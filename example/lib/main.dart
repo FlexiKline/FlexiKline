@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:kline/kline.dart';
 
 import 'test.dart';
 
@@ -34,6 +35,15 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  CandleModel model = CandleModel.fromJson({
+    "open": "1",
+    "close": "2",
+    "high": "3",
+    "low": "4",
+    "volume": "5",
+    "date": DateTime.now().millisecondsSinceEpoch,
+  });
+
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
@@ -48,6 +58,15 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           body: Center(
             child: TestBody(),
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              valueNotifier.value++;
+              final map = model.toJson();
+              debugPrint("zp::: map :${map.toString()}");
+              debugPrint("zp::: model :${model.toString()}");
+            },
+            child: Text('Add'),
           ),
         );
       },

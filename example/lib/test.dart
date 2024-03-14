@@ -4,6 +4,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+ValueNotifier<int> valueNotifier = ValueNotifier(0);
+
 class TestBody extends StatefulWidget {
   const TestBody({super.key});
 
@@ -21,7 +23,7 @@ class _TestBodyState extends State<TestBody> {
       color: Color.fromARGB(179, 243, 220, 220),
       child: RepaintBoundary(
         child: CustomPaint(
-          painter: PathCustomPainter(),
+          painter: PathCustomPainter(value: valueNotifier),
           isComplex: true,
         ),
       ),
@@ -32,11 +34,11 @@ class _TestBodyState extends State<TestBody> {
 /// https://juejin.cn/post/7274536210731073572
 /// Flutter 绘制路径 Path 的全部方法介绍，一篇足矣~ （三）
 class PathCustomPainter extends CustomPainter {
-  const PathCustomPainter({this.value}) : super(repaint: value);
-  final ValueNotifier<int>? value;
+  const PathCustomPainter({required this.value}) : super(repaint: value);
+  final ValueNotifier<int> value;
   @override
   void paint(Canvas canvas, Size size) {
-    final val = value?.value;
+    debugPrint('zp::: paint>>> value${value.value}');
     relativeArcToPoint(canvas);
   }
 
