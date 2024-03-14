@@ -30,7 +30,7 @@ mixin _$CandleModel {
   Decimal get low => throw _privateConstructorUsedError;
   @JsonKey(fromJson: valueToDecimal, toJson: valueToString)
   Decimal get volume => throw _privateConstructorUsedError;
-  @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToString)
+  @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
   DateTime get date => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -51,7 +51,7 @@ abstract class $CandleModelCopyWith<$Res> {
       @JsonKey(fromJson: valueToDecimal, toJson: valueToString) Decimal high,
       @JsonKey(fromJson: valueToDecimal, toJson: valueToString) Decimal low,
       @JsonKey(fromJson: valueToDecimal, toJson: valueToString) Decimal volume,
-      @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToString)
+      @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
       DateTime date});
 }
 
@@ -118,7 +118,7 @@ abstract class _$$CandleModelImplCopyWith<$Res>
       @JsonKey(fromJson: valueToDecimal, toJson: valueToString) Decimal high,
       @JsonKey(fromJson: valueToDecimal, toJson: valueToString) Decimal low,
       @JsonKey(fromJson: valueToDecimal, toJson: valueToString) Decimal volume,
-      @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToString)
+      @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
       DateTime date});
 }
 
@@ -183,7 +183,7 @@ class _$CandleModelImpl implements _CandleModel {
       required this.low,
       @JsonKey(fromJson: valueToDecimal, toJson: valueToString)
       required this.volume,
-      @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToString)
+      @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
       required this.date});
 
   factory _$CandleModelImpl.fromJson(Map<String, dynamic> json) =>
@@ -205,7 +205,7 @@ class _$CandleModelImpl implements _CandleModel {
   @JsonKey(fromJson: valueToDecimal, toJson: valueToString)
   final Decimal volume;
   @override
-  @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToString)
+  @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
   final DateTime date;
 
   @override
@@ -257,7 +257,7 @@ abstract class _CandleModel implements CandleModel {
       required final Decimal low,
       @JsonKey(fromJson: valueToDecimal, toJson: valueToString)
       required final Decimal volume,
-      @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToString)
+      @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
       required final DateTime date}) = _$CandleModelImpl;
 
   factory _CandleModel.fromJson(Map<String, dynamic> json) =
@@ -279,7 +279,7 @@ abstract class _CandleModel implements CandleModel {
   @JsonKey(fromJson: valueToDecimal, toJson: valueToString)
   Decimal get volume;
   @override
-  @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToString)
+  @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
   DateTime get date;
   @override
   @JsonKey(ignore: true)

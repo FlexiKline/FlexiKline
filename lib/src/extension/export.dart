@@ -29,7 +29,7 @@ DateTime valueToDateTime(dynamic value) {
   return _emptyDateTime;
 }
 
-int dateTimeToString(dynamic dateTime) {
+int dateTimeToInt(dynamic dateTime) {
   if (dateTime == null) {
     return 0;
   } else if (dateTime is DateTime) {

@@ -23,5 +23,5 @@ Map<String, dynamic> _$$CandleModelImplToJson(_$CandleModelImpl instance) =>
       'high': valueToString(instance.high),
       'low': valueToString(instance.low),
       'volume': valueToString(instance.volume),
-      'date': dateTimeToString(instance.date),
+      'date': dateTimeToInt(instance.date),
     };

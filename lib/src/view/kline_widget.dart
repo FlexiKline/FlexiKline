@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
 
-import '../controller/export.dart';
-import '../core/export.dart';
+import '../kline_controller.dart';
 
 class KlineWidget extends StatefulWidget {
   const KlineWidget({super.key, required this.controller});
@@ -30,7 +29,7 @@ class _KlineWidgetState extends State<KlineWidget> {
             child: CustomPaint(
               size: size,
               painter: KlinePainter(
-                candleController: widget.controller.candleController,
+                controller: widget.controller,
               ),
               isComplex: true,
             ),
@@ -42,15 +41,15 @@ class _KlineWidgetState extends State<KlineWidget> {
 }
 
 class KlinePainter extends CustomPainter {
-  const KlinePainter({
-    required this.candleController,
-  }) : super(repaint: candleController);
+  KlinePainter({
+    required this.controller,
+  }) : super(repaint: controller.repaintCandle);
 
-  final CandleController candleController;
+  final KlineController controller;
 
   @override
   void paint(Canvas canvas, Size size) {
-    candleController.paint(canvas, size);
+    controller.paintCandle(canvas, size);
   }
 
   @override

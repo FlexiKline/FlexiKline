@@ -18,7 +18,7 @@ class CandleModel with _$CandleModel {
     required Decimal low,
     @JsonKey(fromJson: valueToDecimal, toJson: valueToString)
     required Decimal volume,
-    @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToString)
+    @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
     required DateTime date,
   }) = _CandleModel;
 

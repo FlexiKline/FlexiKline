@@ -36,6 +36,15 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  late final KlineController controller;
+  @override
+  void initState() {
+    super.initState();
+    controller = KlineController();
+
+    controller.addCandle(model);
+  }
+
   CandleModel model = CandleModel.fromJson({
     "open": "1",
     "close": "2",
@@ -58,14 +67,21 @@ class _MyHomePageState extends State<MyHomePage> {
             title: Text(widget.title),
           ),
           body: Center(
-            child: TestBody(),
+            child: KlineWidget(
+              controller: controller,
+            ),
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: () {
               valueNotifier.value++;
-              final map = model.toJson();
-              debugPrint("zp::: map :${map.toString()}");
-              debugPrint("zp::: model :${model.toString()}");
+              controller.addCandle(CandleModel.fromJson({
+                "open": "11",
+                "close": "22",
+                "high": "33",
+                "low": "44",
+                "volume": "55",
+                "date": DateTime.now().millisecondsSinceEpoch,
+              }));
             },
             child: Text('Add'),
           ),
