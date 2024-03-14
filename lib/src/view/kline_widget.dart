@@ -1,7 +1,12 @@
 import 'package:flutter/widgets.dart';
 
+import '../controller/export.dart';
+import '../core/export.dart';
+
 class KlineWidget extends StatefulWidget {
-  const KlineWidget({super.key});
+  const KlineWidget({super.key, required this.controller});
+
+  final KlineController controller;
 
   @override
   State<KlineWidget> createState() => _KlineWidgetState();
@@ -24,7 +29,9 @@ class _KlineWidgetState extends State<KlineWidget> {
           RepaintBoundary(
             child: CustomPaint(
               size: size,
-              // painter: KlinePainter(klineData: controller.klineData),
+              painter: KlinePainter(
+                candleController: widget.controller.candleController,
+              ),
               isComplex: true,
             ),
           ),
@@ -35,12 +42,16 @@ class _KlineWidgetState extends State<KlineWidget> {
 }
 
 class KlinePainter extends CustomPainter {
-  const KlinePainter({required this.klineData}) : super(repaint: klineData);
+  const KlinePainter({
+    required this.candleController,
+  }) : super(repaint: candleController);
 
-  final ChangeNotifier klineData;
+  final CandleController candleController;
 
   @override
-  void paint(Canvas canvas, Size size) {}
+  void paint(Canvas canvas, Size size) {
+    candleController.paint(canvas, size);
+  }
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {

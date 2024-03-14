@@ -5,6 +5,7 @@ import 'package:kline/kline.dart';
 import 'test.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
