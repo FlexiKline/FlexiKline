@@ -16,14 +16,12 @@ abstract interface class ICandlePinter {
   void paintCandle(Canvas canvas, Size size);
 }
 
-mixin CandleBindings on KlineBindingBase
+mixin CandleBinding on KlineBindingBase
     implements ICandlePinter, ICandleProduce {
   @override
-  String get logTag => 'CandleBindings';
-  @override
-  void initInstances() {
-    super.initInstances();
-    logd('initInstances');
+  void initBinding() {
+    super.initBinding();
+    logd('candle init');
     // _instance = this;
   }
 

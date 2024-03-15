@@ -4,17 +4,17 @@ import '../utils/log.dart';
 
 abstract class KlineBindingBase with KlineLog {
   @override
-  String get logTag => "BindingBase";
+  String get logTag => "klineBinding";
 
   KlineBindingBase() {
     logd("constrouct");
-    initInstances();
+    initBinding();
   }
 
   @protected
   @mustCallSuper
-  void initInstances() {
-    logd("initInstances");
+  void initBinding() {
+    logd("base init");
   }
 
   @protected
