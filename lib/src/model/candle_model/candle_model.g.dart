@@ -8,20 +8,28 @@ part of 'candle_model.dart';
 
 _$CandleModelImpl _$$CandleModelImplFromJson(Map<String, dynamic> json) =>
     _$CandleModelImpl(
-      open: valueToDecimal(json['open']),
-      close: valueToDecimal(json['close']),
-      high: valueToDecimal(json['high']),
-      low: valueToDecimal(json['low']),
-      volume: valueToDecimal(json['volume']),
-      date: valueToDateTime(json['date']),
+      timestamp: json['timestamp'] as int,
+      dateTime: valueToDateTime(json['dateTime']),
+      open: stringToDecimal(json['open']),
+      high: stringToDecimal(json['high']),
+      low: stringToDecimal(json['low']),
+      close: stringToDecimal(json['close']),
+      vol: stringToDecimal(json['vol']),
+      volCcy: stringToDecimalOrNull(json['volCcy']),
+      volCcyQuote: stringToDecimalOrNull(json['volCcyQuote']),
+      confirm: json['confirm'] as String? ?? "1",
     );
 
 Map<String, dynamic> _$$CandleModelImplToJson(_$CandleModelImpl instance) =>
     <String, dynamic>{
-      'open': valueToString(instance.open),
-      'close': valueToString(instance.close),
-      'high': valueToString(instance.high),
-      'low': valueToString(instance.low),
-      'volume': valueToString(instance.volume),
-      'date': dateTimeToInt(instance.date),
+      'timestamp': instance.timestamp,
+      'dateTime': dateTimeToInt(instance.dateTime),
+      'open': decimalToString(instance.open),
+      'high': decimalToString(instance.high),
+      'low': decimalToString(instance.low),
+      'close': decimalToString(instance.close),
+      'vol': decimalToString(instance.vol),
+      'volCcy': decimalToStringOrNull(instance.volCcy),
+      'volCcyQuote': decimalToStringOrNull(instance.volCcyQuote),
+      'confirm': instance.confirm,
     };

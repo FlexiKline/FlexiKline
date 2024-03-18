@@ -1,25 +1,50 @@
 import 'package:decimal/decimal.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:kline/src/extension/export.dart';
+
+import '../../utils/export.dart';
 
 part 'candle_model.freezed.dart';
 part 'candle_model.g.dart';
 
-@freezed
+@unfreezed
 class CandleModel with _$CandleModel {
   factory CandleModel({
-    @JsonKey(fromJson: valueToDecimal, toJson: valueToString)
-    required Decimal open,
-    @JsonKey(fromJson: valueToDecimal, toJson: valueToString)
-    required Decimal close,
-    @JsonKey(fromJson: valueToDecimal, toJson: valueToString)
-    required Decimal high,
-    @JsonKey(fromJson: valueToDecimal, toJson: valueToString)
-    required Decimal low,
-    @JsonKey(fromJson: valueToDecimal, toJson: valueToString)
-    required Decimal volume,
+    /// 开始时间，Unix时间戳的毫秒数格式，如 1597026383085
+    // @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
+    required int timestamp,
     @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
-    required DateTime date,
+    DateTime? dateTime, // 从timestamp转换为dateTime;
+
+    /// 开盘价格
+    @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
+    required Decimal open,
+
+    /// 最高价格
+    @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
+    required Decimal high,
+
+    ///最低价格
+    @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
+    required Decimal low,
+
+    /// 收盘价格
+    @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
+    required Decimal close,
+
+    /// 交易量，以张为单位: 如果是衍生品合约，数值为合约的张数。如果是币币/币币杠杆，数值为交易货币的数量。
+    @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
+    required Decimal vol,
+
+    /// 交易量(成交额)，以币为单位: 如果是衍生品合约，数值为交易货币的数量。如果是币币/币币杠杆，数值为计价货币的数量。
+    @JsonKey(fromJson: stringToDecimalOrNull, toJson: decimalToStringOrNull)
+    Decimal? volCcy,
+
+    ///交易量(成交额)，以计价货币为单位: 如 BTC-USDT和BTC-USDT-SWAP，单位均是USDT。BTC-USD-SWAP单位是USD。
+    @JsonKey(fromJson: stringToDecimalOrNull, toJson: decimalToStringOrNull)
+    Decimal? volCcyQuote,
+
+    /// K线状态:  0：K线未完结  1：K线已完结
+    @Default("1") String confirm,
   }) = _CandleModel;
 
   factory CandleModel.fromJson(Map<String, dynamic> json) =>

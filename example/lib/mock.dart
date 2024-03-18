@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:decimal/decimal.dart';
 import 'package:kline/kline.dart';
 
 final Random _random = Random();
@@ -11,8 +12,6 @@ double get deltaPrice =>
         (_random.nextBool() ? 1 : -1)) *
     10;
 
-TimeParams tp = TimeParams(type: TimeParamsType.minute, value: 15);
-
 Future<List<CandleModel>> genCandleModelList({
   int count = 500,
 }) async {
@@ -23,19 +22,20 @@ Future<List<CandleModel>> genCandleModelList({
   DateTime date = DateTime(2017, 9, 1, 0);
   final List<CandleModel> r = <CandleModel>[];
   for (int i = 0; i < count; i++) {
-    r.add(CandleModel(
+    final item = CandleModel(
       open: open.d,
       close: close.d,
       low: low.d,
       high: high.d,
-      volume: (10000000 * _random.nextDouble()).d,
-      date: date,
-    ));
+      vol: (10000000 * _random.nextDouble()).d,
+      timestamp: date.millisecondsSinceEpoch,
+    );
+    r.add(item);
     open = close;
     close = open + deltaPrice;
     high = max(open, close) + deltaPrice.abs() * 0.2;
     low = min(open, close) - deltaPrice.abs() * 0.3;
-    date = tp.nextDate(date);
+    date = date.add(const Duration(days: 1));
   }
   return r;
 }

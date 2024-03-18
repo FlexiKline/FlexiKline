@@ -20,18 +20,79 @@ CandleModel _$CandleModelFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$CandleModel {
-  @JsonKey(fromJson: valueToDecimal, toJson: valueToString)
-  Decimal get open => throw _privateConstructorUsedError;
-  @JsonKey(fromJson: valueToDecimal, toJson: valueToString)
-  Decimal get close => throw _privateConstructorUsedError;
-  @JsonKey(fromJson: valueToDecimal, toJson: valueToString)
-  Decimal get high => throw _privateConstructorUsedError;
-  @JsonKey(fromJson: valueToDecimal, toJson: valueToString)
-  Decimal get low => throw _privateConstructorUsedError;
-  @JsonKey(fromJson: valueToDecimal, toJson: valueToString)
-  Decimal get volume => throw _privateConstructorUsedError;
+  /// 开始时间，Unix时间戳的毫秒数格式，如 1597026383085
+// @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
+  int get timestamp => throw _privateConstructorUsedError;
+
+  /// 开始时间，Unix时间戳的毫秒数格式，如 1597026383085
+// @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
+  set timestamp(int value) => throw _privateConstructorUsedError;
   @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
-  DateTime get date => throw _privateConstructorUsedError;
+  DateTime? get dateTime => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
+  set dateTime(DateTime? value) =>
+      throw _privateConstructorUsedError; // 从timestamp转换为dateTime;
+  /// 开盘价格
+  @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
+  Decimal get open =>
+      throw _privateConstructorUsedError; // 从timestamp转换为dateTime;
+  /// 开盘价格
+  @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
+  set open(Decimal value) => throw _privateConstructorUsedError;
+
+  /// 最高价格
+  @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
+  Decimal get high => throw _privateConstructorUsedError;
+
+  /// 最高价格
+  @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
+  set high(Decimal value) => throw _privateConstructorUsedError;
+
+  ///最低价格
+  @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
+  Decimal get low => throw _privateConstructorUsedError;
+
+  ///最低价格
+  @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
+  set low(Decimal value) => throw _privateConstructorUsedError;
+
+  /// 收盘价格
+  @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
+  Decimal get close => throw _privateConstructorUsedError;
+
+  /// 收盘价格
+  @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
+  set close(Decimal value) => throw _privateConstructorUsedError;
+
+  /// 交易量，以张为单位: 如果是衍生品合约，数值为合约的张数。如果是币币/币币杠杆，数值为交易货币的数量。
+  @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
+  Decimal get vol => throw _privateConstructorUsedError;
+
+  /// 交易量，以张为单位: 如果是衍生品合约，数值为合约的张数。如果是币币/币币杠杆，数值为交易货币的数量。
+  @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
+  set vol(Decimal value) => throw _privateConstructorUsedError;
+
+  /// 交易量(成交额)，以币为单位: 如果是衍生品合约，数值为交易货币的数量。如果是币币/币币杠杆，数值为计价货币的数量。
+  @JsonKey(fromJson: stringToDecimalOrNull, toJson: decimalToStringOrNull)
+  Decimal? get volCcy => throw _privateConstructorUsedError;
+
+  /// 交易量(成交额)，以币为单位: 如果是衍生品合约，数值为交易货币的数量。如果是币币/币币杠杆，数值为计价货币的数量。
+  @JsonKey(fromJson: stringToDecimalOrNull, toJson: decimalToStringOrNull)
+  set volCcy(Decimal? value) => throw _privateConstructorUsedError;
+
+  ///交易量(成交额)，以计价货币为单位: 如 BTC-USDT和BTC-USDT-SWAP，单位均是USDT。BTC-USD-SWAP单位是USD。
+  @JsonKey(fromJson: stringToDecimalOrNull, toJson: decimalToStringOrNull)
+  Decimal? get volCcyQuote => throw _privateConstructorUsedError;
+
+  ///交易量(成交额)，以计价货币为单位: 如 BTC-USDT和BTC-USDT-SWAP，单位均是USDT。BTC-USD-SWAP单位是USD。
+  @JsonKey(fromJson: stringToDecimalOrNull, toJson: decimalToStringOrNull)
+  set volCcyQuote(Decimal? value) => throw _privateConstructorUsedError;
+
+  /// K线状态:  0：K线未完结  1：K线已完结
+  String get confirm => throw _privateConstructorUsedError;
+
+  /// K线状态:  0：K线未完结  1：K线已完结
+  set confirm(String value) => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -46,13 +107,20 @@ abstract class $CandleModelCopyWith<$Res> {
       _$CandleModelCopyWithImpl<$Res, CandleModel>;
   @useResult
   $Res call(
-      {@JsonKey(fromJson: valueToDecimal, toJson: valueToString) Decimal open,
-      @JsonKey(fromJson: valueToDecimal, toJson: valueToString) Decimal close,
-      @JsonKey(fromJson: valueToDecimal, toJson: valueToString) Decimal high,
-      @JsonKey(fromJson: valueToDecimal, toJson: valueToString) Decimal low,
-      @JsonKey(fromJson: valueToDecimal, toJson: valueToString) Decimal volume,
+      {int timestamp,
       @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
-      DateTime date});
+      DateTime? dateTime,
+      @JsonKey(fromJson: stringToDecimal, toJson: decimalToString) Decimal open,
+      @JsonKey(fromJson: stringToDecimal, toJson: decimalToString) Decimal high,
+      @JsonKey(fromJson: stringToDecimal, toJson: decimalToString) Decimal low,
+      @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
+      Decimal close,
+      @JsonKey(fromJson: stringToDecimal, toJson: decimalToString) Decimal vol,
+      @JsonKey(fromJson: stringToDecimalOrNull, toJson: decimalToStringOrNull)
+      Decimal? volCcy,
+      @JsonKey(fromJson: stringToDecimalOrNull, toJson: decimalToStringOrNull)
+      Decimal? volCcyQuote,
+      String confirm});
 }
 
 /// @nodoc
@@ -68,21 +136,29 @@ class _$CandleModelCopyWithImpl<$Res, $Val extends CandleModel>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? timestamp = null,
+    Object? dateTime = freezed,
     Object? open = null,
-    Object? close = null,
     Object? high = null,
     Object? low = null,
-    Object? volume = null,
-    Object? date = null,
+    Object? close = null,
+    Object? vol = null,
+    Object? volCcy = freezed,
+    Object? volCcyQuote = freezed,
+    Object? confirm = null,
   }) {
     return _then(_value.copyWith(
+      timestamp: null == timestamp
+          ? _value.timestamp
+          : timestamp // ignore: cast_nullable_to_non_nullable
+              as int,
+      dateTime: freezed == dateTime
+          ? _value.dateTime
+          : dateTime // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
       open: null == open
           ? _value.open
           : open // ignore: cast_nullable_to_non_nullable
-              as Decimal,
-      close: null == close
-          ? _value.close
-          : close // ignore: cast_nullable_to_non_nullable
               as Decimal,
       high: null == high
           ? _value.high
@@ -92,14 +168,26 @@ class _$CandleModelCopyWithImpl<$Res, $Val extends CandleModel>
           ? _value.low
           : low // ignore: cast_nullable_to_non_nullable
               as Decimal,
-      volume: null == volume
-          ? _value.volume
-          : volume // ignore: cast_nullable_to_non_nullable
+      close: null == close
+          ? _value.close
+          : close // ignore: cast_nullable_to_non_nullable
               as Decimal,
-      date: null == date
-          ? _value.date
-          : date // ignore: cast_nullable_to_non_nullable
-              as DateTime,
+      vol: null == vol
+          ? _value.vol
+          : vol // ignore: cast_nullable_to_non_nullable
+              as Decimal,
+      volCcy: freezed == volCcy
+          ? _value.volCcy
+          : volCcy // ignore: cast_nullable_to_non_nullable
+              as Decimal?,
+      volCcyQuote: freezed == volCcyQuote
+          ? _value.volCcyQuote
+          : volCcyQuote // ignore: cast_nullable_to_non_nullable
+              as Decimal?,
+      confirm: null == confirm
+          ? _value.confirm
+          : confirm // ignore: cast_nullable_to_non_nullable
+              as String,
     ) as $Val);
   }
 }
@@ -113,13 +201,20 @@ abstract class _$$CandleModelImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {@JsonKey(fromJson: valueToDecimal, toJson: valueToString) Decimal open,
-      @JsonKey(fromJson: valueToDecimal, toJson: valueToString) Decimal close,
-      @JsonKey(fromJson: valueToDecimal, toJson: valueToString) Decimal high,
-      @JsonKey(fromJson: valueToDecimal, toJson: valueToString) Decimal low,
-      @JsonKey(fromJson: valueToDecimal, toJson: valueToString) Decimal volume,
+      {int timestamp,
       @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
-      DateTime date});
+      DateTime? dateTime,
+      @JsonKey(fromJson: stringToDecimal, toJson: decimalToString) Decimal open,
+      @JsonKey(fromJson: stringToDecimal, toJson: decimalToString) Decimal high,
+      @JsonKey(fromJson: stringToDecimal, toJson: decimalToString) Decimal low,
+      @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
+      Decimal close,
+      @JsonKey(fromJson: stringToDecimal, toJson: decimalToString) Decimal vol,
+      @JsonKey(fromJson: stringToDecimalOrNull, toJson: decimalToStringOrNull)
+      Decimal? volCcy,
+      @JsonKey(fromJson: stringToDecimalOrNull, toJson: decimalToStringOrNull)
+      Decimal? volCcyQuote,
+      String confirm});
 }
 
 /// @nodoc
@@ -133,21 +228,29 @@ class __$$CandleModelImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? timestamp = null,
+    Object? dateTime = freezed,
     Object? open = null,
-    Object? close = null,
     Object? high = null,
     Object? low = null,
-    Object? volume = null,
-    Object? date = null,
+    Object? close = null,
+    Object? vol = null,
+    Object? volCcy = freezed,
+    Object? volCcyQuote = freezed,
+    Object? confirm = null,
   }) {
     return _then(_$CandleModelImpl(
+      timestamp: null == timestamp
+          ? _value.timestamp
+          : timestamp // ignore: cast_nullable_to_non_nullable
+              as int,
+      dateTime: freezed == dateTime
+          ? _value.dateTime
+          : dateTime // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
       open: null == open
           ? _value.open
           : open // ignore: cast_nullable_to_non_nullable
-              as Decimal,
-      close: null == close
-          ? _value.close
-          : close // ignore: cast_nullable_to_non_nullable
               as Decimal,
       high: null == high
           ? _value.high
@@ -157,14 +260,26 @@ class __$$CandleModelImplCopyWithImpl<$Res>
           ? _value.low
           : low // ignore: cast_nullable_to_non_nullable
               as Decimal,
-      volume: null == volume
-          ? _value.volume
-          : volume // ignore: cast_nullable_to_non_nullable
+      close: null == close
+          ? _value.close
+          : close // ignore: cast_nullable_to_non_nullable
               as Decimal,
-      date: null == date
-          ? _value.date
-          : date // ignore: cast_nullable_to_non_nullable
-              as DateTime,
+      vol: null == vol
+          ? _value.vol
+          : vol // ignore: cast_nullable_to_non_nullable
+              as Decimal,
+      volCcy: freezed == volCcy
+          ? _value.volCcy
+          : volCcy // ignore: cast_nullable_to_non_nullable
+              as Decimal?,
+      volCcyQuote: freezed == volCcyQuote
+          ? _value.volCcyQuote
+          : volCcyQuote // ignore: cast_nullable_to_non_nullable
+              as Decimal?,
+      confirm: null == confirm
+          ? _value.confirm
+          : confirm // ignore: cast_nullable_to_non_nullable
+              as String,
     ));
   }
 }
@@ -173,63 +288,79 @@ class __$$CandleModelImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$CandleModelImpl implements _CandleModel {
   _$CandleModelImpl(
-      {@JsonKey(fromJson: valueToDecimal, toJson: valueToString)
+      {required this.timestamp,
+      @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt) this.dateTime,
+      @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
       required this.open,
-      @JsonKey(fromJson: valueToDecimal, toJson: valueToString)
-      required this.close,
-      @JsonKey(fromJson: valueToDecimal, toJson: valueToString)
+      @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
       required this.high,
-      @JsonKey(fromJson: valueToDecimal, toJson: valueToString)
+      @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
       required this.low,
-      @JsonKey(fromJson: valueToDecimal, toJson: valueToString)
-      required this.volume,
-      @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
-      required this.date});
+      @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
+      required this.close,
+      @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
+      required this.vol,
+      @JsonKey(fromJson: stringToDecimalOrNull, toJson: decimalToStringOrNull)
+      this.volCcy,
+      @JsonKey(fromJson: stringToDecimalOrNull, toJson: decimalToStringOrNull)
+      this.volCcyQuote,
+      this.confirm = "1"});
 
   factory _$CandleModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$CandleModelImplFromJson(json);
 
+  /// 开始时间，Unix时间戳的毫秒数格式，如 1597026383085
+// @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
   @override
-  @JsonKey(fromJson: valueToDecimal, toJson: valueToString)
-  final Decimal open;
-  @override
-  @JsonKey(fromJson: valueToDecimal, toJson: valueToString)
-  final Decimal close;
-  @override
-  @JsonKey(fromJson: valueToDecimal, toJson: valueToString)
-  final Decimal high;
-  @override
-  @JsonKey(fromJson: valueToDecimal, toJson: valueToString)
-  final Decimal low;
-  @override
-  @JsonKey(fromJson: valueToDecimal, toJson: valueToString)
-  final Decimal volume;
+  int timestamp;
   @override
   @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
-  final DateTime date;
+  DateTime? dateTime;
+// 从timestamp转换为dateTime;
+  /// 开盘价格
+  @override
+  @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
+  Decimal open;
+
+  /// 最高价格
+  @override
+  @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
+  Decimal high;
+
+  ///最低价格
+  @override
+  @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
+  Decimal low;
+
+  /// 收盘价格
+  @override
+  @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
+  Decimal close;
+
+  /// 交易量，以张为单位: 如果是衍生品合约，数值为合约的张数。如果是币币/币币杠杆，数值为交易货币的数量。
+  @override
+  @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
+  Decimal vol;
+
+  /// 交易量(成交额)，以币为单位: 如果是衍生品合约，数值为交易货币的数量。如果是币币/币币杠杆，数值为计价货币的数量。
+  @override
+  @JsonKey(fromJson: stringToDecimalOrNull, toJson: decimalToStringOrNull)
+  Decimal? volCcy;
+
+  ///交易量(成交额)，以计价货币为单位: 如 BTC-USDT和BTC-USDT-SWAP，单位均是USDT。BTC-USD-SWAP单位是USD。
+  @override
+  @JsonKey(fromJson: stringToDecimalOrNull, toJson: decimalToStringOrNull)
+  Decimal? volCcyQuote;
+
+  /// K线状态:  0：K线未完结  1：K线已完结
+  @override
+  @JsonKey()
+  String confirm;
 
   @override
   String toString() {
-    return 'CandleModel(open: $open, close: $close, high: $high, low: $low, volume: $volume, date: $date)';
+    return 'CandleModel(timestamp: $timestamp, dateTime: $dateTime, open: $open, high: $high, low: $low, close: $close, vol: $vol, volCcy: $volCcy, volCcyQuote: $volCcyQuote, confirm: $confirm)';
   }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$CandleModelImpl &&
-            (identical(other.open, open) || other.open == open) &&
-            (identical(other.close, close) || other.close == close) &&
-            (identical(other.high, high) || other.high == high) &&
-            (identical(other.low, low) || other.low == low) &&
-            (identical(other.volume, volume) || other.volume == volume) &&
-            (identical(other.date, date) || other.date == date));
-  }
-
-  @JsonKey(ignore: true)
-  @override
-  int get hashCode =>
-      Object.hash(runtimeType, open, close, high, low, volume, date);
 
   @JsonKey(ignore: true)
   @override
@@ -247,40 +378,110 @@ class _$CandleModelImpl implements _CandleModel {
 
 abstract class _CandleModel implements CandleModel {
   factory _CandleModel(
-      {@JsonKey(fromJson: valueToDecimal, toJson: valueToString)
-      required final Decimal open,
-      @JsonKey(fromJson: valueToDecimal, toJson: valueToString)
-      required final Decimal close,
-      @JsonKey(fromJson: valueToDecimal, toJson: valueToString)
-      required final Decimal high,
-      @JsonKey(fromJson: valueToDecimal, toJson: valueToString)
-      required final Decimal low,
-      @JsonKey(fromJson: valueToDecimal, toJson: valueToString)
-      required final Decimal volume,
+      {required int timestamp,
       @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
-      required final DateTime date}) = _$CandleModelImpl;
+      DateTime? dateTime,
+      @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
+      required Decimal open,
+      @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
+      required Decimal high,
+      @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
+      required Decimal low,
+      @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
+      required Decimal close,
+      @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
+      required Decimal vol,
+      @JsonKey(fromJson: stringToDecimalOrNull, toJson: decimalToStringOrNull)
+      Decimal? volCcy,
+      @JsonKey(fromJson: stringToDecimalOrNull, toJson: decimalToStringOrNull)
+      Decimal? volCcyQuote,
+      String confirm}) = _$CandleModelImpl;
 
   factory _CandleModel.fromJson(Map<String, dynamic> json) =
       _$CandleModelImpl.fromJson;
 
   @override
-  @JsonKey(fromJson: valueToDecimal, toJson: valueToString)
-  Decimal get open;
-  @override
-  @JsonKey(fromJson: valueToDecimal, toJson: valueToString)
-  Decimal get close;
-  @override
-  @JsonKey(fromJson: valueToDecimal, toJson: valueToString)
-  Decimal get high;
-  @override
-  @JsonKey(fromJson: valueToDecimal, toJson: valueToString)
-  Decimal get low;
-  @override
-  @JsonKey(fromJson: valueToDecimal, toJson: valueToString)
-  Decimal get volume;
+
+  /// 开始时间，Unix时间戳的毫秒数格式，如 1597026383085
+// @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
+  int get timestamp;
+
+  /// 开始时间，Unix时间戳的毫秒数格式，如 1597026383085
+// @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
+  set timestamp(int value);
   @override
   @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
-  DateTime get date;
+  DateTime? get dateTime;
+  @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
+  set dateTime(DateTime? value);
+  @override // 从timestamp转换为dateTime;
+  /// 开盘价格
+  @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
+  Decimal get open; // 从timestamp转换为dateTime;
+  /// 开盘价格
+  @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
+  set open(Decimal value);
+  @override
+
+  /// 最高价格
+  @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
+  Decimal get high;
+
+  /// 最高价格
+  @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
+  set high(Decimal value);
+  @override
+
+  ///最低价格
+  @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
+  Decimal get low;
+
+  ///最低价格
+  @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
+  set low(Decimal value);
+  @override
+
+  /// 收盘价格
+  @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
+  Decimal get close;
+
+  /// 收盘价格
+  @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
+  set close(Decimal value);
+  @override
+
+  /// 交易量，以张为单位: 如果是衍生品合约，数值为合约的张数。如果是币币/币币杠杆，数值为交易货币的数量。
+  @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
+  Decimal get vol;
+
+  /// 交易量，以张为单位: 如果是衍生品合约，数值为合约的张数。如果是币币/币币杠杆，数值为交易货币的数量。
+  @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
+  set vol(Decimal value);
+  @override
+
+  /// 交易量(成交额)，以币为单位: 如果是衍生品合约，数值为交易货币的数量。如果是币币/币币杠杆，数值为计价货币的数量。
+  @JsonKey(fromJson: stringToDecimalOrNull, toJson: decimalToStringOrNull)
+  Decimal? get volCcy;
+
+  /// 交易量(成交额)，以币为单位: 如果是衍生品合约，数值为交易货币的数量。如果是币币/币币杠杆，数值为计价货币的数量。
+  @JsonKey(fromJson: stringToDecimalOrNull, toJson: decimalToStringOrNull)
+  set volCcy(Decimal? value);
+  @override
+
+  ///交易量(成交额)，以计价货币为单位: 如 BTC-USDT和BTC-USDT-SWAP，单位均是USDT。BTC-USD-SWAP单位是USD。
+  @JsonKey(fromJson: stringToDecimalOrNull, toJson: decimalToStringOrNull)
+  Decimal? get volCcyQuote;
+
+  ///交易量(成交额)，以计价货币为单位: 如 BTC-USDT和BTC-USDT-SWAP，单位均是USDT。BTC-USD-SWAP单位是USD。
+  @JsonKey(fromJson: stringToDecimalOrNull, toJson: decimalToStringOrNull)
+  set volCcyQuote(Decimal? value);
+  @override
+
+  /// K线状态:  0：K线未完结  1：K线已完结
+  String get confirm;
+
+  /// K线状态:  0：K线未完结  1：K线已完结
+  set confirm(String value);
   @override
   @JsonKey(ignore: true)
   _$$CandleModelImplCopyWith<_$CandleModelImpl> get copyWith =>

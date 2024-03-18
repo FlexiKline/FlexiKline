@@ -1,2 +1,2 @@
 export './candle_model/candle_model.dart';
-export './time_param.dart';
+export './candle_req/candle_req.dart';
