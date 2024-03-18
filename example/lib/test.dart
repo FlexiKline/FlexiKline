@@ -39,12 +39,47 @@ class PathCustomPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     debugPrint('zp::: paint>>> value${value.value}');
-    relativeArcToPoint(canvas);
+    drawCandle(canvas);
   }
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
     return true;
+  }
+
+  /// 绘制Candle
+  void drawCandle(Canvas canvas) {
+    final path = Path();
+    final paint = Paint()
+      ..color = Colors.red
+      ..style = PaintingStyle.fill
+      ..strokeWidth = 2;
+    final start = Offset(100, 100);
+    final width = 10;
+    final height = 40;
+    final lineW = 2;
+    // path.moveTo(start.dx + (width - lineW) / 2, start.dy - 10);
+    // path.lineTo(start.dx + (width - lineW) / 2, start.dy);
+    // path.moveTo(start.dx, start.dy);
+    // path.addRect(Rect.fromLTWH(start.dx, start.dy, 10, 40));
+    // path.moveTo(start.dx + (width - lineW) / 2, start.dy + height);
+    // path.lineTo(start.dx + (width - lineW) / 2, start.dy + height + 20);
+    // canvas.drawPath(
+    //   path,
+    //   Paint()
+    //     ..color = Colors.red
+    //     ..style = PaintingStyle.fill
+    //     ..strokeWidth = 2,
+    // );
+
+    final p1 = Offset(start.dx + (width) / 2, start.dy - 20);
+    final p2 = Offset(start.dx + (width) / 2, start.dy);
+    final pp1 = Offset(start.dx + (width) / 2, start.dy + height);
+    final pp2 = Offset(start.dx + (width) / 2, start.dy + height + 20);
+    canvas
+      ..drawLine(p1, p2, paint)
+      ..drawRect(Rect.fromLTWH(start.dx, start.dy, 10, 40), paint)
+      ..drawLine(pp1, pp2, paint);
   }
 
   /// 1. void addRect(Rect rect) 线描述的矩形

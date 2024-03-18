@@ -3,20 +3,22 @@ import 'package:flutter/material.dart';
 import '../model/export.dart';
 import '../render/export.dart';
 import 'binding_base.dart';
+import 'config.dart';
 
 abstract interface class ICandleProduce {
   void updateCandleList(List<CandleModel> list);
 
-  void addCandleList(List<CandleModel> list);
+  void addNewCandleList(List<CandleModel> list);
 
-  void addCandle(CandleModel candleModel);
+  void addNewCandle(CandleModel candleModel);
 }
 
 abstract interface class ICandlePinter {
   void paintCandle(Canvas canvas, Size size);
 }
 
-mixin CandleBinding on KlineBindingBase
+mixin CandleBinding
+    on KlineBindingBase, ConfigBinding
     implements ICandlePinter, ICandleProduce {
   @override
   void initBinding() {
@@ -38,12 +40,12 @@ mixin CandleBinding on KlineBindingBase
   // static CandleBindings? _instance;
 
   @override
-  void addCandle(CandleModel candleModel) {
-    addCandleList([candleModel]);
+  void addNewCandle(CandleModel candleModel) {
+    addNewCandleList([candleModel]);
   }
 
   @override
-  void addCandleList(List<CandleModel> list) {
+  void addNewCandleList(List<CandleModel> list) {
     _candleListenable.value = [..._candleListenable.value, ...list];
   }
 
@@ -55,6 +57,8 @@ mixin CandleBinding on KlineBindingBase
   @override
   void paintCandle(Canvas canvas, Size size) {
     final candle = candleList.first;
+    background;
+    updateBackground();
     canvas.drawString(
       string: candle.toString(),
       fontSize: 10,

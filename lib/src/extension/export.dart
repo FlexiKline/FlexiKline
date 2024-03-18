@@ -6,7 +6,7 @@ Decimal valueToDecimal(dynamic value) {
   if (value == null) {
     return Decimal.zero;
   } else {
-    return Decimal.tryParse(value) ?? Decimal.zero;
+    return Decimal.tryParse(value.toString()) ?? Decimal.zero;
   }
 }
 

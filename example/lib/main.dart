@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:kline/kline.dart';
 
+import 'mock.dart';
 import 'test.dart';
 
 void main() {
@@ -42,17 +43,10 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     controller = KlineController();
 
-    controller.addCandle(model);
+    genCandleModelList().then((list) {
+      controller.updateCandleList(list);
+    });
   }
-
-  CandleModel model = CandleModel.fromJson({
-    "open": "1",
-    "close": "2",
-    "high": "3",
-    "low": "4",
-    "volume": "5",
-    "date": DateTime.now().millisecondsSinceEpoch,
-  });
 
   @override
   Widget build(BuildContext context) {
@@ -67,21 +61,18 @@ class _MyHomePageState extends State<MyHomePage> {
             title: Text(widget.title),
           ),
           body: Center(
-            child: KlineWidget(
-              controller: controller,
-            ),
+            // child: KlineWidget(
+            //   controller: controller,
+            // ),
+            child: TestBody(),
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: () {
               valueNotifier.value++;
-              controller.addCandle(CandleModel.fromJson({
-                "open": "11",
-                "close": "22",
-                "high": "33",
-                "low": "44",
-                "volume": "55",
-                "date": DateTime.now().millisecondsSinceEpoch,
-              }));
+              controller.background;
+              genCandleModelList(count: randomCount).then((list) {
+                controller.addNewCandleList(list);
+              });
             },
             child: Text('Add'),
           ),
