@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:kline/src/model/candle_data.dart';
 
 import '../model/export.dart';
-import '../render/export.dart';
 import 'binding_base.dart';
 import 'config.dart';
 
 abstract interface class ICandleProduce {
-  void updateCandleList(List<CandleModel> list);
+  void updateCandleList(CandleReq req, List<CandleModel> list);
 
-  void addNewCandleList(List<CandleModel> list);
+  void addNewCandleList(CandleReq req, List<CandleModel> list);
 
-  void addNewCandle(CandleModel candleModel);
+  void addNewCandle(CandleReq req, CandleModel candleModel);
 }
 
 abstract interface class ICandlePinter {
@@ -27,47 +27,60 @@ mixin CandleBinding
     // _instance = this;
   }
 
-  final ValueNotifier<List<CandleModel>> _candleListenable = ValueNotifier(
-    List.empty(growable: true),
+  final Map<String, CandleData> _candleDataCache = {};
+
+  final ValueNotifier<CandleData> _curCandleData = ValueNotifier(
+    CandleData.empty,
   );
 
-  Listenable get repaintCandle => _candleListenable;
+  Listenable get repaintCandle => _curCandleData;
 
-  List<CandleModel> get candleList => _candleListenable.value;
+  CandleData get candleData => _curCandleData.value;
 
   // static CandleBindings get instance =>
   //     KlineBindingBase.checkInstance(_instance);
   // static CandleBindings? _instance;
 
   @override
-  void addNewCandle(CandleModel candleModel) {
-    addNewCandleList([candleModel]);
+  void addNewCandle(CandleReq req, CandleModel candleModel) {
+    addNewCandleList(req, [candleModel]);
   }
 
   @override
-  void addNewCandleList(List<CandleModel> list) {
-    _candleListenable.value = [..._candleListenable.value, ...list];
+  void addNewCandleList(CandleReq req, List<CandleModel> list) {
+    CandleData data;
+    if (_candleDataCache.containsKey(req.key)) {
+      data = _candleDataCache[req.key]!;
+      data.addNewCandleList(req, list);
+      _curCandleData.value = data;
+    }
   }
 
   @override
-  void updateCandleList(List<CandleModel> list) {
-    _candleListenable.value = list;
+  void updateCandleList(CandleReq req, List<CandleModel> list) {
+    CandleData data;
+    if (_candleDataCache.containsKey(req.key)) {
+      data = _candleDataCache[req.key]!;
+      data.list = list;
+    } else {
+      data = CandleData(req, list);
+      _candleDataCache[req.key] = data;
+    }
+    _curCandleData.value = data;
   }
 
   @override
   void paintCandle(Canvas canvas, Size size) {
-    final candle = candleList.first;
-    background;
-    updateBackground();
-    canvas.drawString(
-      string: candle.toString(),
-      fontSize: 10,
-      fontColor: Colors.red,
-      backgroundRadius: 2,
-      offset: const Offset(20, 20),
-      alignment: Alignment.center,
-      backgroundColor: Colors.white60,
-      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-    );
+    // final candle = candleList.first;
+    // canvas.drawString(
+    //   string: candle.toString(),
+    //   fontSize: 10,
+    //   fontColor: Colors.red,
+    //   backgroundRadius: 2,
+    //   offset: const Offset(20, 20),
+    //   alignment: Alignment.center,
+    //   backgroundColor: Colors.white60,
+    //   padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+    // );
   }
 }

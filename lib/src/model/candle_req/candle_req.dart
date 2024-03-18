@@ -3,7 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'candle_req.freezed.dart';
 part 'candle_req.g.dart';
 
-@freezed
+@unfreezed
 class CandleReq with _$CandleReq {
   factory CandleReq({
     /// 产品ID，如 BTC-USDT

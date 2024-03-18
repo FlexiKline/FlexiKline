@@ -44,7 +44,7 @@ class _MyHomePageState extends State<MyHomePage> {
     controller = KlineController();
 
     genCandleModelList().then((list) {
-      controller.updateCandleList(list);
+      // controller.updateCandleList(list);
     });
   }
 
@@ -71,7 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
               valueNotifier.value++;
               controller.background;
               genCandleModelList(count: randomCount).then((list) {
-                controller.addNewCandleList(list);
+                // controller.addNewCandleList(list);
               });
             },
             child: Text('Add'),
