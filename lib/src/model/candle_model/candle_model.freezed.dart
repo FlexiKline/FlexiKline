@@ -28,9 +28,9 @@ mixin _$CandleModel {
 // @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
   set timestamp(int value) => throw _privateConstructorUsedError;
   @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
-  DateTime? get dateTime => throw _privateConstructorUsedError;
+  DateTime? get datetime => throw _privateConstructorUsedError;
   @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
-  set dateTime(DateTime? value) =>
+  set datetime(DateTime? value) =>
       throw _privateConstructorUsedError; // 从timestamp转换为dateTime;
   /// 开盘价格
   @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
@@ -109,7 +109,7 @@ abstract class $CandleModelCopyWith<$Res> {
   $Res call(
       {int timestamp,
       @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
-      DateTime? dateTime,
+      DateTime? datetime,
       @JsonKey(fromJson: stringToDecimal, toJson: decimalToString) Decimal open,
       @JsonKey(fromJson: stringToDecimal, toJson: decimalToString) Decimal high,
       @JsonKey(fromJson: stringToDecimal, toJson: decimalToString) Decimal low,
@@ -137,7 +137,7 @@ class _$CandleModelCopyWithImpl<$Res, $Val extends CandleModel>
   @override
   $Res call({
     Object? timestamp = null,
-    Object? dateTime = freezed,
+    Object? datetime = freezed,
     Object? open = null,
     Object? high = null,
     Object? low = null,
@@ -152,9 +152,9 @@ class _$CandleModelCopyWithImpl<$Res, $Val extends CandleModel>
           ? _value.timestamp
           : timestamp // ignore: cast_nullable_to_non_nullable
               as int,
-      dateTime: freezed == dateTime
-          ? _value.dateTime
-          : dateTime // ignore: cast_nullable_to_non_nullable
+      datetime: freezed == datetime
+          ? _value.datetime
+          : datetime // ignore: cast_nullable_to_non_nullable
               as DateTime?,
       open: null == open
           ? _value.open
@@ -203,7 +203,7 @@ abstract class _$$CandleModelImplCopyWith<$Res>
   $Res call(
       {int timestamp,
       @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
-      DateTime? dateTime,
+      DateTime? datetime,
       @JsonKey(fromJson: stringToDecimal, toJson: decimalToString) Decimal open,
       @JsonKey(fromJson: stringToDecimal, toJson: decimalToString) Decimal high,
       @JsonKey(fromJson: stringToDecimal, toJson: decimalToString) Decimal low,
@@ -229,7 +229,7 @@ class __$$CandleModelImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? timestamp = null,
-    Object? dateTime = freezed,
+    Object? datetime = freezed,
     Object? open = null,
     Object? high = null,
     Object? low = null,
@@ -244,9 +244,9 @@ class __$$CandleModelImplCopyWithImpl<$Res>
           ? _value.timestamp
           : timestamp // ignore: cast_nullable_to_non_nullable
               as int,
-      dateTime: freezed == dateTime
-          ? _value.dateTime
-          : dateTime // ignore: cast_nullable_to_non_nullable
+      datetime: freezed == datetime
+          ? _value.datetime
+          : datetime // ignore: cast_nullable_to_non_nullable
               as DateTime?,
       open: null == open
           ? _value.open
@@ -289,7 +289,7 @@ class __$$CandleModelImplCopyWithImpl<$Res>
 class _$CandleModelImpl implements _CandleModel {
   _$CandleModelImpl(
       {required this.timestamp,
-      @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt) this.dateTime,
+      @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt) this.datetime,
       @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
       required this.open,
       @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
@@ -315,7 +315,7 @@ class _$CandleModelImpl implements _CandleModel {
   int timestamp;
   @override
   @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
-  DateTime? dateTime;
+  DateTime? datetime;
 // 从timestamp转换为dateTime;
   /// 开盘价格
   @override
@@ -359,7 +359,7 @@ class _$CandleModelImpl implements _CandleModel {
 
   @override
   String toString() {
-    return 'CandleModel(timestamp: $timestamp, dateTime: $dateTime, open: $open, high: $high, low: $low, close: $close, vol: $vol, volCcy: $volCcy, volCcyQuote: $volCcyQuote, confirm: $confirm)';
+    return 'CandleModel(timestamp: $timestamp, datetime: $datetime, open: $open, high: $high, low: $low, close: $close, vol: $vol, volCcy: $volCcy, volCcyQuote: $volCcyQuote, confirm: $confirm)';
   }
 
   @JsonKey(ignore: true)
@@ -380,7 +380,7 @@ abstract class _CandleModel implements CandleModel {
   factory _CandleModel(
       {required int timestamp,
       @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
-      DateTime? dateTime,
+      DateTime? datetime,
       @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
       required Decimal open,
       @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
@@ -411,9 +411,9 @@ abstract class _CandleModel implements CandleModel {
   set timestamp(int value);
   @override
   @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
-  DateTime? get dateTime;
+  DateTime? get datetime;
   @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
-  set dateTime(DateTime? value);
+  set datetime(DateTime? value);
   @override // 从timestamp转换为dateTime;
   /// 开盘价格
   @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)

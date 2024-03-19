@@ -13,7 +13,7 @@ class CandleModel with _$CandleModel {
     // @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
     required int timestamp,
     @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
-    DateTime? dateTime, // 从timestamp转换为dateTime;
+    DateTime? datetime, // 从timestamp转换为dateTime;
 
     /// 开盘价格
     @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)

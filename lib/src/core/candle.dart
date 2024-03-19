@@ -1,25 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:kline/src/model/candle_data.dart';
-
-import '../model/export.dart';
+import '../extension/export.dart';
 import 'binding_base.dart';
 import 'config.dart';
-
-abstract interface class ICandleProduce {
-  void updateCandleList(CandleReq req, List<CandleModel> list);
-
-  void addNewCandleList(CandleReq req, List<CandleModel> list);
-
-  void addNewCandle(CandleReq req, CandleModel candleModel);
-}
+import 'data.dart';
+import 'setting.dart';
 
 abstract interface class ICandlePinter {
   void paintCandle(Canvas canvas, Size size);
 }
 
 mixin CandleBinding
-    on KlineBindingBase, ConfigBinding
-    implements ICandlePinter, ICandleProduce {
+    on KlineBindingBase, SettingBinding, ConfigBinding, DataBinding
+    implements ICandlePinter {
   @override
   void initBinding() {
     super.initBinding();
@@ -27,60 +19,46 @@ mixin CandleBinding
     // _instance = this;
   }
 
-  final Map<String, CandleData> _candleDataCache = {};
-
-  final ValueNotifier<CandleData> _curCandleData = ValueNotifier(
-    CandleData.empty,
-  );
-
-  Listenable get repaintCandle => _curCandleData;
-
-  CandleData get candleData => _curCandleData.value;
-
-  // static CandleBindings get instance =>
-  //     KlineBindingBase.checkInstance(_instance);
-  // static CandleBindings? _instance;
-
-  @override
-  void addNewCandle(CandleReq req, CandleModel candleModel) {
-    addNewCandleList(req, [candleModel]);
-  }
-
-  @override
-  void addNewCandleList(CandleReq req, List<CandleModel> list) {
-    CandleData data;
-    if (_candleDataCache.containsKey(req.key)) {
-      data = _candleDataCache[req.key]!;
-      data.addNewCandleList(req, list);
-      _curCandleData.value = data;
-    }
-  }
-
-  @override
-  void updateCandleList(CandleReq req, List<CandleModel> list) {
-    CandleData data;
-    if (_candleDataCache.containsKey(req.key)) {
-      data = _candleDataCache[req.key]!;
-      data.list = list;
-    } else {
-      data = CandleData(req, list);
-      _candleDataCache[req.key] = data;
-    }
-    _curCandleData.value = data;
+  double get dyFactor {
+    return ((mainRect.top - mainRect.bottom).d / curCandleData.height)
+        .toDouble();
   }
 
   @override
   void paintCandle(Canvas canvas, Size size) {
-    // final candle = candleList.first;
-    // canvas.drawString(
-    //   string: candle.toString(),
-    //   fontSize: 10,
-    //   fontColor: Colors.red,
-    //   backgroundRadius: 2,
-    //   offset: const Offset(20, 20),
-    //   alignment: Alignment.center,
-    //   backgroundColor: Colors.white60,
-    //   padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-    // );
+    final data = curCandleData;
+
+    for (var i = 0; i < data.list.length; i++) {
+      final model = data.list[i];
+      final dx = mainRect.right - (i * 8 + 7 / 2);
+      final isRise = model.close >= model.open;
+      final highOff = Offset(
+        dx,
+        mainRect.bottom + (model.high - data.min).toDouble() * dyFactor,
+      );
+      final lowOff = Offset(
+        dx,
+        mainRect.bottom + (model.low - data.min).toDouble() * dyFactor,
+      );
+
+      canvas.drawLine(
+        highOff,
+        lowOff,
+        isRise ? riseLinePaint : downLinePaint,
+      );
+      final openOff = Offset(
+        dx,
+        mainRect.bottom + (model.open - data.min).toDouble() * dyFactor,
+      );
+      final closeOff = Offset(
+        dx,
+        mainRect.bottom + (model.close - data.min).toDouble() * dyFactor,
+      );
+      canvas.drawLine(
+        openOff,
+        closeOff,
+        isRise ? riseBoldPaint : downBoldPaint,
+      );
+    }
   }
 }

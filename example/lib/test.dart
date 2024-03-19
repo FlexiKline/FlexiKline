@@ -39,12 +39,41 @@ class PathCustomPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     debugPrint('zp::: paint>>> value${value.value}');
-    drawCandle(canvas);
+    debugPrint(
+      'zp::: paint>>> size$size,  screenWidth:${ScreenUtil().screenWidth}',
+    );
+    drawCandle2(canvas);
   }
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
     return true;
+  }
+
+  void drawCandle2(Canvas canvas) {
+    final paint1 = Paint()
+      ..color = Colors.red
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
+
+    final paint2 = Paint()
+      ..color = Colors.red
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 7;
+
+    final dx = 10.0;
+
+    canvas
+      ..drawLine(
+        Offset(dx, 100.0),
+        Offset(dx, 200.0),
+        paint1,
+      )
+      ..drawLine(
+        Offset(dx, 120.0),
+        Offset(dx, 170.0),
+        paint2,
+      );
   }
 
   /// 绘制Candle

@@ -16,13 +16,20 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+    return ScreenUtilInit(
+      designSize: const Size(393, 852),
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (context, child) {
+        return MaterialApp(
+          title: 'Flutter Demo',
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+            useMaterial3: true,
+          ),
+          home: const MyHomePage(title: 'Flutter Demo Home Page'),
+        );
+      },
     );
   }
 }
@@ -38,46 +45,44 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   late final KlineController controller;
+  final CandleReq req = CandleReq(instId: 'BTC-USDT', bar: '1d');
   @override
   void initState() {
     super.initState();
-    controller = KlineController();
+    controller = KlineController()
+      ..setMainSize(Size(
+        ScreenUtil().screenWidth,
+        ScreenUtil().screenWidth,
+      ));
 
-    genCandleModelList().then((list) {
-      // controller.updateCandleList(list);
+    genRandomCandleList(count: 50).then((list) {
+      controller.setCandleData(req, list);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return ScreenUtilInit(
-      designSize: const Size(393, 852),
-      minTextAdapt: true,
-      splitScreenMode: true,
-      builder: (context, child) {
-        return Scaffold(
-          appBar: AppBar(
-            backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-            title: Text(widget.title),
-          ),
-          body: Center(
-            // child: KlineWidget(
-            //   controller: controller,
-            // ),
-            child: TestBody(),
-          ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () {
-              valueNotifier.value++;
-              controller.background;
-              genCandleModelList(count: randomCount).then((list) {
-                // controller.addNewCandleList(list);
-              });
-            },
-            child: Text('Add'),
-          ),
-        );
-      },
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Text(widget.title),
+      ),
+      body: Center(
+        child: KlineWidget(
+          controller: controller,
+        ),
+        // child: TestBody(),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          valueNotifier.value++;
+          controller.background;
+          genRandomCandleList(count: randomCount).then((list) {
+            // controller.addNewCandleList(list);
+          });
+        },
+        child: Text('Add'),
+      ),
     );
   }
 }

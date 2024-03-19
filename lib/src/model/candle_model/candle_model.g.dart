@@ -9,7 +9,7 @@ part of 'candle_model.dart';
 _$CandleModelImpl _$$CandleModelImplFromJson(Map<String, dynamic> json) =>
     _$CandleModelImpl(
       timestamp: json['timestamp'] as int,
-      dateTime: valueToDateTime(json['dateTime']),
+      datetime: valueToDateTime(json['datetime']),
       open: stringToDecimal(json['open']),
       high: stringToDecimal(json['high']),
       low: stringToDecimal(json['low']),
@@ -23,7 +23,7 @@ _$CandleModelImpl _$$CandleModelImplFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$$CandleModelImplToJson(_$CandleModelImpl instance) =>
     <String, dynamic>{
       'timestamp': instance.timestamp,
-      'dateTime': dateTimeToInt(instance.dateTime),
+      'datetime': dateTimeToInt(instance.datetime),
       'open': decimalToString(instance.open),
       'high': decimalToString(instance.high),
       'low': decimalToString(instance.low),

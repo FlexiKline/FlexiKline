@@ -12,7 +12,7 @@ double get deltaPrice =>
         (_random.nextBool() ? 1 : -1)) *
     10;
 
-Future<List<CandleModel>> genCandleModelList({
+Future<List<CandleModel>> genRandomCandleList({
   int count = 500,
 }) async {
   double open = 50000;
@@ -35,7 +35,31 @@ Future<List<CandleModel>> genCandleModelList({
     close = open + deltaPrice;
     high = max(open, close) + deltaPrice.abs() * 0.2;
     low = min(open, close) - deltaPrice.abs() * 0.3;
-    date = date.add(const Duration(days: 1));
+    date = date.add(const Duration(days: -1));
   }
   return r;
+}
+
+Future<List<CandleModel>> genCustomCandleList({
+  int count = 500,
+}) async {
+  DateTime dateTime = DateTime.now();
+  return <CandleModel>[
+    CandleModel.fromJson({
+      "timestamp": dateTime.add(Duration(days: 0)).millisecondsSinceEpoch,
+      "high": 120,
+      "open": 100,
+      "close": 60,
+      "low": 20,
+      "vol": 800,
+    }),
+    CandleModel.fromJson({
+      "timestamp": dateTime.add(Duration(days: -1)).millisecondsSinceEpoch,
+      "high": 220,
+      "open": 60,
+      "close": 200,
+      "low": 50,
+      "vol": 900,
+    }),
+  ];
 }

@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 import '../kline_controller.dart';
 
@@ -22,12 +22,20 @@ class _KlineWidgetState extends State<KlineWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      constraints: BoxConstraints.loose(size),
+      width: widget.controller.mainRectWidth,
+      height: widget.controller.mainRectHeight,
+      decoration: const BoxDecoration(
+        color: Color.fromARGB(179, 243, 220, 220),
+      ),
+      // color: Colors.redAccent,
       child: Stack(
         children: <Widget>[
           RepaintBoundary(
             child: CustomPaint(
-              size: size,
+              size: Size(
+                widget.controller.mainRectWidth,
+                widget.controller.mainRectHeight,
+              ),
               painter: KlinePainter(
                 controller: widget.controller,
               ),
@@ -54,6 +62,6 @@ class KlinePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    throw oldDelegate != this;
+    return oldDelegate != this;
   }
 }
