@@ -49,13 +49,15 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    controller = KlineController()
+    controller = KlineController();
+    controller
       ..setMainSize(Size(
         ScreenUtil().screenWidth,
         ScreenUtil().screenWidth,
-      ));
+      ))
+      ..candleWidth = 7;
 
-    genRandomCandleList(count: 50).then((list) {
+    genRandomCandleList(count: 100).then((list) {
       controller.setCandleData(req, list);
     });
   }
@@ -78,7 +80,7 @@ class _MyHomePageState extends State<MyHomePage> {
           valueNotifier.value++;
           controller.background;
           genRandomCandleList(count: randomCount).then((list) {
-            // controller.addNewCandleList(list);
+            controller.appendCandleData(req, list);
           });
         },
         child: Text('Add'),

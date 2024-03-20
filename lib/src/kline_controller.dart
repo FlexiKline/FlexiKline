@@ -4,7 +4,7 @@ class KlineController extends KlineBindingBase
     with
         SettingBinding,
         ConfigBinding,
-        DataBinding,
+        DataMgrBinding,
         CandleBinding,
         GestureBinding {
   // factory KlineController() => KlineController();

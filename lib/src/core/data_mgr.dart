@@ -1,10 +1,15 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 import '../model/export.dart';
 import 'binding_base.dart';
+import 'setting.dart';
 
 abstract interface class IDataSourceMgr {
-  void setCandleData(CandleReq req, List<CandleModel> list);
+  void setCandleData(
+    CandleReq req,
+    List<CandleModel> list, {
+    bool replace = false,
+  });
 
   void appendCandleData(CandleReq req, List<CandleModel> list);
 }
@@ -13,17 +18,18 @@ abstract interface class IDataScopeMgr {
   void moveCandle(int leftTs, int rightTs);
 }
 
-mixin DataBinding on KlineBindingBase implements IDataSourceMgr, IDataScopeMgr {
+mixin DataMgrBinding
+    on KlineBindingBase, SettingBinding
+    implements IDataSourceMgr, IDataScopeMgr {
   @override
   void initBinding() {
     super.initBinding();
-    logd('data init');
-    _curCandleData = CandleData.empty;
+    logd('dataMgr init');
   }
 
   final Map<String, CandleData> _candleDataCache = {};
 
-  late CandleData _curCandleData;
+  CandleData _curCandleData = CandleData.empty;
   CandleData get curCandleData => _curCandleData;
   set curCandleData(val) {
     /// TODO 预处理数据
@@ -32,20 +38,22 @@ mixin DataBinding on KlineBindingBase implements IDataSourceMgr, IDataScopeMgr {
 
   String get curDataKey => curCandleData.key;
 
+  /// 触发重绘蜡烛线.
+  void markRepainCandle() => repaintCandle.value++;
   ValueNotifier<int> repaintCandle = ValueNotifier(0);
-  void makeRepainCandle() => repaintCandle.value++;
 
   @override
-  void setCandleData(CandleReq req, List<CandleModel> list) {
+  void setCandleData(
+    CandleReq req,
+    List<CandleModel> list, {
+    bool replace = false,
+  }) {
     final data = _candleDataCache[req.key] ?? CandleData(req, List.of(list));
-    data.mergeCandleList(list);
+    data.mergeCandleList(list, replace: replace);
     _candleDataCache[req.key] = data;
-    if (curCandleData.invalid) {
+    if (curCandleData.invalid || req.key == curDataKey) {
       curCandleData = data;
-    }
-    if (req.key == curDataKey) {
-      makeRepainCandle();
-      // TODO: 数据处理
+      _calcuateCandleDataDrawParams(reset: true);
     }
   }
 
@@ -53,10 +61,24 @@ mixin DataBinding on KlineBindingBase implements IDataSourceMgr, IDataScopeMgr {
   void appendCandleData(CandleReq req, List<CandleModel> list) {
     final data = _candleDataCache[req.key] ?? CandleData(req, List.of(list));
     data.mergeCandleList(list);
+    _candleDataCache[req.key] = data;
     if (req.key == curDataKey) {
-      makeRepainCandle();
-      // TODO: 数据处理
+      _calcuateCandleDataDrawParams();
     }
+  }
+
+  /// 计算绘制所需要的参数.
+  void _calcuateCandleDataDrawParams({
+    bool reset = false, // 是否从头开始绘制.
+  }) {
+    if (reset) curCandleData.reset();
+    curCandleData.calcuateDrawParams(
+      maxCandleNums,
+      candleActualWidth,
+      canvasWidth,
+    );
+
+    markRepainCandle();
   }
 
   @override

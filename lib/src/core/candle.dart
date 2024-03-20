@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import '../extension/export.dart';
 import 'binding_base.dart';
 import 'config.dart';
-import 'data.dart';
+import 'data_mgr.dart';
 import 'setting.dart';
 
 abstract interface class ICandlePinter {
@@ -10,7 +9,7 @@ abstract interface class ICandlePinter {
 }
 
 mixin CandleBinding
-    on KlineBindingBase, SettingBinding, ConfigBinding, DataBinding
+    on KlineBindingBase, SettingBinding, ConfigBinding, DataMgrBinding
     implements ICandlePinter {
   @override
   void initBinding() {
@@ -20,27 +19,28 @@ mixin CandleBinding
   }
 
   double get dyFactor {
-    return ((mainRect.top - mainRect.bottom).d / curCandleData.height)
-        .toDouble();
+    return -canvasHeight / curCandleData.height.toDouble();
   }
 
   @override
   void paintCandle(Canvas canvas, Size size) {
     final data = curCandleData;
+    int start = data.start;
+    int end = data.end;
+    double offset = canvasWidth - data.offset + (candleActualWidth / 2);
 
-    for (var i = 0; i < data.list.length; i++) {
+    for (var i = start; i < end; i++) {
       final model = data.list[i];
-      final dx = mainRect.right - (i * 8 + 7 / 2);
+      final dx = offset - ((i - start) * candleActualWidth);
       final isRise = model.close >= model.open;
       final highOff = Offset(
         dx,
-        mainRect.bottom + (model.high - data.min).toDouble() * dyFactor,
+        canvasHeight + (model.high - data.min).toDouble() * dyFactor,
       );
       final lowOff = Offset(
         dx,
-        mainRect.bottom + (model.low - data.min).toDouble() * dyFactor,
+        canvasHeight + (model.low - data.min).toDouble() * dyFactor,
       );
-
       canvas.drawLine(
         highOff,
         lowOff,
@@ -48,11 +48,11 @@ mixin CandleBinding
       );
       final openOff = Offset(
         dx,
-        mainRect.bottom + (model.open - data.min).toDouble() * dyFactor,
+        canvasHeight + (model.open - data.min).toDouble() * dyFactor,
       );
       final closeOff = Offset(
         dx,
-        mainRect.bottom + (model.close - data.min).toDouble() * dyFactor,
+        canvasHeight + (model.close - data.min).toDouble() * dyFactor,
       );
       canvas.drawLine(
         openOff,
