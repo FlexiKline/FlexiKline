@@ -75,7 +75,7 @@ mixin DataMgrBinding
     curCandleData.calcuateDrawParams(
       maxCandleNums,
       candleActualWidth,
-      canvasWidth,
+      canvasWidth, // 暂无用
     );
 
     markRepainCandle();

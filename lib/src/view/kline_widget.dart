@@ -22,8 +22,8 @@ class _KlineWidgetState extends State<KlineWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: widget.controller.mainRect.width,
-      height: widget.controller.mainRect.height,
+      width: widget.controller.mainRectWidth,
+      height: widget.controller.mainRectHeight,
       decoration: const BoxDecoration(
         color: Color.fromARGB(179, 243, 220, 220),
       ),
@@ -33,8 +33,8 @@ class _KlineWidgetState extends State<KlineWidget> {
           RepaintBoundary(
             child: CustomPaint(
               size: Size(
-                widget.controller.mainRect.width,
-                widget.controller.mainRect.height,
+                widget.controller.mainRectWidth,
+                widget.controller.mainRectHeight,
               ),
               painter: KlinePainter(
                 controller: widget.controller,

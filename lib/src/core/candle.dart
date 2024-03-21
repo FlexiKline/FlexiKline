@@ -27,19 +27,21 @@ mixin CandleBinding
     final data = curCandleData;
     int start = data.start;
     int end = data.end;
-    double offset = canvasWidth - data.offset + (candleActualWidth / 2);
+
+    double offset = canvasRight - data.offset - candleMargin;
+    // offset ? + (candleActualWidth / 2)
 
     for (var i = start; i < end; i++) {
       final model = data.list[i];
-      final dx = offset - ((i - start) * candleActualWidth);
+      final dx = offset - (i - start) * candleActualWidth;
       final isRise = model.close >= model.open;
       final highOff = Offset(
         dx,
-        canvasHeight + (model.high - data.min).toDouble() * dyFactor,
+        canvasBottom + (model.high - data.min).toDouble() * dyFactor,
       );
       final lowOff = Offset(
         dx,
-        canvasHeight + (model.low - data.min).toDouble() * dyFactor,
+        canvasBottom + (model.low - data.min).toDouble() * dyFactor,
       );
       canvas.drawLine(
         highOff,
@@ -48,11 +50,11 @@ mixin CandleBinding
       );
       final openOff = Offset(
         dx,
-        canvasHeight + (model.open - data.min).toDouble() * dyFactor,
+        canvasBottom + (model.open - data.min).toDouble() * dyFactor,
       );
       final closeOff = Offset(
         dx,
-        canvasHeight + (model.close - data.min).toDouble() * dyFactor,
+        canvasBottom + (model.close - data.min).toDouble() * dyFactor,
       );
       canvas.drawLine(
         openOff,

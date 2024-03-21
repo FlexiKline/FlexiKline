@@ -11,15 +11,17 @@ double get deltaPrice =>
         (_random.nextBool() ? 1 : -1)) *
     10;
 
+DateTime baseDate = DateTime(2023, 06, 01);
+
 Future<List<CandleModel>> genRandomCandleList({int count = 500}) async {
   double open = 50000;
   double close = open + deltaPrice;
   double high = max(open, close) + deltaPrice.abs();
   double low = min(open, close) - deltaPrice.abs();
-  DateTime date = DateTime.now();
-  final List<CandleModel> r = <CandleModel>[];
+  DateTime date = baseDate;
+  final List<CandleModel> list = <CandleModel>[];
   for (int i = 0; i < count; i++) {
-    r.add(CandleModel(
+    list.add(CandleModel(
       close: Decimal.parse(close.toString()),
       high: Decimal.parse(high.toString()),
       low: Decimal.parse(low.toString()),
@@ -33,7 +35,38 @@ Future<List<CandleModel>> genRandomCandleList({int count = 500}) async {
     low = min(open, close) - deltaPrice.abs() * 0.3;
     date = date.add(const Duration(days: -1));
   }
-  return r;
+  return list;
+}
+
+Future<List<CandleModel>> appendCandleList({
+  required CandleModel model,
+  int count = 500,
+}) async {
+  double open = model.close.toDouble();
+  double close = open + deltaPrice;
+  double high = max(open, close) + deltaPrice.abs();
+  double low = min(open, close) - deltaPrice.abs();
+  DateTime date = DateTime.fromMillisecondsSinceEpoch(model.timestamp).add(
+    Duration(days: 1),
+  );
+  final List<CandleModel> list = <CandleModel>[];
+  for (int i = 0; i < count; i++) {
+    list.add(CandleModel(
+      close: Decimal.parse(close.toString()),
+      high: Decimal.parse(high.toString()),
+      low: Decimal.parse(low.toString()),
+      open: Decimal.parse(open.toString()),
+      vol: Decimal.parse((10000000 * _random.nextDouble()).toString()),
+      timestamp: date.millisecondsSinceEpoch,
+    ));
+    open = close;
+    close = open + deltaPrice;
+    high = max(open, close) + deltaPrice.abs() * 0.2;
+    low = min(open, close) - deltaPrice.abs() * 0.3;
+    date = date.add(const Duration(days: 1));
+  }
+  list.sort((a, b) => b.timestamp - a.timestamp);
+  return list;
 }
 
 Future<List<CandleModel>> genCustomCandleList({

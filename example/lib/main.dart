@@ -79,7 +79,10 @@ class _MyHomePageState extends State<MyHomePage> {
         onPressed: () {
           valueNotifier.value++;
           controller.background;
-          genRandomCandleList(count: randomCount).then((list) {
+          appendCandleList(
+            model: controller.curCandleData.list.first,
+            count: randomCount,
+          ).then((list) {
             controller.appendCandleData(req, list);
           });
         },

@@ -24,9 +24,43 @@ mixin SettingBinding on KlineBindingBase {
     );
   }
 
-  /// 绘制区域真实宽高.
-  double get canvasWidth => mainRect.width;
-  double get canvasHeight => mainRect.height;
+  ///
+  ///  --------------------------- mainRect.top
+  ///   |                 ---------- mainPadding.top
+  ///   |                   |
+  ///   |mainRectHeight     | canvasHeight
+  ///   |                   |
+  ///   |canvasBaseHeight ---------- mainPadding.bottom
+  ///  --------------------------- mainRect.bottom
+  /// 主绘制区域宽高
+  double get mainRectWidth => mainRect.width;
+  double get mainRectHeight => mainRect.height;
+
+  /// 绘制区域真实宽.
+  double get canvasWidth {
+    return mainRectWidth - mainPadding.left - mainPadding.right;
+  }
+
+  /// 绘制区域真实高.
+  double get canvasHeight {
+    return mainRectHeight - mainPadding.top - mainPadding.bottom;
+  }
+
+  /// 绘制区域右边界值
+  double get canvasRight => mainRectHeight - mainPadding.right;
+
+  /// 绘制区域下边界值
+  double get canvasBottom => mainRectHeight - mainPadding.bottom;
+
+  /// 主图上下padding
+  EdgeInsets mainPadding = const EdgeInsets.only(
+    top: 20,
+    bottom: 10,
+    right: 20,
+  );
+
+  /// 幅图上下padding
+  EdgeInsets subPadding = const EdgeInsets.all(10);
 
   /// 最大蜡烛宽度
   // double maxCandleWidth = 20;
@@ -40,10 +74,10 @@ mixin SettingBinding on KlineBindingBase {
   }
 
   /// 蜡烛间距
-  double get margin => candleWidth / 7;
+  double get candleMargin => candleWidth / 7;
 
   /// 单根蜡烛所占据实际宽度
-  double get candleActualWidth => candleWidth + margin;
+  double get candleActualWidth => candleWidth + candleMargin;
 
   /// 绘制区域宽度内, 可绘制的蜡烛数
   int get maxCandleNums => (canvasWidth / candleActualWidth).ceil();

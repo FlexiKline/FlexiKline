@@ -70,7 +70,7 @@ class CandleData with KlineLog {
   void ensureDrawScope(
     int maxCandleNums,
     double candleWidth,
-    double canvasWidth,
+    double canvasWidth, // 暂无用
   ) {
     if (list.isEmpty) {
       reset();
@@ -84,14 +84,17 @@ class CandleData with KlineLog {
       end = math.min(len, maxCandleNums);
       offset = (math.max(0, maxCandleNums - len)) * candleWidth; // 右边偏移量.
     } else {
+      offset = 0;
+      start = 0;
+      end = maxCandleNums;
       // 满一屏
       //? ceil() ? floor()
-      int candleNums = ((candleWidth - offset) / candleWidth).floor();
+      // int candleNums = ((canvasWidth - offset) / candleWidth).floor();
 
-      int curLen = start - end;
-      if (curLen < candleNums) {
-        end = start + candleNums;
-      }
+      // int curLen = start - end;
+      // if (curLen < candleNums) {
+      //   end = start + candleNums;
+      // }
     }
   }
 
@@ -99,14 +102,14 @@ class CandleData with KlineLog {
   void calcuateDrawParams(
     int maxCandleNums,
     double candleWidth,
-    double canvasWidth,
+    double canvasWidth, // 暂无用
   ) {
     debugPrintDrawParams('before');
 
     ensureDrawScope(
       maxCandleNums,
       candleWidth,
-      candleWidth,
+      canvasWidth,
     );
 
     CandleModel m = list[start];
@@ -148,11 +151,17 @@ class CandleData with KlineLog {
 
     int curAfter = list.first.timestamp; // 此时间ts之前的数据
     int curBefore = list.last.timestamp; // 此时间ts之后的数据
-    assert(curAfter > curBefore, "curAfter should be greater than curBefore!");
+    assert(
+      curAfter >= curBefore,
+      "curAfter($curAfter) should be greater than curBefore($curBefore)!",
+    );
 
     int newAfter = newList.first.timestamp; // 此时间ts之前的数据
     int newBefore = newList.last.timestamp; // 此时间ts之后的数据
-    assert(newAfter > newBefore, "newAfter should be greater than newBefore!");
+    assert(
+      newAfter >= newBefore,
+      "newAfter($newAfter) should be greater than newBefore($newBefore)!",
+    );
 
     // 根据两个数组范围[after, before], 合并去重
     if (newBefore > curAfter) {
