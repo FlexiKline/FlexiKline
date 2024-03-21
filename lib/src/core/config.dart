@@ -41,15 +41,25 @@ mixin ConfigBinding on KlineBindingBase, SettingBinding {
   Paint get gridXAxisLinePaint => Paint()
     ..color = Colors.blue
     ..style = PaintingStyle.stroke
-    ..strokeWidth = onePx;
+    ..strokeWidth = pixel;
 
   Paint get gridYAxisLinePaint => Paint()
     ..color = Colors.blue
     ..style = PaintingStyle.stroke
-    ..strokeWidth = onePx;
+    ..strokeWidth = pixel;
 
-  double get onePx {
+  double get pixel {
     final mediaQuery = MediaQueryData.fromView(ui.window);
     return 1.0 / mediaQuery.devicePixelRatio;
   }
+
+  double tickTextFontSize = 10;
+  double tickTextWidth = 100;
+  Color tickTextColor = Colors.black;
+  double get tickTextHeight => tickTextFontSize;
+  TextStyle get tickTextStyle => TextStyle(
+        fontSize: tickTextFontSize,
+        color: tickTextColor,
+        overflow: TextOverflow.ellipsis,
+      );
 }

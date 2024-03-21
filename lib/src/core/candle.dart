@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kline/src/render/draw_text.dart';
 import 'binding_base.dart';
 import 'config.dart';
 import 'data_mgr.dart';
@@ -19,7 +20,7 @@ mixin CandleBinding
   }
 
   double get dyFactor {
-    return -canvasHeight / curCandleData.height.toDouble();
+    return canvasHeight / curCandleData.dataHeight.toDouble();
   }
 
   @override
@@ -27,11 +28,11 @@ mixin CandleBinding
     /// 绘制Grid
     paintGrid(canvas, size);
 
-    /// 绘制X轴刻度线
-    printXAisTickLine(canvas, size);
-
     /// 绘制蜡烛线
     paintCandleLine(canvas, size);
+
+    /// 绘制X轴刻度数据
+    printXAisTickData(canvas, size);
   }
 
   /// 绘制蜡烛线
@@ -50,11 +51,11 @@ mixin CandleBinding
       final isRise = model.close >= model.open;
       final highOff = Offset(
         dx,
-        canvasBottom + (model.high - data.min).toDouble() * dyFactor,
+        canvasBottom - (model.high - data.min).toDouble() * dyFactor,
       );
       final lowOff = Offset(
         dx,
-        canvasBottom + (model.low - data.min).toDouble() * dyFactor,
+        canvasBottom - (model.low - data.min).toDouble() * dyFactor,
       );
       canvas.drawLine(
         highOff,
@@ -63,11 +64,11 @@ mixin CandleBinding
       );
       final openOff = Offset(
         dx,
-        canvasBottom + (model.open - data.min).toDouble() * dyFactor,
+        canvasBottom - (model.open - data.min).toDouble() * dyFactor,
       );
       final closeOff = Offset(
         dx,
-        canvasBottom + (model.close - data.min).toDouble() * dyFactor,
+        canvasBottom - (model.close - data.min).toDouble() * dyFactor,
       );
       canvas.drawLine(
         openOff,
@@ -79,8 +80,8 @@ mixin CandleBinding
 
   /// 绘制Grid
   void paintGrid(Canvas canvas, Size size) {
-    final yAxisItem = mainRectWidth / gridCount;
-    final xAxisItem = mainRectHeight / gridCount;
+    final yAxisStep = mainRectWidth / gridCount;
+    final xAxisStep = mainRectHeight / gridCount;
     final paintX = gridXAxisLinePaint;
     final paintY = gridYAxisLinePaint;
     double dx = 0;
@@ -91,8 +92,8 @@ mixin CandleBinding
       paintX,
     );
     for (int i = 1; i < gridCount; i++) {
-      dx = i * yAxisItem;
-      dy = i * xAxisItem;
+      dx = i * yAxisStep;
+      dy = i * xAxisStep;
       // 绘制xAsix线
       canvas.drawLine(
         Offset(0, dy),
@@ -113,16 +114,30 @@ mixin CandleBinding
     );
   }
 
-  /// 绘制X轴刻度线
-  void printXAisTickLine(Canvas canvas, Size size) {
+  /// 绘制X轴刻度数据
+  void printXAisTickData(Canvas canvas, Size size) {
     final data = curCandleData;
-    final xAxisItem = mainRectHeight / gridCount;
-    double dx = 0;
-    // for (int i = 1; i < gridCount; i++) {
-    //   dx = i * yAxisItem;
-    //   dy = i * xAxisItem;
-    //   // 绘制xAsix刻度
+    final min = data.min;
+    // final tickStep = data.dataHeight.toDouble() / gridCount;
+    final yAxisStep = mainRectHeight / gridCount;
+    final dx = mainRectWidth - tickTextWidth;
+    double dy = 0;
+    for (int i = 1; i <= gridCount; i++) {
+      dy = i * yAxisStep - tickTextFontSize;
 
-    // }
+      // final val = min.toDouble() + (i * yAxisStep - mainRect.top) / canvasHeight * data.dataHeight.toDouble();
+      final val = min.toDouble() + (i * yAxisStep - mainRect.top) / dyFactor;
+
+      final text = val.toStringAsFixed(6); // TODO: 待数据格式化.
+      canvas.drawText(
+        offset: Offset(dx, dy),
+        text: text,
+        style: tickTextStyle,
+        textWidth: 100,
+        textAlign: TextAlign.end,
+        // padding: EdgeInsets.only(right: 10),
+        maxLines: 1,
+      );
+    }
   }
 }

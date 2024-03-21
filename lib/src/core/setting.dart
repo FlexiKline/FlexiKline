@@ -47,7 +47,7 @@ mixin SettingBinding on KlineBindingBase {
   }
 
   /// 绘制区域右边界值
-  double get canvasRight => mainRectHeight - mainPadding.right;
+  double get canvasRight => mainRectWidth - mainPadding.right;
 
   /// 绘制区域下边界值
   double get canvasBottom => mainRectHeight - mainPadding.bottom;

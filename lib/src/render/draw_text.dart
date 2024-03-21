@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 extension DrawTextExt on Canvas {
   /// 绘制文本
   Size drawText({
-    required Offset offset, //绘制启始坐标位置
+    ///绘制启始坐标位置
+    required Offset offset,
 
     /// 文本,样式设置. (注: text与children必须设置一个, 否则不绘制)
     String? text,
@@ -57,6 +58,7 @@ extension DrawTextExt on Canvas {
         padding.horizontal,
         padding.vertical,
       );
+      // offset -= Offset(padding.right, padding.bottom);
       path.addRRect(
         RRect.fromLTRBR(
           offset.dx,

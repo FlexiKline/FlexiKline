@@ -17,7 +17,7 @@ class CandleData with KlineLog {
 
   Decimal max = Decimal.zero;
   Decimal min = Decimal.zero;
-  Decimal get height => max - min;
+  Decimal get dataHeight => max - min;
 
   /// 当前绘制区域起始下标 右
   int _start = 0;
