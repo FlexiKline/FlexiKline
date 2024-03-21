@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:kline/kline.dart';
 
 ValueNotifier<int> valueNotifier = ValueNotifier(0);
 
@@ -42,12 +43,54 @@ class PathCustomPainter extends CustomPainter {
     debugPrint(
       'zp::: paint>>> size$size,  screenWidth:${ScreenUtil().screenWidth}',
     );
-    drawCandle2(canvas);
+    drawText(canvas);
   }
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
     return true;
+  }
+
+  void drawText(Canvas canvas) {
+    canvas.drawText(
+      text: '你好12311111111',
+      style: TextStyle(
+        fontSize: 20,
+        color: Colors.black,
+        overflow: TextOverflow.ellipsis,
+      ),
+      children: [
+        TextSpan(
+          text: '红色',
+          style: TextStyle(fontSize: 18.0, color: Colors.red),
+        ),
+        TextSpan(
+          text: '绿色',
+          style: TextStyle(fontSize: 18.0, color: Colors.green),
+        ),
+      ],
+      textAlign: TextAlign.center,
+      textDirection: TextDirection.rtl,
+      minWidth: 100,
+      maxWidth: 100,
+      offset: Offset(100, 100),
+      padding: EdgeInsets.all(10),
+      backgroundColor: Colors.yellowAccent,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: Colors.red,
+    );
+
+    canvas.drawPoints(
+      PointMode.points,
+      [
+        const Offset(100, 100),
+      ],
+      Paint()
+        ..color = Colors.blue
+        ..strokeWidth = 6
+        ..style = PaintingStyle.stroke,
+    );
   }
 
   void drawCandle2(Canvas canvas) {
@@ -224,21 +267,22 @@ class PathCustomPainter extends CustomPainter {
   void addRRect(Canvas canvas) {
     final Path path = Path();
     path.moveTo(100, 100);
-    path.lineTo(200, 150);
+    // path.lineTo(200, 150);
+    path.reset();
     path.addRRect(
       RRect.fromLTRBR(
         100,
+        100,
+        300,
         200,
-        300,
-        300,
-        const Radius.circular(10), // 圆角
+        const Radius.circular(5), // 圆角
       ),
     );
     canvas.drawPath(
       path,
       Paint()
         ..color = Colors.purple
-        ..style = PaintingStyle.stroke
+        ..style = PaintingStyle.fill
         ..strokeWidth = 2,
     );
   }

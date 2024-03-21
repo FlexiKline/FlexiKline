@@ -56,7 +56,7 @@ mixin SettingBinding on KlineBindingBase {
   EdgeInsets mainPadding = const EdgeInsets.only(
     top: 20,
     bottom: 10,
-    right: 20,
+    // right: 20,
   );
 
   /// 幅图上下padding
@@ -80,5 +80,10 @@ mixin SettingBinding on KlineBindingBase {
   double get candleActualWidth => candleWidth + candleMargin;
 
   /// 绘制区域宽度内, 可绘制的蜡烛数
-  int get maxCandleNums => (canvasWidth / candleActualWidth).ceil();
+  int get maxCandleCount => (canvasWidth / candleActualWidth).ceil();
+
+  /// Grid xAxis Count
+  int gridCount = 5;
+  int get gridXAxisCount => gridCount + 1; // 平分5份: 上下边线都展示
+  int get gridYAxisCount => gridCount - 1; // 平分5份: 左右边线不展示
 }

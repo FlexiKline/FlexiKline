@@ -73,7 +73,7 @@ mixin DataMgrBinding
   }) {
     if (reset) curCandleData.reset();
     curCandleData.calcuateDrawParams(
-      maxCandleNums,
+      maxCandleCount,
       candleActualWidth,
       canvasWidth, // 暂无用
     );

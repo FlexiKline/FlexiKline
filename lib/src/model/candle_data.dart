@@ -68,7 +68,7 @@ class CandleData with KlineLog {
 
   /// 确保绘制区域的startEnd值已初始化并有效
   void ensureDrawScope(
-    int maxCandleNums,
+    int maxCandleCount,
     double candleWidth,
     double canvasWidth, // 暂无用
   ) {
@@ -78,15 +78,15 @@ class CandleData with KlineLog {
     }
 
     int len = list.length;
-    if (len < maxCandleNums || end == 0) {
+    if (len < maxCandleCount || end == 0) {
       // 不足一屏; 或者被重置了;
       start = 0;
-      end = math.min(len, maxCandleNums);
-      offset = (math.max(0, maxCandleNums - len)) * candleWidth; // 右边偏移量.
+      end = math.min(len, maxCandleCount);
+      offset = (math.max(0, maxCandleCount - len)) * candleWidth; // 右边偏移量.
     } else {
       offset = 0;
       start = 0;
-      end = maxCandleNums;
+      end = maxCandleCount;
       // 满一屏
       //? ceil() ? floor()
       // int candleNums = ((canvasWidth - offset) / candleWidth).floor();
@@ -100,14 +100,14 @@ class CandleData with KlineLog {
 
   /// 计算当前绘制区域的最大最小值
   void calcuateDrawParams(
-    int maxCandleNums,
+    int maxCandleCount,
     double candleWidth,
     double canvasWidth, // 暂无用
   ) {
     debugPrintDrawParams('before');
 
     ensureDrawScope(
-      maxCandleNums,
+      maxCandleCount,
       candleWidth,
       canvasWidth,
     );

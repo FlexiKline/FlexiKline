@@ -70,10 +70,10 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-        child: KlineWidget(
-          controller: controller,
-        ),
-        // child: TestBody(),
+        // child: KlineWidget(
+        //   controller: controller,
+        // ),
+        child: TestBody(),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {

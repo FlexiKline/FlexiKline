@@ -24,11 +24,24 @@ mixin CandleBinding
 
   @override
   void paintCandle(Canvas canvas, Size size) {
+    /// 绘制Grid
+    paintGrid(canvas, size);
+
+    /// 绘制X轴刻度线
+    printXAisTickLine(canvas, size);
+
+    /// 绘制蜡烛线
+    paintCandleLine(canvas, size);
+  }
+
+  /// 绘制蜡烛线
+  void paintCandleLine(Canvas canvas, Size size) {
     final data = curCandleData;
     int start = data.start;
     int end = data.end;
 
-    double offset = canvasRight - data.offset - candleMargin;
+    double offset =
+        canvasRight - data.offset - candleMargin + (candleActualWidth / 2);
     // offset ? + (candleActualWidth / 2)
 
     for (var i = start; i < end; i++) {
@@ -62,5 +75,54 @@ mixin CandleBinding
         isRise ? riseBoldPaint : downBoldPaint,
       );
     }
+  }
+
+  /// 绘制Grid
+  void paintGrid(Canvas canvas, Size size) {
+    final yAxisItem = mainRectWidth / gridCount;
+    final xAxisItem = mainRectHeight / gridCount;
+    final paintX = gridXAxisLinePaint;
+    final paintY = gridYAxisLinePaint;
+    double dx = 0;
+    double dy = 0;
+    canvas.drawLine(
+      Offset(0, dy),
+      Offset(mainRectWidth, dy),
+      paintX,
+    );
+    for (int i = 1; i < gridCount; i++) {
+      dx = i * yAxisItem;
+      dy = i * xAxisItem;
+      // 绘制xAsix线
+      canvas.drawLine(
+        Offset(0, dy),
+        Offset(mainRectWidth, dy),
+        paintX,
+      );
+      // 绘制YAsix线
+      canvas.drawLine(
+        Offset(dx, 0),
+        Offset(dx, mainRectHeight),
+        paintY,
+      );
+    }
+    canvas.drawLine(
+      Offset(0, mainRectHeight),
+      Offset(mainRectWidth, mainRectHeight),
+      paintX,
+    );
+  }
+
+  /// 绘制X轴刻度线
+  void printXAisTickLine(Canvas canvas, Size size) {
+    final data = curCandleData;
+    final xAxisItem = mainRectHeight / gridCount;
+    double dx = 0;
+    // for (int i = 1; i < gridCount; i++) {
+    //   dx = i * yAxisItem;
+    //   dy = i * xAxisItem;
+    //   // 绘制xAsix刻度
+
+    // }
   }
 }

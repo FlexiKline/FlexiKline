@@ -1,39 +1,39 @@
 import 'dart:ui';
 
+/// Came from [flutter_path_drawing](https://github.com/dnfield/flutter_path_drawing) library.
 /// Creates a new path that is drawn from the segments of `source`.
 ///
-/// Dash intervals are controlled by the `dashArray` - see [CircularIntervalList]
+/// Dash intervals are controled by the `dashArray` - see [CircularIntervalList]
 /// for examples.
 ///
 /// `dashOffset` specifies an initial starting point for the dashing.
 ///
-/// Passing in a null `source` will result in a null result.  Passing a `source`
-/// that is an empty path will return an empty path.
-extension PathExtension on Path {
-  Path dashPath({
-    required CircularIntervalList<double> dashArray,
-    DashOffset? dashOffset,
-  }) {
-    dashOffset = dashOffset ?? const DashOffset.absolute(0.0);
+/// Passing a `source` that is an empty path will return an empty path.
+Path dashPath(
+  Path source, {
+  required CircularIntervalList<double> dashArray,
+  DashOffset? dashOffset,
+}) {
+  assert(dashArray != null); // ignore: unnecessary_null_comparison
 
-    final Path dest = Path();
-    for (final PathMetric metric in computeMetrics()) {
-      double distance = dashOffset._calculate(metric.length);
-      bool draw = true;
-      while (distance < metric.length) {
-        final double len = dashArray.next;
-        if (draw) {
-          dest.addPath(
-            metric.extractPath(distance, distance + len),
-            Offset.zero,
-          );
-        }
-        distance += len;
-        draw = !draw;
+  dashOffset = dashOffset ?? const DashOffset.absolute(0);
+  // TODO(imaNNeo): Is there some way to determine how much of a path would be visible today?
+
+  final dest = Path();
+  for (final metric in source.computeMetrics()) {
+    var distance = dashOffset._calculate(metric.length);
+    var draw = true;
+    while (distance < metric.length) {
+      final len = dashArray.next;
+      if (draw) {
+        dest.addPath(metric.extractPath(distance, distance + len), Offset.zero);
       }
+      distance += len;
+      draw = !draw;
     }
-    return dest;
   }
+
+  return dest;
 }
 
 enum _DashOffsetType { absolute, percentage }
@@ -46,16 +46,13 @@ class DashOffset {
   /// Create a DashOffset that will be measured as a percentage of the length
   /// of the segment being dashed.
   ///
-  /// `percentage` will be clamped between 0.0 and 1.0; null will be converted
-  /// to 0.0.
+  /// `percentage` will be clamped between 0.0 and 1.0.
   DashOffset.percentage(double percentage)
-      : _rawVal = (percentage.clamp(0.0, 1.0)).toDouble(),
+      : _rawVal = percentage.clamp(0.0, 1.0),
         _dashOffsetType = _DashOffsetType.percentage;
 
   /// Create a DashOffset that will be measured in terms of absolute pixels
   /// along the length of a [Path] segment.
-  ///
-  /// `start` will be coerced to 0.0 if null.
   const DashOffset.absolute(double start)
       : _rawVal = start,
         _dashOffsetType = _DashOffsetType.absolute;
@@ -80,16 +77,16 @@ class DashOffset {
 /// Note that this does not quite conform to an [Iterable<T>], because it does
 /// not have a moveNext.
 class CircularIntervalList<T> {
-  CircularIntervalList(this._valList);
+  CircularIntervalList(this._values);
 
-  final List<T> _valList;
+  final List<T> _values;
   int _idx = 0;
 
   T get next {
-    if (_idx >= _valList.length) {
+    if (_idx >= _values.length) {
       _idx = 0;
     }
-    return _valList[_idx++];
+    return _values[_idx++];
   }
 }
 
@@ -101,7 +98,8 @@ extension PathDraw on Canvas {
     List<double>? dashes,
   }) {
     drawPath(
-      path.dashPath(
+      dashPath(
+        path,
         dashArray: CircularIntervalList<double>(
           dashes ?? <double>[5, 3],
         ),

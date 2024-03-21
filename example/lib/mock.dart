@@ -47,7 +47,7 @@ Future<List<CandleModel>> appendCandleList({
   double high = max(open, close) + deltaPrice.abs();
   double low = min(open, close) - deltaPrice.abs();
   DateTime date = DateTime.fromMillisecondsSinceEpoch(model.timestamp).add(
-    Duration(days: 1),
+    const Duration(days: 1),
   );
   final List<CandleModel> list = <CandleModel>[];
   for (int i = 0; i < count; i++) {

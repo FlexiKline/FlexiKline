@@ -1,2 +1,2 @@
 export './draw_path.dart';
-export './draw_string.dart';
+export './draw_text.dart';
