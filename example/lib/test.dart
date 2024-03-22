@@ -19,11 +19,15 @@ class _TestBodyState extends State<TestBody> {
   Widget build(BuildContext context) {
     return Container(
       width: ScreenUtil().screenWidth,
-      height: ScreenUtil().screenWidth,
+      height: ScreenUtil().screenWidth * 2 / 3,
       // margin: EdgeInsetsDirectional.all(20.r),
-      color: Color.fromARGB(179, 243, 220, 220),
+      color: Colors.grey,
       child: RepaintBoundary(
         child: CustomPaint(
+          size: Size(
+            ScreenUtil().screenWidth,
+            ScreenUtil().screenWidth * 2 / 3,
+          ),
           painter: PathCustomPainter(value: valueNotifier),
           isComplex: true,
         ),
@@ -51,11 +55,85 @@ class PathCustomPainter extends CustomPainter {
     return true;
   }
 
-  void drawText(Canvas canvas) {
+  // 向左绘制, 超过左边界
+  void drawText3(Canvas canvas) {
+    final offset = Offset(20, 100);
     canvas.drawText(
-      offset: Offset(200, 200),
-      isEndDraw: true,
-      text: '你好123111',
+      offset: offset,
+      drawDirection: DrawDirection.rtl,
+      canvasWidth: ScreenUtil().screenWidth,
+      text: '你好123456789',
+      style: TextStyle(
+        fontSize: 20,
+        color: Colors.black,
+        overflow: TextOverflow.ellipsis,
+      ),
+      textAlign: TextAlign.right,
+      textDirection: TextDirection.rtl,
+      // minWidth: 100,
+      maxWidth: 100,
+      padding: EdgeInsets.all(10),
+      backgroundColor: Colors.yellowAccent,
+      borderRadius: 10,
+      borderWidth: 1,
+      maxLines: 1,
+      borderColor: Colors.red,
+    );
+
+    canvas.drawPoints(
+      PointMode.points,
+      [
+        offset,
+      ],
+      Paint()
+        ..color = Colors.blue
+        ..strokeWidth = 6
+        ..style = PaintingStyle.stroke,
+    );
+  }
+
+  void drawText2(Canvas canvas) {
+    final offset = Offset(ScreenUtil().screenWidth - 20, 100);
+    canvas.drawText(
+      offset: offset,
+      drawDirection: DrawDirection.rtl,
+      text: '你好123456789',
+      style: TextStyle(
+        fontSize: 20,
+        color: Colors.black,
+        overflow: TextOverflow.ellipsis,
+      ),
+      textAlign: TextAlign.center,
+      textDirection: TextDirection.rtl,
+      // minWidth: 100,
+      // maxWidth: 100,
+      padding: EdgeInsets.all(10),
+      backgroundColor: Colors.yellowAccent,
+      borderRadius: 10,
+      borderWidth: 1,
+      // maxLines: 1,
+      borderColor: Colors.red,
+    );
+
+    canvas.drawPoints(
+      PointMode.points,
+      [
+        offset,
+      ],
+      Paint()
+        ..color = Colors.blue
+        ..strokeWidth = 6
+        ..style = PaintingStyle.stroke,
+    );
+  }
+
+  void drawText(Canvas canvas) {
+    Offset offset = Offset(ScreenUtil().screenWidth - 100, 150);
+    final size = canvas.drawText(
+      offset: offset,
+      drawDirection: DrawDirection.ltr,
+      canvasWidth: ScreenUtil().screenWidth,
+      text: '你好123456',
       style: TextStyle(
         fontSize: 20,
         color: Colors.black,
@@ -71,22 +149,23 @@ class PathCustomPainter extends CustomPainter {
       //     style: TextStyle(fontSize: 18.0, color: Colors.green),
       //   ),
       // ],
-      textAlign: TextAlign.center,
+      textAlign: TextAlign.right,
       textDirection: TextDirection.ltr,
       // minWidth: 100,
       // maxWidth: 100,
-      // padding: EdgeInsets.all(10),
-      // backgroundColor: Colors.yellowAccent,
-      // borderRadius: 10,
-      // borderWidth: 1,
-      // maxLines: 1,
-      // borderColor: Colors.red,
+      textWidth: 80,
+      padding: EdgeInsets.all(10),
+      backgroundColor: Colors.yellowAccent,
+      borderRadius: 10,
+      borderWidth: 1,
+      maxLines: 1,
+      borderColor: Colors.red,
     );
 
     canvas.drawPoints(
       PointMode.points,
       [
-        const Offset(200, 200),
+        offset,
       ],
       Paint()
         ..color = Colors.blue

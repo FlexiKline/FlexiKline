@@ -125,9 +125,11 @@ mixin CandleBinding
     final text = val.toStringAsFixed(6); // TODO: 格式化
     canvas.drawText(
       offset: endOffset,
-      isEndDraw: flag < 0,
+      drawDirection: flag < 0 ? DrawDirection.rtl : DrawDirection.ltr,
+      // canvasWidth: canvasRight,
       text: text,
       style: priceMarkTextStyle,
+      maxLines: 1,
     );
   }
 
@@ -138,10 +140,22 @@ mixin CandleBinding
   /// 3. 最新价向左移动后, 刻度线根据最新价蜡烛线平行移动.
   void paintLastPriceMark(Canvas canvas, Size size) {
     final data = curCandleData;
-    final candle = data.latest;
-    if (candle == null) {
+    final model = data.latest;
+    if (model == null) {
       logd('paintLastPriceMark > on data!');
       return;
+    }
+
+    if (data.start == 0) {
+      // 最新价存在当前画板上
+      final dxOffset =
+          canvasRight - data.offset - candleMargin + (candleActualWidth / 2);
+      final closeOff = Offset(
+        dxOffset,
+        canvasBottom - (model.close - data.min).toDouble() * dyFactor,
+      );
+    } else {
+      // 最新价已移出画板
     }
   }
 
@@ -149,24 +163,24 @@ mixin CandleBinding
   void printXAisTickData(Canvas canvas, Size size) {
     final data = curCandleData;
     final min = data.min;
-    // final tickStep = data.dataHeight.toDouble() / gridCount;
     final yAxisStep = mainRectHeight / gridCount;
-    final dx = mainRectWidth - tickTextWidth;
+    final dx = mainRectWidth - tickTextWidth - tickTextPadding.horizontal;
     double dy = 0;
     for (int i = 1; i <= gridCount; i++) {
       dy = i * yAxisStep - tickTextFontSize;
 
       // final val = min.toDouble() + (i * yAxisStep - mainRect.top) / canvasHeight * data.dataHeight.toDouble();
       final val = min + ((i * yAxisStep - mainRect.top) / dyFactor).d;
-
       final text = val.toStringAsFixed(6); // TODO: 待数据格式化.
+
       canvas.drawText(
         offset: Offset(dx, dy),
+        canvasWidth: canvasRight,
         text: text,
         style: tickTextStyle,
         textWidth: tickTextWidth,
         textAlign: TextAlign.end,
-        // padding: EdgeInsets.only(right: 10),
+        padding: tickTextPadding,
         maxLines: 1,
       );
     }

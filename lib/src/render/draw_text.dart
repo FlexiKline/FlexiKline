@@ -1,12 +1,27 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
+enum DrawDirection {
+  /// The draw flows from right to left.
+  rtl,
+
+  /// The draw flows from left to right.
+  ltr,
+}
+
 extension DrawTextExt on Canvas {
   /// 绘制文本
   Size drawText({
     ///绘制启始坐标位置
     required Offset offset,
-    bool isEndDraw = false, // 是否在offset右边绘制
+
+    /// X轴上的绘制方向: 以offset为原点, 向左向进制绘制.
+    DrawDirection drawDirection = DrawDirection.ltr,
+
+    // TextDirection
+    /// 画布总宽度,
+    /// 注: 如果提供, 在向offset右边绘制时, 检测超出画板右边绘制区域时, 会主动向左调整offset偏移量, 以保证内容区域完全展示.
+    double? canvasWidth,
 
     /// 文本,样式设置. (注: text与children必须设置一个, 否则不绘制)
     String? text,
@@ -51,20 +66,29 @@ extension DrawTextExt on Canvas {
     );
 
     Size paintSize = textPainter.size;
+    paintSize += Offset(
+      padding.horizontal,
+      padding.vertical,
+    );
 
-    if (isEndDraw) {
-      offset = Offset(math.max(0, offset.dx - paintSize.width), offset.dy);
+    if (drawDirection == DrawDirection.rtl) {
+      offset = Offset(
+        math.max(0, offset.dx - paintSize.width),
+        offset.dy,
+      );
+    } else if (canvasWidth != null &&
+        offset.dx + paintSize.width > canvasWidth) {
+      // 如果内容区域超出画布右边界. 向左调整offset
+      offset = Offset(
+        math.max(0, canvasWidth - paintSize.width),
+        offset.dy,
+      );
     }
 
     final isDrawBg = backgroundColor.alpha != 0;
     final isDrawBorder = borderColor.alpha != 0 && borderWidth > 0;
     if (!padding.collapsedSize.isEmpty || isDrawBg || isDrawBorder) {
       final Path path = Path();
-      paintSize += Offset(
-        padding.horizontal,
-        padding.vertical,
-      );
-      // offset -= Offset(padding.right, padding.bottom);
       path.addRRect(
         RRect.fromLTRBR(
           offset.dx,

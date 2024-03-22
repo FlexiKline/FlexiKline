@@ -69,11 +69,15 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
       ),
-      body: Center(
-        child: KlineWidget(
-          controller: controller,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            KlineWidget(
+              controller: controller,
+            ),
+            TestBody(),
+          ],
         ),
-        // child: TestBody(),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {

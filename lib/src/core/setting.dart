@@ -126,6 +126,9 @@ mixin SettingBinding on KlineBindingBase {
   /// X轴上的刻度线配置
   double tickTextFontSize = 10;
   double tickTextWidth = 100;
+  EdgeInsets tickTextPadding = const EdgeInsets.only(
+    right: 2,
+  );
   Color tickTextColor = Colors.grey;
   double get tickTextHeight => tickTextFontSize;
   TextStyle get tickTextStyle => TextStyle(
@@ -155,6 +158,7 @@ mixin SettingBinding on KlineBindingBase {
   /// 蜡烛图上的当前价刻度线与价钱标记
   bool isDrawLastPriceMark = true;
   double lastPriceMarkFontSize = 10;
+  double lastPriceMarkTextWidth = 100;
   Color lastPriceMarkColor = Colors.black;
   TextStyle get lastPriceMarkTextStyle => TextStyle(
         fontSize: lastPriceMarkFontSize,
@@ -165,4 +169,12 @@ mixin SettingBinding on KlineBindingBase {
     ..color = lastPriceMarkColor
     ..style = PaintingStyle.stroke
     ..strokeWidth = 1;
+  // 最新价文本区域的背景相关配置.
+  Color lastPriceMarkRectBackgroundColor = Colors.white;
+  double lastPriceMarkRectRadius = 2;
+  EdgeInsets lastPriceMarkRectPadding = const EdgeInsets.symmetric(
+    horizontal: 2,
+    vertical: 1,
+  );
+  bool isShowLastPriceUpdateTime = true; // 是否在最新价下面展示下次更新时间.
 }
