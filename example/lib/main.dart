@@ -78,7 +78,6 @@ class _MyHomePageState extends State<MyHomePage> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           valueNotifier.value++;
-          controller.background;
           appendCandleList(
             model: controller.curCandleData.list.first,
             count: randomCount,

@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 extension DrawTextExt on Canvas {
@@ -5,6 +6,7 @@ extension DrawTextExt on Canvas {
   Size drawText({
     ///绘制启始坐标位置
     required Offset offset,
+    bool isEndDraw = false, // 是否在offset右边绘制
 
     /// 文本,样式设置. (注: text与children必须设置一个, 否则不绘制)
     String? text,
@@ -49,6 +51,10 @@ extension DrawTextExt on Canvas {
     );
 
     Size paintSize = textPainter.size;
+
+    if (isEndDraw) {
+      offset = Offset(math.max(0, offset.dx - paintSize.width), offset.dy);
+    }
 
     final isDrawBg = backgroundColor.alpha != 0;
     final isDrawBorder = borderColor.alpha != 0 && borderWidth > 0;

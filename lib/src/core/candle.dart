@@ -1,9 +1,12 @@
+import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
-import 'package:kline/src/render/draw_text.dart';
+
 import 'binding_base.dart';
 import 'config.dart';
 import 'data_mgr.dart';
 import 'setting.dart';
+import '../extension/export.dart';
+import '../render/draw_text.dart';
 
 abstract interface class ICandlePinter {
   void paintCandle(Canvas canvas, Size size);
@@ -33,6 +36,9 @@ mixin CandleBinding
 
     /// 绘制X轴刻度数据
     printXAisTickData(canvas, size);
+
+    /// 绘制最新价与刻度线
+    paintLastPriceMark(canvas, size);
   }
 
   /// 绘制蜡烛线
@@ -41,10 +47,10 @@ mixin CandleBinding
     int start = data.start;
     int end = data.end;
 
-    double offset =
+    final offset =
         canvasRight - data.offset - candleMargin + (candleActualWidth / 2);
-    // offset ? + (candleActualWidth / 2)
 
+    Offset? maxHihgOffset, minLowOffset;
     for (var i = start; i < end; i++) {
       final model = data.list[i];
       final dx = offset - (i - start) * candleActualWidth;
@@ -74,6 +80,94 @@ mixin CandleBinding
         openOff,
         closeOff,
         isRise ? riseBoldPaint : downBoldPaint,
+      );
+
+      if (isDrawPriceMark) {
+        // 记录最大最小偏移量.
+        if (model.high == data.max) {
+          maxHihgOffset = highOff;
+          // paintPriceMark(canvas, highOff, model.high);
+        }
+        if (model.low == data.min) {
+          minLowOffset = lowOff;
+          // paintPriceMark(canvas, lowOff, model.low);
+        }
+      }
+    }
+
+    //最后绘制在蜡烛图中的最大最小价钱标记
+    if (isDrawPriceMark && maxHihgOffset != null && minLowOffset != null) {
+      paintPriceMark(canvas, maxHihgOffset, data.max);
+      paintPriceMark(canvas, minLowOffset, data.min);
+    }
+  }
+
+  /// 绘制蜡烛图上最大最小值价钱标记.
+  void paintPriceMark(
+    Canvas canvas,
+    Offset offset,
+    Decimal val,
+  ) {
+    final flag = offset.dx > canvasWidthHalf ? -1 : 1;
+    Offset endOffset = Offset(
+      offset.dx + priceMarkLineWidth * flag,
+      offset.dy,
+    );
+    canvas.drawLine(
+      offset,
+      endOffset,
+      priceMarkLinePaint,
+    );
+    endOffset = Offset(
+      endOffset.dx + flag * priceMarkMargin,
+      endOffset.dy - priceMarkFontSize / 2,
+    );
+    final text = val.toStringAsFixed(6); // TODO: 格式化
+    canvas.drawText(
+      offset: endOffset,
+      isEndDraw: flag < 0,
+      text: text,
+      style: priceMarkTextStyle,
+    );
+  }
+
+  /// 绘制最新价刻度线与价钱标记
+  /// 1. 价钱标记始终展示在画板最右边.
+  /// 2. 最新价向右移出屏幕后, 刻度线横穿整屏.
+  ///    且展示在指定价钱区间内, 如超出边界, 则停靠在最高最低线上.
+  /// 3. 最新价向左移动后, 刻度线根据最新价蜡烛线平行移动.
+  void paintLastPriceMark(Canvas canvas, Size size) {
+    final data = curCandleData;
+    final candle = data.latest;
+    if (candle == null) {
+      logd('paintLastPriceMark > on data!');
+      return;
+    }
+  }
+
+  /// 绘制X轴刻度数据
+  void printXAisTickData(Canvas canvas, Size size) {
+    final data = curCandleData;
+    final min = data.min;
+    // final tickStep = data.dataHeight.toDouble() / gridCount;
+    final yAxisStep = mainRectHeight / gridCount;
+    final dx = mainRectWidth - tickTextWidth;
+    double dy = 0;
+    for (int i = 1; i <= gridCount; i++) {
+      dy = i * yAxisStep - tickTextFontSize;
+
+      // final val = min.toDouble() + (i * yAxisStep - mainRect.top) / canvasHeight * data.dataHeight.toDouble();
+      final val = min + ((i * yAxisStep - mainRect.top) / dyFactor).d;
+
+      final text = val.toStringAsFixed(6); // TODO: 待数据格式化.
+      canvas.drawText(
+        offset: Offset(dx, dy),
+        text: text,
+        style: tickTextStyle,
+        textWidth: tickTextWidth,
+        textAlign: TextAlign.end,
+        // padding: EdgeInsets.only(right: 10),
+        maxLines: 1,
       );
     }
   }
@@ -112,32 +206,5 @@ mixin CandleBinding
       Offset(mainRectWidth, mainRectHeight),
       paintX,
     );
-  }
-
-  /// 绘制X轴刻度数据
-  void printXAisTickData(Canvas canvas, Size size) {
-    final data = curCandleData;
-    final min = data.min;
-    // final tickStep = data.dataHeight.toDouble() / gridCount;
-    final yAxisStep = mainRectHeight / gridCount;
-    final dx = mainRectWidth - tickTextWidth;
-    double dy = 0;
-    for (int i = 1; i <= gridCount; i++) {
-      dy = i * yAxisStep - tickTextFontSize;
-
-      // final val = min.toDouble() + (i * yAxisStep - mainRect.top) / canvasHeight * data.dataHeight.toDouble();
-      final val = min.toDouble() + (i * yAxisStep - mainRect.top) / dyFactor;
-
-      final text = val.toStringAsFixed(6); // TODO: 待数据格式化.
-      canvas.drawText(
-        offset: Offset(dx, dy),
-        text: text,
-        style: tickTextStyle,
-        textWidth: 100,
-        textAlign: TextAlign.end,
-        // padding: EdgeInsets.only(right: 10),
-        maxLines: 1,
-      );
-    }
   }
 }

@@ -1,4 +1,5 @@
-import 'dart:math';
+import 'dart:ui' as ui;
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
@@ -9,6 +10,12 @@ mixin SettingBinding on KlineBindingBase {
   void initBinding() {
     super.initBinding();
     logd("setting init");
+  }
+
+  /// 一个像素的值.
+  double get pixel {
+    final mediaQuery = MediaQueryData.fromView(ui.window);
+    return 1.0 / mediaQuery.devicePixelRatio;
   }
 
   /// 主绘制区域(蜡烛图)
@@ -41,6 +48,8 @@ mixin SettingBinding on KlineBindingBase {
     return mainRectWidth - mainPadding.left - mainPadding.right;
   }
 
+  double get canvasWidthHalf => canvasWidth / 2;
+
   /// 绘制区域真实高.
   double get canvasHeight {
     return mainRectHeight - mainPadding.top - mainPadding.bottom;
@@ -62,15 +71,13 @@ mixin SettingBinding on KlineBindingBase {
   /// 幅图上下padding
   EdgeInsets subPadding = const EdgeInsets.all(10);
 
-  /// 最大蜡烛宽度
-  // double maxCandleWidth = 20;
-
   /// 单根蜡烛宽度
   double _candleWidth = 7.0;
+  double candleMaxWidth = 20.0; // 最大蜡烛宽度
   double get candleWidth => _candleWidth;
   set candleWidth(double width) {
-    // 限制蜡烛宽度范围[1, 20]
-    _candleWidth = width.clamp(1.0, 20.0);
+    // 限制蜡烛宽度范围[1, candleMaxWidth]
+    _candleWidth = width.clamp(1.0, math.max(7, candleMaxWidth));
   }
 
   /// 蜡烛间距
@@ -82,8 +89,80 @@ mixin SettingBinding on KlineBindingBase {
   /// 绘制区域宽度内, 可绘制的蜡烛数
   int get maxCandleCount => (canvasWidth / candleActualWidth).ceil();
 
-  /// Grid xAxis Count
+  /// CandleBar上涨配置
+  Paint get riseLinePaint => Paint()
+    ..color = Colors.green
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 1;
+  Paint get riseBoldPaint => Paint()
+    ..color = Colors.green
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 7;
+
+  /// CandleBar下跌配置
+  Paint get downLinePaint => Paint()
+    ..color = Colors.red
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 1;
+  Paint get downBoldPaint => Paint()
+    ..color = Colors.red
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 7;
+
+  /// Grid Axis config
+  // Grid Axis Count
   int gridCount = 5;
   int get gridXAxisCount => gridCount + 1; // 平分5份: 上下边线都展示
   int get gridYAxisCount => gridCount - 1; // 平分5份: 左右边线不展示
+  Paint get gridXAxisLinePaint => Paint()
+    ..color = Colors.grey.withOpacity(0.2)
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = pixel;
+  Paint get gridYAxisLinePaint => Paint()
+    ..color = Colors.grey.withOpacity(0.2)
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = pixel;
+
+  /// X轴上的刻度线配置
+  double tickTextFontSize = 10;
+  double tickTextWidth = 100;
+  Color tickTextColor = Colors.grey;
+  double get tickTextHeight => tickTextFontSize;
+  TextStyle get tickTextStyle => TextStyle(
+        fontSize: tickTextFontSize,
+        color: tickTextColor,
+        overflow: TextOverflow.ellipsis,
+      );
+
+  /// 蜡烛图上最大最小价钱刻度线与价钱标记.
+  bool isDrawPriceMark = true;
+  double priceMarkFontSize = 10;
+  double priceMarkTextWidth = 100;
+  Color priceMarkColor = Colors.black;
+  TextStyle get priceMarkTextStyle => TextStyle(
+        fontSize: priceMarkFontSize,
+        color: priceMarkColor,
+        overflow: TextOverflow.ellipsis,
+      );
+  double priceMarkMargin = 1; // 价钱与线之前的间距
+  double priceMarkLineWidth = 20; // 价钱指示线的长度
+  // 价钱指示线的Paint
+  Paint get priceMarkLinePaint => Paint()
+    ..color = priceMarkColor
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 1;
+
+  /// 蜡烛图上的当前价刻度线与价钱标记
+  bool isDrawLastPriceMark = true;
+  double lastPriceMarkFontSize = 10;
+  Color lastPriceMarkColor = Colors.black;
+  TextStyle get lastPriceMarkTextStyle => TextStyle(
+        fontSize: lastPriceMarkFontSize,
+        color: lastPriceMarkColor,
+        overflow: TextOverflow.ellipsis,
+      );
+  Paint get lastPriceMarkLinePaint => Paint()
+    ..color = lastPriceMarkColor
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 1;
 }
