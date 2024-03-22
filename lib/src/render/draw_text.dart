@@ -2,15 +2,21 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 enum DrawDirection {
-  /// The draw flows from right to left.
-  rtl,
-
   /// The draw flows from left to right.
-  ltr,
+  ltr(-1),
+
+  /// The draw flows from right to left.
+  rtl(1);
+
+  const DrawDirection(this.flag);
+
+  /// 基于Offset.dx的计算系数flag.
+  final int flag;
 }
 
 extension DrawTextExt on Canvas {
   /// 绘制文本
+  ///
   Size drawText({
     ///绘制启始坐标位置
     required Offset offset,
@@ -18,8 +24,12 @@ extension DrawTextExt on Canvas {
     /// X轴上的绘制方向: 以offset为原点, 向左向进制绘制.
     DrawDirection drawDirection = DrawDirection.ltr,
 
+    /// 文本区域的边界margin, 主要场景是在文本内容靠近绘制边界时, 增加一定的margin方便展示.
+    double drawMargin = 0,
+
     // TextDirection
-    /// 画布总宽度,
+    /// 画布总宽度
+    /// 绘制方向是DrawDirection.ltr, 建议提供. 方向是DrawDirection.rtl时, 无需提供.
     /// 注: 如果提供, 在向offset右边绘制时, 检测超出画板右边绘制区域时, 会主动向左调整offset偏移量, 以保证内容区域完全展示.
     double? canvasWidth,
 
@@ -88,6 +98,14 @@ extension DrawTextExt on Canvas {
     final isDrawBg = backgroundColor.alpha != 0;
     final isDrawBorder = borderColor.alpha != 0 && borderWidth > 0;
     if (!padding.collapsedSize.isEmpty || isDrawBg || isDrawBorder) {
+      if (drawMargin > 0) {
+        offset = Offset(
+          offset.dx + drawDirection.flag * drawMargin,
+          offset.dy,
+        );
+        drawMargin = 0;
+      }
+
       final Path path = Path();
       path.addRRect(
         RRect.fromLTRBR(
@@ -120,6 +138,13 @@ extension DrawTextExt on Canvas {
       }
 
       offset += Offset(padding.left, padding.top);
+    }
+
+    if (drawMargin > 0) {
+      offset = Offset(
+        offset.dx + drawDirection.flag * drawMargin,
+        offset.dy,
+      );
     }
 
     textPainter.paint(this, offset);

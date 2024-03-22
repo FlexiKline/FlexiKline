@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 import 'dart:math' as math;
 
+import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 
 import 'binding_base.dart';
@@ -32,13 +33,15 @@ mixin SettingBinding on KlineBindingBase {
   }
 
   ///
-  ///  --------------------------- mainRect.top
-  ///   |                 ---------- mainPadding.top
-  ///   |                   |
-  ///   |mainRectHeight     | canvasHeight
-  ///   |                   |
-  ///   |canvasBaseHeight ---------- mainPadding.bottom
-  ///  --------------------------- mainRect.bottom
+  ///   |-------------mainRect.top----------------------------|
+  ///   |------------------mainPadding.top--------------------|
+  ///   |mainPadding.left---+----------------mainPadding.right|
+  ///   |   |---------------+canvasWidth------------------|   |
+  ///   |-------------------+------------------canvasRight|   |
+  ///   |mainRectHeight     |canvasHeight                     |
+  ///   |                   |                                 |
+  ///   |canvasBottom------mainPadding.bottom-----------------|
+  ///   |-------------mainRect.bottom-------------------------|
   /// 主绘制区域宽高
   double get mainRectWidth => mainRect.width;
   double get mainRectHeight => mainRect.height;
@@ -164,6 +167,7 @@ mixin SettingBinding on KlineBindingBase {
         fontSize: lastPriceMarkFontSize,
         color: lastPriceMarkColor,
         overflow: TextOverflow.ellipsis,
+        textBaseline: TextBaseline.alphabetic,
       );
   Paint get lastPriceMarkLinePaint => Paint()
     ..color = lastPriceMarkColor
@@ -171,10 +175,16 @@ mixin SettingBinding on KlineBindingBase {
     ..strokeWidth = 1;
   // 最新价文本区域的背景相关配置.
   Color lastPriceMarkRectBackgroundColor = Colors.white;
-  double lastPriceMarkRectRadius = 2;
+  double lastPriceMarkRectBorderRadius = 3;
+  double lastPriceMarkRectBorderWidth = 0.5;
+  double lastPriceMarkRectMargin = 1;
+  Color lastPriceMarkRectBorderColor = Colors.black;
   EdgeInsets lastPriceMarkRectPadding = const EdgeInsets.symmetric(
     horizontal: 2,
     vertical: 1,
   );
   bool isShowLastPriceUpdateTime = true; // 是否在最新价下面展示下次更新时间.
+
+  /// 价钱格式化函数
+  String Function(String instId, Decimal val, {int? precision})? priceFormat;
 }

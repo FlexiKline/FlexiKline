@@ -47,7 +47,7 @@ class PathCustomPainter extends CustomPainter {
     debugPrint(
       'zp::: paint>>> size$size,  screenWidth:${ScreenUtil().screenWidth}',
     );
-    drawText(canvas);
+    drawText3(canvas);
   }
 
   @override
@@ -57,10 +57,11 @@ class PathCustomPainter extends CustomPainter {
 
   // 向左绘制, 超过左边界
   void drawText3(Canvas canvas) {
-    final offset = Offset(20, 100);
+    final offset = Offset(50, 100);
     canvas.drawText(
       offset: offset,
       drawDirection: DrawDirection.rtl,
+      // drawMargin: 20,
       canvasWidth: ScreenUtil().screenWidth,
       text: '你好123456789',
       style: TextStyle(
@@ -132,6 +133,7 @@ class PathCustomPainter extends CustomPainter {
     final size = canvas.drawText(
       offset: offset,
       drawDirection: DrawDirection.ltr,
+      // drawMargin: 20,
       canvasWidth: ScreenUtil().screenWidth,
       text: '你好123456',
       style: TextStyle(

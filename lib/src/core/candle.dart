@@ -122,7 +122,8 @@ mixin CandleBinding
       endOffset.dx + flag * priceMarkMargin,
       endOffset.dy - priceMarkFontSize / 2,
     );
-    final text = val.toStringAsFixed(6); // TODO: 格式化
+
+    final text = formatPrice(val);
     canvas.drawText(
       offset: endOffset,
       drawDirection: flag < 0 ? DrawDirection.rtl : DrawDirection.ltr,
@@ -154,6 +155,23 @@ mixin CandleBinding
         dxOffset,
         canvasBottom - (model.close - data.min).toDouble() * dyFactor,
       );
+
+      final text = formatPrice(model.close);
+      canvas.drawText(
+        offset: closeOff,
+        drawDirection: DrawDirection.ltr,
+        drawMargin: lastPriceMarkRectMargin,
+        canvasWidth: canvasRight,
+        text: text,
+        style: lastPriceMarkTextStyle,
+        textAlign: TextAlign.end,
+        // textWidthBasis: TextWidthBasis.longestLine,
+        padding: lastPriceMarkRectPadding,
+        backgroundColor: lastPriceMarkRectBackgroundColor,
+        borderRadius: lastPriceMarkRectBorderRadius,
+        borderWidth: lastPriceMarkRectBorderWidth,
+        borderColor: lastPriceMarkRectBorderColor,
+      );
     } else {
       // 最新价已移出画板
     }
@@ -171,7 +189,7 @@ mixin CandleBinding
 
       // final val = min.toDouble() + (i * yAxisStep - mainRect.top) / canvasHeight * data.dataHeight.toDouble();
       final val = min + ((i * yAxisStep - mainRect.top) / dyFactor).d;
-      final text = val.toStringAsFixed(6); // TODO: 待数据格式化.
+      final text = formatPrice(val);
 
       canvas.drawText(
         offset: Offset(dx, dy),
