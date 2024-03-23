@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../kline_controller.dart';
+import 'price_order_widget.dart';
 
 class KlineWidget extends StatefulWidget {
   const KlineWidget({super.key, required this.controller});
@@ -17,6 +18,11 @@ class _KlineWidgetState extends State<KlineWidget> {
   @override
   void initState() {
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -41,6 +47,9 @@ class _KlineWidgetState extends State<KlineWidget> {
               ),
               isComplex: true,
             ),
+          ),
+          PriceOrderWidget(
+            controller: widget.controller,
           ),
         ],
       ),

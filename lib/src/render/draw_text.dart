@@ -3,15 +3,12 @@ import 'package:flutter/material.dart';
 
 enum DrawDirection {
   /// The draw flows from left to right.
-  ltr(-1),
+  ltr,
 
   /// The draw flows from right to left.
-  rtl(1);
+  rtl;
 
-  const DrawDirection(this.flag);
-
-  /// 基于Offset.dx的计算系数flag.
-  final int flag;
+  bool get isltr => this == ltr;
 }
 
 extension DrawTextExt on Canvas {
@@ -24,14 +21,15 @@ extension DrawTextExt on Canvas {
     /// X轴上的绘制方向: 以offset为原点, 向左向进制绘制.
     DrawDirection drawDirection = DrawDirection.ltr,
 
-    /// 文本区域的边界margin, 主要场景是在文本内容靠近绘制边界时, 增加一定的margin方便展示.
-    double drawMargin = 0,
+    /// 文本区域的边界margin, 在贴近绘制边界时, 增加一定的margin友好展示.
+    // double drawMargin = 0,
+    EdgeInsets? margin,
 
-    // TextDirection
-    /// 画布总宽度
-    /// 绘制方向是DrawDirection.ltr, 建议提供. 方向是DrawDirection.rtl时, 无需提供.
-    /// 注: 如果提供, 在向offset右边绘制时, 检测超出画板右边绘制区域时, 会主动向左调整offset偏移量, 以保证内容区域完全展示.
-    double? canvasWidth,
+    /// 可绘制区域大小
+    /// 主要用于边界矫正, 当前超出边界区域时, 会主动反向调整, 以保证内容区域完全展示. 如为null: 则不做边界矫正.
+    /// 1. 在向offset右边绘制时, 检测超出画板右边绘制区域时, 会主动向左调整offset偏移量, 以保证内容区域完全展示.
+    /// 2. 在向offset下边绘制时, 检测已超过底部绘制区域时, 会主动向上调整offset偏移量, 以保证内容区域完全展示.
+    Size? drawableSize,
 
     /// 文本,样式设置. (注: text与children必须设置一个, 否则不绘制)
     String? text,
@@ -46,14 +44,14 @@ extension DrawTextExt on Canvas {
     double minWidth = 0.0,
     double maxWidth = double.infinity,
 
-    // 文本内容的背景区域设置
+    /// 文本内容的背景区域设置
     Color backgroundColor = Colors.transparent,
     double borderRadius = 0,
     EdgeInsets padding = EdgeInsets.zero,
     Color borderColor = Colors.transparent,
     double borderWidth = 0,
   }) {
-    if (text?.trim().isNotEmpty != true && children?.isNotEmpty != true) {
+    if (text?.isNotEmpty != true && children?.isNotEmpty != true) {
       return Size.zero;
     }
 
@@ -81,29 +79,43 @@ extension DrawTextExt on Canvas {
       padding.vertical,
     );
 
+    /// 根据绘制方向计算并矫正X轴上的偏移量.
     if (drawDirection == DrawDirection.rtl) {
       offset = Offset(
         math.max(0, offset.dx - paintSize.width),
-        offset.dy,
+        math.max(0, offset.dy),
       );
-    } else if (canvasWidth != null &&
-        offset.dx + paintSize.width > canvasWidth) {
+    } else if (drawableSize != null &&
+        offset.dx + paintSize.width > drawableSize.width) {
       // 如果内容区域超出画布右边界. 向左调整offset
       offset = Offset(
-        math.max(0, canvasWidth - paintSize.width),
-        offset.dy,
+        math.max(0, drawableSize.width - paintSize.width),
+        math.max(0, offset.dy),
       );
+    }
+
+    // 矫正Y轴上的边界.
+    bool isUpward = true;
+    if (drawableSize != null &&
+        offset.dy + paintSize.height > drawableSize.height) {
+      offset = Offset(
+        math.max(0, offset.dx),
+        drawableSize.height - paintSize.height,
+      );
+      isUpward = false;
     }
 
     final isDrawBg = backgroundColor.alpha != 0;
     final isDrawBorder = borderColor.alpha != 0 && borderWidth > 0;
     if (!padding.collapsedSize.isEmpty || isDrawBg || isDrawBorder) {
-      if (drawMargin > 0) {
+      if (margin != null && margin.isNonNegative) {
+        final x = drawDirection.isltr ? -margin.right : margin.left;
+        final y = isUpward ? margin.bottom : -margin.top;
         offset = Offset(
-          offset.dx + drawDirection.flag * drawMargin,
-          offset.dy,
+          offset.dx + x,
+          offset.dy + y,
         );
-        drawMargin = 0;
+        margin = null;
       }
 
       final Path path = Path();
@@ -140,10 +152,12 @@ extension DrawTextExt on Canvas {
       offset += Offset(padding.left, padding.top);
     }
 
-    if (drawMargin > 0) {
+    if (margin != null && margin.isNonNegative) {
+      final x = drawDirection.isltr ? -margin.right : margin.left;
+      final y = isUpward ? -margin.bottom : margin.top;
       offset = Offset(
-        offset.dx + drawDirection.flag * drawMargin,
-        offset.dy,
+        offset.dx + x,
+        offset.dy + y,
       );
     }
 

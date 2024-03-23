@@ -10,7 +10,13 @@ mixin SettingBinding on KlineBindingBase {
   @override
   void initBinding() {
     super.initBinding();
-    logd("setting init");
+    logd("init setting");
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    logd("dispose setting");
   }
 
   /// 一个像素的值.
@@ -32,8 +38,9 @@ mixin SettingBinding on KlineBindingBase {
     );
   }
 
-  ///
-  ///   |-------------mainRect.top----------------------------|
+  ///  Canvas 布局参数图
+  ///                      mainRectWidth
+  ///   |------------------mainRect.top-----------------------|
   ///   |------------------mainPadding.top--------------------|
   ///   |mainPadding.left---+----------------mainPadding.right|
   ///   |   |---------------+canvasWidth------------------|   |
@@ -41,28 +48,13 @@ mixin SettingBinding on KlineBindingBase {
   ///   |mainRectHeight     |canvasHeight                     |
   ///   |                   |                                 |
   ///   |canvasBottom------mainPadding.bottom-----------------|
-  ///   |-------------mainRect.bottom-------------------------|
+  ///   |------------------mainRect.bottom--------------------|
   /// 主绘制区域宽高
   double get mainRectWidth => mainRect.width;
   double get mainRectHeight => mainRect.height;
 
-  /// 绘制区域真实宽.
-  double get canvasWidth {
-    return mainRectWidth - mainPadding.left - mainPadding.right;
-  }
-
-  double get canvasWidthHalf => canvasWidth / 2;
-
-  /// 绘制区域真实高.
-  double get canvasHeight {
-    return mainRectHeight - mainPadding.top - mainPadding.bottom;
-  }
-
-  /// 绘制区域右边界值
-  double get canvasRight => mainRectWidth - mainPadding.right;
-
-  /// 绘制区域下边界值
-  double get canvasBottom => mainRectHeight - mainPadding.bottom;
+  /// 主绘制区域的大小
+  Size get drawableSize => Size(mainRectWidth, mainRectHeight);
 
   /// 主图上下padding
   EdgeInsets mainPadding = const EdgeInsets.only(
@@ -70,6 +62,27 @@ mixin SettingBinding on KlineBindingBase {
     bottom: 10,
     // right: 20,
   );
+
+  /// X轴绘制区域真实宽.
+  double get canvasWidth => mainRectWidth - mainPadding.horizontal;
+
+  /// X轴上绘制区域半值.
+  double get canvasWidthHalf => canvasWidth / 2;
+
+  /// Y轴绘制区域真实高.
+  double get canvasHeight => mainRectHeight - mainPadding.vertical;
+
+  /// X轴主绘制区域的左边界值
+  double get canvasLeft => mainPadding.left;
+
+  /// X轴主绘制区域右边界值
+  double get canvasRight => mainRectWidth - mainPadding.right;
+
+  /// Y轴主绘制区域上边界值
+  double get canvasTop => mainPadding.top;
+
+  /// Y轴主绘制区域下边界值
+  double get canvasBottom => mainRectHeight - mainPadding.bottom;
 
   /// 幅图上下padding
   EdgeInsets subPadding = const EdgeInsets.all(10);
@@ -88,6 +101,9 @@ mixin SettingBinding on KlineBindingBase {
 
   /// 单根蜡烛所占据实际宽度
   double get candleActualWidth => candleWidth + candleMargin;
+
+  /// 单根蜡烛的一半
+  double get candleWidthHalf => candleActualWidth / 2;
 
   /// 绘制区域宽度内, 可绘制的蜡烛数
   int get maxCandleCount => (canvasWidth / candleActualWidth).ceil();
@@ -140,7 +156,7 @@ mixin SettingBinding on KlineBindingBase {
         overflow: TextOverflow.ellipsis,
       );
 
-  /// 蜡烛图上最大最小价钱刻度线与价钱标记.
+  /// 最大最小价钱刻度线与价钱标记.
   bool isDrawPriceMark = true;
   double priceMarkFontSize = 10;
   double priceMarkTextWidth = 100;
@@ -158,32 +174,43 @@ mixin SettingBinding on KlineBindingBase {
     ..style = PaintingStyle.stroke
     ..strokeWidth = 1;
 
-  /// 蜡烛图上的当前价刻度线与价钱标记
+  /// 最新价文本区域配置
   bool isDrawLastPriceMark = true;
-  double lastPriceMarkFontSize = 10;
-  double lastPriceMarkTextWidth = 100;
-  Color lastPriceMarkColor = Colors.black;
-  TextStyle get lastPriceMarkTextStyle => TextStyle(
-        fontSize: lastPriceMarkFontSize,
-        color: lastPriceMarkColor,
+  double lastPriceFontSize = 10;
+  double lastPriceTextWidth = 100;
+  Color lastPriceColor = Colors.black;
+  TextStyle get lastPriceTextStyle => TextStyle(
+        fontSize: lastPriceFontSize,
+        color: lastPriceColor,
         overflow: TextOverflow.ellipsis,
         textBaseline: TextBaseline.alphabetic,
       );
-  Paint get lastPriceMarkLinePaint => Paint()
-    ..color = lastPriceMarkColor
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = 1;
-  // 最新价文本区域的背景相关配置.
-  Color lastPriceMarkRectBackgroundColor = Colors.white;
-  double lastPriceMarkRectBorderRadius = 3;
-  double lastPriceMarkRectBorderWidth = 0.5;
-  double lastPriceMarkRectMargin = 1;
-  Color lastPriceMarkRectBorderColor = Colors.black;
-  EdgeInsets lastPriceMarkRectPadding = const EdgeInsets.symmetric(
+
+  /// 是否在最新价下面展示下次更新时间.
+  bool showLastPriceUpdateTime = true;
+
+  /// 最新价文本区域的背景相关配置.
+  Color lastPriceRectBackgroundColor = Colors.white;
+  double lastPriceRectBorderRadius = 2;
+  double lastPriceRectBorderWidth = 0.5;
+  Color lastPriceRectBorderColor = Colors.black;
+  EdgeInsets lastPriceRectMargin = const EdgeInsets.symmetric(
+    horizontal: 1,
+    // vertical: 1,
+  );
+  EdgeInsets lastPriceRectPadding = const EdgeInsets.symmetric(
     horizontal: 2,
     vertical: 1,
   );
-  bool isShowLastPriceUpdateTime = true; // 是否在最新价下面展示下次更新时间.
+
+  /// 最新价刻度线配置
+  Color lastPriceMarkLineColor = Colors.black;
+  double lastPriceMarkLineWidth = 1;
+  Paint get lastPriceMarkLinePaint => Paint()
+    ..color = lastPriceMarkLineColor
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = lastPriceMarkLineWidth;
+  List<double> lastPriceMarkLineDashes = const [3, 3];
 
   /// 价钱格式化函数
   String Function(String instId, Decimal val, {int? precision})? priceFormat;

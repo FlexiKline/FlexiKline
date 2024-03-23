@@ -1,11 +1,12 @@
 import 'package:decimal/decimal.dart';
-import 'package:flutter/material.dart';
 
 import '../model/export.dart';
 import 'binding_base.dart';
+import 'candle.dart';
+import 'price_order.dart';
 import 'setting.dart';
 
-abstract interface class IDataSourceMgr {
+abstract interface class IDataSource {
   void setCandleData(
     CandleReq req,
     List<CandleModel> list, {
@@ -15,17 +16,23 @@ abstract interface class IDataSourceMgr {
   void appendCandleData(CandleReq req, List<CandleModel> list);
 }
 
-abstract interface class IDataScopeMgr {
+abstract interface class IDataScope {
   void moveCandle(int leftTs, int rightTs);
 }
 
-mixin DataMgrBinding
+mixin DataSourceBinding
     on KlineBindingBase, SettingBinding
-    implements IDataSourceMgr, IDataScopeMgr {
+    implements IDataSource, IDataScope, IPriceOrder, ICandlePainter {
   @override
   void initBinding() {
     super.initBinding();
-    logd('dataMgr init');
+    logd('init dataSource');
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    logd('dispose dataSource');
   }
 
   final Map<String, CandleData> _candleDataCache = {};
@@ -39,9 +46,9 @@ mixin DataMgrBinding
 
   String get curDataKey => curCandleData.key;
 
-  /// 触发重绘蜡烛线.
-  void markRepainCandle() => repaintCandle.value++;
-  ValueNotifier<int> repaintCandle = ValueNotifier(0);
+  double get dyFactor {
+    return canvasHeight / curCandleData.dataHeight.toDouble();
+  }
 
   @override
   void setCandleData(
@@ -54,7 +61,8 @@ mixin DataMgrBinding
     _candleDataCache[req.key] = data;
     if (curCandleData.invalid || req.key == curDataKey) {
       curCandleData = data;
-      _calcuateCandleDataDrawParams(reset: true);
+      _calculateCandleDataDrawParams(reset: true);
+      startLastPriceCountDownTimer();
     }
   }
 
@@ -64,22 +72,23 @@ mixin DataMgrBinding
     data.mergeCandleList(list);
     _candleDataCache[req.key] = data;
     if (req.key == curDataKey) {
-      _calcuateCandleDataDrawParams();
+      _calculateCandleDataDrawParams();
+      checkAndRestartLastPriceCountDownTimer();
     }
   }
 
   /// 计算绘制所需要的参数.
-  void _calcuateCandleDataDrawParams({
+  void _calculateCandleDataDrawParams({
     bool reset = false, // 是否从头开始绘制.
   }) {
     if (reset) curCandleData.reset();
-    curCandleData.calcuateDrawParams(
+    curCandleData.calculateDrawParams(
       maxCandleCount,
       candleActualWidth,
       canvasWidth, // 暂无用
     );
 
-    markRepainCandle();
+    markRepaintCandle();
   }
 
   /// 价钱格式化函数
@@ -94,6 +103,28 @@ mixin DataMgrBinding
       );
     }
     return val.toStringAsFixed(p);
+  }
+
+  /// 计算时间差, 并格式化展示
+  /// 1. 超过1天展示 "md nh"
+  /// 2. 小于一天展示 "hh:MM:ss"
+  /// 3. 小天一小时展示 "MM:ss"
+  String? calculateTimeDiff(DateTime nextUpdateDateTime) {
+    final timeLag = nextUpdateDateTime.difference(DateTime.now());
+    if (timeLag.isNegative) {
+      logd(
+        'calculateTimeDiff > next:$nextUpdateDateTime - now:${DateTime.now()} = $timeLag',
+      );
+      return null;
+    }
+
+    final dayLag = timeLag.inDays;
+    if (dayLag >= 1) {
+      final hoursLag = (timeLag.inHours - dayLag * 24).clamp(0, 23);
+      return '${dayLag}h ${hoursLag}h';
+    } else {
+      return timeLag.toString().substring(0, 8);
+    }
   }
 
   @override

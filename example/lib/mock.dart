@@ -72,14 +72,17 @@ Future<List<CandleModel>> appendCandleList({
 Future<List<CandleModel>> genCustomCandleList({
   int count = 500,
 }) async {
-  DateTime dateTime = DateTime.now();
+  DateTime dateTime = DateTime.now().add(Duration(
+    hours: -10,
+    minutes: -20,
+  ));
   return <CandleModel>[
     CandleModel.fromJson({
       "timestamp": dateTime.add(Duration(days: 0)).millisecondsSinceEpoch,
       "high": 120,
       "open": 100,
-      "close": 60,
-      "low": 20,
+      "close": 320,
+      "low": 0,
       "vol": 800,
     }),
     CandleModel.fromJson({
@@ -91,7 +94,7 @@ Future<List<CandleModel>> genCustomCandleList({
       "vol": 900,
     }),
     CandleModel.fromJson({
-      "timestamp": dateTime.add(Duration(days: -1)).millisecondsSinceEpoch,
+      "timestamp": dateTime.add(Duration(days: -2)).millisecondsSinceEpoch,
       "high": 320,
       "open": 200,
       "close": 100,
@@ -99,7 +102,7 @@ Future<List<CandleModel>> genCustomCandleList({
       "vol": 900,
     }),
     CandleModel.fromJson({
-      "timestamp": dateTime.add(Duration(days: -1)).millisecondsSinceEpoch,
+      "timestamp": dateTime.add(Duration(days: -3)).millisecondsSinceEpoch,
       "high": 140,
       "open": 90,
       "close": 120,
@@ -107,19 +110,19 @@ Future<List<CandleModel>> genCustomCandleList({
       "vol": 900,
     }),
     CandleModel.fromJson({
-      "timestamp": dateTime.add(Duration(days: -1)).millisecondsSinceEpoch,
+      "timestamp": dateTime.add(Duration(days: -4)).millisecondsSinceEpoch,
       "high": 200,
       "open": 120,
-      "close": 10,
-      "low": 0,
+      "close": 20,
+      "low": 20,
       "vol": 900,
     }),
     CandleModel.fromJson({
-      "timestamp": dateTime.add(Duration(days: -1)).millisecondsSinceEpoch,
+      "timestamp": dateTime.add(Duration(days: -5)).millisecondsSinceEpoch,
       "high": 130,
       "open": 20,
       "close": 110,
-      "low": -20,
+      "low": 10,
       "vol": 900,
     }),
   ];

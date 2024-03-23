@@ -45,19 +45,17 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   late final KlineController controller;
-  final CandleReq req = CandleReq(instId: 'BTC-USDT', bar: '1d');
+  final CandleReq req = CandleReq(instId: 'BTC-USDT', bar: TimeBar.D1.bar);
   @override
   void initState() {
     super.initState();
     controller = KlineController();
-    controller
-      ..setMainSize(Size(
-        ScreenUtil().screenWidth,
-        ScreenUtil().screenWidth,
-      ))
-      ..candleWidth = 7;
+    controller.setMainSize(Size(
+      ScreenUtil().screenWidth,
+      ScreenUtil().screenWidth,
+    ));
 
-    genRandomCandleList(count: 100).then((list) {
+    genCustomCandleList(count: 100).then((list) {
       controller.setCandleData(req, list);
     });
   }

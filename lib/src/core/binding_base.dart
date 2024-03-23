@@ -14,7 +14,13 @@ abstract class KlineBindingBase with KlineLog {
   @protected
   @mustCallSuper
   void initBinding() {
-    logd("base init");
+    logd("init base");
+  }
+
+  @protected
+  @mustCallSuper
+  void dispose() {
+    logd("dispose base");
   }
 
   @protected

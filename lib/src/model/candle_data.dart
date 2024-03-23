@@ -101,7 +101,7 @@ class CandleData with KlineLog {
   }
 
   /// 计算当前绘制区域的最大最小值
-  void calcuateDrawParams(
+  void calculateDrawParams(
     int maxCandleCount,
     double candleWidth,
     double canvasWidth, // 暂无用

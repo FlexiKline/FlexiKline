@@ -14,6 +14,11 @@ class TestBody extends StatefulWidget {
   State<TestBody> createState() => _TestBodyState();
 }
 
+Size get drawableSize => Size(
+      ScreenUtil().screenWidth,
+      ScreenUtil().screenWidth * 2 / 3,
+    );
+
 class _TestBodyState extends State<TestBody> {
   @override
   Widget build(BuildContext context) {
@@ -24,10 +29,7 @@ class _TestBodyState extends State<TestBody> {
       color: Colors.grey,
       child: RepaintBoundary(
         child: CustomPaint(
-          size: Size(
-            ScreenUtil().screenWidth,
-            ScreenUtil().screenWidth * 2 / 3,
-          ),
+          size: drawableSize,
           painter: PathCustomPainter(value: valueNotifier),
           isComplex: true,
         ),
@@ -47,7 +49,7 @@ class PathCustomPainter extends CustomPainter {
     debugPrint(
       'zp::: paint>>> size$size,  screenWidth:${ScreenUtil().screenWidth}',
     );
-    drawText3(canvas);
+    drawText(canvas);
   }
 
   @override
@@ -61,8 +63,8 @@ class PathCustomPainter extends CustomPainter {
     canvas.drawText(
       offset: offset,
       drawDirection: DrawDirection.rtl,
-      // drawMargin: 20,
-      canvasWidth: ScreenUtil().screenWidth,
+      margin: EdgeInsets.symmetric(horizontal: 0),
+      drawableSize: drawableSize,
       text: '你好123456789',
       style: TextStyle(
         fontSize: 20,
@@ -133,8 +135,8 @@ class PathCustomPainter extends CustomPainter {
     final size = canvas.drawText(
       offset: offset,
       drawDirection: DrawDirection.ltr,
-      // drawMargin: 20,
-      canvasWidth: ScreenUtil().screenWidth,
+      margin: EdgeInsets.symmetric(horizontal: 0),
+      drawableSize: drawableSize,
       text: '你好123456',
       style: TextStyle(
         fontSize: 20,

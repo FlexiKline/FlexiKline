@@ -9,6 +9,12 @@ mixin ConfigBinding on KlineBindingBase, SettingBinding {
   @override
   void initBinding() {
     super.initBinding();
-    logd("config init");
+    logd("init config");
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    logd("dispose config");
   }
 }
