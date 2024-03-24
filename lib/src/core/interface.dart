@@ -2,6 +2,7 @@ import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 
 import '../model/export.dart';
+import 'candle_data.dart';
 
 ///// Gesture  ////
 /// 点击
@@ -27,6 +28,7 @@ abstract interface class ILongPressGesture {
 abstract interface class IGestureData {
   void move(GestureData data);
   void scale(GestureData data);
+  void longMove(GestureData data);
 }
 
 //////// DataSource ///////

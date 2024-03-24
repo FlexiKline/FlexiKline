@@ -29,7 +29,8 @@ mixin GestureBinding on KlineBindingBase
   AnimationController? _animationController;
 
   GestureData? _panScaleData; // 移动缩放监听数据
-  GestureData? longData; // 长按监听数据
+  GestureData? _longData; // 长按监听数据
+  GestureData? _tapData;
 
   ///
   /// 点击
@@ -37,6 +38,12 @@ mixin GestureBinding on KlineBindingBase
   @override
   void onTapUp(TapUpDetails details) {
     logd("onTapUp details:$details");
+    _panScaleData?.end();
+    _panScaleData = null;
+    _longData?.end();
+    _longData = null;
+
+    _tapData = GestureData.tap(details.localPosition);
   }
 
   ///
@@ -46,6 +53,10 @@ mixin GestureBinding on KlineBindingBase
   void onScaleStart(ScaleStartDetails details) {
     logd("onScaleStart localFocalPoint:${details.localFocalPoint} >>>>");
 
+    _tapData?.end();
+    _tapData = null;
+    _longData?.end();
+    _longData = null;
     _panScaleData = GestureData.pan(details.localFocalPoint);
   }
 
@@ -58,13 +69,12 @@ mixin GestureBinding on KlineBindingBase
       return;
     }
 
-    final data = _panScaleData!;
-    data.update(details.localFocalPoint, scale: details.scale);
+    _panScaleData!.update(details.localFocalPoint, scale: details.scale);
 
-    if (data.isScale) {
-      scale(data);
+    if (_panScaleData!.isScale) {
+      scale(_panScaleData!);
     } else {
-      move(data);
+      move(_panScaleData!);
     }
   }
 
@@ -86,15 +96,30 @@ mixin GestureBinding on KlineBindingBase
   @override
   void onLongPressStart(LongPressStartDetails details) {
     logd("onLongPressStart details:$details");
+    _tapData?.end();
+    _tapData = null;
+    _panScaleData?.end();
+    _panScaleData = null;
+    _longData = GestureData.long(details.localPosition);
   }
 
   @override
   void onLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
-    logd("onLongPressMoveUpdate details:$details");
+    if (_longData == null) {
+      logd("onLongPressMoveUpdate details:$details");
+      return;
+    }
+    _longData!.update(details.localPosition);
+    longMove(_longData!);
   }
 
   @override
   void onLongPressEnd(LongPressEndDetails details) {
-    logd("onLongPressEnd details:$details");
+    if (_longData == null) {
+      logd("onLongPressEnd details:$details");
+      return;
+    }
+    _longData?.end();
+    _longData = null;
   }
 }

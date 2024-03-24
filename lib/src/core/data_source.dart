@@ -3,8 +3,8 @@ import 'package:decimal/decimal.dart';
 import '../model/export.dart';
 import 'binding_base.dart';
 import 'candle.dart';
+import 'candle_data.dart';
 import 'interface.dart';
-import 'price_order.dart';
 import 'setting.dart';
 
 mixin DataSourceBinding
@@ -38,6 +38,10 @@ mixin DataSourceBinding
   }
 
   String get curDataKey => curCandleData.key;
+
+  /// 画板的最大宽度
+  double get maxCanvasWidth => curCandleData.list.length * candleActualWidth;
+
 
   @override
   double get dyFactor {
@@ -124,8 +128,35 @@ mixin DataSourceBinding
   }
 
   @override
-  void move(GestureData data) {}
+  void move(GestureData data) {
+    if (!data.moved) return;
+    final dxDelta = data.dxDelta;
+    final dyDelta = data.dyDelta;
+    logd('move dxDelta:$dxDelta, dyDelta:$dyDelta');
+
+    /// 处理X轴移动
+    final distance = dxDelta * 3; // 放大3倍.
+    if (distance.abs().ceil() < candleWidth) {
+      logd('move small offset!');
+      return;
+    }
+    final count = (distance / candleActualWidth).ceil();
+    final ret = curCandleData.moveCandle(
+      count,
+      maxCandleCount: maxCandleCount,
+    );
+    if (ret) {
+      markRepaintCandle();
+    }
+  }
 
   @override
-  void scale(GestureData data) {}
+  void scale(GestureData data) {
+    if (!data.scaled) return;
+  }
+
+  @override
+  void longMove(GestureData data) {
+    if (!data.moved) return;
+  }
 }

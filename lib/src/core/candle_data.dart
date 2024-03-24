@@ -3,8 +3,7 @@ import 'dart:math' as math;
 import 'package:decimal/decimal.dart';
 import 'package:kline/src/utils/log.dart';
 
-import 'candle_model/candle_model.dart';
-import 'candle_req/candle_req.dart';
+import '../model/export.dart';
 
 class CandleData with KlineLog {
   @override
@@ -68,6 +67,21 @@ class CandleData with KlineLog {
     end = 0;
   }
 
+  // 移动count根蜡烛. 注: 小于0: 向左滑动; 大于0: 向右滑动
+  bool moveCandle(int count, {required int maxCandleCount}) {
+    if (count == 0) return false;
+    start = (start + count).clamp(
+      0,
+      math.min(0, list.length - maxCandleCount),
+    );
+    end = (start + maxCandleCount + count).clamp(
+      end,
+      math.min(end + count, list.length),
+    );
+    calculateMaxmin();
+    return true;
+  }
+
   /// 确保绘制区域的startEnd值已初始化并有效
   void ensureDrawScope(
     int maxCandleCount,
@@ -114,6 +128,12 @@ class CandleData with KlineLog {
       canvasWidth,
     );
 
+    calculateMaxmin();
+
+    debugPrintDrawParams('after');
+  }
+
+  void calculateMaxmin() {
     CandleModel m = list[start];
     max = m.high;
     min = m.low;
@@ -132,8 +152,6 @@ class CandleData with KlineLog {
       max = m.high > max ? m.high : max;
       min = m.low < min ? m.low : min;
     }
-
-    debugPrintDrawParams('after');
   }
 
   /// 合并newList到list
