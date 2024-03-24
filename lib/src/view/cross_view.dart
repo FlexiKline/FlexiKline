@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../kline_controller.dart';
 
-class PriceOrderView extends StatelessWidget {
-  const PriceOrderView({
+class CrossView extends StatelessWidget {
+  const CrossView({
     super.key,
     required this.controller,
   });
@@ -18,7 +18,7 @@ class PriceOrderView extends StatelessWidget {
           controller.mainRectWidth,
           controller.mainRectHeight,
         ),
-        painter: PriceOrderPainter(
+        painter: CrossPainter(
           controller: controller,
         ),
         isComplex: true,
@@ -27,8 +27,8 @@ class PriceOrderView extends StatelessWidget {
   }
 }
 
-class PriceOrderPainter extends CustomPainter {
-  PriceOrderPainter({
+class CrossPainter extends CustomPainter {
+  CrossPainter({
     required this.controller,
   }) : super(repaint: controller.repaintPriceOrder);
 
@@ -36,7 +36,7 @@ class PriceOrderPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    controller.paintPriceOrder(canvas, size);
+    controller.paintCross(canvas, size);
   }
 
   @override

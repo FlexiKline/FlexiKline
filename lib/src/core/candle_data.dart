@@ -9,6 +9,19 @@ class CandleData with KlineLog {
   @override
   String get logTag => 'CandleData';
 
+  CandleData(this.req, List<CandleModel> list) {
+    if (list.isEmpty) {
+      reset();
+      return;
+    }
+    list = List.of(list);
+  }
+
+  static final CandleData empty = CandleData(
+    CandleReq(instId: "", bar: ""),
+    List.empty(growable: true),
+  );
+
   final CandleReq req;
   List<CandleModel> _list = List.empty(growable: true);
 
@@ -19,6 +32,9 @@ class CandleData with KlineLog {
   Decimal max = Decimal.zero;
   Decimal min = Decimal.zero;
   Decimal get dataHeight => max - min;
+
+  double dxStart = 0;
+  double dxEnd = 0;
 
   /// 当前绘制区域起始下标 右
   int _start = 0;
@@ -38,17 +54,26 @@ class CandleData with KlineLog {
   CandleModel? startModel;
   CandleModel? endModel;
 
-  static final CandleData empty = CandleData(
-    CandleReq(instId: "", bar: ""),
-    List.empty(growable: true),
-  );
+  /// 计算
+  void calculateMaxmin() {
+    CandleModel m = list[start];
+    max = m.high;
+    min = m.low;
+    for (var i = start; i < end; i++) {
+      m = list[i];
 
-  CandleData(this.req, List<CandleModel> list) {
-    if (list.isEmpty) {
-      reset();
-      return;
+      if (i == 0) {
+        startModel = m;
+        // req.after ??= m.timestamp;
+      }
+      if (i == list.length - 1) {
+        endModel = m;
+        // req.before ??= m.timestamp;
+      }
+
+      max = m.high > max ? m.high : max;
+      min = m.low < min ? m.low : min;
     }
-    list = List.of(list);
   }
 
   String get instId => req.instId;
@@ -131,27 +156,6 @@ class CandleData with KlineLog {
     calculateMaxmin();
 
     debugPrintDrawParams('after');
-  }
-
-  void calculateMaxmin() {
-    CandleModel m = list[start];
-    max = m.high;
-    min = m.low;
-    for (var i = start; i < end; i++) {
-      m = list[i];
-
-      if (i == 0) {
-        startModel = m;
-        // req.after ??= m.timestamp;
-      }
-      if (i == list.length - 1) {
-        endModel = m;
-        // req.before ??= m.timestamp;
-      }
-
-      max = m.high > max ? m.high : max;
-      min = m.low < min ? m.low : min;
-    }
   }
 
   /// 合并newList到list

@@ -1,34 +1,54 @@
-import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 
 import '../model/export.dart';
 import 'candle_data.dart';
 
-///// Gesture  ////
-/// 点击
-abstract interface class ITapGesture {
+/// Gesture 事件处理接口
+abstract interface class IGestureEvent {
+  /// 点击
   void onTapUp(TapUpDetails details);
-}
 
-/// 移动, 缩放
-abstract interface class IPanScaleGesture {
+  /// 移动, 缩放
   void onScaleStart(ScaleStartDetails details);
   void onScaleUpdate(ScaleUpdateDetails details);
   void onScaleEnd(ScaleEndDetails details);
-}
 
-/// 长按
-abstract interface class ILongPressGesture {
+  /// 长按
   void onLongPressStart(LongPressStartDetails details);
   void onLongPressMoveUpdate(LongPressMoveUpdateDetails details);
   void onLongPressEnd(LongPressEndDetails details);
 }
 
-/// 手势更新数据
-abstract interface class IGestureData {
-  void move(GestureData data);
-  void scale(GestureData data);
-  void longMove(GestureData data);
+/// 手势事件的处理接口
+/// 注: 必须首页调用super.handlexxx(); 向其他绘制模块传递手势数据.
+/// 否则, 此事件的处理仅限出当前绘制模块.
+/// 调用顺序参看kline_controller.dart的mixin倒序.
+abstract interface class IGestureHandler {
+  @mustCallSuper
+  bool handleTap(GestureData data);
+
+  @mustCallSuper
+  void handleMove(GestureData data);
+  @mustCallSuper
+  void handleScale(GestureData data);
+
+  @mustCallSuper
+  void handleLongPress(GestureData data);
+  @mustCallSuper
+  void handleLongMove(GestureData data);
+}
+
+mixin TapHanderImpl implements IGestureHandler {
+  @override
+  bool handleTap(GestureData data) => false;
+  @override
+  void handleMove(GestureData data) {}
+  @override
+  void handleScale(GestureData data) {}
+  @override
+  void handleLongPress(GestureData data) {}
+  @override
+  void handleLongMove(GestureData data) {}
 }
 
 //////// DataSource ///////
@@ -48,15 +68,11 @@ abstract interface class IDataSource {
   double get dyFactor;
 }
 
-abstract interface class IDataConvert {
-  String formatPrice(Decimal val, {int? precision});
+//// 蜡烛图绘制接口
+abstract interface class ICandlePainter {
+  void paintCandle(Canvas canvas, Size size);
 
-  String? calculateTimeDiff(DateTime nextUpdateDateTime);
-}
-
-///// PriceOrder /////
-abstract interface class IPriceOrder {
-  void paintPriceOrder(Canvas canvas, Size size);
+  void markRepaintCandle();
 
   void startLastPriceCountDownTimer();
 

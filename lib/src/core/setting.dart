@@ -214,4 +214,18 @@ mixin SettingBinding on KlineBindingBase {
 
   /// 价钱格式化函数
   String Function(String instId, Decimal val, {int? precision})? priceFormat;
+
+  /// 价钱格式化函数
+  /// TODO: 待数据格式化.
+  String formatPrice(Decimal val, {int? precision, required String instId}) {
+    int p = precision ?? 6; // TODO: 待优化
+    if (priceFormat != null) {
+      return priceFormat!.call(
+        instId,
+        val,
+        precision: p,
+      );
+    }
+    return val.toStringAsFixed(p);
+  }
 }

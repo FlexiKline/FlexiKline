@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../kline_controller.dart';
 import 'gesture_view.dart';
-import 'price_order_view.dart';
+import 'cross_view.dart';
 
 class KlineWidget extends StatefulWidget {
   const KlineWidget({super.key, required this.controller});
@@ -49,7 +49,7 @@ class _KlineWidgetState extends State<KlineWidget> {
               isComplex: true,
             ),
           ),
-          PriceOrderView(
+          CrossView(
             controller: widget.controller,
           ),
           GestureView(

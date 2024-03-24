@@ -4,8 +4,7 @@ import '../model/export.dart';
 import 'binding_base.dart';
 import 'interface.dart';
 
-mixin GestureBinding on KlineBindingBase
-    implements ITapGesture, IPanScaleGesture, ILongPressGesture, IGestureData {
+mixin GestureBinding on KlineBindingBase implements IGestureEvent {
   @override
   void initBinding() {
     super.initBinding();
@@ -44,6 +43,8 @@ mixin GestureBinding on KlineBindingBase
     _longData = null;
 
     _tapData = GestureData.tap(details.localPosition);
+
+    handleTap(_tapData!);
   }
 
   ///
@@ -72,9 +73,9 @@ mixin GestureBinding on KlineBindingBase
     _panScaleData!.update(details.localFocalPoint, scale: details.scale);
 
     if (_panScaleData!.isScale) {
-      scale(_panScaleData!);
+      handleScale(_panScaleData!);
     } else {
-      move(_panScaleData!);
+      handleMove(_panScaleData!);
     }
   }
 
@@ -110,7 +111,7 @@ mixin GestureBinding on KlineBindingBase
       return;
     }
     _longData!.update(details.localPosition);
-    longMove(_longData!);
+    handleLongMove(_longData!);
   }
 
   @override

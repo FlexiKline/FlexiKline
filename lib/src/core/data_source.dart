@@ -1,20 +1,12 @@
-import 'package:decimal/decimal.dart';
-
 import '../model/export.dart';
 import 'binding_base.dart';
-import 'candle.dart';
 import 'candle_data.dart';
 import 'interface.dart';
 import 'setting.dart';
 
 mixin DataSourceBinding
     on KlineBindingBase, SettingBinding
-    implements
-        IDataSource,
-        IPriceOrder,
-        ICandlePainter,
-        IGestureData,
-        IDataConvert {
+    implements IDataSource, ICandlePainter {
   @override
   void initBinding() {
     super.initBinding();
@@ -37,16 +29,25 @@ mixin DataSourceBinding
     _curCandleData = val;
   }
 
+  /// 数据缓存Key
   String get curDataKey => curCandleData.key;
 
   /// 画板的最大宽度
   double get maxCanvasWidth => curCandleData.list.length * candleActualWidth;
 
+  /// 当前画板绘制的X轴偏移量. 注: 滑动/缩放都主要通过调整其值.
+  double dxOffset = 0;
 
   @override
   double get dyFactor {
     return canvasHeight / curCandleData.dataHeight.toDouble();
   }
+
+  /// 计算startDx和endDx偏移. 根据dxOffset.
+  void calculateStartEndDx() {}
+
+  /// 计算蜡烛数组的start和end下标.
+  void calculateStartEndIndex() {}
 
   @override
   void setCandleData(
@@ -89,46 +90,9 @@ mixin DataSourceBinding
     markRepaintCandle();
   }
 
-  /// 价钱格式化函数
-  /// TODO: 待数据格式化.
   @override
-  String formatPrice(Decimal val, {int? precision}) {
-    int p = precision ?? 6; // TODO: 待优化
-    if (priceFormat != null) {
-      return priceFormat!.call(
-        curCandleData.req.instId,
-        val,
-        precision: p,
-      );
-    }
-    return val.toStringAsFixed(p);
-  }
-
-  /// 计算时间差, 并格式化展示
-  /// 1. 超过1天展示 "md nh"
-  /// 2. 小于一天展示 "hh:MM:ss"
-  /// 3. 小天一小时展示 "MM:ss"
-  @override
-  String? calculateTimeDiff(DateTime nextUpdateDateTime) {
-    final timeLag = nextUpdateDateTime.difference(DateTime.now());
-    if (timeLag.isNegative) {
-      logd(
-        'calculateTimeDiff > next:$nextUpdateDateTime - now:${DateTime.now()} = $timeLag',
-      );
-      return null;
-    }
-
-    final dayLag = timeLag.inDays;
-    if (dayLag >= 1) {
-      final hoursLag = (timeLag.inHours - dayLag * 24).clamp(0, 23);
-      return '${dayLag}h ${hoursLag}h';
-    } else {
-      return timeLag.toString().substring(0, 8);
-    }
-  }
-
-  @override
-  void move(GestureData data) {
+  void handleMove(GestureData data) {
+    super.handleScale(data);
     if (!data.moved) return;
     final dxDelta = data.dxDelta;
     final dyDelta = data.dyDelta;
@@ -151,12 +115,14 @@ mixin DataSourceBinding
   }
 
   @override
-  void scale(GestureData data) {
+  void handleScale(GestureData data) {
+    super.handleScale(data);
     if (!data.scaled) return;
   }
 
   @override
-  void longMove(GestureData data) {
+  void handleLongMove(GestureData data) {
+    super.handleScale(data);
     if (!data.moved) return;
   }
 }
