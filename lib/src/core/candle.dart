@@ -2,8 +2,7 @@ import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 
 import 'binding_base.dart';
-import 'config.dart';
-import 'data_source.dart';
+import 'interface.dart';
 import 'setting.dart';
 import '../extension/export.dart';
 import '../render/export.dart';
@@ -27,8 +26,8 @@ abstract interface class ICandlePainter {
 ///   |canvasBottom------mainPadding.bottom-----------------|
 ///   |------------------mainRect.bottom--------------------|
 mixin CandleBinding
-    on KlineBindingBase, SettingBinding, ConfigBinding, DataSourceBinding
-    implements ICandlePainter, IDataSource {
+    on KlineBindingBase, SettingBinding
+    implements ICandlePainter, IDataSource, IDataConvert {
   @override
   void initBinding() {
     super.initBinding();

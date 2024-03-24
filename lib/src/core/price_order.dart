@@ -3,23 +3,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'binding_base.dart';
-import 'data_source.dart';
+import 'interface.dart';
 import 'setting.dart';
 import '../model/export.dart';
 import '../render/export.dart';
 
-abstract interface class IPriceOrder {
-  void paintPriceOrder(Canvas canvas, Size size);
-
-  void startLastPriceCountDownTimer();
-
-  /// 检查最新价倒计时刷新时间是否发生变化, 如有变化, 重新启动倒时器.
-  void checkAndRestartLastPriceCountDownTimer();
-}
-
 mixin PriceOrderBinding
-    on KlineBindingBase, SettingBinding, DataSourceBinding
-    implements IPriceOrder, IDataSource {
+    on KlineBindingBase, SettingBinding
+    implements IPriceOrder, IDataSource, IDataConvert {
   @override
   void initBinding() {
     super.initBinding();

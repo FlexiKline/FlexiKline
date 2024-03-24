@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../kline_controller.dart';
 
-class PriceOrderWidget extends StatelessWidget {
-  const PriceOrderWidget({
+class PriceOrderView extends StatelessWidget {
+  const PriceOrderView({
     super.key,
     required this.controller,
   });

@@ -7,6 +7,7 @@ export './candle_model/candle_model.dart';
 export './candle_req/candle_req.dart';
 export './candle_data.dart';
 export './constant.dart';
+export './gesture.dart';
 
 extension CandleDataExt on CandleData {
   String get key => req.key;

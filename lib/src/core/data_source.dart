@@ -3,26 +3,18 @@ import 'package:decimal/decimal.dart';
 import '../model/export.dart';
 import 'binding_base.dart';
 import 'candle.dart';
+import 'interface.dart';
 import 'price_order.dart';
 import 'setting.dart';
 
-abstract interface class IDataSource {
-  void setCandleData(
-    CandleReq req,
-    List<CandleModel> list, {
-    bool replace = false,
-  });
-
-  void appendCandleData(CandleReq req, List<CandleModel> list);
-}
-
-abstract interface class IDataScope {
-  void moveCandle(int leftTs, int rightTs);
-}
-
 mixin DataSourceBinding
     on KlineBindingBase, SettingBinding
-    implements IDataSource, IDataScope, IPriceOrder, ICandlePainter {
+    implements
+        IDataSource,
+        IPriceOrder,
+        ICandlePainter,
+        IGestureData,
+        IDataConvert {
   @override
   void initBinding() {
     super.initBinding();
@@ -38,6 +30,7 @@ mixin DataSourceBinding
   final Map<String, CandleData> _candleDataCache = {};
 
   CandleData _curCandleData = CandleData.empty;
+  @override
   CandleData get curCandleData => _curCandleData;
   set curCandleData(val) {
     /// TODO 预处理数据
@@ -46,6 +39,7 @@ mixin DataSourceBinding
 
   String get curDataKey => curCandleData.key;
 
+  @override
   double get dyFactor {
     return canvasHeight / curCandleData.dataHeight.toDouble();
   }
@@ -93,6 +87,7 @@ mixin DataSourceBinding
 
   /// 价钱格式化函数
   /// TODO: 待数据格式化.
+  @override
   String formatPrice(Decimal val, {int? precision}) {
     int p = precision ?? 6; // TODO: 待优化
     if (priceFormat != null) {
@@ -109,6 +104,7 @@ mixin DataSourceBinding
   /// 1. 超过1天展示 "md nh"
   /// 2. 小于一天展示 "hh:MM:ss"
   /// 3. 小天一小时展示 "MM:ss"
+  @override
   String? calculateTimeDiff(DateTime nextUpdateDateTime) {
     final timeLag = nextUpdateDateTime.difference(DateTime.now());
     if (timeLag.isNegative) {
@@ -128,7 +124,8 @@ mixin DataSourceBinding
   }
 
   @override
-  void moveCandle(int leftTs, int rightTs) {
-    // 计算leftTs与rightTs在curCandleData的下标. 更新repaintCandle
-  }
+  void move(GestureData data) {}
+
+  @override
+  void scale(GestureData data) {}
 }

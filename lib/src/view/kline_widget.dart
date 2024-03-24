@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../kline_controller.dart';
-import 'price_order_widget.dart';
+import 'gesture_view.dart';
+import 'price_order_view.dart';
 
 class KlineWidget extends StatefulWidget {
   const KlineWidget({super.key, required this.controller});
@@ -48,9 +49,12 @@ class _KlineWidgetState extends State<KlineWidget> {
               isComplex: true,
             ),
           ),
-          PriceOrderWidget(
+          PriceOrderView(
             controller: widget.controller,
           ),
+          GestureView(
+            controller: widget.controller,
+          )
         ],
       ),
     );
