@@ -4,7 +4,7 @@ export 'gesture.dart';
 export 'data_source.dart';
 export 'config.dart';
 export 'setting.dart';
-export 'cross.dart';
+export 'price_cross.dart';
 export 'interface.dart';
 export 'draw.dart';
 export 'grid.dart';

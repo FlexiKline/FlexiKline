@@ -8,7 +8,7 @@ class KlineController extends KlineBindingBase
         DataSourceBinding,
         GridBgBinding,
         CandleBinding,
-        CrossBinding,
+        PriceCrossBinding,
         DrawBinding {
   ///
 }

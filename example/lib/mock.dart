@@ -81,7 +81,7 @@ Future<List<CandleModel>> genCustomCandleList({
       "timestamp": dateTime.add(Duration(days: 0)).millisecondsSinceEpoch,
       "high": 120,
       "open": 100,
-      "close": 320,
+      "close": 300,
       "low": 0,
       "vol": 800,
     }),

@@ -73,9 +73,12 @@ abstract interface class ICandlePainter {
   void paintCandle(Canvas canvas, Size size);
 
   void markRepaintCandle();
+}
 
+//// 最新价与十字线绘制API
+abstract interface class IPriceCrossPainter {
+  void paintPriceCross(Canvas canvas, Size size);
   void startLastPriceCountDownTimer();
-
-  /// 检查最新价倒计时刷新时间是否发生变化, 如有变化, 重新启动倒时器.
-  void checkAndRestartLastPriceCountDownTimer();
+  void markRepaintLastPrice();
+  void markRepaintCross();
 }

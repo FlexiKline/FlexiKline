@@ -4,9 +4,10 @@ import 'candle_data.dart';
 import 'interface.dart';
 import 'setting.dart';
 
+/// 负责数据的管理, 缓存, 切换, 计算
 mixin DataSourceBinding
     on KlineBindingBase, SettingBinding
-    implements IDataSource, ICandlePainter {
+    implements IDataSource, ICandlePainter, IPriceCrossPainter {
   @override
   void initBinding() {
     super.initBinding();
@@ -77,7 +78,8 @@ mixin DataSourceBinding
     _candleDataCache[req.key] = data;
     if (curCandleData.invalid || req.key == curDataKey) {
       _curCandleData = data;
-      _calculateCandleDataDrawParams(reset: true);
+      markRepaintCandle();
+      // _calculateCandleDataDrawParams(reset: true);
       startLastPriceCountDownTimer();
     }
   }
@@ -88,24 +90,24 @@ mixin DataSourceBinding
     data.mergeCandleList(list);
     _candleDataCache[req.key] = data;
     if (req.key == curDataKey) {
-      _calculateCandleDataDrawParams();
-      checkAndRestartLastPriceCountDownTimer();
+      markRepaintCandle();
+      // _calculateCandleDataDrawParams();
     }
   }
 
   /// 计算绘制所需要的参数.
-  void _calculateCandleDataDrawParams({
-    bool reset = false, // 是否从头开始绘制.
-  }) {
-    if (reset) curCandleData.reset();
-    curCandleData.calculateDrawParams(
-      maxCandleCount,
-      candleActualWidth,
-      canvasWidth, // 暂无用
-    );
+  // void _calculateCandleDataDrawParams({
+  //   bool reset = false, // 是否从头开始绘制.
+  // }) {
+  //   if (reset) curCandleData.reset();
+  //   curCandleData.calculateDrawParams(
+  //     maxCandleCount,
+  //     candleActualWidth,
+  //     canvasWidth, // 暂无用
+  //   );
 
-    markRepaintCandle();
-  }
+  //   markRepaintCandle();
+  // }
 
   @override
   void handleMove(GestureData data) {
@@ -124,7 +126,7 @@ mixin DataSourceBinding
     //   candleActualWidth,
     // );
     // curCandleData.calculateMaxmin();
-    markRepaintCandle();
+    // markRepaintCandle();
 
     /// 处理X轴移动
     // final distance = dxDelta * 3; // 放大3倍.

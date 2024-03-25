@@ -5,6 +5,7 @@ import 'package:kline/src/utils/log.dart';
 
 import '../model/export.dart';
 
+/// 蜡烛图相关数据
 class CandleData with KlineLog {
   @override
   String get logTag => 'CandleData';
@@ -33,9 +34,6 @@ class CandleData with KlineLog {
   Decimal min = Decimal.zero;
   Decimal get dataHeight => max - min;
 
-  double dxStart = 0;
-  double dxEnd = 0;
-
   /// 当前绘制区域起始下标 右
   int _start = 0;
   int get start => _start;
@@ -63,11 +61,14 @@ class CandleData with KlineLog {
   }
 
   void reset() {
+    list.clear();
     max = Decimal.zero;
     min = Decimal.zero;
     offset = 0;
     start = 0;
     end = 0;
+    startModel = null;
+    endModel = null;
   }
 
   /// 根据[start, end]下标计算最大最小值
