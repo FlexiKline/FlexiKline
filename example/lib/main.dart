@@ -50,6 +50,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    debugPrint('initState screenWidth:${ScreenUtil().screenWidth}');
     initController1();
     initController2();
   }
@@ -74,7 +75,7 @@ class _MyHomePageState extends State<MyHomePage> {
     ));
 
     controller2
-      ..candleMaxWidth = 60
+      ..candleMaxWidth = 50
       ..candleWidth = 50;
 
     genCustomCandleList(count: 500).then((list) {

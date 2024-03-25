@@ -66,6 +66,11 @@ abstract interface class IDataSource {
   CandleData get curCandleData;
 
   double get dyFactor;
+
+  double get paintDxOffset;
+
+  /// 计算绘制蜡烛图的起始数组索引下标和绘制偏移量
+  void calculateCandleIndexAndOffset();
 }
 
 //// 蜡烛图绘制接口

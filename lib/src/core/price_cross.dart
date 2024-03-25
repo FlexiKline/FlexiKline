@@ -15,6 +15,7 @@ mixin PriceCrossBinding
   void initBinding() {
     super.initBinding();
     logd('init priceOrder');
+    startLastPriceCountDownTimer();
   }
 
   @override

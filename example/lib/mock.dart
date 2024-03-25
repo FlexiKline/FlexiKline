@@ -125,5 +125,13 @@ Future<List<CandleModel>> genCustomCandleList({
       "low": 10,
       "vol": 900,
     }),
+    CandleModel.fromJson({
+      "timestamp": dateTime.add(Duration(days: -6)).millisecondsSinceEpoch,
+      "high": 160,
+      "open": 110,
+      "close": 150,
+      "low": 100,
+      "vol": 900,
+    }),
   ];
 }

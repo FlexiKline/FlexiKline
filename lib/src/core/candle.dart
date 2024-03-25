@@ -2,7 +2,6 @@ import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 
 import 'binding_base.dart';
-import 'data_source.dart';
 import 'interface.dart';
 import 'setting.dart';
 import '../extension/export.dart';
@@ -21,7 +20,7 @@ import '../render/export.dart';
 ///   |canvasBottom------mainPadding.bottom-----------------|
 ///   |------------------mainRect.bottom--------------------|
 mixin CandleBinding
-    on KlineBindingBase, SettingBinding, DataSourceBinding
+    on KlineBindingBase, SettingBinding
     implements ICandlePainter, IDataSource {
   @override
   void initBinding() {
@@ -54,11 +53,7 @@ mixin CandleBinding
   void paintCandle(Canvas canvas, Size size) {
     logd('$diffTime paintCandle >>>>');
 
-    curCandleData.calculateIndex(
-      paintDxOffset,
-      candleActualWidth,
-    );
-    curCandleData.calculateMaxmin();
+    calculateCandleIndexAndOffset();
 
     /// 绘制蜡烛图
     paintCandleChart(canvas, size);
@@ -73,12 +68,12 @@ mixin CandleBinding
     int start = data.start;
     int end = data.end;
 
-    final offset = canvasRight - data.offset - candleMargin + candleWidthHalf;
+    final offset = canvasRight + data.offset + candleWidthHalf;
 
     Offset? maxHihgOffset, minLowOffset;
     for (var i = start; i < end; i++) {
       final model = data.list[i];
-      final dx = offset - (i - start) * candleActualWidth;
+      final dx = offset - (i - start + 1) * candleActualWidth;
       final isRise = model.close >= model.open;
       final highOff = Offset(
         dx,
@@ -160,15 +155,14 @@ mixin CandleBinding
   /// 绘制X轴刻度数据
   void printXAisTickData(Canvas canvas, Size size) {
     final data = curCandleData;
-    final min = data.min;
+    final max = data.max;
     final yAxisStep = mainRectHeight / gridCount;
     final dx = mainRectWidth - tickTextWidth - tickTextPadding.horizontal;
     double dy = 0;
     for (int i = 1; i <= gridCount; i++) {
       dy = i * yAxisStep - tickTextFontSize;
 
-      // final val = min.toDouble() + (i * yAxisStep - mainRect.top) / canvasHeight * data.dataHeight.toDouble();
-      final val = min + ((i * yAxisStep - mainRect.top) / dyFactor).d;
+      final val = max - ((i * yAxisStep - mainPadding.top) / dyFactor).d;
       final text = formatPrice(val, instId: curCandleData.req.instId);
 
       canvas.drawText(
