@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kline/src/view/grid_bg_view.dart';
 
 import '../kline_controller.dart';
 import 'gesture_view.dart';
@@ -37,6 +38,7 @@ class _KlineWidgetState extends State<KlineWidget> {
       // color: Colors.redAccent,
       child: Stack(
         children: <Widget>[
+          GridBgView(controller: widget.controller),
           RepaintBoundary(
             child: CustomPaint(
               size: Size(

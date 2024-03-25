@@ -87,13 +87,19 @@ mixin SettingBinding on KlineBindingBase {
   /// 幅图上下padding
   EdgeInsets subPadding = const EdgeInsets.all(10);
 
+  /// 最大蜡烛宽度
+  double _candleMaxWidth = 40.0;
+  double get candleMaxWidth => _candleMaxWidth;
+  set candleMaxWidth(double width) {
+    _candleMaxWidth = width.clamp(1.0, 100.0);
+  }
+
   /// 单根蜡烛宽度
   double _candleWidth = 7.0;
-  double candleMaxWidth = 20.0; // 最大蜡烛宽度
   double get candleWidth => _candleWidth;
   set candleWidth(double width) {
     // 限制蜡烛宽度范围[1, candleMaxWidth]
-    _candleWidth = width.clamp(1.0, math.max(7, candleMaxWidth));
+    _candleWidth = width.clamp(1.0, candleMaxWidth);
   }
 
   /// 蜡烛间距
@@ -116,7 +122,7 @@ mixin SettingBinding on KlineBindingBase {
   Paint get riseBoldPaint => Paint()
     ..color = Colors.green
     ..style = PaintingStyle.stroke
-    ..strokeWidth = 7;
+    ..strokeWidth = candleWidth;
 
   /// CandleBar下跌配置
   Paint get downLinePaint => Paint()
@@ -126,7 +132,7 @@ mixin SettingBinding on KlineBindingBase {
   Paint get downBoldPaint => Paint()
     ..color = Colors.red
     ..style = PaintingStyle.stroke
-    ..strokeWidth = 7;
+    ..strokeWidth = candleWidth;
 
   /// Grid Axis config
   // Grid Axis Count

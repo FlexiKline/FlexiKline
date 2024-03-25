@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../utils/log.dart';
 import 'interface.dart';
 
-abstract class KlineBindingBase with KlineLog, TapHanderImpl {
+abstract class KlineBindingBase with KlineLog, GestureHanderImpl {
   @override
   String get logTag => "klineBinding";
 

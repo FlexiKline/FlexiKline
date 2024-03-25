@@ -6,6 +6,7 @@ class KlineController extends KlineBindingBase
         SettingBinding,
         ConfigBinding,
         DataSourceBinding,
+        GridBgBinding,
         CandleBinding,
         CrossBinding,
         DrawBinding {

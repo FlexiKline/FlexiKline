@@ -54,8 +54,25 @@ class CandleData with KlineLog {
   CandleModel? startModel;
   CandleModel? endModel;
 
-  /// 计算
+  String get instId => req.instId;
+
+  void debugPrintDrawParams(String tag) {
+    logd(
+      'DrawParams>$tag [${req.instId}-${req.bar}] > len:${list.length} start:$start, end:$end, offset:$offset, max:$max, min:$min',
+    );
+  }
+
+  void reset() {
+    max = Decimal.zero;
+    min = Decimal.zero;
+    offset = 0;
+    start = 0;
+    end = 0;
+  }
+
+  /// 根据[start, end]下标计算最大最小值
   void calculateMaxmin() {
+    if (list.isEmpty) return;
     CandleModel m = list[start];
     max = m.high;
     min = m.low;
@@ -76,35 +93,14 @@ class CandleData with KlineLog {
     }
   }
 
-  String get instId => req.instId;
-
-  void debugPrintDrawParams(String tag) {
-    logd(
-      'DrawParams>$tag [${req.instId}-${req.bar}] > len:${list.length} start:$start, end:$end, offset:$offset, max:$max, min:$min',
-    );
-  }
-
-  void reset() {
-    max = Decimal.zero;
-    min = Decimal.zero;
-    offset = 0;
-    start = 0;
-    end = 0;
-  }
-
-  // 移动count根蜡烛. 注: 小于0: 向左滑动; 大于0: 向右滑动
-  bool moveCandle(int count, {required int maxCandleCount}) {
-    if (count == 0) return false;
-    start = (start + count).clamp(
-      0,
-      math.min(0, list.length - maxCandleCount),
-    );
-    end = (start + maxCandleCount + count).clamp(
-      end,
-      math.min(end + count, list.length),
-    );
-    calculateMaxmin();
-    return true;
+  void calculateIndex(
+    double paintDxOffset,
+    double candleWidth,
+  ) {
+    start = (paintDxOffset / candleWidth).floor();
+    offset = paintDxOffset % candleWidth;
+    end = list.length - 1;
+    logd('calculateIndex [$start, $end] offset$offset');
   }
 
   /// 确保绘制区域的startEnd值已初始化并有效

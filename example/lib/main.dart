@@ -44,19 +44,41 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  late final KlineController controller;
+  late final KlineController controller1;
+  late final KlineController controller2;
   final CandleReq req = CandleReq(instId: 'BTC-USDT', bar: TimeBar.D1.bar);
   @override
   void initState() {
     super.initState();
-    controller = KlineController();
-    controller.setMainSize(Size(
+    initController1();
+    initController2();
+  }
+
+  void initController1() {
+    controller1 = KlineController();
+    controller1.setMainSize(Size(
+      ScreenUtil().screenWidth,
+      ScreenUtil().screenWidth * 0.75,
+    ));
+
+    genRandomCandleList(count: 500).then((list) {
+      controller1.setCandleData(req, list);
+    });
+  }
+
+  void initController2() {
+    controller2 = KlineController();
+    controller2.setMainSize(Size(
       ScreenUtil().screenWidth,
       ScreenUtil().screenWidth,
     ));
 
-    genRandomCandleList(count: 500).then((list) {
-      controller.setCandleData(req, list);
+    controller2
+      ..candleMaxWidth = 60
+      ..candleWidth = 50;
+
+    genCustomCandleList(count: 500).then((list) {
+      controller2.setCandleData(req, list);
     });
   }
 
@@ -70,9 +92,16 @@ class _MyHomePageState extends State<MyHomePage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
+            // KlineWidget(
+            //   key: const ValueKey('1'),
+            //   controller: controller1,
+            // ),
+            SizedBox(height: 20),
             KlineWidget(
-              controller: controller,
+              key: const ValueKey('2'),
+              controller: controller2,
             ),
+            SizedBox(height: 20),
             TestBody(),
           ],
         ),
@@ -81,10 +110,10 @@ class _MyHomePageState extends State<MyHomePage> {
         onPressed: () {
           valueNotifier.value++;
           appendCandleList(
-            model: controller.curCandleData.list.first,
+            model: controller1.curCandleData.list.first,
             count: randomCount,
           ).then((list) {
-            controller.appendCandleData(req, list);
+            controller1.appendCandleData(req, list);
           });
         },
         child: Text('Add'),

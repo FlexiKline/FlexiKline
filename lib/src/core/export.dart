@@ -7,3 +7,4 @@ export 'setting.dart';
 export 'cross.dart';
 export 'interface.dart';
 export 'draw.dart';
+export 'grid.dart';

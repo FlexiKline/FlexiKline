@@ -6,6 +6,7 @@ import 'package:kline/src/model/export.dart';
 
 import '../utils/export.dart';
 import 'binding_base.dart';
+import 'data_source.dart';
 import 'interface.dart';
 import 'setting.dart';
 import '../extension/export.dart';
@@ -20,11 +21,11 @@ import '../render/export.dart';
 ///   |   |---------------+canvasWidth------------------|   |
 ///   |-------------------+------------------canvasRight|   |
 ///   |mainRectHeight     |canvasHeight                     |
-///   |                   |                                 |
+///   |   |---------------+---------------|-->startDx<--|---+-->paintDx<--...|
 ///   |canvasBottom------mainPadding.bottom-----------------|
 ///   |------------------mainRect.bottom--------------------|
 mixin CandleBinding
-    on KlineBindingBase, SettingBinding
+    on KlineBindingBase, SettingBinding, DataSourceBinding
     implements ICandlePainter, IDataSource {
   @override
   void initBinding() {
@@ -45,10 +46,18 @@ mixin CandleBinding
   void markRepaintCandle() => repaintCandle.value++;
   ValueNotifier<int> repaintCandle = ValueNotifier(0);
 
+  DateTime lastPaintTime = DateTime.now();
   @override
   void paintCandle(Canvas canvas, Size size) {
-    /// 绘制Grid
-    paintGrid(canvas, size);
+    final lag = DateTime.now().difference(lastPaintTime);
+    logd('${lag.inMilliseconds} paintCandle >>>>');
+    lastPaintTime = DateTime.now();
+
+    curCandleData.calculateIndex(
+      paintDxOffset,
+      candleActualWidth,
+    );
+    curCandleData.calculateMaxmin();
 
     /// 绘制蜡烛图
     paintCandleChart(canvas, size);
@@ -175,42 +184,6 @@ mixin CandleBinding
         maxLines: 1,
       );
     }
-  }
-
-  /// 绘制Grid
-  void paintGrid(Canvas canvas, Size size) {
-    final yAxisStep = mainRectWidth / gridCount;
-    final xAxisStep = mainRectHeight / gridCount;
-    final paintX = gridXAxisLinePaint;
-    final paintY = gridYAxisLinePaint;
-    double dx = 0;
-    double dy = 0;
-    canvas.drawLine(
-      Offset(0, dy),
-      Offset(mainRectWidth, dy),
-      paintX,
-    );
-    for (int i = 1; i < gridCount; i++) {
-      dx = i * yAxisStep;
-      dy = i * xAxisStep;
-      // 绘制xAsix线
-      canvas.drawLine(
-        Offset(0, dy),
-        Offset(mainRectWidth, dy),
-        paintX,
-      );
-      // 绘制YAsix线
-      canvas.drawLine(
-        Offset(dx, 0),
-        Offset(dx, mainRectHeight),
-        paintY,
-      );
-    }
-    canvas.drawLine(
-      Offset(0, mainRectHeight),
-      Offset(mainRectWidth, mainRectHeight),
-      paintX,
-    );
   }
 
   //// 以下是最新价绘制逻辑.(暂)

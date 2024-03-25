@@ -38,7 +38,7 @@ abstract interface class IGestureHandler {
   void handleLongMove(GestureData data);
 }
 
-mixin TapHanderImpl implements IGestureHandler {
+mixin GestureHanderImpl implements IGestureHandler {
   @override
   bool handleTap(GestureData data) => false;
   @override
