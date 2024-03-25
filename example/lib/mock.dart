@@ -79,7 +79,7 @@ Future<List<CandleModel>> genCustomCandleList({
   return <CandleModel>[
     CandleModel.fromJson({
       "timestamp": dateTime.add(Duration(days: 0)).millisecondsSinceEpoch,
-      "high": 120,
+      "high": 320,
       "open": 100,
       "close": 300,
       "low": 0,
@@ -109,29 +109,29 @@ Future<List<CandleModel>> genCustomCandleList({
       "low": 80,
       "vol": 900,
     }),
-    CandleModel.fromJson({
-      "timestamp": dateTime.add(Duration(days: -4)).millisecondsSinceEpoch,
-      "high": 200,
-      "open": 120,
-      "close": 20,
-      "low": 20,
-      "vol": 900,
-    }),
-    CandleModel.fromJson({
-      "timestamp": dateTime.add(Duration(days: -5)).millisecondsSinceEpoch,
-      "high": 130,
-      "open": 20,
-      "close": 110,
-      "low": 10,
-      "vol": 900,
-    }),
-    CandleModel.fromJson({
-      "timestamp": dateTime.add(Duration(days: -6)).millisecondsSinceEpoch,
-      "high": 160,
-      "open": 110,
-      "close": 150,
-      "low": 100,
-      "vol": 900,
-    }),
+    // CandleModel.fromJson({
+    //   "timestamp": dateTime.add(Duration(days: -4)).millisecondsSinceEpoch,
+    //   "high": 200,
+    //   "open": 120,
+    //   "close": 20,
+    //   "low": 20,
+    //   "vol": 900,
+    // }),
+    // CandleModel.fromJson({
+    //   "timestamp": dateTime.add(Duration(days: -5)).millisecondsSinceEpoch,
+    //   "high": 130,
+    //   "open": 20,
+    //   "close": 110,
+    //   "low": 10,
+    //   "vol": 900,
+    // }),
+    // CandleModel.fromJson({
+    //   "timestamp": dateTime.add(Duration(days: -6)).millisecondsSinceEpoch,
+    //   "high": 160,
+    //   "open": 110,
+    //   "close": 150,
+    //   "low": 100,
+    //   "vol": 900,
+    // }),
   ];
 }

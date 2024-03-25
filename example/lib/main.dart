@@ -109,13 +109,23 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          valueNotifier.value++;
-          appendCandleList(
-            model: controller1.curCandleData.list.first,
-            count: randomCount,
-          ).then((list) {
-            controller1.appendCandleData(req, list);
-          });
+          // valueNotifier.value++;
+          // appendCandleList(
+          //   model: controller1.curCandleData.list.first,
+          //   count: randomCount,
+          // ).then((list) {
+          //   controller1.appendCandleData(req, list);
+          // });
+          CandleModel newModel = controller2.curCandleData.latest!;
+          newModel = newModel.copyWith(
+            timestamp: DateTime.fromMillisecondsSinceEpoch(newModel.timestamp)
+                .add(const Duration(days: 1))
+                .millisecondsSinceEpoch,
+          );
+          controller2.appendCandleData(
+            req,
+            [newModel],
+          );
         },
         child: Text('Add'),
       ),

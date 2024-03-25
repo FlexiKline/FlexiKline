@@ -87,9 +87,7 @@ mixin SettingBinding on KlineBindingBase {
   /// 绘制区域左边最少空白比例
   /// 当蜡烛数量不足以绘制一屏, 向右移动到末尾时, 绘制区域左边最少留白区域占可绘制区域(canvasWidth)的比例
   double minPaintRate = 0.5;
-  double get minPaintWidthInCanvas {
-    return canvasWidth * minPaintRate + candleActualWidth;
-  }
+  double get minPaintWidthInCanvas => canvasWidth * minPaintRate;
 
   /// 幅图上下padding
   EdgeInsets subPadding = const EdgeInsets.all(10);

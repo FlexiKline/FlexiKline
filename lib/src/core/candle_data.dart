@@ -73,7 +73,7 @@ class CandleData with KlineLog {
     CandleModel m = list[start];
     max = m.high;
     min = m.low;
-    for (var i = start; i < end; i++) {
+    for (var i = start; i <= end; i++) {
       m = list[i];
 
       if (i == 0) {

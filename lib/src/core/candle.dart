@@ -65,13 +65,14 @@ mixin CandleBinding
   /// 绘制蜡烛图
   void paintCandleChart(Canvas canvas, Size size) {
     final data = curCandleData;
+    if (data.list.isEmpty) return;
     int start = data.start;
     int end = data.end;
 
     final offset = canvasRight + data.offset + candleWidthHalf;
 
     Offset? maxHihgOffset, minLowOffset;
-    for (var i = start; i < end; i++) {
+    for (var i = start; i <= end; i++) {
       final model = data.list[i];
       final dx = offset - (i - start + 1) * candleActualWidth;
       final isRise = model.close >= model.open;
