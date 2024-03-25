@@ -54,13 +54,37 @@ mixin DataSourceBinding
   }
 
   double clampPaintDxOffset(double dxOffset) {
-    final minDxOffset =
-        (math.min(curCandleData.list.length, maxCandleCount) - maxCandleCount) *
+    if (minPaintBlandUseWidth) {
+      if (maxPaintWidth < canvasWidth) {
+        // 不足一屏: 按最少留白的宽度精确计算
+        final min = math.min(minPaintBlankWidth, maxPaintWidth) - canvasWidth;
+        final max = maxPaintWidth - minPaintBlankWidth;
+        return math.min(math.max(min, dxOffset), max);
+      } else {
+        // 满足一屏: 按最少留白的宽度精确计算
+        final min = -minPaintBlankWidth;
+        final max = maxPaintWidth + minPaintBlankWidth - canvasWidth;
+        return math.min(math.max(min, dxOffset), max);
+      }
+    } else {
+      int dataLen = curCandleData.list.length;
+      if (dataLen < maxCandleCount) {
+        // 不足一屏: 按最少留白的蜡烛数来计算
+        final min =
+            math.min(minPaintBlankCandleCount, dataLen) * candleActualWidth -
+                canvasWidth;
+        final max = (dataLen - minPaintBlankCandleCount) * candleActualWidth;
+
+        return math.min(math.max(min, dxOffset), max);
+      } else {
+        // 满足一屏: 按最少留白的蜡烛数来计算
+        final min = -minPaintBlankCandleCount * candleActualWidth;
+        final max = (dataLen + minPaintBlankCandleCount - maxCandleCount) *
             candleActualWidth;
-    return math.min(
-      math.max(minDxOffset, dxOffset),
-      maxPaintWidth - minPaintWidthInCanvas,
-    );
+        // maxPaintWidth - minPaintBlankCandleCount  * candleActualWidth;
+        return math.min(math.max(min, dxOffset), max);
+      }
+    }
   }
 
   void initPaintDxOffset() {
@@ -77,7 +101,7 @@ mixin DataSourceBinding
   @override
   void calculateCandleIndexAndOffset() {
     logd(
-      'calculateCandleIndexAndOffset begin paintDxOffset:$paintDxOffset in [${-canvasWidth}, ${maxPaintWidth - minPaintWidthInCanvas}]',
+      'calculateCandleIndexAndOffset begin paintDxOffset:$paintDxOffset in [${-canvasWidth}, ${maxPaintWidth - minPaintBlankWidth}]',
     );
 
     if (paintDxOffset > 0) {
@@ -97,7 +121,7 @@ mixin DataSourceBinding
     }
 
     logd(
-      'calculateCandleIndexAndOffset end paintDxOffset:$paintDxOffset in [${-canvasWidth}, ${maxPaintWidth - minPaintWidthInCanvas}]',
+      'calculateCandleIndexAndOffset end paintDxOffset:$paintDxOffset in [${-canvasWidth}, ${maxPaintWidth - minPaintBlankWidth}]',
     );
     curCandleData.calculateMaxmin();
   }

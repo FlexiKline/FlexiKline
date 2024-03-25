@@ -84,10 +84,24 @@ mixin SettingBinding on KlineBindingBase {
   /// Y轴主绘制区域下边界值
   double get canvasBottom => mainRectHeight - mainPadding.bottom;
 
-  /// 绘制区域左边最少空白比例
-  /// 当蜡烛数量不足以绘制一屏, 向右移动到末尾时, 绘制区域左边最少留白区域占可绘制区域(canvasWidth)的比例
-  double minPaintRate = 0.5;
-  double get minPaintWidthInCanvas => canvasWidth * minPaintRate;
+  /// 绘制区域最少留白比例
+  /// 例如: 当蜡烛数量不足以绘制一屏, 向右移动到末尾时, 绘制区域左边最少留白区域占可绘制区域(canvasWidth)的比例
+  double _minPaintBlankRate = 0.3;
+  double get minPaintBlankRate => _minPaintBlankRate;
+  set minPaintBlankRate(double val) {
+    _minPaintBlankRate = val.clamp(0, 0.9);
+  }
+
+  /// 绘制区域最少留白宽度.
+  double get minPaintBlankWidth => canvasWidth * minPaintBlankRate;
+
+  /// 留白按宽度minPaintBlankWidth来计算
+  bool minPaintBlandUseWidth = false;
+
+  /// 绘制区域最少留白可绘制蜡烛数.
+  int get minPaintBlankCandleCount {
+    return (minPaintBlankWidth / candleActualWidth).ceil();
+  }
 
   /// 幅图上下padding
   EdgeInsets subPadding = const EdgeInsets.all(10);
