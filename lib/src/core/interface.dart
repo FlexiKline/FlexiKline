@@ -86,4 +86,6 @@ abstract interface class IPriceCrossPainter {
   void startLastPriceCountDownTimer();
   void markRepaintLastPrice();
   void markRepaintCross();
+
+  bool get isDrawCross;
 }

@@ -10,5 +10,7 @@ class KlineController extends KlineBindingBase
         CandleBinding,
         PriceCrossBinding,
         DrawBinding {
-  ///
+  KlineController({
+    super.debug,
+  });
 }

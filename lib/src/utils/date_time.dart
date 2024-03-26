@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 /// 计算时间差, 并格式化展示
 /// 1. 超过1天展示 "md nh"
 /// 2. 小于一天展示 "hh:MM:ss"
@@ -7,9 +5,9 @@ import 'package:flutter/material.dart';
 String? calculateTimeDiff(DateTime nextUpdateDateTime) {
   final timeLag = nextUpdateDateTime.difference(DateTime.now());
   if (timeLag.isNegative) {
-    debugPrint(
-      'calculateTimeDiff > next:$nextUpdateDateTime - now:${DateTime.now()} = $timeLag',
-    );
+    // debugPrint(
+    //   'calculateTimeDiff > next:$nextUpdateDateTime - now:${DateTime.now()} = $timeLag',
+    // );
     return null;
   }
 

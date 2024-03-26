@@ -26,6 +26,11 @@ mixin PriceCrossBinding
     _lastPriceCountDownTimer = null;
   }
 
+  // 是否绘制十字线
+  bool _isDrawCross = false;
+  @override
+  bool get isDrawCross => _isDrawCross;
+
   Timer? _lastPriceCountDownTimer;
   ValueNotifier<int> repaintPriceCross = ValueNotifier(0);
   void _markRepaint() => repaintPriceCross.value++;
@@ -39,6 +44,8 @@ mixin PriceCrossBinding
   void paintPriceCross(Canvas canvas, Size size) {
     /// 绘制最新价刻度线与价钱标记
     paintLastPriceMark(canvas, size);
+
+    paintCrossLine(canvas, size);
   }
 
   @override
@@ -132,5 +139,10 @@ mixin PriceCrossBinding
       borderWidth: lastPriceRectBorderWidth,
       borderColor: lastPriceRectBorderColor,
     );
+  }
+
+  void paintCrossLine(Canvas canvas, Size size) {
+    if (!isDrawCross) return;
+    _isDrawCross = true;
   }
 }

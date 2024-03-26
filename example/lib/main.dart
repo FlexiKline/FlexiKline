@@ -56,19 +56,23 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void initController1() {
-    controller1 = KlineController();
+    controller1 = KlineController(debug: true);
     controller1.setMainSize(Size(
       ScreenUtil().screenWidth,
       ScreenUtil().screenWidth * 0.75,
     ));
 
-    genRandomCandleList(count: 500).then((list) {
+    // genRandomCandleList(count: 500).then((list) {
+    //   controller1.setCandleData(req, list);
+    // });
+    genLocalCandleList().then((list) {
+      final req = CandleReq(instId: 'BTC-USDT-SWAP', bar: TimeBar.m15.bar);
       controller1.setCandleData(req, list);
     });
   }
 
   void initController2() {
-    controller2 = KlineController();
+    controller2 = KlineController(debug: false);
     controller2.setMainSize(Size(
       ScreenUtil().screenWidth,
       ScreenUtil().screenWidth,
@@ -93,10 +97,10 @@ class _MyHomePageState extends State<MyHomePage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // KlineWidget(
-            //   key: const ValueKey('1'),
-            //   controller: controller1,
-            // ),
+            KlineWidget(
+              key: const ValueKey('1'),
+              controller: controller1,
+            ),
             SizedBox(height: 20),
             KlineWidget(
               key: const ValueKey('2'),

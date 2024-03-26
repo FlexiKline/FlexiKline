@@ -6,8 +6,14 @@ import 'interface.dart';
 abstract class KlineBindingBase with KlineLog, GestureHanderImpl {
   @override
   String get logTag => "klineBinding";
+  @override
+  bool get isDebug => debug;
 
-  KlineBindingBase() {
+  final bool debug;
+
+  KlineBindingBase({
+    this.debug = false,
+  }) {
     logd("constrouct");
     initBinding();
   }

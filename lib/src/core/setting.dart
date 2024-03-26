@@ -86,7 +86,7 @@ mixin SettingBinding on KlineBindingBase {
 
   /// 绘制区域最少留白比例
   /// 例如: 当蜡烛数量不足以绘制一屏, 向右移动到末尾时, 绘制区域左边最少留白区域占可绘制区域(canvasWidth)的比例
-  double _minPaintBlankRate = 0.3;
+  double _minPaintBlankRate = 0.5;
   double get minPaintBlankRate => _minPaintBlankRate;
   set minPaintBlankRate(double val) {
     _minPaintBlankRate = val.clamp(0, 0.9);
@@ -96,7 +96,7 @@ mixin SettingBinding on KlineBindingBase {
   double get minPaintBlankWidth => canvasWidth * minPaintBlankRate;
 
   /// 留白按宽度minPaintBlankWidth来计算
-  bool minPaintBlandUseWidth = false;
+  bool minPaintBlandUseWidth = true;
 
   /// 绘制区域最少留白可绘制蜡烛数.
   int get minPaintBlankCandleCount {

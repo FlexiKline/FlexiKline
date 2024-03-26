@@ -100,9 +100,9 @@ mixin DataSourceBinding
   /// 计算绘制蜡烛图的起始数组索引下标和绘制偏移量
   @override
   void calculateCandleIndexAndOffset() {
-    logd(
-      'calculateCandleIndexAndOffset begin paintDxOffset:$paintDxOffset in [${-canvasWidth}, ${maxPaintWidth - minPaintBlankWidth}]',
-    );
+    // logd(
+    //   'calculateCandleIndexAndOffset begin paintDxOffset:$paintDxOffset in [${-canvasWidth}, ${maxPaintWidth - minPaintBlankWidth}]',
+    // );
 
     if (paintDxOffset > 0) {
       final startIndex = (paintDxOffset / candleActualWidth).floor();
@@ -120,9 +120,9 @@ mixin DataSourceBinding
       );
     }
 
-    logd(
-      'calculateCandleIndexAndOffset end paintDxOffset:$paintDxOffset in [${-canvasWidth}, ${maxPaintWidth - minPaintBlankWidth}]',
-    );
+    // logd(
+    //   'calculateCandleIndexAndOffset end paintDxOffset:$paintDxOffset in [${-canvasWidth}, ${maxPaintWidth - minPaintBlankWidth}]',
+    // );
     curCandleData.calculateMaxmin();
   }
 
