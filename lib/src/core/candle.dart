@@ -69,7 +69,7 @@ mixin CandleBinding
     int start = data.start;
     int end = data.end;
 
-    final offset = canvasRight + data.offset + candleWidthHalf;
+    final offset = startCandleDx;
 
     Offset? maxHihgOffset, minLowOffset;
     for (var i = start; i <= end; i++) {

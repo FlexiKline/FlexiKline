@@ -26,18 +26,41 @@ mixin PriceCrossBinding
     _lastPriceCountDownTimer = null;
   }
 
-  // 是否绘制十字线
-  bool _isDrawCross = false;
-  @override
-  bool get isDrawCross => _isDrawCross;
-
-  Timer? _lastPriceCountDownTimer;
   ValueNotifier<int> repaintPriceCross = ValueNotifier(0);
   void _markRepaint() => repaintPriceCross.value++;
+
+  //// Last Price ////
   @override
   void markRepaintLastPrice() => _markRepaint();
+  Timer? _lastPriceCountDownTimer;
+
+  //// Cross ////
   @override
   void markRepaintCross() => _markRepaint();
+  // 是否正在绘制Cross
+  @override
+  bool get isCrossing => offset?.isFinite == true;
+  // 当前Cross焦点.
+  Offset? _offset;
+  Offset? get offset => _offset;
+  set offset(Offset? val) {
+    if (val != null) {
+      _offset = correctCrossOffset(val);
+    } else {
+      _offset = null;
+    }
+  }
+
+  /// 矫正Cross
+  Offset? correctCrossOffset(Offset val) {
+    if (val.isInfinite && !checkOffsetInCanvas(val)) {
+      return null;
+    }
+    final startDx = startCandleDx;
+    final index = ((startDx - val.dx) / candleActualWidth).round();
+    final dx = startDx - index * candleActualWidth;
+    return Offset(dx, val.dy);
+  }
 
   /// 绘制最新价与十字线
   @override
@@ -45,13 +68,32 @@ mixin PriceCrossBinding
     /// 绘制最新价刻度线与价钱标记
     paintLastPriceMark(canvas, size);
 
+    /// 绘制Cross
     paintCrossLine(canvas, size);
   }
 
   @override
   bool handleTap(GestureData data) {
-    logd('handleTap cross');
-    return super.handleTap(data);
+    if (isCrossing) {
+      offset = null;
+      markRepaintCross();
+      return super.handleTap(data); // 不处理, 向上传递事件.
+    }
+    logd('handleTap cross > ${data.offset}');
+    // 更新并校正起始焦点.
+    offset = data.offset;
+    markRepaintCross();
+    return true;
+  }
+
+  @override
+  void handleMove(GestureData data) {
+    if (!isCrossing) {
+      return super.handleMove(data);
+    }
+    logd('handleMove cross > ${data.offset}');
+    offset = data.offset;
+    markRepaintCross();
   }
 
   @override
@@ -142,7 +184,31 @@ mixin PriceCrossBinding
   }
 
   void paintCrossLine(Canvas canvas, Size size) {
-    if (!isDrawCross) return;
-    _isDrawCross = true;
+    if (!isCrossing) return;
+
+    final offset = this.offset;
+    if (offset == null || offset.isInfinite) {
+      return;
+    }
+
+    final path = Path()
+      ..moveTo(canvasLeft, offset.dy)
+      ..lineTo(canvasRight, offset.dy)
+      ..moveTo(offset.dx, 0)
+      ..lineTo(offset.dx, mainRectHeight);
+
+    final paint = Paint()
+      ..color = Colors.black
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = pixel;
+    canvas.drawDashPath(path, paint);
+    canvas.drawCircle(
+      offset,
+      2,
+      Paint()
+        ..color = Colors.blue
+        ..strokeWidth = 6
+        ..style = PaintingStyle.fill,
+    );
   }
 }

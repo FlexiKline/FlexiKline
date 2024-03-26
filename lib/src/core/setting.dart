@@ -84,6 +84,13 @@ mixin SettingBinding on KlineBindingBase {
   /// Y轴主绘制区域下边界值
   double get canvasBottom => mainRectHeight - mainPadding.bottom;
 
+  bool checkOffsetInCanvas(Offset offset) {
+    return offset.dx > canvasLeft &&
+        offset.dx < canvasRight &&
+        offset.dy > canvasTop &&
+        offset.dy < canvasBottom;
+  }
+
   /// 绘制区域最少留白比例
   /// 例如: 当蜡烛数量不足以绘制一屏, 向右移动到末尾时, 绘制区域左边最少留白区域占可绘制区域(canvasWidth)的比例
   double _minPaintBlankRate = 0.5;

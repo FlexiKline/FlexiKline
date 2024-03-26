@@ -65,9 +65,20 @@ abstract interface class IDataSource {
 
   CandleData get curCandleData;
 
+  /// 蜡烛总数
+  int get totalCandleCount;
+
+  /// 绘制区域高度 / 当前绘制的蜡烛数据高度.
   double get dyFactor;
 
+  /// 最大绘制宽度
+  double get maxPaintWidth;
+
+  /// 代表当前绘制区域相对于startIndex的偏移量.
   double get paintDxOffset;
+
+  /// 当前canvas绘制区域第一根蜡烛绘制的偏移量
+  double get startCandleDx;
 
   /// 计算绘制蜡烛图的起始数组索引下标和绘制偏移量
   void calculateCandleIndexAndOffset();
@@ -87,5 +98,6 @@ abstract interface class IPriceCrossPainter {
   void markRepaintLastPrice();
   void markRepaintCross();
 
-  bool get isDrawCross;
+  /// 是否正在绘制Cross
+  bool get isCrossing;
 }

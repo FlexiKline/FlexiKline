@@ -28,12 +28,26 @@ mixin DataSourceBinding
   @override
   CandleData get curCandleData => _curCandleData;
 
+  /// 蜡烛总数
+  @override
+  int get totalCandleCount => curCandleData.list.length;
+
   /// 数据缓存Key
   String get curDataKey => curCandleData.key;
 
   /// 最大绘制宽度
+  @override
   double get maxPaintWidth => curCandleData.list.length * candleActualWidth;
 
+  /// 当前canvas绘制区域第一根蜡烛绘制的偏移量
+  /// canvas绘制区右起始位置 - 当前第一根蜡烛在的起始偏移 - 半根蜡烛值
+  /// 用于绘制蜡烛图计算的起始位置.
+  @override
+  double get startCandleDx {
+    return canvasRight + curCandleData.offset + candleWidthHalf;
+  }
+
+  /// 绘制区域高度 / 当前绘制的蜡烛数据高度.
   @override
   double get dyFactor {
     return canvasHeight / curCandleData.dataHeight.toDouble();
@@ -53,6 +67,7 @@ mixin DataSourceBinding
     _paintDxOffset = clampPaintDxOffset(val);
   }
 
+  /// 矫正PaintDxOffset的范围
   double clampPaintDxOffset(double dxOffset) {
     if (minPaintBlandUseWidth) {
       if (maxPaintWidth < canvasWidth) {
