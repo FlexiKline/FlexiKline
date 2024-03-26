@@ -58,8 +58,8 @@ mixin CandleBinding
     /// 绘制蜡烛图
     paintCandleChart(canvas, size);
 
-    /// 绘制X轴刻度数据
-    printXAisTickData(canvas, size);
+    /// 绘制Y轴刻度数据
+    printYAisTickData(canvas, size);
   }
 
   /// 绘制蜡烛图
@@ -158,7 +158,7 @@ mixin CandleBinding
   }
 
   /// 绘制X轴刻度数据
-  void printXAisTickData(Canvas canvas, Size size) {
+  void printYAisTickData(Canvas canvas, Size size) {
     final data = curCandleData;
     final max = data.max;
     final yAxisStep = mainRectHeight / gridCount;

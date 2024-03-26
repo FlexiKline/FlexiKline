@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:kline/src/extension/export.dart';
 
 import '../model/export.dart';
 import '../render/export.dart';
@@ -192,7 +193,7 @@ mixin PriceCrossBinding
     if (!isCrossing) return;
 
     final offset = this.offset;
-    if (offset == null || offset.isInfinite) {
+    if (offset == null || !checkOffsetInCanvas(offset)) {
       return;
     }
 
@@ -202,18 +203,44 @@ mixin PriceCrossBinding
       ..moveTo(offset.dx, 0)
       ..lineTo(offset.dx, mainRectHeight);
 
-    final paint = Paint()
-      ..color = Colors.black
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = pixel;
-    canvas.drawDashPath(path, paint);
-    canvas.drawCircle(
-      offset,
-      2,
-      Paint()
-        ..color = Colors.blue
-        ..strokeWidth = 6
-        ..style = PaintingStyle.fill,
-    );
+    canvas
+      ..drawDashPath(
+        path,
+        crossLinePaint,
+        dashes: crossLineDashes,
+      )
+      ..drawCircle(
+        offset,
+        crossPointRadius,
+        crossPointPaint,
+      );
+
+    if (isDrawCrossPriceMark) {
+      final val =
+          curCandleData.max - ((offset.dy - mainPadding.top) / dyFactor).d;
+      final text = formatPrice(
+        val,
+        instId: curCandleData.req.instId,
+        precision: curCandleData.req.precision,
+      );
+      canvas.drawText(
+        offset: Offset(
+          canvasRight,
+          offset.dy - crossPriceRectHeight / 2,
+        ),
+        drawDirection: DrawDirection.ltr,
+        margin: crossPriceRectMargin,
+        drawableSize: drawableSize,
+        text: text,
+        style: crossPriceTextStyle,
+        textAlign: TextAlign.end,
+        textWidthBasis: TextWidthBasis.longestLine,
+        padding: crossPriceRectPadding,
+        backgroundColor: crossPriceRectBackgroundColor,
+        borderRadius: crossPriceRectBorderRadius,
+        borderWidth: crossPriceRectBorderWidth,
+        borderColor: crossPriceRectBorderColor,
+      );
+    }
   }
 }

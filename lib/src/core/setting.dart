@@ -210,7 +210,7 @@ mixin SettingBinding on KlineBindingBase {
   /// 最新价文本区域配置
   bool isDrawLastPriceMark = true;
   double lastPriceFontSize = 10;
-  double lastPriceTextWidth = 100;
+  double lastPriceTextWidth = 100; // TODO 暂无用
   Color lastPriceColor = Colors.black;
   TextStyle get lastPriceTextStyle => TextStyle(
         fontSize: lastPriceFontSize,
@@ -231,9 +231,10 @@ mixin SettingBinding on KlineBindingBase {
     horizontal: 1,
     // vertical: 1,
   );
-  EdgeInsets lastPriceRectPadding = const EdgeInsets.symmetric(
-    horizontal: 2,
-    vertical: 1,
+  EdgeInsets lastPriceRectPadding = const EdgeInsets.only(
+    left: 2,
+    right: 2,
+    top: 1,
   );
 
   /// 最新价刻度线配置
@@ -260,5 +261,54 @@ mixin SettingBinding on KlineBindingBase {
       );
     }
     return val.toStringAsFixed(p);
+  }
+
+  /// Cross 配置 ///
+  // cross line
+  Color crossLineColor = Colors.black;
+  double crossLineWidth = 0.5;
+  List<double> crossLineDashes = const [3, 3];
+  Paint get crossLinePaint => Paint()
+    ..color = crossLineColor
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = crossLineWidth;
+  // cross point
+  Color corssPointColor = Colors.black;
+  double crossPointRadius = 2;
+  double crossPointWidth = 6;
+  Paint get crossPointPaint => Paint()
+    ..color = corssPointColor
+    ..strokeWidth = crossPointWidth
+    ..style = PaintingStyle.fill;
+  // cross Y轴价钱文本配置
+  bool isDrawCrossPriceMark = true;
+  double crossPriceFontSize = 10;
+  double crossPriceTextWidth = 100; // TODO 暂无用
+  Color crossPriceColor = Colors.white;
+  TextStyle get crossPriceTextStyle => TextStyle(
+        fontSize: crossPriceFontSize,
+        color: crossPriceColor,
+        overflow: TextOverflow.ellipsis,
+        textBaseline: TextBaseline.alphabetic,
+      );
+  // cross Y轴最右边文本区域的背景相关配置.
+  Color crossPriceRectBackgroundColor = Colors.black;
+  double crossPriceRectBorderRadius = 2;
+  double crossPriceRectBorderWidth = 0.5;
+  Color crossPriceRectBorderColor = Colors.transparent;
+  EdgeInsets crossPriceRectMargin = const EdgeInsets.symmetric(
+    horizontal: 1,
+    // vertical: 1,
+  );
+  EdgeInsets crossPriceRectPadding = const EdgeInsets.only(
+    left: 2,
+    right: 2,
+    top: 1,
+  );
+  // cross 价钱区域总高度.
+  double get crossPriceRectHeight {
+    return crossPriceFontSize +
+        crossPriceRectPadding.vertical +
+        crossPriceRectMargin.vertical;
   }
 }
