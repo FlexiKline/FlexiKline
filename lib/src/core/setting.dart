@@ -189,6 +189,7 @@ mixin SettingBinding on KlineBindingBase {
         fontSize: tickTextFontSize,
         color: tickTextColor,
         overflow: TextOverflow.ellipsis,
+        height: 1,
       );
 
   /// 最大最小价钱刻度线与价钱标记.
@@ -200,14 +201,16 @@ mixin SettingBinding on KlineBindingBase {
         fontSize: priceMarkFontSize,
         color: priceMarkColor,
         overflow: TextOverflow.ellipsis,
+        height: 1,
       );
   double priceMarkMargin = 1; // 价钱与线之前的间距
-  double priceMarkLineWidth = 20; // 价钱指示线的长度
+  double priceMarkLineLength = 20; // 价钱指示线的长度
+  double? priceMarkLineWidth; // 价钱指示线的绘制宽度
   // 价钱指示线的Paint
   Paint get priceMarkLinePaint => Paint()
     ..color = priceMarkColor
     ..style = PaintingStyle.stroke
-    ..strokeWidth = 1;
+    ..strokeWidth = priceMarkLineWidth ?? pixel;
 
   /// 最新价文本区域配置
   bool isDrawLastPriceMark = true;
@@ -218,6 +221,7 @@ mixin SettingBinding on KlineBindingBase {
         fontSize: lastPriceFontSize,
         color: lastPriceColor,
         overflow: TextOverflow.ellipsis,
+        height: 1,
         textBaseline: TextBaseline.alphabetic,
       );
 
@@ -233,19 +237,18 @@ mixin SettingBinding on KlineBindingBase {
     horizontal: 1,
     // vertical: 1,
   );
-  EdgeInsets lastPriceRectPadding = const EdgeInsets.only(
-    left: 2,
-    right: 2,
-    top: 1,
+  EdgeInsets lastPriceRectPadding = const EdgeInsets.symmetric(
+    horizontal: 2,
+    vertical: 2,
   );
 
   /// 最新价刻度线配置
   Color lastPriceMarkLineColor = Colors.black;
-  double lastPriceMarkLineWidth = 1;
+  double? lastPriceMarkLineWidth; // 最新价X轴标志线的绘制宽度.
   Paint get lastPriceMarkLinePaint => Paint()
     ..color = lastPriceMarkLineColor
     ..style = PaintingStyle.stroke
-    ..strokeWidth = lastPriceMarkLineWidth;
+    ..strokeWidth = lastPriceMarkLineWidth ?? pixel;
   List<double> lastPriceMarkLineDashes = const [3, 3];
 
   /// 价钱格式化函数
@@ -283,7 +286,8 @@ mixin SettingBinding on KlineBindingBase {
     ..strokeWidth = crossPointWidth
     ..style = PaintingStyle.fill;
   // cross Y轴价钱文本配置
-  bool isDrawCrossPriceMark = true;
+  // 是否展示Cross Y轴上的价钱标记.
+  bool isShowCrossYAxisPriceMark = true;
   double crossPriceFontSize = 10;
   double crossPriceTextWidth = 100; // TODO 暂无用
   Color crossPriceColor = Colors.white;
@@ -291,21 +295,21 @@ mixin SettingBinding on KlineBindingBase {
         fontSize: crossPriceFontSize,
         color: crossPriceColor,
         overflow: TextOverflow.ellipsis,
+        height: 1,
         textBaseline: TextBaseline.alphabetic,
       );
   // cross Y轴最右边文本区域的背景相关配置.
   Color crossPriceRectBackgroundColor = Colors.black;
   double crossPriceRectBorderRadius = 2;
-  double crossPriceRectBorderWidth = 0.5;
+  double crossPriceRectBorderWidth = 0.0;
   Color crossPriceRectBorderColor = Colors.transparent;
   EdgeInsets crossPriceRectMargin = const EdgeInsets.symmetric(
     horizontal: 1,
     // vertical: 1,
   );
-  EdgeInsets crossPriceRectPadding = const EdgeInsets.only(
-    left: 2,
-    right: 2,
-    top: 1,
+  EdgeInsets crossPriceRectPadding = const EdgeInsets.symmetric(
+    horizontal: 2,
+    vertical: 2,
   );
   // cross 价钱区域总高度.
   double get crossPriceRectHeight {
@@ -313,4 +317,7 @@ mixin SettingBinding on KlineBindingBase {
         crossPriceRectPadding.vertical +
         crossPriceRectMargin.vertical;
   }
+
+  // cross popup window 配置
+  bool isShowCrossPopupWindow = true;
 }

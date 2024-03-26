@@ -98,6 +98,14 @@ class CandleData with KlineLog {
     end = startIndex + maxCandleCount;
   }
 
+  /// 获取index位置的蜡烛数据.
+  CandleModel? getCandle(int index) {
+    if (index >= 0 && index < list.length) {
+      return list[index];
+    }
+    return null;
+  }
+
   /// 合并newList到list
   void mergeCandleList(
     List<CandleModel> newList, {

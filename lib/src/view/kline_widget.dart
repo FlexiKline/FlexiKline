@@ -14,8 +14,6 @@ class KlineWidget extends StatefulWidget {
 }
 
 class _KlineWidgetState extends State<KlineWidget> {
-  Size size = Size.zero;
-
   @override
   void initState() {
     super.initState();

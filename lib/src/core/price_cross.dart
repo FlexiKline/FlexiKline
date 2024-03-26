@@ -215,7 +215,7 @@ mixin PriceCrossBinding
         crossPointPaint,
       );
 
-    if (isDrawCrossPriceMark) {
+    if (isShowCrossYAxisPriceMark) {
       final val =
           curCandleData.max - ((offset.dy - mainPadding.top) / dyFactor).d;
       final text = formatPrice(
@@ -242,5 +242,57 @@ mixin PriceCrossBinding
         borderColor: crossPriceRectBorderColor,
       );
     }
+
+    if (isShowCrossPopupWindow) {
+      _paintCrossPopupWindow(canvas, offset);
+    }
+  }
+
+  /// 绘制Cross 命中的蜡烛数据弹窗
+  void _paintCrossPopupWindow(Canvas canvas, Offset offset) {
+    final index = ((startCandleDx - offset.dx) / candleActualWidth).round();
+    final model = curCandleData.getCandle(curCandleData.start + index - 1);
+    logd('_paintCrossPopupWindow model:$model');
+    if (model == null) return;
+
+    canvas.drawText(
+      offset: Offset(
+        canvasLeft + 10,
+        canvasTop,
+      ),
+      inlineSpan: TextSpan(
+        children: <InlineSpan>[
+          TextSpan(
+            text: '时间\t\t',
+            style: crossPriceTextStyle,
+          ),
+          TextSpan(
+            text: '${model.dateTime.toString()}\n',
+            style: crossPriceTextStyle,
+          ),
+          TextSpan(
+            text: '开盘\t\t',
+            style: crossPriceTextStyle,
+          ),
+          TextSpan(
+            text: '${model.open.toStringAsFixed(6)}\n',
+            style: crossPriceTextStyle,
+          ),
+        ],
+      ),
+      drawDirection: DrawDirection.ltr,
+      margin: crossPriceRectMargin,
+      drawableSize: drawableSize,
+      style: crossPriceTextStyle,
+      // textWidth: 120,
+      textDirection: TextDirection.ltr,
+      textAlign: TextAlign.justify,
+      textWidthBasis: TextWidthBasis.longestLine,
+      padding: crossPriceRectPadding,
+      backgroundColor: crossPriceRectBackgroundColor,
+      borderRadius: crossPriceRectBorderRadius,
+      borderWidth: crossPriceRectBorderWidth,
+      borderColor: crossPriceRectBorderColor,
+    );
   }
 }

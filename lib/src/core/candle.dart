@@ -129,7 +129,7 @@ mixin CandleBinding
   ) {
     final flag = offset.dx > canvasWidthHalf ? -1 : 1;
     Offset endOffset = Offset(
-      offset.dx + priceMarkLineWidth * flag,
+      offset.dx + priceMarkLineLength * flag,
       offset.dy,
     );
     canvas.drawLine(

@@ -34,7 +34,7 @@ extension DrawTextExt on Canvas {
     /// 文本,样式设置. (注: text与children必须设置一个, 否则不绘制)
     String? text,
     TextStyle? style,
-    List<TextSpan>? children,
+    InlineSpan? inlineSpan,
     TextAlign textAlign = TextAlign.left,
     TextDirection textDirection = TextDirection.ltr,
     int? maxLines,
@@ -51,16 +51,16 @@ extension DrawTextExt on Canvas {
     Color borderColor = Colors.transparent,
     double borderWidth = 0,
   }) {
-    if (text?.isNotEmpty != true && children?.isNotEmpty != true) {
+    if (text?.isNotEmpty != true && inlineSpan == null) {
       return Size.zero;
     }
 
     TextPainter textPainter = TextPainter(
-      text: TextSpan(
-        text: text,
-        style: style,
-        children: children,
-      ),
+      text: inlineSpan ??
+          TextSpan(
+            text: text,
+            style: style,
+          ),
       textAlign: textAlign,
       textDirection: textDirection,
       maxLines: maxLines,
