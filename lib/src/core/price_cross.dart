@@ -128,14 +128,14 @@ mixin PriceCrossBinding
     double ldx = 0; // 计算最新价刻度线lineTo参数X轴的dx值. 默认0: 代表橫穿整个Canvas.
     double dy;
     double flag = -1; // 计算右边最新价钱文本时, dy增减的方向
-    if (model.close > data.max) {
+    if (model.close >= data.max) {
       dy = canvasTop; // 画板顶部展示.
-    } else if (model.close < data.min) {
+    } else if (model.close <= data.min) {
       dy = canvasBottom; // 画板底部展示.
       flag = 1;
     } else {
       // 计算最新价在当前画板中的X轴位置.
-      ldx = canvasRight - data.offset - candleMargin + candleWidthHalf;
+      ldx = clampDxInCanvas(startCandleDx - candleActualWidth);
       dy = canvasBottom - (model.close - data.min).toDouble() * dyFactor;
     }
 

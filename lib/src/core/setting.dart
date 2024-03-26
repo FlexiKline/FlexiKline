@@ -1,5 +1,4 @@
 import 'dart:ui' as ui;
-import 'dart:math' as math;
 
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
@@ -91,6 +90,9 @@ mixin SettingBinding on KlineBindingBase {
         offset.dy > canvasTop &&
         offset.dy < canvasBottom;
   }
+
+  double clampDxInCanvas(double dx) => dx.clamp(canvasLeft, canvasRight);
+  double clampDyInCanvas(double dy) => dy.clamp(canvasTop, canvasBottom);
 
   /// 绘制区域最少留白比例
   /// 例如: 当蜡烛数量不足以绘制一屏, 向右移动到末尾时, 绘制区域左边最少留白区域占可绘制区域(canvasWidth)的比例

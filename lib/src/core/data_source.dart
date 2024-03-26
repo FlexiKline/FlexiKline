@@ -9,7 +9,7 @@ import 'setting.dart';
 /// 负责数据的管理, 缓存, 切换, 计算
 mixin DataSourceBinding
     on KlineBindingBase, SettingBinding
-    implements IDataSource, ICandlePainter {
+    implements IDataSource, ICandlePainter, IPriceCrossPainter {
   @override
   void initBinding() {
     super.initBinding();
@@ -198,6 +198,9 @@ mixin DataSourceBinding
     if (newDxOffset != paintDxOffset) {
       paintDxOffset = newDxOffset;
       markRepaintCandle();
+
+      // TODO: 是否要将最新价移回 Candle 模块中绘制 ???
+      markRepaintLastPrice();
     }
   }
 
