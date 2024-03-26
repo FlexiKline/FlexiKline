@@ -142,7 +142,11 @@ mixin CandleBinding
       endOffset.dy - priceMarkFontSize / 2,
     );
 
-    final text = formatPrice(val, instId: curCandleData.req.instId);
+    final text = formatPrice(
+      val,
+      instId: curCandleData.req.instId,
+      precision: curCandleData.req.precision,
+    );
     canvas.drawText(
       offset: endOffset,
       drawDirection: flag < 0 ? DrawDirection.rtl : DrawDirection.ltr,
@@ -164,7 +168,11 @@ mixin CandleBinding
       dy = i * yAxisStep - tickTextFontSize;
 
       final val = max - ((i * yAxisStep - mainPadding.top) / dyFactor).d;
-      final text = formatPrice(val, instId: curCandleData.req.instId);
+      final text = formatPrice(
+        val,
+        instId: curCandleData.req.instId,
+        precision: curCandleData.req.precision,
+      );
 
       canvas.drawText(
         offset: Offset(dx, dy),

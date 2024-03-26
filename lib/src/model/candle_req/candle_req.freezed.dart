@@ -56,6 +56,12 @@ mixin _$CandleReq {
   /// 分页返回的结果集数量，最大为300，不填默认返回100条
   set limit(int value) => throw _privateConstructorUsedError;
 
+  /// 当前交易对精度
+  int get precision => throw _privateConstructorUsedError;
+
+  /// 当前交易对精度
+  set precision(int value) => throw _privateConstructorUsedError;
+
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
   $CandleReqCopyWith<CandleReq> get copyWith =>
@@ -67,7 +73,13 @@ abstract class $CandleReqCopyWith<$Res> {
   factory $CandleReqCopyWith(CandleReq value, $Res Function(CandleReq) then) =
       _$CandleReqCopyWithImpl<$Res, CandleReq>;
   @useResult
-  $Res call({String instId, int? after, int? before, String bar, int limit});
+  $Res call(
+      {String instId,
+      int? after,
+      int? before,
+      String bar,
+      int limit,
+      int precision});
 }
 
 /// @nodoc
@@ -88,6 +100,7 @@ class _$CandleReqCopyWithImpl<$Res, $Val extends CandleReq>
     Object? before = freezed,
     Object? bar = null,
     Object? limit = null,
+    Object? precision = null,
   }) {
     return _then(_value.copyWith(
       instId: null == instId
@@ -110,6 +123,10 @@ class _$CandleReqCopyWithImpl<$Res, $Val extends CandleReq>
           ? _value.limit
           : limit // ignore: cast_nullable_to_non_nullable
               as int,
+      precision: null == precision
+          ? _value.precision
+          : precision // ignore: cast_nullable_to_non_nullable
+              as int,
     ) as $Val);
   }
 }
@@ -122,7 +139,13 @@ abstract class _$$CandleReqImplCopyWith<$Res>
       __$$CandleReqImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String instId, int? after, int? before, String bar, int limit});
+  $Res call(
+      {String instId,
+      int? after,
+      int? before,
+      String bar,
+      int limit,
+      int precision});
 }
 
 /// @nodoc
@@ -141,6 +164,7 @@ class __$$CandleReqImplCopyWithImpl<$Res>
     Object? before = freezed,
     Object? bar = null,
     Object? limit = null,
+    Object? precision = null,
   }) {
     return _then(_$CandleReqImpl(
       instId: null == instId
@@ -163,6 +187,10 @@ class __$$CandleReqImplCopyWithImpl<$Res>
           ? _value.limit
           : limit // ignore: cast_nullable_to_non_nullable
               as int,
+      precision: null == precision
+          ? _value.precision
+          : precision // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }
@@ -175,7 +203,8 @@ class _$CandleReqImpl implements _CandleReq {
       this.after,
       this.before,
       this.bar = "1m",
-      this.limit = 100});
+      this.limit = 100,
+      this.precision = 6});
 
   factory _$CandleReqImpl.fromJson(Map<String, dynamic> json) =>
       _$$CandleReqImplFromJson(json);
@@ -205,9 +234,14 @@ class _$CandleReqImpl implements _CandleReq {
   @JsonKey()
   int limit;
 
+  /// 当前交易对精度
+  @override
+  @JsonKey()
+  int precision;
+
   @override
   String toString() {
-    return 'CandleReq(instId: $instId, after: $after, before: $before, bar: $bar, limit: $limit)';
+    return 'CandleReq(instId: $instId, after: $after, before: $before, bar: $bar, limit: $limit, precision: $precision)';
   }
 
   @JsonKey(ignore: true)
@@ -230,7 +264,8 @@ abstract class _CandleReq implements CandleReq {
       int? after,
       int? before,
       String bar,
-      int limit}) = _$CandleReqImpl;
+      int limit,
+      int precision}) = _$CandleReqImpl;
 
   factory _CandleReq.fromJson(Map<String, dynamic> json) =
       _$CandleReqImpl.fromJson;
@@ -276,6 +311,13 @@ abstract class _CandleReq implements CandleReq {
 
   /// 分页返回的结果集数量，最大为300，不填默认返回100条
   set limit(int value);
+  @override
+
+  /// 当前交易对精度
+  int get precision;
+
+  /// 当前交易对精度
+  set precision(int value);
   @override
   @JsonKey(ignore: true)
   _$$CandleReqImplCopyWith<_$CandleReqImpl> get copyWith =>

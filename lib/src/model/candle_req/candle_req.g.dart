@@ -13,6 +13,7 @@ _$CandleReqImpl _$$CandleReqImplFromJson(Map<String, dynamic> json) =>
       before: json['before'] as int?,
       bar: json['bar'] as String? ?? "1m",
       limit: json['limit'] as int? ?? 100,
+      precision: json['precision'] as int? ?? 6,
     );
 
 Map<String, dynamic> _$$CandleReqImplToJson(_$CandleReqImpl instance) =>
@@ -22,4 +23,5 @@ Map<String, dynamic> _$$CandleReqImplToJson(_$CandleReqImpl instance) =>
       'before': instance.before,
       'bar': instance.bar,
       'limit': instance.limit,
+      'precision': instance.precision,
     };

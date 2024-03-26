@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 
+import '../constant.dart';
 import 'binding_base.dart';
 
 mixin SettingBinding on KlineBindingBase {
@@ -250,7 +251,7 @@ mixin SettingBinding on KlineBindingBase {
   /// 价钱格式化函数
   /// TODO: 待数据格式化.
   String formatPrice(Decimal val, {int? precision, required String instId}) {
-    int p = precision ?? 6; // TODO: 待优化
+    int p = precision ?? defaultPrecision; // TODO: 待优化
     if (priceFormat != null) {
       return priceFormat!.call(
         instId,

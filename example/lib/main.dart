@@ -46,7 +46,11 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   late final KlineController controller1;
   late final KlineController controller2;
-  final CandleReq req = CandleReq(instId: 'BTC-USDT', bar: TimeBar.D1.bar);
+  final CandleReq req = CandleReq(
+    instId: 'BTC-USDT',
+    bar: TimeBar.D1.bar,
+    precision: 4,
+  );
   @override
   void initState() {
     super.initState();
@@ -66,7 +70,11 @@ class _MyHomePageState extends State<MyHomePage> {
     //   controller1.setCandleData(req, list);
     // });
     genLocalCandleList().then((list) {
-      final req = CandleReq(instId: 'BTC-USDT-SWAP', bar: TimeBar.m15.bar);
+      final req = CandleReq(
+        instId: 'BTC-USDT-SWAP',
+        bar: TimeBar.m15.bar,
+        precision: 4,
+      );
       controller1.setCandleData(req, list);
     });
   }

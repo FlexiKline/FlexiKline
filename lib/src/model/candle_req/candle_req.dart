@@ -23,6 +23,9 @@ class CandleReq with _$CandleReq {
 
     /// 分页返回的结果集数量，最大为300，不填默认返回100条
     @Default(100) int limit,
+
+    /// 当前交易对精度
+    @Default(6) int precision,
   }) = _CandleReq;
 
   factory CandleReq.fromJson(Map<String, dynamic> json) =>

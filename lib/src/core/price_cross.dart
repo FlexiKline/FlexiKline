@@ -1,12 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+
+import '../model/export.dart';
 import '../render/export.dart';
 import '../utils/export.dart';
 import 'binding_base.dart';
 import 'interface.dart';
 import 'setting.dart';
-import '../model/export.dart';
 
 mixin PriceCrossBinding
     on KlineBindingBase, SettingBinding
@@ -149,7 +150,11 @@ mixin PriceCrossBinding
 
     // 画最新价文本区域.
     double textHeight = lastPriceRectPadding.vertical + lastPriceFontSize;
-    String text = formatPrice(model.close, instId: curCandleData.req.instId);
+    String text = formatPrice(
+      model.close,
+      instId: curCandleData.req.instId,
+      precision: curCandleData.req.precision,
+    );
     if (showLastPriceUpdateTime) {
       final nextUpdateDateTime = model.nextUpdateDateTime(data.req.bar);
       // logd(

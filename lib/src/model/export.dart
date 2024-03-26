@@ -1,11 +1,10 @@
-import '../core/candle_data.dart';
 import 'candle_model/candle_model.dart';
 import 'candle_req/candle_req.dart';
-import 'constant.dart';
+import '../constant.dart';
+import '../core/candle_data.dart';
 
 export './candle_model/candle_model.dart';
 export './candle_req/candle_req.dart';
-export './constant.dart';
 export './gesture.dart';
 
 extension CandleDataExt on CandleData {
