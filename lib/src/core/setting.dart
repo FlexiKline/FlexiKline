@@ -4,6 +4,7 @@ import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 
 import '../constant.dart';
+import '../utils/export.dart';
 import 'binding_base.dart';
 
 mixin SettingBinding on KlineBindingBase {
@@ -37,6 +38,9 @@ mixin SettingBinding on KlineBindingBase {
       size.height,
     );
   }
+
+  Color longColor = Colors.green;
+  Color shortColor = Colors.red;
 
   ///  Canvas 布局参数图
   ///                      mainRectWidth
@@ -143,23 +147,24 @@ mixin SettingBinding on KlineBindingBase {
   /// 绘制区域宽度内, 可绘制的蜡烛数
   int get maxCandleCount => (canvasWidth / candleActualWidth).ceil();
 
-  /// CandleBar上涨配置
-  Paint get riseLinePaint => Paint()
-    ..color = Colors.green
+  /// CandleBar配置
+  // Candle Line
+  double candleLineWidth = 1;
+  Paint get candleLineLongPaint => Paint()
+    ..color = longColor
     ..style = PaintingStyle.stroke
-    ..strokeWidth = 1;
-  Paint get riseBoldPaint => Paint()
-    ..color = Colors.green
+    ..strokeWidth = candleLineWidth;
+  Paint get candleLineShortPaint => Paint()
+    ..color = shortColor
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = candleLineWidth;
+  // Candle Bar
+  Paint get candleBarLongPaint => Paint()
+    ..color = longColor
     ..style = PaintingStyle.stroke
     ..strokeWidth = candleWidth;
-
-  /// CandleBar下跌配置
-  Paint get downLinePaint => Paint()
-    ..color = Colors.red
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = 1;
-  Paint get downBoldPaint => Paint()
-    ..color = Colors.red
+  Paint get candleBarShortPaint => Paint()
+    ..color = shortColor
     ..style = PaintingStyle.stroke
     ..strokeWidth = candleWidth;
 
@@ -183,7 +188,7 @@ mixin SettingBinding on KlineBindingBase {
   EdgeInsets tickTextPadding = const EdgeInsets.only(
     right: 2,
   );
-  Color tickTextColor = Colors.blue;
+  Color tickTextColor = Colors.black;
   double get tickTextHeight => tickTextFontSize;
   TextStyle get tickTextStyle => TextStyle(
         fontSize: tickTextFontSize,
@@ -251,23 +256,6 @@ mixin SettingBinding on KlineBindingBase {
     ..strokeWidth = lastPriceMarkLineWidth ?? pixel;
   List<double> lastPriceMarkLineDashes = const [3, 3];
 
-  /// 价钱格式化函数
-  String Function(String instId, Decimal val, {int? precision})? priceFormat;
-
-  /// 价钱格式化函数
-  /// TODO: 待数据格式化.
-  String formatPrice(Decimal val, {int? precision, required String instId}) {
-    int p = precision ?? defaultPrecision; // TODO: 待优化
-    if (priceFormat != null) {
-      return priceFormat!.call(
-        instId,
-        val,
-        precision: p,
-      );
-    }
-    return val.toStringAsFixed(p);
-  }
-
   /// Cross 配置 ///
   // cross line
   Color crossLineColor = Colors.black;
@@ -287,7 +275,7 @@ mixin SettingBinding on KlineBindingBase {
     ..style = PaintingStyle.fill;
   // cross Y轴价钱文本配置
   // 是否展示Cross Y轴上的价钱标记.
-  bool isShowCrossYAxisPriceMark = true;
+  bool showCrossYAxisPriceMark = true;
   double crossPriceFontSize = 10;
   double crossPriceTextWidth = 100; // TODO 暂无用
   Color crossPriceColor = Colors.white;
@@ -318,6 +306,95 @@ mixin SettingBinding on KlineBindingBase {
         crossPriceRectMargin.vertical;
   }
 
-  // cross popup window 配置
-  bool isShowCrossPopupWindow = true;
+  // cross popup candle info 配置
+  bool showPopupCrossCandleInfo = true;
+  // Cross popup background config.
+  Color crossCandleRectBackgroundColor = Colors.grey;
+  double crossCandleRectBorderRadius = 2;
+  double crossCandleRectBorderWidth = 0.0;
+  Color crossCandleRectBorderColor = Colors.transparent;
+  EdgeInsets crossCandleRectMargin = const EdgeInsets.symmetric(
+    horizontal: 1,
+  );
+  EdgeInsets crossCandleRectPadding = const EdgeInsets.symmetric(
+    horizontal: 2,
+    vertical: 2,
+  );
+
+  double crossCandleFontSize = 10;
+  double crossCandleTextHeight = 1.2; // 文本跨度的高度，为字体大小的倍数
+  TextStyle get crossCandleTextStyle => TextStyle(
+        fontSize: crossCandleFontSize,
+        color: Colors.black,
+        overflow: TextOverflow.ellipsis,
+        height: crossCandleTextHeight,
+        textBaseline: TextBaseline.alphabetic,
+      );
+
+  // Cross Candle Title Style
+  TextStyle? _crossCandleTitleStyle;
+  TextStyle get crossCandleTitleStyle =>
+      _crossCandleTitleStyle ?? crossCandleTextStyle;
+  set crossCandleTitleStyle(TextStyle style) => _crossCandleTitleStyle = style;
+
+  // Cross Candle Value Style
+  TextStyle? _crossCandleValueStyle;
+  TextStyle get crossCandleValueStyle =>
+      _crossCandleValueStyle ?? crossCandleTextStyle;
+  set crossCandleValueStyle(TextStyle style) => _crossCandleValueStyle = style;
+
+  // Cross Candle Long Style
+  TextStyle? _crossCandleLongStyle;
+  TextStyle get crossCandleLongStyle =>
+      _crossCandleLongStyle ??
+      crossCandleTextStyle.copyWith(
+        color: longColor,
+      );
+  set crossCandleLongStyle(TextStyle style) => _crossCandleLongStyle = style;
+
+  // Cross Candle Short Style
+  TextStyle? _crossCandleShortStyle;
+  TextStyle get crossCandleShortStyle =>
+      _crossCandleShortStyle ??
+      crossCandleTextStyle.copyWith(
+        color: shortColor,
+      );
+  set crossCandleShortStyle(TextStyle style) => _crossCandleShortStyle = style;
+
+  // Candle信息多语言配置.
+  List<String> _i18nCandleKeys = i18nCandleEnKeys;
+  List<String> get i18nCandleKeys => _i18nCandleKeys;
+  set i18nCandleKeys(List<String> keys) {
+    if (keys.isNotEmpty && keys.length == i18nCandleEnKeys.length) {
+      _i18nCandleKeys = keys;
+    }
+  }
+
+  //////////////////////////////////////
+
+  /// 价钱格式化函数
+  String Function(String instId, Decimal val, {int? precision})? priceFormat;
+
+  /// 价钱格式化函数
+  /// TODO: 待数据格式化.
+  String formatPrice(Decimal val, {int? precision, required String instId}) {
+    int p = precision ?? defaultPrecision; // TODO: 待优化
+    if (priceFormat != null) {
+      return priceFormat!.call(
+        instId,
+        val,
+        precision: p,
+      );
+    }
+    return val.toStringAsFixed(p);
+  }
+
+  /// 时间格式化函数
+  String Function(DateTime dateTime)? dateTimeFormat;
+  String formatDateTime(DateTime dateTime) {
+    if (dateTimeFormat != null) {
+      return dateTimeFormat!.call(dateTime);
+    }
+    return formatyyMMddHHMMss(dateTime);
+  }
 }

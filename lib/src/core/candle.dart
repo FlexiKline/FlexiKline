@@ -87,7 +87,7 @@ mixin CandleBinding
       canvas.drawLine(
         highOff,
         lowOff,
-        isRise ? riseLinePaint : downLinePaint,
+        isRise ? candleLineLongPaint : candleLineShortPaint,
       );
       final openOff = Offset(
         dx,
@@ -100,7 +100,7 @@ mixin CandleBinding
       canvas.drawLine(
         openOff,
         closeOff,
-        isRise ? riseBoldPaint : downBoldPaint,
+        isRise ? candleBarLongPaint : candleBarShortPaint,
       );
 
       if (isDrawPriceMark) {

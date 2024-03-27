@@ -55,3 +55,16 @@ enum TimeBar {
     }
   }
 }
+
+List<String> i18nCandleEnKeys = [
+  'Time',
+  'Open',
+  'High',
+  'Low',
+  'Close',
+  'Chg',
+  '%Chg',
+  // 'Range',
+  'Amount',
+  // 'Turnover'
+];

@@ -215,7 +215,7 @@ mixin PriceCrossBinding
         crossPointPaint,
       );
 
-    if (isShowCrossYAxisPriceMark) {
+    if (showCrossYAxisPriceMark) {
       final val =
           curCandleData.max - ((offset.dy - mainPadding.top) / dyFactor).d;
       final text = formatPrice(
@@ -243,17 +243,79 @@ mixin PriceCrossBinding
       );
     }
 
-    if (isShowCrossPopupWindow) {
-      _paintCrossPopupWindow(canvas, offset);
+    if (showPopupCrossCandleInfo) {
+      _paintPopupCrossCandleCard(canvas, offset);
     }
   }
 
   /// 绘制Cross 命中的蜡烛数据弹窗
-  void _paintCrossPopupWindow(Canvas canvas, Offset offset) {
+  void _paintPopupCrossCandleCard(Canvas canvas, Offset offset) {
     final index = ((startCandleDx - offset.dx) / candleActualWidth).round();
     final model = curCandleData.getCandle(curCandleData.start + index - 1);
     logd('_paintCrossPopupWindow model:$model');
     if (model == null) return;
+
+    final instId = curCandleData.instId;
+    final keys = i18nCandleKeys;
+    TextStyle changeStyle = crossCandleTitleStyle;
+    final chgrate = model.changeRate;
+    if (chgrate > 0) {
+      changeStyle = crossCandleLongStyle;
+    } else if (chgrate < 0) {
+      changeStyle = crossCandleShortStyle;
+    }
+
+    // ['Time', 'Open', 'High', 'Low', 'Close', 'Chg', '%Chg', 'Amount']
+    List<InlineSpan> spanList = [
+      TextSpan(
+        text: '${keys[0]}\t${formatDateTime(model.dateTime)}\n',
+        style: crossCandleTitleStyle,
+      ),
+      TextSpan(
+        text: '${keys[1]}\t${formatPrice(model.open, instId: instId)}\n',
+        style: crossCandleTitleStyle,
+      ),
+      TextSpan(
+        text: '${keys[2]}\t${formatPrice(model.high, instId: instId)}\n',
+        style: crossCandleTitleStyle,
+      ),
+      TextSpan(
+        text: '${keys[3]}\t${formatPrice(model.low, instId: instId)}\n',
+        style: crossCandleTitleStyle,
+      ),
+      TextSpan(
+        text: '${keys[4]}\t${formatPrice(model.close, instId: instId)}\n',
+        style: crossCandleTitleStyle,
+      ),
+      TextSpan(
+        style: crossCandleTitleStyle,
+        children: [
+          TextSpan(
+            text: '${keys[5]}\t',
+          ),
+          TextSpan(
+            text: '${formatPrice(model.change, instId: instId)}\n',
+            style: changeStyle,
+          )
+        ],
+      ),
+      TextSpan(
+        style: crossCandleTitleStyle,
+        children: [
+          TextSpan(
+            text: '${keys[6]}\t',
+          ),
+          TextSpan(
+            text: '${formatPercentage(model.changeRate)}\n',
+            style: changeStyle,
+          )
+        ],
+      ),
+      TextSpan(
+        text: '${keys[7]}\t${model.vol.bigDecimalString}',
+        style: crossCandleTitleStyle,
+      ),
+    ];
 
     canvas.drawText(
       offset: Offset(
@@ -261,38 +323,21 @@ mixin PriceCrossBinding
         canvasTop,
       ),
       inlineSpan: TextSpan(
-        children: <InlineSpan>[
-          TextSpan(
-            text: '时间\t\t',
-            style: crossPriceTextStyle,
-          ),
-          TextSpan(
-            text: '${model.dateTime.toString()}\n',
-            style: crossPriceTextStyle,
-          ),
-          TextSpan(
-            text: '开盘\t\t',
-            style: crossPriceTextStyle,
-          ),
-          TextSpan(
-            text: '${model.open.toStringAsFixed(6)}\n',
-            style: crossPriceTextStyle,
-          ),
-        ],
+        children: spanList,
       ),
       drawDirection: DrawDirection.ltr,
-      margin: crossPriceRectMargin,
+      margin: crossCandleRectMargin,
       drawableSize: drawableSize,
-      style: crossPriceTextStyle,
+      style: crossCandleTextStyle,
       // textWidth: 120,
       textDirection: TextDirection.ltr,
       textAlign: TextAlign.justify,
       textWidthBasis: TextWidthBasis.longestLine,
-      padding: crossPriceRectPadding,
-      backgroundColor: crossPriceRectBackgroundColor,
-      borderRadius: crossPriceRectBorderRadius,
-      borderWidth: crossPriceRectBorderWidth,
-      borderColor: crossPriceRectBorderColor,
+      padding: crossCandleRectPadding,
+      backgroundColor: crossCandleRectBackgroundColor,
+      borderRadius: crossCandleRectBorderRadius,
+      borderWidth: crossCandleRectBorderWidth,
+      borderColor: crossCandleRectBorderColor,
     );
   }
 }
