@@ -37,7 +37,8 @@ extension DrawTextExt on Canvas {
 
     /// 文本内容的背景区域设置
     Color backgroundColor = Colors.transparent,
-    double borderRadius = 0,
+    double radius = 0,
+    BorderRadius? borderRadius,
     EdgeInsets padding = EdgeInsets.zero,
     Color borderColor = Colors.transparent,
     double borderWidth = 0,
@@ -110,15 +111,26 @@ extension DrawTextExt on Canvas {
       // }
 
       final Path path = Path();
-      path.addRRect(
-        RRect.fromLTRBR(
+      if (borderRadius != null) {
+        path.addRRect(RRect.fromLTRBAndCorners(
           offset.dx,
           offset.dy,
           offset.dx + paintSize.width,
           offset.dy + paintSize.height,
-          Radius.circular(borderRadius),
-        ),
-      );
+          topLeft: borderRadius.topLeft,
+          topRight: borderRadius.topRight,
+          bottomLeft: borderRadius.bottomLeft,
+          bottomRight: borderRadius.bottomRight,
+        ));
+      } else {
+        path.addRRect(RRect.fromLTRBR(
+          offset.dx,
+          offset.dy,
+          offset.dx + paintSize.width,
+          offset.dy + paintSize.height,
+          Radius.circular(radius),
+        ));
+      }
 
       if (isDrawBg) {
         drawPath(

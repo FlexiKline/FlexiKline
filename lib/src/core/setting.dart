@@ -305,11 +305,9 @@ mixin SettingBinding on KlineBindingBase {
   // candle Card background config.
   Color candleCardRectBackgroundColor = Colors.grey;
   double candleCardRectBorderRadius = 4;
-  double candleCardRectBorderWidth = 0.0;
-  Color candleCardRectBorderColor = Colors.transparent;
-  EdgeInsets candleCardRectMargin = const EdgeInsets.symmetric(
-    horizontal: 6,
-  );
+  // double candleCardRectBorderWidth = 0.5;
+  // Color candleCardRectBorderColor = Colors.black;
+  double candleCardRectMargin = 6;
   EdgeInsets candleCardRectPadding = const EdgeInsets.symmetric(
     horizontal: 2,
     vertical: 2,

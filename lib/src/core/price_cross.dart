@@ -182,7 +182,7 @@ mixin PriceCrossBinding
       textWidthBasis: TextWidthBasis.longestLine,
       padding: lastPriceRectPadding,
       backgroundColor: lastPriceRectBackgroundColor,
-      borderRadius: lastPriceRectBorderRadius,
+      radius: lastPriceRectBorderRadius,
       borderWidth: lastPriceRectBorderWidth,
       borderColor: lastPriceRectBorderColor,
     );
@@ -235,7 +235,7 @@ mixin PriceCrossBinding
         textWidthBasis: TextWidthBasis.longestLine,
         padding: crossPriceRectPadding,
         backgroundColor: crossPriceRectBackgroundColor,
-        borderRadius: crossPriceRectBorderRadius,
+        radius: crossPriceRectBorderRadius,
         borderWidth: crossPriceRectBorderWidth,
         borderColor: crossPriceRectBorderColor,
       );
@@ -256,7 +256,7 @@ mixin PriceCrossBinding
     /// 1. 准备数据
     // ['Time', 'Open', 'High', 'Low', 'Close', 'Chg', '%Chg', 'Amount']
     final keys = i18nCandleCardKeys;
-    final keySpanList = [];
+    final keySpanList = <TextSpan>[];
     for (var i = 0; i < keys.length; i++) {
       final text = i < keys.length - 1 ? '${keys[i]}\n' : keys[i];
       keySpanList.add(TextSpan(text: text, style: candleCardTitleStyle));
@@ -271,7 +271,7 @@ mixin PriceCrossBinding
     } else if (chgrate < 0) {
       changeStyle = candleCardShortStyle;
     }
-    final valueSpan = [
+    final valueSpan = <TextSpan>[
       TextSpan(
         text: '${formatDateTime(model.dateTime)}\n',
         style: candleCardTitleStyle,
@@ -311,25 +311,62 @@ mixin PriceCrossBinding
     DrawDirection drawDirection;
     if (offset.dx > canvasWidthHalf) {
       // 点击区域在右边; 绘制在左边
-      drawOffset = Offset(canvasLeft, canvasTop);
+      drawOffset = Offset(canvasLeft + candleCardRectMargin, canvasTop);
       drawDirection = DrawDirection.ltr;
     } else {
       drawOffset = Offset(canvasRight, canvasTop);
       drawDirection = DrawDirection.rtl;
     }
 
-    Size size = Size(100, 100);
-    // canvas.drawRRect(rrect, paint)
-
-    canvas.drawRectBackground(
+    final size = canvas.drawText(
       offset: drawOffset,
       drawDirection: drawDirection,
-      margin: candleCardRectMargin,
-      drawableSize: drawableSize, // 必须矫正.
-      size: size,
+      drawableSize: drawableSize,
+      inlineSpan: TextSpan(
+        children: keySpanList,
+        style: candleCardTitleStyle,
+      ),
+      style: candleCardTitleStyle,
+      textAlign: TextAlign.start,
+      textWidthBasis: TextWidthBasis.longestLine,
+      padding: candleCardRectPadding,
       backgroundColor: candleCardRectBackgroundColor,
-      borderRadius: candleCardRectBorderRadius,
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(candleCardRectBorderRadius),
+        bottomLeft: Radius.circular(candleCardRectBorderRadius),
+      ),
     );
+    canvas.drawText(
+      offset: Offset(
+        drawOffset.dx + size.width - 1,
+        drawOffset.dy,
+      ),
+      drawDirection: drawDirection,
+      drawableSize: drawableSize,
+      inlineSpan: TextSpan(
+        children: valueSpan,
+        style: candleCardValueStyle,
+      ),
+      style: candleCardValueStyle,
+      textAlign: TextAlign.end,
+      textWidthBasis: TextWidthBasis.longestLine,
+      padding: candleCardRectPadding,
+      backgroundColor: candleCardRectBackgroundColor,
+      borderRadius: BorderRadius.only(
+        topRight: Radius.circular(candleCardRectBorderRadius),
+        bottomRight: Radius.circular(candleCardRectBorderRadius),
+      ),
+    );
+
+    // canvas.drawRectBackground(
+    //   offset: drawOffset,
+    //   drawDirection: drawDirection,
+    //   margin: candleCardRectMargin,
+    //   drawableSize: drawableSize, // 必须矫正.
+    //   size: size,
+    //   backgroundColor: candleCardRectBackgroundColor,
+    //   borderRadius: candleCardRectBorderRadius,
+    // );
   }
 
   /// 绘制Cross 命中的蜡烛数据弹窗
