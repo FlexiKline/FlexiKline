@@ -48,8 +48,6 @@ class CandleData with KlineLog {
   CandleModel? startModel;
   CandleModel? endModel;
 
-  String get instId => req.instId;
-
   void debugPrintDrawParams(String tag) {
     logd(
       'DrawParams>$tag [${req.instId}-${req.bar}] > len:${list.length} start:$start, end:$end, offset:$offset, max:$max, min:$min',

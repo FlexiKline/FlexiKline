@@ -8,9 +8,11 @@ import '../constant.dart';
 export './candle_model/candle_model.dart';
 export './candle_req/candle_req.dart';
 export './gesture.dart';
+export './card_info.dart';
 
 extension CandleDataExt on CandleData {
   String get instId => req.instId;
+  int get precision => req.precision;
   String get key => req.key;
   String get reqKey => req.reqKey;
 

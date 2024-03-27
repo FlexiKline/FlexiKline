@@ -1,29 +1,20 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
-enum DrawDirection {
-  /// The draw flows from left to right.
-  ltr,
-
-  /// The draw flows from right to left.
-  rtl;
-
-  bool get isltr => this == ltr;
-}
+import 'common.dart';
 
 extension DrawTextExt on Canvas {
   /// 绘制文本
-  ///
   Size drawText({
     ///绘制启始坐标位置
     required Offset offset,
 
-    /// X轴上的绘制方向: 以offset为原点, 向左向进制绘制.
+    /// X轴上的绘制方向: 以offset为原点, 向左向右绘制.
     DrawDirection drawDirection = DrawDirection.ltr,
 
     /// 文本区域的边界margin, 在贴近绘制边界时, 增加一定的margin友好展示.
     // double drawMargin = 0,
-    EdgeInsets? margin,
+    // EdgeInsets? margin,
 
     /// 可绘制区域大小
     /// 主要用于边界矫正, 当前超出边界区域时, 会主动反向调整, 以保证内容区域完全展示. 如为null: 则不做边界矫正.
@@ -79,44 +70,44 @@ extension DrawTextExt on Canvas {
       padding.vertical,
     );
 
-    /// 根据绘制方向计算并矫正X轴上的偏移量.
-    if (drawDirection == DrawDirection.rtl) {
-      offset = Offset(
-        math.max(0, offset.dx - paintSize.width),
-        math.max(0, offset.dy),
+    if (drawableSize != null) {
+      double dy = math.max(
+        0,
+        math.min(offset.dy, drawableSize.height - paintSize.height),
       );
-    } else if (drawableSize != null &&
-        offset.dx + paintSize.width > drawableSize.width) {
-      // 如果内容区域超出画布右边界. 向左调整offset
-      offset = Offset(
-        math.max(0, drawableSize.width - paintSize.width),
-        math.max(0, offset.dy),
-      );
-    }
 
-    // 矫正Y轴上的边界.
-    bool isUpward = true;
-    if (drawableSize != null &&
-        offset.dy + paintSize.height > drawableSize.height) {
-      offset = Offset(
-        math.max(0, offset.dx),
-        drawableSize.height - paintSize.height,
-      );
-      isUpward = false;
+      double dx;
+      if (drawDirection.isltr) {
+        dx = math.max(
+          0,
+          math.min(offset.dx, drawableSize.width - paintSize.width),
+        );
+      } else {
+        // 从右向左
+        dx = math.max(
+          0,
+          math.min(
+            drawableSize.width - paintSize.width,
+            offset.dx - paintSize.width,
+          ),
+        );
+      }
+
+      offset = Offset(dx, dy);
     }
 
     final isDrawBg = backgroundColor.alpha != 0;
     final isDrawBorder = borderColor.alpha != 0 && borderWidth > 0;
     if (!padding.collapsedSize.isEmpty || isDrawBg || isDrawBorder) {
-      if (margin != null && margin.isNonNegative) {
-        final x = drawDirection.isltr ? -margin.right : margin.left;
-        final y = isUpward ? margin.bottom : -margin.top;
-        offset = Offset(
-          offset.dx + x,
-          offset.dy + y,
-        );
-        margin = null;
-      }
+      // if (margin != null && margin.isNonNegative) {
+      //   final x = drawDirection.isltr ? -margin.right : margin.left;
+      //   final y = isUpward ? margin.bottom : -margin.top;
+      //   offset = Offset(
+      //     offset.dx + x,
+      //     offset.dy + y,
+      //   );
+      //   margin = null;
+      // }
 
       final Path path = Path();
       path.addRRect(
@@ -152,14 +143,14 @@ extension DrawTextExt on Canvas {
       offset += Offset(padding.left, padding.top);
     }
 
-    if (margin != null && margin.isNonNegative) {
-      final x = drawDirection.isltr ? -margin.right : margin.left;
-      final y = isUpward ? -margin.bottom : margin.top;
-      offset = Offset(
-        offset.dx + x,
-        offset.dy + y,
-      );
-    }
+    // if (margin != null && margin.isNonNegative) {
+    //   final x = drawDirection.isltr ? -margin.right : margin.left;
+    //   final y = isUpward ? -margin.bottom : margin.top;
+    //   offset = Offset(
+    //     offset.dx + x,
+    //     offset.dy + y,
+    //   );
+    // }
 
     textPainter.paint(this, offset);
 

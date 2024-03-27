@@ -13,6 +13,6 @@ String formatBigDecimal(Decimal val) {
   } else if (val.abs() >= 1e3.d) {
     return '${(val / 1e3.d).toDecimal().toStringAsFixed(2)}K';
   } else {
-    return val.toStringAsFixed(3);
+    return val.toStringAsFixed(2);
   }
 }

@@ -4,6 +4,7 @@ import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 
 import '../constant.dart';
+import '../model/export.dart';
 import '../utils/export.dart';
 import 'binding_base.dart';
 
@@ -238,10 +239,7 @@ mixin SettingBinding on KlineBindingBase {
   double lastPriceRectBorderRadius = 2;
   double lastPriceRectBorderWidth = 0.5;
   Color lastPriceRectBorderColor = Colors.black;
-  EdgeInsets lastPriceRectMargin = const EdgeInsets.symmetric(
-    horizontal: 1,
-    // vertical: 1,
-  );
+  double lastPriceRectRightMargin = 1;
   EdgeInsets lastPriceRectPadding = const EdgeInsets.symmetric(
     horizontal: 2,
     vertical: 2,
@@ -291,82 +289,78 @@ mixin SettingBinding on KlineBindingBase {
   double crossPriceRectBorderRadius = 2;
   double crossPriceRectBorderWidth = 0.0;
   Color crossPriceRectBorderColor = Colors.transparent;
-  EdgeInsets crossPriceRectMargin = const EdgeInsets.symmetric(
-    horizontal: 1,
-    // vertical: 1,
-  );
+  double crossPriceRectRigthMargin = 1;
   EdgeInsets crossPriceRectPadding = const EdgeInsets.symmetric(
     horizontal: 2,
     vertical: 2,
   );
   // cross 价钱区域总高度.
   double get crossPriceRectHeight {
-    return crossPriceFontSize +
-        crossPriceRectPadding.vertical +
-        crossPriceRectMargin.vertical;
+    return crossPriceFontSize + crossPriceRectPadding.vertical;
   }
 
-  // cross popup candle info 配置
-  bool showPopupCrossCandleInfo = true;
-  // Cross popup background config.
-  Color crossCandleRectBackgroundColor = Colors.grey;
-  double crossCandleRectBorderRadius = 2;
-  double crossCandleRectBorderWidth = 0.0;
-  Color crossCandleRectBorderColor = Colors.transparent;
-  EdgeInsets crossCandleRectMargin = const EdgeInsets.symmetric(
-    horizontal: 1,
+  // candle Card 配置
+  bool showPopupCandleCard = true;
+
+  // candle Card background config.
+  Color candleCardRectBackgroundColor = Colors.grey;
+  double candleCardRectBorderRadius = 4;
+  double candleCardRectBorderWidth = 0.0;
+  Color candleCardRectBorderColor = Colors.transparent;
+  EdgeInsets candleCardRectMargin = const EdgeInsets.symmetric(
+    horizontal: 6,
   );
-  EdgeInsets crossCandleRectPadding = const EdgeInsets.symmetric(
+  EdgeInsets candleCardRectPadding = const EdgeInsets.symmetric(
     horizontal: 2,
     vertical: 2,
   );
 
-  double crossCandleFontSize = 10;
-  double crossCandleTextHeight = 1.2; // 文本跨度的高度，为字体大小的倍数
-  TextStyle get crossCandleTextStyle => TextStyle(
-        fontSize: crossCandleFontSize,
+  double candleCardFontSize = 10;
+  double candleCardTextHeight = 1.2; // 文本跨度的高度，为字体大小的倍数
+  TextStyle get candleCardTextStyle => TextStyle(
+        fontSize: candleCardFontSize,
         color: Colors.black,
         overflow: TextOverflow.ellipsis,
-        height: crossCandleTextHeight,
+        height: candleCardTextHeight,
         textBaseline: TextBaseline.alphabetic,
       );
 
-  // Cross Candle Title Style
-  TextStyle? _crossCandleTitleStyle;
-  TextStyle get crossCandleTitleStyle =>
-      _crossCandleTitleStyle ?? crossCandleTextStyle;
-  set crossCandleTitleStyle(TextStyle style) => _crossCandleTitleStyle = style;
+  // candle Card Title Style
+  TextStyle? _candleCardTitleStyle;
+  TextStyle get candleCardTitleStyle =>
+      _candleCardTitleStyle ?? candleCardTextStyle;
+  set candleCardTitleStyle(TextStyle style) => _candleCardTitleStyle = style;
 
-  // Cross Candle Value Style
-  TextStyle? _crossCandleValueStyle;
-  TextStyle get crossCandleValueStyle =>
-      _crossCandleValueStyle ?? crossCandleTextStyle;
-  set crossCandleValueStyle(TextStyle style) => _crossCandleValueStyle = style;
+  // candle Card Value Style
+  TextStyle? _candleCardValueStyle;
+  TextStyle get candleCardValueStyle =>
+      _candleCardValueStyle ?? candleCardTextStyle;
+  set candleCardValueStyle(TextStyle style) => _candleCardValueStyle = style;
 
   // Cross Candle Long Style
-  TextStyle? _crossCandleLongStyle;
-  TextStyle get crossCandleLongStyle =>
-      _crossCandleLongStyle ??
-      crossCandleTextStyle.copyWith(
+  TextStyle? _candleCardLongStyle;
+  TextStyle get candleCardLongStyle =>
+      _candleCardLongStyle ??
+      candleCardTextStyle.copyWith(
         color: longColor,
       );
-  set crossCandleLongStyle(TextStyle style) => _crossCandleLongStyle = style;
+  set candleCardLongStyle(TextStyle style) => _candleCardLongStyle = style;
 
-  // Cross Candle Short Style
-  TextStyle? _crossCandleShortStyle;
-  TextStyle get crossCandleShortStyle =>
-      _crossCandleShortStyle ??
-      crossCandleTextStyle.copyWith(
+  // candle Card Short Style
+  TextStyle? _candleCardShortStyle;
+  TextStyle get candleCardShortStyle =>
+      _candleCardShortStyle ??
+      candleCardTextStyle.copyWith(
         color: shortColor,
       );
-  set crossCandleShortStyle(TextStyle style) => _crossCandleShortStyle = style;
+  set candleCardShortStyle(TextStyle style) => _candleCardShortStyle = style;
 
-  // Candle信息多语言配置.
-  List<String> _i18nCandleKeys = i18nCandleEnKeys;
-  List<String> get i18nCandleKeys => _i18nCandleKeys;
-  set i18nCandleKeys(List<String> keys) {
-    if (keys.isNotEmpty && keys.length == i18nCandleEnKeys.length) {
-      _i18nCandleKeys = keys;
+  // candle Card信息多语言配置.
+  List<String> _i18nCandleCardKeys = i18nCandleCardEn;
+  List<String> get i18nCandleCardKeys => _i18nCandleCardKeys;
+  set i18nCandleCardKeys(List<String> keys) {
+    if (keys.isNotEmpty && keys.length == i18nCandleCardEn.length) {
+      _i18nCandleCardKeys = keys;
     }
   }
 
@@ -397,4 +391,7 @@ mixin SettingBinding on KlineBindingBase {
     }
     return formatyyMMddHHMMss(dateTime);
   }
+
+  /// 定制展示Candle Card info.
+  List<CardInfo> Function(CandleModel model)? customCandleCardInfo;
 }

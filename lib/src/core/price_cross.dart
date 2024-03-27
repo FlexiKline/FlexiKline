@@ -171,11 +171,10 @@ mixin PriceCrossBinding
     }
     canvas.drawText(
       offset: Offset(
-        dx,
+        dx - lastPriceRectRightMargin,
         dy + flag * textHeight / 2, // 计算最新价文本区域相对于刻度线的位置
       ),
-      drawDirection: DrawDirection.ltr,
-      margin: lastPriceRectMargin,
+      drawDirection: DrawDirection.rtl,
       drawableSize: drawableSize,
       text: text,
       style: lastPriceTextStyle,
@@ -225,11 +224,10 @@ mixin PriceCrossBinding
       );
       canvas.drawText(
         offset: Offset(
-          canvasRight,
+          canvasRight - crossPriceRectRigthMargin,
           offset.dy - crossPriceRectHeight / 2,
         ),
-        drawDirection: DrawDirection.ltr,
-        margin: crossPriceRectMargin,
+        drawDirection: DrawDirection.rtl,
         drawableSize: drawableSize,
         text: text,
         style: crossPriceTextStyle,
@@ -243,101 +241,194 @@ mixin PriceCrossBinding
       );
     }
 
-    if (showPopupCrossCandleInfo) {
-      _paintPopupCrossCandleCard(canvas, offset);
+    if (showPopupCandleCard) {
+      _paintPopupCandleCard(canvas, offset);
     }
   }
 
   /// 绘制Cross 命中的蜡烛数据弹窗
-  void _paintPopupCrossCandleCard(Canvas canvas, Offset offset) {
+  void _paintPopupCandleCard(Canvas canvas, Offset offset) {
     final index = ((startCandleDx - offset.dx) / candleActualWidth).round();
     final model = curCandleData.getCandle(curCandleData.start + index - 1);
     logd('_paintCrossPopupWindow model:$model');
     if (model == null) return;
 
-    final instId = curCandleData.instId;
-    final keys = i18nCandleKeys;
-    TextStyle changeStyle = crossCandleTitleStyle;
-    final chgrate = model.changeRate;
-    if (chgrate > 0) {
-      changeStyle = crossCandleLongStyle;
-    } else if (chgrate < 0) {
-      changeStyle = crossCandleShortStyle;
+    /// 1. 准备数据
+    // ['Time', 'Open', 'High', 'Low', 'Close', 'Chg', '%Chg', 'Amount']
+    final keys = i18nCandleCardKeys;
+    final keySpanList = [];
+    for (var i = 0; i < keys.length; i++) {
+      final text = i < keys.length - 1 ? '${keys[i]}\n' : keys[i];
+      keySpanList.add(TextSpan(text: text, style: candleCardTitleStyle));
     }
 
-    // ['Time', 'Open', 'High', 'Low', 'Close', 'Chg', '%Chg', 'Amount']
-    List<InlineSpan> spanList = [
+    final instId = curCandleData.instId;
+    final p = curCandleData.precision;
+    TextStyle changeStyle = candleCardTitleStyle;
+    final chgrate = model.changeRate;
+    if (chgrate > 0) {
+      changeStyle = candleCardLongStyle;
+    } else if (chgrate < 0) {
+      changeStyle = candleCardShortStyle;
+    }
+    final valueSpan = [
       TextSpan(
-        text: '${keys[0]}\t${formatDateTime(model.dateTime)}\n',
-        style: crossCandleTitleStyle,
+        text: '${formatDateTime(model.dateTime)}\n',
+        style: candleCardTitleStyle,
       ),
       TextSpan(
-        text: '${keys[1]}\t${formatPrice(model.open, instId: instId)}\n',
-        style: crossCandleTitleStyle,
+        text: '${formatPrice(model.open, instId: instId, precision: p)}\n',
+        style: candleCardTitleStyle,
       ),
       TextSpan(
-        text: '${keys[2]}\t${formatPrice(model.high, instId: instId)}\n',
-        style: crossCandleTitleStyle,
+        text: '${formatPrice(model.high, instId: instId)}\n',
+        style: candleCardTitleStyle,
       ),
       TextSpan(
-        text: '${keys[3]}\t${formatPrice(model.low, instId: instId)}\n',
-        style: crossCandleTitleStyle,
+        text: '${formatPrice(model.low, instId: instId)}\n',
+        style: candleCardTitleStyle,
       ),
       TextSpan(
-        text: '${keys[4]}\t${formatPrice(model.close, instId: instId)}\n',
-        style: crossCandleTitleStyle,
+        text: '${formatPrice(model.close, instId: instId)}\n',
+        style: candleCardTitleStyle,
       ),
       TextSpan(
-        style: crossCandleTitleStyle,
-        children: [
-          TextSpan(
-            text: '${keys[5]}\t',
-          ),
-          TextSpan(
-            text: '${formatPrice(model.change, instId: instId)}\n',
-            style: changeStyle,
-          )
-        ],
+        text: '${formatPrice(model.change, instId: instId, precision: p)}\n',
+        style: changeStyle,
       ),
       TextSpan(
-        style: crossCandleTitleStyle,
-        children: [
-          TextSpan(
-            text: '${keys[6]}\t',
-          ),
-          TextSpan(
-            text: '${formatPercentage(model.changeRate)}\n',
-            style: changeStyle,
-          )
-        ],
+        text: '${formatPercentage(model.changeRate)}\n',
+        style: changeStyle,
       ),
       TextSpan(
-        text: '${keys[7]}\t${model.vol.bigDecimalString}',
-        style: crossCandleTitleStyle,
+        text: model.vol.bigDecimalString,
+        style: candleCardTitleStyle,
       ),
     ];
 
-    canvas.drawText(
-      offset: Offset(
-        canvasLeft + 10,
-        canvasTop,
-      ),
-      inlineSpan: TextSpan(
-        children: spanList,
-      ),
-      drawDirection: DrawDirection.ltr,
-      margin: crossCandleRectMargin,
-      drawableSize: drawableSize,
-      style: crossCandleTextStyle,
-      // textWidth: 120,
-      textDirection: TextDirection.ltr,
-      textAlign: TextAlign.justify,
-      textWidthBasis: TextWidthBasis.longestLine,
-      padding: crossCandleRectPadding,
-      backgroundColor: crossCandleRectBackgroundColor,
-      borderRadius: crossCandleRectBorderRadius,
-      borderWidth: crossCandleRectBorderWidth,
-      borderColor: crossCandleRectBorderColor,
+    /// 2. 开始绘制.
+    Offset drawOffset;
+    DrawDirection drawDirection;
+    if (offset.dx > canvasWidthHalf) {
+      // 点击区域在右边; 绘制在左边
+      drawOffset = Offset(canvasLeft, canvasTop);
+      drawDirection = DrawDirection.ltr;
+    } else {
+      drawOffset = Offset(canvasRight, canvasTop);
+      drawDirection = DrawDirection.rtl;
+    }
+
+    Size size = Size(100, 100);
+    // canvas.drawRRect(rrect, paint)
+
+    canvas.drawRectBackground(
+      offset: drawOffset,
+      drawDirection: drawDirection,
+      margin: candleCardRectMargin,
+      drawableSize: drawableSize, // 必须矫正.
+      size: size,
+      backgroundColor: candleCardRectBackgroundColor,
+      borderRadius: candleCardRectBorderRadius,
     );
   }
+
+  /// 绘制Cross 命中的蜡烛数据弹窗
+  // @Deprecated('pls use _paintPopupCandleCard')
+  // void _paintPopupCandleCard2(Canvas canvas, Offset offset) {
+  //   final index = ((startCandleDx - offset.dx) / candleActualWidth).round();
+  //   final model = curCandleData.getCandle(curCandleData.start + index - 1);
+  //   logd('_paintCrossPopupWindow model:$model');
+  //   if (model == null) return;
+
+  //   final instId = curCandleData.instId;
+  //   final p = curCandleData.precision;
+  //   final keys = i18nCandleCardKeys;
+  //   TextStyle changeStyle = candleCardTitleStyle;
+  //   final chgrate = model.changeRate;
+  //   if (chgrate > 0) {
+  //     changeStyle = candleCardLongStyle;
+  //   } else if (chgrate < 0) {
+  //     changeStyle = candleCardShortStyle;
+  //   }
+
+  //   // ['Time', 'Open', 'High', 'Low', 'Close', 'Chg', '%Chg', 'Amount']
+  //   List<InlineSpan> spanList = [
+  //     TextSpan(
+  //       text: '${keys[0]}\t${formatDateTime(model.dateTime)}\n',
+  //       style: candleCardTitleStyle,
+  //     ),
+  //     TextSpan(
+  //       text:
+  //           '${keys[1]}\t${formatPrice(model.open, instId: instId, precision: p)}\n',
+  //       style: candleCardTitleStyle,
+  //     ),
+  //     TextSpan(
+  //       text:
+  //           '${keys[2]}\t${formatPrice(model.high, instId: instId, precision: p)}\n',
+  //       style: candleCardTitleStyle,
+  //     ),
+  //     TextSpan(
+  //       text:
+  //           '${keys[3]}\t${formatPrice(model.low, instId: instId, precision: p)}\n',
+  //       style: candleCardTitleStyle,
+  //     ),
+  //     TextSpan(
+  //       text:
+  //           '${keys[4]}\t${formatPrice(model.close, instId: instId, precision: p)}\n',
+  //       style: candleCardTitleStyle,
+  //     ),
+  //     TextSpan(
+  //       style: candleCardTitleStyle,
+  //       children: [
+  //         TextSpan(
+  //           text: '${keys[5]}\t',
+  //         ),
+  //         TextSpan(
+  //           text:
+  //               '${formatPrice(model.change, instId: instId, precision: p)}\n',
+  //           style: changeStyle,
+  //         )
+  //       ],
+  //     ),
+  //     TextSpan(
+  //       style: candleCardTitleStyle,
+  //       children: [
+  //         TextSpan(
+  //           text: '${keys[6]}\t',
+  //         ),
+  //         TextSpan(
+  //           text: '${formatPercentage(model.changeRate)}\n',
+  //           style: changeStyle,
+  //         )
+  //       ],
+  //     ),
+  //     TextSpan(
+  //       text: '${keys[7]}\t${model.vol.bigDecimalString}',
+  //       style: candleCardTitleStyle,
+  //     ),
+  //   ];
+
+  //   canvas.drawText(
+  //     offset: Offset(
+  //       canvasLeft + 10,
+  //       canvasTop,
+  //     ),
+  //     inlineSpan: TextSpan(
+  //       children: spanList,
+  //     ),
+  //     drawDirection: DrawDirection.ltr,
+  //     margin: candleCardRectMargin,
+  //     drawableSize: drawableSize,
+  //     style: candleCardTextStyle,
+  //     // textWidth: 120,
+  //     textDirection: TextDirection.ltr,
+  //     textAlign: TextAlign.justify,
+  //     textWidthBasis: TextWidthBasis.longestLine,
+  //     padding: candleCardRectPadding,
+  //     backgroundColor: candleCardRectBackgroundColor,
+  //     borderRadius: candleCardRectBorderRadius,
+  //     borderWidth: candleCardRectBorderWidth,
+  //     borderColor: candleCardRectBorderColor,
+  //   );
+  // }
 }

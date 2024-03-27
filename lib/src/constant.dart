@@ -56,7 +56,7 @@ enum TimeBar {
   }
 }
 
-List<String> i18nCandleEnKeys = [
+List<String> i18nCandleCardEn = [
   'Time',
   'Open',
   'High',

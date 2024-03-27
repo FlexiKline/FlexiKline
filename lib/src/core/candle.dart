@@ -150,7 +150,6 @@ mixin CandleBinding
     canvas.drawText(
       offset: endOffset,
       drawDirection: flag < 0 ? DrawDirection.rtl : DrawDirection.ltr,
-      // canvasWidth: canvasRight,
       text: text,
       style: priceMarkTextStyle,
       maxLines: 1,
