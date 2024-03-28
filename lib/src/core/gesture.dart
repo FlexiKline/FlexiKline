@@ -86,73 +86,52 @@ mixin GestureBinding on KlineBindingBase implements IGestureEvent, IDataSource {
 
   @override
   void onScaleEnd(ScaleEndDetails details) {
-    final dataLen = curCandleData.list.length;
-    if (_panScaleData == null || ticker == null || dataLen <= 0) {
-      logd("onScaleEnd data and ticker is empty! > details:$details");
+    if (_panScaleData == null || ticker == null) {
+      logd("onScaleEnd panScaledata and ticker is empty! > details:$details");
       return;
     }
-    // logd("onScaleEnd  details:$details");
 
-    // final Tolerance tolerance = Tolerance(
-    //   velocity: 1.0 /
-    //       (0.050 *
-    //           WidgetsBinding.instance.window
-    //               .devicePixelRatio), // logical pixels per second
-    //   distance: 1.0 /
-    //       WidgetsBinding.instance.window.devicePixelRatio, // logical pixels
-    // );
-    // double start = paintDxOffset;
-    // ClampingScrollSimulation clampingScrollSimulation =
-    //     ClampingScrollSimulation(
-    //   position: start,
-    //   velocity: -details.velocity.pixelsPerSecond.dx,
-    //   tolerance: tolerance,
-    // );
-    // animationController = AnimationController(
-    //   vsync: ticker!,
-    //   value: 0,
-    //   lowerBound: double.negativeInfinity,
-    //   upperBound: double.infinity,
-    // );
-    // animationController!.reset();
-    // animationController!.addListener(() {
-    //   // scrollController.jumpTo(animationController.value);
-    //   handleMove(_panScaleData!
-    //     ..update(Offset(
-    //       animationController!.value,
-    //       _panScaleData!.offset.dy,
-    //     )));
-    // });
-    // animationController!.animateWith(clampingScrollSimulation);
+    // <0: 负数代表从右向左滑动.
+    // >0: 正数代表从左向右滑动.
+    final velocity = details.velocity.pixelsPerSecond.dx;
+    final data = curCandleData;
+    final len = data.list.length;
+    if (len <= 0 ||
+        (velocity < 0 && data.start == 0) ||
+        (velocity > 0 && data.end >= len - 1)) {
+      // TODO: 待优化
+      logd("onScaleEnd current not move! > details:$details");
+      return;
+    }
 
-    // final clampingScrollSimulation = ClampingScrollSimulation(
-    //   position: 0.0, //?
-    //   velocity: details.velocity.pixelsPerSecond.dx,
-    //   friction: 0.09,
-    // );
-
-    // double distanceOffset = 0;
-    // animationController?.addListener(() {
-    //   double tempValue = animationController?.value ?? 0.0;
-    //   if (!tempValue.isInfinite && tempValue != translateX) {
-    //     translateX = updateTranslate(tempValue);
-    //     handleMove(_panScaleData!
-    //       ..update(Offset(
-    //         tempValue - distanceOffset,
-    //         _panScaleData!.offset.dy,
-    //       )));
-    //     distanceOffset = tempValue;
-    //   }
-    // });
-
-    // stateListener(status) {
-    //   if (status == AnimationStatus.completed) {
-    //     animationController?.removeStatusListener(stateListener);
-    //   }
-    // }
-
-    // animationController?.addStatusListener(stateListener);
-    // animationController?.animateWith(clampingScrollSimulation);
+    final duration = (velocity / 1.7).abs().round().clamp(0, 1000);
+    final distance = (velocity * 0.125).clamp(-20.0, 20.0); // TODO: 待优化.
+    logd(
+      'onScaleEnd >>> velocity:${details.velocity.pixelsPerSecond.dx} duration:$duration, distance:$distance, curOffset:${_panScaleData!.offset.dx}',
+    );
+    animationController?.dispose();
+    animationController = AnimationController(
+      value: 0,
+      vsync: ticker!,
+      duration: Duration(milliseconds: duration),
+    );
+    Animation<double> curve = CurvedAnimation(
+      parent: animationController!,
+      curve: Curves.decelerate,
+    );
+    Animation<double> animation = Tween<double>(
+      begin: distance,
+      end: 0,
+    ).animate(curve);
+    animation.addListener(() {
+      // logd('onScaleEnd val:${animation.value}');
+      _panScaleData!.update(Offset(
+        _panScaleData!.offset.dx + animation.value,
+        _panScaleData!.offset.dy,
+      ));
+      handleMove(_panScaleData!);
+    });
+    animationController!.forward();
   }
 
   ///

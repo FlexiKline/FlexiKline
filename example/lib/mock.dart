@@ -146,7 +146,7 @@ Future<List<CandleModel>> genCustomCandleList({
 }
 
 Future<List<CandleModel>> genLocalCandleList() async {
-  final data = jsonDecode(jsonString2);
+  final data = jsonDecode(jsonString);
   if (data is List) {
     List<CandleModel> list = List.empty(growable: true);
     for (var i = data.length - 1; i >= 0; i--) {
