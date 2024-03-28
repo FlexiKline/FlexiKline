@@ -6,4 +6,5 @@ enum DrawDirection {
   rtl;
 
   bool get isltr => this == ltr;
+  bool get isrtl => this == rtl;
 }

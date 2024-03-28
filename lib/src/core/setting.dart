@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import '../constant.dart';
 import '../model/export.dart';
@@ -303,18 +304,19 @@ mixin SettingBinding on KlineBindingBase {
   bool showPopupCandleCard = true;
 
   // candle Card background config.
-  Color candleCardRectBackgroundColor = Colors.grey;
+  Color candleCardRectBackgroundColor = const Color(0xFFF2F2F2);
   double candleCardRectBorderRadius = 4;
-  // double candleCardRectBorderWidth = 0.5;
-  // Color candleCardRectBorderColor = Colors.black;
-  double candleCardRectMargin = 6;
+  EdgeInsets candleCardRectMargin = const EdgeInsets.symmetric(
+    horizontal: 6,
+    vertical: 4,
+  );
   EdgeInsets candleCardRectPadding = const EdgeInsets.symmetric(
-    horizontal: 2,
-    vertical: 2,
+    horizontal: 4,
+    vertical: 4,
   );
 
   double candleCardFontSize = 10;
-  double candleCardTextHeight = 1.2; // 文本跨度的高度，为字体大小的倍数
+  double candleCardTextHeight = 1.5; // 文本跨度的高度，为字体大小的倍数
   TextStyle get candleCardTextStyle => TextStyle(
         fontSize: candleCardFontSize,
         color: Colors.black,

@@ -307,56 +307,101 @@ mixin PriceCrossBinding
     ];
 
     /// 2. 开始绘制.
-    Offset drawOffset;
-    DrawDirection drawDirection;
     if (offset.dx > canvasWidthHalf) {
       // 点击区域在右边; 绘制在左边
-      drawOffset = Offset(canvasLeft + candleCardRectMargin, canvasTop);
-      drawDirection = DrawDirection.ltr;
-    } else {
-      drawOffset = Offset(canvasRight, canvasTop);
-      drawDirection = DrawDirection.rtl;
-    }
+      Offset drawOffset = Offset(
+        canvasLeft + candleCardRectMargin.left,
+        canvasTop + candleCardRectMargin.top,
+      );
 
-    final size = canvas.drawText(
-      offset: drawOffset,
-      drawDirection: drawDirection,
-      drawableSize: drawableSize,
-      inlineSpan: TextSpan(
-        children: keySpanList,
+      final size = canvas.drawText(
+        offset: drawOffset,
+        drawDirection: DrawDirection.ltr,
+        drawableSize: drawableSize,
+        textSpan: TextSpan(
+          children: keySpanList,
+          style: candleCardTitleStyle,
+        ),
         style: candleCardTitleStyle,
-      ),
-      style: candleCardTitleStyle,
-      textAlign: TextAlign.start,
-      textWidthBasis: TextWidthBasis.longestLine,
-      padding: candleCardRectPadding,
-      backgroundColor: candleCardRectBackgroundColor,
-      borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(candleCardRectBorderRadius),
-        bottomLeft: Radius.circular(candleCardRectBorderRadius),
-      ),
-    );
-    canvas.drawText(
-      offset: Offset(
-        drawOffset.dx + size.width - 1,
-        drawOffset.dy,
-      ),
-      drawDirection: drawDirection,
-      drawableSize: drawableSize,
-      inlineSpan: TextSpan(
-        children: valueSpan,
+        textAlign: TextAlign.start,
+        textWidthBasis: TextWidthBasis.longestLine,
+        padding: candleCardRectPadding,
+        backgroundColor: candleCardRectBackgroundColor,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(candleCardRectBorderRadius),
+          bottomLeft: Radius.circular(candleCardRectBorderRadius),
+        ),
+      );
+
+      canvas.drawText(
+        offset: Offset(
+          drawOffset.dx + size.width,
+          drawOffset.dy,
+        ),
+        drawDirection: DrawDirection.ltr,
+        drawableSize: drawableSize,
+        textSpan: TextSpan(
+          children: valueSpan,
+          style: candleCardValueStyle,
+        ),
         style: candleCardValueStyle,
-      ),
-      style: candleCardValueStyle,
-      textAlign: TextAlign.end,
-      textWidthBasis: TextWidthBasis.longestLine,
-      padding: candleCardRectPadding,
-      backgroundColor: candleCardRectBackgroundColor,
-      borderRadius: BorderRadius.only(
-        topRight: Radius.circular(candleCardRectBorderRadius),
-        bottomRight: Radius.circular(candleCardRectBorderRadius),
-      ),
-    );
+        textAlign: TextAlign.end,
+        textWidthBasis: TextWidthBasis.longestLine,
+        padding: candleCardRectPadding,
+        backgroundColor: candleCardRectBackgroundColor,
+        borderRadius: BorderRadius.only(
+          topRight: Radius.circular(candleCardRectBorderRadius),
+          bottomRight: Radius.circular(candleCardRectBorderRadius),
+        ),
+      );
+    } else {
+      // 点击区域在左边; 绘制在右边
+      Offset drawOffset = Offset(
+        canvasRight - candleCardRectMargin.right,
+        canvasTop + candleCardRectMargin.top,
+      );
+
+      final size = canvas.drawText(
+        offset: drawOffset,
+        drawDirection: DrawDirection.rtl,
+        drawableSize: drawableSize,
+        textSpan: TextSpan(
+          children: valueSpan,
+          style: candleCardValueStyle,
+        ),
+        style: candleCardValueStyle,
+        textAlign: TextAlign.end,
+        textWidthBasis: TextWidthBasis.longestLine,
+        padding: candleCardRectPadding,
+        backgroundColor: candleCardRectBackgroundColor,
+        borderRadius: BorderRadius.only(
+          topRight: Radius.circular(candleCardRectBorderRadius),
+          bottomRight: Radius.circular(candleCardRectBorderRadius),
+        ),
+      );
+
+      canvas.drawText(
+        offset: Offset(
+          drawOffset.dx - size.width,
+          drawOffset.dy,
+        ),
+        drawDirection: DrawDirection.rtl,
+        drawableSize: drawableSize,
+        textSpan: TextSpan(
+          children: keySpanList,
+          style: candleCardTitleStyle,
+        ),
+        style: candleCardTitleStyle,
+        textAlign: TextAlign.start,
+        textWidthBasis: TextWidthBasis.longestLine,
+        padding: candleCardRectPadding,
+        backgroundColor: candleCardRectBackgroundColor,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(candleCardRectBorderRadius),
+          bottomLeft: Radius.circular(candleCardRectBorderRadius),
+        ),
+      );
+    }
 
     // canvas.drawRectBackground(
     //   offset: drawOffset,

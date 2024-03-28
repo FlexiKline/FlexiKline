@@ -17,15 +17,16 @@ extension DrawTextExt on Canvas {
     // EdgeInsets? margin,
 
     /// 可绘制区域大小
-    /// 主要用于边界矫正, 当前超出边界区域时, 会主动反向调整, 以保证内容区域完全展示. 如为null: 则不做边界矫正.
-    /// 1. 在向offset右边绘制时, 检测超出画板右边绘制区域时, 会主动向左调整offset偏移量, 以保证内容区域完全展示.
-    /// 2. 在向offset下边绘制时, 检测已超过底部绘制区域时, 会主动向上调整offset偏移量, 以保证内容区域完全展示.
+    /// 主要用于边界矫正, 当绘制超出边界区域时, 会主动反向调整, 以保证内容区域完全展示. 如为null: 则不做边界矫正.
+    /// 1. 当绘制方向DrawDirection.ltr, 检测超出drawableSize右边界, 会主动向左调整offset xAxis偏移量, 且不超过左边界, 以保证内容区域完全展示.
+    /// 2. 当绘制方向DrawDirection.rtl, 检测超出drawableSize左边界, 会主动向右调整offset xAxis偏移量, 且不超过右边界, 以保证内容区域完全展示.
+    /// 3. 当绘制高度超出drawableSize规定高度时, 会主动向上调整offset yAxis轴偏移量, 且不超过上边界, 以保证内容区域完全展示.
     Size? drawableSize,
 
-    /// 文本,样式设置. (注: text与children必须设置一个, 否则不绘制)
+    /// 文本,样式设置. (注: text与textSpan必须设置一个, 否则不绘制)
     String? text,
+    InlineSpan? textSpan,
     TextStyle? style,
-    InlineSpan? inlineSpan,
     TextAlign textAlign = TextAlign.left,
     TextDirection textDirection = TextDirection.ltr,
     int? maxLines,
@@ -43,12 +44,12 @@ extension DrawTextExt on Canvas {
     Color borderColor = Colors.transparent,
     double borderWidth = 0,
   }) {
-    if (text?.isNotEmpty != true && inlineSpan == null) {
+    if (text?.isNotEmpty != true && textSpan == null) {
       return Size.zero;
     }
 
     TextPainter textPainter = TextPainter(
-      text: inlineSpan ??
+      text: textSpan ??
           TextSpan(
             text: text,
             style: style,
@@ -95,6 +96,13 @@ extension DrawTextExt on Canvas {
       }
 
       offset = Offset(dx, dy);
+    } else {
+      if (drawDirection.isrtl) {
+        offset = Offset(
+          offset.dx - paintSize.width,
+          offset.dy,
+        );
+      }
     }
 
     final isDrawBg = backgroundColor.alpha != 0;
