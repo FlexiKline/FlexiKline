@@ -25,6 +25,7 @@ class CandleData with KlineLog {
   List<CandleModel> get list => _list;
 
   CandleModel? get latest => list.firstOrNull;
+  bool get isEmpty => list.isEmpty;
 
   Decimal max = Decimal.zero;
   Decimal min = Decimal.zero;

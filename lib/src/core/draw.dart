@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:kline/src/model/gesture.dart';
 
 import 'binding_base.dart';
@@ -19,6 +20,7 @@ mixin DrawBinding on KlineBindingBase {
   }
 
   @override
+  @protected
   bool handleTap(GestureData data) {
     logd('handleTap draw');
     return super.handleTap(data);

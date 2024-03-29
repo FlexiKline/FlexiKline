@@ -2,7 +2,6 @@ import 'dart:ui' as ui;
 
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 import '../constant.dart';
 import '../model/export.dart';
@@ -118,6 +117,12 @@ mixin SettingBinding on KlineBindingBase {
   int get minPaintBlankCandleCount {
     return (minPaintBlankWidth / candleActualWidth).ceil();
   }
+
+  // Gesture Pan
+  // 平移结束后, candle惯性平移, 持续的最长时间.
+  int panMaxDurationWhenPanEnd = 1000;
+  // 平移结束后, candle惯性平移, 此时每一帧移动的最大偏移量. 值越大, 移动的会越远.
+  double panMaxOffsetPreFrameWhenPanEnd = 20.0;
 
   /// 幅图上下padding
   EdgeInsets subPadding = const EdgeInsets.all(10);

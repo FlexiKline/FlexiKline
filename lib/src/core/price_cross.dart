@@ -75,6 +75,7 @@ mixin PriceCrossBinding
   }
 
   @override
+  @protected
   bool handleTap(GestureData data) {
     if (isCrossing) {
       offset = null;
@@ -89,6 +90,7 @@ mixin PriceCrossBinding
   }
 
   @override
+  @protected
   void handleMove(GestureData data) {
     if (!isCrossing) {
       return super.handleMove(data);
@@ -99,6 +101,7 @@ mixin PriceCrossBinding
   }
 
   @override
+  @protected
   void startLastPriceCountDownTimer() {
     _lastPriceCountDownTimer?.cancel();
     markRepaintLastPrice();
@@ -115,6 +118,7 @@ mixin PriceCrossBinding
   /// 2. 最新价向右移出屏幕后, 刻度线横穿整屏.
   ///    且展示在指定价钱区间内, 如超出边界, 则停靠在最高最低线上.
   /// 3. 最新价向左移动后, 刻度线根据最新价蜡烛线平行移动.
+  @protected
   void paintLastPriceMark(Canvas canvas, Size size) {
     if (!isDrawLastPriceMark) return;
     final data = curCandleData;

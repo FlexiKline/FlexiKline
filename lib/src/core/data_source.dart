@@ -67,6 +67,18 @@ mixin DataSourceBinding
     _paintDxOffset = clampPaintDxOffset(val);
   }
 
+  /// 画布是否可以从右向左进行平移.
+  @override
+  bool get canPanRTL => paintDxOffset > 0;
+
+  /// 画布是否可以从左向右进行平移.
+  @override
+  bool get canPanLTR {
+    // 蜡烛数据最大可绘制长度 - 移动画面的长度 + 最小留白区域长度 = 剩余可以移动的区域长度.
+    // 如果大于当前画布宽度, 即是可以从左向右平移的.
+    return maxPaintWidth - paintDxOffset + minPaintBlankWidth > canvasWidth;
+  }
+
   /// 矫正PaintDxOffset的范围
   double clampPaintDxOffset(double dxOffset) {
     if (minPaintBlandUseWidth) {

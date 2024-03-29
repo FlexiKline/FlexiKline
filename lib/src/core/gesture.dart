@@ -1,10 +1,14 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../model/export.dart';
 import 'binding_base.dart';
 import 'interface.dart';
+import 'setting.dart';
 
-mixin GestureBinding on KlineBindingBase implements IGestureEvent, IDataSource {
+mixin GestureBinding
+    on KlineBindingBase, SettingBinding
+    implements IGestureEvent, IDataSource {
   @override
   void initBinding() {
     super.initBinding();
@@ -35,6 +39,7 @@ mixin GestureBinding on KlineBindingBase implements IGestureEvent, IDataSource {
   /// 点击
   ///
   @override
+  @protected
   void onTapUp(TapUpDetails details) {
     logd("onTapUp details:$details");
     _panScaleData?.end();
@@ -51,6 +56,7 @@ mixin GestureBinding on KlineBindingBase implements IGestureEvent, IDataSource {
   /// 移动 缩放
   ///
   @override
+  @protected
   void onScaleStart(ScaleStartDetails details) {
     logd("onScaleStart localFocalPoint:${details.localFocalPoint} >>>>");
 
@@ -62,6 +68,7 @@ mixin GestureBinding on KlineBindingBase implements IGestureEvent, IDataSource {
   }
 
   @override
+  @protected
   void onScaleUpdate(ScaleUpdateDetails details) {
     if (_panScaleData == null) {
       logd(
@@ -85,6 +92,7 @@ mixin GestureBinding on KlineBindingBase implements IGestureEvent, IDataSource {
   }
 
   @override
+  @protected
   void onScaleEnd(ScaleEndDetails details) {
     if (_panScaleData == null || ticker == null) {
       logd("onScaleEnd panScaledata and ticker is empty! > details:$details");
@@ -94,18 +102,26 @@ mixin GestureBinding on KlineBindingBase implements IGestureEvent, IDataSource {
     // <0: 负数代表从右向左滑动.
     // >0: 正数代表从左向右滑动.
     final velocity = details.velocity.pixelsPerSecond.dx;
-    final data = curCandleData;
-    final len = data.list.length;
-    if (len <= 0 ||
-        (velocity < 0 && data.start == 0) ||
-        (velocity > 0 && data.end >= len - 1)) {
-      // TODO: 待优化
+    if (velocity == 0 ||
+        curCandleData.isEmpty ||
+        (velocity < 0 && !canPanRTL) ||
+        (velocity > 0 && !canPanLTR)) {
       logd("onScaleEnd current not move! > details:$details");
       return;
     }
 
-    final duration = (velocity / 1.7).abs().round().clamp(0, 1000);
-    final distance = (velocity * 0.125).clamp(-20.0, 20.0); // TODO: 待优化.
+    /// 确认继续平移时间 (利用log指数函数特点: 随着自变量velocity的增大，函数值的增长速度逐渐减慢)
+    /// 测试当限定参数panMaxDurationWhenPanEnd等于1000(1秒时), velocity代入变化为:
+    /// 100000 > 1151.29; 10000 > 921.03; 9000 > 910.49; 5000 > 851.71; 2000 > 760.09; 800 > 668.46; 100 > 460.51
+    final duration = (math.log(velocity.abs()) * panMaxDurationWhenPanEnd / 10)
+        .round()
+        .clamp(0, panMaxDurationWhenPanEnd);
+
+    /// 当动画执行时每一帧继续平移的最大偏移量.
+    final distance = velocity.clamp(
+      -panMaxOffsetPreFrameWhenPanEnd,
+      panMaxOffsetPreFrameWhenPanEnd,
+    );
     logd(
       'onScaleEnd >>> velocity:${details.velocity.pixelsPerSecond.dx} duration:$duration, distance:$distance, curOffset:${_panScaleData!.offset.dx}',
     );
@@ -138,6 +154,7 @@ mixin GestureBinding on KlineBindingBase implements IGestureEvent, IDataSource {
   /// 长按
   ///
   @override
+  @protected
   void onLongPressStart(LongPressStartDetails details) {
     logd("onLongPressStart details:$details");
     _tapData?.end();
@@ -148,6 +165,7 @@ mixin GestureBinding on KlineBindingBase implements IGestureEvent, IDataSource {
   }
 
   @override
+  @protected
   void onLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
     if (_longData == null) {
       logd("onLongPressMoveUpdate details:$details");
@@ -158,6 +176,7 @@ mixin GestureBinding on KlineBindingBase implements IGestureEvent, IDataSource {
   }
 
   @override
+  @protected
   void onLongPressEnd(LongPressEndDetails details) {
     if (_longData == null) {
       logd("onLongPressEnd details:$details");
