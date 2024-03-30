@@ -80,6 +80,8 @@ abstract interface class IDataSource {
   /// 当前canvas绘制区域第一根蜡烛绘制的偏移量
   double get startCandleDx;
 
+  int offsetToIndex(Offset offset);
+
   /// 画布是否可以从右向左进行平移.
   bool get canPanRTL;
 

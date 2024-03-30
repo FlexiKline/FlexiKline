@@ -122,20 +122,20 @@ mixin SettingBinding on KlineBindingBase {
   // 平移结束后, candle惯性平移, 持续的最长时间.
   int panMaxDurationWhenPanEnd = 1000;
   // 平移结束后, candle惯性平移, 此时每一帧移动的最大偏移量. 值越大, 移动的会越远.
-  double panMaxOffsetPreFrameWhenPanEnd = 20.0;
+  double panMaxOffsetPreFrameWhenPanEnd = 30.0;
 
   /// 幅图上下padding
   EdgeInsets subPadding = const EdgeInsets.all(10);
 
-  /// 最大蜡烛宽度
+  /// 最大蜡烛宽度[1, 50]
   double _candleMaxWidth = 40.0;
   double get candleMaxWidth => _candleMaxWidth;
   set candleMaxWidth(double width) {
-    _candleMaxWidth = width.clamp(1.0, 100.0);
+    _candleMaxWidth = width.clamp(1.0, 50.0);
   }
 
   /// 单根蜡烛宽度
-  double _candleWidth = 7.0;
+  double _candleWidth = 8.0;
   double get candleWidth => _candleWidth;
   set candleWidth(double width) {
     // 限制蜡烛宽度范围[1, candleMaxWidth]

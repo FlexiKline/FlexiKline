@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 
+import 'package:flutter/material.dart';
+
 import '../model/export.dart';
 import 'binding_base.dart';
 import 'candle_data.dart';
@@ -45,6 +47,14 @@ mixin DataSourceBinding
   @override
   double get startCandleDx {
     return canvasRight + curCandleData.offset + candleWidthHalf;
+  }
+
+  /// 将offset指定的dx转换为蜡烛index.
+  @override
+  int offsetToIndex(Offset offset) {
+    final rightOffset = canvasRight - offset.dx;
+    // logd('dxToIndex paintDxOffset:$paintDxOffset, rightOffset:$rightOffset');
+    return ((paintDxOffset + rightOffset) / candleActualWidth).round();
   }
 
   /// 绘制区域高度 / 当前绘制的蜡烛数据高度.
@@ -203,7 +213,7 @@ mixin DataSourceBinding
 
   @override
   void handleMove(GestureData data) {
-    super.handleScale(data);
+    super.handleMove(data);
     if (!data.moved) return;
 
     final newDxOffset = clampPaintDxOffset(paintDxOffset + data.dxDelta);
@@ -220,11 +230,26 @@ mixin DataSourceBinding
   void handleScale(GestureData data) {
     super.handleScale(data);
     if (!data.scaled) return;
+
+    final index = offsetToIndex(data.offset);
+    final dxGrowth = data.scaleDelta * 10;
+    final newWidth = (candleWidth + dxGrowth).clamp(1.0, candleMaxWidth);
+    final newDxOffset = clampPaintDxOffset(
+      paintDxOffset + dxGrowth * index,
+    );
+    logd(
+      '>scale growth:$dxGrowth candleWidth:$candleWidth > newWidth:$newWidth, newDxOffset:$newDxOffset',
+    );
+    if (newWidth != candleWidth || newDxOffset != paintDxOffset) {
+      candleWidth = newWidth;
+      paintDxOffset = newDxOffset;
+      markRepaintCandle();
+    }
   }
 
   @override
   void handleLongMove(GestureData data) {
-    super.handleScale(data);
+    super.handleLongMove(data);
     if (!data.moved) return;
   }
 }

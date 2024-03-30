@@ -101,6 +101,16 @@ mixin PriceCrossBinding
   }
 
   @override
+  void handleScale(GestureData data) {
+    if (isCrossing) {
+      logd('handleMove cross > ${data.offset}');
+      // 注: 当前正在展示Cross, 不能缩放, 直接return拦截.
+      return;
+    }
+    return super.handleScale(data);
+  }
+
+  @override
   @protected
   void startLastPriceCountDownTimer() {
     _lastPriceCountDownTimer?.cancel();

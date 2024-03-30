@@ -39,63 +39,72 @@ mixin GestureBinding
   /// 点击
   ///
   @override
-  @protected
   void onTapUp(TapUpDetails details) {
     logd("onTapUp details:$details");
-    _panScaleData?.end();
-    _panScaleData = null;
-    _longData?.end();
-    _longData = null;
-
     _tapData = GestureData.tap(details.localPosition);
-
     handleTap(_tapData!);
+    _tapData?.end();
+    _tapData = null;
   }
 
   ///
   /// 移动 缩放
   ///
   @override
-  @protected
   void onScaleStart(ScaleStartDetails details) {
+    if (_panScaleData?.isEnd == false) {
+      // 如果上次平移或缩放, 还没有结束, 不允许开始.
+      return;
+    }
     logd("onScaleStart localFocalPoint:${details.localFocalPoint} >>>>");
 
-    _tapData?.end();
-    _tapData = null;
-    _longData?.end();
-    _longData = null;
-    _panScaleData = GestureData.pan(details.localFocalPoint);
+    if (details.pointerCount > 1) {
+      _panScaleData = GestureData.scale(details.localFocalPoint);
+    } else {
+      _panScaleData = GestureData.pan(details.localFocalPoint);
+    }
   }
 
   @override
-  @protected
   void onScaleUpdate(ScaleUpdateDetails details) {
     if (_panScaleData == null) {
-      logd(
-        "onScaleUpdate localFocalPoint:${details.localFocalPoint}, scale:${details.scale}",
-      );
+      logd("onScaleUpdate panScaleData is empty! details:$details");
       return;
     }
 
-    _panScaleData!.update(details.localFocalPoint, scale: details.scale);
-
-    if (details.pointerCount > 1 /*_panScaleData!.isScale*/) {
-      handleScale(_panScaleData!);
-    } else {
+    if (_panScaleData!.isPan) {
+      _panScaleData!.update(
+        details.localFocalPoint,
+        newScale: details.scale,
+      );
       handleMove(_panScaleData!);
+    } else if (_panScaleData!.isScale) {
+      final delta = details.scale - _panScaleData!.scale;
+      if (delta.abs() > 0.001) {
+        logd('>scale ${details.scale} > delta:$delta');
+        _panScaleData!.update(
+          details.localFocalPoint,
+          newScale: details.scale,
+        );
+        handleScale(_panScaleData!);
+      }
     }
   }
 
-  double translateX = double.nan;
-  double updateTranslate(double val) {
-    return val.clamp(-1000, 0);
-  }
-
   @override
-  @protected
   void onScaleEnd(ScaleEndDetails details) {
-    if (_panScaleData == null || ticker == null) {
+    if (ticker == null || _panScaleData == null) {
       logd("onScaleEnd panScaledata and ticker is empty! > details:$details");
+      return;
+    }
+
+    if (_panScaleData!.isScale) {
+      // 如果是scale操作, 不需要惯性平移, 直接return
+      // 为了防止缩放后的平移, 延时结束.
+      Future.delayed(const Duration(milliseconds: 200), () {
+        _panScaleData?.end();
+        _panScaleData = null;
+      });
       return;
     }
 
@@ -107,6 +116,8 @@ mixin GestureBinding
         (velocity < 0 && !canPanRTL) ||
         (velocity > 0 && !canPanLTR)) {
       logd("onScaleEnd current not move! > details:$details");
+      _panScaleData?.end();
+      _panScaleData = null;
       return;
     }
 
@@ -141,31 +152,36 @@ mixin GestureBinding
     ).animate(curve);
     animation.addListener(() {
       // logd('onScaleEnd val:${animation.value}');
-      _panScaleData!.update(Offset(
-        _panScaleData!.offset.dx + animation.value,
-        _panScaleData!.offset.dy,
-      ));
-      handleMove(_panScaleData!);
+      if (_panScaleData != null) {
+        _panScaleData!.update(Offset(
+          _panScaleData!.offset.dx + animation.value,
+          _panScaleData!.offset.dy,
+        ));
+        handleMove(_panScaleData!);
+      }
     });
-    animationController!.forward();
+    animation.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        if (_panScaleData != null) {
+          handleMove(_panScaleData!);
+        }
+        _panScaleData?.end();
+        _panScaleData = null;
+      }
+    });
+    animationController?.forward();
   }
 
   ///
   /// 长按
   ///
   @override
-  @protected
   void onLongPressStart(LongPressStartDetails details) {
     logd("onLongPressStart details:$details");
-    _tapData?.end();
-    _tapData = null;
-    _panScaleData?.end();
-    _panScaleData = null;
     _longData = GestureData.long(details.localPosition);
   }
 
   @override
-  @protected
   void onLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
     if (_longData == null) {
       logd("onLongPressMoveUpdate details:$details");
@@ -176,7 +192,6 @@ mixin GestureBinding
   }
 
   @override
-  @protected
   void onLongPressEnd(LongPressEndDetails details) {
     if (_longData == null) {
       logd("onLongPressEnd details:$details");
