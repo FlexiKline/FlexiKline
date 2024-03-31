@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:kline/src/view/grid_bg_view.dart';
 
 import '../kline_controller.dart';
 import 'gesture_view.dart';
@@ -17,6 +16,9 @@ class _KlineWidgetState extends State<KlineWidget> {
   @override
   void initState() {
     super.initState();
+    widget.controller.onSizeChange = () {
+      setState(() {});
+    };
   }
 
   @override
@@ -27,34 +29,51 @@ class _KlineWidgetState extends State<KlineWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: widget.controller.mainRectWidth,
-      height: widget.controller.mainRectHeight,
+      width: widget.controller.canvasRect.width,
+      height: widget.controller.canvasRect.height,
       decoration: const BoxDecoration(
         color: Color.fromARGB(179, 243, 220, 220),
       ),
       // color: Colors.redAccent,
       child: Stack(
         children: <Widget>[
-          GridBgView(controller: widget.controller),
+          // GridBgView(controller: widget.controller),
           RepaintBoundary(
-            key: const ValueKey('KlinePaint'),
+            key: const ValueKey('MainRectPaint'),
             child: CustomPaint(
               size: Size(
                 widget.controller.mainRectWidth,
                 widget.controller.mainRectHeight,
               ),
-              painter: KlinePainter(
+              painter: GridBgPainter(
+                controller: widget.controller,
+              ),
+              foregroundPainter: KlinePainter(
                 controller: widget.controller,
               ),
               isComplex: true,
+            ),
+          ),
+          Positioned(
+            left: 0,
+            top: widget.controller.mainRectHeight,
+            width: widget.controller.subRectWidth,
+            height: widget.controller.subRectHeight,
+            child: RepaintBoundary(
+              key: const ValueKey('SubRectPaint'),
+              child: Container(
+                width: widget.controller.mainRectWidth,
+                height: widget.controller.mainRectHeight,
+                color: Colors.grey,
+              ),
             ),
           ),
           RepaintBoundary(
             key: const ValueKey('PriceCrossPaint'),
             child: CustomPaint(
               size: Size(
-                widget.controller.mainRectWidth,
-                widget.controller.mainRectHeight,
+                widget.controller.canvasRect.width,
+                widget.controller.canvasRect.height,
               ),
               painter: PriceCrossPainter(
                 controller: widget.controller,
@@ -68,6 +87,24 @@ class _KlineWidgetState extends State<KlineWidget> {
         ],
       ),
     );
+  }
+}
+
+class GridBgPainter extends CustomPainter {
+  GridBgPainter({
+    required this.controller,
+  }) : super(repaint: controller.repaintGridBg);
+
+  final KlineController controller;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    controller.paintGridBg(canvas, size);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return oldDelegate != this;
   }
 }
 

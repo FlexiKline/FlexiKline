@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:decimal/decimal.dart';
@@ -21,83 +22,93 @@ mixin SettingBinding on KlineBindingBase {
     logd("dispose setting");
   }
 
+  VoidCallback? onSizeChange;
+
+  Color longColor = Colors.green;
+  Color shortColor = Colors.red;
+
   /// 一个像素的值.
   double get pixel {
     final mediaQuery = MediaQueryData.fromView(ui.window);
     return 1.0 / mediaQuery.devicePixelRatio;
   }
 
-  /// 主绘制区域(蜡烛图)
-  Rect _mainRect = Rect.zero;
-  Rect get mainRect => _mainRect;
-  // 设置主绘制区域(蜡烛图)
+  /// 整个画布区域大小 = 由主图区域 + 副图区域
+  Size get canvasRect => Size(
+        math.max(mainRectSize.width, _subRectSize.width),
+        mainRectSize.height + _subRectSize.height,
+      );
+  double get canvasWidth => canvasRect.width;
+  double get canvasHeight => canvasRect.height;
+
+  /// 主图区域大小
+  Size _mainRectSize = Size.zero;
+  Size get mainRectSize => _mainRectSize;
   void setMainSize(Size size) {
-    _mainRect = Rect.fromLTRB(
-      0,
-      0,
-      size.width,
-      size.height,
-    );
+    _mainRectSize = size;
+    onSizeChange?.call();
   }
 
-  Color longColor = Colors.green;
-  Color shortColor = Colors.red;
+  /// 主图总宽度
+  double get mainRectWidth => mainRectSize.width;
 
-  ///  Canvas 布局参数图
-  ///                      mainRectWidth
-  ///   |------------------mainRect.top-----------------------|
-  ///   |------------------mainPadding.top--------------------|
-  ///   |mainPadding.left---+----------------mainPadding.right|
-  ///   |   |---------------+canvasWidth------------------|   |
-  ///   |-------------------+------------------canvasRight|   |
-  ///   |mainRectHeight     |canvasHeight                     |
-  ///   |                   |                                 |
-  ///   |canvasBottom------mainPadding.bottom-----------------|
-  ///   |------------------mainRect.bottom--------------------|
-  /// 主绘制区域宽高
-  double get mainRectWidth => mainRect.width;
-  double get mainRectHeight => mainRect.height;
+  /// 主图总高度
+  double get mainRectHeight => mainRectSize.height;
 
-  /// 主绘制区域的大小
-  Size get drawableSize => Size(mainRectWidth, mainRectHeight);
+  /// 副图区域大小
+  Size _subRectSize = Size.zero;
+  Size get subRectSize => _subRectSize;
+  void setSubSize(Size size) {
+    _subRectSize = size;
+    onSizeChange?.call();
+  }
+
+  /// 副图总宽度
+  double get subRectWidth => subRectSize.width;
+
+  /// 副图总高度
+  double get subRectHeight => subRectSize.height;
 
   /// 主图上下padding
   EdgeInsets mainPadding = const EdgeInsets.only(
     top: 20,
-    bottom: 10,
+    bottom: 15,
     // right: 20,
   );
 
-  /// X轴绘制区域真实宽.
-  double get canvasWidth => mainRectWidth - mainPadding.horizontal;
+  /// 幅图上下padding
+  EdgeInsets subPadding = const EdgeInsets.all(10);
 
-  /// X轴上绘制区域半值.
-  double get canvasWidthHalf => canvasWidth / 2;
+  /// X轴主绘制区域真实宽.
+  double get mainDrawWidth => mainRectWidth - mainPadding.horizontal;
 
-  /// Y轴绘制区域真实高.
-  double get canvasHeight => mainRectHeight - mainPadding.vertical;
+  /// Y轴主绘制区域真实高.
+  double get mainDrawHeight => mainRectHeight - mainPadding.vertical;
+
+  /// X轴上主绘制区域宽度的半值.
+  double get mainDrawWidthHalf => mainDrawWidth / 2;
 
   /// X轴主绘制区域的左边界值
-  double get canvasLeft => mainPadding.left;
+  double get mainDrawLeft => mainPadding.left;
 
   /// X轴主绘制区域右边界值
-  double get canvasRight => mainRectWidth - mainPadding.right;
+  double get mainDrawRight => mainRectWidth - mainPadding.right;
 
   /// Y轴主绘制区域上边界值
-  double get canvasTop => mainPadding.top;
+  double get mainDrawTop => mainPadding.top;
 
   /// Y轴主绘制区域下边界值
-  double get canvasBottom => mainRectHeight - mainPadding.bottom;
+  double get mainDrawBottom => mainRectHeight - mainPadding.bottom;
 
-  bool checkOffsetInCanvas(Offset offset) {
-    return offset.dx > canvasLeft &&
-        offset.dx < canvasRight &&
-        offset.dy > canvasTop &&
-        offset.dy < canvasBottom;
+  bool checkOffsetInMainDraw(Offset offset) {
+    return offset.dx > mainDrawLeft &&
+        offset.dx < mainDrawRight &&
+        offset.dy > mainDrawTop &&
+        offset.dy < mainDrawBottom;
   }
 
-  double clampDxInCanvas(double dx) => dx.clamp(canvasLeft, canvasRight);
-  double clampDyInCanvas(double dy) => dy.clamp(canvasTop, canvasBottom);
+  double clampDxInMain(double dx) => dx.clamp(mainDrawLeft, mainDrawRight);
+  double clampDyInMain(double dy) => dy.clamp(mainDrawTop, mainDrawBottom);
 
   /// 绘制区域最少留白比例
   /// 例如: 当蜡烛数量不足以绘制一屏, 向右移动到末尾时, 绘制区域左边最少留白区域占可绘制区域(canvasWidth)的比例
@@ -108,7 +119,7 @@ mixin SettingBinding on KlineBindingBase {
   }
 
   /// 绘制区域最少留白宽度.
-  double get minPaintBlankWidth => canvasWidth * minPaintBlankRate;
+  double get minPaintBlankWidth => mainDrawWidth * minPaintBlankRate;
 
   /// 留白按宽度minPaintBlankWidth来计算
   bool minPaintBlandUseWidth = true;
@@ -123,9 +134,6 @@ mixin SettingBinding on KlineBindingBase {
   int panMaxDurationWhenPanEnd = 1000;
   // 平移结束后, candle惯性平移, 此时每一帧移动的最大偏移量. 值越大, 移动的会越远.
   double panMaxOffsetPreFrameWhenPanEnd = 30.0;
-
-  /// 幅图上下padding
-  EdgeInsets subPadding = const EdgeInsets.all(10);
 
   /// 最大蜡烛宽度[1, 50]
   double _candleMaxWidth = 40.0;
@@ -143,7 +151,7 @@ mixin SettingBinding on KlineBindingBase {
   }
 
   /// 蜡烛间距
-  double get candleMargin => candleWidth / 7;
+  double get candleMargin => candleWidth / 8;
 
   /// 单根蜡烛所占据实际宽度
   double get candleActualWidth => candleWidth + candleMargin;
@@ -152,7 +160,7 @@ mixin SettingBinding on KlineBindingBase {
   double get candleWidthHalf => candleActualWidth / 2;
 
   /// 绘制区域宽度内, 可绘制的蜡烛数
-  int get maxCandleCount => (canvasWidth / candleActualWidth).ceil();
+  int get maxCandleCount => (mainDrawWidth / candleActualWidth).ceil();
 
   /// CandleBar配置
   // Candle Line

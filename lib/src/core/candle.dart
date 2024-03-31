@@ -8,17 +8,6 @@ import '../extension/export.dart';
 import '../render/export.dart';
 
 /// 绘制蜡烛图以及相关指标数据
-///   Canvas 布局参数图
-///                      mainRectWidth
-///   |------------------mainRect.top-----------------------|
-///   |------------------mainPadding.top--------------------|
-///   |mainPadding.left---+----------------mainPadding.right|
-///   |   |---------------+canvasWidth------------------|   |
-///   |-------------------+------------------canvasRight|   |
-///   |mainRectHeight     |canvasHeight                     |
-///   |   |---------------+---------------|-->startDx<--|---+-->paintDx<--...|
-///   |canvasBottom------mainPadding.bottom-----------------|
-///   |------------------mainRect.bottom--------------------|
 mixin CandleBinding
     on KlineBindingBase, SettingBinding
     implements ICandlePainter, IDataSource {
@@ -59,7 +48,7 @@ mixin CandleBinding
     paintCandleChart(canvas, size);
 
     /// 绘制Y轴刻度数据
-    printYAisTickData(canvas, size);
+    printYAxisTickData(canvas, size);
   }
 
   /// 绘制蜡烛图
@@ -78,11 +67,11 @@ mixin CandleBinding
       final isRise = model.close >= model.open;
       final highOff = Offset(
         dx,
-        canvasBottom - (model.high - data.min).toDouble() * dyFactor,
+        mainDrawBottom - (model.high - data.min).toDouble() * dyFactor,
       );
       final lowOff = Offset(
         dx,
-        canvasBottom - (model.low - data.min).toDouble() * dyFactor,
+        mainDrawBottom - (model.low - data.min).toDouble() * dyFactor,
       );
       canvas.drawLine(
         highOff,
@@ -91,11 +80,11 @@ mixin CandleBinding
       );
       final openOff = Offset(
         dx,
-        canvasBottom - (model.open - data.min).toDouble() * dyFactor,
+        mainDrawBottom - (model.open - data.min).toDouble() * dyFactor,
       );
       final closeOff = Offset(
         dx,
-        canvasBottom - (model.close - data.min).toDouble() * dyFactor,
+        mainDrawBottom - (model.close - data.min).toDouble() * dyFactor,
       );
       canvas.drawLine(
         openOff,
@@ -127,7 +116,7 @@ mixin CandleBinding
     Offset offset,
     Decimal val,
   ) {
-    final flag = offset.dx > canvasWidthHalf ? -1 : 1;
+    final flag = offset.dx > mainDrawWidthHalf ? -1 : 1;
     Offset endOffset = Offset(
       offset.dx + priceMarkLineLength * flag,
       offset.dy,
@@ -157,7 +146,7 @@ mixin CandleBinding
   }
 
   /// 绘制X轴刻度数据
-  void printYAisTickData(Canvas canvas, Size size) {
+  void printYAxisTickData(Canvas canvas, Size size) {
     final data = curCandleData;
     final max = data.max;
     final yAxisStep = mainRectHeight / gridCount;
@@ -175,7 +164,7 @@ mixin CandleBinding
 
       canvas.drawText(
         offset: Offset(dx, dy),
-        drawableSize: drawableSize,
+        drawableSize: mainRectSize,
         text: text,
         style: tickTextStyle,
         textWidth: tickTextWidth,

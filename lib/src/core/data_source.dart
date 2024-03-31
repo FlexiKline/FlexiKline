@@ -46,13 +46,13 @@ mixin DataSourceBinding
   /// 用于绘制蜡烛图计算的起始位置.
   @override
   double get startCandleDx {
-    return canvasRight + curCandleData.offset + candleWidthHalf;
+    return mainDrawRight + curCandleData.offset + candleWidthHalf;
   }
 
   /// 将offset指定的dx转换为蜡烛index.
   @override
   int offsetToIndex(Offset offset) {
-    final rightOffset = canvasRight - offset.dx;
+    final rightOffset = mainDrawRight - offset.dx;
     // logd('dxToIndex paintDxOffset:$paintDxOffset, rightOffset:$rightOffset');
     return ((paintDxOffset + rightOffset) / candleActualWidth).round();
   }
@@ -60,7 +60,7 @@ mixin DataSourceBinding
   /// 绘制区域高度 / 当前绘制的蜡烛数据高度.
   @override
   double get dyFactor {
-    return canvasHeight / curCandleData.dataHeight.toDouble();
+    return mainDrawHeight / curCandleData.dataHeight.toDouble();
   }
 
   /// 代表当前绘制区域相对于startIndex的偏移量.
@@ -86,21 +86,21 @@ mixin DataSourceBinding
   bool get canPanLTR {
     // 蜡烛数据最大可绘制长度 - 移动画面的长度 + 最小留白区域长度 = 剩余可以移动的区域长度.
     // 如果大于当前画布宽度, 即是可以从左向右平移的.
-    return maxPaintWidth - paintDxOffset + minPaintBlankWidth > canvasWidth;
+    return maxPaintWidth - paintDxOffset + minPaintBlankWidth > mainDrawWidth;
   }
 
   /// 矫正PaintDxOffset的范围
   double clampPaintDxOffset(double dxOffset) {
     if (minPaintBlandUseWidth) {
-      if (maxPaintWidth < canvasWidth) {
+      if (maxPaintWidth < mainDrawWidth) {
         // 不足一屏: 按最少留白的宽度精确计算
-        final min = math.min(minPaintBlankWidth, maxPaintWidth) - canvasWidth;
+        final min = math.min(minPaintBlankWidth, maxPaintWidth) - mainDrawWidth;
         final max = maxPaintWidth - minPaintBlankWidth;
         return math.min(math.max(min, dxOffset), max);
       } else {
         // 满足一屏: 按最少留白的宽度精确计算
         final min = -minPaintBlankWidth;
-        final max = maxPaintWidth + minPaintBlankWidth - canvasWidth;
+        final max = maxPaintWidth + minPaintBlankWidth - mainDrawWidth;
         return math.min(math.max(min, dxOffset), max);
       }
     } else {
@@ -109,7 +109,7 @@ mixin DataSourceBinding
         // 不足一屏: 按最少留白的蜡烛数来计算
         final min =
             math.min(minPaintBlankCandleCount, dataLen) * candleActualWidth -
-                canvasWidth;
+                mainDrawWidth;
         final max = (dataLen - minPaintBlankCandleCount) * candleActualWidth;
 
         return math.min(math.max(min, dxOffset), max);
@@ -125,12 +125,12 @@ mixin DataSourceBinding
   }
 
   void initPaintDxOffset() {
-    if (maxPaintWidth >= canvasWidth) {
+    if (maxPaintWidth >= mainDrawWidth) {
       // 当前蜡烛数足够绘制一屏
       paintDxOffset = 0;
     } else {
       // 不足一屏
-      paintDxOffset = maxPaintWidth - canvasWidth;
+      paintDxOffset = maxPaintWidth - mainDrawWidth;
     }
   }
 

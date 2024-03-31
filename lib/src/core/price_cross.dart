@@ -55,7 +55,7 @@ mixin PriceCrossBinding
 
   /// 矫正Cross
   Offset? correctCrossOffset(Offset val) {
-    if (val.isInfinite && !checkOffsetInCanvas(val)) {
+    if (val.isInfinite && !checkOffsetInMainDraw(val)) {
       return null;
     }
     final startDx = startCandleDx;
@@ -138,19 +138,19 @@ mixin PriceCrossBinding
       return;
     }
 
-    double dx = canvasRight;
+    double dx = mainDrawRight;
     double ldx = 0; // 计算最新价刻度线lineTo参数X轴的dx值. 默认0: 代表橫穿整个Canvas.
     double dy;
     double flag = -1; // 计算右边最新价钱文本时, dy增减的方向
     if (model.close >= data.max) {
-      dy = canvasTop; // 画板顶部展示.
+      dy = mainDrawTop; // 画板顶部展示.
     } else if (model.close <= data.min) {
-      dy = canvasBottom; // 画板底部展示.
+      dy = mainDrawBottom; // 画板底部展示.
       flag = 1;
     } else {
       // 计算最新价在当前画板中的X轴位置.
-      ldx = clampDxInCanvas(startCandleDx - candleActualWidth);
-      dy = canvasBottom - (model.close - data.min).toDouble() * dyFactor;
+      ldx = clampDxInMain(startCandleDx - candleActualWidth);
+      dy = mainDrawBottom - (model.close - data.min).toDouble() * dyFactor;
     }
 
     // 画最新价在画板中的刻度线.
@@ -189,7 +189,7 @@ mixin PriceCrossBinding
         dy + flag * textHeight / 2, // 计算最新价文本区域相对于刻度线的位置
       ),
       drawDirection: DrawDirection.rtl,
-      drawableSize: drawableSize,
+      drawableSize: mainRectSize,
       text: text,
       style: lastPriceTextStyle,
       textAlign: TextAlign.end,
@@ -206,15 +206,15 @@ mixin PriceCrossBinding
     if (!isCrossing) return;
 
     final offset = this.offset;
-    if (offset == null || !checkOffsetInCanvas(offset)) {
+    if (offset == null || !checkOffsetInMainDraw(offset)) {
       return;
     }
 
     final path = Path()
-      ..moveTo(canvasLeft, offset.dy)
-      ..lineTo(canvasRight, offset.dy)
+      ..moveTo(mainDrawLeft, offset.dy)
+      ..lineTo(mainDrawRight, offset.dy)
       ..moveTo(offset.dx, 0)
-      ..lineTo(offset.dx, mainRectHeight);
+      ..lineTo(offset.dx, canvasHeight);
 
     canvas
       ..drawDashPath(
@@ -238,11 +238,11 @@ mixin PriceCrossBinding
       );
       canvas.drawText(
         offset: Offset(
-          canvasRight - crossPriceRectRigthMargin,
+          mainDrawRight - crossPriceRectRigthMargin,
           offset.dy - crossPriceRectHeight / 2,
         ),
         drawDirection: DrawDirection.rtl,
-        drawableSize: drawableSize,
+        drawableSize: mainRectSize,
         text: text,
         style: crossPriceTextStyle,
         textAlign: TextAlign.end,
@@ -295,15 +295,15 @@ mixin PriceCrossBinding
         style: candleCardTitleStyle,
       ),
       TextSpan(
-        text: '${formatPrice(model.high, instId: instId)}\n',
+        text: '${formatPrice(model.high, instId: instId, precision: p)}\n',
         style: candleCardTitleStyle,
       ),
       TextSpan(
-        text: '${formatPrice(model.low, instId: instId)}\n',
+        text: '${formatPrice(model.low, instId: instId, precision: p)}\n',
         style: candleCardTitleStyle,
       ),
       TextSpan(
-        text: '${formatPrice(model.close, instId: instId)}\n',
+        text: '${formatPrice(model.close, instId: instId, precision: p)}\n',
         style: candleCardTitleStyle,
       ),
       TextSpan(
@@ -321,17 +321,17 @@ mixin PriceCrossBinding
     ];
 
     /// 2. 开始绘制.
-    if (offset.dx > canvasWidthHalf) {
+    if (offset.dx > mainDrawWidthHalf) {
       // 点击区域在右边; 绘制在左边
       Offset drawOffset = Offset(
-        canvasLeft + candleCardRectMargin.left,
-        canvasTop + candleCardRectMargin.top,
+        mainDrawLeft + candleCardRectMargin.left,
+        mainDrawTop + candleCardRectMargin.top,
       );
 
       final size = canvas.drawText(
         offset: drawOffset,
         drawDirection: DrawDirection.ltr,
-        drawableSize: drawableSize,
+        drawableSize: mainRectSize,
         textSpan: TextSpan(
           children: keySpanList,
           style: candleCardTitleStyle,
@@ -353,7 +353,7 @@ mixin PriceCrossBinding
           drawOffset.dy,
         ),
         drawDirection: DrawDirection.ltr,
-        drawableSize: drawableSize,
+        drawableSize: mainRectSize,
         textSpan: TextSpan(
           children: valueSpan,
           style: candleCardValueStyle,
@@ -371,14 +371,14 @@ mixin PriceCrossBinding
     } else {
       // 点击区域在左边; 绘制在右边
       Offset drawOffset = Offset(
-        canvasRight - candleCardRectMargin.right,
-        canvasTop + candleCardRectMargin.top,
+        mainDrawRight - candleCardRectMargin.right,
+        mainDrawTop + candleCardRectMargin.top,
       );
 
       final size = canvas.drawText(
         offset: drawOffset,
         drawDirection: DrawDirection.rtl,
-        drawableSize: drawableSize,
+        drawableSize: mainRectSize,
         textSpan: TextSpan(
           children: valueSpan,
           style: candleCardValueStyle,
@@ -400,7 +400,7 @@ mixin PriceCrossBinding
           drawOffset.dy,
         ),
         drawDirection: DrawDirection.rtl,
-        drawableSize: drawableSize,
+        drawableSize: mainRectSize,
         textSpan: TextSpan(
           children: keySpanList,
           style: candleCardTitleStyle,

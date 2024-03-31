@@ -65,6 +65,10 @@ class _MyHomePageState extends State<MyHomePage> {
       ScreenUtil().screenWidth,
       ScreenUtil().screenWidth * 0.75,
     ));
+    controller1.setSubSize(Size(
+      ScreenUtil().screenWidth,
+      100,
+    ));
 
     // genRandomCandleList(count: 500).then((list) {
     //   controller1.setCandleData(req, list);
