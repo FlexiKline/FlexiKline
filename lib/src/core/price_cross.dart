@@ -317,6 +317,7 @@ mixin PriceCrossBinding
       TextSpan(
         text: model.vol.bigDecimalString,
         style: candleCardTitleStyle,
+        // recognizer: _tapGestureRecognizer..onTap = () => ... // 点击事件处理?
       ),
     ];
 

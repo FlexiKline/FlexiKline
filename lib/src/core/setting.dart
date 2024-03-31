@@ -183,6 +183,9 @@ mixin SettingBinding on KlineBindingBase {
     ..style = PaintingStyle.stroke
     ..strokeWidth = candleWidth;
 
+  // Candle 第一根Candle相对于mainRect右边的偏移
+  double firstCandleOffset = 80;
+
   /// Grid Axis config
   // Grid Axis Count
   int gridCount = 5;
@@ -197,9 +200,9 @@ mixin SettingBinding on KlineBindingBase {
     ..style = PaintingStyle.stroke
     ..strokeWidth = pixel;
 
-  /// X轴上的刻度线配置
+  /// Y轴上价钱刻度线配置
   double tickTextFontSize = 10;
-  double tickTextWidth = 100;
+  // double tickTextWidth = 100; //暂无用
   EdgeInsets tickTextPadding = const EdgeInsets.only(
     right: 2,
   );
@@ -210,6 +213,22 @@ mixin SettingBinding on KlineBindingBase {
         color: tickTextColor,
         overflow: TextOverflow.ellipsis,
         height: 1,
+      );
+
+  /// X轴上时间刻度线配置
+  double timeTextFontSize = 10;
+  double timeTextWidth = 80;
+  double timeTextInterval = 10;
+  int get timeTextOffsetCandleCounts {
+    return ((timeTextWidth + timeTextInterval) / candleActualWidth).round();
+  }
+
+  Color timeTextColor = Colors.black;
+  TextStyle get timeTextStyle => TextStyle(
+        fontSize: timeTextFontSize,
+        color: timeTextColor,
+        overflow: TextOverflow.ellipsis,
+        height: mainPadding.bottom / timeTextFontSize,
       );
 
   /// 最大最小价钱刻度线与价钱标记.

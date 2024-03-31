@@ -125,9 +125,9 @@ mixin DataSourceBinding
   }
 
   void initPaintDxOffset() {
-    if (maxPaintWidth >= mainDrawWidth) {
-      // 当前蜡烛数足够绘制一屏
-      paintDxOffset = 0;
+    if (maxPaintWidth >= mainDrawWidth - firstCandleOffset) {
+      // 当前蜡烛数足够绘制一屏宽度 - 首根蜡烛相对于主绘制区域右部偏移时, 起始位置定在偏移处, 展示友好.
+      paintDxOffset = -firstCandleOffset;
     } else {
       // 不足一屏
       paintDxOffset = maxPaintWidth - mainDrawWidth;

@@ -1,11 +1,12 @@
+import 'dart:math' as math;
+import 'dart:ui';
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
+import 'package:kline/kline.dart';
 
 import 'binding_base.dart';
 import 'interface.dart';
 import 'setting.dart';
-import '../extension/export.dart';
-import '../render/export.dart';
 
 /// 绘制蜡烛图以及相关指标数据
 mixin CandleBinding
@@ -47,8 +48,11 @@ mixin CandleBinding
     /// 绘制蜡烛图
     paintCandleChart(canvas, size);
 
-    /// 绘制Y轴刻度数据
-    printYAxisTickData(canvas, size);
+    /// 绘制Y轴价钱刻度数据
+    paintYAxisPriceTick(canvas, size);
+
+    /// 绘制X轴时间刻度数据. 在paintCandleChart调用
+    // paintXAxisTimeTick(canvas);
   }
 
   /// 绘制蜡烛图
@@ -59,7 +63,7 @@ mixin CandleBinding
     int end = data.end;
 
     final offset = startCandleDx;
-
+    final bar = data.timerBar;
     Offset? maxHihgOffset, minLowOffset;
     for (var i = start; i <= end; i++) {
       final model = data.list[i];
@@ -91,6 +95,19 @@ mixin CandleBinding
         closeOff,
         isRise ? candleBarLongPaint : candleBarShortPaint,
       );
+
+      if (bar != null && i % timeTextOffsetCandleCounts == 0) {
+        // 绘制X轴时间刻度.
+        paintXAxisTimeTick(
+          canvas,
+          bar: bar,
+          model: model,
+          offset: Offset(
+            dx + timeTextWidth / 2,
+            mainDrawBottom,
+          ),
+        );
+      }
 
       if (isDrawPriceMark) {
         // 记录最大最小偏移量.
@@ -145,12 +162,43 @@ mixin CandleBinding
     );
   }
 
-  /// 绘制X轴刻度数据
-  void printYAxisTickData(Canvas canvas, Size size) {
+  /// 绘制X轴时间刻度 (paintCandleChart遍历时触发)
+  void paintXAxisTimeTick(
+    Canvas canvas, {
+    required TimeBar bar,
+    required CandleModel model,
+    required Offset offset,
+  }) {
+    // final data = curCandleData;
+    // if (data.list.isEmpty) return;
+
+    // int start = data.start;
+    // int end = data.end;
+    // final offset = startCandleDx;
+    // final bar = data.timerBar;
+    // for (var i = start; i <= end; i++) {
+    //   final model = data.list[i];
+    //   final dx = offset - (i - start + 1) * candleActualWidth;
+    //   if (bar != null && i % timeTextOffsetCandleCounts == 0) {
+    // 绘制X轴时间刻度.
+    canvas.drawText(
+      offset: offset,
+      drawDirection: DrawDirection.rtl,
+      text: model.formatDateTimeByTimeBar(bar),
+      style: timeTextStyle,
+      textWidth: timeTextWidth,
+      textAlign: TextAlign.center,
+    );
+    //   }
+    // }
+  }
+
+  /// 绘制Y轴价钱刻度数据
+  void paintYAxisPriceTick(Canvas canvas, Size size) {
     final data = curCandleData;
     final max = data.max;
-    final yAxisStep = mainRectHeight / gridCount;
-    final dx = mainRectWidth - tickTextWidth - tickTextPadding.horizontal;
+    final yAxisStep = mainDrawBottom / gridCount;
+    final dx = mainRectWidth;
     double dy = 0;
     for (int i = 1; i <= gridCount; i++) {
       dy = i * yAxisStep - tickTextFontSize;
@@ -164,10 +212,11 @@ mixin CandleBinding
 
       canvas.drawText(
         offset: Offset(dx, dy),
+        drawDirection: DrawDirection.rtl,
         drawableSize: mainRectSize,
         text: text,
         style: tickTextStyle,
-        textWidth: tickTextWidth,
+        // textWidth: tickTextWidth,
         textAlign: TextAlign.end,
         padding: tickTextPadding,
         maxLines: 1,

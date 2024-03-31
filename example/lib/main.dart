@@ -91,8 +91,8 @@ class _MyHomePageState extends State<MyHomePage> {
     ));
 
     controller2
-      ..candleMaxWidth = 50
-      ..candleWidth = 50;
+      ..candleMaxWidth = 30
+      ..candleWidth = 30;
 
     genCustomCandleList(count: 500).then((list) {
       controller2.setCandleData(req, list);
@@ -120,6 +120,8 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             SizedBox(height: 20),
             TestBody(),
+            // AbsorbPointer(child: ,)
+            // IgnorePointer()
           ],
         ),
       ),

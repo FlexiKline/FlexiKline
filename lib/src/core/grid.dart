@@ -23,7 +23,7 @@ mixin GridBgBinding on KlineBindingBase, SettingBinding {
 
   void paintGridBg(Canvas canvas, Size size) {
     final yAxisStep = mainRectWidth / gridCount;
-    final xAxisStep = mainRectHeight / gridCount;
+    final xAxisStep = mainDrawBottom / gridCount;
     final paintX = gridXAxisLinePaint;
     final paintY = gridYAxisLinePaint;
     double dx = 0;
@@ -45,13 +45,13 @@ mixin GridBgBinding on KlineBindingBase, SettingBinding {
       // 绘制YAsix线
       canvas.drawLine(
         Offset(dx, 0),
-        Offset(dx, mainRectHeight),
+        Offset(dx, mainDrawBottom),
         paintY,
       );
     }
     canvas.drawLine(
-      Offset(0, mainRectHeight),
-      Offset(mainRectWidth, mainRectHeight),
+      Offset(0, mainDrawBottom),
+      Offset(mainRectWidth, mainDrawBottom),
       paintX,
     );
   }
