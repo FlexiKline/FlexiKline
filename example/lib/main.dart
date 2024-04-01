@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:kline/kline.dart';
 
 import 'mock.dart';
+import 'src/gesture_test.dart';
 import 'test.dart';
 
 void main() {
@@ -118,10 +119,9 @@ class _MyHomePageState extends State<MyHomePage> {
               key: const ValueKey('2'),
               controller: controller2,
             ),
-            SizedBox(height: 20),
-            TestBody(),
-            // AbsorbPointer(child: ,)
-            // IgnorePointer()
+            // SizedBox(height: 20),
+            // GestureTest(),
+            // TestBody(),
           ],
         ),
       ),

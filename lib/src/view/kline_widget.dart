@@ -35,56 +35,59 @@ class _KlineWidgetState extends State<KlineWidget> {
         color: Color.fromARGB(179, 243, 220, 220),
       ),
       // color: Colors.redAccent,
-      child: Stack(
-        children: <Widget>[
-          // GridBgView(controller: widget.controller),
-          RepaintBoundary(
-            key: const ValueKey('MainRectPaint'),
-            child: CustomPaint(
-              size: Size(
-                widget.controller.mainRectWidth,
-                widget.controller.mainRectHeight,
-              ),
-              painter: GridBgPainter(
-                controller: widget.controller,
-              ),
-              foregroundPainter: KlinePainter(
-                controller: widget.controller,
-              ),
-              isComplex: true,
-            ),
-          ),
-          Positioned(
-            left: 0,
-            top: widget.controller.mainRectHeight,
-            width: widget.controller.subRectWidth,
-            height: widget.controller.subRectHeight,
-            child: RepaintBoundary(
-              key: const ValueKey('SubRectPaint'),
-              child: Container(
-                width: widget.controller.mainRectWidth,
-                height: widget.controller.mainRectHeight,
-                color: Colors.grey,
+      child: GestureView(
+        controller: widget.controller,
+        child: Stack(
+          children: <Widget>[
+            // GridBgView(controller: widget.controller),
+            RepaintBoundary(
+              key: const ValueKey('MainRectPaint'),
+              child: CustomPaint(
+                size: Size(
+                  widget.controller.mainRectWidth,
+                  widget.controller.mainRectHeight,
+                ),
+                painter: GridBgPainter(
+                  controller: widget.controller,
+                ),
+                foregroundPainter: KlinePainter(
+                  controller: widget.controller,
+                ),
+                isComplex: true,
               ),
             ),
-          ),
-          RepaintBoundary(
-            key: const ValueKey('PriceCrossPaint'),
-            child: CustomPaint(
-              size: Size(
-                widget.controller.canvasRect.width,
-                widget.controller.canvasRect.height,
+            Positioned(
+              left: 0,
+              top: widget.controller.mainRectHeight,
+              width: widget.controller.subRectWidth,
+              height: widget.controller.subRectHeight,
+              child: RepaintBoundary(
+                key: const ValueKey('SubRectPaint'),
+                child: Container(
+                  width: widget.controller.mainRectWidth,
+                  height: widget.controller.mainRectHeight,
+                  color: Colors.grey,
+                ),
               ),
-              painter: PriceCrossPainter(
-                controller: widget.controller,
-              ),
-              isComplex: true,
             ),
-          ),
-          GestureView(
-            controller: widget.controller,
-          )
-        ],
+            RepaintBoundary(
+              key: const ValueKey('PriceCrossPaint'),
+              child: CustomPaint(
+                size: Size(
+                  widget.controller.canvasRect.width,
+                  widget.controller.canvasRect.height,
+                ),
+                painter: PriceCrossPainter(
+                  controller: widget.controller,
+                ),
+                isComplex: true,
+              ),
+            ),
+            // GestureView(
+            //   controller: widget.controller,
+            // )
+          ],
+        ),
       ),
     );
   }

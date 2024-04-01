@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:kline/src/extension/export.dart';
 
+import '../extension/export.dart';
 import '../model/export.dart';
 import '../render/export.dart';
 import '../utils/export.dart';
@@ -55,9 +55,13 @@ mixin PriceCrossBinding
 
   /// 矫正Cross
   Offset? correctCrossOffset(Offset val) {
-    if (val.isInfinite && !checkOffsetInMainDraw(val)) {
+    if (val.isInfinite) {
       return null;
     }
+    val = Offset(
+      val.dx.clamp(mainDrawLeft, mainDrawRight),
+      val.dy.clamp(mainDrawTop, mainDrawBottom),
+    );
     final startDx = startCandleDx;
     final index = ((startDx - val.dx) / candleActualWidth).round();
     final dx = startDx - index * candleActualWidth;
@@ -206,7 +210,7 @@ mixin PriceCrossBinding
     if (!isCrossing) return;
 
     final offset = this.offset;
-    if (offset == null || !checkOffsetInMainDraw(offset)) {
+    if (offset == null || offset.isInfinite) {
       return;
     }
 

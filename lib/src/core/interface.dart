@@ -8,6 +8,9 @@ abstract interface class IGestureEvent {
   /// 点击
   void onTapUp(TapUpDetails details);
 
+  /// 原始移动
+  void onPointerMove(PointerMoveEvent event);
+
   /// 移动, 缩放
   void onScaleStart(ScaleStartDetails details);
   void onScaleUpdate(ScaleUpdateDetails details);

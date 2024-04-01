@@ -42,9 +42,21 @@ mixin GestureBinding
   void onTapUp(TapUpDetails details) {
     logd("onTapUp details:$details");
     _tapData = GestureData.tap(details.localPosition);
-    handleTap(_tapData!);
-    _tapData?.end();
-    _tapData = null;
+    final ret = handleTap(_tapData!);
+    if (!ret) {
+      _tapData?.end();
+      _tapData = null;
+    }
+  }
+
+  @override
+  void onPointerMove(PointerMoveEvent event) {
+    if (_tapData == null) return;
+    // logd('onPointerMove position:${event.position}, delta:${event.delta}');
+    _tapData!.update(
+      _tapData!.offset + event.delta,
+    );
+    handleMove(_tapData!);
   }
 
   ///
