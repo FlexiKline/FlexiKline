@@ -23,12 +23,15 @@ mixin CrossBinding
     logd('dispose cross');
   }
 
-  ValueNotifier<int> repaintPriceCross = ValueNotifier(0);
-  void _markRepaint() => repaintPriceCross.value++;
+  final ValueNotifier<int> _repaintCross = ValueNotifier(0);
+  @override
+  Listenable get repaintCross => _repaintCross;
+  void _markRepaint() => _repaintCross.value++;
 
   //// Cross ////
   @override
   void markRepaintCross() => _markRepaint();
+
   // 是否正在绘制Cross
   @override
   bool get isCrossing => offset?.isFinite == true;
@@ -57,7 +60,6 @@ mixin CrossBinding
 
   /// 绘制最新价与十字线
   @override
-  @protected
   void paintCross(Canvas canvas, Size size) {
     if (isCrossing) {
       final offset = this.offset;

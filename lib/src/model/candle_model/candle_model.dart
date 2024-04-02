@@ -6,14 +6,14 @@ import '../../utils/export.dart';
 part 'candle_model.freezed.dart';
 part 'candle_model.g.dart';
 
-@unfreezed
+@freezed
 class CandleModel with _$CandleModel {
   factory CandleModel({
     /// 开始时间，Unix时间戳的毫秒数格式，如 1597026383085
     // @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
     required int timestamp,
-    @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
-    DateTime? datetime, // 从timestamp转换为dateTime;
+    // @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
+    // DateTime? datetime, // 从timestamp转换为dateTime;
 
     /// 开盘价格
     @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)

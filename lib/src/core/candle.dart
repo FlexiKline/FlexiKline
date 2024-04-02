@@ -30,8 +30,10 @@ mixin CandleBinding
     _lastPriceCountDownTimer = null;
   }
 
-  ValueNotifier<int> repaintCandle = ValueNotifier(0);
-  void _markRepaint() => repaintCandle.value++;
+  final ValueNotifier<int> _repaintCandle = ValueNotifier(0);
+  @override
+  Listenable get repaintCandle => _repaintCandle;
+  void _markRepaint() => _repaintCandle.value++;
 
   //// Last Price ////
   Timer? _lastPriceCountDownTimer;
@@ -68,7 +70,6 @@ mixin CandleBinding
   }
 
   @override
-  @protected
   void paintCandle(Canvas canvas, Size size) {
     logd('$diffTime paintCandle >>>>');
 

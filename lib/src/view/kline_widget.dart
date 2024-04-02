@@ -47,7 +47,7 @@ class _KlineWidgetState extends State<KlineWidget> {
                   widget.controller.mainRectWidth,
                   widget.controller.mainRectHeight,
                 ),
-                painter: GridBgPainter(
+                painter: GridPainter(
                   controller: widget.controller,
                 ),
                 foregroundPainter: KlinePainter(
@@ -93,8 +93,8 @@ class _KlineWidgetState extends State<KlineWidget> {
   }
 }
 
-class GridBgPainter extends CustomPainter {
-  GridBgPainter({
+class GridPainter extends CustomPainter {
+  GridPainter({
     required this.controller,
   }) : super(repaint: controller.repaintGridBg);
 
@@ -132,7 +132,7 @@ class KlinePainter extends CustomPainter {
 class PriceCrossPainter extends CustomPainter {
   PriceCrossPainter({
     required this.controller,
-  }) : super(repaint: controller.repaintPriceCross);
+  }) : super(repaint: controller.repaintCross);
 
   final KlineController controller;
 

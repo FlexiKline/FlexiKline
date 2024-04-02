@@ -2,8 +2,8 @@ import 'package:decimal/decimal.dart';
 
 import '../core/data.dart';
 import '../utils/num_util.dart';
-import 'candle_model/candle_model.dart';
-import 'candle_req/candle_req.dart';
+import './candle_model/candle_model.dart';
+import './candle_req/candle_req.dart';
 import '../constant.dart';
 
 export './candle_model/candle_model.dart';
@@ -39,8 +39,7 @@ extension CandleReqExt on CandleReq {
 
 extension CandleModelExt on CandleModel {
   DateTime get dateTime {
-    datetime ??= DateTime.fromMillisecondsSinceEpoch(timestamp);
-    return datetime!;
+    return DateTime.fromMillisecondsSinceEpoch(timestamp);
   }
 
   String formatDateTimeByTimeBar(TimeBar bar) {

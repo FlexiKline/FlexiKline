@@ -107,6 +107,8 @@ abstract interface class IState {
 
 //// 蜡烛图绘制接口
 abstract interface class ICandle {
+  Listenable get repaintCandle;
+
   void paintCandle(Canvas canvas, Size size);
 
   void markRepaintCandle();
@@ -117,7 +119,10 @@ abstract interface class ICandle {
 
 //// 最新价与十字线绘制API
 abstract interface class ICross {
+  Listenable get repaintCross;
+
   void paintCross(Canvas canvas, Size size);
+
   void markRepaintCross();
 
   /// 是否正在绘制Cross

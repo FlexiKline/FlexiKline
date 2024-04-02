@@ -1,8 +1,8 @@
 import 'dart:math' as math;
 
 import 'package:decimal/decimal.dart';
-import 'package:kline/src/utils/log.dart';
 
+import '../utils/export.dart';
 import '../model/export.dart';
 
 /// KLine相关的数据相关数据
