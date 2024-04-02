@@ -138,7 +138,7 @@ class PriceCrossPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    controller.paintPriceCross(canvas, size);
+    controller.paintCross(canvas, size);
   }
 
   @override

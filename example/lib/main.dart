@@ -72,7 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
     ));
 
     // genRandomCandleList(count: 500).then((list) {
-    //   controller1.setCandleData(req, list);
+    //   controller1.setKlineData(req, list);
     // });
     genLocalCandleList().then((list) {
       final req = CandleReq(
@@ -80,7 +80,7 @@ class _MyHomePageState extends State<MyHomePage> {
         bar: TimeBar.m15.bar,
         precision: 4,
       );
-      controller1.setCandleData(req, list);
+      controller1.setKlineData(req, list);
     });
   }
 
@@ -96,7 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ..candleWidth = 8;
 
     genCustomCandleList(count: 500).then((list) {
-      controller2.setCandleData(req, list);
+      controller2.setKlineData(req, list);
     });
   }
 
@@ -129,18 +129,18 @@ class _MyHomePageState extends State<MyHomePage> {
         onPressed: () {
           // valueNotifier.value++;
           // appendCandleList(
-          //   model: controller1.curCandleData.list.first,
+          //   model: controller1.curKlineData.list.first,
           //   count: randomCount,
           // ).then((list) {
-          //   controller1.appendCandleData(req, list);
+          //   controller1.appendKlineData(req, list);
           // });
-          CandleModel newModel = controller2.curCandleData.latest!;
+          CandleModel newModel = controller2.curKlineData.latest!;
           newModel = newModel.copyWith(
             timestamp: DateTime.fromMillisecondsSinceEpoch(newModel.timestamp)
                 .add(const Duration(days: 1))
                 .millisecondsSinceEpoch,
           );
-          controller2.appendCandleData(
+          controller2.appendKlineData(
             req,
             [newModel],
           );

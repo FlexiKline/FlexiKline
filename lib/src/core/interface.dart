@@ -2,7 +2,7 @@ import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 
 import '../model/export.dart';
-import 'candle_data.dart';
+import 'data.dart';
 
 /// Gesture 事件处理接口
 abstract interface class IGestureEvent {
@@ -58,16 +58,16 @@ mixin GestureHanderImpl implements IGestureHandler {
 //////// DataSource ///////
 
 /// 数据源更新
-abstract interface class IDataSource {
-  void setCandleData(
+abstract interface class IState {
+  void setKlineData(
     CandleReq req,
     List<CandleModel> list, {
     bool replace = false,
   });
 
-  void appendCandleData(CandleReq req, List<CandleModel> list);
+  void appendKlineData(CandleReq req, List<CandleModel> list);
 
-  CandleData get curCandleData;
+  KlineData get curKlineData;
 
   /// 蜡烛总数
   int get totalCandleCount;
@@ -106,17 +106,18 @@ abstract interface class IDataSource {
 }
 
 //// 蜡烛图绘制接口
-abstract interface class ICandlePainter {
+abstract interface class ICandle {
   void paintCandle(Canvas canvas, Size size);
 
   void markRepaintCandle();
+  void markRepaintLastPrice();
+
+  void startLastPriceCountDownTimer();
 }
 
 //// 最新价与十字线绘制API
-abstract interface class IPriceCrossPainter {
-  void paintPriceCross(Canvas canvas, Size size);
-  void startLastPriceCountDownTimer();
-  void markRepaintLastPrice();
+abstract interface class ICross {
+  void paintCross(Canvas canvas, Size size);
   void markRepaintCross();
 
   /// 是否正在绘制Cross

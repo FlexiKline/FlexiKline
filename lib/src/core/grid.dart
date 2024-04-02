@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'binding_base.dart';
 import 'setting.dart';
 
-mixin GridBgBinding on KlineBindingBase, SettingBinding {
+mixin GridBinding on KlineBindingBase, SettingBinding {
   @override
   void initBinding() {
     super.initBinding();

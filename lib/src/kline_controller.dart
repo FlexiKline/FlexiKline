@@ -4,11 +4,11 @@ class KlineController extends KlineBindingBase
     with
         SettingBinding,
         ConfigBinding,
-        DataSourceBinding,
+        StateBinding,
         GestureBinding,
-        GridBgBinding,
+        GridBinding,
         CandleBinding,
-        PriceCrossBinding,
+        CrossBinding,
         DrawBinding {
   KlineController({
     super.debug,

@@ -5,19 +5,22 @@ import 'package:kline/src/utils/log.dart';
 
 import '../model/export.dart';
 
-/// 蜡烛图相关数据
-class CandleData with KlineLog {
+/// KLine相关的数据相关数据
+class KlineData with KlineLog {
   @override
-  String get logTag => 'CandleData';
+  String get logTag => 'KlineData';
   @override
-  bool get isDebug => true;
+  bool get isDebug => debug;
 
-  CandleData(
+  final bool debug;
+
+  KlineData(
     this.req,
-    List<CandleModel> list,
-  ) : _list = List.of(list);
+    List<CandleModel> list, {
+    this.debug = false,
+  }) : _list = List.of(list);
 
-  static final CandleData empty = CandleData(
+  static final KlineData empty = KlineData(
     CandleReq(instId: "", bar: ""),
     List.empty(growable: true),
   );

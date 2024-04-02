@@ -6,14 +6,14 @@ import 'package:flutter/material.dart';
 import '../extension/export.dart';
 import '../model/export.dart';
 import 'binding_base.dart';
-import 'candle_data.dart';
+import 'data.dart';
 import 'interface.dart';
 import 'setting.dart';
 
-/// 负责数据的管理, 缓存, 切换, 计算
-mixin DataSourceBinding
+/// 状态管理: 负责数据的管理, 缓存, 切换, 计算
+mixin StateBinding
     on KlineBindingBase, SettingBinding
-    implements IDataSource, ICandlePainter, IPriceCrossPainter {
+    implements IState, ICandle, ICross {
   @override
   void initBinding() {
     super.initBinding();
@@ -26,29 +26,29 @@ mixin DataSourceBinding
     logd('dispose dataSource');
   }
 
-  final Map<String, CandleData> _candleDataCache = {};
+  final Map<String, KlineData> _klineDataCache = {};
 
-  CandleData _curCandleData = CandleData.empty;
+  KlineData _curKlineData = KlineData.empty;
   @override
-  CandleData get curCandleData => _curCandleData;
+  KlineData get curKlineData => _curKlineData;
 
   /// 蜡烛总数
   @override
-  int get totalCandleCount => curCandleData.list.length;
+  int get totalCandleCount => curKlineData.list.length;
 
   /// 数据缓存Key
-  String get curDataKey => curCandleData.key;
+  String get curDataKey => curKlineData.key;
 
   /// 最大绘制宽度
   @override
-  double get maxPaintWidth => curCandleData.list.length * candleActualWidth;
+  double get maxPaintWidth => curKlineData.list.length * candleActualWidth;
 
   /// 当前canvas绘制区域第一根蜡烛绘制的偏移量
   /// canvas绘制区右起始位置 - 当前第一根蜡烛在的起始偏移 - 半根蜡烛值
   /// 用于绘制蜡烛图计算的起始位置.
   @override
   double get startCandleDx {
-    return mainDrawRight + curCandleData.offset - candleWidthHalf;
+    return mainDrawRight + curKlineData.offset - candleWidthHalf;
   }
 
   /// 将offset指定的dx转换为当前绘制区域对应的蜡烛的下标.
@@ -61,7 +61,7 @@ mixin DataSourceBinding
     // return ((paintDxOffset + rightOffset) / candleActualWidth).floor();
 
     final index = ((startCandleDx - dx) / candleActualWidth).ceil();
-    return curCandleData.start + index;
+    return curKlineData.start + index;
   }
 
   /// 将offset指定的dy转换为当前坐标Y轴中价钱.
@@ -71,20 +71,20 @@ mixin DataSourceBinding
   @override
   Decimal? dyToPrice(double dy) {
     if (!mainDrawRect.inclueDy(dy)) return null;
-    return curCandleData.max - ((dy - mainPadding.top) / dyFactor).d;
+    return curKlineData.max - ((dy - mainPadding.top) / dyFactor).d;
   }
 
   /// 将价钱转换为主图(蜡烛图)的Y轴坐标.
   @override
   double priceToDy(Decimal price) {
-    price = price.clamp(curCandleData.min, curCandleData.max);
-    return mainDrawBottom - (price - curCandleData.min).toDouble() * dyFactor;
+    price = price.clamp(curKlineData.min, curKlineData.max);
+    return mainDrawBottom - (price - curKlineData.min).toDouble() * dyFactor;
   }
 
   /// 绘制区域高度 / 当前绘制的蜡烛数据高度.
   @override
   double get dyFactor {
-    return mainDrawHeight / curCandleData.dataHeight.toDouble();
+    return mainDrawHeight / curKlineData.dataHeight.toDouble();
   }
 
   /// 代表当前绘制区域相对于startIndex的偏移量.
@@ -130,7 +130,7 @@ mixin DataSourceBinding
       }
     } else {
       // TODO: 待优化.
-      int dataLen = curCandleData.list.length;
+      int dataLen = curKlineData.list.length;
       if (dataLen < maxCandleCount) {
         // 不足一屏: 按最少留白的蜡烛数来计算
         final min =
@@ -164,7 +164,7 @@ mixin DataSourceBinding
     if (paintDxOffset > 0) {
       final dxOffset = paintDxOffset % candleActualWidth;
       final maxCount = ((mainDrawWidth + dxOffset) / candleActualWidth).ceil();
-      curCandleData.ensureIndexAndOffset(
+      curKlineData.ensureIndexAndOffset(
         dxOffsetIndex,
         dxOffset,
         maxCandleCount: maxCount,
@@ -172,48 +172,48 @@ mixin DataSourceBinding
     } else {
       // final maxCount = maxCandleCount; // 取一屏蜡烛数据来计算最大最小
       final maxCount = maxCandleCount - dxOffsetIndex.abs(); // 取当前可见蜡烛来计算最大最小
-      curCandleData.ensureIndexAndOffset(
+      curKlineData.ensureIndexAndOffset(
         0,
         paintDxOffset,
         maxCandleCount: maxCount,
       );
     }
 
-    curCandleData.calculateMaxmin();
+    curKlineData.calculateMaxmin();
   }
 
   @override
-  void setCandleData(
+  void setKlineData(
     CandleReq req,
     List<CandleModel> list, {
     bool replace = false,
   }) {
-    CandleData? data = _candleDataCache[req.key];
+    KlineData? data = _klineDataCache[req.key];
     if (data != null) {
       paintDxOffset = 0;
       data.reset();
     }
-    data = CandleData(req, List.of(list));
-    _candleDataCache[req.key] = data;
-    if (curCandleData.invalid || req.key == curDataKey) {
-      _curCandleData = data;
+    data = KlineData(req, List.of(list), debug: debug);
+    _klineDataCache[req.key] = data;
+    if (curKlineData.invalid || req.key == curDataKey) {
+      _curKlineData = data;
       initPaintDxOffset();
       markRepaintCandle();
     }
   }
 
   @override
-  void appendCandleData(CandleReq req, List<CandleModel> list) {
-    CandleData? data = _candleDataCache[req.key];
+  void appendKlineData(CandleReq req, List<CandleModel> list) {
+    KlineData? data = _klineDataCache[req.key];
     if (data == null || data.list.isEmpty) {
-      logd('appendCandleData >setCandleData(${req.key}, ${data?.list.length})');
-      setCandleData(req, list);
+      logd('appendKlineData >setKlineData(${req.key}, ${data?.list.length})');
+      setKlineData(req, list);
       return;
     }
 
     final oldLen = data.list.length;
     data.mergeCandleList(list);
-    _candleDataCache[req.key] = data;
+    _klineDataCache[req.key] = data;
     if (req.key == curDataKey) {
       final newLen = data.list.length;
       if (paintDxOffset < 0 && newLen > oldLen) {
@@ -242,7 +242,6 @@ mixin DataSourceBinding
       paintDxOffset = newDxOffset;
       markRepaintCandle();
 
-      // TODO: 是否要将最新价移回 Candle 模块中绘制 ???
       markRepaintLastPrice();
     }
   }

@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import '../extension/export.dart';
@@ -10,31 +8,23 @@ import 'binding_base.dart';
 import 'interface.dart';
 import 'setting.dart';
 
-mixin PriceCrossBinding
+mixin CrossBinding
     on KlineBindingBase, SettingBinding
-    implements IPriceCrossPainter, IDataSource {
+    implements ICross, IState {
   @override
   void initBinding() {
     super.initBinding();
-    logd('init priceOrder');
-    startLastPriceCountDownTimer();
+    logd('init cross');
   }
 
   @override
   void dispose() {
     super.dispose();
-    logd('dispose priceOrder');
-    _lastPriceCountDownTimer?.cancel();
-    _lastPriceCountDownTimer = null;
+    logd('dispose cross');
   }
 
   ValueNotifier<int> repaintPriceCross = ValueNotifier(0);
   void _markRepaint() => repaintPriceCross.value++;
-
-  //// Last Price ////
-  @override
-  void markRepaintLastPrice() => _markRepaint();
-  Timer? _lastPriceCountDownTimer;
 
   //// Cross ////
   @override
@@ -58,7 +48,7 @@ mixin PriceCrossBinding
     if (offset.isInfinite) return null;
     // final index = offsetToIndex(offset);
     // final dx =
-    //     startCandleDx - (index - curCandleData.start) * candleActualWidth;
+    //     startCandleDx - (index - curKlineData.start) * candleActualWidth;
     final startDx = startCandleDx;
     final index = ((startDx - offset.dx) / candleActualWidth).ceil();
     final dx = startDx - index * candleActualWidth;
@@ -67,10 +57,8 @@ mixin PriceCrossBinding
 
   /// 绘制最新价与十字线
   @override
-  void paintPriceCross(Canvas canvas, Size size) {
-    /// 绘制最新价刻度线与价钱标记
-    paintLastPriceMark(canvas, size);
-
+  @protected
+  void paintCross(Canvas canvas, Size size) {
     if (isCrossing) {
       final offset = this.offset;
       if (offset == null || offset.isInfinite) {
@@ -123,6 +111,7 @@ mixin PriceCrossBinding
   }
 
   @override
+  @protected
   void handleScale(GestureData data) {
     if (isCrossing) {
       logd('handleMove cross > ${data.offset}');
@@ -132,99 +121,8 @@ mixin PriceCrossBinding
     return super.handleScale(data);
   }
 
-  @override
-  @protected
-  void startLastPriceCountDownTimer() {
-    _lastPriceCountDownTimer?.cancel();
-    markRepaintLastPrice();
-    _lastPriceCountDownTimer = Timer.periodic(
-      const Duration(seconds: 1),
-      (timer) {
-        markRepaintLastPrice();
-      },
-    );
-  }
-
-  /// 绘制最新价刻度线与价钱标记
-  /// 1. 价钱标记始终展示在画板最右边.
-  /// 2. 最新价向右移出屏幕后, 刻度线横穿整屏.
-  ///    且展示在指定价钱区间内, 如超出边界, 则停靠在最高最低线上.
-  /// 3. 最新价向左移动后, 刻度线根据最新价蜡烛线平行移动.
-  @protected
-  void paintLastPriceMark(Canvas canvas, Size size) {
-    if (!isDrawLastPriceMark) return;
-    final data = curCandleData;
-    final model = data.latest;
-    if (model == null) {
-      logd('paintLastPriceMark > on data!');
-      return;
-    }
-
-    double dx = mainDrawRight;
-    double ldx = 0; // 计算最新价刻度线lineTo参数X轴的dx值. 默认0: 代表橫穿整个Canvas.
-    double dy;
-    double flag = -1; // 计算右边最新价钱文本时, dy增减的方向
-    if (model.close >= data.max) {
-      dy = mainDrawTop; // 画板顶部展示.
-    } else if (model.close <= data.min) {
-      dy = mainDrawBottom; // 画板底部展示.
-      flag = 1;
-    } else {
-      // 计算最新价在当前画板中的X轴位置.
-      ldx = clampDxInMain(startCandleDx);
-      dy = clampDyInMain(priceToDy(model.close));
-    }
-
-    // 画最新价在画板中的刻度线.
-    final path = Path();
-    path.moveTo(dx, dy);
-    path.lineTo(ldx, dy);
-    canvas.drawDashPath(
-      path,
-      lastPriceMarkLinePaint,
-      dashes: lastPriceMarkLineDashes,
-    );
-
-    // 画最新价文本区域.
-    double textHeight = lastPriceRectPadding.vertical + lastPriceFontSize;
-    String text = formatPrice(
-      model.close,
-      instId: curCandleData.req.instId,
-      precision: curCandleData.req.precision,
-    );
-    if (showLastPriceUpdateTime) {
-      final nextUpdateDateTime = model.nextUpdateDateTime(data.req.bar);
-      // logd(
-      //   'paintLastPriceMark lastModelTime:${model.dateTime}, nextUpdateDateTime:$nextUpdateDateTime',
-      // );
-      if (nextUpdateDateTime != null) {
-        final timeDiff = calculateTimeDiff(nextUpdateDateTime);
-        if (timeDiff != null) {
-          text += "\n$timeDiff";
-          textHeight += lastPriceFontSize;
-        }
-      }
-    }
-    canvas.drawText(
-      offset: Offset(
-        dx - lastPriceRectRightMargin,
-        dy + flag * textHeight / 2, // 计算最新价文本区域相对于刻度线的位置
-      ),
-      drawDirection: DrawDirection.rtl,
-      drawableSize: mainRectSize,
-      text: text,
-      style: lastPriceTextStyle,
-      textAlign: TextAlign.end,
-      textWidthBasis: TextWidthBasis.longestLine,
-      padding: lastPriceRectPadding,
-      backgroundColor: lastPriceRectBackgroundColor,
-      radius: lastPriceRectBorderRadius,
-      borderWidth: lastPriceRectBorderWidth,
-      borderColor: lastPriceRectBorderColor,
-    );
-  }
-
   /// 绘制Cross Line
+  @protected
   void paintCrossLine(Canvas canvas, Offset offset) {
     final path = Path()
       ..moveTo(mainDrawLeft, offset.dy)
@@ -246,14 +144,15 @@ mixin PriceCrossBinding
   }
 
   /// 绘制Cross Y轴价钱刻度
+  @protected
   void paintCrossYAxisPriceMark(Canvas canvas, Offset offset) {
     final price = offsetToPrice(offset);
     if (price == null) return;
 
     final text = formatPrice(
       price,
-      instId: curCandleData.req.instId,
-      precision: curCandleData.req.precision,
+      instId: curKlineData.req.instId,
+      precision: curKlineData.req.precision,
     );
     canvas.drawText(
       offset: Offset(
@@ -275,10 +174,11 @@ mixin PriceCrossBinding
   }
 
   /// 绘制Cross X轴时间刻度
+  @protected
   void paintCrossXAxisTimeMark(Canvas canvas, Offset offset) {
     final index = offsetToIndex(offset);
-    final model = curCandleData.getCandle(index);
-    final timeBar = curCandleData.timerBar;
+    final model = curKlineData.getCandle(index);
+    final timeBar = curKlineData.timerBar;
     if (model == null || timeBar == null) return;
 
     // final time = model.formatDateTimeByTimeBar(timeBar);
@@ -305,10 +205,11 @@ mixin PriceCrossBinding
   }
 
   /// 绘制Cross 命中的蜡烛数据弹窗
+  @protected
   void paintPopupCandleCard(Canvas canvas, Offset offset) {
     final index = offsetToIndex(offset);
-    final model = curCandleData.getCandle(index);
-    final timeBar = curCandleData.timerBar;
+    final model = curKlineData.getCandle(index);
+    final timeBar = curKlineData.timerBar;
     if (model == null || timeBar == null) return;
 
     /// 1. 准备数据
@@ -320,8 +221,8 @@ mixin PriceCrossBinding
       keySpanList.add(TextSpan(text: text, style: candleCardTitleStyle));
     }
 
-    final instId = curCandleData.instId;
-    final p = curCandleData.precision;
+    final instId = curKlineData.instId;
+    final p = curKlineData.precision;
     TextStyle changeStyle = candleCardTitleStyle;
     final chgrate = model.changeRate;
     if (chgrate > 0) {

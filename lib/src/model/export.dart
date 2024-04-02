@@ -1,6 +1,6 @@
 import 'package:decimal/decimal.dart';
 
-import '../core/candle_data.dart';
+import '../core/data.dart';
 import '../utils/num_util.dart';
 import 'candle_model/candle_model.dart';
 import 'candle_req/candle_req.dart';
@@ -11,7 +11,7 @@ export './candle_req/candle_req.dart';
 export './gesture.dart';
 export './card_info.dart';
 
-extension CandleDataExt on CandleData {
+extension KlineDataExt on KlineData {
   String get instId => req.instId;
   int get precision => req.precision;
   String get key => req.key;

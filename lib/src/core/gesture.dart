@@ -8,7 +8,7 @@ import 'setting.dart';
 
 mixin GestureBinding
     on KlineBindingBase, SettingBinding
-    implements IGestureEvent, IDataSource {
+    implements IGestureEvent, IState {
   @override
   void initBinding() {
     super.initBinding();
@@ -130,7 +130,7 @@ mixin GestureBinding
     // >0: 正数代表从左向右滑动.
     final velocity = details.velocity.pixelsPerSecond.dx;
     if (velocity == 0 ||
-        curCandleData.isEmpty ||
+        curKlineData.isEmpty ||
         (velocity < 0 && !canPanRTL) ||
         (velocity > 0 && !canPanLTR)) {
       logd("onScaleEnd current not move! > details:$details");
