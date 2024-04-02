@@ -29,8 +29,8 @@ class _KlineWidgetState extends State<KlineWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: widget.controller.canvasRect.width,
-      height: widget.controller.canvasRect.height,
+      width: widget.controller.canvasWidth,
+      height: widget.controller.canvasHeight,
       decoration: const BoxDecoration(
         color: Color.fromARGB(179, 243, 220, 220),
       ),
@@ -57,8 +57,8 @@ class _KlineWidgetState extends State<KlineWidget> {
               ),
             ),
             Positioned(
-              left: 0,
-              top: widget.controller.mainRectHeight,
+              left: widget.controller.subRect.left,
+              top: widget.controller.subRect.top,
               width: widget.controller.subRectWidth,
               height: widget.controller.subRectHeight,
               child: RepaintBoundary(

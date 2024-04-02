@@ -93,7 +93,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     controller2
       ..candleMaxWidth = 30
-      ..candleWidth = 30;
+      ..candleWidth = 8;
 
     genCustomCandleList(count: 500).then((list) {
       controller2.setCandleData(req, list);

@@ -9,6 +9,8 @@ import '../model/export.dart';
 class CandleData with KlineLog {
   @override
   String get logTag => 'CandleData';
+  @override
+  bool get isDebug => true;
 
   CandleData(
     this.req,
@@ -35,14 +37,15 @@ class CandleData with KlineLog {
   int _start = 0;
   int get start => _start;
   set start(int val) {
-    _start = val.clamp(0, math.max(0, list.length - 1));
+    _start = val.clamp(0, math.max(0, list.length));
   }
 
   /// 当前绘制区域结束下标 左
+  /// 注: 遍历时, 应 < end;
   int _end = 0;
   int get end => _end;
   set end(int val) {
-    _end = val.clamp(0, math.max(0, list.length - 1));
+    _end = val.clamp(0, math.max(0, list.length));
   }
 
   double offset = 0;
@@ -72,7 +75,7 @@ class CandleData with KlineLog {
     CandleModel m = list[start];
     max = m.high;
     min = m.low;
-    for (var i = start; i <= end; i++) {
+    for (var i = start; i < end; i++) {
       m = list[i];
 
       if (i == 0) {
@@ -95,6 +98,7 @@ class CandleData with KlineLog {
     start = startIndex;
     offset = dxOffset;
     end = startIndex + maxCandleCount;
+    // logd('ensureIndexAndOffset [$start, $end] > $offset');
   }
 
   /// 获取index位置的蜡烛数据.

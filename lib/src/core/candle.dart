@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:kline/kline.dart';
@@ -43,6 +45,15 @@ mixin CandleBinding
 
     calculateCandleIndexAndOffset();
 
+    // canvas.drawPoints(
+    //   PointMode.points,
+    //   [Offset(startCandleDx, 100)],
+    //   Paint()
+    //     ..color = Colors.blue
+    //     ..strokeWidth = 2
+    //     ..style = PaintingStyle.stroke,
+    // );
+
     /// 绘制蜡烛图
     paintCandleChart(canvas, size);
 
@@ -63,47 +74,34 @@ mixin CandleBinding
     final offset = startCandleDx;
     final bar = data.timerBar;
     Offset? maxHihgOffset, minLowOffset;
-    for (var i = start; i <= end; i++) {
+    for (var i = start; i < end; i++) {
       final model = data.list[i];
-      final dx = offset - (i - start + 1) * candleActualWidth;
-      final isRise = model.close >= model.open;
-      final highOff = Offset(
-        dx,
-        mainDrawBottom - (model.high - data.min).toDouble() * dyFactor,
-      );
-      final lowOff = Offset(
-        dx,
-        mainDrawBottom - (model.low - data.min).toDouble() * dyFactor,
-      );
+      final dx = offset - (i - start) * candleActualWidth;
+      final isLong = model.close >= model.open;
+
+      final highOff = Offset(dx, priceToDy(model.high));
+      final lowOff = Offset(dx, priceToDy(model.low));
       canvas.drawLine(
         highOff,
         lowOff,
-        isRise ? candleLineLongPaint : candleLineShortPaint,
+        isLong ? candleLineLongPaint : candleLineShortPaint,
       );
-      final openOff = Offset(
-        dx,
-        mainDrawBottom - (model.open - data.min).toDouble() * dyFactor,
-      );
-      final closeOff = Offset(
-        dx,
-        mainDrawBottom - (model.close - data.min).toDouble() * dyFactor,
-      );
+
+      final openOff = Offset(dx, priceToDy(model.open));
+      final closeOff = Offset(dx, priceToDy(model.close));
       canvas.drawLine(
         openOff,
         closeOff,
-        isRise ? candleBarLongPaint : candleBarShortPaint,
+        isLong ? candleBarLongPaint : candleBarShortPaint,
       );
 
-      if (bar != null && i % timeTextOffsetCandleCounts == 0) {
+      if (bar != null && i % timeTickIntervalCandleCounts == 0) {
         // 绘制X轴时间刻度.
         paintXAxisTimeTick(
           canvas,
           bar: bar,
           model: model,
-          offset: Offset(
-            dx + timeTextWidth / 2,
-            mainDrawBottom,
-          ),
+          offset: Offset(dx, mainDrawBottom),
         );
       }
 
@@ -169,23 +167,24 @@ mixin CandleBinding
   }) {
     // final data = curCandleData;
     // if (data.list.isEmpty) return;
-
     // int start = data.start;
     // int end = data.end;
+
     // final offset = startCandleDx;
     // final bar = data.timerBar;
-    // for (var i = start; i <= end; i++) {
+    // for (var i = start; i < end; i++) {
     //   final model = data.list[i];
-    //   final dx = offset - (i - start + 1) * candleActualWidth;
-    //   if (bar != null && i % timeTextOffsetCandleCounts == 0) {
+    //   final dx = offset - (i - start) * candleActualWidth;
+    //   if (bar != null && i % timeTickIntervalCandleCounts == 0) {
+    //     Offset(dx, mainDrawBottom);
     // 绘制X轴时间刻度.
     canvas.drawText(
       offset: offset,
-      drawDirection: DrawDirection.rtl,
+      drawDirection: DrawDirection.center,
       text: model.formatDateTimeByTimeBar(bar),
-      style: timeTextStyle,
-      textWidth: timeTextWidth,
+      style: timeTickStyle,
       textAlign: TextAlign.center,
+      textWidth: timeTickRectWidth,
     );
     //   }
     // }
@@ -193,30 +192,29 @@ mixin CandleBinding
 
   /// 绘制Y轴价钱刻度数据
   void paintYAxisPriceTick(Canvas canvas, Size size) {
-    final data = curCandleData;
-    final max = data.max;
     final yAxisStep = mainDrawBottom / gridCount;
-    final dx = mainRectWidth;
+    final dx = mainDrawRight;
     double dy = 0;
     for (int i = 1; i <= gridCount; i++) {
-      dy = i * yAxisStep - tickTextFontSize;
+      dy = i * yAxisStep;
+      final price = dyToPrice(dy);
+      if (price == null) return;
 
-      final val = max - ((i * yAxisStep - mainPadding.top) / dyFactor).d;
       final text = formatPrice(
-        val,
+        price,
         instId: curCandleData.req.instId,
         precision: curCandleData.req.precision,
       );
 
       canvas.drawText(
-        offset: Offset(dx, dy),
+        offset: Offset(dx, dy - priceTickRectHeight),
         drawDirection: DrawDirection.rtl,
         drawableSize: mainRectSize,
         text: text,
-        style: tickTextStyle,
+        style: priceTickStyle,
         // textWidth: tickTextWidth,
         textAlign: TextAlign.end,
-        padding: tickTextPadding,
+        padding: priceTickRectPadding,
         maxLines: 1,
       );
     }

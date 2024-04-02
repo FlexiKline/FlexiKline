@@ -54,18 +54,15 @@ mixin PriceCrossBinding
   }
 
   /// 矫正Cross
-  Offset? correctCrossOffset(Offset val) {
-    if (val.isInfinite) {
-      return null;
-    }
-    val = Offset(
-      val.dx.clamp(mainDrawLeft, mainDrawRight),
-      val.dy.clamp(mainDrawTop, mainDrawBottom),
-    );
+  Offset? correctCrossOffset(Offset offset) {
+    if (offset.isInfinite) return null;
+    // final index = offsetToIndex(offset);
+    // final dx =
+    //     startCandleDx - (index - curCandleData.start) * candleActualWidth;
     final startDx = startCandleDx;
-    final index = ((startDx - val.dx) / candleActualWidth).round();
+    final index = ((startDx - offset.dx) / candleActualWidth).ceil();
     final dx = startDx - index * candleActualWidth;
-    return Offset(dx, val.dy);
+    return clampOffsetInCanvas(Offset(dx, offset.dy));
   }
 
   /// 绘制最新价与十字线
@@ -74,8 +71,30 @@ mixin PriceCrossBinding
     /// 绘制最新价刻度线与价钱标记
     paintLastPriceMark(canvas, size);
 
-    /// 绘制Cross
-    paintCrossLine(canvas, size);
+    if (isCrossing) {
+      final offset = this.offset;
+      if (offset == null || offset.isInfinite) {
+        return;
+      }
+
+      /// 绘制Cross Line
+      paintCrossLine(canvas, offset);
+
+      if (showCrossYAxisPriceMark) {
+        /// 绘制Cross Y轴价钱刻度
+        paintCrossYAxisPriceMark(canvas, offset);
+      }
+
+      if (showCrossXAxisTimeMark) {
+        /// 绘制Cross X轴时间刻度
+        paintCrossXAxisTimeMark(canvas, offset);
+      }
+
+      if (showPopupCandleCard) {
+        /// 绘制Cross 命中的蜡烛数据弹窗
+        paintPopupCandleCard(canvas, offset);
+      }
+    }
   }
 
   @override
@@ -99,7 +118,6 @@ mixin PriceCrossBinding
     if (!isCrossing) {
       return super.handleMove(data);
     }
-    logd('handleMove cross > ${data.offset}');
     offset = data.offset;
     markRepaintCross();
   }
@@ -153,8 +171,8 @@ mixin PriceCrossBinding
       flag = 1;
     } else {
       // 计算最新价在当前画板中的X轴位置.
-      ldx = clampDxInMain(startCandleDx - candleActualWidth);
-      dy = mainDrawBottom - (model.close - data.min).toDouble() * dyFactor;
+      ldx = clampDxInMain(startCandleDx);
+      dy = clampDyInMain(priceToDy(model.close));
     }
 
     // 画最新价在画板中的刻度线.
@@ -206,14 +224,8 @@ mixin PriceCrossBinding
     );
   }
 
-  void paintCrossLine(Canvas canvas, Size size) {
-    if (!isCrossing) return;
-
-    final offset = this.offset;
-    if (offset == null || offset.isInfinite) {
-      return;
-    }
-
+  /// 绘制Cross Line
+  void paintCrossLine(Canvas canvas, Offset offset) {
     final path = Path()
       ..moveTo(mainDrawLeft, offset.dy)
       ..lineTo(mainDrawRight, offset.dy)
@@ -231,45 +243,73 @@ mixin PriceCrossBinding
         crossPointRadius,
         crossPointPaint,
       );
+  }
 
-    if (showCrossYAxisPriceMark) {
-      final val =
-          curCandleData.max - ((offset.dy - mainPadding.top) / dyFactor).d;
-      final text = formatPrice(
-        val,
-        instId: curCandleData.req.instId,
-        precision: curCandleData.req.precision,
-      );
-      canvas.drawText(
-        offset: Offset(
-          mainDrawRight - crossPriceRectRigthMargin,
-          offset.dy - crossPriceRectHeight / 2,
-        ),
-        drawDirection: DrawDirection.rtl,
-        drawableSize: mainRectSize,
-        text: text,
-        style: crossPriceTextStyle,
-        textAlign: TextAlign.end,
-        textWidthBasis: TextWidthBasis.longestLine,
-        padding: crossPriceRectPadding,
-        backgroundColor: crossPriceRectBackgroundColor,
-        radius: crossPriceRectBorderRadius,
-        borderWidth: crossPriceRectBorderWidth,
-        borderColor: crossPriceRectBorderColor,
-      );
-    }
+  /// 绘制Cross Y轴价钱刻度
+  void paintCrossYAxisPriceMark(Canvas canvas, Offset offset) {
+    final price = offsetToPrice(offset);
+    if (price == null) return;
 
-    if (showPopupCandleCard) {
-      _paintPopupCandleCard(canvas, offset);
-    }
+    final text = formatPrice(
+      price,
+      instId: curCandleData.req.instId,
+      precision: curCandleData.req.precision,
+    );
+    canvas.drawText(
+      offset: Offset(
+        mainDrawRight - crossPriceRectRigthMargin,
+        offset.dy - crossPriceRectHeight / 2,
+      ),
+      drawDirection: DrawDirection.rtl,
+      drawableSize: mainRectSize,
+      text: text,
+      style: crossPriceTextStyle,
+      textAlign: TextAlign.end,
+      textWidthBasis: TextWidthBasis.longestLine,
+      padding: crossPriceRectPadding,
+      backgroundColor: crossPriceRectBackgroundColor,
+      radius: crossPriceRectBorderRadius,
+      borderWidth: crossPriceRectBorderWidth,
+      borderColor: crossPriceRectBorderColor,
+    );
+  }
+
+  /// 绘制Cross X轴时间刻度
+  void paintCrossXAxisTimeMark(Canvas canvas, Offset offset) {
+    final index = offsetToIndex(offset);
+    final model = curCandleData.getCandle(index);
+    final timeBar = curCandleData.timerBar;
+    if (model == null || timeBar == null) return;
+
+    // final time = model.formatDateTimeByTimeBar(timeBar);
+    final time = formatDateTime(model.dateTime);
+
+    final dyCenterOffset = (mainPadding.bottom - crossTimeRectHeight) / 2;
+    canvas.drawText(
+      offset: Offset(
+        offset.dx,
+        mainDrawBottom + dyCenterOffset,
+      ),
+      drawDirection: DrawDirection.center,
+      // drawableSize: mainRectSize,
+      text: time,
+      style: crossTimeTextStyle,
+      textAlign: TextAlign.center,
+      textWidthBasis: TextWidthBasis.longestLine,
+      padding: crossTimeRectPadding,
+      backgroundColor: crossTimeRectBackgroundColor,
+      radius: crossTimeRectBorderRadius,
+      borderWidth: crossTimeRectBorderWidth,
+      borderColor: crossTimeRectBorderColor,
+    );
   }
 
   /// 绘制Cross 命中的蜡烛数据弹窗
-  void _paintPopupCandleCard(Canvas canvas, Offset offset) {
-    final index = ((startCandleDx - offset.dx) / candleActualWidth).round();
-    final model = curCandleData.getCandle(curCandleData.start + index - 1);
-    logd('_paintCrossPopupWindow model:$model');
-    if (model == null) return;
+  void paintPopupCandleCard(Canvas canvas, Offset offset) {
+    final index = offsetToIndex(offset);
+    final model = curCandleData.getCandle(index);
+    final timeBar = curCandleData.timerBar;
+    if (model == null || timeBar == null) return;
 
     /// 1. 准备数据
     // ['Time', 'Open', 'High', 'Low', 'Close', 'Chg', '%Chg', 'Amount']
@@ -291,7 +331,7 @@ mixin PriceCrossBinding
     }
     final valueSpan = <TextSpan>[
       TextSpan(
-        text: '${formatDateTime(model.dateTime)}\n',
+        text: '${model.formatDateTimeByTimeBar(timeBar)}\n',
         style: candleCardTitleStyle,
       ),
       TextSpan(

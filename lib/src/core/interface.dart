@@ -1,3 +1,4 @@
+import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 
 import '../model/export.dart';
@@ -83,7 +84,16 @@ abstract interface class IDataSource {
   /// 当前canvas绘制区域第一根蜡烛绘制的偏移量
   double get startCandleDx;
 
+  /// 将offset指定的dx转换为当前绘制区域对应的蜡烛的下标.
   int offsetToIndex(Offset offset);
+  int dxToIndex(double dx);
+
+  /// 将offset指定的dy转换为当前坐标Y轴中价钱.
+  Decimal? offsetToPrice(Offset offset);
+  Decimal? dyToPrice(double dy);
+
+  /// 将价钱转换为Y轴坐标.
+  double priceToDy(Decimal price);
 
   /// 画布是否可以从右向左进行平移.
   bool get canPanRTL;

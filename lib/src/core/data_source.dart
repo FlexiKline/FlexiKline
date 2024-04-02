@@ -1,7 +1,9 @@
 import 'dart:math' as math;
 
+import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 
+import '../extension/export.dart';
 import '../model/export.dart';
 import 'binding_base.dart';
 import 'candle_data.dart';
@@ -46,15 +48,37 @@ mixin DataSourceBinding
   /// 用于绘制蜡烛图计算的起始位置.
   @override
   double get startCandleDx {
-    return mainDrawRight + curCandleData.offset + candleWidthHalf;
+    return mainDrawRight + curCandleData.offset - candleWidthHalf;
   }
 
-  /// 将offset指定的dx转换为蜡烛index.
+  /// 将offset指定的dx转换为当前绘制区域对应的蜡烛的下标.
   @override
-  int offsetToIndex(Offset offset) {
-    final rightOffset = mainDrawRight - offset.dx;
-    // logd('dxToIndex paintDxOffset:$paintDxOffset, rightOffset:$rightOffset');
-    return ((paintDxOffset + rightOffset) / candleActualWidth).round();
+  int offsetToIndex(Offset offset) => dxToIndex(offset.dx);
+
+  @override
+  int dxToIndex(double dx) {
+    // final rightOffset = mainDrawRight - dx;
+    // return ((paintDxOffset + rightOffset) / candleActualWidth).floor();
+
+    final index = ((startCandleDx - dx) / candleActualWidth).ceil();
+    return curCandleData.start + index;
+  }
+
+  /// 将offset指定的dy转换为当前坐标Y轴中价钱.
+  @override
+  Decimal? offsetToPrice(Offset offset) => dyToPrice(offset.dy);
+
+  @override
+  Decimal? dyToPrice(double dy) {
+    if (!mainDrawRect.inclueDy(dy)) return null;
+    return curCandleData.max - ((dy - mainPadding.top) / dyFactor).d;
+  }
+
+  /// 将价钱转换为主图(蜡烛图)的Y轴坐标.
+  @override
+  double priceToDy(Decimal price) {
+    price = price.clamp(curCandleData.min, curCandleData.max);
+    return mainDrawBottom - (price - curCandleData.min).toDouble() * dyFactor;
   }
 
   /// 绘制区域高度 / 当前绘制的蜡烛数据高度.
@@ -91,10 +115,11 @@ mixin DataSourceBinding
 
   /// 矫正PaintDxOffset的范围
   double clampPaintDxOffset(double dxOffset) {
-    if (minPaintBlandUseWidth) {
+    if (minPaintBlankUseWidth) {
       if (maxPaintWidth < mainDrawWidth) {
         // 不足一屏: 按最少留白的宽度精确计算
         final min = math.min(minPaintBlankWidth, maxPaintWidth) - mainDrawWidth;
+        // 如果为0时, 首根蜡烛可平移到MainRect绘制区域右边.
         final max = maxPaintWidth - minPaintBlankWidth;
         return math.min(math.max(min, dxOffset), max);
       } else {
@@ -104,6 +129,7 @@ mixin DataSourceBinding
         return math.min(math.max(min, dxOffset), max);
       }
     } else {
+      // TODO: 待优化.
       int dataLen = curCandleData.list.length;
       if (dataLen < maxCandleCount) {
         // 不足一屏: 按最少留白的蜡烛数来计算
@@ -125,41 +151,34 @@ mixin DataSourceBinding
   }
 
   void initPaintDxOffset() {
-    if (maxPaintWidth >= mainDrawWidth - firstCandleOffset) {
-      // 当前蜡烛数足够绘制一屏宽度 - 首根蜡烛相对于主绘制区域右部偏移时, 起始位置定在偏移处, 展示友好.
-      paintDxOffset = -firstCandleOffset;
-    } else {
-      // 不足一屏
-      paintDxOffset = maxPaintWidth - mainDrawWidth;
-    }
+    paintDxOffset = math.min(
+      maxPaintWidth - mainDrawWidth, // 不足一屏, 首根蜡烛偏移量等于首根蜡烛右边长度.
+      -firstCandleInitOffset, // 满足一屏时, 首根蜡烛相对于主绘制区域最小的偏移量
+    );
   }
 
   /// 计算绘制蜡烛图的起始数组索引下标和绘制偏移量
   @override
   void calculateCandleIndexAndOffset() {
-    // logd(
-    //   'calculateCandleIndexAndOffset begin paintDxOffset:$paintDxOffset in [${-canvasWidth}, ${maxPaintWidth - minPaintBlankWidth}]',
-    // );
-
+    final dxOffsetIndex = (paintDxOffset / candleActualWidth).floor();
     if (paintDxOffset > 0) {
-      final startIndex = (paintDxOffset / candleActualWidth).floor();
       final dxOffset = paintDxOffset % candleActualWidth;
+      final maxCount = ((mainDrawWidth + dxOffset) / candleActualWidth).ceil();
       curCandleData.ensureIndexAndOffset(
-        startIndex,
+        dxOffsetIndex,
         dxOffset,
-        maxCandleCount: maxCandleCount,
+        maxCandleCount: maxCount,
       );
     } else {
+      // final maxCount = maxCandleCount; // 取一屏蜡烛数据来计算最大最小
+      final maxCount = maxCandleCount - dxOffsetIndex.abs(); // 取当前可见蜡烛来计算最大最小
       curCandleData.ensureIndexAndOffset(
         0,
         paintDxOffset,
-        maxCandleCount: maxCandleCount,
+        maxCandleCount: maxCount,
       );
     }
 
-    // logd(
-    //   'calculateCandleIndexAndOffset end paintDxOffset:$paintDxOffset in [${-canvasWidth}, ${maxPaintWidth - minPaintBlankWidth}]',
-    // );
     curCandleData.calculateMaxmin();
   }
 
@@ -192,18 +211,20 @@ mixin DataSourceBinding
       return;
     }
 
-    int oldLen = data.list.length;
+    final oldLen = data.list.length;
     data.mergeCandleList(list);
     _candleDataCache[req.key] = data;
     if (req.key == curDataKey) {
-      if (paintDxOffset <= 0) {
+      final newLen = data.list.length;
+      if (paintDxOffset < 0 && newLen > oldLen) {
         /// 当数据合并后
-        /// 1. 如果paintDxOffset > 0 说明满足一屏, 且最蜡烛被用户移动到绘制区域外面, 无需要更新绘制偏移量paintDxOffset
-        /// 2. 如果paintDxOffset <= 0 说明未满足一屏, 或当前最新蜡烛在屏幕第一位(最右边)展示, 需要减小偏移量, 以保证新数据能够展示.
+        /// 1. 如果paintDxOffset > 0 说明满足一屏, 且最蜡烛被用户移动到绘制区域外面, 无需调整偏移量paintDxOffset, 重绘时, 仍按此偏移量计算后, 当前首根蜡烛向左移动一个蜡烛.
+        /// 2. 如果paintDxOffset == 0 说明当前最新蜡烛在屏幕第一位(最右边)展示. 无需调整偏移量paintDxOffset, 重绘时calculateCandleIndexAndOffset, 会计算startIndex = 0;
+        /// 2. 如果paintDxOffset < 0 说明未满足一屏, 需要减小偏移量, 以保证新数据能够展示.
         ///    注: 如果调整后 paintDxOffset > 0 则要置为0, 以保证最新蜡烛在最右边展示.
         paintDxOffset = math.min(
           0,
-          paintDxOffset + (data.list.length - oldLen) * candleActualWidth,
+          paintDxOffset + (newLen - oldLen) * candleActualWidth,
         );
       }
 

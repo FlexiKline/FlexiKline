@@ -49,13 +49,18 @@ mixin GestureBinding
     }
   }
 
+  ///
+  /// 原始移动
+  ///
   @override
   void onPointerMove(PointerMoveEvent event) {
     if (_tapData == null) return;
     // logd('onPointerMove position:${event.position}, delta:${event.delta}');
-    _tapData!.update(
-      _tapData!.offset + event.delta,
-    );
+    Offset newOffset = _tapData!.offset + event.delta;
+    if (!canvasRect.contains(newOffset)) {
+      newOffset = clampOffsetInCanvas(newOffset);
+    }
+    _tapData!.update(newOffset);
     handleMove(_tapData!);
   }
 
@@ -86,12 +91,13 @@ mixin GestureBinding
 
     if (_panScaleData!.isPan) {
       _panScaleData!.update(
-        details.localFocalPoint,
+        clampOffsetInCanvas(details.localFocalPoint),
         newScale: details.scale,
       );
       handleMove(_panScaleData!);
     } else if (_panScaleData!.isScale) {
       final delta = details.scale - _panScaleData!.scale;
+      // TODO: 待优化
       if (delta.abs() > 0.001) {
         logd('>scale ${details.scale} > delta:$delta');
         _panScaleData!.update(

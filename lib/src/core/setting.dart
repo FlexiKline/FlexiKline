@@ -34,40 +34,61 @@ mixin SettingBinding on KlineBindingBase {
   }
 
   /// 整个画布区域大小 = 由主图区域 + 副图区域
-  Size get canvasRect => Size(
-        math.max(mainRectSize.width, _subRectSize.width),
-        mainRectSize.height + _subRectSize.height,
+  Rect get canvasRect => Rect.fromLTRB(
+        mainRect.left,
+        mainRect.top,
+        math.max(mainRectSize.width, subRectSize.width),
+        mainRectSize.height + subRectSize.height,
       );
   double get canvasWidth => canvasRect.width;
   double get canvasHeight => canvasRect.height;
+  // 校正offset必须在canvasRect中.
+  Offset clampOffsetInCanvas(Offset offset) {
+    return Offset(
+      offset.dx.clamp(canvasRect.left, canvasRect.right),
+      offset.dy.clamp(canvasRect.top, canvasRect.bottom),
+    );
+  }
 
   /// 主图区域大小
-  Size _mainRectSize = Size.zero;
-  Size get mainRectSize => _mainRectSize;
+  Rect _mainRect = Rect.zero;
+  Rect get mainRect => _mainRect;
+  Size get mainRectSize => Size(mainRect.width, mainRect.height);
   void setMainSize(Size size) {
-    _mainRectSize = size;
+    _mainRect = Rect.fromLTRB(
+      0,
+      0,
+      size.width,
+      size.height,
+    );
     onSizeChange?.call();
   }
 
   /// 主图总宽度
-  double get mainRectWidth => mainRectSize.width;
+  double get mainRectWidth => mainRect.width;
 
   /// 主图总高度
-  double get mainRectHeight => mainRectSize.height;
+  double get mainRectHeight => mainRect.height;
 
   /// 副图区域大小
-  Size _subRectSize = Size.zero;
-  Size get subRectSize => _subRectSize;
+  Rect _subRect = Rect.zero;
+  Rect get subRect => _subRect;
+  Size get subRectSize => Size(subRect.width, subRect.height);
   void setSubSize(Size size) {
-    _subRectSize = size;
+    _subRect = Rect.fromLTWH(
+      0,
+      _mainRect.bottom,
+      size.width,
+      size.height,
+    );
     onSizeChange?.call();
   }
 
   /// 副图总宽度
-  double get subRectWidth => subRectSize.width;
+  double get subRectWidth => subRect.width;
 
   /// 副图总高度
-  double get subRectHeight => subRectSize.height;
+  double get subRectHeight => subRect.height;
 
   /// 主图上下padding
   EdgeInsets mainPadding = const EdgeInsets.only(
@@ -78,6 +99,13 @@ mixin SettingBinding on KlineBindingBase {
 
   /// 幅图上下padding
   EdgeInsets subPadding = const EdgeInsets.all(10);
+
+  Rect get mainDrawRect => Rect.fromLTRB(
+        mainRect.left + mainPadding.left,
+        mainRect.top + mainPadding.top,
+        mainRect.right - mainPadding.right,
+        mainRect.bottom - mainPadding.bottom,
+      );
 
   /// X轴主绘制区域真实宽.
   double get mainDrawWidth => mainRectWidth - mainPadding.horizontal;
@@ -100,11 +128,8 @@ mixin SettingBinding on KlineBindingBase {
   /// Y轴主绘制区域下边界值
   double get mainDrawBottom => mainRectHeight - mainPadding.bottom;
 
-  bool checkOffsetInMainDraw(Offset offset) {
-    return offset.dx > mainDrawLeft &&
-        offset.dx < mainDrawRight &&
-        offset.dy > mainDrawTop &&
-        offset.dy < mainDrawBottom;
+  bool checkOffsetInMainRect(Offset offset) {
+    return mainRect.contains(offset);
   }
 
   double clampDxInMain(double dx) => dx.clamp(mainDrawLeft, mainDrawRight);
@@ -122,7 +147,7 @@ mixin SettingBinding on KlineBindingBase {
   double get minPaintBlankWidth => mainDrawWidth * minPaintBlankRate;
 
   /// 留白按宽度minPaintBlankWidth来计算
-  bool minPaintBlandUseWidth = true;
+  bool minPaintBlankUseWidth = true;
 
   /// 绘制区域最少留白可绘制蜡烛数.
   int get minPaintBlankCandleCount {
@@ -184,7 +209,7 @@ mixin SettingBinding on KlineBindingBase {
     ..strokeWidth = candleWidth;
 
   // Candle 第一根Candle相对于mainRect右边的偏移
-  double firstCandleOffset = 80;
+  double firstCandleInitOffset = 80;
 
   /// Grid Axis config
   // Grid Axis Count
@@ -201,34 +226,37 @@ mixin SettingBinding on KlineBindingBase {
     ..strokeWidth = pixel;
 
   /// Y轴上价钱刻度线配置
-  double tickTextFontSize = 10;
-  // double tickTextWidth = 100; //暂无用
-  EdgeInsets tickTextPadding = const EdgeInsets.only(
+  double priceTickFontSize = 10;
+  EdgeInsets priceTickRectPadding = const EdgeInsets.only(
     right: 2,
   );
-  Color tickTextColor = Colors.black;
-  double get tickTextHeight => tickTextFontSize;
-  TextStyle get tickTextStyle => TextStyle(
-        fontSize: tickTextFontSize,
-        color: tickTextColor,
+  Color priceTickColor = Colors.black;
+  double get priceTickRectHeight {
+    final textHeight = priceTickFontSize * (priceTickStyle.height ?? 1);
+    return textHeight + priceTickRectPadding.vertical;
+  }
+
+  TextStyle get priceTickStyle => TextStyle(
+        fontSize: priceTickFontSize,
+        color: priceTickColor,
         overflow: TextOverflow.ellipsis,
         height: 1,
       );
 
   /// X轴上时间刻度线配置
-  double timeTextFontSize = 10;
-  double timeTextWidth = 80;
-  double timeTextInterval = 10;
-  int get timeTextOffsetCandleCounts {
-    return ((timeTextWidth + timeTextInterval) / candleActualWidth).round();
+  double timeTickFontSize = 10;
+  double timeTickRectWidth = 70;
+  double timeTickSpacing = 10;
+  int get timeTickIntervalCandleCounts {
+    return ((timeTickRectWidth + timeTickSpacing) / candleActualWidth).round();
   }
 
-  Color timeTextColor = Colors.black;
-  TextStyle get timeTextStyle => TextStyle(
-        fontSize: timeTextFontSize,
-        color: timeTextColor,
+  Color timeTickColor = Colors.black;
+  TextStyle get timeTickStyle => TextStyle(
+        fontSize: timeTickFontSize,
+        color: timeTickColor,
         overflow: TextOverflow.ellipsis,
-        height: mainPadding.bottom / timeTextFontSize,
+        height: mainPadding.bottom / timeTickFontSize,
       );
 
   /// 最大最小价钱刻度线与价钱标记.
@@ -329,7 +357,36 @@ mixin SettingBinding on KlineBindingBase {
   );
   // cross 价钱区域总高度.
   double get crossPriceRectHeight {
-    return crossPriceFontSize + crossPriceRectPadding.vertical;
+    final textHeight = crossPriceFontSize * (crossPriceTextStyle.height ?? 1);
+    return textHeight + crossPriceRectPadding.vertical;
+  }
+
+  /// Cross X轴时间文本配置
+  bool showCrossXAxisTimeMark = true;
+  double crossTimeFontSize = 10;
+  double crossTimeTextWidth = 100; // TODO 暂无用
+  Color crossTimeColor = Colors.white;
+  TextStyle get crossTimeTextStyle => TextStyle(
+        fontSize: crossTimeFontSize,
+        color: crossTimeColor,
+        overflow: TextOverflow.ellipsis,
+        height: 1,
+        textBaseline: TextBaseline.alphabetic,
+      );
+  // cross Y轴最右边文本区域的背景相关配置.
+  Color crossTimeRectBackgroundColor = Colors.black;
+  double crossTimeRectBorderRadius = 2;
+  double crossTimeRectBorderWidth = 0.0;
+  Color crossTimeRectBorderColor = Colors.transparent;
+  // double crossTimeRectRigthMargin = 1;
+  EdgeInsets crossTimeRectPadding = const EdgeInsets.symmetric(
+    horizontal: 2,
+    vertical: 2,
+  );
+
+  double get crossTimeRectHeight {
+    final textHeight = crossTimeFontSize * (crossTimeTextStyle.height ?? 1);
+    return textHeight + crossTimeRectPadding.vertical;
   }
 
   // candle Card 配置

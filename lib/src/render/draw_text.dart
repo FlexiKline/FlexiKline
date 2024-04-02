@@ -9,7 +9,7 @@ extension DrawTextExt on Canvas {
     ///绘制启始坐标位置
     required Offset offset,
 
-    /// X轴上的绘制方向: 以offset为原点, 向左向右绘制.
+    /// X轴上的绘制方向: 以offset为原点, 向左向右绘制; 以及居中绘制
     DrawDirection drawDirection = DrawDirection.ltr,
 
     /// 文本区域的边界margin, 在贴近绘制边界时, 增加一定的margin友好展示.
@@ -84,6 +84,11 @@ extension DrawTextExt on Canvas {
           0,
           math.min(offset.dx, drawableSize.width - paintSize.width),
         );
+      } else if (drawDirection.isCenter) {
+        dx = math.max(
+          0,
+          math.min(offset.dx, drawableSize.width - paintSize.width / 2),
+        );
       } else {
         // 从右向左
         dx = math.max(
@@ -100,6 +105,11 @@ extension DrawTextExt on Canvas {
       if (drawDirection.isrtl) {
         offset = Offset(
           offset.dx - paintSize.width,
+          offset.dy,
+        );
+      } else if (drawDirection.isCenter) {
+        offset = Offset(
+          offset.dx - paintSize.width / 2,
           offset.dy,
         );
       }
