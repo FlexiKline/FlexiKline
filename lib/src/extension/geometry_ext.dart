@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-extension OffsetExt on Rect {
+extension RectExt on Rect {
   /// Whether the point specified by the given offset (which is assumed to be
   /// relative to the origin) lies between the left and right and the top and
   /// bottom edges of this rectangle.
@@ -19,5 +19,14 @@ extension OffsetExt on Rect {
 
   bool inclueDy(double dy) {
     return dy >= top && dy <= bottom;
+  }
+}
+
+extension OffsetExt on Offset {
+  Offset clamp(Rect rect) {
+    return Offset(
+      dx.clamp(rect.left, rect.right),
+      dy.clamp(rect.top, rect.bottom),
+    );
   }
 }

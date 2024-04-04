@@ -42,13 +42,6 @@ mixin SettingBinding on KlineBindingBase {
       );
   double get canvasWidth => canvasRect.width;
   double get canvasHeight => canvasRect.height;
-  // 校正offset必须在canvasRect中.
-  Offset clampOffsetInCanvas(Offset offset) {
-    return Offset(
-      offset.dx.clamp(canvasRect.left, canvasRect.right),
-      offset.dy.clamp(canvasRect.top, canvasRect.bottom),
-    );
-  }
 
   /// 主图区域大小
   Rect _mainRect = Rect.zero;
@@ -145,14 +138,6 @@ mixin SettingBinding on KlineBindingBase {
 
   /// 绘制区域最少留白宽度.
   double get minPaintBlankWidth => mainDrawWidth * minPaintBlankRate;
-
-  /// 留白按宽度minPaintBlankWidth来计算
-  bool minPaintBlankUseWidth = true;
-
-  /// 绘制区域最少留白可绘制蜡烛数.
-  int get minPaintBlankCandleCount {
-    return (minPaintBlankWidth / candleActualWidth).ceil();
-  }
 
   // Gesture Pan
   // 平移结束后, candle惯性平移, 持续的最长时间.

@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
+import '../extension/export.dart';
 import '../model/export.dart';
 import 'binding_base.dart';
 import 'interface.dart';
@@ -57,8 +58,8 @@ mixin GestureBinding
     if (_tapData == null) return;
     // logd('onPointerMove position:${event.position}, delta:${event.delta}');
     Offset newOffset = _tapData!.offset + event.delta;
-    if (!canvasRect.contains(newOffset)) {
-      newOffset = clampOffsetInCanvas(newOffset);
+    if (!canvasRect.include(newOffset)) {
+      newOffset = newOffset.clamp(canvasRect);
     }
     _tapData!.update(newOffset);
     handleMove(_tapData!);
@@ -91,7 +92,7 @@ mixin GestureBinding
 
     if (_panScaleData!.isPan) {
       _panScaleData!.update(
-        clampOffsetInCanvas(details.localFocalPoint),
+        details.localFocalPoint.clamp(canvasRect),
         newScale: details.scale,
       );
       handleMove(_panScaleData!);

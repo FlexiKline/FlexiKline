@@ -49,13 +49,14 @@ mixin CrossBinding
   /// 矫正Cross
   Offset? correctCrossOffset(Offset offset) {
     if (offset.isInfinite) return null;
-    // final index = offsetToIndex(offset);
-    // final dx =
-    //     startCandleDx - (index - curKlineData.start) * candleActualWidth;
-    final startDx = startCandleDx;
-    final index = ((startDx - offset.dx) / candleActualWidth).ceil();
-    final dx = startDx - index * candleActualWidth;
-    return clampOffsetInCanvas(Offset(dx, offset.dy));
+
+    if (canvasRect.contains(offset)) {
+      final diff = (startCandleDx - offset.dx) % candleActualWidth;
+      final dx = offset.dx + diff - candleWidthHalf;
+      return Offset(dx, offset.dy);
+    } else {
+      return offset.clamp(canvasRect);
+    }
   }
 
   /// 绘制最新价与十字线

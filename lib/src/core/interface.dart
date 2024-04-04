@@ -55,7 +55,7 @@ mixin GestureHanderImpl implements IGestureHandler {
   void handleLongMove(GestureData data) {}
 }
 
-//////// DataSource ///////
+//////// State ///////
 
 /// 数据源更新
 abstract interface class IState {
@@ -72,28 +72,28 @@ abstract interface class IState {
   /// 蜡烛总数
   int get totalCandleCount;
 
-  /// 绘制区域高度 / 当前绘制的蜡烛数据高度.
-  double get dyFactor;
-
   /// 最大绘制宽度
   double get maxPaintWidth;
 
-  /// 代表当前绘制区域相对于startIndex的偏移量.
-  double get paintDxOffset;
+  /// 绘制区域高度 / 当前绘制的蜡烛数据高度.
+  double get dyFactor;
 
-  /// 当前canvas绘制区域第一根蜡烛绘制的偏移量
-  double get startCandleDx;
-
-  /// 将offset指定的dx转换为当前绘制区域对应的蜡烛的下标.
-  int offsetToIndex(Offset offset);
-  int dxToIndex(double dx);
-
-  /// 将offset指定的dy转换为当前坐标Y轴中价钱.
+  /// 将offset指定的dy转换为当前坐标Y轴对应价钱.
   Decimal? offsetToPrice(Offset offset);
   Decimal? dyToPrice(double dy);
 
   /// 将价钱转换为Y轴坐标.
   double priceToDy(Decimal price);
+
+  /// 将offset指定的dx转换为当前绘制区域对应的蜡烛的下标.
+  int offsetToIndex(Offset offset);
+  int dxToIndex(double dx);
+
+  /// 将index转换为当前绘制区域对应的X轴坐标. 如果超出范围, 则返回null.
+  double? indexToDx(int index);
+
+  /// 当前canvas绘制区域第一根蜡烛绘制的偏移量
+  double get startCandleDx;
 
   /// 画布是否可以从右向左进行平移.
   bool get canPanRTL;
@@ -102,7 +102,7 @@ abstract interface class IState {
   bool get canPanLTR;
 
   /// 计算绘制蜡烛图的起始数组索引下标和绘制偏移量
-  void calculateCandleIndexAndOffset();
+  void calculateCandleDrawIndex();
 }
 
 //// 蜡烛图绘制接口
@@ -112,9 +112,6 @@ abstract interface class ICandle {
   void paintCandle(Canvas canvas, Size size);
 
   void markRepaintCandle();
-  void markRepaintLastPrice();
-
-  void startLastPriceCountDownTimer();
 }
 
 //// 最新价与十字线绘制API

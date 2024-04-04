@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
@@ -37,7 +38,6 @@ mixin CandleBinding
 
   //// Last Price ////
   Timer? _lastPriceCountDownTimer;
-  @override
   @protected
   void markRepaintLastPrice() => _markRepaint();
 
@@ -46,7 +46,6 @@ mixin CandleBinding
   @protected
   void markRepaintCandle() => _markRepaint();
 
-  @override
   @protected
   void startLastPriceCountDownTimer() {
     _lastPriceCountDownTimer?.cancel();
@@ -73,11 +72,11 @@ mixin CandleBinding
   void paintCandle(Canvas canvas, Size size) {
     logd('$diffTime paintCandle >>>>');
 
-    calculateCandleIndexAndOffset();
+    calculateCandleDrawIndex();
 
     // canvas.drawPoints(
     //   PointMode.points,
-    //   [Offset(startCandleDx, 100)],
+    //   [Offset(startCandleDx - candleWidthHalf, 100)],
     //   Paint()
     //     ..color = Colors.blue
     //     ..strokeWidth = 2
@@ -105,7 +104,7 @@ mixin CandleBinding
     int start = data.start;
     int end = data.end;
 
-    final offset = startCandleDx;
+    final offset = startCandleDx - candleWidthHalf;
     final bar = data.timerBar;
     Offset? maxHihgOffset, minLowOffset;
     for (var i = start; i < end; i++) {
@@ -206,7 +205,7 @@ mixin CandleBinding
     // int start = data.start;
     // int end = data.end;
 
-    // final offset = startCandleDx;
+    // final offset = startCandleDx - candleWidthHalf;
     // final bar = data.timerBar;
     // for (var i = start; i < end; i++) {
     //   final model = data.list[i];

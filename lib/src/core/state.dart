@@ -17,13 +17,13 @@ mixin StateBinding
   @override
   void initBinding() {
     super.initBinding();
-    logd('init dataSource');
+    logd('init state');
   }
 
   @override
   void dispose() {
     super.dispose();
-    logd('dispose dataSource');
+    logd('dispose state');
   }
 
   final Map<String, KlineData> _klineDataCache = {};
@@ -32,39 +32,24 @@ mixin StateBinding
   @override
   KlineData get curKlineData => _curKlineData;
 
+  /// 数据缓存Key
+  String get curDataKey => curKlineData.key;
+
   /// 蜡烛总数
   @override
   int get totalCandleCount => curKlineData.list.length;
 
-  /// 数据缓存Key
-  String get curDataKey => curKlineData.key;
-
   /// 最大绘制宽度
   @override
-  double get maxPaintWidth => curKlineData.list.length * candleActualWidth;
+  double get maxPaintWidth => totalCandleCount * candleActualWidth;
 
-  /// 当前canvas绘制区域第一根蜡烛绘制的偏移量
-  /// canvas绘制区右起始位置 - 当前第一根蜡烛在的起始偏移 - 半根蜡烛值
-  /// 用于绘制蜡烛图计算的起始位置.
+  /// 绘制区域高度 / 当前绘制的蜡烛数据高度.
   @override
-  double get startCandleDx {
-    return mainDrawRight + curKlineData.offset - candleWidthHalf;
+  double get dyFactor {
+    return mainDrawHeight / curKlineData.dataHeight.toDouble();
   }
 
-  /// 将offset指定的dx转换为当前绘制区域对应的蜡烛的下标.
-  @override
-  int offsetToIndex(Offset offset) => dxToIndex(offset.dx);
-
-  @override
-  int dxToIndex(double dx) {
-    // final rightOffset = mainDrawRight - dx;
-    // return ((paintDxOffset + rightOffset) / candleActualWidth).floor();
-
-    final index = ((startCandleDx - dx) / candleActualWidth).ceil();
-    return curKlineData.start + index;
-  }
-
-  /// 将offset指定的dy转换为当前坐标Y轴中价钱.
+  /// 将offset指定的dy转换为当前坐标Y轴对应价钱.
   @override
   Decimal? offsetToPrice(Offset offset) => dyToPrice(offset.dy);
 
@@ -74,80 +59,92 @@ mixin StateBinding
     return curKlineData.max - ((dy - mainPadding.top) / dyFactor).d;
   }
 
-  /// 将价钱转换为主图(蜡烛图)的Y轴坐标.
+  /// 将价钱转换为主图(蜡烛图)的Y轴坐标. 如果超出以最大最小值来计算.
   @override
   double priceToDy(Decimal price) {
     price = price.clamp(curKlineData.min, curKlineData.max);
     return mainDrawBottom - (price - curKlineData.min).toDouble() * dyFactor;
   }
 
-  /// 绘制区域高度 / 当前绘制的蜡烛数据高度.
+  /// 将offset指定的dx转换为当前绘制区域对应的蜡烛的下标.
   @override
-  double get dyFactor {
-    return mainDrawHeight / curKlineData.dataHeight.toDouble();
+  int offsetToIndex(Offset offset) => dxToIndex(offset.dx);
+
+  @override
+  int dxToIndex(double dx) {
+    final dxPaintOffset = (mainDrawRight - dx) + paintDxOffset;
+    // final diff = dxPaintOffset % candleActualWidth;
+    return (dxPaintOffset / candleActualWidth).floor();
+    // if (paintDxOffset == 0) {
+    //   int index = ((mainDrawRight - dx) / candleActualWidth).floor();
+    //   return curKlineData.start - index;
+    // } else if (paintDxOffset > 0) {
+    //   double dxPaintOffset = (mainDrawRight - dx) + paintDxOffset;
+    //   return (dxPaintOffset / candleActualWidth).floor();
+    // } else {
+    //   double dxPaintOffset = (mainDrawRight - dx) + paintDxOffset;
+    //   return (dxPaintOffset / candleActualWidth).floor();
+    // }
   }
 
-  /// 代表当前绘制区域相对于startIndex的偏移量.
-  /// 取值范围 [-canvasWidth, maxPaintWidth - minPaintWidthInCanvas]
-  /// 1. 当为零时(默认) : 说明首根蜡烛在Canvas最右边展示.
-  /// 2. 当为负数时     : 代表首根蜡烛到Canvas右部的距离
-  /// 3. 当为正数时     : 说明有部分蜡烛已向右移出Canvas.
-  ///     移出数量 = (paintDxOffset / candleActualWidth).floor()
-  ///     移出Offset = paintDxOffset % candleActualWidth;
-  double _paintDxOffset = 0;
+  /// 将index转换为当前绘制区域对应的X轴坐标. 如果超出范围, 则返回null.
   @override
+  double? indexToDx(int index) {
+    double dx = mainDrawRight - (index * candleActualWidth - paintDxOffset);
+    if (mainDrawRect.inclueDx(dx)) return dx;
+    return null;
+  }
+
+  /// 当前canvas绘制区域起始蜡烛右部dx值.
+  @override
+  double get startCandleDx {
+    if (paintDxOffset == 0) {
+      return 0;
+    } else if (paintDxOffset > 0) {
+      return mainDrawRight + paintDxOffset % candleActualWidth;
+    } else {
+      return mainDrawRight + paintDxOffset;
+    }
+  }
+
+  /// 画布是否可以从右向左进行平移.
+  @override
+  bool get canPanRTL => paintDxOffset > minPaintDxOffset;
+
+  /// 画布是否可以从左向右进行平移.
+  @override
+  bool get canPanLTR {
+    return paintDxOffset < maxPaintDxOffset;
+  }
+
+  /// 代表当前绘制区域相对于startIndex右侧的偏移量.
+  /// 1. 当为零时(默认) : 说明首根蜡烛在Canvas右边界展示.
+  /// 2. 当为负数时     : 代表首根蜡烛到Canvas右边界的距离.
+  /// 3. 当为正数时     : 说明首根蜡烛已向右移出Canvas.
+  ///     移出右边界的蜡烛数量 = (paintDxOffset / candleActualWidth).floor()
+  ///     绘制起始蜡烛的向右边界外的偏移 = paintDxOffset % candleActualWidth;
+  double _paintDxOffset = 0;
   double get paintDxOffset => _paintDxOffset;
   set paintDxOffset(double val) {
     _paintDxOffset = clampPaintDxOffset(val);
   }
 
-  /// 画布是否可以从右向左进行平移.
-  @override
-  bool get canPanRTL => paintDxOffset > 0;
+  /// PaintDxOffset的最小值
+  double get minPaintDxOffset {
+    return math.min(
+      maxPaintWidth - mainDrawWidth,
+      -minPaintBlankWidth,
+    );
+  }
 
-  /// 画布是否可以从左向右进行平移.
-  @override
-  bool get canPanLTR {
-    // 蜡烛数据最大可绘制长度 - 移动画面的长度 + 最小留白区域长度 = 剩余可以移动的区域长度.
-    // 如果大于当前画布宽度, 即是可以从左向右平移的.
-    return maxPaintWidth - paintDxOffset + minPaintBlankWidth > mainDrawWidth;
+  /// PaintDxOffset的最大值
+  double get maxPaintDxOffset {
+    return maxPaintWidth - (mainDrawWidth - minPaintBlankWidth);
   }
 
   /// 矫正PaintDxOffset的范围
   double clampPaintDxOffset(double dxOffset) {
-    if (minPaintBlankUseWidth) {
-      if (maxPaintWidth < mainDrawWidth) {
-        // 不足一屏: 按最少留白的宽度精确计算
-        final min = math.min(minPaintBlankWidth, maxPaintWidth) - mainDrawWidth;
-        // 如果为0时, 首根蜡烛可平移到MainRect绘制区域右边.
-        final max = maxPaintWidth - minPaintBlankWidth;
-        return math.min(math.max(min, dxOffset), max);
-      } else {
-        // 满足一屏: 按最少留白的宽度精确计算
-        final min = -minPaintBlankWidth;
-        final max = maxPaintWidth + minPaintBlankWidth - mainDrawWidth;
-        return math.min(math.max(min, dxOffset), max);
-      }
-    } else {
-      // TODO: 待优化.
-      int dataLen = curKlineData.list.length;
-      if (dataLen < maxCandleCount) {
-        // 不足一屏: 按最少留白的蜡烛数来计算
-        final min =
-            math.min(minPaintBlankCandleCount, dataLen) * candleActualWidth -
-                mainDrawWidth;
-        final max = (dataLen - minPaintBlankCandleCount) * candleActualWidth;
-
-        return math.min(math.max(min, dxOffset), max);
-      } else {
-        // 满足一屏: 按最少留白的蜡烛数来计算
-        final min = -minPaintBlankCandleCount * candleActualWidth;
-        final max = (dataLen + minPaintBlankCandleCount - maxCandleCount) *
-            candleActualWidth;
-        // maxPaintWidth - minPaintBlankCandleCount  * candleActualWidth;
-        return math.min(math.max(min, dxOffset), max);
-      }
-    }
+    return dxOffset.clamp(minPaintDxOffset, maxPaintDxOffset);
   }
 
   void initPaintDxOffset() {
@@ -157,25 +154,26 @@ mixin StateBinding
     );
   }
 
-  /// 计算绘制蜡烛图的起始数组索引下标和绘制偏移量
+  /// 计算绘制蜡烛图的起始数组索引下标
   @override
-  void calculateCandleIndexAndOffset() {
-    final dxOffsetIndex = (paintDxOffset / candleActualWidth).floor();
+  void calculateCandleDrawIndex() {
     if (paintDxOffset > 0) {
-      final dxOffset = paintDxOffset % candleActualWidth;
-      final maxCount = ((mainDrawWidth + dxOffset) / candleActualWidth).ceil();
-      curKlineData.ensureIndexAndOffset(
-        dxOffsetIndex,
-        dxOffset,
-        maxCandleCount: maxCount,
+      final startIndex = (paintDxOffset / candleActualWidth).floor();
+      final diff = paintDxOffset % candleActualWidth;
+      final maxCount = ((mainDrawWidth + diff) / candleActualWidth).round();
+      curKlineData.ensureStartAndEndIndex(
+        startIndex,
+        maxCount,
       );
     } else {
-      // final maxCount = maxCandleCount; // 取一屏蜡烛数据来计算最大最小
-      final maxCount = maxCandleCount - dxOffsetIndex.abs(); // 取当前可见蜡烛来计算最大最小
-      curKlineData.ensureIndexAndOffset(
+      // 1: 取一屏蜡烛数据来计算最大最小
+      // final maxCount = maxCandleCount;
+      // 2: 取当前可见蜡烛来计算最大最小. 四舍五入
+      final offsetIndex = (paintDxOffset.abs() / candleActualWidth).round();
+      final maxCount = maxCandleCount - offsetIndex;
+      curKlineData.ensureStartAndEndIndex(
         0,
-        paintDxOffset,
-        maxCandleCount: maxCount,
+        maxCount,
       );
     }
 
@@ -206,7 +204,7 @@ mixin StateBinding
   void appendKlineData(CandleReq req, List<CandleModel> list) {
     KlineData? data = _klineDataCache[req.key];
     if (data == null || data.list.isEmpty) {
-      logd('appendKlineData >setKlineData(${req.key}, ${data?.list.length})');
+      logd('appendKlineData > setKlineData(${req.key}, ${data?.list.length})');
       setKlineData(req, list);
       return;
     }
@@ -241,8 +239,6 @@ mixin StateBinding
     if (newDxOffset != paintDxOffset) {
       paintDxOffset = newDxOffset;
       markRepaintCandle();
-
-      markRepaintLastPrice();
     }
   }
 

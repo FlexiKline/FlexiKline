@@ -51,13 +51,12 @@ class KlineData with KlineLog {
     _end = val.clamp(0, math.max(0, list.length));
   }
 
-  double offset = 0;
   CandleModel? startModel;
   CandleModel? endModel;
 
-  void debugPrintDrawParams(String tag) {
+  void printDataState(String tag) {
     logd(
-      'DrawParams>$tag [${req.instId}-${req.bar}] > len:${list.length} start:$start, end:$end, offset:$offset, max:$max, min:$min',
+      'DrawParams>$tag [${req.instId}-${req.bar}] > len:${list.length} start:$start, end:$end, max:$max, min:$min',
     );
   }
 
@@ -65,7 +64,6 @@ class KlineData with KlineLog {
     list.clear();
     max = Decimal.zero;
     min = Decimal.zero;
-    offset = 0;
     start = 0;
     end = 0;
     startModel = null;
@@ -84,7 +82,7 @@ class KlineData with KlineLog {
       if (i == 0) {
         startModel = m;
       }
-      if (i == list.length - 1) {
+      if (i == end - 1) {
         endModel = m;
       }
 
@@ -93,15 +91,12 @@ class KlineData with KlineLog {
     }
   }
 
-  void ensureIndexAndOffset(
+  void ensureStartAndEndIndex(
     int startIndex,
-    double dxOffset, {
-    required int maxCandleCount,
-  }) {
+    int maxCandleCount,
+  ) {
     start = startIndex;
-    offset = dxOffset;
     end = startIndex + maxCandleCount;
-    // logd('ensureIndexAndOffset [$start, $end] > $offset');
   }
 
   /// 获取index位置的蜡烛数据.
