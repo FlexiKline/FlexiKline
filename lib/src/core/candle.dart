@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
@@ -302,6 +301,7 @@ mixin CandleBinding
       model.close,
       instId: curKlineData.req.instId,
       precision: curKlineData.req.precision,
+      cutInvalidZero: false,
     );
     if (showLastPriceUpdateTime) {
       final nextUpdateDateTime = model.nextUpdateDateTime(data.req.bar);

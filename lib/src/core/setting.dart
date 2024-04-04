@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
+import 'package:kline/src/utils/num_util.dart';
 
 import '../constant.dart';
 import '../model/export.dart';
@@ -380,9 +381,10 @@ mixin SettingBinding on KlineBindingBase {
   // candle Card background config.
   Color candleCardRectBackgroundColor = const Color(0xFFF2F2F2);
   double candleCardRectBorderRadius = 4;
-  EdgeInsets candleCardRectMargin = const EdgeInsets.symmetric(
-    horizontal: 6,
-    vertical: 4,
+  EdgeInsets candleCardRectMargin = const EdgeInsets.only(
+    left: 15,
+    right: 65,
+    top: 4,
   );
   EdgeInsets candleCardRectPadding = const EdgeInsets.symmetric(
     horizontal: 4,
@@ -441,20 +443,32 @@ mixin SettingBinding on KlineBindingBase {
   //////////////////////////////////////
 
   /// 价钱格式化函数
-  String Function(String instId, Decimal val, {int? precision})? priceFormat;
+  String Function(String instId, Decimal val,
+      {int? precision, bool? cutInvalidZero})? priceFormat;
 
   /// 价钱格式化函数
-  /// TODO: 待数据格式化.
-  String formatPrice(Decimal val, {int? precision, required String instId}) {
-    int p = precision ?? defaultPrecision; // TODO: 待优化
+  /// TODO: 待优化
+  String formatPrice(
+    Decimal val, {
+    int? precision,
+    required String instId,
+    bool cutInvalidZero = true,
+  }) {
+    int p = precision ?? defaultPrecision;
     if (priceFormat != null) {
       return priceFormat!.call(
         instId,
         val,
         precision: p,
+        cutInvalidZero: cutInvalidZero,
       );
     }
-    return val.toStringAsFixed(p);
+    return formatNumber(
+      val,
+      precision: p,
+      cutInvalidZero: cutInvalidZero,
+      // showThousands: true,
+    );
   }
 
   /// 时间格式化函数

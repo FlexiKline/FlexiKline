@@ -156,6 +156,7 @@ mixin CrossBinding
       price,
       instId: curKlineData.req.instId,
       precision: curKlineData.req.precision,
+      cutInvalidZero: false,
     );
     canvas.drawText(
       offset: Offset(
@@ -263,7 +264,7 @@ mixin CrossBinding
         style: changeStyle,
       ),
       TextSpan(
-        text: model.vol.bigDecimalString,
+        text: model.vol.toCompactBigNumber,
         style: candleCardTitleStyle,
         // recognizer: _tapGestureRecognizer..onTap = () => ... // 点击事件处理?
       ),

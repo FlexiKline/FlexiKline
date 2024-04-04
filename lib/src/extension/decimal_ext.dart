@@ -17,5 +17,5 @@ extension IntExt on int {
 }
 
 extension DecimalExt on Decimal {
-  String get bigDecimalString => formatBigDecimal(this);
+  String get toCompactBigNumber => compactBigNumber(this);
 }
