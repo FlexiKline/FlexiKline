@@ -1,11 +1,11 @@
 // Copyright 2024 Andy.Zhao
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     https://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,7 +27,7 @@ import 'setting.dart';
 /// 状态管理: 负责数据的管理, 缓存, 切换, 计算
 mixin StateBinding
     on KlineBindingBase, SettingBinding
-    implements IState, ICandle, ICross {
+    implements IState, ISubState, ICandle, ICross {
   @override
   void initBinding() {
     super.initBinding();
@@ -281,5 +281,31 @@ mixin StateBinding
   void handleLongMove(GestureData data) {
     super.handleLongMove(data);
     if (!data.moved) return;
+  }
+
+  //////////////////////////////////////////
+  /// 副图指标数据的状态
+  //////////////////////////////////////////
+  /// 副图(volume)绘制区域高度 / 当前绘制的Volume数据高度.
+  @override
+  double get dyVolFactor {
+    return indicatorDrawHeight / curKlineData.volDataHeight.toDouble();
+  }
+
+  /// Volume转换为dy坐标
+  @override
+  double volToDy(Decimal vol, int index) {
+    vol = vol.clamp(curKlineData.minVol, curKlineData.maxVol);
+    return indicatorDrawBottom(index) -
+        (vol - curKlineData.minVol).toDouble() * dyVolFactor;
+  }
+
+  /// dy坐标转换为Volume
+  @override
+  Decimal? dyToVol(double dy, int index) {
+    final drawTop = indicatorDrawTop(index);
+    if (dy <= drawTop) return null;
+    if (dy > indicatorDrawBottom(index)) return null;
+    return curKlineData.maxVol - ((dy - drawTop) / dyVolFactor).d;
   }
 }

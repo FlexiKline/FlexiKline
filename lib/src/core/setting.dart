@@ -1,11 +1,11 @@
 // Copyright 2024 Andy.Zhao
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     https://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -77,35 +77,12 @@ mixin SettingBinding on KlineBindingBase {
   /// 主图总高度
   double get mainRectHeight => mainRect.height;
 
-  /// 副图区域大小
-  Rect _subRect = Rect.zero;
-  Rect get subRect => _subRect;
-  Size get subRectSize => Size(subRect.width, subRect.height);
-  void setSubSize(Size size) {
-    _subRect = Rect.fromLTWH(
-      0,
-      _mainRect.bottom,
-      size.width,
-      size.height,
-    );
-    onSizeChange?.call();
-  }
-
-  /// 副图总宽度
-  double get subRectWidth => subRect.width;
-
-  /// 副图总高度
-  double get subRectHeight => subRect.height;
-
   /// 主图上下padding
   EdgeInsets mainPadding = const EdgeInsets.only(
     top: 20,
     bottom: 15,
     // right: 20,
   );
-
-  /// 幅图上下padding
-  EdgeInsets subPadding = const EdgeInsets.all(10);
 
   Rect get mainDrawRect => Rect.fromLTRB(
         mainRect.left + mainPadding.left,
@@ -495,4 +472,94 @@ mixin SettingBinding on KlineBindingBase {
 
   /// 定制展示Candle Card info.
   List<CardInfo> Function(CandleModel model)? customCandleCardInfo;
+
+  ///////////////////////////////////////////
+  /// 以下是副图的绘制配置 /////////////////////
+  //////////////////////////////////////////
+  /// 副图区域大小
+  Rect _subRect = Rect.zero;
+  Rect get subRect => _subRect;
+  Size get subRectSize => Size(subRect.width, subRect.height);
+  // 副图指标数量
+  int _indicatorCount = 1;
+  int get indicatorCount => _indicatorCount;
+  void setSubSize(Size size, {int count = 1}) {
+    _indicatorCount = count;
+    if (count > 0) {
+      _subRect = Rect.fromLTWH(
+        0,
+        _mainRect.bottom,
+        size.width,
+        size.height,
+      );
+    } else {
+      _subRect = Rect.zero;
+    }
+    onSizeChange?.call();
+  }
+
+  /// 副图总宽度
+  double get subRectWidth => subRect.width;
+
+  /// 副图总高度
+  double get subRectHeight => subRect.height;
+
+  /// 幅图上下padding
+  EdgeInsets indicatorPadding = const EdgeInsets.only(
+    top: 20,
+  );
+
+  // 单个指标图高度
+  double get indicatorHeight => subRectHeight / indicatorCount;
+
+  // 单个指标图Tooltip信息高度 注: toolTip信息绘制在indicatorPadding.top中, 不单独设置配置
+  double get indicatorTipHeight => indicatorPadding.top;
+  // 设置单个指标图Tooltip信息的高度. 最大不能超过单个指标图高度.
+  void setIndicatorTipHeight(double height) {
+    if (height > indicatorHeight) return;
+    indicatorPadding = indicatorPadding.copyWith(top: height);
+  }
+
+  /// 指标图的toolTip信息绘制范围. ///
+  // 某个指标图的toolTip的Top绘制坐标
+  double indicatorTipDrawTop(int index) {
+    return subRect.top + index * indicatorHeight;
+  }
+
+  // 某个指标图的toolTip的Bottom绘制坐标
+  double indicatorTipDrawBottom(int index) {
+    return indicatorTipDrawTop(index) + indicatorTipHeight;
+  }
+
+  // 单个指标图绘制高度
+  double get indicatorDrawHeight => indicatorHeight - indicatorPadding.vertical;
+
+  // 某个指标图的toolTip的Left绘制坐标
+  double get indicatorTipDrawLeft => subRect.left + indicatorPadding.left;
+  // 某个指标图的toolTip的Right绘制坐标
+  double get indicatorTipDrawRight => subRect.right - indicatorPadding.right;
+
+  /// 指标图的Chart的绘制范围. ///
+  // 某个指标图的Top绘制坐标
+  double indicatorDrawTop(int index) => indicatorTipDrawBottom(index);
+
+  // 某个指标图的Bottom绘制坐标
+  double indicatorDrawBottom(int index) {
+    return subRect.top + (index + 1) * indicatorHeight;
+  }
+
+  // 某个指标图的Left绘制坐标
+  double get indicatorDrawLeft => subRect.left + indicatorPadding.left;
+  // 某个指标图的Right绘制坐标
+  double get indicatorDrawRight => subRect.right - indicatorPadding.right;
+
+  /// Volume
+  Paint get volBarLongPaint => Paint()
+    ..color = longColor
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = candleWidth;
+  Paint get volBarShortPaint => Paint()
+    ..color = shortColor
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = candleWidth;
 }

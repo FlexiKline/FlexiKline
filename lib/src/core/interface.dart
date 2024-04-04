@@ -1,11 +1,11 @@
 // Copyright 2024 Andy.Zhao
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     https://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -119,13 +119,27 @@ abstract interface class IState {
   void calculateCandleDrawIndex();
 }
 
-//// 蜡烛图绘制接口
+abstract interface class ISubState {
+  /// 副图(volume)绘制区域高度 / 当前绘制的Volume数据高度.
+  double get dyVolFactor;
+
+  double volToDy(Decimal vol, int index);
+
+  Decimal? dyToVol(double dy, int index);
+}
+
+//// 主图(蜡烛)绘制接口
 abstract interface class ICandle {
   Listenable get repaintCandle;
 
-  void paintCandle(Canvas canvas, Size size);
+  void paintMainChart(Canvas canvas, Size size);
 
   void markRepaintCandle();
+}
+
+/// 副图(指标)绘制接口
+abstract interface class ISubChart {
+  void paintSubChart(Canvas canvas, Size size);
 }
 
 //// 最新价与十字线绘制API

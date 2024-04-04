@@ -1,11 +1,11 @@
 // Copyright 2024 Andy.Zhao
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     https://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -58,8 +58,8 @@ class _KlineWidgetState extends State<KlineWidget> {
               key: const ValueKey('MainRectPaint'),
               child: CustomPaint(
                 size: Size(
-                  widget.controller.mainRectWidth,
-                  widget.controller.mainRectHeight,
+                  widget.controller.canvasWidth,
+                  widget.controller.canvasHeight,
                 ),
                 painter: GridPainter(
                   controller: widget.controller,
@@ -70,26 +70,12 @@ class _KlineWidgetState extends State<KlineWidget> {
                 isComplex: true,
               ),
             ),
-            Positioned(
-              left: widget.controller.subRect.left,
-              top: widget.controller.subRect.top,
-              width: widget.controller.subRectWidth,
-              height: widget.controller.subRectHeight,
-              child: RepaintBoundary(
-                key: const ValueKey('SubRectPaint'),
-                child: Container(
-                  width: widget.controller.mainRectWidth,
-                  height: widget.controller.mainRectHeight,
-                  color: Colors.grey,
-                ),
-              ),
-            ),
             RepaintBoundary(
               key: const ValueKey('PriceCrossPaint'),
               child: CustomPaint(
                 size: Size(
-                  widget.controller.canvasRect.width,
-                  widget.controller.canvasRect.height,
+                  widget.controller.canvasWidth,
+                  widget.controller.canvasHeight,
                 ),
                 painter: PriceCrossPainter(
                   controller: widget.controller,
@@ -97,9 +83,6 @@ class _KlineWidgetState extends State<KlineWidget> {
                 isComplex: true,
               ),
             ),
-            // GestureView(
-            //   controller: widget.controller,
-            // )
           ],
         ),
       ),
@@ -134,7 +117,10 @@ class KlinePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    controller.paintCandle(canvas, size);
+    controller.calculateCandleDrawIndex();
+
+    controller.paintMainChart(canvas, size);
+    controller.paintSubChart(canvas, size);
   }
 
   @override

@@ -1,11 +1,11 @@
 // Copyright 2024 Andy.Zhao
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     https://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,6 +36,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding {
   ValueNotifier<int> repaintGridBg = ValueNotifier(0);
 
   void paintGridBg(Canvas canvas, Size size) {
+    /// 绘制主图Grid gridCount*gridCount 坐标
     final yAxisStep = mainRectWidth / gridCount;
     final xAxisStep = mainDrawBottom / gridCount;
     final paintX = gridXAxisLinePaint;
@@ -68,5 +69,30 @@ mixin GridBinding on KlineBindingBase, SettingBinding {
       Offset(mainRectWidth, mainDrawBottom),
       paintX,
     );
+
+    /// 绘制副图Grid X轴线
+    final subTop = subRect.top;
+    final indicatorChartHeight = indicatorHeight;
+    for (int i = 0; i <= indicatorCount; i++) {
+      dy = subTop + i * indicatorChartHeight;
+      // 绘制XAsix线
+      canvas.drawLine(
+        Offset(0, dy),
+        Offset(mainRectWidth, dy),
+        paintX,
+      );
+    }
+
+    ///绘制副图Grid Y轴线
+    final subBottom = subRect.bottom;
+    for (int i = 1; i < gridCount; i++) {
+      dx = i * yAxisStep;
+      // 绘制YAsix线
+      canvas.drawLine(
+        Offset(dx, subTop),
+        Offset(dx, subBottom),
+        paintY,
+      );
+    }
   }
 }

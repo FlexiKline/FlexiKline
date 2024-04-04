@@ -1,11 +1,11 @@
 // Copyright 2024 Andy.Zhao
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     https://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -50,6 +50,10 @@ class KlineData with KlineLog {
   Decimal min = Decimal.zero;
   Decimal get dataHeight => max - min;
 
+  Decimal maxVol = Decimal.zero;
+  Decimal minVol = Decimal.zero;
+  Decimal get volDataHeight => maxVol - minVol;
+
   /// 当前绘制区域起始下标 右
   int _start = 0;
   int get start => _start;
@@ -90,6 +94,8 @@ class KlineData with KlineLog {
     CandleModel m = list[start];
     max = m.high;
     min = m.low;
+    maxVol = m.vol;
+    minVol = m.vol;
     for (var i = start; i < end; i++) {
       m = list[i];
 
@@ -102,7 +108,13 @@ class KlineData with KlineLog {
 
       max = m.high > max ? m.high : max;
       min = m.low < min ? m.low : min;
+
+      maxVol = m.vol > maxVol ? m.vol : maxVol;
+      minVol = m.vol < minVol ? m.vol : minVol;
     }
+
+    // TODO: 考虑极端情况.
+    minVol -= Decimal.one; // 保证最小值有一个基数.
   }
 
   void ensureStartAndEndIndex(
