@@ -1,7 +1,7 @@
 name: example
-description: "A new Flutter project."
+description: "Example App for a flexible Kline package project."
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
-version: 1.0.0+1
+version: 1.0.1
 
 environment:
   sdk: ">=3.3.0 <4.0.0"
@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.6
-  kline:
+  flexi_kline:
     path: ../
   flutter_screenutil: ^5.9.0
   decimal: ^2.3.3

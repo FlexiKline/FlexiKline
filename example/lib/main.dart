@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:kline/kline.dart';
+import 'package:flexi_kline/flexi_kline.dart';
 
 import 'mock.dart';
 import 'src/gesture_test.dart';

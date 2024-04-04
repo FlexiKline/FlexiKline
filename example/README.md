@@ -1,6 +1,6 @@
 # example
 
-A new Flutter project.
+An example of a highly customized FlexiKline Chart.
 
 ## Getting Started
 

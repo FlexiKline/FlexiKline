@@ -5,18 +5,18 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "flutter_kline",
+      "name": "FlexiKline",
       "request": "launch",
       "type": "dart"
     },
     {
-      "name": "flutter_kline (profile mode)",
+      "name": "FlexiKline (profile mode)",
       "request": "launch",
       "type": "dart",
       "flutterMode": "profile"
     },
     {
-      "name": "flutter_kline (release mode)",
+      "name": "FlexiKline (release mode)",
       "request": "launch",
       "type": "dart",
       "flutterMode": "release"

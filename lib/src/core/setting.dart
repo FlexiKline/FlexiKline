@@ -3,7 +3,6 @@ import 'dart:ui' as ui;
 
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
-import 'package:kline/src/utils/num_util.dart';
 
 import '../constant.dart';
 import '../model/export.dart';

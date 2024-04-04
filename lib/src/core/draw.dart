@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:kline/src/model/gesture.dart';
 
+import '../model/export.dart';
 import 'binding_base.dart';
 
 ///

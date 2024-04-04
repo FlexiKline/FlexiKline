@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:decimal/decimal.dart';
-import 'package:kline/kline.dart';
+import 'package:flexi_kline/flexi_kline.dart';
 
 final Random _random = Random();
 int get randomCount => _random.nextInt(5);

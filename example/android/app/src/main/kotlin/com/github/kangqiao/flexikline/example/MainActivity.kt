@@ -1,4 +1,4 @@
-package com.github.kangqiao.kline.example
+package com.github.kangqiao.flexikline.example
 
 import io.flutter.embedding.android.FlutterActivity
 
