@@ -74,6 +74,7 @@ mixin SubBinding
     switch (type) {
       case IndicatorType.volume:
         indicatorQueue.addLast(VolumeChart(
+          debug: debug,
           index: indicatorQueue.length,
           controller: this as KlineController,
           height: height,
@@ -82,6 +83,7 @@ mixin SubBinding
         ));
       case IndicatorType.macd:
         indicatorQueue.addLast(VolumeChart(
+          debug: debug,
           index: indicatorQueue.length,
           controller: this as KlineController,
           height: height,

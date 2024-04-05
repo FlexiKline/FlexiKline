@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:ui';
+
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 
@@ -23,6 +25,7 @@ import 'indicator.dart';
 
 class VolumeChart extends IndicatorChart {
   VolumeChart({
+    super.debug,
     required super.index,
     required super.controller,
     super.type = IndicatorType.volume,
@@ -30,11 +33,6 @@ class VolumeChart extends IndicatorChart {
     super.tipHeight,
     super.padding,
   });
-
-  @override
-  Paint get longPaint => setting.volBarLongPaint;
-  @override
-  Paint get shortPaint => setting.volBarShortPaint;
 
   Decimal get volDataHeight => curKlineData.volDataHeight;
 
@@ -78,7 +76,7 @@ class VolumeChart extends IndicatorChart {
       canvas.drawLine(
         Offset(dx, dy),
         Offset(dx, dyBottom),
-        isLong ? longPaint : shortPaint,
+        isLong ? setting.volBarLongPaint : setting.volBarShortPaint,
       );
     }
 
@@ -86,14 +84,17 @@ class VolumeChart extends IndicatorChart {
   }
 
   @override
-  void paintTooltip(Canvas canvas, Size size) {}
+  void paintTooltip(Canvas canvas, Size size) {
+    
+  }
 
   @override
   void paintYAxisTick(Canvas canvas, Size size) {
-    double yAxisStep = drawRect.height / volBarYAxisTickCount;
+    double yAxisStep = drawRect.height / (volBarYAxisTickCount - 1);
     final dx = drawRect.right;
     double dy = 0.0;
     double drawTop = drawRect.top;
+
     for (int i = 0; i < volBarYAxisTickCount; i++) {
       dy = drawTop + i * yAxisStep;
       final vol = dyToVol(dy);
@@ -109,15 +110,15 @@ class VolumeChart extends IndicatorChart {
       canvas.drawText(
         offset: Offset(
           dx,
-          dy + setting.priceTickRectHeight,
+          dy - setting.priceTickRectHeight,
         ),
         drawDirection: DrawDirection.rtl,
-        drawableSize: Size(setting.canvasWidth, setting.canvasHeight),
+        // drawableSize: Size(setting.canvasWidth, setting.canvasHeight + 200),
         text: text,
-        style: setting.priceTickStyle.copyWith(color: Colors.blue),
+        style: setting.volBarTickStyle,
         // textWidth: tickTextWidth,
         textAlign: TextAlign.end,
-        padding: setting.priceTickRectPadding,
+        padding: setting.volBarTickRectPadding,
         maxLines: 1,
       );
     }

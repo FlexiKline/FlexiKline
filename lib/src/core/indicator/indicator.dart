@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 
 import '../../constant.dart';
 import '../../kline_controller.dart';
+import '../../utils/log.dart';
 import '../data.dart';
 import '../setting.dart';
 import '../state.dart';
@@ -46,8 +47,14 @@ abstract class BaseState {
   double get startCandleDx => state.startCandleDx;
 }
 
-abstract class IndicatorChart extends BaseState {
+abstract class IndicatorChart extends BaseState with KlineLog {
+  @override
+  String get logTag => 'Indicator';
+  @override
+  bool get isDebug => debug;
+
   IndicatorChart({
+    this.debug = false,
     required this.index,
     required this.type,
     required super.controller,
@@ -56,6 +63,7 @@ abstract class IndicatorChart extends BaseState {
     this.tipHeight = 0.0,
   });
 
+  final bool debug;
   late int index;
   final IndicatorType type;
   final EdgeInsets padding;
@@ -105,11 +113,12 @@ abstract class IndicatorChart extends BaseState {
   // 指标图tooltip区域的Rect
   Rect? _tipRect;
   Rect get tipRect {
+    final top = chartRect.top + padding.top;
     _tipRect ??= Rect.fromLTRB(
       chartRect.left + padding.left,
-      chartRect.top + padding.top,
+      top,
       chartRect.right - padding.right,
-      chartRect.top + tipHeight,
+      top + tipHeight,
     );
     return _tipRect!;
   }

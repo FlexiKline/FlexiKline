@@ -17,6 +17,7 @@ import 'dart:ui' as ui;
 
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import '../constant.dart';
 import '../model/export.dart';
@@ -497,5 +498,20 @@ mixin SettingBinding on KlineBindingBase implements ISubChart {
     ..style = PaintingStyle.stroke
     ..strokeWidth = candleWidth;
   // Volume Bar Y轴刻度数量
-  int volBarYAxisTickCount = 3;
+  int volBarYAxisTickCount = 3; // 高中低=>top, middle, bottom
+  double volBarTickFontSize = 10;
+  Color volBarTickColor = Colors.black;
+  TextStyle get volBarTickStyle => TextStyle(
+        fontSize: volBarTickFontSize,
+        color: volBarTickColor,
+        overflow: TextOverflow.ellipsis,
+        height: 1,
+      );
+  EdgeInsets volBarTickRectPadding = const EdgeInsets.only(
+    right: 2,
+  );
+  double get volBarTickRectHeight {
+    final textHeight = volBarTickFontSize * (volBarTickStyle.height ?? 1);
+    return textHeight + volBarTickRectPadding.vertical;
+  }
 }
