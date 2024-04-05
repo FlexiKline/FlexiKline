@@ -99,6 +99,12 @@ abstract interface class IState {
   /// 将价钱转换为Y轴坐标.
   double priceToDy(Decimal price);
 
+  /// 当前Cross命中的Model
+  CandleModel? get crossingCandle;
+
+  /// 将offset转换为蜡烛数据
+  CandleModel? offsetToCandle(Offset offset);
+
   /// 将offset指定的dx转换为当前绘制区域对应的蜡烛的下标.
   int offsetToIndex(Offset offset);
   int dxToIndex(double dx);
@@ -131,6 +137,10 @@ abstract interface class ICandle {
 /// 副图(指标)绘制接口
 abstract interface class ISubChart {
   void paintSubChart(Canvas canvas, Size size);
+
+  void paintSubTooltip(Canvas canvas, Size size);
+
+  void paintSubCross(Canvas canvas, Size size);
   // 副图数量
   int get indicatorCount;
   // 副图高度的列表.
@@ -149,4 +159,6 @@ abstract interface class ICross {
 
   /// 是否正在绘制Cross
   bool get isCrossing;
+
+  Offset? get crossingOffset;
 }

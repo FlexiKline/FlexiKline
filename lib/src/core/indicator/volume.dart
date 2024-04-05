@@ -19,6 +19,7 @@ import 'package:flutter/material.dart';
 
 import '../../constant.dart';
 import '../../extension/export.dart';
+import '../../model/export.dart';
 import '../../render/export.dart';
 import '../../utils/num_util.dart';
 import 'indicator.dart';
@@ -58,7 +59,7 @@ class VolumeChart extends IndicatorChart {
   }
 
   @override
-  void paintSubChart(Canvas canvas, Size size) {
+  void paintIndicatorChart(Canvas canvas, Size size) {
     final data = curKlineData;
     if (data.list.isEmpty) return;
     int start = data.start;
@@ -83,12 +84,6 @@ class VolumeChart extends IndicatorChart {
     paintYAxisTick(canvas, size);
   }
 
-  @override
-  void paintTooltip(Canvas canvas, Size size) {
-    
-  }
-
-  @override
   void paintYAxisTick(Canvas canvas, Size size) {
     double yAxisStep = drawRect.height / (volBarYAxisTickCount - 1);
     final dx = drawRect.right;
@@ -122,5 +117,80 @@ class VolumeChart extends IndicatorChart {
         maxLines: 1,
       );
     }
+  }
+
+  @override
+  void paintSubTooltip(Canvas canvas, Size size) {
+    if (state.isCrossing) return;
+    final model = state.curKlineData.latest;
+    if (model == null) return;
+    _paintTooltipVolume(canvas, model);
+  }
+
+  @override
+  void handleIndicatorCross(Canvas canvas, Offset offset) {
+    CandleModel? model = state.offsetToCandle(offset);
+    if (model == null) return;
+
+    _paintCrossYAxisVolumeMark(canvas, offset);
+    _paintTooltipVolume(canvas, model);
+  }
+
+  void _paintCrossYAxisVolumeMark(Canvas canvas, Offset offset) {
+    final volume = dyToVol(offset.dy);
+    if (volume == null) return;
+
+    final text = formatNumber(
+      volume,
+      precision: 2,
+      cutInvalidZero: true,
+      showCompact: true,
+    );
+
+    canvas.drawText(
+      offset: Offset(
+        drawRect.right - setting.crossPriceRectRigthMargin,
+        offset.dy - setting.crossPriceRectHeight / 2,
+      ),
+      drawDirection: DrawDirection.rtl,
+      drawableSize: setting.canvasRect.size,
+      text: text,
+      style: setting.crossPriceTextStyle,
+      textAlign: TextAlign.end,
+      textWidthBasis: TextWidthBasis.longestLine,
+      padding: setting.crossPriceRectPadding,
+      backgroundColor: setting.crossPriceRectBackgroundColor,
+      radius: setting.crossPriceRectBorderRadius,
+      borderWidth: setting.crossPriceRectBorderWidth,
+      borderColor: setting.crossPriceRectBorderColor,
+    );
+  }
+
+  void _paintTooltipVolume(Canvas canvas, CandleModel model) {
+    final dx = tipRect.left;
+    final dy = tipRect.top;
+
+    final text = formatNumber(
+      model.vol,
+      precision: 2,
+      cutInvalidZero: true,
+      showCompact: true,
+      prefix: 'Vol:',
+    );
+
+    canvas.drawText(
+      offset: Offset(
+        dx,
+        dy,
+      ),
+      drawDirection: DrawDirection.ltr,
+      drawableSize: setting.canvasRect.size,
+      text: text,
+      style: setting.volTipStyle,
+      // textWidth: tickTextWidth,
+      textAlign: TextAlign.left,
+      padding: setting.volTipRectPadding,
+      maxLines: 1,
+    );
   }
 }

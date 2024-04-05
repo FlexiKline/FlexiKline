@@ -134,9 +134,9 @@ abstract class IndicatorChart extends BaseState with KlineLog {
     return _drawRect!;
   }
 
-  void paintSubChart(Canvas canvas, Size size);
+  void paintIndicatorChart(Canvas canvas, Size size);
 
-  void paintYAxisTick(Canvas canvas, Size size);
+  void paintSubTooltip(Canvas canvas, Size size);
 
-  void paintTooltip(Canvas canvas, Size size);
+  void handleIndicatorCross(Canvas canvas, Offset offset);
 }

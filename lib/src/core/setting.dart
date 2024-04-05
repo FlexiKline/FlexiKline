@@ -514,4 +514,17 @@ mixin SettingBinding on KlineBindingBase implements ISubChart {
     final textHeight = volBarTickFontSize * (volBarTickStyle.height ?? 1);
     return textHeight + volBarTickRectPadding.vertical;
   }
+
+  /// Volume Tooltip 区域配置
+  double volTipFontSize = 10;
+  Color volTipColor = Colors.black;
+  TextStyle get volTipStyle => TextStyle(
+        fontSize: volTipFontSize,
+        color: volTipColor,
+        overflow: TextOverflow.ellipsis,
+        height: 1,
+      );
+  EdgeInsets volTipRectPadding = const EdgeInsets.symmetric(
+    horizontal: 20,
+  );
 }

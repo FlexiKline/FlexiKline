@@ -80,6 +80,21 @@ mixin StateBinding
     return mainDrawBottom - (price - curKlineData.min).toDouble() * dyFactor;
   }
 
+  /// 当前Cross命中的Model
+  @override
+  CandleModel? get crossingCandle {
+    final offset = crossingOffset;
+    if (offset == null) return null;
+    return offsetToCandle(offset);
+  }
+
+  /// 将offset转换为蜡烛数据
+  @override
+  CandleModel? offsetToCandle(Offset offset) {
+    final index = offsetToIndex(offset);
+    return curKlineData.getCandle(index);
+  }
+
   /// 将offset指定的dx转换为当前绘制区域对应的蜡烛的下标.
   @override
   int offsetToIndex(Offset offset) => dxToIndex(offset.dx);
@@ -282,9 +297,4 @@ mixin StateBinding
     super.handleLongMove(data);
     if (!data.moved) return;
   }
-
-  //////////////////////////////////////////
-  /// 副图指标数据的状态
-  //////////////////////////////////////////
-  /// 副图(volume)绘制区域高度 / 当前绘制的Volume数据高度.
 }

@@ -26,7 +26,7 @@ import 'setting.dart';
 
 mixin SubBinding
     on KlineBindingBase, SettingBinding
-    implements ISubChart, IState {
+    implements ISubChart, IState, ICross {
   @override
   void initBinding() {
     super.initBinding();
@@ -97,7 +97,25 @@ mixin SubBinding
   void paintSubChart(Canvas canvas, Size size) {
     for (var indicator in indicatorQueue) {
       /// 绘制 Volume
-      indicator.paintSubChart(canvas, size);
+      indicator.paintIndicatorChart(canvas, size);
+    }
+  }
+
+  @override
+  void paintSubTooltip(Canvas canvas, Size size) {
+    for (var indicator in indicatorQueue) {
+      /// 绘制 Volume
+      indicator.paintSubTooltip(canvas, size);
+    }
+  }
+
+  @override
+  void paintSubCross(Canvas canvas, Size size) {
+    final offset = crossingOffset;
+    if (offset == null) return;
+    for (var indicator in indicatorQueue) {
+      /// 绘制 Volume
+      indicator.handleIndicatorCross(canvas, offset);
     }
   }
 }
