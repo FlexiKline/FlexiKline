@@ -119,15 +119,6 @@ abstract interface class IState {
   void calculateCandleDrawIndex();
 }
 
-abstract interface class ISubState {
-  /// 副图(volume)绘制区域高度 / 当前绘制的Volume数据高度.
-  double get dyVolFactor;
-
-  double volToDy(Decimal vol, int index);
-
-  Decimal? dyToVol(double dy, int index);
-}
-
 //// 主图(蜡烛)绘制接口
 abstract interface class ICandle {
   Listenable get repaintCandle;
@@ -140,6 +131,12 @@ abstract interface class ICandle {
 /// 副图(指标)绘制接口
 abstract interface class ISubChart {
   void paintSubChart(Canvas canvas, Size size);
+  // 副图数量
+  int get indicatorCount;
+  // 副图高度的列表.
+  List<double> get indicatorHeightList;
+  // 副图区域的总高度
+  double get subRectHeight;
 }
 
 //// 最新价与十字线绘制API

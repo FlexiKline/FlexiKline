@@ -17,9 +17,10 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 
 import 'binding_base.dart';
+import 'interface.dart';
 import 'setting.dart';
 
-mixin GridBinding on KlineBindingBase, SettingBinding {
+mixin GridBinding on KlineBindingBase, SettingBinding implements ISubChart {
   @override
   void initBinding() {
     super.initBinding();
@@ -36,6 +37,11 @@ mixin GridBinding on KlineBindingBase, SettingBinding {
   ValueNotifier<int> repaintGridBg = ValueNotifier(0);
 
   void paintGridBg(Canvas canvas, Size size) {
+    paintMainGrid(canvas, size);
+    paintSubGrid(canvas, size);
+  }
+
+  void paintMainGrid(Canvas canvas, Size size) {
     /// 绘制主图Grid gridCount*gridCount 坐标
     final yAxisStep = mainRectWidth / gridCount;
     final xAxisStep = mainDrawBottom / gridCount;
@@ -69,12 +75,30 @@ mixin GridBinding on KlineBindingBase, SettingBinding {
       Offset(mainRectWidth, mainDrawBottom),
       paintX,
     );
+  }
 
+  void paintSubGrid(Canvas canvas, Size size) {
     /// 绘制副图Grid X轴线
+    final yAxisStep = mainRectWidth / gridCount;
+    final paintX = gridXAxisLinePaint;
+    final paintY = gridYAxisLinePaint;
     final subTop = subRect.top;
-    final indicatorChartHeight = indicatorHeight;
-    for (int i = 0; i <= indicatorCount; i++) {
-      dy = subTop + i * indicatorChartHeight;
+
+    double dx = 0;
+    double dy = 0;
+
+    // 绘制起始线.
+    canvas.drawLine(
+      Offset(0, subTop),
+      Offset(mainRectWidth, subTop),
+      paintX,
+    );
+
+    final list = indicatorHeightList;
+    double height = 0.0;
+    for (int i = 0; i < list.length; i++) {
+      height += list[i];
+      dy = subTop + height;
       // 绘制XAsix线
       canvas.drawLine(
         Offset(0, dy),

@@ -22,8 +22,9 @@ import '../constant.dart';
 import '../model/export.dart';
 import '../utils/export.dart';
 import 'binding_base.dart';
+import 'interface.dart';
 
-mixin SettingBinding on KlineBindingBase {
+mixin SettingBinding on KlineBindingBase implements ISubChart {
   @override
   void initBinding() {
     super.initBinding();
@@ -477,83 +478,16 @@ mixin SettingBinding on KlineBindingBase {
   /// 以下是副图的绘制配置 /////////////////////
   //////////////////////////////////////////
   /// 副图区域大小
-  Rect _subRect = Rect.zero;
-  Rect get subRect => _subRect;
-  Size get subRectSize => Size(subRect.width, subRect.height);
-  // 副图指标数量
-  int _indicatorCount = 1;
-  int get indicatorCount => _indicatorCount;
-  void setSubSize(Size size, {int count = 1}) {
-    _indicatorCount = count;
-    if (count > 0) {
-      _subRect = Rect.fromLTWH(
-        0,
-        _mainRect.bottom,
-        size.width,
-        size.height,
+  Rect get subRect => Rect.fromLTRB(
+        mainRect.left,
+        mainRect.bottom,
+        mainRect.right,
+        mainRect.bottom + subRectHeight,
       );
-    } else {
-      _subRect = Rect.zero;
-    }
-    onSizeChange?.call();
-  }
 
-  /// 副图总宽度
-  double get subRectWidth => subRect.width;
+  Size get subRectSize => Size(subRect.width, subRect.height);
 
-  /// 副图总高度
-  double get subRectHeight => subRect.height;
-
-  /// 幅图上下padding
-  EdgeInsets indicatorPadding = const EdgeInsets.only(
-    top: 20,
-  );
-
-  // 单个指标图高度
-  double get indicatorHeight => subRectHeight / indicatorCount;
-
-  // 单个指标图Tooltip信息高度 注: toolTip信息绘制在indicatorPadding.top中, 不单独设置配置
-  double get indicatorTipHeight => indicatorPadding.top;
-  // 设置单个指标图Tooltip信息的高度. 最大不能超过单个指标图高度.
-  void setIndicatorTipHeight(double height) {
-    if (height > indicatorHeight) return;
-    indicatorPadding = indicatorPadding.copyWith(top: height);
-  }
-
-  /// 指标图的toolTip信息绘制范围. ///
-  // 某个指标图的toolTip的Top绘制坐标
-  double indicatorTipDrawTop(int index) {
-    return subRect.top + index * indicatorHeight;
-  }
-
-  // 某个指标图的toolTip的Bottom绘制坐标
-  double indicatorTipDrawBottom(int index) {
-    return indicatorTipDrawTop(index) + indicatorTipHeight;
-  }
-
-  // 单个指标图绘制高度
-  double get indicatorDrawHeight => indicatorHeight - indicatorPadding.vertical;
-
-  // 某个指标图的toolTip的Left绘制坐标
-  double get indicatorTipDrawLeft => subRect.left + indicatorPadding.left;
-  // 某个指标图的toolTip的Right绘制坐标
-  double get indicatorTipDrawRight => subRect.right - indicatorPadding.right;
-
-  /// 指标图的Chart的绘制范围. ///
-  // 某个指标图的Top绘制坐标
-  double indicatorDrawTop(int index) => indicatorTipDrawBottom(index);
-
-  // 某个指标图的Bottom绘制坐标
-  double indicatorDrawBottom(int index) {
-    return subRect.top + (index + 1) * indicatorHeight;
-  }
-
-  // 某个指标图的Left绘制坐标
-  double get indicatorDrawLeft => subRect.left + indicatorPadding.left;
-  // 某个指标图的Right绘制坐标
-  double get indicatorDrawRight => subRect.right - indicatorPadding.right;
-
-  /// Volume
+  /// Volume Bar
   Paint get volBarLongPaint => Paint()
     ..color = longColor
     ..style = PaintingStyle.stroke
@@ -562,4 +496,6 @@ mixin SettingBinding on KlineBindingBase {
     ..color = shortColor
     ..style = PaintingStyle.stroke
     ..strokeWidth = candleWidth;
+  // Volume Bar Y轴刻度数量
+  int volBarYAxisTickCount = 3;
 }

@@ -80,13 +80,6 @@ class _MyHomePageState extends State<MyHomePage> {
       ScreenUtil().screenWidth,
       ScreenUtil().screenWidth * 0.75,
     ));
-    controller1.setSubSize(
-      Size(
-        ScreenUtil().screenWidth,
-        120,
-      ),
-      count: 2,
-    );
 
     // genRandomCandleList(count: 500).then((list) {
     //   controller1.setKlineData(req, list);

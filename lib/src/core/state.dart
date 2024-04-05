@@ -27,7 +27,7 @@ import 'setting.dart';
 /// 状态管理: 负责数据的管理, 缓存, 切换, 计算
 mixin StateBinding
     on KlineBindingBase, SettingBinding
-    implements IState, ISubState, ICandle, ICross {
+    implements IState, ICandle, ICross {
   @override
   void initBinding() {
     super.initBinding();
@@ -70,7 +70,7 @@ mixin StateBinding
   @override
   Decimal? dyToPrice(double dy) {
     if (!mainDrawRect.inclueDy(dy)) return null;
-    return curKlineData.max - ((dy - mainPadding.top) / dyFactor).d;
+    return curKlineData.max - ((dy - mainDrawTop) / dyFactor).d;
   }
 
   /// 将价钱转换为主图(蜡烛图)的Y轴坐标. 如果超出以最大最小值来计算.
@@ -287,25 +287,4 @@ mixin StateBinding
   /// 副图指标数据的状态
   //////////////////////////////////////////
   /// 副图(volume)绘制区域高度 / 当前绘制的Volume数据高度.
-  @override
-  double get dyVolFactor {
-    return indicatorDrawHeight / curKlineData.volDataHeight.toDouble();
-  }
-
-  /// Volume转换为dy坐标
-  @override
-  double volToDy(Decimal vol, int index) {
-    vol = vol.clamp(curKlineData.minVol, curKlineData.maxVol);
-    return indicatorDrawBottom(index) -
-        (vol - curKlineData.minVol).toDouble() * dyVolFactor;
-  }
-
-  /// dy坐标转换为Volume
-  @override
-  Decimal? dyToVol(double dy, int index) {
-    final drawTop = indicatorDrawTop(index);
-    if (dy <= drawTop) return null;
-    if (dy > indicatorDrawBottom(index)) return null;
-    return curKlineData.maxVol - ((dy - drawTop) / dyVolFactor).d;
-  }
 }

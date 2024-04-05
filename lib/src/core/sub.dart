@@ -12,21 +12,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:ui';
+import 'dart:collection';
 
-import '../model/export.dart';
+import 'package:flutter/material.dart';
+
+import '../constant.dart';
+import '../kline_controller.dart';
 
 import 'binding_base.dart';
+import 'indicator/export.dart';
 import 'interface.dart';
 import 'setting.dart';
 
 mixin SubBinding
     on KlineBindingBase, SettingBinding
-    implements ISubChart, IState, ISubState {
+    implements ISubChart, IState {
   @override
   void initBinding() {
     super.initBinding();
     logd('init sub');
+    appendIndicator(
+      IndicatorType.volume,
+      tipHeight: 10,
+    );
+    // appendIndicator(
+    //   IndicatorType.macd,
+    //   height: 100,
+    // );
   }
 
   @override
@@ -35,33 +47,55 @@ mixin SubBinding
     logd('dispose');
   }
 
+  final Queue<IndicatorChart> indicatorQueue = ListQueue();
+
+  // 副图指标数量
   @override
-  void paintSubChart(Canvas canvas, Size size) {
-    /// 绘制 Volume
-    paintVolChart(canvas, size, 0);
+  int get indicatorCount => indicatorQueue.length;
+
+  // 指标图高度的集合
+  @override
+  List<double> get indicatorHeightList {
+    return indicatorQueue.map((e) => e.height).toList(growable: false);
   }
 
-  /// 绘制 Volume
-  void paintVolChart(Canvas canvas, Size size, int index) {
-    final data = curKlineData;
-    if (data.list.isEmpty) return;
-    int start = data.start;
-    int end = data.end;
+  @override
+  double get subRectHeight {
+    return indicatorHeightList.reduce((curr, next) => curr + next);
+  }
 
-    final offset = startCandleDx - candleWidthHalf;
-    final dyBottom = indicatorDrawBottom(index);
-    for (var i = start; i < end; i++) {
-      final model = data.list[i];
-      final dx = offset - (i - start) * candleActualWidth;
-      final isLong = model.close >= model.open;
+  void appendIndicator(
+    IndicatorType type, {
+    double height = 60,
+    double tipHeight = 0,
+    EdgeInsets padding = EdgeInsets.zero,
+  }) {
+    // assert(tipHeight < indicatorHeight);
+    switch (type) {
+      case IndicatorType.volume:
+        indicatorQueue.addLast(VolumeChart(
+          index: indicatorQueue.length,
+          controller: this as KlineController,
+          height: height,
+          tipHeight: tipHeight,
+          padding: padding,
+        ));
+      case IndicatorType.macd:
+        indicatorQueue.addLast(VolumeChart(
+          index: indicatorQueue.length,
+          controller: this as KlineController,
+          height: height,
+          tipHeight: tipHeight,
+          padding: padding,
+        ));
+    }
+  }
 
-      final dy = volToDy(model.vol, index);
-
-      canvas.drawLine(
-        Offset(dx, dy),
-        Offset(dx, dyBottom),
-        isLong ? volBarLongPaint : volBarShortPaint,
-      );
+  @override
+  void paintSubChart(Canvas canvas, Size size) {
+    for (var indicator in indicatorQueue) {
+      /// 绘制 Volume
+      indicator.paintSubChart(canvas, size);
     }
   }
 }

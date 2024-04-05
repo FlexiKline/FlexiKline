@@ -245,7 +245,7 @@ mixin CandleBinding
     for (int i = 1; i <= gridCount; i++) {
       dy = i * yAxisStep;
       final price = dyToPrice(dy);
-      if (price == null) return;
+      if (price == null) continue;
 
       final text = formatPrice(
         price,

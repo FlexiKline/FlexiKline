@@ -113,9 +113,14 @@ class KlineData with KlineLog {
       minVol = m.vol < minVol ? m.vol : minVol;
     }
 
-    // TODO: 考虑极端情况.
-    minVol -= Decimal.one; // 保证最小值有一个基数.
+    // 增加vol区域的margin为高度的1/10
+    final volH = maxVol == minVol ? Decimal.one : maxVol - minVol;
+    final margin = volH * twentieth;
+    maxVol += margin;
+    minVol -= margin;
   }
+
+  final Decimal twentieth = (Decimal.one / Decimal.fromInt(20)).toDecimal();
 
   void ensureStartAndEndIndex(
     int startIndex,
