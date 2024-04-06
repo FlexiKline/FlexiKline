@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:ui';
-
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 
@@ -129,11 +127,12 @@ class VolumeChart extends IndicatorChart {
 
   @override
   void handleIndicatorCross(Canvas canvas, Offset offset) {
-    CandleModel? model = state.offsetToCandle(offset);
-    if (model == null) return;
-
     _paintCrossYAxisVolumeMark(canvas, offset);
-    _paintTooltipVolume(canvas, model);
+
+    CandleModel? model = state.offsetToCandle(offset);
+    if (model != null) {
+      _paintTooltipVolume(canvas, model);
+    }
   }
 
   void _paintCrossYAxisVolumeMark(Canvas canvas, Offset offset) {
@@ -149,20 +148,20 @@ class VolumeChart extends IndicatorChart {
 
     canvas.drawText(
       offset: Offset(
-        drawRect.right - setting.crossPriceRectRigthMargin,
-        offset.dy - setting.crossPriceRectHeight / 2,
+        drawRect.right - setting.crossYTickRectRigthMargin,
+        offset.dy - setting.crossYTickRectHeight / 2,
       ),
       drawDirection: DrawDirection.rtl,
       drawableSize: setting.canvasRect.size,
       text: text,
-      style: setting.crossPriceTextStyle,
+      style: setting.crossYTickTextStyle,
       textAlign: TextAlign.end,
       textWidthBasis: TextWidthBasis.longestLine,
-      padding: setting.crossPriceRectPadding,
-      backgroundColor: setting.crossPriceRectBackgroundColor,
-      radius: setting.crossPriceRectBorderRadius,
-      borderWidth: setting.crossPriceRectBorderWidth,
-      borderColor: setting.crossPriceRectBorderColor,
+      padding: setting.crossYTickRectPadding,
+      backgroundColor: setting.crossYTickRectBackgroundColor,
+      radius: setting.crossYTickRectBorderRadius,
+      borderWidth: setting.crossYTickRectBorderWidth,
+      borderColor: setting.crossYTickRectBorderColor,
     );
   }
 
@@ -175,7 +174,7 @@ class VolumeChart extends IndicatorChart {
       precision: 2,
       cutInvalidZero: true,
       showCompact: true,
-      prefix: 'Vol:',
+      prefix: 'Vol: ',
     );
 
     canvas.drawText(
@@ -187,10 +186,10 @@ class VolumeChart extends IndicatorChart {
       drawableSize: setting.canvasRect.size,
       text: text,
       style: setting.volTipStyle,
-      // textWidth: tickTextWidth,
       textAlign: TextAlign.left,
       padding: setting.volTipRectPadding,
       maxLines: 1,
+      // backgroundColor: Colors.white, // TODO: 增加背景防止重叠.
     );
   }
 }

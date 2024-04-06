@@ -87,12 +87,12 @@ mixin CrossBinding
       /// 绘制Cross Line
       paintCrossLine(canvas, offset);
 
-      if (showCrossYAxisPriceMark) {
+      if (showCrossYAxisTickMark) {
         /// 绘制Cross Y轴价钱刻度
         paintCrossYAxisPriceMark(canvas, offset);
       }
 
-      if (showCrossXAxisTimeMark) {
+      if (showCrossXAxisTickMark) {
         /// 绘制Cross X轴时间刻度
         paintCrossXAxisTimeMark(canvas, offset);
       }
@@ -176,20 +176,20 @@ mixin CrossBinding
     );
     canvas.drawText(
       offset: Offset(
-        mainDrawRight - crossPriceRectRigthMargin,
-        offset.dy - crossPriceRectHeight / 2,
+        mainDrawRight - crossYTickRectRigthMargin,
+        offset.dy - crossYTickRectHeight / 2,
       ),
       drawDirection: DrawDirection.rtl,
       drawableSize: mainRectSize,
       text: text,
-      style: crossPriceTextStyle,
+      style: crossYTickTextStyle,
       textAlign: TextAlign.end,
       textWidthBasis: TextWidthBasis.longestLine,
-      padding: crossPriceRectPadding,
-      backgroundColor: crossPriceRectBackgroundColor,
-      radius: crossPriceRectBorderRadius,
-      borderWidth: crossPriceRectBorderWidth,
-      borderColor: crossPriceRectBorderColor,
+      padding: crossYTickRectPadding,
+      backgroundColor: crossYTickRectBackgroundColor,
+      radius: crossYTickRectBorderRadius,
+      borderWidth: crossYTickRectBorderWidth,
+      borderColor: crossYTickRectBorderColor,
     );
   }
 
@@ -204,7 +204,7 @@ mixin CrossBinding
     // final time = model.formatDateTimeByTimeBar(timeBar);
     final time = formatDateTime(model.dateTime);
 
-    final dyCenterOffset = (mainPadding.bottom - crossTimeRectHeight) / 2;
+    final dyCenterOffset = (mainPadding.bottom - crossXTickRectHeight) / 2;
     canvas.drawText(
       offset: Offset(
         offset.dx,
@@ -213,14 +213,14 @@ mixin CrossBinding
       drawDirection: DrawDirection.center,
       // drawableSize: mainRectSize,
       text: time,
-      style: crossTimeTextStyle,
+      style: crossXTickTextStyle,
       textAlign: TextAlign.center,
       textWidthBasis: TextWidthBasis.longestLine,
-      padding: crossTimeRectPadding,
-      backgroundColor: crossTimeRectBackgroundColor,
-      radius: crossTimeRectBorderRadius,
-      borderWidth: crossTimeRectBorderWidth,
-      borderColor: crossTimeRectBorderColor,
+      padding: crossXTickRectPadding,
+      backgroundColor: crossXTickRectBackgroundColor,
+      radius: crossXTickRectBorderRadius,
+      borderWidth: crossXTickRectBorderWidth,
+      borderColor: crossXTickRectBorderColor,
     );
   }
 

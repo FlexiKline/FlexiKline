@@ -310,61 +310,60 @@ mixin SettingBinding on KlineBindingBase implements ISubChart {
     ..color = corssPointColor
     ..strokeWidth = crossPointWidth
     ..style = PaintingStyle.fill;
-  // cross Y轴价钱文本配置
+
   // 是否展示Cross Y轴上的价钱标记.
-  bool showCrossYAxisPriceMark = true;
-  double crossPriceFontSize = 10;
-  double crossPriceTextWidth = 100; // TODO 暂无用
-  Color crossPriceColor = Colors.white;
-  TextStyle get crossPriceTextStyle => TextStyle(
-        fontSize: crossPriceFontSize,
-        color: crossPriceColor,
+  bool showCrossYAxisTickMark = true;
+  // cross Y轴对应刻度文本区域配置 (价钱, Volume ...)
+  double crossYTickFontSize = 10;
+  double crossYTickTextWidth = 100; // TODO 暂无用
+  Color crossYTickColor = Colors.white;
+  TextStyle get crossYTickTextStyle => TextStyle(
+        fontSize: crossYTickFontSize,
+        color: crossYTickColor,
         overflow: TextOverflow.ellipsis,
         height: 1,
         textBaseline: TextBaseline.alphabetic,
       );
-  // cross Y轴最右边文本区域的背景相关配置.
-  Color crossPriceRectBackgroundColor = Colors.black;
-  double crossPriceRectBorderRadius = 2;
-  double crossPriceRectBorderWidth = 0.0;
-  Color crossPriceRectBorderColor = Colors.transparent;
-  double crossPriceRectRigthMargin = 1;
-  EdgeInsets crossPriceRectPadding = const EdgeInsets.symmetric(
+  // cross Y轴对应刻度文本区域配置
+  Color crossYTickRectBackgroundColor = Colors.black;
+  double crossYTickRectBorderRadius = 2;
+  double crossYTickRectBorderWidth = 0.0;
+  Color crossYTickRectBorderColor = Colors.transparent;
+  double crossYTickRectRigthMargin = 1;
+  EdgeInsets crossYTickRectPadding = const EdgeInsets.symmetric(
     horizontal: 2,
     vertical: 2,
   );
-  // cross 价钱区域总高度.
-  double get crossPriceRectHeight {
-    final textHeight = crossPriceFontSize * (crossPriceTextStyle.height ?? 1);
-    return textHeight + crossPriceRectPadding.vertical;
+  // cross YAxis Tick Rect总高度.
+  double get crossYTickRectHeight {
+    final textHeight = crossYTickFontSize * (crossYTickTextStyle.height ?? 1);
+    return textHeight + crossYTickRectPadding.vertical;
   }
 
-  /// Cross X轴时间文本配置
-  bool showCrossXAxisTimeMark = true;
-  double crossTimeFontSize = 10;
-  double crossTimeTextWidth = 100; // TODO 暂无用
-  Color crossTimeColor = Colors.white;
-  TextStyle get crossTimeTextStyle => TextStyle(
-        fontSize: crossTimeFontSize,
-        color: crossTimeColor,
+  /// Cross X轴对应刻度文本配置(时间)
+  bool showCrossXAxisTickMark = true;
+  double crossXTickFontSize = 10;
+  double crossXTickTextWidth = 100; // TODO 暂无用
+  Color crossXTickColor = Colors.white;
+  TextStyle get crossXTickTextStyle => TextStyle(
+        fontSize: crossXTickFontSize,
+        color: crossXTickColor,
         overflow: TextOverflow.ellipsis,
         height: 1,
         textBaseline: TextBaseline.alphabetic,
       );
-  // cross Y轴最右边文本区域的背景相关配置.
-  Color crossTimeRectBackgroundColor = Colors.black;
-  double crossTimeRectBorderRadius = 2;
-  double crossTimeRectBorderWidth = 0.0;
-  Color crossTimeRectBorderColor = Colors.transparent;
-  // double crossTimeRectRigthMargin = 1;
-  EdgeInsets crossTimeRectPadding = const EdgeInsets.symmetric(
+  // cross X轴对应刻度文本区域的配置
+  Color crossXTickRectBackgroundColor = Colors.black;
+  double crossXTickRectBorderRadius = 2;
+  double crossXTickRectBorderWidth = 0.0;
+  Color crossXTickRectBorderColor = Colors.transparent;
+  EdgeInsets crossXTickRectPadding = const EdgeInsets.symmetric(
     horizontal: 2,
     vertical: 2,
   );
-
-  double get crossTimeRectHeight {
-    final textHeight = crossTimeFontSize * (crossTimeTextStyle.height ?? 1);
-    return textHeight + crossTimeRectPadding.vertical;
+  double get crossXTickRectHeight {
+    final textHeight = crossXTickFontSize * (crossXTickTextStyle.height ?? 1);
+    return textHeight + crossXTickRectPadding.vertical;
   }
 
   // candle Card 配置
@@ -524,7 +523,7 @@ mixin SettingBinding on KlineBindingBase implements ISubChart {
         overflow: TextOverflow.ellipsis,
         height: 1,
       );
-  EdgeInsets volTipRectPadding = const EdgeInsets.symmetric(
-    horizontal: 20,
+  EdgeInsets volTipRectPadding = const EdgeInsets.only(
+    left: 8,
   );
 }

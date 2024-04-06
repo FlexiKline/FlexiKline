@@ -131,7 +131,8 @@ extension DrawTextExt on Canvas {
 
     final isDrawBg = backgroundColor.alpha != 0;
     final isDrawBorder = borderColor.alpha != 0 && borderWidth > 0;
-    if (!padding.collapsedSize.isEmpty || isDrawBg || isDrawBorder) {
+    final hasPadding = padding.collapsedSize.isEmpty != true;
+    if (!hasPadding || isDrawBg || isDrawBorder) {
       // if (margin != null && margin.isNonNegative) {
       //   final x = drawDirection.isltr ? -margin.right : margin.left;
       //   final y = isUpward ? margin.bottom : -margin.top;
