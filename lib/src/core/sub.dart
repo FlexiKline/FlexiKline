@@ -81,7 +81,7 @@ mixin SubBinding
           tipHeight: tipHeight,
           padding: padding,
         ));
-      case IndicatorType.macd:
+      case IndicatorType.ma:
         indicatorQueue.addLast(VolumeChart(
           debug: debug,
           index: indicatorQueue.length,
@@ -90,6 +90,8 @@ mixin SubBinding
           tipHeight: tipHeight,
           padding: padding,
         ));
+      case IndicatorType.candle:
+      // TODO: Handle this case.
     }
   }
 

@@ -1,28 +1,21 @@
+// Copyright 2024 Andy.Zhao
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
-# FlexiKline
+import 'package:decimal/decimal.dart';
+import 'package:flutter/material.dart';
 
-
-## 架构设计
-
-### 绘制图层
-
-#### 1. GridBackgroundPainter
-负责绘制网格线与背景
-
-#### 2. IndicatorChartPainter
-负责绘制所有指标图
-
-#### 3. DrawPainter
-负责画图工具
-
-#### 4. CrossPainter
-负责Cross时, 命中的指标状态.
-
-### 指标配置定义
-
-
-### 指标图的绘制边界接口
-```dart
+/// 指标图的绘制边界接口
 abstract interface class IIndicatorBounding {
   bool get drawInMain;
   bool get drawInSub;
@@ -47,11 +40,8 @@ abstract interface class IIndicatorBounding {
   /// 当前指标图绘制区域
   Rect get chartRect;
 }
-```
 
-### 指标图绘制接口
-
-```dart
+/// 指标图绘制接口
 abstract interface class IPaintChart {
   /// 计算指标需要的数据
   void calculateIndicatorData();
@@ -71,11 +61,8 @@ abstract interface class IPaintChart {
   /// 绘制顶部tips信息
   // void paintTips(Canvas canvas, Size size);
 }
-```
 
-### 指标图的Cross绘制接口
-
-```dart
+/// 指标图的Cross绘制接口
 abstract interface class IPaintCross {
   /// 将dy坐标值转换为YAxis轴对应的值.
   Decimal? dyToValue(double dy);
@@ -89,4 +76,3 @@ abstract interface class IPaintCross {
   /// 绘制Cross命中的指标信息
   void paintCrossTips(Canvas canvas, Offset offset);
 }
-```

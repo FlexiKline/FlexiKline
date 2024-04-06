@@ -22,7 +22,7 @@ import '../constant.dart';
 
 export './candle_model/candle_model.dart';
 export './candle_req/candle_req.dart';
-export './gesture.dart';
+export 'gesture_data.dart';
 export './card_info.dart';
 
 extension KlineDataExt on KlineData {

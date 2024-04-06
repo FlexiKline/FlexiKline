@@ -61,10 +61,10 @@ class _KlineWidgetState extends State<KlineWidget> {
                   widget.controller.canvasWidth,
                   widget.controller.canvasHeight,
                 ),
-                painter: GridPainter(
+                painter: GridBackgroundPainter(
                   controller: widget.controller,
                 ),
-                foregroundPainter: KlinePainter(
+                foregroundPainter: IndicatorChartPainter(
                   controller: widget.controller,
                 ),
                 isComplex: true,
@@ -77,7 +77,10 @@ class _KlineWidgetState extends State<KlineWidget> {
                   widget.controller.canvasWidth,
                   widget.controller.canvasHeight,
                 ),
-                painter: PriceCrossPainter(
+                painter: DrawPainter(
+                  controller: widget.controller,
+                ),
+                foregroundPainter: CrossPainter(
                   controller: widget.controller,
                 ),
                 isComplex: true,
@@ -90,8 +93,8 @@ class _KlineWidgetState extends State<KlineWidget> {
   }
 }
 
-class GridPainter extends CustomPainter {
-  GridPainter({
+class GridBackgroundPainter extends CustomPainter {
+  GridBackgroundPainter({
     required this.controller,
   }) : super(repaint: controller.repaintGridBg);
 
@@ -108,8 +111,8 @@ class GridPainter extends CustomPainter {
   }
 }
 
-class KlinePainter extends CustomPainter {
-  KlinePainter({
+class IndicatorChartPainter extends CustomPainter {
+  IndicatorChartPainter({
     required this.controller,
   }) : super(repaint: controller.repaintCandle);
 
@@ -132,8 +135,26 @@ class KlinePainter extends CustomPainter {
   }
 }
 
-class PriceCrossPainter extends CustomPainter {
-  PriceCrossPainter({
+class DrawPainter extends CustomPainter {
+  DrawPainter({
+    required this.controller,
+  }) : super();
+
+  final KlineController controller;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // TODO: 待实现
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return oldDelegate != this;
+  }
+}
+
+class CrossPainter extends CustomPainter {
+  CrossPainter({
     required this.controller,
   }) : super(repaint: controller.repaintCross);
 

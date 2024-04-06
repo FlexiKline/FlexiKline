@@ -84,8 +84,10 @@ const List<String> i18nCandleCardEn = [
 ];
 
 enum IndicatorType {
+  candle,
   volume,
-  macd,
+  // macd,
+  ma,
   // kdj,
   // rsi;
 }

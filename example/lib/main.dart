@@ -18,7 +18,7 @@ import 'package:flexi_kline/flexi_kline.dart';
 
 import 'mock.dart';
 import 'src/gesture_test.dart';
-import 'test.dart';
+import 'src/canvas_test.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
