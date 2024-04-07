@@ -23,7 +23,7 @@ import '../state.dart';
 
 abstract class BaseState {
   BaseState({required this.controller});
-  final KlineController controller;
+  final FlexiKlineController controller;
 
   SettingBinding get setting => controller.getInstance(controller);
   StateBinding get state => controller.getInstance(controller);

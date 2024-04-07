@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 
@@ -59,8 +60,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  late final KlineController controller1;
-  late final KlineController controller2;
+  late final FlexiKlineController controller1;
+  late final FlexiKlineController controller2;
   final CandleReq req = CandleReq(
     instId: 'BTC-USDT',
     bar: TimeBar.D1.bar,
@@ -75,7 +76,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void initController1() {
-    controller1 = KlineController(debug: true);
+    controller1 = FlexiKlineController(debug: true);
     controller1.setMainSize(Size(
       ScreenUtil().screenWidth,
       ScreenUtil().screenWidth * 0.75,
@@ -95,7 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void initController2() {
-    controller2 = KlineController(debug: false);
+    controller2 = FlexiKlineController(debug: false);
     controller2.setMainSize(Size(
       ScreenUtil().screenWidth,
       ScreenUtil().screenWidth,
@@ -120,7 +121,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            KlineWidget(
+            FlexiKlineWidget(
               key: const ValueKey('1'),
               controller: controller1,
             ),

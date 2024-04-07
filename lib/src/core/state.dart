@@ -27,7 +27,7 @@ import 'setting.dart';
 /// 状态管理: 负责数据的管理, 缓存, 切换, 计算
 mixin StateBinding
     on KlineBindingBase, SettingBinding
-    implements IState, ICandle, ICross {
+    implements IState, IIndicator, ICross {
   @override
   void initBinding() {
     super.initBinding();
@@ -153,6 +153,7 @@ mixin StateBinding
   ///     移出右边界的蜡烛数量 = (paintDxOffset / candleActualWidth).floor()
   ///     绘制起始蜡烛的向右边界外的偏移 = paintDxOffset % candleActualWidth;
   double _paintDxOffset = 0;
+  @override
   double get paintDxOffset => _paintDxOffset;
   set paintDxOffset(double val) {
     _paintDxOffset = clampPaintDxOffset(val);
@@ -225,7 +226,7 @@ mixin StateBinding
     if (curKlineData.invalid || req.key == curDataKey) {
       _curKlineData = data;
       initPaintDxOffset();
-      markRepaintCandle();
+      markRepaintIndicatorChart();
     }
   }
 
@@ -255,7 +256,7 @@ mixin StateBinding
         );
       }
 
-      markRepaintCandle();
+      markRepaintIndicatorChart();
     }
   }
 
@@ -267,7 +268,7 @@ mixin StateBinding
     final newDxOffset = clampPaintDxOffset(paintDxOffset + data.dxDelta);
     if (newDxOffset != paintDxOffset) {
       paintDxOffset = newDxOffset;
-      markRepaintCandle();
+      markRepaintIndicatorChart();
     }
   }
 
@@ -288,7 +289,7 @@ mixin StateBinding
     if (newWidth != candleWidth || newDxOffset != paintDxOffset) {
       candleWidth = newWidth;
       paintDxOffset = newDxOffset;
-      markRepaintCandle();
+      markRepaintIndicatorChart();
     }
   }
 

@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:collection';
+
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 
@@ -115,6 +117,9 @@ abstract interface class IState {
   /// 当前canvas绘制区域第一根蜡烛绘制的偏移量
   double get startCandleDx;
 
+  /// 代表当前绘制区域相对于startIndex右侧的偏移量.
+  double get paintDxOffset;
+
   /// 画布是否可以从右向左进行平移.
   bool get canPanRTL;
 
@@ -125,13 +130,19 @@ abstract interface class IState {
   void calculateCandleDrawIndex();
 }
 
+/// Config接口
+abstract interface class IConfig {
+  MainIndicator get mainIndicator;
+  Queue<Indicator> get subIndicators;
+}
+
 //// 主图(蜡烛)绘制接口
-abstract interface class ICandle {
-  Listenable get repaintCandle;
+abstract interface class IIndicator {
+  Listenable get repaintIndicatorChart;
 
-  void paintMainChart(Canvas canvas, Size size);
+  void paintIndicatorChart(Canvas canvas, Size size);
 
-  void markRepaintCandle();
+  void markRepaintIndicatorChart();
 }
 
 /// 副图(指标)绘制接口

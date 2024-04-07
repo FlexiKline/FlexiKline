@@ -17,7 +17,6 @@ import 'dart:ui' as ui;
 
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 import '../constant.dart';
 import '../model/export.dart';
@@ -79,11 +78,12 @@ mixin SettingBinding on KlineBindingBase implements ISubChart {
   /// 主图总高度
   double get mainRectHeight => mainRect.height;
 
+  /// 主图区域的tips高度
+  double mainTipsHeight = 20;
+
   /// 主图上下padding
   EdgeInsets mainPadding = const EdgeInsets.only(
-    top: 20,
     bottom: 15,
-    // right: 20,
   );
 
   Rect get mainDrawRect => Rect.fromLTRB(
@@ -484,6 +484,12 @@ mixin SettingBinding on KlineBindingBase implements ISubChart {
         mainRect.right,
         mainRect.bottom + subRectHeight,
       );
+
+  /// 副区的单个指标图高度
+  double subIndicatorChartHeight = 80;
+
+  /// 副区的指标图最大数量
+  int subIndicatorChartMaxCount = 4;
 
   Size get subRectSize => Size(subRect.width, subRect.height);
 

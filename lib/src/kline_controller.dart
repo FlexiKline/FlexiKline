@@ -14,18 +14,18 @@
 
 import 'core/export.dart';
 
-class KlineController extends KlineBindingBase
+class FlexiKlineController extends KlineBindingBase
     with
         SettingBinding,
         ConfigBinding,
         StateBinding,
         GestureBinding,
         GridBinding,
-        CandleBinding,
+        IndicatorBinding,
         SubBinding,
         CrossBinding,
         DrawBinding {
-  KlineController({
+  FlexiKlineController({
     super.debug,
   });
 }

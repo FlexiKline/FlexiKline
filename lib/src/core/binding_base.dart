@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 import '../utils/log.dart';
 import 'interface.dart';
@@ -44,7 +45,9 @@ abstract class KlineBindingBase with KlineLog, GestureHanderImpl {
     logd("dispose base");
   }
 
-  T getInstance<T extends KlineBindingBase>(T? instance) {
-    return instance!;
+  KlineBindingBase get instance => this;
+
+  T getInstance<T extends KlineBindingBase>(T instance) {
+    return instance;
   }
 }

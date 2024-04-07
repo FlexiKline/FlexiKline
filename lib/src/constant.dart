@@ -84,10 +84,14 @@ const List<String> i18nCandleCardEn = [
 ];
 
 enum IndicatorType {
+  composite,
   candle,
   volume,
   // macd,
-  ma,
+  ma
   // kdj,
   // rsi;
+  ;
+
+  bool get isComposite => this == IndicatorType.composite;
 }

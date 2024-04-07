@@ -17,16 +17,19 @@ import 'package:flutter/material.dart';
 import '../kline_controller.dart';
 import 'gesture_view.dart';
 
-class KlineWidget extends StatefulWidget {
-  const KlineWidget({super.key, required this.controller});
+class FlexiKlineWidget extends StatefulWidget {
+  const FlexiKlineWidget({
+    super.key,
+    required this.controller,
+  });
 
-  final KlineController controller;
+  final FlexiKlineController controller;
 
   @override
-  State<KlineWidget> createState() => _KlineWidgetState();
+  State<FlexiKlineWidget> createState() => _FlexiKlineWidgetState();
 }
 
-class _KlineWidgetState extends State<KlineWidget> {
+class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
   @override
   void initState() {
     super.initState();
@@ -98,7 +101,7 @@ class GridBackgroundPainter extends CustomPainter {
     required this.controller,
   }) : super(repaint: controller.repaintGridBg);
 
-  final KlineController controller;
+  final FlexiKlineController controller;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -114,15 +117,15 @@ class GridBackgroundPainter extends CustomPainter {
 class IndicatorChartPainter extends CustomPainter {
   IndicatorChartPainter({
     required this.controller,
-  }) : super(repaint: controller.repaintCandle);
+  }) : super(repaint: controller.repaintIndicatorChart);
 
-  final KlineController controller;
+  final FlexiKlineController controller;
 
   @override
   void paint(Canvas canvas, Size size) {
     controller.calculateCandleDrawIndex();
 
-    controller.paintMainChart(canvas, size);
+    controller.paintIndicatorChart(canvas, size);
 
     /// 处理副图的Cross绘制
     controller.paintSubChart(canvas, size);
@@ -140,7 +143,7 @@ class DrawPainter extends CustomPainter {
     required this.controller,
   }) : super();
 
-  final KlineController controller;
+  final FlexiKlineController controller;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -158,7 +161,7 @@ class CrossPainter extends CustomPainter {
     required this.controller,
   }) : super(repaint: controller.repaintCross);
 
-  final KlineController controller;
+  final FlexiKlineController controller;
 
   @override
   void paint(Canvas canvas, Size size) {

@@ -76,7 +76,7 @@ mixin SubBinding
         indicatorQueue.addLast(VolumeChart(
           debug: debug,
           index: indicatorQueue.length,
-          controller: this as KlineController,
+          controller: this as FlexiKlineController,
           height: height,
           tipHeight: tipHeight,
           padding: padding,
@@ -85,12 +85,14 @@ mixin SubBinding
         indicatorQueue.addLast(VolumeChart(
           debug: debug,
           index: indicatorQueue.length,
-          controller: this as KlineController,
+          controller: this as FlexiKlineController,
           height: height,
           tipHeight: tipHeight,
           padding: padding,
         ));
       case IndicatorType.candle:
+      // TODO: Handle this case.
+      case IndicatorType.composite:
       // TODO: Handle this case.
     }
   }

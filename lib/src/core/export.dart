@@ -13,7 +13,7 @@
 // limitations under the License.
 
 export 'binding_base.dart';
-export 'candle.dart';
+export 'indicator.dart';
 export 'gesture.dart';
 export 'state.dart';
 export 'config.dart';
@@ -23,3 +23,4 @@ export 'interface.dart';
 export 'draw.dart';
 export 'grid.dart';
 export 'sub.dart';
+export 'data.dart';
