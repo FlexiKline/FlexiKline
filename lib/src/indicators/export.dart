@@ -12,20 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'core/export.dart';
-
-class FlexiKlineController extends KlineBindingBase
-    with
-        SettingBinding,
-        ConfigBinding,
-        StateBinding,
-        GestureBinding,
-        GridBinding,
-        PaintBinding,
-        SubBinding,
-        CrossBinding,
-        DrawBinding {
-  FlexiKlineController({
-    super.debug,
-  });
-}
+// export 'indicator.dart';
+export 'candle.dart';
+export 'volume.dart';

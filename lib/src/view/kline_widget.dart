@@ -125,7 +125,7 @@ class IndicatorChartPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     controller.calculateCandleDrawIndex();
 
-    controller.paintIndicatorChart(canvas, size);
+    controller.paintChart(canvas, size);
 
     /// 处理副图的Cross绘制
     controller.paintSubChart(canvas, size);

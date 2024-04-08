@@ -16,55 +16,65 @@ import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 
 import '../constant.dart';
-import '../extension/export.dart';
+import '../core/export.dart';
 import '../model/export.dart';
 import '../render/export.dart';
 import '../utils/export.dart';
-import 'indicator_chart.dart';
+import '../framework/export.dart';
 
-class CandleChart extends IndicatorChartBox<CandleIndicator> {
-  CandleChart(
-    super.controller, {
-    required super.indicator,
+class CandleIndicator extends SingleChartIndicator {
+  const CandleIndicator({
+    super.key,
   });
 
   @override
-  void calculateIndicatorData() {
-    state.calculateCandleDrawIndex();
+  IndicatorChart createIndicatorChart(
+    KlineBindingBase controller,
+  ) {
+    return CandleIndicatorChart(
+      controller: controller,
+      indicator: this,
+    );
   }
 
   @override
-  double get dyFactor {
-    return chartRect.height / curKlineData.dataHeight.toDouble();
+  void updateIndicatorChart(
+    KlineBindingBase controller,
+    CandleIndicatorChart indicatorChart,
+  ) {
+    super.updateIndicatorChart(controller, indicatorChart);
+  }
+}
+
+class CandleIndicatorChart extends IndicatorChartBox<CandleIndicator> {
+  CandleIndicatorChart({
+    required super.controller,
+    required super.indicator,
+  });
+
+  Decimal _max = Decimal.zero;
+  Decimal _min = Decimal.zero;
+
+  @override
+  void initData(List<CandleModel> list, {int start = 0, int end = 0}) {
+    if (list.isEmpty || start < 0 || end > list.length) return;
+    CandleModel m = list[start];
+    _max = m.vol;
+    _min = m.vol;
+    for (var i = start + 1; i < end; i++) {
+      m = list[i];
+      _max = m.high > _max ? m.high : _max;
+      _min = m.low < _min ? m.low : _min;
+    }
   }
 
   @override
-  double valueToDy(Decimal value) {
-    value = value.clamp(curKlineData.min, curKlineData.max);
-    return chartRect.bottom - (value - curKlineData.min).toDouble() * dyFactor;
-  }
+  Decimal get maxVal => _max;
+  @override
+  Decimal get minVal => _min;
 
   @override
-  double? indexToDx(int index) {
-    double dx = chartRect.right - (index * candleActualWidth - paintDxOffset);
-    if (chartRect.inclueDx(dx)) return dx;
-    return null;
-  }
-
-  @override
-  Decimal? dyToValue(double dy) {
-    if (!chartRect.inclueDy(dy)) return null;
-    return curKlineData.max - ((dy - chartRect.top) / dyFactor).d;
-  }
-
-  @override
-  int dxToIndex(double dx) {
-    final dxPaintOffset = (chartRect.right - dx) + paintDxOffset;
-    return (dxPaintOffset / candleActualWidth).floor();
-  }
-
-  @override
-  void paintIndicatorChart(Canvas canvas, Size size) {
+  void paintChart(Canvas canvas, Size size) {
     /// 绘制蜡烛图
     paintCandleChart(canvas, size);
 
@@ -205,7 +215,6 @@ class CandleChart extends IndicatorChartBox<CandleIndicator> {
     // }
   }
 
-  @override
   void paintAxisTickMark(Canvas canvas, Size size) {
     final yAxisStep = chartRect.bottom / setting.gridCount;
     final dx = chartRect.right;
@@ -318,7 +327,7 @@ class CandleChart extends IndicatorChartBox<CandleIndicator> {
   }
 
   @override
-  void paintCrossTickMark(Canvas canvas, Offset offset) {
+  void onCross(Canvas canvas, Offset offset) {
     if (setting.showCrossYAxisTickMark) {
       /// 绘制Cross Y轴价钱刻度
       paintCrossYAxisPriceMark(canvas, offset);
@@ -335,6 +344,7 @@ class CandleChart extends IndicatorChartBox<CandleIndicator> {
     }
   }
 
+  /// TODO: 待考虑.
   @override
   void paintCrossTips(Canvas canvas, Offset offset) {
     // TODO: implement paintCrossTips
@@ -407,7 +417,7 @@ class CandleChart extends IndicatorChartBox<CandleIndicator> {
   /// 绘制Cross 命中的蜡烛数据弹窗
   @protected
   void paintPopupCandleCard(Canvas canvas, Offset offset) {
-    final model = offsetToCandle(offset);
+    final model = dxToCandle(offset.dx);
     final timeBar = curKlineData.timerBar;
     if (model == null || timeBar == null) return;
 
@@ -577,15 +587,5 @@ class CandleChart extends IndicatorChartBox<CandleIndicator> {
         ),
       );
     }
-
-    // canvas.drawRectBackground(
-    //   offset: drawOffset,
-    //   drawDirection: drawDirection,
-    //   margin: candleCardRectMargin,
-    //   drawableSize: drawableSize, // 必须矫正.
-    //   size: size,
-    //   backgroundColor: candleCardRectBackgroundColor,
-    //   borderRadius: candleCardRectBorderRadius,
-    // );
   }
 }

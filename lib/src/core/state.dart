@@ -27,7 +27,7 @@ import 'setting.dart';
 /// 状态管理: 负责数据的管理, 缓存, 切换, 计算
 mixin StateBinding
     on KlineBindingBase, SettingBinding
-    implements IState, IIndicator, ICross {
+    implements IState, IPaint, ICross {
   @override
   void initBinding() {
     super.initBinding();
@@ -226,7 +226,7 @@ mixin StateBinding
     if (curKlineData.invalid || req.key == curDataKey) {
       _curKlineData = data;
       initPaintDxOffset();
-      markRepaintIndicatorChart();
+      markRepaintChart();
     }
   }
 
@@ -256,7 +256,7 @@ mixin StateBinding
         );
       }
 
-      markRepaintIndicatorChart();
+      markRepaintChart();
     }
   }
 
@@ -268,7 +268,7 @@ mixin StateBinding
     final newDxOffset = clampPaintDxOffset(paintDxOffset + data.dxDelta);
     if (newDxOffset != paintDxOffset) {
       paintDxOffset = newDxOffset;
-      markRepaintIndicatorChart();
+      markRepaintChart();
     }
   }
 
@@ -289,7 +289,7 @@ mixin StateBinding
     if (newWidth != candleWidth || newDxOffset != paintDxOffset) {
       candleWidth = newWidth;
       paintDxOffset = newDxOffset;
-      markRepaintIndicatorChart();
+      markRepaintChart();
     }
   }
 

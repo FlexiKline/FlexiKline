@@ -12,6 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export 'indicator_chart.dart';
-export 'candle.dart';
-export 'volume.dart';
+export 'element.dart';
+export 'indicator.dart';
+export 'paint_object.dart';

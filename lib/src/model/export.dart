@@ -24,7 +24,6 @@ export './candle_model/candle_model.dart';
 export './candle_req/candle_req.dart';
 export './gesture_data.dart';
 export './card_info.dart';
-export './indicator.dart';
 
 extension KlineDataExt on KlineData {
   String get instId => req.instId;

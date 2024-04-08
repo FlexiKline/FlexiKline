@@ -17,7 +17,7 @@ import 'dart:collection';
 import 'package:flexi_kline/src/constant.dart';
 import 'package:flutter/material.dart';
 
-import '../model/export.dart';
+import '../indicators/export.dart';
 import 'binding_base.dart';
 import 'interface.dart';
 import 'setting.dart';
@@ -31,10 +31,10 @@ mixin ConfigBinding on KlineBindingBase, SettingBinding implements IConfig {
   void initBinding() {
     super.initBinding();
     logd("init config");
-    _mainIndicator = MainIndicator(
-      tipsHeight: mainTipsHeight,
-      padding: mainPadding,
-    );
+    // _mainIndicator = MainIndicator(
+    //   tipsHeight: mainTipsHeight,
+    //   padding: mainPadding,
+    // );
   }
 
   @override
@@ -43,41 +43,42 @@ mixin ConfigBinding on KlineBindingBase, SettingBinding implements IConfig {
     logd("dispose config");
   }
 
-  late final MainIndicator _mainIndicator;
-  final Queue<Indicator> _subIndicators = ListQueue<Indicator>();
+  // late final MainIndicator _mainIndicator;
+  // final Queue<PaintObjectIndicator> _subIndicators =
+  //     ListQueue<PaintObjectIndicator>();
 
-  @override
-  @protected
-  MainIndicator get mainIndicator => _mainIndicator;
+  // @override
+  // @protected
+  // MainIndicator get mainIndicator => _mainIndicator;
 
-  @override
-  @protected
-  Queue<Indicator> get subIndicators => _subIndicators;
+  // @override
+  // @protected
+  // Queue<PaintObjectIndicator> get subIndicators => _subIndicators;
 
-  /// 在主图中增加指标
-  void addIndicatorInMain(Indicator indicator) {
-    final oldIndicator = mainIndicator.appendIndicator(indicator);
-    if (oldIndicator != null) {
-      // TODO: 发生替换操作. 是否要做些处理.
-    }
-  }
+  // /// 在主图中增加指标
+  // void addIndicatorInMain(PaintObjectIndicator indicator) {
+  //   final oldIndicator = mainIndicator.appendIndicator(indicator);
+  //   if (oldIndicator != null) {
+  //     // TODO: 发生替换操作. 是否要做些处理.
+  //   }
+  // }
 
-  void delIndicatorInMain(IndicatorType type) {
-    final deleted = mainIndicator.delIndicator(type);
-    if (deleted != null) {
-      // TODO: 删除主图指标后的操作.
-    }
-  }
+  // void delIndicatorInMain(IndicatorType type) {
+  //   final deleted = mainIndicator.delIndicator(type);
+  //   if (deleted != null) {
+  //     // TODO: 删除主图指标后的操作.
+  //   }
+  // }
 
-  /// 在副图中增加指标
-  void addIndicatorInSub(Indicator indicator) {
-    subIndicators.addLast(indicator);
-    while (subIndicators.length > subIndicatorChartMaxCount) {
-      subIndicators.removeFirst();
-    }
-  }
+  // /// 在副图中增加指标
+  // void addIndicatorInSub(PaintObjectIndicator indicator) {
+  //   subIndicators.addLast(indicator);
+  //   while (subIndicators.length > subIndicatorChartMaxCount) {
+  //     subIndicators.removeFirst();
+  //   }
+  // }
 
-  void delIndicatorInSub(IndicatorType type) {
-    subIndicators.removeWhere((e) => e.type == type);
-  }
+  // void delIndicatorInSub(IndicatorType type) {
+  //   subIndicators.removeWhere((e) => e.type == type);
+  // }
 }

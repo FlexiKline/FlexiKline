@@ -16,11 +16,16 @@ import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 
 import '../core/export.dart';
+import '../extension/export.dart';
 import '../model/export.dart';
 import '../utils/export.dart';
+import 'indicator.dart';
+import 'element.dart';
+
+const mainDrawIndex = -1;
 
 /// 指标图的绘制边界接口
-abstract interface class IIndicatorBounding {
+abstract interface class IIndicatorBoundingBox {
   bool get drawInMain;
   bool get drawInSub;
 
@@ -46,33 +51,22 @@ abstract interface class IIndicatorBounding {
 }
 
 /// 数据与坐标相互转换接口
-abstract interface class IDataConvert {
+abstract interface class IDataInit {
   /// 计算指标需要的数据
-  void calculateIndicatorData();
+  void initData(List<CandleModel> list, {int start = 0, int end = 0});
 
-  /// 绘制区域高度 / 当前绘制的数据高度.
-  double get dyFactor;
-
-  /// 将某个指标数据的值转换为dy坐标值
-  double valueToDy(Decimal value);
-
-  /// 将某个指标数据的index转换为dx坐标值
-  double? indexToDx(int index);
-
-  /// 将dy坐标值转换为YAxis轴对应的值.
-  Decimal? dyToValue(double dy);
-
-  /// 将dx坐标值转换为XAxis轴对应的下标.
-  int dxToIndex(double dx);
+  /// 最大值/最小值
+  Decimal get maxVal;
+  Decimal get minVal;
 }
 
 /// 指标图绘制接口
 abstract interface class IPaintChart {
   /// 绘制指标图
-  void paintIndicatorChart(Canvas canvas, Size size);
+  void paintChart(Canvas canvas, Size size);
 
   /// 绘制XAxis与YAxis刻度值
-  void paintAxisTickMark(Canvas canvas, Size size);
+  // void paintAxisTickMark(Canvas canvas, Size size);
 
   /// 绘制顶部tips信息
   // void paintTips(Canvas canvas, Size size);
@@ -81,55 +75,67 @@ abstract interface class IPaintChart {
 /// 指标图的Cross绘制接口
 abstract interface class IPaintCross {
   /// 绘制Cross上的刻度值
-  void paintCrossTickMark(Canvas canvas, Offset offset);
+  void onCross(Canvas canvas, Offset offset);
 
   /// 绘制Cross命中的指标信息
-  void paintCrossTips(Canvas canvas, Offset offset);
+  // void paintCrossTips(Canvas canvas, Offset offset);
 }
 
 /// IndicatorChart
 /// 通过实现对应的接口, 实现Chart的配置, 计算, 绘制, Cross
-abstract class IndicatorChart<T extends Indicator>
-    with KlineLog
-    implements IIndicatorBounding, IDataConvert, IPaintChart, IPaintCross {
-  IndicatorChart({
+// @immutable
+abstract class IndicatorChart<T extends PaintObjectIndicator>
+    implements IIndicatorBoundingBox, IDataInit, IPaintChart, IPaintCross {
+  const IndicatorChart({
     required this.indicator,
-    this.debug = false,
   });
 
   final T indicator;
-  final bool debug;
 
-  @override
-  String get logTag => indicator.type.name;
-  @override
-  bool get isDebug => debug;
+  // T get myindicator => indicator
 }
 
 /// IndicatorChart 对 KlineBindingBase的代理.
 /// 主要是setting和state的代理
-abstract class IndicatorChartProxy<T extends Indicator> extends IndicatorChart
-    with SettingProxyMixin, StateProxyMixin {
-  IndicatorChartProxy(
-    KlineBindingBase controller, {
+abstract class IndicatorChartProxy<T extends PaintObjectIndicator>
+    extends IndicatorChart with KlineLog, SettingProxyMixin, StateProxyMixin {
+  IndicatorChartProxy({
+    required KlineBindingBase controller,
     required T super.indicator,
-    super.debug,
   }) {
     setting = controller as SettingBinding;
     state = controller as IState;
+    _debug = controller.debug;
   }
+
+  bool _debug = false;
+  @override
+  bool get isDebug => _debug;
+  @override
+  String get logTag => indicator.key.toString();
+}
+
+abstract class IndicatorChartBox<T extends PaintObjectIndicator>
+    extends IndicatorChartProxy with IndicatorBoundingMixin, DataInitMixin {
+  IndicatorChartBox({
+    required super.controller,
+    required T super.indicator,
+  });
 }
 
 /// 代理Setting.
 mixin SettingProxyMixin on IndicatorChart {
   late final SettingBinding setting;
+
   double get candleActualWidth => setting.candleActualWidth;
+
   double get candleWidthHalf => setting.candleWidthHalf;
 }
 
 /// 代理State
 mixin StateProxyMixin on IndicatorChart {
   late final IState state;
+
   KlineData get curKlineData => state.curKlineData;
 
   double get paintDxOffset => state.paintDxOffset;
@@ -138,32 +144,17 @@ mixin StateProxyMixin on IndicatorChart {
 }
 
 /// IndicatorChart的接口实现的通用扩展
-abstract class IndicatorChartBox<T extends Indicator>
-    extends IndicatorChartProxy with IndicatorBoundingMixin, DataConvertMixin {
-  IndicatorChartBox(
-    super.controller, {
-    required T super.indicator,
-  });
-}
-
-/// DataConvert的通用扩展
-mixin DataConvertMixin on IndicatorChartProxy implements IDataConvert {
-  CandleModel? offsetToCandle(Offset offset) {
-    final index = dxToIndex(offset.dx);
-    return state.curKlineData.getCandle(index);
-  }
-}
 
 /// IndicatorBounding的通用扩展
 mixin IndicatorBoundingMixin on IndicatorChartProxy
-    implements IIndicatorBounding {
+    implements IIndicatorBoundingBox {
   @override
-  bool get drawInMain => !indicator.drawInMain;
+  bool get drawInMain => index == mainDrawIndex; // TODO: 待优化
   @override
-  bool get drawInSub => indicator.drawInSub;
+  bool get drawInSub => index > mainDrawIndex; // TODO: 待优化
 
   @override
-  int get index => indicator.drawIndex;
+  int get index => mainDrawIndex;
 
   @override
   EdgeInsets get paintPadding => indicator.padding;
@@ -214,4 +205,39 @@ mixin IndicatorBoundingMixin on IndicatorChartProxy
 
   double clampDxInChart(double dx) => dx.clamp(chartRect.left, chartRect.right);
   double clampDyInChart(double dy) => dy.clamp(chartRect.top, chartRect.bottom);
+}
+
+/// DataInit的通用扩展
+mixin DataInitMixin on IndicatorChartProxy implements IDataInit {
+  double get candleWidth => candleActualWidth;
+
+  double get dyFactor {
+    return chartRect.height / (maxVal - minVal).toDouble();
+  }
+
+  double valueToDy(Decimal value) {
+    value = value.clamp(minVal, maxVal);
+    return chartRect.bottom - (value - minVal).toDouble() * dyFactor;
+  }
+
+  double? indexToDx(int index) {
+    double dx = chartRect.right - (index * candleWidth - paintDxOffset);
+    if (chartRect.inclueDx(dx)) return dx;
+    return null;
+  }
+
+  Decimal? dyToValue(double dy) {
+    if (!chartRect.inclueDy(dy)) return null;
+    return maxVal - ((dy - chartRect.top) / dyFactor).d;
+  }
+
+  int dxToIndex(double dx) {
+    final dxPaintOffset = (chartRect.right - dx) + paintDxOffset;
+    return (dxPaintOffset / candleWidth).floor();
+  }
+
+  CandleModel? dxToCandle(double dx) {
+    final index = dxToIndex(dx);
+    return state.curKlineData.getCandle(index);
+  }
 }

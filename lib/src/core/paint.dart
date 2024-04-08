@@ -18,18 +18,15 @@ import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 
 import '../constant.dart';
-import '../model/export.dart';
-import '../render/export.dart';
-import '../utils/export.dart';
 import 'binding_base.dart';
 import 'indicator/export.dart';
 import 'interface.dart';
 import 'setting.dart';
 
 /// 绘制蜡烛图以及相关指标数据
-mixin IndicatorBinding
+mixin PaintBinding
     on KlineBindingBase, SettingBinding
-    implements IIndicator, IState, IConfig {
+    implements IPaint, IState, IConfig {
   @override
   void initBinding() {
     super.initBinding();
@@ -58,7 +55,7 @@ mixin IndicatorBinding
   /// 触发重绘蜡烛线.
   @override
   @protected
-  void markRepaintIndicatorChart() => _markRepaint();
+  void markRepaintChart() => _markRepaint();
 
   @protected
   void startLastPriceCountDownTimer() {
@@ -85,15 +82,15 @@ mixin IndicatorBinding
   }
 
   @override
-  void paintIndicatorChart(Canvas canvas, Size size) {
+  void paintChart(Canvas canvas, Size size) {
     logd('$diffTime paintCandle >>>>');
 
-    mainIndicator.indicators.forEach((key, value) {
-      logd('paintIndicatorChart main key:$key');
-      if (!mainIndicatorChart.containsKey(key)) {
-        // mainIndicatorChart[key] =
-      }
-    });
+    // mainIndicator.indicators.forEach((key, value) {
+    //   logd('paintIndicatorChart main key:$key');
+    //   if (!mainIndicatorChart.containsKey(key)) {
+    //     // mainIndicatorChart[key] =
+    //   }
+    // });
 
     // canvas.drawPoints(
     //   PointMode.points,

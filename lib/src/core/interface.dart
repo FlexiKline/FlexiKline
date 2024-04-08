@@ -17,6 +17,7 @@ import 'dart:collection';
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 
+import '../indicators/export.dart';
 import '../model/export.dart';
 import 'data.dart';
 
@@ -132,17 +133,17 @@ abstract interface class IState {
 
 /// Config接口
 abstract interface class IConfig {
-  MainIndicator get mainIndicator;
-  Queue<Indicator> get subIndicators;
+  // MainIndicator get mainIndicator;
+  // Queue<Indicator> get subIndicators;
 }
 
 //// 主图(蜡烛)绘制接口
-abstract interface class IIndicator {
+abstract interface class IPaint {
   Listenable get repaintIndicatorChart;
 
-  void paintIndicatorChart(Canvas canvas, Size size);
+  void paintChart(Canvas canvas, Size size);
 
-  void markRepaintIndicatorChart();
+  void markRepaintChart();
 }
 
 /// 副图(指标)绘制接口
