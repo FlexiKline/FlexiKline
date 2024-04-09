@@ -12,22 +12,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:decimal/decimal.dart';
+import 'package:flexi_kline/src/constant.dart';
 import 'package:flutter/material.dart';
 
 import '../core/export.dart';
-import '../model/export.dart';
-import 'element.dart';
-import 'paint_object.dart';
+import 'object.dart';
 
-@immutable
+/// 指标基础配置
+/// tipsHeight: 绘制区域顶部提示信息区域的高度
+/// padding: 绘制区域的边界设定
 abstract class Indicator {
-  const Indicator({this.key});
-  final Key? key;
+  Indicator({
+    required this.key,
+    this.tipsHeight = 0.0,
+    this.padding = EdgeInsets.zero,
+  });
+  final Key key;
+  double tipsHeight;
+  EdgeInsets padding;
 
-  @protected
-  @factory
-  IndicatorElement createElement();
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is Indicator) {
+      return other.runtimeType == runtimeType && other.key == key;
+    }
+    return false;
+  }
+
+  @override
+  int get hashCode {
+    return key.hashCode;
+  }
 
   static bool canUpdate(Indicator oldIndicator, Indicator newIndicator) {
     return oldIndicator.runtimeType == newIndicator.runtimeType &&
@@ -35,63 +51,44 @@ abstract class Indicator {
   }
 
   static bool isMultiIndicator(Indicator indicator) {
-    return indicator is MultiChartIndicator;
+    return indicator is MultiPaintObjectIndicator;
   }
 }
 
-@immutable
+/// 绘制对象的配置
+/// 通过Indicator去创建PaintObject接口
+/// 缓存Indicator对应创建的paintObject.
 abstract class PaintObjectIndicator extends Indicator {
-  const PaintObjectIndicator({
-    super.key,
-    this.tipsHeight = 0.0,
-    this.padding = EdgeInsets.zero,
-  });
-
-  final double tipsHeight;
-  final EdgeInsets padding;
-
-  @protected
-  @factory
-  IndicatorChart createIndicatorChart(KlineBindingBase controller);
-
-  @override
-  @protected
-  @factory
-  IndicatorElement<PaintObjectIndicator> createElement();
-
-  @protected
-  void updateIndicatorChart(
-    KlineBindingBase controller,
-    covariant IndicatorChart indicatorChart,
-  ) {}
-
-  static bool canUpdate(
-      PaintObjectIndicator oldIndicator, PaintObjectIndicator newIndicator) {
-    return oldIndicator.runtimeType == newIndicator.runtimeType &&
-        oldIndicator.key == newIndicator.key;
-  }
-
-  static bool isMultiIndicator(PaintObjectIndicator indicator) {
-    return indicator is MultiChartIndicator;
-  }
-}
-
-abstract class SingleChartIndicator extends PaintObjectIndicator {
-  const SingleChartIndicator({
-    super.key,
+  PaintObjectIndicator({
+    required super.key,
     super.tipsHeight,
     super.padding,
   });
 
-  @override
-  IndicatorElement<PaintObjectIndicator> createElement() {
-    return SingleIndicatorElement(this);
+  PaintObject? _paintObject;
+  PaintObject? get paintObject => _paintObject;
+  @protected
+  set paintObject(val) {
+    _paintObject = val;
   }
+
+  void update(Indicator newVal) {
+    tipsHeight = newVal.tipsHeight;
+    padding = newVal.padding;
+  }
+
+  @protected
+  @factory
+  PaintObject createPaintObject(
+    KlineBindingBase controller,
+  );
 }
 
-class MultiChartIndicator extends PaintObjectIndicator {
-  const MultiChartIndicator({
-    super.key,
+/// 多个绘制Indicator的配置.
+/// children 维护具体的Indicator配置.
+class MultiPaintObjectIndicator extends PaintObjectIndicator {
+  MultiPaintObjectIndicator({
+    required super.key,
     super.tipsHeight,
     super.padding,
     this.children = const <PaintObjectIndicator>[],
@@ -100,45 +97,20 @@ class MultiChartIndicator extends PaintObjectIndicator {
   final List<PaintObjectIndicator> children;
 
   @override
-  MultiChartIndicatorChart createIndicatorChart(KlineBindingBase controller) {
-    return MultiChartIndicatorChart(controller: controller, indicator: this);
+  PaintObject createPaintObject(KlineBindingBase controller) {
+    for (var indicator in children) {
+      // 保证子Indicator的布局参数与父布局一置.
+      indicator.update(this);
+    }
+    paintObject = MultiPaintObject(controller: controller, indicator: this);
+    return paintObject!;
   }
 
-  @override
-  IndicatorElement<PaintObjectIndicator> createElement() {
-    // TODO: implement createElement
-    throw UnimplementedError();
+  void appendIndicator(PaintObjectIndicator indicator) {
+    if (!children.contains(indicator)) {
+      children.add(indicator);
+    }
   }
 
-  @override
-  void updateIndicatorChart(
-    KlineBindingBase controller,
-    covariant MultiChartIndicatorChart indicatorChart,
-  ) {
-    super.updateIndicatorChart(controller, indicatorChart);
-  }
-}
-
-class MultiChartIndicatorChart extends IndicatorChartBox<MultiChartIndicator> {
-  MultiChartIndicatorChart({
-    required super.controller,
-    required super.indicator,
-  });
-
-  MultiChartIndicator get multiIndicator => indicator as MultiChartIndicator;
-
-  @override
-  void initData(List<CandleModel> list, {int start = 0, int end = 0}) {}
-
-  @override
-  Decimal get maxVal => throw UnimplementedError();
-
-  @override
-  Decimal get minVal => throw UnimplementedError();
-
-  @override
-  void paintChart(Canvas canvas, Size size) {}
-
-  @override
-  void onCross(Canvas canvas, Offset offset) {}
+  deleteIndicator(ValueKey key) {}
 }

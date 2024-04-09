@@ -17,6 +17,7 @@ import 'dart:collection';
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 
+import '../framework/export.dart';
 import '../indicators/export.dart';
 import '../model/export.dart';
 import 'data.dart';
@@ -133,7 +134,7 @@ abstract interface class IState {
 
 /// Config接口
 abstract interface class IConfig {
-  // MainIndicator get mainIndicator;
+  PaintObjectIndicator get mainIndicator;
   // Queue<Indicator> get subIndicators;
 }
 

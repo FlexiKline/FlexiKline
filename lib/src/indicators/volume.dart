@@ -20,23 +20,23 @@ import '../core/export.dart';
 import '../model/export.dart';
 import '../framework/export.dart';
 
-class VolumeIndicator extends SingleChartIndicator {
-  const VolumeIndicator({
-    super.key,
+class VolumeIndicator extends PaintObjectIndicator {
+  VolumeIndicator({
+    required super.key,
     super.tipsHeight,
     super.padding,
   });
 
   @override
-  IndicatorChart createIndicatorChart(KlineBindingBase controller) =>
-      VolumeIndicatorChart(
+  PaintObject createPaintObject(KlineBindingBase controller) =>
+      VolumePaintObject(
         controller: controller,
         indicator: this,
       );
 }
 
-class VolumeIndicatorChart extends IndicatorChartBox<VolumeIndicator> {
-  VolumeIndicatorChart({
+class VolumePaintObject extends PaintObjectBox<VolumeIndicator> {
+  VolumePaintObject({
     required super.controller,
     required super.indicator,
   });

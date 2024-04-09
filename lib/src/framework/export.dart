@@ -12,6 +12,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export 'element.dart';
 export 'indicator.dart';
-export 'paint_object.dart';
+export 'object.dart';

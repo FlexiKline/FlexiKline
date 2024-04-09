@@ -22,32 +22,27 @@ import '../render/export.dart';
 import '../utils/export.dart';
 import '../framework/export.dart';
 
-class CandleIndicator extends SingleChartIndicator {
-  const CandleIndicator({
-    super.key,
+class CandleIndicator extends PaintObjectIndicator {
+  CandleIndicator({
+    required super.key,
+    required this.bgColor,
   });
 
+  final Color bgColor;
+
   @override
-  IndicatorChart createIndicatorChart(
+  PaintObject createPaintObject(
     KlineBindingBase controller,
   ) {
-    return CandleIndicatorChart(
+    return CandlePaintObject(
       controller: controller,
       indicator: this,
     );
   }
-
-  @override
-  void updateIndicatorChart(
-    KlineBindingBase controller,
-    CandleIndicatorChart indicatorChart,
-  ) {
-    super.updateIndicatorChart(controller, indicatorChart);
-  }
 }
 
-class CandleIndicatorChart extends IndicatorChartBox<CandleIndicator> {
-  CandleIndicatorChart({
+class CandlePaintObject extends PaintObjectBox<CandleIndicator> {
+  CandlePaintObject({
     required super.controller,
     required super.indicator,
   });
