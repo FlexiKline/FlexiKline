@@ -31,7 +31,7 @@ abstract interface class IPaintBoundingBox {
   /// 当前指标索引(仅对副图有效)
   /// <0 代表在主图绘制
   /// >=0 代表在副图绘制
-  int get index => -1;
+  int get index => mainDrawIndex;
 
   /// 当前指标图paint内的padding.
   /// 增加padding后tipsRect和chartRect将在此以内绘制.
@@ -92,12 +92,15 @@ mixin SettingProxyMixin on PaintObject {
 /// 绘制对象混入数据状态代理State
 mixin StateProxyMixin on PaintObject {
   late final IState state;
+  late final ICross cross;
 
   KlineData get curKlineData => state.curKlineData;
 
   double get paintDxOffset => state.paintDxOffset;
 
   double get startCandleDx => state.startCandleDx;
+
+  bool get isCrossing => cross.isCrossing;
 }
 
 /// 绘制对象混入边界计算的通用扩展
@@ -107,9 +110,6 @@ mixin PaintObjectBoundingMixin on PaintObjectProxy
   bool get drawInMain => index == mainDrawIndex; // TODO: 待优化
   @override
   bool get drawInSub => index > mainDrawIndex; // TODO: 待优化
-
-  @override
-  int get index => mainDrawIndex;
 
   @override
   EdgeInsets get paintPadding => indicator.padding;
@@ -148,10 +148,10 @@ mixin PaintObjectBoundingMixin on PaintObjectProxy
 
   @override
   Rect get chartRect {
-    return Rect.fromLTWH(
+    return Rect.fromLTRB(
       drawBounding.left + paintPadding.left,
       tipsRect.bottom,
-      drawBounding.width - paintPadding.horizontal,
+      drawBounding.right - paintPadding.right,
       drawBounding.bottom - paintPadding.bottom,
     );
   }
@@ -204,9 +204,19 @@ abstract class PaintObject<T extends Indicator>
     required T indicator,
   }) : _indicator = indicator;
 
-  final T? _indicator;
+  T? _indicator;
 
   T get indicator => _indicator!;
+
+  int _slot = mainDrawIndex;
+  @override
+  int get index => _slot;
+  set slot(val) => _slot = val;
+
+  @mustCallSuper
+  void dispose() {
+    _indicator = null;
+  }
 }
 
 /// PaintObjectProxy
@@ -219,6 +229,7 @@ abstract class PaintObjectProxy<T extends PaintObjectIndicator>
   }) {
     setting = controller as SettingBinding;
     state = controller as IState;
+    cross = controller as ICross;
     _debug = controller.debug;
   }
 
@@ -278,5 +289,14 @@ class MultiPaintObject extends PaintObjectBox<MultiPaintObjectIndicator> {
     for (var indicator in indicator.children) {
       indicator.paintObject?.onCross(canvas, offset);
     }
+  }
+
+  @mustCallSuper
+  @override
+  void dispose() {
+    for (var indicator in indicator.children) {
+      indicator.paintObject?.dispose();
+    }
+    super.dispose();
   }
 }

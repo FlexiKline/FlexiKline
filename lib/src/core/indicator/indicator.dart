@@ -40,7 +40,7 @@ abstract class BaseState {
   Rect get subRect => setting.subRect;
 
   // 指标图高度的集合
-  List<double> get indicatorHeightList => setting.indicatorHeightList;
+  List<double> get indicatorHeightList => setting.subIndicatorHeightList;
 
   // KlineData数据
   KlineData get curKlineData => state.curKlineData;

@@ -126,10 +126,6 @@ class IndicatorChartPainter extends CustomPainter {
     controller.calculateCandleDrawIndex();
 
     controller.paintChart(canvas, size);
-
-    /// 处理副图的Cross绘制
-    controller.paintSubChart(canvas, size);
-    controller.paintSubTooltip(canvas, size);
   }
 
   @override
@@ -166,9 +162,6 @@ class CrossPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     controller.paintCross(canvas, size);
-
-    /// 处理副图的Cross绘制
-    controller.paintSubCross(canvas, size);
   }
 
   @override

@@ -27,7 +27,7 @@ import 'setting.dart';
 /// 状态管理: 负责数据的管理, 缓存, 切换, 计算
 mixin StateBinding
     on KlineBindingBase, SettingBinding
-    implements IState, IPaint, ICross {
+    implements IState, IPainting, ICross {
   @override
   void initBinding() {
     super.initBinding();
@@ -207,7 +207,7 @@ mixin StateBinding
       );
     }
 
-    curKlineData.calculateMaxmin();
+    // curKlineData.calculateMaxmin();
   }
 
   @override

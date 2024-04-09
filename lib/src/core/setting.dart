@@ -24,7 +24,7 @@ import '../utils/export.dart';
 import 'binding_base.dart';
 import 'interface.dart';
 
-mixin SettingBinding on KlineBindingBase implements ISubChart {
+mixin SettingBinding on KlineBindingBase implements IConfig {
   @override
   void initBinding() {
     super.initBinding();
@@ -312,7 +312,7 @@ mixin SettingBinding on KlineBindingBase implements ISubChart {
     ..style = PaintingStyle.fill;
 
   // 是否展示Cross Y轴上的价钱标记.
-  bool showCrossYAxisTickMark = true;
+  // bool showCrossYAxisTickMark = true;
   // cross Y轴对应刻度文本区域配置 (价钱, Volume ...)
   double crossYTickFontSize = 10;
   double crossYTickTextWidth = 100; // TODO 暂无用

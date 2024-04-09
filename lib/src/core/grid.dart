@@ -20,7 +20,7 @@ import 'binding_base.dart';
 import 'interface.dart';
 import 'setting.dart';
 
-mixin GridBinding on KlineBindingBase, SettingBinding implements ISubChart {
+mixin GridBinding on KlineBindingBase, SettingBinding implements IConfig {
   @override
   void initBinding() {
     super.initBinding();
@@ -94,7 +94,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements ISubChart {
       paintX,
     );
 
-    final list = indicatorHeightList;
+    final list = subIndicatorHeightList;
     double height = 0.0;
     for (int i = 0; i < list.length; i++) {
       height += list[i];

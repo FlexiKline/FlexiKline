@@ -79,7 +79,7 @@ class _MyHomePageState extends State<MyHomePage> {
     controller1 = FlexiKlineController(debug: true);
     controller1.setMainSize(Size(
       ScreenUtil().screenWidth,
-      ScreenUtil().screenWidth * 0.75,
+      300,
     ));
 
     // genRandomCandleList(count: 500).then((list) {

@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:flexi_kline/src/constant.dart';
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 
 import '../core/export.dart';
@@ -45,6 +46,9 @@ abstract class Indicator {
     return key.hashCode;
   }
 
+  @mustCallSuper
+  void dispose();
+
   static bool canUpdate(Indicator oldIndicator, Indicator newIndicator) {
     return oldIndicator.runtimeType == newIndicator.runtimeType &&
         oldIndicator.key == newIndicator.key;
@@ -67,7 +71,6 @@ abstract class PaintObjectIndicator extends Indicator {
 
   PaintObject? _paintObject;
   PaintObject? get paintObject => _paintObject;
-  @protected
   set paintObject(val) {
     _paintObject = val;
   }
@@ -77,11 +80,17 @@ abstract class PaintObjectIndicator extends Indicator {
     padding = newVal.padding;
   }
 
-  @protected
   @factory
   PaintObject createPaintObject(
     KlineBindingBase controller,
   );
+
+  @mustCallSuper
+  @override
+  void dispose() {
+    paintObject?.dispose();
+    paintObject = null;
+  }
 }
 
 /// 多个绘制Indicator的配置.
@@ -91,26 +100,37 @@ class MultiPaintObjectIndicator extends PaintObjectIndicator {
     required super.key,
     super.tipsHeight,
     super.padding,
-    this.children = const <PaintObjectIndicator>[],
-  });
+    Iterable<dynamic> children = const [],
+  }) : children = LinkedHashSet<PaintObjectIndicator>.from(children);
 
-  final List<PaintObjectIndicator> children;
+  final Set<PaintObjectIndicator> children;
 
   @override
   PaintObject createPaintObject(KlineBindingBase controller) {
     for (var indicator in children) {
       // 保证子Indicator的布局参数与父布局一置.
       indicator.update(this);
+      indicator.paintObject ??= indicator.createPaintObject(controller);
     }
-    paintObject = MultiPaintObject(controller: controller, indicator: this);
-    return paintObject!;
+    return MultiPaintObject(controller: controller, indicator: this);
   }
 
   void appendIndicator(PaintObjectIndicator indicator) {
-    if (!children.contains(indicator)) {
-      children.add(indicator);
+    PaintObjectIndicator? old;
+    if (children.contains(indicator)) {
+      old = children.lookup(indicator);
+      old?.dispose();
     }
+    children.add(indicator);
   }
 
-  deleteIndicator(ValueKey key) {}
+  void deleteIndicator(Key key) {
+    children.removeWhere((element) {
+      if (element.key == key) {
+        element.dispose();
+        return true;
+      }
+      return false;
+    });
+  }
 }

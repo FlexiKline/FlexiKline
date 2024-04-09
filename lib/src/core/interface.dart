@@ -135,11 +135,18 @@ abstract interface class IState {
 /// Config接口
 abstract interface class IConfig {
   PaintObjectIndicator get mainIndicator;
-  // Queue<Indicator> get subIndicators;
+  Queue<PaintObjectIndicator> get subIndicators;
+  List<double> get subIndicatorHeightList;
+  double get subRectHeight;
+  void checkAndCreatePaintObject();
+  void addIndicatorInMain(PaintObjectIndicator indicator);
+  void delIndicatorInMain(Key key);
+  void addIndicatorInSub(PaintObjectIndicator indicator);
+  void delIndicatorInSub(Key key);
 }
 
 //// 主图(蜡烛)绘制接口
-abstract interface class IPaint {
+abstract interface class IPainting {
   Listenable get repaintIndicatorChart;
 
   void paintChart(Canvas canvas, Size size);

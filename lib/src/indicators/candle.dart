@@ -25,19 +25,15 @@ import '../framework/export.dart';
 class CandleIndicator extends PaintObjectIndicator {
   CandleIndicator({
     required super.key,
-    required this.bgColor,
+    super.tipsHeight,
+    super.padding,
   });
-
-  final Color bgColor;
 
   @override
   PaintObject createPaintObject(
     KlineBindingBase controller,
   ) {
-    return CandlePaintObject(
-      controller: controller,
-      indicator: this,
-    );
+    return CandlePaintObject(controller: controller, indicator: this);
   }
 }
 
@@ -54,8 +50,8 @@ class CandlePaintObject extends PaintObjectBox<CandleIndicator> {
   void initData(List<CandleModel> list, {int start = 0, int end = 0}) {
     if (list.isEmpty || start < 0 || end > list.length) return;
     CandleModel m = list[start];
-    _max = m.vol;
-    _min = m.vol;
+    _max = m.high;
+    _min = m.low;
     for (var i = start + 1; i < end; i++) {
       m = list[i];
       _max = m.high > _max ? m.high : _max;
@@ -258,9 +254,9 @@ class CandlePaintObject extends PaintObjectBox<CandleIndicator> {
     double ldx = 0; // 计算最新价刻度线lineTo参数X轴的dx值. 默认0: 代表橫穿整个Canvas.
     double dy;
     double flag = -1; // 计算右边最新价钱文本时, dy增减的方向
-    if (model.close >= data.max) {
+    if (model.close >= maxVal) {
       dy = chartRect.top; // 画板顶部展示.
-    } else if (model.close <= data.min) {
+    } else if (model.close <= minVal) {
       dy = chartRect.bottom; // 画板底部展示.
       flag = 1;
     } else {
@@ -323,10 +319,8 @@ class CandlePaintObject extends PaintObjectBox<CandleIndicator> {
 
   @override
   void onCross(Canvas canvas, Offset offset) {
-    if (setting.showCrossYAxisTickMark) {
-      /// 绘制Cross Y轴价钱刻度
-      paintCrossYAxisPriceMark(canvas, offset);
-    }
+    /// 绘制Cross Y轴价钱刻度
+    paintCrossYAxisPriceMark(canvas, offset);
 
     if (setting.showCrossXAxisTickMark) {
       /// 绘制Cross X轴时间刻度
@@ -422,8 +416,10 @@ class CandlePaintObject extends PaintObjectBox<CandleIndicator> {
     final keySpanList = <TextSpan>[];
     for (var i = 0; i < keys.length; i++) {
       final text = i < keys.length - 1 ? '${keys[i]}\n' : keys[i];
-      keySpanList
-          .add(TextSpan(text: text, style: setting.candleCardTitleStyle));
+      keySpanList.add(TextSpan(
+        text: text,
+        style: setting.candleCardTitleStyle,
+      ));
     }
 
     final instId = curKlineData.instId;
@@ -475,7 +471,6 @@ class CandlePaintObject extends PaintObjectBox<CandleIndicator> {
           precision: 2,
           cutInvalidZero: true,
           showCompact: true,
-          prefix: 'Vol:',
         ),
         style: setting.candleCardTitleStyle,
         // recognizer: _tapGestureRecognizer..onTap = () => ... // 点击事件处理?

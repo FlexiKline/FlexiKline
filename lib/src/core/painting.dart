@@ -24,9 +24,9 @@ import 'interface.dart';
 import 'setting.dart';
 
 /// 绘制蜡烛图以及相关指标数据
-mixin PaintBinding
+mixin PaintingBinding
     on KlineBindingBase, SettingBinding
-    implements IPaint, IState, IConfig {
+    implements IPainting, IState, IConfig {
   @override
   void initBinding() {
     super.initBinding();
@@ -45,7 +45,10 @@ mixin PaintBinding
   final ValueNotifier<int> _repaintCandle = ValueNotifier(0);
   @override
   Listenable get repaintIndicatorChart => _repaintCandle;
-  void _markRepaint() => _repaintCandle.value++;
+  void _markRepaint() {
+    checkAndCreatePaintObject();
+    _repaintCandle.value++;
+  }
 
   //// Last Price ////
   Timer? _lastPriceCountDownTimer;
@@ -85,12 +88,24 @@ mixin PaintBinding
   void paintChart(Canvas canvas, Size size) {
     logd('$diffTime paintCandle >>>>');
 
-    // mainIndicator.indicators.forEach((key, value) {
-    //   logd('paintIndicatorChart main key:$key');
-    //   if (!mainIndicatorChart.containsKey(key)) {
-    //     // mainIndicatorChart[key] =
-    //   }
-    // });
+    mainIndicator.paintObject?.initData(
+      curKlineData.list,
+      start: curKlineData.start,
+      end: curKlineData.end,
+    );
+
+    mainIndicator.paintObject?.paintChart(canvas, size);
+
+    int i = 0;
+    for (var indicator in subIndicators) {
+      indicator.paintObject?.slot = i++;
+      indicator.paintObject?.initData(
+        curKlineData.list,
+        start: curKlineData.start,
+        end: curKlineData.end,
+      );
+      indicator.paintObject?.paintChart(canvas, size);
+    }
 
     // canvas.drawPoints(
     //   PointMode.points,

@@ -15,11 +15,10 @@
 import 'dart:collection';
 
 import 'package:flexi_kline/src/constant.dart';
-import 'package:flexi_kline/src/framework/indicator.dart';
-import 'package:flexi_kline/src/framework/object.dart';
+import 'package:flexi_kline/src/indicators/export.dart';
 import 'package:flutter/material.dart';
 
-import '../indicators/export.dart';
+import '../framework/export.dart';
 import 'binding_base.dart';
 import 'interface.dart';
 import 'setting.dart';
@@ -38,12 +37,37 @@ mixin ConfigBinding on KlineBindingBase, SettingBinding implements IConfig {
       tipsHeight: mainTipsHeight,
       padding: mainPadding,
     );
+
+    addIndicatorInMain(CandleIndicator(
+      key: const ValueKey(IndicatorType.candle),
+      tipsHeight: mainTipsHeight,
+      padding: mainPadding,
+    ));
+
+    _subIndicators = ListQueue<PaintObjectIndicator>(
+      subIndicatorChartMaxCount,
+    );
+
+    addIndicatorInSub(VolumeIndicator(
+      key: const ValueKey(IndicatorType.volume),
+      tipsHeight: 12,
+    ));
+
+    addIndicatorInSub(VolumeIndicator(
+      key: const ValueKey(IndicatorType.volume),
+      tipsHeight: 0,
+    ));
   }
 
   @override
   void dispose() {
     super.dispose();
     logd("dispose config");
+    mainIndicator.dispose();
+    for (var indicator in subIndicators) {
+      indicator.dispose();
+    }
+    subIndicators.clear();
   }
 
   /// 主绘制区域
@@ -52,33 +76,69 @@ mixin ConfigBinding on KlineBindingBase, SettingBinding implements IConfig {
   @override
   MultiPaintObjectIndicator get mainIndicator => _mainIndicator;
 
-  final Queue<PaintObjectIndicator> _subIndicators =
-      ListQueue<PaintObjectIndicator>();
+  /// 副图区域
+  late final Queue<PaintObjectIndicator> _subIndicators;
+
   @override
   @protected
   Queue<PaintObjectIndicator> get subIndicators => _subIndicators;
 
-  /// 在主图中增加指标
-  void addIndicatorInMain(PaintObjectIndicator indicator) {
-    final oldIndicator = mainIndicator.appendIndicator(indicator);
+  @override
+  List<double> get subIndicatorHeightList {
+    return subIndicators.map((e) => subIndicatorChartHeight).toList();
   }
 
-  void delIndicatorInMain(ValueKey key) {
-    final deleted = mainIndicator.deleteIndicator(key);
-    if (deleted != null) {
-      // TODO: 删除主图指标后的操作.
+  @override
+  double get subRectHeight {
+    if (subIndicatorHeightList.isEmpty) return 0.0;
+    return subIndicatorHeightList.reduce((curr, next) => curr + next);
+  }
+
+  bool isNeedCreate = false;
+  @override
+  void checkAndCreatePaintObject() {
+    if (isNeedCreate) {
+      mainIndicator.paintObject ??= mainIndicator.createPaintObject(this);
+      for (var indicator in subIndicators) {
+        indicator.paintObject ??= indicator.createPaintObject(this);
+      }
+      isNeedCreate = false;
     }
+  }
+
+  /// 在主图中增加指标
+  @override
+  void addIndicatorInMain(PaintObjectIndicator indicator) {
+    mainIndicator.appendIndicator(indicator);
+    isNeedCreate = true;
+  }
+
+  /// 删除主图中key指定的指标
+  @override
+  void delIndicatorInMain(Key key) {
+    mainIndicator.deleteIndicator(key);
   }
 
   /// 在副图中增加指标
+  @override
   void addIndicatorInSub(PaintObjectIndicator indicator) {
-    subIndicators.addLast(indicator);
-    while (subIndicators.length > subIndicatorChartMaxCount) {
-      subIndicators.removeFirst();
+    if (subIndicators.length > subIndicatorChartMaxCount) {
+      final deleted = subIndicators.removeFirst();
+      deleted.dispose();
     }
+    subIndicators.addLast(indicator);
+    isNeedCreate = true;
   }
 
-  void delIndicatorInSub(IndicatorType type) {
-    // subIndicators.removeWhere((e) => e.type == type);
+  /// 删除副图key指定的指标
+  @override
+  void delIndicatorInSub(Key key) {
+    subIndicators.removeWhere((indicator) {
+      if (indicator.key == key) {
+        indicator.dispose();
+        return true;
+      }
+      return false;
+    });
   }
 }

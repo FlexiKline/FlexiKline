@@ -24,7 +24,7 @@ import 'setting.dart';
 
 mixin CrossBinding
     on KlineBindingBase, SettingBinding
-    implements ICross, IState {
+    implements ICross, IState, IConfig {
   @override
   void initBinding() {
     super.initBinding();
@@ -40,7 +40,10 @@ mixin CrossBinding
   final ValueNotifier<int> _repaintCross = ValueNotifier(0);
   @override
   Listenable get repaintCross => _repaintCross;
-  void _markRepaint() => _repaintCross.value++;
+  void _markRepaint() {
+    checkAndCreatePaintObject();
+    _repaintCross.value++;
+  }
 
   //// Cross ////
   @override
@@ -87,20 +90,28 @@ mixin CrossBinding
       /// 绘制Cross Line
       paintCrossLine(canvas, offset);
 
-      if (showCrossYAxisTickMark) {
-        /// 绘制Cross Y轴价钱刻度
-        paintCrossYAxisPriceMark(canvas, offset);
+      mainIndicator.paintObject?.onCross(canvas, offset);
+
+      int i = 0;
+      for (var indicator in subIndicators) {
+        indicator.paintObject?.slot = i++;
+        indicator.paintObject?.onCross(canvas, offset);
       }
 
-      if (showCrossXAxisTickMark) {
-        /// 绘制Cross X轴时间刻度
-        paintCrossXAxisTimeMark(canvas, offset);
-      }
+      // if (showCrossYAxisTickMark) {
+      //   /// 绘制Cross Y轴价钱刻度
+      //   paintCrossYAxisPriceMark(canvas, offset);
+      // }
 
-      if (showPopupCandleCard) {
-        /// 绘制Cross 命中的蜡烛数据弹窗
-        paintPopupCandleCard(canvas, offset);
-      }
+      // if (showCrossXAxisTickMark) {
+      //   /// 绘制Cross X轴时间刻度
+      //   paintCrossXAxisTimeMark(canvas, offset);
+      // }
+
+      // if (showPopupCandleCard) {
+      //   /// 绘制Cross 命中的蜡烛数据弹窗
+      //   paintPopupCandleCard(canvas, offset);
+      // }
     }
   }
 
