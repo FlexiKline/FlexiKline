@@ -18,7 +18,6 @@ import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 
 import '../framework/export.dart';
-import '../indicators/export.dart';
 import '../model/export.dart';
 import 'data.dart';
 

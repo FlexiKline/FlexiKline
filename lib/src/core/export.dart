@@ -22,5 +22,4 @@ export 'cross.dart';
 export 'interface.dart';
 export 'draw.dart';
 export 'grid.dart';
-export 'sub.dart';
 export 'data.dart';

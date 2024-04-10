@@ -14,12 +14,9 @@
 
 import 'dart:async';
 
-import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 
-import '../constant.dart';
 import 'binding_base.dart';
-import 'indicator/export.dart';
 import 'interface.dart';
 import 'setting.dart';
 
@@ -72,21 +69,18 @@ mixin PaintingBinding
     );
   }
 
-  final Map<IndicatorType, IndicatorChart> mainIndicatorChart = {};
-
-  DateTime? _lastPaintTime;
+  DateTime _lastPaintTime = DateTime.now();
   int get diffTime {
     // 计算两次绘制时间差
     return _lastPaintTime
-            ?.difference(_lastPaintTime = DateTime.now())
-            .inMilliseconds
-            .abs() ??
-        0;
+        .difference(_lastPaintTime = DateTime.now())
+        .inMilliseconds
+        .abs();
   }
 
   @override
   void paintChart(Canvas canvas, Size size) {
-    logd('$diffTime paintCandle >>>>');
+    // logd('$diffTime paintChart >>>>');
 
     mainIndicator.paintObject?.initData(
       curKlineData.list,
@@ -106,27 +100,6 @@ mixin PaintingBinding
       );
       indicator.paintObject?.paintChart(canvas, size);
     }
-
-    // canvas.drawPoints(
-    //   PointMode.points,
-    //   [Offset(startCandleDx - candleWidthHalf, 100)],
-    //   Paint()
-    //     ..color = Colors.blue
-    //     ..strokeWidth = 2
-    //     ..style = PaintingStyle.stroke,
-    // );
-
-    /// 绘制蜡烛图
-    // paintCandleChart(canvas, size);
-
-    // /// 绘制Y轴价钱刻度数据
-    // paintYAxisPriceTick(canvas, size);
-
-    // /// 绘制X轴时间刻度数据. 在paintCandleChart调用
-    // // paintXAxisTimeTick(canvas);
-
-    // /// 绘制最新价刻度线与价钱标记
-    // paintLastPriceMark(canvas, size);
   }
 
   // /// 绘制蜡烛图
