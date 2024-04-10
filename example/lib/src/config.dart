@@ -12,27 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'src/app.dart';
-import 'src/config.dart';
-import 'src/repo/http_client.dart';
+final localProvider = StateProvider<Locale>((ref) {
+  throw UnimplementedError();
+});
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+class AppProviderObserver extends ProviderObserver {
+  AppProviderObserver();
 
-  const locale = Locale('zh');
-
-  HttpClient().init();
-
-  runApp(ProviderScope(
-    overrides: [
-      localProvider.overrideWith((ref) => locale),
-    ],
-    observers: [AppProviderObserver()],
-    child: const MyApp(
-      extraNavObservers: [],
-    ),
-  ));
+  @override
+  Future<void> didUpdateProvider(
+    ProviderBase<dynamic> provider,
+    Object? previousValue,
+    Object? newValue,
+    ProviderContainer container,
+  ) async {
+    if (kDebugMode) {
+      debugPrint('PROVIDER    : ${provider.name ?? '<NO NAME>'}\n'
+          '  Type      : ${provider.runtimeType}\n'
+          '  Old value : $previousValue\n'
+          '  New value : $newValue');
+    }
+  }
 }

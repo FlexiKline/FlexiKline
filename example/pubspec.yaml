@@ -9,11 +9,25 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.18.1
+
   cupertino_icons: ^1.0.6
   flexi_kline:
     path: ../
   flutter_screenutil: ^5.9.0
+  flutter_smart_dialog: ^4.9.6
   decimal: ^2.3.3
+  go_router: ^13.2.3
+  flutter_riverpod: ^2.5.1
+  dio: ^5.4.2+1
+  web_socket_channel: ^2.4.5
+
+  flutter_ume_plus: ^3.0.2
+  flutter_ume_kit_dio_plus: ^3.4.5
+  flutter_ume_kit_perf_plus: ^2.0.1
+  flutter_ume_kit_ui_plus: ^2.0.0
 
 dev_dependencies:
   flutter_test:
@@ -22,3 +36,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+flutter_intl:
+  enabled: true

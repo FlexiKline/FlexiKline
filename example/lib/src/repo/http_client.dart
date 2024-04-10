@@ -12,27 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:dio/dio.dart';
 
-import 'src/app.dart';
-import 'src/config.dart';
-import 'src/repo/http_client.dart';
+class HttpClient {
+  HttpClient._internal();
+  factory HttpClient() => _instance;
+  static final HttpClient _instance = HttpClient._internal();
+  static HttpClient get instance => _instance;
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  late final Dio _dio;
+  Dio get dio => _dio;
 
-  const locale = Locale('zh');
-
-  HttpClient().init();
-
-  runApp(ProviderScope(
-    overrides: [
-      localProvider.overrideWith((ref) => locale),
-    ],
-    observers: [AppProviderObserver()],
-    child: const MyApp(
-      extraNavObservers: [],
-    ),
-  ));
+  void init() {
+    _dio = Dio(BaseOptions(
+      baseUrl: "",
+      headers: {},
+      sendTimeout: const Duration(seconds: 15),
+      receiveTimeout: const Duration(seconds: 15),
+      connectTimeout: const Duration(seconds: 15),
+    ));
+  }
 }

@@ -15,24 +15,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'src/app.dart';
-import 'src/config.dart';
-import 'src/repo/http_client.dart';
+class KOKlinePage extends ConsumerStatefulWidget {
+  const KOKlinePage({super.key});
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  @override
+  ConsumerState<ConsumerStatefulWidget> createState() => _KOKlinePageState();
+}
 
-  const locale = Locale('zh');
-
-  HttpClient().init();
-
-  runApp(ProviderScope(
-    overrides: [
-      localProvider.overrideWith((ref) => locale),
-    ],
-    observers: [AppProviderObserver()],
-    child: const MyApp(
-      extraNavObservers: [],
-    ),
-  ));
+class _KOKlinePageState extends ConsumerState<KOKlinePage> {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Center(
+        child: Text('KOKline'),
+      ),
+    );
+  }
 }
