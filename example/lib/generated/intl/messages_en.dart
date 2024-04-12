@@ -22,8 +22,43 @@ class MessageLookup extends MessageLookupByLibrary {
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
+        "badCertificate":
+            MessageLookupByLibrary.simpleMessage("Bad certificate"),
+        "canceled": MessageLookupByLibrary.simpleMessage("Canceled"),
+        "cannotReachServer":
+            MessageLookupByLibrary.simpleMessage("Can not reach server"),
+        "connectionError":
+            MessageLookupByLibrary.simpleMessage("Connection error"),
+        "connectionTimeout":
+            MessageLookupByLibrary.simpleMessage("Client connection timeout"),
         "demo": MessageLookupByLibrary.simpleMessage("Demo"),
+        "invalidReq": MessageLookupByLibrary.simpleMessage("Invalid request"),
         "ko": MessageLookupByLibrary.simpleMessage("KO"),
-        "title": MessageLookupByLibrary.simpleMessage("FlexiKline")
+        "permissionDenied":
+            MessageLookupByLibrary.simpleMessage("Permission denied"),
+        "reqMethodForbidden":
+            MessageLookupByLibrary.simpleMessage("Request method is forbidden"),
+        "responseTimeout":
+            MessageLookupByLibrary.simpleMessage("Server response timeout"),
+        "sendTimeout":
+            MessageLookupByLibrary.simpleMessage("Client send timeout"),
+        "serverDown":
+            MessageLookupByLibrary.simpleMessage("The server is down"),
+        "serverInternalError":
+            MessageLookupByLibrary.simpleMessage("Server internal error"),
+        "serverRefused":
+            MessageLookupByLibrary.simpleMessage("Server refuses to execute"),
+        "setting": MessageLookupByLibrary.simpleMessage("Setting"),
+        "settingLanguage": MessageLookupByLibrary.simpleMessage("Language"),
+        "settingThemeMode": MessageLookupByLibrary.simpleMessage("Theme Mode"),
+        "syntaxError":
+            MessageLookupByLibrary.simpleMessage("Request syntax error"),
+        "themeModeDark": MessageLookupByLibrary.simpleMessage("Dark"),
+        "themeModeLight": MessageLookupByLibrary.simpleMessage("Light"),
+        "themeModeSystem": MessageLookupByLibrary.simpleMessage("System"),
+        "title": MessageLookupByLibrary.simpleMessage("FlexiKline"),
+        "unknownError": MessageLookupByLibrary.simpleMessage("Unknown error"),
+        "unsupportedProtocol": MessageLookupByLibrary.simpleMessage(
+            "HTTP protocol requests are not supported")
       };
 }

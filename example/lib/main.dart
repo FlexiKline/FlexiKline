@@ -12,23 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:example/src/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'src/app.dart';
 import 'src/config.dart';
+import 'src/i18n.dart';
 import 'src/repo/http_client.dart';
+import 'src/utils/cache_util.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  const locale = Locale('zh');
+  await CacheUtil().init();
 
-  HttpClient().init();
+  final locale = I18nManager().init();
+  final themeMode = ThemeManager().init();
+
+  initHttpClient();
 
   runApp(ProviderScope(
     overrides: [
       localProvider.overrideWith((ref) => locale),
+      themeModeProvider.overrideWith((ref) => themeMode),
     ],
     observers: [AppProviderObserver()],
     child: const MyApp(

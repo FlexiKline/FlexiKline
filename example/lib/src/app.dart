@@ -25,9 +25,10 @@ import 'package:flutter_ume_kit_ui_plus/flutter_ume_kit_ui_plus.dart';
 import 'package:flutter_ume_plus/flutter_ume_plus.dart';
 import 'package:go_router/go_router.dart';
 
-import 'config.dart';
+import 'i18n.dart';
 import 'repo/http_client.dart';
 import 'router.dart';
+import 'theme.dart';
 
 class MyApp extends ConsumerStatefulWidget {
   const MyApp({super.key, this.extraNavObservers});
@@ -43,15 +44,15 @@ class _MyAppState extends ConsumerState<MyApp> {
     super.initState();
     if (kDebugMode) {
       PluginManager.instance
+        ..register(DioInspector(dio: httpClient.dio))
+        ..register(Performance())
+        ..register(const MemoryInfoPage())
         ..register(const WidgetInfoInspector())
         ..register(const WidgetDetailInspector())
         ..register(const ColorSucker())
         ..register(AlignRuler())
         ..register(const ColorPicker()) // New feature
-        ..register(const TouchIndicator()) // New feature
-        ..register(Performance())
-        ..register(const MemoryInfoPage())
-        ..register(DioInspector(dio: HttpClient().dio));
+        ..register(const TouchIndicator());
     }
   }
 
@@ -73,25 +74,31 @@ class _MyAppState extends ConsumerState<MyApp> {
         return MaterialApp.router(
           restorationScopeId: 'flexiKlineApp',
           routerConfig: GoRouter(
+            navigatorKey: globalNavigatorKey,
             observers: [
               ...?widget.extraNavObservers,
             ],
-            initialLocation: '/demo',
+            initialLocation: '/ko',
             restorationScopeId: 'router',
             routes: routeList,
           ),
           builder: FlutterSmartDialog.init(),
           debugShowCheckedModeBanner: false,
           locale: ref.watch(localProvider),
-          localizationsDelegates: const [
-            S.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate
-          ],
+          localizationsDelegates: I18nManager().localizationsDelegates,
+          supportedLocales: I18nManager().supportedLocales,
           theme: ThemeData(
-            appBarTheme: AppBarTheme(),
+            colorScheme: schemeLightOnBW,
+            useMaterial3: true,
           ),
+          darkTheme: ThemeData(
+            colorScheme: schemeDarkOnBW,
+            useMaterial3: true,
+          ),
+          themeMode: ref.watch(themeModeProvider),
+          themeAnimationCurve: Curves.linear,
+          themeAnimationDuration: const Duration(milliseconds: 500),
+          // themeAnimationStyle: ActionDispatcher,
         );
       },
     );

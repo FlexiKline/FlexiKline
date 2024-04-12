@@ -13,12 +13,8 @@
 // limitations under the License.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-final localProvider = StateProvider<Locale>((ref) {
-  throw UnimplementedError();
-});
+import 'package:logger/logger.dart';
 
 class AppProviderObserver extends ProviderObserver {
   AppProviderObserver();
@@ -38,3 +34,16 @@ class AppProviderObserver extends ProviderObserver {
     }
   }
 }
+
+final logger = Logger(
+  filter: null, // Use the default LogFilter (-> only log in debug mode)
+  printer: PrettyPrinter(
+    methodCount: 1, // number of method calls to be displayed
+    errorMethodCount: 2, // number of method calls if stacktrace is provided
+    lineLength: 120, // width of the output
+    colors: true, // Colorful log messages
+    printEmojis: true, // Print an emoji for each log message
+    printTime: true, // Should each log print contain a timestamp
+  ),
+  output: null, // Use the default LogOutput (-> send everything to console)
+);

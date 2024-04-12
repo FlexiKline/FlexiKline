@@ -22,8 +22,31 @@ class MessageLookup extends MessageLookupByLibrary {
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
+        "badCertificate": MessageLookupByLibrary.simpleMessage("证书错误"),
+        "canceled": MessageLookupByLibrary.simpleMessage("已取消"),
+        "cannotReachServer": MessageLookupByLibrary.simpleMessage("无法连接服务器"),
+        "connectionError": MessageLookupByLibrary.simpleMessage("连接错误"),
+        "connectionTimeout": MessageLookupByLibrary.simpleMessage("客户端连接超时"),
         "demo": MessageLookupByLibrary.simpleMessage("示例"),
+        "invalidReq": MessageLookupByLibrary.simpleMessage("无效的请求"),
         "ko": MessageLookupByLibrary.simpleMessage("Ko"),
-        "title": MessageLookupByLibrary.simpleMessage("FlexiKline")
+        "permissionDenied": MessageLookupByLibrary.simpleMessage("没有权限"),
+        "reqMethodForbidden": MessageLookupByLibrary.simpleMessage("请求方法被禁止"),
+        "responseTimeout": MessageLookupByLibrary.simpleMessage("服务端响应超时"),
+        "sendTimeout": MessageLookupByLibrary.simpleMessage("客户端发送超时"),
+        "serverDown": MessageLookupByLibrary.simpleMessage("服务器挂了"),
+        "serverInternalError": MessageLookupByLibrary.simpleMessage("服务器内部错误"),
+        "serverRefused": MessageLookupByLibrary.simpleMessage("服务器拒绝执行"),
+        "setting": MessageLookupByLibrary.simpleMessage("设置"),
+        "settingLanguage": MessageLookupByLibrary.simpleMessage("语言"),
+        "settingThemeMode": MessageLookupByLibrary.simpleMessage("主题模式"),
+        "syntaxError": MessageLookupByLibrary.simpleMessage("请求语法错误"),
+        "themeModeDark": MessageLookupByLibrary.simpleMessage("夜间模式"),
+        "themeModeLight": MessageLookupByLibrary.simpleMessage("日间模式"),
+        "themeModeSystem": MessageLookupByLibrary.simpleMessage("跟随系统"),
+        "title": MessageLookupByLibrary.simpleMessage("FlexiKline"),
+        "unknownError": MessageLookupByLibrary.simpleMessage("未知错误"),
+        "unsupportedProtocol":
+            MessageLookupByLibrary.simpleMessage("不支持HTTP协议请求")
       };
 }

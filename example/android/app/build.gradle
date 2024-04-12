@@ -24,7 +24,7 @@ if (flutterVersionName == null) {
 
 android {
     namespace "com.github.kangqiao.flexikline.example"
-    compileSdk 33 //flutter.compileSdkVersion
+    compileSdk flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
 
     compileOptions {

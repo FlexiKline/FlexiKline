@@ -14,15 +14,22 @@ dependencies:
   intl: ^0.18.1
 
   cupertino_icons: ^1.0.6
+
   flexi_kline:
     path: ../
-  flutter_screenutil: ^5.9.0
-  flutter_smart_dialog: ^4.9.6
+
   decimal: ^2.3.3
   go_router: ^13.2.3
   flutter_riverpod: ^2.5.1
   dio: ^5.4.2+1
+  logger: ^2.2.0
   web_socket_channel: ^2.4.5
+
+  flutter_screenutil: ^5.9.0
+  flutter_smart_dialog: ^4.9.6
+  flex_seed_scheme: ^1.5.0
+  google_fonts: ^6.2.1
+  shared_preferences: ^2.2.3
 
   flutter_ume_plus: ^3.0.2
   flutter_ume_kit_dio_plus: ^3.4.5

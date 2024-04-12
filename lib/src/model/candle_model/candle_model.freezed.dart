@@ -21,7 +21,7 @@ CandleModel _$CandleModelFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$CandleModel {
   /// 开始时间，Unix时间戳的毫秒数格式，如 1597026383085
-// @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
+  @JsonKey(fromJson: valueToInt, toJson: intToString)
   int get timestamp =>
       throw _privateConstructorUsedError; // @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
 // DateTime? datetime, // 从timestamp转换为dateTime;
@@ -69,7 +69,7 @@ abstract class $CandleModelCopyWith<$Res> {
       _$CandleModelCopyWithImpl<$Res, CandleModel>;
   @useResult
   $Res call(
-      {int timestamp,
+      {@JsonKey(fromJson: valueToInt, toJson: intToString) int timestamp,
       @JsonKey(fromJson: stringToDecimal, toJson: decimalToString) Decimal open,
       @JsonKey(fromJson: stringToDecimal, toJson: decimalToString) Decimal high,
       @JsonKey(fromJson: stringToDecimal, toJson: decimalToString) Decimal low,
@@ -156,7 +156,7 @@ abstract class _$$CandleModelImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {int timestamp,
+      {@JsonKey(fromJson: valueToInt, toJson: intToString) int timestamp,
       @JsonKey(fromJson: stringToDecimal, toJson: decimalToString) Decimal open,
       @JsonKey(fromJson: stringToDecimal, toJson: decimalToString) Decimal high,
       @JsonKey(fromJson: stringToDecimal, toJson: decimalToString) Decimal low,
@@ -236,7 +236,8 @@ class __$$CandleModelImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$CandleModelImpl implements _CandleModel {
   _$CandleModelImpl(
-      {required this.timestamp,
+      {@JsonKey(fromJson: valueToInt, toJson: intToString)
+      required this.timestamp,
       @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
       required this.open,
       @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
@@ -257,8 +258,8 @@ class _$CandleModelImpl implements _CandleModel {
       _$$CandleModelImplFromJson(json);
 
   /// 开始时间，Unix时间戳的毫秒数格式，如 1597026383085
-// @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
   @override
+  @JsonKey(fromJson: valueToInt, toJson: intToString)
   final int timestamp;
 // @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
 // DateTime? datetime, // 从timestamp转换为dateTime;
@@ -346,7 +347,8 @@ class _$CandleModelImpl implements _CandleModel {
 
 abstract class _CandleModel implements CandleModel {
   factory _CandleModel(
-      {required final int timestamp,
+      {@JsonKey(fromJson: valueToInt, toJson: intToString)
+      required final int timestamp,
       @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
       required final Decimal open,
       @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
@@ -369,7 +371,7 @@ abstract class _CandleModel implements CandleModel {
   @override
 
   /// 开始时间，Unix时间戳的毫秒数格式，如 1597026383085
-// @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
+  @JsonKey(fromJson: valueToInt, toJson: intToString)
   int get timestamp;
   @override // @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
 // DateTime? datetime, // 从timestamp转换为dateTime;

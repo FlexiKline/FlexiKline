@@ -1,11 +1,11 @@
 // Copyright 2024 Andy.Zhao
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     https://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,6 +28,18 @@ Decimal? stringToDecimalOrNull(dynamic value) {
 String decimalToString(dynamic value) => value?.toString() ?? "";
 
 String? decimalToStringOrNull(dynamic value) => value?.toString();
+
+int valueToInt(dynamic value) {
+  if (value is int) {
+    return value;
+  } else {
+    return int.tryParse(value.toString()) ?? 0;
+  }
+}
+
+String intToString(int value) {
+  return value.toString();
+}
 
 DateTime? valueToDateTime(dynamic value) {
   if (value == null) {

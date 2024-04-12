@@ -1,11 +1,11 @@
 // Copyright 2024 Andy.Zhao
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     https://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,7 +24,7 @@ part 'candle_model.g.dart';
 class CandleModel with _$CandleModel {
   factory CandleModel({
     /// 开始时间，Unix时间戳的毫秒数格式，如 1597026383085
-    // @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
+    @JsonKey(fromJson: valueToInt, toJson: intToString)
     required int timestamp,
     // @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
     // DateTime? datetime, // 从timestamp转换为dateTime;

@@ -2,5 +2,27 @@
 {
   "title": "FlexiKline", 
   "demo": "Demo",
-  "ko": "KO"
+  "ko": "KO",
+  "connectionTimeout": "Client connection timeout",
+  "sendTimeout": "Client send timeout",
+  "responseTimeout": "Server response timeout",
+  "canceled": "Canceled",
+  "syntaxError": "Request syntax error",
+  "permissionDenied": "Permission denied",
+  "serverRefused": "Server refuses to execute",
+  "cannotReachServer": "Can not reach server",
+  "reqMethodForbidden": "Request method is forbidden",
+  "serverInternalError": "Server internal error",
+  "invalidReq": "Invalid request",
+  "serverDown": "The server is down",
+  "unsupportedProtocol": "HTTP protocol requests are not supported",
+  "badCertificate": "Bad certificate",
+  "connectionError": "Connection error",
+  "unknownError": "Unknown error",
+  "setting": "Setting",
+  "settingLanguage": "Language",
+  "settingThemeMode": "Theme Mode",
+  "themeModeSystem": "System",
+  "themeModeLight": "Light",
+  "themeModeDark": "Dark"
 }

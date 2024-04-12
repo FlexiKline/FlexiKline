@@ -18,6 +18,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../repo/mock.dart';
+import 'setting_page.dart';
 
 class MyDemoPage extends ConsumerStatefulWidget {
   const MyDemoPage({super.key});
@@ -82,6 +83,7 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('MyDemo'),
       ),
+      drawer: const SettingDrawer(),
       body: SingleChildScrollView(
         child: Column(
           children: [
