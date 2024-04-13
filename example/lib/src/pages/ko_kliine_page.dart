@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:example/src/pages/setting_page.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -20,8 +19,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
+import '../config.dart';
 import '../repo/api.dart' as api;
 import '../widgets/latest_price_view.dart';
+import 'main_nav_page.dart';
 
 class KOKlinePage extends ConsumerStatefulWidget {
   const KOKlinePage({super.key});
@@ -45,7 +46,7 @@ class _KOKlinePageState extends ConsumerState<KOKlinePage> {
   void initState() {
     super.initState();
 
-    controller = FlexiKlineController(debug: kDebugMode);
+    controller = FlexiKlineController(debug: kDebugMode, logger: loggerImpl);
     controller.setMainSize(
       Size(ScreenUtil().screenWidth, 300.r),
     );
@@ -65,10 +66,15 @@ class _KOKlinePageState extends ConsumerState<KOKlinePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: GestureDetector(
+          onTap: () {
+            mainNavScaffoldKey.currentState?.openDrawer();
+          },
+          child: const Icon(Icons.menu_outlined),
+        ),
         title: Text(req.instId),
         centerTitle: true,
       ),
-      drawer: const SettingDrawer(),
       body: SingleChildScrollView(
         child: Column(
           children: [

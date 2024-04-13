@@ -21,9 +21,13 @@ class FlexiKlineWidget extends StatefulWidget {
   const FlexiKlineWidget({
     super.key,
     required this.controller,
+    this.decoration,
+    this.foregroundDecoration,
   });
 
   final FlexiKlineController controller;
+  final BoxDecoration? decoration;
+  final Decoration? foregroundDecoration;
 
   @override
   State<FlexiKlineWidget> createState() => _FlexiKlineWidgetState();
@@ -48,10 +52,8 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
     return Container(
       width: widget.controller.canvasWidth,
       height: widget.controller.canvasHeight,
-      decoration: const BoxDecoration(
-        color: Color.fromARGB(179, 243, 220, 220),
-      ),
-      // color: Colors.redAccent,
+      decoration: widget.decoration,
+      foregroundDecoration: widget.foregroundDecoration,
       child: GestureView(
         controller: widget.controller,
         child: Stack(

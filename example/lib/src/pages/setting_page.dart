@@ -25,7 +25,7 @@ class SettingDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      key: const ValueKey('drawer'),
+      key: key,
       width: ScreenUtil().screenWidth * 0.75,
       child: const SettingPage(
         key: ValueKey('setting'),
@@ -81,10 +81,7 @@ class _SettingPageState extends ConsumerState<SettingPage> {
                         style: theme.textTheme.bodyMedium,
                       ),
                       trailing: currLocale == locale
-                          ? Icon(
-                              Icons.check_rounded,
-                              color: theme.primaryColor,
-                            )
+                          ? const Icon(Icons.check_rounded)
                           : null,
                       onTap: () {
                         I18nManager().switchLocale(locale);
@@ -108,10 +105,7 @@ class _SettingPageState extends ConsumerState<SettingPage> {
                         style: theme.textTheme.bodyMedium,
                       ),
                       trailing: currThemeMode == mode
-                          ? Icon(
-                              Icons.check_rounded,
-                              color: theme.primaryColor,
-                            )
+                          ? const Icon(Icons.check_rounded)
                           : null,
                       onTap: () {
                         ThemeManager().swithThemeMode(mode);

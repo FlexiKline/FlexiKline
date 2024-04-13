@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logger/logger.dart';
@@ -47,3 +48,48 @@ final logger = Logger(
   ),
   output: null, // Use the default LogOutput (-> send everything to console)
 );
+
+// 默认ILogger接口实现
+final loggerImpl = LoggerImpl();
+
+class LoggerImpl implements ILogger {
+  @override
+  void logd(
+    String msg, {
+    DateTime? time,
+    Object? error,
+    StackTrace? stackTrace,
+  }) {
+    logger.d(msg, time: time, error: error, stackTrace: stackTrace);
+  }
+
+  @override
+  void logi(
+    String msg, {
+    DateTime? time,
+    Object? error,
+    StackTrace? stackTrace,
+  }) {
+    logger.i(msg, time: time, error: error, stackTrace: stackTrace);
+  }
+
+  @override
+  void logw(
+    String msg, {
+    DateTime? time,
+    Object? error,
+    StackTrace? stackTrace,
+  }) {
+    logger.w(msg, time: time, error: error, stackTrace: stackTrace);
+  }
+
+  @override
+  void loge(
+    String msg, {
+    DateTime? time,
+    Object? error,
+    StackTrace? stackTrace,
+  }) {
+    logger.e(msg, time: time, error: error, stackTrace: stackTrace);
+  }
+}

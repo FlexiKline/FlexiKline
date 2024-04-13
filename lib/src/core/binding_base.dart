@@ -28,7 +28,9 @@ abstract class KlineBindingBase with KlineLog, GestureHanderImpl {
 
   KlineBindingBase({
     this.debug = false,
+    ILogger? logger,
   }) {
+    this.logger = logger;
     logd("constrouct");
     initBinding();
   }

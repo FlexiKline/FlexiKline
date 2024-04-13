@@ -44,6 +44,24 @@ final ColorScheme schemeDarkOnBW = SeedColorScheme.fromSeeds(
     ..onMainsUseBW().onSurfacesUseBW().surfacesUseBW(),
 );
 
+final lightTheme = ThemeData(
+  colorScheme: schemeLightOnBW,
+  useMaterial3: true,
+  scaffoldBackgroundColor: const Color(0xffF8F9FB),
+  bottomNavigationBarTheme: BottomNavigationBarThemeData(
+    backgroundColor: const Color(0xffFEFEFF),
+  ),
+);
+
+final darkTheme = ThemeData(
+  colorScheme: schemeDarkOnBW,
+  useMaterial3: true,
+  scaffoldBackgroundColor: const Color(0xFF121212),
+  bottomNavigationBarTheme: BottomNavigationBarThemeData(
+    backgroundColor: const Color(0xFF1A1A1A),
+  ),
+);
+
 final themeModeProvider = StateProvider<ThemeMode>((ref) {
   return ThemeMode.system;
 });

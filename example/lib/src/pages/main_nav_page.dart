@@ -17,6 +17,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'setting_page.dart';
+
+GlobalKey<ScaffoldState> mainNavScaffoldKey = GlobalKey();
+
 class MainNavPage extends ConsumerWidget {
   const MainNavPage({
     super.key = const ValueKey<String>('MainNavPage'),
@@ -30,6 +34,10 @@ class MainNavPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final s = S.of(context);
     return Scaffold(
+      key: mainNavScaffoldKey,
+      drawer: const SettingDrawer(
+        key: ValueKey("demo"),
+      ),
       drawerEdgeDragWidth: 0.0, // 禁止通过滑动打开drawer
       body: navigationShell,
       bottomNavigationBar: BottomNavigationBar(

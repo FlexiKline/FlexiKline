@@ -19,7 +19,7 @@ dependencies:
     path: ../
 
   decimal: ^2.3.3
-  go_router: ^13.2.3
+  go_router: 12.1.3
   flutter_riverpod: ^2.5.1
   dio: ^5.4.2+1
   logger: ^2.2.0

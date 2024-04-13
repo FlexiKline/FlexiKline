@@ -26,5 +26,6 @@ class FlexiKlineController extends KlineBindingBase
         DrawBinding {
   FlexiKlineController({
     super.debug,
+    super.logger,
   });
 }
