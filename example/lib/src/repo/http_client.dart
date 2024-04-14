@@ -14,7 +14,6 @@
 
 import 'package:dio/dio.dart';
 import 'package:example/generated/l10n.dart';
-import 'package:flutter/foundation.dart';
 
 typedef ModelMapper<T> = T Function(dynamic);
 typedef DataConvert<T> = T? Function(dynamic);

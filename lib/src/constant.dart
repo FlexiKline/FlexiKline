@@ -17,6 +17,8 @@ import 'package:flutter/material.dart';
 /// 默认数据格式化精度
 const int defaultPrecision = 6;
 
+const double defaultSubIndicatorHeight = 80;
+
 /// 时间粒度，默认值1m
 /// 如 [1m/3m/5m/15m/30m/1H/2H/4H]
 /// 香港时间开盘价k线：[6H/12H/1D/2D/3D/1W/1M/3M]
@@ -82,16 +84,3 @@ const List<String> i18nCandleCardEn = [
   'Amount',
   // 'Turnover'
 ];
-
-enum IndicatorType {
-  composite,
-  candle,
-  volume,
-  // macd,
-  ma
-  // kdj,
-  // rsi;
-  ;
-
-  bool get isComposite => this == IndicatorType.composite;
-}

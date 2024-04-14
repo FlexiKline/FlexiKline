@@ -15,3 +15,9 @@
 // export 'indicator.dart';
 export 'candle.dart';
 export 'volume.dart';
+
+enum IndicatorType {
+  candle,
+  volume,
+  ma;
+}

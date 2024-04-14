@@ -486,8 +486,12 @@ mixin SettingBinding on KlineBindingBase implements IConfig {
         mainRect.bottom + subRectHeight,
       );
 
-  /// 副区的单个指标图高度
-  double subIndicatorDefaultHeight = 80;
+  /// 副区的单个指标图默认配置
+  final double subIndicatorDefaultHeight = defaultSubIndicatorHeight;
+  final double subIndicatorDefaultTipsHeight = 15;
+  final EdgeInsets subIndicatorDefaultPadding = const EdgeInsets.only(
+    left: 8,
+  );
 
   /// 副区的指标图最大数量
   int subIndicatorChartMaxCount = 4;

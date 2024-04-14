@@ -14,11 +14,10 @@
 
 import 'dart:collection';
 
-import 'package:flexi_kline/src/constant.dart';
-import 'package:flexi_kline/src/indicators/export.dart';
 import 'package:flutter/material.dart';
 
 import '../framework/export.dart';
+import '../indicators/export.dart';
 import 'binding_base.dart';
 import 'interface.dart';
 import 'setting.dart';
@@ -32,6 +31,21 @@ mixin ConfigBinding on KlineBindingBase, SettingBinding implements IConfig {
   void initBinding() {
     super.initBinding();
     logd("init config");
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    logd("dispose config");
+    mainIndicator.dispose();
+    for (var indicator in subIndicators) {
+      indicator.dispose();
+    }
+    subIndicators.clear();
+  }
+
+  @override
+  void initIndicators() {
     _mainIndicator = MultiPaintObjectIndicator(
       key: const ValueKey('main'),
       height: mainRect.height,
@@ -61,17 +75,6 @@ mixin ConfigBinding on KlineBindingBase, SettingBinding implements IConfig {
       height: 120,
       tipsHeight: 0,
     ));
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    logd("dispose config");
-    mainIndicator.dispose();
-    for (var indicator in subIndicators) {
-      indicator.dispose();
-    }
-    subIndicators.clear();
   }
 
   /// 主绘制区域

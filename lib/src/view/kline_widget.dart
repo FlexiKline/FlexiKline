@@ -40,6 +40,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
     widget.controller.onSizeChange = () {
       setState(() {});
     };
+    widget.controller.initIndicators();
   }
 
   @override

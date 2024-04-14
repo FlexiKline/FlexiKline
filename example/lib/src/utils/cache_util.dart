@@ -14,9 +14,9 @@
 
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../config.dart';
 import '../repo/http_client.dart';
 
 class CacheUtil {
@@ -77,8 +77,8 @@ class CacheUtil {
         final json = jsonDecode(jsonStr);
         return modelMapper(json);
       }
-    } catch (e, stack) {
-      debugPrint('get($key) catch an exception');
+    } catch (err, stack) {
+      logger.e('getModel error:$err', stackTrace: stack);
     }
     return null;
   }
@@ -97,7 +97,7 @@ class CacheUtil {
             const [];
       }
     } catch (err, stack) {
-      debugPrint('getList($key) catch an exception');
+      logger.e('getModelList error:$err', stackTrace: stack);
     }
     return null;
   }

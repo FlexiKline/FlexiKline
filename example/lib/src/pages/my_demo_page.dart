@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:example/src/pages/main_nav_page.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../repo/mock.dart';
 import '../test/canvas_test.dart';
+import '../widgets/time_bar.dart';
+import 'main_nav_page.dart';
 
 class MyDemoPage extends ConsumerStatefulWidget {
   const MyDemoPage({super.key});
@@ -38,6 +38,13 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
     bar: TimeBar.D1.bar,
     precision: 4,
   );
+
+  final List<TimeBar> timBarList = const [
+    TimeBar.m15,
+    TimeBar.H1,
+    TimeBar.H4,
+    TimeBar.D1
+  ];
 
   @override
   void initState() {
@@ -95,6 +102,15 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
+            FlexiTimeBar(
+              timeBars: timBarList,
+              currTimeBar: req.timerBar,
+              onTapTimeBar: (value) {
+                setState(() {
+                  req.bar = value.bar;
+                });
+              },
+            ),
             FlexiKlineWidget(
               key: const ValueKey('1'),
               controller: controller1,

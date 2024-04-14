@@ -227,7 +227,6 @@ class CandlePaintObject extends PaintObjectBox<CandleIndicator> {
 
       final text = setting.formatPrice(
         price,
-        
         instId: curKlineData.req.instId,
         precision: curKlineData.req.precision,
       );
@@ -300,7 +299,7 @@ class CandlePaintObject extends PaintObjectBox<CandleIndicator> {
       //   'paintLastPriceMark lastModelTime:${model.dateTime}, nextUpdateDateTime:$nextUpdateDateTime',
       // );
       if (nextUpdateDateTime != null) {
-        final timeDiff = calculateTimeDiff(nextUpdateDateTime);
+        final timeDiff = formatTimeDiff(nextUpdateDateTime);
         if (timeDiff != null) {
           text += "\n$timeDiff";
           textHeight += setting.lastPriceFontSize;

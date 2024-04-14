@@ -280,17 +280,25 @@ class MultiPaintObject extends PaintObjectBox<MultiPaintObjectIndicator> {
   });
 
   @override
+  Decimal get maxVal => throw UnimplementedError();
+
+  @override
+  Decimal get minVal => throw UnimplementedError();
+
+  @override
+  void bindSolt(int newSlot) {
+    super.bindSolt(newSlot);
+    for (var indicator in indicator.children) {
+      indicator.paintObject?.bindSolt(newSlot);
+    }
+  }
+
+  @override
   void initData(List<CandleModel> list, {int start = 0, int end = 0}) {
     for (var indicator in indicator.children) {
       indicator.paintObject?.initData(list, start: start, end: end);
     }
   }
-
-  @override
-  Decimal get maxVal => throw UnimplementedError();
-
-  @override
-  Decimal get minVal => throw UnimplementedError();
 
   @override
   void paintChart(Canvas canvas, Size size) {

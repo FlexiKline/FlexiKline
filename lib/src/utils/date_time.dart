@@ -1,11 +1,11 @@
 // Copyright 2024 Andy.Zhao
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     https://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,7 +18,7 @@ import 'dart:math' as math;
 /// 1. 超过1天展示 "md nh"
 /// 2. 小于一天展示 "hh:MM:ss"
 /// 3. 小天一小时展示 "MM:ss"
-String? calculateTimeDiff(DateTime nextUpdateDateTime) {
+String? formatTimeDiff(DateTime nextUpdateDateTime) {
   final timeLag = nextUpdateDateTime.difference(DateTime.now());
   if (timeLag.isNegative) {
     // debugPrint(
