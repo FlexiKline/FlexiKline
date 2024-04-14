@@ -21,7 +21,7 @@ import '../model/export.dart';
 import '../utils/export.dart';
 import 'indicator.dart';
 
-const mainDrawIndex = -1;
+const mainIndicatorSlot = -1;
 
 /// 指标图的绘制边界接口
 abstract interface class IPaintBoundingBox {
@@ -31,7 +31,10 @@ abstract interface class IPaintBoundingBox {
   /// 当前指标索引(仅对副图有效)
   /// <0 代表在主图绘制
   /// >=0 代表在副图绘制
-  int get index => mainDrawIndex;
+  int get slot => mainIndicatorSlot;
+
+  /// 为当前指标的绘制绑定slot.
+  void bindSolt(int newSlot);
 
   /// 当前指标图paint内的padding.
   /// 增加padding后tipsRect和chartRect将在此以内绘制.
@@ -93,8 +96,12 @@ mixin SettingProxyMixin on PaintObject {
 mixin StateProxyMixin on PaintObject {
   late final IState state;
   late final ICross cross;
+  late final IConfig config;
 
   KlineData get curKlineData => state.curKlineData;
+
+  @Deprecated('请使用curKlineData')
+  KlineData get data => state.curKlineData;
 
   double get paintDxOffset => state.paintDxOffset;
 
@@ -107,9 +114,17 @@ mixin StateProxyMixin on PaintObject {
 mixin PaintObjectBoundingMixin on PaintObjectProxy
     implements IPaintBoundingBox {
   @override
-  bool get drawInMain => index == mainDrawIndex; // TODO: 待优化
+  bool get drawInMain => slot == mainIndicatorSlot;
   @override
-  bool get drawInSub => index > mainDrawIndex; // TODO: 待优化
+  bool get drawInSub => slot > mainIndicatorSlot;
+
+  @override
+  void bindSolt(int newSlot) {
+    if (newSlot != slot) {
+      _bounding = null;
+      _slot = newSlot;
+    }
+  }
 
   @override
   EdgeInsets get paintPadding => indicator.padding;
@@ -120,18 +135,15 @@ mixin PaintObjectBoundingMixin on PaintObjectProxy
     if (drawInMain) {
       _bounding ??= setting.mainRect;
     } else {
-      assert(
-        index >= 0 && index < setting.subIndicatorChartMaxCount,
-        'index is invalid!!!',
-      );
-      final top = index * setting.subIndicatorChartHeight;
-      final bottom = (index + 1) * setting.subIndicatorChartHeight;
-      _bounding ??= Rect.fromLTRB(
-        setting.subRect.left,
-        setting.subRect.top + top,
-        setting.subRect.right,
-        setting.subRect.top + bottom,
-      );
+      if (_bounding == null) {
+        final top = config.calculateIndicatorTop(slot);
+        _bounding = Rect.fromLTRB(
+          setting.subRect.left,
+          setting.subRect.top + top,
+          setting.subRect.right,
+          setting.subRect.top + top + indicator.height,
+        );
+      }
     }
     return _bounding!;
   }
@@ -164,6 +176,8 @@ mixin PaintObjectBoundingMixin on PaintObjectProxy
 
 /// 绘制对象混入数据初始化的通用扩展
 mixin DataInitMixin on PaintObjectProxy implements IPaintDataInit {
+  final Decimal twentieth = (Decimal.one / Decimal.fromInt(20)).toDecimal();
+
   double get dyFactor {
     return chartRect.height / (maxVal - minVal).toDouble();
   }
@@ -208,11 +222,6 @@ abstract class PaintObject<T extends Indicator>
 
   T get indicator => _indicator!;
 
-  int _slot = mainDrawIndex;
-  @override
-  int get index => _slot;
-  set slot(val) => _slot = val;
-
   @mustCallSuper
   void dispose() {
     _indicator = null;
@@ -227,11 +236,17 @@ abstract class PaintObjectProxy<T extends PaintObjectIndicator>
     required KlineBindingBase controller,
     required T super.indicator,
   }) {
+    super.logger = controller.logger;
+    _debug = controller.debug;
     setting = controller as SettingBinding;
     state = controller as IState;
     cross = controller as ICross;
-    _debug = controller.debug;
+    config = controller as IConfig;
   }
+
+  int _slot = mainIndicatorSlot;
+  @override
+  int get slot => _slot;
 
   @override
   T get indicator => super.indicator as T;

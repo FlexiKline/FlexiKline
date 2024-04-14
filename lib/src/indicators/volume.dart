@@ -24,6 +24,7 @@ import '../utils/export.dart';
 class VolumeIndicator extends PaintObjectIndicator {
   VolumeIndicator({
     required super.key,
+    required super.height,
     super.tipsHeight,
     super.padding,
   });
@@ -44,8 +45,6 @@ class VolumePaintObject extends PaintObjectBox<VolumeIndicator> {
 
   Decimal _max = Decimal.zero;
   Decimal _min = Decimal.zero;
-
-  final Decimal twentieth = (Decimal.one / Decimal.fromInt(20)).toDecimal();
 
   @override
   void initData(List<CandleModel> list, {int start = 0, int end = 0}) {
@@ -135,6 +134,7 @@ class VolumePaintObject extends PaintObjectBox<VolumeIndicator> {
       final text = formatNumber(
         vol,
         precision: 2,
+        defIfZero: '--',
         cutInvalidZero: true,
         showCompact: true,
       );
@@ -145,7 +145,7 @@ class VolumePaintObject extends PaintObjectBox<VolumeIndicator> {
           dy - setting.priceTickRectHeight,
         ),
         drawDirection: DrawDirection.rtl,
-        // drawableSize: Size(setting.canvasWidth, setting.canvasHeight + 200),
+        drawableRect: drawBounding,
         text: text,
         style: setting.volBarTickStyle,
         // textWidth: tickTextWidth,
@@ -174,7 +174,7 @@ class VolumePaintObject extends PaintObjectBox<VolumeIndicator> {
         offset.dy - setting.crossYTickRectHeight / 2,
       ),
       drawDirection: DrawDirection.rtl,
-      drawableSize: setting.canvasRect.size,
+      drawableRect: drawBounding,
       text: text,
       style: setting.crossYTickTextStyle,
       textAlign: TextAlign.end,
@@ -209,15 +209,14 @@ class VolumePaintObject extends PaintObjectBox<VolumeIndicator> {
         dy,
       ),
       drawDirection: DrawDirection.ltr,
-      drawableSize: setting.canvasRect.size,
+      drawableRect: tipsRect,
       text: text,
       style: setting.volTipStyle.copyWith(
         height: indicator.tipsHeight / setting.volTipFontSize,
       ),
-      textAlign: TextAlign.left,
+      textAlign: TextAlign.center,
       padding: setting.volTipRectPadding,
       maxLines: 1,
-      // backgroundColor: Colors.white, // TODO: 增加背景防止重叠.
     );
   }
 }

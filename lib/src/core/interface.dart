@@ -136,6 +136,7 @@ abstract interface class IConfig {
   PaintObjectIndicator get mainIndicator;
   Queue<PaintObjectIndicator> get subIndicators;
   List<double> get subIndicatorHeightList;
+  double calculateIndicatorTop(int slot);
   double get subRectHeight;
   void checkAndCreatePaintObject();
   void addIndicatorInMain(PaintObjectIndicator indicator);

@@ -15,11 +15,12 @@
 import 'package:example/src/pages/main_nav_page.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../config.dart';
 import '../repo/mock.dart';
+import '../test/canvas_test.dart';
 
 class MyDemoPage extends ConsumerStatefulWidget {
   const MyDemoPage({super.key});
@@ -79,6 +80,7 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         leading: GestureDetector(
@@ -97,14 +99,17 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
               key: const ValueKey('1'),
               controller: controller1,
             ),
-            SizedBox(height: 20),
+            Container(
+              height: 20,
+              color: theme.dividerColor,
+            ),
             // KlineWidget(
             //   key: const ValueKey('2'),
             //   controller: controller2,
             // ),
             // SizedBox(height: 20),
             // GestureTest(),
-            // TestBody(),
+            TestBody(),
           ],
         ),
       ),

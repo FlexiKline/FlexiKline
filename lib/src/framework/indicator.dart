@@ -25,10 +25,12 @@ import 'object.dart';
 abstract class Indicator {
   Indicator({
     required this.key,
+    required this.height,
     this.tipsHeight = 0.0,
     this.padding = EdgeInsets.zero,
   });
   final Key key;
+  final double height;
   double tipsHeight;
   EdgeInsets padding;
 
@@ -65,6 +67,7 @@ abstract class Indicator {
 abstract class PaintObjectIndicator extends Indicator {
   PaintObjectIndicator({
     required super.key,
+    required super.height,
     super.tipsHeight,
     super.padding,
   });
@@ -98,6 +101,7 @@ abstract class PaintObjectIndicator extends Indicator {
 class MultiPaintObjectIndicator extends PaintObjectIndicator {
   MultiPaintObjectIndicator({
     required super.key,
+    required super.height,
     super.tipsHeight,
     super.padding,
     Iterable<dynamic> children = const [],

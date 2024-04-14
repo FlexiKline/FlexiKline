@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'dart:math' as math;
+import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart';
 
 import 'common.dart';
@@ -35,7 +36,8 @@ extension DrawTextExt on Canvas {
     /// 1. 当绘制方向DrawDirection.ltr, 检测超出drawableSize右边界, 会主动向左调整offset xAxis偏移量, 且不超过左边界, 以保证内容区域完全展示.
     /// 2. 当绘制方向DrawDirection.rtl, 检测超出drawableSize左边界, 会主动向右调整offset xAxis偏移量, 且不超过右边界, 以保证内容区域完全展示.
     /// 3. 当绘制高度超出drawableSize规定高度时, 会主动向上调整offset yAxis轴偏移量, 且不超过上边界, 以保证内容区域完全展示.
-    Size? drawableSize,
+    @Deprecated("建议使用drawableRect来代替") Size? drawableSize,
+    Rect? drawableRect,
 
     /// 文本,样式设置. (注: text与textSpan必须设置一个, 否则不绘制)
     String? text,
@@ -86,7 +88,38 @@ extension DrawTextExt on Canvas {
       padding.vertical,
     );
 
-    if (drawableSize != null) {
+    if (drawableRect != null) {
+      double dy = math.max(
+        drawableRect.top,
+        math.min(offset.dy, drawableRect.bottom),
+      );
+      double dx;
+      switch (drawDirection) {
+        case DrawDirection.ltr:
+          dx = math.max(
+            drawableRect.left,
+            math.min(offset.dx, drawableRect.right - paintSize.width),
+          );
+          break;
+        case DrawDirection.center:
+          dx = math.max(
+            drawableRect.left,
+            math.min(offset.dx, drawableRect.right - paintSize.width / 2),
+          );
+          break;
+        case DrawDirection.rtl:
+          dx = math.max(
+            drawableRect.left,
+            math.min(
+              drawableRect.right - paintSize.width,
+              offset.dx - paintSize.width,
+            ),
+          );
+          break;
+      }
+
+      offset = Offset(dx, dy);
+    } else if (drawableSize != null) {
       double dy = math.max(
         0,
         math.min(offset.dy, drawableSize.height - paintSize.height),

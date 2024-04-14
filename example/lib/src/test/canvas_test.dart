@@ -1,11 +1,11 @@
 // Copyright 2024 Andy.Zhao
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     https://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,7 +30,14 @@ class TestBody extends StatefulWidget {
 
 Size get drawableSize => Size(
       ScreenUtil().screenWidth,
-      ScreenUtil().screenWidth * 2 / 3,
+      300.r,
+    );
+
+Rect get drawableRect => Rect.fromLTWH(
+      0,
+      0,
+      ScreenUtil().screenWidth,
+      300.r,
     );
 
 class _TestBodyState extends State<TestBody> {
@@ -38,7 +45,7 @@ class _TestBodyState extends State<TestBody> {
   Widget build(BuildContext context) {
     return Container(
       width: ScreenUtil().screenWidth,
-      height: ScreenUtil().screenWidth * 2 / 3,
+      height: 300.r,
       // margin: EdgeInsetsDirectional.all(20.r),
       color: Colors.grey,
       child: RepaintBoundary(
@@ -73,11 +80,13 @@ class PathCustomPainter extends CustomPainter {
 
   // 向左绘制, 超过左边界
   void drawText3(Canvas canvas) {
-    final offset = Offset(0, 0);
-    canvas.drawText(
+    Offset offset = Offset(drawableRect.right + 10, 0);
+    DrawDirection direction = DrawDirection.rtl;
+    final size = canvas.drawText(
       offset: offset,
-      drawDirection: DrawDirection.rtl,
-      drawableSize: drawableSize,
+      drawDirection: direction,
+      // drawableSize: drawableSize,
+      drawableRect: drawableRect,
       text: 'Hello123456789',
       style: TextStyle(
         fontSize: 20,
@@ -96,10 +105,19 @@ class PathCustomPainter extends CustomPainter {
       borderColor: Colors.red,
     );
 
+    Offset endOffset = offset;
+    if (direction.isltr) {
+      offset = offset.clamp(drawableRect);
+      endOffset = Offset(offset.dx + size.width, offset.dy + size.height);
+    } else if (direction.isrtl) {
+      endOffset = Offset(offset.dx - size.width, offset.dy + size.height);
+    }
+
     canvas.drawPoints(
       PointMode.points,
       [
         offset,
+        endOffset,
       ],
       Paint()
         ..color = Colors.blue

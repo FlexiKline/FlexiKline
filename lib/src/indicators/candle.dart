@@ -25,6 +25,7 @@ import '../framework/export.dart';
 class CandleIndicator extends PaintObjectIndicator {
   CandleIndicator({
     required super.key,
+    required super.height,
     super.tipsHeight,
     super.padding,
   });
@@ -46,6 +47,8 @@ class CandlePaintObject extends PaintObjectBox<CandleIndicator> {
   Decimal _max = Decimal.zero;
   Decimal _min = Decimal.zero;
 
+  Decimal? _maxHigh, _minLow;
+
   @override
   void initData(List<CandleModel> list, {int start = 0, int end = 0}) {
     if (list.isEmpty || start < 0 || end > list.length) return;
@@ -57,6 +60,13 @@ class CandlePaintObject extends PaintObjectBox<CandleIndicator> {
       _max = m.high > _max ? m.high : _max;
       _min = m.low < _min ? m.low : _min;
     }
+    _maxHigh = _max;
+    _minLow = _min;
+    // 增加vol区域的margin为高度的1/10
+    final volH = _max == _min ? Decimal.one : _max - _min;
+    final margin = volH * twentieth;
+    _max += margin;
+    _min -= margin;
   }
 
   @override
@@ -122,10 +132,10 @@ class CandlePaintObject extends PaintObjectBox<CandleIndicator> {
 
       if (setting.isDrawPriceMark) {
         // 记录最大最小偏移量.
-        if (model.high == data.max) {
+        if (model.high == _maxHigh) {
           maxHihgOffset = highOff;
         }
-        if (model.low == data.min) {
+        if (model.low == _minLow) {
           minLowOffset = lowOff;
         }
       }
@@ -133,10 +143,10 @@ class CandlePaintObject extends PaintObjectBox<CandleIndicator> {
 
     // 最后绘制在蜡烛图中的最大最小价钱标记
     if (setting.isDrawPriceMark &&
-        maxHihgOffset != null &&
-        minLowOffset != null) {
-      paintPriceMark(canvas, maxHihgOffset, data.max);
-      paintPriceMark(canvas, minLowOffset, data.min);
+        (maxHihgOffset != null && _maxHigh != null) &&
+        (minLowOffset != null && _minLow != null)) {
+      paintPriceMark(canvas, maxHihgOffset, _maxHigh!);
+      paintPriceMark(canvas, minLowOffset, _minLow!);
     }
   }
 
@@ -217,6 +227,7 @@ class CandlePaintObject extends PaintObjectBox<CandleIndicator> {
 
       final text = setting.formatPrice(
         price,
+        
         instId: curKlineData.req.instId,
         precision: curKlineData.req.precision,
       );
@@ -224,8 +235,7 @@ class CandlePaintObject extends PaintObjectBox<CandleIndicator> {
       canvas.drawText(
         offset: Offset(dx, dy - setting.priceTickRectHeight),
         drawDirection: DrawDirection.rtl,
-        // drawableSize: mainRectSize,
-        drawableSize: chartRect.size,
+        drawableRect: drawBounding,
         text: text,
         style: setting.priceTickStyle,
         // textWidth: tickTextWidth,
@@ -285,7 +295,7 @@ class CandlePaintObject extends PaintObjectBox<CandleIndicator> {
       cutInvalidZero: false,
     );
     if (setting.showLastPriceUpdateTime) {
-      final nextUpdateDateTime = model.nextUpdateDateTime(data.req.bar);
+      final nextUpdateDateTime = model.nextUpdateDateTime(curKlineData.req.bar);
       // logd(
       //   'paintLastPriceMark lastModelTime:${model.dateTime}, nextUpdateDateTime:$nextUpdateDateTime',
       // );
@@ -303,8 +313,7 @@ class CandlePaintObject extends PaintObjectBox<CandleIndicator> {
         dy + flag * textHeight / 2, // 计算最新价文本区域相对于刻度线的位置
       ),
       drawDirection: DrawDirection.rtl,
-      // drawableSize: mainRectSize,
-      drawableSize: chartRect.size,
+      drawableRect: drawBounding,
       text: text,
       style: setting.lastPriceTextStyle,
       textAlign: TextAlign.end,
@@ -334,7 +343,6 @@ class CandlePaintObject extends PaintObjectBox<CandleIndicator> {
   }
 
   /// TODO: 待考虑.
-  @override
   void paintCrossTips(Canvas canvas, Offset offset) {
     // TODO: implement paintCrossTips
   }
@@ -357,8 +365,8 @@ class CandlePaintObject extends PaintObjectBox<CandleIndicator> {
         offset.dy - setting.crossYTickRectHeight / 2,
       ),
       drawDirection: DrawDirection.rtl,
-      // drawableSize: mainRectSize,
-      drawableSize: chartRect.size,
+      // drawableSize: drawBounding.size,
+      drawableRect: drawBounding,
       text: text,
       style: setting.crossYTickTextStyle,
       textAlign: TextAlign.end,
@@ -390,7 +398,6 @@ class CandlePaintObject extends PaintObjectBox<CandleIndicator> {
         chartRect.bottom + dyCenterOffset,
       ),
       drawDirection: DrawDirection.center,
-      // drawableSize: mainRectSize,
       text: time,
       style: setting.crossXTickTextStyle,
       textAlign: TextAlign.center,
@@ -488,8 +495,7 @@ class CandlePaintObject extends PaintObjectBox<CandleIndicator> {
       final size = canvas.drawText(
         offset: drawOffset,
         drawDirection: DrawDirection.ltr,
-        // drawableSize: mainRectSize,
-        drawableSize: chartRect.size,
+        drawableRect: chartRect,
         textSpan: TextSpan(
           children: keySpanList,
           style: setting.candleCardTitleStyle,
@@ -507,12 +513,11 @@ class CandlePaintObject extends PaintObjectBox<CandleIndicator> {
 
       canvas.drawText(
         offset: Offset(
-          drawOffset.dx + size.width,
+          drawOffset.dx + size.width - 1,
           drawOffset.dy,
         ),
         drawDirection: DrawDirection.ltr,
-        // drawableSize: mainRectSize,
-        drawableSize: chartRect.size,
+        drawableRect: chartRect,
         textSpan: TextSpan(
           children: valueSpan,
           style: setting.candleCardValueStyle,
@@ -537,8 +542,7 @@ class CandlePaintObject extends PaintObjectBox<CandleIndicator> {
       final size = canvas.drawText(
         offset: drawOffset,
         drawDirection: DrawDirection.rtl,
-        // drawableSize: mainRectSize,
-        drawableSize: chartRect.size,
+        drawableRect: chartRect,
         textSpan: TextSpan(
           children: valueSpan,
           style: setting.candleCardValueStyle,
@@ -556,12 +560,11 @@ class CandlePaintObject extends PaintObjectBox<CandleIndicator> {
 
       canvas.drawText(
         offset: Offset(
-          drawOffset.dx - size.width,
+          drawOffset.dx - size.width + 1,
           drawOffset.dy,
         ),
         drawDirection: DrawDirection.rtl,
-        // drawableSize: mainRectSize,
-        drawableSize: chartRect.size,
+        drawableRect: chartRect,
         textSpan: TextSpan(
           children: keySpanList,
           style: setting.candleCardTitleStyle,

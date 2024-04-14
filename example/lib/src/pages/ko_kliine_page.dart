@@ -85,6 +85,10 @@ class _KOKlinePageState extends ConsumerState<KOKlinePage> {
             FlexiKlineWidget(
               controller: controller,
             ),
+            Container(
+              height: 300.r,
+              color: Colors.amber,
+            )
           ],
         ),
       ),

@@ -34,12 +34,14 @@ mixin ConfigBinding on KlineBindingBase, SettingBinding implements IConfig {
     logd("init config");
     _mainIndicator = MultiPaintObjectIndicator(
       key: const ValueKey('main'),
+      height: mainRect.height,
       tipsHeight: mainTipsHeight,
       padding: mainPadding,
     );
 
     addIndicatorInMain(CandleIndicator(
       key: const ValueKey(IndicatorType.candle),
+      height: mainRect.height,
       tipsHeight: mainTipsHeight,
       padding: mainPadding,
     ));
@@ -50,11 +52,13 @@ mixin ConfigBinding on KlineBindingBase, SettingBinding implements IConfig {
 
     addIndicatorInSub(VolumeIndicator(
       key: const ValueKey(IndicatorType.volume),
-      tipsHeight: 12,
+      height: subIndicatorDefaultHeight,
+      tipsHeight: 22,
     ));
 
     addIndicatorInSub(VolumeIndicator(
       key: const ValueKey(IndicatorType.volume),
+      height: 120,
       tipsHeight: 0,
     ));
   }
@@ -85,7 +89,19 @@ mixin ConfigBinding on KlineBindingBase, SettingBinding implements IConfig {
 
   @override
   List<double> get subIndicatorHeightList {
-    return subIndicators.map((e) => subIndicatorChartHeight).toList();
+    return subIndicators.map((e) => e.height).toList();
+  }
+
+  @override
+  double calculateIndicatorTop(int slot) {
+    double top = 0;
+    final hList = subIndicatorHeightList;
+    if (slot >= 0 && slot < hList.length) {
+      for (int i = 0; i < slot; i++) {
+        top += hList[i];
+      }
+    }
+    return top;
   }
 
   @override

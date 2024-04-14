@@ -457,6 +457,7 @@ mixin SettingBinding on KlineBindingBase implements IConfig {
     return formatNumber(
       val,
       precision: p,
+      defIfZero: '--',
       cutInvalidZero: cutInvalidZero,
       // showThousands: true,
     );
@@ -486,7 +487,7 @@ mixin SettingBinding on KlineBindingBase implements IConfig {
       );
 
   /// 副区的单个指标图高度
-  double subIndicatorChartHeight = 80;
+  double subIndicatorDefaultHeight = 80;
 
   /// 副区的指标图最大数量
   int subIndicatorChartMaxCount = 4;

@@ -19,7 +19,6 @@ import 'package:go_router/go_router.dart';
 import 'pages/ko_kliine_page.dart';
 import 'pages/main_nav_page.dart';
 import 'pages/my_demo_page.dart';
-import 'pages/setting_page.dart';
 
 final GlobalKey<NavigatorState> globalNavigatorKey = GlobalKey<NavigatorState>(
   debugLabel: 'myApp',
