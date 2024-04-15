@@ -80,8 +80,9 @@ class VolumePaintObject extends PaintObjectBox<VolumeIndicator> {
 
     if (cross.isCrossing) return;
     final model = state.curKlineData.latest;
-    if (model == null) return;
-    _paintTooltipVolume(canvas, model);
+    if (model != null) {
+      _paintTooltipVolume(canvas, model);
+    }
   }
 
   @override
@@ -89,7 +90,7 @@ class VolumePaintObject extends PaintObjectBox<VolumeIndicator> {
     /// 绘制Cross命中的Y轴刻度值
     _paintCrossYAxisVolumeMark(canvas, offset);
 
-    CandleModel? model = state.offsetToCandle(offset);
+    final model = state.offsetToCandle(offset);
     if (model != null) {
       _paintTooltipVolume(canvas, model);
     }
@@ -107,9 +108,8 @@ class VolumePaintObject extends PaintObjectBox<VolumeIndicator> {
     for (var i = start; i < end; i++) {
       final model = data.list[i];
       final dx = offset - (i - start) * candleActualWidth;
-      final isLong = model.close >= model.open;
-
       final dy = valueToDy(model.vol);
+      final isLong = model.close >= model.open;
 
       canvas.drawLine(
         Offset(dx, dy),
@@ -215,7 +215,7 @@ class VolumePaintObject extends PaintObjectBox<VolumeIndicator> {
         height: indicator.tipsHeight / setting.volTipFontSize,
       ),
       textAlign: TextAlign.center,
-      padding: setting.volTipRectPadding,
+      padding: setting.volTipsRectPadding,
       maxLines: 1,
     );
   }

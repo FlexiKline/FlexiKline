@@ -119,6 +119,7 @@ mixin PaintObjectBoundingMixin on PaintObjectProxy
   bool get drawInSub => slot > mainIndicatorSlot;
 
   @override
+  @mustCallSuper
   void bindSolt(int newSlot) {
     if (newSlot != slot) {
       _bounding = null;
@@ -182,8 +183,8 @@ mixin DataInitMixin on PaintObjectProxy implements IPaintDataInit {
     return chartRect.height / (maxVal - minVal).toDouble();
   }
 
-  double valueToDy(Decimal value) {
-    value = value.clamp(minVal, maxVal);
+  double valueToDy(Decimal value, {bool correct = true}) {
+    if (correct) value = value.clamp(minVal, maxVal);
     return chartRect.bottom - (value - minVal).toDouble() * dyFactor;
   }
 
@@ -222,9 +223,13 @@ abstract class PaintObject<T extends Indicator>
 
   T get indicator => _indicator!;
 
+  // 父级PaintObject. 主要用于给其他子级PaintObject限定范围.
+  PaintObject? parent;
+
   @mustCallSuper
   void dispose() {
     _indicator = null;
+    parent = null;
   }
 }
 
@@ -273,19 +278,25 @@ abstract class PaintObjectBox<T extends PaintObjectIndicator>
 
 /// 多个Indicator组合绘制
 /// 主要实现接口遍历转发.
-class MultiPaintObject extends PaintObjectBox<MultiPaintObjectIndicator> {
-  MultiPaintObject({
-    required super.controller,
-    required super.indicator,
-  });
+abstract class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
+    extends PaintObjectProxy with PaintObjectBoundingMixin, DataInitMixin {
+  MultiPaintObjectBox({
+    required KlineBindingBase controller,
+    required MultiPaintObjectIndicator indicator,
+  }) : super(controller: controller, indicator: indicator) {
+    for (var child in indicator.children) {
+      // 保证子Indicator的布局参数与父布局一置.
+      child.update(indicator);
+      child.paintObject = child.createPaintObject(controller);
+      child.paintObject!.parent = this;
+    }
+  }
 
   @override
-  Decimal get maxVal => throw UnimplementedError();
+  T get indicator => super.indicator as T;
 
   @override
-  Decimal get minVal => throw UnimplementedError();
-
-  @override
+  @mustCallSuper
   void bindSolt(int newSlot) {
     super.bindSolt(newSlot);
     for (var indicator in indicator.children) {
@@ -294,6 +305,7 @@ class MultiPaintObject extends PaintObjectBox<MultiPaintObjectIndicator> {
   }
 
   @override
+  @mustCallSuper
   void initData(List<CandleModel> list, {int start = 0, int end = 0}) {
     for (var indicator in indicator.children) {
       indicator.paintObject?.initData(list, start: start, end: end);
@@ -301,6 +313,7 @@ class MultiPaintObject extends PaintObjectBox<MultiPaintObjectIndicator> {
   }
 
   @override
+  @mustCallSuper
   void paintChart(Canvas canvas, Size size) {
     for (var indicator in indicator.children) {
       indicator.paintObject?.paintChart(canvas, size);
@@ -308,14 +321,15 @@ class MultiPaintObject extends PaintObjectBox<MultiPaintObjectIndicator> {
   }
 
   @override
+  @mustCallSuper
   void onCross(Canvas canvas, Offset offset) {
     for (var indicator in indicator.children) {
       indicator.paintObject?.onCross(canvas, offset);
     }
   }
 
-  @mustCallSuper
   @override
+  @mustCallSuper
   void dispose() {
     for (var indicator in indicator.children) {
       indicator.paintObject?.dispose();

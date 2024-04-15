@@ -32,7 +32,7 @@ abstract class KlineBindingBase with KlineLog, GestureHanderImpl {
   }) {
     this.logger = logger;
     logd("constrouct");
-    initBinding();
+    // initBinding();
   }
 
   @protected

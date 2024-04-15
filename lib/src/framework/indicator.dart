@@ -98,7 +98,7 @@ abstract class PaintObjectIndicator extends Indicator {
 
 /// 多个绘制Indicator的配置.
 /// children 维护具体的Indicator配置.
-class MultiPaintObjectIndicator extends PaintObjectIndicator {
+abstract class MultiPaintObjectIndicator extends PaintObjectIndicator {
   MultiPaintObjectIndicator({
     required super.key,
     required super.height,
@@ -110,22 +110,25 @@ class MultiPaintObjectIndicator extends PaintObjectIndicator {
   final Set<PaintObjectIndicator> children;
 
   @override
-  PaintObject createPaintObject(KlineBindingBase controller) {
-    for (var indicator in children) {
-      // 保证子Indicator的布局参数与父布局一置.
-      indicator.update(this);
-      indicator.paintObject ??= indicator.createPaintObject(controller);
-    }
-    return MultiPaintObject(controller: controller, indicator: this);
-  }
+  @mustCallSuper
+  MultiPaintObjectBox createPaintObject(KlineBindingBase controller);
 
-  void appendIndicator(PaintObjectIndicator indicator) {
+  void appendIndicator(
+    PaintObjectIndicator newIndicator,
+    KlineBindingBase controller,
+  ) {
     PaintObjectIndicator? old;
-    if (children.contains(indicator)) {
-      old = children.lookup(indicator);
+    if (children.contains(newIndicator)) {
+      old = children.lookup(newIndicator);
       old?.dispose();
     }
-    children.add(indicator);
+    children.add(newIndicator);
+    if (paintObject != null) {
+      // 说明当前父PaintObject已经创建, 需要及时创建新加入的newIndicator,
+      newIndicator.update(this);
+      newIndicator.paintObject = newIndicator.createPaintObject(controller);
+      newIndicator.paintObject!.parent = paintObject;
+    }
   }
 
   void deleteIndicator(Key key) {

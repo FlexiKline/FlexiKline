@@ -23,7 +23,7 @@ import 'setting.dart';
 
 mixin CrossBinding
     on KlineBindingBase, SettingBinding
-    implements ICross, IState, IConfig {
+    implements ICross, IState, IConfig, IPainting {
   @override
   void initBinding() {
     super.initBinding();
@@ -40,7 +40,6 @@ mixin CrossBinding
   @override
   Listenable get repaintCross => _repaintCross;
   void _markRepaint() {
-    checkAndCreatePaintObject();
     _repaintCross.value++;
   }
 
@@ -88,6 +87,7 @@ mixin CrossBinding
   @override
   void paintCross(Canvas canvas, Size size) {
     if (isCrossing) {
+      checkAndCreatePaintObject();
       final offset = this.offset;
       if (offset == null || offset.isInfinite) {
         return;
@@ -103,21 +103,6 @@ mixin CrossBinding
         indicator.paintObject?.bindSolt(i++);
         indicator.paintObject?.onCross(canvas, offset);
       }
-
-      // if (showCrossYAxisTickMark) {
-      //   /// 绘制Cross Y轴价钱刻度
-      //   paintCrossYAxisPriceMark(canvas, offset);
-      // }
-
-      // if (showCrossXAxisTickMark) {
-      //   /// 绘制Cross X轴时间刻度
-      //   paintCrossXAxisTimeMark(canvas, offset);
-      // }
-
-      // if (showPopupCandleCard) {
-      //   /// 绘制Cross 命中的蜡烛数据弹窗
-      //   paintPopupCandleCard(canvas, offset);
-      // }
     }
   }
 
@@ -126,6 +111,7 @@ mixin CrossBinding
   bool handleTap(GestureData data) {
     if (isCrossing) {
       offset = null;
+      markRepaintChart(); // 当Cross事件结束后, 调用markRepaintChart绘制Painting图层首根蜡烛的tips信息.
       markRepaintCross();
       return super.handleTap(data); // 不处理, 向上传递事件.
     }
@@ -133,6 +119,7 @@ mixin CrossBinding
     // 更新并校正起始焦点.
     offset = data.offset;
     markRepaintCross();
+    markRepaintChart(); // 当Cross事件启动后, 调用markRepaintChart清理Painting图层的tips信息.
     return true;
   }
 

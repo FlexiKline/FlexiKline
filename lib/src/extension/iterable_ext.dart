@@ -12,14 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// export 'indicator.dart';
-export 'candle.dart';
-export 'volume.dart';
-export 'ma.dart';
-export 'macd.dart';
+extension ListExt<T> on List<T> {
+  bool checkIndex(int index) {
+    return index >= 0 && index < length;
+  }
 
-enum IndicatorType {
-  candle,
-  volume,
-  ma;
+  T? getItem(int index) {
+    if (checkIndex(index)) return this[index];
+    return null;
+  }
+}
+
+extension MapExt<K, V> on Map<K, V> {
+  V? getItem(K? key) {
+    if (key != null) return this[key];
+    return null;
+  }
 }

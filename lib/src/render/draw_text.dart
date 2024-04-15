@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import 'dart:math' as math;
-import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart';
 
 import 'common.dart';

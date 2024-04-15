@@ -43,7 +43,6 @@ mixin PaintingBinding
   @override
   Listenable get repaintIndicatorChart => _repaintCandle;
   void _markRepaint() {
-    checkAndCreatePaintObject();
     _repaintCandle.value++;
   }
 
@@ -81,7 +80,7 @@ mixin PaintingBinding
   @override
   void paintChart(Canvas canvas, Size size) {
     // logd('$diffTime paintChart >>>>');
-
+    checkAndCreatePaintObject();
     mainIndicator.paintObject?.initData(
       curKlineData.list,
       start: curKlineData.start,

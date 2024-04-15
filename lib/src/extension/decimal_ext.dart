@@ -29,6 +29,10 @@ extension IntExt on int {
   Decimal get d => Decimal.tryParse(toString()) ?? Decimal.zero;
 }
 
+final Decimal two = Decimal.fromInt(2);
+
 extension DecimalExt on Decimal {
   // String get toCompactBigNumber => compactBigNumber(this);
+
+  Decimal get half => (this / two).toDecimal();
 }

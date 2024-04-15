@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import 'package:decimal/decimal.dart';
-import 'package:flexi_kline/flexi_kline.dart';
+
 import '../extension/export.dart';
 
 String formatPercentage(

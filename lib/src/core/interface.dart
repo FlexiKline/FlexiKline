@@ -138,7 +138,6 @@ abstract interface class IConfig {
   List<double> get subIndicatorHeightList;
   double calculateIndicatorTop(int slot);
   double get subRectHeight;
-  void initIndicators();
   void checkAndCreatePaintObject();
   void addIndicatorInMain(PaintObjectIndicator indicator);
   void delIndicatorInMain(Key key);

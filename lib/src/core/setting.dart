@@ -534,7 +534,14 @@ mixin SettingBinding on KlineBindingBase implements IConfig {
         overflow: TextOverflow.ellipsis,
         height: 1,
       );
-  EdgeInsets volTipRectPadding = const EdgeInsets.only(
+  EdgeInsets volTipsRectPadding = const EdgeInsets.only(
+    left: 8,
+  );
+
+  /// MA 指标配置
+  double maLineStrokeWidth = 1.0; // MA线宽
+  double maTipsFontSize = 10;
+  EdgeInsets maTipsRectPadding = const EdgeInsets.only(
     left: 8,
   );
 }

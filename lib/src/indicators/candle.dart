@@ -17,28 +17,30 @@ import 'package:flutter/material.dart';
 
 import '../constant.dart';
 import '../core/export.dart';
+import '../extension/export.dart';
 import '../model/export.dart';
 import '../render/export.dart';
 import '../utils/export.dart';
 import '../framework/export.dart';
 
-class CandleIndicator extends PaintObjectIndicator {
+class CandleIndicator extends MultiPaintObjectIndicator {
   CandleIndicator({
     required super.key,
     required super.height,
     super.tipsHeight,
     super.padding,
+    super.children,
   });
 
   @override
-  PaintObject createPaintObject(
+  MultiPaintObjectBox createPaintObject(
     KlineBindingBase controller,
   ) {
     return CandlePaintObject(controller: controller, indicator: this);
   }
 }
 
-class CandlePaintObject extends PaintObjectBox<CandleIndicator> {
+class CandlePaintObject extends MultiPaintObjectBox<CandleIndicator> {
   CandlePaintObject({
     required super.controller,
     required super.indicator,
@@ -67,6 +69,8 @@ class CandlePaintObject extends PaintObjectBox<CandleIndicator> {
     final margin = volH * twentieth;
     _max += margin;
     _min -= margin;
+
+    super.initData(list, start: start, end: end);
   }
 
   @override
@@ -87,18 +91,43 @@ class CandlePaintObject extends PaintObjectBox<CandleIndicator> {
 
     /// 绘制最新价刻度线与价钱标记
     paintLastPriceMark(canvas, size);
+
+    super.paintChart(canvas, size);
+  }
+
+  @override
+  void onCross(Canvas canvas, Offset offset) {
+    /// 绘制Cross Y轴价钱刻度
+    paintCrossYAxisPriceMark(canvas, offset);
+
+    if (setting.showCrossXAxisTickMark) {
+      /// 绘制Cross X轴时间刻度
+      paintCrossXAxisTimeMark(canvas, offset);
+    }
+
+    if (setting.showPopupCandleCard) {
+      /// 绘制Cross 命中的蜡烛数据弹窗
+      paintPopupCandleCard(canvas, offset);
+    }
+    super.onCross(canvas, offset);
   }
 
   /// 绘制蜡烛图
   void paintCandleChart(Canvas canvas, Size size) {
     final data = curKlineData;
-    if (data.list.isEmpty) return;
     int start = data.start;
     int end = data.end;
+    if (data.list.isEmpty || !data.list.checkIndex(start)) {
+      logw('paintCandleChart Data.list is empty or Index is out of bounds');
+      return;
+    }
 
     final offset = startCandleDx - candleWidthHalf;
     final bar = data.timerBar;
     Offset? maxHihgOffset, minLowOffset;
+    bool hasEnough = paintDxOffset > 0;
+    Decimal maxHigh = data.list[start].high;
+    Decimal minLow = data.list[start].low;
     for (var i = start; i < end; i++) {
       final model = data.list[i];
       final dx = offset - (i - start) * candleActualWidth;
@@ -131,22 +160,36 @@ class CandlePaintObject extends PaintObjectBox<CandleIndicator> {
       }
 
       if (setting.isDrawPriceMark) {
-        // 记录最大最小偏移量.
-        if (model.high == _maxHigh) {
-          maxHihgOffset = highOff;
-        }
-        if (model.low == _minLow) {
-          minLowOffset = lowOff;
+        if (hasEnough) {
+          // 满足一屏, 根据initData中的最大最小值来记录最大最小偏移量.
+          if (model.high == _maxHigh) {
+            maxHihgOffset = highOff;
+            maxHigh = _maxHigh!;
+          }
+          if (model.low == _minLow) {
+            minLowOffset = lowOff;
+            minLow = _minLow!;
+          }
+        } else if (dx > 0) {
+          // 如果当前绘制不足一屏, 最大最小绘制仅限可见区域.
+          if (model.high >= maxHigh) {
+            maxHihgOffset = highOff;
+            maxHigh = model.high;
+          }
+          if (model.low <= minLow) {
+            minLowOffset = lowOff;
+            minLow = model.low;
+          }
         }
       }
     }
 
     // 最后绘制在蜡烛图中的最大最小价钱标记
     if (setting.isDrawPriceMark &&
-        (maxHihgOffset != null && _maxHigh != null) &&
-        (minLowOffset != null && _minLow != null)) {
-      paintPriceMark(canvas, maxHihgOffset, _maxHigh!);
-      paintPriceMark(canvas, minLowOffset, _minLow!);
+        (maxHihgOffset != null && maxHigh > Decimal.zero) &&
+        (minLowOffset != null && minLow > Decimal.zero)) {
+      paintPriceMark(canvas, maxHihgOffset, maxHigh);
+      paintPriceMark(canvas, minLowOffset, minLow);
     }
   }
 
@@ -323,22 +366,6 @@ class CandlePaintObject extends PaintObjectBox<CandleIndicator> {
       borderWidth: setting.lastPriceRectBorderWidth,
       borderColor: setting.lastPriceRectBorderColor,
     );
-  }
-
-  @override
-  void onCross(Canvas canvas, Offset offset) {
-    /// 绘制Cross Y轴价钱刻度
-    paintCrossYAxisPriceMark(canvas, offset);
-
-    if (setting.showCrossXAxisTickMark) {
-      /// 绘制Cross X轴时间刻度
-      paintCrossXAxisTimeMark(canvas, offset);
-    }
-
-    if (setting.showPopupCandleCard) {
-      /// 绘制Cross 命中的蜡烛数据弹窗
-      paintPopupCandleCard(canvas, offset);
-    }
   }
 
   /// TODO: 待考虑.

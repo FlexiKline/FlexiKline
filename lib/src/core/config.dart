@@ -31,6 +31,7 @@ mixin ConfigBinding on KlineBindingBase, SettingBinding implements IConfig {
   void initBinding() {
     super.initBinding();
     logd("init config");
+    initIndicators();
   }
 
   @override
@@ -44,20 +45,22 @@ mixin ConfigBinding on KlineBindingBase, SettingBinding implements IConfig {
     subIndicators.clear();
   }
 
-  @override
   void initIndicators() {
-    _mainIndicator = MultiPaintObjectIndicator(
+    logd("initIndicators");
+    _mainIndicator = CandleIndicator(
       key: const ValueKey('main'),
       height: mainRect.height,
       tipsHeight: mainTipsHeight,
       padding: mainPadding,
     );
 
-    addIndicatorInMain(CandleIndicator(
-      key: const ValueKey(IndicatorType.candle),
+    addIndicatorInMain(MAIndicator(
+      key: const ValueKey(IndicatorType.ma),
       height: mainRect.height,
-      tipsHeight: mainTipsHeight,
-      padding: mainPadding,
+      calcParams: [
+        MaParam(label: 'MA7', count: 7, color: Colors.red),
+        MaParam(label: 'MA30', count: 30, color: Colors.blue)
+      ],
     ));
 
     _subIndicators = ListQueue<PaintObjectIndicator>(
@@ -113,23 +116,19 @@ mixin ConfigBinding on KlineBindingBase, SettingBinding implements IConfig {
     return subIndicatorHeightList.reduce((curr, next) => curr + next);
   }
 
-  bool isNeedCreate = false;
+  // bool isNeedCreate = false;
   @override
   void checkAndCreatePaintObject() {
-    if (isNeedCreate) {
-      mainIndicator.paintObject ??= mainIndicator.createPaintObject(this);
-      for (var indicator in subIndicators) {
-        indicator.paintObject ??= indicator.createPaintObject(this);
-      }
-      isNeedCreate = false;
+    mainIndicator.paintObject ??= mainIndicator.createPaintObject(this);
+    for (var indicator in subIndicators) {
+      indicator.paintObject ??= indicator.createPaintObject(this);
     }
   }
 
   /// 在主图中增加指标
   @override
   void addIndicatorInMain(PaintObjectIndicator indicator) {
-    mainIndicator.appendIndicator(indicator);
-    isNeedCreate = true;
+    mainIndicator.appendIndicator(indicator, this);
   }
 
   /// 删除主图中key指定的指标
@@ -146,7 +145,6 @@ mixin ConfigBinding on KlineBindingBase, SettingBinding implements IConfig {
       deleted.dispose();
     }
     subIndicators.addLast(indicator);
-    isNeedCreate = true;
   }
 
   /// 删除副图key指定的指标
