@@ -22,17 +22,22 @@ import '../model/export.dart';
 import '../render/export.dart';
 import '../utils/export.dart';
 
-class MaParam {
+class EMAParam {
   final String label;
   final int count;
   final Color color;
 
-  MaParam({required this.label, required this.count, required this.color});
+  EMAParam({required this.label, required this.count, required this.color});
 }
 
-/// MA 移动平均指标线
-class MAIndicator extends PaintObjectIndicator {
-  MAIndicator({
+/// EMA 平滑移动平均线
+/// 公式：
+/// 1）快速平滑移动平均线（EMA）是12日的，计算公式为：
+///   EMA(12)=2*今收盘价/(12+1)+11*昨日EMA(12)/(12+1)
+/// 2）慢速平滑移动平均线（EMA）是26日的，计算公式为：
+///   EMA(26)=2*今收盘价/(26+1)+25*昨日EMA(26)/(26+1)
+class EMAIndicator extends PaintObjectIndicator {
+  EMAIndicator({
     required super.key,
     required super.height,
     super.tipsHeight,
@@ -40,16 +45,16 @@ class MAIndicator extends PaintObjectIndicator {
     required this.calcParams,
   });
 
-  final List<MaParam> calcParams;
+  final List<EMAParam> calcParams;
 
   @override
   PaintObject createPaintObject(KlineBindingBase controller) {
-    return MAPaintObject(controller: controller, indicator: this);
+    return EMAPaintObject(controller: controller, indicator: this);
   }
 }
 
-class MAPaintObject extends PaintObjectBox<MAIndicator> {
-  MAPaintObject({
+class EMAPaintObject extends PaintObjectBox<EMAIndicator> {
+  EMAPaintObject({
     required super.controller,
     required super.indicator,
   });
@@ -58,7 +63,7 @@ class MAPaintObject extends PaintObjectBox<MAIndicator> {
   void initData(List<CandleModel> list, {int start = 0, int end = 0}) {
     if (list.isEmpty || start < 0 || end >= list.length) return;
     for (var param in indicator.calcParams) {
-      calcuMgr.calculateAndCacheMA(list, param.count, start: start, end: end);
+      calcuMgr.calculateAnCacheEMA(list, param.count);
     }
   }
 
@@ -80,12 +85,12 @@ class MAPaintObject extends PaintObjectBox<MAIndicator> {
 
   @override
   void paintChart(Canvas canvas, Size size) {
-    paintMALine(canvas, size);
+    paintEMALine(canvas, size);
 
     if (cross.isCrossing) return;
     final model = state.curKlineData.latest;
     if (model != null) {
-      paintMATips(canvas, model);
+      paintEMATips(canvas, model);
     }
   }
 
@@ -95,16 +100,16 @@ class MAPaintObject extends PaintObjectBox<MAIndicator> {
 
     final model = state.offsetToCandle(offset);
     if (model != null) {
-      paintMATips(canvas, model);
+      paintEMATips(canvas, model);
     }
   }
 
-  /// 绘制MA指标线
-  void paintMALine(Canvas canvas, Size size) {
+  /// 绘制EMA线
+  void paintEMALine(Canvas canvas, Size size) {
     final data = curKlineData;
     if (data.list.isEmpty) return;
     int start = data.start;
-    int end = (data.end + 1).clamp(start, data.list.length); // 多绘制一根蜡烛
+    int end = data.end;
 
     try {
       /// 保存画布状态
@@ -114,8 +119,8 @@ class MAPaintObject extends PaintObjectBox<MAIndicator> {
       canvas.clipRect(setting.mainDrawRect);
 
       for (var param in indicator.calcParams) {
-        final countMaMap = calcuMgr.getCountMaMap(param.count);
-        if (countMaMap == null || countMaMap.isEmpty) continue;
+        final countEmaMap = calcuMgr.getCountEmaMap(param.count);
+        if (countEmaMap == null || countEmaMap.isEmpty) continue;
 
         final offset = startCandleDx - candleWidthHalf;
         CandleModel m;
@@ -123,9 +128,9 @@ class MAPaintObject extends PaintObjectBox<MAIndicator> {
         for (int i = start; i < end; i++) {
           m = data.list[i];
           final dx = offset - (i - start) * candleActualWidth;
-          Decimal? maVal = countMaMap[m.timestamp];
-          maVal ??= calcuMgr.calculateMA(data.list, i, param.count);
-          final dy = valueToDy(maVal, correct: false);
+          final emaData = countEmaMap[m.timestamp];
+          if (emaData == null) continue;
+          final dy = valueToDy(emaData.val, correct: false);
           points.add(Offset(dx, dy));
         }
 
@@ -143,20 +148,20 @@ class MAPaintObject extends PaintObjectBox<MAIndicator> {
     }
   }
 
-  /// MA 绘制tips区域
-  void paintMATips(Canvas canvas, CandleModel model) {
+  /// EMA 绘制tips区域
+  void paintEMATips(Canvas canvas, CandleModel model) {
     final dx = tipsRect.left;
     final dy = tipsRect.top;
 
     final children = <TextSpan>[];
     for (var param in indicator.calcParams) {
-      final countMaMap = calcuMgr.getCountMaMap(param.count);
-      if (countMaMap == null || countMaMap.isEmpty) continue;
+      final countEmaMap = calcuMgr.getCountEmaMap(param.count);
+      if (countEmaMap == null || countEmaMap.isEmpty) continue;
 
-      final maVal = countMaMap.getItem(model.timestamp);
-      if (maVal != null) {
+      final emaData = countEmaMap.getItem(model.timestamp);
+      if (emaData != null) {
         final text = formatNumber(
-          maVal,
+          emaData.val,
           precision: state.curKlineData.req.precision,
           cutInvalidZero: true,
           prefix: '${param.label}: ',

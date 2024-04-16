@@ -63,6 +63,17 @@ mixin ConfigBinding on KlineBindingBase, SettingBinding implements IConfig {
       ],
     ));
 
+    addIndicatorInMain(EMAIndicator(
+      key: const ValueKey(IndicatorType.ema),
+      height: mainRect.height,
+      calcParams: [
+        EMAParam(label: 'MA5', count: 5, color: const Color(0xFF806180)),
+        EMAParam(label: 'MA10', count: 10, color: const Color(0xFFEBB736)),
+        EMAParam(label: 'MA20', count: 20, color: const Color(0xFFD672D5)),
+        EMAParam(label: 'MA60', count: 60, color: const Color(0xFF7F93DE))
+      ],
+    ));
+
     _subIndicators = ListQueue<PaintObjectIndicator>(
       subIndicatorChartMaxCount,
     );

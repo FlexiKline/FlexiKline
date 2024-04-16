@@ -19,6 +19,7 @@ import '../core/export.dart';
 import '../extension/export.dart';
 import '../model/export.dart';
 import '../utils/export.dart';
+import 'calcu_mgr.dart';
 import 'indicator.dart';
 
 const mainIndicatorSlot = -1;
@@ -97,6 +98,7 @@ mixin StateProxyMixin on PaintObject {
   late final IState state;
   late final ICross cross;
   late final IConfig config;
+  late final CalcuDataManager calcuMgr;
 
   KlineData get curKlineData => state.curKlineData;
 
@@ -247,6 +249,7 @@ abstract class PaintObjectProxy<T extends PaintObjectIndicator>
     state = controller as IState;
     cross = controller as ICross;
     config = controller as IConfig;
+    calcuMgr = state.calcuMgr;
   }
 
   int _slot = mainIndicatorSlot;

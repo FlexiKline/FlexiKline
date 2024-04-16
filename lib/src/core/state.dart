@@ -18,6 +18,7 @@ import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 
 import '../extension/export.dart';
+import '../framework/export.dart';
 import '../model/export.dart';
 import 'binding_base.dart';
 import 'data.dart';
@@ -39,6 +40,10 @@ mixin StateBinding
     super.dispose();
     logd('dispose state');
   }
+
+  final CalcuDataManager _calcuMgr = CalcuDataManager();
+  @override
+  CalcuDataManager get calcuMgr => _calcuMgr;
 
   final Map<String, KlineData> _klineDataCache = {};
 

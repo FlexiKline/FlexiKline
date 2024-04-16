@@ -84,6 +84,8 @@ abstract interface class IState {
 
   void appendKlineData(CandleReq req, List<CandleModel> list);
 
+  CalcuDataManager get calcuMgr;
+
   KlineData get curKlineData;
 
   /// 蜡烛总数

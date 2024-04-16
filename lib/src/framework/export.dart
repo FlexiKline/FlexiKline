@@ -14,3 +14,4 @@
 
 export 'indicator.dart';
 export 'object.dart';
+export 'calcu_mgr.dart';
