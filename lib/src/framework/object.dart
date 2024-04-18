@@ -46,6 +46,9 @@ abstract interface class IPaintBoundingBox {
   /// 当前指标图画笔可以绘制的范围
   Rect get drawBounding;
 
+  /// 当前指标图去除padding后的区域
+  Rect get paintRect;
+
   /// 当前指标图tooltip信息绘制区域
   Rect get tipsRect;
 
@@ -98,9 +101,10 @@ mixin StateProxyMixin on PaintObject {
   late final IState state;
   late final ICross cross;
   late final IConfig config;
-  late final CalcuDataManager calcuMgr;
 
-  KlineData get curKlineData => state.curKlineData;
+  KlineData get klineData => state.curKlineData;
+
+  CalcuDataManager get calcuMgr => state.curCalcuMgr;
 
   @Deprecated('请使用curKlineData')
   KlineData get data => state.curKlineData;
@@ -149,6 +153,16 @@ mixin PaintObjectBoundingMixin on PaintObjectProxy
       }
     }
     return _bounding!;
+  }
+
+  @override
+  Rect get paintRect {
+    return Rect.fromLTRB(
+      drawBounding.left + paintPadding.left,
+      drawBounding.top + paintPadding.top,
+      drawBounding.right - paintPadding.right,
+      drawBounding.bottom - paintPadding.bottom,
+    );
   }
 
   @override
@@ -249,7 +263,6 @@ abstract class PaintObjectProxy<T extends PaintObjectIndicator>
     state = controller as IState;
     cross = controller as ICross;
     config = controller as IConfig;
-    calcuMgr = state.calcuMgr;
   }
 
   int _slot = mainIndicatorSlot;

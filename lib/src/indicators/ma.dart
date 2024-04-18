@@ -93,7 +93,7 @@ class MAPaintObject extends PaintObjectBox<MAIndicator> {
   void onCross(Canvas canvas, Offset offset) {
     if (indicator.tipsHeight <= 0) return;
 
-    final model = state.offsetToCandle(offset);
+    final model = dxToCandle(offset.dx);
     if (model != null) {
       paintMATips(canvas, model);
     }
@@ -101,7 +101,7 @@ class MAPaintObject extends PaintObjectBox<MAIndicator> {
 
   /// 绘制MA指标线
   void paintMALine(Canvas canvas, Size size) {
-    final data = curKlineData;
+    final data = klineData;
     if (data.list.isEmpty) return;
     int start = data.start;
     int end = (data.end + 1).clamp(start, data.list.length); // 多绘制一根蜡烛

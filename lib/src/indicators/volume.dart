@@ -90,7 +90,7 @@ class VolumePaintObject extends PaintObjectBox<VolumeIndicator> {
     /// 绘制Cross命中的Y轴刻度值
     _paintCrossYAxisVolumeMark(canvas, offset);
 
-    final model = state.offsetToCandle(offset);
+    final model = dxToCandle(offset.dx);
     if (model != null) {
       _paintTooltipVolume(canvas, model);
     }
@@ -98,7 +98,7 @@ class VolumePaintObject extends PaintObjectBox<VolumeIndicator> {
 
   /// 绘制Volume柱状图
   void paintIndicatorChart(Canvas canvas, Size size) {
-    final data = curKlineData;
+    final data = klineData;
     if (data.list.isEmpty) return;
     int start = data.start;
     int end = data.end;

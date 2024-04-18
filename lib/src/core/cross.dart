@@ -23,7 +23,7 @@ import 'setting.dart';
 
 mixin CrossBinding
     on KlineBindingBase, SettingBinding
-    implements ICross, IState, IConfig, IPainting {
+    implements ICross, IState, IConfig, IChart {
   @override
   void initBinding() {
     super.initBinding();

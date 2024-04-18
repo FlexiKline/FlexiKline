@@ -13,7 +13,7 @@
 // limitations under the License.
 
 export 'binding_base.dart';
-export 'painting.dart';
+export 'chart.dart';
 export 'gesture.dart';
 export 'state.dart';
 export 'config.dart';

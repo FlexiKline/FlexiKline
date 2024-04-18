@@ -114,7 +114,7 @@ class CandlePaintObject extends MultiPaintObjectBox<CandleIndicator> {
 
   /// 绘制蜡烛图
   void paintCandleChart(Canvas canvas, Size size) {
-    final data = curKlineData;
+    final data = klineData;
     int start = data.start;
     int end = data.end;
     if (data.list.isEmpty || !data.list.checkIndex(start)) {
@@ -216,8 +216,8 @@ class CandlePaintObject extends MultiPaintObjectBox<CandleIndicator> {
 
     final text = setting.formatPrice(
       val,
-      instId: curKlineData.req.instId,
-      precision: curKlineData.req.precision,
+      instId: klineData.req.instId,
+      precision: klineData.req.precision,
     );
     canvas.drawText(
       offset: endOffset,
@@ -270,8 +270,8 @@ class CandlePaintObject extends MultiPaintObjectBox<CandleIndicator> {
 
       final text = setting.formatPrice(
         price,
-        instId: curKlineData.req.instId,
-        precision: curKlineData.req.precision,
+        instId: klineData.req.instId,
+        precision: klineData.req.precision,
       );
 
       canvas.drawText(
@@ -295,7 +295,7 @@ class CandlePaintObject extends MultiPaintObjectBox<CandleIndicator> {
   /// 3. 最新价向左移动后, 刻度线根据最新价蜡烛线平行移动.
   void paintLastPriceMark(Canvas canvas, Size size) {
     if (!setting.isDrawLastPriceMark) return;
-    final data = curKlineData;
+    final data = klineData;
     final model = data.latest;
     if (model == null) {
       logd('paintLastPriceMark > on data!');
@@ -332,12 +332,12 @@ class CandlePaintObject extends MultiPaintObjectBox<CandleIndicator> {
         setting.lastPriceRectPadding.vertical + setting.lastPriceFontSize;
     String text = setting.formatPrice(
       model.close,
-      instId: curKlineData.req.instId,
-      precision: curKlineData.req.precision,
+      instId: klineData.req.instId,
+      precision: klineData.req.precision,
       cutInvalidZero: false,
     );
     if (setting.showLastPriceUpdateTime) {
-      final nextUpdateDateTime = model.nextUpdateDateTime(curKlineData.req.bar);
+      final nextUpdateDateTime = model.nextUpdateDateTime(klineData.req.bar);
       // logd(
       //   'paintLastPriceMark lastModelTime:${model.dateTime}, nextUpdateDateTime:$nextUpdateDateTime',
       // );
@@ -381,8 +381,8 @@ class CandlePaintObject extends MultiPaintObjectBox<CandleIndicator> {
 
     final text = setting.formatPrice(
       price,
-      instId: curKlineData.req.instId,
-      precision: curKlineData.req.precision,
+      instId: klineData.req.instId,
+      precision: klineData.req.precision,
       cutInvalidZero: false,
     );
     canvas.drawText(
@@ -409,8 +409,8 @@ class CandlePaintObject extends MultiPaintObjectBox<CandleIndicator> {
   @protected
   void paintCrossXAxisTimeMark(Canvas canvas, Offset offset) {
     final index = dxToIndex(offset.dx);
-    final model = curKlineData.getCandle(index);
-    final timeBar = curKlineData.timerBar;
+    final model = klineData.getCandle(index);
+    final timeBar = klineData.timerBar;
     if (model == null || timeBar == null) return;
 
     // final time = model.formatDateTimeByTimeBar(timeBar);
@@ -440,7 +440,7 @@ class CandlePaintObject extends MultiPaintObjectBox<CandleIndicator> {
   @protected
   void paintPopupCandleCard(Canvas canvas, Offset offset) {
     final model = dxToCandle(offset.dx);
-    final timeBar = curKlineData.timerBar;
+    final timeBar = klineData.timerBar;
     if (model == null || timeBar == null) return;
 
     /// 1. 准备数据
@@ -455,8 +455,8 @@ class CandlePaintObject extends MultiPaintObjectBox<CandleIndicator> {
       ));
     }
 
-    final instId = curKlineData.instId;
-    final p = curKlineData.precision;
+    final instId = klineData.instId;
+    final p = klineData.precision;
     TextStyle changeStyle = setting.candleCardTitleStyle;
     final chgrate = model.changeRate;
     if (chgrate > 0) {

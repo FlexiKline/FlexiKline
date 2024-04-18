@@ -14,7 +14,6 @@
 
 import 'dart:collection';
 
-import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 
 import '../framework/export.dart';
@@ -84,7 +83,9 @@ abstract interface class IState {
 
   void appendKlineData(CandleReq req, List<CandleModel> list);
 
-  CalcuDataManager get calcuMgr;
+  CalcuDataManager getCalcuMgrByReq(CandleReq req);
+  CalcuDataManager getCalcuMgr(String req);
+  CalcuDataManager get curCalcuMgr;
 
   KlineData get curKlineData;
 
@@ -95,17 +96,17 @@ abstract interface class IState {
   double get maxPaintWidth;
 
   /// 绘制区域高度 / 当前绘制的蜡烛数据高度.
-  double get dyFactor;
+  // double get dyFactor;
 
   /// 将offset指定的dy转换为当前坐标Y轴对应价钱.
-  Decimal? offsetToPrice(Offset offset);
-  Decimal? dyToPrice(double dy);
+  // Decimal? offsetToPrice(Offset offset);
+  // Decimal? dyToPrice(double dy);
 
   /// 将价钱转换为Y轴坐标.
-  double priceToDy(Decimal price);
+  // double priceToDy(Decimal price);
 
   /// 当前Cross命中的Model
-  CandleModel? get crossingCandle;
+  // CandleModel? get crossingCandle;
 
   /// 将offset转换为蜡烛数据
   CandleModel? offsetToCandle(Offset offset);
@@ -147,28 +148,13 @@ abstract interface class IConfig {
   void delIndicatorInSub(Key key);
 }
 
-//// 主图(蜡烛)绘制接口
-abstract interface class IPainting {
+//// Chart层绘制接口
+abstract interface class IChart {
   Listenable get repaintIndicatorChart;
 
   void paintChart(Canvas canvas, Size size);
 
   void markRepaintChart();
-}
-
-/// 副图(指标)绘制接口
-abstract interface class ISubChart {
-  void paintSubChart(Canvas canvas, Size size);
-
-  void paintSubTooltip(Canvas canvas, Size size);
-
-  void paintSubCross(Canvas canvas, Size size);
-  // 副图数量
-  int get indicatorCount;
-  // 副图高度的列表.
-  List<double> get indicatorHeightList;
-  // 副图区域的总高度
-  double get subRectHeight;
 }
 
 //// 最新价与十字线绘制API

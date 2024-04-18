@@ -98,7 +98,7 @@ class EMAPaintObject extends PaintObjectBox<EMAIndicator> {
   void onCross(Canvas canvas, Offset offset) {
     if (indicator.tipsHeight <= 0) return;
 
-    final model = state.offsetToCandle(offset);
+    final model = dxToCandle(offset.dx);
     if (model != null) {
       paintEMATips(canvas, model);
     }
@@ -106,7 +106,7 @@ class EMAPaintObject extends PaintObjectBox<EMAIndicator> {
 
   /// 绘制EMA线
   void paintEMALine(Canvas canvas, Size size) {
-    final data = curKlineData;
+    final data = klineData;
     if (data.list.isEmpty) return;
     int start = data.start;
     int end = data.end;

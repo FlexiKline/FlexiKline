@@ -22,6 +22,7 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import '../config.dart';
 import '../repo/api.dart' as api;
 import '../widgets/latest_price_view.dart';
+import '../widgets/time_bar.dart';
 import 'main_nav_page.dart';
 
 class KOKlinePage extends ConsumerStatefulWidget {
@@ -38,6 +39,13 @@ class _KOKlinePageState extends ConsumerState<KOKlinePage> {
     precision: 4,
     limit: 300,
   );
+
+  final List<TimeBar> timBarList = const [
+    TimeBar.m15,
+    TimeBar.H1,
+    TimeBar.H4,
+    TimeBar.D1
+  ];
 
   late final FlexiKlineController controller;
   CandleModel? latest;
@@ -62,6 +70,22 @@ class _KOKlinePageState extends ConsumerState<KOKlinePage> {
     });
   }
 
+  void onTapTimerBar(TimeBar bar) {
+    if (bar.bar != req.bar) {
+      req.bar = bar.bar;
+      api.getHistoryCandles(req).then((resp) {
+        if (resp.success && resp.data != null) {
+          latest = resp.data?.first;
+          controller.setKlineData(req, resp.data!);
+          setState(() {});
+        } else {
+          SmartDialog.showToast(resp.msg);
+        }
+      });
+      setState(() {});
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -81,6 +105,11 @@ class _KOKlinePageState extends ConsumerState<KOKlinePage> {
             LatestPriceView(
               model: latest,
               precision: req.precision,
+            ),
+            FlexiTimeBar(
+              timeBars: timBarList,
+              currTimeBar: req.timerBar,
+              onTapTimeBar: onTapTimerBar,
             ),
             FlexiKlineWidget(
               controller: controller,

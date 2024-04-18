@@ -14,7 +14,6 @@
 
 import 'dart:math' as math;
 
-import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 
 import '../extension/export.dart';
@@ -28,7 +27,7 @@ import 'setting.dart';
 /// 状态管理: 负责数据的管理, 缓存, 切换, 计算
 mixin StateBinding
     on KlineBindingBase, SettingBinding
-    implements IState, IPainting, ICross {
+    implements IState, IChart {
   @override
   void initBinding() {
     super.initBinding();
@@ -41,12 +40,24 @@ mixin StateBinding
     logd('dispose state');
   }
 
-  final CalcuDataManager _calcuMgr = CalcuDataManager();
+  final Map<String, CalcuDataManager> _calcuMgrMap = {};
+
   @override
-  CalcuDataManager get calcuMgr => _calcuMgr;
+  CalcuDataManager getCalcuMgrByReq(CandleReq req) => getCalcuMgr(req.key);
+
+  @override
+  CalcuDataManager getCalcuMgr(String key) {
+    CalcuDataManager? calcuMgr = _calcuMgrMap[key];
+    if (calcuMgr == null) {
+      _calcuMgrMap[key] = calcuMgr = CalcuDataManager();
+    }
+    return calcuMgr;
+  }
+
+  @override
+  CalcuDataManager get curCalcuMgr => getCalcuMgr(curDataKey);
 
   final Map<String, KlineData> _klineDataCache = {};
-
   KlineData _curKlineData = KlineData.empty;
   @override
   KlineData get curKlineData => _curKlineData;
@@ -63,35 +74,35 @@ mixin StateBinding
   double get maxPaintWidth => totalCandleCount * candleActualWidth;
 
   /// 绘制区域高度 / 当前绘制的蜡烛数据高度.
-  @override
-  double get dyFactor {
-    return mainDrawHeight / curKlineData.dataHeight.toDouble();
-  }
+  // @override
+  // double get dyFactor {
+  //   return mainDrawHeight / curKlineData.dataHeight.toDouble();
+  // }
 
   /// 将offset指定的dy转换为当前坐标Y轴对应价钱.
-  @override
-  Decimal? offsetToPrice(Offset offset) => dyToPrice(offset.dy);
+  // @override
+  // Decimal? offsetToPrice(Offset offset) => dyToPrice(offset.dy);
 
-  @override
-  Decimal? dyToPrice(double dy) {
-    if (!mainDrawRect.inclueDy(dy)) return null;
-    return curKlineData.max - ((dy - mainDrawTop) / dyFactor).d;
-  }
+  // @override
+  // Decimal? dyToPrice(double dy) {
+  //   if (!mainDrawRect.inclueDy(dy)) return null;
+  //   return curKlineData.max - ((dy - mainDrawTop) / dyFactor).d;
+  // }
 
   /// 将价钱转换为主图(蜡烛图)的Y轴坐标. 如果超出以最大最小值来计算.
-  @override
-  double priceToDy(Decimal price) {
-    price = price.clamp(curKlineData.min, curKlineData.max);
-    return mainDrawBottom - (price - curKlineData.min).toDouble() * dyFactor;
-  }
+  // @override
+  // double priceToDy(Decimal price) {
+  //   price = price.clamp(curKlineData.min, curKlineData.max);
+  //   return mainDrawBottom - (price - curKlineData.min).toDouble() * dyFactor;
+  // }
 
   /// 当前Cross命中的Model
-  @override
-  CandleModel? get crossingCandle {
-    final offset = crossingOffset;
-    if (offset == null) return null;
-    return offsetToCandle(offset);
-  }
+  // @override
+  // CandleModel? get crossingCandle {
+  //   final offset = crossingOffset;
+  //   if (offset == null) return null;
+  //   return offsetToCandle(offset);
+  // }
 
   /// 将offset转换为蜡烛数据
   @override
