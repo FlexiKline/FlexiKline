@@ -1,0 +1,264 @@
+// Copyright 2024 Andy.Zhao
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import 'package:example/generated/l10n.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import 'router.dart';
+import 'utils/cache_util.dart';
+
+const cacheKeyTheme = 'cache_key_theme';
+
+final themeModeProvider = StateProvider<ThemeMode>((ref) {
+  return ThemeMode.system;
+});
+final themeProvider = StateProvider<FKTheme>((ref) {
+  return ref.watch(themeModeProvider) != ThemeMode.dark
+      ? fkDarkTheme
+      : fkLightTheme;
+});
+
+class ThemeManager {
+  ThemeManager._internal();
+  factory ThemeManager() => _instance;
+  static final ThemeManager _instance = ThemeManager._internal();
+  static ThemeManager get instance => _instance;
+
+  final List<ValueChanged<ThemeMode>> _themeModeListeners = [];
+
+  ThemeMode init() {
+    final String? theme = CacheUtil().get(cacheKeyTheme);
+    if (theme != null) {
+      return ThemeMode.values.firstWhere(
+        (e) => e.name == theme,
+        orElse: () => ThemeMode.system,
+      );
+    }
+    return ThemeMode.system;
+  }
+
+  void swithThemeMode(ThemeMode mode) {
+    final curr = globalNavigatorKey.ref.read(themeModeProvider);
+    if (curr != mode) {
+      globalNavigatorKey.ref.read(themeModeProvider.notifier).state = mode;
+      CacheUtil().setString(cacheKeyTheme, mode.name);
+      for (var cb in _themeModeListeners) {
+        cb(mode);
+      }
+    }
+  }
+
+  void registerListener(ValueChanged listener) {
+    _themeModeListeners.add(listener);
+  }
+
+  void removeListener(ValueChanged listener) {
+    _themeModeListeners.remove(listener);
+  }
+
+  String convert(ThemeMode mode, {S? s}) {
+    s ??= S.current;
+    switch (mode) {
+      case ThemeMode.system:
+        return s.themeModeSystem;
+      case ThemeMode.light:
+        return s.themeModeLight;
+      case ThemeMode.dark:
+        return s.themeModeDark;
+    }
+  }
+}
+
+final fkLightTheme = LightFKTheme();
+final fkDarkTheme = DarkFKTheme();
+
+abstract class FKTheme {
+  Brightness get brightness;
+  ThemeData get themeData;
+
+  Color get long => const Color(0xFF02C19A);
+  Color get short => const Color(0xFFDD5B58);
+
+  Color get pageBg;
+  Color get cardBg;
+  Color get markBg;
+  Color get disable;
+
+  Color get dividerLine;
+  Color get borderLine;
+
+  Color get t1;
+  Color get t2;
+  Color get t3;
+  Color get white => Colors.white;
+}
+
+class LightFKTheme extends FKTheme {
+  @override
+  Brightness get brightness => Brightness.light;
+  @override
+  ThemeData get themeData => lightTheme;
+
+  @override
+  Color get pageBg => const Color(0xffF5F6FA);
+  @override
+  Color get cardBg => const Color(0xffF8F9FB);
+  @override
+  Color get markBg => const Color(0xffE4ECFF);
+  @override
+  Color get disable => const Color(0xffB3B3B3);
+
+  @override
+  Color get dividerLine => const Color(0xffE9EDF0);
+  @override
+  Color get borderLine => const Color(0xFFE3E6E9);
+
+  @override
+  Color get t1 => const Color(0xff282828);
+  @override
+  Color get t2 => const Color(0xff6C6C6C);
+  @override
+  Color get t3 => const Color(0xff8F8F8F);
+  @override
+  Color get white => Colors.black;
+}
+
+class DarkFKTheme extends FKTheme {
+  @override
+  Brightness get brightness => Brightness.dark;
+  @override
+  ThemeData get themeData => darkTheme;
+
+  @override
+  Color get pageBg => const Color(0xFF121212);
+  @override
+  Color get cardBg => const Color(0xFF202020);
+  @override
+  Color get markBg => const Color(0xFF040404);
+  @override
+  Color get disable => const Color(0xFF353535);
+
+  @override
+  Color get dividerLine => const Color(0xFF242424);
+  @override
+  Color get borderLine => const Color(0xFF2F2F2F);
+  @override
+  Color get t1 => const Color(0xFFFFFFFF);
+  @override
+  Color get t2 => const Color(0xFF939393);
+  @override
+  Color get t3 => const Color(0xFF606060);
+  @override
+  Color get white => Colors.white;
+}
+
+extension TextStyleFKThemeEx on FKTheme {
+// T1
+  TextStyle get t1s10w400 =>
+      TextStyle(color: t1, fontSize: 10.sp, fontWeight: FontWeight.w400);
+  TextStyle get t1s12w400 =>
+      TextStyle(color: t1, fontSize: 12.sp, fontWeight: FontWeight.w400);
+  TextStyle get t1s14w400 =>
+      TextStyle(color: t2, fontSize: 14.sp, fontWeight: FontWeight.w400);
+  TextStyle get t1s14w500 =>
+      TextStyle(color: t2, fontSize: 14.sp, fontWeight: FontWeight.w500);
+  TextStyle get t1s16w400 =>
+      TextStyle(color: t2, fontSize: 16.sp, fontWeight: FontWeight.w400);
+  TextStyle get t1s16w500 =>
+      TextStyle(color: t2, fontSize: 16.sp, fontWeight: FontWeight.w500);
+  TextStyle get t1s18w500 =>
+      TextStyle(color: t2, fontSize: 16.sp, fontWeight: FontWeight.w500);
+  TextStyle get t1s18w600 =>
+      TextStyle(color: t2, fontSize: 16.sp, fontWeight: FontWeight.w600);
+  // T2
+  TextStyle get t2s10w400 =>
+      TextStyle(color: t2, fontSize: 10.sp, fontWeight: FontWeight.w400);
+  TextStyle get t2s12w400 =>
+      TextStyle(color: t2, fontSize: 12.sp, fontWeight: FontWeight.w400);
+  TextStyle get t2s14w400 =>
+      TextStyle(color: t2, fontSize: 14.sp, fontWeight: FontWeight.w400);
+  TextStyle get t2s14w500 =>
+      TextStyle(color: t2, fontSize: 14.sp, fontWeight: FontWeight.w500);
+  TextStyle get t2s16w400 =>
+      TextStyle(color: t2, fontSize: 16.sp, fontWeight: FontWeight.w400);
+  TextStyle get t2s16w500 =>
+      TextStyle(color: t2, fontSize: 16.sp, fontWeight: FontWeight.w500);
+  TextStyle get t2s18w500 =>
+      TextStyle(color: t2, fontSize: 16.sp, fontWeight: FontWeight.w500);
+  TextStyle get t2s18w600 =>
+      TextStyle(color: t2, fontSize: 16.sp, fontWeight: FontWeight.w600);
+  // T3
+  TextStyle get t3s10w400 =>
+      TextStyle(color: t3, fontSize: 10.sp, fontWeight: FontWeight.w400);
+  TextStyle get t3s12w400 =>
+      TextStyle(color: t3, fontSize: 12.sp, fontWeight: FontWeight.w400);
+  TextStyle get t3s14w400 =>
+      TextStyle(color: t3, fontSize: 14.sp, fontWeight: FontWeight.w400);
+  TextStyle get t3s14w500 =>
+      TextStyle(color: t3, fontSize: 14.sp, fontWeight: FontWeight.w500);
+  TextStyle get t3s16w400 =>
+      TextStyle(color: t3, fontSize: 16.sp, fontWeight: FontWeight.w400);
+  TextStyle get t3s16w500 =>
+      TextStyle(color: t3, fontSize: 16.sp, fontWeight: FontWeight.w500);
+  TextStyle get t3s18w500 =>
+      TextStyle(color: t3, fontSize: 16.sp, fontWeight: FontWeight.w500);
+  TextStyle get t3s18w600 =>
+      TextStyle(color: t3, fontSize: 16.sp, fontWeight: FontWeight.w600);
+}
+
+final lightTheme = ThemeData(
+  colorScheme: ColorScheme(
+    brightness: Brightness.light,
+    background: fkLightTheme.pageBg,
+    onBackground: fkLightTheme.white,
+    primary: fkLightTheme.pageBg,
+    onPrimary: fkLightTheme.white,
+    secondary: fkLightTheme.cardBg,
+    onSecondary: fkLightTheme.t1,
+    tertiary: fkLightTheme.disable,
+    onTertiary: fkLightTheme.t2,
+    surface: fkLightTheme.markBg,
+    onSurface: fkLightTheme.t3,
+    error: fkLightTheme.short,
+    onError: fkLightTheme.white,
+  ),
+  useMaterial3: true,
+  scaffoldBackgroundColor: fkLightTheme.pageBg,
+  navigationBarTheme: NavigationBarThemeData(
+    backgroundColor: fkLightTheme.cardBg,
+    indicatorColor: Colors.black,
+  ),
+);
+
+final darkTheme = ThemeData(
+  colorScheme: ColorScheme(
+    brightness: Brightness.light,
+    background: fkDarkTheme.pageBg,
+    onBackground: fkDarkTheme.white,
+    primary: fkDarkTheme.pageBg,
+    onPrimary: fkDarkTheme.white,
+    secondary: fkDarkTheme.cardBg,
+    onSecondary: fkDarkTheme.t1,
+    tertiary: fkDarkTheme.disable,
+    onTertiary: fkDarkTheme.t2,
+    surface: fkDarkTheme.markBg,
+    onSurface: fkDarkTheme.t3,
+    error: fkDarkTheme.short,
+    onError: fkDarkTheme.white,
+  ),
+  useMaterial3: true,
+  scaffoldBackgroundColor: fkDarkTheme.pageBg,
+);

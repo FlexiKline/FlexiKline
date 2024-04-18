@@ -13,58 +13,23 @@
 // limitations under the License.
 
 import 'package:example/generated/l10n.dart';
-import 'package:example/src/router.dart';
-import 'package:example/src/utils/cache_util.dart';
-import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-const cacheKeyTheme = 'key_theme';
+import '../router.dart';
+import '../utils/cache_util.dart';
+import 'theme.dart';
 
-// but with always black and white contrasting onColors.
-final ColorScheme schemeLightOnBW = SeedColorScheme.fromSeeds(
-  brightness: Brightness.light,
-  primaryKey: const Color(0xFF1F2860),
-  secondaryKey: const Color(0xFF21518F),
-  tertiaryKey: const Color(0xFF327BD2),
-  errorKey: const Color(0xFFDD5858),
-  tones: FlexTones.material(Brightness.light)
-    ..onMainsUseBW().onSurfacesUseBW().surfacesUseBW(),
-);
-
-// Make a Vivid dark ColorScheme,
-// but with always black and white contrasting onColors.
-final ColorScheme schemeDarkOnBW = SeedColorScheme.fromSeeds(
-  brightness: Brightness.dark,
-  primaryKey: const Color(0xFF1F2860),
-  secondaryKey: const Color(0xFF21518F),
-  tertiaryKey: const Color(0xFF327BD2),
-  errorKey: const Color(0xFFDD5858),
-  tones: FlexTones.vivid(Brightness.dark)
-    ..onMainsUseBW().onSurfacesUseBW().surfacesUseBW(),
-);
-
-final lightTheme = ThemeData(
-  colorScheme: schemeLightOnBW,
-  useMaterial3: true,
-  scaffoldBackgroundColor: const Color(0xffF8F9FB),
-  bottomNavigationBarTheme: BottomNavigationBarThemeData(
-    backgroundColor: const Color(0xffFEFEFF),
-  ),
-);
-
-final darkTheme = ThemeData(
-  colorScheme: schemeDarkOnBW,
-  useMaterial3: true,
-  scaffoldBackgroundColor: const Color(0xFF121212),
-  bottomNavigationBarTheme: BottomNavigationBarThemeData(
-    backgroundColor: const Color(0xFF1A1A1A),
-  ),
-);
+const cacheKeyTheme = 'cache_key_theme';
 
 final themeModeProvider = StateProvider<ThemeMode>((ref) {
   return ThemeMode.system;
 });
+
+final materialTheme = MaterialTheme(TextTheme());
+
+final lightTheme = materialTheme.light();
+final darkTheme = materialTheme.dark();
 
 class ThemeManager {
   ThemeManager._internal();

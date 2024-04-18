@@ -20,7 +20,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'router.dart';
 
-const String cacheKeyLocale = 'key_locale';
+const String cacheKeyLocale = 'cache_key_locale';
 
 final localProvider = StateProvider<Locale>((ref) {
   throw UnimplementedError();

@@ -228,52 +228,61 @@ final class HttpClient {
     if (exception is DioException) {
       switch (exception.type) {
         case DioExceptionType.connectionTimeout:
-          msg ??= S.current.connectionTimeout;
+          msg = S.current.connectionTimeout;
         case DioExceptionType.sendTimeout:
-          msg ??= S.current.sendTimeout;
+          msg = S.current.sendTimeout;
         case DioExceptionType.receiveTimeout:
-          msg ??= S.current.responseTimeout;
-          code ??= errorCodeTimeout;
+          msg = S.current.responseTimeout;
+          code = errorCodeTimeout;
           break;
         case DioExceptionType.cancel:
-          code ??= errorCodeCancel;
-          msg ??= S.current.canceled;
+          code = errorCodeCancel;
+          msg = S.current.canceled;
           break;
         case DioExceptionType.badResponse:
           int? statusCode = exception.response?.statusCode;
           if (statusCode != null) {
-            code ??= '$statusCode';
+            code = '$statusCode';
             switch (statusCode) {
               case 400:
-                msg ??= S.current.syntaxError;
+                msg = S.current.syntaxError;
+                break;
               case 401:
-                msg ??= S.current.permissionDenied;
+                msg = S.current.permissionDenied;
+                break;
               case 403:
-                msg ??= S.current.serverRefused;
+                msg = S.current.serverRefused;
+                break;
               case 404:
-                msg ??= S.current.cannotReachServer;
+                msg = S.current.cannotReachServer;
+                break;
               case 405:
-                msg ??= S.current.reqMethodForbidden;
+                msg = S.current.reqMethodForbidden;
+                break;
               case 500:
-                msg ??= S.current.serverInternalError;
+                msg = S.current.serverInternalError;
+                break;
               case 502:
-                msg ??= S.current.invalidReq;
+                msg = S.current.invalidReq;
+                break;
               case 503:
-                msg ??= S.current.serverDown;
+                msg = S.current.serverDown;
+                break;
               case 505:
-                msg ??= S.current.unsupportedProtocol;
+                msg = S.current.unsupportedProtocol;
+                break;
             }
           }
           code ??= errorCodeInternal;
           msg ??= exception.response?.statusMessage ?? S.current.unknownError;
           break;
         case DioExceptionType.badCertificate:
-          code ??= errorCodeBadCertificate;
-          msg ??= S.current.badCertificate;
+          code = errorCodeBadCertificate;
+          msg = S.current.badCertificate;
           break;
         case DioExceptionType.connectionError:
-          code ??= errorCodeConnectionError;
-          msg ??= S.current.connectionError;
+          code = errorCodeConnectionError;
+          msg = S.current.connectionError;
           break;
         case DioExceptionType.unknown:
       }

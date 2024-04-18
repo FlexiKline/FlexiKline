@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:example/src/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -20,6 +19,7 @@ import 'src/app.dart';
 import 'src/config.dart';
 import 'src/i18n.dart';
 import 'src/repo/http_client.dart';
+import 'src/theme/theme_manager.dart';
 import 'src/utils/cache_util.dart';
 
 void main() async {
@@ -38,8 +38,6 @@ void main() async {
       themeModeProvider.overrideWith((ref) => themeMode),
     ],
     observers: [AppProviderObserver()],
-    child: const MyApp(
-      extraNavObservers: [],
-    ),
+    child: const MyApp(),
   ));
 }

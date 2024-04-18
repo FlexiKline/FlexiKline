@@ -14,10 +14,11 @@
 
 import 'package:example/generated/l10n.dart';
 import 'package:example/src/i18n.dart';
-import 'package:example/src/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import '../theme/theme_manager.dart';
 
 class SettingDrawer extends StatelessWidget {
   const SettingDrawer({super.key});

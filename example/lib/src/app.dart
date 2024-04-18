@@ -21,16 +21,14 @@ import 'package:flutter_ume_kit_dio_plus/flutter_ume_kit_dio_plus.dart';
 import 'package:flutter_ume_kit_perf_plus/flutter_ume_kit_perf_plus.dart';
 import 'package:flutter_ume_kit_ui_plus/flutter_ume_kit_ui_plus.dart';
 import 'package:flutter_ume_plus/flutter_ume_plus.dart';
-import 'package:go_router/go_router.dart';
 
 import 'i18n.dart';
 import 'repo/http_client.dart';
 import 'router.dart';
-import 'theme.dart';
+import 'theme/theme_manager.dart';
 
 class MyApp extends ConsumerStatefulWidget {
-  const MyApp({super.key, this.extraNavObservers});
-  final List<NavigatorObserver>? extraNavObservers;
+  const MyApp({super.key});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _MyAppState();
@@ -71,17 +69,7 @@ class _MyAppState extends ConsumerState<MyApp> {
       builder: (context, child) {
         return MaterialApp.router(
           restorationScopeId: 'flexiKlineApp',
-          routerConfig: GoRouter(
-            navigatorKey: globalNavigatorKey,
-            observers: [
-              FlutterSmartDialog.observer,
-              ...?widget.extraNavObservers,
-            ],
-            initialLocation: '/demo',
-            restorationScopeId: 'router',
-            routes: routeList,
-            debugLogDiagnostics: true,
-          ),
+          routerConfig: ref.watch(routerProvider),
           builder: FlutterSmartDialog.init(),
           debugShowCheckedModeBanner: false,
           locale: ref.watch(localProvider),

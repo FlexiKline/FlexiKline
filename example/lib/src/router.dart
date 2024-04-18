@@ -12,8 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:go_router/go_router.dart';
 
 import 'pages/ko_kliine_page.dart';
@@ -31,6 +33,21 @@ extension GlobalKeyExt on GlobalKey<NavigatorState> {
     return ref;
   }
 }
+
+final routerProvider = Provider.autoDispose<GoRouter>((ref) {
+  final router = GoRouter(
+    navigatorKey: globalNavigatorKey,
+    observers: [
+      FlutterSmartDialog.observer,
+    ],
+    initialLocation: '/demo',
+    restorationScopeId: 'router',
+    routes: routeList,
+    debugLogDiagnostics: kDebugMode,
+  );
+  ref.onDispose(router.dispose);
+  return router;
+});
 
 final List<RouteBase> routeList = <RouteBase>[
   StatefulShellRoute.indexedStack(

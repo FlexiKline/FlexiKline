@@ -53,7 +53,7 @@ enum TimeBar {
   utc3D(3 * Duration.millisecondsPerDay, '3Dutc'),
   utc1W(7 * Duration.millisecondsPerDay, '1Wutc'),
   utc1M(30 * Duration.millisecondsPerDay, '1Mutc'),
-  utc3M(90 * Duration.millisecondsPerDay, '1Mutc');
+  utc3M(90 * Duration.millisecondsPerDay, '3Mutc');
 
   const TimeBar(this.milliseconds, this.bar);
 
