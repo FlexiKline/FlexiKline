@@ -37,15 +37,15 @@ import '../model/export.dart';
 /// 3）计算MACD指标
 ///   DIF=EMA(12)-EMA(26)
 ///   今日DEA(MACD)=2/(9+1)*今日DIF+8/(9+1)*昨日DEA
-/// 
+///
 /// MACD指标中的柱状线（BAR）的计算公式为：
 ///   BAR=2*(DIF-DEA)
-/// 
+///
 /// ⒈首先分别计算出收盘价12日指数平滑移动平均线与26日指数平滑移动平均线，分别记为EMA(12）与EMA(26）。
 /// ⒉求这两条指数平滑移动平均线的差，即：DIFF = EMA(SHORT) － EMA(LONG)。
 /// ⒊再计算DIFF的M日的平均的指数平滑移动平均线，记为DEA。
 /// ⒋最后用DIFF减DEA，得MACD。MACD通常绘制成围绕零轴线波动的柱形图。MACD柱状大于0涨颜色，小于0跌颜色。
-class MacdIndicator extends PaintObjectIndicator {
+class MacdIndicator extends SinglePaintObjectIndicator {
   MacdIndicator({
     required super.key,
     super.height = defaultSubIndicatorHeight,
@@ -54,26 +54,29 @@ class MacdIndicator extends PaintObjectIndicator {
   });
 
   @override
-  PaintObject createPaintObject(KlineBindingBase controller) {
+  SinglePaintObjectBox createPaintObject(KlineBindingBase controller) {
     return MacdPaintObject(controller: controller, indicator: this);
   }
 }
 
-class MacdPaintObject extends PaintObjectBox<MacdIndicator> {
+class MacdPaintObject extends SinglePaintObjectBox<MacdIndicator> {
   MacdPaintObject({required super.controller, required super.indicator});
 
   @override
-  void initData(List<CandleModel> list, {int start = 0, int end = 0}) {}
-
-  @override
-  Decimal get maxVal => throw UnimplementedError();
-
-  @override
-  Decimal get minVal => throw UnimplementedError();
+  MinMax? initData({
+    required List<CandleModel> list,
+    required int start,
+    required int end,
+  }) {
+    return null;
+  }
 
   @override
   void onCross(Canvas canvas, Offset offset) {}
 
   @override
   void paintChart(Canvas canvas, Size size) {}
+
+  @override
+  Size? paintTips(Canvas canvas, {CandleModel? model, Offset? offset}) {}
 }

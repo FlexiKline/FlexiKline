@@ -36,6 +36,10 @@ extension RectExt on Rect {
   }
 
   Offset get origin => Offset(left, top);
+
+  Rect shiftYAxis(double height) {
+    return Rect.fromLTRB(left, top + height, right, bottom + height);
+  }
 }
 
 extension OffsetExt on Offset {
@@ -45,6 +49,8 @@ extension OffsetExt on Offset {
       dy.clamp(rect.top, rect.bottom),
     );
   }
+}
 
-  
+extension SizeExt on Size {
+  bool get isValid => width > 0 && height > 0;
 }

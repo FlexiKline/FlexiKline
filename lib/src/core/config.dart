@@ -47,12 +47,19 @@ mixin ConfigBinding on KlineBindingBase, SettingBinding implements IConfig {
 
   void initIndicators() {
     logd("initIndicators");
-    _mainIndicator = CandleIndicator(
+    _mainIndicator = MultiPaintObjectIndicator(
       key: const ValueKey('main'),
       height: mainRect.height,
       tipsHeight: mainTipsHeight,
       padding: mainPadding,
     );
+
+    addIndicatorInMain(CandleIndicator(
+      key: const ValueKey(IndicatorType.candle),
+      height: mainRect.height,
+      tipsHeight: mainTipsHeight,
+      padding: mainPadding,
+    ));
 
     addIndicatorInMain(MAIndicator(
       key: const ValueKey(IndicatorType.ma),
@@ -74,7 +81,7 @@ mixin ConfigBinding on KlineBindingBase, SettingBinding implements IConfig {
       ],
     ));
 
-    _subIndicators = ListQueue<PaintObjectIndicator>(
+    _subIndicators = ListQueue<SinglePaintObjectIndicator>(
       subIndicatorChartMaxCount,
     );
 
@@ -84,11 +91,11 @@ mixin ConfigBinding on KlineBindingBase, SettingBinding implements IConfig {
       tipsHeight: 22,
     ));
 
-    addIndicatorInSub(VolumeIndicator(
-      key: const ValueKey(IndicatorType.volume),
-      height: 120,
-      tipsHeight: 0,
-    ));
+    // addIndicatorInSub(VolumeIndicator(
+    //   key: const ValueKey(IndicatorType.volume),
+    //   height: 120,
+    //   tipsHeight: 0,
+    // ));
   }
 
   /// 主绘制区域
@@ -98,11 +105,11 @@ mixin ConfigBinding on KlineBindingBase, SettingBinding implements IConfig {
   MultiPaintObjectIndicator get mainIndicator => _mainIndicator;
 
   /// 副图区域
-  late final Queue<PaintObjectIndicator> _subIndicators;
+  late final Queue<SinglePaintObjectIndicator> _subIndicators;
 
   @override
   @protected
-  Queue<PaintObjectIndicator> get subIndicators => _subIndicators;
+  Queue<SinglePaintObjectIndicator> get subIndicators => _subIndicators;
 
   @override
   List<double> get subIndicatorHeightList {
@@ -127,18 +134,17 @@ mixin ConfigBinding on KlineBindingBase, SettingBinding implements IConfig {
     return subIndicatorHeightList.reduce((curr, next) => curr + next);
   }
 
-  // bool isNeedCreate = false;
   @override
-  void checkAndCreatePaintObject() {
-    mainIndicator.paintObject ??= mainIndicator.createPaintObject(this);
+  void ensurePaintObjectInstance() {
+    mainIndicator.ensurePaintObject(this);
     for (var indicator in subIndicators) {
-      indicator.paintObject ??= indicator.createPaintObject(this);
+      indicator.ensurePaintObject(this);
     }
   }
 
   /// 在主图中增加指标
   @override
-  void addIndicatorInMain(PaintObjectIndicator indicator) {
+  void addIndicatorInMain(SinglePaintObjectIndicator indicator) {
     mainIndicator.appendIndicator(indicator, this);
   }
 
@@ -150,7 +156,7 @@ mixin ConfigBinding on KlineBindingBase, SettingBinding implements IConfig {
 
   /// 在副图中增加指标
   @override
-  void addIndicatorInSub(PaintObjectIndicator indicator) {
+  void addIndicatorInSub(SinglePaintObjectIndicator indicator) {
     if (subIndicators.length > subIndicatorChartMaxCount) {
       final deleted = subIndicators.removeFirst();
       deleted.dispose();

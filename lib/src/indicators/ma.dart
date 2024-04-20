@@ -31,7 +31,7 @@ class MaParam {
 }
 
 /// MA 移动平均指标线
-class MAIndicator extends PaintObjectIndicator {
+class MAIndicator extends SinglePaintObjectIndicator {
   MAIndicator({
     required super.key,
     required super.height,
@@ -43,60 +43,52 @@ class MAIndicator extends PaintObjectIndicator {
   final List<MaParam> calcParams;
 
   @override
-  PaintObject createPaintObject(KlineBindingBase controller) {
+  SinglePaintObjectBox createPaintObject(KlineBindingBase controller) {
     return MAPaintObject(controller: controller, indicator: this);
   }
 }
 
-class MAPaintObject extends PaintObjectBox<MAIndicator> {
+class MAPaintObject extends SinglePaintObjectBox<MAIndicator> {
   MAPaintObject({
     required super.controller,
     required super.indicator,
   });
 
   @override
-  void initData(List<CandleModel> list, {int start = 0, int end = 0}) {
-    if (list.isEmpty || start < 0 || end >= list.length) return;
+  MinMax? initData({
+    required List<CandleModel> list,
+    required int start,
+    required int end,
+  }) {
+    if (list.isEmpty || start < 0 || end >= list.length) return null;
+    MinMax? minMax;
     for (var param in indicator.calcParams) {
-      calcuMgr.calculateAndCacheMA(list, param.count, start: start, end: end);
+      final ret = calcuMgr.calculateAndCacheMA(
+        list,
+        param.count,
+        start: start,
+        end: end,
+      );
+      minMax ??= ret;
+      minMax?.updateMinMax(ret);
     }
-  }
-
-  @override
-  Decimal get maxVal {
-    if (parent != null) {
-      return parent!.maxVal;
-    }
-    throw UnimplementedError();
-  }
-
-  @override
-  Decimal get minVal {
-    if (parent != null) {
-      return parent!.minVal;
-    }
-    throw UnimplementedError();
+    return minMax;
   }
 
   @override
   void paintChart(Canvas canvas, Size size) {
     paintMALine(canvas, size);
 
-    if (cross.isCrossing) return;
-    final model = state.curKlineData.latest;
-    if (model != null) {
-      paintMATips(canvas, model);
-    }
+    // if (!cross.isCrossing) {
+    //   paintTips(canvas, model: state.curKlineData.latest);
+    // }
   }
 
   @override
   void onCross(Canvas canvas, Offset offset) {
     if (indicator.tipsHeight <= 0) return;
 
-    final model = dxToCandle(offset.dx);
-    if (model != null) {
-      paintMATips(canvas, model);
-    }
+    // paintTips(canvas, offset: offset);
   }
 
   /// 绘制MA指标线
@@ -106,47 +98,48 @@ class MAPaintObject extends PaintObjectBox<MAIndicator> {
     int start = data.start;
     int end = (data.end + 1).clamp(start, data.list.length); // 多绘制一根蜡烛
 
-    try {
-      /// 保存画布状态
-      canvas.save();
+    // try {
+    //   // 保存画布状态
+    //   canvas.save();
+    //   // 裁剪绘制范围
+    //   canvas.clipRect(setting.mainDrawRect);
+    for (var param in indicator.calcParams) {
+      final countMaMap = calcuMgr.getCountMaMap(param.count);
+      if (countMaMap == null || countMaMap.isEmpty) continue;
 
-      /// 裁剪绘制范围
-      canvas.clipRect(setting.mainDrawRect);
-
-      for (var param in indicator.calcParams) {
-        final countMaMap = calcuMgr.getCountMaMap(param.count);
-        if (countMaMap == null || countMaMap.isEmpty) continue;
-
-        final offset = startCandleDx - candleWidthHalf;
-        CandleModel m;
-        final List<Offset> points = [];
-        for (int i = start; i < end; i++) {
-          m = data.list[i];
-          final dx = offset - (i - start) * candleActualWidth;
-          Decimal? maVal = countMaMap[m.timestamp];
-          maVal ??= calcuMgr.calculateMA(data.list, i, param.count);
-          final dy = valueToDy(maVal, correct: false);
-          points.add(Offset(dx, dy));
-        }
-
-        canvas.drawPath(
-          Path()..addPolygon(points, false),
-          Paint()
-            ..color = param.color
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = setting.maLineStrokeWidth,
-        );
+      final offset = startCandleDx - candleWidthHalf;
+      CandleModel m;
+      final List<Offset> points = [];
+      for (int i = start; i < end; i++) {
+        m = data.list[i];
+        final dx = offset - (i - start) * candleActualWidth;
+        Decimal? maVal = countMaMap[m.timestamp];
+        maVal ??= calcuMgr.calculateMA(data.list, i, param.count);
+        final dy = valueToDy(maVal, correct: false);
+        points.add(Offset(dx, dy));
       }
-    } finally {
-      /// 恢复画布状态
-      canvas.restore();
+
+      canvas.drawPath(
+        Path()..addPolygon(points, false),
+        Paint()
+          ..color = param.color
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = setting.maLineStrokeWidth,
+      );
     }
+    // } finally {
+    //   // 恢复画布状态
+    //   canvas.restore();
+    // }
   }
 
   /// MA 绘制tips区域
-  void paintMATips(Canvas canvas, CandleModel model) {
-    final dx = tipsRect.left;
-    final dy = tipsRect.top;
+  @override
+  Size? paintTips(Canvas canvas, {CandleModel? model, Offset? offset}) {
+    model ??= offsetToCandle(offset);
+    if (model == null) return null;
+
+    Rect drawRect = multiBoxParent?.nextTipsRect ?? tipsRect;
 
     final children = <TextSpan>[];
     for (var param in indicator.calcParams) {
@@ -167,21 +160,23 @@ class MAPaintObject extends PaintObjectBox<MAIndicator> {
           style: TextStyle(
             fontSize: setting.maTipsFontSize,
             color: param.color,
-            height: tipsRect.height / setting.maTipsFontSize,
+            // height: tipsRect.height / setting.maTipsFontSize,
+            height: 1.2,
           ),
         ));
       }
     }
     if (children.isNotEmpty) {
-      canvas.drawText(
-        offset: Offset(dx, dy),
+      return canvas.drawText(
+        offset: drawRect.topLeft,
         textSpan: TextSpan(children: children),
         drawDirection: DrawDirection.ltr,
-        drawableRect: tipsRect,
+        drawableRect: drawRect,
         textAlign: TextAlign.center,
         padding: setting.maTipsRectPadding,
         maxLines: 1,
       );
     }
+    return null;
   }
 }

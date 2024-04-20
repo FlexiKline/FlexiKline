@@ -52,20 +52,21 @@ class CalcuDataManager {
 
   /// 计算并缓存MA数据.
   /// 如果start和end指定了, 只计算[start, end]区间内.
-  void calculateAndCacheMA(
+  MinMax? calculateAndCacheMA(
     List<CandleModel> list,
     int count, {
     int? start,
     int? end,
     bool reset = false,
   }) {
-    if (list.isEmpty) return;
+    if (list.isEmpty) return null;
     int len = list.length;
-    if (len < count) return;
+    if (len < count) return null;
 
+    bool needReturn = start != null && end != null && start >= 0 && end < len;
     start ??= 0;
     end ??= len;
-    if (start < 0 || end > len) return;
+    if (start < 0 || end > len) return null;
 
     Map<int, Decimal>? countMaMap = getCountMaMap(count);
 
@@ -83,17 +84,17 @@ class CalcuDataManager {
           //如果start是0, 有可能更新了最新价, 重新计算
           countMaMap[list.first.timestamp] = calculateMA(list, 0, count);
         }
-        return;
       }
     } else {
       count2ts2MaMap[count] = countMaMap = {};
     }
 
-    int index = end - 1;
+    int index = end; // 多算一个
     CandleModel m = list[index];
     Decimal pre = countMaMap[m.timestamp] ?? calculateMA(list, index, count);
     countMaMap[m.timestamp] = pre;
-    for (int i = index - 1; i >= 0; i--) {
+    final minmax = MinMax(max: pre, min: pre);
+    for (int i = index - 1; i >= start; i--) {
       m = list[i];
       Decimal? val = countMaMap[m.timestamp];
       if (val == null) {
@@ -101,9 +102,11 @@ class CalcuDataManager {
         // val = pre * math.
       }
       val ??= calculateMA(list, i, count);
+      if (needReturn) minmax.updateMinMaxByVal(val);
       pre = val;
       countMaMap[m.timestamp] = val;
     }
+    return needReturn ? minmax : null;
   }
 
   /// 计算从index开始的count个close指标和

@@ -23,60 +23,55 @@ import '../render/export.dart';
 import '../utils/export.dart';
 import '../framework/export.dart';
 
-class CandleIndicator extends MultiPaintObjectIndicator {
+class CandleIndicator extends SinglePaintObjectIndicator {
   CandleIndicator({
     required super.key,
     required super.height,
     super.tipsHeight,
     super.padding,
-    super.children,
   });
 
   @override
-  MultiPaintObjectBox createPaintObject(
+  SinglePaintObjectBox createPaintObject(
     KlineBindingBase controller,
   ) {
     return CandlePaintObject(controller: controller, indicator: this);
   }
 }
 
-class CandlePaintObject extends MultiPaintObjectBox<CandleIndicator> {
+class CandlePaintObject extends SinglePaintObjectBox<CandleIndicator> {
   CandlePaintObject({
     required super.controller,
     required super.indicator,
   });
 
-  Decimal _max = Decimal.zero;
-  Decimal _min = Decimal.zero;
-
   Decimal? _maxHigh, _minLow;
 
   @override
-  void initData(List<CandleModel> list, {int start = 0, int end = 0}) {
-    if (list.isEmpty || start < 0 || end > list.length) return;
+  MinMax? initData({
+    required List<CandleModel> list,
+    required int start,
+    required int end,
+  }) {
+    if (list.isEmpty || start < 0 || end > list.length) return null;
     CandleModel m = list[start];
-    _max = m.high;
-    _min = m.low;
+    Decimal max = m.high;
+    Decimal min = m.low;
     for (var i = start + 1; i < end; i++) {
       m = list[i];
-      _max = m.high > _max ? m.high : _max;
-      _min = m.low < _min ? m.low : _min;
+      max = m.high > max ? m.high : max;
+      min = m.low < min ? m.low : min;
     }
-    _maxHigh = _max;
-    _minLow = _min;
+    _maxHigh = max;
+    _minLow = min;
     // 增加vol区域的margin为高度的1/10
-    final volH = _max == _min ? Decimal.one : _max - _min;
-    final margin = volH * twentieth;
-    _max += margin;
-    _min -= margin;
+    // final volH = _max == _min ? Decimal.one : _max - _min;
+    // final margin = volH * twentieth;
+    // _max += margin;
+    // _min -= margin;
 
-    super.initData(list, start: start, end: end);
+    return MinMax(max: max, min: min);
   }
-
-  @override
-  Decimal get maxVal => _max;
-  @override
-  Decimal get minVal => _min;
 
   @override
   void paintChart(Canvas canvas, Size size) {
@@ -91,8 +86,6 @@ class CandlePaintObject extends MultiPaintObjectBox<CandleIndicator> {
 
     /// 绘制最新价刻度线与价钱标记
     paintLastPriceMark(canvas, size);
-
-    super.paintChart(canvas, size);
   }
 
   @override
@@ -107,9 +100,8 @@ class CandlePaintObject extends MultiPaintObjectBox<CandleIndicator> {
 
     if (setting.showPopupCandleCard) {
       /// 绘制Cross 命中的蜡烛数据弹窗
-      paintPopupCandleCard(canvas, offset);
+      paintTips(canvas, offset: offset);
     }
-    super.onCross(canvas, offset);
   }
 
   /// 绘制蜡烛图
@@ -306,9 +298,9 @@ class CandlePaintObject extends MultiPaintObjectBox<CandleIndicator> {
     double ldx = 0; // 计算最新价刻度线lineTo参数X轴的dx值. 默认0: 代表橫穿整个Canvas.
     double dy;
     double flag = -1; // 计算右边最新价钱文本时, dy增减的方向
-    if (model.close >= maxVal) {
+    if (model.close >= minMax.max) {
       dy = chartRect.top; // 画板顶部展示.
-    } else if (model.close <= minVal) {
+    } else if (model.close <= minMax.min) {
       dy = chartRect.bottom; // 画板底部展示.
       flag = 1;
     } else {
@@ -437,11 +429,12 @@ class CandlePaintObject extends MultiPaintObjectBox<CandleIndicator> {
   }
 
   /// 绘制Cross 命中的蜡烛数据弹窗
-  @protected
-  void paintPopupCandleCard(Canvas canvas, Offset offset) {
-    final model = dxToCandle(offset.dx);
+  @override
+  Size? paintTips(Canvas canvas, {CandleModel? model, Offset? offset}) {
+    if (offset == null) return null;
+    model ??= offsetToCandle(offset);
     final timeBar = klineData.timerBar;
-    if (model == null || timeBar == null) return;
+    if (model == null || timeBar == null) return null;
 
     /// 1. 准备数据
     // ['Time', 'Open', 'High', 'Low', 'Close', 'Chg', '%Chg', 'Amount']
@@ -606,5 +599,6 @@ class CandlePaintObject extends MultiPaintObjectBox<CandleIndicator> {
         ),
       );
     }
+    return null;
   }
 }

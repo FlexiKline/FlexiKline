@@ -82,17 +82,17 @@ mixin ChartBinding
     // logd('$diffTime paintChart >>>>');
 
     /// 检查主图和副图的PaintObject是否都创建了.
-    checkAndCreatePaintObject();
+    ensurePaintObjectInstance();
 
     /// 初始化主图展示的数据.
-    mainIndicator.paintObject?.initData(
-      curKlineData.list,
+    mainIndicator.paintObject?.doInitData(
+      list: curKlineData.list,
       start: curKlineData.start,
       end: curKlineData.end,
     );
 
     /// 通过paintObject绘制主图
-    mainIndicator.paintObject?.paintChart(canvas, size);
+    mainIndicator.paintObject?.doPaintChart(canvas, size);
 
     /// 开始绘制副图
     if (subIndicators.isNotEmpty) {
@@ -102,14 +102,14 @@ mixin ChartBinding
         indicator.paintObject?.bindSolt(i++);
 
         /// 初始化副图指标展示数据.
-        indicator.paintObject?.initData(
-          curKlineData.list,
+        indicator.paintObject?.doInitData(
+          list: curKlineData.list,
           start: curKlineData.start,
           end: curKlineData.end,
         );
 
         /// 绘制副图的指标图
-        indicator.paintObject?.paintChart(canvas, size);
+        indicator.paintObject?.doPaintChart(canvas, size);
       }
     }
   }

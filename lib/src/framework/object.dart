@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:math' as math;
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 
@@ -59,32 +60,42 @@ abstract interface class IPaintBoundingBox {
 /// 指标图的绘制数据初始化接口
 abstract interface class IPaintDataInit {
   /// 计算指标需要的数据
-  void initData(List<CandleModel> list, {int start = 0, int end = 0});
+  MinMax? initData({
+    required List<CandleModel> list,
+    required int start,
+    required int end,
+  });
 
   /// 最大值/最小值
-  Decimal get maxVal;
-  Decimal get minVal;
+  MinMax get minMax;
+  // Decimal get maxVal;
+  // Decimal get minVal;
+
+  set minMax(MinMax val);
 }
 
-/// 指标图的绘制接口
-abstract interface class IPaintChart {
+/// 指标图的绘制接口/指标图的Cross事件绘制接口
+abstract interface class IPaintChartAndHandleCross {
   /// 绘制指标图
   void paintChart(Canvas canvas, Size size);
 
-  /// 绘制XAxis与YAxis刻度值
-  // void paintAxisTickMark(Canvas canvas, Size size);
-
-  /// 绘制顶部tips信息
-  // void paintTips(Canvas canvas, Size size);
-}
-
-/// 指标图的Cross事件绘制接口
-abstract interface class IPaintCross {
   /// 绘制Cross上的刻度值
   void onCross(Canvas canvas, Offset offset);
 
-  /// 绘制Cross命中的指标信息
-  // void paintCrossTips(Canvas canvas, Offset offset);
+  /// 绘制顶部tips信息
+  Size? paintTips(Canvas canvas, {CandleModel? model, Offset? offset});
+}
+
+abstract interface class IPaintChartAndHandleCrossDelegate {
+  void doInitData({
+    required List<CandleModel> list,
+    required int start,
+    required int end,
+  });
+
+  void doPaintChart(Canvas canvas, Size size);
+
+  void doOnCross(Canvas canvas, Offset offset);
 }
 
 /// 绘制对象混入全局Setting配置.
@@ -196,12 +207,12 @@ mixin DataInitMixin on PaintObjectProxy implements IPaintDataInit {
   final Decimal twentieth = (Decimal.one / Decimal.fromInt(20)).toDecimal();
 
   double get dyFactor {
-    return chartRect.height / (maxVal - minVal).toDouble();
+    return chartRect.height / (minMax.size).toDouble();
   }
 
   double valueToDy(Decimal value, {bool correct = true}) {
-    if (correct) value = value.clamp(minVal, maxVal);
-    return chartRect.bottom - (value - minVal).toDouble() * dyFactor;
+    if (correct) value = value.clamp(minMax.min, minMax.max);
+    return chartRect.bottom - (value - minMax.min).toDouble() * dyFactor;
   }
 
   double? indexToDx(int index) {
@@ -212,7 +223,7 @@ mixin DataInitMixin on PaintObjectProxy implements IPaintDataInit {
 
   Decimal? dyToValue(double dy) {
     if (!chartRect.inclueDy(dy)) return null;
-    return maxVal - ((dy - chartRect.top) / dyFactor).d;
+    return minMax.max - ((dy - chartRect.top) / dyFactor).d;
   }
 
   int dxToIndex(double dx) {
@@ -224,13 +235,22 @@ mixin DataInitMixin on PaintObjectProxy implements IPaintDataInit {
     final index = dxToIndex(dx);
     return state.curKlineData.getCandle(index);
   }
+
+  CandleModel? offsetToCandle(Offset? offset) {
+    if (offset != null) return dxToCandle(offset.dx);
+    return null;
+  }
 }
 
 /// PaintObject
 /// 通过实现对应的接口, 实现Chart的配置, 计算, 绘制, Cross
 // @immutable
 abstract class PaintObject<T extends Indicator>
-    implements IPaintBoundingBox, IPaintDataInit, IPaintChart, IPaintCross {
+    implements
+        IPaintBoundingBox,
+        IPaintDataInit,
+        IPaintChartAndHandleCross,
+        IPaintChartAndHandleCrossDelegate {
   PaintObject({
     required T indicator,
   }) : _indicator = indicator;
@@ -251,8 +271,8 @@ abstract class PaintObject<T extends Indicator>
 
 /// PaintObjectProxy
 /// 通过参数KlineBindingBase 混入对setting和state的代理
-abstract class PaintObjectProxy<T extends PaintObjectIndicator>
-    extends PaintObject with KlineLog, SettingProxyMixin, StateProxyMixin {
+abstract class PaintObjectProxy<T extends Indicator> extends PaintObject
+    with KlineLog, SettingProxyMixin, StateProxyMixin {
   PaintObjectProxy({
     required KlineBindingBase controller,
     required T super.indicator,
@@ -281,38 +301,115 @@ abstract class PaintObjectProxy<T extends PaintObjectIndicator>
 
 /// PaintObjectBox
 /// 通过混入边界计算与数据初始化计算, 简化PaintObject接口.
-abstract class PaintObjectBox<T extends PaintObjectIndicator>
+abstract class SinglePaintObjectBox<T extends SinglePaintObjectIndicator>
     extends PaintObjectProxy with PaintObjectBoundingMixin, DataInitMixin {
-  PaintObjectBox({
+  SinglePaintObjectBox({
     required super.controller,
     required T super.indicator,
   });
 
   @override
   T get indicator => super.indicator as T;
-}
 
-/// 多个Indicator组合绘制
-/// 主要实现接口遍历转发.
-abstract class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
-    extends PaintObjectProxy with PaintObjectBoundingMixin, DataInitMixin {
-  MultiPaintObjectBox({
-    required KlineBindingBase controller,
-    required MultiPaintObjectIndicator indicator,
-  }) : super(controller: controller, indicator: indicator) {
-    for (var child in indicator.children) {
-      // 保证子Indicator的布局参数与父布局一置.
-      child.update(indicator);
-      child.paintObject = child.createPaintObject(controller);
-      child.paintObject!.parent = this;
+  /// 转换parent为MultiPaintObjectBox类型的.
+  MultiPaintObjectBox<MultiPaintObjectIndicator>? get multiBoxParent {
+    if (super.parent is MultiPaintObjectBox) {
+      return super.parent as MultiPaintObjectBox;
+    }
+    return null;
+  }
+
+  MinMax? _minMax;
+
+  @override
+  MinMax get minMax {
+    if (multiBoxParent != null) {
+      return multiBoxParent!.minMax;
+    }
+    return _minMax ?? MinMax.zero;
+  }
+
+  @override
+  set minMax(MinMax val) {
+    if (multiBoxParent != null) {
+      multiBoxParent!.minMax = val;
+    }
+    _minMax = val;
+  }
+
+  @override
+  void doInitData({
+    required List<CandleModel> list,
+    required int start,
+    required int end,
+  }) {
+    _minMax = null;
+    final ret = initData(list: list, start: start, end: end);
+    if (ret != null) {
+      minMax = ret;
     }
   }
 
   @override
-  T get indicator => super.indicator as T;
+  void doPaintChart(Canvas canvas, Size size) {
+    paintChart(canvas, size);
+
+    if (!cross.isCrossing) {
+      paintTips(canvas, model: state.curKlineData.latest);
+    }
+  }
 
   @override
-  @mustCallSuper
+  void doOnCross(Canvas canvas, Offset offset) {
+    onCross(canvas, offset);
+
+    paintTips(canvas, offset: offset);
+  }
+}
+
+/// 多个Indicator组合绘制
+/// 主要实现接口遍历转发.
+class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
+    extends PaintObjectProxy with PaintObjectBoundingMixin, DataInitMixin {
+  MultiPaintObjectBox({
+    required super.controller,
+    required T super.indicator,
+  });
+
+  @override
+  T get indicator => super.indicator as T;
+
+  // 下一个Tips的绘制区域
+  Rect _nextTipsRect = Rect.zero;
+
+  Rect? get nextTipsRect => _nextTipsRect;
+
+  void resetNextTipsRect() => _nextTipsRect = tipsRect;
+
+  MinMax? _minMax;
+
+  @override
+  MinMax get minMax => _minMax ?? MinMax.zero;
+
+  @override
+  set minMax(MinMax val) {
+    if (_minMax == null) {
+      _minMax = val;
+    } else {
+      _minMax!.updateMinMax(val);
+    }
+  }
+
+  @override
+  MinMax? initData({
+    required List<CandleModel> list,
+    required int start,
+    required int end,
+  }) {
+    return _minMax;
+  }
+
+  @override
   void bindSolt(int newSlot) {
     super.bindSolt(newSlot);
     for (var indicator in indicator.children) {
@@ -321,27 +418,62 @@ abstract class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
   }
 
   @override
-  @mustCallSuper
-  void initData(List<CandleModel> list, {int start = 0, int end = 0}) {
+  void paintChart(Canvas canvas, Size size) {}
+
+  @override
+  void onCross(Canvas canvas, Offset offset) {}
+
+  @override
+  Size? paintTips(Canvas canvas, {CandleModel? model, Offset? offset}) {
+    // 每次绘制前, 重置Tips区域大小为0
+    resetNextTipsRect();
     for (var indicator in indicator.children) {
-      indicator.paintObject?.initData(list, start: start, end: end);
+      final size = indicator.paintObject?.paintTips(
+        canvas,
+        model: model,
+        offset: offset,
+      );
+      if (size != null) {
+        _nextTipsRect = _nextTipsRect.shiftYAxis(size.height);
+      }
+    }
+    return _nextTipsRect.size;
+  }
+
+  @override
+  void doInitData({
+    required List<CandleModel> list,
+    required int start,
+    required int end,
+  }) {
+    _minMax = null;
+    for (var indicator in indicator.children) {
+      indicator.paintObject?.doInitData(
+        list: list,
+        start: start,
+        end: end,
+      );
     }
   }
 
   @override
-  @mustCallSuper
-  void paintChart(Canvas canvas, Size size) {
+  void doPaintChart(Canvas canvas, Size size) {
     for (var indicator in indicator.children) {
       indicator.paintObject?.paintChart(canvas, size);
     }
+
+    if (!cross.isCrossing) {
+      paintTips(canvas, model: state.curKlineData.latest);
+    }
   }
 
   @override
-  @mustCallSuper
-  void onCross(Canvas canvas, Offset offset) {
+  void doOnCross(Canvas canvas, Offset offset) {
     for (var indicator in indicator.children) {
       indicator.paintObject?.onCross(canvas, offset);
     }
+
+    paintTips(canvas, offset: offset);
   }
 
   @override

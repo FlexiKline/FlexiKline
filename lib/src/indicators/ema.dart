@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 
 import '../core/export.dart';
@@ -36,7 +35,7 @@ class EMAParam {
 ///   EMA(12)=2*今收盘价/(12+1)+11*昨日EMA(12)/(12+1)
 /// 2）慢速平滑移动平均线（EMA）是26日的，计算公式为：
 ///   EMA(26)=2*今收盘价/(26+1)+25*昨日EMA(26)/(26+1)
-class EMAIndicator extends PaintObjectIndicator {
+class EMAIndicator extends SinglePaintObjectIndicator {
   EMAIndicator({
     required super.key,
     required super.height,
@@ -48,60 +47,44 @@ class EMAIndicator extends PaintObjectIndicator {
   final List<EMAParam> calcParams;
 
   @override
-  PaintObject createPaintObject(KlineBindingBase controller) {
+  SinglePaintObjectBox createPaintObject(KlineBindingBase controller) {
     return EMAPaintObject(controller: controller, indicator: this);
   }
 }
 
-class EMAPaintObject extends PaintObjectBox<EMAIndicator> {
+class EMAPaintObject extends SinglePaintObjectBox<EMAIndicator> {
   EMAPaintObject({
     required super.controller,
     required super.indicator,
   });
 
   @override
-  void initData(List<CandleModel> list, {int start = 0, int end = 0}) {
-    if (list.isEmpty || start < 0 || end >= list.length) return;
+  MinMax? initData({
+    required List<CandleModel> list,
+    required int start,
+    required int end,
+  }) {
+    if (list.isEmpty || start < 0 || end >= list.length) return null;
     for (var param in indicator.calcParams) {
       calcuMgr.calculateAnCacheEMA(list, param.count);
     }
-  }
-
-  @override
-  Decimal get maxVal {
-    if (parent != null) {
-      return parent!.maxVal;
-    }
-    throw UnimplementedError();
-  }
-
-  @override
-  Decimal get minVal {
-    if (parent != null) {
-      return parent!.minVal;
-    }
-    throw UnimplementedError();
+    return null; // TODO: 待解决返回值
   }
 
   @override
   void paintChart(Canvas canvas, Size size) {
     paintEMALine(canvas, size);
 
-    if (cross.isCrossing) return;
-    final model = state.curKlineData.latest;
-    if (model != null) {
-      paintEMATips(canvas, model);
-    }
+    // if (!cross.isCrossing) {
+    //   paintTips(canvas, model: state.curKlineData.latest);
+    // }
   }
 
   @override
   void onCross(Canvas canvas, Offset offset) {
     if (indicator.tipsHeight <= 0) return;
 
-    final model = dxToCandle(offset.dx);
-    if (model != null) {
-      paintEMATips(canvas, model);
-    }
+    // paintTips(canvas, offset: offset);
   }
 
   /// 绘制EMA线
@@ -149,9 +132,12 @@ class EMAPaintObject extends PaintObjectBox<EMAIndicator> {
   }
 
   /// EMA 绘制tips区域
-  void paintEMATips(Canvas canvas, CandleModel model) {
-    final dx = tipsRect.left;
-    final dy = tipsRect.top;
+  @override
+  Size? paintTips(Canvas canvas, {CandleModel? model, Offset? offset}) {
+    model ??= offsetToCandle(offset);
+    if (model == null) return null;
+
+    Rect drawRect = multiBoxParent?.nextTipsRect ?? tipsRect;
 
     final children = <TextSpan>[];
     for (var param in indicator.calcParams) {
@@ -172,21 +158,23 @@ class EMAPaintObject extends PaintObjectBox<EMAIndicator> {
           style: TextStyle(
             fontSize: setting.maTipsFontSize,
             color: param.color,
-            height: tipsRect.height / setting.maTipsFontSize,
+            // height: tipsRect.height / setting.maTipsFontSize,
+            height: 1.2,
           ),
         ));
       }
     }
     if (children.isNotEmpty) {
-      canvas.drawText(
-        offset: Offset(dx, dy),
+      return canvas.drawText(
+        offset: drawRect.topLeft,
         textSpan: TextSpan(children: children),
         drawDirection: DrawDirection.ltr,
-        drawableRect: tipsRect,
+        drawableRect: drawRect,
         textAlign: TextAlign.center,
         padding: setting.maTipsRectPadding,
         maxLines: 1,
       );
     }
+    return null;
   }
 }

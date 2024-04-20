@@ -87,7 +87,7 @@ mixin CrossBinding
   @override
   void paintCross(Canvas canvas, Size size) {
     if (isCrossing) {
-      checkAndCreatePaintObject();
+      ensurePaintObjectInstance();
       final offset = this.offset;
       if (offset == null || offset.isInfinite) {
         return;
@@ -96,12 +96,12 @@ mixin CrossBinding
       /// 绘制Cross Line
       paintCrossLine(canvas, offset);
 
-      mainIndicator.paintObject?.onCross(canvas, offset);
+      mainIndicator.paintObject?.doOnCross(canvas, offset);
 
       int i = 0;
       for (var indicator in subIndicators) {
         indicator.paintObject?.bindSolt(i++);
-        indicator.paintObject?.onCross(canvas, offset);
+        indicator.paintObject?.doOnCross(canvas, offset);
       }
     }
   }

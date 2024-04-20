@@ -21,7 +21,7 @@ import '../model/export.dart';
 import '../render/export.dart';
 import '../utils/export.dart';
 
-class VolumeIndicator extends PaintObjectIndicator {
+class VolumeIndicator extends SinglePaintObjectIndicator {
   VolumeIndicator({
     required super.key,
     required super.height,
@@ -30,14 +30,14 @@ class VolumeIndicator extends PaintObjectIndicator {
   });
 
   @override
-  PaintObject createPaintObject(KlineBindingBase controller) =>
+  SinglePaintObjectBox createPaintObject(KlineBindingBase controller) =>
       VolumePaintObject(
         controller: controller,
         indicator: this,
       );
 }
 
-class VolumePaintObject extends PaintObjectBox<VolumeIndicator> {
+class VolumePaintObject extends SinglePaintObjectBox<VolumeIndicator> {
   VolumePaintObject({
     required super.controller,
     required super.indicator,
@@ -47,8 +47,12 @@ class VolumePaintObject extends PaintObjectBox<VolumeIndicator> {
   Decimal _min = Decimal.zero;
 
   @override
-  void initData(List<CandleModel> list, {int start = 0, int end = 0}) {
-    if (list.isEmpty || start < 0 || end > list.length) return;
+  MinMax? initData({
+    required List<CandleModel> list,
+    required int start,
+    required int end,
+  }) {
+    if (list.isEmpty || start < 0 || end > list.length) return null;
     CandleModel m = list[start];
     _max = m.vol;
     _min = m.vol;
@@ -62,13 +66,9 @@ class VolumePaintObject extends PaintObjectBox<VolumeIndicator> {
     final margin = volH * twentieth;
     _max += margin;
     _min -= margin;
+
+    return MinMax(max: _max, min: _min);
   }
-
-  @override
-  Decimal get maxVal => _max;
-
-  @override
-  Decimal get minVal => _min;
 
   @override
   void paintChart(Canvas canvas, Size size) {
@@ -78,11 +78,9 @@ class VolumePaintObject extends PaintObjectBox<VolumeIndicator> {
     /// 绘制Y轴刻度值
     paintYAxisTick(canvas, size);
 
-    if (cross.isCrossing) return;
-    final model = state.curKlineData.latest;
-    if (model != null) {
-      _paintTooltipVolume(canvas, model);
-    }
+    // if (!cross.isCrossing) {
+    //   paintTips(canvas, model: state.curKlineData.latest);
+    // }
   }
 
   @override
@@ -90,10 +88,7 @@ class VolumePaintObject extends PaintObjectBox<VolumeIndicator> {
     /// 绘制Cross命中的Y轴刻度值
     _paintCrossYAxisVolumeMark(canvas, offset);
 
-    final model = dxToCandle(offset.dx);
-    if (model != null) {
-      _paintTooltipVolume(canvas, model);
-    }
+    // paintTips(canvas, offset: offset);
   }
 
   /// 绘制Volume柱状图
@@ -190,8 +185,12 @@ class VolumePaintObject extends PaintObjectBox<VolumeIndicator> {
   /// 绘制tips区域信息
   /// 1. 正常展示最新一根蜡烛交易量
   /// 2. 当Cross时, 展示命中的蜡烛交易量
-  void _paintTooltipVolume(Canvas canvas, CandleModel model) {
-    if (indicator.tipsHeight <= 0) return;
+  @override
+  Size? paintTips(Canvas canvas, {CandleModel? model, Offset? offset}) {
+    if (indicator.tipsHeight <= 0) return null;
+    model ??= offsetToCandle(offset);
+    if (model == null) return null;
+
     final dx = tipsRect.left;
     final dy = tipsRect.top;
 
@@ -203,7 +202,7 @@ class VolumePaintObject extends PaintObjectBox<VolumeIndicator> {
       prefix: 'Vol: ',
     );
 
-    canvas.drawText(
+    return canvas.drawText(
       offset: Offset(
         dx,
         dy,
