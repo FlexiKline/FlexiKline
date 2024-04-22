@@ -81,21 +81,36 @@ mixin ConfigBinding on KlineBindingBase, SettingBinding implements IConfig {
       ],
     ));
 
-    _subIndicators = ListQueue<SinglePaintObjectIndicator>(
+    _subIndicators = ListQueue<Indicator>(
       subIndicatorChartMaxCount,
     );
 
-    addIndicatorInSub(VolumeIndicator(
-      key: const ValueKey(IndicatorType.volume),
-      height: subIndicatorDefaultHeight,
-      tipsHeight: 22,
-    ));
-
     // addIndicatorInSub(VolumeIndicator(
     //   key: const ValueKey(IndicatorType.volume),
-    //   height: 120,
-    //   tipsHeight: 0,
+    //   height: subIndicatorDefaultHeight,
+    //   tipsHeight: 22,
     // ));
+
+    addIndicatorInSub(MultiPaintObjectIndicator(
+      key: ValueKey('${IndicatorType.volume.name}+${IndicatorType.ma.name}'),
+      height: subIndicatorDefaultHeight,
+      tipsHeight: 22,
+      paintMode: MultiPaintMode.alone,
+      children: [
+        VolumeIndicator(
+          key: const ValueKey(IndicatorType.volume),
+          height: subIndicatorDefaultHeight,
+        ),
+        MAIndicator(
+          key: const ValueKey(IndicatorType.ma),
+          height: subIndicatorDefaultHeight,
+          calcParams: [
+            MaParam(label: 'MA7', count: 7, color: Colors.black),
+            MaParam(label: 'MA30', count: 30, color: Colors.blue)
+          ],
+        )
+      ],
+    ));
   }
 
   /// 主绘制区域
@@ -105,11 +120,11 @@ mixin ConfigBinding on KlineBindingBase, SettingBinding implements IConfig {
   MultiPaintObjectIndicator get mainIndicator => _mainIndicator;
 
   /// 副图区域
-  late final Queue<SinglePaintObjectIndicator> _subIndicators;
+  late final Queue<Indicator> _subIndicators;
 
   @override
   @protected
-  Queue<SinglePaintObjectIndicator> get subIndicators => _subIndicators;
+  Queue<Indicator> get subIndicators => _subIndicators;
 
   @override
   List<double> get subIndicatorHeightList {
@@ -156,7 +171,7 @@ mixin ConfigBinding on KlineBindingBase, SettingBinding implements IConfig {
 
   /// 在副图中增加指标
   @override
-  void addIndicatorInSub(SinglePaintObjectIndicator indicator) {
+  void addIndicatorInSub(Indicator indicator) {
     if (subIndicators.length > subIndicatorChartMaxCount) {
       final deleted = subIndicators.removeFirst();
       deleted.dispose();

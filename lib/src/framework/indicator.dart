@@ -93,6 +93,16 @@ abstract class SinglePaintObjectIndicator extends Indicator {
   );
 }
 
+/// 多Indicator绘制模式
+/// 注: 仅为MultiPaintObjectIndicator提供, 指定子Indicator的绘制模式.
+enum MultiPaintMode {
+  /// 组合模式下, 多个Indicator会联合绘图, 坐标系共享.
+  combine,
+
+  /// 独立模式下, 多个Indicator各自按父height独立绘制.
+  alone;
+}
+
 /// 多个绘制Indicator的配置.
 /// children 维护具体的Indicator配置.
 class MultiPaintObjectIndicator extends Indicator {
@@ -101,9 +111,11 @@ class MultiPaintObjectIndicator extends Indicator {
     required super.height,
     super.tipsHeight,
     super.padding,
-    Iterable<dynamic> children = const [],
+    this.paintMode = MultiPaintMode.combine,
+    Iterable<SinglePaintObjectIndicator> children = const [],
   }) : children = LinkedHashSet<SinglePaintObjectIndicator>.from(children);
 
+  final MultiPaintMode paintMode;
   final Set<SinglePaintObjectIndicator> children;
 
   @override

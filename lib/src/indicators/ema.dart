@@ -137,7 +137,7 @@ class EMAPaintObject extends SinglePaintObjectBox<EMAIndicator> {
     model ??= offsetToCandle(offset);
     if (model == null) return null;
 
-    Rect drawRect = multiBoxParent?.nextTipsRect ?? tipsRect;
+    Rect drawRect = nextTipsRect;
 
     final children = <TextSpan>[];
     for (var param in indicator.calcParams) {

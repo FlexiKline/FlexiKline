@@ -137,14 +137,14 @@ abstract interface class IState {
 /// Config接口
 abstract interface class IConfig {
   MultiPaintObjectIndicator get mainIndicator;
-  Queue<SinglePaintObjectIndicator> get subIndicators;
+  Queue<Indicator> get subIndicators;
   List<double> get subIndicatorHeightList;
   double calculateIndicatorTop(int slot);
   double get subRectHeight;
   void ensurePaintObjectInstance();
   void addIndicatorInMain(SinglePaintObjectIndicator indicator);
   void delIndicatorInMain(Key key);
-  void addIndicatorInSub(SinglePaintObjectIndicator indicator);
+  void addIndicatorInSub(Indicator indicator);
   void delIndicatorInSub(Key key);
 }
 

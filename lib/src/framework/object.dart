@@ -30,14 +30,6 @@ abstract interface class IPaintBoundingBox {
   bool get drawInMain;
   bool get drawInSub;
 
-  /// 当前指标索引(仅对副图有效)
-  /// <0 代表在主图绘制
-  /// >=0 代表在副图绘制
-  int get slot => mainIndicatorSlot;
-
-  /// 为当前指标的绘制绑定slot.
-  void bindSolt(int newSlot);
-
   /// 当前指标图paint内的padding.
   /// 增加padding后tipsRect和chartRect将在此以内绘制.
   /// 一些额外的信息可以通过padding在左上右下方向上增加扩展的绘制区域.
@@ -55,6 +47,15 @@ abstract interface class IPaintBoundingBox {
 
   /// 当前指标图绘制区域
   Rect get chartRect;
+
+  /// 复位Tips区域
+  void resetNextTipsRect();
+
+  /// tips的绘制区域.
+  Rect get nextTipsRect;
+
+  /// 设置下一个Tips的绘制区域.
+  void shiftNextTipsRect(double height);
 }
 
 /// 指标图的绘制数据初始化接口
@@ -66,16 +67,20 @@ abstract interface class IPaintDataInit {
     required int end,
   });
 
+  /// 重置minmax值为null.
+  void resetMinMax();
+
   /// 最大值/最小值
   MinMax get minMax;
-  // Decimal get maxVal;
-  // Decimal get minVal;
 
   set minMax(MinMax val);
 }
 
 /// 指标图的绘制接口/指标图的Cross事件绘制接口
 abstract interface class IPaintChartAndHandleCross {
+  /// 为当前指标的绘制绑定slot.
+  void bindSolt(int newSlot);
+
   /// 绘制指标图
   void paintChart(Canvas canvas, Size size);
 
@@ -86,7 +91,7 @@ abstract interface class IPaintChartAndHandleCross {
   Size? paintTips(Canvas canvas, {CandleModel? model, Offset? offset});
 }
 
-abstract interface class IPaintChartAndHandleCrossDelegate {
+abstract interface class IPaintDelegate {
   void doInitData({
     required List<CandleModel> list,
     required int start,
@@ -96,6 +101,8 @@ abstract interface class IPaintChartAndHandleCrossDelegate {
   void doPaintChart(Canvas canvas, Size size);
 
   void doOnCross(Canvas canvas, Offset offset);
+
+  void doPaintTips(Canvas canvas, {CandleModel? model, Offset? offset});
 }
 
 /// 绘制对象混入全局Setting配置.
@@ -134,6 +141,13 @@ mixin PaintObjectBoundingMixin on PaintObjectProxy
   bool get drawInMain => slot == mainIndicatorSlot;
   @override
   bool get drawInSub => slot > mainIndicatorSlot;
+
+  int _slot = mainIndicatorSlot;
+
+  /// 当前指标索引(仅对副图有效)
+  /// <0 代表在主图绘制
+  /// >=0 代表在副图绘制
+  int get slot => _slot;
 
   @override
   @mustCallSuper
@@ -200,11 +214,40 @@ mixin PaintObjectBoundingMixin on PaintObjectProxy
 
   double clampDxInChart(double dx) => dx.clamp(chartRect.left, chartRect.right);
   double clampDyInChart(double dy) => dy.clamp(chartRect.top, chartRect.bottom);
+
+  // 下一个Tips的绘制区域
+  Rect? _nextTipsRect;
+
+  // 复位Tips区域
+  @override
+  void resetNextTipsRect() => _nextTipsRect = null;
+
+  @override
+  Rect get nextTipsRect => _nextTipsRect ?? tipsRect;
+
+  // Tips区域向下移动height.
+  @override
+  void shiftNextTipsRect(double height) {
+    _nextTipsRect = tipsRect.shiftYAxis(height);
+  }
 }
 
 /// 绘制对象混入数据初始化的通用扩展
 mixin DataInitMixin on PaintObjectProxy implements IPaintDataInit {
   final Decimal twentieth = (Decimal.one / Decimal.fromInt(20)).toDecimal();
+
+  MinMax? _minMax;
+
+  @override
+  void resetMinMax() => _minMax = null;
+
+  @override
+  MinMax get minMax => _minMax ?? MinMax.zero;
+
+  @override
+  set minMax(MinMax val) {
+    _minMax = val;
+  }
 
   double get dyFactor {
     return chartRect.height / (minMax.size).toDouble();
@@ -215,15 +258,15 @@ mixin DataInitMixin on PaintObjectProxy implements IPaintDataInit {
     return chartRect.bottom - (value - minMax.min).toDouble() * dyFactor;
   }
 
+  Decimal? dyToValue(double dy) {
+    if (!chartRect.inclueDy(dy)) return null;
+    return minMax.max - ((dy - chartRect.top) / dyFactor).d;
+  }
+
   double? indexToDx(int index) {
     double dx = chartRect.right - (index * candleActualWidth - paintDxOffset);
     if (chartRect.inclueDx(dx)) return dx;
     return null;
-  }
-
-  Decimal? dyToValue(double dy) {
-    if (!chartRect.inclueDy(dy)) return null;
-    return minMax.max - ((dy - chartRect.top) / dyFactor).d;
   }
 
   int dxToIndex(double dx) {
@@ -250,7 +293,7 @@ abstract class PaintObject<T extends Indicator>
         IPaintBoundingBox,
         IPaintDataInit,
         IPaintChartAndHandleCross,
-        IPaintChartAndHandleCrossDelegate {
+        IPaintDelegate {
   PaintObject({
     required T indicator,
   }) : _indicator = indicator;
@@ -285,10 +328,6 @@ abstract class PaintObjectProxy<T extends Indicator> extends PaintObject
     config = controller as IConfig;
   }
 
-  int _slot = mainIndicatorSlot;
-  @override
-  int get slot => _slot;
-
   @override
   T get indicator => super.indicator as T;
 
@@ -312,30 +351,27 @@ abstract class SinglePaintObjectBox<T extends SinglePaintObjectIndicator>
   T get indicator => super.indicator as T;
 
   /// 转换parent为MultiPaintObjectBox类型的.
-  MultiPaintObjectBox<MultiPaintObjectIndicator>? get multiBoxParent {
-    if (super.parent is MultiPaintObjectBox) {
-      return super.parent as MultiPaintObjectBox;
-    }
-    return null;
-  }
+  // MultiPaintObjectBox<MultiPaintObjectIndicator>? get multiBoxParent {
+  //   if (super.parent is MultiPaintObjectBox) {
+  //     return super.parent as MultiPaintObjectBox;
+  //   }
+  //   return null;
+  // }
 
-  MinMax? _minMax;
+  // MinMax? _minMax;
 
-  @override
-  MinMax get minMax {
-    if (multiBoxParent != null) {
-      return multiBoxParent!.minMax;
-    }
-    return _minMax ?? MinMax.zero;
-  }
+  // @override
+  // void cleanMinMax() => _minMax = null;
 
-  @override
-  set minMax(MinMax val) {
-    if (multiBoxParent != null) {
-      multiBoxParent!.minMax = val;
-    }
-    _minMax = val;
-  }
+  // @override
+  // MinMax get minMax {
+  //   return _minMax ?? MinMax.zero;
+  // }
+
+  // @override
+  // set minMax(MinMax val) {
+  //   _minMax = val;
+  // }
 
   @override
   void doInitData({
@@ -343,7 +379,7 @@ abstract class SinglePaintObjectBox<T extends SinglePaintObjectIndicator>
     required int start,
     required int end,
   }) {
-    _minMax = null;
+    resetMinMax();
     final ret = initData(list: list, start: start, end: end);
     if (ret != null) {
       minMax = ret;
@@ -355,7 +391,7 @@ abstract class SinglePaintObjectBox<T extends SinglePaintObjectIndicator>
     paintChart(canvas, size);
 
     if (!cross.isCrossing) {
-      paintTips(canvas, model: state.curKlineData.latest);
+      doPaintTips(canvas, model: state.curKlineData.latest);
     }
   }
 
@@ -363,7 +399,12 @@ abstract class SinglePaintObjectBox<T extends SinglePaintObjectIndicator>
   void doOnCross(Canvas canvas, Offset offset) {
     onCross(canvas, offset);
 
-    paintTips(canvas, offset: offset);
+    doPaintTips(canvas, offset: offset);
+  }
+
+  @override
+  void doPaintTips(Canvas canvas, {CandleModel? model, Offset? offset}) {
+    paintTips(canvas, model: model, offset: offset);
   }
 }
 
@@ -380,16 +421,19 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
   T get indicator => super.indicator as T;
 
   // 下一个Tips的绘制区域
-  Rect _nextTipsRect = Rect.zero;
+  // Rect _nextTipsRect = Rect.zero;
 
-  Rect? get nextTipsRect => _nextTipsRect;
+  // Rect? get nextTipsRect => _nextTipsRect;
 
-  void resetNextTipsRect() => _nextTipsRect = tipsRect;
+  // void resetNextTipsRect() => _nextTipsRect = tipsRect;
 
-  MinMax? _minMax;
+  // MinMax? _minMax;
 
-  @override
-  MinMax get minMax => _minMax ?? MinMax.zero;
+  // @override
+  // void cleanMinMax() => _minMax = null;
+
+  // @override
+  // MinMax get minMax => _minMax ?? MinMax.zero;
 
   @override
   set minMax(MinMax val) {
@@ -412,8 +456,8 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
   @override
   void bindSolt(int newSlot) {
     super.bindSolt(newSlot);
-    for (var indicator in indicator.children) {
-      indicator.paintObject?.bindSolt(newSlot);
+    for (var child in indicator.children) {
+      child.paintObject?.bindSolt(newSlot);
     }
   }
 
@@ -425,19 +469,7 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
 
   @override
   Size? paintTips(Canvas canvas, {CandleModel? model, Offset? offset}) {
-    // 每次绘制前, 重置Tips区域大小为0
-    resetNextTipsRect();
-    for (var indicator in indicator.children) {
-      final size = indicator.paintObject?.paintTips(
-        canvas,
-        model: model,
-        offset: offset,
-      );
-      if (size != null) {
-        _nextTipsRect = _nextTipsRect.shiftYAxis(size.height);
-      }
-    }
-    return _nextTipsRect.size;
+    return Size(tipsRect.width, nextTipsRect.bottom - tipsRect.top);
   }
 
   @override
@@ -446,41 +478,75 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
     required int start,
     required int end,
   }) {
-    _minMax = null;
-    for (var indicator in indicator.children) {
-      indicator.paintObject?.doInitData(
-        list: list,
-        start: start,
-        end: end,
-      );
+    resetMinMax();
+    for (var child in indicator.children) {
+      final childPaintObject = child.paintObject;
+      if (childPaintObject == null) continue;
+      if (indicator.paintMode == MultiPaintMode.alone) {
+        childPaintObject.doInitData(
+          list: list,
+          start: start,
+          end: end,
+        );
+      } else {
+        childPaintObject.resetMinMax();
+        final ret = childPaintObject.initData(
+          list: list,
+          start: start,
+          end: end,
+        );
+        if (ret != null) {
+          minMax = ret;
+          childPaintObject.minMax = minMax;
+        }
+      }
     }
   }
 
   @override
   void doPaintChart(Canvas canvas, Size size) {
-    for (var indicator in indicator.children) {
-      indicator.paintObject?.paintChart(canvas, size);
+    for (var child in indicator.children) {
+      child.paintObject?.paintChart(canvas, size);
     }
 
     if (!cross.isCrossing) {
-      paintTips(canvas, model: state.curKlineData.latest);
+      doPaintTips(canvas, model: state.curKlineData.latest);
     }
   }
 
   @override
   void doOnCross(Canvas canvas, Offset offset) {
-    for (var indicator in indicator.children) {
-      indicator.paintObject?.onCross(canvas, offset);
+    for (var child in indicator.children) {
+      child.paintObject?.onCross(canvas, offset);
     }
 
-    paintTips(canvas, offset: offset);
+    doPaintTips(canvas, offset: offset);
+  }
+
+  @override
+  void doPaintTips(Canvas canvas, {CandleModel? model, Offset? offset}) {
+    // 每次绘制前, 重置Tips区域大小为0
+    resetNextTipsRect();
+    double height = 0;
+    for (var child in indicator.children) {
+      child.paintObject?.shiftNextTipsRect(height);
+      final size = child.paintObject?.paintTips(
+        canvas,
+        model: model,
+        offset: offset,
+      );
+      if (size != null) {
+        height += size.height;
+        shiftNextTipsRect(height);
+      }
+    }
   }
 
   @override
   @mustCallSuper
   void dispose() {
-    for (var indicator in indicator.children) {
-      indicator.paintObject?.dispose();
+    for (var child in indicator.children) {
+      child.paintObject?.dispose();
     }
     super.dispose();
   }
