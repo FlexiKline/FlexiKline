@@ -13,10 +13,12 @@
 // limitations under the License.
 
 import 'package:flexi_kline/flexi_kline.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../config.dart';
 import '../repo/mock.dart';
 import '../test/canvas_test.dart';
 import '../widgets/time_bar.dart';
@@ -33,8 +35,14 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
   late final FlexiKlineController controller1;
   late final FlexiKlineController controller2;
 
-  final CandleReq req = CandleReq(
+  final req1 = CandleReq(
     instId: 'BTC-USDT',
+    bar: TimeBar.m15.bar,
+    precision: 4,
+  );
+
+  final CandleReq req2 = CandleReq(
+    instId: 'BTC-USDT-SWAP',
     bar: TimeBar.D1.bar,
     precision: 4,
   );
@@ -53,24 +61,47 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
     initController2();
   }
 
+  void onTapTimeBar1(TimeBar value) {
+    req1.bar = value.bar;
+    Future.delayed(const Duration(seconds: 3), () {
+      controller1.setKlineData(req1, [
+        // TODO: 测试代码.
+      ]);
+    });
+  }
+
   void initController1() {
-    controller1 = FlexiKlineController(debug: true);
+    controller1 = FlexiKlineController(
+      logger: LogPrintImpl(
+        debug: kDebugMode,
+        tag: 'Demo1',
+      ),
+    );
     controller1.setMainSize(Size(
       ScreenUtil().screenWidth,
       300,
     ));
     genLocalCandleList().then((list) {
-      final req = CandleReq(
-        instId: 'BTC-USDT-SWAP',
-        bar: TimeBar.m15.bar,
-        precision: 4,
-      );
-      controller1.setKlineData(req, list);
+      controller1.setKlineData(req1, list);
     });
   }
 
+  // void onTapTimeBar2(TimeBar value) {
+  //   req2.bar = value.bar;
+  //   Future.delayed(const Duration(seconds: 3), () {
+  //     controller2.setKlineData(req2, [
+  //       // TODO: 测试代码.
+  //     ]);
+  //   });
+  // }
+
   void initController2() {
-    controller2 = FlexiKlineController(debug: false);
+    controller2 = FlexiKlineController(
+      logger: LogPrintImpl(
+        debug: kDebugMode,
+        tag: 'Demo2',
+      ),
+    );
     controller2.setMainSize(Size(
       ScreenUtil().screenWidth,
       ScreenUtil().screenWidth,
@@ -81,7 +112,7 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
       ..candleWidth = 8;
 
     genCustomCandleList(count: 500).then((list) {
-      controller2.setKlineData(req, list);
+      controller2.setKlineData(req2, list);
     });
   }
 
@@ -104,12 +135,8 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
           children: [
             FlexiTimeBar(
               timeBars: timBarList,
-              currTimeBar: req.timerBar,
-              onTapTimeBar: (value) {
-                setState(() {
-                  req.bar = value.bar;
-                });
-              },
+              currTimeBar: req1.timerBar,
+              onTapTimeBar: onTapTimeBar1,
             ),
             FlexiKlineWidget(
               key: const ValueKey('1'),
@@ -131,18 +158,18 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          CandleModel newModel = controller2.curKlineData.latest!;
+          CandleModel newModel = controller1.curKlineData.latest!;
           newModel = newModel.copyWith(
             timestamp: DateTime.fromMillisecondsSinceEpoch(newModel.timestamp)
                 .add(const Duration(days: 1))
                 .millisecondsSinceEpoch,
           );
-          controller2.appendKlineData(
-            req,
+          controller1.appendKlineData(
+            req1,
             [newModel],
           );
         },
-        child: Text('Add'),
+        child: const Text('Add'),
       ),
     );
   }

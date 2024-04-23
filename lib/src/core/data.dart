@@ -22,17 +22,15 @@ import '../model/export.dart';
 /// KLine相关的数据相关数据
 class KlineData with KlineLog {
   @override
-  String get logTag => 'KlineData';
-  @override
-  bool get isDebug => debug;
-
-  final bool debug;
+  String get logTag => '${super.logTag}\tKlineData';
 
   KlineData(
     this.req,
     List<CandleModel> list, {
-    this.debug = false,
-  }) : _list = List.of(list);
+    ILogger? logger,
+  }) : _list = List.of(list) {
+    loggerDelegate = logger;
+  }
 
   static final KlineData empty = KlineData(
     CandleReq(instId: "", bar: ""),

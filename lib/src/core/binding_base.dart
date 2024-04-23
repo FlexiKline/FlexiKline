@@ -19,18 +19,10 @@ import '../utils/log.dart';
 import 'interface.dart';
 
 abstract class KlineBindingBase with KlineLog, GestureHanderImpl {
-  @override
-  String get logTag => "klineBinding";
-  @override
-  bool get isDebug => debug;
-
-  final bool debug;
-
   KlineBindingBase({
-    this.debug = false,
     ILogger? logger,
   }) {
-    this.logger = logger;
+    loggerDelegate = logger;
     logd("constrouct");
     // initBinding();
   }

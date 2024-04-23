@@ -40,7 +40,7 @@ final routerProvider = Provider.autoDispose<GoRouter>((ref) {
     observers: [
       FlutterSmartDialog.observer,
     ],
-    initialLocation: '/demo',
+    initialLocation: '/ko',
     restorationScopeId: 'router',
     routes: routeList,
     debugLogDiagnostics: kDebugMode,

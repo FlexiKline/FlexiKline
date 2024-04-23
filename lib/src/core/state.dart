@@ -47,11 +47,11 @@ mixin StateBinding
 
   @override
   CalcuDataManager getCalcuMgr(String key) {
-    CalcuDataManager? calcuMgr = _calcuMgrMap[key];
-    if (calcuMgr == null) {
-      _calcuMgrMap[key] = calcuMgr = CalcuDataManager();
-    }
-    return calcuMgr;
+    _calcuMgrMap[key] ??= CalcuDataManager(
+      key: key,
+      logger: loggerDelegate,
+    );
+    return _calcuMgrMap[key]!;
   }
 
   @override
@@ -237,7 +237,7 @@ mixin StateBinding
       paintDxOffset = 0;
       data.reset();
     }
-    data = KlineData(req, List.of(list), debug: debug);
+    data = KlineData(req, List.of(list), logger: loggerDelegate);
     _klineDataCache[req.key] = data;
     if (curKlineData.invalid || req.key == curDataKey) {
       _curKlineData = data;

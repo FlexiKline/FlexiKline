@@ -36,10 +36,10 @@ class AppProviderObserver extends ProviderObserver {
   }
 }
 
-final logger = Logger(
+final defLogger = Logger(
   filter: null, // Use the default LogFilter (-> only log in debug mode)
   printer: PrettyPrinter(
-    methodCount: 1, // number of method calls to be displayed
+    methodCount: 0, // number of method calls to be displayed
     errorMethodCount: 2, // number of method calls if stacktrace is provided
     lineLength: 120, // width of the output
     colors: true, // Colorful log messages
@@ -49,10 +49,23 @@ final logger = Logger(
   output: null, // Use the default LogOutput (-> send everything to console)
 );
 
-// 默认ILogger接口实现
-final loggerImpl = LoggerImpl();
-
 class LoggerImpl implements ILogger {
+  final String? tag;
+  bool debug;
+  final Logger logger;
+
+  LoggerImpl({
+    this.tag,
+    this.debug = false,
+    Logger? logger,
+  }) : logger = logger ?? defLogger;
+
+  @override
+  String? get logTag => tag;
+
+  @override
+  bool get isDebug => debug;
+
   @override
   void logd(
     String msg, {
@@ -91,5 +104,60 @@ class LoggerImpl implements ILogger {
     StackTrace? stackTrace,
   }) {
     logger.e(msg, time: time, error: error, stackTrace: stackTrace);
+  }
+}
+
+class LogPrintImpl implements ILogger {
+  final String? tag;
+  bool debug;
+
+  LogPrintImpl({
+    this.tag,
+    this.debug = false,
+  });
+  @override
+  bool get isDebug => debug;
+
+  @override
+  String? get logTag => tag;
+
+  @override
+  void logd(
+    String msg, {
+    DateTime? time,
+    Object? error,
+    StackTrace? stackTrace,
+  }) {
+    debugPrint("zp:::Debug $logTag\t$msg");
+  }
+
+  @override
+  void logi(
+    String msg, {
+    DateTime? time,
+    Object? error,
+    StackTrace? stackTrace,
+  }) {
+    debugPrint("zp:::Info $logTag\t$msg");
+  }
+
+  @override
+  void logw(
+    String msg, {
+    DateTime? time,
+    Object? error,
+    StackTrace? stackTrace,
+  }) {
+    debugPrint("zp:::Warn $logTag\t$msg");
+  }
+
+  @override
+  void loge(
+    String msg, {
+    DateTime? time,
+    Object? error,
+    StackTrace? stackTrace,
+  }) {
+    debugPrint("zp:::Error $logTag\t$msg");
   }
 }

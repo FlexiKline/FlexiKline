@@ -320,8 +320,7 @@ abstract class PaintObjectProxy<T extends Indicator> extends PaintObject
     required KlineBindingBase controller,
     required T super.indicator,
   }) {
-    super.logger = controller.logger;
-    _debug = controller.debug;
+    loggerDelegate = controller.loggerDelegate;
     setting = controller as SettingBinding;
     state = controller as IState;
     cross = controller as ICross;
@@ -331,11 +330,8 @@ abstract class PaintObjectProxy<T extends Indicator> extends PaintObject
   @override
   T get indicator => super.indicator as T;
 
-  bool _debug = false;
   @override
-  bool get isDebug => _debug;
-  @override
-  String get logTag => indicator.key.toString();
+  String get logTag => '${super.logTag}\t${indicator.key.toString()}';
 }
 
 /// PaintObjectBox

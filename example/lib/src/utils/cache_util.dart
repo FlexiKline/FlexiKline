@@ -78,7 +78,7 @@ class CacheUtil {
         return modelMapper(json);
       }
     } catch (err, stack) {
-      logger.e('getModel error:$err', stackTrace: stack);
+      defLogger.e('getModel error:$err', stackTrace: stack);
     }
     return null;
   }
@@ -97,7 +97,7 @@ class CacheUtil {
             const [];
       }
     } catch (err, stack) {
-      logger.e('getModelList error:$err', stackTrace: stack);
+      defLogger.e('getModelList error:$err', stackTrace: stack);
     }
     return null;
   }

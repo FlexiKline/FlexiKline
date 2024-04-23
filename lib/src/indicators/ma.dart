@@ -90,7 +90,7 @@ class MAPaintObject extends SinglePaintObjectBox<MAIndicator> {
     //   canvas.clipRect(setting.mainDrawRect);
     for (var param in indicator.calcParams) {
       final countMaMap = calcuMgr.getCountMaMap(param.count);
-      if (countMaMap == null || countMaMap.isEmpty) continue;
+      if (countMaMap.isEmpty) continue;
 
       final offset = startCandleDx - candleWidthHalf;
       CandleModel m;
@@ -129,7 +129,7 @@ class MAPaintObject extends SinglePaintObjectBox<MAIndicator> {
     final children = <TextSpan>[];
     for (var param in indicator.calcParams) {
       final countMaMap = calcuMgr.getCountMaMap(param.count);
-      if (countMaMap == null || countMaMap.isEmpty) continue;
+      if (countMaMap.isEmpty) continue;
 
       final maVal = countMaMap.getItem(model.timestamp);
       if (maVal != null) {

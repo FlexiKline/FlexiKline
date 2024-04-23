@@ -89,8 +89,8 @@ class MAVolPaintObject extends SinglePaintObjectBox<MAVolIndicator> {
     //   // 裁剪绘制范围
     //   canvas.clipRect(setting.mainDrawRect);
     for (var param in indicator.calcParams) {
-      final countMaMap = calcuMgr.getCountMaVolMap(param.count);
-      if (countMaMap == null || countMaMap.isEmpty) continue;
+      final maVolMap = calcuMgr.getCountMaVolMap(param.count);
+      if (maVolMap.isEmpty) continue;
 
       final offset = startCandleDx - candleWidthHalf;
       CandleModel m;
@@ -98,7 +98,7 @@ class MAVolPaintObject extends SinglePaintObjectBox<MAVolIndicator> {
       for (int i = start; i < end; i++) {
         m = data.list[i];
         final dx = offset - (i - start) * candleActualWidth;
-        CalcuData? maData = countMaMap[m.timestamp];
+        CalcuData? maData = maVolMap[m.timestamp];
         maData ??= calcuMgr.calculateMAVol(data.list, i, param.count);
         final dy = valueToDy(maData.val, correct: false);
         points.add(Offset(dx, dy));
@@ -128,10 +128,10 @@ class MAVolPaintObject extends SinglePaintObjectBox<MAVolIndicator> {
 
     final children = <TextSpan>[];
     for (var param in indicator.calcParams) {
-      final countMaMap = calcuMgr.getCountMaVolMap(param.count);
-      if (countMaMap == null || countMaMap.isEmpty) continue;
+      final maVolMap = calcuMgr.getCountMaVolMap(param.count);
+      if (maVolMap.isEmpty) continue;
 
-      final maVal = countMaMap.getItem(model.timestamp);
+      final maVal = maVolMap.getItem(model.timestamp);
       if (maVal != null) {
         final text = formatNumber(
           maVal.val,

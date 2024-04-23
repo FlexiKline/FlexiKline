@@ -54,7 +54,12 @@ class _KOKlinePageState extends ConsumerState<KOKlinePage> {
   void initState() {
     super.initState();
 
-    controller = FlexiKlineController(debug: kDebugMode, logger: loggerImpl);
+    controller = FlexiKlineController(
+      logger: LoggerImpl(
+        tag: "KOKline",
+        debug: kDebugMode,
+      ),
+    );
     controller.setMainSize(
       Size(ScreenUtil().screenWidth, 300.r),
     );

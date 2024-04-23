@@ -57,10 +57,18 @@ class EMAPaintObject extends SinglePaintObjectBox<EMAIndicator> {
     required int end,
   }) {
     if (list.isEmpty || start < 0 || end >= list.length) return null;
+    MinMax? minMax;
     for (var param in indicator.calcParams) {
-      calcuMgr.calculateAnCacheEMA(list, param.count);
+      final ret = calcuMgr.calculateAndCacheEMA(
+        list,
+        param.count,
+        start: start,
+        end: end,
+      );
+      minMax ??= ret;
+      minMax?.updateMinMax(ret);
     }
-    return null; // TODO: 待解决返回值
+    return minMax;
   }
 
   @override
@@ -94,8 +102,8 @@ class EMAPaintObject extends SinglePaintObjectBox<EMAIndicator> {
       canvas.clipRect(setting.mainDrawRect);
 
       for (var param in indicator.calcParams) {
-        final countEmaMap = calcuMgr.getCountEmaMap(param.count);
-        if (countEmaMap == null || countEmaMap.isEmpty) continue;
+        final emaMap = calcuMgr.getCountEmaMap(param.count);
+        if (emaMap.isEmpty) continue;
 
         final offset = startCandleDx - candleWidthHalf;
         CandleModel m;
@@ -103,7 +111,7 @@ class EMAPaintObject extends SinglePaintObjectBox<EMAIndicator> {
         for (int i = start; i < end; i++) {
           m = data.list[i];
           final dx = offset - (i - start) * candleActualWidth;
-          final emaData = countEmaMap[m.timestamp];
+          final emaData = emaMap[m.timestamp];
           if (emaData == null) continue;
           final dy = valueToDy(emaData.val, correct: false);
           points.add(Offset(dx, dy));
@@ -133,10 +141,10 @@ class EMAPaintObject extends SinglePaintObjectBox<EMAIndicator> {
 
     final children = <TextSpan>[];
     for (var param in indicator.calcParams) {
-      final countEmaMap = calcuMgr.getCountEmaMap(param.count);
-      if (countEmaMap == null || countEmaMap.isEmpty) continue;
+      final emaMap = calcuMgr.getCountEmaMap(param.count);
+      if (emaMap.isEmpty) continue;
 
-      final emaData = countEmaMap.getItem(model.timestamp);
+      final emaData = emaMap.getItem(model.timestamp);
       if (emaData != null) {
         final text = formatNumber(
           emaData.val,

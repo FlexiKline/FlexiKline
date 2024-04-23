@@ -15,6 +15,8 @@
 import 'package:flutter/foundation.dart';
 
 abstract interface class ILogger {
+  bool get isDebug;
+  String? get logTag;
   void logd(
     String msg, {
     DateTime? time,
@@ -42,10 +44,14 @@ abstract interface class ILogger {
 }
 
 mixin KlineLog implements ILogger {
-  String get logTag => 'Kline';
-  bool get isDebug => false;
+  @override
+  String get logTag => loggerDelegate?.logTag ?? 'FlexiKline';
 
-  ILogger? logger;
+  @override
+  bool get isDebug => loggerDelegate?.isDebug ?? false;
+
+  /// KlineLog的代理者
+  ILogger? loggerDelegate;
 
   @override
   void logd(
@@ -55,8 +61,13 @@ mixin KlineLog implements ILogger {
     StackTrace? stackTrace,
   }) {
     if (isDebug) {
-      if (logger != null) {
-        logger?.logd(msg, time: time, error: error, stackTrace: stackTrace);
+      if (loggerDelegate != null) {
+        loggerDelegate?.logd(
+          '$logTag\t$msg',
+          time: time,
+          error: error,
+          stackTrace: stackTrace,
+        );
       } else {
         debugPrint("zp::: DEBUG $logTag\t$msg");
       }
@@ -71,8 +82,13 @@ mixin KlineLog implements ILogger {
     StackTrace? stackTrace,
   }) {
     if (isDebug) {
-      if (logger != null) {
-        logger?.logi(msg, time: time, error: error, stackTrace: stackTrace);
+      if (loggerDelegate != null) {
+        loggerDelegate?.logi(
+          '$logTag\t$msg',
+          time: time,
+          error: error,
+          stackTrace: stackTrace,
+        );
       } else {
         debugPrint("zp::: INFO $logTag\t$msg");
       }
@@ -87,8 +103,13 @@ mixin KlineLog implements ILogger {
     StackTrace? stackTrace,
   }) {
     if (isDebug) {
-      if (logger != null) {
-        logger?.logw(msg, time: time, error: error, stackTrace: stackTrace);
+      if (loggerDelegate != null) {
+        loggerDelegate?.logw(
+          '$logTag\t$msg',
+          time: time,
+          error: error,
+          stackTrace: stackTrace,
+        );
       } else {
         debugPrint("zp::: WARN $logTag\t$msg");
       }
@@ -103,8 +124,13 @@ mixin KlineLog implements ILogger {
     StackTrace? stackTrace,
   }) {
     if (isDebug) {
-      if (logger != null) {
-        logger?.loge(msg, time: time, error: error, stackTrace: stackTrace);
+      if (loggerDelegate != null) {
+        loggerDelegate?.loge(
+          '$logTag\t$msg',
+          time: time,
+          error: error,
+          stackTrace: stackTrace,
+        );
       } else {
         debugPrint("zp::: ERROR $logTag\t$msg");
       }

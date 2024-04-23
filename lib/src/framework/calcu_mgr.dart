@@ -15,10 +15,11 @@
 import 'dart:math' as math;
 
 import 'package:decimal/decimal.dart';
-import 'package:flutter/material.dart';
 
+import '../constant.dart';
 import '../extension/export.dart';
 import '../model/export.dart';
+import '../utils/export.dart';
 
 class CalcuData {
   final int count;
@@ -34,52 +35,79 @@ class CalcuData {
   });
 }
 
-class CalcuDataManager {
+class CalcuDataManager with KlineLog {
   // CalcuDataManager._internal();
   // factory CalcuDataManager() => _instance;
   // static final CalcuDataManager _instance = CalcuDataManager._internal();
   // static CalcuDataManager get instance => _instance;
 
+  CalcuDataManager({
+    required this.key,
+    ILogger? logger,
+  }) {
+    loggerDelegate = logger;
+  }
+
+  final String key;
+
+  @override
+  String get logTag => '${super.logTag}\tCalcuMgr($key)';
+
   final Decimal two = Decimal.fromInt(2);
 
   /// MA数据缓存 <count, <timestamp, Decimal>>
-  final Map<int, Map<int, CalcuData>> count2ts2MaMap = {};
+  final Map<int, Map<int, CalcuData>> _count2ts2MaMap = {};
 
-  Map<int, CalcuData>? getCountMaMap(int count) {
-    return count2ts2MaMap[count];
+  Map<int, CalcuData> getCountMaMap(int count) {
+    _count2ts2MaMap[count] ??= {};
+    return _count2ts2MaMap[count]!;
   }
 
   CalcuData? getMaData(int? ts, int? count) {
     if (count != null && ts != null) {
-      return count2ts2MaMap[count]?[ts];
+      return _count2ts2MaMap[count]?[ts];
     }
     return null;
   }
 
   /// MAVOL数据缓存 <count, <timestamp, Decimal>>
-  final Map<int, Map<int, CalcuData>> count2ts2MaVolMap = {};
+  final Map<int, Map<int, CalcuData>> _count2ts2MaVolMap = {};
 
-  Map<int, CalcuData>? getCountMaVolMap(int count) {
-    return count2ts2MaVolMap[count];
+  Map<int, CalcuData> getCountMaVolMap(int count) {
+    _count2ts2MaVolMap[count] ??= {};
+    return _count2ts2MaVolMap[count]!;
   }
 
   CalcuData? getMaVolData(int? ts, int? count) {
     if (count != null && ts != null) {
-      return count2ts2MaVolMap[count]?[ts];
+      return _count2ts2MaVolMap[count]?[ts];
     }
     return null;
   }
 
   /// EMA数据缓存 <count, <timestamp, val>>
-  Map<int, Map<int, CalcuData>> count2ts2dataEmaMap = {};
+  final Map<int, Map<int, CalcuData>> _count2ts2dataEmaMap = {};
 
-  Map<int, CalcuData>? getCountEmaMap(int count) {
-    return count2ts2dataEmaMap[count];
+  Map<int, CalcuData> getCountEmaMap(int count) {
+    _count2ts2dataEmaMap[count] ??= {};
+    return _count2ts2dataEmaMap[count]!;
+  }
+
+  void clearEmaMap(int count) {
+    _count2ts2dataEmaMap[count]?.clear();
+  }
+
+  bool isEnoughEmaDataInCache(List<CandleModel> list, int count) {
+    final emaMap = getCountEmaMap(count);
+    if (emaMap.isNotEmpty) {
+      return emaMap.length >= list.length - count;
+    }
+    return false;
   }
 
   CalcuData? getEmaData(int? ts, int? count) {
     if (count != null && ts != null) {
-      return count2ts2dataEmaMap[count]?[ts];
+      return _count2ts2dataEmaMap[count]?[ts];
     }
     return null;
   }
@@ -108,7 +136,9 @@ extension CalculateMA on CalcuDataManager {
     return CalcuData(
       count: count,
       ts: m.timestamp,
-      val: (sum / count.d).toDecimal(scaleOnInfinitePrecision: 18),
+      val: (sum / count.d).toDecimal(
+        scaleOnInfinitePrecision: defaultScaleOnInfinitePrecision,
+      ),
     );
   }
 
@@ -130,25 +160,23 @@ extension CalculateMA on CalcuDataManager {
     end ??= len;
     if (start < 0 || end > len) return null;
 
-    Map<int, CalcuData>? maMap = getCountMaMap(count);
+    Map<int, CalcuData> maMap = getCountMaMap(count);
 
-    if (maMap != null) {
+    if (maMap.isNotEmpty) {
       if (reset ||
           maMap.getItem(list.getItem(start)?.timestamp) == null ||
           maMap.getItem(list.getItem(end)?.timestamp) == null) {
-        debugPrint(
+        logd(
           'calculateAndCacheMA reset:$reset >>> maMapLen:${maMap.length}, listLen$len : [$start, $end]',
         );
         // countMaMap.clear(); // 清理旧数据. TODO: 如何清理dirty数据
       } else {
-        debugPrint('calculateAndCacheMA use cache!!! [$start, $end]');
+        logd('calculateAndCacheMA use cache!!! [$start, $end]');
         if (start == 0) {
           //如果start是0, 有可能更新了最新价, 重新计算
           maMap[list.first.timestamp] = calculateMA(list, 0, count);
         }
       }
-    } else {
-      count2ts2MaMap[count] = maMap = {};
     }
 
     int index = end; // 多算一个
@@ -195,7 +223,9 @@ extension CalculateMAVol on CalcuDataManager {
     return CalcuData(
       count: count,
       ts: m.timestamp,
-      val: (sum / count.d).toDecimal(scaleOnInfinitePrecision: 18),
+      val: (sum / count.d).toDecimal(
+        scaleOnInfinitePrecision: defaultScaleOnInfinitePrecision,
+      ),
     );
   }
 
@@ -217,25 +247,23 @@ extension CalculateMAVol on CalcuDataManager {
     end ??= len;
     if (start < 0 || end > len) return null;
 
-    Map<int, CalcuData>? maVolMap = getCountMaVolMap(count);
+    Map<int, CalcuData> maVolMap = getCountMaVolMap(count);
 
-    if (maVolMap != null) {
+    if (maVolMap.isNotEmpty) {
       if (reset ||
           maVolMap.getItem(list.getItem(start)?.timestamp) == null ||
           maVolMap.getItem(list.getItem(end)?.timestamp) == null) {
-        debugPrint(
+        logd(
           'calculateAndCacheMAVol reset:$reset >>> maVolMapLen:${maVolMap.length}, listLen$len : [$start, $end]',
         );
         // countMaMap.clear(); // 清理旧数据. TODO: 如何清理dirty数据
       } else {
-        debugPrint('calculateAndCacheMAVol use cache!!! [$start, $end]');
+        logd('calculateAndCacheMAVol use cache!!! [$start, $end]');
         if (start == 0) {
           //如果start是0, 有可能更新了最新价, 重新计算
           maVolMap[list.first.timestamp] = calculateMAVol(list, 0, count);
         }
       }
-    } else {
-      count2ts2MaVolMap[count] = maVolMap = {};
     }
 
     int index = end; // 多算一个
@@ -282,6 +310,34 @@ extension CalculateEMA on CalcuDataManager {
     return sum;
   }
 
+  /// 从缓存中获取[start, end]之间的最大最小值.
+  MinMax? getEMAMinmaxFromCache(
+    List<CandleModel> list,
+    int count,
+    int start,
+    int end,
+  ) {
+    final len = list.length;
+    if (start < 0 && end > len) return null;
+    final emaMap = getCountEmaMap(count);
+    if (emaMap.isEmpty ||
+        emaMap.length < len - count ||
+        emaMap.getItem(list[start].timestamp) == null) {
+      // 校验emaMap中是否存在缓存数据. 如果不存在直接返回null
+      return null;
+    }
+    MinMax? minMax;
+    CalcuData? data;
+    for (int i = end - 1; i >= start; i--) {
+      data = emaMap[list[i].timestamp];
+      if (data != null) {
+        minMax ??= MinMax(max: data.val, min: data.val);
+        minMax.updateMinMaxByVal(data.val);
+      }
+    }
+    return minMax;
+  }
+
   /// 指数平滑移动平均线Exponential Moving Averages
   /// 由于当日EMA计算依赖于昨日EMA, 所以数据从最后开始计算, 并缓存,
   /// 注: 如果有旧数据加入列表, 需要从最旧的数据开始重新计算.
@@ -290,28 +346,35 @@ extension CalculateEMA on CalcuDataManager {
   ///   EMA(12)=2*今收盘价/(12+1)+11*昨日EMA(12)/(12+1)
   /// 2）慢速平滑移动平均线（EMA）是26日的，计算公式为：
   ///   EMA(26)=2*今收盘价/(26+1)+25*昨日EMA(26)/(26+1)
-  void calculateAnCacheEMA(
+  MinMax? calculateAndCacheEMA(
     List<CandleModel> list,
     int count, {
+    int? start,
+    int? end,
     bool reset = false,
   }) {
-    if (list.isEmpty) return;
+    if (list.isEmpty) return null;
     final len = list.length;
-    if (len < count) return;
+    if (len < count) return null;
 
-    Map<int, CalcuData>? countEmaMap = getCountEmaMap(count);
-    if (countEmaMap != null) {
-      if (reset || countEmaMap.length < len - count) {
-        debugPrint(
-          'calculateAnCacheEMA reset:$reset >>>  countEmaMapLen:${countEmaMap.length} < ${len - count} >>> ($len, $count)',
-        );
-        countEmaMap.clear(); // 清理旧数据.
-      } else {
-        debugPrint('calculateAnCacheEMA use cache!!!');
-        return;
+    bool needReturn = start != null && end != null && start >= 0 && end < len;
+    start ??= 0;
+    end ??= len;
+    if (start < 0 || end > len) return null;
+
+    if (reset || !isEnoughEmaDataInCache(list, count)) {
+      // EMA指标保证从[end-count, start(0)]的计算. 如果不够, 说明有新数据加入, 需要重新计算
+      logd('calculateAnCacheEMA(reset:$reset) clearEmaMap($count)');
+      clearEmaMap(count);
+    }
+
+    Map<int, CalcuData> countEmaMap = getCountEmaMap(count);
+    if (countEmaMap.isNotEmpty) {
+      logd('calculateAnCacheEMA immediate use cache!!!');
+      if (needReturn) {
+        return getEMAMinmaxFromCache(list, count, start, end);
       }
-    } else {
-      count2ts2dataEmaMap[count] = countEmaMap = {};
+      return null;
     }
 
     // 初始采用WMA
@@ -326,13 +389,16 @@ extension CalculateEMA on CalcuDataManager {
     for (int i = index - 1; i >= 0; i--) {
       m = list[i];
       lastEma = (((two * m.close) + lastEma * (count - 1).d) / (count + 1).d)
-          .toDecimal(scaleOnInfinitePrecision: 18);
+          .toDecimal(scaleOnInfinitePrecision: defaultScaleOnInfinitePrecision);
       countEmaMap[m.timestamp] = CalcuData(
         ts: m.timestamp,
         count: count,
         val: lastEma,
       );
     }
-    return;
+    if (needReturn) {
+      return getEMAMinmaxFromCache(list, count, start, end);
+    }
+    return null;
   }
 }

@@ -16,7 +16,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../kline_controller.dart';
-import '../utils/export.dart';
 
 class GestureView extends StatefulWidget {
   const GestureView({
@@ -33,12 +32,7 @@ class GestureView extends StatefulWidget {
 }
 
 class _GestureViewState extends State<GestureView>
-    with TickerProviderStateMixin, KlineLog {
-  @override
-  String get logTag => '';
-  @override
-  bool get isDebug => widget.controller.debug;
-
+    with TickerProviderStateMixin {
   bool isSweeped = false;
 
   @override
@@ -79,7 +73,7 @@ class _GestureViewState extends State<GestureView>
   void onPointerMove(PointerMoveEvent event) {
     if (widget.controller.isCrossing) {
       if (!isSweeped) {
-        logd(
+        widget.controller.logd(
           'onPointerMove currently in crossing, need clear the gesture arena!',
         );
         isSweeped = true;

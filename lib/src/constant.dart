@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 /// 默认数据格式化精度
 const int defaultPrecision = 6;
 
+const int defaultScaleOnInfinitePrecision = 18;
 const double defaultSubIndicatorHeight = 80;
 const double defaultSubIndicatorTipsHeight = 15;
 const EdgeInsets defaultSubIndicatorPadding = EdgeInsets.only(
