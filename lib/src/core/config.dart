@@ -55,14 +55,12 @@ mixin ConfigBinding on KlineBindingBase, SettingBinding implements IConfig {
     );
 
     addIndicatorInMain(CandleIndicator(
-      key: const ValueKey(IndicatorType.candle),
       height: mainRect.height,
       tipsHeight: mainTipsHeight,
       padding: mainPadding,
     ));
 
     addIndicatorInMain(MAIndicator(
-      key: const ValueKey(IndicatorType.ma),
       height: mainRect.height,
       calcParams: [
         MaParam(label: 'MA7', count: 7, color: Colors.red),
@@ -71,13 +69,12 @@ mixin ConfigBinding on KlineBindingBase, SettingBinding implements IConfig {
     ));
 
     addIndicatorInMain(EMAIndicator(
-      key: const ValueKey(IndicatorType.ema),
       height: mainRect.height,
       calcParams: [
-        EMAParam(label: 'MA5', count: 5, color: const Color(0xFF806180)),
-        EMAParam(label: 'MA10', count: 10, color: const Color(0xFFEBB736)),
-        EMAParam(label: 'MA20', count: 20, color: const Color(0xFFD672D5)),
-        EMAParam(label: 'MA60', count: 60, color: const Color(0xFF7F93DE))
+        EMAParam(label: 'EMA5', count: 5, color: const Color(0xFF806180)),
+        EMAParam(label: 'EMA10', count: 10, color: const Color(0xFFEBB736)),
+        EMAParam(label: 'EMA20', count: 20, color: const Color(0xFFD672D5)),
+        EMAParam(label: 'EMA60', count: 60, color: const Color(0xFF7F93DE))
       ],
     ));
 
@@ -85,28 +82,25 @@ mixin ConfigBinding on KlineBindingBase, SettingBinding implements IConfig {
       subIndicatorChartMaxCount,
     );
 
-    // addIndicatorInSub(VolumeIndicator(
-    //   key: const ValueKey(IndicatorType.volume),
-    //   height: subIndicatorDefaultHeight,
-    //   tipsHeight: 22,
-    // ));
+    addIndicatorInSub(VolumeIndicator(
+      height: subIndicatorDefaultHeight,
+      tipsHeight: 12,
+    ));
 
     addIndicatorInSub(MultiPaintObjectIndicator(
-      key: ValueKey('${IndicatorType.volume.name}+${IndicatorType.ma.name}'),
+      key: ValueKey('${IndicatorType.volume.name}+${IndicatorType.maVol.name}'),
       height: subIndicatorDefaultHeight,
-      tipsHeight: 22,
-      paintMode: MultiPaintMode.alone,
+      tipsHeight: 12,
+      // paintMode: MultiPaintMode.alone,
       children: [
         VolumeIndicator(
-          key: const ValueKey(IndicatorType.volume),
           height: subIndicatorDefaultHeight,
         ),
-        MAIndicator(
-          key: const ValueKey(IndicatorType.ma),
+        MAVolIndicator(
           height: subIndicatorDefaultHeight,
           calcParams: [
-            MaParam(label: 'MA7', count: 7, color: Colors.black),
-            MaParam(label: 'MA30', count: 30, color: Colors.blue)
+            MaParam(label: 'MA5', count: 5, color: Colors.orange),
+            MaParam(label: 'MA10', count: 10, color: Colors.blue)
           ],
         )
       ],

@@ -23,14 +23,14 @@ import '../utils/export.dart';
 
 class VolumeIndicator extends SinglePaintObjectIndicator {
   VolumeIndicator({
-    required super.key,
+    super.key = const ValueKey(IndicatorType.volume),
     required super.height,
     super.tipsHeight,
     super.padding,
   });
 
   @override
-  SinglePaintObjectBox createPaintObject(KlineBindingBase controller) =>
+  VolumePaintObject createPaintObject(KlineBindingBase controller) =>
       VolumePaintObject(
         controller: controller,
         indicator: this,
@@ -61,12 +61,8 @@ class VolumePaintObject extends SinglePaintObjectBox<VolumeIndicator> {
       _max = m.vol > _max ? m.vol : _max;
       _min = m.vol < _min ? m.vol : _min;
     }
-    // 增加vol区域的margin为高度的1/10
-    final volH = _max == _min ? Decimal.one : _max - _min;
-    final margin = volH * twentieth;
-    _max += margin;
-    _min -= margin;
 
+    _min = _min > Decimal.zero ? Decimal.zero : _min;
     return MinMax(max: _max, min: _min);
   }
 
@@ -77,18 +73,12 @@ class VolumePaintObject extends SinglePaintObjectBox<VolumeIndicator> {
 
     /// 绘制Y轴刻度值
     paintYAxisTick(canvas, size);
-
-    // if (!cross.isCrossing) {
-    //   paintTips(canvas, model: state.curKlineData.latest);
-    // }
   }
 
   @override
   void onCross(Canvas canvas, Offset offset) {
     /// 绘制Cross命中的Y轴刻度值
     _paintCrossYAxisVolumeMark(canvas, offset);
-
-    // paintTips(canvas, offset: offset);
   }
 
   /// 绘制Volume柱状图
@@ -129,7 +119,7 @@ class VolumePaintObject extends SinglePaintObjectBox<VolumeIndicator> {
       final text = formatNumber(
         vol,
         precision: 2,
-        defIfZero: '--',
+        defIfZero: '0.00',
         cutInvalidZero: true,
         showCompact: true,
       );
@@ -159,7 +149,8 @@ class VolumePaintObject extends SinglePaintObjectBox<VolumeIndicator> {
     final text = formatNumber(
       volume,
       precision: 2,
-      cutInvalidZero: true,
+      // cutInvalidZero: true,
+      defIfZero: '0.00',
       showCompact: true,
     );
 
@@ -190,9 +181,7 @@ class VolumePaintObject extends SinglePaintObjectBox<VolumeIndicator> {
     if (indicator.tipsHeight <= 0) return null;
     model ??= offsetToCandle(offset);
     if (model == null) return null;
-
-    final dx = tipsRect.left;
-    final dy = tipsRect.top;
+    Rect drawRect = nextTipsRect;
 
     final text = formatNumber(
       model.vol,
@@ -203,17 +192,15 @@ class VolumePaintObject extends SinglePaintObjectBox<VolumeIndicator> {
     );
 
     return canvas.drawText(
-      offset: Offset(
-        dx,
-        dy,
-      ),
+      offset: drawRect.topLeft,
       drawDirection: DrawDirection.ltr,
       drawableRect: tipsRect,
       text: text,
       style: setting.volTipStyle.copyWith(
-        height: indicator.tipsHeight / setting.volTipFontSize,
+        height: drawRect.height / setting.volTipFontSize,
+        // height: 1.2,
       ),
-      textAlign: TextAlign.center,
+      textAlign: TextAlign.left,
       padding: setting.volTipsRectPadding,
       maxLines: 1,
     );

@@ -79,7 +79,7 @@ mixin SettingBinding on KlineBindingBase implements IConfig {
   double get mainRectHeight => mainRect.height;
 
   /// 主图区域的tips高度
-  double mainTipsHeight = 20;
+  double mainTipsHeight = 12;
 
   /// 主图上下padding
   EdgeInsets mainPadding = const EdgeInsets.only(

@@ -21,6 +21,8 @@ class MinMax {
 
   static final MinMax zero = MinMax(max: Decimal.zero, min: Decimal.zero);
 
+  MinMax clone() => MinMax(max: max, min: min);
+
   void updateMinMaxByVal(Decimal val) {
     max = val > max ? val : max;
     min = val < min ? val : min;

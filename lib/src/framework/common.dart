@@ -12,7 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export 'common.dart';
-export 'indicator.dart';
-export 'object.dart';
-export 'calcu_mgr.dart';
+import 'package:flutter/material.dart';
+
+enum IndicatorType {
+  candle,
+  volume,
+  ma,
+  maVol,
+  ema,
+  macd;
+}
+
+class MaParam {
+  final String label;
+  final int count;
+  final Color color;
+
+  MaParam({required this.label, required this.count, required this.color});
+}
+
+class EMAParam {
+  final String label;
+  final int count;
+  final Color color;
+
+  EMAParam({required this.label, required this.count, required this.color});
+}

@@ -15,6 +15,7 @@
 import 'dart:ui';
 
 import 'package:decimal/decimal.dart';
+import 'package:flutter/material.dart';
 
 import '../constant.dart';
 import '../core/export.dart';
@@ -47,7 +48,7 @@ import '../model/export.dart';
 /// ⒋最后用DIFF减DEA，得MACD。MACD通常绘制成围绕零轴线波动的柱形图。MACD柱状大于0涨颜色，小于0跌颜色。
 class MacdIndicator extends SinglePaintObjectIndicator {
   MacdIndicator({
-    required super.key,
+    super.key = const ValueKey(IndicatorType.macd),
     super.height = defaultSubIndicatorHeight,
     super.tipsHeight = defaultSubIndicatorTipsHeight,
     super.padding = defaultSubIndicatorPadding,

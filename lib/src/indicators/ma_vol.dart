@@ -21,10 +21,10 @@ import '../model/export.dart';
 import '../render/export.dart';
 import '../utils/export.dart';
 
-/// MA 移动平均指标线
-class MAIndicator extends SinglePaintObjectIndicator {
-  MAIndicator({
-    super.key = const ValueKey(IndicatorType.ma),
+/// MAVOL 移动平均指标线
+class MAVolIndicator extends SinglePaintObjectIndicator {
+  MAVolIndicator({
+    super.key = const ValueKey(IndicatorType.maVol),
     required super.height,
     super.tipsHeight,
     super.padding,
@@ -34,13 +34,13 @@ class MAIndicator extends SinglePaintObjectIndicator {
   final List<MaParam> calcParams;
 
   @override
-  SinglePaintObjectBox createPaintObject(KlineBindingBase controller) {
-    return MAPaintObject(controller: controller, indicator: this);
+  MAVolPaintObject createPaintObject(KlineBindingBase controller) {
+    return MAVolPaintObject(controller: controller, indicator: this);
   }
 }
 
-class MAPaintObject extends SinglePaintObjectBox<MAIndicator> {
-  MAPaintObject({
+class MAVolPaintObject extends SinglePaintObjectBox<MAVolIndicator> {
+  MAVolPaintObject({
     required super.controller,
     required super.indicator,
   });
@@ -54,7 +54,7 @@ class MAPaintObject extends SinglePaintObjectBox<MAIndicator> {
     if (list.isEmpty || start < 0 || end >= list.length) return null;
     MinMax? minMax;
     for (var param in indicator.calcParams) {
-      final ret = calcuMgr.calculateAndCacheMA(
+      final ret = calcuMgr.calculateAndCacheMAVol(
         list,
         param.count,
         start: start,
@@ -89,7 +89,7 @@ class MAPaintObject extends SinglePaintObjectBox<MAIndicator> {
     //   // 裁剪绘制范围
     //   canvas.clipRect(setting.mainDrawRect);
     for (var param in indicator.calcParams) {
-      final countMaMap = calcuMgr.getCountMaMap(param.count);
+      final countMaMap = calcuMgr.getCountMaVolMap(param.count);
       if (countMaMap == null || countMaMap.isEmpty) continue;
 
       final offset = startCandleDx - candleWidthHalf;
@@ -99,7 +99,7 @@ class MAPaintObject extends SinglePaintObjectBox<MAIndicator> {
         m = data.list[i];
         final dx = offset - (i - start) * candleActualWidth;
         CalcuData? maData = countMaMap[m.timestamp];
-        maData ??= calcuMgr.calculateMA(data.list, i, param.count);
+        maData ??= calcuMgr.calculateMAVol(data.list, i, param.count);
         final dy = valueToDy(maData.val, correct: false);
         points.add(Offset(dx, dy));
       }
@@ -128,7 +128,7 @@ class MAPaintObject extends SinglePaintObjectBox<MAIndicator> {
 
     final children = <TextSpan>[];
     for (var param in indicator.calcParams) {
-      final countMaMap = calcuMgr.getCountMaMap(param.count);
+      final countMaMap = calcuMgr.getCountMaVolMap(param.count);
       if (countMaMap == null || countMaMap.isEmpty) continue;
 
       final maVal = countMaMap.getItem(model.timestamp);

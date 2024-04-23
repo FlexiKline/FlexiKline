@@ -21,14 +21,6 @@ import '../model/export.dart';
 import '../render/export.dart';
 import '../utils/export.dart';
 
-class EMAParam {
-  final String label;
-  final int count;
-  final Color color;
-
-  EMAParam({required this.label, required this.count, required this.color});
-}
-
 /// EMA 平滑移动平均线
 /// 公式：
 /// 1）快速平滑移动平均线（EMA）是12日的，计算公式为：
@@ -37,7 +29,7 @@ class EMAParam {
 ///   EMA(26)=2*今收盘价/(26+1)+25*昨日EMA(26)/(26+1)
 class EMAIndicator extends SinglePaintObjectIndicator {
   EMAIndicator({
-    required super.key,
+    super.key = const ValueKey(IndicatorType.ema),
     required super.height,
     super.tipsHeight,
     super.padding,
@@ -158,8 +150,8 @@ class EMAPaintObject extends SinglePaintObjectBox<EMAIndicator> {
           style: TextStyle(
             fontSize: setting.maTipsFontSize,
             color: param.color,
-            // height: tipsRect.height / setting.maTipsFontSize,
-            height: 1.2,
+            height: drawRect.height / setting.maTipsFontSize,
+            // height: 1.2,
           ),
         ));
       }
@@ -170,7 +162,7 @@ class EMAPaintObject extends SinglePaintObjectBox<EMAIndicator> {
         textSpan: TextSpan(children: children),
         drawDirection: DrawDirection.ltr,
         drawableRect: drawRect,
-        textAlign: TextAlign.center,
+        textAlign: TextAlign.left,
         padding: setting.maTipsRectPadding,
         maxLines: 1,
       );

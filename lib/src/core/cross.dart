@@ -87,11 +87,12 @@ mixin CrossBinding
   @override
   void paintCross(Canvas canvas, Size size) {
     if (isCrossing) {
-      ensurePaintObjectInstance();
       final offset = this.offset;
       if (offset == null || offset.isInfinite) {
         return;
       }
+
+      ensurePaintObjectInstance();
 
       /// 绘制Cross Line
       paintCrossLine(canvas, offset);

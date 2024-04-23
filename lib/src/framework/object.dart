@@ -482,23 +482,20 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
     for (var child in indicator.children) {
       final childPaintObject = child.paintObject;
       if (childPaintObject == null) continue;
-      if (indicator.paintMode == MultiPaintMode.alone) {
-        childPaintObject.doInitData(
-          list: list,
-          start: start,
-          end: end,
-        );
-      } else {
-        childPaintObject.resetMinMax();
-        final ret = childPaintObject.initData(
-          list: list,
-          start: start,
-          end: end,
-        );
-        if (ret != null) {
-          minMax = ret;
-          childPaintObject.minMax = minMax;
-        }
+      childPaintObject.resetMinMax();
+      final ret = childPaintObject.initData(
+        list: list,
+        start: start,
+        end: end,
+      );
+      if (ret != null) {
+        childPaintObject.minMax = ret;
+        minMax = ret.clone();
+      }
+    }
+    if (indicator.paintMode == MultiPaintMode.combine) {
+      for (var child in indicator.children) {
+        child.paintObject?.minMax = minMax;
       }
     }
   }

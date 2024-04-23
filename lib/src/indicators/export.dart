@@ -16,12 +16,6 @@
 export 'candle.dart';
 export 'volume.dart';
 export 'ma.dart';
+export 'ma_vol.dart';
 export 'ema.dart';
 export 'macd.dart';
-
-enum IndicatorType {
-  candle,
-  volume,
-  ma,
-  ema;
-}

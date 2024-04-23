@@ -20,12 +20,18 @@ import 'package:flutter/material.dart';
 import '../extension/export.dart';
 import '../model/export.dart';
 
-class EMAData {
+class CalcuData {
   final int count;
   final int ts;
   final Decimal val;
+  final bool dirty;
 
-  EMAData({required this.count, required this.ts, required this.val});
+  CalcuData({
+    required this.count,
+    required this.ts,
+    required this.val,
+    this.dirty = false,
+  });
 }
 
 class CalcuDataManager {
@@ -36,18 +42,74 @@ class CalcuDataManager {
 
   final Decimal two = Decimal.fromInt(2);
 
-  /// 用于缓存计算结果 <count, <timestamp, Decimal>>
-  final Map<int, Map<int, Decimal>> count2ts2MaMap = {};
+  /// MA数据缓存 <count, <timestamp, Decimal>>
+  final Map<int, Map<int, CalcuData>> count2ts2MaMap = {};
 
-  Map<int, Decimal>? getCountMaMap(int count) {
+  Map<int, CalcuData>? getCountMaMap(int count) {
     return count2ts2MaMap[count];
   }
 
-  Decimal? getMaVal(int? ts, int? count) {
+  CalcuData? getMaData(int? ts, int? count) {
     if (count != null && ts != null) {
       return count2ts2MaMap[count]?[ts];
     }
     return null;
+  }
+
+  /// MAVOL数据缓存 <count, <timestamp, Decimal>>
+  final Map<int, Map<int, CalcuData>> count2ts2MaVolMap = {};
+
+  Map<int, CalcuData>? getCountMaVolMap(int count) {
+    return count2ts2MaVolMap[count];
+  }
+
+  CalcuData? getMaVolData(int? ts, int? count) {
+    if (count != null && ts != null) {
+      return count2ts2MaVolMap[count]?[ts];
+    }
+    return null;
+  }
+
+  /// EMA数据缓存 <count, <timestamp, val>>
+  Map<int, Map<int, CalcuData>> count2ts2dataEmaMap = {};
+
+  Map<int, CalcuData>? getCountEmaMap(int count) {
+    return count2ts2dataEmaMap[count];
+  }
+
+  CalcuData? getEmaData(int? ts, int? count) {
+    if (count != null && ts != null) {
+      return count2ts2dataEmaMap[count]?[ts];
+    }
+    return null;
+  }
+}
+
+extension CalculateMA on CalcuDataManager {
+  /// 计算从index开始的count个close指标和
+  /// 如果后续数据不够count个, 动态改变count. 最后平均. 所以最后的(count-1)个数据是不准确的.
+  /// 注: 如果有旧数据加入, 需要重新计算最后的MA指标数据.
+  CalcuData calculateMA(
+    List<CandleModel> list,
+    int index,
+    int count,
+  ) {
+    final dataLen = list.length;
+    assert(
+      index >= 0 && index < dataLen,
+      'calculateMa index is invalid',
+    );
+    count = math.min(count, dataLen - index);
+    Decimal sum = Decimal.zero;
+    CandleModel m = list[index];
+    for (int i = index; i < index + count; i++) {
+      sum += list[i].close;
+    }
+    return CalcuData(
+      count: count,
+      ts: m.timestamp,
+      val: (sum / count.d).toDecimal(scaleOnInfinitePrecision: 18),
+    );
   }
 
   /// 计算并缓存MA数据.
@@ -68,51 +130,53 @@ class CalcuDataManager {
     end ??= len;
     if (start < 0 || end > len) return null;
 
-    Map<int, Decimal>? countMaMap = getCountMaMap(count);
+    Map<int, CalcuData>? maMap = getCountMaMap(count);
 
-    if (countMaMap != null) {
+    if (maMap != null) {
       if (reset ||
-          countMaMap.getItem(list.getItem(start)?.timestamp) == null ||
-          countMaMap.getItem(list.getItem(end)?.timestamp) == null) {
+          maMap.getItem(list.getItem(start)?.timestamp) == null ||
+          maMap.getItem(list.getItem(end)?.timestamp) == null) {
         debugPrint(
-          'calculateAndCacheMA reset:$reset >>>  countEmaMapLen:${countMaMap.length}, listLen$len : [$start, $end]',
+          'calculateAndCacheMA reset:$reset >>> maMapLen:${maMap.length}, listLen$len : [$start, $end]',
         );
-        countMaMap.clear(); // 清理旧数据.
+        // countMaMap.clear(); // 清理旧数据. TODO: 如何清理dirty数据
       } else {
-        debugPrint('calculateAndCacheMA use cache!!! $start');
+        debugPrint('calculateAndCacheMA use cache!!! [$start, $end]');
         if (start == 0) {
           //如果start是0, 有可能更新了最新价, 重新计算
-          countMaMap[list.first.timestamp] = calculateMA(list, 0, count);
+          maMap[list.first.timestamp] = calculateMA(list, 0, count);
         }
       }
     } else {
-      count2ts2MaMap[count] = countMaMap = {};
+      count2ts2MaMap[count] = maMap = {};
     }
 
     int index = end; // 多算一个
     CandleModel m = list[index];
-    Decimal pre = countMaMap[m.timestamp] ?? calculateMA(list, index, count);
-    countMaMap[m.timestamp] = pre;
-    final minmax = MinMax(max: pre, min: pre);
+    CalcuData pre = maMap[m.timestamp] ?? calculateMA(list, index, count);
+    maMap[m.timestamp] = pre;
+    final minmax = MinMax(max: pre.val, min: pre.val);
     for (int i = index - 1; i >= start; i--) {
       m = list[i];
-      Decimal? val = countMaMap[m.timestamp];
-      if (val == null) {
+      CalcuData? data = maMap[m.timestamp];
+      if (data == null) {
         // TODO: 优化: 利用pre去计算.
         // val = pre * math.
       }
-      val ??= calculateMA(list, i, count);
-      if (needReturn) minmax.updateMinMaxByVal(val);
-      pre = val;
-      countMaMap[m.timestamp] = val;
+      data ??= calculateMA(list, i, count);
+      if (needReturn) minmax.updateMinMaxByVal(data.val);
+      pre = data;
+      maMap[m.timestamp] = data;
     }
     return needReturn ? minmax : null;
   }
+}
 
-  /// 计算从index开始的count个close指标和
+extension CalculateMAVol on CalcuDataManager {
+  /// 计算从index开始的count个vol指标和
   /// 如果后续数据不够count个, 动态改变count. 最后平均. 所以最后的(count-1)个数据是不准确的.
   /// 注: 如果有旧数据加入, 需要重新计算最后的MA指标数据.
-  Decimal calculateMA(
+  CalcuData calculateMAVol(
     List<CandleModel> list,
     int index,
     int count,
@@ -120,16 +184,82 @@ class CalcuDataManager {
     final dataLen = list.length;
     assert(
       index >= 0 && index < dataLen,
-      'calculateMa index is invalid',
+      'calculateMAVol index is invalid',
     );
     count = math.min(count, dataLen - index);
     Decimal sum = Decimal.zero;
+    CandleModel m = list[index];
     for (int i = index; i < index + count; i++) {
-      sum += list[i].close;
+      sum += list[i].vol;
     }
-    return (sum / count.d).toDecimal(scaleOnInfinitePrecision: 18);
+    return CalcuData(
+      count: count,
+      ts: m.timestamp,
+      val: (sum / count.d).toDecimal(scaleOnInfinitePrecision: 18),
+    );
   }
 
+  /// 计算并缓存MA数据.
+  /// 如果start和end指定了, 只计算[start, end]区间内.
+  MinMax? calculateAndCacheMAVol(
+    List<CandleModel> list,
+    int count, {
+    int? start,
+    int? end,
+    bool reset = false,
+  }) {
+    if (list.isEmpty) return null;
+    int len = list.length;
+    if (len < count) return null;
+
+    bool needReturn = start != null && end != null && start >= 0 && end < len;
+    start ??= 0;
+    end ??= len;
+    if (start < 0 || end > len) return null;
+
+    Map<int, CalcuData>? maVolMap = getCountMaVolMap(count);
+
+    if (maVolMap != null) {
+      if (reset ||
+          maVolMap.getItem(list.getItem(start)?.timestamp) == null ||
+          maVolMap.getItem(list.getItem(end)?.timestamp) == null) {
+        debugPrint(
+          'calculateAndCacheMAVol reset:$reset >>> maVolMapLen:${maVolMap.length}, listLen$len : [$start, $end]',
+        );
+        // countMaMap.clear(); // 清理旧数据. TODO: 如何清理dirty数据
+      } else {
+        debugPrint('calculateAndCacheMAVol use cache!!! [$start, $end]');
+        if (start == 0) {
+          //如果start是0, 有可能更新了最新价, 重新计算
+          maVolMap[list.first.timestamp] = calculateMAVol(list, 0, count);
+        }
+      }
+    } else {
+      count2ts2MaVolMap[count] = maVolMap = {};
+    }
+
+    int index = end; // 多算一个
+    CandleModel m = list[index];
+    CalcuData pre = maVolMap[m.timestamp] ?? calculateMAVol(list, index, count);
+    maVolMap[m.timestamp] = pre;
+    final minmax = MinMax(max: pre.val, min: pre.val);
+    for (int i = index - 1; i >= start; i--) {
+      m = list[i];
+      CalcuData? data = maVolMap[m.timestamp];
+      if (data == null) {
+        // TODO: 优化: 利用pre去计算.
+        // val = pre * math.
+      }
+      data ??= calculateMAVol(list, i, count);
+      if (needReturn) minmax.updateMinMaxByVal(data.val);
+      pre = data;
+      maVolMap[m.timestamp] = data;
+    }
+    return needReturn ? minmax : null;
+  }
+}
+
+extension CalculateEMA on CalcuDataManager {
   /// 加权移动平均数Weighted Moving Average
   Decimal calculateWMA(
     List<CandleModel> list,
@@ -152,20 +282,6 @@ class CalcuDataManager {
     return sum;
   }
 
-  /// <count, <timestamp, val>>
-  Map<int, Map<int, EMAData>> count2ts2dataEmaMap = {};
-
-  Map<int, EMAData>? getCountEmaMap(int count) {
-    return count2ts2dataEmaMap[count];
-  }
-
-  EMAData? getEmaData(int? ts, int? count) {
-    if (count != null && ts != null) {
-      return count2ts2dataEmaMap[count]?[ts];
-    }
-    return null;
-  }
-
   /// 指数平滑移动平均线Exponential Moving Averages
   /// 由于当日EMA计算依赖于昨日EMA, 所以数据从最后开始计算, 并缓存,
   /// 注: 如果有旧数据加入列表, 需要从最旧的数据开始重新计算.
@@ -183,7 +299,7 @@ class CalcuDataManager {
     final len = list.length;
     if (len < count) return;
 
-    Map<int, EMAData>? countEmaMap = getCountEmaMap(count);
+    Map<int, CalcuData>? countEmaMap = getCountEmaMap(count);
     if (countEmaMap != null) {
       if (reset || countEmaMap.length < len - count) {
         debugPrint(
@@ -202,7 +318,7 @@ class CalcuDataManager {
     int index = len - count;
     Decimal lastEma = calculateWMA(list, index, count);
     CandleModel m = list[index];
-    countEmaMap[m.timestamp] = EMAData(
+    countEmaMap[m.timestamp] = CalcuData(
       ts: m.timestamp,
       count: count,
       val: lastEma,
@@ -211,7 +327,7 @@ class CalcuDataManager {
       m = list[i];
       lastEma = (((two * m.close) + lastEma * (count - 1).d) / (count + 1).d)
           .toDecimal(scaleOnInfinitePrecision: 18);
-      countEmaMap[m.timestamp] = EMAData(
+      countEmaMap[m.timestamp] = CalcuData(
         ts: m.timestamp,
         count: count,
         val: lastEma,

@@ -25,7 +25,7 @@ import '../framework/export.dart';
 
 class CandleIndicator extends SinglePaintObjectIndicator {
   CandleIndicator({
-    required super.key,
+    super.key = const ValueKey(IndicatorType.candle),
     required super.height,
     super.tipsHeight,
     super.padding,
@@ -358,11 +358,6 @@ class CandlePaintObject extends SinglePaintObjectBox<CandleIndicator> {
       borderWidth: setting.lastPriceRectBorderWidth,
       borderColor: setting.lastPriceRectBorderColor,
     );
-  }
-
-  /// TODO: 待考虑.
-  void paintCrossTips(Canvas canvas, Offset offset) {
-    // TODO: implement paintCrossTips
   }
 
   /// 绘制Cross Y轴价钱刻度

@@ -129,7 +129,7 @@ class MultiPaintObjectIndicator extends Indicator {
   void ensurePaintObject(KlineBindingBase controller) {
     paintObject ??= createPaintObject(controller);
     for (var child in children) {
-      if (child.paintObject != paintObject) {
+      if (child.paintObject?.parent != paintObject) {
         child.paintObject?.dispose();
         _initChildPaintObject(controller, child);
       }
