@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+export 'render/export.dart';
 export 'decimal_ext.dart';
 export 'geometry_ext.dart';
 export 'iterable_ext.dart';

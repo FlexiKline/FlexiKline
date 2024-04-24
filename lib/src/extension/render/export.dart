@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export './common.dart';
-export './draw_path.dart';
-export './draw_text.dart';
-export './draw_rect.dart';
+export 'common.dart';
+export 'draw_path.dart';
+export 'draw_text.dart';
+export 'draw_rect.dart';

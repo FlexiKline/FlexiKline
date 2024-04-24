@@ -27,3 +27,32 @@ class CalcuData {
     this.dirty = false,
   });
 }
+
+class MinMax {
+  MinMax({required this.max, required this.min});
+  Decimal max;
+  Decimal min;
+
+  static final MinMax zero = MinMax(max: Decimal.zero, min: Decimal.zero);
+
+  MinMax clone() => MinMax(max: max, min: min);
+
+  void updateMinMaxByVal(Decimal val) {
+    max = val > max ? val : max;
+    min = val < min ? val : min;
+  }
+
+  void updateMinMax(MinMax? newVal) {
+    if (newVal == null) return;
+    max = newVal.max > max ? newVal.max : max;
+    min = newVal.min < min ? newVal.min : min;
+  }
+
+  Decimal get size => max - min;
+
+  @override
+  String toString() {
+    return 'MinMax(max:${max.toStringAsFixed(4)}, min:${min.toStringAsFixed(4)})';
+  }
+}
+

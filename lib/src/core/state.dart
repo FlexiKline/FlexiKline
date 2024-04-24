@@ -43,23 +43,6 @@ mixin StateBinding
     _klineDataCache.clear();
   }
 
-  // final Map<String, CalcuDataManager> _calcuMgrMap = {};
-
-  // @override
-  // CalcuDataManager? getCalcuMgrByReq(CandleReq req) => getCalcuMgr(req.key);
-
-  // @override
-  // CalcuDataManager? getCalcuMgr(String key) {
-  //   // _calcuMgrMap[key] ??= CalcuDataManager(
-  //   //   key: key,
-  //   //   logger: loggerDelegate,
-  //   // );
-  //   return _calcuMgrMap[key];
-  // }
-
-  // @override
-  // CalcuDataManager? get curCalcuMgr => getCalcuMgr(curDataKey);
-
   final Map<String, KlineData> _klineDataCache = {};
   KlineData _curKlineData = KlineData.empty;
   @override

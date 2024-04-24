@@ -19,7 +19,6 @@ import '../data/export.dart';
 import '../extension/export.dart';
 import '../framework/export.dart';
 import '../model/export.dart';
-import '../render/export.dart';
 import '../utils/export.dart';
 
 /// MAVOL 移动平均指标线

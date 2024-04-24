@@ -16,9 +16,10 @@ import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 
 import '../core/export.dart';
+import '../data/export.dart';
+import '../extension/export.dart';
 import '../framework/export.dart';
 import '../model/export.dart';
-import '../render/export.dart';
 import '../utils/export.dart';
 
 class VolumeIndicator extends SinglePaintObjectIndicator {
