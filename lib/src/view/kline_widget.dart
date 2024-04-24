@@ -23,23 +23,32 @@ class FlexiKlineWidget extends StatefulWidget {
     required this.controller,
     this.decoration,
     this.foregroundDecoration,
+    this.loadingView,
   });
 
   final FlexiKlineController controller;
   final BoxDecoration? decoration;
   final Decoration? foregroundDecoration;
+  final Widget? loadingView;
 
   @override
   State<FlexiKlineWidget> createState() => _FlexiKlineWidgetState();
 }
 
 class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
+  bool loading = false;
   @override
   void initState() {
     super.initState();
     widget.controller.onSizeChange = () {
       setState(() {});
     };
+    widget.controller.onLoading = (isLoading) {
+      setState(() {
+        loading = isLoading;
+      });
+    };
+
     widget.controller.initBinding();
   }
 
@@ -92,6 +101,25 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
                 isComplex: true,
               ),
             ),
+            Positioned.fromRect(
+              rect: widget.controller.mainRect,
+              child: Offstage(
+                offstage: !loading,
+                child: widget.loadingView ??
+                    const Center(
+                      child: SizedBox.square(
+                        dimension: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 4,
+                          backgroundColor: Color(0xFFEBEBEB),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.black,
+                          ),
+                        ),
+                      ),
+                    ),
+              ),
+            )
           ],
         ),
       ),

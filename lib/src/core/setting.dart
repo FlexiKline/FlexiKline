@@ -17,6 +17,7 @@ import 'dart:ui' as ui;
 
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import '../constant.dart';
 import '../model/export.dart';
@@ -38,6 +39,7 @@ mixin SettingBinding on KlineBindingBase implements IConfig {
   }
 
   VoidCallback? onSizeChange;
+  ValueChanged<bool>? onLoading;
 
   Color longColor = Colors.green;
   Color shortColor = Colors.red;

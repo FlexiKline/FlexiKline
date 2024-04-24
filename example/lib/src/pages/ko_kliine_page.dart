@@ -78,14 +78,17 @@ class _KOKlinePageState extends ConsumerState<KOKlinePage> {
   void onTapTimerBar(TimeBar bar) {
     if (bar.bar != req.bar) {
       req.bar = bar.bar;
-      api.getHistoryCandles(req).then((resp) {
-        if (resp.success && resp.data != null) {
-          latest = resp.data?.first;
-          controller.setKlineData(req, resp.data!);
-          setState(() {});
-        } else {
-          SmartDialog.showToast(resp.msg);
-        }
+      controller.prepareSwithTimeBar(req, useCacheFirst: false);
+      Future.delayed(const Duration(seconds: 2), () {
+        api.getHistoryCandles(req).then((resp) {
+          if (resp.success && resp.data != null) {
+            latest = resp.data?.first;
+            controller.setKlineData(req, resp.data!);
+            setState(() {});
+          } else {
+            SmartDialog.showToast(resp.msg);
+          }
+        });
       });
       setState(() {});
     }

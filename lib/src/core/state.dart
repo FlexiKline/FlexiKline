@@ -16,6 +16,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../constant.dart';
 import '../extension/export.dart';
 import '../framework/export.dart';
 import '../model/export.dart';
@@ -38,24 +39,32 @@ mixin StateBinding
   void dispose() {
     super.dispose();
     logd('dispose state');
+    _calcuMgrMap.forEach((key, mgr) {
+      mgr.dispose();
+    });
+    _calcuMgrMap.clear();
+    _klineDataCache.forEach((key, data) {
+      // TODO: do what you want to do.
+    });
+    _klineDataCache.clear();
   }
 
   final Map<String, CalcuDataManager> _calcuMgrMap = {};
 
   @override
-  CalcuDataManager getCalcuMgrByReq(CandleReq req) => getCalcuMgr(req.key);
+  CalcuDataManager? getCalcuMgrByReq(CandleReq req) => getCalcuMgr(req.key);
 
   @override
-  CalcuDataManager getCalcuMgr(String key) {
-    _calcuMgrMap[key] ??= CalcuDataManager(
-      key: key,
-      logger: loggerDelegate,
-    );
-    return _calcuMgrMap[key]!;
+  CalcuDataManager? getCalcuMgr(String key) {
+    // _calcuMgrMap[key] ??= CalcuDataManager(
+    //   key: key,
+    //   logger: loggerDelegate,
+    // );
+    return _calcuMgrMap[key];
   }
 
   @override
-  CalcuDataManager get curCalcuMgr => getCalcuMgr(curDataKey);
+  CalcuDataManager? get curCalcuMgr => getCalcuMgr(curDataKey);
 
   final Map<String, KlineData> _klineDataCache = {};
   KlineData _curKlineData = KlineData.empty;
@@ -226,24 +235,47 @@ mixin StateBinding
     // curKlineData.calculateMaxmin();
   }
 
+  void prepareSwithTimeBar(
+    CandleReq req, {
+    bool showLoading = true,
+    bool useCacheFirst = true,
+  }) {
+    if (showLoading) {
+      onLoading?.call(true);
+    }
+    KlineData? data = _klineDataCache[req.key];
+    if (data != null && !useCacheFirst) {
+      data.reset();
+      markRepaintChart();
+    }
+  }
+
   @override
   void setKlineData(
     CandleReq req,
     List<CandleModel> list, {
     bool replace = false,
   }) {
+    onLoading?.call(false);
+
+    req = req.copyWith();
     KlineData? data = _klineDataCache[req.key];
     if (data != null) {
       paintDxOffset = 0;
-      data.reset();
+      data.reset(); // TODO: 此处考虑是否做下对新旧list的合并, 复用旧数据.
     }
     data = KlineData(req, List.of(list), logger: loggerDelegate);
     _klineDataCache[req.key] = data;
-    if (curKlineData.invalid || req.key == curDataKey) {
-      _curKlineData = data;
-      initPaintDxOffset();
-      markRepaintChart();
-    }
+    // if (curKlineData.invalid || req.key == curDataKey) {
+    _curKlineData = data;
+    _calcuMgrMap[req.key]?.dispose();
+    _calcuMgrMap[req.key] = CalcuDataManager(
+      klineData: data,
+      logger: loggerDelegate,
+    );
+    initPaintDxOffset();
+    markRepaintChart();
+    // }
   }
 
   @override

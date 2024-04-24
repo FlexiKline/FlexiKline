@@ -83,9 +83,9 @@ abstract interface class IState {
 
   void appendKlineData(CandleReq req, List<CandleModel> list);
 
-  CalcuDataManager getCalcuMgrByReq(CandleReq req);
-  CalcuDataManager getCalcuMgr(String req);
-  CalcuDataManager get curCalcuMgr;
+  CalcuDataManager? getCalcuMgrByReq(CandleReq req);
+  CalcuDataManager? getCalcuMgr(String key);
+  CalcuDataManager? get curCalcuMgr;
 
   KlineData get curKlineData;
 

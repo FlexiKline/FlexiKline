@@ -17,6 +17,7 @@ import 'dart:math' as math;
 import 'package:decimal/decimal.dart';
 
 import '../constant.dart';
+import '../core/data.dart';
 import '../extension/export.dart';
 import '../model/export.dart';
 import '../utils/export.dart';
@@ -42,16 +43,16 @@ class CalcuDataManager with KlineLog {
   // static CalcuDataManager get instance => _instance;
 
   CalcuDataManager({
-    required this.key,
+    required this.klineData,
     ILogger? logger,
   }) {
     loggerDelegate = logger;
   }
 
-  final String key;
+  final KlineData klineData;
 
   @override
-  String get logTag => '${super.logTag}\tCalcuMgr($key)';
+  String get logTag => '${super.logTag}\tCalcuMgr(${klineData.key})';
 
   final Decimal two = Decimal.fromInt(2);
 
@@ -110,6 +111,10 @@ class CalcuDataManager with KlineLog {
       return _count2ts2dataEmaMap[count]?[ts];
     }
     return null;
+  }
+
+  void dispose() {
+    // TODO: 清理或缓存
   }
 }
 

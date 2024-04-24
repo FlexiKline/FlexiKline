@@ -54,7 +54,7 @@ class MAPaintObject extends SinglePaintObjectBox<MAIndicator> {
     if (list.isEmpty || start < 0 || end >= list.length) return null;
     MinMax? minMax;
     for (var param in indicator.calcParams) {
-      final ret = calcuMgr.calculateAndCacheMA(
+      final ret = calcuMgr?.calculateAndCacheMA(
         list,
         param.count,
         start: start,
@@ -89,8 +89,8 @@ class MAPaintObject extends SinglePaintObjectBox<MAIndicator> {
     //   // 裁剪绘制范围
     //   canvas.clipRect(setting.mainDrawRect);
     for (var param in indicator.calcParams) {
-      final countMaMap = calcuMgr.getCountMaMap(param.count);
-      if (countMaMap.isEmpty) continue;
+      final countMaMap = calcuMgr?.getCountMaMap(param.count);
+      if (countMaMap == null || countMaMap.isEmpty) continue;
 
       final offset = startCandleDx - candleWidthHalf;
       CandleModel m;
@@ -99,7 +99,8 @@ class MAPaintObject extends SinglePaintObjectBox<MAIndicator> {
         m = data.list[i];
         final dx = offset - (i - start) * candleActualWidth;
         CalcuData? maData = countMaMap[m.timestamp];
-        maData ??= calcuMgr.calculateMA(data.list, i, param.count);
+        maData ??= calcuMgr?.calculateMA(data.list, i, param.count);
+        if (maData == null) continue;
         final dy = valueToDy(maData.val, correct: false);
         points.add(Offset(dx, dy));
       }
@@ -128,8 +129,8 @@ class MAPaintObject extends SinglePaintObjectBox<MAIndicator> {
 
     final children = <TextSpan>[];
     for (var param in indicator.calcParams) {
-      final countMaMap = calcuMgr.getCountMaMap(param.count);
-      if (countMaMap.isEmpty) continue;
+      final countMaMap = calcuMgr?.getCountMaMap(param.count);
+      if (countMaMap == null || countMaMap.isEmpty) continue;
 
       final maVal = countMaMap.getItem(model.timestamp);
       if (maVal != null) {

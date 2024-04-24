@@ -122,7 +122,7 @@ mixin StateProxyMixin on PaintObject {
 
   KlineData get klineData => state.curKlineData;
 
-  CalcuDataManager get calcuMgr => state.curCalcuMgr;
+  CalcuDataManager? get calcuMgr => state.curCalcuMgr;
 
   @Deprecated('请使用curKlineData')
   KlineData get data => state.curKlineData;
