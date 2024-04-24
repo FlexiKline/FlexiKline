@@ -51,11 +51,28 @@ android {
         versionName flutterVersionName
     }
 
+    signingConfigs {
+        config {
+            storeFile file('./flexi_kline.jks')
+            storePassword 'FlexiKline'
+            keyAlias 'FlexiKlineAlias'
+            keyPassword 'FlexiKline'
+        }
+    }
+
     buildTypes {
+        debug {
+            debuggable true
+            minifyEnabled false
+            signingConfig signingConfigs.config
+        }
+        profile {
+            initWith debug
+        }
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig signingConfigs.debug
+            debuggable false
+            minifyEnabled true
+            signingConfig signingConfigs.config
         }
     }
 }
