@@ -15,46 +15,46 @@
 import 'dart:math' as math;
 import 'package:decimal/decimal.dart';
 
-import '../constant.dart';
 import '../extension/export.dart';
+import '../constant.dart';
 import '../model/export.dart';
 import 'base_data.dart';
 import 'common.dart';
 
-mixin MAData on BaseData {
+mixin MAVOLData on BaseData {
   @override
   void initData() {
     super.initData();
-    logd('init MA');
+    logd('init MAVOL');
   }
 
   @override
   void dispose() {
     super.dispose();
-    logd('dispose MA');
+    logd('dispose MAVOL');
     // TODO: 是否要缓存
-    _count2ts2MaMap.clear();
+    _count2ts2MaVolMap.clear();
   }
 
-  /// MA数据缓存 <count, <timestamp, Decimal>>
-  final Map<int, Map<int, CalcuData>> _count2ts2MaMap = {};
+  /// MAVOL数据缓存 <count, <timestamp, Decimal>>
+  final Map<int, Map<int, CalcuData>> _count2ts2MaVolMap = {};
 
-  Map<int, CalcuData> getCountMaMap(int count) {
-    _count2ts2MaMap[count] ??= {};
-    return _count2ts2MaMap[count]!;
+  Map<int, CalcuData> getCountMaVolMap(int count) {
+    _count2ts2MaVolMap[count] ??= {};
+    return _count2ts2MaVolMap[count]!;
   }
 
-  CalcuData? getMaData(int? ts, int? count) {
+  CalcuData? getMaVolData(int? ts, int? count) {
     if (count != null && ts != null) {
-      return _count2ts2MaMap[count]?[ts];
+      return _count2ts2MaVolMap[count]?[ts];
     }
     return null;
   }
 
-  /// 计算从index开始的count个close指标和
+  /// 计算从index开始的count个vol指标和
   /// 如果后续数据不够count个, 动态改变count. 最后平均. 所以最后的(count-1)个数据是不准确的.
   /// 注: 如果有旧数据加入, 需要重新计算最后的MA指标数据.
-  CalcuData calculateMA(
+  CalcuData calculateMAVol(
     List<CandleModel> list,
     int index,
     int count,
@@ -62,13 +62,13 @@ mixin MAData on BaseData {
     final dataLen = list.length;
     assert(
       index >= 0 && index < dataLen,
-      'calculateMa index is invalid',
+      'calculateMAVol index is invalid',
     );
     count = math.min(count, dataLen - index);
     Decimal sum = Decimal.zero;
     CandleModel m = list[index];
     for (int i = index; i < index + count; i++) {
-      sum += list[i].close;
+      sum += list[i].vol;
     }
     return CalcuData(
       count: count,
@@ -81,7 +81,7 @@ mixin MAData on BaseData {
 
   /// 计算并缓存MA数据.
   /// 如果start和end指定了, 只计算[start, end]区间内.
-  MinMax? calculateAndCacheMA(
+  MinMax? calculateAndCacheMAVol(
     List<CandleModel> list,
     int count, {
     int? start,
@@ -97,41 +97,41 @@ mixin MAData on BaseData {
     end ??= len;
     if (start < 0 || end > len) return null;
 
-    Map<int, CalcuData> maMap = getCountMaMap(count);
+    Map<int, CalcuData> maVolMap = getCountMaVolMap(count);
 
-    if (maMap.isNotEmpty) {
+    if (maVolMap.isNotEmpty) {
       if (reset ||
-          maMap.getItem(list.getItem(start)?.timestamp) == null ||
-          maMap.getItem(list.getItem(end)?.timestamp) == null) {
+          maVolMap.getItem(list.getItem(start)?.timestamp) == null ||
+          maVolMap.getItem(list.getItem(end)?.timestamp) == null) {
         logd(
-          'calculateAndCacheMA reset:$reset >>> maMapLen:${maMap.length}, listLen$len : [$start, $end]',
+          'calculateAndCacheMAVol reset:$reset >>> maVolMapLen:${maVolMap.length}, listLen$len : [$start, $end]',
         );
         // countMaMap.clear(); // 清理旧数据. TODO: 如何清理dirty数据
       } else {
-        logd('calculateAndCacheMA use cache!!! [$start, $end]');
+        logd('calculateAndCacheMAVol use cache!!! [$start, $end]');
         if (start == 0) {
           //如果start是0, 有可能更新了最新价, 重新计算
-          maMap[list.first.timestamp] = calculateMA(list, 0, count);
+          maVolMap[list.first.timestamp] = calculateMAVol(list, 0, count);
         }
       }
     }
 
     int index = end; // 多算一个
     CandleModel m = list[index];
-    CalcuData pre = maMap[m.timestamp] ?? calculateMA(list, index, count);
-    maMap[m.timestamp] = pre;
+    CalcuData pre = maVolMap[m.timestamp] ?? calculateMAVol(list, index, count);
+    maVolMap[m.timestamp] = pre;
     final minmax = MinMax(max: pre.val, min: pre.val);
     for (int i = index - 1; i >= start; i--) {
       m = list[i];
-      CalcuData? data = maMap[m.timestamp];
+      CalcuData? data = maVolMap[m.timestamp];
       if (data == null) {
         // TODO: 优化: 利用pre去计算.
         // val = pre * math.
       }
-      data ??= calculateMA(list, i, count);
+      data ??= calculateMAVol(list, i, count);
       if (needReturn) minmax.updateMinMaxByVal(data.val);
       pre = data;
-      maMap[m.timestamp] = data;
+      maVolMap[m.timestamp] = data;
     }
     return needReturn ? minmax : null;
   }

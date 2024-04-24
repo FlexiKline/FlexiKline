@@ -59,7 +59,7 @@ class EMAPaintObject extends SinglePaintObjectBox<EMAIndicator> {
     if (list.isEmpty || start < 0 || end >= list.length) return null;
     MinMax? minMax;
     for (var param in indicator.calcParams) {
-      final ret = calcuMgr?.calculateAndCacheEMA(
+      final ret = klineData.calculateAndCacheEMA(
         list,
         param.count,
         start: start,
@@ -102,8 +102,8 @@ class EMAPaintObject extends SinglePaintObjectBox<EMAIndicator> {
       canvas.clipRect(setting.mainDrawRect);
 
       for (var param in indicator.calcParams) {
-        final emaMap = calcuMgr?.getCountEmaMap(param.count);
-        if (emaMap == null || emaMap.isEmpty) continue;
+        final emaMap = klineData.getCountEmaMap(param.count);
+        if (emaMap.isEmpty) continue;
 
         final offset = startCandleDx - candleWidthHalf;
         CandleModel m;
@@ -141,8 +141,8 @@ class EMAPaintObject extends SinglePaintObjectBox<EMAIndicator> {
 
     final children = <TextSpan>[];
     for (var param in indicator.calcParams) {
-      final emaMap = calcuMgr?.getCountEmaMap(param.count);
-      if (emaMap == null || emaMap.isEmpty) continue;
+      final emaMap = klineData.getCountEmaMap(param.count);
+      if (emaMap.isEmpty) continue;
 
       final emaData = emaMap.getItem(model.timestamp);
       if (emaData != null) {

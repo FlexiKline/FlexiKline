@@ -83,10 +83,6 @@ abstract interface class IState {
 
   void appendKlineData(CandleReq req, List<CandleModel> list);
 
-  CalcuDataManager? getCalcuMgrByReq(CandleReq req);
-  CalcuDataManager? getCalcuMgr(String key);
-  CalcuDataManager? get curCalcuMgr;
-
   KlineData get curKlineData;
 
   /// 蜡烛总数
@@ -94,19 +90,6 @@ abstract interface class IState {
 
   /// 最大绘制宽度
   double get maxPaintWidth;
-
-  /// 绘制区域高度 / 当前绘制的蜡烛数据高度.
-  // double get dyFactor;
-
-  /// 将offset指定的dy转换为当前坐标Y轴对应价钱.
-  // Decimal? offsetToPrice(Offset offset);
-  // Decimal? dyToPrice(double dy);
-
-  /// 将价钱转换为Y轴坐标.
-  // double priceToDy(Decimal price);
-
-  /// 当前Cross命中的Model
-  // CandleModel? get crossingCandle;
 
   /// 将offset转换为蜡烛数据
   CandleModel? offsetToCandle(Offset offset);

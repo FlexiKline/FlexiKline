@@ -45,7 +45,8 @@ abstract class BaseData with KlineLog {
   @mustCallSuper
   void dispose() {
     logd('dispose BASE');
-    list.clear(); // TODO: 是否缓存
+    // TODO: 是否要缓存
+    list.clear();
     start = 0;
     end = 0;
   }

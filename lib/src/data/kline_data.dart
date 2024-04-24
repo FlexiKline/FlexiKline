@@ -19,8 +19,10 @@ import 'candle_data.dart';
 import 'ema_data.dart';
 import 'ma_data.dart';
 import 'macd_data.dart';
+import 'mavol_data.dart';
 
-class KlineData extends BaseData with CandleData, MAData, EMAData, MACDData {
+class KlineData extends BaseData
+    with CandleData, MAData, MAVOLData, EMAData, MACDData {
   KlineData(
     super.req,
     super.list, {

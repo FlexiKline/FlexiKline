@@ -12,6 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export 'common.dart';
-export 'indicator.dart';
-export 'object.dart';
+import 'package:decimal/decimal.dart';
+
+class CalcuData {
+  final int count;
+  final int ts;
+  final Decimal val;
+  final bool dirty;
+
+  CalcuData({
+    required this.count,
+    required this.ts,
+    required this.val,
+    this.dirty = false,
+  });
+}

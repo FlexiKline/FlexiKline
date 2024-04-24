@@ -18,7 +18,6 @@ import 'package:flutter/material.dart';
 
 import '../data/export.dart';
 import '../extension/export.dart';
-import '../framework/export.dart';
 import '../model/export.dart';
 import 'binding_base.dart';
 import 'interface.dart';
@@ -44,22 +43,22 @@ mixin StateBinding
     _klineDataCache.clear();
   }
 
-  final Map<String, CalcuDataManager> _calcuMgrMap = {};
+  // final Map<String, CalcuDataManager> _calcuMgrMap = {};
 
-  @override
-  CalcuDataManager? getCalcuMgrByReq(CandleReq req) => getCalcuMgr(req.key);
+  // @override
+  // CalcuDataManager? getCalcuMgrByReq(CandleReq req) => getCalcuMgr(req.key);
 
-  @override
-  CalcuDataManager? getCalcuMgr(String key) {
-    // _calcuMgrMap[key] ??= CalcuDataManager(
-    //   key: key,
-    //   logger: loggerDelegate,
-    // );
-    return _calcuMgrMap[key];
-  }
+  // @override
+  // CalcuDataManager? getCalcuMgr(String key) {
+  //   // _calcuMgrMap[key] ??= CalcuDataManager(
+  //   //   key: key,
+  //   //   logger: loggerDelegate,
+  //   // );
+  //   return _calcuMgrMap[key];
+  // }
 
-  @override
-  CalcuDataManager? get curCalcuMgr => getCalcuMgr(curDataKey);
+  // @override
+  // CalcuDataManager? get curCalcuMgr => getCalcuMgr(curDataKey);
 
   final Map<String, KlineData> _klineDataCache = {};
   KlineData _curKlineData = KlineData.empty;
@@ -222,11 +221,6 @@ mixin StateBinding
     _klineDataCache[req.key] = data;
     // if (curKlineData.invalid || req.key == curDataKey) {
     _curKlineData = data;
-    _calcuMgrMap[req.key]?.dispose();
-    _calcuMgrMap[req.key] = CalcuDataManager(
-      klineData: data,
-      logger: loggerDelegate,
-    );
     initPaintDxOffset();
     markRepaintChart();
     // }

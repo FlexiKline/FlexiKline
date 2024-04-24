@@ -20,7 +20,6 @@ import '../data/export.dart';
 import '../extension/export.dart';
 import '../model/export.dart';
 import '../utils/export.dart';
-import 'calcu_mgr.dart';
 import 'indicator.dart';
 
 const mainIndicatorSlot = -1;
@@ -121,8 +120,6 @@ mixin StateProxyMixin on PaintObject {
   late final IConfig config;
 
   KlineData get klineData => state.curKlineData;
-
-  CalcuDataManager? get calcuMgr => state.curCalcuMgr;
 
   @Deprecated('请使用curKlineData')
   KlineData get data => state.curKlineData;
