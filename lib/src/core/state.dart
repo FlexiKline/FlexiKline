@@ -16,12 +16,11 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../constant.dart';
+import '../data/export.dart';
 import '../extension/export.dart';
 import '../framework/export.dart';
 import '../model/export.dart';
 import 'binding_base.dart';
-import 'data.dart';
 import 'interface.dart';
 import 'setting.dart';
 
@@ -39,12 +38,8 @@ mixin StateBinding
   void dispose() {
     super.dispose();
     logd('dispose state');
-    _calcuMgrMap.forEach((key, mgr) {
-      mgr.dispose();
-    });
-    _calcuMgrMap.clear();
     _klineDataCache.forEach((key, data) {
-      // TODO: do what you want to do.
+      data.dispose();
     });
     _klineDataCache.clear();
   }
@@ -82,37 +77,6 @@ mixin StateBinding
   @override
   double get maxPaintWidth => totalCandleCount * candleActualWidth;
 
-  /// 绘制区域高度 / 当前绘制的蜡烛数据高度.
-  // @override
-  // double get dyFactor {
-  //   return mainDrawHeight / curKlineData.dataHeight.toDouble();
-  // }
-
-  /// 将offset指定的dy转换为当前坐标Y轴对应价钱.
-  // @override
-  // Decimal? offsetToPrice(Offset offset) => dyToPrice(offset.dy);
-
-  // @override
-  // Decimal? dyToPrice(double dy) {
-  //   if (!mainDrawRect.inclueDy(dy)) return null;
-  //   return curKlineData.max - ((dy - mainDrawTop) / dyFactor).d;
-  // }
-
-  /// 将价钱转换为主图(蜡烛图)的Y轴坐标. 如果超出以最大最小值来计算.
-  // @override
-  // double priceToDy(Decimal price) {
-  //   price = price.clamp(curKlineData.min, curKlineData.max);
-  //   return mainDrawBottom - (price - curKlineData.min).toDouble() * dyFactor;
-  // }
-
-  /// 当前Cross命中的Model
-  // @override
-  // CandleModel? get crossingCandle {
-  //   final offset = crossingOffset;
-  //   if (offset == null) return null;
-  //   return offsetToCandle(offset);
-  // }
-
   /// 将offset转换为蜡烛数据
   @override
   CandleModel? offsetToCandle(Offset offset) {
@@ -129,16 +93,6 @@ mixin StateBinding
     final dxPaintOffset = (mainDrawRight - dx) + paintDxOffset;
     // final diff = dxPaintOffset % candleActualWidth;
     return (dxPaintOffset / candleActualWidth).floor();
-    // if (paintDxOffset == 0) {
-    //   int index = ((mainDrawRight - dx) / candleActualWidth).floor();
-    //   return curKlineData.start - index;
-    // } else if (paintDxOffset > 0) {
-    //   double dxPaintOffset = (mainDrawRight - dx) + paintDxOffset;
-    //   return (dxPaintOffset / candleActualWidth).floor();
-    // } else {
-    //   double dxPaintOffset = (mainDrawRight - dx) + paintDxOffset;
-    //   return (dxPaintOffset / candleActualWidth).floor();
-    // }
   }
 
   /// 将index转换为当前绘制区域对应的X轴坐标. 如果超出范围, 则返回null.
@@ -245,7 +199,7 @@ mixin StateBinding
     }
     KlineData? data = _klineDataCache[req.key];
     if (data != null && !useCacheFirst) {
-      data.reset();
+      data.dispose();
       markRepaintChart();
     }
   }
@@ -262,7 +216,7 @@ mixin StateBinding
     KlineData? data = _klineDataCache[req.key];
     if (data != null) {
       paintDxOffset = 0;
-      data.reset(); // TODO: 此处考虑是否做下对新旧list的合并, 复用旧数据.
+      data.dispose(); // TODO: 此处考虑是否做下对新旧list的合并, 复用旧数据.
     }
     data = KlineData(req, List.of(list), logger: loggerDelegate);
     _klineDataCache[req.key] = data;

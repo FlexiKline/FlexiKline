@@ -14,7 +14,6 @@
 
 import 'package:decimal/decimal.dart';
 
-import '../core/data.dart';
 import '../utils/num_util.dart';
 import './candle_model/candle_model.dart';
 import './candle_req/candle_req.dart';
@@ -25,25 +24,6 @@ export './candle_req/candle_req.dart';
 export './gesture_data.dart';
 export './card_info.dart';
 export './minmax.dart';
-
-extension KlineDataExt on KlineData {
-  String get instId => req.instId;
-  int get precision => req.precision;
-  String get key => req.key;
-  String get reqKey => req.reqKey;
-
-  bool get invalid => req.instId.isEmpty;
-
-  DateTime? get nextUpdateDateTime {
-    final lastModel = list.firstOrNull;
-    if (lastModel != null) {
-      return lastModel.nextUpdateDateTime(req.bar);
-    }
-    return null;
-  }
-
-  TimeBar? get timerBar => req.timerBar;
-}
 
 extension CandleReqExt on CandleReq {
   String get key => "$instId-$bar";

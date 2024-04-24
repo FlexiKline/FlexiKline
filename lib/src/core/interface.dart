@@ -16,9 +16,9 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 
+import '../data/export.dart';
 import '../framework/export.dart';
 import '../model/export.dart';
-import 'data.dart';
 
 /// Gesture 事件处理接口
 abstract interface class IGestureEvent {

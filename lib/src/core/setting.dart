@@ -17,7 +17,6 @@ import 'dart:ui' as ui;
 
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 import '../constant.dart';
 import '../model/export.dart';
@@ -43,6 +42,12 @@ mixin SettingBinding on KlineBindingBase implements IConfig {
 
   Color longColor = Colors.green;
   Color shortColor = Colors.red;
+
+  /// Loading配置
+  double loadingProgressSize = 24;
+  double loadingProgressStrokeWidth = 4;
+  Color loadingProgressBackgroundColor = const Color(0xFFEBEBEB);
+  Color loadingProgressValueColor = Colors.black;
 
   /// 一个像素的值.
   double get pixel {

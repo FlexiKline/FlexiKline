@@ -12,13 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export 'binding_base.dart';
-export 'chart.dart';
-export 'gesture.dart';
-export 'state.dart';
-export 'config.dart';
-export 'setting.dart';
-export 'cross.dart';
-export 'interface.dart';
-export 'draw.dart';
-export 'grid.dart';
+import 'base_data.dart';
+
+mixin EMAData on BaseData {
+  @override
+  void initData() {
+    super.initData();
+    logd('init EMA');
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    logd('dispose EMA');
+  }
+}

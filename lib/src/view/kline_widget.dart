@@ -68,7 +68,6 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
         controller: widget.controller,
         child: Stack(
           children: <Widget>[
-            // GridBgView(controller: widget.controller),
             RepaintBoundary(
               key: const ValueKey('MainRectPaint'),
               child: CustomPaint(
@@ -106,14 +105,16 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
               child: Offstage(
                 offstage: !loading,
                 child: widget.loadingView ??
-                    const Center(
+                    Center(
                       child: SizedBox.square(
-                        dimension: 24,
+                        dimension: widget.controller.loadingProgressSize,
                         child: CircularProgressIndicator(
-                          strokeWidth: 4,
-                          backgroundColor: Color(0xFFEBEBEB),
+                          strokeWidth:
+                              widget.controller.loadingProgressStrokeWidth,
+                          backgroundColor:
+                              widget.controller.loadingProgressBackgroundColor,
                           valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.black,
+                            widget.controller.loadingProgressValueColor,
                           ),
                         ),
                       ),
