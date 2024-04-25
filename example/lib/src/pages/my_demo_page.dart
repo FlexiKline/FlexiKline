@@ -61,15 +61,6 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
     initController2();
   }
 
-  void onTapTimeBar1(TimeBar value) {
-    req1.bar = value.bar;
-    Future.delayed(const Duration(seconds: 3), () {
-      controller1.setKlineData(req1, [
-        // TODO: 测试代码.
-      ]);
-    });
-  }
-
   void initController1() {
     controller1 = FlexiKlineController(
       logger: LogPrintImpl(
@@ -81,19 +72,30 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
       ScreenUtil().screenWidth,
       300,
     ));
-    genLocalCandleList().then((list) {
-      controller1.setKlineData(req1, list);
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      loadCandleData1(req1);
     });
   }
 
-  // void onTapTimeBar2(TimeBar value) {
-  //   req2.bar = value.bar;
-  //   Future.delayed(const Duration(seconds: 3), () {
-  //     controller2.setKlineData(req2, [
-  //       // TODO: 测试代码.
-  //     ]);
-  //   });
-  // }
+  void onTapTimeBar1(TimeBar value) {
+    req1.bar = value.bar;
+    setState(() {});
+    loadCandleData1(req1);
+  }
+
+  Future<void> loadCandleData1(CandleReq request) async {
+    try {
+      controller1.startLoading(request, useCacheFirst: true);
+
+      await Future.delayed(const Duration(seconds: 2));
+
+      genLocalCandleList().then((list) {
+        controller1.setKlineData(request, list);
+      });
+    } finally {
+      controller1.stopLoading();
+    }
+  }
 
   void initController2() {
     controller2 = FlexiKlineController(
@@ -111,9 +113,30 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
       ..candleMaxWidth = 30
       ..candleWidth = 8;
 
-    genCustomCandleList(count: 500).then((list) {
-      controller2.setKlineData(req2, list);
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      loadCandleData2(req2);
     });
+  }
+
+  // void onTapTimeBar2(TimeBar value) {
+  //   req2.bar = value.bar;
+  //   Future.delayed(const Duration(seconds: 3), () {
+  //     controller2.setKlineData(req2, [
+  //       // TODO: 测试代码.
+  //     ]);
+  //   });
+  // }
+
+  Future<void> loadCandleData2(CandleReq request) async {
+    try {
+      controller2.startLoading(request, useCacheFirst: true);
+      await Future.delayed(const Duration(seconds: 2));
+      genCustomCandleList(count: 500).then((list) {
+        controller2.setKlineData(request, list);
+      });
+    } finally {
+      controller2.stopLoading();
+    }
   }
 
   @override

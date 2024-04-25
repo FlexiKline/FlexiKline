@@ -26,7 +26,7 @@ import 'setting.dart';
 /// 状态管理: 负责数据的管理, 缓存, 切换, 计算
 mixin StateBinding
     on KlineBindingBase, SettingBinding
-    implements IState, IChart {
+    implements IState, IChart, ICross {
   @override
   void initBinding() {
     super.initBinding();
@@ -47,6 +47,12 @@ mixin StateBinding
   KlineData _curKlineData = KlineData.empty;
   @override
   KlineData get curKlineData => _curKlineData;
+  set curKlineData(data) {
+    _curKlineData = data;
+    initPaintDxOffset();
+    markRepaintChart();
+    cancelCross();
+  }
 
   /// 数据缓存Key
   String get curDataKey => curKlineData.key;
@@ -171,42 +177,39 @@ mixin StateBinding
     // curKlineData.calculateMaxmin();
   }
 
-  void prepareSwithTimeBar(
+  /// 起动loading
+  /// req: 标记当前请求
+  /// return: 返回false代表使用了缓存, 不展示loading了
+  bool startLoading(
     CandleReq req, {
-    bool showLoading = true,
-    bool useCacheFirst = true,
+    bool useCacheFirst = false,
   }) {
-    if (showLoading) {
-      onLoading?.call(true);
-    }
     KlineData? data = _klineDataCache[req.key];
-    if (data != null && !useCacheFirst) {
-      data.dispose();
-      markRepaintChart();
+    if (useCacheFirst && data != null && !data.isEmpty) {
+      curKlineData = data;
+      onLoading?.call(false);
+      return false;
     }
+    curKlineData = KlineData(req);
+    onLoading?.call(true);
+    return true;
   }
 
-  @override
-  void setKlineData(
-    CandleReq req,
-    List<CandleModel> list, {
-    bool replace = false,
-  }) {
-    onLoading?.call(false);
+  void stopLoading() => onLoading?.call(false);
 
+  @override
+  void setKlineData(CandleReq req, List<CandleModel> list) {
+    // TODO: 校验数据合法性.
     req = req.copyWith();
     KlineData? data = _klineDataCache[req.key];
-    if (data != null) {
-      paintDxOffset = 0;
-      data.dispose(); // TODO: 此处考虑是否做下对新旧list的合并, 复用旧数据.
+    if (data != null && !data.isEmpty) {
+      data.dispose();
     }
-    data = KlineData(req, List.of(list), logger: loggerDelegate);
+    data = KlineData(req, list: List.of(list), logger: loggerDelegate);
     _klineDataCache[req.key] = data;
-    // if (curKlineData.invalid || req.key == curDataKey) {
-    _curKlineData = data;
-    initPaintDxOffset();
-    markRepaintChart();
-    // }
+    if (curKlineData.invalid || req.key == curDataKey) {
+      curKlineData = data;
+    }
   }
 
   @override

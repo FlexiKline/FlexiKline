@@ -49,9 +49,14 @@ mixin CrossBinding
   // 是否正在绘制Cross
   @override
   bool get isCrossing => offset?.isFinite == true;
-  // 当前Cross焦点.
+
+  // 取消当前Cross事件
   @override
-  Offset? get crossingOffset => _offset;
+  void cancelCross() {
+    offset = null;
+    markRepaintCross();
+  }
+
   Offset? _offset;
   Offset? get offset => _offset;
   set offset(Offset? val) {

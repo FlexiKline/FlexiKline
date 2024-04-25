@@ -29,6 +29,15 @@ extension CandleReqExt on CandleReq {
   String get reqKey => "$instId-$bar-$before-$after";
 
   TimeBar? get timerBar => TimeBar.convert(bar);
+
+  void update(CandleReq req) {
+    instId = req.instId;
+    after = req.after;
+    before = req.before;
+    bar = req.bar;
+    limit = req.limit;
+    precision = req.precision;
+  }
 }
 
 extension CandleModelExt on CandleModel {

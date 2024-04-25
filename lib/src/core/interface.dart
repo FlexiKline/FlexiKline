@@ -75,11 +75,7 @@ mixin GestureHanderImpl implements IGestureHandler {
 
 /// 数据源更新
 abstract interface class IState {
-  void setKlineData(
-    CandleReq req,
-    List<CandleModel> list, {
-    bool replace = false,
-  });
+  void setKlineData(CandleReq req, List<CandleModel> list);
 
   void appendKlineData(CandleReq req, List<CandleModel> list);
 
@@ -151,5 +147,6 @@ abstract interface class ICross {
   /// 是否正在绘制Cross
   bool get isCrossing;
 
-  Offset? get crossingOffset;
+  /// 取消当前Cross事件
+  void cancelCross();
 }

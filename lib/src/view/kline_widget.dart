@@ -44,9 +44,10 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
       setState(() {});
     };
     widget.controller.onLoading = (isLoading) {
-      setState(() {
+      if (loading != isLoading) {
         loading = isLoading;
-      });
+        setState(() {});
+      }
     };
 
     widget.controller.initBinding();

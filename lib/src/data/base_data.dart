@@ -27,8 +27,8 @@ abstract class BaseData with KlineLog {
   String get logTag => '${super.logTag}\tDADA';
 
   BaseData(
-    this.req,
-    List<CandleModel> list, {
+    this.req, {
+    List<CandleModel> list = const [],
     ILogger? logger,
   }) : _list = List.of(list) {
     loggerDelegate = logger;

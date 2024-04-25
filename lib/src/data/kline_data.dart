@@ -24,14 +24,14 @@ import 'mavol_data.dart';
 class KlineData extends BaseData
     with CandleData, MAData, MAVOLData, EMAData, MACDData {
   KlineData(
-    super.req,
-    super.list, {
+    super.req, {
+    super.list,
     super.logger,
   });
 
   static final KlineData empty = KlineData(
     CandleReq(instId: "", bar: ""),
-    List.empty(growable: true),
+    list: List.empty(growable: false),
   );
 }
 
@@ -40,6 +40,7 @@ extension KlineDataExt on KlineData {
   int get precision => req.precision;
   String get key => req.key;
   String get reqKey => req.reqKey;
+  TimeBar? get timerBar => req.timerBar;
 
   bool get invalid => req.instId.isEmpty;
 
@@ -50,6 +51,4 @@ extension KlineDataExt on KlineData {
     }
     return null;
   }
-
-  TimeBar? get timerBar => req.timerBar;
 }

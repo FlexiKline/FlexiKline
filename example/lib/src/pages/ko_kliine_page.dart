@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:dio/dio.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -49,6 +50,7 @@ class _KOKlinePageState extends ConsumerState<KOKlinePage> {
 
   late final FlexiKlineController controller;
   CandleModel? latest;
+  CancelToken? cancelToken;
 
   @override
   void initState() {
@@ -64,33 +66,39 @@ class _KOKlinePageState extends ConsumerState<KOKlinePage> {
       Size(ScreenUtil().screenWidth, 300.r),
     );
 
-    api.getHistoryCandles(req).then((resp) {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      loadCandleData(req);
+    });
+  }
+
+  Future<void> loadCandleData(CandleReq request) async {
+    try {
+      controller.startLoading(request, useCacheFirst: true);
+
+      await Future.delayed(const Duration(seconds: 2));
+
+      cancelToken?.cancel();
+      final resp = await api.getHistoryCandles(
+        request,
+        cancelToken: cancelToken = CancelToken(),
+      );
+      cancelToken = null;
       if (resp.success && resp.data != null) {
-        latest = resp.data?.first;
-        controller.setKlineData(req, resp.data!);
+        controller.setKlineData(request, resp.data!);
         setState(() {});
       } else {
         SmartDialog.showToast(resp.msg);
       }
-    });
+    } finally {
+      controller.stopLoading();
+    }
   }
 
   void onTapTimerBar(TimeBar bar) {
     if (bar.bar != req.bar) {
       req.bar = bar.bar;
-      controller.prepareSwithTimeBar(req, useCacheFirst: false);
-      Future.delayed(const Duration(seconds: 2), () {
-        api.getHistoryCandles(req).then((resp) {
-          if (resp.success && resp.data != null) {
-            latest = resp.data?.first;
-            controller.setKlineData(req, resp.data!);
-            setState(() {});
-          } else {
-            SmartDialog.showToast(resp.msg);
-          }
-        });
-      });
       setState(() {});
+      loadCandleData(req);
     }
   }
 
@@ -111,7 +119,7 @@ class _KOKlinePageState extends ConsumerState<KOKlinePage> {
         child: Column(
           children: [
             LatestPriceView(
-              model: latest,
+              model: controller.curKlineData.latest,
               precision: req.precision,
             ),
             FlexiTimeBar(
