@@ -92,43 +92,42 @@ class EMAPaintObject extends SinglePaintObjectBox<EMAIndicator> {
     final data = klineData;
     if (data.list.isEmpty) return;
     int start = data.start;
-    int end = data.end;
+    int end = (data.end + 1).clamp(start, data.list.length); // 多绘制一根蜡烛
 
-    try {
-      /// 保存画布状态
-      canvas.save();
+    // try {
+    //   /// 保存画布状态
+    //   canvas.save();
+    //   /// 裁剪绘制范围
+    //   canvas.clipRect(setting.mainDrawRect);
 
-      /// 裁剪绘制范围
-      canvas.clipRect(setting.mainDrawRect);
+    for (var param in indicator.calcParams) {
+      final emaMap = klineData.getCountEmaMap(param.count);
+      if (emaMap.isEmpty) continue;
 
-      for (var param in indicator.calcParams) {
-        final emaMap = klineData.getCountEmaMap(param.count);
-        if (emaMap.isEmpty) continue;
-
-        final offset = startCandleDx - candleWidthHalf;
-        CandleModel m;
-        final List<Offset> points = [];
-        for (int i = start; i < end; i++) {
-          m = data.list[i];
-          final dx = offset - (i - start) * candleActualWidth;
-          final emaData = emaMap[m.timestamp];
-          if (emaData == null) continue;
-          final dy = valueToDy(emaData.val, correct: false);
-          points.add(Offset(dx, dy));
-        }
-
-        canvas.drawPath(
-          Path()..addPolygon(points, false),
-          Paint()
-            ..color = param.color
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = setting.maLineStrokeWidth,
-        );
+      final offset = startCandleDx - candleWidthHalf;
+      CandleModel m;
+      final List<Offset> points = [];
+      for (int i = start; i < end; i++) {
+        m = data.list[i];
+        final dx = offset - (i - start) * candleActualWidth;
+        final emaData = emaMap[m.timestamp];
+        if (emaData == null) continue;
+        final dy = valueToDy(emaData.val, correct: false);
+        points.add(Offset(dx, dy));
       }
-    } finally {
-      /// 恢复画布状态
-      canvas.restore();
+
+      canvas.drawPath(
+        Path()..addPolygon(points, false),
+        Paint()
+          ..color = param.color
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = setting.maLineStrokeWidth,
+      );
     }
+    // } finally {
+    //   /// 恢复画布状态
+    //   canvas.restore();
+    // }
   }
 
   /// EMA 绘制tips区域

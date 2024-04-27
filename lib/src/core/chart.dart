@@ -80,6 +80,8 @@ mixin ChartBinding
   @override
   void paintChart(Canvas canvas, Size size) {
     // logd('$diffTime paintChart >>>>');
+    // TODO: 待优化: 是否在此控制
+    curKlineData.resetCalcuResult();
 
     /// 检查主图和副图的PaintObject是否都创建了.
     ensurePaintObjectInstance();

@@ -282,6 +282,54 @@ mixin DataInitMixin on PaintObjectProxy implements IPaintDataInit {
   }
 }
 
+mixin PaintYAxisTickMixin<T extends SinglePaintObjectIndicator>
+    on SinglePaintObjectBox<T> {
+  /// 为副区的指标图绘制Y轴上的刻度信息
+  @protected
+  void paintSubChartYAxisTick(Canvas canvas, Size size) {
+    if (minMax.isZero) return;
+
+    double yAxisStep = chartRect.height / (setting.subChartYAxisTickCount - 1);
+    final dx = chartRect.right;
+    double dy = 0.0;
+    double drawTop = chartRect.top;
+
+    for (int i = 0; i < setting.subChartYAxisTickCount; i++) {
+      dy = drawTop + i * yAxisStep;
+      final value = dyToValue(dy);
+      if (value == null) continue;
+
+      final text = fromatYAxisTickValue(value);
+
+      canvas.drawText(
+        offset: Offset(
+          dx,
+          dy - setting.subChartYAxisTickRectHeight,
+        ),
+        drawDirection: DrawDirection.rtl,
+        drawableRect: drawBounding,
+        text: text,
+        style: setting.subChartYAxisTickStyle,
+        // textWidth: tickTextWidth,
+        textAlign: TextAlign.end,
+        padding: setting.subChartYAxisTickRectPadding,
+        maxLines: 1,
+      );
+    }
+  }
+
+  /// 如果要定制格式化刻度值. 在PaintObject中覆写此方法.
+  @protected
+  String fromatYAxisTickValue(Decimal value) {
+    return formatNumber(
+      value,
+      precision: 2,
+      defIfZero: '0.00',
+      showCompact: true,
+    );
+  }
+}
+
 /// PaintObject
 /// 通过实现对应的接口, 实现Chart的配置, 计算, 绘制, Cross
 // @immutable

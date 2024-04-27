@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 
 import '../core/export.dart';
@@ -38,14 +37,12 @@ class VolumeIndicator extends SinglePaintObjectIndicator {
       );
 }
 
-class VolumePaintObject extends SinglePaintObjectBox<VolumeIndicator> {
+class VolumePaintObject extends SinglePaintObjectBox<VolumeIndicator>
+    with PaintYAxisTickMixin {
   VolumePaintObject({
     required super.controller,
     required super.indicator,
   });
-
-  Decimal _max = Decimal.zero;
-  Decimal _min = Decimal.zero;
 
   @override
   MinMax? initData({
@@ -53,27 +50,22 @@ class VolumePaintObject extends SinglePaintObjectBox<VolumeIndicator> {
     required int start,
     required int end,
   }) {
-    if (list.isEmpty || start < 0 || end > list.length) return null;
-    CandleModel m = list[start];
-    _max = m.vol;
-    _min = m.vol;
-    for (var i = start + 1; i < end; i++) {
-      m = list[i];
-      _max = m.vol > _max ? m.vol : _max;
-      _min = m.vol < _min ? m.vol : _min;
+    MinMax? minmaxVol = klineData.minmaxVol;
+    if (minmaxVol == null) {
+      klineData.calculateMaxmin();
+      minmaxVol = klineData.minmaxVol;
     }
-
-    _min = _min > Decimal.zero ? Decimal.zero : _min;
-    return MinMax(max: _max, min: _min);
+    minmaxVol?.minToZero();
+    return minmaxVol;
   }
 
   @override
   void paintChart(Canvas canvas, Size size) {
+    /// 绘制Y轴刻度值
+    paintSubChartYAxisTick(canvas, size);
+
     /// 绘制Volume柱状图
     paintIndicatorChart(canvas, size);
-
-    /// 绘制Y轴刻度值
-    paintYAxisTick(canvas, size);
   }
 
   @override
@@ -105,42 +97,41 @@ class VolumePaintObject extends SinglePaintObjectBox<VolumeIndicator> {
     }
   }
 
-  /// 绘制Y轴刻度值
-  void paintYAxisTick(Canvas canvas, Size size) {
-    double yAxisStep = chartRect.height / (setting.volBarYAxisTickCount - 1);
-    final dx = chartRect.right;
-    double dy = 0.0;
-    double drawTop = chartRect.top;
+  // /// 绘制Y轴刻度值
+  // void paintYAxisTick(Canvas canvas, Size size) {
+  //   double yAxisStep = chartRect.height / (setting.subChartYAxisTickCount - 1);
+  //   final dx = chartRect.right;
+  //   double dy = 0.0;
+  //   double drawTop = chartRect.top;
 
-    for (int i = 0; i < setting.volBarYAxisTickCount; i++) {
-      dy = drawTop + i * yAxisStep;
-      final vol = dyToValue(dy);
-      if (vol == null) continue;
+  //   for (int i = 0; i < setting.subChartYAxisTickCount; i++) {
+  //     dy = drawTop + i * yAxisStep;
+  //     final vol = dyToValue(dy);
+  //     if (vol == null) continue;
 
-      final text = formatNumber(
-        vol,
-        precision: 2,
-        defIfZero: '0.00',
-        cutInvalidZero: true,
-        showCompact: true,
-      );
+  //     final text = formatNumber(
+  //       vol,
+  //       precision: 2,
+  //       defIfZero: '0.00',
+  //       showCompact: true,
+  //     );
 
-      canvas.drawText(
-        offset: Offset(
-          dx,
-          dy - setting.priceTickRectHeight,
-        ),
-        drawDirection: DrawDirection.rtl,
-        drawableRect: drawBounding,
-        text: text,
-        style: setting.volBarTickStyle,
-        // textWidth: tickTextWidth,
-        textAlign: TextAlign.end,
-        padding: setting.volBarTickRectPadding,
-        maxLines: 1,
-      );
-    }
-  }
+  //     canvas.drawText(
+  //       offset: Offset(
+  //         dx,
+  //         dy - setting.subChartYAxisTickRectHeight,
+  //       ),
+  //       drawDirection: DrawDirection.rtl,
+  //       drawableRect: drawBounding,
+  //       text: text,
+  //       style: setting.subChartYAxisTickStyle,
+  //       // textWidth: tickTextWidth,
+  //       textAlign: TextAlign.end,
+  //       padding: setting.subChartYAxisTickRectPadding,
+  //       maxLines: 1,
+  //     );
+  //   }
+  // }
 
   /// 绘制Cross命中的Y轴刻度值
   void _paintCrossYAxisVolumeMark(Canvas canvas, Offset offset) {

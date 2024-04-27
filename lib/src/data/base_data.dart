@@ -51,6 +51,13 @@ abstract class BaseData with KlineLog {
     end = 0;
   }
 
+  /// 绘制前: 重置计算结果.
+  @protected
+  @mustCallSuper
+  void resetCalcuResult() {
+    logd('resetCalcuResult BASE');
+  }
+
   final CandleReq req;
   List<CandleModel> _list = List.empty(growable: true);
   List<CandleModel> get list => _list;

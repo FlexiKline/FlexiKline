@@ -160,6 +160,7 @@ mixin EMAData on BaseData {
       ts: m.timestamp,
       count: count,
       val: lastEma,
+      dirty: true,
     );
     for (int i = index - 1; i >= 0; i--) {
       m = list[i];

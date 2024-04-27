@@ -35,4 +35,6 @@ extension DecimalExt on Decimal {
   // String get toCompactBigNumber => compactBigNumber(this);
 
   Decimal get half => (this / two).toDecimal();
+
+  String get str => toStringAsFixed(2);
 }

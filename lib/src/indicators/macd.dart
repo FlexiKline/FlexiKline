@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'package:decimal/decimal.dart';
+import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart';
 
 import '../constant.dart';
@@ -51,7 +52,18 @@ class MacdIndicator extends SinglePaintObjectIndicator {
     super.height = defaultSubIndicatorHeight,
     super.tipsHeight = defaultSubIndicatorTipsHeight,
     super.padding = defaultSubIndicatorPadding,
+    this.emaShortCount = 12,
+    this.emaLongCount = 26,
+    this.macdCount = 9,
+    this.difColor = const Color(0xFFDFBF47),
+    this.deaColor = const Color(0xFF795583),
   });
+
+  final int emaShortCount;
+  final int emaLongCount;
+  final int macdCount;
+  final Color difColor;
+  final Color deaColor;
 
   @override
   SinglePaintObjectBox createPaintObject(KlineBindingBase controller) {
@@ -59,7 +71,8 @@ class MacdIndicator extends SinglePaintObjectIndicator {
   }
 }
 
-class MacdPaintObject extends SinglePaintObjectBox<MacdIndicator> {
+class MacdPaintObject extends SinglePaintObjectBox<MacdIndicator>
+    with PaintYAxisTickMixin {
   MacdPaintObject({required super.controller, required super.indicator});
 
   @override
@@ -68,15 +81,88 @@ class MacdPaintObject extends SinglePaintObjectBox<MacdIndicator> {
     required int start,
     required int end,
   }) {
-    return null;
+    final minmax = klineData.calculateAndCacheMACD(
+      s: indicator.emaShortCount,
+      l: indicator.emaLongCount,
+      m: indicator.macdCount,
+    );
+
+    return minmax;
+  }
+
+  @override
+  void paintChart(Canvas canvas, Size size) {
+    /// 绘制Y轴刻度值
+    paintSubChartYAxisTick(canvas, size);
+
+    final data = klineData;
+    if (data.isEmpty) return;
+    int start = data.start;
+    int end = (data.end + 1).clamp(start, data.list.length); //多绘制一根蜡烛
+
+    final offset = startCandleDx - candleWidthHalf;
+    CandleModel m;
+    MacdResult? ret, next;
+    final List<Offset> difPoints = [];
+    final List<Offset> deaPoints = [];
+    double zeroDy = valueToDy(Decimal.zero);
+    final candleHalf = candleWidthHalf - setting.candleMargin / 2;
+    for (int i = start; i < end; i++) {
+      m = data.list[i];
+      ret = klineData.getMacdResult(m.timestamp);
+      if (ret == null) continue;
+      final dx = offset - (i - start) * candleActualWidth;
+      difPoints.add(Offset(dx, valueToDy(ret.dif, correct: false)));
+      deaPoints.add(Offset(dx, valueToDy(ret.dea, correct: false)));
+
+      next = klineData.getMacdResult(data.list.getItem(i + 1)?.timestamp);
+
+      if (next != null && next.macd < ret.macd) {
+        // 空心
+        canvas.drawPath(
+          Path()
+            ..addRect(Rect.fromPoints(
+              Offset(dx - candleHalf, zeroDy),
+              Offset(dx + candleHalf, valueToDy(ret.macd, correct: false)),
+            )),
+          ret.macd > Decimal.zero
+              ? setting.macdBarLongHollowPaint
+              : setting.macdBarShortHollowPaint,
+        );
+      } else {
+        // 实心
+        canvas.drawLine(
+          Offset(dx, zeroDy),
+          Offset(dx, valueToDy(ret.macd, correct: false)),
+          ret.macd > Decimal.zero
+              ? setting.macdBarLongPaint
+              : setting.macdBarShortPaint,
+        );
+      }
+    }
+
+    canvas.drawPath(
+      Path()..addPolygon(difPoints, false),
+      Paint()
+        ..color = indicator.difColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = setting.maLineStrokeWidth,
+    );
+
+    canvas.drawPath(
+      Path()..addPolygon(deaPoints, false),
+      Paint()
+        ..color = indicator.deaColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = setting.maLineStrokeWidth,
+    );
   }
 
   @override
   void onCross(Canvas canvas, Offset offset) {}
 
   @override
-  void paintChart(Canvas canvas, Size size) {}
-
-  @override
-  Size? paintTips(Canvas canvas, {CandleModel? model, Offset? offset}) {}
+  Size? paintTips(Canvas canvas, {CandleModel? model, Offset? offset}) {
+    return null;
+  }
 }

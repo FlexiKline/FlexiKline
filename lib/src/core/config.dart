@@ -79,25 +79,25 @@ mixin ConfigBinding on KlineBindingBase, SettingBinding implements IConfig {
     ));
 
     _subIndicators = ListQueue<Indicator>(
-      subIndicatorChartMaxCount,
+      subChartMaxCount,
     );
 
-    addIndicatorInSub(VolumeIndicator(
-      height: subIndicatorDefaultHeight,
+    addIndicatorInSub(MacdIndicator(
+      height: 60,
       tipsHeight: 12,
     ));
 
     addIndicatorInSub(MultiPaintObjectIndicator(
       key: ValueKey('${IndicatorType.volume.name}+${IndicatorType.maVol.name}'),
-      height: subIndicatorDefaultHeight,
+      height: subChartDefaultHeight,
       tipsHeight: 12,
       // paintMode: MultiPaintMode.alone,
       children: [
         VolumeIndicator(
-          height: subIndicatorDefaultHeight,
+          height: subChartDefaultHeight,
         ),
         MAVolIndicator(
-          height: subIndicatorDefaultHeight,
+          height: subChartDefaultHeight,
           calcParams: [
             MaParam(label: 'MA5', count: 5, color: Colors.orange),
             MaParam(label: 'MA10', count: 10, color: Colors.blue)
@@ -166,7 +166,7 @@ mixin ConfigBinding on KlineBindingBase, SettingBinding implements IConfig {
   /// 在副图中增加指标
   @override
   void addIndicatorInSub(Indicator indicator) {
-    if (subIndicators.length > subIndicatorChartMaxCount) {
+    if (subIndicators.length > subChartMaxCount) {
       final deleted = subIndicators.removeFirst();
       deleted.dispose();
     }

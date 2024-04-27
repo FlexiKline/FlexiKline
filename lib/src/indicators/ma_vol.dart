@@ -100,7 +100,7 @@ class MAVolPaintObject extends SinglePaintObjectBox<MAVolIndicator> {
         final dx = offset - (i - start) * candleActualWidth;
         CalcuData? maData = maVolMap[m.timestamp];
         maData ??= klineData.calculateMAVol(data.list, i, param.count);
-        if (maData == null) continue;
+        // if (maData == null) continue;
         final dy = valueToDy(maData.val, correct: false);
         points.add(Offset(dx, dy));
       }

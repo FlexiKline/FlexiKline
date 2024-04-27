@@ -485,7 +485,7 @@ mixin SettingBinding on KlineBindingBase implements IConfig {
   ///////////////////////////////////////////
   /// 以下是副图的绘制配置 /////////////////////
   //////////////////////////////////////////
-  /// 副图区域大小
+  /// 副图整个区域
   Rect get subRect => Rect.fromLTRB(
         mainRect.left,
         mainRect.bottom,
@@ -493,17 +493,42 @@ mixin SettingBinding on KlineBindingBase implements IConfig {
         mainRect.bottom + subRectHeight,
       );
 
+  /// 副图整个区域大小
+  Size get subRectSize => Size(subRect.width, subRect.height);
+
+  /// 副区的指标图最大数量
+  int subChartMaxCount = 4;
+
   /// 副区的单个指标图默认配置
-  final double subIndicatorDefaultHeight = defaultSubIndicatorHeight;
-  final double subIndicatorDefaultTipsHeight = 15;
-  final EdgeInsets subIndicatorDefaultPadding = const EdgeInsets.only(
+  final double subChartDefaultHeight = defaultSubIndicatorHeight;
+  final double subChartDefaultTipsHeight = 15;
+  final EdgeInsets subChartDefaultPadding = const EdgeInsets.only(
     left: 8,
   );
 
-  /// 副区的指标图最大数量
-  int subIndicatorChartMaxCount = 4;
+  /// 副区的指标图的右侧刻度值统一配置
+  // 右侧刻度数量
+  int subChartYAxisTickCount = 3; // 高中低=>top, middle, bottom
+  // 刻度字体大小
+  double subChartYAxisTickFontSize = 10;
+  // 刻度字体颜色
+  Color subChartYAxisTickColor = Colors.black;
 
-  Size get subRectSize => Size(subRect.width, subRect.height);
+  TextStyle get subChartYAxisTickStyle => TextStyle(
+        fontSize: subChartYAxisTickFontSize,
+        color: subChartYAxisTickColor,
+        overflow: TextOverflow.ellipsis,
+        height: 1,
+      );
+  EdgeInsets subChartYAxisTickRectPadding = const EdgeInsets.only(
+    right: 2,
+  );
+
+  double get subChartYAxisTickRectHeight {
+    final textHeight =
+        subChartYAxisTickFontSize * (subChartYAxisTickStyle.height ?? 1);
+    return textHeight + subChartYAxisTickRectPadding.vertical;
+  }
 
   /// Volume Bar
   Paint get volBarLongPaint => Paint()
@@ -515,22 +540,6 @@ mixin SettingBinding on KlineBindingBase implements IConfig {
     ..style = PaintingStyle.stroke
     ..strokeWidth = candleWidth;
   // Volume Bar Y轴刻度数量
-  int volBarYAxisTickCount = 3; // 高中低=>top, middle, bottom
-  double volBarTickFontSize = 10;
-  Color volBarTickColor = Colors.black;
-  TextStyle get volBarTickStyle => TextStyle(
-        fontSize: volBarTickFontSize,
-        color: volBarTickColor,
-        overflow: TextOverflow.ellipsis,
-        height: 1,
-      );
-  EdgeInsets volBarTickRectPadding = const EdgeInsets.only(
-    right: 2,
-  );
-  double get volBarTickRectHeight {
-    final textHeight = volBarTickFontSize * (volBarTickStyle.height ?? 1);
-    return textHeight + volBarTickRectPadding.vertical;
-  }
 
   /// Volume Tooltip 区域配置
   double volTipFontSize = 10;
@@ -551,4 +560,22 @@ mixin SettingBinding on KlineBindingBase implements IConfig {
   EdgeInsets maTipsRectPadding = const EdgeInsets.only(
     left: 8,
   );
+
+  /// MACD 指标配置
+  Paint get macdBarLongPaint => Paint()
+    ..color = longColor
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = candleWidth;
+  Paint get macdBarShortPaint => Paint()
+    ..color = shortColor
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = candleWidth;
+  Paint get macdBarLongHollowPaint => Paint()
+    ..color = longColor
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 1;
+  Paint get macdBarShortHollowPaint => Paint()
+    ..color = shortColor
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 1;
 }

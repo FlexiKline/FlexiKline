@@ -18,7 +18,7 @@ import 'package:flutter/material.dart';
 const int defaultPrecision = 6;
 
 const int defaultScaleOnInfinitePrecision = 18;
-const double defaultSubIndicatorHeight = 80;
+const double defaultSubIndicatorHeight = 60;
 const double defaultSubIndicatorTipsHeight = 15;
 const EdgeInsets defaultSubIndicatorPadding = EdgeInsets.only(
   left: 8,

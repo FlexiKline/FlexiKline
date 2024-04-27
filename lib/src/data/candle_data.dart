@@ -16,6 +16,7 @@ import 'package:decimal/decimal.dart';
 
 import '../model/export.dart';
 import 'base_data.dart';
+import 'common.dart';
 
 mixin CandleData on BaseData {
   @override
@@ -30,42 +31,41 @@ mixin CandleData on BaseData {
     logd('dispose CANDLE');
   }
 
-  Decimal max = Decimal.zero;
-  Decimal min = Decimal.zero;
-  Decimal maxVol = Decimal.zero;
-  Decimal minVol = Decimal.zero;
-  CandleModel? startModel;
-  CandleModel? endModel;
+  MinMax? minmax;
+  MinMax? minmaxVol;
+  // CandleModel? startModel;
+  // CandleModel? endModel;
+
+  @override
+  void resetCalcuResult() {
+    super.resetCalcuResult();
+    minmax = null;
+    minmaxVol = null;
+  }
 
   /// 根据[start, end]下标计算最大最小值
-  void calculateMaxmin() {
-    if (list.isEmpty) return;
+  MinMax? calculateMaxmin() {
+    if (list.isEmpty || start < 0 || end > list.length) return null;
     CandleModel m = list[start];
-    max = m.high;
-    min = m.low;
-    maxVol = m.vol;
-    minVol = m.vol;
-    for (var i = start; i < end; i++) {
+    Decimal maxHigh = m.high;
+    Decimal minLow = m.low;
+    Decimal maxVol = m.vol;
+    Decimal minVol = m.vol;
+    for (var i = start + 1; i < end; i++) {
       m = list[i];
 
-      if (i == 0) {
-        startModel = m;
-      }
-      if (i == end - 1) {
-        endModel = m;
-      }
+      // if (i == 0) startModel = m;
+      // if (i == end - 1) endModel = m;
 
-      max = m.high > max ? m.high : max;
-      min = m.low < min ? m.low : min;
+      maxHigh = m.high > maxHigh ? m.high : maxHigh;
+      minLow = m.low < minLow ? m.low : minLow;
 
       maxVol = m.vol > maxVol ? m.vol : maxVol;
       minVol = m.vol < minVol ? m.vol : minVol;
     }
 
-    // 增加vol区域的margin为高度的1/10
-    final volH = maxVol == minVol ? Decimal.one : maxVol - minVol;
-    final margin = volH * twentieth;
-    maxVol += margin;
-    minVol -= margin;
+    minmax = MinMax(max: maxHigh, min: minLow);
+    minmaxVol = MinMax(max: maxVol, min: minVol);
+    return MinMax(max: maxHigh, min: minLow);
   }
 }

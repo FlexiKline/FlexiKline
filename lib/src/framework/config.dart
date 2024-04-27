@@ -67,9 +67,9 @@ class VolumeConfig extends IndicatorConfig {
     final setting = controller as SettingBinding;
     return VolumeIndicator(
       key: key,
-      height: setting.subIndicatorDefaultHeight,
-      tipsHeight: setting.subIndicatorDefaultTipsHeight,
-      padding: setting.subIndicatorDefaultPadding,
+      height: setting.subChartDefaultHeight,
+      tipsHeight: setting.subChartDefaultTipsHeight,
+      padding: setting.subChartDefaultPadding,
     );
   }
 }

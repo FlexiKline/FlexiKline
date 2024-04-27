@@ -70,7 +70,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
         child: Stack(
           children: <Widget>[
             RepaintBoundary(
-              key: const ValueKey('MainRectPaint'),
+              key: const ValueKey('GridAndChartLayer'),
               child: CustomPaint(
                 size: Size(
                   widget.controller.canvasWidth,
@@ -86,7 +86,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
               ),
             ),
             RepaintBoundary(
-              key: const ValueKey('PriceCrossPaint'),
+              key: const ValueKey('DrawAndCrossLayer'),
               child: CustomPaint(
                 size: Size(
                   widget.controller.canvasWidth,
@@ -107,6 +107,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
                 offstage: !loading,
                 child: widget.loadingView ??
                     Center(
+                      key: const ValueKey('loadingView'),
                       child: SizedBox.square(
                         dimension: widget.controller.loadingProgressSize,
                         child: CircularProgressIndicator(

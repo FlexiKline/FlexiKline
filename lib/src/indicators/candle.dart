@@ -53,24 +53,14 @@ class CandlePaintObject extends SinglePaintObjectBox<CandleIndicator> {
     required int start,
     required int end,
   }) {
-    if (list.isEmpty || start < 0 || end > list.length) return null;
-    CandleModel m = list[start];
-    Decimal max = m.high;
-    Decimal min = m.low;
-    for (var i = start + 1; i < end; i++) {
-      m = list[i];
-      max = m.high > max ? m.high : max;
-      min = m.low < min ? m.low : min;
+    MinMax? minmax = klineData.minmax;
+    if (minmax == null) {
+      minmax = klineData.calculateMaxmin();
+      minmax = klineData.minmax;
     }
-    _maxHigh = max;
-    _minLow = min;
-    // 增加vol区域的margin为高度的1/10
-    // final volH = _max == _min ? Decimal.one : _max - _min;
-    // final margin = volH * twentieth;
-    // _max += margin;
-    // _min -= margin;
-
-    return MinMax(max: max, min: min);
+    _maxHigh = minmax?.max;
+    _minLow = minmax?.min;
+    return minmax;
   }
 
   @override
