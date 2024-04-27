@@ -439,29 +439,6 @@ abstract class SinglePaintObjectBox<T extends SinglePaintObjectIndicator>
   @override
   T get indicator => super.indicator as T;
 
-  /// 转换parent为MultiPaintObjectBox类型的.
-  // MultiPaintObjectBox<MultiPaintObjectIndicator>? get multiBoxParent {
-  //   if (super.parent is MultiPaintObjectBox) {
-  //     return super.parent as MultiPaintObjectBox;
-  //   }
-  //   return null;
-  // }
-
-  // MinMax? _minMax;
-
-  // @override
-  // void cleanMinMax() => _minMax = null;
-
-  // @override
-  // MinMax get minMax {
-  //   return _minMax ?? MinMax.zero;
-  // }
-
-  // @override
-  // set minMax(MinMax val) {
-  //   _minMax = val;
-  // }
-
   @override
   void doInitData({
     required List<CandleModel> list,
@@ -509,21 +486,6 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
   @override
   T get indicator => super.indicator as T;
 
-  // 下一个Tips的绘制区域
-  // Rect _nextTipsRect = Rect.zero;
-
-  // Rect? get nextTipsRect => _nextTipsRect;
-
-  // void resetNextTipsRect() => _nextTipsRect = tipsRect;
-
-  // MinMax? _minMax;
-
-  // @override
-  // void cleanMinMax() => _minMax = null;
-
-  // @override
-  // MinMax get minMax => _minMax ?? MinMax.zero;
-
   @override
   set minMax(MinMax val) {
     if (_minMax == null) {
@@ -558,7 +520,7 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
 
   @override
   Size? paintTips(Canvas canvas, {CandleModel? model, Offset? offset}) {
-    return Size(tipsRect.width, nextTipsRect.bottom - tipsRect.top);
+    return Size(tipsRect.width, nextTipsRect.top - tipsRect.top);
   }
 
   @override
@@ -591,12 +553,31 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
 
   @override
   void doPaintChart(Canvas canvas, Size size) {
+    double? tipsHeight;
+    if (indicator.drawChartAlawaysBelowTipsArea) {
+      // 1.1 如果设置总是要在Tips区域下绘制指标图, 则要首先绘制完所有Tips.
+      // 否则, 在绘制完指标图后, 再绘制Tips
+      if (!cross.isCrossing) {
+        doPaintTips(canvas, model: state.curKlineData.latest);
+
+        // 1.2. Tips绘制完成后, 计算出当前Tips区域所占总高度.
+        final tipsSize = paintTips(canvas);
+        tipsHeight = tipsSize?.height;
+      }
+    }
+
     for (var child in indicator.children) {
+      if (tipsHeight != null && tipsHeight > 0) {
+        // 1.3. 在绘制指标图前, 动态设置子图的Tips区域高度.
+        child.tipsHeight = tipsHeight;
+      }
       child.paintObject?.paintChart(canvas, size);
     }
 
-    if (!cross.isCrossing) {
-      doPaintTips(canvas, model: state.curKlineData.latest);
+    if (!indicator.drawChartAlawaysBelowTipsArea) {
+      if (!cross.isCrossing) {
+        doPaintTips(canvas, model: state.curKlineData.latest);
+      }
     }
   }
 

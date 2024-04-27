@@ -52,6 +52,7 @@ mixin ConfigBinding on KlineBindingBase, SettingBinding implements IConfig {
       height: mainRect.height,
       tipsHeight: mainTipsHeight,
       padding: mainPadding,
+      drawChartAlawaysBelowTipsArea: true,
     );
 
     addIndicatorInMain(CandleIndicator(

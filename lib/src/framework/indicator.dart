@@ -112,11 +112,13 @@ class MultiPaintObjectIndicator extends Indicator {
     super.tipsHeight,
     super.padding,
     this.paintMode = MultiPaintMode.combine,
+    this.drawChartAlawaysBelowTipsArea = false,
     Iterable<SinglePaintObjectIndicator> children = const [],
   }) : children = LinkedHashSet<SinglePaintObjectIndicator>.from(children);
 
   final MultiPaintMode paintMode;
   final Set<SinglePaintObjectIndicator> children;
+  final bool drawChartAlawaysBelowTipsArea;
 
   @override
   MultiPaintObjectBox createPaintObject(
