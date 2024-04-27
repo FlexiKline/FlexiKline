@@ -57,6 +57,7 @@ class MacdIndicator extends SinglePaintObjectIndicator {
     this.macdCount = 9,
     this.difColor = const Color(0xFFDFBF47),
     this.deaColor = const Color(0xFF795583),
+    this.macdColor,
     this.tickCount,
     this.precision = 2,
   });
@@ -67,6 +68,7 @@ class MacdIndicator extends SinglePaintObjectIndicator {
   final int macdCount;
   final Color difColor;
   final Color deaColor;
+  final Color? macdColor;
 
   /// 绘制相关参数
   final int? tickCount;
@@ -148,8 +150,8 @@ class MacdPaintObject extends SinglePaintObjectBox<MacdIndicator>
               Offset(dx + candleHalf, valueToDy(ret.macd, correct: false)),
             )),
           ret.macd > Decimal.zero
-              ? setting.macdBarLongHollowPaint
-              : setting.macdBarShortHollowPaint,
+              ? setting.defLongHollowBarPaint
+              : setting.defShortHollowBarPaint,
         );
       } else {
         // 实心
@@ -157,8 +159,8 @@ class MacdPaintObject extends SinglePaintObjectBox<MacdIndicator>
           Offset(dx, zeroDy),
           Offset(dx, valueToDy(ret.macd, correct: false)),
           ret.macd > Decimal.zero
-              ? setting.macdBarLongPaint
-              : setting.macdBarShortPaint,
+              ? setting.defLongBarPaint
+              : setting.defShortBarPaint,
         );
       }
     }
@@ -168,7 +170,7 @@ class MacdPaintObject extends SinglePaintObjectBox<MacdIndicator>
       Paint()
         ..color = indicator.difColor
         ..style = PaintingStyle.stroke
-        ..strokeWidth = setting.maLineStrokeWidth,
+        ..strokeWidth = setting.paintLineStrokeDefaultWidth,
     );
 
     canvas.drawPath(
@@ -176,7 +178,7 @@ class MacdPaintObject extends SinglePaintObjectBox<MacdIndicator>
       Paint()
         ..color = indicator.deaColor
         ..style = PaintingStyle.stroke
-        ..strokeWidth = setting.maLineStrokeWidth,
+        ..strokeWidth = setting.paintLineStrokeDefaultWidth,
     );
   }
 
@@ -236,7 +238,7 @@ class MacdPaintObject extends SinglePaintObjectBox<MacdIndicator>
       text: macdTxt,
       style: TextStyle(
         fontSize: setting.tipsDefaultTextSize,
-        color: setting.tipsDefaultTextColor,
+        color: indicator.macdColor ?? setting.tipsDefaultTextColor,
         height: setting.tipsDefaultTextHeight,
       ),
     ));

@@ -110,7 +110,7 @@ class MAPaintObject extends SinglePaintObjectBox<MAIndicator> {
         Paint()
           ..color = param.color
           ..style = PaintingStyle.stroke
-          ..strokeWidth = setting.maLineStrokeWidth,
+          ..strokeWidth = setting.paintLineStrokeDefaultWidth,
       );
     }
     // } finally {
@@ -145,10 +145,9 @@ class MAPaintObject extends SinglePaintObjectBox<MAIndicator> {
         children.add(TextSpan(
           text: text,
           style: TextStyle(
-            fontSize: setting.maTipsFontSize,
+            fontSize: setting.tipsDefaultTextSize,
             color: param.color,
-            height: drawRect.height / setting.maTipsFontSize,
-            // height: 1.2,
+            height: setting.tipsDefaultTextHeight,
           ),
         ));
       }
@@ -160,7 +159,7 @@ class MAPaintObject extends SinglePaintObjectBox<MAIndicator> {
         drawDirection: DrawDirection.ltr,
         drawableRect: drawRect,
         textAlign: TextAlign.left,
-        padding: setting.maTipsRectPadding,
+        padding: setting.tipsRectDefaultPadding,
         maxLines: 1,
       );
     }

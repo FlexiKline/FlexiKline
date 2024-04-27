@@ -289,12 +289,19 @@ mixin PaintYAxisTickMixin<T extends SinglePaintObjectIndicator>
     required int tickCount, // 刻度数量.
   }) {
     if (minMax.isZero) return;
+    if (tickCount <= 0) return;
 
-    double yAxisStep = chartRect.height / (setting.subChartYAxisTickCount - 1);
+    double yAxisStep = 0;
+    double drawTop;
+    if (tickCount == 1) {
+      drawTop = chartRect.top + chartRect.height / 2;
+    } else {
+      drawTop = chartRect.top;
+      yAxisStep = chartRect.height / (tickCount - 1);
+    }
+
     final dx = chartRect.right;
     double dy = 0.0;
-    double drawTop = chartRect.top;
-
     for (int i = 0; i < tickCount; i++) {
       dy = drawTop + i * yAxisStep;
       final value = dyToValue(dy);

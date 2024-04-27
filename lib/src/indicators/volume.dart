@@ -28,10 +28,12 @@ class VolumeIndicator extends SinglePaintObjectIndicator {
     super.tipsHeight,
     super.padding,
     this.tickCount,
+    this.tipsTextColor,
   });
 
   /// 绘制相关参数
   final int? tickCount;
+  final Color? tipsTextColor;
 
   @override
   VolumePaintObject createPaintObject(KlineBindingBase controller) =>
@@ -100,7 +102,7 @@ class VolumePaintObject extends SinglePaintObjectBox<VolumeIndicator>
       canvas.drawLine(
         Offset(dx, dy),
         Offset(dx, dyBottom),
-        isLong ? setting.volBarLongPaint : setting.volBarShortPaint,
+        isLong ? setting.defLongBarPaint : setting.defShortBarPaint,
       );
     }
   }
@@ -125,15 +127,16 @@ class VolumePaintObject extends SinglePaintObjectBox<VolumeIndicator>
 
     return canvas.drawText(
       offset: drawRect.topLeft,
+      text: text,
+      style: TextStyle(
+        fontSize: setting.tipsDefaultTextSize,
+        color: indicator.tipsTextColor ?? setting.tipsDefaultTextColor,
+        height: setting.tipsDefaultTextHeight,
+      ),
       drawDirection: DrawDirection.ltr,
       drawableRect: tipsRect,
-      text: text,
-      style: setting.volTipStyle.copyWith(
-        height: drawRect.height / setting.volTipFontSize,
-        // height: 1.2,
-      ),
       textAlign: TextAlign.left,
-      padding: setting.volTipsRectPadding,
+      padding: setting.tipsRectDefaultPadding,
       maxLines: 1,
     );
   }

@@ -115,7 +115,7 @@ class EMAPaintObject extends SinglePaintObjectBox<EMAIndicator> {
         Paint()
           ..color = param.color
           ..style = PaintingStyle.stroke
-          ..strokeWidth = setting.maLineStrokeWidth,
+          ..strokeWidth = setting.paintLineStrokeDefaultWidth,
       );
     }
     // } finally {
@@ -153,7 +153,6 @@ class EMAPaintObject extends SinglePaintObjectBox<EMAIndicator> {
             fontSize: setting.tipsDefaultTextSize,
             color: param.color,
             height: setting.tipsDefaultTextHeight,
-            // height: 1.2,
           ),
         ));
       }
@@ -165,7 +164,7 @@ class EMAPaintObject extends SinglePaintObjectBox<EMAIndicator> {
         drawDirection: DrawDirection.ltr,
         drawableRect: drawRect,
         textAlign: TextAlign.left,
-        padding: setting.maTipsRectPadding,
+        padding: setting.tipsRectDefaultPadding,
         maxLines: 1,
       );
     }

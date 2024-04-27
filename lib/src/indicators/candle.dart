@@ -297,19 +297,30 @@ class CandlePaintObject extends SinglePaintObjectBox<CandleIndicator>
       return;
     }
 
+    bool showLastPriceUpdateTime = setting.showLastPriceUpdateTime;
     double dx = chartRect.right;
+    double firstCandleDx = startCandleDx;
+    double rightMargin = setting.lastPriceRectRightMinMargin;
     double ldx = 0; // 计算最新价刻度线lineTo参数X轴的dx值. 默认0: 代表橫穿整个Canvas.
     double dy;
-    double flag = -1; // 计算右边最新价钱文本时, dy增减的方向
     if (model.close >= minMax.max) {
       dy = chartRect.top; // 画板顶部展示.
     } else if (model.close <= minMax.min) {
       dy = chartRect.bottom; // 画板底部展示.
-      flag = 1;
     } else {
-      // 计算最新价在当前画板中的X轴位置.
-      ldx = clampDxInChart(startCandleDx);
       dy = clampDyInChart(valueToDy(model.close));
+    }
+    // 计算最新价在当前画板中的X轴位置.
+    if (firstCandleDx < dx) {
+      ldx = firstCandleDx;
+    } else {
+      if (setting.showLastPriceXAxisLineWhenMoveOffDrawArea) {
+        ldx = 0;
+        rightMargin += setting.lastPriceRectRightMaxMargin;
+        showLastPriceUpdateTime = false;
+      } else {
+        ldx = dx - rightMargin;
+      }
     }
 
     // 画最新价在画板中的刻度线.
@@ -331,7 +342,7 @@ class CandlePaintObject extends SinglePaintObjectBox<CandleIndicator>
       precision: klineData.req.precision,
       cutInvalidZero: false,
     );
-    if (setting.showLastPriceUpdateTime) {
+    if (showLastPriceUpdateTime) {
       final nextUpdateDateTime = model.nextUpdateDateTime(klineData.req.bar);
       // logd(
       //   'paintLastPriceMark lastModelTime:${model.dateTime}, nextUpdateDateTime:$nextUpdateDateTime',
@@ -344,10 +355,11 @@ class CandlePaintObject extends SinglePaintObjectBox<CandleIndicator>
         }
       }
     }
+
     canvas.drawText(
       offset: Offset(
-        dx - setting.lastPriceRectRightMargin,
-        dy + flag * textHeight / 2, // 计算最新价文本区域相对于刻度线的位置
+        dx - rightMargin,
+        dy - textHeight / 2, // 计算最新价文本区域相对于刻度线的位置
       ),
       drawDirection: DrawDirection.rtl,
       drawableRect: drawBounding,

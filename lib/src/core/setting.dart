@@ -277,7 +277,6 @@ mixin SettingBinding on KlineBindingBase implements IConfig {
   /// 最新价文本区域配置
   bool isDrawLastPriceMark = true;
   double lastPriceFontSize = 10;
-  double lastPriceTextWidth = 100; // TODO 暂无用
   Color lastPriceColor = Colors.black;
   TextStyle get lastPriceTextStyle => TextStyle(
         fontSize: lastPriceFontSize,
@@ -288,14 +287,18 @@ mixin SettingBinding on KlineBindingBase implements IConfig {
       );
 
   /// 是否在最新价下面展示下次更新时间.
+  // 根据TimeBar计算: 当lastPrice时间距离下次更新时间在一个TimeBar内时展示; 否则不展示.
   bool showLastPriceUpdateTime = true;
+  // 当移出绘制区域后, 是否展示最新价X轴线.
+  bool showLastPriceXAxisLineWhenMoveOffDrawArea = true;
 
   /// 最新价文本区域的背景相关配置.
   Color lastPriceRectBackgroundColor = Colors.white;
   double lastPriceRectBorderRadius = 2;
   double lastPriceRectBorderWidth = 0.5;
   Color lastPriceRectBorderColor = Colors.black;
-  double lastPriceRectRightMargin = 1;
+  double lastPriceRectRightMinMargin = 1;
+  double lastPriceRectRightMaxMargin = 60;
   EdgeInsets lastPriceRectPadding = const EdgeInsets.symmetric(
     horizontal: 2,
     vertical: 2,
@@ -511,71 +514,42 @@ mixin SettingBinding on KlineBindingBase implements IConfig {
 
   /// 副区的单个指标图默认配置
   final double subChartDefaultHeight = defaultSubIndicatorHeight;
-  final double subChartDefaultTipsHeight = 15;
+  final double subChartDefaultTipsHeight = defaultIndicatorTipsHeight;
   final EdgeInsets subChartDefaultPadding = const EdgeInsets.only(
     left: 8,
   );
 
-  /// 副区的指标图的右侧刻度值统一配置
-  // 右侧刻度数量
+  /// 副区的指标图的右侧右侧刻度数量
   int subChartYAxisTickCount = 3; // 高中低=>top, middle, bottom
 
   /// Tips文本区域默认配置
   // tips默认字体大小
   double tipsDefaultTextSize = 10;
   // tips默认字体高度
-  double tipsDefaultTextHeight = 1.5;
+  double tipsDefaultTextHeight = 1.2;
   // tips默认字体颜色
   Color tipsDefaultTextColor = Colors.black;
   EdgeInsets tipsRectDefaultPadding = const EdgeInsets.only(
     left: 8,
   );
 
-  /// Volume Bar
-  Paint get volBarLongPaint => Paint()
+  /// 绘制线图的默认线宽
+  double paintLineStrokeDefaultWidth = 1.0;
+
+  /// 指标图 bar 配置
+  Paint get defLongBarPaint => Paint()
     ..color = longColor
     ..style = PaintingStyle.stroke
     ..strokeWidth = candleWidth;
-  Paint get volBarShortPaint => Paint()
+  Paint get defShortBarPaint => Paint()
     ..color = shortColor
     ..style = PaintingStyle.stroke
     ..strokeWidth = candleWidth;
-  // Volume Bar Y轴刻度数量
-
-  /// Volume Tooltip 区域配置
-  double volTipFontSize = 10;
-  Color volTipColor = Colors.black;
-  TextStyle get volTipStyle => TextStyle(
-        fontSize: volTipFontSize,
-        color: volTipColor,
-        overflow: TextOverflow.ellipsis,
-        height: 1,
-      );
-  EdgeInsets volTipsRectPadding = const EdgeInsets.only(
-    left: 8,
-  );
-
-  /// MA 指标配置
-  double maLineStrokeWidth = 1.0; // MA线宽
-  double maTipsFontSize = 10;
-  EdgeInsets maTipsRectPadding = const EdgeInsets.only(
-    left: 8,
-  );
-
-  /// MACD 指标配置
-  Paint get macdBarLongPaint => Paint()
-    ..color = longColor
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = candleWidth;
-  Paint get macdBarShortPaint => Paint()
-    ..color = shortColor
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = candleWidth;
-  Paint get macdBarLongHollowPaint => Paint()
+  Paint get defLongHollowBarPaint => Paint()
     ..color = longColor
     ..style = PaintingStyle.stroke
     ..strokeWidth = 1;
-  Paint get macdBarShortHollowPaint => Paint()
+  Paint get defShortHollowBarPaint => Paint()
     ..color = shortColor
     ..style = PaintingStyle.stroke
     ..strokeWidth = 1;
