@@ -121,9 +121,6 @@ mixin StateProxyMixin on PaintObject {
 
   KlineData get klineData => state.curKlineData;
 
-  @Deprecated('请使用curKlineData')
-  KlineData get data => state.curKlineData;
-
   double get paintDxOffset => state.paintDxOffset;
 
   double get startCandleDx => state.startCandleDx;
@@ -286,7 +283,11 @@ mixin PaintYAxisTickMixin<T extends SinglePaintObjectIndicator>
     on SinglePaintObjectBox<T> {
   /// 为副区的指标图绘制Y轴上的刻度信息
   @protected
-  void paintSubChartYAxisTick(Canvas canvas, Size size) {
+  void paintYAxisTick(
+    Canvas canvas,
+    Size size, {
+    required int tickCount, // 刻度数量.
+  }) {
     if (minMax.isZero) return;
 
     double yAxisStep = chartRect.height / (setting.subChartYAxisTickCount - 1);
@@ -294,7 +295,7 @@ mixin PaintYAxisTickMixin<T extends SinglePaintObjectIndicator>
     double dy = 0.0;
     double drawTop = chartRect.top;
 
-    for (int i = 0; i < setting.subChartYAxisTickCount; i++) {
+    for (int i = 0; i < tickCount; i++) {
       dy = drawTop + i * yAxisStep;
       final value = dyToValue(dy);
       if (value == null) continue;
@@ -304,15 +305,15 @@ mixin PaintYAxisTickMixin<T extends SinglePaintObjectIndicator>
       canvas.drawText(
         offset: Offset(
           dx,
-          dy - setting.subChartYAxisTickRectHeight,
+          dy - setting.yAxisTickRectHeight,
         ),
         drawDirection: DrawDirection.rtl,
         drawableRect: drawBounding,
         text: text,
-        style: setting.subChartYAxisTickStyle,
+        style: setting.yAxisTickTextStyle,
         // textWidth: tickTextWidth,
         textAlign: TextAlign.end,
-        padding: setting.subChartYAxisTickRectPadding,
+        padding: setting.yAxisTickRectPadding,
         maxLines: 1,
       );
     }
@@ -321,6 +322,46 @@ mixin PaintYAxisTickMixin<T extends SinglePaintObjectIndicator>
   /// 如果要定制格式化刻度值. 在PaintObject中覆写此方法.
   @protected
   String fromatYAxisTickValue(Decimal value) {
+    return formatNumber(
+      value,
+      precision: 2,
+      defIfZero: '0.00',
+      showCompact: true,
+    );
+  }
+}
+
+mixin PaintYAxisMarkOnCrossMixin<T extends SinglePaintObjectIndicator>
+    on SinglePaintObjectBox<T> {
+  /// onCross时, 绘制Y轴上的标记值
+  @protected
+  void paintYAxisMarkOnCross(Canvas canvas, Offset offset) {
+    final value = dyToValue(offset.dy);
+    if (value == null) return;
+
+    final text = formatYAxisMarkValueOnCross(value);
+
+    canvas.drawText(
+      offset: Offset(
+        chartRect.right - setting.crossYTickRectRigthMargin,
+        offset.dy - setting.crossYTickRectHeight / 2,
+      ),
+      drawDirection: DrawDirection.rtl,
+      drawableRect: drawBounding,
+      text: text,
+      style: setting.crossYTickTextStyle,
+      textAlign: TextAlign.end,
+      textWidthBasis: TextWidthBasis.longestLine,
+      padding: setting.crossYTickRectPadding,
+      backgroundColor: setting.crossYTickRectBackgroundColor,
+      radius: setting.crossYTickRectBorderRadius,
+      borderWidth: setting.crossYTickRectBorderWidth,
+      borderColor: setting.crossYTickRectBorderColor,
+    );
+  }
+
+  @protected
+  String formatYAxisMarkValueOnCross(Decimal value) {
     return formatNumber(
       value,
       precision: 2,

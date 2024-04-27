@@ -27,7 +27,11 @@ class VolumeIndicator extends SinglePaintObjectIndicator {
     required super.height,
     super.tipsHeight,
     super.padding,
+    this.tickCount,
   });
+
+  /// 绘制相关参数
+  final int? tickCount;
 
   @override
   VolumePaintObject createPaintObject(KlineBindingBase controller) =>
@@ -38,7 +42,7 @@ class VolumeIndicator extends SinglePaintObjectIndicator {
 }
 
 class VolumePaintObject extends SinglePaintObjectBox<VolumeIndicator>
-    with PaintYAxisTickMixin {
+    with PaintYAxisTickMixin, PaintYAxisMarkOnCrossMixin {
   VolumePaintObject({
     required super.controller,
     required super.indicator,
@@ -62,7 +66,11 @@ class VolumePaintObject extends SinglePaintObjectBox<VolumeIndicator>
   @override
   void paintChart(Canvas canvas, Size size) {
     /// 绘制Y轴刻度值
-    paintSubChartYAxisTick(canvas, size);
+    paintYAxisTick(
+      canvas,
+      size,
+      tickCount: indicator.tickCount ?? setting.subChartYAxisTickCount,
+    );
 
     /// 绘制Volume柱状图
     paintIndicatorChart(canvas, size);
@@ -70,8 +78,8 @@ class VolumePaintObject extends SinglePaintObjectBox<VolumeIndicator>
 
   @override
   void onCross(Canvas canvas, Offset offset) {
-    /// 绘制Cross命中的Y轴刻度值
-    _paintCrossYAxisVolumeMark(canvas, offset);
+    /// onCross时, 绘制Y轴上的标记值
+    paintYAxisMarkOnCross(canvas, offset);
   }
 
   /// 绘制Volume柱状图
@@ -95,74 +103,6 @@ class VolumePaintObject extends SinglePaintObjectBox<VolumeIndicator>
         isLong ? setting.volBarLongPaint : setting.volBarShortPaint,
       );
     }
-  }
-
-  // /// 绘制Y轴刻度值
-  // void paintYAxisTick(Canvas canvas, Size size) {
-  //   double yAxisStep = chartRect.height / (setting.subChartYAxisTickCount - 1);
-  //   final dx = chartRect.right;
-  //   double dy = 0.0;
-  //   double drawTop = chartRect.top;
-
-  //   for (int i = 0; i < setting.subChartYAxisTickCount; i++) {
-  //     dy = drawTop + i * yAxisStep;
-  //     final vol = dyToValue(dy);
-  //     if (vol == null) continue;
-
-  //     final text = formatNumber(
-  //       vol,
-  //       precision: 2,
-  //       defIfZero: '0.00',
-  //       showCompact: true,
-  //     );
-
-  //     canvas.drawText(
-  //       offset: Offset(
-  //         dx,
-  //         dy - setting.subChartYAxisTickRectHeight,
-  //       ),
-  //       drawDirection: DrawDirection.rtl,
-  //       drawableRect: drawBounding,
-  //       text: text,
-  //       style: setting.subChartYAxisTickStyle,
-  //       // textWidth: tickTextWidth,
-  //       textAlign: TextAlign.end,
-  //       padding: setting.subChartYAxisTickRectPadding,
-  //       maxLines: 1,
-  //     );
-  //   }
-  // }
-
-  /// 绘制Cross命中的Y轴刻度值
-  void _paintCrossYAxisVolumeMark(Canvas canvas, Offset offset) {
-    final volume = dyToValue(offset.dy);
-    if (volume == null) return;
-
-    final text = formatNumber(
-      volume,
-      precision: 2,
-      // cutInvalidZero: true,
-      defIfZero: '0.00',
-      showCompact: true,
-    );
-
-    canvas.drawText(
-      offset: Offset(
-        chartRect.right - setting.crossYTickRectRigthMargin,
-        offset.dy - setting.crossYTickRectHeight / 2,
-      ),
-      drawDirection: DrawDirection.rtl,
-      drawableRect: drawBounding,
-      text: text,
-      style: setting.crossYTickTextStyle,
-      textAlign: TextAlign.end,
-      textWidthBasis: TextWidthBasis.longestLine,
-      padding: setting.crossYTickRectPadding,
-      backgroundColor: setting.crossYTickRectBackgroundColor,
-      radius: setting.crossYTickRectBorderRadius,
-      borderWidth: setting.crossYTickRectBorderWidth,
-      borderColor: setting.crossYTickRectBorderColor,
-    );
   }
 
   /// 绘制tips区域信息

@@ -37,7 +37,7 @@ class _KOKlinePageState extends ConsumerState<KOKlinePage> {
   CandleReq req = CandleReq(
     instId: 'BTC-USDT',
     bar: TimeBar.m15.bar,
-    precision: 4,
+    precision: 2,
     limit: 300,
   );
 

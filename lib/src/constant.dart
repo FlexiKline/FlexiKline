@@ -19,10 +19,8 @@ const int defaultPrecision = 6;
 
 const int defaultScaleOnInfinitePrecision = 18;
 const double defaultSubIndicatorHeight = 60;
-const double defaultSubIndicatorTipsHeight = 15;
-const EdgeInsets defaultSubIndicatorPadding = EdgeInsets.only(
-  left: 8,
-);
+const double defaultIndicatorTipsHeight = 15;
+const EdgeInsets defaultIndicatorPadding = EdgeInsets.zero;
 
 /// 时间粒度，默认值1m
 /// 如 [1m/3m/5m/15m/30m/1H/2H/4H]

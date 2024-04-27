@@ -67,8 +67,8 @@ abstract class BaseData with KlineLog {
   CandleModel? get latest => list.firstOrNull;
 
   /// 获取index位置的蜡烛数据.
-  CandleModel? getCandle(int index) {
-    if (index >= 0 && index < list.length) {
+  CandleModel? getCandle(int? index) {
+    if (index != null && index >= 0 && index < list.length) {
       return list[index];
     }
     return null;

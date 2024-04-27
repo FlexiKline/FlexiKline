@@ -74,17 +74,11 @@ class EMAPaintObject extends SinglePaintObjectBox<EMAIndicator> {
   @override
   void paintChart(Canvas canvas, Size size) {
     paintEMALine(canvas, size);
-
-    // if (!cross.isCrossing) {
-    //   paintTips(canvas, model: state.curKlineData.latest);
-    // }
   }
 
   @override
   void onCross(Canvas canvas, Offset offset) {
     if (indicator.tipsHeight <= 0) return;
-
-    // paintTips(canvas, offset: offset);
   }
 
   /// 绘制EMA线
@@ -133,6 +127,7 @@ class EMAPaintObject extends SinglePaintObjectBox<EMAIndicator> {
   /// EMA 绘制tips区域
   @override
   Size? paintTips(Canvas canvas, {CandleModel? model, Offset? offset}) {
+    if (indicator.tipsHeight <= 0) return null;
     model ??= offsetToCandle(offset);
     if (model == null) return null;
 
@@ -155,9 +150,9 @@ class EMAPaintObject extends SinglePaintObjectBox<EMAIndicator> {
         children.add(TextSpan(
           text: text,
           style: TextStyle(
-            fontSize: setting.maTipsFontSize,
+            fontSize: setting.tipsDefaultTextSize,
             color: param.color,
-            height: drawRect.height / setting.maTipsFontSize,
+            height: setting.tipsDefaultTextHeight,
             // height: 1.2,
           ),
         ));

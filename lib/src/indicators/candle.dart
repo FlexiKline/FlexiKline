@@ -39,7 +39,8 @@ class CandleIndicator extends SinglePaintObjectIndicator {
   }
 }
 
-class CandlePaintObject extends SinglePaintObjectBox<CandleIndicator> {
+class CandlePaintObject extends SinglePaintObjectBox<CandleIndicator>
+    with PaintYAxisMarkOnCrossMixin {
   CandlePaintObject({
     required super.controller,
     required super.indicator,
@@ -72,7 +73,7 @@ class CandlePaintObject extends SinglePaintObjectBox<CandleIndicator> {
     // paintXAxisTimeTick(canvas);
 
     /// 绘制Y轴价钱刻度数据
-    paintAxisTickMark(canvas, size);
+    paintYAxisPriceTick(canvas, size);
 
     /// 绘制最新价刻度线与价钱标记
     paintLastPriceMark(canvas, size);
@@ -81,17 +82,26 @@ class CandlePaintObject extends SinglePaintObjectBox<CandleIndicator> {
   @override
   void onCross(Canvas canvas, Offset offset) {
     /// 绘制Cross Y轴价钱刻度
-    paintCrossYAxisPriceMark(canvas, offset);
+    paintYAxisMarkOnCross(canvas, offset);
 
-    if (setting.showCrossXAxisTickMark) {
-      /// 绘制Cross X轴时间刻度
-      paintCrossXAxisTimeMark(canvas, offset);
-    }
+    /// 绘制Cross X轴时间刻度
+    paintXAxisMarkOnCross(canvas, offset);
 
     if (setting.showPopupCandleCard) {
       /// 绘制Cross 命中的蜡烛数据弹窗
       paintTips(canvas, offset: offset);
     }
+  }
+
+  // onCross时, 格式化Y轴上的标记值.
+  @override
+  String formatYAxisMarkValueOnCross(Decimal value) {
+    return setting.formatPrice(
+      value,
+      instId: klineData.req.instId,
+      precision: klineData.req.precision,
+      cutInvalidZero: false,
+    );
   }
 
   /// 绘制蜡烛图
@@ -241,7 +251,7 @@ class CandlePaintObject extends SinglePaintObjectBox<CandleIndicator> {
     // }
   }
 
-  void paintAxisTickMark(Canvas canvas, Size size) {
+  void paintYAxisPriceTick(Canvas canvas, Size size) {
     final yAxisStep = chartRect.bottom / setting.gridCount;
     final dx = chartRect.right;
     double dy = 0;
@@ -257,14 +267,17 @@ class CandlePaintObject extends SinglePaintObjectBox<CandleIndicator> {
       );
 
       canvas.drawText(
-        offset: Offset(dx, dy - setting.priceTickRectHeight),
+        offset: Offset(
+          dx,
+          dy - setting.yAxisTickRectHeight,
+        ),
         drawDirection: DrawDirection.rtl,
         drawableRect: drawBounding,
         text: text,
-        style: setting.priceTickStyle,
+        style: setting.yAxisTickTextStyle,
         // textWidth: tickTextWidth,
         textAlign: TextAlign.end,
-        padding: setting.priceTickRectPadding,
+        padding: setting.yAxisTickRectPadding,
         maxLines: 1,
       );
     }
@@ -350,41 +363,9 @@ class CandlePaintObject extends SinglePaintObjectBox<CandleIndicator> {
     );
   }
 
-  /// 绘制Cross Y轴价钱刻度
-  @protected
-  void paintCrossYAxisPriceMark(Canvas canvas, Offset offset) {
-    final price = dyToValue(offset.dy);
-    if (price == null) return;
-
-    final text = setting.formatPrice(
-      price,
-      instId: klineData.req.instId,
-      precision: klineData.req.precision,
-      cutInvalidZero: false,
-    );
-    canvas.drawText(
-      offset: Offset(
-        chartRect.right - setting.crossYTickRectRigthMargin,
-        offset.dy - setting.crossYTickRectHeight / 2,
-      ),
-      drawDirection: DrawDirection.rtl,
-      // drawableSize: drawBounding.size,
-      drawableRect: drawBounding,
-      text: text,
-      style: setting.crossYTickTextStyle,
-      textAlign: TextAlign.end,
-      textWidthBasis: TextWidthBasis.longestLine,
-      padding: setting.crossYTickRectPadding,
-      backgroundColor: setting.crossYTickRectBackgroundColor,
-      radius: setting.crossYTickRectBorderRadius,
-      borderWidth: setting.crossYTickRectBorderWidth,
-      borderColor: setting.crossYTickRectBorderColor,
-    );
-  }
-
   /// 绘制Cross X轴时间刻度
   @protected
-  void paintCrossXAxisTimeMark(Canvas canvas, Offset offset) {
+  void paintXAxisMarkOnCross(Canvas canvas, Offset offset) {
     final index = dxToIndex(offset.dx);
     final model = klineData.getCandle(index);
     final timeBar = klineData.timerBar;

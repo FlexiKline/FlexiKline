@@ -50,20 +50,27 @@ class MacdIndicator extends SinglePaintObjectIndicator {
   MacdIndicator({
     super.key = const ValueKey(IndicatorType.macd),
     super.height = defaultSubIndicatorHeight,
-    super.tipsHeight = defaultSubIndicatorTipsHeight,
-    super.padding = defaultSubIndicatorPadding,
+    super.tipsHeight = defaultIndicatorTipsHeight,
+    super.padding = defaultIndicatorPadding,
     this.emaShortCount = 12,
     this.emaLongCount = 26,
     this.macdCount = 9,
     this.difColor = const Color(0xFFDFBF47),
     this.deaColor = const Color(0xFF795583),
+    this.tickCount,
+    this.precision = 2,
   });
 
+  /// Macd相关参数
   final int emaShortCount;
   final int emaLongCount;
   final int macdCount;
   final Color difColor;
   final Color deaColor;
+
+  /// 绘制相关参数
+  final int? tickCount;
+  final int precision;
 
   @override
   SinglePaintObjectBox createPaintObject(KlineBindingBase controller) {
@@ -72,7 +79,7 @@ class MacdIndicator extends SinglePaintObjectIndicator {
 }
 
 class MacdPaintObject extends SinglePaintObjectBox<MacdIndicator>
-    with PaintYAxisTickMixin {
+    with PaintYAxisTickMixin, PaintYAxisMarkOnCrossMixin {
   MacdPaintObject({required super.controller, required super.indicator});
 
   @override
@@ -93,8 +100,23 @@ class MacdPaintObject extends SinglePaintObjectBox<MacdIndicator>
   @override
   void paintChart(Canvas canvas, Size size) {
     /// 绘制Y轴刻度值
-    paintSubChartYAxisTick(canvas, size);
+    paintYAxisTick(
+      canvas,
+      size,
+      tickCount: indicator.tickCount ?? setting.subChartYAxisTickCount,
+    );
 
+    paintMacdChart(canvas, size);
+  }
+
+  @override
+  void onCross(Canvas canvas, Offset offset) {
+    /// onCross时, 绘制Y轴上的标记值
+    paintYAxisMarkOnCross(canvas, offset);
+  }
+
+  /// 绘制MACD图
+  void paintMacdChart(Canvas canvas, Size size) {
     final data = klineData;
     if (data.isEmpty) return;
     int start = data.start;
@@ -106,7 +128,7 @@ class MacdPaintObject extends SinglePaintObjectBox<MacdIndicator>
     final List<Offset> difPoints = [];
     final List<Offset> deaPoints = [];
     double zeroDy = valueToDy(Decimal.zero);
-    final candleHalf = candleWidthHalf - setting.candleMargin / 2;
+    final candleHalf = candleWidthHalf - setting.candleMargin;
     for (int i = start; i < end; i++) {
       m = data.list[i];
       ret = klineData.getMacdResult(m.timestamp);
@@ -159,10 +181,74 @@ class MacdPaintObject extends SinglePaintObjectBox<MacdIndicator>
   }
 
   @override
-  void onCross(Canvas canvas, Offset offset) {}
-
-  @override
   Size? paintTips(Canvas canvas, {CandleModel? model, Offset? offset}) {
-    return null;
+    if (indicator.tipsHeight <= 0) return null;
+    model ??= offsetToCandle(offset);
+    if (model == null) return null;
+
+    final ret = klineData.getMacdResult(model.timestamp);
+    if (ret == null) return null;
+
+    Rect drawRect = nextTipsRect;
+    final children = <TextSpan>[];
+
+    final difTxt = formatNumber(
+      ret.dif,
+      precision: indicator.precision,
+      cutInvalidZero: true,
+      prefix: 'DIF: ',
+      suffix: ' ',
+    );
+    final deaTxt = formatNumber(
+      ret.dea,
+      precision: indicator.precision,
+      cutInvalidZero: true,
+      prefix: 'DEA: ',
+      suffix: ' ',
+    );
+    final macdTxt = formatNumber(
+      ret.macd,
+      precision: indicator.precision,
+      cutInvalidZero: true,
+      prefix: 'MACD: ',
+      suffix: ' ',
+    );
+
+    children.add(TextSpan(
+      text: difTxt,
+      style: TextStyle(
+        fontSize: setting.tipsDefaultTextSize,
+        color: indicator.difColor,
+        height: setting.tipsDefaultTextHeight,
+      ),
+    ));
+
+    children.add(TextSpan(
+      text: deaTxt,
+      style: TextStyle(
+        fontSize: setting.tipsDefaultTextSize,
+        color: indicator.deaColor,
+        height: setting.tipsDefaultTextHeight,
+      ),
+    ));
+
+    children.add(TextSpan(
+      text: macdTxt,
+      style: TextStyle(
+        fontSize: setting.tipsDefaultTextSize,
+        color: setting.tipsDefaultTextColor,
+        height: setting.tipsDefaultTextHeight,
+      ),
+    ));
+
+    return canvas.drawText(
+      offset: drawRect.topLeft,
+      textSpan: TextSpan(children: children),
+      drawDirection: DrawDirection.ltr,
+      drawableRect: drawRect,
+      textAlign: TextAlign.left,
+      padding: setting.tipsRectDefaultPadding,
+      maxLines: 1,
+    );
   }
 }

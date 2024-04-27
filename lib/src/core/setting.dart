@@ -197,36 +197,46 @@ mixin SettingBinding on KlineBindingBase implements IConfig {
   double firstCandleInitOffset = 80;
 
   /// Grid Axis config
-  // Grid Axis Count
+  // 主图区域grid数量
   int gridCount = 5;
+  // 主图区域grid线的颜色
+  Color gridLineColor = Colors.grey.withOpacity(0.2);
+  // 主图区域grid线的宽度(默认1像素)
+  double? gridLineWidth;
   int get gridXAxisCount => gridCount + 1; // 平分5份: 上下边线都展示
   int get gridYAxisCount => gridCount - 1; // 平分5份: 左右边线不展示
   Paint get gridXAxisLinePaint => Paint()
-    ..color = Colors.grey.withOpacity(0.2)
+    ..color = gridLineColor
     ..style = PaintingStyle.stroke
-    ..strokeWidth = pixel;
+    ..strokeWidth = gridLineWidth ?? pixel;
   Paint get gridYAxisLinePaint => Paint()
-    ..color = Colors.grey.withOpacity(0.2)
+    ..color = gridLineColor
     ..style = PaintingStyle.stroke
-    ..strokeWidth = pixel;
+    ..strokeWidth = gridLineWidth ?? pixel;
 
-  /// Y轴上价钱刻度线配置
-  double priceTickFontSize = 10;
-  EdgeInsets priceTickRectPadding = const EdgeInsets.only(
+  /// Y轴上刻度线配置
+  // Y轴刻度字体大小
+  double yAxisTickTextSize = 10;
+  // Y轴刻度字体颜色
+  Color yAxisTickTextColor = Colors.black;
+  // Y轴刻度字体高度
+  double yAxisTickTextHeight = 1;
+  // Y轴刻度字体样式
+  TextStyle get yAxisTickTextStyle => TextStyle(
+        fontSize: yAxisTickTextSize,
+        color: yAxisTickTextColor,
+        overflow: TextOverflow.ellipsis,
+        height: yAxisTickTextHeight,
+      );
+  // Y轴刻度区域padding
+  EdgeInsets yAxisTickRectPadding = const EdgeInsets.only(
     right: 2,
   );
-  Color priceTickColor = Colors.black;
-  double get priceTickRectHeight {
-    final textHeight = priceTickFontSize * (priceTickStyle.height ?? 1);
-    return textHeight + priceTickRectPadding.vertical;
+  // Y轴刻度区域总高度(加上yAxisTickRectPadding)
+  double get yAxisTickRectHeight {
+    final textHeight = yAxisTickTextSize * (yAxisTickTextStyle.height ?? 1);
+    return textHeight + yAxisTickRectPadding.vertical;
   }
-
-  TextStyle get priceTickStyle => TextStyle(
-        fontSize: priceTickFontSize,
-        color: priceTickColor,
-        overflow: TextOverflow.ellipsis,
-        height: 1,
-      );
 
   /// X轴上时间刻度线配置
   double timeTickFontSize = 10;
@@ -331,7 +341,8 @@ mixin SettingBinding on KlineBindingBase implements IConfig {
         height: 1,
         textBaseline: TextBaseline.alphabetic,
       );
-  // cross Y轴对应刻度文本区域配置
+
+  /// onCross时 Y轴对应刻度文本区域配置
   Color crossYTickRectBackgroundColor = Colors.black;
   double crossYTickRectBorderRadius = 2;
   double crossYTickRectBorderWidth = 0.0;
@@ -348,7 +359,6 @@ mixin SettingBinding on KlineBindingBase implements IConfig {
   }
 
   /// Cross X轴对应刻度文本配置(时间)
-  bool showCrossXAxisTickMark = true;
   double crossXTickFontSize = 10;
   double crossXTickTextWidth = 100; // TODO 暂无用
   Color crossXTickColor = Colors.white;
@@ -389,10 +399,10 @@ mixin SettingBinding on KlineBindingBase implements IConfig {
     vertical: 4,
   );
 
-  double candleCardFontSize = 10;
+  double candleCardTextSize = 10;
   double candleCardTextHeight = 1.5; // 文本跨度的高度，为字体大小的倍数
   TextStyle get candleCardTextStyle => TextStyle(
-        fontSize: candleCardFontSize,
+        fontSize: candleCardTextSize,
         color: Colors.black,
         overflow: TextOverflow.ellipsis,
         height: candleCardTextHeight,
@@ -509,26 +519,17 @@ mixin SettingBinding on KlineBindingBase implements IConfig {
   /// 副区的指标图的右侧刻度值统一配置
   // 右侧刻度数量
   int subChartYAxisTickCount = 3; // 高中低=>top, middle, bottom
-  // 刻度字体大小
-  double subChartYAxisTickFontSize = 10;
-  // 刻度字体颜色
-  Color subChartYAxisTickColor = Colors.black;
 
-  TextStyle get subChartYAxisTickStyle => TextStyle(
-        fontSize: subChartYAxisTickFontSize,
-        color: subChartYAxisTickColor,
-        overflow: TextOverflow.ellipsis,
-        height: 1,
-      );
-  EdgeInsets subChartYAxisTickRectPadding = const EdgeInsets.only(
-    right: 2,
+  /// Tips文本区域默认配置
+  // tips默认字体大小
+  double tipsDefaultTextSize = 10;
+  // tips默认字体高度
+  double tipsDefaultTextHeight = 1.5;
+  // tips默认字体颜色
+  Color tipsDefaultTextColor = Colors.black;
+  EdgeInsets tipsRectDefaultPadding = const EdgeInsets.only(
+    left: 8,
   );
-
-  double get subChartYAxisTickRectHeight {
-    final textHeight =
-        subChartYAxisTickFontSize * (subChartYAxisTickStyle.height ?? 1);
-    return textHeight + subChartYAxisTickRectPadding.vertical;
-  }
 
   /// Volume Bar
   Paint get volBarLongPaint => Paint()

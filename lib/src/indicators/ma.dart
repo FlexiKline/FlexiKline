@@ -122,6 +122,7 @@ class MAPaintObject extends SinglePaintObjectBox<MAIndicator> {
   /// MA 绘制tips区域
   @override
   Size? paintTips(Canvas canvas, {CandleModel? model, Offset? offset}) {
+    if (indicator.tipsHeight <= 0) return null;
     model ??= offsetToCandle(offset);
     if (model == null) return null;
 
