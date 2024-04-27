@@ -139,6 +139,10 @@ mixin SettingBinding on KlineBindingBase implements IConfig {
   /// 绘制区域最少留白宽度.
   double get minPaintBlankWidth => mainDrawWidth * minPaintBlankRate;
 
+  /// 如果足够总是计算一屏的蜡烛.
+  /// 当滑动或初始化时会存在(minPaintBlankRate)的空白, 此时, 计算按一屏的蜡烛数量向后计算.
+  bool alwaysCalculateScreenOfCandlesIfEnough = false;
+
   // Gesture Pan
   // 平移结束后, candle惯性平移, 持续的最长时间.
   int panMaxDurationWhenPanEnd = 1000;

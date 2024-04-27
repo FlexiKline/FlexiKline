@@ -163,11 +163,15 @@ mixin StateBinding
         maxCount,
       );
     } else {
-      // 1: 当前[start, end]不足一屏蜡烛时, 向后取一屏蜡烛数据来计算最大最小
-      // final maxCount = maxCandleCount;
-      // 2: 取当前可见蜡烛来计算最大最小. 四舍五入
-      final offsetIndex = (paintDxOffset.abs() / candleActualWidth).round();
-      final maxCount = maxCandleCount - offsetIndex;
+      int maxCount;
+      if (alwaysCalculateScreenOfCandlesIfEnough) {
+        // 1: 当前[start, end]不足一屏蜡烛时, 向后取一屏蜡烛数据来计算最大最小
+        maxCount = maxCandleCount;
+      } else {
+        // 2: 取当前可见蜡烛来计算最大最小. 四舍五入
+        final offsetIndex = (paintDxOffset.abs() / candleActualWidth).round();
+        maxCount = maxCandleCount - offsetIndex;
+      }
       curKlineData.ensureStartAndEndIndex(
         0,
         maxCount,
