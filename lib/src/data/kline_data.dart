@@ -15,6 +15,7 @@
 import '../constant.dart';
 import '../model/export.dart';
 import 'base_data.dart';
+import 'boll_data.dart';
 import 'candle_data.dart';
 import 'ema_data.dart';
 import 'kdj_data.dart';
@@ -23,7 +24,7 @@ import 'macd_data.dart';
 import 'mavol_data.dart';
 
 class KlineData extends BaseData
-    with CandleData, MAData, MAVOLData, EMAData, MACDData, KDJData {
+    with CandleData, MAData, MAVOLData, EMAData, MACDData, KDJData, BOLLData {
   KlineData(
     super.req, {
     super.list,

@@ -14,6 +14,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../constant.dart';
 import '../core/export.dart';
 import '../data/export.dart';
 import '../extension/export.dart';
@@ -26,9 +27,12 @@ class MAIndicator extends SinglePaintObjectIndicator {
   MAIndicator({
     super.key = const ValueKey(IndicatorType.ma),
     required super.height,
-    super.tipsHeight,
+    super.tipsHeight = defaultIndicatorTipsHeight,
     super.padding,
-    required this.calcParams,
+    this.calcParams = const [
+      MaParam(label: 'MA7', count: 7, color: Color(0xFF946F9A)),
+      MaParam(label: 'MA30', count: 30, color: Color(0xFFF1BF32))
+    ],
   });
 
   final List<MaParam> calcParams;
@@ -55,7 +59,6 @@ class MAPaintObject extends SinglePaintObjectBox<MAIndicator> {
     MinMax? minMax;
     for (var param in indicator.calcParams) {
       final ret = klineData.calculateAndCacheMA(
-        list,
         param.count,
         start: start,
         end: end,
@@ -73,7 +76,7 @@ class MAPaintObject extends SinglePaintObjectBox<MAIndicator> {
 
   @override
   void onCross(Canvas canvas, Offset offset) {
-    // if (indicator.tipsHeight <= 0) return;
+    ///
   }
 
   /// 绘制MA指标线
@@ -99,8 +102,8 @@ class MAPaintObject extends SinglePaintObjectBox<MAIndicator> {
         m = data.list[i];
         final dx = offset - (i - start) * candleActualWidth;
         MAResult? maRet = countMaMap[m.timestamp];
-        maRet ??= klineData.calculateMA(data.list, i, param.count);
-        // if (maData == null) continue;
+        maRet ??= klineData.calculateMA(i, param.count);
+        if (maRet == null) continue;
         final dy = valueToDy(maRet.val, correct: false);
         points.add(Offset(dx, dy));
       }

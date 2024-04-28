@@ -80,6 +80,10 @@ mixin ChartBinding
   @override
   void paintChart(Canvas canvas, Size size) {
     // logd('$diffTime paintChart >>>>');
+    if (!curKlineData.canPaintChart) {
+      logd('chartBinding paintChart data is being prepared!');
+      return;
+    }
 
     /// 检查主图和副图的PaintObject是否都创建了.
     ensurePaintObjectInstance();

@@ -54,6 +54,9 @@ mixin StateBinding
     cancelCross();
   }
 
+  @override
+  bool get canPaintChart => curKlineData.canPaintChart;
+
   /// 数据缓存Key
   String get curDataKey => curKlineData.key;
 

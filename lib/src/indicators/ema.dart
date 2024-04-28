@@ -14,6 +14,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../constant.dart';
 import '../core/export.dart';
 import '../data/export.dart';
 import '../extension/export.dart';
@@ -31,9 +32,14 @@ class EMAIndicator extends SinglePaintObjectIndicator {
   EMAIndicator({
     super.key = const ValueKey(IndicatorType.ema),
     required super.height,
-    super.tipsHeight,
+    super.tipsHeight = defaultIndicatorTipsHeight,
     super.padding,
-    required this.calcParams,
+    this.calcParams = const [
+      EMAParam(label: 'EMA5', count: 5, color: Color(0xFF806180)),
+      EMAParam(label: 'EMA10', count: 10, color: Color(0xFFEBB736)),
+      EMAParam(label: 'EMA20', count: 20, color: Color(0xFFD672D5)),
+      EMAParam(label: 'EMA60', count: 60, color: Color(0xFF788FD5))
+    ],
   });
 
   final List<EMAParam> calcParams;
@@ -78,7 +84,7 @@ class EMAPaintObject extends SinglePaintObjectBox<EMAIndicator> {
 
   @override
   void onCross(Canvas canvas, Offset offset) {
-    if (indicator.tipsHeight <= 0) return;
+    ///
   }
 
   /// 绘制EMA线

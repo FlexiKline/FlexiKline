@@ -16,10 +16,11 @@ import 'package:flutter/material.dart';
 
 enum IndicatorType {
   candle,
-  volume,
   ma,
-  maVol,
   ema,
+  boll,
+  maVol,
+  volume,
   macd,
   kdj,
 }
@@ -29,7 +30,11 @@ class MaParam {
   final int count;
   final Color color;
 
-  MaParam({required this.label, required this.count, required this.color});
+  const MaParam({
+    required this.label,
+    required this.count,
+    required this.color,
+  });
 }
 
 class EMAParam {
@@ -37,5 +42,9 @@ class EMAParam {
   final int count;
   final Color color;
 
-  EMAParam({required this.label, required this.count, required this.color});
+  const EMAParam({
+    required this.label,
+    required this.count,
+    required this.color,
+  });
 }

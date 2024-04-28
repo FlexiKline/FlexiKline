@@ -63,20 +63,14 @@ mixin ConfigBinding on KlineBindingBase, SettingBinding implements IConfig {
 
     addIndicatorInMain(MAIndicator(
       height: mainRect.height,
-      calcParams: [
-        MaParam(label: 'MA7', count: 7, color: Colors.red),
-        MaParam(label: 'MA30', count: 30, color: Colors.blue)
-      ],
     ));
 
     addIndicatorInMain(EMAIndicator(
       height: mainRect.height,
-      calcParams: [
-        EMAParam(label: 'EMA5', count: 5, color: const Color(0xFF806180)),
-        EMAParam(label: 'EMA10', count: 10, color: const Color(0xFFEBB736)),
-        EMAParam(label: 'EMA20', count: 20, color: const Color(0xFFD672D5)),
-        EMAParam(label: 'EMA60', count: 60, color: const Color(0xFF7F93DE))
-      ],
+    ));
+
+    addIndicatorInMain(BOLLIndicator(
+      height: mainRect.height,
     ));
 
     _subIndicators = ListQueue<Indicator>(

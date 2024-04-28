@@ -102,6 +102,25 @@ class KDJReset extends BaseResult {
   }
 }
 
+class BOLLResult extends BaseResult {
+  final Decimal mb;
+  final Decimal up;
+  final Decimal dn;
+
+  BOLLResult({
+    required super.ts,
+    super.dirty = false,
+    required this.mb,
+    required this.up,
+    required this.dn,
+  });
+
+  @override
+  String toString() {
+    return 'BOLLResult(ts:$ts, mb:${mb.str}, up:${up.str}, dn:${dn.str})';
+  }
+}
+
 class MinMax {
   MinMax({required this.max, required this.min});
   Decimal max;

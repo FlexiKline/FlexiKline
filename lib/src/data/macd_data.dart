@@ -126,10 +126,10 @@ mixin MACDData on BaseData {
           minmax ??= ret.minmax;
           minmax.updateMinMax(ret.minmax);
           _macdResultMap[model.timestamp] = ret;
-          logi(
-            'calculateAndCacheMACD emaShort:${emaShort.str}, emaLong:${emaLong.str} macd:$ret',
-          );
-          logi('calculateAndCacheMACD minmax:$minmax');
+          // logi(
+          //   'calculateAndCacheMACD emaShort:${emaShort.str}, emaLong:${emaLong.str} macd:$ret',
+          // );
+          // logi('calculateAndCacheMACD minmax:$minmax');
         }
       }
     }

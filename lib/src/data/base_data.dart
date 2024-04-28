@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'dart:math' as math;
+import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/foundation.dart';
 
 import '../model/export.dart';
@@ -59,6 +60,10 @@ abstract class BaseData with KlineLog {
   List<CandleModel> get list => _list;
 
   bool get isEmpty => list.isEmpty;
+
+  bool get canPaintChart {
+    return !isEmpty && list.checkIndex(start); // TODO && list.checkIndex(end);
+  }
 
   CandleModel? get latest => list.firstOrNull;
 

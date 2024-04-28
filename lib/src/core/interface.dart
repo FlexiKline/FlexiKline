@@ -81,6 +81,8 @@ abstract interface class IState {
 
   KlineData get curKlineData;
 
+  bool get canPaintChart;
+
   /// 蜡烛总数
   int get totalCandleCount;
 

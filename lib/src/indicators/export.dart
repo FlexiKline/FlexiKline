@@ -20,3 +20,4 @@ export 'ma_vol.dart';
 export 'ema.dart';
 export 'macd.dart';
 export 'kdj.dart';
+export 'boll.dart';

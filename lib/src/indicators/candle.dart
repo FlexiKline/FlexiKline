@@ -104,12 +104,13 @@ class CandlePaintObject extends SinglePaintObjectBox<CandleIndicator>
   /// 绘制蜡烛图
   void paintCandleChart(Canvas canvas, Size size) {
     final data = klineData;
-    int start = data.start;
-    int end = data.end;
-    if (data.list.isEmpty || !data.list.checkIndex(start)) {
+    if (!data.canPaintChart) {
       logw('paintCandleChart Data.list is empty or Index is out of bounds');
       return;
     }
+
+    int start = data.start;
+    int end = data.end;
 
     final offset = startCandleDx - candleWidthHalf;
     final bar = data.timerBar;

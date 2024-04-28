@@ -43,43 +43,47 @@ mixin MAData on BaseData {
     return _count2ts2MaMap[count]!;
   }
 
-  MAResult? getMaResult(int? ts, int? count) {
+  MAResult? getMaResult({int? count, int? ts}) {
     if (count != null && ts != null) {
       return _count2ts2MaMap[count]?[ts];
     }
     return null;
   }
 
-  /// 计算从index开始的count个close指标和
-  /// 如果后续数据不够count个, 动态改变count. 最后平均. 所以最后的(count-1)个数据是不准确的.
-  /// 注: 如果有旧数据加入, 需要重新计算最后的MA指标数据.
-  MAResult calculateMA(
-    List<CandleModel> list,
+  /// 计算从index(包含index)开始的count个收盘价的平均数
+  /// 注: 如果index开始后不足count, 不矛计算, 返回空.
+  MAResult? calculateMA(
     int index,
     int count,
   ) {
-    final dataLen = list.length;
-    assert(
-      index >= 0 && index < dataLen,
-      'calculateMa index is invalid',
-    );
-    count = math.min(count, dataLen - index);
-    Decimal sum = Decimal.zero;
-    CandleModel m = list[index];
-    for (int i = index; i < index + count; i++) {
+    if (list.isEmpty) return null;
+    int len = list.length;
+    if (count <= 0 || index < 0 || index + count > len) return null;
+
+    final m = list[index];
+
+    final ret = getMaResult(count: count, ts: m.timestamp);
+    if (ret != null && !ret.dirty) {
+      return ret;
+    }
+
+    Decimal sum = m.close;
+    for (int i = index + 1; i < index + count; i++) {
       sum += list[i].close;
     }
+
     return MAResult(
       count: count,
       ts: m.timestamp,
       val: sum.div(count.d),
+      dirty: index == 0, // 如果是第一根蜡烛的数据.下次需要重新计算.
     );
   }
 
   /// 计算并缓存MA数据.
   /// 如果start和end指定了, 只计算[start, end]区间内.
+  /// 否则, 从当前绘制的[start, end]开始计算.
   MinMax? calculateAndCacheMA(
-    List<CandleModel> list,
     int count, {
     int? start,
     int? end,
@@ -87,49 +91,85 @@ mixin MAData on BaseData {
   }) {
     if (list.isEmpty) return null;
     int len = list.length;
-    if (len < count) return null;
-
-    bool needReturn = start != null && end != null && start >= 0 && end < len;
-    start ??= 0;
-    end ??= len;
-    if (start < 0 || end > len) return null;
+    start ??= this.start;
+    end ??= this.end;
+    if (len < count || start < 0 || end > len) return null;
 
     Map<int, MAResult> maMap = getCountMaMap(count);
 
-    if (maMap.isNotEmpty) {
-      if (reset ||
-          maMap.getItem(list.getItem(start)?.timestamp) == null ||
-          maMap.getItem(list.getItem(end)?.timestamp) == null) {
-        logd(
-          'calculateAndCacheMA reset:$reset >>> maMapLen:${maMap.length}, listLen$len : [$start, $end]',
-        );
-        // countMaMap.clear(); // 清理旧数据. TODO: 如何清理dirty数据
-      } else {
-        logd('calculateAndCacheMA use cache!!! [$start, $end]');
-        if (start == 0) {
-          //如果start是0, 有可能更新了最新价, 重新计算
-          maMap[list.first.timestamp] = calculateMA(list, 0, count);
-        }
-      }
+    if (reset) {
+      maMap.clear();
     }
 
-    int index = end; // 多算一个
-    CandleModel m = list[index];
-    MAResult pre = maMap[m.timestamp] ?? calculateMA(list, index, count);
-    maMap[m.timestamp] = pre;
-    final minmax = MinMax(max: pre.val, min: pre.val);
-    for (int i = index - 1; i >= start; i--) {
+    // 计算从end到len之间count的偏移量
+    int offset = math.max(end + count - len, 0);
+    int index = end - offset;
+    CandleModel m;
+    MAResult? preRet = maMap.getItem(list.getItem(index + 1)?.timestamp);
+    MAResult? curRet;
+    MinMax? minmax;
+    Decimal cD = Decimal.fromInt(count);
+    for (int i = index; i >= start; i--) {
       m = list[i];
-      MAResult? data = maMap[m.timestamp];
-      if (data == null) {
-        // TODO: 优化: 利用pre去计算.
-        // val = pre * math.
+      curRet = maMap[m.timestamp];
+      if (curRet == null || curRet.dirty) {
+        // 没有缓存或无效, 计算MA
+        if (preRet != null && i + count < len) {
+          // 用上一次结果进行换算当前结果
+          curRet = MAResult(
+            count: count,
+            ts: m.timestamp,
+            val: ((preRet.val * cD) - list[i + count].close + m.close).div(cD),
+          );
+        } else {
+          curRet = calculateMA(index, count);
+        }
       }
-      data ??= calculateMA(list, i, count);
-      if (needReturn) minmax.updateMinMaxByVal(data.val);
-      pre = data;
-      maMap[m.timestamp] = data;
+
+      if (curRet != null) {
+        maMap[m.timestamp] = curRet;
+        minmax ??= MinMax(max: curRet.val, min: curRet.val);
+        minmax.updateMinMaxByVal(curRet.val);
+      }
+      preRet = curRet;
     }
-    return needReturn ? minmax : null;
+
+    return minmax;
+
+    // if (maMap.isNotEmpty) {
+    //   if (reset ||
+    //       maMap.getItem(list.getItem(start)?.timestamp) == null ||
+    //       maMap.getItem(list.getItem(end)?.timestamp) == null) {
+    //     logd(
+    //       'calculateAndCacheMA reset:$reset >>> maMapLen:${maMap.length}, listLen$len : [$start, $end]',
+    //     );
+    //     // countMaMap.clear(); // 清理旧数据. TODO: 如何清理dirty数据
+    //   } else {
+    //     logd('calculateAndCacheMA use cache!!! [$start, $end]');
+    //     if (start == 0) {
+    //       //如果start是0, 有可能更新了最新价, 重新计算
+    //       maMap[list.first.timestamp] = calculateMA(list, 0, count);
+    //     }
+    //   }
+    // }
+
+    // int index = end; // 多算一个
+    // CandleModel m = list[index];
+    // MAResult pre = maMap[m.timestamp] ?? calculateMA(list, index, count);
+    // maMap[m.timestamp] = pre;
+    // final minmax = MinMax(max: pre.val, min: pre.val);
+    // for (int i = index - 1; i >= start; i--) {
+    //   m = list[i];
+    //   MAResult? data = maMap[m.timestamp];
+    //   if (data == null) {
+    //     // TODO: 优化: 利用pre去计算.
+    //     // val = pre * math.
+    //   }
+    //   data ??= calculateMA(list, i, count);
+    //   if (needReturn) minmax.updateMinMaxByVal(data.val);
+    //   pre = data;
+    //   maMap[m.timestamp] = data;
+    // }
+    // return needReturn ? minmax : null;
   }
 }
