@@ -15,11 +15,10 @@
 import 'dart:math' as math;
 import 'package:decimal/decimal.dart';
 
-import '../constant.dart';
 import '../extension/export.dart';
 import '../model/export.dart';
 import 'base_data.dart';
-import 'common.dart';
+import 'results.dart';
 
 mixin MAData on BaseData {
   @override
@@ -37,14 +36,14 @@ mixin MAData on BaseData {
   }
 
   /// MA数据缓存 <count, <timestamp, Decimal>>
-  final Map<int, Map<int, CalcuData>> _count2ts2MaMap = {};
+  final Map<int, Map<int, MAResult>> _count2ts2MaMap = {};
 
-  Map<int, CalcuData> getCountMaMap(int count) {
+  Map<int, MAResult> getCountMaMap(int count) {
     _count2ts2MaMap[count] ??= {};
     return _count2ts2MaMap[count]!;
   }
 
-  CalcuData? getMaData(int? ts, int? count) {
+  MAResult? getMaResult(int? ts, int? count) {
     if (count != null && ts != null) {
       return _count2ts2MaMap[count]?[ts];
     }
@@ -54,7 +53,7 @@ mixin MAData on BaseData {
   /// 计算从index开始的count个close指标和
   /// 如果后续数据不够count个, 动态改变count. 最后平均. 所以最后的(count-1)个数据是不准确的.
   /// 注: 如果有旧数据加入, 需要重新计算最后的MA指标数据.
-  CalcuData calculateMA(
+  MAResult calculateMA(
     List<CandleModel> list,
     int index,
     int count,
@@ -70,12 +69,10 @@ mixin MAData on BaseData {
     for (int i = index; i < index + count; i++) {
       sum += list[i].close;
     }
-    return CalcuData(
+    return MAResult(
       count: count,
       ts: m.timestamp,
-      val: (sum / count.d).toDecimal(
-        scaleOnInfinitePrecision: defaultScaleOnInfinitePrecision,
-      ),
+      val: sum.div(count.d),
     );
   }
 
@@ -97,7 +94,7 @@ mixin MAData on BaseData {
     end ??= len;
     if (start < 0 || end > len) return null;
 
-    Map<int, CalcuData> maMap = getCountMaMap(count);
+    Map<int, MAResult> maMap = getCountMaMap(count);
 
     if (maMap.isNotEmpty) {
       if (reset ||
@@ -118,12 +115,12 @@ mixin MAData on BaseData {
 
     int index = end; // 多算一个
     CandleModel m = list[index];
-    CalcuData pre = maMap[m.timestamp] ?? calculateMA(list, index, count);
+    MAResult pre = maMap[m.timestamp] ?? calculateMA(list, index, count);
     maMap[m.timestamp] = pre;
     final minmax = MinMax(max: pre.val, min: pre.val);
     for (int i = index - 1; i >= start; i--) {
       m = list[i];
-      CalcuData? data = maMap[m.timestamp];
+      MAResult? data = maMap[m.timestamp];
       if (data == null) {
         // TODO: 优化: 利用pre去计算.
         // val = pre * math.

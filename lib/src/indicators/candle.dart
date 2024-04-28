@@ -54,11 +54,7 @@ class CandlePaintObject extends SinglePaintObjectBox<CandleIndicator>
     required int start,
     required int end,
   }) {
-    MinMax? minmax = klineData.minmax;
-    if (minmax == null) {
-      minmax = klineData.calculateMaxmin();
-      minmax = klineData.minmax;
-    }
+    MinMax? minmax = klineData.calculateMaxmin();
     _maxHigh = minmax?.max;
     _minLow = minmax?.min;
     return minmax;

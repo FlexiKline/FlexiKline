@@ -15,11 +15,10 @@
 import 'dart:math' as math;
 import 'package:decimal/decimal.dart';
 
-import '../constant.dart';
 import '../extension/export.dart';
 import '../model/export.dart';
 import 'base_data.dart';
-import 'common.dart';
+import 'results.dart';
 
 mixin MAVOLData on BaseData {
   @override
@@ -37,14 +36,14 @@ mixin MAVOLData on BaseData {
   }
 
   /// MAVOL数据缓存 <count, <timestamp, Decimal>>
-  final Map<int, Map<int, CalcuData>> _count2ts2MaVolMap = {};
+  final Map<int, Map<int, MAResult>> _count2ts2MaVolMap = {};
 
-  Map<int, CalcuData> getCountMaVolMap(int count) {
+  Map<int, MAResult> getCountMaVolMap(int count) {
     _count2ts2MaVolMap[count] ??= {};
     return _count2ts2MaVolMap[count]!;
   }
 
-  CalcuData? getMaVolData(int? ts, int? count) {
+  MAResult? getMaVolResult(int? ts, int? count) {
     if (count != null && ts != null) {
       return _count2ts2MaVolMap[count]?[ts];
     }
@@ -54,7 +53,7 @@ mixin MAVOLData on BaseData {
   /// 计算从index开始的count个vol指标和
   /// 如果后续数据不够count个, 动态改变count. 最后平均. 所以最后的(count-1)个数据是不准确的.
   /// 注: 如果有旧数据加入, 需要重新计算最后的MA指标数据.
-  CalcuData calculateMAVol(
+  MAResult calculateMAVol(
     List<CandleModel> list,
     int index,
     int count,
@@ -70,12 +69,10 @@ mixin MAVOLData on BaseData {
     for (int i = index; i < index + count; i++) {
       sum += list[i].vol;
     }
-    return CalcuData(
+    return MAResult(
       count: count,
       ts: m.timestamp,
-      val: (sum / count.d).toDecimal(
-        scaleOnInfinitePrecision: defaultScaleOnInfinitePrecision,
-      ),
+      val: sum.div(count.d),
     );
   }
 
@@ -97,7 +94,7 @@ mixin MAVOLData on BaseData {
     end ??= len;
     if (start < 0 || end > len) return null;
 
-    Map<int, CalcuData> maVolMap = getCountMaVolMap(count);
+    Map<int, MAResult> maVolMap = getCountMaVolMap(count);
 
     if (maVolMap.isNotEmpty) {
       if (reset ||
@@ -118,12 +115,12 @@ mixin MAVOLData on BaseData {
 
     int index = end; // 多算一个
     CandleModel m = list[index];
-    CalcuData pre = maVolMap[m.timestamp] ?? calculateMAVol(list, index, count);
+    MAResult pre = maVolMap[m.timestamp] ?? calculateMAVol(list, index, count);
     maVolMap[m.timestamp] = pre;
     final minmax = MinMax(max: pre.val, min: pre.val);
     for (int i = index - 1; i >= start; i--) {
       m = list[i];
-      CalcuData? data = maVolMap[m.timestamp];
+      MAResult? data = maVolMap[m.timestamp];
       if (data == null) {
         // TODO: 优化: 利用pre去计算.
         // val = pre * math.

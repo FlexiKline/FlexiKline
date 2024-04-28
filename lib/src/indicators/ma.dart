@@ -98,10 +98,10 @@ class MAPaintObject extends SinglePaintObjectBox<MAIndicator> {
       for (int i = start; i < end; i++) {
         m = data.list[i];
         final dx = offset - (i - start) * candleActualWidth;
-        CalcuData? maData = countMaMap[m.timestamp];
-        maData ??= klineData.calculateMA(data.list, i, param.count);
+        MAResult? maRet = countMaMap[m.timestamp];
+        maRet ??= klineData.calculateMA(data.list, i, param.count);
         // if (maData == null) continue;
-        final dy = valueToDy(maData.val, correct: false);
+        final dy = valueToDy(maRet.val, correct: false);
         points.add(Offset(dx, dy));
       }
 

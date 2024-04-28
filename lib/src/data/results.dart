@@ -14,7 +14,6 @@
 
 import 'package:decimal/decimal.dart';
 
-import '../constant.dart';
 import '../extension/export.dart';
 
 /// Base数据
@@ -26,18 +25,21 @@ abstract class BaseResult {
 }
 
 /// MA, WMA, EMA计算结果
-class CalcuData {
+class MAResult extends BaseResult {
   final int count;
-  final int ts;
   final Decimal val;
-  final bool dirty;
 
-  CalcuData({
+  MAResult({
     required this.count,
-    required this.ts,
+    required super.ts,
     required this.val,
-    this.dirty = false,
+    super.dirty = false,
   });
+
+  @override
+  String toString() {
+    return 'MAResult(ts:$ts, count:$count => val:${val.str})';
+  }
 }
 
 /// MACD 计算结果
@@ -72,6 +74,34 @@ class MacdResult extends BaseResult {
   }
 }
 
+/// KDJ指标计算结果
+class KDJReset extends BaseResult {
+  final Decimal k;
+  final Decimal d;
+  final Decimal j;
+
+  KDJReset({
+    required super.ts,
+    super.dirty = true,
+    required this.k,
+    required this.d,
+    required this.j,
+  });
+
+  MinMax get minmax {
+    Decimal max = k > d ? k : d;
+    max = max > j ? max : j;
+    Decimal min = k < d ? k : d;
+    min = min < j ? min : j;
+    return MinMax(max: max, min: min);
+  }
+
+  @override
+  String toString() {
+    return 'KDJResult(ts:$ts, k:${k.str}, d:${d.str}, j:${j.str})';
+  }
+}
+
 class MinMax {
   MinMax({required this.max, required this.min});
   Decimal max;
@@ -96,16 +126,16 @@ class MinMax {
     min = min > Decimal.zero ? Decimal.zero : min;
   }
 
-  Decimal get middle => (size / two).toDecimal(
-        scaleOnInfinitePrecision: defaultScaleOnInfinitePrecision,
-      );
+  Decimal get middle => size.div(two);
 
   Decimal get size => max - min;
+
+  Decimal get divisor => max == min ? Decimal.one : max - min;
 
   bool get isZero => max == Decimal.zero && min == Decimal.zero;
 
   @override
   String toString() {
-    return 'MinMax(max:${max.toStringAsFixed(4)}, min:${min.toStringAsFixed(4)})';
+    return 'MinMax(max:${max.str}, min:${min.str})';
   }
 }

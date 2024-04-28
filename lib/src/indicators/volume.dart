@@ -56,11 +56,7 @@ class VolumePaintObject extends SinglePaintObjectBox<VolumeIndicator>
     required int start,
     required int end,
   }) {
-    MinMax? minmaxVol = klineData.minmaxVol;
-    if (minmaxVol == null) {
-      klineData.calculateMaxmin();
-      minmaxVol = klineData.minmaxVol;
-    }
+    MinMax? minmaxVol = klineData.calculateMaxminVol();
     minmaxVol?.minToZero();
     return minmaxVol;
   }

@@ -119,7 +119,7 @@ mixin CrossBinding
       int i = 0;
       for (var indicator in subIndicators) {
         indicator.paintObject?.bindSolt(i++);
-        indicator.paintObject?.doOnCross(canvas, offset);
+        indicator.paintObject?.doOnCross(canvas, offset, model: model);
       }
     }
   }

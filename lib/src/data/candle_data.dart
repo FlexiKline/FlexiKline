@@ -16,7 +16,7 @@ import 'package:decimal/decimal.dart';
 
 import '../model/export.dart';
 import 'base_data.dart';
-import 'common.dart';
+import 'results.dart';
 
 mixin CandleData on BaseData {
   @override
@@ -31,41 +31,42 @@ mixin CandleData on BaseData {
     logd('dispose CANDLE');
   }
 
-  MinMax? minmax;
-  MinMax? minmaxVol;
-  // CandleModel? startModel;
-  // CandleModel? endModel;
-
-  @override
-  void resetCalcuResult() {
-    super.resetCalcuResult();
-    minmax = null;
-    minmaxVol = null;
-  }
-
   /// 根据[start, end]下标计算最大最小值
-  MinMax? calculateMaxmin() {
-    if (list.isEmpty || start < 0 || end > list.length) return null;
-    CandleModel m = list[start];
+  MinMax? calculateMaxmin({
+    int? start,
+    int? end,
+  }) {
+    int from = start ?? this.start;
+    int to = end ?? this.end;
+    if (list.isEmpty || from < 0 || to > list.length) return null;
+
+    CandleModel m = list[to - 1];
     Decimal maxHigh = m.high;
     Decimal minLow = m.low;
-    Decimal maxVol = m.vol;
-    Decimal minVol = m.vol;
-    for (var i = start + 1; i < end; i++) {
+    for (int i = to - 2; i >= from; i--) {
       m = list[i];
-
-      // if (i == 0) startModel = m;
-      // if (i == end - 1) endModel = m;
-
       maxHigh = m.high > maxHigh ? m.high : maxHigh;
       minLow = m.low < minLow ? m.low : minLow;
+    }
+    return MinMax(max: maxHigh, min: minLow);
+  }
 
+  MinMax? calculateMaxminVol({
+    int? start,
+    int? end,
+  }) {
+    int from = start ?? this.start;
+    int to = end ?? this.end;
+    if (list.isEmpty || from < 0 || to > list.length) return null;
+
+    CandleModel m = list[to - 1];
+    Decimal minVol = m.vol;
+    Decimal maxVol = m.vol;
+    for (int i = to - 2; i >= from; i--) {
+      m = list[i];
       maxVol = m.vol > maxVol ? m.vol : maxVol;
       minVol = m.vol < minVol ? m.vol : minVol;
     }
-
-    minmax = MinMax(max: maxHigh, min: minLow);
-    minmaxVol = MinMax(max: maxVol, min: minVol);
-    return MinMax(max: maxHigh, min: minLow);
+    return MinMax(max: maxVol, min: minVol);
   }
 }

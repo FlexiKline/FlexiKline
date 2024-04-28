@@ -106,6 +106,11 @@ mixin ConfigBinding on KlineBindingBase, SettingBinding implements IConfig {
         )
       ],
     ));
+
+    addIndicatorInSub(KDJIndicator(
+      height: 60,
+      tipsHeight: 12,
+    ));
   }
 
   /// 主绘制区域

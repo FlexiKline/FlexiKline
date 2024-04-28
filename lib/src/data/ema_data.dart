@@ -15,11 +15,10 @@
 import 'dart:math' as math;
 import 'package:decimal/decimal.dart';
 
-import '../constant.dart';
 import '../extension/export.dart';
 import '../model/export.dart';
 import 'base_data.dart';
-import 'common.dart';
+import 'results.dart';
 
 mixin EMAData on BaseData {
   @override
@@ -37,9 +36,9 @@ mixin EMAData on BaseData {
   }
 
   /// EMA数据缓存 <count, <timestamp, val>>
-  final Map<int, Map<int, CalcuData>> _count2ts2dataEmaMap = {};
+  final Map<int, Map<int, MAResult>> _count2ts2dataEmaMap = {};
 
-  Map<int, CalcuData> getCountEmaMap(int count) {
+  Map<int, MAResult> getCountEmaMap(int count) {
     _count2ts2dataEmaMap[count] ??= {};
     return _count2ts2dataEmaMap[count]!;
   }
@@ -56,7 +55,7 @@ mixin EMAData on BaseData {
     return false;
   }
 
-  CalcuData? getEmaData(int? ts, int? count) {
+  MAResult? getEmaResult(int? ts, int? count) {
     if (count != null && ts != null) {
       return _count2ts2dataEmaMap[count]?[ts];
     }
@@ -102,7 +101,7 @@ mixin EMAData on BaseData {
       return null;
     }
     MinMax? minMax;
-    CalcuData? data;
+    MAResult? data;
     for (int i = end - 1; i >= start; i--) {
       data = emaMap[list[i].timestamp];
       if (data != null) {
@@ -143,7 +142,7 @@ mixin EMAData on BaseData {
       clearEmaMap(count);
     }
 
-    Map<int, CalcuData> countEmaMap = getCountEmaMap(count);
+    Map<int, MAResult> countEmaMap = getCountEmaMap(count);
     if (countEmaMap.isNotEmpty) {
       logd('calculateAnCacheEMA immediate use cache!!!');
       if (needReturn) {
@@ -156,7 +155,7 @@ mixin EMAData on BaseData {
     int index = len - count;
     Decimal lastEma = calculateWMA(list, index, count);
     CandleModel m = list[index];
-    countEmaMap[m.timestamp] = CalcuData(
+    countEmaMap[m.timestamp] = MAResult(
       ts: m.timestamp,
       count: count,
       val: lastEma,
@@ -164,9 +163,8 @@ mixin EMAData on BaseData {
     );
     for (int i = index - 1; i >= 0; i--) {
       m = list[i];
-      lastEma = (((two * m.close) + lastEma * (count - 1).d) / (count + 1).d)
-          .toDecimal(scaleOnInfinitePrecision: defaultScaleOnInfinitePrecision);
-      countEmaMap[m.timestamp] = CalcuData(
+      lastEma = ((two * m.close) + lastEma * (count - 1).d).div((count + 1).d);
+      countEmaMap[m.timestamp] = MAResult(
         ts: m.timestamp,
         count: count,
         val: lastEma,

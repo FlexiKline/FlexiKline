@@ -14,6 +14,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../constant.dart';
 import '../core/export.dart';
 import '../data/export.dart';
 import '../extension/export.dart';
@@ -21,13 +22,38 @@ import '../framework/export.dart';
 import '../model/export.dart';
 import '../utils/export.dart';
 
+///
+/// KDJ (9, 3, 3)
+/// 当日K值=2/3×前一日K值+1/3×当日RSV
+/// 当日D值=2/3×前一日D值+1/3×当日K值
+/// 若无前一日K 值与D值，则可分别用50来代替。
+/// J值=3*当日K值-2*当日D值
 class KDJIndicator extends SinglePaintObjectIndicator {
   KDJIndicator({
     super.key = const ValueKey(IndicatorType.kdj),
     required super.height,
-    super.tipsHeight,
+    super.tipsHeight = defaultIndicatorTipsHeight,
     super.padding,
+    this.n = 9,
+    this.m1 = 3,
+    this.m2 = 3,
+    this.kColor = const Color(0xFF7A5C79),
+    this.dColor = const Color(0xFFFABD3F),
+    this.jColor = const Color(0xFFBB72CA),
+    this.tickCount,
+    this.precision = 2,
   });
+
+  final int n;
+  final int m1;
+  final int m2;
+  final Color kColor;
+  final Color dColor;
+  final Color jColor;
+
+  /// 绘制相关参数
+  final int? tickCount;
+  final int precision;
 
   @override
   KDJPaintObject createPaintObject(KlineBindingBase controller) {
@@ -35,7 +61,8 @@ class KDJIndicator extends SinglePaintObjectIndicator {
   }
 }
 
-class KDJPaintObject extends SinglePaintObjectBox<KDJIndicator> {
+class KDJPaintObject extends SinglePaintObjectBox<KDJIndicator>
+    with PaintYAxisTickMixin, PaintYAxisMarkOnCrossMixin {
   KDJPaintObject({
     required super.controller,
     required super.indicator,
@@ -47,17 +74,146 @@ class KDJPaintObject extends SinglePaintObjectBox<KDJIndicator> {
     required int start,
     required int end,
   }) {
-    return null;
+    final minmax = klineData.calculateAndCacheKDJ(
+      n: indicator.n,
+      m1: indicator.m1,
+      m2: indicator.m2,
+    );
+    return minmax;
   }
 
   @override
-  void paintChart(Canvas canvas, Size size) {}
+  void paintChart(Canvas canvas, Size size) {
+    /// 绘制Y轴刻度值
+    paintYAxisTick(
+      canvas,
+      size,
+      tickCount: indicator.tickCount ?? setting.subChartYAxisTickCount,
+    );
+
+    /// 绘制KDJ线
+    paintKDJLine(canvas, size);
+  }
 
   @override
-  void onCross(Canvas canvas, Offset offset) {}
+  void onCross(Canvas canvas, Offset offset) {
+    /// onCross时, 绘制Y轴上的标记值
+    paintYAxisMarkOnCross(canvas, offset);
+  }
+
+  void paintKDJLine(Canvas canvas, Size size) {
+    final data = klineData;
+    if (data.list.isEmpty) return;
+    int start = data.start;
+    int end = (data.end + 1).clamp(start, data.list.length); // 多绘制一根蜡烛
+    KDJReset? ret;
+    final List<Offset> kPoints = [];
+    final List<Offset> dPoints = [];
+    final List<Offset> jPoints = [];
+    final offset = startCandleDx - candleWidthHalf;
+    for (int i = start; i < end; i++) {
+      ret = klineData.getKdjResult(data.list[i].timestamp);
+      if (ret == null) continue;
+      final dx = offset - (i - start) * candleActualWidth;
+      kPoints.add(Offset(dx, valueToDy(ret.k, correct: false)));
+      dPoints.add(Offset(dx, valueToDy(ret.d, correct: false)));
+      jPoints.add(Offset(dx, valueToDy(ret.j, correct: false)));
+    }
+
+    canvas.drawPath(
+      Path()..addPolygon(kPoints, false),
+      Paint()
+        ..color = indicator.kColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = setting.paintLineStrokeDefaultWidth,
+    );
+
+    canvas.drawPath(
+      Path()..addPolygon(dPoints, false),
+      Paint()
+        ..color = indicator.dColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = setting.paintLineStrokeDefaultWidth,
+    );
+
+    canvas.drawPath(
+      Path()..addPolygon(jPoints, false),
+      Paint()
+        ..color = indicator.jColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = setting.paintLineStrokeDefaultWidth,
+    );
+  }
 
   @override
   Size? paintTips(Canvas canvas, {CandleModel? model, Offset? offset}) {
-    return null;
+    if (indicator.tipsHeight <= 0) return null;
+    model ??= offsetToCandle(offset);
+    if (model == null) return null;
+
+    final ret = klineData.getKdjResult(model.timestamp);
+    if (ret == null) return null;
+
+    Rect drawRect = nextTipsRect;
+    final children = <TextSpan>[];
+
+    final kTxt = formatNumber(
+      ret.k,
+      precision: indicator.precision,
+      cutInvalidZero: true,
+      prefix: 'K: ',
+      suffix: ' ',
+    );
+    final dTxt = formatNumber(
+      ret.d,
+      precision: indicator.precision,
+      cutInvalidZero: true,
+      prefix: 'D: ',
+      suffix: ' ',
+    );
+    final jTxt = formatNumber(
+      ret.j,
+      precision: indicator.precision,
+      cutInvalidZero: true,
+      prefix: 'J: ',
+      suffix: ' ',
+    );
+
+    children.add(TextSpan(
+      text: kTxt,
+      style: TextStyle(
+        fontSize: setting.tipsDefaultTextSize,
+        color: indicator.kColor,
+        height: setting.tipsDefaultTextHeight,
+      ),
+    ));
+
+    children.add(TextSpan(
+      text: dTxt,
+      style: TextStyle(
+        fontSize: setting.tipsDefaultTextSize,
+        color: indicator.dColor,
+        height: setting.tipsDefaultTextHeight,
+      ),
+    ));
+
+    children.add(TextSpan(
+      text: jTxt,
+      style: TextStyle(
+        fontSize: setting.tipsDefaultTextSize,
+        color: indicator.jColor,
+        height: setting.tipsDefaultTextHeight,
+      ),
+    ));
+
+    return canvas.drawText(
+      offset: drawRect.topLeft,
+      textSpan: TextSpan(children: children),
+      drawDirection: DrawDirection.ltr,
+      drawableRect: drawRect,
+      textAlign: TextAlign.left,
+      padding: setting.tipsRectDefaultPadding,
+      maxLines: 1,
+    );
   }
 }

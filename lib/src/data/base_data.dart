@@ -13,14 +13,10 @@
 // limitations under the License.
 
 import 'dart:math' as math;
-import 'package:decimal/decimal.dart';
 import 'package:flutter/foundation.dart';
 
 import '../model/export.dart';
 import '../utils/export.dart';
-
-double a = 0.0;
-final Decimal twentieth = (Decimal.one / Decimal.fromInt(20)).toDecimal();
 
 abstract class BaseData with KlineLog {
   @override

@@ -141,9 +141,7 @@ extension CalculateMA on CalcuDataManager {
     return CalcuData(
       count: count,
       ts: m.timestamp,
-      val: (sum / count.d).toDecimal(
-        scaleOnInfinitePrecision: defaultScaleOnInfinitePrecision,
-      ),
+      val: sum.div(count.d),
     );
   }
 
@@ -228,9 +226,7 @@ extension CalculateMAVol on CalcuDataManager {
     return CalcuData(
       count: count,
       ts: m.timestamp,
-      val: (sum / count.d).toDecimal(
-        scaleOnInfinitePrecision: defaultScaleOnInfinitePrecision,
-      ),
+      val: sum.div(count.d),
     );
   }
 
@@ -393,8 +389,7 @@ extension CalculateEMA on CalcuDataManager {
     );
     for (int i = index - 1; i >= 0; i--) {
       m = list[i];
-      lastEma = (((two * m.close) + lastEma * (count - 1).d) / (count + 1).d)
-          .toDecimal(scaleOnInfinitePrecision: defaultScaleOnInfinitePrecision);
+      lastEma = ((two * m.close) + lastEma * (count - 1).d).div((count + 1).d);
       countEmaMap[m.timestamp] = CalcuData(
         ts: m.timestamp,
         count: count,

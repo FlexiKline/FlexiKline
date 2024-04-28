@@ -14,11 +14,10 @@
 
 import 'package:decimal/decimal.dart';
 
-import '../constant.dart';
 import '../extension/export.dart';
 import '../model/export.dart';
 import 'base_data.dart';
-import 'common.dart';
+import 'results.dart';
 
 mixin MACDData on BaseData {
   @override
@@ -38,7 +37,6 @@ mixin MACDData on BaseData {
   final Map<int, MacdResult> _macdResultMap = {};
 
   MacdResult? getMacdResult(int? ts) {
-    if (ts == null) return null;
     return _macdResultMap.getItem(ts);
   }
 
@@ -91,27 +89,18 @@ mixin MACDData on BaseData {
       count++;
       if (count >= s) {
         if (count > s) {
-          emaShort = (((two * model.close) + emaShort * (s - 1).d) / (s + 1).d)
-              .toDecimal(
-            scaleOnInfinitePrecision: defaultScaleOnInfinitePrecision,
-          );
+          emaShort =
+              ((two * model.close) + emaShort * (s - 1).d).div((s + 1).d);
         } else {
-          emaShort = (closeSum / s.d).toDecimal(
-            scaleOnInfinitePrecision: defaultScaleOnInfinitePrecision,
-          );
+          emaShort = closeSum.div(s.d);
         }
       }
 
       if (count >= l) {
         if (count > l) {
-          emaLong = (((two * model.close) + emaLong * (l - 1).d) / (l + 1).d)
-              .toDecimal(
-            scaleOnInfinitePrecision: defaultScaleOnInfinitePrecision,
-          );
+          emaLong = ((two * model.close) + emaLong * (l - 1).d).div((l + 1).d);
         } else {
-          emaLong = (closeSum / l.d).toDecimal(
-            scaleOnInfinitePrecision: defaultScaleOnInfinitePrecision,
-          );
+          emaLong = closeSum.div(l.d);
         }
       }
 
@@ -120,13 +109,9 @@ mixin MACDData on BaseData {
         difSum += dif;
         if (count >= l + m) {
           if (count > l + m) {
-            dea = (((two * dif) + dea * (m - 1).d) / (m + 1).d).toDecimal(
-              scaleOnInfinitePrecision: defaultScaleOnInfinitePrecision,
-            );
+            dea = ((two * dif) + dea * (m - 1).d).div((m + 1).d);
           } else {
-            dea = (difSum / m.d).toDecimal(
-              scaleOnInfinitePrecision: defaultScaleOnInfinitePrecision,
-            );
+            dea = difSum.div(m.d);
           }
 
           macd = (dif - dea) * two;
