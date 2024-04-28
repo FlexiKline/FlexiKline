@@ -16,11 +16,9 @@ import 'package:decimal/decimal.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart';
 
-import '../constant.dart';
 import '../core/export.dart';
 import '../data/export.dart';
 import '../framework/export.dart';
-import '../model/export.dart';
 
 /// 指数平滑移动平均线
 /// 参考: https://zhuanlan.zhihu.com/p/361132689

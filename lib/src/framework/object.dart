@@ -76,12 +76,15 @@ abstract interface class IPaintDataInit {
 }
 
 /// 指标图的绘制接口/指标图的Cross事件绘制接口
-abstract interface class IPaintChartAndHandleCross {
+abstract interface class IPaintObject {
   /// 为当前指标的绘制绑定slot.
   void bindSolt(int newSlot);
 
   /// 绘制指标图
   void paintChart(Canvas canvas, Size size);
+
+  /// 在所有指标图绘制结束后额外的绘制
+  void paintExtraAfterPaintChart(Canvas canvas, Size size);
 
   /// 绘制Cross上的刻度值
   void onCross(Canvas canvas, Offset offset);
@@ -99,7 +102,7 @@ abstract interface class IPaintDelegate {
 
   void doPaintChart(Canvas canvas, Size size);
 
-  void doOnCross(Canvas canvas, Offset offset);
+  void doOnCross(Canvas canvas, Offset offset, {CandleModel? model});
 
   void doPaintTips(Canvas canvas, {CandleModel? model, Offset? offset});
 }
@@ -382,11 +385,7 @@ mixin PaintYAxisMarkOnCrossMixin<T extends SinglePaintObjectIndicator>
 /// 通过实现对应的接口, 实现Chart的配置, 计算, 绘制, Cross
 // @immutable
 abstract class PaintObject<T extends Indicator>
-    implements
-        IPaintBoundingBox,
-        IPaintDataInit,
-        IPaintChartAndHandleCross,
-        IPaintDelegate {
+    implements IPaintBoundingBox, IPaintDataInit, IPaintObject, IPaintDelegate {
   PaintObject({
     required T indicator,
   }) : _indicator = indicator;
@@ -403,6 +402,10 @@ abstract class PaintObject<T extends Indicator>
     _indicator = null;
     parent = null;
   }
+
+  @protected
+  @override
+  void paintExtraAfterPaintChart(Canvas canvas, Size size) {}
 }
 
 /// PaintObjectProxy
@@ -459,13 +462,15 @@ abstract class SinglePaintObjectBox<T extends SinglePaintObjectIndicator>
     if (!cross.isCrossing) {
       doPaintTips(canvas, model: state.curKlineData.latest);
     }
+
+    paintExtraAfterPaintChart(canvas, size);
   }
 
   @override
-  void doOnCross(Canvas canvas, Offset offset) {
+  void doOnCross(Canvas canvas, Offset offset, {CandleModel? model}) {
     onCross(canvas, offset);
 
-    doPaintTips(canvas, offset: offset);
+    doPaintTips(canvas, offset: offset, model: model);
   }
 
   @override
@@ -516,7 +521,7 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
   void paintChart(Canvas canvas, Size size) {}
 
   @override
-  void onCross(Canvas canvas, Offset offset) {}
+  void onCross(Canvas canvas, Offset offset, {CandleModel? model}) {}
 
   @override
   Size? paintTips(Canvas canvas, {CandleModel? model, Offset? offset}) {
@@ -569,7 +574,7 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
     for (var child in indicator.children) {
       if (tipsHeight != null && tipsHeight > 0) {
         // 1.3. 在绘制指标图前, 动态设置子图的Tips区域高度.
-        child.tipsHeight = tipsHeight;
+        child.tipsHeight = tipsHeight; // TODO: 待验证极端情况
       }
       child.paintObject?.paintChart(canvas, size);
     }
@@ -579,15 +584,19 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
         doPaintTips(canvas, model: state.curKlineData.latest);
       }
     }
+
+    for (var child in indicator.children) {
+      child.paintObject?.paintExtraAfterPaintChart(canvas, size);
+    }
   }
 
   @override
-  void doOnCross(Canvas canvas, Offset offset) {
+  void doOnCross(Canvas canvas, Offset offset, {CandleModel? model}) {
     for (var child in indicator.children) {
       child.paintObject?.onCross(canvas, offset);
     }
 
-    doPaintTips(canvas, offset: offset);
+    doPaintTips(canvas, offset: offset, model: model);
   }
 
   @override

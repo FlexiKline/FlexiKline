@@ -74,7 +74,10 @@ class CandlePaintObject extends SinglePaintObjectBox<CandleIndicator>
 
     /// 绘制Y轴价钱刻度数据
     paintYAxisPriceTick(canvas, size);
+  }
 
+  @override
+  void paintExtraAfterPaintChart(Canvas canvas, Size size) {
     /// 绘制最新价刻度线与价钱标记
     paintLastPriceMark(canvas, size);
   }
@@ -87,10 +90,8 @@ class CandlePaintObject extends SinglePaintObjectBox<CandleIndicator>
     /// 绘制Cross X轴时间刻度
     paintXAxisMarkOnCross(canvas, offset);
 
-    if (setting.showPopupCandleCard) {
-      /// 绘制Cross 命中的蜡烛数据弹窗
-      paintTips(canvas, offset: offset);
-    }
+    // /// 绘制Cross 命中的蜡烛数据弹窗
+    // paintTips(canvas, offset: offset);
   }
 
   // onCross时, 格式化Y轴上的标记值.
@@ -409,6 +410,8 @@ class CandlePaintObject extends SinglePaintObjectBox<CandleIndicator>
   /// 绘制Cross 命中的蜡烛数据弹窗
   @override
   Size? paintTips(Canvas canvas, {CandleModel? model, Offset? offset}) {
+    if (!setting.showPopupCandleCard) return null;
+
     if (offset == null) return null;
     model ??= offsetToCandle(offset);
     final timeBar = klineData.timerBar;

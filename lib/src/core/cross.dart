@@ -96,12 +96,25 @@ mixin CrossBinding
         return;
       }
 
+      CandleModel? model;
+      if (showLatestTipsInBlank) {
+        model = offsetToCandle(offset);
+        // 如果当前model为空, 则根据offset.dx计算当前model是最新的, 还是最后的.
+        if (model == null) {
+          if (offset.dx > startCandleDx) {
+            model = curKlineData.latest;
+          } else {
+            model = curKlineData.list.last;
+          }
+        }
+      }
+
       ensurePaintObjectInstance();
 
       /// 绘制Cross Line
       paintCrossLine(canvas, offset);
 
-      mainIndicator.paintObject?.doOnCross(canvas, offset);
+      mainIndicator.paintObject?.doOnCross(canvas, offset, model: model);
 
       int i = 0;
       for (var indicator in subIndicators) {

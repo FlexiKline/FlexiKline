@@ -20,7 +20,8 @@ enum IndicatorType {
   ma,
   maVol,
   ema,
-  macd;
+  macd,
+  kdj,
 }
 
 class MaParam {

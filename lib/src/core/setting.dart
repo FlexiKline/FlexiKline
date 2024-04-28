@@ -335,8 +335,6 @@ mixin SettingBinding on KlineBindingBase implements IConfig {
     ..strokeWidth = crossPointWidth
     ..style = PaintingStyle.fill;
 
-  // 是否展示Cross Y轴上的价钱标记.
-  // bool showCrossYAxisTickMark = true;
   // cross Y轴对应刻度文本区域配置 (价钱, Volume ...)
   double crossYTickFontSize = 10;
   double crossYTickTextWidth = 100; // TODO 暂无用
@@ -348,6 +346,9 @@ mixin SettingBinding on KlineBindingBase implements IConfig {
         height: 1,
         textBaseline: TextBaseline.alphabetic,
       );
+
+  /// onCross时, 当移动到空白区域时, Tips区域是否展示最新的蜡烛的Tips数据.
+  bool showLatestTipsInBlank = true;
 
   /// onCross时 Y轴对应刻度文本区域配置
   Color crossYTickRectBackgroundColor = Colors.black;
