@@ -42,6 +42,8 @@ mixin SettingBinding on KlineBindingBase implements IConfig {
 
   Color longColor = Colors.green;
   Color shortColor = Colors.red;
+  Color longTintColor = Colors.green.withOpacity(0.5);
+  Color shortTintColor = Colors.red.withOpacity(0.5);
 
   /// Loading配置
   double loadingProgressSize = 24;
@@ -541,7 +543,8 @@ mixin SettingBinding on KlineBindingBase implements IConfig {
   /// 绘制线图的默认线宽
   double paintLineStrokeDefaultWidth = 1.0;
 
-  /// 指标图 bar 配置
+  /// 指标图 涨跌 bar/line 配置
+  // 实心
   Paint get defLongBarPaint => Paint()
     ..color = longColor
     ..style = PaintingStyle.stroke
@@ -550,6 +553,16 @@ mixin SettingBinding on KlineBindingBase implements IConfig {
     ..color = shortColor
     ..style = PaintingStyle.stroke
     ..strokeWidth = candleWidth;
+  // 实心, 浅色
+  Paint get defLongTintBarPaint => Paint()
+    ..color = longTintColor
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = candleWidth;
+  Paint get defShortTintBarPaint => Paint()
+    ..color = shortTintColor
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = candleWidth;
+  // 空心
   Paint get defLongHollowBarPaint => Paint()
     ..color = longColor
     ..style = PaintingStyle.stroke
@@ -558,4 +571,14 @@ mixin SettingBinding on KlineBindingBase implements IConfig {
     ..color = shortColor
     ..style = PaintingStyle.stroke
     ..strokeWidth = 1;
+  // 线
+  double defLongShortLineWidth = 1;
+  Paint get defLongLinePaint => Paint()
+    ..color = longColor
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = defLongShortLineWidth;
+  Paint get defShortLinePaint => Paint()
+    ..color = shortColor
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = defLongShortLineWidth;
 }

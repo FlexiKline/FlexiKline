@@ -199,11 +199,18 @@ mixin PaintObjectBoundingMixin on PaintObjectProxy
 
   @override
   Rect get chartRect {
+    final chartBottom = drawBounding.bottom - paintPadding.bottom;
+    double chartTop;
+    if (indicator.paintMode == PaintMode.alone) {
+      chartTop = chartBottom - indicator.height;
+    } else {
+      chartTop = tipsRect.bottom;
+    }
     return Rect.fromLTRB(
       drawBounding.left + paintPadding.left,
-      tipsRect.bottom,
+      chartTop,
       drawBounding.right - paintPadding.right,
-      drawBounding.bottom - paintPadding.bottom,
+      chartBottom,
     );
   }
 
@@ -397,6 +404,8 @@ abstract class PaintObject<T extends Indicator>
   // 父级PaintObject. 主要用于给其他子级PaintObject限定范围.
   PaintObject? parent;
 
+  bool get hasParentObject => parent != null;
+
   @mustCallSuper
   void dispose() {
     _indicator = null;
@@ -506,7 +515,7 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
     required int start,
     required int end,
   }) {
-    return _minMax;
+    return minMax;
   }
 
   @override
@@ -535,6 +544,8 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
     required int end,
   }) {
     resetMinMax();
+
+    /// 初始化所有子指标数据, 并汇总minmax.
     for (var child in indicator.children) {
       final childPaintObject = child.paintObject;
       if (childPaintObject == null) continue;
@@ -546,11 +557,15 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
       );
       if (ret != null) {
         childPaintObject.minMax = ret;
-        minMax = ret.clone();
+        if (child.paintMode == PaintMode.combine) {
+          minMax = ret.clone();
+        }
       }
     }
-    if (indicator.paintMode == MultiPaintMode.combine) {
-      for (var child in indicator.children) {
+
+    /// 所有子指标初始化完成后, 重置子指标的minmax.
+    for (var child in indicator.children) {
+      if (child.paintMode == PaintMode.combine) {
         child.paintObject?.minMax = minMax;
       }
     }

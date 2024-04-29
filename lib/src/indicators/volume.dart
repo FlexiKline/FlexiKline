@@ -27,13 +27,22 @@ class VolumeIndicator extends SinglePaintObjectIndicator {
     required super.height,
     super.tipsHeight,
     super.padding,
+    super.paintMode,
     this.tickCount,
     this.tipsTextColor,
+    this.showYAxisTick = true,
+    this.showCrossMark = true,
+    this.showTips = true,
+    this.useTint = false,
   });
 
   /// 绘制相关参数
   final int? tickCount;
   final Color? tipsTextColor;
+  final bool showYAxisTick;
+  final bool showCrossMark;
+  final bool showTips;
+  final bool useTint;
 
   @override
   VolumePaintObject createPaintObject(KlineBindingBase controller) =>
@@ -63,12 +72,14 @@ class VolumePaintObject extends SinglePaintObjectBox<VolumeIndicator>
 
   @override
   void paintChart(Canvas canvas, Size size) {
-    /// 绘制Y轴刻度值
-    paintYAxisTick(
-      canvas,
-      size,
-      tickCount: indicator.tickCount ?? setting.subChartYAxisTickCount,
-    );
+    if (indicator.showYAxisTick) {
+      /// 绘制Y轴刻度值
+      paintYAxisTick(
+        canvas,
+        size,
+        tickCount: indicator.tickCount ?? setting.subChartYAxisTickCount,
+      );
+    }
 
     /// 绘制Volume柱状图
     paintIndicatorChart(canvas, size);
@@ -76,8 +87,10 @@ class VolumePaintObject extends SinglePaintObjectBox<VolumeIndicator>
 
   @override
   void onCross(Canvas canvas, Offset offset) {
-    /// onCross时, 绘制Y轴上的标记值
-    paintYAxisMarkOnCross(canvas, offset);
+    if (indicator.showCrossMark) {
+      /// onCross时, 绘制Y轴上的标记值
+      paintYAxisMarkOnCross(canvas, offset);
+    }
   }
 
   /// 绘制Volume柱状图
@@ -89,6 +102,14 @@ class VolumePaintObject extends SinglePaintObjectBox<VolumeIndicator>
 
     final offset = startCandleDx - candleWidthHalf;
     final dyBottom = chartRect.bottom;
+
+    final longPaint = indicator.useTint
+        ? setting.defLongTintBarPaint
+        : setting.defLongBarPaint;
+    final shortPaint = indicator.useTint
+        ? setting.defShortTintBarPaint
+        : setting.defShortBarPaint;
+
     for (var i = start; i < end; i++) {
       final model = data.list[i];
       final dx = offset - (i - start) * candleActualWidth;
@@ -98,7 +119,7 @@ class VolumePaintObject extends SinglePaintObjectBox<VolumeIndicator>
       canvas.drawLine(
         Offset(dx, dy),
         Offset(dx, dyBottom),
-        isLong ? setting.defLongBarPaint : setting.defShortBarPaint,
+        isLong ? longPaint : shortPaint,
       );
     }
   }
@@ -108,6 +129,7 @@ class VolumePaintObject extends SinglePaintObjectBox<VolumeIndicator>
   /// 2. 当Cross时, 展示命中的蜡烛交易量
   @override
   Size? paintTips(Canvas canvas, {CandleModel? model, Offset? offset}) {
+    if (!indicator.showTips) return null;
     if (indicator.tipsHeight <= 0) return null;
     model ??= offsetToCandle(offset);
     if (model == null) return null;

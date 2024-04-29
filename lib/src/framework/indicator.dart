@@ -19,6 +19,17 @@ import 'package:flutter/material.dart';
 import '../core/export.dart';
 import 'object.dart';
 
+/// Indicator绘制模式
+/// 注: PaintMode仅当Indicator加入MultiPaintObjectIndicator后起作用,
+/// 代表当前Indicator的绘制是否是独立绘制的, 还是依赖于MultiPaintObjectIndicator
+enum PaintMode {
+  /// 组合模式, 当前Indicator绘制按MultiPaintObjectIndicator的高度和minmax进行联合绘图, 坐标系共享.
+  combine,
+
+  /// 独立模式下, 此Indicator会按自己height和minmax独立绘制.
+  alone;
+}
+
 /// 指标基础配置
 /// tipsHeight: 绘制区域顶部提示信息区域的高度
 /// padding: 绘制区域的边界设定
@@ -28,11 +39,14 @@ abstract class Indicator {
     required this.height,
     this.tipsHeight = 0.0,
     this.padding = EdgeInsets.zero,
+    this.paintMode = PaintMode.combine,
   });
   final Key key;
   final double height;
   double tipsHeight;
   EdgeInsets padding;
+
+  final PaintMode paintMode;
 
   @override
   bool operator ==(Object other) {
@@ -85,22 +99,13 @@ abstract class SinglePaintObjectIndicator extends Indicator {
     required super.height,
     super.tipsHeight,
     super.padding,
+    super.paintMode,
   });
 
   @override
   SinglePaintObjectBox createPaintObject(
     KlineBindingBase controller,
   );
-}
-
-/// 多Indicator绘制模式
-/// 注: 仅为MultiPaintObjectIndicator提供, 指定子Indicator的绘制模式.
-enum MultiPaintMode {
-  /// 组合模式下, 多个Indicator会联合绘图, 坐标系共享.
-  combine,
-
-  /// 独立模式下, 多个Indicator各自按父height独立绘制.
-  alone;
 }
 
 /// 多个绘制Indicator的配置.
@@ -111,12 +116,10 @@ class MultiPaintObjectIndicator extends Indicator {
     required super.height,
     super.tipsHeight,
     super.padding,
-    this.paintMode = MultiPaintMode.combine,
     this.drawChartAlawaysBelowTipsArea = false,
     Iterable<SinglePaintObjectIndicator> children = const [],
   }) : children = LinkedHashSet<SinglePaintObjectIndicator>.from(children);
 
-  final MultiPaintMode paintMode;
   final Set<SinglePaintObjectIndicator> children;
   final bool drawChartAlawaysBelowTipsArea;
 

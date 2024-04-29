@@ -28,7 +28,10 @@ class MAVolIndicator extends SinglePaintObjectIndicator {
     required super.height,
     super.tipsHeight,
     super.padding,
-    required this.calcParams,
+    this.calcParams = const [
+      MaParam(label: 'MA5', count: 5, color: Colors.orange),
+      MaParam(label: 'MA10', count: 10, color: Colors.blue)
+    ],
   });
 
   final List<MaParam> calcParams;

@@ -61,6 +61,15 @@ mixin ConfigBinding on KlineBindingBase, SettingBinding implements IConfig {
       padding: mainPadding,
     ));
 
+    addIndicatorInMain(VolumeIndicator(
+      height: subChartDefaultHeight,
+      paintMode: PaintMode.alone,
+      showYAxisTick: false,
+      showCrossMark: false,
+      showTips: false,
+      useTint: true,
+    ));
+
     addIndicatorInMain(MAIndicator(
       height: mainRect.height,
     ));
@@ -86,18 +95,13 @@ mixin ConfigBinding on KlineBindingBase, SettingBinding implements IConfig {
       key: ValueKey('${IndicatorType.volume.name}+${IndicatorType.maVol.name}'),
       height: subChartDefaultHeight,
       tipsHeight: 12,
-      // paintMode: MultiPaintMode.alone,
       children: [
         VolumeIndicator(
           height: subChartDefaultHeight,
         ),
         MAVolIndicator(
           height: subChartDefaultHeight,
-          calcParams: [
-            MaParam(label: 'MA5', count: 5, color: Colors.orange),
-            MaParam(label: 'MA10', count: 10, color: Colors.blue)
-          ],
-        )
+        ),
       ],
     ));
 
