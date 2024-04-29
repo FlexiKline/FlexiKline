@@ -35,6 +35,7 @@ mixin BOLLData on BaseData, MAData {
     _bollResultMap.clear();
   }
 
+  /// boll数据缓存 <timestamp, result>
   final Map<int, BOLLResult> _bollResultMap = {};
 
   BOLLResult? getBollResult(int? ts) {
@@ -98,21 +99,32 @@ mixin BOLLData on BaseData, MAData {
     Decimal up;
     Decimal dn;
     CandleModel m;
-    BOLLResult ret;
+    BOLLResult? ret;
     MinMax? minmax;
+    final stdD = Decimal.fromInt(std);
     for (int i = index; i >= start; i--) {
       m = list[i];
       sum += m.close;
-      ma = sum.div(n.d);
-      md = calculateBollMd(ma: ma, index: i, n: n);
-      up = ma + std.d * md;
-      dn = ma - std.d * md;
-      ret = BOLLResult(ts: m.timestamp, mb: ma, up: up, dn: dn);
-      // logd('calculateAndCacheBOLL ret:$ret');
-      _bollResultMap[m.timestamp] = ret;
 
-      minmax ??= MinMax(max: up, min: dn);
-      minmax.updateMinMax(MinMax(max: up, min: dn));
+      ret = getBollResult(m.timestamp);
+      if (ret == null || ret.dirty) {
+        ma = sum.div(n.d);
+        md = calculateBollMd(ma: ma, index: i, n: n);
+        up = ma + stdD * md;
+        dn = ma - stdD * md;
+        ret = BOLLResult(
+          ts: m.timestamp,
+          mb: ma,
+          up: up,
+          dn: dn,
+          dirty: i == 0,
+        );
+        // logd('calculateAndCacheBOLL ret:$ret');
+        _bollResultMap[m.timestamp] = ret;
+      }
+
+      minmax ??= MinMax(max: ret.up, min: ret.dn);
+      minmax.updateMinMax(MinMax(max: ret.up, min: ret.dn));
 
       sum -= list[i + n - 1].close;
     }

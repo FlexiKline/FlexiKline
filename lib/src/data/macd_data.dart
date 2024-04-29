@@ -71,6 +71,13 @@ mixin MACDData on BaseData {
     // 清理缓存重头计算
     _macdResultMap.clear();
 
+    final sPre = Decimal.fromInt(s - 1);
+    final sNext = Decimal.fromInt(s + 1);
+    final lPre = Decimal.fromInt(l - 1);
+    final lNext = Decimal.fromInt(l + 1);
+    final mPre = Decimal.fromInt(m - 1);
+    final mNext = Decimal.fromInt(m + 1);
+
     CandleModel model;
     Decimal emaShort = Decimal.zero;
     Decimal emaLong = Decimal.zero;
@@ -89,8 +96,7 @@ mixin MACDData on BaseData {
       count++;
       if (count >= s) {
         if (count > s) {
-          emaShort =
-              ((two * model.close) + emaShort * (s - 1).d).div((s + 1).d);
+          emaShort = ((two * model.close) + emaShort * sPre).div(sNext);
         } else {
           emaShort = closeSum.div(s.d);
         }
@@ -98,7 +104,7 @@ mixin MACDData on BaseData {
 
       if (count >= l) {
         if (count > l) {
-          emaLong = ((two * model.close) + emaLong * (l - 1).d).div((l + 1).d);
+          emaLong = ((two * model.close) + emaLong * lPre).div(lNext);
         } else {
           emaLong = closeSum.div(l.d);
         }
@@ -109,7 +115,7 @@ mixin MACDData on BaseData {
         difSum += dif;
         if (count >= l + m) {
           if (count > l + m) {
-            dea = ((two * dif) + dea * (m - 1).d).div((m + 1).d);
+            dea = ((two * dif) + dea * mPre).div(mNext);
           } else {
             dea = difSum.div(m.d);
           }

@@ -35,7 +35,7 @@ mixin EMAData on BaseData {
     _count2ts2dataEmaMap.clear();
   }
 
-  /// EMA数据缓存 <count, <timestamp, val>>
+  /// EMA数据缓存 <count, <timestamp, result>>
   final Map<int, Map<int, MAResult>> _count2ts2dataEmaMap = {};
 
   Map<int, MAResult> getCountEmaMap(int count) {
@@ -64,7 +64,6 @@ mixin EMAData on BaseData {
 
   /// 加权移动平均数Weighted Moving Average
   Decimal calculateWMA(
-    List<CandleModel> list,
     int index,
     int count,
   ) {
@@ -120,6 +119,7 @@ mixin EMAData on BaseData {
   ///   EMA(12)=2*今收盘价/(12+1)+11*昨日EMA(12)/(12+1)
   /// 2）慢速平滑移动平均线（EMA）是26日的，计算公式为：
   ///   EMA(26)=2*今收盘价/(26+1)+25*昨日EMA(26)/(26+1)
+  /// TODO: 待优化
   MinMax? calculateAndCacheEMA(
     List<CandleModel> list,
     int count, {
@@ -144,7 +144,7 @@ mixin EMAData on BaseData {
 
     Map<int, MAResult> countEmaMap = getCountEmaMap(count);
     if (countEmaMap.isNotEmpty) {
-      logd('calculateAnCacheEMA immediate use cache!!!');
+      //logd('calculateAnCacheEMA immediate use cache!!!');
       if (needReturn) {
         return getEMAMinmaxFromCache(list, count, start, end);
       }
@@ -153,7 +153,7 @@ mixin EMAData on BaseData {
 
     // 初始采用WMA
     int index = len - count;
-    Decimal lastEma = calculateWMA(list, index, count);
+    Decimal lastEma = calculateWMA(index, count);
     CandleModel m = list[index];
     countEmaMap[m.timestamp] = MAResult(
       ts: m.timestamp,

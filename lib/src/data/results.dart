@@ -82,7 +82,7 @@ class KDJReset extends BaseResult {
 
   KDJReset({
     required super.ts,
-    super.dirty = true,
+    super.dirty = false,
     required this.k,
     required this.d,
     required this.j,

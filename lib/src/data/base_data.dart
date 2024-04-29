@@ -48,12 +48,12 @@ abstract class BaseData with KlineLog {
     end = 0;
   }
 
-  /// 绘制前: 重置计算结果.
-  @protected
-  @mustCallSuper
-  void resetCalcuResult() {
-    logd('resetCalcuResult BASE');
-  }
+  // /// 绘制前: 重置计算结果.
+  // @protected
+  // @mustCallSuper
+  // void resetCalcuResult() {
+  //   logd('resetCalcuResult BASE');
+  // }
 
   final CandleReq req;
   List<CandleModel> _list = List.empty(growable: true);
@@ -79,7 +79,7 @@ abstract class BaseData with KlineLog {
   int _start = 0;
   int get start => _start;
   set start(int val) {
-    _start = val.clamp(0, math.max(0, list.length));
+    _start = val.clamp(0, list.length);
   }
 
   /// 当前绘制区域结束下标 左
@@ -87,7 +87,7 @@ abstract class BaseData with KlineLog {
   int _end = 0;
   int get end => _end;
   set end(int val) {
-    _end = val.clamp(0, math.max(0, list.length));
+    _end = val.clamp(0, list.length);
   }
 
   void ensureStartAndEndIndex(

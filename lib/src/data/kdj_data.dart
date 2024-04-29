@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:math' as math;
 import 'package:decimal/decimal.dart';
 
 import '../extension/export.dart';
@@ -57,36 +58,56 @@ mixin KDJData on BaseData, CandleData {
     required int n,
     required int m1,
     required int m2,
+    int? start,
+    int? end,
   }) {
     if (list.isEmpty) return null;
     int len = list.length;
+    start ??= this.start;
+    end ??= this.end;
     if (len < n || start < 0 || end > len) return null;
 
+    // 计算从end到len之间n的偏移量
+    int offset = math.max(end + n - len, 0);
+    int index = end - offset;
+
+    final m1k = Decimal.fromInt(m1 - 1);
+    final m1Div = Decimal.fromInt(m1);
+    final m2d = Decimal.fromInt(m2 - 1);
+    final m2Div = Decimal.fromInt(m2);
     MinMax? minmaxRet;
-    KDJReset kdjRet;
+    KDJReset? ret;
     Decimal rsv;
     CandleModel m;
     Decimal k = fifty;
-    final m1k = Decimal.fromInt(m1 - 1);
-    final m1Div = Decimal.fromInt(m1);
     Decimal d = fifty;
-    final m2d = Decimal.fromInt(m2 - 1);
-    final m2Div = Decimal.fromInt(m2);
     Decimal j;
-    // 计算KDJ
-    for (int i = end; i >= start; i--) {
-      final minmax = calculateMaxmin(start: i, end: i + n);
-      if (minmax == null) continue;
-      m = list[i];
-      rsv = (m.close - minmax.min).div(minmax.divisor) * hundred;
-      k = (m1k * k + rsv).div(m1Div);
-      d = (m2d * d + k).div(m2Div);
-      j = three * k - two * d;
 
-      kdjRet = KDJReset(ts: m.timestamp, k: k, d: d, j: j);
-      _kdjResultMap[m.timestamp] = kdjRet;
-      minmaxRet ??= kdjRet.minmax;
-      minmaxRet.updateMinMax(kdjRet.minmax);
+    // 计算KDJ
+    for (int i = index; i >= start; i--) {
+      m = list[i];
+
+      ret = getKdjResult(m.timestamp);
+      if (ret == null || ret.dirty) {
+        final minmax = calculateMaxmin(start: i, end: i + n);
+        if (minmax == null) continue;
+        rsv = (m.close - minmax.min).div(minmax.divisor) * hundred;
+        k = (m1k * k + rsv).div(m1Div);
+        d = (m2d * d + k).div(m2Div);
+        j = three * k - two * d;
+
+        ret = KDJReset(
+          ts: m.timestamp,
+          k: k,
+          d: d,
+          j: j,
+          dirty: i == 0,
+        );
+        _kdjResultMap[m.timestamp] = ret;
+      }
+
+      minmaxRet ??= ret.minmax;
+      minmaxRet.updateMinMax(ret.minmax);
     }
     return minmaxRet;
   }

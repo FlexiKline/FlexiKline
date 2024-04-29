@@ -35,7 +35,7 @@ mixin MAVOLData on BaseData {
     _count2ts2MaVolMap.clear();
   }
 
-  /// MAVOL数据缓存 <count, <timestamp, Decimal>>
+  /// MAVOL数据缓存 <count, <timestamp, result>>
   final Map<int, Map<int, MAResult>> _count2ts2MaVolMap = {};
 
   Map<int, MAResult> getCountMaVolMap(int count) {
@@ -78,6 +78,7 @@ mixin MAVOLData on BaseData {
 
   /// 计算并缓存MA数据.
   /// 如果start和end指定了, 只计算[start, end]区间内.
+  /// TODO: 待优化
   MinMax? calculateAndCacheMAVol(
     List<CandleModel> list,
     int count, {
@@ -105,7 +106,7 @@ mixin MAVOLData on BaseData {
         );
         // countMaMap.clear(); // 清理旧数据. TODO: 如何清理dirty数据
       } else {
-        logd('calculateAndCacheMAVol use cache!!! [$start, $end]');
+        // logd('calculateAndCacheMAVol use cache!!! [$start, $end]');
         if (start == 0) {
           //如果start是0, 有可能更新了最新价, 重新计算
           maVolMap[list.first.timestamp] = calculateMAVol(list, 0, count);

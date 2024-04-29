@@ -114,12 +114,13 @@ mixin MAData on BaseData {
       curRet = maMap[m.timestamp];
       if (curRet == null || curRet.dirty) {
         // 没有缓存或无效, 计算MA
-        if (preRet != null && i + count < len) {
+        if (preRet != null && !preRet.dirty && i + count < len) {
           // 用上一次结果进行换算当前结果
           curRet = MAResult(
             count: count,
             ts: m.timestamp,
             val: ((preRet.val * cD) - list[i + count].close + m.close).div(cD),
+            dirty: i == 0,
           );
         } else {
           curRet = calculateMA(index, count);
