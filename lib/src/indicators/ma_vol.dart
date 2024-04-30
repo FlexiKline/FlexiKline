@@ -49,19 +49,12 @@ class MAVolPaintObject extends SinglePaintObjectBox<MAVolIndicator> {
   });
 
   @override
-  MinMax? initData({
-    required List<CandleModel> list,
-    required int start,
-    required int end,
-  }) {
+  MinMax? initData({int? start, int? end}) {
     if (!klineData.canPaintChart) return null;
+
     MinMax? minmax;
     for (var param in indicator.calcParams) {
-      final ret = klineData.calculateAndCacheMavol(
-        param.count,
-        start: start,
-        end: end,
-      );
+      final ret = klineData.calculateMavolMinmax(param.count);
       minmax ??= ret;
       minmax?.updateMinMax(ret);
     }

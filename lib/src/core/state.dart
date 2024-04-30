@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 
 import '../data/export.dart';
 import '../extension/export.dart';
+import '../framework/indicator.dart';
 import '../model/export.dart';
 import 'binding_base.dart';
 import 'interface.dart';
@@ -180,23 +181,33 @@ mixin StateBinding
         maxCount,
       );
     }
-
-    // curKlineData.calculateMaxmin();
   }
 
-  void preprocessIndicatorData(KlineData data) {
+  void preprocessIndicatorData(KlineData data, {bool reset = false}) {
     if (data.isEmpty) return;
 
     const start = 0;
     final end = data.length;
 
+    final startTime = DateTime.now();
+    logd('preprocessIndicatorData start at $startTime');
+
     for (var child in mainIndicator.children) {
-      data.preprocess(child, start: start, end: end);
+      data.preprocess(child, start: start, end: end, reset: reset);
     }
 
     for (var indicator in subIndicators) {
-      data.preprocess(indicator, start: start, end: end);
+      if (indicator is MultiPaintObjectIndicator) {
+        for (var child in indicator.children) {
+          data.preprocess(child, start: start, end: end, reset: reset);
+        }
+      } else {
+        data.preprocess(indicator, start: start, end: end, reset: reset);
+      }
     }
+    logd(
+      'preprocessIndicatorData completed!!! Total time spent ${DateTime.now().difference(startTime).inMicroseconds} milliseconds',
+    );
   }
 
   /// 起动loading
@@ -229,7 +240,7 @@ mixin StateBinding
     }
     data = KlineData(req, list: List.of(list), logger: loggerDelegate);
     _klineDataCache[req.key] = data;
-    preprocessIndicatorData(data);
+    preprocessIndicatorData(data, reset: true);
     if (curKlineData.invalid || req.key == curDataKey) {
       curKlineData = data;
     }
@@ -247,7 +258,7 @@ mixin StateBinding
     final oldLen = data.list.length;
     data.mergeCandleList(list);
     _klineDataCache[req.key] = data;
-    preprocessIndicatorData(data);
+    preprocessIndicatorData(data, reset: false);
     if (req.key == curDataKey) {
       final newLen = data.list.length;
       if (paintDxOffset < 0 && newLen > oldLen) {

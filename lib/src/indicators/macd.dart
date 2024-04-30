@@ -56,11 +56,9 @@ class MacdPaintObject extends SinglePaintObjectBox<MacdIndicator>
   MacdPaintObject({required super.controller, required super.indicator});
 
   @override
-  MinMax? initData({
-    required List<CandleModel> list,
-    required int start,
-    required int end,
-  }) {
+  MinMax? initData({int? start, int? end}) {
+    if (!klineData.canPaintChart) return null;
+
     return klineData.calculateMacdMinmax(
       param: indicator.calcParam,
     );

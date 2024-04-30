@@ -12,11 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
-abstract interface class CalcParam {}
-
-final class MaParam implements CalcParam {
+final class MaParam {
   final String label;
   final int count;
   final Color color;
@@ -28,7 +27,7 @@ final class MaParam implements CalcParam {
   });
 }
 
-final class EMAParam implements CalcParam {
+final class EMAParam {
   final String label;
   final int count;
   final Color color;
@@ -40,7 +39,7 @@ final class EMAParam implements CalcParam {
   });
 }
 
-final class BOLLParam implements CalcParam {
+final class BOLLParam {
   final int n;
   final int std;
 
@@ -65,7 +64,7 @@ final class BOLLParam implements CalcParam {
   }
 }
 
-final class MACDParam implements CalcParam {
+final class MACDParam {
   final int s;
   final int l;
   final int m;
@@ -73,6 +72,8 @@ final class MACDParam implements CalcParam {
   const MACDParam({required this.s, required this.l, required this.m});
 
   bool get isValid => l > 0 && s > 0 && l > s && m > 0;
+
+  int get paramCount => math.max(l, s) + m;
 
   @override
   int get hashCode => s.hashCode ^ l.hashCode ^ m.hashCode;
@@ -92,7 +93,7 @@ final class MACDParam implements CalcParam {
   }
 }
 
-final class KDJParam implements CalcParam {
+final class KDJParam {
   final int n;
   final int m1;
   final int m2;

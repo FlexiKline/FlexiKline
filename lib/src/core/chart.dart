@@ -90,7 +90,6 @@ mixin ChartBinding
 
     /// 初始化主图展示的数据.
     mainIndicator.paintObject?.doInitData(
-      list: curKlineData.list,
       start: curKlineData.start,
       end: curKlineData.end,
     );
@@ -107,7 +106,6 @@ mixin ChartBinding
 
         /// 初始化副图指标展示数据.
         indicator.paintObject?.doInitData(
-          list: curKlineData.list,
           start: curKlineData.start,
           end: curKlineData.end,
         );

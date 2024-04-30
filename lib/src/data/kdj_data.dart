@@ -84,17 +84,17 @@ mixin KDJData on BaseData, CandleData {
   /// D值=2/3×第8日D值＋1/3×第9日K值
   /// J值=3*第9日K值-2*第9日D值
   /// 若无前一日K值与D值，则可以分别用50代替。
-  MinMax? calculateAndCacheKDJ({
+  void calculateAndCacheKDJ({
     required KDJParam param,
     int? start,
     int? end,
     bool reset = false,
   }) {
-    if (!param.isValid || isEmpty) return null;
+    if (!param.isValid || isEmpty) return;
     int len = list.length;
     start ??= this.start;
     end ??= this.end;
-    if (start < 0 || end > len) return null;
+    if (start < 0 || end > len) return;
 
     final kdjMap = getKdjMap(param);
     if (reset) {
@@ -109,7 +109,6 @@ mixin KDJData on BaseData, CandleData {
     final m1Div = Decimal.fromInt(param.m1);
     final m2d = Decimal.fromInt(param.m2 - 1);
     final m2Div = Decimal.fromInt(param.m2);
-    MinMax? minmaxRet;
     KdjReset? ret;
     Decimal rsv;
     CandleModel m;
@@ -123,7 +122,7 @@ mixin KDJData on BaseData, CandleData {
 
       ret = kdjMap[m.timestamp];
       if (ret == null || ret.dirty) {
-        final minmax = calculateMaxmin(start: i, end: i + param.n);
+        final minmax = calculateMinmax(start: i, end: i + param.n);
         if (minmax == null) continue;
         rsv = (m.close - minmax.min).div(minmax.divisor) * hundred;
         k = (m1k * k + rsv).div(m1Div);
@@ -139,10 +138,42 @@ mixin KDJData on BaseData, CandleData {
         );
         kdjMap[m.timestamp] = ret;
       }
-
-      minmaxRet ??= ret.minmax;
-      minmaxRet.updateMinMax(ret.minmax);
     }
-    return minmaxRet;
+  }
+
+  MinMax? calculateKdjMinmax({
+    required KDJParam param,
+    int? start,
+    int? end,
+  }) {
+    if (!param.isValid || isEmpty) return null;
+    int len = list.length;
+    start ??= this.start;
+    end ??= this.end;
+    if (start < 0 || end > len) return null;
+
+    final kdjMap = getKdjMap(param);
+
+    // 计算从end到len之间n的偏移量
+    int offset = math.max(end + param.n - len, 0);
+    int index = end - offset;
+
+    if (index < start) return null;
+    if (kdjMap.isEmpty ||
+        kdjMap[list[start].timestamp] == null ||
+        kdjMap[list[index].timestamp] == null) {
+      calculateAndCacheKDJ(param: param, start: start, end: end, reset: true);
+    }
+
+    MinMax? minmax;
+    KdjReset? ret;
+    for (int i = index; i >= start; i--) {
+      ret = kdjMap[list[i].timestamp];
+      if (ret != null) {
+        minmax ??= ret.minmax;
+        minmax.updateMinMax(ret.minmax);
+      }
+    }
+    return minmax;
   }
 }

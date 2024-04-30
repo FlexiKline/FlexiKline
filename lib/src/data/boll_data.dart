@@ -102,17 +102,17 @@ mixin BOLLData on BaseData, MAData {
   ///   MB=（N－1）日的MA
   ///   UP=MB＋2×MD
   ///   DN=MB－2×MD
-  MinMax? calculateAndCacheBoll({
+  void calculateAndCacheBoll({
     required BOLLParam param,
     int? start,
     int? end,
     bool reset = false,
   }) {
-    if (!param.isValid || list.isEmpty) return null;
+    if (!param.isValid || list.isEmpty) return;
     int len = list.length;
     start ??= this.start;
     end ??= this.end;
-    if (start < 0 || end > len) return null;
+    if (start < 0 || end > len) return;
 
     // 获取count对应的Emap数据结果
     final bollMap = getBollMap(param);
@@ -136,7 +136,6 @@ mixin BOLLData on BaseData, MAData {
     Decimal dn;
     CandleModel m;
     BollResult? ret;
-    MinMax? minmax;
     final stdD = Decimal.fromInt(param.std);
     for (int i = index; i >= start; i--) {
       m = list[i];
@@ -158,13 +157,43 @@ mixin BOLLData on BaseData, MAData {
         // logd('calculateAndCacheBOLL ret:$ret');
         bollMap[m.timestamp] = ret;
       }
-
-      minmax ??= MinMax(max: ret.up, min: ret.dn);
-      minmax.updateMinMax(MinMax(max: ret.up, min: ret.dn));
-
       sum -= list[i + param.n - 1].close;
     }
+  }
 
+  MinMax? calculateBollMinmax({
+    required BOLLParam param,
+    int? start,
+    int? end,
+  }) {
+    if (!param.isValid || list.isEmpty) return null;
+    int len = list.length;
+    start ??= this.start;
+    end ??= this.end;
+    if (start < 0 || end > len) return null;
+
+    // 获取count对应的Emap数据结果
+    final bollMap = getBollMap(param);
+
+    int offset = math.max(end + param.n - len, 0);
+    int index = end - offset;
+
+    if (index < start) return null;
+    if (bollMap.isEmpty ||
+        bollMap[list[start].timestamp] == null ||
+        bollMap[list[index].timestamp] == null) {
+      calculateAndCacheBoll(param: param, start: start, end: end, reset: true);
+    }
+
+    MinMax? minmax;
+    BollResult? ret;
+    for (int i = index; i >= start; i--) {
+      ret = bollMap[list[i].timestamp];
+      if (ret != null) {
+        minmax ??= MinMax(max: ret.up, min: ret.dn);
+        minmax.updateMinMax(MinMax(max: ret.up, min: ret.dn));
+      }
+    }
     return minmax;
   }
 }

@@ -32,7 +32,7 @@ mixin CandleData on BaseData {
   }
 
   /// 根据[start, end]下标计算最大最小值
-  MinMax? calculateMaxmin({
+  MinMax? calculateMinmax({
     int? start,
     int? end,
   }) {
@@ -51,7 +51,7 @@ mixin CandleData on BaseData {
     return MinMax(max: maxHigh, min: minLow);
   }
 
-  MinMax? calculateMaxminVol({
+  MinMax? calculateVolMinmax({
     int? start,
     int? end,
   }) {

@@ -106,17 +106,17 @@ mixin MAData on BaseData {
   /// 计算并缓存MA数据.
   /// 如果start和end指定了, 只计算[start, end]区间内.
   /// 否则, 从当前绘制的[start, end]开始计算.
-  MinMax? calculateAndCacheMa(
+  void calculateAndCacheMa(
     int count, {
     int? start,
     int? end,
     bool reset = false,
   }) {
-    if (count <= 0 || isEmpty) return null;
+    if (count <= 0 || isEmpty) return;
     int len = list.length;
     start ??= this.start;
     end ??= this.end;
-    if (start < 0 || end > len) return null;
+    if (start < 0 || end > len) return;
 
     final maMap = getMaMap(count);
     if (reset) {
@@ -129,7 +129,6 @@ mixin MAData on BaseData {
     CandleModel m;
     MaResult? preRet = maMap.getItem(list.getItem(index + 1)?.timestamp);
     MaResult? curRet;
-    MinMax? minmax;
     Decimal cD = Decimal.fromInt(count);
     for (int i = index; i >= start; i--) {
       m = list[i];
@@ -151,12 +150,43 @@ mixin MAData on BaseData {
 
       if (curRet != null) {
         maMap[m.timestamp] = curRet;
-        minmax ??= MinMax(max: curRet.val, min: curRet.val);
-        minmax.updateMinMaxByVal(curRet.val);
       }
       preRet = curRet;
     }
+  }
 
+  MinMax? calculateMaMinmax(
+    int count, {
+    int? start,
+    int? end,
+  }) {
+    if (count <= 0 || isEmpty) return null;
+    int len = list.length;
+    start ??= this.start;
+    end ??= this.end;
+    if (start < 0 || end > len) return null;
+
+    final maMap = getMaMap(count);
+
+    int offset = math.max(end + count - len, 0);
+    int index = end - offset;
+
+    if (index < start) return null;
+    if (maMap.isEmpty ||
+        maMap[list[start].timestamp] == null ||
+        maMap[list[index].timestamp] == null) {
+      calculateAndCacheMa(count, start: start, end: end, reset: true);
+    }
+
+    MinMax? minmax;
+    MaResult? ret;
+    for (int i = index; i >= start; i--) {
+      ret = maMap[list[i].timestamp];
+      if (ret != null) {
+        minmax ??= MinMax(max: ret.val, min: ret.val);
+        minmax.updateMinMaxByVal(ret.val);
+      }
+    }
     return minmax;
   }
 }

@@ -49,12 +49,10 @@ class CandlePaintObject extends SinglePaintObjectBox<CandleIndicator>
   Decimal? _maxHigh, _minLow;
 
   @override
-  MinMax? initData({
-    required List<CandleModel> list,
-    required int start,
-    required int end,
-  }) {
-    MinMax? minmax = klineData.calculateMaxmin();
+  MinMax? initData({int? start, int? end}) {
+    if (!klineData.canPaintChart) return null;
+
+    MinMax? minmax = klineData.calculateMinmax(start: start, end: end);
     _maxHigh = minmax?.max;
     _minLow = minmax?.min;
     return minmax;

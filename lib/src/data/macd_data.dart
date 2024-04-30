@@ -171,17 +171,21 @@ mixin MACDData on BaseData {
     end ??= this.end;
     if (start < 0 || end > len) return null;
 
-    Map<int, MacdResult> macdMap = getMacdMap(param);
+    final macdMap = getMacdMap(param);
 
-    MinMax? minMax;
+    if (macdMap.length < len - param.paramCount + 1) {
+      calculateMacd(param);
+    }
+
+    MinMax? minmax;
     MacdResult? data;
     for (int i = end - 1; i >= start; i--) {
       data = macdMap[list[i].timestamp];
       if (data != null) {
-        minMax ??= data.minmax;
-        minMax.updateMinMax(data.minmax);
+        minmax ??= data.minmax;
+        minmax.updateMinMax(data.minmax);
       }
     }
-    return minMax;
+    return minmax;
   }
 }

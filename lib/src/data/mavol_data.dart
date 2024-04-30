@@ -107,17 +107,17 @@ mixin MAVOLData on BaseData {
   /// 计算并缓存MAVol数据.
   /// 如果start和end指定了, 只计算[start, end]区间内.
   /// 否则, 从当前绘制的[start, end]开始计算.
-  MinMax? calculateAndCacheMavol(
+  void calculateAndCacheMavol(
     int count, {
     int? start,
     int? end,
     bool reset = false,
   }) {
-    if (count <= 0 || isEmpty) return null;
+    if (count <= 0 || isEmpty) return;
     int len = list.length;
     start ??= this.start;
     end ??= this.end;
-    if (start < 0 || end > len) return null;
+    if (start < 0 || end > len) return;
 
     final maVolMap = getMavolMap(count);
     if (reset) {
@@ -130,7 +130,6 @@ mixin MAVOLData on BaseData {
     CandleModel m;
     MaResult? preRet = maVolMap.getItem(list.getItem(index + 1)?.timestamp);
     MaResult? curRet;
-    MinMax? minmax;
     Decimal cD = Decimal.fromInt(count);
     for (int i = index; i >= start; i--) {
       m = list[i];
@@ -152,12 +151,43 @@ mixin MAVOLData on BaseData {
 
       if (curRet != null) {
         maVolMap[m.timestamp] = curRet;
-        minmax ??= MinMax(max: curRet.val, min: curRet.val);
-        minmax.updateMinMaxByVal(curRet.val);
       }
       preRet = curRet;
     }
+  }
 
+  MinMax? calculateMavolMinmax(
+    int count, {
+    int? start,
+    int? end,
+  }) {
+    if (count <= 0 || isEmpty) return null;
+    int len = list.length;
+    start ??= this.start;
+    end ??= this.end;
+    if (start < 0 || end > len) return null;
+
+    final mavolMap = getMavolMap(count);
+
+    int offset = math.max(end + count - len, 0);
+    int index = end - offset;
+
+    if (index < start) return null;
+    if (mavolMap.isEmpty ||
+        mavolMap[list[start].timestamp] == null ||
+        mavolMap[list[index].timestamp] == null) {
+      calculateAndCacheMavol(count, start: start, end: end, reset: true);
+    }
+
+    MinMax? minmax;
+    MaResult? ret;
+    for (int i = index; i >= start; i--) {
+      ret = mavolMap[list[i].timestamp];
+      if (ret != null) {
+        minmax ??= MinMax(max: ret.val, min: ret.val);
+        minmax.updateMinMaxByVal(ret.val);
+      }
+    }
     return minmax;
   }
 }

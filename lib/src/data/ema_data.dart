@@ -138,11 +138,10 @@ mixin EMAData on BaseData {
 
   /// 计算并缓存EMA数据
   /// 注: 计算会全量计算
-  MinMax? calculateMinmaxEma(
+  MinMax? calculateEmaMinmax(
     int count, {
     int? start,
     int? end,
-    bool reset = false,
   }) {
     if (count <= 0 || isEmpty) return null;
     int len = list.length;
@@ -151,24 +150,21 @@ mixin EMAData on BaseData {
     if (start < 0 || end > len) return null;
 
     final emaMap = getEmaMap(count);
-    if (reset) {
-      emaMap.clear();
-    }
 
     // 说明当前count对应的EMA数量不够; 需要重新计算
     if (emaMap.length < len - count + 1) {
       calculateEma(count);
     }
 
-    MinMax? minMax;
-    MaResult? data;
+    MinMax? minmax;
+    MaResult? ret;
     for (int i = end - 1; i >= start; i--) {
-      data = emaMap[list[i].timestamp];
-      if (data != null) {
-        minMax ??= MinMax(max: data.val, min: data.val);
-        minMax.updateMinMaxByVal(data.val);
+      ret = emaMap[list[i].timestamp];
+      if (ret != null) {
+        minmax ??= MinMax(max: ret.val, min: ret.val);
+        minmax.updateMinMaxByVal(ret.val);
       }
     }
-    return minMax;
+    return minmax;
   }
 }

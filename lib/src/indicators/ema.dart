@@ -57,15 +57,12 @@ class EMAPaintObject extends SinglePaintObjectBox<EMAIndicator> {
   });
 
   @override
-  MinMax? initData({
-    required List<CandleModel> list,
-    required int start,
-    required int end,
-  }) {
+  MinMax? initData({int? start, int? end}) {
     if (!klineData.canPaintChart) return null;
+
     MinMax? minmax;
     for (var param in indicator.calcParams) {
-      final ret = klineData.calculateMinmaxEma(
+      final ret = klineData.calculateEmaMinmax(
         param.count,
         start: start,
         end: end,

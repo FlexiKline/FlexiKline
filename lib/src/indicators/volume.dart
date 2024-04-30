@@ -60,12 +60,10 @@ class VolumePaintObject extends SinglePaintObjectBox<VolumeIndicator>
   });
 
   @override
-  MinMax? initData({
-    required List<CandleModel> list,
-    required int start,
-    required int end,
-  }) {
-    final minmax = klineData.calculateMaxminVol();
+  MinMax? initData({int? start, int? end}) {
+    if (!klineData.canPaintChart) return null;
+
+    final minmax = klineData.calculateVolMinmax();
     minmax?.minToZero();
     return minmax;
   }

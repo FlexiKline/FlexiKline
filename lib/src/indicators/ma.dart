@@ -50,19 +50,12 @@ class MAPaintObject extends SinglePaintObjectBox<MAIndicator> {
   });
 
   @override
-  MinMax? initData({
-    required List<CandleModel> list,
-    required int start,
-    required int end,
-  }) {
+  MinMax? initData({int? start, int? end}) {
     if (!klineData.canPaintChart) return null;
+
     MinMax? minmax;
     for (var param in indicator.calcParams) {
-      final ret = klineData.calculateAndCacheMa(
-        param.count,
-        start: start,
-        end: end,
-      );
+      final ret = klineData.calculateMaMinmax(param.count);
       minmax ??= ret;
       minmax?.updateMinMax(ret);
     }

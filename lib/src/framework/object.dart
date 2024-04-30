@@ -60,11 +60,7 @@ abstract interface class IPaintBoundingBox {
 /// 指标图的绘制数据初始化接口
 abstract interface class IPaintDataInit {
   /// 计算指标需要的数据
-  MinMax? initData({
-    required List<CandleModel> list,
-    required int start,
-    required int end,
-  });
+  MinMax? initData({int? start, int? end});
 
   /// 重置minmax值为null.
   void resetMinMax();
@@ -94,11 +90,7 @@ abstract interface class IPaintObject {
 }
 
 abstract interface class IPaintDelegate {
-  void doInitData({
-    required List<CandleModel> list,
-    required int start,
-    required int end,
-  });
+  void doInitData({int? start, int? end});
 
   void doPaintChart(Canvas canvas, Size size);
 
@@ -452,13 +444,9 @@ abstract class SinglePaintObjectBox<T extends SinglePaintObjectIndicator>
   T get indicator => super.indicator as T;
 
   @override
-  void doInitData({
-    required List<CandleModel> list,
-    required int start,
-    required int end,
-  }) {
+  void doInitData({int? start, int? end}) {
     resetMinMax();
-    final ret = initData(list: list, start: start, end: end);
+    final ret = initData(start: start, end: end);
     if (ret != null) {
       minMax = ret;
     }
@@ -510,11 +498,7 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
   }
 
   @override
-  MinMax? initData({
-    required List<CandleModel> list,
-    required int start,
-    required int end,
-  }) {
+  MinMax? initData({int? start, int? end}) {
     return minMax;
   }
 
@@ -538,11 +522,7 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
   }
 
   @override
-  void doInitData({
-    required List<CandleModel> list,
-    required int start,
-    required int end,
-  }) {
+  void doInitData({int? start, int? end}) {
     resetMinMax();
 
     /// 初始化所有子指标数据, 并汇总minmax.
@@ -551,7 +531,6 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
       if (childPaintObject == null) continue;
       childPaintObject.resetMinMax();
       final ret = childPaintObject.initData(
-        list: list,
         start: start,
         end: end,
       );

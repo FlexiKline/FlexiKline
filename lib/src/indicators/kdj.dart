@@ -65,12 +65,10 @@ class KDJPaintObject extends SinglePaintObjectBox<KDJIndicator>
   });
 
   @override
-  MinMax? initData({
-    required List<CandleModel> list,
-    required int start,
-    required int end,
-  }) {
-    return klineData.calculateAndCacheKDJ(
+  MinMax? initData({int? start, int? end}) {
+    if (!klineData.canPaintChart) return null;
+
+    return klineData.calculateKdjMinmax(
       param: indicator.calcParam,
     );
   }
