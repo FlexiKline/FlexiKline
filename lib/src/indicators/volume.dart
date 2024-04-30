@@ -65,9 +65,9 @@ class VolumePaintObject extends SinglePaintObjectBox<VolumeIndicator>
     required int start,
     required int end,
   }) {
-    MinMax? minmaxVol = klineData.calculateMaxminVol();
-    minmaxVol?.minToZero();
-    return minmaxVol;
+    final minmax = klineData.calculateMaxminVol();
+    minmax?.minToZero();
+    return minmax;
   }
 
   @override
@@ -82,7 +82,7 @@ class VolumePaintObject extends SinglePaintObjectBox<VolumeIndicator>
     }
 
     /// 绘制Volume柱状图
-    paintIndicatorChart(canvas, size);
+    paintVolumeChart(canvas, size);
   }
 
   @override
@@ -94,11 +94,11 @@ class VolumePaintObject extends SinglePaintObjectBox<VolumeIndicator>
   }
 
   /// 绘制Volume柱状图
-  void paintIndicatorChart(Canvas canvas, Size size) {
-    final data = klineData;
-    if (data.list.isEmpty) return;
-    int start = data.start;
-    int end = data.end;
+  void paintVolumeChart(Canvas canvas, Size size) {
+    if (!klineData.canPaintChart) return;
+    final list = klineData.list;
+    int start = klineData.start;
+    int end = klineData.end;
 
     final offset = startCandleDx - candleWidthHalf;
     final dyBottom = chartRect.bottom;
@@ -111,7 +111,7 @@ class VolumePaintObject extends SinglePaintObjectBox<VolumeIndicator>
         : setting.defShortBarPaint;
 
     for (var i = start; i < end; i++) {
-      final model = data.list[i];
+      final model = list[i];
       final dx = offset - (i - start) * candleActualWidth;
       final dy = valueToDy(model.vol);
       final isLong = model.close >= model.open;
@@ -133,6 +133,7 @@ class VolumePaintObject extends SinglePaintObjectBox<VolumeIndicator>
     if (indicator.tipsHeight <= 0) return null;
     model ??= offsetToCandle(offset);
     if (model == null) return null;
+
     Rect drawRect = nextTipsRect;
 
     final text = formatNumber(

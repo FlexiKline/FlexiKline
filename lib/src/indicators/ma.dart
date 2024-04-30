@@ -55,18 +55,18 @@ class MAPaintObject extends SinglePaintObjectBox<MAIndicator> {
     required int start,
     required int end,
   }) {
-    if (list.isEmpty || start < 0 || end >= list.length) return null;
-    MinMax? minMax;
+    if (!klineData.canPaintChart) return null;
+    MinMax? minmax;
     for (var param in indicator.calcParams) {
-      final ret = klineData.calculateAndCacheMA(
+      final ret = klineData.calculateAndCacheMa(
         param.count,
         start: start,
         end: end,
       );
-      minMax ??= ret;
-      minMax?.updateMinMax(ret);
+      minmax ??= ret;
+      minmax?.updateMinMax(ret);
     }
-    return minMax;
+    return minmax;
   }
 
   @override
@@ -81,30 +81,32 @@ class MAPaintObject extends SinglePaintObjectBox<MAIndicator> {
 
   /// 绘制MA指标线
   void paintMALine(Canvas canvas, Size size) {
-    final data = klineData;
-    if (data.list.isEmpty) return;
-    int start = data.start;
-    int end = (data.end + 1).clamp(start, data.list.length); // 多绘制一根蜡烛
+    if (!klineData.canPaintChart) return;
+    final list = klineData.list;
+    int start = klineData.start;
+    int end = (klineData.end + 1).clamp(start, list.length); // 多绘制一根蜡烛
 
     // try {
     //   // 保存画布状态
     //   canvas.save();
     //   // 裁剪绘制范围
     //   canvas.clipRect(setting.mainDrawRect);
+
     for (var param in indicator.calcParams) {
-      final countMaMap = klineData.getCountMaMap(param.count);
-      if (countMaMap.isEmpty) continue;
+      final maMap = klineData.getMaMap(param.count);
+      if (maMap.isEmpty) continue;
 
       final offset = startCandleDx - candleWidthHalf;
       CandleModel m;
+      MaResult? ret;
       final List<Offset> points = [];
       for (int i = start; i < end; i++) {
-        m = data.list[i];
+        m = list[i];
         final dx = offset - (i - start) * candleActualWidth;
-        MAResult? maRet = countMaMap[m.timestamp];
-        maRet ??= klineData.calculateMA(i, param.count);
-        if (maRet == null) continue;
-        final dy = valueToDy(maRet.val, correct: false);
+        ret = maMap[m.timestamp];
+        ret ??= klineData.calculateMa(i, param.count);
+        if (ret == null) continue;
+        final dy = valueToDy(ret.val, correct: false);
         points.add(Offset(dx, dy));
       }
 
@@ -133,28 +135,29 @@ class MAPaintObject extends SinglePaintObjectBox<MAIndicator> {
 
     final children = <TextSpan>[];
     for (var param in indicator.calcParams) {
-      final countMaMap = klineData.getCountMaMap(param.count);
-      if (countMaMap.isEmpty) continue;
+      final ret = klineData.getMaResult(
+        count: param.count,
+        ts: model.timestamp,
+      );
+      if (ret == null) continue;
 
-      final maVal = countMaMap.getItem(model.timestamp);
-      if (maVal != null) {
-        final text = formatNumber(
-          maVal.val,
-          precision: state.curKlineData.req.precision,
-          cutInvalidZero: true,
-          prefix: '${param.label}: ',
-          suffix: '  ',
-        );
-        children.add(TextSpan(
-          text: text,
-          style: TextStyle(
-            fontSize: setting.tipsDefaultTextSize,
-            color: param.color,
-            height: setting.tipsDefaultTextHeight,
-          ),
-        ));
-      }
+      final text = formatNumber(
+        ret.val,
+        precision: state.curKlineData.req.precision,
+        cutInvalidZero: true,
+        prefix: '${param.label}: ',
+        suffix: '  ',
+      );
+      children.add(TextSpan(
+        text: text,
+        style: TextStyle(
+          fontSize: setting.tipsDefaultTextSize,
+          color: param.color,
+          height: setting.tipsDefaultTextHeight,
+        ),
+      ));
     }
+
     if (children.isNotEmpty) {
       return canvas.drawText(
         offset: drawRect.topLeft,

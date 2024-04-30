@@ -16,9 +16,12 @@ import 'dart:math' as math;
 import 'package:decimal/decimal.dart';
 
 import '../extension/export.dart';
+import '../framework/indicator.dart';
+import '../indicators/kdj.dart';
 import '../model/export.dart';
 import 'base_data.dart';
 import 'candle_data.dart';
+import 'params.dart';
 import 'results.dart';
 
 mixin KDJData on BaseData, CandleData {
@@ -35,10 +38,37 @@ mixin KDJData on BaseData, CandleData {
     _kdjResultMap.clear();
   }
 
-  final Map<int, KDJReset> _kdjResultMap = {};
+  @override
+  void preprocess(
+    Indicator indicator, {
+    required int start,
+    required int end,
+    bool reset = false,
+  }) {
+    super.preprocess(indicator, start: start, end: end, reset: reset);
+    if (indicator is KDJIndicator) {
+      logd('preprocess KDJ => ${indicator.calcParam}');
+      calculateAndCacheKDJ(
+        param: indicator.calcParam,
+        start: start,
+        end: end,
+        reset: reset,
+      );
+    }
+  }
 
-  KDJReset? getKdjResult(int? ts) {
-    return _kdjResultMap.getItem(ts);
+  final Map<KDJParam, Map<int, KdjReset>> _kdjResultMap = {};
+
+  Map<int, KdjReset> getKdjMap(KDJParam param) {
+    _kdjResultMap[param] ??= {};
+    return _kdjResultMap[param]!;
+  }
+
+  KdjReset? getKdjResult({KDJParam? param, int? ts}) {
+    if (param != null && ts != null) {
+      return _kdjResultMap[param]?[ts];
+    }
+    return null;
   }
 
   /// 首先要计算周期（n日、n周等）的RSV值（即未成熟随机指标值），然后再计算K值、D值、J值等。
@@ -55,28 +85,32 @@ mixin KDJData on BaseData, CandleData {
   /// J值=3*第9日K值-2*第9日D值
   /// 若无前一日K值与D值，则可以分别用50代替。
   MinMax? calculateAndCacheKDJ({
-    required int n,
-    required int m1,
-    required int m2,
+    required KDJParam param,
     int? start,
     int? end,
+    bool reset = false,
   }) {
-    if (list.isEmpty) return null;
+    if (!param.isValid || isEmpty) return null;
     int len = list.length;
     start ??= this.start;
     end ??= this.end;
-    if (len < n || start < 0 || end > len) return null;
+    if (start < 0 || end > len) return null;
+
+    final kdjMap = getKdjMap(param);
+    if (reset) {
+      kdjMap.clear();
+    }
 
     // 计算从end到len之间n的偏移量
-    int offset = math.max(end + n - len, 0);
+    int offset = math.max(end + param.n - len, 0);
     int index = end - offset;
 
-    final m1k = Decimal.fromInt(m1 - 1);
-    final m1Div = Decimal.fromInt(m1);
-    final m2d = Decimal.fromInt(m2 - 1);
-    final m2Div = Decimal.fromInt(m2);
+    final m1k = Decimal.fromInt(param.m1 - 1);
+    final m1Div = Decimal.fromInt(param.m1);
+    final m2d = Decimal.fromInt(param.m2 - 1);
+    final m2Div = Decimal.fromInt(param.m2);
     MinMax? minmaxRet;
-    KDJReset? ret;
+    KdjReset? ret;
     Decimal rsv;
     CandleModel m;
     Decimal k = fifty;
@@ -87,23 +121,23 @@ mixin KDJData on BaseData, CandleData {
     for (int i = index; i >= start; i--) {
       m = list[i];
 
-      ret = getKdjResult(m.timestamp);
+      ret = kdjMap[m.timestamp];
       if (ret == null || ret.dirty) {
-        final minmax = calculateMaxmin(start: i, end: i + n);
+        final minmax = calculateMaxmin(start: i, end: i + param.n);
         if (minmax == null) continue;
         rsv = (m.close - minmax.min).div(minmax.divisor) * hundred;
         k = (m1k * k + rsv).div(m1Div);
         d = (m2d * d + k).div(m2Div);
         j = three * k - two * d;
 
-        ret = KDJReset(
+        ret = KdjReset(
           ts: m.timestamp,
           k: k,
           d: d,
           j: j,
           dirty: i == 0,
         );
-        _kdjResultMap[m.timestamp] = ret;
+        kdjMap[m.timestamp] = ret;
       }
 
       minmaxRet ??= ret.minmax;

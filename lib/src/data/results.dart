@@ -25,11 +25,11 @@ abstract class BaseResult {
 }
 
 /// MA, WMA, EMA计算结果
-class MAResult extends BaseResult {
+class MaResult extends BaseResult {
   final int count;
   final Decimal val;
 
-  MAResult({
+  MaResult({
     required this.count,
     required super.ts,
     required this.val,
@@ -38,7 +38,7 @@ class MAResult extends BaseResult {
 
   @override
   String toString() {
-    return 'MAResult(ts:$ts, count:$count => val:${val.str})';
+    return 'MaResult(ts:$ts, count:$count => val:${val.str})';
   }
 }
 
@@ -75,12 +75,12 @@ class MacdResult extends BaseResult {
 }
 
 /// KDJ指标计算结果
-class KDJReset extends BaseResult {
+class KdjReset extends BaseResult {
   final Decimal k;
   final Decimal d;
   final Decimal j;
 
-  KDJReset({
+  KdjReset({
     required super.ts,
     super.dirty = false,
     required this.k,
@@ -98,16 +98,16 @@ class KDJReset extends BaseResult {
 
   @override
   String toString() {
-    return 'KDJResult(ts:$ts, k:${k.str}, d:${d.str}, j:${j.str})';
+    return 'KdjReset(ts:$ts, k:${k.str}, d:${d.str}, j:${j.str})';
   }
 }
 
-class BOLLResult extends BaseResult {
+class BollResult extends BaseResult {
   final Decimal mb;
   final Decimal up;
   final Decimal dn;
 
-  BOLLResult({
+  BollResult({
     required super.ts,
     super.dirty = false,
     required this.mb,
@@ -117,7 +117,7 @@ class BOLLResult extends BaseResult {
 
   @override
   String toString() {
-    return 'BOLLResult(ts:$ts, mb:${mb.str}, up:${up.str}, dn:${dn.str})';
+    return 'BollResult(ts:$ts, mb:${mb.str}, up:${up.str}, dn:${dn.str})';
   }
 }
 

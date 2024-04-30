@@ -103,36 +103,37 @@ class CandlePaintObject extends SinglePaintObjectBox<CandleIndicator>
 
   /// 绘制蜡烛图
   void paintCandleChart(Canvas canvas, Size size) {
-    final data = klineData;
-    if (!data.canPaintChart) {
+    if (!klineData.canPaintChart) {
       logw('paintCandleChart Data.list is empty or Index is out of bounds');
       return;
     }
 
-    int start = data.start;
-    int end = data.end;
+    final list = klineData.list;
+    int start = klineData.start;
+    int end = klineData.end;
 
     final offset = startCandleDx - candleWidthHalf;
-    final bar = data.timerBar;
+    final bar = klineData.timerBar;
     Offset? maxHihgOffset, minLowOffset;
     bool hasEnough = paintDxOffset > 0;
-    Decimal maxHigh = data.list[start].high;
-    Decimal minLow = data.list[start].low;
+    Decimal maxHigh = list[start].high;
+    Decimal minLow = list[start].low;
+    CandleModel m;
     for (var i = start; i < end; i++) {
-      final model = data.list[i];
+      m = list[i];
       final dx = offset - (i - start) * candleActualWidth;
-      final isLong = model.close >= model.open;
+      final isLong = m.close >= m.open;
 
-      final highOff = Offset(dx, valueToDy(model.high));
-      final lowOff = Offset(dx, valueToDy(model.low));
+      final highOff = Offset(dx, valueToDy(m.high));
+      final lowOff = Offset(dx, valueToDy(m.low));
       canvas.drawLine(
         highOff,
         lowOff,
         isLong ? setting.candleLineLongPaint : setting.candleLineShortPaint,
       );
 
-      final openOff = Offset(dx, valueToDy(model.open));
-      final closeOff = Offset(dx, valueToDy(model.close));
+      final openOff = Offset(dx, valueToDy(m.open));
+      final closeOff = Offset(dx, valueToDy(m.close));
       canvas.drawLine(
         openOff,
         closeOff,
@@ -144,7 +145,7 @@ class CandlePaintObject extends SinglePaintObjectBox<CandleIndicator>
         paintXAxisTimeTick(
           canvas,
           bar: bar,
-          model: model,
+          model: m,
           offset: Offset(dx, chartRect.bottom),
         );
       }
@@ -152,23 +153,23 @@ class CandlePaintObject extends SinglePaintObjectBox<CandleIndicator>
       if (setting.isDrawPriceMark) {
         if (hasEnough) {
           // 满足一屏, 根据initData中的最大最小值来记录最大最小偏移量.
-          if (model.high == _maxHigh) {
+          if (m.high == _maxHigh) {
             maxHihgOffset = highOff;
             maxHigh = _maxHigh!;
           }
-          if (model.low == _minLow) {
+          if (m.low == _minLow) {
             minLowOffset = lowOff;
             minLow = _minLow!;
           }
         } else if (dx > 0) {
           // 如果当前绘制不足一屏, 最大最小绘制仅限可见区域.
-          if (model.high >= maxHigh) {
+          if (m.high >= maxHigh) {
             maxHihgOffset = highOff;
-            maxHigh = model.high;
+            maxHigh = m.high;
           }
-          if (model.low <= minLow) {
+          if (m.low <= minLow) {
             minLowOffset = lowOff;
-            minLow = model.low;
+            minLow = m.low;
           }
         }
       }

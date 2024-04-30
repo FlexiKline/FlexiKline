@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:math' as math;
-import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/foundation.dart';
 
+import '../extension/export.dart';
+import '../framework/indicator.dart';
 import '../model/export.dart';
 import '../utils/export.dart';
 
@@ -48,6 +48,17 @@ abstract class BaseData with KlineLog {
     end = 0;
   }
 
+  @protected
+  @mustCallSuper
+  void preprocess(
+    Indicator indicator, {
+    required int start,
+    required int end,
+    bool reset = false,
+  }) {
+    logd('preprocess BASE[$start, $end]$reset');
+  }
+
   // /// 绘制前: 重置计算结果.
   // @protected
   // @mustCallSuper
@@ -59,6 +70,7 @@ abstract class BaseData with KlineLog {
   List<CandleModel> _list = List.empty(growable: true);
   List<CandleModel> get list => _list;
 
+  int get length => list.length;
   bool get isEmpty => list.isEmpty;
 
   bool get canPaintChart {

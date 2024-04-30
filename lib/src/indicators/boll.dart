@@ -28,8 +28,7 @@ class BOLLIndicator extends SinglePaintObjectIndicator {
     required super.height,
     super.tipsHeight = defaultIndicatorTipsHeight,
     super.padding,
-    this.mid = 20,
-    this.std = 2,
+    this.calcParam = const BOLLParam(n: 20, std: 2),
     this.mbColor = const Color(0xFF886787),
     this.upColor = const Color(0xFFF0B527),
     this.dnColor = const Color(0xFFD85BE0),
@@ -42,8 +41,7 @@ class BOLLIndicator extends SinglePaintObjectIndicator {
   }) : fillColor = fillColor ?? mbColor.withOpacity(0.1);
 
   // BOLL相关参数
-  final int mid;
-  final int std;
+  final BOLLParam calcParam;
   final Color mbColor;
   final Color upColor;
   final Color dnColor;
@@ -77,11 +75,9 @@ class BOLLPaintObject extends SinglePaintObjectBox<BOLLIndicator> {
     required int start,
     required int end,
   }) {
-    final minmax = klineData.calculateAndCacheBOLL(
-      n: indicator.mid,
-      std: indicator.std,
+    return klineData.calculateAndCacheBoll(
+      param: indicator.calcParam,
     );
-    return minmax;
   }
 
   @override
@@ -97,17 +93,19 @@ class BOLLPaintObject extends SinglePaintObjectBox<BOLLIndicator> {
 
   /// 绘制BOLL线
   void paintBollLine(Canvas canvas, Size size) {
-    final data = klineData;
-    if (data.list.isEmpty) return;
-    int start = data.start;
-    int end = (data.end + 1).clamp(start, data.list.length); // 多绘制一根蜡烛
-    BOLLResult? ret;
+    final bollMap = klineData.getBollMap(indicator.calcParam);
+    if (bollMap.isEmpty || !klineData.canPaintChart) return;
+    final list = klineData.list;
+    int start = klineData.start;
+    int end = (klineData.end + 1).clamp(start, list.length); // 多绘制一根蜡烛
+
+    BollResult? ret;
     final List<Offset> mbPoints = [];
     final List<Offset> upPoints = [];
     final List<Offset> dnPoints = [];
     final offset = startCandleDx - candleWidthHalf;
     for (int i = start; i < end; i++) {
-      ret = klineData.getBollResult(data.list[i].timestamp);
+      ret = bollMap[list[i].timestamp];
       if (ret == null) continue;
       final dx = offset - (i - start) * candleActualWidth;
       mbPoints.add(Offset(dx, valueToDy(ret.mb, correct: false)));
@@ -155,7 +153,10 @@ class BOLLPaintObject extends SinglePaintObjectBox<BOLLIndicator> {
     model ??= offsetToCandle(offset);
     if (model == null) return null;
 
-    final ret = klineData.getBollResult(model.timestamp);
+    final ret = klineData.getBollResult(
+      param: indicator.calcParam,
+      ts: model.timestamp,
+    );
     if (ret == null) return null;
 
     final precision = indicator.precision ?? klineData.precision;

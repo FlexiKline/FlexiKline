@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:flutter/material.dart';
-
 enum IndicatorType {
   candle,
   ma,
@@ -23,28 +21,4 @@ enum IndicatorType {
   volume,
   macd,
   kdj,
-}
-
-class MaParam {
-  final String label;
-  final int count;
-  final Color color;
-
-  const MaParam({
-    required this.label,
-    required this.count,
-    required this.color,
-  });
-}
-
-class EMAParam {
-  final String label;
-  final int count;
-  final Color color;
-
-  const EMAParam({
-    required this.label,
-    required this.count,
-    required this.color,
-  });
 }

@@ -16,9 +16,12 @@ import 'dart:math' as math;
 import 'package:decimal/decimal.dart';
 
 import '../extension/export.dart';
+import '../framework/indicator.dart';
+import '../indicators/boll.dart';
 import '../model/export.dart';
 import 'base_data.dart';
 import 'ma_data.dart';
+import 'params.dart';
 import 'results.dart';
 
 mixin BOLLData on BaseData, MAData {
@@ -35,16 +38,43 @@ mixin BOLLData on BaseData, MAData {
     _bollResultMap.clear();
   }
 
-  /// boll数据缓存 <timestamp, result>
-  final Map<int, BOLLResult> _bollResultMap = {};
+  @override
+  void preprocess(
+    Indicator indicator, {
+    required int start,
+    required int end,
+    bool reset = false,
+  }) {
+    super.preprocess(indicator, start: start, end: end, reset: reset);
+    if (indicator is BOLLIndicator) {
+      logd('preprocess BOLL => ${indicator.calcParam}');
+      calculateAndCacheBoll(
+        param: indicator.calcParam,
+        start: start,
+        end: end,
+        reset: reset,
+      );
+    }
+  }
 
-  BOLLResult? getBollResult(int? ts) {
-    return _bollResultMap.getItem(ts);
+  /// boll数据缓存 <timestamp, result>
+  final Map<BOLLParam, Map<int, BollResult>> _bollResultMap = {};
+
+  Map<int, BollResult> getBollMap(BOLLParam param) {
+    _bollResultMap[param] ??= {};
+    return _bollResultMap[param]!;
+  }
+
+  BollResult? getBollResult({BOLLParam? param, int? ts}) {
+    if (param != null && ts != null) {
+      return _bollResultMap[param]?[ts];
+    }
+    return null;
   }
 
   /// 计算标准差MD
   /// MD=平方根N日的（C－MA）的两次方之和除以N
-  Decimal calculateBollMd({
+  Decimal _calculateBollMd({
     required Decimal ma,
     required int index,
     required int n,
@@ -72,25 +102,31 @@ mixin BOLLData on BaseData, MAData {
   ///   MB=（N－1）日的MA
   ///   UP=MB＋2×MD
   ///   DN=MB－2×MD
-  MinMax? calculateAndCacheBOLL({
-    required int n,
-    required int std,
+  MinMax? calculateAndCacheBoll({
+    required BOLLParam param,
     int? start,
     int? end,
+    bool reset = false,
   }) {
-    if (list.isEmpty) return null;
+    if (!param.isValid || list.isEmpty) return null;
     int len = list.length;
     start ??= this.start;
     end ??= this.end;
-    if (len < n || start < 0 || end > len) return null;
+    if (start < 0 || end > len) return null;
+
+    // 获取count对应的Emap数据结果
+    final bollMap = getBollMap(param);
+    if (reset) {
+      bollMap.clear();
+    }
 
     // 计算从end到len之间mid的偏移量
-    int offset = math.max(end + n - len, 0);
+    int offset = math.max(end + param.n - len, 0);
     int index = end - offset;
 
     Decimal sum = Decimal.zero;
     // 计算index之前N-1日的收盘价之和.
-    for (int i = index + 1; i < index + n; i++) {
+    for (int i = index + 1; i < index + param.n; i++) {
       sum += list[i].close;
     }
 
@@ -99,20 +135,20 @@ mixin BOLLData on BaseData, MAData {
     Decimal up;
     Decimal dn;
     CandleModel m;
-    BOLLResult? ret;
+    BollResult? ret;
     MinMax? minmax;
-    final stdD = Decimal.fromInt(std);
+    final stdD = Decimal.fromInt(param.std);
     for (int i = index; i >= start; i--) {
       m = list[i];
       sum += m.close;
 
-      ret = getBollResult(m.timestamp);
+      ret = bollMap[m.timestamp];
       if (ret == null || ret.dirty) {
-        ma = sum.div(n.d);
-        md = calculateBollMd(ma: ma, index: i, n: n);
+        ma = sum.div(param.n.d);
+        md = _calculateBollMd(ma: ma, index: i, n: param.n);
         up = ma + stdD * md;
         dn = ma - stdD * md;
-        ret = BOLLResult(
+        ret = BollResult(
           ts: m.timestamp,
           mb: ma,
           up: up,
@@ -120,13 +156,13 @@ mixin BOLLData on BaseData, MAData {
           dirty: i == 0,
         );
         // logd('calculateAndCacheBOLL ret:$ret');
-        _bollResultMap[m.timestamp] = ret;
+        bollMap[m.timestamp] = ret;
       }
 
       minmax ??= MinMax(max: ret.up, min: ret.dn);
       minmax.updateMinMax(MinMax(max: ret.up, min: ret.dn));
 
-      sum -= list[i + n - 1].close;
+      sum -= list[i + param.n - 1].close;
     }
 
     return minmax;

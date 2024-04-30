@@ -54,19 +54,18 @@ class MAVolPaintObject extends SinglePaintObjectBox<MAVolIndicator> {
     required int start,
     required int end,
   }) {
-    if (list.isEmpty || start < 0 || end >= list.length) return null;
-    MinMax? minMax;
+    if (!klineData.canPaintChart) return null;
+    MinMax? minmax;
     for (var param in indicator.calcParams) {
-      final ret = klineData.calculateAndCacheMAVol(
-        list,
+      final ret = klineData.calculateAndCacheMavol(
         param.count,
         start: start,
         end: end,
       );
-      minMax ??= ret;
-      minMax?.updateMinMax(ret);
+      minmax ??= ret;
+      minmax?.updateMinMax(ret);
     }
-    return minMax;
+    return minmax;
   }
 
   @override
@@ -76,7 +75,7 @@ class MAVolPaintObject extends SinglePaintObjectBox<MAVolIndicator> {
 
   @override
   void onCross(Canvas canvas, Offset offset) {
-    // if (indicator.tipsHeight <= 0) return;
+    ///
   }
 
   /// 绘制MA指标线
@@ -91,19 +90,21 @@ class MAVolPaintObject extends SinglePaintObjectBox<MAVolIndicator> {
     //   canvas.save();
     //   // 裁剪绘制范围
     //   canvas.clipRect(setting.mainDrawRect);
+
     for (var param in indicator.calcParams) {
-      final maVolMap = klineData.getCountMaVolMap(param.count);
+      final maVolMap = klineData.getMavolMap(param.count);
       if (maVolMap.isEmpty) continue;
 
       final offset = startCandleDx - candleWidthHalf;
       CandleModel m;
+      MaResult? maRet;
       final List<Offset> points = [];
       for (int i = start; i < end; i++) {
         m = data.list[i];
         final dx = offset - (i - start) * candleActualWidth;
-        MAResult? maRet = maVolMap[m.timestamp];
-        maRet ??= klineData.calculateMAVol(data.list, i, param.count);
-        // if (maData == null) continue;
+        maRet = maVolMap[m.timestamp];
+        maRet ??= klineData.calculateMavol(i, param.count);
+        if (maRet == null) continue;
         final dy = valueToDy(maRet.val, correct: false);
         points.add(Offset(dx, dy));
       }
@@ -133,28 +134,29 @@ class MAVolPaintObject extends SinglePaintObjectBox<MAVolIndicator> {
 
     final children = <TextSpan>[];
     for (var param in indicator.calcParams) {
-      final maVolMap = klineData.getCountMaVolMap(param.count);
-      if (maVolMap.isEmpty) continue;
+      final ret = klineData.getMavolResult(
+        count: param.count,
+        ts: model.timestamp,
+      );
+      if (ret == null) continue;
 
-      final maVal = maVolMap.getItem(model.timestamp);
-      if (maVal != null) {
-        final text = formatNumber(
-          maVal.val,
-          precision: state.curKlineData.req.precision,
-          cutInvalidZero: true,
-          prefix: '${param.label}: ',
-          suffix: '  ',
-        );
-        children.add(TextSpan(
-          text: text,
-          style: TextStyle(
-            fontSize: setting.tipsDefaultTextSize,
-            color: param.color,
-            height: setting.tipsDefaultTextHeight,
-          ),
-        ));
-      }
+      final text = formatNumber(
+        ret.val,
+        precision: state.curKlineData.req.precision,
+        cutInvalidZero: true,
+        prefix: '${param.label}: ',
+        suffix: '  ',
+      );
+      children.add(TextSpan(
+        text: text,
+        style: TextStyle(
+          fontSize: setting.tipsDefaultTextSize,
+          color: param.color,
+          height: setting.tipsDefaultTextHeight,
+        ),
+      ));
     }
+
     if (children.isNotEmpty) {
       return canvas.drawText(
         offset: drawRect.topLeft,

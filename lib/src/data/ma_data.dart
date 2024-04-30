@@ -16,6 +16,8 @@ import 'dart:math' as math;
 import 'package:decimal/decimal.dart';
 
 import '../extension/export.dart';
+import '../framework/indicator.dart';
+import '../indicators/ma.dart';
 import '../model/export.dart';
 import 'base_data.dart';
 import 'results.dart';
@@ -32,31 +34,52 @@ mixin MAData on BaseData {
     super.dispose();
     logd('dispose MA');
     // TODO: 是否要缓存
-    _count2ts2MaMap.clear();
+    _maResultMap.clear();
+  }
+
+  @override
+  void preprocess(
+    Indicator indicator, {
+    required int start,
+    required int end,
+    bool reset = false,
+  }) {
+    super.preprocess(indicator, start: start, end: end, reset: reset);
+    if (indicator is MAIndicator) {
+      for (var param in indicator.calcParams) {
+        logd('preprocess MA => ${param.count}');
+        calculateAndCacheMa(
+          param.count,
+          start: start,
+          end: end,
+          reset: reset,
+        );
+      }
+    }
   }
 
   /// MA数据缓存 <count, <timestamp, Decimal>>
-  final Map<int, Map<int, MAResult>> _count2ts2MaMap = {};
+  final Map<int, Map<int, MaResult>> _maResultMap = {};
 
-  Map<int, MAResult> getCountMaMap(int count) {
-    _count2ts2MaMap[count] ??= {};
-    return _count2ts2MaMap[count]!;
+  Map<int, MaResult> getMaMap(int count) {
+    _maResultMap[count] ??= {};
+    return _maResultMap[count]!;
   }
 
-  MAResult? getMaResult({int? count, int? ts}) {
+  MaResult? getMaResult({int? count, int? ts}) {
     if (count != null && ts != null) {
-      return _count2ts2MaMap[count]?[ts];
+      return _maResultMap[count]?[ts];
     }
     return null;
   }
 
   /// 计算从index(包含index)开始的count个收盘价的平均数
   /// 注: 如果index开始后不足count, 不矛计算, 返回空.
-  MAResult? calculateMA(
+  MaResult? calculateMa(
     int index,
     int count,
   ) {
-    if (list.isEmpty) return null;
+    if (isEmpty) return null;
     int len = list.length;
     if (count <= 0 || index < 0 || index + count > len) return null;
 
@@ -72,7 +95,7 @@ mixin MAData on BaseData {
       sum += list[i].close;
     }
 
-    return MAResult(
+    return MaResult(
       count: count,
       ts: m.timestamp,
       val: sum.div(count.d),
@@ -83,20 +106,19 @@ mixin MAData on BaseData {
   /// 计算并缓存MA数据.
   /// 如果start和end指定了, 只计算[start, end]区间内.
   /// 否则, 从当前绘制的[start, end]开始计算.
-  MinMax? calculateAndCacheMA(
+  MinMax? calculateAndCacheMa(
     int count, {
     int? start,
     int? end,
     bool reset = false,
   }) {
-    if (list.isEmpty) return null;
+    if (count <= 0 || isEmpty) return null;
     int len = list.length;
     start ??= this.start;
     end ??= this.end;
-    if (len < count || start < 0 || end > len) return null;
+    if (start < 0 || end > len) return null;
 
-    Map<int, MAResult> maMap = getCountMaMap(count);
-
+    final maMap = getMaMap(count);
     if (reset) {
       maMap.clear();
     }
@@ -105,8 +127,8 @@ mixin MAData on BaseData {
     int offset = math.max(end + count - len, 0);
     int index = end - offset;
     CandleModel m;
-    MAResult? preRet = maMap.getItem(list.getItem(index + 1)?.timestamp);
-    MAResult? curRet;
+    MaResult? preRet = maMap.getItem(list.getItem(index + 1)?.timestamp);
+    MaResult? curRet;
     MinMax? minmax;
     Decimal cD = Decimal.fromInt(count);
     for (int i = index; i >= start; i--) {
@@ -116,14 +138,14 @@ mixin MAData on BaseData {
         // 没有缓存或无效, 计算MA
         if (preRet != null && !preRet.dirty && i + count < len) {
           // 用上一次结果进行换算当前结果
-          curRet = MAResult(
+          curRet = MaResult(
             count: count,
             ts: m.timestamp,
             val: ((preRet.val * cD) - list[i + count].close + m.close).div(cD),
             dirty: i == 0,
           );
         } else {
-          curRet = calculateMA(index, count);
+          curRet = calculateMa(index, count);
         }
       }
 
@@ -136,41 +158,5 @@ mixin MAData on BaseData {
     }
 
     return minmax;
-
-    // if (maMap.isNotEmpty) {
-    //   if (reset ||
-    //       maMap.getItem(list.getItem(start)?.timestamp) == null ||
-    //       maMap.getItem(list.getItem(end)?.timestamp) == null) {
-    //     logd(
-    //       'calculateAndCacheMA reset:$reset >>> maMapLen:${maMap.length}, listLen$len : [$start, $end]',
-    //     );
-    //     // countMaMap.clear(); // 清理旧数据. TODO: 如何清理dirty数据
-    //   } else {
-    //     logd('calculateAndCacheMA use cache!!! [$start, $end]');
-    //     if (start == 0) {
-    //       //如果start是0, 有可能更新了最新价, 重新计算
-    //       maMap[list.first.timestamp] = calculateMA(list, 0, count);
-    //     }
-    //   }
-    // }
-
-    // int index = end; // 多算一个
-    // CandleModel m = list[index];
-    // MAResult pre = maMap[m.timestamp] ?? calculateMA(list, index, count);
-    // maMap[m.timestamp] = pre;
-    // final minmax = MinMax(max: pre.val, min: pre.val);
-    // for (int i = index - 1; i >= start; i--) {
-    //   m = list[i];
-    //   MAResult? data = maMap[m.timestamp];
-    //   if (data == null) {
-    //     // TODO: 优化: 利用pre去计算.
-    //     // val = pre * math.
-    //   }
-    //   data ??= calculateMA(list, i, count);
-    //   if (needReturn) minmax.updateMinMaxByVal(data.val);
-    //   pre = data;
-    //   maMap[m.timestamp] = data;
-    // }
-    // return needReturn ? minmax : null;
   }
 }

@@ -34,9 +34,7 @@ class KDJIndicator extends SinglePaintObjectIndicator {
     required super.height,
     super.tipsHeight = defaultIndicatorTipsHeight,
     super.padding,
-    this.n = 9,
-    this.m1 = 3,
-    this.m2 = 3,
+    this.calcParam = const KDJParam(n: 9, m1: 3, m2: 3),
     this.kColor = const Color(0xFF7A5C79),
     this.dColor = const Color(0xFFFABD3F),
     this.jColor = const Color(0xFFBB72CA),
@@ -44,9 +42,7 @@ class KDJIndicator extends SinglePaintObjectIndicator {
     this.precision = 2,
   });
 
-  final int n;
-  final int m1;
-  final int m2;
+  final KDJParam calcParam;
   final Color kColor;
   final Color dColor;
   final Color jColor;
@@ -74,12 +70,9 @@ class KDJPaintObject extends SinglePaintObjectBox<KDJIndicator>
     required int start,
     required int end,
   }) {
-    final minmax = klineData.calculateAndCacheKDJ(
-      n: indicator.n,
-      m1: indicator.m1,
-      m2: indicator.m2,
+    return klineData.calculateAndCacheKDJ(
+      param: indicator.calcParam,
     );
-    return minmax;
   }
 
   @override
@@ -102,17 +95,19 @@ class KDJPaintObject extends SinglePaintObjectBox<KDJIndicator>
   }
 
   void paintKDJLine(Canvas canvas, Size size) {
-    final data = klineData;
-    if (data.list.isEmpty) return;
-    int start = data.start;
-    int end = (data.end + 1).clamp(start, data.list.length); // 多绘制一根蜡烛
-    KDJReset? ret;
+    final kdjMap = klineData.getKdjMap(indicator.calcParam);
+    if (kdjMap.isEmpty || !klineData.canPaintChart) return;
+    final list = klineData.list;
+    int start = klineData.start;
+    int end = (klineData.end + 1).clamp(start, list.length); // 多绘制一根蜡烛
+
+    KdjReset? ret;
     final List<Offset> kPoints = [];
     final List<Offset> dPoints = [];
     final List<Offset> jPoints = [];
     final offset = startCandleDx - candleWidthHalf;
     for (int i = start; i < end; i++) {
-      ret = klineData.getKdjResult(data.list[i].timestamp);
+      ret = kdjMap[list[i].timestamp];
       if (ret == null) continue;
       final dx = offset - (i - start) * candleActualWidth;
       kPoints.add(Offset(dx, valueToDy(ret.k, correct: false)));
@@ -151,7 +146,10 @@ class KDJPaintObject extends SinglePaintObjectBox<KDJIndicator>
     model ??= offsetToCandle(offset);
     if (model == null) return null;
 
-    final ret = klineData.getKdjResult(model.timestamp);
+    final ret = klineData.getKdjResult(
+      param: indicator.calcParam,
+      ts: model.timestamp,
+    );
     if (ret == null) return null;
 
     Rect drawRect = nextTipsRect;

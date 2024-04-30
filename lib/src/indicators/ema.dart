@@ -62,19 +62,18 @@ class EMAPaintObject extends SinglePaintObjectBox<EMAIndicator> {
     required int start,
     required int end,
   }) {
-    if (list.isEmpty || start < 0 || end >= list.length) return null;
-    MinMax? minMax;
+    if (!klineData.canPaintChart) return null;
+    MinMax? minmax;
     for (var param in indicator.calcParams) {
-      final ret = klineData.calculateAndCacheEMA(
-        list,
+      final ret = klineData.calculateMinmaxEma(
         param.count,
         start: start,
         end: end,
       );
-      minMax ??= ret;
-      minMax?.updateMinMax(ret);
+      minmax ??= ret;
+      minmax?.updateMinMax(ret);
     }
-    return minMax;
+    return minmax;
   }
 
   @override
@@ -89,10 +88,10 @@ class EMAPaintObject extends SinglePaintObjectBox<EMAIndicator> {
 
   /// 绘制EMA线
   void paintEMALine(Canvas canvas, Size size) {
-    final data = klineData;
-    if (data.list.isEmpty) return;
-    int start = data.start;
-    int end = (data.end + 1).clamp(start, data.list.length); // 多绘制一根蜡烛
+    if (!klineData.canPaintChart) return;
+    final list = klineData.list;
+    int start = klineData.start;
+    int end = (klineData.end + 1).clamp(start, list.length); // 多绘制一根蜡烛
 
     // try {
     //   /// 保存画布状态
@@ -101,18 +100,19 @@ class EMAPaintObject extends SinglePaintObjectBox<EMAIndicator> {
     //   canvas.clipRect(setting.mainDrawRect);
 
     for (var param in indicator.calcParams) {
-      final emaMap = klineData.getCountEmaMap(param.count);
+      final emaMap = klineData.getEmaMap(param.count);
       if (emaMap.isEmpty) continue;
 
       final offset = startCandleDx - candleWidthHalf;
       CandleModel m;
+      MaResult? ret;
       final List<Offset> points = [];
       for (int i = start; i < end; i++) {
-        m = data.list[i];
+        m = list[i];
         final dx = offset - (i - start) * candleActualWidth;
-        final emaData = emaMap[m.timestamp];
-        if (emaData == null) continue;
-        final dy = valueToDy(emaData.val, correct: false);
+        ret = emaMap[m.timestamp];
+        if (ret == null) continue;
+        final dy = valueToDy(ret.val, correct: false);
         points.add(Offset(dx, dy));
       }
 
@@ -141,27 +141,27 @@ class EMAPaintObject extends SinglePaintObjectBox<EMAIndicator> {
 
     final children = <TextSpan>[];
     for (var param in indicator.calcParams) {
-      final emaMap = klineData.getCountEmaMap(param.count);
-      if (emaMap.isEmpty) continue;
+      final ret = klineData.getEmaResult(
+        count: param.count,
+        ts: model.timestamp,
+      );
+      if (ret == null) continue;
 
-      final emaData = emaMap.getItem(model.timestamp);
-      if (emaData != null) {
-        final text = formatNumber(
-          emaData.val,
-          precision: state.curKlineData.req.precision,
-          cutInvalidZero: true,
-          prefix: '${param.label}: ',
-          suffix: '  ',
-        );
-        children.add(TextSpan(
-          text: text,
-          style: TextStyle(
-            fontSize: setting.tipsDefaultTextSize,
-            color: param.color,
-            height: setting.tipsDefaultTextHeight,
-          ),
-        ));
-      }
+      final text = formatNumber(
+        ret.val,
+        precision: state.curKlineData.req.precision,
+        cutInvalidZero: true,
+        prefix: '${param.label}: ',
+        suffix: '  ',
+      );
+      children.add(TextSpan(
+        text: text,
+        style: TextStyle(
+          fontSize: setting.tipsDefaultTextSize,
+          color: param.color,
+          height: setting.tipsDefaultTextHeight,
+        ),
+      ));
     }
     if (children.isNotEmpty) {
       return canvas.drawText(

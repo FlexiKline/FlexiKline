@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:math' as math;
 import 'package:decimal/decimal.dart';
 
 import '../extension/export.dart';
+import '../framework/indicator.dart';
+import '../indicators/ema.dart';
 import '../model/export.dart';
 import 'base_data.dart';
 import 'results.dart';
@@ -32,50 +33,52 @@ mixin EMAData on BaseData {
     super.dispose();
     logd('dispose EMA');
     // TODO: 是否要缓存
-    _count2ts2dataEmaMap.clear();
+    _emaResultMap.clear();
+  }
+
+  @override
+  void preprocess(
+    Indicator indicator, {
+    required int start,
+    required int end,
+    bool reset = false,
+  }) {
+    super.preprocess(indicator, start: start, end: end, reset: reset);
+    if (indicator is EMAIndicator) {
+      for (var param in indicator.calcParams) {
+        logd('preprocess EMA => ${param.count}');
+        calculateEma(param.count);
+      }
+    }
   }
 
   /// EMA数据缓存 <count, <timestamp, result>>
-  final Map<int, Map<int, MAResult>> _count2ts2dataEmaMap = {};
+  final Map<int, Map<int, MaResult>> _emaResultMap = {};
 
-  Map<int, MAResult> getCountEmaMap(int count) {
-    _count2ts2dataEmaMap[count] ??= {};
-    return _count2ts2dataEmaMap[count]!;
+  Map<int, MaResult> getEmaMap(int count) {
+    _emaResultMap[count] ??= {};
+    return _emaResultMap[count]!;
   }
 
-  void clearEmaMap(int count) {
-    _count2ts2dataEmaMap[count]?.clear();
-  }
-
-  bool isEnoughEmaDataInCache(List<CandleModel> list, int count) {
-    final emaMap = getCountEmaMap(count);
-    if (emaMap.isNotEmpty) {
-      return emaMap.length >= list.length - count;
-    }
-    return false;
-  }
-
-  MAResult? getEmaResult(int? ts, int? count) {
+  MaResult? getEmaResult({int? count, int? ts}) {
     if (count != null && ts != null) {
-      return _count2ts2dataEmaMap[count]?[ts];
+      return _emaResultMap[count]?[ts];
     }
     return null;
   }
 
   /// 加权移动平均数Weighted Moving Average
-  Decimal calculateWMA(
+  /// WMA = price[1] * n + price[2] * (n-1) + ... + price[n] / n * (n+1) / 2
+  Decimal? calculateWMA(
     int index,
     int count,
   ) {
-    final dataLen = list.length;
-    assert(
-      index >= 0 && index < dataLen,
-      'calculateWMA($count) index is invalid',
-    );
-    count = math.min(count, dataLen - index);
+    if (isEmpty) return null;
+    int len = list.length;
+    if (count <= 0 || index < 0 || index + count > len) return null;
+
     final weight = count * (count + 1) / 2;
     int j = count;
-
     Decimal sum = Decimal.zero;
     for (int i = index; i < index + count; i++) {
       sum += list[i].close * (j-- / weight).d;
@@ -83,24 +86,82 @@ mixin EMAData on BaseData {
     return sum;
   }
 
-  /// 从缓存中获取[start, end]之间的最大最小值.
-  MinMax? getEMAMinmaxFromCache(
-    List<CandleModel> list,
-    int count,
-    int start,
-    int end,
-  ) {
+  /// 指数平滑移动平均线Exponential Moving Averages
+  /// 由于当日EMA计算依赖于昨日EMA, 所以数据从最后开始计算, 并缓存,
+  /// 注: 如果有旧数据加入列表, 需要从最后的数据开始重新计算.
+  /// 公式：
+  /// 1）快速平滑移动平均线（EMA）是12日的，计算公式为：
+  ///   EMA(12)=2*今收盘价/(12+1)+11*昨日EMA(12)/(12+1)
+  /// 2）慢速平滑移动平均线（EMA）是26日的，计算公式为：
+  ///   EMA(26)=2*今收盘价/(26+1)+25*昨日EMA(26)/(26+1)
+  void calculateEma(int count) {
+    if (count <= 0 || !canPaintChart) return;
     final len = list.length;
-    if (start < 0 && end > len) return null;
-    final emaMap = getCountEmaMap(count);
-    if (emaMap.isEmpty ||
-        emaMap.length < len - count ||
-        emaMap.getItem(list[start].timestamp) == null) {
-      // 校验emaMap中是否存在缓存数据. 如果不存在直接返回null
-      return null;
+    if (len < count) return;
+
+    // 获取count对应的Emap数据结果, 并清空它.
+    Map<int, MaResult> emaMap = getEmaMap(count);
+    if (emaMap.isNotEmpty) emaMap.clear();
+
+    // 计算从end到len之间count的偏移量
+    int index = len - count;
+    CandleModel m = list[index];
+
+    /// 初始值采用count日的WMA
+    final weight = count * (count + 1) / 2;
+    int j = count;
+    Decimal ema = Decimal.zero;
+    for (int i = index; i < index + count; i++) {
+      ema += list[i].close * (j-- / weight).d;
     }
+
+    emaMap[m.timestamp] = MaResult(
+      ts: m.timestamp,
+      count: count,
+      val: ema,
+      dirty: true,
+    );
+
+    final preCount = Decimal.fromInt(count - 1);
+    final nextCount = Decimal.fromInt(count + 1);
+    for (int i = index - 1; i >= 0; i--) {
+      m = list[i];
+      ema = ((two * m.close) + ema * preCount).div(nextCount);
+      emaMap[m.timestamp] = MaResult(
+        ts: m.timestamp,
+        count: count,
+        val: ema,
+        dirty: true,
+      );
+    }
+  }
+
+  /// 计算并缓存EMA数据
+  /// 注: 计算会全量计算
+  MinMax? calculateMinmaxEma(
+    int count, {
+    int? start,
+    int? end,
+    bool reset = false,
+  }) {
+    if (count <= 0 || isEmpty) return null;
+    int len = list.length;
+    start ??= this.start;
+    end ??= this.end;
+    if (start < 0 || end > len) return null;
+
+    final emaMap = getEmaMap(count);
+    if (reset) {
+      emaMap.clear();
+    }
+
+    // 说明当前count对应的EMA数量不够; 需要重新计算
+    if (emaMap.length < len - count + 1) {
+      calculateEma(count);
+    }
+
     MinMax? minMax;
-    MAResult? data;
+    MaResult? data;
     for (int i = end - 1; i >= start; i--) {
       data = emaMap[list[i].timestamp];
       if (data != null) {
@@ -109,70 +170,5 @@ mixin EMAData on BaseData {
       }
     }
     return minMax;
-  }
-
-  /// 指数平滑移动平均线Exponential Moving Averages
-  /// 由于当日EMA计算依赖于昨日EMA, 所以数据从最后开始计算, 并缓存,
-  /// 注: 如果有旧数据加入列表, 需要从最旧的数据开始重新计算.
-  /// 公式：
-  /// 1）快速平滑移动平均线（EMA）是12日的，计算公式为：
-  ///   EMA(12)=2*今收盘价/(12+1)+11*昨日EMA(12)/(12+1)
-  /// 2）慢速平滑移动平均线（EMA）是26日的，计算公式为：
-  ///   EMA(26)=2*今收盘价/(26+1)+25*昨日EMA(26)/(26+1)
-  /// TODO: 待优化
-  MinMax? calculateAndCacheEMA(
-    List<CandleModel> list,
-    int count, {
-    int? start,
-    int? end,
-    bool reset = false,
-  }) {
-    if (list.isEmpty) return null;
-    final len = list.length;
-    if (len < count) return null;
-
-    bool needReturn = start != null && end != null && start >= 0 && end < len;
-    start ??= 0;
-    end ??= len;
-    if (start < 0 || end > len) return null;
-
-    if (reset || !isEnoughEmaDataInCache(list, count)) {
-      // EMA指标保证从[end-count, start(0)]的计算. 如果不够, 说明有新数据加入, 需要重新计算
-      logd('calculateAnCacheEMA(reset:$reset) clearEmaMap($count)');
-      clearEmaMap(count);
-    }
-
-    Map<int, MAResult> countEmaMap = getCountEmaMap(count);
-    if (countEmaMap.isNotEmpty) {
-      //logd('calculateAnCacheEMA immediate use cache!!!');
-      if (needReturn) {
-        return getEMAMinmaxFromCache(list, count, start, end);
-      }
-      return null;
-    }
-
-    // 初始采用WMA
-    int index = len - count;
-    Decimal lastEma = calculateWMA(index, count);
-    CandleModel m = list[index];
-    countEmaMap[m.timestamp] = MAResult(
-      ts: m.timestamp,
-      count: count,
-      val: lastEma,
-      dirty: true,
-    );
-    for (int i = index - 1; i >= 0; i--) {
-      m = list[i];
-      lastEma = ((two * m.close) + lastEma * (count - 1).d).div((count + 1).d);
-      countEmaMap[m.timestamp] = MAResult(
-        ts: m.timestamp,
-        count: count,
-        val: lastEma,
-      );
-    }
-    if (needReturn) {
-      return getEMAMinmaxFromCache(list, count, start, end);
-    }
-    return null;
   }
 }

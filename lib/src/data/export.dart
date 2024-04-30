@@ -14,4 +14,5 @@
 
 export 'kline_data.dart';
 export 'base_data.dart';
+export 'params.dart';
 export 'results.dart';

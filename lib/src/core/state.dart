@@ -26,7 +26,7 @@ import 'setting.dart';
 /// 状态管理: 负责数据的管理, 缓存, 切换, 计算
 mixin StateBinding
     on KlineBindingBase, SettingBinding
-    implements IState, IChart, ICross {
+    implements IState, IChart, ICross, IConfig {
   @override
   void initBinding() {
     super.initBinding();
@@ -184,6 +184,21 @@ mixin StateBinding
     // curKlineData.calculateMaxmin();
   }
 
+  void preprocessIndicatorData(KlineData data) {
+    if (data.isEmpty) return;
+
+    const start = 0;
+    final end = data.length;
+
+    for (var child in mainIndicator.children) {
+      data.preprocess(child, start: start, end: end);
+    }
+
+    for (var indicator in subIndicators) {
+      data.preprocess(indicator, start: start, end: end);
+    }
+  }
+
   /// 起动loading
   /// req: 标记当前请求
   /// return: 返回false代表使用了缓存, 不展示loading了
@@ -214,6 +229,7 @@ mixin StateBinding
     }
     data = KlineData(req, list: List.of(list), logger: loggerDelegate);
     _klineDataCache[req.key] = data;
+    preprocessIndicatorData(data);
     if (curKlineData.invalid || req.key == curDataKey) {
       curKlineData = data;
     }
@@ -231,6 +247,7 @@ mixin StateBinding
     final oldLen = data.list.length;
     data.mergeCandleList(list);
     _klineDataCache[req.key] = data;
+    preprocessIndicatorData(data);
     if (req.key == curDataKey) {
       final newLen = data.list.length;
       if (paintDxOffset < 0 && newLen > oldLen) {
