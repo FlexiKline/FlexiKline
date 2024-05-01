@@ -45,15 +45,19 @@ mixin KDJData on BaseData, CandleData {
     required int end,
     bool reset = false,
   }) {
-    super.preprocess(indicator, start: start, end: end, reset: reset);
     if (indicator is KDJIndicator) {
-      logd('preprocess KDJ => ${indicator.calcParam}');
+      final startTime = DateTime.now();
       calculateAndCacheKDJ(
         param: indicator.calcParam,
         start: start,
         end: end,
         reset: reset,
       );
+      logd(
+        'preprocess KDJ => ${indicator.calcParam} spent:${DateTime.now().difference(startTime).inMicroseconds} microseconds',
+      );
+    } else {
+      super.preprocess(indicator, start: start, end: end, reset: reset);
     }
   }
 

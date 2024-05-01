@@ -43,10 +43,14 @@ mixin MACDData on BaseData {
     required int end,
     bool reset = false,
   }) {
-    super.preprocess(indicator, start: start, end: end, reset: reset);
     if (indicator is MacdIndicator) {
-      logd('preprocess MACD => ${indicator.calcParam}');
+      final startTime = DateTime.now();
       calculateMacd(indicator.calcParam);
+      logd(
+        'preprocess MACD => ${indicator.calcParam} spent:${DateTime.now().difference(startTime).inMicroseconds} microseconds',
+      );
+    } else {
+      super.preprocess(indicator, start: start, end: end, reset: reset);
     }
   }
 

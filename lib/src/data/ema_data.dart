@@ -43,12 +43,16 @@ mixin EMAData on BaseData {
     required int end,
     bool reset = false,
   }) {
-    super.preprocess(indicator, start: start, end: end, reset: reset);
     if (indicator is EMAIndicator) {
       for (var param in indicator.calcParams) {
-        logd('preprocess EMA => ${param.count}');
+        final startTime = DateTime.now();
         calculateEma(param.count);
+        logd(
+          'preprocess EMA => ${param.count} spent:${DateTime.now().difference(startTime).inMicroseconds} microseconds',
+        );
       }
+    } else {
+      super.preprocess(indicator, start: start, end: end, reset: reset);
     }
   }
 

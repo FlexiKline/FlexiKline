@@ -45,15 +45,19 @@ mixin BOLLData on BaseData, MAData {
     required int end,
     bool reset = false,
   }) {
-    super.preprocess(indicator, start: start, end: end, reset: reset);
     if (indicator is BOLLIndicator) {
-      logd('preprocess BOLL => ${indicator.calcParam}');
+      final startTime = DateTime.now();
       calculateAndCacheBoll(
         param: indicator.calcParam,
         start: start,
         end: end,
         reset: reset,
       );
+      logd(
+        'preprocess BOLL => ${indicator.calcParam} spent:${DateTime.now().difference(startTime).inMicroseconds} microseconds',
+      );
+    } else {
+      super.preprocess(indicator, start: start, end: end, reset: reset);
     }
   }
 

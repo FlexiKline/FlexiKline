@@ -44,17 +44,21 @@ mixin MAData on BaseData {
     required int end,
     bool reset = false,
   }) {
-    super.preprocess(indicator, start: start, end: end, reset: reset);
     if (indicator is MAIndicator) {
       for (var param in indicator.calcParams) {
-        logd('preprocess MA => ${param.count}');
+        final startTime = DateTime.now();
         calculateAndCacheMa(
           param.count,
           start: start,
           end: end,
           reset: reset,
         );
+        logd(
+          'preprocess MA => ${param.count} spent:${DateTime.now().difference(startTime).inMicroseconds} microseconds',
+        );
       }
+    } else {
+      super.preprocess(indicator, start: start, end: end, reset: reset);
     }
   }
 
@@ -126,32 +130,24 @@ mixin MAData on BaseData {
     // 计算从end到len之间count的偏移量
     int offset = math.max(end + count - len, 0);
     int index = end - offset;
-    CandleModel m;
-    MaResult? preRet = maMap.getItem(list.getItem(index + 1)?.timestamp);
-    MaResult? curRet;
-    Decimal cD = Decimal.fromInt(count);
-    for (int i = index; i >= start; i--) {
-      m = list[i];
-      curRet = maMap[m.timestamp];
-      if (curRet == null || curRet.dirty) {
-        // 没有缓存或无效, 计算MA
-        if (preRet != null && !preRet.dirty && i + count < len) {
-          // 用上一次结果进行换算当前结果
-          curRet = MaResult(
-            count: count,
-            ts: m.timestamp,
-            val: ((preRet.val * cD) - list[i + count].close + m.close).div(cD),
-            dirty: i == 0,
-          );
-        } else {
-          curRet = calculateMa(index, count);
-        }
-      }
 
-      if (curRet != null) {
-        maMap[m.timestamp] = curRet;
+    Decimal cD = Decimal.fromInt(count);
+    CandleModel m = list[index];
+    Decimal sum = m.close;
+    for (int i = index + 1; i < index + count; i++) {
+      sum += list[i].close;
+    }
+    MaResult? ret = MaResult(count: count, ts: m.timestamp, val: sum.div(cD));
+    maMap[m.timestamp] = ret;
+
+    for (int i = index - 1; i >= start; i--) {
+      m = list[i];
+      sum = sum - list[i + count].close + m.close;
+      ret = maMap[m.timestamp];
+      if (ret == null || ret.dirty) {
+        ret = MaResult(count: count, ts: m.timestamp, val: sum.div(cD));
       }
-      preRet = curRet;
+      maMap[m.timestamp] = ret;
     }
   }
 

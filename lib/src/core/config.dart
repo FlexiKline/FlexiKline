@@ -61,54 +61,54 @@ mixin ConfigBinding on KlineBindingBase, SettingBinding implements IConfig {
       padding: mainPadding,
     ));
 
-    addIndicatorInMain(VolumeIndicator(
-      height: subChartDefaultHeight,
-      paintMode: PaintMode.alone,
-      showYAxisTick: false,
-      showCrossMark: false,
-      showTips: false,
-      useTint: true,
-    ));
+    // addIndicatorInMain(VolumeIndicator(
+    //   height: subChartDefaultHeight,
+    //   paintMode: PaintMode.alone,
+    //   showYAxisTick: false,
+    //   showCrossMark: false,
+    //   showTips: false,
+    //   useTint: true,
+    // ));
 
-    addIndicatorInMain(MAIndicator(
-      height: mainRect.height,
-    ));
+    // addIndicatorInMain(MAIndicator(
+    //   height: mainRect.height,
+    // ));
 
-    addIndicatorInMain(EMAIndicator(
-      height: mainRect.height,
-    ));
+    // addIndicatorInMain(EMAIndicator(
+    //   height: mainRect.height,
+    // ));
 
-    addIndicatorInMain(BOLLIndicator(
-      height: mainRect.height,
-    ));
+    // addIndicatorInMain(BOLLIndicator(
+    //   height: mainRect.height,
+    // ));
 
     _subIndicators = ListQueue<Indicator>(
       subChartMaxCount,
     );
 
-    addIndicatorInSub(MacdIndicator(
-      height: 60,
-      tipsHeight: 12,
-    ));
+    // addIndicatorInSub(MacdIndicator(
+    //   height: 60,
+    //   tipsHeight: 12,
+    // ));
 
-    addIndicatorInSub(MultiPaintObjectIndicator(
-      key: ValueKey('${IndicatorType.volume.name}+${IndicatorType.maVol.name}'),
-      height: subChartDefaultHeight,
-      tipsHeight: 12,
-      children: [
-        VolumeIndicator(
-          height: subChartDefaultHeight,
-        ),
-        MAVolIndicator(
-          height: subChartDefaultHeight,
-        ),
-      ],
-    ));
+    // addIndicatorInSub(MultiPaintObjectIndicator(
+    //   key: ValueKey('${IndicatorType.volume.name}+${IndicatorType.maVol.name}'),
+    //   height: subChartDefaultHeight,
+    //   tipsHeight: 12,
+    //   children: [
+    //     VolumeIndicator(
+    //       height: subChartDefaultHeight,
+    //     ),
+    //     MAVolIndicator(
+    //       height: subChartDefaultHeight,
+    //     ),
+    //   ],
+    // ));
 
-    addIndicatorInSub(KDJIndicator(
-      height: 60,
-      tipsHeight: 12,
-    ));
+    // addIndicatorInSub(KDJIndicator(
+    //   height: 60,
+    //   tipsHeight: 12,
+    // ));
   }
 
   /// 主绘制区域
