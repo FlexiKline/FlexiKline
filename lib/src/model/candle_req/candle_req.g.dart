@@ -9,11 +9,11 @@ part of 'candle_req.dart';
 _$CandleReqImpl _$$CandleReqImplFromJson(Map<String, dynamic> json) =>
     _$CandleReqImpl(
       instId: json['instId'] as String,
-      after: json['after'] as int?,
-      before: json['before'] as int?,
+      after: (json['after'] as num?)?.toInt(),
+      before: (json['before'] as num?)?.toInt(),
       bar: json['bar'] as String? ?? "1m",
-      limit: json['limit'] as int? ?? 100,
-      precision: json['precision'] as int? ?? 6,
+      limit: (json['limit'] as num?)?.toInt() ?? 100,
+      precision: (json['precision'] as num?)?.toInt() ?? 6,
     );
 
 Map<String, dynamic> _$$CandleReqImplToJson(_$CandleReqImpl instance) =>

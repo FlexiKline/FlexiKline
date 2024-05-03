@@ -15,3 +15,4 @@
 export 'common.dart';
 export 'indicator.dart';
 export 'object.dart';
+export 'serializable.dart';

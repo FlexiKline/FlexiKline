@@ -23,9 +23,13 @@ import '../model/export.dart';
 import '../utils/export.dart';
 import '../framework/export.dart';
 
+part 'candle.g.dart';
+
+@indicatorSerializable
 class CandleIndicator extends SinglePaintObjectIndicator {
   CandleIndicator({
     super.key = const ValueKey(IndicatorType.candle),
+    super.name = 'Candle',
     required super.height,
     super.tipsHeight,
     super.padding,
@@ -37,6 +41,10 @@ class CandleIndicator extends SinglePaintObjectIndicator {
   ) {
     return CandlePaintObject(controller: controller, indicator: this);
   }
+
+  factory CandleIndicator.fromJson(Map<String, dynamic> json) =>
+      _$CandleIndicatorFromJson(json);
+  Map<String, dynamic> toJson() => _$CandleIndicatorToJson(this);
 }
 
 class CandlePaintObject extends SinglePaintObjectBox<CandleIndicator>

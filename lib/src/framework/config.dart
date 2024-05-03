@@ -12,71 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:flexi_kline/src/indicators/candle.dart';
 import 'package:flutter/material.dart';
 
 import '../core/export.dart';
 import '../indicators/export.dart';
 import 'indicator.dart';
 
-abstract interface class IndicatorGenerator {
-  Indicator createIndicator(KlineBindingBase controller);
+class IndicatorMgr {
+  final List<Indicator> supportMainIndicators = [
+    VolumeIndicator(),
+  ];
+  final List<Indicator> supportSubIndicators = [];
+
+
+  
 }
-
-sealed class IndicatorConfig implements IndicatorGenerator {
-  IndicatorConfig({
-    required this.name,
-    required this.key,
-    this.drawInMain = false,
-  });
-
-  final String name;
-  final ValueKey key;
-  final bool drawInMain;
-}
-
-class CandleConfig extends IndicatorConfig {
-  CandleConfig({String? name})
-      : super(
-          name: name ?? 'Candle',
-          key: const ValueKey('Candle'),
-          drawInMain: true,
-        );
-
-  @override
-  Indicator createIndicator(KlineBindingBase controller) {
-    final setting = controller as SettingBinding;
-    return CandleIndicator(
-      key: key,
-      height: setting.mainRect.height,
-      tipsHeight: setting.mainTipsHeight,
-      padding: setting.mainPadding,
-    );
-  }
-}
-
-class VolumeConfig extends IndicatorConfig {
-  VolumeConfig({String? name})
-      : super(
-          name: name ?? 'Vol',
-          key: const ValueKey('Volume'),
-          drawInMain: false,
-        );
-
-  @override
-  Indicator createIndicator(KlineBindingBase controller) {
-    final setting = controller as SettingBinding;
-    return VolumeIndicator(
-      key: key,
-      height: setting.subChartDefaultHeight,
-      tipsHeight: setting.subChartDefaultTipsHeight,
-      padding: setting.subChartDefaultPadding,
-    );
-  }
-}
-
-final List<IndicatorConfig> supportMainIndicators = [
-  CandleConfig(),
-];
-final List<IndicatorConfig> supportSubIndicators = [
-  VolumeConfig(),
-];

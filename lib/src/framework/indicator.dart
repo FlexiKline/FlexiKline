@@ -15,18 +15,22 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../core/export.dart';
 import 'object.dart';
+import 'serializable.dart';
+
+part 'indicator.g.dart';
 
 /// Indicator绘制模式
 /// 注: PaintMode仅当Indicator加入MultiPaintObjectIndicator后起作用,
 /// 代表当前Indicator的绘制是否是独立绘制的, 还是依赖于MultiPaintObjectIndicator
 enum PaintMode {
-  /// 组合模式, 当前Indicator绘制按MultiPaintObjectIndicator的高度和minmax进行联合绘图, 坐标系共享.
+  /// 组合模式, Indicator会联合其他子Indicator一起绘制, 坐标系共享.
   combine,
 
-  /// 独立模式下, 此Indicator会按自己height和minmax独立绘制.
+  /// 独立模式下, Indicator会按自己height和minmax独立绘制.
   alone;
 }
 
@@ -36,13 +40,15 @@ enum PaintMode {
 abstract class Indicator {
   Indicator({
     required this.key,
+    required this.name,
     required this.height,
     this.tipsHeight = 0.0,
     this.padding = EdgeInsets.zero,
     this.paintMode = PaintMode.combine,
   });
-  final Key key;
-  final double height;
+  final ValueKey key;
+  final String name;
+  double height;
   double tipsHeight;
   EdgeInsets padding;
 
@@ -62,7 +68,9 @@ abstract class Indicator {
     return key.hashCode;
   }
 
+  @JsonKey(includeFromJson: false, includeToJson: false)
   PaintObject? paintObject;
+
   void ensurePaintObject(KlineBindingBase controller) {
     paintObject ??= createPaintObject(controller);
   }
@@ -70,6 +78,9 @@ abstract class Indicator {
   void update(Indicator newVal) {
     tipsHeight = newVal.tipsHeight;
     padding = newVal.padding;
+    if (paintMode == PaintMode.combine) {
+      height = newVal.height;
+    }
   }
 
   PaintObject createPaintObject(KlineBindingBase controller);
@@ -96,6 +107,7 @@ abstract class Indicator {
 abstract class SinglePaintObjectIndicator extends Indicator {
   SinglePaintObjectIndicator({
     required super.key,
+    required super.name,
     required super.height,
     super.tipsHeight,
     super.padding,
@@ -110,17 +122,20 @@ abstract class SinglePaintObjectIndicator extends Indicator {
 
 /// 多个绘制Indicator的配置.
 /// children 维护具体的Indicator配置.
-class MultiPaintObjectIndicator extends Indicator {
+@indicatorSerializable
+class MultiPaintObjectIndicator<T extends SinglePaintObjectIndicator>
+    extends Indicator {
   MultiPaintObjectIndicator({
     required super.key,
+    required super.name,
     required super.height,
     super.tipsHeight,
     super.padding,
     this.drawChartAlawaysBelowTipsArea = false,
-    Iterable<SinglePaintObjectIndicator> children = const [],
-  }) : children = LinkedHashSet<SinglePaintObjectIndicator>.from(children);
+    Iterable<T> children = const [],
+  }) : children = LinkedHashSet<T>.from(children);
 
-  final Set<SinglePaintObjectIndicator> children;
+  final Set<T> children;
   final bool drawChartAlawaysBelowTipsArea;
 
   @override
@@ -143,7 +158,7 @@ class MultiPaintObjectIndicator extends Indicator {
 
   void _initChildPaintObject(
     KlineBindingBase controller,
-    SinglePaintObjectIndicator indicator,
+    Indicator indicator,
   ) {
     indicator.update(this);
     indicator.paintObject = indicator.createPaintObject(controller);
@@ -151,10 +166,10 @@ class MultiPaintObjectIndicator extends Indicator {
   }
 
   void appendIndicator(
-    SinglePaintObjectIndicator newIndicator,
+    T newIndicator,
     KlineBindingBase controller,
   ) {
-    SinglePaintObjectIndicator? old;
+    Indicator? old;
     if (children.contains(newIndicator)) {
       old = children.lookup(newIndicator);
       old?.dispose();

@@ -20,11 +20,16 @@ import '../extension/export.dart';
 import '../framework/export.dart';
 import '../model/export.dart';
 import '../utils/export.dart';
+import 'ma.dart';
+
+part 'ma_vol.g.dart';
 
 /// MAVOL 移动平均指标线
+@indicatorSerializable
 class MAVolIndicator extends SinglePaintObjectIndicator {
   MAVolIndicator({
     super.key = const ValueKey(IndicatorType.maVol),
+    super.name = 'MAVOL',
     required super.height,
     super.tipsHeight,
     super.padding,
@@ -40,6 +45,10 @@ class MAVolIndicator extends SinglePaintObjectIndicator {
   MAVolPaintObject createPaintObject(KlineBindingBase controller) {
     return MAVolPaintObject(controller: controller, indicator: this);
   }
+
+  factory MAVolIndicator.fromJson(Map<String, dynamic> json) =>
+      _$MAVolIndicatorFromJson(json);
+  Map<String, dynamic> toJson() => _$MAVolIndicatorToJson(this);
 }
 
 class MAVolPaintObject extends SinglePaintObjectBox<MAVolIndicator> {

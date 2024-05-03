@@ -22,8 +22,9 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
 import '../config.dart';
 import '../repo/api.dart' as api;
+import '../widgets/flexi_indicator_bar.dart';
 import '../widgets/latest_price_view.dart';
-import '../widgets/time_bar.dart';
+import '../widgets/flexi_time_bar.dart';
 import 'main_nav_page.dart';
 
 class KOKlinePage extends ConsumerStatefulWidget {
@@ -130,9 +131,8 @@ class _KOKlinePageState extends ConsumerState<KOKlinePage> {
             FlexiKlineWidget(
               controller: controller,
             ),
-            Container(
-              height: 300.r,
-              color: Colors.amber,
+            FlexiIndicatorBar(
+              controller: controller,
             )
           ],
         ),

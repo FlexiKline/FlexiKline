@@ -14,6 +14,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../constant.dart';
 import '../core/export.dart';
 import '../data/export.dart';
 import '../extension/export.dart';
@@ -21,10 +22,14 @@ import '../framework/export.dart';
 import '../model/export.dart';
 import '../utils/export.dart';
 
+part 'volume.g.dart';
+
+@indicatorSerializable
 class VolumeIndicator extends SinglePaintObjectIndicator {
   VolumeIndicator({
     super.key = const ValueKey(IndicatorType.volume),
-    required super.height,
+    super.name = 'VOL',
+    super.height = defaultSubIndicatorHeight,
     super.tipsHeight,
     super.padding,
     super.paintMode,
@@ -50,6 +55,10 @@ class VolumeIndicator extends SinglePaintObjectIndicator {
         controller: controller,
         indicator: this,
       );
+
+  factory VolumeIndicator.fromJson(Map<String, dynamic> json) =>
+      _$VolumeIndicatorFromJson(json);
+  Map<String, dynamic> toJson() => _$VolumeIndicatorToJson(this);
 }
 
 class VolumePaintObject extends SinglePaintObjectBox<VolumeIndicator>

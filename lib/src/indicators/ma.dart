@@ -22,10 +22,31 @@ import '../framework/export.dart';
 import '../model/export.dart';
 import '../utils/export.dart';
 
+part 'ma.g.dart';
+
+@paramSerializable
+final class MaParam {
+  final String label;
+  final int count;
+  final Color color;
+
+  const MaParam({
+    required this.label,
+    required this.count,
+    required this.color,
+  });
+
+  factory MaParam.fromJson(Map<String, dynamic> json) =>
+      _$MaParamFromJson(json);
+  Map<String, dynamic> toJson() => _$MaParamToJson(this);
+}
+
 /// MA 移动平均指标线
+@indicatorSerializable
 class MAIndicator extends SinglePaintObjectIndicator {
   MAIndicator({
     super.key = const ValueKey(IndicatorType.ma),
+    super.name = 'MA',
     required super.height,
     super.tipsHeight = defaultIndicatorTipsHeight,
     super.padding,
@@ -41,6 +62,10 @@ class MAIndicator extends SinglePaintObjectIndicator {
   SinglePaintObjectBox createPaintObject(KlineBindingBase controller) {
     return MAPaintObject(controller: controller, indicator: this);
   }
+
+  factory MAIndicator.fromJson(Map<String, dynamic> json) =>
+      _$MAIndicatorFromJson(json);
+  Map<String, dynamic> toJson() => _$MAIndicatorToJson(this);
 }
 
 class MAPaintObject extends SinglePaintObjectBox<MAIndicator> {

@@ -19,7 +19,6 @@ import '../framework/indicator.dart';
 import '../indicators/macd.dart';
 import '../model/export.dart';
 import 'base_data.dart';
-import 'params.dart';
 import 'results.dart';
 
 mixin MACDData on BaseData {
@@ -43,7 +42,7 @@ mixin MACDData on BaseData {
     required int end,
     bool reset = false,
   }) {
-    if (indicator is MacdIndicator) {
+    if (indicator is MACDIndicator) {
       final startTime = DateTime.now();
       calculateMacd(indicator.calcParam);
       logd(

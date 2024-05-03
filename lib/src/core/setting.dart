@@ -517,7 +517,7 @@ mixin SettingBinding on KlineBindingBase implements IConfig {
   Size get subRectSize => Size(subRect.width, subRect.height);
 
   /// 副区的指标图最大数量
-  int subChartMaxCount = 4;
+  int subChartMaxCount = defaultSubChartMaxCount;
 
   /// 副区的单个指标图默认配置
   final double subChartDefaultHeight = defaultSubIndicatorHeight;

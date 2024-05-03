@@ -20,5 +20,8 @@ enum IndicatorType {
   maVol,
   volume,
   macd,
-  kdj,
+  kdj;
+
+  @override
+  String toString() => name.toUpperCase();
 }

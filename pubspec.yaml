@@ -11,7 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
   decimal: ^2.3.3
-  json_annotation: ^4.8.1
+  json_annotation: ^4.9.0
   freezed_annotation: ^2.4.1
 
 dev_dependencies:
@@ -20,8 +20,8 @@ dev_dependencies:
   flutter_lints: ^3.0.0
 
   # 序列化
-  build_runner: ^2.4.8
-  freezed: ^2.4.7
-  json_serializable: ^6.7.1
+  build_runner: ^2.4.9
+  freezed: ^2.5.2
+  json_serializable: ^6.8.0
 
 flutter:

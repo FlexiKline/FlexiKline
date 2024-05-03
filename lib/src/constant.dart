@@ -22,6 +22,8 @@ const double defaultSubIndicatorHeight = 60;
 const double defaultIndicatorTipsHeight = 15;
 const EdgeInsets defaultIndicatorPadding = EdgeInsets.zero;
 
+const int defaultSubChartMaxCount = 4;
+
 /// 时间粒度，默认值1m
 /// 如 [1m/3m/5m/15m/30m/1H/2H/4H]
 /// 香港时间开盘价k线：[6H/12H/1D/2D/3D/1W/1M/3M]

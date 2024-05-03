@@ -16,6 +16,7 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 
+import '../constant.dart';
 import '../framework/export.dart';
 import '../indicators/export.dart';
 import 'binding_base.dart';
@@ -26,7 +27,9 @@ import 'setting.dart';
 /// 1. Indicator的setting.
 /// 2. 增/删 不同的指标图.
 /// 3. 主题配置切换.
-mixin ConfigBinding on KlineBindingBase, SettingBinding implements IConfig {
+mixin ConfigBinding
+    on KlineBindingBase, SettingBinding
+    implements IConfig, IChart {
   @override
   void initBinding() {
     super.initBinding();
@@ -45,80 +48,76 @@ mixin ConfigBinding on KlineBindingBase, SettingBinding implements IConfig {
     subIndicators.clear();
   }
 
+  /// 主绘制区域
+  final MultiPaintObjectIndicator _mainIndicator = MultiPaintObjectIndicator(
+    key: const ValueKey('main'),
+    name: 'MAIN',
+    height: 0,
+    drawChartAlawaysBelowTipsArea: true,
+  );
+
+  /// 副图区域
+  final Queue<Indicator> _subIndicators = ListQueue<Indicator>(
+    defaultSubChartMaxCount,
+  );
+
+  final Set<SinglePaintObjectIndicator> _supportMainIndicators =
+      LinkedHashSet<SinglePaintObjectIndicator>(
+    equals: (p0, p1) => p0.key == p1.key,
+    hashCode: (p0) => p0.key.hashCode,
+  );
+
+  final Set<Indicator> _supportSubIndicators = LinkedHashSet<Indicator>(
+    equals: (p0, p1) => p0.key == p1.key,
+    hashCode: (p0) => p0.key.hashCode,
+  );
+
   void initIndicators() {
     logd("initIndicators");
-    _mainIndicator = MultiPaintObjectIndicator(
-      key: const ValueKey('main'),
-      height: mainRect.height,
-      tipsHeight: mainTipsHeight,
-      padding: mainPadding,
-      drawChartAlawaysBelowTipsArea: true,
-    );
+    _supportMainIndicators.addAll([
+      volumeMainIndicator,
+      maMainIndicator,
+      emaMainIndicator,
+      bollMainIndicator,
+    ]);
 
-    addIndicatorInMain(CandleIndicator(
-      height: mainRect.height,
-      tipsHeight: mainTipsHeight,
-      padding: mainPadding,
-    ));
+    _supportSubIndicators.addAll([
+      macdSubIndicator,
+      kdjSubIndicator,
+      volumeMavolSubIndicator,
+    ]);
 
-    // addIndicatorInMain(VolumeIndicator(
-    //   height: subChartDefaultHeight,
-    //   paintMode: PaintMode.alone,
-    //   showYAxisTick: false,
-    //   showCrossMark: false,
-    //   showTips: false,
-    //   useTint: true,
-    // ));
+    _mainIndicator.height = mainRect.height;
+    _mainIndicator.tipsHeight = mainTipsHeight;
+    _mainIndicator.padding = mainPadding;
 
-    // addIndicatorInMain(MAIndicator(
-    //   height: mainRect.height,
-    // ));
+    addIndicatorInMain(candleMainIndicator);
 
-    // addIndicatorInMain(EMAIndicator(
-    //   height: mainRect.height,
-    // ));
+    /// 主图
+    // addIndicatorInMain(volumeMainIndicator);
 
-    // addIndicatorInMain(BOLLIndicator(
-    //   height: mainRect.height,
-    // ));
+    // addIndicatorInMain(maMainIndicator);
 
-    _subIndicators = ListQueue<Indicator>(
-      subChartMaxCount,
-    );
+    // addIndicatorInMain(emaMainIndicator);
 
-    // addIndicatorInSub(MacdIndicator(
-    //   height: 60,
-    //   tipsHeight: 12,
-    // ));
+    // addIndicatorInMain(bollMainIndicator);
 
-    // addIndicatorInSub(MultiPaintObjectIndicator(
-    //   key: ValueKey('${IndicatorType.volume.name}+${IndicatorType.maVol.name}'),
-    //   height: subChartDefaultHeight,
-    //   tipsHeight: 12,
-    //   children: [
-    //     VolumeIndicator(
-    //       height: subChartDefaultHeight,
-    //     ),
-    //     MAVolIndicator(
-    //       height: subChartDefaultHeight,
-    //     ),
-    //   ],
-    // ));
+    /// 副图
+    // addIndicatorInSub(macdSubIndicator);
 
-    // addIndicatorInSub(KDJIndicator(
-    //   height: 60,
-    //   tipsHeight: 12,
-    // ));
+    // addIndicatorInSub(volumeMavolSubIndicator);
+
+    // addIndicatorInSub(kdjSubIndicator);
   }
 
-  /// 主绘制区域
-  late final MultiPaintObjectIndicator _mainIndicator;
+  Set<SinglePaintObjectIndicator> get supportMainIndicators =>
+      _supportMainIndicators;
+
+  Set<Indicator> get supportSubIndicators => _supportSubIndicators;
+
   @protected
   @override
   MultiPaintObjectIndicator get mainIndicator => _mainIndicator;
-
-  /// 副图区域
-  late final Queue<Indicator> _subIndicators;
 
   @override
   @protected
@@ -155,16 +154,26 @@ mixin ConfigBinding on KlineBindingBase, SettingBinding implements IConfig {
     }
   }
 
+  Set<ValueKey> get mainIndicatorKeys {
+    return mainIndicator.children.map((e) => e.key).toSet();
+  }
+
   /// 在主图中增加指标
   @override
   void addIndicatorInMain(SinglePaintObjectIndicator indicator) {
     mainIndicator.appendIndicator(indicator, this);
+    markRepaintChart();
   }
 
   /// 删除主图中key指定的指标
   @override
   void delIndicatorInMain(Key key) {
     mainIndicator.deleteIndicator(key);
+    markRepaintChart();
+  }
+
+  Set<ValueKey> get subIndicatorKeys {
+    return subIndicators.map((e) => e.key).toSet();
   }
 
   /// 在副图中增加指标
@@ -175,6 +184,8 @@ mixin ConfigBinding on KlineBindingBase, SettingBinding implements IConfig {
       deleted.dispose();
     }
     subIndicators.addLast(indicator);
+    onSizeChange?.call();
+    markRepaintChart();
   }
 
   /// 删除副图key指定的指标
@@ -183,9 +194,62 @@ mixin ConfigBinding on KlineBindingBase, SettingBinding implements IConfig {
     subIndicators.removeWhere((indicator) {
       if (indicator.key == key) {
         indicator.dispose();
+        onSizeChange?.call();
+        markRepaintChart();
         return true;
       }
       return false;
     });
   }
+
+  CandleIndicator get candleMainIndicator => CandleIndicator(
+        height: mainRect.height,
+        tipsHeight: mainTipsHeight,
+        padding: mainPadding,
+      );
+
+  VolumeIndicator get volumeMainIndicator => VolumeIndicator(
+        height: subChartDefaultHeight,
+        paintMode: PaintMode.alone,
+        showYAxisTick: false,
+        showCrossMark: false,
+        showTips: false,
+        useTint: true,
+      );
+  MAIndicator get maMainIndicator => MAIndicator(
+        height: mainRect.height,
+      );
+  EMAIndicator get emaMainIndicator => EMAIndicator(
+        height: mainRect.height,
+      );
+  BOLLIndicator get bollMainIndicator => BOLLIndicator(
+        height: mainRect.height,
+      );
+
+  MACDIndicator get macdSubIndicator => MACDIndicator(
+        height: 60,
+        tipsHeight: 12,
+      );
+
+  KDJIndicator get kdjSubIndicator => KDJIndicator(
+        height: 60,
+        tipsHeight: 12,
+      );
+
+  Indicator get volumeMavolSubIndicator => MultiPaintObjectIndicator(
+        key: ValueKey(
+          '${IndicatorType.volume.name}+${IndicatorType.maVol.name}',
+        ),
+        name: 'MAVOL',
+        height: subChartDefaultHeight,
+        tipsHeight: 12,
+        children: [
+          VolumeIndicator(
+            height: subChartDefaultHeight,
+          ),
+          MAVolIndicator(
+            height: subChartDefaultHeight,
+          ),
+        ],
+      );
 }

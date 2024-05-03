@@ -12,18 +12,57 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:math' as math;
+
 import 'package:decimal/decimal.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart';
 
 import '../core/export.dart';
 import '../data/export.dart';
-import '../framework/export.dart';
+
+part 'macd.g.dart';
+
+@paramSerializable
+final class MACDParam {
+  final int s;
+  final int l;
+  final int m;
+
+  const MACDParam({required this.s, required this.l, required this.m});
+
+  bool get isValid => l > 0 && s > 0 && l > s && m > 0;
+
+  int get paramCount => math.max(l, s) + m;
+
+  @override
+  int get hashCode => s.hashCode ^ l.hashCode ^ m.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MACDParam &&
+          runtimeType == other.runtimeType &&
+          s == other.s &&
+          l == other.l &&
+          m == other.m;
+
+  @override
+  String toString() {
+    return 'MACDParam{s:$s, l:$l, m:$s}';
+  }
+
+  factory MACDParam.fromJson(Map<String, dynamic> json) =>
+      _$MACDParamFromJson(json);
+  Map<String, dynamic> toJson() => _$MACDParamToJson(this);
+}
 
 /// 指数平滑移动平均线MACD
-class MacdIndicator extends SinglePaintObjectIndicator {
-  MacdIndicator({
+@indicatorSerializable
+class MACDIndicator extends SinglePaintObjectIndicator {
+  MACDIndicator({
     super.key = const ValueKey(IndicatorType.macd),
+    super.name = 'MACD',
     super.height = defaultSubIndicatorHeight,
     super.tipsHeight = defaultIndicatorTipsHeight,
     super.padding = defaultIndicatorPadding,
@@ -47,13 +86,17 @@ class MacdIndicator extends SinglePaintObjectIndicator {
 
   @override
   SinglePaintObjectBox createPaintObject(KlineBindingBase controller) {
-    return MacdPaintObject(controller: controller, indicator: this);
+    return MACDPaintObject(controller: controller, indicator: this);
   }
+
+  factory MACDIndicator.fromJson(Map<String, dynamic> json) =>
+      _$MACDIndicatorFromJson(json);
+  Map<String, dynamic> toJson() => _$MACDIndicatorToJson(this);
 }
 
-class MacdPaintObject extends SinglePaintObjectBox<MacdIndicator>
+class MACDPaintObject extends SinglePaintObjectBox<MACDIndicator>
     with PaintYAxisTickMixin, PaintYAxisMarkOnCrossMixin {
-  MacdPaintObject({required super.controller, required super.indicator});
+  MACDPaintObject({required super.controller, required super.indicator});
 
   @override
   MinMax? initData({int? start, int? end}) {

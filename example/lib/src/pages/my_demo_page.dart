@@ -21,7 +21,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../config.dart';
 import '../repo/mock.dart';
 import '../test/canvas_test.dart';
-import '../widgets/time_bar.dart';
+import '../widgets/flexi_time_bar.dart';
 import 'main_nav_page.dart';
 
 class MyDemoPage extends ConsumerStatefulWidget {

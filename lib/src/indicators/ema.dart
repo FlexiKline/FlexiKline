@@ -22,15 +22,36 @@ import '../framework/export.dart';
 import '../model/export.dart';
 import '../utils/export.dart';
 
+part 'ema.g.dart';
+
+@paramSerializable
+final class EMAParam {
+  final String label;
+  final int count;
+  final Color color;
+
+  const EMAParam({
+    required this.label,
+    required this.count,
+    required this.color,
+  });
+
+  factory EMAParam.fromJson(Map<String, dynamic> json) =>
+      _$EMAParamFromJson(json);
+  Map<String, dynamic> toJson() => _$EMAParamToJson(this);
+}
+
 /// EMA 平滑移动平均线
 /// 公式：
 /// 1）快速平滑移动平均线（EMA）是12日的，计算公式为：
 ///   EMA(12)=2*今收盘价/(12+1)+11*昨日EMA(12)/(12+1)
 /// 2）慢速平滑移动平均线（EMA）是26日的，计算公式为：
 ///   EMA(26)=2*今收盘价/(26+1)+25*昨日EMA(26)/(26+1)
+@indicatorSerializable
 class EMAIndicator extends SinglePaintObjectIndicator {
   EMAIndicator({
     super.key = const ValueKey(IndicatorType.ema),
+    super.name = 'EMA',
     required super.height,
     super.tipsHeight = defaultIndicatorTipsHeight,
     super.padding,
@@ -48,6 +69,10 @@ class EMAIndicator extends SinglePaintObjectIndicator {
   SinglePaintObjectBox createPaintObject(KlineBindingBase controller) {
     return EMAPaintObject(controller: controller, indicator: this);
   }
+
+  factory EMAIndicator.fromJson(Map<String, dynamic> json) =>
+      _$EMAIndicatorFromJson(json);
+  Map<String, dynamic> toJson() => _$EMAIndicatorToJson(this);
 }
 
 class EMAPaintObject extends SinglePaintObjectBox<EMAIndicator> {

@@ -21,7 +21,6 @@ import '../indicators/boll.dart';
 import '../model/export.dart';
 import 'base_data.dart';
 import 'ma_data.dart';
-import 'params.dart';
 import 'results.dart';
 
 mixin BOLLData on BaseData, MAData {

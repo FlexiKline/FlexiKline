@@ -21,7 +21,6 @@ import '../indicators/kdj.dart';
 import '../model/export.dart';
 import 'base_data.dart';
 import 'candle_data.dart';
-import 'params.dart';
 import 'results.dart';
 
 mixin KDJData on BaseData, CandleData {

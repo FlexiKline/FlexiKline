@@ -22,15 +22,51 @@ import '../framework/export.dart';
 import '../model/export.dart';
 import '../utils/export.dart';
 
+part 'kdj.g.dart';
+
+@paramSerializable
+final class KDJParam {
+  final int n;
+  final int m1;
+  final int m2;
+
+  const KDJParam({required this.n, required this.m1, required this.m2});
+
+  bool get isValid => n > 0 && m1 > 0 && m2 > 0;
+
+  @override
+  int get hashCode => n.hashCode ^ m1.hashCode ^ m2.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is KDJParam &&
+          runtimeType == other.runtimeType &&
+          n == other.n &&
+          m1 == other.m1 &&
+          m2 == other.m2;
+
+  @override
+  String toString() {
+    return 'KDJParam{n:$n, m1:$m1, m2:$m2}';
+  }
+
+  factory KDJParam.fromJson(Map<String, dynamic> json) =>
+      _$KDJParamFromJson(json);
+  Map<String, dynamic> toJson() => _$KDJParamToJson(this);
+}
+
 ///
 /// KDJ (9, 3, 3)
 /// 当日K值=2/3×前一日K值+1/3×当日RSV
 /// 当日D值=2/3×前一日D值+1/3×当日K值
 /// 若无前一日K 值与D值，则可分别用50来代替。
 /// J值=3*当日K值-2*当日D值
+@indicatorSerializable
 class KDJIndicator extends SinglePaintObjectIndicator {
   KDJIndicator({
     super.key = const ValueKey(IndicatorType.kdj),
+    super.name = 'KDJ',
     required super.height,
     super.tipsHeight = defaultIndicatorTipsHeight,
     super.padding,
@@ -55,6 +91,10 @@ class KDJIndicator extends SinglePaintObjectIndicator {
   KDJPaintObject createPaintObject(KlineBindingBase controller) {
     return KDJPaintObject(controller: controller, indicator: this);
   }
+
+  factory KDJIndicator.fromJson(Map<String, dynamic> json) =>
+      _$KDJIndicatorFromJson(json);
+  Map<String, dynamic> toJson() => _$KDJIndicatorToJson(this);
 }
 
 class KDJPaintObject extends SinglePaintObjectBox<KDJIndicator>
