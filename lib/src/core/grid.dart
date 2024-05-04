@@ -22,9 +22,9 @@ import 'setting.dart';
 
 mixin GridBinding on KlineBindingBase, SettingBinding implements IConfig {
   @override
-  void initBinding() {
-    super.initBinding();
-    logd('init grid');
+  void initState() {
+    super.initState();
+    logd('initState grid');
   }
 
   @override

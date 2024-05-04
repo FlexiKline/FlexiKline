@@ -15,28 +15,42 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../utils/log.dart';
+import '../framework/export.dart';
 import 'interface.dart';
 
-abstract class KlineBindingBase with KlineLog, GestureHanderImpl {
+abstract class KlineBindingBase with KlineLog, KlineStorage, GestureHanderImpl {
   KlineBindingBase({
     ILogger? logger,
+    IStore? storage,
   }) {
     loggerDelegate = logger;
+    storeDelegate = storage;
     logd("constrouct");
-    // initBinding();
+    init();
   }
 
   @protected
   @mustCallSuper
-  void initBinding() {
+  void init() {
     logd("init base");
+  }
+
+  @protected
+  @mustCallSuper
+  void initState() {
+    logd("initState base");
   }
 
   @protected
   @mustCallSuper
   void dispose() {
     logd("dispose base");
+  }
+
+  @protected
+  @mustCallSuper
+  void storeState() {
+    logd("storeState base");
   }
 
   KlineBindingBase get instance => this;

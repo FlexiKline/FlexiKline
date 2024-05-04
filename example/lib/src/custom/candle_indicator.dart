@@ -12,14 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-enum IndicatorType {
-  candle,
-  ma,
-  ema,
-  boll,
-  maVol,
-  volume,
-  macd,
-  kdj;
+import 'package:flexi_kline/flexi_kline.dart';
 
+class CustomCandleIndicator extends CandleIndicator {
+  CustomCandleIndicator({
+    required super.height,
+    super.latestPriceRectBackgroundColor,
+  });
+
+  @override
+  CustomCandlePaintObject createPaintObject(FlexiKlineController controller) {
+    return CustomCandlePaintObject(controller: controller, indicator: this);
+  }
+}
+
+class CustomCandlePaintObject extends CandlePaintObject {
+  CustomCandlePaintObject({
+    required super.controller,
+    required super.indicator,
+  });
 }

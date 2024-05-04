@@ -19,9 +19,9 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../core/export.dart';
 import 'object.dart';
-import 'serializable.dart';
+// import 'serializable.dart';
 
-part 'indicator.g.dart';
+// part 'indicator.g.dart';
 
 /// Indicator绘制模式
 /// 注: PaintMode仅当Indicator加入MultiPaintObjectIndicator后起作用,
@@ -116,13 +116,13 @@ abstract class SinglePaintObjectIndicator extends Indicator {
 
   @override
   SinglePaintObjectBox createPaintObject(
-    KlineBindingBase controller,
+    covariant KlineBindingBase controller,
   );
 }
 
 /// 多个绘制Indicator的配置.
 /// children 维护具体的Indicator配置.
-@indicatorSerializable
+// @indicatorSerializable
 class MultiPaintObjectIndicator<T extends SinglePaintObjectIndicator>
     extends Indicator {
   MultiPaintObjectIndicator({
@@ -136,7 +136,7 @@ class MultiPaintObjectIndicator<T extends SinglePaintObjectIndicator>
   }) : children = LinkedHashSet<T>.from(children);
 
   final Set<T> children;
-  final bool drawChartAlawaysBelowTipsArea;
+  bool drawChartAlawaysBelowTipsArea;
 
   @override
   MultiPaintObjectBox createPaintObject(
@@ -190,4 +190,13 @@ class MultiPaintObjectIndicator<T extends SinglePaintObjectIndicator>
       return false;
     });
   }
+
+  // // 从JSON映射转换为Response对象的工厂方法
+  // factory MultiPaintObjectIndicator.fromJson(
+  //         Map<String, dynamic> json, T Function(Object? json) fromJsonT) =>
+  //     _$MultiPaintObjectIndicatorFromJson(json, fromJsonT);
+
+  // // 将Response对象转换为JSON映射的方法
+  // Map<String, dynamic> toJson(Object? Function(T value) toJsonT) =>
+  //     _$MultiPaintObjectIndicatorToJson(this, toJsonT);
 }

@@ -25,9 +25,9 @@ mixin GestureBinding
     on KlineBindingBase, SettingBinding
     implements IGestureEvent, IState {
   @override
-  void initBinding() {
-    super.initBinding();
-    logd('init gesture');
+  void initState() {
+    super.initState();
+    logd('initState gesture');
   }
 
   @override

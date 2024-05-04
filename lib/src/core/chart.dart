@@ -25,9 +25,9 @@ mixin ChartBinding
     on KlineBindingBase, SettingBinding
     implements IChart, IState, IConfig {
   @override
-  void initBinding() {
-    super.initBinding();
-    logd('init indicator');
+  void initState() {
+    super.initState();
+    logd('initState indicator');
     startLastPriceCountDownTimer();
   }
 

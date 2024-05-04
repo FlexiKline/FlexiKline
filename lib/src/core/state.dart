@@ -29,9 +29,9 @@ mixin StateBinding
     on KlineBindingBase, SettingBinding
     implements IState, IChart, ICross, IConfig {
   @override
-  void initBinding() {
-    super.initBinding();
-    logd('init state');
+  void initState() {
+    super.initState();
+    logd('initState state');
   }
 
   @override

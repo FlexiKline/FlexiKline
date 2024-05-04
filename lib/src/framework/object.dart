@@ -21,6 +21,7 @@ import '../extension/export.dart';
 import '../model/export.dart';
 import '../utils/export.dart';
 import 'indicator.dart';
+import 'logger.dart';
 
 const mainIndicatorSlot = -1;
 

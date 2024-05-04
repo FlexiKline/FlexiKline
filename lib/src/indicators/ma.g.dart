@@ -29,7 +29,7 @@ MAIndicator _$MAIndicatorFromJson(Map<String, dynamic> json) => MAIndicator(
       padding: json['padding'] == null
           ? EdgeInsets.zero
           : const EdgeInsetsConverter()
-              .fromJson(json['padding'] as Map<String, double>),
+              .fromJson(json['padding'] as Map<String, dynamic>),
       calcParams: (json['calcParams'] as List<dynamic>?)
               ?.map((e) => MaParam.fromJson(e as Map<String, dynamic>))
               .toList() ??

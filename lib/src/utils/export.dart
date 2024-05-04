@@ -14,5 +14,4 @@
 
 export './convert_util.dart';
 export './date_time.dart';
-export './log.dart';
 export './num_util.dart';

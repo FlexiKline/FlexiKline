@@ -26,15 +26,22 @@ import 'interface.dart';
 
 mixin SettingBinding on KlineBindingBase implements IConfig {
   @override
-  void initBinding() {
-    super.initBinding();
-    logd("init setting");
+  void initState() {
+    super.initState();
+    logd("initState setting");
   }
 
   @override
   void dispose() {
     super.dispose();
     logd("dispose setting");
+  }
+
+  @override
+  void storeState() {
+    super.storeState();
+    logd("storeState setting");
+    //
   }
 
   VoidCallback? onSizeChange;

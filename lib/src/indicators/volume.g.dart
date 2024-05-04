@@ -17,7 +17,7 @@ VolumeIndicator _$VolumeIndicatorFromJson(Map<String, dynamic> json) =>
       padding: json['padding'] == null
           ? EdgeInsets.zero
           : const EdgeInsetsConverter()
-              .fromJson(json['padding'] as Map<String, double>),
+              .fromJson(json['padding'] as Map<String, dynamic>),
       paintMode: json['paintMode'] == null
           ? PaintMode.combine
           : const PaintModeConverter().fromJson(json['paintMode'] as String),

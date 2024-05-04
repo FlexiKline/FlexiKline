@@ -39,7 +39,7 @@ class ValueKeyConverter implements JsonConverter<ValueKey, String> {
 }
 
 class EdgeInsetsConverter
-    implements JsonConverter<EdgeInsets, Map<String, double>> {
+    implements JsonConverter<EdgeInsets, Map<String, dynamic>> {
   const EdgeInsetsConverter();
 
   double parseDouble(dynamic value) {
@@ -48,14 +48,14 @@ class EdgeInsetsConverter
     } else if (value is num) {
       return value.toDouble();
     } else if (value is String) {
-      return double.parse(value);
+      return double.tryParse(value) ?? 0;
     } else {
       return 0;
     }
   }
 
   @override
-  EdgeInsets fromJson(Map<String, double> json) {
+  EdgeInsets fromJson(Map<String, dynamic> json) {
     if (json.isEmpty) {
       return EdgeInsets.zero;
     }
@@ -83,7 +83,7 @@ class EdgeInsetsConverter
   }
 
   @override
-  Map<String, double> toJson(EdgeInsets edgeInsets) {
+  Map<String, dynamic> toJson(EdgeInsets edgeInsets) {
     if (edgeInsets.left == 0 &&
         edgeInsets.top == 0 &&
         edgeInsets.right == 0 &&
@@ -164,7 +164,7 @@ const indicatorSerializable = JsonSerializable(
     EdgeInsetsConverter(),
   ],
   explicitToJson: true,
-  genericArgumentFactories: true,
+  // genericArgumentFactories: true,
 );
 
 const paramSerializable = JsonSerializable(

@@ -14,5 +14,7 @@
 
 export 'common.dart';
 export 'indicator.dart';
+export 'logger.dart';
 export 'object.dart';
 export 'serializable.dart';
+export 'store.dart';

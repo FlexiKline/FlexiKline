@@ -21,7 +21,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
 import '../config.dart';
+import '../custom/candle_indicator.dart';
 import '../repo/api.dart' as api;
+import '../utils/cache_util.dart';
 import '../widgets/flexi_indicator_bar.dart';
 import '../widgets/latest_price_view.dart';
 import '../widgets/flexi_time_bar.dart';
@@ -62,9 +64,15 @@ class _KOKlinePageState extends ConsumerState<KOKlinePage> {
         tag: "KOKline",
         debug: kDebugMode,
       ),
+      storage: CacheUtil(),
     );
     controller.setMainSize(
       Size(ScreenUtil().screenWidth, 300.r),
+    );
+
+    controller.candleMainIndicator = CustomCandleIndicator(
+      height: 300.r,
+      latestPriceRectBackgroundColor: Colors.grey,
     );
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
@@ -133,9 +141,19 @@ class _KOKlinePageState extends ConsumerState<KOKlinePage> {
             ),
             FlexiIndicatorBar(
               controller: controller,
+            ),
+            Container(
+              height: 200,
+              color: Colors.orangeAccent,
             )
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          controller.storeState();
+        },
+        child: const Text('Store'),
       ),
     );
   }

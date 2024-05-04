@@ -14,12 +14,13 @@
 
 import 'dart:convert';
 
+import 'package:flexi_kline/flexi_kline.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../config.dart';
 import '../repo/http_client.dart';
 
-class CacheUtil {
+class CacheUtil implements IStore {
   CacheUtil._internal();
   factory CacheUtil() => _instance;
   static final CacheUtil _instance = CacheUtil._internal();
@@ -31,16 +32,40 @@ class CacheUtil {
     _prefs = await SharedPreferences.getInstance();
   }
 
-  Future<bool> remove(String key) {
-    return _prefs.remove(key);
-  }
-
   Future<bool> clear() {
     return _prefs.clear();
   }
 
+  @override
+  bool contains(String key) {
+    return _prefs.containsKey(key);
+  }
+
+  @override
+  Future<bool> remove(String key) {
+    return _prefs.remove(key);
+  }
+
+  @override
   T? get<T>(String key, {T? def}) {
     return _prefs.get(key) as T? ?? def;
+  }
+
+  @override
+  Future<bool> set<T>(String key, T value) {
+    if (value is String) {
+      return setString(key, value);
+    } else if (value is double) {
+      return setDouble(key, value);
+    } else if (value is int) {
+      return setInt(key, value);
+    } else if (value is bool) {
+      return setBool(key, value);
+    } else if (value is List<String>) {
+      return setStringList(key, value);
+    } else {
+      return setModel(key, value);
+    }
   }
 
   Future<bool> setString(String key, String value) {
@@ -83,9 +108,9 @@ class CacheUtil {
     return null;
   }
 
-  void setModel<T>(String key, T data) {
+  Future<bool> setModel<T>(String key, T data) {
     final jsonSrc = jsonEncode(data);
-    setString(key, jsonSrc);
+    return setString(key, jsonSrc);
   }
 
   List<T>? getModelList<T>(String key, ModelMapper<T> modelMapper) {
@@ -100,10 +125,5 @@ class CacheUtil {
       defLogger.e('getModelList error:$err', stackTrace: stack);
     }
     return null;
-  }
-
-  void setModelList<T>(String key, List<T> list) {
-    final jsonSrc = jsonEncode(list);
-    setString(key, jsonSrc);
   }
 }

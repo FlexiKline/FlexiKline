@@ -30,7 +30,7 @@ MACDIndicator _$MACDIndicatorFromJson(Map<String, dynamic> json) =>
       padding: json['padding'] == null
           ? defaultIndicatorPadding
           : const EdgeInsetsConverter()
-              .fromJson(json['padding'] as Map<String, double>),
+              .fromJson(json['padding'] as Map<String, dynamic>),
       calcParam: json['calcParam'] == null
           ? const MACDParam(s: 12, l: 26, m: 9)
           : MACDParam.fromJson(json['calcParam'] as Map<String, dynamic>),

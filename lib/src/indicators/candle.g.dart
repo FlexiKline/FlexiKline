@@ -9,7 +9,7 @@ part of 'candle.dart';
 CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
     CandleIndicator(
       key: json['key'] == null
-          ? const ValueKey(IndicatorType.candle)
+          ? candleIndicatorKey
           : const ValueKeyConverter().fromJson(json['key'] as String),
       name: json['name'] as String? ?? 'Candle',
       height: (json['height'] as num).toDouble(),
@@ -17,7 +17,7 @@ CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
       padding: json['padding'] == null
           ? EdgeInsets.zero
           : const EdgeInsetsConverter()
-              .fromJson(json['padding'] as Map<String, double>),
+              .fromJson(json['padding'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$CandleIndicatorToJson(CandleIndicator instance) =>

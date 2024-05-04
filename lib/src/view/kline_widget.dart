@@ -50,7 +50,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
       }
     };
 
-    widget.controller.initBinding();
+    widget.controller.initState();
   }
 
   @override

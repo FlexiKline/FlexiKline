@@ -29,7 +29,7 @@ KDJIndicator _$KDJIndicatorFromJson(Map<String, dynamic> json) => KDJIndicator(
       padding: json['padding'] == null
           ? EdgeInsets.zero
           : const EdgeInsetsConverter()
-              .fromJson(json['padding'] as Map<String, double>),
+              .fromJson(json['padding'] as Map<String, dynamic>),
       calcParam: json['calcParam'] == null
           ? const KDJParam(n: 9, m1: 3, m2: 3)
           : KDJParam.fromJson(json['calcParam'] as Map<String, dynamic>),

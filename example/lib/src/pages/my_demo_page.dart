@@ -21,6 +21,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../config.dart';
 import '../repo/mock.dart';
 import '../test/canvas_test.dart';
+import '../utils/cache_util.dart';
+import '../widgets/flexi_indicator_bar.dart';
 import '../widgets/flexi_time_bar.dart';
 import 'main_nav_page.dart';
 
@@ -67,6 +69,7 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
         debug: kDebugMode,
         tag: 'Demo1',
       ),
+      storage: CacheUtil(),
     );
     controller1.setMainSize(Size(
       ScreenUtil().screenWidth,
@@ -163,6 +166,9 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
             ),
             FlexiKlineWidget(
               key: const ValueKey('1'),
+              controller: controller1,
+            ),
+            FlexiIndicatorBar(
               controller: controller1,
             ),
             Container(

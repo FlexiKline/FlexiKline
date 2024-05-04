@@ -124,9 +124,9 @@ abstract interface class IConfig {
   double get subRectHeight;
   void ensurePaintObjectInstance();
   void addIndicatorInMain(SinglePaintObjectIndicator indicator);
-  void delIndicatorInMain(Key key);
+  void delIndicatorInMain(ValueKey key);
   void addIndicatorInSub(Indicator indicator);
-  void delIndicatorInSub(Key key);
+  void delIndicatorInSub(ValueKey key);
 }
 
 //// Chart层绘制接口

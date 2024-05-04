@@ -31,9 +31,19 @@ mixin ConfigBinding
     on KlineBindingBase, SettingBinding
     implements IConfig, IChart {
   @override
-  void initBinding() {
-    super.initBinding();
-    logd("init config");
+  void init() {
+    super.init();
+    logd('init config');
+    _candleMainIndicator = restoreIndicator(
+      candleIndicatorKey,
+      CandleIndicator.fromJson,
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    logd("initState config");
     initIndicators();
   }
 
@@ -41,12 +51,28 @@ mixin ConfigBinding
   void dispose() {
     super.dispose();
     logd("dispose config");
+    storeState();
     mainIndicator.dispose();
     for (var indicator in subIndicators) {
       indicator.dispose();
     }
     subIndicators.clear();
   }
+
+  @override
+  void storeState() {
+    super.storeState();
+    logd('storeState config');
+    saveIndicator(candleIndicatorKey, candleMainIndicator.toJson());
+    // saveMultiIndicator(mainIndicator);
+    // for (var indicator in subIndicators) {
+    //   saveIndicator(indicator);
+    // }
+  }
+
+  // final Map<String, IndicatorBuilder> indicatorBuilderMap = {
+  //   IndicatorType.candle.name:
+  // };
 
   /// 主绘制区域
   final MultiPaintObjectIndicator _mainIndicator = MultiPaintObjectIndicator(
@@ -167,7 +193,7 @@ mixin ConfigBinding
 
   /// 删除主图中key指定的指标
   @override
-  void delIndicatorInMain(Key key) {
+  void delIndicatorInMain(ValueKey key) {
     mainIndicator.deleteIndicator(key);
     markRepaintChart();
   }
@@ -179,7 +205,7 @@ mixin ConfigBinding
   /// 在副图中增加指标
   @override
   void addIndicatorInSub(Indicator indicator) {
-    if (subIndicators.length > subChartMaxCount) {
+    if (subIndicators.length >= subChartMaxCount) {
       final deleted = subIndicators.removeFirst();
       deleted.dispose();
     }
@@ -190,7 +216,7 @@ mixin ConfigBinding
 
   /// 删除副图key指定的指标
   @override
-  void delIndicatorInSub(Key key) {
+  void delIndicatorInSub(ValueKey key) {
     subIndicators.removeWhere((indicator) {
       if (indicator.key == key) {
         indicator.dispose();
@@ -202,11 +228,20 @@ mixin ConfigBinding
     });
   }
 
-  CandleIndicator get candleMainIndicator => CandleIndicator(
-        height: mainRect.height,
-        tipsHeight: mainTipsHeight,
-        padding: mainPadding,
-      );
+  CandleIndicator? _candleMainIndicator;
+  CandleIndicator get candleMainIndicator {
+    _candleMainIndicator ??= CandleIndicator(
+      height: mainRect.height,
+      tipsHeight: mainTipsHeight,
+      padding: mainPadding,
+    );
+    return _candleMainIndicator!;
+  }
+
+  set candleMainIndicator(covariant CandleIndicator val) {
+    _candleMainIndicator = val;
+    saveIndicator(candleIndicatorKey, val.toJson());
+  }
 
   VolumeIndicator get volumeMainIndicator => VolumeIndicator(
         height: subChartDefaultHeight,

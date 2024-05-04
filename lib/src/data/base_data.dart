@@ -16,8 +16,8 @@ import 'package:flutter/foundation.dart';
 
 import '../extension/export.dart';
 import '../framework/indicator.dart';
+import '../framework/logger.dart';
 import '../model/export.dart';
-import '../utils/export.dart';
 
 abstract class BaseData with KlineLog {
   @override

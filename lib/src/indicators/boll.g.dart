@@ -28,7 +28,7 @@ BOLLIndicator _$BOLLIndicatorFromJson(Map<String, dynamic> json) =>
       padding: json['padding'] == null
           ? EdgeInsets.zero
           : const EdgeInsetsConverter()
-              .fromJson(json['padding'] as Map<String, double>),
+              .fromJson(json['padding'] as Map<String, dynamic>),
       calcParam: json['calcParam'] == null
           ? const BOLLParam(n: 20, std: 2)
           : BOLLParam.fromJson(json['calcParam'] as Map<String, dynamic>),
