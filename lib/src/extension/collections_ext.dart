@@ -28,4 +28,24 @@ extension MapExt<K, V> on Map<K, V> {
     if (key != null) return this[key];
     return null;
   }
+
+  void setItem(K? key, V val) {
+    if (key == null) return;
+    this[key] = val;
+  }
+
+  @Deprecated('废弃, 不安全')
+  T? obtainItem<T>(K? key) {
+    if (key == null) return null;
+    V? val = this[key];
+    if (val == null) return null;
+    if (val is Map && T == Map<String, dynamic>) {
+      return Map<String, dynamic>.from(val) as T;
+    } else if (val is List && T == List<String>) {
+      return List<String>.from(val) as T;
+    } else if (val is T) {
+      return val as T;
+    }
+    return null;
+  }
 }

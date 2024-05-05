@@ -54,20 +54,20 @@ class _FlexiIndicatorBarState extends ConsumerState<FlexiIndicatorBar> {
     super.initState();
   }
 
-  void onTapMainIndicator(SinglePaintObjectIndicator indicator) {
-    if (widget.controller.mainIndicatorKeys.contains(indicator.key)) {
-      widget.controller.delIndicatorInMain(indicator.key);
+  void onTapMainIndicator(ValueKey key) {
+    if (widget.controller.mainIndicatorKeys.contains(key)) {
+      widget.controller.delIndicatorInMain(key);
     } else {
-      widget.controller.addIndicatorInMain(indicator);
+      widget.controller.addIndicatorInMain(key);
     }
     setState(() {});
   }
 
-  void onTapSubIndicator(Indicator indicator) {
-    if (widget.controller.subIndicatorKeys.contains(indicator.key)) {
-      widget.controller.delIndicatorInSub(indicator.key);
+  void onTapSubIndicator(ValueKey key) {
+    if (widget.controller.subIndicatorKeys.contains(key)) {
+      widget.controller.delIndicatorInSub(key);
     } else {
-      widget.controller.addIndicatorInSub(indicator);
+      widget.controller.addIndicatorInSub(key);
     }
     setState(() {});
   }
@@ -86,15 +86,13 @@ class _FlexiIndicatorBarState extends ConsumerState<FlexiIndicatorBar> {
           mainAxisAlignment: MainAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            ...widget.controller.supportMainIndicators.map((indicator) {
+            ...widget.controller.supportMainIndicatorKeys.map((key) {
               return GestureDetector(
-                key: indicator.key,
-                onTap: () => onTapMainIndicator(indicator),
+                key: key,
+                onTap: () => onTapMainIndicator(key),
                 child: IndicatorView(
-                  indicator: indicator,
-                  selected: widget.controller.mainIndicatorKeys.contains(
-                    indicator.key,
-                  ),
+                  indicatorKey: key,
+                  selected: widget.controller.mainIndicatorKeys.contains(key),
                 ),
               );
             }),
@@ -104,15 +102,13 @@ class _FlexiIndicatorBarState extends ConsumerState<FlexiIndicatorBar> {
               width: 1.r,
               height: 20.r,
             ),
-            ...widget.controller.supportSubIndicators.map((indicator) {
+            ...widget.controller.supportSubIndicatorKeys.map((key) {
               return GestureDetector(
-                key: indicator.key,
-                onTap: () => onTapSubIndicator(indicator),
+                key: key,
+                onTap: () => onTapSubIndicator(key),
                 child: IndicatorView(
-                  indicator: indicator,
-                  selected: widget.controller.subIndicatorKeys.contains(
-                    indicator.key,
-                  ),
+                  indicatorKey: key,
+                  selected: widget.controller.subIndicatorKeys.contains(key),
                 ),
               );
             }),
@@ -126,21 +122,21 @@ class _FlexiIndicatorBarState extends ConsumerState<FlexiIndicatorBar> {
 class IndicatorView extends ConsumerWidget {
   const IndicatorView({
     super.key,
-    required this.indicator,
+    required this.indicatorKey,
     this.selected = false,
   });
 
-  final Indicator indicator;
+  final ValueKey indicatorKey;
   final bool selected;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     return Container(
-      key: indicator.key,
+      key: indicatorKey,
       padding: EdgeInsets.all(8.r),
       child: Text(
-        indicator.name,
+        indicatorKey.value.toString().toUpperCase(),
         style: theme.textTheme.bodySmall?.copyWith(
           color: selected ? Colors.black : null,
           fontWeight: selected ? FontWeight.bold : null,

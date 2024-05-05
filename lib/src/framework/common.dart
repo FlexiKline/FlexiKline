@@ -12,14 +12,39 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:flutter/material.dart';
+
+const jsonKeySetting = 'setting';
+const jsonKeySupportMainIndicators = 'supportMainIndicators';
+const jsonKeySupportSubIndicators = 'supportSubIndicators';
+const jsonKeyMain = 'main';
+const jsonKeySub = 'sub';
+const jsonKeyChildren = 'children';
+const mainChartKey = ValueKey<dynamic>(jsonKeyMain);
+
 enum IndicatorType {
   candle,
   ma,
   ema,
   boll,
-  maVol,
+  // volMa,
   volume,
+  maVol,
   macd,
   kdj;
 
+  @override
+  String toString() {
+    return name;
+  }
 }
+
+const candleKey = ValueKey<dynamic>(IndicatorType.candle);
+const maKey = ValueKey<dynamic>(IndicatorType.ma);
+const emaKey = ValueKey<dynamic>(IndicatorType.ema);
+const bollKey = ValueKey<dynamic>(IndicatorType.boll);
+const volMaKey = ValueKey<dynamic>(IndicatorType.ma);
+const volumeKey = ValueKey<dynamic>(IndicatorType.volume);
+const maVolKey = ValueKey<dynamic>(IndicatorType.maVol);
+const macdKey = ValueKey<dynamic>(IndicatorType.macd);
+const kdjKey = ValueKey<dynamic>(IndicatorType.kdj);

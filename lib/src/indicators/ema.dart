@@ -24,7 +24,7 @@ import '../utils/export.dart';
 
 part 'ema.g.dart';
 
-@paramSerializable
+@flexiKlineParamSerializable
 final class EMAParam {
   final String label;
   final int count;
@@ -47,10 +47,10 @@ final class EMAParam {
 ///   EMA(12)=2*今收盘价/(12+1)+11*昨日EMA(12)/(12+1)
 /// 2）慢速平滑移动平均线（EMA）是26日的，计算公式为：
 ///   EMA(26)=2*今收盘价/(26+1)+25*昨日EMA(26)/(26+1)
-@indicatorSerializable
+@flexiKlineIndicatorSerializable
 class EMAIndicator extends SinglePaintObjectIndicator {
   EMAIndicator({
-    super.key = const ValueKey(IndicatorType.ema),
+    super.key = emaKey,
     super.name = 'EMA',
     required super.height,
     super.tipsHeight = defaultIndicatorTipsHeight,
@@ -72,10 +72,12 @@ class EMAIndicator extends SinglePaintObjectIndicator {
 
   factory EMAIndicator.fromJson(Map<String, dynamic> json) =>
       _$EMAIndicatorFromJson(json);
+  
+  @override
   Map<String, dynamic> toJson() => _$EMAIndicatorToJson(this);
 }
 
-class EMAPaintObject extends SinglePaintObjectBox<EMAIndicator> {
+class EMAPaintObject<T extends EMAIndicator> extends SinglePaintObjectBox<T> {
   EMAPaintObject({
     required super.controller,
     required super.indicator,

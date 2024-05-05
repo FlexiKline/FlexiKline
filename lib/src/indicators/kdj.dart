@@ -24,7 +24,7 @@ import '../utils/export.dart';
 
 part 'kdj.g.dart';
 
-@paramSerializable
+@flexiKlineParamSerializable
 final class KDJParam {
   final int n;
   final int m1;
@@ -62,7 +62,7 @@ final class KDJParam {
 /// 当日D值=2/3×前一日D值+1/3×当日K值
 /// 若无前一日K 值与D值，则可分别用50来代替。
 /// J值=3*当日K值-2*当日D值
-@indicatorSerializable
+@flexiKlineIndicatorSerializable
 class KDJIndicator extends SinglePaintObjectIndicator {
   KDJIndicator({
     super.key = const ValueKey(IndicatorType.kdj),
@@ -94,10 +94,12 @@ class KDJIndicator extends SinglePaintObjectIndicator {
 
   factory KDJIndicator.fromJson(Map<String, dynamic> json) =>
       _$KDJIndicatorFromJson(json);
+
+  @override
   Map<String, dynamic> toJson() => _$KDJIndicatorToJson(this);
 }
 
-class KDJPaintObject extends SinglePaintObjectBox<KDJIndicator>
+class KDJPaintObject<T extends KDJIndicator> extends SinglePaintObjectBox<T>
     with PaintYAxisTickMixin, PaintYAxisMarkOnCrossMixin {
   KDJPaintObject({
     required super.controller,

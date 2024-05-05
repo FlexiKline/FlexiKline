@@ -23,7 +23,7 @@ import '../data/export.dart';
 
 part 'macd.g.dart';
 
-@paramSerializable
+@flexiKlineParamSerializable
 final class MACDParam {
   final int s;
   final int l;
@@ -58,10 +58,10 @@ final class MACDParam {
 }
 
 /// 指数平滑移动平均线MACD
-@indicatorSerializable
+@flexiKlineIndicatorSerializable
 class MACDIndicator extends SinglePaintObjectIndicator {
   MACDIndicator({
-    super.key = const ValueKey(IndicatorType.macd),
+    super.key = macdKey,
     super.name = 'MACD',
     super.height = defaultSubIndicatorHeight,
     super.tipsHeight = defaultIndicatorTipsHeight,
@@ -91,10 +91,12 @@ class MACDIndicator extends SinglePaintObjectIndicator {
 
   factory MACDIndicator.fromJson(Map<String, dynamic> json) =>
       _$MACDIndicatorFromJson(json);
+
+  @override
   Map<String, dynamic> toJson() => _$MACDIndicatorToJson(this);
 }
 
-class MACDPaintObject extends SinglePaintObjectBox<MACDIndicator>
+class MACDPaintObject<T extends MACDIndicator> extends SinglePaintObjectBox<T>
     with PaintYAxisTickMixin, PaintYAxisMarkOnCrossMixin {
   MACDPaintObject({required super.controller, required super.indicator});
 

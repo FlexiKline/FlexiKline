@@ -45,6 +45,9 @@ abstract class KlineBindingBase with KlineLog, KlineStorage, GestureHanderImpl {
   @mustCallSuper
   void dispose() {
     logd("dispose base");
+
+    /// TODO: 待验证 销毁前保存当前配置
+    storeState();
   }
 
   @protected

@@ -9,7 +9,7 @@ part of 'volume.dart';
 VolumeIndicator _$VolumeIndicatorFromJson(Map<String, dynamic> json) =>
     VolumeIndicator(
       key: json['key'] == null
-          ? const ValueKey(IndicatorType.volume)
+          ? volumeKey
           : const ValueKeyConverter().fromJson(json['key'] as String),
       name: json['name'] as String? ?? 'VOL',
       height: (json['height'] as num?)?.toDouble() ?? defaultSubIndicatorHeight,

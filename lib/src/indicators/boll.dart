@@ -24,7 +24,7 @@ import '../framework/export.dart';
 
 part 'boll.g.dart';
 
-@paramSerializable
+@flexiKlineParamSerializable
 final class BOLLParam {
   final int n;
   final int std;
@@ -54,10 +54,10 @@ final class BOLLParam {
   Map<String, dynamic> toJson() => _$BOLLParamToJson(this);
 }
 
-@indicatorSerializable
+@flexiKlineIndicatorSerializable
 class BOLLIndicator extends SinglePaintObjectIndicator {
   BOLLIndicator({
-    super.key = const ValueKey(IndicatorType.boll),
+    super.key = bollKey,
     super.name = 'BOLL',
     required super.height,
     super.tipsHeight = defaultIndicatorTipsHeight,
@@ -98,10 +98,11 @@ class BOLLIndicator extends SinglePaintObjectIndicator {
 
   factory BOLLIndicator.fromJson(Map<String, dynamic> json) =>
       _$BOLLIndicatorFromJson(json);
+  @override
   Map<String, dynamic> toJson() => _$BOLLIndicatorToJson(this);
 }
 
-class BOLLPaintObject extends SinglePaintObjectBox<BOLLIndicator> {
+class BOLLPaintObject<T extends BOLLIndicator> extends SinglePaintObjectBox<T> {
   BOLLPaintObject({
     required super.controller,
     required super.indicator,

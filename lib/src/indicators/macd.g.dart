@@ -21,7 +21,7 @@ Map<String, dynamic> _$MACDParamToJson(MACDParam instance) => <String, dynamic>{
 MACDIndicator _$MACDIndicatorFromJson(Map<String, dynamic> json) =>
     MACDIndicator(
       key: json['key'] == null
-          ? const ValueKey(IndicatorType.macd)
+          ? macdKey
           : const ValueKeyConverter().fromJson(json['key'] as String),
       name: json['name'] as String? ?? 'MACD',
       height: (json['height'] as num?)?.toDouble() ?? defaultSubIndicatorHeight,

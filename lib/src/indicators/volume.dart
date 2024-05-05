@@ -24,10 +24,10 @@ import '../utils/export.dart';
 
 part 'volume.g.dart';
 
-@indicatorSerializable
+@flexiKlineIndicatorSerializable
 class VolumeIndicator extends SinglePaintObjectIndicator {
   VolumeIndicator({
-    super.key = const ValueKey(IndicatorType.volume),
+    super.key = volumeKey,
     super.name = 'VOL',
     super.height = defaultSubIndicatorHeight,
     super.tipsHeight,
@@ -58,10 +58,13 @@ class VolumeIndicator extends SinglePaintObjectIndicator {
 
   factory VolumeIndicator.fromJson(Map<String, dynamic> json) =>
       _$VolumeIndicatorFromJson(json);
+
+  @override
   Map<String, dynamic> toJson() => _$VolumeIndicatorToJson(this);
 }
 
-class VolumePaintObject extends SinglePaintObjectBox<VolumeIndicator>
+class VolumePaintObject<T extends VolumeIndicator>
+    extends SinglePaintObjectBox<T>
     with PaintYAxisTickMixin, PaintYAxisMarkOnCrossMixin {
   VolumePaintObject({
     required super.controller,

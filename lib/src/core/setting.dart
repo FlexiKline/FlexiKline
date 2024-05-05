@@ -26,6 +26,12 @@ import 'interface.dart';
 
 mixin SettingBinding on KlineBindingBase implements IConfig {
   @override
+  void init() {
+    initSetting(settingConfig);
+    super.init();
+  }
+
+  @override
   void initState() {
     super.initState();
     logd("initState setting");
@@ -35,6 +41,10 @@ mixin SettingBinding on KlineBindingBase implements IConfig {
   void dispose() {
     super.dispose();
     logd("dispose setting");
+  }
+
+  void initSetting(Map<String, dynamic> setting) {
+    // 从配置中恢复
   }
 
   @override
@@ -288,43 +298,43 @@ mixin SettingBinding on KlineBindingBase implements IConfig {
     ..strokeWidth = priceMarkLineWidth ?? pixel;
 
   /// 最新价文本区域配置
-  bool isDrawLastPriceMark = true;
-  double lastPriceFontSize = 10;
-  Color lastPriceColor = Colors.black;
-  TextStyle get lastPriceTextStyle => TextStyle(
-        fontSize: lastPriceFontSize,
-        color: lastPriceColor,
+  bool isDrawLatestPriceMark = true;
+  double latestPriceFontSize = 10;
+  Color latestPriceColor = Colors.black;
+  TextStyle get latestPriceTextStyle => TextStyle(
+        fontSize: latestPriceFontSize,
+        color: latestPriceColor,
         overflow: TextOverflow.ellipsis,
         height: 1,
         textBaseline: TextBaseline.alphabetic,
       );
 
   /// 是否在最新价下面展示下次更新时间.
-  // 根据TimeBar计算: 当lastPrice时间距离下次更新时间在一个TimeBar内时展示; 否则不展示.
-  bool showLastPriceUpdateTime = true;
+  // 根据TimeBar计算: 当latestPrice时间距离下次更新时间在一个TimeBar内时展示; 否则不展示.
+  bool showLatestPriceUpdateTime = true;
   // 当移出绘制区域后, 是否展示最新价X轴线.
-  bool showLastPriceXAxisLineWhenMoveOffDrawArea = true;
+  bool showLatestPriceXAxisLineWhenMoveOffDrawArea = true;
 
   /// 最新价文本区域的背景相关配置.
-  Color lastPriceRectBackgroundColor = Colors.white;
-  double lastPriceRectBorderRadius = 2;
-  double lastPriceRectBorderWidth = 0.5;
-  Color lastPriceRectBorderColor = Colors.black;
-  double lastPriceRectRightMinMargin = 1;
-  double lastPriceRectRightMaxMargin = 60;
-  EdgeInsets lastPriceRectPadding = const EdgeInsets.symmetric(
+  Color latestPriceRectBackgroundColor = Colors.white;
+  double latestPriceRectBorderRadius = 2;
+  double latestPriceRectBorderWidth = 0.5;
+  Color latestPriceRectBorderColor = Colors.black;
+  double latestPriceRectRightMinMargin = 1;
+  double latestPriceRectRightMaxMargin = 60;
+  EdgeInsets latestPriceRectPadding = const EdgeInsets.symmetric(
     horizontal: 2,
     vertical: 2,
   );
 
   /// 最新价刻度线配置
-  Color lastPriceMarkLineColor = Colors.black;
-  double? lastPriceMarkLineWidth; // 最新价X轴标志线的绘制宽度.
-  Paint get lastPriceMarkLinePaint => Paint()
-    ..color = lastPriceMarkLineColor
+  Color latestPriceMarkLineColor = Colors.black;
+  double? latestPriceMarkLineWidth; // 最新价X轴标志线的绘制宽度.
+  Paint get latestPriceMarkLinePaint => Paint()
+    ..color = latestPriceMarkLineColor
     ..style = PaintingStyle.stroke
-    ..strokeWidth = lastPriceMarkLineWidth ?? pixel;
-  List<double> lastPriceMarkLineDashes = const [3, 3];
+    ..strokeWidth = latestPriceMarkLineWidth ?? pixel;
+  List<double> latestPriceMarkLineDashes = const [3, 3];
 
   /// Cross 配置 ///
   // cross line

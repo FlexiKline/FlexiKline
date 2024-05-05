@@ -13,6 +13,8 @@
 // limitations under the License.
 
 import 'package:decimal/decimal.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 Decimal stringToDecimal(dynamic value) =>
     stringToDecimalOrNull(value) ?? Decimal.zero;
@@ -61,4 +63,164 @@ int? dateTimeToInt(dynamic dateTime) {
     return dateTime;
   }
   return int.tryParse(dateTime.toString());
+}
+
+/// parse vs convert.
+
+double? parseDouble(dynamic value, {double? def}) {
+  if (value == null) {
+    return def;
+  } else if (value is num) {
+    return value.toDouble();
+  } else if (value is String) {
+    return double.tryParse(value) ?? 0;
+  } else {
+    return def;
+  }
+}
+
+String? convertDouble(double? value, {String? def}) {
+  if (value == null) return def;
+  return value.toString();
+}
+
+Color parseHexColor(String? hexStr, {Color def = Colors.transparent}) {
+  if (hexStr == null || hexStr.trim().isEmpty) {
+    return def;
+  }
+
+  if (hexStr.startsWith('0x')) {
+    int? colorInt = int.tryParse(hexStr);
+    if (colorInt == null) return def;
+    return Color(colorInt);
+  }
+
+  hexStr = hexStr.toUpperCase().replaceAll("#", "");
+  if (hexStr.length == 6) {
+    hexStr = "FF$hexStr";
+  }
+  int colorInt = int.parse(hexStr, radix: 16);
+  return Color(colorInt);
+}
+
+String convertHexColor(Color? color, {String def = ''}) {
+  if (color == null) return def;
+  return '0x${color.value.toRadixString(16).padLeft(8, '0')}';
+}
+
+FontStyle parseFontStyle(
+  String? fontStyle, {
+  FontStyle def = FontStyle.normal,
+}) {
+  if (fontStyle == 'normal') {
+    return FontStyle.normal;
+  }
+
+  if (fontStyle == 'italic') {
+    return FontStyle.italic;
+  }
+
+  return def;
+}
+
+FontWeight parseFontWeight(
+  String? textFontWeight, {
+  FontWeight def = FontWeight.normal,
+}) {
+  FontWeight fontWeight = def;
+  switch (textFontWeight) {
+    case 'w100':
+      fontWeight = FontWeight.w100;
+      break;
+    case 'w200':
+      fontWeight = FontWeight.w200;
+      break;
+    case 'w300':
+      fontWeight = FontWeight.w300;
+      break;
+    case 'normal':
+    case 'w400':
+      fontWeight = FontWeight.w400;
+      break;
+    case 'w500':
+      fontWeight = FontWeight.w500;
+      break;
+    case 'w600':
+      fontWeight = FontWeight.w600;
+      break;
+    case 'bold':
+    case 'w700':
+      fontWeight = FontWeight.w700;
+      break;
+    case 'w800':
+      fontWeight = FontWeight.w800;
+      break;
+    case 'w900':
+      fontWeight = FontWeight.w900;
+      break;
+    default:
+      fontWeight = FontWeight.normal;
+  }
+  return fontWeight;
+}
+
+String convertFontWeight(FontWeight? fontWeight, {String def = 'normal'}) {
+  if (fontWeight == null) return def;
+  String weight = def;
+  switch (fontWeight) {
+    case FontWeight.w100:
+      weight = 'w100';
+      break;
+    case FontWeight.w200:
+      weight = 'w200';
+      break;
+    case FontWeight.w300:
+      weight = 'w300';
+      break;
+    case FontWeight.w400:
+      weight = 'w400';
+      break;
+    case FontWeight.w500:
+      weight = 'w500';
+      break;
+    case FontWeight.w600:
+      weight = 'w600';
+      break;
+    case FontWeight.w700:
+      weight = 'w700';
+      break;
+    case FontWeight.w800:
+      weight = 'w800';
+      break;
+    case FontWeight.w900:
+      weight = 'w900';
+      break;
+    case FontWeight.normal:
+      weight = 'normal';
+      break;
+    case FontWeight.bold:
+      weight = 'bold';
+      break;
+    default:
+      weight = def;
+  }
+  return weight;
+}
+
+TextBaseline parseTextBaseline(
+  String? textBaseline, {
+  TextBaseline def = TextBaseline.ideographic,
+}) {
+  if (textBaseline == null) return def;
+  return 'alphabetic' == textBaseline
+      ? TextBaseline.alphabetic
+      : TextBaseline.ideographic;
+}
+
+String convertTextBaseline(
+  TextBaseline? textBaseline, {
+  String def = 'ideographic',
+}) {
+  if (textBaseline == null) return def;
+  return textBaseline.name;
 }

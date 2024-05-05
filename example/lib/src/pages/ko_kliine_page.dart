@@ -23,7 +23,7 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import '../config.dart';
 import '../custom/candle_indicator.dart';
 import '../repo/api.dart' as api;
-import '../utils/cache_util.dart';
+import '../utils/flexi_kline_storage.dart';
 import '../widgets/flexi_indicator_bar.dart';
 import '../widgets/latest_price_view.dart';
 import '../widgets/flexi_time_bar.dart';
@@ -64,16 +64,21 @@ class _KOKlinePageState extends ConsumerState<KOKlinePage> {
         tag: "KOKline",
         debug: kDebugMode,
       ),
-      storage: CacheUtil(),
+      storage: FlexiKlineStorage(),
     );
     controller.setMainSize(
       Size(ScreenUtil().screenWidth, 300.r),
     );
 
-    controller.candleMainIndicator = CustomCandleIndicator(
-      height: 300.r,
-      latestPriceRectBackgroundColor: Colors.grey,
-    );
+    // controller.candleMainIndicator = CustomCandleIndicator(
+    //   height: 300.r,
+    //   latestPriceRectBackgroundColor: Colors.grey,
+    //   // latestPriceTextStyle: const TextStyle(
+    //   //   color: Colors.red,
+    //   //   fontSize: 12,
+    //   //   fontWeight: FontWeight.bold,
+    //   // ),
+    // );
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       loadCandleData(req);

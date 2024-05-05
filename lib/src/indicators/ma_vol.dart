@@ -24,12 +24,12 @@ import 'ma.dart';
 
 part 'ma_vol.g.dart';
 
-/// MAVOL 移动平均指标线
-@indicatorSerializable
+/// VolMa 移动平均指标线
+@flexiKlineIndicatorSerializable
 class MAVolIndicator extends SinglePaintObjectIndicator {
   MAVolIndicator({
-    super.key = const ValueKey(IndicatorType.maVol),
-    super.name = 'MAVOL',
+    super.key = volMaKey,
+    super.name = 'VOLMA',
     required super.height,
     super.tipsHeight,
     super.padding,
@@ -48,10 +48,13 @@ class MAVolIndicator extends SinglePaintObjectIndicator {
 
   factory MAVolIndicator.fromJson(Map<String, dynamic> json) =>
       _$MAVolIndicatorFromJson(json);
+
+  @override
   Map<String, dynamic> toJson() => _$MAVolIndicatorToJson(this);
 }
 
-class MAVolPaintObject extends SinglePaintObjectBox<MAVolIndicator> {
+class MAVolPaintObject<T extends MAVolIndicator>
+    extends SinglePaintObjectBox<T> {
   MAVolPaintObject({
     required super.controller,
     required super.indicator,

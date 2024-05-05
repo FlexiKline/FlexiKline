@@ -14,13 +14,12 @@
 
 import 'dart:convert';
 
-import 'package:flexi_kline/flexi_kline.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../config.dart';
 import '../repo/http_client.dart';
 
-class CacheUtil implements IStore {
+class CacheUtil {
   CacheUtil._internal();
   factory CacheUtil() => _instance;
   static final CacheUtil _instance = CacheUtil._internal();
@@ -36,22 +35,18 @@ class CacheUtil implements IStore {
     return _prefs.clear();
   }
 
-  @override
   bool contains(String key) {
     return _prefs.containsKey(key);
   }
 
-  @override
   Future<bool> remove(String key) {
     return _prefs.remove(key);
   }
 
-  @override
   T? get<T>(String key, {T? def}) {
     return _prefs.get(key) as T? ?? def;
   }
 
-  @override
   Future<bool> set<T>(String key, T value) {
     if (value is String) {
       return setString(key, value);

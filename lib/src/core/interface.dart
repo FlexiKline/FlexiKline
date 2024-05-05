@@ -123,10 +123,10 @@ abstract interface class IConfig {
   double calculateIndicatorTop(int slot);
   double get subRectHeight;
   void ensurePaintObjectInstance();
-  void addIndicatorInMain(SinglePaintObjectIndicator indicator);
-  void delIndicatorInMain(ValueKey key);
-  void addIndicatorInSub(Indicator indicator);
-  void delIndicatorInSub(ValueKey key);
+  void addIndicatorInMain(ValueKey<dynamic> key);
+  void delIndicatorInMain(ValueKey<dynamic> key);
+  void addIndicatorInSub(ValueKey<dynamic> key);
+  void delIndicatorInSub(ValueKey<dynamic> key);
 }
 
 //// Chart层绘制接口

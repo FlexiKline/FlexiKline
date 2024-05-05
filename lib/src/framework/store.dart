@@ -12,81 +12,160 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:convert';
+import 'dart:collection';
 
 import 'package:flutter/material.dart';
 
+import '../extension/export.dart';
 import 'common.dart';
 import 'indicator.dart';
 import 'logger.dart';
+import 'serializable.dart';
 
 typedef IndicatorFromJson<T extends Indicator> = T Function(
   Map<String, dynamic>,
 );
 
-abstract interface class IStore {
-  T? get<T>(
-    String key, {
-    T? def,
-  });
+const defaultFlexKlineConfigKey = 'flexi_kline_config_key';
 
-  Future<bool> set<T>(
-    String key,
-    T value,
-  );
+abstract class IStore {
+  String get flexKlineConfigKey => defaultFlexKlineConfigKey;
 
-  Future<bool> remove(String key);
+  Map<String, dynamic>? getFlexiKlineConfig();
 
-  bool contains(String key);
+  void saveFlexiKlineConfig(Map<String, dynamic> klineConfig);
 }
 
 mixin KlineStorage implements IStore, ILogger {
   IStore? storeDelegate;
 
   @override
-  T? get<T>(
-    String key, {
-    T? def,
-  }) {
-    return storeDelegate?.get(key, def: def);
+  String get flexKlineConfigKey {
+    return storeDelegate?.flexKlineConfigKey ?? defaultFlexKlineConfigKey;
   }
 
   @override
-  Future<bool> set<T>(String key, T value) async {
-    return await storeDelegate?.set(key, value) ?? false;
+  Map<String, dynamic> getFlexiKlineConfig() {
+    return storeDelegate?.getFlexiKlineConfig() ?? <String, dynamic>{};
   }
 
   @override
-  Future<bool> remove(String key) async {
-    return await storeDelegate?.remove(key) ?? false;
+  void saveFlexiKlineConfig(Map<String, dynamic> klineConfig) {
+    return storeDelegate?.saveFlexiKlineConfig(klineConfig);
   }
 
-  @override
-  bool contains(String key) {
-    return storeDelegate?.contains(key) ?? false;
+  Map<String, dynamic>? _flexiKlineConfig;
+
+  Map<String, dynamic> get flexiKlineConfig {
+    if (_flexiKlineConfig == null) {
+      final initConfig = storeDelegate?.getFlexiKlineConfig();
+      if (initConfig != null && initConfig.isNotEmpty) {
+        _flexiKlineConfig = Map<String, dynamic>.of(initConfig);
+      }
+      _flexiKlineConfig ??= <String, dynamic>{};
+    }
+    return _flexiKlineConfig!;
   }
 
-  String _valueKeyToString(ValueKey key) {
+  String? _valueKeyToString(ValueKey? key) {
+    if (key == null) return null;
     if (key.value is IndicatorType) {
       return key.value.toString();
     }
     return key.value.toString();
   }
 
-  T? restoreIndicator<T extends Indicator>(
+  Map<String, dynamic> _getRootConfig(String key) {
+    dynamic config = flexiKlineConfig[key];
+    if (config == null || config is! Map<String, dynamic>) {
+      flexiKlineConfig[key] = config = <String, dynamic>{};
+    }
+    return config;
+  }
+
+  Map<String, dynamic> get settingConfig => _getRootConfig(jsonKeySetting);
+
+  Map<String, dynamic> get mainIndicatorConfig => _getRootConfig(jsonKeyMain);
+
+  List<ValueKey> get mainChildrenKeys {
+    dynamic list = mainIndicatorConfig[jsonKeyChildren];
+    if (list is List) {
+      return list.map((e) => parseValueKey(e)).toList();
+    }
+    return <ValueKey>[];
+  }
+
+  List<ValueKey> get subChildrenKeys {
+    final list = flexiKlineConfig[jsonKeySub];
+    if (list is List) {
+      return list.map((e) => parseValueKey(e)).toList();
+    }
+    return <ValueKey>[];
+  }
+
+  Map<String, dynamic> get supportMainIndicatorsConfig {
+    return _getRootConfig(jsonKeySupportMainIndicators);
+  }
+
+  Map<String, dynamic> get supportSubIndicatorsConfig {
+    return _getRootConfig(jsonKeySupportSubIndicators);
+  }
+
+  MultiPaintObjectIndicator? restoreMainIndicator() {
+    return _restoreIndicator(
+      mainIndicatorConfig,
+      mainChartKey,
+      MultiPaintObjectIndicator.fromJson,
+    );
+  }
+
+  T? restoreMainSupportIndicator<T extends Indicator>(
     ValueKey key,
     IndicatorFromJson<T> fromJson,
   ) {
-    if (storeDelegate == null) return null;
+    return _restoreIndicator(
+      supportMainIndicatorsConfig,
+      key,
+      fromJson,
+    );
+  }
+
+  T? restoreSubSupportIndicator<T extends Indicator>(
+    ValueKey key,
+    IndicatorFromJson<T> fromJson, {
+    ValueKey? childKey,
+  }) {
+    return _restoreIndicator(
+      supportSubIndicatorsConfig,
+      key,
+      fromJson,
+      childKey: childKey,
+    );
+  }
+
+  T? _restoreIndicator<T extends Indicator>(
+    Map<String, dynamic> configs,
+    ValueKey key,
+    IndicatorFromJson<T> fromJson, {
+    ValueKey? childKey,
+  }) {
+    if (configs.isEmpty) return null;
     try {
-      final String? jsonStr = storeDelegate!.get(_valueKeyToString(key));
-      if (jsonStr != null && jsonStr.trim().isNotEmpty) {
-        final json = jsonDecode(jsonStr);
-        return fromJson(json);
+      final json = configs.getItem(_valueKeyToString(key));
+      if (json != null && json is Map<String, dynamic> && json.isNotEmpty) {
+        if (childKey == null) {
+          return fromJson(json);
+        }
+        final childJson = json.getItem(_valueKeyToString(childKey));
+        if (childJson != null &&
+            childJson is Map<String, dynamic> &&
+            childJson.isNotEmpty) {
+          return fromJson(childJson);
+        }
       }
     } catch (err, stack) {
       loge(
-        'restoreIndicator error',
+        '_restoreIndicator error',
         error: err,
         stackTrace: stack,
       );
@@ -94,8 +173,44 @@ mixin KlineStorage implements IStore, ILogger {
     return null;
   }
 
-  Future<bool> saveIndicator(ValueKey key, Map<String, dynamic> json) async {
-    if (storeDelegate == null) return false;
-    return storeDelegate!.set(_valueKeyToString(key), jsonEncode(json));
+  void storeMainIndicator(
+    MultiPaintObjectIndicator mainIndicator,
+  ) {
+    flexiKlineConfig[jsonKeyMain] = mainIndicator.toJson();
+    flexiKlineConfig[jsonKeyMain][jsonKeyChildren] = mainIndicator.children
+        .map(
+          (e) => convertValueKey(e.key),
+        )
+        .toList();
+  }
+
+  void storeSubIndicators(Queue<Indicator> subIndicators) {
+    flexiKlineConfig[jsonKeySub] = subIndicators
+        .map(
+          (e) => convertValueKey(e.key),
+        )
+        .toList();
+  }
+
+  void storeSupportMainIndicators(
+    Map<ValueKey, SinglePaintObjectIndicator> supportIndicator,
+  ) {
+    flexiKlineConfig[jsonKeySupportMainIndicators] = supportIndicator.map(
+      (key, value) => MapEntry<String, Map<String, dynamic>>(
+        convertValueKey(key),
+        value.toJson(),
+      ),
+    );
+  }
+
+  void storeSupportSubIndicators(
+    Map<ValueKey, Indicator> supportIndicator,
+  ) {
+    flexiKlineConfig[jsonKeySupportSubIndicators] = supportIndicator.map(
+      (key, value) => MapEntry<String, Map<String, dynamic>>(
+        convertValueKey(key),
+        value.toJson(),
+      ),
+    );
   }
 }

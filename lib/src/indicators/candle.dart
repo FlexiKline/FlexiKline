@@ -25,12 +25,10 @@ import '../framework/export.dart';
 
 part 'candle.g.dart';
 
-const candleIndicatorKey = ValueKey(IndicatorType.candle);
-
-@indicatorSerializable
+@flexiKlineIndicatorSerializable
 class CandleIndicator extends SinglePaintObjectIndicator {
   CandleIndicator({
-    super.key = candleIndicatorKey,
+    super.key = candleKey,
     super.name = 'Candle',
     required super.height,
     super.tipsHeight,
@@ -49,11 +47,12 @@ class CandleIndicator extends SinglePaintObjectIndicator {
 
   factory CandleIndicator.fromJson(Map<String, dynamic> json) =>
       _$CandleIndicatorFromJson(json);
+  @override
   Map<String, dynamic> toJson() => _$CandleIndicatorToJson(this);
 }
 
-class CandlePaintObject extends SinglePaintObjectBox<CandleIndicator>
-    with PaintYAxisMarkOnCrossMixin {
+class CandlePaintObject<T extends CandleIndicator>
+    extends SinglePaintObjectBox<T> with PaintYAxisMarkOnCrossMixin {
   CandlePaintObject({
     required super.controller,
     required super.indicator,
@@ -299,7 +298,7 @@ class CandlePaintObject extends SinglePaintObjectBox<CandleIndicator>
   ///    且展示在指定价钱区间内, 如超出边界, 则停靠在最高最低线上.
   /// 3. 最新价向左移动后, 刻度线根据最新价蜡烛线平行移动.
   void paintLatestPriceMark(Canvas canvas, Size size) {
-    if (!setting.isDrawLastPriceMark) return;
+    if (!setting.isDrawLatestPriceMark) return;
     final data = klineData;
     final model = data.latest;
     if (model == null) {
@@ -307,10 +306,10 @@ class CandlePaintObject extends SinglePaintObjectBox<CandleIndicator>
       return;
     }
 
-    bool showLastPriceUpdateTime = setting.showLastPriceUpdateTime;
+    bool showLastPriceUpdateTime = setting.showLatestPriceUpdateTime;
     double dx = chartRect.right;
     double firstCandleDx = startCandleDx;
-    double rightMargin = setting.lastPriceRectRightMinMargin;
+    double rightMargin = setting.latestPriceRectRightMinMargin;
     double ldx = 0; // 计算最新价刻度线lineTo参数X轴的dx值. 默认0: 代表橫穿整个Canvas.
     double dy;
     if (model.close >= minMax.max) {
@@ -324,9 +323,9 @@ class CandlePaintObject extends SinglePaintObjectBox<CandleIndicator>
     if (firstCandleDx < dx) {
       ldx = firstCandleDx;
     } else {
-      if (setting.showLastPriceXAxisLineWhenMoveOffDrawArea) {
+      if (setting.showLatestPriceXAxisLineWhenMoveOffDrawArea) {
         ldx = 0;
-        rightMargin += setting.lastPriceRectRightMaxMargin;
+        rightMargin += setting.latestPriceRectRightMaxMargin;
         showLastPriceUpdateTime = false;
       } else {
         ldx = dx - rightMargin;
@@ -339,13 +338,13 @@ class CandlePaintObject extends SinglePaintObjectBox<CandleIndicator>
     path.lineTo(ldx, dy);
     canvas.drawDashPath(
       path,
-      setting.lastPriceMarkLinePaint,
-      dashes: setting.lastPriceMarkLineDashes,
+      setting.latestPriceMarkLinePaint,
+      dashes: setting.latestPriceMarkLineDashes,
     );
 
     // 画最新价文本区域.
     double textHeight =
-        setting.lastPriceRectPadding.vertical + setting.lastPriceFontSize;
+        setting.latestPriceRectPadding.vertical + setting.latestPriceFontSize;
     String text = setting.formatPrice(
       model.close,
       instId: klineData.req.instId,
@@ -361,7 +360,7 @@ class CandlePaintObject extends SinglePaintObjectBox<CandleIndicator>
         final timeDiff = formatTimeDiff(nextUpdateDateTime);
         if (timeDiff != null) {
           text += "\n$timeDiff";
-          textHeight += setting.lastPriceFontSize;
+          textHeight += setting.latestPriceFontSize;
         }
       }
     }
@@ -374,15 +373,15 @@ class CandlePaintObject extends SinglePaintObjectBox<CandleIndicator>
       drawDirection: DrawDirection.rtl,
       drawableRect: drawBounding,
       text: text,
-      style: setting.lastPriceTextStyle,
+      style: setting.latestPriceTextStyle,
       textAlign: TextAlign.end,
       textWidthBasis: TextWidthBasis.longestLine,
-      padding: setting.lastPriceRectPadding,
+      padding: setting.latestPriceRectPadding,
       backgroundColor: indicator.latestPriceRectBackgroundColor ??
-          setting.lastPriceRectBackgroundColor,
-      radius: setting.lastPriceRectBorderRadius,
-      borderWidth: setting.lastPriceRectBorderWidth,
-      borderColor: setting.lastPriceRectBorderColor,
+          setting.latestPriceRectBackgroundColor,
+      radius: setting.latestPriceRectBorderRadius,
+      borderWidth: setting.latestPriceRectBorderWidth,
+      borderColor: setting.latestPriceRectBorderColor,
     );
   }
 

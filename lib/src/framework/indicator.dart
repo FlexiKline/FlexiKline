@@ -19,9 +19,9 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../core/export.dart';
 import 'object.dart';
-// import 'serializable.dart';
+import 'serializable.dart';
 
-// part 'indicator.g.dart';
+part 'indicator.g.dart';
 
 /// Indicator绘制模式
 /// 注: PaintMode仅当Indicator加入MultiPaintObjectIndicator后起作用,
@@ -91,6 +91,8 @@ abstract class Indicator {
     paintObject = null;
   }
 
+  Map<String, dynamic> toJson();
+
   static bool canUpdate(Indicator oldIndicator, Indicator newIndicator) {
     return oldIndicator.runtimeType == newIndicator.runtimeType &&
         oldIndicator.key == newIndicator.key;
@@ -122,7 +124,7 @@ abstract class SinglePaintObjectIndicator extends Indicator {
 
 /// 多个绘制Indicator的配置.
 /// children 维护具体的Indicator配置.
-// @indicatorSerializable
+@flexiKlineIndicatorSerializable
 class MultiPaintObjectIndicator<T extends SinglePaintObjectIndicator>
     extends Indicator {
   MultiPaintObjectIndicator({
@@ -135,6 +137,7 @@ class MultiPaintObjectIndicator<T extends SinglePaintObjectIndicator>
     Iterable<T> children = const [],
   }) : children = LinkedHashSet<T>.from(children);
 
+  @JsonKey(includeFromJson: false, includeToJson: false)
   final Set<T> children;
   bool drawChartAlawaysBelowTipsArea;
 
@@ -165,6 +168,12 @@ class MultiPaintObjectIndicator<T extends SinglePaintObjectIndicator>
     indicator.paintObject!.parent = paintObject;
   }
 
+  void appendIndicators(Iterable<T> indicators, KlineBindingBase controller) {
+    for (var indicator in indicators) {
+      appendIndicator(indicator, controller);
+    }
+  }
+
   void appendIndicator(
     T newIndicator,
     KlineBindingBase controller,
@@ -191,12 +200,11 @@ class MultiPaintObjectIndicator<T extends SinglePaintObjectIndicator>
     });
   }
 
-  // // 从JSON映射转换为Response对象的工厂方法
-  // factory MultiPaintObjectIndicator.fromJson(
-  //         Map<String, dynamic> json, T Function(Object? json) fromJsonT) =>
-  //     _$MultiPaintObjectIndicatorFromJson(json, fromJsonT);
+  // 从JSON映射转换为Response对象的工厂方法
+  factory MultiPaintObjectIndicator.fromJson(Map<String, dynamic> json) =>
+      _$MultiPaintObjectIndicatorFromJson(json);
 
-  // // 将Response对象转换为JSON映射的方法
-  // Map<String, dynamic> toJson(Object? Function(T value) toJsonT) =>
-  //     _$MultiPaintObjectIndicatorToJson(this, toJsonT);
+  // 将Response对象转换为JSON映射的方法
+  @override
+  Map<String, dynamic> toJson() => _$MultiPaintObjectIndicatorToJson(this);
 }

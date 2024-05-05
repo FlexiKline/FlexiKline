@@ -20,7 +20,7 @@ Map<String, dynamic> _$EMAParamToJson(EMAParam instance) => <String, dynamic>{
 
 EMAIndicator _$EMAIndicatorFromJson(Map<String, dynamic> json) => EMAIndicator(
       key: json['key'] == null
-          ? const ValueKey(IndicatorType.ema)
+          ? emaKey
           : const ValueKeyConverter().fromJson(json['key'] as String),
       name: json['name'] as String? ?? 'EMA',
       height: (json['height'] as num).toDouble(),

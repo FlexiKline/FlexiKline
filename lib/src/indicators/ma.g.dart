@@ -20,7 +20,7 @@ Map<String, dynamic> _$MaParamToJson(MaParam instance) => <String, dynamic>{
 
 MAIndicator _$MAIndicatorFromJson(Map<String, dynamic> json) => MAIndicator(
       key: json['key'] == null
-          ? const ValueKey(IndicatorType.ma)
+          ? maKey
           : const ValueKeyConverter().fromJson(json['key'] as String),
       name: json['name'] as String? ?? 'MA',
       height: (json['height'] as num).toDouble(),

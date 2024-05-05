@@ -9,9 +9,9 @@ part of 'ma_vol.dart';
 MAVolIndicator _$MAVolIndicatorFromJson(Map<String, dynamic> json) =>
     MAVolIndicator(
       key: json['key'] == null
-          ? const ValueKey(IndicatorType.maVol)
+          ? volMaKey
           : const ValueKeyConverter().fromJson(json['key'] as String),
-      name: json['name'] as String? ?? 'MAVOL',
+      name: json['name'] as String? ?? 'VOLMA',
       height: (json['height'] as num).toDouble(),
       tipsHeight: (json['tipsHeight'] as num?)?.toDouble() ?? 0.0,
       padding: json['padding'] == null

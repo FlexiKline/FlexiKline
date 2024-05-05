@@ -15,44 +15,40 @@
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 
+import '../utils/convert_util.dart';
 import 'common.dart';
 import 'indicator.dart';
+
+ValueKey parseValueKey(String key) {
+  if (key.trim().isEmpty) return const ValueKey('');
+  final name = key.toLowerCase();
+  final types = IndicatorType.values.where(
+    (type) => type.name.toLowerCase() == name,
+  );
+  if (types.isNotEmpty) return ValueKey(types.first);
+  return ValueKey(key);
+}
+
+String convertValueKey(ValueKey key) {
+  return key.value.toString();
+}
 
 class ValueKeyConverter implements JsonConverter<ValueKey, String> {
   const ValueKeyConverter();
   @override
   ValueKey fromJson(String json) {
-    if (json.trim().isEmpty) return const ValueKey('');
-    if (json.startsWith('IndicatorType')) {
-      final name = json.substring('IndicatorType'.length + 1);
-      final types = IndicatorType.values.where((type) => type.name == name);
-      if (types.isNotEmpty) return ValueKey(types.first);
-    }
-
-    return ValueKey(json);
+    return parseValueKey(json);
   }
 
   @override
   String toJson(ValueKey key) {
-    return key.value.toString();
+    return convertValueKey(key);
   }
 }
 
 class EdgeInsetsConverter
     implements JsonConverter<EdgeInsets, Map<String, dynamic>> {
   const EdgeInsetsConverter();
-
-  double parseDouble(dynamic value) {
-    if (value == null) {
-      return 0;
-    } else if (value is num) {
-      return value.toDouble();
-    } else if (value is String) {
-      return double.tryParse(value) ?? 0;
-    } else {
-      return 0;
-    }
-  }
 
   @override
   EdgeInsets fromJson(Map<String, dynamic> json) {
@@ -62,8 +58,8 @@ class EdgeInsetsConverter
 
     if (json.containsKey('vertical') || json.containsKey('horizontal')) {
       return EdgeInsets.symmetric(
-        vertical: parseDouble(json['vertical']),
-        horizontal: parseDouble(json['horizontal']),
+        vertical: parseDouble(json['vertical']) ?? 0.0,
+        horizontal: parseDouble(json['horizontal']) ?? 0.0,
       );
     }
 
@@ -72,10 +68,10 @@ class EdgeInsetsConverter
         json.containsKey('right') ||
         json.containsKey('bottom')) {
       return EdgeInsets.only(
-        left: parseDouble(json['left']),
-        top: parseDouble(json['top']),
-        right: parseDouble(json['right']),
-        bottom: parseDouble(json['bottom']),
+        left: parseDouble(json['left']) ?? 0.0,
+        top: parseDouble(json['top']) ?? 0.0,
+        right: parseDouble(json['right']) ?? 0.0,
+        bottom: parseDouble(json['bottom']) ?? 0.0,
       );
     }
 
@@ -129,34 +125,46 @@ class PaintModeConverter implements JsonConverter<PaintMode, String> {
 
 class ColorConverter implements JsonConverter<Color, String?> {
   const ColorConverter();
+
   @override
   Color fromJson(String? json) {
-    if (json == null || json.trim().isEmpty) {
-      return Colors.transparent;
-    }
-
-    if (json.startsWith('0x')) {
-      int? colorInt = int.tryParse(json);
-      if (colorInt == null) return Colors.transparent;
-      return Color(colorInt);
-    }
-
-    json = json.toUpperCase().replaceAll("#", "");
-    if (json.length == 6) {
-      json = "FF$json";
-    }
-    int colorInt = int.parse(json, radix: 16);
-    return Color(colorInt);
+    return parseHexColor(json);
   }
 
   @override
   String toJson(Color? color) {
-    if (color == null) return '';
-    return '0x${color.value.toRadixString(16).padLeft(8, '0')}';
+    return convertHexColor(color);
   }
 }
 
-const indicatorSerializable = JsonSerializable(
+class TextStyleConverter
+    implements JsonConverter<TextStyle, Map<String, dynamic>> {
+  const TextStyleConverter();
+
+  @override
+  TextStyle fromJson(Map<String, dynamic> json) {
+    if (json.isEmpty) return const TextStyle(); // TODO: 待优化.
+    return TextStyle(
+      color: parseHexColor(json['color']),
+      fontSize: parseDouble(json['fontSize']),
+      fontFamily: json['fontFamily'],
+      fontStyle: parseFontStyle(json['fontStyle']),
+      height: parseDouble(json['height']),
+      fontWeight: parseFontWeight(json['fontWeight']),
+      textBaseline: parseTextBaseline(json['textBaseline']),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson(TextStyle style) {
+    return {
+      'color': convertHexColor(style.color),
+      'fontSize': convertDouble(style.fontSize),
+    };
+  }
+}
+
+const flexiKlineIndicatorSerializable = JsonSerializable(
   converters: [
     ValueKeyConverter(),
     ColorConverter(),
@@ -167,7 +175,7 @@ const indicatorSerializable = JsonSerializable(
   // genericArgumentFactories: true,
 );
 
-const paramSerializable = JsonSerializable(
+const flexiKlineParamSerializable = JsonSerializable(
   converters: [
     ColorConverter(),
     EdgeInsetsConverter(),

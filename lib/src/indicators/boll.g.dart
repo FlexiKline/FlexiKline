@@ -19,7 +19,7 @@ Map<String, dynamic> _$BOLLParamToJson(BOLLParam instance) => <String, dynamic>{
 BOLLIndicator _$BOLLIndicatorFromJson(Map<String, dynamic> json) =>
     BOLLIndicator(
       key: json['key'] == null
-          ? const ValueKey(IndicatorType.boll)
+          ? bollKey
           : const ValueKeyConverter().fromJson(json['key'] as String),
       name: json['name'] as String? ?? 'BOLL',
       height: (json['height'] as num).toDouble(),
