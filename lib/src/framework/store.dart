@@ -16,7 +16,6 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 
-import '../extension/export.dart';
 import 'common.dart';
 import 'indicator.dart';
 import 'logger.dart';
@@ -51,7 +50,8 @@ mixin KlineStorage implements IStore, ILogger {
 
   @override
   void saveFlexiKlineConfig(Map<String, dynamic> klineConfig) {
-    return storeDelegate?.saveFlexiKlineConfig(klineConfig);
+    final configData = Map<String, dynamic>.of(klineConfig);
+    return storeDelegate?.saveFlexiKlineConfig(configData);
   }
 
   Map<String, dynamic>? _flexiKlineConfig;
@@ -65,14 +65,6 @@ mixin KlineStorage implements IStore, ILogger {
       _flexiKlineConfig ??= <String, dynamic>{};
     }
     return _flexiKlineConfig!;
-  }
-
-  String? _valueKeyToString(ValueKey? key) {
-    if (key == null) return null;
-    if (key.value is IndicatorType) {
-      return key.value.toString();
-    }
-    return key.value.toString();
   }
 
   Map<String, dynamic> _getRootConfig(String key) {
@@ -151,12 +143,12 @@ mixin KlineStorage implements IStore, ILogger {
   }) {
     if (configs.isEmpty) return null;
     try {
-      final json = configs.getItem(_valueKeyToString(key));
+      final json = configs[convertValueKey(key)];
       if (json != null && json is Map<String, dynamic> && json.isNotEmpty) {
         if (childKey == null) {
           return fromJson(json);
         }
-        final childJson = json.getItem(_valueKeyToString(childKey));
+        final childJson = json[convertValueKey(childKey)];
         if (childJson != null &&
             childJson is Map<String, dynamic> &&
             childJson.isNotEmpty) {

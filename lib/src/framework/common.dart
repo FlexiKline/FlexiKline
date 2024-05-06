@@ -28,7 +28,7 @@ enum IndicatorType {
   ema,
   boll,
   // volMa,
-  volume,
+  vol, // Volume
   maVol,
   macd,
   kdj;
@@ -44,7 +44,7 @@ const maKey = ValueKey<dynamic>(IndicatorType.ma);
 const emaKey = ValueKey<dynamic>(IndicatorType.ema);
 const bollKey = ValueKey<dynamic>(IndicatorType.boll);
 const volMaKey = ValueKey<dynamic>(IndicatorType.ma);
-const volumeKey = ValueKey<dynamic>(IndicatorType.volume);
+const volumeKey = ValueKey<dynamic>(IndicatorType.vol);
 const maVolKey = ValueKey<dynamic>(IndicatorType.maVol);
 const macdKey = ValueKey<dynamic>(IndicatorType.macd);
 const kdjKey = ValueKey<dynamic>(IndicatorType.kdj);
