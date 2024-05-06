@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 
 import '../constant.dart';
@@ -80,14 +81,20 @@ class MAPaintObject<T extends MAIndicator> extends SinglePaintObjectBox<T> {
   MinMax? initData({int? start, int? end}) {
     if (!klineData.canPaintChart) return null;
 
-    MinMax? minmax;
-    for (var param in indicator.calcParams) {
-      final ret = klineData.calculateMaMinmax(param.count);
-      minmax ??= ret;
-      minmax?.updateMinMax(ret);
-    }
+    MinMax? minmax = klineData.calcuMaMinmax(indicator.calcParams);
     return minmax;
   }
+  // MinMax? initData({int? start, int? end}) {
+  //   if (!klineData.canPaintChart) return null;
+
+  //   MinMax? minmax;
+  //   for (var param in indicator.calcParams) {
+  //     final ret = klineData.calculateMaMinmax(param.count);
+  //     minmax ??= ret;
+  //     minmax?.updateMinMax(ret);
+  //   }
+  //   return minmax;
+  // }
 
   @override
   void paintChart(Canvas canvas, Size size) {
@@ -102,67 +109,97 @@ class MAPaintObject<T extends MAIndicator> extends SinglePaintObjectBox<T> {
   /// 绘制MA指标线
   void paintMALine(Canvas canvas, Size size) {
     if (!klineData.canPaintChart) return;
+    if (indicator.calcParams.isEmpty) return;
     final list = klineData.list;
     int start = klineData.start;
     int end = (klineData.end + 1).clamp(start, list.length); // 多绘制一根蜡烛
 
-    // try {
-    //   // 保存画布状态
-    //   canvas.save();
-    //   // 裁剪绘制范围
-    //   canvas.clipRect(setting.mainDrawRect);
-
-    for (var param in indicator.calcParams) {
-      final maMap = klineData.getMaMap(param.count);
-      if (maMap.isEmpty) continue;
-
+    for (int j = 0; j < indicator.calcParams.length; j++) {
       final offset = startCandleDx - candleWidthHalf;
-      CandleModel m;
-      MaResult? ret;
+      Decimal? val;
       final List<Offset> points = [];
       for (int i = start; i < end; i++) {
-        m = list[i];
-        final dx = offset - (i - start) * candleActualWidth;
-        ret = maMap[m.timestamp];
-        ret ??= klineData.calculateMa(i, param.count);
-        if (ret == null) continue;
-        final dy = valueToDy(ret.val, correct: false);
-        points.add(Offset(dx, dy));
+        val = list[i].maRets?.getItem(j);
+        if (val == null) continue;
+        points.add(Offset(
+          offset - (i - start) * candleActualWidth,
+          valueToDy(val, correct: false),
+        ));
       }
 
       canvas.drawPath(
         Path()..addPolygon(points, false),
         Paint()
-          ..color = param.color
+          ..color = indicator.calcParams[j].color
           ..style = PaintingStyle.stroke
           ..strokeWidth = setting.paintLineStrokeDefaultWidth,
       );
     }
-    // } finally {
-    //   // 恢复画布状态
-    //   canvas.restore();
-    // }
   }
+
+  // void paintMALine(Canvas canvas, Size size) {
+  //   if (!klineData.canPaintChart) return;
+  //   final list = klineData.list;
+  //   int start = klineData.start;
+  //   int end = (klineData.end + 1).clamp(start, list.length); // 多绘制一根蜡烛
+
+  //   // try {
+  //   //   // 保存画布状态
+  //   //   canvas.save();
+  //   //   // 裁剪绘制范围
+  //   //   canvas.clipRect(setting.mainDrawRect);
+
+  //   for (var param in indicator.calcParams) {
+  //     final maMap = klineData.getMaMap(param.count);
+  //     if (maMap.isEmpty) continue;
+
+  //     final offset = startCandleDx - candleWidthHalf;
+  //     CandleModel m;
+  //     MaResult? ret;
+  //     final List<Offset> points = [];
+  //     for (int i = start; i < end; i++) {
+  //       m = list[i];
+  //       final dx = offset - (i - start) * candleActualWidth;
+  //       ret = maMap[m.timestamp];
+  //       ret ??= klineData.calculateMa(i, param.count);
+  //       if (ret == null) continue;
+  //       final dy = valueToDy(ret.val, correct: false);
+  //       points.add(Offset(dx, dy));
+  //     }
+
+  //     canvas.drawPath(
+  //       Path()..addPolygon(points, false),
+  //       Paint()
+  //         ..color = param.color
+  //         ..style = PaintingStyle.stroke
+  //         ..strokeWidth = setting.paintLineStrokeDefaultWidth,
+  //     );
+  //   }
+  //   // } finally {
+  //   //   // 恢复画布状态
+  //   //   canvas.restore();
+  //   // }
+  // }
 
   /// MA 绘制tips区域
   @override
   Size? paintTips(Canvas canvas, {CandleModel? model, Offset? offset}) {
     if (indicator.tipsHeight <= 0) return null;
     model ??= offsetToCandle(offset);
-    if (model == null) return null;
+    if (model == null || !model.isValidMaRets) return null;
 
     Rect drawRect = nextTipsRect;
 
     final children = <TextSpan>[];
-    for (var param in indicator.calcParams) {
-      final ret = klineData.getMaResult(
-        count: param.count,
-        ts: model.timestamp,
-      );
-      if (ret == null) continue;
+    Decimal? val;
+    for (int i = 0; i < model.maRets!.length; i++) {
+      val = model.maRets![i];
+      if (val == null) continue;
+      final param = indicator.calcParams.getItem(i);
+      if (param == null) continue;
 
       final text = formatNumber(
-        ret.val,
+        val,
         precision: state.curKlineData.req.precision,
         cutInvalidZero: true,
         prefix: '${param.label}: ',
@@ -177,7 +214,6 @@ class MAPaintObject<T extends MAIndicator> extends SinglePaintObjectBox<T> {
         ),
       ));
     }
-
     if (children.isNotEmpty) {
       return canvas.drawText(
         offset: drawRect.topLeft,
@@ -191,4 +227,50 @@ class MAPaintObject<T extends MAIndicator> extends SinglePaintObjectBox<T> {
     }
     return null;
   }
+  // @override
+  // Size? paintTips(Canvas canvas, {CandleModel? model, Offset? offset}) {
+  //   if (indicator.tipsHeight <= 0) return null;
+  //   model ??= offsetToCandle(offset);
+  //   if (model == null) return null;
+
+  //   Rect drawRect = nextTipsRect;
+
+  //   final children = <TextSpan>[];
+  //   for (var param in indicator.calcParams) {
+  //     final ret = klineData.getMaResult(
+  //       count: param.count,
+  //       ts: model.timestamp,
+  //     );
+  //     if (ret == null) continue;
+
+  //     final text = formatNumber(
+  //       ret.val,
+  //       precision: state.curKlineData.req.precision,
+  //       cutInvalidZero: true,
+  //       prefix: '${param.label}: ',
+  //       suffix: '  ',
+  //     );
+  //     children.add(TextSpan(
+  //       text: text,
+  //       style: TextStyle(
+  //         fontSize: setting.tipsDefaultTextSize,
+  //         color: param.color,
+  //         height: setting.tipsDefaultTextHeight,
+  //       ),
+  //     ));
+  //   }
+
+  //   if (children.isNotEmpty) {
+  //     return canvas.drawText(
+  //       offset: drawRect.topLeft,
+  //       textSpan: TextSpan(children: children),
+  //       drawDirection: DrawDirection.ltr,
+  //       drawableRect: drawRect,
+  //       textAlign: TextAlign.left,
+  //       padding: setting.tipsRectDefaultPadding,
+  //       maxLines: 1,
+  //     );
+  //   }
+  //   return null;
+  // }
 }

@@ -17,11 +17,12 @@ import 'package:json_annotation/json_annotation.dart';
 
 import '../../framework/serializable.dart';
 import '../../utils/convert_util.dart';
+import 'candle_mixin.dart';
 
 part 'candle_model.g.dart';
 
 @FlexiModelSerializable
-class CandleModel {
+class CandleModel with MaMixin {
   CandleModel({
     required this.timestamp,
     required this.open,

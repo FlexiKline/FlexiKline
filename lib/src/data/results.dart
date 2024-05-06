@@ -15,6 +15,7 @@
 import 'package:decimal/decimal.dart';
 
 import '../extension/export.dart';
+import '../model/export.dart';
 
 /// Base数据
 abstract class BaseResult {
@@ -118,43 +119,5 @@ class BollResult extends BaseResult {
   @override
   String toString() {
     return 'BollResult(ts:$ts, mb:${mb.str}, up:${up.str}, dn:${dn.str})';
-  }
-}
-
-class MinMax {
-  MinMax({required this.max, required this.min});
-  Decimal max;
-  Decimal min;
-
-  static final MinMax zero = MinMax(max: Decimal.zero, min: Decimal.zero);
-
-  MinMax clone() => MinMax(max: max, min: min);
-
-  void updateMinMaxByVal(Decimal val) {
-    max = val > max ? val : max;
-    min = val < min ? val : min;
-  }
-
-  void updateMinMax(MinMax? newVal) {
-    if (newVal == null) return;
-    max = newVal.max > max ? newVal.max : max;
-    min = newVal.min < min ? newVal.min : min;
-  }
-
-  void minToZero() {
-    min = min > Decimal.zero ? Decimal.zero : min;
-  }
-
-  Decimal get middle => size.div(two);
-
-  Decimal get size => max - min;
-
-  Decimal get divisor => max == min ? Decimal.one : max - min;
-
-  bool get isZero => max == Decimal.zero && min == Decimal.zero;
-
-  @override
-  String toString() {
-    return 'MinMax(max:${max.str}, min:${min.str})';
   }
 }
