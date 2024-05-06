@@ -15,7 +15,6 @@
 import 'package:decimal/decimal.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-import '../../constant.dart';
 import '../../framework/serializable.dart';
 import '../../utils/convert_util.dart';
 
@@ -96,9 +95,16 @@ class CandleModel {
       low: low ?? this.low,
       close: close ?? this.close,
       vol: vol ?? this.vol,
-      volCcy: volCcy == freezed ? this.volCcy : volCcy as Decimal?,
-      volCcyQuote:
-          volCcyQuote == freezed ? this.volCcyQuote : volCcy as Decimal?,
+      volCcy: volCcy == freezed
+          ? this.volCcy
+          : volCcy is Decimal
+              ? volCcy
+              : null,
+      volCcyQuote: volCcyQuote == freezed
+          ? this.volCcyQuote
+          : volCcy is Decimal
+              ? volCcy
+              : null,
       confirm: confirm == '1' ? this.confirm : confirm,
     );
   }

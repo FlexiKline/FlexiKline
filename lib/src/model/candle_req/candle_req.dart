@@ -12,8 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:flexi_kline/flexi_kline.dart';
 import 'package:json_annotation/json_annotation.dart';
+
+import '../../constant.dart';
+import '../../framework/serializable.dart';
 
 part 'candle_req.g.dart';
 
@@ -44,15 +46,15 @@ class CandleReq {
   /// 如 [1m/3m/5m/15m/30m/1H/2H/4H]
   /// 香港时间开盘价k线：[6H/12H/1D/2D/3D/1W/1M/3M]
   /// UTC时间开盘价k线：[/6Hutc/12Hutc/1Dutc/2Dutc/3Dutc/1Wutc/1Mutc/3Mutc]
-  @JsonKey(defaultValue: '1m')
+  @JsonKey()
   String bar;
 
   /// 分页返回的结果集数量，最大为300，不填默认返回100条
-  @JsonKey(defaultValue: 100)
+  @JsonKey()
   int limit;
 
   /// 当前交易对精度
-  @JsonKey(defaultValue: defaultPrecision)
+  @JsonKey()
   int precision;
 
   factory CandleReq.fromJson(Map<String, dynamic> json) =>
@@ -69,8 +71,16 @@ class CandleReq {
   }) {
     return CandleReq(
       instId: instId ?? this.instId,
-      after: after == freezed ? this.after : after as int?,
-      before: before == freezed ? this.before : before as int?,
+      after: after == freezed
+          ? this.after
+          : after is int
+              ? after
+              : null,
+      before: before == freezed
+          ? this.before
+          : before is int
+              ? before
+              : null,
       bar: bar ?? this.bar,
       limit: limit ?? this.limit,
       precision: precision ?? this.precision,

@@ -210,3 +210,9 @@ const FlexiModelSerializable = JsonSerializable(
   ignoreUnannotated: true,
   explicitToJson: true,
 );
+
+final class _Freezed {
+  const _Freezed();
+}
+
+const freezed = _Freezed();
