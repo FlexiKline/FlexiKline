@@ -13,54 +13,93 @@
 // limitations under the License.
 
 import 'package:decimal/decimal.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:json_annotation/json_annotation.dart';
 
-import '../../utils/export.dart';
+import '../../constant.dart';
+import '../../framework/serializable.dart';
+import '../../utils/convert_util.dart';
 
-part 'candle_model.freezed.dart';
 part 'candle_model.g.dart';
 
-@freezed
-class CandleModel with _$CandleModel {
-  factory CandleModel({
-    /// 开始时间，Unix时间戳的毫秒数格式，如 1597026383085
-    @JsonKey(fromJson: valueToInt, toJson: intToString)
-    required int timestamp,
-    // @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
-    // DateTime? datetime, // 从timestamp转换为dateTime;
+@FlexiModelSerializable
+class CandleModel {
+  CandleModel({
+    required this.timestamp,
+    required this.open,
+    required this.high,
+    required this.low,
+    required this.close,
+    required this.vol,
+    this.volCcy,
+    this.volCcyQuote,
+    this.confirm = '1',
+  });
 
-    /// 开盘价格
-    @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
-    required Decimal open,
+  /// 开始时间，Unix时间戳的毫秒数格式，如 1597026383085
+  @JsonKey(fromJson: valueToInt, toJson: intToString)
+  final int timestamp;
+  // @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
+  // DateTime? datetime, // 从timestamp转换为dateTime;
 
-    /// 最高价格
-    @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
-    required Decimal high,
+  /// 开盘价格
+  @JsonKey()
+  final Decimal open;
 
-    ///最低价格
-    @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
-    required Decimal low,
+  /// 最高价格
+  @JsonKey()
+  final Decimal high;
 
-    /// 收盘价格
-    @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
-    required Decimal close,
+  ///最低价格
+  @JsonKey()
+  final Decimal low;
 
-    /// 交易量，以张为单位: 如果是衍生品合约，数值为合约的张数。如果是币币/币币杠杆，数值为交易货币的数量。
-    @JsonKey(fromJson: stringToDecimal, toJson: decimalToString)
-    required Decimal vol,
+  /// 收盘价格
+  @JsonKey()
+  final Decimal close;
 
-    /// 交易量(成交额)，以币为单位: 如果是衍生品合约，数值为交易货币的数量。如果是币币/币币杠杆，数值为计价货币的数量。
-    @JsonKey(fromJson: stringToDecimalOrNull, toJson: decimalToStringOrNull)
-    Decimal? volCcy,
+  /// 交易量，以张为单位: 如果是衍生品合约，数值为合约的张数。如果是币币/币币杠杆，数值为交易货币的数量。
+  @JsonKey()
+  final Decimal vol;
 
-    ///交易量(成交额)，以计价货币为单位: 如 BTC-USDT和BTC-USDT-SWAP，单位均是USDT。BTC-USD-SWAP单位是USD。
-    @JsonKey(fromJson: stringToDecimalOrNull, toJson: decimalToStringOrNull)
-    Decimal? volCcyQuote,
+  /// 交易量(成交额)，以币为单位: 如果是衍生品合约，数值为交易货币的数量。如果是币币/币币杠杆，数值为计价货币的数量。
+  @JsonKey()
+  Decimal? volCcy;
 
-    /// K线状态:  0：K线未完结  1：K线已完结
-    @Default("1") String confirm,
-  }) = _CandleModel;
+  ///交易量(成交额)，以计价货币为单位: 如 BTC-USDT和BTC-USDT-SWAP，单位均是USDT。BTC-USD-SWAP单位是USD。
+  @JsonKey()
+  Decimal? volCcyQuote;
+
+  /// K线状态:  0：K线未完结  1：K线已完结
+  @JsonKey()
+  String confirm;
 
   factory CandleModel.fromJson(Map<String, dynamic> json) =>
       _$CandleModelFromJson(json);
+
+  Map<String, dynamic> toJson() => _$CandleModelToJson(this);
+
+  CandleModel copyWith({
+    int? timestamp,
+    Decimal? open,
+    Decimal? high,
+    Decimal? low,
+    Decimal? close,
+    Decimal? vol,
+    Object? volCcy = freezed,
+    Object? volCcyQuote = freezed,
+    String confirm = '1',
+  }) {
+    return CandleModel(
+      timestamp: timestamp ?? this.timestamp,
+      open: open ?? this.open,
+      high: high ?? this.high,
+      low: low ?? this.low,
+      close: close ?? this.close,
+      vol: vol ?? this.vol,
+      volCcy: volCcy == freezed ? this.volCcy : volCcy as Decimal?,
+      volCcyQuote:
+          volCcyQuote == freezed ? this.volCcyQuote : volCcy as Decimal?,
+      confirm: confirm == '1' ? this.confirm : confirm,
+    );
+  }
 }

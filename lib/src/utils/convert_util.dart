@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'package:decimal/decimal.dart';
+import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -66,6 +67,20 @@ int? dateTimeToInt(dynamic dateTime) {
 }
 
 /// parse vs convert.
+
+Decimal? parseDecimal(dynamic value, {Decimal? def}) {
+  if (value == null) {
+    return def;
+  } else if (value is int) {
+    return Decimal.fromInt(value);
+  } else {
+    return Decimal.tryParse(value.toString());
+  }
+}
+
+String convertDecimal(Decimal value) {
+  return value.toStringAsFixed(defaultScaleOnInfinitePrecision);
+}
 
 double? parseDouble(dynamic value, {double? def}) {
   if (value == null) {

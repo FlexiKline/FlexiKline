@@ -6,28 +6,35 @@ part of 'candle_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$CandleModelImpl _$$CandleModelImplFromJson(Map<String, dynamic> json) =>
-    _$CandleModelImpl(
+CandleModel _$CandleModelFromJson(Map<String, dynamic> json) => CandleModel(
       timestamp: valueToInt(json['timestamp']),
-      open: stringToDecimal(json['open']),
-      high: stringToDecimal(json['high']),
-      low: stringToDecimal(json['low']),
-      close: stringToDecimal(json['close']),
-      vol: stringToDecimal(json['vol']),
-      volCcy: stringToDecimalOrNull(json['volCcy']),
-      volCcyQuote: stringToDecimalOrNull(json['volCcyQuote']),
-      confirm: json['confirm'] as String? ?? "1",
+      open: const DecimalConverter().fromJson(json['open']),
+      high: const DecimalConverter().fromJson(json['high']),
+      low: const DecimalConverter().fromJson(json['low']),
+      close: const DecimalConverter().fromJson(json['close']),
+      vol: const DecimalConverter().fromJson(json['vol']),
+      volCcy: const DecimalConverter().fromJson(json['volCcy']),
+      volCcyQuote: const DecimalConverter().fromJson(json['volCcyQuote']),
+      confirm: json['confirm'] as String? ?? '1',
     );
 
-Map<String, dynamic> _$$CandleModelImplToJson(_$CandleModelImpl instance) =>
+Map<String, dynamic> _$CandleModelToJson(CandleModel instance) =>
     <String, dynamic>{
       'timestamp': intToString(instance.timestamp),
-      'open': decimalToString(instance.open),
-      'high': decimalToString(instance.high),
-      'low': decimalToString(instance.low),
-      'close': decimalToString(instance.close),
-      'vol': decimalToString(instance.vol),
-      'volCcy': decimalToStringOrNull(instance.volCcy),
-      'volCcyQuote': decimalToStringOrNull(instance.volCcyQuote),
+      'open': const DecimalConverter().toJson(instance.open),
+      'high': const DecimalConverter().toJson(instance.high),
+      'low': const DecimalConverter().toJson(instance.low),
+      'close': const DecimalConverter().toJson(instance.close),
+      'vol': const DecimalConverter().toJson(instance.vol),
+      'volCcy': _$JsonConverterToJson<dynamic, Decimal>(
+          instance.volCcy, const DecimalConverter().toJson),
+      'volCcyQuote': _$JsonConverterToJson<dynamic, Decimal>(
+          instance.volCcyQuote, const DecimalConverter().toJson),
       'confirm': instance.confirm,
     };
+
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) =>
+    value == null ? null : toJson(value);

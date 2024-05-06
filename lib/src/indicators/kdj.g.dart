@@ -27,7 +27,7 @@ KDJIndicator _$KDJIndicatorFromJson(Map<String, dynamic> json) => KDJIndicator(
       tipsHeight: (json['tipsHeight'] as num?)?.toDouble() ??
           defaultIndicatorTipsHeight,
       padding: json['padding'] == null
-          ? EdgeInsets.zero
+          ? defaultIndicatorPadding
           : const EdgeInsetsConverter()
               .fromJson(json['padding'] as Map<String, dynamic>),
       calcParam: json['calcParam'] == null

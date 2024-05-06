@@ -65,7 +65,7 @@ class MACDIndicator extends SinglePaintObjectIndicator {
     super.name = 'MACD',
     super.height = defaultSubIndicatorHeight,
     super.tipsHeight = defaultIndicatorTipsHeight,
-    super.padding = defaultIndicatorPadding,
+    super.padding,
     this.calcParam = const MACDParam(s: 12, l: 26, m: 9),
     this.difColor = const Color(0xFFDFBF47),
     this.deaColor = const Color(0xFF795583),

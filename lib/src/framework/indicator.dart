@@ -15,8 +15,9 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:json_annotation/json_annotation.dart';
 
+import '../constant.dart';
 import '../core/export.dart';
 import 'object.dart';
 import 'serializable.dart';
@@ -43,7 +44,7 @@ abstract class Indicator {
     required this.name,
     required this.height,
     this.tipsHeight = 0.0,
-    this.padding = EdgeInsets.zero,
+    this.padding = defaultIndicatorPadding,
     this.paintMode = PaintMode.combine,
   });
   final ValueKey key;

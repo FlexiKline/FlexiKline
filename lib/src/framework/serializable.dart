@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -167,6 +168,19 @@ class TextStyleConverter
   }
 }
 
+class DecimalConverter implements JsonConverter<Decimal, dynamic> {
+  const DecimalConverter();
+  @override
+  Decimal fromJson(dynamic json) {
+    return parseDecimal(json) ?? Decimal.zero;
+  }
+
+  @override
+  String toJson(Decimal object) {
+    return convertDecimal(object);
+  }
+}
+
 // ignore: constant_identifier_names
 const FlexiIndicatorSerializable = JsonSerializable(
   converters: [
@@ -185,5 +199,14 @@ const FlexiParamSerializable = JsonSerializable(
     ColorConverter(),
     EdgeInsetsConverter(),
   ],
+  explicitToJson: true,
+);
+
+// ignore: constant_identifier_names
+const FlexiModelSerializable = JsonSerializable(
+  converters: [
+    DecimalConverter(),
+  ],
+  ignoreUnannotated: true,
   explicitToJson: true,
 );

@@ -27,7 +27,7 @@ MAIndicator _$MAIndicatorFromJson(Map<String, dynamic> json) => MAIndicator(
       tipsHeight: (json['tipsHeight'] as num?)?.toDouble() ??
           defaultIndicatorTipsHeight,
       padding: json['padding'] == null
-          ? EdgeInsets.zero
+          ? defaultIndicatorPadding
           : const EdgeInsetsConverter()
               .fromJson(json['padding'] as Map<String, dynamic>),
       calcParams: (json['calcParams'] as List<dynamic>?)

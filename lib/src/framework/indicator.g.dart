@@ -15,7 +15,7 @@ MultiPaintObjectIndicator<T>
           height: (json['height'] as num).toDouble(),
           tipsHeight: (json['tipsHeight'] as num?)?.toDouble() ?? 0.0,
           padding: json['padding'] == null
-              ? EdgeInsets.zero
+              ? defaultIndicatorPadding
               : const EdgeInsetsConverter()
                   .fromJson(json['padding'] as Map<String, dynamic>),
           drawChartAlawaysBelowTipsArea:

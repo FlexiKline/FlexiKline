@@ -14,8 +14,10 @@
 
 import 'package:flutter/material.dart';
 
+const freezed = Object();
+
 /// 默认数据格式化精度
-const int defaultPrecision = 6;
+const int defaultPrecision = 4;
 
 const int defaultScaleOnInfinitePrecision = 18;
 const double defaultSubIndicatorHeight = 60;

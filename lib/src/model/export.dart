@@ -31,12 +31,14 @@ extension CandleReqExt on CandleReq {
   TimeBar? get timerBar => TimeBar.convert(bar);
 
   void update(CandleReq req) {
-    instId = req.instId;
-    after = req.after;
-    before = req.before;
-    bar = req.bar;
-    limit = req.limit;
-    precision = req.precision;
+    if (instId == req.instId) {
+      // instId = req.instId;
+      after = req.after;
+      before = req.before;
+      bar = req.bar;
+      limit = req.limit;
+      precision = req.precision;
+    }
   }
 }
 
