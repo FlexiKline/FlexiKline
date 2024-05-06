@@ -23,19 +23,25 @@ const jsonKeyChildren = 'children';
 const mainChartKey = ValueKey<dynamic>(jsonKeyMain);
 
 enum IndicatorType {
-  candle,
-  ma,
-  ema,
-  boll,
-  // volMa,
-  vol, // Volume
-  maVol,
-  macd,
-  kdj;
+  candle('CANDLE'),
+  ma('MA'),
+  ema('EMA'),
+  boll('BOLL'),
+  volMa('VOLMA'),
+  volume('VOL'),
+  maVol('MAVOL'),
+  macd('MACD'),
+  kdj('KDJ'),
+  rsi('RSI'),
+  stochRsi('StochRSI');
+
+  const IndicatorType(this.label);
+
+  final String label;
 
   @override
   String toString() {
-    return name;
+    return label;
   }
 }
 
@@ -43,8 +49,10 @@ const candleKey = ValueKey<dynamic>(IndicatorType.candle);
 const maKey = ValueKey<dynamic>(IndicatorType.ma);
 const emaKey = ValueKey<dynamic>(IndicatorType.ema);
 const bollKey = ValueKey<dynamic>(IndicatorType.boll);
-const volMaKey = ValueKey<dynamic>(IndicatorType.ma);
-const volumeKey = ValueKey<dynamic>(IndicatorType.vol);
+const volMaKey = ValueKey<dynamic>(IndicatorType.volMa);
+const volumeKey = ValueKey<dynamic>(IndicatorType.volume);
 const maVolKey = ValueKey<dynamic>(IndicatorType.maVol);
 const macdKey = ValueKey<dynamic>(IndicatorType.macd);
 const kdjKey = ValueKey<dynamic>(IndicatorType.kdj);
+const rsiKey = ValueKey<dynamic>(IndicatorType.rsi);
+const stochRsiKey = ValueKey<dynamic>(IndicatorType.stochRsi);

@@ -15,7 +15,9 @@
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart';
 
-@flexiKlineIndicatorSerializable
+part 'candle_indicator.g.dart';
+
+@FlexiIndicatorSerializable
 class CustomCandleIndicator extends CandleIndicator {
   CustomCandleIndicator({
     required super.height,

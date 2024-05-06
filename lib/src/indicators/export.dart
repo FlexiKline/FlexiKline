@@ -16,7 +16,7 @@
 export 'candle.dart';
 export 'volume.dart';
 export 'ma.dart';
-export 'ma_vol.dart';
+export 'vol_ma.dart';
 export 'ema.dart';
 export 'macd.dart';
 export 'kdj.dart';

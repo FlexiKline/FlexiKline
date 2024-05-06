@@ -25,7 +25,7 @@ import '../framework/export.dart';
 
 part 'candle.g.dart';
 
-@flexiKlineIndicatorSerializable
+@FlexiIndicatorSerializable
 class CandleIndicator extends SinglePaintObjectIndicator {
   CandleIndicator({
     super.key = candleKey,

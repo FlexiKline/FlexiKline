@@ -24,7 +24,7 @@ import '../utils/export.dart';
 
 part 'ma.g.dart';
 
-@flexiKlineParamSerializable
+@FlexiParamSerializable
 final class MaParam {
   final String label;
   final int count;
@@ -42,7 +42,7 @@ final class MaParam {
 }
 
 /// MA 移动平均指标线
-@flexiKlineIndicatorSerializable
+@FlexiIndicatorSerializable
 class MAIndicator extends SinglePaintObjectIndicator {
   MAIndicator({
     super.key = maKey,

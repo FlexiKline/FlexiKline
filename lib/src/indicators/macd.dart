@@ -23,7 +23,7 @@ import '../data/export.dart';
 
 part 'macd.g.dart';
 
-@flexiKlineParamSerializable
+@FlexiParamSerializable
 final class MACDParam {
   final int s;
   final int l;
@@ -58,7 +58,7 @@ final class MACDParam {
 }
 
 /// 指数平滑移动平均线MACD
-@flexiKlineIndicatorSerializable
+@FlexiIndicatorSerializable
 class MACDIndicator extends SinglePaintObjectIndicator {
   MACDIndicator({
     super.key = macdKey,

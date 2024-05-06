@@ -17,24 +17,24 @@ import 'package:decimal/decimal.dart';
 
 import '../extension/export.dart';
 import '../framework/indicator.dart';
-import '../indicators/ma_vol.dart';
+import '../indicators/vol_ma.dart';
 import '../model/export.dart';
 import 'base_data.dart';
 import 'results.dart';
 
-mixin MAVOLData on BaseData {
+mixin VOLMAData on BaseData {
   @override
   void initData() {
     super.initData();
-    logd('init MAVOL');
+    logd('init VOLMA');
   }
 
   @override
   void dispose() {
     super.dispose();
-    logd('dispose MAVOL');
+    logd('dispose VOLMA');
     // TODO: 是否要缓存
-    _mavolResultMap.clear();
+    _volmaResultMap.clear();
   }
 
   @override
@@ -44,17 +44,17 @@ mixin MAVOLData on BaseData {
     required int end,
     bool reset = false,
   }) {
-    if (indicator is MAVolIndicator) {
+    if (indicator is VolMaIndicator) {
       for (var param in indicator.calcParams) {
         final startTime = DateTime.now();
-        calculateAndCacheMavol(
+        calculateAndCacheVolma(
           param.count,
           start: start,
           end: end,
           reset: reset,
         );
         logd(
-          'preprocess MAVOL => ${param.count} spent:${DateTime.now().difference(startTime).inMicroseconds} microseconds',
+          'preprocess VOLMA => ${param.count} spent:${DateTime.now().difference(startTime).inMicroseconds} microseconds',
         );
       }
     } else {
@@ -63,16 +63,16 @@ mixin MAVOLData on BaseData {
   }
 
   /// MAVOL数据缓存 <count, <timestamp, result>>
-  final Map<int, Map<int, MaResult>> _mavolResultMap = {};
+  final Map<int, Map<int, MaResult>> _volmaResultMap = {};
 
-  Map<int, MaResult> getMavolMap(int count) {
-    _mavolResultMap[count] ??= {};
-    return _mavolResultMap[count]!;
+  Map<int, MaResult> getVolmaMap(int count) {
+    _volmaResultMap[count] ??= {};
+    return _volmaResultMap[count]!;
   }
 
-  MaResult? getMavolResult({int? count, int? ts}) {
+  MaResult? getVolmaResult({int? count, int? ts}) {
     if (count != null && ts != null) {
-      return _mavolResultMap[count]?[ts];
+      return _volmaResultMap[count]?[ts];
     }
     return null;
   }
@@ -80,7 +80,7 @@ mixin MAVOLData on BaseData {
   /// 计算从index开始的count个vol指标和
   /// 如果后续数据不够count个, 动态改变count. 最后平均. 所以最后的(count-1)个数据是不准确的.
   /// 注: 如果有旧数据加入, 需要重新计算最后的MA指标数据.
-  MaResult? calculateMavol(
+  MaResult? calculateVolma(
     int index,
     int count,
   ) {
@@ -90,7 +90,7 @@ mixin MAVOLData on BaseData {
 
     final m = list[index];
 
-    final ret = getMavolResult(count: count, ts: m.timestamp);
+    final ret = getVolmaResult(count: count, ts: m.timestamp);
     if (ret != null && !ret.dirty) {
       return ret;
     }
@@ -111,7 +111,7 @@ mixin MAVOLData on BaseData {
   /// 计算并缓存MAVol数据.
   /// 如果start和end指定了, 只计算[start, end]区间内.
   /// 否则, 从当前绘制的[start, end]开始计算.
-  void calculateAndCacheMavol(
+  void calculateAndCacheVolma(
     int count, {
     int? start,
     int? end,
@@ -123,7 +123,7 @@ mixin MAVOLData on BaseData {
     end ??= this.end;
     if (start < 0 || end > len) return;
 
-    final maVolMap = getMavolMap(count);
+    final maVolMap = getVolmaMap(count);
     if (reset) {
       maVolMap.clear();
     }
@@ -163,7 +163,7 @@ mixin MAVOLData on BaseData {
     end ??= this.end;
     if (start < 0 || end > len) return null;
 
-    final mavolMap = getMavolMap(count);
+    final mavolMap = getVolmaMap(count);
 
     int offset = math.max(end + count - len, 0);
     int index = end - offset;
@@ -172,7 +172,7 @@ mixin MAVOLData on BaseData {
     if (mavolMap.isEmpty ||
         mavolMap[list[start].timestamp] == null ||
         mavolMap[list[index].timestamp] == null) {
-      calculateAndCacheMavol(count, start: start, end: end, reset: true);
+      calculateAndCacheVolma(count, start: start, end: end, reset: true);
     }
 
     MinMax? minmax;

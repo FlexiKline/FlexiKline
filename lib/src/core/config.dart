@@ -136,10 +136,10 @@ mixin ConfigBinding
           ),
       restoreSubSupportIndicator(
             maVolKey,
-            MAVolIndicator.fromJson,
+            VolMaIndicator.fromJson,
             childKey: volMaKey,
           ) ??
-          MAVolIndicator(
+          VolMaIndicator(
             height: subChartDefaultHeight,
           ),
     ], this);

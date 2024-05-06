@@ -24,7 +24,7 @@ import '../framework/export.dart';
 
 part 'boll.g.dart';
 
-@flexiKlineParamSerializable
+@FlexiParamSerializable
 final class BOLLParam {
   final int n;
   final int std;
@@ -54,7 +54,7 @@ final class BOLLParam {
   Map<String, dynamic> toJson() => _$BOLLParamToJson(this);
 }
 
-@flexiKlineIndicatorSerializable
+@FlexiIndicatorSerializable
 class BOLLIndicator extends SinglePaintObjectIndicator {
   BOLLIndicator({
     super.key = bollKey,

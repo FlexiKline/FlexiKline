@@ -1,13 +1,13 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'ma_vol.dart';
+part of 'vol_ma.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-MAVolIndicator _$MAVolIndicatorFromJson(Map<String, dynamic> json) =>
-    MAVolIndicator(
+VolMaIndicator _$VolMaIndicatorFromJson(Map<String, dynamic> json) =>
+    VolMaIndicator(
       key: json['key'] == null
           ? volMaKey
           : const ValueKeyConverter().fromJson(json['key'] as String),
@@ -27,7 +27,7 @@ MAVolIndicator _$MAVolIndicatorFromJson(Map<String, dynamic> json) =>
           ],
     );
 
-Map<String, dynamic> _$MAVolIndicatorToJson(MAVolIndicator instance) =>
+Map<String, dynamic> _$VolMaIndicatorToJson(VolMaIndicator instance) =>
     <String, dynamic>{
       'key': const ValueKeyConverter().toJson(instance.key),
       'name': instance.name,

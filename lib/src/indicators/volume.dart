@@ -24,7 +24,7 @@ import '../utils/export.dart';
 
 part 'volume.g.dart';
 
-@flexiKlineIndicatorSerializable
+@FlexiIndicatorSerializable
 class VolumeIndicator extends SinglePaintObjectIndicator {
   VolumeIndicator({
     super.key = volumeKey,

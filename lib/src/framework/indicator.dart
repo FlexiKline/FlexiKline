@@ -124,7 +124,7 @@ abstract class SinglePaintObjectIndicator extends Indicator {
 
 /// 多个绘制Indicator的配置.
 /// children 维护具体的Indicator配置.
-@flexiKlineIndicatorSerializable
+@FlexiIndicatorSerializable
 class MultiPaintObjectIndicator<T extends SinglePaintObjectIndicator>
     extends Indicator {
   MultiPaintObjectIndicator({

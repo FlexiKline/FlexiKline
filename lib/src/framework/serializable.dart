@@ -30,6 +30,9 @@ ValueKey parseValueKey(String key) {
 }
 
 String convertValueKey(ValueKey key) {
+  if (key.value is IndicatorType) {
+    return (key.value as IndicatorType).name;
+  }
   return key.value.toString();
 }
 
@@ -164,7 +167,8 @@ class TextStyleConverter
   }
 }
 
-const flexiKlineIndicatorSerializable = JsonSerializable(
+// ignore: constant_identifier_names
+const FlexiIndicatorSerializable = JsonSerializable(
   converters: [
     ValueKeyConverter(),
     ColorConverter(),
@@ -175,7 +179,8 @@ const flexiKlineIndicatorSerializable = JsonSerializable(
   // genericArgumentFactories: true,
 );
 
-const flexiKlineParamSerializable = JsonSerializable(
+// ignore: constant_identifier_names
+const FlexiParamSerializable = JsonSerializable(
   converters: [
     ColorConverter(),
     EdgeInsetsConverter(),

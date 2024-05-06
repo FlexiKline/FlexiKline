@@ -22,12 +22,12 @@ import '../model/export.dart';
 import '../utils/export.dart';
 import 'ma.dart';
 
-part 'ma_vol.g.dart';
+part 'vol_ma.g.dart';
 
 /// VolMa 移动平均指标线
-@flexiKlineIndicatorSerializable
-class MAVolIndicator extends SinglePaintObjectIndicator {
-  MAVolIndicator({
+@FlexiIndicatorSerializable
+class VolMaIndicator extends SinglePaintObjectIndicator {
+  VolMaIndicator({
     super.key = volMaKey,
     super.name = 'VOLMA',
     required super.height,
@@ -42,20 +42,20 @@ class MAVolIndicator extends SinglePaintObjectIndicator {
   final List<MaParam> calcParams;
 
   @override
-  MAVolPaintObject createPaintObject(KlineBindingBase controller) {
-    return MAVolPaintObject(controller: controller, indicator: this);
+  VolMaPaintObject createPaintObject(KlineBindingBase controller) {
+    return VolMaPaintObject(controller: controller, indicator: this);
   }
 
-  factory MAVolIndicator.fromJson(Map<String, dynamic> json) =>
-      _$MAVolIndicatorFromJson(json);
+  factory VolMaIndicator.fromJson(Map<String, dynamic> json) =>
+      _$VolMaIndicatorFromJson(json);
 
   @override
-  Map<String, dynamic> toJson() => _$MAVolIndicatorToJson(this);
+  Map<String, dynamic> toJson() => _$VolMaIndicatorToJson(this);
 }
 
-class MAVolPaintObject<T extends MAVolIndicator>
+class VolMaPaintObject<T extends VolMaIndicator>
     extends SinglePaintObjectBox<T> {
-  MAVolPaintObject({
+  VolMaPaintObject({
     required super.controller,
     required super.indicator,
   });
@@ -75,7 +75,7 @@ class MAVolPaintObject<T extends MAVolIndicator>
 
   @override
   void paintChart(Canvas canvas, Size size) {
-    paintMALine(canvas, size);
+    paintVolMALine(canvas, size);
   }
 
   @override
@@ -84,7 +84,7 @@ class MAVolPaintObject<T extends MAVolIndicator>
   }
 
   /// 绘制MA指标线
-  void paintMALine(Canvas canvas, Size size) {
+  void paintVolMALine(Canvas canvas, Size size) {
     final data = klineData;
     if (data.list.isEmpty) return;
     int start = data.start;
@@ -97,7 +97,7 @@ class MAVolPaintObject<T extends MAVolIndicator>
     //   canvas.clipRect(setting.mainDrawRect);
 
     for (var param in indicator.calcParams) {
-      final maVolMap = klineData.getMavolMap(param.count);
+      final maVolMap = klineData.getVolmaMap(param.count);
       if (maVolMap.isEmpty) continue;
 
       final offset = startCandleDx - candleWidthHalf;
@@ -108,7 +108,7 @@ class MAVolPaintObject<T extends MAVolIndicator>
         m = data.list[i];
         final dx = offset - (i - start) * candleActualWidth;
         maRet = maVolMap[m.timestamp];
-        maRet ??= klineData.calculateMavol(i, param.count);
+        maRet ??= klineData.calculateVolma(i, param.count);
         if (maRet == null) continue;
         final dy = valueToDy(maRet.val, correct: false);
         points.add(Offset(dx, dy));
@@ -139,7 +139,7 @@ class MAVolPaintObject<T extends MAVolIndicator>
 
     final children = <TextSpan>[];
     for (var param in indicator.calcParams) {
-      final ret = klineData.getMavolResult(
+      final ret = klineData.getVolmaResult(
         count: param.count,
         ts: model.timestamp,
       );
