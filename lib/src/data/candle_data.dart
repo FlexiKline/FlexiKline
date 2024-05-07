@@ -16,7 +16,6 @@ import 'package:decimal/decimal.dart';
 
 import '../model/export.dart';
 import 'base_data.dart';
-import 'results.dart';
 
 mixin CandleData on BaseData {
   @override

@@ -20,7 +20,7 @@ import '../framework/indicator.dart';
 import '../indicators/ma.dart';
 import '../model/export.dart';
 import 'base_data.dart';
-// import 'results.dart';
+import 'results.dart';
 
 mixin MAData on BaseData {
   @override
@@ -33,8 +33,6 @@ mixin MAData on BaseData {
   void dispose() {
     super.dispose();
     logd('dispose MA');
-    // TODO: 是否要缓存
-    // _maResultMap.clear();
     for (var model in list) {
       model.maRets = null;
     }
@@ -48,18 +46,6 @@ mixin MAData on BaseData {
     bool reset = false,
   }) {
     if (indicator is MAIndicator) {
-      // for (var param in indicator.calcParams) {
-      //   final startTime = DateTime.now();
-      //   calculateAndCacheMa(
-      //     param.count,
-      //     start: start,
-      //     end: end,
-      //     reset: reset,
-      //   );
-      //   logd(
-      //     'preprocess MA => ${param.count} spent:${DateTime.now().difference(startTime).inMicroseconds} microseconds',
-      //   );
-      // }
       final startTime = DateTime.now();
       calcuAndCacheMa(indicator.calcParams, start: start, end: end);
       logd(
@@ -150,128 +136,168 @@ mixin MAData on BaseData {
     }
     return minmax;
   }
+}
 
-  // /// MA数据缓存 <count, <timestamp, Decimal>>
-  // final Map<int, Map<int, MaResult>> _maResultMap = {};
+mixin MAData2 on BaseData {
+  @override
+  void initData() {
+    super.initData();
+    logd('init MA');
+  }
 
-  // Map<int, MaResult> getMaMap(int count) {
-  //   _maResultMap[count] ??= {};
-  //   return _maResultMap[count]!;
-  // }
+  @override
+  void dispose() {
+    super.dispose();
+    logd('dispose MA');
+    _maResultMap.clear();
+  }
 
-  // MaResult? getMaResult({int? count, int? ts}) {
-  //   if (count != null && ts != null) {
-  //     return _maResultMap[count]?[ts];
-  //   }
-  //   return null;
-  // }
+  @override
+  void preprocess(
+    Indicator indicator, {
+    required int start,
+    required int end,
+    bool reset = false,
+  }) {
+    if (indicator is MAIndicator) {
+      for (var param in indicator.calcParams) {
+        final startTime = DateTime.now();
+        calculateAndCacheMa(
+          param.count,
+          start: start,
+          end: end,
+          reset: reset,
+        );
+        logd(
+          'preprocess MA => ${param.count} spent:${DateTime.now().difference(startTime).inMicroseconds} microseconds',
+        );
+      }
+    } else {
+      super.preprocess(indicator, start: start, end: end, reset: reset);
+    }
+  }
 
-  // /// 计算从index(包含index)开始的count个收盘价的平均数
-  // /// 注: 如果index开始后不足count, 不矛计算, 返回空.
-  // MaResult? calculateMa(
-  //   int index,
-  //   int count,
-  // ) {
-  //   if (isEmpty) return null;
-  //   int len = list.length;
-  //   if (count <= 0 || index < 0 || index + count > len) return null;
+  /// MA数据缓存 <count, <timestamp, Decimal>>
+  final Map<int, Map<int, MaResult>> _maResultMap = {};
 
-  //   final m = list[index];
+  Map<int, MaResult> getMaMap(int count) {
+    _maResultMap[count] ??= {};
+    return _maResultMap[count]!;
+  }
 
-  //   final ret = getMaResult(count: count, ts: m.timestamp);
-  //   if (ret != null && !ret.dirty) {
-  //     return ret;
-  //   }
+  MaResult? getMaResult({int? count, int? ts}) {
+    if (count != null && ts != null) {
+      return _maResultMap[count]?[ts];
+    }
+    return null;
+  }
 
-  //   Decimal sum = m.close;
-  //   for (int i = index + 1; i < index + count; i++) {
-  //     sum += list[i].close;
-  //   }
+  /// 计算从index(包含index)开始的count个收盘价的平均数
+  /// 注: 如果index开始后不足count, 不矛计算, 返回空.
+  MaResult? calculateMa(
+    int index,
+    int count,
+  ) {
+    if (isEmpty) return null;
+    int len = list.length;
+    if (count <= 0 || index < 0 || index + count > len) return null;
 
-  //   return MaResult(
-  //     count: count,
-  //     ts: m.timestamp,
-  //     val: sum.div(count.d),
-  //     dirty: index == 0, // 如果是第一根蜡烛的数据.下次需要重新计算.
-  //   );
-  // }
+    final m = list[index];
 
-  // /// 计算并缓存MA数据.
-  // /// 如果start和end指定了, 只计算[start, end]区间内.
-  // /// 否则, 从当前绘制的[start, end]开始计算.
-  // void calculateAndCacheMa(
-  //   int count, {
-  //   int? start,
-  //   int? end,
-  //   bool reset = false,
-  // }) {
-  //   if (count <= 0 || isEmpty) return;
-  //   int len = list.length;
-  //   start ??= this.start;
-  //   end ??= this.end;
-  //   if (start < 0 || end > len) return;
+    final ret = getMaResult(count: count, ts: m.timestamp);
+    if (ret != null && !ret.dirty) {
+      return ret;
+    }
 
-  //   final maMap = getMaMap(count);
-  //   if (reset) {
-  //     maMap.clear();
-  //   }
+    Decimal sum = m.close;
+    for (int i = index + 1; i < index + count; i++) {
+      sum += list[i].close;
+    }
 
-  //   // 计算从end到len之间count的偏移量
-  //   int offset = math.max(end + count - len, 0);
-  //   int index = end - offset;
+    return MaResult(
+      count: count,
+      ts: m.timestamp,
+      val: sum.div(count.d),
+      dirty: index == 0, // 如果是第一根蜡烛的数据.下次需要重新计算.
+    );
+  }
 
-  //   Decimal cD = Decimal.fromInt(count);
-  //   CandleModel m = list[index];
-  //   Decimal sum = m.close;
-  //   for (int i = index + 1; i < index + count; i++) {
-  //     sum += list[i].close;
-  //   }
-  //   MaResult? ret = MaResult(count: count, ts: m.timestamp, val: sum.div(cD));
-  //   maMap[m.timestamp] = ret;
+  /// 计算并缓存MA数据.
+  /// 如果start和end指定了, 只计算[start, end]区间内.
+  /// 否则, 从当前绘制的[start, end]开始计算.
+  void calculateAndCacheMa(
+    int count, {
+    int? start,
+    int? end,
+    bool reset = false,
+  }) {
+    if (count <= 0 || isEmpty) return;
+    int len = list.length;
+    start ??= this.start;
+    end ??= this.end;
+    if (start < 0 || end > len) return;
 
-  //   for (int i = index - 1; i >= start; i--) {
-  //     m = list[i];
-  //     sum = sum - list[i + count].close + m.close;
-  //     ret = maMap[m.timestamp];
-  //     if (ret == null || ret.dirty) {
-  //       ret = MaResult(count: count, ts: m.timestamp, val: sum.div(cD));
-  //     }
-  //     maMap[m.timestamp] = ret;
-  //   }
-  // }
+    final maMap = getMaMap(count);
+    if (reset) {
+      maMap.clear();
+    }
 
-  // MinMax? calculateMaMinmax(
-  //   int count, {
-  //   int? start,
-  //   int? end,
-  // }) {
-  //   if (count <= 0 || isEmpty) return null;
-  //   int len = list.length;
-  //   start ??= this.start;
-  //   end ??= this.end;
-  //   if (start < 0 || end > len) return null;
+    // 计算从end到len之间count的偏移量
+    int offset = math.max(end + count - len, 0);
+    int index = end - offset;
 
-  //   final maMap = getMaMap(count);
+    Decimal cD = Decimal.fromInt(count);
+    CandleModel m = list[index];
+    Decimal sum = m.close;
+    for (int i = index + 1; i < index + count; i++) {
+      sum += list[i].close;
+    }
+    MaResult? ret = MaResult(count: count, ts: m.timestamp, val: sum.div(cD));
+    maMap[m.timestamp] = ret;
 
-  //   int offset = math.max(end + count - len, 0);
-  //   int index = end - offset;
+    for (int i = index - 1; i >= start; i--) {
+      m = list[i];
+      sum = sum - list[i + count].close + m.close;
+      ret = maMap[m.timestamp];
+      if (ret == null || ret.dirty) {
+        ret = MaResult(count: count, ts: m.timestamp, val: sum.div(cD));
+      }
+      maMap[m.timestamp] = ret;
+    }
+  }
 
-  //   if (index < start) return null;
-  //   if (maMap.isEmpty ||
-  //       maMap[list[start].timestamp] == null ||
-  //       maMap[list[index].timestamp] == null) {
-  //     calculateAndCacheMa(count, start: start, end: end, reset: true);
-  //   }
+  MinMax? calculateMaMinmax(
+    int count, {
+    int? start,
+    int? end,
+  }) {
+    if (count <= 0 || isEmpty) return null;
+    int len = list.length;
+    start ??= this.start;
+    end ??= this.end;
+    if (start < 0 || end > len) return null;
 
-  //   MinMax? minmax;
-  //   MaResult? ret;
-  //   for (int i = index; i >= start; i--) {
-  //     ret = maMap[list[i].timestamp];
-  //     if (ret != null) {
-  //       minmax ??= MinMax(max: ret.val, min: ret.val);
-  //       minmax.updateMinMaxByVal(ret.val);
-  //     }
-  //   }
-  //   return minmax;
-  // }
+    final maMap = getMaMap(count);
+
+    int offset = math.max(end + count - len, 0);
+    int index = end - offset;
+
+    if (index < start) return null;
+    if (maMap.isEmpty ||
+        maMap[list[start].timestamp] == null ||
+        maMap[list[index].timestamp] == null) {
+      calculateAndCacheMa(count, start: start, end: end, reset: true);
+    }
+
+    MinMax? minmax;
+    MaResult? ret;
+    for (int i = index; i >= start; i--) {
+      ret = maMap[list[i].timestamp];
+      if (ret != null) {
+        minmax ??= MinMax(max: ret.val, min: ret.val);
+        minmax.updateMinMaxByVal(ret.val);
+      }
+    }
+    return minmax;
+  }
 }
