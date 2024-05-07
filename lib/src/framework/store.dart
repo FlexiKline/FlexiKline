@@ -19,7 +19,7 @@ import 'package:flutter/material.dart';
 import 'common.dart';
 import 'indicator.dart';
 import 'logger.dart';
-import 'serializable.dart';
+import 'serializers.dart';
 
 typedef IndicatorFromJson<T extends Indicator> = T Function(
   Map<String, dynamic>,

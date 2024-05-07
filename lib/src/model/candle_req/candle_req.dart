@@ -15,7 +15,7 @@
 import 'package:json_annotation/json_annotation.dart';
 
 import '../../constant.dart';
-import '../../framework/serializable.dart';
+import '../../framework/serializers.dart';
 
 part 'candle_req.g.dart';
 

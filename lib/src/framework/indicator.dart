@@ -20,7 +20,7 @@ import 'package:json_annotation/json_annotation.dart';
 import '../constant.dart';
 import '../core/export.dart';
 import 'object.dart';
-import 'serializable.dart';
+import 'serializers.dart';
 
 part 'indicator.g.dart';
 

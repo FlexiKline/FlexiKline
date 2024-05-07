@@ -15,7 +15,7 @@
 import 'package:decimal/decimal.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-import '../../framework/serializable.dart';
+import '../../framework/serializers.dart';
 import '../../utils/convert_util.dart';
 import 'candle_mixin.dart';
 

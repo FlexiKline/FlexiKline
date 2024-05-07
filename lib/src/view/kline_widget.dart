@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 
 import '../kline_controller.dart';
@@ -157,9 +159,11 @@ class IndicatorChartPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    Timeline.startSync("Flexi-PaintChart");
     controller.calculateCandleDrawIndex();
 
     controller.paintChart(canvas, size);
+    Timeline.finishSync();
   }
 
   @override

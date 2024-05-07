@@ -77,6 +77,9 @@ abstract interface class IPaintObject {
   /// 为当前指标的绘制绑定slot.
   void bindSolt(int newSlot);
 
+  /// 绘制前设置绘制参数
+  void resetParamBeforPaint();
+
   /// 绘制指标图
   void paintChart(Canvas canvas, Size size);
 
@@ -246,8 +249,14 @@ mixin DataInitMixin on PaintObjectProxy implements IPaintDataInit {
     _minMax = val;
   }
 
+  double? _dyFactor;
+  @override
+  void resetParamBeforPaint() {
+    _dyFactor = chartRect.height / (minMax.size).toDouble();
+  }
+
   double get dyFactor {
-    return chartRect.height / (minMax.size).toDouble();
+    return _dyFactor ?? chartRect.height / (minMax.size).toDouble();
   }
 
   double valueToDy(Decimal value, {bool correct = true}) {
@@ -455,6 +464,7 @@ abstract class SinglePaintObjectBox<T extends SinglePaintObjectIndicator>
 
   @override
   void doPaintChart(Canvas canvas, Size size) {
+    resetParamBeforPaint();
     paintChart(canvas, size);
 
     if (!cross.isCrossing) {
@@ -567,6 +577,7 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
     }
 
     for (var child in indicator.children) {
+      child.paintObject?.resetParamBeforPaint();
       if (tipsHeight != null && tipsHeight > 0) {
         // 1.3. 在绘制指标图前, 动态设置子图的Tips区域高度.
         child.tipsHeight = tipsHeight; // TODO: 待验证极端情况
