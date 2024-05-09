@@ -14,12 +14,15 @@
 
 import 'dart:math' as math;
 
-import 'package:decimal/decimal.dart';
-import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart';
 
+import '../constant.dart';
 import '../core/export.dart';
 import '../data/export.dart';
+import '../extension/export.dart';
+import '../framework/export.dart';
+import '../model/export.dart';
+import '../utils/export.dart';
 
 part 'macd.g.dart';
 
@@ -139,7 +142,7 @@ class MACDPaintObject<T extends MACDIndicator> extends SinglePaintObjectBox<T>
     MacdResult? ret, next;
     final List<Offset> difPoints = [];
     final List<Offset> deaPoints = [];
-    double zeroDy = valueToDy(Decimal.zero);
+    double zeroDy = valueToDy(BagNum.zero);
     final offset = startCandleDx - candleWidthHalf;
     final candleHalf = candleWidthHalf - setting.candleMargin;
     for (int i = start; i < end; i++) {
@@ -159,7 +162,7 @@ class MACDPaintObject<T extends MACDIndicator> extends SinglePaintObjectBox<T>
               Offset(dx - candleHalf, zeroDy),
               Offset(dx + candleHalf, valueToDy(ret.macd, correct: false)),
             )),
-          ret.macd > Decimal.zero
+          ret.macd > BagNum.zero
               ? setting.defLongHollowBarPaint
               : setting.defShortHollowBarPaint,
         );
@@ -168,7 +171,7 @@ class MACDPaintObject<T extends MACDIndicator> extends SinglePaintObjectBox<T>
         canvas.drawLine(
           Offset(dx, zeroDy),
           Offset(dx, valueToDy(ret.macd, correct: false)),
-          ret.macd > Decimal.zero
+          ret.macd > BagNum.zero
               ? setting.defLongBarPaint
               : setting.defShortBarPaint,
         );
@@ -207,21 +210,21 @@ class MACDPaintObject<T extends MACDIndicator> extends SinglePaintObjectBox<T>
     Rect drawRect = nextTipsRect;
     final children = <TextSpan>[];
     final difTxt = formatNumber(
-      ret.dif,
+      ret.dif.toDecimal(),
       precision: indicator.precision,
       cutInvalidZero: true,
       prefix: 'DIF: ',
       suffix: ' ',
     );
     final deaTxt = formatNumber(
-      ret.dea,
+      ret.dea.toDecimal(),
       precision: indicator.precision,
       cutInvalidZero: true,
       prefix: 'DEA: ',
       suffix: ' ',
     );
     final macdTxt = formatNumber(
-      ret.macd,
+      ret.macd.toDecimal(),
       precision: indicator.precision,
       cutInvalidZero: true,
       prefix: 'MACD: ',

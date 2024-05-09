@@ -14,65 +14,144 @@
 
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import '../theme/export.dart';
 
 typedef TimeBarItemBuilder = Widget Function(BuildContext, TimeBar);
 
-class FlexiTimeBar extends StatelessWidget {
+class FlexiTimeBar extends ConsumerStatefulWidget {
   const FlexiTimeBar({
     super.key,
-    required this.timeBars,
-    this.currTimeBar,
+    required this.controller,
+    required this.onTapTimeBar,
     this.alignment,
-    this.padding,
     this.decoration,
-    this.margin,
-    this.onTapTimeBar,
-    this.labelStyle,
-    this.unselectedLabelStyle,
   });
 
-  final AlignmentGeometry? alignment;
-  final EdgeInsetsGeometry? padding;
-  final Decoration? decoration;
-  final EdgeInsetsGeometry? margin;
+  final FlexiKlineController controller;
+  final ValueChanged<TimeBar> onTapTimeBar;
 
-  final List<TimeBar> timeBars;
-  final TimeBar? currTimeBar;
-  final ValueChanged<TimeBar>? onTapTimeBar;
-  final TextStyle? labelStyle;
-  final TextStyle? unselectedLabelStyle;
+  final AlignmentGeometry? alignment;
+  final Decoration? decoration;
+
+  @override
+  ConsumerState<ConsumerStatefulWidget> createState() => _FlexiTimeBarState();
+}
+
+class _FlexiTimeBarState extends ConsumerState<FlexiTimeBar>
+    with TickerProviderStateMixin {
+  final List<TimeBar> timeBarList = [
+    TimeBar.m15,
+    TimeBar.H1,
+    TimeBar.H4,
+    TimeBar.D1,
+  ];
+
+  bool get isScrollTabBar => timeBarList.length > 4;
+
+  late TabController tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    tabController = TabController(length: timeBarList.length, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    tabController.dispose();
+    super.dispose();
+  }
+
+  void onTapIndicatorSetting() {
+    final preTimeBar = timeBarList.getItem(tabController.index);
+    timeBarList.add(TimeBar.D2);
+    tabController.dispose();
+    int index = 0;
+    if (preTimeBar != null) {
+      final val = timeBarList.indexOf(preTimeBar);
+      if (val >= 0) index = val;
+    }
+    tabController = TabController(
+      initialIndex: index,
+      length: timeBarList.length,
+      vsync: this,
+    );
+    setState(() {});
+  }
+
+  void onTabKlineSetting() {}
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ref.read(themeProvider);
     return Container(
-      alignment: alignment,
-      padding: padding,
-      margin: margin,
-      decoration: decoration,
+      alignment: widget.alignment ?? AlignmentDirectional.centerStart,
+      padding: EdgeInsetsDirectional.only(start: 6.r, end: 16.r),
+      decoration: widget.decoration,
       child: Row(
         mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          ButtonBar(
-            buttonPadding: EdgeInsets.zero,
-            buttonHeight: 30.r,
-            children: timeBars.map((bar) {
-              return TextButton(
-                key: ValueKey(bar),
-                onPressed: () {
-                  onTapTimeBar?.call(bar);
-                },
-                child: Text(
-                  bar.bar,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: bar == currTimeBar ? Colors.black : null,
-                    fontWeight: bar == currTimeBar ? FontWeight.bold : null,
+          Expanded(
+            child: TabBar(
+              controller: tabController,
+              isScrollable: isScrollTabBar,
+              tabAlignment: isScrollTabBar ? TabAlignment.start : null,
+              physics: const BouncingScrollPhysics(),
+              labelPadding: EdgeInsetsDirectional.symmetric(horizontal: 4.r),
+              labelColor: theme.t1,
+              unselectedLabelColor: theme.t2,
+              labelStyle: theme.t1s14w700.copyWith(height: 2),
+              unselectedLabelStyle: theme.t2s14w400.copyWith(height: 2),
+              indicator: BoxDecoration(
+                borderRadius: BorderRadius.circular(5.r),
+                color: theme.markBg,
+              ),
+              splashBorderRadius: BorderRadius.circular(5.r),
+              onTap: (index) {
+                final timeBar = timeBarList.getItem(index);
+                if (timeBar != null) widget.onTapTimeBar(timeBar);
+              },
+              tabs: timeBarList.map((bar) {
+                return Tab(
+                  height: 28.r,
+                  child: Container(
+                    constraints: BoxConstraints(minWidth: 28.r),
+                    alignment: AlignmentDirectional.center,
+                    margin: EdgeInsetsDirectional.symmetric(horizontal: 8.r),
+                    child: Text(bar.bar),
                   ),
-                ),
-              );
-            }).toList(),
+                );
+              }).toList(),
+            ),
           ),
+          TextButton(
+            onPressed: onTapIndicatorSetting,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '指标',
+                  style: theme.t1s14w500,
+                ),
+                Icon(
+                  Icons.arrow_drop_down,
+                  color: theme.t1,
+                )
+              ],
+            ),
+          ),
+          IconButton(
+            onPressed: onTabKlineSetting,
+            icon: Icon(
+              Icons.settings_rounded,
+              color: theme.t1,
+              size: 18.r,
+            ),
+          )
         ],
       ),
     );

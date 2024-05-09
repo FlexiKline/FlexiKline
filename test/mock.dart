@@ -13,10 +13,10 @@
 // limitations under the License.
 
 import 'dart:convert';
-import 'dart:ffi';
 
 import 'package:decimal/decimal.dart';
 import 'package:flexi_kline/flexi_kline.dart';
+import 'package:flexi_kline/src/model/export.dart';
 
 List<CandleModel> getCandleModelList() {
   final data = jsonDecode(jsonString);
@@ -27,125 +27,18 @@ List<CandleModel> getCandleModelList() {
       if (item is List) {
         list.add(CandleModel(
           timestamp: item[0] * 1000,
-          open: Decimal.parse(item[1].toString()),
-          high: Decimal.parse(item[2].toString()),
-          low: Decimal.parse(item[3].toString()),
-          close: Decimal.parse(item[4].toString()),
-          vol: Decimal.parse(item[5].toString()),
-          volCcy: Decimal.parse(item[6].toString()),
+          o: Decimal.parse(item[1].toString()),
+          h: Decimal.parse(item[2].toString()),
+          l: Decimal.parse(item[3].toString()),
+          c: Decimal.parse(item[4].toString()),
+          v: Decimal.parse(item[5].toString()),
+          vc: Decimal.parse(item[6].toString()),
         ));
       }
     }
     return list;
   }
   return [];
-}
-
-List<CandleBean> getCandleBeanList() {
-  final data = jsonDecode(jsonString);
-  if (data is List) {
-    List<CandleBean> list = List.empty(growable: true);
-    for (var i = data.length - 1; i >= 0; i--) {
-      final item = data[i];
-      if (item is List) {
-        list.add(CandleBean(
-          timestamp: item[0] * 1000,
-          open: double.parse(item[1].toString()),
-          high: double.parse(item[2].toString()),
-          low: double.parse(item[3].toString()),
-          close: double.parse(item[4].toString()),
-          vol: double.parse(item[5].toString()),
-          volCcy: double.parse(item[6].toString()),
-        ));
-      }
-    }
-    return list;
-  }
-  return [];
-}
-
-class CandleBean {
-  final int timestamp;
-  final double open;
-  final double high;
-  final double low;
-  final double close;
-  final double vol;
-  final double volCcy;
-
-  CandleBean({
-    required this.timestamp,
-    required this.open,
-    required this.high,
-    required this.low,
-    required this.close,
-    required this.vol,
-    required this.volCcy,
-  });
-
-  List<double?>? maRets;
-
-  bool get isValidMaRets {
-    if (maRets == null || maRets!.isEmpty) return false;
-    bool isValid = false;
-    for (var ret in maRets!) {
-      if (ret != null) {
-        isValid = true;
-        break;
-      }
-    }
-    return isValid;
-  }
-
-  Maxmin? get maRetsMinmax {
-    if (maRets == null || maRets!.isEmpty) return null;
-    Maxmin? minmax;
-    for (var ret in maRets!) {
-      if (ret != null) {
-        minmax ??= Maxmin(max: ret, min: ret);
-        minmax.updateMinMaxByVal(ret);
-      }
-    }
-    return minmax;
-  }
-}
-
-class Maxmin {
-  Maxmin({required this.max, required this.min});
-  double max;
-  double min;
-
-  static final Maxmin zero = Maxmin(max: 0.0, min: 0.0);
-
-  Maxmin clone() => Maxmin(max: max, min: min);
-
-  void updateMinMaxByVal(double val) {
-    max = val > max ? val : max;
-    min = val < min ? val : min;
-  }
-
-  void updateMinMax(Maxmin? newVal) {
-    if (newVal == null) return;
-    max = newVal.max > max ? newVal.max : max;
-    min = newVal.min < min ? newVal.min : min;
-  }
-
-  void minToZero() {
-    min = min > 0.0 ? 0.0 : min;
-  }
-
-  double get middle => size / 2;
-
-  double get size => max - min;
-
-  double get divisor => max == min ? 0.0 : max - min;
-
-  bool get isZero => max == 0.0 && min == 0;
-
-  @override
-  String toString() {
-    return 'Maxmin(max:$max, min:$min)';
-  }
 }
 
 String jsonString = '''

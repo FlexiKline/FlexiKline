@@ -172,7 +172,7 @@ class EMAPaintObject<T extends EMAIndicator> extends SinglePaintObjectBox<T> {
       if (ret == null) continue;
 
       final text = formatNumber(
-        ret.val,
+        ret.val.toDecimal(),
         precision: state.curKlineData.req.precision,
         cutInvalidZero: true,
         prefix: '${param.label}: ',

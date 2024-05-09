@@ -196,21 +196,21 @@ class KDJPaintObject<T extends KDJIndicator> extends SinglePaintObjectBox<T>
     final children = <TextSpan>[];
 
     final kTxt = formatNumber(
-      ret.k,
+      ret.k.toDecimal(),
       precision: indicator.precision,
       cutInvalidZero: true,
       prefix: 'K: ',
       suffix: ' ',
     );
     final dTxt = formatNumber(
-      ret.d,
+      ret.d.toDecimal(),
       precision: indicator.precision,
       cutInvalidZero: true,
       prefix: 'D: ',
       suffix: ' ',
     );
     final jTxt = formatNumber(
-      ret.j,
+      ret.j.toDecimal(),
       precision: indicator.precision,
       cutInvalidZero: true,
       prefix: 'J: ',

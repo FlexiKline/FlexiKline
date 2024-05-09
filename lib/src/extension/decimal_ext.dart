@@ -31,6 +31,7 @@ extension IntExt on int {
   Decimal get d => Decimal.fromInt(this);
 }
 
+@Deprecated('请使用BagNum')
 final Decimal two = Decimal.fromInt(2);
 final Decimal three = Decimal.fromInt(3);
 final Decimal twentieth = (Decimal.one / Decimal.fromInt(20)).toDecimal();

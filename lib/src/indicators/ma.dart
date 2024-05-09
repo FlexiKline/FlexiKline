@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 
 import '../constant.dart';
@@ -104,7 +103,7 @@ class MAPaintObject<T extends MAIndicator> extends SinglePaintObjectBox<T> {
 
     for (int j = 0; j < indicator.calcParams.length; j++) {
       final offset = startCandleDx - candleWidthHalf;
-      Decimal? val;
+      BagNum? val;
       final List<Offset> points = [];
       for (int i = start; i < end; i++) {
         val = list[i].maRets?.getItem(j);
@@ -135,7 +134,7 @@ class MAPaintObject<T extends MAIndicator> extends SinglePaintObjectBox<T> {
     Rect drawRect = nextTipsRect;
 
     final children = <TextSpan>[];
-    Decimal? val;
+    BagNum? val;
     for (int i = 0; i < model.maRets!.length; i++) {
       val = model.maRets![i];
       if (val == null) continue;
@@ -143,7 +142,7 @@ class MAPaintObject<T extends MAIndicator> extends SinglePaintObjectBox<T> {
       if (param == null) continue;
 
       final text = formatNumber(
-        val,
+        val.toDecimal(),
         precision: state.curKlineData.req.precision,
         cutInvalidZero: true,
         prefix: '${param.label}: ',

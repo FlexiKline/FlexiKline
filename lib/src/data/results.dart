@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:decimal/decimal.dart';
-
-import '../extension/export.dart';
 import '../model/export.dart';
 
 /// Base数据
@@ -28,7 +25,7 @@ abstract class BaseResult {
 /// MA, WMA, EMA计算结果
 class MaResult extends BaseResult {
   final int count;
-  final Decimal val;
+  final BagNum val;
 
   MaResult({
     required this.count,
@@ -39,17 +36,17 @@ class MaResult extends BaseResult {
 
   @override
   String toString() {
-    return 'MaResult(ts:$ts, count:$count => val:${val.str})';
+    return 'MaResult(ts:$ts, count:$count => val:${val.toString()})';
   }
 }
 
 /// MACD 计算结果
 class MacdResult extends BaseResult {
-  final Decimal emaShort;
-  final Decimal emaLong;
-  final Decimal dif;
-  final Decimal dea;
-  final Decimal macd;
+  final BagNum emaShort;
+  final BagNum emaLong;
+  final BagNum dif;
+  final BagNum dea;
+  final BagNum macd;
 
   MacdResult({
     required super.ts,
@@ -62,24 +59,24 @@ class MacdResult extends BaseResult {
   });
 
   MinMax get minmax {
-    Decimal max = dif.compareTo(dea) > 0 ? dif : dea;
+    BagNum max = dif.compareTo(dea) > 0 ? dif : dea;
     max = max.compareTo(macd) > 0 ? max : macd;
-    Decimal min = dif.compareTo(dea) < 0 ? dif : dea;
+    BagNum min = dif.compareTo(dea) < 0 ? dif : dea;
     min = min.compareTo(macd) < 0 ? min : macd;
     return MinMax(max: max, min: min);
   }
 
   @override
   String toString() {
-    return 'MacdResult(ts:$ts, dif:${dif.str}, dea:${dea.str}, macd:${macd.str})';
+    return 'MacdResult(ts:$ts, dif:${dif.toString()}, dea:${dea.toString()}, macd:${macd.toString()})';
   }
 }
 
 /// KDJ指标计算结果
 class KdjReset extends BaseResult {
-  final Decimal k;
-  final Decimal d;
-  final Decimal j;
+  final BagNum k;
+  final BagNum d;
+  final BagNum j;
 
   KdjReset({
     required super.ts,
@@ -90,23 +87,23 @@ class KdjReset extends BaseResult {
   });
 
   MinMax get minmax {
-    Decimal max = k > d ? k : d;
+    BagNum max = k > d ? k : d;
     max = max > j ? max : j;
-    Decimal min = k < d ? k : d;
+    BagNum min = k < d ? k : d;
     min = min < j ? min : j;
     return MinMax(max: max, min: min);
   }
 
   @override
   String toString() {
-    return 'KdjReset(ts:$ts, k:${k.str}, d:${d.str}, j:${j.str})';
+    return 'KdjReset(ts:$ts, k:${k.toString()}, d:${d.toString()}, j:${j.toString()})';
   }
 }
 
 class BollResult extends BaseResult {
-  final Decimal mb;
-  final Decimal up;
-  final Decimal dn;
+  final BagNum mb;
+  final BagNum up;
+  final BagNum dn;
 
   BollResult({
     required super.ts,
@@ -118,6 +115,6 @@ class BollResult extends BaseResult {
 
   @override
   String toString() {
-    return 'BollResult(ts:$ts, mb:${mb.str}, up:${up.str}, dn:${dn.str})';
+    return 'BollResult(ts:$ts, mb:${mb.toString()}, up:${up.toString()}, dn:${dn.toString()})';
   }
 }

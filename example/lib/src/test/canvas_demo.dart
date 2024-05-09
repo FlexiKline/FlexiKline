@@ -21,11 +21,11 @@ import 'package:flexi_kline/flexi_kline.dart';
 
 ValueNotifier<int> valueNotifier = ValueNotifier(0);
 
-class TestBody extends StatefulWidget {
-  const TestBody({super.key});
+class CanvasDemo extends StatefulWidget {
+  const CanvasDemo({super.key});
 
   @override
-  State<TestBody> createState() => _TestBodyState();
+  State<CanvasDemo> createState() => _CanvasDemoState();
 }
 
 Size get drawableSize => Size(
@@ -40,7 +40,7 @@ Rect get drawableRect => Rect.fromLTWH(
       300.r,
     );
 
-class _TestBodyState extends State<TestBody> {
+class _CanvasDemoState extends State<CanvasDemo> {
   @override
   Widget build(BuildContext context) {
     return Container(

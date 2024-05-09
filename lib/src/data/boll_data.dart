@@ -13,9 +13,7 @@
 // limitations under the License.
 
 import 'dart:math' as math;
-import 'package:decimal/decimal.dart';
 
-import '../extension/export.dart';
 import '../framework/indicator.dart';
 import '../indicators/boll.dart';
 import '../model/export.dart';
@@ -77,21 +75,21 @@ mixin BOLLData on BaseData, MAData {
 
   /// 计算标准差MD
   /// MD=平方根N日的（C－MA）的两次方之和除以N
-  Decimal _calculateBollMd({
-    required Decimal ma,
+  BagNum _calculateBollMd({
+    required BagNum ma,
     required int index,
     required int n,
   }) {
     final start = math.min(index, list.length);
     final end = math.min(index + n, list.length);
-    Decimal sum = Decimal.zero;
-    Decimal closeMa;
+    BagNum sum = BagNum.zero;
+    BagNum closeMa;
     for (int i = start; i < end; i++) {
       closeMa = list[i].close - ma;
       sum += closeMa * closeMa;
     }
     n = end - start;
-    return math.sqrt(sum.toDouble() / n).d;
+    return math.sqrt(sum.toDouble() / n).toBagNum();
   }
 
   /// 中轨线=N日的移动平均线
@@ -127,26 +125,26 @@ mixin BOLLData on BaseData, MAData {
     int offset = math.max(end + param.n - len, 0);
     int index = end - offset;
 
-    Decimal sum = Decimal.zero;
+    BagNum sum = BagNum.zero;
     // 计算index之前N-1日的收盘价之和.
     for (int i = index + 1; i < index + param.n; i++) {
       sum += list[i].close;
     }
 
-    Decimal ma;
-    Decimal md;
-    Decimal up;
-    Decimal dn;
+    BagNum ma;
+    BagNum md;
+    BagNum up;
+    BagNum dn;
     CandleModel m;
     BollResult? ret;
-    final stdD = Decimal.fromInt(param.std);
+    final stdD = BagNum.fromInt(param.std);
     for (int i = index; i >= start; i--) {
       m = list[i];
       sum += m.close;
 
       ret = bollMap[m.timestamp];
       if (ret == null || ret.dirty) {
-        ma = sum.div(param.n.d);
+        ma = sum.divNum(param.n);
         md = _calculateBollMd(ma: ma, index: i, n: param.n);
         up = ma + stdD * md;
         dn = ma - stdD * md;

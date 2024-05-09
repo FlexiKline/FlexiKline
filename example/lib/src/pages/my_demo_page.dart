@@ -20,7 +20,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../config.dart';
 import '../repo/mock.dart';
-import '../test/canvas_test.dart';
+import '../test/canvas_demo.dart';
 import '../utils/flexi_kline_storage.dart';
 import '../widgets/flexi_indicator_bar.dart';
 import '../widgets/flexi_time_bar.dart';
@@ -160,8 +160,7 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
         child: Column(
           children: [
             FlexiTimeBar(
-              timeBars: timBarList,
-              currTimeBar: req1.timerBar,
+              controller: controller1,
               onTapTimeBar: onTapTimeBar1,
             ),
             FlexiKlineWidget(
@@ -181,7 +180,7 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
             // ),
             // SizedBox(height: 20),
             // GestureTest(),
-            TestBody(),
+            CanvasDemo(),
           ],
         ),
       ),

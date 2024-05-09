@@ -14,6 +14,7 @@
 
 import 'package:flutter/foundation.dart';
 
+import '../constant.dart';
 import '../extension/export.dart';
 import '../framework/indicator.dart';
 import '../framework/logger.dart';
@@ -78,6 +79,13 @@ abstract class BaseData with KlineLog {
   }
 
   CandleModel? get latest => list.firstOrNull;
+
+  /// 初始化基础数据
+  void initBasicData(ComputeMode mode, {bool reset = false}) {
+    for (var m in _list) {
+      m.initBasicData(mode, reset: reset);
+    }
+  }
 
   /// 获取index位置的蜡烛数据.
   CandleModel? getCandle(int? index) {

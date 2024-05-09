@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:decimal/decimal.dart';
-
-import '../extension/export.dart';
 import '../framework/indicator.dart';
 import '../indicators/ema.dart';
 import '../model/export.dart';
@@ -73,7 +70,7 @@ mixin EMAData on BaseData {
 
   /// 加权移动平均数Weighted Moving Average
   /// WMA = price[1] * n + price[2] * (n-1) + ... + price[n] / n * (n+1) / 2
-  Decimal? calculateWMA(
+  BagNum? calculateWMA(
     int index,
     int count,
   ) {
@@ -83,9 +80,9 @@ mixin EMAData on BaseData {
 
     final weight = count * (count + 1) / 2;
     int j = count;
-    Decimal sum = Decimal.zero;
+    BagNum sum = BagNum.zero;
     for (int i = index; i < index + count; i++) {
-      sum += list[i].close * (j-- / weight).d;
+      sum += list[i].close.mulNum(j-- / weight);
     }
     return sum;
   }
@@ -114,9 +111,9 @@ mixin EMAData on BaseData {
     /// 初始值采用count日的WMA
     final weight = count * (count + 1) / 2;
     int j = count;
-    Decimal ema = Decimal.zero;
+    BagNum ema = BagNum.zero;
     for (int i = index; i < index + count; i++) {
-      ema += list[i].close * (j-- / weight).d;
+      ema += list[i].close.mulNum(j-- / weight);
     }
 
     emaMap[m.timestamp] = MaResult(
@@ -126,11 +123,11 @@ mixin EMAData on BaseData {
       dirty: true,
     );
 
-    final preCount = Decimal.fromInt(count - 1);
-    final nextCount = Decimal.fromInt(count + 1);
+    final preCount = BagNum.fromInt(count - 1);
+    final nextCount = BagNum.fromInt(count + 1);
     for (int i = index - 1; i >= 0; i--) {
       m = list[i];
-      ema = ((two * m.close) + ema * preCount).div(nextCount);
+      ema = ((BagNum.two * m.close) + ema * preCount).div(nextCount);
       emaMap[m.timestamp] = MaResult(
         ts: m.timestamp,
         count: count,
@@ -166,7 +163,7 @@ mixin EMAData on BaseData {
       ret = emaMap[list[i].timestamp];
       if (ret != null) {
         minmax ??= MinMax(max: ret.val, min: ret.val);
-        minmax.updateMinMaxByVal(ret.val);
+        minmax.updateMinMaxBy(ret.val);
       }
     }
     return minmax;

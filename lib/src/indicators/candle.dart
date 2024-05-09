@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 
 import '../constant.dart';
@@ -58,7 +57,7 @@ class CandlePaintObject<T extends CandleIndicator>
     required super.indicator,
   });
 
-  Decimal? _maxHigh, _minLow;
+  BagNum? _maxHigh, _minLow;
 
   @override
   MinMax? initData({int? start, int? end}) {
@@ -102,9 +101,9 @@ class CandlePaintObject<T extends CandleIndicator>
 
   // onCross时, 格式化Y轴上的标记值.
   @override
-  String formatYAxisMarkValueOnCross(Decimal value) {
+  String formatYAxisMarkValueOnCross(BagNum value) {
     return setting.formatPrice(
-      value,
+      value.toDecimal(),
       instId: klineData.req.instId,
       precision: klineData.req.precision,
       cutInvalidZero: false,
@@ -126,8 +125,8 @@ class CandlePaintObject<T extends CandleIndicator>
     final bar = klineData.timerBar;
     Offset? maxHihgOffset, minLowOffset;
     bool hasEnough = paintDxOffset > 0;
-    Decimal maxHigh = list[start].high;
-    Decimal minLow = list[start].low;
+    BagNum maxHigh = list[start].high;
+    BagNum minLow = list[start].low;
     CandleModel m;
     for (var i = start; i < end; i++) {
       m = list[i];
@@ -187,8 +186,8 @@ class CandlePaintObject<T extends CandleIndicator>
 
     // 最后绘制在蜡烛图中的最大最小价钱标记
     if (setting.isDrawPriceMark &&
-        (maxHihgOffset != null && maxHigh > Decimal.zero) &&
-        (minLowOffset != null && minLow > Decimal.zero)) {
+        (maxHihgOffset != null && maxHigh > BagNum.zero) &&
+        (minLowOffset != null && minLow > BagNum.zero)) {
       paintPriceMark(canvas, maxHihgOffset, maxHigh);
       paintPriceMark(canvas, minLowOffset, minLow);
     }
@@ -198,7 +197,7 @@ class CandlePaintObject<T extends CandleIndicator>
   void paintPriceMark(
     Canvas canvas,
     Offset offset,
-    Decimal val,
+    BagNum val,
   ) {
     final flag = offset.dx > chartRectWidthHalf ? -1 : 1;
     Offset endOffset = Offset(
@@ -216,7 +215,7 @@ class CandlePaintObject<T extends CandleIndicator>
     );
 
     final text = setting.formatPrice(
-      val,
+      val.toDecimal(),
       instId: klineData.req.instId,
       precision: klineData.req.precision,
     );
@@ -270,7 +269,7 @@ class CandlePaintObject<T extends CandleIndicator>
       if (price == null) continue;
 
       final text = setting.formatPrice(
-        price,
+        price.toDecimal(),
         instId: klineData.req.instId,
         precision: klineData.req.precision,
       );
@@ -346,7 +345,7 @@ class CandlePaintObject<T extends CandleIndicator>
     double textHeight =
         setting.latestPriceRectPadding.vertical + setting.latestPriceFontSize;
     String text = setting.formatPrice(
-      model.close,
+      model.close.toDecimal(),
       instId: klineData.req.instId,
       precision: klineData.req.precision,
       cutInvalidZero: false,
@@ -454,27 +453,27 @@ class CandlePaintObject<T extends CandleIndicator>
       ),
       TextSpan(
         text:
-            '${setting.formatPrice(model.open, instId: instId, precision: p)}\n',
+            '${setting.formatPrice(model.open.toDecimal(), instId: instId, precision: p)}\n',
         style: setting.candleCardTitleStyle,
       ),
       TextSpan(
         text:
-            '${setting.formatPrice(model.high, instId: instId, precision: p)}\n',
+            '${setting.formatPrice(model.high.toDecimal(), instId: instId, precision: p)}\n',
         style: setting.candleCardTitleStyle,
       ),
       TextSpan(
         text:
-            '${setting.formatPrice(model.low, instId: instId, precision: p)}\n',
+            '${setting.formatPrice(model.low.toDecimal(), instId: instId, precision: p)}\n',
         style: setting.candleCardTitleStyle,
       ),
       TextSpan(
         text:
-            '${setting.formatPrice(model.close, instId: instId, precision: p)}\n',
+            '${setting.formatPrice(model.close.toDecimal(), instId: instId, precision: p)}\n',
         style: setting.candleCardTitleStyle,
       ),
       TextSpan(
         text:
-            '${setting.formatPrice(model.change, instId: instId, precision: p)}\n',
+            '${setting.formatPrice(model.change.toDecimal(), instId: instId, precision: p)}\n',
         style: changeStyle,
       ),
       TextSpan(
@@ -483,7 +482,7 @@ class CandlePaintObject<T extends CandleIndicator>
       ),
       TextSpan(
         text: formatNumber(
-          model.vol,
+          model.vol.toDecimal(),
           precision: 2,
           cutInvalidZero: true,
           showCompact: true,

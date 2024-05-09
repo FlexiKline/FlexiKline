@@ -16,11 +16,11 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class GestureTest extends StatefulWidget {
-  const GestureTest({super.key});
+class GestureDemo extends StatefulWidget {
+  const GestureDemo({super.key});
 
   @override
-  State<GestureTest> createState() => _GestureTestState();
+  State<GestureDemo> createState() => _GestureDemoState();
 }
 
 Size get drawableSize => Size(
@@ -28,7 +28,7 @@ Size get drawableSize => Size(
       ScreenUtil().screenWidth * 2 / 3,
     );
 
-class _GestureTestState extends State<GestureTest> {
+class _GestureDemoState extends State<GestureDemo> {
   void logd(String msg) {
     debugPrint('zp::: GestureTest > $msg');
   }

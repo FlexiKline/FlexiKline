@@ -18,7 +18,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../router.dart';
 import '../utils/cache_util.dart';
-import 'theme.dart';
 
 const cacheKeyTheme = 'cache_key_theme';
 
@@ -26,18 +25,13 @@ final themeModeProvider = StateProvider<ThemeMode>((ref) {
   return ThemeMode.system;
 });
 
-final materialTheme = MaterialTheme(TextTheme());
-
-final lightTheme = materialTheme.light();
-final darkTheme = materialTheme.dark();
-
 class ThemeManager {
   ThemeManager._internal();
   factory ThemeManager() => _instance;
   static final ThemeManager _instance = ThemeManager._internal();
   static ThemeManager get instance => _instance;
 
-  final List<ValueChanged<ThemeMode>> _themeModeListeners = [];
+  final List<WeakReference<ValueChanged<ThemeMode>>> _themeModeListeners = [];
 
   ThemeMode init() {
     final String? theme = CacheUtil().get(cacheKeyTheme);
@@ -55,18 +49,20 @@ class ThemeManager {
     if (curr != mode) {
       globalNavigatorKey.ref.read(themeModeProvider.notifier).state = mode;
       CacheUtil().setString(cacheKeyTheme, mode.name);
-      for (var cb in _themeModeListeners) {
-        cb(mode);
+      for (var listenerRef in _themeModeListeners) {
+        listenerRef.target?.call(mode);
       }
     }
   }
 
   void registerListener(ValueChanged listener) {
-    _themeModeListeners.add(listener);
+    _themeModeListeners.add(WeakReference(listener));
   }
 
   void removeListener(ValueChanged listener) {
-    _themeModeListeners.remove(listener);
+    _themeModeListeners.removeWhere((listenerRef) {
+      return listenerRef.target == listener;
+    });
   }
 
   String convert(ThemeMode mode, {S? s}) {

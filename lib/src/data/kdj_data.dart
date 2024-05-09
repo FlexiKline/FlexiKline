@@ -13,9 +13,7 @@
 // limitations under the License.
 
 import 'dart:math' as math;
-import 'package:decimal/decimal.dart';
 
-import '../extension/export.dart';
 import '../framework/indicator.dart';
 import '../indicators/kdj.dart';
 import '../model/export.dart';
@@ -108,16 +106,16 @@ mixin KDJData on BaseData, CandleData {
     int offset = math.max(end + param.n - len, 0);
     int index = end - offset;
 
-    final m1k = Decimal.fromInt(param.m1 - 1);
-    final m1Div = Decimal.fromInt(param.m1);
-    final m2d = Decimal.fromInt(param.m2 - 1);
-    final m2Div = Decimal.fromInt(param.m2);
+    final m1k = BagNum.fromInt(param.m1 - 1);
+    final m1Div = BagNum.fromInt(param.m1);
+    final m2d = BagNum.fromInt(param.m2 - 1);
+    final m2Div = BagNum.fromInt(param.m2);
     KdjReset? ret;
-    Decimal rsv;
+    BagNum rsv;
     CandleModel m;
-    Decimal k = fifty;
-    Decimal d = fifty;
-    Decimal j;
+    BagNum k = BagNum.fifty;
+    BagNum d = BagNum.fifty;
+    BagNum j;
 
     // 计算KDJ
     for (int i = index; i >= start; i--) {
@@ -127,10 +125,10 @@ mixin KDJData on BaseData, CandleData {
       if (ret == null || ret.dirty) {
         final minmax = calculateMinmax(start: i, end: i + param.n);
         if (minmax == null) continue;
-        rsv = (m.close - minmax.min).div(minmax.divisor) * hundred;
+        rsv = (m.close - minmax.min).div(minmax.divisor) * BagNum.hundred;
         k = (m1k * k + rsv).div(m1Div);
         d = (m2d * d + k).div(m2Div);
-        j = three * k - two * d;
+        j = BagNum.three * k - BagNum.two * d;
 
         ret = KdjReset(
           ts: m.timestamp,

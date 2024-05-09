@@ -13,9 +13,7 @@
 // limitations under the License.
 
 import 'dart:math' as math;
-import 'package:decimal/decimal.dart';
 
-import '../extension/export.dart';
 import '../framework/indicator.dart';
 import '../indicators/ma.dart';
 import '../model/export.dart';
@@ -57,7 +55,7 @@ mixin MAData on BaseData {
   }
 
   /// 计算 [index] 位置的 [count] 个数据的Ma指标.
-  Decimal? calcuMa(
+  BagNum? calcuMa(
     int index,
     int count,
   ) {
@@ -67,12 +65,12 @@ mixin MAData on BaseData {
 
     final m = list[index];
 
-    Decimal sum = m.close;
+    BagNum sum = m.close;
     for (int i = index + 1; i < index + count; i++) {
       sum += list[i].close;
     }
 
-    return sum.div(count.d);
+    return sum.divNum(count);
   }
 
   void calcuAndCacheMa(
@@ -96,7 +94,7 @@ mixin MAData on BaseData {
 
     CandleModel m;
     final paramLen = calcParams.length;
-    final closeSum = List.filled(paramLen, Decimal.zero, growable: false);
+    final closeSum = List.filled(paramLen, BagNum.zero, growable: false);
     for (int i = end - 1; i >= start; i--) {
       m = list[i];
       m.maRets = List.filled(calcParams.length, null, growable: false);
@@ -104,7 +102,7 @@ mixin MAData on BaseData {
         closeSum[j] += m.close;
         final count = calcParams[j].count;
         if (i <= end - count) {
-          m.maRets![j] = closeSum[j].div(count.d);
+          m.maRets![j] = closeSum[j].divNum(count);
           closeSum[j] -= list[i + (count - 1)].close;
         }
       }
@@ -209,7 +207,7 @@ mixin MAData2 on BaseData {
       return ret;
     }
 
-    Decimal sum = m.close;
+    BagNum sum = m.close;
     for (int i = index + 1; i < index + count; i++) {
       sum += list[i].close;
     }
@@ -217,7 +215,7 @@ mixin MAData2 on BaseData {
     return MaResult(
       count: count,
       ts: m.timestamp,
-      val: sum.div(count.d),
+      val: sum.divNum(count),
       dirty: index == 0, // 如果是第一根蜡烛的数据.下次需要重新计算.
     );
   }
@@ -246,9 +244,9 @@ mixin MAData2 on BaseData {
     int offset = math.max(end + count - len, 0);
     int index = end - offset;
 
-    Decimal cD = Decimal.fromInt(count);
+    BagNum cD = BagNum.fromInt(count);
     CandleModel m = list[index];
-    Decimal sum = m.close;
+    BagNum sum = m.close;
     for (int i = index + 1; i < index + count; i++) {
       sum += list[i].close;
     }
@@ -295,7 +293,7 @@ mixin MAData2 on BaseData {
       ret = maMap[list[i].timestamp];
       if (ret != null) {
         minmax ??= MinMax(max: ret.val, min: ret.val);
-        minmax.updateMinMaxByVal(ret.val);
+        minmax.updateMinMaxBy(ret.val);
       }
     }
     return minmax;

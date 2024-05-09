@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 
 import '../core/export.dart';
@@ -234,7 +233,7 @@ mixin PaintObjectBoundingMixin on PaintObjectProxy
 
 /// 绘制对象混入数据初始化的通用扩展
 mixin DataInitMixin on PaintObjectProxy implements IPaintDataInit {
-  final Decimal twentieth = (Decimal.one / Decimal.fromInt(20)).toDecimal();
+  // final Decimal twentieth = (Decimal.one / Decimal.fromInt(20)).toDecimal();
 
   MinMax? _minMax;
 
@@ -259,14 +258,14 @@ mixin DataInitMixin on PaintObjectProxy implements IPaintDataInit {
     return _dyFactor ?? chartRect.height / (minMax.size).toDouble();
   }
 
-  double valueToDy(Decimal value, {bool correct = true}) {
+  double valueToDy(BagNum value, {bool correct = true}) {
     if (correct) value = value.clamp(minMax.min, minMax.max);
     return chartRect.bottom - (value - minMax.min).toDouble() * dyFactor;
   }
 
-  Decimal? dyToValue(double dy) {
+  BagNum? dyToValue(double dy) {
     if (!chartRect.inclueDy(dy)) return null;
-    return minMax.max - ((dy - chartRect.top) / dyFactor).d;
+    return minMax.max - ((dy - chartRect.top) / dyFactor).toBagNum();
   }
 
   double? indexToDx(int index) {
@@ -340,9 +339,9 @@ mixin PaintYAxisTickMixin<T extends SinglePaintObjectIndicator>
 
   /// 如果要定制格式化刻度值. 在PaintObject中覆写此方法.
   @protected
-  String fromatYAxisTickValue(Decimal value) {
+  String fromatYAxisTickValue(BagNum value) {
     return formatNumber(
-      value,
+      value.toDecimal(),
       precision: 2,
       defIfZero: '0.00',
       showCompact: true,
@@ -380,9 +379,9 @@ mixin PaintYAxisMarkOnCrossMixin<T extends SinglePaintObjectIndicator>
   }
 
   @protected
-  String formatYAxisMarkValueOnCross(Decimal value) {
+  String formatYAxisMarkValueOnCross(BagNum value) {
     return formatNumber(
-      value,
+      value.toDecimal(),
       precision: 2,
       defIfZero: '0.00',
       showCompact: true,

@@ -12,12 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:decimal/decimal.dart';
-
+import '../bag_num.dart';
 import '../minmax.dart';
 
 mixin MaMixin {
-  List<Decimal?>? maRets;
+  List<BagNum?>? maRets;
 
   bool get isValidMaRets {
     if (maRets == null || maRets!.isEmpty) return false;
@@ -36,8 +35,8 @@ mixin MaMixin {
     MinMax? minmax;
     for (var ret in maRets!) {
       if (ret != null) {
-        minmax ??= MinMax(max: ret, min: ret);
-        minmax.updateMinMaxByVal(ret);
+        minmax ??= MinMax.same(ret);
+        minmax.updateMinMaxBy(ret);
       }
     }
     return minmax;

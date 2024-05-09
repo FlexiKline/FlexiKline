@@ -24,10 +24,11 @@ dependencies:
   dio: ^5.4.2+1
   logger: ^2.2.0
   web_socket_channel: ^2.4.5
+  shared_preferences: ^2.2.3
 
   flutter_screenutil: ^5.9.0
   flutter_smart_dialog: ^4.9.6
-  shared_preferences: ^2.2.3
+  easy_refresh: ^3.3.5
 
   flutter_ume_plus: ^3.0.2
   flutter_ume_kit_dio_plus: ^3.4.5

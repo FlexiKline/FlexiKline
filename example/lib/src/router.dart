@@ -23,7 +23,7 @@ import 'pages/main_nav_page.dart';
 import 'pages/my_demo_page.dart';
 
 final GlobalKey<NavigatorState> globalNavigatorKey = GlobalKey<NavigatorState>(
-  debugLabel: 'myApp',
+  debugLabel: 'FlexiKlineApp',
 );
 
 extension GlobalKeyExt on GlobalKey<NavigatorState> {

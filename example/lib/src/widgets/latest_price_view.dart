@@ -54,7 +54,7 @@ class LatestPriceView extends ConsumerWidget {
                 FittedBox(
                   child: Text(
                     formatNumber(
-                      model?.close,
+                      model?.c,
                       precision: precision,
                       showThousands: true,
                       cutInvalidZero: true,
@@ -81,7 +81,7 @@ class LatestPriceView extends ConsumerWidget {
                 IndicatorInfoView(
                   title: '24小时最高',
                   value: formatNumber(
-                    model?.high,
+                    model?.h,
                     precision: precision,
                     cutInvalidZero: true,
                   ),
@@ -89,7 +89,7 @@ class LatestPriceView extends ConsumerWidget {
                 IndicatorInfoView(
                   title: '24小时最低',
                   value: formatNumber(
-                    model?.low,
+                    model?.l,
                     precision: precision,
                     cutInvalidZero: true,
                   ),
@@ -97,7 +97,7 @@ class LatestPriceView extends ConsumerWidget {
                 IndicatorInfoView(
                   title: '24小时量',
                   value: formatNumber(
-                    model?.vol,
+                    model?.v,
                     precision: 2,
                     showCompact: true,
                     cutInvalidZero: true,
@@ -106,7 +106,7 @@ class LatestPriceView extends ConsumerWidget {
                 IndicatorInfoView(
                   title: '24小时额',
                   value: formatNumber(
-                    model?.volCcy,
+                    model?.vc,
                     precision: 2,
                     showCompact: true,
                     cutInvalidZero: true,

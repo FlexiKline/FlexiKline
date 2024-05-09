@@ -37,11 +37,11 @@ Future<List<CandleModel>> genRandomCandleList({int count = 500}) async {
   final List<CandleModel> list = <CandleModel>[];
   for (int i = 0; i < count; i++) {
     list.add(CandleModel(
-      close: Decimal.parse(close.toString()),
-      high: Decimal.parse(high.toString()),
-      low: Decimal.parse(low.toString()),
-      open: Decimal.parse(open.toString()),
-      vol: Decimal.parse((10000000 * _random.nextDouble()).toString()),
+      c: Decimal.parse(close.toString()),
+      h: Decimal.parse(high.toString()),
+      l: Decimal.parse(low.toString()),
+      o: Decimal.parse(open.toString()),
+      v: Decimal.parse((10000000 * _random.nextDouble()).toString()),
       timestamp: date.millisecondsSinceEpoch,
     ));
     open = close;
@@ -67,11 +67,11 @@ Future<List<CandleModel>> appendCandleList({
   final List<CandleModel> list = <CandleModel>[];
   for (int i = 0; i < count; i++) {
     list.add(CandleModel(
-      close: Decimal.parse(close.toString()),
-      high: Decimal.parse(high.toString()),
-      low: Decimal.parse(low.toString()),
-      open: Decimal.parse(open.toString()),
-      vol: Decimal.parse((10000000 * _random.nextDouble()).toString()),
+      c: Decimal.parse(close.toString()),
+      h: Decimal.parse(high.toString()),
+      l: Decimal.parse(low.toString()),
+      o: Decimal.parse(open.toString()),
+      v: Decimal.parse((10000000 * _random.nextDouble()).toString()),
       timestamp: date.millisecondsSinceEpoch,
     ));
     open = close;
@@ -168,12 +168,12 @@ Future<List<CandleModel>> genLocalCandleList() async {
       if (item is List) {
         list.add(CandleModel(
           timestamp: item[0] * 1000,
-          open: Decimal.parse(item[1].toString()),
-          high: Decimal.parse(item[2].toString()),
-          low: Decimal.parse(item[3].toString()),
-          close: Decimal.parse(item[4].toString()),
-          vol: Decimal.parse(item[5].toString()),
-          volCcy: Decimal.parse(item[6].toString()),
+          o: Decimal.parse(item[1].toString()),
+          h: Decimal.parse(item[2].toString()),
+          l: Decimal.parse(item[3].toString()),
+          c: Decimal.parse(item[4].toString()),
+          v: Decimal.parse(item[5].toString()),
+          vc: Decimal.parse(item[6].toString()),
         ));
       }
     }

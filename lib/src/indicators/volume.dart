@@ -146,7 +146,7 @@ class VolumePaintObject<T extends VolumeIndicator>
     Rect drawRect = nextTipsRect;
 
     final text = formatNumber(
-      model.vol,
+      model.vol.toDecimal(),
       precision: 2,
       cutInvalidZero: true,
       showCompact: true,

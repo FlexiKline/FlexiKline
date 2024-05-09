@@ -14,7 +14,6 @@
 
 import 'dart:math' as math;
 
-import 'package:decimal/decimal.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -70,7 +69,7 @@ void calcuAndCacheMa(
 
   CandleModel m;
   final paramLen = calcParams.length;
-  final closeSum = List.filled(paramLen, Decimal.zero, growable: false);
+  final closeSum = List.filled(paramLen, BagNum.zero, growable: false);
   for (int i = end - 1; i >= start; i--) {
     m = list[i];
     m.maRets = List.filled(calcParams.length, null, growable: false);
@@ -78,7 +77,7 @@ void calcuAndCacheMa(
       closeSum[j] += m.close;
       final count = calcParams[j].count;
       if (i <= end - count) {
-        m.maRets![j] = closeSum[j].div(count.d);
+        m.maRets![j] = closeSum[j].divNum(count);
         closeSum[j] -= list[i + (count - 1)].close;
       }
     }

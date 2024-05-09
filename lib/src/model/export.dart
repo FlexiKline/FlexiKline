@@ -12,18 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:decimal/decimal.dart';
-
 import '../utils/num_util.dart';
 import './candle_model/candle_model.dart';
 import './candle_req/candle_req.dart';
 import '../constant.dart';
+import 'bag_num.dart';
 
 export './candle_model/candle_model.dart';
 export './candle_req/candle_req.dart';
 export './gesture_data.dart';
 export './card_info.dart';
 export './minmax.dart';
+export './bag_num.dart';
 
 extension CandleReqExt on CandleReq {
   String get key => "$instId-$bar";
@@ -73,7 +73,10 @@ extension CandleModelExt on CandleModel {
     return null;
   }
 
-  Decimal get change => close - open;
+  BagNum get change => close - open;
 
-  double get changeRate => (change / open).toDouble() * 100;
+  double get changeRate {
+    if (change.isZero) return 0;
+    return (change / open).toDouble() * 100;
+  }
 }

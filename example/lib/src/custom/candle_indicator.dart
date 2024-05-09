@@ -89,7 +89,7 @@ class CustomCandlePaintObject extends CandlePaintObject<CustomCandleIndicator> {
     double textHeight =
         setting.latestPriceRectPadding.vertical + setting.latestPriceFontSize;
     String text = setting.formatPrice(
-      model.close,
+      model.c,
       instId: klineData.req.instId,
       precision: klineData.req.precision,
       cutInvalidZero: false,

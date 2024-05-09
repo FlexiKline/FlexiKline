@@ -21,7 +21,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
 import '../config.dart';
-import '../custom/candle_indicator.dart';
 import '../repo/api.dart' as api;
 import '../utils/flexi_kline_storage.dart';
 import '../widgets/flexi_indicator_bar.dart';
@@ -137,8 +136,7 @@ class _KOKlinePageState extends ConsumerState<KOKlinePage> {
               precision: req.precision,
             ),
             FlexiTimeBar(
-              timeBars: timBarList,
-              currTimeBar: req.timerBar,
+              controller: controller,
               onTapTimeBar: onTapTimerBar,
             ),
             FlexiKlineWidget(

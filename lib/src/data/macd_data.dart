@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:decimal/decimal.dart';
-
-import '../extension/export.dart';
 import '../framework/indicator.dart';
 import '../indicators/macd.dart';
 import '../model/export.dart';
@@ -97,23 +94,23 @@ mixin MACDData on BaseData {
     Map<int, MacdResult> macdMap = getMacdMap(param);
     if (macdMap.isNotEmpty) macdMap.clear();
 
-    final sPre = Decimal.fromInt(param.s - 1);
-    final sNext = Decimal.fromInt(param.s + 1);
-    final lPre = Decimal.fromInt(param.l - 1);
-    final lNext = Decimal.fromInt(param.l + 1);
-    final mPre = Decimal.fromInt(param.m - 1);
-    final mNext = Decimal.fromInt(param.m + 1);
+    final sPre = BagNum.fromInt(param.s - 1);
+    final sNext = BagNum.fromInt(param.s + 1);
+    final lPre = BagNum.fromInt(param.l - 1);
+    final lNext = BagNum.fromInt(param.l + 1);
+    final mPre = BagNum.fromInt(param.m - 1);
+    final mNext = BagNum.fromInt(param.m + 1);
 
     CandleModel model;
-    Decimal emaShort = Decimal.zero;
-    Decimal emaLong = Decimal.zero;
-    Decimal dif;
-    Decimal dea = Decimal.zero;
-    Decimal macd;
+    BagNum emaShort = BagNum.zero;
+    BagNum emaLong = BagNum.zero;
+    BagNum dif;
+    BagNum dea = BagNum.zero;
+    BagNum macd;
 
     int count = 0;
-    Decimal closeSum = Decimal.zero;
-    Decimal difSum = Decimal.zero;
+    BagNum closeSum = BagNum.zero;
+    BagNum difSum = BagNum.zero;
     MacdResult ret;
     for (int i = len - 1; i >= 0; i--) {
       model = list[i];
@@ -121,17 +118,17 @@ mixin MACDData on BaseData {
       count++;
       if (count >= param.s) {
         if (count > param.s) {
-          emaShort = ((two * model.close) + emaShort * sPre).div(sNext);
+          emaShort = ((BagNum.two * model.close) + emaShort * sPre).div(sNext);
         } else {
-          emaShort = closeSum.div(param.s.d);
+          emaShort = closeSum.divNum(param.s);
         }
       }
 
       if (count >= param.l) {
         if (count > param.l) {
-          emaLong = ((two * model.close) + emaLong * lPre).div(lNext);
+          emaLong = ((BagNum.two * model.close) + emaLong * lPre).div(lNext);
         } else {
-          emaLong = closeSum.div(param.l.d);
+          emaLong = closeSum.divNum(param.l);
         }
       }
 
@@ -140,12 +137,12 @@ mixin MACDData on BaseData {
         difSum += dif;
         if (count >= param.l + param.m) {
           if (count > param.l + param.m) {
-            dea = ((two * dif) + dea * mPre).div(mNext);
+            dea = ((BagNum.two * dif) + dea * mPre).div(mNext);
           } else {
-            dea = difSum.div(param.m.d);
+            dea = difSum.divNum(param.m);
           }
 
-          macd = (dif - dea) * two;
+          macd = (dif - dea) * BagNum.two;
           ret = MacdResult(
             ts: model.timestamp,
             dif: dif,

@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:io';
+
+import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -25,7 +28,7 @@ import 'package:flutter_ume_plus/flutter_ume_plus.dart';
 import 'i18n.dart';
 import 'repo/http_client.dart';
 import 'router.dart';
-import 'theme/theme_manager.dart';
+import 'theme/export.dart';
 
 class MyApp extends ConsumerStatefulWidget {
   const MyApp({super.key});
@@ -38,6 +41,7 @@ class _MyAppState extends ConsumerState<MyApp> {
   @override
   void initState() {
     super.initState();
+    configDefaultRefresher();
     if (kDebugMode) {
       PluginManager.instance
         ..register(DioInspector(dio: httpClient.dio))
@@ -84,5 +88,28 @@ class _MyAppState extends ConsumerState<MyApp> {
         );
       },
     );
+  }
+
+  void configDefaultRefresher() {
+    final theme = ref.read(themeProvider);
+    Header header;
+    if (Platform.isIOS) {
+      header = CupertinoHeader(
+        foregroundColor: theme.white,
+        backgroundColor: theme.transparent,
+      );
+    } else {
+      header = MaterialHeader(
+        color: theme.white,
+        backgroundColor: theme.transparent,
+      );
+    }
+    EasyRefresh.defaultHeaderBuilder = () => header;
+    EasyRefresh.defaultFooterBuilder = () => CupertinoFooter(
+          emptyWidget: Text(
+            'Protected By FlexiKline',
+            style: theme.t2s12w400,
+          ),
+        );
   }
 }

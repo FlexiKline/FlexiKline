@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:decimal/decimal.dart';
-
 import '../model/export.dart';
 import 'base_data.dart';
 
@@ -40,8 +38,8 @@ mixin CandleData on BaseData {
     if (list.isEmpty || from < 0 || to > list.length) return null;
 
     CandleModel m = list[to - 1];
-    Decimal maxHigh = m.high;
-    Decimal minLow = m.low;
+    BagNum maxHigh = m.high;
+    BagNum minLow = m.low;
     for (int i = to - 2; i >= from; i--) {
       m = list[i];
       maxHigh = m.high > maxHigh ? m.high : maxHigh;
@@ -59,8 +57,8 @@ mixin CandleData on BaseData {
     if (list.isEmpty || from < 0 || to > list.length) return null;
 
     CandleModel m = list[to - 1];
-    Decimal minVol = m.vol;
-    Decimal maxVol = m.vol;
+    BagNum minVol = m.vol;
+    BagNum maxVol = m.vol;
     for (int i = to - 2; i >= from; i--) {
       m = list[i];
       maxVol = m.vol > maxVol ? m.vol : maxVol;

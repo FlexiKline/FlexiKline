@@ -16,6 +16,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../constant.dart';
 import '../data/export.dart';
 import '../extension/export.dart';
 import '../framework/indicator.dart';
@@ -42,6 +43,15 @@ mixin StateBinding
       data.dispose();
     });
     _klineDataCache.clear();
+  }
+
+  ComputeMode _computeMode = ComputeMode.fast;
+  ComputeMode get computeMode => _computeMode;
+  set computeMode(mode) {
+    if (mode != _computeMode) {
+      _computeMode = mode;
+      preprocessIndicatorData(curKlineData, reset: true);
+    }
   }
 
   final Map<String, KlineData> _klineDataCache = {};
@@ -185,6 +195,9 @@ mixin StateBinding
 
   void preprocessIndicatorData(KlineData data, {bool reset = false}) {
     if (data.isEmpty) return;
+
+    // 根据计算模式, 初始化基础数据
+    data.initBasicData(computeMode, reset: reset);
 
     const start = 0;
     final end = data.length;

@@ -25,13 +25,13 @@ CandleModel jsonToCandle(dynamic data) {
   if (data is List<dynamic>) {
     return CandleModel.fromJson({
       "timestamp": data.get(0),
-      "open": data.get(1),
-      "high": data.get(2),
-      "low": data.get(3),
-      "close": data.get(4),
-      "vol": data.get(5),
-      "volCcy": data.get(6),
-      "volCcyQuote": data.get(7),
+      "o": data.get(1),
+      "h": data.get(2),
+      "l": data.get(3),
+      "c": data.get(4),
+      "v": data.get(5),
+      "vc": data.get(6),
+      "vcq": data.get(7),
       "confirm": data.get(8),
     });
   } else {

@@ -203,21 +203,21 @@ class BOLLPaintObject<T extends BOLLIndicator> extends SinglePaintObjectBox<T> {
     final children = <TextSpan>[];
 
     final mbTxt = formatNumber(
-      ret.mb,
+      ret.mb.toDecimal(),
       precision: precision,
       cutInvalidZero: true,
       prefix: indicator.mbLabel,
       suffix: ' ',
     );
     final upTxt = formatNumber(
-      ret.up,
+      ret.up.toDecimal(),
       precision: precision,
       cutInvalidZero: true,
       prefix: indicator.upLabel,
       suffix: ' ',
     );
     final dnTxt = formatNumber(
-      ret.dn,
+      ret.dn.toDecimal(),
       precision: precision,
       cutInvalidZero: true,
       prefix: indicator.dnLabel,

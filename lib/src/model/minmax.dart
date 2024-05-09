@@ -14,42 +14,103 @@
 
 import 'package:decimal/decimal.dart';
 
-import '../extension/export.dart';
+import 'bag_num.dart';
 
 class MinMax {
-  MinMax({required this.max, required this.min});
-  Decimal max;
-  Decimal min;
+  static final MinMax zero = MinMax(max: BagNum.zero, min: BagNum.zero);
 
-  static final MinMax zero = MinMax(max: Decimal.zero, min: Decimal.zero);
+  MinMax({required this.max, required this.min});
+
+  factory MinMax.same(BagNum val) => MinMax(max: val, min: val);
 
   MinMax clone() => MinMax(max: max, min: min);
 
-  void updateMinMaxByVal(Decimal val) {
-    max = val > max ? val : max;
-    min = val < min ? val : min;
+  BagNum max;
+  BagNum min;
+
+  void updateMinMaxBy(BagNum val) {
+    if (max < val) max = val;
+    if (min > val) min = val;
   }
 
-  void updateMinMax(MinMax? newVal) {
-    if (newVal == null) return;
-    max = newVal.max > max ? newVal.max : max;
-    min = newVal.min < min ? newVal.min : min;
+  void updateMinMaxByNum(num val) {
+    if (max.ltNum(val)) max = BagNum.fromNum(val);
+    if (min.gtNum(val)) min = BagNum.fromNum(val);
+  }
+
+  void updateMinMaxByDecimal(Decimal val) {
+    if (max.ltDecimal(val)) max = BagNum.fromDecimal(val);
+    if (min.gtDecimal(val)) min = BagNum.fromDecimal(val);
+  }
+
+  void updateMinMax(MinMax? minmax) {
+    if (minmax == null) return;
+    if (max < minmax.max) max = minmax.max;
+    if (min > minmax.min) min = minmax.min;
   }
 
   void minToZero() {
-    min = min > Decimal.zero ? Decimal.zero : min;
+    min = min > BagNum.zero ? BagNum.zero : min;
   }
 
-  Decimal get middle => size.div(two);
+  BagNum get middle => size / BagNum.two;
 
-  Decimal get size => max - min;
+  BagNum get size => max - min;
 
-  Decimal get divisor => max == min ? Decimal.one : max - min;
+  BagNum get divisor => max == min ? BagNum.one : max - min;
 
-  bool get isZero => max == Decimal.zero && min == Decimal.zero;
+  bool get isZero => max == BagNum.zero && min == BagNum.zero;
 
   @override
   String toString() {
-    return 'MinMax(max:${max.str}, min:${min.str})';
+    return 'MinMax(max:${max.toString()}, min:${min.toString()})';
   }
 }
+
+// class Maxmin {
+//   Maxmin({required this.max, required this.min});
+//   BagNum max;
+//   BagNum min;
+
+//   static final Maxmin zero = Maxmin(max: BagNum.zero, min: BagNum.zero);
+
+//   Maxmin clone() => Maxmin(max: max, min: min);
+
+//   void updateMinMaxBy(BagNum val) {
+//     if (max < val) max = val;
+//     if (min > val) min = val;
+//   }
+
+//   void updateMinMaxByNum(num val) {
+//     if (max.ltNum(val)) max = BagNum.formNum(val);
+//     if (min.gtNum(val)) min = BagNum.formNum(val);
+//   }
+
+//   void updateMinMaxByDecimal(Decimal val) {
+//     if (max.ltDecimal(val)) max = BagNum.formDecimal(val);
+//     if (min.gtDecimal(val)) min = BagNum.formDecimal(val);
+//   }
+
+//   void updateMinMax(Maxmin? minmax) {
+//     if (minmax == null) return;
+//     if (max < minmax.max) max = minmax.max;
+//     if (min > minmax.min) min = minmax.min;
+//   }
+
+//   void minToZero() {
+//     min = min > BagNum.zero ? BagNum.zero : min;
+//   }
+
+//   BagNum get middle => size / BagNum.two;
+
+//   BagNum get size => max - min;
+
+//   BagNum get divisor => max == min ? BagNum.one : max - min;
+
+//   bool get isZero => max == BagNum.zero && min == BagNum.zero;
+
+//   @override
+//   String toString() {
+//     return 'MinMax(max:${max.toString()}, min:${min.toString()})';
+//   }
+// }

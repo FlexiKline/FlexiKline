@@ -24,6 +24,14 @@ const EdgeInsets defaultIndicatorPadding = EdgeInsets.zero;
 
 const int defaultSubChartMaxCount = 4;
 
+/// 计算模式
+/// [fast] 使用(IEEE 754 二进制浮点数算术标准)计算指标数据. (用double类型计算)
+/// [accurate] 使用Decimal基于十进制算术的精确计算指标数据. (用Decimal类型计算)
+enum ComputeMode {
+  fast,
+  accurate,
+}
+
 /// 时间粒度，默认值1m
 /// 如 [1m/3m/5m/15m/30m/1H/2H/4H]
 /// 香港时间开盘价k线：[6H/12H/1D/2D/3D/1W/1M/3M]

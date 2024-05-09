@@ -12,75 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:example/generated/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import 'router.dart';
-import 'utils/cache_util.dart';
+import 'theme.dart';
+import 'theme_manager.dart';
 
-const cacheKeyTheme = 'cache_key_theme';
-
-final themeModeProvider = StateProvider<ThemeMode>((ref) {
-  return ThemeMode.system;
-});
 final themeProvider = StateProvider<FKTheme>((ref) {
   return ref.watch(themeModeProvider) != ThemeMode.dark
-      ? fkDarkTheme
-      : fkLightTheme;
+      ? fkLightTheme
+      : fkDarkTheme;
 });
-
-class ThemeManager {
-  ThemeManager._internal();
-  factory ThemeManager() => _instance;
-  static final ThemeManager _instance = ThemeManager._internal();
-  static ThemeManager get instance => _instance;
-
-  final List<ValueChanged<ThemeMode>> _themeModeListeners = [];
-
-  ThemeMode init() {
-    final String? theme = CacheUtil().get(cacheKeyTheme);
-    if (theme != null) {
-      return ThemeMode.values.firstWhere(
-        (e) => e.name == theme,
-        orElse: () => ThemeMode.system,
-      );
-    }
-    return ThemeMode.system;
-  }
-
-  void swithThemeMode(ThemeMode mode) {
-    final curr = globalNavigatorKey.ref.read(themeModeProvider);
-    if (curr != mode) {
-      globalNavigatorKey.ref.read(themeModeProvider.notifier).state = mode;
-      CacheUtil().setString(cacheKeyTheme, mode.name);
-      for (var cb in _themeModeListeners) {
-        cb(mode);
-      }
-    }
-  }
-
-  void registerListener(ValueChanged listener) {
-    _themeModeListeners.add(listener);
-  }
-
-  void removeListener(ValueChanged listener) {
-    _themeModeListeners.remove(listener);
-  }
-
-  String convert(ThemeMode mode, {S? s}) {
-    s ??= S.current;
-    switch (mode) {
-      case ThemeMode.system:
-        return s.themeModeSystem;
-      case ThemeMode.light:
-        return s.themeModeLight;
-      case ThemeMode.dark:
-        return s.themeModeDark;
-    }
-  }
-}
 
 final fkLightTheme = LightFKTheme();
 final fkDarkTheme = DarkFKTheme();
@@ -89,21 +32,23 @@ abstract class FKTheme {
   Brightness get brightness;
   ThemeData get themeData;
 
+  Color get transparent => Colors.transparent;
+  Color get brand => Colors.black;
   Color get long => const Color(0xFF02C19A);
   Color get short => const Color(0xFFDD5B58);
 
-  Color get pageBg;
-  Color get cardBg;
-  Color get markBg;
-  Color get disable;
+  late Color pageBg;
+  late Color cardBg;
+  late Color markBg;
+  late Color disable;
 
-  Color get dividerLine;
-  Color get borderLine;
+  late Color dividerLine;
+  late Color borderLine;
 
-  Color get t1;
-  Color get t2;
-  Color get t3;
-  Color get white => Colors.white;
+  late Color t1;
+  late Color t2;
+  late Color t3;
+  late Color white = Colors.white;
 }
 
 class LightFKTheme extends FKTheme {
@@ -165,7 +110,7 @@ class DarkFKTheme extends FKTheme {
   Color get white => Colors.white;
 }
 
-extension TextStyleFKThemeEx on FKTheme {
+extension TextStyleFKTheme on FKTheme {
 // T1
   TextStyle get t1s10w400 =>
       TextStyle(color: t1, fontSize: 10.sp, fontWeight: FontWeight.w400);
@@ -175,6 +120,8 @@ extension TextStyleFKThemeEx on FKTheme {
       TextStyle(color: t2, fontSize: 14.sp, fontWeight: FontWeight.w400);
   TextStyle get t1s14w500 =>
       TextStyle(color: t2, fontSize: 14.sp, fontWeight: FontWeight.w500);
+  TextStyle get t1s14w700 =>
+      TextStyle(color: t2, fontSize: 14.sp, fontWeight: FontWeight.w700);
   TextStyle get t1s16w400 =>
       TextStyle(color: t2, fontSize: 16.sp, fontWeight: FontWeight.w400);
   TextStyle get t1s16w500 =>
@@ -237,6 +184,10 @@ final lightTheme = ThemeData(
   ),
   useMaterial3: true,
   scaffoldBackgroundColor: fkLightTheme.pageBg,
+  tabBarTheme: TabBarTheme(
+    dividerColor: Colors.transparent,
+    indicatorColor: fkLightTheme.t1,
+  ),
   navigationBarTheme: NavigationBarThemeData(
     backgroundColor: fkLightTheme.cardBg,
     indicatorColor: Colors.black,
@@ -261,4 +212,13 @@ final darkTheme = ThemeData(
   ),
   useMaterial3: true,
   scaffoldBackgroundColor: fkDarkTheme.pageBg,
+  tabBarTheme: TabBarTheme(
+    dividerColor: Colors.transparent,
+    indicatorColor: fkDarkTheme.t1,
+  ),
 );
+
+// const materialTheme = MaterialTheme(TextTheme());
+
+// final lightTheme = materialTheme.light();
+// final darkTheme = materialTheme.dark();

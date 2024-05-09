@@ -22,11 +22,11 @@ import 'mock.dart';
 
 void main() {
   final stopwatch = Stopwatch();
-  late List<CandleBean> list;
+  late List<CandleModel> list;
   late List<MaParam> calcParams;
 
   setUpAll(() {
-    list = getCandleBeanList();
+    list = getCandleModelList();
     calcParams = const [
       MaParam(label: 'MA7', count: 7, color: Color(0xFF946F9A)),
       MaParam(label: 'MA30', count: 30, color: Color(0xFFF1BF32))
@@ -50,7 +50,7 @@ void main() {
 }
 
 void calcuAndCacheMa(
-  List<CandleBean> list,
+  List<CandleModel> list,
   List<MaParam> calcParams,
   int start,
   int end,
@@ -67,9 +67,9 @@ void calcuAndCacheMa(
 
   end = math.min(end + minCount!, len);
 
-  CandleBean m;
+  CandleModel m;
   final paramLen = calcParams.length;
-  final closeSum = List.filled(paramLen, 0.0, growable: false);
+  final closeSum = List.filled(paramLen, BagNum.zero, growable: false);
   for (int i = end - 1; i >= start; i--) {
     m = list[i];
     m.maRets = List.filled(calcParams.length, null, growable: false);
@@ -77,15 +77,15 @@ void calcuAndCacheMa(
       closeSum[j] += m.close;
       final count = calcParams[j].count;
       if (i <= end - count) {
-        m.maRets![j] = closeSum[j] / count;
+        m.maRets![j] = closeSum[j].divNum(count);
         closeSum[j] -= list[i + (count - 1)].close;
       }
     }
   }
 }
 
-Maxmin? calcuMaMaxmin(
-  List<CandleBean> list,
+MinMax? calcuMaMaxmin(
+  List<CandleModel> list,
   List<MaParam> calcParams,
   int start,
   int end,
@@ -99,8 +99,8 @@ Maxmin? calcuMaMaxmin(
     calcuAndCacheMa(list, calcParams, start, end);
   }
 
-  Maxmin? maxmin;
-  CandleBean m;
+  MinMax? maxmin;
+  CandleModel m;
   for (int i = end - 1; i >= start; i--) {
     m = list[i];
     maxmin ??= m.maRetsMinmax;

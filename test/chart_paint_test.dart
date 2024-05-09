@@ -65,7 +65,7 @@ void main() {
 
   tearDown(() {
     stopwatch.stop();
-    debugPrint('tearDown spent:${stopwatch.elapsedMilliseconds}');
+    debugPrint('tearDown spent:${stopwatch.elapsedMicroseconds}');
   });
 
   group('paint-Ma', () {

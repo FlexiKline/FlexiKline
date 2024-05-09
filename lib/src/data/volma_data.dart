@@ -13,9 +13,7 @@
 // limitations under the License.
 
 import 'dart:math' as math;
-import 'package:decimal/decimal.dart';
 
-import '../extension/export.dart';
 import '../framework/indicator.dart';
 import '../indicators/vol_ma.dart';
 import '../model/export.dart';
@@ -95,7 +93,7 @@ mixin VOLMAData on BaseData {
       return ret;
     }
 
-    Decimal sum = m.vol;
+    BagNum sum = m.vol;
     for (int i = index + 1; i < index + count; i++) {
       sum += list[i].vol;
     }
@@ -103,7 +101,7 @@ mixin VOLMAData on BaseData {
     return MaResult(
       count: count,
       ts: m.timestamp,
-      val: sum.div(count.d),
+      val: sum.divNum(count),
       dirty: index == 0, // 如果是第一根蜡烛的数据.下次需要重新计算.
     );
   }
@@ -132,9 +130,9 @@ mixin VOLMAData on BaseData {
     int offset = math.max(end + count - len, 0);
     int index = end - offset;
 
-    Decimal cD = Decimal.fromInt(count);
+    BagNum cD = BagNum.fromInt(count);
     CandleModel m = list[index];
-    Decimal sum = m.vol;
+    BagNum sum = m.vol;
     for (int i = index + 1; i < index + count; i++) {
       sum += list[i].vol;
     }
@@ -181,7 +179,7 @@ mixin VOLMAData on BaseData {
       ret = mavolMap[list[i].timestamp];
       if (ret != null) {
         minmax ??= MinMax(max: ret.val, min: ret.val);
-        minmax.updateMinMaxByVal(ret.val);
+        minmax.updateMinMaxBy(ret.val);
       }
     }
     return minmax;
