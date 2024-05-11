@@ -98,6 +98,12 @@ mixin SettingProxyMixin on PaintObject {
   double get candleActualWidth => setting.candleActualWidth;
 
   double get candleWidthHalf => setting.candleWidthHalf;
+
+  TextStyle get defaultTextStyle => setting.defaultTextStyle;
+  Color get defaultLineColor => setting.defaultLineColor;
+  double get pixel => setting.pixel;
+  Color get defaultRectBackgroundColor => setting.defaultRectBackgroundColor;
+  Color get defaultRectBorderColor => setting.defaultRectBorderColor;
 }
 
 /// 绘制对象混入数据状态代理State
@@ -260,6 +266,8 @@ mixin PaintYAxisTickMixin<T extends SinglePaintObjectIndicator>
     Canvas canvas,
     Size size, {
     required int tickCount, // 刻度数量.
+    TextStyle? yAxisTickTextStyle,
+    EdgeInsets? yAxisTickRectPadding,
   }) {
     if (minMax.isZero) return;
     if (tickCount <= 0) return;
@@ -282,18 +290,23 @@ mixin PaintYAxisTickMixin<T extends SinglePaintObjectIndicator>
 
       final text = fromatYAxisTickValue(value);
 
+      yAxisTickTextStyle ??= setting.defaultYAxisTickTextStyle;
+      yAxisTickRectPadding ??= setting.defaultYAxisTickRectPadding;
+      final yAxisTickRectHeight =
+          (yAxisTickTextStyle.totalHeight ?? 0) + yAxisTickRectPadding.vertical;
+
       canvas.drawText(
         offset: Offset(
           dx,
-          dy - setting.yAxisTickRectHeight,
+          dy - yAxisTickRectHeight, // 绘制在刻度线之上
         ),
         drawDirection: DrawDirection.rtl,
         drawableRect: drawBounding,
         text: text,
-        style: setting.yAxisTickTextStyle,
+        style: yAxisTickTextStyle,
         // textWidth: tickTextWidth,
         textAlign: TextAlign.end,
-        padding: setting.yAxisTickRectPadding,
+        padding: yAxisTickRectPadding,
         maxLines: 1,
       );
     }
@@ -512,29 +525,29 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
       _slot = newSlot;
     }
 
-    if (_start != start || _end != end || _minMax == null) {
+    if (_start != start || _end != end) {
       _start = start;
       _end = end;
+    }
 
-      _minMax = null;
-      for (var child in indicator.children) {
-        final childPaintObject = child.paintObject;
-        if (childPaintObject == null) continue;
-        final ret = childPaintObject.doInitState(
-          newSlot,
-          start: start,
-          end: end,
-          reset: reset,
-        );
-        if (ret != null && child.paintMode == PaintMode.combine) {
-          minMax = ret.clone();
-        }
+    _minMax = null;
+    for (var child in indicator.children) {
+      final childPaintObject = child.paintObject;
+      if (childPaintObject == null) continue;
+      final ret = childPaintObject.doInitState(
+        newSlot,
+        start: start,
+        end: end,
+        reset: reset,
+      );
+      if (ret != null && child.paintMode == PaintMode.combine) {
+        minMax = ret.clone();
       }
+    }
 
-      for (var child in indicator.children) {
-        if (child.paintMode == PaintMode.combine) {
-          child.paintObject?.minMax = minMax;
-        }
+    for (var child in indicator.children) {
+      if (child.paintMode == PaintMode.combine) {
+        child.paintObject?.minMax = minMax;
       }
     }
 

@@ -138,6 +138,10 @@ FontStyle parseFontStyle(
   return def;
 }
 
+String convertFontStyle(FontStyle? style, {FontStyle def = FontStyle.normal}) {
+  return style?.name ?? def.name;
+}
+
 FontWeight parseFontWeight(
   String? textFontWeight, {
   FontWeight def = FontWeight.normal,
@@ -179,9 +183,12 @@ FontWeight parseFontWeight(
   return fontWeight;
 }
 
-String convertFontWeight(FontWeight? fontWeight, {String def = 'normal'}) {
-  if (fontWeight == null) return def;
-  String weight = def;
+String convertFontWeight(
+  FontWeight? fontWeight, {
+  FontWeight def = FontWeight.normal,
+}) {
+  fontWeight ??= def;
+  String weight = 'w400';
   switch (fontWeight) {
     case FontWeight.w100:
       weight = 'w100';
@@ -210,14 +217,8 @@ String convertFontWeight(FontWeight? fontWeight, {String def = 'normal'}) {
     case FontWeight.w900:
       weight = 'w900';
       break;
-    case FontWeight.normal:
-      weight = 'normal';
-      break;
-    case FontWeight.bold:
-      weight = 'bold';
-      break;
     default:
-      weight = def;
+      weight = 'w400';
   }
   return weight;
 }
@@ -238,4 +239,53 @@ String convertTextBaseline(
 }) {
   if (textBaseline == null) return def;
   return textBaseline.name;
+}
+
+TextDecoration parseTextDecoration(
+  String? decoration, {
+  TextDecoration def = TextDecoration.none,
+}) {
+  TextDecoration textDecoration = def;
+  switch (decoration) {
+    case "lineThrough":
+      textDecoration = TextDecoration.lineThrough;
+      break;
+    case "overline":
+      textDecoration = TextDecoration.overline;
+      break;
+    case "underline":
+      textDecoration = TextDecoration.underline;
+      break;
+    case "none":
+  }
+  return textDecoration;
+}
+
+String convertTextDecoration(
+  TextDecoration? decoration, {
+  TextDecoration def = TextDecoration.none,
+}) {
+  decoration = def;
+  switch (decoration) {
+    case TextDecoration.none:
+      return 'none';
+    case TextDecoration.lineThrough:
+      return 'lineThrough';
+    case TextDecoration.overline:
+      return 'overline';
+    case TextDecoration.underline:
+      return 'underline';
+  }
+  return 'none';
+}
+
+TextDecorationStyle parseTextDecorationStyle(
+  String? style, {
+  TextDecorationStyle def = TextDecorationStyle.solid,
+}) {
+  if (style == null) return def;
+  return TextDecorationStyle.values.firstWhere(
+    (e) => e.name == style,
+    orElse: () => def,
+  );
 }

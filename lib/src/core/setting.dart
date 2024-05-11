@@ -239,103 +239,51 @@ mixin SettingBinding on KlineBindingBase implements IConfig {
     ..strokeWidth = gridLineWidth ?? pixel;
 
   /// Y轴上刻度线配置
-  // Y轴刻度字体大小
-  double yAxisTickTextSize = 10;
-  // Y轴刻度字体颜色
-  Color yAxisTickTextColor = Colors.black;
-  // Y轴刻度字体高度
-  double yAxisTickTextHeight = 1;
+  // // Y轴刻度字体大小
+  // double yAxisTickTextSize = 10;
+  // // Y轴刻度字体颜色
+  // Color yAxisTickTextColor = Colors.black;
+  // // Y轴刻度字体高度
+  // double yAxisTickTextHeight = 1;
+
+  /// 全局默认的Y轴刻度值配置.
+  TextStyle? _defaultYAxisTickTextStyle;
   // Y轴刻度字体样式
-  TextStyle get yAxisTickTextStyle => TextStyle(
-        fontSize: yAxisTickTextSize,
-        color: yAxisTickTextColor,
+  TextStyle get defaultYAxisTickTextStyle =>
+      _defaultYAxisTickTextStyle ??
+      const TextStyle(
+        fontSize: 10,
+        color: Colors.black,
         overflow: TextOverflow.ellipsis,
-        height: yAxisTickTextHeight,
+        height: 1,
       );
   // Y轴刻度区域padding
-  EdgeInsets yAxisTickRectPadding = const EdgeInsets.only(
-    right: 2,
-  );
-  // Y轴刻度区域总高度(加上yAxisTickRectPadding)
-  double get yAxisTickRectHeight {
-    final textHeight = yAxisTickTextSize * (yAxisTickTextStyle.height ?? 1);
-    return textHeight + yAxisTickRectPadding.vertical;
-  }
-
-  /// X轴上时间刻度线配置
-  double timeTickFontSize = 10;
-  double timeTickRectWidth = 70;
-  double timeTickSpacing = 10;
-  int get timeTickIntervalCandleCounts {
-    return ((timeTickRectWidth + timeTickSpacing) / candleActualWidth).round();
-  }
-
-  Color timeTickColor = Colors.black;
-  TextStyle get timeTickStyle => TextStyle(
-        fontSize: timeTickFontSize,
-        color: timeTickColor,
-        overflow: TextOverflow.ellipsis,
-        height: mainPadding.bottom / timeTickFontSize,
+  EdgeInsets? _defaultYAxisTickRectPadding;
+  EdgeInsets get defaultYAxisTickRectPadding =>
+      _defaultYAxisTickRectPadding ??
+      const EdgeInsets.only(
+        right: 2,
       );
 
-  /// 最大最小价钱刻度线与价钱标记.
-  bool isDrawPriceMark = true;
-  double priceMarkFontSize = 10;
-  double priceMarkTextWidth = 100;
-  Color priceMarkColor = Colors.black;
-  TextStyle get priceMarkTextStyle => TextStyle(
-        fontSize: priceMarkFontSize,
-        color: priceMarkColor,
+  /// 全局默认样式
+  TextStyle? _defaultTextStyle;
+  TextStyle get defaultTextStyle =>
+      _defaultTextStyle ??
+      const TextStyle(
+        fontSize: 10,
+        color: Colors.black,
         overflow: TextOverflow.ellipsis,
-        height: 1,
+        height: 1.2,
       );
-  double priceMarkMargin = 1; // 价钱与线之前的间距
-  double priceMarkLineLength = 20; // 价钱指示线的长度
-  double? priceMarkLineWidth; // 价钱指示线的绘制宽度
-  // 价钱指示线的Paint
-  Paint get priceMarkLinePaint => Paint()
-    ..color = priceMarkColor
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = priceMarkLineWidth ?? pixel;
-
-  /// 最新价文本区域配置
-  bool isDrawLatestPriceMark = true;
-  double latestPriceFontSize = 10;
-  Color latestPriceColor = Colors.black;
-  TextStyle get latestPriceTextStyle => TextStyle(
-        fontSize: latestPriceFontSize,
-        color: latestPriceColor,
-        overflow: TextOverflow.ellipsis,
-        height: 1,
-        textBaseline: TextBaseline.alphabetic,
-      );
-
-  /// 是否在最新价下面展示下次更新时间.
-  // 根据TimeBar计算: 当latestPrice时间距离下次更新时间在一个TimeBar内时展示; 否则不展示.
-  bool showLatestPriceUpdateTime = true;
-  // 当移出绘制区域后, 是否展示最新价X轴线.
-  bool showLatestPriceXAxisLineWhenMoveOffDrawArea = true;
-
-  /// 最新价文本区域的背景相关配置.
-  Color latestPriceRectBackgroundColor = Colors.white;
-  double latestPriceRectBorderRadius = 2;
-  double latestPriceRectBorderWidth = 0.5;
-  Color latestPriceRectBorderColor = Colors.black;
-  double latestPriceRectRightMinMargin = 1;
-  double latestPriceRectRightMaxMargin = 60;
-  EdgeInsets latestPriceRectPadding = const EdgeInsets.symmetric(
-    horizontal: 2,
-    vertical: 2,
-  );
-
-  /// 最新价刻度线配置
-  Color latestPriceMarkLineColor = Colors.black;
-  double? latestPriceMarkLineWidth; // 最新价X轴标志线的绘制宽度.
-  Paint get latestPriceMarkLinePaint => Paint()
-    ..color = latestPriceMarkLineColor
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = latestPriceMarkLineWidth ?? pixel;
-  List<double> latestPriceMarkLineDashes = const [3, 3];
+  // 默认线颜色
+  Color? _defaultLineColor;
+  Color get defaultLineColor => _defaultLineColor ?? Colors.black;
+  // 默认背景色
+  Color? _defaultRectBackgroundColor;
+  Color get defaultRectBackgroundColor =>
+      _defaultRectBackgroundColor ?? Colors.white;
+  Color? _defaultRectBorderColor;
+  Color get defaultRectBorderColor => _defaultRectBorderColor ?? Colors.black;
 
   /// Cross 配置 ///
   // cross line

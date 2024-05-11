@@ -14,6 +14,7 @@
 
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import '../utils/convert_util.dart';
@@ -156,6 +157,9 @@ class TextStyleConverter
       height: parseDouble(json['height']),
       fontWeight: parseFontWeight(json['fontWeight']),
       textBaseline: parseTextBaseline(json['textBaseline']),
+      decoration: parseTextDecoration(json['decoration']),
+      decorationColor: parseHexColor(json['decorationColor']),
+      decorationStyle: parseTextDecorationStyle(json['decorationStyle']),
     );
   }
 
@@ -164,6 +168,14 @@ class TextStyleConverter
     return {
       'color': convertHexColor(style.color),
       'fontSize': convertDouble(style.fontSize),
+      'fontFamily': style.fontFamily,
+      'fontStyle': convertFontStyle(style.fontStyle),
+      'height': style.height,
+      'fontWeight': convertFontWeight(style.fontWeight),
+      'textBaseline': convertTextBaseline(style.textBaseline),
+      'decoration': convertTextDecoration(style.decoration),
+      'decorationColor': convertHexColor(style.decorationColor),
+      'decorationStyle': style.decorationStyle?.name,
     };
   }
 }
@@ -188,6 +200,7 @@ const FlexiIndicatorSerializable = JsonSerializable(
     ColorConverter(),
     PaintModeConverter(),
     EdgeInsetsConverter(),
+    TextStyleConverter(),
   ],
   explicitToJson: true,
   // genericArgumentFactories: true,

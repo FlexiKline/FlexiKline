@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../constant.dart';
@@ -32,10 +33,100 @@ class CandleIndicator extends SinglePaintObjectIndicator {
     required super.height,
     super.tipsHeight,
     super.padding,
+
+    /// 控制开关
+    this.isShowLatestPrice = true,
+    this.isShowCountDownTime = true,
+    this.isShowLastestPriceWhenMoveOffDrawArea = true,
+
+    /// 最新价文字
+    this.latestPriceTextStyle,
+
+    /// 最新价文字
+    this.countDownTimeTextStyle,
+
+    /// X轴上时间刻度
+    this.timeTickTextStyle,
+    this.timeTickTextWidth = 80,
+
+    /// Y轴刻度文本
+    this.yAxisTickTextStyle,
+    this.yAxisTickRectPadding,
+
+    /// 背景
     this.latestPriceRectBackgroundColor,
+    this.latestPriceRectBorderRadius = 2,
+    this.latestPriceRectBorderWidth = 0.5,
+    this.latestPriceRectRightMinMargin = 1,
+    this.latestPriceRectRightMaxMargin = 60,
+    this.latestPriceRectBorderColor,
+    this.latestPriceRectPadding = const EdgeInsets.symmetric(
+      horizontal: 2,
+      vertical: 2,
+    ),
+
+    /// 最新价刻度线
+    this.latestPriceMarkLineColor,
+    this.latestPriceMarkLineWidth,
+    this.latestPriceMarkLineDashes,
+
+    /// 最大最小价钱刻度线与价钱标记
+    this.isShowMaxminPriceMark = true,
+    this.maxminPriceTextStyle,
+    this.maxminPriceMargin = 1,
+    this.maxminPriceLineLength = 20,
+    this.maxminPriceLineWidth,
+    this.maxminPriceLineColor,
   });
 
+  /// 控制开关
+  final bool isShowLatestPrice;
+  final bool isShowCountDownTime;
+  // 当移出绘制区域后, 是否展示最新价X轴线.
+  final bool isShowLastestPriceWhenMoveOffDrawArea;
+
+  /// 最新价文字
+  final TextStyle? latestPriceTextStyle;
+
+  /// 倒计时方案
+  final TextStyle? countDownTimeTextStyle;
+
+  /// X轴上时间刻度
+  final TextStyle? timeTickTextStyle;
+  // 时间刻度文本宽度; 注设置需要大于60;
+  final double timeTickTextWidth;
+
+  /// Y轴刻度文本
+  final TextStyle? yAxisTickTextStyle;
+  final EdgeInsets? yAxisTickRectPadding;
+
+  /// 背景
   final Color? latestPriceRectBackgroundColor;
+  final double latestPriceRectBorderRadius;
+  final double latestPriceRectBorderWidth;
+  final double latestPriceRectRightMinMargin;
+  final double latestPriceRectRightMaxMargin;
+  final Color? latestPriceRectBorderColor;
+  final EdgeInsets latestPriceRectPadding;
+
+  /// 最新价刻度线 (默认用cross线配置)
+  final Color? latestPriceMarkLineColor;
+  // 最新价X轴标志线的绘制宽度.
+  final double? latestPriceMarkLineWidth;
+  final List<double>? latestPriceMarkLineDashes;
+
+  /// 最大最小价钱刻度线与价钱标记
+  // 是否显示最大最小值标记
+  final bool isShowMaxminPriceMark;
+  final TextStyle? maxminPriceTextStyle;
+  // 价钱与线之前的间距
+  final double maxminPriceMargin;
+  // 价钱指示线的长度
+  final double maxminPriceLineLength;
+  // 价钱指示线的绘制宽度
+  final double? maxminPriceLineWidth;
+  // 价钱指标线颜色
+  final Color? maxminPriceLineColor;
 
   @override
   CandlePaintObject createPaintObject(
@@ -149,7 +240,10 @@ class CandlePaintObject<T extends CandleIndicator>
         isLong ? setting.candleBarLongPaint : setting.candleBarShortPaint,
       );
 
-      if (bar != null && i % setting.timeTickIntervalCandleCounts == 0) {
+      final timeTickIntervalCount =
+          ((math.max(60, indicator.timeTickTextWidth)) / candleActualWidth)
+              .round();
+      if (bar != null && i % timeTickIntervalCount == 0) {
         // 绘制X轴时间刻度.
         paintXAxisTimeTick(
           canvas,
@@ -159,7 +253,7 @@ class CandlePaintObject<T extends CandleIndicator>
         );
       }
 
-      if (setting.isDrawPriceMark) {
+      if (indicator.isShowMaxminPriceMark) {
         if (hasEnough) {
           // 满足一屏, 根据initData中的最大最小值来记录最大最小偏移量.
           if (m.high == _maxHigh) {
@@ -185,7 +279,7 @@ class CandlePaintObject<T extends CandleIndicator>
     }
 
     // 最后绘制在蜡烛图中的最大最小价钱标记
-    if (setting.isDrawPriceMark &&
+    if (indicator.isShowMaxminPriceMark &&
         (maxHihgOffset != null && maxHigh > BagNum.zero) &&
         (minLowOffset != null && minLow > BagNum.zero)) {
       paintPriceMark(canvas, maxHihgOffset, maxHigh);
@@ -201,17 +295,21 @@ class CandlePaintObject<T extends CandleIndicator>
   ) {
     final flag = offset.dx > chartRectWidthHalf ? -1 : 1;
     Offset endOffset = Offset(
-      offset.dx + setting.priceMarkLineLength * flag,
+      offset.dx + indicator.maxminPriceLineLength * flag,
       offset.dy,
     );
     canvas.drawLine(
       offset,
       endOffset,
-      setting.priceMarkLinePaint,
+      Paint()
+        ..color = indicator.maxminPriceLineColor ?? defaultLineColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = indicator.maxminPriceLineWidth ?? pixel,
     );
+    final textStyle = indicator.maxminPriceTextStyle ?? defaultTextStyle;
     endOffset = Offset(
-      endOffset.dx + flag * setting.priceMarkMargin,
-      endOffset.dy - setting.priceMarkFontSize / 2,
+      endOffset.dx + flag * indicator.maxminPriceMargin,
+      endOffset.dy - (textStyle.totalHeight ?? 0) / 2,
     );
 
     final text = setting.formatPrice(
@@ -223,7 +321,7 @@ class CandlePaintObject<T extends CandleIndicator>
       offset: endOffset,
       drawDirection: flag < 0 ? DrawDirection.rtl : DrawDirection.ltr,
       text: text,
-      style: setting.priceMarkTextStyle,
+      style: textStyle,
       maxLines: 1,
     );
   }
@@ -251,9 +349,10 @@ class CandlePaintObject<T extends CandleIndicator>
       offset: offset,
       drawDirection: DrawDirection.center,
       text: model.formatDateTimeByTimeBar(bar),
-      style: setting.timeTickStyle,
+      style: indicator.timeTickTextStyle ?? defaultTextStyle,
+      maxLines: 1,
       textAlign: TextAlign.center,
-      textWidth: setting.timeTickRectWidth,
+      textWidth: indicator.timeTickTextWidth,
     );
     //   }
     // }
@@ -274,18 +373,25 @@ class CandlePaintObject<T extends CandleIndicator>
         precision: klineData.req.precision,
       );
 
+      final yAxisTickTextStyle =
+          indicator.yAxisTickTextStyle ?? setting.defaultYAxisTickTextStyle;
+      final yAxisTickRectPadding =
+          indicator.yAxisTickRectPadding ?? setting.defaultYAxisTickRectPadding;
+      final yAxisTickRectHeight =
+          (yAxisTickTextStyle.totalHeight ?? 0) + yAxisTickRectPadding.vertical;
+
       canvas.drawText(
         offset: Offset(
           dx,
-          dy - setting.yAxisTickRectHeight,
+          dy - yAxisTickRectHeight, // 绘制在刻度线之上
         ),
         drawDirection: DrawDirection.rtl,
         drawableRect: drawBounding,
         text: text,
-        style: setting.yAxisTickTextStyle,
+        style: yAxisTickTextStyle,
         // textWidth: tickTextWidth,
         textAlign: TextAlign.end,
-        padding: setting.yAxisTickRectPadding,
+        padding: yAxisTickRectPadding,
         maxLines: 1,
       );
     }
@@ -297,7 +403,7 @@ class CandlePaintObject<T extends CandleIndicator>
   ///    且展示在指定价钱区间内, 如超出边界, 则停靠在最高最低线上.
   /// 3. 最新价向左移动后, 刻度线根据最新价蜡烛线平行移动.
   void paintLatestPriceMark(Canvas canvas, Size size) {
-    if (!setting.isDrawLatestPriceMark) return;
+    if (!indicator.isShowLatestPrice) return;
     final data = klineData;
     final model = data.latest;
     if (model == null) {
@@ -305,10 +411,10 @@ class CandlePaintObject<T extends CandleIndicator>
       return;
     }
 
-    bool showLastPriceUpdateTime = setting.showLatestPriceUpdateTime;
+    bool showLastPriceUpdateTime = indicator.isShowCountDownTime;
     double dx = chartRect.right;
     double firstCandleDx = startCandleDx;
-    double rightMargin = setting.latestPriceRectRightMinMargin;
+    double rightMargin = indicator.latestPriceRectRightMinMargin;
     double ldx = 0; // 计算最新价刻度线lineTo参数X轴的dx值. 默认0: 代表橫穿整个Canvas.
     double dy;
     if (model.close >= minMax.max) {
@@ -322,9 +428,9 @@ class CandlePaintObject<T extends CandleIndicator>
     if (firstCandleDx < dx) {
       ldx = firstCandleDx;
     } else {
-      if (setting.showLatestPriceXAxisLineWhenMoveOffDrawArea) {
+      if (indicator.isShowLastestPriceWhenMoveOffDrawArea) {
         ldx = 0;
-        rightMargin += setting.latestPriceRectRightMaxMargin;
+        rightMargin += indicator.latestPriceRectRightMaxMargin;
         showLastPriceUpdateTime = false;
       } else {
         ldx = dx - rightMargin;
@@ -337,19 +443,27 @@ class CandlePaintObject<T extends CandleIndicator>
     path.lineTo(ldx, dy);
     canvas.drawDashPath(
       path,
-      setting.latestPriceMarkLinePaint,
-      dashes: setting.latestPriceMarkLineDashes,
+      Paint()
+        ..color = indicator.latestPriceMarkLineColor ?? setting.crossLineColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = indicator.latestPriceMarkLineWidth ?? setting.pixel,
+      dashes: indicator.latestPriceMarkLineDashes ?? setting.crossLineDashes,
     );
 
     // 画最新价文本区域.
-    double textHeight =
-        setting.latestPriceRectPadding.vertical + setting.latestPriceFontSize;
-    String text = setting.formatPrice(
-      model.close.toDecimal(),
-      instId: klineData.req.instId,
-      precision: klineData.req.precision,
-      cutInvalidZero: false,
-    );
+    final spanList = <TextSpan>[];
+    final priceStyle = indicator.latestPriceTextStyle ?? defaultTextStyle;
+    spanList.add(TextSpan(
+      text: setting.formatPrice(
+        model.close.toDecimal(),
+        instId: klineData.req.instId,
+        precision: klineData.req.precision,
+        cutInvalidZero: false,
+      ),
+      style: priceStyle,
+    ));
+    double textHeight = indicator.latestPriceRectPadding.vertical +
+        (priceStyle.totalHeight ?? 0);
     if (showLastPriceUpdateTime) {
       final nextUpdateDateTime = model.nextUpdateDateTime(klineData.req.bar);
       // logd(
@@ -358,8 +472,13 @@ class CandlePaintObject<T extends CandleIndicator>
       if (nextUpdateDateTime != null) {
         final timeDiff = formatTimeDiff(nextUpdateDateTime);
         if (timeDiff != null) {
-          text += "\n$timeDiff";
-          textHeight += setting.latestPriceFontSize;
+          final timeStyle =
+              indicator.countDownTimeTextStyle ?? defaultTextStyle;
+          spanList.add(TextSpan(
+            text: "\n$timeDiff",
+            style: timeStyle,
+          ));
+          textHeight += timeStyle.totalHeight ?? 0;
         }
       }
     }
@@ -371,16 +490,18 @@ class CandlePaintObject<T extends CandleIndicator>
       ),
       drawDirection: DrawDirection.rtl,
       drawableRect: drawBounding,
-      text: text,
-      style: setting.latestPriceTextStyle,
+      textSpan: TextSpan(
+        children: spanList,
+      ),
       textAlign: TextAlign.end,
       textWidthBasis: TextWidthBasis.longestLine,
-      padding: setting.latestPriceRectPadding,
+      padding: indicator.latestPriceRectPadding,
       backgroundColor: indicator.latestPriceRectBackgroundColor ??
-          setting.latestPriceRectBackgroundColor,
-      radius: setting.latestPriceRectBorderRadius,
-      borderWidth: setting.latestPriceRectBorderWidth,
-      borderColor: setting.latestPriceRectBorderColor,
+          defaultRectBackgroundColor,
+      radius: indicator.latestPriceRectBorderRadius,
+      borderWidth: indicator.latestPriceRectBorderWidth,
+      borderColor:
+          indicator.latestPriceRectBorderColor ?? defaultRectBorderColor,
     );
   }
 
