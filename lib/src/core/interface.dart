@@ -127,6 +127,11 @@ abstract interface class IConfig {
   void delIndicatorInMain(ValueKey<dynamic> key);
   void addIndicatorInSub(ValueKey<dynamic> key);
   void delIndicatorInSub(ValueKey<dynamic> key);
+  void updateMainIndicatorParam({
+    double? height,
+    double? tipHeight,
+    EdgeInsets? padding,
+  });
 }
 
 //// Chart层绘制接口

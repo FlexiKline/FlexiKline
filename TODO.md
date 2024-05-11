@@ -10,7 +10,7 @@ v0.2.0
 - [x] 指标计算算法优化 (MAVOL, EMA, MACD).
 
 v0.3.0
-- [ ] CandleModel重构(指标数据绑定到Model上).
+- [x] CandleModel重构(指标数据绑定到Model上).
 - [ ] 配置管理扩展.
 - [ ] 增加副图指标.
 - [ ] 手势优化.

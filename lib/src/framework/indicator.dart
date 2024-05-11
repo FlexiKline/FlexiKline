@@ -33,6 +33,8 @@ enum PaintMode {
 
   /// 独立模式下, Indicator会按自己height和minmax独立绘制.
   alone;
+
+  bool get isCombine => this == PaintMode.combine;
 }
 
 /// 指标基础配置
@@ -76,12 +78,33 @@ abstract class Indicator {
     paintObject ??= createPaintObject(controller);
   }
 
-  void update(Indicator newVal) {
-    tipsHeight = newVal.tipsHeight;
-    padding = newVal.padding;
-    if (paintMode == PaintMode.combine) {
-      height = newVal.height;
+  bool updateLayout({
+    double? height,
+    double? tipsHeight,
+    EdgeInsets? padding,
+  }) {
+    bool hasChange = false;
+    if (height != null && height > 0 && height != this.height) {
+      this.height = height;
+      hasChange = true;
     }
+    if (tipsHeight != null && tipsHeight > 0 && tipsHeight != this.tipsHeight) {
+      this.tipsHeight = tipsHeight;
+      hasChange = true;
+    }
+    if (padding != null && padding != this.padding) {
+      this.padding = padding;
+      hasChange = true;
+    }
+    // if (hasChange && paintObject != null) {
+    //   paintObject?.resetDrawBounding();
+    // }
+    return hasChange;
+    // tipsHeight = newVal.tipsHeight;
+    // padding = newVal.padding;
+    // if (paintMode == PaintMode.combine) {
+    //   height = newVal.height;
+    // }
   }
 
   PaintObject createPaintObject(KlineBindingBase controller);
@@ -164,9 +187,32 @@ class MultiPaintObjectIndicator<T extends SinglePaintObjectIndicator>
     KlineBindingBase controller,
     Indicator indicator,
   ) {
-    indicator.update(this);
+    indicator.updateLayout(
+      height: indicator.paintMode.isCombine ? height : null,
+      tipsHeight: tipsHeight,
+      padding: padding,
+    );
     indicator.paintObject = indicator.createPaintObject(controller);
     indicator.paintObject!.parent = paintObject;
+  }
+
+  @override
+  bool updateLayout({double? height, double? tipsHeight, EdgeInsets? padding}) {
+    final hasChange = super.updateLayout(
+      height: height,
+      tipsHeight: tipsHeight,
+      padding: padding,
+    );
+    if (hasChange) {
+      for (var child in children) {
+        child.updateLayout(
+          height: child.paintMode.isCombine ? this.height : null,
+          tipsHeight: this.tipsHeight,
+          padding: this.padding,
+        );
+      }
+    }
+    return hasChange;
   }
 
   void appendIndicators(Iterable<T> indicators, KlineBindingBase controller) {

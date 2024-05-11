@@ -167,12 +167,12 @@ mixin ConfigBinding
     super.initState();
     logd("initState config");
 
-    bool changed = false;
-
     /// 最终渲染前, 如果用户更改了配置, 此处做下更新.
-    _mainIndicator.height = mainRect.height;
-    _mainIndicator.tipsHeight = mainTipsHeight;
-    _mainIndicator.padding = mainPadding;
+    updateMainIndicatorParam(
+      height: mainRect.height,
+      tipHeight: mainTipsHeight,
+      padding: mainPadding,
+    );
 
     // TODO: 更新当前配置指标.
 
@@ -233,6 +233,25 @@ mixin ConfigBinding
   @override
   List<double> get subIndicatorHeightList {
     return subIndicators.map((e) => e.height).toList();
+  }
+
+  @override
+  void updateMainIndicatorParam({
+    double? height,
+    double? tipHeight,
+    EdgeInsets? padding,
+  }) {
+    bool changed = mainIndicator.updateLayout(
+      height: height,
+      tipsHeight: tipHeight,
+      padding: padding,
+    );
+    if (changed) {
+      // for (var indicator in subIndicators) {
+      //   indicator.paintObject?.resetDrawBounding();
+      // }
+      markRepaintChart();
+    }
   }
 
   @override

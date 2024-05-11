@@ -62,12 +62,16 @@ class VolMaPaintObject<T extends VolMaIndicator>
   });
 
   @override
-  MinMax? initData({int? start, int? end}) {
+  MinMax? initState({required int start, required int end}) {
     if (!klineData.canPaintChart) return null;
 
     MinMax? minmax;
     for (var param in indicator.calcParams) {
-      final ret = klineData.calculateMavolMinmax(param.count);
+      final ret = klineData.calculateMavolMinmax(
+        param.count,
+        start: start,
+        end: end,
+      );
       minmax ??= ret;
       minmax?.updateMinMax(ret);
     }

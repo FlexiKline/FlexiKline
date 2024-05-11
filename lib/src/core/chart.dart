@@ -16,6 +16,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../framework/export.dart';
 import 'binding_base.dart';
 import 'interface.dart';
 import 'setting.dart';
@@ -88,31 +89,18 @@ mixin ChartBinding
     /// 检查主图和副图的PaintObject是否都创建了.
     ensurePaintObjectInstance();
 
-    /// 初始化主图展示的数据.
-    mainIndicator.paintObject?.doInitData(
-      start: curKlineData.start,
-      end: curKlineData.end,
-    );
+    int solt = mainIndicatorSlot;
+    for (var indicator in [mainIndicator, ...subIndicators]) {
+      /// 初始化副图指标展示数据.
+      indicator.paintObject?.doInitState(
+        solt++,
+        start: curKlineData.start,
+        end: curKlineData.end,
+        reset: false,
+      );
 
-    /// 通过paintObject绘制主图
-    mainIndicator.paintObject?.doPaintChart(canvas, size);
-
-    /// 开始绘制副图
-    if (subIndicators.isNotEmpty) {
-      int i = 0;
-      for (var indicator in subIndicators) {
-        /// 为每个副图指标动态绑定槽位.
-        indicator.paintObject?.bindSolt(i++);
-
-        /// 初始化副图指标展示数据.
-        indicator.paintObject?.doInitData(
-          start: curKlineData.start,
-          end: curKlineData.end,
-        );
-
-        /// 绘制副图的指标图
-        indicator.paintObject?.doPaintChart(canvas, size);
-      }
+      /// 绘制副图的指标图
+      indicator.paintObject?.doPaintChart(canvas, size);
     }
   }
 }

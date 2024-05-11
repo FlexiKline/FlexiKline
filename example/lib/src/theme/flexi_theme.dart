@@ -34,8 +34,8 @@ abstract class FKTheme {
 
   Color get transparent => Colors.transparent;
   Color get brand => Colors.black;
-  Color get long => const Color(0xFF02C19A);
-  Color get short => const Color(0xFFDD5B58);
+  Color get long => const Color(0xFF33BD65);
+  Color get short => const Color(0xFFE84E74);
 
   late Color pageBg;
   late Color cardBg;
@@ -44,6 +44,7 @@ abstract class FKTheme {
 
   late Color dividerLine;
   late Color borderLine;
+  late Color borderLight;
 
   late Color t1;
   late Color t2;
@@ -58,27 +59,27 @@ class LightFKTheme extends FKTheme {
   ThemeData get themeData => lightTheme;
 
   @override
-  Color get pageBg => const Color(0xffF5F6FA);
+  Color get pageBg => const Color(0xFFFFFFFF);
   @override
-  Color get cardBg => const Color(0xffF8F9FB);
+  Color get cardBg => const Color(0xFFF2F2F2);
   @override
-  Color get markBg => const Color(0xffE4ECFF);
+  Color get markBg => const Color(0xFFECECEC);
   @override
-  Color get disable => const Color(0xffB3B3B3);
+  Color get disable => const Color(0xFFBDBDBD);
 
   @override
   Color get dividerLine => const Color(0xffE9EDF0);
   @override
   Color get borderLine => const Color(0xFFE3E6E9);
+  @override
+  Color get borderLight => const Color(0xFF000000);
 
   @override
-  Color get t1 => const Color(0xff282828);
+  Color get t1 => const Color(0xFF000000);
   @override
-  Color get t2 => const Color(0xff6C6C6C);
+  Color get t2 => const Color(0xFF949494);
   @override
-  Color get t3 => const Color(0xff8F8F8F);
-  @override
-  Color get white => Colors.black;
+  Color get t3 => const Color(0xFF5F5F5F);
 }
 
 class DarkFKTheme extends FKTheme {
@@ -88,26 +89,27 @@ class DarkFKTheme extends FKTheme {
   ThemeData get themeData => darkTheme;
 
   @override
-  Color get pageBg => const Color(0xFF121212);
+  Color get pageBg => const Color(0xFF111111);
   @override
-  Color get cardBg => const Color(0xFF202020);
+  Color get cardBg => const Color(0xFF1A1A1A);
   @override
-  Color get markBg => const Color(0xFF040404);
+  Color get markBg => const Color(0xFF2F2F2F);
   @override
-  Color get disable => const Color(0xFF353535);
+  Color get disable => const Color(0xFF5B5B5B);
 
   @override
   Color get dividerLine => const Color(0xFF242424);
   @override
   Color get borderLine => const Color(0xFF2F2F2F);
   @override
+  Color get borderLight => const Color(0xFFFFFFFF);
+
+  @override
   Color get t1 => const Color(0xFFFFFFFF);
   @override
-  Color get t2 => const Color(0xFF939393);
+  Color get t2 => const Color(0xFF909090);
   @override
   Color get t3 => const Color(0xFF606060);
-  @override
-  Color get white => Colors.white;
 }
 
 extension TextStyleFKTheme on FKTheme {
@@ -117,19 +119,23 @@ extension TextStyleFKTheme on FKTheme {
   TextStyle get t1s12w400 =>
       TextStyle(color: t1, fontSize: 12.sp, fontWeight: FontWeight.w400);
   TextStyle get t1s14w400 =>
-      TextStyle(color: t2, fontSize: 14.sp, fontWeight: FontWeight.w400);
+      TextStyle(color: t1, fontSize: 14.sp, fontWeight: FontWeight.w400);
   TextStyle get t1s14w500 =>
-      TextStyle(color: t2, fontSize: 14.sp, fontWeight: FontWeight.w500);
+      TextStyle(color: t1, fontSize: 14.sp, fontWeight: FontWeight.w500);
   TextStyle get t1s14w700 =>
-      TextStyle(color: t2, fontSize: 14.sp, fontWeight: FontWeight.w700);
+      TextStyle(color: t1, fontSize: 14.sp, fontWeight: FontWeight.w700);
   TextStyle get t1s16w400 =>
-      TextStyle(color: t2, fontSize: 16.sp, fontWeight: FontWeight.w400);
+      TextStyle(color: t1, fontSize: 16.sp, fontWeight: FontWeight.w400);
   TextStyle get t1s16w500 =>
-      TextStyle(color: t2, fontSize: 16.sp, fontWeight: FontWeight.w500);
+      TextStyle(color: t1, fontSize: 16.sp, fontWeight: FontWeight.w500);
+  TextStyle get t1s16w700 =>
+      TextStyle(color: t1, fontSize: 16.sp, fontWeight: FontWeight.w700);
   TextStyle get t1s18w500 =>
-      TextStyle(color: t2, fontSize: 16.sp, fontWeight: FontWeight.w500);
+      TextStyle(color: t1, fontSize: 16.sp, fontWeight: FontWeight.w500);
   TextStyle get t1s18w600 =>
-      TextStyle(color: t2, fontSize: 16.sp, fontWeight: FontWeight.w600);
+      TextStyle(color: t1, fontSize: 16.sp, fontWeight: FontWeight.w600);
+  TextStyle get t1s18w700 =>
+      TextStyle(color: t1, fontSize: 18.sp, fontWeight: FontWeight.w700);
   // T2
   TextStyle get t2s10w400 =>
       TextStyle(color: t2, fontSize: 10.sp, fontWeight: FontWeight.w400);
@@ -166,59 +172,84 @@ extension TextStyleFKTheme on FKTheme {
       TextStyle(color: t3, fontSize: 16.sp, fontWeight: FontWeight.w600);
 }
 
-final lightTheme = ThemeData(
-  colorScheme: ColorScheme(
-    brightness: Brightness.light,
-    background: fkLightTheme.pageBg,
-    onBackground: fkLightTheme.white,
-    primary: fkLightTheme.pageBg,
-    onPrimary: fkLightTheme.white,
-    secondary: fkLightTheme.cardBg,
-    onSecondary: fkLightTheme.t1,
-    tertiary: fkLightTheme.disable,
-    onTertiary: fkLightTheme.t2,
-    surface: fkLightTheme.markBg,
-    onSurface: fkLightTheme.t3,
-    error: fkLightTheme.short,
-    onError: fkLightTheme.white,
-  ),
-  useMaterial3: true,
-  scaffoldBackgroundColor: fkLightTheme.pageBg,
-  tabBarTheme: TabBarTheme(
-    dividerColor: Colors.transparent,
-    indicatorColor: fkLightTheme.t1,
-  ),
-  navigationBarTheme: NavigationBarThemeData(
-    backgroundColor: fkLightTheme.cardBg,
-    indicatorColor: Colors.black,
-  ),
-);
+extension ButtonStyleFKTheme on FKTheme {
+  ButtonStyle get roundBtnStyle {
+    return TextButton.styleFrom(
+      foregroundColor: t1,
+      backgroundColor: markBg,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5.r)),
+    );
+  }
 
-final darkTheme = ThemeData(
-  colorScheme: ColorScheme(
-    brightness: Brightness.light,
-    background: fkDarkTheme.pageBg,
-    onBackground: fkDarkTheme.white,
-    primary: fkDarkTheme.pageBg,
-    onPrimary: fkDarkTheme.white,
-    secondary: fkDarkTheme.cardBg,
-    onSecondary: fkDarkTheme.t1,
-    tertiary: fkDarkTheme.disable,
-    onTertiary: fkDarkTheme.t2,
-    surface: fkDarkTheme.markBg,
-    onSurface: fkDarkTheme.t3,
-    error: fkDarkTheme.short,
-    onError: fkDarkTheme.white,
-  ),
-  useMaterial3: true,
-  scaffoldBackgroundColor: fkDarkTheme.pageBg,
-  tabBarTheme: TabBarTheme(
-    dividerColor: Colors.transparent,
-    indicatorColor: fkDarkTheme.t1,
-  ),
-);
+  ShapeBorder get defaultShape => RoundedRectangleBorder(
+        side: BorderSide(color: borderLight, width: 1.r),
+        borderRadius: BorderRadius.circular(5.r),
+      );
+}
 
-// const materialTheme = MaterialTheme(TextTheme());
+// final lightTheme = ThemeData(
+//   colorScheme: ColorScheme(
+//     brightness: Brightness.light,
+//     background: fkLightTheme.pageBg,
+//     onBackground: fkLightTheme.white,
+//     primary: fkLightTheme.pageBg,
+//     onPrimary: fkLightTheme.white,
+//     secondary: fkLightTheme.cardBg,
+//     onSecondary: fkLightTheme.t1,
+//     tertiary: fkLightTheme.disable,
+//     onTertiary: fkLightTheme.t2,
+//     surface: fkLightTheme.markBg,
+//     onSurface: fkLightTheme.t3,
+//     error: fkLightTheme.short,
+//     onError: fkLightTheme.white,
+//   ),
+//   useMaterial3: true,
+//   scaffoldBackgroundColor: fkLightTheme.pageBg,
+//   tabBarTheme: TabBarTheme(
+//     dividerColor: Colors.transparent,
+//     indicatorColor: fkLightTheme.t1,
+//   ),
+//   navigationBarTheme: NavigationBarThemeData(
+//     backgroundColor: fkLightTheme.cardBg,
+//     indicatorColor: Colors.black,
+//   ),
+// );
 
-// final lightTheme = materialTheme.light();
-// final darkTheme = materialTheme.dark();
+// final darkTheme = ThemeData(
+//   colorScheme: ColorScheme(
+//     brightness: Brightness.light,
+//     background: fkDarkTheme.pageBg,
+//     onBackground: fkDarkTheme.white,
+//     primary: fkDarkTheme.pageBg,
+//     onPrimary: fkDarkTheme.white,
+//     secondary: fkDarkTheme.cardBg,
+//     onSecondary: fkDarkTheme.t1,
+//     tertiary: fkDarkTheme.disable,
+//     onTertiary: fkDarkTheme.t2,
+//     surface: fkDarkTheme.markBg,
+//     onSurface: fkDarkTheme.t3,
+//     error: fkDarkTheme.short,
+//     onError: fkDarkTheme.white,
+//   ),
+//   useMaterial3: true,
+//   scaffoldBackgroundColor: fkDarkTheme.pageBg,
+//   tabBarTheme: TabBarTheme(
+//     dividerColor: Colors.transparent,
+//     indicatorColor: fkDarkTheme.t1,
+//   ),
+// );
+
+const materialTheme = MaterialTheme(TextTheme());
+
+final lightTheme = materialTheme.light().copyWith(
+      tabBarTheme: TabBarTheme(
+        dividerColor: Colors.transparent,
+        indicatorColor: fkLightTheme.t1,
+      ),
+    );
+final darkTheme = materialTheme.dark().copyWith(
+      tabBarTheme: TabBarTheme(
+        dividerColor: Colors.transparent,
+        indicatorColor: fkDarkTheme.t1,
+      ),
+    );

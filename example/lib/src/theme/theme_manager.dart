@@ -31,8 +31,6 @@ class ThemeManager {
   static final ThemeManager _instance = ThemeManager._internal();
   static ThemeManager get instance => _instance;
 
-  final List<WeakReference<ValueChanged<ThemeMode>>> _themeModeListeners = [];
-
   ThemeMode init() {
     final String? theme = CacheUtil().get(cacheKeyTheme);
     if (theme != null) {
@@ -49,20 +47,7 @@ class ThemeManager {
     if (curr != mode) {
       globalNavigatorKey.ref.read(themeModeProvider.notifier).state = mode;
       CacheUtil().setString(cacheKeyTheme, mode.name);
-      for (var listenerRef in _themeModeListeners) {
-        listenerRef.target?.call(mode);
-      }
     }
-  }
-
-  void registerListener(ValueChanged listener) {
-    _themeModeListeners.add(WeakReference(listener));
-  }
-
-  void removeListener(ValueChanged listener) {
-    _themeModeListeners.removeWhere((listenerRef) {
-      return listenerRef.target == listener;
-    });
   }
 
   String convert(ThemeMode mode, {S? s}) {

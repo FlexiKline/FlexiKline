@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:example/src/theme/flexi_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flexi_kline/flexi_kline.dart';
@@ -74,6 +75,7 @@ class _FlexiIndicatorBarState extends ConsumerState<FlexiIndicatorBar> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = ref.watch(themeProvider);
     return Container(
       alignment: widget.alignment ?? AlignmentDirectional.centerStart,
       padding: widget.padding,
@@ -98,7 +100,7 @@ class _FlexiIndicatorBarState extends ConsumerState<FlexiIndicatorBar> {
             }),
             Container(
               margin: EdgeInsets.symmetric(horizontal: 10.r),
-              color: Colors.black,
+              color: theme.dividerLine,
               width: 1.r,
               height: 20.r,
             ),
@@ -131,14 +133,14 @@ class IndicatorView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
+    final theme = ref.watch(themeProvider);
     return Container(
       key: indicatorKey,
       padding: EdgeInsets.all(8.r),
       child: Text(
         indicatorKey.value.toString().toUpperCase(),
-        style: theme.textTheme.bodySmall?.copyWith(
-          color: selected ? Colors.black : null,
+        style: theme.t2s12w400.copyWith(
+          color: selected ? theme.t1 : null,
           fontWeight: selected ? FontWeight.bold : null,
         ),
       ),

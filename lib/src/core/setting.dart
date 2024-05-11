@@ -95,6 +95,7 @@ mixin SettingBinding on KlineBindingBase implements IConfig {
       size.width,
       size.height,
     );
+    updateMainIndicatorParam(height: size.height);
     onSizeChange?.call();
   }
 

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'package:dio/dio.dart';
+import 'package:example/src/theme/flexi_theme.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -117,7 +118,9 @@ class _KOKlinePageState extends ConsumerState<KOKlinePage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = ref.watch(themeProvider);
     return Scaffold(
+      backgroundColor: theme.pageBg,
       appBar: AppBar(
         leading: GestureDetector(
           onTap: () {
@@ -147,16 +150,21 @@ class _KOKlinePageState extends ConsumerState<KOKlinePage> {
             ),
             Container(
               height: 200,
-              color: Colors.orangeAccent,
             )
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: theme.cardBg,
+        foregroundColor: theme.t1,
+        mini: true,
         onPressed: () {
           controller.storeState();
         },
-        child: const Text('Store'),
+        child: Text(
+          'Store',
+          style: theme.t1s14w400,
+        ),
       ),
     );
   }

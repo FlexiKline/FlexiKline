@@ -107,11 +107,13 @@ class KDJPaintObject<T extends KDJIndicator> extends SinglePaintObjectBox<T>
   });
 
   @override
-  MinMax? initData({int? start, int? end}) {
+  MinMax? initState({required int start, required int end}) {
     if (!klineData.canPaintChart) return null;
 
     return klineData.calculateKdjMinmax(
       param: indicator.calcParam,
+      start: start,
+      end: end,
     );
   }
 

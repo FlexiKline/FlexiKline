@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'package:example/generated/l10n.dart';
+import 'package:example/src/theme/flexi_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -32,6 +33,7 @@ class MainNavPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(themeProvider);
     final s = S.of(context);
     return Scaffold(
       key: mainNavScaffoldKey,
@@ -41,6 +43,9 @@ class MainNavPage extends ConsumerWidget {
       drawerEdgeDragWidth: 0.0, // 禁止通过滑动打开drawer
       body: navigationShell,
       bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: theme.cardBg,
+        selectedItemColor: theme.t1,
+        unselectedItemColor: theme.t2,
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: const Icon(Icons.align_vertical_bottom),

@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:example/src/pages/kline_settting_dialog.dart';
+import 'package:example/src/utils/dialog_manager.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -82,14 +84,21 @@ class _FlexiTimeBarState extends ConsumerState<FlexiTimeBar>
     setState(() {});
   }
 
-  void onTabKlineSetting() {}
+  void onTabKlineSetting() {
+    DialogManager().show(
+      dialogTag: KlineSettingDialog.dialogTag,
+      builder: (context) => KlineSettingDialog(
+        controller: widget.controller,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final theme = ref.read(themeProvider);
+    final theme = ref.watch(themeProvider);
     return Container(
       alignment: widget.alignment ?? AlignmentDirectional.centerStart,
-      padding: EdgeInsetsDirectional.only(start: 6.r, end: 16.r),
+      padding: EdgeInsetsDirectional.only(start: 6.r, end: 6.r),
       decoration: widget.decoration,
       child: Row(
         mainAxisSize: MainAxisSize.max,

@@ -114,11 +114,7 @@ mixin CrossBinding
       /// 绘制Cross Line
       paintCrossLine(canvas, offset);
 
-      mainIndicator.paintObject?.doOnCross(canvas, offset, model: model);
-
-      int i = 0;
-      for (var indicator in subIndicators) {
-        indicator.paintObject?.bindSolt(i++);
+      for (var indicator in [mainIndicator, ...subIndicators]) {
         indicator.paintObject?.doOnCross(canvas, offset, model: model);
       }
     }

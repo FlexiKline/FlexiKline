@@ -84,7 +84,7 @@ class EMAPaintObject<T extends EMAIndicator> extends SinglePaintObjectBox<T> {
   });
 
   @override
-  MinMax? initData({int? start, int? end}) {
+  MinMax? initState({required int start, required int end}) {
     if (!klineData.canPaintChart) return null;
 
     MinMax? minmax;

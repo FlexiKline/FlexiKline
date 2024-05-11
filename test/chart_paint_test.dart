@@ -75,7 +75,11 @@ void main() {
     });
     test('test-MA-Paint', () async {
       debugPrint('test-MA-Paint');
-      maIndicator.paintObject?.doInitData(start: 0, end: 100);
+      maIndicator.paintObject?.doInitState(
+        mainIndicatorSlot,
+        start: 0,
+        end: 100,
+      );
       maIndicator.paintObject?.doPaintChart(canvas, mainSize);
     });
   });

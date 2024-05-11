@@ -71,10 +71,13 @@ class VolumePaintObject<T extends VolumeIndicator>
   });
 
   @override
-  MinMax? initData({int? start, int? end}) {
+  MinMax? initState({required int start, required int end}) {
     if (!klineData.canPaintChart) return null;
 
-    final minmax = klineData.calculateVolMinmax();
+    final minmax = klineData.calculateVolMinmax(
+      start: start,
+      end: end,
+    );
     minmax?.minToZero();
     return minmax;
   }
