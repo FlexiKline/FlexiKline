@@ -19,12 +19,9 @@ import 'package:flutter/material.dart';
 import '../framework/export.dart';
 import 'binding_base.dart';
 import 'interface.dart';
-import 'setting.dart';
 
 /// 绘制蜡烛图以及相关指标数据
-mixin ChartBinding
-    on KlineBindingBase, SettingBinding
-    implements IChart, IState, IConfig {
+mixin ChartBinding on KlineBindingBase implements IChart, IState, IConfig {
   @override
   void initState() {
     super.initState();

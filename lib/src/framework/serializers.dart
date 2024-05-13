@@ -106,6 +106,145 @@ class EdgeInsetsConverter
   }
 }
 
+class SizeConverter implements JsonConverter<Size, Map<String, dynamic>> {
+  const SizeConverter();
+
+  @override
+  Size fromJson(Map<String, dynamic> json) {
+    return Size(
+      parseDouble(json['width']) ?? 0,
+      parseDouble(json['height']) ?? 0,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson(Size size) {
+    return {
+      'width': size.width,
+      'height': size.height,
+    };
+  }
+}
+
+class RectConverter implements JsonConverter<Rect, Map<String, dynamic>> {
+  const RectConverter();
+
+  @override
+  Rect fromJson(Map<String, dynamic> json) {
+    if (json.isEmpty) return Rect.zero;
+    if (json.containsKey('left') || json.containsKey('top')) {
+      if (json.containsKey('width') && json.containsKey('height')) {
+        return Rect.fromLTWH(
+          parseDouble(json['left']) ?? 0,
+          parseDouble(json['top']) ?? 0,
+          parseDouble(json['width']) ?? 0,
+          parseDouble(json['width']) ?? 0,
+        );
+      } else {
+        return Rect.fromLTRB(
+          parseDouble(json['left']) ?? 0,
+          parseDouble(json['top']) ?? 0,
+          parseDouble(json['right']) ?? 0,
+          parseDouble(json['bottom']) ?? 0,
+        );
+      }
+    }
+    return Rect.zero;
+  }
+
+  @override
+  Map<String, dynamic> toJson(Rect rect) {
+    return {
+      'left': rect.left,
+      'top': rect.top,
+      'right': rect.right,
+      'bottom': rect.bottom,
+    };
+  }
+}
+
+class BorderSideConvert
+    implements JsonConverter<BorderSide, Map<String, dynamic>> {
+  const BorderSideConvert();
+
+  @override
+  BorderSide fromJson(Map<String, dynamic> json) {
+    return parseBorderSide(json);
+  }
+
+  @override
+  Map<String, dynamic> toJson(BorderSide side) {
+    return convertBorderSide(side);
+  }
+}
+
+class BorderConverter implements JsonConverter<Border, Map<String, dynamic>> {
+  const BorderConverter();
+
+  @override
+  Border fromJson(Map<String, dynamic> json) {
+    if (json.isEmpty) return const Border.fromBorderSide(BorderSide.none);
+    if (json.containsKey('all')) {
+      return Border.fromBorderSide(parseBorderSide(json['all']));
+    } else {
+      return Border(
+        top: parseBorderSide(json['top']),
+        right: parseBorderSide(json['right']),
+        bottom: parseBorderSide(json['bottom']),
+        left: parseBorderSide(json['left']),
+      );
+    }
+  }
+
+  @override
+  Map<String, dynamic> toJson(Border border) {
+    if (border.isUniform) {
+      return {
+        "all": convertBorderSide(border.top),
+      };
+    }
+    return {
+      "top": convertBorderSide(border.top),
+      "right": convertBorderSide(border.right),
+      "bottom": convertBorderSide(border.bottom),
+      "left": convertBorderSide(border.left),
+    };
+  }
+}
+
+// 仅支持圆角类型
+class BorderRadiusConverter
+    implements JsonConverter<BorderRadius, Map<String, dynamic>> {
+  const BorderRadiusConverter();
+
+  @override
+  BorderRadius fromJson(Map<String, dynamic> json) {
+    if (json.isEmpty) return BorderRadius.zero;
+    if (json.containsKey('topLeft') ||
+        json.containsKey('topRight') ||
+        json.containsKey('bottomLeft') ||
+        json.containsKey('bottomRight')) {
+      return BorderRadius.only(
+        topLeft: parseRadius(json['topLeft']),
+        topRight: parseRadius(json['topRight']),
+        bottomLeft: parseRadius(json['bottomLeft']),
+        bottomRight: parseRadius(json['bottomRight']),
+      );
+    }
+    return BorderRadius.zero;
+  }
+
+  @override
+  Map<String, dynamic> toJson(BorderRadius borderRadius) {
+    return {
+      'topLeft': convertRadius(borderRadius.topLeft),
+      'topRight': convertRadius(borderRadius.topRight),
+      'bottomLeft': convertRadius(borderRadius.bottomLeft),
+      'bottomRight': convertRadius(borderRadius.bottomRight),
+    };
+  }
+}
+
 // 定义一个JsonConverter实现类，用于转换Status枚举类型。
 class PaintModeConverter implements JsonConverter<PaintMode, String> {
   const PaintModeConverter();
@@ -201,6 +340,11 @@ const FlexiIndicatorSerializable = JsonSerializable(
     PaintModeConverter(),
     EdgeInsetsConverter(),
     TextStyleConverter(),
+    SizeConverter(),
+    RectConverter(),
+    BorderSideConvert(),
+    BorderConverter(),
+    BorderRadiusConverter(),
   ],
   explicitToJson: true,
   // genericArgumentFactories: true,
@@ -218,10 +362,19 @@ const FlexiParamSerializable = JsonSerializable(
 // ignore: constant_identifier_names
 const FlexiModelSerializable = JsonSerializable(
   converters: [
+    ColorConverter(),
     DecimalConverter(),
+    EdgeInsetsConverter(),
+    TextStyleConverter(),
+    SizeConverter(),
+    RectConverter(),
+    BorderSideConvert(),
+    BorderConverter(),
+    BorderRadiusConverter(),
   ],
   ignoreUnannotated: true,
   explicitToJson: true,
+  includeIfNull: false,
 );
 
 final class _Freezed {

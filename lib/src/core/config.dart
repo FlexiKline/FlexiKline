@@ -65,7 +65,7 @@ mixin ConfigBinding
             VolumeIndicator.fromJson,
           ) ??
           VolumeIndicator(
-            height: subChartDefaultHeight,
+            height: settingData.subIndicatorDefaultHeight,
             paintMode: PaintMode.alone,
             showYAxisTick: false,
             showCrossMark: false,
@@ -101,16 +101,16 @@ mixin ConfigBinding
             MACDIndicator.fromJson,
           ) ??
           MACDIndicator(
-            height: subChartDefaultHeight,
-            tipsHeight: subChartDefaultTipsHeight,
+            height: settingData.subIndicatorDefaultHeight,
+            tipsHeight: settingData.subIndicatorDefaultTipsHeight,
           ),
       kdjKey: restoreSubSupportIndicator(
             kdjKey,
             KDJIndicator.fromJson,
           ) ??
           KDJIndicator(
-            height: subChartDefaultHeight,
-            tipsHeight: subChartDefaultTipsHeight,
+            height: settingData.subIndicatorDefaultHeight,
+            tipsHeight: settingData.subIndicatorDefaultTipsHeight,
           ),
       maVolKey: restoreSubSupportIndicator(
             maVolKey,
@@ -119,8 +119,8 @@ mixin ConfigBinding
           MultiPaintObjectIndicator(
             key: maVolKey,
             name: 'MAVOL',
-            height: subChartDefaultHeight,
-            tipsHeight: subChartDefaultTipsHeight,
+            height: settingData.subIndicatorDefaultHeight,
+            tipsHeight: settingData.subIndicatorDefaultTipsHeight,
           ),
     };
 
@@ -132,7 +132,7 @@ mixin ConfigBinding
             childKey: volumeKey,
           ) ??
           VolumeIndicator(
-            height: subChartDefaultHeight,
+            height: settingData.subIndicatorDefaultHeight,
           ),
       restoreSubSupportIndicator(
             maVolKey,
@@ -140,7 +140,7 @@ mixin ConfigBinding
             childKey: volMaKey,
           ) ??
           VolMaIndicator(
-            height: subChartDefaultHeight,
+            height: settingData.subIndicatorDefaultHeight,
           ),
     ], this);
 
@@ -203,7 +203,6 @@ mixin ConfigBinding
     storeSubIndicators(_subIndicators);
     storeSupportMainIndicators(_supportMainIndicators);
     storeSupportSubIndicators(_supportSubIndicators);
-    saveFlexiKlineConfig(flexiKlineConfig);
   }
 
   Set<ValueKey> get supportMainIndicatorKeys {

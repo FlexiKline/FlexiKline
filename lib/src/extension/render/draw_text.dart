@@ -53,11 +53,12 @@ extension DrawTextExt on Canvas {
 
     /// 文本内容的背景区域设置
     Color backgroundColor = Colors.transparent,
-    double radius = 0,
+    @Deprecated('废弃的, 请使用borderRadius') double radius = 0,
     BorderRadius? borderRadius,
     EdgeInsets padding = EdgeInsets.zero,
-    Color borderColor = Colors.transparent,
-    double borderWidth = 0,
+    @Deprecated('废弃的, 请使用borderSide') Color borderColor = Colors.transparent,
+    @Deprecated('废弃的, 请使用borderSide') double borderWidth = 0,
+    BorderSide? borderSide,
   }) {
     if (text?.isNotEmpty != true && textSpan == null) {
       return Size.zero;
@@ -162,9 +163,12 @@ extension DrawTextExt on Canvas {
     }
 
     final isDrawBg = backgroundColor.alpha != 0;
-    final isDrawBorder = borderColor.alpha != 0 && borderWidth > 0;
+    final isDrawBorder = (borderColor.alpha != 0 && borderWidth > 0) ||
+        (borderSide != null &&
+            borderSide.color.alpha != 0 &&
+            borderSide.width > 0);
     final hasPadding = padding.collapsedSize.isEmpty != true;
-    if (!hasPadding || isDrawBg || isDrawBorder) {
+    if (hasPadding || isDrawBg || isDrawBorder) {
       // if (margin != null && margin.isNonNegative) {
       //   final x = drawDirection.isltr ? -margin.right : margin.left;
       //   final y = isUpward ? margin.bottom : -margin.top;
@@ -211,9 +215,9 @@ extension DrawTextExt on Canvas {
         drawPath(
           path,
           Paint()
-            ..color = borderColor
+            ..color = borderSide?.color ?? borderColor
             ..style = PaintingStyle.stroke
-            ..strokeWidth = borderWidth,
+            ..strokeWidth = borderSide?.width ?? borderWidth,
         );
       }
 

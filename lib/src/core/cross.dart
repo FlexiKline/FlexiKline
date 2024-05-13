@@ -170,13 +170,13 @@ mixin CrossBinding
     canvas
       ..drawDashPath(
         path,
-        crossLinePaint,
-        dashes: crossLineDashes,
+        settingData.crossLinePaint,
+        dashes: settingData.crosshairLineDashes,
       )
       ..drawCircle(
         offset,
-        crossPointRadius,
-        crossPointPaint,
+        settingData.crossPointRadius,
+        settingData.crossPointPaint,
       );
   }
 }

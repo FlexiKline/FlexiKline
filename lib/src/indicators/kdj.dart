@@ -123,7 +123,7 @@ class KDJPaintObject<T extends KDJIndicator> extends SinglePaintObjectBox<T>
     paintYAxisTick(
       canvas,
       size,
-      tickCount: indicator.tickCount ?? setting.subChartYAxisTickCount,
+      tickCount: indicator.tickCount ?? setting.subIndicatorTickCount,
     );
 
     /// 绘制KDJ线
@@ -162,7 +162,7 @@ class KDJPaintObject<T extends KDJIndicator> extends SinglePaintObjectBox<T>
       Paint()
         ..color = indicator.kColor
         ..style = PaintingStyle.stroke
-        ..strokeWidth = setting.defPaintLineWidth,
+        ..strokeWidth = setting.indicatorLineWidth,
     );
 
     canvas.drawPath(
@@ -170,7 +170,7 @@ class KDJPaintObject<T extends KDJIndicator> extends SinglePaintObjectBox<T>
       Paint()
         ..color = indicator.dColor
         ..style = PaintingStyle.stroke
-        ..strokeWidth = setting.defPaintLineWidth,
+        ..strokeWidth = setting.indicatorLineWidth,
     );
 
     canvas.drawPath(
@@ -178,7 +178,7 @@ class KDJPaintObject<T extends KDJIndicator> extends SinglePaintObjectBox<T>
       Paint()
         ..color = indicator.jColor
         ..style = PaintingStyle.stroke
-        ..strokeWidth = setting.defPaintLineWidth,
+        ..strokeWidth = setting.indicatorLineWidth,
     );
   }
 
@@ -221,29 +221,17 @@ class KDJPaintObject<T extends KDJIndicator> extends SinglePaintObjectBox<T>
 
     children.add(TextSpan(
       text: kTxt,
-      style: TextStyle(
-        fontSize: setting.tipsDefaultTextSize,
-        color: indicator.kColor,
-        height: setting.tipsDefaultTextHeight,
-      ),
+      style: setting.tipsTextStyle.copyWith(color: indicator.kColor),
     ));
 
     children.add(TextSpan(
       text: dTxt,
-      style: TextStyle(
-        fontSize: setting.tipsDefaultTextSize,
-        color: indicator.dColor,
-        height: setting.tipsDefaultTextHeight,
-      ),
+      style: setting.tipsTextStyle.copyWith(color: indicator.dColor),
     ));
 
     children.add(TextSpan(
       text: jTxt,
-      style: TextStyle(
-        fontSize: setting.tipsDefaultTextSize,
-        color: indicator.jColor,
-        height: setting.tipsDefaultTextHeight,
-      ),
+      style: setting.tipsTextStyle.copyWith(color: indicator.jColor),
     ));
 
     return canvas.drawText(
@@ -252,7 +240,7 @@ class KDJPaintObject<T extends KDJIndicator> extends SinglePaintObjectBox<T>
       drawDirection: DrawDirection.ltr,
       drawableRect: drawRect,
       textAlign: TextAlign.left,
-      padding: setting.tipsRectDefaultPadding,
+      padding: setting.tipsPadding,
       maxLines: 1,
     );
   }

@@ -289,3 +289,47 @@ TextDecorationStyle parseTextDecorationStyle(
     orElse: () => def,
   );
 }
+
+BorderSide parseBorderSide(Map<String, dynamic>? json) {
+  if (json == null || json.isEmpty) return BorderSide.none;
+  final style = json['style']?.toString() ?? BorderStyle.solid.name;
+  return BorderSide(
+    color: parseHexColor(json['color']),
+    width: parseDouble(json['width']) ?? 1.0,
+    style: BorderStyle.values.firstWhere(
+      (e) => e.name == style,
+      orElse: () => BorderStyle.solid,
+    ),
+  );
+}
+
+Map<String, dynamic> convertBorderSide(BorderSide side) {
+  return {
+    "color": convertHexColor(side.color),
+    "width": side.width,
+    "style": side.style.name,
+  };
+}
+
+Radius parseRadius(dynamic radius) {
+  if (radius == null) return Radius.zero;
+  if (radius is num) return Radius.circular(radius.toDouble());
+  if (radius is String) {
+    final values = radius.split(':');
+    if (values.length == 1) {
+      return Radius.circular(parseDouble(radius) ?? 0);
+    } else if (values.length == 2) {
+      return Radius.elliptical(
+        parseDouble(values[0]) ?? 0,
+        parseDouble(values[1]) ?? 0,
+      );
+    }
+  }
+  return Radius.zero;
+}
+
+dynamic convertRadius(Radius radius) {
+  if (radius == Radius.zero) return null;
+  if (radius.x == radius.y) return radius.x;
+  return '${radius.x}:${radius.y}';
+}

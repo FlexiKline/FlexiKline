@@ -123,7 +123,7 @@ class MAPaintObject<T extends MAIndicator> extends SinglePaintObjectBox<T> {
         Paint()
           ..color = indicator.calcParams[j].color
           ..style = PaintingStyle.stroke
-          ..strokeWidth = setting.defPaintLineWidth,
+          ..strokeWidth = setting.indicatorLineWidth,
       );
     }
   }
@@ -154,11 +154,7 @@ class MAPaintObject<T extends MAIndicator> extends SinglePaintObjectBox<T> {
       );
       children.add(TextSpan(
         text: text,
-        style: TextStyle(
-          fontSize: setting.tipsDefaultTextSize,
-          color: param.color,
-          height: setting.tipsDefaultTextHeight,
-        ),
+        style: setting.tipsTextStyle.copyWith(color: param.color),
       ));
     }
     if (children.isNotEmpty) {
@@ -168,7 +164,7 @@ class MAPaintObject<T extends MAIndicator> extends SinglePaintObjectBox<T> {
         drawDirection: DrawDirection.ltr,
         drawableRect: drawRect,
         textAlign: TextAlign.left,
-        padding: setting.tipsRectDefaultPadding,
+        padding: setting.tipsPadding,
         maxLines: 1,
       );
     }

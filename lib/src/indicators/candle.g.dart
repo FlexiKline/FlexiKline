@@ -34,29 +34,27 @@ CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
           _$JsonConverterFromJson<Map<String, dynamic>, TextStyle>(
               json['timeTickTextStyle'], const TextStyleConverter().fromJson),
       timeTickTextWidth: (json['timeTickTextWidth'] as num?)?.toDouble() ?? 80,
-      yAxisTickTextStyle:
-          _$JsonConverterFromJson<Map<String, dynamic>, TextStyle>(
-              json['yAxisTickTextStyle'], const TextStyleConverter().fromJson),
-      yAxisTickRectPadding:
+      tickTextStyle: _$JsonConverterFromJson<Map<String, dynamic>, TextStyle>(
+          json['tickTextStyle'], const TextStyleConverter().fromJson),
+      tickPadding: _$JsonConverterFromJson<Map<String, dynamic>, EdgeInsets>(
+          json['tickPadding'], const EdgeInsetsConverter().fromJson),
+      latestPriceBackground: const ColorConverter()
+          .fromJson(json['latestPriceBackground'] as String?),
+      latestPriceRectRadius:
+          _$JsonConverterFromJson<Map<String, dynamic>, BorderRadius>(
+              json['latestPriceRectRadius'],
+              const BorderRadiusConverter().fromJson),
+      latestPriceBorder:
+          _$JsonConverterFromJson<Map<String, dynamic>, BorderSide>(
+              json['latestPriceBorder'], const BorderSideConvert().fromJson),
+      latestPriceRectPadding:
           _$JsonConverterFromJson<Map<String, dynamic>, EdgeInsets>(
-              json['yAxisTickRectPadding'],
+              json['latestPriceRectPadding'],
               const EdgeInsetsConverter().fromJson),
-      latestPriceRectBackgroundColor: const ColorConverter()
-          .fromJson(json['latestPriceRectBackgroundColor'] as String?),
-      latestPriceRectBorderRadius:
-          (json['latestPriceRectBorderRadius'] as num?)?.toDouble() ?? 2,
-      latestPriceRectBorderWidth:
-          (json['latestPriceRectBorderWidth'] as num?)?.toDouble() ?? 0.5,
       latestPriceRectRightMinMargin:
           (json['latestPriceRectRightMinMargin'] as num?)?.toDouble() ?? 1,
       latestPriceRectRightMaxMargin:
           (json['latestPriceRectRightMaxMargin'] as num?)?.toDouble() ?? 60,
-      latestPriceRectBorderColor: const ColorConverter()
-          .fromJson(json['latestPriceRectBorderColor'] as String?),
-      latestPriceRectPadding: json['latestPriceRectPadding'] == null
-          ? const EdgeInsets.symmetric(horizontal: 2, vertical: 2)
-          : const EdgeInsetsConverter()
-              .fromJson(json['latestPriceRectPadding'] as Map<String, dynamic>),
       latestPriceMarkLineColor: const ColorConverter()
           .fromJson(json['latestPriceMarkLineColor'] as String?),
       latestPriceMarkLineWidth:
@@ -71,11 +69,11 @@ CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
               json['maxminPriceTextStyle'],
               const TextStyleConverter().fromJson),
       maxminPriceMargin: (json['maxminPriceMargin'] as num?)?.toDouble() ?? 1,
-      maxminPriceLineLength:
-          (json['maxminPriceLineLength'] as num?)?.toDouble() ?? 20,
-      maxminPriceLineWidth: (json['maxminPriceLineWidth'] as num?)?.toDouble(),
-      maxminPriceLineColor: const ColorConverter()
-          .fromJson(json['maxminPriceLineColor'] as String?),
+      maxminMarkLineLength:
+          (json['maxminMarkLineLength'] as num?)?.toDouble() ?? 20,
+      maxminMarkLineWidth: (json['maxminMarkLineWidth'] as num?)?.toDouble(),
+      maxminMarkLineColor: const ColorConverter()
+          .fromJson(json['maxminMarkLineColor'] as String?),
     );
 
 Map<String, dynamic> _$CandleIndicatorToJson(CandleIndicator instance) =>
@@ -100,24 +98,25 @@ Map<String, dynamic> _$CandleIndicatorToJson(CandleIndicator instance) =>
           _$JsonConverterToJson<Map<String, dynamic>, TextStyle>(
               instance.timeTickTextStyle, const TextStyleConverter().toJson),
       'timeTickTextWidth': instance.timeTickTextWidth,
-      'yAxisTickTextStyle':
-          _$JsonConverterToJson<Map<String, dynamic>, TextStyle>(
-              instance.yAxisTickTextStyle, const TextStyleConverter().toJson),
-      'yAxisTickRectPadding':
+      'tickTextStyle': _$JsonConverterToJson<Map<String, dynamic>, TextStyle>(
+          instance.tickTextStyle, const TextStyleConverter().toJson),
+      'tickPadding': _$JsonConverterToJson<Map<String, dynamic>, EdgeInsets>(
+          instance.tickPadding, const EdgeInsetsConverter().toJson),
+      'latestPriceBackground': _$JsonConverterToJson<String?, Color>(
+          instance.latestPriceBackground, const ColorConverter().toJson),
+      'latestPriceRectRadius':
+          _$JsonConverterToJson<Map<String, dynamic>, BorderRadius>(
+              instance.latestPriceRectRadius,
+              const BorderRadiusConverter().toJson),
+      'latestPriceBorder':
+          _$JsonConverterToJson<Map<String, dynamic>, BorderSide>(
+              instance.latestPriceBorder, const BorderSideConvert().toJson),
+      'latestPriceRectPadding':
           _$JsonConverterToJson<Map<String, dynamic>, EdgeInsets>(
-              instance.yAxisTickRectPadding,
+              instance.latestPriceRectPadding,
               const EdgeInsetsConverter().toJson),
-      'latestPriceRectBackgroundColor': _$JsonConverterToJson<String?, Color>(
-          instance.latestPriceRectBackgroundColor,
-          const ColorConverter().toJson),
-      'latestPriceRectBorderRadius': instance.latestPriceRectBorderRadius,
-      'latestPriceRectBorderWidth': instance.latestPriceRectBorderWidth,
       'latestPriceRectRightMinMargin': instance.latestPriceRectRightMinMargin,
       'latestPriceRectRightMaxMargin': instance.latestPriceRectRightMaxMargin,
-      'latestPriceRectBorderColor': _$JsonConverterToJson<String?, Color>(
-          instance.latestPriceRectBorderColor, const ColorConverter().toJson),
-      'latestPriceRectPadding':
-          const EdgeInsetsConverter().toJson(instance.latestPriceRectPadding),
       'latestPriceMarkLineColor': _$JsonConverterToJson<String?, Color>(
           instance.latestPriceMarkLineColor, const ColorConverter().toJson),
       'latestPriceMarkLineWidth': instance.latestPriceMarkLineWidth,
@@ -127,10 +126,10 @@ Map<String, dynamic> _$CandleIndicatorToJson(CandleIndicator instance) =>
           _$JsonConverterToJson<Map<String, dynamic>, TextStyle>(
               instance.maxminPriceTextStyle, const TextStyleConverter().toJson),
       'maxminPriceMargin': instance.maxminPriceMargin,
-      'maxminPriceLineLength': instance.maxminPriceLineLength,
-      'maxminPriceLineWidth': instance.maxminPriceLineWidth,
-      'maxminPriceLineColor': _$JsonConverterToJson<String?, Color>(
-          instance.maxminPriceLineColor, const ColorConverter().toJson),
+      'maxminMarkLineLength': instance.maxminMarkLineLength,
+      'maxminMarkLineWidth': instance.maxminMarkLineWidth,
+      'maxminMarkLineColor': _$JsonConverterToJson<String?, Color>(
+          instance.maxminMarkLineColor, const ColorConverter().toJson),
     };
 
 Value? _$JsonConverterFromJson<Json, Value>(

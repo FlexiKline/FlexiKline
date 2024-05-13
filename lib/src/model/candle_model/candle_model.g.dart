@@ -18,20 +18,33 @@ CandleModel _$CandleModelFromJson(Map<String, dynamic> json) => CandleModel(
       confirm: json['confirm'] as String? ?? '1',
     );
 
-Map<String, dynamic> _$CandleModelToJson(CandleModel instance) =>
-    <String, dynamic>{
-      'timestamp': intToString(instance.timestamp),
-      'o': const DecimalConverter().toJson(instance.o),
-      'h': const DecimalConverter().toJson(instance.h),
-      'l': const DecimalConverter().toJson(instance.l),
-      'c': const DecimalConverter().toJson(instance.c),
-      'v': const DecimalConverter().toJson(instance.v),
-      'vc': _$JsonConverterToJson<dynamic, Decimal>(
-          instance.vc, const DecimalConverter().toJson),
-      'vcq': _$JsonConverterToJson<dynamic, Decimal>(
-          instance.vcq, const DecimalConverter().toJson),
-      'confirm': instance.confirm,
-    };
+Map<String, dynamic> _$CandleModelToJson(CandleModel instance) {
+  final val = <String, dynamic>{
+    'timestamp': intToString(instance.timestamp),
+  };
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('o', const DecimalConverter().toJson(instance.o));
+  writeNotNull('h', const DecimalConverter().toJson(instance.h));
+  writeNotNull('l', const DecimalConverter().toJson(instance.l));
+  writeNotNull('c', const DecimalConverter().toJson(instance.c));
+  writeNotNull('v', const DecimalConverter().toJson(instance.v));
+  writeNotNull(
+      'vc',
+      _$JsonConverterToJson<dynamic, Decimal>(
+          instance.vc, const DecimalConverter().toJson));
+  writeNotNull(
+      'vcq',
+      _$JsonConverterToJson<dynamic, Decimal>(
+          instance.vcq, const DecimalConverter().toJson));
+  val['confirm'] = instance.confirm;
+  return val;
+}
 
 Json? _$JsonConverterToJson<Json, Value>(
   Value? value,

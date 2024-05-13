@@ -159,7 +159,7 @@ class _KOKlinePageState extends ConsumerState<KOKlinePage> {
         foregroundColor: theme.t1,
         mini: true,
         onPressed: () {
-          controller.storeState();
+          controller.storeStateToLocal();
         },
         child: Text(
           'Store',

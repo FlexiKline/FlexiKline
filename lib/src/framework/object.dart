@@ -93,17 +93,12 @@ abstract interface class IPaintDelegate {
 
 /// 绘制对象混入全局Setting配置.
 mixin SettingProxyMixin on PaintObject {
-  late final SettingBinding setting;
+  late final SettingBinding settingBinding;
+  late final SettingData setting;
 
-  double get candleActualWidth => setting.candleActualWidth;
+  double get candleActualWidth => settingBinding.candleActualWidth;
 
-  double get candleWidthHalf => setting.candleWidthHalf;
-
-  TextStyle get defaultTextStyle => setting.defaultTextStyle;
-  Color get defaultLineColor => setting.defaultLineColor;
-  double get pixel => setting.pixel;
-  Color get defaultRectBackgroundColor => setting.defaultRectBackgroundColor;
-  Color get defaultRectBorderColor => setting.defaultRectBorderColor;
+  double get candleWidthHalf => settingBinding.candleWidthHalf;
 }
 
 /// 绘制对象混入数据状态代理State
@@ -147,10 +142,10 @@ mixin PaintObjectBoundingMixin on PaintObjectProxy
       if (_bounding == null) {
         final top = config.calculateIndicatorTop(slot);
         _bounding = Rect.fromLTRB(
-          setting.subRect.left,
-          setting.subRect.top + top,
-          setting.subRect.right,
-          setting.subRect.top + top + indicator.height,
+          settingBinding.subRect.left,
+          settingBinding.subRect.top + top,
+          settingBinding.subRect.right,
+          settingBinding.subRect.top + top + indicator.height,
         );
       }
     }
@@ -266,8 +261,8 @@ mixin PaintYAxisTickMixin<T extends SinglePaintObjectIndicator>
     Canvas canvas,
     Size size, {
     required int tickCount, // 刻度数量.
-    TextStyle? yAxisTickTextStyle,
-    EdgeInsets? yAxisTickRectPadding,
+    TextStyle? tickTextStyle,
+    EdgeInsets? tickPadding,
   }) {
     if (minMax.isZero) return;
     if (tickCount <= 0) return;
@@ -290,23 +285,22 @@ mixin PaintYAxisTickMixin<T extends SinglePaintObjectIndicator>
 
       final text = fromatYAxisTickValue(value);
 
-      yAxisTickTextStyle ??= setting.defaultYAxisTickTextStyle;
-      yAxisTickRectPadding ??= setting.defaultYAxisTickRectPadding;
-      final yAxisTickRectHeight =
-          (yAxisTickTextStyle.totalHeight ?? 0) + yAxisTickRectPadding.vertical;
+      tickTextStyle ??= setting.defaultTextStyle;
+      tickPadding ??= setting.defaultPadding;
+      final height = (tickTextStyle.totalHeight ?? 0) + tickPadding.vertical;
 
       canvas.drawText(
         offset: Offset(
           dx,
-          dy - yAxisTickRectHeight, // 绘制在刻度线之上
+          dy - height, // 绘制在刻度线之上
         ),
         drawDirection: DrawDirection.rtl,
         drawableRect: drawBounding,
         text: text,
-        style: yAxisTickTextStyle,
+        style: tickTextStyle,
         // textWidth: tickTextWidth,
         textAlign: TextAlign.end,
-        padding: yAxisTickRectPadding,
+        padding: tickPadding,
         maxLines: 1,
       );
     }
@@ -334,22 +328,25 @@ mixin PaintYAxisMarkOnCrossMixin<T extends SinglePaintObjectIndicator>
 
     final text = formatYAxisMarkValueOnCross(value);
 
+    final textStyle = setting.crossTickTextStyle;
+    final textPadding = setting.crossTickPadding;
+    final textHeight = (textStyle.totalHeight ?? 0) + textPadding.vertical;
+
     canvas.drawText(
       offset: Offset(
-        chartRect.right - setting.crossYTickRectRigthMargin,
-        offset.dy - setting.crossYTickRectHeight / 2,
+        chartRect.right - setting.tickRectMargin,
+        offset.dy - textHeight / 2,
       ),
       drawDirection: DrawDirection.rtl,
       drawableRect: drawBounding,
       text: text,
-      style: setting.crossYTickTextStyle,
+      style: textStyle,
       textAlign: TextAlign.end,
       textWidthBasis: TextWidthBasis.longestLine,
-      padding: setting.crossYTickRectPadding,
-      backgroundColor: setting.crossYTickRectBackgroundColor,
-      radius: setting.crossYTickRectBorderRadius,
-      borderWidth: setting.crossYTickRectBorderWidth,
-      borderColor: setting.crossYTickRectBorderColor,
+      padding: textPadding,
+      backgroundColor: setting.crossTickBackground,
+      borderRadius: setting.crossTickRadius,
+      borderSide: setting.crossTickBorder,
     );
   }
 
@@ -402,7 +399,8 @@ abstract class PaintObjectProxy<T extends Indicator> extends PaintObject
     required T super.indicator,
   }) {
     loggerDelegate = controller.loggerDelegate;
-    setting = controller as SettingBinding;
+    setting = controller.settingData;
+    settingBinding = controller as SettingBinding;
     state = controller as IState;
     cross = controller as ICross;
     config = controller as IConfig;

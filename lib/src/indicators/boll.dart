@@ -157,7 +157,7 @@ class BOLLPaintObject<T extends BOLLIndicator> extends SinglePaintObjectBox<T> {
       Paint()
         ..color = indicator.mbColor
         ..style = PaintingStyle.stroke
-        ..strokeWidth = setting.defPaintLineWidth,
+        ..strokeWidth = setting.indicatorLineWidth,
     );
 
     canvas.drawPath(
@@ -165,7 +165,7 @@ class BOLLPaintObject<T extends BOLLIndicator> extends SinglePaintObjectBox<T> {
       Paint()
         ..color = indicator.upColor
         ..style = PaintingStyle.stroke
-        ..strokeWidth = setting.defPaintLineWidth,
+        ..strokeWidth = setting.indicatorLineWidth,
     );
 
     canvas.drawPath(
@@ -173,7 +173,7 @@ class BOLLPaintObject<T extends BOLLIndicator> extends SinglePaintObjectBox<T> {
       Paint()
         ..color = indicator.dnColor
         ..style = PaintingStyle.stroke
-        ..strokeWidth = setting.defPaintLineWidth,
+        ..strokeWidth = setting.indicatorLineWidth,
     );
 
     if (indicator.isFillBetweenUpAndDn) {
@@ -226,29 +226,17 @@ class BOLLPaintObject<T extends BOLLIndicator> extends SinglePaintObjectBox<T> {
 
     children.add(TextSpan(
       text: mbTxt,
-      style: TextStyle(
-        fontSize: setting.tipsDefaultTextSize,
-        color: indicator.mbColor,
-        height: setting.tipsDefaultTextHeight,
-      ),
+      style: setting.tipsTextStyle.copyWith(color: indicator.mbColor),
     ));
 
     children.add(TextSpan(
       text: upTxt,
-      style: TextStyle(
-        fontSize: setting.tipsDefaultTextSize,
-        color: indicator.upColor,
-        height: setting.tipsDefaultTextHeight,
-      ),
+      style: setting.tipsTextStyle.copyWith(color: indicator.upColor),
     ));
 
     children.add(TextSpan(
       text: dnTxt,
-      style: TextStyle(
-        fontSize: setting.tipsDefaultTextSize,
-        color: indicator.dnColor,
-        height: setting.tipsDefaultTextHeight,
-      ),
+      style: setting.tipsTextStyle.copyWith(color: indicator.dnColor),
     ));
 
     return canvas.drawText(
@@ -257,7 +245,7 @@ class BOLLPaintObject<T extends BOLLIndicator> extends SinglePaintObjectBox<T> {
       drawDirection: DrawDirection.ltr,
       drawableRect: drawRect,
       textAlign: TextAlign.left,
-      padding: setting.tipsRectDefaultPadding,
+      padding: setting.tipsPadding,
       maxLines: 1,
     );
   }

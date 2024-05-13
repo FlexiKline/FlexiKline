@@ -16,6 +16,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../framework/export.dart';
+import '../model/export.dart';
 import 'interface.dart';
 
 abstract class KlineBindingBase with KlineLog, KlineStorage, GestureHanderImpl {
@@ -56,7 +57,15 @@ abstract class KlineBindingBase with KlineLog, KlineStorage, GestureHanderImpl {
     logd("storeState base");
   }
 
+  /// 缓存FlexiKline的所有配置到本地
+  void storeStateToLocal() {
+    storeState();
+    saveFlexiKlineConfig(flexiKlineConfig);
+  }
+
   KlineBindingBase get instance => this;
+
+  SettingData get settingData;
 
   T getInstance<T extends KlineBindingBase>(T instance) {
     return instance;

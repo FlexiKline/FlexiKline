@@ -16,6 +16,7 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 
+import '../model/export.dart';
 import 'common.dart';
 import 'indicator.dart';
 import 'logger.dart';
@@ -204,5 +205,9 @@ mixin KlineStorage implements IStore, ILogger {
         value.toJson(),
       ),
     );
+  }
+
+  void storeSettingData(SettingData settingData) {
+    flexiKlineConfig[jsonKeySetting] = settingData.toJson();
   }
 }

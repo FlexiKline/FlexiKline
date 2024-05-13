@@ -89,7 +89,7 @@ class VolumePaintObject<T extends VolumeIndicator>
       paintYAxisTick(
         canvas,
         size,
-        tickCount: indicator.tickCount ?? setting.subChartYAxisTickCount,
+        tickCount: indicator.tickCount ?? setting.subIndicatorTickCount,
       );
     }
 
@@ -159,15 +159,11 @@ class VolumePaintObject<T extends VolumeIndicator>
     return canvas.drawText(
       offset: drawRect.topLeft,
       text: text,
-      style: TextStyle(
-        fontSize: setting.tipsDefaultTextSize,
-        color: indicator.tipsTextColor ?? setting.tipsDefaultTextColor,
-        height: setting.tipsDefaultTextHeight,
-      ),
+      style: setting.tipsTextStyle.copyWith(color: indicator.tipsTextColor),
       drawDirection: DrawDirection.ltr,
       drawableRect: tipsRect,
       textAlign: TextAlign.left,
-      padding: setting.tipsRectDefaultPadding,
+      padding: setting.tipsPadding,
       maxLines: 1,
     );
   }

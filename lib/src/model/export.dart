@@ -24,6 +24,7 @@ export './gesture_data.dart';
 export './card_info.dart';
 export './minmax.dart';
 export './bag_num.dart';
+export './setting_data/setting_data.dart';
 
 extension CandleReqExt on CandleReq {
   String get key => "$instId-$bar";

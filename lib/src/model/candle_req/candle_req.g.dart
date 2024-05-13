@@ -15,11 +15,21 @@ CandleReq _$CandleReqFromJson(Map<String, dynamic> json) => CandleReq(
       before: (json['before'] as num?)?.toInt(),
     );
 
-Map<String, dynamic> _$CandleReqToJson(CandleReq instance) => <String, dynamic>{
-      'instId': instance.instId,
-      'after': instance.after,
-      'before': instance.before,
-      'bar': instance.bar,
-      'limit': instance.limit,
-      'precision': instance.precision,
-    };
+Map<String, dynamic> _$CandleReqToJson(CandleReq instance) {
+  final val = <String, dynamic>{
+    'instId': instance.instId,
+  };
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('after', instance.after);
+  writeNotNull('before', instance.before);
+  val['bar'] = instance.bar;
+  val['limit'] = instance.limit;
+  val['precision'] = instance.precision;
+  return val;
+}

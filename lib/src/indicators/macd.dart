@@ -120,7 +120,7 @@ class MACDPaintObject<T extends MACDIndicator> extends SinglePaintObjectBox<T>
     paintYAxisTick(
       canvas,
       size,
-      tickCount: indicator.tickCount ?? setting.subChartYAxisTickCount,
+      tickCount: indicator.tickCount ?? setting.subIndicatorTickCount,
     );
 
     paintMacdChart(canvas, size);
@@ -146,7 +146,7 @@ class MACDPaintObject<T extends MACDIndicator> extends SinglePaintObjectBox<T>
     final List<Offset> deaPoints = [];
     double zeroDy = valueToDy(BagNum.zero);
     final offset = startCandleDx - candleWidthHalf;
-    final candleHalf = candleWidthHalf - setting.candleMargin;
+    final candleHalf = candleWidthHalf - setting.candleSpacing;
     for (int i = start; i < end; i++) {
       m = list[i];
       ret = macdMap[m.timestamp];
@@ -185,7 +185,7 @@ class MACDPaintObject<T extends MACDIndicator> extends SinglePaintObjectBox<T>
       Paint()
         ..color = indicator.difColor
         ..style = PaintingStyle.stroke
-        ..strokeWidth = setting.defPaintLineWidth,
+        ..strokeWidth = setting.indicatorLineWidth,
     );
 
     canvas.drawPath(
@@ -193,7 +193,7 @@ class MACDPaintObject<T extends MACDIndicator> extends SinglePaintObjectBox<T>
       Paint()
         ..color = indicator.deaColor
         ..style = PaintingStyle.stroke
-        ..strokeWidth = setting.defPaintLineWidth,
+        ..strokeWidth = setting.indicatorLineWidth,
     );
   }
 
@@ -235,29 +235,17 @@ class MACDPaintObject<T extends MACDIndicator> extends SinglePaintObjectBox<T>
 
     children.add(TextSpan(
       text: difTxt,
-      style: TextStyle(
-        fontSize: setting.tipsDefaultTextSize,
-        color: indicator.difColor,
-        height: setting.tipsDefaultTextHeight,
-      ),
+      style: setting.tipsTextStyle.copyWith(color: indicator.difColor),
     ));
 
     children.add(TextSpan(
       text: deaTxt,
-      style: TextStyle(
-        fontSize: setting.tipsDefaultTextSize,
-        color: indicator.deaColor,
-        height: setting.tipsDefaultTextHeight,
-      ),
+      style: setting.tipsTextStyle.copyWith(color: indicator.deaColor),
     ));
 
     children.add(TextSpan(
       text: macdTxt,
-      style: TextStyle(
-        fontSize: setting.tipsDefaultTextSize,
-        color: indicator.macdColor ?? setting.tipsDefaultTextColor,
-        height: setting.tipsDefaultTextHeight,
-      ),
+      style: setting.tipsTextStyle.copyWith(color: indicator.macdColor),
     ));
 
     return canvas.drawText(
@@ -266,7 +254,7 @@ class MACDPaintObject<T extends MACDIndicator> extends SinglePaintObjectBox<T>
       drawDirection: DrawDirection.ltr,
       drawableRect: drawRect,
       textAlign: TextAlign.left,
-      padding: setting.tipsRectDefaultPadding,
+      padding: setting.tipsPadding,
       maxLines: 1,
     );
   }
