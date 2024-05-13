@@ -124,7 +124,7 @@ class VolMaPaintObject<T extends VolMaIndicator>
         Paint()
           ..color = param.color
           ..style = PaintingStyle.stroke
-          ..strokeWidth = setting.paintLineStrokeDefaultWidth,
+          ..strokeWidth = setting.defPaintLineWidth,
       );
     }
     // } finally {

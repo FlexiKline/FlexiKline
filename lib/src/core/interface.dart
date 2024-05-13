@@ -140,7 +140,7 @@ abstract interface class IChart {
 
   void paintChart(Canvas canvas, Size size);
 
-  void markRepaintChart();
+  void markRepaintChart({bool reset = false});
 }
 
 //// 最新价与十字线绘制API

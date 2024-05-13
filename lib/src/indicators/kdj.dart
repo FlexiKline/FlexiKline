@@ -162,7 +162,7 @@ class KDJPaintObject<T extends KDJIndicator> extends SinglePaintObjectBox<T>
       Paint()
         ..color = indicator.kColor
         ..style = PaintingStyle.stroke
-        ..strokeWidth = setting.paintLineStrokeDefaultWidth,
+        ..strokeWidth = setting.defPaintLineWidth,
     );
 
     canvas.drawPath(
@@ -170,7 +170,7 @@ class KDJPaintObject<T extends KDJIndicator> extends SinglePaintObjectBox<T>
       Paint()
         ..color = indicator.dColor
         ..style = PaintingStyle.stroke
-        ..strokeWidth = setting.paintLineStrokeDefaultWidth,
+        ..strokeWidth = setting.defPaintLineWidth,
     );
 
     canvas.drawPath(
@@ -178,7 +178,7 @@ class KDJPaintObject<T extends KDJIndicator> extends SinglePaintObjectBox<T>
       Paint()
         ..color = indicator.jColor
         ..style = PaintingStyle.stroke
-        ..strokeWidth = setting.paintLineStrokeDefaultWidth,
+        ..strokeWidth = setting.defPaintLineWidth,
     );
   }
 

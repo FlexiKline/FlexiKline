@@ -196,26 +196,47 @@ mixin SettingBinding on KlineBindingBase implements IConfig {
   /// 绘制区域宽度内, 可绘制的蜡烛数
   int get maxCandleCount => (mainDrawWidth / candleActualWidth).ceil();
 
-  /// CandleBar配置
-  // Candle Line
-  double candleLineWidth = 1;
-  Paint get candleLineLongPaint => Paint()
-    ..color = longColor
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = candleLineWidth;
-  Paint get candleLineShortPaint => Paint()
-    ..color = shortColor
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = candleLineWidth;
-  // Candle Bar
-  Paint get candleBarLongPaint => Paint()
+  /// 绘制线图的默认线宽
+  double defPaintLineWidth = 1.0;
+
+  /// 指标图 涨跌 bar/line 配置
+  // 实心
+  Paint get defLongBarPaint => Paint()
     ..color = longColor
     ..style = PaintingStyle.stroke
     ..strokeWidth = candleWidth;
-  Paint get candleBarShortPaint => Paint()
+  Paint get defShortBarPaint => Paint()
     ..color = shortColor
     ..style = PaintingStyle.stroke
     ..strokeWidth = candleWidth;
+  // 实心, 浅色
+  Paint get defLongTintBarPaint => Paint()
+    ..color = longTintColor
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = candleWidth;
+  Paint get defShortTintBarPaint => Paint()
+    ..color = shortTintColor
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = candleWidth;
+  // 空心
+  Paint get defLongHollowBarPaint => Paint()
+    ..color = longColor
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 1;
+  Paint get defShortHollowBarPaint => Paint()
+    ..color = shortColor
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 1;
+  // 线
+  double defCandleLineWidth = 1;
+  Paint get defLongLinePaint => Paint()
+    ..color = longColor
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = defCandleLineWidth;
+  Paint get defShortLinePaint => Paint()
+    ..color = shortColor
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = defCandleLineWidth;
 
   // Candle 第一根Candle相对于mainRect右边的偏移
   double firstCandleInitOffset = 80;
@@ -505,46 +526,4 @@ mixin SettingBinding on KlineBindingBase implements IConfig {
   EdgeInsets tipsRectDefaultPadding = const EdgeInsets.only(
     left: 8,
   );
-
-  /// 绘制线图的默认线宽
-  double paintLineStrokeDefaultWidth = 1.0;
-
-  /// 指标图 涨跌 bar/line 配置
-  // 实心
-  Paint get defLongBarPaint => Paint()
-    ..color = longColor
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = candleWidth;
-  Paint get defShortBarPaint => Paint()
-    ..color = shortColor
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = candleWidth;
-  // 实心, 浅色
-  Paint get defLongTintBarPaint => Paint()
-    ..color = longTintColor
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = candleWidth;
-  Paint get defShortTintBarPaint => Paint()
-    ..color = shortTintColor
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = candleWidth;
-  // 空心
-  Paint get defLongHollowBarPaint => Paint()
-    ..color = longColor
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = 1;
-  Paint get defShortHollowBarPaint => Paint()
-    ..color = shortColor
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = 1;
-  // 线
-  double defLongShortLineWidth = 1;
-  Paint get defLongLinePaint => Paint()
-    ..color = longColor
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = defLongShortLineWidth;
-  Paint get defShortLinePaint => Paint()
-    ..color = shortColor
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = defLongShortLineWidth;
 }

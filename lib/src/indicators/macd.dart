@@ -185,7 +185,7 @@ class MACDPaintObject<T extends MACDIndicator> extends SinglePaintObjectBox<T>
       Paint()
         ..color = indicator.difColor
         ..style = PaintingStyle.stroke
-        ..strokeWidth = setting.paintLineStrokeDefaultWidth,
+        ..strokeWidth = setting.defPaintLineWidth,
     );
 
     canvas.drawPath(
@@ -193,7 +193,7 @@ class MACDPaintObject<T extends MACDIndicator> extends SinglePaintObjectBox<T>
       Paint()
         ..color = indicator.deaColor
         ..style = PaintingStyle.stroke
-        ..strokeWidth = setting.paintLineStrokeDefaultWidth,
+        ..strokeWidth = setting.defPaintLineWidth,
     );
   }
 

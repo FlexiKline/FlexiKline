@@ -157,7 +157,7 @@ class BOLLPaintObject<T extends BOLLIndicator> extends SinglePaintObjectBox<T> {
       Paint()
         ..color = indicator.mbColor
         ..style = PaintingStyle.stroke
-        ..strokeWidth = setting.paintLineStrokeDefaultWidth,
+        ..strokeWidth = setting.defPaintLineWidth,
     );
 
     canvas.drawPath(
@@ -165,7 +165,7 @@ class BOLLPaintObject<T extends BOLLIndicator> extends SinglePaintObjectBox<T> {
       Paint()
         ..color = indicator.upColor
         ..style = PaintingStyle.stroke
-        ..strokeWidth = setting.paintLineStrokeDefaultWidth,
+        ..strokeWidth = setting.defPaintLineWidth,
     );
 
     canvas.drawPath(
@@ -173,7 +173,7 @@ class BOLLPaintObject<T extends BOLLIndicator> extends SinglePaintObjectBox<T> {
       Paint()
         ..color = indicator.dnColor
         ..style = PaintingStyle.stroke
-        ..strokeWidth = setting.paintLineStrokeDefaultWidth,
+        ..strokeWidth = setting.defPaintLineWidth,
     );
 
     if (indicator.isFillBetweenUpAndDn) {

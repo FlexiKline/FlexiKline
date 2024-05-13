@@ -47,15 +47,25 @@ mixin ChartBinding
     _repaintCandle.value++;
   }
 
-  //// Last Price ////
+  //// Latest Price ////
   Timer? _lastPriceCountDownTimer;
   @protected
-  void markRepaintLastPrice() => _markRepaint();
+  void markRepaintLastPrice({bool latestPriceUpdated = false}) {
+    // 最新价已更新, 且首根蜡烛在可视区域内.
+    _reset = latestPriceUpdated && paintDxOffset <= 0;
+    _markRepaint();
+  }
+
+  /// 控制doInitState操作是否重置计算结果
+  bool _reset = false;
 
   /// 触发重绘蜡烛线.
   @override
   @protected
-  void markRepaintChart() => _markRepaint();
+  void markRepaintChart({bool reset = false}) {
+    _reset = reset;
+    _markRepaint();
+  }
 
   @protected
   void startLastPriceCountDownTimer() {
@@ -96,7 +106,7 @@ mixin ChartBinding
         solt++,
         start: curKlineData.start,
         end: curKlineData.end,
-        reset: false,
+        reset: _reset,
       );
 
       /// 绘制副图的指标图

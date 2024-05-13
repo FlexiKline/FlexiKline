@@ -145,7 +145,7 @@ class EMAPaintObject<T extends EMAIndicator> extends SinglePaintObjectBox<T> {
         Paint()
           ..color = param.color
           ..style = PaintingStyle.stroke
-          ..strokeWidth = setting.paintLineStrokeDefaultWidth,
+          ..strokeWidth = setting.defPaintLineWidth,
       );
     }
     // } finally {

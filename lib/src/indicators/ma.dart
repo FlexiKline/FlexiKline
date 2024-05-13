@@ -123,7 +123,7 @@ class MAPaintObject<T extends MAIndicator> extends SinglePaintObjectBox<T> {
         Paint()
           ..color = indicator.calcParams[j].color
           ..style = PaintingStyle.stroke
-          ..strokeWidth = setting.paintLineStrokeDefaultWidth,
+          ..strokeWidth = setting.defPaintLineWidth,
       );
     }
   }

@@ -61,7 +61,7 @@ mixin StateBinding
   set curKlineData(data) {
     _curKlineData = data;
     initPaintDxOffset();
-    markRepaintChart();
+    markRepaintChart(reset: true);
     cancelCross();
   }
 

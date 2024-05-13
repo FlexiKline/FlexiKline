@@ -229,7 +229,7 @@ class CandlePaintObject<T extends CandleIndicator>
       canvas.drawLine(
         highOff,
         lowOff,
-        isLong ? setting.candleLineLongPaint : setting.candleLineShortPaint,
+        isLong ? setting.defLongLinePaint : setting.defShortLinePaint,
       );
 
       final openOff = Offset(dx, valueToDy(m.open));
@@ -237,7 +237,7 @@ class CandlePaintObject<T extends CandleIndicator>
       canvas.drawLine(
         openOff,
         closeOff,
-        isLong ? setting.candleBarLongPaint : setting.candleBarShortPaint,
+        isLong ? setting.defLongBarPaint : setting.defShortBarPaint,
       );
 
       final timeTickIntervalCount =
