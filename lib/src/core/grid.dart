@@ -16,11 +16,21 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 
+import '../extension/export.dart';
+import '../model/export.dart';
 import 'binding_base.dart';
 import 'interface.dart';
 import 'setting.dart';
 
-mixin GridBinding on KlineBindingBase, SettingBinding implements IConfig {
+mixin GridBinding
+    on KlineBindingBase, SettingBinding
+    implements IGrid, IConfig {
+  @override
+  void init() {
+    super.init();
+    initGridConfig(gridConfig);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -33,90 +43,122 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IConfig {
     logd('dispose grid');
   }
 
+  @override
+  void storeState() {
+    super.storeState();
+    storeGridConfig(grid);
+  }
+
+  late Grid _grid;
+
+  @override
+  Grid get grid => _grid;
+
+  void initGridConfig(Map<String, dynamic> config) {
+    // 从配置中恢复
+    _grid = Grid.fromJson(config);
+  }
+
+  @override
   void markRepaintGrid() => repaintGridBg.value++;
   ValueNotifier<int> repaintGridBg = ValueNotifier(0);
 
   void paintGridBg(Canvas canvas, Size size) {
-    paintMainGrid(canvas, size);
-    paintSubGrid(canvas, size);
-  }
+    if (grid.show) {
+      // 主图图Grid X轴起始值
+      const mainLeft = 0.0;
+      final mainRight = mainRectWidth;
+      // 主图图Grid Y轴起始值
+      const mainTop = 0.0;
+      final mainBottom = mainDrawBottom;
+      // 副图Grid Y轴起始值
+      final subTop = subRect.top;
+      final subBottom = subRect.bottom;
 
-  void paintMainGrid(Canvas canvas, Size size) {
-    /// 绘制主图Grid gridCount*gridCount 坐标
-    final yAxisStep = mainRectWidth / gridCount;
-    final xAxisStep = mainDrawBottom / gridCount;
-    final paintX = gridXAxisLinePaint;
-    final paintY = gridYAxisLinePaint;
-    double dx = 0;
-    double dy = 0;
-    canvas.drawLine(
-      Offset(0, dy),
-      Offset(mainRectWidth, dy),
-      paintX,
-    );
-    for (int i = 1; i < gridCount; i++) {
-      dx = i * yAxisStep;
-      dy = i * xAxisStep;
-      // 绘制xAsix线
-      canvas.drawLine(
-        Offset(0, dy),
-        Offset(mainRectWidth, dy),
-        paintX,
-      );
-      // 绘制YAsix线
-      canvas.drawLine(
-        Offset(dx, 0),
-        Offset(dx, mainDrawBottom),
-        paintY,
-      );
-    }
-    canvas.drawLine(
-      Offset(0, mainDrawBottom),
-      Offset(mainRectWidth, mainDrawBottom),
-      paintX,
-    );
-  }
+      // 绘制horizontal轴 Grid 线
+      if (grid.horizontal.show) {
+        double dy = mainTop;
 
-  void paintSubGrid(Canvas canvas, Size size) {
-    /// 绘制副图Grid X轴线
-    final yAxisStep = mainRectWidth / gridCount;
-    final paintX = gridXAxisLinePaint;
-    final paintY = gridYAxisLinePaint;
-    final subTop = subRect.top;
+        // 绘制主图顶部起始线
+        canvas.drawLineType(
+          grid.horizontal.type,
+          Path()
+            ..moveTo(mainLeft, dy)
+            ..lineTo(mainRight, dy),
+          grid.horizontal.paint,
+        );
 
-    double dx = 0;
-    double dy = 0;
+        // 绘制主图网格线
+        final step = mainBottom / grid.horizontal.count;
+        for (int i = 1; i < grid.horizontal.count; i++) {
+          dy = i * step;
+          canvas.drawLineType(
+            grid.horizontal.type,
+            Path()
+              ..moveTo(mainLeft, dy)
+              ..lineTo(mainRight, dy),
+            grid.horizontal.paint,
+          );
+        }
 
-    // 绘制起始线.
-    canvas.drawLine(
-      Offset(0, subTop),
-      Offset(mainRectWidth, subTop),
-      paintX,
-    );
+        // 绘制主图mainDrawBottom线
+        canvas.drawLineType(
+          grid.horizontal.type,
+          Path()
+            ..moveTo(mainLeft, mainBottom)
+            ..lineTo(mainRight, mainBottom),
+          grid.horizontal.paint,
+        );
 
-    final list = subIndicatorHeightList;
-    double height = 0.0;
-    for (int i = 0; i < list.length; i++) {
-      height += list[i];
-      dy = subTop + height;
-      // 绘制XAsix线
-      canvas.drawLine(
-        Offset(0, dy),
-        Offset(mainRectWidth, dy),
-        paintX,
-      );
-    }
+        // 绘制副图区域起始线
+        canvas.drawLineType(
+          grid.horizontal.type,
+          Path()
+            ..moveTo(mainLeft, subTop)
+            ..lineTo(mainRight, subTop),
+          grid.horizontal.paint,
+        );
 
-    ///绘制副图Grid Y轴线
-    final subBottom = subRect.bottom;
-    for (int i = 1; i < gridCount; i++) {
-      dx = i * yAxisStep;
-      // 绘制YAsix线
-      canvas.drawLine(
-        Offset(dx, subTop),
-        Offset(dx, subBottom),
-        paintY,
-      );
+        // 绘制每一个副图的底部线
+        final list = subIndicatorHeightList;
+        double height = 0.0;
+        for (int i = 0; i < list.length; i++) {
+          height += list[i];
+          dy = subTop + height;
+          canvas.drawLineType(
+            grid.horizontal.type,
+            Path()
+              ..moveTo(mainLeft, dy)
+              ..lineTo(mainRight, dy),
+            grid.horizontal.paint,
+          );
+        }
+      }
+
+      // 绘制Vertical轴 Grid 线
+      if (grid.vertical.show) {
+        double dx = mainLeft;
+        final step = mainRight / grid.vertical.count;
+
+        for (int i = 1; i < grid.vertical.count; i++) {
+          dx = i * step;
+          canvas.drawLineType(
+            grid.horizontal.type,
+            Path()
+              ..moveTo(dx, mainTop)
+              ..lineTo(dx, mainBottom),
+            grid.horizontal.paint,
+          );
+
+          canvas.drawLineType(
+            grid.horizontal.type,
+            Path()
+              ..moveTo(dx, subTop)
+              ..lineTo(dx, subBottom),
+            grid.horizontal.paint,
+          );
+        }
+      }
     }
   }
 }

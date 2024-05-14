@@ -91,21 +91,21 @@ abstract interface class IPaintDelegate {
   void doOnCross(Canvas canvas, Offset offset, {CandleModel? model});
 }
 
-/// 绘制对象混入全局Setting配置.
-mixin SettingProxyMixin on PaintObject {
-  late final SettingBinding settingBinding;
-  late final SettingData setting;
+/// FlexiKlineController 状态/配置/接口代理
+mixin ControllerProxyMixin on PaintObject {
+  late final KlineBindingBase controller;
+
+  // TODO: 待命名统一
+  SettingBinding get settingBinding => controller as SettingBinding;
+  SettingData get setting => settingBinding.settingData; // TODO: 待命名统一
+  Grid get grid => (controller as IGrid).grid;
+  IState get state => controller as IState;
+  ICross get cross => controller as ICross;
+  IConfig get config => controller as IConfig;
 
   double get candleActualWidth => settingBinding.candleActualWidth;
 
   double get candleWidthHalf => settingBinding.candleWidthHalf;
-}
-
-/// 绘制对象混入数据状态代理State
-mixin StateProxyMixin on PaintObject {
-  late final IState state;
-  late final ICross cross;
-  late final IConfig config;
 
   KlineData get klineData => state.curKlineData;
 
@@ -393,17 +393,18 @@ abstract class PaintObject<T extends Indicator>
 /// PaintObjectProxy
 /// 通过参数KlineBindingBase 混入对setting和state的代理
 abstract class PaintObjectProxy<T extends Indicator> extends PaintObject
-    with KlineLog, SettingProxyMixin, StateProxyMixin {
+    with KlineLog, ControllerProxyMixin {
   PaintObjectProxy({
     required KlineBindingBase controller,
     required T super.indicator,
   }) {
+    this.controller = controller;
     loggerDelegate = controller.loggerDelegate;
-    setting = controller.settingData;
-    settingBinding = controller as SettingBinding;
-    state = controller as IState;
-    cross = controller as ICross;
-    config = controller as IConfig;
+    // settingBinding = controller as SettingBinding;
+    // setting = controller.settingData; // TODO: 待命名统一
+    // state = controller as IState;
+    // cross = controller as ICross;
+    // config = controller as IConfig;
   }
 
   @override

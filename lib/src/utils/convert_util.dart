@@ -17,21 +17,6 @@ import 'package:flutter/material.dart';
 
 import '../constant.dart';
 
-Decimal stringToDecimal(dynamic value) =>
-    stringToDecimalOrNull(value) ?? Decimal.zero;
-
-Decimal? stringToDecimalOrNull(dynamic value) {
-  if (value == null) {
-    return null;
-  } else {
-    return Decimal.tryParse(value.toString());
-  }
-}
-
-String decimalToString(dynamic value) => value?.toString() ?? "";
-
-String? decimalToStringOrNull(dynamic value) => value?.toString();
-
 int valueToInt(dynamic value) {
   if (value is int) {
     return value;
@@ -44,7 +29,7 @@ String intToString(int value) {
   return value.toString();
 }
 
-DateTime? valueToDateTime(dynamic value) {
+DateTime? parseDateTime(dynamic value) {
   if (value == null) {
     return null;
   } else if (value is int) {
@@ -55,7 +40,7 @@ DateTime? valueToDateTime(dynamic value) {
   return null;
 }
 
-int? dateTimeToInt(dynamic dateTime) {
+int? convertDateTime(dynamic dateTime) {
   if (dateTime == null) {
     return null;
   } else if (dateTime is DateTime) {
@@ -99,7 +84,7 @@ String? convertDouble(double? value, {String? def}) {
   return value.toString();
 }
 
-Color parseHexColor(String? hexStr, {Color def = Colors.transparent}) {
+Color? parseHexColor(String? hexStr, {Color? def}) {
   if (hexStr == null || hexStr.trim().isEmpty) {
     return def;
   }
@@ -118,7 +103,7 @@ Color parseHexColor(String? hexStr, {Color def = Colors.transparent}) {
   return Color(colorInt);
 }
 
-String convertHexColor(Color? color, {String def = ''}) {
+String? convertHexColor(Color? color, {String? def}) {
   if (color == null) return def;
   return '0x${color.value.toRadixString(16).padLeft(8, '0')}';
 }
@@ -294,7 +279,7 @@ BorderSide parseBorderSide(Map<String, dynamic>? json) {
   if (json == null || json.isEmpty) return BorderSide.none;
   final style = json['style']?.toString() ?? BorderStyle.solid.name;
   return BorderSide(
-    color: parseHexColor(json['color']),
+    color: parseHexColor(json['color']) ?? const Color(0xFF000000),
     width: parseDouble(json['width']) ?? 1.0,
     style: BorderStyle.values.firstWhere(
       (e) => e.name == style,

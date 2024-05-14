@@ -24,7 +24,7 @@ import '../utils/export.dart';
 import 'binding_base.dart';
 import 'interface.dart';
 
-mixin SettingBinding on KlineBindingBase implements IConfig {
+mixin SettingBinding on KlineBindingBase implements ISetting, IConfig {
   @override
   void init() {
     initSetting(settingConfig);
@@ -56,6 +56,7 @@ mixin SettingBinding on KlineBindingBase implements IConfig {
   }
 
   late SettingData _settingData;
+
   @override
   SettingData get settingData => _settingData;
 

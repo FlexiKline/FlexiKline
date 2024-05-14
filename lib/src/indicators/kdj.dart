@@ -119,15 +119,15 @@ class KDJPaintObject<T extends KDJIndicator> extends SinglePaintObjectBox<T>
 
   @override
   void paintChart(Canvas canvas, Size size) {
+    /// 绘制KDJ线
+    paintKDJLine(canvas, size);
+
     /// 绘制Y轴刻度值
     paintYAxisTick(
       canvas,
       size,
       tickCount: indicator.tickCount ?? setting.subIndicatorTickCount,
     );
-
-    /// 绘制KDJ线
-    paintKDJLine(canvas, size);
   }
 
   @override

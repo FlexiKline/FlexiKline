@@ -116,14 +116,14 @@ class MACDPaintObject<T extends MACDIndicator> extends SinglePaintObjectBox<T>
 
   @override
   void paintChart(Canvas canvas, Size size) {
+    paintMacdChart(canvas, size);
+
     /// 绘制Y轴刻度值
     paintYAxisTick(
       canvas,
       size,
       tickCount: indicator.tickCount ?? setting.subIndicatorTickCount,
     );
-
-    paintMacdChart(canvas, size);
   }
 
   @override

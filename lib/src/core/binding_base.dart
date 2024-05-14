@@ -65,8 +65,6 @@ abstract class KlineBindingBase with KlineLog, KlineStorage, GestureHanderImpl {
 
   KlineBindingBase get instance => this;
 
-  SettingData get settingData;
-
   T getInstance<T extends KlineBindingBase>(T instance) {
     return instance;
   }

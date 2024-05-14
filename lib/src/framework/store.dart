@@ -207,7 +207,15 @@ mixin KlineStorage implements IStore, ILogger {
     );
   }
 
+  /// SettingData
+
   void storeSettingData(SettingData settingData) {
     flexiKlineConfig[jsonKeySetting] = settingData.toJson();
+  }
+
+  /// Grid
+  Map<String, dynamic> get gridConfig => _getRootConfig(jsonKeyGrid);
+  void storeGridConfig(Grid grid) {
+    flexiKlineConfig[jsonKeyGrid] = grid.toJson();
   }
 }

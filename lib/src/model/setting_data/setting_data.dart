@@ -13,14 +13,13 @@
 // limitations under the License.
 
 import 'package:flutter/material.dart';
-import 'package:json_annotation/json_annotation.dart';
 
 import '../../constant.dart';
 import '../../framework/serializers.dart';
 
 part 'setting_data.g.dart';
 
-@FlexiModelSerializable
+@FlexiSettingSerializable
 class SettingData {
   SettingData({
     /// Long/Short颜色配置
@@ -126,151 +125,101 @@ class SettingData {
         tickTextStyle = tickTextStyle ?? defaultTextStyle;
 
   /// Long/Short颜色配置
-  @JsonKey()
   final Color textColor;
-  @JsonKey()
   final Color longColor;
-  @JsonKey()
   final Color shortColor;
-  @JsonKey()
   final double opacity;
 
   /// 内置LoadingView样式配置
-  @JsonKey()
   final double loadingProgressSize;
-  @JsonKey()
   final double loadingProgressStrokeWidth;
-  @JsonKey()
   final Color loadingProgressBackgroundColor;
-  @JsonKey()
   final Color loadingProgressValueColor;
 
   /// 主/副图区域大小配置
-  @JsonKey()
   Rect mainRect;
-  @JsonKey()
   double mainTipsHeight;
-  @JsonKey()
   EdgeInsets mainPadding;
 
   /// 主/副图绘制参数
   // 绘制区域最少留白比例
   // 例如: 当蜡烛数量不足以绘制一屏, 向右移动到末尾时, 绘制区域左边最少留白区域占可绘制区域(canvasWidth)的比例
-  @JsonKey()
   double minPaintBlankRate;
   // 如果足够总是计算一屏的蜡烛.
   // 当滑动或初始化时会存在(minPaintBlankRate)的空白, 此时, 计算按一屏的蜡烛数量向后计算.
-  @JsonKey()
   bool alwaysCalculateScreenOfCandlesIfEnough;
   // 最大蜡烛宽度[1, 50]
-  @JsonKey()
   double candleMaxWidth;
   // 单根蜡烛宽度
-  @JsonKey()
   double candleWidth;
   // 蜡烛间距
-  @JsonKey()
   double candleSpacing;
   // 蜡烛线宽(high, low)
-  @JsonKey()
   double candleLineWidth;
   // Candle 第一根Candle相对于mainRect右边的偏移
-  @JsonKey()
   double firstCandleInitOffset;
   // 指标线图的默认线宽
-  @JsonKey()
   double indicatorLineWidth;
 
   /// 主/副图 Grid Axis conifg
   // 主图区域grid的数量
-  @JsonKey()
   final int gridCount;
-  @JsonKey()
   final Color gridLineColor;
-  @JsonKey()
   final double gridLineWidth;
 
   /// 全局默认文本配置: TextStyle / Background / Border
-  @JsonKey()
   final TextStyle defaultTextStyle;
-  @JsonKey()
   final EdgeInsets defaultPadding;
-  @JsonKey()
   final Color defaultBackground;
-  @JsonKey()
   final BorderSide defaultBorder;
-  @JsonKey()
   final BorderRadius defaultRadius;
-  @JsonKey()
   final TextStyle longTextStyle;
-  @JsonKey()
   final TextStyle shortTextStyle;
   // Tips文本样式
-  @JsonKey()
   final TextStyle tipsTextStyle;
   // Tips文本的通用Padding
-  @JsonKey()
   final EdgeInsets tipsPadding;
 
   /// 全局默认的刻度值配置.
   // 刻度文本区域距离边框
-  @JsonKey()
   final double tickRectMargin;
-  @JsonKey()
   final TextStyle tickTextStyle;
-  @JsonKey()
   final EdgeInsets tickPadding;
 
   /// 标记线配置
-  @JsonKey()
   final double markLineWidth;
-  @JsonKey()
   final Color markLineColor;
 
   /// Cross 通用配置
-  @JsonKey()
   final double crosshairLineWidth;
-  @JsonKey()
   final Color crosshairLineColor;
-  @JsonKey()
   final List<double> crosshairLineDashes;
-  @JsonKey()
   final Color corssPointColor;
-  @JsonKey()
   final double crossPointRadius;
-  @JsonKey()
   final double crossPointWidth;
   // onCross时, 刻度配置 (价钱/数量/时间...)
-  @JsonKey()
+
   final TextStyle crossTickTextStyle;
-  @JsonKey()
   final Color crossTickBackground;
-  @JsonKey()
   final EdgeInsets crossTickPadding;
-  @JsonKey()
   final BorderSide crossTickBorder;
-  @JsonKey()
   final BorderRadius crossTickRadius;
 
   /// 副图配置
   // 副区的指标图最大数量
-  @JsonKey()
   int subChartMaxCount;
   // 副图的指标图的右侧右侧刻度数量
-  @JsonKey()
   final int subIndicatorTickCount;
   // 副图指标图默认高度
-  @JsonKey()
   final double subIndicatorDefaultHeight;
   // 副图指标图默认Tips高度
-  @JsonKey()
   final double subIndicatorDefaultTipsHeight;
   // 副图指标图默认Pading
-  @JsonKey()
   final EdgeInsets subIndicatorDefaultPadding;
 
   factory SettingData.fromJson(Map<String, dynamic> json) =>
       _$SettingDataFromJson(json);
+
   Map<String, dynamic> toJson() => _$SettingDataToJson(this);
 }
 

@@ -157,3 +157,12 @@ abstract interface class ICross {
   /// 取消当前Cross事件
   void cancelCross();
 }
+
+abstract interface class ISetting {
+  SettingData get settingData;
+}
+
+abstract interface class IGrid {
+  Grid get grid;
+  void markRepaintGrid();
+}

@@ -1,5 +1,7 @@
 import 'dart:ui';
 
+import 'common.dart';
+
 /// Came from [flutter_path_drawing](https://github.com/dnfield/flutter_path_drawing) library.
 /// Creates a new path that is drawn from the segments of `source`.
 ///
@@ -106,5 +108,19 @@ extension PathDraw on Canvas {
       ),
       paint,
     );
+  }
+
+  /// 绘制线(根据LineType)
+  void drawLineType(
+    LineType type,
+    Path path,
+    Paint paint, {
+    List<double>? dashes,
+  }) {
+    if (type == LineType.dashed) {
+      drawDashPath(path, paint, dashes: dashes);
+    } else {
+      drawPath(path, paint);
+    }
   }
 }

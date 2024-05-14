@@ -14,6 +14,7 @@
 
 import 'package:flutter/material.dart';
 
+const jsonKeyGrid = 'grid';
 const jsonKeySetting = 'setting';
 const jsonKeySupportMainIndicators = 'supportMainIndicators';
 const jsonKeySupportSubIndicators = 'supportSubIndicators';

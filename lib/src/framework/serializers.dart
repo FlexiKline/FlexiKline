@@ -14,9 +14,9 @@
 
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:json_annotation/json_annotation.dart';
 
+import '../extension/export.dart';
 import '../utils/convert_util.dart';
 import 'common.dart';
 import 'indicator.dart';
@@ -123,6 +123,39 @@ class SizeConverter implements JsonConverter<Size, Map<String, dynamic>> {
       'width': size.width,
       'height': size.height,
     };
+  }
+}
+
+class PaintingStyleConverter implements JsonConverter<PaintingStyle, String> {
+  const PaintingStyleConverter();
+  @override
+  PaintingStyle fromJson(String json) {
+    return PaintingStyle.values.firstWhere(
+      (e) => e.name == json,
+      orElse: () => PaintingStyle.stroke,
+    );
+  }
+
+  @override
+  String toJson(PaintingStyle object) {
+    return object.name;
+  }
+}
+
+class LineTypeConverter implements JsonConverter<LineType, String> {
+  const LineTypeConverter();
+
+  @override
+  LineType fromJson(String json) {
+    return LineType.values.firstWhere(
+      (e) => e.name == json,
+      orElse: () => LineType.solid,
+    );
+  }
+
+  @override
+  String toJson(LineType object) {
+    return object.name;
   }
 }
 
@@ -272,12 +305,12 @@ class ColorConverter implements JsonConverter<Color, String?> {
 
   @override
   Color fromJson(String? json) {
-    return parseHexColor(json);
+    return parseHexColor(json) ?? Colors.transparent;
   }
 
   @override
   String toJson(Color? color) {
-    return convertHexColor(color);
+    return convertHexColor(color) ?? '';
   }
 }
 
@@ -371,8 +404,29 @@ const FlexiModelSerializable = JsonSerializable(
     BorderSideConvert(),
     BorderConverter(),
     BorderRadiusConverter(),
+    PaintingStyleConverter(),
+    LineTypeConverter(),
   ],
   ignoreUnannotated: true,
+  explicitToJson: true,
+  includeIfNull: false,
+);
+
+// ignore: constant_identifier_names
+const FlexiSettingSerializable = JsonSerializable(
+  converters: [
+    ColorConverter(),
+    DecimalConverter(),
+    EdgeInsetsConverter(),
+    TextStyleConverter(),
+    SizeConverter(),
+    RectConverter(),
+    BorderSideConvert(),
+    BorderConverter(),
+    BorderRadiusConverter(),
+    PaintingStyleConverter(),
+    LineTypeConverter(),
+  ],
   explicitToJson: true,
   includeIfNull: false,
 );

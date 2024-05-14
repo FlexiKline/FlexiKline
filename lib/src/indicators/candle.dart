@@ -164,7 +164,7 @@ class CandlePaintObject<T extends CandleIndicator>
     // paintXAxisTimeTick(canvas);
 
     /// 绘制Y轴价钱刻度数据
-    paintYAxisPriceTick(canvas, size);
+    paintPriceTick(canvas, size);
   }
 
   @override
@@ -359,11 +359,11 @@ class CandlePaintObject<T extends CandleIndicator>
     // }
   }
 
-  void paintYAxisPriceTick(Canvas canvas, Size size) {
+  void paintPriceTick(Canvas canvas, Size size) {
     final yAxisStep = chartRect.bottom / setting.gridCount;
     final dx = chartRect.right;
     double dy = 0;
-    for (int i = 1; i <= setting.gridCount; i++) {
+    for (int i = 1; i <= grid.horizontal.count; i++) {
       dy = i * yAxisStep;
       final price = dyToValue(dy);
       if (price == null) continue;

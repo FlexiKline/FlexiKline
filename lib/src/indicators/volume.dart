@@ -84,6 +84,9 @@ class VolumePaintObject<T extends VolumeIndicator>
 
   @override
   void paintChart(Canvas canvas, Size size) {
+    /// 绘制Volume柱状图
+    paintVolumeChart(canvas, size);
+
     if (indicator.showYAxisTick) {
       /// 绘制Y轴刻度值
       paintYAxisTick(
@@ -92,9 +95,6 @@ class VolumePaintObject<T extends VolumeIndicator>
         tickCount: indicator.tickCount ?? setting.subIndicatorTickCount,
       );
     }
-
-    /// 绘制Volume柱状图
-    paintVolumeChart(canvas, size);
   }
 
   @override
