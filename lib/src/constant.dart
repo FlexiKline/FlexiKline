@@ -24,6 +24,10 @@ const EdgeInsets defaultIndicatorPadding = EdgeInsets.zero;
 
 const int defaultSubChartMaxCount = 4;
 
+// 默认Text配置
+const double defaulTextSize = 10;
+const double defaultTextHeight = 1;
+
 /// 计算模式
 /// [fast] 使用(IEEE 754 二进制浮点数算术标准)计算指标数据. (用double类型计算)
 /// [accurate] 使用Decimal基于十进制算术的精确计算指标数据. (用Decimal类型计算)

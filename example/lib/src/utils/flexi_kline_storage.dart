@@ -15,8 +15,10 @@
 import 'dart:convert';
 
 import 'package:flexi_kline/flexi_kline.dart';
+import 'package:flutter/material.dart';
 
 import '../config.dart';
+import '../theme/export.dart';
 import 'cache_util.dart';
 
 class FlexiKlineStorage extends IStore {
@@ -42,5 +44,56 @@ class FlexiKlineStorage extends IStore {
       final jsonSrc = jsonEncode(klineConfig);
       CacheUtil().setString(flexKlineConfigKey, jsonSrc);
     }
+  }
+
+  FlexiKlineConfig getFlexiKlineConfigObject(FKTheme theme) {
+    return FlexiKlineConfig(
+      grid: GridConfig(
+        show: true,
+        horizontal: GridAxis(
+          show: true,
+          width: 0.5,
+          color: theme.dividerLine,
+          type: LineType.solid,
+          dashes: const [2, 2],
+        ),
+        vertical: GridAxis(
+          show: true,
+          width: 0.5,
+          color: theme.dividerLine,
+          type: LineType.solid,
+          dashes: const [2, 2],
+        ),
+      ),
+      setting: SettingConfig(),
+      cross: CrossConfig(
+        enable: true,
+        crosshair: Crosshair(
+          width: 0.5,
+          color: theme.t1,
+          type: LineType.dashed,
+          dashes: const [3, 3],
+        ),
+        point: CrossPoint(
+          radius: 2,
+          width: 6,
+          color: theme.t1,
+        ),
+        tickText: CrossTickText(
+          style: TextStyle(
+            color: theme.t1,
+            fontSize: 10,
+            fontWeight: FontWeight.normal,
+            height: 1,
+          ),
+          background: theme.lightBg,
+          padding: const EdgeInsets.all(2),
+          border: BorderSide.none,
+          borderRadius: const BorderRadius.all(
+            Radius.circular(2),
+          ),
+        ),
+      ),
+    );
   }
 }

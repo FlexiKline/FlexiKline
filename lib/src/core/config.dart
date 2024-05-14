@@ -65,7 +65,7 @@ mixin ConfigBinding
             VolumeIndicator.fromJson,
           ) ??
           VolumeIndicator(
-            height: settingData.subIndicatorDefaultHeight,
+            height: settingConfig.subIndicatorDefaultHeight,
             paintMode: PaintMode.alone,
             showYAxisTick: false,
             showCrossMark: false,
@@ -101,16 +101,16 @@ mixin ConfigBinding
             MACDIndicator.fromJson,
           ) ??
           MACDIndicator(
-            height: settingData.subIndicatorDefaultHeight,
-            tipsHeight: settingData.subIndicatorDefaultTipsHeight,
+            height: settingConfig.subIndicatorDefaultHeight,
+            tipsHeight: settingConfig.subIndicatorDefaultTipsHeight,
           ),
       kdjKey: restoreSubSupportIndicator(
             kdjKey,
             KDJIndicator.fromJson,
           ) ??
           KDJIndicator(
-            height: settingData.subIndicatorDefaultHeight,
-            tipsHeight: settingData.subIndicatorDefaultTipsHeight,
+            height: settingConfig.subIndicatorDefaultHeight,
+            tipsHeight: settingConfig.subIndicatorDefaultTipsHeight,
           ),
       maVolKey: restoreSubSupportIndicator(
             maVolKey,
@@ -119,8 +119,8 @@ mixin ConfigBinding
           MultiPaintObjectIndicator(
             key: maVolKey,
             name: 'MAVOL',
-            height: settingData.subIndicatorDefaultHeight,
-            tipsHeight: settingData.subIndicatorDefaultTipsHeight,
+            height: settingConfig.subIndicatorDefaultHeight,
+            tipsHeight: settingConfig.subIndicatorDefaultTipsHeight,
           ),
     };
 
@@ -132,7 +132,7 @@ mixin ConfigBinding
             childKey: volumeKey,
           ) ??
           VolumeIndicator(
-            height: settingData.subIndicatorDefaultHeight,
+            height: settingConfig.subIndicatorDefaultHeight,
           ),
       restoreSubSupportIndicator(
             maVolKey,
@@ -140,7 +140,7 @@ mixin ConfigBinding
             childKey: volMaKey,
           ) ??
           VolMaIndicator(
-            height: settingData.subIndicatorDefaultHeight,
+            height: settingConfig.subIndicatorDefaultHeight,
           ),
     ], this);
 

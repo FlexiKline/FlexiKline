@@ -12,5 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export 'grid.dart';
-export 'setting_data.dart';
+class CandleConfig {}

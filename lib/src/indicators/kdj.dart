@@ -126,14 +126,14 @@ class KDJPaintObject<T extends KDJIndicator> extends SinglePaintObjectBox<T>
     paintYAxisTick(
       canvas,
       size,
-      tickCount: indicator.tickCount ?? setting.subIndicatorTickCount,
+      tickCount: indicator.tickCount ?? settingConfig.subIndicatorTickCount,
     );
   }
 
   @override
   void onCross(Canvas canvas, Offset offset) {
     /// onCross时, 绘制Y轴上的标记值
-    paintYAxisMarkOnCross(canvas, offset);
+    paintYAxisTickOnCross(canvas, offset);
   }
 
   void paintKDJLine(Canvas canvas, Size size) {
@@ -162,7 +162,7 @@ class KDJPaintObject<T extends KDJIndicator> extends SinglePaintObjectBox<T>
       Paint()
         ..color = indicator.kColor
         ..style = PaintingStyle.stroke
-        ..strokeWidth = setting.indicatorLineWidth,
+        ..strokeWidth = settingConfig.indicatorLineWidth,
     );
 
     canvas.drawPath(
@@ -170,7 +170,7 @@ class KDJPaintObject<T extends KDJIndicator> extends SinglePaintObjectBox<T>
       Paint()
         ..color = indicator.dColor
         ..style = PaintingStyle.stroke
-        ..strokeWidth = setting.indicatorLineWidth,
+        ..strokeWidth = settingConfig.indicatorLineWidth,
     );
 
     canvas.drawPath(
@@ -178,7 +178,7 @@ class KDJPaintObject<T extends KDJIndicator> extends SinglePaintObjectBox<T>
       Paint()
         ..color = indicator.jColor
         ..style = PaintingStyle.stroke
-        ..strokeWidth = setting.indicatorLineWidth,
+        ..strokeWidth = settingConfig.indicatorLineWidth,
     );
   }
 
@@ -221,17 +221,17 @@ class KDJPaintObject<T extends KDJIndicator> extends SinglePaintObjectBox<T>
 
     children.add(TextSpan(
       text: kTxt,
-      style: setting.tipsTextStyle.copyWith(color: indicator.kColor),
+      style: settingConfig.tipsTextStyle.copyWith(color: indicator.kColor),
     ));
 
     children.add(TextSpan(
       text: dTxt,
-      style: setting.tipsTextStyle.copyWith(color: indicator.dColor),
+      style: settingConfig.tipsTextStyle.copyWith(color: indicator.dColor),
     ));
 
     children.add(TextSpan(
       text: jTxt,
-      style: setting.tipsTextStyle.copyWith(color: indicator.jColor),
+      style: settingConfig.tipsTextStyle.copyWith(color: indicator.jColor),
     ));
 
     return canvas.drawText(
@@ -240,7 +240,7 @@ class KDJPaintObject<T extends KDJIndicator> extends SinglePaintObjectBox<T>
       drawDirection: DrawDirection.ltr,
       drawableRect: drawRect,
       textAlign: TextAlign.left,
-      padding: setting.tipsPadding,
+      padding: settingConfig.tipsPadding,
       maxLines: 1,
     );
   }

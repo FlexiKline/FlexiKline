@@ -157,7 +157,7 @@ class BOLLPaintObject<T extends BOLLIndicator> extends SinglePaintObjectBox<T> {
       Paint()
         ..color = indicator.mbColor
         ..style = PaintingStyle.stroke
-        ..strokeWidth = setting.indicatorLineWidth,
+        ..strokeWidth = settingConfig.indicatorLineWidth,
     );
 
     canvas.drawPath(
@@ -165,7 +165,7 @@ class BOLLPaintObject<T extends BOLLIndicator> extends SinglePaintObjectBox<T> {
       Paint()
         ..color = indicator.upColor
         ..style = PaintingStyle.stroke
-        ..strokeWidth = setting.indicatorLineWidth,
+        ..strokeWidth = settingConfig.indicatorLineWidth,
     );
 
     canvas.drawPath(
@@ -173,7 +173,7 @@ class BOLLPaintObject<T extends BOLLIndicator> extends SinglePaintObjectBox<T> {
       Paint()
         ..color = indicator.dnColor
         ..style = PaintingStyle.stroke
-        ..strokeWidth = setting.indicatorLineWidth,
+        ..strokeWidth = settingConfig.indicatorLineWidth,
     );
 
     if (indicator.isFillBetweenUpAndDn) {
@@ -226,17 +226,17 @@ class BOLLPaintObject<T extends BOLLIndicator> extends SinglePaintObjectBox<T> {
 
     children.add(TextSpan(
       text: mbTxt,
-      style: setting.tipsTextStyle.copyWith(color: indicator.mbColor),
+      style: settingConfig.tipsTextStyle.copyWith(color: indicator.mbColor),
     ));
 
     children.add(TextSpan(
       text: upTxt,
-      style: setting.tipsTextStyle.copyWith(color: indicator.upColor),
+      style: settingConfig.tipsTextStyle.copyWith(color: indicator.upColor),
     ));
 
     children.add(TextSpan(
       text: dnTxt,
-      style: setting.tipsTextStyle.copyWith(color: indicator.dnColor),
+      style: settingConfig.tipsTextStyle.copyWith(color: indicator.dnColor),
     ));
 
     return canvas.drawText(
@@ -245,7 +245,7 @@ class BOLLPaintObject<T extends BOLLIndicator> extends SinglePaintObjectBox<T> {
       drawDirection: DrawDirection.ltr,
       drawableRect: drawRect,
       textAlign: TextAlign.left,
-      padding: setting.tipsPadding,
+      padding: settingConfig.tipsPadding,
       maxLines: 1,
     );
   }

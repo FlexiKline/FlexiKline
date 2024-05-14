@@ -122,14 +122,14 @@ class MACDPaintObject<T extends MACDIndicator> extends SinglePaintObjectBox<T>
     paintYAxisTick(
       canvas,
       size,
-      tickCount: indicator.tickCount ?? setting.subIndicatorTickCount,
+      tickCount: indicator.tickCount ?? settingConfig.subIndicatorTickCount,
     );
   }
 
   @override
   void onCross(Canvas canvas, Offset offset) {
     /// onCross时, 绘制Y轴上的标记值
-    paintYAxisMarkOnCross(canvas, offset);
+    paintYAxisTickOnCross(canvas, offset);
   }
 
   /// 绘制MACD图
@@ -146,7 +146,7 @@ class MACDPaintObject<T extends MACDIndicator> extends SinglePaintObjectBox<T>
     final List<Offset> deaPoints = [];
     double zeroDy = valueToDy(BagNum.zero);
     final offset = startCandleDx - candleWidthHalf;
-    final candleHalf = candleWidthHalf - setting.candleSpacing;
+    final candleHalf = candleWidthHalf - settingConfig.candleSpacing;
     for (int i = start; i < end; i++) {
       m = list[i];
       ret = macdMap[m.timestamp];
@@ -165,8 +165,8 @@ class MACDPaintObject<T extends MACDIndicator> extends SinglePaintObjectBox<T>
               Offset(dx + candleHalf, valueToDy(ret.macd, correct: false)),
             )),
           ret.macd > BagNum.zero
-              ? setting.defLongHollowBarPaint
-              : setting.defShortHollowBarPaint,
+              ? settingConfig.defLongHollowBarPaint
+              : settingConfig.defShortHollowBarPaint,
         );
       } else {
         // 实心
@@ -174,8 +174,8 @@ class MACDPaintObject<T extends MACDIndicator> extends SinglePaintObjectBox<T>
           Offset(dx, zeroDy),
           Offset(dx, valueToDy(ret.macd, correct: false)),
           ret.macd > BagNum.zero
-              ? setting.defLongBarPaint
-              : setting.defShortBarPaint,
+              ? settingConfig.defLongBarPaint
+              : settingConfig.defShortBarPaint,
         );
       }
     }
@@ -185,7 +185,7 @@ class MACDPaintObject<T extends MACDIndicator> extends SinglePaintObjectBox<T>
       Paint()
         ..color = indicator.difColor
         ..style = PaintingStyle.stroke
-        ..strokeWidth = setting.indicatorLineWidth,
+        ..strokeWidth = settingConfig.indicatorLineWidth,
     );
 
     canvas.drawPath(
@@ -193,7 +193,7 @@ class MACDPaintObject<T extends MACDIndicator> extends SinglePaintObjectBox<T>
       Paint()
         ..color = indicator.deaColor
         ..style = PaintingStyle.stroke
-        ..strokeWidth = setting.indicatorLineWidth,
+        ..strokeWidth = settingConfig.indicatorLineWidth,
     );
   }
 
@@ -235,17 +235,17 @@ class MACDPaintObject<T extends MACDIndicator> extends SinglePaintObjectBox<T>
 
     children.add(TextSpan(
       text: difTxt,
-      style: setting.tipsTextStyle.copyWith(color: indicator.difColor),
+      style: settingConfig.tipsTextStyle.copyWith(color: indicator.difColor),
     ));
 
     children.add(TextSpan(
       text: deaTxt,
-      style: setting.tipsTextStyle.copyWith(color: indicator.deaColor),
+      style: settingConfig.tipsTextStyle.copyWith(color: indicator.deaColor),
     ));
 
     children.add(TextSpan(
       text: macdTxt,
-      style: setting.tipsTextStyle.copyWith(color: indicator.macdColor),
+      style: settingConfig.tipsTextStyle.copyWith(color: indicator.macdColor),
     ));
 
     return canvas.drawText(
@@ -254,7 +254,7 @@ class MACDPaintObject<T extends MACDIndicator> extends SinglePaintObjectBox<T>
       drawDirection: DrawDirection.ltr,
       drawableRect: drawRect,
       textAlign: TextAlign.left,
-      padding: setting.tipsPadding,
+      padding: settingConfig.tipsPadding,
       maxLines: 1,
     );
   }

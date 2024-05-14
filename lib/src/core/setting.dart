@@ -27,7 +27,8 @@ import 'interface.dart';
 mixin SettingBinding on KlineBindingBase implements ISetting, IConfig {
   @override
   void init() {
-    initSetting(settingConfig);
+    _settingConfig = SettingConfig.fromJson(settingConfigData);
+    logd('init setting');
     super.init();
   }
 
@@ -47,34 +48,37 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IConfig {
   void storeState() {
     super.storeState();
     logd("storeState setting");
-    storeSettingData(settingData);
+    storeSettingData(settingConfig);
   }
-
-  void initSetting(Map<String, dynamic> setting) {
-    // 从配置中恢复
-    _settingData = SettingData.fromJson(settingConfig);
-  }
-
-  late SettingData _settingData;
 
   @override
-  SettingData get settingData => _settingData;
+  void loadConfig(Map<String, dynamic> configData) {
+    logd("loadConfig setting");
+    _settingConfig = SettingConfig.fromJson(configData);
+    super.loadConfig(configData);
+  }
+
+  late SettingConfig _settingConfig;
+
+  @override
+  SettingConfig get settingConfig => _settingConfig;
 
   VoidCallback? onSizeChange;
   ValueChanged<bool>? onLoading;
 
-  Color get longColor => settingData.longColor;
-  Color get shortColor => settingData.shortColor;
-  Color get longTintColor => settingData.longTintColor;
-  Color get shortTintColor => settingData.shortTintColor;
+  Color get longColor => settingConfig.longColor;
+  Color get shortColor => settingConfig.shortColor;
+  Color get longTintColor => settingConfig.longTintColor;
+  Color get shortTintColor => settingConfig.shortTintColor;
 
   /// Loading配置
-  double get loadingProgressSize => settingData.loadingProgressSize;
+  double get loadingProgressSize => settingConfig.loadingProgressSize;
   double get loadingProgressStrokeWidth =>
-      settingData.loadingProgressStrokeWidth;
+      settingConfig.loadingProgressStrokeWidth;
   Color get loadingProgressBackgroundColor =>
-      settingData.loadingProgressBackgroundColor;
-  Color get loadingProgressValueColor => settingData.loadingProgressValueColor;
+      settingConfig.loadingProgressBackgroundColor;
+  Color get loadingProgressValueColor =>
+      settingConfig.loadingProgressValueColor;
 
   /// 一个像素的值.
   double get pixel {
@@ -94,10 +98,10 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IConfig {
 
   /// 主图区域大小
   // Rect _mainRect = Rect.zero;
-  Rect get mainRect => settingData.mainRect;
+  Rect get mainRect => settingConfig.mainRect;
   Size get mainRectSize => Size(mainRect.width, mainRect.height);
   void setMainSize(Size size) {
-    settingData.mainRect = Rect.fromLTRB(
+    settingConfig.mainRect = Rect.fromLTRB(
       0,
       0,
       size.width,
@@ -114,10 +118,10 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IConfig {
   double get mainRectHeight => mainRect.height;
 
   /// 主图区域的tips高度
-  double get mainTipsHeight => settingData.mainTipsHeight;
+  double get mainTipsHeight => settingConfig.mainTipsHeight;
 
   /// 主图上下padding
-  EdgeInsets get mainPadding => settingData.mainPadding;
+  EdgeInsets get mainPadding => settingConfig.mainPadding;
 
   Rect get mainDrawRect => Rect.fromLTRB(
         mainRect.left + mainPadding.left,
@@ -164,7 +168,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IConfig {
 
   /// 绘制区域最少留白宽度.
   double get minPaintBlankWidth =>
-      mainDrawWidth * settingData.minPaintBlankRate.clamp(0, 0.9);
+      mainDrawWidth * settingConfig.minPaintBlankRate.clamp(0, 0.9);
 
   /// 如果足够总是计算一屏的蜡烛.
   /// 当滑动或初始化时会存在(minPaintBlankRate)的空白, 此时, 计算按一屏的蜡烛数量向后计算.
@@ -180,21 +184,21 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IConfig {
 
   /// 最大蜡烛宽度[1, 50]
   // double _candleMaxWidth = 40.0;
-  double get candleMaxWidth => settingData.candleMaxWidth;
+  double get candleMaxWidth => settingConfig.candleMaxWidth;
   set candleMaxWidth(double width) {
-    settingData.candleMaxWidth = width.clamp(1.0, 50.0);
+    settingConfig.candleMaxWidth = width.clamp(1.0, 50.0);
   }
 
   /// 单根蜡烛宽度
   // double _candleWidth = 8.0;
-  double get candleWidth => settingData.candleWidth;
+  double get candleWidth => settingConfig.candleWidth;
   set candleWidth(double width) {
     // 限制蜡烛宽度范围[1, candleMaxWidth]
-    settingData.candleWidth = width.clamp(1.0, candleMaxWidth);
+    settingConfig.candleWidth = width.clamp(1.0, candleMaxWidth);
   }
 
   /// 蜡烛间距
-  double get candleSpacing => settingData.candleSpacing;
+  double get candleSpacing => settingConfig.candleSpacing;
 
   /// 单根蜡烛所占据实际宽度
   double get candleActualWidth => candleWidth + candleSpacing;
@@ -248,25 +252,25 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IConfig {
   //   ..strokeWidth = candleLineWidth;
 
   // Candle 第一根Candle相对于mainRect右边的偏移
-  double get firstCandleInitOffset => settingData.firstCandleInitOffset;
+  double get firstCandleInitOffset => settingConfig.firstCandleInitOffset;
 
   /// Grid Axis config
   // 主图区域grid数量
-  int get gridCount => settingData.gridCount;
-  // 主图区域grid线的颜色
-  Color get gridLineColor => settingData.gridLineColor;
-  // 主图区域grid线的宽度(默认1像素)
-  double get gridLineWidth => settingData.gridLineWidth;
-  int get gridXAxisCount => gridCount + 1; // 平分5份: 上下边线都展示
-  int get gridYAxisCount => gridCount - 1; // 平分5份: 左右边线不展示
-  Paint get gridXAxisLinePaint => Paint()
-    ..color = gridLineColor
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = gridLineWidth;
-  Paint get gridYAxisLinePaint => Paint()
-    ..color = gridLineColor
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = gridLineWidth;
+  // int get gridCount => settingData.gridCount;
+  // // 主图区域grid线的颜色
+  // Color get gridLineColor => settingData.gridLineColor;
+  // // 主图区域grid线的宽度(默认1像素)
+  // double get gridLineWidth => settingData.gridLineWidth;
+  // int get gridXAxisCount => gridCount + 1; // 平分5份: 上下边线都展示
+  // int get gridYAxisCount => gridCount - 1; // 平分5份: 左右边线不展示
+  // Paint get gridXAxisLinePaint => Paint()
+  //   ..color = gridLineColor
+  //   ..style = PaintingStyle.stroke
+  //   ..strokeWidth = gridLineWidth;
+  // Paint get gridYAxisLinePaint => Paint()
+  //   ..color = gridLineColor
+  //   ..style = PaintingStyle.stroke
+  //   ..strokeWidth = gridLineWidth;
 
   /// Y轴上刻度线配置
   // // Y轴刻度字体大小
@@ -508,7 +512,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IConfig {
   Size get subRectSize => Size(subRect.width, subRect.height);
 
   /// 副区的指标图最大数量
-  int get subChartMaxCount => settingData.subChartMaxCount;
+  int get subChartMaxCount => settingConfig.subChartMaxCount;
 
   /// 副区的单个指标图默认配置
   // final double subChartDefaultHeight = defaultSubIndicatorHeight;

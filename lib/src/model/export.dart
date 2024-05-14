@@ -24,7 +24,12 @@ export './gesture_data.dart';
 export './card_info.dart';
 export './minmax.dart';
 export './bag_num.dart';
-export 'setting_data/export.dart';
+
+/// Config
+export 'flexi_kline_config/flexi_kline_config.dart';
+export 'setting_config/setting_config.dart';
+export 'grid_config/grid_config.dart';
+export 'cross_config/cross_config.dart';
 
 extension CandleReqExt on CandleReq {
   String get key => "$instId-$bar";

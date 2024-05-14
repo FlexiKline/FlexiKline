@@ -38,6 +38,7 @@ abstract class FKTheme {
   Color get short => const Color(0xFFE84E74);
 
   late Color pageBg;
+  late Color lightBg;
   late Color cardBg;
   late Color markBg;
   late Color disable;
@@ -60,6 +61,8 @@ class LightFKTheme extends FKTheme {
 
   @override
   Color get pageBg => const Color(0xFFFFFFFF);
+  @override
+  Color get lightBg => const Color(0xFF111111);
   @override
   Color get cardBg => const Color(0xFFF2F2F2);
   @override
@@ -90,6 +93,8 @@ class DarkFKTheme extends FKTheme {
 
   @override
   Color get pageBg => const Color(0xFF111111);
+  @override
+  Color get lightBg => const Color(0xFFFFFFFF);
   @override
   Color get cardBg => const Color(0xFF1A1A1A);
   @override

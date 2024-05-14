@@ -176,10 +176,10 @@ class CandlePaintObject<T extends CandleIndicator>
   @override
   void onCross(Canvas canvas, Offset offset) {
     /// 绘制Cross Y轴价钱刻度
-    paintYAxisMarkOnCross(canvas, offset);
+    paintYAxisTickOnCross(canvas, offset);
 
     /// 绘制Cross X轴时间刻度
-    paintXAxisMarkOnCross(canvas, offset);
+    paintTimeTickOnCross(canvas, offset);
 
     // /// 绘制Cross 命中的蜡烛数据弹窗
     // paintTips(canvas, offset: offset);
@@ -187,8 +187,8 @@ class CandlePaintObject<T extends CandleIndicator>
 
   // onCross时, 格式化Y轴上的标记值.
   @override
-  String formatYAxisMarkValueOnCross(BagNum value) {
-    return settingBinding.formatPrice(
+  String formatTickValueOnCross(BagNum value) {
+    return setting.formatPrice(
       value.toDecimal(),
       instId: klineData.req.instId,
       precision: klineData.req.precision,
@@ -224,7 +224,9 @@ class CandlePaintObject<T extends CandleIndicator>
       canvas.drawLine(
         highOff,
         lowOff,
-        isLong ? setting.defLongLinePaint : setting.defShortLinePaint,
+        isLong
+            ? settingConfig.defLongLinePaint
+            : settingConfig.defShortLinePaint,
       );
 
       final openOff = Offset(dx, valueToDy(m.open));
@@ -232,7 +234,7 @@ class CandlePaintObject<T extends CandleIndicator>
       canvas.drawLine(
         openOff,
         closeOff,
-        isLong ? setting.defLongBarPaint : setting.defShortBarPaint,
+        isLong ? settingConfig.defLongBarPaint : settingConfig.defShortBarPaint,
       );
 
       final timeTickIntervalCount =
@@ -298,18 +300,19 @@ class CandlePaintObject<T extends CandleIndicator>
       offset,
       endOffset,
       Paint()
-        ..color = indicator.maxminMarkLineColor ?? setting.markLineColor
+        ..color = indicator.maxminMarkLineColor ?? settingConfig.markLineColor
         ..style = PaintingStyle.stroke
-        ..strokeWidth = indicator.maxminMarkLineWidth ?? setting.markLineWidth,
+        ..strokeWidth =
+            indicator.maxminMarkLineWidth ?? settingConfig.markLineWidth,
     );
     final textStyle =
-        indicator.maxminPriceTextStyle ?? setting.defaultTextStyle;
+        indicator.maxminPriceTextStyle ?? settingConfig.defaultTextStyle;
     endOffset = Offset(
       endOffset.dx + flag * indicator.maxminPriceMargin,
       endOffset.dy - (textStyle.totalHeight ?? 0) / 2,
     );
 
-    final text = settingBinding.formatPrice(
+    final text = setting.formatPrice(
       val.toDecimal(),
       instId: klineData.req.instId,
       precision: klineData.req.precision,
@@ -343,7 +346,8 @@ class CandlePaintObject<T extends CandleIndicator>
     //   if (bar != null && i % timeTickIntervalCandleCounts == 0) {
     //     Offset(dx, mainDrawBottom);
     // 绘制X轴时间刻度.
-    final textStyle = indicator.timeTickTextStyle ?? setting.defaultTextStyle;
+    final textStyle =
+        indicator.timeTickTextStyle ?? settingConfig.defaultTextStyle;
     final dyCenterOffset =
         (paintPadding.bottom - (textStyle.totalHeight ?? 0)) / 2;
     canvas.drawText(
@@ -359,25 +363,26 @@ class CandlePaintObject<T extends CandleIndicator>
     // }
   }
 
+  /// 绘制价钱刻度
   void paintPriceTick(Canvas canvas, Size size) {
-    final yAxisStep = chartRect.bottom / setting.gridCount;
+    final yAxisStep = chartRect.bottom / gridConfig.horizontal.count;
     final dx = chartRect.right;
     double dy = 0;
-    for (int i = 1; i <= grid.horizontal.count; i++) {
+    for (int i = 1; i <= gridConfig.horizontal.count; i++) {
       dy = i * yAxisStep;
       final price = dyToValue(dy);
       if (price == null) continue;
 
-      final text = settingBinding.formatPrice(
+      final text = setting.formatPrice(
         price.toDecimal(),
         instId: klineData.req.instId,
         precision: klineData.req.precision,
       );
 
       final yAxisTickTextStyle =
-          indicator.tickTextStyle ?? setting.defaultTextStyle;
+          indicator.tickTextStyle ?? settingConfig.defaultTextStyle;
       final yAxisTickRectPadding =
-          indicator.tickPadding ?? setting.defaultPadding;
+          indicator.tickPadding ?? settingConfig.defaultPadding;
       final yAxisTickRectHeight =
           (yAxisTickTextStyle.totalHeight ?? 0) + yAxisTickRectPadding.vertical;
 
@@ -446,22 +451,22 @@ class CandlePaintObject<T extends CandleIndicator>
       path,
       Paint()
         ..color =
-            indicator.latestPriceMarkLineColor ?? setting.crosshairLineColor
+            indicator.latestPriceMarkLineColor ?? settingConfig.markLineColor
         ..style = PaintingStyle.stroke
         ..strokeWidth =
-            indicator.latestPriceMarkLineWidth ?? setting.crosshairLineWidth,
-      dashes:
-          indicator.latestPriceMarkLineDashes ?? setting.crosshairLineDashes,
+            indicator.latestPriceMarkLineWidth ?? settingConfig.markLineWidth,
+      dashes: indicator.latestPriceMarkLineDashes ??
+          crossConfig.crosshair.dashes, // TODO: 待优化
     );
 
     // 画最新价文本区域.
     final spanList = <TextSpan>[];
     final priceStyle =
-        indicator.latestPriceTextStyle ?? setting.defaultTextStyle;
+        indicator.latestPriceTextStyle ?? settingConfig.defaultTextStyle;
     final pricePadding =
-        indicator.latestPriceRectPadding ?? setting.defaultPadding;
+        indicator.latestPriceRectPadding ?? settingConfig.defaultPadding;
     spanList.add(TextSpan(
-      text: settingBinding.formatPrice(
+      text: setting.formatPrice(
         model.close.toDecimal(),
         instId: klineData.req.instId,
         precision: klineData.req.precision,
@@ -479,8 +484,8 @@ class CandlePaintObject<T extends CandleIndicator>
       if (nextUpdateDateTime != null) {
         final timeDiff = formatTimeDiff(nextUpdateDateTime);
         if (timeDiff != null) {
-          final timeStyle =
-              indicator.countDownTimeTextStyle ?? setting.defaultTextStyle;
+          final timeStyle = indicator.countDownTimeTextStyle ??
+              settingConfig.defaultTextStyle;
           spanList.add(TextSpan(
             text: "\n$timeDiff",
             style: timeStyle,
@@ -504,28 +509,29 @@ class CandlePaintObject<T extends CandleIndicator>
       textWidthBasis: TextWidthBasis.longestLine,
       padding: pricePadding,
       backgroundColor:
-          indicator.latestPriceBackground ?? setting.defaultBackground,
-      borderRadius: indicator.latestPriceRectRadius ?? setting.defaultRadius,
-      borderSide: indicator.latestPriceBorder ?? setting.defaultBorder,
+          indicator.latestPriceBackground ?? settingConfig.defaultBackground,
+      borderRadius:
+          indicator.latestPriceRectRadius ?? settingConfig.defaultRadius,
+      borderSide: indicator.latestPriceBorder ?? settingConfig.defaultBorder,
     );
   }
 
-  /// 绘制Cross X轴时间刻度
+  /// 绘制OnCross 时间刻度
   @protected
-  void paintXAxisMarkOnCross(Canvas canvas, Offset offset) {
+  void paintTimeTickOnCross(Canvas canvas, Offset offset) {
     final index = dxToIndex(offset.dx);
     final model = klineData.getCandle(index);
     final timeBar = klineData.timerBar;
     if (model == null || timeBar == null) return;
 
     // final time = model.formatDateTimeByTimeBar(timeBar);
-    final time = settingBinding.formatDateTime(model.dateTime);
+    final time = setting.formatDateTime(model.dateTime);
 
-    final textStyle = indicator.timeTickTextStyle ?? setting.crossTickTextStyle;
-    final textPadding = setting.crossTickPadding;
+    final textStyle = crossConfig.tickText.style;
+    final textPadding = crossConfig.tickText.padding;
     final textHeight = (textStyle.totalHeight ?? 0) + textPadding.vertical;
 
-    final dyCenterOffset = (paintPadding.bottom - textHeight) / 2;
+    final dyCenterOffset = (indicator.padding.bottom - textHeight) / 2;
     canvas.drawText(
       offset: Offset(
         offset.dx,
@@ -533,20 +539,20 @@ class CandlePaintObject<T extends CandleIndicator>
       ),
       drawDirection: DrawDirection.center,
       text: time,
-      style: setting.crossTickTextStyle,
+      style: textStyle,
       textAlign: TextAlign.center,
       textWidthBasis: TextWidthBasis.longestLine,
-      padding: setting.crossTickPadding,
-      backgroundColor: setting.crossTickBackground,
-      borderRadius: setting.crossTickRadius,
-      borderSide: setting.crossTickBorder,
+      padding: textPadding,
+      backgroundColor: crossConfig.tickText.background,
+      borderRadius: crossConfig.tickText.borderRadius,
+      borderSide: crossConfig.tickText.border,
     );
   }
 
   /// 绘制Cross 命中的蜡烛数据弹窗
   @override
   Size? paintTips(Canvas canvas, {CandleModel? model, Offset? offset}) {
-    if (!settingBinding.showPopupCandleCard) return null;
+    if (!setting.showPopupCandleCard) return null;
 
     if (offset == null) return null;
     model ??= offsetToCandle(offset);
@@ -555,53 +561,53 @@ class CandlePaintObject<T extends CandleIndicator>
 
     /// 1. 准备数据
     // ['Time', 'Open', 'High', 'Low', 'Close', 'Chg', '%Chg', 'Amount']
-    final keys = settingBinding.i18nCandleCardKeys;
+    final keys = setting.i18nCandleCardKeys;
     final keySpanList = <TextSpan>[];
     for (var i = 0; i < keys.length; i++) {
       final text = i < keys.length - 1 ? '${keys[i]}\n' : keys[i];
       keySpanList.add(TextSpan(
         text: text,
-        style: settingBinding.candleCardTitleStyle,
+        style: setting.candleCardTitleStyle,
       ));
     }
 
     final instId = klineData.instId;
     final p = klineData.precision;
-    TextStyle changeStyle = settingBinding.candleCardTitleStyle;
+    TextStyle changeStyle = setting.candleCardTitleStyle;
     final chgrate = model.changeRate;
     if (chgrate > 0) {
-      changeStyle = settingBinding.candleCardLongStyle;
+      changeStyle = setting.candleCardLongStyle;
     } else if (chgrate < 0) {
-      changeStyle = settingBinding.candleCardShortStyle;
+      changeStyle = setting.candleCardShortStyle;
     }
     final valueSpan = <TextSpan>[
       TextSpan(
         text: '${model.formatDateTimeByTimeBar(timeBar)}\n',
-        style: settingBinding.candleCardTitleStyle,
+        style: setting.candleCardTitleStyle,
       ),
       TextSpan(
         text:
-            '${settingBinding.formatPrice(model.open.toDecimal(), instId: instId, precision: p)}\n',
-        style: settingBinding.candleCardTitleStyle,
+            '${setting.formatPrice(model.open.toDecimal(), instId: instId, precision: p)}\n',
+        style: setting.candleCardTitleStyle,
       ),
       TextSpan(
         text:
-            '${settingBinding.formatPrice(model.high.toDecimal(), instId: instId, precision: p)}\n',
-        style: settingBinding.candleCardTitleStyle,
+            '${setting.formatPrice(model.high.toDecimal(), instId: instId, precision: p)}\n',
+        style: setting.candleCardTitleStyle,
       ),
       TextSpan(
         text:
-            '${settingBinding.formatPrice(model.low.toDecimal(), instId: instId, precision: p)}\n',
-        style: settingBinding.candleCardTitleStyle,
+            '${setting.formatPrice(model.low.toDecimal(), instId: instId, precision: p)}\n',
+        style: setting.candleCardTitleStyle,
       ),
       TextSpan(
         text:
-            '${settingBinding.formatPrice(model.close.toDecimal(), instId: instId, precision: p)}\n',
-        style: settingBinding.candleCardTitleStyle,
+            '${setting.formatPrice(model.close.toDecimal(), instId: instId, precision: p)}\n',
+        style: setting.candleCardTitleStyle,
       ),
       TextSpan(
         text:
-            '${settingBinding.formatPrice(model.change.toDecimal(), instId: instId, precision: p)}\n',
+            '${setting.formatPrice(model.change.toDecimal(), instId: instId, precision: p)}\n',
         style: changeStyle,
       ),
       TextSpan(
@@ -615,7 +621,7 @@ class CandlePaintObject<T extends CandleIndicator>
           cutInvalidZero: true,
           showCompact: true,
         ),
-        style: settingBinding.candleCardTitleStyle,
+        style: setting.candleCardTitleStyle,
         // recognizer: _tapGestureRecognizer..onTap = () => ... // 点击事件处理?
       ),
     ];
@@ -624,8 +630,8 @@ class CandlePaintObject<T extends CandleIndicator>
     if (offset.dx > chartRectWidthHalf) {
       // 点击区域在右边; 绘制在左边
       Offset drawOffset = Offset(
-        chartRect.left + settingBinding.candleCardRectMargin.left,
-        chartRect.top + settingBinding.candleCardRectMargin.top,
+        chartRect.left + setting.candleCardRectMargin.left,
+        chartRect.top + setting.candleCardRectMargin.top,
       );
 
       final size = canvas.drawText(
@@ -634,17 +640,16 @@ class CandlePaintObject<T extends CandleIndicator>
         drawableRect: chartRect,
         textSpan: TextSpan(
           children: keySpanList,
-          style: settingBinding.candleCardTitleStyle,
+          style: setting.candleCardTitleStyle,
         ),
-        style: settingBinding.candleCardTitleStyle,
+        style: setting.candleCardTitleStyle,
         textAlign: TextAlign.start,
         textWidthBasis: TextWidthBasis.longestLine,
-        padding: settingBinding.candleCardRectPadding,
-        backgroundColor: settingBinding.candleCardRectBackgroundColor,
+        padding: setting.candleCardRectPadding,
+        backgroundColor: setting.candleCardRectBackgroundColor,
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(settingBinding.candleCardRectBorderRadius),
-          bottomLeft:
-              Radius.circular(settingBinding.candleCardRectBorderRadius),
+          topLeft: Radius.circular(setting.candleCardRectBorderRadius),
+          bottomLeft: Radius.circular(setting.candleCardRectBorderRadius),
         ),
       );
 
@@ -657,24 +662,23 @@ class CandlePaintObject<T extends CandleIndicator>
         drawableRect: chartRect,
         textSpan: TextSpan(
           children: valueSpan,
-          style: settingBinding.candleCardValueStyle,
+          style: setting.candleCardValueStyle,
         ),
-        style: settingBinding.candleCardValueStyle,
+        style: setting.candleCardValueStyle,
         textAlign: TextAlign.end,
         textWidthBasis: TextWidthBasis.longestLine,
-        padding: settingBinding.candleCardRectPadding,
-        backgroundColor: settingBinding.candleCardRectBackgroundColor,
+        padding: setting.candleCardRectPadding,
+        backgroundColor: setting.candleCardRectBackgroundColor,
         borderRadius: BorderRadius.only(
-          topRight: Radius.circular(settingBinding.candleCardRectBorderRadius),
-          bottomRight:
-              Radius.circular(settingBinding.candleCardRectBorderRadius),
+          topRight: Radius.circular(setting.candleCardRectBorderRadius),
+          bottomRight: Radius.circular(setting.candleCardRectBorderRadius),
         ),
       );
     } else {
       // 点击区域在左边; 绘制在右边
       Offset drawOffset = Offset(
-        chartRect.right - settingBinding.candleCardRectMargin.right,
-        chartRect.top + settingBinding.candleCardRectMargin.top,
+        chartRect.right - setting.candleCardRectMargin.right,
+        chartRect.top + setting.candleCardRectMargin.top,
       );
 
       final size = canvas.drawText(
@@ -683,17 +687,16 @@ class CandlePaintObject<T extends CandleIndicator>
         drawableRect: chartRect,
         textSpan: TextSpan(
           children: valueSpan,
-          style: settingBinding.candleCardValueStyle,
+          style: setting.candleCardValueStyle,
         ),
-        style: settingBinding.candleCardValueStyle,
+        style: setting.candleCardValueStyle,
         textAlign: TextAlign.end,
         textWidthBasis: TextWidthBasis.longestLine,
-        padding: settingBinding.candleCardRectPadding,
-        backgroundColor: settingBinding.candleCardRectBackgroundColor,
+        padding: setting.candleCardRectPadding,
+        backgroundColor: setting.candleCardRectBackgroundColor,
         borderRadius: BorderRadius.only(
-          topRight: Radius.circular(settingBinding.candleCardRectBorderRadius),
-          bottomRight:
-              Radius.circular(settingBinding.candleCardRectBorderRadius),
+          topRight: Radius.circular(setting.candleCardRectBorderRadius),
+          bottomRight: Radius.circular(setting.candleCardRectBorderRadius),
         ),
       );
 
@@ -706,17 +709,16 @@ class CandlePaintObject<T extends CandleIndicator>
         drawableRect: chartRect,
         textSpan: TextSpan(
           children: keySpanList,
-          style: settingBinding.candleCardTitleStyle,
+          style: setting.candleCardTitleStyle,
         ),
-        style: settingBinding.candleCardTitleStyle,
+        style: setting.candleCardTitleStyle,
         textAlign: TextAlign.start,
         textWidthBasis: TextWidthBasis.longestLine,
-        padding: settingBinding.candleCardRectPadding,
-        backgroundColor: settingBinding.candleCardRectBackgroundColor,
+        padding: setting.candleCardRectPadding,
+        backgroundColor: setting.candleCardRectBackgroundColor,
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(settingBinding.candleCardRectBorderRadius),
-          bottomLeft:
-              Radius.circular(settingBinding.candleCardRectBorderRadius),
+          topLeft: Radius.circular(setting.candleCardRectBorderRadius),
+          bottomLeft: Radius.circular(setting.candleCardRectBorderRadius),
         ),
       );
     }

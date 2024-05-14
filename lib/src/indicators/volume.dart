@@ -92,7 +92,7 @@ class VolumePaintObject<T extends VolumeIndicator>
       paintYAxisTick(
         canvas,
         size,
-        tickCount: indicator.tickCount ?? setting.subIndicatorTickCount,
+        tickCount: indicator.tickCount ?? settingConfig.subIndicatorTickCount,
       );
     }
   }
@@ -101,7 +101,7 @@ class VolumePaintObject<T extends VolumeIndicator>
   void onCross(Canvas canvas, Offset offset) {
     if (indicator.showCrossMark) {
       /// onCross时, 绘制Y轴上的标记值
-      paintYAxisMarkOnCross(canvas, offset);
+      paintYAxisTickOnCross(canvas, offset);
     }
   }
 
@@ -116,11 +116,11 @@ class VolumePaintObject<T extends VolumeIndicator>
     final dyBottom = chartRect.bottom;
 
     final longPaint = indicator.useTint
-        ? setting.defLongTintBarPaint
-        : setting.defLongBarPaint;
+        ? settingConfig.defLongTintBarPaint
+        : settingConfig.defLongBarPaint;
     final shortPaint = indicator.useTint
-        ? setting.defShortTintBarPaint
-        : setting.defShortBarPaint;
+        ? settingConfig.defShortTintBarPaint
+        : settingConfig.defShortBarPaint;
 
     for (var i = start; i < end; i++) {
       final model = list[i];
@@ -159,11 +159,12 @@ class VolumePaintObject<T extends VolumeIndicator>
     return canvas.drawText(
       offset: drawRect.topLeft,
       text: text,
-      style: setting.tipsTextStyle.copyWith(color: indicator.tipsTextColor),
+      style:
+          settingConfig.tipsTextStyle.copyWith(color: indicator.tipsTextColor),
       drawDirection: DrawDirection.ltr,
       drawableRect: tipsRect,
       textAlign: TextAlign.left,
-      padding: setting.tipsPadding,
+      padding: settingConfig.tipsPadding,
       maxLines: 1,
     );
   }

@@ -124,7 +124,7 @@ class VolMaPaintObject<T extends VolMaIndicator>
         Paint()
           ..color = param.color
           ..style = PaintingStyle.stroke
-          ..strokeWidth = setting.indicatorLineWidth,
+          ..strokeWidth = settingConfig.indicatorLineWidth,
       );
     }
     // } finally {
@@ -159,7 +159,7 @@ class VolMaPaintObject<T extends VolMaIndicator>
       );
       children.add(TextSpan(
         text: text,
-        style: setting.tipsTextStyle.copyWith(color: param.color),
+        style: settingConfig.tipsTextStyle.copyWith(color: param.color),
       ));
     }
 
@@ -170,7 +170,7 @@ class VolMaPaintObject<T extends VolMaIndicator>
         drawDirection: DrawDirection.ltr,
         drawableRect: drawRect,
         textAlign: TextAlign.left,
-        padding: setting.tipsPadding,
+        padding: settingConfig.tipsPadding,
         maxLines: 1,
       );
     }

@@ -95,17 +95,20 @@ abstract interface class IPaintDelegate {
 mixin ControllerProxyMixin on PaintObject {
   late final KlineBindingBase controller;
 
-  // TODO: 待命名统一
-  SettingBinding get settingBinding => controller as SettingBinding;
-  SettingData get setting => settingBinding.settingData; // TODO: 待命名统一
-  Grid get grid => (controller as IGrid).grid;
+  /// Binding
+  SettingBinding get setting => controller as SettingBinding;
   IState get state => controller as IState;
   ICross get cross => controller as ICross;
   IConfig get config => controller as IConfig;
 
-  double get candleActualWidth => settingBinding.candleActualWidth;
+  /// Config
+  SettingConfig get settingConfig => setting.settingConfig;
+  GridConfig get gridConfig => (controller as IGrid).gridConfig;
+  CrossConfig get crossConfig => cross.crossConfig;
 
-  double get candleWidthHalf => settingBinding.candleWidthHalf;
+  double get candleActualWidth => setting.candleActualWidth;
+
+  double get candleWidthHalf => setting.candleWidthHalf;
 
   KlineData get klineData => state.curKlineData;
 
@@ -137,15 +140,15 @@ mixin PaintObjectBoundingMixin on PaintObjectProxy
   @override
   Rect get drawBounding {
     if (drawInMain) {
-      _bounding ??= setting.mainRect;
+      _bounding ??= settingConfig.mainRect;
     } else {
       if (_bounding == null) {
         final top = config.calculateIndicatorTop(slot);
         _bounding = Rect.fromLTRB(
-          settingBinding.subRect.left,
-          settingBinding.subRect.top + top,
-          settingBinding.subRect.right,
-          settingBinding.subRect.top + top + indicator.height,
+          setting.subRect.left,
+          setting.subRect.top + top,
+          setting.subRect.right,
+          setting.subRect.top + top + indicator.height,
         );
       }
     }
@@ -285,8 +288,8 @@ mixin PaintYAxisTickMixin<T extends SinglePaintObjectIndicator>
 
       final text = fromatYAxisTickValue(value);
 
-      tickTextStyle ??= setting.defaultTextStyle;
-      tickPadding ??= setting.defaultPadding;
+      tickTextStyle ??= settingConfig.defaultTextStyle;
+      tickPadding ??= settingConfig.defaultPadding;
       final height = (tickTextStyle.totalHeight ?? 0) + tickPadding.vertical;
 
       canvas.drawText(
@@ -320,21 +323,21 @@ mixin PaintYAxisTickMixin<T extends SinglePaintObjectIndicator>
 
 mixin PaintYAxisMarkOnCrossMixin<T extends SinglePaintObjectIndicator>
     on SinglePaintObjectBox<T> {
-  /// onCross时, 绘制Y轴上的标记值
+  /// onCross时, 绘制Y轴上的刻度值
   @protected
-  void paintYAxisMarkOnCross(Canvas canvas, Offset offset) {
+  void paintYAxisTickOnCross(Canvas canvas, Offset offset) {
     final value = dyToValue(offset.dy);
     if (value == null) return;
 
-    final text = formatYAxisMarkValueOnCross(value);
+    final text = formatTickValueOnCross(value);
 
-    final textStyle = setting.crossTickTextStyle;
-    final textPadding = setting.crossTickPadding;
+    final textStyle = crossConfig.tickText.style;
+    final textPadding = crossConfig.tickText.padding;
     final textHeight = (textStyle.totalHeight ?? 0) + textPadding.vertical;
 
     canvas.drawText(
       offset: Offset(
-        chartRect.right - setting.tickRectMargin,
+        chartRect.right - settingConfig.tickRectMargin,
         offset.dy - textHeight / 2,
       ),
       drawDirection: DrawDirection.rtl,
@@ -344,14 +347,14 @@ mixin PaintYAxisMarkOnCrossMixin<T extends SinglePaintObjectIndicator>
       textAlign: TextAlign.end,
       textWidthBasis: TextWidthBasis.longestLine,
       padding: textPadding,
-      backgroundColor: setting.crossTickBackground,
-      borderRadius: setting.crossTickRadius,
-      borderSide: setting.crossTickBorder,
+      backgroundColor: crossConfig.tickText.background,
+      borderRadius: crossConfig.tickText.borderRadius,
+      borderSide: crossConfig.tickText.border,
     );
   }
 
   @protected
-  String formatYAxisMarkValueOnCross(BagNum value) {
+  String formatTickValueOnCross(BagNum value) {
     return formatNumber(
       value.toDecimal(),
       precision: 2,

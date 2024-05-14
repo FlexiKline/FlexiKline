@@ -24,6 +24,13 @@ mixin CrossBinding
     on KlineBindingBase, SettingBinding
     implements ICross, IState, IConfig, IChart {
   @override
+  void init() {
+    super.init();
+    logd('init cross');
+    _crossConfig = CrossConfig.fromJson(crossConfigData);
+  }
+
+  @override
   void initState() {
     super.initState();
     logd('initState cross');
@@ -34,6 +41,25 @@ mixin CrossBinding
     super.dispose();
     logd('dispose cross');
   }
+
+  @override
+  void storeState() {
+    super.storeState();
+    logd("storeState cross");
+    storeCrossConfig(crossConfig);
+  }
+
+  @override
+  void loadConfig(Map<String, dynamic> configData) {
+    super.loadConfig(configData);
+    logd("loadConfig cross");
+    _crossConfig = CrossConfig.fromJson(configData);
+  }
+
+  late CrossConfig _crossConfig;
+
+  @override
+  CrossConfig get crossConfig => _crossConfig;
 
   final ValueNotifier<int> _repaintCross = ValueNotifier(0);
   @override
@@ -96,6 +122,9 @@ mixin CrossBinding
         return;
       }
 
+      /// 绘制Cross Line
+      paintCrossLine(canvas, offset);
+
       CandleModel? model;
       if (showLatestTipsInBlank) {
         model = offsetToCandle(offset);
@@ -110,9 +139,6 @@ mixin CrossBinding
       }
 
       ensurePaintObjectInstance();
-
-      /// 绘制Cross Line
-      paintCrossLine(canvas, offset);
 
       for (var indicator in [mainIndicator, ...subIndicators]) {
         indicator.paintObject?.doOnCross(canvas, offset, model: model);
@@ -167,16 +193,17 @@ mixin CrossBinding
       ..moveTo(offset.dx, 0)
       ..lineTo(offset.dx, canvasHeight);
 
-    canvas
-      ..drawDashPath(
-        path,
-        settingData.crossLinePaint,
-        dashes: settingData.crosshairLineDashes,
-      )
-      ..drawCircle(
-        offset,
-        settingData.crossPointRadius,
-        settingData.crossPointPaint,
-      );
+    canvas.drawLineType(
+      crossConfig.crosshair.type,
+      path,
+      crossConfig.crosshairPaint,
+      dashes: crossConfig.crosshair.dashes,
+    );
+
+    canvas.drawCircle(
+      offset,
+      crossConfig.point.radius,
+      crossConfig.pointPaint,
+    );
   }
 }

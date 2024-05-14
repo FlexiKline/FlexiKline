@@ -57,6 +57,12 @@ abstract class KlineBindingBase with KlineLog, KlineStorage, GestureHanderImpl {
     logd("storeState base");
   }
 
+  @protected
+  @mustCallSuper
+  void loadConfig(Map<String, dynamic> configData) {
+    logd("loadConfig base");
+  }
+
   /// 缓存FlexiKline的所有配置到本地
   void storeStateToLocal() {
     storeState();

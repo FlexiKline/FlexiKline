@@ -28,7 +28,8 @@ mixin GridBinding
   @override
   void init() {
     super.init();
-    initGridConfig(gridConfig);
+    logd('init grid');
+    _gridConfig = GridConfig.fromJson(gridConfigData);
   }
 
   @override
@@ -46,25 +47,28 @@ mixin GridBinding
   @override
   void storeState() {
     super.storeState();
-    storeGridConfig(grid);
+    logd("storeState grid");
+    storeGridConfig(gridConfig);
   }
-
-  late Grid _grid;
 
   @override
-  Grid get grid => _grid;
-
-  void initGridConfig(Map<String, dynamic> config) {
-    // 从配置中恢复
-    _grid = Grid.fromJson(config);
+  void loadConfig(Map<String, dynamic> configData) {
+    super.loadConfig(configData);
+    logd("loadConfig grid");
+    _gridConfig = GridConfig.fromJson(configData);
   }
+
+  late GridConfig _gridConfig;
+
+  @override
+  GridConfig get gridConfig => _gridConfig;
 
   @override
   void markRepaintGrid() => repaintGridBg.value++;
   ValueNotifier<int> repaintGridBg = ValueNotifier(0);
 
   void paintGridBg(Canvas canvas, Size size) {
-    if (grid.show) {
+    if (gridConfig.show) {
       // 主图图Grid X轴起始值
       const mainLeft = 0.0;
       final mainRight = mainRectWidth;
@@ -76,47 +80,55 @@ mixin GridBinding
       final subBottom = subRect.bottom;
 
       // 绘制horizontal轴 Grid 线
-      if (grid.horizontal.show) {
+      if (gridConfig.horizontal.show) {
+        final horiLineType = gridConfig.horizontal.type;
+        final horiPaint = gridConfig.horizontal.paint;
+        final horiDashes = gridConfig.horizontal.dashes;
+
         double dy = mainTop;
 
         // 绘制主图顶部起始线
         canvas.drawLineType(
-          grid.horizontal.type,
+          horiLineType,
           Path()
             ..moveTo(mainLeft, dy)
             ..lineTo(mainRight, dy),
-          grid.horizontal.paint,
+          horiPaint,
+          dashes: horiDashes,
         );
 
         // 绘制主图网格线
-        final step = mainBottom / grid.horizontal.count;
-        for (int i = 1; i < grid.horizontal.count; i++) {
+        final step = mainBottom / gridConfig.horizontal.count;
+        for (int i = 1; i < gridConfig.horizontal.count; i++) {
           dy = i * step;
           canvas.drawLineType(
-            grid.horizontal.type,
+            horiLineType,
             Path()
               ..moveTo(mainLeft, dy)
               ..lineTo(mainRight, dy),
-            grid.horizontal.paint,
+            horiPaint,
+            dashes: horiDashes,
           );
         }
 
         // 绘制主图mainDrawBottom线
         canvas.drawLineType(
-          grid.horizontal.type,
+          horiLineType,
           Path()
             ..moveTo(mainLeft, mainBottom)
             ..lineTo(mainRight, mainBottom),
-          grid.horizontal.paint,
+          horiPaint,
+          dashes: horiDashes,
         );
 
         // 绘制副图区域起始线
         canvas.drawLineType(
-          grid.horizontal.type,
+          horiLineType,
           Path()
             ..moveTo(mainLeft, subTop)
             ..lineTo(mainRight, subTop),
-          grid.horizontal.paint,
+          horiPaint,
+          dashes: horiDashes,
         );
 
         // 绘制每一个副图的底部线
@@ -126,36 +138,43 @@ mixin GridBinding
           height += list[i];
           dy = subTop + height;
           canvas.drawLineType(
-            grid.horizontal.type,
+            horiLineType,
             Path()
               ..moveTo(mainLeft, dy)
               ..lineTo(mainRight, dy),
-            grid.horizontal.paint,
+            horiPaint,
+            dashes: horiDashes,
           );
         }
       }
 
       // 绘制Vertical轴 Grid 线
-      if (grid.vertical.show) {
-        double dx = mainLeft;
-        final step = mainRight / grid.vertical.count;
+      if (gridConfig.vertical.show) {
+        final vertLineType = gridConfig.vertical.type;
+        final vertPaint = gridConfig.vertical.paint;
+        final vertDashes = gridConfig.horizontal.dashes;
 
-        for (int i = 1; i < grid.vertical.count; i++) {
+        double dx = mainLeft;
+        final step = mainRight / gridConfig.vertical.count;
+
+        for (int i = 1; i < gridConfig.vertical.count; i++) {
           dx = i * step;
           canvas.drawLineType(
-            grid.horizontal.type,
+            vertLineType,
             Path()
               ..moveTo(dx, mainTop)
               ..lineTo(dx, mainBottom),
-            grid.horizontal.paint,
+            vertPaint,
+            dashes: vertDashes,
           );
 
           canvas.drawLineType(
-            grid.horizontal.type,
+            vertLineType,
             Path()
               ..moveTo(dx, subTop)
               ..lineTo(dx, subBottom),
-            grid.horizontal.paint,
+            vertPaint,
+            dashes: vertDashes,
           );
         }
       }

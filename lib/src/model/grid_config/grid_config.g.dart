@@ -1,12 +1,12 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'grid.dart';
+part of 'grid_config.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-Grid _$GridFromJson(Map<String, dynamic> json) => Grid(
+GridConfig _$GridConfigFromJson(Map<String, dynamic> json) => GridConfig(
       show: json['show'] as bool? ?? true,
       horizontal: json['horizontal'] == null
           ? const GridAxis()
@@ -16,7 +16,8 @@ Grid _$GridFromJson(Map<String, dynamic> json) => Grid(
           : GridAxis.fromJson(json['vertical'] as Map<String, dynamic>),
     );
 
-Map<String, dynamic> _$GridToJson(Grid instance) => <String, dynamic>{
+Map<String, dynamic> _$GridConfigToJson(GridConfig instance) =>
+    <String, dynamic>{
       'show': instance.show,
       'horizontal': instance.horizontal.toJson(),
       'vertical': instance.vertical.toJson(),

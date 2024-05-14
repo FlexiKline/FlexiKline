@@ -17,11 +17,11 @@ import 'package:flutter/material.dart';
 import '../../extension/render/common.dart';
 import '../../framework/serializers.dart';
 
-part 'grid.g.dart';
+part 'grid_config.g.dart';
 
-@FlexiSettingSerializable
-class Grid {
-  const Grid({
+@FlexiConfigSerializable
+class GridConfig {
+  const GridConfig({
     this.show = true,
     this.horizontal = const GridAxis(),
     this.vertical = const GridAxis(),
@@ -31,12 +31,13 @@ class Grid {
   final GridAxis horizontal;
   final GridAxis vertical;
 
-  factory Grid.fromJson(Map<String, dynamic> json) => _$GridFromJson(json);
+  factory GridConfig.fromJson(Map<String, dynamic> json) =>
+      _$GridConfigFromJson(json);
 
-  Map<String, dynamic> toJson() => _$GridToJson(this);
+  Map<String, dynamic> toJson() => _$GridConfigToJson(this);
 }
 
-@FlexiSettingSerializable
+@FlexiConfigSerializable
 class GridAxis {
   const GridAxis({
     this.show = true,

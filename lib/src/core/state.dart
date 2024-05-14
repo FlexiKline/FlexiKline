@@ -178,7 +178,7 @@ mixin StateBinding
       );
     } else {
       int maxCount;
-      if (settingData.alwaysCalculateScreenOfCandlesIfEnough) {
+      if (settingConfig.alwaysCalculateScreenOfCandlesIfEnough) {
         // 1: 当前[start, end]不足一屏蜡烛时, 向后取一屏蜡烛数据来计算最大最小
         maxCount = maxCandleCount;
       } else {

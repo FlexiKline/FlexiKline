@@ -17,11 +17,11 @@ import 'package:flutter/material.dart';
 import '../../constant.dart';
 import '../../framework/serializers.dart';
 
-part 'setting_data.g.dart';
+part 'setting_config.g.dart';
 
-@FlexiSettingSerializable
-class SettingData {
-  SettingData({
+@FlexiConfigSerializable
+class SettingConfig {
+  SettingConfig({
     /// Long/Short颜色配置
     Color textColor = Colors.black,
     Color longColor = const Color(0xFF33BD65),
@@ -50,9 +50,9 @@ class SettingData {
     this.indicatorLineWidth = 1.0,
 
     /// Grid Axis conifg
-    this.gridCount = 5,
-    this.gridLineColor = const Color(0xffE9EDF0),
-    this.gridLineWidth = 0.5,
+    // this.gridCount = 5,
+    // this.gridLineColor = const Color(0xffE9EDF0),
+    // this.gridLineWidth = 0.5,
 
     /// 全局默认文本配置: TextStyle / Background / Border
     TextStyle defaultTextStyle = const TextStyle(
@@ -81,25 +81,25 @@ class SettingData {
     Color? markLineColor,
 
     /// Cross 通用配置
-    this.crosshairLineWidth = 0.5,
-    this.crosshairLineColor = Colors.black,
-    this.crosshairLineDashes = const [3, 3],
-    this.corssPointColor = Colors.black,
-    this.crossPointRadius = 2,
-    this.crossPointWidth = 6,
-    // onCross时, 刻度配置 (价钱/数量/时间...)
-    this.crossTickTextStyle = const TextStyle(
-      fontSize: 10,
-      color: Colors.white,
-      overflow: TextOverflow.ellipsis,
-      height: 1,
-    ),
-    this.crossTickBackground = Colors.black,
-    this.crossTickPadding = const EdgeInsets.all(2),
-    this.crossTickBorder = BorderSide.none,
-    this.crossTickRadius = const BorderRadius.all(
-      Radius.circular(2),
-    ),
+    // this.crosshairLineWidth = 0.5,
+    // this.crosshairLineColor = Colors.black,
+    // this.crosshairLineDashes = const [3, 3],
+    // this.corssPointColor = Colors.black,
+    // this.crossPointRadius = 2,
+    // this.crossPointWidth = 6,
+    // // onCross时, 刻度配置 (价钱/数量/时间...)
+    // this.crossTickTextStyle = const TextStyle(
+    //   fontSize: 10,
+    //   color: Colors.white,
+    //   overflow: TextOverflow.ellipsis,
+    //   height: 1,
+    // ),
+    // this.crossTickBackground = Colors.black,
+    // this.crossTickPadding = const EdgeInsets.all(2),
+    // this.crossTickBorder = BorderSide.none,
+    // this.crossTickRadius = const BorderRadius.all(
+    //   Radius.circular(2),
+    // ),
 
     /// 副图配置
     // 副区的指标图最大数量
@@ -163,9 +163,9 @@ class SettingData {
 
   /// 主/副图 Grid Axis conifg
   // 主图区域grid的数量
-  final int gridCount;
-  final Color gridLineColor;
-  final double gridLineWidth;
+  // final int gridCount;
+  // final Color gridLineColor;
+  // final double gridLineWidth;
 
   /// 全局默认文本配置: TextStyle / Background / Border
   final TextStyle defaultTextStyle;
@@ -191,19 +191,19 @@ class SettingData {
   final Color markLineColor;
 
   /// Cross 通用配置
-  final double crosshairLineWidth;
-  final Color crosshairLineColor;
-  final List<double> crosshairLineDashes;
-  final Color corssPointColor;
-  final double crossPointRadius;
-  final double crossPointWidth;
-  // onCross时, 刻度配置 (价钱/数量/时间...)
+  // final double crosshairLineWidth;
+  // final Color crosshairLineColor;
+  // final List<double> crosshairLineDashes;
+  // final Color corssPointColor;
+  // final double crossPointRadius;
+  // final double crossPointWidth;
+  // // onCross时, 刻度配置 (价钱/数量/时间...)
 
-  final TextStyle crossTickTextStyle;
-  final Color crossTickBackground;
-  final EdgeInsets crossTickPadding;
-  final BorderSide crossTickBorder;
-  final BorderRadius crossTickRadius;
+  // final TextStyle crossTickTextStyle;
+  // final Color crossTickBackground;
+  // final EdgeInsets crossTickPadding;
+  // final BorderSide crossTickBorder;
+  // final BorderRadius crossTickRadius;
 
   /// 副图配置
   // 副区的指标图最大数量
@@ -217,13 +217,13 @@ class SettingData {
   // 副图指标图默认Pading
   final EdgeInsets subIndicatorDefaultPadding;
 
-  factory SettingData.fromJson(Map<String, dynamic> json) =>
-      _$SettingDataFromJson(json);
+  factory SettingConfig.fromJson(Map<String, dynamic> json) =>
+      _$SettingConfigFromJson(json);
 
-  Map<String, dynamic> toJson() => _$SettingDataToJson(this);
+  Map<String, dynamic> toJson() => _$SettingConfigToJson(this);
 }
 
-extension SettingDataExt on SettingData {
+extension SettingDataExt on SettingConfig {
   /// 指标图 涨跌 bar/line 配置
   Color get longTintColor => longColor.withOpacity(opacity);
   Color get shortTintColor => shortColor.withOpacity(opacity);
@@ -263,15 +263,4 @@ extension SettingDataExt on SettingData {
     ..color = shortColor
     ..style = PaintingStyle.stroke
     ..strokeWidth = candleLineWidth;
-
-  /// Cross 配置 ///
-  Paint get crossLinePaint => Paint()
-    ..color = crosshairLineColor
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = crosshairLineWidth;
-  // cross point
-  Paint get crossPointPaint => Paint()
-    ..color = corssPointColor
-    ..strokeWidth = crossPointWidth
-    ..style = PaintingStyle.fill;
 }

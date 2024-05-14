@@ -1,12 +1,13 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'setting_data.dart';
+part of 'setting_config.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-SettingData _$SettingDataFromJson(Map<String, dynamic> json) => SettingData(
+SettingConfig _$SettingConfigFromJson(Map<String, dynamic> json) =>
+    SettingConfig(
       textColor: json['textColor'] == null
           ? Colors.black
           : const ColorConverter().fromJson(json['textColor'] as String?),
@@ -50,11 +51,6 @@ SettingData _$SettingDataFromJson(Map<String, dynamic> json) => SettingData(
           (json['firstCandleInitOffset'] as num?)?.toDouble() ?? 80,
       indicatorLineWidth:
           (json['indicatorLineWidth'] as num?)?.toDouble() ?? 1.0,
-      gridCount: (json['gridCount'] as num?)?.toInt() ?? 5,
-      gridLineColor: json['gridLineColor'] == null
-          ? const Color(0xffE9EDF0)
-          : const ColorConverter().fromJson(json['gridLineColor'] as String?),
-      gridLineWidth: (json['gridLineWidth'] as num?)?.toDouble() ?? 0.5,
       defaultTextStyle: json['defaultTextStyle'] == null
           ? const TextStyle(
               fontSize: 10,
@@ -99,45 +95,6 @@ SettingData _$SettingDataFromJson(Map<String, dynamic> json) => SettingData(
       markLineWidth: (json['markLineWidth'] as num?)?.toDouble() ?? 0.5,
       markLineColor:
           const ColorConverter().fromJson(json['markLineColor'] as String?),
-      crosshairLineWidth:
-          (json['crosshairLineWidth'] as num?)?.toDouble() ?? 0.5,
-      crosshairLineColor: json['crosshairLineColor'] == null
-          ? Colors.black
-          : const ColorConverter()
-              .fromJson(json['crosshairLineColor'] as String?),
-      crosshairLineDashes: (json['crosshairLineDashes'] as List<dynamic>?)
-              ?.map((e) => (e as num).toDouble())
-              .toList() ??
-          const [3, 3],
-      corssPointColor: json['corssPointColor'] == null
-          ? Colors.black
-          : const ColorConverter().fromJson(json['corssPointColor'] as String?),
-      crossPointRadius: (json['crossPointRadius'] as num?)?.toDouble() ?? 2,
-      crossPointWidth: (json['crossPointWidth'] as num?)?.toDouble() ?? 6,
-      crossTickTextStyle: json['crossTickTextStyle'] == null
-          ? const TextStyle(
-              fontSize: 10,
-              color: Colors.white,
-              overflow: TextOverflow.ellipsis,
-              height: 1)
-          : const TextStyleConverter()
-              .fromJson(json['crossTickTextStyle'] as Map<String, dynamic>),
-      crossTickBackground: json['crossTickBackground'] == null
-          ? Colors.black
-          : const ColorConverter()
-              .fromJson(json['crossTickBackground'] as String?),
-      crossTickPadding: json['crossTickPadding'] == null
-          ? const EdgeInsets.all(2)
-          : const EdgeInsetsConverter()
-              .fromJson(json['crossTickPadding'] as Map<String, dynamic>),
-      crossTickBorder: json['crossTickBorder'] == null
-          ? BorderSide.none
-          : const BorderSideConvert()
-              .fromJson(json['crossTickBorder'] as Map<String, dynamic>),
-      crossTickRadius: json['crossTickRadius'] == null
-          ? const BorderRadius.all(Radius.circular(2))
-          : const BorderRadiusConverter()
-              .fromJson(json['crossTickRadius'] as Map<String, dynamic>),
       subChartMaxCount: (json['subChartMaxCount'] as num?)?.toInt() ??
           defaultSubChartMaxCount,
       subIndicatorTickCount:
@@ -154,7 +111,7 @@ SettingData _$SettingDataFromJson(Map<String, dynamic> json) => SettingData(
               json['subIndicatorDefaultPadding'] as Map<String, dynamic>),
     );
 
-Map<String, dynamic> _$SettingDataToJson(SettingData instance) {
+Map<String, dynamic> _$SettingConfigToJson(SettingConfig instance) {
   final val = <String, dynamic>{};
 
   void writeNotNull(String key, dynamic value) {
@@ -186,10 +143,6 @@ Map<String, dynamic> _$SettingDataToJson(SettingData instance) {
   val['candleLineWidth'] = instance.candleLineWidth;
   val['firstCandleInitOffset'] = instance.firstCandleInitOffset;
   val['indicatorLineWidth'] = instance.indicatorLineWidth;
-  val['gridCount'] = instance.gridCount;
-  writeNotNull(
-      'gridLineColor', const ColorConverter().toJson(instance.gridLineColor));
-  val['gridLineWidth'] = instance.gridLineWidth;
   val['defaultTextStyle'] =
       const TextStyleConverter().toJson(instance.defaultTextStyle);
   val['defaultPadding'] =
@@ -214,24 +167,6 @@ Map<String, dynamic> _$SettingDataToJson(SettingData instance) {
   val['markLineWidth'] = instance.markLineWidth;
   writeNotNull(
       'markLineColor', const ColorConverter().toJson(instance.markLineColor));
-  val['crosshairLineWidth'] = instance.crosshairLineWidth;
-  writeNotNull('crosshairLineColor',
-      const ColorConverter().toJson(instance.crosshairLineColor));
-  val['crosshairLineDashes'] = instance.crosshairLineDashes;
-  writeNotNull('corssPointColor',
-      const ColorConverter().toJson(instance.corssPointColor));
-  val['crossPointRadius'] = instance.crossPointRadius;
-  val['crossPointWidth'] = instance.crossPointWidth;
-  val['crossTickTextStyle'] =
-      const TextStyleConverter().toJson(instance.crossTickTextStyle);
-  writeNotNull('crossTickBackground',
-      const ColorConverter().toJson(instance.crossTickBackground));
-  val['crossTickPadding'] =
-      const EdgeInsetsConverter().toJson(instance.crossTickPadding);
-  val['crossTickBorder'] =
-      const BorderSideConvert().toJson(instance.crossTickBorder);
-  val['crossTickRadius'] =
-      const BorderRadiusConverter().toJson(instance.crossTickRadius);
   val['subChartMaxCount'] = instance.subChartMaxCount;
   val['subIndicatorTickCount'] = instance.subIndicatorTickCount;
   val['subIndicatorDefaultHeight'] = instance.subIndicatorDefaultHeight;

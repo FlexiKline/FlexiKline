@@ -145,7 +145,7 @@ class EMAPaintObject<T extends EMAIndicator> extends SinglePaintObjectBox<T> {
         Paint()
           ..color = param.color
           ..style = PaintingStyle.stroke
-          ..strokeWidth = setting.indicatorLineWidth,
+          ..strokeWidth = settingConfig.indicatorLineWidth,
       );
     }
     // } finally {
@@ -180,7 +180,7 @@ class EMAPaintObject<T extends EMAIndicator> extends SinglePaintObjectBox<T> {
       );
       children.add(TextSpan(
         text: text,
-        style: setting.tipsTextStyle.copyWith(color: param.color),
+        style: settingConfig.tipsTextStyle.copyWith(color: param.color),
       ));
     }
     if (children.isNotEmpty) {
@@ -190,7 +190,7 @@ class EMAPaintObject<T extends EMAIndicator> extends SinglePaintObjectBox<T> {
         drawDirection: DrawDirection.ltr,
         drawableRect: drawRect,
         textAlign: TextAlign.left,
-        padding: setting.tipsPadding,
+        padding: settingConfig.tipsPadding,
         maxLines: 1,
       );
     }

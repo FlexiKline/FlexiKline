@@ -413,7 +413,7 @@ const FlexiModelSerializable = JsonSerializable(
 );
 
 // ignore: constant_identifier_names
-const FlexiSettingSerializable = JsonSerializable(
+const FlexiConfigSerializable = JsonSerializable(
   converters: [
     ColorConverter(),
     DecimalConverter(),

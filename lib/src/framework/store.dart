@@ -76,8 +76,6 @@ mixin KlineStorage implements IStore, ILogger {
     return config;
   }
 
-  Map<String, dynamic> get settingConfig => _getRootConfig(jsonKeySetting);
-
   Map<String, dynamic> get mainIndicatorConfig => _getRootConfig(jsonKeyMain);
 
   List<ValueKey> get mainChildrenKeys {
@@ -207,15 +205,21 @@ mixin KlineStorage implements IStore, ILogger {
     );
   }
 
-  /// SettingData
-
-  void storeSettingData(SettingData settingData) {
-    flexiKlineConfig[jsonKeySetting] = settingData.toJson();
+  /// SettingConfig
+  Map<String, dynamic> get settingConfigData => _getRootConfig(jsonKeySetting);
+  void storeSettingData(SettingConfig config) {
+    flexiKlineConfig[jsonKeySetting] = config.toJson();
   }
 
-  /// Grid
-  Map<String, dynamic> get gridConfig => _getRootConfig(jsonKeyGrid);
-  void storeGridConfig(Grid grid) {
-    flexiKlineConfig[jsonKeyGrid] = grid.toJson();
+  /// GridConfig
+  Map<String, dynamic> get gridConfigData => _getRootConfig(jsonKeyGrid);
+  void storeGridConfig(GridConfig config) {
+    flexiKlineConfig[jsonKeyGrid] = config.toJson();
+  }
+
+  /// CrossConfig
+  Map<String, dynamic> get crossConfigData => _getRootConfig(jsonKeyCross);
+  void storeCrossConfig(CrossConfig config) {
+    flexiKlineConfig[jsonKeyCross] = config.toJson();
   }
 }
