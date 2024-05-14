@@ -65,7 +65,7 @@ mixin ConfigBinding
             VolumeIndicator.fromJson,
           ) ??
           VolumeIndicator(
-            height: settingConfig.subIndicatorDefaultHeight,
+            height: defaultSubIndicatorHeight,
             paintMode: PaintMode.alone,
             showYAxisTick: false,
             showCrossMark: false,
@@ -100,18 +100,12 @@ mixin ConfigBinding
             macdKey,
             MACDIndicator.fromJson,
           ) ??
-          MACDIndicator(
-            height: settingConfig.subIndicatorDefaultHeight,
-            tipsHeight: settingConfig.subIndicatorDefaultTipsHeight,
-          ),
+          MACDIndicator(),
       kdjKey: restoreSubSupportIndicator(
             kdjKey,
             KDJIndicator.fromJson,
           ) ??
-          KDJIndicator(
-            height: settingConfig.subIndicatorDefaultHeight,
-            tipsHeight: settingConfig.subIndicatorDefaultTipsHeight,
-          ),
+          KDJIndicator(),
       maVolKey: restoreSubSupportIndicator(
             maVolKey,
             MultiPaintObjectIndicator.fromJson,
@@ -119,8 +113,8 @@ mixin ConfigBinding
           MultiPaintObjectIndicator(
             key: maVolKey,
             name: 'MAVOL',
-            height: settingConfig.subIndicatorDefaultHeight,
-            tipsHeight: settingConfig.subIndicatorDefaultTipsHeight,
+            height: defaultSubIndicatorHeight,
+            tipsHeight: defaultIndicatorTipsHeight,
           ),
     };
 
@@ -131,17 +125,13 @@ mixin ConfigBinding
             VolumeIndicator.fromJson,
             childKey: volumeKey,
           ) ??
-          VolumeIndicator(
-            height: settingConfig.subIndicatorDefaultHeight,
-          ),
+          VolumeIndicator(),
       restoreSubSupportIndicator(
             maVolKey,
             VolMaIndicator.fromJson,
             childKey: volMaKey,
           ) ??
-          VolMaIndicator(
-            height: settingConfig.subIndicatorDefaultHeight,
-          ),
+          VolMaIndicator(),
     ], this);
 
     _mainIndicator = restoreMainIndicator() ??

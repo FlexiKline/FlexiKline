@@ -105,13 +105,13 @@ class SettingConfig {
     // 副区的指标图最大数量
     this.subChartMaxCount = defaultSubChartMaxCount,
     // 副图的指标图的右侧右侧刻度数量
-    this.subIndicatorTickCount = 3, // 高中低=>top, middle, bottom
-    // 副图指标图默认高度
-    this.subIndicatorDefaultHeight = defaultSubIndicatorHeight,
-    // 副图指标图默认Tips高度
-    this.subIndicatorDefaultTipsHeight = defaultIndicatorTipsHeight,
-    // 副图指标图默认Pading
-    this.subIndicatorDefaultPadding = defaultIndicatorPadding,
+    // this.subIndicatorTickCount = 3, // 高中低=>top, middle, bottom
+    // // 副图指标图默认高度
+    // this.subIndicatorDefaultHeight = defaultSubIndicatorHeight,
+    // // 副图指标图默认Tips高度
+    // this.subIndicatorDefaultTipsHeight = defaultIndicatorTipsHeight,
+    // // 副图指标图默认Pading
+    // this.subIndicatorDefaultPadding = defaultIndicatorPadding,
   })  : textColor = textColor,
         longColor = longColor,
         shortColor = shortColor,
@@ -159,6 +159,7 @@ class SettingConfig {
   // Candle 第一根Candle相对于mainRect右边的偏移
   double firstCandleInitOffset;
   // 指标线图的默认线宽
+  @Deprecated('废弃的, 由各个指标图自行配置')
   double indicatorLineWidth;
 
   /// 主/副图 Grid Axis conifg
@@ -209,13 +210,13 @@ class SettingConfig {
   // 副区的指标图最大数量
   int subChartMaxCount;
   // 副图的指标图的右侧右侧刻度数量
-  final int subIndicatorTickCount;
-  // 副图指标图默认高度
-  final double subIndicatorDefaultHeight;
-  // 副图指标图默认Tips高度
-  final double subIndicatorDefaultTipsHeight;
-  // 副图指标图默认Pading
-  final EdgeInsets subIndicatorDefaultPadding;
+  // final int subIndicatorTickCount;
+  // // 副图指标图默认高度
+  // final double subIndicatorDefaultHeight;
+  // // 副图指标图默认Tips高度
+  // final double subIndicatorDefaultTipsHeight;
+  // // 副图指标图默认Pading
+  // final EdgeInsets subIndicatorDefaultPadding;
 
   factory SettingConfig.fromJson(Map<String, dynamic> json) =>
       _$SettingConfigFromJson(json);

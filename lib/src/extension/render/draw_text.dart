@@ -15,6 +15,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
+import '../geometry_ext.dart';
 import 'common.dart';
 
 extension DrawTextExt on Canvas {
@@ -167,7 +168,7 @@ extension DrawTextExt on Canvas {
         (borderSide != null &&
             borderSide.color.alpha != 0 &&
             borderSide.width > 0);
-    final hasPadding = padding.collapsedSize.isEmpty != true;
+    final hasPadding = padding.collapsedSize.nonzero;
     if (hasPadding || isDrawBg || isDrawBorder) {
       // if (margin != null && margin.isNonNegative) {
       //   final x = drawDirection.isltr ? -margin.right : margin.left;

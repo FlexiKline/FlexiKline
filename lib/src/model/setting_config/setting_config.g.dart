@@ -97,18 +97,6 @@ SettingConfig _$SettingConfigFromJson(Map<String, dynamic> json) =>
           const ColorConverter().fromJson(json['markLineColor'] as String?),
       subChartMaxCount: (json['subChartMaxCount'] as num?)?.toInt() ??
           defaultSubChartMaxCount,
-      subIndicatorTickCount:
-          (json['subIndicatorTickCount'] as num?)?.toInt() ?? 3,
-      subIndicatorDefaultHeight:
-          (json['subIndicatorDefaultHeight'] as num?)?.toDouble() ??
-              defaultSubIndicatorHeight,
-      subIndicatorDefaultTipsHeight:
-          (json['subIndicatorDefaultTipsHeight'] as num?)?.toDouble() ??
-              defaultIndicatorTipsHeight,
-      subIndicatorDefaultPadding: json['subIndicatorDefaultPadding'] == null
-          ? defaultIndicatorPadding
-          : const EdgeInsetsConverter().fromJson(
-              json['subIndicatorDefaultPadding'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$SettingConfigToJson(SettingConfig instance) {
@@ -168,11 +156,6 @@ Map<String, dynamic> _$SettingConfigToJson(SettingConfig instance) {
   writeNotNull(
       'markLineColor', const ColorConverter().toJson(instance.markLineColor));
   val['subChartMaxCount'] = instance.subChartMaxCount;
-  val['subIndicatorTickCount'] = instance.subIndicatorTickCount;
-  val['subIndicatorDefaultHeight'] = instance.subIndicatorDefaultHeight;
-  val['subIndicatorDefaultTipsHeight'] = instance.subIndicatorDefaultTipsHeight;
-  val['subIndicatorDefaultPadding'] =
-      const EdgeInsetsConverter().toJson(instance.subIndicatorDefaultPadding);
   return val;
 }
 

@@ -29,11 +29,26 @@ class VolumeIndicator extends SinglePaintObjectIndicator {
     super.key = volumeKey,
     super.name = 'VOL',
     super.height = defaultSubIndicatorHeight,
-    super.tipsHeight,
-    super.padding,
+    super.tipsHeight = defaultIndicatorTipsHeight,
+    super.padding = defaultIndicatorPadding,
     super.paintMode,
-    this.tickCount,
-    this.tipsTextColor,
+
+    /// 绘制相关参数
+    this.volTips = const TipsConfig(
+      label: 'Vol: ',
+      precision: 2,
+      style: TextStyle(
+        fontSize: defaulTextSize,
+        color: Colors.black,
+        overflow: TextOverflow.ellipsis,
+        height: defaultTipsTextHeight,
+      ),
+    ),
+    this.tipsPadding = defaultTipsPadding,
+    this.tickCount = defaultSubTickCount,
+    // this.lineWidth = defaultIndicatorLineWidth,
+
+    /// 控制参数
     this.showYAxisTick = true,
     this.showCrossMark = true,
     this.showTips = true,
@@ -41,8 +56,12 @@ class VolumeIndicator extends SinglePaintObjectIndicator {
   });
 
   /// 绘制相关参数
-  final int? tickCount;
-  final Color? tipsTextColor;
+  final TipsConfig volTips;
+  final EdgeInsets tipsPadding;
+  final int tickCount;
+  // final double lineWidth;
+
+  /// 控制参数(Volume可用于主图和副图, 以下开关控制在主/副图的展示效果)
   final bool showYAxisTick;
   final bool showCrossMark;
   final bool showTips;
@@ -92,7 +111,7 @@ class VolumePaintObject<T extends VolumeIndicator>
       paintYAxisTick(
         canvas,
         size,
-        tickCount: indicator.tickCount ?? settingConfig.subIndicatorTickCount,
+        tickCount: indicator.tickCount,
       );
     }
   }
@@ -150,21 +169,20 @@ class VolumePaintObject<T extends VolumeIndicator>
 
     final text = formatNumber(
       model.vol.toDecimal(),
-      precision: 2,
+      precision: indicator.volTips.p,
       cutInvalidZero: true,
       showCompact: true,
-      prefix: 'Vol: ',
+      prefix: indicator.volTips.label,
     );
 
     return canvas.drawText(
       offset: drawRect.topLeft,
       text: text,
-      style:
-          settingConfig.tipsTextStyle.copyWith(color: indicator.tipsTextColor),
+      style: indicator.volTips.style,
       drawDirection: DrawDirection.ltr,
       drawableRect: tipsRect,
       textAlign: TextAlign.left,
-      padding: settingConfig.tipsPadding,
+      padding: indicator.tipsPadding,
       maxLines: 1,
     );
   }

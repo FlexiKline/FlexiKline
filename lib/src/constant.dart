@@ -17,16 +17,38 @@ import 'package:flutter/material.dart';
 /// 默认数据格式化精度
 const int defaultPrecision = 4;
 
+// 默认Decimal除法精度
 const int defaultScaleOnInfinitePrecision = 18;
+
+// 默认副图指标高度
 const double defaultSubIndicatorHeight = 60;
-const double defaultIndicatorTipsHeight = 15;
+
+// 默认指标图Padding
 const EdgeInsets defaultIndicatorPadding = EdgeInsets.zero;
 
+// 默认副图指标最大数量
 const int defaultSubChartMaxCount = 4;
 
-// 默认Text配置
+// 默认文本配置
 const double defaulTextSize = 10;
+
+// 默认文本高度
 const double defaultTextHeight = 1;
+
+// 默认副图指标刻度数量: 高中低=>top, middle, bottom
+const int defaultSubTickCount = 3;
+
+// 默认指标线图的宽度
+const double defaultIndicatorLineWidth = 1;
+
+// 默认指标图TipsHeight
+const double defaultIndicatorTipsHeight = 15;
+
+// 默认Tips文本高度
+const double defaultTipsTextHeight = 1.2;
+
+// 默认Tips文本区域的Padding: 左边缩进8个单位
+const EdgeInsets defaultTipsPadding = EdgeInsets.only(left: 8);
 
 /// 计算模式
 /// [fast] 使用(IEEE 754 二进制浮点数算术标准)计算指标数据. (用double类型计算)

@@ -30,6 +30,7 @@ export 'flexi_kline_config/flexi_kline_config.dart';
 export 'setting_config/setting_config.dart';
 export 'grid_config/grid_config.dart';
 export 'cross_config/cross_config.dart';
+export 'tips_config/tips_config.dart';
 
 extension CandleReqExt on CandleReq {
   String get key => "$instId-$bar";

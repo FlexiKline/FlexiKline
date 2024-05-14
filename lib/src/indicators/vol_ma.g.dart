@@ -12,8 +12,9 @@ VolMaIndicator _$VolMaIndicatorFromJson(Map<String, dynamic> json) =>
           ? volMaKey
           : const ValueKeyConverter().fromJson(json['key'] as String),
       name: json['name'] as String? ?? 'VOLMA',
-      height: (json['height'] as num).toDouble(),
-      tipsHeight: (json['tipsHeight'] as num?)?.toDouble() ?? 0.0,
+      height: (json['height'] as num?)?.toDouble() ?? defaultSubIndicatorHeight,
+      tipsHeight: (json['tipsHeight'] as num?)?.toDouble() ??
+          defaultIndicatorTipsHeight,
       padding: json['padding'] == null
           ? defaultIndicatorPadding
           : const EdgeInsetsConverter()

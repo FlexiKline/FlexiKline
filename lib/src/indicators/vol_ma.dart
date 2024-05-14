@@ -31,9 +31,9 @@ class VolMaIndicator extends SinglePaintObjectIndicator {
   VolMaIndicator({
     super.key = volMaKey,
     super.name = 'VOLMA',
-    required super.height,
-    super.tipsHeight,
-    super.padding,
+    super.height = defaultSubIndicatorHeight,
+    super.tipsHeight = defaultIndicatorTipsHeight,
+    super.padding = defaultIndicatorPadding,
     this.calcParams = const [
       MaParam(label: 'MA5', count: 5, color: Colors.orange),
       MaParam(label: 'MA10', count: 10, color: Colors.blue)

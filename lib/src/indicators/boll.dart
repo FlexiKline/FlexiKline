@@ -61,31 +61,61 @@ class BOLLIndicator extends SinglePaintObjectIndicator {
     super.name = 'BOLL',
     required super.height,
     super.tipsHeight = defaultIndicatorTipsHeight,
-    super.padding,
+    super.padding = defaultIndicatorPadding,
+
+    /// BOLL计算参数
     this.calcParam = const BOLLParam(n: 20, std: 2),
-    this.mbColor = const Color(0xFF886787),
-    this.upColor = const Color(0xFFF0B527),
-    this.dnColor = const Color(0xFFD85BE0),
-    this.mbLabel = 'BOLL(20):',
-    this.upLabel = 'UB:',
-    this.dnLabel = 'LB:',
-    this.precision,
+
+    /// 绘制相关参数
+    this.mbTips = const TipsConfig(
+      label: 'BOLL(20): ',
+      // precision: 2,
+      style: TextStyle(
+        fontSize: defaulTextSize,
+        color: Color(0xFF886787),
+        overflow: TextOverflow.ellipsis,
+        height: defaultTipsTextHeight,
+      ),
+    ),
+    this.upTips = const TipsConfig(
+      label: 'UB: ',
+      // precision: 2,
+      style: TextStyle(
+        fontSize: defaulTextSize,
+        color: Color(0xFFF0B527),
+        overflow: TextOverflow.ellipsis,
+        height: defaultTipsTextHeight,
+      ),
+    ),
+    this.dnTips = const TipsConfig(
+      label: 'LB: ',
+      // precision: 2,
+      style: TextStyle(
+        fontSize: defaulTextSize,
+        color: Color(0xFFD85BE0),
+        overflow: TextOverflow.ellipsis,
+        height: defaultTipsTextHeight,
+      ),
+    ),
+    this.tipsPadding = defaultTipsPadding,
+    this.lineWidth = defaultIndicatorLineWidth,
+
+    /// 填充配置
     this.isFillBetweenUpAndDn = true,
     Color? fillColor,
-  }) : fillColor = fillColor ?? mbColor.withOpacity(0.1);
+  }) : fillColor = fillColor ?? mbTips.color.withOpacity(0.1);
 
-  // BOLL相关参数
+  /// BOLL计算参数
   final BOLLParam calcParam;
-  final Color mbColor;
-  final Color upColor;
-  final Color dnColor;
-  final String mbLabel;
-  final String upLabel;
-  final String dnLabel;
 
   /// 绘制相关参数
-  // 精度, 如果未提供, 使用当前币种精度
-  final int? precision;
+  final TipsConfig mbTips;
+  final TipsConfig upTips;
+  final TipsConfig dnTips;
+  final EdgeInsets tipsPadding;
+  final double lineWidth;
+
+  /// 填充配置
   // 是否将up和dn之间填充半透明色
   final bool isFillBetweenUpAndDn;
   // 默认是mbColor的0.1不透明度.
@@ -155,25 +185,25 @@ class BOLLPaintObject<T extends BOLLIndicator> extends SinglePaintObjectBox<T> {
     canvas.drawPath(
       Path()..addPolygon(mbPoints, false),
       Paint()
-        ..color = indicator.mbColor
+        ..color = indicator.mbTips.color
         ..style = PaintingStyle.stroke
-        ..strokeWidth = settingConfig.indicatorLineWidth,
+        ..strokeWidth = indicator.lineWidth,
     );
 
     canvas.drawPath(
       Path()..addPolygon(upPoints, false),
       Paint()
-        ..color = indicator.upColor
+        ..color = indicator.upTips.color
         ..style = PaintingStyle.stroke
-        ..strokeWidth = settingConfig.indicatorLineWidth,
+        ..strokeWidth = indicator.lineWidth,
     );
 
     canvas.drawPath(
       Path()..addPolygon(dnPoints, false),
       Paint()
-        ..color = indicator.dnColor
+        ..color = indicator.dnTips.color
         ..style = PaintingStyle.stroke
-        ..strokeWidth = settingConfig.indicatorLineWidth,
+        ..strokeWidth = indicator.lineWidth,
     );
 
     if (indicator.isFillBetweenUpAndDn) {
@@ -198,45 +228,45 @@ class BOLLPaintObject<T extends BOLLIndicator> extends SinglePaintObjectBox<T> {
     );
     if (ret == null) return null;
 
-    final precision = indicator.precision ?? klineData.precision;
+    final precision = klineData.precision;
     Rect drawRect = nextTipsRect;
     final children = <TextSpan>[];
 
     final mbTxt = formatNumber(
       ret.mb.toDecimal(),
-      precision: precision,
+      precision: indicator.mbTips.getP(precision),
       cutInvalidZero: true,
-      prefix: indicator.mbLabel,
+      prefix: indicator.mbTips.label,
       suffix: ' ',
     );
     final upTxt = formatNumber(
       ret.up.toDecimal(),
-      precision: precision,
+      precision: indicator.upTips.getP(precision),
       cutInvalidZero: true,
-      prefix: indicator.upLabel,
+      prefix: indicator.upTips.label,
       suffix: ' ',
     );
     final dnTxt = formatNumber(
       ret.dn.toDecimal(),
-      precision: precision,
+      precision: indicator.dnTips.getP(precision),
       cutInvalidZero: true,
-      prefix: indicator.dnLabel,
+      prefix: indicator.dnTips.label,
       suffix: ' ',
     );
 
     children.add(TextSpan(
       text: mbTxt,
-      style: settingConfig.tipsTextStyle.copyWith(color: indicator.mbColor),
+      style: indicator.mbTips.style,
     ));
 
     children.add(TextSpan(
       text: upTxt,
-      style: settingConfig.tipsTextStyle.copyWith(color: indicator.upColor),
+      style: indicator.upTips.style,
     ));
 
     children.add(TextSpan(
       text: dnTxt,
-      style: settingConfig.tipsTextStyle.copyWith(color: indicator.dnColor),
+      style: indicator.dnTips.style,
     ));
 
     return canvas.drawText(
@@ -245,7 +275,7 @@ class BOLLPaintObject<T extends BOLLIndicator> extends SinglePaintObjectBox<T> {
       drawDirection: DrawDirection.ltr,
       drawableRect: drawRect,
       textAlign: TextAlign.left,
-      padding: settingConfig.tipsPadding,
+      padding: indicator.tipsPadding,
       maxLines: 1,
     );
   }

@@ -67,25 +67,59 @@ class KDJIndicator extends SinglePaintObjectIndicator {
   KDJIndicator({
     super.key = const ValueKey(IndicatorType.kdj),
     super.name = 'KDJ',
-    required super.height,
+    super.height = defaultSubIndicatorHeight,
     super.tipsHeight = defaultIndicatorTipsHeight,
-    super.padding,
+    super.padding = defaultIndicatorPadding,
+
+    /// KDJ计算参数
     this.calcParam = const KDJParam(n: 9, m1: 3, m2: 3),
-    this.kColor = const Color(0xFF7A5C79),
-    this.dColor = const Color(0xFFFABD3F),
-    this.jColor = const Color(0xFFBB72CA),
-    this.tickCount,
-    this.precision = 2,
+
+    /// 绘制相关参数
+    this.ktips = const TipsConfig(
+      label: 'K: ',
+      precision: 2,
+      style: TextStyle(
+        fontSize: defaulTextSize,
+        color: Color(0xFF7A5C79),
+        overflow: TextOverflow.ellipsis,
+        height: defaultTipsTextHeight,
+      ),
+    ),
+    this.dtips = const TipsConfig(
+      label: 'D: ',
+      precision: 2,
+      style: TextStyle(
+        fontSize: defaulTextSize,
+        color: Color(0xFFFABD3F),
+        overflow: TextOverflow.ellipsis,
+        height: defaultTipsTextHeight,
+      ),
+    ),
+    this.jtips = const TipsConfig(
+      label: 'D: ',
+      precision: 2,
+      style: TextStyle(
+        fontSize: defaulTextSize,
+        color: Color(0xFFBB72CA),
+        overflow: TextOverflow.ellipsis,
+        height: defaultTipsTextHeight,
+      ),
+    ),
+    this.tipsPadding = defaultTipsPadding,
+    this.tickCount = defaultSubTickCount,
+    this.lineWidth = defaultIndicatorLineWidth,
   });
 
+  /// KDJ计算参数
   final KDJParam calcParam;
-  final Color kColor;
-  final Color dColor;
-  final Color jColor;
 
   /// 绘制相关参数
-  final int? tickCount;
-  final int precision;
+  final TipsConfig ktips;
+  final TipsConfig dtips;
+  final TipsConfig jtips;
+  final EdgeInsets tipsPadding;
+  final int tickCount;
+  final double lineWidth;
 
   @override
   KDJPaintObject createPaintObject(KlineBindingBase controller) {
@@ -126,7 +160,7 @@ class KDJPaintObject<T extends KDJIndicator> extends SinglePaintObjectBox<T>
     paintYAxisTick(
       canvas,
       size,
-      tickCount: indicator.tickCount ?? settingConfig.subIndicatorTickCount,
+      tickCount: indicator.tickCount,
     );
   }
 
@@ -160,25 +194,25 @@ class KDJPaintObject<T extends KDJIndicator> extends SinglePaintObjectBox<T>
     canvas.drawPath(
       Path()..addPolygon(kPoints, false),
       Paint()
-        ..color = indicator.kColor
+        ..color = indicator.ktips.color
         ..style = PaintingStyle.stroke
-        ..strokeWidth = settingConfig.indicatorLineWidth,
+        ..strokeWidth = indicator.lineWidth,
     );
 
     canvas.drawPath(
       Path()..addPolygon(dPoints, false),
       Paint()
-        ..color = indicator.dColor
+        ..color = indicator.dtips.color
         ..style = PaintingStyle.stroke
-        ..strokeWidth = settingConfig.indicatorLineWidth,
+        ..strokeWidth = indicator.lineWidth,
     );
 
     canvas.drawPath(
       Path()..addPolygon(jPoints, false),
       Paint()
-        ..color = indicator.jColor
+        ..color = indicator.jtips.color
         ..style = PaintingStyle.stroke
-        ..strokeWidth = settingConfig.indicatorLineWidth,
+        ..strokeWidth = indicator.lineWidth,
     );
   }
 
@@ -199,39 +233,39 @@ class KDJPaintObject<T extends KDJIndicator> extends SinglePaintObjectBox<T>
 
     final kTxt = formatNumber(
       ret.k.toDecimal(),
-      precision: indicator.precision,
+      precision: indicator.ktips.p,
       cutInvalidZero: true,
-      prefix: 'K: ',
+      prefix: indicator.ktips.label,
       suffix: ' ',
     );
     final dTxt = formatNumber(
       ret.d.toDecimal(),
-      precision: indicator.precision,
+      precision: indicator.dtips.p,
       cutInvalidZero: true,
-      prefix: 'D: ',
+      prefix: indicator.dtips.label,
       suffix: ' ',
     );
     final jTxt = formatNumber(
       ret.j.toDecimal(),
-      precision: indicator.precision,
+      precision: indicator.jtips.p,
       cutInvalidZero: true,
-      prefix: 'J: ',
+      prefix: indicator.jtips.label,
       suffix: ' ',
     );
 
     children.add(TextSpan(
       text: kTxt,
-      style: settingConfig.tipsTextStyle.copyWith(color: indicator.kColor),
+      style: indicator.ktips.style,
     ));
 
     children.add(TextSpan(
       text: dTxt,
-      style: settingConfig.tipsTextStyle.copyWith(color: indicator.dColor),
+      style: indicator.dtips.style,
     ));
 
     children.add(TextSpan(
       text: jTxt,
-      style: settingConfig.tipsTextStyle.copyWith(color: indicator.jColor),
+      style: indicator.jtips.style,
     ));
 
     return canvas.drawText(
@@ -240,7 +274,7 @@ class KDJPaintObject<T extends KDJIndicator> extends SinglePaintObjectBox<T>
       drawDirection: DrawDirection.ltr,
       drawableRect: drawRect,
       textAlign: TextAlign.left,
-      padding: settingConfig.tipsPadding,
+      padding: indicator.tipsPadding,
       maxLines: 1,
     );
   }

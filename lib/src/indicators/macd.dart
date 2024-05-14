@@ -68,24 +68,57 @@ class MACDIndicator extends SinglePaintObjectIndicator {
     super.name = 'MACD',
     super.height = defaultSubIndicatorHeight,
     super.tipsHeight = defaultIndicatorTipsHeight,
-    super.padding,
+    super.padding = defaultIndicatorPadding,
+
+    /// Macd相关参数
     this.calcParam = const MACDParam(s: 12, l: 26, m: 9),
-    this.difColor = const Color(0xFFDFBF47),
-    this.deaColor = const Color(0xFF795583),
-    this.macdColor,
-    this.tickCount,
-    this.precision = 2,
+
+    /// 绘制相关参数
+    this.difTips = const TipsConfig(
+      label: 'DIF: ',
+      precision: 2,
+      style: TextStyle(
+        fontSize: defaulTextSize,
+        color: Color(0xFFDFBF47),
+        overflow: TextOverflow.ellipsis,
+        height: defaultTipsTextHeight,
+      ),
+    ),
+    this.deaTips = const TipsConfig(
+      label: 'DEA: ',
+      precision: 2,
+      style: TextStyle(
+        fontSize: defaulTextSize,
+        color: Color(0xFF795583),
+        overflow: TextOverflow.ellipsis,
+        height: defaultTipsTextHeight,
+      ),
+    ),
+    this.macdTips = const TipsConfig(
+      label: 'MACD: ',
+      precision: 2,
+      style: TextStyle(
+        fontSize: defaulTextSize,
+        color: Colors.black,
+        overflow: TextOverflow.ellipsis,
+        height: defaultTipsTextHeight,
+      ),
+    ),
+    this.tipsPadding = defaultTipsPadding,
+    this.tickCount = defaultSubTickCount,
+    this.lineWidth = defaultIndicatorLineWidth,
   });
 
   /// Macd相关参数
   final MACDParam calcParam;
-  final Color difColor;
-  final Color deaColor;
-  final Color? macdColor;
 
   /// 绘制相关参数
-  final int? tickCount;
-  final int precision;
+  final TipsConfig difTips;
+  final TipsConfig deaTips;
+  final TipsConfig macdTips;
+  final EdgeInsets tipsPadding;
+  final int tickCount;
+  final double lineWidth;
 
   @override
   SinglePaintObjectBox createPaintObject(KlineBindingBase controller) {
@@ -122,7 +155,7 @@ class MACDPaintObject<T extends MACDIndicator> extends SinglePaintObjectBox<T>
     paintYAxisTick(
       canvas,
       size,
-      tickCount: indicator.tickCount ?? settingConfig.subIndicatorTickCount,
+      tickCount: indicator.tickCount,
     );
   }
 
@@ -183,17 +216,17 @@ class MACDPaintObject<T extends MACDIndicator> extends SinglePaintObjectBox<T>
     canvas.drawPath(
       Path()..addPolygon(difPoints, false),
       Paint()
-        ..color = indicator.difColor
+        ..color = indicator.difTips.color
         ..style = PaintingStyle.stroke
-        ..strokeWidth = settingConfig.indicatorLineWidth,
+        ..strokeWidth = indicator.lineWidth,
     );
 
     canvas.drawPath(
       Path()..addPolygon(deaPoints, false),
       Paint()
-        ..color = indicator.deaColor
+        ..color = indicator.deaTips.color
         ..style = PaintingStyle.stroke
-        ..strokeWidth = settingConfig.indicatorLineWidth,
+        ..strokeWidth = indicator.lineWidth,
     );
   }
 
@@ -213,39 +246,39 @@ class MACDPaintObject<T extends MACDIndicator> extends SinglePaintObjectBox<T>
     final children = <TextSpan>[];
     final difTxt = formatNumber(
       ret.dif.toDecimal(),
-      precision: indicator.precision,
+      precision: indicator.difTips.p,
       cutInvalidZero: true,
-      prefix: 'DIF: ',
+      prefix: indicator.difTips.label,
       suffix: ' ',
     );
     final deaTxt = formatNumber(
       ret.dea.toDecimal(),
-      precision: indicator.precision,
+      precision: indicator.deaTips.p,
       cutInvalidZero: true,
-      prefix: 'DEA: ',
+      prefix: indicator.deaTips.label,
       suffix: ' ',
     );
     final macdTxt = formatNumber(
       ret.macd.toDecimal(),
-      precision: indicator.precision,
+      precision: indicator.macdTips.p,
       cutInvalidZero: true,
-      prefix: 'MACD: ',
+      prefix: indicator.macdTips.label,
       suffix: ' ',
     );
 
     children.add(TextSpan(
       text: difTxt,
-      style: settingConfig.tipsTextStyle.copyWith(color: indicator.difColor),
+      style: indicator.difTips.style,
     ));
 
     children.add(TextSpan(
       text: deaTxt,
-      style: settingConfig.tipsTextStyle.copyWith(color: indicator.deaColor),
+      style: indicator.deaTips.style,
     ));
 
     children.add(TextSpan(
       text: macdTxt,
-      style: settingConfig.tipsTextStyle.copyWith(color: indicator.macdColor),
+      style: indicator.macdTips.style,
     ));
 
     return canvas.drawText(
@@ -254,7 +287,7 @@ class MACDPaintObject<T extends MACDIndicator> extends SinglePaintObjectBox<T>
       drawDirection: DrawDirection.ltr,
       drawableRect: drawRect,
       textAlign: TextAlign.left,
-      padding: settingConfig.tipsPadding,
+      padding: indicator.tipsPadding,
       maxLines: 1,
     );
   }

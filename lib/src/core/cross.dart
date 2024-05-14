@@ -116,6 +116,8 @@ mixin CrossBinding
   /// 绘制最新价与十字线
   @override
   void paintCross(Canvas canvas, Size size) {
+    if (crossConfig.enable != true) return;
+
     if (isCrossing) {
       final offset = this.offset;
       if (offset == null || offset.isInfinite) {
@@ -149,6 +151,11 @@ mixin CrossBinding
   @override
   @protected
   bool handleTap(GestureData data) {
+    if (crossConfig.enable != true) {
+      super.handleTap(data);
+      return false;
+    }
+
     if (isCrossing) {
       offset = null;
       markRepaintChart(); // 当Cross事件结束后, 调用markRepaintChart绘制Painting图层首根蜡烛的tips信息.

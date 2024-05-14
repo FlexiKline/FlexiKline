@@ -52,5 +52,5 @@ extension OffsetExt on Offset {
 }
 
 extension SizeExt on Size {
-  bool get isValid => width > 0 && height > 0;
+  bool get nonzero => width > 0 || height > 0;
 }

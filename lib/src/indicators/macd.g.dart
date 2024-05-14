@@ -34,15 +34,43 @@ MACDIndicator _$MACDIndicatorFromJson(Map<String, dynamic> json) =>
       calcParam: json['calcParam'] == null
           ? const MACDParam(s: 12, l: 26, m: 9)
           : MACDParam.fromJson(json['calcParam'] as Map<String, dynamic>),
-      difColor: json['difColor'] == null
-          ? const Color(0xFFDFBF47)
-          : const ColorConverter().fromJson(json['difColor'] as String?),
-      deaColor: json['deaColor'] == null
-          ? const Color(0xFF795583)
-          : const ColorConverter().fromJson(json['deaColor'] as String?),
-      macdColor: const ColorConverter().fromJson(json['macdColor'] as String?),
-      tickCount: (json['tickCount'] as num?)?.toInt(),
-      precision: (json['precision'] as num?)?.toInt() ?? 2,
+      difTips: json['difTips'] == null
+          ? const TipsConfig(
+              label: 'DIF: ',
+              precision: 2,
+              style: TextStyle(
+                  fontSize: defaulTextSize,
+                  color: Color(0xFFDFBF47),
+                  overflow: TextOverflow.ellipsis,
+                  height: defaultTipsTextHeight))
+          : TipsConfig.fromJson(json['difTips'] as Map<String, dynamic>),
+      deaTips: json['deaTips'] == null
+          ? const TipsConfig(
+              label: 'DEA: ',
+              precision: 2,
+              style: TextStyle(
+                  fontSize: defaulTextSize,
+                  color: Color(0xFF795583),
+                  overflow: TextOverflow.ellipsis,
+                  height: defaultTipsTextHeight))
+          : TipsConfig.fromJson(json['deaTips'] as Map<String, dynamic>),
+      macdTips: json['macdTips'] == null
+          ? const TipsConfig(
+              label: 'MACD: ',
+              precision: 2,
+              style: TextStyle(
+                  fontSize: defaulTextSize,
+                  color: Colors.black,
+                  overflow: TextOverflow.ellipsis,
+                  height: defaultTipsTextHeight))
+          : TipsConfig.fromJson(json['macdTips'] as Map<String, dynamic>),
+      tipsPadding: json['tipsPadding'] == null
+          ? defaultTipsPadding
+          : const EdgeInsetsConverter()
+              .fromJson(json['tipsPadding'] as Map<String, dynamic>),
+      tickCount: (json['tickCount'] as num?)?.toInt() ?? defaultSubTickCount,
+      lineWidth:
+          (json['lineWidth'] as num?)?.toDouble() ?? defaultIndicatorLineWidth,
     );
 
 Map<String, dynamic> _$MACDIndicatorToJson(MACDIndicator instance) =>
@@ -53,16 +81,10 @@ Map<String, dynamic> _$MACDIndicatorToJson(MACDIndicator instance) =>
       'tipsHeight': instance.tipsHeight,
       'padding': const EdgeInsetsConverter().toJson(instance.padding),
       'calcParam': instance.calcParam.toJson(),
-      'difColor': const ColorConverter().toJson(instance.difColor),
-      'deaColor': const ColorConverter().toJson(instance.deaColor),
-      'macdColor': _$JsonConverterToJson<String?, Color>(
-          instance.macdColor, const ColorConverter().toJson),
+      'difTips': instance.difTips.toJson(),
+      'deaTips': instance.deaTips.toJson(),
+      'macdTips': instance.macdTips.toJson(),
+      'tipsPadding': const EdgeInsetsConverter().toJson(instance.tipsPadding),
       'tickCount': instance.tickCount,
-      'precision': instance.precision,
+      'lineWidth': instance.lineWidth,
     };
-
-Json? _$JsonConverterToJson<Json, Value>(
-  Value? value,
-  Json? Function(Value value) toJson,
-) =>
-    value == null ? null : toJson(value);

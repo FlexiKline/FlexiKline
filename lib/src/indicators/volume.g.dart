@@ -13,7 +13,8 @@ VolumeIndicator _$VolumeIndicatorFromJson(Map<String, dynamic> json) =>
           : const ValueKeyConverter().fromJson(json['key'] as String),
       name: json['name'] as String? ?? 'VOL',
       height: (json['height'] as num?)?.toDouble() ?? defaultSubIndicatorHeight,
-      tipsHeight: (json['tipsHeight'] as num?)?.toDouble() ?? 0.0,
+      tipsHeight: (json['tipsHeight'] as num?)?.toDouble() ??
+          defaultIndicatorTipsHeight,
       padding: json['padding'] == null
           ? defaultIndicatorPadding
           : const EdgeInsetsConverter()
@@ -21,9 +22,21 @@ VolumeIndicator _$VolumeIndicatorFromJson(Map<String, dynamic> json) =>
       paintMode: json['paintMode'] == null
           ? PaintMode.combine
           : const PaintModeConverter().fromJson(json['paintMode'] as String),
-      tickCount: (json['tickCount'] as num?)?.toInt(),
-      tipsTextColor:
-          const ColorConverter().fromJson(json['tipsTextColor'] as String?),
+      volTips: json['volTips'] == null
+          ? const TipsConfig(
+              label: 'Vol: ',
+              precision: 2,
+              style: TextStyle(
+                  fontSize: defaulTextSize,
+                  color: Colors.black,
+                  overflow: TextOverflow.ellipsis,
+                  height: defaultTipsTextHeight))
+          : TipsConfig.fromJson(json['volTips'] as Map<String, dynamic>),
+      tipsPadding: json['tipsPadding'] == null
+          ? defaultTipsPadding
+          : const EdgeInsetsConverter()
+              .fromJson(json['tipsPadding'] as Map<String, dynamic>),
+      tickCount: (json['tickCount'] as num?)?.toInt() ?? defaultSubTickCount,
       showYAxisTick: json['showYAxisTick'] as bool? ?? true,
       showCrossMark: json['showCrossMark'] as bool? ?? true,
       showTips: json['showTips'] as bool? ?? true,
@@ -38,17 +51,11 @@ Map<String, dynamic> _$VolumeIndicatorToJson(VolumeIndicator instance) =>
       'tipsHeight': instance.tipsHeight,
       'padding': const EdgeInsetsConverter().toJson(instance.padding),
       'paintMode': const PaintModeConverter().toJson(instance.paintMode),
+      'volTips': instance.volTips.toJson(),
+      'tipsPadding': const EdgeInsetsConverter().toJson(instance.tipsPadding),
       'tickCount': instance.tickCount,
-      'tipsTextColor': _$JsonConverterToJson<String?, Color>(
-          instance.tipsTextColor, const ColorConverter().toJson),
       'showYAxisTick': instance.showYAxisTick,
       'showCrossMark': instance.showCrossMark,
       'showTips': instance.showTips,
       'useTint': instance.useTint,
     };
-
-Json? _$JsonConverterToJson<Json, Value>(
-  Value? value,
-  Json? Function(Value value) toJson,
-) =>
-    value == null ? null : toJson(value);
