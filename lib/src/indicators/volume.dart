@@ -46,7 +46,7 @@ class VolumeIndicator extends SinglePaintObjectIndicator {
     ),
     this.tipsPadding = defaultTipsPadding,
     this.tickCount = defaultSubTickCount,
-    // this.lineWidth = defaultIndicatorLineWidth,
+    this.precision = 2,
 
     /// 控制参数
     this.showYAxisTick = true,
@@ -59,7 +59,8 @@ class VolumeIndicator extends SinglePaintObjectIndicator {
   final TipsConfig volTips;
   final EdgeInsets tipsPadding;
   final int tickCount;
-  // final double lineWidth;
+  // 默认精度
+  final int precision;
 
   /// 控制参数(Volume可用于主图和副图, 以下开关控制在主/副图的展示效果)
   final bool showYAxisTick;
@@ -83,7 +84,7 @@ class VolumeIndicator extends SinglePaintObjectIndicator {
 
 class VolumePaintObject<T extends VolumeIndicator>
     extends SinglePaintObjectBox<T>
-    with PaintYAxisTickMixin, PaintYAxisMarkOnCrossMixin {
+    with PaintHorizontalTickMixin, PaintHorizontalTickOnCrossMixin {
   VolumePaintObject({
     required super.controller,
     required super.indicator,
@@ -108,10 +109,11 @@ class VolumePaintObject<T extends VolumeIndicator>
 
     if (indicator.showYAxisTick) {
       /// 绘制Y轴刻度值
-      paintYAxisTick(
+      paintHorizontalTick(
         canvas,
         size,
         tickCount: indicator.tickCount,
+        precision: indicator.precision,
       );
     }
   }
@@ -120,7 +122,11 @@ class VolumePaintObject<T extends VolumeIndicator>
   void onCross(Canvas canvas, Offset offset) {
     if (indicator.showCrossMark) {
       /// onCross时, 绘制Y轴上的标记值
-      paintYAxisTickOnCross(canvas, offset);
+      paintHorizontalTickOnCross(
+        canvas,
+        offset,
+        precision: indicator.precision,
+      );
     }
   }
 
@@ -169,7 +175,7 @@ class VolumePaintObject<T extends VolumeIndicator>
 
     final text = formatNumber(
       model.vol.toDecimal(),
-      precision: indicator.volTips.p,
+      precision: indicator.volTips.getP(indicator.precision),
       cutInvalidZero: true,
       showCompact: true,
       prefix: indicator.volTips.label,

@@ -85,13 +85,16 @@ SettingConfig _$SettingConfigFromJson(Map<String, dynamic> json) =>
           ? const EdgeInsets.only(left: 8)
           : const EdgeInsetsConverter()
               .fromJson(json['tipsPadding'] as Map<String, dynamic>),
-      tickRectMargin: (json['tickRectMargin'] as num?)?.toDouble() ?? 1,
-      tickTextStyle: _$JsonConverterFromJson<Map<String, dynamic>, TextStyle>(
-          json['tickTextStyle'], const TextStyleConverter().fromJson),
-      tickPadding: json['tickPadding'] == null
-          ? const EdgeInsets.all(2)
-          : const EdgeInsetsConverter()
-              .fromJson(json['tickPadding'] as Map<String, dynamic>),
+      tickText: json['tickText'] == null
+          ? const TextAreaConfig(
+              style: TextStyle(
+                  fontSize: defaulTextSize,
+                  color: Colors.black,
+                  overflow: TextOverflow.ellipsis,
+                  height: defaultTextHeight),
+              textAlign: TextAlign.end,
+              padding: EdgeInsets.symmetric(horizontal: 2))
+          : TextAreaConfig.fromJson(json['tickText'] as Map<String, dynamic>),
       markLineWidth: (json['markLineWidth'] as num?)?.toDouble() ?? 0.5,
       markLineColor:
           const ColorConverter().fromJson(json['markLineColor'] as String?),
@@ -148,10 +151,7 @@ Map<String, dynamic> _$SettingConfigToJson(SettingConfig instance) {
   val['tipsTextStyle'] =
       const TextStyleConverter().toJson(instance.tipsTextStyle);
   val['tipsPadding'] = const EdgeInsetsConverter().toJson(instance.tipsPadding);
-  val['tickRectMargin'] = instance.tickRectMargin;
-  val['tickTextStyle'] =
-      const TextStyleConverter().toJson(instance.tickTextStyle);
-  val['tickPadding'] = const EdgeInsetsConverter().toJson(instance.tickPadding);
+  val['tickText'] = instance.tickText.toJson();
   val['markLineWidth'] = instance.markLineWidth;
   writeNotNull(
       'markLineColor', const ColorConverter().toJson(instance.markLineColor));

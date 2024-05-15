@@ -30,9 +30,10 @@ String? formatTimeDiff(DateTime nextUpdateDateTime) {
   final dayLag = timeLag.inDays;
   if (dayLag >= 1) {
     final hoursLag = (timeLag.inHours - dayLag * 24).clamp(0, 23);
-    return '${dayLag}h ${hoursLag}h';
+    return '${dayLag}D ${hoursLag}H';
   } else {
-    return timeLag.toString().substring(0, 8);
+    final ret = timeLag.toString();
+    return ret.split('.')[0];
   }
 }
 

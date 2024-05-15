@@ -45,12 +45,4 @@ extension KlineDataExt on KlineData {
   TimeBar? get timerBar => req.timerBar;
 
   bool get invalid => req.instId.isEmpty;
-
-  DateTime? get nextUpdateDateTime {
-    final lastModel = list.firstOrNull;
-    if (lastModel != null) {
-      return lastModel.nextUpdateDateTime(req.bar);
-    }
-    return null;
-  }
 }

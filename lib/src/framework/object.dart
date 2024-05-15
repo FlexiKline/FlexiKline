@@ -256,108 +256,111 @@ mixin DataInitMixin on PaintObjectProxy implements IPaintDataInit {
   }
 }
 
-mixin PaintYAxisTickMixin<T extends SinglePaintObjectIndicator>
+mixin PaintHorizontalTickMixin<T extends SinglePaintObjectIndicator>
     on SinglePaintObjectBox<T> {
   /// 为副区的指标图绘制Y轴上的刻度信息
   @protected
-  void paintYAxisTick(
+  void paintHorizontalTick(
     Canvas canvas,
     Size size, {
     required int tickCount, // 刻度数量.
-    TextStyle? tickTextStyle,
-    EdgeInsets? tickPadding,
+    required int precision,
   }) {
     if (minMax.isZero) return;
     if (tickCount <= 0) return;
 
-    double yAxisStep = 0;
+    double dyStep = 0;
     double drawTop;
     if (tickCount == 1) {
       drawTop = chartRect.top + chartRect.height / 2;
     } else {
       drawTop = chartRect.top;
-      yAxisStep = chartRect.height / (tickCount - 1);
+      dyStep = chartRect.height / (tickCount - 1);
     }
 
     final dx = chartRect.right;
     double dy = 0.0;
     for (int i = 0; i < tickCount; i++) {
-      dy = drawTop + i * yAxisStep;
+      dy = drawTop + i * dyStep;
       final value = dyToValue(dy);
       if (value == null) continue;
 
-      final text = fromatTickValue(value);
+      final text = fromatTickValue(value, precision: precision);
 
-      tickTextStyle ??= settingConfig.defaultTextStyle;
-      tickPadding ??= settingConfig.defaultPadding;
-      final height = (tickTextStyle.totalHeight ?? 0) + tickPadding.vertical;
+      final tickText = settingConfig.tickText;
 
       canvas.drawText(
         offset: Offset(
           dx,
-          dy - height, // 绘制在刻度线之上
+          dy - tickText.areaHeight, // 绘制在刻度线之上
         ),
         drawDirection: DrawDirection.rtl,
         drawableRect: drawBounding,
         text: text,
-        style: tickTextStyle,
-        // textWidth: tickTextWidth,
-        textAlign: TextAlign.end,
-        padding: tickPadding,
-        maxLines: 1,
+        style: tickText.style,
+        textAlign: tickText.textAlign,
+        textWidth: tickText.textWidth,
+        padding: tickText.padding,
+        backgroundColor: tickText.background,
+        borderRadius: tickText.borderRadius,
+        borderSide: tickText.border,
+        maxLines: tickText.maxLines ?? 1,
       );
     }
   }
 
   /// 如果要定制格式化刻度值. 在PaintObject中覆写此方法.
   @protected
-  String fromatTickValue(BagNum value) {
+  String fromatTickValue(BagNum value, {required int precision}) {
     return formatNumber(
       value.toDecimal(),
-      precision: 2,
+      precision: precision,
       defIfZero: '0.00',
       showCompact: true,
     );
   }
 }
 
-mixin PaintYAxisMarkOnCrossMixin<T extends SinglePaintObjectIndicator>
+mixin PaintHorizontalTickOnCrossMixin<T extends SinglePaintObjectIndicator>
     on SinglePaintObjectBox<T> {
   /// onCross时, 绘制Y轴上的刻度值
   @protected
-  void paintYAxisTickOnCross(Canvas canvas, Offset offset) {
+  void paintHorizontalTickOnCross(
+    Canvas canvas,
+    Offset offset, {
+    required int precision,
+  }) {
     final value = dyToValue(offset.dy);
     if (value == null) return;
 
-    final text = formatTickValueOnCross(value);
+    final text = formatTickValueOnCross(value, precision: precision);
 
-    final textStyle = crossConfig.tickText.style;
-    final textPadding = crossConfig.tickText.padding;
-    final textHeight = (textStyle.totalHeight ?? 0) + textPadding.vertical;
+    final tickText = crossConfig.tickText;
 
     canvas.drawText(
       offset: Offset(
-        chartRect.right - settingConfig.tickRectMargin,
-        offset.dy - textHeight / 2,
+        chartRect.right - crossConfig.spacing,
+        offset.dy - tickText.areaHeight / 2,
       ),
       drawDirection: DrawDirection.rtl,
       drawableRect: drawBounding,
       text: text,
-      style: textStyle,
-      textAlign: TextAlign.end,
-      textWidthBasis: TextWidthBasis.longestLine,
-      padding: textPadding,
-      backgroundColor: crossConfig.tickText.background,
-      borderRadius: crossConfig.tickText.borderRadius,
-      borderSide: crossConfig.tickText.border,
+      style: tickText.style,
+      textAlign: tickText.textAlign,
+      textWidth: tickText.textWidth,
+      padding: tickText.padding,
+      backgroundColor: tickText.background,
+      borderRadius: tickText.borderRadius,
+      borderSide: tickText.border,
+      maxLines: tickText.maxLines ?? 1,
     );
   }
 
   @protected
-  String formatTickValueOnCross(BagNum value) {
+  String formatTickValueOnCross(BagNum value, {required int precision}) {
     return formatNumber(
       value.toDecimal(),
-      precision: 2,
+      precision: precision,
       defIfZero: '0.00',
       showCompact: true,
     );

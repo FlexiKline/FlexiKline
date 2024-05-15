@@ -37,6 +37,7 @@ VolumeIndicator _$VolumeIndicatorFromJson(Map<String, dynamic> json) =>
           : const EdgeInsetsConverter()
               .fromJson(json['tipsPadding'] as Map<String, dynamic>),
       tickCount: (json['tickCount'] as num?)?.toInt() ?? defaultSubTickCount,
+      precision: (json['precision'] as num?)?.toInt() ?? 2,
       showYAxisTick: json['showYAxisTick'] as bool? ?? true,
       showCrossMark: json['showCrossMark'] as bool? ?? true,
       showTips: json['showTips'] as bool? ?? true,
@@ -54,6 +55,7 @@ Map<String, dynamic> _$VolumeIndicatorToJson(VolumeIndicator instance) =>
       'volTips': instance.volTips.toJson(),
       'tipsPadding': const EdgeInsetsConverter().toJson(instance.tipsPadding),
       'tickCount': instance.tickCount,
+      'precision': instance.precision,
       'showYAxisTick': instance.showYAxisTick,
       'showCrossMark': instance.showCrossMark,
       'showTips': instance.showTips,

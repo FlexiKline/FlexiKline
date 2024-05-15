@@ -51,6 +51,56 @@ class ValueKeyConverter implements JsonConverter<ValueKey, String> {
   }
 }
 
+class PaintModeConverter implements JsonConverter<PaintMode, String> {
+  const PaintModeConverter();
+
+  @override
+  PaintMode fromJson(String json) {
+    return PaintMode.values.firstWhere(
+      (e) => e.name == json,
+      orElse: () => PaintMode.combine,
+    );
+  }
+
+  @override
+  String toJson(PaintMode mode) => mode.name;
+}
+
+/// 基础样式转换
+
+class PaintingStyleConverter implements JsonConverter<PaintingStyle, String> {
+  const PaintingStyleConverter();
+  @override
+  PaintingStyle fromJson(String json) {
+    return PaintingStyle.values.firstWhere(
+      (e) => e.name == json,
+      orElse: () => PaintingStyle.stroke,
+    );
+  }
+
+  @override
+  String toJson(PaintingStyle object) {
+    return object.name;
+  }
+}
+
+class LineTypeConverter implements JsonConverter<LineType, String> {
+  const LineTypeConverter();
+
+  @override
+  LineType fromJson(String json) {
+    return LineType.values.firstWhere(
+      (e) => e.name == json,
+      orElse: () => LineType.solid,
+    );
+  }
+
+  @override
+  String toJson(LineType object) {
+    return object.name;
+  }
+}
+
 class EdgeInsetsConverter
     implements JsonConverter<EdgeInsets, Map<String, dynamic>> {
   const EdgeInsetsConverter();
@@ -123,39 +173,6 @@ class SizeConverter implements JsonConverter<Size, Map<String, dynamic>> {
       'width': size.width,
       'height': size.height,
     };
-  }
-}
-
-class PaintingStyleConverter implements JsonConverter<PaintingStyle, String> {
-  const PaintingStyleConverter();
-  @override
-  PaintingStyle fromJson(String json) {
-    return PaintingStyle.values.firstWhere(
-      (e) => e.name == json,
-      orElse: () => PaintingStyle.stroke,
-    );
-  }
-
-  @override
-  String toJson(PaintingStyle object) {
-    return object.name;
-  }
-}
-
-class LineTypeConverter implements JsonConverter<LineType, String> {
-  const LineTypeConverter();
-
-  @override
-  LineType fromJson(String json) {
-    return LineType.values.firstWhere(
-      (e) => e.name == json,
-      orElse: () => LineType.solid,
-    );
-  }
-
-  @override
-  String toJson(LineType object) {
-    return object.name;
   }
 }
 
@@ -278,39 +295,20 @@ class BorderRadiusConverter
   }
 }
 
-// 定义一个JsonConverter实现类，用于转换Status枚举类型。
-class PaintModeConverter implements JsonConverter<PaintMode, String> {
-  const PaintModeConverter();
-
-  // 从JSON到Dart的转换：将字符串转换为Status枚举值。
-  @override
-  PaintMode fromJson(String json) {
-    switch (json) {
-      case 'combine':
-        return PaintMode.combine;
-      case 'alone':
-        return PaintMode.alone;
-      default:
-        return PaintMode.combine;
-    }
-  }
-
-  // 从Dart到JSON的转换：将Status枚举值转换为字符串。
-  @override
-  String toJson(PaintMode mode) => mode.name;
-}
-
-class ColorConverter implements JsonConverter<Color, String?> {
-  const ColorConverter();
+class TextAlignConvert implements JsonConverter<TextAlign, String> {
+  const TextAlignConvert();
 
   @override
-  Color fromJson(String? json) {
-    return parseHexColor(json) ?? Colors.transparent;
+  TextAlign fromJson(String json) {
+    return TextAlign.values.firstWhere(
+      (e) => e.name == json,
+      orElse: () => TextAlign.start,
+    );
   }
 
   @override
-  String toJson(Color? color) {
-    return convertHexColor(color) ?? '';
+  String toJson(TextAlign object) {
+    return object.name;
   }
 }
 
@@ -352,6 +350,20 @@ class TextStyleConverter
   }
 }
 
+class ColorConverter implements JsonConverter<Color, String?> {
+  const ColorConverter();
+
+  @override
+  Color fromJson(String? json) {
+    return parseHexColor(json) ?? Colors.transparent;
+  }
+
+  @override
+  String toJson(Color? color) {
+    return convertHexColor(color) ?? '';
+  }
+}
+
 class DecimalConverter implements JsonConverter<Decimal, dynamic> {
   const DecimalConverter();
   @override
@@ -365,19 +377,27 @@ class DecimalConverter implements JsonConverter<Decimal, dynamic> {
   }
 }
 
+const _basicConverterList = <JsonConverter>[
+  PaintingStyleConverter(),
+  LineTypeConverter(),
+  EdgeInsetsConverter(),
+  SizeConverter(),
+  RectConverter(),
+  BorderSideConvert(),
+  BorderConverter(),
+  BorderRadiusConverter(),
+  TextAlignConvert(),
+  TextStyleConverter(),
+  ColorConverter(),
+  DecimalConverter(),
+];
+
 // ignore: constant_identifier_names
 const FlexiIndicatorSerializable = JsonSerializable(
   converters: [
     ValueKeyConverter(),
-    ColorConverter(),
     PaintModeConverter(),
-    EdgeInsetsConverter(),
-    TextStyleConverter(),
-    SizeConverter(),
-    RectConverter(),
-    BorderSideConvert(),
-    BorderConverter(),
-    BorderRadiusConverter(),
+    ..._basicConverterList,
   ],
   explicitToJson: true,
   // genericArgumentFactories: true,
@@ -394,19 +414,7 @@ const FlexiParamSerializable = JsonSerializable(
 
 // ignore: constant_identifier_names
 const FlexiModelSerializable = JsonSerializable(
-  converters: [
-    ColorConverter(),
-    DecimalConverter(),
-    EdgeInsetsConverter(),
-    TextStyleConverter(),
-    SizeConverter(),
-    RectConverter(),
-    BorderSideConvert(),
-    BorderConverter(),
-    BorderRadiusConverter(),
-    PaintingStyleConverter(),
-    LineTypeConverter(),
-  ],
+  converters: _basicConverterList,
   ignoreUnannotated: true,
   explicitToJson: true,
   includeIfNull: false,
@@ -414,19 +422,7 @@ const FlexiModelSerializable = JsonSerializable(
 
 // ignore: constant_identifier_names
 const FlexiConfigSerializable = JsonSerializable(
-  converters: [
-    ColorConverter(),
-    DecimalConverter(),
-    EdgeInsetsConverter(),
-    TextStyleConverter(),
-    SizeConverter(),
-    RectConverter(),
-    BorderSideConvert(),
-    BorderConverter(),
-    BorderRadiusConverter(),
-    PaintingStyleConverter(),
-    LineTypeConverter(),
-  ],
+  converters: _basicConverterList,
   explicitToJson: true,
   includeIfNull: false,
 );

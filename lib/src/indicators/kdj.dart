@@ -108,6 +108,7 @@ class KDJIndicator extends SinglePaintObjectIndicator {
     this.tipsPadding = defaultTipsPadding,
     this.tickCount = defaultSubTickCount,
     this.lineWidth = defaultIndicatorLineWidth,
+    this.precision = 2,
   });
 
   /// KDJ计算参数
@@ -120,6 +121,8 @@ class KDJIndicator extends SinglePaintObjectIndicator {
   final EdgeInsets tipsPadding;
   final int tickCount;
   final double lineWidth;
+  // 默认精度
+  final int precision;
 
   @override
   KDJPaintObject createPaintObject(KlineBindingBase controller) {
@@ -134,7 +137,7 @@ class KDJIndicator extends SinglePaintObjectIndicator {
 }
 
 class KDJPaintObject<T extends KDJIndicator> extends SinglePaintObjectBox<T>
-    with PaintYAxisTickMixin, PaintYAxisMarkOnCrossMixin {
+    with PaintHorizontalTickMixin, PaintHorizontalTickOnCrossMixin {
   KDJPaintObject({
     required super.controller,
     required super.indicator,
@@ -157,17 +160,22 @@ class KDJPaintObject<T extends KDJIndicator> extends SinglePaintObjectBox<T>
     paintKDJLine(canvas, size);
 
     /// 绘制Y轴刻度值
-    paintYAxisTick(
+    paintHorizontalTick(
       canvas,
       size,
       tickCount: indicator.tickCount,
+      precision: indicator.precision,
     );
   }
 
   @override
   void onCross(Canvas canvas, Offset offset) {
     /// onCross时, 绘制Y轴上的标记值
-    paintYAxisTickOnCross(canvas, offset);
+    paintHorizontalTickOnCross(
+      canvas,
+      offset,
+      precision: indicator.precision,
+    );
   }
 
   void paintKDJLine(Canvas canvas, Size size) {
@@ -233,21 +241,21 @@ class KDJPaintObject<T extends KDJIndicator> extends SinglePaintObjectBox<T>
 
     final kTxt = formatNumber(
       ret.k.toDecimal(),
-      precision: indicator.ktips.p,
+      precision: indicator.ktips.getP(indicator.precision),
       cutInvalidZero: true,
       prefix: indicator.ktips.label,
       suffix: ' ',
     );
     final dTxt = formatNumber(
       ret.d.toDecimal(),
-      precision: indicator.dtips.p,
+      precision: indicator.dtips.getP(indicator.precision),
       cutInvalidZero: true,
       prefix: indicator.dtips.label,
       suffix: ' ',
     );
     final jTxt = formatNumber(
       ret.j.toDecimal(),
-      precision: indicator.jtips.p,
+      precision: indicator.jtips.getP(indicator.precision),
       cutInvalidZero: true,
       prefix: indicator.jtips.label,
       suffix: ' ',

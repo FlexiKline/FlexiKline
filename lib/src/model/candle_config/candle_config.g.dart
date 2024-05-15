@@ -1,24 +1,12 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'candle.dart';
+part of 'candle_config.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
-    CandleIndicator(
-      key: json['key'] == null
-          ? candleKey
-          : const ValueKeyConverter().fromJson(json['key'] as String),
-      name: json['name'] as String? ?? 'Candle',
-      height: (json['height'] as num).toDouble(),
-      tipsHeight: (json['tipsHeight'] as num?)?.toDouble() ??
-          defaultIndicatorTipsHeight,
-      padding: json['padding'] == null
-          ? const EdgeInsets.only(bottom: 15)
-          : const EdgeInsetsConverter()
-              .fromJson(json['padding'] as Map<String, dynamic>),
+CandleConfig _$CandleConfigFromJson(Map<String, dynamic> json) => CandleConfig(
       high: json['high'] == null
           ? const MarkConfig(
               spacing: 2,
@@ -40,7 +28,7 @@ CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
       last: json['last'] == null
           ? const MarkConfig(
               show: true,
-              spacing: 100,
+              spacing: 0,
               line: LineConfig(
                   type: LineType.dashed,
                   color: Colors.black,
@@ -51,12 +39,11 @@ CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
                       fontSize: defaulTextSize,
                       color: Colors.white,
                       overflow: TextOverflow.ellipsis,
-                      height: defaultTextHeight,
-                      textBaseline: TextBaseline.alphabetic),
-                  background: Colors.grey,
+                      height: defaultTextHeight),
+                  background: Colors.black38,
                   padding: defaultTextPading,
                   border: BorderSide(color: Colors.transparent),
-                  borderRadius: BorderRadius.all(Radius.circular(10))))
+                  borderRadius: BorderRadius.all(Radius.circular(5))))
           : MarkConfig.fromJson(json['last'] as Map<String, dynamic>),
       latest: json['latest'] == null
           ? const MarkConfig(
@@ -73,24 +60,11 @@ CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
                       color: Colors.black,
                       overflow: TextOverflow.ellipsis,
                       height: defaultTextHeight),
-                  textAlign: TextAlign.end,
                   background: Colors.white,
                   padding: defaultTextPading,
                   border: BorderSide(color: Colors.black, width: 0.5),
                   borderRadius: BorderRadius.all(Radius.circular(2))))
           : MarkConfig.fromJson(json['latest'] as Map<String, dynamic>),
-      prettyLatest: json['prettyLatest'] == null
-          ? const TextAreaConfig(
-              style: TextStyle(
-                  fontSize: defaulTextSize,
-                  color: Colors.white,
-                  overflow: TextOverflow.ellipsis,
-                  height: defaultTextHeight),
-              textAlign: TextAlign.end,
-              padding: defaultTextPading,
-              borderRadius: BorderRadius.all(Radius.circular(2)))
-          : TextAreaConfig.fromJson(
-              json['prettyLatest'] as Map<String, dynamic>),
       showCountDown: json['showCountDown'] as bool? ?? true,
       countDown: json['countDown'] == null
           ? const TextAreaConfig(
@@ -99,8 +73,7 @@ CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
                   color: Colors.black,
                   overflow: TextOverflow.ellipsis,
                   height: defaultTextHeight),
-              textAlign: TextAlign.center,
-              background: Colors.grey,
+              background: Colors.white30,
               padding: defaultTextPading,
               border: BorderSide(color: Colors.black, width: 0.5),
               borderRadius: BorderRadius.all(Radius.circular(2)))
@@ -116,18 +89,12 @@ CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
           : TextAreaConfig.fromJson(json['timeTick'] as Map<String, dynamic>),
     );
 
-Map<String, dynamic> _$CandleIndicatorToJson(CandleIndicator instance) =>
+Map<String, dynamic> _$CandleConfigToJson(CandleConfig instance) =>
     <String, dynamic>{
-      'key': const ValueKeyConverter().toJson(instance.key),
-      'name': instance.name,
-      'height': instance.height,
-      'tipsHeight': instance.tipsHeight,
-      'padding': const EdgeInsetsConverter().toJson(instance.padding),
       'high': instance.high.toJson(),
       'low': instance.low.toJson(),
       'last': instance.last.toJson(),
       'latest': instance.latest.toJson(),
-      'prettyLatest': instance.prettyLatest?.toJson(),
       'showCountDown': instance.showCountDown,
       'countDown': instance.countDown.toJson(),
       'timeTick': instance.timeTick.toJson(),

@@ -70,6 +70,7 @@ KDJIndicator _$KDJIndicatorFromJson(Map<String, dynamic> json) => KDJIndicator(
       tickCount: (json['tickCount'] as num?)?.toInt() ?? defaultSubTickCount,
       lineWidth:
           (json['lineWidth'] as num?)?.toDouble() ?? defaultIndicatorLineWidth,
+      precision: (json['precision'] as num?)?.toInt() ?? 2,
     );
 
 Map<String, dynamic> _$KDJIndicatorToJson(KDJIndicator instance) =>
@@ -86,4 +87,5 @@ Map<String, dynamic> _$KDJIndicatorToJson(KDJIndicator instance) =>
       'tipsPadding': const EdgeInsetsConverter().toJson(instance.tipsPadding),
       'tickCount': instance.tickCount,
       'lineWidth': instance.lineWidth,
+      'precision': instance.precision,
     };

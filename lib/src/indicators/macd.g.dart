@@ -71,6 +71,7 @@ MACDIndicator _$MACDIndicatorFromJson(Map<String, dynamic> json) =>
       tickCount: (json['tickCount'] as num?)?.toInt() ?? defaultSubTickCount,
       lineWidth:
           (json['lineWidth'] as num?)?.toDouble() ?? defaultIndicatorLineWidth,
+      precision: (json['precision'] as num?)?.toInt() ?? 2,
     );
 
 Map<String, dynamic> _$MACDIndicatorToJson(MACDIndicator instance) =>
@@ -87,4 +88,5 @@ Map<String, dynamic> _$MACDIndicatorToJson(MACDIndicator instance) =>
       'tipsPadding': const EdgeInsetsConverter().toJson(instance.tipsPadding),
       'tickCount': instance.tickCount,
       'lineWidth': instance.lineWidth,
+      'precision': instance.precision,
     };

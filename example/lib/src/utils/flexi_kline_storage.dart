@@ -29,7 +29,8 @@ class FlexiKlineStorage extends IStore {
       if (jsonStr != null && jsonStr.isNotEmpty) {
         final json = jsonDecode(jsonStr);
         if (json is Map<String, dynamic>) {
-          return json;
+          // return json;
+          return {};
         }
       }
     } catch (err, stack) {
@@ -68,18 +69,18 @@ class FlexiKlineStorage extends IStore {
       setting: SettingConfig(),
       cross: CrossConfig(
         enable: true,
-        crosshair: Crosshair(
+        crosshair: LineConfig(
           width: 0.5,
           color: theme.t1,
           type: LineType.dashed,
           dashes: const [3, 3],
         ),
-        point: CrossPoint(
+        point: CrossPointConfig(
           radius: 2,
           width: 6,
           color: theme.t1,
         ),
-        tickText: CrossTickText(
+        tickText: TextAreaConfig(
           style: TextStyle(
             color: theme.t1,
             fontSize: 10,

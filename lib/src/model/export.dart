@@ -34,6 +34,9 @@ export 'setting_config/setting_config.dart';
 export 'grid_config/grid_config.dart';
 export 'cross_config/cross_config.dart';
 export 'tips_config/tips_config.dart';
+export 'line_config/line_config.dart';
+export 'text_area_config/text_area_config.dart';
+export 'mark_config/mark_config.dart';
 
 extension CandleReqExt on CandleReq {
   String get key => "$instId-$bar";

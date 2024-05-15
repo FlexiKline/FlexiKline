@@ -28,8 +28,32 @@ void main() {
   setUpAll(() {
     list = getCandleModelList();
     calcParams = const [
-      MaParam(label: 'MA7', count: 7, color: Color(0xFF946F9A)),
-      MaParam(label: 'MA30', count: 30, color: Color(0xFFF1BF32))
+      MaParam(
+        count: 7,
+        tips: TipsConfig(
+          label: 'MA7: ',
+          // precision: 2,
+          style: TextStyle(
+            fontSize: defaulTextSize,
+            color: Color(0xFF946F9A),
+            overflow: TextOverflow.ellipsis,
+            height: defaultTipsTextHeight,
+          ),
+        ),
+      ),
+      MaParam(
+        count: 30,
+        tips: TipsConfig(
+          label: 'MA30: ',
+          // precision: 2,
+          style: TextStyle(
+            fontSize: defaulTextSize,
+            color: Color(0xFFF1BF32),
+            overflow: TextOverflow.ellipsis,
+            height: defaultTipsTextHeight,
+          ),
+        ),
+      ),
     ];
   });
 

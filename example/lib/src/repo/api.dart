@@ -39,6 +39,18 @@ CandleModel jsonToCandle(dynamic data) {
   }
 }
 
+Future<ApiResult<List<CandleModel>>> getMarketCandles(
+  CandleReq req, {
+  CancelToken? cancelToken,
+}) {
+  return httpClient.getList(
+    '/api/v5/market/candles',
+    jsonToCandle,
+    queryParameters: req.toJson(),
+    cancelToken: cancelToken,
+  );
+}
+
 Future<ApiResult<List<CandleModel>>> getHistoryCandles(
   CandleReq req, {
   CancelToken? cancelToken,

@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 
 import '../../constant.dart';
 import '../../framework/serializers.dart';
+import '../../model/export.dart';
 
 part 'setting_config.g.dart';
 
@@ -71,10 +72,20 @@ class SettingConfig {
     this.tipsPadding = const EdgeInsets.only(left: 8),
 
     /// 全局默认的刻度值配置.
+    this.tickText = const TextAreaConfig(
+      style: TextStyle(
+        fontSize: defaulTextSize,
+        color: Colors.black,
+        overflow: TextOverflow.ellipsis,
+        height: defaultTextHeight,
+      ),
+      textAlign: TextAlign.end,
+      padding: EdgeInsets.symmetric(horizontal: 2),
+    ),
     // 刻度文本区域距离边框
-    this.tickRectMargin = 1,
-    TextStyle? tickTextStyle,
-    this.tickPadding = const EdgeInsets.all(2),
+    // this.tickRectMargin = 1,
+    // TextStyle? tickTextStyle,
+    // this.tickPadding = const EdgeInsets.all(2),
 
     /// 标记线配置
     this.markLineWidth = 0.5,
@@ -121,8 +132,8 @@ class SettingConfig {
             longTextStyle ?? defaultTextStyle.copyWith(color: longColor),
         shortTextStyle =
             shortTextStyle ?? defaultTextStyle.copyWith(color: shortColor),
-        tipsTextStyle = tipsTextStyle ?? defaultTextStyle.copyWith(height: 1.2),
-        tickTextStyle = tickTextStyle ?? defaultTextStyle;
+        // tickTextStyle = tickTextStyle ?? defaultTextStyle,
+        tipsTextStyle = tipsTextStyle ?? defaultTextStyle.copyWith(height: 1.2);
 
   /// Long/Short颜色配置
   final Color textColor;
@@ -182,10 +193,11 @@ class SettingConfig {
   final EdgeInsets tipsPadding;
 
   /// 全局默认的刻度值配置.
+  final TextAreaConfig tickText;
   // 刻度文本区域距离边框
-  final double tickRectMargin;
-  final TextStyle tickTextStyle;
-  final EdgeInsets tickPadding;
+  // final double tickRectMargin;
+  // final TextStyle tickTextStyle;
+  // final EdgeInsets tickPadding;
 
   /// 标记线配置
   final double markLineWidth;

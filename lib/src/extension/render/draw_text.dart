@@ -43,7 +43,7 @@ extension DrawTextExt on Canvas {
     String? text,
     InlineSpan? textSpan,
     TextStyle? style,
-    TextAlign textAlign = TextAlign.left,
+    TextAlign textAlign = TextAlign.start,
     TextDirection textDirection = TextDirection.ltr,
     int? maxLines,
     TextScaler textScaler = TextScaler.noScaling,
@@ -53,10 +53,10 @@ extension DrawTextExt on Canvas {
     double maxWidth = double.infinity,
 
     /// 文本内容的背景区域设置
-    Color backgroundColor = Colors.transparent,
+    Color? backgroundColor,
     @Deprecated('废弃的, 请使用borderRadius') double radius = 0,
     BorderRadius? borderRadius,
-    EdgeInsets padding = EdgeInsets.zero,
+    EdgeInsets? padding,
     @Deprecated('废弃的, 请使用borderSide') Color borderColor = Colors.transparent,
     @Deprecated('废弃的, 请使用borderSide') double borderWidth = 0,
     BorderSide? borderSide,
@@ -84,10 +84,14 @@ extension DrawTextExt on Canvas {
     );
 
     Size paintSize = textPainter.size;
-    paintSize += Offset(
-      padding.horizontal,
-      padding.vertical,
-    );
+
+    final hasPadding = padding != null && padding.collapsedSize.nonzero;
+    if (hasPadding) {
+      paintSize += Offset(
+        padding.horizontal,
+        padding.vertical,
+      );
+    }
 
     if (drawableRect != null) {
       double dy = math.max(
@@ -163,12 +167,11 @@ extension DrawTextExt on Canvas {
       }
     }
 
-    final isDrawBg = backgroundColor.alpha != 0;
+    final isDrawBg = backgroundColor != null && backgroundColor.alpha != 0;
     final isDrawBorder = (borderColor.alpha != 0 && borderWidth > 0) ||
         (borderSide != null &&
             borderSide.color.alpha != 0 &&
             borderSide.width > 0);
-    final hasPadding = padding.collapsedSize.nonzero;
     if (hasPadding || isDrawBg || isDrawBorder) {
       // if (margin != null && margin.isNonNegative) {
       //   final x = drawDirection.isltr ? -margin.right : margin.left;
@@ -222,7 +225,7 @@ extension DrawTextExt on Canvas {
         );
       }
 
-      offset += Offset(padding.left, padding.top);
+      if (padding != null) offset += Offset(padding.left, padding.top);
     }
 
     // if (margin != null && margin.isNonNegative) {

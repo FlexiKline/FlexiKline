@@ -48,6 +48,7 @@ VolMaIndicator _$VolMaIndicatorFromJson(Map<String, dynamic> json) =>
               .fromJson(json['tipsPadding'] as Map<String, dynamic>),
       lineWidth:
           (json['lineWidth'] as num?)?.toDouble() ?? defaultIndicatorLineWidth,
+      precision: (json['precision'] as num?)?.toInt() ?? 2,
     );
 
 Map<String, dynamic> _$VolMaIndicatorToJson(VolMaIndicator instance) =>
@@ -60,4 +61,5 @@ Map<String, dynamic> _$VolMaIndicatorToJson(VolMaIndicator instance) =>
       'calcParams': instance.calcParams.map((e) => e.toJson()).toList(),
       'tipsPadding': const EdgeInsetsConverter().toJson(instance.tipsPadding),
       'lineWidth': instance.lineWidth,
+      'precision': instance.precision,
     };

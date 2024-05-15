@@ -107,6 +107,7 @@ class MACDIndicator extends SinglePaintObjectIndicator {
     this.tipsPadding = defaultTipsPadding,
     this.tickCount = defaultSubTickCount,
     this.lineWidth = defaultIndicatorLineWidth,
+    this.precision = 2,
   });
 
   /// Macd相关参数
@@ -119,6 +120,8 @@ class MACDIndicator extends SinglePaintObjectIndicator {
   final EdgeInsets tipsPadding;
   final int tickCount;
   final double lineWidth;
+  // 默认精度
+  final int precision;
 
   @override
   SinglePaintObjectBox createPaintObject(KlineBindingBase controller) {
@@ -133,7 +136,7 @@ class MACDIndicator extends SinglePaintObjectIndicator {
 }
 
 class MACDPaintObject<T extends MACDIndicator> extends SinglePaintObjectBox<T>
-    with PaintYAxisTickMixin, PaintYAxisMarkOnCrossMixin {
+    with PaintHorizontalTickMixin, PaintHorizontalTickOnCrossMixin {
   MACDPaintObject({required super.controller, required super.indicator});
 
   @override
@@ -152,17 +155,22 @@ class MACDPaintObject<T extends MACDIndicator> extends SinglePaintObjectBox<T>
     paintMacdChart(canvas, size);
 
     /// 绘制Y轴刻度值
-    paintYAxisTick(
+    paintHorizontalTick(
       canvas,
       size,
       tickCount: indicator.tickCount,
+      precision: indicator.precision,
     );
   }
 
   @override
   void onCross(Canvas canvas, Offset offset) {
     /// onCross时, 绘制Y轴上的标记值
-    paintYAxisTickOnCross(canvas, offset);
+    paintHorizontalTickOnCross(
+      canvas,
+      offset,
+      precision: indicator.precision,
+    );
   }
 
   /// 绘制MACD图
@@ -246,21 +254,21 @@ class MACDPaintObject<T extends MACDIndicator> extends SinglePaintObjectBox<T>
     final children = <TextSpan>[];
     final difTxt = formatNumber(
       ret.dif.toDecimal(),
-      precision: indicator.difTips.p,
+      precision: indicator.difTips.getP(indicator.precision),
       cutInvalidZero: true,
       prefix: indicator.difTips.label,
       suffix: ' ',
     );
     final deaTxt = formatNumber(
       ret.dea.toDecimal(),
-      precision: indicator.deaTips.p,
+      precision: indicator.deaTips.getP(indicator.precision),
       cutInvalidZero: true,
       prefix: indicator.deaTips.label,
       suffix: ' ',
     );
     final macdTxt = formatNumber(
       ret.macd.toDecimal(),
-      precision: indicator.macdTips.p,
+      precision: indicator.macdTips.getP(indicator.precision),
       cutInvalidZero: true,
       prefix: indicator.macdTips.label,
       suffix: ' ',

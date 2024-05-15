@@ -92,7 +92,7 @@ class _KOKlinePageState extends ConsumerState<KOKlinePage> {
       await Future.delayed(const Duration(seconds: 2));
 
       cancelToken?.cancel();
-      final resp = await api.getHistoryCandles(
+      final resp = await api.getMarketCandles(
         request,
         cancelToken: cancelToken = CancelToken(),
       );

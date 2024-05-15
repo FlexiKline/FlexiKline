@@ -17,6 +17,8 @@ import 'package:flutter/material.dart';
 import '../../constant.dart';
 import '../../extension/render/common.dart';
 import '../../framework/serializers.dart';
+import '../line_config/line_config.dart';
+import '../text_area_config/text_area_config.dart';
 
 part 'cross_config.g.dart';
 
@@ -24,15 +26,35 @@ part 'cross_config.g.dart';
 class CrossConfig {
   CrossConfig({
     this.enable = true,
-    this.crosshair = const Crosshair(),
-    this.point = const CrossPoint(),
-    this.tickText = const CrossTickText(),
+    this.crosshair = const LineConfig(
+      type: LineType.dashed,
+      color: Colors.black,
+      width: 0.5,
+      dashes: [3, 3],
+    ),
+    this.point = const CrossPointConfig(),
+    this.tickText = const TextAreaConfig(
+      style: TextStyle(
+        fontSize: defaulTextSize,
+        color: Colors.white,
+        overflow: TextOverflow.ellipsis,
+        height: defaultTextHeight,
+      ),
+      background: Colors.black,
+      padding: EdgeInsets.all(2),
+      border: BorderSide.none,
+      borderRadius: BorderRadius.all(
+        Radius.circular(2),
+      ),
+    ),
+    this.spacing = 1,
   });
 
   final bool enable;
-  final Crosshair crosshair;
-  final CrossPoint point;
-  final CrossTickText tickText;
+  final LineConfig crosshair;
+  final CrossPointConfig point;
+  final TextAreaConfig tickText;
+  final double spacing;
 
   Paint get crosshairPaint => Paint()
     ..color = crosshair.color
@@ -51,28 +73,8 @@ class CrossConfig {
 }
 
 @FlexiConfigSerializable
-class Crosshair {
-  const Crosshair({
-    this.width = 0.5,
-    this.color = Colors.black,
-    this.type = LineType.dashed,
-    this.dashes = const [3, 3],
-  });
-
-  final double width;
-  final Color color;
-  final LineType type;
-  final List<double> dashes;
-
-  factory Crosshair.fromJson(Map<String, dynamic> json) =>
-      _$CrosshairFromJson(json);
-
-  Map<String, dynamic> toJson() => _$CrosshairToJson(this);
-}
-
-@FlexiConfigSerializable
-class CrossPoint {
-  const CrossPoint({
+class CrossPointConfig {
+  const CrossPointConfig({
     this.radius = 2,
     this.width = 6,
     this.color = Colors.black,
@@ -82,37 +84,59 @@ class CrossPoint {
   final double width;
   final Color color;
 
-  factory CrossPoint.fromJson(Map<String, dynamic> json) =>
-      _$CrossPointFromJson(json);
+  factory CrossPointConfig.fromJson(Map<String, dynamic> json) =>
+      _$CrossPointConfigFromJson(json);
 
-  Map<String, dynamic> toJson() => _$CrossPointToJson(this);
+  Map<String, dynamic> toJson() => _$CrossPointConfigToJson(this);
 }
 
-@FlexiConfigSerializable
-class CrossTickText {
-  const CrossTickText({
-    this.style = const TextStyle(
-      fontSize: defaulTextSize,
-      color: Colors.white,
-      overflow: TextOverflow.ellipsis,
-      height: defaultTextHeight,
-    ),
-    this.background = Colors.black,
-    this.padding = const EdgeInsets.all(2),
-    this.border = BorderSide.none,
-    this.borderRadius = const BorderRadius.all(
-      Radius.circular(2),
-    ),
-  });
+// @FlexiConfigSerializable
+// class Crosshair {
+//   const Crosshair({
+//     this.type = LineType.dashed,
+//     this.color = Colors.black,
+//     this.width = 0.5,
+//     this.dashes = const [3, 3],
+//   });
 
-  final TextStyle style;
-  final Color background;
-  final EdgeInsets padding;
-  final BorderSide border;
-  final BorderRadius borderRadius;
+//   final LineType type;
+//   final Color color;
+//   final double width;
+//   final List<double> dashes;
 
-  factory CrossTickText.fromJson(Map<String, dynamic> json) =>
-      _$CrossTickTextFromJson(json);
+//   factory Crosshair.fromJson(Map<String, dynamic> json) =>
+//       _$CrosshairFromJson(json);
 
-  Map<String, dynamic> toJson() => _$CrossTickTextToJson(this);
-}
+//   Map<String, dynamic> toJson() => _$CrosshairToJson(this);
+// }
+
+
+
+// @FlexiConfigSerializable
+// class CrossTickText {
+//   const CrossTickText({
+//     this.style = const TextStyle(
+//       fontSize: defaulTextSize,
+//       color: Colors.white,
+//       overflow: TextOverflow.ellipsis,
+//       height: defaultTextHeight,
+//     ),
+//     this.background = Colors.black,
+//     this.padding = const EdgeInsets.all(2),
+//     this.border = BorderSide.none,
+//     this.borderRadius = const BorderRadius.all(
+//       Radius.circular(2),
+//     ),
+//   });
+
+//   final TextStyle style;
+//   final Color background;
+//   final EdgeInsets padding;
+//   final BorderSide border;
+//   final BorderRadius borderRadius;
+
+//   factory CrossTickText.fromJson(Map<String, dynamic> json) =>
+//       _$CrossTickTextFromJson(json);
+
+//   Map<String, dynamic> toJson() => _$CrossTickTextToJson(this);
+// }

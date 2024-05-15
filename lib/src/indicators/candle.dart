@@ -31,97 +31,131 @@ class CandleIndicator extends SinglePaintObjectIndicator {
     super.key = candleKey,
     super.name = 'Candle',
     required super.height,
-    super.tipsHeight,
-    super.padding,
+    super.tipsHeight = defaultIndicatorTipsHeight,
+    super.padding = const EdgeInsets.only(bottom: 15),
 
-    /// 控制开关
-    this.isShowLatestPrice = true,
-    this.isShowCountDownTime = true,
-    this.isShowLastestPriceWhenMoveOffDrawArea = true,
-
-    /// 最新价文字
-    this.latestPriceTextStyle,
-
-    /// 最新价文字
-    this.countDownTimeTextStyle,
-
-    /// X轴上时间刻度
-    this.timeTickTextStyle,
-    this.timeTickTextWidth = 80,
-
-    /// Y轴刻度文本
-    this.tickTextStyle,
-    this.tickPadding,
-
-    /// 背景
-    this.latestPriceBackground,
-    this.latestPriceRectRadius,
-    this.latestPriceBorder,
-    this.latestPriceRectPadding,
-    this.latestPriceRectRightMinMargin = 1,
-    this.latestPriceRectRightMaxMargin = 60,
-
-    /// 最新价刻度线
-    this.latestPriceMarkLineColor,
-    this.latestPriceMarkLineWidth,
-    this.latestPriceMarkLineDashes,
-
-    /// 最大最小价钱刻度线与价钱标记
-    this.isShowMaxminPriceMark = true,
-    this.maxminPriceTextStyle,
-    this.maxminPriceMargin = 1,
-    this.maxminMarkLineLength = 20,
-    this.maxminMarkLineWidth,
-    this.maxminMarkLineColor,
+    // 最高价
+    this.high = const MarkConfig(
+      spacing: 2,
+      line: LineConfig(
+        type: LineType.solid,
+        color: Colors.black,
+        length: 20,
+        width: 0.5,
+      ),
+    ),
+    // 最低价
+    this.low = const MarkConfig(
+      spacing: 2,
+      line: LineConfig(
+        type: LineType.solid,
+        color: Colors.black,
+        length: 20,
+        width: 0.5,
+      ),
+    ),
+    // 最后价: 当最新蜡烛不在可视区域时使用.
+    this.last = const MarkConfig(
+      show: true,
+      spacing: 100,
+      line: LineConfig(
+        type: LineType.dashed,
+        color: Colors.black,
+        width: 0.5,
+        dashes: [3, 3],
+      ),
+      text: TextAreaConfig(
+        style: TextStyle(
+          fontSize: defaulTextSize,
+          color: Colors.white,
+          overflow: TextOverflow.ellipsis,
+          height: defaultTextHeight,
+          textBaseline: TextBaseline.alphabetic,
+        ),
+        background: Colors.black,
+        padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+        border: BorderSide(color: Colors.transparent),
+        borderRadius: BorderRadius.all(Radius.circular(10)),
+      ),
+    ),
+    // 最新价: 当最新蜡烛在可视区域时使用.
+    this.latest = const MarkConfig(
+      show: true,
+      spacing: 1,
+      line: LineConfig(
+        type: LineType.dashed,
+        color: Colors.black,
+        width: 0.5,
+        dashes: [3, 3],
+      ),
+      text: TextAreaConfig(
+        style: TextStyle(
+          fontSize: defaulTextSize,
+          color: Colors.black,
+          overflow: TextOverflow.ellipsis,
+          height: defaultTextHeight,
+        ),
+        textAlign: TextAlign.end,
+        background: Colors.white,
+        padding: defaultTextPading,
+        border: BorderSide(color: Colors.black, width: 0.5),
+        borderRadius: BorderRadius.all(Radius.circular(2)),
+      ),
+    ),
+    this.prettyLatest = const TextAreaConfig(
+      style: TextStyle(
+        fontSize: defaulTextSize,
+        color: Colors.white,
+        overflow: TextOverflow.ellipsis,
+        height: defaultTextHeight,
+      ),
+      textAlign: TextAlign.end,
+      // background: 背景由涨跌颜色决定,
+      padding: defaultTextPading,
+      borderRadius: BorderRadius.all(Radius.circular(2)),
+    ),
+    // 倒计时, 在latest最新价之下展示
+    this.showCountDown = true,
+    this.countDown = const TextAreaConfig(
+      style: TextStyle(
+        fontSize: defaulTextSize,
+        color: Colors.black,
+        overflow: TextOverflow.ellipsis,
+        height: defaultTextHeight,
+      ),
+      textAlign: TextAlign.center,
+      background: Colors.grey,
+      padding: defaultTextPading,
+      border: BorderSide(color: Colors.black, width: 0.5),
+      borderRadius: BorderRadius.all(Radius.circular(2)),
+    ),
+    // 时间刻度.
+    this.timeTick = const TextAreaConfig(
+      style: TextStyle(
+        fontSize: defaulTextSize,
+        color: Colors.black,
+        overflow: TextOverflow.ellipsis,
+        height: defaultTextHeight,
+      ),
+      textWidth: 80,
+    ),
   });
 
-  /// 控制开关
-  final bool isShowLatestPrice;
-  final bool isShowCountDownTime;
-  // 当移出绘制区域后, 是否展示最新价X轴线.
-  final bool isShowLastestPriceWhenMoveOffDrawArea;
-
-  /// 最新价文字
-  final TextStyle? latestPriceTextStyle;
-
-  /// 倒计时方案
-  final TextStyle? countDownTimeTextStyle;
-
-  /// X轴上时间刻度
-  final TextStyle? timeTickTextStyle;
-  // 时间刻度文本宽度; 注设置需要大于60;
-  final double timeTickTextWidth;
-
-  /// Y轴刻度文本
-  final TextStyle? tickTextStyle;
-  final EdgeInsets? tickPadding;
-
-  /// 背景
-  final Color? latestPriceBackground;
-  final BorderRadius? latestPriceRectRadius;
-  final BorderSide? latestPriceBorder;
-  final EdgeInsets? latestPriceRectPadding;
-  final double latestPriceRectRightMinMargin;
-  final double latestPriceRectRightMaxMargin;
-
-  /// 最新价刻度线 (默认用cross线配置)
-  final Color? latestPriceMarkLineColor;
-  // 最新价X轴标志线的绘制宽度.
-  final double? latestPriceMarkLineWidth;
-  final List<double>? latestPriceMarkLineDashes;
-
-  /// 最大最小价钱刻度线与价钱标记
-  // 是否显示最大最小值标记
-  final bool isShowMaxminPriceMark;
-  final TextStyle? maxminPriceTextStyle;
-  // 价钱与线之前的间距
-  final double maxminPriceMargin;
-  // 价钱指示线的长度
-  final double maxminMarkLineLength;
-  // 价钱指示线的绘制宽度
-  final double? maxminMarkLineWidth;
-  // 价钱指标线颜色
-  final Color? maxminMarkLineColor;
+  // 最高价
+  final MarkConfig high;
+  // 最低价
+  final MarkConfig low;
+  // 最后价: 当最新蜡烛不在可视区域时使用.
+  final MarkConfig last;
+  // 最新价: 当最新蜡烛在可视区域时使用.
+  final MarkConfig latest;
+  // 最新价: PrettyLatest
+  final TextAreaConfig? prettyLatest;
+  // 倒计时, 在latest最新价之下展示
+  final bool showCountDown;
+  final TextAreaConfig countDown;
+  // 时间刻度.
+  final TextAreaConfig timeTick;
 
   @override
   CandlePaintObject createPaintObject(
@@ -137,13 +171,20 @@ class CandleIndicator extends SinglePaintObjectIndicator {
 }
 
 class CandlePaintObject<T extends CandleIndicator>
-    extends SinglePaintObjectBox<T> with PaintYAxisMarkOnCrossMixin {
+    extends SinglePaintObjectBox<T> with PaintHorizontalTickOnCrossMixin {
   CandlePaintObject({
     required super.controller,
     required super.indicator,
   });
 
   BagNum? _maxHigh, _minLow;
+
+  /// 两个时间刻度间隔的蜡烛数
+  int get timeTickIntervalCount {
+    return ((math.max(60, indicator.timeTick.textWidth ?? 0)) /
+            setting.candleActualWidth)
+        .round();
+  }
 
   @override
   MinMax? initState({required int start, required int end}) {
@@ -160,10 +201,10 @@ class CandlePaintObject<T extends CandleIndicator>
     /// 绘制蜡烛图
     paintCandleChart(canvas, size);
 
-    /// 绘制X轴时间刻度数据. 在paintCandleChart调用
-    // paintXAxisTimeTick(canvas);
+    /// 绘制X轴时间刻度数据. 已在paintCandleChart调用
+    // paintTimeTick(canvas);
 
-    /// 绘制Y轴价钱刻度数据
+    /// 绘制价钱刻度数据
     paintPriceTick(canvas, size);
   }
 
@@ -176,22 +217,23 @@ class CandlePaintObject<T extends CandleIndicator>
   @override
   void onCross(Canvas canvas, Offset offset) {
     /// 绘制Cross Y轴价钱刻度
-    paintYAxisTickOnCross(canvas, offset);
+    paintHorizontalTickOnCross(
+      canvas,
+      offset,
+      precision: klineData.precision,
+    );
 
     /// 绘制Cross X轴时间刻度
     paintTimeTickOnCross(canvas, offset);
-
-    // /// 绘制Cross 命中的蜡烛数据弹窗
-    // paintTips(canvas, offset: offset);
   }
 
   // onCross时, 格式化Y轴上的标记值.
   @override
-  String formatTickValueOnCross(BagNum value) {
+  String formatTickValueOnCross(BagNum value, {required int precision}) {
     return setting.formatPrice(
       value.toDecimal(),
-      instId: klineData.req.instId,
-      precision: klineData.req.precision,
+      instId: klineData.instId,
+      precision: klineData.precision,
       cutInvalidZero: false,
     );
   }
@@ -237,12 +279,9 @@ class CandlePaintObject<T extends CandleIndicator>
         isLong ? settingConfig.defLongBarPaint : settingConfig.defShortBarPaint,
       );
 
-      final timeTickIntervalCount =
-          ((math.max(60, indicator.timeTickTextWidth)) / candleActualWidth)
-              .round();
       if (bar != null && i % timeTickIntervalCount == 0) {
-        // 绘制X轴时间刻度.
-        paintXAxisTimeTick(
+        // 绘制时间刻度.
+        paintTimeTick(
           canvas,
           bar: bar,
           model: m,
@@ -251,7 +290,7 @@ class CandlePaintObject<T extends CandleIndicator>
         );
       }
 
-      if (indicator.isShowMaxminPriceMark) {
+      if (indicator.high.show || indicator.low.show) {
         if (hasEnough) {
           // 满足一屏, 根据initData中的最大最小值来记录最大最小偏移量.
           if (m.high == _maxHigh) {
@@ -277,11 +316,11 @@ class CandlePaintObject<T extends CandleIndicator>
     }
 
     // 最后绘制在蜡烛图中的最大最小价钱标记
-    if (indicator.isShowMaxminPriceMark &&
+    if ((indicator.high.show || indicator.low.show) &&
         (maxHihgOffset != null && maxHigh > BagNum.zero) &&
         (minLowOffset != null && minLow > BagNum.zero)) {
-      paintPriceMark(canvas, maxHihgOffset, maxHigh);
-      paintPriceMark(canvas, minLowOffset, minLow);
+      paintPriceMark(canvas, maxHihgOffset, maxHigh, indicator.high);
+      paintPriceMark(canvas, minLowOffset, minLow, indicator.low);
     }
   }
 
@@ -290,50 +329,59 @@ class CandlePaintObject<T extends CandleIndicator>
     Canvas canvas,
     Offset offset,
     BagNum val,
+    MarkConfig markConfig,
   ) {
     final flag = offset.dx > chartRectWidthHalf ? -1 : 1;
     Offset endOffset = Offset(
-      offset.dx + indicator.maxminMarkLineLength * flag,
+      offset.dx + markConfig.lineLength * flag,
       offset.dy,
     );
     canvas.drawLine(
       offset,
       endOffset,
       Paint()
-        ..color = indicator.maxminMarkLineColor ?? settingConfig.markLineColor
+        ..color = markConfig.line.color
         ..style = PaintingStyle.stroke
-        ..strokeWidth =
-            indicator.maxminMarkLineWidth ?? settingConfig.markLineWidth,
+        ..strokeWidth = markConfig.line.width,
     );
-    final textStyle =
-        indicator.maxminPriceTextStyle ?? settingConfig.defaultTextStyle;
+
+    final markText = markConfig.text;
+
     endOffset = Offset(
-      endOffset.dx + flag * indicator.maxminPriceMargin,
-      endOffset.dy - (textStyle.totalHeight ?? 0) / 2,
+      endOffset.dx + flag * markConfig.spacing,
+      endOffset.dy - (markText.areaHeight) / 2,
     );
 
     final text = setting.formatPrice(
       val.toDecimal(),
-      instId: klineData.req.instId,
-      precision: klineData.req.precision,
+      instId: klineData.instId,
+      precision: klineData.precision,
     );
+
     canvas.drawText(
       offset: endOffset,
       drawDirection: flag < 0 ? DrawDirection.rtl : DrawDirection.ltr,
       text: text,
-      style: textStyle,
-      maxLines: 1,
+      style: markText.style,
+      textAlign: markText.textAlign,
+      textWidth: markText.textWidth,
+      padding: markText.padding,
+      backgroundColor: markText.background,
+      borderRadius: markText.borderRadius,
+      borderSide: markText.border,
+      maxLines: markText.maxLines ?? 1,
     );
   }
 
-  void paintXAxisTimeTick(
+  /// 绘制时间刻度
+  void paintTimeTick(
     Canvas canvas, {
     required TimeBar bar,
     required CandleModel model,
     required Offset offset,
     required double bottomHeight,
   }) {
-    // final data = curKlineData;
+    // final data = klineData;
     // if (data.list.isEmpty) return;
     // int start = data.start;
     // int end = data.end;
@@ -343,62 +391,69 @@ class CandlePaintObject<T extends CandleIndicator>
     // for (var i = start; i < end; i++) {
     //   final model = data.list[i];
     //   final dx = offset - (i - start) * candleActualWidth;
-    //   if (bar != null && i % timeTickIntervalCandleCounts == 0) {
-    //     Offset(dx, mainDrawBottom);
-    // 绘制X轴时间刻度.
-    final textStyle =
-        indicator.timeTickTextStyle ?? settingConfig.defaultTextStyle;
-    final dyCenterOffset =
-        (paintPadding.bottom - (textStyle.totalHeight ?? 0)) / 2;
+    //   if (bar != null && i % timeTickIntervalCount == 0) {
+    //     final offset = Offset(dx,  chartRect.bottom);
+
+    // 绘制时间刻度.
+    final timeTick = indicator.timeTick;
+    final dyCenterOffset = (indicator.padding.bottom - timeTick.areaHeight) / 2;
     canvas.drawText(
-      offset: Offset(offset.dx, offset.dy + dyCenterOffset),
+      offset: Offset(
+        offset.dx,
+        offset.dy + dyCenterOffset,
+      ),
       drawDirection: DrawDirection.center,
       text: model.formatDateTimeByTimeBar(bar),
-      style: textStyle,
-      maxLines: 1,
-      textAlign: TextAlign.center,
-      textWidth: indicator.timeTickTextWidth,
+      style: timeTick.style,
+      textAlign: timeTick.textAlign,
+      textWidth: timeTick.textWidth,
+      padding: timeTick.padding,
+      backgroundColor: timeTick.background,
+      borderRadius: timeTick.borderRadius,
+      borderSide: timeTick.border,
+      maxLines: timeTick.maxLines ?? 1,
     );
+
     //   }
     // }
   }
 
-  /// 绘制价钱刻度
+  /// 绘制蜡烛图右侧价钱刻度
+  /// 根据Grid horizontal配置来绘制, 保证在grid.horizontal线之上.
   void paintPriceTick(Canvas canvas, Size size) {
-    final yAxisStep = chartRect.bottom / gridConfig.horizontal.count;
+    final dyStep = chartRect.bottom / gridConfig.horizontal.count;
     final dx = chartRect.right;
     double dy = 0;
     for (int i = 1; i <= gridConfig.horizontal.count; i++) {
-      dy = i * yAxisStep;
+      dy = i * dyStep;
       final price = dyToValue(dy);
       if (price == null) continue;
 
       final text = setting.formatPrice(
         price.toDecimal(),
-        instId: klineData.req.instId,
-        precision: klineData.req.precision,
+        instId: klineData.instId,
+        precision: klineData.precision,
+        cutInvalidZero: false,
       );
 
-      final yAxisTickTextStyle =
-          indicator.tickTextStyle ?? settingConfig.defaultTextStyle;
-      final yAxisTickRectPadding =
-          indicator.tickPadding ?? settingConfig.defaultPadding;
-      final yAxisTickRectHeight =
-          (yAxisTickTextStyle.totalHeight ?? 0) + yAxisTickRectPadding.vertical;
+      final tickText = settingConfig.tickText;
 
       canvas.drawText(
         offset: Offset(
           dx,
-          dy - yAxisTickRectHeight, // 绘制在刻度线之上
+          dy - tickText.areaHeight, // 绘制在刻度线之上
         ),
         drawDirection: DrawDirection.rtl,
         drawableRect: drawBounding,
         text: text,
-        style: yAxisTickTextStyle,
-        // textWidth: tickTextWidth,
-        textAlign: TextAlign.end,
-        padding: yAxisTickRectPadding,
-        maxLines: 1,
+        style: tickText.style,
+        textAlign: tickText.textAlign,
+        textWidth: tickText.textWidth,
+        padding: tickText.padding,
+        backgroundColor: tickText.background,
+        borderRadius: tickText.borderRadius,
+        borderSide: tickText.border,
+        maxLines: tickText.maxLines ?? 1,
       );
     }
   }
@@ -409,7 +464,7 @@ class CandlePaintObject<T extends CandleIndicator>
   ///    且展示在指定价钱区间内, 如超出边界, 则停靠在最高最低线上.
   /// 3. 最新价向左移动后, 刻度线根据最新价蜡烛线平行移动.
   void paintLatestPriceMark(Canvas canvas, Size size) {
-    if (!indicator.isShowLatestPrice) return;
+    if (!indicator.latest.show || !indicator.last.show) return;
     final data = klineData;
     final model = data.latest;
     if (model == null) {
@@ -417,11 +472,7 @@ class CandlePaintObject<T extends CandleIndicator>
       return;
     }
 
-    bool showLastPriceUpdateTime = indicator.isShowCountDownTime;
-    double dx = chartRect.right;
-    double firstCandleDx = startCandleDx;
-    double rightMargin = indicator.latestPriceRectRightMinMargin;
-    double ldx = 0; // 计算最新价刻度线lineTo参数X轴的dx值. 默认0: 代表橫穿整个Canvas.
+    // 计算最新价YAxis位置.
     double dy;
     if (model.close >= minMax.max) {
       dy = chartRect.top; // 画板顶部展示.
@@ -430,90 +481,180 @@ class CandlePaintObject<T extends CandleIndicator>
     } else {
       dy = clampDyInChart(valueToDy(model.close));
     }
-    // 计算最新价在当前画板中的X轴位置.
-    if (firstCandleDx < dx) {
+
+    // 计算最新价XAxis位置.
+    // bool showLastPriceUpdateTime = indicator.isShowCountDownTime;
+    final firstCandleDx = startCandleDx;
+    double rdx = chartRect.right;
+    // double rightMargin = indicator.latestPriceRectRightMinMargin;
+    double ldx = 0; // 计算最新价刻度线lineTo参数X轴的dx值. 默认0: 代表橫穿整个Canvas.
+
+    if (firstCandleDx < rdx) {
+      // 绘制最新价和倒计时
+      final latest = indicator.latest;
+      if (!latest.show) return;
+
       ldx = firstCandleDx;
-    } else {
-      if (indicator.isShowLastestPriceWhenMoveOffDrawArea) {
-        ldx = 0;
-        rightMargin += indicator.latestPriceRectRightMaxMargin;
-        showLastPriceUpdateTime = false;
-      } else {
-        ldx = dx - rightMargin;
-      }
-    }
 
-    // 画最新价在画板中的刻度线.
-    final path = Path();
-    path.moveTo(dx, dy);
-    path.lineTo(ldx, dy);
-    canvas.drawDashPath(
-      path,
-      Paint()
-        ..color =
-            indicator.latestPriceMarkLineColor ?? settingConfig.markLineColor
-        ..style = PaintingStyle.stroke
-        ..strokeWidth =
-            indicator.latestPriceMarkLineWidth ?? settingConfig.markLineWidth,
-      dashes: indicator.latestPriceMarkLineDashes ??
-          crossConfig.crosshair.dashes, // TODO: 待优化
-    );
+      /// 绘制首根蜡烛到rdx的刻度线.
+      final latestPath = Path();
+      latestPath.moveTo(rdx, dy);
+      latestPath.lineTo(ldx, dy);
+      canvas.drawLineType(
+        indicator.last.line.type,
+        latestPath,
+        Paint()
+          ..color = latest.line.color
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = latest.line.width,
+        dashes: latest.line.dashes,
+      );
 
-    // 画最新价文本区域.
-    final spanList = <TextSpan>[];
-    final priceStyle =
-        indicator.latestPriceTextStyle ?? settingConfig.defaultTextStyle;
-    final pricePadding =
-        indicator.latestPriceRectPadding ?? settingConfig.defaultPadding;
-    spanList.add(TextSpan(
-      text: setting.formatPrice(
+      /// 计算最新价和倒计时区域的文本和高度
+      final text = setting.formatPrice(
         model.close.toDecimal(),
         instId: klineData.req.instId,
         precision: klineData.req.precision,
         cutInvalidZero: false,
-      ),
-      style: priceStyle,
-    ));
+      );
 
-    double textHeight = (priceStyle.totalHeight ?? 0) + pricePadding.vertical;
-    if (showLastPriceUpdateTime) {
-      final nextUpdateDateTime = model.nextUpdateDateTime(klineData.req.bar);
-      // logd(
-      //   'paintLastPriceMark lastModelTime:${model.dateTime}, nextUpdateDateTime:$nextUpdateDateTime',
-      // );
-      if (nextUpdateDateTime != null) {
-        final timeDiff = formatTimeDiff(nextUpdateDateTime);
-        if (timeDiff != null) {
-          final timeStyle = indicator.countDownTimeTextStyle ??
-              settingConfig.defaultTextStyle;
-          spanList.add(TextSpan(
-            text: "\n$timeDiff",
-            style: timeStyle,
-          ));
-          textHeight += timeStyle.totalHeight ?? 0;
+      /// 计算倒计时Text
+      String? countDownText;
+      if (indicator.showCountDown) {
+        final nextUpdateDateTime = model.nextUpdateDateTime(klineData.req.bar);
+        if (nextUpdateDateTime != null) {
+          countDownText = formatTimeDiff(nextUpdateDateTime);
         }
       }
-    }
 
-    canvas.drawText(
-      offset: Offset(
-        dx - rightMargin,
-        dy - textHeight / 2, // 计算最新价文本区域相对于刻度线的位置
-      ),
-      drawDirection: DrawDirection.rtl,
-      drawableRect: drawBounding,
-      textSpan: TextSpan(
-        children: spanList,
-      ),
-      textAlign: TextAlign.end,
-      textWidthBasis: TextWidthBasis.longestLine,
-      padding: pricePadding,
-      backgroundColor:
-          indicator.latestPriceBackground ?? settingConfig.defaultBackground,
-      borderRadius:
-          indicator.latestPriceRectRadius ?? settingConfig.defaultRadius,
-      borderSide: indicator.latestPriceBorder ?? settingConfig.defaultBorder,
-    );
+      TextAreaConfig textConfig;
+      Color? background;
+
+      if (indicator.prettyLatest != null) {
+        textConfig = indicator.prettyLatest!;
+        background = model.close >= model.open
+            ? settingConfig.longColor
+            : settingConfig.shortColor;
+      } else {
+        textConfig = latest.text;
+        background = textConfig.background;
+      }
+
+      BorderSide? borderSide = textConfig.border;
+      BorderRadius? borderRadius = textConfig.borderRadius;
+      if (countDownText != null) {
+        // 如果展示倒计时, 最新价仅保留顶部radius
+        borderRadius = borderRadius?.copyWith(
+          topLeft: borderRadius.topLeft,
+          topRight: borderRadius.topRight,
+          bottomLeft: const Radius.circular(0),
+          bottomRight: const Radius.circular(0),
+        );
+      }
+
+      final offset = Offset(
+        rdx - latest.spacing,
+        dy - latest.text.areaHeight / 2, // 垂直居中
+      );
+
+      /// 绘制最新价标记
+      final size = canvas.drawText(
+        offset: offset,
+        drawDirection: DrawDirection.rtl,
+        drawableRect: drawBounding,
+        text: text,
+        style: textConfig.style,
+        textAlign: textConfig.textAlign,
+        textWidth: textConfig.textWidth,
+        padding: textConfig.padding,
+        backgroundColor: background,
+        borderRadius: borderRadius,
+        borderSide: borderSide,
+        maxLines: textConfig.maxLines ?? 1,
+      );
+
+      if (countDownText != null) {
+        final countDown = indicator.countDown;
+
+        // 展示倒计时, 倒计时radius始终使用最新价的, 且保留底部radius
+        borderRadius = borderRadius?.copyWith(
+          topLeft: const Radius.circular(0),
+          topRight: const Radius.circular(0),
+          bottomLeft: borderRadius.topLeft,
+          bottomRight: borderRadius.topRight,
+        );
+
+        /// 绘制倒计时标记
+        canvas.drawText(
+          offset: Offset(
+            offset.dx,
+            offset.dy + size.height - 0.5,
+          ),
+          drawDirection: DrawDirection.rtl,
+          drawableRect: drawBounding,
+          text: countDownText,
+          style: countDown.style.copyWith(
+            // 修正倒计时文本区域高度:
+            // 由于倒计时使用了固定宽度(最新价的size.width), 保持与最新价同宽.
+            // 此处无法再为countDown设置padding, 固在此处修正
+            height: (countDown.areaHeight - 1) / countDown.textHeight,
+          ),
+          textAlign: countDown.textAlign,
+          textWidth: size.width,
+          // padding: countDown.padding,
+          backgroundColor: countDown.background,
+          borderRadius: borderRadius,
+          borderSide: borderSide,
+          maxLines: countDown.maxLines ?? 1,
+        );
+      }
+    } else {
+      /// 绘制最后价
+      final last = indicator.last;
+      if (!last.show) return;
+
+      ldx = 0;
+
+      /// 绘制横穿画板的最后价刻度线.
+      final lastPath = Path();
+      lastPath.moveTo(rdx, dy);
+      lastPath.lineTo(ldx, dy);
+      canvas.drawLineType(
+        indicator.last.line.type,
+        lastPath,
+        Paint()
+          ..color = last.line.color
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = last.line.width,
+        dashes: last.line.dashes,
+      );
+
+      final text = setting.formatPrice(
+        model.close.toDecimal(),
+        instId: klineData.instId,
+        precision: klineData.precision,
+        cutInvalidZero: true,
+      );
+
+      /// 绘制最后价标记
+      canvas.drawText(
+        offset: Offset(
+          rdx - last.spacing,
+          dy - last.text.areaHeight / 2, // 居中
+        ),
+        drawDirection: DrawDirection.center,
+        drawableRect: drawBounding,
+        text: '$text ▸', // ➤➤▹►▸▶︎≻
+        style: last.text.style,
+        textAlign: last.text.textAlign,
+        textWidth: last.text.textWidth,
+        padding: last.text.padding,
+        backgroundColor: last.text.background,
+        borderRadius: last.text.borderRadius,
+        borderSide: last.text.border,
+        maxLines: last.text.maxLines ?? 1,
+      );
+    }
   }
 
   /// 绘制OnCross 时间刻度
@@ -527,11 +668,9 @@ class CandlePaintObject<T extends CandleIndicator>
     // final time = model.formatDateTimeByTimeBar(timeBar);
     final time = setting.formatDateTime(model.dateTime);
 
-    final textStyle = crossConfig.tickText.style;
-    final textPadding = crossConfig.tickText.padding;
-    final textHeight = (textStyle.totalHeight ?? 0) + textPadding.vertical;
+    final tickText = crossConfig.tickText;
 
-    final dyCenterOffset = (indicator.padding.bottom - textHeight) / 2;
+    final dyCenterOffset = (indicator.padding.bottom - tickText.areaHeight) / 2;
     canvas.drawText(
       offset: Offset(
         offset.dx,
@@ -539,13 +678,13 @@ class CandlePaintObject<T extends CandleIndicator>
       ),
       drawDirection: DrawDirection.center,
       text: time,
-      style: textStyle,
+      style: tickText.style,
       textAlign: TextAlign.center,
       textWidthBasis: TextWidthBasis.longestLine,
-      padding: textPadding,
-      backgroundColor: crossConfig.tickText.background,
-      borderRadius: crossConfig.tickText.borderRadius,
-      borderSide: crossConfig.tickText.border,
+      padding: tickText.padding,
+      backgroundColor: tickText.background,
+      borderRadius: tickText.borderRadius,
+      borderSide: tickText.border,
     );
   }
 

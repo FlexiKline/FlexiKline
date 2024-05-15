@@ -63,11 +63,14 @@ class VolMaIndicator extends SinglePaintObjectIndicator {
     ],
     this.tipsPadding = defaultTipsPadding,
     this.lineWidth = defaultIndicatorLineWidth,
+    this.precision = 2,
   });
 
   final List<MaParam> calcParams;
   final EdgeInsets tipsPadding;
   final double lineWidth;
+  // 默认精度
+  final int precision;
 
   @override
   VolMaPaintObject createPaintObject(KlineBindingBase controller) {
@@ -179,7 +182,7 @@ class VolMaPaintObject<T extends VolMaIndicator>
 
       final text = formatNumber(
         ret.val.toDecimal(),
-        precision: param.tips.getP(klineData.precision),
+        precision: param.tips.getP(indicator.precision),
         cutInvalidZero: true,
         prefix: param.tips.label,
         suffix: '  ',
