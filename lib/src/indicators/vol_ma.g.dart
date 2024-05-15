@@ -23,9 +23,31 @@ VolMaIndicator _$VolMaIndicatorFromJson(Map<String, dynamic> json) =>
               ?.map((e) => MaParam.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [
-            MaParam(label: 'MA5', count: 5, color: Colors.orange),
-            MaParam(label: 'MA10', count: 10, color: Colors.blue)
+            MaParam(
+                count: 5,
+                tips: TipsConfig(
+                    label: 'MA5: ',
+                    style: TextStyle(
+                        fontSize: defaulTextSize,
+                        color: Colors.orange,
+                        overflow: TextOverflow.ellipsis,
+                        height: defaultTipsTextHeight))),
+            MaParam(
+                count: 10,
+                tips: TipsConfig(
+                    label: 'MA10: ',
+                    style: TextStyle(
+                        fontSize: defaulTextSize,
+                        color: Colors.blue,
+                        overflow: TextOverflow.ellipsis,
+                        height: defaultTipsTextHeight)))
           ],
+      tipsPadding: json['tipsPadding'] == null
+          ? defaultTipsPadding
+          : const EdgeInsetsConverter()
+              .fromJson(json['tipsPadding'] as Map<String, dynamic>),
+      lineWidth:
+          (json['lineWidth'] as num?)?.toDouble() ?? defaultIndicatorLineWidth,
     );
 
 Map<String, dynamic> _$VolMaIndicatorToJson(VolMaIndicator instance) =>
@@ -36,4 +58,6 @@ Map<String, dynamic> _$VolMaIndicatorToJson(VolMaIndicator instance) =>
       'tipsHeight': instance.tipsHeight,
       'padding': const EdgeInsetsConverter().toJson(instance.padding),
       'calcParams': instance.calcParams.map((e) => e.toJson()).toList(),
+      'tipsPadding': const EdgeInsetsConverter().toJson(instance.tipsPadding),
+      'lineWidth': instance.lineWidth,
     };

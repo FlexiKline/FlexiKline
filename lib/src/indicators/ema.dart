@@ -24,23 +24,6 @@ import '../utils/export.dart';
 
 part 'ema.g.dart';
 
-@FlexiParamSerializable
-final class EMAParam {
-  final String label;
-  final int count;
-  final Color color;
-
-  const EMAParam({
-    required this.label,
-    required this.count,
-    required this.color,
-  });
-
-  factory EMAParam.fromJson(Map<String, dynamic> json) =>
-      _$EMAParamFromJson(json);
-  Map<String, dynamic> toJson() => _$EMAParamToJson(this);
-}
-
 /// EMA 平滑移动平均线
 /// 公式：
 /// 1）快速平滑移动平均线（EMA）是12日的，计算公式为：
@@ -56,14 +39,66 @@ class EMAIndicator extends SinglePaintObjectIndicator {
     super.tipsHeight = defaultIndicatorTipsHeight,
     super.padding,
     this.calcParams = const [
-      EMAParam(label: 'EMA5', count: 5, color: Color(0xFF806180)),
-      EMAParam(label: 'EMA10', count: 10, color: Color(0xFFEBB736)),
-      EMAParam(label: 'EMA20', count: 20, color: Color(0xFFD672D5)),
-      EMAParam(label: 'EMA60', count: 60, color: Color(0xFF788FD5))
+      MaParam(
+        count: 5,
+        tips: TipsConfig(
+          label: 'EMA5: ',
+          // precision: 2,
+          style: TextStyle(
+            fontSize: defaulTextSize,
+            color: Color(0xFF806180),
+            overflow: TextOverflow.ellipsis,
+            height: defaultTipsTextHeight,
+          ),
+        ),
+      ),
+      MaParam(
+        count: 10,
+        tips: TipsConfig(
+          label: 'EMA10: ',
+          // precision: 2,
+          style: TextStyle(
+            fontSize: defaulTextSize,
+            color: Color(0xFFEBB736),
+            overflow: TextOverflow.ellipsis,
+            height: defaultTipsTextHeight,
+          ),
+        ),
+      ),
+      MaParam(
+        count: 20,
+        tips: TipsConfig(
+          label: 'EMA20: ',
+          // precision: 2,
+          style: TextStyle(
+            fontSize: defaulTextSize,
+            color: Color(0xFFD672D5),
+            overflow: TextOverflow.ellipsis,
+            height: defaultTipsTextHeight,
+          ),
+        ),
+      ),
+      MaParam(
+        count: 60,
+        tips: TipsConfig(
+          label: 'EMA60: ',
+          // precision: 2,
+          style: TextStyle(
+            fontSize: defaulTextSize,
+            color: Color(0xFF788FD5),
+            overflow: TextOverflow.ellipsis,
+            height: defaultTipsTextHeight,
+          ),
+        ),
+      ),
     ],
+    this.tipsPadding = defaultTipsPadding,
+    this.lineWidth = defaultIndicatorLineWidth,
   });
 
-  final List<EMAParam> calcParams;
+  final List<MaParam> calcParams;
+  final EdgeInsets tipsPadding;
+  final double lineWidth;
 
   @override
   SinglePaintObjectBox createPaintObject(KlineBindingBase controller) {
@@ -143,9 +178,9 @@ class EMAPaintObject<T extends EMAIndicator> extends SinglePaintObjectBox<T> {
       canvas.drawPath(
         Path()..addPolygon(points, false),
         Paint()
-          ..color = param.color
+          ..color = param.tips.color
           ..style = PaintingStyle.stroke
-          ..strokeWidth = settingConfig.indicatorLineWidth,
+          ..strokeWidth = indicator.lineWidth,
       );
     }
     // } finally {
@@ -173,14 +208,14 @@ class EMAPaintObject<T extends EMAIndicator> extends SinglePaintObjectBox<T> {
 
       final text = formatNumber(
         ret.val.toDecimal(),
-        precision: state.curKlineData.req.precision,
+        precision: param.tips.getP(klineData.precision),
         cutInvalidZero: true,
-        prefix: '${param.label}: ',
+        prefix: param.tips.label,
         suffix: '  ',
       );
       children.add(TextSpan(
         text: text,
-        style: settingConfig.tipsTextStyle.copyWith(color: param.color),
+        style: param.tips.style,
       ));
     }
     if (children.isNotEmpty) {
@@ -190,7 +225,7 @@ class EMAPaintObject<T extends EMAIndicator> extends SinglePaintObjectBox<T> {
         drawDirection: DrawDirection.ltr,
         drawableRect: drawRect,
         textAlign: TextAlign.left,
-        padding: settingConfig.tipsPadding,
+        padding: indicator.tipsPadding,
         maxLines: 1,
       );
     }

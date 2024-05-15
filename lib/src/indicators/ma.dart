@@ -16,29 +16,13 @@ import 'package:flutter/material.dart';
 
 import '../constant.dart';
 import '../core/export.dart';
+import '../data/export.dart';
 import '../extension/export.dart';
 import '../framework/export.dart';
 import '../model/export.dart';
 import '../utils/export.dart';
 
 part 'ma.g.dart';
-
-@FlexiParamSerializable
-final class MaParam {
-  final String label;
-  final int count;
-  final Color color;
-
-  const MaParam({
-    required this.label,
-    required this.count,
-    required this.color,
-  });
-
-  factory MaParam.fromJson(Map<String, dynamic> json) =>
-      _$MaParamFromJson(json);
-  Map<String, dynamic> toJson() => _$MaParamToJson(this);
-}
 
 /// MA 移动平均指标线
 @FlexiIndicatorSerializable
@@ -50,12 +34,40 @@ class MAIndicator extends SinglePaintObjectIndicator {
     super.tipsHeight = defaultIndicatorTipsHeight,
     super.padding,
     this.calcParams = const [
-      MaParam(label: 'MA7', count: 7, color: Color(0xFF946F9A)),
-      MaParam(label: 'MA30', count: 30, color: Color(0xFFF1BF32))
+      MaParam(
+        count: 7,
+        tips: TipsConfig(
+          label: 'MA7: ',
+          // precision: 2,
+          style: TextStyle(
+            fontSize: defaulTextSize,
+            color: Color(0xFF946F9A),
+            overflow: TextOverflow.ellipsis,
+            height: defaultTipsTextHeight,
+          ),
+        ),
+      ),
+      MaParam(
+        count: 30,
+        tips: TipsConfig(
+          label: 'MA30: ',
+          // precision: 2,
+          style: TextStyle(
+            fontSize: defaulTextSize,
+            color: Color(0xFFF1BF32),
+            overflow: TextOverflow.ellipsis,
+            height: defaultTipsTextHeight,
+          ),
+        ),
+      ),
     ],
+    this.tipsPadding = defaultTipsPadding,
+    this.lineWidth = defaultIndicatorLineWidth,
   });
 
   final List<MaParam> calcParams;
+  final EdgeInsets tipsPadding;
+  final double lineWidth;
 
   @override
   SinglePaintObjectBox createPaintObject(KlineBindingBase controller) {
@@ -121,9 +133,9 @@ class MAPaintObject<T extends MAIndicator> extends SinglePaintObjectBox<T> {
       canvas.drawPath(
         Path()..addPolygon(points, false),
         Paint()
-          ..color = indicator.calcParams[j].color
+          ..color = indicator.calcParams[j].tips.color
           ..style = PaintingStyle.stroke
-          ..strokeWidth = settingConfig.indicatorLineWidth,
+          ..strokeWidth = indicator.lineWidth,
       );
     }
   }
@@ -147,14 +159,14 @@ class MAPaintObject<T extends MAIndicator> extends SinglePaintObjectBox<T> {
 
       final text = formatNumber(
         val.toDecimal(),
-        precision: state.curKlineData.req.precision,
+        precision: param.tips.getP(klineData.precision),
         cutInvalidZero: true,
-        prefix: '${param.label}: ',
+        prefix: '${param.tips.label}: ',
         suffix: '  ',
       );
       children.add(TextSpan(
         text: text,
-        style: settingConfig.tipsTextStyle.copyWith(color: param.color),
+        style: param.tips.style,
       ));
     }
     if (children.isNotEmpty) {
@@ -164,7 +176,7 @@ class MAPaintObject<T extends MAIndicator> extends SinglePaintObjectBox<T> {
         drawDirection: DrawDirection.ltr,
         drawableRect: drawRect,
         textAlign: TextAlign.left,
-        padding: settingConfig.tipsPadding,
+        padding: indicator.tipsPadding,
         maxLines: 1,
       );
     }

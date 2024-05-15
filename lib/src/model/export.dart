@@ -25,6 +25,9 @@ export './card_info.dart';
 export './minmax.dart';
 export './bag_num.dart';
 
+/// 参数
+export 'ma_param/ma_param.dart';
+
 /// Config
 export 'flexi_kline_config/flexi_kline_config.dart';
 export 'setting_config/setting_config.dart';

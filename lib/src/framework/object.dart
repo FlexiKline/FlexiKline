@@ -286,7 +286,7 @@ mixin PaintYAxisTickMixin<T extends SinglePaintObjectIndicator>
       final value = dyToValue(dy);
       if (value == null) continue;
 
-      final text = fromatYAxisTickValue(value);
+      final text = fromatTickValue(value);
 
       tickTextStyle ??= settingConfig.defaultTextStyle;
       tickPadding ??= settingConfig.defaultPadding;
@@ -311,7 +311,7 @@ mixin PaintYAxisTickMixin<T extends SinglePaintObjectIndicator>
 
   /// 如果要定制格式化刻度值. 在PaintObject中覆写此方法.
   @protected
-  String fromatYAxisTickValue(BagNum value) {
+  String fromatTickValue(BagNum value) {
     return formatNumber(
       value.toDecimal(),
       precision: 2,

@@ -81,7 +81,7 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
                 onPressed: () {},
                 child: Column(
                   children: [
-                    Icon(Icons.analytics_outlined, color: theme.t1),
+                    Icon(Icons.legend_toggle_rounded, color: theme.t1),
                     Text('指标', style: theme.t1s14w500),
                   ],
                 ),

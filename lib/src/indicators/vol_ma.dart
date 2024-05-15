@@ -21,7 +21,6 @@ import '../extension/export.dart';
 import '../framework/export.dart';
 import '../model/export.dart';
 import '../utils/export.dart';
-import 'ma.dart';
 
 part 'vol_ma.g.dart';
 
@@ -35,12 +34,40 @@ class VolMaIndicator extends SinglePaintObjectIndicator {
     super.tipsHeight = defaultIndicatorTipsHeight,
     super.padding = defaultIndicatorPadding,
     this.calcParams = const [
-      MaParam(label: 'MA5', count: 5, color: Colors.orange),
-      MaParam(label: 'MA10', count: 10, color: Colors.blue)
+      MaParam(
+        count: 5,
+        tips: TipsConfig(
+          label: 'MA5: ',
+          // precision: 2,
+          style: TextStyle(
+            fontSize: defaulTextSize,
+            color: Colors.orange,
+            overflow: TextOverflow.ellipsis,
+            height: defaultTipsTextHeight,
+          ),
+        ),
+      ),
+      MaParam(
+        count: 10,
+        tips: TipsConfig(
+          label: 'MA10: ',
+          // precision: 2,
+          style: TextStyle(
+            fontSize: defaulTextSize,
+            color: Colors.blue,
+            overflow: TextOverflow.ellipsis,
+            height: defaultTipsTextHeight,
+          ),
+        ),
+      ),
     ],
+    this.tipsPadding = defaultTipsPadding,
+    this.lineWidth = defaultIndicatorLineWidth,
   });
 
   final List<MaParam> calcParams;
+  final EdgeInsets tipsPadding;
+  final double lineWidth;
 
   @override
   VolMaPaintObject createPaintObject(KlineBindingBase controller) {
@@ -122,9 +149,9 @@ class VolMaPaintObject<T extends VolMaIndicator>
       canvas.drawPath(
         Path()..addPolygon(points, false),
         Paint()
-          ..color = param.color
+          ..color = param.tips.color
           ..style = PaintingStyle.stroke
-          ..strokeWidth = settingConfig.indicatorLineWidth,
+          ..strokeWidth = indicator.lineWidth,
       );
     }
     // } finally {
@@ -152,14 +179,14 @@ class VolMaPaintObject<T extends VolMaIndicator>
 
       final text = formatNumber(
         ret.val.toDecimal(),
-        precision: state.curKlineData.req.precision,
+        precision: param.tips.getP(klineData.precision),
         cutInvalidZero: true,
-        prefix: '${param.label}: ',
+        prefix: param.tips.label,
         suffix: '  ',
       );
       children.add(TextSpan(
         text: text,
-        style: settingConfig.tipsTextStyle.copyWith(color: param.color),
+        style: param.tips.style,
       ));
     }
 
@@ -170,7 +197,7 @@ class VolMaPaintObject<T extends VolMaIndicator>
         drawDirection: DrawDirection.ltr,
         drawableRect: drawRect,
         textAlign: TextAlign.left,
-        padding: settingConfig.tipsPadding,
+        padding: indicator.tipsPadding,
         maxLines: 1,
       );
     }

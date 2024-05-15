@@ -6,18 +6,6 @@ part of 'ma.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-MaParam _$MaParamFromJson(Map<String, dynamic> json) => MaParam(
-      label: json['label'] as String,
-      count: (json['count'] as num).toInt(),
-      color: const ColorConverter().fromJson(json['color'] as String?),
-    );
-
-Map<String, dynamic> _$MaParamToJson(MaParam instance) => <String, dynamic>{
-      'label': instance.label,
-      'count': instance.count,
-      'color': const ColorConverter().toJson(instance.color),
-    };
-
 MAIndicator _$MAIndicatorFromJson(Map<String, dynamic> json) => MAIndicator(
       key: json['key'] == null
           ? maKey
@@ -34,9 +22,31 @@ MAIndicator _$MAIndicatorFromJson(Map<String, dynamic> json) => MAIndicator(
               ?.map((e) => MaParam.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [
-            MaParam(label: 'MA7', count: 7, color: Color(0xFF946F9A)),
-            MaParam(label: 'MA30', count: 30, color: Color(0xFFF1BF32))
+            MaParam(
+                count: 7,
+                tips: TipsConfig(
+                    label: 'MA7: ',
+                    style: TextStyle(
+                        fontSize: defaulTextSize,
+                        color: Color(0xFF946F9A),
+                        overflow: TextOverflow.ellipsis,
+                        height: defaultTipsTextHeight))),
+            MaParam(
+                count: 30,
+                tips: TipsConfig(
+                    label: 'MA30: ',
+                    style: TextStyle(
+                        fontSize: defaulTextSize,
+                        color: Color(0xFFF1BF32),
+                        overflow: TextOverflow.ellipsis,
+                        height: defaultTipsTextHeight)))
           ],
+      tipsPadding: json['tipsPadding'] == null
+          ? defaultTipsPadding
+          : const EdgeInsetsConverter()
+              .fromJson(json['tipsPadding'] as Map<String, dynamic>),
+      lineWidth:
+          (json['lineWidth'] as num?)?.toDouble() ?? defaultIndicatorLineWidth,
     );
 
 Map<String, dynamic> _$MAIndicatorToJson(MAIndicator instance) =>
@@ -47,4 +57,6 @@ Map<String, dynamic> _$MAIndicatorToJson(MAIndicator instance) =>
       'tipsHeight': instance.tipsHeight,
       'padding': const EdgeInsetsConverter().toJson(instance.padding),
       'calcParams': instance.calcParams.map((e) => e.toJson()).toList(),
+      'tipsPadding': const EdgeInsetsConverter().toJson(instance.tipsPadding),
+      'lineWidth': instance.lineWidth,
     };

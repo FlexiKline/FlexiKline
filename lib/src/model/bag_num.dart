@@ -15,7 +15,6 @@
 import 'dart:math' as math;
 
 import 'package:decimal/decimal.dart';
-import 'package:flexi_kline/flexi_kline.dart';
 
 import '../constant.dart';
 

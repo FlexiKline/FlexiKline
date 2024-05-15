@@ -46,9 +46,11 @@ class MainNavPage extends ConsumerWidget {
         backgroundColor: theme.cardBg,
         selectedItemColor: theme.t1,
         unselectedItemColor: theme.t2,
+        selectedLabelStyle: theme.t1s14w700,
+        unselectedLabelStyle: theme.t2s14w400,
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: const Icon(Icons.align_vertical_bottom),
+            icon: const Icon(Icons.bar_chart_rounded),
             label: s.demo,
           ),
           BottomNavigationBarItem(

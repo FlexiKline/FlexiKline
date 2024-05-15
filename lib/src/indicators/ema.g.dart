@@ -6,18 +6,6 @@ part of 'ema.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-EMAParam _$EMAParamFromJson(Map<String, dynamic> json) => EMAParam(
-      label: json['label'] as String,
-      count: (json['count'] as num).toInt(),
-      color: const ColorConverter().fromJson(json['color'] as String?),
-    );
-
-Map<String, dynamic> _$EMAParamToJson(EMAParam instance) => <String, dynamic>{
-      'label': instance.label,
-      'count': instance.count,
-      'color': const ColorConverter().toJson(instance.color),
-    };
-
 EMAIndicator _$EMAIndicatorFromJson(Map<String, dynamic> json) => EMAIndicator(
       key: json['key'] == null
           ? emaKey
@@ -31,14 +19,52 @@ EMAIndicator _$EMAIndicatorFromJson(Map<String, dynamic> json) => EMAIndicator(
           : const EdgeInsetsConverter()
               .fromJson(json['padding'] as Map<String, dynamic>),
       calcParams: (json['calcParams'] as List<dynamic>?)
-              ?.map((e) => EMAParam.fromJson(e as Map<String, dynamic>))
+              ?.map((e) => MaParam.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [
-            EMAParam(label: 'EMA5', count: 5, color: Color(0xFF806180)),
-            EMAParam(label: 'EMA10', count: 10, color: Color(0xFFEBB736)),
-            EMAParam(label: 'EMA20', count: 20, color: Color(0xFFD672D5)),
-            EMAParam(label: 'EMA60', count: 60, color: Color(0xFF788FD5))
+            MaParam(
+                count: 5,
+                tips: TipsConfig(
+                    label: 'EMA5: ',
+                    style: TextStyle(
+                        fontSize: defaulTextSize,
+                        color: Color(0xFF806180),
+                        overflow: TextOverflow.ellipsis,
+                        height: defaultTipsTextHeight))),
+            MaParam(
+                count: 10,
+                tips: TipsConfig(
+                    label: 'EMA10: ',
+                    style: TextStyle(
+                        fontSize: defaulTextSize,
+                        color: Color(0xFFEBB736),
+                        overflow: TextOverflow.ellipsis,
+                        height: defaultTipsTextHeight))),
+            MaParam(
+                count: 20,
+                tips: TipsConfig(
+                    label: 'EMA20: ',
+                    style: TextStyle(
+                        fontSize: defaulTextSize,
+                        color: Color(0xFFD672D5),
+                        overflow: TextOverflow.ellipsis,
+                        height: defaultTipsTextHeight))),
+            MaParam(
+                count: 60,
+                tips: TipsConfig(
+                    label: 'EMA60: ',
+                    style: TextStyle(
+                        fontSize: defaulTextSize,
+                        color: Color(0xFF788FD5),
+                        overflow: TextOverflow.ellipsis,
+                        height: defaultTipsTextHeight)))
           ],
+      tipsPadding: json['tipsPadding'] == null
+          ? defaultTipsPadding
+          : const EdgeInsetsConverter()
+              .fromJson(json['tipsPadding'] as Map<String, dynamic>),
+      lineWidth:
+          (json['lineWidth'] as num?)?.toDouble() ?? defaultIndicatorLineWidth,
     );
 
 Map<String, dynamic> _$EMAIndicatorToJson(EMAIndicator instance) =>
@@ -49,4 +75,6 @@ Map<String, dynamic> _$EMAIndicatorToJson(EMAIndicator instance) =>
       'tipsHeight': instance.tipsHeight,
       'padding': const EdgeInsetsConverter().toJson(instance.padding),
       'calcParams': instance.calcParams.map((e) => e.toJson()).toList(),
+      'tipsPadding': const EdgeInsetsConverter().toJson(instance.tipsPadding),
+      'lineWidth': instance.lineWidth,
     };
