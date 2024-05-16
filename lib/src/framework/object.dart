@@ -289,7 +289,7 @@ mixin PaintHorizontalTickMixin<T extends SinglePaintObjectIndicator>
 
       final tickText = settingConfig.tickText;
 
-      canvas.drawText(
+      canvas.drawTextArea(
         offset: Offset(
           dx,
           dy - tickText.areaHeight, // 绘制在刻度线之上
@@ -297,14 +297,7 @@ mixin PaintHorizontalTickMixin<T extends SinglePaintObjectIndicator>
         drawDirection: DrawDirection.rtl,
         drawableRect: drawBounding,
         text: text,
-        style: tickText.style,
-        textAlign: tickText.textAlign,
-        textWidth: tickText.textWidth,
-        padding: tickText.padding,
-        backgroundColor: tickText.background,
-        borderRadius: tickText.borderRadius,
-        borderSide: tickText.border,
-        maxLines: tickText.maxLines ?? 1,
+        textConfig: tickText,
       );
     }
   }
@@ -337,7 +330,7 @@ mixin PaintHorizontalTickOnCrossMixin<T extends SinglePaintObjectIndicator>
 
     final tickText = crossConfig.tickText;
 
-    canvas.drawText(
+    canvas.drawTextArea(
       offset: Offset(
         chartRect.right - crossConfig.spacing,
         offset.dy - tickText.areaHeight / 2,
@@ -345,14 +338,7 @@ mixin PaintHorizontalTickOnCrossMixin<T extends SinglePaintObjectIndicator>
       drawDirection: DrawDirection.rtl,
       drawableRect: drawBounding,
       text: text,
-      style: tickText.style,
-      textAlign: tickText.textAlign,
-      textWidth: tickText.textWidth,
-      padding: tickText.padding,
-      backgroundColor: tickText.background,
-      borderRadius: tickText.borderRadius,
-      borderSide: tickText.border,
-      maxLines: tickText.maxLines ?? 1,
+      textConfig: tickText,
     );
   }
 
@@ -563,7 +549,7 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
   @override
   void doPaintChart(Canvas canvas, Size size) {
     double? tipsHeight;
-    if (indicator.drawChartAlawaysBelowTipsArea) {
+    if (indicator.drawBelowTipsArea) {
       // 1.1 如果设置总是要在Tips区域下绘制指标图, 则要首先绘制完所有Tips.
       if (!cross.isCrossing) {
         tipsHeight = doPaintTips(canvas, model: state.curKlineData.latest);
@@ -582,7 +568,7 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
       child.paintObject?.paintChart(canvas, size);
     }
 
-    if (!indicator.drawChartAlawaysBelowTipsArea) {
+    if (!indicator.drawBelowTipsArea) {
       if (!cross.isCrossing) {
         doPaintTips(canvas, model: state.curKlineData.latest);
       }

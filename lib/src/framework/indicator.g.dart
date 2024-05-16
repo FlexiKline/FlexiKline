@@ -18,8 +18,7 @@ MultiPaintObjectIndicator<T>
               ? defaultIndicatorPadding
               : const EdgeInsetsConverter()
                   .fromJson(json['padding'] as Map<String, dynamic>),
-          drawChartAlawaysBelowTipsArea:
-              json['drawChartAlawaysBelowTipsArea'] as bool? ?? false,
+          drawBelowTipsArea: json['drawBelowTipsArea'] as bool? ?? false,
         );
 
 Map<String, dynamic>
@@ -31,6 +30,5 @@ Map<String, dynamic>
           'height': instance.height,
           'tipsHeight': instance.tipsHeight,
           'padding': const EdgeInsetsConverter().toJson(instance.padding),
-          'drawChartAlawaysBelowTipsArea':
-              instance.drawChartAlawaysBelowTipsArea,
+          'drawBelowTipsArea': instance.drawBelowTipsArea,
         };

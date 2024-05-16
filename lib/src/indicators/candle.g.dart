@@ -53,8 +53,8 @@ CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
                       overflow: TextOverflow.ellipsis,
                       height: defaultTextHeight,
                       textBaseline: TextBaseline.alphabetic),
-                  background: Colors.grey,
-                  padding: defaultTextPading,
+                  background: Colors.black54,
+                  padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                   border: BorderSide(color: Colors.transparent),
                   borderRadius: BorderRadius.all(Radius.circular(10))))
           : MarkConfig.fromJson(json['last'] as Map<String, dynamic>),
@@ -70,27 +70,16 @@ CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
               text: TextAreaConfig(
                   style: TextStyle(
                       fontSize: defaulTextSize,
-                      color: Colors.black,
+                      color: Colors.white,
                       overflow: TextOverflow.ellipsis,
                       height: defaultTextHeight),
-                  textAlign: TextAlign.end,
-                  background: Colors.white,
+                  minWidth: 45,
+                  textAlign: TextAlign.center,
                   padding: defaultTextPading,
-                  border: BorderSide(color: Colors.black, width: 0.5),
                   borderRadius: BorderRadius.all(Radius.circular(2))))
           : MarkConfig.fromJson(json['latest'] as Map<String, dynamic>),
-      prettyLatest: json['prettyLatest'] == null
-          ? const TextAreaConfig(
-              style: TextStyle(
-                  fontSize: defaulTextSize,
-                  color: Colors.white,
-                  overflow: TextOverflow.ellipsis,
-                  height: defaultTextHeight),
-              textAlign: TextAlign.end,
-              padding: defaultTextPading,
-              borderRadius: BorderRadius.all(Radius.circular(2)))
-          : TextAreaConfig.fromJson(
-              json['prettyLatest'] as Map<String, dynamic>),
+      useCandleColorAsLatestBg:
+          json['useCandleColorAsLatestBg'] as bool? ?? true,
       showCountDown: json['showCountDown'] as bool? ?? true,
       countDown: json['countDown'] == null
           ? const TextAreaConfig(
@@ -100,9 +89,8 @@ CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
                   overflow: TextOverflow.ellipsis,
                   height: defaultTextHeight),
               textAlign: TextAlign.center,
-              background: Colors.grey,
+              background: Color(0xFFD6D6D6),
               padding: defaultTextPading,
-              border: BorderSide(color: Colors.black, width: 0.5),
               borderRadius: BorderRadius.all(Radius.circular(2)))
           : TextAreaConfig.fromJson(json['countDown'] as Map<String, dynamic>),
       timeTick: json['timeTick'] == null
@@ -127,7 +115,7 @@ Map<String, dynamic> _$CandleIndicatorToJson(CandleIndicator instance) =>
       'low': instance.low.toJson(),
       'last': instance.last.toJson(),
       'latest': instance.latest.toJson(),
-      'prettyLatest': instance.prettyLatest?.toJson(),
+      'useCandleColorAsLatestBg': instance.useCandleColorAsLatestBg,
       'showCountDown': instance.showCountDown,
       'countDown': instance.countDown.toJson(),
       'timeTick': instance.timeTick.toJson(),

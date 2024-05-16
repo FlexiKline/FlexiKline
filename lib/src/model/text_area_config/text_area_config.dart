@@ -32,6 +32,8 @@ class TextAreaConfig {
     ),
     this.textAlign = TextAlign.start,
     this.textWidth,
+    this.minWidth,
+    this.maxWidth,
     this.maxLines,
 
     /// Area区域设置
@@ -45,6 +47,8 @@ class TextAreaConfig {
   final TextStyle style;
   final TextAlign textAlign;
   final double? textWidth;
+  final double? minWidth;
+  final double? maxWidth;
   final int? maxLines;
 
   /// Area区域设置

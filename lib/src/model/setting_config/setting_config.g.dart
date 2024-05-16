@@ -49,42 +49,6 @@ SettingConfig _$SettingConfigFromJson(Map<String, dynamic> json) =>
       candleLineWidth: (json['candleLineWidth'] as num?)?.toDouble() ?? 1.0,
       firstCandleInitOffset:
           (json['firstCandleInitOffset'] as num?)?.toDouble() ?? 80,
-      indicatorLineWidth:
-          (json['indicatorLineWidth'] as num?)?.toDouble() ?? 1.0,
-      defaultTextStyle: json['defaultTextStyle'] == null
-          ? const TextStyle(
-              fontSize: 10,
-              color: Colors.black,
-              overflow: TextOverflow.ellipsis,
-              height: 1)
-          : const TextStyleConverter()
-              .fromJson(json['defaultTextStyle'] as Map<String, dynamic>),
-      defaultPadding: json['defaultPadding'] == null
-          ? const EdgeInsets.all(2)
-          : const EdgeInsetsConverter()
-              .fromJson(json['defaultPadding'] as Map<String, dynamic>),
-      defaultBackground: json['defaultBackground'] == null
-          ? Colors.white
-          : const ColorConverter()
-              .fromJson(json['defaultBackground'] as String?),
-      defaultRadius: json['defaultRadius'] == null
-          ? const BorderRadius.all(Radius.circular(2))
-          : const BorderRadiusConverter()
-              .fromJson(json['defaultRadius'] as Map<String, dynamic>),
-      defaultBorder: json['defaultBorder'] == null
-          ? const BorderSide(color: Colors.black, width: 0.5)
-          : const BorderSideConvert()
-              .fromJson(json['defaultBorder'] as Map<String, dynamic>),
-      longTextStyle: _$JsonConverterFromJson<Map<String, dynamic>, TextStyle>(
-          json['longTextStyle'], const TextStyleConverter().fromJson),
-      shortTextStyle: _$JsonConverterFromJson<Map<String, dynamic>, TextStyle>(
-          json['shortTextStyle'], const TextStyleConverter().fromJson),
-      tipsTextStyle: _$JsonConverterFromJson<Map<String, dynamic>, TextStyle>(
-          json['tipsTextStyle'], const TextStyleConverter().fromJson),
-      tipsPadding: json['tipsPadding'] == null
-          ? const EdgeInsets.only(left: 8)
-          : const EdgeInsetsConverter()
-              .fromJson(json['tipsPadding'] as Map<String, dynamic>),
       tickText: json['tickText'] == null
           ? const TextAreaConfig(
               style: TextStyle(
@@ -95,9 +59,6 @@ SettingConfig _$SettingConfigFromJson(Map<String, dynamic> json) =>
               textAlign: TextAlign.end,
               padding: EdgeInsets.symmetric(horizontal: 2))
           : TextAreaConfig.fromJson(json['tickText'] as Map<String, dynamic>),
-      markLineWidth: (json['markLineWidth'] as num?)?.toDouble() ?? 0.5,
-      markLineColor:
-          const ColorConverter().fromJson(json['markLineColor'] as String?),
       subChartMaxCount: (json['subChartMaxCount'] as num?)?.toInt() ??
           defaultSubChartMaxCount,
     );
@@ -133,34 +94,7 @@ Map<String, dynamic> _$SettingConfigToJson(SettingConfig instance) {
   val['candleSpacing'] = instance.candleSpacing;
   val['candleLineWidth'] = instance.candleLineWidth;
   val['firstCandleInitOffset'] = instance.firstCandleInitOffset;
-  val['indicatorLineWidth'] = instance.indicatorLineWidth;
-  val['defaultTextStyle'] =
-      const TextStyleConverter().toJson(instance.defaultTextStyle);
-  val['defaultPadding'] =
-      const EdgeInsetsConverter().toJson(instance.defaultPadding);
-  writeNotNull('defaultBackground',
-      const ColorConverter().toJson(instance.defaultBackground));
-  val['defaultBorder'] =
-      const BorderSideConvert().toJson(instance.defaultBorder);
-  val['defaultRadius'] =
-      const BorderRadiusConverter().toJson(instance.defaultRadius);
-  val['longTextStyle'] =
-      const TextStyleConverter().toJson(instance.longTextStyle);
-  val['shortTextStyle'] =
-      const TextStyleConverter().toJson(instance.shortTextStyle);
-  val['tipsTextStyle'] =
-      const TextStyleConverter().toJson(instance.tipsTextStyle);
-  val['tipsPadding'] = const EdgeInsetsConverter().toJson(instance.tipsPadding);
   val['tickText'] = instance.tickText.toJson();
-  val['markLineWidth'] = instance.markLineWidth;
-  writeNotNull(
-      'markLineColor', const ColorConverter().toJson(instance.markLineColor));
   val['subChartMaxCount'] = instance.subChartMaxCount;
   return val;
 }
-
-Value? _$JsonConverterFromJson<Json, Value>(
-  Object? json,
-  Value? Function(Json json) fromJson,
-) =>
-    json == null ? null : fromJson(json as Json);

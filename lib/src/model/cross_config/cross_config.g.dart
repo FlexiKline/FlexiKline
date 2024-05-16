@@ -31,6 +31,7 @@ CrossConfig _$CrossConfigFromJson(Map<String, dynamic> json) => CrossConfig(
               borderRadius: BorderRadius.all(Radius.circular(2)))
           : TextAreaConfig.fromJson(json['tickText'] as Map<String, dynamic>),
       spacing: (json['spacing'] as num?)?.toDouble() ?? 1,
+      showLatestTipsInBlank: json['showLatestTipsInBlank'] as bool? ?? true,
     );
 
 Map<String, dynamic> _$CrossConfigToJson(CrossConfig instance) =>
@@ -40,6 +41,7 @@ Map<String, dynamic> _$CrossConfigToJson(CrossConfig instance) =>
       'point': instance.point.toJson(),
       'tickText': instance.tickText.toJson(),
       'spacing': instance.spacing,
+      'showLatestTipsInBlank': instance.showLatestTipsInBlank,
     };
 
 CrossPointConfig _$CrossPointConfigFromJson(Map<String, dynamic> json) =>

@@ -139,7 +139,7 @@ mixin ConfigBinding
           key: mainChartKey,
           name: 'MAIN',
           height: 0,
-          drawChartAlawaysBelowTipsArea: true,
+          drawBelowTipsArea: true,
         );
     _mainIndicator.appendIndicator(_supportMainIndicators[candleKey]!, this);
     for (var childKey in mainChildrenKeys) {

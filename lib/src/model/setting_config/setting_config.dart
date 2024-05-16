@@ -48,28 +48,6 @@ class SettingConfig {
     this.candleSpacing = 1.0,
     this.candleLineWidth = 1.0,
     this.firstCandleInitOffset = 80,
-    this.indicatorLineWidth = 1.0,
-
-    /// Grid Axis conifg
-    // this.gridCount = 5,
-    // this.gridLineColor = const Color(0xffE9EDF0),
-    // this.gridLineWidth = 0.5,
-
-    /// 全局默认文本配置: TextStyle / Background / Border
-    TextStyle defaultTextStyle = const TextStyle(
-      fontSize: 10,
-      color: Colors.black,
-      overflow: TextOverflow.ellipsis,
-      height: 1,
-    ),
-    this.defaultPadding = const EdgeInsets.all(2),
-    this.defaultBackground = Colors.white,
-    this.defaultRadius = const BorderRadius.all(Radius.circular(2)),
-    this.defaultBorder = const BorderSide(color: Colors.black, width: 0.5),
-    TextStyle? longTextStyle,
-    TextStyle? shortTextStyle,
-    TextStyle? tipsTextStyle,
-    this.tipsPadding = const EdgeInsets.only(left: 8),
 
     /// 全局默认的刻度值配置.
     this.tickText = const TextAreaConfig(
@@ -82,58 +60,13 @@ class SettingConfig {
       textAlign: TextAlign.end,
       padding: EdgeInsets.symmetric(horizontal: 2),
     ),
-    // 刻度文本区域距离边框
-    // this.tickRectMargin = 1,
-    // TextStyle? tickTextStyle,
-    // this.tickPadding = const EdgeInsets.all(2),
-
-    /// 标记线配置
-    this.markLineWidth = 0.5,
-    Color? markLineColor,
-
-    /// Cross 通用配置
-    // this.crosshairLineWidth = 0.5,
-    // this.crosshairLineColor = Colors.black,
-    // this.crosshairLineDashes = const [3, 3],
-    // this.corssPointColor = Colors.black,
-    // this.crossPointRadius = 2,
-    // this.crossPointWidth = 6,
-    // // onCross时, 刻度配置 (价钱/数量/时间...)
-    // this.crossTickTextStyle = const TextStyle(
-    //   fontSize: 10,
-    //   color: Colors.white,
-    //   overflow: TextOverflow.ellipsis,
-    //   height: 1,
-    // ),
-    // this.crossTickBackground = Colors.black,
-    // this.crossTickPadding = const EdgeInsets.all(2),
-    // this.crossTickBorder = BorderSide.none,
-    // this.crossTickRadius = const BorderRadius.all(
-    //   Radius.circular(2),
-    // ),
 
     /// 副图配置
     // 副区的指标图最大数量
     this.subChartMaxCount = defaultSubChartMaxCount,
-    // 副图的指标图的右侧右侧刻度数量
-    // this.subIndicatorTickCount = 3, // 高中低=>top, middle, bottom
-    // // 副图指标图默认高度
-    // this.subIndicatorDefaultHeight = defaultSubIndicatorHeight,
-    // // 副图指标图默认Tips高度
-    // this.subIndicatorDefaultTipsHeight = defaultIndicatorTipsHeight,
-    // // 副图指标图默认Pading
-    // this.subIndicatorDefaultPadding = defaultIndicatorPadding,
   })  : textColor = textColor,
         longColor = longColor,
-        shortColor = shortColor,
-        markLineColor = markLineColor ?? textColor,
-        defaultTextStyle = defaultTextStyle,
-        longTextStyle =
-            longTextStyle ?? defaultTextStyle.copyWith(color: longColor),
-        shortTextStyle =
-            shortTextStyle ?? defaultTextStyle.copyWith(color: shortColor),
-        // tickTextStyle = tickTextStyle ?? defaultTextStyle,
-        tipsTextStyle = tipsTextStyle ?? defaultTextStyle.copyWith(height: 1.2);
+        shortColor = shortColor;
 
   /// Long/Short颜色配置
   final Color textColor;
@@ -169,66 +102,13 @@ class SettingConfig {
   double candleLineWidth;
   // Candle 第一根Candle相对于mainRect右边的偏移
   double firstCandleInitOffset;
-  // 指标线图的默认线宽
-  @Deprecated('废弃的, 由各个指标图自行配置')
-  double indicatorLineWidth;
-
-  /// 主/副图 Grid Axis conifg
-  // 主图区域grid的数量
-  // final int gridCount;
-  // final Color gridLineColor;
-  // final double gridLineWidth;
-
-  /// 全局默认文本配置: TextStyle / Background / Border
-  final TextStyle defaultTextStyle;
-  final EdgeInsets defaultPadding;
-  final Color defaultBackground;
-  final BorderSide defaultBorder;
-  final BorderRadius defaultRadius;
-  final TextStyle longTextStyle;
-  final TextStyle shortTextStyle;
-  // Tips文本样式
-  final TextStyle tipsTextStyle;
-  // Tips文本的通用Padding
-  final EdgeInsets tipsPadding;
 
   /// 全局默认的刻度值配置.
   final TextAreaConfig tickText;
-  // 刻度文本区域距离边框
-  // final double tickRectMargin;
-  // final TextStyle tickTextStyle;
-  // final EdgeInsets tickPadding;
-
-  /// 标记线配置
-  final double markLineWidth;
-  final Color markLineColor;
-
-  /// Cross 通用配置
-  // final double crosshairLineWidth;
-  // final Color crosshairLineColor;
-  // final List<double> crosshairLineDashes;
-  // final Color corssPointColor;
-  // final double crossPointRadius;
-  // final double crossPointWidth;
-  // // onCross时, 刻度配置 (价钱/数量/时间...)
-
-  // final TextStyle crossTickTextStyle;
-  // final Color crossTickBackground;
-  // final EdgeInsets crossTickPadding;
-  // final BorderSide crossTickBorder;
-  // final BorderRadius crossTickRadius;
 
   /// 副图配置
   // 副区的指标图最大数量
   int subChartMaxCount;
-  // 副图的指标图的右侧右侧刻度数量
-  // final int subIndicatorTickCount;
-  // // 副图指标图默认高度
-  // final double subIndicatorDefaultHeight;
-  // // 副图指标图默认Tips高度
-  // final double subIndicatorDefaultTipsHeight;
-  // // 副图指标图默认Pading
-  // final EdgeInsets subIndicatorDefaultPadding;
 
   factory SettingConfig.fromJson(Map<String, dynamic> json) =>
       _$SettingConfigFromJson(json);

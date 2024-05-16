@@ -157,13 +157,13 @@ class MultiPaintObjectIndicator<T extends SinglePaintObjectIndicator>
     required super.height,
     super.tipsHeight,
     super.padding,
-    this.drawChartAlawaysBelowTipsArea = false,
+    this.drawBelowTipsArea = false,
     Iterable<T> children = const [],
   }) : children = LinkedHashSet<T>.from(children);
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   final Set<T> children;
-  bool drawChartAlawaysBelowTipsArea;
+  bool drawBelowTipsArea;
 
   @override
   MultiPaintObjectBox createPaintObject(

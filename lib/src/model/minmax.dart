@@ -49,6 +49,13 @@ class MinMax {
     if (min > minmax.min) min = minmax.min;
   }
 
+  void expand(num margin) {
+    if (margin > 0) {
+      max = max.addNum(margin);
+      min = min.subNum(margin);
+    }
+  }
+
   void minToZero() {
     min = min > BagNum.zero ? BagNum.zero : min;
   }

@@ -72,7 +72,7 @@ class CandleIndicator extends SinglePaintObjectIndicator {
           height: defaultTextHeight,
           textBaseline: TextBaseline.alphabetic,
         ),
-        background: Colors.black,
+        background: Colors.black54,
         padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
         border: BorderSide(color: Colors.transparent),
         borderRadius: BorderRadius.all(Radius.circular(10)),
@@ -91,29 +91,20 @@ class CandleIndicator extends SinglePaintObjectIndicator {
       text: TextAreaConfig(
         style: TextStyle(
           fontSize: defaulTextSize,
-          color: Colors.black,
+          // color: Colors.black,
+          color: Colors.white,
           overflow: TextOverflow.ellipsis,
           height: defaultTextHeight,
         ),
-        textAlign: TextAlign.end,
-        background: Colors.white,
+        minWidth: 45,
+        textAlign: TextAlign.center,
+        // background: Colors.white,
         padding: defaultTextPading,
-        border: BorderSide(color: Colors.black, width: 0.5),
+        // border: BorderSide(color: Colors.black, width: 0.5),
         borderRadius: BorderRadius.all(Radius.circular(2)),
       ),
     ),
-    this.prettyLatest = const TextAreaConfig(
-      style: TextStyle(
-        fontSize: defaulTextSize,
-        color: Colors.white,
-        overflow: TextOverflow.ellipsis,
-        height: defaultTextHeight,
-      ),
-      textAlign: TextAlign.end,
-      // background: 背景由涨跌颜色决定,
-      padding: defaultTextPading,
-      borderRadius: BorderRadius.all(Radius.circular(2)),
-    ),
+    this.useCandleColorAsLatestBg = true,
     // 倒计时, 在latest最新价之下展示
     this.showCountDown = true,
     this.countDown = const TextAreaConfig(
@@ -124,9 +115,9 @@ class CandleIndicator extends SinglePaintObjectIndicator {
         height: defaultTextHeight,
       ),
       textAlign: TextAlign.center,
-      background: Colors.grey,
+      background: Color(0xFFD6D6D6),
       padding: defaultTextPading,
-      border: BorderSide(color: Colors.black, width: 0.5),
+      // border: BorderSide(color: Colors.black, width: 0.5),
       borderRadius: BorderRadius.all(Radius.circular(2)),
     ),
     // 时间刻度.
@@ -149,8 +140,8 @@ class CandleIndicator extends SinglePaintObjectIndicator {
   final MarkConfig last;
   // 最新价: 当最新蜡烛在可视区域时使用.
   final MarkConfig latest;
-  // 最新价: PrettyLatest
-  final TextAreaConfig? prettyLatest;
+  // 使用蜡烛颜色做为背景
+  final bool useCandleColorAsLatestBg;
   // 倒计时, 在latest最新价之下展示
   final bool showCountDown;
   final TextAreaConfig countDown;
@@ -358,18 +349,11 @@ class CandlePaintObject<T extends CandleIndicator>
       precision: klineData.precision,
     );
 
-    canvas.drawText(
+    canvas.drawTextArea(
       offset: endOffset,
       drawDirection: flag < 0 ? DrawDirection.rtl : DrawDirection.ltr,
       text: text,
-      style: markText.style,
-      textAlign: markText.textAlign,
-      textWidth: markText.textWidth,
-      padding: markText.padding,
-      backgroundColor: markText.background,
-      borderRadius: markText.borderRadius,
-      borderSide: markText.border,
-      maxLines: markText.maxLines ?? 1,
+      textConfig: markText,
     );
   }
 
@@ -397,21 +381,14 @@ class CandlePaintObject<T extends CandleIndicator>
     // 绘制时间刻度.
     final timeTick = indicator.timeTick;
     final dyCenterOffset = (indicator.padding.bottom - timeTick.areaHeight) / 2;
-    canvas.drawText(
+    canvas.drawTextArea(
       offset: Offset(
         offset.dx,
         offset.dy + dyCenterOffset,
       ),
       drawDirection: DrawDirection.center,
       text: model.formatDateTimeByTimeBar(bar),
-      style: timeTick.style,
-      textAlign: timeTick.textAlign,
-      textWidth: timeTick.textWidth,
-      padding: timeTick.padding,
-      backgroundColor: timeTick.background,
-      borderRadius: timeTick.borderRadius,
-      borderSide: timeTick.border,
-      maxLines: timeTick.maxLines ?? 1,
+      textConfig: timeTick,
     );
 
     //   }
@@ -438,7 +415,7 @@ class CandlePaintObject<T extends CandleIndicator>
 
       final tickText = settingConfig.tickText;
 
-      canvas.drawText(
+      canvas.drawTextArea(
         offset: Offset(
           dx,
           dy - tickText.areaHeight, // 绘制在刻度线之上
@@ -446,14 +423,7 @@ class CandlePaintObject<T extends CandleIndicator>
         drawDirection: DrawDirection.rtl,
         drawableRect: drawBounding,
         text: text,
-        style: tickText.style,
-        textAlign: tickText.textAlign,
-        textWidth: tickText.textWidth,
-        padding: tickText.padding,
-        backgroundColor: tickText.background,
-        borderRadius: tickText.borderRadius,
-        borderSide: tickText.border,
-        maxLines: tickText.maxLines ?? 1,
+        textConfig: tickText,
       );
     }
   }
@@ -527,20 +497,15 @@ class CandlePaintObject<T extends CandleIndicator>
         }
       }
 
-      TextAreaConfig textConfig;
-      Color? background;
+      TextAreaConfig textConfig = latest.text;
 
-      if (indicator.prettyLatest != null) {
-        textConfig = indicator.prettyLatest!;
+      Color? background = textConfig.background;
+      if (indicator.useCandleColorAsLatestBg) {
         background = model.close >= model.open
             ? settingConfig.longColor
             : settingConfig.shortColor;
-      } else {
-        textConfig = latest.text;
-        background = textConfig.background;
       }
 
-      BorderSide? borderSide = textConfig.border;
       BorderRadius? borderRadius = textConfig.borderRadius;
       if (countDownText != null) {
         // 如果展示倒计时, 最新价仅保留顶部radius
@@ -558,19 +523,14 @@ class CandlePaintObject<T extends CandleIndicator>
       );
 
       /// 绘制最新价标记
-      final size = canvas.drawText(
+      final size = canvas.drawTextArea(
         offset: offset,
         drawDirection: DrawDirection.rtl,
         drawableRect: drawBounding,
         text: text,
-        style: textConfig.style,
-        textAlign: textConfig.textAlign,
-        textWidth: textConfig.textWidth,
-        padding: textConfig.padding,
+        textConfig: textConfig,
         backgroundColor: background,
         borderRadius: borderRadius,
-        borderSide: borderSide,
-        maxLines: textConfig.maxLines ?? 1,
       );
 
       if (countDownText != null) {
@@ -604,7 +564,7 @@ class CandlePaintObject<T extends CandleIndicator>
           // padding: countDown.padding,
           backgroundColor: countDown.background,
           borderRadius: borderRadius,
-          borderSide: borderSide,
+          borderSide: countDown.border,
           maxLines: countDown.maxLines ?? 1,
         );
       }
@@ -637,7 +597,7 @@ class CandlePaintObject<T extends CandleIndicator>
       );
 
       /// 绘制最后价标记
-      canvas.drawText(
+      canvas.drawTextArea(
         offset: Offset(
           rdx - last.spacing,
           dy - last.text.areaHeight / 2, // 居中
@@ -645,14 +605,7 @@ class CandlePaintObject<T extends CandleIndicator>
         drawDirection: DrawDirection.center,
         drawableRect: drawBounding,
         text: '$text ▸', // ➤➤▹►▸▶︎≻
-        style: last.text.style,
-        textAlign: last.text.textAlign,
-        textWidth: last.text.textWidth,
-        padding: last.text.padding,
-        backgroundColor: last.text.background,
-        borderRadius: last.text.borderRadius,
-        borderSide: last.text.border,
-        maxLines: last.text.maxLines ?? 1,
+        textConfig: last.text,
       );
     }
   }
@@ -671,20 +624,14 @@ class CandlePaintObject<T extends CandleIndicator>
     final tickText = crossConfig.tickText;
 
     final dyCenterOffset = (indicator.padding.bottom - tickText.areaHeight) / 2;
-    canvas.drawText(
+    canvas.drawTextArea(
       offset: Offset(
         offset.dx,
         chartRect.bottom + dyCenterOffset,
       ),
       drawDirection: DrawDirection.center,
       text: time,
-      style: tickText.style,
-      textAlign: TextAlign.center,
-      textWidthBasis: TextWidthBasis.longestLine,
-      padding: tickText.padding,
-      backgroundColor: tickText.background,
-      borderRadius: tickText.borderRadius,
-      borderSide: tickText.border,
+      textConfig: tickText,
     );
   }
 

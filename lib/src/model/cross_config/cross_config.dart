@@ -48,6 +48,7 @@ class CrossConfig {
       ),
     ),
     this.spacing = 1,
+    this.showLatestTipsInBlank = true,
   });
 
   final bool enable;
@@ -55,6 +56,9 @@ class CrossConfig {
   final CrossPointConfig point;
   final TextAreaConfig tickText;
   final double spacing;
+
+  /// onCross时, 当移动到空白区域时, Tips区域是否展示最新的蜡烛的Tips数据.
+  bool showLatestTipsInBlank = true;
 
   Paint get crosshairPaint => Paint()
     ..color = crosshair.color

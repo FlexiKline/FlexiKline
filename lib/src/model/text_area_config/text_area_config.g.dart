@@ -20,6 +20,8 @@ TextAreaConfig _$TextAreaConfigFromJson(Map<String, dynamic> json) =>
           ? TextAlign.start
           : const TextAlignConvert().fromJson(json['textAlign'] as String),
       textWidth: (json['textWidth'] as num?)?.toDouble(),
+      minWidth: (json['minWidth'] as num?)?.toDouble(),
+      maxWidth: (json['maxWidth'] as num?)?.toDouble(),
       maxLines: (json['maxLines'] as num?)?.toInt(),
       background:
           const ColorConverter().fromJson(json['background'] as String?),
@@ -44,6 +46,8 @@ Map<String, dynamic> _$TextAreaConfigToJson(TextAreaConfig instance) {
   }
 
   writeNotNull('textWidth', instance.textWidth);
+  writeNotNull('minWidth', instance.minWidth);
+  writeNotNull('maxWidth', instance.maxWidth);
   writeNotNull('maxLines', instance.maxLines);
   writeNotNull(
       'background',

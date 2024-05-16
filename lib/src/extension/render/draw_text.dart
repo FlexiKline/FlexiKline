@@ -15,6 +15,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
+import '../../model/text_area_config/text_area_config.dart';
 import '../geometry_ext.dart';
 import 'common.dart';
 
@@ -240,5 +241,52 @@ extension DrawTextExt on Canvas {
     textPainter.paint(this, offset);
 
     return paintSize;
+  }
+
+  Size drawTextArea({
+    ///绘制启始坐标位置
+    required Offset offset,
+
+    /// X轴上的绘制方向: 以offset为原点, 向左向右绘制; 以及居中绘制
+    DrawDirection drawDirection = DrawDirection.ltr,
+
+    /// 可绘制区域大小
+    Rect? drawableRect,
+
+    /// 文本,样式设置. (注: text与textSpan必须设置一个, 否则不绘制)
+    String? text,
+    InlineSpan? textSpan,
+
+    /// 文本区域配置
+    required TextAreaConfig textConfig,
+    // 如textConfig未指定, 备选
+    int maxLines = 1,
+    double minWidth = 0,
+    double maxWidth = double.infinity,
+    // 如指定, 首先使用
+    Color? backgroundColor,
+    BorderRadius? borderRadius,
+    BorderSide? borderSide,
+    EdgeInsets? padding,
+  }) {
+    return drawText(
+      offset: offset,
+      drawDirection: drawDirection,
+      drawableRect: drawableRect,
+      text: text,
+      textSpan: textSpan,
+      // 文本
+      style: textConfig.style,
+      textAlign: textConfig.textAlign,
+      maxLines: textConfig.maxLines ?? 1,
+      textWidth: textConfig.textWidth,
+      minWidth: textConfig.minWidth ?? minWidth,
+      maxWidth: textConfig.maxWidth ?? maxWidth,
+      // 文本区域
+      backgroundColor: backgroundColor ?? textConfig.background,
+      borderRadius: borderRadius ?? textConfig.borderRadius,
+      borderSide: borderSide ?? textConfig.border,
+      padding: padding ?? textConfig.padding,
+    );
   }
 }

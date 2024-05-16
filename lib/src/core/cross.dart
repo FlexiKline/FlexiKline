@@ -128,7 +128,7 @@ mixin CrossBinding
       paintCrossLine(canvas, offset);
 
       CandleModel? model;
-      if (showLatestTipsInBlank) {
+      if (crossConfig.showLatestTipsInBlank) {
         model = offsetToCandle(offset);
         // 如果当前model为空, 则根据offset.dx计算当前model是最新的, 还是最后的.
         if (model == null) {
