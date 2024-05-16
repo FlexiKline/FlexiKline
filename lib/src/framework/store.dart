@@ -222,4 +222,10 @@ mixin KlineStorage implements IStore, ILogger {
   void storeCrossConfig(CrossConfig config) {
     flexiKlineConfig[jsonKeyCross] = config.toJson();
   }
+
+  /// TooltipConfig
+  Map<String, dynamic> get tooltipConfigData => _getRootConfig(jsonKeyTooltip);
+  void storeTooltipConfig(TooltipConfig config) {
+    flexiKlineConfig[jsonKeyTooltip] = config.toJson();
+  }
 }

@@ -15,12 +15,9 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
-import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 
-import '../constant.dart';
 import '../model/export.dart';
-import '../utils/export.dart';
 import 'binding_base.dart';
 import 'interface.dart';
 
@@ -199,114 +196,17 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IConfig {
   // Candle 第一根Candle相对于mainRect右边的偏移
   double get firstCandleInitOffset => settingConfig.firstCandleInitOffset;
 
-  // candle Card 配置
-  bool showPopupCandleCard = true;
-
-  // candle Card background config.
-  Color candleCardRectBackgroundColor = const Color(0xFFF2F2F2);
-  double candleCardRectBorderRadius = 4;
-  EdgeInsets candleCardRectMargin = const EdgeInsets.only(
-    left: 15,
-    right: 65,
-    top: 4,
-  );
-  EdgeInsets candleCardRectPadding = const EdgeInsets.symmetric(
-    horizontal: 4,
-    vertical: 4,
-  );
-
-  double candleCardTextSize = 10;
-  double candleCardTextHeight = 1.5; // 文本跨度的高度，为字体大小的倍数
-  TextStyle get candleCardTextStyle => TextStyle(
-        fontSize: candleCardTextSize,
-        color: Colors.black,
-        overflow: TextOverflow.ellipsis,
-        height: candleCardTextHeight,
-        textBaseline: TextBaseline.alphabetic,
-      );
-
-  // candle Card Title Style
-  TextStyle? _candleCardTitleStyle;
-  TextStyle get candleCardTitleStyle =>
-      _candleCardTitleStyle ?? candleCardTextStyle;
-  set candleCardTitleStyle(TextStyle style) => _candleCardTitleStyle = style;
-
-  // candle Card Value Style
-  TextStyle? _candleCardValueStyle;
-  TextStyle get candleCardValueStyle =>
-      _candleCardValueStyle ?? candleCardTextStyle;
-  set candleCardValueStyle(TextStyle style) => _candleCardValueStyle = style;
-
-  // Cross Candle Long Style
-  TextStyle? _candleCardLongStyle;
-  TextStyle get candleCardLongStyle =>
-      _candleCardLongStyle ??
-      candleCardTextStyle.copyWith(
-        color: longColor,
-      );
-  set candleCardLongStyle(TextStyle style) => _candleCardLongStyle = style;
-
-  // candle Card Short Style
-  TextStyle? _candleCardShortStyle;
-  TextStyle get candleCardShortStyle =>
-      _candleCardShortStyle ??
-      candleCardTextStyle.copyWith(
-        color: shortColor,
-      );
-  set candleCardShortStyle(TextStyle style) => _candleCardShortStyle = style;
-
-  // candle Card信息多语言配置.
-  List<String> _i18nCandleCardKeys = i18nCandleCardEn;
-  List<String> get i18nCandleCardKeys => _i18nCandleCardKeys;
-  set i18nCandleCardKeys(List<String> keys) {
-    if (keys.isNotEmpty && keys.length == i18nCandleCardEn.length) {
-      _i18nCandleCardKeys = keys;
-    }
-  }
-
-  //////////////////////////////////////
-
-  /// 价钱格式化函数
-  String Function(String instId, Decimal val,
-      {int? precision, bool? cutInvalidZero})? priceFormat;
-
-  /// 价钱格式化函数
-  /// TODO: 待优化
-  String formatPrice(
-    Decimal val, {
-    int? precision,
-    required String instId,
-    bool cutInvalidZero = true,
-  }) {
-    int p = precision ?? defaultPrecision;
-    if (priceFormat != null) {
-      return priceFormat!.call(
-        instId,
-        val,
-        precision: p,
-        cutInvalidZero: cutInvalidZero,
-      );
-    }
-    return formatNumber(
-      val,
-      precision: p,
-      defIfZero: '--',
-      cutInvalidZero: cutInvalidZero,
-      // showThousands: true,
-    );
-  }
-
   /// 时间格式化函数
-  String Function(DateTime dateTime)? dateTimeFormat;
-  String formatDateTime(DateTime dateTime) {
-    if (dateTimeFormat != null) {
-      return dateTimeFormat!.call(dateTime);
-    }
-    return formatyyMMddHHMMss(dateTime);
-  }
+  // String Function(DateTime dateTime)? dateTimeFormat;
+  // String formatDateTime(DateTime dateTime) {
+  //   if (dateTimeFormat != null) {
+  //     return dateTimeFormat!.call(dateTime);
+  //   }
+  //   return formatyyMMddHHMMss(dateTime);
+  // }
 
   /// 定制展示Candle Card info.
-  List<CardInfo> Function(CandleModel model)? customCandleCardInfo;
+  List<TooltipInfo> Function(CandleModel model)? customCandleCardInfo;
 
   ///////////////////////////////////////////
   /// 以下是副图的绘制配置 /////////////////////

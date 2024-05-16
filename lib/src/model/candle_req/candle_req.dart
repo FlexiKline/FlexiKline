@@ -87,3 +87,21 @@ class CandleReq {
     );
   }
 }
+
+extension CandleReqExt on CandleReq {
+  String get key => "$instId-$bar";
+  String get reqKey => "$instId-$bar-$before-$after";
+
+  TimeBar? get timeBar => TimeBar.convert(bar);
+
+  void update(CandleReq req) {
+    if (instId == req.instId) {
+      // instId = req.instId;
+      after = req.after;
+      before = req.before;
+      bar = req.bar;
+      limit = req.limit;
+      precision = req.precision;
+    }
+  }
+}

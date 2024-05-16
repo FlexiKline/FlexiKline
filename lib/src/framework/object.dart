@@ -604,6 +604,7 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
         shiftNextTipsRect(height);
       }
     }
+    indicator.tipsHeight = height;
     return height;
   }
 

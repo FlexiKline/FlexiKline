@@ -133,3 +133,35 @@ String formatNumber(
 
   return ret;
 }
+
+/// 格式化价钱
+String formatPrice(
+  Decimal? val, {
+  required int precision,
+  bool cutInvalidZero = true,
+  String? defIfZero,
+}) {
+  return formatNumber(
+    val,
+    precision: precision,
+    defIfZero: defIfZero,
+    cutInvalidZero: cutInvalidZero,
+  );
+}
+
+/// 格式化数量
+String formatAmount(
+  Decimal? val, {
+  int precision = 2,
+  bool showCompact = true,
+  bool cutInvalidZero = true,
+  String? defIfZero,
+}) {
+  return formatNumber(
+    val,
+    precision: precision,
+    defIfZero: defIfZero,
+    cutInvalidZero: cutInvalidZero,
+    showCompact: showCompact,
+  );
+}

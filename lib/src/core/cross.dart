@@ -14,11 +14,19 @@
 
 import 'package:flutter/material.dart';
 
+import '../constant.dart';
+import '../data/export.dart';
 import '../extension/export.dart';
 import '../model/export.dart';
+import '../utils/num_util.dart';
 import 'binding_base.dart';
 import 'interface.dart';
 import 'setting.dart';
+
+typedef OnCrossCustomTooltipCallback = List<TooltipInfo> Function(
+  CandleModel model, {
+  CandleModel? pre,
+});
 
 mixin CrossBinding
     on KlineBindingBase, SettingBinding
@@ -28,6 +36,7 @@ mixin CrossBinding
     super.init();
     logd('init cross');
     _crossConfig = CrossConfig.fromJson(crossConfigData);
+    _tooltipConfig = TooltipConfig.fromJson(tooltipConfigData);
   }
 
   @override
@@ -54,12 +63,16 @@ mixin CrossBinding
     super.loadConfig(configData);
     logd("loadConfig cross");
     _crossConfig = CrossConfig.fromJson(configData);
+    _tooltipConfig = TooltipConfig.fromJson(configData);
   }
 
   late CrossConfig _crossConfig;
+  late TooltipConfig _tooltipConfig;
 
   @override
   CrossConfig get crossConfig => _crossConfig;
+
+  TooltipConfig get tooltipConfig => _tooltipConfig;
 
   final ValueNotifier<int> _repaintCross = ValueNotifier(0);
   @override
@@ -124,9 +137,6 @@ mixin CrossBinding
         return;
       }
 
-      /// 绘制Cross Line
-      paintCrossLine(canvas, offset);
-
       CandleModel? model;
       if (crossConfig.showLatestTipsInBlank) {
         model = offsetToCandle(offset);
@@ -139,6 +149,12 @@ mixin CrossBinding
           }
         }
       }
+
+      /// 绘制Cross Line
+      paintCrossLine(canvas, offset);
+
+      /// 绘制 Tooltip
+      paintTooltip(canvas, offset, model: model);
 
       ensurePaintObjectInstance();
 
@@ -212,5 +228,210 @@ mixin CrossBinding
       crossConfig.point.radius,
       crossConfig.pointPaint,
     );
+  }
+
+  /// 绘制 Tooltip
+  void paintTooltip(Canvas canvas, Offset offset, {CandleModel? model}) {
+    if (!tooltipConfig.show) return;
+    int index = offsetToIndex(offset);
+    model ??= curKlineData.getCandle(index);
+    final pre = curKlineData.getCandle(index + 1);
+    if (model == null) return;
+
+    /// 准备数据
+    List<TooltipInfo> tooltipInfoList;
+    if (onCrossCustomTooltip != null) {
+      tooltipInfoList = onCrossCustomTooltip!(model, pre: pre);
+    } else {
+      tooltipInfoList = genTooltipInfoListf(model, pre: pre);
+    }
+    if (tooltipInfoList.isEmpty) return;
+
+    /// 初始化绘制数据
+    final labelSpanList = <TextSpan>[];
+    final valueSpanList = <TextSpan>[];
+    TooltipInfo info;
+    for (int i = 0; i < tooltipInfoList.length; i++) {
+      info = tooltipInfoList[i];
+      String br = i < tooltipInfoList.length - 1 ? '\n' : '';
+      labelSpanList.add(TextSpan(
+        text: info.label + br,
+        style: info.labelStyle ?? tooltipConfig.style,
+      ));
+      TextStyle valStyle = info.valueStyle ?? tooltipConfig.style;
+      if (info.riseOrFall > 0) {
+        valStyle.copyWith(color: settingConfig.longColor);
+      } else if (info.riseOrFall < 0) {
+        valStyle.copyWith(color: settingConfig.shortColor);
+      }
+      valueSpanList.add(TextSpan(
+        text: info.value + br,
+        style: valStyle,
+      ));
+    }
+
+    /// 开始绘制
+    double top = tooltipConfig.margin.top;
+    if (mainIndicator.drawBelowTipsArea) {
+      top += mainIndicator.tipsHeight;
+    }
+
+    if (offset.dx > mainDrawWidthHalf) {
+      // 点击区域在右边; 绘制在左边
+      Offset offset = Offset(
+        mainDrawLeft + tooltipConfig.margin.left,
+        mainDrawTop + top,
+      );
+
+      final size = canvas.drawText(
+        offset: offset,
+        drawDirection: DrawDirection.ltr,
+        drawableRect: mainDrawRect,
+        textSpan: TextSpan(
+          children: labelSpanList,
+          style: tooltipConfig.style,
+        ),
+        textAlign: TextAlign.start,
+        textWidthBasis: TextWidthBasis.longestLine,
+        padding: tooltipConfig.padding,
+        backgroundColor: tooltipConfig.background,
+        borderRadius: BorderRadius.only(
+          topLeft: tooltipConfig.radius.topLeft,
+          bottomLeft: tooltipConfig.radius.bottomLeft,
+        ),
+      );
+
+      canvas.drawText(
+        offset: Offset(
+          offset.dx + size.width - 1,
+          offset.dy,
+        ),
+        drawDirection: DrawDirection.ltr,
+        drawableRect: mainDrawRect,
+        textSpan: TextSpan(
+          children: valueSpanList,
+          style: tooltipConfig.style,
+        ),
+        textAlign: TextAlign.end,
+        textWidthBasis: TextWidthBasis.longestLine,
+        padding: tooltipConfig.padding,
+        backgroundColor: tooltipConfig.background,
+        borderRadius: BorderRadius.only(
+          topRight: tooltipConfig.radius.topRight,
+          bottomRight: tooltipConfig.radius.bottomRight,
+        ),
+      );
+    } else {
+      // 点击区域在左边; 绘制在右边
+      Offset offset = Offset(
+        mainDrawRight - tooltipConfig.margin.right,
+        mainDrawTop + top,
+      );
+
+      final size = canvas.drawText(
+        offset: offset,
+        drawDirection: DrawDirection.rtl,
+        drawableRect: mainDrawRect,
+        textSpan: TextSpan(
+          children: valueSpanList,
+          style: tooltipConfig.style,
+        ),
+        textAlign: TextAlign.end,
+        textWidthBasis: TextWidthBasis.longestLine,
+        padding: tooltipConfig.padding,
+        backgroundColor: tooltipConfig.background,
+        borderRadius: BorderRadius.only(
+          topRight: tooltipConfig.radius.topRight,
+          bottomRight: tooltipConfig.radius.bottomRight,
+        ),
+      );
+
+      canvas.drawText(
+        offset: Offset(
+          offset.dx - size.width + 1,
+          offset.dy,
+        ),
+        drawDirection: DrawDirection.rtl,
+        drawableRect: mainDrawRect,
+        textSpan: TextSpan(
+          children: labelSpanList,
+          style: tooltipConfig.style,
+        ),
+        textAlign: TextAlign.start,
+        textWidthBasis: TextWidthBasis.longestLine,
+        padding: tooltipConfig.padding,
+        backgroundColor: tooltipConfig.background,
+        borderRadius: BorderRadius.only(
+          topLeft: tooltipConfig.radius.topLeft,
+          bottomLeft: tooltipConfig.radius.bottomLeft,
+        ),
+      );
+    }
+  }
+
+  /// Tooltip定制回调
+  OnCrossCustomTooltipCallback? onCrossCustomTooltip;
+
+  /// TooltipLables
+  Map<TooltipLabel, String> _tooltipLables = defaultTooltipLables;
+  Map<TooltipLabel, String> get tooltipLables => _tooltipLables;
+  set tooltipLabelI18n(Map<TooltipLabel, String> i18nLabels) {
+    _tooltipLables = i18nLabels;
+  }
+
+  List<TooltipInfo> genTooltipInfoListf(CandleModel model, {CandleModel? pre}) {
+    if (tooltipLables.isEmpty) return const [];
+    final p = curKlineData.precision;
+
+    final list = <TooltipInfo>[];
+    tooltipLables.forEach((key, label) {
+      String? value;
+      int riseOrFall = 0;
+      switch (key) {
+        case TooltipLabel.time:
+          final timeBar = curKlineData.timeBar;
+          value = model.formatDateTimeByTimeBar(timeBar);
+          break;
+        case TooltipLabel.open:
+          value = formatPrice(model.o, precision: p);
+          break;
+        case TooltipLabel.high:
+          value = formatPrice(model.h, precision: p);
+          break;
+        case TooltipLabel.low:
+          value = formatPrice(model.l, precision: p);
+          break;
+        case TooltipLabel.close:
+          value = formatPrice(model.c, precision: p);
+          break;
+        case TooltipLabel.chg:
+          value = formatPrice(model.change, precision: p);
+          break;
+        case TooltipLabel.chgRate:
+          value = formatPercentage(model.changeRate);
+          riseOrFall = model.change.signum;
+          break;
+        case TooltipLabel.range:
+          if (pre != null) {
+            value = formatPercentage(model.rangeRate(pre));
+          } else {
+            value = formatPrice(model.range, precision: p);
+          }
+          break;
+        case TooltipLabel.amount:
+          value = formatAmount(model.v);
+          break;
+        case TooltipLabel.turnover:
+          if (model.vc != null) {
+            value = formatAmount(model.vc);
+          }
+          break;
+      }
+      if (value != null) {
+        list.add(
+            TooltipInfo(label: label, value: value, riseOrFall: riseOrFall));
+      }
+    });
+    return list;
   }
 }

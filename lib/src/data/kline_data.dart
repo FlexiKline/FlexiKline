@@ -42,7 +42,7 @@ extension KlineDataExt on KlineData {
   int get precision => req.precision;
   String get key => req.key;
   String get reqKey => req.reqKey;
-  TimeBar? get timerBar => req.timerBar;
+  TimeBar? get timeBar => req.timeBar;
 
   bool get invalid => req.instId.isEmpty;
 }

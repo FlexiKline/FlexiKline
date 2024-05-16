@@ -44,6 +44,9 @@ const EdgeInsets defaultTextPading = EdgeInsets.all(2);
 // 默认文本高度
 const double defaultTextHeight = 1;
 
+// 默认文本高度多行模式
+const double defaultMultiTextHeight = 1.4;
+
 // 默认Tips文本高度
 const double defaultTipsTextHeight = 1.2;
 
@@ -126,3 +129,30 @@ const List<String> i18nCandleCardEn = [
   'Amount',
   // 'Turnover'
 ];
+
+/// 内置TooltipLabel
+enum TooltipLabel {
+  time,
+  open,
+  high,
+  low,
+  close,
+  chg,
+  chgRate,
+  range,
+  amount,
+  turnover;
+}
+
+const Map<TooltipLabel, String> defaultTooltipLables = {
+  TooltipLabel.time: 'Time',
+  TooltipLabel.open: 'Open',
+  TooltipLabel.high: 'High',
+  TooltipLabel.low: 'Low',
+  TooltipLabel.close: 'Close',
+  TooltipLabel.chg: 'Chg',
+  TooltipLabel.chgRate: '%Chg',
+  TooltipLabel.range: 'Range',
+  TooltipLabel.amount: 'Amount',
+  TooltipLabel.turnover: 'Turnover',
+};

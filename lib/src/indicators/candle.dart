@@ -221,9 +221,8 @@ class CandlePaintObject<T extends CandleIndicator>
   // onCross时, 格式化Y轴上的标记值.
   @override
   String formatTickValueOnCross(BagNum value, {required int precision}) {
-    return setting.formatPrice(
+    return formatPrice(
       value.toDecimal(),
-      instId: klineData.instId,
       precision: klineData.precision,
       cutInvalidZero: false,
     );
@@ -241,7 +240,7 @@ class CandlePaintObject<T extends CandleIndicator>
     int end = klineData.end;
 
     final offset = startCandleDx - candleWidthHalf;
-    final bar = klineData.timerBar;
+    final bar = klineData.timeBar;
     Offset? maxHihgOffset, minLowOffset;
     bool hasEnough = paintDxOffset > 0;
     BagNum maxHigh = list[start].high;
@@ -343,11 +342,7 @@ class CandlePaintObject<T extends CandleIndicator>
       endOffset.dy - (markText.areaHeight) / 2,
     );
 
-    final text = setting.formatPrice(
-      val.toDecimal(),
-      instId: klineData.instId,
-      precision: klineData.precision,
-    );
+    final text = formatPrice(val.toDecimal(), precision: klineData.precision);
 
     canvas.drawTextArea(
       offset: endOffset,
@@ -406,9 +401,8 @@ class CandlePaintObject<T extends CandleIndicator>
       final price = dyToValue(dy);
       if (price == null) continue;
 
-      final text = setting.formatPrice(
+      final text = formatPrice(
         price.toDecimal(),
-        instId: klineData.instId,
         precision: klineData.precision,
         cutInvalidZero: false,
       );
@@ -481,9 +475,8 @@ class CandlePaintObject<T extends CandleIndicator>
       );
 
       /// 计算最新价和倒计时区域的文本和高度
-      final text = setting.formatPrice(
+      final text = formatPrice(
         model.close.toDecimal(),
-        instId: klineData.req.instId,
         precision: klineData.req.precision,
         cutInvalidZero: false,
       );
@@ -589,9 +582,8 @@ class CandlePaintObject<T extends CandleIndicator>
         dashes: last.line.dashes,
       );
 
-      final text = setting.formatPrice(
+      final text = formatPrice(
         model.close.toDecimal(),
-        instId: klineData.instId,
         precision: klineData.precision,
         cutInvalidZero: true,
       );
@@ -615,11 +607,11 @@ class CandlePaintObject<T extends CandleIndicator>
   void paintTimeTickOnCross(Canvas canvas, Offset offset) {
     final index = dxToIndex(offset.dx);
     final model = klineData.getCandle(index);
-    final timeBar = klineData.timerBar;
+    final timeBar = klineData.timeBar;
     if (model == null || timeBar == null) return;
 
-    // final time = model.formatDateTimeByTimeBar(timeBar);
-    final time = setting.formatDateTime(model.dateTime);
+    final time = model.formatDateTimeByTimeBar(timeBar);
+    // final time = formatyyMMddHHMMss(model.dateTime);
 
     final tickText = crossConfig.tickText;
 
@@ -635,179 +627,8 @@ class CandlePaintObject<T extends CandleIndicator>
     );
   }
 
-  /// 绘制Cross 命中的蜡烛数据弹窗
   @override
   Size? paintTips(Canvas canvas, {CandleModel? model, Offset? offset}) {
-    if (!setting.showPopupCandleCard) return null;
-
-    if (offset == null) return null;
-    model ??= offsetToCandle(offset);
-    final timeBar = klineData.timerBar;
-    if (model == null || timeBar == null) return null;
-
-    /// 1. 准备数据
-    // ['Time', 'Open', 'High', 'Low', 'Close', 'Chg', '%Chg', 'Amount']
-    final keys = setting.i18nCandleCardKeys;
-    final keySpanList = <TextSpan>[];
-    for (var i = 0; i < keys.length; i++) {
-      final text = i < keys.length - 1 ? '${keys[i]}\n' : keys[i];
-      keySpanList.add(TextSpan(
-        text: text,
-        style: setting.candleCardTitleStyle,
-      ));
-    }
-
-    final instId = klineData.instId;
-    final p = klineData.precision;
-    TextStyle changeStyle = setting.candleCardTitleStyle;
-    final chgrate = model.changeRate;
-    if (chgrate > 0) {
-      changeStyle = setting.candleCardLongStyle;
-    } else if (chgrate < 0) {
-      changeStyle = setting.candleCardShortStyle;
-    }
-    final valueSpan = <TextSpan>[
-      TextSpan(
-        text: '${model.formatDateTimeByTimeBar(timeBar)}\n',
-        style: setting.candleCardTitleStyle,
-      ),
-      TextSpan(
-        text:
-            '${setting.formatPrice(model.open.toDecimal(), instId: instId, precision: p)}\n',
-        style: setting.candleCardTitleStyle,
-      ),
-      TextSpan(
-        text:
-            '${setting.formatPrice(model.high.toDecimal(), instId: instId, precision: p)}\n',
-        style: setting.candleCardTitleStyle,
-      ),
-      TextSpan(
-        text:
-            '${setting.formatPrice(model.low.toDecimal(), instId: instId, precision: p)}\n',
-        style: setting.candleCardTitleStyle,
-      ),
-      TextSpan(
-        text:
-            '${setting.formatPrice(model.close.toDecimal(), instId: instId, precision: p)}\n',
-        style: setting.candleCardTitleStyle,
-      ),
-      TextSpan(
-        text:
-            '${setting.formatPrice(model.change.toDecimal(), instId: instId, precision: p)}\n',
-        style: changeStyle,
-      ),
-      TextSpan(
-        text: '${formatPercentage(model.changeRate)}\n',
-        style: changeStyle,
-      ),
-      TextSpan(
-        text: formatNumber(
-          model.vol.toDecimal(),
-          precision: 2,
-          cutInvalidZero: true,
-          showCompact: true,
-        ),
-        style: setting.candleCardTitleStyle,
-        // recognizer: _tapGestureRecognizer..onTap = () => ... // 点击事件处理?
-      ),
-    ];
-
-    /// 2. 开始绘制.
-    if (offset.dx > chartRectWidthHalf) {
-      // 点击区域在右边; 绘制在左边
-      Offset drawOffset = Offset(
-        chartRect.left + setting.candleCardRectMargin.left,
-        chartRect.top + setting.candleCardRectMargin.top,
-      );
-
-      final size = canvas.drawText(
-        offset: drawOffset,
-        drawDirection: DrawDirection.ltr,
-        drawableRect: chartRect,
-        textSpan: TextSpan(
-          children: keySpanList,
-          style: setting.candleCardTitleStyle,
-        ),
-        style: setting.candleCardTitleStyle,
-        textAlign: TextAlign.start,
-        textWidthBasis: TextWidthBasis.longestLine,
-        padding: setting.candleCardRectPadding,
-        backgroundColor: setting.candleCardRectBackgroundColor,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(setting.candleCardRectBorderRadius),
-          bottomLeft: Radius.circular(setting.candleCardRectBorderRadius),
-        ),
-      );
-
-      canvas.drawText(
-        offset: Offset(
-          drawOffset.dx + size.width - 1,
-          drawOffset.dy,
-        ),
-        drawDirection: DrawDirection.ltr,
-        drawableRect: chartRect,
-        textSpan: TextSpan(
-          children: valueSpan,
-          style: setting.candleCardValueStyle,
-        ),
-        style: setting.candleCardValueStyle,
-        textAlign: TextAlign.end,
-        textWidthBasis: TextWidthBasis.longestLine,
-        padding: setting.candleCardRectPadding,
-        backgroundColor: setting.candleCardRectBackgroundColor,
-        borderRadius: BorderRadius.only(
-          topRight: Radius.circular(setting.candleCardRectBorderRadius),
-          bottomRight: Radius.circular(setting.candleCardRectBorderRadius),
-        ),
-      );
-    } else {
-      // 点击区域在左边; 绘制在右边
-      Offset drawOffset = Offset(
-        chartRect.right - setting.candleCardRectMargin.right,
-        chartRect.top + setting.candleCardRectMargin.top,
-      );
-
-      final size = canvas.drawText(
-        offset: drawOffset,
-        drawDirection: DrawDirection.rtl,
-        drawableRect: chartRect,
-        textSpan: TextSpan(
-          children: valueSpan,
-          style: setting.candleCardValueStyle,
-        ),
-        style: setting.candleCardValueStyle,
-        textAlign: TextAlign.end,
-        textWidthBasis: TextWidthBasis.longestLine,
-        padding: setting.candleCardRectPadding,
-        backgroundColor: setting.candleCardRectBackgroundColor,
-        borderRadius: BorderRadius.only(
-          topRight: Radius.circular(setting.candleCardRectBorderRadius),
-          bottomRight: Radius.circular(setting.candleCardRectBorderRadius),
-        ),
-      );
-
-      canvas.drawText(
-        offset: Offset(
-          drawOffset.dx - size.width + 1,
-          drawOffset.dy,
-        ),
-        drawDirection: DrawDirection.rtl,
-        drawableRect: chartRect,
-        textSpan: TextSpan(
-          children: keySpanList,
-          style: setting.candleCardTitleStyle,
-        ),
-        style: setting.candleCardTitleStyle,
-        textAlign: TextAlign.start,
-        textWidthBasis: TextWidthBasis.longestLine,
-        padding: setting.candleCardRectPadding,
-        backgroundColor: setting.candleCardRectBackgroundColor,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(setting.candleCardRectBorderRadius),
-          bottomLeft: Radius.circular(setting.candleCardRectBorderRadius),
-        ),
-      );
-    }
     return null;
   }
 }
