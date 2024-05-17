@@ -57,15 +57,12 @@ mixin ConfigBinding
           ) ??
           CandleIndicator(
             height: mainRect.height,
-            tipsHeight: mainTipsHeight,
-            padding: mainPadding,
           ),
       volumeKey: restoreMainSupportIndicator(
             volumeKey,
             VolumeIndicator.fromJson,
           ) ??
           VolumeIndicator(
-            height: defaultSubIndicatorHeight,
             paintMode: PaintMode.alone,
             showYAxisTick: false,
             showCrossMark: false,
@@ -114,7 +111,7 @@ mixin ConfigBinding
             key: maVolKey,
             name: 'MAVOL',
             height: defaultSubIndicatorHeight,
-            tipsHeight: defaultIndicatorTipsHeight,
+            padding: defaultSubIndicatorPadding,
           ),
     };
 
@@ -139,6 +136,7 @@ mixin ConfigBinding
           key: mainChartKey,
           name: 'MAIN',
           height: 0,
+          padding: defaultMainIndicatorPadding,
           drawBelowTipsArea: true,
         );
     _mainIndicator.appendIndicator(_supportMainIndicators[candleKey]!, this);
@@ -157,19 +155,11 @@ mixin ConfigBinding
     super.initState();
     logd("initState config");
 
-    /// 最终渲染前, 如果用户更改了配置, 此处做下更新.
+    /// 最终渲染前, 如果用户更改了配置, 此处做下更新. TODO: 待优化.
     updateMainIndicatorParam(
       height: mainRect.height,
-      tipHeight: mainTipsHeight,
       padding: mainPadding,
     );
-
-    // TODO: 更新当前配置指标.
-
-    // 暂存下配置, 此处会从BaseBinding开始触发.
-    // if (changed) {
-    //   storeState();
-    // }
   }
 
   @override
@@ -227,12 +217,10 @@ mixin ConfigBinding
   @override
   void updateMainIndicatorParam({
     double? height,
-    double? tipHeight,
     EdgeInsets? padding,
   }) {
     bool changed = mainIndicator.updateLayout(
       height: height,
-      tipsHeight: tipHeight,
       padding: padding,
     );
     if (changed) {

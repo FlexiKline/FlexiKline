@@ -15,7 +15,6 @@
 import 'package:flutter/material.dart';
 
 import '../../constant.dart';
-import '../../extension/export.dart';
 import '../../framework/serializers.dart';
 
 part 'tips_config.g.dart';
@@ -72,7 +71,9 @@ class TipsConfig {
 
   Color get color => style.color ?? Colors.black;
 
-  double get tipsHeight => (style.totalHeight ?? 0);
+  double get textHeight => textSize * (style.height ?? defaultTextHeight);
+
+  double get textSize => style.fontSize ?? defaulTextSize;
 
   factory TipsConfig.fromJson(Map<String, dynamic> json) =>
       _$TipsConfigFromJson(json);

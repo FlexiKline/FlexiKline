@@ -24,7 +24,12 @@ const int defaultScaleOnInfinitePrecision = 18;
 const double defaultSubIndicatorHeight = 60;
 
 // 默认指标图Padding
-const EdgeInsets defaultIndicatorPadding = EdgeInsets.zero;
+const EdgeInsets defaultSubIndicatorPadding = EdgeInsets.only(top: 12);
+// 默认主图区域Padding
+const EdgeInsets defaultMainIndicatorPadding = EdgeInsets.only(
+  top: 12, // 顶部留白
+  bottom: 15, // 底部TimeTick展示
+);
 
 // 默认副图指标最大数量
 const int defaultSubChartMaxCount = 4;
@@ -51,7 +56,7 @@ const double defaultMultiTextHeight = 1.4;
 const double defaultTipsTextHeight = 1.2;
 
 // 默认指标图TipsHeight
-const double defaultIndicatorTipsHeight = 15;
+// const double defaultIndicatorTipsHeight = 15;
 
 // 默认Tips文本区域的Padding: 左边缩进8个单位
 const EdgeInsets defaultTipsPadding = EdgeInsets.only(left: 8);

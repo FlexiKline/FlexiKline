@@ -30,26 +30,28 @@ abstract interface class IPaintBoundingBox {
   /// 增加padding后tipsRect和chartRect将在此以内绘制.
   /// 一些额外的信息可以通过padding在左上右下方向上增加扩展的绘制区域.
   /// 1. 主图的XAxis上的时间刻度绘制在pading.bottom上.
-  @Deprecated('暂保留此接口')
-  EdgeInsets get paintPadding => EdgeInsets.zero;
+  EdgeInsets get padding => EdgeInsets.zero;
 
   /// 当前指标图画笔可以绘制的范围
-  Rect get drawBounding;
-
-  /// 当前指标图tooltip信息绘制区域
-  Rect get tipsRect;
+  Rect get drawableRect;
 
   /// 当前指标图绘制区域
   Rect get chartRect;
 
-  /// 复位Tips区域
-  void resetNextTipsRect();
+  /// 当前指标图顶部绘制区域
+  Rect get topRect;
 
-  /// tips的绘制区域.
-  Rect get nextTipsRect;
+  /// 当前指标图底部绘制区域
+  Rect get bottomRect;
+
+  // /// 复位Tips区域
+  // void resetNextTipsRect();
+
+  // /// tips的绘制区域.
+  // Rect get nextTipsRect;
 
   /// 设置下一个Tips的绘制区域.
-  void shiftNextTipsRect(double height);
+  Rect shiftNextTipsRect(double height);
 }
 
 /// 指标图的绘制数据初始化接口
@@ -69,13 +71,18 @@ abstract interface class IPaintObject {
   void paintChart(Canvas canvas, Size size);
 
   /// 在所有指标图绘制结束后额外的绘制
-  void paintExtraAfterPaintChart(Canvas canvas, Size size);
+  void paintExtraAboveChart(Canvas canvas, Size size);
 
   /// 绘制Cross上的刻度值
   void onCross(Canvas canvas, Offset offset);
 
   /// 绘制顶部tips信息
-  Size? paintTips(Canvas canvas, {CandleModel? model, Offset? offset});
+  Size? paintTips(
+    Canvas canvas, {
+    CandleModel? model,
+    Offset? offset,
+    Rect? tipsRect,
+  });
 }
 
 abstract interface class IPaintDelegate {
@@ -133,12 +140,12 @@ mixin PaintObjectBoundingMixin on PaintObjectProxy
   int get slot => _slot;
 
   @override
-  EdgeInsets get paintPadding => indicator.padding;
+  EdgeInsets get padding => indicator.padding;
 
   Rect? _bounding;
 
   @override
-  Rect get drawBounding {
+  Rect get drawableRect {
     if (drawInMain) {
       _bounding ??= settingConfig.mainRect;
     } else {
@@ -156,28 +163,38 @@ mixin PaintObjectBoundingMixin on PaintObjectProxy
   }
 
   @override
-  Rect get tipsRect {
-    return Rect.fromLTWH(
-      drawBounding.left + paintPadding.left,
-      drawBounding.top + paintPadding.top,
-      drawBounding.width - paintPadding.horizontal,
-      indicator.tipsHeight,
+  Rect get topRect {
+    return Rect.fromLTRB(
+      drawableRect.left,
+      drawableRect.top,
+      drawableRect.right,
+      drawableRect.top + padding.top,
+    );
+  }
+
+  @override
+  Rect get bottomRect {
+    return Rect.fromLTRB(
+      drawableRect.left,
+      drawableRect.bottom - padding.bottom,
+      drawableRect.right,
+      drawableRect.bottom,
     );
   }
 
   @override
   Rect get chartRect {
-    final chartBottom = drawBounding.bottom - paintPadding.bottom;
+    final chartBottom = drawableRect.bottom - padding.bottom;
     double chartTop;
     if (indicator.paintMode == PaintMode.alone) {
       chartTop = chartBottom - indicator.height;
     } else {
-      chartTop = tipsRect.bottom;
+      chartTop = drawableRect.top + padding.top;
     }
     return Rect.fromLTRB(
-      drawBounding.left + paintPadding.left,
+      drawableRect.left + padding.left,
       chartTop,
-      drawBounding.right - paintPadding.right,
+      drawableRect.right - padding.right,
       chartBottom,
     );
   }
@@ -188,19 +205,19 @@ mixin PaintObjectBoundingMixin on PaintObjectProxy
   double clampDyInChart(double dy) => dy.clamp(chartRect.top, chartRect.bottom);
 
   // 下一个Tips的绘制区域
-  Rect? _nextTipsRect;
+  // Rect? _nextTipsRect;
 
   // 复位Tips区域
-  @override
-  void resetNextTipsRect() => _nextTipsRect = null;
+  // @override
+  // void resetNextTipsRect() => _nextTipsRect = null;
 
-  @override
-  Rect get nextTipsRect => _nextTipsRect ?? tipsRect;
+  // @override
+  // Rect get nextTipsRect => _nextTipsRect ?? topRect;
 
   // Tips区域向下移动height.
   @override
-  void shiftNextTipsRect(double height) {
-    _nextTipsRect = tipsRect.shiftYAxis(height);
+  Rect shiftNextTipsRect(double height) {
+    return drawableRect.shiftYAxis(height);
   }
 }
 
@@ -295,7 +312,7 @@ mixin PaintHorizontalTickMixin<T extends SinglePaintObjectIndicator>
           dy - tickText.areaHeight, // 绘制在刻度线之上
         ),
         drawDirection: DrawDirection.rtl,
-        drawableRect: drawBounding,
+        drawableRect: drawableRect,
         text: text,
         textConfig: tickText,
       );
@@ -336,7 +353,7 @@ mixin PaintHorizontalTickOnCrossMixin<T extends SinglePaintObjectIndicator>
         offset.dy - tickText.areaHeight / 2,
       ),
       drawDirection: DrawDirection.rtl,
-      drawableRect: drawBounding,
+      drawableRect: drawableRect,
       text: text,
       textConfig: tickText,
     );
@@ -379,7 +396,7 @@ abstract class PaintObject<T extends Indicator>
 
   @protected
   @override
-  void paintExtraAfterPaintChart(Canvas canvas, Size size) {}
+  void paintExtraAboveChart(Canvas canvas, Size size) {}
 }
 
 /// PaintObjectProxy
@@ -451,17 +468,26 @@ abstract class SinglePaintObjectBox<T extends SinglePaintObjectIndicator>
     paintChart(canvas, size);
 
     if (!cross.isCrossing) {
-      paintTips(canvas, model: state.curKlineData.latest);
+      paintTips(
+        canvas,
+        model: state.curKlineData.latest,
+        tipsRect: drawableRect,
+      );
     }
 
-    paintExtraAfterPaintChart(canvas, size);
+    paintExtraAboveChart(canvas, size);
   }
 
   @override
   void doOnCross(Canvas canvas, Offset offset, {CandleModel? model}) {
     onCross(canvas, offset);
 
-    paintTips(canvas, offset: offset, model: model);
+    paintTips(
+      canvas,
+      offset: offset,
+      model: model,
+      tipsRect: drawableRect,
+    );
   }
 }
 
@@ -489,8 +515,14 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
   void onCross(Canvas canvas, Offset offset, {CandleModel? model}) {}
 
   @override
-  Size? paintTips(Canvas canvas, {CandleModel? model, Offset? offset}) {
-    return Size(tipsRect.width, nextTipsRect.top - tipsRect.top);
+  Size? paintTips(
+    Canvas canvas, {
+    CandleModel? model,
+    Offset? offset,
+    Rect? tipsRect,
+  }) {
+    // return Size(topRect.width, nextTipsRect.top - topRect.top);
+    return topRect.size;
   }
 
   @override
@@ -548,34 +580,32 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
 
   @override
   void doPaintChart(Canvas canvas, Size size) {
-    double? tipsHeight;
     if (indicator.drawBelowTipsArea) {
       // 1.1 如果设置总是要在Tips区域下绘制指标图, 则要首先绘制完所有Tips.
       if (!cross.isCrossing) {
-        tipsHeight = doPaintTips(canvas, model: state.curKlineData.latest);
+        final tipsHeight = doPaintTips(
+          canvas,
+          model: state.curKlineData.latest,
+        );
 
-        // 1.2. Tips绘制完成后, 计算出当前Tips区域所占总高度.
-        // final tipsSize = paintTips(canvas);
-        // tipsHeight = tipsSize?.height;
+        if (tipsHeight > 0 && tipsHeight != padding.top) {
+          indicator.updateLayout(padding: padding.copyWith(top: tipsHeight));
+        }
       }
-    }
-
-    for (var child in indicator.children) {
-      if (tipsHeight != null && tipsHeight > 0) {
-        // 1.3. 在绘制指标图前, 动态设置子图的Tips区域高度.
-        child.tipsHeight = tipsHeight;
+      for (var child in indicator.children) {
+        child.paintObject?.paintChart(canvas, size);
       }
-      child.paintObject?.paintChart(canvas, size);
-    }
-
-    if (!indicator.drawBelowTipsArea) {
+    } else {
+      for (var child in indicator.children) {
+        child.paintObject?.paintChart(canvas, size);
+      }
       if (!cross.isCrossing) {
         doPaintTips(canvas, model: state.curKlineData.latest);
       }
     }
 
     for (var child in indicator.children) {
-      child.paintObject?.paintExtraAfterPaintChart(canvas, size);
+      child.paintObject?.paintExtraAboveChart(canvas, size);
     }
   }
 
@@ -590,21 +620,16 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
 
   double doPaintTips(Canvas canvas, {CandleModel? model, Offset? offset}) {
     // 每次绘制前, 重置Tips区域大小为0
-    resetNextTipsRect();
     double height = 0;
     for (var child in indicator.children) {
-      child.paintObject?.shiftNextTipsRect(height);
       final size = child.paintObject?.paintTips(
         canvas,
         model: model,
         offset: offset,
+        tipsRect: shiftNextTipsRect(height),
       );
-      if (size != null) {
-        height += size.height;
-        shiftNextTipsRect(height);
-      }
+      if (size != null) height += size.height;
     }
-    indicator.tipsHeight = height;
     return height;
   }
 

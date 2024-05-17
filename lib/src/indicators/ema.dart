@@ -36,8 +36,7 @@ class EMAIndicator extends SinglePaintObjectIndicator {
     super.key = emaKey,
     super.name = 'EMA',
     required super.height,
-    super.tipsHeight = defaultIndicatorTipsHeight,
-    super.padding,
+    super.padding = defaultMainIndicatorPadding,
     this.calcParams = const [
       MaParam(
         count: 5,
@@ -191,12 +190,14 @@ class EMAPaintObject<T extends EMAIndicator> extends SinglePaintObjectBox<T> {
 
   /// EMA 绘制tips区域
   @override
-  Size? paintTips(Canvas canvas, {CandleModel? model, Offset? offset}) {
-    if (indicator.tipsHeight <= 0) return null;
+  Size? paintTips(
+    Canvas canvas, {
+    CandleModel? model,
+    Offset? offset,
+    Rect? tipsRect,
+  }) {
     model ??= offsetToCandle(offset);
     if (model == null) return null;
-
-    Rect drawRect = nextTipsRect;
 
     final children = <TextSpan>[];
     for (var param in indicator.calcParams) {
@@ -219,11 +220,12 @@ class EMAPaintObject<T extends EMAIndicator> extends SinglePaintObjectBox<T> {
       ));
     }
     if (children.isNotEmpty) {
+      tipsRect ??= drawableRect;
       return canvas.drawText(
-        offset: drawRect.topLeft,
+        offset: tipsRect.topLeft,
         textSpan: TextSpan(children: children),
         drawDirection: DrawDirection.ltr,
-        drawableRect: drawRect,
+        drawableRect: tipsRect,
         textAlign: TextAlign.left,
         padding: indicator.tipsPadding,
         maxLines: 1,

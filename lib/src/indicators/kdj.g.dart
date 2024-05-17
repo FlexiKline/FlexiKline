@@ -24,10 +24,8 @@ KDJIndicator _$KDJIndicatorFromJson(Map<String, dynamic> json) => KDJIndicator(
           : const ValueKeyConverter().fromJson(json['key'] as String),
       name: json['name'] as String? ?? 'KDJ',
       height: (json['height'] as num?)?.toDouble() ?? defaultSubIndicatorHeight,
-      tipsHeight: (json['tipsHeight'] as num?)?.toDouble() ??
-          defaultIndicatorTipsHeight,
       padding: json['padding'] == null
-          ? defaultIndicatorPadding
+          ? defaultSubIndicatorPadding
           : const EdgeInsetsConverter()
               .fromJson(json['padding'] as Map<String, dynamic>),
       calcParam: json['calcParam'] == null
@@ -78,7 +76,6 @@ Map<String, dynamic> _$KDJIndicatorToJson(KDJIndicator instance) =>
       'key': const ValueKeyConverter().toJson(instance.key),
       'name': instance.name,
       'height': instance.height,
-      'tipsHeight': instance.tipsHeight,
       'padding': const EdgeInsetsConverter().toJson(instance.padding),
       'calcParam': instance.calcParam.toJson(),
       'ktips': instance.ktips.toJson(),

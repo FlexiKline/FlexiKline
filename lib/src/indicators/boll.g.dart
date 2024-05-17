@@ -23,10 +23,8 @@ BOLLIndicator _$BOLLIndicatorFromJson(Map<String, dynamic> json) =>
           : const ValueKeyConverter().fromJson(json['key'] as String),
       name: json['name'] as String? ?? 'BOLL',
       height: (json['height'] as num).toDouble(),
-      tipsHeight: (json['tipsHeight'] as num?)?.toDouble() ??
-          defaultIndicatorTipsHeight,
       padding: json['padding'] == null
-          ? defaultIndicatorPadding
+          ? defaultMainIndicatorPadding
           : const EdgeInsetsConverter()
               .fromJson(json['padding'] as Map<String, dynamic>),
       calcParam: json['calcParam'] == null
@@ -74,7 +72,6 @@ Map<String, dynamic> _$BOLLIndicatorToJson(BOLLIndicator instance) =>
       'key': const ValueKeyConverter().toJson(instance.key),
       'name': instance.name,
       'height': instance.height,
-      'tipsHeight': instance.tipsHeight,
       'padding': const EdgeInsetsConverter().toJson(instance.padding),
       'calcParam': instance.calcParam.toJson(),
       'mbTips': instance.mbTips.toJson(),

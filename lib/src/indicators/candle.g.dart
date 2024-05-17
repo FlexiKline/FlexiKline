@@ -13,10 +13,8 @@ CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
           : const ValueKeyConverter().fromJson(json['key'] as String),
       name: json['name'] as String? ?? 'Candle',
       height: (json['height'] as num).toDouble(),
-      tipsHeight: (json['tipsHeight'] as num?)?.toDouble() ??
-          defaultIndicatorTipsHeight,
       padding: json['padding'] == null
-          ? const EdgeInsets.only(bottom: 15)
+          ? defaultMainIndicatorPadding
           : const EdgeInsetsConverter()
               .fromJson(json['padding'] as Map<String, dynamic>),
       high: json['high'] == null
@@ -109,7 +107,6 @@ Map<String, dynamic> _$CandleIndicatorToJson(CandleIndicator instance) =>
       'key': const ValueKeyConverter().toJson(instance.key),
       'name': instance.name,
       'height': instance.height,
-      'tipsHeight': instance.tipsHeight,
       'padding': const EdgeInsetsConverter().toJson(instance.padding),
       'high': instance.high.toJson(),
       'low': instance.low.toJson(),

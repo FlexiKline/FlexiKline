@@ -13,10 +13,8 @@ VolumeIndicator _$VolumeIndicatorFromJson(Map<String, dynamic> json) =>
           : const ValueKeyConverter().fromJson(json['key'] as String),
       name: json['name'] as String? ?? 'VOL',
       height: (json['height'] as num?)?.toDouble() ?? defaultSubIndicatorHeight,
-      tipsHeight: (json['tipsHeight'] as num?)?.toDouble() ??
-          defaultIndicatorTipsHeight,
       padding: json['padding'] == null
-          ? defaultIndicatorPadding
+          ? defaultSubIndicatorPadding
           : const EdgeInsetsConverter()
               .fromJson(json['padding'] as Map<String, dynamic>),
       paintMode: json['paintMode'] == null
@@ -49,7 +47,6 @@ Map<String, dynamic> _$VolumeIndicatorToJson(VolumeIndicator instance) =>
       'key': const ValueKeyConverter().toJson(instance.key),
       'name': instance.name,
       'height': instance.height,
-      'tipsHeight': instance.tipsHeight,
       'padding': const EdgeInsetsConverter().toJson(instance.padding),
       'paintMode': const PaintModeConverter().toJson(instance.paintMode),
       'volTips': instance.volTips.toJson(),

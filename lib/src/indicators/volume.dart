@@ -29,8 +29,7 @@ class VolumeIndicator extends SinglePaintObjectIndicator {
     super.key = volumeKey,
     super.name = 'VOL',
     super.height = defaultSubIndicatorHeight,
-    super.tipsHeight = defaultIndicatorTipsHeight,
-    super.padding = defaultIndicatorPadding,
+    super.padding = defaultSubIndicatorPadding,
     super.paintMode,
 
     /// 绘制相关参数
@@ -165,13 +164,15 @@ class VolumePaintObject<T extends VolumeIndicator>
   /// 1. 正常展示最新一根蜡烛交易量
   /// 2. 当Cross时, 展示命中的蜡烛交易量
   @override
-  Size? paintTips(Canvas canvas, {CandleModel? model, Offset? offset}) {
+  Size? paintTips(
+    Canvas canvas, {
+    CandleModel? model,
+    Offset? offset,
+    Rect? tipsRect,
+  }) {
     if (!indicator.showTips) return null;
-    if (indicator.tipsHeight <= 0) return null;
     model ??= offsetToCandle(offset);
     if (model == null) return null;
-
-    Rect drawRect = nextTipsRect;
 
     final text = formatNumber(
       model.vol.toDecimal(),
@@ -181,8 +182,9 @@ class VolumePaintObject<T extends VolumeIndicator>
       prefix: indicator.volTips.label,
     );
 
+    tipsRect ??= drawableRect;
     return canvas.drawText(
-      offset: drawRect.topLeft,
+      offset: tipsRect.topLeft,
       text: text,
       style: indicator.volTips.style,
       drawDirection: DrawDirection.ltr,

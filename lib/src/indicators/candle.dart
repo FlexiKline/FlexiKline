@@ -31,8 +31,7 @@ class CandleIndicator extends SinglePaintObjectIndicator {
     super.key = candleKey,
     super.name = 'Candle',
     required super.height,
-    super.tipsHeight = defaultIndicatorTipsHeight,
-    super.padding = const EdgeInsets.only(bottom: 15),
+    super.padding = defaultMainIndicatorPadding,
 
     // 最高价
     this.high = const MarkConfig(
@@ -200,7 +199,7 @@ class CandlePaintObject<T extends CandleIndicator>
   }
 
   @override
-  void paintExtraAfterPaintChart(Canvas canvas, Size size) {
+  void paintExtraAboveChart(Canvas canvas, Size size) {
     /// 绘制最新价刻度线与价钱标记
     paintLatestPriceMark(canvas, size);
   }
@@ -415,7 +414,7 @@ class CandlePaintObject<T extends CandleIndicator>
           dy - tickText.areaHeight, // 绘制在刻度线之上
         ),
         drawDirection: DrawDirection.rtl,
-        drawableRect: drawBounding,
+        drawableRect: drawableRect,
         text: text,
         textConfig: tickText,
       );
@@ -519,7 +518,7 @@ class CandlePaintObject<T extends CandleIndicator>
       final size = canvas.drawTextArea(
         offset: offset,
         drawDirection: DrawDirection.rtl,
-        drawableRect: drawBounding,
+        drawableRect: drawableRect,
         text: text,
         textConfig: textConfig,
         backgroundColor: background,
@@ -544,7 +543,7 @@ class CandlePaintObject<T extends CandleIndicator>
             offset.dy + size.height - 0.5,
           ),
           drawDirection: DrawDirection.rtl,
-          drawableRect: drawBounding,
+          drawableRect: drawableRect,
           text: countDownText,
           style: countDown.style.copyWith(
             // 修正倒计时文本区域高度:
@@ -595,7 +594,7 @@ class CandlePaintObject<T extends CandleIndicator>
           dy - last.text.areaHeight / 2, // 居中
         ),
         drawDirection: DrawDirection.center,
-        drawableRect: drawBounding,
+        drawableRect: drawableRect,
         text: '$text ▸', // ➤➤▹►▸▶︎≻
         textConfig: last.text,
       );
@@ -628,7 +627,12 @@ class CandlePaintObject<T extends CandleIndicator>
   }
 
   @override
-  Size? paintTips(Canvas canvas, {CandleModel? model, Offset? offset}) {
+  Size? paintTips(
+    Canvas canvas, {
+    CandleModel? model,
+    Offset? offset,
+    Rect? tipsRect,
+  }) {
     return null;
   }
 }

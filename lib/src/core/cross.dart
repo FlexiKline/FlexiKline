@@ -299,14 +299,14 @@ mixin CrossBinding
     /// 开始绘制
     double top = tooltipConfig.margin.top;
     if (mainIndicator.drawBelowTipsArea) {
-      top += mainIndicator.tipsHeight;
+      top += mainIndicator.padding.top;
     }
 
     if (offset.dx > mainDrawWidthHalf) {
       // 点击区域在右边; 绘制在左边
       Offset offset = Offset(
-        mainDrawLeft + tooltipConfig.margin.left,
-        mainDrawTop + top,
+        mainRect.left + tooltipConfig.margin.left,
+        mainRect.top + top,
       );
 
       final size = canvas.drawText(
@@ -350,8 +350,8 @@ mixin CrossBinding
     } else {
       // 点击区域在左边; 绘制在右边
       Offset offset = Offset(
-        mainDrawRight - tooltipConfig.margin.right,
-        mainDrawTop + top,
+        mainRect.right - tooltipConfig.margin.right,
+        mainRect.top + top,
       );
 
       final size = canvas.drawText(

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:math' as math;
 import 'dart:ui';
 
 extension RectExt on Rect {
@@ -38,7 +39,7 @@ extension RectExt on Rect {
   Offset get origin => Offset(left, top);
 
   Rect shiftYAxis(double height) {
-    return Rect.fromLTRB(left, top + height, right, bottom + height);
+    return Rect.fromLTRB(left, math.min(top + height, bottom), right, bottom);
   }
 }
 

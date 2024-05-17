@@ -38,21 +38,25 @@ enum PaintMode {
 }
 
 /// 指标基础配置
-/// tipsHeight: 绘制区域顶部提示信息区域的高度
-/// padding: 绘制区域的边界设定
+/// [key] 唯一指定Indicator
+/// [name] 用于展示
+/// [height] 指标图高度
+/// [padding] 限制指标图绘制区域
+/// [paintMode] 控制多指标图一起的绘制方式.
+///   [PaintMode.combine] 多指标时, 统一使用父Indicator的高度和padding.
+///   [PaintMode.alone] 多指标时, 使用自己的height进行绘制.
 abstract class Indicator {
   Indicator({
     required this.key,
     required this.name,
     required this.height,
-    this.tipsHeight = 0.0,
-    this.padding = defaultIndicatorPadding,
+    required this.padding,
     this.paintMode = PaintMode.combine,
   });
+
   final ValueKey key;
   final String name;
   double height;
-  double tipsHeight;
   EdgeInsets padding;
 
   final PaintMode paintMode;
@@ -80,7 +84,6 @@ abstract class Indicator {
 
   bool updateLayout({
     double? height,
-    double? tipsHeight,
     EdgeInsets? padding,
   }) {
     bool hasChange = false;
@@ -88,10 +91,7 @@ abstract class Indicator {
       this.height = height;
       hasChange = true;
     }
-    if (tipsHeight != null && tipsHeight > 0 && tipsHeight != this.tipsHeight) {
-      this.tipsHeight = tipsHeight;
-      hasChange = true;
-    }
+
     if (padding != null && padding != this.padding) {
       this.padding = padding;
       hasChange = true;
@@ -100,11 +100,6 @@ abstract class Indicator {
     //   paintObject?.resetDrawBounding();
     // }
     return hasChange;
-    // tipsHeight = newVal.tipsHeight;
-    // padding = newVal.padding;
-    // if (paintMode == PaintMode.combine) {
-    //   height = newVal.height;
-    // }
   }
 
   PaintObject createPaintObject(KlineBindingBase controller);
@@ -135,8 +130,7 @@ abstract class SinglePaintObjectIndicator extends Indicator {
     required super.key,
     required super.name,
     required super.height,
-    super.tipsHeight,
-    super.padding,
+    required super.padding,
     super.paintMode,
   });
 
@@ -147,7 +141,7 @@ abstract class SinglePaintObjectIndicator extends Indicator {
 }
 
 /// 多个绘制Indicator的配置.
-/// children 维护具体的Indicator配置.
+/// [children] 维护具体的Indicator配置.
 @FlexiIndicatorSerializable
 class MultiPaintObjectIndicator<T extends SinglePaintObjectIndicator>
     extends Indicator {
@@ -155,8 +149,7 @@ class MultiPaintObjectIndicator<T extends SinglePaintObjectIndicator>
     required super.key,
     required super.name,
     required super.height,
-    super.tipsHeight,
-    super.padding,
+    required super.padding,
     this.drawBelowTipsArea = false,
     Iterable<T> children = const [],
   }) : children = LinkedHashSet<T>.from(children);
@@ -189,7 +182,6 @@ class MultiPaintObjectIndicator<T extends SinglePaintObjectIndicator>
   ) {
     indicator.updateLayout(
       height: indicator.paintMode.isCombine ? height : null,
-      tipsHeight: tipsHeight,
       padding: padding,
     );
     indicator.paintObject = indicator.createPaintObject(controller);
@@ -197,20 +189,17 @@ class MultiPaintObjectIndicator<T extends SinglePaintObjectIndicator>
   }
 
   @override
-  bool updateLayout({double? height, double? tipsHeight, EdgeInsets? padding}) {
-    final hasChange = super.updateLayout(
+  bool updateLayout({double? height, EdgeInsets? padding}) {
+    bool hasChange = super.updateLayout(
       height: height,
-      tipsHeight: tipsHeight,
       padding: padding,
     );
-    if (hasChange) {
-      for (var child in children) {
-        child.updateLayout(
-          height: child.paintMode.isCombine ? this.height : null,
-          tipsHeight: this.tipsHeight,
-          padding: this.padding,
-        );
-      }
+    for (var child in children) {
+      final childChange = child.updateLayout(
+        height: child.paintMode.isCombine ? this.height : null,
+        padding: this.padding,
+      );
+      hasChange = hasChange || childChange;
     }
     return hasChange;
   }

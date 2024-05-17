@@ -67,8 +67,7 @@ class MACDIndicator extends SinglePaintObjectIndicator {
     super.key = macdKey,
     super.name = 'MACD',
     super.height = defaultSubIndicatorHeight,
-    super.tipsHeight = defaultIndicatorTipsHeight,
-    super.padding = defaultIndicatorPadding,
+    super.padding = defaultSubIndicatorPadding,
 
     /// Macd相关参数
     this.calcParam = const MACDParam(s: 12, l: 26, m: 9),
@@ -239,8 +238,12 @@ class MACDPaintObject<T extends MACDIndicator> extends SinglePaintObjectBox<T>
   }
 
   @override
-  Size? paintTips(Canvas canvas, {CandleModel? model, Offset? offset}) {
-    if (indicator.tipsHeight <= 0) return null;
+  Size? paintTips(
+    Canvas canvas, {
+    CandleModel? model,
+    Offset? offset,
+    Rect? tipsRect,
+  }) {
     model ??= offsetToCandle(offset);
     if (model == null) return null;
 
@@ -250,7 +253,6 @@ class MACDPaintObject<T extends MACDIndicator> extends SinglePaintObjectBox<T>
     );
     if (ret == null) return null;
 
-    Rect drawRect = nextTipsRect;
     final children = <TextSpan>[];
     final difTxt = formatNumber(
       ret.dif.toDecimal(),
@@ -289,11 +291,12 @@ class MACDPaintObject<T extends MACDIndicator> extends SinglePaintObjectBox<T>
       style: indicator.macdTips.style,
     ));
 
+    tipsRect ??= drawableRect;
     return canvas.drawText(
-      offset: drawRect.topLeft,
+      offset: tipsRect.topLeft,
       textSpan: TextSpan(children: children),
       drawDirection: DrawDirection.ltr,
-      drawableRect: drawRect,
+      drawableRect: tipsRect,
       textAlign: TextAlign.left,
       padding: indicator.tipsPadding,
       maxLines: 1,

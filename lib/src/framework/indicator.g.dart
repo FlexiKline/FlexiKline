@@ -13,11 +13,8 @@ MultiPaintObjectIndicator<T>
           key: const ValueKeyConverter().fromJson(json['key'] as String),
           name: json['name'] as String,
           height: (json['height'] as num).toDouble(),
-          tipsHeight: (json['tipsHeight'] as num?)?.toDouble() ?? 0.0,
-          padding: json['padding'] == null
-              ? defaultIndicatorPadding
-              : const EdgeInsetsConverter()
-                  .fromJson(json['padding'] as Map<String, dynamic>),
+          padding: const EdgeInsetsConverter()
+              .fromJson(json['padding'] as Map<String, dynamic>),
           drawBelowTipsArea: json['drawBelowTipsArea'] as bool? ?? false,
         );
 
@@ -28,7 +25,6 @@ Map<String, dynamic>
           'key': const ValueKeyConverter().toJson(instance.key),
           'name': instance.name,
           'height': instance.height,
-          'tipsHeight': instance.tipsHeight,
           'padding': const EdgeInsetsConverter().toJson(instance.padding),
           'drawBelowTipsArea': instance.drawBelowTipsArea,
         };

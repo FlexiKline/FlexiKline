@@ -68,8 +68,7 @@ class KDJIndicator extends SinglePaintObjectIndicator {
     super.key = const ValueKey(IndicatorType.kdj),
     super.name = 'KDJ',
     super.height = defaultSubIndicatorHeight,
-    super.tipsHeight = defaultIndicatorTipsHeight,
-    super.padding = defaultIndicatorPadding,
+    super.padding = defaultSubIndicatorPadding,
 
     /// KDJ计算参数
     this.calcParam = const KDJParam(n: 9, m1: 3, m2: 3),
@@ -225,8 +224,12 @@ class KDJPaintObject<T extends KDJIndicator> extends SinglePaintObjectBox<T>
   }
 
   @override
-  Size? paintTips(Canvas canvas, {CandleModel? model, Offset? offset}) {
-    if (indicator.tipsHeight <= 0) return null;
+  Size? paintTips(
+    Canvas canvas, {
+    CandleModel? model,
+    Offset? offset,
+    Rect? tipsRect,
+  }) {
     model ??= offsetToCandle(offset);
     if (model == null) return null;
 
@@ -236,7 +239,6 @@ class KDJPaintObject<T extends KDJIndicator> extends SinglePaintObjectBox<T>
     );
     if (ret == null) return null;
 
-    Rect drawRect = nextTipsRect;
     final children = <TextSpan>[];
 
     final kTxt = formatNumber(
@@ -276,11 +278,12 @@ class KDJPaintObject<T extends KDJIndicator> extends SinglePaintObjectBox<T>
       style: indicator.jtips.style,
     ));
 
+    tipsRect ??= drawableRect;
     return canvas.drawText(
-      offset: drawRect.topLeft,
+      offset: tipsRect.topLeft,
       textSpan: TextSpan(children: children),
       drawDirection: DrawDirection.ltr,
-      drawableRect: drawRect,
+      drawableRect: tipsRect,
       textAlign: TextAlign.left,
       padding: indicator.tipsPadding,
       maxLines: 1,

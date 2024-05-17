@@ -60,8 +60,7 @@ class BOLLIndicator extends SinglePaintObjectIndicator {
     super.key = bollKey,
     super.name = 'BOLL',
     required super.height,
-    super.tipsHeight = defaultIndicatorTipsHeight,
-    super.padding = defaultIndicatorPadding,
+    super.padding = defaultMainIndicatorPadding,
 
     /// BOLL计算参数
     this.calcParam = const BOLLParam(n: 20, std: 2),
@@ -217,8 +216,12 @@ class BOLLPaintObject<T extends BOLLIndicator> extends SinglePaintObjectBox<T> {
   }
 
   @override
-  Size? paintTips(Canvas canvas, {CandleModel? model, Offset? offset}) {
-    if (indicator.tipsHeight <= 0) return null;
+  Size? paintTips(
+    Canvas canvas, {
+    CandleModel? model,
+    Offset? offset,
+    Rect? tipsRect,
+  }) {
     model ??= offsetToCandle(offset);
     if (model == null) return null;
 
@@ -229,7 +232,6 @@ class BOLLPaintObject<T extends BOLLIndicator> extends SinglePaintObjectBox<T> {
     if (ret == null) return null;
 
     final precision = klineData.precision;
-    Rect drawRect = nextTipsRect;
     final children = <TextSpan>[];
 
     final mbTxt = formatNumber(
@@ -269,11 +271,12 @@ class BOLLPaintObject<T extends BOLLIndicator> extends SinglePaintObjectBox<T> {
       style: indicator.dnTips.style,
     ));
 
+    tipsRect ??= drawableRect;
     return canvas.drawText(
-      offset: drawRect.topLeft,
+      offset: tipsRect.topLeft,
       textSpan: TextSpan(children: children),
       drawDirection: DrawDirection.ltr,
-      drawableRect: drawRect,
+      drawableRect: tipsRect,
       textAlign: TextAlign.left,
       padding: indicator.tipsPadding,
       maxLines: 1,

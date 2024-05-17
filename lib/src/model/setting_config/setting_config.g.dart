@@ -35,9 +35,8 @@ SettingConfig _$SettingConfigFromJson(Map<String, dynamic> json) =>
           ? Rect.zero
           : const RectConverter()
               .fromJson(json['mainRect'] as Map<String, dynamic>),
-      mainTipsHeight: (json['mainTipsHeight'] as num?)?.toDouble() ?? 12,
       mainPadding: json['mainPadding'] == null
-          ? const EdgeInsets.only(bottom: 15)
+          ? const EdgeInsets.only(top: 12, bottom: 15)
           : const EdgeInsetsConverter()
               .fromJson(json['mainPadding'] as Map<String, dynamic>),
       minPaintBlankRate: (json['minPaintBlankRate'] as num?)?.toDouble() ?? 0.5,
@@ -84,7 +83,6 @@ Map<String, dynamic> _$SettingConfigToJson(SettingConfig instance) {
   writeNotNull('loadingProgressValueColor',
       const ColorConverter().toJson(instance.loadingProgressValueColor));
   val['mainRect'] = const RectConverter().toJson(instance.mainRect);
-  val['mainTipsHeight'] = instance.mainTipsHeight;
   val['mainPadding'] = const EdgeInsetsConverter().toJson(instance.mainPadding);
   val['minPaintBlankRate'] = instance.minPaintBlankRate;
   val['alwaysCalculateScreenOfCandlesIfEnough'] =

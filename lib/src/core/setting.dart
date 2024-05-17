@@ -115,7 +115,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IConfig {
   double get mainRectHeight => mainRect.height;
 
   /// 主图区域的tips高度
-  double get mainTipsHeight => settingConfig.mainTipsHeight;
+  // double get mainTipsHeight => settingConfig.mainTipsHeight;
 
   /// 主图上下padding
   EdgeInsets get mainPadding => settingConfig.mainPadding;

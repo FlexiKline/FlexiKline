@@ -12,10 +12,8 @@ EMAIndicator _$EMAIndicatorFromJson(Map<String, dynamic> json) => EMAIndicator(
           : const ValueKeyConverter().fromJson(json['key'] as String),
       name: json['name'] as String? ?? 'EMA',
       height: (json['height'] as num).toDouble(),
-      tipsHeight: (json['tipsHeight'] as num?)?.toDouble() ??
-          defaultIndicatorTipsHeight,
       padding: json['padding'] == null
-          ? defaultIndicatorPadding
+          ? defaultMainIndicatorPadding
           : const EdgeInsetsConverter()
               .fromJson(json['padding'] as Map<String, dynamic>),
       calcParams: (json['calcParams'] as List<dynamic>?)
@@ -72,7 +70,6 @@ Map<String, dynamic> _$EMAIndicatorToJson(EMAIndicator instance) =>
       'key': const ValueKeyConverter().toJson(instance.key),
       'name': instance.name,
       'height': instance.height,
-      'tipsHeight': instance.tipsHeight,
       'padding': const EdgeInsetsConverter().toJson(instance.padding),
       'calcParams': instance.calcParams.map((e) => e.toJson()).toList(),
       'tipsPadding': const EdgeInsetsConverter().toJson(instance.tipsPadding),

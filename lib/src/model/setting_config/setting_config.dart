@@ -37,8 +37,8 @@ class SettingConfig {
 
     /// 主/副图区域大小配置
     this.mainRect = Rect.zero,
-    this.mainTipsHeight = 12,
-    this.mainPadding = const EdgeInsets.only(bottom: 15),
+    // this.mainTipsHeight = 12,
+    this.mainPadding = const EdgeInsets.only(top: 12, bottom: 15),
 
     /// 主/副图绘制参数
     this.minPaintBlankRate = 0.5,
@@ -82,7 +82,7 @@ class SettingConfig {
 
   /// 主/副图区域大小配置
   Rect mainRect;
-  double mainTipsHeight;
+  // double mainTipsHeight;
   EdgeInsets mainPadding;
 
   /// 主/副图绘制参数

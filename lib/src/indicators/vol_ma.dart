@@ -31,8 +31,7 @@ class VolMaIndicator extends SinglePaintObjectIndicator {
     super.key = volMaKey,
     super.name = 'VOLMA',
     super.height = defaultSubIndicatorHeight,
-    super.tipsHeight = defaultIndicatorTipsHeight,
-    super.padding = defaultIndicatorPadding,
+    super.padding = defaultSubIndicatorPadding,
     this.calcParams = const [
       MaParam(
         count: 5,
@@ -165,12 +164,14 @@ class VolMaPaintObject<T extends VolMaIndicator>
 
   /// MA 绘制tips区域
   @override
-  Size? paintTips(Canvas canvas, {CandleModel? model, Offset? offset}) {
-    if (indicator.tipsHeight <= 0) return null;
+  Size? paintTips(
+    Canvas canvas, {
+    CandleModel? model,
+    Offset? offset,
+    Rect? tipsRect,
+  }) {
     model ??= offsetToCandle(offset);
     if (model == null) return null;
-
-    Rect drawRect = nextTipsRect;
 
     final children = <TextSpan>[];
     for (var param in indicator.calcParams) {
@@ -194,11 +195,12 @@ class VolMaPaintObject<T extends VolMaIndicator>
     }
 
     if (children.isNotEmpty) {
+      tipsRect ??= drawableRect;
       return canvas.drawText(
-        offset: drawRect.topLeft,
+        offset: tipsRect.topLeft,
         textSpan: TextSpan(children: children),
         drawDirection: DrawDirection.ltr,
-        drawableRect: drawRect,
+        drawableRect: tipsRect,
         textAlign: TextAlign.left,
         padding: indicator.tipsPadding,
         maxLines: 1,

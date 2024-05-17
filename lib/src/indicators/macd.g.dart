@@ -25,10 +25,8 @@ MACDIndicator _$MACDIndicatorFromJson(Map<String, dynamic> json) =>
           : const ValueKeyConverter().fromJson(json['key'] as String),
       name: json['name'] as String? ?? 'MACD',
       height: (json['height'] as num?)?.toDouble() ?? defaultSubIndicatorHeight,
-      tipsHeight: (json['tipsHeight'] as num?)?.toDouble() ??
-          defaultIndicatorTipsHeight,
       padding: json['padding'] == null
-          ? defaultIndicatorPadding
+          ? defaultSubIndicatorPadding
           : const EdgeInsetsConverter()
               .fromJson(json['padding'] as Map<String, dynamic>),
       calcParam: json['calcParam'] == null
@@ -79,7 +77,6 @@ Map<String, dynamic> _$MACDIndicatorToJson(MACDIndicator instance) =>
       'key': const ValueKeyConverter().toJson(instance.key),
       'name': instance.name,
       'height': instance.height,
-      'tipsHeight': instance.tipsHeight,
       'padding': const EdgeInsetsConverter().toJson(instance.padding),
       'calcParam': instance.calcParam.toJson(),
       'difTips': instance.difTips.toJson(),

@@ -129,7 +129,6 @@ abstract interface class IConfig {
   void delIndicatorInSub(ValueKey<dynamic> key);
   void updateMainIndicatorParam({
     double? height,
-    double? tipHeight,
     EdgeInsets? padding,
   });
 }

@@ -31,8 +31,7 @@ class MAIndicator extends SinglePaintObjectIndicator {
     super.key = maKey,
     super.name = 'MA',
     required super.height,
-    super.tipsHeight = defaultIndicatorTipsHeight,
-    super.padding,
+    super.padding = defaultMainIndicatorPadding,
     this.calcParams = const [
       MaParam(
         count: 7,
@@ -142,12 +141,14 @@ class MAPaintObject<T extends MAIndicator> extends SinglePaintObjectBox<T> {
 
   /// MA 绘制tips区域
   @override
-  Size? paintTips(Canvas canvas, {CandleModel? model, Offset? offset}) {
-    if (indicator.tipsHeight <= 0) return null;
+  Size? paintTips(
+    Canvas canvas, {
+    CandleModel? model,
+    Offset? offset,
+    Rect? tipsRect,
+  }) {
     model ??= offsetToCandle(offset);
     if (model == null || !model.isValidMaRets) return null;
-
-    Rect drawRect = nextTipsRect;
 
     final children = <TextSpan>[];
     BagNum? val;
@@ -170,11 +171,12 @@ class MAPaintObject<T extends MAIndicator> extends SinglePaintObjectBox<T> {
       ));
     }
     if (children.isNotEmpty) {
+      tipsRect ??= drawableRect;
       return canvas.drawText(
-        offset: drawRect.topLeft,
+        offset: tipsRect.topLeft,
         textSpan: TextSpan(children: children),
         drawDirection: DrawDirection.ltr,
-        drawableRect: drawRect,
+        drawableRect: tipsRect,
         textAlign: TextAlign.left,
         padding: indicator.tipsPadding,
         maxLines: 1,
@@ -261,7 +263,6 @@ class MAPaintObject<T extends MAIndicator> extends SinglePaintObjectBox<T> {
 //   /// MA 绘制tips区域
 //   @override
 //   Size? paintTips(Canvas canvas, {CandleModel? model, Offset? offset}) {
-//     if (indicator.tipsHeight <= 0) return null;
 //     model ??= offsetToCandle(offset);
 //     if (model == null) return null;
 
