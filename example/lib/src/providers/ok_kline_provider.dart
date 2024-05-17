@@ -19,9 +19,12 @@ import 'package:flutter/material.dart';
 
 import '../config.dart';
 import '../theme/export.dart';
-import 'cache_util.dart';
+import '../utils/cache_util.dart';
 
-class FlexiKlineStorage extends IStore {
+class OkFlexiKlineStorage extends IStore {
+  @override
+  String get flexKlineConfigKey => 'flexi_kline_config_key_ok';
+
   @override
   Map<String, dynamic>? getFlexiKlineConfig() {
     try {

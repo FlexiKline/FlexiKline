@@ -23,13 +23,14 @@ class MessageLookup extends MessageLookupByLibrary {
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "badCertificate": MessageLookupByLibrary.simpleMessage("证书错误"),
+        "bit": MessageLookupByLibrary.simpleMessage("Bit"),
         "canceled": MessageLookupByLibrary.simpleMessage("已取消"),
         "cannotReachServer": MessageLookupByLibrary.simpleMessage("无法连接服务器"),
         "connectionError": MessageLookupByLibrary.simpleMessage("连接错误"),
         "connectionTimeout": MessageLookupByLibrary.simpleMessage("客户端连接超时"),
         "demo": MessageLookupByLibrary.simpleMessage("示例"),
         "invalidReq": MessageLookupByLibrary.simpleMessage("无效的请求"),
-        "ko": MessageLookupByLibrary.simpleMessage("Ko"),
+        "ok": MessageLookupByLibrary.simpleMessage("Ok"),
         "permissionDenied": MessageLookupByLibrary.simpleMessage("没有权限"),
         "reqMethodForbidden": MessageLookupByLibrary.simpleMessage("请求方法被禁止"),
         "responseTimeout": MessageLookupByLibrary.simpleMessage("服务端响应超时"),
@@ -45,6 +46,16 @@ class MessageLookup extends MessageLookupByLibrary {
         "themeModeLight": MessageLookupByLibrary.simpleMessage("日间模式"),
         "themeModeSystem": MessageLookupByLibrary.simpleMessage("跟随系统"),
         "title": MessageLookupByLibrary.simpleMessage("FlexiKline"),
+        "tooltipAmount": MessageLookupByLibrary.simpleMessage("成交量"),
+        "tooltipChg": MessageLookupByLibrary.simpleMessage("涨跌额"),
+        "tooltipChgRate": MessageLookupByLibrary.simpleMessage("涨跌幅"),
+        "tooltipClose": MessageLookupByLibrary.simpleMessage("收盘"),
+        "tooltipHigh": MessageLookupByLibrary.simpleMessage("最高"),
+        "tooltipLow": MessageLookupByLibrary.simpleMessage("最低"),
+        "tooltipOpen": MessageLookupByLibrary.simpleMessage("开盘"),
+        "tooltipRange": MessageLookupByLibrary.simpleMessage("振幅"),
+        "tooltipTime": MessageLookupByLibrary.simpleMessage("时间"),
+        "tooltipTurnover": MessageLookupByLibrary.simpleMessage("成交额"),
         "unknownError": MessageLookupByLibrary.simpleMessage("未知错误"),
         "unsupportedProtocol":
             MessageLookupByLibrary.simpleMessage("不支持HTTP协议请求")

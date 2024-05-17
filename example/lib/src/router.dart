@@ -12,13 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:example/src/pages/bit_kline_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:go_router/go_router.dart';
 
-import 'pages/ko_kliine_page.dart';
+import 'pages/ok_kliine_page.dart';
 import 'pages/main_nav_page.dart';
 import 'pages/my_demo_page.dart';
 
@@ -40,7 +41,7 @@ final routerProvider = Provider.autoDispose<GoRouter>((ref) {
     observers: [
       FlutterSmartDialog.observer,
     ],
-    initialLocation: '/ko',
+    initialLocation: '/ok',
     restorationScopeId: 'router',
     routes: routeList,
     debugLogDiagnostics: kDebugMode,
@@ -73,7 +74,7 @@ final List<RouteBase> routeList = <RouteBase>[
             path: '/demo',
             pageBuilder: (BuildContext context, GoRouterState state) {
               return const MaterialPage<void>(
-                restorationId: 'mydemo',
+                restorationId: 'myDemo',
                 child: MyDemoPage(),
               );
             },
@@ -83,16 +84,33 @@ final List<RouteBase> routeList = <RouteBase>[
       ),
       // The route branch for the second tab of the bottom navigation bar.
       StatefulShellBranch(
-        restorationScopeId: 'kokline',
+        restorationScopeId: 'okKline',
         routes: <RouteBase>[
           GoRoute(
             // The screen to display as the root in the second tab of the
             // bottom navigation bar.
-            path: '/ko',
+            path: '/ok',
             pageBuilder: (BuildContext context, GoRouterState state) {
               return const MaterialPage<void>(
-                restorationId: 'kokline',
-                child: KOKlinePage(),
+                restorationId: 'okKline',
+                child: OkKlinePage(),
+              );
+            },
+            routes: <RouteBase>[],
+          ),
+        ],
+      ),
+      StatefulShellBranch(
+        restorationScopeId: 'bitKline',
+        routes: <RouteBase>[
+          GoRoute(
+            // The screen to display as the root in the second tab of the
+            // bottom navigation bar.
+            path: '/bit',
+            pageBuilder: (BuildContext context, GoRouterState state) {
+              return const MaterialPage<void>(
+                restorationId: 'bitKline',
+                child: BitKlinePage(),
               );
             },
             routes: <RouteBase>[],

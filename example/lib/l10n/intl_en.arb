@@ -2,7 +2,8 @@
 {
   "title": "FlexiKline", 
   "demo": "Demo",
-  "ko": "KO",
+  "ok": "Ok",
+  "bit": "Bit",
   "connectionTimeout": "Client connection timeout",
   "sendTimeout": "Client send timeout",
   "responseTimeout": "Server response timeout",
@@ -24,5 +25,17 @@
   "settingThemeMode": "Theme Mode",
   "themeModeSystem": "System",
   "themeModeLight": "Light",
-  "themeModeDark": "Dark"
+  "themeModeDark": "Dark",
+
+  "tooltipTime": "Time",
+  "tooltipOpen": "Open",
+  "tooltipHigh": "High",
+  "tooltipLow": "Low",
+  "tooltipClose": "Close",
+  "tooltipChg": "Chg",
+  "tooltipChgRate": "%Chg",
+  "tooltipRange": "Range",
+  "tooltipAmount": "Amount",
+  "tooltipTurnover": "Turnover"
+
 }

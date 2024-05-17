@@ -23,10 +23,20 @@ import 'binding_base.dart';
 import 'interface.dart';
 import 'setting.dart';
 
-typedef OnCrossCustomTooltipCallback = List<TooltipInfo> Function(
+/// 定制TooltipInfoList
+/// [model] 当前Cross选中的CandleMode数据.
+/// [pre] 前一个CandleMode数据
+/// 1. 如果返回null, 则尝试用 [OnCrossI18nTooltipLables] 继续定制.
+/// 2. 如果返回const [], 则不会再展示Tooltip信息.
+typedef OnCrossCustomTooltipCallback = List<TooltipInfo>? Function(
   CandleModel model, {
   CandleModel? pre,
 });
+
+/// 定制TooltipLables
+/// 1. 如果返回null, 则使用默认[defaultTooltipLables] 生成TooltipInfoList
+/// 2. 如果返回const {}, 则不会再展示Tooltip信息
+typedef OnCrossI18nTooltipLables = Map<TooltipLabel, String>? Function();
 
 mixin CrossBinding
     on KlineBindingBase, SettingBinding
@@ -239,12 +249,28 @@ mixin CrossBinding
     if (model == null) return;
 
     /// 准备数据
-    List<TooltipInfo> tooltipInfoList;
+    // 1. 使用定制接口生成TooltipInfoList.
+    List<TooltipInfo>? tooltipInfoList;
     if (onCrossCustomTooltip != null) {
       tooltipInfoList = onCrossCustomTooltip!(model, pre: pre);
-    } else {
-      tooltipInfoList = genTooltipInfoListf(model, pre: pre);
     }
+
+    if (tooltipInfoList == null) {
+      Map<TooltipLabel, String>? tooltipLables;
+      // 2. 使用定制多语言TooltipLables生成TooltipInfoList
+      if (onCrossI18nTooltipLables != null) {
+        tooltipLables = onCrossI18nTooltipLables!.call();
+      }
+      // 3. 使用FlexiKline内置(默认En)的Lables生成TooltipInfoList
+      tooltipLables ??= defaultTooltipLables;
+
+      tooltipInfoList = genTooltipInfoListByLables(
+        tooltipLables,
+        model: model,
+        pre: pre,
+      );
+    }
+
     if (tooltipInfoList.isEmpty) return;
 
     /// 初始化绘制数据
@@ -260,9 +286,9 @@ mixin CrossBinding
       ));
       TextStyle valStyle = info.valueStyle ?? tooltipConfig.style;
       if (info.riseOrFall > 0) {
-        valStyle.copyWith(color: settingConfig.longColor);
+        valStyle = valStyle.copyWith(color: settingConfig.longColor);
       } else if (info.riseOrFall < 0) {
-        valStyle.copyWith(color: settingConfig.shortColor);
+        valStyle = valStyle.copyWith(color: settingConfig.shortColor);
       }
       valueSpanList.add(TextSpan(
         text: info.value + br,
@@ -372,14 +398,15 @@ mixin CrossBinding
   /// Tooltip定制回调
   OnCrossCustomTooltipCallback? onCrossCustomTooltip;
 
-  /// TooltipLables
-  Map<TooltipLabel, String> _tooltipLables = defaultTooltipLables;
-  Map<TooltipLabel, String> get tooltipLables => _tooltipLables;
-  set tooltipLabelI18n(Map<TooltipLabel, String> i18nLabels) {
-    _tooltipLables = i18nLabels;
-  }
+  /// TooltipLables多语言回调
+  OnCrossI18nTooltipLables? onCrossI18nTooltipLables;
 
-  List<TooltipInfo> genTooltipInfoListf(CandleModel model, {CandleModel? pre}) {
+  /// 根据TooltipLables生成TooltipInfoList.
+  List<TooltipInfo> genTooltipInfoListByLables(
+    Map<TooltipLabel, String> tooltipLables, {
+    required CandleModel model,
+    CandleModel? pre,
+  }) {
     if (tooltipLables.isEmpty) return const [];
     final p = curKlineData.precision;
 
@@ -428,8 +455,11 @@ mixin CrossBinding
           break;
       }
       if (value != null) {
-        list.add(
-            TooltipInfo(label: label, value: value, riseOrFall: riseOrFall));
+        list.add(TooltipInfo(
+          label: label,
+          value: value,
+          riseOrFall: riseOrFall,
+        ));
       }
     });
     return list;

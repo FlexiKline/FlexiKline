@@ -21,7 +21,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../config.dart';
 import '../repo/mock.dart';
 import '../test/canvas_demo.dart';
-import '../utils/flexi_kline_storage.dart';
+import '../providers/ok_kline_provider.dart';
 import '../widgets/flexi_indicator_bar.dart';
 import '../widgets/flexi_time_bar.dart';
 import 'main_nav_page.dart';
@@ -69,7 +69,7 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
         debug: kDebugMode,
         tag: 'Demo1',
       ),
-      storage: FlexiKlineStorage(),
+      storage: OkFlexiKlineStorage(),
     );
     controller1.setMainSize(Size(
       ScreenUtil().screenWidth,

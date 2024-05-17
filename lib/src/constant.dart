@@ -117,19 +117,6 @@ enum TimeBar {
   }
 }
 
-const List<String> i18nCandleCardEn = [
-  'Time',
-  'Open',
-  'High',
-  'Low',
-  'Close',
-  'Chg',
-  '%Chg',
-  // 'Range',
-  'Amount',
-  // 'Turnover'
-];
-
 /// 内置TooltipLabel
 enum TooltipLabel {
   time,

@@ -1,7 +1,8 @@
 {
   "title": "FlexiKline",
   "demo": "示例",
-  "ko": "Ko",
+  "ok": "Ok",
+  "bit": "Bit",
   "connectionTimeout": "客户端连接超时",
   "sendTimeout": "客户端发送超时",
   "responseTimeout": "服务端响应超时",
@@ -23,5 +24,17 @@
   "settingThemeMode": "主题模式",
   "themeModeSystem": "跟随系统",
   "themeModeLight": "日间模式",
-  "themeModeDark": "夜间模式"
+  "themeModeDark": "夜间模式",
+
+  "tooltipTime": "时间",
+  "tooltipOpen": "开盘",
+  "tooltipHigh": "最高",
+  "tooltipLow": "最低",
+  "tooltipClose": "收盘",
+  "tooltipChg": "涨跌额",
+  "tooltipChgRate": "涨跌幅",
+  "tooltipRange": "振幅",
+  "tooltipAmount": "成交量",
+  "tooltipTurnover": "成交额"
+
 }

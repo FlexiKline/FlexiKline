@@ -24,6 +24,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "badCertificate":
             MessageLookupByLibrary.simpleMessage("Bad certificate"),
+        "bit": MessageLookupByLibrary.simpleMessage("Bit"),
         "canceled": MessageLookupByLibrary.simpleMessage("Canceled"),
         "cannotReachServer":
             MessageLookupByLibrary.simpleMessage("Can not reach server"),
@@ -33,7 +34,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Client connection timeout"),
         "demo": MessageLookupByLibrary.simpleMessage("Demo"),
         "invalidReq": MessageLookupByLibrary.simpleMessage("Invalid request"),
-        "ko": MessageLookupByLibrary.simpleMessage("KO"),
+        "ok": MessageLookupByLibrary.simpleMessage("Ok"),
         "permissionDenied":
             MessageLookupByLibrary.simpleMessage("Permission denied"),
         "reqMethodForbidden":
@@ -57,6 +58,16 @@ class MessageLookup extends MessageLookupByLibrary {
         "themeModeLight": MessageLookupByLibrary.simpleMessage("Light"),
         "themeModeSystem": MessageLookupByLibrary.simpleMessage("System"),
         "title": MessageLookupByLibrary.simpleMessage("FlexiKline"),
+        "tooltipAmount": MessageLookupByLibrary.simpleMessage("Amount"),
+        "tooltipChg": MessageLookupByLibrary.simpleMessage("Chg"),
+        "tooltipChgRate": MessageLookupByLibrary.simpleMessage("%Chg"),
+        "tooltipClose": MessageLookupByLibrary.simpleMessage("Close"),
+        "tooltipHigh": MessageLookupByLibrary.simpleMessage("High"),
+        "tooltipLow": MessageLookupByLibrary.simpleMessage("Low"),
+        "tooltipOpen": MessageLookupByLibrary.simpleMessage("Open"),
+        "tooltipRange": MessageLookupByLibrary.simpleMessage("Range"),
+        "tooltipTime": MessageLookupByLibrary.simpleMessage("Time"),
+        "tooltipTurnover": MessageLookupByLibrary.simpleMessage("Turnover"),
         "unknownError": MessageLookupByLibrary.simpleMessage("Unknown error"),
         "unsupportedProtocol": MessageLookupByLibrary.simpleMessage(
             "HTTP protocol requests are not supported")

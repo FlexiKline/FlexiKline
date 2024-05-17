@@ -16,7 +16,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../framework/export.dart';
-import '../model/export.dart';
 import 'interface.dart';
 
 abstract class KlineBindingBase with KlineLog, KlineStorage, GestureHanderImpl {

@@ -70,11 +70,21 @@ class S {
     );
   }
 
-  /// `KO`
-  String get ko {
+  /// `Ok`
+  String get ok {
     return Intl.message(
-      'KO',
-      name: 'ko',
+      'Ok',
+      name: 'ok',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Bit`
+  String get bit {
+    return Intl.message(
+      'Bit',
+      name: 'bit',
       desc: '',
       args: [],
     );
@@ -295,6 +305,106 @@ class S {
     return Intl.message(
       'Dark',
       name: 'themeModeDark',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Time`
+  String get tooltipTime {
+    return Intl.message(
+      'Time',
+      name: 'tooltipTime',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open`
+  String get tooltipOpen {
+    return Intl.message(
+      'Open',
+      name: 'tooltipOpen',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `High`
+  String get tooltipHigh {
+    return Intl.message(
+      'High',
+      name: 'tooltipHigh',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Low`
+  String get tooltipLow {
+    return Intl.message(
+      'Low',
+      name: 'tooltipLow',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Close`
+  String get tooltipClose {
+    return Intl.message(
+      'Close',
+      name: 'tooltipClose',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Chg`
+  String get tooltipChg {
+    return Intl.message(
+      'Chg',
+      name: 'tooltipChg',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `%Chg`
+  String get tooltipChgRate {
+    return Intl.message(
+      '%Chg',
+      name: 'tooltipChgRate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Range`
+  String get tooltipRange {
+    return Intl.message(
+      'Range',
+      name: 'tooltipRange',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Amount`
+  String get tooltipAmount {
+    return Intl.message(
+      'Amount',
+      name: 'tooltipAmount',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Turnover`
+  String get tooltipTurnover {
+    return Intl.message(
+      'Turnover',
+      name: 'tooltipTurnover',
       desc: '',
       args: [],
     );

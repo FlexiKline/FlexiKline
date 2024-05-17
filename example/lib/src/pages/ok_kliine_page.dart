@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'package:dio/dio.dart';
+import 'package:example/generated/l10n.dart';
 import 'package:example/src/theme/flexi_theme.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/foundation.dart';
@@ -23,20 +24,20 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
 import '../config.dart';
 import '../repo/api.dart' as api;
-import '../utils/flexi_kline_storage.dart';
+import '../providers/ok_kline_provider.dart';
 import '../widgets/flexi_indicator_bar.dart';
 import '../widgets/latest_price_view.dart';
 import '../widgets/flexi_time_bar.dart';
 import 'main_nav_page.dart';
 
-class KOKlinePage extends ConsumerStatefulWidget {
-  const KOKlinePage({super.key});
+class OkKlinePage extends ConsumerStatefulWidget {
+  const OkKlinePage({super.key});
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _KOKlinePageState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _OkKlinePageState();
 }
 
-class _KOKlinePageState extends ConsumerState<KOKlinePage> {
+class _OkKlinePageState extends ConsumerState<OkKlinePage> {
   CandleReq req = CandleReq(
     instId: 'BTC-USDT',
     bar: TimeBar.m15.bar,
@@ -54,6 +55,20 @@ class _KOKlinePageState extends ConsumerState<KOKlinePage> {
   late final FlexiKlineController controller;
   CandleModel? latest;
   CancelToken? cancelToken;
+  Map<TooltipLabel, String> tooltipLables() {
+    return {
+      TooltipLabel.time: S.current.tooltipTime,
+      TooltipLabel.open: S.current.tooltipOpen,
+      TooltipLabel.high: S.current.tooltipHigh,
+      TooltipLabel.low: S.current.tooltipLow,
+      TooltipLabel.close: S.current.tooltipClose,
+      TooltipLabel.chg: S.current.tooltipChg,
+      TooltipLabel.chgRate: S.current.tooltipChgRate,
+      TooltipLabel.range: S.current.tooltipRange,
+      TooltipLabel.amount: S.current.tooltipAmount,
+      TooltipLabel.turnover: S.current.tooltipTurnover,
+    };
+  }
 
   @override
   void initState() {
@@ -61,14 +76,16 @@ class _KOKlinePageState extends ConsumerState<KOKlinePage> {
 
     controller = FlexiKlineController(
       logger: LoggerImpl(
-        tag: "KOKline",
+        tag: "OkFlexiKline",
         debug: kDebugMode,
       ),
-      storage: FlexiKlineStorage(),
+      storage: OkFlexiKlineStorage(),
     );
     controller.setMainSize(
       Size(ScreenUtil().screenWidth, 300.r),
     );
+
+    controller.onCrossI18nTooltipLables = tooltipLables;
 
     // controller.candleMainIndicator = CustomCandleIndicator(
     //   height: 300.r,

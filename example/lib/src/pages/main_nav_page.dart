@@ -54,8 +54,12 @@ class MainNavPage extends ConsumerWidget {
             label: s.demo,
           ),
           BottomNavigationBarItem(
-            icon: const Icon(Icons.view_comfy_alt),
-            label: s.ko,
+            icon: const Icon(Icons.view_comfy_alt_rounded),
+            label: s.ok,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.pets_rounded),
+            label: s.bit,
           ),
         ],
         currentIndex: navigationShell.currentIndex,
