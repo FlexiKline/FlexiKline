@@ -17,7 +17,6 @@ import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-import '../constant.dart';
 import '../core/export.dart';
 import 'object.dart';
 import 'serializers.dart';
@@ -96,9 +95,9 @@ abstract class Indicator {
       this.padding = padding;
       hasChange = true;
     }
-    // if (hasChange && paintObject != null) {
-    //   paintObject?.resetDrawBounding();
-    // }
+    if (hasChange && paintObject != null) {
+      paintObject?.resetPaintBounding();
+    }
     return hasChange;
   }
 

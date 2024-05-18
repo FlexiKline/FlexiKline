@@ -128,6 +128,7 @@ class CandleIndicator extends SinglePaintObjectIndicator {
         height: defaultTextHeight,
       ),
       textWidth: 80,
+      textAlign: TextAlign.center,
     ),
   });
 

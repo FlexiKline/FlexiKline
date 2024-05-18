@@ -13,7 +13,8 @@
 // limitations under the License.
 
 import 'dart:math' as math;
-import 'dart:ui';
+
+import 'package:flutter/material.dart';
 
 extension RectExt on Rect {
   /// Whether the point specified by the given offset (which is assumed to be

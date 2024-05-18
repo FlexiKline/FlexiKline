@@ -44,14 +44,10 @@ abstract interface class IPaintBoundingBox {
   /// 当前指标图底部绘制区域
   Rect get bottomRect;
 
-  // /// 复位Tips区域
-  // void resetNextTipsRect();
-
-  // /// tips的绘制区域.
-  // Rect get nextTipsRect;
-
   /// 设置下一个Tips的绘制区域.
   Rect shiftNextTipsRect(double height);
+
+  void resetPaintBounding();
 }
 
 /// 指标图的绘制数据初始化接口
@@ -142,29 +138,40 @@ mixin PaintObjectBoundingMixin on PaintObjectProxy
   @override
   EdgeInsets get padding => indicator.padding;
 
-  Rect? _bounding;
+  Rect? _drawableRect;
+  Rect? _chartRect;
+  Rect? _topRect;
+  Rect? _bottomRect;
+
+  @override
+  void resetPaintBounding({int? slot}) {
+    if (slot != null) _slot = slot;
+    _drawableRect = null;
+    _chartRect = null;
+    _topRect = null;
+    _bottomRect = null;
+  }
 
   @override
   Rect get drawableRect {
+    if (_drawableRect != null) return _drawableRect!;
     if (drawInMain) {
-      _bounding ??= settingConfig.mainRect;
+      _drawableRect = settingConfig.mainRect;
     } else {
-      if (_bounding == null) {
-        final top = config.calculateIndicatorTop(slot);
-        _bounding = Rect.fromLTRB(
-          setting.subRect.left,
-          setting.subRect.top + top,
-          setting.subRect.right,
-          setting.subRect.top + top + indicator.height,
-        );
-      }
+      final top = config.calculateIndicatorTop(slot);
+      _drawableRect = Rect.fromLTRB(
+        setting.subRect.left,
+        setting.subRect.top + top,
+        setting.subRect.right,
+        setting.subRect.top + top + indicator.height,
+      );
     }
-    return _bounding!;
+    return _drawableRect!;
   }
 
   @override
   Rect get topRect {
-    return Rect.fromLTRB(
+    return _topRect ??= Rect.fromLTRB(
       drawableRect.left,
       drawableRect.top,
       drawableRect.right,
@@ -174,7 +181,7 @@ mixin PaintObjectBoundingMixin on PaintObjectProxy
 
   @override
   Rect get bottomRect {
-    return Rect.fromLTRB(
+    return _bottomRect ??= Rect.fromLTRB(
       drawableRect.left,
       drawableRect.bottom - padding.bottom,
       drawableRect.right,
@@ -184,6 +191,7 @@ mixin PaintObjectBoundingMixin on PaintObjectProxy
 
   @override
   Rect get chartRect {
+    if (_chartRect != null) return _chartRect!;
     final chartBottom = drawableRect.bottom - padding.bottom;
     double chartTop;
     if (indicator.paintMode == PaintMode.alone) {
@@ -191,7 +199,7 @@ mixin PaintObjectBoundingMixin on PaintObjectProxy
     } else {
       chartTop = drawableRect.top + padding.top;
     }
-    return Rect.fromLTRB(
+    return _chartRect = Rect.fromLTRB(
       drawableRect.left + padding.left,
       chartTop,
       drawableRect.right - padding.right,
@@ -203,16 +211,6 @@ mixin PaintObjectBoundingMixin on PaintObjectProxy
 
   double clampDxInChart(double dx) => dx.clamp(chartRect.left, chartRect.right);
   double clampDyInChart(double dy) => dy.clamp(chartRect.top, chartRect.bottom);
-
-  // 下一个Tips的绘制区域
-  // Rect? _nextTipsRect;
-
-  // 复位Tips区域
-  // @override
-  // void resetNextTipsRect() => _nextTipsRect = null;
-
-  // @override
-  // Rect get nextTipsRect => _nextTipsRect ?? topRect;
 
   // Tips区域向下移动height.
   @override
@@ -409,11 +407,6 @@ abstract class PaintObjectProxy<T extends Indicator> extends PaintObject
   }) {
     this.controller = controller;
     loggerDelegate = controller.loggerDelegate;
-    // settingBinding = controller as SettingBinding;
-    // setting = controller.settingData; // TODO: 待命名统一
-    // state = controller as IState;
-    // cross = controller as ICross;
-    // config = controller as IConfig;
   }
 
   @override
@@ -443,9 +436,9 @@ abstract class SinglePaintObjectBox<T extends SinglePaintObjectIndicator>
     bool reset = false,
   }) {
     if (reset || newSlot != slot) {
-      _bounding = null;
+      resetPaintBounding(slot: newSlot);
       _minMax = null;
-      _slot = newSlot;
+      _dyFactor = null;
     }
 
     if (_start != start || _end != end || _minMax == null) {
@@ -542,10 +535,9 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
     bool reset = false,
   }) {
     if (reset || newSlot != slot) {
-      _bounding = null;
+      resetPaintBounding(slot: newSlot);
       _minMax = null;
       _dyFactor = null;
-      _slot = newSlot;
     }
 
     if (_start != start || _end != end) {
