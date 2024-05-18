@@ -31,6 +31,118 @@ mixin VOLMAData on BaseData {
   void dispose() {
     super.dispose();
     logd('dispose VOLMA');
+    for (var model in list) {
+      model.volMaRets = null;
+    }
+  }
+
+  @override
+  void preprocess(
+    Indicator indicator, {
+    required int start,
+    required int end,
+    bool reset = false,
+  }) {
+    if (indicator is VolMaIndicator) {
+      final startTime = DateTime.now();
+      calcuAndCacheVolMa(indicator.calcParams, start: start, end: end);
+      logd(
+        'preprocess VOLMA => total spent:${DateTime.now().difference(startTime).inMicroseconds} microseconds',
+      );
+    } else {
+      super.preprocess(indicator, start: start, end: end, reset: reset);
+    }
+  }
+
+  /// 计算 [index] 位置的 [count] 个数据的Ma指标.
+  BagNum? calcuVolMa(
+    int index,
+    int count,
+  ) {
+    if (isEmpty) return null;
+    int len = list.length;
+    if (count <= 0 || index < 0 || index + count > len) return null;
+
+    final m = list[index];
+
+    BagNum sum = m.vol;
+    for (int i = index + 1; i < index + count; i++) {
+      sum += list[i].vol;
+    }
+
+    return sum.divNum(count);
+  }
+
+  void calcuAndCacheVolMa(
+    List<MaParam> calcParams, {
+    int? start,
+    int? end,
+  }) {
+    if (isEmpty || calcParams.isEmpty) return;
+    int len = list.length;
+    start ??= this.start;
+    end ??= this.end;
+    if (start < 0 || end > len) return;
+
+    int? maxCount = MaParam.getMaxCountByList(calcParams);
+    end = math.min(end + maxCount!, len);
+
+    CandleModel m;
+    final paramLen = calcParams.length;
+    final volSum = List.filled(paramLen, BagNum.zero, growable: false);
+    for (int i = end - 1; i >= start; i--) {
+      m = list[i];
+      m.volMaRets = List.filled(calcParams.length, null, growable: false);
+      for (int j = 0; j < calcParams.length; j++) {
+        volSum[j] += m.vol;
+        final count = calcParams[j].count;
+        if (i <= end - count) {
+          m.volMaRets![j] = volSum[j].divNum(count);
+          volSum[j] -= list[i + (count - 1)].vol;
+        }
+      }
+    }
+  }
+
+  MinMax? calcuVolMaMinmax(
+    List<MaParam> calcParams, {
+    int? start,
+    int? end,
+  }) {
+    if (isEmpty || calcParams.isEmpty) return null;
+    int len = list.length;
+    start ??= this.start;
+    end ??= this.end;
+    if (start < 0 || end > len) return null;
+
+    if (list[start].isValidVolMaRets != true ||
+        list[end - 1].isValidVolMaRets != true) {
+      calcuAndCacheVolMa(calcParams, start: start, end: end);
+    }
+
+    MinMax? minmax;
+    CandleModel m;
+    for (int i = end - 1; i >= start; i--) {
+      m = list[i];
+      minmax ??= m.volMaRetsMinmax;
+      minmax?.updateMinMax(m.volMaRetsMinmax);
+    }
+    return minmax;
+  }
+}
+
+@Deprecated('废弃的')
+mixin VOLMAData2 on BaseData {
+  @override
+  void initData() {
+    super.initData();
+    logd('init VOLMA');
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    logd('dispose VOLMA');
     // TODO: 是否要缓存
     _volmaResultMap.clear();
   }

@@ -21,6 +21,14 @@ extension ListExt<T> on List<T> {
     if (checkIndex(index)) return this[index];
     return null;
   }
+
+  bool get hasValidData {
+    if (isEmpty) return false;
+    for (T t in this) {
+      if (t != null) return true;
+    }
+    return false;
+  }
 }
 
 extension MapExt<K, V> on Map<K, V> {

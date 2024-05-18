@@ -83,14 +83,9 @@ mixin MAData on BaseData {
     start ??= this.start;
     end ??= this.end;
     if (start < 0 || end > len) return;
-    int? minCount;
 
-    for (var param in calcParams) {
-      minCount ??= param.count;
-      minCount = param.count < minCount ? param.count : minCount;
-    }
-
-    end = math.min(end + minCount!, len);
+    int? maxCount = MaParam.getMaxCountByList(calcParams);
+    end = math.min(end + maxCount!, len);
 
     CandleModel m;
     final paramLen = calcParams.length;
@@ -136,6 +131,7 @@ mixin MAData on BaseData {
   }
 }
 
+@Deprecated('废弃的')
 mixin MAData2 on BaseData {
   @override
   void initData() {

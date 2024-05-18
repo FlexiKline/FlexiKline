@@ -68,6 +68,19 @@ class MinMax {
 
   bool get isZero => max == BagNum.zero && min == BagNum.zero;
 
+  /// 计算给定集合[list]中的所有[BagNum]的最大最小值
+  static MinMax? getMinMaxByList(List<BagNum?>? list) {
+    if (list == null || list.isEmpty) return null;
+    MinMax? minmax;
+    for (var val in list) {
+      if (val != null) {
+        minmax ??= MinMax.same(val);
+        minmax.updateMinMaxBy(val);
+      }
+    }
+    return minmax;
+  }
+
   @override
   String toString() {
     return 'MinMax(max:${max.toString()}, min:${min.toString()})';

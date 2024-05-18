@@ -94,16 +94,11 @@ class VolMaPaintObject<T extends VolMaIndicator>
   MinMax? initState({required int start, required int end}) {
     if (!klineData.canPaintChart) return null;
 
-    MinMax? minmax;
-    for (var param in indicator.calcParams) {
-      final ret = klineData.calculateMavolMinmax(
-        param.count,
-        start: start,
-        end: end,
-      );
-      minmax ??= ret;
-      minmax?.updateMinMax(ret);
-    }
+    MinMax? minmax = klineData.calcuVolMaMinmax(
+      indicator.calcParams,
+      start: start,
+      end: end,
+    );
     return minmax;
   }
 
@@ -117,52 +112,38 @@ class VolMaPaintObject<T extends VolMaIndicator>
     ///
   }
 
-  /// 绘制MA指标线
+  /// 绘制VOLMA指标线
   void paintVolMALine(Canvas canvas, Size size) {
-    final data = klineData;
-    if (data.list.isEmpty) return;
-    int start = data.start;
-    int end = (data.end + 1).clamp(start, data.list.length); // 多绘制一根蜡烛
+    if (!klineData.canPaintChart) return;
+    if (indicator.calcParams.isEmpty) return;
+    final list = klineData.list;
+    int start = klineData.start;
+    int end = (klineData.end + 1).clamp(start, list.length); // 多绘制一根蜡烛
 
-    // try {
-    //   // 保存画布状态
-    //   canvas.save();
-    //   // 裁剪绘制范围
-    //   canvas.clipRect(setting.mainDrawRect);
-
-    for (var param in indicator.calcParams) {
-      final maVolMap = klineData.getVolmaMap(param.count);
-      if (maVolMap.isEmpty) continue;
-
+    for (int j = 0; j < indicator.calcParams.length; j++) {
       final offset = startCandleDx - candleWidthHalf;
-      CandleModel m;
-      MaResult? maRet;
+      BagNum? val;
       final List<Offset> points = [];
       for (int i = start; i < end; i++) {
-        m = data.list[i];
-        final dx = offset - (i - start) * candleActualWidth;
-        maRet = maVolMap[m.timestamp];
-        maRet ??= klineData.calculateVolma(i, param.count);
-        if (maRet == null) continue;
-        final dy = valueToDy(maRet.val, correct: false);
-        points.add(Offset(dx, dy));
+        val = list[i].volMaRets?.getItem(j);
+        if (val == null) continue;
+        points.add(Offset(
+          offset - (i - start) * candleActualWidth,
+          valueToDy(val, correct: false),
+        ));
       }
 
       canvas.drawPath(
         Path()..addPolygon(points, false),
         Paint()
-          ..color = param.tips.color
+          ..color = indicator.calcParams[j].tips.color
           ..style = PaintingStyle.stroke
           ..strokeWidth = indicator.lineWidth,
       );
     }
-    // } finally {
-    //   // 恢复画布状态
-    //   canvas.restore();
-    // }
   }
 
-  /// MA 绘制tips区域
+  /// VOLMA 绘制tips区域
   @override
   Size? paintTips(
     Canvas canvas, {
@@ -171,21 +152,21 @@ class VolMaPaintObject<T extends VolMaIndicator>
     Rect? tipsRect,
   }) {
     model ??= offsetToCandle(offset);
-    if (model == null) return null;
+    if (model == null || !model.isValidVolMaRets) return null;
 
     final children = <TextSpan>[];
-    for (var param in indicator.calcParams) {
-      final ret = klineData.getVolmaResult(
-        count: param.count,
-        ts: model.timestamp,
-      );
-      if (ret == null) continue;
+    BagNum? val;
+    for (int i = 0; i < model.volMaRets!.length; i++) {
+      val = model.volMaRets![i];
+      if (val == null) continue;
+      final param = indicator.calcParams.getItem(i);
+      if (param == null) continue;
 
       final text = formatNumber(
-        ret.val.toDecimal(),
-        precision: param.tips.getP(indicator.precision),
+        val.toDecimal(),
+        precision: param.tips.getP(klineData.precision),
         cutInvalidZero: true,
-        prefix: param.tips.label,
+        prefix: '${param.tips.label}: ',
         suffix: '  ',
       );
       children.add(TextSpan(
@@ -193,7 +174,6 @@ class VolMaPaintObject<T extends VolMaIndicator>
         style: param.tips.style,
       ));
     }
-
     if (children.isNotEmpty) {
       tipsRect ??= drawableRect;
       return canvas.drawText(

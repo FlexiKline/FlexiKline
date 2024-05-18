@@ -24,7 +24,7 @@ import 'candle_mixin.dart';
 part 'candle_model.g.dart';
 
 @FlexiModelSerializable
-class CandleModel with MaMixin {
+class CandleModel with MaMixin, VolMaMixin {
   CandleModel({
     required this.timestamp,
     required this.o,

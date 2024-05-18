@@ -12,33 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import '../../extension/export.dart';
 import '../bag_num.dart';
 import '../minmax.dart';
 
 mixin MaMixin {
   List<BagNum?>? maRets;
 
-  bool get isValidMaRets {
-    if (maRets == null || maRets!.isEmpty) return false;
-    bool isValid = false;
-    for (var ret in maRets!) {
-      if (ret != null) {
-        isValid = true;
-        break;
-      }
-    }
-    return isValid;
-  }
+  bool get isValidMaRets => maRets != null && maRets!.hasValidData;
 
-  MinMax? get maRetsMinmax {
-    if (maRets == null || maRets!.isEmpty) return null;
-    MinMax? minmax;
-    for (var ret in maRets!) {
-      if (ret != null) {
-        minmax ??= MinMax.same(ret);
-        minmax.updateMinMaxBy(ret);
-      }
-    }
-    return minmax;
-  }
+  MinMax? get maRetsMinmax => MinMax.getMinMaxByList(maRets);
+}
+
+mixin VolMaMixin {
+  List<BagNum?>? volMaRets;
+
+  bool get isValidVolMaRets => volMaRets != null && volMaRets!.hasValidData;
+
+  MinMax? get volMaRetsMinmax => MinMax.getMinMaxByList(volMaRets);
+}
+
+mixin EmaMixin {
+  List<BagNum?>? emaRets;
+
+  bool get isValidEmaRets => emaRets != null && emaRets!.hasValidData;
+
+  MinMax? get emaRetsMinmax => MinMax.getMinMaxByList(emaRets);
 }
