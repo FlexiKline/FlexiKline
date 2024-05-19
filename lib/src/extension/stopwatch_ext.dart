@@ -12,12 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export 'decimal_ext.dart';
-export 'geometry_ext.dart';
-export 'collections_ext.dart';
-export 'render/common.dart';
-export 'render/draw_path.dart';
-export 'render/draw_rect.dart';
-export 'render/draw_text.dart';
-export 'style_ext.dart';
-export 'stopwatch_ext.dart';
+import 'package:flutter/material.dart';
+
+extension StopwatchExt on Stopwatch {
+  /// 返回[runable]运行耗时
+  int run(VoidCallback runable) {
+    reset();
+    start();
+    runable();
+    stop();
+    return elapsedMicroseconds;
+  }
+}

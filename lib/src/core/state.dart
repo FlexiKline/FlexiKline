@@ -204,18 +204,33 @@ mixin StateBinding
 
     final startTime = DateTime.now();
     logd('preprocessIndicatorData start at $startTime');
-
+    final stopwatch = Stopwatch();
     for (var child in mainIndicator.children) {
-      data.preprocess(child, start: start, end: end, reset: reset);
+      final elapseTime = stopwatch.run(() {
+        data.preprocess(child, start: start, end: end, reset: reset);
+      });
+      logd(
+        'preprocess Main ${child.name} [$start, $end] $reset total spent:$elapseTime microseconds',
+      );
     }
 
     for (var indicator in subIndicators) {
       if (indicator is MultiPaintObjectIndicator) {
         for (var child in indicator.children) {
-          data.preprocess(child, start: start, end: end, reset: reset);
+          final elapseTime = stopwatch.run(() {
+            data.preprocess(child, start: start, end: end, reset: reset);
+          });
+          logd(
+            'preprocess Sub ${indicator.name}-${child.name} [$start, $end] $reset total spent:$elapseTime microseconds',
+          );
         }
       } else {
-        data.preprocess(indicator, start: start, end: end, reset: reset);
+        final elapseTime = stopwatch.run(() {
+          data.preprocess(indicator, start: start, end: end, reset: reset);
+        });
+        logd(
+          'preprocess Sub ${indicator.name} [$start, $end] $reset total spent:$elapseTime microseconds',
+        );
       }
     }
     logd(

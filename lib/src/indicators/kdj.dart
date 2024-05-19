@@ -16,7 +16,6 @@ import 'package:flutter/material.dart';
 
 import '../constant.dart';
 import '../core/export.dart';
-import '../data/export.dart';
 import '../extension/export.dart';
 import '../framework/export.dart';
 import '../model/export.dart';
@@ -146,7 +145,7 @@ class KDJPaintObject<T extends KDJIndicator> extends SinglePaintObjectBox<T>
   MinMax? initState({required int start, required int end}) {
     if (!klineData.canPaintChart) return null;
 
-    return klineData.calculateKdjMinmax(
+    return klineData.calcuKdjMinmax(
       param: indicator.calcParam,
       start: start,
       end: end,
@@ -178,24 +177,25 @@ class KDJPaintObject<T extends KDJIndicator> extends SinglePaintObjectBox<T>
   }
 
   void paintKDJLine(Canvas canvas, Size size) {
-    final kdjMap = klineData.getKdjMap(indicator.calcParam);
-    if (kdjMap.isEmpty || !klineData.canPaintChart) return;
+    if (!klineData.canPaintChart) return;
+    if (!indicator.calcParam.isValid) return;
     final list = klineData.list;
     int start = klineData.start;
     int end = (klineData.end + 1).clamp(start, list.length); // 多绘制一根蜡烛
 
-    KdjReset? ret;
     final List<Offset> kPoints = [];
     final List<Offset> dPoints = [];
     final List<Offset> jPoints = [];
     final offset = startCandleDx - candleWidthHalf;
+
+    CandleModel m;
     for (int i = start; i < end; i++) {
-      ret = kdjMap[list[i].timestamp];
-      if (ret == null) continue;
+      m = list[i];
+      if (!m.isValidKdjData) continue;
       final dx = offset - (i - start) * candleActualWidth;
-      kPoints.add(Offset(dx, valueToDy(ret.k, correct: false)));
-      dPoints.add(Offset(dx, valueToDy(ret.d, correct: false)));
-      jPoints.add(Offset(dx, valueToDy(ret.j, correct: false)));
+      kPoints.add(Offset(dx, valueToDy(m.k!, correct: false)));
+      dPoints.add(Offset(dx, valueToDy(m.d!, correct: false)));
+      jPoints.add(Offset(dx, valueToDy(m.j!, correct: false)));
     }
 
     canvas.drawPath(
@@ -231,50 +231,41 @@ class KDJPaintObject<T extends KDJIndicator> extends SinglePaintObjectBox<T>
     Rect? tipsRect,
   }) {
     model ??= offsetToCandle(offset);
-    if (model == null) return null;
+    if (model == null || !model.isValidKdjData) return null;
 
-    final ret = klineData.getKdjResult(
-      param: indicator.calcParam,
-      ts: model.timestamp,
-    );
-    if (ret == null) return null;
-
+    final precision = indicator.precision;
     final children = <TextSpan>[];
 
-    final kTxt = formatNumber(
-      ret.k.toDecimal(),
-      precision: indicator.ktips.getP(indicator.precision),
-      cutInvalidZero: true,
-      prefix: indicator.ktips.label,
-      suffix: ' ',
-    );
-    final dTxt = formatNumber(
-      ret.d.toDecimal(),
-      precision: indicator.dtips.getP(indicator.precision),
-      cutInvalidZero: true,
-      prefix: indicator.dtips.label,
-      suffix: ' ',
-    );
-    final jTxt = formatNumber(
-      ret.j.toDecimal(),
-      precision: indicator.jtips.getP(indicator.precision),
-      cutInvalidZero: true,
-      prefix: indicator.jtips.label,
-      suffix: ' ',
-    );
-
     children.add(TextSpan(
-      text: kTxt,
+      text: formatNumber(
+        model.k?.toDecimal(),
+        precision: indicator.ktips.getP(precision),
+        cutInvalidZero: true,
+        prefix: indicator.ktips.label,
+        suffix: ' ',
+      ),
       style: indicator.ktips.style,
     ));
 
     children.add(TextSpan(
-      text: dTxt,
+      text: formatNumber(
+        model.d?.toDecimal(),
+        precision: indicator.dtips.getP(precision),
+        cutInvalidZero: true,
+        prefix: indicator.dtips.label,
+        suffix: ' ',
+      ),
       style: indicator.dtips.style,
     ));
 
     children.add(TextSpan(
-      text: jTxt,
+      text: formatNumber(
+        model.j?.toDecimal(),
+        precision: indicator.jtips.getP(precision),
+        cutInvalidZero: true,
+        prefix: indicator.jtips.label,
+        suffix: ' ',
+      ),
       style: indicator.jtips.style,
     ));
 

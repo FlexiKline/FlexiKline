@@ -18,7 +18,6 @@ import '../framework/indicator.dart';
 import '../indicators/ma.dart';
 import '../model/export.dart';
 import 'base_data.dart';
-import 'results.dart';
 
 mixin MAData on BaseData {
   @override
@@ -32,7 +31,7 @@ mixin MAData on BaseData {
     super.dispose();
     logd('dispose MA');
     for (var model in list) {
-      model.maRets = null;
+      model.maList = null;
     }
   }
 
@@ -44,10 +43,11 @@ mixin MAData on BaseData {
     bool reset = false,
   }) {
     if (indicator is MAIndicator) {
-      final startTime = DateTime.now();
-      calcuAndCacheMa(indicator.calcParams, start: start, end: end);
-      logd(
-        'preprocess MA => total spent:${DateTime.now().difference(startTime).inMicroseconds} microseconds',
+      calcuAndCacheMa(
+        indicator.calcParams,
+        start: start,
+        end: end,
+        reset: reset,
       );
     } else {
       super.preprocess(indicator, start: start, end: end, reset: reset);
@@ -73,37 +73,62 @@ mixin MAData on BaseData {
     return sum.divNum(count);
   }
 
-  void calcuAndCacheMa(
-    List<MaParam> calcParams, {
+  void _calculateMa(
+    int count, {
+    required int paramIndex,
+    required int paramLen,
     int? start,
     int? end,
   }) {
-    if (isEmpty || calcParams.isEmpty) return;
+    if (count <= 0 || isEmpty) return;
     int len = list.length;
     start ??= this.start;
     end ??= this.end;
     if (start < 0 || end > len) return;
 
-    int? maxCount = MaParam.getMaxCountByList(calcParams);
-    end = math.min(end + maxCount!, len);
+    // 计算从end到len之间count的偏移量
+    int offset = math.max(end + count - len, 0);
+    int index = end - offset;
 
-    CandleModel m;
-    final paramLen = calcParams.length;
-    final closeSum = List.filled(paramLen, BagNum.zero, growable: false);
-    for (int i = end - 1; i >= start; i--) {
+    /// 初始值化[index]位置的MA值
+    CandleModel m = list[index];
+    BagNum sum = m.close;
+    for (int i = index + 1; i < index + count; i++) {
+      sum += list[i].close;
+    }
+    m.maList ??= List.filled(paramLen, null, growable: false);
+    m.maList![paramIndex] = sum.divNum(count);
+
+    for (int i = index - 1; i >= start; i--) {
       m = list[i];
-      m.maRets = List.filled(calcParams.length, null, growable: false);
-      for (int j = 0; j < calcParams.length; j++) {
-        closeSum[j] += m.close;
-        final count = calcParams[j].count;
-        if (i <= end - count) {
-          m.maRets![j] = closeSum[j].divNum(count);
-          closeSum[j] -= list[i + (count - 1)].close;
-        }
-      }
+      sum = sum - list[i + count].close + m.close;
+      m.maList ??= List.filled(paramLen, null, growable: false);
+      m.maList![paramIndex] = sum.divNum(count);
     }
   }
 
+  void calcuAndCacheMa(
+    List<MaParam> calcParams, {
+    int? start,
+    int? end,
+    bool reset = false,
+  }) {
+    if (isEmpty || calcParams.isEmpty) return;
+    final paramLen = calcParams.length;
+    for (int i = 0; i < paramLen; i++) {
+      _calculateMa(
+        calcParams[i].count,
+        paramIndex: i,
+        paramLen: paramLen,
+        start: start,
+        end: end,
+      );
+    }
+  }
+
+  /// 计算并缓存MA数据.
+  /// 如果[start]和[end]指定了, 只计算[start] ~ [end]区间内的MA值.
+  /// 否则, 从当前可视区域的[start] ~ [end]开始计算.
   MinMax? calcuMaMinmax(
     List<MaParam> calcParams, {
     int? start,
@@ -115,182 +140,19 @@ mixin MAData on BaseData {
     end ??= this.end;
     if (start < 0 || end > len) return null;
 
-    if (list[start].isValidMaRets != true ||
-        list[end - 1].isValidMaRets != true) {
-      calcuAndCacheMa(calcParams, start: start, end: end);
+    int minCount = MaParam.getMinCountByList(calcParams)!;
+    end = math.min(len - minCount, end - 1);
+
+    if (!list[end].isValidMaList) {
+      calcuAndCacheMa(calcParams, start: 0, end: len);
     }
 
     MinMax? minmax;
     CandleModel m;
-    for (int i = end - 1; i >= start; i--) {
+    for (int i = end; i >= start; i--) {
       m = list[i];
-      minmax ??= m.maRetsMinmax;
-      minmax?.updateMinMax(m.maRetsMinmax);
-    }
-    return minmax;
-  }
-}
-
-@Deprecated('废弃的')
-mixin MAData2 on BaseData {
-  @override
-  void initData() {
-    super.initData();
-    logd('init MA');
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    logd('dispose MA');
-    _maResultMap.clear();
-  }
-
-  @override
-  void preprocess(
-    Indicator indicator, {
-    required int start,
-    required int end,
-    bool reset = false,
-  }) {
-    if (indicator is MAIndicator) {
-      for (var param in indicator.calcParams) {
-        final startTime = DateTime.now();
-        calculateAndCacheMa(
-          param.count,
-          start: start,
-          end: end,
-          reset: reset,
-        );
-        logd(
-          'preprocess MA => ${param.count} spent:${DateTime.now().difference(startTime).inMicroseconds} microseconds',
-        );
-      }
-    } else {
-      super.preprocess(indicator, start: start, end: end, reset: reset);
-    }
-  }
-
-  /// MA数据缓存 <count, <timestamp, Decimal>>
-  final Map<int, Map<int, MaResult>> _maResultMap = {};
-
-  Map<int, MaResult> getMaMap(int count) {
-    _maResultMap[count] ??= {};
-    return _maResultMap[count]!;
-  }
-
-  MaResult? getMaResult({int? count, int? ts}) {
-    if (count != null && ts != null) {
-      return _maResultMap[count]?[ts];
-    }
-    return null;
-  }
-
-  /// 计算从index(包含index)开始的count个收盘价的平均数
-  /// 注: 如果index开始后不足count, 不矛计算, 返回空.
-  MaResult? calculateMa(
-    int index,
-    int count,
-  ) {
-    if (isEmpty) return null;
-    int len = list.length;
-    if (count <= 0 || index < 0 || index + count > len) return null;
-
-    final m = list[index];
-
-    final ret = getMaResult(count: count, ts: m.timestamp);
-    if (ret != null && !ret.dirty) {
-      return ret;
-    }
-
-    BagNum sum = m.close;
-    for (int i = index + 1; i < index + count; i++) {
-      sum += list[i].close;
-    }
-
-    return MaResult(
-      count: count,
-      ts: m.timestamp,
-      val: sum.divNum(count),
-      dirty: index == 0, // 如果是第一根蜡烛的数据.下次需要重新计算.
-    );
-  }
-
-  /// 计算并缓存MA数据.
-  /// 如果start和end指定了, 只计算[start, end]区间内.
-  /// 否则, 从当前绘制的[start, end]开始计算.
-  void calculateAndCacheMa(
-    int count, {
-    int? start,
-    int? end,
-    bool reset = false,
-  }) {
-    if (count <= 0 || isEmpty) return;
-    int len = list.length;
-    start ??= this.start;
-    end ??= this.end;
-    if (start < 0 || end > len) return;
-
-    final maMap = getMaMap(count);
-    if (reset) {
-      maMap.clear();
-    }
-
-    // 计算从end到len之间count的偏移量
-    int offset = math.max(end + count - len, 0);
-    int index = end - offset;
-
-    BagNum cD = BagNum.fromInt(count);
-    CandleModel m = list[index];
-    BagNum sum = m.close;
-    for (int i = index + 1; i < index + count; i++) {
-      sum += list[i].close;
-    }
-    MaResult? ret = MaResult(count: count, ts: m.timestamp, val: sum.div(cD));
-    maMap[m.timestamp] = ret;
-
-    for (int i = index - 1; i >= start; i--) {
-      m = list[i];
-      sum = sum - list[i + count].close + m.close;
-      ret = maMap[m.timestamp];
-      if (ret == null || ret.dirty) {
-        ret = MaResult(count: count, ts: m.timestamp, val: sum.div(cD));
-      }
-      maMap[m.timestamp] = ret;
-    }
-  }
-
-  MinMax? calculateMaMinmax(
-    int count, {
-    int? start,
-    int? end,
-  }) {
-    if (count <= 0 || isEmpty) return null;
-    int len = list.length;
-    start ??= this.start;
-    end ??= this.end;
-    if (start < 0 || end > len) return null;
-
-    final maMap = getMaMap(count);
-
-    int offset = math.max(end + count - len, 0);
-    int index = end - offset;
-
-    if (index < start) return null;
-    if (maMap.isEmpty ||
-        maMap[list[start].timestamp] == null ||
-        maMap[list[index].timestamp] == null) {
-      calculateAndCacheMa(count, start: start, end: end, reset: true);
-    }
-
-    MinMax? minmax;
-    MaResult? ret;
-    for (int i = index; i >= start; i--) {
-      ret = maMap[list[i].timestamp];
-      if (ret != null) {
-        minmax ??= MinMax(max: ret.val, min: ret.val);
-        minmax.updateMinMaxBy(ret.val);
-      }
+      minmax ??= m.maListMinmax;
+      minmax?.updateMinMax(m.maListMinmax);
     }
     return minmax;
   }

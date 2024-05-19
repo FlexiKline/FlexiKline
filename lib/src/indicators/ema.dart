@@ -121,17 +121,11 @@ class EMAPaintObject<T extends EMAIndicator> extends SinglePaintObjectBox<T> {
   MinMax? initState({required int start, required int end}) {
     if (!klineData.canPaintChart) return null;
 
-    MinMax? minmax;
-    for (var param in indicator.calcParams) {
-      final ret = klineData.calculateEmaMinmax(
-        param.count,
-        start: start,
-        end: end,
-      );
-      minmax ??= ret;
-      minmax?.updateMinMax(ret);
-    }
-    return minmax;
+    return klineData.calcuEmaMinmax(
+      indicator.calcParams,
+      start: start,
+      end: end,
+    );
   }
 
   @override
@@ -157,27 +151,23 @@ class EMAPaintObject<T extends EMAIndicator> extends SinglePaintObjectBox<T> {
     //   /// 裁剪绘制范围
     //   canvas.clipRect(setting.mainDrawRect);
 
-    for (var param in indicator.calcParams) {
-      final emaMap = klineData.getEmaMap(param.count);
-      if (emaMap.isEmpty) continue;
-
-      final offset = startCandleDx - candleWidthHalf;
-      CandleModel m;
-      MaResult? ret;
+    final offset = startCandleDx - candleWidthHalf;
+    for (int j = 0; j < indicator.calcParams.length; j++) {
+      BagNum? val;
       final List<Offset> points = [];
       for (int i = start; i < end; i++) {
-        m = list[i];
-        final dx = offset - (i - start) * candleActualWidth;
-        ret = emaMap[m.timestamp];
-        if (ret == null) continue;
-        final dy = valueToDy(ret.val, correct: false);
-        points.add(Offset(dx, dy));
+        val = list[i].emaList?.getItem(j);
+        if (val == null) continue;
+        points.add(Offset(
+          offset - (i - start) * candleActualWidth,
+          valueToDy(val, correct: false),
+        ));
       }
 
       canvas.drawPath(
         Path()..addPolygon(points, false),
         Paint()
-          ..color = param.tips.color
+          ..color = indicator.calcParams[j].tips.color
           ..style = PaintingStyle.stroke
           ..strokeWidth = indicator.lineWidth,
       );
@@ -197,18 +187,18 @@ class EMAPaintObject<T extends EMAIndicator> extends SinglePaintObjectBox<T> {
     Rect? tipsRect,
   }) {
     model ??= offsetToCandle(offset);
-    if (model == null) return null;
+    if (model == null || !model.isValidEmaList) return null;
 
     final children = <TextSpan>[];
-    for (var param in indicator.calcParams) {
-      final ret = klineData.getEmaResult(
-        count: param.count,
-        ts: model.timestamp,
-      );
-      if (ret == null) continue;
+    BagNum? val;
+    for (int i = 0; i < model.emaList!.length; i++) {
+      val = model.emaList?.getItem(i);
+      if (val == null) continue;
+      final param = indicator.calcParams.getItem(i);
+      if (param == null) continue;
 
       final text = formatNumber(
-        ret.val.toDecimal(),
+        val.toDecimal(),
         precision: param.tips.getP(klineData.precision),
         cutInvalidZero: true,
         prefix: param.tips.label,

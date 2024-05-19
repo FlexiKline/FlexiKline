@@ -55,7 +55,7 @@ abstract interface class IPaintDataInit {
   /// 最大值/最小值
   MinMax get minMax;
 
-  set minMax(MinMax val);
+  void setMinMax(MinMax val);
 }
 
 /// 指标图的绘制接口/指标图的Cross事件绘制接口
@@ -230,13 +230,13 @@ mixin DataInitMixin on PaintObjectProxy implements IPaintDataInit {
   MinMax get minMax => _minMax ?? MinMax.zero;
 
   @override
-  set minMax(MinMax val) {
+  void setMinMax(MinMax val) {
     _minMax = val;
   }
 
   double? _dyFactor;
   double get dyFactor {
-    return _dyFactor ??= chartRect.height / (minMax.size).toDouble();
+    return _dyFactor ??= chartRect.height / (minMax.diffDivisor).toDouble();
   }
 
   double valueToDy(BagNum value, {bool correct = true}) {
@@ -444,16 +444,16 @@ abstract class SinglePaintObjectBox<T extends SinglePaintObjectIndicator>
     if (_start != start || _end != end || _minMax == null) {
       _start = start;
       _end = end;
+    }
 
-      _minMax = null;
-      final ret = initState(start: start, end: end);
-      if (ret != null) {
-        minMax = ret;
-      }
+    _minMax = null;
+    final ret = initState(start: start, end: end);
+    if (ret != null) {
+      setMinMax(ret);
     }
 
     _dyFactor = null;
-    return minMax;
+    return _minMax;
   }
 
   @override
@@ -519,7 +519,7 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
   }
 
   @override
-  set minMax(MinMax val) {
+  void setMinMax(MinMax val) {
     if (_minMax == null) {
       _minMax = val;
     } else {
@@ -556,18 +556,18 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
         reset: reset,
       );
       if (ret != null && child.paintMode == PaintMode.combine) {
-        minMax = ret.clone();
+        setMinMax(ret.clone());
       }
     }
 
     for (var child in indicator.children) {
       if (child.paintMode == PaintMode.combine) {
-        child.paintObject?.minMax = minMax;
+        child.paintObject?.setMinMax(minMax);
       }
     }
 
     _dyFactor = null;
-    return minMax;
+    return _minMax;
   }
 
   @override

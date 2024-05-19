@@ -98,7 +98,8 @@ CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
                   color: Colors.black,
                   overflow: TextOverflow.ellipsis,
                   height: defaultTextHeight),
-              textWidth: 80)
+              textWidth: 80,
+              textAlign: TextAlign.center)
           : TextAreaConfig.fromJson(json['timeTick'] as Map<String, dynamic>),
     );
 

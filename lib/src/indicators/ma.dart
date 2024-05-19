@@ -90,12 +90,11 @@ class MAPaintObject<T extends MAIndicator> extends SinglePaintObjectBox<T> {
   MinMax? initState({required int start, required int end}) {
     if (!klineData.canPaintChart) return null;
 
-    MinMax? minmax = klineData.calcuMaMinmax(
+    return klineData.calcuMaMinmax(
       indicator.calcParams,
       start: start,
       end: end,
     );
-    return minmax;
   }
 
   @override
@@ -116,12 +115,12 @@ class MAPaintObject<T extends MAIndicator> extends SinglePaintObjectBox<T> {
     int start = klineData.start;
     int end = (klineData.end + 1).clamp(start, list.length); // 多绘制一根蜡烛
 
+    final offset = startCandleDx - candleWidthHalf;
     for (int j = 0; j < indicator.calcParams.length; j++) {
-      final offset = startCandleDx - candleWidthHalf;
       BagNum? val;
       final List<Offset> points = [];
       for (int i = start; i < end; i++) {
-        val = list[i].maRets?.getItem(j);
+        val = list[i].maList?.getItem(j);
         if (val == null) continue;
         points.add(Offset(
           offset - (i - start) * candleActualWidth,
@@ -148,12 +147,12 @@ class MAPaintObject<T extends MAIndicator> extends SinglePaintObjectBox<T> {
     Rect? tipsRect,
   }) {
     model ??= offsetToCandle(offset);
-    if (model == null || !model.isValidMaRets) return null;
+    if (model == null || !model.isValidMaList) return null;
 
     final children = <TextSpan>[];
     BagNum? val;
-    for (int i = 0; i < model.maRets!.length; i++) {
-      val = model.maRets![i];
+    for (int i = 0; i < model.maList!.length; i++) {
+      val = model.maList?.getItem(i);
       if (val == null) continue;
       final param = indicator.calcParams.getItem(i);
       if (param == null) continue;
@@ -162,7 +161,7 @@ class MAPaintObject<T extends MAIndicator> extends SinglePaintObjectBox<T> {
         val.toDecimal(),
         precision: param.tips.getP(klineData.precision),
         cutInvalidZero: true,
-        prefix: '${param.tips.label}: ',
+        prefix: param.tips.label,
         suffix: '  ',
       );
       children.add(TextSpan(
@@ -185,125 +184,3 @@ class MAPaintObject<T extends MAIndicator> extends SinglePaintObjectBox<T> {
     return null;
   }
 }
-
-// class MAPaintObject2<T extends MAIndicator> extends SinglePaintObjectBox<T> {
-//   MAPaintObject2({
-//     required super.controller,
-//     required super.indicator,
-//   });
-
-//   @override
-//   MinMax? initData({int? start, int? end}) {
-//     if (!klineData.canPaintChart) return null;
-
-//     MinMax? minmax;
-//     for (var param in indicator.calcParams) {
-//       final ret = klineData.calculateMaMinmax(param.count);
-//       minmax ??= ret;
-//       minmax?.updateMinMax(ret);
-//     }
-//     return minmax;
-//   }
-
-//   @override
-//   void paintChart(Canvas canvas, Size size) {
-//     paintMALine(canvas, size);
-//   }
-
-//   @override
-//   void onCross(Canvas canvas, Offset offset) {
-//     ///
-//   }
-
-//   /// 绘制MA指标线
-//   void paintMALine(Canvas canvas, Size size) {
-//     if (!klineData.canPaintChart) return;
-//     final list = klineData.list;
-//     int start = klineData.start;
-//     int end = (klineData.end + 1).clamp(start, list.length); // 多绘制一根蜡烛
-
-//     // try {
-//     //   // 保存画布状态
-//     //   canvas.save();
-//     //   // 裁剪绘制范围
-//     //   canvas.clipRect(setting.mainDrawRect);
-
-//     for (var param in indicator.calcParams) {
-//       final maMap = klineData.getMaMap(param.count);
-//       if (maMap.isEmpty) continue;
-
-//       final offset = startCandleDx - candleWidthHalf;
-//       CandleModel m;
-//       MaResult? ret;
-//       final List<Offset> points = [];
-//       for (int i = start; i < end; i++) {
-//         m = list[i];
-//         final dx = offset - (i - start) * candleActualWidth;
-//         ret = maMap[m.timestamp];
-//         ret ??= klineData.calculateMa(i, param.count);
-//         if (ret == null) continue;
-//         final dy = valueToDy(ret.val, correct: false);
-//         points.add(Offset(dx, dy));
-//       }
-
-//       canvas.drawPath(
-//         Path()..addPolygon(points, false),
-//         Paint()
-//           ..color = param.color
-//           ..style = PaintingStyle.stroke
-//           ..strokeWidth = setting.paintLineStrokeDefaultWidth,
-//       );
-//     }
-//     // } finally {
-//     //   // 恢复画布状态
-//     //   canvas.restore();
-//     // }
-//   }
-
-//   /// MA 绘制tips区域
-//   @override
-//   Size? paintTips(Canvas canvas, {CandleModel? model, Offset? offset}) {
-//     model ??= offsetToCandle(offset);
-//     if (model == null) return null;
-
-//     Rect drawRect = nextTipsRect;
-
-//     final children = <TextSpan>[];
-//     for (var param in indicator.calcParams) {
-//       final ret = klineData.getMaResult(
-//         count: param.count,
-//         ts: model.timestamp,
-//       );
-//       if (ret == null) continue;
-
-//       final text = formatNumber(
-//         ret.val,
-//         precision: state.curKlineData.req.precision,
-//         cutInvalidZero: true,
-//         prefix: '${param.label}: ',
-//         suffix: '  ',
-//       );
-//       children.add(TextSpan(
-//         text: text,
-//         style: TextStyle(
-//           fontSize: setting.tipsDefaultTextSize,
-//           color: param.color,
-//           height: setting.tipsDefaultTextHeight,
-//         ),
-//       ));
-//     }
-
-//     if (children.isNotEmpty) {
-//       return canvas.drawText(
-//         offset: drawRect.topLeft,
-//         textSpan: TextSpan(children: children),
-//         drawDirection: DrawDirection.ltr,
-//         drawableRect: drawRect,
-//         textAlign: TextAlign.left,
-//         padding: setting.tipsRectDefaultPadding,
-//         maxLines: 1,
-//       );
-//     }
-//     return null;
-//   }
-// }

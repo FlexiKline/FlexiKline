@@ -37,6 +37,16 @@ final class MaParam {
     return count;
   }
 
+  static int? getMinCountByList(List<MaParam> list) {
+    if (list.isEmpty) return null;
+    int? count;
+    for (var param in list) {
+      count ??= param.count;
+      count = param.count < count ? param.count : count;
+    }
+    return count;
+  }
+
   factory MaParam.fromJson(Map<String, dynamic> json) =>
       _$MaParamFromJson(json);
   Map<String, dynamic> toJson() => _$MaParamToJson(this);

@@ -18,7 +18,6 @@ import 'package:flutter/material.dart';
 
 import '../constant.dart';
 import '../core/export.dart';
-import '../data/export.dart';
 import '../extension/export.dart';
 import '../framework/export.dart';
 import '../model/export.dart';
@@ -142,7 +141,7 @@ class MACDPaintObject<T extends MACDIndicator> extends SinglePaintObjectBox<T>
   MinMax? initState({required int start, required int end}) {
     if (!klineData.canPaintChart) return null;
 
-    return klineData.calculateMacdMinmax(
+    return klineData.calcuMacdMinmax(
       param: indicator.calcParam,
       start: start,
       end: end,
@@ -174,37 +173,37 @@ class MACDPaintObject<T extends MACDIndicator> extends SinglePaintObjectBox<T>
 
   /// 绘制MACD图
   void paintMacdChart(Canvas canvas, Size size) {
-    final macdMap = klineData.getMacdMap(indicator.calcParam);
-    if (macdMap.isEmpty || !klineData.canPaintChart) return;
+    if (!klineData.canPaintChart) return;
+    if (!indicator.calcParam.isValid) return;
     final list = klineData.list;
     int start = klineData.start;
     int end = (klineData.end + 1).clamp(start, list.length); // 多绘制一根蜡烛
 
-    CandleModel m;
-    MacdResult? ret, next;
     final List<Offset> difPoints = [];
     final List<Offset> deaPoints = [];
     double zeroDy = valueToDy(BagNum.zero);
     final offset = startCandleDx - candleWidthHalf;
     final candleHalf = candleWidthHalf - settingConfig.candleSpacing;
+
+    CandleModel m;
+    CandleModel? next;
     for (int i = start; i < end; i++) {
       m = list[i];
-      ret = macdMap[m.timestamp];
-      if (ret == null) continue;
+      if (!m.isValidMacdData) continue;
       final dx = offset - (i - start) * candleActualWidth;
-      difPoints.add(Offset(dx, valueToDy(ret.dif, correct: false)));
-      deaPoints.add(Offset(dx, valueToDy(ret.dea, correct: false)));
+      difPoints.add(Offset(dx, valueToDy(m.dif!, correct: false)));
+      deaPoints.add(Offset(dx, valueToDy(m.dea!, correct: false)));
 
-      next = macdMap[list.getItem(i + 1)?.timestamp];
-      if (next != null && next.macd < ret.macd) {
+      next = list.getItem(i + 1);
+      if (next?.macd != null && m.macd! > next!.macd!) {
         // 空心
         canvas.drawPath(
           Path()
             ..addRect(Rect.fromPoints(
               Offset(dx - candleHalf, zeroDy),
-              Offset(dx + candleHalf, valueToDy(ret.macd, correct: false)),
+              Offset(dx + candleHalf, valueToDy(m.macd!, correct: false)),
             )),
-          ret.macd > BagNum.zero
+          m.macd! > BagNum.zero
               ? settingConfig.defLongHollowBarPaint
               : settingConfig.defShortHollowBarPaint,
         );
@@ -212,8 +211,8 @@ class MACDPaintObject<T extends MACDIndicator> extends SinglePaintObjectBox<T>
         // 实心
         canvas.drawLine(
           Offset(dx, zeroDy),
-          Offset(dx, valueToDy(ret.macd, correct: false)),
-          ret.macd > BagNum.zero
+          Offset(dx, valueToDy(m.macd!)),
+          m.macd! > BagNum.zero
               ? settingConfig.defLongBarPaint
               : settingConfig.defShortBarPaint,
         );
@@ -245,49 +244,41 @@ class MACDPaintObject<T extends MACDIndicator> extends SinglePaintObjectBox<T>
     Rect? tipsRect,
   }) {
     model ??= offsetToCandle(offset);
-    if (model == null) return null;
+    if (model == null || !model.isValidMacdData) return null;
 
-    final ret = klineData.getMacdResult(
-      param: indicator.calcParam,
-      ts: model.timestamp,
-    );
-    if (ret == null) return null;
-
+    final precision = indicator.precision;
     final children = <TextSpan>[];
-    final difTxt = formatNumber(
-      ret.dif.toDecimal(),
-      precision: indicator.difTips.getP(indicator.precision),
-      cutInvalidZero: true,
-      prefix: indicator.difTips.label,
-      suffix: ' ',
-    );
-    final deaTxt = formatNumber(
-      ret.dea.toDecimal(),
-      precision: indicator.deaTips.getP(indicator.precision),
-      cutInvalidZero: true,
-      prefix: indicator.deaTips.label,
-      suffix: ' ',
-    );
-    final macdTxt = formatNumber(
-      ret.macd.toDecimal(),
-      precision: indicator.macdTips.getP(indicator.precision),
-      cutInvalidZero: true,
-      prefix: indicator.macdTips.label,
-      suffix: ' ',
-    );
 
     children.add(TextSpan(
-      text: difTxt,
+      text: formatNumber(
+        model.dif?.toDecimal(),
+        precision: indicator.difTips.getP(precision),
+        cutInvalidZero: true,
+        prefix: indicator.difTips.label,
+        suffix: ' ',
+      ),
       style: indicator.difTips.style,
     ));
 
     children.add(TextSpan(
-      text: deaTxt,
+      text: formatNumber(
+        model.dea?.toDecimal(),
+        precision: indicator.deaTips.getP(precision),
+        cutInvalidZero: true,
+        prefix: indicator.deaTips.label,
+        suffix: ' ',
+      ),
       style: indicator.deaTips.style,
     ));
 
     children.add(TextSpan(
-      text: macdTxt,
+      text: formatNumber(
+        model.macd?.toDecimal(),
+        precision: indicator.macdTips.getP(precision),
+        cutInvalidZero: true,
+        prefix: indicator.macdTips.label,
+        suffix: ' ',
+      ),
       style: indicator.macdTips.style,
     ));
 

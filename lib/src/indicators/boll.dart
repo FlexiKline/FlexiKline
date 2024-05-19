@@ -141,7 +141,7 @@ class BOLLPaintObject<T extends BOLLIndicator> extends SinglePaintObjectBox<T> {
   MinMax? initState({required int start, required int end}) {
     if (!klineData.canPaintChart) return null;
 
-    return klineData.calculateBollMinmax(
+    return klineData.calcuBollMinmax(
       param: indicator.calcParam,
       start: start,
       end: end,
@@ -161,24 +161,25 @@ class BOLLPaintObject<T extends BOLLIndicator> extends SinglePaintObjectBox<T> {
 
   /// 绘制BOLL线
   void paintBollLine(Canvas canvas, Size size) {
-    final bollMap = klineData.getBollMap(indicator.calcParam);
-    if (bollMap.isEmpty || !klineData.canPaintChart) return;
+    if (!klineData.canPaintChart) return;
+    if (!indicator.calcParam.isValid) return;
     final list = klineData.list;
     int start = klineData.start;
     int end = (klineData.end + 1).clamp(start, list.length); // 多绘制一根蜡烛
 
-    BollResult? ret;
     final List<Offset> mbPoints = [];
     final List<Offset> upPoints = [];
     final List<Offset> dnPoints = [];
     final offset = startCandleDx - candleWidthHalf;
+
+    CandleModel m;
     for (int i = start; i < end; i++) {
-      ret = bollMap[list[i].timestamp];
-      if (ret == null) continue;
+      m = list[i];
+      if (!m.isValidBollData) continue;
       final dx = offset - (i - start) * candleActualWidth;
-      mbPoints.add(Offset(dx, valueToDy(ret.mb, correct: false)));
-      upPoints.add(Offset(dx, valueToDy(ret.up, correct: false)));
-      dnPoints.add(Offset(dx, valueToDy(ret.dn, correct: false)));
+      mbPoints.add(Offset(dx, valueToDy(m.mb!, correct: false)));
+      upPoints.add(Offset(dx, valueToDy(m.up!, correct: false)));
+      dnPoints.add(Offset(dx, valueToDy(m.dn!, correct: false)));
     }
 
     canvas.drawPath(
@@ -223,51 +224,41 @@ class BOLLPaintObject<T extends BOLLIndicator> extends SinglePaintObjectBox<T> {
     Rect? tipsRect,
   }) {
     model ??= offsetToCandle(offset);
-    if (model == null) return null;
-
-    final ret = klineData.getBollResult(
-      param: indicator.calcParam,
-      ts: model.timestamp,
-    );
-    if (ret == null) return null;
+    if (model == null || !model.isValidBollData) return null;
 
     final precision = klineData.precision;
     final children = <TextSpan>[];
 
-    final mbTxt = formatNumber(
-      ret.mb.toDecimal(),
-      precision: indicator.mbTips.getP(precision),
-      cutInvalidZero: true,
-      prefix: indicator.mbTips.label,
-      suffix: ' ',
-    );
-    final upTxt = formatNumber(
-      ret.up.toDecimal(),
-      precision: indicator.upTips.getP(precision),
-      cutInvalidZero: true,
-      prefix: indicator.upTips.label,
-      suffix: ' ',
-    );
-    final dnTxt = formatNumber(
-      ret.dn.toDecimal(),
-      precision: indicator.dnTips.getP(precision),
-      cutInvalidZero: true,
-      prefix: indicator.dnTips.label,
-      suffix: ' ',
-    );
-
     children.add(TextSpan(
-      text: mbTxt,
+      text: formatNumber(
+        model.mb?.toDecimal(),
+        precision: indicator.mbTips.getP(precision),
+        cutInvalidZero: true,
+        prefix: indicator.mbTips.label,
+        suffix: ' ',
+      ),
       style: indicator.mbTips.style,
     ));
 
     children.add(TextSpan(
-      text: upTxt,
+      text: formatNumber(
+        model.up?.toDecimal(),
+        precision: indicator.upTips.getP(precision),
+        cutInvalidZero: true,
+        prefix: indicator.upTips.label,
+        suffix: ' ',
+      ),
       style: indicator.upTips.style,
     ));
 
     children.add(TextSpan(
-      text: dnTxt,
+      text: formatNumber(
+        model.dn?.toDecimal(),
+        precision: indicator.dnTips.getP(precision),
+        cutInvalidZero: true,
+        prefix: indicator.dnTips.label,
+        suffix: ' ',
+      ),
       style: indicator.dnTips.style,
     ));
 

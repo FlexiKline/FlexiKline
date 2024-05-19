@@ -94,12 +94,11 @@ class VolMaPaintObject<T extends VolMaIndicator>
   MinMax? initState({required int start, required int end}) {
     if (!klineData.canPaintChart) return null;
 
-    MinMax? minmax = klineData.calcuVolMaMinmax(
+    return klineData.calcuVolMaMinmax(
       indicator.calcParams,
       start: start,
       end: end,
     );
-    return minmax;
   }
 
   @override
@@ -120,12 +119,12 @@ class VolMaPaintObject<T extends VolMaIndicator>
     int start = klineData.start;
     int end = (klineData.end + 1).clamp(start, list.length); // 多绘制一根蜡烛
 
+    final offset = startCandleDx - candleWidthHalf;
     for (int j = 0; j < indicator.calcParams.length; j++) {
-      final offset = startCandleDx - candleWidthHalf;
       BagNum? val;
       final List<Offset> points = [];
       for (int i = start; i < end; i++) {
-        val = list[i].volMaRets?.getItem(j);
+        val = list[i].volMaList?.getItem(j);
         if (val == null) continue;
         points.add(Offset(
           offset - (i - start) * candleActualWidth,
@@ -152,12 +151,12 @@ class VolMaPaintObject<T extends VolMaIndicator>
     Rect? tipsRect,
   }) {
     model ??= offsetToCandle(offset);
-    if (model == null || !model.isValidVolMaRets) return null;
+    if (model == null || !model.isValidVolMaList) return null;
 
     final children = <TextSpan>[];
     BagNum? val;
-    for (int i = 0; i < model.volMaRets!.length; i++) {
-      val = model.volMaRets![i];
+    for (int i = 0; i < model.volMaList!.length; i++) {
+      val = model.volMaList?.getItem(i);
       if (val == null) continue;
       final param = indicator.calcParams.getItem(i);
       if (param == null) continue;
@@ -166,7 +165,7 @@ class VolMaPaintObject<T extends VolMaIndicator>
         val.toDecimal(),
         precision: param.tips.getP(klineData.precision),
         cutInvalidZero: true,
-        prefix: '${param.tips.label}: ',
+        prefix: param.tips.label,
         suffix: '  ',
       );
       children.add(TextSpan(

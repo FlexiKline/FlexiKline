@@ -17,25 +17,79 @@ import '../bag_num.dart';
 import '../minmax.dart';
 
 mixin MaMixin {
-  List<BagNum?>? maRets;
+  List<BagNum?>? maList;
 
-  bool get isValidMaRets => maRets != null && maRets!.hasValidData;
+  bool get isValidMaList => maList != null && maList!.hasValidData;
 
-  MinMax? get maRetsMinmax => MinMax.getMinMaxByList(maRets);
+  MinMax? get maListMinmax => MinMax.getMinMaxByList(maList);
+
+  void cleanMa() {
+    maList = null;
+  }
 }
 
 mixin VolMaMixin {
-  List<BagNum?>? volMaRets;
+  List<BagNum?>? volMaList;
 
-  bool get isValidVolMaRets => volMaRets != null && volMaRets!.hasValidData;
+  bool get isValidVolMaList => volMaList != null && volMaList!.hasValidData;
 
-  MinMax? get volMaRetsMinmax => MinMax.getMinMaxByList(volMaRets);
+  MinMax? get volMaListMinmax => MinMax.getMinMaxByList(volMaList);
+
+  void cleanVolMa() {
+    volMaList = null;
+  }
 }
 
 mixin EmaMixin {
-  List<BagNum?>? emaRets;
+  List<BagNum?>? emaList;
 
-  bool get isValidEmaRets => emaRets != null && emaRets!.hasValidData;
+  bool get isValidEmaList => emaList != null && emaList!.hasValidData;
 
-  MinMax? get emaRetsMinmax => MinMax.getMinMaxByList(emaRets);
+  MinMax? get emaListMinmax => MinMax.getMinMaxByList(emaList);
+
+  void cleanEma() {
+    emaList = null;
+  }
+}
+
+mixin BollMixin {
+  BagNum? mb;
+  BagNum? up;
+  BagNum? dn;
+
+  bool get isValidBollData => mb != null && up != null && dn != null;
+
+  MinMax? get bollMinmax => MinMax.getMinMaxByList([mb, up, dn]);
+
+  void cleanBoll() {
+    mb = up = dn = null;
+  }
+}
+
+mixin MacdMixin {
+  BagNum? dif;
+  BagNum? dea;
+  BagNum? macd;
+
+  bool get isValidMacdData => dif != null && dea != null && macd != null;
+
+  MinMax? get macdMinmax => MinMax.getMinMaxByList([dif, dea, macd]);
+
+  void cleanMacd() {
+    dif = dea = macd = null;
+  }
+}
+
+mixin KdjMixin {
+  BagNum? k;
+  BagNum? d;
+  BagNum? j;
+
+  bool get isValidKdjData => k != null && d != null && j != null;
+
+  MinMax? get kdjMinmax => MinMax.getMinMaxByList([k, d, j]);
+
+  void cleanKdj() {
+    k = d = j = null;
+  }
 }

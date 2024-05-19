@@ -64,7 +64,8 @@ class MinMax {
 
   BagNum get size => max - min;
 
-  BagNum get divisor => max == min ? BagNum.one : max - min;
+  /// 最大最小值做为除数
+  BagNum get diffDivisor => max == min ? BagNum.one : max - min;
 
   bool get isZero => max == BagNum.zero && min == BagNum.zero;
 

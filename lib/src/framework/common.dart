@@ -23,9 +23,10 @@ const jsonKeySupportSubIndicators = 'supportSubIndicators';
 const jsonKeyMain = 'main';
 const jsonKeySub = 'sub';
 const jsonKeyChildren = 'children';
-const mainChartKey = ValueKey<dynamic>(jsonKeyMain);
+// const mainChartKey = ValueKey<dynamic>(jsonKeyMain);
 
 enum IndicatorType {
+  main('MAIN'),
   candle('CANDLE'),
   ma('MA'),
   ema('EMA'),
@@ -48,6 +49,7 @@ enum IndicatorType {
   }
 }
 
+const mainChartKey = ValueKey<dynamic>(IndicatorType.main);
 const candleKey = ValueKey<dynamic>(IndicatorType.candle);
 const maKey = ValueKey<dynamic>(IndicatorType.ma);
 const emaKey = ValueKey<dynamic>(IndicatorType.ema);

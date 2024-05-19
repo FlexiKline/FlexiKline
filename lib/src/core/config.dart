@@ -105,31 +105,29 @@ mixin ConfigBinding
           KDJIndicator(),
       maVolKey: restoreSubSupportIndicator(
             maVolKey,
-            MultiPaintObjectIndicator.fromJson,
+            MAVolumeIndicator.fromJson,
           ) ??
-          MultiPaintObjectIndicator(
-            key: maVolKey,
-            name: 'MAVOL',
-            height: defaultSubIndicatorHeight,
-            padding: defaultSubIndicatorPadding,
+          MAVolumeIndicator(
+            volumeIndicator: VolumeIndicator(),
+            volMaIndicator: VolMaIndicator(),
           ),
     };
 
-    (_supportSubIndicators[maVolKey] as MultiPaintObjectIndicator)
-        .appendIndicators([
-      restoreSubSupportIndicator(
-            maVolKey,
-            VolumeIndicator.fromJson,
-            childKey: volumeKey,
-          ) ??
-          VolumeIndicator(),
-      restoreSubSupportIndicator(
-            maVolKey,
-            VolMaIndicator.fromJson,
-            childKey: volMaKey,
-          ) ??
-          VolMaIndicator(),
-    ], this);
+    // (_supportSubIndicators[maVolKey] as MultiPaintObjectIndicator)
+    //     .appendIndicators([
+    //   restoreSubSupportIndicator(
+    //         maVolKey,
+    //         VolumeIndicator.fromJson,
+    //         childKey: volumeKey,
+    //       ) ??
+    //       VolumeIndicator(),
+    //   restoreSubSupportIndicator(
+    //         maVolKey,
+    //         VolMaIndicator.fromJson,
+    //         childKey: volMaKey,
+    //       ) ??
+    //       VolMaIndicator(),
+    // ], this);
 
     _mainIndicator = restoreMainIndicator() ??
         MultiPaintObjectIndicator(

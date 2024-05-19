@@ -24,7 +24,8 @@ import 'candle_mixin.dart';
 part 'candle_model.g.dart';
 
 @FlexiModelSerializable
-class CandleModel with MaMixin, VolMaMixin {
+class CandleModel
+    with MaMixin, VolMaMixin, EmaMixin, BollMixin, MacdMixin, KdjMixin {
   CandleModel({
     required this.timestamp,
     required this.o,
@@ -129,7 +130,7 @@ class CandleModel with MaMixin, VolMaMixin {
         _volCcyQuote = vcq != null ? BagNum.fromDecimal(vcq!) : null;
       }
     }
-    maRets = null;
+    maList = null;
   }
 
   CandleModel copyWith({

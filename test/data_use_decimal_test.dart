@@ -96,12 +96,12 @@ void calcuAndCacheMa(
   final closeSum = List.filled(paramLen, BagNum.zero, growable: false);
   for (int i = end - 1; i >= start; i--) {
     m = list[i];
-    m.maRets = List.filled(calcParams.length, null, growable: false);
+    m.maList = List.filled(calcParams.length, null, growable: false);
     for (int j = 0; j < calcParams.length; j++) {
       closeSum[j] += m.close;
       final count = calcParams[j].count;
       if (i <= end - count) {
-        m.maRets![j] = closeSum[j].divNum(count);
+        m.maList![j] = closeSum[j].divNum(count);
         closeSum[j] -= list[i + (count - 1)].close;
       }
     }
@@ -118,8 +118,8 @@ MinMax? calcuMaMinmax(
   int len = list.length;
   if (start < 0 || end > len) return null;
 
-  if (list[start].isValidMaRets != true ||
-      list[end - 1].isValidMaRets != true) {
+  if (list[start].isValidMaList != true ||
+      list[end - 1].isValidMaList != true) {
     calcuAndCacheMa(list, calcParams, start, end);
   }
 
@@ -127,8 +127,8 @@ MinMax? calcuMaMinmax(
   CandleModel m;
   for (int i = end - 1; i >= start; i--) {
     m = list[i];
-    minmax ??= m.maRetsMinmax;
-    minmax?.updateMinMax(m.maRetsMinmax);
+    minmax ??= m.maListMinmax;
+    minmax?.updateMinMax(m.maListMinmax);
   }
   return minmax;
 }
