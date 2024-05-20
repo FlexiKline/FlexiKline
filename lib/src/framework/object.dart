@@ -47,7 +47,7 @@ abstract interface class IPaintBoundingBox {
   /// 设置下一个Tips的绘制区域.
   Rect shiftNextTipsRect(double height);
 
-  void resetPaintBounding();
+  void resetPaintBounding({int? slot});
 }
 
 /// 指标图的绘制数据初始化接口
@@ -244,8 +244,8 @@ mixin DataInitMixin on PaintObjectProxy implements IPaintDataInit {
     return chartRect.bottom - (value - minMax.min).toDouble() * dyFactor;
   }
 
-  BagNum? dyToValue(double dy) {
-    if (!chartRect.inclueDy(dy)) return null;
+  BagNum? dyToValue(double dy, {bool check = true}) {
+    if (check && !chartRect.inclueDy(dy)) return null;
     return minMax.max - ((dy - chartRect.top) / dyFactor).toBagNum();
   }
 
@@ -580,8 +580,8 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
           model: state.curKlineData.latest,
         );
 
-        if (tipsHeight > 0 && tipsHeight != padding.top) {
-          indicator.updateLayout(padding: padding.copyWith(top: tipsHeight));
+        if (indicator.needUpdateLayout(tipsHeight)) {
+          indicator.updateLayout(tipsHeight: tipsHeight);
         }
       }
       for (var child in indicator.children) {

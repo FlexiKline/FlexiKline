@@ -18,6 +18,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../widgets/flexi_kline_size_slider.dart';
+
 class KlineSettingDialog extends ConsumerStatefulWidget {
   static const String dialogTag = "KlineSettingDialog";
   const KlineSettingDialog({
@@ -181,7 +183,6 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
     );
   }
 
-  double sliderValue = 0.3;
   Widget _buildKlineHeightSetting(BuildContext context) {
     final theme = ref.watch(themeProvider);
     return Container(
@@ -196,24 +197,13 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
             '图表高度',
             style: theme.t1s14w400,
           ),
-          Slider(
-            value: widget.controller.mainDrawHeight / ScreenUtil().screenHeight,
-            min: 0,
-            max: 1,
-            thumbColor: theme.t1,
-            overlayColor: MaterialStatePropertyAll(theme.transparent),
-            onChanged: (value) {
-              sliderValue = value;
-              setState(() {
-                final newHeight = ScreenUtil().screenHeight * value;
-                widget.controller.setMainSize(
-                  Size(
-                    ScreenUtil().screenWidth,
-                    newHeight,
-                  ),
-                );
-              });
-            },
+          FlexiKlineSizeSlider(
+            controller: widget.controller,
+            maxSize: Size(
+              ScreenUtil().screenWidth,
+              ScreenUtil().screenHeight * 2 / 3,
+            ),
+            axis: Axis.horizontal,
           ),
         ],
       ),

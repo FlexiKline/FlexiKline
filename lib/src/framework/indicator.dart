@@ -84,6 +84,7 @@ abstract class Indicator {
   bool updateLayout({
     double? height,
     EdgeInsets? padding,
+    bool reset = false,
   }) {
     bool hasChange = false;
     if (height != null && height > 0 && height != this.height) {
@@ -95,10 +96,10 @@ abstract class Indicator {
       this.padding = padding;
       hasChange = true;
     }
-    if (hasChange && paintObject != null) {
+    if (reset || hasChange) {
       paintObject?.resetPaintBounding();
     }
-    return hasChange;
+    return reset || hasChange;
   }
 
   PaintObject createPaintObject(KlineBindingBase controller);
@@ -151,11 +152,18 @@ class MultiPaintObjectIndicator<T extends SinglePaintObjectIndicator>
     required super.padding,
     this.drawBelowTipsArea = false,
     Iterable<T> children = const [],
-  }) : children = LinkedHashSet<T>.from(children);
+  })  : children = LinkedHashSet<T>.from(children),
+        _initialPadding = padding;
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   final Set<T> children;
   bool drawBelowTipsArea;
+  final EdgeInsets _initialPadding;
+
+  /// 当前[tipsHeight]是否需要更新布局参数
+  bool needUpdateLayout(double tipsHeight) {
+    return _initialPadding.top + tipsHeight != padding.top;
+  }
 
   @override
   MultiPaintObjectBox createPaintObject(
@@ -181,22 +189,35 @@ class MultiPaintObjectIndicator<T extends SinglePaintObjectIndicator>
   ) {
     indicator.updateLayout(
       height: indicator.paintMode.isCombine ? height : null,
-      padding: padding,
+      padding: indicator.paintMode.isCombine ? padding : null,
     );
     indicator.paintObject = indicator.createPaintObject(controller);
     indicator.paintObject!.parent = paintObject;
   }
 
   @override
-  bool updateLayout({double? height, EdgeInsets? padding}) {
+  bool updateLayout({
+    double? height,
+    EdgeInsets? padding,
+    bool reset = false,
+    double? tipsHeight,
+  }) {
+    if (tipsHeight != null) {
+      // 如果tipsHeight不为空, 说明是绘制过程中动态调整, 只需要在MultiPaintObjectIndicator原padding基础上增加即可.
+      padding = _initialPadding.copyWith(
+        top: _initialPadding.top + tipsHeight,
+      );
+    }
     bool hasChange = super.updateLayout(
       height: height,
       padding: padding,
+      reset: reset,
     );
     for (var child in children) {
       final childChange = child.updateLayout(
         height: child.paintMode.isCombine ? this.height : null,
-        padding: this.padding,
+        padding: child.paintMode.isCombine ? this.padding : null,
+        reset: reset,
       );
       hasChange = hasChange || childChange;
     }

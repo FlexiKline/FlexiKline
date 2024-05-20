@@ -23,12 +23,14 @@ class FlexiKlineWidget extends StatefulWidget {
   const FlexiKlineWidget({
     super.key,
     required this.controller,
+    this.alignment,
     this.decoration,
     this.foregroundDecoration,
     this.loadingView,
   });
 
   final FlexiKlineController controller;
+  final AlignmentGeometry? alignment;
   final BoxDecoration? decoration;
   final Decoration? foregroundDecoration;
   final Widget? loadingView;
@@ -63,6 +65,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      alignment: widget.alignment,
       width: widget.controller.canvasWidth,
       height: widget.controller.canvasHeight,
       decoration: widget.decoration,
@@ -107,25 +110,29 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
               rect: widget.controller.mainRect,
               child: Offstage(
                 offstage: !loading,
-                child: widget.loadingView ??
-                    Center(
-                      key: const ValueKey('loadingView'),
-                      child: SizedBox.square(
-                        dimension: widget.controller.loadingProgressSize,
-                        child: CircularProgressIndicator(
-                          strokeWidth:
-                              widget.controller.loadingProgressStrokeWidth,
-                          backgroundColor:
-                              widget.controller.loadingProgressBackgroundColor,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            widget.controller.loadingProgressValueColor,
-                          ),
-                        ),
-                      ),
-                    ),
+                child: _buildLoadingView(context),
               ),
             )
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingView(BuildContext context) {
+    if (widget.loadingView != null) {
+      return widget.loadingView!;
+    }
+    return Center(
+      key: const ValueKey('loadingView'),
+      child: SizedBox.square(
+        dimension: widget.controller.loading.size,
+        child: CircularProgressIndicator(
+          strokeWidth: widget.controller.loading.strokeWidth,
+          backgroundColor: widget.controller.loading.background,
+          valueColor: AlwaysStoppedAnimation<Color>(
+            widget.controller.loading.valueColor,
+          ),
         ),
       ),
     );

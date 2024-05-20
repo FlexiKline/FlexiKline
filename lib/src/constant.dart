@@ -25,11 +25,15 @@ const double defaultSubIndicatorHeight = 60;
 
 // 默认指标图Padding
 const EdgeInsets defaultSubIndicatorPadding = EdgeInsets.only(top: 12);
+
 // 默认主图区域Padding
 const EdgeInsets defaultMainIndicatorPadding = EdgeInsets.only(
-  top: 12, // 顶部留白
-  bottom: 15, // 底部TimeTick展示
+  top: 5, // 顶部留白
+  bottom: 5, // 底部留白, 5: 最低价字体高度的一半, 保证最低价文本不会绘制到边线上.
 );
+
+// 默认主图区域最小Size
+const Size defaultMainRectMinSize = Size(150, 100);
 
 // 默认副图指标最大数量
 const int defaultSubChartMaxCount = 4;

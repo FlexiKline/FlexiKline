@@ -32,3 +32,4 @@ export 'line_config/line_config.dart';
 export 'text_area_config/text_area_config.dart';
 export 'mark_config/mark_config.dart';
 export 'tooltip_config/tooltip_config.dart';
+export 'loading_config/loading_config.dart';

@@ -70,16 +70,16 @@ mixin GridBinding
   void paintGridBg(Canvas canvas, Size size) {
     if (gridConfig.show) {
       // 主图图Grid X轴起始值
-      const mainLeft = 0.0;
-      final mainRight = mainRectWidth;
+      final mainLeft = mainRect.left;
+      final mainRight = mainRect.right;
       // 主图图Grid Y轴起始值
-      const mainTop = 0.0;
-      final mainBottom = mainDrawBottom;
+      final mainTop = mainRect.top;
+      final mainBottom = mainRect.bottom;
       // 副图Grid Y轴起始值
       final subTop = subRect.top;
       final subBottom = subRect.bottom;
 
-      // 绘制horizontal轴 Grid 线
+      /// 绘制horizontal轴 Grid 线
       if (gridConfig.horizontal.show) {
         final horiLineType = gridConfig.horizontal.type;
         final horiPaint = gridConfig.horizontal.paint;
@@ -121,15 +121,15 @@ mixin GridBinding
           dashes: horiDashes,
         );
 
-        // 绘制副图区域起始线
-        canvas.drawLineType(
-          horiLineType,
-          Path()
-            ..moveTo(mainLeft, subTop)
-            ..lineTo(mainRight, subTop),
-          horiPaint,
-          dashes: horiDashes,
-        );
+        // // 绘制副图区域起始线
+        // canvas.drawLineType(
+        //   horiLineType,
+        //   Path()
+        //     ..moveTo(mainLeft, subTop)
+        //     ..lineTo(mainRight, subTop),
+        //   horiPaint,
+        //   dashes: horiDashes,
+        // );
 
         // 绘制每一个副图的底部线
         final list = subIndicatorHeightList;
@@ -148,7 +148,7 @@ mixin GridBinding
         }
       }
 
-      // 绘制Vertical轴 Grid 线
+      /// 绘制Vertical轴 Grid 线
       if (gridConfig.vertical.show) {
         final vertLineType = gridConfig.vertical.type;
         final vertPaint = gridConfig.vertical.paint;
@@ -157,6 +157,17 @@ mixin GridBinding
         double dx = mainLeft;
         final step = mainRight / gridConfig.vertical.count;
 
+        // 绘制左边线
+        canvas.drawLineType(
+          vertLineType,
+          Path()
+            ..moveTo(dx, mainTop)
+            ..lineTo(dx, subBottom),
+          vertPaint,
+          dashes: vertDashes,
+        );
+
+        // 绘制主区/副区的Vertical线
         for (int i = 1; i < gridConfig.vertical.count; i++) {
           dx = i * step;
           canvas.drawLineType(
@@ -177,6 +188,16 @@ mixin GridBinding
             dashes: vertDashes,
           );
         }
+
+        // 绘制右边线
+        canvas.drawLineType(
+          vertLineType,
+          Path()
+            ..moveTo(mainRight, mainTop)
+            ..lineTo(mainRight, subBottom),
+          vertPaint,
+          dashes: vertDashes,
+        );
       }
     }
   }

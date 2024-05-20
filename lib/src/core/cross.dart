@@ -221,8 +221,8 @@ mixin CrossBinding
   @protected
   void paintCrossLine(Canvas canvas, Offset offset) {
     final path = Path()
-      ..moveTo(mainDrawLeft, offset.dy)
-      ..lineTo(mainDrawRight, offset.dy)
+      ..moveTo(mainChartLeft, offset.dy)
+      ..lineTo(mainChartRight, offset.dy)
       ..moveTo(offset.dx, 0)
       ..lineTo(offset.dx, canvasHeight);
 
@@ -302,7 +302,7 @@ mixin CrossBinding
       top += mainIndicator.padding.top;
     }
 
-    if (offset.dx > mainDrawWidthHalf) {
+    if (offset.dx > mainChartWidthHalf) {
       // 点击区域在右边; 绘制在左边
       Offset offset = Offset(
         mainRect.left + tooltipConfig.margin.left,
@@ -312,7 +312,7 @@ mixin CrossBinding
       final size = canvas.drawText(
         offset: offset,
         drawDirection: DrawDirection.ltr,
-        drawableRect: mainDrawRect,
+        drawableRect: mainChartRect,
         textSpan: TextSpan(
           children: labelSpanList,
           style: tooltipConfig.style,
@@ -333,7 +333,7 @@ mixin CrossBinding
           offset.dy,
         ),
         drawDirection: DrawDirection.ltr,
-        drawableRect: mainDrawRect,
+        drawableRect: mainChartRect,
         textSpan: TextSpan(
           children: valueSpanList,
           style: tooltipConfig.style,
@@ -357,7 +357,7 @@ mixin CrossBinding
       final size = canvas.drawText(
         offset: offset,
         drawDirection: DrawDirection.rtl,
-        drawableRect: mainDrawRect,
+        drawableRect: mainChartRect,
         textSpan: TextSpan(
           children: valueSpanList,
           style: tooltipConfig.style,
@@ -378,7 +378,7 @@ mixin CrossBinding
           offset.dy,
         ),
         drawDirection: DrawDirection.rtl,
-        drawableRect: mainDrawRect,
+        drawableRect: mainChartRect,
         textSpan: TextSpan(
           children: labelSpanList,
           style: tooltipConfig.style,

@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../constant.dart';
@@ -120,16 +119,16 @@ class CandleIndicator extends SinglePaintObjectIndicator {
       borderRadius: BorderRadius.all(Radius.circular(2)),
     ),
     // 时间刻度.
-    this.timeTick = const TextAreaConfig(
-      style: TextStyle(
-        fontSize: defaulTextSize,
-        color: Colors.black,
-        overflow: TextOverflow.ellipsis,
-        height: defaultTextHeight,
-      ),
-      textWidth: 80,
-      textAlign: TextAlign.center,
-    ),
+    // this.timeTick = const TextAreaConfig(
+    //   style: TextStyle(
+    //     fontSize: defaulTextSize,
+    //     color: Colors.black,
+    //     overflow: TextOverflow.ellipsis,
+    //     height: defaultTextHeight,
+    //   ),
+    //   textWidth: 80,
+    //   textAlign: TextAlign.center,
+    // ),
   });
 
   // 最高价
@@ -146,7 +145,7 @@ class CandleIndicator extends SinglePaintObjectIndicator {
   final bool showCountDown;
   final TextAreaConfig countDown;
   // 时间刻度.
-  final TextAreaConfig timeTick;
+  // final TextAreaConfig timeTick;
 
   @override
   CandlePaintObject createPaintObject(
@@ -171,11 +170,11 @@ class CandlePaintObject<T extends CandleIndicator>
   BagNum? _maxHigh, _minLow;
 
   /// 两个时间刻度间隔的蜡烛数
-  int get timeTickIntervalCount {
-    return ((math.max(60, indicator.timeTick.textWidth ?? 0)) /
-            setting.candleActualWidth)
-        .round();
-  }
+  // int get timeTickIntervalCount {
+  //   return ((math.max(60, indicator.timeTick.textWidth ?? 0)) /
+  //           setting.candleActualWidth)
+  //       .round();
+  // }
 
   @override
   MinMax? initState({required int start, required int end}) {
@@ -215,7 +214,7 @@ class CandlePaintObject<T extends CandleIndicator>
     );
 
     /// 绘制Cross X轴时间刻度
-    paintTimeTickOnCross(canvas, offset);
+    // paintTimeTickOnCross(canvas, offset);
   }
 
   // onCross时, 格式化Y轴上的标记值.
@@ -240,7 +239,7 @@ class CandlePaintObject<T extends CandleIndicator>
     int end = klineData.end;
 
     final offset = startCandleDx - candleWidthHalf;
-    final bar = klineData.timeBar;
+    // final bar = klineData.timeBar;
     Offset? maxHihgOffset, minLowOffset;
     bool hasEnough = paintDxOffset > 0;
     BagNum maxHigh = list[start].high;
@@ -269,16 +268,16 @@ class CandlePaintObject<T extends CandleIndicator>
         isLong ? settingConfig.defLongBarPaint : settingConfig.defShortBarPaint,
       );
 
-      if (bar != null && i % timeTickIntervalCount == 0) {
-        // 绘制时间刻度.
-        paintTimeTick(
-          canvas,
-          bar: bar,
-          model: m,
-          offset: Offset(dx, chartRect.bottom),
-          bottomHeight: chartRect.bottom,
-        );
-      }
+      // if (bar != null && i % timeTickIntervalCount == 0) {
+      //   // 绘制时间刻度.
+      //   paintTimeTick(
+      //     canvas,
+      //     bar: bar,
+      //     model: m,
+      //     offset: Offset(dx, chartRect.bottom),
+      //     bottomHeight: chartRect.bottom,
+      //   );
+      // }
 
       if (indicator.high.show || indicator.low.show) {
         if (hasEnough) {
@@ -353,52 +352,52 @@ class CandlePaintObject<T extends CandleIndicator>
   }
 
   /// 绘制时间刻度
-  void paintTimeTick(
-    Canvas canvas, {
-    required TimeBar bar,
-    required CandleModel model,
-    required Offset offset,
-    required double bottomHeight,
-  }) {
-    // final data = klineData;
-    // if (data.list.isEmpty) return;
-    // int start = data.start;
-    // int end = data.end;
+  // void paintTimeTick(
+  //   Canvas canvas, {
+  //   required TimeBar bar,
+  //   required CandleModel model,
+  //   required Offset offset,
+  //   required double bottomHeight,
+  // }) {
+  //   // final data = klineData;
+  //   // if (data.list.isEmpty) return;
+  //   // int start = data.start;
+  //   // int end = data.end;
 
-    // final offset = startCandleDx - candleWidthHalf;
-    // final bar = data.timerBar;
-    // for (var i = start; i < end; i++) {
-    //   final model = data.list[i];
-    //   final dx = offset - (i - start) * candleActualWidth;
-    //   if (bar != null && i % timeTickIntervalCount == 0) {
-    //     final offset = Offset(dx,  chartRect.bottom);
+  //   // final offset = startCandleDx - candleWidthHalf;
+  //   // final bar = data.timerBar;
+  //   // for (var i = start; i < end; i++) {
+  //   //   final model = data.list[i];
+  //   //   final dx = offset - (i - start) * candleActualWidth;
+  //   //   if (bar != null && i % timeTickIntervalCount == 0) {
+  //   //     final offset = Offset(dx,  chartRect.bottom);
 
-    // 绘制时间刻度.
-    final timeTick = indicator.timeTick;
-    final dyCenterOffset = (indicator.padding.bottom - timeTick.areaHeight) / 2;
-    canvas.drawTextArea(
-      offset: Offset(
-        offset.dx,
-        offset.dy + dyCenterOffset,
-      ),
-      drawDirection: DrawDirection.center,
-      text: model.formatDateTimeByTimeBar(bar),
-      textConfig: timeTick,
-    );
+  //   // 绘制时间刻度.
+  //   final timeTick = indicator.timeTick;
+  //   final dyCenterOffset = (indicator.padding.bottom - timeTick.areaHeight) / 2;
+  //   canvas.drawTextArea(
+  //     offset: Offset(
+  //       offset.dx,
+  //       offset.dy + dyCenterOffset,
+  //     ),
+  //     drawDirection: DrawDirection.center,
+  //     text: model.formatDateTimeByTimeBar(bar),
+  //     textConfig: timeTick,
+  //   );
 
-    //   }
-    // }
-  }
+  //   //   }
+  //   // }
+  // }
 
   /// 绘制蜡烛图右侧价钱刻度
   /// 根据Grid horizontal配置来绘制, 保证在grid.horizontal线之上.
   void paintPriceTick(Canvas canvas, Size size) {
-    final dyStep = chartRect.bottom / gridConfig.horizontal.count;
+    final dyStep = drawableRect.height / gridConfig.horizontal.count;
     final dx = chartRect.right;
     double dy = 0;
     for (int i = 1; i <= gridConfig.horizontal.count; i++) {
       dy = i * dyStep;
-      final price = dyToValue(dy);
+      final price = dyToValue(dy, check: false);
       if (price == null) continue;
 
       final text = formatPrice(
@@ -603,29 +602,29 @@ class CandlePaintObject<T extends CandleIndicator>
   }
 
   /// 绘制OnCross 时间刻度
-  @protected
-  void paintTimeTickOnCross(Canvas canvas, Offset offset) {
-    final index = dxToIndex(offset.dx);
-    final model = klineData.getCandle(index);
-    final timeBar = klineData.timeBar;
-    if (model == null || timeBar == null) return;
+  // @protected
+  // void paintTimeTickOnCross(Canvas canvas, Offset offset) {
+  //   final index = dxToIndex(offset.dx);
+  //   final model = klineData.getCandle(index);
+  //   final timeBar = klineData.timeBar;
+  //   if (model == null || timeBar == null) return;
 
-    final time = model.formatDateTimeByTimeBar(timeBar);
-    // final time = formatyyMMddHHMMss(model.dateTime);
+  //   final time = model.formatDateTimeByTimeBar(timeBar);
+  //   // final time = formatyyMMddHHMMss(model.dateTime);
 
-    final tickText = crossConfig.tickText;
+  //   final tickText = crossConfig.tickText;
 
-    final dyCenterOffset = (indicator.padding.bottom - tickText.areaHeight) / 2;
-    canvas.drawTextArea(
-      offset: Offset(
-        offset.dx,
-        chartRect.bottom + dyCenterOffset,
-      ),
-      drawDirection: DrawDirection.center,
-      text: time,
-      textConfig: tickText,
-    );
-  }
+  //   final dyCenterOffset = (indicator.padding.bottom - tickText.areaHeight) / 2;
+  //   canvas.drawTextArea(
+  //     offset: Offset(
+  //       offset.dx,
+  //       chartRect.bottom + dyCenterOffset,
+  //     ),
+  //     drawDirection: DrawDirection.center,
+  //     text: time,
+  //     textConfig: tickText,
+  //   );
+  // }
 
   @override
   Size? paintTips(

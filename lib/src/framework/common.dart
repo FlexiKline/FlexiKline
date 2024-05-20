@@ -27,6 +27,7 @@ const jsonKeyChildren = 'children';
 
 enum IndicatorType {
   main('MAIN'),
+  time('Time'),
   candle('CANDLE'),
   ma('MA'),
   ema('EMA'),
@@ -50,6 +51,9 @@ enum IndicatorType {
 }
 
 const mainChartKey = ValueKey<dynamic>(IndicatorType.main);
+const timeKey = ValueKey<dynamic>(IndicatorType.time);
+
+/// 指标
 const candleKey = ValueKey<dynamic>(IndicatorType.candle);
 const maKey = ValueKey<dynamic>(IndicatorType.ma);
 const emaKey = ValueKey<dynamic>(IndicatorType.ema);

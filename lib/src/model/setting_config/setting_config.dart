@@ -24,21 +24,18 @@ part 'setting_config.g.dart';
 class SettingConfig {
   SettingConfig({
     /// Long/Short颜色配置
-    Color textColor = Colors.black,
-    Color longColor = const Color(0xFF33BD65),
-    Color shortColor = const Color(0xFFE84E74),
+    this.textColor = Colors.black,
+    this.longColor = const Color(0xFF33BD65),
+    this.shortColor = const Color(0xFFE84E74),
     this.opacity = 0.5,
 
     /// 内置LoadingView样式配置
-    this.loadingProgressSize = 24,
-    this.loadingProgressStrokeWidth = 4,
-    this.loadingProgressBackgroundColor = const Color(0xFFECECEC),
-    this.loadingProgressValueColor = Colors.black,
+    this.loading = const LoadingConfig(),
 
     /// 主/副图区域大小配置
     this.mainRect = Rect.zero,
-    // this.mainTipsHeight = 12,
-    this.mainPadding = const EdgeInsets.only(top: 12, bottom: 15),
+    this.mainMinSize = defaultMainRectMinSize,
+    this.mainPadding = defaultMainIndicatorPadding,
 
     /// 主/副图绘制参数
     this.minPaintBlankRate = 0.5,
@@ -64,9 +61,7 @@ class SettingConfig {
     /// 副图配置
     // 副区的指标图最大数量
     this.subChartMaxCount = defaultSubChartMaxCount,
-  })  : textColor = textColor,
-        longColor = longColor,
-        shortColor = shortColor;
+  });
 
   /// Long/Short颜色配置
   final Color textColor;
@@ -75,23 +70,25 @@ class SettingConfig {
   final double opacity;
 
   /// 内置LoadingView样式配置
-  final double loadingProgressSize;
-  final double loadingProgressStrokeWidth;
-  final Color loadingProgressBackgroundColor;
-  final Color loadingProgressValueColor;
+  final LoadingConfig loading;
 
-  /// 主/副图区域大小配置
+  /// 主区
+  // 主区域大小配置
   Rect mainRect;
-  // double mainTipsHeight;
+  // 主区域最小大小限制
+  Size mainMinSize;
+  // 主区域Padding
   EdgeInsets mainPadding;
 
-  /// 主/副图绘制参数
-  // 绘制区域最少留白比例
-  // 例如: 当蜡烛数量不足以绘制一屏, 向右移动到末尾时, 绘制区域左边最少留白区域占可绘制区域(canvasWidth)的比例
+  /// 绘制区域最少留白比例
+  /// 例如: 当蜡烛数量不足以绘制一屏, 向右移动到末尾时, 绘制区域左边最少留白区域占可绘制区域(canvasWidth)的比例
   double minPaintBlankRate;
-  // 如果足够总是计算一屏的蜡烛.
-  // 当滑动或初始化时会存在(minPaintBlankRate)的空白, 此时, 计算按一屏的蜡烛数量向后计算.
+
+  /// 如果足够总是计算一屏的蜡烛.
+  /// 当滑动或初始化时会存在(minPaintBlankRate)的空白, 此时, 计算按一屏的蜡烛数量向后计算.
   bool alwaysCalculateScreenOfCandlesIfEnough;
+
+  /// 蜡烛配置
   // 最大蜡烛宽度[1, 50]
   double candleMaxWidth;
   // 单根蜡烛宽度
@@ -106,9 +103,8 @@ class SettingConfig {
   /// 全局默认的刻度值配置.
   final TextAreaConfig tickText;
 
-  /// 副图配置
   // 副区的指标图最大数量
-  int subChartMaxCount;
+  final int subChartMaxCount;
 
   factory SettingConfig.fromJson(Map<String, dynamic> json) =>
       _$SettingConfigFromJson(json);

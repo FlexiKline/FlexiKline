@@ -93,6 +93,7 @@ mixin ConfigBinding
     };
 
     _supportSubIndicators = {
+      timeKey: TimeIndicator(),
       macdKey: restoreSubSupportIndicator(
             macdKey,
             MACDIndicator.fromJson,
@@ -143,6 +144,7 @@ mixin ConfigBinding
     }
 
     _subIndicators = ListQueue<Indicator>(defaultSubChartMaxCount);
+    addIndicatorInSub(timeKey);
     for (var childKey in subChildrenKeys) {
       addIndicatorInSub(childKey);
     }
@@ -220,12 +222,10 @@ mixin ConfigBinding
     bool changed = mainIndicator.updateLayout(
       height: height,
       padding: padding,
+      reset: true,
     );
     if (changed) {
-      // for (var indicator in subIndicators) {
-      //   indicator.paintObject?.resetDrawBounding();
-      // }
-      markRepaintChart();
+      markRepaintChart(reset: true);
     }
   }
 

@@ -150,6 +150,7 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage> {
       ),
       body: SingleChildScrollView(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             LatestPriceView(
               model: controller.curKlineData.latest,

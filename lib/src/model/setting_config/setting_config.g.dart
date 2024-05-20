@@ -18,25 +18,19 @@ SettingConfig _$SettingConfigFromJson(Map<String, dynamic> json) =>
           ? const Color(0xFFE84E74)
           : const ColorConverter().fromJson(json['shortColor'] as String?),
       opacity: (json['opacity'] as num?)?.toDouble() ?? 0.5,
-      loadingProgressSize:
-          (json['loadingProgressSize'] as num?)?.toDouble() ?? 24,
-      loadingProgressStrokeWidth:
-          (json['loadingProgressStrokeWidth'] as num?)?.toDouble() ?? 4,
-      loadingProgressBackgroundColor:
-          json['loadingProgressBackgroundColor'] == null
-              ? const Color(0xFFECECEC)
-              : const ColorConverter()
-                  .fromJson(json['loadingProgressBackgroundColor'] as String?),
-      loadingProgressValueColor: json['loadingProgressValueColor'] == null
-          ? Colors.black
-          : const ColorConverter()
-              .fromJson(json['loadingProgressValueColor'] as String?),
+      loading: json['loading'] == null
+          ? const LoadingConfig()
+          : LoadingConfig.fromJson(json['loading'] as Map<String, dynamic>),
       mainRect: json['mainRect'] == null
           ? Rect.zero
           : const RectConverter()
               .fromJson(json['mainRect'] as Map<String, dynamic>),
+      mainMinSize: json['mainMinSize'] == null
+          ? defaultMainRectMinSize
+          : const SizeConverter()
+              .fromJson(json['mainMinSize'] as Map<String, dynamic>),
       mainPadding: json['mainPadding'] == null
-          ? const EdgeInsets.only(top: 12, bottom: 15)
+          ? defaultMainIndicatorPadding
           : const EdgeInsetsConverter()
               .fromJson(json['mainPadding'] as Map<String, dynamic>),
       minPaintBlankRate: (json['minPaintBlankRate'] as num?)?.toDouble() ?? 0.5,
@@ -76,13 +70,9 @@ Map<String, dynamic> _$SettingConfigToJson(SettingConfig instance) {
   writeNotNull(
       'shortColor', const ColorConverter().toJson(instance.shortColor));
   val['opacity'] = instance.opacity;
-  val['loadingProgressSize'] = instance.loadingProgressSize;
-  val['loadingProgressStrokeWidth'] = instance.loadingProgressStrokeWidth;
-  writeNotNull('loadingProgressBackgroundColor',
-      const ColorConverter().toJson(instance.loadingProgressBackgroundColor));
-  writeNotNull('loadingProgressValueColor',
-      const ColorConverter().toJson(instance.loadingProgressValueColor));
+  val['loading'] = instance.loading.toJson();
   val['mainRect'] = const RectConverter().toJson(instance.mainRect);
+  val['mainMinSize'] = const SizeConverter().toJson(instance.mainMinSize);
   val['mainPadding'] = const EdgeInsetsConverter().toJson(instance.mainPadding);
   val['minPaintBlankRate'] = instance.minPaintBlankRate;
   val['alwaysCalculateScreenOfCandlesIfEnough'] =

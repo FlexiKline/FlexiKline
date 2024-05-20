@@ -91,16 +91,6 @@ CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
               padding: defaultTextPading,
               borderRadius: BorderRadius.all(Radius.circular(2)))
           : TextAreaConfig.fromJson(json['countDown'] as Map<String, dynamic>),
-      timeTick: json['timeTick'] == null
-          ? const TextAreaConfig(
-              style: TextStyle(
-                  fontSize: defaulTextSize,
-                  color: Colors.black,
-                  overflow: TextOverflow.ellipsis,
-                  height: defaultTextHeight),
-              textWidth: 80,
-              textAlign: TextAlign.center)
-          : TextAreaConfig.fromJson(json['timeTick'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$CandleIndicatorToJson(CandleIndicator instance) =>
@@ -116,5 +106,4 @@ Map<String, dynamic> _$CandleIndicatorToJson(CandleIndicator instance) =>
       'useCandleColorAsLatestBg': instance.useCandleColorAsLatestBg,
       'showCountDown': instance.showCountDown,
       'countDown': instance.countDown.toJson(),
-      'timeTick': instance.timeTick.toJson(),
     };

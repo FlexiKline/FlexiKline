@@ -92,7 +92,7 @@ mixin StateBinding
 
   @override
   int dxToIndex(double dx) {
-    final dxPaintOffset = (mainDrawRight - dx) + paintDxOffset;
+    final dxPaintOffset = (mainChartRight - dx) + paintDxOffset;
     // final diff = dxPaintOffset % candleActualWidth;
     return (dxPaintOffset / candleActualWidth).floor();
   }
@@ -100,8 +100,8 @@ mixin StateBinding
   /// 将index转换为当前绘制区域对应的X轴坐标. 如果超出范围, 则返回null.
   @override
   double? indexToDx(int index) {
-    double dx = mainDrawRight - (index * candleActualWidth - paintDxOffset);
-    if (mainDrawRect.inclueDx(dx)) return dx;
+    double dx = mainChartRight - (index * candleActualWidth - paintDxOffset);
+    if (mainChartRect.inclueDx(dx)) return dx;
     return null;
   }
 
@@ -111,9 +111,9 @@ mixin StateBinding
     if (paintDxOffset == 0) {
       return 0;
     } else if (paintDxOffset > 0) {
-      return mainDrawRight + paintDxOffset % candleActualWidth;
+      return mainChartRight + paintDxOffset % candleActualWidth;
     } else {
-      return mainDrawRight + paintDxOffset;
+      return mainChartRight + paintDxOffset;
     }
   }
 
@@ -143,14 +143,14 @@ mixin StateBinding
   /// PaintDxOffset的最小值
   double get minPaintDxOffset {
     return math.min(
-      maxPaintWidth - mainDrawWidth,
+      maxPaintWidth - mainChartWidth,
       -minPaintBlankWidth,
     );
   }
 
   /// PaintDxOffset的最大值
   double get maxPaintDxOffset {
-    return maxPaintWidth - (mainDrawWidth - minPaintBlankWidth);
+    return maxPaintWidth - (mainChartWidth - minPaintBlankWidth);
   }
 
   /// 矫正PaintDxOffset的范围
@@ -160,8 +160,8 @@ mixin StateBinding
 
   void initPaintDxOffset() {
     paintDxOffset = math.min(
-      maxPaintWidth - mainDrawWidth, // 不足一屏, 首根蜡烛偏移量等于首根蜡烛右边长度.
-      -firstCandleInitOffset, // 满足一屏时, 首根蜡烛相对于主绘制区域最小的偏移量
+      maxPaintWidth - mainChartWidth, // 不足一屏, 首根蜡烛偏移量等于首根蜡烛右边长度.
+      -settingConfig.firstCandleInitOffset, // 满足一屏时, 首根蜡烛相对于主绘制区域最小的偏移量
     );
   }
 
@@ -171,7 +171,7 @@ mixin StateBinding
     if (paintDxOffset > 0) {
       final startIndex = (paintDxOffset / candleActualWidth).floor();
       final diff = paintDxOffset % candleActualWidth;
-      final maxCount = ((mainDrawWidth + diff) / candleActualWidth).round();
+      final maxCount = ((mainChartWidth + diff) / candleActualWidth).round();
       curKlineData.ensureStartAndEndIndex(
         startIndex,
         maxCount,

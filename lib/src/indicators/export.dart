@@ -22,3 +22,4 @@ export 'ema.dart';
 export 'macd.dart';
 export 'kdj.dart';
 export 'boll.dart';
+export 'time.dart';
