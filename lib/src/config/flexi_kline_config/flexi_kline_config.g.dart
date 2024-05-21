@@ -11,6 +11,7 @@ FlexiKlineConfig _$FlexiKlineConfigFromJson(Map<String, dynamic> json) =>
       grid: GridConfig.fromJson(json['grid'] as Map<String, dynamic>),
       setting: SettingConfig.fromJson(json['setting'] as Map<String, dynamic>),
       cross: CrossConfig.fromJson(json['cross'] as Map<String, dynamic>),
+      tooltip: TooltipConfig.fromJson(json['tooltip'] as Map<String, dynamic>),
       indicators:
           IndicatorsConfig.fromJson(json['indicators'] as Map<String, dynamic>),
     );
@@ -20,5 +21,6 @@ Map<String, dynamic> _$FlexiKlineConfigToJson(FlexiKlineConfig instance) =>
       'grid': instance.grid.toJson(),
       'setting': instance.setting.toJson(),
       'cross': instance.cross.toJson(),
+      'tooltip': instance.tooltip.toJson(),
       'indicators': instance.indicators.toJson(),
     };

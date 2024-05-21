@@ -22,7 +22,8 @@ import 'mock.dart';
 
 void main() {
   final stopwatch = Stopwatch();
-  final controller = FlexiKlineController();
+  final configuration = FlexiKlineDefaultConfiguration();
+  final controller = FlexiKlineController(configuration: configuration);
   late SinglePaintObjectIndicator maIndicator;
   final canvas = Canvas(PictureRecorder());
   const mainSize = Size(400, 300);

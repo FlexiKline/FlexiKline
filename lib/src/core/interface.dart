@@ -147,7 +147,7 @@ abstract interface class IChart {
 abstract interface class ICross {
   Listenable get repaintCross;
 
-  CrossConfig get crossConfig;
+  // CrossConfig get crossConfig;
 
   void paintCross(Canvas canvas, Size size);
 
@@ -161,10 +161,10 @@ abstract interface class ICross {
 }
 
 abstract interface class ISetting {
-  SettingConfig get settingConfig;
+  // SettingConfig get settingConfig;
 }
 
 abstract interface class IGrid {
-  GridConfig get gridConfig;
+  // GridConfig get gridConfig;
   void markRepaintGrid();
 }

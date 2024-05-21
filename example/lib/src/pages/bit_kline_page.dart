@@ -75,11 +75,11 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage> {
     super.initState();
 
     controller = FlexiKlineController(
+      configuration: BitFlexiKlineStorage(),
       logger: LoggerImpl(
         tag: "BitFlexiKline",
         debug: kDebugMode,
       ),
-      storage: BitFlexiKlineStorage(),
     );
     controller.setMainSize(
       Size(ScreenUtil().screenWidth, 300.r),

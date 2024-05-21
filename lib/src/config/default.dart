@@ -13,17 +13,20 @@
 // limitations under the License.
 
 import '../constant.dart';
+import '../framework/export.dart';
 import '../indicators/export.dart';
 import 'cross_config/cross_config.dart';
 import 'flexi_kline_config/flexi_kline_config.dart';
 import 'grid_config/grid_config.dart';
 import 'indicators_config/indicators_config.dart';
 import 'setting_config/setting_config.dart';
+import 'tooltip_config/tooltip_config.dart';
 
 final FlexiKlineConfig defaultFlexiKlineConfig = FlexiKlineConfig(
   grid: const GridConfig(),
   setting: SettingConfig(),
   cross: CrossConfig(),
+  tooltip: TooltipConfig(),
   indicators: IndicatorsConfig(
     candle: CandleIndicator(height: defaultMainIndicatorHeight),
     volume: VolumeIndicator(
@@ -51,3 +54,16 @@ final FlexiKlineConfig defaultFlexiKlineConfig = FlexiKlineConfig(
     ),
   ),
 );
+
+class FlexiKlineDefaultConfiguration implements IConfiguration {
+  const FlexiKlineDefaultConfiguration();
+  @override
+  FlexiKlineConfig getFlexiKlineConfig() {
+    return defaultFlexiKlineConfig;
+  }
+
+  @override
+  void saveFlexiKlineConfig(FlexiKlineConfig config) {
+    // TODO: implement saveFlexiKlineConfig
+  }
+}

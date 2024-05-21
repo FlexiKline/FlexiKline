@@ -23,32 +23,28 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../config.dart';
 
 class BitFlexiKlineStorage extends IConfiguration {
-  @override
-  String get flexKlineConfigKey => 'flexi_kline_config_key_bit';
+  static const flexKlineConfigKey = 'flexi_kline_config_key_bit';
 
   @override
-  Map<String, dynamic>? getFlexiKlineConfig() {
+  FlexiKlineConfig getFlexiKlineConfig() {
     try {
       final String? jsonStr = CacheUtil().get(flexKlineConfigKey);
       if (jsonStr != null && jsonStr.isNotEmpty) {
         final json = jsonDecode(jsonStr);
         if (json is Map<String, dynamic>) {
-          // return json;
-          return {};
+          return FlexiKlineConfig.fromJson(json);
         }
       }
     } catch (err, stack) {
-      defLogger.e('getModelList error:$err', stackTrace: stack);
+      defLogger.e('getFlexiKlineConfig error:$err', stackTrace: stack);
     }
-    return null;
+    return defaultFlexiKlineConfig;
   }
 
   @override
-  void saveFlexiKlineConfig(Map<String, dynamic> klineConfig) {
-    if (klineConfig.isNotEmpty) {
-      final jsonSrc = jsonEncode(klineConfig);
-      CacheUtil().setString(flexKlineConfigKey, jsonSrc);
-    }
+  void saveFlexiKlineConfig(FlexiKlineConfig config) {
+    final jsonSrc = jsonEncode(config);
+    CacheUtil().setString(flexKlineConfigKey, jsonSrc);
   }
 
   FlexiKlineConfig genFlexiKlineConfigObject(FKTheme theme) {
@@ -99,6 +95,7 @@ class BitFlexiKlineStorage extends IConfiguration {
           ),
         ),
       ),
+      tooltip: TooltipConfig(),
       indicators: genIndicatorsConfig(theme),
     );
   }

@@ -16,7 +16,6 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 
-import '../config/export.dart';
 import '../extension/export.dart';
 import 'binding_base.dart';
 import 'interface.dart';
@@ -29,7 +28,7 @@ mixin GridBinding
   void init() {
     super.init();
     logd('init grid');
-    _gridConfig = GridConfig.fromJson(gridConfigData);
+    // _gridConfig = GridConfig.fromJson(gridConfigData);
   }
 
   @override
@@ -51,17 +50,17 @@ mixin GridBinding
     storeGridConfig(gridConfig);
   }
 
-  @override
-  void loadConfig(Map<String, dynamic> configData) {
-    super.loadConfig(configData);
-    logd("loadConfig grid");
-    _gridConfig = GridConfig.fromJson(configData);
-  }
+  // @override
+  // void loadConfig(Map<String, dynamic> configData) {
+  //   super.loadConfig(configData);
+  //   logd("loadConfig grid");
+  //   _gridConfig = GridConfig.fromJson(configData);
+  // }
 
-  late GridConfig _gridConfig;
+  // late GridConfig _gridConfig;
 
-  @override
-  GridConfig get gridConfig => _gridConfig;
+  // @override
+  // GridConfig get gridConfig => _gridConfig;
 
   @override
   void markRepaintGrid() => repaintGridBg.value++;

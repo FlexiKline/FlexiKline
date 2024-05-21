@@ -19,7 +19,6 @@ import 'package:flutter/material.dart';
 import '../config/export.dart';
 import '../constant.dart';
 import '../framework/export.dart';
-import '../indicators/export.dart';
 import 'binding_base.dart';
 import 'interface.dart';
 import 'setting.dart';
@@ -38,84 +37,84 @@ mixin ConfigBinding
   late Queue<Indicator> _subIndicators;
 
   /// 支持的主图指标集
-  late Map<ValueKey, SinglePaintObjectIndicator> _supportMainIndicators;
+  // late Map<ValueKey, SinglePaintObjectIndicator> _supportMainIndicators;
 
   /// 支持的副图指标集
-  late Map<ValueKey, Indicator> _supportSubIndicators;
+  // late Map<ValueKey, Indicator> _supportSubIndicators;
 
   @override
   void init() {
     super.init();
     logd('init config');
 
-    _indicatorsConfig = IndicatorsConfig.fromJson(indicatorsConfigData);
+    // _indicatorsConfig = IndicatorsConfig.fromJson(indicatorsConfigData);
 
     /// 初始化指标配置:
     /// 1. 优先从storage中反序列化所有指标配置.
     /// 2. 如果storage中不存在, 默认构造
-    _supportMainIndicators = {
-      candleKey: restoreMainSupportIndicator(
-            candleKey,
-            CandleIndicator.fromJson,
-          ) ??
-          CandleIndicator(
-            height: mainRect.height,
-          ),
-      volumeKey: restoreMainSupportIndicator(
-            volumeKey,
-            VolumeIndicator.fromJson,
-          ) ??
-          VolumeIndicator(),
-      maKey: restoreMainSupportIndicator(
-            maKey,
-            MAIndicator.fromJson,
-          ) ??
-          MAIndicator(
-            height: mainRect.height,
-          ),
-      emaKey: restoreMainSupportIndicator(
-            emaKey,
-            EMAIndicator.fromJson,
-          ) ??
-          EMAIndicator(
-            height: mainRect.height,
-          ),
-      bollKey: restoreMainSupportIndicator(
-            bollKey,
-            BOLLIndicator.fromJson,
-          ) ??
-          BOLLIndicator(
-            height: mainRect.height,
-          )
-    };
+    // _supportMainIndicators = {
+    //   candleKey: restoreMainSupportIndicator(
+    //         candleKey,
+    //         CandleIndicator.fromJson,
+    //       ) ??
+    //       CandleIndicator(
+    //         height: mainRect.height,
+    //       ),
+    //   volumeKey: restoreMainSupportIndicator(
+    //         volumeKey,
+    //         VolumeIndicator.fromJson,
+    //       ) ??
+    //       VolumeIndicator(),
+    //   maKey: restoreMainSupportIndicator(
+    //         maKey,
+    //         MAIndicator.fromJson,
+    //       ) ??
+    //       MAIndicator(
+    //         height: mainRect.height,
+    //       ),
+    //   emaKey: restoreMainSupportIndicator(
+    //         emaKey,
+    //         EMAIndicator.fromJson,
+    //       ) ??
+    //       EMAIndicator(
+    //         height: mainRect.height,
+    //       ),
+    //   bollKey: restoreMainSupportIndicator(
+    //         bollKey,
+    //         BOLLIndicator.fromJson,
+    //       ) ??
+    //       BOLLIndicator(
+    //         height: mainRect.height,
+    //       )
+    // };
 
-    _supportSubIndicators = {
-      timeKey: TimeIndicator(),
-      macdKey: restoreSubSupportIndicator(
-            macdKey,
-            MACDIndicator.fromJson,
-          ) ??
-          MACDIndicator(),
-      kdjKey: restoreSubSupportIndicator(
-            kdjKey,
-            KDJIndicator.fromJson,
-          ) ??
-          KDJIndicator(),
-      maVolKey: restoreSubSupportIndicator(
-            maVolKey,
-            MAVolumeIndicator.fromJson,
-          ) ??
-          MAVolumeIndicator(
-            volumeIndicator: VolumeIndicator(
-              paintMode: PaintMode.combine,
-              showYAxisTick: true,
-              showCrossMark: true,
-              showTips: true,
-              useTint: false,
-            ),
-            volMaIndicator: VolMaIndicator(),
-          ),
-    };
+    // _supportSubIndicators = {
+    //   timeKey: TimeIndicator(),
+    //   macdKey: restoreSubSupportIndicator(
+    //         macdKey,
+    //         MACDIndicator.fromJson,
+    //       ) ??
+    //       MACDIndicator(),
+    //   kdjKey: restoreSubSupportIndicator(
+    //         kdjKey,
+    //         KDJIndicator.fromJson,
+    //       ) ??
+    //       KDJIndicator(),
+    //   maVolKey: restoreSubSupportIndicator(
+    //         maVolKey,
+    //         MAVolumeIndicator.fromJson,
+    //       ) ??
+    //       MAVolumeIndicator(
+    //         volumeIndicator: VolumeIndicator(
+    //           paintMode: PaintMode.combine,
+    //           showYAxisTick: true,
+    //           showCrossMark: true,
+    //           showTips: true,
+    //           useTint: false,
+    //         ),
+    //         volMaIndicator: VolMaIndicator(),
+    //       ),
+    // };
 
     // (_supportSubIndicators[maVolKey] as MultiPaintObjectIndicator)
     //     .appendIndicators([
@@ -133,24 +132,23 @@ mixin ConfigBinding
     //       VolMaIndicator(),
     // ], this);
 
-    _mainIndicator = restoreMainIndicator() ??
-        MultiPaintObjectIndicator(
-          key: mainChartKey,
-          name: 'MAIN',
-          height: 0,
-          padding: defaultMainIndicatorPadding,
-          drawBelowTipsArea: true,
-        );
-    _mainIndicator.appendIndicator(_supportMainIndicators[candleKey]!, this);
-    for (var childKey in mainChildrenKeys) {
-      addIndicatorInMain(childKey);
-    }
+    _mainIndicator = MultiPaintObjectIndicator(
+      key: mainChartKey,
+      name: 'MAIN',
+      height: 0,
+      padding: defaultMainIndicatorPadding,
+      drawBelowTipsArea: true,
+    );
+    _mainIndicator.appendIndicator(indicatorsConfig.candle, this);
+    // for (var childKey in mainChildrenKeys) {
+    //   addIndicatorInMain(childKey);
+    // }
 
     _subIndicators = ListQueue<Indicator>(defaultSubChartMaxCount);
-    addIndicatorInSub(timeKey);
-    for (var childKey in subChildrenKeys) {
-      addIndicatorInSub(childKey);
-    }
+    // addIndicatorInSub(timeKey);
+    // for (var childKey in subChildrenKeys) {
+    //   addIndicatorInSub(childKey);
+    // }
   }
 
   @override
@@ -174,28 +172,28 @@ mixin ConfigBinding
       indicator.dispose();
     }
     subIndicators.clear();
-    _supportMainIndicators.clear();
-    _supportSubIndicators.clear();
+    // _supportMainIndicators.clear();
+    // _supportSubIndicators.clear();
   }
 
   @override
   void storeState() {
     super.storeState();
     logd('storeState config');
-    storeMainIndicator(_mainIndicator);
-    storeSubIndicators(_subIndicators);
-    storeSupportMainIndicators(_supportMainIndicators);
-    storeSupportSubIndicators(_supportSubIndicators);
+    // storeMainIndicator(_mainIndicator);
+    // storeSubIndicators(_subIndicators);
+    // storeSupportMainIndicators(_supportMainIndicators);
+    // storeSupportSubIndicators(_supportSubIndicators);
   }
 
-  late IndicatorsConfig _indicatorsConfig;
+  // late IndicatorsConfig _indicatorsConfig;
 
   Set<ValueKey> get supportMainIndicatorKeys {
-    return _supportMainIndicators.keys.toSet()..remove(candleKey);
+    return indicatorsConfig.mainIndicators.keys.toSet()..remove(candleKey);
   }
 
   Set<ValueKey> get supportSubIndicatorKeys {
-    return _supportSubIndicators.keys.toSet();
+    return indicatorsConfig.subIndicators.keys.toSet();
   }
 
   Set<ValueKey> get mainIndicatorKeys {
@@ -262,10 +260,10 @@ mixin ConfigBinding
 
   @override
   void addIndicatorInMain(ValueKey<dynamic> key) {
-    if (_supportMainIndicators.containsKey(key)) {
-      mainIndicator.appendIndicator(_supportMainIndicators[key]!, this);
-      markRepaintChart();
-    }
+    // if (_supportMainIndicators.containsKey(key)) {
+    //   mainIndicator.appendIndicator(_supportMainIndicators[key]!, this);
+    //   markRepaintChart();
+    // }
   }
 
   /// 删除主图中key指定的指标
@@ -278,15 +276,15 @@ mixin ConfigBinding
   /// 在副图中增加指标
   @override
   void addIndicatorInSub(ValueKey<dynamic> key) {
-    if (_supportSubIndicators.containsKey(key)) {
-      if (subIndicators.length >= subChartMaxCount) {
-        final deleted = subIndicators.removeFirst();
-        deleted.dispose();
-      }
-      subIndicators.addLast(_supportSubIndicators[key]!);
-      onSizeChange?.call();
-      markRepaintChart();
-    }
+    // if (_supportSubIndicators.containsKey(key)) {
+    //   if (subIndicators.length >= subChartMaxCount) {
+    //     final deleted = subIndicators.removeFirst();
+    //     deleted.dispose();
+    //   }
+    //   subIndicators.addLast(_supportSubIndicators[key]!);
+    //   onSizeChange?.call();
+    //   markRepaintChart();
+    // }
   }
 
   /// 删除副图key指定的指标

@@ -24,7 +24,7 @@ import 'interface.dart';
 mixin SettingBinding on KlineBindingBase implements ISetting, IConfig {
   @override
   void init() {
-    _settingConfig = SettingConfig.fromJson(settingConfigData);
+    // _settingConfig = SettingConfig.fromJson(settingConfigData);
     logd('init setting');
     super.init();
   }
@@ -48,20 +48,20 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IConfig {
     storeSettingData(settingConfig);
   }
 
-  @override
-  void loadConfig(Map<String, dynamic> configData) {
-    logd("loadConfig setting");
-    _settingConfig = SettingConfig.fromJson(configData);
-    super.loadConfig(configData);
-  }
+  // @override
+  // void loadConfig(Map<String, dynamic> configData) {
+  //   logd("loadConfig setting");
+  //   // _settingConfig = SettingConfig.fromJson(configData);
+  //   super.loadConfig(configData);
+  // }
 
   VoidCallback? onSizeChange;
   ValueChanged<bool>? onLoading;
 
-  late SettingConfig _settingConfig;
+  // late SettingConfig _settingConfig;
 
-  @override
-  SettingConfig get settingConfig => _settingConfig;
+  // @override
+  // SettingConfig get settingConfig => _settingConfig;
 
   /// Loading配置
   LoadingConfig get loading => settingConfig.loading;

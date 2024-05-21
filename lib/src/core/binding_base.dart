@@ -21,11 +21,11 @@ import 'interface.dart';
 abstract class KlineBindingBase
     with KlineLog, KlineConfiguration, GestureHanderImpl {
   KlineBindingBase({
+    required IConfiguration configuration,
     ILogger? logger,
-    IConfiguration? storage,
   }) {
+    this.configuration = configuration;
     loggerDelegate = logger;
-    configuration = storage;
     logd("constrouct");
     init();
   }

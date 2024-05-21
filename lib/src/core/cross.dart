@@ -14,7 +14,6 @@
 
 import 'package:flutter/material.dart';
 
-import '../config/export.dart';
 import '../constant.dart';
 import '../data/export.dart';
 import '../extension/export.dart';
@@ -46,8 +45,8 @@ mixin CrossBinding
   void init() {
     super.init();
     logd('init cross');
-    _crossConfig = CrossConfig.fromJson(crossConfigData);
-    _tooltipConfig = TooltipConfig.fromJson(tooltipConfigData);
+    // _crossConfig = CrossConfig.fromJson(crossConfigData);
+    // _tooltipConfig = TooltipConfig.fromJson(tooltipConfigData);
   }
 
   @override
@@ -69,21 +68,21 @@ mixin CrossBinding
     storeCrossConfig(crossConfig);
   }
 
-  @override
-  void loadConfig(Map<String, dynamic> configData) {
-    super.loadConfig(configData);
-    logd("loadConfig cross");
-    _crossConfig = CrossConfig.fromJson(configData);
-    _tooltipConfig = TooltipConfig.fromJson(configData);
-  }
+  // @override
+  // void loadConfig(Map<String, dynamic> configData) {
+  //   super.loadConfig(configData);
+  //   logd("loadConfig cross");
+  //   _crossConfig = CrossConfig.fromJson(configData);
+  //   _tooltipConfig = TooltipConfig.fromJson(configData);
+  // }
 
-  late CrossConfig _crossConfig;
-  late TooltipConfig _tooltipConfig;
+  // late CrossConfig _crossConfig;
+  // late TooltipConfig _tooltipConfig;
 
-  @override
-  CrossConfig get crossConfig => _crossConfig;
+  // @override
+  // CrossConfig get crossConfig => _crossConfig;
 
-  TooltipConfig get tooltipConfig => _tooltipConfig;
+  // TooltipConfig get tooltipConfig => _tooltipConfig;
 
   final ValueNotifier<int> _repaintCross = ValueNotifier(0);
   @override

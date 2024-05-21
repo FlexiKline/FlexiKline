@@ -106,9 +106,9 @@ mixin ControllerProxyMixin on PaintObject {
   IConfig get config => controller as IConfig;
 
   /// Config
-  SettingConfig get settingConfig => setting.settingConfig;
-  GridConfig get gridConfig => (controller as IGrid).gridConfig;
-  CrossConfig get crossConfig => cross.crossConfig;
+  SettingConfig get settingConfig => controller.settingConfig;
+  GridConfig get gridConfig => controller.gridConfig;
+  CrossConfig get crossConfig => controller.crossConfig;
 
   double get candleActualWidth => setting.candleActualWidth;
 

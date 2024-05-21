@@ -75,11 +75,11 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage> {
     super.initState();
 
     controller = FlexiKlineController(
+      configuration: OkFlexiKlineStorage(),
       logger: LoggerImpl(
         tag: "OkFlexiKline",
         debug: kDebugMode,
       ),
-      storage: OkFlexiKlineStorage(),
     );
     controller.setMainSize(
       Size(ScreenUtil().screenWidth, 300.r),
