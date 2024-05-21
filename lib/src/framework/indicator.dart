@@ -157,7 +157,9 @@ class MultiPaintObjectIndicator<T extends SinglePaintObjectIndicator>
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   final Set<T> children;
+
   bool drawBelowTipsArea;
+
   final EdgeInsets _initialPadding;
 
   /// 当前[tipsHeight]是否需要更新布局参数

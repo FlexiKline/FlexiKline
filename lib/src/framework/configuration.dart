@@ -16,7 +16,7 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 
-import '../model/export.dart';
+import '../config/export.dart';
 import 'common.dart';
 import 'indicator.dart';
 import 'logger.dart';
@@ -28,7 +28,7 @@ typedef IndicatorFromJson<T extends Indicator> = T Function(
 
 const defaultFlexKlineConfigKey = 'flexi_kline_config_key';
 
-abstract class IStore {
+abstract class IConfiguration {
   String get flexKlineConfigKey => defaultFlexKlineConfigKey;
 
   Map<String, dynamic>? getFlexiKlineConfig();
@@ -36,30 +36,30 @@ abstract class IStore {
   void saveFlexiKlineConfig(Map<String, dynamic> klineConfig);
 }
 
-mixin KlineStorage implements IStore, ILogger {
-  IStore? storeDelegate;
+mixin KlineConfiguration implements IConfiguration, ILogger {
+  IConfiguration? configuration;
 
   @override
   String get flexKlineConfigKey {
-    return storeDelegate?.flexKlineConfigKey ?? defaultFlexKlineConfigKey;
+    return configuration?.flexKlineConfigKey ?? defaultFlexKlineConfigKey;
   }
 
   @override
   Map<String, dynamic> getFlexiKlineConfig() {
-    return storeDelegate?.getFlexiKlineConfig() ?? <String, dynamic>{};
+    return configuration?.getFlexiKlineConfig() ?? <String, dynamic>{};
   }
 
   @override
   void saveFlexiKlineConfig(Map<String, dynamic> klineConfig) {
     final configData = Map<String, dynamic>.of(klineConfig);
-    return storeDelegate?.saveFlexiKlineConfig(configData);
+    return configuration?.saveFlexiKlineConfig(configData);
   }
 
   Map<String, dynamic>? _flexiKlineConfig;
 
   Map<String, dynamic> get flexiKlineConfig {
     if (_flexiKlineConfig == null) {
-      final initConfig = storeDelegate?.getFlexiKlineConfig();
+      final initConfig = configuration?.getFlexiKlineConfig();
       if (initConfig != null && initConfig.isNotEmpty) {
         _flexiKlineConfig = Map<String, dynamic>.of(initConfig);
       }
@@ -203,6 +203,14 @@ mixin KlineStorage implements IStore, ILogger {
         value.toJson(),
       ),
     );
+  }
+
+  /// IndicatorsConfig
+  Map<String, dynamic> get indicatorsConfigData => _getRootConfig(
+        jsonKeyIndicators,
+      );
+  void storeIndicatorsData(IndicatorsConfig config) {
+    flexiKlineConfig[jsonKeyIndicators] = config.toJson();
   }
 
   /// SettingConfig

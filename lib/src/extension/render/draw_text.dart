@@ -15,7 +15,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
-import '../../model/text_area_config/text_area_config.dart';
+import '../../config/text_area_config/text_area_config.dart';
 import '../geometry_ext.dart';
 import 'common.dart';
 

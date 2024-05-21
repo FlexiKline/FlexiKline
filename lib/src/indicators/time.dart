@@ -15,6 +15,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
+import '../config/export.dart';
 import '../constant.dart';
 import '../core/export.dart';
 import '../data/export.dart';
@@ -30,7 +31,7 @@ class TimeIndicator extends SinglePaintObjectIndicator {
   TimeIndicator({
     super.key = timeKey,
     super.name = 'Time',
-    super.height = 15,
+    super.height = defaultTimeIndicatorHeight,
     super.padding = EdgeInsets.zero,
     // 时间刻度.
     this.timeTick = const TextAreaConfig(

@@ -15,6 +15,7 @@
 library flexi_kline;
 
 export 'src/constant.dart';
+export 'src/config/export.dart';
 export 'src/extension/export.dart';
 export 'src/framework/export.dart';
 export 'src/indicators/export.dart';

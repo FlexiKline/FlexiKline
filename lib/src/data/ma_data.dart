@@ -14,6 +14,7 @@
 
 import 'dart:math' as math;
 
+import '../config/export.dart';
 import '../framework/indicator.dart';
 import '../indicators/ma.dart';
 import '../model/export.dart';

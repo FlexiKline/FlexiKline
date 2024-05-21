@@ -16,12 +16,13 @@ import 'dart:convert';
 
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../config.dart';
 import '../theme/export.dart';
 import '../utils/cache_util.dart';
 
-class OkFlexiKlineStorage extends IStore {
+class OkFlexiKlineStorage extends IConfiguration {
   @override
   String get flexKlineConfigKey => 'flexi_kline_config_key_ok';
 
@@ -50,20 +51,20 @@ class OkFlexiKlineStorage extends IStore {
     }
   }
 
-  FlexiKlineConfig getFlexiKlineConfigObject(FKTheme theme) {
+  FlexiKlineConfig genFlexiKlineConfigObject(FKTheme theme) {
     return FlexiKlineConfig(
       grid: GridConfig(
         show: true,
         horizontal: GridAxis(
           show: true,
-          width: 0.5,
+          width: 0.5.r,
           color: theme.dividerLine,
           type: LineType.solid,
           dashes: const [2, 2],
         ),
         vertical: GridAxis(
           show: true,
-          width: 0.5,
+          width: 0.5.r,
           color: theme.dividerLine,
           type: LineType.solid,
           dashes: const [2, 2],
@@ -73,30 +74,122 @@ class OkFlexiKlineStorage extends IStore {
       cross: CrossConfig(
         enable: true,
         crosshair: LineConfig(
-          width: 0.5,
+          width: 0.5.r,
           color: theme.t1,
           type: LineType.dashed,
           dashes: const [3, 3],
         ),
         point: CrossPointConfig(
-          radius: 2,
-          width: 6,
+          radius: 2.r,
+          width: 6.r,
           color: theme.t1,
         ),
         tickText: TextAreaConfig(
           style: TextStyle(
             color: theme.t1,
-            fontSize: 10,
+            fontSize: theme.klineTextSize,
             fontWeight: FontWeight.normal,
-            height: 1,
+            height: theme.klineTextHeight,
           ),
           background: theme.lightBg,
-          padding: const EdgeInsets.all(2),
+          padding: EdgeInsets.all(2.r),
           border: BorderSide.none,
-          borderRadius: const BorderRadius.all(
-            Radius.circular(2),
+          borderRadius: BorderRadius.all(
+            Radius.circular(2.r),
           ),
         ),
+      ),
+      indicators: genIndicatorsConfig(theme),
+    );
+  }
+
+  IndicatorsConfig genIndicatorsConfig(FKTheme theme) {
+    final mainHeight = 300.r;
+    return IndicatorsConfig(
+      candle: genCandleIndicator(theme, mainHeight),
+    );
+  }
+
+  CandleIndicator genCandleIndicator(FKTheme theme, double mainHeight) {
+    return CandleIndicator(
+      height: mainHeight,
+      padding: defaultMainIndicatorPadding,
+      high: MarkConfig(
+        spacing: 2,
+        line: LineConfig(
+          type: LineType.solid,
+          color: theme.t1,
+          length: 20.r,
+          width: 0.5.r,
+        ),
+      ),
+      low: MarkConfig(
+        spacing: 2.r,
+        line: LineConfig(
+          type: LineType.solid,
+          color: theme.t1,
+          length: 20.r,
+          width: 0.5.r,
+        ),
+      ),
+      last: MarkConfig(
+        show: true,
+        spacing: 100.r,
+        line: LineConfig(
+          type: LineType.dashed,
+          color: theme.t1,
+          width: 0.5.r,
+          dashes: [3, 3],
+        ),
+        text: TextAreaConfig(
+          style: TextStyle(
+            fontSize: theme.klineTextSize,
+            color: theme.tlight,
+            overflow: TextOverflow.ellipsis,
+            height: theme.klineTextHeight,
+            textBaseline: TextBaseline.alphabetic,
+          ),
+          background: theme.translucentBg,
+          padding: EdgeInsets.symmetric(horizontal: 4.r, vertical: 2.r),
+          border: BorderSide(color: theme.transparent),
+          borderRadius: BorderRadius.all(Radius.circular(10.r)),
+        ),
+      ),
+      latest: MarkConfig(
+        show: true,
+        spacing: 1.r,
+        line: LineConfig(
+          type: LineType.dashed,
+          color: theme.t1,
+          width: 0.5.r,
+          dashes: [3, 3],
+        ),
+        text: TextAreaConfig(
+          style: TextStyle(
+            fontSize: theme.klineTextSize,
+            color: Colors.white,
+            overflow: TextOverflow.ellipsis,
+            height: theme.klineTextHeight,
+          ),
+          minWidth: 45,
+          textAlign: TextAlign.center,
+          padding: defaultTextPading,
+          borderRadius: BorderRadius.all(Radius.circular(2.r)),
+        ),
+      ),
+      useCandleColorAsLatestBg: true,
+      showCountDown: true,
+      countDown: TextAreaConfig(
+        style: TextStyle(
+          fontSize: theme.klineTextSize,
+          color: theme.t1,
+          overflow: TextOverflow.ellipsis,
+          height: theme.klineTextHeight,
+        ),
+        textAlign: TextAlign.center,
+        background: theme.markBg,
+        padding: defaultTextPading,
+        borderRadius: BorderRadius.all(Radius.circular(2.r)),
       ),
     );
   }

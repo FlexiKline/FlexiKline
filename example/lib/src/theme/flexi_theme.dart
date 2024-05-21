@@ -36,9 +36,11 @@ abstract class FKTheme {
   Color get brand => Colors.black;
   Color get long => const Color(0xFF33BD65);
   Color get short => const Color(0xFFE84E74);
+  Color get white => Colors.white;
 
   late Color pageBg;
   late Color lightBg;
+  late Color translucentBg;
   late Color cardBg;
   late Color markBg;
   late Color disable;
@@ -50,7 +52,11 @@ abstract class FKTheme {
   late Color t1;
   late Color t2;
   late Color t3;
-  late Color white = Colors.white;
+  late Color tlight;
+
+  @Deprecated('暂保留') // TODO: 待优化
+  double get klineTextSize => 10.sp;
+  double get klineTextHeight => 1;
 }
 
 class LightFKTheme extends FKTheme {
@@ -63,6 +69,8 @@ class LightFKTheme extends FKTheme {
   Color get pageBg => const Color(0xFFFFFFFF);
   @override
   Color get lightBg => const Color(0xFF111111);
+  @override
+  Color get translucentBg => Colors.black54;
   @override
   Color get cardBg => const Color(0xFFF2F2F2);
   @override
@@ -83,6 +91,8 @@ class LightFKTheme extends FKTheme {
   Color get t2 => const Color(0xFF949494);
   @override
   Color get t3 => const Color(0xFF5F5F5F);
+  @override
+  Color get tlight => const Color(0xFFFFFFFF);
 }
 
 class DarkFKTheme extends FKTheme {
@@ -95,6 +105,8 @@ class DarkFKTheme extends FKTheme {
   Color get pageBg => const Color(0xFF111111);
   @override
   Color get lightBg => const Color(0xFFFFFFFF);
+  @override
+  Color get translucentBg => Colors.white54;
   @override
   Color get cardBg => const Color(0xFF1A1A1A);
   @override
@@ -115,6 +127,8 @@ class DarkFKTheme extends FKTheme {
   Color get t2 => const Color(0xFF909090);
   @override
   Color get t3 => const Color(0xFF606060);
+  @override
+  Color get tlight => const Color(0xFF000000);
 }
 
 extension TextStyleFKTheme on FKTheme {

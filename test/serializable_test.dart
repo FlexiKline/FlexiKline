@@ -12,9 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export 'common.dart';
-export 'indicator.dart';
-export 'logger.dart';
-export 'object.dart';
-export 'serializers.dart';
-export 'configuration.dart';
+import 'package:flexi_kline/flexi_kline.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+void main() {
+  group('test-configs', () {
+    test('test-indicators', () {
+      final json = <String, dynamic>{};
+      final indicators = IndicatorsConfig.fromJson(json);
+
+      indicators.volume = VolumeIndicator(paintMode: PaintMode.combine);
+      expect(indicators.mavol.children.length, 2);
+    });
+  });
+}

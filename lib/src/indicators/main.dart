@@ -12,9 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export 'common.dart';
-export 'indicator.dart';
-export 'logger.dart';
-export 'object.dart';
-export 'serializers.dart';
-export 'configuration.dart';
+import '../constant.dart';
+import '../framework/export.dart';
+
+part 'main.g.dart';
+
+@FlexiIndicatorSerializable
+class MainChartIndicator extends MultiPaintObjectIndicator {
+  MainChartIndicator({
+    super.key = mainChartKey,
+    super.name = 'Main',
+    required super.height,
+    super.padding = defaultMainIndicatorPadding,
+  });
+
+  factory MainChartIndicator.fromJson(Map<String, dynamic> json) =>
+      _$MainChartIndicatorFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson() => _$MainChartIndicatorToJson(this);
+}

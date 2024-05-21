@@ -16,8 +16,8 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 
+import '../config/export.dart';
 import '../extension/export.dart';
-import '../model/export.dart';
 import 'binding_base.dart';
 import 'interface.dart';
 import 'setting.dart';

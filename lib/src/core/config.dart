@@ -16,6 +16,7 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 
+import '../config/export.dart';
 import '../constant.dart';
 import '../framework/export.dart';
 import '../indicators/export.dart';
@@ -47,6 +48,8 @@ mixin ConfigBinding
     super.init();
     logd('init config');
 
+    _indicatorsConfig = IndicatorsConfig.fromJson(indicatorsConfigData);
+
     /// 初始化指标配置:
     /// 1. 优先从storage中反序列化所有指标配置.
     /// 2. 如果storage中不存在, 默认构造
@@ -62,13 +65,7 @@ mixin ConfigBinding
             volumeKey,
             VolumeIndicator.fromJson,
           ) ??
-          VolumeIndicator(
-            paintMode: PaintMode.alone,
-            showYAxisTick: false,
-            showCrossMark: false,
-            showTips: false,
-            useTint: true,
-          ),
+          VolumeIndicator(),
       maKey: restoreMainSupportIndicator(
             maKey,
             MAIndicator.fromJson,
@@ -109,7 +106,13 @@ mixin ConfigBinding
             MAVolumeIndicator.fromJson,
           ) ??
           MAVolumeIndicator(
-            volumeIndicator: VolumeIndicator(),
+            volumeIndicator: VolumeIndicator(
+              paintMode: PaintMode.combine,
+              showYAxisTick: true,
+              showCrossMark: true,
+              showTips: true,
+              useTint: false,
+            ),
             volMaIndicator: VolMaIndicator(),
           ),
     };
@@ -184,6 +187,8 @@ mixin ConfigBinding
     storeSupportMainIndicators(_supportMainIndicators);
     storeSupportSubIndicators(_supportSubIndicators);
   }
+
+  late IndicatorsConfig _indicatorsConfig;
 
   Set<ValueKey> get supportMainIndicatorKeys {
     return _supportMainIndicators.keys.toSet()..remove(candleKey);

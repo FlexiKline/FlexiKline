@@ -12,6 +12,7 @@ dependencies:
     sdk: flutter
   decimal: ^2.3.3
   json_annotation: ^4.9.0
+  copy_with_extension: ^5.0.4
 
 dev_dependencies:
   flutter_test:
@@ -21,5 +22,6 @@ dev_dependencies:
   # 序列化
   build_runner: ^2.4.9
   json_serializable: ^6.8.0
+  copy_with_extension_gen: ^5.0.4
 
 flutter:

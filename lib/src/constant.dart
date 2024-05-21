@@ -20,6 +20,12 @@ const int defaultPrecision = 4;
 // 默认Decimal除法精度
 const int defaultScaleOnInfinitePrecision = 18;
 
+// 默认主区指标高度
+const double defaultMainIndicatorHeight = 300;
+
+// 默认时间指标高度
+const double defaultTimeIndicatorHeight = 15;
+
 // 默认副图指标高度
 const double defaultSubIndicatorHeight = 60;
 

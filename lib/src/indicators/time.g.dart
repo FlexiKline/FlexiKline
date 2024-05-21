@@ -12,7 +12,8 @@ TimeIndicator _$TimeIndicatorFromJson(Map<String, dynamic> json) =>
           ? timeKey
           : const ValueKeyConverter().fromJson(json['key'] as String),
       name: json['name'] as String? ?? 'Time',
-      height: (json['height'] as num?)?.toDouble() ?? 15,
+      height:
+          (json['height'] as num?)?.toDouble() ?? defaultTimeIndicatorHeight,
       padding: json['padding'] == null
           ? EdgeInsets.zero
           : const EdgeInsetsConverter()

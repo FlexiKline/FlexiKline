@@ -29,6 +29,24 @@ class MAVolumeIndicator extends MultiPaintObjectIndicator {
     required this.volumeIndicator,
     required this.volMaIndicator,
   }) : super(children: [volumeIndicator, volMaIndicator]);
+  // 确保MAVOL中Volume参数
+  // : volumeIndicator = volumeIndicator.copyWith(
+  //       paintMode: PaintMode.combine,
+  //       showYAxisTick: true,
+  //       showCrossMark: true,
+  //       showTips: true,
+  //       useTint: false,
+  //     ),
+  //     super(children: [
+  //       volumeIndicator.copyWith(
+  //         paintMode: PaintMode.combine,
+  //         showYAxisTick: true,
+  //         showCrossMark: true,
+  //         showTips: true,
+  //         useTint: false,
+  //       ),
+  //       volMaIndicator
+  //     ]);
 
   final VolumeIndicator volumeIndicator;
   final VolMaIndicator volMaIndicator;

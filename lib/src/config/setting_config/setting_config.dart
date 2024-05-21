@@ -16,7 +16,8 @@ import 'package:flutter/material.dart';
 
 import '../../constant.dart';
 import '../../framework/serializers.dart';
-import '../../model/export.dart';
+import '../loading_config/loading_config.dart';
+import '../text_area_config/text_area_config.dart';
 
 part 'setting_config.g.dart';
 

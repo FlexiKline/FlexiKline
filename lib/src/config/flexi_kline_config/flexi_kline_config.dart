@@ -15,6 +15,7 @@
 import '../../framework/serializers.dart';
 import '../cross_config/cross_config.dart';
 import '../grid_config/grid_config.dart';
+import '../indicators_config/indicators_config.dart';
 import '../setting_config/setting_config.dart';
 
 part 'flexi_kline_config.g.dart';
@@ -25,11 +26,13 @@ class FlexiKlineConfig {
     required this.grid,
     required this.setting,
     required this.cross,
+    required this.indicators,
   });
 
   GridConfig grid;
   SettingConfig setting;
   CrossConfig cross;
+  IndicatorsConfig indicators;
 
   factory FlexiKlineConfig.fromJson(Map<String, dynamic> json) =>
       _$FlexiKlineConfigFromJson(json);

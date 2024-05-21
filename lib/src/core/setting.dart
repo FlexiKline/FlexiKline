@@ -17,7 +17,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
-import '../model/export.dart';
+import '../config/export.dart';
 import 'binding_base.dart';
 import 'interface.dart';
 
@@ -55,13 +55,13 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IConfig {
     super.loadConfig(configData);
   }
 
+  VoidCallback? onSizeChange;
+  ValueChanged<bool>? onLoading;
+
   late SettingConfig _settingConfig;
 
   @override
   SettingConfig get settingConfig => _settingConfig;
-
-  VoidCallback? onSizeChange;
-  ValueChanged<bool>? onLoading;
 
   /// Loading配置
   LoadingConfig get loading => settingConfig.loading;
@@ -96,7 +96,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IConfig {
   /// 主区域大小
   Rect get mainRect => settingConfig.mainRect;
 
-  /// 主区域最小大小
+  /// 主区域最小宽高
   Size get mainMinSize => settingConfig.mainMinSize;
 
   /// 主区域大小设置
@@ -150,7 +150,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IConfig {
   /// 主图区域下边界值
   double get mainChartBottom => mainChartRect.bottom;
 
-  /// 主图区域最少留白宽度.
+  /// 主图区域最少留白宽度比例.
   double get minPaintBlankWidth {
     return mainChartWidth * settingConfig.minPaintBlankRate.clamp(0, 0.9);
   }

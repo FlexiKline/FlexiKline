@@ -18,13 +18,14 @@ import 'package:flutter/material.dart';
 import '../framework/export.dart';
 import 'interface.dart';
 
-abstract class KlineBindingBase with KlineLog, KlineStorage, GestureHanderImpl {
+abstract class KlineBindingBase
+    with KlineLog, KlineConfiguration, GestureHanderImpl {
   KlineBindingBase({
     ILogger? logger,
-    IStore? storage,
+    IConfiguration? storage,
   }) {
     loggerDelegate = logger;
-    storeDelegate = storage;
+    configuration = storage;
     logd("constrouct");
     init();
   }
