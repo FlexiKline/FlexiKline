@@ -14,6 +14,7 @@
 
 import 'dart:math' as math;
 
+import '../config/boll_param/boll_param.dart';
 import '../framework/indicator.dart';
 import '../indicators/boll.dart';
 import '../model/export.dart';

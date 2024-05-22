@@ -45,7 +45,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IConfig {
   void storeState() {
     super.storeState();
     logd("storeState setting");
-    storeSettingData(settingConfig);
+    // storeSettingData(settingConfig);
   }
 
   // @override

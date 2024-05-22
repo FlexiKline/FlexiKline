@@ -27,6 +27,8 @@ final FlexiKlineConfig defaultFlexiKlineConfig = FlexiKlineConfig(
   setting: SettingConfig(),
   cross: CrossConfig(),
   tooltip: TooltipConfig(),
+  main: {candleKey},
+  sub: {timeKey},
   indicators: IndicatorsConfig(
     candle: CandleIndicator(height: defaultMainIndicatorHeight),
     volume: VolumeIndicator(

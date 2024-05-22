@@ -14,6 +14,7 @@
 
 import 'dart:math' as math;
 
+import '../config/macd_param/macd_param.dart';
 import '../framework/indicator.dart';
 import '../indicators/macd.dart';
 import '../model/export.dart';

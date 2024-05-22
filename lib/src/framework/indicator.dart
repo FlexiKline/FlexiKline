@@ -44,7 +44,7 @@ enum PaintMode {
 /// [paintMode] 控制多指标图一起的绘制方式.
 ///   [PaintMode.combine] 多指标时, 统一使用父Indicator的高度和padding.
 ///   [PaintMode.alone] 多指标时, 使用自己的height进行绘制.
-abstract class Indicator {
+abstract class Indicator implements Comparable<Indicator> {
   Indicator({
     required this.key,
     required this.name,
@@ -111,6 +111,11 @@ abstract class Indicator {
   }
 
   Map<String, dynamic> toJson();
+
+  @override
+  int compareTo(Indicator other) {
+    return 0;
+  }
 
   static bool canUpdate(Indicator oldIndicator, Indicator newIndicator) {
     return oldIndicator.runtimeType == newIndicator.runtimeType &&

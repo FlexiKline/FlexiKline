@@ -26,6 +26,7 @@ class MAVolumeIndicator extends MultiPaintObjectIndicator {
     super.name = 'MAVOL',
     super.height = defaultSubIndicatorHeight,
     super.padding = defaultSubIndicatorPadding,
+    super.drawBelowTipsArea = false,
     required this.volumeIndicator,
     required this.volMaIndicator,
   }) : super(children: [volumeIndicator, volMaIndicator]);

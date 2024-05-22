@@ -17,11 +17,12 @@ MAVolumeIndicator _$MAVolumeIndicatorFromJson(Map<String, dynamic> json) =>
           ? defaultSubIndicatorPadding
           : const EdgeInsetsConverter()
               .fromJson(json['padding'] as Map<String, dynamic>),
+      drawBelowTipsArea: json['drawBelowTipsArea'] as bool? ?? false,
       volumeIndicator: VolumeIndicator.fromJson(
           json['volumeIndicator'] as Map<String, dynamic>),
       volMaIndicator: VolMaIndicator.fromJson(
           json['volMaIndicator'] as Map<String, dynamic>),
-    )..drawBelowTipsArea = json['drawBelowTipsArea'] as bool;
+    );
 
 Map<String, dynamic> _$MAVolumeIndicatorToJson(MAVolumeIndicator instance) =>
     <String, dynamic>{

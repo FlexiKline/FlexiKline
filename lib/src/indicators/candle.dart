@@ -192,9 +192,6 @@ class CandlePaintObject<T extends CandleIndicator>
     /// 绘制蜡烛图
     paintCandleChart(canvas, size);
 
-    /// 绘制X轴时间刻度数据. 已在paintCandleChart调用
-    // paintTimeTick(canvas);
-
     /// 绘制价钱刻度数据
     paintPriceTick(canvas, size);
   }
@@ -447,25 +444,22 @@ class CandlePaintObject<T extends CandleIndicator>
     }
 
     // 计算最新价XAxis位置.
-    // bool showLastPriceUpdateTime = indicator.isShowCountDownTime;
-    final firstCandleDx = startCandleDx;
     double rdx = chartRect.right;
-    // double rightMargin = indicator.latestPriceRectRightMinMargin;
     double ldx = 0; // 计算最新价刻度线lineTo参数X轴的dx值. 默认0: 代表橫穿整个Canvas.
 
-    if (firstCandleDx < rdx) {
+    if (paintDxOffset < 0) {
       // 绘制最新价和倒计时
       final latest = indicator.latest;
       if (!latest.show) return;
 
-      ldx = firstCandleDx;
+      ldx = startCandleDx;
 
       /// 绘制首根蜡烛到rdx的刻度线.
       final latestPath = Path();
       latestPath.moveTo(rdx, dy);
       latestPath.lineTo(ldx, dy);
       canvas.drawLineType(
-        indicator.last.line.type,
+        indicator.latest.line.type,
         latestPath,
         Paint()
           ..color = latest.line.color
@@ -474,23 +468,14 @@ class CandlePaintObject<T extends CandleIndicator>
         dashes: latest.line.dashes,
       );
 
-      /// 计算最新价和倒计时区域的文本和高度
+      TextAreaConfig textConfig = latest.text;
+
+      /// 最新价文本和样式配置
       final text = formatPrice(
         model.close.toDecimal(),
         precision: klineData.req.precision,
         cutInvalidZero: false,
       );
-
-      /// 计算倒计时Text
-      String? countDownText;
-      if (indicator.showCountDown) {
-        final nextUpdateDateTime = model.nextUpdateDateTime(klineData.req.bar);
-        if (nextUpdateDateTime != null) {
-          countDownText = formatTimeDiff(nextUpdateDateTime);
-        }
-      }
-
-      TextAreaConfig textConfig = latest.text;
 
       Color? background = textConfig.background;
       if (indicator.useCandleColorAsLatestBg) {
@@ -500,6 +485,15 @@ class CandlePaintObject<T extends CandleIndicator>
       }
 
       BorderRadius? borderRadius = textConfig.borderRadius;
+
+      /// 倒计时Text
+      String? countDownText;
+      if (indicator.showCountDown) {
+        final nextUpdateDateTime = model.nextUpdateDateTime(klineData.req.bar);
+        if (nextUpdateDateTime != null) {
+          countDownText = formatTimeDiff(nextUpdateDateTime);
+        }
+      }
       if (countDownText != null) {
         // 如果展示倒计时, 最新价仅保留顶部radius
         borderRadius = borderRadius?.copyWith(

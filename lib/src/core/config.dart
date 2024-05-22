@@ -16,7 +16,6 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 
-import '../config/export.dart';
 import '../constant.dart';
 import '../framework/export.dart';
 import 'binding_base.dart';
@@ -30,108 +29,16 @@ import 'setting.dart';
 mixin ConfigBinding
     on KlineBindingBase, SettingBinding
     implements IConfig, IChart {
-  /// 主绘制区域
+  /// 主绘制区域指标
   late MultiPaintObjectIndicator _mainIndicator;
 
-  /// 副图区域
+  /// 副图区域绘制指标集合
   late Queue<Indicator> _subIndicators;
-
-  /// 支持的主图指标集
-  // late Map<ValueKey, SinglePaintObjectIndicator> _supportMainIndicators;
-
-  /// 支持的副图指标集
-  // late Map<ValueKey, Indicator> _supportSubIndicators;
 
   @override
   void init() {
     super.init();
     logd('init config');
-
-    // _indicatorsConfig = IndicatorsConfig.fromJson(indicatorsConfigData);
-
-    /// 初始化指标配置:
-    /// 1. 优先从storage中反序列化所有指标配置.
-    /// 2. 如果storage中不存在, 默认构造
-    // _supportMainIndicators = {
-    //   candleKey: restoreMainSupportIndicator(
-    //         candleKey,
-    //         CandleIndicator.fromJson,
-    //       ) ??
-    //       CandleIndicator(
-    //         height: mainRect.height,
-    //       ),
-    //   volumeKey: restoreMainSupportIndicator(
-    //         volumeKey,
-    //         VolumeIndicator.fromJson,
-    //       ) ??
-    //       VolumeIndicator(),
-    //   maKey: restoreMainSupportIndicator(
-    //         maKey,
-    //         MAIndicator.fromJson,
-    //       ) ??
-    //       MAIndicator(
-    //         height: mainRect.height,
-    //       ),
-    //   emaKey: restoreMainSupportIndicator(
-    //         emaKey,
-    //         EMAIndicator.fromJson,
-    //       ) ??
-    //       EMAIndicator(
-    //         height: mainRect.height,
-    //       ),
-    //   bollKey: restoreMainSupportIndicator(
-    //         bollKey,
-    //         BOLLIndicator.fromJson,
-    //       ) ??
-    //       BOLLIndicator(
-    //         height: mainRect.height,
-    //       )
-    // };
-
-    // _supportSubIndicators = {
-    //   timeKey: TimeIndicator(),
-    //   macdKey: restoreSubSupportIndicator(
-    //         macdKey,
-    //         MACDIndicator.fromJson,
-    //       ) ??
-    //       MACDIndicator(),
-    //   kdjKey: restoreSubSupportIndicator(
-    //         kdjKey,
-    //         KDJIndicator.fromJson,
-    //       ) ??
-    //       KDJIndicator(),
-    //   maVolKey: restoreSubSupportIndicator(
-    //         maVolKey,
-    //         MAVolumeIndicator.fromJson,
-    //       ) ??
-    //       MAVolumeIndicator(
-    //         volumeIndicator: VolumeIndicator(
-    //           paintMode: PaintMode.combine,
-    //           showYAxisTick: true,
-    //           showCrossMark: true,
-    //           showTips: true,
-    //           useTint: false,
-    //         ),
-    //         volMaIndicator: VolMaIndicator(),
-    //       ),
-    // };
-
-    // (_supportSubIndicators[maVolKey] as MultiPaintObjectIndicator)
-    //     .appendIndicators([
-    //   restoreSubSupportIndicator(
-    //         maVolKey,
-    //         VolumeIndicator.fromJson,
-    //         childKey: volumeKey,
-    //       ) ??
-    //       VolumeIndicator(),
-    //   restoreSubSupportIndicator(
-    //         maVolKey,
-    //         VolMaIndicator.fromJson,
-    //         childKey: volMaKey,
-    //       ) ??
-    //       VolMaIndicator(),
-    // ], this);
-
     _mainIndicator = MultiPaintObjectIndicator(
       key: mainChartKey,
       name: 'MAIN',
@@ -140,21 +47,17 @@ mixin ConfigBinding
       drawBelowTipsArea: true,
     );
     _mainIndicator.appendIndicator(indicatorsConfig.candle, this);
-    // for (var childKey in mainChildrenKeys) {
-    //   addIndicatorInMain(childKey);
-    // }
 
     _subIndicators = ListQueue<Indicator>(defaultSubChartMaxCount);
-    // addIndicatorInSub(timeKey);
-    // for (var childKey in subChildrenKeys) {
-    //   addIndicatorInSub(childKey);
-    // }
   }
 
   @override
   void initState() {
     super.initState();
     logd("initState config");
+
+    _mainIndicator.appendIndicator(indicatorsConfig.candle, this);
+    // addIndicatorInSub(timeKey);
 
     /// 最终渲染前, 如果用户更改了配置, 此处做下更新. TODO: 待优化.
     updateMainIndicatorParam(
@@ -172,21 +75,13 @@ mixin ConfigBinding
       indicator.dispose();
     }
     subIndicators.clear();
-    // _supportMainIndicators.clear();
-    // _supportSubIndicators.clear();
   }
 
   @override
   void storeState() {
     super.storeState();
     logd('storeState config');
-    // storeMainIndicator(_mainIndicator);
-    // storeSubIndicators(_subIndicators);
-    // storeSupportMainIndicators(_supportMainIndicators);
-    // storeSupportSubIndicators(_supportSubIndicators);
   }
-
-  // late IndicatorsConfig _indicatorsConfig;
 
   Set<ValueKey> get supportMainIndicatorKeys {
     return indicatorsConfig.mainIndicators.keys.toSet()..remove(candleKey);
@@ -260,10 +155,13 @@ mixin ConfigBinding
 
   @override
   void addIndicatorInMain(ValueKey<dynamic> key) {
-    // if (_supportMainIndicators.containsKey(key)) {
-    //   mainIndicator.appendIndicator(_supportMainIndicators[key]!, this);
-    //   markRepaintChart();
-    // }
+    if (indicatorsConfig.mainIndicators.containsKey(key)) {
+      mainIndicator.appendIndicator(
+        indicatorsConfig.mainIndicators[key]!,
+        this,
+      );
+      markRepaintChart();
+    }
   }
 
   /// 删除主图中key指定的指标
@@ -276,15 +174,15 @@ mixin ConfigBinding
   /// 在副图中增加指标
   @override
   void addIndicatorInSub(ValueKey<dynamic> key) {
-    // if (_supportSubIndicators.containsKey(key)) {
-    //   if (subIndicators.length >= subChartMaxCount) {
-    //     final deleted = subIndicators.removeFirst();
-    //     deleted.dispose();
-    //   }
-    //   subIndicators.addLast(_supportSubIndicators[key]!);
-    //   onSizeChange?.call();
-    //   markRepaintChart();
-    // }
+    if (indicatorsConfig.subIndicators.containsKey(key)) {
+      if (subIndicators.length >= subChartMaxCount) {
+        final deleted = subIndicators.removeFirst();
+        deleted.dispose();
+      }
+      subIndicators.addLast(indicatorsConfig.subIndicators[key]!);
+      onSizeChange?.call();
+      markRepaintChart();
+    }
   }
 
   /// 删除副图key指定的指标

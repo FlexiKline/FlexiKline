@@ -25,7 +25,10 @@ export 'loading_config/loading_config.dart';
 export 'indicators_config/indicators_config.dart';
 
 /// Indicator 参数
+export 'boll_param/boll_param.dart';
+export 'kdj_param/kdj_param.dart';
 export 'ma_param/ma_param.dart';
+export 'macd_param/macd_param.dart';
 
 /// 内置默认配置
 export 'default.dart';

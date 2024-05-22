@@ -6,18 +6,6 @@ part of 'macd.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-MACDParam _$MACDParamFromJson(Map<String, dynamic> json) => MACDParam(
-      s: (json['s'] as num).toInt(),
-      l: (json['l'] as num).toInt(),
-      m: (json['m'] as num).toInt(),
-    );
-
-Map<String, dynamic> _$MACDParamToJson(MACDParam instance) => <String, dynamic>{
-      's': instance.s,
-      'l': instance.l,
-      'm': instance.m,
-    };
-
 MACDIndicator _$MACDIndicatorFromJson(Map<String, dynamic> json) =>
     MACDIndicator(
       key: json['key'] == null

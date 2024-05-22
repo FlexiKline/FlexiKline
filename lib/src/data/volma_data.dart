@@ -14,7 +14,7 @@
 
 import 'dart:math' as math;
 
-import '../config/export.dart';
+import '../config/ma_param/ma_param.dart';
 import '../framework/indicator.dart';
 import '../indicators/vol_ma.dart';
 import '../model/export.dart';

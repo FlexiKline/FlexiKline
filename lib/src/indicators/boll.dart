@@ -25,36 +25,6 @@ import '../framework/export.dart';
 
 part 'boll.g.dart';
 
-@FlexiParamSerializable
-final class BOLLParam {
-  final int n;
-  final int std;
-
-  const BOLLParam({required this.n, required this.std});
-
-  bool get isValid => n > 0 && std > 0;
-
-  @override
-  int get hashCode => n.hashCode ^ std.hashCode;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is BOLLParam &&
-          runtimeType == other.runtimeType &&
-          n == other.n &&
-          std == other.std;
-
-  @override
-  String toString() {
-    return 'BOLLParam{n:$n, std:$std}';
-  }
-
-  factory BOLLParam.fromJson(Map<String, dynamic> json) =>
-      _$BOLLParamFromJson(json);
-  Map<String, dynamic> toJson() => _$BOLLParamToJson(this);
-}
-
 @FlexiIndicatorSerializable
 class BOLLIndicator extends SinglePaintObjectIndicator {
   BOLLIndicator({

@@ -26,40 +26,6 @@ import '../utils/export.dart';
 
 part 'macd.g.dart';
 
-@FlexiParamSerializable
-final class MACDParam {
-  final int s;
-  final int l;
-  final int m;
-
-  const MACDParam({required this.s, required this.l, required this.m});
-
-  bool get isValid => l > 0 && s > 0 && l > s && m > 0;
-
-  int get paramCount => math.max(l, s) + m;
-
-  @override
-  int get hashCode => s.hashCode ^ l.hashCode ^ m.hashCode;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is MACDParam &&
-          runtimeType == other.runtimeType &&
-          s == other.s &&
-          l == other.l &&
-          m == other.m;
-
-  @override
-  String toString() {
-    return 'MACDParam{s:$s, l:$l, m:$s}';
-  }
-
-  factory MACDParam.fromJson(Map<String, dynamic> json) =>
-      _$MACDParamFromJson(json);
-  Map<String, dynamic> toJson() => _$MACDParamToJson(this);
-}
-
 /// 指数平滑移动平均线MACD
 @FlexiIndicatorSerializable
 class MACDIndicator extends SinglePaintObjectIndicator {

@@ -40,6 +40,7 @@ String convertValueKey(ValueKey key) {
 
 class ValueKeyConverter implements JsonConverter<ValueKey, String> {
   const ValueKeyConverter();
+
   @override
   ValueKey fromJson(String json) {
     return parseValueKey(json);
@@ -48,6 +49,21 @@ class ValueKeyConverter implements JsonConverter<ValueKey, String> {
   @override
   String toJson(ValueKey key) {
     return convertValueKey(key);
+  }
+}
+
+class SetValueKeyConverter
+    implements JsonConverter<Set<ValueKey>, List<String>> {
+  const SetValueKeyConverter();
+
+  @override
+  Set<ValueKey> fromJson(List<String> json) {
+    return json.map((e) => const ValueKeyConverter().fromJson(e)).toSet();
+  }
+
+  @override
+  List<String> toJson(Set<ValueKey> object) {
+    return object.map((e) => const ValueKeyConverter().toJson(e)).toList();
   }
 }
 
@@ -111,10 +127,10 @@ class EdgeInsetsConverter
       return EdgeInsets.zero;
     }
 
-    if (json.containsKey('vertical') || json.containsKey('horizontal')) {
+    if (json.containsKey('horizontal') || json.containsKey('vertical')) {
       return EdgeInsets.symmetric(
-        vertical: parseDouble(json['vertical']) ?? 0.0,
         horizontal: parseDouble(json['horizontal']) ?? 0.0,
+        vertical: parseDouble(json['vertical']) ?? 0.0,
       );
     }
 
@@ -143,8 +159,8 @@ class EdgeInsetsConverter
     if (edgeInsets.left == edgeInsets.right &&
         edgeInsets.top == edgeInsets.bottom) {
       return {
-        "vertical": edgeInsets.left,
-        "horizontal": edgeInsets.top,
+        "horizontal": edgeInsets.left,
+        "vertical": edgeInsets.top,
       };
     }
     return {
@@ -422,7 +438,10 @@ const FlexiModelSerializable = JsonSerializable(
 
 // ignore: constant_identifier_names
 const FlexiConfigSerializable = JsonSerializable(
-  converters: _basicConverterList,
+  converters: [
+    ..._basicConverterList,
+    SetValueKeyConverter(),
+  ],
   explicitToJson: true,
   includeIfNull: false,
 );

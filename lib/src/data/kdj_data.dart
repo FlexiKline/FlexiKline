@@ -14,6 +14,7 @@
 
 import 'dart:math' as math;
 
+import '../config/kdj_param/kdj_param.dart';
 import '../framework/indicator.dart';
 import '../indicators/kdj.dart';
 import '../model/export.dart';

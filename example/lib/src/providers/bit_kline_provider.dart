@@ -49,6 +49,8 @@ class BitFlexiKlineStorage extends IConfiguration {
 
   FlexiKlineConfig genFlexiKlineConfigObject(FKTheme theme) {
     return FlexiKlineConfig(
+      main: {candleKey},
+      sub: {timeKey},
       grid: GridConfig(
         show: true,
         horizontal: GridAxis(

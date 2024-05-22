@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:flutter/material.dart';
+
 import '../../framework/serializers.dart';
 import '../cross_config/cross_config.dart';
 import '../grid_config/grid_config.dart';
@@ -29,6 +31,8 @@ class FlexiKlineConfig {
     required this.cross,
     required this.tooltip,
     required this.indicators,
+    required this.main,
+    required this.sub,
   });
 
   GridConfig grid;
@@ -36,6 +40,8 @@ class FlexiKlineConfig {
   CrossConfig cross;
   TooltipConfig tooltip;
   IndicatorsConfig indicators;
+  Set<ValueKey> main;
+  Set<ValueKey> sub;
 
   factory FlexiKlineConfig.fromJson(Map<String, dynamic> json) =>
       _$FlexiKlineConfigFromJson(json);

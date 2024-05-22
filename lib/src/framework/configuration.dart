@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:flutter/material.dart';
+
 import '../config/export.dart';
 import 'indicator.dart';
 import 'logger.dart';
@@ -31,7 +33,19 @@ abstract class IConfiguration {
 mixin KlineConfiguration implements IConfiguration, ILogger {
   late IConfiguration configuration;
 
-  FlexiKlineConfig get flexiKlineConfig => getFlexiKlineConfig();
+  FlexiKlineConfig? _flexiKlineConfig;
+  FlexiKlineConfig get flexiKlineConfig {
+    if (_flexiKlineConfig == null) {
+      final config = getFlexiKlineConfig();
+      try {
+        _flexiKlineConfig = FlexiKlineConfig.fromJson(config.toJson());
+      } catch (e) {
+        loge('flexiKlineConfig init failed!!!');
+        _flexiKlineConfig = config;
+      }
+    }
+    return _flexiKlineConfig!;
+  }
 
   @override
   FlexiKlineConfig getFlexiKlineConfig() {
@@ -43,165 +57,27 @@ mixin KlineConfiguration implements IConfiguration, ILogger {
     configuration.saveFlexiKlineConfig(config);
   }
 
-  // Map<String, dynamic>? _flexiKlineConfig;
+  /// mainConfig
+  Set<ValueKey> get mainConfig => flexiKlineConfig.main;
+  void storeMainConfig(MultiPaintObjectIndicator mainIndicator) {
+    flexiKlineConfig.main = mainIndicator.children.map((e) => e.key).toSet();
+  }
 
-  // Map<String, dynamic> get flexiKlineConfig {
-  //   if (_flexiKlineConfig == null) {
-  //     final initConfig = configuration?.getFlexiKlineConfig();
-  //     if (initConfig != null && initConfig.isNotEmpty) {
-  //       _flexiKlineConfig = Map<String, dynamic>.of(initConfig);
-  //     }
-  //     _flexiKlineConfig ??= <String, dynamic>{};
-  //   }
-  //   return _flexiKlineConfig!;
-  // }
-
-  // Map<String, dynamic> _getRootConfig(String key) {
-  //   dynamic config = flexiKlineConfig[key];
-  //   if (config == null || config is! Map<String, dynamic>) {
-  //     flexiKlineConfig[key] = config = <String, dynamic>{};
-  //   }
-  //   return config;
-  // }
-
-  // Map<String, dynamic> get mainIndicatorConfig => _getRootConfig(jsonKeyMain);
-
-  // List<ValueKey> get mainChildrenKeys {
-  //   dynamic list = mainIndicatorConfig[jsonKeyChildren];
-  //   if (list is List) {
-  //     return list.map((e) => parseValueKey(e)).toList();
-  //   }
-  //   return <ValueKey>[];
-  // }
-
-  // List<ValueKey> get subChildrenKeys {
-  //   final list = flexiKlineConfig[jsonKeySub];
-  //   if (list is List) {
-  //     return list.map((e) => parseValueKey(e)).toList();
-  //   }
-  //   return <ValueKey>[];
-  // }
-
-  // Map<String, dynamic> get supportMainIndicatorsConfig {
-  //   return _getRootConfig(jsonKeySupportMainIndicators);
-  // }
-
-  // Map<String, dynamic> get supportSubIndicatorsConfig {
-  //   return _getRootConfig(jsonKeySupportSubIndicators);
-  // }
-
-  // MultiPaintObjectIndicator? restoreMainIndicator() {
-  //   return _restoreIndicator(
-  //     mainIndicatorConfig,
-  //     mainChartKey,
-  //     MultiPaintObjectIndicator.fromJson,
-  //   );
-  // }
-
-  // T? restoreMainSupportIndicator<T extends Indicator>(
-  //   ValueKey key,
-  //   IndicatorFromJson<T> fromJson,
-  // ) {
-  //   return _restoreIndicator(
-  //     supportMainIndicatorsConfig,
-  //     key,
-  //     fromJson,
-  //   );
-  // }
-
-  // T? restoreSubSupportIndicator<T extends Indicator>(
-  //   ValueKey key,
-  //   IndicatorFromJson<T> fromJson, {
-  //   ValueKey? childKey,
-  // }) {
-  //   return _restoreIndicator(
-  //     supportSubIndicatorsConfig,
-  //     key,
-  //     fromJson,
-  //     childKey: childKey,
-  //   );
-  // }
-
-  // T? _restoreIndicator<T extends Indicator>(
-  //   Map<String, dynamic> configs,
-  //   ValueKey key,
-  //   IndicatorFromJson<T> fromJson, {
-  //   ValueKey? childKey,
-  // }) {
-  //   if (configs.isEmpty) return null;
-  //   try {
-  //     final json = configs[convertValueKey(key)];
-  //     if (json != null && json is Map<String, dynamic> && json.isNotEmpty) {
-  //       if (childKey == null) {
-  //         return fromJson(json);
-  //       }
-  //       final childJson = json[convertValueKey(childKey)];
-  //       if (childJson != null &&
-  //           childJson is Map<String, dynamic> &&
-  //           childJson.isNotEmpty) {
-  //         return fromJson(childJson);
-  //       }
-  //     }
-  //   } catch (err, stack) {
-  //     loge(
-  //       '_restoreIndicator error',
-  //       error: err,
-  //       stackTrace: stack,
-  //     );
-  //   }
-  //   return null;
-  // }
-
-  // void storeMainIndicator(
-  //   MultiPaintObjectIndicator mainIndicator,
-  // ) {
-  //   flexiKlineConfig[jsonKeyMain] = mainIndicator.toJson();
-  //   flexiKlineConfig[jsonKeyMain][jsonKeyChildren] = mainIndicator.children
-  //       .map(
-  //         (e) => convertValueKey(e.key),
-  //       )
-  //       .toList();
-  // }
-
-  // void storeSubIndicators(Queue<Indicator> subIndicators) {
-  //   flexiKlineConfig[jsonKeySub] = subIndicators
-  //       .map(
-  //         (e) => convertValueKey(e.key),
-  //       )
-  //       .toList();
-  // }
-
-  // void storeSupportMainIndicators(
-  //   Map<ValueKey, SinglePaintObjectIndicator> supportIndicator,
-  // ) {
-  //   flexiKlineConfig[jsonKeySupportMainIndicators] = supportIndicator.map(
-  //     (key, value) => MapEntry<String, Map<String, dynamic>>(
-  //       convertValueKey(key),
-  //       value.toJson(),
-  //     ),
-  //   );
-  // }
-
-  // void storeSupportSubIndicators(
-  //   Map<ValueKey, Indicator> supportIndicator,
-  // ) {
-  //   flexiKlineConfig[jsonKeySupportSubIndicators] = supportIndicator.map(
-  //     (key, value) => MapEntry<String, Map<String, dynamic>>(
-  //       convertValueKey(key),
-  //       value.toJson(),
-  //     ),
-  //   );
-  // }
+  /// subConfig
+  Set<ValueKey> get subConfig => flexiKlineConfig.sub;
+  void storeSubConfig(Set<Indicator> list) {
+    flexiKlineConfig.main = list.map((e) => e.key).toSet();
+  }
 
   /// IndicatorsConfig
   IndicatorsConfig get indicatorsConfig => flexiKlineConfig.indicators;
-  void storeIndicatorsData(IndicatorsConfig config) {
+  void storeIndicatorsConfig(IndicatorsConfig config) {
     flexiKlineConfig.indicators = config;
   }
 
   /// SettingConfig
   SettingConfig get settingConfig => flexiKlineConfig.setting;
-  void storeSettingData(SettingConfig config) {
+  void storeSettingConfig(SettingConfig config) {
     flexiKlineConfig.setting = config;
   }
 
