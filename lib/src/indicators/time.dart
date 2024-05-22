@@ -33,6 +33,7 @@ class TimeIndicator extends SinglePaintObjectIndicator {
     super.name = 'Time',
     super.height = defaultTimeIndicatorHeight,
     super.padding = EdgeInsets.zero,
+    this.position = DrawPosition.middle,
     // 时间刻度.
     this.timeTick = const TextAreaConfig(
       style: TextStyle(
@@ -48,6 +49,7 @@ class TimeIndicator extends SinglePaintObjectIndicator {
 
   // 时间刻度.
   final TextAreaConfig timeTick;
+  final DrawPosition position;
 
   @override
   TimePaintObject createPaintObject(covariant KlineBindingBase controller) {

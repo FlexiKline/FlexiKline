@@ -97,7 +97,7 @@ mixin ChartBinding on KlineBindingBase implements IChart, IState, IConfig {
     ensurePaintObjectInstance();
 
     int solt = mainIndicatorSlot;
-    for (var indicator in [mainIndicator, ...subIndicators]) {
+    for (var indicator in [mainIndicator, ...subRectIndicators]) {
       /// 初始化副图指标展示数据.
       indicator.paintObject?.doInitState(
         solt++,

@@ -18,6 +18,9 @@ TimeIndicator _$TimeIndicatorFromJson(Map<String, dynamic> json) =>
           ? EdgeInsets.zero
           : const EdgeInsetsConverter()
               .fromJson(json['padding'] as Map<String, dynamic>),
+      position: json['position'] == null
+          ? DrawPosition.middle
+          : const DrawPositionConverter().fromJson(json['position'] as String),
       timeTick: json['timeTick'] == null
           ? const TextAreaConfig(
               style: TextStyle(
@@ -37,4 +40,5 @@ Map<String, dynamic> _$TimeIndicatorToJson(TimeIndicator instance) =>
       'height': instance.height,
       'padding': const EdgeInsetsConverter().toJson(instance.padding),
       'timeTick': instance.timeTick.toJson(),
+      'position': const DrawPositionConverter().toJson(instance.position),
     };

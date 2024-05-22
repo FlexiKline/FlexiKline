@@ -46,9 +46,8 @@ mixin ConfigBinding
       padding: defaultMainIndicatorPadding,
       drawBelowTipsArea: true,
     );
-    _mainIndicator.appendIndicator(indicatorsConfig.candle, this);
 
-    _subIndicators = ListQueue<Indicator>(defaultSubChartMaxCount);
+    _subIndicators = ListQueue<Indicator>(subChartMaxCount);
   }
 
   @override
@@ -57,13 +56,19 @@ mixin ConfigBinding
     logd("initState config");
 
     _mainIndicator.appendIndicator(indicatorsConfig.candle, this);
-    // addIndicatorInSub(timeKey);
+    _mainIndicator.appendIndicator(getCandleIndicator(), this);
+    final mainChildIndicators = genMainChildIndicators();
+    _mainIndicator.appendIndicators(mainChildIndicators, this);
 
-    /// 最终渲染前, 如果用户更改了配置, 此处做下更新. TODO: 待优化.
+    /// 最终渲染前, 如果用户更改了配置, 此处做下更新.
     updateMainIndicatorParam(
       height: mainRect.height,
       padding: mainPadding,
     );
+
+    for (var subKey in subConfig) {
+      addIndicatorInSub(subKey);
+    }
   }
 
   @override
@@ -71,10 +76,10 @@ mixin ConfigBinding
     super.dispose();
     logd("dispose config");
     mainIndicator.dispose();
-    for (var indicator in subIndicators) {
+    for (var indicator in subRectIndicators) {
       indicator.dispose();
     }
-    subIndicators.clear();
+    subRectIndicators.clear();
   }
 
   @override
@@ -84,7 +89,7 @@ mixin ConfigBinding
   }
 
   Set<ValueKey> get supportMainIndicatorKeys {
-    return indicatorsConfig.mainIndicators.keys.toSet()..remove(candleKey);
+    return indicatorsConfig.mainIndicators.keys.toSet();
   }
 
   Set<ValueKey> get supportSubIndicatorKeys {
@@ -96,22 +101,24 @@ mixin ConfigBinding
   }
 
   Set<ValueKey> get subIndicatorKeys {
-    return subIndicators.map((e) => e.key).toSet();
+    return subRectIndicators.map((e) => e.key).toSet();
   }
 
   @protected
   @override
   MultiPaintObjectIndicator get mainIndicator => _mainIndicator;
 
-  @override
   @protected
-  Queue<Indicator> get subIndicators => _subIndicators;
-
   @override
-  List<double> get subIndicatorHeightList {
-    return subIndicators.map((e) => e.height).toList();
+  List<Indicator> get subRectIndicators {
+    if (indicatorsConfig.time.position == DrawPosition.bottom) {
+      return [..._subIndicators, indicatorsConfig.time];
+    } else {
+      return [indicatorsConfig.time, ..._subIndicators];
+    }
   }
 
+  @protected
   @override
   void updateMainIndicatorParam({
     double? height,
@@ -130,30 +137,34 @@ mixin ConfigBinding
   @override
   double calculateIndicatorTop(int slot) {
     double top = 0;
-    final hList = subIndicatorHeightList;
-    if (slot >= 0 && slot < hList.length) {
+    final list = subRectIndicators;
+    if (slot >= 0 && slot < list.length) {
       for (int i = 0; i < slot; i++) {
-        top += hList[i];
+        top += list[i].height;
       }
     }
     return top;
   }
 
+  @protected
   @override
   double get subRectHeight {
-    if (subIndicatorHeightList.isEmpty) return 0.0;
-    return subIndicatorHeightList.reduce((curr, next) => curr + next);
+    double totalHeight = 0.0;
+    for (final indicator in subRectIndicators) {
+      totalHeight += indicator.height;
+    }
+    return totalHeight;
   }
 
+  @protected
   @override
   void ensurePaintObjectInstance() {
     mainIndicator.ensurePaintObject(this);
-    for (var indicator in subIndicators) {
+    for (var indicator in subRectIndicators) {
       indicator.ensurePaintObject(this);
     }
   }
 
-  @override
   void addIndicatorInMain(ValueKey<dynamic> key) {
     if (indicatorsConfig.mainIndicators.containsKey(key)) {
       mainIndicator.appendIndicator(
@@ -165,30 +176,27 @@ mixin ConfigBinding
   }
 
   /// 删除主图中key指定的指标
-  @override
   void delIndicatorInMain(ValueKey<dynamic> key) {
     mainIndicator.deleteIndicator(key);
     markRepaintChart();
   }
 
   /// 在副图中增加指标
-  @override
   void addIndicatorInSub(ValueKey<dynamic> key) {
     if (indicatorsConfig.subIndicators.containsKey(key)) {
-      if (subIndicators.length >= subChartMaxCount) {
-        final deleted = subIndicators.removeFirst();
+      if (_subIndicators.length >= subChartMaxCount) {
+        final deleted = _subIndicators.removeFirst();
         deleted.dispose();
       }
-      subIndicators.addLast(indicatorsConfig.subIndicators[key]!);
+      _subIndicators.addLast(indicatorsConfig.subIndicators[key]!);
       onSizeChange?.call();
       markRepaintChart();
     }
   }
 
   /// 删除副图key指定的指标
-  @override
   void delIndicatorInSub(ValueKey key) {
-    subIndicators.removeWhere((indicator) {
+    _subIndicators.removeWhere((indicator) {
       if (indicator.key == key) {
         indicator.dispose();
         onSizeChange?.call();

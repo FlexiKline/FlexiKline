@@ -91,7 +91,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IConfig {
       );
 
   /// 副区的指标图最大数量
-  int get subChartMaxCount => settingConfig.subChartMaxCount;
+  int get subChartMaxCount => settingConfig.subChartMaxCount + 1;
 
   /// 主区域大小
   Rect get mainRect => settingConfig.mainRect;

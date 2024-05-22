@@ -31,6 +31,7 @@ class TextAreaConfig {
       height: defaultTextHeight,
     ),
     this.textAlign = TextAlign.start,
+    this.strutStyle,
     this.textWidth,
     this.minWidth,
     this.maxWidth,
@@ -46,6 +47,7 @@ class TextAreaConfig {
   /// 文本样式
   final TextStyle style;
   final TextAlign textAlign;
+  final StrutStyle? strutStyle;
   final double? textWidth;
   final double? minWidth;
   final double? maxWidth;

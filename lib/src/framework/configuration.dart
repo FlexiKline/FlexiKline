@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart';
 
 import '../config/export.dart';
+import '../extension/export.dart';
 import 'indicator.dart';
 import 'logger.dart';
 
@@ -55,6 +57,32 @@ mixin KlineConfiguration implements IConfiguration, ILogger {
   @override
   void saveFlexiKlineConfig(FlexiKlineConfig config) {
     configuration.saveFlexiKlineConfig(config);
+  }
+
+  Set<SinglePaintObjectIndicator> genMainChildIndicators() {
+    final list = <SinglePaintObjectIndicator>{};
+    for (var key in mainConfig) {
+      final indicator = indicatorsConfig.mainIndicators.getItem(key);
+      if (indicator != null) {
+        list.add(indicator);
+      }
+    }
+    return list;
+  }
+
+  Set<Indicator> genSubIndicators() {
+    final list = <Indicator>{};
+    for (var key in subConfig) {
+      final indicator = indicatorsConfig.subIndicators.getItem(key);
+      if (indicator != null) {
+        list.add(indicator);
+      }
+    }
+    return list;
+  }
+
+  CandleIndicator getCandleIndicator() {
+    return indicatorsConfig.candle;
   }
 
   /// mainConfig

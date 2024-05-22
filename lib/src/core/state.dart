@@ -214,7 +214,7 @@ mixin StateBinding
       );
     }
 
-    for (var indicator in subIndicators) {
+    for (var indicator in subRectIndicators) {
       if (indicator is MultiPaintObjectIndicator) {
         for (var child in indicator.children) {
           final elapseTime = stopwatch.run(() {

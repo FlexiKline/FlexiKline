@@ -168,7 +168,7 @@ mixin CrossBinding
 
       ensurePaintObjectInstance();
 
-      for (var indicator in [mainIndicator, ...subIndicators]) {
+      for (var indicator in [mainIndicator, ...subRectIndicators]) {
         indicator.paintObject?.doOnCross(canvas, offset, model: model);
       }
     }

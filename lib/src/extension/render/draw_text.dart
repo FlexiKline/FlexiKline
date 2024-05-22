@@ -44,6 +44,7 @@ extension DrawTextExt on Canvas {
     String? text,
     InlineSpan? textSpan,
     TextStyle? style,
+    StrutStyle? strutStyle,
     TextAlign textAlign = TextAlign.start,
     TextDirection textDirection = TextDirection.ltr,
     int? maxLines,
@@ -77,6 +78,7 @@ extension DrawTextExt on Canvas {
       maxLines: maxLines,
       textScaler: textScaler,
       textWidthBasis: textWidthBasis,
+      strutStyle: strutStyle,
     );
 
     textPainter.layout(
@@ -277,6 +279,7 @@ extension DrawTextExt on Canvas {
       textSpan: textSpan,
       // 文本
       style: textConfig.style,
+      strutStyle: textConfig.strutStyle,
       textAlign: textConfig.textAlign,
       maxLines: textConfig.maxLines ?? 1,
       textWidth: textConfig.textWidth,

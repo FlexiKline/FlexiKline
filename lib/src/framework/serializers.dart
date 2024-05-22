@@ -84,6 +84,23 @@ class PaintModeConverter implements JsonConverter<PaintMode, String> {
 
 /// 基础样式转换
 
+class DrawPositionConverter implements JsonConverter<DrawPosition, String> {
+  const DrawPositionConverter();
+
+  @override
+  DrawPosition fromJson(String json) {
+    return DrawPosition.values.firstWhere(
+      (e) => e.name == json,
+      orElse: () => DrawPosition.middle,
+    );
+  }
+
+  @override
+  String toJson(DrawPosition object) {
+    return object.name;
+  }
+}
+
 class PaintingStyleConverter implements JsonConverter<PaintingStyle, String> {
   const PaintingStyleConverter();
   @override
@@ -353,7 +370,7 @@ class TextStyleConverter
   Map<String, dynamic> toJson(TextStyle style) {
     return {
       'color': convertHexColor(style.color),
-      'fontSize': convertDouble(style.fontSize),
+      'fontSize': style.fontSize,
       'fontFamily': style.fontFamily,
       'fontStyle': convertFontStyle(style.fontStyle),
       'height': style.height,
@@ -362,6 +379,42 @@ class TextStyleConverter
       'decoration': convertTextDecoration(style.decoration),
       'decorationColor': convertHexColor(style.decorationColor),
       'decorationStyle': style.decorationStyle?.name,
+    };
+  }
+}
+
+class StrutStyleConverter
+    implements JsonConverter<StrutStyle, Map<String, dynamic>> {
+  const StrutStyleConverter();
+
+  @override
+  StrutStyle fromJson(Map<String, dynamic> json) {
+    if (json.isEmpty) return const StrutStyle();
+    return StrutStyle(
+      fontFamily: json['fontFamily'],
+      height: parseDouble(json['height']),
+      leadingDistribution: parseTextLeadingDistribution(
+        json['leadingDistribution'],
+      ),
+      leading: parseDouble(json['leading']),
+      fontWeight: parseFontWeight(json['fontWeight']),
+      fontStyle: parseFontStyle(json['fontStyle']),
+      forceStrutHeight: parseBool(json['forceStrutHeight']),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson(StrutStyle style) {
+    return {
+      'fontFamily': style.fontFamily,
+      'height': convertDouble(style.height),
+      'leadingDistribution': convertTextLeadingDistribution(
+        style.leadingDistribution,
+      ),
+      'leading': style.leading,
+      'fontWeight': convertFontWeight(style.fontWeight),
+      'fontStyle': convertFontStyle(style.fontStyle),
+      'forceStrutHeight': convertBool(style.forceStrutHeight),
     };
   }
 }
@@ -394,6 +447,7 @@ class DecimalConverter implements JsonConverter<Decimal, dynamic> {
 }
 
 const _basicConverterList = <JsonConverter>[
+  DrawPositionConverter(),
   PaintingStyleConverter(),
   LineTypeConverter(),
   EdgeInsetsConverter(),
@@ -404,6 +458,7 @@ const _basicConverterList = <JsonConverter>[
   BorderRadiusConverter(),
   TextAlignConvert(),
   TextStyleConverter(),
+  StrutStyleConverter(),
   ColorConverter(),
   DecimalConverter(),
 ];

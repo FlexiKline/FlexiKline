@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:collection';
+
 extension ListExt<T> on List<T> {
   bool checkIndex(int index) {
     return index >= 0 && index < length;
@@ -56,4 +58,12 @@ extension MapExt<K, V> on Map<K, V> {
     }
     return null;
   }
+}
+
+extension SetExt<T> on Set<T> {
+
+}
+
+extension QueueExt<T> on Queue<T> {
+  
 }

@@ -30,6 +30,18 @@ class Item implements Comparable<Item> {
   }
 
   @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is Item) {
+      return other.runtimeType == runtimeType && other.name == other.name;
+    }
+    return false;
+  }
+
+  @override
+  int get hashCode => name.hashCode;
+
+  @override
   String toString() {
     return 'Item($name, $weight)';
   }

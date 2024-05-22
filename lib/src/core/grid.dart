@@ -17,6 +17,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 
 import '../extension/export.dart';
+import '../framework/export.dart';
 import 'binding_base.dart';
 import 'interface.dart';
 import 'setting.dart';
@@ -96,7 +97,7 @@ mixin GridBinding
           dashes: horiDashes,
         );
 
-        // 绘制主图网格线
+        // 绘制主图网格横线
         final step = mainBottom / gridConfig.horizontal.count;
         for (int i = 1; i < gridConfig.horizontal.count; i++) {
           dy = i * step;
@@ -130,11 +131,11 @@ mixin GridBinding
         //   dashes: horiDashes,
         // );
 
+        /// 副图区域
         // 绘制每一个副图的底部线
-        final list = subIndicatorHeightList;
         double height = 0.0;
-        for (int i = 0; i < list.length; i++) {
-          height += list[i];
+        for (final indicator in subRectIndicators) {
+          height += indicator.height;
           dy = subTop + height;
           canvas.drawLineType(
             horiLineType,
@@ -166,6 +167,16 @@ mixin GridBinding
           dashes: vertDashes,
         );
 
+        // 计算排队时间指标的top和bottom
+        double top = subTop;
+        double bottom = subBottom;
+        final timeIndicator = indicatorsConfig.time;
+        if (timeIndicator.position == DrawPosition.bottom) {
+          bottom -= timeIndicator.height;
+        } else {
+          top += timeIndicator.height;
+        }
+
         // 绘制主区/副区的Vertical线
         for (int i = 1; i < gridConfig.vertical.count; i++) {
           dx = i * step;
@@ -181,8 +192,8 @@ mixin GridBinding
           canvas.drawLineType(
             vertLineType,
             Path()
-              ..moveTo(dx, subTop)
-              ..lineTo(dx, subBottom),
+              ..moveTo(dx, top)
+              ..lineTo(dx, bottom),
             vertPaint,
             dashes: vertDashes,
           );

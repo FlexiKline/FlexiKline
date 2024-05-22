@@ -19,6 +19,8 @@ TextAreaConfig _$TextAreaConfigFromJson(Map<String, dynamic> json) =>
       textAlign: json['textAlign'] == null
           ? TextAlign.start
           : const TextAlignConvert().fromJson(json['textAlign'] as String),
+      strutStyle: _$JsonConverterFromJson<Map<String, dynamic>, StrutStyle>(
+          json['strutStyle'], const StrutStyleConverter().fromJson),
       textWidth: (json['textWidth'] as num?)?.toDouble(),
       minWidth: (json['minWidth'] as num?)?.toDouble(),
       maxWidth: (json['maxWidth'] as num?)?.toDouble(),
@@ -45,6 +47,10 @@ Map<String, dynamic> _$TextAreaConfigToJson(TextAreaConfig instance) {
     }
   }
 
+  writeNotNull(
+      'strutStyle',
+      _$JsonConverterToJson<Map<String, dynamic>, StrutStyle>(
+          instance.strutStyle, const StrutStyleConverter().toJson));
   writeNotNull('textWidth', instance.textWidth);
   writeNotNull('minWidth', instance.minWidth);
   writeNotNull('maxWidth', instance.maxWidth);

@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:collection';
-
 import 'package:flutter/material.dart';
 
 import '../data/export.dart';
@@ -118,15 +116,10 @@ abstract interface class IState {
 /// Config接口
 abstract interface class IConfig {
   MultiPaintObjectIndicator get mainIndicator;
-  Queue<Indicator> get subIndicators;
-  List<double> get subIndicatorHeightList;
+  List<Indicator> get subRectIndicators;
   double calculateIndicatorTop(int slot);
   double get subRectHeight;
   void ensurePaintObjectInstance();
-  void addIndicatorInMain(ValueKey<dynamic> key);
-  void delIndicatorInMain(ValueKey<dynamic> key);
-  void addIndicatorInSub(ValueKey<dynamic> key);
-  void delIndicatorInSub(ValueKey<dynamic> key);
   void updateMainIndicatorParam({
     double? height,
     EdgeInsets? padding,

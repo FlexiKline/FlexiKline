@@ -14,6 +14,7 @@
 
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import '../constant.dart';
 
@@ -52,6 +53,19 @@ int? convertDateTime(dynamic dateTime) {
 }
 
 /// parse vs convert.
+
+bool? parseBool(dynamic value, {bool? def}) {
+  if (value == null) return def;
+  final val = value.toString().toLowerCase();
+  if (val == 'true') return true;
+  if (val == 'false') return false;
+  return null;
+}
+
+String? convertBool(bool? value) {
+  if (value == null) return null;
+  return value ? 'true' : 'false';
+}
 
 Decimal? parseDecimal(dynamic value, {Decimal? def}) {
   if (value == null) {
@@ -273,6 +287,23 @@ TextDecorationStyle parseTextDecorationStyle(
     (e) => e.name == style,
     orElse: () => def,
   );
+}
+
+TextLeadingDistribution? parseTextLeadingDistribution(String? distribution,
+    {TextLeadingDistribution? def}) {
+  if (distribution == null) return def;
+  if (distribution == TextLeadingDistribution.proportional.name) {
+    return TextLeadingDistribution.proportional;
+  }
+  if (distribution == TextLeadingDistribution.even.name) {
+    return TextLeadingDistribution.even;
+  }
+  return null;
+}
+
+String? convertTextLeadingDistribution(TextLeadingDistribution? distribution) {
+  if (distribution == null) return null;
+  return distribution.name;
 }
 
 BorderSide parseBorderSide(Map<String, dynamic>? json) {

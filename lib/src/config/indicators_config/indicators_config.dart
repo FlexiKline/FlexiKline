@@ -89,7 +89,7 @@ class IndicatorsConfig {
 
   /// 内置主区指标
   Map<ValueKey, SinglePaintObjectIndicator> get _innerMainIndicators => {
-        candle.key: candle,
+        // candle.key: candle,
         volume.key: volume,
         ma.key: ma,
         ema.key: ema,
@@ -98,7 +98,7 @@ class IndicatorsConfig {
 
   /// 内置副区指标
   Map<ValueKey, Indicator> get _innerSubIndicators => {
-        time.key: time,
+        // time.key: time,
         macd.key: macd,
         kdj.key: kdj,
         mavol.key: mavol,
