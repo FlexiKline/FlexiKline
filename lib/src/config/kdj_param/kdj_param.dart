@@ -12,10 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:copy_with_extension/copy_with_extension.dart';
+
 import '../../framework/serializers.dart';
 
 part 'kdj_param.g.dart';
 
+@CopyWith()
 @FlexiParamSerializable
 final class KDJParam {
   final int n;

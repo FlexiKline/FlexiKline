@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flutter/material.dart';
 
 import '../../constant.dart';
@@ -22,6 +23,7 @@ import '../text_area_config/text_area_config.dart';
 
 part 'cross_config.g.dart';
 
+@CopyWith()
 @FlexiConfigSerializable
 class CrossConfig {
   CrossConfig({
@@ -76,6 +78,7 @@ class CrossConfig {
   Map<String, dynamic> toJson() => _$CrossConfigToJson(this);
 }
 
+@CopyWith()
 @FlexiConfigSerializable
 class CrossPointConfig {
   const CrossPointConfig({
@@ -93,54 +96,3 @@ class CrossPointConfig {
 
   Map<String, dynamic> toJson() => _$CrossPointConfigToJson(this);
 }
-
-// @FlexiConfigSerializable
-// class Crosshair {
-//   const Crosshair({
-//     this.type = LineType.dashed,
-//     this.color = Colors.black,
-//     this.width = 0.5,
-//     this.dashes = const [3, 3],
-//   });
-
-//   final LineType type;
-//   final Color color;
-//   final double width;
-//   final List<double> dashes;
-
-//   factory Crosshair.fromJson(Map<String, dynamic> json) =>
-//       _$CrosshairFromJson(json);
-
-//   Map<String, dynamic> toJson() => _$CrosshairToJson(this);
-// }
-
-
-
-// @FlexiConfigSerializable
-// class CrossTickText {
-//   const CrossTickText({
-//     this.style = const TextStyle(
-//       fontSize: defaulTextSize,
-//       color: Colors.white,
-//       overflow: TextOverflow.ellipsis,
-//       height: defaultTextHeight,
-//     ),
-//     this.background = Colors.black,
-//     this.padding = const EdgeInsets.all(2),
-//     this.border = BorderSide.none,
-//     this.borderRadius = const BorderRadius.all(
-//       Radius.circular(2),
-//     ),
-//   });
-
-//   final TextStyle style;
-//   final Color background;
-//   final EdgeInsets padding;
-//   final BorderSide border;
-//   final BorderRadius borderRadius;
-
-//   factory CrossTickText.fromJson(Map<String, dynamic> json) =>
-//       _$CrossTickTextFromJson(json);
-
-//   Map<String, dynamic> toJson() => _$CrossTickTextToJson(this);
-// }

@@ -3,6 +3,147 @@
 part of 'indicators_config.dart';
 
 // **************************************************************************
+// CopyWithGenerator
+// **************************************************************************
+
+abstract class _$IndicatorsConfigCWProxy {
+  IndicatorsConfig candle(CandleIndicator? candle);
+
+  IndicatorsConfig volume(VolumeIndicator? volume);
+
+  IndicatorsConfig ma(MAIndicator? ma);
+
+  IndicatorsConfig ema(EMAIndicator? ema);
+
+  IndicatorsConfig boll(BOLLIndicator? boll);
+
+  IndicatorsConfig time(TimeIndicator? time);
+
+  IndicatorsConfig macd(MACDIndicator? macd);
+
+  IndicatorsConfig kdj(KDJIndicator? kdj);
+
+  IndicatorsConfig mavol(MAVolumeIndicator? mavol);
+
+  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `IndicatorsConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  ///
+  /// Usage
+  /// ```dart
+  /// IndicatorsConfig(...).copyWith(id: 12, name: "My name")
+  /// ````
+  IndicatorsConfig call({
+    CandleIndicator? candle,
+    VolumeIndicator? volume,
+    MAIndicator? ma,
+    EMAIndicator? ema,
+    BOLLIndicator? boll,
+    TimeIndicator? time,
+    MACDIndicator? macd,
+    KDJIndicator? kdj,
+    MAVolumeIndicator? mavol,
+  });
+}
+
+/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfIndicatorsConfig.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfIndicatorsConfig.copyWith.fieldName(...)`
+class _$IndicatorsConfigCWProxyImpl implements _$IndicatorsConfigCWProxy {
+  const _$IndicatorsConfigCWProxyImpl(this._value);
+
+  final IndicatorsConfig _value;
+
+  @override
+  IndicatorsConfig candle(CandleIndicator? candle) => this(candle: candle);
+
+  @override
+  IndicatorsConfig volume(VolumeIndicator? volume) => this(volume: volume);
+
+  @override
+  IndicatorsConfig ma(MAIndicator? ma) => this(ma: ma);
+
+  @override
+  IndicatorsConfig ema(EMAIndicator? ema) => this(ema: ema);
+
+  @override
+  IndicatorsConfig boll(BOLLIndicator? boll) => this(boll: boll);
+
+  @override
+  IndicatorsConfig time(TimeIndicator? time) => this(time: time);
+
+  @override
+  IndicatorsConfig macd(MACDIndicator? macd) => this(macd: macd);
+
+  @override
+  IndicatorsConfig kdj(KDJIndicator? kdj) => this(kdj: kdj);
+
+  @override
+  IndicatorsConfig mavol(MAVolumeIndicator? mavol) => this(mavol: mavol);
+
+  @override
+
+  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `IndicatorsConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  ///
+  /// Usage
+  /// ```dart
+  /// IndicatorsConfig(...).copyWith(id: 12, name: "My name")
+  /// ````
+  IndicatorsConfig call({
+    Object? candle = const $CopyWithPlaceholder(),
+    Object? volume = const $CopyWithPlaceholder(),
+    Object? ma = const $CopyWithPlaceholder(),
+    Object? ema = const $CopyWithPlaceholder(),
+    Object? boll = const $CopyWithPlaceholder(),
+    Object? time = const $CopyWithPlaceholder(),
+    Object? macd = const $CopyWithPlaceholder(),
+    Object? kdj = const $CopyWithPlaceholder(),
+    Object? mavol = const $CopyWithPlaceholder(),
+  }) {
+    return IndicatorsConfig(
+      candle: candle == const $CopyWithPlaceholder()
+          ? _value.candle
+          // ignore: cast_nullable_to_non_nullable
+          : candle as CandleIndicator?,
+      volume: volume == const $CopyWithPlaceholder()
+          ? _value.volume
+          // ignore: cast_nullable_to_non_nullable
+          : volume as VolumeIndicator?,
+      ma: ma == const $CopyWithPlaceholder()
+          ? _value.ma
+          // ignore: cast_nullable_to_non_nullable
+          : ma as MAIndicator?,
+      ema: ema == const $CopyWithPlaceholder()
+          ? _value.ema
+          // ignore: cast_nullable_to_non_nullable
+          : ema as EMAIndicator?,
+      boll: boll == const $CopyWithPlaceholder()
+          ? _value.boll
+          // ignore: cast_nullable_to_non_nullable
+          : boll as BOLLIndicator?,
+      time: time == const $CopyWithPlaceholder()
+          ? _value.time
+          // ignore: cast_nullable_to_non_nullable
+          : time as TimeIndicator?,
+      macd: macd == const $CopyWithPlaceholder()
+          ? _value.macd
+          // ignore: cast_nullable_to_non_nullable
+          : macd as MACDIndicator?,
+      kdj: kdj == const $CopyWithPlaceholder()
+          ? _value.kdj
+          // ignore: cast_nullable_to_non_nullable
+          : kdj as KDJIndicator?,
+      mavol: mavol == const $CopyWithPlaceholder()
+          ? _value.mavol
+          // ignore: cast_nullable_to_non_nullable
+          : mavol as MAVolumeIndicator?,
+    );
+  }
+}
+
+extension $IndicatorsConfigCopyWith on IndicatorsConfig {
+  /// Returns a callable class that can be used as follows: `instanceOfIndicatorsConfig.copyWith(...)` or like so:`instanceOfIndicatorsConfig.copyWith.fieldName(...)`.
+  // ignore: library_private_types_in_public_api
+  _$IndicatorsConfigCWProxy get copyWith => _$IndicatorsConfigCWProxyImpl(this);
+}
+
+// **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 

@@ -46,9 +46,6 @@ class _FlexiKlineSizeSliderState extends ConsumerState<FlexiKlineSizeSlider> {
   late final int divisions;
   late Size maxSize;
 
-  /// 当前Kline的主区大小对应Slider的值.
-  late Size curSize;
-
   double get minValue {
     return widget.axis == Axis.vertical
         ? controller.mainMinSize.height
@@ -59,6 +56,9 @@ class _FlexiKlineSizeSliderState extends ConsumerState<FlexiKlineSizeSlider> {
     return widget.axis == Axis.vertical ? maxSize.height : maxSize.width;
   }
 
+  /// 当前Kline的主区大小对应Slider的值.
+  Size get curSize => controller.mainRect.size;
+
   double get curValue {
     return widget.axis == Axis.vertical ? curSize.height : curSize.width;
   }
@@ -67,11 +67,6 @@ class _FlexiKlineSizeSliderState extends ConsumerState<FlexiKlineSizeSlider> {
   void initState() {
     super.initState();
     maxSize = widget.maxSize ?? Size(ScreenUtil().screenWidth, 800);
-    curSize = controller.mainRect.size;
-    curSize = Size(
-      math.max(controller.mainMinSize.width, curSize.width),
-      math.max(controller.mainMinSize.height, curSize.height),
-    );
     maxSize = Size(
       math.max(curSize.width, maxSize.width),
       math.max(curSize.height, maxSize.height),
@@ -92,11 +87,10 @@ class _FlexiKlineSizeSliderState extends ConsumerState<FlexiKlineSizeSlider> {
       onChanged: (value) {
         setState(() {
           if (widget.axis == Axis.vertical) {
-            curSize = Size(curSize.width, value);
+            widget.controller.setMainSize(Size(curSize.width, value));
           } else {
-            curSize = Size(value, curSize.height);
+            widget.controller.setMainSize(Size(value, curSize.height));
           }
-          widget.controller.setMainSize(curSize);
         });
       },
     );

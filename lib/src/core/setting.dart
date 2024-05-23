@@ -12,20 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:collection';
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
 import '../config/export.dart';
+import '../constant.dart';
+import '../framework/export.dart';
 import 'binding_base.dart';
 import 'interface.dart';
 
-mixin SettingBinding on KlineBindingBase implements ISetting, IConfig {
+mixin SettingBinding on KlineBindingBase implements ISetting, IChart {
   @override
   void init() {
-    // _settingConfig = SettingConfig.fromJson(settingConfigData);
     logd('init setting');
+    _mainIndicator = MultiPaintObjectIndicator(
+      key: mainChartKey,
+      name: 'MAIN',
+      height: 0,
+      padding: defaultMainIndicatorPadding,
+      drawBelowTipsArea: true,
+    );
+
+    _subIndicators = ListQueue<Indicator>(subChartMaxCount);
     super.init();
   }
 
@@ -33,44 +43,49 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IConfig {
   void initState() {
     super.initState();
     logd("initState setting");
+    _mainIndicator.appendIndicator(indicatorsConfig.candle, this);
+    _mainIndicator.appendIndicator(getCandleIndicator(), this);
+    final mainChildIndicators = genMainChildIndicators();
+    _mainIndicator.appendIndicators(mainChildIndicators, this);
+
+    if (mainRect.isEmpty) {
+      settingConfig.setMainRect(initialMainSize);
+    }
+    settingConfig.checkAndFixMinSize();
+
+    /// 最终渲染前, 如果用户更改了配置, 此处做下更新.
+    updateMainIndicatorParam(
+      height: mainRect.height,
+      padding: mainPadding,
+    );
+
+    for (var subKey in subConfig) {
+      addIndicatorInSub(subKey);
+    }
   }
 
   @override
   void dispose() {
     super.dispose();
     logd("dispose setting");
+    mainIndicator.dispose();
+    for (var indicator in subRectIndicators) {
+      indicator.dispose();
+    }
+    subRectIndicators.clear();
   }
-
-  @override
-  void storeState() {
-    super.storeState();
-    logd("storeState setting");
-    // storeSettingData(settingConfig);
-  }
-
-  // @override
-  // void loadConfig(Map<String, dynamic> configData) {
-  //   logd("loadConfig setting");
-  //   // _settingConfig = SettingConfig.fromJson(configData);
-  //   super.loadConfig(configData);
-  // }
 
   VoidCallback? onSizeChange;
   ValueChanged<bool>? onLoading;
 
-  // late SettingConfig _settingConfig;
+  /// 主绘制区域指标
+  late MultiPaintObjectIndicator _mainIndicator;
 
-  // @override
-  // SettingConfig get settingConfig => _settingConfig;
+  /// 副图区域绘制指标集合
+  late Queue<Indicator> _subIndicators;
 
   /// Loading配置
   LoadingConfig get loading => settingConfig.loading;
-
-  /// 一个像素的值.
-  double get pixel {
-    final mediaQuery = MediaQueryData.fromView(ui.window);
-    return 1.0 / mediaQuery.devicePixelRatio;
-  }
 
   /// 整个画布区域大小 = 由主图区域 + 副图区域
   Rect get canvasRect => Rect.fromLTRB(
@@ -187,4 +202,123 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IConfig {
 
   /// 绘制区域宽度内, 可绘制的蜡烛数
   int get maxCandleCount => (mainChartWidth / candleActualWidth).ceil();
+
+  Set<ValueKey> get supportMainIndicatorKeys {
+    return indicatorsConfig.mainIndicators.keys.toSet();
+  }
+
+  Set<ValueKey> get supportSubIndicatorKeys {
+    return indicatorsConfig.subIndicators.keys.toSet();
+  }
+
+  Set<ValueKey> get mainIndicatorKeys {
+    return mainIndicator.children.map((e) => e.key).toSet();
+  }
+
+  Set<ValueKey> get subIndicatorKeys {
+    return subRectIndicators.map((e) => e.key).toSet();
+  }
+
+  @protected
+  @override
+  MultiPaintObjectIndicator get mainIndicator => _mainIndicator;
+
+  @protected
+  @override
+  List<Indicator> get subRectIndicators {
+    if (indicatorsConfig.time.position == DrawPosition.bottom) {
+      return [..._subIndicators, indicatorsConfig.time];
+    } else {
+      return [indicatorsConfig.time, ..._subIndicators];
+    }
+  }
+
+  @protected
+  @override
+  void updateMainIndicatorParam({
+    double? height,
+    EdgeInsets? padding,
+  }) {
+    bool changed = mainIndicator.updateLayout(
+      height: height,
+      padding: padding,
+      reset: true,
+    );
+    if (changed) {
+      markRepaintChart(reset: true);
+    }
+  }
+
+  @override
+  double calculateIndicatorTop(int slot) {
+    double top = 0;
+    final list = subRectIndicators;
+    if (slot >= 0 && slot < list.length) {
+      for (int i = 0; i < slot; i++) {
+        top += list[i].height;
+      }
+    }
+    return top;
+  }
+
+  @protected
+  @override
+  double get subRectHeight {
+    double totalHeight = 0.0;
+    for (final indicator in subRectIndicators) {
+      totalHeight += indicator.height;
+    }
+    return totalHeight;
+  }
+
+  @protected
+  @override
+  void ensurePaintObjectInstance() {
+    mainIndicator.ensurePaintObject(this);
+    for (var indicator in subRectIndicators) {
+      indicator.ensurePaintObject(this);
+    }
+  }
+
+  void addIndicatorInMain(ValueKey<dynamic> key) {
+    if (indicatorsConfig.mainIndicators.containsKey(key)) {
+      mainIndicator.appendIndicator(
+        indicatorsConfig.mainIndicators[key]!,
+        this,
+      );
+      markRepaintChart();
+    }
+  }
+
+  /// 删除主图中key指定的指标
+  void delIndicatorInMain(ValueKey<dynamic> key) {
+    mainIndicator.deleteIndicator(key);
+    markRepaintChart();
+  }
+
+  /// 在副图中增加指标
+  void addIndicatorInSub(ValueKey<dynamic> key) {
+    if (indicatorsConfig.subIndicators.containsKey(key)) {
+      if (_subIndicators.length >= subChartMaxCount) {
+        final deleted = _subIndicators.removeFirst();
+        deleted.dispose();
+      }
+      _subIndicators.addLast(indicatorsConfig.subIndicators[key]!);
+      onSizeChange?.call();
+      markRepaintChart();
+    }
+  }
+
+  /// 删除副图key指定的指标
+  void delIndicatorInSub(ValueKey key) {
+    _subIndicators.removeWhere((indicator) {
+      if (indicator.key == key) {
+        indicator.dispose();
+        onSizeChange?.call();
+        markRepaintChart();
+        return true;
+      }
+      return false;
+    });
+  }
 }

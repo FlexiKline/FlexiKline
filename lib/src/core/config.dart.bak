@@ -60,6 +60,10 @@ mixin ConfigBinding
     final mainChildIndicators = genMainChildIndicators();
     _mainIndicator.appendIndicators(mainChildIndicators, this);
 
+    if (mainRect.isEmpty) {
+      settingConfig.setMainRect(initialMainSize);
+    }
+
     /// 最终渲染前, 如果用户更改了配置, 此处做下更新.
     updateMainIndicatorParam(
       height: mainRect.height,
@@ -80,12 +84,6 @@ mixin ConfigBinding
       indicator.dispose();
     }
     subRectIndicators.clear();
-  }
-
-  @override
-  void storeState() {
-    super.storeState();
-    logd('storeState config');
   }
 
   Set<ValueKey> get supportMainIndicatorKeys {

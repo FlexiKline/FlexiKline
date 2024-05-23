@@ -53,16 +53,16 @@ class ValueKeyConverter implements JsonConverter<ValueKey, String> {
 }
 
 class SetValueKeyConverter
-    implements JsonConverter<Set<ValueKey>, List<String>> {
+    implements JsonConverter<Set<ValueKey>, List<dynamic>> {
   const SetValueKeyConverter();
 
   @override
-  Set<ValueKey> fromJson(List<String> json) {
+  Set<ValueKey> fromJson(List<dynamic> json) {
     return json.map((e) => const ValueKeyConverter().fromJson(e)).toSet();
   }
 
   @override
-  List<String> toJson(Set<ValueKey> object) {
+  List<dynamic> toJson(Set<ValueKey> object) {
     return object.map((e) => const ValueKeyConverter().toJson(e)).toList();
   }
 }

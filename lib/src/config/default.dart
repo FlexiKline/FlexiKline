@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:ui';
+
 import '../constant.dart';
 import '../framework/export.dart';
 import '../indicators/export.dart';
@@ -33,6 +35,7 @@ final FlexiKlineConfig defaultFlexiKlineConfig = FlexiKlineConfig(
     candle: CandleIndicator(height: defaultMainIndicatorHeight),
     volume: VolumeIndicator(
       height: defaultSubIndicatorHeight,
+      paintMode: PaintMode.alone,
       showYAxisTick: false,
       showCrossMark: false,
       showTips: false,
@@ -47,6 +50,7 @@ final FlexiKlineConfig defaultFlexiKlineConfig = FlexiKlineConfig(
     mavol: MAVolumeIndicator(
       volumeIndicator: VolumeIndicator(
         height: defaultSubIndicatorHeight,
+        paintMode: PaintMode.combine,
         showYAxisTick: true,
         showCrossMark: true,
         showTips: true,
@@ -68,4 +72,8 @@ class FlexiKlineDefaultConfiguration implements IConfiguration {
   void saveFlexiKlineConfig(FlexiKlineConfig config) {
     // TODO: implement saveFlexiKlineConfig
   }
+
+  @override
+  // TODO: implement initialMainSize
+  Size get initialMainSize => throw UnimplementedError();
 }

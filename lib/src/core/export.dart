@@ -16,7 +16,7 @@ export 'binding_base.dart';
 export 'chart.dart';
 export 'gesture.dart';
 export 'state.dart';
-export 'config.dart';
+// export 'config.dart';
 export 'setting.dart';
 export 'cross.dart';
 export 'interface.dart';

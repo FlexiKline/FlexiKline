@@ -114,7 +114,7 @@ abstract interface class IState {
 }
 
 /// Config接口
-abstract interface class IConfig {
+abstract interface class ISetting {
   MultiPaintObjectIndicator get mainIndicator;
   List<Indicator> get subRectIndicators;
   double calculateIndicatorTop(int slot);
@@ -150,10 +150,6 @@ abstract interface class ICross {
 
   /// 取消当前Cross事件
   void cancelCross();
-}
-
-abstract interface class ISetting {
-  // SettingConfig get settingConfig;
 }
 
 abstract interface class IGrid {

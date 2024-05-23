@@ -46,27 +46,7 @@ abstract class KlineBindingBase
   @mustCallSuper
   void dispose() {
     logd("dispose base");
-
-    /// TODO: 待验证 销毁前保存当前配置
-    storeState();
-  }
-
-  @protected
-  @mustCallSuper
-  void storeState() {
-    logd("storeState base");
-  }
-
-  @protected
-  @mustCallSuper
-  void loadConfig(Map<String, dynamic> configData) {
-    logd("loadConfig base");
-  }
-
-  /// 缓存FlexiKline的所有配置到本地
-  void storeStateToLocal() {
-    storeState();
-    saveFlexiKlineConfig(flexiKlineConfig);
+    storeFlexiKlineConfig();
   }
 
   KlineBindingBase get instance => this;

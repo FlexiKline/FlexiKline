@@ -35,7 +35,7 @@ mixin CandleData on BaseData {
   }) {
     int from = start ?? this.start;
     int to = end ?? this.end;
-    if (list.isEmpty || from < 0 || to > list.length) return null;
+    if (list.isEmpty || from >= to || from < 0 || to > list.length) return null;
 
     CandleModel m = list[to - 1];
     BagNum maxHigh = m.high;

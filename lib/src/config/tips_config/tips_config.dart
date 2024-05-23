@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flutter/material.dart';
 
 import '../../constant.dart';
@@ -19,6 +20,7 @@ import '../../framework/serializers.dart';
 
 part 'tips_config.g.dart';
 
+@CopyWith()
 /// 指标图顶部提示文本配置
 @FlexiConfigSerializable
 class TipsConfig {

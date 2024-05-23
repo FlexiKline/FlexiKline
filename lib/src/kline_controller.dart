@@ -12,13 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'config/export.dart';
 import 'core/export.dart';
 
 class FlexiKlineController extends KlineBindingBase
     with
         SettingBinding,
-        ConfigBinding,
+        // ConfigBinding,
         StateBinding,
         GestureBinding,
         GridBinding,
@@ -26,7 +25,7 @@ class FlexiKlineController extends KlineBindingBase
         CrossBinding,
         DrawBinding {
   FlexiKlineController({
-    super.configuration = const FlexiKlineDefaultConfiguration(),
+    required super.configuration,
     super.logger,
   });
 }

@@ -42,6 +42,14 @@ class CandleIndicator extends SinglePaintObjectIndicator {
         length: 20,
         width: 0.5,
       ),
+      text: TextAreaConfig(
+        style: TextStyle(
+          fontSize: defaulTextSize,
+          color: Colors.black,
+          overflow: TextOverflow.ellipsis,
+          height: defaultTextHeight,
+        ),
+      ),
     ),
     // 最低价
     this.low = const MarkConfig(
@@ -52,11 +60,19 @@ class CandleIndicator extends SinglePaintObjectIndicator {
         length: 20,
         width: 0.5,
       ),
+      text: TextAreaConfig(
+        style: TextStyle(
+          fontSize: defaulTextSize,
+          color: Colors.black,
+          overflow: TextOverflow.ellipsis,
+          height: defaultTextHeight,
+        ),
+      ),
     ),
     // 最后价: 当最新蜡烛不在可视区域时使用.
     this.last = const MarkConfig(
       show: true,
-      spacing: 100,
+      spacing: 120,
       line: LineConfig(
         type: LineType.dashed,
         color: Colors.black,
@@ -395,7 +411,7 @@ class CandlePaintObject<T extends CandleIndicator>
     double dy = 0;
     for (int i = 1; i <= gridConfig.horizontal.count; i++) {
       dy = i * dyStep;
-      final price = dyToValue(dy, check: false);
+      final price = dyToValue(dy);
       if (price == null) continue;
 
       final text = formatPrice(
@@ -418,6 +434,9 @@ class CandlePaintObject<T extends CandleIndicator>
       );
     }
   }
+
+  /// 缓存latest文本相对于屏幕右侧的负偏移量
+  double _latestTextOffset = 0.0;
 
   /// 绘制最新价刻度线与价钱标记
   /// 1. 价钱标记始终展示在画板最右边.
@@ -447,7 +466,7 @@ class CandlePaintObject<T extends CandleIndicator>
     double rdx = chartRect.right;
     double ldx = 0; // 计算最新价刻度线lineTo参数X轴的dx值. 默认0: 代表橫穿整个Canvas.
 
-    if (paintDxOffset < 0) {
+    if (paintDxOffset < _latestTextOffset) {
       // 绘制最新价和倒计时
       final latest = indicator.latest;
       if (!latest.show) return;
@@ -519,6 +538,7 @@ class CandlePaintObject<T extends CandleIndicator>
         backgroundColor: background,
         borderRadius: borderRadius,
       );
+      _latestTextOffset = -size.width;
 
       if (countDownText != null) {
         final countDown = indicator.countDown;

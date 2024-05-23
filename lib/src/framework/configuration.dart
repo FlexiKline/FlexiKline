@@ -12,11 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:flexi_kline/flexi_kline.dart';
+// import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 import '../config/export.dart';
+import '../core/export.dart';
 import '../extension/export.dart';
+import '../indicators/export.dart';
 import 'indicator.dart';
 import 'logger.dart';
 
@@ -27,13 +29,28 @@ typedef IndicatorFromJson<T extends Indicator> = T Function(
 const defaultFlexKlineConfigKey = 'flexi_kline_config_key';
 
 abstract class IConfiguration {
+  Size get initialMainSize;
+
   FlexiKlineConfig getFlexiKlineConfig();
 
   void saveFlexiKlineConfig(FlexiKlineConfig config);
 }
 
-mixin KlineConfiguration implements IConfiguration, ILogger {
+mixin KlineConfiguration implements IConfiguration, ILogger, ISetting {
   late IConfiguration configuration;
+
+  /// 一个像素的值.
+  // double get pixel {
+  //   final mediaQuery = MediaQueryData.fromView(ui.window);
+  //   return 1.0 / mediaQuery.devicePixelRatio;
+  // }
+
+  @override
+  Size get initialMainSize {
+    return configuration.initialMainSize;
+    // final mediaQuery = MediaQueryData.fromWindow(ui.window);
+    // return Size(mediaQuery.size.width, 300);
+  }
 
   FlexiKlineConfig? _flexiKlineConfig;
   FlexiKlineConfig get flexiKlineConfig {
@@ -49,6 +66,11 @@ mixin KlineConfiguration implements IConfiguration, ILogger {
     return _flexiKlineConfig!;
   }
 
+  /// 保存当前FlexiKline配置到本地
+  void storeFlexiKlineConfig() {
+    saveFlexiKlineConfig(flexiKlineConfig);
+  }
+
   @override
   FlexiKlineConfig getFlexiKlineConfig() {
     return configuration.getFlexiKlineConfig();
@@ -56,6 +78,8 @@ mixin KlineConfiguration implements IConfiguration, ILogger {
 
   @override
   void saveFlexiKlineConfig(FlexiKlineConfig config) {
+    storeMainConfig(mainIndicator);
+    storeSubConfig(subRectIndicators);
     configuration.saveFlexiKlineConfig(config);
   }
 
@@ -93,8 +117,8 @@ mixin KlineConfiguration implements IConfiguration, ILogger {
 
   /// subConfig
   Set<ValueKey> get subConfig => flexiKlineConfig.sub;
-  void storeSubConfig(Set<Indicator> list) {
-    flexiKlineConfig.main = list.map((e) => e.key).toSet();
+  void storeSubConfig(List<Indicator> list) {
+    flexiKlineConfig.sub = list.map((e) => e.key).toSet();
   }
 
   /// IndicatorsConfig

@@ -28,7 +28,7 @@ import 'setting.dart';
 /// 状态管理: 负责数据的管理, 缓存, 切换, 计算
 mixin StateBinding
     on KlineBindingBase, SettingBinding
-    implements IState, IChart, ICross, IConfig {
+    implements IState, IChart, ICross {
   @override
   void initState() {
     super.initState();

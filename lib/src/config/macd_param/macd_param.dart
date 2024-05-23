@@ -14,10 +14,13 @@
 
 import 'dart:math' as math;
 
+import 'package:copy_with_extension/copy_with_extension.dart';
+
 import '../../framework/serializers.dart';
 
 part 'macd_param.g.dart';
 
+@CopyWith()
 @FlexiParamSerializable
 final class MACDParam {
   final int s;

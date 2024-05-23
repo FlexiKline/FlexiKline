@@ -12,11 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:copy_with_extension/copy_with_extension.dart';
+
 import '../../framework/serializers.dart';
 import '../tips_config/tips_config.dart';
 
 part 'ma_param.g.dart';
 
+@CopyWith()
 @FlexiParamSerializable
 final class MaParam {
   final int count;

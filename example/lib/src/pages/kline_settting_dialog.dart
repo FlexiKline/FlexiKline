@@ -194,7 +194,7 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '图表高度',
+            '主图宽度',
             style: theme.t1s14w400,
           ),
           FlexiKlineSizeSlider(
@@ -204,6 +204,18 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
               ScreenUtil().screenHeight * 2 / 3,
             ),
             axis: Axis.horizontal,
+          ),
+          Text(
+            '主图高度',
+            style: theme.t1s14w400,
+          ),
+          FlexiKlineSizeSlider(
+            controller: widget.controller,
+            maxSize: Size(
+              ScreenUtil().screenWidth,
+              ScreenUtil().screenHeight * 2 / 3,
+            ),
+            axis: Axis.vertical,
           ),
         ],
       ),

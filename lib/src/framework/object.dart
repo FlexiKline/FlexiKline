@@ -103,7 +103,7 @@ mixin ControllerProxyMixin on PaintObject {
   SettingBinding get setting => controller as SettingBinding;
   IState get state => controller as IState;
   ICross get cross => controller as ICross;
-  IConfig get config => controller as IConfig;
+  // IConfig get config => controller as IConfig;
 
   /// Config
   SettingConfig get settingConfig => controller.settingConfig;
@@ -159,7 +159,7 @@ mixin PaintObjectBoundingMixin on PaintObjectProxy
     if (drawInMain) {
       _drawableRect = settingConfig.mainRect;
     } else {
-      final top = config.calculateIndicatorTop(slot);
+      final top = setting.calculateIndicatorTop(slot);
       _drawableRect = Rect.fromLTRB(
         setting.subRect.left,
         setting.subRect.top + top,
@@ -237,7 +237,9 @@ mixin DataInitMixin on PaintObjectProxy implements IPaintDataInit {
 
   double? _dyFactor;
   double get dyFactor {
-    return _dyFactor ??= chartRect.height / (minMax.diffDivisor).toDouble();
+    if (_dyFactor != null) return _dyFactor!;
+    if (chartRect.height == 0) return _dyFactor = 1;
+    return _dyFactor = chartRect.height / (minMax.diffDivisor).toDouble();
   }
 
   double valueToDy(BagNum value, {bool correct = true}) {
@@ -245,8 +247,8 @@ mixin DataInitMixin on PaintObjectProxy implements IPaintDataInit {
     return chartRect.bottom - (value - minMax.min).toDouble() * dyFactor;
   }
 
-  BagNum? dyToValue(double dy, {bool check = true}) {
-    if (check && !chartRect.inclueDy(dy)) return null;
+  BagNum? dyToValue(double dy) {
+    if (!drawableRect.inclueDy(dy)) return null;
     return minMax.max - ((dy - chartRect.top) / dyFactor).toBagNum();
   }
 

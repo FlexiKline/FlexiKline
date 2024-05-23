@@ -22,9 +22,7 @@ import 'binding_base.dart';
 import 'interface.dart';
 import 'setting.dart';
 
-mixin GridBinding
-    on KlineBindingBase, SettingBinding
-    implements IGrid, IConfig {
+mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid {
   @override
   void init() {
     super.init();
@@ -43,25 +41,6 @@ mixin GridBinding
     super.dispose();
     logd('dispose grid');
   }
-
-  @override
-  void storeState() {
-    super.storeState();
-    logd("storeState grid");
-    storeGridConfig(gridConfig);
-  }
-
-  // @override
-  // void loadConfig(Map<String, dynamic> configData) {
-  //   super.loadConfig(configData);
-  //   logd("loadConfig grid");
-  //   _gridConfig = GridConfig.fromJson(configData);
-  // }
-
-  // late GridConfig _gridConfig;
-
-  // @override
-  // GridConfig get gridConfig => _gridConfig;
 
   @override
   void markRepaintGrid() => repaintGridBg.value++;

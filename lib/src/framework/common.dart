@@ -14,18 +14,6 @@
 
 import 'package:flutter/material.dart';
 
-// const jsonKeyIndicators = 'indicators';
-// const jsonKeyTooltip = 'tooptip';
-// const jsonKeyCross = 'cross';
-// const jsonKeyGrid = 'grid';
-// const jsonKeySetting = 'setting';
-// const jsonKeySupportMainIndicators = 'supportMainIndicators';
-// const jsonKeySupportSubIndicators = 'supportSubIndicators';
-// const jsonKeyMain = 'main';
-// const jsonKeySub = 'sub';
-// const jsonKeyChildren = 'children';
-// const mainChartKey = ValueKey<dynamic>(jsonKeyMain);
-
 /// 绘制位置
 /// 主要是指定TimeIndicator的绘制位置
 enum DrawPosition {

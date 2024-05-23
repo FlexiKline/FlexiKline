@@ -22,8 +22,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../config.dart';
 
-class BitFlexiKlineStorage extends IConfiguration {
+class BitFlexiKlineConfiguration extends IConfiguration {
   static const flexKlineConfigKey = 'flexi_kline_config_key_bit';
+
+  @override
+  Size get initialMainSize => Size(ScreenUtil().screenWidth, 300.r);
 
   @override
   FlexiKlineConfig getFlexiKlineConfig() {

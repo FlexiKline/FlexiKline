@@ -38,7 +38,7 @@ CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
       last: json['last'] == null
           ? const MarkConfig(
               show: true,
-              spacing: 100,
+              spacing: 120,
               line: LineConfig(
                   type: LineType.dashed,
                   color: Colors.black,

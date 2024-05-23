@@ -75,15 +75,15 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage> {
     super.initState();
 
     controller = FlexiKlineController(
-      configuration: OkFlexiKlineStorage(),
+      configuration: OkFlexiKlineConfiguration(),
       logger: LoggerImpl(
         tag: "OkFlexiKline",
         debug: kDebugMode,
       ),
     );
-    controller.setMainSize(
-      Size(ScreenUtil().screenWidth, 300.r),
-    );
+    // controller.setMainSize(
+    //   Size(ScreenUtil().screenWidth, 300.r),
+    // );
 
     controller.onCrossI18nTooltipLables = tooltipLables;
 
@@ -106,7 +106,7 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage> {
     try {
       controller.startLoading(request, useCacheFirst: true);
 
-      await Future.delayed(const Duration(seconds: 2));
+      // await Future.delayed(const Duration(seconds: 2));
 
       cancelToken?.cancel();
       final resp = await api.getMarketCandles(
@@ -177,7 +177,7 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage> {
         foregroundColor: theme.t1,
         mini: true,
         onPressed: () {
-          controller.storeStateToLocal();
+          controller.storeFlexiKlineConfig();
         },
         child: Text(
           'Store',

@@ -106,7 +106,7 @@ class DarkFKTheme extends FKTheme {
   @override
   Color get lightBg => const Color(0xFFFFFFFF);
   @override
-  Color get translucentBg => Colors.white54;
+  Color get translucentBg => Colors.grey.shade500;
   @override
   Color get cardBg => const Color(0xFF1A1A1A);
   @override

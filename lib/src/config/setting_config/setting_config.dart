@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flutter/material.dart';
 
 import '../../constant.dart';
@@ -21,6 +22,7 @@ import '../text_area_config/text_area_config.dart';
 
 part 'setting_config.g.dart';
 
+@CopyWith()
 @FlexiConfigSerializable
 class SettingConfig {
   SettingConfig({
@@ -106,6 +108,29 @@ class SettingConfig {
 
   // 副区的指标图最大数量
   final int subChartMaxCount;
+
+  void setMainRect(Size size) {
+    if (size.isEmpty) {
+      throw Exception('setMainRect($size) is invalid!!!');
+    }
+    mainRect = Rect.fromLTRB(
+      0,
+      0,
+      size.width,
+      size.height,
+    );
+  }
+
+  // 确保最小Size必须小于MainSize.
+  void checkAndFixMinSize() {
+    final mainSize = mainRect.size;
+    if (mainMinSize.width > mainSize.width) {
+      mainMinSize = Size(mainSize.width, mainMinSize.height);
+    }
+    if (mainMinSize.height > mainSize.height) {
+      mainMinSize = Size(mainMinSize.width, mainSize.height);
+    }
+  }
 
   factory SettingConfig.fromJson(Map<String, dynamic> json) =>
       _$SettingConfigFromJson(json);

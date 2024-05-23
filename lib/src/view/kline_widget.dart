@@ -167,9 +167,21 @@ class IndicatorChartPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     Timeline.startSync("Flexi-PaintChart");
-    controller.calculateCandleDrawIndex();
 
-    controller.paintChart(canvas, size);
+    try {
+      /// 保存画布状态
+      canvas.save();
+
+      canvas.clipRect(controller.canvasRect);
+
+      controller.calculateCandleDrawIndex();
+
+      controller.paintChart(canvas, size);
+    } finally {
+      /// 恢复画布状态
+      canvas.restore();
+    }
+
     Timeline.finishSync();
   }
 

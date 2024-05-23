@@ -75,15 +75,15 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage> {
     super.initState();
 
     controller = FlexiKlineController(
-      configuration: BitFlexiKlineStorage(),
+      configuration: BitFlexiKlineConfiguration(),
       logger: LoggerImpl(
         tag: "BitFlexiKline",
         debug: kDebugMode,
       ),
     );
-    controller.setMainSize(
-      Size(ScreenUtil().screenWidth, 300.r),
-    );
+    // controller.setMainSize(
+    //   Size(ScreenUtil().screenWidth, 300.r),
+    // );
 
     controller.onCrossI18nTooltipLables = tooltipLables;
 
@@ -176,7 +176,7 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage> {
         foregroundColor: theme.t1,
         mini: true,
         onPressed: () {
-          controller.storeStateToLocal();
+          controller.storeFlexiKlineConfig();
         },
         child: Text(
           'Store',

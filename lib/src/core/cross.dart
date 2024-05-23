@@ -40,7 +40,7 @@ typedef OnCrossI18nTooltipLables = Map<TooltipLabel, String>? Function();
 
 mixin CrossBinding
     on KlineBindingBase, SettingBinding
-    implements ICross, IState, IConfig, IChart {
+    implements ICross, IState, IChart {
   @override
   void init() {
     super.init();
@@ -60,29 +60,6 @@ mixin CrossBinding
     super.dispose();
     logd('dispose cross');
   }
-
-  @override
-  void storeState() {
-    super.storeState();
-    logd("storeState cross");
-    storeCrossConfig(crossConfig);
-  }
-
-  // @override
-  // void loadConfig(Map<String, dynamic> configData) {
-  //   super.loadConfig(configData);
-  //   logd("loadConfig cross");
-  //   _crossConfig = CrossConfig.fromJson(configData);
-  //   _tooltipConfig = TooltipConfig.fromJson(configData);
-  // }
-
-  // late CrossConfig _crossConfig;
-  // late TooltipConfig _tooltipConfig;
-
-  // @override
-  // CrossConfig get crossConfig => _crossConfig;
-
-  // TooltipConfig get tooltipConfig => _tooltipConfig;
 
   final ValueNotifier<int> _repaintCross = ValueNotifier(0);
   @override
