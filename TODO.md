@@ -12,12 +12,12 @@ v0.2.0
 v0.3.0
 - [x] CandleModel重构(指标数据绑定到Model上).
 - [x] 指标的定制化实现.
-- [ ] 指标计算与算法实现统一.
-- [x] 主题切换实现.
-- [ ] 配置管理扩展: 由FlexiKlineConfig统一管理所有配置, FlexiKline构造时必传. 所有配置实现Serializer和CopyWith接口. 
-- [ ] 框架调整: 将MultiPaintObjectIndicator改为abstract. 由不同功能的Indicator去实现多个Indicator的组合.
+- [x] 指标计算与算法实现统一.
+- [x] 优化核心框架状态可配置.
+- [x] 配置管理调整: 由FlexiKlineConfig统一管理所有配置, FlexiKline构造时必传. 所有配置实现Serializer和CopyWith接口. 
 
 v0.4.0
+- [ ] 主题切换实现.
 - [ ] 数据加载接口封装.
 - [ ] 数据合并算法优化.
 - [ ] 手势操作优化.
