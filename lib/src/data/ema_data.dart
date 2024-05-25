@@ -78,7 +78,7 @@ mixin EMAData on BaseData {
     required int paramLen,
   }) {
     final len = list.length;
-    if (count <= 0 || len < count || paramIndex >= paramLen) return;
+    if (count > len || paramIndex >= paramLen) return;
 
     // 计算从end到len之间count的偏移量
     int index = len - count;
@@ -135,11 +135,10 @@ mixin EMAData on BaseData {
     int? start,
     int? end,
   }) {
-    if (isEmpty || calcParams.isEmpty) return null;
-    int len = list.length;
     start ??= this.start;
     end ??= this.end;
-    if (start < 0 || end > len) return null;
+    if (calcParams.isEmpty || !checkStartAndEnd(start, end)) return null;
+    final len = list.length;
 
     int minCount = MaParam.getMinCountByList(calcParams)!;
     end = math.min(len - minCount, end - 1);

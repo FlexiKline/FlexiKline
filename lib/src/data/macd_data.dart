@@ -74,10 +74,9 @@ mixin MACDData on BaseData {
     MACDParam param, {
     bool reset = false,
   }) {
-    if (!param.isValid || list.isEmpty) return;
     final len = list.length;
-    // 数据不够, 无需计算
-    if (len < param.paramCount) return;
+    // 参数无效或数据不够, 无需计算
+    if (!param.isValid(len)) return;
 
     final sPre = param.s - 1;
     final sNext = param.s + 1;
@@ -138,11 +137,10 @@ mixin MACDData on BaseData {
     int? start,
     int? end,
   }) {
-    if (!param.isValid || isEmpty) return null;
-    int len = list.length;
+    final len = list.length;
     start ??= this.start;
     end ??= this.end;
-    if (start < 0 || end > len) return null;
+    if (!param.isValid(len) || !checkStartAndEnd(start, end)) return null;
 
     end = math.min(len - param.paramCount, end - 1);
 

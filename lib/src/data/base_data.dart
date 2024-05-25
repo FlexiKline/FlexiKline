@@ -80,6 +80,10 @@ abstract class BaseData with KlineLog {
 
   CandleModel? get latest => list.firstOrNull;
 
+  bool checkStartAndEnd(int start, int end) {
+    return list.isNotEmpty && start < end && start >= 0 && end <= list.length;
+  }
+
   /// 初始化基础数据
   void initBasicData(ComputeMode mode, {bool reset = false}) {
     for (var m in _list) {

@@ -33,14 +33,14 @@ mixin CandleData on BaseData {
     int? start,
     int? end,
   }) {
-    int from = start ?? this.start;
-    int to = end ?? this.end;
-    if (list.isEmpty || from >= to || from < 0 || to > list.length) return null;
+    start ??= this.start;
+    end ??= this.end;
+    if (!checkStartAndEnd(start, end)) return null;
 
-    CandleModel m = list[to - 1];
+    CandleModel m = list[end - 1];
     BagNum maxHigh = m.high;
     BagNum minLow = m.low;
-    for (int i = to - 2; i >= from; i--) {
+    for (int i = end - 2; i >= start; i--) {
       m = list[i];
       maxHigh = m.high > maxHigh ? m.high : maxHigh;
       minLow = m.low < minLow ? m.low : minLow;
@@ -52,14 +52,14 @@ mixin CandleData on BaseData {
     int? start,
     int? end,
   }) {
-    int from = start ?? this.start;
-    int to = end ?? this.end;
-    if (list.isEmpty || from < 0 || to > list.length) return null;
+    start ??= this.start;
+    end ??= this.end;
+    if (!checkStartAndEnd(start, end)) return null;
 
-    CandleModel m = list[to - 1];
+    CandleModel m = list[end - 1];
     BagNum minVol = m.vol;
     BagNum maxVol = m.vol;
-    for (int i = to - 2; i >= from; i--) {
+    for (int i = end - 2; i >= start; i--) {
       m = list[i];
       maxVol = m.vol > maxVol ? m.vol : maxVol;
       minVol = m.vol < minVol ? m.vol : minVol;

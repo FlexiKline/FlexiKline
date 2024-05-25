@@ -15,17 +15,19 @@
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:example/src/theme/flexi_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 
 ValueNotifier<int> valueNotifier = ValueNotifier(0);
 
-class CanvasDemo extends StatefulWidget {
+class CanvasDemo extends ConsumerStatefulWidget {
   const CanvasDemo({super.key});
 
   @override
-  State<CanvasDemo> createState() => _CanvasDemoState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _CanvasDemoState();
 }
 
 Size get drawableSize => Size(
@@ -40,14 +42,14 @@ Rect get drawableRect => Rect.fromLTWH(
       300.r,
     );
 
-class _CanvasDemoState extends State<CanvasDemo> {
+class _CanvasDemoState extends ConsumerState<CanvasDemo> {
   @override
   Widget build(BuildContext context) {
+    final theme = ref.watch(themeProvider);
     return Container(
       width: ScreenUtil().screenWidth,
       height: 300.r,
-      // margin: EdgeInsetsDirectional.all(20.r),
-      color: Colors.grey,
+      color: theme.markBg,
       child: RepaintBoundary(
         child: CustomPaint(
           size: drawableSize,

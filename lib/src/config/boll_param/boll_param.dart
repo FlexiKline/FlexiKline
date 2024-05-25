@@ -26,7 +26,7 @@ final class BOLLParam {
 
   const BOLLParam({required this.n, required this.std});
 
-  bool get isValid => n > 0 && std > 0;
+  bool isValid(int len) => n > 0 && n <= len && std > 0;
 
   @override
   int get hashCode => n.hashCode ^ std.hashCode;

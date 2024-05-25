@@ -76,15 +76,13 @@ mixin KDJData on BaseData, CandleData {
     int? end,
     bool reset = false,
   }) {
-    if (!param.isValid || isEmpty) return;
-    int len = list.length;
+    final len = list.length;
     start ??= this.start;
     end ??= this.end;
-    if (start < 0 || end > len) return;
+    if (!param.isValid(len) || !checkStartAndEnd(start, end)) return;
 
     // 计算从end到len之间n的偏移量
-    int offset = math.max(end + param.n - len, 0);
-    int index = end - offset;
+    end = math.min(len - param.n, end - 1);
 
     final m1pre = param.m1 - 1;
     final m2pre = param.m2 - 1;
@@ -95,7 +93,7 @@ mixin KDJData on BaseData, CandleData {
     BagNum j;
 
     // 计算KDJ
-    for (int i = index; i >= start; i--) {
+    for (int i = end; i >= start; i--) {
       m = list[i];
 
       final minmax = calculateMinmax(start: i, end: i + param.n);
@@ -116,11 +114,10 @@ mixin KDJData on BaseData, CandleData {
     int? start,
     int? end,
   }) {
-    if (!param.isValid || isEmpty) return null;
-    int len = list.length;
+    final len = list.length;
     start ??= this.start;
     end ??= this.end;
-    if (start < 0 || end > len) return null;
+    if (!param.isValid(len) || !checkStartAndEnd(start, end)) return null;
 
     end = math.min(len - param.n, end - 1);
 

@@ -24,7 +24,6 @@ import '../utils/export.dart';
 
 part 'kdj.g.dart';
 
-
 ///
 /// KDJ (9, 3, 3)
 /// 当日K值=2/3×前一日K值+1/3×当日RSV
@@ -148,10 +147,11 @@ class KDJPaintObject<T extends KDJIndicator> extends SinglePaintObjectBox<T>
 
   void paintKDJLine(Canvas canvas, Size size) {
     if (!klineData.canPaintChart) return;
-    if (!indicator.calcParam.isValid) return;
     final list = klineData.list;
+    final len = list.length;
+    if (!indicator.calcParam.isValid(len)) return;
     int start = klineData.start;
-    int end = (klineData.end + 1).clamp(start, list.length); // 多绘制一根蜡烛
+    int end = (klineData.end + 1).clamp(start, len); // 多绘制一根蜡烛
 
     final List<Offset> kPoints = [];
     final List<Offset> dPoints = [];

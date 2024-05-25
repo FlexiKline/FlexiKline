@@ -27,7 +27,7 @@ final class KDJParam {
 
   const KDJParam({required this.n, required this.m1, required this.m2});
 
-  bool get isValid => n > 0 && m1 > 0 && m2 > 0;
+  bool isValid(int len) => n > 0 && n <= len && m1 > 0 && m2 > 0;
 
   @override
   int get hashCode => n.hashCode ^ m1.hashCode ^ m2.hashCode;

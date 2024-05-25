@@ -133,10 +133,11 @@ class BOLLPaintObject<T extends BOLLIndicator> extends SinglePaintObjectBox<T> {
   /// 绘制BOLL线
   void paintBollLine(Canvas canvas, Size size) {
     if (!klineData.canPaintChart) return;
-    if (!indicator.calcParam.isValid) return;
     final list = klineData.list;
+    final len = list.length;
+    if (!indicator.calcParam.isValid(len)) return;
     int start = klineData.start;
-    int end = (klineData.end + 1).clamp(start, list.length); // 多绘制一根蜡烛
+    int end = (klineData.end + 1).clamp(start, len); // 多绘制一根蜡烛
 
     final List<Offset> mbPoints = [];
     final List<Offset> upPoints = [];

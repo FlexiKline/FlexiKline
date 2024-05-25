@@ -92,19 +92,17 @@ mixin BOLLData on BaseData, MAData {
     int? end,
     bool reset = false,
   }) {
-    if (!param.isValid || list.isEmpty) return;
-    int len = list.length;
+    final len = list.length;
     start ??= this.start;
     end ??= this.end;
-    if (start < 0 || end > len) return;
+    if (!param.isValid(len) || !checkStartAndEnd(start, end)) return;
 
     // 计算从end到len之间mid的偏移量
-    int offset = math.max(end + param.n - len, 0);
-    int index = end - offset;
+    end = math.min(len - param.n, end - 1);
 
     BagNum sum = BagNum.zero;
     // 计算index之前N-1日的收盘价之和.
-    for (int i = index + 1; i < index + param.n; i++) {
+    for (int i = end + 1; i < end + param.n; i++) {
       sum += list[i].close;
     }
 
@@ -112,7 +110,7 @@ mixin BOLLData on BaseData, MAData {
     BagNum md;
     CandleModel m;
     final std = BagNum.fromInt(param.std);
-    for (int i = index; i >= start; i--) {
+    for (int i = end; i >= start; i--) {
       m = list[i];
       sum += m.close;
 
@@ -133,11 +131,10 @@ mixin BOLLData on BaseData, MAData {
     int? start,
     int? end,
   }) {
-    if (!param.isValid || list.isEmpty) return null;
-    int len = list.length;
+    final len = list.length;
     start ??= this.start;
     end ??= this.end;
-    if (start < 0 || end > len) return null;
+    if (!param.isValid(len) || !checkStartAndEnd(start, end)) return null;
 
     end = math.min(len - param.n, end - 1);
 

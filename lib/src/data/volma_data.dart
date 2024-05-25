@@ -76,26 +76,23 @@ mixin VOLMAData on BaseData {
     int? start,
     int? end,
   }) {
-    if (count <= 0 || isEmpty) return;
-    int len = list.length;
+    final len = list.length;
     start ??= this.start;
     end ??= this.end;
-    if (start < 0 || end > len) return;
+    if (count > len || !checkStartAndEnd(start, end)) return;
 
-    // 计算从end到len之间count的偏移量
-    int offset = math.max(end + count - len, 0);
-    int index = end - offset;
+    end = math.min(len - count, end - 1);
 
     /// 初始值化[index]位置的MA值
-    CandleModel m = list[index];
+    CandleModel m = list[end];
     BagNum sum = m.vol;
-    for (int i = index + 1; i < index + count; i++) {
+    for (int i = end + 1; i < end + count; i++) {
       sum += list[i].vol;
     }
     m.volMaList ??= List.filled(paramLen, null, growable: false);
     m.volMaList![paramIndex] = sum.divNum(count);
 
-    for (int i = index - 1; i >= start; i--) {
+    for (int i = end - 1; i >= start; i--) {
       m = list[i];
       sum = sum - list[i + count].vol + m.vol;
       m.volMaList ??= List.filled(paramLen, null, growable: false);
@@ -126,11 +123,10 @@ mixin VOLMAData on BaseData {
     int? start,
     int? end,
   }) {
-    if (isEmpty || calcParams.isEmpty) return null;
-    int len = list.length;
     start ??= this.start;
     end ??= this.end;
-    if (start < 0 || end > len) return null;
+    if (calcParams.isEmpty || !checkStartAndEnd(start, end)) return null;
+    final len = list.length;
 
     int minCount = MaParam.getMinCountByList(calcParams)!;
     end = math.min(len - minCount, end - 1);

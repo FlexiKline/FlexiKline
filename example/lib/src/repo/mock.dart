@@ -12,155 +12,152 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:math' as math;
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:decimal/decimal.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 
-final Random _random = Random();
-int get randomCount => _random.nextInt(5);
-double get deltaPrice =>
-    (1.0 *
-        pow(_random.nextDouble(), _random.nextInt(10) + 3) *
-        (_random.nextBool() ? 1 : -1)) *
-    10;
-
-DateTime baseDate = DateTime(2023, 06, 01);
-
-Future<List<CandleModel>> genRandomCandleList({int count = 500}) async {
-  double open = 50000;
-  double close = open + deltaPrice;
-  double high = max(open, close) + deltaPrice.abs();
-  double low = min(open, close) - deltaPrice.abs();
-  DateTime date = baseDate;
-  final List<CandleModel> list = <CandleModel>[];
-  for (int i = 0; i < count; i++) {
-    list.add(CandleModel(
-      c: Decimal.parse(close.toString()),
-      h: Decimal.parse(high.toString()),
-      l: Decimal.parse(low.toString()),
-      o: Decimal.parse(open.toString()),
-      v: Decimal.parse((10000000 * _random.nextDouble()).toString()),
-      timestamp: date.millisecondsSinceEpoch,
-    ));
-    open = close;
-    close = open + deltaPrice;
-    high = max(open, close) + deltaPrice.abs() * 0.2;
-    low = min(open, close) - deltaPrice.abs() * 0.3;
-    date = date.add(const Duration(days: -1));
-  }
-  return list;
-}
-
-Future<List<CandleModel>> appendCandleList({
-  required CandleModel model,
-  int count = 500,
-}) async {
-  double open = model.close.toDouble();
-  double close = open + deltaPrice;
-  double high = max(open, close) + deltaPrice.abs();
-  double low = min(open, close) - deltaPrice.abs();
-  DateTime date = DateTime.fromMillisecondsSinceEpoch(model.timestamp).add(
-    const Duration(days: 1),
-  );
-  final List<CandleModel> list = <CandleModel>[];
-  for (int i = 0; i < count; i++) {
-    list.add(CandleModel(
-      c: Decimal.parse(close.toString()),
-      h: Decimal.parse(high.toString()),
-      l: Decimal.parse(low.toString()),
-      o: Decimal.parse(open.toString()),
-      v: Decimal.parse((10000000 * _random.nextDouble()).toString()),
-      timestamp: date.millisecondsSinceEpoch,
-    ));
-    open = close;
-    close = open + deltaPrice;
-    high = max(open, close) + deltaPrice.abs() * 0.2;
-    low = min(open, close) - deltaPrice.abs() * 0.3;
-    date = date.add(const Duration(days: 1));
-  }
-  list.sort((a, b) => b.timestamp - a.timestamp);
-  return list;
-}
-
 Future<List<CandleModel>> genCustomCandleList({
-  int count = 500,
+  int count = 7,
+  TimeBar bar = TimeBar.D1,
 }) async {
-  DateTime dateTime = DateTime.now().add(Duration(
-    hours: -10,
-    minutes: -20,
-  ));
+  DateTime dateTime = DateTime.now();
   return <CandleModel>[
-    CandleModel.fromJson({
-      "timestamp": dateTime.add(Duration(days: 0)).millisecondsSinceEpoch,
-      "high": 320,
-      "open": 100,
-      "close": 300,
-      "low": 0,
-      "vol": 800,
-    }),
-    CandleModel.fromJson({
-      "timestamp": dateTime.add(Duration(days: -1)).millisecondsSinceEpoch,
-      "high": 220,
-      "open": 60,
-      "close": 200,
-      "low": 50,
-      "vol": 900,
-    }),
-    CandleModel.fromJson({
-      "timestamp": dateTime.add(Duration(days: -2)).millisecondsSinceEpoch,
-      "high": 320,
-      "open": 200,
-      "close": 100,
-      "low": 50,
-      "vol": 900,
-    }),
-    CandleModel.fromJson({
-      "timestamp": dateTime.add(Duration(days: -3)).millisecondsSinceEpoch,
-      "high": 140,
-      "open": 90,
-      "close": 120,
-      "low": 80,
-      "vol": 900,
-    }),
-    CandleModel.fromJson({
-      "timestamp": dateTime.add(Duration(days: -4)).millisecondsSinceEpoch,
-      "high": 200,
-      "open": 120,
-      "close": 20,
-      "low": 20,
-      "vol": 900,
-    }),
-    CandleModel.fromJson({
-      "timestamp": dateTime.add(Duration(days: -5)).millisecondsSinceEpoch,
-      "high": 130,
-      "open": 20,
-      "close": 110,
-      "low": 10,
-      "vol": 900,
-    }),
-    CandleModel.fromJson({
-      "timestamp": dateTime.add(Duration(days: -6)).millisecondsSinceEpoch,
-      "high": 160,
-      "open": 110,
-      "close": 150,
-      "low": 100,
-      "vol": 900,
-    }),
-    CandleModel.fromJson({
-      "timestamp": dateTime.add(Duration(days: -7)).millisecondsSinceEpoch,
-      "high": 160,
-      "open": 150,
-      "close": 120,
-      "low": 100,
-      "vol": 900,
-    }),
+    CandleModel(
+      timestamp: dateTime.add(const Duration(days: 0)).millisecondsSinceEpoch,
+      h: 320.d,
+      o: 100.d,
+      c: 300.d,
+      l: 10.d,
+      v: 80.d,
+    ),
+    CandleModel(
+      timestamp: dateTime.add(const Duration(days: -1)).millisecondsSinceEpoch,
+      h: 220.d,
+      o: 60.d,
+      c: 200.d,
+      l: 50.d,
+      v: 50.d,
+    ),
+    CandleModel(
+      timestamp: dateTime.add(const Duration(days: -2)).millisecondsSinceEpoch,
+      h: 320.d,
+      o: 200.d,
+      c: 100.d,
+      l: 50.d,
+      v: 90.d,
+    ),
+    CandleModel(
+      timestamp: dateTime.add(const Duration(days: -3)).millisecondsSinceEpoch,
+      h: 140.d,
+      o: 90.d,
+      c: 120.d,
+      l: 80.d,
+      v: 30.d,
+    ),
+    CandleModel(
+      timestamp: dateTime.add(const Duration(days: -4)).millisecondsSinceEpoch,
+      h: 200.d,
+      o: 120.d,
+      c: 20.d,
+      l: 20.d,
+      v: 20.d,
+    ),
+    CandleModel(
+      timestamp: dateTime.add(const Duration(days: -5)).millisecondsSinceEpoch,
+      h: 130.d,
+      o: 20.d,
+      c: 110.d,
+      l: 10.d,
+      v: 10.d,
+    ),
+    CandleModel(
+      timestamp: dateTime.add(const Duration(days: -6)).millisecondsSinceEpoch,
+      h: 160.d,
+      o: 110.d,
+      c: 150.d,
+      l: 100.d,
+      v: 90.d,
+    ),
+    CandleModel(
+      timestamp: dateTime.add(const Duration(days: -7)).millisecondsSinceEpoch,
+      h: 160.d,
+      o: 150.d,
+      c: 120.d,
+      l: 100.d,
+      v: 20.d,
+    ),
   ];
 }
 
-Future<List<CandleModel>> genLocalCandleList() async {
-  final data = jsonDecode(jsonString);
+/// 随机生成CandleModel列表
+/// [count] : 返回列表数量
+/// [inital] : 初始收盘价
+/// [range] : 开/收/高/低价的随机波动范围
+/// [initalVol] : 初始交易量
+/// [rangeVol] : 交易量的随机波动范围
+/// [bar] : 时间间隔
+/// [dateTime] : 初始时间
+/// [isHistory] : 是否生成历史数据
+Future<List<CandleModel>> genRandomCandleList({
+  int count = 5,
+  double inital = 1000,
+  double range = 100,
+  double initalVol = 100,
+  double rangeVol = 50,
+  TimeBar bar = TimeBar.D1,
+  DateTime? dateTime,
+  bool isHistory = true,
+}) async {
+  List<CandleModel> list = [];
+  dateTime ??= DateTime.now();
+  final random = math.Random();
+  CandleModel? m;
+  double h, l, o, c = inital, v = initalVol;
+
+  double genVal(double m, double k, {bool? isUp}) {
+    double val;
+    double r = random.nextDouble();
+    if (isUp != null) {
+      r = r * r;
+    }
+    isUp ??= random.nextBool();
+    if (isUp) {
+      val = m + r * k;
+    } else {
+      val = m - r * k;
+    }
+    return val;
+  }
+
+  int flag = isHistory ? -1 : 1;
+
+  for (int i = 0; i < count; i++) {
+    o = c;
+    c = genVal(o, range);
+    h = genVal(math.max(o, c), range, isUp: true);
+    l = genVal(math.min(o, c), range, isUp: false);
+    if (h < l) [h, l] = [l, h];
+    v = genVal(v, rangeVol);
+    dateTime = dateTime!.add(Duration(
+      milliseconds: flag * i * bar.milliseconds,
+    ));
+    m = CandleModel(
+      timestamp: dateTime.millisecondsSinceEpoch,
+      h: h.d,
+      o: o.d,
+      c: c.d,
+      l: l.d,
+      v: v.d,
+    );
+    list.add(m);
+  }
+  return list;
+}
+
+Future<List<CandleModel>> genLocalCandleList({String json = jsonString}) async {
+  final data = jsonDecode(json);
   if (data is List) {
     List<CandleModel> list = List.empty(growable: true);
     for (var i = data.length - 1; i >= 0; i--) {
@@ -182,7 +179,7 @@ Future<List<CandleModel>> genLocalCandleList() async {
   return [];
 }
 
-String jsonString = '''
+const jsonString = '''
 [
 	[1677380400, 23237.84, 23241.32, 23186.79, 23220.74, 13.3079, 308857.6952927],
 	[1677381300, 23220.72, 23236.66, 23194.86, 23216.63, 14.64115, 339897.2510879],
@@ -484,45 +481,6 @@ String jsonString = '''
 	[1677647700, 23730.86, 23760.79, 23650.29, 23681.65, 20.44646, 484441.1032018],
 	[1677648600, 23682.91, 23719.28, 23637.77, 23682.39, 18.75004, 444081.1829765],
 	[1677649500, 23682.4, 23799.52, 23657.73, 23677.8, 12.21567, 289288.480896]
-]
-
-''';
-
-String jsonString2 = '''
-[
-  [1677620700, 23089.19, 23151.91, 23042.64, 23139.91, 20.40061, 471328.7325543],
-	[1677621600, 23139.9, 23224.67, 23097.38, 23221.3, 19.2508, 446071.0814639],
-	[1677622500, 23221.76, 23238.23, 23182.66, 23194.06, 24.68166, 572756.5331743],
-	[1677623400, 23194.05, 23222.44, 23173.01, 23222.44, 17.50017, 406033.4264857],
-	[1677624300, 23222.46, 23227.33, 23123.87, 23159.3, 18.02575, 417651.3991424],
-	[1677625200, 23159.84, 23167.9, 23124.53, 23153.77, 19.60989, 453985.6203635],
-	[1677626100, 23153.76, 23196.73, 23125.18, 23127.61, 16.35519, 379018.9083542],
-	[1677627000, 23127.22, 23173.9, 23102.81, 23137.16, 16.06103, 371545.7813026],
-	[1677627900, 23137.15, 23159.75, 23113.74, 23132.39, 16.85952, 390065.08279],
-	[1677628800, 23133.91, 23179.55, 23119.21, 23160.43, 15.80283, 365828.808397],
-	[1677629700, 23160.45, 23218.22, 23159.68, 23170.95, 16.15786, 374625.8601256],
-	[1677630600, 23170.93, 23216.03, 23142.52, 23143.32, 15.44294, 358117.7195363],
-	[1677631500, 23146.03, 23147.76, 23022.12, 23098.1, 19.75152, 455913.9755774],
-	[1677632400, 23098.08, 23164.9, 23077.15, 23164.75, 17.81147, 411811.1591821],
-	[1677633300, 23164.24, 23166.13, 23125.93, 23149.15, 14.8146, 342873.7536175],
-	[1677634200, 23149.17, 23274.72, 23149.17, 23236.72, 15.41754, 358003.7245882],
-	[1677635100, 23237.31, 23294.15, 23225.72, 23248.53, 14.92876, 347089.803393],
-	[1677636000, 23247.99, 23263.83, 23237.36, 23258.48, 15.55253, 361596.2307062],
-	[1677636900, 23258.5, 23287.19, 23242.07, 23245.76, 12.69914, 295445.8632974],
-	[1677637800, 23245.46, 23315.68, 23235.43, 23292.43, 17.23934, 401241.3886137],
-	[1677638700, 23293.25, 23333.02, 23289.45, 23328.76, 16.93749, 394724.5524994],
-	[1677639600, 23331.8, 23439.85, 23307.3, 23439.22, 20.18062, 470872.0648021],
-	[1677640500, 23438.59, 23491.84, 23390.27, 23419.26, 23.39367, 548507.4992652],
-	[1677641400, 23422.09, 23487.68, 23422.09, 23475, 19.41475, 455554.9048149],
-	[1677642300, 23474.99, 23484.28, 23405.12, 23441.91, 16.07861, 376867.9065637],
-	[1677643200, 23441.89, 23455.43, 23429.17, 23430.5, 16.12003, 377822.9103909],
-	[1677644100, 23430.57, 23482.31, 23430.57, 23467.07, 18.54112, 434985.0911647],
-	[1677645000, 23467.08, 23525.45, 23467.08, 23492.12, 13.85937, 325661.2321329],
-	[1677645900, 23492.13, 23837.49, 23492.13, 23792.6, 20.43446, 484352.693998],
-	[1677646800, 23792.55, 23820.41, 23729.85, 23730.88, 21.89969, 520782.6676474],
-	[1677647700, 23730.86, 23760.79, 23650.29, 23681.65, 20.44646, 484441.1032018],
-	[1677648600, 23682.91, 23719.28, 23637.77, 23682.39, 18.75004, 444081.1829765],
-	[1677649500, 23682.4, 23699.52, 23657.73, 23677.8, 12.21567, 289288.480896]
 ]
 
 ''';

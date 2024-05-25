@@ -29,7 +29,9 @@ final class MACDParam {
 
   const MACDParam({required this.s, required this.l, required this.m});
 
-  bool get isValid => l > 0 && s > 0 && l > s && m > 0;
+  bool isValid(int len) {
+    return l > 0 && s > 0 && l > s && m > 0 && paramCount <= len;
+  }
 
   int get paramCount => math.max(l, s) + m;
 
