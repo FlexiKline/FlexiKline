@@ -24,16 +24,10 @@ abstract class KlineBindingBase
     required IConfiguration configuration,
     ILogger? logger,
   }) {
-    this.configuration = configuration;
-    loggerDelegate = logger;
     logd("constrouct");
-    init();
-  }
-
-  @protected
-  @mustCallSuper
-  void init() {
-    logd("init base");
+    loggerDelegate = logger;
+    this.configuration = configuration;
+    updateFlexiKlineConfig();
   }
 
   @protected

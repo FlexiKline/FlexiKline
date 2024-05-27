@@ -198,6 +198,8 @@ extension CandleModelExt on CandleModel {
     return null;
   }
 
+  bool get isLong => c > o;
+
   Decimal get change => c - o;
 
   double get changeRate {

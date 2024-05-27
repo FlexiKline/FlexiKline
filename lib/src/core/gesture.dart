@@ -19,11 +19,8 @@ import '../extension/export.dart';
 import '../model/export.dart';
 import 'binding_base.dart';
 import 'interface.dart';
-import 'setting.dart';
 
-mixin GestureBinding
-    on KlineBindingBase, SettingBinding
-    implements IGestureEvent, IState {
+mixin GestureBinding on KlineBindingBase implements IGestureEvent, IState {
   @override
   void initState() {
     super.initState();

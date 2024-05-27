@@ -20,16 +20,8 @@ import '../extension/export.dart';
 import '../framework/export.dart';
 import 'binding_base.dart';
 import 'interface.dart';
-import 'setting.dart';
 
-mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid {
-  @override
-  void init() {
-    super.init();
-    logd('init grid');
-    // _gridConfig = GridConfig.fromJson(gridConfigData);
-  }
-
+mixin GridBinding on KlineBindingBase implements IGrid {
   @override
   void initState() {
     super.initState();
@@ -66,7 +58,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid {
 
         double dy = mainTop;
 
-        // 绘制主图顶部起始线
+        // 绘制Top边框线
         canvas.drawLineType(
           horiLineType,
           Path()
@@ -136,7 +128,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid {
         double dx = mainLeft;
         final step = mainRight / gridConfig.vertical.count;
 
-        // 绘制左边线
+        // 绘制左边框线
         canvas.drawLineType(
           vertLineType,
           Path()
@@ -146,7 +138,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid {
           dashes: vertDashes,
         );
 
-        // 计算排队时间指标的top和bottom
+        // 计算排除时间指标后的top和bottom
         double top = subTop;
         double bottom = subBottom;
         final timeIndicator = indicatorsConfig.time;
@@ -159,6 +151,8 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid {
         // 绘制主区/副区的Vertical线
         for (int i = 1; i < gridConfig.vertical.count; i++) {
           dx = i * step;
+
+          /// 绘制主区的Grid竖线
           canvas.drawLineType(
             vertLineType,
             Path()
@@ -168,6 +162,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid {
             dashes: vertDashes,
           );
 
+          /// 绘制副区Grid竖线
           canvas.drawLineType(
             vertLineType,
             Path()
@@ -178,7 +173,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid {
           );
         }
 
-        // 绘制右边线
+        // 绘制右边框线
         canvas.drawLineType(
           vertLineType,
           Path()

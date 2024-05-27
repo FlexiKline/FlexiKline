@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:flexi_kline/src/extension/export.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import '../../constant.dart';
@@ -104,4 +105,7 @@ extension CandleReqExt on CandleReq {
       precision = req.precision;
     }
   }
+
+  String get base => instId.split('-').firstOrNull ?? instId;
+  String get quote => instId.split('-').getItem(1) ?? '';
 }

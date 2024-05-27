@@ -12,24 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:flutter/material.dart';
+final class Images {
+  Images._();
 
-part 'tooltip_info.g.dart';
-
-@CopyWith()
-class TooltipInfo {
-  TooltipInfo({
-    required this.label,
-    this.labelStyle,
-    required this.value,
-    this.valueStyle,
-    this.riseOrFall = 0,
-  });
-
-  final String label;
-  final TextStyle? labelStyle;
-  final String value;
-  final TextStyle? valueStyle;
-  final int riseOrFall;
+  static const String logo = 'assets/imgs/logo.png';
 }

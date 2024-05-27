@@ -19,6 +19,11 @@ import 'package:flutter/material.dart';
 import '../kline_controller.dart';
 import 'gesture_view.dart';
 
+typedef MainForegroundViewBuilder = Widget Function(
+  BuildContext context,
+  bool isLoading,
+);
+
 class FlexiKlineWidget extends StatefulWidget {
   const FlexiKlineWidget({
     super.key,
@@ -26,14 +31,16 @@ class FlexiKlineWidget extends StatefulWidget {
     this.alignment,
     this.decoration,
     this.foregroundDecoration,
-    this.loadingView,
+    this.mainforegroundViewBuilder,
+    this.mainBackgroundView,
   });
 
   final FlexiKlineController controller;
   final AlignmentGeometry? alignment;
   final BoxDecoration? decoration;
   final Decoration? foregroundDecoration;
-  final Widget? loadingView;
+  final MainForegroundViewBuilder? mainforegroundViewBuilder;
+  final Widget? mainBackgroundView;
 
   @override
   State<FlexiKlineWidget> createState() => _FlexiKlineWidgetState();
@@ -74,6 +81,11 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
         controller: widget.controller,
         child: Stack(
           children: <Widget>[
+            if (widget.mainBackgroundView != null)
+              Positioned.fromRect(
+                rect: widget.controller.mainRect,
+                child: widget.mainBackgroundView!,
+              ),
             RepaintBoundary(
               key: const ValueKey('GridAndChartLayer'),
               child: CustomPaint(
@@ -108,10 +120,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
             ),
             Positioned.fromRect(
               rect: widget.controller.mainRect,
-              child: Offstage(
-                offstage: !loading,
-                child: _buildLoadingView(context),
-              ),
+              child: _buildMainForgroundView(context),
             )
           ],
         ),
@@ -119,19 +128,22 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
     );
   }
 
-  Widget _buildLoadingView(BuildContext context) {
-    if (widget.loadingView != null) {
-      return widget.loadingView!;
+  Widget _buildMainForgroundView(BuildContext context) {
+    if (widget.mainforegroundViewBuilder != null) {
+      return widget.mainforegroundViewBuilder!(context, loading);
     }
-    return Center(
-      key: const ValueKey('loadingView'),
-      child: SizedBox.square(
-        dimension: widget.controller.loading.size,
-        child: CircularProgressIndicator(
-          strokeWidth: widget.controller.loading.strokeWidth,
-          backgroundColor: widget.controller.loading.background,
-          valueColor: AlwaysStoppedAnimation<Color>(
-            widget.controller.loading.valueColor,
+    return Offstage(
+      offstage: !loading,
+      child: Center(
+        key: const ValueKey('loadingView'),
+        child: SizedBox.square(
+          dimension: widget.controller.loading.size,
+          child: CircularProgressIndicator(
+            strokeWidth: widget.controller.loading.strokeWidth,
+            backgroundColor: widget.controller.loading.background,
+            valueColor: AlwaysStoppedAnimation<Color>(
+              widget.controller.loading.valueColor,
+            ),
           ),
         ),
       ),

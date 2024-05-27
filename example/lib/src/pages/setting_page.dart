@@ -117,7 +117,7 @@ class _SettingPageState extends ConsumerState<SettingPage> {
                 SizedBox(height: 8.r),
                 ExpansionTile(
                   title: Text(
-                    '关于',
+                    s.about,
                     style: theme.textTheme.titleMedium,
                   ),
                   leading: const Icon(Icons.error_outline_rounded),

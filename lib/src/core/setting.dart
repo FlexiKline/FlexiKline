@@ -18,31 +18,46 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../config/export.dart';
-import '../constant.dart';
 import '../framework/export.dart';
 import 'binding_base.dart';
 import 'interface.dart';
 
 mixin SettingBinding on KlineBindingBase implements ISetting, IChart {
   @override
-  void init() {
-    logd('init setting');
+  void initState() {
+    super.initState();
+    logd("initState setting");
+    initFlexiKlineState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    logd("dispose setting");
+    mainIndicator.dispose();
+    for (var indicator in subRectIndicators) {
+      indicator.dispose();
+    }
+    subRectIndicators.clear();
+  }
+
+  @override
+  void initFlexiKline() {
+    logd('initByFlexiKlineConfig setting');
+    // 根据配置进行初始化
     _mainIndicator = MultiPaintObjectIndicator(
       key: mainChartKey,
       name: 'MAIN',
       height: 0,
-      padding: defaultMainIndicatorPadding,
+      padding: mainPadding,
       drawBelowTipsArea: true,
     );
 
     _subIndicators = ListQueue<Indicator>(subChartMaxCount);
-    super.init();
   }
 
   @override
-  void initState() {
-    super.initState();
-    logd("initState setting");
+  void initFlexiKlineState() {
     _mainIndicator.appendIndicator(indicatorsConfig.candle, this);
     _mainIndicator.appendIndicator(getCandleIndicator(), this);
     final mainChildIndicators = genMainChildIndicators();
@@ -64,17 +79,6 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart {
     }
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-    logd("dispose setting");
-    mainIndicator.dispose();
-    for (var indicator in subRectIndicators) {
-      indicator.dispose();
-    }
-    subRectIndicators.clear();
-  }
-
   VoidCallback? onSizeChange;
   ValueChanged<bool>? onLoading;
 
@@ -88,6 +92,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart {
   LoadingConfig get loading => settingConfig.loading;
 
   /// 整个画布区域大小 = 由主图区域 + 副图区域
+  @override
   Rect get canvasRect => Rect.fromLTRB(
         mainRect.left,
         mainRect.top,
@@ -98,6 +103,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart {
   double get canvasHeight => canvasRect.height;
 
   /// 副图整个区域
+  @override
   Rect get subRect => Rect.fromLTRB(
         mainRect.left,
         mainRect.bottom,
@@ -109,6 +115,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart {
   int get subChartMaxCount => settingConfig.subChartMaxCount + 1;
 
   /// 主区域大小
+  @override
   Rect get mainRect => settingConfig.mainRect;
 
   /// 主区域最小宽高
@@ -173,9 +180,11 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart {
   // Gesture Pan
   // 平移结束后, candle惯性平移, 持续的最长时间.
   @Deprecated('待优化')
-  int panMaxDurationWhenPanEnd = 1000;
+  @override
+  int get panMaxDurationWhenPanEnd => 1000;
   // 平移结束后, candle惯性平移, 此时每一帧移动的最大偏移量. 值越大, 移动的会越远.
-  double panMaxOffsetPreFrameWhenPanEnd = 30.0;
+  @override
+  double get panMaxOffsetPreFrameWhenPanEnd => 30.0;
 
   /// 最大蜡烛宽度[1, 50]
   // double _candleMaxWidth = 40.0;

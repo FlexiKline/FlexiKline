@@ -14,6 +14,7 @@
 
 import 'package:dio/dio.dart';
 import 'package:example/generated/l10n.dart';
+import 'package:example/src/constants/images.dart';
 import 'package:example/src/theme/flexi_theme.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/foundation.dart';
@@ -44,35 +45,12 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage> {
     limit: 300,
   );
 
-  final List<TimeBar> timBarList = const [
-    TimeBar.m15,
-    TimeBar.H1,
-    TimeBar.H4,
-    TimeBar.D1
-  ];
-
   late final FlexiKlineController controller;
-  CandleModel? latest;
   CancelToken? cancelToken;
-  Map<TooltipLabel, String> tooltipLables() {
-    return {
-      TooltipLabel.time: S.current.tooltipTime,
-      TooltipLabel.open: S.current.tooltipOpen,
-      TooltipLabel.high: S.current.tooltipHigh,
-      TooltipLabel.low: S.current.tooltipLow,
-      TooltipLabel.close: S.current.tooltipClose,
-      TooltipLabel.chg: S.current.tooltipChg,
-      TooltipLabel.chgRate: S.current.tooltipChgRate,
-      TooltipLabel.range: S.current.tooltipRange,
-      TooltipLabel.amount: S.current.tooltipAmount,
-      TooltipLabel.turnover: S.current.tooltipTurnover,
-    };
-  }
 
   @override
   void initState() {
     super.initState();
-
     controller = FlexiKlineController(
       configuration: BitFlexiKlineConfiguration(),
       logger: LoggerImpl(
@@ -80,21 +58,8 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage> {
         debug: kDebugMode,
       ),
     );
-    // controller.setMainSize(
-    //   Size(ScreenUtil().screenWidth, 300.r),
-    // );
 
-    controller.onCrossI18nTooltipLables = tooltipLables;
-
-    // controller.candleMainIndicator = CustomCandleIndicator(
-    //   height: 300.r,
-    //   latestPriceRectBackgroundColor: Colors.grey,
-    //   // latestPriceTextStyle: const TextStyle(
-    //   //   color: Colors.red,
-    //   //   fontSize: 12,
-    //   //   fontWeight: FontWeight.bold,
-    //   // ),
-    // );
+    controller.onCrossCustomTooltip = onCrossCustomTooltip;
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       loadCandleData(req);
@@ -104,8 +69,6 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage> {
   Future<void> loadCandleData(CandleReq request) async {
     try {
       controller.startLoading(request, useCacheFirst: true);
-
-      await Future.delayed(const Duration(seconds: 2));
 
       cancelToken?.cancel();
       final resp = await api.getMarketCandles(
@@ -151,6 +114,8 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage> {
         child: Column(
           children: [
             LatestPriceView(
+              base: req.base,
+              quote: req.quote,
               model: controller.curKlineData.latest,
               precision: req.precision,
             ),
@@ -160,6 +125,14 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage> {
             ),
             FlexiKlineWidget(
               controller: controller,
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage(Images.logo),
+                  fit: BoxFit.scaleDown,
+                  scale: 6,
+                  opacity: 0.1,
+                ),
+              ),
             ),
             FlexiIndicatorBar(
               controller: controller,
@@ -183,5 +156,67 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage> {
         ),
       ),
     );
+  }
+
+  List<TooltipInfo> onCrossCustomTooltip(
+    CandleModel model, {
+    CandleModel? pre,
+  }) {
+    final s = S.of(context);
+    final theme = ref.read(themeProvider);
+    final lableStyle = theme.t1s10w400;
+    final valueStyle = theme.t1s10w400;
+    final valStyle = model.isLong ? theme.tls10w400 : theme.tss10w400;
+    final p = req.precision;
+    return <TooltipInfo>[
+      TooltipInfo(
+        label: s.tooltipTime,
+        labelStyle: lableStyle,
+        value: model.formatDateTimeByTimeBar(req.timeBar),
+        valueStyle: valueStyle,
+      ),
+      TooltipInfo(
+        label: s.tooltipOpen,
+        labelStyle: lableStyle,
+        value: formatPrice(model.o, precision: p, showThousands: true),
+        valueStyle: valueStyle,
+      ),
+      TooltipInfo(
+        label: s.tooltipHigh,
+        labelStyle: lableStyle,
+        value: formatPrice(model.h, precision: p, showThousands: true),
+        valueStyle: valueStyle,
+      ),
+      TooltipInfo(
+        label: s.tooltipLow,
+        labelStyle: lableStyle,
+        value: formatPrice(model.l, precision: p, showThousands: true),
+        valueStyle: valueStyle,
+      ),
+      TooltipInfo(
+        label: s.tooltipClose,
+        labelStyle: lableStyle,
+        value: formatPrice(model.c, precision: p, showThousands: true),
+        valueStyle: valueStyle,
+      ),
+      TooltipInfo(
+        label: s.tooltipAmount,
+        labelStyle: lableStyle,
+        value: formatPrice(model.c, precision: p, showThousands: true),
+        valueStyle: valueStyle,
+      ),
+      TooltipInfo(
+        label: s.tooltipChg,
+        labelStyle: lableStyle,
+        value: formatPrice(model.change, precision: p, showThousands: true),
+        valueStyle: valStyle,
+      ),
+      TooltipInfo(
+        label: s.tooltipChgRate,
+        labelStyle: lableStyle,
+        value: formatPercentage(model.changeRate),
+        valueStyle: valStyle,
+      ),
+    ];
   }
 }

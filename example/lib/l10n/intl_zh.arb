@@ -1,5 +1,6 @@
 {
   "title": "FlexiKline",
+  "about": "关于",
   "demo": "示例",
   "ok": "Ok",
   "bit": "Bit",
@@ -35,6 +36,22 @@
   "tooltipChgRate": "涨跌幅",
   "tooltipRange": "振幅",
   "tooltipAmount": "成交量",
-  "tooltipTurnover": "成交额"
+  "tooltipTurnover": "成交额",
+
+  "indicators": "指标",
+  "h24_high": "24小时最高",
+  "h24_low": "24小时最低",
+  "h24_vol": "24小时量({unit})",
+  "h24_turnover": "24小时额({unit})",
+
+  "chartSettings": "图表设置",
+  "landscape": "横屏",
+  "drawings": "画图",
+  "more": "更多",
+  "lastPrice": "最新价",
+  "priceScale": "Y轴坐标",
+  "countdown": "倒计时",
+  "chartHeight": "图表高度",
+  "chartWidth": "图表宽度"
 
 }

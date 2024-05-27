@@ -14,6 +14,7 @@
 
 import 'dart:convert';
 
+import 'package:example/generated/l10n.dart';
 import 'package:example/src/router.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart';
@@ -23,16 +24,35 @@ import '../config.dart';
 import '../theme/export.dart';
 import '../utils/cache_util.dart';
 
-class OkFlexiKlineConfiguration extends IConfiguration {
-  static const flexKlineConfigKey = 'flexi_kline_config_key_ok';
+Map<TooltipLabel, String> tooltipLables() {
+  return {
+    TooltipLabel.time: S.current.tooltipTime,
+    TooltipLabel.open: S.current.tooltipOpen,
+    TooltipLabel.high: S.current.tooltipHigh,
+    TooltipLabel.low: S.current.tooltipLow,
+    TooltipLabel.close: S.current.tooltipClose,
+    TooltipLabel.chg: S.current.tooltipChg,
+    TooltipLabel.chgRate: S.current.tooltipChgRate,
+    TooltipLabel.range: S.current.tooltipRange,
+    TooltipLabel.amount: S.current.tooltipAmount,
+    TooltipLabel.turnover: S.current.tooltipTurnover,
+  };
+}
+
+class OkFlexiKlineConfiguration implements IConfiguration {
+  String getFlexKlineConfigKey([FKTheme? theme]) {
+    theme ??= globalNavigatorKey.ref.read(themeProvider);
+    return 'flexi_kline_config_key_ok-${theme!.brightness.name}';
+  }
 
   @override
   Size get initialMainSize => Size(ScreenUtil().screenWidth, 300.r);
 
   @override
-  FlexiKlineConfig getFlexiKlineConfig() {
+  FlexiKlineConfig getInitialFlexiKlineConfig() {
     try {
-      final String? jsonStr = CacheUtil().get(flexKlineConfigKey);
+      final key = getFlexKlineConfigKey();
+      final String? jsonStr = CacheUtil().get(key);
       if (jsonStr != null && jsonStr.isNotEmpty) {
         final json = jsonDecode(jsonStr);
         if (json is Map<String, dynamic>) {
@@ -50,11 +70,12 @@ class OkFlexiKlineConfiguration extends IConfiguration {
   @override
   void saveFlexiKlineConfig(FlexiKlineConfig config) {
     final jsonSrc = jsonEncode(config);
-    CacheUtil().setString(flexKlineConfigKey, jsonSrc);
+    CacheUtil().setString(config.key, jsonSrc);
   }
 
   FlexiKlineConfig genFlexiKlineConfigObject(FKTheme theme) {
     return FlexiKlineConfig(
+      key: getFlexKlineConfigKey(theme),
       main: {candleKey},
       sub: {timeKey},
       grid: GridConfig(

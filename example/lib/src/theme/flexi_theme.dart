@@ -54,7 +54,7 @@ abstract class FKTheme {
   late Color t3;
   late Color tlight;
 
-  @Deprecated('暂保留') // TODO: 待优化
+  // @Deprecated('暂保留') // TODO: 待优化
   double get klineTextSize => 10.sp;
   double get klineTextHeight => 1;
 }
@@ -132,7 +132,19 @@ class DarkFKTheme extends FKTheme {
 }
 
 extension TextStyleFKTheme on FKTheme {
-// T1
+  /// Text long
+  TextStyle get tls10w400 =>
+      TextStyle(color: long, fontSize: 10.sp, fontWeight: FontWeight.w400);
+  TextStyle get tls12w400 =>
+      TextStyle(color: long, fontSize: 12.sp, fontWeight: FontWeight.w400);
+
+  /// Text short
+  TextStyle get tss10w400 =>
+      TextStyle(color: short, fontSize: 10.sp, fontWeight: FontWeight.w400);
+  TextStyle get tss12w400 =>
+      TextStyle(color: short, fontSize: 12.sp, fontWeight: FontWeight.w400);
+
+  /// T1
   TextStyle get t1s10w400 =>
       TextStyle(color: t1, fontSize: 10.sp, fontWeight: FontWeight.w400);
   TextStyle get t1s12w400 =>
@@ -155,7 +167,10 @@ extension TextStyleFKTheme on FKTheme {
       TextStyle(color: t1, fontSize: 16.sp, fontWeight: FontWeight.w600);
   TextStyle get t1s18w700 =>
       TextStyle(color: t1, fontSize: 18.sp, fontWeight: FontWeight.w700);
-  // T2
+  TextStyle get t1s20w700 =>
+      TextStyle(color: t1, fontSize: 20.sp, fontWeight: FontWeight.w700);
+
+  /// T2
   TextStyle get t2s10w400 =>
       TextStyle(color: t2, fontSize: 10.sp, fontWeight: FontWeight.w400);
   TextStyle get t2s12w400 =>
@@ -172,7 +187,8 @@ extension TextStyleFKTheme on FKTheme {
       TextStyle(color: t2, fontSize: 16.sp, fontWeight: FontWeight.w500);
   TextStyle get t2s18w600 =>
       TextStyle(color: t2, fontSize: 16.sp, fontWeight: FontWeight.w600);
-  // T3
+
+  /// T3
   TextStyle get t3s10w400 =>
       TextStyle(color: t3, fontSize: 10.sp, fontWeight: FontWeight.w400);
   TextStyle get t3s12w400 =>
@@ -197,6 +213,14 @@ extension ButtonStyleFKTheme on FKTheme {
       foregroundColor: t1,
       backgroundColor: markBg,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5.r)),
+    );
+  }
+
+  ButtonStyle circleBtnStyle({Color? fg, Color? bg}) {
+    return TextButton.styleFrom(
+      foregroundColor: fg ?? t2,
+      backgroundColor: bg ?? markBg,
+      shape: const CircleBorder(),
     );
   }
 

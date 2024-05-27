@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:example/generated/l10n.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -23,12 +24,16 @@ import 'indicator_info_view.dart';
 class LatestPriceView extends ConsumerWidget {
   const LatestPriceView({
     super.key,
+    required this.base,
+    required this.quote,
     this.model,
     this.precision = 0,
     this.padding,
     this.backgroundColor,
   });
 
+  final String base;
+  final String quote;
   final CandleModel? model;
   final int precision;
   final EdgeInsetsGeometry? padding;
@@ -36,6 +41,7 @@ class LatestPriceView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final s = S.of(context);
     return Container(
       padding: padding ??
           EdgeInsets.symmetric(
@@ -73,13 +79,13 @@ class LatestPriceView extends ConsumerWidget {
           ),
           SizedBox(width: 16.r),
           Flexible(
-            flex: 2,
+            flex: 3,
             child: Column(
               mainAxisSize: MainAxisSize.max,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 IndicatorInfoView(
-                  title: '24小时最高',
+                  title: s.h24_high,
                   value: formatNumber(
                     model?.h,
                     precision: precision,
@@ -87,7 +93,7 @@ class LatestPriceView extends ConsumerWidget {
                   ),
                 ),
                 IndicatorInfoView(
-                  title: '24小时最低',
+                  title: s.h24_low,
                   value: formatNumber(
                     model?.l,
                     precision: precision,
@@ -95,7 +101,7 @@ class LatestPriceView extends ConsumerWidget {
                   ),
                 ),
                 IndicatorInfoView(
-                  title: '24小时量',
+                  title: s.h24_vol(base),
                   value: formatNumber(
                     model?.v,
                     precision: 2,
@@ -104,7 +110,7 @@ class LatestPriceView extends ConsumerWidget {
                   ),
                 ),
                 IndicatorInfoView(
-                  title: '24小时额',
+                  title: s.h24_turnover(quote),
                   value: formatNumber(
                     model?.vc,
                     precision: 2,

@@ -20,18 +20,37 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'zh';
 
+  static String m0(unit) => "24小时额(${unit})";
+
+  static String m1(unit) => "24小时量(${unit})";
+
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
+        "about": MessageLookupByLibrary.simpleMessage("关于"),
         "badCertificate": MessageLookupByLibrary.simpleMessage("证书错误"),
         "bit": MessageLookupByLibrary.simpleMessage("Bit"),
         "canceled": MessageLookupByLibrary.simpleMessage("已取消"),
         "cannotReachServer": MessageLookupByLibrary.simpleMessage("无法连接服务器"),
+        "chartHeight": MessageLookupByLibrary.simpleMessage("图表高度"),
+        "chartSettings": MessageLookupByLibrary.simpleMessage("图表设置"),
+        "chartWidth": MessageLookupByLibrary.simpleMessage("图表宽度"),
         "connectionError": MessageLookupByLibrary.simpleMessage("连接错误"),
         "connectionTimeout": MessageLookupByLibrary.simpleMessage("客户端连接超时"),
+        "countdown": MessageLookupByLibrary.simpleMessage("倒计时"),
         "demo": MessageLookupByLibrary.simpleMessage("示例"),
+        "drawings": MessageLookupByLibrary.simpleMessage("画图"),
+        "h24_high": MessageLookupByLibrary.simpleMessage("24小时最高"),
+        "h24_low": MessageLookupByLibrary.simpleMessage("24小时最低"),
+        "h24_turnover": m0,
+        "h24_vol": m1,
+        "indicators": MessageLookupByLibrary.simpleMessage("指标"),
         "invalidReq": MessageLookupByLibrary.simpleMessage("无效的请求"),
+        "landscape": MessageLookupByLibrary.simpleMessage("横屏"),
+        "lastPrice": MessageLookupByLibrary.simpleMessage("最新价"),
+        "more": MessageLookupByLibrary.simpleMessage("更多"),
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
         "permissionDenied": MessageLookupByLibrary.simpleMessage("没有权限"),
+        "priceScale": MessageLookupByLibrary.simpleMessage("Y轴坐标"),
         "reqMethodForbidden": MessageLookupByLibrary.simpleMessage("请求方法被禁止"),
         "responseTimeout": MessageLookupByLibrary.simpleMessage("服务端响应超时"),
         "sendTimeout": MessageLookupByLibrary.simpleMessage("客户端发送超时"),

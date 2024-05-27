@@ -139,6 +139,7 @@ String formatPrice(
   Decimal? val, {
   required int precision,
   bool cutInvalidZero = true,
+  bool showThousands = false,
   String? defIfZero,
 }) {
   return formatNumber(
@@ -146,6 +147,7 @@ String formatPrice(
     precision: precision,
     defIfZero: defIfZero,
     cutInvalidZero: cutInvalidZero,
+    showThousands: showThousands,
   );
 }
 

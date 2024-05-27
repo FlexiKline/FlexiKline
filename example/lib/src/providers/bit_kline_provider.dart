@@ -14,6 +14,7 @@
 
 import 'dart:convert';
 
+import 'package:example/src/router.dart';
 import 'package:example/src/theme/flexi_theme.dart';
 import 'package:example/src/utils/cache_util.dart';
 import 'package:flexi_kline/flexi_kline.dart';
@@ -22,26 +23,28 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../config.dart';
 
-class BitFlexiKlineConfiguration extends IConfiguration {
+class BitFlexiKlineConfiguration implements IConfiguration {
   static const flexKlineConfigKey = 'flexi_kline_config_key_bit';
 
   @override
   Size get initialMainSize => Size(ScreenUtil().screenWidth, 300.r);
 
   @override
-  FlexiKlineConfig getFlexiKlineConfig() {
+  FlexiKlineConfig getInitialFlexiKlineConfig() {
     try {
       final String? jsonStr = CacheUtil().get(flexKlineConfigKey);
       if (jsonStr != null && jsonStr.isNotEmpty) {
         final json = jsonDecode(jsonStr);
         if (json is Map<String, dynamic>) {
-          return FlexiKlineConfig.fromJson(json);
+          // return FlexiKlineConfig.fromJson(json);
         }
       }
     } catch (err, stack) {
       defLogger.e('getFlexiKlineConfig error:$err', stackTrace: stack);
     }
-    return defaultFlexiKlineConfig;
+    return genFlexiKlineConfigObject(
+      globalNavigatorKey.ref.read(themeProvider),
+    );
   }
 
   @override
@@ -52,6 +55,7 @@ class BitFlexiKlineConfiguration extends IConfiguration {
 
   FlexiKlineConfig genFlexiKlineConfigObject(FKTheme theme) {
     return FlexiKlineConfig(
+      key: '$flexKlineConfigKey-${theme.brightness.name}',
       main: {candleKey},
       sub: {timeKey},
       grid: GridConfig(
@@ -87,7 +91,7 @@ class BitFlexiKlineConfiguration extends IConfiguration {
         ),
         tickText: TextAreaConfig(
           style: TextStyle(
-            color: theme.t1,
+            color: theme.tlight,
             fontSize: theme.klineTextSize,
             fontWeight: FontWeight.normal,
             height: theme.klineTextHeight,
@@ -100,7 +104,26 @@ class BitFlexiKlineConfiguration extends IConfiguration {
           ),
         ),
       ),
-      tooltip: TooltipConfig(),
+      tooltip: TooltipConfig(
+        show: true,
+        background: theme.cardBg,
+        margin: EdgeInsets.only(
+          left: 15.r,
+          right: 65.r,
+          top: 4.r,
+        ),
+        padding: EdgeInsets.symmetric(
+          horizontal: 4.r,
+          vertical: 4.r,
+        ),
+        radius: BorderRadius.all(Radius.circular(6.r)),
+        style: TextStyle(
+          fontSize: theme.klineTextSize,
+          color: theme.t1,
+          overflow: TextOverflow.ellipsis,
+          height: defaultMultiTextHeight,
+        ),
+      ),
       indicators: genIndicatorsConfig(theme),
     );
   }

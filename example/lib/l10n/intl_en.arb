@@ -1,6 +1,7 @@
 
 {
   "title": "FlexiKline", 
+  "about": "About",
   "demo": "Demo",
   "ok": "Ok",
   "bit": "Bit",
@@ -36,6 +37,24 @@
   "tooltipChgRate": "%Chg",
   "tooltipRange": "Range",
   "tooltipAmount": "Amount",
-  "tooltipTurnover": "Turnover"
+  "tooltipTurnover": "Turnover",
+
+  "indicators": "Indicators",
+  "h24_high": "24h high",
+  "h24_low": "24h low",
+  "h24_vol": "24h vol({unit})",
+  "h24_turnover": "24h turnover({unit})",
+
+  "chartSettings": "Chart settings",
+  "landscape": "Landscape",
+  "drawings": "Drawings",
+  "more": "More",
+  "lastPrice": "Last price",
+  "priceScale": "Price scale(y-axis)",
+  "countdown": "Countdown",
+  "chartHeight": "Chart Height",
+  "chartWidth": "Chart Width"
+
+
 
 }

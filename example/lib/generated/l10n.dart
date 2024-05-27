@@ -60,6 +60,16 @@ class S {
     );
   }
 
+  /// `About`
+  String get about {
+    return Intl.message(
+      'About',
+      name: 'about',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Demo`
   String get demo {
     return Intl.message(
@@ -405,6 +415,146 @@ class S {
     return Intl.message(
       'Turnover',
       name: 'tooltipTurnover',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Indicators`
+  String get indicators {
+    return Intl.message(
+      'Indicators',
+      name: 'indicators',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `24h high`
+  String get h24_high {
+    return Intl.message(
+      '24h high',
+      name: 'h24_high',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `24h low`
+  String get h24_low {
+    return Intl.message(
+      '24h low',
+      name: 'h24_low',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `24h vol({unit})`
+  String h24_vol(Object unit) {
+    return Intl.message(
+      '24h vol($unit)',
+      name: 'h24_vol',
+      desc: '',
+      args: [unit],
+    );
+  }
+
+  /// `24h turnover({unit})`
+  String h24_turnover(Object unit) {
+    return Intl.message(
+      '24h turnover($unit)',
+      name: 'h24_turnover',
+      desc: '',
+      args: [unit],
+    );
+  }
+
+  /// `Chart settings`
+  String get chartSettings {
+    return Intl.message(
+      'Chart settings',
+      name: 'chartSettings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Landscape`
+  String get landscape {
+    return Intl.message(
+      'Landscape',
+      name: 'landscape',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Drawings`
+  String get drawings {
+    return Intl.message(
+      'Drawings',
+      name: 'drawings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `More`
+  String get more {
+    return Intl.message(
+      'More',
+      name: 'more',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Last price`
+  String get lastPrice {
+    return Intl.message(
+      'Last price',
+      name: 'lastPrice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Price scale(y-axis)`
+  String get priceScale {
+    return Intl.message(
+      'Price scale(y-axis)',
+      name: 'priceScale',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Countdown`
+  String get countdown {
+    return Intl.message(
+      'Countdown',
+      name: 'countdown',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Chart Height`
+  String get chartHeight {
+    return Intl.message(
+      'Chart Height',
+      name: 'chartHeight',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Chart Width`
+  String get chartWidth {
+    return Intl.message(
+      'Chart Width',
+      name: 'chartWidth',
       desc: '',
       args: [],
     );

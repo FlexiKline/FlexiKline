@@ -13,18 +13,19 @@
 // limitations under the License.
 
 import 'package:dio/dio.dart';
-import 'package:example/generated/l10n.dart';
 import 'package:example/src/theme/flexi_theme.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
 import '../config.dart';
 import '../repo/api.dart' as api;
 import '../providers/ok_kline_provider.dart';
 import '../widgets/flexi_indicator_bar.dart';
+import '../widgets/flexi_kline_mark_view.dart';
 import '../widgets/latest_price_view.dart';
 import '../widgets/flexi_time_bar.dart';
 import 'main_nav_page.dart';
@@ -44,57 +45,23 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage> {
     limit: 300,
   );
 
-  final List<TimeBar> timBarList = const [
-    TimeBar.m15,
-    TimeBar.H1,
-    TimeBar.H4,
-    TimeBar.D1
-  ];
-
   late final FlexiKlineController controller;
-  CandleModel? latest;
+  late final OkFlexiKlineConfiguration configuration;
   CancelToken? cancelToken;
-  Map<TooltipLabel, String> tooltipLables() {
-    return {
-      TooltipLabel.time: S.current.tooltipTime,
-      TooltipLabel.open: S.current.tooltipOpen,
-      TooltipLabel.high: S.current.tooltipHigh,
-      TooltipLabel.low: S.current.tooltipLow,
-      TooltipLabel.close: S.current.tooltipClose,
-      TooltipLabel.chg: S.current.tooltipChg,
-      TooltipLabel.chgRate: S.current.tooltipChgRate,
-      TooltipLabel.range: S.current.tooltipRange,
-      TooltipLabel.amount: S.current.tooltipAmount,
-      TooltipLabel.turnover: S.current.tooltipTurnover,
-    };
-  }
 
   @override
   void initState() {
     super.initState();
-
+    configuration = OkFlexiKlineConfiguration();
     controller = FlexiKlineController(
-      configuration: OkFlexiKlineConfiguration(),
+      configuration: configuration,
       logger: LoggerImpl(
         tag: "OkFlexiKline",
         debug: kDebugMode,
       ),
     );
-    // controller.setMainSize(
-    //   Size(ScreenUtil().screenWidth, 300.r),
-    // );
 
     controller.onCrossI18nTooltipLables = tooltipLables;
-
-    // controller.candleMainIndicator = CustomCandleIndicator(
-    //   height: 300.r,
-    //   latestPriceRectBackgroundColor: Colors.grey,
-    //   // latestPriceTextStyle: const TextStyle(
-    //   //   color: Colors.red,
-    //   //   fontSize: 12,
-    //   //   fontWeight: FontWeight.bold,
-    //   // ),
-    // );
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       loadCandleData(req);
@@ -104,8 +71,6 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage> {
   Future<void> loadCandleData(CandleReq request) async {
     try {
       controller.startLoading(request, useCacheFirst: true);
-
-      // await Future.delayed(const Duration(seconds: 2));
 
       cancelToken?.cancel();
       final resp = await api.getMarketCandles(
@@ -135,6 +100,12 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage> {
   @override
   Widget build(BuildContext context) {
     final theme = ref.watch(themeProvider);
+    ref.listen(themeProvider, (previous, next) {
+      if (previous != next) {
+        final config = configuration.genFlexiKlineConfigObject(next);
+        controller.updateFlexiKlineConfig(config);
+      }
+    });
     return Scaffold(
       backgroundColor: theme.pageBg,
       appBar: AppBar(
@@ -152,6 +123,8 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             LatestPriceView(
+              base: req.base,
+              quote: req.quote,
               model: controller.curKlineData.latest,
               precision: req.precision,
             ),
@@ -161,6 +134,10 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage> {
             ),
             FlexiKlineWidget(
               controller: controller,
+              mainBackgroundView: FlexiKlineMarkView(
+                margin: EdgeInsetsDirectional.only(bottom: 10.r, start: 36.r),
+              ),
+              mainforegroundViewBuilder: _buildKlineMainForgroundView,
             ),
             FlexiIndicatorBar(
               controller: controller,
@@ -183,6 +160,48 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage> {
           style: theme.t1s14w400,
         ),
       ),
+    );
+  }
+
+  Widget _buildKlineMainForgroundView(BuildContext context, bool isLoading) {
+    final theme = ref.watch(themeProvider);
+    return Stack(
+      children: [
+        Positioned(
+          left: 8.r,
+          bottom: 8.r,
+          width: 28.r,
+          height: 28.r,
+          child: IconButton(
+            // constraints: BoxConstraints.tight(Size(28.r, 28.r)),
+            padding: EdgeInsets.zero,
+            style: theme.circleBtnStyle(bg: theme.markBg.withOpacity(0.6)),
+            iconSize: 16.r,
+            icon: const Icon(Icons.open_in_full_rounded),
+            onPressed: () {
+              // TODO: 待实现
+            },
+          ),
+        ),
+        Positioned(
+          child: Offstage(
+            offstage: !isLoading,
+            child: Center(
+              key: const ValueKey('loadingView'),
+              child: SizedBox.square(
+                dimension: 28.r,
+                child: CircularProgressIndicator(
+                  strokeWidth: 3.r,
+                  backgroundColor: theme.markBg,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    theme.t1,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        )
+      ],
     );
   }
 }

@@ -20,23 +20,43 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'en';
 
+  static String m0(unit) => "24h turnover(${unit})";
+
+  static String m1(unit) => "24h vol(${unit})";
+
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
+        "about": MessageLookupByLibrary.simpleMessage("About"),
         "badCertificate":
             MessageLookupByLibrary.simpleMessage("Bad certificate"),
         "bit": MessageLookupByLibrary.simpleMessage("Bit"),
         "canceled": MessageLookupByLibrary.simpleMessage("Canceled"),
         "cannotReachServer":
             MessageLookupByLibrary.simpleMessage("Can not reach server"),
+        "chartHeight": MessageLookupByLibrary.simpleMessage("Chart Height"),
+        "chartSettings": MessageLookupByLibrary.simpleMessage("Chart settings"),
+        "chartWidth": MessageLookupByLibrary.simpleMessage("Chart Width"),
         "connectionError":
             MessageLookupByLibrary.simpleMessage("Connection error"),
         "connectionTimeout":
             MessageLookupByLibrary.simpleMessage("Client connection timeout"),
+        "countdown": MessageLookupByLibrary.simpleMessage("Countdown"),
         "demo": MessageLookupByLibrary.simpleMessage("Demo"),
+        "drawings": MessageLookupByLibrary.simpleMessage("Drawings"),
+        "h24_high": MessageLookupByLibrary.simpleMessage("24h high"),
+        "h24_low": MessageLookupByLibrary.simpleMessage("24h low"),
+        "h24_turnover": m0,
+        "h24_vol": m1,
+        "indicators": MessageLookupByLibrary.simpleMessage("Indicators"),
         "invalidReq": MessageLookupByLibrary.simpleMessage("Invalid request"),
+        "landscape": MessageLookupByLibrary.simpleMessage("Landscape"),
+        "lastPrice": MessageLookupByLibrary.simpleMessage("Last price"),
+        "more": MessageLookupByLibrary.simpleMessage("More"),
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
         "permissionDenied":
             MessageLookupByLibrary.simpleMessage("Permission denied"),
+        "priceScale":
+            MessageLookupByLibrary.simpleMessage("Price scale(y-axis)"),
         "reqMethodForbidden":
             MessageLookupByLibrary.simpleMessage("Request method is forbidden"),
         "responseTimeout":

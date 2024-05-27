@@ -115,15 +115,45 @@ abstract interface class IState {
 
 /// Config接口
 abstract interface class ISetting {
+  /// 初始化配置
+  void initFlexiKline();
+
+  /// 初始化状态
+  void initFlexiKlineState();
+
+  /// 主区指标集
   MultiPaintObjectIndicator get mainIndicator;
+
+  /// 副区指标集
   List<Indicator> get subRectIndicators;
+
+  /// 画板Size = [mainRect] + [subRect]
+  Rect get canvasRect;
+
+  /// 主区Size
+  Rect get mainRect;
+
+  /// 副区Size
+  Rect get subRect;
+
+  /// 计算[slot]位置指标的Top坐标
   double calculateIndicatorTop(int slot);
+
+  /// 副区当前总高度
   double get subRectHeight;
+
+  /// 检查并确保当前指标PaintObject实例化.
   void ensurePaintObjectInstance();
+
+  /// 更新主区指标的布局参数
   void updateMainIndicatorParam({
     double? height,
     EdgeInsets? padding,
   });
+
+  /// 废弃的, 暂保留
+  int get panMaxDurationWhenPanEnd;
+  double get panMaxOffsetPreFrameWhenPanEnd;
 }
 
 //// Chart层绘制接口

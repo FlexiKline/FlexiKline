@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:example/generated/l10n.dart';
 import 'package:example/src/theme/flexi_theme.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart';
@@ -51,6 +52,7 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
 
   Widget _buildSettingTab(BuildContext context) {
     final theme = ref.watch(themeProvider);
+    final s = S.of(context);
     return Container(
       padding: EdgeInsetsDirectional.symmetric(
         horizontal: 16.r,
@@ -60,7 +62,7 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '图表设置',
+            s.chartSettings,
             style: theme.t1s18w700,
           ),
           SizedBox(height: 20.r),
@@ -74,7 +76,7 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
                 child: Column(
                   children: [
                     Icon(Icons.screen_rotation_rounded, color: theme.t1),
-                    Text('横屏', style: theme.t1s14w500),
+                    Text(s.landscape, style: theme.t1s14w500),
                   ],
                 ),
               ),
@@ -84,7 +86,7 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
                 child: Column(
                   children: [
                     Icon(Icons.legend_toggle_rounded, color: theme.t1),
-                    Text('指标', style: theme.t1s14w500),
+                    Text(s.indicators, style: theme.t1s14w500),
                   ],
                 ),
               ),
@@ -94,7 +96,7 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
                 child: Column(
                   children: [
                     Icon(Icons.draw_rounded, color: theme.t1),
-                    Text('画图', style: theme.t1s14w500),
+                    Text(s.drawings, style: theme.t1s14w500),
                   ],
                 ),
               ),
@@ -104,7 +106,7 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
                 child: Column(
                   children: [
                     Icon(Icons.settings_rounded, color: theme.t1),
-                    Text('设置', style: theme.t1s14w500),
+                    Text(s.more, style: theme.t1s14w500),
                   ],
                 ),
               ),
@@ -117,6 +119,7 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
 
   Widget _buildDisplaySetting(BuildContext context) {
     final theme = ref.watch(themeProvider);
+    final s = S.of(context);
     return Container(
       padding: EdgeInsetsDirectional.symmetric(
         horizontal: 16.r,
@@ -134,10 +137,13 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
                     setState(() {});
                   },
                   controlAffinity: ListTileControlAffinity.leading,
-                  title: Text("最新价"),
+                  title: Text(
+                    s.lastPrice,
+                    style: theme.t1s14w500,
+                  ),
                   activeColor: theme.t1,
                   selected: true,
-                  checkColor: theme.white,
+                  checkColor: theme.tlight,
                   // shape: theme.defaultShape,
                 ),
               ),
@@ -149,10 +155,13 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
                     setState(() {});
                   },
                   controlAffinity: ListTileControlAffinity.leading,
-                  title: Text("Y轴坐标"),
+                  title: Text(
+                    s.priceScale,
+                    style: theme.t1s14w500,
+                  ),
                   activeColor: theme.t1,
                   selected: true,
-                  checkColor: theme.white,
+                  checkColor: theme.tlight,
                   // shape: theme.defaultShape,
                 ),
               ),
@@ -169,10 +178,13 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
                     });
                   },
                   controlAffinity: ListTileControlAffinity.leading,
-                  title: Text("倒计时"),
+                  title: Text(
+                    s.countdown,
+                    style: theme.t1s14w500,
+                  ),
                   activeColor: theme.t1,
                   selected: true,
-                  checkColor: theme.white,
+                  checkColor: theme.tlight,
                 ),
               ),
               Expanded(child: SizedBox.shrink())
@@ -185,6 +197,7 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
 
   Widget _buildKlineHeightSetting(BuildContext context) {
     final theme = ref.watch(themeProvider);
+    final s = S.of(context);
     return Container(
       padding: EdgeInsetsDirectional.symmetric(
         horizontal: 16.r,
@@ -194,7 +207,7 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '主图宽度',
+            s.chartWidth,
             style: theme.t1s14w400,
           ),
           FlexiKlineSizeSlider(
@@ -206,7 +219,7 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
             axis: Axis.horizontal,
           ),
           Text(
-            '主图高度',
+            s.chartHeight,
             style: theme.t1s14w400,
           ),
           FlexiKlineSizeSlider(

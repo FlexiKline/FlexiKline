@@ -14,8 +14,8 @@
 
 import 'dart:math' as math;
 
-import 'package:example/generated/l10n.dart';
 import 'package:example/src/theme/flexi_theme.dart';
+import 'package:example/src/widgets/flexi_kline_mark_view.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -39,33 +39,11 @@ class MyDemoPage extends ConsumerStatefulWidget {
 class _MyDemoPageState extends ConsumerState<MyDemoPage> {
   late final FlexiKlineController controller1;
 
-  Map<TooltipLabel, String> tooltipLables() {
-    return {
-      TooltipLabel.time: S.current.tooltipTime,
-      TooltipLabel.open: S.current.tooltipOpen,
-      TooltipLabel.high: S.current.tooltipHigh,
-      TooltipLabel.low: S.current.tooltipLow,
-      TooltipLabel.close: S.current.tooltipClose,
-      TooltipLabel.chg: S.current.tooltipChg,
-      TooltipLabel.chgRate: S.current.tooltipChgRate,
-      TooltipLabel.range: S.current.tooltipRange,
-      TooltipLabel.amount: S.current.tooltipAmount,
-      TooltipLabel.turnover: S.current.tooltipTurnover,
-    };
-  }
-
   final req1 = CandleReq(
     instId: 'BTC-USDT',
     bar: TimeBar.m15.bar,
     precision: 2,
   );
-
-  final List<TimeBar> timBarList = const [
-    TimeBar.m15,
-    TimeBar.H1,
-    TimeBar.H4,
-    TimeBar.D1
-  ];
 
   @override
   void initState() {
@@ -128,6 +106,7 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
             FlexiKlineWidget(
               key: const ValueKey('Kline1'),
               controller: controller1,
+              mainBackgroundView: const FlexiKlineMarkView(),
             ),
             FlexiIndicatorBar(
               controller: controller1,

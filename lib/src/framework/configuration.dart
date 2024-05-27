@@ -28,11 +28,14 @@ typedef IndicatorFromJson<T extends Indicator> = T Function(
 
 const defaultFlexKlineConfigKey = 'flexi_kline_config_key';
 
-abstract class IConfiguration {
+abstract interface class IConfiguration {
+  /// FlexiKline初始或默认的主区的宽高.
   Size get initialMainSize;
 
-  FlexiKlineConfig getFlexiKlineConfig();
+  /// FlexiKline构造时, 初始配置.
+  FlexiKlineConfig getInitialFlexiKlineConfig();
 
+  /// 保存[config]配置信息到本地; 通过FlexiKlineController调用.
   void saveFlexiKlineConfig(FlexiKlineConfig config);
 }
 
@@ -52,10 +55,22 @@ mixin KlineConfiguration implements IConfiguration, ILogger, ISetting {
     // return Size(mediaQuery.size.width, 300);
   }
 
+  @override
+  FlexiKlineConfig getInitialFlexiKlineConfig() {
+    return configuration.getInitialFlexiKlineConfig();
+  }
+
+  @override
+  void saveFlexiKlineConfig(FlexiKlineConfig config) {
+    storeMainConfig(mainIndicator);
+    storeSubConfig(subRectIndicators);
+    configuration.saveFlexiKlineConfig(config);
+  }
+
   FlexiKlineConfig? _flexiKlineConfig;
   FlexiKlineConfig get flexiKlineConfig {
     if (_flexiKlineConfig == null) {
-      final config = getFlexiKlineConfig();
+      final config = getInitialFlexiKlineConfig();
       try {
         _flexiKlineConfig = FlexiKlineConfig.fromJson(config.toJson());
       } catch (e) {
@@ -66,21 +81,68 @@ mixin KlineConfiguration implements IConfiguration, ILogger, ISetting {
     return _flexiKlineConfig!;
   }
 
+  /// 更新
+  void updateFlexiKlineConfig([FlexiKlineConfig? config]) {
+    if (_flexiKlineConfig == null) {
+      // 说明是初始化过程调用的
+      /// 根据config重新初始化
+      initFlexiKline();
+      return;
+    }
+
+    if (config != null && config.key != flexiKlineConfig.key) {
+      /// 保存上次配置
+      saveFlexiKlineConfig(flexiKlineConfig);
+
+      /// 暂存当前配置
+      final oldMain = flexiKlineConfig.main;
+      final oldSub = flexiKlineConfig.sub;
+      final oldSetting = flexiKlineConfig.setting;
+
+      /// 释放所有指标
+      indicatorsConfig.mainIndicators.forEach((key, indicator) {
+        indicator.dispose();
+      });
+      indicatorsConfig.subIndicators.forEach((key, indicator) {
+        indicator.dispose();
+      });
+
+      /// 释放当前指标
+      mainIndicator.dispose();
+      for (var indicator in subRectIndicators) {
+        indicator.dispose();
+      }
+
+      /// 更新config
+      _flexiKlineConfig = config;
+      // 以下配置优先使用前一个配置; TODO: 待优化
+      _flexiKlineConfig!.main = oldMain;
+      _flexiKlineConfig!.sub = oldSub;
+      _flexiKlineConfig!.setting = _flexiKlineConfig!.setting.copyWith(
+        mainRect: oldSetting.mainRect,
+        mainMinSize: oldSetting.mainMinSize,
+        mainPadding: oldSetting.mainPadding,
+        minPaintBlankRate: oldSetting.minPaintBlankRate,
+        alwaysCalculateScreenOfCandlesIfEnough:
+            oldSetting.alwaysCalculateScreenOfCandlesIfEnough,
+        candleMaxWidth: oldSetting.candleMaxWidth,
+        candleWidth: oldSetting.candleWidth,
+        candleSpacing: oldSetting.candleSpacing,
+        candleLineWidth: oldSetting.candleLineWidth,
+        firstCandleInitOffset: oldSetting.firstCandleInitOffset,
+      );
+
+      /// 根据config重新初始化
+      initFlexiKline();
+
+      /// 初始化状态
+      initFlexiKlineState();
+    }
+  }
+
   /// 保存当前FlexiKline配置到本地
   void storeFlexiKlineConfig() {
     saveFlexiKlineConfig(flexiKlineConfig);
-  }
-
-  @override
-  FlexiKlineConfig getFlexiKlineConfig() {
-    return configuration.getFlexiKlineConfig();
-  }
-
-  @override
-  void saveFlexiKlineConfig(FlexiKlineConfig config) {
-    storeMainConfig(mainIndicator);
-    storeSubConfig(subRectIndicators);
-    configuration.saveFlexiKlineConfig(config);
   }
 
   Set<SinglePaintObjectIndicator> genMainChildIndicators() {

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:example/generated/l10n.dart';
 import 'package:example/src/pages/kline_settting_dialog.dart';
 import 'package:example/src/utils/dialog_manager.dart';
 import 'package:flexi_kline/flexi_kline.dart';
@@ -96,6 +97,7 @@ class _FlexiTimeBarState extends ConsumerState<FlexiTimeBar>
   @override
   Widget build(BuildContext context) {
     final theme = ref.watch(themeProvider);
+    final s = S.of(context);
     return Container(
       alignment: widget.alignment ?? AlignmentDirectional.centerStart,
       padding: EdgeInsetsDirectional.only(start: 6.r, end: 6.r),
@@ -143,7 +145,7 @@ class _FlexiTimeBarState extends ConsumerState<FlexiTimeBar>
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  '指标',
+                  s.indicators,
                   style: theme.t1s14w500,
                 ),
                 Icon(

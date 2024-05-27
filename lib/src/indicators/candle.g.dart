@@ -24,7 +24,13 @@ CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
                   type: LineType.solid,
                   color: Colors.black,
                   length: 20,
-                  width: 0.5))
+                  width: 0.5),
+              text: TextAreaConfig(
+                  style: TextStyle(
+                      fontSize: defaulTextSize,
+                      color: Colors.black,
+                      overflow: TextOverflow.ellipsis,
+                      height: defaultTextHeight)))
           : MarkConfig.fromJson(json['high'] as Map<String, dynamic>),
       low: json['low'] == null
           ? const MarkConfig(
@@ -33,7 +39,13 @@ CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
                   type: LineType.solid,
                   color: Colors.black,
                   length: 20,
-                  width: 0.5))
+                  width: 0.5),
+              text: TextAreaConfig(
+                  style: TextStyle(
+                      fontSize: defaulTextSize,
+                      color: Colors.black,
+                      overflow: TextOverflow.ellipsis,
+                      height: defaultTextHeight)))
           : MarkConfig.fromJson(json['low'] as Map<String, dynamic>),
       last: json['last'] == null
           ? const MarkConfig(

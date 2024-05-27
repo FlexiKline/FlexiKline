@@ -25,6 +25,7 @@ import 'setting_config/setting_config.dart';
 import 'tooltip_config/tooltip_config.dart';
 
 final FlexiKlineConfig defaultFlexiKlineConfig = FlexiKlineConfig(
+  key: 'default-light',
   grid: const GridConfig(),
   setting: SettingConfig(),
   cross: CrossConfig(),
@@ -64,7 +65,7 @@ final FlexiKlineConfig defaultFlexiKlineConfig = FlexiKlineConfig(
 class FlexiKlineDefaultConfiguration implements IConfiguration {
   const FlexiKlineDefaultConfiguration();
   @override
-  FlexiKlineConfig getFlexiKlineConfig() {
+  FlexiKlineConfig getInitialFlexiKlineConfig() {
     return defaultFlexiKlineConfig;
   }
 

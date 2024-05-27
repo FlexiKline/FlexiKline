@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flutter/material.dart';
 
 import '../../framework/export.dart';
@@ -25,10 +24,10 @@ import '../tooltip_config/tooltip_config.dart';
 
 part 'flexi_kline_config.g.dart';
 
-@CopyWith()
 @FlexiConfigSerializable
 class FlexiKlineConfig {
   FlexiKlineConfig({
+    required this.key,
     required this.grid,
     required this.setting,
     required this.cross,
@@ -38,6 +37,7 @@ class FlexiKlineConfig {
     required this.sub,
   });
 
+  final String key;
   GridConfig grid;
   SettingConfig setting;
   CrossConfig cross;
