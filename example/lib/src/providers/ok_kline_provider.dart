@@ -208,8 +208,11 @@ class OkFlexiKlineConfiguration implements IConfiguration {
       candle: genCandleIndicator(theme),
       volume: genVolumeIndicator(theme, paintMode: PaintMode.alone),
       ma: genMaIndicator(theme),
+      ema: genEmaIndicator(theme),
+      boll: genBollIndicator(theme),
       time: genTimeIndicator(theme),
       macd: genMacdIndicator(theme),
+      kdj: genKdjIndicator(theme),
       mavol: genMavolIndicator(theme),
     );
   }
@@ -375,6 +378,25 @@ class OkFlexiKlineConfiguration implements IConfiguration {
     );
   }
 
+  EMAIndicator genEmaIndicator(FKTheme theme) {
+    return EMAIndicator(
+      height: 0,
+    );
+  }
+
+  BOLLIndicator genBollIndicator(FKTheme theme) {
+    return BOLLIndicator(
+      height: 0,
+    );
+  }
+
+  KDJIndicator genKdjIndicator(FKTheme theme) {
+    return KDJIndicator(
+      height: defaultSubIndicatorHeight,
+      padding: defaultSubIndicatorPadding,
+    );
+  }
+
   MACDIndicator genMacdIndicator(FKTheme theme) {
     return MACDIndicator(
       height: defaultSubIndicatorHeight,
@@ -423,6 +445,8 @@ class OkFlexiKlineConfiguration implements IConfiguration {
 
   MAVolumeIndicator genMavolIndicator(FKTheme theme) {
     return MAVolumeIndicator(
+      height: defaultSubIndicatorHeight,
+      padding: defaultSubIndicatorPadding,
       volumeIndicator: genVolumeIndicator(
         theme,
         paintMode: PaintMode.combine,
@@ -436,6 +460,9 @@ class OkFlexiKlineConfiguration implements IConfiguration {
   }
 
   VolMaIndicator genVolMaIndicator(FKTheme theme) {
-    return VolMaIndicator();
+    return VolMaIndicator(
+      height: defaultSubIndicatorHeight,
+      padding: defaultSubIndicatorPadding,
+    );
   }
 }

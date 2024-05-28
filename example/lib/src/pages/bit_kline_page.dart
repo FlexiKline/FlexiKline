@@ -46,13 +46,15 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage> {
   );
 
   late final FlexiKlineController controller;
+  late final BitFlexiKlineConfiguration configuration;
   CancelToken? cancelToken;
 
   @override
   void initState() {
     super.initState();
+    configuration = BitFlexiKlineConfiguration();
     controller = FlexiKlineController(
-      configuration: BitFlexiKlineConfiguration(),
+      configuration: configuration,
       logger: LoggerImpl(
         tag: "BitFlexiKline",
         debug: kDebugMode,
@@ -98,6 +100,14 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage> {
   @override
   Widget build(BuildContext context) {
     final theme = ref.watch(themeProvider);
+    ref.listen(themeProvider, (previous, next) {
+      if (previous != next) {
+        final config = configuration.genFlexiKlineConfig(
+          ref.read(bitFlexiKlineThemeProvider),
+        );
+        controller.updateFlexiKlineConfig(config);
+      }
+    });
     return Scaffold(
       backgroundColor: theme.pageBg,
       appBar: AppBar(

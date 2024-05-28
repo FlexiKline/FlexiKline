@@ -16,4 +16,5 @@ final class Images {
   Images._();
 
   static const String logo = 'assets/imgs/logo.png';
+  static const String logoRound = 'assets/imgs/logo_round.png';
 }

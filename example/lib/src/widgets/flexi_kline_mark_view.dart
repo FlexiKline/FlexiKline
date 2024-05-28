@@ -36,6 +36,7 @@ class FlexiKlineMarkView extends ConsumerWidget {
     return Container(
       alignment: alignment ?? AlignmentDirectional.bottomStart,
       margin: margin ?? EdgeInsetsDirectional.only(bottom: 10.r, start: 10.r),
+      padding: EdgeInsetsDirectional.symmetric(horizontal: 6.r),
       child: Opacity(
         opacity: opacity,
         child: Row(
@@ -46,6 +47,7 @@ class FlexiKlineMarkView extends ConsumerWidget {
               width: 24.r,
               height: 24.r,
             ),
+            SizedBox(width: 6.r),
             Text(
               'FlexiKline',
               style: theme.t1s18w700,

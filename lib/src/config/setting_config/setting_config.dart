@@ -39,6 +39,7 @@ class SettingConfig {
     this.mainRect = Rect.zero,
     this.mainMinSize = defaultMainRectMinSize,
     this.mainPadding = defaultMainIndicatorPadding,
+    this.mainDrawBelowTipsArea = true,
 
     /// 主/副图绘制参数
     this.minPaintBlankRate = 0.5,
@@ -82,6 +83,8 @@ class SettingConfig {
   Size mainMinSize;
   // 主区域Padding
   EdgeInsets mainPadding;
+  // 主区图表的绘制是否在Tips区域下
+  bool mainDrawBelowTipsArea;
 
   /// 绘制区域最少留白比例
   /// 例如: 当蜡烛数量不足以绘制一屏, 向右移动到末尾时, 绘制区域左边最少留白区域占可绘制区域(canvasWidth)的比例
@@ -130,6 +133,21 @@ class SettingConfig {
     if (mainMinSize.height > mainSize.height) {
       mainMinSize = Size(mainMinSize.width, mainSize.height);
     }
+  }
+
+  void update(SettingConfig config) {
+    mainRect = config.mainRect;
+    mainMinSize = config.mainMinSize;
+    mainPadding = config.mainPadding;
+    mainDrawBelowTipsArea = config.mainDrawBelowTipsArea;
+    minPaintBlankRate = config.minPaintBlankRate;
+    alwaysCalculateScreenOfCandlesIfEnough =
+        config.alwaysCalculateScreenOfCandlesIfEnough;
+    candleMaxWidth = config.candleMaxWidth;
+    candleWidth = config.candleWidth;
+    candleSpacing = config.candleSpacing;
+    candleLineWidth = config.candleLineWidth;
+    firstCandleInitOffset = config.firstCandleInitOffset;
   }
 
   factory SettingConfig.fromJson(Map<String, dynamic> json) =>

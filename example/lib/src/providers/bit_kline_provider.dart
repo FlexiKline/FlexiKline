@@ -12,210 +12,190 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:ui';
 import 'dart:convert';
 
+import 'package:example/src/config.dart';
 import 'package:example/src/router.dart';
+import 'package:example/src/theme/export.dart';
 import 'package:example/src/theme/flexi_theme.dart';
 import 'package:example/src/utils/cache_util.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../config.dart';
+class BitFlexiKlineLightTheme implements IFlexiKlineTheme {
+  @override
+  String key = 'flexi_kline_config_key_bit-light';
 
-class BitFlexiKlineConfiguration implements IConfiguration {
-  static const flexKlineConfigKey = 'flexi_kline_config_key_bit';
+  double? _scale;
+  @override
+  double get scale => _scale ??= ScreenUtil().scaleWidth;
+
+  double? _pixel;
+  @override
+  double get pixel {
+    if (_pixel != null) return _pixel!;
+    double? ratio = ScreenUtil().pixelRatio;
+    ratio ??= MediaQueryData.fromWindow(window).devicePixelRatio;
+    _pixel = 1 / ratio;
+    return _pixel!;
+  }
 
   @override
-  Size get initialMainSize => Size(ScreenUtil().screenWidth, 300.r);
+  double setPt(num size) => size * scale;
 
   @override
-  FlexiKlineConfig getInitialFlexiKlineConfig() {
+  double setSp(num fontSize) => fontSize * scale;
+
+  @override
+  Color long = const Color(0xFF33BD65);
+
+  @override
+  Color short = const Color(0xFFE84E74);
+
+  @override
+  Color markBg = const Color(0xFFECECEC);
+
+  @override
+  Color cardBg = const Color(0xFFF2F2F2);
+
+  @override
+  Color disable = const Color(0xFFBDBDBD);
+
+  @override
+  Color lightBg = const Color(0xFF111111);
+
+  @override
+  Color transparent = Colors.transparent;
+
+  @override
+  Color translucentBg = Colors.black54;
+
+  @override
+  Color dividerLine = const Color(0xffE9EDF0);
+
+  @override
+  Color t1 = const Color(0xFF000000);
+
+  @override
+  Color t2 = const Color(0xFF949494);
+
+  @override
+  Color t3 = const Color(0xFF5F5F5F);
+
+  @override
+  Color tlight = const Color(0xFFFFFFFF);
+}
+
+class BitFlexiKlineDarkTheme implements IFlexiKlineTheme {
+  @override
+  String key = 'flexi_kline_config_key_bit-dark';
+
+  double? _scale;
+  @override
+  double get scale => _scale ??= ScreenUtil().scaleWidth;
+
+  double? _pixel;
+  @override
+  double get pixel {
+    if (_pixel != null) return _pixel!;
+    double? ratio = ScreenUtil().pixelRatio;
+    ratio ??= MediaQueryData.fromWindow(window).devicePixelRatio;
+    _pixel = 1 / ratio;
+    return _pixel!;
+  }
+
+  @override
+  double setPt(num size) => size * scale;
+
+  @override
+  double setSp(num fontSize) => fontSize * scale;
+
+  @override
+  Color long = const Color(0xFF33BD65);
+
+  @override
+  Color short = const Color(0xFFE84E74);
+
+  @override
+  Color markBg = const Color(0xFFECECEC);
+
+  @override
+  Color cardBg = const Color(0xFFF2F2F2);
+
+  @override
+  Color disable = const Color(0xFFBDBDBD);
+
+  @override
+  Color lightBg = const Color(0xFF111111);
+
+  @override
+  Color transparent = Colors.transparent;
+
+  @override
+  Color translucentBg = Colors.black54;
+
+  @override
+  Color dividerLine = const Color(0xffE9EDF0);
+
+  @override
+  Color t1 = const Color(0xFF000000);
+
+  @override
+  Color t2 = const Color(0xFF949494);
+
+  @override
+  Color t3 = const Color(0xFF5F5F5F);
+
+  @override
+  Color tlight = const Color(0xFFFFFFFF);
+}
+
+final lightBitFlexiKlineTheme = BitFlexiKlineLightTheme();
+final darkBitFlexiKlineTheme = BitFlexiKlineDarkTheme();
+
+final bitFlexiKlineThemeProvider = StateProvider<IFlexiKlineTheme>((ref) {
+  final brightness = ref.watch(
+    themeProvider.select((theme) => theme.brightness),
+  );
+  if (brightness == Brightness.dark) {
+    return darkBitFlexiKlineTheme;
+  } else {
+    return lightBitFlexiKlineTheme;
+  }
+});
+
+class BitFlexiKlineConfiguration extends BaseFlexiKlineConfiguration {
+  @override
+  Size get initialMainSize {
+    return Size(ScreenUtil().screenWidth, 300.r);
+  }
+
+  @override
+  FlexiKlineConfig getInitialFlexiKlineConfig([String? key]) {
+    final theme = globalNavigatorKey.ref.read(bitFlexiKlineThemeProvider);
     try {
-      final String? jsonStr = CacheUtil().get(flexKlineConfigKey);
+      key ??= theme.key;
+      final String? jsonStr = CacheUtil().get(key);
       if (jsonStr != null && jsonStr.isNotEmpty) {
         final json = jsonDecode(jsonStr);
         if (json is Map<String, dynamic>) {
-          // return FlexiKlineConfig.fromJson(json);
+          return FlexiKlineConfig.fromJson(json);
         }
       }
     } catch (err, stack) {
       defLogger.e('getFlexiKlineConfig error:$err', stackTrace: stack);
     }
-    return genFlexiKlineConfigObject(
-      globalNavigatorKey.ref.read(themeProvider),
-    );
+
+    /// 取默认
+    return genFlexiKlineConfig(theme);
   }
 
   @override
   void saveFlexiKlineConfig(FlexiKlineConfig config) {
     final jsonSrc = jsonEncode(config);
-    CacheUtil().setString(flexKlineConfigKey, jsonSrc);
-  }
-
-  FlexiKlineConfig genFlexiKlineConfigObject(FKTheme theme) {
-    return FlexiKlineConfig(
-      key: '$flexKlineConfigKey-${theme.brightness.name}',
-      main: {candleKey},
-      sub: {timeKey},
-      grid: GridConfig(
-        show: true,
-        horizontal: GridAxis(
-          show: true,
-          width: 0.5.r,
-          color: theme.dividerLine,
-          type: LineType.solid,
-          dashes: const [2, 2],
-        ),
-        vertical: GridAxis(
-          show: true,
-          width: 0.5.r,
-          color: theme.dividerLine,
-          type: LineType.solid,
-          dashes: const [2, 2],
-        ),
-      ),
-      setting: SettingConfig(),
-      cross: CrossConfig(
-        enable: true,
-        crosshair: LineConfig(
-          width: 0.5.r,
-          color: theme.t1,
-          type: LineType.dashed,
-          dashes: const [3, 3],
-        ),
-        point: CrossPointConfig(
-          radius: 2.r,
-          width: 6.r,
-          color: theme.t1,
-        ),
-        tickText: TextAreaConfig(
-          style: TextStyle(
-            color: theme.tlight,
-            fontSize: theme.klineTextSize,
-            fontWeight: FontWeight.normal,
-            height: theme.klineTextHeight,
-          ),
-          background: theme.lightBg,
-          padding: EdgeInsets.all(2.r),
-          border: BorderSide.none,
-          borderRadius: BorderRadius.all(
-            Radius.circular(2.r),
-          ),
-        ),
-      ),
-      tooltip: TooltipConfig(
-        show: true,
-        background: theme.cardBg,
-        margin: EdgeInsets.only(
-          left: 15.r,
-          right: 65.r,
-          top: 4.r,
-        ),
-        padding: EdgeInsets.symmetric(
-          horizontal: 4.r,
-          vertical: 4.r,
-        ),
-        radius: BorderRadius.all(Radius.circular(6.r)),
-        style: TextStyle(
-          fontSize: theme.klineTextSize,
-          color: theme.t1,
-          overflow: TextOverflow.ellipsis,
-          height: defaultMultiTextHeight,
-        ),
-      ),
-      indicators: genIndicatorsConfig(theme),
-    );
-  }
-
-  IndicatorsConfig genIndicatorsConfig(FKTheme theme) {
-    final mainHeight = 300.r;
-    return IndicatorsConfig(
-      candle: genCandleIndicator(theme, mainHeight),
-    );
-  }
-
-  CandleIndicator genCandleIndicator(FKTheme theme, double mainHeight) {
-    return CandleIndicator(
-      height: mainHeight,
-      padding: defaultMainIndicatorPadding,
-      high: MarkConfig(
-        spacing: 2,
-        line: LineConfig(
-          type: LineType.solid,
-          color: theme.t1,
-          length: 20.r,
-          width: 0.5.r,
-        ),
-      ),
-      low: MarkConfig(
-        spacing: 2.r,
-        line: LineConfig(
-          type: LineType.solid,
-          color: theme.t1,
-          length: 20.r,
-          width: 0.5.r,
-        ),
-      ),
-      last: MarkConfig(
-        show: true,
-        spacing: 100.r,
-        line: LineConfig(
-          type: LineType.dashed,
-          color: theme.t1,
-          width: 0.5.r,
-          dashes: [3, 3],
-        ),
-        text: TextAreaConfig(
-          style: TextStyle(
-            fontSize: theme.klineTextSize,
-            color: theme.tlight,
-            overflow: TextOverflow.ellipsis,
-            height: theme.klineTextHeight,
-            textBaseline: TextBaseline.alphabetic,
-          ),
-          background: theme.translucentBg,
-          padding: EdgeInsets.symmetric(horizontal: 4.r, vertical: 2.r),
-          border: BorderSide(color: theme.transparent),
-          borderRadius: BorderRadius.all(Radius.circular(10.r)),
-        ),
-      ),
-      latest: MarkConfig(
-        show: true,
-        spacing: 1.r,
-        line: LineConfig(
-          type: LineType.dashed,
-          color: theme.t1,
-          width: 0.5.r,
-          dashes: [3, 3],
-        ),
-        text: TextAreaConfig(
-          style: TextStyle(
-            fontSize: theme.klineTextSize,
-            color: Colors.white,
-            overflow: TextOverflow.ellipsis,
-            height: theme.klineTextHeight,
-          ),
-          minWidth: 45,
-          textAlign: TextAlign.center,
-          padding: defaultTextPading,
-          borderRadius: BorderRadius.all(Radius.circular(2.r)),
-        ),
-      ),
-      useCandleColorAsLatestBg: true,
-      showCountDown: true,
-      countDown: TextAreaConfig(
-        style: TextStyle(
-          fontSize: theme.klineTextSize,
-          color: theme.t1,
-          overflow: TextOverflow.ellipsis,
-          height: theme.klineTextHeight,
-        ),
-        textAlign: TextAlign.center,
-        background: theme.markBg,
-        padding: defaultTextPading,
-        borderRadius: BorderRadius.all(Radius.circular(2.r)),
-      ),
-    );
+    CacheUtil().setString(config.key, jsonSrc);
   }
 }

@@ -23,58 +23,58 @@ part 'indicators_config.g.dart';
 @CopyWith()
 @FlexiConfigSerializable
 class IndicatorsConfig {
-  // IndicatorsConfig({
-  //   /// 主区指标
-  //   required this.candle,
-  //   required this.volume,
-  //   required this.ma,
-  //   required this.ema,
-  //   required this.boll,
-
-  //   /// 副区指标
-  //   required this.time,
-  //   required this.macd,
-  //   required this.kdj,
-  //   required this.mavol,
-  // });
-
   IndicatorsConfig({
     /// 主区指标
-    CandleIndicator? candle,
-    VolumeIndicator? volume,
-    MAIndicator? ma,
-    EMAIndicator? ema,
-    BOLLIndicator? boll,
+    required this.candle,
+    required this.volume,
+    required this.ma,
+    required this.ema,
+    required this.boll,
 
     /// 副区指标
-    TimeIndicator? time,
-    MACDIndicator? macd,
-    KDJIndicator? kdj,
-    MAVolumeIndicator? mavol,
-  }) {
-    /// 主区指标
-    this.candle = candle ?? CandleIndicator(height: 0);
-    this.volume = volume ?? VolumeIndicator();
-    this.ma = ma ?? MAIndicator(height: 0);
-    this.ema = ema ?? EMAIndicator(height: 0);
-    this.boll = boll ?? BOLLIndicator(height: 0);
+    required this.time,
+    required this.macd,
+    required this.kdj,
+    required this.mavol,
+  });
 
-    /// 副区指标
-    this.time = time ?? TimeIndicator();
-    this.macd = macd ?? MACDIndicator();
-    this.kdj = kdj ?? KDJIndicator();
-    this.mavol = mavol ??
-        MAVolumeIndicator(
-          volumeIndicator: VolumeIndicator(
-            paintMode: PaintMode.combine,
-            showYAxisTick: true,
-            showCrossMark: true,
-            showTips: true,
-            useTint: false,
-          ),
-          volMaIndicator: VolMaIndicator(),
-        );
-  }
+  // IndicatorsConfig({
+  //   /// 主区指标
+  //   CandleIndicator? candle,
+  //   VolumeIndicator? volume,
+  //   MAIndicator? ma,
+  //   EMAIndicator? ema,
+  //   BOLLIndicator? boll,
+
+  //   /// 副区指标
+  //   TimeIndicator? time,
+  //   MACDIndicator? macd,
+  //   KDJIndicator? kdj,
+  //   MAVolumeIndicator? mavol,
+  // }) {
+  //   /// 主区指标
+  //   this.candle = candle ?? CandleIndicator(height: 0);
+  //   this.volume = volume ?? VolumeIndicator();
+  //   this.ma = ma ?? MAIndicator(height: 0);
+  //   this.ema = ema ?? EMAIndicator(height: 0);
+  //   this.boll = boll ?? BOLLIndicator(height: 0);
+
+  //   /// 副区指标
+  //   this.time = time ?? TimeIndicator();
+  //   this.macd = macd ?? MACDIndicator();
+  //   this.kdj = kdj ?? KDJIndicator();
+  //   this.mavol = mavol ??
+  //       MAVolumeIndicator(
+  //         volumeIndicator: VolumeIndicator(
+  //           paintMode: PaintMode.combine,
+  //           showYAxisTick: true,
+  //           showCrossMark: true,
+  //           showTips: true,
+  //           useTint: false,
+  //         ),
+  //         volMaIndicator: VolMaIndicator(),
+  //       );
+  // }
 
   /// 主区指标
   late CandleIndicator candle;
@@ -91,7 +91,7 @@ class IndicatorsConfig {
 
   /// 内置主区指标
   Map<ValueKey, SinglePaintObjectIndicator> get _innerMainIndicators => {
-        // candle.key: candle,
+        candle.key: candle,
         volume.key: volume,
         ma.key: ma,
         ema.key: ema,
@@ -100,7 +100,7 @@ class IndicatorsConfig {
 
   /// 内置副区指标
   Map<ValueKey, Indicator> get _innerSubIndicators => {
-        // time.key: time,
+        time.key: time,
         macd.key: macd,
         kdj.key: kdj,
         mavol.key: mavol,
@@ -146,6 +146,15 @@ class IndicatorsConfig {
         ..._innerSubIndicators,
         ..._customSubIndicators,
       };
+
+  void dispose() {
+    mainIndicators.forEach((key, indicator) {
+      indicator.dispose();
+    });
+    subIndicators.forEach((key, indicator) {
+      indicator.dispose();
+    });
+  }
 
   factory IndicatorsConfig.fromJson(Map<String, dynamic> json) =>
       _$IndicatorsConfigFromJson(json);

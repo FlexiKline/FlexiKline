@@ -31,4 +31,4 @@ export 'ma_param/ma_param.dart';
 export 'macd_param/macd_param.dart';
 
 /// 内置默认配置
-export 'default.dart';
+export 'default_config.dart';

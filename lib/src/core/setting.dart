@@ -41,55 +41,8 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart {
     subRectIndicators.clear();
   }
 
-  @override
-  void initFlexiKline() {
-    logd('initByFlexiKlineConfig setting');
-    // 根据配置进行初始化
-    _mainIndicator = MultiPaintObjectIndicator(
-      key: mainChartKey,
-      name: 'MAIN',
-      height: 0,
-      padding: mainPadding,
-      drawBelowTipsArea: true,
-    );
-
-    _subIndicators = ListQueue<Indicator>(subChartMaxCount);
-  }
-
-  @override
-  void initFlexiKlineState() {
-    _mainIndicator.appendIndicator(indicatorsConfig.candle, this);
-    _mainIndicator.appendIndicator(getCandleIndicator(), this);
-    final mainChildIndicators = genMainChildIndicators();
-    _mainIndicator.appendIndicators(mainChildIndicators, this);
-
-    if (mainRect.isEmpty) {
-      settingConfig.setMainRect(initialMainSize);
-    }
-    settingConfig.checkAndFixMinSize();
-
-    /// 最终渲染前, 如果用户更改了配置, 此处做下更新.
-    updateMainIndicatorParam(
-      height: mainRect.height,
-      padding: mainPadding,
-    );
-
-    for (var subKey in subConfig) {
-      addIndicatorInSub(subKey);
-    }
-  }
-
   VoidCallback? onSizeChange;
   ValueChanged<bool>? onLoading;
-
-  /// 主绘制区域指标
-  late MultiPaintObjectIndicator _mainIndicator;
-
-  /// 副图区域绘制指标集合
-  late Queue<Indicator> _subIndicators;
-
-  /// Loading配置
-  LoadingConfig get loading => settingConfig.loading;
 
   /// 整个画布区域大小 = 由主图区域 + 副图区域
   @override
@@ -111,9 +64,6 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart {
         mainRect.bottom + subRectHeight,
       );
 
-  /// 副区的指标图最大数量
-  int get subChartMaxCount => settingConfig.subChartMaxCount + 1;
-
   /// 主区域大小
   @override
   Rect get mainRect => settingConfig.mainRect;
@@ -134,12 +84,6 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart {
       onSizeChange?.call();
     }
   }
-
-  // 主区总宽度
-  double get mainRectWidth => mainRect.width;
-
-  /// 主区总高度
-  double get mainRectHeight => mainRect.height;
 
   /// 主区padding
   EdgeInsets get mainPadding => settingConfig.mainPadding;
@@ -213,11 +157,11 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart {
   int get maxCandleCount => (mainChartWidth / candleActualWidth).ceil();
 
   Set<ValueKey> get supportMainIndicatorKeys {
-    return indicatorsConfig.mainIndicators.keys.toSet();
+    return indicatorsConfig.mainIndicators.keys.toSet()..remove(candleKey);
   }
 
   Set<ValueKey> get supportSubIndicatorKeys {
-    return indicatorsConfig.subIndicators.keys.toSet();
+    return indicatorsConfig.subIndicators.keys.toSet()..remove(timeKey);
   }
 
   Set<ValueKey> get mainIndicatorKeys {
@@ -230,18 +174,25 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart {
 
   @protected
   @override
-  MultiPaintObjectIndicator get mainIndicator => _mainIndicator;
+  MultiPaintObjectIndicator get mainIndicator {
+    return _flexiKlineConfig.mainIndicator;
+  }
+
+  Queue<Indicator> get subIndicators {
+    return _flexiKlineConfig.subIndicators;
+  }
 
   @protected
   @override
   List<Indicator> get subRectIndicators {
     if (indicatorsConfig.time.position == DrawPosition.bottom) {
-      return [..._subIndicators, indicatorsConfig.time];
+      return [...subIndicators, indicatorsConfig.time];
     } else {
-      return [indicatorsConfig.time, ..._subIndicators];
+      return [indicatorsConfig.time, ...subIndicators];
     }
   }
 
+  /// 更新主区指标的布局参数
   @protected
   @override
   void updateMainIndicatorParam({
@@ -289,6 +240,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart {
     }
   }
 
+  /// 在主图中添加指标
   void addIndicatorInMain(ValueKey<dynamic> key) {
     if (indicatorsConfig.mainIndicators.containsKey(key)) {
       mainIndicator.appendIndicator(
@@ -299,28 +251,28 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart {
     }
   }
 
-  /// 删除主图中key指定的指标
+  /// 删除主图中[key]指定的指标
   void delIndicatorInMain(ValueKey<dynamic> key) {
     mainIndicator.deleteIndicator(key);
     markRepaintChart();
   }
 
-  /// 在副图中增加指标
+  /// 在副图中添加指标
   void addIndicatorInSub(ValueKey<dynamic> key) {
     if (indicatorsConfig.subIndicators.containsKey(key)) {
-      if (_subIndicators.length >= subChartMaxCount) {
-        final deleted = _subIndicators.removeFirst();
+      if (subIndicators.length >= settingConfig.subChartMaxCount) {
+        final deleted = subIndicators.removeFirst();
         deleted.dispose();
       }
-      _subIndicators.addLast(indicatorsConfig.subIndicators[key]!);
+      subIndicators.addLast(indicatorsConfig.subIndicators[key]!);
       onSizeChange?.call();
       markRepaintChart();
     }
   }
 
-  /// 删除副图key指定的指标
+  /// 删除副图[key]指定的指标
   void delIndicatorInSub(ValueKey key) {
-    _subIndicators.removeWhere((indicator) {
+    subIndicators.removeWhere((indicator) {
       if (indicator.key == key) {
         indicator.dispose();
         onSizeChange?.call();
@@ -330,4 +282,88 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart {
       return false;
     });
   }
+
+  FlexiKlineConfig? __flexiKlineConfig;
+  FlexiKlineConfig get _flexiKlineConfig {
+    if (__flexiKlineConfig == null) {
+      final config = configuration.getInitialFlexiKlineConfig();
+      _flexiKlineConfig = config;
+    }
+    return __flexiKlineConfig!;
+  }
+
+  set _flexiKlineConfig(config) {
+    __flexiKlineConfig = config.clone();
+    __flexiKlineConfig!.init();
+  }
+
+  @override
+  void initFlexiKlineState() {
+    /// 修正mainRect大小
+    if (mainRect.isEmpty) {
+      settingConfig.setMainRect(configuration.initialMainSize);
+    }
+    settingConfig.checkAndFixMinSize();
+
+    /// 最终渲染前, 如果用户更改了配置, 此处做下更新.
+
+    updateMainIndicatorParam(
+      height: mainRect.height,
+      padding: mainPadding,
+    );
+
+    /// TODO: 此处考虑对其他参数的修正
+  }
+
+  /// 保存当前配置到本地
+  @override
+  void saveFlexiKlineConfig() {
+    configuration.saveFlexiKlineConfig(_flexiKlineConfig);
+  }
+
+  /// 更新[config]
+  @override
+  void updateFlexiKlineConfig(FlexiKlineConfig config) {
+    if (config.key != _flexiKlineConfig.key) {
+      /// 保存当前配置
+      saveFlexiKlineConfig();
+
+      /// 使用当前配置更新config
+      config.update(_flexiKlineConfig);
+
+      /// 释放当前配置所有指标
+      _flexiKlineConfig.dispose();
+
+      /// 更新当前配置为[config]
+      _flexiKlineConfig = config;
+
+      /// 初始化状态
+      initFlexiKlineState();
+    }
+  }
+
+  /// 保存当前FlexiKline配置到本地
+  void storeFlexiKlineConfig() {
+    configuration.saveFlexiKlineConfig(_flexiKlineConfig);
+  }
+
+  /// IndicatorsConfig
+  @override
+  IndicatorsConfig get indicatorsConfig => _flexiKlineConfig.indicators;
+
+  /// SettingConfig
+  @override
+  SettingConfig get settingConfig => _flexiKlineConfig.setting;
+
+  /// GridConfig
+  @override
+  GridConfig get gridConfig => _flexiKlineConfig.grid;
+
+  /// CrossConfig
+  @override
+  CrossConfig get crossConfig => _flexiKlineConfig.cross;
+
+  /// TooltipConfig
+  @override
+  TooltipConfig get tooltipConfig => _flexiKlineConfig.tooltip;
 }

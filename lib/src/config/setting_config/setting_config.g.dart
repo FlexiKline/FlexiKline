@@ -23,6 +23,8 @@ abstract class _$SettingConfigCWProxy {
 
   SettingConfig mainPadding(EdgeInsets mainPadding);
 
+  SettingConfig mainDrawBelowTipsArea(bool mainDrawBelowTipsArea);
+
   SettingConfig minPaintBlankRate(double minPaintBlankRate);
 
   SettingConfig alwaysCalculateScreenOfCandlesIfEnough(
@@ -57,6 +59,7 @@ abstract class _$SettingConfigCWProxy {
     Rect? mainRect,
     Size? mainMinSize,
     EdgeInsets? mainPadding,
+    bool? mainDrawBelowTipsArea,
     double? minPaintBlankRate,
     bool? alwaysCalculateScreenOfCandlesIfEnough,
     double? candleMaxWidth,
@@ -99,6 +102,10 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
   @override
   SettingConfig mainPadding(EdgeInsets mainPadding) =>
       this(mainPadding: mainPadding);
+
+  @override
+  SettingConfig mainDrawBelowTipsArea(bool mainDrawBelowTipsArea) =>
+      this(mainDrawBelowTipsArea: mainDrawBelowTipsArea);
 
   @override
   SettingConfig minPaintBlankRate(double minPaintBlankRate) =>
@@ -155,6 +162,7 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
     Object? mainRect = const $CopyWithPlaceholder(),
     Object? mainMinSize = const $CopyWithPlaceholder(),
     Object? mainPadding = const $CopyWithPlaceholder(),
+    Object? mainDrawBelowTipsArea = const $CopyWithPlaceholder(),
     Object? minPaintBlankRate = const $CopyWithPlaceholder(),
     Object? alwaysCalculateScreenOfCandlesIfEnough =
         const $CopyWithPlaceholder(),
@@ -202,6 +210,12 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
               ? _value.mainPadding
               // ignore: cast_nullable_to_non_nullable
               : mainPadding as EdgeInsets,
+      mainDrawBelowTipsArea:
+          mainDrawBelowTipsArea == const $CopyWithPlaceholder() ||
+                  mainDrawBelowTipsArea == null
+              ? _value.mainDrawBelowTipsArea
+              // ignore: cast_nullable_to_non_nullable
+              : mainDrawBelowTipsArea as bool,
       minPaintBlankRate: minPaintBlankRate == const $CopyWithPlaceholder() ||
               minPaintBlankRate == null
           ? _value.minPaintBlankRate
@@ -290,6 +304,7 @@ SettingConfig _$SettingConfigFromJson(Map<String, dynamic> json) =>
           ? defaultMainIndicatorPadding
           : const EdgeInsetsConverter()
               .fromJson(json['mainPadding'] as Map<String, dynamic>),
+      mainDrawBelowTipsArea: json['mainDrawBelowTipsArea'] as bool? ?? true,
       minPaintBlankRate: (json['minPaintBlankRate'] as num?)?.toDouble() ?? 0.5,
       alwaysCalculateScreenOfCandlesIfEnough:
           json['alwaysCalculateScreenOfCandlesIfEnough'] as bool? ?? false,
@@ -331,6 +346,7 @@ Map<String, dynamic> _$SettingConfigToJson(SettingConfig instance) {
   val['mainRect'] = const RectConverter().toJson(instance.mainRect);
   val['mainMinSize'] = const SizeConverter().toJson(instance.mainMinSize);
   val['mainPadding'] = const EdgeInsetsConverter().toJson(instance.mainPadding);
+  val['mainDrawBelowTipsArea'] = instance.mainDrawBelowTipsArea;
   val['minPaintBlankRate'] = instance.minPaintBlankRate;
   val['alwaysCalculateScreenOfCandlesIfEnough'] =
       instance.alwaysCalculateScreenOfCandlesIfEnough;

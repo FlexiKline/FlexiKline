@@ -7,23 +7,23 @@ part of 'indicators_config.dart';
 // **************************************************************************
 
 abstract class _$IndicatorsConfigCWProxy {
-  IndicatorsConfig candle(CandleIndicator? candle);
+  IndicatorsConfig candle(CandleIndicator candle);
 
-  IndicatorsConfig volume(VolumeIndicator? volume);
+  IndicatorsConfig volume(VolumeIndicator volume);
 
-  IndicatorsConfig ma(MAIndicator? ma);
+  IndicatorsConfig ma(MAIndicator ma);
 
-  IndicatorsConfig ema(EMAIndicator? ema);
+  IndicatorsConfig ema(EMAIndicator ema);
 
-  IndicatorsConfig boll(BOLLIndicator? boll);
+  IndicatorsConfig boll(BOLLIndicator boll);
 
-  IndicatorsConfig time(TimeIndicator? time);
+  IndicatorsConfig time(TimeIndicator time);
 
-  IndicatorsConfig macd(MACDIndicator? macd);
+  IndicatorsConfig macd(MACDIndicator macd);
 
-  IndicatorsConfig kdj(KDJIndicator? kdj);
+  IndicatorsConfig kdj(KDJIndicator kdj);
 
-  IndicatorsConfig mavol(MAVolumeIndicator? mavol);
+  IndicatorsConfig mavol(MAVolumeIndicator mavol);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `IndicatorsConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -51,31 +51,31 @@ class _$IndicatorsConfigCWProxyImpl implements _$IndicatorsConfigCWProxy {
   final IndicatorsConfig _value;
 
   @override
-  IndicatorsConfig candle(CandleIndicator? candle) => this(candle: candle);
+  IndicatorsConfig candle(CandleIndicator candle) => this(candle: candle);
 
   @override
-  IndicatorsConfig volume(VolumeIndicator? volume) => this(volume: volume);
+  IndicatorsConfig volume(VolumeIndicator volume) => this(volume: volume);
 
   @override
-  IndicatorsConfig ma(MAIndicator? ma) => this(ma: ma);
+  IndicatorsConfig ma(MAIndicator ma) => this(ma: ma);
 
   @override
-  IndicatorsConfig ema(EMAIndicator? ema) => this(ema: ema);
+  IndicatorsConfig ema(EMAIndicator ema) => this(ema: ema);
 
   @override
-  IndicatorsConfig boll(BOLLIndicator? boll) => this(boll: boll);
+  IndicatorsConfig boll(BOLLIndicator boll) => this(boll: boll);
 
   @override
-  IndicatorsConfig time(TimeIndicator? time) => this(time: time);
+  IndicatorsConfig time(TimeIndicator time) => this(time: time);
 
   @override
-  IndicatorsConfig macd(MACDIndicator? macd) => this(macd: macd);
+  IndicatorsConfig macd(MACDIndicator macd) => this(macd: macd);
 
   @override
-  IndicatorsConfig kdj(KDJIndicator? kdj) => this(kdj: kdj);
+  IndicatorsConfig kdj(KDJIndicator kdj) => this(kdj: kdj);
 
   @override
-  IndicatorsConfig mavol(MAVolumeIndicator? mavol) => this(mavol: mavol);
+  IndicatorsConfig mavol(MAVolumeIndicator mavol) => this(mavol: mavol);
 
   @override
 
@@ -97,42 +97,42 @@ class _$IndicatorsConfigCWProxyImpl implements _$IndicatorsConfigCWProxy {
     Object? mavol = const $CopyWithPlaceholder(),
   }) {
     return IndicatorsConfig(
-      candle: candle == const $CopyWithPlaceholder()
+      candle: candle == const $CopyWithPlaceholder() || candle == null
           ? _value.candle
           // ignore: cast_nullable_to_non_nullable
-          : candle as CandleIndicator?,
-      volume: volume == const $CopyWithPlaceholder()
+          : candle as CandleIndicator,
+      volume: volume == const $CopyWithPlaceholder() || volume == null
           ? _value.volume
           // ignore: cast_nullable_to_non_nullable
-          : volume as VolumeIndicator?,
-      ma: ma == const $CopyWithPlaceholder()
+          : volume as VolumeIndicator,
+      ma: ma == const $CopyWithPlaceholder() || ma == null
           ? _value.ma
           // ignore: cast_nullable_to_non_nullable
-          : ma as MAIndicator?,
-      ema: ema == const $CopyWithPlaceholder()
+          : ma as MAIndicator,
+      ema: ema == const $CopyWithPlaceholder() || ema == null
           ? _value.ema
           // ignore: cast_nullable_to_non_nullable
-          : ema as EMAIndicator?,
-      boll: boll == const $CopyWithPlaceholder()
+          : ema as EMAIndicator,
+      boll: boll == const $CopyWithPlaceholder() || boll == null
           ? _value.boll
           // ignore: cast_nullable_to_non_nullable
-          : boll as BOLLIndicator?,
-      time: time == const $CopyWithPlaceholder()
+          : boll as BOLLIndicator,
+      time: time == const $CopyWithPlaceholder() || time == null
           ? _value.time
           // ignore: cast_nullable_to_non_nullable
-          : time as TimeIndicator?,
-      macd: macd == const $CopyWithPlaceholder()
+          : time as TimeIndicator,
+      macd: macd == const $CopyWithPlaceholder() || macd == null
           ? _value.macd
           // ignore: cast_nullable_to_non_nullable
-          : macd as MACDIndicator?,
-      kdj: kdj == const $CopyWithPlaceholder()
+          : macd as MACDIndicator,
+      kdj: kdj == const $CopyWithPlaceholder() || kdj == null
           ? _value.kdj
           // ignore: cast_nullable_to_non_nullable
-          : kdj as KDJIndicator?,
-      mavol: mavol == const $CopyWithPlaceholder()
+          : kdj as KDJIndicator,
+      mavol: mavol == const $CopyWithPlaceholder() || mavol == null
           ? _value.mavol
           // ignore: cast_nullable_to_non_nullable
-          : mavol as MAVolumeIndicator?,
+          : mavol as MAVolumeIndicator,
     );
   }
 }
@@ -149,33 +149,15 @@ extension $IndicatorsConfigCopyWith on IndicatorsConfig {
 
 IndicatorsConfig _$IndicatorsConfigFromJson(Map<String, dynamic> json) =>
     IndicatorsConfig(
-      candle: json['candle'] == null
-          ? null
-          : CandleIndicator.fromJson(json['candle'] as Map<String, dynamic>),
-      volume: json['volume'] == null
-          ? null
-          : VolumeIndicator.fromJson(json['volume'] as Map<String, dynamic>),
-      ma: json['ma'] == null
-          ? null
-          : MAIndicator.fromJson(json['ma'] as Map<String, dynamic>),
-      ema: json['ema'] == null
-          ? null
-          : EMAIndicator.fromJson(json['ema'] as Map<String, dynamic>),
-      boll: json['boll'] == null
-          ? null
-          : BOLLIndicator.fromJson(json['boll'] as Map<String, dynamic>),
-      time: json['time'] == null
-          ? null
-          : TimeIndicator.fromJson(json['time'] as Map<String, dynamic>),
-      macd: json['macd'] == null
-          ? null
-          : MACDIndicator.fromJson(json['macd'] as Map<String, dynamic>),
-      kdj: json['kdj'] == null
-          ? null
-          : KDJIndicator.fromJson(json['kdj'] as Map<String, dynamic>),
-      mavol: json['mavol'] == null
-          ? null
-          : MAVolumeIndicator.fromJson(json['mavol'] as Map<String, dynamic>),
+      candle: CandleIndicator.fromJson(json['candle'] as Map<String, dynamic>),
+      volume: VolumeIndicator.fromJson(json['volume'] as Map<String, dynamic>),
+      ma: MAIndicator.fromJson(json['ma'] as Map<String, dynamic>),
+      ema: EMAIndicator.fromJson(json['ema'] as Map<String, dynamic>),
+      boll: BOLLIndicator.fromJson(json['boll'] as Map<String, dynamic>),
+      time: TimeIndicator.fromJson(json['time'] as Map<String, dynamic>),
+      macd: MACDIndicator.fromJson(json['macd'] as Map<String, dynamic>),
+      kdj: KDJIndicator.fromJson(json['kdj'] as Map<String, dynamic>),
+      mavol: MAVolumeIndicator.fromJson(json['mavol'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$IndicatorsConfigToJson(IndicatorsConfig instance) =>

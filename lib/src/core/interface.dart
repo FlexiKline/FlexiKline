@@ -14,6 +14,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../config/export.dart';
 import '../data/export.dart';
 import '../framework/export.dart';
 import '../model/export.dart';
@@ -115,12 +116,6 @@ abstract interface class IState {
 
 /// Config接口
 abstract interface class ISetting {
-  /// 初始化配置
-  void initFlexiKline();
-
-  /// 初始化状态
-  void initFlexiKlineState();
-
   /// 主区指标集
   MultiPaintObjectIndicator get mainIndicator;
 
@@ -151,9 +146,38 @@ abstract interface class ISetting {
     EdgeInsets? padding,
   });
 
-  /// 废弃的, 暂保留
+  /// TODO: 待优化后废弃, 暂保留
   int get panMaxDurationWhenPanEnd;
   double get panMaxOffsetPreFrameWhenPanEnd;
+
+  /// Config
+
+  /// 初始化配置: 将会根据[IConfiguration.getInitialFlexiKlineConfig]返回值去初始化
+  // void initFlexiKlineConfig();
+
+  /// 初始化状态
+  void initFlexiKlineState();
+
+  /// 保存到本地
+  void saveFlexiKlineConfig();
+
+  /// 更新配置[config]
+  void updateFlexiKlineConfig(FlexiKlineConfig config);
+
+  /// IndicatorsConfig
+  IndicatorsConfig get indicatorsConfig;
+
+  /// SettingConfig
+  SettingConfig get settingConfig;
+
+  /// GridConfig
+  GridConfig get gridConfig;
+
+  /// CrossConfig
+  CrossConfig get crossConfig;
+
+  /// TooltipConfig
+  TooltipConfig get tooltipConfig;
 }
 
 //// Chart层绘制接口

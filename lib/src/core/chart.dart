@@ -21,7 +21,7 @@ import 'binding_base.dart';
 import 'interface.dart';
 
 /// 绘制蜡烛图以及相关指标数据
-mixin ChartBinding on KlineBindingBase implements IChart, IState {
+mixin ChartBinding on KlineBindingBase implements IChart, IState, ISetting {
   @override
   void initState() {
     super.initState();

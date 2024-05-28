@@ -132,17 +132,18 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
     if (widget.mainforegroundViewBuilder != null) {
       return widget.mainforegroundViewBuilder!(context, loading);
     }
+
     return Offstage(
       offstage: !loading,
       child: Center(
         key: const ValueKey('loadingView'),
         child: SizedBox.square(
-          dimension: widget.controller.loading.size,
+          dimension: widget.controller.settingConfig.loading.size,
           child: CircularProgressIndicator(
-            strokeWidth: widget.controller.loading.strokeWidth,
-            backgroundColor: widget.controller.loading.background,
+            strokeWidth: widget.controller.settingConfig.loading.strokeWidth,
+            backgroundColor: widget.controller.settingConfig.loading.background,
             valueColor: AlwaysStoppedAnimation<Color>(
-              widget.controller.loading.valueColor,
+              widget.controller.settingConfig.loading.valueColor,
             ),
           ),
         ),

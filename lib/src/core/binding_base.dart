@@ -19,15 +19,17 @@ import '../framework/export.dart';
 import 'interface.dart';
 
 abstract class KlineBindingBase
-    with KlineLog, KlineConfiguration, GestureHanderImpl {
+    with KlineLog, GestureHanderImpl
+    implements ISetting {
+  final IConfiguration configuration;
+
   KlineBindingBase({
-    required IConfiguration configuration,
+    required this.configuration,
     ILogger? logger,
   }) {
     logd("constrouct");
     loggerDelegate = logger;
-    this.configuration = configuration;
-    updateFlexiKlineConfig();
+    // initFlexiKlineConfig();
   }
 
   @protected
@@ -40,7 +42,7 @@ abstract class KlineBindingBase
   @mustCallSuper
   void dispose() {
     logd("dispose base");
-    storeFlexiKlineConfig();
+    saveFlexiKlineConfig();
   }
 
   KlineBindingBase get instance => this;

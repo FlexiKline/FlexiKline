@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flexi_kline/flexi_kline.dart';
@@ -20,9 +21,95 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'mock.dart';
 
+class TestFlexiKlineTheme implements IFlexiKlineTheme {
+  @override
+  String key = 'flexi_kline_config_key_test';
+
+  double? _scale;
+  @override
+  double get scale {
+    if (_scale != null) return _scale!;
+    final mediaQuery = MediaQueryData.fromWindow(window);
+    _scale = math.min(mediaQuery.size.width, mediaQuery.size.height) / 393;
+    return _scale!;
+  }
+
+  double? _pixel;
+  @override
+  double get pixel {
+    if (_pixel != null) return _pixel!;
+    final mediaQuery = MediaQueryData.fromWindow(window);
+    _pixel = 1.0 / mediaQuery.devicePixelRatio;
+    return _pixel!;
+  }
+
+  @override
+  double setPt(num size) => size * scale;
+
+  @override
+  double setSp(num fontSize) => fontSize * scale;
+
+  @override
+  Color long = const Color(0xFF33BD65);
+
+  @override
+  Color short = const Color(0xFFE84E74);
+
+  @override
+  Color markBg = const Color(0xFFECECEC);
+
+  @override
+  Color cardBg = const Color(0xFFF2F2F2);
+
+  @override
+  Color disable = const Color(0xFFBDBDBD);
+
+  @override
+  Color lightBg = const Color(0xFF111111);
+
+  @override
+  Color transparent = Colors.transparent;
+
+  @override
+  Color translucentBg = Colors.black54;
+
+  @override
+  Color dividerLine = const Color(0xffE9EDF0);
+
+  @override
+  Color t1 = const Color(0xFF000000);
+
+  @override
+  Color t2 = const Color(0xFF949494);
+
+  @override
+  Color t3 = const Color(0xFF5F5F5F);
+
+  @override
+  Color tlight = const Color(0xFFFFFFFF);
+}
+
+class TestFlexiKlineConfiguration extends BaseFlexiKlineConfiguration {
+  @override
+  FlexiKlineConfig getInitialFlexiKlineConfig() {
+    return genFlexiKlineConfig(TestFlexiKlineTheme());
+  }
+
+  @override
+  Size get initialMainSize {
+    final mediaQuery = MediaQueryData.fromWindow(window);
+    return Size(mediaQuery.size.width, 300);
+  }
+
+  @override
+  void saveFlexiKlineConfig(FlexiKlineConfig config) {
+    // TODO: implement saveFlexiKlineConfig
+  }
+}
+
 void main() {
   final stopwatch = Stopwatch();
-  final configuration = FlexiKlineDefaultConfiguration();
+  final configuration = TestFlexiKlineConfiguration();
   final controller = FlexiKlineController(configuration: configuration);
   late SinglePaintObjectIndicator maIndicator;
   final canvas = Canvas(PictureRecorder());
