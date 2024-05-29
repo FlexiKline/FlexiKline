@@ -44,7 +44,7 @@ class TestFlexiKlineTheme implements IFlexiKlineTheme {
   }
 
   @override
-  double setPt(num size) => size * scale;
+  double setDp(num size) => size * scale;
 
   @override
   double setSp(num fontSize) => fontSize * scale;
@@ -56,49 +56,58 @@ class TestFlexiKlineTheme implements IFlexiKlineTheme {
   Color short = const Color(0xFFE84E74);
 
   @override
-  Color markBg = const Color(0xFFECECEC);
+  Color chartBg = const Color(0xFFFFFFFF);
 
   @override
-  Color cardBg = const Color(0xFFF2F2F2);
+  Color tooltipBg = const Color(0xFFF2F2F2);
 
   @override
-  Color disable = const Color(0xFFBDBDBD);
+  Color countDownTextBg = const Color(0xFFBDBDBD);
 
   @override
-  Color lightBg = const Color(0xFF111111);
+  Color crossTextBg = const Color(0xFF111111);
 
   @override
   Color transparent = Colors.transparent;
 
   @override
-  Color translucentBg = Colors.black54;
+  Color lastPriceTextBg = Colors.black54;
 
   @override
-  Color dividerLine = const Color(0xffE9EDF0);
+  Color gridLine = const Color(0xffE9EDF0);
 
   @override
-  Color t1 = const Color(0xFF000000);
+  Color crosshair = const Color(0xFF000000);
 
   @override
-  Color t2 = const Color(0xFF949494);
+  Color priceMarkLine = const Color(0xFF000000);
 
   @override
-  Color t3 = const Color(0xFF5F5F5F);
+  Color textColor = const Color(0xFF000000);
 
   @override
-  Color tlight = const Color(0xFFFFFFFF);
+  Color tickTextColor = const Color(0xFF949494);
+
+  @override
+  Color lastPriceTextColor = const Color(0xFF5F5F5F);
+
+  @override
+  Color crossTextColor = const Color(0xFFFFFFFF);
+
+  @override
+  Color tooltipTextColor = const Color(0xFF949494);
 }
 
 class TestFlexiKlineConfiguration extends BaseFlexiKlineConfiguration {
   @override
-  FlexiKlineConfig getInitialFlexiKlineConfig() {
-    return genFlexiKlineConfig(TestFlexiKlineTheme());
-  }
-
-  @override
   Size get initialMainSize {
     final mediaQuery = MediaQueryData.fromWindow(window);
     return Size(mediaQuery.size.width, 300);
+  }
+
+  @override
+  FlexiKlineConfig getFlexiKlineConfig() {
+    return genFlexiKlineConfig(TestFlexiKlineTheme());
   }
 
   @override

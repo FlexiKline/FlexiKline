@@ -23,7 +23,7 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
 import '../config.dart';
 import '../repo/api.dart' as api;
-import '../providers/ok_kline_provider.dart';
+import '../providers/default_flexi_kline_provider.dart';
 import '../widgets/flexi_indicator_bar.dart';
 import '../widgets/flexi_kline_mark_view.dart';
 import '../widgets/latest_price_view.dart';
@@ -46,13 +46,13 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage> {
   );
 
   late final FlexiKlineController controller;
-  late final OkFlexiKlineConfiguration configuration;
+  late final DefaultFlexiKlineConfiguration configuration;
   CancelToken? cancelToken;
 
   @override
   void initState() {
     super.initState();
-    configuration = OkFlexiKlineConfiguration();
+    configuration = DefaultFlexiKlineConfiguration(ref: ref);
     controller = FlexiKlineController(
       configuration: configuration,
       logger: LoggerImpl(
@@ -100,9 +100,9 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage> {
   @override
   Widget build(BuildContext context) {
     final theme = ref.watch(themeProvider);
-    ref.listen(themeProvider, (previous, next) {
+    ref.listen(defaultKlineThemeProvider, (previous, next) {
       if (previous != next) {
-        final config = configuration.genFlexiKlineConfigObject(next);
+        final config = configuration.getFlexiKlineConfig(next);
         controller.updateFlexiKlineConfig(config);
       }
     });

@@ -19,7 +19,6 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^3.0.0
 
-  # 序列化
   build_runner: ^2.4.9
   json_serializable: ^6.8.0
   copy_with_extension_gen: ^5.0.4

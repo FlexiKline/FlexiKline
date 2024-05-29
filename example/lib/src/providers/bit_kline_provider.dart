@@ -16,7 +16,6 @@ import 'dart:ui';
 import 'dart:convert';
 
 import 'package:example/src/config.dart';
-import 'package:example/src/router.dart';
 import 'package:example/src/theme/export.dart';
 import 'package:example/src/theme/flexi_theme.dart';
 import 'package:example/src/utils/cache_util.dart';
@@ -25,10 +24,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class BitFlexiKlineLightTheme implements IFlexiKlineTheme {
-  @override
-  String key = 'flexi_kline_config_key_bit-light';
-
+abstract class BaseBitFlexiKlineTheme implements IFlexiKlineTheme {
   double? _scale;
   @override
   double get scale => _scale ??= ScreenUtil().scaleWidth;
@@ -44,113 +40,104 @@ class BitFlexiKlineLightTheme implements IFlexiKlineTheme {
   }
 
   @override
-  double setPt(num size) => size * scale;
+  double setDp(num size) => ScreenUtil().radius(size);
 
   @override
-  double setSp(num fontSize) => fontSize * scale;
+  double setSp(num fontSize) => ScreenUtil().setSp(fontSize);
 
   @override
-  Color long = const Color(0xFF33BD65);
+  Color long = const Color(0xFF21B26D);
 
   @override
-  Color short = const Color(0xFFE84E74);
-
-  @override
-  Color markBg = const Color(0xFFECECEC);
-
-  @override
-  Color cardBg = const Color(0xFFF2F2F2);
-
-  @override
-  Color disable = const Color(0xFFBDBDBD);
-
-  @override
-  Color lightBg = const Color(0xFF111111);
+  Color short = const Color(0xFFEE4549);
 
   @override
   Color transparent = Colors.transparent;
 
   @override
-  Color translucentBg = Colors.black54;
-
-  @override
-  Color dividerLine = const Color(0xffE9EDF0);
-
-  @override
-  Color t1 = const Color(0xFF000000);
-
-  @override
-  Color t2 = const Color(0xFF949494);
-
-  @override
-  Color t3 = const Color(0xFF5F5F5F);
-
-  @override
-  Color tlight = const Color(0xFFFFFFFF);
+  Color crosshair = const Color(0xFFF6A701);
 }
 
-class BitFlexiKlineDarkTheme implements IFlexiKlineTheme {
+class BitFlexiKlineLightTheme extends BaseBitFlexiKlineTheme {
+  @override
+  String get key => 'flexi_kline_config_key_bit-light';
+
+  @override
+  Color get chartBg => const Color(0xFFFBFDFF);
+
+  @override
+  Color get tooltipBg => const Color(0xFFFFFFFF);
+
+  @override
+  Color get countDownTextBg => const Color(0xFFF5F5F5);
+
+  @override
+  Color get crossTextBg => const Color(0xFF444444);
+
+  @override
+  Color get lastPriceTextBg => Colors.black54;
+
+  @override
+  Color get gridLine => const Color(0xFFE9E9E9);
+
+  @override
+  Color get priceMarkLine => textColor;
+
+  @override
+  Color get textColor => const Color(0xFF111111);
+
+  @override
+  Color get tickTextColor => const Color(0xFF949494);
+
+  @override
+  Color get lastPriceTextColor => crossTextColor;
+
+  @override
+  Color get crossTextColor => const Color(0xFFF9F8F8);
+
+  @override
+  Color get tooltipTextColor => textColor;
+}
+
+class BitFlexiKlineDarkTheme extends BaseBitFlexiKlineTheme {
   @override
   String key = 'flexi_kline_config_key_bit-dark';
 
-  double? _scale;
   @override
-  double get scale => _scale ??= ScreenUtil().scaleWidth;
-
-  double? _pixel;
-  @override
-  double get pixel {
-    if (_pixel != null) return _pixel!;
-    double? ratio = ScreenUtil().pixelRatio;
-    ratio ??= MediaQueryData.fromWindow(window).devicePixelRatio;
-    _pixel = 1 / ratio;
-    return _pixel!;
-  }
+  Color chartBg = const Color(0xFF111111);
 
   @override
-  double setPt(num size) => size * scale;
+  Color tooltipBg = const Color(0xFF16181A);
 
   @override
-  double setSp(num fontSize) => fontSize * scale;
+  Color countDownTextBg = const Color(0xFF333333);
 
   @override
-  Color long = const Color(0xFF33BD65);
+  Color crossTextBg = const Color(0xFF404040);
 
   @override
-  Color short = const Color(0xFFE84E74);
+  Color lastPriceTextBg = Colors.black54;
 
   @override
-  Color markBg = const Color(0xFFECECEC);
+  Color gridLine = const Color(0xFF222222);
 
   @override
-  Color cardBg = const Color(0xFFF2F2F2);
+  Color priceMarkLine = const Color(0xFFA0A0A0);
 
   @override
-  Color disable = const Color(0xFFBDBDBD);
+  Color textColor = const Color(0xFFA0A0A0);
 
   @override
-  Color lightBg = const Color(0xFF111111);
+  Color tickTextColor = const Color(0xFF949494);
 
   @override
-  Color transparent = Colors.transparent;
+  Color lastPriceTextColor = const Color(0xFF5F5F5F);
 
   @override
-  Color translucentBg = Colors.black54;
+  Color crossTextColor = const Color(0xFFFFFFFF);
 
   @override
-  Color dividerLine = const Color(0xffE9EDF0);
-
-  @override
-  Color t1 = const Color(0xFF000000);
-
-  @override
-  Color t2 = const Color(0xFF949494);
-
-  @override
-  Color t3 = const Color(0xFF5F5F5F);
-
-  @override
-  Color tlight = const Color(0xFFFFFFFF);
+  Color tooltipTextColor = const Color(0xFF9D9DA1);
 }
 
 final lightBitFlexiKlineTheme = BitFlexiKlineLightTheme();
@@ -168,17 +155,19 @@ final bitFlexiKlineThemeProvider = StateProvider<IFlexiKlineTheme>((ref) {
 });
 
 class BitFlexiKlineConfiguration extends BaseFlexiKlineConfiguration {
+  final WidgetRef ref;
+
+  BitFlexiKlineConfiguration({required this.ref});
   @override
   Size get initialMainSize {
     return Size(ScreenUtil().screenWidth, 300.r);
   }
 
   @override
-  FlexiKlineConfig getInitialFlexiKlineConfig([String? key]) {
-    final theme = globalNavigatorKey.ref.read(bitFlexiKlineThemeProvider);
+  FlexiKlineConfig getFlexiKlineConfig([IFlexiKlineTheme? theme]) {
+    theme ??= ref.read(bitFlexiKlineThemeProvider);
     try {
-      key ??= theme.key;
-      final String? jsonStr = CacheUtil().get(key);
+      final String? jsonStr = CacheUtil().get(theme!.key);
       if (jsonStr != null && jsonStr.isNotEmpty) {
         final json = jsonDecode(jsonStr);
         if (json is Map<String, dynamic>) {
@@ -189,8 +178,7 @@ class BitFlexiKlineConfiguration extends BaseFlexiKlineConfiguration {
       defLogger.e('getFlexiKlineConfig error:$err', stackTrace: stack);
     }
 
-    /// 取默认
-    return genFlexiKlineConfig(theme);
+    return genFlexiKlineConfig(theme!);
   }
 
   @override

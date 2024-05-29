@@ -104,14 +104,14 @@ abstract class BaseFlexiKlineConfiguration implements IConfiguration {
       horizontal: GridAxis(
         show: true,
         width: theme.pixel,
-        color: theme.dividerLine,
+        color: theme.gridLine,
         type: LineType.solid,
         dashes: const [2, 2],
       ),
       vertical: GridAxis(
         show: true,
         width: theme.pixel,
-        color: theme.dividerLine,
+        color: theme.gridLine,
         type: LineType.solid,
         dashes: const [2, 2],
       ),
@@ -120,7 +120,7 @@ abstract class BaseFlexiKlineConfiguration implements IConfiguration {
 
   SettingConfig genSettingConfig(IFlexiKlineTheme theme) {
     return SettingConfig(
-      textColor: theme.t1,
+      textColor: theme.textColor,
       longColor: theme.long,
       shortColor: theme.short,
       opacity: 0.5,
@@ -129,8 +129,8 @@ abstract class BaseFlexiKlineConfiguration implements IConfiguration {
       loading: LoadingConfig(
         size: 24,
         strokeWidth: 4,
-        background: theme.markBg,
-        valueColor: theme.t1,
+        background: theme.tooltipBg,
+        valueColor: theme.textColor,
       ),
 
       /// 主/副图区域大小配置
@@ -152,7 +152,7 @@ abstract class BaseFlexiKlineConfiguration implements IConfiguration {
       tickText: TextAreaConfig(
         style: TextStyle(
           fontSize: theme.defaulTextSize,
-          color: theme.t2,
+          color: theme.tickTextColor,
           overflow: TextOverflow.ellipsis,
           height: theme.defaultTextHeight,
         ),
@@ -171,23 +171,23 @@ abstract class BaseFlexiKlineConfiguration implements IConfiguration {
       enable: true,
       crosshair: LineConfig(
         width: 0.5 * theme.scale,
-        color: theme.t1,
+        color: theme.crosshair,
         type: LineType.dashed,
         dashes: const [3, 3],
       ),
       point: CrossPointConfig(
         radius: 2 * theme.scale,
         width: 6 * theme.scale,
-        color: theme.t1,
+        color: theme.crosshair,
       ),
       tickText: TextAreaConfig(
         style: TextStyle(
-          color: theme.tlight,
+          color: theme.crossTextColor,
           fontSize: theme.defaulTextSize,
           fontWeight: FontWeight.normal,
           height: theme.defaultTextHeight,
         ),
-        background: theme.lightBg,
+        background: theme.crossTextBg,
         padding: EdgeInsets.all(2 * theme.scale),
         border: BorderSide.none,
         borderRadius: BorderRadius.all(
@@ -202,7 +202,7 @@ abstract class BaseFlexiKlineConfiguration implements IConfiguration {
       show: true,
 
       /// tooltip 区域设置
-      background: theme.cardBg,
+      background: theme.tooltipBg,
       margin: EdgeInsets.only(
         left: 15 * theme.scale,
         right: 65 * theme.scale,
@@ -217,7 +217,7 @@ abstract class BaseFlexiKlineConfiguration implements IConfiguration {
       /// tooltip 文本设置
       style: TextStyle(
         fontSize: theme.defaulTextSize,
-        color: theme.t2,
+        color: theme.tooltipTextColor,
         overflow: TextOverflow.ellipsis,
         height: theme.defaultMultiTextHeight,
       ),
@@ -253,14 +253,14 @@ abstract class BaseFlexiKlineConfiguration implements IConfiguration {
         spacing: 2 * theme.scale,
         line: LineConfig(
           type: LineType.solid,
-          color: theme.t1,
+          color: theme.priceMarkLine,
           length: 20 * theme.scale,
           width: 0.5 * theme.scale,
         ),
         text: TextAreaConfig(
           style: TextStyle(
             fontSize: theme.defaulTextSize,
-            color: theme.t1,
+            color: theme.textColor,
             overflow: TextOverflow.ellipsis,
             height: theme.defaultTextHeight,
           ),
@@ -270,14 +270,14 @@ abstract class BaseFlexiKlineConfiguration implements IConfiguration {
         spacing: 2 * theme.scale,
         line: LineConfig(
           type: LineType.solid,
-          color: theme.t1,
+          color: theme.priceMarkLine,
           length: 20 * theme.scale,
           width: 0.5 * theme.scale,
         ),
         text: TextAreaConfig(
           style: TextStyle(
             fontSize: theme.defaulTextSize,
-            color: theme.t1,
+            color: theme.textColor,
             overflow: TextOverflow.ellipsis,
             height: theme.defaultTextHeight,
           ),
@@ -288,19 +288,19 @@ abstract class BaseFlexiKlineConfiguration implements IConfiguration {
         spacing: 100 * theme.scale,
         line: LineConfig(
           type: LineType.dashed,
-          color: theme.t3,
+          color: theme.priceMarkLine,
           width: 0.5 * theme.scale,
           dashes: [3, 3],
         ),
         text: TextAreaConfig(
           style: TextStyle(
             fontSize: theme.defaulTextSize,
-            color: theme.tlight,
+            color: theme.lastPriceTextColor,
             overflow: TextOverflow.ellipsis,
             height: theme.defaultTextHeight,
             textBaseline: TextBaseline.alphabetic,
           ),
-          background: theme.translucentBg,
+          background: theme.lastPriceTextBg,
           padding: EdgeInsets.symmetric(
             horizontal: 4 * theme.scale,
             vertical: 2 * theme.scale,
@@ -314,7 +314,7 @@ abstract class BaseFlexiKlineConfiguration implements IConfiguration {
         spacing: 1 * theme.scale,
         line: LineConfig(
           type: LineType.dashed,
-          color: theme.t3,
+          color: theme.priceMarkLine,
           width: 0.5 * theme.scale,
           dashes: [3, 3],
         ),
@@ -336,12 +336,12 @@ abstract class BaseFlexiKlineConfiguration implements IConfiguration {
       countDown: TextAreaConfig(
         style: TextStyle(
           fontSize: theme.defaulTextSize,
-          color: theme.t1,
+          color: theme.textColor,
           overflow: TextOverflow.ellipsis,
           height: theme.defaultTextHeight,
         ),
         textAlign: TextAlign.center,
-        background: theme.disable,
+        background: theme.countDownTextBg,
         padding: theme.defaultTextPading,
         borderRadius: BorderRadius.all(Radius.circular(2 * theme.scale)),
       ),
@@ -368,7 +368,7 @@ abstract class BaseFlexiKlineConfiguration implements IConfiguration {
         precision: precision,
         style: TextStyle(
           fontSize: theme.defaulTextSize,
-          color: theme.t1,
+          color: theme.textColor,
           overflow: TextOverflow.ellipsis,
           height: theme.defaultTextHeight,
         ),
@@ -542,7 +542,7 @@ abstract class BaseFlexiKlineConfiguration implements IConfiguration {
       timeTick: TextAreaConfig(
         style: TextStyle(
           fontSize: theme.defaulTextSize,
-          color: theme.t2,
+          color: theme.tickTextColor,
           overflow: TextOverflow.ellipsis,
           height: theme.defaultTextHeight,
         ),
@@ -589,7 +589,7 @@ abstract class BaseFlexiKlineConfiguration implements IConfiguration {
         precision: precision,
         style: TextStyle(
           fontSize: theme.defaulTextSize,
-          color: theme.t1,
+          color: theme.textColor,
           overflow: TextOverflow.ellipsis,
           height: theme.defaultTextHeight,
         ),

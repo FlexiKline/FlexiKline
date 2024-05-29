@@ -15,11 +15,11 @@
 import 'package:dio/dio.dart';
 import 'package:example/generated/l10n.dart';
 import 'package:example/src/constants/images.dart';
-import 'package:example/src/theme/flexi_theme.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
 import '../config.dart';
@@ -52,7 +52,7 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage> {
   @override
   void initState() {
     super.initState();
-    configuration = BitFlexiKlineConfiguration();
+    configuration = BitFlexiKlineConfiguration(ref: ref);
     controller = FlexiKlineController(
       configuration: configuration,
       logger: LoggerImpl(
@@ -99,17 +99,15 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = ref.watch(themeProvider);
-    ref.listen(themeProvider, (previous, next) {
+    final klineTheme = ref.watch(bitFlexiKlineThemeProvider);
+    ref.listen(bitFlexiKlineThemeProvider, (previous, next) {
       if (previous != next) {
-        final config = configuration.genFlexiKlineConfig(
-          ref.read(bitFlexiKlineThemeProvider),
-        );
+        final config = configuration.getFlexiKlineConfig(next);
         controller.updateFlexiKlineConfig(config);
       }
     });
     return Scaffold(
-      backgroundColor: theme.pageBg,
+      backgroundColor: klineTheme.chartBg,
       appBar: AppBar(
         leading: GestureDetector(
           onTap: () {
@@ -154,15 +152,19 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: theme.cardBg,
-        foregroundColor: theme.t1,
+        backgroundColor: klineTheme.tooltipBg,
+        foregroundColor: klineTheme.textColor,
         mini: true,
         onPressed: () {
           controller.storeFlexiKlineConfig();
         },
         child: Text(
           'Store',
-          style: theme.t1s14w400,
+          style: TextStyle(
+            fontSize: 14.sp,
+            color: klineTheme.textColor,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );
@@ -173,10 +175,12 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage> {
     CandleModel? pre,
   }) {
     final s = S.of(context);
-    final theme = ref.read(themeProvider);
-    final lableStyle = theme.t1s10w400;
-    final valueStyle = theme.t1s10w400;
-    final valStyle = model.isLong ? theme.tls10w400 : theme.tss10w400;
+    final klineTheme = ref.read(bitFlexiKlineThemeProvider);
+    final lableStyle = TextStyle(color: klineTheme.textColor, fontSize: 10.sp);
+    final valueStyle = TextStyle(color: klineTheme.textColor, fontSize: 10.sp);
+    final valStyle = model.isLong
+        ? TextStyle(color: klineTheme.long, fontSize: 10.sp)
+        : TextStyle(color: klineTheme.short, fontSize: 10.sp);
     final p = req.precision;
     return <TooltipInfo>[
       TooltipInfo(

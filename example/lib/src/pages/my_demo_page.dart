@@ -22,7 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../config.dart';
-import '../providers/ok_kline_provider.dart';
+import '../providers/default_flexi_kline_provider.dart';
 import '../repo/mock.dart';
 import '../test/canvas_demo.dart';
 import '../widgets/flexi_indicator_bar.dart';
@@ -37,7 +37,8 @@ class MyDemoPage extends ConsumerStatefulWidget {
 }
 
 class _MyDemoPageState extends ConsumerState<MyDemoPage> {
-  late final FlexiKlineController controller1;
+  late final FlexiKlineController controller;
+  late final DefaultFlexiKlineConfiguration configuration;
 
   final req1 = CandleReq(
     instId: 'BTC-USDT',
@@ -48,16 +49,16 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
   @override
   void initState() {
     super.initState();
-
-    controller1 = FlexiKlineController(
-      configuration: OkFlexiKlineConfiguration(),
+    configuration = DefaultFlexiKlineConfiguration(ref: ref);
+    controller = FlexiKlineController(
+      configuration: configuration,
       logger: LogPrintImpl(
         debug: kDebugMode,
         tag: 'Demo1',
       ),
     );
 
-    controller1.onCrossI18nTooltipLables = tooltipLables;
+    controller.onCrossI18nTooltipLables = tooltipLables;
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       loadCandleData1(req1);
@@ -66,12 +67,12 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
 
   Future<void> loadCandleData1(CandleReq request) async {
     try {
-      controller1.startLoading(request, useCacheFirst: true);
+      controller.startLoading(request, useCacheFirst: true);
       genRandomCandleList(count: 300, bar: request.timeBar!).then((list) {
-        controller1.setKlineData(request, list);
+        controller.setKlineData(request, list);
       });
     } finally {
-      controller1.stopLoading();
+      controller.stopLoading();
     }
   }
 
@@ -83,7 +84,13 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = ref.read(themeProvider);
+    final theme = ref.watch(themeProvider);
+    ref.listen(defaultKlineThemeProvider, (previous, next) {
+      if (previous != next) {
+        final config = configuration.getFlexiKlineConfig(next);
+        controller.updateFlexiKlineConfig(config);
+      }
+    });
     return Scaffold(
       appBar: AppBar(
         leading: GestureDetector(
@@ -100,16 +107,16 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             FlexiTimeBar(
-              controller: controller1,
+              controller: controller,
               onTapTimeBar: onTapTimeBar,
             ),
             FlexiKlineWidget(
-              key: const ValueKey('Kline1'),
-              controller: controller1,
+              key: const ValueKey('MyKlineDemo'),
+              controller: controller,
               mainBackgroundView: const FlexiKlineMarkView(),
             ),
             FlexiIndicatorBar(
-              controller: controller1,
+              controller: controller,
             ),
             Container(
               height: 2,
@@ -122,12 +129,12 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final latest = controller1.curKlineData.latest;
+          final latest = controller.curKlineData.latest;
           DateTime dateTime;
           if (latest != null) {
             dateTime = DateTime.fromMillisecondsSinceEpoch(latest.timestamp)
                 .add(Duration(
-              milliseconds: controller1.curKlineData.req.timeBar!.milliseconds,
+              milliseconds: controller.curKlineData.req.timeBar!.milliseconds,
             ));
           } else {
             dateTime = DateTime.now();
@@ -139,7 +146,7 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
             dateTime: dateTime,
             isHistory: false,
           );
-          controller1.appendKlineData(req1, newList);
+          controller.appendKlineData(req1, newList);
         },
         child: const Text('Add'),
       ),

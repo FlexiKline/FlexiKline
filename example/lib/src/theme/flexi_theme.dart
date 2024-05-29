@@ -43,7 +43,7 @@ abstract class FKTheme {
   late Color translucentBg;
   late Color cardBg;
   late Color markBg;
-  late Color disable;
+  late Color gridLine;
 
   late Color dividerLine;
   late Color borderLine;
@@ -70,13 +70,13 @@ class LightFKTheme extends FKTheme {
   @override
   Color get lightBg => const Color(0xFF111111);
   @override
-  Color get translucentBg => Colors.black54;
+  Color get translucentBg => markBg.withOpacity(0.7);
   @override
   Color get cardBg => const Color(0xFFF2F2F2);
   @override
   Color get markBg => const Color(0xFFECECEC);
   @override
-  Color get disable => const Color(0xFFBDBDBD);
+  Color get gridLine => const Color(0xFFE9E9E9);
 
   @override
   Color get dividerLine => const Color(0xffE9EDF0);
@@ -106,13 +106,13 @@ class DarkFKTheme extends FKTheme {
   @override
   Color get lightBg => const Color(0xFFFFFFFF);
   @override
-  Color get translucentBg => Colors.grey.shade500;
+  Color get translucentBg => pageBg.withOpacity(0.7);
   @override
   Color get cardBg => const Color(0xFF1A1A1A);
   @override
   Color get markBg => const Color(0xFF2F2F2F);
   @override
-  Color get disable => const Color(0xFF5B5B5B);
+  Color get gridLine => const Color(0xFF333333);
 
   @override
   Color get dividerLine => const Color(0xFF242424);

@@ -286,7 +286,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart {
   FlexiKlineConfig? __flexiKlineConfig;
   FlexiKlineConfig get _flexiKlineConfig {
     if (__flexiKlineConfig == null) {
-      final config = configuration.getInitialFlexiKlineConfig();
+      final config = configuration.getFlexiKlineConfig();
       _flexiKlineConfig = config;
     }
     return __flexiKlineConfig!;
@@ -339,6 +339,9 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart {
 
       /// 初始化状态
       initFlexiKlineState();
+
+      /// 保存当前配置
+      saveFlexiKlineConfig();
     }
   }
 

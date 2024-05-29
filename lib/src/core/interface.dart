@@ -152,7 +152,7 @@ abstract interface class ISetting {
 
   /// Config
 
-  /// 初始化配置: 将会根据[IConfiguration.getInitialFlexiKlineConfig]返回值去初始化
+  /// 初始化配置: 将会根据[IConfiguration.getFlexiKlineConfig]返回值去初始化
   // void initFlexiKlineConfig();
 
   /// 初始化状态
