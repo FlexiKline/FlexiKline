@@ -40,7 +40,8 @@ Map<TooltipLabel, String> tooltipLables() {
   };
 }
 
-class DefaultFlexiKlineTheme extends BaseFlexiKlineTheme {
+class DefaultFlexiKlineTheme extends BaseFlexiKlineTheme
+    with FlexiKlineThemeTextStyle {
   final FKTheme theme;
 
   DefaultFlexiKlineTheme({
@@ -122,7 +123,7 @@ class DefaultFlexiKlineConfiguration extends BaseFlexiKlineThemeConfiguration {
   }
 
   @override
-  FlexiKlineConfig getFlexiKlineConfig([IFlexiKlineTheme? theme]) {
+  FlexiKlineConfig getFlexiKlineConfig([DefaultFlexiKlineTheme? theme]) {
     theme ??= ref.read(defaultKlineThemeProvider);
     try {
       final String? jsonStr = CacheUtil().get(theme!.key);

@@ -24,7 +24,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-abstract class BaseBitFlexiKlineTheme implements IFlexiKlineTheme {
+abstract class BaseBitFlexiKlineTheme
+    with FlexiKlineThemeTextStyle
+    implements IFlexiKlineTheme {
   double? _scale;
   @override
   double get scale => _scale ??= ScreenUtil().scaleWidth;
@@ -143,7 +145,7 @@ class BitFlexiKlineDarkTheme extends BaseBitFlexiKlineTheme {
 final lightBitFlexiKlineTheme = BitFlexiKlineLightTheme();
 final darkBitFlexiKlineTheme = BitFlexiKlineDarkTheme();
 
-final bitFlexiKlineThemeProvider = StateProvider<IFlexiKlineTheme>((ref) {
+final bitFlexiKlineThemeProvider = StateProvider<BaseBitFlexiKlineTheme>((ref) {
   final brightness = ref.watch(
     themeProvider.select((theme) => theme.brightness),
   );
@@ -164,7 +166,7 @@ class BitFlexiKlineConfiguration extends BaseFlexiKlineThemeConfiguration {
   }
 
   @override
-  FlexiKlineConfig getFlexiKlineConfig([IFlexiKlineTheme? theme]) {
+  FlexiKlineConfig getFlexiKlineConfig([BaseBitFlexiKlineTheme? theme]) {
     theme ??= ref.read(bitFlexiKlineThemeProvider);
     try {
       final String? jsonStr = CacheUtil().get(theme!.key);
@@ -189,7 +191,7 @@ class BitFlexiKlineConfiguration extends BaseFlexiKlineThemeConfiguration {
 
   @override
   TimeIndicator genTimeIndicator(
-    IFlexiKlineTheme theme, {
+    BaseBitFlexiKlineTheme theme, {
     double? height,
     EdgeInsets? padding,
     DrawPosition? position,

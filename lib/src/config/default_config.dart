@@ -14,7 +14,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../constant.dart' as constant;
+import '../constant.dart';
 import '../extension/render/common.dart';
 import '../framework/export.dart';
 import '../indicators/export.dart';
@@ -36,56 +36,130 @@ import 'tooltip_config/tooltip_config.dart';
 
 extension IFlexiKlineThemeExt on IFlexiKlineTheme {
   /// 默认时间指标高度
-  double get defaultTimeIndicatorHeight {
-    return constant.defaultTimeIndicatorHeight * scale;
+  double get timeIndicatorHeight {
+    return defaultTimeIndicatorHeight * scale;
   }
 
   /// 默认副图指标高度
-  double get defaultSubIndicatorHeight {
-    return constant.defaultSubIndicatorHeight * scale;
+  double get subIndicatorHeight {
+    return defaultSubIndicatorHeight * scale;
   }
 
   /// 默认副图指标高度
-  double get defaultMainIndicatorHeight {
-    return constant.defaultMainIndicatorHeight * scale;
+  double get mainIndicatorHeight {
+    return defaultMainIndicatorHeight * scale;
   }
 
   /// 默认主图区域Padding
-  EdgeInsets get defaultMainIndicatorPadding => EdgeInsets.only(
+  EdgeInsets get mainIndicatorPadding => EdgeInsets.only(
         top: 5 * scale, // 顶部留白
         bottom: 5 * scale, // 底部留白, 5: 最低价字体高度的一半, 保证最低价文本不会绘制到边线上.
       );
 
   /// 默认副指标图Padding
-  EdgeInsets get defaultSubIndicatorPadding => EdgeInsets.only(top: 12 * scale);
+  EdgeInsets get subIndicatorPadding => EdgeInsets.only(top: 12 * scale);
 
   /// 默认Tips文本区域的Padding: 左边缩进8个单位
-  EdgeInsets get defaultTipsPadding => EdgeInsets.only(left: 8 * scale);
+  EdgeInsets get tipsPadding => EdgeInsets.only(left: 8 * scale);
 
   /// 默认文本区域Padding
-  EdgeInsets get defaultTextPading => EdgeInsets.all(2 * scale);
+  EdgeInsets get textPading => EdgeInsets.all(2 * scale);
 
   /// 默认指标线图的宽度
-  double get defaultIndicatorLineWidth {
-    return constant.defaultIndicatorLineWidth * scale;
+  double get indicatorLineWidth {
+    return defaultIndicatorLineWidth * scale;
   }
 
-  // 默认文本高度
-  double get defaultTextHeight => constant.defaultTextHeight;
-
-// 默认文本高度多行模式
-  double get defaultMultiTextHeight => constant.defaultMultiTextHeight;
-
-// 默认Tips文本高度
-  double get defaultTipsTextHeight => constant.defaultTipsTextHeight;
-
   // 默认文本配置
-  double get defaulTextSize => setSp(constant.defaulTextSize);
+  double get normalTextSize => setSp(defaulTextSize);
+}
+
+abstract class BaseFlexiKlineTheme implements IFlexiKlineTheme {
+  BaseFlexiKlineTheme({
+    required this.long,
+    required this.short,
+    required this.chartBg,
+    required this.tooltipBg,
+    required this.countDownTextBg,
+    required this.crossTextBg,
+    this.transparent = Colors.transparent,
+    required this.lastPriceTextBg,
+    required this.gridLine,
+    required this.crosshair,
+    required this.priceMarkLine,
+    required this.textColor,
+    required this.tickTextColor,
+    required this.lastPriceTextColor,
+    required this.crossTextColor,
+    required this.tooltipTextColor,
+  });
+
+  BaseFlexiKlineTheme.simple({
+    required this.long,
+    required this.short,
+    required this.chartBg,
+    required Color markBg,
+    required this.crossTextBg,
+    this.transparent = Colors.transparent,
+    required this.lastPriceTextBg,
+    required Color color,
+    required this.gridLine,
+    required this.tickTextColor,
+    required this.crossTextColor,
+  })  : tooltipBg = markBg,
+        countDownTextBg = markBg,
+        crosshair = color,
+        priceMarkLine = color,
+        textColor = color,
+        lastPriceTextColor = color,
+        tooltipTextColor = color;
+
+  @override
+  late Color long;
+  @override
+  late Color short;
+
+  /// 背景色
+  @override
+  late Color chartBg;
+  @override
+  late Color tooltipBg;
+  @override
+  late Color countDownTextBg;
+  @override
+  late Color crossTextBg;
+  @override
+  late Color transparent;
+  @override
+  late Color lastPriceTextBg;
+
+  /// 分隔线
+  @override
+  late Color gridLine;
+  @override
+  late Color crosshair;
+  @override
+  late Color priceMarkLine;
+
+  /// 文本颜色配置
+  @override
+  late Color textColor;
+  @override
+  late Color tickTextColor;
+  @override
+  late Color lastPriceTextColor;
+  @override
+  late Color crossTextColor;
+  @override
+  late Color tooltipTextColor;
 }
 
 /// 通过[IFlexiKlineTheme]来配置FlexiKline基类.
 abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
-  FlexiKlineConfig genFlexiKlineConfig(IFlexiKlineTheme theme) {
+  @override
+  FlexiKlineConfig getFlexiKlineConfig([covariant IFlexiKlineTheme? theme]);
+
+  FlexiKlineConfig genFlexiKlineConfig(covariant IFlexiKlineTheme theme) {
     return FlexiKlineConfig(
       key: theme.key,
       grid: genGridConfig(theme),
@@ -99,7 +173,7 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
   }
 
   GridConfig genGridConfig(
-    IFlexiKlineTheme theme, {
+    covariant IFlexiKlineTheme theme, {
     bool show = true,
     GridAxis? horizontal,
     GridAxis? vertical,
@@ -138,7 +212,7 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
   }
 
   SettingConfig genSettingConfig(
-    IFlexiKlineTheme theme, {
+    covariant IFlexiKlineTheme theme, {
     Color? textColor,
     Color? longColor,
     Color? shortColor,
@@ -165,7 +239,7 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
     TextAreaConfig? tickText,
 
     /// 副区的指标图最大数量
-    int subChartMaxCount = constant.defaultSubChartMaxCount,
+    int subChartMaxCount = defaultSubChartMaxCount,
   }) {
     return SettingConfig(
       textColor: textColor ?? theme.textColor,
@@ -185,7 +259,7 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
       /// 主/副图区域大小配置
       // mainRect: Rect.zero,
       mainMinSize: mainMinSize ?? Size.square(20 * theme.scale),
-      mainPadding: mainPadding ?? theme.defaultMainIndicatorPadding,
+      mainPadding: mainPadding ?? theme.mainIndicatorPadding,
       mainDrawBelowTipsArea: mainDrawBelowTipsArea,
 
       /// 主/副图绘制参数
@@ -202,10 +276,10 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
       tickText: tickText ??
           TextAreaConfig(
             style: TextStyle(
-              fontSize: theme.defaulTextSize,
+              fontSize: theme.normalTextSize,
               color: theme.tickTextColor,
               overflow: TextOverflow.ellipsis,
-              height: theme.defaultTextHeight,
+              height: defaultTextHeight,
             ),
             textAlign: TextAlign.end,
             padding: EdgeInsets.symmetric(horizontal: 2 * theme.scale),
@@ -217,7 +291,7 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
   }
 
   CrossConfig genCrossConfig(
-    IFlexiKlineTheme theme, {
+    covariant IFlexiKlineTheme theme, {
     bool enable = true,
     LineConfig? crosshair,
     CrossPointConfig? point,
@@ -254,9 +328,9 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
             style: tickTextStyle ??
                 TextStyle(
                   color: theme.crossTextColor,
-                  fontSize: theme.defaulTextSize,
+                  fontSize: theme.normalTextSize,
                   fontWeight: FontWeight.normal,
-                  height: theme.defaultTextHeight,
+                  height: defaultTextHeight,
                 ),
             background: tickTextBackground ?? theme.crossTextBg,
             padding: tickTextPadding ?? EdgeInsets.all(2 * theme.scale),
@@ -272,7 +346,7 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
   }
 
   TooltipConfig genTooltipConfig(
-    IFlexiKlineTheme theme, {
+    covariant IFlexiKlineTheme theme, {
     bool show = true,
     Color? background,
     EdgeInsets? margin,
@@ -301,10 +375,10 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
       /// tooltip 文本设置
       style: style ??
           TextStyle(
-            fontSize: theme.defaulTextSize,
+            fontSize: theme.normalTextSize,
             color: theme.tooltipTextColor,
             overflow: TextOverflow.ellipsis,
-            height: theme.defaultMultiTextHeight,
+            height: defaultMultiTextHeight,
           ),
     );
   }
@@ -324,7 +398,7 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
   }
 
   CandleIndicator genCandleIndicator(
-    IFlexiKlineTheme theme, {
+    covariant IFlexiKlineTheme theme, {
     double? height,
     EdgeInsets? padding,
     MarkConfig? high,
@@ -336,8 +410,8 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
     TextAreaConfig? countDown,
   }) {
     return CandleIndicator(
-      height: height ?? theme.defaultMainIndicatorHeight,
-      padding: padding ?? theme.defaultMainIndicatorPadding,
+      height: height ?? theme.mainIndicatorHeight,
+      padding: padding ?? theme.mainIndicatorPadding,
       high: high ??
           MarkConfig(
             spacing: 2 * theme.scale,
@@ -349,10 +423,10 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
             ),
             text: TextAreaConfig(
               style: TextStyle(
-                fontSize: theme.defaulTextSize,
+                fontSize: theme.normalTextSize,
                 color: theme.textColor,
                 overflow: TextOverflow.ellipsis,
-                height: theme.defaultTextHeight,
+                height: defaultTextHeight,
               ),
             ),
           ),
@@ -367,10 +441,10 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
             ),
             text: TextAreaConfig(
               style: TextStyle(
-                fontSize: theme.defaulTextSize,
+                fontSize: theme.normalTextSize,
                 color: theme.textColor,
                 overflow: TextOverflow.ellipsis,
-                height: theme.defaultTextHeight,
+                height: defaultTextHeight,
               ),
             ),
           ),
@@ -386,10 +460,10 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
             ),
             text: TextAreaConfig(
               style: TextStyle(
-                fontSize: theme.defaulTextSize,
+                fontSize: theme.normalTextSize,
                 color: theme.lastPriceTextColor,
                 overflow: TextOverflow.ellipsis,
-                height: theme.defaultTextHeight,
+                height: defaultTextHeight,
                 textBaseline: TextBaseline.alphabetic,
               ),
               background: theme.lastPriceTextBg,
@@ -413,14 +487,14 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
             ),
             text: TextAreaConfig(
               style: TextStyle(
-                fontSize: theme.defaulTextSize,
+                fontSize: theme.normalTextSize,
                 color: Colors.white,
                 overflow: TextOverflow.ellipsis,
-                height: theme.defaultTextHeight,
+                height: defaultTextHeight,
               ),
               minWidth: 45,
               textAlign: TextAlign.center,
-              padding: theme.defaultTextPading,
+              padding: theme.textPading,
               borderRadius: BorderRadius.all(Radius.circular(2 * theme.scale)),
             ),
           ),
@@ -429,32 +503,32 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
       countDown: countDown ??
           TextAreaConfig(
             style: TextStyle(
-              fontSize: theme.defaulTextSize,
+              fontSize: theme.normalTextSize,
               color: theme.textColor,
               overflow: TextOverflow.ellipsis,
-              height: theme.defaultTextHeight,
+              height: defaultTextHeight,
             ),
             textAlign: TextAlign.center,
             background: theme.countDownTextBg,
-            padding: theme.defaultTextPading,
+            padding: theme.textPading,
             borderRadius: BorderRadius.all(Radius.circular(2 * theme.scale)),
           ),
     );
   }
 
   VolumeIndicator genMainVolumeIndicator(
-    IFlexiKlineTheme theme, {
+    covariant IFlexiKlineTheme theme, {
     double? height,
     EdgeInsets? padding,
     PaintMode paintMode = PaintMode.alone,
     TipsConfig? volTips,
     EdgeInsets? tipsPadding,
-    int tickCount = constant.defaultSubTickCount,
+    int tickCount = defaultSubTickCount,
     int precision = 2,
   }) {
     return VolumeIndicator(
-      height: height ?? theme.defaultSubIndicatorHeight,
-      padding: padding ?? theme.defaultSubIndicatorPadding,
+      height: height ?? theme.subIndicatorHeight,
+      padding: padding ?? theme.subIndicatorPadding,
       paintMode: paintMode,
 
       /// 绘制相关参数
@@ -463,13 +537,13 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
             label: 'Vol: ',
             precision: precision,
             style: TextStyle(
-              fontSize: theme.defaulTextSize,
+              fontSize: theme.normalTextSize,
               color: theme.textColor,
               overflow: TextOverflow.ellipsis,
-              height: theme.defaultTextHeight,
+              height: defaultTextHeight,
             ),
           ),
-      tipsPadding: tipsPadding ?? theme.defaultTipsPadding,
+      tipsPadding: tipsPadding ?? theme.tipsPadding,
       tickCount: tickCount,
       precision: precision,
 
@@ -482,7 +556,7 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
   }
 
   MAIndicator genMaIndicator(
-    IFlexiKlineTheme theme, {
+    covariant IFlexiKlineTheme theme, {
     double? height,
     EdgeInsets? padding,
     List<MaParam>? calcParams,
@@ -490,8 +564,8 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
     double? lineWidth,
   }) {
     return MAIndicator(
-      height: height ?? theme.defaultMainIndicatorHeight,
-      padding: padding ?? theme.defaultMainIndicatorPadding,
+      height: height ?? theme.mainIndicatorHeight,
+      padding: padding ?? theme.mainIndicatorPadding,
       calcParams: calcParams ??
           [
             MaParam(
@@ -500,10 +574,10 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
                 label: 'MA7: ',
                 // precision: 2,
                 style: TextStyle(
-                  fontSize: theme.defaulTextSize,
+                  fontSize: theme.normalTextSize,
                   color: const Color(0xFF946F9A),
                   overflow: TextOverflow.ellipsis,
-                  height: theme.defaultTipsTextHeight,
+                  height: defaultTipsTextHeight,
                 ),
               ),
             ),
@@ -513,21 +587,21 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
                 label: 'MA30: ',
                 // precision: 2,
                 style: TextStyle(
-                  fontSize: theme.defaulTextSize,
+                  fontSize: theme.normalTextSize,
                   color: const Color(0xFFF1BF32),
                   overflow: TextOverflow.ellipsis,
-                  height: theme.defaultTipsTextHeight,
+                  height: defaultTipsTextHeight,
                 ),
               ),
             ),
           ],
-      tipsPadding: tipsPadding ?? theme.defaultTipsPadding,
-      lineWidth: lineWidth ?? theme.defaultIndicatorLineWidth,
+      tipsPadding: tipsPadding ?? theme.tipsPadding,
+      lineWidth: lineWidth ?? theme.indicatorLineWidth,
     );
   }
 
   EMAIndicator genEmaIndicator(
-    IFlexiKlineTheme theme, {
+    covariant IFlexiKlineTheme theme, {
     double? height,
     EdgeInsets? padding,
     List<MaParam>? calcParams,
@@ -535,8 +609,8 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
     double? lineWidth,
   }) {
     return EMAIndicator(
-      height: height ?? theme.defaultMainIndicatorHeight,
-      padding: padding ?? theme.defaultMainIndicatorPadding,
+      height: height ?? theme.mainIndicatorHeight,
+      padding: padding ?? theme.mainIndicatorPadding,
       calcParams: calcParams ??
           [
             MaParam(
@@ -545,10 +619,10 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
                 label: 'EMA5: ',
                 // precision: 2,
                 style: TextStyle(
-                  fontSize: theme.defaulTextSize,
+                  fontSize: theme.normalTextSize,
                   color: const Color(0xFF806180),
                   overflow: TextOverflow.ellipsis,
-                  height: theme.defaultTipsTextHeight,
+                  height: defaultTipsTextHeight,
                 ),
               ),
             ),
@@ -558,10 +632,10 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
                 label: 'EMA10: ',
                 // precision: 2,
                 style: TextStyle(
-                  fontSize: theme.defaulTextSize,
+                  fontSize: theme.normalTextSize,
                   color: const Color(0xFFEBB736),
                   overflow: TextOverflow.ellipsis,
-                  height: theme.defaultTipsTextHeight,
+                  height: defaultTipsTextHeight,
                 ),
               ),
             ),
@@ -571,10 +645,10 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
                 label: 'EMA20: ',
                 // precision: 2,
                 style: TextStyle(
-                  fontSize: theme.defaulTextSize,
+                  fontSize: theme.normalTextSize,
                   color: const Color(0xFFD672D5),
                   overflow: TextOverflow.ellipsis,
-                  height: theme.defaultTipsTextHeight,
+                  height: defaultTipsTextHeight,
                 ),
               ),
             ),
@@ -584,21 +658,21 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
                 label: 'EMA60: ',
                 // precision: 2,
                 style: TextStyle(
-                  fontSize: theme.defaulTextSize,
+                  fontSize: theme.normalTextSize,
                   color: const Color.fromARGB(255, 44, 45, 47),
                   overflow: TextOverflow.ellipsis,
-                  height: theme.defaultTipsTextHeight,
+                  height: defaultTipsTextHeight,
                 ),
               ),
             ),
           ],
-      tipsPadding: tipsPadding ?? theme.defaultTipsPadding,
-      lineWidth: lineWidth ?? theme.defaultIndicatorLineWidth,
+      tipsPadding: tipsPadding ?? theme.tipsPadding,
+      lineWidth: lineWidth ?? theme.indicatorLineWidth,
     );
   }
 
   BOLLIndicator genBollIndicator(
-    IFlexiKlineTheme theme, {
+    covariant IFlexiKlineTheme theme, {
     double? height,
     EdgeInsets? padding,
     BOLLParam? calcParam,
@@ -606,14 +680,14 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
     TipsConfig? upTips,
     TipsConfig? dnTips,
     EdgeInsets? tipsPadding,
-    int tickCount = constant.defaultSubTickCount,
+    int tickCount = defaultSubTickCount,
     double? lineWidth,
     bool isFillBetweenUpAndDn = true,
     Color? fillColor,
   }) {
     return BOLLIndicator(
-      height: height ?? theme.defaultMainIndicatorHeight,
-      padding: padding ?? theme.defaultMainIndicatorPadding,
+      height: height ?? theme.mainIndicatorHeight,
+      padding: padding ?? theme.mainIndicatorPadding,
 
       /// BOLL计算参数
       calcParam: calcParam ?? const BOLLParam(n: 20, std: 2),
@@ -624,10 +698,10 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
             label: 'BOLL(20): ',
             // precision: 2,
             style: TextStyle(
-              fontSize: theme.defaulTextSize,
+              fontSize: theme.normalTextSize,
               color: const Color(0xFF886787),
               overflow: TextOverflow.ellipsis,
-              height: theme.defaultTipsTextHeight,
+              height: defaultTipsTextHeight,
             ),
           ),
       upTips: upTips ??
@@ -635,10 +709,10 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
             label: 'UB: ',
             // precision: 2,
             style: TextStyle(
-              fontSize: theme.defaulTextSize,
+              fontSize: theme.normalTextSize,
               color: const Color(0xFFF0B527),
               overflow: TextOverflow.ellipsis,
-              height: theme.defaultTipsTextHeight,
+              height: defaultTipsTextHeight,
             ),
           ),
       dnTips: dnTips ??
@@ -646,14 +720,14 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
             label: 'LB: ',
             // precision: 2,
             style: TextStyle(
-              fontSize: theme.defaulTextSize,
+              fontSize: theme.normalTextSize,
               color: const Color(0xFFD85BE0),
               overflow: TextOverflow.ellipsis,
-              height: theme.defaultTipsTextHeight,
+              height: defaultTipsTextHeight,
             ),
           ),
-      tipsPadding: tipsPadding ?? theme.defaultTipsPadding,
-      lineWidth: lineWidth ?? theme.defaultIndicatorLineWidth,
+      tipsPadding: tipsPadding ?? theme.tipsPadding,
+      lineWidth: lineWidth ?? theme.indicatorLineWidth,
 
       /// 填充配置
       isFillBetweenUpAndDn: isFillBetweenUpAndDn,
@@ -662,24 +736,24 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
   }
 
   TimeIndicator genTimeIndicator(
-    IFlexiKlineTheme theme, {
+    covariant IFlexiKlineTheme theme, {
     double? height,
     EdgeInsets? padding,
     DrawPosition? position,
     TextAreaConfig? tmeiTick,
   }) {
     return TimeIndicator(
-      height: height ?? theme.defaultTimeIndicatorHeight,
+      height: height ?? theme.timeIndicatorHeight,
       padding: padding ?? EdgeInsets.zero,
       position: position ?? DrawPosition.middle,
       // 时间刻度.
       timeTick: tmeiTick ??
           TextAreaConfig(
             style: TextStyle(
-              fontSize: theme.defaulTextSize,
+              fontSize: theme.normalTextSize,
               color: theme.tickTextColor,
               overflow: TextOverflow.ellipsis,
-              height: theme.defaultTextHeight,
+              height: defaultTextHeight,
             ),
             textWidth: 80 * theme.scale,
             textAlign: TextAlign.center,
@@ -688,7 +762,7 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
   }
 
   MACDIndicator genMacdIndicator(
-    IFlexiKlineTheme theme, {
+    covariant IFlexiKlineTheme theme, {
     double? height,
     EdgeInsets? padding,
     MACDParam? calcParam,
@@ -696,13 +770,13 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
     TipsConfig? deaTips,
     TipsConfig? macdTips,
     EdgeInsets? tipsPadding,
-    int tickCount = constant.defaultSubTickCount,
+    int tickCount = defaultSubTickCount,
     double? lineWidth,
     int precision = 2,
   }) {
     return MACDIndicator(
-      height: height ?? theme.defaultSubIndicatorHeight,
-      padding: padding ?? theme.defaultSubIndicatorPadding,
+      height: height ?? theme.subIndicatorHeight,
+      padding: padding ?? theme.subIndicatorPadding,
 
       /// Macd相关参数
       calcParam: calcParam ?? const MACDParam(s: 12, l: 26, m: 9),
@@ -713,10 +787,10 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
             label: 'DIF: ',
             precision: precision,
             style: TextStyle(
-              fontSize: theme.defaulTextSize,
+              fontSize: theme.normalTextSize,
               color: const Color(0xFFDFBF47),
               overflow: TextOverflow.ellipsis,
-              height: theme.defaultTextHeight,
+              height: defaultTextHeight,
             ),
           ),
       deaTips: deaTips ??
@@ -724,10 +798,10 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
             label: 'DEA: ',
             precision: precision,
             style: TextStyle(
-              fontSize: theme.defaulTextSize,
+              fontSize: theme.normalTextSize,
               color: const Color(0xFF795583),
               overflow: TextOverflow.ellipsis,
-              height: theme.defaultTextHeight,
+              height: defaultTextHeight,
             ),
           ),
       macdTips: macdTips ??
@@ -735,21 +809,21 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
             label: 'MACD: ',
             precision: precision,
             style: TextStyle(
-              fontSize: theme.defaulTextSize,
+              fontSize: theme.normalTextSize,
               color: theme.textColor,
               overflow: TextOverflow.ellipsis,
-              height: theme.defaultTextHeight,
+              height: defaultTextHeight,
             ),
           ),
-      tipsPadding: tipsPadding ?? theme.defaultTipsPadding,
+      tipsPadding: tipsPadding ?? theme.tipsPadding,
       tickCount: tickCount,
-      lineWidth: lineWidth ?? theme.defaultIndicatorLineWidth,
+      lineWidth: lineWidth ?? theme.indicatorLineWidth,
       precision: precision,
     );
   }
 
   KDJIndicator genKdjIndicator(
-    IFlexiKlineTheme theme, {
+    covariant IFlexiKlineTheme theme, {
     double? height,
     EdgeInsets? padding,
     KDJParam? calcParam,
@@ -757,13 +831,13 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
     TipsConfig? dtips,
     TipsConfig? jtips,
     EdgeInsets? tipsPadding,
-    int tickCount = constant.defaultSubTickCount,
+    int tickCount = defaultSubTickCount,
     double? lineWidth,
     int precision = 2,
   }) {
     return KDJIndicator(
-      height: height ?? theme.defaultSubIndicatorHeight,
-      padding: padding ?? theme.defaultSubIndicatorPadding,
+      height: height ?? theme.subIndicatorHeight,
+      padding: padding ?? theme.subIndicatorPadding,
 
       /// KDJ计算参数
       calcParam: calcParam ?? const KDJParam(n: 9, m1: 3, m2: 3),
@@ -774,10 +848,10 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
             label: 'K: ',
             precision: precision,
             style: TextStyle(
-              fontSize: theme.defaulTextSize,
+              fontSize: theme.normalTextSize,
               color: const Color(0xFF7A5C79),
               overflow: TextOverflow.ellipsis,
-              height: theme.defaultTipsTextHeight,
+              height: defaultTipsTextHeight,
             ),
           ),
       dtips: dtips ??
@@ -785,10 +859,10 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
             label: 'D: ',
             precision: precision,
             style: TextStyle(
-              fontSize: theme.defaulTextSize,
+              fontSize: theme.normalTextSize,
               color: const Color(0xFFFABD3F),
               overflow: TextOverflow.ellipsis,
-              height: theme.defaultTipsTextHeight,
+              height: defaultTipsTextHeight,
             ),
           ),
       jtips: jtips ??
@@ -796,28 +870,28 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
             label: 'D: ',
             precision: precision,
             style: TextStyle(
-              fontSize: theme.defaulTextSize,
+              fontSize: theme.normalTextSize,
               color: const Color(0xFFBB72CA),
               overflow: TextOverflow.ellipsis,
-              height: theme.defaultTipsTextHeight,
+              height: defaultTipsTextHeight,
             ),
           ),
-      tipsPadding: tipsPadding ?? theme.defaultTipsPadding,
+      tipsPadding: tipsPadding ?? theme.tipsPadding,
       tickCount: tickCount,
-      lineWidth: lineWidth ?? theme.defaultIndicatorLineWidth,
+      lineWidth: lineWidth ?? theme.indicatorLineWidth,
       precision: precision,
     );
   }
 
   MAVolumeIndicator genMavolIndicator(
-    IFlexiKlineTheme theme, {
+    covariant IFlexiKlineTheme theme, {
     double? height,
     EdgeInsets? padding,
     bool drawBelowTipsArea = false,
   }) {
     return MAVolumeIndicator(
-      height: height ?? theme.defaultSubIndicatorHeight,
-      padding: padding ?? theme.defaultSubIndicatorPadding,
+      height: height ?? theme.subIndicatorHeight,
+      padding: padding ?? theme.subIndicatorPadding,
       drawBelowTipsArea: drawBelowTipsArea,
       volumeIndicator: genSubVolumeIndicator(
         theme,
@@ -833,18 +907,18 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
   }
 
   VolumeIndicator genSubVolumeIndicator(
-    IFlexiKlineTheme theme, {
+    covariant IFlexiKlineTheme theme, {
     double? height,
     EdgeInsets? padding,
     PaintMode paintMode = PaintMode.combine,
     TipsConfig? volTips,
     EdgeInsets? tipsPadding,
-    int tickCount = constant.defaultSubTickCount,
+    int tickCount = defaultSubTickCount,
     int precision = 2,
   }) {
     return VolumeIndicator(
-      height: height ?? theme.defaultSubIndicatorHeight,
-      padding: padding ?? theme.defaultSubIndicatorPadding,
+      height: height ?? theme.subIndicatorHeight,
+      padding: padding ?? theme.subIndicatorPadding,
       paintMode: paintMode,
 
       /// 绘制相关参数
@@ -853,13 +927,13 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
             label: 'Vol: ',
             precision: precision,
             style: TextStyle(
-              fontSize: theme.defaulTextSize,
+              fontSize: theme.normalTextSize,
               color: theme.textColor,
               overflow: TextOverflow.ellipsis,
-              height: theme.defaultTextHeight,
+              height: defaultTextHeight,
             ),
           ),
-      tipsPadding: tipsPadding ?? theme.defaultTipsPadding,
+      tipsPadding: tipsPadding ?? theme.tipsPadding,
       tickCount: tickCount,
       precision: precision,
 
@@ -872,7 +946,7 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
   }
 
   VolMaIndicator genVolMaIndicator(
-    IFlexiKlineTheme theme, {
+    covariant IFlexiKlineTheme theme, {
     double? height,
     EdgeInsets? padding,
     List<MaParam>? calcParams,
@@ -881,8 +955,8 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
     int precision = 2,
   }) {
     return VolMaIndicator(
-      height: height ?? theme.defaultSubIndicatorHeight,
-      padding: padding ?? theme.defaultSubIndicatorPadding,
+      height: height ?? theme.subIndicatorHeight,
+      padding: padding ?? theme.subIndicatorPadding,
       calcParams: calcParams ??
           [
             MaParam(
@@ -891,10 +965,10 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
                 label: 'MA5: ',
                 // precision: 2,
                 style: TextStyle(
-                  fontSize: theme.defaulTextSize,
+                  fontSize: theme.normalTextSize,
                   color: Colors.orange,
                   overflow: TextOverflow.ellipsis,
-                  height: theme.defaultTipsTextHeight,
+                  height: defaultTipsTextHeight,
                 ),
               ),
             ),
@@ -904,16 +978,16 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
                 label: 'MA10: ',
                 // precision: 2,
                 style: TextStyle(
-                  fontSize: theme.defaulTextSize,
+                  fontSize: theme.normalTextSize,
                   color: Colors.blue,
                   overflow: TextOverflow.ellipsis,
-                  height: theme.defaultTipsTextHeight,
+                  height: defaultTipsTextHeight,
                 ),
               ),
             ),
           ],
-      tipsPadding: tipsPadding ?? theme.defaultTipsPadding,
-      lineWidth: lineWidth ?? theme.defaultIndicatorLineWidth,
+      tipsPadding: tipsPadding ?? theme.tipsPadding,
+      lineWidth: lineWidth ?? theme.indicatorLineWidth,
       precision: precision,
     );
   }

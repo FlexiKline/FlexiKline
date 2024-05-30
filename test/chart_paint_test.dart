@@ -106,7 +106,7 @@ class TestFlexiKlineConfiguration extends BaseFlexiKlineThemeConfiguration {
   }
 
   @override
-  FlexiKlineConfig getFlexiKlineConfig() {
+  FlexiKlineConfig getFlexiKlineConfig([TestFlexiKlineTheme? theme]) {
     return genFlexiKlineConfig(TestFlexiKlineTheme());
   }
 

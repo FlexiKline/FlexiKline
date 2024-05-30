@@ -14,6 +14,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../constant.dart';
 import '../config/export.dart';
 
 /// FlexiKline主题接口.
@@ -61,84 +62,69 @@ abstract interface class IFlexiKlineTheme {
   Color get tooltipTextColor;
 }
 
-abstract class BaseFlexiKlineTheme implements IFlexiKlineTheme {
-  BaseFlexiKlineTheme({
-    required this.long,
-    required this.short,
-    required this.chartBg,
-    required this.tooltipBg,
-    required this.countDownTextBg,
-    required this.crossTextBg,
-    this.transparent = Colors.transparent,
-    required this.lastPriceTextBg,
-    required this.gridLine,
-    required this.crosshair,
-    required this.priceMarkLine,
-    required this.textColor,
-    required this.tickTextColor,
-    required this.lastPriceTextColor,
-    required this.crossTextColor,
-    required this.tooltipTextColor,
-  });
+mixin FlexiKlineThemeTextStyle implements IFlexiKlineTheme {
+  TextStyle getTextStyle(
+    Color color, {
+    double? fontSize,
+    FontWeight? fontWeight,
+    TextOverflow? overflow,
+    double height = defaultTextHeight,
+    TextBaseline textBaseline = TextBaseline.alphabetic,
+  }) {
+    return TextStyle(
+      color: color,
+      fontSize: fontSize ?? defaulTextSize * scale,
+      fontWeight: fontWeight,
+      overflow: overflow,
+      height: height,
+      textBaseline: textBaseline,
+    );
+  }
 
-  BaseFlexiKlineTheme.simple({
-    required this.long,
-    required this.short,
-    required this.chartBg,
-    required Color markBg,
-    required this.crossTextBg,
-    this.transparent = Colors.transparent,
-    required this.lastPriceTextBg,
-    required Color color,
-    required this.gridLine,
-    required this.tickTextColor,
-    required this.crossTextColor,
-  })  : tooltipBg = markBg,
-        countDownTextBg = markBg,
-        crosshair = color,
-        priceMarkLine = color,
-        textColor = color,
-        lastPriceTextColor = color,
-        tooltipTextColor = color;
+  TextStyle get normalTextyStyle => TextStyle(
+        color: textColor,
+        fontSize: setSp(defaulTextSize),
+        fontWeight: FontWeight.normal,
+        overflow: TextOverflow.ellipsis,
+        height: defaultTextHeight,
+      );
 
-  @override
-  late Color long;
-  @override
-  late Color short;
+  TextStyle get tickTextStyle => TextStyle(
+        color: tickTextColor,
+        fontSize: setSp(defaulTextSize),
+        fontWeight: FontWeight.normal,
+        overflow: TextOverflow.ellipsis,
+        height: defaultTextHeight,
+      );
 
-  /// 背景色
-  @override
-  late Color chartBg;
-  @override
-  late Color tooltipBg;
-  @override
-  late Color countDownTextBg;
-  @override
-  late Color crossTextBg;
-  @override
-  late Color transparent;
-  @override
-  late Color lastPriceTextBg;
+  TextStyle get lastPriceTextStyle => TextStyle(
+        color: lastPriceTextColor,
+        fontSize: setSp(defaulTextSize),
+        fontWeight: FontWeight.normal,
+        overflow: TextOverflow.ellipsis,
+        height: defaultTextHeight,
+      );
 
-  /// 分隔线
-  @override
-  late Color gridLine;
-  @override
-  late Color crosshair;
-  @override
-  late Color priceMarkLine;
+  TextStyle get crossTextStyle => TextStyle(
+        color: crossTextColor,
+        fontSize: setSp(defaulTextSize),
+        fontWeight: FontWeight.normal,
+        height: defaultTextHeight,
+      );
 
-  /// 文本颜色配置
-  @override
-  late Color textColor;
-  @override
-  late Color tickTextColor;
-  @override
-  late Color lastPriceTextColor;
-  @override
-  late Color crossTextColor;
-  @override
-  late Color tooltipTextColor;
+  TextStyle get tooltipTextStyle => TextStyle(
+        color: tooltipTextColor,
+        fontSize: setSp(defaulTextSize),
+        overflow: TextOverflow.ellipsis,
+        height: defaultMultiTextHeight,
+      );
+
+  TextStyle getTipsTextStyle(Color tipsColor) => TextStyle(
+        color: tipsColor,
+        fontSize: setSp(defaulTextSize),
+        overflow: TextOverflow.ellipsis,
+        height: defaultTipsTextHeight,
+      );
 }
 
 /// FlexiKline配置接口

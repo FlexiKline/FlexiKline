@@ -17,7 +17,7 @@ v0.3.0
 - [x] 配置管理调整: 由FlexiKlineConfig统一管理所有配置, FlexiKline构造时必传. 所有配置实现Serializer和CopyWith接口. 
 
 v0.4.0
-- [ ] 主题切换实现.
+- [x] 主题切换实现.
 - [ ] 数据加载接口封装.
 - [ ] 蜡烛数据合并算法优化.
 - [ ] 指标计算在compute线程.
