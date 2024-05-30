@@ -15,7 +15,6 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flutter/material.dart';
 
-import '../../constant.dart';
 import '../../framework/serializers.dart';
 
 part 'tooltip_config.g.dart';
@@ -27,25 +26,13 @@ class TooltipConfig {
     this.show = true,
 
     /// tooltip 区域设置
-    this.background = const Color(0xFFD6D6D6),
-    this.margin = const EdgeInsets.only(
-      left: 15,
-      right: 65,
-      top: 4,
-    ),
-    this.padding = const EdgeInsets.symmetric(
-      horizontal: 4,
-      vertical: 4,
-    ),
-    this.radius = const BorderRadius.all(Radius.circular(4)),
+    required this.background,
+    required this.margin,
+    required this.padding,
+    required this.radius,
 
     /// tooltip 文本设置
-    this.style = const TextStyle(
-      fontSize: defaulTextSize,
-      color: Colors.black,
-      overflow: TextOverflow.ellipsis,
-      height: defaultMultiTextHeight,
-    ),
+    required this.style,
   });
 
   final bool show;

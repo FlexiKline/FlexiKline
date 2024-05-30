@@ -34,107 +34,17 @@ class CandleIndicator extends SinglePaintObjectIndicator {
     super.padding = defaultMainIndicatorPadding,
 
     // 最高价
-    this.high = const MarkConfig(
-      spacing: 2,
-      line: LineConfig(
-        type: LineType.solid,
-        color: Colors.black,
-        length: 20,
-        width: 0.5,
-      ),
-      text: TextAreaConfig(
-        style: TextStyle(
-          fontSize: defaulTextSize,
-          color: Colors.black,
-          overflow: TextOverflow.ellipsis,
-          height: defaultTextHeight,
-        ),
-      ),
-    ),
+    required this.high,
     // 最低价
-    this.low = const MarkConfig(
-      spacing: 2,
-      line: LineConfig(
-        type: LineType.solid,
-        color: Colors.black,
-        length: 20,
-        width: 0.5,
-      ),
-      text: TextAreaConfig(
-        style: TextStyle(
-          fontSize: defaulTextSize,
-          color: Colors.black,
-          overflow: TextOverflow.ellipsis,
-          height: defaultTextHeight,
-        ),
-      ),
-    ),
+    required this.low,
     // 最后价: 当最新蜡烛不在可视区域时使用.
-    this.last = const MarkConfig(
-      show: true,
-      spacing: 120,
-      line: LineConfig(
-        type: LineType.dashed,
-        color: Colors.black,
-        width: 0.5,
-        dashes: [3, 3],
-      ),
-      text: TextAreaConfig(
-        style: TextStyle(
-          fontSize: defaulTextSize,
-          color: Colors.white,
-          overflow: TextOverflow.ellipsis,
-          height: defaultTextHeight,
-          textBaseline: TextBaseline.alphabetic,
-        ),
-        background: Colors.black54,
-        padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-        border: BorderSide(color: Colors.transparent),
-        borderRadius: BorderRadius.all(Radius.circular(10)),
-      ),
-    ),
+    required this.last,
     // 最新价: 当最新蜡烛在可视区域时使用.
-    this.latest = const MarkConfig(
-      show: true,
-      spacing: 1,
-      line: LineConfig(
-        type: LineType.dashed,
-        color: Colors.black,
-        width: 0.5,
-        dashes: [3, 3],
-      ),
-      text: TextAreaConfig(
-        style: TextStyle(
-          fontSize: defaulTextSize,
-          // color: Colors.black,
-          color: Colors.white,
-          overflow: TextOverflow.ellipsis,
-          height: defaultTextHeight,
-        ),
-        minWidth: 45,
-        textAlign: TextAlign.center,
-        // background: Colors.white,
-        padding: defaultTextPading,
-        // border: BorderSide(color: Colors.black, width: 0.5),
-        borderRadius: BorderRadius.all(Radius.circular(2)),
-      ),
-    ),
+    required this.latest,
     this.useCandleColorAsLatestBg = true,
     // 倒计时, 在latest最新价之下展示
     this.showCountDown = true,
-    this.countDown = const TextAreaConfig(
-      style: TextStyle(
-        fontSize: defaulTextSize,
-        color: Colors.black,
-        overflow: TextOverflow.ellipsis,
-        height: defaultTextHeight,
-      ),
-      textAlign: TextAlign.center,
-      background: Color(0xFFD6D6D6),
-      padding: defaultTextPading,
-      // border: BorderSide(color: Colors.black, width: 0.5),
-      borderRadius: BorderRadius.all(Radius.circular(2)),
-    ),
+    required this.countDown,
     // 时间刻度.
     // this.timeTick = const TextAreaConfig(
     //   style: TextStyle(

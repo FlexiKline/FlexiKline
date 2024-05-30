@@ -33,36 +33,9 @@ class MAIndicator extends SinglePaintObjectIndicator {
     super.name = 'MA',
     required super.height,
     super.padding = defaultMainIndicatorPadding,
-    this.calcParams = const [
-      MaParam(
-        count: 7,
-        tips: TipsConfig(
-          label: 'MA7: ',
-          // precision: 2,
-          style: TextStyle(
-            fontSize: defaulTextSize,
-            color: Color(0xFF946F9A),
-            overflow: TextOverflow.ellipsis,
-            height: defaultTipsTextHeight,
-          ),
-        ),
-      ),
-      MaParam(
-        count: 30,
-        tips: TipsConfig(
-          label: 'MA30: ',
-          // precision: 2,
-          style: TextStyle(
-            fontSize: defaulTextSize,
-            color: Color(0xFFF1BF32),
-            overflow: TextOverflow.ellipsis,
-            height: defaultTipsTextHeight,
-          ),
-        ),
-      ),
-    ],
-    this.tipsPadding = defaultTipsPadding,
-    this.lineWidth = defaultIndicatorLineWidth,
+    required this.calcParams,
+    required this.tipsPadding,
+    required this.lineWidth,
   });
 
   final List<MaParam> calcParams;

@@ -38,62 +38,9 @@ class EMAIndicator extends SinglePaintObjectIndicator {
     super.name = 'EMA',
     required super.height,
     super.padding = defaultMainIndicatorPadding,
-    this.calcParams = const [
-      MaParam(
-        count: 5,
-        tips: TipsConfig(
-          label: 'EMA5: ',
-          // precision: 2,
-          style: TextStyle(
-            fontSize: defaulTextSize,
-            color: Color(0xFF806180),
-            overflow: TextOverflow.ellipsis,
-            height: defaultTipsTextHeight,
-          ),
-        ),
-      ),
-      MaParam(
-        count: 10,
-        tips: TipsConfig(
-          label: 'EMA10: ',
-          // precision: 2,
-          style: TextStyle(
-            fontSize: defaulTextSize,
-            color: Color(0xFFEBB736),
-            overflow: TextOverflow.ellipsis,
-            height: defaultTipsTextHeight,
-          ),
-        ),
-      ),
-      MaParam(
-        count: 20,
-        tips: TipsConfig(
-          label: 'EMA20: ',
-          // precision: 2,
-          style: TextStyle(
-            fontSize: defaulTextSize,
-            color: Color(0xFFD672D5),
-            overflow: TextOverflow.ellipsis,
-            height: defaultTipsTextHeight,
-          ),
-        ),
-      ),
-      MaParam(
-        count: 60,
-        tips: TipsConfig(
-          label: 'EMA60: ',
-          // precision: 2,
-          style: TextStyle(
-            fontSize: defaulTextSize,
-            color: Color(0xFF788FD5),
-            overflow: TextOverflow.ellipsis,
-            height: defaultTipsTextHeight,
-          ),
-        ),
-      ),
-    ],
-    this.tipsPadding = defaultTipsPadding,
-    this.lineWidth = defaultIndicatorLineWidth,
+    required this.calcParams,
+    required this.tipsPadding,
+    required this.lineWidth,
   });
 
   final List<MaParam> calcParams;

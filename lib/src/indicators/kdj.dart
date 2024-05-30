@@ -42,39 +42,12 @@ class KDJIndicator extends SinglePaintObjectIndicator {
     this.calcParam = const KDJParam(n: 9, m1: 3, m2: 3),
 
     /// 绘制相关参数
-    this.ktips = const TipsConfig(
-      label: 'K: ',
-      precision: 2,
-      style: TextStyle(
-        fontSize: defaulTextSize,
-        color: Color(0xFF7A5C79),
-        overflow: TextOverflow.ellipsis,
-        height: defaultTipsTextHeight,
-      ),
-    ),
-    this.dtips = const TipsConfig(
-      label: 'D: ',
-      precision: 2,
-      style: TextStyle(
-        fontSize: defaulTextSize,
-        color: Color(0xFFFABD3F),
-        overflow: TextOverflow.ellipsis,
-        height: defaultTipsTextHeight,
-      ),
-    ),
-    this.jtips = const TipsConfig(
-      label: 'D: ',
-      precision: 2,
-      style: TextStyle(
-        fontSize: defaulTextSize,
-        color: Color(0xFFBB72CA),
-        overflow: TextOverflow.ellipsis,
-        height: defaultTipsTextHeight,
-      ),
-    ),
-    this.tipsPadding = defaultTipsPadding,
+    required this.ktips,
+    required this.dtips,
+    required this.jtips,
+    required this.tipsPadding,
     this.tickCount = defaultSubTickCount,
-    this.lineWidth = defaultIndicatorLineWidth,
+    required this.lineWidth,
     this.precision = 2,
   });
 

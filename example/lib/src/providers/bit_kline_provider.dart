@@ -154,7 +154,7 @@ final bitFlexiKlineThemeProvider = StateProvider<IFlexiKlineTheme>((ref) {
   }
 });
 
-class BitFlexiKlineConfiguration extends BaseFlexiKlineConfiguration {
+class BitFlexiKlineConfiguration extends BaseFlexiKlineThemeConfiguration {
   final WidgetRef ref;
 
   BitFlexiKlineConfiguration({required this.ref});
@@ -185,5 +185,19 @@ class BitFlexiKlineConfiguration extends BaseFlexiKlineConfiguration {
   void saveFlexiKlineConfig(FlexiKlineConfig config) {
     final jsonSrc = jsonEncode(config);
     CacheUtil().setString(config.key, jsonSrc);
+  }
+
+  @override
+  TimeIndicator genTimeIndicator(
+    IFlexiKlineTheme theme, {
+    double? height,
+    EdgeInsets? padding,
+    DrawPosition? position,
+    TextAreaConfig? tmeiTick,
+  }) {
+    return super.genTimeIndicator(
+      theme,
+      position: DrawPosition.bottom,
+    );
   }
 }

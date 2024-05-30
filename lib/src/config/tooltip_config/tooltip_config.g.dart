@@ -118,29 +118,16 @@ extension $TooltipConfigCopyWith on TooltipConfig {
 TooltipConfig _$TooltipConfigFromJson(Map<String, dynamic> json) =>
     TooltipConfig(
       show: json['show'] as bool? ?? true,
-      background: json['background'] == null
-          ? const Color(0xFFD6D6D6)
-          : const ColorConverter().fromJson(json['background'] as String?),
-      margin: json['margin'] == null
-          ? const EdgeInsets.only(left: 15, right: 65, top: 4)
-          : const EdgeInsetsConverter()
-              .fromJson(json['margin'] as Map<String, dynamic>),
-      padding: json['padding'] == null
-          ? const EdgeInsets.symmetric(horizontal: 4, vertical: 4)
-          : const EdgeInsetsConverter()
-              .fromJson(json['padding'] as Map<String, dynamic>),
-      radius: json['radius'] == null
-          ? const BorderRadius.all(Radius.circular(4))
-          : const BorderRadiusConverter()
-              .fromJson(json['radius'] as Map<String, dynamic>),
-      style: json['style'] == null
-          ? const TextStyle(
-              fontSize: defaulTextSize,
-              color: Colors.black,
-              overflow: TextOverflow.ellipsis,
-              height: defaultMultiTextHeight)
-          : const TextStyleConverter()
-              .fromJson(json['style'] as Map<String, dynamic>),
+      background:
+          const ColorConverter().fromJson(json['background'] as String?),
+      margin: const EdgeInsetsConverter()
+          .fromJson(json['margin'] as Map<String, dynamic>),
+      padding: const EdgeInsetsConverter()
+          .fromJson(json['padding'] as Map<String, dynamic>),
+      radius: const BorderRadiusConverter()
+          .fromJson(json['radius'] as Map<String, dynamic>),
+      style: const TextStyleConverter()
+          .fromJson(json['style'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$TooltipConfigToJson(TooltipConfig instance) {

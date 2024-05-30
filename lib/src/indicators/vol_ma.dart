@@ -33,37 +33,10 @@ class VolMaIndicator extends SinglePaintObjectIndicator {
     super.name = 'VOLMA',
     super.height = defaultSubIndicatorHeight,
     super.padding = defaultSubIndicatorPadding,
-    this.calcParams = const [
-      MaParam(
-        count: 5,
-        tips: TipsConfig(
-          label: 'MA5: ',
-          // precision: 2,
-          style: TextStyle(
-            fontSize: defaulTextSize,
-            color: Colors.orange,
-            overflow: TextOverflow.ellipsis,
-            height: defaultTipsTextHeight,
-          ),
-        ),
-      ),
-      MaParam(
-        count: 10,
-        tips: TipsConfig(
-          label: 'MA10: ',
-          // precision: 2,
-          style: TextStyle(
-            fontSize: defaulTextSize,
-            color: Colors.blue,
-            overflow: TextOverflow.ellipsis,
-            height: defaultTipsTextHeight,
-          ),
-        ),
-      ),
-    ],
-    this.tipsPadding = defaultTipsPadding,
-    this.lineWidth = defaultIndicatorLineWidth,
-    this.precision = 2,
+    required this.calcParams,
+    required this.tipsPadding,
+    required this.lineWidth,
+    required this.precision,
   });
 
   final List<MaParam> calcParams;

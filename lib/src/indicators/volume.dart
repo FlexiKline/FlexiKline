@@ -36,19 +36,10 @@ class VolumeIndicator extends SinglePaintObjectIndicator {
     super.paintMode = PaintMode.alone,
 
     /// 绘制相关参数
-    this.volTips = const TipsConfig(
-      label: 'Vol: ',
-      precision: 2,
-      style: TextStyle(
-        fontSize: defaulTextSize,
-        color: Colors.black,
-        overflow: TextOverflow.ellipsis,
-        height: defaultTipsTextHeight,
-      ),
-    ),
-    this.tipsPadding = defaultTipsPadding,
+    required this.volTips,
+    required this.tipsPadding,
     this.tickCount = defaultSubTickCount,
-    this.precision = 2,
+    required this.precision,
 
     /// 控制参数
     this.showYAxisTick = false,

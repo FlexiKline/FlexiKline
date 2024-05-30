@@ -21,7 +21,7 @@ void main() {
       final json = <String, dynamic>{};
       final indicators = IndicatorsConfig.fromJson(json);
 
-      indicators.volume = VolumeIndicator(paintMode: PaintMode.combine);
+      // indicators.volume = VolumeIndicator(paintMode: PaintMode.combine);
       expect(indicators.mavol.children.length, 2);
     });
   });

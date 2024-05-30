@@ -279,51 +279,31 @@ extension $SettingConfigCopyWith on SettingConfig {
 
 SettingConfig _$SettingConfigFromJson(Map<String, dynamic> json) =>
     SettingConfig(
-      textColor: json['textColor'] == null
-          ? Colors.black
-          : const ColorConverter().fromJson(json['textColor'] as String?),
-      longColor: json['longColor'] == null
-          ? const Color(0xFF33BD65)
-          : const ColorConverter().fromJson(json['longColor'] as String?),
-      shortColor: json['shortColor'] == null
-          ? const Color(0xFFE84E74)
-          : const ColorConverter().fromJson(json['shortColor'] as String?),
+      textColor: const ColorConverter().fromJson(json['textColor'] as String?),
+      longColor: const ColorConverter().fromJson(json['longColor'] as String?),
+      shortColor:
+          const ColorConverter().fromJson(json['shortColor'] as String?),
       opacity: (json['opacity'] as num?)?.toDouble() ?? 0.5,
-      loading: json['loading'] == null
-          ? const LoadingConfig()
-          : LoadingConfig.fromJson(json['loading'] as Map<String, dynamic>),
+      loading: LoadingConfig.fromJson(json['loading'] as Map<String, dynamic>),
       mainRect: json['mainRect'] == null
           ? Rect.zero
           : const RectConverter()
               .fromJson(json['mainRect'] as Map<String, dynamic>),
-      mainMinSize: json['mainMinSize'] == null
-          ? defaultMainRectMinSize
-          : const SizeConverter()
-              .fromJson(json['mainMinSize'] as Map<String, dynamic>),
-      mainPadding: json['mainPadding'] == null
-          ? defaultMainIndicatorPadding
-          : const EdgeInsetsConverter()
-              .fromJson(json['mainPadding'] as Map<String, dynamic>),
+      mainMinSize: const SizeConverter()
+          .fromJson(json['mainMinSize'] as Map<String, dynamic>),
+      mainPadding: const EdgeInsetsConverter()
+          .fromJson(json['mainPadding'] as Map<String, dynamic>),
       mainDrawBelowTipsArea: json['mainDrawBelowTipsArea'] as bool? ?? true,
       minPaintBlankRate: (json['minPaintBlankRate'] as num?)?.toDouble() ?? 0.5,
       alwaysCalculateScreenOfCandlesIfEnough:
           json['alwaysCalculateScreenOfCandlesIfEnough'] as bool? ?? false,
-      candleMaxWidth: (json['candleMaxWidth'] as num?)?.toDouble() ?? 40.0,
-      candleWidth: (json['candleWidth'] as num?)?.toDouble() ?? 7.0,
-      candleSpacing: (json['candleSpacing'] as num?)?.toDouble() ?? 1.0,
-      candleLineWidth: (json['candleLineWidth'] as num?)?.toDouble() ?? 1.0,
-      firstCandleInitOffset:
-          (json['firstCandleInitOffset'] as num?)?.toDouble() ?? 80,
-      tickText: json['tickText'] == null
-          ? const TextAreaConfig(
-              style: TextStyle(
-                  fontSize: defaulTextSize,
-                  color: Colors.black,
-                  overflow: TextOverflow.ellipsis,
-                  height: defaultTextHeight),
-              textAlign: TextAlign.end,
-              padding: EdgeInsets.symmetric(horizontal: 2))
-          : TextAreaConfig.fromJson(json['tickText'] as Map<String, dynamic>),
+      candleMaxWidth: (json['candleMaxWidth'] as num).toDouble(),
+      candleWidth: (json['candleWidth'] as num).toDouble(),
+      candleSpacing: (json['candleSpacing'] as num).toDouble(),
+      candleLineWidth: (json['candleLineWidth'] as num).toDouble(),
+      firstCandleInitOffset: (json['firstCandleInitOffset'] as num).toDouble(),
+      tickText:
+          TextAreaConfig.fromJson(json['tickText'] as Map<String, dynamic>),
       subChartMaxCount: (json['subChartMaxCount'] as num?)?.toInt() ??
           defaultSubChartMaxCount,
     );

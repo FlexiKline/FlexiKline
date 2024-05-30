@@ -16,6 +16,8 @@ import 'package:flutter/material.dart';
 
 import '../config/export.dart';
 
+/// FlexiKline主题接口.
+/// 定义FlexiKline中通用颜色
 abstract interface class IFlexiKlineTheme {
   /// 缓存Key
   String get key;
@@ -59,8 +61,8 @@ abstract interface class IFlexiKlineTheme {
   Color get tooltipTextColor;
 }
 
-abstract class FlexiKlineTheme implements IFlexiKlineTheme {
-  FlexiKlineTheme({
+abstract class BaseFlexiKlineTheme implements IFlexiKlineTheme {
+  BaseFlexiKlineTheme({
     required this.long,
     required this.short,
     required this.chartBg,
@@ -79,7 +81,7 @@ abstract class FlexiKlineTheme implements IFlexiKlineTheme {
     required this.tooltipTextColor,
   });
 
-  FlexiKlineTheme.simple({
+  BaseFlexiKlineTheme.simple({
     required this.long,
     required this.short,
     required this.chartBg,
@@ -139,6 +141,7 @@ abstract class FlexiKlineTheme implements IFlexiKlineTheme {
   late Color tooltipTextColor;
 }
 
+/// FlexiKline配置接口
 abstract interface class IConfiguration {
   /// FlexiKline初始或默认的主区的宽高.
   Size get initialMainSize;

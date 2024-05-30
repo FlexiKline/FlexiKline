@@ -37,38 +37,11 @@ class BOLLIndicator extends SinglePaintObjectIndicator {
     this.calcParam = const BOLLParam(n: 20, std: 2),
 
     /// 绘制相关参数
-    this.mbTips = const TipsConfig(
-      label: 'BOLL(20): ',
-      // precision: 2,
-      style: TextStyle(
-        fontSize: defaulTextSize,
-        color: Color(0xFF886787),
-        overflow: TextOverflow.ellipsis,
-        height: defaultTipsTextHeight,
-      ),
-    ),
-    this.upTips = const TipsConfig(
-      label: 'UB: ',
-      // precision: 2,
-      style: TextStyle(
-        fontSize: defaulTextSize,
-        color: Color(0xFFF0B527),
-        overflow: TextOverflow.ellipsis,
-        height: defaultTipsTextHeight,
-      ),
-    ),
-    this.dnTips = const TipsConfig(
-      label: 'LB: ',
-      // precision: 2,
-      style: TextStyle(
-        fontSize: defaulTextSize,
-        color: Color(0xFFD85BE0),
-        overflow: TextOverflow.ellipsis,
-        height: defaultTipsTextHeight,
-      ),
-    ),
-    this.tipsPadding = defaultTipsPadding,
-    this.lineWidth = defaultIndicatorLineWidth,
+    required this.mbTips,
+    required this.upTips,
+    required this.dnTips,
+    required this.tipsPadding,
+    required this.lineWidth,
 
     /// 填充配置
     this.isFillBetweenUpAndDn = true,

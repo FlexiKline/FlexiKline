@@ -15,8 +15,6 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flutter/material.dart';
 
-import '../../constant.dart';
-import '../../extension/render/common.dart';
 import '../../framework/serializers.dart';
 import '../line_config/line_config.dart';
 import '../text_area_config/text_area_config.dart';
@@ -28,28 +26,10 @@ part 'cross_config.g.dart';
 class CrossConfig {
   CrossConfig({
     this.enable = true,
-    this.crosshair = const LineConfig(
-      type: LineType.dashed,
-      color: Colors.black,
-      width: 0.5,
-      dashes: [3, 3],
-    ),
-    this.point = const CrossPointConfig(),
-    this.tickText = const TextAreaConfig(
-      style: TextStyle(
-        fontSize: defaulTextSize,
-        color: Colors.white,
-        overflow: TextOverflow.ellipsis,
-        height: defaultTextHeight,
-      ),
-      background: Colors.black,
-      padding: EdgeInsets.all(2),
-      border: BorderSide.none,
-      borderRadius: BorderRadius.all(
-        Radius.circular(2),
-      ),
-    ),
-    this.spacing = 1,
+    required this.crosshair,
+    required this.point,
+    required this.tickText,
+    required this.spacing,
     this.showLatestTipsInBlank = true,
   });
 

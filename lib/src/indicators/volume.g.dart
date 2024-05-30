@@ -211,22 +211,11 @@ VolumeIndicator _$VolumeIndicatorFromJson(Map<String, dynamic> json) =>
       paintMode: json['paintMode'] == null
           ? PaintMode.alone
           : const PaintModeConverter().fromJson(json['paintMode'] as String),
-      volTips: json['volTips'] == null
-          ? const TipsConfig(
-              label: 'Vol: ',
-              precision: 2,
-              style: TextStyle(
-                  fontSize: defaulTextSize,
-                  color: Colors.black,
-                  overflow: TextOverflow.ellipsis,
-                  height: defaultTipsTextHeight))
-          : TipsConfig.fromJson(json['volTips'] as Map<String, dynamic>),
-      tipsPadding: json['tipsPadding'] == null
-          ? defaultTipsPadding
-          : const EdgeInsetsConverter()
-              .fromJson(json['tipsPadding'] as Map<String, dynamic>),
+      volTips: TipsConfig.fromJson(json['volTips'] as Map<String, dynamic>),
+      tipsPadding: const EdgeInsetsConverter()
+          .fromJson(json['tipsPadding'] as Map<String, dynamic>),
       tickCount: (json['tickCount'] as num?)?.toInt() ?? defaultSubTickCount,
-      precision: (json['precision'] as num?)?.toInt() ?? 2,
+      precision: (json['precision'] as num).toInt(),
       showYAxisTick: json['showYAxisTick'] as bool? ?? false,
       showCrossMark: json['showCrossMark'] as bool? ?? false,
       showTips: json['showTips'] as bool? ?? false,

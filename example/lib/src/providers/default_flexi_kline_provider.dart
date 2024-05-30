@@ -40,7 +40,7 @@ Map<TooltipLabel, String> tooltipLables() {
   };
 }
 
-class DefaultFlexiKlineTheme extends FlexiKlineTheme {
+class DefaultFlexiKlineTheme extends BaseFlexiKlineTheme {
   final FKTheme theme;
 
   DefaultFlexiKlineTheme({
@@ -81,7 +81,7 @@ class DefaultFlexiKlineTheme extends FlexiKlineTheme {
 
   @override
   String get key {
-    return 'flexi_kline_config_key_ok-${theme.brightness.name}';
+    return 'flexi_kline_config_key-${theme.brightness.name}';
   }
 
   double? _scale;
@@ -111,7 +111,7 @@ final defaultKlineThemeProvider = StateProvider<DefaultFlexiKlineTheme>((ref) {
   );
 });
 
-class DefaultFlexiKlineConfiguration extends BaseFlexiKlineConfiguration {
+class DefaultFlexiKlineConfiguration extends BaseFlexiKlineThemeConfiguration {
   final WidgetRef ref;
 
   DefaultFlexiKlineConfiguration({required this.ref});

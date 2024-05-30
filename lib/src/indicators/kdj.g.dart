@@ -19,43 +19,13 @@ KDJIndicator _$KDJIndicatorFromJson(Map<String, dynamic> json) => KDJIndicator(
       calcParam: json['calcParam'] == null
           ? const KDJParam(n: 9, m1: 3, m2: 3)
           : KDJParam.fromJson(json['calcParam'] as Map<String, dynamic>),
-      ktips: json['ktips'] == null
-          ? const TipsConfig(
-              label: 'K: ',
-              precision: 2,
-              style: TextStyle(
-                  fontSize: defaulTextSize,
-                  color: Color(0xFF7A5C79),
-                  overflow: TextOverflow.ellipsis,
-                  height: defaultTipsTextHeight))
-          : TipsConfig.fromJson(json['ktips'] as Map<String, dynamic>),
-      dtips: json['dtips'] == null
-          ? const TipsConfig(
-              label: 'D: ',
-              precision: 2,
-              style: TextStyle(
-                  fontSize: defaulTextSize,
-                  color: Color(0xFFFABD3F),
-                  overflow: TextOverflow.ellipsis,
-                  height: defaultTipsTextHeight))
-          : TipsConfig.fromJson(json['dtips'] as Map<String, dynamic>),
-      jtips: json['jtips'] == null
-          ? const TipsConfig(
-              label: 'D: ',
-              precision: 2,
-              style: TextStyle(
-                  fontSize: defaulTextSize,
-                  color: Color(0xFFBB72CA),
-                  overflow: TextOverflow.ellipsis,
-                  height: defaultTipsTextHeight))
-          : TipsConfig.fromJson(json['jtips'] as Map<String, dynamic>),
-      tipsPadding: json['tipsPadding'] == null
-          ? defaultTipsPadding
-          : const EdgeInsetsConverter()
-              .fromJson(json['tipsPadding'] as Map<String, dynamic>),
+      ktips: TipsConfig.fromJson(json['ktips'] as Map<String, dynamic>),
+      dtips: TipsConfig.fromJson(json['dtips'] as Map<String, dynamic>),
+      jtips: TipsConfig.fromJson(json['jtips'] as Map<String, dynamic>),
+      tipsPadding: const EdgeInsetsConverter()
+          .fromJson(json['tipsPadding'] as Map<String, dynamic>),
       tickCount: (json['tickCount'] as num?)?.toInt() ?? defaultSubTickCount,
-      lineWidth:
-          (json['lineWidth'] as num?)?.toDouble() ?? defaultIndicatorLineWidth,
+      lineWidth: (json['lineWidth'] as num).toDouble(),
       precision: (json['precision'] as num?)?.toInt() ?? 2,
     );
 

@@ -37,39 +37,12 @@ class MACDIndicator extends SinglePaintObjectIndicator {
     this.calcParam = const MACDParam(s: 12, l: 26, m: 9),
 
     /// 绘制相关参数
-    this.difTips = const TipsConfig(
-      label: 'DIF: ',
-      precision: 2,
-      style: TextStyle(
-        fontSize: defaulTextSize,
-        color: Color(0xFFDFBF47),
-        overflow: TextOverflow.ellipsis,
-        height: defaultTipsTextHeight,
-      ),
-    ),
-    this.deaTips = const TipsConfig(
-      label: 'DEA: ',
-      precision: 2,
-      style: TextStyle(
-        fontSize: defaulTextSize,
-        color: Color(0xFF795583),
-        overflow: TextOverflow.ellipsis,
-        height: defaultTipsTextHeight,
-      ),
-    ),
-    this.macdTips = const TipsConfig(
-      label: 'MACD: ',
-      precision: 2,
-      style: TextStyle(
-        fontSize: defaulTextSize,
-        color: Colors.black,
-        overflow: TextOverflow.ellipsis,
-        height: defaultTipsTextHeight,
-      ),
-    ),
-    this.tipsPadding = defaultTipsPadding,
+    required this.difTips,
+    required this.deaTips,
+    required this.macdTips,
+    required this.tipsPadding,
     this.tickCount = defaultSubTickCount,
-    this.lineWidth = defaultIndicatorLineWidth,
+    required this.lineWidth,
     this.precision = 2,
   });
 

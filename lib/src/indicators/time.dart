@@ -35,16 +35,7 @@ class TimeIndicator extends SinglePaintObjectIndicator {
     super.padding = EdgeInsets.zero,
     this.position = DrawPosition.middle,
     // 时间刻度.
-    this.timeTick = const TextAreaConfig(
-      style: TextStyle(
-        fontSize: defaulTextSize,
-        color: Colors.black,
-        overflow: TextOverflow.ellipsis,
-        height: defaultTextHeight,
-      ),
-      textWidth: 80,
-      textAlign: TextAlign.center,
-    ),
+    required this.timeTick,
   });
 
   // 时间刻度.

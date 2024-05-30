@@ -190,29 +190,11 @@ extension $CrossPointConfigCopyWith on CrossPointConfig {
 
 CrossConfig _$CrossConfigFromJson(Map<String, dynamic> json) => CrossConfig(
       enable: json['enable'] as bool? ?? true,
-      crosshair: json['crosshair'] == null
-          ? const LineConfig(
-              type: LineType.dashed,
-              color: Colors.black,
-              width: 0.5,
-              dashes: [3, 3])
-          : LineConfig.fromJson(json['crosshair'] as Map<String, dynamic>),
-      point: json['point'] == null
-          ? const CrossPointConfig()
-          : CrossPointConfig.fromJson(json['point'] as Map<String, dynamic>),
-      tickText: json['tickText'] == null
-          ? const TextAreaConfig(
-              style: TextStyle(
-                  fontSize: defaulTextSize,
-                  color: Colors.white,
-                  overflow: TextOverflow.ellipsis,
-                  height: defaultTextHeight),
-              background: Colors.black,
-              padding: EdgeInsets.all(2),
-              border: BorderSide.none,
-              borderRadius: BorderRadius.all(Radius.circular(2)))
-          : TextAreaConfig.fromJson(json['tickText'] as Map<String, dynamic>),
-      spacing: (json['spacing'] as num?)?.toDouble() ?? 1,
+      crosshair: LineConfig.fromJson(json['crosshair'] as Map<String, dynamic>),
+      point: CrossPointConfig.fromJson(json['point'] as Map<String, dynamic>),
+      tickText:
+          TextAreaConfig.fromJson(json['tickText'] as Map<String, dynamic>),
+      spacing: (json['spacing'] as num).toDouble(),
       showLatestTipsInBlank: json['showLatestTipsInBlank'] as bool? ?? true,
     );
 

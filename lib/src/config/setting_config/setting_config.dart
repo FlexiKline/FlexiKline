@@ -27,40 +27,31 @@ part 'setting_config.g.dart';
 class SettingConfig {
   SettingConfig({
     /// Long/Short颜色配置
-    this.textColor = Colors.black,
-    this.longColor = const Color(0xFF33BD65),
-    this.shortColor = const Color(0xFFE84E74),
+    required this.textColor,
+    required this.longColor,
+    required this.shortColor,
     this.opacity = 0.5,
 
     /// 内置LoadingView样式配置
-    this.loading = const LoadingConfig(),
+    required this.loading,
 
     /// 主/副图区域大小配置
     this.mainRect = Rect.zero,
-    this.mainMinSize = defaultMainRectMinSize,
-    this.mainPadding = defaultMainIndicatorPadding,
+    required this.mainMinSize,
+    required this.mainPadding,
     this.mainDrawBelowTipsArea = true,
 
     /// 主/副图绘制参数
     this.minPaintBlankRate = 0.5,
     this.alwaysCalculateScreenOfCandlesIfEnough = false,
-    this.candleMaxWidth = 40.0,
-    this.candleWidth = 7.0,
-    this.candleSpacing = 1.0,
-    this.candleLineWidth = 1.0,
-    this.firstCandleInitOffset = 80,
+    required this.candleMaxWidth,
+    required this.candleWidth,
+    required this.candleSpacing,
+    required this.candleLineWidth,
+    required this.firstCandleInitOffset,
 
     /// 全局默认的刻度值配置.
-    this.tickText = const TextAreaConfig(
-      style: TextStyle(
-        fontSize: defaulTextSize,
-        color: Colors.black,
-        overflow: TextOverflow.ellipsis,
-        height: defaultTextHeight,
-      ),
-      textAlign: TextAlign.end,
-      padding: EdgeInsets.symmetric(horizontal: 2),
-    ),
+    required this.tickText,
 
     /// 副图配置
     // 副区的指标图最大数量

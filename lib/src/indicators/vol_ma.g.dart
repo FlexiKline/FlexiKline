@@ -17,36 +17,13 @@ VolMaIndicator _$VolMaIndicatorFromJson(Map<String, dynamic> json) =>
           ? defaultSubIndicatorPadding
           : const EdgeInsetsConverter()
               .fromJson(json['padding'] as Map<String, dynamic>),
-      calcParams: (json['calcParams'] as List<dynamic>?)
-              ?.map((e) => MaParam.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          const [
-            MaParam(
-                count: 5,
-                tips: TipsConfig(
-                    label: 'MA5: ',
-                    style: TextStyle(
-                        fontSize: defaulTextSize,
-                        color: Colors.orange,
-                        overflow: TextOverflow.ellipsis,
-                        height: defaultTipsTextHeight))),
-            MaParam(
-                count: 10,
-                tips: TipsConfig(
-                    label: 'MA10: ',
-                    style: TextStyle(
-                        fontSize: defaulTextSize,
-                        color: Colors.blue,
-                        overflow: TextOverflow.ellipsis,
-                        height: defaultTipsTextHeight)))
-          ],
-      tipsPadding: json['tipsPadding'] == null
-          ? defaultTipsPadding
-          : const EdgeInsetsConverter()
-              .fromJson(json['tipsPadding'] as Map<String, dynamic>),
-      lineWidth:
-          (json['lineWidth'] as num?)?.toDouble() ?? defaultIndicatorLineWidth,
-      precision: (json['precision'] as num?)?.toInt() ?? 2,
+      calcParams: (json['calcParams'] as List<dynamic>)
+          .map((e) => MaParam.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      tipsPadding: const EdgeInsetsConverter()
+          .fromJson(json['tipsPadding'] as Map<String, dynamic>),
+      lineWidth: (json['lineWidth'] as num).toDouble(),
+      precision: (json['precision'] as num).toInt(),
     );
 
 Map<String, dynamic> _$VolMaIndicatorToJson(VolMaIndicator instance) =>

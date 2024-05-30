@@ -98,7 +98,7 @@ class TestFlexiKlineTheme implements IFlexiKlineTheme {
   Color tooltipTextColor = const Color(0xFF949494);
 }
 
-class TestFlexiKlineConfiguration extends BaseFlexiKlineConfiguration {
+class TestFlexiKlineConfiguration extends BaseFlexiKlineThemeConfiguration {
   @override
   Size get initialMainSize {
     final mediaQuery = MediaQueryData.fromWindow(window);
