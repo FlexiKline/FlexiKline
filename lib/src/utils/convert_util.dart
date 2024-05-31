@@ -349,3 +349,92 @@ dynamic convertRadius(Radius radius) {
   if (radius.x == radius.y) return radius.x;
   return '${radius.x}:${radius.y}';
 }
+
+// Ref: https://api.flutter.dev/flutter/animation/Curves-class.html
+Curve parseCurve(String curvestr) {
+  switch (curvestr) {
+    case 'decelerate':
+      return Curves.decelerate;
+    case 'linear':
+      return Curves.linear;
+    case 'ease':
+      return Curves.ease;
+
+    case 'easeIn':
+      return Curves.easeIn;
+    case 'easeInSine':
+      return Curves.easeInSine;
+    case 'easeInQuad':
+      return Curves.easeInQuad;
+    case 'easeInCubic':
+      return Curves.easeInCubic;
+    case 'easeInQuart':
+      return Curves.easeInQuart;
+    case 'easeInQuint':
+      return Curves.easeInQuint;
+    case 'easeInExpo':
+      return Curves.easeInExpo;
+    case 'easeInCirc':
+      return Curves.easeInCirc;
+    case 'easeInBack':
+      return Curves.easeInBack;
+
+    case 'easeInOut':
+      return Curves.easeInOut;
+    case 'easeInOutSine':
+      return Curves.easeInOutSine;
+    case 'easeInOutQuad':
+      return Curves.easeInOutQuad;
+    case 'easeInOutCubic':
+      return Curves.easeInOutCubic;
+    case 'easeInOutQuart':
+      return Curves.easeInOutQuart;
+    case 'easeInOutQuint':
+      return Curves.easeInOutQuint;
+    case 'easeInOutExpo':
+      return Curves.easeInOutExpo;
+    case 'easeInOutCirc':
+      return Curves.easeInOutCirc;
+    case 'easeInOutBack':
+      return Curves.easeInOutBack;
+
+    case 'easeOut':
+      return Curves.easeOut;
+    case 'easeOutSine':
+      return Curves.easeOutSine;
+    case 'easeOutQuad':
+      return Curves.easeOutQuad;
+    case 'easeOutCubic':
+      return Curves.easeOutCubic;
+    case 'easeOutQuart':
+      return Curves.easeOutQuart;
+    case 'easeOutQuint':
+      return Curves.easeOutQuint;
+    case 'easeOutExpo':
+      return Curves.easeOutExpo;
+    case 'easeOutCirc':
+      return Curves.easeOutCirc;
+    case 'easeOutBack':
+      return Curves.easeOutBack;
+
+    case 'elasticIn':
+      return Curves.elasticIn;
+    case 'elasticInOut':
+      return Curves.elasticInOut;
+    case 'elasticOut':
+      return Curves.elasticOut;
+
+    case 'fastOutSlowIn':
+      return Curves.fastOutSlowIn;
+    case 'slowMiddle':
+      return Curves.slowMiddle;
+
+    case 'bounceIn':
+      return Curves.bounceIn;
+    case 'bounceInOut':
+      return Curves.bounceInOut;
+    case 'bounceOut':
+      return Curves.bounceOut;
+  }
+  return Curves.decelerate;
+}

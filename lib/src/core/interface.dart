@@ -146,9 +146,8 @@ abstract interface class ISetting {
     EdgeInsets? padding,
   });
 
-  /// TODO: 待优化后废弃, 暂保留
-  int get panMaxDurationWhenPanEnd;
-  double get panMaxOffsetPreFrameWhenPanEnd;
+  // Gesture Pan
+  ToleranceConfig get panTolerance;
 
   /// Config
 

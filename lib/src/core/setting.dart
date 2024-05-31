@@ -122,13 +122,8 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart {
   }
 
   // Gesture Pan
-  // 平移结束后, candle惯性平移, 持续的最长时间.
-  @Deprecated('待优化')
   @override
-  int get panMaxDurationWhenPanEnd => 1000;
-  // 平移结束后, candle惯性平移, 此时每一帧移动的最大偏移量. 值越大, 移动的会越远.
-  @override
-  double get panMaxOffsetPreFrameWhenPanEnd => 30.0;
+  ToleranceConfig get panTolerance => settingConfig.panTolerance;
 
   /// 最大蜡烛宽度[1, 50]
   // double _candleMaxWidth = 40.0;

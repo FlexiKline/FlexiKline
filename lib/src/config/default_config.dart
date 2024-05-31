@@ -32,6 +32,7 @@ import 'mark_config/mark_config.dart';
 import 'setting_config/setting_config.dart';
 import 'text_area_config/text_area_config.dart';
 import 'tips_config/tips_config.dart';
+import 'tolerance_config/tolerance_config.dart';
 import 'tooltip_config/tooltip_config.dart';
 
 extension IFlexiKlineThemeExt on IFlexiKlineTheme {
@@ -240,6 +241,9 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
 
     /// 副区的指标图最大数量
     int subChartMaxCount = defaultSubChartMaxCount,
+
+    /// 手势平移限制参数
+    ToleranceConfig? panTolerance,
   }) {
     return SettingConfig(
       textColor: textColor ?? theme.textColor,
@@ -287,6 +291,9 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
 
       /// 副区的指标图最大数量
       subChartMaxCount: subChartMaxCount,
+
+      /// 手势平移限制参数
+      panTolerance: panTolerance,
     );
   }
 

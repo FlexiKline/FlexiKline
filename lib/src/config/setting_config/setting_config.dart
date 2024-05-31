@@ -19,6 +19,7 @@ import '../../constant.dart';
 import '../../framework/serializers.dart';
 import '../loading_config/loading_config.dart';
 import '../text_area_config/text_area_config.dart';
+import '../tolerance_config/tolerance_config.dart';
 
 part 'setting_config.g.dart';
 
@@ -56,7 +57,10 @@ class SettingConfig {
     /// 副图配置
     // 副区的指标图最大数量
     this.subChartMaxCount = defaultSubChartMaxCount,
-  });
+
+    /// 手势平移限制参数
+    ToleranceConfig? panTolerance,
+  }) : panTolerance = panTolerance ?? ToleranceConfig();
 
   /// Long/Short颜色配置
   final Color textColor;
@@ -102,6 +106,9 @@ class SettingConfig {
 
   // 副区的指标图最大数量
   final int subChartMaxCount;
+
+  /// 手势平移限制参数
+  final ToleranceConfig panTolerance;
 
   void setMainRect(Size size) {
     if (size.isEmpty) {

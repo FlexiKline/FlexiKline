@@ -44,6 +44,8 @@ abstract class _$SettingConfigCWProxy {
 
   SettingConfig subChartMaxCount(int subChartMaxCount);
 
+  SettingConfig panTolerance(ToleranceConfig? panTolerance);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `SettingConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -69,6 +71,7 @@ abstract class _$SettingConfigCWProxy {
     double? firstCandleInitOffset,
     TextAreaConfig? tickText,
     int? subChartMaxCount,
+    ToleranceConfig? panTolerance,
   });
 }
 
@@ -146,6 +149,10 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
       this(subChartMaxCount: subChartMaxCount);
 
   @override
+  SettingConfig panTolerance(ToleranceConfig? panTolerance) =>
+      this(panTolerance: panTolerance);
+
+  @override
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `SettingConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -173,6 +180,7 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
     Object? firstCandleInitOffset = const $CopyWithPlaceholder(),
     Object? tickText = const $CopyWithPlaceholder(),
     Object? subChartMaxCount = const $CopyWithPlaceholder(),
+    Object? panTolerance = const $CopyWithPlaceholder(),
   }) {
     return SettingConfig(
       textColor: textColor == const $CopyWithPlaceholder() || textColor == null
@@ -263,6 +271,10 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
           ? _value.subChartMaxCount
           // ignore: cast_nullable_to_non_nullable
           : subChartMaxCount as int,
+      panTolerance: panTolerance == const $CopyWithPlaceholder()
+          ? _value.panTolerance
+          // ignore: cast_nullable_to_non_nullable
+          : panTolerance as ToleranceConfig?,
     );
   }
 }
@@ -306,6 +318,10 @@ SettingConfig _$SettingConfigFromJson(Map<String, dynamic> json) =>
           TextAreaConfig.fromJson(json['tickText'] as Map<String, dynamic>),
       subChartMaxCount: (json['subChartMaxCount'] as num?)?.toInt() ??
           defaultSubChartMaxCount,
+      panTolerance: json['panTolerance'] == null
+          ? null
+          : ToleranceConfig.fromJson(
+              json['panTolerance'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$SettingConfigToJson(SettingConfig instance) {
@@ -337,5 +353,6 @@ Map<String, dynamic> _$SettingConfigToJson(SettingConfig instance) {
   val['firstCandleInitOffset'] = instance.firstCandleInitOffset;
   val['tickText'] = instance.tickText.toJson();
   val['subChartMaxCount'] = instance.subChartMaxCount;
+  val['panTolerance'] = instance.panTolerance.toJson();
   return val;
 }

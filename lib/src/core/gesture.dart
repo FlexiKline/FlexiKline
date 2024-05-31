@@ -31,6 +31,7 @@ mixin GestureBinding on KlineBindingBase implements IGestureEvent, IState {
   void dispose() {
     super.dispose();
     logd('dispose gesture');
+    animationController?.dispose();
     _ticker = null;
   }
 
@@ -141,7 +142,8 @@ mixin GestureBinding on KlineBindingBase implements IGestureEvent, IState {
     // <0: 负数代表从右向左滑动.
     // >0: 正数代表从左向右滑动.
     final velocity = details.velocity.pixelsPerSecond.dx;
-    if (velocity == 0 ||
+    if (ticker == null ||
+        velocity == 0 ||
         curKlineData.isEmpty ||
         (velocity < 0 && !canPanRTL) ||
         (velocity > 0 && !canPanLTR)) {
@@ -152,53 +154,46 @@ mixin GestureBinding on KlineBindingBase implements IGestureEvent, IState {
     }
 
     /// 确认继续平移时间 (利用log指数函数特点: 随着自变量velocity的增大，函数值的增长速度逐渐减慢)
-    /// 测试当限定参数panMaxDurationWhenPanEnd等于1000(1秒时), velocity代入变化为:
+    /// 测试当限定参数[panTolerance.maxDuration]等于1000(1秒时), [velocity]带入后[duration]变化为:
     /// 100000 > 1151.29; 10000 > 921.03; 9000 > 910.49; 5000 > 851.71; 2000 > 760.09; 800 > 668.46; 100 > 460.51
-    final duration = (math.log(velocity.abs()) * panMaxDurationWhenPanEnd / 10)
+    final duration = (math.log(velocity.abs()) * panTolerance.maxDuration / 10)
         .round()
-        .clamp(0, panMaxDurationWhenPanEnd);
+        .clamp(0, panTolerance.maxDuration);
 
-    /// 当动画执行时每一帧继续平移的最大偏移量.
-    final distance = velocity.clamp(
-      -panMaxOffsetPreFrameWhenPanEnd,
-      panMaxOffsetPreFrameWhenPanEnd,
-    );
-    logd(
-      'onScaleEnd >>> velocity:${details.velocity.pixelsPerSecond.dx} duration:$duration, distance:$distance, curOffset:${_panScaleData!.offset.dx}',
-    );
+    /// 惯性平移的最大距离.
+    final distance = velocity * panTolerance.inertiaFactor;
+
+    logi('onScaleEnd animation velocity:$velocity => $panTolerance');
+
     animationController?.dispose();
     animationController = AnimationController(
-      value: 0,
       vsync: ticker!,
       duration: Duration(milliseconds: duration),
     );
-    Animation<double> curve = CurvedAnimation(
-      parent: animationController!,
-      curve: Curves.decelerate,
-    );
-    Animation<double> animation = Tween<double>(
-      begin: distance,
-      end: 0,
-    ).animate(curve);
+
+    final animation = Tween(begin: 0.0, end: distance)
+        .chain(CurveTween(curve: panTolerance.curve))
+        .animate(animationController!);
+
+    final initDx = _panScaleData!.offset.dx;
     animation.addListener(() {
-      // logd('onScaleEnd val:${animation.value}');
+      // logd('onScaleEnd animation.value:${animation.value}');
       if (_panScaleData != null) {
         _panScaleData!.update(Offset(
-          _panScaleData!.offset.dx + animation.value,
+          initDx + animation.value,
           _panScaleData!.offset.dy,
         ));
         handleMove(_panScaleData!);
       }
     });
-    animation.addStatusListener((status) {
+
+    animationController?.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        if (_panScaleData != null) {
-          handleMove(_panScaleData!);
-        }
         _panScaleData?.end();
         _panScaleData = null;
       }
     });
+
     animationController?.forward();
   }
 
