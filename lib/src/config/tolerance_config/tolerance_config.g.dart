@@ -88,7 +88,7 @@ extension $ToleranceConfigCopyWith on ToleranceConfig {
 ToleranceConfig _$ToleranceConfigFromJson(Map<String, dynamic> json) =>
     ToleranceConfig(
       maxDuration: (json['maxDuration'] as num?)?.toInt() ?? 1000,
-      inertiaFactor: (json['inertiaFactor'] as num?)?.toDouble() ?? 0.15,
+      inertiaFactor: (json['inertiaFactor'] as num?)?.toDouble() ?? 0.2,
       curvestr: json['curvestr'] as String? ?? 'decelerate',
     );
 

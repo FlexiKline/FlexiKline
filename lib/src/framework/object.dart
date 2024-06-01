@@ -606,11 +606,25 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
 
   @override
   void doOnCross(Canvas canvas, Offset offset, {CandleModel? model}) {
-    for (var child in indicator.children) {
-      child.paintObject?.onCross(canvas, offset);
-    }
+    if (indicator.drawBelowTipsArea) {
+      if (cross.isCrossing) {
+        final tipsHeight = doPaintTips(canvas, offset: offset, model: model);
 
-    doPaintTips(canvas, offset: offset, model: model);
+        if (indicator.needUpdateLayout(tipsHeight)) {
+          indicator.updateLayout(tipsHeight: tipsHeight);
+        }
+      }
+      for (var child in indicator.children) {
+        child.paintObject?.onCross(canvas, offset);
+      }
+    } else {
+      for (var child in indicator.children) {
+        child.paintObject?.onCross(canvas, offset);
+      }
+      if (cross.isCrossing) {
+        doPaintTips(canvas, offset: offset, model: model);
+      }
+    }
   }
 
   double doPaintTips(Canvas canvas, {CandleModel? model, Offset? offset}) {

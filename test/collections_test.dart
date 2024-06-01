@@ -60,6 +60,18 @@ void main() {
     printIterable(set);
   });
 
+  test('SplayTreeMap', () {
+    SplayTreeMap map = SplayTreeMap<String, Item>();
+    map['zp3'] = Item('zp3', 3);
+    map['zp0'] = Item('zp0', 0);
+    map['zp2'] = Item('zp2', 0);
+    map['zp1'] = Item('zp1', 0);
+    map['zp-1'] = Item('zp-1', -1);
+
+    map['zp4'] = Item('zp-4', 0);
+    printMap(map);
+  });
+
   test('LinkedHashSet', () {
     LinkedHashSet set = LinkedHashSet();
     set.add(Item('zp-1', -1));

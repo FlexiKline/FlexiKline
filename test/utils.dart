@@ -19,3 +19,9 @@ void printIterable<T>(Iterable<T> list, {String? tag}) {
     debugPrint('${tag ?? ''}>${val.toString()}');
   }
 }
+
+void printMap<K, V>(Map<K, V> map, {String? tag}) {
+  map.forEach((key, val) {
+    debugPrint('${tag ?? ''}> key:$key val:${val.toString()}');
+  });
+}

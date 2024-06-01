@@ -49,7 +49,7 @@ mixin ChartBinding on KlineBindingBase implements IChart, IState, ISetting {
   @protected
   void markRepaintLastPrice({bool latestPriceUpdated = false}) {
     // 最新价已更新, 且首根蜡烛在可视区域内.
-    _reset = latestPriceUpdated && paintDxOffset <= 0;
+    // _reset = latestPriceUpdated && paintDxOffset <= 0;
     _markRepaint();
   }
 
@@ -109,5 +109,7 @@ mixin ChartBinding on KlineBindingBase implements IChart, IState, ISetting {
       /// 绘制副图的指标图
       indicator.paintObject?.doPaintChart(canvas, size);
     }
+
+    if (_reset) _reset = false;
   }
 }

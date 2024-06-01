@@ -29,7 +29,7 @@ part 'tolerance_config.g.dart';
 class ToleranceConfig {
   ToleranceConfig({
     this.maxDuration = 1000,
-    this.inertiaFactor = 0.15,
+    this.inertiaFactor = 0.2,
     this.curvestr = 'decelerate',
   }) : _curve = parseCurve(curvestr);
 

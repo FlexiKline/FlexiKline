@@ -22,7 +22,7 @@ import '../framework/export.dart';
 import 'binding_base.dart';
 import 'interface.dart';
 
-mixin SettingBinding on KlineBindingBase implements ISetting, IChart {
+mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
   @override
   void initState() {
     super.initState();
@@ -242,14 +242,16 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart {
         indicatorsConfig.mainIndicators[key]!,
         this,
       );
-      markRepaintChart();
+      markRepaintChart(reset: true);
+      markRepaintCross();
     }
   }
 
   /// 删除主图中[key]指定的指标
   void delIndicatorInMain(ValueKey<dynamic> key) {
     mainIndicator.deleteIndicator(key);
-    markRepaintChart();
+    markRepaintChart(reset: true);
+    markRepaintCross();
   }
 
   /// 在副图中添加指标

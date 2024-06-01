@@ -370,7 +370,7 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
           EdgeInsets.only(
             left: 15 * theme.scale,
             right: 65 * theme.scale,
-            top: 4 * theme.scale,
+            top: 10 * theme.scale,
           ),
       padding: padding ??
           EdgeInsets.symmetric(
