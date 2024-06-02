@@ -190,6 +190,21 @@ class BitFlexiKlineConfiguration extends BaseFlexiKlineThemeConfiguration {
   }
 
   @override
+  LoadingConfig genInnerLoadingConfig(
+    BaseBitFlexiKlineTheme theme, {
+    double? size,
+    double? strokeWidth,
+    Color? background,
+    Color? valueColor,
+  }) {
+    return super.genInnerLoadingConfig(
+      theme,
+      background: theme.countDownTextBg,
+      valueColor: theme.crosshair,
+    );
+  }
+
+  @override
   TimeIndicator genTimeIndicator(
     BaseBitFlexiKlineTheme theme, {
     double? height,

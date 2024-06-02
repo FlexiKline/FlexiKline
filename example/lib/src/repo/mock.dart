@@ -140,11 +140,10 @@ Future<List<CandleModel>> genRandomCandleList({
     l = genVal(math.min(o, c), range, isUp: false);
     if (h < l) [h, l] = [l, h];
     v = genVal(v, rangeVol);
-    dateTime = dateTime!.add(Duration(
-      milliseconds: flag * i * bar.milliseconds,
-    ));
     m = CandleModel(
-      timestamp: dateTime.millisecondsSinceEpoch,
+      timestamp: dateTime
+          .add(Duration(milliseconds: flag * i * bar.milliseconds))
+          .millisecondsSinceEpoch,
       h: h.d,
       o: o.d,
       c: c.d,
@@ -153,6 +152,7 @@ Future<List<CandleModel>> genRandomCandleList({
     );
     list.add(m);
   }
+
   return list;
 }
 

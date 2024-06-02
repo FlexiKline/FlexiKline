@@ -23,7 +23,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
 import '../config.dart';
-import '../providers/bit_kline_provider.dart';
+import '../providers/bit_kline_config.dart';
 import '../repo/api.dart' as api;
 import '../widgets/flexi_indicator_bar.dart';
 import '../widgets/latest_price_view.dart';

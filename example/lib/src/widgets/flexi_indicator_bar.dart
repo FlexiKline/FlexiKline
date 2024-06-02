@@ -18,6 +18,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../providers/kline_controller_state_provider.dart';
+
 typedef IndicatorBarItemBuilder = Widget Function(BuildContext, Indicator);
 
 class FlexiIndicatorBar extends ConsumerStatefulWidget {
@@ -55,27 +57,10 @@ class _FlexiIndicatorBarState extends ConsumerState<FlexiIndicatorBar> {
     super.initState();
   }
 
-  void onTapMainIndicator(ValueKey key) {
-    if (widget.controller.mainIndicatorKeys.contains(key)) {
-      widget.controller.delIndicatorInMain(key);
-    } else {
-      widget.controller.addIndicatorInMain(key);
-    }
-    setState(() {});
-  }
-
-  void onTapSubIndicator(ValueKey key) {
-    if (widget.controller.subIndicatorKeys.contains(key)) {
-      widget.controller.delIndicatorInSub(key);
-    } else {
-      widget.controller.addIndicatorInSub(key);
-    }
-    setState(() {});
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = ref.watch(themeProvider);
+    final klineState = ref.watch(klineStateProvider(widget.controller));
     return Container(
       alignment: widget.alignment ?? AlignmentDirectional.centerStart,
       padding: widget.padding,
@@ -88,13 +73,17 @@ class _FlexiIndicatorBarState extends ConsumerState<FlexiIndicatorBar> {
           mainAxisAlignment: MainAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            ...widget.controller.supportMainIndicatorKeys.map((key) {
+            ...klineState.supportMainIndicatorKeys.map((key) {
               return GestureDetector(
                 key: key,
-                onTap: () => onTapMainIndicator(key),
+                onTap: () {
+                  ref
+                      .read(klineStateProvider(widget.controller).notifier)
+                      .onTapMainIndicator(key);
+                },
                 child: IndicatorView(
                   indicatorKey: key,
-                  selected: widget.controller.mainIndicatorKeys.contains(key),
+                  selected: klineState.mainIndicatorKeys.contains(key),
                 ),
               );
             }),
@@ -104,13 +93,17 @@ class _FlexiIndicatorBarState extends ConsumerState<FlexiIndicatorBar> {
               width: 1.r,
               height: 20.r,
             ),
-            ...widget.controller.supportSubIndicatorKeys.map((key) {
+            ...klineState.supportSubIndicatorKeys.map((key) {
               return GestureDetector(
                 key: key,
-                onTap: () => onTapSubIndicator(key),
+                onTap: () {
+                  ref
+                      .read(klineStateProvider(widget.controller).notifier)
+                      .onTapSubIndicator(key);
+                },
                 child: IndicatorView(
                   indicatorKey: key,
-                  selected: widget.controller.subIndicatorKeys.contains(key),
+                  selected: klineState.subIndicatorKeys.contains(key),
                 ),
               );
             }),

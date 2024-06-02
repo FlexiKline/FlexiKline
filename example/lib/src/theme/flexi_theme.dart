@@ -216,6 +216,17 @@ extension ButtonStyleFKTheme on FKTheme {
     );
   }
 
+  ButtonStyle outlinedBtnStyle({
+    bool showOutlined = false,
+  }) {
+    return TextButton.styleFrom(
+      foregroundColor: t1,
+      backgroundColor: cardBg,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5.r)),
+      side: showOutlined ? BorderSide(color: t1, width: 1.r) : null,
+    );
+  }
+
   ButtonStyle circleBtnStyle({Color? fg, Color? bg}) {
     return TextButton.styleFrom(
       foregroundColor: fg ?? t2,

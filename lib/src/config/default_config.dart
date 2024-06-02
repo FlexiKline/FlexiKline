@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart';
 
 import '../constant.dart';
@@ -252,13 +253,7 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
       opacity: opacity,
 
       /// 内置LoadingView样式配置
-      loading: loadingConfig ??
-          LoadingConfig(
-            size: 24,
-            strokeWidth: 4,
-            background: theme.tooltipBg,
-            valueColor: theme.textColor,
-          ),
+      loading: loadingConfig ?? genInnerLoadingConfig(theme),
 
       /// 主/副图区域大小配置
       // mainRect: Rect.zero,
@@ -294,6 +289,21 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
 
       /// 手势平移限制参数
       panTolerance: panTolerance,
+    );
+  }
+
+  LoadingConfig genInnerLoadingConfig(
+    covariant IFlexiKlineTheme theme, {
+    double? size,
+    double? strokeWidth,
+    Color? background,
+    Color? valueColor,
+  }) {
+    return LoadingConfig(
+      size: size ?? 24 * theme.scale,
+      strokeWidth: strokeWidth ?? 4 * theme.scale,
+      background: background ?? theme.tooltipBg,
+      valueColor: valueColor ?? theme.textColor,
     );
   }
 

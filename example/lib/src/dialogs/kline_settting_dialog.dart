@@ -19,6 +19,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../providers/kline_controller_state_provider.dart';
 import '../widgets/flexi_kline_size_slider.dart';
 
 class KlineSettingDialog extends ConsumerStatefulWidget {
@@ -120,6 +121,7 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
   Widget _buildDisplaySetting(BuildContext context) {
     final theme = ref.watch(themeProvider);
     final s = S.of(context);
+    final klineState = ref.watch(klineStateProvider(widget.controller));
     return Container(
       padding: EdgeInsetsDirectional.symmetric(
         horizontal: 16.r,
@@ -132,6 +134,7 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
               Expanded(
                 child: CheckboxListTile(
                   value: true,
+                  contentPadding: EdgeInsets.zero,
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   onChanged: (value) {
                     setState(() {});
@@ -150,6 +153,7 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
               Expanded(
                 child: CheckboxListTile(
                   value: true,
+                  contentPadding: EdgeInsets.zero,
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   onChanged: (value) {
                     setState(() {});
@@ -171,11 +175,11 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
             children: [
               Expanded(
                 child: CheckboxListTile(
-                  value: true,
+                  value: klineState
+                      .controller.indicatorsConfig.candle.showCountDown,
+                  contentPadding: EdgeInsets.zero,
                   onChanged: (value) {
-                    setState(() {
-                      // this.check = value;
-                    });
+                    ref.read(klineStateProvider(widget.controller).notifier);
                   },
                   controlAffinity: ListTileControlAffinity.leading,
                   title: Text(

@@ -15,17 +15,17 @@
 import 'dart:math' as math;
 
 import 'package:example/src/theme/flexi_theme.dart';
-import 'package:example/src/widgets/flexi_kline_mark_view.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../config.dart';
-import '../providers/default_flexi_kline_provider.dart';
+import '../providers/default_flexi_kline_config.dart';
 import '../repo/mock.dart';
 import '../test/canvas_demo.dart';
 import '../widgets/flexi_indicator_bar.dart';
+import '../widgets/flexi_kline_mark_view.dart';
 import '../widgets/flexi_time_bar.dart';
 import 'main_nav_page.dart';
 
@@ -68,9 +68,16 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
   Future<void> loadCandleData1(CandleReq request) async {
     try {
       controller.startLoading(request, useCacheFirst: true);
-      genRandomCandleList(count: 300, bar: request.timeBar!).then((list) {
-        controller.setKlineData(request, list);
-      });
+
+      Future<List<CandleModel>> getCandleData(TimeBar timeBar) async =>
+          await genRandomCandleList(
+            count: 500,
+            bar: timeBar,
+          );
+      final list = await compute(getCandleData, request.timeBar!);
+
+      controller.setKlineData(request, list);
+      setState(() {});
     } finally {
       controller.stopLoading();
     }
@@ -78,7 +85,6 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
 
   void onTapTimeBar(TimeBar value) {
     req1.bar = value.bar;
-    setState(() {});
     loadCandleData1(req1);
   }
 

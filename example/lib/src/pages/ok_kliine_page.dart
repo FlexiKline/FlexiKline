@@ -23,7 +23,7 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
 import '../config.dart';
 import '../repo/api.dart' as api;
-import '../providers/default_flexi_kline_provider.dart';
+import '../providers/default_flexi_kline_config.dart';
 import '../widgets/flexi_indicator_bar.dart';
 import '../widgets/flexi_kline_mark_view.dart';
 import '../widgets/latest_price_view.dart';
