@@ -27,7 +27,8 @@ part 'vol_ma.g.dart';
 
 /// VolMa 移动平均指标线
 @FlexiIndicatorSerializable
-class VolMaIndicator extends SinglePaintObjectIndicator {
+class VolMaIndicator extends SinglePaintObjectIndicator
+    implements IPrecomputable {
   VolMaIndicator({
     super.key = volMaKey,
     super.name = 'VOLMA',
@@ -44,6 +45,9 @@ class VolMaIndicator extends SinglePaintObjectIndicator {
   final double lineWidth;
   // 默认精度
   final int precision;
+
+  @override
+  dynamic getCalcParam() => calcParams;
 
   @override
   VolMaPaintObject createPaintObject(KlineBindingBase controller) {

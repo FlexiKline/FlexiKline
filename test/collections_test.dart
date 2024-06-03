@@ -13,7 +13,9 @@
 // limitations under the License.
 
 import 'dart:collection';
+import 'dart:math';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'utils.dart';
@@ -48,38 +50,72 @@ class Item implements Comparable<Item> {
 }
 
 void main() {
-  test('SplayTreeSet', () {
-    SplayTreeSet set = SplayTreeSet();
-    set.add(Item('zp3', 3));
-    set.add(Item('zp0', 0));
-    set.add(Item('zp2', 0));
-    set.add(Item('zp1', 0));
-    set.add(Item('zp-1', -1));
-
-    set.add(Item('zp-4', 0));
-    printIterable(set);
+  final stopwatch = Stopwatch();
+  setUp(() {
+    stopwatch.reset();
+    stopwatch.start();
   });
 
-  test('SplayTreeMap', () {
-    SplayTreeMap map = SplayTreeMap<String, Item>();
-    map['zp3'] = Item('zp3', 3);
-    map['zp0'] = Item('zp0', 0);
-    map['zp2'] = Item('zp2', 0);
-    map['zp1'] = Item('zp1', 0);
-    map['zp-1'] = Item('zp-1', -1);
-
-    map['zp4'] = Item('zp-4', 0);
-    printMap(map);
+  tearDown(() {
+    stopwatch.stop();
+    debugPrint('spent:${stopwatch.elapsedMicroseconds}');
   });
 
-  test('LinkedHashSet', () {
-    LinkedHashSet set = LinkedHashSet();
-    set.add(Item('zp-1', -1));
-    set.add(Item('zp0', 0));
-    set.add(Item('zp1', 1));
-    set.add(Item('zp2', 2));
+  // test('SplayTreeSet', () {
+  //   SplayTreeSet set = SplayTreeSet();
+  //   set.add(Item('zp3', 3));
+  //   set.add(Item('zp0', 0));
+  //   set.add(Item('zp2', 0));
+  //   set.add(Item('zp1', 0));
+  //   set.add(Item('zp-1', -1));
 
-    set.remove(set.first);
-    printIterable(set);
+  //   set.add(Item('zp-4', 0));
+  //   printIterable(set);
+  // });
+
+  // test('SplayTreeMap', () {
+  //   SplayTreeMap map = SplayTreeMap<String, Item>();
+  //   map['zp3'] = Item('zp3', 3);
+  //   map['zp0'] = Item('zp0', 0);
+  //   map['zp2'] = Item('zp2', 0);
+  //   map['zp1'] = Item('zp1', 0);
+  //   map['zp-1'] = Item('zp-1', -1);
+
+  //   map['zp4'] = Item('zp-4', 0);
+  //   printMap(map);
+  // });
+
+  // test('LinkedHashSet', () {
+  //   LinkedHashSet set = LinkedHashSet();
+  //   set.add(Item('zp-1', -1));
+  //   set.add(Item('zp0', 0));
+  //   set.add(Item('zp1', 1));
+  //   set.add(Item('zp2', 2));
+
+  //   set.remove(set.first);
+  //   printIterable(set);
+  // });
+
+  test('merger addAll', () {
+    final list1 = List.filled(100000000, fillData1);
+    final list2 = List.filled(100000000, fillData2);
+
+    debugPrint('merger add');
+    final newList = List.of(list1, growable: true)..addAll(list2);
+
+    assert(newList.length == 200000000);
+  });
+
+  test('merger ...', () {
+    final list1 = List.filled(100000000, fillData1);
+    final list2 = List.filled(100000000, fillData2);
+
+    debugPrint('merger ...');
+    final newList = List.of([...list1, ...list2]);
+
+    assert(newList.length == 200000000);
   });
 }
+
+const fillData1 = 'AAABBBCCC';
+const fillData2 = 'XXXYYYZZZ';

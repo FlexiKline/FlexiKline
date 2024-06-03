@@ -12,10 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export 'candle_model/candle_model.dart';
-export 'candle_req/candle_req.dart';
-export 'gesture_data.dart';
-export 'tooltip_info.dart';
-export 'minmax.dart';
-export 'bag_num.dart';
-export 'range.dart';
+final class Range {
+  Range(this.start, this.end);
+
+  final int start;
+  final int end;
+
+  @override
+  String toString() {
+    return 'Range[$start, $end]';
+  }
+
+  @override
+  int get hashCode => start.hashCode ^ end.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Range &&
+          runtimeType == other.runtimeType &&
+          start == other.start &&
+          end == other.end;
+}

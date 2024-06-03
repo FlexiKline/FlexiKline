@@ -27,7 +27,7 @@ part 'ma.g.dart';
 
 /// MA 移动平均指标线
 @FlexiIndicatorSerializable
-class MAIndicator extends SinglePaintObjectIndicator {
+class MAIndicator extends SinglePaintObjectIndicator implements IPrecomputable {
   MAIndicator({
     super.key = maKey,
     super.name = 'MA',
@@ -41,6 +41,9 @@ class MAIndicator extends SinglePaintObjectIndicator {
   final List<MaParam> calcParams;
   final EdgeInsets tipsPadding;
   final double lineWidth;
+
+  @override
+  dynamic getCalcParam() => calcParams;
 
   @override
   SinglePaintObjectBox createPaintObject(KlineBindingBase controller) {

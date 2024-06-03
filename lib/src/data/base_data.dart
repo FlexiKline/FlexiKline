@@ -16,7 +16,6 @@ import 'package:flutter/foundation.dart';
 
 import '../constant.dart';
 import '../extension/export.dart';
-import '../framework/indicator.dart';
 import '../framework/logger.dart';
 import '../model/export.dart';
 
@@ -49,26 +48,24 @@ abstract class BaseData with KlineLog {
     end = 0;
   }
 
+  /// 预计算指标数据
+  /// [key] 对应指标图的key
+  /// [calcParam] 对应指标图的计算参数
+  /// [range] 预计算的范围
+  /// [reset] 是否重置; 如果有, 忽略之前的计算结果.
   @protected
   @mustCallSuper
-  void preprocess(
-    Indicator indicator, {
-    required int start,
-    required int end,
+  void precompute(
+    ValueKey key, {
+    dynamic calcParam,
+    required Range range,
     bool reset = false,
   }) {
-    logd('preprocess BASE[$start, $end]$reset');
+    logd('precompute BASE(key:$key, $range, $reset, $calcParam)');
   }
 
-  // /// 绘制前: 重置计算结果.
-  // @protected
-  // @mustCallSuper
-  // void resetCalcuResult() {
-  //   logd('resetCalcuResult BASE');
-  // }
-
   final CandleReq req;
-  List<CandleModel> _list = List.empty(growable: true);
+  List<CandleModel> _list;
   List<CandleModel> get list => _list;
 
   int get length => list.length;
@@ -122,63 +119,40 @@ abstract class BaseData with KlineLog {
     end = startIndex + maxCandleCount;
   }
 
-  /// 合并newList到list
-  void mergeCandleList(
-    List<CandleModel> newList, {
-    bool replace = false,
-  }) {
+  /// 合并[list]和[newList]为一个新数组
+  /// 约定: [newList]和[list]都是按时间倒序排好的, 即最近/新的蜡烛数据以数组0开始依次存放.
+  /// 去重: 如两个数组拼接过程中发现重复的, 要去掉[list]中重复的元素.
+  /// return: 返回新列表中被更新的范围[start] ~ [end]
+  Range? mergeCandleList(List<CandleModel> newList) {
     if (newList.isEmpty) {
       logw("mergeCandleList newList is empty!");
-      return;
+      return null;
     }
-    if (list.isEmpty || replace) {
-      logw("mergeCandleList Use newList directly! $replace");
+    if (list.isEmpty) {
+      logw("mergeCandleList Use newList directly!");
       _list = List.of(newList);
-      return;
+      return Range(0, newList.length);
     }
 
-    int curAfter = list.first.timestamp; // 此时间ts之前的数据
-    int curBefore = list.last.timestamp; // 此时间ts之后的数据
-    assert(
-      curAfter >= curBefore,
-      "curAfter($curAfter) should be greater than curBefore($curBefore)!",
-    );
-
-    int newAfter = newList.first.timestamp; // 此时间ts之前的数据
-    int newBefore = newList.last.timestamp; // 此时间ts之后的数据
-    assert(
-      newAfter >= newBefore,
-      "newAfter($newAfter) should be greater than newBefore($newBefore)!",
-    );
-
-    // 根据两个数组范围[after, before], 合并去重
-    if (newBefore > curAfter) {
-      // newList拼接到列表前面
-      _list = [...newList, ...list];
-    } else if (newAfter < curBefore) {
-      // newList拼接到列表尾部
-      _list = [...list, ...newList];
+    if (list.first.timestamp <= newList.first.timestamp) {
+      int start = 0;
+      while (start < list.length &&
+          list[start].timestamp >= newList.last.timestamp) {
+        start++;
+      }
+      final curIterable = list.getRange(start, list.length);
+      _list = List.of(newList, growable: true)..addAll(curIterable);
+      // _list = List.of([...newList, ...curIterable]);
+      return Range(0, newList.length);
     } else {
-      List<CandleModel> allList = [...list, ...newList];
-      allList.sort((a, b) => b.timestamp - a.timestamp); // 排序
-      allList = removeDuplicate(allList);
-      _list = allList;
-      // newList在list有重叠, 需要合并. // TODO: 后续算法优化
-      // int newLen = newList.length;
-      // int curLen = list.length;
-      // int newIndex = 0;
-      // int curIndex = 0;
-      // CandleModel curData;
-      // while (newIndex < newLen || curIndex < curLen) {
-      //   if (newIndex == newLen) curData = newList[newIndex];
-      //   if (curIndex == curLen) curData = list[curIndex];
-      //   if (list[curIndex].timestamp < newList[newIndex].timestamp) {
-      //     curData = list[curIndex++];
-      //   } else {
-      //     curData = newList[newIndex++];
-      //   }
-      //   // list[]
-      // }
+      int end = list.length - 1;
+      while (end >= 0 && list[end].timestamp <= newList.first.timestamp) {
+        end--;
+      }
+      final curIterable = list.getRange(0, end + 1);
+      _list = List.of(curIterable, growable: true)..addAll(newList);
+      // _list =  List.of([...curIterable, ...newList]);
+      return Range(end + 1, _list.length);
     }
   }
 

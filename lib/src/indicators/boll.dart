@@ -26,7 +26,8 @@ import '../framework/export.dart';
 part 'boll.g.dart';
 
 @FlexiIndicatorSerializable
-class BOLLIndicator extends SinglePaintObjectIndicator {
+class BOLLIndicator extends SinglePaintObjectIndicator
+    implements IPrecomputable {
   BOLLIndicator({
     super.key = bollKey,
     super.name = 'BOLL',
@@ -63,6 +64,9 @@ class BOLLIndicator extends SinglePaintObjectIndicator {
   final bool isFillBetweenUpAndDn;
   // 默认是mbColor的0.1不透明度.
   final Color fillColor;
+
+  @override
+  dynamic getCalcParam() => calcParam;
 
   @override
   BOLLPaintObject createPaintObject(KlineBindingBase controller) {

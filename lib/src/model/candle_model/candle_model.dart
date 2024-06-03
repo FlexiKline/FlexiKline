@@ -25,7 +25,8 @@ part 'candle_model.g.dart';
 
 @FlexiModelSerializable
 class CandleModel
-    with MaMixin, VolMaMixin, EmaMixin, BollMixin, MacdMixin, KdjMixin {
+    with MaMixin, VolMaMixin, EmaMixin, BollMixin, MacdMixin, KdjMixin
+    implements Comparable<CandleModel> {
   CandleModel({
     required this.timestamp,
     required this.o,
@@ -75,6 +76,11 @@ class CandleModel
   /// K线状态:  0：K线未完结  1：K线已完结
   @JsonKey()
   String confirm;
+
+  @override
+  int compareTo(CandleModel other) {
+    return other.timestamp - timestamp;
+  }
 
   factory CandleModel.fromJson(Map<String, dynamic> json) =>
       _$CandleModelFromJson(json);

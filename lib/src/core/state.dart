@@ -50,7 +50,11 @@ mixin StateBinding
   set computeMode(mode) {
     if (mode != _computeMode) {
       _computeMode = mode;
-      preprocessIndicatorData(curKlineData, reset: true);
+      precomputeIndicatorData(
+        curKlineData,
+        range: Range(0, curDataKey.length),
+        reset: true,
+      );
     }
   }
 
@@ -193,49 +197,46 @@ mixin StateBinding
     }
   }
 
-  void preprocessIndicatorData(KlineData data, {bool reset = false}) {
+  /// 预计算Kline指标数据
+  /// [data] 待计算的Kline蜡烛数据
+  /// [range] 待计算的蜡烛数据范围
+  /// [reset] 是否重置; 如果有, 忽略之前的计算结果.
+  void precomputeIndicatorData(
+    KlineData data, {
+    required Range range,
+    bool reset = false,
+  }) {
     if (data.isEmpty) return;
 
     // 根据计算模式, 初始化基础数据
     data.initBasicData(computeMode, reset: reset);
 
-    const start = 0;
-    final end = data.length;
+    /// 收集预计算的指标参数
+    final calcParams = <ValueKey, dynamic>{};
+    // final isOnlyPrecomputeCurrent = false;
+    // if (isOnlyPrecomputeCurrent) {
+    //   calcParams.addAll(mainIndicator.getCalcParams());
+    //   subRectIndicators.forEach((indicator) {
+    //     calcParams.addAll(indicator.getCalcParams());
+    //   });
+    // } else {
+    indicatorsConfig.mainIndicators.forEach((key, indicator) {
+      calcParams.addAll(indicator.getCalcParams());
+    });
+    indicatorsConfig.subIndicators.forEach((key, indicator) {
+      calcParams.addAll(indicator.getCalcParams());
+    });
+    // }
 
-    final startTime = DateTime.now();
-    logd('preprocessIndicatorData start at $startTime');
     final stopwatch = Stopwatch();
-    for (var child in mainIndicator.children) {
-      final elapseTime = stopwatch.run(() {
-        data.preprocess(child, start: start, end: end, reset: reset);
-      });
-      logd(
-        'preprocess Main ${child.name} [$start, $end] $reset total spent:$elapseTime microseconds',
-      );
-    }
 
-    for (var indicator in subRectIndicators) {
-      if (indicator is MultiPaintObjectIndicator) {
-        for (var child in indicator.children) {
-          final elapseTime = stopwatch.run(() {
-            data.preprocess(child, start: start, end: end, reset: reset);
-          });
-          logd(
-            'preprocess Sub ${indicator.name}-${child.name} [$start, $end] $reset total spent:$elapseTime microseconds',
-          );
-        }
-      } else {
-        final elapseTime = stopwatch.run(() {
-          data.preprocess(indicator, start: start, end: end, reset: reset);
-        });
-        logd(
-          'preprocess Sub ${indicator.name} [$start, $end] $reset total spent:$elapseTime microseconds',
-        );
-      }
-    }
-    logd(
-      'preprocessIndicatorData completed!!! Total time spent ${DateTime.now().difference(startTime).inMicroseconds} milliseconds',
-    );
+    /// 预计算指标数据
+    calcParams.forEach((key, calcParam) {
+      final elapseTime = stopwatch.run(() {
+        data.precompute(key, calcParam: calcParam, range: range, reset: reset);
+      });
+      logd('precompute $key, $range, $reset spent:$elapseTime microseconds');
+    });
   }
 
   /// 起动loading
@@ -251,7 +252,7 @@ mixin StateBinding
       onLoading?.call(false);
       return false;
     }
-    curKlineData = KlineData(req);
+    curKlineData = KlineData(req); // TODO: 验证使用> KlineData.empty;
     onLoading?.call(true);
     return true;
   }
@@ -268,30 +269,36 @@ mixin StateBinding
     }
     data = KlineData(req, list: List.of(list), logger: loggerDelegate);
     _klineDataCache[req.key] = data;
-    preprocessIndicatorData(data, reset: true);
+    precomputeIndicatorData(data, range: Range(0, data.length), reset: true);
     if (curKlineData.invalid || req.key == curDataKey) {
       curKlineData = data;
     }
   }
 
+  /// 追加蜡烛数据.
+  /// 约定: 只有先调用 [setKlineData] 后, 才可以调用[appendKlineData]追加数据.
   @override
   void appendKlineData(CandleReq req, List<CandleModel> list) {
     KlineData? data = _klineDataCache[req.key];
-    if (data == null || data.list.isEmpty) {
+    if (data == null || list.isEmpty) {
       logd('appendKlineData > setKlineData(${req.key}, ${data?.list.length})');
-      setKlineData(req, list);
+      // setKlineData(req, list);
       return;
     }
 
     final oldLen = data.list.length;
-    data.mergeCandleList(list);
+    final range = data.mergeCandleList(list);
+    if (range == null) {
+      // klineData数据未发生变化, 直接return.
+      return;
+    }
+    precomputeIndicatorData(data, reset: false, range: range);
     _klineDataCache[req.key] = data;
-    preprocessIndicatorData(data, reset: false);
     if (req.key == curDataKey) {
       final newLen = data.list.length;
       if (paintDxOffset < 0 && newLen > oldLen) {
         /// 当数据合并后
-        /// 1. 如果paintDxOffset > 0 说明满足一屏, 且最蜡烛被用户移动到绘制区域外面, 无需调整偏移量paintDxOffset, 重绘时, 仍按此偏移量计算后, 当前首根蜡烛向左移动一个蜡烛.
+        /// 1. 如果paintDxOffset > 0 说明满足一屏, 且最新蜡烛被用户移动到绘制区域外面, 无需调整偏移量paintDxOffset, 重绘时, 仍按此偏移量计算后, 当前首根蜡烛向左移动一个蜡烛.
         /// 2. 如果paintDxOffset == 0 说明当前最新蜡烛在屏幕第一位(最右边)展示. 无需调整偏移量paintDxOffset, 重绘时calculateCandleIndexAndOffset, 会计算startIndex = 0;
         /// 2. 如果paintDxOffset < 0 说明未满足一屏, 需要减小偏移量, 以保证新数据能够展示.
         ///    注: 如果调整后 paintDxOffset > 0 则要置为0, 以保证最新蜡烛在最右边展示.

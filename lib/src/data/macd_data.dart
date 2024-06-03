@@ -14,9 +14,10 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/material.dart';
+
 import '../config/macd_param/macd_param.dart';
-import '../framework/indicator.dart';
-import '../indicators/macd.dart';
+import '../framework/common.dart';
 import '../model/export.dart';
 import 'base_data.dart';
 
@@ -37,17 +38,22 @@ mixin MACDData on BaseData {
   }
 
   @override
-  void preprocess(
-    Indicator indicator, {
-    required int start,
-    required int end,
+  void precompute(
+    ValueKey key, {
+    dynamic calcParam,
+    required Range range,
     bool reset = false,
   }) {
-    if (indicator is MACDIndicator) {
-      calcuAndCacheMacd(indicator.calcParam, reset: reset);
-    } else {
-      super.preprocess(indicator, start: start, end: end, reset: reset);
+    if (key == macdKey && calcParam is MACDParam) {
+      calcuAndCacheMacd(
+        param: calcParam,
+        // start: range.start,
+        // end: range.end,
+        reset: reset,
+      );
+      return;
     }
+    super.precompute(key, calcParam: calcParam, range: range, reset: reset);
   }
 
   /// 指数平滑移动平均线MACD
@@ -70,8 +76,8 @@ mixin MACDData on BaseData {
   ///
   /// MACD指标中的柱状线（BAR）的计算公式为：
   ///   BAR=2*(DIF-DEA)
-  void calcuAndCacheMacd(
-    MACDParam param, {
+  void calcuAndCacheMacd({
+    required MACDParam param,
     bool reset = false,
   }) {
     final len = list.length;
@@ -146,7 +152,7 @@ mixin MACDData on BaseData {
 
     if (end < start) return null;
     if (!list[end].isValidMacdData) {
-      calcuAndCacheMacd(param);
+      calcuAndCacheMacd(param: param);
     }
 
     MinMax? minmax;

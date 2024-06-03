@@ -62,3 +62,10 @@ const macdKey = ValueKey<dynamic>(IndicatorType.macd);
 const kdjKey = ValueKey<dynamic>(IndicatorType.kdj);
 const rsiKey = ValueKey<dynamic>(IndicatorType.rsi);
 const stochRsiKey = ValueKey<dynamic>(IndicatorType.stochRsi);
+
+/// 可预计算接口
+/// 实现 [IPrecomputable] 接口, 即代表当前对象是可以进行预计算.
+/// [getCalcParam] 返回预计算的参数. 可以为空
+abstract interface class IPrecomputable {
+  dynamic getCalcParam();
+}

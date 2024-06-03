@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:math' as math;
+import 'dart:math';
 
+import 'package:example/src/providers/kline_controller_state_provider.dart';
 import 'package:example/src/theme/flexi_theme.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/foundation.dart';
@@ -40,9 +41,9 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
   late final FlexiKlineController controller;
   late final DefaultFlexiKlineConfiguration configuration;
 
-  final req1 = CandleReq(
+  final req = CandleReq(
     instId: 'BTC-USDT',
-    bar: TimeBar.m15.bar,
+    bar: TimeBar.D1.bar,
     precision: 2,
   );
 
@@ -61,7 +62,7 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
     controller.onCrossI18nTooltipLables = tooltipLables;
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      loadCandleData1(req1);
+      loadCandleData1(req);
     });
   }
 
@@ -84,8 +85,8 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
   }
 
   void onTapTimeBar(TimeBar value) {
-    req1.bar = value.bar;
-    loadCandleData1(req1);
+    req.bar = value.bar;
+    loadCandleData1(req);
   }
 
   @override
@@ -136,23 +137,27 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final latest = controller.curKlineData.latest;
-          DateTime dateTime;
+          DateTime? dateTime;
           if (latest != null) {
-            dateTime = DateTime.fromMillisecondsSinceEpoch(latest.timestamp)
-                .add(Duration(
-              milliseconds: controller.curKlineData.req.timeBar!.milliseconds,
-            ));
-          } else {
-            dateTime = DateTime.now();
+            dateTime = DateTime.fromMillisecondsSinceEpoch(latest.timestamp);
           }
+          dateTime ??= DateTime.now();
+
+          final randomCount = 3; //Random().nextInt(10);
+
+          final bar = ref.read(klineStateProvider(controller)).currentTimeBar!;
+          dateTime = dateTime.add(Duration(
+            milliseconds: bar.milliseconds * randomCount,
+          ));
 
           /// 随机生成[count] 个以 [dateTime]为基准的新数据
           final newList = await genRandomCandleList(
-            count: math.Random().nextInt(3),
+            count: randomCount,
             dateTime: dateTime,
-            isHistory: false,
           );
-          controller.appendKlineData(req1, newList);
+
+          controller.logd('Add $dateTime, ${req.key}, ${newList.length}');
+          controller.appendKlineData(req, newList);
         },
         child: const Text('Add'),
       ),

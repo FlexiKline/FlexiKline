@@ -14,9 +14,10 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/material.dart';
+
 import '../config/kdj_param/kdj_param.dart';
-import '../framework/indicator.dart';
-import '../indicators/kdj.dart';
+import '../framework/common.dart';
 import '../model/export.dart';
 import 'base_data.dart';
 import 'candle_data.dart';
@@ -38,22 +39,22 @@ mixin KDJData on BaseData, CandleData {
   }
 
   @override
-  void preprocess(
-    Indicator indicator, {
-    required int start,
-    required int end,
+  void precompute(
+    ValueKey key, {
+    dynamic calcParam,
+    required Range range,
     bool reset = false,
   }) {
-    if (indicator is KDJIndicator) {
+    if (key == kdjKey && calcParam is KDJParam) {
       calcuAndCacheKDJ(
-        param: indicator.calcParam,
-        start: start,
-        end: end,
+        param: calcParam,
+        start: range.start,
+        end: range.end,
         reset: reset,
       );
-    } else {
-      super.preprocess(indicator, start: start, end: end, reset: reset);
+      return;
     }
+    super.precompute(key, calcParam: calcParam, range: range, reset: reset);
   }
 
   /// 首先要计算周期（n日、n周等）的RSV值（即未成熟随机指标值），然后再计算K值、D值、J值等。

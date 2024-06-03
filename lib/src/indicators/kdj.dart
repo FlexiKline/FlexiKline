@@ -31,7 +31,8 @@ part 'kdj.g.dart';
 /// 若无前一日K 值与D值，则可分别用50来代替。
 /// J值=3*当日K值-2*当日D值
 @FlexiIndicatorSerializable
-class KDJIndicator extends SinglePaintObjectIndicator {
+class KDJIndicator extends SinglePaintObjectIndicator
+    implements IPrecomputable {
   KDJIndicator({
     super.key = const ValueKey(IndicatorType.kdj),
     super.name = 'KDJ',
@@ -63,6 +64,9 @@ class KDJIndicator extends SinglePaintObjectIndicator {
   final double lineWidth;
   // 默认精度
   final int precision;
+
+  @override
+  dynamic getCalcParam() => calcParam;
 
   @override
   KDJPaintObject createPaintObject(KlineBindingBase controller) {

@@ -14,9 +14,10 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/material.dart';
+
 import '../config/ma_param/ma_param.dart';
-import '../framework/indicator.dart';
-import '../indicators/ma.dart';
+import '../framework/common.dart';
 import '../model/export.dart';
 import 'base_data.dart';
 
@@ -37,22 +38,22 @@ mixin MAData on BaseData {
   }
 
   @override
-  void preprocess(
-    Indicator indicator, {
-    required int start,
-    required int end,
+  void precompute(
+    ValueKey key, {
+    dynamic calcParam,
+    required Range range,
     bool reset = false,
   }) {
-    if (indicator is MAIndicator) {
+    if (key == maKey && calcParam is List<MaParam>) {
       calcuAndCacheMa(
-        indicator.calcParams,
-        start: start,
-        end: end,
+        calcParam,
+        start: range.start,
+        end: range.end,
         reset: reset,
       );
-    } else {
-      super.preprocess(indicator, start: start, end: end, reset: reset);
+      return;
     }
+    super.precompute(key, calcParam: calcParam, range: range, reset: reset);
   }
 
   /// 计算 [index] 位置的 [count] 个数据的Ma指标.

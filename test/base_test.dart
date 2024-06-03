@@ -12,10 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export 'candle_model/candle_model.dart';
-export 'candle_req/candle_req.dart';
-export 'gesture_data.dart';
-export 'tooltip_info.dart';
-export 'minmax.dart';
-export 'bag_num.dart';
-export 'range.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+void main() {
+  test('test  base', () {});
+}

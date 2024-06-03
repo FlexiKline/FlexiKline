@@ -26,7 +26,8 @@ part 'macd.g.dart';
 
 /// 指数平滑移动平均线MACD
 @FlexiIndicatorSerializable
-class MACDIndicator extends SinglePaintObjectIndicator {
+class MACDIndicator extends SinglePaintObjectIndicator
+    implements IPrecomputable {
   MACDIndicator({
     super.key = macdKey,
     super.name = 'MACD',
@@ -58,6 +59,9 @@ class MACDIndicator extends SinglePaintObjectIndicator {
   final double lineWidth;
   // 默认精度
   final int precision;
+
+  @override
+  dynamic getCalcParam() => calcParam;
 
   @override
   SinglePaintObjectBox createPaintObject(KlineBindingBase controller) {

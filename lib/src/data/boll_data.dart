@@ -14,14 +14,14 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/material.dart';
+
 import '../config/boll_param/boll_param.dart';
-import '../framework/indicator.dart';
-import '../indicators/boll.dart';
+import '../framework/export.dart';
 import '../model/export.dart';
 import 'base_data.dart';
-import 'ma_data.dart';
 
-mixin BOLLData on BaseData, MAData {
+mixin BOLLData on BaseData {
   @override
   void initData() {
     super.initData();
@@ -38,22 +38,22 @@ mixin BOLLData on BaseData, MAData {
   }
 
   @override
-  void preprocess(
-    Indicator indicator, {
-    required int start,
-    required int end,
+  void precompute(
+    ValueKey key, {
+    dynamic calcParam,
+    required Range range,
     bool reset = false,
   }) {
-    if (indicator is BOLLIndicator) {
+    if (key == bollKey && calcParam is BOLLParam) {
       calcuAndCacheBoll(
-        param: indicator.calcParam,
-        start: start,
-        end: end,
+        param: calcParam,
+        start: range.start,
+        end: range.end,
         reset: reset,
       );
-    } else {
-      super.preprocess(indicator, start: start, end: end, reset: reset);
+      return;
     }
+    super.precompute(key, calcParam: calcParam, range: range, reset: reset);
   }
 
   /// 计算标准差MD

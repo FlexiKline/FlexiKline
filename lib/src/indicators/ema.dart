@@ -32,7 +32,8 @@ part 'ema.g.dart';
 /// 2）慢速平滑移动平均线（EMA）是26日的，计算公式为：
 ///   EMA(26)=2*今收盘价/(26+1)+25*昨日EMA(26)/(26+1)
 @FlexiIndicatorSerializable
-class EMAIndicator extends SinglePaintObjectIndicator {
+class EMAIndicator extends SinglePaintObjectIndicator
+    implements IPrecomputable {
   EMAIndicator({
     super.key = emaKey,
     super.name = 'EMA',
@@ -46,6 +47,9 @@ class EMAIndicator extends SinglePaintObjectIndicator {
   final List<MaParam> calcParams;
   final EdgeInsets tipsPadding;
   final double lineWidth;
+
+  @override
+  dynamic getCalcParam() => calcParams;
 
   @override
   SinglePaintObjectBox createPaintObject(KlineBindingBase controller) {

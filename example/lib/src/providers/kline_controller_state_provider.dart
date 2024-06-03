@@ -76,8 +76,6 @@ class KlineStateNotifier extends ChangeNotifier {
     _currentTimeBar = bar;
     notifyListeners();
   }
-
-  
 }
 
 final timeBarProvider = StateProvider.autoDispose

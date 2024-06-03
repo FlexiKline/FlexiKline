@@ -85,7 +85,7 @@ class _FlexiTimeBarState extends ConsumerState<FlexiTimeBar> {
     final s = S.of(context);
     final klineState = ref.watch(klineStateProvider(widget.controller));
     ref.listen(timeBarProvider(widget.controller), (prev, next) {
-      if (prev != next && next != null) {
+      if (next != null && prev != next && next == klineState.currentTimeBar) {
         widget.onTapTimeBar(next);
       }
     });

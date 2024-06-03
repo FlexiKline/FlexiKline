@@ -14,9 +14,10 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/material.dart';
+
 import '../config/ma_param/ma_param.dart';
-import '../framework/indicator.dart';
-import '../indicators/ema.dart';
+import '../framework/common.dart';
 import '../model/export.dart';
 import 'base_data.dart';
 
@@ -37,17 +38,22 @@ mixin EMAData on BaseData {
   }
 
   @override
-  void preprocess(
-    Indicator indicator, {
-    required int start,
-    required int end,
+  void precompute(
+    ValueKey key, {
+    dynamic calcParam,
+    required Range range,
     bool reset = false,
   }) {
-    if (indicator is EMAIndicator) {
-      calcuAndCacheEma(indicator.calcParams, reset: reset);
-    } else {
-      super.preprocess(indicator, start: start, end: end, reset: reset);
+    if (key == emaKey && calcParam is List<MaParam>) {
+      calcuAndCacheEma(
+        calcParam,
+        // start: range.start,
+        // end: range.end,
+        reset: reset,
+      );
+      return;
     }
+    super.precompute(key, calcParam: calcParam, range: range, reset: reset);
   }
 
   /// 加权移动平均数Weighted Moving Average

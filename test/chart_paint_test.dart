@@ -168,7 +168,11 @@ void main() {
   group('paint-Ma', () {
     test('test-MA-preprocess', () {
       debugPrint('test-MA-preprocess');
-      controller.curKlineData.preprocess(maIndicator, start: start, end: end);
+      controller.curKlineData.precompute(
+        maIndicator.key,
+        calcParam: maIndicator.getCalcParams(),
+        range: Range(start, end),
+      );
     });
     test('test-MA-Paint', () async {
       debugPrint('test-MA-Paint');

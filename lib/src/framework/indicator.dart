@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import '../core/export.dart';
+import 'common.dart';
 import 'object.dart';
 import 'serializers.dart';
 
@@ -270,4 +271,34 @@ class MultiPaintObjectIndicator<T extends SinglePaintObjectIndicator>
   // 将Response对象转换为JSON映射的方法
   @override
   Map<String, dynamic> toJson() => _$MultiPaintObjectIndicatorToJson(this);
+}
+
+extension IndicatorExt on Indicator {
+  Map<ValueKey, dynamic> getCalcParams() {
+    if (this is SinglePaintObjectIndicator) {
+      return (this as SinglePaintObjectIndicator).getCalcParams();
+    } else if (this is MultiPaintObjectIndicator) {
+      return (this as MultiPaintObjectIndicator).getCalcParams();
+    }
+    return const <ValueKey, dynamic>{};
+  }
+}
+
+extension SinglePaintObjectIndicatorExt on SinglePaintObjectIndicator {
+  Map<ValueKey, dynamic> getCalcParams() {
+    if (this is IPrecomputable) {
+      return {key: (this as IPrecomputable).getCalcParam()};
+    }
+    return const <ValueKey, dynamic>{};
+  }
+}
+
+extension MultiPaintObjectIndicatorExt on MultiPaintObjectIndicator {
+  Map<ValueKey, dynamic> getCalcParams() {
+    final results = <ValueKey, dynamic>{};
+    for (var child in children) {
+      results.addAll(child.getCalcParams());
+    }
+    return results;
+  }
 }
