@@ -229,6 +229,20 @@ void main() {
     assert(equalsLists(list, [...newList]));
     assert(range == Range(0, list.length));
   });
+
+  test('mergeCandleList after5', () {
+    final curList = [Item(10), Item(9), Item(8)];
+    final newList = [Item(9, '9-new')];
+
+    final kData = KlineData(curList);
+    final range = kData.mergeCandleLists(newList);
+    final list = kData.list;
+
+    debugPrint(range?.toString());
+    debugPrint(list.toString());
+    assert(equalsLists(list, [...curList]));
+    assert(range == null);
+  });
 }
 
 class KlineData {
@@ -238,7 +252,9 @@ class KlineData {
   List<Item> get list => _list;
 
   /// 合并[list]和[newList]为一个新数组
-  /// 约定: [newList]和[list]都是按时间倒序排好的, 即最近/新的蜡烛数据以数组0开始依次存放.
+  /// 约定:
+  ///   1. [newList]和[list]都是按时间倒序排好的, 即最近/新的蜡烛数据以数组0开始依次存放.
+  ///   2. 如果[newList]数据存在于[list]中间, 不矛处理.
   /// 去重: 如两个数组拼接过程中发现重复的, 要去掉[list]中重复的元素.
   /// return: 返回新列表中被更新的范围[start] ~ [end]
   Range? mergeCandleLists(List<Item> newList) {
@@ -258,7 +274,7 @@ class KlineData {
       _list = List.of(newList, growable: true)..addAll(curIterable);
       // _list = List.of([...newList, ...curIterable]);
       return Range(0, newList.length);
-    } else {
+    } else if (list.last.timestamp >= newList.last.timestamp) {
       int end = list.length - 1;
       while (end >= 0 && list[end].timestamp <= newList.first.timestamp) {
         end--;
@@ -268,5 +284,6 @@ class KlineData {
       // _list =  List.of([...curIterable, ...newList]);
       return Range(end + 1, _list.length);
     }
+    return null;
   }
 }

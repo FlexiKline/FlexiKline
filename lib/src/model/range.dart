@@ -13,15 +13,21 @@
 // limitations under the License.
 
 final class Range {
-  Range(this.start, this.end);
+  const Range(this.start, this.end);
 
   final int start;
   final int end;
+
+  static Range get empty => const Range(0, 0);
 
   @override
   String toString() {
     return 'Range[$start, $end]';
   }
+
+  int get length => end - start;
+
+  bool get isNotEmpty => length > 0;
 
   @override
   int get hashCode => start.hashCode ^ end.hashCode;

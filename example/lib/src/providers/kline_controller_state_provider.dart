@@ -31,22 +31,6 @@ class KlineStateNotifier extends ChangeNotifier {
   final Ref ref;
   final FlexiKlineController controller;
 
-  List<TimeBar> preferTimeBarList = [
-    TimeBar.m15,
-    TimeBar.H1,
-    TimeBar.H4,
-    TimeBar.D1,
-  ];
-
-  final List<TimeBar> allTimeBarList = TimeBar.values;
-
-  TimeBar? _currentTimeBar;
-  TimeBar? get currentTimeBar {
-    return _currentTimeBar ?? controller.curKlineData.req.timeBar;
-  }
-
-  bool get isPreferTimeBar => preferTimeBarList.contains(currentTimeBar);
-
   Set<ValueKey> get supportMainIndicatorKeys =>
       controller.supportMainIndicatorKeys;
   Set<ValueKey> get supportSubIndicatorKeys =>
@@ -71,16 +55,4 @@ class KlineStateNotifier extends ChangeNotifier {
     }
     notifyListeners();
   }
-
-  void setTimeBar(TimeBar bar) {
-    _currentTimeBar = bar;
-    notifyListeners();
-  }
 }
-
-final timeBarProvider = StateProvider.autoDispose
-    .family<TimeBar?, FlexiKlineController>((ref, controller) {
-  return ref.watch(
-    klineStateProvider(controller).select((state) => state.currentTimeBar),
-  );
-});

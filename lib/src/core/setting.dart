@@ -18,6 +18,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../config/export.dart';
+import '../constant.dart';
 import '../framework/export.dart';
 import 'binding_base.dart';
 import 'interface.dart';
@@ -28,12 +29,14 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
     super.initState();
     logd("initState setting");
     initFlexiKlineState();
+    // sizeChnageListener.value = canvasRect;
   }
 
   @override
   void dispose() {
     super.dispose();
     logd("dispose setting");
+    sizeChnageListener.dispose();
     mainIndicator.dispose();
     for (var indicator in subRectIndicators) {
       indicator.dispose();
@@ -41,8 +44,8 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
     subRectIndicators.clear();
   }
 
-  VoidCallback? onSizeChange;
-  ValueChanged<bool>? onLoading;
+  /// KlineData整个图表区域大小变化监听器
+  final sizeChnageListener = ValueNotifier(defaultCanvasRectMinRect);
 
   /// 整个画布区域大小 = 由主图区域 + 副图区域
   @override
@@ -81,7 +84,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
         size.height,
       );
       updateMainIndicatorParam(height: size.height);
-      onSizeChange?.call();
+      sizeChnageListener.value = canvasRect;
     }
   }
 
@@ -262,7 +265,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
         deleted.dispose();
       }
       subIndicators.addLast(indicatorsConfig.subIndicators[key]!);
-      onSizeChange?.call();
+      sizeChnageListener.value = canvasRect;
       markRepaintChart();
     }
   }
@@ -272,7 +275,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
     subIndicators.removeWhere((indicator) {
       if (indicator.key == key) {
         indicator.dispose();
-        onSizeChange?.call();
+        sizeChnageListener.value = canvasRect;
         markRepaintChart();
         return true;
       }

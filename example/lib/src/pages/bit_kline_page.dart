@@ -25,9 +25,9 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import '../config.dart';
 import '../providers/bit_kline_config.dart';
 import '../repo/api.dart' as api;
-import '../widgets/flexi_indicator_bar.dart';
+import '../widgets/flexi_kline_indicator_bar.dart';
 import '../widgets/latest_price_view.dart';
-import '../widgets/flexi_time_bar.dart';
+import '../widgets/flexi_kline_setting_bar.dart';
 import 'main_nav_page.dart';
 
 class BitKlinePage extends ConsumerStatefulWidget {
@@ -79,13 +79,12 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage> {
       );
       cancelToken = null;
       if (resp.success && resp.data != null) {
-        controller.setKlineData(request, resp.data!);
-        setState(() {});
+        await controller.updateKlineData(request, resp.data!);
       } else {
         SmartDialog.showToast(resp.msg);
       }
     } finally {
-      controller.stopLoading();
+      controller.stopLoading(req: request);
     }
   }
 
@@ -127,7 +126,7 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage> {
               model: controller.curKlineData.latest,
               precision: req.precision,
             ),
-            FlexiTimeBar(
+            FlexiKlineSettingBar(
               controller: controller,
               onTapTimeBar: onTapTimerBar,
             ),
@@ -142,7 +141,7 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage> {
                 ),
               ),
             ),
-            FlexiIndicatorBar(
+            FlexiKlineIndicatorBar(
               controller: controller,
             ),
             Container(

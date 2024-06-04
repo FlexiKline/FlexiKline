@@ -18,30 +18,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../providers/kline_controller_state_provider.dart';
-
-class TimerBarSelectDialog extends ConsumerStatefulWidget {
+class TimerBarSelectDialog extends ConsumerWidget {
   static const String dialogTag = "TimerBarSelectDialog";
   const TimerBarSelectDialog({
     super.key,
     required this.controller,
+    required this.onTapTimeBar,
+    required this.preferTimeBarList,
   });
 
   final FlexiKlineController controller;
+  final ValueChanged<TimeBar> onTapTimeBar;
+  final List<TimeBar> preferTimeBarList;
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() =>
-      _IndicatorSelectDialogState();
-}
-
-class _IndicatorSelectDialogState extends ConsumerState<TimerBarSelectDialog> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = ref.watch(themeProvider);
     return Container(
       padding: EdgeInsetsDirectional.all(16.r),
@@ -55,14 +46,14 @@ class _IndicatorSelectDialogState extends ConsumerState<TimerBarSelectDialog> {
               style: theme.t1s20w700,
             ),
             SizedBox(height: 10.r),
-            _buildPreferTimeBarList(context),
+            _buildPreferTimeBarList(context, ref),
             SizedBox(height: 20.r),
             Text(
               '全部周期',
               style: theme.t1s16w400,
             ),
             SizedBox(height: 10.r),
-            _buildAllTimeBarList(context),
+            _buildAllTimeBarList(context, ref),
             SizedBox(height: 10.r),
           ],
         ),
@@ -70,61 +61,61 @@ class _IndicatorSelectDialogState extends ConsumerState<TimerBarSelectDialog> {
     );
   }
 
-  Widget _buildPreferTimeBarList(BuildContext context) {
-    final theme = ref.read(themeProvider);
-    final klineState = ref.watch(klineStateProvider(widget.controller));
-    return Wrap(
-      alignment: WrapAlignment.start,
-      spacing: 16.r,
-      runSpacing: 8.r,
-      children: klineState.preferTimeBarList.map((bar) {
-        final selected = klineState.currentTimeBar == bar;
-        return TextButton(
-          key: ValueKey(bar),
-          style: theme.outlinedBtnStyle(showOutlined: selected),
-          onPressed: () {
-            ref
-                .read(klineStateProvider(widget.controller).notifier)
-                .setTimeBar(bar);
-          },
-          child: Text(
-            bar.bar,
-            style: theme.t2s12w400.copyWith(
-              color: theme.t1,
-              fontWeight: selected ? FontWeight.bold : null,
-            ),
-          ),
+  Widget _buildPreferTimeBarList(BuildContext context, WidgetRef ref) {
+    return ValueListenableBuilder(
+      valueListenable: controller.timeBarListener,
+      builder: (context, value, child) {
+        final theme = ref.read(themeProvider);
+        return Wrap(
+          alignment: WrapAlignment.start,
+          spacing: 16.r,
+          runSpacing: 8.r,
+          children: preferTimeBarList.map((bar) {
+            final selected = value == bar;
+            return TextButton(
+              key: ValueKey(bar),
+              style: theme.outlinedBtnStyle(showOutlined: selected),
+              onPressed: () => onTapTimeBar(bar),
+              child: Text(
+                bar.bar,
+                style: theme.t2s12w400.copyWith(
+                  color: theme.t1,
+                  fontWeight: selected ? FontWeight.bold : null,
+                ),
+              ),
+            );
+          }).toList(),
         );
-      }).toList(),
+      },
     );
   }
 
-  Widget _buildAllTimeBarList(BuildContext context) {
-    final theme = ref.read(themeProvider);
-    final klineState = ref.watch(klineStateProvider(widget.controller));
-    return Wrap(
-      alignment: WrapAlignment.start,
-      spacing: 16.r,
-      runSpacing: 8.r,
-      children: klineState.allTimeBarList.map((bar) {
-        final selected = klineState.currentTimeBar == bar;
-        return TextButton(
-          key: ValueKey(bar),
-          style: theme.outlinedBtnStyle(showOutlined: selected),
-          onPressed: () {
-            ref
-                .read(klineStateProvider(widget.controller).notifier)
-                .setTimeBar(bar);
-          },
-          child: Text(
-            bar.bar,
-            style: theme.t2s12w400.copyWith(
-              color: theme.t1,
-              fontWeight: selected ? FontWeight.bold : null,
-            ),
-          ),
+  Widget _buildAllTimeBarList(BuildContext context, WidgetRef ref) {
+    return ValueListenableBuilder(
+      valueListenable: controller.timeBarListener,
+      builder: (context, value, child) {
+        final theme = ref.read(themeProvider);
+        return Wrap(
+          alignment: WrapAlignment.start,
+          spacing: 16.r,
+          runSpacing: 8.r,
+          children: TimeBar.values.map((bar) {
+            final selected = value == bar;
+            return TextButton(
+              key: ValueKey(bar),
+              style: theme.outlinedBtnStyle(showOutlined: selected),
+              onPressed: () => onTapTimeBar(bar),
+              child: Text(
+                bar.bar,
+                style: theme.t2s12w400.copyWith(
+                  color: theme.t1,
+                  fontWeight: selected ? FontWeight.bold : null,
+                ),
+              ),
+            );
+          }).toList(),
         );
-      }).toList(),
+      },
     );
   }
 }

@@ -39,11 +39,19 @@ mixin StateBinding
   void dispose() {
     super.dispose();
     logd('dispose state');
+    timeBarListener.dispose();
+    loadingListener.dispose();
     _klineDataCache.forEach((key, data) {
       data.dispose();
     });
     _klineDataCache.clear();
   }
+
+  /// 当KlineData的TimeBar的监听器
+  final timeBarListener = ValueNotifier<TimeBar?>(null);
+
+  /// KlineData数据加载loading状态监听器
+  final loadingListener = ValueNotifier<bool>(false);
 
   ComputeMode _computeMode = ComputeMode.fast;
   ComputeMode get computeMode => _computeMode;
@@ -62,8 +70,15 @@ mixin StateBinding
   KlineData _curKlineData = KlineData.empty;
   @override
   KlineData get curKlineData => _curKlineData;
-  set curKlineData(data) {
+
+  /// 设置当前KlineData:
+  /// 1. 通知timeBar变更
+  /// 2. 初始化首根蜡烛绘制位置于屏幕右侧[initPaintDxOffset]指定处.
+  /// 3. 重绘图表
+  /// 4. 取消Cross绘制(如果有)
+  void setCurKlineData(KlineData data) {
     _curKlineData = data;
+    timeBarListener.value = data.req.timeBar;
     initPaintDxOffset();
     markRepaintChart(reset: true);
     cancelCross();
@@ -205,11 +220,8 @@ mixin StateBinding
     KlineData data, {
     required Range range,
     bool reset = false,
-  }) {
+  }) async {
     if (data.isEmpty) return;
-
-    // 根据计算模式, 初始化基础数据
-    data.initBasicData(computeMode, reset: reset);
 
     /// 收集预计算的指标参数
     final calcParams = <ValueKey, dynamic>{};
@@ -230,6 +242,9 @@ mixin StateBinding
 
     final stopwatch = Stopwatch();
 
+    // 根据计算模式, 初始化基础数据
+    data.initBasicData(computeMode, reset: reset);
+
     /// 预计算指标数据
     calcParams.forEach((key, calcParam) {
       final elapseTime = stopwatch.run(() {
@@ -239,78 +254,152 @@ mixin StateBinding
     });
   }
 
-  /// 起动loading
-  /// req: 标记当前请求
-  /// return: 返回false代表使用了缓存, 不展示loading了
+  /// 开始加载[req]请求指定的蜡烛数据
+  /// [req] 标记当前请求
+  /// [useCacheFirst] 优先使用缓存. 注: 如果有缓存数据(说明之前加载过), loading不会展示.
+  /// return
+  ///   1. false:代表使用了缓存, 不会展示loading了
+  ///   2. true: 代表已展示loading; 未使用缓存; 且当前KlineData数据被清空(如果有).
+  @override
   bool startLoading(
     CandleReq req, {
-    bool useCacheFirst = false,
+    bool useCacheFirst = true,
   }) {
+    // 取消上一次的Loading展示
+    // loadingListener.value = false;
+
     KlineData? data = _klineDataCache[req.key];
+
     if (useCacheFirst && data != null && !data.isEmpty) {
-      curKlineData = data;
-      onLoading?.call(false);
+      // 如果优先使用缓存且缓存数据不为空时, 设置缓存为当前KlineData, 同时结束loading状态.
+      setCurKlineData(data);
+      loadingListener.value = false;
       return false;
     }
-    curKlineData = KlineData(req); // TODO: 验证使用> KlineData.empty;
-    onLoading?.call(true);
+
+    // 清理历史缓存数据.
+    data?.dispose();
+
+    // 重置当前KlineData为[req]请求指定的KlineData, 并更新到缓存中, 同时展示loading状态.
+    loadingListener.value = true;
+    data = KlineData(req.copyWith(), logger: loggerDelegate);
+    _klineDataCache[req.key] = data;
+    _curKlineData = data;
     return true;
   }
 
-  void stopLoading() => onLoading?.call(false);
-
+  /// 结束加载中状态
+  /// [force] 使终结束加载
+  /// [req] 如果指定, 且与当前正常加载的蜡烛请求一致, 才结束加载中状态
   @override
-  void setKlineData(CandleReq req, List<CandleModel> list) {
-    // TODO: 校验数据合法性.
-    req = req.copyWith();
-    KlineData? data = _klineDataCache[req.key];
-    if (data != null && !data.isEmpty) {
-      data.dispose();
-    }
-    data = KlineData(req, list: List.of(list), logger: loggerDelegate);
-    _klineDataCache[req.key] = data;
-    precomputeIndicatorData(data, range: Range(0, data.length), reset: true);
-    if (curKlineData.invalid || req.key == curDataKey) {
-      curKlineData = data;
+  void stopLoading({bool force = false, CandleReq? req}) {
+    if (force || (req != null && req.key == curDataKey)) {
+      loadingListener.value = false;
     }
   }
 
-  /// 追加蜡烛数据.
-  /// 约定: 只有先调用 [setKlineData] 后, 才可以调用[appendKlineData]追加数据.
+  /// 更新KlineData
   @override
-  void appendKlineData(CandleReq req, List<CandleModel> list) {
+  Future<void> updateKlineData(CandleReq req, List<CandleModel> list) async {
+    // 数据为空, 无需要更新.
+    if (list.isEmpty) return;
+
     KlineData? data = _klineDataCache[req.key];
-    if (data == null || list.isEmpty) {
-      logd('appendKlineData > setKlineData(${req.key}, ${data?.list.length})');
-      // setKlineData(req, list);
-      return;
+
+    final oldLen = data?.length ?? 0;
+    bool reset = false;
+    Range? range;
+    if (data == null) {
+      req = req.copyWith();
+      data = KlineData(req, list: list, logger: loggerDelegate);
+      _klineDataCache[req.key] = data;
+      reset = true;
+      range = Range(0, list.length);
+    } else {
+      reset = data.isEmpty;
+      range = data.mergeCandleList(list);
+      range ??= Range.empty;
     }
 
-    final oldLen = data.list.length;
-    final range = data.mergeCandleList(list);
-    if (range == null) {
-      // klineData数据未发生变化, 直接return.
-      return;
+    if (range.isNotEmpty) {
+      precomputeIndicatorData(data, range: range, reset: reset);
     }
-    precomputeIndicatorData(data, reset: false, range: range);
-    _klineDataCache[req.key] = data;
+
     if (req.key == curDataKey) {
-      final newLen = data.list.length;
-      if (paintDxOffset < 0 && newLen > oldLen) {
-        /// 当数据合并后
-        /// 1. 如果paintDxOffset > 0 说明满足一屏, 且最新蜡烛被用户移动到绘制区域外面, 无需调整偏移量paintDxOffset, 重绘时, 仍按此偏移量计算后, 当前首根蜡烛向左移动一个蜡烛.
-        /// 2. 如果paintDxOffset == 0 说明当前最新蜡烛在屏幕第一位(最右边)展示. 无需调整偏移量paintDxOffset, 重绘时calculateCandleIndexAndOffset, 会计算startIndex = 0;
-        /// 2. 如果paintDxOffset < 0 说明未满足一屏, 需要减小偏移量, 以保证新数据能够展示.
-        ///    注: 如果调整后 paintDxOffset > 0 则要置为0, 以保证最新蜡烛在最右边展示.
-        paintDxOffset = math.min(
-          0,
-          paintDxOffset + (newLen - oldLen) * candleActualWidth,
-        );
-      }
+      if (oldLen == 0) {
+        setCurKlineData(data);
+      } else {
+        final newLen = data.length;
+        if (paintDxOffset < 0 && newLen > oldLen) {
+          /// 当数据合并后
+          /// 1. 如果paintDxOffset > 0 说明满足一屏, 且最新蜡烛被用户移动到绘制区域外面, 无需调整偏移量paintDxOffset, 重绘时, 仍按此偏移量计算后, 当前首根蜡烛向左移动一个蜡烛.
+          /// 2. 如果paintDxOffset == 0 说明当前最新蜡烛在屏幕第一位(最右边)展示. 无需调整偏移量paintDxOffset, 重绘时calculateCandleIndexAndOffset, 会计算startIndex = 0;
+          /// 2. 如果paintDxOffset < 0 说明未满足一屏, 需要减小偏移量, 以保证新数据能够展示.
+          ///    注: 如果调整后 paintDxOffset > 0 则要置为0, 以保证最新蜡烛在最右边展示.
+          paintDxOffset = math.min(
+            0,
+            paintDxOffset + (newLen - oldLen) * candleActualWidth,
+          );
+        }
 
-      markRepaintChart();
+        markRepaintChart();
+      }
     }
   }
+
+  // @override
+  // void setKlineData(CandleReq req, List<CandleModel> list) {
+  //   // TODO: 校验数据合法性.
+  //   req = req.copyWith();
+  //   KlineData? data = _klineDataCache[req.key];
+  //   if (data != null && !data.isEmpty) {
+  //     data.dispose();
+  //   }
+
+  //   data = KlineData(req, list: List.of(list), logger: loggerDelegate);
+  //   precomputeIndicatorData(data, range: Range(0, data.length), reset: true);
+
+  //   _klineDataCache[req.key] = data;
+  //   if (curKlineData.invalid || req.key == curDataKey) {
+  //     curKlineData = data;
+  //   }
+  // }
+
+  // /// 追加蜡烛数据.
+  // @override
+  // void appendKlineData(CandleReq req, List<CandleModel> list) {
+  //   KlineData? data = _klineDataCache[req.key];
+  //   if (data == null || data.isEmpty) {
+  //     logd('appendKlineData > setKlineData(${req.key}, ${data?.list.length})');
+  //     setKlineData(req, list);
+  //     return;
+  //   }
+
+  //   final oldLen = data.list.length;
+  //   final range = data.mergeCandleList(list);
+  //   if (range == null) {
+  //     // klineData数据未发生变化, 直接return.
+  //     return;
+  //   }
+  //   precomputeIndicatorData(data, reset: false, range: range);
+  //   _klineDataCache[req.key] = data;
+  //   if (req.key == curDataKey) {
+  //     final newLen = data.list.length;
+  //     if (paintDxOffset < 0 && newLen > oldLen) {
+  //       /// 当数据合并后
+  //       /// 1. 如果paintDxOffset > 0 说明满足一屏, 且最新蜡烛被用户移动到绘制区域外面, 无需调整偏移量paintDxOffset, 重绘时, 仍按此偏移量计算后, 当前首根蜡烛向左移动一个蜡烛.
+  //       /// 2. 如果paintDxOffset == 0 说明当前最新蜡烛在屏幕第一位(最右边)展示. 无需调整偏移量paintDxOffset, 重绘时calculateCandleIndexAndOffset, 会计算startIndex = 0;
+  //       /// 2. 如果paintDxOffset < 0 说明未满足一屏, 需要减小偏移量, 以保证新数据能够展示.
+  //       ///    注: 如果调整后 paintDxOffset > 0 则要置为0, 以保证最新蜡烛在最右边展示.
+  //       paintDxOffset = math.min(
+  //         0,
+  //         paintDxOffset + (newLen - oldLen) * candleActualWidth,
+  //       );
+  //     }
+
+  //     markRepaintChart();
+  //   }
+  // }
 
   @override
   void handleMove(GestureData data) {

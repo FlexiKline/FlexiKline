@@ -74,9 +74,28 @@ mixin GestureHanderImpl implements IGestureHandler {
 
 /// 数据源更新
 abstract interface class IState {
-  void setKlineData(CandleReq req, List<CandleModel> list);
+  // void setKlineData(CandleReq req, List<CandleModel> list);
 
-  void appendKlineData(CandleReq req, List<CandleModel> list);
+  // void appendKlineData(CandleReq req, List<CandleModel> list);
+
+  /// 开始加载[req]请求指定的蜡烛数据
+  /// [req] 标记当前请求
+  /// [useCacheFirst] 优先使用缓存. 注: 如果有缓存数据(说明之前加载过), loading不会展示.
+  /// return
+  ///   1. false:代表使用了缓存, 不会展示loading了
+  ///   2. true: 代表已展示loading; 未使用缓存; 且当前KlineData数据被清空(如果有).
+  bool startLoading(
+    CandleReq req, {
+    bool useCacheFirst = true,
+  });
+
+  /// 结束加载中状态
+  /// [force] 使终结束加载
+  /// [req] 如果指定, 且与当前正常加载的蜡烛请求一致, 才结束加载中状态
+  void stopLoading({bool force = false, CandleReq? req});
+
+  /// 更新KlineData
+  Future<void> updateKlineData(CandleReq req, List<CandleModel> list);
 
   KlineData get curKlineData;
 

@@ -19,6 +19,12 @@ import '../extension/export.dart';
 import '../framework/logger.dart';
 import '../model/export.dart';
 
+/// KlineData基类
+/// [req] 蜡烛数据请求
+/// [list] 蜡烛数据列表
+/// [start] 当前绘制区域起始下标
+/// [end] 当前绘制区域结束下标
+/// 注: 对于BaseData的指标计算mixin: 仅保留计算逻辑, 不持有状态, 计算结果统一整合在[CandleModel]中.
 abstract class BaseData with KlineLog {
   @override
   String get logTag => '${super.logTag}\tDADA';
@@ -42,7 +48,7 @@ abstract class BaseData with KlineLog {
   @mustCallSuper
   void dispose() {
     logd('dispose BASE');
-    // TODO: 是否要缓存
+    loggerDelegate = null;
     list.clear();
     start = 0;
     end = 0;
@@ -144,7 +150,7 @@ abstract class BaseData with KlineLog {
       _list = List.of(newList, growable: true)..addAll(curIterable);
       // _list = List.of([...newList, ...curIterable]);
       return Range(0, newList.length);
-    } else {
+    } else if (list.last.timestamp >= newList.last.timestamp) {
       int end = list.length - 1;
       while (end >= 0 && list[end].timestamp <= newList.first.timestamp) {
         end--;
@@ -154,6 +160,7 @@ abstract class BaseData with KlineLog {
       // _list =  List.of([...curIterable, ...newList]);
       return Range(end + 1, _list.length);
     }
+    return null;
   }
 
   static List<CandleModel> removeDuplicate(List<CandleModel> list) {

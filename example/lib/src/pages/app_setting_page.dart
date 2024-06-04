@@ -20,29 +20,29 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../theme/theme_manager.dart';
 
-class SettingDrawer extends StatelessWidget {
-  const SettingDrawer({super.key});
+class AppSettingDrawer extends StatelessWidget {
+  const AppSettingDrawer({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Drawer(
       key: key,
       width: ScreenUtil().screenWidth * 0.75,
-      child: const SettingPage(
-        key: ValueKey('setting'),
+      child: const AppSettingPage(
+        key: ValueKey('app_setting'),
       ),
     );
   }
 }
 
-class SettingPage extends ConsumerStatefulWidget {
-  const SettingPage({super.key});
+class AppSettingPage extends ConsumerStatefulWidget {
+  const AppSettingPage({super.key});
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _SettingPageState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _AppSettingPageState();
 }
 
-class _SettingPageState extends ConsumerState<SettingPage> {
+class _AppSettingPageState extends ConsumerState<AppSettingPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);

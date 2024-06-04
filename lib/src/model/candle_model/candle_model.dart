@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:decimal/decimal.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -23,6 +24,7 @@ import 'candle_mixin.dart';
 
 part 'candle_model.g.dart';
 
+@CopyWith()
 @FlexiModelSerializable
 class CandleModel
     with MaMixin, VolMaMixin, EmaMixin, BollMixin, MacdMixin, KdjMixin
@@ -115,9 +117,7 @@ class CandleModel
         _high == null ||
         _low == null ||
         _close == null ||
-        _vol == null ||
-        _volCcy == null ||
-        _volCcyQuote == null) {
+        _vol == null) {
       if (mode == ComputeMode.fast) {
         _open = BagNum.fromNum(o.toDouble());
         _high = BagNum.fromNum(h.toDouble());
@@ -136,39 +136,6 @@ class CandleModel
         _volCcyQuote = vcq != null ? BagNum.fromDecimal(vcq!) : null;
       }
     }
-    maList = null;
-  }
-
-  CandleModel copyWith({
-    int? timestamp,
-    Decimal? open,
-    Decimal? high,
-    Decimal? low,
-    Decimal? close,
-    Decimal? vol,
-    Object? volCcy = freezed,
-    Object? volCcyQuote = freezed,
-    String confirm = '1',
-  }) {
-    return CandleModel(
-      timestamp: timestamp ?? this.timestamp,
-      o: open ?? this.o,
-      h: high ?? this.h,
-      l: low ?? this.l,
-      c: close ?? this.c,
-      v: vol ?? this.v,
-      vc: volCcy == freezed
-          ? this.vc
-          : volCcy is Decimal
-              ? volCcy
-              : null,
-      vcq: volCcyQuote == freezed
-          ? this.vcq
-          : volCcy is Decimal
-              ? volCcy
-              : null,
-      confirm: confirm == '1' ? this.confirm : confirm,
-    );
   }
 }
 

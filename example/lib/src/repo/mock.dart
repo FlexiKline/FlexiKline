@@ -150,7 +150,11 @@ Future<List<CandleModel>> genRandomCandleList({
       l: l.d,
       v: v.d,
     );
-    list.add(m);
+    if (isHistory) {
+      list.add(m);
+    } else {
+      list.insert(0, m);
+    }
   }
 
   return list;

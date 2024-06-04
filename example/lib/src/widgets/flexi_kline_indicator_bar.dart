@@ -20,10 +20,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../providers/kline_controller_state_provider.dart';
 
-typedef IndicatorBarItemBuilder = Widget Function(BuildContext, Indicator);
-
-class FlexiIndicatorBar extends ConsumerStatefulWidget {
-  const FlexiIndicatorBar({
+class FlexiKlineIndicatorBar extends ConsumerStatefulWidget {
+  const FlexiKlineIndicatorBar({
     super.key,
     this.alignment,
     this.padding,
@@ -48,10 +46,11 @@ class FlexiIndicatorBar extends ConsumerStatefulWidget {
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
-      _FlexiIndicatorBarState();
+      _FlexiKliineIndicatorBarState();
 }
 
-class _FlexiIndicatorBarState extends ConsumerState<FlexiIndicatorBar> {
+class _FlexiKliineIndicatorBarState
+    extends ConsumerState<FlexiKlineIndicatorBar> {
   @override
   void initState() {
     super.initState();

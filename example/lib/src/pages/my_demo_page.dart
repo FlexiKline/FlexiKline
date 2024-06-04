@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:math';
-
-import 'package:example/src/providers/kline_controller_state_provider.dart';
 import 'package:example/src/theme/flexi_theme.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/foundation.dart';
@@ -22,12 +19,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../config.dart';
-import '../providers/default_flexi_kline_config.dart';
+import '../providers/default_kline_config.dart';
 import '../repo/mock.dart';
 import '../test/canvas_demo.dart';
-import '../widgets/flexi_indicator_bar.dart';
+import '../widgets/flexi_kline_indicator_bar.dart';
 import '../widgets/flexi_kline_mark_view.dart';
-import '../widgets/flexi_time_bar.dart';
+import '../widgets/flexi_kline_setting_bar.dart';
 import 'main_nav_page.dart';
 
 class MyDemoPage extends ConsumerStatefulWidget {
@@ -68,8 +65,7 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
 
   Future<void> loadCandleData1(CandleReq request) async {
     try {
-      controller.startLoading(request, useCacheFirst: true);
-
+      controller.startLoading(request);
       Future<List<CandleModel>> getCandleData(TimeBar timeBar) async =>
           await genRandomCandleList(
             count: 500,
@@ -77,10 +73,9 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
           );
       final list = await compute(getCandleData, request.timeBar!);
 
-      controller.setKlineData(request, list);
-      setState(() {});
+      await controller.updateKlineData(request, list);
     } finally {
-      controller.stopLoading();
+      controller.stopLoading(req: request);
     }
   }
 
@@ -113,7 +108,7 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            FlexiTimeBar(
+            FlexiKlineSettingBar(
               controller: controller,
               onTapTimeBar: onTapTimeBar,
             ),
@@ -122,7 +117,7 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
               controller: controller,
               mainBackgroundView: const FlexiKlineMarkView(),
             ),
-            FlexiIndicatorBar(
+            FlexiKlineIndicatorBar(
               controller: controller,
             ),
             Container(
@@ -143,21 +138,16 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
           }
           dateTime ??= DateTime.now();
 
-          final randomCount = 3; //Random().nextInt(10);
-
-          final bar = ref.read(klineStateProvider(controller)).currentTimeBar!;
-          dateTime = dateTime.add(Duration(
-            milliseconds: bar.milliseconds * randomCount,
-          ));
-
           /// 随机生成[count] 个以 [dateTime]为基准的新数据
           final newList = await genRandomCandleList(
-            count: randomCount,
+            count: 3,
             dateTime: dateTime,
+            bar: controller.curKlineData.req.timeBar!,
+            isHistory: false,
           );
 
           controller.logd('Add $dateTime, ${req.key}, ${newList.length}');
-          controller.appendKlineData(req, newList);
+          controller.updateKlineData(req, newList);
         },
         child: const Text('Add'),
       ),

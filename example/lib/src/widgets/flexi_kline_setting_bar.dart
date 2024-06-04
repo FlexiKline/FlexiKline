@@ -21,14 +21,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../dialogs/indicators_select_dialog.dart';
 import '../dialogs/kline_settting_dialog.dart';
 import '../dialogs/timebar_select_dialog.dart';
-import '../providers/kline_controller_state_provider.dart';
 import '../theme/export.dart';
 import '../utils/dialog_manager.dart';
 
-typedef TimeBarItemBuilder = Widget Function(BuildContext, TimeBar);
-
-class FlexiTimeBar extends ConsumerStatefulWidget {
-  const FlexiTimeBar({
+class FlexiKlineSettingBar extends ConsumerStatefulWidget {
+  const FlexiKlineSettingBar({
     super.key,
     required this.controller,
     required this.onTapTimeBar,
@@ -43,20 +40,32 @@ class FlexiTimeBar extends ConsumerStatefulWidget {
   final Decoration? decoration;
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _FlexiTimeBarState();
+  ConsumerState<ConsumerStatefulWidget> createState() =>
+      _FlexiKlineSettingBarState();
 }
 
-class _FlexiTimeBarState extends ConsumerState<FlexiTimeBar> {
+class _FlexiKlineSettingBarState extends ConsumerState<FlexiKlineSettingBar> {
   @override
   void initState() {
     super.initState();
   }
+
+  List<TimeBar> preferTimeBarList = [
+    TimeBar.m15,
+    TimeBar.H1,
+    TimeBar.H4,
+    TimeBar.D1,
+  ];
+
+  bool isPreferTimeBar(TimeBar bar) => preferTimeBarList.contains(bar);
 
   void onTapTimeBarSetting() {
     DialogManager().showBottomDialog(
       dialogTag: TimerBarSelectDialog.dialogTag,
       builder: (context) => TimerBarSelectDialog(
         controller: widget.controller,
+        onTapTimeBar: widget.onTapTimeBar,
+        preferTimeBarList: preferTimeBarList,
       ),
     );
   }
@@ -83,12 +92,7 @@ class _FlexiTimeBarState extends ConsumerState<FlexiTimeBar> {
   Widget build(BuildContext context) {
     final theme = ref.watch(themeProvider);
     final s = S.of(context);
-    final klineState = ref.watch(klineStateProvider(widget.controller));
-    ref.listen(timeBarProvider(widget.controller), (prev, next) {
-      if (next != null && prev != next && next == klineState.currentTimeBar) {
-        widget.onTapTimeBar(next);
-      }
-    });
+
     return Container(
       alignment: widget.alignment ?? AlignmentDirectional.centerStart,
       padding: EdgeInsetsDirectional.only(start: 6.r, end: 6.r),
@@ -100,57 +104,10 @@ class _FlexiTimeBarState extends ConsumerState<FlexiTimeBar> {
           Flexible(
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              child: Row(
-                children: klineState.preferTimeBarList.map((bar) {
-                  final selected = klineState.currentTimeBar == bar;
-                  return GestureDetector(
-                    onTap: () {
-                      ref
-                          .read(klineStateProvider(widget.controller).notifier)
-                          .setTimeBar(bar);
-                    },
-                    child: Container(
-                      key: ValueKey(bar),
-                      constraints: BoxConstraints(minWidth: 28.r),
-                      alignment: AlignmentDirectional.center,
-                      decoration: BoxDecoration(
-                        color: selected ? theme.markBg : null,
-                        borderRadius: BorderRadius.circular(5.r),
-                      ),
-                      padding: EdgeInsetsDirectional.symmetric(
-                        horizontal: 6.r,
-                        vertical: 4.r,
-                      ),
-                      margin: EdgeInsetsDirectional.symmetric(horizontal: 6.r),
-                      child: Text(
-                        bar.bar,
-                        style: selected ? theme.t1s14w700 : theme.t1s14w400,
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
+              child: _buildPreferTimeBarList(context),
             ),
           ),
-          TextButton(
-            onPressed: onTapTimeBarSetting,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  klineState.currentTimeBar == null ||
-                          klineState.isPreferTimeBar
-                      ? '更多'
-                      : klineState.currentTimeBar!.bar,
-                  style: theme.t1s14w500,
-                ),
-                Icon(
-                  Icons.arrow_drop_down,
-                  color: theme.t1,
-                )
-              ],
-            ),
-          ),
+          _buildMoreTimeBarButton(context),
           TextButton(
             onPressed: onTapIndicatorSetting,
             child: Row(
@@ -177,6 +134,66 @@ class _FlexiTimeBarState extends ConsumerState<FlexiTimeBar> {
           )
         ],
       ),
+    );
+  }
+
+  Widget _buildPreferTimeBarList(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: widget.controller.timeBarListener,
+      builder: (context, value, child) {
+        final theme = ref.watch(themeProvider);
+        return Row(
+          children: preferTimeBarList.map((bar) {
+            final selected = value == bar;
+            return GestureDetector(
+              onTap: () => widget.onTapTimeBar(bar),
+              child: Container(
+                key: ValueKey(bar),
+                constraints: BoxConstraints(minWidth: 28.r),
+                alignment: AlignmentDirectional.center,
+                decoration: BoxDecoration(
+                  color: selected ? theme.markBg : null,
+                  borderRadius: BorderRadius.circular(5.r),
+                ),
+                padding: EdgeInsetsDirectional.symmetric(
+                  horizontal: 6.r,
+                  vertical: 4.r,
+                ),
+                margin: EdgeInsetsDirectional.symmetric(horizontal: 6.r),
+                child: Text(
+                  bar.bar,
+                  style: selected ? theme.t1s14w700 : theme.t1s14w400,
+                ),
+              ),
+            );
+          }).toList(),
+        );
+      },
+    );
+  }
+
+  Widget _buildMoreTimeBarButton(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: widget.controller.timeBarListener,
+      builder: (context, value, child) {
+        final theme = ref.watch(themeProvider);
+        return TextButton(
+          onPressed: onTapTimeBarSetting,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                value == null || isPreferTimeBar(value) ? '更多' : value.bar,
+                style: theme.t1s14w500,
+              ),
+              Icon(
+                Icons.arrow_drop_down,
+                color: theme.t1,
+              )
+            ],
+          ),
+        );
+      },
     );
   }
 }

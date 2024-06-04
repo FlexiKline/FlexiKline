@@ -47,25 +47,20 @@ class FlexiKlineWidget extends StatefulWidget {
 }
 
 class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
-  bool loading = false;
   @override
   void initState() {
     super.initState();
-    widget.controller.onSizeChange = () {
-      setState(() {});
-    };
-    widget.controller.onLoading = (isLoading) {
-      if (loading != isLoading) {
-        loading = isLoading;
-        setState(() {});
-      }
-    };
 
     widget.controller.initState();
+
+    widget.controller.sizeChnageListener.addListener(() {
+      setState(() {});
+    });
   }
 
   @override
   void dispose() {
+    widget.controller.dispose();
     super.dispose();
   }
 
@@ -120,7 +115,12 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
             ),
             Positioned.fromRect(
               rect: widget.controller.mainRect,
-              child: _buildMainForgroundView(context),
+              child: ValueListenableBuilder(
+                valueListenable: widget.controller.loadingListener,
+                builder: (context, value, child) {
+                  return _buildMainForgroundView(context, value);
+                },
+              ),
             )
           ],
         ),
@@ -128,7 +128,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
     );
   }
 
-  Widget _buildMainForgroundView(BuildContext context) {
+  Widget _buildMainForgroundView(BuildContext context, bool loading) {
     if (widget.mainforegroundViewBuilder != null) {
       return widget.mainforegroundViewBuilder!(context, loading);
     }

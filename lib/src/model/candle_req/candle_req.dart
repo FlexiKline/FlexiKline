@@ -12,14 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:flexi_kline/src/extension/export.dart';
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import '../../constant.dart';
+import '../../extension/export.dart';
 import '../../framework/serializers.dart';
 
 part 'candle_req.g.dart';
 
+@CopyWith()
 @FlexiModelSerializable
 class CandleReq {
   CandleReq({
@@ -61,32 +63,6 @@ class CandleReq {
   factory CandleReq.fromJson(Map<String, dynamic> json) =>
       _$CandleReqFromJson(json);
   Map<String, dynamic> toJson() => _$CandleReqToJson(this);
-
-  CandleReq copyWith({
-    String? instId,
-    Object? after = freezed,
-    Object? before = freezed,
-    String? bar,
-    int? limit,
-    int? precision,
-  }) {
-    return CandleReq(
-      instId: instId ?? this.instId,
-      after: after == freezed
-          ? this.after
-          : after is int
-              ? after
-              : null,
-      before: before == freezed
-          ? this.before
-          : before is int
-              ? before
-              : null,
-      bar: bar ?? this.bar,
-      limit: limit ?? this.limit,
-      precision: precision ?? this.precision,
-    );
-  }
 }
 
 extension CandleReqExt on CandleReq {
