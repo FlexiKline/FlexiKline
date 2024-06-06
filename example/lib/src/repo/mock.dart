@@ -17,6 +17,7 @@ import 'dart:convert';
 
 import 'package:decimal/decimal.dart';
 import 'package:flexi_kline/flexi_kline.dart';
+import 'package:flutter/foundation.dart';
 
 Future<List<CandleModel>> genCustomCandleList({
   int count = 7,
@@ -101,6 +102,54 @@ Future<List<CandleModel>> genCustomCandleList({
 /// [dateTime] : 初始时间
 /// [isHistory] : 是否生成历史数据
 Future<List<CandleModel>> genRandomCandleList({
+  int count = 5,
+  double inital = 1000,
+  double range = 100,
+  double initalVol = 100,
+  double rangeVol = 50,
+  TimeBar bar = TimeBar.D1,
+  DateTime? dateTime,
+  bool isHistory = true,
+}) async {
+  if (count > 10000) {
+    return await compute((List<dynamic> list) async {
+      debugPrint('zp::: genRandomCandleList Begin ${DateTime.now()}');
+      final result = await _genRandomCandleList(
+        count: list[0],
+        inital: list[1],
+        range: list[2],
+        initalVol: list[3],
+        rangeVol: list[4],
+        bar: list[5],
+        dateTime: list[6],
+        isHistory: list[7],
+      );
+      debugPrint('zp::: genRandomCandleList End ${DateTime.now()}');
+      return result;
+    }, [
+      count,
+      inital,
+      range,
+      initalVol,
+      rangeVol,
+      bar,
+      dateTime,
+      isHistory,
+    ]);
+  }
+  return _genRandomCandleList(
+    count: count,
+    inital: inital,
+    range: range,
+    initalVol: initalVol,
+    rangeVol: rangeVol,
+    bar: bar,
+    dateTime: dateTime,
+    isHistory: isHistory,
+  );
+}
+
+Future<List<CandleModel>> _genRandomCandleList({
   int count = 5,
   double inital = 1000,
   double range = 100,

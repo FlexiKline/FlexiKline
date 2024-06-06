@@ -121,6 +121,9 @@ enum TimeBar {
     return name.contains('utc') || bar.contains('utc');
   }
 
+  @override
+  String toString() => bar;
+
   static TimeBar? convert(String bar) {
     try {
       return TimeBar.values.firstWhere(

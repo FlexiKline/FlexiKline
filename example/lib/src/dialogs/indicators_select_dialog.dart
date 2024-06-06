@@ -46,6 +46,7 @@ class _IndicatorSelectDialogState extends ConsumerState<IndicatorSelectDialog> {
     final theme = ref.watch(themeProvider);
     final s = S.of(context);
     return Container(
+      width: ScreenUtil().screenWidth,
       padding: EdgeInsetsDirectional.all(16.r),
       child: SingleChildScrollView(
         child: Column(

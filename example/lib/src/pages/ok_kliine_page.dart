@@ -70,7 +70,7 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage> {
 
   Future<void> loadCandleData(CandleReq request) async {
     try {
-      controller.startLoading(request, useCacheFirst: true);
+      controller.startLoading(request);
 
       cancelToken?.cancel();
       final resp = await api.getMarketCandles(
@@ -84,7 +84,7 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage> {
         SmartDialog.showToast(resp.msg);
       }
     } finally {
-      controller.stopLoading(req: request);
+      controller.stopLoading(request);
     }
   }
 

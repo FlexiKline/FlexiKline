@@ -147,6 +147,18 @@ class IndicatorsConfig {
         ..._customSubIndicators,
       };
 
+  /// 收集当前所有支持的指标的计算参数
+  Map<ValueKey, dynamic> getIndicatorCalcParams() {
+    final calcParams = <ValueKey, dynamic>{};
+    mainIndicators.forEach((key, indicator) {
+      calcParams.addAll(indicator.getCalcParams());
+    });
+    subIndicators.forEach((key, indicator) {
+      calcParams.addAll(indicator.getCalcParams());
+    });
+    return calcParams;
+  }
+
   void dispose() {
     mainIndicators.forEach((key, indicator) {
       indicator.dispose();

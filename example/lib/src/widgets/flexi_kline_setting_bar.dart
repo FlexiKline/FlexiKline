@@ -23,6 +23,7 @@ import '../dialogs/kline_settting_dialog.dart';
 import '../dialogs/timebar_select_dialog.dart';
 import '../theme/export.dart';
 import '../utils/dialog_manager.dart';
+import 'text_arrow_button.dart';
 
 class FlexiKlineSettingBar extends ConsumerStatefulWidget {
   const FlexiKlineSettingBar({
@@ -50,6 +51,13 @@ class _FlexiKlineSettingBarState extends ConsumerState<FlexiKlineSettingBar> {
     super.initState();
   }
 
+  @override
+  void dispose() {
+    timeBarSettingBtnStatus.dispose();
+    indicatorSettingBtnStatus.dispose();
+    super.dispose();
+  }
+
   List<TimeBar> preferTimeBarList = [
     TimeBar.m15,
     TimeBar.H1,
@@ -59,8 +67,10 @@ class _FlexiKlineSettingBarState extends ConsumerState<FlexiKlineSettingBar> {
 
   bool isPreferTimeBar(TimeBar bar) => preferTimeBarList.contains(bar);
 
-  void onTapTimeBarSetting() {
-    DialogManager().showBottomDialog(
+  final timeBarSettingBtnStatus = ValueNotifier(false);
+  Future<void> onTapTimeBarSetting() async {
+    timeBarSettingBtnStatus.value = true;
+    await DialogManager().showBottomDialog(
       dialogTag: TimerBarSelectDialog.dialogTag,
       builder: (context) => TimerBarSelectDialog(
         controller: widget.controller,
@@ -68,15 +78,19 @@ class _FlexiKlineSettingBarState extends ConsumerState<FlexiKlineSettingBar> {
         preferTimeBarList: preferTimeBarList,
       ),
     );
+    timeBarSettingBtnStatus.value = false;
   }
 
-  void onTapIndicatorSetting() {
-    DialogManager().showBottomDialog(
+  final indicatorSettingBtnStatus = ValueNotifier(false);
+  Future<void> onTapIndicatorSetting() async {
+    indicatorSettingBtnStatus.value = true;
+    await DialogManager().showBottomDialog(
       dialogTag: IndicatorSelectDialog.dialogTag,
       builder: (context) => IndicatorSelectDialog(
         controller: widget.controller,
       ),
     );
+    indicatorSettingBtnStatus.value = false;
   }
 
   void onTabKlineSetting() {
@@ -107,22 +121,21 @@ class _FlexiKlineSettingBarState extends ConsumerState<FlexiKlineSettingBar> {
               child: _buildPreferTimeBarList(context),
             ),
           ),
-          _buildMoreTimeBarButton(context),
-          TextButton(
+          ValueListenableBuilder(
+            valueListenable: widget.controller.timeBarListener,
+            builder: (context, value, child) {
+              final showMore = value == null || isPreferTimeBar(value);
+              return TextArrowButton(
+                onPressed: onTapTimeBarSetting,
+                text: showMore ? '更多' : value.bar,
+                iconStatus: timeBarSettingBtnStatus,
+              );
+            },
+          ),
+          TextArrowButton(
             onPressed: onTapIndicatorSetting,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  s.indicators,
-                  style: theme.t1s14w500,
-                ),
-                Icon(
-                  Icons.arrow_drop_down,
-                  color: theme.t1,
-                )
-              ],
-            ),
+            text: s.indicators,
+            iconStatus: indicatorSettingBtnStatus,
           ),
           IconButton(
             onPressed: onTabKlineSetting,
@@ -167,31 +180,6 @@ class _FlexiKlineSettingBarState extends ConsumerState<FlexiKlineSettingBar> {
               ),
             );
           }).toList(),
-        );
-      },
-    );
-  }
-
-  Widget _buildMoreTimeBarButton(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: widget.controller.timeBarListener,
-      builder: (context, value, child) {
-        final theme = ref.watch(themeProvider);
-        return TextButton(
-          onPressed: onTapTimeBarSetting,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                value == null || isPreferTimeBar(value) ? '更多' : value.bar,
-                style: theme.t1s14w500,
-              ),
-              Icon(
-                Icons.arrow_drop_down,
-                color: theme.t1,
-              )
-            ],
-          ),
         );
       },
     );

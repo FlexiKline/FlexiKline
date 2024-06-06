@@ -18,7 +18,7 @@ import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'mock.dart';
+import 'base/mock.dart';
 
 void main() {
   final stopwatch = Stopwatch();

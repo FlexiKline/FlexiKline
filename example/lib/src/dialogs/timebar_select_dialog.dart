@@ -34,8 +34,11 @@ class TimerBarSelectDialog extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = ref.watch(themeProvider);
+    final screenWidth = ScreenUtil().screenWidth;
+    final timeBarWidth = (screenWidth - 2 * 16.r - 4 * 12.r) / 5;
     return Container(
-      padding: EdgeInsetsDirectional.all(16.r),
+      width: screenWidth,
+      margin: EdgeInsetsDirectional.all(16.r),
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -46,14 +49,14 @@ class TimerBarSelectDialog extends ConsumerWidget {
               style: theme.t1s20w700,
             ),
             SizedBox(height: 10.r),
-            _buildPreferTimeBarList(context, ref),
+            _buildPreferTimeBarList(context, ref, barWidth: timeBarWidth),
             SizedBox(height: 20.r),
             Text(
               '全部周期',
               style: theme.t1s16w400,
             ),
             SizedBox(height: 10.r),
-            _buildAllTimeBarList(context, ref),
+            _buildAllTimeBarList(context, ref, barWidth: timeBarWidth),
             SizedBox(height: 10.r),
           ],
         ),
@@ -61,26 +64,35 @@ class TimerBarSelectDialog extends ConsumerWidget {
     );
   }
 
-  Widget _buildPreferTimeBarList(BuildContext context, WidgetRef ref) {
+  Widget _buildPreferTimeBarList(
+    BuildContext context,
+    WidgetRef ref, {
+    required double barWidth,
+  }) {
     return ValueListenableBuilder(
       valueListenable: controller.timeBarListener,
       builder: (context, value, child) {
         final theme = ref.read(themeProvider);
         return Wrap(
           alignment: WrapAlignment.start,
-          spacing: 16.r,
+          spacing: 12.r,
           runSpacing: 8.r,
           children: preferTimeBarList.map((bar) {
             final selected = value == bar;
-            return TextButton(
-              key: ValueKey(bar),
-              style: theme.outlinedBtnStyle(showOutlined: selected),
-              onPressed: () => onTapTimeBar(bar),
-              child: Text(
-                bar.bar,
-                style: theme.t2s12w400.copyWith(
-                  color: theme.t1,
-                  fontWeight: selected ? FontWeight.bold : null,
+            return SizedBox(
+              width: barWidth,
+              child: TextButton(
+                key: ValueKey(bar),
+                style: theme.outlinedBtnStyle(showOutlined: selected),
+                onPressed: () => onTapTimeBar(bar),
+                child: FittedBox(
+                  child: Text(
+                    bar.bar,
+                    style: theme.t2s12w400.copyWith(
+                      color: theme.t1,
+                      fontWeight: selected ? FontWeight.bold : null,
+                    ),
+                  ),
                 ),
               ),
             );
@@ -90,26 +102,35 @@ class TimerBarSelectDialog extends ConsumerWidget {
     );
   }
 
-  Widget _buildAllTimeBarList(BuildContext context, WidgetRef ref) {
+  Widget _buildAllTimeBarList(
+    BuildContext context,
+    WidgetRef ref, {
+    required double barWidth,
+  }) {
     return ValueListenableBuilder(
       valueListenable: controller.timeBarListener,
       builder: (context, value, child) {
         final theme = ref.read(themeProvider);
         return Wrap(
           alignment: WrapAlignment.start,
-          spacing: 16.r,
+          spacing: 12.r,
           runSpacing: 8.r,
           children: TimeBar.values.map((bar) {
             final selected = value == bar;
-            return TextButton(
-              key: ValueKey(bar),
-              style: theme.outlinedBtnStyle(showOutlined: selected),
-              onPressed: () => onTapTimeBar(bar),
-              child: Text(
-                bar.bar,
-                style: theme.t2s12w400.copyWith(
-                  color: theme.t1,
-                  fontWeight: selected ? FontWeight.bold : null,
+            return SizedBox(
+              width: barWidth,
+              child: TextButton(
+                key: ValueKey(bar),
+                style: theme.outlinedBtnStyle(showOutlined: selected),
+                onPressed: () => onTapTimeBar(bar),
+                child: FittedBox(
+                  child: Text(
+                    bar.bar,
+                    style: theme.t2s12w400.copyWith(
+                      color: theme.t1,
+                      fontWeight: selected ? FontWeight.bold : null,
+                    ),
+                  ),
                 ),
               ),
             );

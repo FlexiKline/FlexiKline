@@ -15,3 +15,4 @@
 export 'kline_data.dart';
 export 'base_data.dart';
 export 'results.dart';
+export 'precompute_data.dart';

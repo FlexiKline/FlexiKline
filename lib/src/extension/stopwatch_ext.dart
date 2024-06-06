@@ -12,15 +12,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:flutter/material.dart';
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
+
+import '../framework/logger.dart';
 
 extension StopwatchExt on Stopwatch {
-  /// 返回[runable]运行耗时
-  int run(VoidCallback runable) {
+  /// 同步运行[runable]任务, 并打印耗时.
+  T run<T>(
+    ValueGetter runable, {
+    String debugLabel = 'runable',
+    ILogger? logger,
+  }) {
     reset();
     start();
-    runable();
+    final result = runable();
     stop();
-    return elapsedMicroseconds;
+    debugPrint('WatchRun:::\t$debugLabel\tspent:$elapsedMicrosecondsμs');
+    return result;
+  }
+
+  /// 异常运行[computation]任务, 并打印耗时.
+  Future<T> runAsync<T>(
+    TaskCallback<T> computation, {
+    String debugLabel = 'compute',
+  }) async {
+    reset();
+    start();
+    final result = await Future(() => computation());
+    stop();
+    debugPrint('WatchRunAsync:::\t$debugLabel\tspent:$elapsedMicrosecondsμs');
+    return result;
   }
 }

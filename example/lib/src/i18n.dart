@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:ui';
+
 import 'package:example/generated/l10n.dart';
 import 'package:example/src/utils/cache_util.dart';
 import 'package:flutter/material.dart';
@@ -59,7 +61,11 @@ class I18nManager {
         );
       }
     }
-    return supportedLocales.first;
+    Locale systemLocale = PlatformDispatcher.instance.locale;
+    return supportedLocales.firstWhere(
+      (element) => element.languageCode == systemLocale.languageCode,
+      orElse: () => supportedLocales.first,
+    );
   }
 
   void switchLocale(Locale locale) {

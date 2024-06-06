@@ -15,11 +15,11 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
 import '../constant.dart';
 import '../data/export.dart';
 import '../extension/export.dart';
-import '../framework/indicator.dart';
 import '../model/export.dart';
 import 'binding_base.dart';
 import 'interface.dart';
@@ -54,13 +54,12 @@ mixin StateBinding
   final loadingListener = ValueNotifier<bool>(false);
 
   ComputeMode _computeMode = ComputeMode.fast;
-  ComputeMode get computeMode => _computeMode;
+  // ComputeMode get computeMode => _computeMode;
   set computeMode(mode) {
     if (mode != _computeMode) {
       _computeMode = mode;
-      precomputeIndicatorData(
+      _startPrecomputeKlineData(
         curKlineData,
-        range: Range(0, curDataKey.length),
         reset: true,
       );
     }
@@ -212,46 +211,81 @@ mixin StateBinding
     }
   }
 
-  /// 预计算Kline指标数据
+  /// 开始预计算Kline指标数据
   /// [data] 待计算的Kline蜡烛数据
-  /// [range] 待计算的蜡烛数据范围
-  /// [reset] 是否重置; 如果有, 忽略之前的计算结果.
-  void precomputeIndicatorData(
+  /// [newList] 待计算的蜡烛数据范围
+  /// [reset] 是否重置[data],
+  /// 1. true: 重新计算[data]的指标数据;
+  /// 2. false: 仅计算[data]与[newList]合并后的部分.
+  /// 数据合并更新结果的处理:
+  /// 1. 对于历史数据追加, 像EMA这类依赖于历史数据会适时考虑从头计算.
+  /// 2. 对于实时数据更新, 会仅计算[newList]部分.
+  Future<KlineData> _startPrecomputeKlineData(
     KlineData data, {
-    required Range range,
+    List<CandleModel> newList = const [],
     bool reset = false,
   }) async {
-    if (data.isEmpty) return;
+    if (newList.isEmpty || !reset) {
+      // 无需计算; 直接返回
+      return data;
+    }
 
-    /// 收集预计算的指标参数
-    final calcParams = <ValueKey, dynamic>{};
-    // final isOnlyPrecomputeCurrent = false;
-    // if (isOnlyPrecomputeCurrent) {
-    //   calcParams.addAll(mainIndicator.getCalcParams());
-    //   subRectIndicators.forEach((indicator) {
-    //     calcParams.addAll(indicator.getCalcParams());
-    //   });
-    // } else {
-    indicatorsConfig.mainIndicators.forEach((key, indicator) {
-      calcParams.addAll(indicator.getCalcParams());
-    });
-    indicatorsConfig.subIndicators.forEach((key, indicator) {
-      calcParams.addAll(indicator.getCalcParams());
-    });
-    // }
+    // 确认当前数据的计算模式
+    final computeMode = _computeMode;
 
-    final stopwatch = Stopwatch();
+    // 收集指标预计算参数.
+    final calcParams = indicatorsConfig.getIndicatorCalcParams();
 
-    // 根据计算模式, 初始化基础数据
-    data.initBasicData(computeMode, reset: reset);
+    final watchPrecompute = Stopwatch();
 
-    /// 预计算指标数据
-    calcParams.forEach((key, calcParam) {
-      final elapseTime = stopwatch.run(() {
-        data.precompute(key, calcParam: calcParam, range: range, reset: reset);
-      });
-      logd('precompute $key, $range, $reset spent:$elapseTime microseconds');
-    });
+    try {
+      logd('PrecomputeKlineData Begin:${DateTime.now()}');
+      watchPrecompute.start();
+
+      /// 使用scheduleTask + compute方式运行预计算
+      // return await SchedulerBinding.instance.scheduleTask(
+      //   () => precomputeKlineDataByCompute(
+      //     data,
+      //     newList: newList,
+      //     computeMode: computeMode,
+      //     calcParams: calcParams,
+      //     reset: reset,
+      //     debugLabel: 'Precompute-Compute',
+      //     logger: loggerDelegate,
+      //   ),
+      //   Priority.animation,
+      //   debugLabel: 'Precompute-Task',
+      // );
+
+      /// 使用scheduleTask方式运行预计算
+      return await SchedulerBinding.instance.scheduleTask(
+        () => KlineData.precomputeKlineData(
+          data,
+          newList: newList,
+          computeMode: computeMode,
+          calcParams: calcParams,
+          reset: reset,
+        ),
+        Priority.animation,
+        debugLabel: 'Precompute-Task',
+      );
+
+      /// 直接运行预计算
+      // return await KlineData.precomputeKlineData(
+      //   data,
+      //   newList: newList,
+      //   computeMode: computeMode,
+      //   calcParams: calcParams,
+      //   reset: reset,
+      // );
+    } catch (e, stack) {
+      loge('PrecomputeKlineData exception!!!', error: e, stackTrace: stack);
+      return data;
+    } finally {
+      watchPrecompute.stop();
+      logd('PrecomputeKlineData End:${DateTime.now()}');
+      logi('PrecomputeKlineData spent:${watchPrecompute.elapsedMicroseconds}');
+    }
   }
 
   /// 开始加载[req]请求指定的蜡烛数据
@@ -285,6 +319,7 @@ mixin StateBinding
     data = KlineData(req.copyWith(), logger: loggerDelegate);
     _klineDataCache[req.key] = data;
     _curKlineData = data;
+    timeBarListener.value = data.timeBar;
     return true;
   }
 
@@ -292,41 +327,39 @@ mixin StateBinding
   /// [force] 使终结束加载
   /// [req] 如果指定, 且与当前正常加载的蜡烛请求一致, 才结束加载中状态
   @override
-  void stopLoading({bool force = false, CandleReq? req}) {
-    if (force || (req != null && req.key == curDataKey)) {
+  void stopLoading(CandleReq request, {bool force = false}) {
+    if (force || request.key == curDataKey) {
       loadingListener.value = false;
     }
   }
 
   /// 更新KlineData
   @override
-  Future<void> updateKlineData(CandleReq req, List<CandleModel> list) async {
+  Future<void> updateKlineData(
+    CandleReq request,
+    List<CandleModel> list,
+  ) async {
     // 数据为空, 无需要更新.
     if (list.isEmpty) return;
 
+    final req = request.copyWith();
+
     KlineData? data = _klineDataCache[req.key];
-
+    bool reset = data == null || data.isEmpty;
     final oldLen = data?.length ?? 0;
-    bool reset = false;
-    Range? range;
-    if (data == null) {
-      req = req.copyWith();
-      data = KlineData(req, list: list, logger: loggerDelegate);
-      _klineDataCache[req.key] = data;
-      reset = true;
-      range = Range(0, list.length);
-    } else {
-      reset = data.isEmpty;
-      range = data.mergeCandleList(list);
-      range ??= Range.empty;
-    }
 
-    if (range.isNotEmpty) {
-      precomputeIndicatorData(data, range: range, reset: reset);
-    }
+    data ??= KlineData(req, logger: loggerDelegate);
+
+    data = await _startPrecomputeKlineData(
+      data,
+      newList: list,
+      reset: reset,
+    );
+
+    _klineDataCache[req.key] = data;
 
     if (req.key == curDataKey) {
-      if (oldLen == 0) {
+      if (reset) {
         setCurKlineData(data);
       } else {
         final newLen = data.length;
@@ -346,60 +379,6 @@ mixin StateBinding
       }
     }
   }
-
-  // @override
-  // void setKlineData(CandleReq req, List<CandleModel> list) {
-  //   // TODO: 校验数据合法性.
-  //   req = req.copyWith();
-  //   KlineData? data = _klineDataCache[req.key];
-  //   if (data != null && !data.isEmpty) {
-  //     data.dispose();
-  //   }
-
-  //   data = KlineData(req, list: List.of(list), logger: loggerDelegate);
-  //   precomputeIndicatorData(data, range: Range(0, data.length), reset: true);
-
-  //   _klineDataCache[req.key] = data;
-  //   if (curKlineData.invalid || req.key == curDataKey) {
-  //     curKlineData = data;
-  //   }
-  // }
-
-  // /// 追加蜡烛数据.
-  // @override
-  // void appendKlineData(CandleReq req, List<CandleModel> list) {
-  //   KlineData? data = _klineDataCache[req.key];
-  //   if (data == null || data.isEmpty) {
-  //     logd('appendKlineData > setKlineData(${req.key}, ${data?.list.length})');
-  //     setKlineData(req, list);
-  //     return;
-  //   }
-
-  //   final oldLen = data.list.length;
-  //   final range = data.mergeCandleList(list);
-  //   if (range == null) {
-  //     // klineData数据未发生变化, 直接return.
-  //     return;
-  //   }
-  //   precomputeIndicatorData(data, reset: false, range: range);
-  //   _klineDataCache[req.key] = data;
-  //   if (req.key == curDataKey) {
-  //     final newLen = data.list.length;
-  //     if (paintDxOffset < 0 && newLen > oldLen) {
-  //       /// 当数据合并后
-  //       /// 1. 如果paintDxOffset > 0 说明满足一屏, 且最新蜡烛被用户移动到绘制区域外面, 无需调整偏移量paintDxOffset, 重绘时, 仍按此偏移量计算后, 当前首根蜡烛向左移动一个蜡烛.
-  //       /// 2. 如果paintDxOffset == 0 说明当前最新蜡烛在屏幕第一位(最右边)展示. 无需调整偏移量paintDxOffset, 重绘时calculateCandleIndexAndOffset, 会计算startIndex = 0;
-  //       /// 2. 如果paintDxOffset < 0 说明未满足一屏, 需要减小偏移量, 以保证新数据能够展示.
-  //       ///    注: 如果调整后 paintDxOffset > 0 则要置为0, 以保证最新蜡烛在最右边展示.
-  //       paintDxOffset = math.min(
-  //         0,
-  //         paintDxOffset + (newLen - oldLen) * candleActualWidth,
-  //       );
-  //     }
-
-  //     markRepaintChart();
-  //   }
-  // }
 
   @override
   void handleMove(GestureData data) {

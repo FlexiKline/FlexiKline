@@ -17,7 +17,6 @@ import 'dart:ui';
 
 import 'package:example/generated/l10n.dart';
 import 'package:flexi_kline/flexi_kline.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -94,7 +93,7 @@ class DefaultFlexiKlineTheme extends BaseFlexiKlineTheme
   double get pixel {
     if (_pixel != null) return _pixel!;
     double? ratio = ScreenUtil().pixelRatio;
-    ratio ??= MediaQueryData.fromWindow(window).devicePixelRatio;
+    ratio ??= PlatformDispatcher.instance.displays.first.devicePixelRatio;
     _pixel = 1 / ratio;
     return _pixel!;
   }

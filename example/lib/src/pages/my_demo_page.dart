@@ -44,44 +44,47 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
     precision: 2,
   );
 
+  final logger = LogPrintImpl(
+    debug: kDebugMode,
+    tag: 'Demo1',
+  );
+
   @override
   void initState() {
     super.initState();
     configuration = DefaultFlexiKlineConfiguration(ref: ref);
     controller = FlexiKlineController(
       configuration: configuration,
-      logger: LogPrintImpl(
-        debug: kDebugMode,
-        tag: 'Demo1',
-      ),
+      logger: logger,
     );
 
     controller.onCrossI18nTooltipLables = tooltipLables;
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      loadCandleData1(req);
+      loadCandleData(req);
     });
   }
 
-  Future<void> loadCandleData1(CandleReq request) async {
+  Future<void> loadCandleData(CandleReq request) async {
     try {
       controller.startLoading(request);
-      Future<List<CandleModel>> getCandleData(TimeBar timeBar) async =>
-          await genRandomCandleList(
-            count: 500,
-            bar: timeBar,
-          );
-      final list = await compute(getCandleData, request.timeBar!);
+
+      logger.logd('loadCandleData Begin ${DateTime.now()}');
+      final list = await genRandomCandleList(
+        count: 50000,
+        bar: request.timeBar!,
+      );
+      logger.logd('loadCandleData End ${DateTime.now()}');
 
       await controller.updateKlineData(request, list);
     } finally {
-      controller.stopLoading(req: request);
+      controller.stopLoading(request);
     }
   }
 
   void onTapTimeBar(TimeBar value) {
     req.bar = value.bar;
-    loadCandleData1(req);
+    loadCandleData(req);
   }
 
   @override

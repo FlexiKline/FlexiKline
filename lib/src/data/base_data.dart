@@ -27,7 +27,7 @@ import '../model/export.dart';
 /// 注: 对于BaseData的指标计算mixin: 仅保留计算逻辑, 不持有状态, 计算结果统一整合在[CandleModel]中.
 abstract class BaseData with KlineLog {
   @override
-  String get logTag => '${super.logTag}\tDADA';
+  String get logTag => req.key;
 
   BaseData(
     this.req, {

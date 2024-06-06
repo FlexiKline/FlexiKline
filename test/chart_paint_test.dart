@@ -12,109 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'mock.dart';
-
-class TestFlexiKlineTheme implements IFlexiKlineTheme {
-  @override
-  String key = 'flexi_kline_config_key_test';
-
-  double? _scale;
-  @override
-  double get scale {
-    if (_scale != null) return _scale!;
-    final mediaQuery = MediaQueryData.fromWindow(window);
-    _scale = math.min(mediaQuery.size.width, mediaQuery.size.height) / 393;
-    return _scale!;
-  }
-
-  double? _pixel;
-  @override
-  double get pixel {
-    if (_pixel != null) return _pixel!;
-    final mediaQuery = MediaQueryData.fromWindow(window);
-    _pixel = 1.0 / mediaQuery.devicePixelRatio;
-    return _pixel!;
-  }
-
-  @override
-  double setDp(num size) => size * scale;
-
-  @override
-  double setSp(num fontSize) => fontSize * scale;
-
-  @override
-  Color long = const Color(0xFF33BD65);
-
-  @override
-  Color short = const Color(0xFFE84E74);
-
-  @override
-  Color chartBg = const Color(0xFFFFFFFF);
-
-  @override
-  Color tooltipBg = const Color(0xFFF2F2F2);
-
-  @override
-  Color countDownTextBg = const Color(0xFFBDBDBD);
-
-  @override
-  Color crossTextBg = const Color(0xFF111111);
-
-  @override
-  Color transparent = Colors.transparent;
-
-  @override
-  Color lastPriceTextBg = Colors.black54;
-
-  @override
-  Color gridLine = const Color(0xffE9EDF0);
-
-  @override
-  Color crosshair = const Color(0xFF000000);
-
-  @override
-  Color priceMarkLine = const Color(0xFF000000);
-
-  @override
-  Color textColor = const Color(0xFF000000);
-
-  @override
-  Color tickTextColor = const Color(0xFF949494);
-
-  @override
-  Color lastPriceTextColor = const Color(0xFF5F5F5F);
-
-  @override
-  Color crossTextColor = const Color(0xFFFFFFFF);
-
-  @override
-  Color tooltipTextColor = const Color(0xFF949494);
-}
-
-class TestFlexiKlineConfiguration extends BaseFlexiKlineThemeConfiguration {
-  @override
-  Size get initialMainSize {
-    final mediaQuery = MediaQueryData.fromWindow(window);
-    return Size(mediaQuery.size.width, 300);
-  }
-
-  @override
-  FlexiKlineConfig getFlexiKlineConfig([TestFlexiKlineTheme? theme]) {
-    return genFlexiKlineConfig(TestFlexiKlineTheme());
-  }
-
-  @override
-  void saveFlexiKlineConfig(FlexiKlineConfig config) {
-    // TODO: implement saveFlexiKlineConfig
-  }
-}
+import 'base/test_flexi_kline_configuration.dart';
+import 'base/mock.dart';
 
 void main() {
   final stopwatch = Stopwatch();
@@ -129,7 +34,7 @@ void main() {
   setUpAll(() {
     debugPrint('setUpAll');
     final list = getCandleModelList();
-    controller.setKlineData(
+    controller.updateKlineData(
       CandleReq(
         instId: 'BTC-USDT',
         bar: TimeBar.m15.bar,
