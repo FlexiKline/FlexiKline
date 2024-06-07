@@ -36,7 +36,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
   void dispose() {
     super.dispose();
     logd("dispose setting");
-    sizeChnageListener.dispose();
+    sizeChangeListener.dispose();
     mainIndicator.dispose();
     for (var indicator in subRectIndicators) {
       indicator.dispose();
@@ -45,7 +45,8 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
   }
 
   /// KlineData整个图表区域大小变化监听器
-  final sizeChnageListener = ValueNotifier(defaultCanvasRectMinRect);
+  final sizeChangeListener = ValueNotifier(defaultCanvasRectMinRect);
+  void invokeSizeChanged() => sizeChangeListener.value = canvasRect;
 
   /// 整个画布区域大小 = 由主图区域 + 副图区域
   @override
@@ -53,7 +54,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
         mainRect.left,
         mainRect.top,
         math.max(mainRect.width, subRect.width),
-        mainRect.height + subRect.height,
+        mainRect.height + subRectHeight,
       );
   double get canvasWidth => canvasRect.width;
   double get canvasHeight => canvasRect.height;
@@ -84,7 +85,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
         size.height,
       );
       updateMainIndicatorParam(height: size.height);
-      sizeChnageListener.value = canvasRect;
+      invokeSizeChanged();
     }
   }
 
@@ -265,22 +266,24 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
         deleted.dispose();
       }
       subIndicators.addLast(indicatorsConfig.subIndicators[key]!);
-      sizeChnageListener.value = canvasRect;
+      invokeSizeChanged();
       markRepaintChart();
     }
   }
 
   /// 删除副图[key]指定的指标
   void delIndicatorInSub(ValueKey key) {
+    bool hasRemove = false;
     subIndicators.removeWhere((indicator) {
       if (indicator.key == key) {
         indicator.dispose();
-        sizeChnageListener.value = canvasRect;
         markRepaintChart();
+        hasRemove = true;
         return true;
       }
       return false;
     });
+    if (hasRemove) invokeSizeChanged();
   }
 
   FlexiKlineConfig? __flexiKlineConfig;

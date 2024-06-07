@@ -33,6 +33,7 @@ mixin ChartBinding on KlineBindingBase implements IChart, IState, ISetting {
   void dispose() {
     super.dispose();
     logd('dispose indicator');
+    _repaintCandle.dispose();
     _lastPriceCountDownTimer?.cancel();
     _lastPriceCountDownTimer = null;
   }

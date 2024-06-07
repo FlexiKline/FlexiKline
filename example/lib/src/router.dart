@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:example/src/pages/bit_kline_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:go_router/go_router.dart';
 
+import 'pages/bit_kline_page.dart';
 import 'pages/ok_kline_page.dart';
 import 'pages/main_nav_page.dart';
 import 'pages/my_demo_page.dart';

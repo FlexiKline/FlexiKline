@@ -299,9 +299,6 @@ mixin StateBinding
     CandleReq req, {
     bool useCacheFirst = true,
   }) {
-    // 取消上一次的Loading展示
-    // loadingListener.value = false;
-
     KlineData? data = _klineDataCache[req.key];
 
     if (useCacheFirst && data != null && !data.isEmpty) {

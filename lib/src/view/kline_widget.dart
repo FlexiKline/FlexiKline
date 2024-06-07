@@ -53,7 +53,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
 
     widget.controller.initState();
 
-    widget.controller.sizeChnageListener.addListener(() {
+    widget.controller.sizeChangeListener.addListener(() {
       setState(() {});
     });
   }

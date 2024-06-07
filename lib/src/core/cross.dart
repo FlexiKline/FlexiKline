@@ -51,6 +51,7 @@ mixin CrossBinding
   void dispose() {
     super.dispose();
     logd('dispose cross');
+    _repaintCross.dispose();
   }
 
   final ValueNotifier<int> _repaintCross = ValueNotifier(0);

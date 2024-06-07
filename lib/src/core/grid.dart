@@ -32,6 +32,7 @@ mixin GridBinding on KlineBindingBase implements IGrid {
   void dispose() {
     super.dispose();
     logd('dispose grid');
+    repaintGridBg.dispose();
   }
 
   @override
