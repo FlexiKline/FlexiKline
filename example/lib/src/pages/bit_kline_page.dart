@@ -26,7 +26,7 @@ import '../config.dart';
 import '../providers/bit_kline_config.dart';
 import '../repo/api.dart' as api;
 import '../widgets/flexi_kline_indicator_bar.dart';
-import '../widgets/latest_price_view.dart';
+import '../widgets/market_ticker_view.dart';
 import '../widgets/flexi_kline_setting_bar.dart';
 import 'main_nav_page.dart';
 
@@ -120,10 +120,8 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            LatestPriceView(
-              base: req.base,
-              quote: req.quote,
-              model: controller.curKlineData.latest,
+            MarketTickerView(
+              instId: req.instId,
               precision: req.precision,
             ),
             FlexiKlineSettingBar(

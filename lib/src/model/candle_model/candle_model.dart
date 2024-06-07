@@ -14,6 +14,7 @@
 
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:decimal/decimal.dart';
+import 'package:flexi_kline/src/extension/export.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import '../../constant.dart';
@@ -30,7 +31,7 @@ class CandleModel
     with MaMixin, VolMaMixin, EmaMixin, BollMixin, MacdMixin, KdjMixin
     implements Comparable<CandleModel> {
   CandleModel({
-    required this.timestamp,
+    required this.ts,
     required this.o,
     required this.h,
     required this.l,
@@ -43,7 +44,7 @@ class CandleModel
 
   /// 开始时间，Unix时间戳的毫秒数格式，如 1597026383085
   @JsonKey(fromJson: valueToInt, toJson: intToString)
-  final int timestamp;
+  final int ts;
   // @JsonKey(fromJson: valueToDateTime, toJson: dateTimeToInt)
   // DateTime? datetime, // 从timestamp转换为dateTime;
 
@@ -81,7 +82,34 @@ class CandleModel
 
   @override
   int compareTo(CandleModel other) {
-    return other.timestamp - timestamp;
+    return other.ts - ts;
+  }
+
+  static CandleModel? fromList(List<dynamic> data) {
+    if (data.isEmpty || data.length < 6) return null;
+    final ts = parseInt(data.getItem(0));
+    if (ts == null) return null;
+    final o = parseDecimal(data.getItem(1));
+    if (o == null) return null;
+    final h = parseDecimal(data.getItem(2));
+    if (h == null) return null;
+    final l = parseDecimal(data.getItem(3));
+    if (l == null) return null;
+    final c = parseDecimal(data.getItem(4));
+    if (c == null) return null;
+    final v = parseDecimal(data.getItem(5));
+    if (v == null) return null;
+    return CandleModel(
+      ts: ts,
+      o: o,
+      h: h,
+      l: l,
+      c: c,
+      v: v,
+      vc: parseDecimal(data.getItem(6)),
+      vcq: parseDecimal(data.getItem(7)),
+      confirm: data.getItem(8).toString(),
+    );
   }
 
   factory CandleModel.fromJson(Map<String, dynamic> json) =>
@@ -141,7 +169,7 @@ class CandleModel
 
 extension CandleModelExt on CandleModel {
   DateTime get dateTime {
-    return DateTime.fromMillisecondsSinceEpoch(timestamp);
+    return DateTime.fromMillisecondsSinceEpoch(ts);
   }
 
   String formatDateTimeByTimeBar(TimeBar? bar) {
@@ -164,7 +192,7 @@ extension CandleModelExt on CandleModel {
     final timeBar = TimeBar.convert(bar);
     if (timeBar != null) {
       return DateTime.fromMillisecondsSinceEpoch(
-        timestamp + timeBar.milliseconds,
+        ts + timeBar.milliseconds,
         isUtc: timeBar.isUtc,
       );
     }

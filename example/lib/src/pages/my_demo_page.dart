@@ -137,7 +137,7 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
           final latest = controller.curKlineData.latest;
           DateTime? dateTime;
           if (latest != null) {
-            dateTime = DateTime.fromMillisecondsSinceEpoch(latest.timestamp);
+            dateTime = DateTime.fromMillisecondsSinceEpoch(latest.ts);
           }
           dateTime ??= DateTime.now();
 

@@ -95,13 +95,13 @@ class _MyAppState extends ConsumerState<MyApp> {
     Header header;
     if (Platform.isIOS) {
       header = CupertinoHeader(
-        foregroundColor: theme.white,
-        backgroundColor: theme.transparent,
+        foregroundColor: theme.brand,
+        backgroundColor: theme.cardBg,
       );
     } else {
       header = MaterialHeader(
-        color: theme.white,
-        backgroundColor: theme.transparent,
+        color: theme.brand,
+        backgroundColor: theme.cardBg,
       );
     }
     EasyRefresh.defaultHeaderBuilder = () => header;

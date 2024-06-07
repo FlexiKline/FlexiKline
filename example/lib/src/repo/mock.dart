@@ -26,7 +26,7 @@ Future<List<CandleModel>> genCustomCandleList({
   DateTime dateTime = DateTime.now();
   return <CandleModel>[
     CandleModel(
-      timestamp: dateTime.add(const Duration(days: 0)).millisecondsSinceEpoch,
+      ts: dateTime.add(const Duration(days: 0)).millisecondsSinceEpoch,
       h: 320.d,
       o: 100.d,
       c: 300.d,
@@ -34,7 +34,7 @@ Future<List<CandleModel>> genCustomCandleList({
       v: 80.d,
     ),
     CandleModel(
-      timestamp: dateTime.add(const Duration(days: -1)).millisecondsSinceEpoch,
+      ts: dateTime.add(const Duration(days: -1)).millisecondsSinceEpoch,
       h: 220.d,
       o: 60.d,
       c: 200.d,
@@ -42,7 +42,7 @@ Future<List<CandleModel>> genCustomCandleList({
       v: 50.d,
     ),
     CandleModel(
-      timestamp: dateTime.add(const Duration(days: -2)).millisecondsSinceEpoch,
+      ts: dateTime.add(const Duration(days: -2)).millisecondsSinceEpoch,
       h: 320.d,
       o: 200.d,
       c: 100.d,
@@ -50,7 +50,7 @@ Future<List<CandleModel>> genCustomCandleList({
       v: 90.d,
     ),
     CandleModel(
-      timestamp: dateTime.add(const Duration(days: -3)).millisecondsSinceEpoch,
+      ts: dateTime.add(const Duration(days: -3)).millisecondsSinceEpoch,
       h: 140.d,
       o: 90.d,
       c: 120.d,
@@ -58,7 +58,7 @@ Future<List<CandleModel>> genCustomCandleList({
       v: 30.d,
     ),
     CandleModel(
-      timestamp: dateTime.add(const Duration(days: -4)).millisecondsSinceEpoch,
+      ts: dateTime.add(const Duration(days: -4)).millisecondsSinceEpoch,
       h: 200.d,
       o: 120.d,
       c: 20.d,
@@ -66,7 +66,7 @@ Future<List<CandleModel>> genCustomCandleList({
       v: 20.d,
     ),
     CandleModel(
-      timestamp: dateTime.add(const Duration(days: -5)).millisecondsSinceEpoch,
+      ts: dateTime.add(const Duration(days: -5)).millisecondsSinceEpoch,
       h: 130.d,
       o: 20.d,
       c: 110.d,
@@ -74,7 +74,7 @@ Future<List<CandleModel>> genCustomCandleList({
       v: 10.d,
     ),
     CandleModel(
-      timestamp: dateTime.add(const Duration(days: -6)).millisecondsSinceEpoch,
+      ts: dateTime.add(const Duration(days: -6)).millisecondsSinceEpoch,
       h: 160.d,
       o: 110.d,
       c: 150.d,
@@ -82,7 +82,7 @@ Future<List<CandleModel>> genCustomCandleList({
       v: 90.d,
     ),
     CandleModel(
-      timestamp: dateTime.add(const Duration(days: -7)).millisecondsSinceEpoch,
+      ts: dateTime.add(const Duration(days: -7)).millisecondsSinceEpoch,
       h: 160.d,
       o: 150.d,
       c: 120.d,
@@ -190,7 +190,7 @@ Future<List<CandleModel>> _genRandomCandleList({
     if (h < l) [h, l] = [l, h];
     v = genVal(v, rangeVol);
     m = CandleModel(
-      timestamp: dateTime
+      ts: dateTime
           .add(Duration(milliseconds: flag * i * bar.milliseconds))
           .millisecondsSinceEpoch,
       h: h.d,
@@ -217,7 +217,7 @@ Future<List<CandleModel>> genLocalCandleList({String json = jsonString}) async {
       final item = data[i];
       if (item is List) {
         list.add(CandleModel(
-          timestamp: item[0] * 1000,
+          ts: item[0] * 1000,
           o: Decimal.parse(item[1].toString()),
           h: Decimal.parse(item[2].toString()),
           l: Decimal.parse(item[3].toString()),

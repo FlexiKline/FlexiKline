@@ -19,7 +19,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:go_router/go_router.dart';
 
-import 'pages/ok_kliine_page.dart';
+import 'pages/ok_kline_page.dart';
 import 'pages/main_nav_page.dart';
 import 'pages/my_demo_page.dart';
 

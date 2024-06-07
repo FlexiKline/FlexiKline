@@ -66,7 +66,7 @@ Future<List<CandleModel>> genRandomCandleList({
     if (h < l) [h, l] = [l, h];
     v = genVal(v, rangeVol);
     m = CandleModel(
-      timestamp: dateTime
+      ts: dateTime
           .add(Duration(milliseconds: flag * i * bar.milliseconds))
           .millisecondsSinceEpoch,
       h: h.d,

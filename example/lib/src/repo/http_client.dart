@@ -15,10 +15,10 @@
 import 'package:dio/dio.dart';
 import 'package:example/generated/l10n.dart';
 
-typedef ModelMapper<T> = T Function(dynamic);
+typedef ModelMapper<T> = T Function(Map<String, dynamic>);
 typedef DataConvert<T> = T? Function(dynamic);
 
-String defSuccessCode = '0';
+String succeedCode = '0';
 const errorCodeCancel = '700';
 const errorCodeInternal = '701';
 const errorCodeUnknown = '600';
@@ -42,7 +42,22 @@ class ApiResult<T> {
     required this.msg,
     this.data,
     bool? success,
-  }) : success = success ?? code == defSuccessCode;
+  }) : success = success ?? code == succeedCode;
+}
+
+enum HttpMethod {
+  connect,
+  head,
+  get,
+  post,
+  put,
+  patch,
+  delete,
+  options,
+  trace;
+
+  @override
+  String toString() => name.toUpperCase();
 }
 
 final class HttpClient {
@@ -86,118 +101,130 @@ final class HttpClient {
     ));
   }
 
-  Future<ApiResult<T>> get<T>(
+  static Options checkOptions(String method, Options? options) {
+    options ??= Options();
+    options.method = method;
+    return options;
+  }
+
+  Future<ApiResult<T>> request<T>(
     String path,
-    ModelMapper<T> mapper, {
+    DataConvert<T> dataConvert, {
+    required HttpMethod method,
+    Object? data,
     Map<String, dynamic>? queryParameters,
-    Options? options,
     CancelToken? cancelToken,
+    Options? options,
+    ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
     try {
-      final resp = await dio.get(
+      final resp = await dio.request(
         path,
+        data: data,
         queryParameters: queryParameters,
-        options: options,
+        options: checkOptions(method.toString(), options),
         cancelToken: cancelToken,
+        onSendProgress: onSendProgress,
         onReceiveProgress: onReceiveProgress,
       );
-      return handleResponse(resp, (dynamic data) {
-        return mapper(data);
-      });
+      return handleResponse(resp, dataConvert);
     } on DioException catch (e) {
       return handleException(e);
     } on Exception catch (e) {
       return handleException(e);
     }
+  }
+
+  Future<ApiResult<T>> get<T>(
+    String path,
+    ModelMapper<T> mapper, {
+    Map<String, dynamic>? queryParameters,
+    Object? data,
+    Options? options,
+    CancelToken? cancelToken,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    return request(
+      path,
+      (dynamic data) => mapper(data),
+      method: HttpMethod.get,
+      data: data,
+      queryParameters: queryParameters,
+      options: options,
+      cancelToken: cancelToken,
+      onReceiveProgress: onReceiveProgress,
+    );
   }
 
   Future<ApiResult<List<T>>> getList<T>(
     String path,
     ModelMapper<T> mapper, {
-    dynamic data,
     Map<String, dynamic>? queryParameters,
+    Object? data,
     Options? options,
     CancelToken? cancelToken,
     ProgressCallback? onReceiveProgress,
   }) async {
-    try {
-      final resp = await dio.get(
-        path,
-        queryParameters: queryParameters,
-        options: options,
-        cancelToken: cancelToken,
-        onReceiveProgress: onReceiveProgress,
-      );
-      return handleResponse(resp, (dynamic data) {
-        return (data as List<dynamic>?)?.map((e) => mapper(e)).toList() ??
-            const [];
-      });
-    } on DioException catch (e) {
-      return handleException(e);
-    } on Exception catch (e) {
-      return handleException(e);
-    }
+    return request(
+      path,
+      (dynamic data) =>
+          (data as List<dynamic>?)?.map((e) => mapper(e)).toList() ?? const [],
+      method: HttpMethod.get,
+      data: data,
+      queryParameters: queryParameters,
+      options: options,
+      cancelToken: cancelToken,
+      onReceiveProgress: onReceiveProgress,
+    );
   }
 
-  // Future<ApiResult<T>> post<T>(
-  //   String path,
-  //   ModelMapper<T> mapper, {
-  //   Map<String, dynamic>? queryParameters,
-  //   Options? options,
-  //   CancelToken? cancelToken,
-  //   ProgressCallback? onSendProgress,
-  //   ProgressCallback? onReceiveProgress,
-  // }) async {
-  //   try {
-  //     final resp = await dio.post(
-  //       path,
-  //       queryParameters: queryParameters,
-  //       options: options,
-  //       cancelToken: cancelToken,
-  //       onSendProgress: onSendProgress,
-  //       onReceiveProgress: onReceiveProgress,
-  //     );
-  //     return handleResponse(resp, (dynamic data) {
-  //       return mapper(data);
-  //     });
-  //   } on DioException catch (e) {
-  //     return handleException(e);
-  //   } on Exception catch (e) {
-  //     return handleException(e);
-  //   }
-  // }
+  Future<ApiResult<T>> post<T>(
+    String path,
+    ModelMapper<T> mapper, {
+    Object? data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    CancelToken? cancelToken,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) {
+    return request(
+      path,
+      (dynamic data) => mapper(data),
+      method: HttpMethod.post,
+      data: data,
+      options: options,
+      queryParameters: queryParameters,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+  }
 
-  // Future<ApiResult<List<T>>> postList<T>(
-  //   String path,
-  //   ModelMapper<T> mapper, {
-  //   dynamic data,
-  //   Map<String, dynamic>? queryParameters,
-  //   Options? options,
-  //   CancelToken? cancelToken,
-  //   ProgressCallback? onSendProgress,
-  //   ProgressCallback? onReceiveProgress,
-  // }) async {
-  //   try {
-  //     final resp = await dio.post(
-  //       path,
-  //       data: data,
-  //       queryParameters: queryParameters,
-  //       options: options,
-  //       cancelToken: cancelToken,
-  //       onSendProgress: onSendProgress,
-  //       onReceiveProgress: onReceiveProgress,
-  //     );
-  //     return handleResponse(resp, (dynamic data) {
-  //       return (data as List<dynamic>?)?.map((e) => mapper(e)).toList() ??
-  //           const [];
-  //     });
-  //   } on DioException catch (e) {
-  //     return handleException(e);
-  //   } on Exception catch (e) {
-  //     return handleException(e);
-  //   }
-  // }
+  Future<ApiResult<List<T>>> postList<T>(
+    String path,
+    ModelMapper<T> mapper, {
+    Object? data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    CancelToken? cancelToken,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) {
+    return request(
+      path,
+      (dynamic data) =>
+          (data as List<dynamic>?)?.map((e) => mapper(e)).toList() ?? const [],
+      method: HttpMethod.post,
+      data: data,
+      options: options,
+      queryParameters: queryParameters,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+  }
 
   ApiResult<T> handleResponse<T>(Response response, DataConvert<T> convert) {
     final respData = response.data;
@@ -205,7 +232,7 @@ final class HttpClient {
     final msg = respData[jsonNodeMsg];
     final success = respData[jsonNodeSuccess];
 
-    if (code == defSuccessCode) {
+    if (code == succeedCode) {
       return ApiResult(
         code: '$code',
         msg: msg,

@@ -7,7 +7,7 @@ part of 'candle_model.dart';
 // **************************************************************************
 
 abstract class _$CandleModelCWProxy {
-  CandleModel timestamp(int timestamp);
+  CandleModel ts(int ts);
 
   CandleModel o(Decimal o);
 
@@ -32,7 +32,7 @@ abstract class _$CandleModelCWProxy {
   /// CandleModel(...).copyWith(id: 12, name: "My name")
   /// ````
   CandleModel call({
-    int? timestamp,
+    int? ts,
     Decimal? o,
     Decimal? h,
     Decimal? l,
@@ -51,7 +51,7 @@ class _$CandleModelCWProxyImpl implements _$CandleModelCWProxy {
   final CandleModel _value;
 
   @override
-  CandleModel timestamp(int timestamp) => this(timestamp: timestamp);
+  CandleModel ts(int ts) => this(ts: ts);
 
   @override
   CandleModel o(Decimal o) => this(o: o);
@@ -86,7 +86,7 @@ class _$CandleModelCWProxyImpl implements _$CandleModelCWProxy {
   /// CandleModel(...).copyWith(id: 12, name: "My name")
   /// ````
   CandleModel call({
-    Object? timestamp = const $CopyWithPlaceholder(),
+    Object? ts = const $CopyWithPlaceholder(),
     Object? o = const $CopyWithPlaceholder(),
     Object? h = const $CopyWithPlaceholder(),
     Object? l = const $CopyWithPlaceholder(),
@@ -97,10 +97,10 @@ class _$CandleModelCWProxyImpl implements _$CandleModelCWProxy {
     Object? confirm = const $CopyWithPlaceholder(),
   }) {
     return CandleModel(
-      timestamp: timestamp == const $CopyWithPlaceholder() || timestamp == null
-          ? _value.timestamp
+      ts: ts == const $CopyWithPlaceholder() || ts == null
+          ? _value.ts
           // ignore: cast_nullable_to_non_nullable
-          : timestamp as int,
+          : ts as int,
       o: o == const $CopyWithPlaceholder() || o == null
           ? _value.o
           // ignore: cast_nullable_to_non_nullable
@@ -148,7 +148,7 @@ extension $CandleModelCopyWith on CandleModel {
 // **************************************************************************
 
 CandleModel _$CandleModelFromJson(Map<String, dynamic> json) => CandleModel(
-      timestamp: valueToInt(json['timestamp']),
+      ts: valueToInt(json['ts']),
       o: const DecimalConverter().fromJson(json['o']),
       h: const DecimalConverter().fromJson(json['h']),
       l: const DecimalConverter().fromJson(json['l']),
@@ -161,7 +161,7 @@ CandleModel _$CandleModelFromJson(Map<String, dynamic> json) => CandleModel(
 
 Map<String, dynamic> _$CandleModelToJson(CandleModel instance) {
   final val = <String, dynamic>{
-    'timestamp': intToString(instance.timestamp),
+    'ts': intToString(instance.ts),
   };
 
   void writeNotNull(String key, dynamic value) {

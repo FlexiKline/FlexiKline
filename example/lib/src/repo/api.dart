@@ -15,50 +15,78 @@
 import 'package:dio/dio.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 
+import '../models/export.dart';
 import 'http_client.dart';
 
-extension ListExt<T> on List<T> {
-  T? get(int index) => (index >= 0 && index < length) ? this[index] : null;
-}
-
-CandleModel jsonToCandle(dynamic data) {
-  if (data is List<dynamic>) {
-    return CandleModel.fromJson({
-      "timestamp": data.get(0),
-      "o": data.get(1),
-      "h": data.get(2),
-      "l": data.get(3),
-      "c": data.get(4),
-      "v": data.get(5),
-      "vc": data.get(6),
-      "vcq": data.get(7),
-      "confirm": data.get(8),
-    });
-  } else {
-    return CandleModel.fromJson(data);
+List<CandleModel> dataToCandleList(dynamic data) {
+  if (data is List<dynamic> && data.isNotEmpty) {
+    final list = List<CandleModel>.empty(growable: true);
+    for (var json in data) {
+      final m = CandleModel.fromList(json);
+      if (m != null) list.add(m);
+    }
+    return list;
   }
+  return const [];
 }
 
+/// 获取K线数据。K线数据按请求的粒度分组返回，K线数据每个粒度最多可获取最近1,440条。
 Future<ApiResult<List<CandleModel>>> getMarketCandles(
   CandleReq req, {
   CancelToken? cancelToken,
 }) {
-  return httpClient.getList(
+  return httpClient.request(
     '/api/v5/market/candles',
-    jsonToCandle,
+    dataToCandleList,
+    method: HttpMethod.get,
     queryParameters: req.toJson(),
     cancelToken: cancelToken,
   );
 }
 
+/// 获取最近几年的历史k线数据(1s k线支持查询最近3个月的数据)
 Future<ApiResult<List<CandleModel>>> getHistoryCandles(
   CandleReq req, {
   CancelToken? cancelToken,
 }) {
-  return httpClient.getList(
+  return httpClient.request(
     '/api/v5/market/history-candles',
-    jsonToCandle,
+    dataToCandleList,
+    method: HttpMethod.get,
     queryParameters: req.toJson(),
     cancelToken: cancelToken,
   );
+}
+
+/// GET / 获取所有产品行情信息
+Future<ApiResult<List<MarketTicker>>> getMarketTickerList({
+  CancelToken? cancelToken,
+}) {
+  return httpClient.getList(
+    '/api/v5/market/tickers',
+    MarketTicker.fromJson,
+    cancelToken: cancelToken,
+  );
+}
+
+/// GET / 获取单个产品行情信息
+Future<ApiResult<MarketTicker>> getMarketTicker(
+  String instId, {
+  CancelToken? cancelToken,
+}) {
+  return httpClient
+      .getList(
+        '/api/v5/market/ticker',
+        MarketTicker.fromJson,
+        queryParameters: {"instId": instId},
+        cancelToken: cancelToken,
+      )
+      .then(
+        (result) => ApiResult(
+          code: result.code,
+          msg: result.msg,
+          data: result.data?.firstOrNull,
+          success: result.success,
+        ),
+      );
 }

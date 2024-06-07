@@ -26,7 +26,7 @@ List<CandleModel> getCandleModelList() {
       final item = data[i];
       if (item is List) {
         list.add(CandleModel(
-          timestamp: item[0] * 1000,
+          ts: item[0] * 1000,
           o: Decimal.parse(item[1].toString()),
           h: Decimal.parse(item[2].toString()),
           l: Decimal.parse(item[3].toString()),

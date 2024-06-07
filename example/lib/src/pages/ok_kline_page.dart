@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'package:dio/dio.dart';
+import 'package:easy_refresh/easy_refresh.dart';
 import 'package:example/src/theme/flexi_theme.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/foundation.dart';
@@ -26,7 +27,7 @@ import '../repo/api.dart' as api;
 import '../providers/default_kline_config.dart';
 import '../widgets/flexi_kline_indicator_bar.dart';
 import '../widgets/flexi_kline_mark_view.dart';
-import '../widgets/latest_price_view.dart';
+import '../widgets/market_ticker_view.dart';
 import '../widgets/flexi_kline_setting_bar.dart';
 import 'main_nav_page.dart';
 
@@ -66,6 +67,11 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage> {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       loadCandleData(req);
     });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   Future<void> loadCandleData(CandleReq request) async {
@@ -117,34 +123,38 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage> {
         title: Text(req.instId),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            LatestPriceView(
-              base: req.base,
-              quote: req.quote,
-              model: controller.curKlineData.latest,
-              precision: req.precision,
-            ),
-            FlexiKlineSettingBar(
-              controller: controller,
-              onTapTimeBar: onTapTimerBar,
-            ),
-            FlexiKlineWidget(
-              controller: controller,
-              mainBackgroundView: FlexiKlineMarkView(
-                margin: EdgeInsetsDirectional.only(bottom: 10.r, start: 36.r),
+      body: EasyRefresh(
+        onRefresh: () async {
+          req = req.copyWith(after: null, before: null);
+          await loadCandleData(req);
+        },
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              MarketTickerView(
+                instId: req.instId,
+                precision: req.precision,
               ),
-              mainforegroundViewBuilder: _buildKlineMainForgroundView,
-            ),
-            FlexiKlineIndicatorBar(
-              controller: controller,
-            ),
-            Container(
-              height: 200,
-            )
-          ],
+              FlexiKlineSettingBar(
+                controller: controller,
+                onTapTimeBar: onTapTimerBar,
+              ),
+              FlexiKlineWidget(
+                controller: controller,
+                mainBackgroundView: FlexiKlineMarkView(
+                  margin: EdgeInsetsDirectional.only(bottom: 10.r, start: 36.r),
+                ),
+                mainforegroundViewBuilder: _buildKlineMainForgroundView,
+              ),
+              FlexiKlineIndicatorBar(
+                controller: controller,
+              ),
+              Container(
+                height: 200,
+              )
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(

@@ -140,19 +140,18 @@ abstract class BaseData with KlineLog {
       return Range(0, newList.length);
     }
 
-    if (list.first.timestamp <= newList.first.timestamp) {
+    if (list.first.ts <= newList.first.ts) {
       int start = 0;
-      while (start < list.length &&
-          list[start].timestamp >= newList.last.timestamp) {
+      while (start < list.length && list[start].ts >= newList.last.ts) {
         start++;
       }
       final curIterable = list.getRange(start, list.length);
       _list = List.of(newList, growable: true)..addAll(curIterable);
       // _list = List.of([...newList, ...curIterable]);
       return Range(0, newList.length);
-    } else if (list.last.timestamp >= newList.last.timestamp) {
+    } else if (list.last.ts >= newList.last.ts) {
       int end = list.length - 1;
-      while (end >= 0 && list[end].timestamp <= newList.first.timestamp) {
+      while (end >= 0 && list[end].ts <= newList.first.ts) {
         end--;
       }
       final curIterable = list.getRange(0, end + 1);
@@ -168,7 +167,7 @@ abstract class BaseData with KlineLog {
     int fast = 1;
     int slow = 1;
     while (fast < n) {
-      if (list[fast].timestamp != list[fast - 1].timestamp) {
+      if (list[fast].ts != list[fast - 1].ts) {
         list[slow] = list[fast];
         ++slow;
       }

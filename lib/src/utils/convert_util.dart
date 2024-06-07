@@ -19,14 +19,26 @@ import 'package:flutter/widgets.dart';
 import '../constant.dart';
 
 int valueToInt(dynamic value) {
-  if (value is int) {
-    return value;
-  } else {
-    return int.tryParse(value.toString()) ?? 0;
-  }
+  return parseInt(value) ?? 0;
 }
 
 String intToString(int value) {
+  return value.toString();
+}
+
+int? parseInt(dynamic value, {int? def}) {
+  if (value == null) {
+    return def;
+  } else if (value is num) {
+    return value.toInt();
+  } else if (value is String) {
+    return int.tryParse(value);
+  }
+  return int.tryParse(value.toString());
+}
+
+String? convertInt(double? value, {String? def}) {
+  if (value == null) return def;
   return value.toString();
 }
 

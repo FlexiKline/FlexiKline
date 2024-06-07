@@ -500,9 +500,3 @@ const FlexiConfigSerializable = JsonSerializable(
   explicitToJson: true,
   includeIfNull: false,
 );
-
-final class _Freezed {
-  const _Freezed();
-}
-
-const freezed = _Freezed();
