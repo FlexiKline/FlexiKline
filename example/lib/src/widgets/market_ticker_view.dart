@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'package:example/generated/l10n.dart';
+import 'package:example/src/theme/flexi_theme.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -27,13 +28,17 @@ class MarketTickerView extends ConsumerWidget {
   const MarketTickerView({
     super.key,
     required this.instId,
-    this.precision = 0,
+    required this.precision,
+    this.long,
+    this.short,
     this.padding,
     this.backgroundColor,
   });
 
   final String instId;
   final int precision;
+  final Color? long;
+  final Color? short;
   final EdgeInsetsGeometry? padding;
   final Color? backgroundColor;
 
@@ -52,22 +57,36 @@ class MarketTickerView extends ConsumerWidget {
           ),
       color: backgroundColor,
       child: marketTicker.when(
-        loading: () => _buildMarketTickerInfo(context, null),
-        error: (error, stackTrace) => _buildMarketTickerInfo(context, null),
-        data: (value) => _buildMarketTickerInfo(context, value),
+        loading: () => _buildMarketTickerInfo(context, ref, null),
+        error: (error, stack) => _buildMarketTickerInfo(context, ref, null),
+        data: (value) => _buildMarketTickerInfo(context, ref, value),
       ),
     );
   }
 
-  Widget _buildMarketTickerInfo(BuildContext context, MarketTicker? ticker) {
+  Widget _buildMarketTickerInfo(
+    BuildContext context,
+    WidgetRef ref,
+    MarketTicker? ticker,
+  ) {
+    final theme = ref.watch(themeProvider);
     final s = S.of(context);
+    final changeRate = ticker?.changeRate;
+    Color rateColor;
+    if (changeRate == null || changeRate == 0) {
+      rateColor = theme.t1;
+    } else if (changeRate > 0) {
+      rateColor = long ?? theme.long;
+    } else {
+      rateColor = short ?? theme.short;
+    }
     return Row(
       children: [
         Expanded(
-          flex: 3,
           child: Column(
             mainAxisSize: MainAxisSize.max,
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               FittedBox(
                 child: Text(
@@ -80,18 +99,25 @@ class MarketTickerView extends ConsumerWidget {
                   style: TextStyle(
                     fontSize: 38.sp,
                     fontWeight: FontWeight.bold,
+                    color: rateColor,
+                    height: 1.2,
                   ),
                 ),
               ),
-              Text(formatPercentage(
-                ticker?.changeRate,
-              ))
+              Text(
+                formatPercentage(
+                  ticker?.changeRate,
+                ),
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  color: rateColor,
+                ),
+              )
             ],
           ),
         ),
         SizedBox(width: 16.r),
         Flexible(
-          flex: 3,
           child: Column(
             mainAxisSize: MainAxisSize.max,
             crossAxisAlignment: CrossAxisAlignment.end,

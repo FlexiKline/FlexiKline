@@ -15,6 +15,8 @@
 import 'package:dio/dio.dart';
 import 'package:example/generated/l10n.dart';
 import 'package:example/src/constants/images.dart';
+import 'package:example/src/models/export.dart';
+import 'package:example/src/providers/instruments_provider.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -28,22 +30,23 @@ import '../repo/api.dart' as api;
 import '../widgets/flexi_kline_indicator_bar.dart';
 import '../widgets/market_ticker_view.dart';
 import '../widgets/flexi_kline_setting_bar.dart';
+import '../widgets/select_symbol_title_view.dart';
 import 'main_nav_page.dart';
 
 class BitKlinePage extends ConsumerStatefulWidget {
-  const BitKlinePage({super.key});
+  const BitKlinePage({
+    super.key,
+    this.instId = 'BTC-USDT',
+  });
+
+  final String instId;
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _BitKlinePageState();
 }
 
 class _BitKlinePageState extends ConsumerState<BitKlinePage> {
-  CandleReq req = CandleReq(
-    instId: 'BTC-USDT',
-    bar: TimeBar.m15.bar,
-    precision: 2,
-    limit: 300,
-  );
+  late CandleReq req;
 
   late final FlexiKlineController controller;
   late final BitFlexiKlineConfiguration configuration;
@@ -52,6 +55,15 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage> {
   @override
   void initState() {
     super.initState();
+    final p = ref.read(instrumentsMgrProvider.notifier).getPrecision(
+          widget.instId,
+        );
+    req = CandleReq(
+      instId: widget.instId,
+      bar: TimeBar.m15.bar,
+      precision: p ?? 2,
+      limit: 300,
+    );
     configuration = BitFlexiKlineConfiguration(ref: ref);
     controller = FlexiKlineController(
       configuration: configuration,
@@ -88,6 +100,20 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage> {
     }
   }
 
+  void onChangeKlineInstId(MarketTicker ticker) {
+    final p = ref.read(instrumentsMgrProvider.notifier).getPrecision(
+          ticker.instId,
+        );
+    req = req.copyWith(
+      instId: ticker.instId,
+      after: null,
+      before: null,
+      precision: p ?? ticker.precision,
+    );
+    loadCandleData(req);
+    setState(() {});
+  }
+
   void onTapTimerBar(TimeBar bar) {
     if (bar.bar != req.bar) {
       req.bar = bar.bar;
@@ -114,7 +140,12 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage> {
           },
           child: const Icon(Icons.menu_outlined),
         ),
-        title: Text(req.instId),
+        title: SelectSymbolTitleView(
+          instId: req.instId,
+          onChangeTradingPair: onChangeKlineInstId,
+          long: klineTheme.long,
+          short: klineTheme.short,
+        ),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -123,6 +154,8 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage> {
             MarketTickerView(
               instId: req.instId,
               precision: req.precision,
+              long: klineTheme.long,
+              short: klineTheme.short,
             ),
             FlexiKlineSettingBar(
               controller: controller,

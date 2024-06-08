@@ -46,7 +46,10 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
 
   /// KlineData整个图表区域大小变化监听器
   final sizeChangeListener = ValueNotifier(defaultCanvasRectMinRect);
-  void invokeSizeChanged() => sizeChangeListener.value = canvasRect;
+  void invokeSizeChanged() {
+    sizeChangeListener.value = canvasRect;
+    markRepaintCross();
+  }
 
   /// 整个画布区域大小 = 由主图区域 + 副图区域
   @override

@@ -115,7 +115,7 @@ class _FlexiKlineSettingBarState extends ConsumerState<FlexiKlineSettingBar> {
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Flexible(
+          Expanded(
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: _buildPreferTimeBarList(context),
@@ -129,6 +129,7 @@ class _FlexiKlineSettingBarState extends ConsumerState<FlexiKlineSettingBar> {
                 onPressed: onTapTimeBarSetting,
                 text: showMore ? '更多' : value.bar,
                 iconStatus: timeBarSettingBtnStatus,
+                background: showMore ? null : theme.markBg,
               );
             },
           ),

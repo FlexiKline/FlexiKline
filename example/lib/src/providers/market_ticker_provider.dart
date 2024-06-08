@@ -16,6 +16,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:dio/dio.dart';
+import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/export.dart';
@@ -34,10 +35,10 @@ final marketTickerProvider =
       instId,
       cancelToken: cancelToken,
     );
-    Future.delayed(
-      Duration(milliseconds: random.nextInt(5000)),
-      () => ref.invalidateSelf(),
-    );
+    // Future.delayed(
+    //   Duration(milliseconds: random.nextInt(5000)),
+    //   () => ref.invalidateSelf(),
+    // );
     if (resp.success) {
       ref.keepAlive();
       return resp.data;
@@ -45,4 +46,24 @@ final marketTickerProvider =
     return null;
   },
   name: 'marketTicker',
+);
+
+final marketTickerListProvider =
+    FutureProvider.autoDispose.family<List<MarketTicker>, String>(
+  (ref, instType) async {
+    final cancelToken = CancelToken();
+    ref.onDispose(() {
+      cancelToken.cancel();
+    });
+    final resp = await api.getMarketTickerList(
+      instType: instType,
+      cancelToken: cancelToken,
+    );
+    if (resp.success && resp.data?.isNotEmpty == true) {
+      ref.keepAlive();
+      return resp.data!..sort((a, b) => b.volCcy24h.d.compareTo(a.volCcy24h.d));
+    }
+    return const [];
+  },
+  name: 'marketTickerList',
 );

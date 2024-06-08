@@ -58,13 +58,32 @@ Future<ApiResult<List<CandleModel>>> getHistoryCandles(
   );
 }
 
+/// 获取交易产品基础信息
+Future<ApiResult<List<Instrument>>> getInstrumentList({
+  String instType = 'SPOT',
+  String? instId,
+  CancelToken? cancelToken,
+}) {
+  return httpClient.getList(
+    '/api/v5/public/instruments',
+    Instrument.fromJson,
+    queryParameters: {
+      "instType": instType,
+      "instId": instId,
+    },
+    cancelToken: cancelToken,
+  );
+}
+
 /// GET / 获取所有产品行情信息
 Future<ApiResult<List<MarketTicker>>> getMarketTickerList({
+  String instType = 'SPOT',
   CancelToken? cancelToken,
 }) {
   return httpClient.getList(
     '/api/v5/market/tickers',
     MarketTicker.fromJson,
+    queryParameters: {"instType": instType},
     cancelToken: cancelToken,
   );
 }

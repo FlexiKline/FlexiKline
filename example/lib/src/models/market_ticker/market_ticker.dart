@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:math' as math;
 import 'package:decimal/decimal.dart';
+import 'package:example/src/utils/model_util.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -92,6 +94,31 @@ extension MarketTickerExt on MarketTicker {
     final open = open24h.d;
     final change = last.d - open;
     if (change == Decimal.zero) return 0;
-    return (change / open).toDouble() * 100;
+    return (change / open).toDouble();
+  }
+
+  String get baseCcy {
+    return instId.split('-').first;
+  }
+
+  String get baseCcyIcon {
+    return currencyIconUrl(baseCcy);
+  }
+
+  String get quoteCcy {
+    return instId.split('-').getItem(1) ?? '';
+  }
+
+  String get tradeSymbol {
+    final arr = instId.split('-');
+    final base = arr.first;
+    final quote = arr.getItem(1);
+    return '$base${quote != null ? '/$quote' : ''}';
+  }
+
+  int get precision {
+    final lastP = calcPrecision(last);
+    final openP = calcPrecision(open24h);
+    return math.max(lastP, openP);
   }
 }

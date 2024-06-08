@@ -15,6 +15,7 @@
 import 'dart:io';
 
 import 'package:easy_refresh/easy_refresh.dart';
+import 'package:example/src/providers/instruments_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -54,6 +55,7 @@ class _MyAppState extends ConsumerState<MyApp> {
         ..register(const ColorPicker()) // New feature
         ..register(const TouchIndicator());
     }
+    ref.read(instrumentsMgrProvider.notifier).loadInstruments();
   }
 
   @override

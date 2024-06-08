@@ -15,22 +15,23 @@
 import 'package:example/src/theme/flexi_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class TextArrowButton extends ConsumerWidget {
   const TextArrowButton({
     super.key,
-    this.style,
     this.onPressed,
     required this.text,
+    this.background,
     this.textStyle,
     this.iconSize,
     this.iconColor,
     required this.iconStatus,
   });
 
-  final ButtonStyle? style;
   final VoidCallback? onPressed;
 
+  final Color? background;
   final String text;
   final TextStyle? textStyle;
   final double? iconSize;
@@ -40,33 +41,43 @@ class TextArrowButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = ref.watch(themeProvider);
-    return TextButton(
-      style: style ??
-          const ButtonStyle(
-            padding: MaterialStatePropertyAll(EdgeInsets.zero),
-          ),
-      onPressed: onPressed,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            text,
-            style: textStyle ?? theme.t1s14w500,
-          ),
-          ValueListenableBuilder(
-            valueListenable: iconStatus,
-            builder: (context, value, child) {
-              return RotationTransition(
-                turns: AlwaysStoppedAnimation(value ? 0.5 : 0),
-                child: Icon(
-                  Icons.arrow_drop_down,
-                  size: iconSize,
-                  color: iconColor ?? theme.t1,
-                ),
-              );
-            },
-          ),
-        ],
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        padding: EdgeInsetsDirectional.only(
+          start: 6.r,
+          end: 2.r,
+          top: 4.r,
+          bottom: 4.r,
+        ),
+        margin: EdgeInsetsDirectional.only(start: 6.r),
+        alignment: AlignmentDirectional.center,
+        decoration: BoxDecoration(
+          color: background,
+          borderRadius: BorderRadius.circular(5.r),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              text,
+              style: textStyle ?? theme.t1s14w500,
+            ),
+            ValueListenableBuilder(
+              valueListenable: iconStatus,
+              builder: (context, value, child) {
+                return RotationTransition(
+                  turns: AlwaysStoppedAnimation(value ? 0.5 : 0),
+                  child: Icon(
+                    Icons.arrow_drop_down,
+                    size: iconSize ?? 18.r,
+                    color: iconColor ?? theme.t1,
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

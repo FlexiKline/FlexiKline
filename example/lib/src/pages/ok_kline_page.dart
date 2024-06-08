@@ -14,6 +14,7 @@
 
 import 'package:dio/dio.dart';
 import 'package:easy_refresh/easy_refresh.dart';
+import 'package:example/src/models/export.dart';
 import 'package:example/src/theme/flexi_theme.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/foundation.dart';
@@ -23,28 +24,30 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
 import '../config.dart';
+import '../providers/instruments_provider.dart';
 import '../repo/api.dart' as api;
 import '../providers/default_kline_config.dart';
 import '../widgets/flexi_kline_indicator_bar.dart';
 import '../widgets/flexi_kline_mark_view.dart';
 import '../widgets/market_ticker_view.dart';
 import '../widgets/flexi_kline_setting_bar.dart';
+import '../widgets/select_symbol_title_view.dart';
 import 'main_nav_page.dart';
 
 class OkKlinePage extends ConsumerStatefulWidget {
-  const OkKlinePage({super.key});
+  const OkKlinePage({
+    super.key,
+    this.instId = 'BTC-USDT',
+  });
+
+  final String instId;
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _OkKlinePageState();
 }
 
 class _OkKlinePageState extends ConsumerState<OkKlinePage> {
-  CandleReq req = CandleReq(
-    instId: 'BTC-USDT',
-    bar: TimeBar.m15.bar,
-    precision: 2,
-    limit: 300,
-  );
+  late CandleReq req;
 
   late final FlexiKlineController controller;
   late final DefaultFlexiKlineConfiguration configuration;
@@ -53,6 +56,15 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage> {
   @override
   void initState() {
     super.initState();
+    final p = ref.read(instrumentsMgrProvider.notifier).getPrecision(
+          widget.instId,
+        );
+    req = CandleReq(
+      instId: widget.instId,
+      bar: TimeBar.m15.bar,
+      precision: p ?? 2,
+      limit: 300,
+    );
     configuration = DefaultFlexiKlineConfiguration(ref: ref);
     controller = FlexiKlineController(
       configuration: configuration,
@@ -94,6 +106,20 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage> {
     }
   }
 
+  void onChangeKlineInstId(MarketTicker ticker) {
+    final p = ref.read(instrumentsMgrProvider.notifier).getPrecision(
+          ticker.instId,
+        );
+    req = req.copyWith(
+      instId: ticker.instId,
+      after: null,
+      before: null,
+      precision: p ?? ticker.precision,
+    );
+    loadCandleData(req);
+    setState(() {});
+  }
+
   void onTapTimerBar(TimeBar bar) {
     if (bar.bar != req.bar) {
       req.bar = bar.bar;
@@ -120,7 +146,10 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage> {
           },
           child: const Icon(Icons.menu_outlined),
         ),
-        title: Text(req.instId),
+        title: SelectSymbolTitleView(
+          instId: req.instId,
+          onChangeTradingPair: onChangeKlineInstId,
+        ),
         centerTitle: true,
       ),
       body: EasyRefresh(

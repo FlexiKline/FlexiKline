@@ -14,6 +14,8 @@
 
 import 'package:dio/dio.dart';
 import 'package:example/generated/l10n.dart';
+import 'package:flutter/foundation.dart';
+import 'package:talker_dio_logger/talker_dio_logger.dart';
 
 typedef ModelMapper<T> = T Function(Map<String, dynamic>);
 typedef DataConvert<T> = T? Function(dynamic);
@@ -99,6 +101,17 @@ final class HttpClient {
         handler.next(options);
       },
     ));
+    if (kDebugMode) {
+      _dio.interceptors.add(
+        TalkerDioLogger(
+          settings: const TalkerDioLoggerSettings(
+            printRequestHeaders: true,
+            printResponseHeaders: true,
+            printResponseMessage: true,
+          ),
+        ),
+      );
+    }
   }
 
   static Options checkOptions(String method, Options? options) {

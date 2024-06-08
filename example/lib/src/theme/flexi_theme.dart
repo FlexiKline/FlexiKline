@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -54,9 +56,14 @@ abstract class FKTheme {
   late Color t3;
   late Color tlight;
 
-  // @Deprecated('暂保留') // TODO: 待优化
-  double get klineTextSize => 10.sp;
-  double get klineTextHeight => 1;
+  double? _pixel;
+  double get pixel {
+    if (_pixel != null) return _pixel!;
+    double? ratio = ScreenUtil().pixelRatio;
+    ratio ??= PlatformDispatcher.instance.displays.first.devicePixelRatio;
+    _pixel = 1 / ratio;
+    return _pixel!;
+  }
 }
 
 class LightFKTheme extends FKTheme {

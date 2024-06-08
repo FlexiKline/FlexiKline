@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:example/src/theme/flexi_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class IndicatorInfoView extends ConsumerWidget {
   const IndicatorInfoView({
@@ -28,8 +28,10 @@ class IndicatorInfoView extends ConsumerWidget {
   final String title;
   final String value;
   final EdgeInsetsGeometry? padding;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(themeProvider);
     return Container(
       padding: padding,
       child: Row(
@@ -39,16 +41,12 @@ class IndicatorInfoView extends ConsumerWidget {
           Text(
             title,
             textAlign: TextAlign.start,
-            style: TextStyle(
-              fontSize: 12.sp,
-            ),
+            style: theme.t2s12w400,
           ),
           Text(
             value,
             textAlign: TextAlign.end,
-            style: TextStyle(
-              fontSize: 12.sp,
-            ),
+            style: theme.t1s12w400,
           ),
         ],
       ),

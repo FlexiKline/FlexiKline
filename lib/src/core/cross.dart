@@ -64,7 +64,10 @@ mixin CrossBinding
   //// Cross ////
   @override
   void markRepaintCross() {
-    if (isCrossing) _markRepaint();
+    if (isCrossing) {
+      offset = offset;
+      _markRepaint();
+    }
   }
 
   // 是否正在绘制Cross

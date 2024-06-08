@@ -12,5 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export 'instrument/instrument.dart';
-export 'market_ticker/market_ticker.dart';
+/// 生成币种Icon
+String currencyIconUrl(String currency) {
+  return 'https://static.coinall.ltd/cdn/oksupport/asset/currency/icon/${currency.toLowerCase()}.png';
+}
+
+/// 根据小数字符串计算精度
+int calcPrecision(String val) {
+  final dotIndex = val.indexOf('.');
+  if (dotIndex != -1) {
+    return val.length - dotIndex - 1;
+  }
+  return 0;
+}
