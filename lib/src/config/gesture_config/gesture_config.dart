@@ -1,0 +1,48 @@
+// Copyright 2024 Andy.Zhao
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import 'package:copy_with_extension/copy_with_extension.dart';
+
+import '../../framework/serializers.dart';
+import '../tolerance_config/tolerance_config.dart';
+
+part 'gesture_config.g.dart';
+
+/// GestureConfig 手势平移相关配置
+/// [tolerance] 代表手势平移惯性动画的容忍参数
+/// [loadMoreWhenNoEnoughDistance] 优先于[loadMoreWhenNoEnoughCandles].
+/// [loadMoreWhenNoEnoughCandles] 60: 按单根蜡烛宽度默认值计算, 代表还剩一屏半时, 触发LoadMore.
+@CopyWith()
+@FlexiConfigSerializable
+class GestureConfig {
+  GestureConfig({
+    ToleranceConfig? tolerance,
+    this.loadMoreWhenNoEnoughDistance,
+    this.loadMoreWhenNoEnoughCandles = 60,
+  }) : tolerance = tolerance ?? ToleranceConfig();
+
+  /// 手势平移限制参数
+  final ToleranceConfig tolerance;
+
+  /// 当没有足够平移的距离时, 加载更多.
+  final double? loadMoreWhenNoEnoughDistance;
+
+  /// 当没有足够平移的蜡烛时, 加载更多.
+  final int loadMoreWhenNoEnoughCandles;
+
+  factory GestureConfig.fromJson(Map<String, dynamic> json) =>
+      _$GestureConfigFromJson(json);
+
+  Map<String, dynamic> toJson() => _$GestureConfigToJson(this);
+}

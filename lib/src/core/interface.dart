@@ -74,7 +74,6 @@ mixin GestureHanderImpl implements IGestureHandler {
 
 /// 数据源更新
 abstract interface class IState {
-
   /// 开始加载[request]请求指定的蜡烛数据
   /// [request] 标记当前请求
   /// [useCacheFirst] 优先使用缓存. 注: 如果有缓存数据(说明之前加载过), loading不会展示.
@@ -89,6 +88,10 @@ abstract interface class IState {
 
   /// 更新[request]请求指定的蜡烛数据
   Future<void> updateKlineData(CandleReq request, List<CandleModel> list);
+
+  /// 检查并加载更多蜡烛数据
+  /// [nextPanDistance] 代表数据将要平移的偏移量
+  void checkAndLoadMoreCandles({double? nextPanDistance});
 
   KlineData get curKlineData;
 
@@ -158,8 +161,6 @@ abstract interface class ISetting {
     EdgeInsets? padding,
   });
 
-  // Gesture Pan
-  ToleranceConfig get panTolerance;
 
   /// Config
 
@@ -180,6 +181,9 @@ abstract interface class ISetting {
 
   /// SettingConfig
   SettingConfig get settingConfig;
+
+    /// SettingConfig
+  GestureConfig get gestureConfig;
 
   /// GridConfig
   GridConfig get gridConfig;

@@ -15,17 +15,20 @@
 import 'package:example/src/constants/images.dart';
 import 'package:example/src/theme/export.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class FlexiKlineMarkView extends ConsumerWidget {
   const FlexiKlineMarkView({
     super.key,
+    this.showLogo = true,
     this.alignment,
     this.margin,
     this.opacity = 0.2,
   });
 
+  final bool showLogo;
   final AlignmentGeometry? alignment;
   final EdgeInsetsGeometry? margin;
   final double opacity;
@@ -35,19 +38,26 @@ class FlexiKlineMarkView extends ConsumerWidget {
     final theme = ref.watch(themeProvider);
     return Container(
       alignment: alignment ?? AlignmentDirectional.bottomStart,
-      margin: margin ?? EdgeInsetsDirectional.only(bottom: 10.r, start: 10.r),
+      margin: margin,
       padding: EdgeInsetsDirectional.symmetric(horizontal: 6.r),
       child: Opacity(
         opacity: opacity,
         child: Row(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(
-              Images.logo,
-              width: 24.r,
-              height: 24.r,
+            Offstage(
+              offstage: !showLogo,
+              child: Padding(
+                padding: EdgeInsetsDirectional.only(end: 6.r),
+                child: Image.asset(
+                  Images.logo,
+                  width: 24.r,
+                  height: 24.r,
+                ),
+              ),
             ),
-            SizedBox(width: 6.r),
             Text(
               'FlexiKline',
               style: theme.t1s18w700,

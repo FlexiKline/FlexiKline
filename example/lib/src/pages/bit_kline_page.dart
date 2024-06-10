@@ -28,6 +28,7 @@ import '../config.dart';
 import '../providers/bit_kline_config.dart';
 import '../repo/api.dart' as api;
 import '../widgets/flexi_kline_indicator_bar.dart';
+import '../widgets/flexi_kline_mark_view.dart';
 import '../widgets/market_ticker_view.dart';
 import '../widgets/flexi_kline_setting_bar.dart';
 import '../widgets/select_symbol_title_view.dart';
@@ -90,9 +91,9 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage> {
         cancelToken: cancelToken = CancelToken(),
       );
       cancelToken = null;
-      if (resp.success && resp.data != null) {
+      if (resp.success && resp.data != null && resp.data!.isNotEmpty) {
         await controller.updateKlineData(request, resp.data!);
-      } else {
+      } else if (resp.msg.isNotEmpty) {
         SmartDialog.showToast(resp.msg);
       }
     } finally {
@@ -150,6 +151,7 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage> {
       ),
       body: SingleChildScrollView(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             MarketTickerView(
               instId: req.instId,
@@ -170,6 +172,10 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage> {
                   scale: 6,
                   opacity: 0.1,
                 ),
+              ),
+              mainBackgroundView: const FlexiKlineMarkView(
+                alignment: AlignmentDirectional.center,
+                showLogo: false,
               ),
             ),
             FlexiKlineIndicatorBar(
@@ -259,6 +265,14 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage> {
         label: s.tooltipChgRate,
         labelStyle: lableStyle,
         value: formatPercentage(model.changeRate),
+        valueStyle: valStyle,
+      ),
+      TooltipInfo(
+        label: s.tooltipRange,
+        labelStyle: lableStyle,
+        value: pre != null
+            ? formatPercentage(model.rangeRate(pre))
+            : formatPrice(model.range, precision: p),
         valueStyle: valStyle,
       ),
     ];

@@ -21,6 +21,7 @@ import '../indicators/export.dart';
 import 'boll_param/boll_param.dart';
 import 'cross_config/cross_config.dart';
 import 'flexi_kline_config/flexi_kline_config.dart';
+import 'gesture_config/gesture_config.dart';
 import 'grid_config/grid_config.dart';
 import 'indicators_config/indicators_config.dart';
 import 'kdj_param/kdj_param.dart';
@@ -32,7 +33,6 @@ import 'mark_config/mark_config.dart';
 import 'setting_config/setting_config.dart';
 import 'text_area_config/text_area_config.dart';
 import 'tips_config/tips_config.dart';
-import 'tolerance_config/tolerance_config.dart';
 import 'tooltip_config/tooltip_config.dart';
 
 extension IFlexiKlineThemeExt on IFlexiKlineTheme {
@@ -165,6 +165,7 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
       key: theme.key,
       grid: genGridConfig(theme),
       setting: genSettingConfig(theme),
+      gesture: genGestureConfig(theme),
       cross: genCrossConfig(theme),
       tooltip: genTooltipConfig(theme),
       indicators: genIndicatorsConfig(theme),
@@ -212,6 +213,10 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
     );
   }
 
+  GestureConfig genGestureConfig(covariant IFlexiKlineTheme theme) {
+    return GestureConfig();
+  }
+
   SettingConfig genSettingConfig(
     covariant IFlexiKlineTheme theme, {
     Color? textColor,
@@ -241,9 +246,6 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
 
     /// 副区的指标图最大数量
     int subChartMaxCount = defaultSubChartMaxCount,
-
-    /// 手势平移限制参数
-    ToleranceConfig? panTolerance,
   }) {
     return SettingConfig(
       textColor: textColor ?? theme.textColor,
@@ -285,9 +287,6 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
 
       /// 副区的指标图最大数量
       subChartMaxCount: subChartMaxCount,
-
-      /// 手势平移限制参数
-      panTolerance: panTolerance,
     );
   }
 

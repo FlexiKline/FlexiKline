@@ -17,6 +17,7 @@ import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../config.dart';
 import '../providers/default_kline_config.dart';
@@ -118,7 +119,9 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
             FlexiKlineWidget(
               key: const ValueKey('MyKlineDemo'),
               controller: controller,
-              mainBackgroundView: const FlexiKlineMarkView(),
+              mainBackgroundView: FlexiKlineMarkView(
+                margin: EdgeInsetsDirectional.only(bottom: 10.r, start: 10.r),
+              ),
             ),
             FlexiKlineIndicatorBar(
               controller: controller,

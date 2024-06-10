@@ -60,6 +60,11 @@ class CandleReq {
   @JsonKey()
   int precision;
 
+  @override
+  String toString() {
+    return 'CandleReq($instId, $bar, $limit, $precision, $before, $after)';
+  }
+
   factory CandleReq.fromJson(Map<String, dynamic> json) =>
       _$CandleReqFromJson(json);
   Map<String, dynamic> toJson() => _$CandleReqToJson(this);

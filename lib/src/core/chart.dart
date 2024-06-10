@@ -94,12 +94,12 @@ mixin ChartBinding on KlineBindingBase implements IChart, IState, ISetting {
       return;
     }
 
-    /// 检查主图和副图的PaintObject是否都创建了.
+    /// 检查主区和副区的PaintObject是否都创建了.
     ensurePaintObjectInstance();
 
     int solt = mainIndicatorSlot;
     for (var indicator in [mainIndicator, ...subRectIndicators]) {
-      /// 初始化副图指标展示数据.
+      /// 初始化副区指标数据.
       indicator.paintObject?.doInitState(
         solt++,
         start: curKlineData.start,
@@ -107,7 +107,7 @@ mixin ChartBinding on KlineBindingBase implements IChart, IState, ISetting {
         reset: _reset,
       );
 
-      /// 绘制副图的指标图
+      /// 绘制副区的指标图
       indicator.paintObject?.doPaintChart(canvas, size);
     }
 

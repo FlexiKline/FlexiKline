@@ -128,10 +128,6 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
     return mainChartWidth * settingConfig.minPaintBlankRate.clamp(0, 0.9);
   }
 
-  // Gesture Pan
-  @override
-  ToleranceConfig get panTolerance => settingConfig.panTolerance;
-
   /// 最大蜡烛宽度[1, 50]
   // double _candleMaxWidth = 40.0;
   double get candleMaxWidth => settingConfig.candleMaxWidth;
@@ -363,6 +359,10 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
   /// SettingConfig
   @override
   SettingConfig get settingConfig => _flexiKlineConfig.setting;
+
+  /// SettingConfig
+  @override
+  GestureConfig get gestureConfig => _flexiKlineConfig.gesture;
 
   /// GridConfig
   @override

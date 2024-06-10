@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:example/src/models/export.dart';
@@ -76,6 +78,8 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage> {
 
     controller.onCrossI18nTooltipLables = tooltipLables;
 
+    controller.onLoadMoreCandles = loadMoreCandles;
+
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       loadCandleData(req);
     });
@@ -96,13 +100,27 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage> {
         cancelToken: cancelToken = CancelToken(),
       );
       cancelToken = null;
-      if (resp.success && resp.data != null) {
+      if (resp.success && resp.data != null && resp.data!.isNotEmpty) {
         await controller.updateKlineData(request, resp.data!);
-      } else {
+      } else if (resp.msg.isNotEmpty) {
         SmartDialog.showToast(resp.msg);
       }
     } finally {
       controller.stopLoading(request);
+    }
+  }
+
+  Future<void> loadMoreCandles(CandleReq request) async {
+    request.before = null;
+    final resp = await api.getHistoryCandles(
+      request,
+      cancelToken: cancelToken = CancelToken(),
+    );
+    cancelToken = null;
+    if (resp.success && resp.data != null && resp.data!.isNotEmpty) {
+      await controller.updateKlineData(request, resp.data!);
+    } else if (resp.msg.isNotEmpty) {
+      SmartDialog.showToast(resp.msg);
     }
   }
 

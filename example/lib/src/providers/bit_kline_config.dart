@@ -219,48 +219,9 @@ class BitFlexiKlineConfiguration extends BaseFlexiKlineThemeConfiguration {
   }
 
   @override
-  SettingConfig genSettingConfig(
-    BaseBitFlexiKlineTheme theme, {
-    Color? textColor,
-    Color? longColor,
-    Color? shortColor,
-    double opacity = 0.5,
-    LoadingConfig? loadingConfig,
-    Size? mainMinSize,
-    EdgeInsets? mainPadding,
-    bool mainDrawBelowTipsArea = true,
-    double minPaintBlankRate = 0.5,
-    bool alwaysCalculateScreenOfCandlesIfEnough = false,
-    double? candleMaxWidth,
-    double? candleWidth,
-    double? candleSpacing,
-    double? candleLineWidth,
-    double? firstCandleInitOffset,
-    TextAreaConfig? tickText,
-    int subChartMaxCount = defaultSubChartMaxCount,
-    ToleranceConfig? panTolerance,
-  }) {
-    return super.genSettingConfig(
-      theme,
-      textColor: textColor,
-      longColor: longColor,
-      shortColor: shortColor,
-      opacity: opacity,
-      loadingConfig: loadingConfig,
-      mainMinSize: mainMinSize,
-      mainPadding: mainPadding,
-      mainDrawBelowTipsArea: mainDrawBelowTipsArea,
-      minPaintBlankRate: minPaintBlankRate,
-      alwaysCalculateScreenOfCandlesIfEnough:
-          alwaysCalculateScreenOfCandlesIfEnough,
-      candleMaxWidth: candleMaxWidth,
-      candleWidth: candleWidth,
-      candleSpacing: candleSpacing,
-      candleLineWidth: candleLineWidth,
-      firstCandleInitOffset: firstCandleInitOffset,
-      tickText: tickText,
-      subChartMaxCount: subChartMaxCount,
-      panTolerance: ToleranceConfig(inertiaFactor: 0.5),
-    );
+  GestureConfig genGestureConfig(BaseBitFlexiKlineTheme theme) {
+    return super.genGestureConfig(theme).copyWith(
+          tolerance: ToleranceConfig(inertiaFactor: 0.5),
+        );
   }
 }

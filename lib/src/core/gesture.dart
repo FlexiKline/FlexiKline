@@ -142,6 +142,15 @@ mixin GestureBinding on KlineBindingBase implements IGestureEvent, IState {
     // <0: 负数代表从右向左滑动.
     // >0: 正数代表从左向右滑动.
     final velocity = details.velocity.pixelsPerSecond.dx;
+
+    final tolerance = gestureConfig.tolerance;
+
+    /// 惯性平移的最大距离.
+    final distance = velocity * tolerance.inertiaFactor;
+
+    /// 检查并加载更多蜡烛数据
+    checkAndLoadMoreCandles(nextPanDistance: distance);
+
     if (ticker == null ||
         velocity == 0 ||
         curKlineData.isEmpty ||
@@ -154,16 +163,13 @@ mixin GestureBinding on KlineBindingBase implements IGestureEvent, IState {
     }
 
     /// 确认继续平移时间 (利用log指数函数特点: 随着自变量velocity的增大，函数值的增长速度逐渐减慢)
-    /// 测试当限定参数[panTolerance.maxDuration]等于1000(1秒时), [velocity]带入后[duration]变化为:
+    /// 测试当限定参数[tolerance.maxDuration]等于1000(1秒时), [velocity]带入后[duration]变化为:
     /// 100000 > 1151.29; 10000 > 921.03; 9000 > 910.49; 5000 > 851.71; 2000 > 760.09; 800 > 668.46; 100 > 460.51
-    final duration = (math.log(velocity.abs()) * panTolerance.maxDuration / 10)
+    final duration = (math.log(velocity.abs()) * tolerance.maxDuration / 10)
         .round()
-        .clamp(0, panTolerance.maxDuration);
+        .clamp(0, tolerance.maxDuration);
 
-    /// 惯性平移的最大距离.
-    final distance = velocity * panTolerance.inertiaFactor;
-
-    logi('onScaleEnd animation velocity:$velocity => $panTolerance');
+    logi('onScaleEnd animation velocity:$velocity => $tolerance');
 
     animationController?.dispose();
     animationController = AnimationController(
@@ -172,7 +178,7 @@ mixin GestureBinding on KlineBindingBase implements IGestureEvent, IState {
     );
 
     final animation = Tween(begin: 0.0, end: distance)
-        .chain(CurveTween(curve: panTolerance.curve))
+        .chain(CurveTween(curve: tolerance.curve))
         .animate(animationController!);
 
     final initDx = _panScaleData!.offset.dx;

@@ -62,6 +62,7 @@ class KlineData extends BaseData
       () => data.mergeCandleList(newList),
       debugLabel: 'mergeCandleList\t${newList.length}|$reset',
     );
+    data.updateReqRange(); // 更新当前data的[CandleReq]的请求边界[before, after]
 
     ///2. 确认要计算的范围.
     range ??= Range.empty;
@@ -106,7 +107,7 @@ Future<KlineData> precomputeKlineDataByCompute(
   String? debugLabel,
   ILogger? logger,
 }) async {
-  if (newList.isEmpty || !reset) {
+  if (newList.isEmpty) {
     return data;
   }
 
@@ -150,4 +151,16 @@ extension KlineDataExt on KlineData {
   TimeBar? get timeBar => req.timeBar;
 
   bool get invalid => req.instId.isEmpty;
+
+  void updateReqRange() {
+    req.after = list.last.ts;
+    req.before = list.first.ts;
+  }
+
+  CandleReq getLoadMoreRequest() {
+    return req.copyWith(
+      after: list.last.ts,
+      before: null,
+    );
+  }
 }

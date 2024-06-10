@@ -25,6 +25,10 @@ import 'binding_base.dart';
 import 'interface.dart';
 import 'setting.dart';
 
+/// LoadMore接口
+/// 加载[request]指定范围[after, before]之前的历史数据.
+typedef OnLoadMoreCandles = Future<void> Function(CandleReq request);
+
 /// 状态管理: 负责数据的管理, 缓存, 切换, 计算
 mixin StateBinding
     on KlineBindingBase, SettingBinding
@@ -46,6 +50,8 @@ mixin StateBinding
     });
     _klineDataCache.clear();
   }
+
+  OnLoadMoreCandles? onLoadMoreCandles;
 
   /// 当KlineData的TimeBar的监听器
   final timeBarListener = ValueNotifier<TimeBar?>(null);
@@ -225,7 +231,7 @@ mixin StateBinding
     List<CandleModel> newList = const [],
     bool reset = false,
   }) async {
-    if (newList.isEmpty || !reset) {
+    if (newList.isEmpty) {
       // 无需计算; 直接返回
       return data;
     }
@@ -373,6 +379,43 @@ mixin StateBinding
         }
 
         markRepaintChart();
+      }
+    }
+  }
+
+  // Future<void> _loadMoreCandles({bool showLoading = false}) async {
+  //   if (onLoadMoreCandles == null) return;
+  //   final request = curKlineData.getLoadMoreRequest();
+  //   logd('onLoadMoreCandles($request)');
+  //   try {
+  //     if (showLoading) {}
+  //     await onLoadMoreCandles!.call(curKlineData.req);
+  //   } finally {
+  //     stopLoading(request);
+  //   }
+  // }
+
+  /// 检查并加载更多蜡烛数据
+  /// [nextPanDistance] 代表数据平移的偏移量
+  @override
+  void checkAndLoadMoreCandles({double? nextPanDistance}) {
+    logd('checkAndLoadMoreCandles(nextPanDistance:$nextPanDistance)');
+    nextPanDistance ??= 0;
+    if (gestureConfig.loadMoreWhenNoEnoughDistance != null) {
+      // 当以[paintDxOffset]为基础继续平移[nextPanDistance]后, 大于最大平移宽度减去[loadMoreWhenNoEnoughDistance]的距离时, 触发LoadMore提前加载更多历史数据.
+      if (paintDxOffset + nextPanDistance >
+          maxPaintWidth - gestureConfig.loadMoreWhenNoEnoughDistance!) {
+        curKlineData.updateReqRange();
+        logd('checkAndLoadMoreCandles >1 onLoadMoreCandles${curKlineData.req}');
+        onLoadMoreCandles?.call(curKlineData.req);
+      }
+    } else if (gestureConfig.loadMoreWhenNoEnoughCandles > 0) {
+      int nextCandles = (nextPanDistance / candleActualWidth).round();
+      if (curKlineData.end + nextCandles >
+          curKlineData.length - gestureConfig.loadMoreWhenNoEnoughCandles) {
+        curKlineData.updateReqRange();
+        logd('checkAndLoadMoreCandles >2 onLoadMoreCandles${curKlineData.req}');
+        onLoadMoreCandles?.call(curKlineData.req);
       }
     }
   }
