@@ -39,20 +39,21 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
   late final FlexiKlineController controller;
   late final DefaultFlexiKlineConfiguration configuration;
 
-  final req = CandleReq(
-    instId: 'BTC-USDT',
-    bar: TimeBar.D1.bar,
-    precision: 2,
-  );
+  late CandleReq req;
 
   final logger = LogPrintImpl(
     debug: kDebugMode,
-    tag: 'Demo1',
+    tag: 'Demo',
   );
 
   @override
   void initState() {
     super.initState();
+    req = CandleReq(
+      instId: 'BTC-USDT',
+      bar: TimeBar.D1.bar,
+      precision: 2,
+    );
     configuration = DefaultFlexiKlineConfiguration(ref: ref);
     controller = FlexiKlineController(
       configuration: configuration,
@@ -61,31 +62,36 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
 
     controller.onCrossI18nTooltipLables = tooltipLables;
 
+    controller.onLoadMoreCandles = loadMoreCandles;
+
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      loadCandleData(req);
+      initKlineData(req);
     });
   }
 
-  Future<void> loadCandleData(CandleReq request) async {
-    try {
-      controller.startLoading(request);
+  Future<void> initKlineData(CandleReq request) async {
+    controller.switchKlineData(request);
 
-      logger.logd('loadCandleData Begin ${DateTime.now()}');
-      final list = await genRandomCandleList(
-        count: 50000,
-        bar: request.timeBar!,
-      );
-      logger.logd('loadCandleData End ${DateTime.now()}');
+    logger.logd('genRandomCandleList Begin ${DateTime.now()}');
+    final list = await genRandomCandleList(
+      count: 50000,
+      bar: request.timeBar!,
+    );
+    logger.logd('genRandomCandleList End ${DateTime.now()}');
 
-      await controller.updateKlineData(request, list);
-    } finally {
-      controller.stopLoading(request);
-    }
+    await controller.updateKlineData(request, list);
   }
 
-  void onTapTimeBar(TimeBar value) {
-    req.bar = value.bar;
-    loadCandleData(req);
+  Future<void> loadMoreCandles(CandleReq request) async {
+    // TODO: 待实现
+  }
+
+  void onTapTimeBar(TimeBar bar) {
+    if (bar.bar != req.bar) {
+      req = req.copyWith(bar: bar.bar);
+      setState(() {});
+      initKlineData(req);
+    }
   }
 
   @override

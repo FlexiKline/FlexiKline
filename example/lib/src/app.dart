@@ -15,7 +15,6 @@
 import 'dart:io';
 
 import 'package:easy_refresh/easy_refresh.dart';
-import 'package:example/src/providers/instruments_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -27,6 +26,7 @@ import 'package:flutter_ume_kit_ui_plus/flutter_ume_kit_ui_plus.dart';
 import 'package:flutter_ume_plus/flutter_ume_plus.dart';
 
 import 'i18n.dart';
+import 'providers/instruments_provider.dart';
 import 'repo/http_client.dart';
 import 'router.dart';
 import 'theme/export.dart';
@@ -93,25 +93,28 @@ class _MyAppState extends ConsumerState<MyApp> {
   }
 
   void configDefaultRefresher() {
-    final theme = ref.read(themeProvider);
-    Header header;
-    if (Platform.isIOS) {
-      header = CupertinoHeader(
-        foregroundColor: theme.brand,
-        backgroundColor: theme.cardBg,
-      );
-    } else {
-      header = MaterialHeader(
-        color: theme.brand,
-        backgroundColor: theme.cardBg,
-      );
-    }
-    EasyRefresh.defaultHeaderBuilder = () => header;
-    EasyRefresh.defaultFooterBuilder = () => CupertinoFooter(
-          emptyWidget: Text(
-            'Protected By FlexiKline',
-            style: theme.t2s12w400,
-          ),
+    EasyRefresh.defaultHeaderBuilder = () {
+      final theme = ref.watch(themeProvider);
+      if (Platform.isIOS) {
+        return CupertinoHeader(
+          foregroundColor: theme.t1,
+          backgroundColor: theme.markBg,
         );
+      } else {
+        return MaterialHeader(
+          color: theme.t1,
+          backgroundColor: theme.markBg,
+        );
+      }
+    };
+    EasyRefresh.defaultFooterBuilder = () {
+      final theme = ref.watch(themeProvider);
+      return CupertinoFooter(
+        emptyWidget: Text(
+          'Protected By FlexiKline',
+          style: theme.t2s12w400,
+        ),
+      );
+    };
   }
 }

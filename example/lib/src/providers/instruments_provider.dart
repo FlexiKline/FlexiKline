@@ -56,10 +56,10 @@ class InstrumentsManagerNotifier
     super.dispose();
   }
 
-  Future<void> loadInstruments() async {
+  Future<void> loadInstruments({String instType = 'SPOT'}) async {
     cancelToken = CancelToken();
     final resp = await api.getInstrumentList(
-      instType: 'SPOT',
+      instType: instType,
       cancelToken: cancelToken,
     );
     if (resp.success && resp.data != null && resp.data!.isNotEmpty) {

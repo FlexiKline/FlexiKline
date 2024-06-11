@@ -205,13 +205,13 @@ extension CandleModelExt on CandleModel {
 
   double get changeRate {
     if (change == Decimal.zero) return 0;
-    return (change / o).toDouble() * 100;
+    return (change / o).toDouble();
   }
 
   Decimal get range => h - l;
 
   double rangeRate(CandleModel pre) {
     if (range == Decimal.zero) return 0;
-    return (range / pre.c).toDouble() * 100;
+    return (range / pre.c).toDouble();
   }
 }

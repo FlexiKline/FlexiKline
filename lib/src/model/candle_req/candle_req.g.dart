@@ -19,6 +19,8 @@ abstract class _$CandleReqCWProxy {
 
   CandleReq before(int? before);
 
+  CandleReq state(RequestState state);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `CandleReq(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -32,6 +34,7 @@ abstract class _$CandleReqCWProxy {
     int? precision,
     int? after,
     int? before,
+    RequestState? state,
   });
 }
 
@@ -60,6 +63,9 @@ class _$CandleReqCWProxyImpl implements _$CandleReqCWProxy {
   CandleReq before(int? before) => this(before: before);
 
   @override
+  CandleReq state(RequestState state) => this(state: state);
+
+  @override
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `CandleReq(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -74,6 +80,7 @@ class _$CandleReqCWProxyImpl implements _$CandleReqCWProxy {
     Object? precision = const $CopyWithPlaceholder(),
     Object? after = const $CopyWithPlaceholder(),
     Object? before = const $CopyWithPlaceholder(),
+    Object? state = const $CopyWithPlaceholder(),
   }) {
     return CandleReq(
       instId: instId == const $CopyWithPlaceholder() || instId == null
@@ -100,6 +107,10 @@ class _$CandleReqCWProxyImpl implements _$CandleReqCWProxy {
           ? _value.before
           // ignore: cast_nullable_to_non_nullable
           : before as int?,
+      state: state == const $CopyWithPlaceholder() || state == null
+          ? _value.state
+          // ignore: cast_nullable_to_non_nullable
+          : state as RequestState,
     );
   }
 }
@@ -118,7 +129,6 @@ CandleReq _$CandleReqFromJson(Map<String, dynamic> json) => CandleReq(
       instId: json['instId'] as String,
       bar: json['bar'] as String? ?? '1m',
       limit: (json['limit'] as num?)?.toInt() ?? 100,
-      precision: (json['precision'] as num?)?.toInt() ?? defaultPrecision,
       after: (json['after'] as num?)?.toInt(),
       before: (json['before'] as num?)?.toInt(),
     );
@@ -138,6 +148,5 @@ Map<String, dynamic> _$CandleReqToJson(CandleReq instance) {
   writeNotNull('before', instance.before);
   val['bar'] = instance.bar;
   val['limit'] = instance.limit;
-  val['precision'] = instance.precision;
   return val;
 }

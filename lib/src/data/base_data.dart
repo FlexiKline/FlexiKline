@@ -70,7 +70,8 @@ abstract class BaseData with KlineLog {
     logd('precompute BASE(key:$key, $range, $reset, $calcParam)');
   }
 
-  final CandleReq req;
+  CandleReq req;
+
   List<CandleModel> _list;
   List<CandleModel> get list => _list;
 

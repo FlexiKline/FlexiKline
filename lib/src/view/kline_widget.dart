@@ -19,11 +19,6 @@ import 'package:flutter/material.dart';
 import '../kline_controller.dart';
 import 'gesture_view.dart';
 
-typedef MainForegroundViewBuilder = Widget Function(
-  BuildContext context,
-  bool isLoading,
-);
-
 class FlexiKlineWidget extends StatefulWidget {
   const FlexiKlineWidget({
     super.key,
@@ -39,7 +34,7 @@ class FlexiKlineWidget extends StatefulWidget {
   final AlignmentGeometry? alignment;
   final BoxDecoration? decoration;
   final Decoration? foregroundDecoration;
-  final MainForegroundViewBuilder? mainforegroundViewBuilder;
+  final WidgetBuilder? mainforegroundViewBuilder;
   final Widget? mainBackgroundView;
 
   @override
@@ -115,12 +110,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
             ),
             Positioned.fromRect(
               rect: widget.controller.mainRect,
-              child: ValueListenableBuilder(
-                valueListenable: widget.controller.loadingListener,
-                builder: (context, value, child) {
-                  return _buildMainForgroundView(context, value);
-                },
-              ),
+              child: _buildMainForgroundView(context),
             )
           ],
         ),
@@ -128,26 +118,33 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
     );
   }
 
-  Widget _buildMainForgroundView(BuildContext context, bool loading) {
+  Widget _buildMainForgroundView(BuildContext context) {
     if (widget.mainforegroundViewBuilder != null) {
-      return widget.mainforegroundViewBuilder!(context, loading);
+      return widget.mainforegroundViewBuilder!(context);
     }
 
-    return Offstage(
-      offstage: !loading,
-      child: Center(
-        key: const ValueKey('loadingView'),
-        child: SizedBox.square(
-          dimension: widget.controller.settingConfig.loading.size,
-          child: CircularProgressIndicator(
-            strokeWidth: widget.controller.settingConfig.loading.strokeWidth,
-            backgroundColor: widget.controller.settingConfig.loading.background,
-            valueColor: AlwaysStoppedAnimation<Color>(
-              widget.controller.settingConfig.loading.valueColor,
+    return ValueListenableBuilder(
+      valueListenable: widget.controller.candleRequestListener,
+      builder: (context, request, child) {
+        return Offstage(
+          offstage: !request.state.showLoading,
+          child: Center(
+            key: const ValueKey('loadingView'),
+            child: SizedBox.square(
+              dimension: widget.controller.settingConfig.loading.size,
+              child: CircularProgressIndicator(
+                strokeWidth:
+                    widget.controller.settingConfig.loading.strokeWidth,
+                backgroundColor:
+                    widget.controller.settingConfig.loading.background,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  widget.controller.settingConfig.loading.valueColor,
+                ),
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

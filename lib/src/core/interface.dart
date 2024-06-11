@@ -74,19 +74,21 @@ mixin GestureHanderImpl implements IGestureHandler {
 
 /// 数据源更新
 abstract interface class IState {
-  /// 开始加载[request]请求指定的蜡烛数据
+  /// 切换到[request]请求指定的蜡烛数据
   /// [request] 标记当前请求
   /// [useCacheFirst] 优先使用缓存. 注: 如果有缓存数据(说明之前加载过), loading不会展示.
   /// return
   ///   1. false:代表使用了缓存, 不会展示loading了
   ///   2. true: 代表已展示loading; 未使用缓存; 且当前KlineData数据被清空(如果有).
-  bool startLoading(CandleReq request, {bool useCacheFirst = true});
+  bool switchKlineData(CandleReq request, {bool useCacheFirst = true});
 
-  /// 如果当前[request]正在加载中, 结束加载中状态, 即取消loading的展示.
-  /// [force] 强制结束加载状态.
+  /// 结束加载中状态
+  /// [force] 强制结束加载中状态
+  /// [request] 如果与当前[curKlineData]的请求一致且状态非[RequestState.none], 即结束加载中状态
+  ///   否则, 仅改变[request]指定的缓存的[KlineData]请求状态.
   void stopLoading(CandleReq request, {bool force = false});
 
-  /// 更新[request]请求指定的蜡烛数据
+  /// 更新[list]到[request]请求指定的[KlineData]中
   Future<void> updateKlineData(CandleReq request, List<CandleModel> list);
 
   /// 检查并加载更多蜡烛数据
@@ -94,14 +96,6 @@ abstract interface class IState {
   void checkAndLoadMoreCandles({double? nextPanDistance});
 
   KlineData get curKlineData;
-
-  bool get canPaintChart;
-
-  /// 蜡烛总数
-  int get totalCandleCount;
-
-  /// 最大绘制宽度
-  double get maxPaintWidth;
 
   /// 将offset转换为蜡烛数据
   CandleModel? offsetToCandle(Offset offset);
@@ -161,7 +155,6 @@ abstract interface class ISetting {
     EdgeInsets? padding,
   });
 
-
   /// Config
 
   /// 初始化配置: 将会根据[IConfiguration.getFlexiKlineConfig]返回值去初始化
@@ -182,7 +175,7 @@ abstract interface class ISetting {
   /// SettingConfig
   SettingConfig get settingConfig;
 
-    /// SettingConfig
+  /// SettingConfig
   GestureConfig get gestureConfig;
 
   /// GridConfig

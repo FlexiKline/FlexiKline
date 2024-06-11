@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:dio/dio.dart';
@@ -35,10 +34,10 @@ final marketTickerProvider =
       instId,
       cancelToken: cancelToken,
     );
-    // Future.delayed(
-    //   Duration(milliseconds: random.nextInt(5000)),
-    //   () => ref.invalidateSelf(),
-    // );
+    Future.delayed(
+      Duration(milliseconds: random.nextInt(5000)),
+      () => ref.invalidateSelf(),
+    );
     if (resp.success) {
       ref.keepAlive();
       return resp.data;

@@ -12,28 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:async';
-
-import 'package:dio/dio.dart';
 import 'package:easy_refresh/easy_refresh.dart';
-import 'package:example/src/models/export.dart';
 import 'package:example/src/theme/flexi_theme.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
 import '../config.dart';
 import '../providers/instruments_provider.dart';
-import '../repo/api.dart' as api;
 import '../providers/default_kline_config.dart';
 import '../widgets/flexi_kline_indicator_bar.dart';
 import '../widgets/flexi_kline_mark_view.dart';
 import '../widgets/market_ticker_view.dart';
 import '../widgets/flexi_kline_setting_bar.dart';
 import '../widgets/select_symbol_title_view.dart';
+import 'kline_page_data_update_mixin.dart';
 import 'main_nav_page.dart';
 
 class OkKlinePage extends ConsumerStatefulWidget {
@@ -48,12 +43,13 @@ class OkKlinePage extends ConsumerStatefulWidget {
   ConsumerState<ConsumerStatefulWidget> createState() => _OkKlinePageState();
 }
 
-class _OkKlinePageState extends ConsumerState<OkKlinePage> {
-  late CandleReq req;
-
+class _OkKlinePageState extends ConsumerState<OkKlinePage>
+    with KlinePageDataUpdateMixin<OkKlinePage> {
   late final FlexiKlineController controller;
   late final DefaultFlexiKlineConfiguration configuration;
-  CancelToken? cancelToken;
+
+  @override
+  FlexiKlineController get flexiKlineController => controller;
 
   @override
   void initState() {
@@ -81,69 +77,8 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage> {
     controller.onLoadMoreCandles = loadMoreCandles;
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      loadCandleData(req);
+      initKlineData(req);
     });
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  Future<void> loadCandleData(CandleReq request) async {
-    try {
-      controller.startLoading(request);
-
-      cancelToken?.cancel();
-      final resp = await api.getMarketCandles(
-        request,
-        cancelToken: cancelToken = CancelToken(),
-      );
-      cancelToken = null;
-      if (resp.success && resp.data != null && resp.data!.isNotEmpty) {
-        await controller.updateKlineData(request, resp.data!);
-      } else if (resp.msg.isNotEmpty) {
-        SmartDialog.showToast(resp.msg);
-      }
-    } finally {
-      controller.stopLoading(request);
-    }
-  }
-
-  Future<void> loadMoreCandles(CandleReq request) async {
-    request.before = null;
-    final resp = await api.getHistoryCandles(
-      request,
-      cancelToken: cancelToken = CancelToken(),
-    );
-    cancelToken = null;
-    if (resp.success && resp.data != null && resp.data!.isNotEmpty) {
-      await controller.updateKlineData(request, resp.data!);
-    } else if (resp.msg.isNotEmpty) {
-      SmartDialog.showToast(resp.msg);
-    }
-  }
-
-  void onChangeKlineInstId(MarketTicker ticker) {
-    final p = ref.read(instrumentsMgrProvider.notifier).getPrecision(
-          ticker.instId,
-        );
-    req = req.copyWith(
-      instId: ticker.instId,
-      after: null,
-      before: null,
-      precision: p ?? ticker.precision,
-    );
-    loadCandleData(req);
-    setState(() {});
-  }
-
-  void onTapTimerBar(TimeBar bar) {
-    if (bar.bar != req.bar) {
-      req.bar = bar.bar;
-      setState(() {});
-      loadCandleData(req);
-    }
   }
 
   @override
@@ -166,14 +101,14 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage> {
         ),
         title: SelectSymbolTitleView(
           instId: req.instId,
-          onChangeTradingPair: onChangeKlineInstId,
+          onChangeTradingPair: onChangeTradingSymbol,
         ),
         centerTitle: true,
       ),
       body: EasyRefresh(
         onRefresh: () async {
           req = req.copyWith(after: null, before: null);
-          await loadCandleData(req);
+          await initKlineData(req, reset: true);
         },
         child: SingleChildScrollView(
           child: Column(
@@ -219,7 +154,7 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage> {
     );
   }
 
-  Widget _buildKlineMainForgroundView(BuildContext context, bool isLoading) {
+  Widget _buildKlineMainForgroundView(BuildContext context) {
     final theme = ref.watch(themeProvider);
     return Stack(
       children: [
@@ -240,21 +175,30 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage> {
           ),
         ),
         Positioned(
-          child: Offstage(
-            offstage: !isLoading,
-            child: Center(
-              key: const ValueKey('loadingView'),
-              child: SizedBox.square(
-                dimension: 28.r,
-                child: CircularProgressIndicator(
-                  strokeWidth: 3.r,
-                  backgroundColor: theme.markBg,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    theme.t1,
+          child: ValueListenableBuilder(
+            valueListenable: controller.candleRequestListener,
+            builder: (context, request, child) {
+              return Offstage(
+                offstage: !request.state.showLoading,
+                child: Container(
+                  key: const ValueKey('loadingView'),
+                  alignment: request.state == RequestState.initLoading
+                      ? AlignmentDirectional.center
+                      : AlignmentDirectional.centerStart,
+                  padding: EdgeInsetsDirectional.all(32.r),
+                  child: SizedBox.square(
+                    dimension: 28.r,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 3.r,
+                      backgroundColor: theme.markBg,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        theme.t1,
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
+              );
+            },
           ),
         )
       ],

@@ -53,7 +53,7 @@ Future<ApiResult<List<CandleModel>>> getHistoryCandles(
     '/api/v5/market/history-candles',
     dataToCandleList,
     method: HttpMethod.get,
-    queryParameters: req.toJson(),
+    queryParameters: req.toLoadMoreJson(),
     cancelToken: cancelToken,
   );
 }

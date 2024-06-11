@@ -21,6 +21,26 @@ import '../../framework/serializers.dart';
 
 part 'candle_req.g.dart';
 
+/// 请求状态
+enum RequestState {
+  // 正常
+  none,
+  // 初始加载中
+  initLoading,
+  // 加载更多
+  loadMore,
+  // 加载更多中(已到达当前最后一根蜡烛)
+  loadingMore;
+
+  bool get showLoading {
+    return this == RequestState.initLoading || this == RequestState.loadingMore;
+  }
+
+  bool get isLoadMore {
+    return this == RequestState.loadMore || this == RequestState.loadingMore;
+  }
+}
+
 @CopyWith()
 @FlexiModelSerializable
 class CandleReq {
@@ -31,6 +51,7 @@ class CandleReq {
     this.precision = defaultPrecision,
     this.after,
     this.before,
+    this.state = RequestState.none,
   });
 
   /// 产品ID，如 BTC-USDT
@@ -39,30 +60,54 @@ class CandleReq {
 
   /// 请求此时间戳之前（更旧的数据）的分页内容，传的值为对应接口的ts
   @JsonKey()
-  int? after;
+  final int? after;
 
   /// 请求此时间戳之后（更新的数据）的分页内容，传的值为对应接口的ts, 单独使用时，会返回最新的数据。
   @JsonKey()
-  int? before;
+  final int? before;
 
   /// 时间粒度，默认值1m
   /// 如 [1m/3m/5m/15m/30m/1H/2H/4H]
   /// 香港时间开盘价k线：[6H/12H/1D/2D/3D/1W/1M/3M]
   /// UTC时间开盘价k线：[/6Hutc/12Hutc/1Dutc/2Dutc/3Dutc/1Wutc/1Mutc/3Mutc]
   @JsonKey()
-  String bar;
+  final String bar;
 
   /// 分页返回的结果集数量，最大为300，不填默认返回100条
   @JsonKey()
-  int limit;
+  final int limit;
 
   /// 当前交易对精度
-  @JsonKey()
-  int precision;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  final int precision;
+
+  /// 当前请求状态
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  final RequestState state;
 
   @override
   String toString() {
-    return 'CandleReq($instId, $bar, $limit, $precision, $before, $after)';
+    return 'CandleReq($instId, $bar, $limit, $precision, $before, $after, $state)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is CandleReq) {
+      return other.runtimeType == runtimeType &&
+          other.instId == instId &&
+          other.bar == bar &&
+          other.after == after &&
+          other.before == before &&
+          other.precision == precision &&
+          other.state == state;
+    }
+    return false;
+  }
+
+  @override
+  int get hashCode {
+    return instId.hashCode ^ bar.hashCode ^ precision.hashCode ^ state.hashCode;
   }
 
   factory CandleReq.fromJson(Map<String, dynamic> json) =>
@@ -76,15 +121,8 @@ extension CandleReqExt on CandleReq {
 
   TimeBar? get timeBar => TimeBar.convert(bar);
 
-  void update(CandleReq req) {
-    if (instId == req.instId) {
-      // instId = req.instId;
-      after = req.after;
-      before = req.before;
-      bar = req.bar;
-      limit = req.limit;
-      precision = req.precision;
-    }
+  Map<String, dynamic> toLoadMoreJson() {
+    return toJson()..remove('before');
   }
 
   String get base => instId.split('-').firstOrNull ?? instId;

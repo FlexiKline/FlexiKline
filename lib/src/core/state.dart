@@ -43,8 +43,8 @@ mixin StateBinding
   void dispose() {
     super.dispose();
     logd('dispose state');
+    candleRequestListener.dispose();
     timeBarListener.dispose();
-    loadingListener.dispose();
     _klineDataCache.forEach((key, data) {
       data.dispose();
     });
@@ -53,11 +53,18 @@ mixin StateBinding
 
   OnLoadMoreCandles? onLoadMoreCandles;
 
+  /// CandleReq变化监听器
+  final candleRequestListener = ValueNotifier(KlineData.empty.req);
+
+  void updateCandleRequestListener(CandleReq request) {
+    if (request.key == curDataKey) {
+      candleRequestListener.value = request;
+      timeBarListener.value = request.timeBar;
+    }
+  }
+
   /// 当KlineData的TimeBar的监听器
   final timeBarListener = ValueNotifier<TimeBar?>(null);
-
-  /// KlineData数据加载loading状态监听器
-  final loadingListener = ValueNotifier<bool>(false);
 
   ComputeMode _computeMode = ComputeMode.fast;
   // ComputeMode get computeMode => _computeMode;
@@ -83,25 +90,17 @@ mixin StateBinding
   /// 4. 取消Cross绘制(如果有)
   void setCurKlineData(KlineData data) {
     _curKlineData = data;
-    timeBarListener.value = data.req.timeBar;
+    updateCandleRequestListener(data.req);
     initPaintDxOffset();
     markRepaintChart(reset: true);
     cancelCross();
   }
 
-  @override
-  bool get canPaintChart => curKlineData.canPaintChart;
-
   /// 数据缓存Key
   String get curDataKey => curKlineData.key;
 
-  /// 蜡烛总数
-  @override
-  int get totalCandleCount => curKlineData.list.length;
-
   /// 最大绘制宽度
-  @override
-  double get maxPaintWidth => totalCandleCount * candleActualWidth;
+  double get maxPaintWidth => curKlineData.length * candleActualWidth;
 
   /// 将offset转换为蜡烛数据
   @override
@@ -275,15 +274,6 @@ mixin StateBinding
         Priority.animation,
         debugLabel: 'Precompute-Task',
       );
-
-      /// 直接运行预计算
-      // return await KlineData.precomputeKlineData(
-      //   data,
-      //   newList: newList,
-      //   computeMode: computeMode,
-      //   calcParams: calcParams,
-      //   reset: reset,
-      // );
     } catch (e, stack) {
       loge('PrecomputeKlineData exception!!!', error: e, stackTrace: stack);
       return data;
@@ -294,14 +284,14 @@ mixin StateBinding
     }
   }
 
-  /// 开始加载[req]请求指定的蜡烛数据
+  /// 切换[req]请求指定的蜡烛数据
   /// [req] 标记当前请求
   /// [useCacheFirst] 优先使用缓存. 注: 如果有缓存数据(说明之前加载过), loading不会展示.
   /// return
   ///   1. false:代表使用了缓存, 不会展示loading了
   ///   2. true: 代表已展示loading; 未使用缓存; 且当前KlineData数据被清空(如果有).
   @override
-  bool startLoading(
+  bool switchKlineData(
     CandleReq req, {
     bool useCacheFirst = true,
   }) {
@@ -310,48 +300,62 @@ mixin StateBinding
     if (useCacheFirst && data != null && !data.isEmpty) {
       // 如果优先使用缓存且缓存数据不为空时, 设置缓存为当前KlineData, 同时结束loading状态.
       setCurKlineData(data);
-      loadingListener.value = false;
       return false;
     }
 
     // 清理历史缓存数据.
     data?.dispose();
 
-    // 重置当前KlineData为[req]请求指定的KlineData, 并更新到缓存中, 同时展示loading状态.
-    loadingListener.value = true;
-    data = KlineData(req.copyWith(), logger: loggerDelegate);
+    // 重置当前KlineData为[req]请求指定的KlineData, 并更新到缓存中.
+    data = KlineData(
+      req.copyWith(state: RequestState.initLoading),
+      logger: loggerDelegate,
+    );
     _klineDataCache[req.key] = data;
     _curKlineData = data;
-    timeBarListener.value = data.timeBar;
+    updateCandleRequestListener(data.req);
     return true;
   }
 
   /// 结束加载中状态
-  /// [force] 使终结束加载
-  /// [req] 如果指定, 且与当前正常加载的蜡烛请求一致, 才结束加载中状态
+  /// [force] 强制结束加载中状态
+  /// [request] 如果与当前[curKlineData]的请求一致且状态非[RequestState.none], 即结束加载中状态
+  ///   否则, 仅改变[request]指定的缓存的[KlineData]请求状态.
   @override
   void stopLoading(CandleReq request, {bool force = false}) {
-    if (force || request.key == curDataKey) {
-      loadingListener.value = false;
+    final data = _klineDataCache[request.key];
+    if (data != null) {
+      if (force || request.key == curDataKey) {
+        if (curKlineData.req.state != RequestState.none) {
+          updateCandleRequestListener(
+            curKlineData.updateReqRange(state: RequestState.none),
+          );
+        }
+      } else {
+        data.updateReqRange(state: RequestState.none);
+      }
     }
   }
 
-  /// 更新KlineData
+  /// 更新[list]到[req]请求指定的[KlineData]中
   @override
   Future<void> updateKlineData(
-    CandleReq request,
+    CandleReq req,
     List<CandleModel> list,
   ) async {
     // 数据为空, 无需要更新.
     if (list.isEmpty) return;
 
-    final req = request.copyWith();
-
     KlineData? data = _klineDataCache[req.key];
     bool reset = data == null || data.isEmpty;
     final oldLen = data?.length ?? 0;
 
-    data ??= KlineData(req, logger: loggerDelegate);
+    data ??= KlineData(
+      req.copyWith(state: RequestState.initLoading),
+      logger: loggerDelegate,
+    );
+
+    updateCandleRequestListener(data.req);
 
     data = await _startPrecomputeKlineData(
       data,
@@ -360,6 +364,8 @@ mixin StateBinding
     );
 
     _klineDataCache[req.key] = data;
+
+    stopLoading(data.req);
 
     if (req.key == curDataKey) {
       if (reset) {
@@ -383,40 +389,53 @@ mixin StateBinding
     }
   }
 
-  // Future<void> _loadMoreCandles({bool showLoading = false}) async {
-  //   if (onLoadMoreCandles == null) return;
-  //   final request = curKlineData.getLoadMoreRequest();
-  //   logd('onLoadMoreCandles($request)');
-  //   try {
-  //     if (showLoading) {}
-  //     await onLoadMoreCandles!.call(curKlineData.req);
-  //   } finally {
-  //     stopLoading(request);
-  //   }
-  // }
-
   /// 检查并加载更多蜡烛数据
   /// [nextPanDistance] 代表数据平移的偏移量
+  /// [loadMoreDistanceOffset]的计算规则: [gestureConfig.loadMoreWhenNoEnoughDistance] 优先 [gestureConfig.loadMoreWhenNoEnoughCandles]
+  /// 当以[paintDxOffset]为基础继续平移[nextPanDistance],
+  ///   1. 当大于最大平移宽度[maxPaintDxOffset]减去[loadMoreDistanceOffset]的距离时, 请求状态为[RequestState.loadMore], 提前加载更多历史数据, 此时不展示loading.
+  ///   2. 当大于最大平移宽度[maxPaintDxOffset]时, 请求状态为[RequestState.loadingMore], 提前加载更多历史数据, 此时展示loading.
+  ///   3. 否则, 请求状态为[RequestState.none], 取消loading的展示.
   @override
   void checkAndLoadMoreCandles({double? nextPanDistance}) {
-    logd('checkAndLoadMoreCandles(nextPanDistance:$nextPanDistance)');
+    final oldState = curKlineData.req.state;
+    if (oldState == RequestState.initLoading) {
+      logw('checkAndLoadMoreCandles currently in init, No more loading!');
+      return;
+    }
+
     nextPanDistance ??= 0;
-    if (gestureConfig.loadMoreWhenNoEnoughDistance != null) {
-      // 当以[paintDxOffset]为基础继续平移[nextPanDistance]后, 大于最大平移宽度减去[loadMoreWhenNoEnoughDistance]的距离时, 触发LoadMore提前加载更多历史数据.
-      if (paintDxOffset + nextPanDistance >
-          maxPaintWidth - gestureConfig.loadMoreWhenNoEnoughDistance!) {
-        curKlineData.updateReqRange();
-        logd('checkAndLoadMoreCandles >1 onLoadMoreCandles${curKlineData.req}');
-        onLoadMoreCandles?.call(curKlineData.req);
+    // 计算提前触发LoadMore的偏移量
+    final loadMoreDistanceOffset = gestureConfig.loadMoreWhenNoEnoughDistance ??
+        gestureConfig.loadMoreWhenNoEnoughCandles * candleActualWidth;
+
+    logd(
+      'checkAndLoadMoreCandles(nextPanDistance:$nextPanDistance) length:${curKlineData.length}, paintDxOffset:$paintDxOffset, maxPaintDxOffset:$maxPaintDxOffset, loadMoreDistanceOffset:$loadMoreDistanceOffset',
+    );
+
+    final destination = paintDxOffset + nextPanDistance;
+    final loadMoreMinPaintDxOffset = maxPaintDxOffset - loadMoreDistanceOffset;
+
+    RequestState newState;
+    if (destination > loadMoreMinPaintDxOffset) {
+      if (destination >= maxPaintDxOffset) {
+        newState = RequestState.loadingMore;
+      } else {
+        newState = RequestState.loadMore;
       }
-    } else if (gestureConfig.loadMoreWhenNoEnoughCandles > 0) {
-      int nextCandles = (nextPanDistance / candleActualWidth).round();
-      if (curKlineData.end + nextCandles >
-          curKlineData.length - gestureConfig.loadMoreWhenNoEnoughCandles) {
-        curKlineData.updateReqRange();
-        logd('checkAndLoadMoreCandles >2 onLoadMoreCandles${curKlineData.req}');
-        onLoadMoreCandles?.call(curKlineData.req);
-      }
+    } else if (oldState.isLoadMore) {
+      newState = RequestState.loadMore;
+    } else {
+      newState = RequestState.none;
+    }
+
+    final request = curKlineData.updateReqRange(state: newState);
+
+    logd('checkAndLoadMoreCandles > onLoadMoreCandles$request');
+    updateCandleRequestListener(request);
+
+    if (!oldState.isLoadMore && newState.isLoadMore) {
+      onLoadMoreCandles?.call(request);
     }
   }
 

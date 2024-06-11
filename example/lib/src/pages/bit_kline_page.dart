@@ -12,26 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:dio/dio.dart';
+import 'package:easy_refresh/easy_refresh.dart';
 import 'package:example/generated/l10n.dart';
-import 'package:example/src/constants/images.dart';
-import 'package:example/src/models/export.dart';
-import 'package:example/src/providers/instruments_provider.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
 import '../config.dart';
+import '../constants/images.dart';
 import '../providers/bit_kline_config.dart';
-import '../repo/api.dart' as api;
+import '../providers/instruments_provider.dart';
 import '../widgets/flexi_kline_indicator_bar.dart';
 import '../widgets/flexi_kline_mark_view.dart';
 import '../widgets/market_ticker_view.dart';
 import '../widgets/flexi_kline_setting_bar.dart';
 import '../widgets/select_symbol_title_view.dart';
+import 'kline_page_data_update_mixin.dart';
 import 'main_nav_page.dart';
 
 class BitKlinePage extends ConsumerStatefulWidget {
@@ -46,12 +44,13 @@ class BitKlinePage extends ConsumerStatefulWidget {
   ConsumerState<ConsumerStatefulWidget> createState() => _BitKlinePageState();
 }
 
-class _BitKlinePageState extends ConsumerState<BitKlinePage> {
-  late CandleReq req;
-
+class _BitKlinePageState extends ConsumerState<BitKlinePage>
+    with KlinePageDataUpdateMixin<BitKlinePage> {
   late final FlexiKlineController controller;
   late final BitFlexiKlineConfiguration configuration;
-  CancelToken? cancelToken;
+
+  @override
+  FlexiKlineController get flexiKlineController => controller;
 
   @override
   void initState() {
@@ -76,51 +75,11 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage> {
 
     controller.onCrossCustomTooltip = onCrossCustomTooltip;
 
+    controller.onLoadMoreCandles = loadMoreCandles;
+
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      loadCandleData(req);
+      initKlineData(req);
     });
-  }
-
-  Future<void> loadCandleData(CandleReq request) async {
-    try {
-      controller.startLoading(request);
-
-      cancelToken?.cancel();
-      final resp = await api.getMarketCandles(
-        request,
-        cancelToken: cancelToken = CancelToken(),
-      );
-      cancelToken = null;
-      if (resp.success && resp.data != null && resp.data!.isNotEmpty) {
-        await controller.updateKlineData(request, resp.data!);
-      } else if (resp.msg.isNotEmpty) {
-        SmartDialog.showToast(resp.msg);
-      }
-    } finally {
-      controller.stopLoading(request);
-    }
-  }
-
-  void onChangeKlineInstId(MarketTicker ticker) {
-    final p = ref.read(instrumentsMgrProvider.notifier).getPrecision(
-          ticker.instId,
-        );
-    req = req.copyWith(
-      instId: ticker.instId,
-      after: null,
-      before: null,
-      precision: p ?? ticker.precision,
-    );
-    loadCandleData(req);
-    setState(() {});
-  }
-
-  void onTapTimerBar(TimeBar bar) {
-    if (bar.bar != req.bar) {
-      req.bar = bar.bar;
-      setState(() {});
-      loadCandleData(req);
-    }
   }
 
   @override
@@ -143,48 +102,55 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage> {
         ),
         title: SelectSymbolTitleView(
           instId: req.instId,
-          onChangeTradingPair: onChangeKlineInstId,
+          onChangeTradingPair: onChangeTradingSymbol,
           long: klineTheme.long,
           short: klineTheme.short,
         ),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            MarketTickerView(
-              instId: req.instId,
-              precision: req.precision,
-              long: klineTheme.long,
-              short: klineTheme.short,
-            ),
-            FlexiKlineSettingBar(
-              controller: controller,
-              onTapTimeBar: onTapTimerBar,
-            ),
-            FlexiKlineWidget(
-              controller: controller,
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage(Images.logo),
-                  fit: BoxFit.scaleDown,
-                  scale: 6,
-                  opacity: 0.1,
+      body: EasyRefresh(
+        onRefresh: () async {
+          req = req.copyWith(after: null, before: null);
+          // reset = false: 下拉刷新不清理当前数据, 等新数据回来后再更新.
+          await initKlineData(req, reset: false);
+        },
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              MarketTickerView(
+                instId: req.instId,
+                precision: req.precision,
+                long: klineTheme.long,
+                short: klineTheme.short,
+              ),
+              FlexiKlineSettingBar(
+                controller: controller,
+                onTapTimeBar: onTapTimerBar,
+              ),
+              FlexiKlineWidget(
+                controller: controller,
+                decoration: const BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage(Images.logo),
+                    fit: BoxFit.scaleDown,
+                    scale: 6,
+                    opacity: 0.1,
+                  ),
+                ),
+                mainBackgroundView: const FlexiKlineMarkView(
+                  alignment: AlignmentDirectional.center,
+                  showLogo: false,
                 ),
               ),
-              mainBackgroundView: const FlexiKlineMarkView(
-                alignment: AlignmentDirectional.center,
-                showLogo: false,
+              FlexiKlineIndicatorBar(
+                controller: controller,
               ),
-            ),
-            FlexiKlineIndicatorBar(
-              controller: controller,
-            ),
-            Container(
-              height: 200,
-            )
-          ],
+              Container(
+                height: 200,
+              )
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(

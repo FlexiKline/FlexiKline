@@ -152,9 +152,13 @@ extension KlineDataExt on KlineData {
 
   bool get invalid => req.instId.isEmpty;
 
-  void updateReqRange() {
-    req.after = list.last.ts;
-    req.before = list.first.ts;
+  CandleReq updateReqRange({RequestState state = RequestState.none}) {
+    req = req.copyWith(
+      after: list.last.ts,
+      before: list.first.ts,
+      state: state,
+    );
+    return req;
   }
 
   CandleReq getLoadMoreRequest() {
