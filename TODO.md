@@ -24,7 +24,7 @@ v0.4.0
 - [x] 手势操作优化.
 - [ ] 测试start和end对调性能影响.
 - [ ] 测试蜡烛数据精度大于18的情况. 考虑CandleMode Decimal直接用BagNum替换.
-- [ ] Flutter最低支持版本
+- [x] Flutter最低支持版本
 
 v0.5.0
 - [ ] 支持横屏.
