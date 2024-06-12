@@ -47,7 +47,7 @@ mixin BOLLData on BaseData {
     if (key == bollKey && calcParam is BOLLParam) {
       calcuAndCacheBoll(
         param: calcParam,
-        start: range.start,
+        start: math.max(0, range.start - calcParam.n), // 补起上一次未算数据
         end: range.end,
         reset: reset,
       );
@@ -96,6 +96,7 @@ mixin BOLLData on BaseData {
     start ??= this.start;
     end ??= this.end;
     if (!param.isValid(len) || !checkStartAndEnd(start, end)) return;
+    logd('calcuAndCacheBoll [end:$end ~ start:$start] param:$param');
 
     // 计算从end到len之间mid的偏移量
     end = math.min(len - param.n, end - 1);

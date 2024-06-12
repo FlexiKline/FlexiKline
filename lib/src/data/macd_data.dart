@@ -83,6 +83,7 @@ mixin MACDData on BaseData {
     final len = list.length;
     // 参数无效或数据不够, 无需计算
     if (!param.isValid(len)) return;
+    logd('calcuAndCacheMacd [len:$len ~ 0] param:$param');
 
     final sPre = param.s - 1;
     final sNext = param.s + 1;

@@ -330,6 +330,7 @@ class CandlePaintObject<T extends CandleIndicator>
         price.toDecimal(),
         precision: klineData.precision,
         cutInvalidZero: false,
+        showThousands: true,
       );
 
       final tickText = settingConfig.tickText;

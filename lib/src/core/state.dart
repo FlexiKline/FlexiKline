@@ -366,12 +366,11 @@ mixin StateBinding
 
     _klineDataCache[req.key] = data;
 
-    // updateCandleRequestListener(data.req);
-
     if (req.key == curDataKey) {
       if (reset) {
         setCurKlineData(data);
       } else {
+        updateCandleRequestListener(data.req);
         final newLen = data.length;
         if (paintDxOffset < 0 && newLen > oldLen) {
           /// 当数据合并后

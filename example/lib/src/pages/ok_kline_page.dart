@@ -144,6 +144,18 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage>
         foregroundColor: theme.t1,
         mini: true,
         onPressed: () {
+          // 模拟更新异常数据
+          // final request = controller.curKlineData.req;
+          // controller.updateKlineData(request, [
+          //   CandleModel(
+          //     ts: request.before! + request.timeBar!.milliseconds,
+          //     o: Decimal.parse('67000'),
+          //     h: Decimal.parse('70000'),
+          //     l: Decimal.parse('62000'),
+          //     c: Decimal.parse('63000'),
+          //     v: Decimal.parse('10'),
+          //   )
+          // ]);
           controller.storeFlexiKlineConfig();
         },
         child: Text(

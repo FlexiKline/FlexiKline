@@ -71,7 +71,7 @@ const thousandSeparator = ',';
 String formatNumber(
   Decimal? val, {
   int precision = 0, // 展示精度
-  bool isSign = false, //是否展示符号位+
+  bool showSign = false, //是否展示符号位+
   bool? isFloor = true, // 默认为true: 向下截断, false:则向上, null: 四舍五入.
   bool cutInvalidZero = false, //删除尾部零.
   bool showCompact = false, // 是否压缩大数展示(B, M, K)
@@ -90,7 +90,7 @@ String formatNumber(
   }
 
   String ret = "";
-  if (isSign) {
+  if (showSign) {
     if (val > Decimal.zero) {
       ret += '+';
     } else if (val < Decimal.zero) {

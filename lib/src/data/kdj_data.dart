@@ -48,7 +48,7 @@ mixin KDJData on BaseData, CandleData {
     if (key == kdjKey && calcParam is KDJParam) {
       calcuAndCacheKDJ(
         param: calcParam,
-        start: range.start,
+        start: math.max(0, range.start - calcParam.n), // 补起上一次未算数据
         end: range.end,
         reset: reset,
       );
@@ -59,7 +59,7 @@ mixin KDJData on BaseData, CandleData {
 
   /// 首先要计算周期（n日、n周等）的RSV值（即未成熟随机指标值），然后再计算K值、D值、J值等。
   /// 以日KDJ数值的计算为例，其计算公式为：n日RSV=（Cn－Ln）÷（Hn－Ln）×100
-  /// 公式中，Cn为第n日收盘价；Ln为n日内的最低价；Hn为n日内的最高价。RSV值始终在1—100间波动。
+  /// 公式中，Cn为第n日收盘价；Ln为n日内的最低价；Hn为第n日内的最高价。RSV值始终在1—100间波动。
   /// 其次，计算K值与D值：
   /// 当日K值=2/3×前一日K值＋1/3×当日RSV
   /// 当日D值=2/3×前一日D值＋1/3×当日K值
@@ -81,6 +81,7 @@ mixin KDJData on BaseData, CandleData {
     start ??= this.start;
     end ??= this.end;
     if (!param.isValid(len) || !checkStartAndEnd(start, end)) return;
+    logd('calcuAndCacheKDJ [end:$end ~ start:$start] param:$param');
 
     // 计算从end到len之间n的偏移量
     end = math.min(len - param.n, end - 1);

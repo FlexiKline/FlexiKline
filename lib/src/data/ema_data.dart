@@ -85,6 +85,7 @@ mixin EMAData on BaseData {
   }) {
     final len = list.length;
     if (count > len || paramIndex >= paramLen) return;
+    logd('calculateEma [len:$len ~ 0] count:$count');
 
     // 计算从end到len之间count的偏移量
     int index = len - count;

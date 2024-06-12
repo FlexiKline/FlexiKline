@@ -128,8 +128,8 @@ mixin KlinePageDataUpdateMixin<T extends ConsumerStatefulWidget>
   void onTapTimerBar(TimeBar bar) {
     if (bar.bar != req.bar) {
       req = req.copyWith(bar: bar.bar);
-      setState(() {});
       initKlineData(req);
+      setState(() {});
     }
   }
 }

@@ -86,6 +86,7 @@ mixin MAData on BaseData {
     start ??= this.start;
     end ??= this.end;
     if (count > len || !checkStartAndEnd(start, end)) return;
+    logd('calculateMa [end:$end ~ start:$start] count:$count');
 
     end = math.min(len - count, end - 1);
 
@@ -108,8 +109,8 @@ mixin MAData on BaseData {
 
   void calcuAndCacheMa(
     List<MaParam> calcParams, {
-    int? start,
-    int? end,
+    required int start,
+    required int end,
     bool reset = false,
   }) {
     if (isEmpty || calcParams.isEmpty) return;
@@ -119,7 +120,7 @@ mixin MAData on BaseData {
         calcParams[i].count,
         paramIndex: i,
         paramLen: paramLen,
-        start: start,
+        start: math.max(0, start - calcParams[i].count), // 补起上一次未算数据
         end: end,
       );
     }
