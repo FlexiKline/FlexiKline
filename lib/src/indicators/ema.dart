@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flutter/material.dart';
 
 import '../config/export.dart';
@@ -31,6 +32,7 @@ part 'ema.g.dart';
 ///   EMA(12)=2*今收盘价/(12+1)+11*昨日EMA(12)/(12+1)
 /// 2）慢速平滑移动平均线（EMA）是26日的，计算公式为：
 ///   EMA(26)=2*今收盘价/(26+1)+25*昨日EMA(26)/(26+1)
+@CopyWith()
 @FlexiIndicatorSerializable
 class EMAIndicator extends SinglePaintObjectIndicator
     implements IPrecomputable {

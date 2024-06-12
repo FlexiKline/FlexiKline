@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:math' as math;
 import 'dart:async';
 
 import 'package:flexi_kline/flexi_kline.dart';
@@ -27,6 +28,17 @@ void main() {
       print('scheduleMicrotask:${val++}');
     });
   }
+
+  test('math ', () {
+    print('math.log(0) ${math.log(0)}');
+    print('math.log(0.1) ${math.log(0.1)}');
+    print('math.log(1) ${math.log(1)}');
+    print('math.log(1.1) ${math.log(1.1)}');
+    print('math.log(2) ${math.log(2)}');
+    print('math.log(2000) ${math.log(2000)}');
+    print('math.log(-1) ${math.log(-1)}');
+    print('math.log(-2) ${math.log(-2)}');
+  });
 
   test('test future', () async {
     final stopwatch = Stopwatch();
@@ -56,7 +68,7 @@ void main() {
     }
 
     microtask();
-    await logValue(Future(()=>{}));
+    await logValue(Future(() => {}));
     microtask();
   });
 

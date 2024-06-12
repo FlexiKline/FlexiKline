@@ -154,8 +154,8 @@ extension KlineDataExt on KlineData {
 
   CandleReq updateReqRange({RequestState state = RequestState.none}) {
     req = req.copyWith(
-      after: list.last.ts,
-      before: list.first.ts,
+      after: list.lastOrNull?.ts,
+      before: list.firstOrNull?.ts,
       state: state,
     );
     return req;
@@ -163,7 +163,7 @@ extension KlineDataExt on KlineData {
 
   CandleReq getLoadMoreRequest() {
     return req.copyWith(
-      after: list.last.ts,
+      after: list.lastOrNull?.ts,
       before: null,
     );
   }

@@ -39,6 +39,7 @@ mixin KlinePageDataUpdateMixin<T extends ConsumerStatefulWidget>
 
   @override
   void dispose() {
+    cancelToken?.cancel();
     _mockPushTimer?.cancel();
     super.dispose();
   }
@@ -57,16 +58,16 @@ mixin KlinePageDataUpdateMixin<T extends ConsumerStatefulWidget>
     cancelToken = null;
     if (resp.success && resp.data != null && resp.data!.isNotEmpty) {
       await flexiKlineController.updateKlineData(request, resp.data!);
-      startMockPushTimer(flexiKlineController.curKlineData.req); // 假装推送
+      _startMockPushTimer(flexiKlineController.curKlineData.req); // 假装推送
     } else if (resp.msg.isNotEmpty) {
       SmartDialog.showToast(resp.msg);
     }
   }
 
   /// 更新历史行情的蜡烛数据
-  /// [request.after]
+  /// [request] 请求[after]时间戳之前（更旧的数据）的分页内容
   Future<void> loadMoreCandles(CandleReq request) async {
-    await Future.delayed(const Duration(milliseconds: 4000));
+    await Future.delayed(const Duration(milliseconds: 2000)); // 模拟延时, 展示loading
     final resp = await api.getHistoryCandles(
       request,
       cancelToken: cancelToken = CancelToken(),
@@ -80,13 +81,13 @@ mixin KlinePageDataUpdateMixin<T extends ConsumerStatefulWidget>
   }
 
   /// 启动模拟推送定时器
-  void startMockPushTimer(CandleReq request) {
+  void _startMockPushTimer(CandleReq request) {
     _mockPushTimer?.cancel();
     _mockPushTimer = Timer(
       Duration(milliseconds: random.nextInt(5000)),
       () async {
         await updateLatestCandles(request);
-        startMockPushTimer(request);
+        _startMockPushTimer(request);
       },
     );
   }
@@ -109,6 +110,7 @@ mixin KlinePageDataUpdateMixin<T extends ConsumerStatefulWidget>
     }
   }
 
+  /// 交易对变更回调
   void onChangeTradingSymbol(MarketTicker ticker) {
     final p = ref.read(instrumentsMgrProvider.notifier).getPrecision(
           ticker.instId,
@@ -122,6 +124,7 @@ mixin KlinePageDataUpdateMixin<T extends ConsumerStatefulWidget>
     setState(() {});
   }
 
+  /// TimerBar变更回调
   void onTapTimerBar(TimeBar bar) {
     if (bar.bar != req.bar) {
       req = req.copyWith(bar: bar.bar);

@@ -190,38 +190,24 @@ class BitFlexiKlineConfiguration extends BaseFlexiKlineThemeConfiguration {
   }
 
   @override
-  LoadingConfig genInnerLoadingConfig(
-    BaseBitFlexiKlineTheme theme, {
-    double? size,
-    double? strokeWidth,
-    Color? background,
-    Color? valueColor,
-  }) {
-    return super.genInnerLoadingConfig(
-      theme,
-      background: theme.countDownTextBg,
-      valueColor: theme.crosshair,
-    );
+  LoadingConfig genInnerLoadingConfig(BaseBitFlexiKlineTheme theme) {
+    return super.genInnerLoadingConfig(theme).copyWith(
+          background: theme.countDownTextBg,
+          valueColor: theme.crosshair,
+        );
   }
 
   @override
-  TimeIndicator genTimeIndicator(
-    BaseBitFlexiKlineTheme theme, {
-    double? height,
-    EdgeInsets? padding,
-    DrawPosition? position,
-    TextAreaConfig? tmeiTick,
-  }) {
-    return super.genTimeIndicator(
-      theme,
-      position: DrawPosition.bottom,
-    );
+  TimeIndicator genTimeIndicator(BaseBitFlexiKlineTheme theme) {
+    return super.genTimeIndicator(theme).copyWith(
+          position: DrawPosition.bottom,
+        );
   }
 
   @override
   GestureConfig genGestureConfig(BaseBitFlexiKlineTheme theme) {
     return super.genGestureConfig(theme).copyWith(
-          tolerance: ToleranceConfig(inertiaFactor: 0.5),
+          tolerance: ToleranceConfig(distanceFactor: 0.5),
         );
   }
 }

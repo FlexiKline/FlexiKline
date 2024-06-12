@@ -3,6 +3,185 @@
 part of 'boll.dart';
 
 // **************************************************************************
+// CopyWithGenerator
+// **************************************************************************
+
+abstract class _$BOLLIndicatorCWProxy {
+  BOLLIndicator key(ValueKey<dynamic> key);
+
+  BOLLIndicator name(String name);
+
+  BOLLIndicator height(double height);
+
+  BOLLIndicator padding(EdgeInsets padding);
+
+  BOLLIndicator calcParam(BOLLParam calcParam);
+
+  BOLLIndicator mbTips(TipsConfig mbTips);
+
+  BOLLIndicator upTips(TipsConfig upTips);
+
+  BOLLIndicator dnTips(TipsConfig dnTips);
+
+  BOLLIndicator tipsPadding(EdgeInsets tipsPadding);
+
+  BOLLIndicator lineWidth(double lineWidth);
+
+  BOLLIndicator isFillBetweenUpAndDn(bool isFillBetweenUpAndDn);
+
+  BOLLIndicator fillColor(Color? fillColor);
+
+  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `BOLLIndicator(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  ///
+  /// Usage
+  /// ```dart
+  /// BOLLIndicator(...).copyWith(id: 12, name: "My name")
+  /// ````
+  BOLLIndicator call({
+    ValueKey<dynamic>? key,
+    String? name,
+    double? height,
+    EdgeInsets? padding,
+    BOLLParam? calcParam,
+    TipsConfig? mbTips,
+    TipsConfig? upTips,
+    TipsConfig? dnTips,
+    EdgeInsets? tipsPadding,
+    double? lineWidth,
+    bool? isFillBetweenUpAndDn,
+    Color? fillColor,
+  });
+}
+
+/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfBOLLIndicator.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfBOLLIndicator.copyWith.fieldName(...)`
+class _$BOLLIndicatorCWProxyImpl implements _$BOLLIndicatorCWProxy {
+  const _$BOLLIndicatorCWProxyImpl(this._value);
+
+  final BOLLIndicator _value;
+
+  @override
+  BOLLIndicator key(ValueKey<dynamic> key) => this(key: key);
+
+  @override
+  BOLLIndicator name(String name) => this(name: name);
+
+  @override
+  BOLLIndicator height(double height) => this(height: height);
+
+  @override
+  BOLLIndicator padding(EdgeInsets padding) => this(padding: padding);
+
+  @override
+  BOLLIndicator calcParam(BOLLParam calcParam) => this(calcParam: calcParam);
+
+  @override
+  BOLLIndicator mbTips(TipsConfig mbTips) => this(mbTips: mbTips);
+
+  @override
+  BOLLIndicator upTips(TipsConfig upTips) => this(upTips: upTips);
+
+  @override
+  BOLLIndicator dnTips(TipsConfig dnTips) => this(dnTips: dnTips);
+
+  @override
+  BOLLIndicator tipsPadding(EdgeInsets tipsPadding) =>
+      this(tipsPadding: tipsPadding);
+
+  @override
+  BOLLIndicator lineWidth(double lineWidth) => this(lineWidth: lineWidth);
+
+  @override
+  BOLLIndicator isFillBetweenUpAndDn(bool isFillBetweenUpAndDn) =>
+      this(isFillBetweenUpAndDn: isFillBetweenUpAndDn);
+
+  @override
+  BOLLIndicator fillColor(Color? fillColor) => this(fillColor: fillColor);
+
+  @override
+
+  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `BOLLIndicator(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  ///
+  /// Usage
+  /// ```dart
+  /// BOLLIndicator(...).copyWith(id: 12, name: "My name")
+  /// ````
+  BOLLIndicator call({
+    Object? key = const $CopyWithPlaceholder(),
+    Object? name = const $CopyWithPlaceholder(),
+    Object? height = const $CopyWithPlaceholder(),
+    Object? padding = const $CopyWithPlaceholder(),
+    Object? calcParam = const $CopyWithPlaceholder(),
+    Object? mbTips = const $CopyWithPlaceholder(),
+    Object? upTips = const $CopyWithPlaceholder(),
+    Object? dnTips = const $CopyWithPlaceholder(),
+    Object? tipsPadding = const $CopyWithPlaceholder(),
+    Object? lineWidth = const $CopyWithPlaceholder(),
+    Object? isFillBetweenUpAndDn = const $CopyWithPlaceholder(),
+    Object? fillColor = const $CopyWithPlaceholder(),
+  }) {
+    return BOLLIndicator(
+      key: key == const $CopyWithPlaceholder() || key == null
+          ? _value.key
+          // ignore: cast_nullable_to_non_nullable
+          : key as ValueKey<dynamic>,
+      name: name == const $CopyWithPlaceholder() || name == null
+          ? _value.name
+          // ignore: cast_nullable_to_non_nullable
+          : name as String,
+      height: height == const $CopyWithPlaceholder() || height == null
+          ? _value.height
+          // ignore: cast_nullable_to_non_nullable
+          : height as double,
+      padding: padding == const $CopyWithPlaceholder() || padding == null
+          ? _value.padding
+          // ignore: cast_nullable_to_non_nullable
+          : padding as EdgeInsets,
+      calcParam: calcParam == const $CopyWithPlaceholder() || calcParam == null
+          ? _value.calcParam
+          // ignore: cast_nullable_to_non_nullable
+          : calcParam as BOLLParam,
+      mbTips: mbTips == const $CopyWithPlaceholder() || mbTips == null
+          ? _value.mbTips
+          // ignore: cast_nullable_to_non_nullable
+          : mbTips as TipsConfig,
+      upTips: upTips == const $CopyWithPlaceholder() || upTips == null
+          ? _value.upTips
+          // ignore: cast_nullable_to_non_nullable
+          : upTips as TipsConfig,
+      dnTips: dnTips == const $CopyWithPlaceholder() || dnTips == null
+          ? _value.dnTips
+          // ignore: cast_nullable_to_non_nullable
+          : dnTips as TipsConfig,
+      tipsPadding:
+          tipsPadding == const $CopyWithPlaceholder() || tipsPadding == null
+              ? _value.tipsPadding
+              // ignore: cast_nullable_to_non_nullable
+              : tipsPadding as EdgeInsets,
+      lineWidth: lineWidth == const $CopyWithPlaceholder() || lineWidth == null
+          ? _value.lineWidth
+          // ignore: cast_nullable_to_non_nullable
+          : lineWidth as double,
+      isFillBetweenUpAndDn:
+          isFillBetweenUpAndDn == const $CopyWithPlaceholder() ||
+                  isFillBetweenUpAndDn == null
+              ? _value.isFillBetweenUpAndDn
+              // ignore: cast_nullable_to_non_nullable
+              : isFillBetweenUpAndDn as bool,
+      fillColor: fillColor == const $CopyWithPlaceholder()
+          ? _value.fillColor
+          // ignore: cast_nullable_to_non_nullable
+          : fillColor as Color?,
+    );
+  }
+}
+
+extension $BOLLIndicatorCopyWith on BOLLIndicator {
+  /// Returns a callable class that can be used as follows: `instanceOfBOLLIndicator.copyWith(...)` or like so:`instanceOfBOLLIndicator.copyWith.fieldName(...)`.
+  // ignore: library_private_types_in_public_api
+  _$BOLLIndicatorCWProxy get copyWith => _$BOLLIndicatorCWProxyImpl(this);
+}
+
+// **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 

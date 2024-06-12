@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flutter/material.dart';
 
 import '../config/export.dart';
@@ -30,6 +31,7 @@ part 'kdj.g.dart';
 /// 当日D值=2/3×前一日D值+1/3×当日K值
 /// 若无前一日K 值与D值，则可分别用50来代替。
 /// J值=3*当日K值-2*当日D值
+@CopyWith()
 @FlexiIndicatorSerializable
 class KDJIndicator extends SinglePaintObjectIndicator
     implements IPrecomputable {

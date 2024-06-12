@@ -21,20 +21,20 @@ import '../../utils/convert_util.dart';
 part 'tolerance_config.g.dart';
 
 /// 平移结束后的惯性动画限制参数
-/// [maxDuration] 允许的最大动画时长ms
-/// [inertiaFactor] 惯性平移的距离因子 = [velocity] * inertiaFactor; 值越大, 惯性平移距离越长.
-/// [curvestr] 动画的响应曲线. 参考: https://api.flutter.dev/flutter/animation/Curves-class.html
+/// [maxDuration] 惯性平移允许的最大时长(单位ms)
+/// [distanceFactor] 惯性平移的距离因子 = [velocity] * inertiaFactor; 值越大, 惯性平移距离越长.
+/// [curvestr] 惯性平移动画的响应曲线. 参考: https://api.flutter.dev/flutter/animation/Curves-class.html
 @CopyWith()
 @FlexiConfigSerializable
 class ToleranceConfig {
   ToleranceConfig({
     this.maxDuration = 1000,
-    this.inertiaFactor = 0.2,
+    this.distanceFactor = 0.2,
     this.curvestr = 'decelerate',
   }) : _curve = parseCurve(curvestr);
 
   final int maxDuration;
-  final double inertiaFactor;
+  final double distanceFactor;
   final String curvestr;
 
   late final Curve _curve;
@@ -42,7 +42,7 @@ class ToleranceConfig {
 
   @override
   String toString() {
-    return 'Tolerance($maxDuration, $inertiaFactor, $curvestr)';
+    return 'Tolerance($maxDuration, $distanceFactor, $curvestr)';
   }
 
   factory ToleranceConfig.fromJson(Map<String, dynamic> json) =>

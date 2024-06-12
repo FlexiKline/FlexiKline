@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flutter/material.dart';
 
 import '../config/export.dart';
@@ -26,6 +27,7 @@ import '../utils/export.dart';
 part 'vol_ma.g.dart';
 
 /// VolMa 移动平均指标线
+@CopyWith()
 @FlexiIndicatorSerializable
 class VolMaIndicator extends SinglePaintObjectIndicator
     implements IPrecomputable {

@@ -145,39 +145,47 @@ mixin GestureBinding on KlineBindingBase implements IGestureEvent, IState {
 
     final tolerance = gestureConfig.tolerance;
 
-    /// 惯性平移的最大距离.
-    final distance = velocity * tolerance.inertiaFactor;
-
-    /// 检查并加载更多蜡烛数据
-    checkAndLoadMoreCandles(nextPanDistance: distance);
-
-    if (ticker == null ||
-        velocity == 0 ||
-        curKlineData.isEmpty ||
-        (velocity < 0 && !canPanRTL) ||
-        (velocity > 0 && !canPanLTR)) {
-      logd("onScaleEnd current not move! > details:$details");
-      _panScaleData?.end();
-      _panScaleData = null;
-      return;
-    }
-
     /// 确认继续平移时间 (利用log指数函数特点: 随着自变量velocity的增大，函数值的增长速度逐渐减慢)
     /// 测试当限定参数[tolerance.maxDuration]等于1000(1秒时), [velocity]带入后[duration]变化为:
     /// 100000 > 1151.29; 10000 > 921.03; 9000 > 910.49; 5000 > 851.71; 2000 > 760.09; 800 > 668.46; 100 > 460.51
-    final duration = (math.log(velocity.abs()) * tolerance.maxDuration / 10)
-        .round()
-        .clamp(0, tolerance.maxDuration);
+    final panDuration =
+        (math.log(math.max(1, velocity.abs())) * tolerance.maxDuration / 10)
+            .round()
+            .clamp(0, tolerance.maxDuration);
 
-    logi('onScaleEnd animation velocity:$velocity => $tolerance');
+    /// 惯性平移的最大距离.
+    final panDistance = velocity * tolerance.distanceFactor;
+
+    if (ticker == null ||
+        panDistance == 0 ||
+        panDuration <= 1 || // 不足1ms, 无需继续平移
+        curKlineData.isEmpty ||
+        (velocity < 0 && !canPanRTL) ||
+        (velocity > 0 && !canPanLTR)) {
+      logd("onScaleEnd currently not need for inertial movement!");
+      _panScaleData?.end();
+      _panScaleData = null;
+
+      /// 检查并加载更多蜡烛数据
+      checkAndLoadMoreCandlesWhenPanEnd();
+      return;
+    }
+
+    /// 检查并加载更多蜡烛数据
+    checkAndLoadMoreCandlesWhenPanEnd(
+      panDistance: panDistance,
+      panDuration: panDuration,
+    );
+
+    logi('onScaleEnd inertial movement, velocity:$velocity => $tolerance');
 
     animationController?.dispose();
     animationController = AnimationController(
       vsync: ticker!,
-      duration: Duration(milliseconds: duration),
+      duration: Duration(milliseconds: panDuration),
     );
 
-    final animation = Tween(begin: 0.0, end: distance)
+    final animation = Tween(begin: 0.0, end: panDistance)
         .chain(CurveTween(curve: tolerance.curve))
         .animate(animationController!);
 

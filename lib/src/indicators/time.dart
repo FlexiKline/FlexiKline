@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'dart:math' as math;
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flutter/material.dart';
 
 import '../config/export.dart';
@@ -26,6 +27,7 @@ import '../framework/export.dart';
 part 'time.g.dart';
 
 /// 时间刻度指标图
+@CopyWith()
 @FlexiIndicatorSerializable
 class TimeIndicator extends SinglePaintObjectIndicator {
   TimeIndicator({

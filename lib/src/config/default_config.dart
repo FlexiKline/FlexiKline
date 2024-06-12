@@ -33,6 +33,7 @@ import 'mark_config/mark_config.dart';
 import 'setting_config/setting_config.dart';
 import 'text_area_config/text_area_config.dart';
 import 'tips_config/tips_config.dart';
+import 'tolerance_config/tolerance_config.dart';
 import 'tooltip_config/tooltip_config.dart';
 
 extension IFlexiKlineThemeExt on IFlexiKlineTheme {
@@ -174,47 +175,34 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
     );
   }
 
-  GridConfig genGridConfig(
-    covariant IFlexiKlineTheme theme, {
-    bool show = true,
-    GridAxis? horizontal,
-    GridAxis? vertical,
-
-    /// 如果配置了[horizontal]与[vertical], 以下无需配置
-    bool horizontalShow = true,
-    bool verticalShow = true,
-    int horizontalCount = 5,
-    int verticalCount = 5,
-    double? lineWidth,
-    Color? lineColor,
-    LineType lineType = LineType.solid,
-    List<double> lineDashes = const [2, 2],
-  }) {
+  GridConfig genGridConfig(covariant IFlexiKlineTheme theme) {
     return GridConfig(
-      show: show,
-      horizontal: horizontal ??
-          GridAxis(
-            show: horizontalShow,
-            count: horizontalCount,
-            width: lineWidth ?? theme.pixel,
-            color: lineColor ?? theme.gridLine,
-            type: lineType,
-            dashes: lineDashes,
-          ),
-      vertical: vertical ??
-          GridAxis(
-            show: verticalShow,
-            count: verticalCount,
-            width: lineWidth ?? theme.pixel,
-            color: lineColor ?? theme.gridLine,
-            type: lineType,
-            dashes: lineDashes,
-          ),
+      show: true,
+      horizontal: GridAxis(
+        show: true,
+        count: 5,
+        width: theme.pixel,
+        color: theme.gridLine,
+        type: LineType.solid,
+        dashes: const [2, 2],
+      ),
+      vertical: GridAxis(
+        show: true,
+        count: 5,
+        width: theme.pixel,
+        color: theme.gridLine,
+        type: LineType.solid,
+        dashes: const [2, 2],
+      ),
     );
   }
 
   GestureConfig genGestureConfig(covariant IFlexiKlineTheme theme) {
-    return GestureConfig();
+    return GestureConfig(
+      tolerance: ToleranceConfig(),
+      loadMoreWhenNoEnoughDistance: null,
+      loadMoreWhenNoEnoughCandles: 60,
+    );
   }
 
   SettingConfig genSettingConfig(
@@ -290,111 +278,73 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
     );
   }
 
-  LoadingConfig genInnerLoadingConfig(
-    covariant IFlexiKlineTheme theme, {
-    double? size,
-    double? strokeWidth,
-    Color? background,
-    Color? valueColor,
-  }) {
+  LoadingConfig genInnerLoadingConfig(covariant IFlexiKlineTheme theme) {
     return LoadingConfig(
-      size: size ?? 24 * theme.scale,
-      strokeWidth: strokeWidth ?? 4 * theme.scale,
-      background: background ?? theme.tooltipBg,
-      valueColor: valueColor ?? theme.textColor,
+      size: 24 * theme.scale,
+      strokeWidth: 4 * theme.scale,
+      background: theme.tooltipBg,
+      valueColor: theme.textColor,
     );
   }
 
-  CrossConfig genCrossConfig(
-    covariant IFlexiKlineTheme theme, {
-    bool enable = true,
-    LineConfig? crosshair,
-    CrossPointConfig? point,
-    TextAreaConfig? tickText,
-    double? spacing,
-
-    /// onCross时, 当移动到空白区域时, Tips区域是否展示最新的蜡烛的Tips数据.
-    bool showLatestTipsInBlank = true,
-
-    /// 如果配置了[tickText], 以下无需配置
-    TextStyle? tickTextStyle,
-    Color? tickTextBackground,
-    EdgeInsets? tickTextPadding,
-    BorderSide? tickTextBorder,
-    BorderRadius? tickTextRadius,
-  }) {
+  CrossConfig genCrossConfig(covariant IFlexiKlineTheme theme) {
     return CrossConfig(
-      enable: enable,
-      crosshair: crosshair ??
-          LineConfig(
-            width: 0.5 * theme.scale,
-            color: theme.crosshair,
-            type: LineType.dashed,
-            dashes: const [3, 3],
-          ),
-      point: point ??
-          CrossPointConfig(
-            radius: 2 * theme.scale,
-            width: 6 * theme.scale,
-            color: theme.crosshair,
-          ),
-      tickText: tickText ??
-          TextAreaConfig(
-            style: tickTextStyle ??
-                TextStyle(
-                  color: theme.crossTextColor,
-                  fontSize: theme.normalTextSize,
-                  fontWeight: FontWeight.normal,
-                  height: defaultTextHeight,
-                ),
-            background: tickTextBackground ?? theme.crossTextBg,
-            padding: tickTextPadding ?? EdgeInsets.all(2 * theme.scale),
-            border: tickTextBorder ?? BorderSide.none,
-            borderRadius: tickTextRadius ??
-                BorderRadius.all(
-                  Radius.circular(2 * theme.scale),
-                ),
-          ),
-      spacing: spacing ?? 1 * theme.scale,
-      showLatestTipsInBlank: showLatestTipsInBlank,
+      enable: true,
+      crosshair: LineConfig(
+        width: 0.5 * theme.scale,
+        color: theme.crosshair,
+        type: LineType.dashed,
+        dashes: const [3, 3],
+      ),
+      point: CrossPointConfig(
+        radius: 2 * theme.scale,
+        width: 6 * theme.scale,
+        color: theme.crosshair,
+      ),
+      tickText: TextAreaConfig(
+        style: TextStyle(
+          color: theme.crossTextColor,
+          fontSize: theme.normalTextSize,
+          fontWeight: FontWeight.normal,
+          height: defaultTextHeight,
+        ),
+        background: theme.crossTextBg,
+        padding: EdgeInsets.all(2 * theme.scale),
+        border: BorderSide.none,
+        borderRadius: BorderRadius.all(
+          Radius.circular(2 * theme.scale),
+        ),
+      ),
+      spacing: 1 * theme.scale,
+      // onCross时, 当移动到空白区域时, Tips区域是否展示最新的蜡烛的Tips数据.
+      showLatestTipsInBlank: true,
     );
   }
 
-  TooltipConfig genTooltipConfig(
-    covariant IFlexiKlineTheme theme, {
-    bool show = true,
-    Color? background,
-    EdgeInsets? margin,
-    EdgeInsets? padding,
-    BorderRadius? radius,
-    TextStyle? style,
-  }) {
+  TooltipConfig genTooltipConfig(covariant IFlexiKlineTheme theme) {
     return TooltipConfig(
-      show: show,
+      show: true,
 
       /// tooltip 区域设置
-      background: background ?? theme.tooltipBg,
-      margin: margin ??
-          EdgeInsets.only(
-            left: 15 * theme.scale,
-            right: 65 * theme.scale,
-            top: 10 * theme.scale,
-          ),
-      padding: padding ??
-          EdgeInsets.symmetric(
-            horizontal: 4 * theme.scale,
-            vertical: 4 * theme.scale,
-          ),
-      radius: radius ?? BorderRadius.all(Radius.circular(4 * theme.scale)),
+      background: theme.tooltipBg,
+      margin: EdgeInsets.only(
+        left: 15 * theme.scale,
+        right: 65 * theme.scale,
+        top: 10 * theme.scale,
+      ),
+      padding: EdgeInsets.symmetric(
+        horizontal: 4 * theme.scale,
+        vertical: 4 * theme.scale,
+      ),
+      radius: BorderRadius.all(Radius.circular(4 * theme.scale)),
 
       /// tooltip 文本设置
-      style: style ??
-          TextStyle(
-            fontSize: theme.normalTextSize,
-            color: theme.tooltipTextColor,
-            overflow: TextOverflow.ellipsis,
-            height: defaultMultiTextHeight,
-          ),
+      style: TextStyle(
+        fontSize: theme.normalTextSize,
+        color: theme.tooltipTextColor,
+        overflow: TextOverflow.ellipsis,
+        height: defaultMultiTextHeight,
+      ),
     );
   }
 
@@ -412,155 +362,129 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
     );
   }
 
-  CandleIndicator genCandleIndicator(
-    covariant IFlexiKlineTheme theme, {
-    double? height,
-    EdgeInsets? padding,
-    MarkConfig? high,
-    MarkConfig? low,
-    MarkConfig? last,
-    MarkConfig? latest,
-    bool useCandleColorAsLatestBg = true,
-    bool showCountDown = true,
-    TextAreaConfig? countDown,
-  }) {
+  CandleIndicator genCandleIndicator(covariant IFlexiKlineTheme theme) {
     return CandleIndicator(
-      height: height ?? theme.mainIndicatorHeight,
-      padding: padding ?? theme.mainIndicatorPadding,
-      high: high ??
-          MarkConfig(
-            spacing: 2 * theme.scale,
-            line: LineConfig(
-              type: LineType.solid,
-              color: theme.priceMarkLine,
-              length: 20 * theme.scale,
-              width: 0.5 * theme.scale,
-            ),
-            text: TextAreaConfig(
-              style: TextStyle(
-                fontSize: theme.normalTextSize,
-                color: theme.textColor,
-                overflow: TextOverflow.ellipsis,
-                height: defaultTextHeight,
-              ),
-            ),
+      height: theme.mainIndicatorHeight,
+      padding: theme.mainIndicatorPadding,
+      high: MarkConfig(
+        spacing: 2 * theme.scale,
+        line: LineConfig(
+          type: LineType.solid,
+          color: theme.priceMarkLine,
+          length: 20 * theme.scale,
+          width: 0.5 * theme.scale,
+        ),
+        text: TextAreaConfig(
+          style: TextStyle(
+            fontSize: theme.normalTextSize,
+            color: theme.textColor,
+            overflow: TextOverflow.ellipsis,
+            height: defaultTextHeight,
           ),
-      low: low ??
-          MarkConfig(
-            spacing: 2 * theme.scale,
-            line: LineConfig(
-              type: LineType.solid,
-              color: theme.priceMarkLine,
-              length: 20 * theme.scale,
-              width: 0.5 * theme.scale,
-            ),
-            text: TextAreaConfig(
-              style: TextStyle(
-                fontSize: theme.normalTextSize,
-                color: theme.textColor,
-                overflow: TextOverflow.ellipsis,
-                height: defaultTextHeight,
-              ),
-            ),
+        ),
+      ),
+      low: MarkConfig(
+        spacing: 2 * theme.scale,
+        line: LineConfig(
+          type: LineType.solid,
+          color: theme.priceMarkLine,
+          length: 20 * theme.scale,
+          width: 0.5 * theme.scale,
+        ),
+        text: TextAreaConfig(
+          style: TextStyle(
+            fontSize: theme.normalTextSize,
+            color: theme.textColor,
+            overflow: TextOverflow.ellipsis,
+            height: defaultTextHeight,
           ),
-      last: last ??
-          MarkConfig(
-            show: true,
-            spacing: 100 * theme.scale,
-            line: LineConfig(
-              type: LineType.dashed,
-              color: theme.priceMarkLine,
-              width: 0.5 * theme.scale,
-              dashes: [3, 3],
-            ),
-            text: TextAreaConfig(
-              style: TextStyle(
-                fontSize: theme.normalTextSize,
-                color: theme.lastPriceTextColor,
-                overflow: TextOverflow.ellipsis,
-                height: defaultTextHeight,
-                textBaseline: TextBaseline.alphabetic,
-              ),
-              background: theme.lastPriceTextBg,
-              padding: EdgeInsets.symmetric(
-                horizontal: 4 * theme.scale,
-                vertical: 2 * theme.scale,
-              ),
-              border: BorderSide(color: theme.transparent),
-              borderRadius: BorderRadius.all(Radius.circular(10 * theme.scale)),
-            ),
+        ),
+      ),
+      last: MarkConfig(
+        show: true,
+        spacing: 100 * theme.scale,
+        line: LineConfig(
+          type: LineType.dashed,
+          color: theme.priceMarkLine,
+          width: 0.5 * theme.scale,
+          dashes: [3, 3],
+        ),
+        text: TextAreaConfig(
+          style: TextStyle(
+            fontSize: theme.normalTextSize,
+            color: theme.lastPriceTextColor,
+            overflow: TextOverflow.ellipsis,
+            height: defaultTextHeight,
+            textBaseline: TextBaseline.alphabetic,
           ),
-      latest: latest ??
-          MarkConfig(
-            show: true,
-            spacing: 1 * theme.scale,
-            line: LineConfig(
-              type: LineType.dashed,
-              color: theme.priceMarkLine,
-              width: 0.5 * theme.scale,
-              dashes: [3, 3],
-            ),
-            text: TextAreaConfig(
-              style: TextStyle(
-                fontSize: theme.normalTextSize,
-                color: Colors.white,
-                overflow: TextOverflow.ellipsis,
-                height: defaultTextHeight,
-              ),
-              minWidth: 45,
-              textAlign: TextAlign.center,
-              padding: theme.textPading,
-              borderRadius: BorderRadius.all(Radius.circular(2 * theme.scale)),
-            ),
+          background: theme.lastPriceTextBg,
+          padding: EdgeInsets.symmetric(
+            horizontal: 4 * theme.scale,
+            vertical: 2 * theme.scale,
           ),
-      useCandleColorAsLatestBg: useCandleColorAsLatestBg,
-      showCountDown: showCountDown,
-      countDown: countDown ??
-          TextAreaConfig(
-            style: TextStyle(
-              fontSize: theme.normalTextSize,
-              color: theme.textColor,
-              overflow: TextOverflow.ellipsis,
-              height: defaultTextHeight,
-            ),
-            textAlign: TextAlign.center,
-            background: theme.countDownTextBg,
-            padding: theme.textPading,
-            borderRadius: BorderRadius.all(Radius.circular(2 * theme.scale)),
+          border: BorderSide(color: theme.transparent),
+          borderRadius: BorderRadius.all(Radius.circular(10 * theme.scale)),
+        ),
+      ),
+      latest: MarkConfig(
+        show: true,
+        spacing: 1 * theme.scale,
+        line: LineConfig(
+          type: LineType.dashed,
+          color: theme.priceMarkLine,
+          width: 0.5 * theme.scale,
+          dashes: [3, 3],
+        ),
+        text: TextAreaConfig(
+          style: TextStyle(
+            fontSize: theme.normalTextSize,
+            color: Colors.white,
+            overflow: TextOverflow.ellipsis,
+            height: defaultTextHeight,
           ),
+          minWidth: 45,
+          textAlign: TextAlign.center,
+          padding: theme.textPading,
+          borderRadius: BorderRadius.all(Radius.circular(2 * theme.scale)),
+        ),
+      ),
+      useCandleColorAsLatestBg: true,
+      showCountDown: true,
+      countDown: TextAreaConfig(
+        style: TextStyle(
+          fontSize: theme.normalTextSize,
+          color: theme.textColor,
+          overflow: TextOverflow.ellipsis,
+          height: defaultTextHeight,
+        ),
+        textAlign: TextAlign.center,
+        background: theme.countDownTextBg,
+        padding: theme.textPading,
+        borderRadius: BorderRadius.all(Radius.circular(2 * theme.scale)),
+      ),
     );
   }
 
-  VolumeIndicator genMainVolumeIndicator(
-    covariant IFlexiKlineTheme theme, {
-    double? height,
-    EdgeInsets? padding,
-    PaintMode paintMode = PaintMode.alone,
-    TipsConfig? volTips,
-    EdgeInsets? tipsPadding,
-    int tickCount = defaultSubTickCount,
-    int precision = 2,
-  }) {
+  VolumeIndicator genMainVolumeIndicator(covariant IFlexiKlineTheme theme) {
     return VolumeIndicator(
-      height: height ?? theme.subIndicatorHeight,
-      padding: padding ?? theme.subIndicatorPadding,
-      paintMode: paintMode,
+      height: theme.subIndicatorHeight,
+      padding: theme.subIndicatorPadding,
+      paintMode: PaintMode.alone,
 
       /// 绘制相关参数
-      volTips: volTips ??
-          TipsConfig(
-            label: 'Vol: ',
-            precision: precision,
-            style: TextStyle(
-              fontSize: theme.normalTextSize,
-              color: theme.textColor,
-              overflow: TextOverflow.ellipsis,
-              height: defaultTextHeight,
-            ),
-          ),
-      tipsPadding: tipsPadding ?? theme.tipsPadding,
-      tickCount: tickCount,
-      precision: precision,
+      volTips: TipsConfig(
+        label: 'Vol: ',
+        precision: 2,
+        style: TextStyle(
+          fontSize: theme.normalTextSize,
+          color: theme.textColor,
+          overflow: TextOverflow.ellipsis,
+          height: defaultTextHeight,
+        ),
+      ),
+      tipsPadding: theme.tipsPadding,
+      tickCount: defaultSubTickCount,
+      precision: 2,
 
       /// 控制参数
       showYAxisTick: false,
@@ -570,331 +494,262 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
     );
   }
 
-  MAIndicator genMaIndicator(
-    covariant IFlexiKlineTheme theme, {
-    double? height,
-    EdgeInsets? padding,
-    List<MaParam>? calcParams,
-    EdgeInsets? tipsPadding,
-    double? lineWidth,
-  }) {
+  MAIndicator genMaIndicator(covariant IFlexiKlineTheme theme) {
     return MAIndicator(
-      height: height ?? theme.mainIndicatorHeight,
-      padding: padding ?? theme.mainIndicatorPadding,
-      calcParams: calcParams ??
-          [
-            MaParam(
-              count: 7,
-              tips: TipsConfig(
-                label: 'MA7: ',
-                // precision: 2,
-                style: TextStyle(
-                  fontSize: theme.normalTextSize,
-                  color: const Color(0xFF946F9A),
-                  overflow: TextOverflow.ellipsis,
-                  height: defaultTipsTextHeight,
-                ),
-              ),
+      height: theme.mainIndicatorHeight,
+      padding: theme.mainIndicatorPadding,
+      calcParams: [
+        MaParam(
+          count: 7,
+          tips: TipsConfig(
+            label: 'MA7: ',
+            // precision: 2,
+            style: TextStyle(
+              fontSize: theme.normalTextSize,
+              color: const Color(0xFF946F9A),
+              overflow: TextOverflow.ellipsis,
+              height: defaultTipsTextHeight,
             ),
-            MaParam(
-              count: 30,
-              tips: TipsConfig(
-                label: 'MA30: ',
-                // precision: 2,
-                style: TextStyle(
-                  fontSize: theme.normalTextSize,
-                  color: const Color(0xFFF1BF32),
-                  overflow: TextOverflow.ellipsis,
-                  height: defaultTipsTextHeight,
-                ),
-              ),
+          ),
+        ),
+        MaParam(
+          count: 30,
+          tips: TipsConfig(
+            label: 'MA30: ',
+            // precision: 2,
+            style: TextStyle(
+              fontSize: theme.normalTextSize,
+              color: const Color(0xFFF1BF32),
+              overflow: TextOverflow.ellipsis,
+              height: defaultTipsTextHeight,
             ),
-          ],
-      tipsPadding: tipsPadding ?? theme.tipsPadding,
-      lineWidth: lineWidth ?? theme.indicatorLineWidth,
+          ),
+        ),
+      ],
+      tipsPadding: theme.tipsPadding,
+      lineWidth: theme.indicatorLineWidth,
     );
   }
 
-  EMAIndicator genEmaIndicator(
-    covariant IFlexiKlineTheme theme, {
-    double? height,
-    EdgeInsets? padding,
-    List<MaParam>? calcParams,
-    EdgeInsets? tipsPadding,
-    double? lineWidth,
-  }) {
+  EMAIndicator genEmaIndicator(covariant IFlexiKlineTheme theme) {
     return EMAIndicator(
-      height: height ?? theme.mainIndicatorHeight,
-      padding: padding ?? theme.mainIndicatorPadding,
-      calcParams: calcParams ??
-          [
-            MaParam(
-              count: 5,
-              tips: TipsConfig(
-                label: 'EMA5: ',
-                // precision: 2,
-                style: TextStyle(
-                  fontSize: theme.normalTextSize,
-                  color: const Color(0xFF806180),
-                  overflow: TextOverflow.ellipsis,
-                  height: defaultTipsTextHeight,
-                ),
-              ),
+      height: theme.mainIndicatorHeight,
+      padding: theme.mainIndicatorPadding,
+      calcParams: [
+        MaParam(
+          count: 5,
+          tips: TipsConfig(
+            label: 'EMA5: ',
+            // precision: 2,
+            style: TextStyle(
+              fontSize: theme.normalTextSize,
+              color: const Color(0xFF806180),
+              overflow: TextOverflow.ellipsis,
+              height: defaultTipsTextHeight,
             ),
-            MaParam(
-              count: 10,
-              tips: TipsConfig(
-                label: 'EMA10: ',
-                // precision: 2,
-                style: TextStyle(
-                  fontSize: theme.normalTextSize,
-                  color: const Color(0xFFEBB736),
-                  overflow: TextOverflow.ellipsis,
-                  height: defaultTipsTextHeight,
-                ),
-              ),
+          ),
+        ),
+        MaParam(
+          count: 10,
+          tips: TipsConfig(
+            label: 'EMA10: ',
+            // precision: 2,
+            style: TextStyle(
+              fontSize: theme.normalTextSize,
+              color: const Color(0xFFEBB736),
+              overflow: TextOverflow.ellipsis,
+              height: defaultTipsTextHeight,
             ),
-            MaParam(
-              count: 20,
-              tips: TipsConfig(
-                label: 'EMA20: ',
-                // precision: 2,
-                style: TextStyle(
-                  fontSize: theme.normalTextSize,
-                  color: const Color(0xFFD672D5),
-                  overflow: TextOverflow.ellipsis,
-                  height: defaultTipsTextHeight,
-                ),
-              ),
+          ),
+        ),
+        MaParam(
+          count: 20,
+          tips: TipsConfig(
+            label: 'EMA20: ',
+            // precision: 2,
+            style: TextStyle(
+              fontSize: theme.normalTextSize,
+              color: const Color(0xFFD672D5),
+              overflow: TextOverflow.ellipsis,
+              height: defaultTipsTextHeight,
             ),
-            MaParam(
-              count: 60,
-              tips: TipsConfig(
-                label: 'EMA60: ',
-                // precision: 2,
-                style: TextStyle(
-                  fontSize: theme.normalTextSize,
-                  color: const Color.fromARGB(255, 44, 45, 47),
-                  overflow: TextOverflow.ellipsis,
-                  height: defaultTipsTextHeight,
-                ),
-              ),
+          ),
+        ),
+        MaParam(
+          count: 60,
+          tips: TipsConfig(
+            label: 'EMA60: ',
+            // precision: 2,
+            style: TextStyle(
+              fontSize: theme.normalTextSize,
+              color: const Color.fromARGB(255, 44, 45, 47),
+              overflow: TextOverflow.ellipsis,
+              height: defaultTipsTextHeight,
             ),
-          ],
-      tipsPadding: tipsPadding ?? theme.tipsPadding,
-      lineWidth: lineWidth ?? theme.indicatorLineWidth,
+          ),
+        ),
+      ],
+      tipsPadding: theme.tipsPadding,
+      lineWidth: theme.indicatorLineWidth,
     );
   }
 
-  BOLLIndicator genBollIndicator(
-    covariant IFlexiKlineTheme theme, {
-    double? height,
-    EdgeInsets? padding,
-    BOLLParam? calcParam,
-    TipsConfig? mbTips,
-    TipsConfig? upTips,
-    TipsConfig? dnTips,
-    EdgeInsets? tipsPadding,
-    int tickCount = defaultSubTickCount,
-    double? lineWidth,
-    bool isFillBetweenUpAndDn = true,
-    Color? fillColor,
-  }) {
+  BOLLIndicator genBollIndicator(covariant IFlexiKlineTheme theme) {
     return BOLLIndicator(
-      height: height ?? theme.mainIndicatorHeight,
-      padding: padding ?? theme.mainIndicatorPadding,
+      height: theme.mainIndicatorHeight,
+      padding: theme.mainIndicatorPadding,
 
       /// BOLL计算参数
-      calcParam: calcParam ?? const BOLLParam(n: 20, std: 2),
+      calcParam: const BOLLParam(n: 20, std: 2),
 
       /// 绘制相关参数
-      mbTips: mbTips ??
-          TipsConfig(
-            label: 'BOLL(20): ',
-            // precision: 2,
-            style: TextStyle(
-              fontSize: theme.normalTextSize,
-              color: const Color(0xFF886787),
-              overflow: TextOverflow.ellipsis,
-              height: defaultTipsTextHeight,
-            ),
-          ),
-      upTips: upTips ??
-          TipsConfig(
-            label: 'UB: ',
-            // precision: 2,
-            style: TextStyle(
-              fontSize: theme.normalTextSize,
-              color: const Color(0xFFF0B527),
-              overflow: TextOverflow.ellipsis,
-              height: defaultTipsTextHeight,
-            ),
-          ),
-      dnTips: dnTips ??
-          TipsConfig(
-            label: 'LB: ',
-            // precision: 2,
-            style: TextStyle(
-              fontSize: theme.normalTextSize,
-              color: const Color(0xFFD85BE0),
-              overflow: TextOverflow.ellipsis,
-              height: defaultTipsTextHeight,
-            ),
-          ),
-      tipsPadding: tipsPadding ?? theme.tipsPadding,
-      lineWidth: lineWidth ?? theme.indicatorLineWidth,
+      mbTips: TipsConfig(
+        label: 'BOLL(20): ',
+        // precision: 2,
+        style: TextStyle(
+          fontSize: theme.normalTextSize,
+          color: const Color(0xFF886787),
+          overflow: TextOverflow.ellipsis,
+          height: defaultTipsTextHeight,
+        ),
+      ),
+      upTips: TipsConfig(
+        label: 'UB: ',
+        // precision: 2,
+        style: TextStyle(
+          fontSize: theme.normalTextSize,
+          color: const Color(0xFFF0B527),
+          overflow: TextOverflow.ellipsis,
+          height: defaultTipsTextHeight,
+        ),
+      ),
+      dnTips: TipsConfig(
+        label: 'LB: ',
+        // precision: 2,
+        style: TextStyle(
+          fontSize: theme.normalTextSize,
+          color: const Color(0xFFD85BE0),
+          overflow: TextOverflow.ellipsis,
+          height: defaultTipsTextHeight,
+        ),
+      ),
+      tipsPadding: theme.tipsPadding,
+      lineWidth: theme.indicatorLineWidth,
 
       /// 填充配置
-      isFillBetweenUpAndDn: isFillBetweenUpAndDn,
-      fillColor: fillColor,
+      isFillBetweenUpAndDn: true,
+      fillColor: null,
     );
   }
 
-  TimeIndicator genTimeIndicator(
-    covariant IFlexiKlineTheme theme, {
-    double? height,
-    EdgeInsets? padding,
-    DrawPosition? position,
-    TextAreaConfig? tmeiTick,
-  }) {
+  TimeIndicator genTimeIndicator(covariant IFlexiKlineTheme theme) {
     return TimeIndicator(
-      height: height ?? theme.timeIndicatorHeight,
-      padding: padding ?? EdgeInsets.zero,
-      position: position ?? DrawPosition.middle,
+      height: theme.timeIndicatorHeight,
+      padding: EdgeInsets.zero,
+      position: DrawPosition.middle,
       // 时间刻度.
-      timeTick: tmeiTick ??
-          TextAreaConfig(
-            style: TextStyle(
-              fontSize: theme.normalTextSize,
-              color: theme.tickTextColor,
-              overflow: TextOverflow.ellipsis,
-              height: defaultTextHeight,
-            ),
-            textWidth: 80 * theme.scale,
-            textAlign: TextAlign.center,
-          ),
+      timeTick: TextAreaConfig(
+        style: TextStyle(
+          fontSize: theme.normalTextSize,
+          color: theme.tickTextColor,
+          overflow: TextOverflow.ellipsis,
+          height: defaultTextHeight,
+        ),
+        textWidth: 80 * theme.scale,
+        textAlign: TextAlign.center,
+      ),
     );
   }
 
-  MACDIndicator genMacdIndicator(
-    covariant IFlexiKlineTheme theme, {
-    double? height,
-    EdgeInsets? padding,
-    MACDParam? calcParam,
-    TipsConfig? difTips,
-    TipsConfig? deaTips,
-    TipsConfig? macdTips,
-    EdgeInsets? tipsPadding,
-    int tickCount = defaultSubTickCount,
-    double? lineWidth,
-    int precision = 2,
-  }) {
+  MACDIndicator genMacdIndicator(covariant IFlexiKlineTheme theme) {
     return MACDIndicator(
-      height: height ?? theme.subIndicatorHeight,
-      padding: padding ?? theme.subIndicatorPadding,
+      height: theme.subIndicatorHeight,
+      padding: theme.subIndicatorPadding,
 
       /// Macd相关参数
-      calcParam: calcParam ?? const MACDParam(s: 12, l: 26, m: 9),
+      calcParam: const MACDParam(s: 12, l: 26, m: 9),
 
       /// 绘制相关参数
-      difTips: difTips ??
-          TipsConfig(
-            label: 'DIF: ',
-            precision: precision,
-            style: TextStyle(
-              fontSize: theme.normalTextSize,
-              color: const Color(0xFFDFBF47),
-              overflow: TextOverflow.ellipsis,
-              height: defaultTextHeight,
-            ),
-          ),
-      deaTips: deaTips ??
-          TipsConfig(
-            label: 'DEA: ',
-            precision: precision,
-            style: TextStyle(
-              fontSize: theme.normalTextSize,
-              color: const Color(0xFF795583),
-              overflow: TextOverflow.ellipsis,
-              height: defaultTextHeight,
-            ),
-          ),
-      macdTips: macdTips ??
-          TipsConfig(
-            label: 'MACD: ',
-            precision: precision,
-            style: TextStyle(
-              fontSize: theme.normalTextSize,
-              color: theme.textColor,
-              overflow: TextOverflow.ellipsis,
-              height: defaultTextHeight,
-            ),
-          ),
-      tipsPadding: tipsPadding ?? theme.tipsPadding,
-      tickCount: tickCount,
-      lineWidth: lineWidth ?? theme.indicatorLineWidth,
-      precision: precision,
+      difTips: TipsConfig(
+        label: 'DIF: ',
+        precision: 2,
+        style: TextStyle(
+          fontSize: theme.normalTextSize,
+          color: const Color(0xFFDFBF47),
+          overflow: TextOverflow.ellipsis,
+          height: defaultTextHeight,
+        ),
+      ),
+      deaTips: TipsConfig(
+        label: 'DEA: ',
+        precision: 2,
+        style: TextStyle(
+          fontSize: theme.normalTextSize,
+          color: const Color(0xFF795583),
+          overflow: TextOverflow.ellipsis,
+          height: defaultTextHeight,
+        ),
+      ),
+      macdTips: TipsConfig(
+        label: 'MACD: ',
+        precision: 2,
+        style: TextStyle(
+          fontSize: theme.normalTextSize,
+          color: theme.textColor,
+          overflow: TextOverflow.ellipsis,
+          height: defaultTextHeight,
+        ),
+      ),
+      tipsPadding: theme.tipsPadding,
+      tickCount: defaultSubTickCount,
+      lineWidth: theme.indicatorLineWidth,
+      precision: 2,
     );
   }
 
-  KDJIndicator genKdjIndicator(
-    covariant IFlexiKlineTheme theme, {
-    double? height,
-    EdgeInsets? padding,
-    KDJParam? calcParam,
-    TipsConfig? ktips,
-    TipsConfig? dtips,
-    TipsConfig? jtips,
-    EdgeInsets? tipsPadding,
-    int tickCount = defaultSubTickCount,
-    double? lineWidth,
-    int precision = 2,
-  }) {
+  KDJIndicator genKdjIndicator(covariant IFlexiKlineTheme theme) {
     return KDJIndicator(
-      height: height ?? theme.subIndicatorHeight,
-      padding: padding ?? theme.subIndicatorPadding,
+      height: theme.subIndicatorHeight,
+      padding: theme.subIndicatorPadding,
 
       /// KDJ计算参数
-      calcParam: calcParam ?? const KDJParam(n: 9, m1: 3, m2: 3),
+      calcParam: const KDJParam(n: 9, m1: 3, m2: 3),
 
       /// 绘制相关参数
-      ktips: ktips ??
-          TipsConfig(
-            label: 'K: ',
-            precision: precision,
-            style: TextStyle(
-              fontSize: theme.normalTextSize,
-              color: const Color(0xFF7A5C79),
-              overflow: TextOverflow.ellipsis,
-              height: defaultTipsTextHeight,
-            ),
-          ),
-      dtips: dtips ??
-          TipsConfig(
-            label: 'D: ',
-            precision: precision,
-            style: TextStyle(
-              fontSize: theme.normalTextSize,
-              color: const Color(0xFFFABD3F),
-              overflow: TextOverflow.ellipsis,
-              height: defaultTipsTextHeight,
-            ),
-          ),
-      jtips: jtips ??
-          TipsConfig(
-            label: 'D: ',
-            precision: precision,
-            style: TextStyle(
-              fontSize: theme.normalTextSize,
-              color: const Color(0xFFBB72CA),
-              overflow: TextOverflow.ellipsis,
-              height: defaultTipsTextHeight,
-            ),
-          ),
-      tipsPadding: tipsPadding ?? theme.tipsPadding,
-      tickCount: tickCount,
-      lineWidth: lineWidth ?? theme.indicatorLineWidth,
-      precision: precision,
+      ktips: TipsConfig(
+        label: 'K: ',
+        precision: 2,
+        style: TextStyle(
+          fontSize: theme.normalTextSize,
+          color: const Color(0xFF7A5C79),
+          overflow: TextOverflow.ellipsis,
+          height: defaultTipsTextHeight,
+        ),
+      ),
+      dtips: TipsConfig(
+        label: 'D: ',
+        precision: 2,
+        style: TextStyle(
+          fontSize: theme.normalTextSize,
+          color: const Color(0xFFFABD3F),
+          overflow: TextOverflow.ellipsis,
+          height: defaultTipsTextHeight,
+        ),
+      ),
+      jtips: TipsConfig(
+        label: 'D: ',
+        precision: 2,
+        style: TextStyle(
+          fontSize: theme.normalTextSize,
+          color: const Color(0xFFBB72CA),
+          overflow: TextOverflow.ellipsis,
+          height: defaultTipsTextHeight,
+        ),
+      ),
+      tipsPadding: theme.tipsPadding,
+      tickCount: defaultSubTickCount,
+      lineWidth: theme.indicatorLineWidth,
+      precision: 2,
     );
   }
 
@@ -908,49 +763,31 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
       height: height ?? theme.subIndicatorHeight,
       padding: padding ?? theme.subIndicatorPadding,
       drawBelowTipsArea: drawBelowTipsArea,
-      volumeIndicator: genSubVolumeIndicator(
-        theme,
-        height: height,
-        padding: padding,
-      ),
-      volMaIndicator: genVolMaIndicator(
-        theme,
-        height: height,
-        padding: padding,
-      ),
+      volumeIndicator: genSubVolumeIndicator(theme),
+      volMaIndicator: genVolMaIndicator(theme),
     );
   }
 
-  VolumeIndicator genSubVolumeIndicator(
-    covariant IFlexiKlineTheme theme, {
-    double? height,
-    EdgeInsets? padding,
-    PaintMode paintMode = PaintMode.combine,
-    TipsConfig? volTips,
-    EdgeInsets? tipsPadding,
-    int tickCount = defaultSubTickCount,
-    int precision = 2,
-  }) {
+  VolumeIndicator genSubVolumeIndicator(covariant IFlexiKlineTheme theme) {
     return VolumeIndicator(
-      height: height ?? theme.subIndicatorHeight,
-      padding: padding ?? theme.subIndicatorPadding,
-      paintMode: paintMode,
+      height: theme.subIndicatorHeight,
+      padding: theme.subIndicatorPadding,
+      paintMode: PaintMode.combine,
 
       /// 绘制相关参数
-      volTips: volTips ??
-          TipsConfig(
-            label: 'Vol: ',
-            precision: precision,
-            style: TextStyle(
-              fontSize: theme.normalTextSize,
-              color: theme.textColor,
-              overflow: TextOverflow.ellipsis,
-              height: defaultTextHeight,
-            ),
-          ),
-      tipsPadding: tipsPadding ?? theme.tipsPadding,
-      tickCount: tickCount,
-      precision: precision,
+      volTips: TipsConfig(
+        label: 'Vol: ',
+        precision: 2,
+        style: TextStyle(
+          fontSize: theme.normalTextSize,
+          color: theme.textColor,
+          overflow: TextOverflow.ellipsis,
+          height: defaultTextHeight,
+        ),
+      ),
+      tipsPadding: theme.tipsPadding,
+      tickCount: defaultSubTickCount,
+      precision: 2,
 
       /// 控制参数
       showYAxisTick: true,
@@ -960,50 +797,41 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
     );
   }
 
-  VolMaIndicator genVolMaIndicator(
-    covariant IFlexiKlineTheme theme, {
-    double? height,
-    EdgeInsets? padding,
-    List<MaParam>? calcParams,
-    EdgeInsets? tipsPadding,
-    double? lineWidth,
-    int precision = 2,
-  }) {
+  VolMaIndicator genVolMaIndicator(covariant IFlexiKlineTheme theme) {
     return VolMaIndicator(
-      height: height ?? theme.subIndicatorHeight,
-      padding: padding ?? theme.subIndicatorPadding,
-      calcParams: calcParams ??
-          [
-            MaParam(
-              count: 5,
-              tips: TipsConfig(
-                label: 'MA5: ',
-                // precision: 2,
-                style: TextStyle(
-                  fontSize: theme.normalTextSize,
-                  color: Colors.orange,
-                  overflow: TextOverflow.ellipsis,
-                  height: defaultTipsTextHeight,
-                ),
-              ),
+      height: theme.subIndicatorHeight,
+      padding: theme.subIndicatorPadding,
+      calcParams: [
+        MaParam(
+          count: 5,
+          tips: TipsConfig(
+            label: 'MA5: ',
+            // precision: 2,
+            style: TextStyle(
+              fontSize: theme.normalTextSize,
+              color: Colors.orange,
+              overflow: TextOverflow.ellipsis,
+              height: defaultTipsTextHeight,
             ),
-            MaParam(
-              count: 10,
-              tips: TipsConfig(
-                label: 'MA10: ',
-                // precision: 2,
-                style: TextStyle(
-                  fontSize: theme.normalTextSize,
-                  color: Colors.blue,
-                  overflow: TextOverflow.ellipsis,
-                  height: defaultTipsTextHeight,
-                ),
-              ),
+          ),
+        ),
+        MaParam(
+          count: 10,
+          tips: TipsConfig(
+            label: 'MA10: ',
+            // precision: 2,
+            style: TextStyle(
+              fontSize: theme.normalTextSize,
+              color: Colors.blue,
+              overflow: TextOverflow.ellipsis,
+              height: defaultTipsTextHeight,
             ),
-          ],
-      tipsPadding: tipsPadding ?? theme.tipsPadding,
-      lineWidth: lineWidth ?? theme.indicatorLineWidth,
-      precision: precision,
+          ),
+        ),
+      ],
+      tipsPadding: theme.tipsPadding,
+      lineWidth: theme.indicatorLineWidth,
+      precision: 2,
     );
   }
 }

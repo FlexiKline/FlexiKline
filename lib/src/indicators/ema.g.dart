@@ -3,6 +3,129 @@
 part of 'ema.dart';
 
 // **************************************************************************
+// CopyWithGenerator
+// **************************************************************************
+
+abstract class _$EMAIndicatorCWProxy {
+  EMAIndicator key(ValueKey<dynamic> key);
+
+  EMAIndicator name(String name);
+
+  EMAIndicator height(double height);
+
+  EMAIndicator padding(EdgeInsets padding);
+
+  EMAIndicator calcParams(List<MaParam> calcParams);
+
+  EMAIndicator tipsPadding(EdgeInsets tipsPadding);
+
+  EMAIndicator lineWidth(double lineWidth);
+
+  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `EMAIndicator(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  ///
+  /// Usage
+  /// ```dart
+  /// EMAIndicator(...).copyWith(id: 12, name: "My name")
+  /// ````
+  EMAIndicator call({
+    ValueKey<dynamic>? key,
+    String? name,
+    double? height,
+    EdgeInsets? padding,
+    List<MaParam>? calcParams,
+    EdgeInsets? tipsPadding,
+    double? lineWidth,
+  });
+}
+
+/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfEMAIndicator.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfEMAIndicator.copyWith.fieldName(...)`
+class _$EMAIndicatorCWProxyImpl implements _$EMAIndicatorCWProxy {
+  const _$EMAIndicatorCWProxyImpl(this._value);
+
+  final EMAIndicator _value;
+
+  @override
+  EMAIndicator key(ValueKey<dynamic> key) => this(key: key);
+
+  @override
+  EMAIndicator name(String name) => this(name: name);
+
+  @override
+  EMAIndicator height(double height) => this(height: height);
+
+  @override
+  EMAIndicator padding(EdgeInsets padding) => this(padding: padding);
+
+  @override
+  EMAIndicator calcParams(List<MaParam> calcParams) =>
+      this(calcParams: calcParams);
+
+  @override
+  EMAIndicator tipsPadding(EdgeInsets tipsPadding) =>
+      this(tipsPadding: tipsPadding);
+
+  @override
+  EMAIndicator lineWidth(double lineWidth) => this(lineWidth: lineWidth);
+
+  @override
+
+  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `EMAIndicator(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  ///
+  /// Usage
+  /// ```dart
+  /// EMAIndicator(...).copyWith(id: 12, name: "My name")
+  /// ````
+  EMAIndicator call({
+    Object? key = const $CopyWithPlaceholder(),
+    Object? name = const $CopyWithPlaceholder(),
+    Object? height = const $CopyWithPlaceholder(),
+    Object? padding = const $CopyWithPlaceholder(),
+    Object? calcParams = const $CopyWithPlaceholder(),
+    Object? tipsPadding = const $CopyWithPlaceholder(),
+    Object? lineWidth = const $CopyWithPlaceholder(),
+  }) {
+    return EMAIndicator(
+      key: key == const $CopyWithPlaceholder() || key == null
+          ? _value.key
+          // ignore: cast_nullable_to_non_nullable
+          : key as ValueKey<dynamic>,
+      name: name == const $CopyWithPlaceholder() || name == null
+          ? _value.name
+          // ignore: cast_nullable_to_non_nullable
+          : name as String,
+      height: height == const $CopyWithPlaceholder() || height == null
+          ? _value.height
+          // ignore: cast_nullable_to_non_nullable
+          : height as double,
+      padding: padding == const $CopyWithPlaceholder() || padding == null
+          ? _value.padding
+          // ignore: cast_nullable_to_non_nullable
+          : padding as EdgeInsets,
+      calcParams:
+          calcParams == const $CopyWithPlaceholder() || calcParams == null
+              ? _value.calcParams
+              // ignore: cast_nullable_to_non_nullable
+              : calcParams as List<MaParam>,
+      tipsPadding:
+          tipsPadding == const $CopyWithPlaceholder() || tipsPadding == null
+              ? _value.tipsPadding
+              // ignore: cast_nullable_to_non_nullable
+              : tipsPadding as EdgeInsets,
+      lineWidth: lineWidth == const $CopyWithPlaceholder() || lineWidth == null
+          ? _value.lineWidth
+          // ignore: cast_nullable_to_non_nullable
+          : lineWidth as double,
+    );
+  }
+}
+
+extension $EMAIndicatorCopyWith on EMAIndicator {
+  /// Returns a callable class that can be used as follows: `instanceOfEMAIndicator.copyWith(...)` or like so:`instanceOfEMAIndicator.copyWith.fieldName(...)`.
+  // ignore: library_private_types_in_public_api
+  _$EMAIndicatorCWProxy get copyWith => _$EMAIndicatorCWProxyImpl(this);
+}
+
+// **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 

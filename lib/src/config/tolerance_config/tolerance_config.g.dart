@@ -9,7 +9,7 @@ part of 'tolerance_config.dart';
 abstract class _$ToleranceConfigCWProxy {
   ToleranceConfig maxDuration(int maxDuration);
 
-  ToleranceConfig inertiaFactor(double inertiaFactor);
+  ToleranceConfig distanceFactor(double distanceFactor);
 
   ToleranceConfig curvestr(String curvestr);
 
@@ -21,7 +21,7 @@ abstract class _$ToleranceConfigCWProxy {
   /// ````
   ToleranceConfig call({
     int? maxDuration,
-    double? inertiaFactor,
+    double? distanceFactor,
     String? curvestr,
   });
 }
@@ -37,8 +37,8 @@ class _$ToleranceConfigCWProxyImpl implements _$ToleranceConfigCWProxy {
       this(maxDuration: maxDuration);
 
   @override
-  ToleranceConfig inertiaFactor(double inertiaFactor) =>
-      this(inertiaFactor: inertiaFactor);
+  ToleranceConfig distanceFactor(double distanceFactor) =>
+      this(distanceFactor: distanceFactor);
 
   @override
   ToleranceConfig curvestr(String curvestr) => this(curvestr: curvestr);
@@ -53,7 +53,7 @@ class _$ToleranceConfigCWProxyImpl implements _$ToleranceConfigCWProxy {
   /// ````
   ToleranceConfig call({
     Object? maxDuration = const $CopyWithPlaceholder(),
-    Object? inertiaFactor = const $CopyWithPlaceholder(),
+    Object? distanceFactor = const $CopyWithPlaceholder(),
     Object? curvestr = const $CopyWithPlaceholder(),
   }) {
     return ToleranceConfig(
@@ -62,11 +62,11 @@ class _$ToleranceConfigCWProxyImpl implements _$ToleranceConfigCWProxy {
               ? _value.maxDuration
               // ignore: cast_nullable_to_non_nullable
               : maxDuration as int,
-      inertiaFactor:
-          inertiaFactor == const $CopyWithPlaceholder() || inertiaFactor == null
-              ? _value.inertiaFactor
-              // ignore: cast_nullable_to_non_nullable
-              : inertiaFactor as double,
+      distanceFactor: distanceFactor == const $CopyWithPlaceholder() ||
+              distanceFactor == null
+          ? _value.distanceFactor
+          // ignore: cast_nullable_to_non_nullable
+          : distanceFactor as double,
       curvestr: curvestr == const $CopyWithPlaceholder() || curvestr == null
           ? _value.curvestr
           // ignore: cast_nullable_to_non_nullable
@@ -88,13 +88,13 @@ extension $ToleranceConfigCopyWith on ToleranceConfig {
 ToleranceConfig _$ToleranceConfigFromJson(Map<String, dynamic> json) =>
     ToleranceConfig(
       maxDuration: (json['maxDuration'] as num?)?.toInt() ?? 1000,
-      inertiaFactor: (json['inertiaFactor'] as num?)?.toDouble() ?? 0.2,
+      distanceFactor: (json['distanceFactor'] as num?)?.toDouble() ?? 0.2,
       curvestr: json['curvestr'] as String? ?? 'decelerate',
     );
 
 Map<String, dynamic> _$ToleranceConfigToJson(ToleranceConfig instance) =>
     <String, dynamic>{
       'maxDuration': instance.maxDuration,
-      'inertiaFactor': instance.inertiaFactor,
+      'distanceFactor': instance.distanceFactor,
       'curvestr': instance.curvestr,
     };

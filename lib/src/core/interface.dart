@@ -74,26 +74,30 @@ mixin GestureHanderImpl implements IGestureHandler {
 
 /// 数据源更新
 abstract interface class IState {
-  /// 切换到[request]请求指定的蜡烛数据
-  /// [request] 标记当前请求
+  /// 切换[req]请求指定的蜡烛数据
+  /// [req] 待切换的[CandleReq]
   /// [useCacheFirst] 优先使用缓存. 注: 如果有缓存数据(说明之前加载过), loading不会展示.
   /// return
-  ///   1. false:代表使用了缓存, 不会展示loading了
-  ///   2. true: 代表已展示loading; 未使用缓存; 且当前KlineData数据被清空(如果有).
-  bool switchKlineData(CandleReq request, {bool useCacheFirst = true});
+  ///   1. true:  代表使用了缓存, [curKlineData]的请求状态为[RequestState.none], 不展示loading
+  ///   2. false: 代表未使用缓存; 且[curKlineData]数据会被清空(如果有).
+  bool switchKlineData(CandleReq req, {bool useCacheFirst = true});
 
   /// 结束加载中状态
   /// [force] 强制结束加载中状态
-  /// [request] 如果与当前[curKlineData]的请求一致且状态非[RequestState.none], 即结束加载中状态
-  ///   否则, 仅改变[request]指定的缓存的[KlineData]请求状态.
-  void stopLoading(CandleReq request, {bool force = false});
+  /// [req] 如果与当前[curKlineData]的请求一致且状态非[RequestState.none], 即结束加载中状态
+  ///   否则, 仅改变[req]指定的缓存的[KlineData]请求状态.
+  void stopLoading(CandleReq req, {bool force = false});
 
-  /// 更新[list]到[request]请求指定的[KlineData]中
-  Future<void> updateKlineData(CandleReq request, List<CandleModel> list);
+  /// 更新[list]到[req]请求指定的[KlineData]中
+  Future<void> updateKlineData(CandleReq req, List<CandleModel> list);
 
-  /// 检查并加载更多蜡烛数据
-  /// [nextPanDistance] 代表数据将要平移的偏移量
-  void checkAndLoadMoreCandles({double? nextPanDistance});
+  /// 当前平移结束(惯性平移之前)时,检查并加载更多蜡烛数据
+  /// [panDistance] 代表数据将要平移的偏移量
+  /// [panDuration] 代表数据将要平移的时长(单们ms)
+  void checkAndLoadMoreCandlesWhenPanEnd({
+    double? panDistance,
+    int? panDuration,
+  });
 
   KlineData get curKlineData;
 
