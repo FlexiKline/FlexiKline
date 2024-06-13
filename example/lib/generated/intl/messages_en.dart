@@ -47,20 +47,35 @@ class MessageLookup extends MessageLookupByLibrary {
         "h24_low": MessageLookupByLibrary.simpleMessage("24h low"),
         "h24_turnover": m0,
         "h24_vol": m1,
+        "indicatorSetting":
+            MessageLookupByLibrary.simpleMessage("Indicator settings"),
         "indicators": MessageLookupByLibrary.simpleMessage("Indicators"),
+        "intervals": MessageLookupByLibrary.simpleMessage("Intervals"),
         "invalidReq": MessageLookupByLibrary.simpleMessage("Invalid request"),
+        "label24HChange": MessageLookupByLibrary.simpleMessage("24H Change"),
+        "labelNameVol": MessageLookupByLibrary.simpleMessage("Name/Vol"),
+        "labelPrice": MessageLookupByLibrary.simpleMessage("Price"),
         "landscape": MessageLookupByLibrary.simpleMessage("Landscape"),
         "lastPrice": MessageLookupByLibrary.simpleMessage("Last price"),
+        "loadFailed": MessageLookupByLibrary.simpleMessage("Load failed!"),
+        "mainChartIndicators":
+            MessageLookupByLibrary.simpleMessage("Main-chart indicators"),
         "more": MessageLookupByLibrary.simpleMessage("More"),
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
         "permissionDenied":
             MessageLookupByLibrary.simpleMessage("Permission denied"),
+        "preferredIntervals":
+            MessageLookupByLibrary.simpleMessage("Preferred intervals"),
         "priceScale":
             MessageLookupByLibrary.simpleMessage("Price scale(y-axis)"),
         "reqMethodForbidden":
             MessageLookupByLibrary.simpleMessage("Request method is forbidden"),
         "responseTimeout":
             MessageLookupByLibrary.simpleMessage("Server response timeout"),
+        "searchTradingPairHint": MessageLookupByLibrary.simpleMessage(
+            "Please enter preferred trading pair"),
+        "selectTradingPair":
+            MessageLookupByLibrary.simpleMessage("Select Trading Pair"),
         "sendTimeout":
             MessageLookupByLibrary.simpleMessage("Client send timeout"),
         "serverDown":
@@ -72,6 +87,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "setting": MessageLookupByLibrary.simpleMessage("Setting"),
         "settingLanguage": MessageLookupByLibrary.simpleMessage("Language"),
         "settingThemeMode": MessageLookupByLibrary.simpleMessage("Theme Mode"),
+        "subChartIndicators":
+            MessageLookupByLibrary.simpleMessage("Sub-chart indicators"),
         "syntaxError":
             MessageLookupByLibrary.simpleMessage("Request syntax error"),
         "themeModeDark": MessageLookupByLibrary.simpleMessage("Dark"),

@@ -26,6 +26,7 @@
   "themeModeSystem": "跟随系统",
   "themeModeLight": "日间模式",
   "themeModeDark": "夜间模式",
+  "loadFailed": "加载失败!",
 
   "tooltipTime": "时间",
   "tooltipOpen": "开盘",
@@ -52,6 +53,17 @@
   "priceScale": "Y轴坐标",
   "countdown": "倒计时",
   "chartHeight": "图表高度",
-  "chartWidth": "图表宽度"
+  "chartWidth": "图表宽度",
+
+  "selectTradingPair": "币种选择",
+  "labelNameVol": "名称/成交量",
+  "labelPrice": "最新价",
+  "label24HChange": "24H涨跌幅",
+  "preferredIntervals": "周期偏好",
+  "intervals": "全部周期", 
+  "mainChartIndicators": "主图指标",
+  "subChartIndicators": "副图指标",
+  "indicatorSetting": "指标设置",
+  "searchTradingPairHint": "请输入交易对"
 
 }

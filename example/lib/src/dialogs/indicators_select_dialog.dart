@@ -21,7 +21,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../providers/kline_controller_state_provider.dart';
 
-class IndicatorSelectDialog extends ConsumerStatefulWidget {
+class IndicatorSelectDialog extends ConsumerWidget {
   static const String dialogTag = "IndicatorSelectDialog";
   const IndicatorSelectDialog({
     super.key,
@@ -31,18 +31,7 @@ class IndicatorSelectDialog extends ConsumerStatefulWidget {
   final FlexiKlineController controller;
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() =>
-      _IndicatorSelectDialogState();
-}
-
-class _IndicatorSelectDialogState extends ConsumerState<IndicatorSelectDialog> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = ref.watch(themeProvider);
     final s = S.of(context);
     return Container(
@@ -59,24 +48,24 @@ class _IndicatorSelectDialogState extends ConsumerState<IndicatorSelectDialog> {
             ),
             SizedBox(height: 20.r),
             Text(
-              '主图指标',
-              style: theme.t1s16w400,
+              s.mainChartIndicators,
+              style: theme.t1s16w500,
             ),
             SizedBox(height: 10.r),
-            _buildMainIndicators(context),
+            _buildMainIndicators(ref),
             SizedBox(height: 20.r),
             Text(
-              '副图指标',
-              style: theme.t1s16w400,
+              s.subChartIndicators,
+              style: theme.t1s16w500,
             ),
             SizedBox(height: 10.r),
-            _buildSubIndicators(context),
+            _buildSubIndicators(ref),
             SizedBox(height: 10.r),
             ListTile(
               contentPadding: EdgeInsets.zero,
               leading: Text(
-                '指标设置',
-                style: theme.t1s16w400,
+                s.indicatorSetting,
+                style: theme.t1s16w500,
               ),
               trailing: Icon(
                 Icons.arrow_forward_ios,
@@ -93,9 +82,9 @@ class _IndicatorSelectDialogState extends ConsumerState<IndicatorSelectDialog> {
     );
   }
 
-  Widget _buildMainIndicators(BuildContext context) {
+  Widget _buildMainIndicators(WidgetRef ref) {
     final theme = ref.read(themeProvider);
-    final klineState = ref.watch(klineStateProvider(widget.controller));
+    final klineState = ref.watch(klineStateProvider(controller));
     return Wrap(
       alignment: WrapAlignment.start,
       spacing: 16.r,
@@ -107,7 +96,7 @@ class _IndicatorSelectDialogState extends ConsumerState<IndicatorSelectDialog> {
           style: theme.outlinedBtnStyle(showOutlined: selected),
           onPressed: () {
             ref
-                .read(klineStateProvider(widget.controller).notifier)
+                .read(klineStateProvider(controller).notifier)
                 .onTapMainIndicator(key);
           },
           child: Text(
@@ -122,9 +111,9 @@ class _IndicatorSelectDialogState extends ConsumerState<IndicatorSelectDialog> {
     );
   }
 
-  Widget _buildSubIndicators(BuildContext context) {
+  Widget _buildSubIndicators(WidgetRef ref) {
     final theme = ref.read(themeProvider);
-    final klineState = ref.watch(klineStateProvider(widget.controller));
+    final klineState = ref.watch(klineStateProvider(controller));
     return Wrap(
       alignment: WrapAlignment.start,
       spacing: 16.r,
@@ -136,7 +125,7 @@ class _IndicatorSelectDialogState extends ConsumerState<IndicatorSelectDialog> {
           style: theme.outlinedBtnStyle(showOutlined: selected),
           onPressed: () {
             ref
-                .read(klineStateProvider(widget.controller).notifier)
+                .read(klineStateProvider(controller).notifier)
                 .onTapSubIndicator(key);
           },
           child: Text(

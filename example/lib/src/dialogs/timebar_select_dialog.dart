@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:example/generated/l10n.dart';
 import 'package:example/src/theme/flexi_theme.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart';
@@ -33,6 +34,7 @@ class TimerBarSelectDialog extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final s = S.of(context);
     final theme = ref.watch(themeProvider);
     final screenWidth = ScreenUtil().screenWidth;
     final timeBarWidth = (screenWidth - 2 * 16.r - 4 * 12.r) / 5;
@@ -45,15 +47,15 @@ class TimerBarSelectDialog extends ConsumerWidget {
           children: [
             SizedBox(height: 10.r),
             Text(
-              '周期偏好',
+              s.preferredIntervals,
               style: theme.t1s20w700,
             ),
             SizedBox(height: 10.r),
             _buildPreferTimeBarList(context, ref, barWidth: timeBarWidth),
             SizedBox(height: 20.r),
             Text(
-              '全部周期',
-              style: theme.t1s16w400,
+              s.intervals,
+              style: theme.t1s20w700,
             ),
             SizedBox(height: 10.r),
             _buildAllTimeBarList(context, ref, barWidth: timeBarWidth),

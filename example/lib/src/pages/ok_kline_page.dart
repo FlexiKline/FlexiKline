@@ -27,7 +27,7 @@ import '../widgets/flexi_kline_indicator_bar.dart';
 import '../widgets/flexi_kline_mark_view.dart';
 import '../widgets/market_ticker_view.dart';
 import '../widgets/flexi_kline_setting_bar.dart';
-import '../widgets/select_symbol_title_view.dart';
+import '../widgets/trading_pair_select_title.dart';
 import 'kline_page_data_update_mixin.dart';
 import 'main_nav_page.dart';
 
@@ -99,7 +99,7 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage>
           },
           child: const Icon(Icons.menu_outlined),
         ),
-        title: SelectSymbolTitleView(
+        title: TradingPairSelectTitle(
           instId: req.instId,
           onChangeTradingPair: onChangeTradingSymbol,
         ),

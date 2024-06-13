@@ -27,6 +27,7 @@
   "themeModeSystem": "System",
   "themeModeLight": "Light",
   "themeModeDark": "Dark",
+  "loadFailed": "Load failed!",
 
   "tooltipTime": "Time",
   "tooltipOpen": "Open",
@@ -53,7 +54,18 @@
   "priceScale": "Price scale(y-axis)",
   "countdown": "Countdown",
   "chartHeight": "Chart Height",
-  "chartWidth": "Chart Width"
+  "chartWidth": "Chart Width",
+
+  "selectTradingPair": "Select Trading Pair",
+  "labelNameVol": "Name/Vol",
+  "labelPrice": "Price",
+  "label24HChange": "24H Change",
+  "preferredIntervals": "Preferred intervals",
+  "intervals": "Intervals", 
+  "mainChartIndicators": "Main-chart indicators",
+  "subChartIndicators": "Sub-chart indicators",
+  "indicatorSetting": "Indicator settings",
+  "searchTradingPairHint": "Please enter preferred trading pair"
 
 
 

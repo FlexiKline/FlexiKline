@@ -320,6 +320,16 @@ class S {
     );
   }
 
+  /// `Load failed!`
+  String get loadFailed {
+    return Intl.message(
+      'Load failed!',
+      name: 'loadFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Time`
   String get tooltipTime {
     return Intl.message(
@@ -555,6 +565,106 @@ class S {
     return Intl.message(
       'Chart Width',
       name: 'chartWidth',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select Trading Pair`
+  String get selectTradingPair {
+    return Intl.message(
+      'Select Trading Pair',
+      name: 'selectTradingPair',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Name/Vol`
+  String get labelNameVol {
+    return Intl.message(
+      'Name/Vol',
+      name: 'labelNameVol',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Price`
+  String get labelPrice {
+    return Intl.message(
+      'Price',
+      name: 'labelPrice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `24H Change`
+  String get label24HChange {
+    return Intl.message(
+      '24H Change',
+      name: 'label24HChange',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Preferred intervals`
+  String get preferredIntervals {
+    return Intl.message(
+      'Preferred intervals',
+      name: 'preferredIntervals',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Intervals`
+  String get intervals {
+    return Intl.message(
+      'Intervals',
+      name: 'intervals',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Main-chart indicators`
+  String get mainChartIndicators {
+    return Intl.message(
+      'Main-chart indicators',
+      name: 'mainChartIndicators',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sub-chart indicators`
+  String get subChartIndicators {
+    return Intl.message(
+      'Sub-chart indicators',
+      name: 'subChartIndicators',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Indicator settings`
+  String get indicatorSetting {
+    return Intl.message(
+      'Indicator settings',
+      name: 'indicatorSetting',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please enter preferred trading pair`
+  String get searchTradingPairHint {
+    return Intl.message(
+      'Please enter preferred trading pair',
+      name: 'searchTradingPairHint',
       desc: '',
       args: [],
     );

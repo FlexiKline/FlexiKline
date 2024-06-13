@@ -39,6 +39,7 @@ abstract class FKTheme {
   Color get long => const Color(0xFF33BD65);
   Color get short => const Color(0xFFE84E74);
   Color get white => Colors.white;
+  Color get error => short;
 
   late Color pageBg;
   late Color lightBg;
@@ -50,6 +51,7 @@ abstract class FKTheme {
   late Color dividerLine;
   late Color borderLine;
   late Color borderLight;
+  late Color disable;
 
   late Color t1;
   late Color t2;
@@ -91,6 +93,8 @@ class LightFKTheme extends FKTheme {
   Color get borderLine => const Color(0xFFE3E6E9);
   @override
   Color get borderLight => const Color(0xFF000000);
+  @override
+  Color get disable => const Color(0xFF505050);
 
   @override
   Color get t1 => const Color(0xFF000000);
@@ -127,6 +131,8 @@ class DarkFKTheme extends FKTheme {
   Color get borderLine => const Color(0xFF2F2F2F);
   @override
   Color get borderLight => const Color(0xFFFFFFFF);
+  @override
+  Color get disable => const Color(0xFF505050);
 
   @override
   Color get t1 => const Color(0xFFFFFFFF);

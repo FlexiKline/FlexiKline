@@ -127,7 +127,7 @@ class _FlexiKlineSettingBarState extends ConsumerState<FlexiKlineSettingBar> {
               final showMore = value == null || isPreferTimeBar(value);
               return TextArrowButton(
                 onPressed: onTapTimeBarSetting,
-                text: showMore ? '更多' : value.bar,
+                text: showMore ? s.more : value.bar,
                 iconStatus: timeBarSettingBtnStatus,
                 background: showMore ? null : theme.markBg,
               );

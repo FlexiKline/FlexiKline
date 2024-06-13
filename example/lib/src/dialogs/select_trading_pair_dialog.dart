@@ -14,33 +14,41 @@
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_refresh/easy_refresh.dart';
-import 'package:example/src/models/export.dart';
+import 'package:example/generated/l10n.dart';
 import 'package:example/src/theme/flexi_theme.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../models/export.dart';
 import '../providers/instruments_provider.dart';
 import '../providers/market_ticker_provider.dart';
+import '../widgets/flexi_text_field.dart';
 
-class SelectSymbolDialog extends ConsumerWidget {
-  static const String dialogTag = "SelectSymbolDialog";
-  const SelectSymbolDialog({
+class SelectTradingPairDialog extends HookConsumerWidget {
+  static const String dialogTag = "SelectTradingPairDialog";
+  const SelectTradingPairDialog({
     super.key,
     this.long,
     this.short,
+    this.instId,
+    this.instType = 'SPOT',
   });
 
+  final String? instId;
   final Color? long;
   final Color? short;
+  final String instType;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final s = S.of(context);
     final theme = ref.watch(themeProvider);
-    final marketTickerList = ref.watch(marketTickerListProvider('SPOT'));
-    final instrumentsMgr = ref.watch(instrumentsMgrProvider);
+    final mkListProvider = ref.watch(marketTickerListProvider(instType));
+    final textController = useTextEditingController();
     return Container(
       width: ScreenUtil().screenWidth,
       height: ScreenUtil().screenHeight * 0.75,
@@ -56,8 +64,52 @@ class SelectSymbolDialog extends ConsumerWidget {
               vertical: 8.r,
             ),
             child: Text(
-              '币种选择',
+              s.selectTradingPair,
               style: theme.t1s20w700,
+            ),
+          ),
+          SizedBox(height: 8.r),
+          FlexiTextField(
+            margin: EdgeInsetsDirectional.symmetric(horizontal: 16.r),
+            contentPadding: EdgeInsetsDirectional.symmetric(
+              horizontal: 12.r,
+              vertical: 8.r,
+            ),
+            bgColor: Colors.transparent,
+            defaultBorderRadius: 20.r,
+            controller: textController,
+            hintText: s.searchTradingPairHint,
+            keyboardType: TextInputType.text,
+            maxLines: 1,
+            prefixIcon: Padding(
+              padding: EdgeInsetsDirectional.symmetric(
+                horizontal: 12.r,
+                vertical: 4.r,
+              ),
+              child: const Icon(Icons.search_outlined),
+            ),
+            prefixIconConstraints: BoxConstraints(
+              maxHeight: 32.r,
+              maxWidth: 32.r,
+            ),
+            suffixIcon: GestureDetector(
+              onTap: () {
+                textController.clear();
+                FocusManager.instance.primaryFocus?.unfocus();
+              },
+              child: Padding(
+                padding: EdgeInsetsDirectional.symmetric(
+                  horizontal: 12.r,
+                  vertical: 4.r,
+                ),
+                child: const Icon(
+                  Icons.cancel_rounded,
+                ),
+              ),
+            ),
+            suffixIconConstraints: BoxConstraints(
+              maxHeight: 32.r,
+              maxWidth: 64.r,
             ),
           ),
           SizedBox(height: 8.r),
@@ -65,21 +117,21 @@ class SelectSymbolDialog extends ConsumerWidget {
             children: [
               SizedBox(width: 56.r),
               Text(
-                '名称/成交量',
-                style: theme.t1s14w500,
+                s.labelNameVol,
+                style: theme.t1s12w400,
               ),
               const Expanded(child: SizedBox.shrink()),
               Text(
-                '最新价',
-                style: theme.t1s14w500,
+                s.lastPrice,
+                style: theme.t1s12w400,
               ),
               Container(
                 width: 80.r,
                 margin: EdgeInsetsDirectional.only(start: 12.r),
                 alignment: AlignmentDirectional.center,
                 child: Text(
-                  '涨跌幅',
-                  style: theme.t1s14w500,
+                  s.label24HChange,
+                  style: theme.t1s12w400,
                 ),
               ),
               SizedBox(width: 16.r),
@@ -90,9 +142,9 @@ class SelectSymbolDialog extends ConsumerWidget {
           Expanded(
             child: EasyRefresh(
               onRefresh: () => ref.refresh(
-                marketTickerListProvider('SPOT').future,
+                marketTickerListProvider(instType).future,
               ),
-              child: marketTickerList.when(
+              child: mkListProvider.when(
                 loading: () => Center(
                   child: CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation<Color>(theme.t1),
@@ -101,37 +153,58 @@ class SelectSymbolDialog extends ConsumerWidget {
                 error: (error, stackTrace) => Container(
                   alignment: AlignmentDirectional.center,
                   child: Text(
-                    '加载失败!!!',
+                    s.loadFailed,
                     style: theme.t3s18w500,
                   ),
                 ),
-                data: (data) => ListView.separated(
-                  padding: EdgeInsetsDirectional.zero,
-                  itemCount: data.length,
-                  itemBuilder: (context, index) {
-                    final item = data[index];
-                    return InkWell(
-                      onTap: () {
-                        SmartDialog.dismiss(tag: dialogTag, result: item);
-                      },
-                      child: _buildMarketTickerItemView(
-                        context,
-                        ref,
-                        ticker: item,
-                        instrument: instrumentsMgr[item.instId],
-                      ),
-                    );
+                data: (data) => ValueListenableBuilder(
+                  valueListenable: textController,
+                  builder: (context, value, child) {
+                    final searchTxt = value.text.trim().toUpperCase();
+                    List<MarketTicker> list = data;
+                    if (searchTxt.isNotEmpty) {
+                      list = data
+                          .where((e) => e.instId.contains(searchTxt))
+                          .toList();
+                    }
+                    return _buildTradingPairListView(ref, list);
                   },
-                  separatorBuilder: (context, index) => Container(
-                    key: ValueKey(index),
-                    height: theme.pixel,
-                    color: theme.dividerLine,
-                  ),
                 ),
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildTradingPairListView(WidgetRef ref, List<MarketTicker> list) {
+    final theme = ref.watch(themeProvider);
+    final instrumentsMgr = ref.watch(instrumentsMgrProvider);
+    return ListView.separated(
+      padding: EdgeInsetsDirectional.zero,
+      itemCount: list.length,
+      itemBuilder: (context, index) {
+        final item = list[index];
+        return InkWell(
+          onTap: () {
+            SmartDialog.dismiss(
+              tag: SelectTradingPairDialog.dialogTag,
+              result: item.instId == instId ? null : item,
+            );
+          },
+          child: _buildMarketTickerItemView(
+            context,
+            ref,
+            ticker: item,
+            instrument: instrumentsMgr[item.instId],
+          ),
+        );
+      },
+      separatorBuilder: (context, index) => Container(
+        key: ValueKey(index),
+        height: theme.pixel,
+        color: theme.dividerLine,
       ),
     );
   }
@@ -145,6 +218,7 @@ class SelectSymbolDialog extends ConsumerWidget {
     final theme = ref.watch(themeProvider);
     return Container(
       key: ValueKey(ticker.instId),
+      color: ticker.instId == instId ? theme.cardBg : null,
       padding: EdgeInsetsDirectional.symmetric(
         horizontal: 16.r,
         vertical: 10.r,

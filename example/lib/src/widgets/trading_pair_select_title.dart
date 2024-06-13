@@ -17,11 +17,11 @@ import 'package:example/src/theme/flexi_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../dialogs/select_symbol_dialog.dart';
+import '../dialogs/select_trading_pair_dialog.dart';
 import '../utils/dialog_manager.dart';
 
-class SelectSymbolTitleView extends ConsumerStatefulWidget {
-  const SelectSymbolTitleView({
+class TradingPairSelectTitle extends ConsumerStatefulWidget {
+  const TradingPairSelectTitle({
     super.key,
     required this.instId,
     this.onChangeTradingPair,
@@ -39,7 +39,8 @@ class SelectSymbolTitleView extends ConsumerStatefulWidget {
       _SelectSymbolTitleViewState();
 }
 
-class _SelectSymbolTitleViewState extends ConsumerState<SelectSymbolTitleView> {
+class _SelectSymbolTitleViewState
+    extends ConsumerState<TradingPairSelectTitle> {
   bool iconStatus = false;
   @override
   void initState() {
@@ -51,10 +52,11 @@ class _SelectSymbolTitleViewState extends ConsumerState<SelectSymbolTitleView> {
       iconStatus = true;
     });
     final result = await DialogManager().showBottomDialog(
-      dialogTag: SelectSymbolDialog.dialogTag,
-      builder: (context) => SelectSymbolDialog(
+      dialogTag: SelectTradingPairDialog.dialogTag,
+      builder: (context) => SelectTradingPairDialog(
         long: widget.long,
         short: widget.short,
+        instId: widget.instId,
       ),
     );
     if (result != null) {
