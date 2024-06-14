@@ -390,8 +390,8 @@ mixin StateBinding
   }
 
   /// 当前平移结束(惯性平移之前)时,检查并加载更多蜡烛数据
-  /// [panDistance] 代表数据将要平移的距离
-  /// [panDuration] 代表数据将要平移的时长(单们ms)
+  /// [panDistance] 代表数据将要惯性平移的距离
+  /// [panDuration] 代表数据将要惯性平移的时长(单们ms)
   /// [loadMoreDistanceOffset]的计算规则: [gestureConfig.loadMoreWhenNoEnoughDistance] 优先 [gestureConfig.loadMoreWhenNoEnoughCandles]
   /// 以[paintDxOffset]为基础继续平移[panDistance],
   ///   1. 当大于最大平移宽度[maxPaintDxOffset]减去[loadMoreDistanceOffset]的距离时, 请求状态为[RequestState.loadMore], 提前加载更多历史数据, 此时不展示loading.

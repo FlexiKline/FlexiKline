@@ -518,10 +518,10 @@ class CandlePaintObject<T extends CandleIndicator>
       /// 绘制最后价标记
       canvas.drawTextArea(
         offset: Offset(
-          rdx - last.spacing,
+          rdx + _latestTextOffset - last.spacing,
           dy - last.text.areaHeight / 2, // 居中
         ),
-        drawDirection: DrawDirection.center,
+        drawDirection: DrawDirection.rtl,
         drawableRect: drawableRect,
         text: '$text ▸', // ➤➤▹►▸▶︎≻
         textConfig: last.text,

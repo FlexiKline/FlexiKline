@@ -85,29 +85,32 @@ mixin CrossBinding
   Offset? get offset => _offset;
   set offset(Offset? val) {
     if (val != null) {
-      _offset = correctCrossOffset(val);
+      _offset = _correctCrossOffset(val);
     } else {
       _offset = null;
     }
   }
 
   /// 矫正Cross
-  Offset? correctCrossOffset(Offset offset) {
-    if (offset.isInfinite) return null;
+  Offset? _correctCrossOffset(Offset val) {
+    if (val.isInfinite) return null;
 
-    // X轴按蜡烛线移动.
-    offset = offset.clamp(canvasRect);
-    final diff = (startCandleDx - offset.dx) % candleActualWidth;
-    final dx = offset.dx + diff - candleWidthHalf;
-    return Offset(dx, offset.dy);
+    // Horizontal轴按蜡烛线移动.
+    val = val.clamp(canvasRect);
+    final diff = startCandleDx - val.dx;
+    if (crossConfig.moveByCandleInBlank && diff < 0) return val;
+    return Offset(
+      val.dx + diff % candleActualWidth - candleWidthHalf,
+      val.dy,
+    );
 
-    // 当超出边界时, X轴平滑移动.
-    // if (canvasRect.contains(offset)) {
-    //   final diff = (startCandleDx - offset.dx) % candleActualWidth;
-    //   final dx = offset.dx + diff - candleWidthHalf;
-    //   return Offset(dx, offset.dy);
+    // 当超出边界时, 校正到边界.
+    // if (canvasRect.contains(val)) {
+    //   final diff = (startCandleDx - val.dx) % candleActualWidth;
+    //   final dx = val.dx + diff - candleWidthHalf;
+    //   return Offset(dx, val.dy);
     // } else {
-    //   return offset.clamp(canvasRect);
+    //   return val.clamp(canvasRect);
     // }
   }
 

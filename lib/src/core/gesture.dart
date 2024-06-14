@@ -109,6 +109,7 @@ mixin GestureBinding on KlineBindingBase implements IGestureEvent, IState {
       );
       handleMove(_panScaleData!);
     } else if (_panScaleData!.isScale) {
+      logd("onScaleUpdate scale details:$details");
       final delta = details.scale - _panScaleData!.scale;
       // TODO: 待优化
       if (delta.abs() > 0.001) {

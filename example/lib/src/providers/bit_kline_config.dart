@@ -198,9 +198,9 @@ class BitFlexiKlineConfiguration extends BaseFlexiKlineThemeConfiguration {
   }
 
   @override
-  TimeIndicator genTimeIndicator(BaseBitFlexiKlineTheme theme) {
-    return super.genTimeIndicator(theme).copyWith(
-          position: DrawPosition.bottom,
+  CrossConfig genCrossConfig(covariant IFlexiKlineTheme theme) {
+    return super.genCrossConfig(theme).copyWith(
+          moveByCandleInBlank: true,
         );
   }
 
@@ -208,6 +208,13 @@ class BitFlexiKlineConfiguration extends BaseFlexiKlineThemeConfiguration {
   GestureConfig genGestureConfig(BaseBitFlexiKlineTheme theme) {
     return super.genGestureConfig(theme).copyWith(
           tolerance: ToleranceConfig(distanceFactor: 0.5),
+        );
+  }
+
+  @override
+  TimeIndicator genTimeIndicator(BaseBitFlexiKlineTheme theme) {
+    return super.genTimeIndicator(theme).copyWith(
+          position: DrawPosition.bottom,
         );
   }
 }

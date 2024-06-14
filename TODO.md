@@ -27,10 +27,12 @@ v0.4.0
 
 v0.5.0
 - [ ] 测试start和end对调性能影响.
-- [ ] 测试蜡烛数据精度大于16的情况. 考虑CandleMode Decimal直接用BagNum替换.
+- [ ] 测试蜡烛数据超出double类型精度, 使用ComputeMode.accurate模式. 考虑CandleMode Decimal直接用BagNum替换.
 - [ ] 支持横屏.
 - [ ] 缩放优化.
 - [ ] 增加副图指标.
+- [ ] 指标增删接口优化.
+- [ ] 自定义指标与替换内置指标.
 - [ ] 文档撰写v1.
 - [ ] 第一版: 1. 发布到pub; 2. github开源
 

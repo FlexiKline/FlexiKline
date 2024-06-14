@@ -402,7 +402,7 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
       ),
       last: MarkConfig(
         show: true,
-        spacing: 100 * theme.scale,
+        spacing: 1 * theme.scale,
         line: LineConfig(
           type: LineType.dashed,
           color: theme.priceMarkLine,

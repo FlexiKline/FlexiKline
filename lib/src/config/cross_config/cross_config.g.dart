@@ -19,6 +19,8 @@ abstract class _$CrossConfigCWProxy {
 
   CrossConfig showLatestTipsInBlank(bool showLatestTipsInBlank);
 
+  CrossConfig moveByCandleInBlank(bool moveByCandleInBlank);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `CrossConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -32,6 +34,7 @@ abstract class _$CrossConfigCWProxy {
     TextAreaConfig? tickText,
     double? spacing,
     bool? showLatestTipsInBlank,
+    bool? moveByCandleInBlank,
   });
 }
 
@@ -61,6 +64,10 @@ class _$CrossConfigCWProxyImpl implements _$CrossConfigCWProxy {
       this(showLatestTipsInBlank: showLatestTipsInBlank);
 
   @override
+  CrossConfig moveByCandleInBlank(bool moveByCandleInBlank) =>
+      this(moveByCandleInBlank: moveByCandleInBlank);
+
+  @override
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `CrossConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -75,6 +82,7 @@ class _$CrossConfigCWProxyImpl implements _$CrossConfigCWProxy {
     Object? tickText = const $CopyWithPlaceholder(),
     Object? spacing = const $CopyWithPlaceholder(),
     Object? showLatestTipsInBlank = const $CopyWithPlaceholder(),
+    Object? moveByCandleInBlank = const $CopyWithPlaceholder(),
   }) {
     return CrossConfig(
       enable: enable == const $CopyWithPlaceholder() || enable == null
@@ -103,6 +111,12 @@ class _$CrossConfigCWProxyImpl implements _$CrossConfigCWProxy {
               ? _value.showLatestTipsInBlank
               // ignore: cast_nullable_to_non_nullable
               : showLatestTipsInBlank as bool,
+      moveByCandleInBlank:
+          moveByCandleInBlank == const $CopyWithPlaceholder() ||
+                  moveByCandleInBlank == null
+              ? _value.moveByCandleInBlank
+              // ignore: cast_nullable_to_non_nullable
+              : moveByCandleInBlank as bool,
     );
   }
 }
@@ -196,6 +210,7 @@ CrossConfig _$CrossConfigFromJson(Map<String, dynamic> json) => CrossConfig(
           TextAreaConfig.fromJson(json['tickText'] as Map<String, dynamic>),
       spacing: (json['spacing'] as num).toDouble(),
       showLatestTipsInBlank: json['showLatestTipsInBlank'] as bool? ?? true,
+      moveByCandleInBlank: json['moveByCandleInBlank'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$CrossConfigToJson(CrossConfig instance) =>
@@ -206,6 +221,7 @@ Map<String, dynamic> _$CrossConfigToJson(CrossConfig instance) =>
       'tickText': instance.tickText.toJson(),
       'spacing': instance.spacing,
       'showLatestTipsInBlank': instance.showLatestTipsInBlank,
+      'moveByCandleInBlank': instance.moveByCandleInBlank,
     };
 
 CrossPointConfig _$CrossPointConfigFromJson(Map<String, dynamic> json) =>

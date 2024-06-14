@@ -92,8 +92,8 @@ abstract interface class IState {
   Future<void> updateKlineData(CandleReq req, List<CandleModel> list);
 
   /// 当前平移结束(惯性平移之前)时,检查并加载更多蜡烛数据
-  /// [panDistance] 代表数据将要平移的偏移量
-  /// [panDuration] 代表数据将要平移的时长(单们ms)
+  /// [panDistance] 代表数据将要惯性平移的偏移量
+  /// [panDuration] 代表数据将要惯性平移的时长(单们ms)
   void checkAndLoadMoreCandlesWhenPanEnd({
     double? panDistance,
     int? panDuration,
@@ -205,8 +205,6 @@ abstract interface class IChart {
 abstract interface class ICross {
   Listenable get repaintCross;
 
-  // CrossConfig get crossConfig;
-
   void paintCross(Canvas canvas, Size size);
 
   void markRepaintCross();
@@ -219,6 +217,5 @@ abstract interface class ICross {
 }
 
 abstract interface class IGrid {
-  // GridConfig get gridConfig;
   void markRepaintGrid();
 }

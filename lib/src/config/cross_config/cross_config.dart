@@ -31,16 +31,22 @@ class CrossConfig {
     required this.tickText,
     required this.spacing,
     this.showLatestTipsInBlank = true,
+    this.moveByCandleInBlank = false,
   });
 
   final bool enable;
   final LineConfig crosshair;
   final CrossPointConfig point;
   final TextAreaConfig tickText;
+
+  /// onCross时, 刻度[tickText]与绘制边界的间距.
   final double spacing;
 
   /// onCross时, 当移动到空白区域时, Tips区域是否展示最新的蜡烛的Tips数据.
   bool showLatestTipsInBlank = true;
+
+  ///  onCross时, 当移动到空白区域时, 是否继续按蜡烛宽度移动.
+  bool moveByCandleInBlank = false;
 
   Paint get crosshairPaint => Paint()
     ..color = crosshair.color

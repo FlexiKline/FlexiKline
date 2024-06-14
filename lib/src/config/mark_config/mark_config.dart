@@ -43,7 +43,8 @@ class MarkConfig {
   final bool show;
   // 间距.
   // 1. 在Candle图中high和low价钱标记中, 指line和text之间的间距.
-  // 2. 在Candle图中latest和countDown标记中,指其与屏幕边界之间的间距.
+  // 2. 在Candle图中latest和countDown标记中, 指与其屏幕边界之间的间距.
+  // 3. 在Candle图中last(最后价)配置中, 指与latest左边界之间的间距.
   final double spacing;
   final LineConfig line;
   final TextAreaConfig text;
