@@ -1,7 +1,7 @@
 name: example
 description: "Example App for a flexible Kline package project."
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
-version: 1.0.4
+version: 1.0.5
 
 environment:
   sdk: ">=3.3.0 <4.0.0"

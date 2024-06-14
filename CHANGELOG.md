@@ -1,3 +1,12 @@
+## 0.4.0
+* Theme switching implementation.
+* Configuration framework optimization.
+* Data loading interface encapsulation.
+* Candle data merging algorithm optimization.
+* Indicator calculation performance optimization.
+* Gesture operation optimization.
+* Flutter minimum supported version
+
 ## 0.3.0
 * Configuration framework implementation
 * Optimization of metric data calculation
