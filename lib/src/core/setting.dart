@@ -143,7 +143,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
   }
 
   /// 蜡烛间距  // TODO: 待优化
-  double get candleSpacing => settingConfig.candleSpacing ?? candleWidth / 7;
+  double get candleSpacing => settingConfig.candleSpacing;
 
   /// 单根蜡烛所占据实际宽度
   double get candleActualWidth => candleWidth + candleSpacing;

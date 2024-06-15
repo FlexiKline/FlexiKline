@@ -14,8 +14,10 @@
 
 export 'candle_model/candle_model.dart';
 export 'candle_req/candle_req.dart';
+export 'tooltip_info/tooltip_info.dart';
+
+// 内置数据类型
 export 'gesture_data.dart';
-export 'tooltip_info.dart';
 export 'minmax.dart';
 export 'bag_num.dart';
 export 'range.dart';
