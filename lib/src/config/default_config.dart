@@ -202,6 +202,8 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
       tolerance: ToleranceConfig(),
       loadMoreWhenNoEnoughDistance: null,
       loadMoreWhenNoEnoughCandles: 60,
+      scalePosition: ScalePosition.auto,
+      scaleSpeed: 10,
     );
   }
 
@@ -236,6 +238,7 @@ abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
     int subChartMaxCount = defaultSubChartMaxCount,
   }) {
     return SettingConfig(
+      pixel: theme.pixel,
       textColor: textColor ?? theme.textColor,
       longColor: longColor ?? theme.long,
       shortColor: shortColor ?? theme.short,

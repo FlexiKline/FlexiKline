@@ -22,6 +22,15 @@ enum DrawPosition {
   bottom,
 }
 
+/// 缩放位置
+/// [auto] 会根据当前绽放开始时, 所有焦点位置, 将绘制区域宽度三等分, 从而自动决定缩放位置.
+enum ScalePosition {
+  auto,
+  left,
+  middle,
+  right,
+}
+
 enum IndicatorType {
   main('MAIN'),
   time('Time'),

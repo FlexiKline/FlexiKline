@@ -14,6 +14,10 @@ abstract class _$GestureConfigCWProxy {
 
   GestureConfig loadMoreWhenNoEnoughCandles(int loadMoreWhenNoEnoughCandles);
 
+  GestureConfig scalePosition(ScalePosition scalePosition);
+
+  GestureConfig scaleSpeed(double scaleSpeed);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GestureConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -24,6 +28,8 @@ abstract class _$GestureConfigCWProxy {
     ToleranceConfig? tolerance,
     double? loadMoreWhenNoEnoughDistance,
     int? loadMoreWhenNoEnoughCandles,
+    ScalePosition? scalePosition,
+    double? scaleSpeed,
   });
 }
 
@@ -47,6 +53,13 @@ class _$GestureConfigCWProxyImpl implements _$GestureConfigCWProxy {
       this(loadMoreWhenNoEnoughCandles: loadMoreWhenNoEnoughCandles);
 
   @override
+  GestureConfig scalePosition(ScalePosition scalePosition) =>
+      this(scalePosition: scalePosition);
+
+  @override
+  GestureConfig scaleSpeed(double scaleSpeed) => this(scaleSpeed: scaleSpeed);
+
+  @override
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GestureConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -58,6 +71,8 @@ class _$GestureConfigCWProxyImpl implements _$GestureConfigCWProxy {
     Object? tolerance = const $CopyWithPlaceholder(),
     Object? loadMoreWhenNoEnoughDistance = const $CopyWithPlaceholder(),
     Object? loadMoreWhenNoEnoughCandles = const $CopyWithPlaceholder(),
+    Object? scalePosition = const $CopyWithPlaceholder(),
+    Object? scaleSpeed = const $CopyWithPlaceholder(),
   }) {
     return GestureConfig(
       tolerance: tolerance == const $CopyWithPlaceholder()
@@ -75,6 +90,16 @@ class _$GestureConfigCWProxyImpl implements _$GestureConfigCWProxy {
               ? _value.loadMoreWhenNoEnoughCandles
               // ignore: cast_nullable_to_non_nullable
               : loadMoreWhenNoEnoughCandles as int,
+      scalePosition:
+          scalePosition == const $CopyWithPlaceholder() || scalePosition == null
+              ? _value.scalePosition
+              // ignore: cast_nullable_to_non_nullable
+              : scalePosition as ScalePosition,
+      scaleSpeed:
+          scaleSpeed == const $CopyWithPlaceholder() || scaleSpeed == null
+              ? _value.scaleSpeed
+              // ignore: cast_nullable_to_non_nullable
+              : scaleSpeed as double,
     );
   }
 }
@@ -98,6 +123,11 @@ GestureConfig _$GestureConfigFromJson(Map<String, dynamic> json) =>
           (json['loadMoreWhenNoEnoughDistance'] as num?)?.toDouble(),
       loadMoreWhenNoEnoughCandles:
           (json['loadMoreWhenNoEnoughCandles'] as num?)?.toInt() ?? 60,
+      scalePosition: json['scalePosition'] == null
+          ? ScalePosition.auto
+          : const ScalePositionConverter()
+              .fromJson(json['scalePosition'] as String),
+      scaleSpeed: (json['scaleSpeed'] as num?)?.toDouble() ?? 10,
     );
 
 Map<String, dynamic> _$GestureConfigToJson(GestureConfig instance) {
@@ -114,5 +144,8 @@ Map<String, dynamic> _$GestureConfigToJson(GestureConfig instance) {
   writeNotNull(
       'loadMoreWhenNoEnoughDistance', instance.loadMoreWhenNoEnoughDistance);
   val['loadMoreWhenNoEnoughCandles'] = instance.loadMoreWhenNoEnoughCandles;
+  val['scalePosition'] =
+      const ScalePositionConverter().toJson(instance.scalePosition);
+  val['scaleSpeed'] = instance.scaleSpeed;
   return val;
 }

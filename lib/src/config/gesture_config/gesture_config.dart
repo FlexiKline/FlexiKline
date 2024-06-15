@@ -14,6 +14,7 @@
 
 import 'package:copy_with_extension/copy_with_extension.dart';
 
+import '../../framework/common.dart';
 import '../../framework/serializers.dart';
 import '../tolerance_config/tolerance_config.dart';
 
@@ -21,7 +22,7 @@ part 'gesture_config.g.dart';
 
 /// GestureConfig 手势平移相关配置
 /// [tolerance] 代表手势平移惯性动画的容忍参数
-/// [loadMoreWhenNoEnoughDistance] 优先于[loadMoreWhenNoEnoughCandles].
+/// [loadMoreWhenNoEnoughDistance] 当滑动时, 还剩此距离时, 触发提前LoadMore蜡烛数据, 其优先于[loadMoreWhenNoEnoughCandles].
 /// [loadMoreWhenNoEnoughCandles] 60: 按单根蜡烛宽度默认值计算, 代表还剩一屏半时, 触发LoadMore.
 @CopyWith()
 @FlexiConfigSerializable
@@ -30,7 +31,10 @@ class GestureConfig {
     ToleranceConfig? tolerance,
     this.loadMoreWhenNoEnoughDistance,
     this.loadMoreWhenNoEnoughCandles = 60,
-  }) : tolerance = tolerance ?? ToleranceConfig();
+    this.scalePosition = ScalePosition.auto,
+    double scaleSpeed = 10,
+  })  : tolerance = tolerance ?? ToleranceConfig(),
+        scaleSpeed = scaleSpeed.clamp(1, 30);
 
   /// 手势平移限制参数
   final ToleranceConfig tolerance;
@@ -40,6 +44,12 @@ class GestureConfig {
 
   /// 当没有足够平移的蜡烛时, 加载更多.
   final int loadMoreWhenNoEnoughCandles;
+
+  /// 缩放操作位置
+  final ScalePosition scalePosition;
+
+  /// 缩放速度. 取值范围[1~30], 建议10.
+  final double scaleSpeed;
 
   factory GestureConfig.fromJson(Map<String, dynamic> json) =>
       _$GestureConfigFromJson(json);

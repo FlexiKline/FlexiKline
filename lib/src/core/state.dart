@@ -20,6 +20,7 @@ import 'package:flutter/scheduler.dart';
 import '../constant.dart';
 import '../data/export.dart';
 import '../extension/export.dart';
+import '../framework/common.dart';
 import '../model/export.dart';
 import 'binding_base.dart';
 import 'interface.dart';
@@ -467,20 +468,53 @@ mixin StateBinding
     super.handleScale(data);
     if (!data.scaled) return;
 
-    final index = offsetToIndex(data.offset);
-    final dxGrowth = data.scaleDelta * 10;
-    final newWidth = (candleWidth + dxGrowth).clamp(1.0, candleMaxWidth);
-    final newDxOffset = clampPaintDxOffset(
-      paintDxOffset + dxGrowth * index,
+    if (data.scale > 1 && candleWidth >= candleMaxWidth) return;
+    if (data.scale < 1 && candleWidth <= settingConfig.pixel) return;
+
+    final dxGrowth = data.scaleDelta * gestureConfig.scaleSpeed;
+    double newWidth = (candleWidth + dxGrowth).clamp(
+      settingConfig.pixel,
+      candleMaxWidth,
     );
-    logd(
-      '>scale growth:$dxGrowth candleWidth:$candleWidth > newWidth:$newWidth, newDxOffset:$newDxOffset',
-    );
-    if (newWidth != candleWidth || newDxOffset != paintDxOffset) {
-      candleWidth = newWidth;
-      paintDxOffset = newDxOffset;
-      markRepaintChart();
+
+    if (newWidth == candleWidth) return;
+    final scaleFactor = (newWidth + candleSpacing) / candleActualWidth;
+    // logd('handleScale candleWidth:$candleWidth>$newWidth; factor:$scaleFactor');
+
+    /// 更新蜡烛宽度
+    candleWidth = newWidth;
+
+    double newDxOffset;
+    switch (data.initPosition) {
+      case ScalePosition.right:
+        if (paintDxOffset <= 0) {
+          newDxOffset = paintDxOffset; // 固定右侧空白
+        } else {
+          newDxOffset = paintDxOffset * scaleFactor;
+        }
+        break;
+      case ScalePosition.left:
+        final chartWidth = mainChartWidth;
+        newDxOffset = (chartWidth + paintDxOffset) * scaleFactor - chartWidth;
+        break;
+      case ScalePosition.auto:
+      case ScalePosition.middle:
+        if (paintDxOffset <= 0) {
+          final dxRight = mainChartWidth - data.offset.dx;
+          newDxOffset = (dxRight + paintDxOffset) * scaleFactor - dxRight;
+        } else {
+          final widthHalf = mainChartWidthHalf;
+          newDxOffset = (widthHalf + paintDxOffset) * scaleFactor - widthHalf;
+        }
+        break;
     }
+
+    if (newDxOffset != paintDxOffset) {
+      // logd('handleScale paintDxOffset:$paintDxOffset > $newDxOffset');
+      paintDxOffset = newDxOffset;
+    }
+
+    markRepaintChart();
   }
 
   @override

@@ -16,6 +16,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../extension/export.dart';
+import '../framework/common.dart';
 import '../model/export.dart';
 import 'binding_base.dart';
 import 'interface.dart';
@@ -82,15 +83,32 @@ mixin GestureBinding on KlineBindingBase implements IGestureEvent, IState {
   ///
   @override
   void onScaleStart(ScaleStartDetails details) {
-    if (_panScaleData?.isEnd == false) {
+    if (_panScaleData != null && _panScaleData!.isEnd == false) {
       // 如果上次平移或缩放, 还没有结束, 不允许开始.
       return;
     }
-    logd("onScaleStart localFocalPoint:${details.localFocalPoint} >>>>");
 
-    if (details.pointerCount > 1) {
-      _panScaleData = GestureData.scale(details.localFocalPoint);
+    if (_panScaleData?.isScale == true || details.pointerCount > 1) {
+      ScalePosition position =
+          _panScaleData?.initPosition ?? gestureConfig.scalePosition;
+      if (position == ScalePosition.auto) {
+        final third = canvasRect.width / 3;
+        final dx = details.localFocalPoint.dx;
+        if (dx < third) {
+          position = ScalePosition.left;
+        } else if (dx > (third + third)) {
+          position = ScalePosition.right;
+        } else {
+          position = ScalePosition.middle;
+        }
+      }
+      logd("onScaleStart scale $position focal:${details.localFocalPoint}");
+      _panScaleData = GestureData.scale(
+        details.localFocalPoint,
+        position: position,
+      );
     } else {
+      logd("onScaleStart pan focal:${details.localFocalPoint}");
       _panScaleData = GestureData.pan(details.localFocalPoint);
     }
   }
@@ -109,14 +127,13 @@ mixin GestureBinding on KlineBindingBase implements IGestureEvent, IState {
       );
       handleMove(_panScaleData!);
     } else if (_panScaleData!.isScale) {
-      logd("onScaleUpdate scale details:$details");
-      final delta = details.scale - _panScaleData!.scale;
-      // TODO: 待优化
-      if (delta.abs() > 0.001) {
-        logd('>scale ${details.scale} > delta:$delta');
+      final newScale = math.log(details.scale) + 1; //减速
+      final change = details.scale - _panScaleData!.scale;
+      // logd("onScaleUpdate scale ${details.scale}>$newScale change:$change");
+      if (change.abs() > 0.01) {
         _panScaleData!.update(
           details.localFocalPoint,
-          newScale: details.scale,
+          newScale: newScale,
         );
         handleScale(_panScaleData!);
       }
@@ -131,12 +148,18 @@ mixin GestureBinding on KlineBindingBase implements IGestureEvent, IState {
     }
 
     if (_panScaleData!.isScale) {
-      // 如果是scale操作, 不需要惯性平移, 直接return
-      // 为了防止缩放后的平移, 延时结束.
-      Future.delayed(const Duration(milliseconds: 200), () {
+      logd("onScaleEnd scale. ${details.pointerCount}");
+      if (details.pointerCount <= 0) {
         _panScaleData?.end();
         _panScaleData = null;
-      });
+      }
+      // 如果是scale操作, 不需要惯性平移, 直接return
+      // 为了防止缩放后的平移, 延时结束.
+      // Future.delayed(const Duration(milliseconds: 200), () {
+      //   logd("onScaleEnd scale.");
+      //   _panScaleData?.end();
+      //   _panScaleData = null;
+      // });
       return;
     }
 

@@ -1,11 +1,11 @@
 // Copyright 2024 Andy.Zhao
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     https://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -13,6 +13,8 @@
 // limitations under the License.
 
 import 'package:flutter/material.dart';
+
+import '../framework/common.dart';
 
 enum GestureState {
   start,
@@ -33,6 +35,7 @@ class GestureData {
     required Offset offset,
     double scale = 1.0,
     GestureState state = GestureState.start,
+    this.initPosition = ScalePosition.auto,
   })  : _prevOffset = offset,
         _offset = offset,
         _scale = scale,
@@ -45,10 +48,19 @@ class GestureData {
       : this._internal(offset: offset, type: GestureType.long);
   GestureData.pan(Offset offset)
       : this._internal(offset: offset, type: GestureType.pan);
-  GestureData.scale(Offset offset, {double scale = 1.0})
-      : this._internal(offset: offset, scale: scale, type: GestureType.scale);
+  GestureData.scale(
+    Offset offset, {
+    double scale = 1.0,
+    required ScalePosition position,
+  }) : this._internal(
+          offset: offset,
+          scale: scale,
+          type: GestureType.scale,
+          initPosition: position,
+        );
 
   final GestureType type;
+  final ScalePosition initPosition;
 
   late double _scale;
   double get scale => _scale;

@@ -40,6 +40,14 @@ void main() {
     print('math.log(-2) ${math.log(-2)}');
   });
 
+  test('math log2', () {
+    for (double i = 0.1; i < 2.5; i += 0.02) {
+      final x = double.parse(i.toStringAsFixed(2));
+      double scaleFactor = math.log(x); // 使用自然对数函数调整缩放速度
+      print('math.log(${i.toStringAsFixed(2)}) \t $scaleFactor');
+    }
+  });
+
   test('test future', () async {
     final stopwatch = Stopwatch();
     for (var element in [1, 2, 3, 4]) {

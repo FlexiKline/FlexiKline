@@ -26,6 +26,8 @@ part 'setting_config.g.dart';
 @FlexiConfigSerializable
 class SettingConfig {
   SettingConfig({
+    required this.pixel,
+
     /// Long/Short颜色配置
     required this.textColor,
     required this.longColor,
@@ -57,6 +59,9 @@ class SettingConfig {
     // 副区的指标图最大数量
     this.subChartMaxCount = defaultSubChartMaxCount,
   });
+
+  /// 单个像素值
+  final double pixel;
 
   /// Long/Short颜色配置
   final Color textColor;

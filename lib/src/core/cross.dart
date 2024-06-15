@@ -98,7 +98,7 @@ mixin CrossBinding
     // Horizontal轴按蜡烛线移动.
     val = val.clamp(canvasRect);
     final diff = startCandleDx - val.dx;
-    if (crossConfig.moveByCandleInBlank && diff < 0) return val;
+    if (!crossConfig.moveByCandleInBlank && diff < 0) return val;
     return Offset(
       val.dx + diff % candleActualWidth - candleWidthHalf,
       val.dy,

@@ -7,6 +7,8 @@ part of 'setting_config.dart';
 // **************************************************************************
 
 abstract class _$SettingConfigCWProxy {
+  SettingConfig pixel(double pixel);
+
   SettingConfig textColor(Color textColor);
 
   SettingConfig longColor(Color longColor);
@@ -51,6 +53,7 @@ abstract class _$SettingConfigCWProxy {
   /// SettingConfig(...).copyWith(id: 12, name: "My name")
   /// ````
   SettingConfig call({
+    double? pixel,
     Color? textColor,
     Color? longColor,
     Color? shortColor,
@@ -77,6 +80,9 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
   const _$SettingConfigCWProxyImpl(this._value);
 
   final SettingConfig _value;
+
+  @override
+  SettingConfig pixel(double pixel) => this(pixel: pixel);
 
   @override
   SettingConfig textColor(Color textColor) => this(textColor: textColor);
@@ -154,6 +160,7 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
   /// SettingConfig(...).copyWith(id: 12, name: "My name")
   /// ````
   SettingConfig call({
+    Object? pixel = const $CopyWithPlaceholder(),
     Object? textColor = const $CopyWithPlaceholder(),
     Object? longColor = const $CopyWithPlaceholder(),
     Object? shortColor = const $CopyWithPlaceholder(),
@@ -175,6 +182,10 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
     Object? subChartMaxCount = const $CopyWithPlaceholder(),
   }) {
     return SettingConfig(
+      pixel: pixel == const $CopyWithPlaceholder() || pixel == null
+          ? _value.pixel
+          // ignore: cast_nullable_to_non_nullable
+          : pixel as double,
       textColor: textColor == const $CopyWithPlaceholder() || textColor == null
           ? _value.textColor
           // ignore: cast_nullable_to_non_nullable
@@ -279,6 +290,7 @@ extension $SettingConfigCopyWith on SettingConfig {
 
 SettingConfig _$SettingConfigFromJson(Map<String, dynamic> json) =>
     SettingConfig(
+      pixel: (json['pixel'] as num).toDouble(),
       textColor: const ColorConverter().fromJson(json['textColor'] as String?),
       longColor: const ColorConverter().fromJson(json['longColor'] as String?),
       shortColor:
@@ -309,7 +321,9 @@ SettingConfig _$SettingConfigFromJson(Map<String, dynamic> json) =>
     );
 
 Map<String, dynamic> _$SettingConfigToJson(SettingConfig instance) {
-  final val = <String, dynamic>{};
+  final val = <String, dynamic>{
+    'pixel': instance.pixel,
+  };
 
   void writeNotNull(String key, dynamic value) {
     if (value != null) {
