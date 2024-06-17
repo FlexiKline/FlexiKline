@@ -23,11 +23,13 @@ class IndicatorInfoView extends ConsumerWidget {
     this.padding,
     required this.title,
     required this.value,
+    this.spacing = 0,
   });
 
   final String title;
   final String value;
   final EdgeInsetsGeometry? padding;
+  final double spacing;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -43,6 +45,7 @@ class IndicatorInfoView extends ConsumerWidget {
             textAlign: TextAlign.start,
             style: theme.t2s12w400,
           ),
+          SizedBox(width: spacing),
           Text(
             value,
             textAlign: TextAlign.end,

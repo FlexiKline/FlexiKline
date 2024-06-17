@@ -72,6 +72,7 @@ class _MyAppState extends ConsumerState<MyApp> {
       designSize: const Size(393, 852),
       minTextAdapt: true,
       splitScreenMode: true,
+      fontSizeResolver: FontSizeResolvers.radius,
       builder: (context, child) {
         return MaterialApp.router(
           restorationScopeId: 'flexiKlineApp',

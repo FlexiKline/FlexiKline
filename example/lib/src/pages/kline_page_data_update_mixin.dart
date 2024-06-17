@@ -58,7 +58,7 @@ mixin KlinePageDataUpdateMixin<T extends ConsumerStatefulWidget>
     cancelToken = null;
     if (resp.success && resp.data != null && resp.data!.isNotEmpty) {
       await flexiKlineController.updateKlineData(request, resp.data!);
-      _startMockPushTimer(flexiKlineController.curKlineData.req); // 假装推送
+      // _startMockPushTimer(flexiKlineController.curKlineData.req); // 假装推送
     } else if (resp.msg.isNotEmpty) {
       SmartDialog.showToast(resp.msg);
     }

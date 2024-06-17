@@ -154,7 +154,7 @@ abstract interface class ISetting {
   void ensurePaintObjectInstance();
 
   /// 更新主区指标的布局参数
-  void updateMainIndicatorParam({
+  bool updateMainIndicatorParam({
     double? height,
     EdgeInsets? padding,
   });

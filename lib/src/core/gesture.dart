@@ -102,13 +102,19 @@ mixin GestureBinding on KlineBindingBase implements IGestureEvent, IState {
           position = ScalePosition.middle;
         }
       }
-      logd("onScaleStart scale $position focal:${details.localFocalPoint}");
+      assert(() {
+        logd("onScaleStart scale $position focal:${details.localFocalPoint}");
+        return true;
+      }());
       _panScaleData = GestureData.scale(
         details.localFocalPoint,
         position: position,
       );
     } else {
-      logd("onScaleStart pan focal:${details.localFocalPoint}");
+      assert(() {
+        logd("onScaleStart pan focal:${details.localFocalPoint}");
+        return true;
+      }());
       _panScaleData = GestureData.pan(details.localFocalPoint);
     }
   }

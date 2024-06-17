@@ -23,13 +23,21 @@ import '../framework/export.dart';
 import 'binding_base.dart';
 import 'interface.dart';
 
+class FlexiKlineSizeNotifier extends ValueNotifier<Rect> {
+  FlexiKlineSizeNotifier(super.value);
+
+  @override
+  void notifyListeners() {
+    super.notifyListeners();
+  }
+}
+
 mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
   @override
   void initState() {
     super.initState();
     logd("initState setting");
     initFlexiKlineState();
-    // sizeChnageListener.value = canvasRect;
   }
 
   @override
@@ -45,35 +53,73 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
   }
 
   /// KlineData整个图表区域大小变化监听器
-  final sizeChangeListener = ValueNotifier(defaultCanvasRectMinRect);
+  final sizeChangeListener = FlexiKlineSizeNotifier(defaultCanvasRectMinRect);
   void invokeSizeChanged() {
-    sizeChangeListener.value = canvasRect;
+    if (_landCanvasRect != null) {
+      final changed = updateMainIndicatorParam(height: mainRect.height);
+      if (!changed) markRepaintChart();
+      sizeChangeListener.value = canvasRect;
+      sizeChangeListener.notifyListeners();
+    }
+    if (sizeChangeListener.value != canvasRect) {
+      final changed = updateMainIndicatorParam(height: mainRect.height);
+      if (!changed) markRepaintChart();
+      sizeChangeListener.value = canvasRect;
+    }
     markRepaintCross();
   }
 
+  Rect? _landCanvasRect;
+
   /// 整个画布区域大小 = 由主图区域 + 副图区域
   @override
-  Rect get canvasRect => Rect.fromLTRB(
-        mainRect.left,
-        mainRect.top,
-        math.max(mainRect.width, subRect.width),
-        mainRect.height + subRectHeight,
-      );
+  Rect get canvasRect {
+    if (_landCanvasRect != null) {
+      return _landCanvasRect!;
+    }
+    return Rect.fromLTRB(
+      mainRect.left,
+      mainRect.top,
+      math.max(mainRect.width, subRect.width),
+      mainRect.height + subRectHeight,
+    );
+  }
+
   double get canvasWidth => canvasRect.width;
   double get canvasHeight => canvasRect.height;
 
   /// 副图整个区域
   @override
-  Rect get subRect => Rect.fromLTRB(
-        mainRect.left,
-        mainRect.bottom,
-        mainRect.right,
-        mainRect.bottom + subRectHeight,
+  Rect get subRect {
+    if (_landCanvasRect != null) {
+      return Rect.fromLTRB(
+        _landCanvasRect!.left,
+        _landCanvasRect!.bottom - subRectHeight,
+        _landCanvasRect!.right,
+        _landCanvasRect!.bottom,
       );
+    }
+    return Rect.fromLTRB(
+      mainRect.left,
+      mainRect.bottom,
+      mainRect.right,
+      mainRect.bottom + subRectHeight,
+    );
+  }
 
   /// 主区域大小
   @override
-  Rect get mainRect => settingConfig.mainRect;
+  Rect get mainRect {
+    if (_landCanvasRect != null) {
+      return Rect.fromLTRB(
+        _landCanvasRect!.left,
+        _landCanvasRect!.top,
+        _landCanvasRect!.right,
+        _landCanvasRect!.bottom - subRectHeight,
+      );
+    }
+    return settingConfig.mainRect;
+  }
 
   /// 主区域最小宽高
   Size get mainMinSize => settingConfig.mainMinSize;
@@ -87,7 +133,21 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
         size.width,
         size.height,
       );
-      updateMainIndicatorParam(height: size.height);
+      invokeSizeChanged();
+    }
+  }
+
+  /// 设置横屏的Kline的大小
+  /// [size] 当前Kline主区+副区的大小.
+  /// 注: 设置是临时的, 并不会更新到配置中.
+  void setLandCanvasSize(Size size) {
+    if (size >= settingConfig.mainMinSize) {
+      _landCanvasRect = Rect.fromLTRB(
+        0,
+        0,
+        size.width,
+        size.height,
+      );
       invokeSizeChanged();
     }
   }
@@ -193,18 +253,19 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
   /// 更新主区指标的布局参数
   @protected
   @override
-  void updateMainIndicatorParam({
+  bool updateMainIndicatorParam({
     double? height,
     EdgeInsets? padding,
   }) {
     bool changed = mainIndicator.updateLayout(
       height: height,
       padding: padding,
-      reset: true,
+      // reset: true,
     );
     if (changed) {
       markRepaintChart(reset: true);
     }
+    return changed;
   }
 
   @override
@@ -266,7 +327,6 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
       }
       subIndicators.addLast(indicatorsConfig.subIndicators[key]!);
       invokeSizeChanged();
-      markRepaintChart();
     }
   }
 
@@ -276,7 +336,6 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
     subIndicators.removeWhere((indicator) {
       if (indicator.key == key) {
         indicator.dispose();
-        markRepaintChart();
         hasRemove = true;
         return true;
       }

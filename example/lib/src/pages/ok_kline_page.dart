@@ -19,6 +19,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
 import '../config.dart';
 import '../providers/instruments_provider.dart';
@@ -78,6 +79,14 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage>
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       initKlineData(req);
+    });
+  }
+
+  void openLandscapePage() {
+    context.pushNamed('landscapeKline', extra: req.copyWith()).then((value) {
+      controller.logd('openLandscapePage return > $value');
+      // final landConfig = configuration.getFlexiKlineConfig();
+      // controller.updateFlexiKlineConfig(landConfig);
     });
   }
 
@@ -181,9 +190,7 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage>
             style: theme.circleBtnStyle(bg: theme.markBg.withOpacity(0.6)),
             iconSize: 16.r,
             icon: const Icon(Icons.open_in_full_rounded),
-            onPressed: () {
-              // TODO: 待实现
-            },
+            onPressed: openLandscapePage,
           ),
         ),
         Positioned(

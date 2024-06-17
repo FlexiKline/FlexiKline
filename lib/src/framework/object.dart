@@ -157,7 +157,7 @@ mixin PaintObjectBoundingMixin on PaintObjectProxy
   Rect get drawableRect {
     if (_drawableRect != null) return _drawableRect!;
     if (drawInMain) {
-      _drawableRect = settingConfig.mainRect;
+      _drawableRect = setting.mainRect;
     } else {
       final top = setting.calculateIndicatorTop(slot);
       _drawableRect = Rect.fromLTRB(

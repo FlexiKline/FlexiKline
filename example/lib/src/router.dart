@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,6 +20,7 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:go_router/go_router.dart';
 
 import 'pages/bit_kline_page.dart';
+import 'pages/landscape_kline_page.dart';
 import 'pages/ok_kline_page.dart';
 import 'pages/main_nav_page.dart';
 import 'pages/my_demo_page.dart';
@@ -26,6 +28,16 @@ import 'pages/my_demo_page.dart';
 final GlobalKey<NavigatorState> globalNavigatorKey = GlobalKey<NavigatorState>(
   debugLabel: 'FlexiKlineApp',
 );
+
+extension StateExt on State {
+  void exit<T extends Object?>([T? result]) {
+    if (mounted) {
+      context.pop(result);
+    } else {
+      GoRouter.of(globalNavigatorKey.currentContext!).pop(result);
+    }
+  }
+}
 
 extension GlobalKeyExt on GlobalKey<NavigatorState> {
   ProviderContainer get ref {
@@ -118,5 +130,18 @@ final List<RouteBase> routeList = <RouteBase>[
         ],
       ),
     ],
+  ),
+  GoRoute(
+    name: 'landscapeKline',
+    path: '/landscape_kline',
+    pageBuilder: (context, state) {
+      return MaterialPage<void>(
+        restorationId: 'bitKline',
+        child: LandscapeKlinePage(
+          // candleReq: CandleReq.fromJson(state.uri.queryParameters),
+          candleReq: state.extra as CandleReq,
+        ),
+      );
+    },
   ),
 ];

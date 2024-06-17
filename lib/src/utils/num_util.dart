@@ -20,7 +20,7 @@ String formatPercentage(
   double? val, {
   int precision = 2,
 }) {
-  if (val == null) return '0%';
+  if (val == null) return '-%';
   return formatNumber(
     (val * 100).d,
     precision: 2,
