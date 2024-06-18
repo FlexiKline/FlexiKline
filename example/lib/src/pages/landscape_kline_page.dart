@@ -103,6 +103,7 @@ class _LandscapeKlinePageState extends ConsumerState<LandscapeKlinePage>
             long: controller.settingConfig.longColor,
             short: controller.settingConfig.shortColor,
           ),
+          centerTitle: false,
           titleSpacing: 0,
           toolbarHeight: 30.r,
           actions: [
@@ -141,7 +142,13 @@ class _LandscapeKlinePageState extends ConsumerState<LandscapeKlinePage>
                 ),
               );
             }
-            return _buildBodyView(context);
+            return SafeArea(
+              top: false,
+              left: true,
+              right: false,
+              bottom: true,
+              child: _buildBodyView(context),
+            );
           },
         ),
       ),

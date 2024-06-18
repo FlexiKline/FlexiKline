@@ -1,4 +1,4 @@
-package com.github.kangqiao.flexikline.example
+package com.github.flexikline.example
 
 import io.flutter.embedding.android.FlutterActivity
 

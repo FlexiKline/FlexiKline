@@ -123,53 +123,55 @@ class MarketTickerLandscapeView extends ConsumerWidget {
           ),
         ),
         SizedBox(width: 8.r),
-        Flexible(
-          child: Row(
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              BasicInfoView(
-                title: s.h24_high,
-                value: formatNumber(
-                  ticker?.high24h.decimal,
-                  precision: precision,
-                  cutInvalidZero: true,
+        Expanded(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                BasicInfoView(
+                  title: s.h24_high,
+                  value: formatNumber(
+                    ticker?.high24h.decimal,
+                    precision: precision,
+                    cutInvalidZero: true,
+                  ),
+                  spacing: 4.r,
+                  padding: EdgeInsetsDirectional.symmetric(horizontal: 6.r),
                 ),
-                spacing: 4.r,
-                padding: EdgeInsetsDirectional.symmetric(horizontal: 6.r),
-              ),
-              BasicInfoView(
-                title: s.h24_low,
-                value: formatNumber(
-                  ticker?.low24h.decimal,
-                  precision: precision,
-                  cutInvalidZero: true,
+                BasicInfoView(
+                  title: s.h24_low,
+                  value: formatNumber(
+                    ticker?.low24h.decimal,
+                    precision: precision,
+                    cutInvalidZero: true,
+                  ),
+                  spacing: 4.r,
+                  padding: EdgeInsetsDirectional.symmetric(horizontal: 6.r),
                 ),
-                spacing: 4.r,
-                padding: EdgeInsetsDirectional.symmetric(horizontal: 6.r),
-              ),
-              BasicInfoView(
-                title: s.h24_vol(base),
-                value: formatNumber(
-                  ticker?.vol24h.decimal,
-                  precision: 2,
-                  showCompact: true,
-                  cutInvalidZero: true,
+                BasicInfoView(
+                  title: s.h24_vol(base),
+                  value: formatNumber(
+                    ticker?.vol24h.decimal,
+                    precision: 2,
+                    showCompact: true,
+                    cutInvalidZero: true,
+                  ),
+                  spacing: 4.r,
+                  padding: EdgeInsetsDirectional.symmetric(horizontal: 6.r),
                 ),
-                spacing: 4.r,
-                padding: EdgeInsetsDirectional.symmetric(horizontal: 6.r),
-              ),
-              BasicInfoView(
-                title: s.h24_turnover(quote),
-                value: formatNumber(
-                  ticker?.volCcy24h.decimal,
-                  precision: 2,
-                  showCompact: true,
-                  cutInvalidZero: true,
+                BasicInfoView(
+                  title: s.h24_turnover(quote),
+                  value: formatNumber(
+                    ticker?.volCcy24h.decimal,
+                    precision: 2,
+                    showCompact: true,
+                    cutInvalidZero: true,
+                  ),
+                  spacing: 4.r,
+                  padding: EdgeInsetsDirectional.symmetric(horizontal: 6.r),
                 ),
-                spacing: 4.r,
-                padding: EdgeInsetsDirectional.symmetric(horizontal: 6.r),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ],
