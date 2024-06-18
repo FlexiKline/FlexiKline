@@ -18,12 +18,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../dialogs/indicators_select_dialog.dart';
-import '../dialogs/kline_settting_dialog.dart';
-import '../dialogs/timebar_select_dialog.dart';
-import '../theme/export.dart';
-import '../utils/dialog_manager.dart';
-import 'text_arrow_button.dart';
+import '../../dialogs/indicators_select_dialog.dart';
+import '../../dialogs/kline_settting_dialog.dart';
+import '../../dialogs/timebar_select_dialog.dart';
+import '../../theme/export.dart';
+import '../../utils/dialog_manager.dart';
+import '../../widgets/text_arrow_button.dart';
 
 class FlexiKlineSettingBar extends ConsumerStatefulWidget {
   const FlexiKlineSettingBar({

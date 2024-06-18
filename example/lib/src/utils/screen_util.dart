@@ -19,7 +19,7 @@ import 'package:flutter/services.dart';
 Future<void> setScreenLandscape() async {
   if (Platform.isAndroid) {
     SystemChrome.setEnabledSystemUIMode(
-      SystemUiMode.manual,
+      SystemUiMode.immersiveSticky,
       overlays: <SystemUiOverlay>[SystemUiOverlay.bottom],
     );
   }

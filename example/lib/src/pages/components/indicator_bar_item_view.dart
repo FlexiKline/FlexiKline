@@ -14,44 +14,33 @@
 
 import 'package:example/src/theme/flexi_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class IndicatorInfoView extends ConsumerWidget {
-  const IndicatorInfoView({
+class IndicatorBarItemView extends ConsumerWidget {
+  const IndicatorBarItemView({
     super.key,
+    required this.indicatorKey,
+    this.selected = false,
     this.padding,
-    required this.title,
-    required this.value,
-    this.spacing = 0,
   });
 
-  final String title;
-  final String value;
+  final ValueKey indicatorKey;
+  final bool selected;
   final EdgeInsetsGeometry? padding;
-  final double spacing;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = ref.watch(themeProvider);
     return Container(
-      padding: padding,
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            title,
-            textAlign: TextAlign.start,
-            style: theme.t2s12w400,
-          ),
-          SizedBox(width: spacing),
-          Text(
-            value,
-            textAlign: TextAlign.end,
-            style: theme.t1s12w400,
-          ),
-        ],
+      key: indicatorKey,
+      padding: padding ?? EdgeInsets.all(8.r),
+      child: Text(
+        indicatorKey.value.toString().toUpperCase(),
+        style: theme.t2s12w400.copyWith(
+          color: selected ? theme.t1 : null,
+          fontWeight: selected ? FontWeight.bold : null,
+        ),
       ),
     );
   }

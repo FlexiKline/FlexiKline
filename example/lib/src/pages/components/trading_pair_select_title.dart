@@ -17,8 +17,8 @@ import 'package:example/src/theme/flexi_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../dialogs/select_trading_pair_dialog.dart';
-import '../utils/dialog_manager.dart';
+import '../../dialogs/select_trading_pair_dialog.dart';
+import '../../utils/dialog_manager.dart';
 
 class TradingPairSelectTitle extends ConsumerStatefulWidget {
   const TradingPairSelectTitle({

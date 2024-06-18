@@ -14,21 +14,23 @@
 
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:example/generated/l10n.dart';
+import 'package:example/src/theme/flexi_theme.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
 import '../config.dart';
 import '../constants/images.dart';
 import '../providers/bit_kline_config.dart';
 import '../providers/instruments_provider.dart';
-import '../widgets/flexi_kline_indicator_bar.dart';
-import '../widgets/flexi_kline_mark_view.dart';
-import '../widgets/market_ticker_view.dart';
-import '../widgets/flexi_kline_setting_bar.dart';
-import '../widgets/trading_pair_select_title.dart';
+import 'components/flexi_kline_indicator_bar.dart';
+import 'components/flexi_kline_mark_view.dart';
+import 'components/market_ticker_view.dart';
+import 'components/flexi_kline_setting_bar.dart';
+import 'components/trading_pair_select_title.dart';
 import 'kline_page_data_update_mixin.dart';
 import 'main_nav_page.dart';
 
@@ -79,6 +81,14 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage>
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       initKlineData(req);
+    });
+  }
+
+  void openLandscapePage() {
+    context.pushNamed('landscapeKline', extra: req.copyWith()).then((value) {
+      controller.logd('openLandscapePage return > $value');
+      // final landConfig = configuration.getFlexiKlineConfig();
+      // controller.updateFlexiKlineConfig(landConfig);
     });
   }
 
@@ -142,6 +152,7 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage>
                   alignment: AlignmentDirectional.center,
                   showLogo: false,
                 ),
+                mainforegroundViewBuilder: _buildKlineMainForgroundView,
               ),
               FlexiKlineIndicatorBar(
                 controller: controller,
@@ -154,6 +165,8 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage>
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        key: const ValueKey('BitConfigStore'),
+        heroTag: "Bit",
         backgroundColor: klineTheme.tooltipBg,
         foregroundColor: klineTheme.textColor,
         mini: true,
@@ -169,6 +182,55 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage>
           ),
         ),
       ),
+    );
+  }
+
+  /// Custom Kline Forground UI
+  Widget _buildKlineMainForgroundView(BuildContext context) {
+    final theme = ref.watch(themeProvider);
+    return Stack(
+      children: [
+        Positioned(
+          left: 8.r,
+          bottom: 8.r,
+          width: 28.r,
+          height: 28.r,
+          child: IconButton(
+            // constraints: BoxConstraints.tight(Size(28.r, 28.r)),
+            padding: EdgeInsets.zero,
+            style: theme.circleBtnStyle(bg: theme.markBg.withOpacity(0.6)),
+            iconSize: 20.r,
+            icon: const Icon(Icons.fullscreen_rounded),
+            onPressed: openLandscapePage,
+          ),
+        ),
+        Positioned(
+          child: ValueListenableBuilder(
+            valueListenable: controller.candleRequestListener,
+            builder: (context, request, child) {
+              return Offstage(
+                offstage: !request.state.showLoading,
+                child: Container(
+                  key: const ValueKey('loadingView'),
+                  alignment: AlignmentDirectional.center,
+                  padding: EdgeInsetsDirectional.all(32.r),
+                  child: SizedBox.square(
+                    dimension: controller.settingConfig.loading.size,
+                    child: CircularProgressIndicator(
+                      strokeWidth: controller.settingConfig.loading.strokeWidth,
+                      backgroundColor:
+                          controller.settingConfig.loading.background,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        controller.settingConfig.loading.valueColor,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        )
+      ],
     );
   }
 

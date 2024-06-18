@@ -55,7 +55,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
   /// KlineData整个图表区域大小变化监听器
   final sizeChangeListener = FlexiKlineSizeNotifier(defaultCanvasRectMinRect);
   void invokeSizeChanged() {
-    if (_landCanvasRect != null) {
+    if (_fixedCanvasRect != null) {
       final changed = updateMainIndicatorParam(height: mainRect.height);
       if (!changed) markRepaintChart();
       sizeChangeListener.value = canvasRect;
@@ -69,13 +69,13 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
     markRepaintCross();
   }
 
-  Rect? _landCanvasRect;
+  Rect? _fixedCanvasRect;
 
   /// 整个画布区域大小 = 由主图区域 + 副图区域
   @override
   Rect get canvasRect {
-    if (_landCanvasRect != null) {
-      return _landCanvasRect!;
+    if (_fixedCanvasRect != null) {
+      return _fixedCanvasRect!;
     }
     return Rect.fromLTRB(
       mainRect.left,
@@ -91,12 +91,12 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
   /// 副图整个区域
   @override
   Rect get subRect {
-    if (_landCanvasRect != null) {
+    if (_fixedCanvasRect != null) {
       return Rect.fromLTRB(
-        _landCanvasRect!.left,
-        _landCanvasRect!.bottom - subRectHeight,
-        _landCanvasRect!.right,
-        _landCanvasRect!.bottom,
+        _fixedCanvasRect!.left,
+        _fixedCanvasRect!.bottom - subRectHeight,
+        _fixedCanvasRect!.right,
+        _fixedCanvasRect!.bottom,
       );
     }
     return Rect.fromLTRB(
@@ -110,12 +110,12 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
   /// 主区域大小
   @override
   Rect get mainRect {
-    if (_landCanvasRect != null) {
+    if (_fixedCanvasRect != null) {
       return Rect.fromLTRB(
-        _landCanvasRect!.left,
-        _landCanvasRect!.top,
-        _landCanvasRect!.right,
-        _landCanvasRect!.bottom - subRectHeight,
+        _fixedCanvasRect!.left,
+        _fixedCanvasRect!.top,
+        _fixedCanvasRect!.right,
+        _fixedCanvasRect!.bottom - subRectHeight,
       );
     }
     return settingConfig.mainRect;
@@ -137,12 +137,20 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
     }
   }
 
-  /// 设置横屏的Kline的大小
+  void exitFixedSize() {
+    if (_fixedCanvasRect != null) {
+      _fixedCanvasRect = null;
+      invokeSizeChanged();
+    }
+  }
+
+  /// 设置Kline固定大小(主要在全屏或横屏场景中使用此API)
+  /// 当设置[_fixedCanvasRect]后, 主区高度=[_fixedCanvasRect]的总高度 - [subRectHeight]副区所有指标高度
   /// [size] 当前Kline主区+副区的大小.
   /// 注: 设置是临时的, 并不会更新到配置中.
-  void setLandCanvasSize(Size size) {
+  void setFixedSize(Size size) {
     if (size >= settingConfig.mainMinSize) {
-      _landCanvasRect = Rect.fromLTRB(
+      _fixedCanvasRect = Rect.fromLTRB(
         0,
         0,
         size.width,

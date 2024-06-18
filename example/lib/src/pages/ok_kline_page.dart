@@ -19,16 +19,15 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
 
 import '../config.dart';
 import '../providers/instruments_provider.dart';
 import '../providers/default_kline_config.dart';
-import '../widgets/flexi_kline_indicator_bar.dart';
-import '../widgets/flexi_kline_mark_view.dart';
-import '../widgets/market_ticker_view.dart';
-import '../widgets/flexi_kline_setting_bar.dart';
-import '../widgets/trading_pair_select_title.dart';
+import 'components/flexi_kline_indicator_bar.dart';
+import 'components/flexi_kline_mark_view.dart';
+import 'components/market_ticker_view.dart';
+import 'components/flexi_kline_setting_bar.dart';
+import 'components/trading_pair_select_title.dart';
 import 'kline_page_data_update_mixin.dart';
 import 'main_nav_page.dart';
 
@@ -48,6 +47,7 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage>
     with KlinePageDataUpdateMixin<OkKlinePage> {
   late final FlexiKlineController controller;
   late final DefaultFlexiKlineConfiguration configuration;
+  bool isFullScreen = false;
 
   @override
   FlexiKlineController get flexiKlineController => controller;
@@ -82,14 +82,6 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage>
     });
   }
 
-  void openLandscapePage() {
-    context.pushNamed('landscapeKline', extra: req.copyWith()).then((value) {
-      controller.logd('openLandscapePage return > $value');
-      // final landConfig = configuration.getFlexiKlineConfig();
-      // controller.updateFlexiKlineConfig(landConfig);
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = ref.watch(themeProvider);
@@ -119,36 +111,62 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage>
           req = req.copyWith(after: null, before: null);
           await initKlineData(req, reset: true);
         },
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              MarketTickerView(
-                instId: req.instId,
-                precision: req.precision,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            if (isFullScreen) {
+              controller.setFixedSize(
+                Size(constraints.maxWidth, constraints.maxHeight - 30.r),
+              );
+            } else {
+              controller.exitFixedSize();
+            }
+            return SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Visibility(
+                    visible: !isFullScreen,
+                    child: MarketTickerView(
+                      instId: req.instId,
+                      precision: req.precision,
+                    ),
+                  ),
+                  Visibility(
+                    visible: !isFullScreen,
+                    child: FlexiKlineSettingBar(
+                      controller: controller,
+                      onTapTimeBar: onTapTimerBar,
+                    ),
+                  ),
+                  FlexiKlineWidget(
+                    controller: controller,
+                    mainBackgroundView: FlexiKlineMarkView(
+                      margin: EdgeInsetsDirectional.only(
+                        bottom: 10.r,
+                        start: 36.r,
+                      ),
+                    ),
+                    mainforegroundViewBuilder: _buildKlineMainForgroundView,
+                  ),
+                  FlexiKlineIndicatorBar(
+                    height: 30.r,
+                    controller: controller,
+                  ),
+                  Visibility(
+                    visible: !isFullScreen,
+                    child: Container(
+                      height: 200,
+                    ),
+                  ),
+                ],
               ),
-              FlexiKlineSettingBar(
-                controller: controller,
-                onTapTimeBar: onTapTimerBar,
-              ),
-              FlexiKlineWidget(
-                controller: controller,
-                mainBackgroundView: FlexiKlineMarkView(
-                  margin: EdgeInsetsDirectional.only(bottom: 10.r, start: 36.r),
-                ),
-                mainforegroundViewBuilder: _buildKlineMainForgroundView,
-              ),
-              FlexiKlineIndicatorBar(
-                controller: controller,
-              ),
-              Container(
-                height: 200,
-              )
-            ],
-          ),
+            );
+          },
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        key: const ValueKey('OkConfigStore'),
+        heroTag: "Ok",
         backgroundColor: theme.cardBg,
         foregroundColor: theme.t1,
         mini: true,
@@ -189,8 +207,14 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage>
             padding: EdgeInsets.zero,
             style: theme.circleBtnStyle(bg: theme.markBg.withOpacity(0.6)),
             iconSize: 16.r,
-            icon: const Icon(Icons.open_in_full_rounded),
-            onPressed: openLandscapePage,
+            icon: Icon(isFullScreen
+                ? Icons.close_fullscreen_outlined
+                : Icons.open_in_full_rounded),
+            onPressed: () {
+              setState(() {
+                isFullScreen = !isFullScreen;
+              });
+            },
           ),
         ),
         Positioned(

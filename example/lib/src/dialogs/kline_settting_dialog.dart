@@ -20,7 +20,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../providers/kline_controller_state_provider.dart';
-import '../widgets/flexi_kline_size_slider.dart';
+import '../pages/components/flexi_kline_size_slider.dart';
 
 class KlineSettingDialog extends ConsumerStatefulWidget {
   static const String dialogTag = "KlineSettingDialog";

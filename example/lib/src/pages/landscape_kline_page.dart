@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import 'package:example/src/router.dart';
-import 'package:example/src/theme/export.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -21,12 +20,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../config.dart';
+import '../providers/bit_kline_config.dart';
 import '../providers/default_kline_config.dart';
 import '../utils/screen_util.dart';
-import '../widgets/flexi_kline_landscape_indicator_bar.dart';
-import '../widgets/flexi_kline_landscape_setting_bar.dart';
-import '../widgets/flexi_kline_mark_view.dart';
-import '../widgets/market_ticker_landscape_view.dart';
+import 'components/flexi_kline_landscape_indicator_bar.dart';
+import 'components/flexi_kline_landscape_setting_bar.dart';
+import 'components/flexi_kline_mark_view.dart';
+import 'components/market_ticker_landscape_view.dart';
 import 'kline_page_data_update_mixin.dart';
 
 class LandscapeKlinePage extends ConsumerStatefulWidget {
@@ -46,7 +46,7 @@ class _LandscapeKlinePageState extends ConsumerState<LandscapeKlinePage>
     with KlinePageDataUpdateMixin<LandscapeKlinePage> {
   late final Size prevSize;
   late final FlexiKlineController controller;
-  late final DefaultFlexiKlineConfiguration configuration;
+  late final BitFlexiKlineConfiguration configuration;
   @override
   FlexiKlineController get flexiKlineController => controller;
 
@@ -56,7 +56,7 @@ class _LandscapeKlinePageState extends ConsumerState<LandscapeKlinePage>
     setScreenLandscape();
 
     req = widget.candleReq;
-    configuration = DefaultFlexiKlineConfiguration(ref: ref);
+    configuration = BitFlexiKlineConfiguration(ref: ref);
     controller = FlexiKlineController(
       configuration: configuration,
       logger: LoggerImpl(
@@ -87,7 +87,6 @@ class _LandscapeKlinePageState extends ConsumerState<LandscapeKlinePage>
 
   @override
   Widget build(BuildContext context) {
-    final theme = ref.watch(themeProvider);
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) async {
@@ -96,7 +95,6 @@ class _LandscapeKlinePageState extends ConsumerState<LandscapeKlinePage>
       },
       child: Scaffold(
         appBar: AppBar(
-          backgroundColor: theme.pageBg,
           leading: const SizedBox.shrink(),
           leadingWidth: 4.r,
           title: MarketTickerLandscapeView(
@@ -109,6 +107,7 @@ class _LandscapeKlinePageState extends ConsumerState<LandscapeKlinePage>
           toolbarHeight: 30.r,
           actions: [
             GestureDetector(
+              behavior: HitTestBehavior.opaque,
               onTap: exitPage,
               child: Container(
                 width: 50.r,
@@ -129,16 +128,15 @@ class _LandscapeKlinePageState extends ConsumerState<LandscapeKlinePage>
             ),
           ),
         ),
-        backgroundColor: theme.pageBg,
         body: OrientationBuilder(
           builder: (context, orientation) {
             if (orientation == Orientation.portrait) {
               return Center(
                 child: CircularProgressIndicator(
-                  strokeWidth: 3.r,
-                  backgroundColor: theme.markBg,
+                  strokeWidth: controller.settingConfig.loading.strokeWidth,
+                  backgroundColor: controller.settingConfig.loading.background,
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    theme.t1,
+                    controller.settingConfig.loading.valueColor,
                   ),
                 ),
               );
@@ -157,7 +155,7 @@ class _LandscapeKlinePageState extends ConsumerState<LandscapeKlinePage>
           child: LayoutBuilder(
             builder: (context, constraints) {
               controller.logd('zp::: LandscapeKlinePage:$constraints');
-              controller.setLandCanvasSize(
+              controller.setFixedSize(
                 Size(constraints.maxWidth, constraints.maxHeight),
               );
               return FlexiKlineWidget(
@@ -188,7 +186,6 @@ class _LandscapeKlinePageState extends ConsumerState<LandscapeKlinePage>
   }
 
   Widget _buildKlineMainForgroundView(BuildContext context) {
-    final theme = ref.watch(themeProvider);
     return ValueListenableBuilder(
       valueListenable: controller.candleRequestListener,
       builder: (context, request, child) {
@@ -201,12 +198,12 @@ class _LandscapeKlinePageState extends ConsumerState<LandscapeKlinePage>
                 : AlignmentDirectional.centerStart,
             padding: EdgeInsetsDirectional.all(32.r),
             child: SizedBox.square(
-              dimension: 28.r,
+              dimension: controller.settingConfig.loading.size,
               child: CircularProgressIndicator(
-                strokeWidth: 3.r,
-                backgroundColor: theme.markBg,
+                strokeWidth: controller.settingConfig.loading.strokeWidth,
+                backgroundColor: controller.settingConfig.loading.background,
                 valueColor: AlwaysStoppedAnimation<Color>(
-                  theme.t1,
+                  controller.settingConfig.loading.valueColor,
                 ),
               ),
             ),

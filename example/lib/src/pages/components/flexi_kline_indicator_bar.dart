@@ -18,11 +18,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../providers/kline_controller_state_provider.dart';
+import '../../providers/kline_controller_state_provider.dart';
+import 'indicator_bar_item_view.dart';
 
 class FlexiKlineIndicatorBar extends ConsumerStatefulWidget {
   const FlexiKlineIndicatorBar({
     super.key,
+    this.height,
     this.alignment,
     this.padding,
     this.decoration,
@@ -30,19 +32,13 @@ class FlexiKlineIndicatorBar extends ConsumerStatefulWidget {
     required this.controller,
   });
 
+  final double? height;
   final AlignmentGeometry? alignment;
   final EdgeInsetsGeometry? padding;
   final Decoration? decoration;
   final EdgeInsetsGeometry? margin;
 
   final FlexiKlineController controller;
-
-  // final Set<SinglePaintObjectIndicator> mainIndicators;
-  // final Set<ValueKey> mainIndicatorKeys;
-  // final ValueChanged<SinglePaintObjectIndicator>? onTapMainIndicator;
-  // final Set<Indicator> subIndicators;
-  // final Set<ValueKey> subIndicatorKeys;
-  // final ValueChanged<Indicator>? onTapSubIndicator;
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
@@ -61,6 +57,7 @@ class _FlexiKliineIndicatorBarState
     final theme = ref.watch(themeProvider);
     final klineState = ref.watch(klineStateProvider(widget.controller));
     return Container(
+      height: widget.height,
       alignment: widget.alignment ?? AlignmentDirectional.centerStart,
       padding: widget.padding,
       margin: widget.margin,
@@ -80,7 +77,7 @@ class _FlexiKliineIndicatorBarState
                       .read(klineStateProvider(widget.controller).notifier)
                       .onTapMainIndicator(key);
                 },
-                child: IndicatorView(
+                child: IndicatorBarItemView(
                   indicatorKey: key,
                   selected: klineState.mainIndicatorKeys.contains(key),
                 ),
@@ -95,45 +92,19 @@ class _FlexiKliineIndicatorBarState
             ...klineState.supportSubIndicatorKeys.map((key) {
               return GestureDetector(
                 key: key,
+                behavior: HitTestBehavior.opaque,
                 onTap: () {
                   ref
                       .read(klineStateProvider(widget.controller).notifier)
                       .onTapSubIndicator(key);
                 },
-                child: IndicatorView(
+                child: IndicatorBarItemView(
                   indicatorKey: key,
                   selected: klineState.subIndicatorKeys.contains(key),
                 ),
               );
             }),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class IndicatorView extends ConsumerWidget {
-  const IndicatorView({
-    super.key,
-    required this.indicatorKey,
-    this.selected = false,
-  });
-
-  final ValueKey indicatorKey;
-  final bool selected;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = ref.watch(themeProvider);
-    return Container(
-      key: indicatorKey,
-      padding: EdgeInsets.all(8.r),
-      child: Text(
-        indicatorKey.value.toString().toUpperCase(),
-        style: theme.t2s12w400.copyWith(
-          color: selected ? theme.t1 : null,
-          fontWeight: selected ? FontWeight.bold : null,
         ),
       ),
     );

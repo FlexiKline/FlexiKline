@@ -18,7 +18,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../providers/kline_controller_state_provider.dart';
+import '../../providers/kline_controller_state_provider.dart';
+import 'indicator_bar_item_view.dart';
 
 class FlexiKlineLandscapeIndicatorBar extends ConsumerStatefulWidget {
   const FlexiKlineLandscapeIndicatorBar({
@@ -72,9 +73,10 @@ class _FlexiKliineIndicatorBarState
                       .read(klineStateProvider(widget.controller).notifier)
                       .onTapMainIndicator(key);
                 },
-                child: IndicatorView(
+                child: IndicatorBarItemView(
                   indicatorKey: key,
                   selected: klineState.mainIndicatorKeys.contains(key),
+                  padding: EdgeInsetsDirectional.symmetric(vertical: 8.r),
                 ),
               );
             }),
@@ -93,40 +95,14 @@ class _FlexiKliineIndicatorBarState
                       .read(klineStateProvider(widget.controller).notifier)
                       .onTapSubIndicator(key);
                 },
-                child: IndicatorView(
+                child: IndicatorBarItemView(
                   indicatorKey: key,
                   selected: klineState.subIndicatorKeys.contains(key),
+                  padding: EdgeInsetsDirectional.symmetric(vertical: 8.r),
                 ),
               );
             }),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class IndicatorView extends ConsumerWidget {
-  const IndicatorView({
-    super.key,
-    required this.indicatorKey,
-    this.selected = false,
-  });
-
-  final ValueKey indicatorKey;
-  final bool selected;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = ref.watch(themeProvider);
-    return Container(
-      key: indicatorKey,
-      padding: EdgeInsets.symmetric(horizontal: 2.r, vertical: 8.r),
-      child: Text(
-        indicatorKey.value.toString().toUpperCase(),
-        style: theme.t2s12w400.copyWith(
-          color: selected ? theme.t1 : null,
-          fontWeight: selected ? FontWeight.bold : null,
         ),
       ),
     );

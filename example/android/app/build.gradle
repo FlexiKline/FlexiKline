@@ -22,6 +22,10 @@ if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 }
 
+def keyPropertiesFile = rootProject.file("key.properties")
+def keyProperties = new Properties()
+keyProperties.load(new FileInputStream(keyPropertiesFile))
+
 android {
     namespace "com.github.kangqiao.flexikline.example"
     compileSdk flutter.compileSdkVersion
@@ -52,11 +56,11 @@ android {
     }
 
     signingConfigs {
-        config {
-            storeFile file('./flexi_kline.jks')
-            storePassword 'FlexiKline'
-            keyAlias 'FlexiKlineAlias'
-            keyPassword 'FlexiKline'
+        release {
+            keyAlias keyProperties['keyAlias']
+            keyPassword keyProperties['keyPassword']
+            storeFile file(keyProperties['storeFile'])
+            storePassword keyProperties['storePassword']
         }
     }
 
@@ -64,7 +68,6 @@ android {
         debug {
             debuggable true
             minifyEnabled false
-            signingConfig signingConfigs.config
         }
         profile {
             initWith debug
@@ -72,7 +75,7 @@ android {
         release {
             debuggable false
             minifyEnabled true
-            signingConfig signingConfigs.config
+            signingConfig signingConfigs.release
         }
     }
 }

@@ -23,9 +23,9 @@ import '../config.dart';
 import '../providers/default_kline_config.dart';
 import '../repo/mock.dart';
 import '../test/canvas_demo.dart';
-import '../widgets/flexi_kline_indicator_bar.dart';
-import '../widgets/flexi_kline_mark_view.dart';
-import '../widgets/flexi_kline_setting_bar.dart';
+import 'components/flexi_kline_indicator_bar.dart';
+import 'components/flexi_kline_mark_view.dart';
+import 'components/flexi_kline_setting_bar.dart';
 import 'main_nav_page.dart';
 
 class MyDemoPage extends ConsumerStatefulWidget {

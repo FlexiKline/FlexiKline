@@ -20,12 +20,12 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../models/export.dart';
-import '../providers/market_ticker_provider.dart';
-import 'indicator_info_view.dart';
+import '../../models/export.dart';
+import '../../providers/market_ticker_provider.dart';
+import '../../widgets/basic_info_view.dart';
 
-class MarketTickerView extends ConsumerWidget {
-  const MarketTickerView({
+class MarketTickerLandscapeView extends ConsumerWidget {
+  const MarketTickerLandscapeView({
     super.key,
     required this.instId,
     required this.precision,
@@ -50,10 +50,11 @@ class MarketTickerView extends ConsumerWidget {
     final marketTicker = ref.watch(marketTickerProvider(instId));
 
     return Container(
+      alignment: AlignmentDirectional.centerStart,
       padding: padding ??
           EdgeInsets.symmetric(
-            horizontal: 16.r,
-            vertical: 12.r,
+            horizontal: 4.r,
+            vertical: 2.r,
           ),
       color: backgroundColor,
       child: marketTicker.when(
@@ -81,64 +82,72 @@ class MarketTickerView extends ConsumerWidget {
       rateColor = short ?? theme.short;
     }
     return Row(
+      mainAxisSize: MainAxisSize.max,
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Expanded(
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              FittedBox(
-                child: Text(
-                  formatNumber(
-                    ticker?.last.decimal,
-                    precision: precision,
-                    showThousands: true,
-                    cutInvalidZero: true,
-                  ),
-                  style: TextStyle(
-                    fontSize: 38.sp,
-                    fontWeight: FontWeight.bold,
-                    color: rateColor,
-                    height: 1.2,
-                  ),
-                ),
+        Text('$base/$quote', style: theme.t1s18w700),
+        Container(
+          padding: EdgeInsetsDirectional.symmetric(
+            horizontal: 6.r,
+            vertical: 2.r,
+          ),
+          margin: EdgeInsetsDirectional.symmetric(horizontal: 4.r),
+          decoration: BoxDecoration(
+            color: rateColor,
+            borderRadius: BorderRadius.circular(5.r),
+          ),
+          child: FittedBox(
+            child: Text(
+              formatPercentage(ticker?.changeRate),
+              style: TextStyle(
+                color: theme.white,
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w500,
               ),
-              Text(
-                formatPercentage(
-                  ticker?.changeRate,
-                ),
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  color: rateColor,
-                ),
-              )
-            ],
+            ),
           ),
         ),
-        SizedBox(width: 16.r),
+        Text(
+          formatNumber(
+            ticker?.last.decimal,
+            precision: precision,
+            showThousands: true,
+            cutInvalidZero: true,
+            prefix: '\$',
+          ),
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.bold,
+            color: rateColor,
+          ),
+        ),
+        SizedBox(width: 8.r),
         Flexible(
-          child: Column(
+          child: Row(
             mainAxisSize: MainAxisSize.max,
-            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              IndicatorInfoView(
+              BasicInfoView(
                 title: s.h24_high,
                 value: formatNumber(
                   ticker?.high24h.decimal,
                   precision: precision,
                   cutInvalidZero: true,
                 ),
+                spacing: 4.r,
+                padding: EdgeInsetsDirectional.symmetric(horizontal: 6.r),
               ),
-              IndicatorInfoView(
+              BasicInfoView(
                 title: s.h24_low,
                 value: formatNumber(
                   ticker?.low24h.decimal,
                   precision: precision,
                   cutInvalidZero: true,
                 ),
+                spacing: 4.r,
+                padding: EdgeInsetsDirectional.symmetric(horizontal: 6.r),
               ),
-              IndicatorInfoView(
+              BasicInfoView(
                 title: s.h24_vol(base),
                 value: formatNumber(
                   ticker?.vol24h.decimal,
@@ -146,8 +155,10 @@ class MarketTickerView extends ConsumerWidget {
                   showCompact: true,
                   cutInvalidZero: true,
                 ),
+                spacing: 4.r,
+                padding: EdgeInsetsDirectional.symmetric(horizontal: 6.r),
               ),
-              IndicatorInfoView(
+              BasicInfoView(
                 title: s.h24_turnover(quote),
                 value: formatNumber(
                   ticker?.volCcy24h.decimal,
@@ -155,6 +166,8 @@ class MarketTickerView extends ConsumerWidget {
                   showCompact: true,
                   cutInvalidZero: true,
                 ),
+                spacing: 4.r,
+                padding: EdgeInsetsDirectional.symmetric(horizontal: 6.r),
               ),
             ],
           ),
