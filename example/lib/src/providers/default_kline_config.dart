@@ -111,7 +111,7 @@ final defaultKlineThemeProvider = StateProvider<DefaultFlexiKlineTheme>((ref) {
   );
 });
 
-class DefaultFlexiKlineConfiguration extends BaseFlexiKlineThemeConfiguration {
+class DefaultFlexiKlineConfiguration with FlexiKlineThemeConfigurationMixin {
   final WidgetRef ref;
 
   DefaultFlexiKlineConfiguration({required this.ref});

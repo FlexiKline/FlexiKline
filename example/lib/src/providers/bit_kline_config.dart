@@ -156,7 +156,7 @@ final bitFlexiKlineThemeProvider = StateProvider<BaseBitFlexiKlineTheme>((ref) {
   }
 });
 
-class BitFlexiKlineConfiguration extends BaseFlexiKlineThemeConfiguration {
+class BitFlexiKlineConfiguration with FlexiKlineThemeConfigurationMixin {
   final WidgetRef ref;
 
   BitFlexiKlineConfiguration({required this.ref});

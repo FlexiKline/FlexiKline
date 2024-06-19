@@ -20,7 +20,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../config.dart';
-import '../providers/bit_kline_config.dart';
 import '../providers/default_kline_config.dart';
 import '../utils/screen_util.dart';
 import 'components/flexi_kline_landscape_indicator_bar.dart';
@@ -33,9 +32,11 @@ class LandscapeKlinePage extends ConsumerStatefulWidget {
   const LandscapeKlinePage({
     super.key,
     required this.candleReq,
+    this.configuration,
   });
 
   final CandleReq candleReq;
+  final IConfiguration? configuration;
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
@@ -46,7 +47,6 @@ class _LandscapeKlinePageState extends ConsumerState<LandscapeKlinePage>
     with KlinePageDataUpdateMixin<LandscapeKlinePage> {
   late final Size prevSize;
   late final FlexiKlineController controller;
-  late final BitFlexiKlineConfiguration configuration;
   @override
   FlexiKlineController get flexiKlineController => controller;
 
@@ -56,11 +56,15 @@ class _LandscapeKlinePageState extends ConsumerState<LandscapeKlinePage>
     setScreenLandscape();
 
     req = widget.candleReq;
-    configuration = BitFlexiKlineConfiguration(ref: ref);
+    IConfiguration configuration = widget.configuration ??
+        DefaultFlexiKlineConfiguration(
+          ref: ref,
+        );
     controller = FlexiKlineController(
       configuration: configuration,
+      autoSave: false,
       logger: LoggerImpl(
-        tag: "OkLandscapeFlexiKline",
+        tag: "LandscapeFlexiKline",
         debug: kDebugMode,
       ),
     );
@@ -81,8 +85,9 @@ class _LandscapeKlinePageState extends ConsumerState<LandscapeKlinePage>
   }
 
   Future<void> exitPage() async {
+    controller.saveFlexiKlineConfig();
     await setScreenPortrait();
-    exit();
+    exit(true);
   }
 
   @override

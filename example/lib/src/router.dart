@@ -135,11 +135,12 @@ final List<RouteBase> routeList = <RouteBase>[
     name: 'landscapeKline',
     path: '/landscape_kline',
     pageBuilder: (context, state) {
+      final param = state.extra as Map<String, dynamic>;
       return MaterialPage<void>(
         restorationId: 'bitKline',
         child: LandscapeKlinePage(
-          // candleReq: CandleReq.fromJson(state.uri.queryParameters),
-          candleReq: state.extra as CandleReq,
+          configuration: param['configuration'],
+          candleReq: param['candleReq'],
         ),
       );
     },

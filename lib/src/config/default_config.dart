@@ -157,7 +157,7 @@ abstract class BaseFlexiKlineTheme implements IFlexiKlineTheme {
 }
 
 /// 通过[IFlexiKlineTheme]来配置FlexiKline基类.
-abstract class BaseFlexiKlineThemeConfiguration implements IConfiguration {
+mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
   @override
   FlexiKlineConfig getFlexiKlineConfig([covariant IFlexiKlineTheme? theme]);
 

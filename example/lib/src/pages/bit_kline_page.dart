@@ -84,12 +84,20 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage>
     });
   }
 
-  void openLandscapePage() {
-    context.pushNamed('landscapeKline', extra: req.copyWith()).then((value) {
-      controller.logd('openLandscapePage return > $value');
-      // final landConfig = configuration.getFlexiKlineConfig();
-      // controller.updateFlexiKlineConfig(landConfig);
-    });
+  Future<void> openLandscapePage() async {
+    controller.saveFlexiKlineConfig();
+    final isUpdate = await context.pushNamed(
+      'landscapeKline',
+      extra: {
+        "candleReq": controller.curKlineData.req.toInitReq(),
+        "configuration": controller.configuration,
+      },
+    );
+    if (mounted && isUpdate == true) {
+      controller.logd('openLandscapePage return isUpdate> $isUpdate');
+      final landConfig = controller.configuration.getFlexiKlineConfig();
+      controller.updateFlexiKlineConfig(landConfig);
+    }
   }
 
   @override

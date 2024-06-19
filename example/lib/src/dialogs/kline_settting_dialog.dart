@@ -13,11 +13,13 @@
 // limitations under the License.
 
 import 'package:example/generated/l10n.dart';
+import 'package:example/src/router.dart';
 import 'package:example/src/theme/flexi_theme.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
 import '../providers/kline_controller_state_provider.dart';
 import '../pages/components/flexi_kline_size_slider.dart';
@@ -37,6 +39,23 @@ class KlineSettingDialog extends ConsumerStatefulWidget {
 }
 
 class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
+  Future<void> openLandscapePage() async {
+    SmartDialog.dismiss(tag: KlineSettingDialog.dialogTag);
+    widget.controller.saveFlexiKlineConfig();
+    final isUpdate = await ref.read(routerProvider).pushNamed(
+      'landscapeKline',
+      extra: {
+        "candleReq": widget.controller.curKlineData.req.toInitReq(),
+        "configuration": widget.controller.configuration,
+      },
+    );
+    if (mounted && isUpdate == true) {
+      widget.controller.logd('openLandscapePage return isUpdate> $isUpdate');
+      final landConfig = widget.controller.configuration.getFlexiKlineConfig();
+      widget.controller.updateFlexiKlineConfig(landConfig);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -73,7 +92,7 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
             children: [
               TextButton(
                 style: theme.roundBtnStyle,
-                onPressed: () {},
+                onPressed: openLandscapePage,
                 child: Column(
                   children: [
                     Icon(Icons.screen_rotation_rounded, color: theme.t1),

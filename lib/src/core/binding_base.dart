@@ -23,8 +23,13 @@ abstract class KlineBindingBase
     implements ISetting {
   final IConfiguration configuration;
 
+  /// 对于Kline的操作是否自动保存到本地配置中.
+  /// 包括: dispose; 增删指标; 调整参数等等.
+  final bool autoSave;
+
   KlineBindingBase({
     required this.configuration,
+    this.autoSave = true,
     ILogger? logger,
   }) {
     logd("constrouct");
@@ -42,7 +47,7 @@ abstract class KlineBindingBase
   @mustCallSuper
   void dispose() {
     logd("dispose base");
-    saveFlexiKlineConfig();
+    if (autoSave) saveFlexiKlineConfig();
   }
 
   KlineBindingBase get instance => this;

@@ -78,29 +78,29 @@ class SettingConfig {
   // 主区域最小大小限制
   Size mainMinSize;
   // 主区域Padding
-  EdgeInsets mainPadding;
+  final EdgeInsets mainPadding;
   // 主区图表的绘制是否在Tips区域下
-  bool mainDrawBelowTipsArea;
+  final bool mainDrawBelowTipsArea;
 
   /// 绘制区域最少留白比例
   /// 例如: 当蜡烛数量不足以绘制一屏, 向右移动到末尾时, 绘制区域左边最少留白区域占可绘制区域(canvasWidth)的比例
-  double minPaintBlankRate;
+  final double minPaintBlankRate;
 
   /// 如果足够总是计算一屏的蜡烛.
   /// 当滑动或初始化时会存在(minPaintBlankRate)的空白, 此时, 计算按一屏的蜡烛数量向后计算.
-  bool alwaysCalculateScreenOfCandlesIfEnough;
+  final bool alwaysCalculateScreenOfCandlesIfEnough;
 
   /// 蜡烛配置
   // 最大蜡烛宽度[1, 50]
-  double candleMaxWidth;
+  final double candleMaxWidth;
   // 单根蜡烛宽度
   double candleWidth;
   // 蜡烛间距
   double candleSpacing;
   // 蜡烛线宽(high, low)
-  double candleLineWidth;
+  final double candleLineWidth;
   // Candle 第一根Candle相对于mainRect右边的偏移
-  double firstCandleInitOffset;
+  final double firstCandleInitOffset;
 
   /// 全局默认的刻度值配置.
   final TextAreaConfig tickText;
@@ -134,16 +134,16 @@ class SettingConfig {
   void update(SettingConfig config) {
     mainRect = config.mainRect;
     mainMinSize = config.mainMinSize;
-    mainPadding = config.mainPadding;
-    mainDrawBelowTipsArea = config.mainDrawBelowTipsArea;
-    minPaintBlankRate = config.minPaintBlankRate;
-    alwaysCalculateScreenOfCandlesIfEnough =
-        config.alwaysCalculateScreenOfCandlesIfEnough;
-    candleMaxWidth = config.candleMaxWidth;
+    // mainPadding = config.mainPadding;
+    // mainDrawBelowTipsArea = config.mainDrawBelowTipsArea;
+    // minPaintBlankRate = config.minPaintBlankRate;
+    // alwaysCalculateScreenOfCandlesIfEnough =
+    //     config.alwaysCalculateScreenOfCandlesIfEnough;
+    // candleMaxWidth = config.candleMaxWidth;
     candleWidth = config.candleWidth;
     candleSpacing = config.candleSpacing;
-    candleLineWidth = config.candleLineWidth;
-    firstCandleInitOffset = config.firstCandleInitOffset;
+    // candleLineWidth = config.candleLineWidth;
+    // firstCandleInitOffset = config.firstCandleInitOffset;
   }
 
   factory SettingConfig.fromJson(Map<String, dynamic> json) =>

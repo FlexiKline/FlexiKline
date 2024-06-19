@@ -199,9 +199,9 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
   /// 最大蜡烛宽度[1, 50]
   // double _candleMaxWidth = 40.0;
   double get candleMaxWidth => settingConfig.candleMaxWidth;
-  set candleMaxWidth(double width) {
-    settingConfig.candleMaxWidth = width.clamp(1.0, 50.0);
-  }
+  // set candleMaxWidth(double width) {
+  //   settingConfig.candleMaxWidth = width.clamp(1.0, 50.0);
+  // }
 
   /// 单根蜡烛宽度
   double get candleWidth => settingConfig.candleWidth;
@@ -376,10 +376,11 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
 
     /// 最终渲染前, 如果用户更改了配置, 此处做下更新.
 
-    updateMainIndicatorParam(
-      height: mainRect.height,
-      padding: mainPadding,
-    );
+    // updateMainIndicatorParam(
+    //   height: mainRect.height,
+    //   padding: mainPadding,
+    // );
+    invokeSizeChanged();
 
     /// TODO: 此处考虑对其他参数的修正
   }
@@ -390,7 +391,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
     configuration.saveFlexiKlineConfig(_flexiKlineConfig);
   }
 
-  /// 更新[config]
+  /// 更新[config]到[_flexiKlineConfig]
   @override
   void updateFlexiKlineConfig(FlexiKlineConfig config) {
     if (config.key != _flexiKlineConfig.key) {
@@ -410,7 +411,15 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
       initFlexiKlineState();
 
       /// 保存当前配置
-      saveFlexiKlineConfig();
+      if (autoSave) saveFlexiKlineConfig();
+    } else {
+      _flexiKlineConfig = config;
+
+      /// 初始化状态
+      initFlexiKlineState();
+
+      /// 保存当前配置
+      if (autoSave) saveFlexiKlineConfig();
     }
   }
 

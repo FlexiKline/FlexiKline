@@ -125,6 +125,8 @@ extension CandleReqExt on CandleReq {
     return toJson()..remove('before');
   }
 
+  CandleReq toInitReq() => copyWith(after: null, before: null);
+
   String get base => instId.split('-').firstOrNull ?? instId;
   String get quote => instId.split('-').getItem(1) ?? '';
 }
