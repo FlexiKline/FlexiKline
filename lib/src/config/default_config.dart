@@ -207,77 +207,47 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
     );
   }
 
-  SettingConfig genSettingConfig(
-    covariant IFlexiKlineTheme theme, {
-    Color? textColor,
-    Color? longColor,
-    Color? shortColor,
-    double opacity = 0.5,
-
-    /// 内置LoadingView样式配置
-    LoadingConfig? loadingConfig,
-
-    /// 主/副图区域大小配置
-    Size? mainMinSize,
-    EdgeInsets? mainPadding,
-    bool mainDrawBelowTipsArea = true,
-
-    /// 主/副图绘制参数
-    double minPaintBlankRate = 0.5,
-    bool alwaysCalculateScreenOfCandlesIfEnough = false,
-    double? candleMaxWidth,
-    double? candleWidth,
-    double? candleSpacing,
-    double? candleLineWidth,
-    double? firstCandleInitOffset,
-
-    /// 全局默认的刻度值配置.
-    TextAreaConfig? tickText,
-
-    /// 副区的指标图最大数量
-    int subChartMaxCount = defaultSubChartMaxCount,
-  }) {
+  SettingConfig genSettingConfig(covariant IFlexiKlineTheme theme) {
     return SettingConfig(
       pixel: theme.pixel,
-      textColor: textColor ?? theme.textColor,
-      longColor: longColor ?? theme.long,
-      shortColor: shortColor ?? theme.short,
-      opacity: opacity,
+      textColor: theme.textColor,
+      longColor: theme.long,
+      shortColor: theme.short,
+      opacity: 0.5,
 
       /// 内置LoadingView样式配置
-      loading: loadingConfig ?? genInnerLoadingConfig(theme),
+      loading: genInnerLoadingConfig(theme),
 
       /// 主/副图区域大小配置
       // mainRect: Rect.zero,
-      mainMinSize: mainMinSize ?? Size.square(20 * theme.scale),
-      mainPadding: mainPadding ?? theme.mainIndicatorPadding,
-      mainDrawBelowTipsArea: mainDrawBelowTipsArea,
+      mainMinSize: Size.square(20 * theme.scale),
+      mainPadding: theme.mainIndicatorPadding,
+      mainDrawBelowTipsArea: true,
 
       /// 主/副图绘制参数
-      minPaintBlankRate: minPaintBlankRate,
-      alwaysCalculateScreenOfCandlesIfEnough:
-          alwaysCalculateScreenOfCandlesIfEnough,
-      candleMaxWidth: candleMaxWidth ?? 40 * theme.scale,
-      candleWidth: candleWidth ?? 7 * theme.scale,
-      candleSpacing: candleSpacing ?? 1 * theme.scale,
-      candleLineWidth: candleLineWidth ?? 1 * theme.scale,
-      firstCandleInitOffset: firstCandleInitOffset ?? 80 * theme.scale,
+      minPaintBlankRate: 0.5,
+      alwaysCalculateScreenOfCandlesIfEnough: false,
+      candleMaxWidth: 40 * theme.scale,
+      candleWidth: 7 * theme.scale,
+      candleSpacingParts: 7,
+      candleFixedSpacing: 1 * theme.scale,
+      candleLineWidth: 1 * theme.scale,
+      firstCandleInitOffset: 80 * theme.scale,
 
       /// 全局默认的刻度值配置.
-      tickText: tickText ??
-          TextAreaConfig(
-            style: TextStyle(
-              fontSize: theme.normalTextSize,
-              color: theme.tickTextColor,
-              overflow: TextOverflow.ellipsis,
-              height: defaultTextHeight,
-            ),
-            textAlign: TextAlign.end,
-            padding: EdgeInsets.symmetric(horizontal: 2 * theme.scale),
-          ),
+      tickText: TextAreaConfig(
+        style: TextStyle(
+          fontSize: theme.normalTextSize,
+          color: theme.tickTextColor,
+          overflow: TextOverflow.ellipsis,
+          height: defaultTextHeight,
+        ),
+        textAlign: TextAlign.end,
+        padding: EdgeInsets.symmetric(horizontal: 2 * theme.scale),
+      ),
 
       /// 副区的指标图最大数量
-      subChartMaxCount: subChartMaxCount,
+      subChartMaxCount: defaultSubChartMaxCount,
     );
   }
 

@@ -126,15 +126,8 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
 
   /// 主区域大小设置
   void setMainSize(Size size) {
-    if (size >= settingConfig.mainMinSize) {
-      settingConfig.mainRect = Rect.fromLTRB(
-        0,
-        0,
-        size.width,
-        size.height,
-      );
-      invokeSizeChanged();
-    }
+    settingConfig.setMainRect(size);
+    invokeSizeChanged();
   }
 
   void exitFixedSize() {
@@ -197,24 +190,22 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
   }
 
   /// 最大蜡烛宽度[1, 50]
-  // double _candleMaxWidth = 40.0;
   double get candleMaxWidth => settingConfig.candleMaxWidth;
   // set candleMaxWidth(double width) {
   //   settingConfig.candleMaxWidth = width.clamp(1.0, 50.0);
   // }
 
-  /// 单根蜡烛宽度
+  /// 单根蜡烛宽度, 限制范围1[pixel] ~ [candleMaxWidth] 之间
   double get candleWidth => settingConfig.candleWidth;
   set candleWidth(double width) {
-    // 限制蜡烛宽度范围[1, candleMaxWidth]
-    settingConfig.candleWidth = width.clamp(1.0, candleMaxWidth);
+    settingConfig.candleWidth = width.clamp(
+      settingConfig.pixel,
+      candleMaxWidth,
+    );
   }
 
-  /// 蜡烛间距  // TODO: 待优化
-  double get candleSpacing => settingConfig.candleSpacing;
-
   /// 单根蜡烛所占据实际宽度
-  double get candleActualWidth => candleWidth + candleSpacing;
+  double get candleActualWidth => candleWidth + settingConfig.candleSpacing;
 
   /// 单根蜡烛的一半
   double get candleWidthHalf => candleActualWidth / 2;
@@ -260,7 +251,6 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
 
   /// 更新主区指标的布局参数
   @protected
-  @override
   bool updateMainIndicatorParam({
     double? height,
     EdgeInsets? padding,
@@ -289,7 +279,6 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
   }
 
   @protected
-  @override
   double get subRectHeight {
     double totalHeight = 0.0;
     for (final indicator in subRectIndicators) {
@@ -366,28 +355,23 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
     __flexiKlineConfig!.init();
   }
 
-  @override
-  void initFlexiKlineState() {
+  void initFlexiKlineState({bool isInit = false}) {
     /// 修正mainRect大小
     if (mainRect.isEmpty) {
-      settingConfig.setMainRect(configuration.initialMainSize);
+      final initSize = configuration.initialMainSize;
+      if (isInit && initSize < settingConfig.mainMinSize) {
+        throw Exception('initMainRect(size:$initSize) is invalid!!!');
+      }
+      settingConfig.setMainRect(initSize);
+      invokeSizeChanged();
     }
-    settingConfig.checkAndFixMinSize();
-
-    /// 最终渲染前, 如果用户更改了配置, 此处做下更新.
-
-    // updateMainIndicatorParam(
-    //   height: mainRect.height,
-    //   padding: mainPadding,
-    // );
-    invokeSizeChanged();
 
     /// TODO: 此处考虑对其他参数的修正
   }
 
-  /// 保存当前配置到本地
+  /// 保存当前FlexiKline配置到本地
   @override
-  void saveFlexiKlineConfig() {
+  void storeFlexiKlineConfig() {
     configuration.saveFlexiKlineConfig(_flexiKlineConfig);
   }
 
@@ -396,7 +380,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
   void updateFlexiKlineConfig(FlexiKlineConfig config) {
     if (config.key != _flexiKlineConfig.key) {
       /// 保存当前配置
-      saveFlexiKlineConfig();
+      storeFlexiKlineConfig();
 
       /// 使用当前配置更新config
       config.update(_flexiKlineConfig);
@@ -411,7 +395,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
       initFlexiKlineState();
 
       /// 保存当前配置
-      if (autoSave) saveFlexiKlineConfig();
+      if (autoSave) storeFlexiKlineConfig();
     } else {
       _flexiKlineConfig = config;
 
@@ -419,13 +403,8 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
       initFlexiKlineState();
 
       /// 保存当前配置
-      if (autoSave) saveFlexiKlineConfig();
+      if (autoSave) storeFlexiKlineConfig();
     }
-  }
-
-  /// 保存当前FlexiKline配置到本地
-  void storeFlexiKlineConfig() {
-    configuration.saveFlexiKlineConfig(_flexiKlineConfig);
   }
 
   /// IndicatorsConfig

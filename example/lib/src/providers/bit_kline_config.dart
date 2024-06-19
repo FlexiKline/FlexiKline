@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:ui';
 import 'dart:convert';
+import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:example/src/config.dart';
 import 'package:example/src/theme/export.dart';
@@ -29,7 +30,10 @@ abstract class BaseBitFlexiKlineTheme
     implements IFlexiKlineTheme {
   double? _scale;
   @override
-  double get scale => _scale ??= ScreenUtil().scaleWidth;
+  double get scale => _scale ??= math.min(
+        ScreenUtil().scaleWidth,
+        ScreenUtil().scaleHeight,
+      );
 
   double? _pixel;
   @override
@@ -208,6 +212,14 @@ class BitFlexiKlineConfiguration with FlexiKlineThemeConfigurationMixin {
   GestureConfig genGestureConfig(BaseBitFlexiKlineTheme theme) {
     return super.genGestureConfig(theme).copyWith(
           tolerance: ToleranceConfig(distanceFactor: 0.5),
+        );
+  }
+
+  @override
+  SettingConfig genSettingConfig(covariant IFlexiKlineTheme theme) {
+    return super.genSettingConfig(theme).copyWith(
+          candleFixedSpacing: null,
+          candleSpacingParts: 7,
         );
   }
 

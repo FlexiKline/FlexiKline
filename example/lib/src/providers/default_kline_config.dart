@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'dart:convert';
+import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:example/generated/l10n.dart';
@@ -86,7 +87,10 @@ class DefaultFlexiKlineTheme extends BaseFlexiKlineTheme
 
   double? _scale;
   @override
-  double get scale => _scale ??= ScreenUtil().scaleWidth;
+  double get scale => _scale ??= math.min(
+        ScreenUtil().scaleWidth,
+        ScreenUtil().scaleHeight,
+      );
 
   double? _pixel;
   @override

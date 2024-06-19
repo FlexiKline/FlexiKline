@@ -85,7 +85,7 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage>
   }
 
   Future<void> openLandscapePage() async {
-    controller.saveFlexiKlineConfig();
+    controller.storeFlexiKlineConfig();
     final isUpdate = await context.pushNamed(
       'landscapeKline',
       extra: {

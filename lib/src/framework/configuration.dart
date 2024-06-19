@@ -26,7 +26,7 @@ abstract interface class IFlexiKlineTheme {
   /// 实际尺寸与UI设计的比例
   double get scale;
 
-  /// 一个像素的值
+  /// 一个物理像素的值
   double get pixel;
 
   ///根据宽度或高度中的较小值进行适配

@@ -39,7 +39,9 @@ class SettingConfig {
 
     /// 主/副图区域大小配置
     this.mainRect = Rect.zero,
-    required this.mainMinSize,
+
+    ///  如果不指定默认为设置为20*20的逻辑像素区域.
+    Size? mainMinSize,
     required this.mainPadding,
     this.mainDrawBelowTipsArea = true,
 
@@ -48,7 +50,8 @@ class SettingConfig {
     this.alwaysCalculateScreenOfCandlesIfEnough = false,
     required this.candleMaxWidth,
     required this.candleWidth,
-    required this.candleSpacing,
+    this.candleFixedSpacing,
+    this.candleSpacingParts = 7,
     required this.candleLineWidth,
     required this.firstCandleInitOffset,
 
@@ -58,7 +61,7 @@ class SettingConfig {
     /// 副图配置
     // 副区的指标图最大数量
     this.subChartMaxCount = defaultSubChartMaxCount,
-  });
+  }) : mainMinSize = mainMinSize ?? Size(20 / pixel, 20 / pixel);
 
   /// 单个像素值
   final double pixel;
@@ -75,8 +78,8 @@ class SettingConfig {
   /// 主区
   // 主区域大小配置
   Rect mainRect;
-  // 主区域最小大小限制
-  Size mainMinSize;
+  // 主区域最小大小限制,
+  final Size mainMinSize;
   // 主区域Padding
   final EdgeInsets mainPadding;
   // 主区图表的绘制是否在Tips区域下
@@ -95,8 +98,10 @@ class SettingConfig {
   final double candleMaxWidth;
   // 单根蜡烛宽度
   double candleWidth;
-  // 蜡烛间距
-  double candleSpacing;
+  // 固定蜡烛间距
+  final double? candleFixedSpacing;
+  // 蜡烛间距按蜡烛宽度平分[candleSpacingParts]份
+  final int candleSpacingParts;
   // 蜡烛线宽(high, low)
   final double candleLineWidth;
   // Candle 第一根Candle相对于mainRect右边的偏移
@@ -108,42 +113,40 @@ class SettingConfig {
   // 副区的指标图最大数量
   final int subChartMaxCount;
 
+  /// 蜡烛间距 [candleFixedSpacing] 优先于 [candleSpacingParts]
+  double? _candleSpacing;
+  double get candleSpacing {
+    _candleSpacing = candleFixedSpacing ?? candleWidth / candleSpacingParts;
+    _candleSpacing = _candleSpacing! < pixel ? pixel : _candleSpacing;
+    return _candleSpacing!;
+  }
+
   void setMainRect(Size size) {
-    if (size.isEmpty) {
-      throw Exception('setMainRect($size) is invalid!!!');
+    if (size >= mainMinSize) {
+      mainRect = Rect.fromLTRB(
+        0,
+        0,
+        size.width,
+        size.height,
+      );
     }
-    mainRect = Rect.fromLTRB(
-      0,
-      0,
-      size.width,
-      size.height,
-    );
   }
 
   // 确保最小Size必须小于MainSize.
-  void checkAndFixMinSize() {
-    final mainSize = mainRect.size;
-    if (mainMinSize.width > mainSize.width) {
-      mainMinSize = Size(mainSize.width, mainMinSize.height);
-    }
-    if (mainMinSize.height > mainSize.height) {
-      mainMinSize = Size(mainMinSize.width, mainSize.height);
-    }
-  }
+  // void checkAndFixMinSize() {
+  //   final mainSize = mainRect.size;
+  //   if (mainMinSize.width > mainSize.width) {
+  //     mainMinSize = Size(mainSize.width, mainMinSize.height);
+  //   }
+  //   if (mainMinSize.height > mainSize.height) {
+  //     mainMinSize = Size(mainMinSize.width, mainSize.height);
+  //   }
+  // }
 
   void update(SettingConfig config) {
     mainRect = config.mainRect;
-    mainMinSize = config.mainMinSize;
-    // mainPadding = config.mainPadding;
-    // mainDrawBelowTipsArea = config.mainDrawBelowTipsArea;
-    // minPaintBlankRate = config.minPaintBlankRate;
-    // alwaysCalculateScreenOfCandlesIfEnough =
-    //     config.alwaysCalculateScreenOfCandlesIfEnough;
-    // candleMaxWidth = config.candleMaxWidth;
+    // mainMinSize = config.mainMinSize;
     candleWidth = config.candleWidth;
-    candleSpacing = config.candleSpacing;
-    // candleLineWidth = config.candleLineWidth;
-    // firstCandleInitOffset = config.firstCandleInitOffset;
   }
 
   factory SettingConfig.fromJson(Map<String, dynamic> json) =>

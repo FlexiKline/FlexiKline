@@ -47,7 +47,7 @@ abstract class KlineBindingBase
   @mustCallSuper
   void dispose() {
     logd("dispose base");
-    if (autoSave) saveFlexiKlineConfig();
+    if (autoSave) storeFlexiKlineConfig();
   }
 
   KlineBindingBase get instance => this;

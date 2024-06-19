@@ -478,7 +478,8 @@ mixin StateBinding
     );
 
     if (newWidth == candleWidth) return;
-    final scaleFactor = (newWidth + candleSpacing) / candleActualWidth;
+    final scaleFactor =
+        (newWidth + settingConfig.candleSpacing) / candleActualWidth;
     // logd('handleScale candleWidth:$candleWidth>$newWidth; factor:$scaleFactor');
 
     /// 更新蜡烛宽度

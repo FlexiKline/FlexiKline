@@ -41,7 +41,7 @@ class KlineSettingDialog extends ConsumerStatefulWidget {
 class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
   Future<void> openLandscapePage() async {
     SmartDialog.dismiss(tag: KlineSettingDialog.dialogTag);
-    widget.controller.saveFlexiKlineConfig();
+    widget.controller.storeFlexiKlineConfig();
     final isUpdate = await ref.read(routerProvider).pushNamed(
       'landscapeKline',
       extra: {

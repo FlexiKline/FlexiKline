@@ -85,7 +85,7 @@ class _LandscapeKlinePageState extends ConsumerState<LandscapeKlinePage>
   }
 
   Future<void> exitPage() async {
-    controller.saveFlexiKlineConfig();
+    controller.storeFlexiKlineConfig();
     await setScreenPortrait();
     exit(true);
   }

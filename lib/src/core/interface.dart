@@ -147,28 +147,19 @@ abstract interface class ISetting {
   /// 计算[slot]位置指标的Top坐标
   double calculateIndicatorTop(int slot);
 
-  /// 副区当前总高度
-  double get subRectHeight;
-
   /// 检查并确保当前指标PaintObject实例化.
   void ensurePaintObjectInstance();
 
   /// 更新主区指标的布局参数
-  bool updateMainIndicatorParam({
-    double? height,
-    EdgeInsets? padding,
-  });
+  // bool updateMainIndicatorParam({
+  //   double? height,
+  //   EdgeInsets? padding,
+  // });
 
   /// Config
 
-  /// 初始化配置: 将会根据[IConfiguration.getFlexiKlineConfig]返回值去初始化
-  // void initFlexiKlineConfig();
-
-  /// 初始化状态
-  void initFlexiKlineState();
-
   /// 保存到本地
-  void saveFlexiKlineConfig();
+  void storeFlexiKlineConfig();
 
   /// 更新配置[config]
   void updateFlexiKlineConfig(FlexiKlineConfig config);

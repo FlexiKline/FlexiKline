@@ -21,7 +21,7 @@ abstract class _$SettingConfigCWProxy {
 
   SettingConfig mainRect(Rect mainRect);
 
-  SettingConfig mainMinSize(Size mainMinSize);
+  SettingConfig mainMinSize(Size? mainMinSize);
 
   SettingConfig mainPadding(EdgeInsets mainPadding);
 
@@ -36,7 +36,9 @@ abstract class _$SettingConfigCWProxy {
 
   SettingConfig candleWidth(double candleWidth);
 
-  SettingConfig candleSpacing(double candleSpacing);
+  SettingConfig candleFixedSpacing(double? candleFixedSpacing);
+
+  SettingConfig candleSpacingParts(int candleSpacingParts);
 
   SettingConfig candleLineWidth(double candleLineWidth);
 
@@ -67,7 +69,8 @@ abstract class _$SettingConfigCWProxy {
     bool? alwaysCalculateScreenOfCandlesIfEnough,
     double? candleMaxWidth,
     double? candleWidth,
-    double? candleSpacing,
+    double? candleFixedSpacing,
+    int? candleSpacingParts,
     double? candleLineWidth,
     double? firstCandleInitOffset,
     TextAreaConfig? tickText,
@@ -103,7 +106,8 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
   SettingConfig mainRect(Rect mainRect) => this(mainRect: mainRect);
 
   @override
-  SettingConfig mainMinSize(Size mainMinSize) => this(mainMinSize: mainMinSize);
+  SettingConfig mainMinSize(Size? mainMinSize) =>
+      this(mainMinSize: mainMinSize);
 
   @override
   SettingConfig mainPadding(EdgeInsets mainPadding) =>
@@ -133,8 +137,12 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
       this(candleWidth: candleWidth);
 
   @override
-  SettingConfig candleSpacing(double candleSpacing) =>
-      this(candleSpacing: candleSpacing);
+  SettingConfig candleFixedSpacing(double? candleFixedSpacing) =>
+      this(candleFixedSpacing: candleFixedSpacing);
+
+  @override
+  SettingConfig candleSpacingParts(int candleSpacingParts) =>
+      this(candleSpacingParts: candleSpacingParts);
 
   @override
   SettingConfig candleLineWidth(double candleLineWidth) =>
@@ -175,7 +183,8 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
         const $CopyWithPlaceholder(),
     Object? candleMaxWidth = const $CopyWithPlaceholder(),
     Object? candleWidth = const $CopyWithPlaceholder(),
-    Object? candleSpacing = const $CopyWithPlaceholder(),
+    Object? candleFixedSpacing = const $CopyWithPlaceholder(),
+    Object? candleSpacingParts = const $CopyWithPlaceholder(),
     Object? candleLineWidth = const $CopyWithPlaceholder(),
     Object? firstCandleInitOffset = const $CopyWithPlaceholder(),
     Object? tickText = const $CopyWithPlaceholder(),
@@ -211,11 +220,10 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
           ? _value.mainRect
           // ignore: cast_nullable_to_non_nullable
           : mainRect as Rect,
-      mainMinSize:
-          mainMinSize == const $CopyWithPlaceholder() || mainMinSize == null
-              ? _value.mainMinSize
-              // ignore: cast_nullable_to_non_nullable
-              : mainMinSize as Size,
+      mainMinSize: mainMinSize == const $CopyWithPlaceholder()
+          ? _value.mainMinSize
+          // ignore: cast_nullable_to_non_nullable
+          : mainMinSize as Size?,
       mainPadding:
           mainPadding == const $CopyWithPlaceholder() || mainPadding == null
               ? _value.mainPadding
@@ -249,11 +257,15 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
               ? _value.candleWidth
               // ignore: cast_nullable_to_non_nullable
               : candleWidth as double,
-      candleSpacing:
-          candleSpacing == const $CopyWithPlaceholder() || candleSpacing == null
-              ? _value.candleSpacing
-              // ignore: cast_nullable_to_non_nullable
-              : candleSpacing as double,
+      candleFixedSpacing: candleFixedSpacing == const $CopyWithPlaceholder()
+          ? _value.candleFixedSpacing
+          // ignore: cast_nullable_to_non_nullable
+          : candleFixedSpacing as double?,
+      candleSpacingParts: candleSpacingParts == const $CopyWithPlaceholder() ||
+              candleSpacingParts == null
+          ? _value.candleSpacingParts
+          // ignore: cast_nullable_to_non_nullable
+          : candleSpacingParts as int,
       candleLineWidth: candleLineWidth == const $CopyWithPlaceholder() ||
               candleLineWidth == null
           ? _value.candleLineWidth
@@ -301,8 +313,8 @@ SettingConfig _$SettingConfigFromJson(Map<String, dynamic> json) =>
           ? Rect.zero
           : const RectConverter()
               .fromJson(json['mainRect'] as Map<String, dynamic>),
-      mainMinSize: const SizeConverter()
-          .fromJson(json['mainMinSize'] as Map<String, dynamic>),
+      mainMinSize: _$JsonConverterFromJson<Map<String, dynamic>, Size>(
+          json['mainMinSize'], const SizeConverter().fromJson),
       mainPadding: const EdgeInsetsConverter()
           .fromJson(json['mainPadding'] as Map<String, dynamic>),
       mainDrawBelowTipsArea: json['mainDrawBelowTipsArea'] as bool? ?? true,
@@ -311,7 +323,8 @@ SettingConfig _$SettingConfigFromJson(Map<String, dynamic> json) =>
           json['alwaysCalculateScreenOfCandlesIfEnough'] as bool? ?? false,
       candleMaxWidth: (json['candleMaxWidth'] as num).toDouble(),
       candleWidth: (json['candleWidth'] as num).toDouble(),
-      candleSpacing: (json['candleSpacing'] as num).toDouble(),
+      candleFixedSpacing: (json['candleFixedSpacing'] as num?)?.toDouble(),
+      candleSpacingParts: (json['candleSpacingParts'] as num?)?.toInt() ?? 7,
       candleLineWidth: (json['candleLineWidth'] as num).toDouble(),
       firstCandleInitOffset: (json['firstCandleInitOffset'] as num).toDouble(),
       tickText:
@@ -346,10 +359,17 @@ Map<String, dynamic> _$SettingConfigToJson(SettingConfig instance) {
       instance.alwaysCalculateScreenOfCandlesIfEnough;
   val['candleMaxWidth'] = instance.candleMaxWidth;
   val['candleWidth'] = instance.candleWidth;
-  val['candleSpacing'] = instance.candleSpacing;
+  writeNotNull('candleFixedSpacing', instance.candleFixedSpacing);
+  val['candleSpacingParts'] = instance.candleSpacingParts;
   val['candleLineWidth'] = instance.candleLineWidth;
   val['firstCandleInitOffset'] = instance.firstCandleInitOffset;
   val['tickText'] = instance.tickText.toJson();
   val['subChartMaxCount'] = instance.subChartMaxCount;
   return val;
 }
+
+Value? _$JsonConverterFromJson<Json, Value>(
+  Object? json,
+  Value? Function(Json json) fromJson,
+) =>
+    json == null ? null : fromJson(json as Json);
