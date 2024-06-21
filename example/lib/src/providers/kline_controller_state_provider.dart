@@ -56,6 +56,40 @@ class KlineStateNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// 蜡烛图中是否展示最新价
+  bool get isShowLatestPrice {
+    return controller.indicatorsConfig.candle.latest.show;
+  }
+
+  /// 设置蜡烛图中是否展示最新价
+  void setShowLatestPrice(bool isShow) {
+    if (isShow == isShowLatestPrice) return;
+    controller.indicatorsConfig = controller.indicatorsConfig.copyWith(
+      candle: controller.indicatorsConfig.candle.copyWith(
+        latest: controller.indicatorsConfig.candle.latest.copyWith(
+          show: isShow,
+        ),
+      ),
+    );
+    notifyListeners();
+  }
+
+  /// 蜡烛图中是否展示最新价
+  bool get isShowCountDown {
+    return controller.indicatorsConfig.candle.showCountDown;
+  }
+
+  /// 设置蜡烛图中是否展示最新价
+  void setShowCountDown(bool isShow) {
+    if (isShow == isShowCountDown) return;
+    controller.indicatorsConfig = controller.indicatorsConfig.copyWith(
+      candle: controller.indicatorsConfig.candle.copyWith(
+        showCountDown: isShow,
+      ),
+    );
+    notifyListeners();
+  }
+
   /// 是否展示Y轴刻度
   bool get isShowYAxisTick {
     return controller.settingConfig.showYAxisTick;
@@ -63,14 +97,10 @@ class KlineStateNotifier extends ChangeNotifier {
 
   /// 设置是否展示Y轴坐标刻度
   void setShowYAxisTick(bool isShow) {
+    if (isShow == isShowYAxisTick) return;
     controller.settingConfig = controller.settingConfig.copyWith(
       showYAxisTick: isShow,
     );
     notifyListeners();
-    // controller.indicatorsConfig = controller.indicatorsConfig.copyWith(
-    //   candle: controller.indicatorsConfig.candle.copyWith(
-    //     showYAxisPriceTick: isShow,
-    //   ),
-    // );
   }
 }

@@ -15,6 +15,7 @@
 import 'package:example/generated/l10n.dart';
 import 'package:example/src/router.dart';
 import 'package:example/src/theme/flexi_theme.dart';
+import 'package:example/src/utils/dialog_manager.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -39,6 +40,10 @@ class KlineSettingDialog extends ConsumerStatefulWidget {
 }
 
 class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
+  bool klineHeightChanging = false;
+  bool klineWidthChanging = false;
+  bool get klineSizeChanging => klineHeightChanging || klineWidthChanging;
+
   Future<void> openLandscapePage() async {
     SmartDialog.dismiss(tag: KlineSettingDialog.dialogTag);
     widget.controller.storeFlexiKlineConfig();
@@ -58,15 +63,45 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildSettingTab(context),
-          _buildDisplaySetting(context),
-          _buildKlineHeightSetting(context),
-        ],
-      ),
+    final theme = ref.watch(themeProvider);
+    return Stack(
+      children: [
+        Visibility.maintain(
+          visible: !klineSizeChanging,
+          child: DialogWrapper(
+            bgColor: theme.pageBg,
+            alignment: Alignment.bottomCenter,
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSettingTab(context),
+                  _buildDisplaySetting(context),
+                  SizedBox(height: 160.r),
+                ],
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: 0,
+          child: Container(
+            height: 160.r,
+            margin: EdgeInsetsDirectional.symmetric(horizontal: 8.r),
+            padding: EdgeInsetsDirectional.symmetric(
+              horizontal: 8.r,
+              vertical: 10.r,
+            ),
+            decoration: BoxDecoration(
+              color: theme.pageBg.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+            child: _buildKlineHeightSetting(context),
+          ),
+        )
+      ],
     );
   }
 
@@ -137,6 +172,7 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
     );
   }
 
+  /// 设置图表区域显示设置
   Widget _buildDisplaySetting(BuildContext context) {
     final theme = ref.watch(themeProvider);
     final s = S.of(context);
@@ -152,11 +188,14 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
             children: [
               Expanded(
                 child: CheckboxListTile(
-                  value: true,
+                  dense: true,
+                  value: klineState.isShowLatestPrice,
                   contentPadding: EdgeInsets.zero,
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   onChanged: (value) {
-                    setState(() {});
+                    klineState.setShowLatestPrice(
+                      !klineState.isShowLatestPrice,
+                    );
                   },
                   controlAffinity: ListTileControlAffinity.leading,
                   title: Text(
@@ -171,13 +210,12 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
               ),
               Expanded(
                 child: CheckboxListTile(
+                  dense: true,
                   value: klineState.isShowYAxisTick,
                   contentPadding: EdgeInsets.zero,
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   onChanged: (value) {
-                    klineState.setShowYAxisTick(
-                      !klineState.isShowYAxisTick,
-                    );
+                    klineState.setShowYAxisTick(!klineState.isShowYAxisTick);
                   },
                   controlAffinity: ListTileControlAffinity.leading,
                   title: Text(
@@ -196,11 +234,11 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
             children: [
               Expanded(
                 child: CheckboxListTile(
-                  value: klineState
-                      .controller.indicatorsConfig.candle.showCountDown,
+                  dense: true,
+                  value: klineState.isShowCountDown,
                   contentPadding: EdgeInsets.zero,
                   onChanged: (value) {
-                    ref.read(klineStateProvider(widget.controller).notifier);
+                    klineState.setShowCountDown(!klineState.isShowCountDown);
                   },
                   controlAffinity: ListTileControlAffinity.leading,
                   title: Text(
@@ -223,40 +261,44 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
   Widget _buildKlineHeightSetting(BuildContext context) {
     final theme = ref.watch(themeProvider);
     final s = S.of(context);
-    return Container(
-      padding: EdgeInsetsDirectional.symmetric(
-        horizontal: 16.r,
-        vertical: 10.r,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            s.chartWidth,
-            style: theme.t1s14w400,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          s.chartWidth,
+          style: theme.t1s14w400,
+        ),
+        FlexiKlineSizeSlider(
+          controller: widget.controller,
+          maxSize: Size(
+            ScreenUtil().screenWidth,
+            ScreenUtil().screenHeight * 2 / 3,
           ),
-          FlexiKlineSizeSlider(
-            controller: widget.controller,
-            maxSize: Size(
-              ScreenUtil().screenWidth,
-              ScreenUtil().screenHeight * 2 / 3,
-            ),
-            axis: Axis.horizontal,
+          axis: Axis.horizontal,
+          onStateChanged: (value) {
+            setState(() {
+              klineWidthChanging = value;
+            });
+          },
+        ),
+        Text(
+          s.chartHeight,
+          style: theme.t1s14w400,
+        ),
+        FlexiKlineSizeSlider(
+          controller: widget.controller,
+          maxSize: Size(
+            ScreenUtil().screenWidth,
+            ScreenUtil().screenHeight * 2 / 3,
           ),
-          Text(
-            s.chartHeight,
-            style: theme.t1s14w400,
-          ),
-          FlexiKlineSizeSlider(
-            controller: widget.controller,
-            maxSize: Size(
-              ScreenUtil().screenWidth,
-              ScreenUtil().screenHeight * 2 / 3,
-            ),
-            axis: Axis.vertical,
-          ),
-        ],
-      ),
+          axis: Axis.vertical,
+          onStateChanged: (value) {
+            setState(() {
+              klineHeightChanging = value;
+            });
+          },
+        ),
+      ],
     );
   }
 }

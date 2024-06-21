@@ -27,6 +27,7 @@ class FlexiKlineSizeSlider extends ConsumerStatefulWidget {
     this.maxSize,
     this.axis = Axis.vertical,
     this.divisions,
+    this.onStateChanged,
   });
 
   final FlexiKlineController controller;
@@ -34,6 +35,7 @@ class FlexiKlineSizeSlider extends ConsumerStatefulWidget {
   final Axis axis;
   // 限制滑动按[10~100]平均分
   final int? divisions;
+  final ValueChanged<bool>? onStateChanged;
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
@@ -84,6 +86,12 @@ class _FlexiKlineSizeSliderState extends ConsumerState<FlexiKlineSizeSlider> {
       divisions: divisions,
       thumbColor: theme.t1,
       overlayColor: MaterialStatePropertyAll(theme.transparent),
+      onChangeStart: (value) {
+        widget.onStateChanged?.call(true);
+      },
+      onChangeEnd: (value) {
+        widget.onStateChanged?.call(false);
+      },
       onChanged: (value) {
         setState(() {
           if (widget.axis == Axis.vertical) {

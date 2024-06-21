@@ -66,12 +66,29 @@ final class SortableHashSet<E> with SetMixin<E> {
     return null;
   }
 
+  /// 添加[elements]集合到队列中.
+  /// [disposeElement] 如果不为空, 则在添加过程中, 发生替换操作时, 会回调原列表旧元素, 方便dispose.
+  void appendAll(
+    Iterable<E> elements, {
+    void Function(E value)? disposeElement,
+  }) {
+    for (var element in elements) {
+      final old = append(element);
+      if (disposeElement != null && old != null) disposeElement(old);
+    }
+  }
+
   @override
   bool add(E value) {
     final result = _set.remove(value);
     _set.add(value);
     __list = null;
     return result;
+  }
+
+  @override
+  void addAll(Iterable<E> elements, {void Function(E value)? disposeElement}) {
+    appendAll(elements, disposeElement: disposeElement);
   }
 
   @override

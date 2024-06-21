@@ -17,6 +17,7 @@ import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
 import '../../dialogs/indicators_select_dialog.dart';
 import '../../dialogs/kline_settting_dialog.dart';
@@ -94,8 +95,9 @@ class _FlexiKlineSettingBarState extends ConsumerState<FlexiKlineSettingBar> {
   }
 
   void onTabKlineSetting() {
-    DialogManager().showBottomDialog(
-      dialogTag: KlineSettingDialog.dialogTag,
+    SmartDialog.show(
+      tag: KlineSettingDialog.dialogTag,
+      alignment: Alignment.bottomCenter,
       builder: (context) => KlineSettingDialog(
         controller: widget.controller,
       ),

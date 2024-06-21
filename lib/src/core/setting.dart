@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:collection';
 import 'dart:math' as math;
 
 import 'package:flexi_kline/src/extension/export.dart';
@@ -237,7 +236,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
   }
 
   @protected
-  Queue<Indicator> get subIndicators {
+  FixedHashQueue<Indicator> get subIndicators {
     return _flexiKlineConfig.subRectIndicatorQueue;
   }
 
@@ -319,14 +318,19 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
 
   /// 在副图中添加指标
   void addIndicatorInSub(ValueKey<dynamic> key) {
-    if (indicatorsConfig.subIndicators.containsKey(key)) {
-      if (subIndicators.length >= settingConfig.subChartMaxCount) {
-        final deleted = subIndicators.removeFirst();
-        deleted.dispose();
-      }
-      subIndicators.addLast(indicatorsConfig.subIndicators[key]!);
+    final indicator = indicatorsConfig.subIndicators.getItem(key);
+    if (indicator != null) {
+      subIndicators.append(indicator)?.dispose();
       invokeSizeChanged();
     }
+    // if (indicatorsConfig.subIndicators.containsKey(key)) {
+    //   if (subIndicators.length >= settingConfig.subChartMaxCount) {
+    //     final deleted = subIndicators.removeFirst();
+    //     deleted.dispose();
+    //   }
+    //   subIndicators.addLast(indicatorsConfig.subIndicators[key]!);
+    //   invokeSizeChanged();
+    // }
   }
 
   /// 删除副图[key]指定的指标
@@ -417,21 +421,14 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
       _flexiKlineConfig.indicators,
     );
     _flexiKlineConfig.indicators = config;
-    SinglePaintObjectIndicator? newMain;
-    Indicator? newSub;
     for (var key in keys) {
-      newMain = indicatorsConfig.mainIndicators.getItem(key);
-      if (newMain != null) {
-        mainIndicator.appendIndicator(newMain, this);
+      if (indicatorsConfig.mainIndicators.containsKey(key)) {
+        addIndicatorInMain(key);
       }
-      newSub = indicatorsConfig.subIndicators.getItem(key);
-      if (newSub != null) {
-        // subIndicators.a
+      if (indicatorsConfig.subIndicators.containsKey(key)) {
+        addIndicatorInSub(key);
       }
     }
-
-    markRepaintChart();
-    markRepaintCross();
   }
 
   /// SettingConfig

@@ -62,6 +62,18 @@ class FixedHashQueue<E> implements Queue<E> {
     }
   }
 
+  /// 添加[iterable]集合到队列中.
+  /// [disposeElement] 如果不为空, 则在添加过程中, 发生替换操作时, 会回调原队列旧元素, 方便dispose.
+  void appendAll(
+    Iterable<E> iterable, {
+    void Function(E value)? disposeElement,
+  }) {
+    iterable.toSet().forEach((element) {
+      final old = append(element);
+      if (disposeElement != null && old != null) disposeElement(old);
+    });
+  }
+
   @override
   void addFirst(E value) => append(value, atFirst: true);
 
@@ -72,10 +84,8 @@ class FixedHashQueue<E> implements Queue<E> {
   void addLast(E value) => append(value);
 
   @override
-  void addAll(Iterable<E> iterable) {
-    iterable.toSet().forEach((element) {
-      append(element);
-    });
+  void addAll(Iterable<E> iterable, {void Function(E value)? disposeElement}) {
+    appendAll(iterable, disposeElement: disposeElement);
   }
 
   @override

@@ -69,7 +69,7 @@ class CandleIndicator extends SinglePaintObjectIndicator {
   final MarkConfig last;
   // 最新价: 当最新蜡烛在可视区域时使用.
   final MarkConfig latest;
-  // 使用蜡烛颜色做为背景
+  // 使用蜡烛颜色做为Latest的背景
   final bool useCandleColorAsLatestBg;
   // 倒计时, 在latest最新价之下展示
   final bool showCountDown;
