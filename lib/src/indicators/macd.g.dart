@@ -11,6 +11,8 @@ abstract class _$MACDIndicatorCWProxy {
 
   MACDIndicator name(String name);
 
+  MACDIndicator zIndex(int zIndex);
+
   MACDIndicator height(double height);
 
   MACDIndicator padding(EdgeInsets padding);
@@ -40,6 +42,7 @@ abstract class _$MACDIndicatorCWProxy {
   MACDIndicator call({
     ValueKey<dynamic>? key,
     String? name,
+    int? zIndex,
     double? height,
     EdgeInsets? padding,
     MACDParam? calcParam,
@@ -64,6 +67,9 @@ class _$MACDIndicatorCWProxyImpl implements _$MACDIndicatorCWProxy {
 
   @override
   MACDIndicator name(String name) => this(name: name);
+
+  @override
+  MACDIndicator zIndex(int zIndex) => this(zIndex: zIndex);
 
   @override
   MACDIndicator height(double height) => this(height: height);
@@ -107,6 +113,7 @@ class _$MACDIndicatorCWProxyImpl implements _$MACDIndicatorCWProxy {
   MACDIndicator call({
     Object? key = const $CopyWithPlaceholder(),
     Object? name = const $CopyWithPlaceholder(),
+    Object? zIndex = const $CopyWithPlaceholder(),
     Object? height = const $CopyWithPlaceholder(),
     Object? padding = const $CopyWithPlaceholder(),
     Object? calcParam = const $CopyWithPlaceholder(),
@@ -127,6 +134,10 @@ class _$MACDIndicatorCWProxyImpl implements _$MACDIndicatorCWProxy {
           ? _value.name
           // ignore: cast_nullable_to_non_nullable
           : name as String,
+      zIndex: zIndex == const $CopyWithPlaceholder() || zIndex == null
+          ? _value.zIndex
+          // ignore: cast_nullable_to_non_nullable
+          : zIndex as int,
       height: height == const $CopyWithPlaceholder() || height == null
           ? _value.height
           // ignore: cast_nullable_to_non_nullable
@@ -188,6 +199,7 @@ MACDIndicator _$MACDIndicatorFromJson(Map<String, dynamic> json) =>
           ? macdKey
           : const ValueKeyConverter().fromJson(json['key'] as String),
       name: json['name'] as String? ?? 'MACD',
+      zIndex: (json['zIndex'] as num?)?.toInt() ?? 0,
       height: (json['height'] as num?)?.toDouble() ?? defaultSubIndicatorHeight,
       padding: json['padding'] == null
           ? defaultSubIndicatorPadding
@@ -212,6 +224,7 @@ Map<String, dynamic> _$MACDIndicatorToJson(MACDIndicator instance) =>
       'name': instance.name,
       'height': instance.height,
       'padding': const EdgeInsetsConverter().toJson(instance.padding),
+      'zIndex': instance.zIndex,
       'calcParam': instance.calcParam.toJson(),
       'difTips': instance.difTips.toJson(),
       'deaTips': instance.deaTips.toJson(),

@@ -11,6 +11,8 @@ abstract class _$KDJIndicatorCWProxy {
 
   KDJIndicator name(String name);
 
+  KDJIndicator zIndex(int zIndex);
+
   KDJIndicator height(double height);
 
   KDJIndicator padding(EdgeInsets padding);
@@ -40,6 +42,7 @@ abstract class _$KDJIndicatorCWProxy {
   KDJIndicator call({
     ValueKey<dynamic>? key,
     String? name,
+    int? zIndex,
     double? height,
     EdgeInsets? padding,
     KDJParam? calcParam,
@@ -64,6 +67,9 @@ class _$KDJIndicatorCWProxyImpl implements _$KDJIndicatorCWProxy {
 
   @override
   KDJIndicator name(String name) => this(name: name);
+
+  @override
+  KDJIndicator zIndex(int zIndex) => this(zIndex: zIndex);
 
   @override
   KDJIndicator height(double height) => this(height: height);
@@ -107,6 +113,7 @@ class _$KDJIndicatorCWProxyImpl implements _$KDJIndicatorCWProxy {
   KDJIndicator call({
     Object? key = const $CopyWithPlaceholder(),
     Object? name = const $CopyWithPlaceholder(),
+    Object? zIndex = const $CopyWithPlaceholder(),
     Object? height = const $CopyWithPlaceholder(),
     Object? padding = const $CopyWithPlaceholder(),
     Object? calcParam = const $CopyWithPlaceholder(),
@@ -127,6 +134,10 @@ class _$KDJIndicatorCWProxyImpl implements _$KDJIndicatorCWProxy {
           ? _value.name
           // ignore: cast_nullable_to_non_nullable
           : name as String,
+      zIndex: zIndex == const $CopyWithPlaceholder() || zIndex == null
+          ? _value.zIndex
+          // ignore: cast_nullable_to_non_nullable
+          : zIndex as int,
       height: height == const $CopyWithPlaceholder() || height == null
           ? _value.height
           // ignore: cast_nullable_to_non_nullable
@@ -187,6 +198,7 @@ KDJIndicator _$KDJIndicatorFromJson(Map<String, dynamic> json) => KDJIndicator(
           ? const ValueKey(IndicatorType.kdj)
           : const ValueKeyConverter().fromJson(json['key'] as String),
       name: json['name'] as String? ?? 'KDJ',
+      zIndex: (json['zIndex'] as num?)?.toInt() ?? 0,
       height: (json['height'] as num?)?.toDouble() ?? defaultSubIndicatorHeight,
       padding: json['padding'] == null
           ? defaultSubIndicatorPadding
@@ -211,6 +223,7 @@ Map<String, dynamic> _$KDJIndicatorToJson(KDJIndicator instance) =>
       'name': instance.name,
       'height': instance.height,
       'padding': const EdgeInsetsConverter().toJson(instance.padding),
+      'zIndex': instance.zIndex,
       'calcParam': instance.calcParam.toJson(),
       'ktips': instance.ktips.toJson(),
       'dtips': instance.dtips.toJson(),

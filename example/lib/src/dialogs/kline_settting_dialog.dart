@@ -171,15 +171,17 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
               ),
               Expanded(
                 child: CheckboxListTile(
-                  value: true,
+                  value: klineState.isShowYAxisTick,
                   contentPadding: EdgeInsets.zero,
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   onChanged: (value) {
-                    setState(() {});
+                    klineState.setShowYAxisTick(
+                      !klineState.isShowYAxisTick,
+                    );
                   },
                   controlAffinity: ListTileControlAffinity.leading,
                   title: Text(
-                    s.priceScale,
+                    s.yAxisPriceScale,
                     style: theme.t1s14w500,
                   ),
                   activeColor: theme.t1,

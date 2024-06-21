@@ -58,7 +58,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
         "permissionDenied": MessageLookupByLibrary.simpleMessage("没有权限"),
         "preferredIntervals": MessageLookupByLibrary.simpleMessage("周期偏好"),
-        "priceScale": MessageLookupByLibrary.simpleMessage("Y轴坐标"),
         "reqMethodForbidden": MessageLookupByLibrary.simpleMessage("请求方法被禁止"),
         "responseTimeout": MessageLookupByLibrary.simpleMessage("服务端响应超时"),
         "searchTradingPairHint": MessageLookupByLibrary.simpleMessage("请输入交易对"),
@@ -88,6 +87,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "tooltipTurnover": MessageLookupByLibrary.simpleMessage("成交额"),
         "unknownError": MessageLookupByLibrary.simpleMessage("未知错误"),
         "unsupportedProtocol":
-            MessageLookupByLibrary.simpleMessage("不支持HTTP协议请求")
+            MessageLookupByLibrary.simpleMessage("不支持HTTP协议请求"),
+        "yAxisPriceScale": MessageLookupByLibrary.simpleMessage("Y轴坐标")
       };
 }

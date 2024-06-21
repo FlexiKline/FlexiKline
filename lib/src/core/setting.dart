@@ -15,6 +15,7 @@
 import 'dart:collection';
 import 'dart:math' as math;
 
+import 'package:flexi_kline/src/extension/export.dart';
 import 'package:flutter/material.dart';
 
 import '../config/export.dart';
@@ -235,8 +236,9 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
     return _flexiKlineConfig.mainIndicator;
   }
 
+  @protected
   Queue<Indicator> get subIndicators {
-    return _flexiKlineConfig.subIndicators;
+    return _flexiKlineConfig.subRectIndicatorQueue;
   }
 
   @protected
@@ -410,24 +412,73 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
   /// IndicatorsConfig
   @override
   IndicatorsConfig get indicatorsConfig => _flexiKlineConfig.indicators;
+  set indicatorsConfig(IndicatorsConfig config) {
+    final keys = config.megerAndDisposeOldIndicator(
+      _flexiKlineConfig.indicators,
+    );
+    _flexiKlineConfig.indicators = config;
+    SinglePaintObjectIndicator? newMain;
+    Indicator? newSub;
+    for (var key in keys) {
+      newMain = indicatorsConfig.mainIndicators.getItem(key);
+      if (newMain != null) {
+        mainIndicator.appendIndicator(newMain, this);
+      }
+      newSub = indicatorsConfig.subIndicators.getItem(key);
+      if (newSub != null) {
+        // subIndicators.a
+      }
+    }
+
+    markRepaintChart();
+    markRepaintCross();
+  }
 
   /// SettingConfig
   @override
   SettingConfig get settingConfig => _flexiKlineConfig.setting;
+  set settingConfig(SettingConfig config) {
+    final isChangeSize = config.mainRect != mainRect;
+    _flexiKlineConfig.setting = config;
+    initFlexiKlineState();
+    if (isChangeSize) invokeSizeChanged();
+    markRepaintChart();
+    markRepaintCross();
+  }
 
   /// SettingConfig
   @override
   GestureConfig get gestureConfig => _flexiKlineConfig.gesture;
+  set gestureConfig(GestureConfig config) {
+    _flexiKlineConfig.gesture = config;
+    markRepaintChart();
+    markRepaintCross();
+  }
 
   /// GridConfig
   @override
   GridConfig get gridConfig => _flexiKlineConfig.grid;
+  set gridConfig(GridConfig config) {
+    _flexiKlineConfig.grid = config;
+    markRepaintChart();
+    markRepaintCross();
+  }
 
   /// CrossConfig
   @override
   CrossConfig get crossConfig => _flexiKlineConfig.cross;
+  set crossConfig(CrossConfig config) {
+    _flexiKlineConfig.cross = config;
+    markRepaintChart();
+    markRepaintCross();
+  }
 
   /// TooltipConfig
   @override
   TooltipConfig get tooltipConfig => _flexiKlineConfig.tooltip;
+  set tooltipConfig(TooltipConfig config) {
+    _flexiKlineConfig.tooltip = config;
+    markRepaintChart();
+    markRepaintCross();
+  }
 }

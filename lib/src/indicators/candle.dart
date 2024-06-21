@@ -32,6 +32,7 @@ class CandleIndicator extends SinglePaintObjectIndicator {
   CandleIndicator({
     super.key = candleKey,
     super.name = 'Candle',
+    super.zIndex = 0,
     required super.height,
     super.padding = defaultMainIndicatorPadding,
 
@@ -90,7 +91,7 @@ class CandleIndicator extends SinglePaintObjectIndicator {
 }
 
 class CandlePaintObject<T extends CandleIndicator>
-    extends SinglePaintObjectBox<T> with PaintHorizontalTickOnCrossMixin {
+    extends SinglePaintObjectBox<T> with PaintYAxisMarkOnCrossMixin {
   CandlePaintObject({
     required super.controller,
     required super.indicator,
@@ -121,7 +122,9 @@ class CandlePaintObject<T extends CandleIndicator>
     paintCandleChart(canvas, size);
 
     /// 绘制价钱刻度数据
-    paintPriceTick(canvas, size);
+    if (settingConfig.showYAxisTick) {
+      paintYAxisPriceTick(canvas, size);
+    }
   }
 
   @override
@@ -133,7 +136,7 @@ class CandlePaintObject<T extends CandleIndicator>
   @override
   void onCross(Canvas canvas, Offset offset) {
     /// 绘制Cross Y轴价钱刻度
-    paintHorizontalTickOnCross(
+    paintYAxisMarkOnCross(
       canvas,
       offset,
       precision: klineData.precision,
@@ -145,7 +148,7 @@ class CandlePaintObject<T extends CandleIndicator>
 
   // onCross时, 格式化Y轴上的标记值.
   @override
-  String formatTickValueOnCross(BagNum value, {required int precision}) {
+  String formatMarkValueOnCross(BagNum value, {required int precision}) {
     return formatPrice(
       value.toDecimal(),
       precision: klineData.precision,
@@ -317,7 +320,7 @@ class CandlePaintObject<T extends CandleIndicator>
 
   /// 绘制蜡烛图右侧价钱刻度
   /// 根据Grid horizontal配置来绘制, 保证在grid.horizontal线之上.
-  void paintPriceTick(Canvas canvas, Size size) {
+  void paintYAxisPriceTick(Canvas canvas, Size size) {
     final dyStep = drawableRect.height / gridConfig.horizontal.count;
     final dx = chartRect.right;
     double dy = 0;

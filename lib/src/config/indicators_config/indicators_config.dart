@@ -159,6 +159,33 @@ class IndicatorsConfig {
     return calcParams;
   }
 
+  /// 从[oldConfig]指标配置集合更新自定义指标. 并清理无效的旧指标.
+  Set<ValueKey> megerAndDisposeOldIndicator(IndicatorsConfig oldConfig) {
+    _customMainIndicators.addAll(oldConfig._customMainIndicators);
+    _customSubIndicators.addAll(oldConfig._customMainIndicators);
+
+    Set<ValueKey> keys = {};
+
+    /// 清理变更的主区指标
+    oldConfig._innerMainIndicators.forEach((key, value) {
+      final newVale = _innerMainIndicators[key];
+      if (!identical(newVale, value)) {
+        value.dispose();
+        keys.add(key);
+      }
+    });
+
+    /// 清理变更的副区指标
+    oldConfig._innerSubIndicators.forEach((key, value) {
+      final newVale = _innerSubIndicators[key];
+      if (!identical(newVale, value)) {
+        value.dispose();
+        keys.add(key);
+      }
+    });
+    return keys;
+  }
+
   void dispose() {
     mainIndicators.forEach((key, indicator) {
       indicator.dispose();

@@ -33,6 +33,7 @@ class BOLLIndicator extends SinglePaintObjectIndicator
   BOLLIndicator({
     super.key = bollKey,
     super.name = 'BOLL',
+    super.zIndex = 2,
     required super.height,
     super.padding = defaultMainIndicatorPadding,
 

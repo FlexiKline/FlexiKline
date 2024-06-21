@@ -55,6 +55,9 @@ class SettingConfig {
     required this.candleLineWidth,
     required this.firstCandleInitOffset,
 
+    /// 是否展示Y轴刻度.
+    this.showYAxisTick = true,
+
     /// 全局默认的刻度值配置.
     required this.tickText,
 
@@ -106,6 +109,9 @@ class SettingConfig {
   final double candleLineWidth;
   // Candle 第一根Candle相对于mainRect右边的偏移
   final double firstCandleInitOffset;
+
+  /// 是否展示Y轴刻度.
+  final bool showYAxisTick;
 
   /// 全局默认的刻度值配置.
   final TextAreaConfig tickText;

@@ -31,6 +31,7 @@ class VolumeIndicator extends SinglePaintObjectIndicator {
   VolumeIndicator({
     super.key = volumeKey,
     super.name = 'VOL',
+    super.zIndex = -1,
     super.height = defaultSubIndicatorHeight,
     super.padding = defaultSubIndicatorPadding,
     super.paintMode = PaintMode.alone,
@@ -77,7 +78,7 @@ class VolumeIndicator extends SinglePaintObjectIndicator {
 
 class VolumePaintObject<T extends VolumeIndicator>
     extends SinglePaintObjectBox<T>
-    with PaintHorizontalTickMixin, PaintHorizontalTickOnCrossMixin {
+    with PaintYAxisScaleMixin, PaintYAxisMarkOnCrossMixin {
   VolumePaintObject({
     required super.controller,
     required super.indicator,
@@ -100,9 +101,9 @@ class VolumePaintObject<T extends VolumeIndicator>
     /// 绘制Volume柱状图
     paintVolumeChart(canvas, size);
 
-    if (indicator.showYAxisTick) {
+    if (settingConfig.showYAxisTick && indicator.showYAxisTick) {
       /// 绘制Y轴刻度值
-      paintHorizontalTick(
+      paintYAxisScale(
         canvas,
         size,
         tickCount: indicator.tickCount,
@@ -115,7 +116,7 @@ class VolumePaintObject<T extends VolumeIndicator>
   void onCross(Canvas canvas, Offset offset) {
     if (indicator.showCrossMark) {
       /// onCross时, 绘制Y轴上的标记值
-      paintHorizontalTickOnCross(
+      paintYAxisMarkOnCross(
         canvas,
         offset,
         precision: indicator.precision,

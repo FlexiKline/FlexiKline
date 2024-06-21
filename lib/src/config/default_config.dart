@@ -337,6 +337,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   CandleIndicator genCandleIndicator(covariant IFlexiKlineTheme theme) {
     return CandleIndicator(
+      zIndex: 0,
       height: theme.mainIndicatorHeight,
       padding: theme.mainIndicatorPadding,
       high: MarkConfig(
@@ -440,6 +441,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   VolumeIndicator genMainVolumeIndicator(covariant IFlexiKlineTheme theme) {
     return VolumeIndicator(
+      zIndex: -1,
       height: theme.subIndicatorHeight,
       padding: theme.subIndicatorPadding,
       paintMode: PaintMode.alone,
@@ -469,6 +471,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   MAIndicator genMaIndicator(covariant IFlexiKlineTheme theme) {
     return MAIndicator(
+      zIndex: 1,
       height: theme.mainIndicatorHeight,
       padding: theme.mainIndicatorPadding,
       calcParams: [
@@ -506,6 +509,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   EMAIndicator genEmaIndicator(covariant IFlexiKlineTheme theme) {
     return EMAIndicator(
+      zIndex: 2,
       height: theme.mainIndicatorHeight,
       padding: theme.mainIndicatorPadding,
       calcParams: [
@@ -569,6 +573,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   BOLLIndicator genBollIndicator(covariant IFlexiKlineTheme theme) {
     return BOLLIndicator(
+      zIndex: 3,
       height: theme.mainIndicatorHeight,
       padding: theme.mainIndicatorPadding,
 
@@ -617,6 +622,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   TimeIndicator genTimeIndicator(covariant IFlexiKlineTheme theme) {
     return TimeIndicator(
+      zIndex: 0,
       height: theme.timeIndicatorHeight,
       padding: EdgeInsets.zero,
       position: DrawPosition.middle,
@@ -636,6 +642,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   MACDIndicator genMacdIndicator(covariant IFlexiKlineTheme theme) {
     return MACDIndicator(
+      zIndex: 0,
       height: theme.subIndicatorHeight,
       padding: theme.subIndicatorPadding,
 
@@ -682,6 +689,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   KDJIndicator genKdjIndicator(covariant IFlexiKlineTheme theme) {
     return KDJIndicator(
+      zIndex: 0,
       height: theme.subIndicatorHeight,
       padding: theme.subIndicatorPadding,
 
@@ -737,12 +745,13 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       padding: padding ?? theme.subIndicatorPadding,
       drawBelowTipsArea: drawBelowTipsArea,
       volumeIndicator: genSubVolumeIndicator(theme),
-      volMaIndicator: genVolMaIndicator(theme),
+      volMaIndicator: genSubVolMaIndicator(theme),
     );
   }
 
   VolumeIndicator genSubVolumeIndicator(covariant IFlexiKlineTheme theme) {
     return VolumeIndicator(
+      zIndex: 0,
       height: theme.subIndicatorHeight,
       padding: theme.subIndicatorPadding,
       paintMode: PaintMode.combine,
@@ -770,8 +779,9 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
     );
   }
 
-  VolMaIndicator genVolMaIndicator(covariant IFlexiKlineTheme theme) {
+  VolMaIndicator genSubVolMaIndicator(covariant IFlexiKlineTheme theme) {
     return VolMaIndicator(
+      zIndex: 1,
       height: theme.subIndicatorHeight,
       padding: theme.subIndicatorPadding,
       calcParams: [

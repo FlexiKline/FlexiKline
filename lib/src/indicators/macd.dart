@@ -33,6 +33,7 @@ class MACDIndicator extends SinglePaintObjectIndicator
   MACDIndicator({
     super.key = macdKey,
     super.name = 'MACD',
+    super.zIndex = 0,
     super.height = defaultSubIndicatorHeight,
     super.padding = defaultSubIndicatorPadding,
 
@@ -78,7 +79,7 @@ class MACDIndicator extends SinglePaintObjectIndicator
 }
 
 class MACDPaintObject<T extends MACDIndicator> extends SinglePaintObjectBox<T>
-    with PaintHorizontalTickMixin, PaintHorizontalTickOnCrossMixin {
+    with PaintYAxisScaleMixin, PaintYAxisMarkOnCrossMixin {
   MACDPaintObject({required super.controller, required super.indicator});
 
   @override
@@ -97,18 +98,20 @@ class MACDPaintObject<T extends MACDIndicator> extends SinglePaintObjectBox<T>
     paintMacdChart(canvas, size);
 
     /// 绘制Y轴刻度值
-    paintHorizontalTick(
-      canvas,
-      size,
-      tickCount: indicator.tickCount,
-      precision: indicator.precision,
-    );
+    if (settingConfig.showYAxisTick) {
+      paintYAxisScale(
+        canvas,
+        size,
+        tickCount: indicator.tickCount,
+        precision: indicator.precision,
+      );
+    }
   }
 
   @override
   void onCross(Canvas canvas, Offset offset) {
     /// onCross时, 绘制Y轴上的标记值
-    paintHorizontalTickOnCross(
+    paintYAxisMarkOnCross(
       canvas,
       offset,
       precision: indicator.precision,

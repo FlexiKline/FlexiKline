@@ -33,6 +33,7 @@ class TimeIndicator extends SinglePaintObjectIndicator {
   TimeIndicator({
     super.key = timeKey,
     super.name = 'Time',
+    super.zIndex = 0,
     super.height = defaultTimeIndicatorHeight,
     super.padding = EdgeInsets.zero,
     this.position = DrawPosition.middle,

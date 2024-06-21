@@ -66,8 +66,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Permission denied"),
         "preferredIntervals":
             MessageLookupByLibrary.simpleMessage("Preferred intervals"),
-        "priceScale":
-            MessageLookupByLibrary.simpleMessage("Price scale(y-axis)"),
         "reqMethodForbidden":
             MessageLookupByLibrary.simpleMessage("Request method is forbidden"),
         "responseTimeout":
@@ -107,6 +105,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "tooltipTurnover": MessageLookupByLibrary.simpleMessage("Turnover"),
         "unknownError": MessageLookupByLibrary.simpleMessage("Unknown error"),
         "unsupportedProtocol": MessageLookupByLibrary.simpleMessage(
-            "HTTP protocol requests are not supported")
+            "HTTP protocol requests are not supported"),
+        "yAxisPriceScale":
+            MessageLookupByLibrary.simpleMessage("Price scale(y-axis)")
       };
 }

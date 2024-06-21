@@ -13,8 +13,9 @@
 // limitations under the License.
 
 import 'dart:collection';
-import 'dart:math';
 
+import 'package:flexi_kline/src/framework/collection/fixed_hash_queue.dart';
+import 'package:flexi_kline/src/framework/collection/sortable_hash_set.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -61,40 +62,84 @@ void main() {
     debugPrint('spent:${stopwatch.elapsedMicroseconds}');
   });
 
-  // test('SplayTreeSet', () {
-  //   SplayTreeSet set = SplayTreeSet();
-  //   set.add(Item('zp3', 3));
-  //   set.add(Item('zp0', 0));
-  //   set.add(Item('zp2', 0));
-  //   set.add(Item('zp1', 0));
-  //   set.add(Item('zp-1', -1));
+  test('HashSortSet', () {});
 
-  //   set.add(Item('zp-4', 0));
-  //   printIterable(set);
-  // });
+  test('SplayTreeSet', () {
+    SplayTreeSet set = SplayTreeSet();
+    set.add(Item('zp3', 3));
+    set.add(Item('zp0', 0));
+    set.add(Item('zp2', 0));
+    set.add(Item('zp1', 0));
+    set.add(Item('zp-1', -1));
 
-  // test('SplayTreeMap', () {
-  //   SplayTreeMap map = SplayTreeMap<String, Item>();
-  //   map['zp3'] = Item('zp3', 3);
-  //   map['zp0'] = Item('zp0', 0);
-  //   map['zp2'] = Item('zp2', 0);
-  //   map['zp1'] = Item('zp1', 0);
-  //   map['zp-1'] = Item('zp-1', -1);
+    set.add(Item('zp-4', 0));
+    printIterable(set);
+  });
 
-  //   map['zp4'] = Item('zp-4', 0);
-  //   printMap(map);
-  // });
+  test('SplayTreeMap', () {
+    SplayTreeMap map = SplayTreeMap<String, Item>();
+    map['zp3'] = Item('zp3', 3);
+    map['zp0'] = Item('zp0', 0);
+    map['zp2'] = Item('zp2', 0);
+    map['zp1'] = Item('zp1', 0);
+    map['zp-1'] = Item('zp-1', -1);
 
-  // test('LinkedHashSet', () {
-  //   LinkedHashSet set = LinkedHashSet();
-  //   set.add(Item('zp-1', -1));
-  //   set.add(Item('zp0', 0));
-  //   set.add(Item('zp1', 1));
-  //   set.add(Item('zp2', 2));
+    map['zp4'] = Item('zp-4', 0);
+    printMap(map);
+  });
 
-  //   set.remove(set.first);
-  //   printIterable(set);
-  // });
+  test('LinkedHashSet', () {
+    LinkedHashSet set = LinkedHashSet();
+    set.add(Item('zp-1', -1));
+    set.add(Item('zp0', 0));
+    set.add(Item('zp1', 1));
+    set.add(Item('zp2', 2));
+
+    set.remove(set.first);
+    printIterable(set);
+  });
+
+  test('SortableHashSet', () {
+    Set set = SortableHashSet<Item>();
+    set.add(Item('A', 1));
+    set.add(Item('B', 2));
+    set.add(Item('C', 3));
+    set.add(Item('a', -1));
+    set.add(Item('b', -2));
+    set.add(Item('c', -3));
+
+    print(set);
+
+    set.add(Item('B', 0));
+    set.add(Item('b', 0));
+
+    print(set);
+
+    set.remove(Item('A', 1111));
+    print(set);
+
+    set.removeWhere((element) {
+      return element.name.toLowerCase() == 'b';
+    });
+
+    print(set);
+  });
+
+  test('FixedHashQueue', () {
+    final queue = FixedHashQueue<Item>(3);
+    queue.append(Item('A', 1));
+    queue.append(Item('B', 2));
+    queue.append(Item('C', 3));
+
+    print(queue);
+
+    final old = queue.append(Item('B', 4));
+    print(old);
+    print(queue);
+
+    queue.append(Item('D', 1), atFirst: true);
+    print(queue);
+  });
 
   test('merger addAll', () {
     final list1 = List.filled(100000000, fillData1);

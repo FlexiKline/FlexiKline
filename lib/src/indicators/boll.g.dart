@@ -11,6 +11,8 @@ abstract class _$BOLLIndicatorCWProxy {
 
   BOLLIndicator name(String name);
 
+  BOLLIndicator zIndex(int zIndex);
+
   BOLLIndicator height(double height);
 
   BOLLIndicator padding(EdgeInsets padding);
@@ -40,6 +42,7 @@ abstract class _$BOLLIndicatorCWProxy {
   BOLLIndicator call({
     ValueKey<dynamic>? key,
     String? name,
+    int? zIndex,
     double? height,
     EdgeInsets? padding,
     BOLLParam? calcParam,
@@ -64,6 +67,9 @@ class _$BOLLIndicatorCWProxyImpl implements _$BOLLIndicatorCWProxy {
 
   @override
   BOLLIndicator name(String name) => this(name: name);
+
+  @override
+  BOLLIndicator zIndex(int zIndex) => this(zIndex: zIndex);
 
   @override
   BOLLIndicator height(double height) => this(height: height);
@@ -108,6 +114,7 @@ class _$BOLLIndicatorCWProxyImpl implements _$BOLLIndicatorCWProxy {
   BOLLIndicator call({
     Object? key = const $CopyWithPlaceholder(),
     Object? name = const $CopyWithPlaceholder(),
+    Object? zIndex = const $CopyWithPlaceholder(),
     Object? height = const $CopyWithPlaceholder(),
     Object? padding = const $CopyWithPlaceholder(),
     Object? calcParam = const $CopyWithPlaceholder(),
@@ -128,6 +135,10 @@ class _$BOLLIndicatorCWProxyImpl implements _$BOLLIndicatorCWProxy {
           ? _value.name
           // ignore: cast_nullable_to_non_nullable
           : name as String,
+      zIndex: zIndex == const $CopyWithPlaceholder() || zIndex == null
+          ? _value.zIndex
+          // ignore: cast_nullable_to_non_nullable
+          : zIndex as int,
       height: height == const $CopyWithPlaceholder() || height == null
           ? _value.height
           // ignore: cast_nullable_to_non_nullable
@@ -191,6 +202,7 @@ BOLLIndicator _$BOLLIndicatorFromJson(Map<String, dynamic> json) =>
           ? bollKey
           : const ValueKeyConverter().fromJson(json['key'] as String),
       name: json['name'] as String? ?? 'BOLL',
+      zIndex: (json['zIndex'] as num?)?.toInt() ?? 2,
       height: (json['height'] as num).toDouble(),
       padding: json['padding'] == null
           ? defaultMainIndicatorPadding
@@ -215,6 +227,7 @@ Map<String, dynamic> _$BOLLIndicatorToJson(BOLLIndicator instance) =>
       'name': instance.name,
       'height': instance.height,
       'padding': const EdgeInsetsConverter().toJson(instance.padding),
+      'zIndex': instance.zIndex,
       'calcParam': instance.calcParam.toJson(),
       'mbTips': instance.mbTips.toJson(),
       'upTips': instance.upTips.toJson(),

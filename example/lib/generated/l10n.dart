@@ -531,10 +531,10 @@ class S {
   }
 
   /// `Price scale(y-axis)`
-  String get priceScale {
+  String get yAxisPriceScale {
     return Intl.message(
       'Price scale(y-axis)',
-      name: 'priceScale',
+      name: 'yAxisPriceScale',
       desc: '',
       args: [],
     );

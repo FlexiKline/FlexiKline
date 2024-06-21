@@ -51,7 +51,7 @@
   "drawings": "Drawings",
   "more": "More",
   "lastPrice": "Last price",
-  "priceScale": "Price scale(y-axis)",
+  "yAxisPriceScale": "Price scale(y-axis)",
   "countdown": "Countdown",
   "chartHeight": "Chart Height",
   "chartWidth": "Chart Width",

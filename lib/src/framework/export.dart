@@ -18,3 +18,5 @@ export 'logger.dart';
 export 'object.dart';
 export 'serializers.dart';
 export 'configuration.dart';
+export 'collection/fixed_hash_queue.dart';
+export 'collection/sortable_hash_set.dart';

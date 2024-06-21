@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:collection';
-
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -21,6 +19,7 @@ import '../core/export.dart';
 import 'common.dart';
 import 'object.dart';
 import 'serializers.dart';
+import 'collection/sortable_hash_set.dart';
 
 part 'indicator.g.dart';
 
@@ -45,7 +44,7 @@ enum PaintMode {
 /// [paintMode] 控制多指标图一起的绘制方式.
 ///   [PaintMode.combine] 多指标时, 统一使用父Indicator的高度和padding.
 ///   [PaintMode.alone] 多指标时, 使用自己的height进行绘制.
-abstract class Indicator implements Comparable<Indicator> {
+abstract class Indicator {
   Indicator({
     required this.key,
     required this.name,
@@ -113,11 +112,6 @@ abstract class Indicator implements Comparable<Indicator> {
 
   Map<String, dynamic> toJson();
 
-  @override
-  int compareTo(Indicator other) {
-    return 0;
-  }
-
   static bool canUpdate(Indicator oldIndicator, Indicator newIndicator) {
     return oldIndicator.runtimeType == newIndicator.runtimeType &&
         oldIndicator.key == newIndicator.key;
@@ -131,19 +125,30 @@ abstract class Indicator implements Comparable<Indicator> {
 /// 绘制对象的配置
 /// 通过Indicator去创建PaintObject接口
 /// 缓存Indicator对应创建的paintObject.
-abstract class SinglePaintObjectIndicator extends Indicator {
+/// [zIndex] 确定指标在绘制时的顺序, 按升序排序; 数值大的将会绘制数值小的上面;
+///   主要在[MultiPaintObjectIndicator]中会有用, 确定多个指标在同一区域的绘制顺序.
+abstract class SinglePaintObjectIndicator extends Indicator
+    implements Comparable<SinglePaintObjectIndicator> {
   SinglePaintObjectIndicator({
     required super.key,
     required super.name,
     required super.height,
     required super.padding,
     super.paintMode,
+    this.zIndex = 0,
   });
+
+  final int zIndex;
 
   @override
   SinglePaintObjectBox createPaintObject(
     covariant KlineBindingBase controller,
   );
+
+  @override
+  int compareTo(SinglePaintObjectIndicator other) {
+    return zIndex.compareTo(other.zIndex);
+  }
 }
 
 /// 多个绘制Indicator的配置.
@@ -158,11 +163,11 @@ class MultiPaintObjectIndicator<T extends SinglePaintObjectIndicator>
     required super.padding,
     this.drawBelowTipsArea = false,
     Iterable<T> children = const [],
-  })  : children = LinkedHashSet<T>.from(children),
+  })  : children = SortableHashSet<T>.from(children),
         _initialPadding = padding;
 
   @JsonKey(includeFromJson: false, includeToJson: false)
-  final Set<T> children;
+  final SortableHashSet<T> children;
 
   bool drawBelowTipsArea;
 
@@ -242,12 +247,7 @@ class MultiPaintObjectIndicator<T extends SinglePaintObjectIndicator>
     T newIndicator,
     KlineBindingBase controller,
   ) {
-    Indicator? old;
-    if (children.contains(newIndicator)) {
-      old = children.lookup(newIndicator);
-      old?.dispose();
-    }
-    children.add(newIndicator);
+    children.append(newIndicator)?.dispose();
     if (paintObject != null) {
       // 说明当前父PaintObject已经创建, 需要及时创建新加入的newIndicator,
       _initChildPaintObject(controller, newIndicator);

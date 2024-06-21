@@ -55,4 +55,22 @@ class KlineStateNotifier extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+  /// 是否展示Y轴刻度
+  bool get isShowYAxisTick {
+    return controller.settingConfig.showYAxisTick;
+  }
+
+  /// 设置是否展示Y轴坐标刻度
+  void setShowYAxisTick(bool isShow) {
+    controller.settingConfig = controller.settingConfig.copyWith(
+      showYAxisTick: isShow,
+    );
+    notifyListeners();
+    // controller.indicatorsConfig = controller.indicatorsConfig.copyWith(
+    //   candle: controller.indicatorsConfig.candle.copyWith(
+    //     showYAxisPriceTick: isShow,
+    //   ),
+    // );
+  }
 }

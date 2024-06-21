@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:collection';
-
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -55,7 +53,7 @@ class FlexiKlineConfig {
   @JsonKey(includeFromJson: false, includeToJson: false)
   late final MultiPaintObjectIndicator mainIndicator;
   @JsonKey(includeFromJson: false, includeToJson: false)
-  late final ListQueue<Indicator> subIndicators;
+  late final FixedHashQueue<Indicator> subRectIndicatorQueue;
 
   void init() {
     mainIndicator = MultiPaintObjectIndicator(
@@ -66,7 +64,7 @@ class FlexiKlineConfig {
       drawBelowTipsArea: setting.mainDrawBelowTipsArea,
     );
 
-    subIndicators = ListQueue<Indicator>(
+    subRectIndicatorQueue = FixedHashQueue<Indicator>(
       setting.subChartMaxCount,
     );
 
@@ -92,7 +90,7 @@ class FlexiKlineConfig {
         final indicator = indicators.subIndicators.getItem(key);
         if (indicator != null) {
           indicator.dispose();
-          subIndicators.add(indicator);
+          subRectIndicatorQueue.append(indicator)?.dispose();
         }
       }
     }
@@ -113,10 +111,30 @@ class FlexiKlineConfig {
     setting.update(config.setting);
   }
 
+  /// 更新指标配置
+  // void updateIndicatorsConfig(IndicatorsConfig config) {
+  //   final keys = config.megerAndDisposeOldIndicator(indicators);
+  //   indicators = config;
+
+  //   for (var key in keys) {
+  //     mainIndicator.appendIndicator(newIndicator, controller)
+  //   }
+  //   for (var indicator in mainIndicator.children) {
+  //     if (keys.contains(indicator.key)) {
+  //       indicator.dispose();
+  //     }
+  //   }
+  //   for (var indicator in subIndicators) {
+  //     if (keys.contains(indicator.key)) {
+  //       indicator.dispose();
+  //     }
+  //   }
+  // }
+
   void dispose() {
     indicators.dispose();
     mainIndicator.dispose();
-    for (var indicator in subIndicators) {
+    for (var indicator in subRectIndicatorQueue) {
       indicator.dispose();
     }
   }
@@ -126,7 +144,7 @@ class FlexiKlineConfig {
 
   Map<String, dynamic> toJson() {
     main = mainIndicator.children.map((e) => e.key).toSet();
-    sub = subIndicators.map((e) => e.key).toSet();
+    sub = subRectIndicatorQueue.map((e) => e.key).toSet();
     return _$FlexiKlineConfigToJson(this);
   }
 }

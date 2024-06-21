@@ -39,6 +39,7 @@ class EMAIndicator extends SinglePaintObjectIndicator
   EMAIndicator({
     super.key = emaKey,
     super.name = 'EMA',
+    super.zIndex = 1,
     required super.height,
     super.padding = defaultMainIndicatorPadding,
     required this.calcParams,

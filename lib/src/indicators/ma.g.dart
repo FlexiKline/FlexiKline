@@ -11,6 +11,8 @@ abstract class _$MAIndicatorCWProxy {
 
   MAIndicator name(String name);
 
+  MAIndicator zIndex(int zIndex);
+
   MAIndicator height(double height);
 
   MAIndicator padding(EdgeInsets padding);
@@ -30,6 +32,7 @@ abstract class _$MAIndicatorCWProxy {
   MAIndicator call({
     ValueKey<dynamic>? key,
     String? name,
+    int? zIndex,
     double? height,
     EdgeInsets? padding,
     List<MaParam>? calcParams,
@@ -49,6 +52,9 @@ class _$MAIndicatorCWProxyImpl implements _$MAIndicatorCWProxy {
 
   @override
   MAIndicator name(String name) => this(name: name);
+
+  @override
+  MAIndicator zIndex(int zIndex) => this(zIndex: zIndex);
 
   @override
   MAIndicator height(double height) => this(height: height);
@@ -78,6 +84,7 @@ class _$MAIndicatorCWProxyImpl implements _$MAIndicatorCWProxy {
   MAIndicator call({
     Object? key = const $CopyWithPlaceholder(),
     Object? name = const $CopyWithPlaceholder(),
+    Object? zIndex = const $CopyWithPlaceholder(),
     Object? height = const $CopyWithPlaceholder(),
     Object? padding = const $CopyWithPlaceholder(),
     Object? calcParams = const $CopyWithPlaceholder(),
@@ -93,6 +100,10 @@ class _$MAIndicatorCWProxyImpl implements _$MAIndicatorCWProxy {
           ? _value.name
           // ignore: cast_nullable_to_non_nullable
           : name as String,
+      zIndex: zIndex == const $CopyWithPlaceholder() || zIndex == null
+          ? _value.zIndex
+          // ignore: cast_nullable_to_non_nullable
+          : zIndex as int,
       height: height == const $CopyWithPlaceholder() || height == null
           ? _value.height
           // ignore: cast_nullable_to_non_nullable
@@ -134,6 +145,7 @@ MAIndicator _$MAIndicatorFromJson(Map<String, dynamic> json) => MAIndicator(
           ? maKey
           : const ValueKeyConverter().fromJson(json['key'] as String),
       name: json['name'] as String? ?? 'MA',
+      zIndex: (json['zIndex'] as num?)?.toInt() ?? 1,
       height: (json['height'] as num).toDouble(),
       padding: json['padding'] == null
           ? defaultMainIndicatorPadding
@@ -153,6 +165,7 @@ Map<String, dynamic> _$MAIndicatorToJson(MAIndicator instance) =>
       'name': instance.name,
       'height': instance.height,
       'padding': const EdgeInsetsConverter().toJson(instance.padding),
+      'zIndex': instance.zIndex,
       'calcParams': instance.calcParams.map((e) => e.toJson()).toList(),
       'tipsPadding': const EdgeInsetsConverter().toJson(instance.tipsPadding),
       'lineWidth': instance.lineWidth,

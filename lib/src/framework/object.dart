@@ -274,11 +274,11 @@ mixin DataInitMixin on PaintObjectProxy implements IPaintDataInit {
   }
 }
 
-mixin PaintHorizontalTickMixin<T extends SinglePaintObjectIndicator>
+mixin PaintYAxisScaleMixin<T extends SinglePaintObjectIndicator>
     on SinglePaintObjectBox<T> {
   /// 为副区的指标图绘制Y轴上的刻度信息
   @protected
-  void paintHorizontalTick(
+  void paintYAxisScale(
     Canvas canvas,
     Size size, {
     required int tickCount, // 刻度数量.
@@ -332,11 +332,11 @@ mixin PaintHorizontalTickMixin<T extends SinglePaintObjectIndicator>
   }
 }
 
-mixin PaintHorizontalTickOnCrossMixin<T extends SinglePaintObjectIndicator>
+mixin PaintYAxisMarkOnCrossMixin<T extends SinglePaintObjectIndicator>
     on SinglePaintObjectBox<T> {
   /// onCross时, 绘制Y轴上的刻度值
   @protected
-  void paintHorizontalTickOnCross(
+  void paintYAxisMarkOnCross(
     Canvas canvas,
     Offset offset, {
     required int precision,
@@ -344,7 +344,7 @@ mixin PaintHorizontalTickOnCrossMixin<T extends SinglePaintObjectIndicator>
     final value = dyToValue(offset.dy);
     if (value == null) return;
 
-    final text = formatTickValueOnCross(value, precision: precision);
+    final text = formatMarkValueOnCross(value, precision: precision);
 
     final tickText = crossConfig.tickText;
 
@@ -361,7 +361,7 @@ mixin PaintHorizontalTickOnCrossMixin<T extends SinglePaintObjectIndicator>
   }
 
   @protected
-  String formatTickValueOnCross(BagNum value, {required int precision}) {
+  String formatMarkValueOnCross(BagNum value, {required int precision}) {
     return formatNumber(
       value.toDecimal(),
       precision: precision,

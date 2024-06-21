@@ -50,7 +50,7 @@
   "drawings": "画图",
   "more": "更多",
   "lastPrice": "最新价",
-  "priceScale": "Y轴坐标",
+  "yAxisPriceScale": "Y轴坐标",
   "countdown": "倒计时",
   "chartHeight": "图表高度",
   "chartWidth": "图表宽度",
