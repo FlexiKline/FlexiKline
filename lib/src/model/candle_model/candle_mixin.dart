@@ -66,6 +66,17 @@ mixin BollMixin {
   }
 }
 
+mixin SarMixin {
+  BagNum? sar;
+  int? sarFlag;
+
+  bool get isValidSarData => sar != null && sarFlag != null;
+
+  void cleanSar() {
+    sar = null;
+  }
+}
+
 mixin MacdMixin {
   BagNum? dif;
   BagNum? dea;

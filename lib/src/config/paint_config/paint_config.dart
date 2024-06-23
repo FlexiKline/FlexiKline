@@ -12,15 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// export 'indicator.dart';
-export 'candle.dart';
-export 'volume.dart';
-export 'ma.dart';
-export 'ma_volume.dart';
-export 'vol_ma.dart';
-export 'ema.dart';
-export 'macd.dart';
-export 'kdj.dart';
-export 'boll.dart';
-export 'time.dart';
-export 'sar.dart';
+import 'package:copy_with_extension/copy_with_extension.dart';
+import 'package:flutter/material.dart';
+
+import '../../framework/serializers.dart';
+
+part 'paint_config.g.dart';
+
+@CopyWith()
+@FlexiConfigSerializable
+class PaintConfig {
+  const PaintConfig({
+    this.color,
+    this.strokeWidth,
+    this.style = PaintingStyle.stroke,
+  });
+
+  final Color? color;
+  final double? strokeWidth;
+  final PaintingStyle style;
+
+  factory PaintConfig.fromJson(Map<String, dynamic> json) =>
+      _$PaintConfigFromJson(json);
+
+  Map<String, dynamic> toJson() => _$PaintConfigToJson(this);
+}

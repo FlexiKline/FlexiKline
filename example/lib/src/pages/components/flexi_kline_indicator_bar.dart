@@ -72,6 +72,7 @@ class _FlexiKliineIndicatorBarState
             ...klineState.supportMainIndicatorKeys.map((key) {
               return GestureDetector(
                 key: key,
+                behavior: HitTestBehavior.opaque,
                 onTap: () {
                   ref
                       .read(klineStateProvider(widget.controller).notifier)

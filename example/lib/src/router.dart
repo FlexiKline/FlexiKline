@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -90,17 +89,14 @@ final List<RouteBase> routeList = <RouteBase>[
                 child: MyDemoPage(),
               );
             },
-            routes: <RouteBase>[],
+            routes: const <RouteBase>[],
           ),
         ],
       ),
-      // The route branch for the second tab of the bottom navigation bar.
       StatefulShellBranch(
         restorationScopeId: 'okKline',
         routes: <RouteBase>[
           GoRoute(
-            // The screen to display as the root in the second tab of the
-            // bottom navigation bar.
             path: '/ok',
             pageBuilder: (BuildContext context, GoRouterState state) {
               return const MaterialPage<void>(
@@ -108,7 +104,7 @@ final List<RouteBase> routeList = <RouteBase>[
                 child: OkKlinePage(),
               );
             },
-            routes: <RouteBase>[],
+            routes: const <RouteBase>[],
           ),
         ],
       ),
@@ -116,8 +112,6 @@ final List<RouteBase> routeList = <RouteBase>[
         restorationScopeId: 'bitKline',
         routes: <RouteBase>[
           GoRoute(
-            // The screen to display as the root in the second tab of the
-            // bottom navigation bar.
             path: '/bit',
             pageBuilder: (BuildContext context, GoRouterState state) {
               return const MaterialPage<void>(
@@ -125,7 +119,7 @@ final List<RouteBase> routeList = <RouteBase>[
                 child: BitKlinePage(),
               );
             },
-            routes: <RouteBase>[],
+            routes: const <RouteBase>[],
           ),
         ],
       ),

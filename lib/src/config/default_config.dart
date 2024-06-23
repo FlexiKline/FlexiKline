@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:flexi_kline/src/config/export.dart';
 import 'package:flutter/material.dart';
 
 import '../constant.dart';
@@ -30,6 +31,7 @@ import 'loading_config/loading_config.dart';
 import 'ma_param/ma_param.dart';
 import 'macd_param/macd_param.dart';
 import 'mark_config/mark_config.dart';
+import 'sar_param/sar_param.dart';
 import 'setting_config/setting_config.dart';
 import 'text_area_config/text_area_config.dart';
 import 'tips_config/tips_config.dart';
@@ -328,6 +330,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       ma: genMaIndicator(theme),
       ema: genEmaIndicator(theme),
       boll: genBollIndicator(theme),
+      sar: genSarIndicator(theme),
       time: genTimeIndicator(theme),
       macd: genMacdIndicator(theme),
       kdj: genKdjIndicator(theme),
@@ -617,6 +620,28 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       /// 填充配置
       isFillBetweenUpAndDn: true,
       fillColor: null,
+    );
+  }
+
+  SARIndicator genSarIndicator(IFlexiKlineTheme theme) {
+    return SARIndicator(
+      zIndex: 4,
+      height: theme.mainIndicatorHeight,
+      padding: theme.mainIndicatorPadding,
+      calcParam: const SARParam(startAf: 0.02, step: 0.02, maxAf: 0.2),
+      radius: 2 * theme.scale,
+      paint: PaintConfig(
+        color: null,
+        strokeWidth: 1 * theme.scale,
+        style: PaintingStyle.stroke,
+      ),
+      tipsPadding: theme.tipsPadding,
+      tipsStyle: TextStyle(
+        fontSize: theme.normalTextSize,
+        color: theme.tickTextColor,
+        overflow: TextOverflow.ellipsis,
+        height: defaultTextHeight,
+      ),
     );
   }
 

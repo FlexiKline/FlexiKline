@@ -546,6 +546,16 @@ class BagNum implements Comparable<BagNum> {
     return _value.compareTo(other._value);
   }
 
+  BagNum calcuMin(BagNum other) {
+    if (this > other) return other;
+    return this;
+  }
+
+  BagNum calcuMax(BagNum other) {
+    if (this < other) return other;
+    return this;
+  }
+
   @override
   bool operator ==(Object other) => other is BagNum && _value == other._value;
 

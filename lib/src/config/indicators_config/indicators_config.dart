@@ -30,6 +30,7 @@ class IndicatorsConfig {
     required this.ma,
     required this.ema,
     required this.boll,
+    required this.sar,
 
     /// 副区指标
     required this.time,
@@ -82,6 +83,7 @@ class IndicatorsConfig {
   late MAIndicator ma;
   late EMAIndicator ema;
   late BOLLIndicator boll;
+  late SARIndicator sar;
 
   /// 副区指标
   late TimeIndicator time;
@@ -96,6 +98,7 @@ class IndicatorsConfig {
         ma.key: ma,
         ema.key: ema,
         boll.key: boll,
+        sar.key: sar,
       };
 
   /// 内置副区指标

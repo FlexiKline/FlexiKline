@@ -17,6 +17,8 @@ abstract class _$IndicatorsConfigCWProxy {
 
   IndicatorsConfig boll(BOLLIndicator boll);
 
+  IndicatorsConfig sar(SARIndicator sar);
+
   IndicatorsConfig time(TimeIndicator time);
 
   IndicatorsConfig macd(MACDIndicator macd);
@@ -37,6 +39,7 @@ abstract class _$IndicatorsConfigCWProxy {
     MAIndicator? ma,
     EMAIndicator? ema,
     BOLLIndicator? boll,
+    SARIndicator? sar,
     TimeIndicator? time,
     MACDIndicator? macd,
     KDJIndicator? kdj,
@@ -66,6 +69,9 @@ class _$IndicatorsConfigCWProxyImpl implements _$IndicatorsConfigCWProxy {
   IndicatorsConfig boll(BOLLIndicator boll) => this(boll: boll);
 
   @override
+  IndicatorsConfig sar(SARIndicator sar) => this(sar: sar);
+
+  @override
   IndicatorsConfig time(TimeIndicator time) => this(time: time);
 
   @override
@@ -91,6 +97,7 @@ class _$IndicatorsConfigCWProxyImpl implements _$IndicatorsConfigCWProxy {
     Object? ma = const $CopyWithPlaceholder(),
     Object? ema = const $CopyWithPlaceholder(),
     Object? boll = const $CopyWithPlaceholder(),
+    Object? sar = const $CopyWithPlaceholder(),
     Object? time = const $CopyWithPlaceholder(),
     Object? macd = const $CopyWithPlaceholder(),
     Object? kdj = const $CopyWithPlaceholder(),
@@ -117,6 +124,10 @@ class _$IndicatorsConfigCWProxyImpl implements _$IndicatorsConfigCWProxy {
           ? _value.boll
           // ignore: cast_nullable_to_non_nullable
           : boll as BOLLIndicator,
+      sar: sar == const $CopyWithPlaceholder() || sar == null
+          ? _value.sar
+          // ignore: cast_nullable_to_non_nullable
+          : sar as SARIndicator,
       time: time == const $CopyWithPlaceholder() || time == null
           ? _value.time
           // ignore: cast_nullable_to_non_nullable
@@ -154,6 +165,7 @@ IndicatorsConfig _$IndicatorsConfigFromJson(Map<String, dynamic> json) =>
       ma: MAIndicator.fromJson(json['ma'] as Map<String, dynamic>),
       ema: EMAIndicator.fromJson(json['ema'] as Map<String, dynamic>),
       boll: BOLLIndicator.fromJson(json['boll'] as Map<String, dynamic>),
+      sar: SARIndicator.fromJson(json['sar'] as Map<String, dynamic>),
       time: TimeIndicator.fromJson(json['time'] as Map<String, dynamic>),
       macd: MACDIndicator.fromJson(json['macd'] as Map<String, dynamic>),
       kdj: KDJIndicator.fromJson(json['kdj'] as Map<String, dynamic>),
@@ -167,6 +179,7 @@ Map<String, dynamic> _$IndicatorsConfigToJson(IndicatorsConfig instance) =>
       'ma': instance.ma.toJson(),
       'ema': instance.ema.toJson(),
       'boll': instance.boll.toJson(),
+      'sar': instance.sar.toJson(),
       'time': instance.time.toJson(),
       'macd': instance.macd.toJson(),
       'kdj': instance.kdj.toJson(),

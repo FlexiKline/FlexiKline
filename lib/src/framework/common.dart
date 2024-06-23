@@ -38,6 +38,7 @@ enum IndicatorType {
   ma('MA'),
   ema('EMA'),
   boll('BOLL'),
+  sar('SAR'),
   volMa('VOLMA'),
   volume('VOL'),
   maVol('MAVOL'),
@@ -64,6 +65,7 @@ const candleKey = ValueKey<dynamic>(IndicatorType.candle);
 const maKey = ValueKey<dynamic>(IndicatorType.ma);
 const emaKey = ValueKey<dynamic>(IndicatorType.ema);
 const bollKey = ValueKey<dynamic>(IndicatorType.boll);
+const sarKey = ValueKey<dynamic>(IndicatorType.sar);
 const volMaKey = ValueKey<dynamic>(IndicatorType.volMa);
 const volumeKey = ValueKey<dynamic>(IndicatorType.volume);
 const maVolKey = ValueKey<dynamic>(IndicatorType.maVol);
