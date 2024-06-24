@@ -104,17 +104,25 @@ class BOLLPaintObject<T extends BOLLIndicator> extends SinglePaintObjectBox<T>
   MinMax? initState({required int start, required int end}) {
     if (!klineData.canPaintChart) return null;
 
-    return klineData.calcuBollMinmax(
+    MinMax? bollMinmax = klineData.calcuBollMinmax(
       param: indicator.calcParam,
       start: start,
       end: end,
     );
+    if (isInSub) {
+      MinMax? candleMinmax = klineData.calculateMinmax(start: start, end: end);
+      if (candleMinmax != null) return candleMinmax..updateMinMax(bollMinmax);
+      if (bollMinmax != null) return bollMinmax..updateMinMax(candleMinmax);
+      return null;
+    } else {
+      return bollMinmax;
+    }
   }
 
   @override
   void paintChart(Canvas canvas, Size size) {
-    /// 绘制BOLL线
-    paintBollLine(canvas, size);
+    /// 绘制BOLL图
+    paintBollChart(canvas, size);
 
     if (isInSub && settingConfig.showYAxisTick) {
       paintYAxisScale(
@@ -161,7 +169,7 @@ class BOLLPaintObject<T extends BOLLIndicator> extends SinglePaintObjectBox<T>
   }
 
   /// 绘制BOLL线
-  void paintBollLine(Canvas canvas, Size size) {
+  void paintBollChart(Canvas canvas, Size size) {
     if (!klineData.canPaintChart) return;
     final list = klineData.list;
     final len = list.length;

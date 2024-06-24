@@ -44,6 +44,9 @@ class SARIndicator extends SinglePaintObjectIndicator
     required this.paint,
     required this.tipsPadding,
     required this.tipsStyle,
+
+    /// YAxis刻度数量(注: 仅在key为subBollKey时有用)
+    this.tickCount = defaultSubTickCount,
   });
 
   final SARParam calcParam;
@@ -56,6 +59,9 @@ class SARIndicator extends SinglePaintObjectIndicator
   final PaintConfig paint;
   final EdgeInsets tipsPadding;
   final TextStyle tipsStyle;
+
+  /// YAxis刻度数量(注: 仅在key为subBollKey时有用)
+  final int tickCount;
 
   @override
   dynamic getCalcParam() => calcParam;
@@ -72,28 +78,95 @@ class SARIndicator extends SinglePaintObjectIndicator
   Map<String, dynamic> toJson() => _$SARIndicatorToJson(this);
 }
 
-class SARPaintObject<T extends SARIndicator> extends SinglePaintObjectBox<T> {
+class SARPaintObject<T extends SARIndicator> extends SinglePaintObjectBox<T>
+    with
+        PaintYAxisScaleMixin,
+        PaintYAxisMarkOnCrossMixin,
+        PaintSimpleCandleMixin {
   SARPaintObject({required super.controller, required super.indicator});
+
+  bool get isInSub => indicator.key == subSarKey;
 
   @override
   MinMax? initState({required int start, required int end}) {
     if (!klineData.canPaintChart) return null;
 
-    return klineData.calcuSarMinmax(
+    MinMax? sarMinmax = klineData.calcuSarMinmax(
       param: indicator.calcParam,
       start: start,
       end: end,
     );
+    if (isInSub) {
+      MinMax? candleMinmax = klineData.calculateMinmax(start: start, end: end);
+      if (candleMinmax != null) return candleMinmax..updateMinMax(sarMinmax);
+      if (sarMinmax != null) return sarMinmax..updateMinMax(candleMinmax);
+      return null;
+    } else {
+      return sarMinmax;
+    }
   }
 
   @override
   void paintChart(Canvas canvas, Size size) {
+    /// 绘制SAR图
+    paintSarChart(canvas, size);
+
+    if (isInSub && settingConfig.showYAxisTick) {
+      paintYAxisScale(
+        canvas,
+        size,
+        tickCount: indicator.tickCount,
+        precision: klineData.precision,
+      );
+    }
+  }
+
+  /// 重写[paintYAxisScale]中的格式化刻度值.
+  @override
+  String fromatTickValue(BagNum value, {required int precision}) {
+    return formatPrice(
+      value.toDecimal(),
+      precision: precision,
+      cutInvalidZero: false,
+      showThousands: true,
+    );
+  }
+
+  @override
+  void onCross(Canvas canvas, Offset offset) {
+    /// onCross时, 绘制Y轴上的标记值(注: 仅对indicator.key为subBollKey时有效)
+    if (isInSub) {
+      paintYAxisMarkOnCross(
+        canvas,
+        offset,
+        precision: klineData.precision,
+      );
+    }
+  }
+
+  /// 在onCross时, 重写[paintYAxisMarkOnCross]中的格式化刻度值
+  @override
+  String formatMarkValueOnCross(BagNum value, {required int precision}) {
+    return formatPrice(
+      value.toDecimal(),
+      precision: precision,
+      cutInvalidZero: false,
+      showThousands: true,
+    );
+  }
+
+  void paintSarChart(Canvas canvas, Size size) {
     if (!klineData.canPaintChart) return;
     final list = klineData.list;
     final len = list.length;
     if (!indicator.calcParam.isValid(len)) return;
     int start = klineData.start;
     int end = (klineData.end + 1).clamp(start, len); // 多绘制一根蜡烛
+
+    if (isInSub) {
+      // 绘制简易蜡烛
+      paintSimpleCandleChart(canvas, size);
+    }
 
     Paint paint = Paint()..style = indicator.paint.style;
 
@@ -126,11 +199,6 @@ class SARPaintObject<T extends SARIndicator> extends SinglePaintObjectBox<T> {
         paint,
       );
     }
-  }
-
-  @override
-  void onCross(Canvas canvas, Offset offset) {
-    ///
   }
 
   @override

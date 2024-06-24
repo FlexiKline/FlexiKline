@@ -16,6 +16,7 @@ export 'common.dart';
 export 'indicator.dart';
 export 'logger.dart';
 export 'object.dart';
+export 'paint_object_helper.dart';
 export 'serializers.dart';
 export 'configuration.dart';
 export 'collection/fixed_hash_queue.dart';

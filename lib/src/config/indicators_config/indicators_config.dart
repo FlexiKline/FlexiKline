@@ -157,6 +157,7 @@ class IndicatorsConfig {
       };
 
   /// 收集当前所有支持的指标的计算参数
+  /// TODO: 待优化: 按需要计算.
   Map<ValueKey, dynamic> getIndicatorCalcParams() {
     final calcParams = <ValueKey, dynamic>{};
     mainIndicators.forEach((key, indicator) {
@@ -165,6 +166,9 @@ class IndicatorsConfig {
     subIndicators.forEach((key, indicator) {
       calcParams.addAll(indicator.getCalcParams());
     });
+    // TODO: 暂时去掉boll和sar在副区的指标参数, 因为主区已经有了.
+    calcParams.remove(subBollKey);
+    calcParams.remove(subSarKey);
     return calcParams;
   }
 

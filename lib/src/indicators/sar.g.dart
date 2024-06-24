@@ -27,6 +27,8 @@ abstract class _$SARIndicatorCWProxy {
 
   SARIndicator tipsStyle(TextStyle tipsStyle);
 
+  SARIndicator tickCount(int tickCount);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `SARIndicator(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -44,6 +46,7 @@ abstract class _$SARIndicatorCWProxy {
     PaintConfig? paint,
     EdgeInsets? tipsPadding,
     TextStyle? tipsStyle,
+    int? tickCount,
   });
 }
 
@@ -85,6 +88,9 @@ class _$SARIndicatorCWProxyImpl implements _$SARIndicatorCWProxy {
   SARIndicator tipsStyle(TextStyle tipsStyle) => this(tipsStyle: tipsStyle);
 
   @override
+  SARIndicator tickCount(int tickCount) => this(tickCount: tickCount);
+
+  @override
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `SARIndicator(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -103,6 +109,7 @@ class _$SARIndicatorCWProxyImpl implements _$SARIndicatorCWProxy {
     Object? paint = const $CopyWithPlaceholder(),
     Object? tipsPadding = const $CopyWithPlaceholder(),
     Object? tipsStyle = const $CopyWithPlaceholder(),
+    Object? tickCount = const $CopyWithPlaceholder(),
   }) {
     return SARIndicator(
       key: key == const $CopyWithPlaceholder() || key == null
@@ -146,6 +153,10 @@ class _$SARIndicatorCWProxyImpl implements _$SARIndicatorCWProxy {
           ? _value.tipsStyle
           // ignore: cast_nullable_to_non_nullable
           : tipsStyle as TextStyle,
+      tickCount: tickCount == const $CopyWithPlaceholder() || tickCount == null
+          ? _value.tickCount
+          // ignore: cast_nullable_to_non_nullable
+          : tickCount as int,
     );
   }
 }
@@ -180,6 +191,7 @@ SARIndicator _$SARIndicatorFromJson(Map<String, dynamic> json) => SARIndicator(
           .fromJson(json['tipsPadding'] as Map<String, dynamic>),
       tipsStyle: const TextStyleConverter()
           .fromJson(json['tipsStyle'] as Map<String, dynamic>),
+      tickCount: (json['tickCount'] as num?)?.toInt() ?? defaultSubTickCount,
     );
 
 Map<String, dynamic> _$SARIndicatorToJson(SARIndicator instance) =>
@@ -194,4 +206,5 @@ Map<String, dynamic> _$SARIndicatorToJson(SARIndicator instance) =>
       'paint': instance.paint.toJson(),
       'tipsPadding': const EdgeInsetsConverter().toJson(instance.tipsPadding),
       'tipsStyle': const TextStyleConverter().toJson(instance.tipsStyle),
+      'tickCount': instance.tickCount,
     };

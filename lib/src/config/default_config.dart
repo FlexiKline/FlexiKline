@@ -899,7 +899,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   SARIndicator genSubSarIndicator(IFlexiKlineTheme theme) {
     return SARIndicator(
-      key: subSarKey,
+      key: subSarKey, // 区别于主区bollKey的地方
       height: theme.subIndicatorHeight,
       padding: theme.subIndicatorPadding,
       calcParam: const SARParam(startAf: 0.02, step: 0.02, maxAf: 0.2),
