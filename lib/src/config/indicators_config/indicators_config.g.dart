@@ -27,6 +27,10 @@ abstract class _$IndicatorsConfigCWProxy {
 
   IndicatorsConfig mavol(MAVolumeIndicator mavol);
 
+  IndicatorsConfig subBoll(BOLLIndicator subBoll);
+
+  IndicatorsConfig subSar(SARIndicator subSar);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `IndicatorsConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -44,6 +48,8 @@ abstract class _$IndicatorsConfigCWProxy {
     MACDIndicator? macd,
     KDJIndicator? kdj,
     MAVolumeIndicator? mavol,
+    BOLLIndicator? subBoll,
+    SARIndicator? subSar,
   });
 }
 
@@ -84,6 +90,12 @@ class _$IndicatorsConfigCWProxyImpl implements _$IndicatorsConfigCWProxy {
   IndicatorsConfig mavol(MAVolumeIndicator mavol) => this(mavol: mavol);
 
   @override
+  IndicatorsConfig subBoll(BOLLIndicator subBoll) => this(subBoll: subBoll);
+
+  @override
+  IndicatorsConfig subSar(SARIndicator subSar) => this(subSar: subSar);
+
+  @override
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `IndicatorsConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -102,6 +114,8 @@ class _$IndicatorsConfigCWProxyImpl implements _$IndicatorsConfigCWProxy {
     Object? macd = const $CopyWithPlaceholder(),
     Object? kdj = const $CopyWithPlaceholder(),
     Object? mavol = const $CopyWithPlaceholder(),
+    Object? subBoll = const $CopyWithPlaceholder(),
+    Object? subSar = const $CopyWithPlaceholder(),
   }) {
     return IndicatorsConfig(
       candle: candle == const $CopyWithPlaceholder() || candle == null
@@ -144,6 +158,14 @@ class _$IndicatorsConfigCWProxyImpl implements _$IndicatorsConfigCWProxy {
           ? _value.mavol
           // ignore: cast_nullable_to_non_nullable
           : mavol as MAVolumeIndicator,
+      subBoll: subBoll == const $CopyWithPlaceholder() || subBoll == null
+          ? _value.subBoll
+          // ignore: cast_nullable_to_non_nullable
+          : subBoll as BOLLIndicator,
+      subSar: subSar == const $CopyWithPlaceholder() || subSar == null
+          ? _value.subSar
+          // ignore: cast_nullable_to_non_nullable
+          : subSar as SARIndicator,
     );
   }
 }
@@ -170,6 +192,8 @@ IndicatorsConfig _$IndicatorsConfigFromJson(Map<String, dynamic> json) =>
       macd: MACDIndicator.fromJson(json['macd'] as Map<String, dynamic>),
       kdj: KDJIndicator.fromJson(json['kdj'] as Map<String, dynamic>),
       mavol: MAVolumeIndicator.fromJson(json['mavol'] as Map<String, dynamic>),
+      subBoll: BOLLIndicator.fromJson(json['subBoll'] as Map<String, dynamic>),
+      subSar: SARIndicator.fromJson(json['subSar'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$IndicatorsConfigToJson(IndicatorsConfig instance) =>
@@ -184,4 +208,6 @@ Map<String, dynamic> _$IndicatorsConfigToJson(IndicatorsConfig instance) =>
       'macd': instance.macd.toJson(),
       'kdj': instance.kdj.toJson(),
       'mavol': instance.mavol.toJson(),
+      'subBoll': instance.subBoll.toJson(),
+      'subSar': instance.subSar.toJson(),
     };

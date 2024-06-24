@@ -371,6 +371,60 @@ mixin PaintYAxisMarkOnCrossMixin<T extends SinglePaintObjectIndicator>
   }
 }
 
+/// 绘制简易蜡烛图
+/// 主要用于SubBoll图和SubSar图中
+mixin PaintSimpleCandleMixin<T extends SinglePaintObjectIndicator>
+    on SinglePaintObjectBox<T> {
+  void paintSimpleCandleChart(
+    Canvas canvas,
+    Size size, {
+    double? lineWidth, // 简易蜡烛线宽.
+  }) {
+    if (!klineData.canPaintChart) return;
+    final list = klineData.list;
+    int start = klineData.start;
+    int end = klineData.end;
+
+    final offset = startCandleDx - candleWidthHalf;
+
+    CandleModel m;
+    for (var i = start; i < end; i++) {
+      m = list[i];
+      final dx = offset - (i - start) * candleActualWidth;
+      final isLong = m.close >= m.open;
+
+      final linePaint = isLong
+          ? settingConfig.defLongLinePaint
+          : settingConfig.defShortLinePaint;
+
+      if (lineWidth != null) linePaint.strokeWidth = lineWidth;
+
+      final highOff = Offset(dx, valueToDy(m.high));
+      final lowOff = Offset(dx, valueToDy(m.low));
+
+      canvas.drawLine(
+        highOff,
+        lowOff,
+        linePaint,
+      );
+
+      final openDy = valueToDy(m.open);
+      canvas.drawLine(
+        Offset(dx - candleWidthHalf, openDy),
+        Offset(dx, openDy),
+        linePaint,
+      );
+
+      final closeDy = valueToDy(m.close);
+      canvas.drawLine(
+        Offset(dx, closeDy),
+        Offset(dx + candleWidthHalf, closeDy),
+        linePaint,
+      );
+    }
+  }
+}
+
 /// PaintObject
 /// 通过实现对应的接口, 实现Chart的配置, 计算, 绘制, Cross
 // @immutable

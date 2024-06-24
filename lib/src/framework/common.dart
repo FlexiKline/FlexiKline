@@ -32,18 +32,23 @@ enum ScalePosition {
 }
 
 enum IndicatorType {
+  /// 主区
   main('MAIN'),
-  time('Time'),
   candle('CANDLE'),
   ma('MA'),
   ema('EMA'),
   boll('BOLL'),
   sar('SAR'),
+
+  /// 副区
+  time('Time'),
   volMa('VOLMA'),
   volume('VOL'),
   maVol('MAVOL'),
   macd('MACD'),
   kdj('KDJ'),
+  subBoll('BOLL'),
+  subSar('SAR'),
   rsi('RSI'),
   stochRsi('StochRSI');
 
@@ -57,22 +62,26 @@ enum IndicatorType {
   }
 }
 
-const mainChartKey = ValueKey<dynamic>(IndicatorType.main);
-const timeKey = ValueKey<dynamic>(IndicatorType.time);
-
 /// 指标
+/// 主区
+const mainChartKey = ValueKey<dynamic>(IndicatorType.main);
 const candleKey = ValueKey<dynamic>(IndicatorType.candle);
 const maKey = ValueKey<dynamic>(IndicatorType.ma);
 const emaKey = ValueKey<dynamic>(IndicatorType.ema);
 const bollKey = ValueKey<dynamic>(IndicatorType.boll);
 const sarKey = ValueKey<dynamic>(IndicatorType.sar);
+
+/// 副区
 const volMaKey = ValueKey<dynamic>(IndicatorType.volMa);
 const volumeKey = ValueKey<dynamic>(IndicatorType.volume);
 const maVolKey = ValueKey<dynamic>(IndicatorType.maVol);
 const macdKey = ValueKey<dynamic>(IndicatorType.macd);
 const kdjKey = ValueKey<dynamic>(IndicatorType.kdj);
+const subBollKey = ValueKey(IndicatorType.subBoll);
+const subSarKey = ValueKey(IndicatorType.subSar);
 const rsiKey = ValueKey<dynamic>(IndicatorType.rsi);
 const stochRsiKey = ValueKey<dynamic>(IndicatorType.stochRsi);
+const timeKey = ValueKey<dynamic>(IndicatorType.time);
 
 /// 可预计算接口
 /// 实现 [IPrecomputable] 接口, 即代表当前对象是可以进行预计算.

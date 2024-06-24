@@ -231,10 +231,55 @@ class BitFlexiKlineConfiguration with FlexiKlineThemeConfigurationMixin {
   }
 
   @override
+  BOLLIndicator genBollIndicator(covariant IFlexiKlineTheme theme) {
+    final defBoll = super.genBollIndicator(theme);
+    return defBoll.copyWith(
+      mbTips: defBoll.mbTips.copyWith(
+        style: defBoll.mbTips.style.copyWith(color: Colors.orangeAccent),
+      ),
+      upTips: defBoll.upTips.copyWith(
+        style: defBoll.upTips.style.copyWith(color: Colors.lightBlueAccent),
+      ),
+      dnTips: defBoll.dnTips.copyWith(
+        style: defBoll.dnTips.style.copyWith(color: Colors.lightBlueAccent),
+      ),
+      fillColor: Colors.blueGrey.withOpacity(0.05),
+    );
+  }
+
+  @override
+  BOLLIndicator genSubBollIndicator(IFlexiKlineTheme theme) {
+    final defBoll = super.genSubBollIndicator(theme);
+    return defBoll.copyWith(
+      mbTips: defBoll.mbTips.copyWith(
+        style: defBoll.mbTips.style.copyWith(color: Colors.orangeAccent),
+      ),
+      upTips: defBoll.upTips.copyWith(
+        style: defBoll.upTips.style.copyWith(color: Colors.lightBlueAccent),
+      ),
+      dnTips: defBoll.dnTips.copyWith(
+        style: defBoll.dnTips.style.copyWith(color: Colors.lightBlueAccent),
+      ),
+      fillColor: Colors.blueGrey.withOpacity(0.05),
+    );
+  }
+
+  @override
   SARIndicator genSarIndicator(IFlexiKlineTheme theme) {
     return super.genSarIndicator(theme).copyWith(
           radius: 2 * theme.scale,
-          paint: PaintConfig(
+          paint: const PaintConfig(
+            color: Colors.blue,
+            style: PaintingStyle.fill,
+          ),
+        );
+  }
+
+  @override
+  SARIndicator genSubSarIndicator(IFlexiKlineTheme theme) {
+    return super.genSubSarIndicator(theme).copyWith(
+          radius: 2 * theme.scale,
+          paint: const PaintConfig(
             color: Colors.blue,
             style: PaintingStyle.fill,
           ),

@@ -50,6 +50,9 @@ class BOLLIndicator extends SinglePaintObjectIndicator
     /// 填充配置
     this.isFillBetweenUpAndDn = true,
     Color? fillColor,
+
+    /// YAxis刻度数量(注: 仅在key为subBollKey时有用)
+    this.tickCount = defaultSubTickCount,
   }) : fillColor = fillColor ?? mbTips.color.withOpacity(0.1);
 
   /// BOLL计算参数
@@ -68,6 +71,9 @@ class BOLLIndicator extends SinglePaintObjectIndicator
   // 默认是mbColor的0.1不透明度.
   final Color fillColor;
 
+  /// YAxis刻度数量(注: 仅在key为subBollKey时有用)
+  final int tickCount;
+
   @override
   dynamic getCalcParam() => calcParam;
 
@@ -82,11 +88,17 @@ class BOLLIndicator extends SinglePaintObjectIndicator
   Map<String, dynamic> toJson() => _$BOLLIndicatorToJson(this);
 }
 
-class BOLLPaintObject<T extends BOLLIndicator> extends SinglePaintObjectBox<T> {
+class BOLLPaintObject<T extends BOLLIndicator> extends SinglePaintObjectBox<T>
+    with
+        PaintYAxisScaleMixin,
+        PaintYAxisMarkOnCrossMixin,
+        PaintSimpleCandleMixin {
   BOLLPaintObject({
     required super.controller,
     required super.indicator,
   });
+
+  bool get isInSub => indicator.key == subBollKey;
 
   @override
   MinMax? initState({required int start, required int end}) {
@@ -103,11 +115,49 @@ class BOLLPaintObject<T extends BOLLIndicator> extends SinglePaintObjectBox<T> {
   void paintChart(Canvas canvas, Size size) {
     /// 绘制BOLL线
     paintBollLine(canvas, size);
+
+    if (isInSub && settingConfig.showYAxisTick) {
+      paintYAxisScale(
+        canvas,
+        size,
+        tickCount: indicator.tickCount,
+        precision: klineData.precision,
+      );
+    }
+  }
+
+  /// 重写[paintYAxisScale]中的格式化刻度值.
+  @override
+  String fromatTickValue(BagNum value, {required int precision}) {
+    return formatPrice(
+      value.toDecimal(),
+      precision: precision,
+      cutInvalidZero: false,
+      showThousands: true,
+    );
   }
 
   @override
   void onCross(Canvas canvas, Offset offset) {
-    ///
+    /// onCross时, 绘制Y轴上的标记值(注: 仅对indicator.key为subBollKey时有效)
+    if (isInSub) {
+      paintYAxisMarkOnCross(
+        canvas,
+        offset,
+        precision: klineData.precision,
+      );
+    }
+  }
+
+  /// 在onCross时, 重写[paintYAxisMarkOnCross]中的格式化刻度值
+  @override
+  String formatMarkValueOnCross(BagNum value, {required int precision}) {
+    return formatPrice(
+      value.toDecimal(),
+      precision: precision,
+      cutInvalidZero: false,
+      showThousands: true,
+    );
   }
 
   /// 绘制BOLL线
@@ -118,6 +168,11 @@ class BOLLPaintObject<T extends BOLLIndicator> extends SinglePaintObjectBox<T> {
     if (!indicator.calcParam.isValid(len)) return;
     int start = klineData.start;
     int end = (klineData.end + 1).clamp(start, len); // 多绘制一根蜡烛
+
+    if (isInSub) {
+      // 绘制简易蜡烛
+      paintSimpleCandleChart(canvas, size);
+    }
 
     final List<Offset> mbPoints = [];
     final List<Offset> upPoints = [];

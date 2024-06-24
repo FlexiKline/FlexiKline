@@ -33,6 +33,8 @@ abstract class _$BOLLIndicatorCWProxy {
 
   BOLLIndicator fillColor(Color? fillColor);
 
+  BOLLIndicator tickCount(int tickCount);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `BOLLIndicator(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -53,6 +55,7 @@ abstract class _$BOLLIndicatorCWProxy {
     double? lineWidth,
     bool? isFillBetweenUpAndDn,
     Color? fillColor,
+    int? tickCount,
   });
 }
 
@@ -104,6 +107,9 @@ class _$BOLLIndicatorCWProxyImpl implements _$BOLLIndicatorCWProxy {
   BOLLIndicator fillColor(Color? fillColor) => this(fillColor: fillColor);
 
   @override
+  BOLLIndicator tickCount(int tickCount) => this(tickCount: tickCount);
+
+  @override
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `BOLLIndicator(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -125,6 +131,7 @@ class _$BOLLIndicatorCWProxyImpl implements _$BOLLIndicatorCWProxy {
     Object? lineWidth = const $CopyWithPlaceholder(),
     Object? isFillBetweenUpAndDn = const $CopyWithPlaceholder(),
     Object? fillColor = const $CopyWithPlaceholder(),
+    Object? tickCount = const $CopyWithPlaceholder(),
   }) {
     return BOLLIndicator(
       key: key == const $CopyWithPlaceholder() || key == null
@@ -182,6 +189,10 @@ class _$BOLLIndicatorCWProxyImpl implements _$BOLLIndicatorCWProxy {
           ? _value.fillColor
           // ignore: cast_nullable_to_non_nullable
           : fillColor as Color?,
+      tickCount: tickCount == const $CopyWithPlaceholder() || tickCount == null
+          ? _value.tickCount
+          // ignore: cast_nullable_to_non_nullable
+          : tickCount as int,
     );
   }
 }
@@ -219,6 +230,7 @@ BOLLIndicator _$BOLLIndicatorFromJson(Map<String, dynamic> json) =>
       lineWidth: (json['lineWidth'] as num).toDouble(),
       isFillBetweenUpAndDn: json['isFillBetweenUpAndDn'] as bool? ?? true,
       fillColor: const ColorConverter().fromJson(json['fillColor'] as String?),
+      tickCount: (json['tickCount'] as num?)?.toInt() ?? defaultSubTickCount,
     );
 
 Map<String, dynamic> _$BOLLIndicatorToJson(BOLLIndicator instance) =>
@@ -236,4 +248,5 @@ Map<String, dynamic> _$BOLLIndicatorToJson(BOLLIndicator instance) =>
       'lineWidth': instance.lineWidth,
       'isFillBetweenUpAndDn': instance.isFillBetweenUpAndDn,
       'fillColor': const ColorConverter().toJson(instance.fillColor),
+      'tickCount': instance.tickCount,
     };

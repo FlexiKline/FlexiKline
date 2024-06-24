@@ -37,6 +37,8 @@ class IndicatorsConfig {
     required this.macd,
     required this.kdj,
     required this.mavol,
+    required this.subBoll,
+    required this.subSar,
   });
 
   // IndicatorsConfig({
@@ -90,6 +92,8 @@ class IndicatorsConfig {
   late MACDIndicator macd;
   late KDJIndicator kdj;
   late MAVolumeIndicator mavol;
+  late BOLLIndicator subBoll;
+  late SARIndicator subSar;
 
   /// 内置主区指标
   Map<ValueKey, SinglePaintObjectIndicator> get _innerMainIndicators => {
@@ -107,6 +111,8 @@ class IndicatorsConfig {
         macd.key: macd,
         kdj.key: kdj,
         mavol.key: mavol,
+        subBoll.key: subBoll,
+        subSar.key: subSar,
       };
 
   /// 用户自定义主区指标
