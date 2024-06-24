@@ -83,10 +83,13 @@ abstract interface class IState {
   bool switchKlineData(CandleReq req, {bool useCacheFirst = true});
 
   /// 结束加载中状态
-  /// [force] 强制结束加载中状态
-  /// [req] 如果与当前[curKlineData]的请求一致且状态非[RequestState.none], 即结束加载中状态
-  ///   否则, 仅改变[req]指定的缓存的[KlineData]请求状态.
-  void stopLoading(CandleReq req, {bool force = false});
+  /// [forceStopCurReq] 强制结束当前请求蜡烛数据[curKlineData]的加载中状态
+  /// [request]和[reqKey]指定要结束加载状态的请求, 如果[request]请求的状态非[RequestState.none], 即结束加载中状态
+  void stopLoading({
+    CandleReq? request,
+    String? reqKey,
+    bool forceStopCurReq = false,
+  });
 
   /// 更新[list]到[req]请求指定的[KlineData]中
   Future<void> updateKlineData(CandleReq req, List<CandleModel> list);

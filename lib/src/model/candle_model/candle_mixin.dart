@@ -68,6 +68,8 @@ mixin BollMixin {
 
 mixin SarMixin {
   BagNum? sar;
+
+  /// 1: 代表上涨; -1: 代表下跌; 0: 代表开始上涨或下跌
   int? sarFlag;
 
   bool get isValidSarData => sar != null && sarFlag != null;

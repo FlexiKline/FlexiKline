@@ -629,7 +629,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       height: theme.mainIndicatorHeight,
       padding: theme.mainIndicatorPadding,
       calcParam: const SARParam(startAf: 0.02, step: 0.02, maxAf: 0.2),
-      radius: 2 * theme.scale,
+      radius: null, // 2 * theme.scale,
       paint: PaintConfig(
         color: null,
         strokeWidth: 1 * theme.scale,

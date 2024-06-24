@@ -74,7 +74,8 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
 
     logger.logd('genRandomCandleList Begin ${DateTime.now()}');
     final list = await genRandomCandleList(
-      count: 50000,
+      // count: 50000,
+      count: 80,
       bar: request.timeBar!,
     );
     logger.logd('genRandomCandleList End ${DateTime.now()}');

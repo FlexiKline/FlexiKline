@@ -229,4 +229,15 @@ class BitFlexiKlineConfiguration with FlexiKlineThemeConfigurationMixin {
           position: DrawPosition.bottom,
         );
   }
+
+  @override
+  SARIndicator genSarIndicator(IFlexiKlineTheme theme) {
+    return super.genSarIndicator(theme).copyWith(
+          radius: 2 * theme.scale,
+          paint: PaintConfig(
+            color: Colors.blue,
+            style: PaintingStyle.fill,
+          ),
+        );
+  }
 }

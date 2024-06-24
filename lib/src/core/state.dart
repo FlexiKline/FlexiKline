@@ -319,20 +319,25 @@ mixin StateBinding
   }
 
   /// 结束加载中状态
-  /// [force] 强制结束加载中状态
-  /// [req] 如果与当前[curKlineData]的请求一致且状态非[RequestState.none], 即结束加载中状态
-  ///   否则, 仅改变[req]指定的缓存的[KlineData]请求状态.
+  /// [forceStopCurReq] 强制结束当前请求蜡烛数据[curKlineData]的加载中状态
+  /// [request]和[reqKey]指定要结束加载状态的请求, 如果[request]请求的状态非[RequestState.none], 即结束加载中状态
   @override
-  void stopLoading(CandleReq req, {bool force = false}) {
-    final data = _klineDataCache[req.key];
-    if (data != null) {
-      if (force || req.key == curDataKey) {
-        if (curKlineData.req.state != RequestState.none) {
-          updateCandleRequestListener(
-            curKlineData.updateReqRange(state: RequestState.none),
-          );
-        }
-      } else {
+  void stopLoading({
+    CandleReq? request,
+    String? reqKey,
+    bool forceStopCurReq = false,
+  }) {
+    KlineData? data;
+    reqKey ??= request?.key;
+    if (forceStopCurReq || reqKey == curDataKey) {
+      if (curKlineData.req.state != RequestState.none) {
+        updateCandleRequestListener(
+          curKlineData.updateReqRange(state: RequestState.none),
+        );
+      }
+    } else {
+      if (reqKey != null) data = _klineDataCache[reqKey];
+      if (data != null) {
         data.updateReqRange(state: RequestState.none);
       }
     }
@@ -357,7 +362,7 @@ mixin StateBinding
     );
 
     /// 首先结束[stat.req]的请求状态为[RequestState.none]
-    stopLoading(data.req);
+    stopLoading(request: data.req);
 
     data = await _startPrecomputeKlineData(
       data,

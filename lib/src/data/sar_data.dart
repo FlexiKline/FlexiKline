@@ -61,15 +61,19 @@ mixin SARData on BaseData {
 
   /// SAR 的计算公式:
   /// SAR(今日)：SAR (昨日) + AF (动能趋势指标) x [ (区间极值(波段内最极值) – SAR(昨日)]
+  /// 当前SAR依赖于昨日SAR, 以及区间极值和这一阶段的动能趋势AF, 因此, 每次都从头开始算.
+  /// 加之极值与动能趋势指标AF在任意位置开始时, 向前追溯算法相对会复杂.
   void calcuAndCacheSar({
     required SARParam param,
     bool reset = false,
   }) {
     final len = list.length;
     const start = 0;
-    final end = len - 1;
-    if (end < start) return;
+    int end = len;
+    if (!checkStartAndEnd(start, end)) return;
     logd('calcuAndCacheSar [len:$len ~ 0] param:$param');
+
+    end = end - 1;
 
     double af = param.startAf;
     final step = param.step;
@@ -134,14 +138,15 @@ mixin SARData on BaseData {
     end ??= this.end;
     if (!checkStartAndEnd(start, end)) return null;
 
+    int endIndex = end - 1;
     if (end < start) return null;
-    if (!list[end].isValidSarData) {
+    if (!list[endIndex].isValidSarData) {
       calcuAndCacheSar(param: param);
     }
 
     MinMax? minmax;
     CandleModel m;
-    for (int i = end; i >= start; i--) {
+    for (int i = endIndex; i >= start; i--) {
       m = list[i];
       if (m.sar != null) {
         minmax ??= MinMax.same(m.sar!);
