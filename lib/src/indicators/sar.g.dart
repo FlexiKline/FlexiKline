@@ -172,9 +172,7 @@ extension $SARIndicatorCopyWith on SARIndicator {
 // **************************************************************************
 
 SARIndicator _$SARIndicatorFromJson(Map<String, dynamic> json) => SARIndicator(
-      key: json['key'] == null
-          ? sarKey
-          : const ValueKeyConverter().fromJson(json['key'] as String),
+      key: const ValueKeyConverter().fromJson(json['key'] as String),
       name: json['name'] as String? ?? 'SAR',
       height: (json['height'] as num).toDouble(),
       padding: json['padding'] == null

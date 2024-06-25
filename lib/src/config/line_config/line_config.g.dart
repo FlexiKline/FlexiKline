@@ -109,7 +109,7 @@ LineConfig _$LineConfigFromJson(Map<String, dynamic> json) => LineConfig(
           : const LineTypeConverter().fromJson(json['type'] as String),
       color: json['color'] == null
           ? Colors.black
-          : const ColorConverter().fromJson(json['color'] as String?),
+          : const ColorConverter().fromJson(json['color'] as String),
       length: (json['length'] as num?)?.toDouble(),
       width: (json['width'] as num?)?.toDouble() ?? 0.5,
       dashes: (json['dashes'] as List<dynamic>?)
@@ -121,6 +121,7 @@ LineConfig _$LineConfigFromJson(Map<String, dynamic> json) => LineConfig(
 Map<String, dynamic> _$LineConfigToJson(LineConfig instance) {
   final val = <String, dynamic>{
     'type': const LineTypeConverter().toJson(instance.type),
+    'color': const ColorConverter().toJson(instance.color),
   };
 
   void writeNotNull(String key, dynamic value) {
@@ -129,7 +130,6 @@ Map<String, dynamic> _$LineConfigToJson(LineConfig instance) {
     }
   }
 
-  writeNotNull('color', const ColorConverter().toJson(instance.color));
   writeNotNull('length', instance.length);
   val['width'] = instance.width;
   val['dashes'] = instance.dashes;

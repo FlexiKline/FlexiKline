@@ -34,7 +34,7 @@ part 'sar.g.dart';
 class SARIndicator extends SinglePaintObjectIndicator
     implements IPrecomputable {
   SARIndicator({
-    super.key = sarKey,
+    required super.key,
     super.name = 'SAR',
     required super.height,
     super.padding = defaultMainIndicatorPadding,
@@ -51,7 +51,8 @@ class SARIndicator extends SinglePaintObjectIndicator
 
   final SARParam calcParam;
 
-  // 圆的半径.
+  /// 圆的半径.
+  /// 注: 如果为空, 将取蜡烛宽度的1/3, 随着缩放操作自动变化大小.
   final double? radius;
 
   /// 绘制SAR的画笔.
@@ -85,7 +86,8 @@ class SARPaintObject<T extends SARIndicator> extends SinglePaintObjectBox<T>
         PaintSimpleCandleMixin {
   SARPaintObject({required super.controller, required super.indicator});
 
-  bool get isInSub => indicator.key == subSarKey;
+  bool? _isInsub;
+  bool get isInSub => _isInsub ??= indicator.key == subSarKey;
 
   @override
   MinMax? initState({required int start, required int end}) {

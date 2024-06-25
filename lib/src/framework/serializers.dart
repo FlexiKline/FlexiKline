@@ -436,16 +436,16 @@ class StrutStyleConverter
   }
 }
 
-class ColorConverter implements JsonConverter<Color, String?> {
+class ColorConverter implements JsonConverter<Color, String> {
   const ColorConverter();
 
   @override
-  Color fromJson(String? json) {
+  Color fromJson(String json) {
     return parseHexColor(json) ?? Colors.transparent;
   }
 
   @override
-  String toJson(Color? color) {
+  String toJson(Color color) {
     return convertHexColor(color) ?? '';
   }
 }

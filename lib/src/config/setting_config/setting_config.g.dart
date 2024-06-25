@@ -316,10 +316,9 @@ extension $SettingConfigCopyWith on SettingConfig {
 SettingConfig _$SettingConfigFromJson(Map<String, dynamic> json) =>
     SettingConfig(
       pixel: (json['pixel'] as num).toDouble(),
-      textColor: const ColorConverter().fromJson(json['textColor'] as String?),
-      longColor: const ColorConverter().fromJson(json['longColor'] as String?),
-      shortColor:
-          const ColorConverter().fromJson(json['shortColor'] as String?),
+      textColor: const ColorConverter().fromJson(json['textColor'] as String),
+      longColor: const ColorConverter().fromJson(json['longColor'] as String),
+      shortColor: const ColorConverter().fromJson(json['shortColor'] as String),
       opacity: (json['opacity'] as num?)?.toDouble() ?? 0.5,
       loading: LoadingConfig.fromJson(json['loading'] as Map<String, dynamic>),
       mainRect: json['mainRect'] == null
@@ -350,6 +349,20 @@ SettingConfig _$SettingConfigFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$SettingConfigToJson(SettingConfig instance) {
   final val = <String, dynamic>{
     'pixel': instance.pixel,
+    'textColor': const ColorConverter().toJson(instance.textColor),
+    'longColor': const ColorConverter().toJson(instance.longColor),
+    'shortColor': const ColorConverter().toJson(instance.shortColor),
+    'opacity': instance.opacity,
+    'loading': instance.loading.toJson(),
+    'mainRect': const RectConverter().toJson(instance.mainRect),
+    'mainMinSize': const SizeConverter().toJson(instance.mainMinSize),
+    'mainPadding': const EdgeInsetsConverter().toJson(instance.mainPadding),
+    'mainDrawBelowTipsArea': instance.mainDrawBelowTipsArea,
+    'minPaintBlankRate': instance.minPaintBlankRate,
+    'alwaysCalculateScreenOfCandlesIfEnough':
+        instance.alwaysCalculateScreenOfCandlesIfEnough,
+    'candleMaxWidth': instance.candleMaxWidth,
+    'candleWidth': instance.candleWidth,
   };
 
   void writeNotNull(String key, dynamic value) {
@@ -358,21 +371,6 @@ Map<String, dynamic> _$SettingConfigToJson(SettingConfig instance) {
     }
   }
 
-  writeNotNull('textColor', const ColorConverter().toJson(instance.textColor));
-  writeNotNull('longColor', const ColorConverter().toJson(instance.longColor));
-  writeNotNull(
-      'shortColor', const ColorConverter().toJson(instance.shortColor));
-  val['opacity'] = instance.opacity;
-  val['loading'] = instance.loading.toJson();
-  val['mainRect'] = const RectConverter().toJson(instance.mainRect);
-  val['mainMinSize'] = const SizeConverter().toJson(instance.mainMinSize);
-  val['mainPadding'] = const EdgeInsetsConverter().toJson(instance.mainPadding);
-  val['mainDrawBelowTipsArea'] = instance.mainDrawBelowTipsArea;
-  val['minPaintBlankRate'] = instance.minPaintBlankRate;
-  val['alwaysCalculateScreenOfCandlesIfEnough'] =
-      instance.alwaysCalculateScreenOfCandlesIfEnough;
-  val['candleMaxWidth'] = instance.candleMaxWidth;
-  val['candleWidth'] = instance.candleWidth;
   writeNotNull('candleFixedSpacing', instance.candleFixedSpacing);
   val['candleSpacingParts'] = instance.candleSpacingParts;
   val['candleLineWidth'] = instance.candleLineWidth;

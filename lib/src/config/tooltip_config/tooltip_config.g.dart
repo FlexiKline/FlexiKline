@@ -118,8 +118,7 @@ extension $TooltipConfigCopyWith on TooltipConfig {
 TooltipConfig _$TooltipConfigFromJson(Map<String, dynamic> json) =>
     TooltipConfig(
       show: json['show'] as bool? ?? true,
-      background:
-          const ColorConverter().fromJson(json['background'] as String?),
+      background: const ColorConverter().fromJson(json['background'] as String),
       margin: const EdgeInsetsConverter()
           .fromJson(json['margin'] as Map<String, dynamic>),
       padding: const EdgeInsetsConverter()
@@ -130,22 +129,12 @@ TooltipConfig _$TooltipConfigFromJson(Map<String, dynamic> json) =>
           .fromJson(json['style'] as Map<String, dynamic>),
     );
 
-Map<String, dynamic> _$TooltipConfigToJson(TooltipConfig instance) {
-  final val = <String, dynamic>{
-    'show': instance.show,
-  };
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull(
-      'background', const ColorConverter().toJson(instance.background));
-  val['margin'] = const EdgeInsetsConverter().toJson(instance.margin);
-  val['padding'] = const EdgeInsetsConverter().toJson(instance.padding);
-  val['radius'] = const BorderRadiusConverter().toJson(instance.radius);
-  val['style'] = const TextStyleConverter().toJson(instance.style);
-  return val;
-}
+Map<String, dynamic> _$TooltipConfigToJson(TooltipConfig instance) =>
+    <String, dynamic>{
+      'show': instance.show,
+      'background': const ColorConverter().toJson(instance.background),
+      'margin': const EdgeInsetsConverter().toJson(instance.margin),
+      'padding': const EdgeInsetsConverter().toJson(instance.padding),
+      'radius': const BorderRadiusConverter().toJson(instance.radius),
+      'style': const TextStyleConverter().toJson(instance.style),
+    };

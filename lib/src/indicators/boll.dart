@@ -31,7 +31,7 @@ part 'boll.g.dart';
 class BOLLIndicator extends SinglePaintObjectIndicator
     implements IPrecomputable {
   BOLLIndicator({
-    super.key = bollKey,
+    required super.key,
     super.name = 'BOLL',
     super.zIndex = 2,
     required super.height,
@@ -98,7 +98,8 @@ class BOLLPaintObject<T extends BOLLIndicator> extends SinglePaintObjectBox<T>
     required super.indicator,
   });
 
-  bool get isInSub => indicator.key == subBollKey;
+  bool? _isInsub;
+  bool get isInSub => _isInsub ??= indicator.key == subBollKey;
 
   @override
   MinMax? initState({required int start, required int end}) {

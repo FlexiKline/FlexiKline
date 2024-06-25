@@ -209,7 +209,7 @@ GridAxis _$GridAxisFromJson(Map<String, dynamic> json) => GridAxis(
       width: (json['width'] as num?)?.toDouble() ?? 0.5,
       color: json['color'] == null
           ? const Color(0xffE9EDF0)
-          : const ColorConverter().fromJson(json['color'] as String?),
+          : const ColorConverter().fromJson(json['color'] as String),
       type: json['type'] == null
           ? LineType.solid
           : const LineTypeConverter().fromJson(json['type'] as String),
@@ -219,21 +219,11 @@ GridAxis _$GridAxisFromJson(Map<String, dynamic> json) => GridAxis(
           const [2, 2],
     );
 
-Map<String, dynamic> _$GridAxisToJson(GridAxis instance) {
-  final val = <String, dynamic>{
-    'show': instance.show,
-    'count': instance.count,
-    'width': instance.width,
-  };
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('color', const ColorConverter().toJson(instance.color));
-  val['type'] = const LineTypeConverter().toJson(instance.type);
-  val['dashes'] = instance.dashes;
-  return val;
-}
+Map<String, dynamic> _$GridAxisToJson(GridAxis instance) => <String, dynamic>{
+      'show': instance.show,
+      'count': instance.count,
+      'width': instance.width,
+      'color': const ColorConverter().toJson(instance.color),
+      'type': const LineTypeConverter().toJson(instance.type),
+      'dashes': instance.dashes,
+    };

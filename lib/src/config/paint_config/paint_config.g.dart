@@ -83,7 +83,8 @@ extension $PaintConfigCopyWith on PaintConfig {
 // **************************************************************************
 
 PaintConfig _$PaintConfigFromJson(Map<String, dynamic> json) => PaintConfig(
-      color: const ColorConverter().fromJson(json['color'] as String?),
+      color: _$JsonConverterFromJson<String, Color>(
+          json['color'], const ColorConverter().fromJson),
       strokeWidth: (json['strokeWidth'] as num?)?.toDouble(),
       style: json['style'] == null
           ? PaintingStyle.stroke
@@ -101,12 +102,18 @@ Map<String, dynamic> _$PaintConfigToJson(PaintConfig instance) {
 
   writeNotNull(
       'color',
-      _$JsonConverterToJson<String?, Color>(
+      _$JsonConverterToJson<String, Color>(
           instance.color, const ColorConverter().toJson));
   writeNotNull('strokeWidth', instance.strokeWidth);
   val['style'] = const PaintingStyleConverter().toJson(instance.style);
   return val;
 }
+
+Value? _$JsonConverterFromJson<Json, Value>(
+  Object? json,
+  Value? Function(Json json) fromJson,
+) =>
+    json == null ? null : fromJson(json as Json);
 
 Json? _$JsonConverterToJson<Json, Value>(
   Value? value,

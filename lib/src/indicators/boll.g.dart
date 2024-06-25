@@ -209,9 +209,7 @@ extension $BOLLIndicatorCopyWith on BOLLIndicator {
 
 BOLLIndicator _$BOLLIndicatorFromJson(Map<String, dynamic> json) =>
     BOLLIndicator(
-      key: json['key'] == null
-          ? bollKey
-          : const ValueKeyConverter().fromJson(json['key'] as String),
+      key: const ValueKeyConverter().fromJson(json['key'] as String),
       name: json['name'] as String? ?? 'BOLL',
       zIndex: (json['zIndex'] as num?)?.toInt() ?? 2,
       height: (json['height'] as num).toDouble(),
@@ -229,7 +227,8 @@ BOLLIndicator _$BOLLIndicatorFromJson(Map<String, dynamic> json) =>
           .fromJson(json['tipsPadding'] as Map<String, dynamic>),
       lineWidth: (json['lineWidth'] as num).toDouble(),
       isFillBetweenUpAndDn: json['isFillBetweenUpAndDn'] as bool? ?? true,
-      fillColor: const ColorConverter().fromJson(json['fillColor'] as String?),
+      fillColor: _$JsonConverterFromJson<String, Color>(
+          json['fillColor'], const ColorConverter().fromJson),
       tickCount: (json['tickCount'] as num?)?.toInt() ?? defaultSubTickCount,
     );
 
@@ -250,3 +249,9 @@ Map<String, dynamic> _$BOLLIndicatorToJson(BOLLIndicator instance) =>
       'fillColor': const ColorConverter().toJson(instance.fillColor),
       'tickCount': instance.tickCount,
     };
+
+Value? _$JsonConverterFromJson<Json, Value>(
+  Object? json,
+  Value? Function(Json json) fromJson,
+) =>
+    json == null ? null : fromJson(json as Json);

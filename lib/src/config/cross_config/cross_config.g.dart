@@ -230,21 +230,12 @@ CrossPointConfig _$CrossPointConfigFromJson(Map<String, dynamic> json) =>
       width: (json['width'] as num?)?.toDouble() ?? 6,
       color: json['color'] == null
           ? Colors.black
-          : const ColorConverter().fromJson(json['color'] as String?),
+          : const ColorConverter().fromJson(json['color'] as String),
     );
 
-Map<String, dynamic> _$CrossPointConfigToJson(CrossPointConfig instance) {
-  final val = <String, dynamic>{
-    'radius': instance.radius,
-    'width': instance.width,
-  };
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('color', const ColorConverter().toJson(instance.color));
-  return val;
-}
+Map<String, dynamic> _$CrossPointConfigToJson(CrossPointConfig instance) =>
+    <String, dynamic>{
+      'radius': instance.radius,
+      'width': instance.width,
+      'color': const ColorConverter().toJson(instance.color),
+    };

@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:flexi_kline/src/config/export.dart';
 import 'package:flutter/material.dart';
 
 import '../constant.dart';
@@ -31,6 +30,7 @@ import 'loading_config/loading_config.dart';
 import 'ma_param/ma_param.dart';
 import 'macd_param/macd_param.dart';
 import 'mark_config/mark_config.dart';
+import 'paint_config/paint_config.dart';
 import 'sar_param/sar_param.dart';
 import 'setting_config/setting_config.dart';
 import 'text_area_config/text_area_config.dart';
@@ -449,6 +449,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   VolumeIndicator genMainVolumeIndicator(covariant IFlexiKlineTheme theme) {
     return VolumeIndicator(
+      key: volumeKey,
       zIndex: -1,
       height: theme.subIndicatorHeight,
       padding: theme.subIndicatorPadding,
@@ -470,10 +471,10 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       precision: 2,
 
       /// 控制参数
-      showYAxisTick: false,
-      showCrossMark: false,
-      showTips: false,
-      useTint: true,
+      // showYAxisTick: false,
+      // showCrossMark: false,
+      // showTips: false,
+      // useTint: true,
     );
   }
 
@@ -581,6 +582,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   BOLLIndicator genBollIndicator(covariant IFlexiKlineTheme theme) {
     return BOLLIndicator(
+      key: bollKey,
       zIndex: 3,
       height: theme.mainIndicatorHeight,
       padding: theme.mainIndicatorPadding,
@@ -630,6 +632,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   SARIndicator genSarIndicator(IFlexiKlineTheme theme) {
     return SARIndicator(
+      key: sarKey,
       zIndex: 4,
       height: theme.mainIndicatorHeight,
       padding: theme.mainIndicatorPadding,
@@ -781,6 +784,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   VolumeIndicator genSubVolumeIndicator(covariant IFlexiKlineTheme theme) {
     return VolumeIndicator(
+      key: subVolKey, // 区别于主区volumeKey的地方
       zIndex: 0,
       height: theme.subIndicatorHeight,
       padding: theme.subIndicatorPadding,
@@ -802,10 +806,10 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       precision: 2,
 
       /// 控制参数
-      showYAxisTick: true,
-      showCrossMark: true,
-      showTips: true,
-      useTint: false,
+      // showYAxisTick: true,
+      // showCrossMark: true,
+      // showTips: true,
+      // useTint: false,
     );
   }
 
@@ -899,7 +903,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   SARIndicator genSubSarIndicator(IFlexiKlineTheme theme) {
     return SARIndicator(
-      key: subSarKey, // 区别于主区bollKey的地方
+      key: subSarKey, // 区别于主区sarKey的地方
       height: theme.subIndicatorHeight,
       padding: theme.subIndicatorPadding,
       calcParam: const SARParam(startAf: 0.02, step: 0.02, maxAf: 0.2),

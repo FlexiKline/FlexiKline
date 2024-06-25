@@ -190,8 +190,8 @@ TextAreaConfig _$TextAreaConfigFromJson(Map<String, dynamic> json) =>
       minWidth: (json['minWidth'] as num?)?.toDouble(),
       maxWidth: (json['maxWidth'] as num?)?.toDouble(),
       maxLines: (json['maxLines'] as num?)?.toInt(),
-      background:
-          const ColorConverter().fromJson(json['background'] as String?),
+      background: _$JsonConverterFromJson<String, Color>(
+          json['background'], const ColorConverter().fromJson),
       padding: _$JsonConverterFromJson<Map<String, dynamic>, EdgeInsets>(
           json['padding'], const EdgeInsetsConverter().fromJson),
       border: _$JsonConverterFromJson<Map<String, dynamic>, BorderSide>(
@@ -222,7 +222,7 @@ Map<String, dynamic> _$TextAreaConfigToJson(TextAreaConfig instance) {
   writeNotNull('maxLines', instance.maxLines);
   writeNotNull(
       'background',
-      _$JsonConverterToJson<String?, Color>(
+      _$JsonConverterToJson<String, Color>(
           instance.background, const ColorConverter().toJson));
   writeNotNull(
       'padding',

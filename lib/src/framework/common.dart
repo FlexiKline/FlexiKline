@@ -39,11 +39,12 @@ enum IndicatorType {
   ema('EMA'),
   boll('BOLL'),
   sar('SAR'),
+  volume('VOL'),
 
   /// 副区
   time('Time'),
   volMa('VOLMA'),
-  volume('VOL'),
+  subVol('VOL'),
   maVol('MAVOL'),
   macd('MACD'),
   kdj('KDJ'),
@@ -70,15 +71,16 @@ const maKey = ValueKey<dynamic>(IndicatorType.ma);
 const emaKey = ValueKey<dynamic>(IndicatorType.ema);
 const bollKey = ValueKey<dynamic>(IndicatorType.boll);
 const sarKey = ValueKey<dynamic>(IndicatorType.sar);
+const volumeKey = ValueKey<dynamic>(IndicatorType.volume);
 
 /// 副区
 const volMaKey = ValueKey<dynamic>(IndicatorType.volMa);
-const volumeKey = ValueKey<dynamic>(IndicatorType.volume);
+const subVolKey = ValueKey<dynamic>(IndicatorType.subVol);
 const maVolKey = ValueKey<dynamic>(IndicatorType.maVol);
 const macdKey = ValueKey<dynamic>(IndicatorType.macd);
 const kdjKey = ValueKey<dynamic>(IndicatorType.kdj);
-const subBollKey = ValueKey(IndicatorType.subBoll);
-const subSarKey = ValueKey(IndicatorType.subSar);
+const subBollKey = ValueKey<dynamic>(IndicatorType.subBoll);
+const subSarKey = ValueKey<dynamic>(IndicatorType.subSar);
 const rsiKey = ValueKey<dynamic>(IndicatorType.rsi);
 const stochRsiKey = ValueKey<dynamic>(IndicatorType.stochRsi);
 const timeKey = ValueKey<dynamic>(IndicatorType.time);

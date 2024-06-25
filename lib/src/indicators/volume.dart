@@ -29,7 +29,7 @@ part 'volume.g.dart';
 @FlexiIndicatorSerializable
 class VolumeIndicator extends SinglePaintObjectIndicator {
   VolumeIndicator({
-    super.key = volumeKey,
+    required super.key,
     super.name = 'VOL',
     super.zIndex = -1,
     super.height = defaultSubIndicatorHeight,
@@ -40,13 +40,7 @@ class VolumeIndicator extends SinglePaintObjectIndicator {
     required this.volTips,
     required this.tipsPadding,
     this.tickCount = defaultSubTickCount,
-    required this.precision,
-
-    /// 控制参数
-    this.showYAxisTick = false,
-    this.showCrossMark = false,
-    this.showTips = false,
-    this.useTint = true,
+    this.precision = 2,
   });
 
   /// 绘制相关参数
@@ -57,10 +51,10 @@ class VolumeIndicator extends SinglePaintObjectIndicator {
   final int precision;
 
   /// 控制参数(Volume可用于主图和副图, 以下开关控制在主/副图的展示效果)
-  final bool showYAxisTick;
-  final bool showCrossMark;
-  final bool showTips;
-  final bool useTint;
+  // final bool showYAxisTick;
+  // final bool showCrossMark;
+  // final bool showTips;
+  // final bool useTint;
 
   @override
   VolumePaintObject createPaintObject(KlineBindingBase controller) =>
@@ -79,10 +73,10 @@ class VolumeIndicator extends SinglePaintObjectIndicator {
 class VolumePaintObject<T extends VolumeIndicator>
     extends SinglePaintObjectBox<T>
     with PaintYAxisScaleMixin, PaintYAxisMarkOnCrossMixin {
-  VolumePaintObject({
-    required super.controller,
-    required super.indicator,
-  });
+  VolumePaintObject({required super.controller, required super.indicator});
+
+  bool? _isInsub;
+  bool get isInSub => _isInsub ??= indicator.key == subVolKey;
 
   @override
   MinMax? initState({required int start, required int end}) {
@@ -101,7 +95,7 @@ class VolumePaintObject<T extends VolumeIndicator>
     /// 绘制Volume柱状图
     paintVolumeChart(canvas, size);
 
-    if (settingConfig.showYAxisTick && indicator.showYAxisTick) {
+    if (settingConfig.showYAxisTick && isInSub) {
       /// 绘制Y轴刻度值
       paintYAxisScale(
         canvas,
@@ -114,7 +108,7 @@ class VolumePaintObject<T extends VolumeIndicator>
 
   @override
   void onCross(Canvas canvas, Offset offset) {
-    if (indicator.showCrossMark) {
+    if (isInSub) {
       /// onCross时, 绘制Y轴上的标记值
       paintYAxisMarkOnCross(
         canvas,
@@ -134,12 +128,12 @@ class VolumePaintObject<T extends VolumeIndicator>
     final offset = startCandleDx - candleWidthHalf;
     final dyBottom = chartRect.bottom;
 
-    final longPaint = indicator.useTint
-        ? settingConfig.defLongTintBarPaint
-        : settingConfig.defLongBarPaint;
-    final shortPaint = indicator.useTint
-        ? settingConfig.defShortTintBarPaint
-        : settingConfig.defShortBarPaint;
+    final longPaint = isInSub
+        ? settingConfig.defLongBarPaint
+        : settingConfig.defLongTintBarPaint;
+    final shortPaint = isInSub
+        ? settingConfig.defShortBarPaint
+        : settingConfig.defShortTintBarPaint;
 
     for (var i = start; i < end; i++) {
       final model = list[i];
@@ -165,7 +159,7 @@ class VolumePaintObject<T extends VolumeIndicator>
     Offset? offset,
     Rect? tipsRect,
   }) {
-    if (!indicator.showTips) return null;
+    if (!isInSub) return null;
     model ??= offsetToCandle(offset);
     if (model == null) return null;
 
