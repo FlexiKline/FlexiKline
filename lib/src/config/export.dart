@@ -33,6 +33,7 @@ export 'boll_param/boll_param.dart';
 export 'sar_param/sar_param.dart';
 export 'kdj_param/kdj_param.dart';
 export 'macd_param/macd_param.dart';
+export 'rsi_param/rsi_param.dart';
 
 /// 内置默认配置
 export 'default_config.dart';

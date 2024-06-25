@@ -75,7 +75,7 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage>
 
     controller.onCrossI18nTooltipLables = tooltipLables;
 
-    controller.onLoadMoreCandles = loadMoreCandles;
+    // controller.onLoadMoreCandles = loadMoreCandles;
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       initKlineData(req);

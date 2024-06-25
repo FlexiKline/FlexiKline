@@ -44,7 +44,7 @@ enum RequestState {
 @CopyWith()
 @FlexiModelSerializable
 class CandleReq {
-  CandleReq({
+  const CandleReq({
     required this.instId,
     this.bar = '1m',
     this.limit = 100,

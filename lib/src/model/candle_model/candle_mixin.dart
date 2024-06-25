@@ -106,3 +106,32 @@ mixin KdjMixin {
     k = d = j = null;
   }
 }
+
+mixin RsiMixin {
+  /// rsi指标值均在[0 ~ 100]之间, 此处直接使用double类型.
+  List<double?>? rsiList;
+
+  bool get isValidRsiList => rsiList != null && rsiList!.hasValidData;
+
+  MinMax? get rsiListMinmax {
+    if (rsiList == null || rsiList!.isEmpty) return null;
+    double? min;
+    double? max;
+    for (var val in rsiList!) {
+      if (val != null) {
+        min ??= val;
+        max ??= val;
+        if (val < min) min = val;
+        if (val > max) max = val;
+      }
+    }
+    if (min != null && max != null) {
+      return MinMax(max: BagNum.fromNum(max), min: BagNum.fromNum(min));
+    }
+    return null;
+  }
+
+  void cleanRsi() {
+    rsiList = null;
+  }
+}

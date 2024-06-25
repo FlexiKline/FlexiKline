@@ -28,7 +28,15 @@ part 'candle_model.g.dart';
 @CopyWith()
 @FlexiModelSerializable
 class CandleModel
-    with MaMixin, VolMaMixin, EmaMixin, BollMixin, SarMixin, MacdMixin, KdjMixin
+    with
+        MaMixin,
+        VolMaMixin,
+        EmaMixin,
+        BollMixin,
+        SarMixin,
+        MacdMixin,
+        KdjMixin,
+        RsiMixin
     implements Comparable<CandleModel> {
   CandleModel({
     required this.ts,

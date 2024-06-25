@@ -31,6 +31,7 @@ import 'ma_param/ma_param.dart';
 import 'macd_param/macd_param.dart';
 import 'mark_config/mark_config.dart';
 import 'paint_config/paint_config.dart';
+import 'rsi_param/rsi_param.dart';
 import 'sar_param/sar_param.dart';
 import 'setting_config/setting_config.dart';
 import 'text_area_config/text_area_config.dart';
@@ -340,6 +341,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       mavol: genMavolIndicator(theme),
       subBoll: genSubBollIndicator(theme),
       subSar: genSubSarIndicator(theme),
+      rsi: genSubRsiIndicator(theme),
     );
   }
 
@@ -920,6 +922,56 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
         overflow: TextOverflow.ellipsis,
         height: defaultTextHeight,
       ),
+    );
+  }
+
+  RSIIndicator genSubRsiIndicator(IFlexiKlineTheme theme) {
+    return RSIIndicator(
+      height: theme.subIndicatorHeight,
+      padding: theme.subIndicatorPadding,
+      calcParams: [
+        RsiParam(
+          count: 6,
+          tips: TipsConfig(
+            label: 'RSI6: ',
+            precision: 2,
+            style: TextStyle(
+              fontSize: theme.normalTextSize,
+              color: Colors.deepOrangeAccent,
+              overflow: TextOverflow.ellipsis,
+              height: defaultTipsTextHeight,
+            ),
+          ),
+        ),
+        RsiParam(
+          count: 12,
+          tips: TipsConfig(
+            label: 'RSI12: ',
+            precision: 2,
+            style: TextStyle(
+              fontSize: theme.normalTextSize,
+              color: Colors.blueAccent,
+              overflow: TextOverflow.ellipsis,
+              height: defaultTipsTextHeight,
+            ),
+          ),
+        ),
+        RsiParam(
+          count: 24,
+          tips: TipsConfig(
+            label: 'RSI24: ',
+            precision: 2,
+            style: TextStyle(
+              fontSize: theme.normalTextSize,
+              color: Colors.pinkAccent,
+              overflow: TextOverflow.ellipsis,
+              height: defaultTipsTextHeight,
+            ),
+          ),
+        )
+      ],
+      tipsPadding: theme.tipsPadding,
+      lineWidth: theme.indicatorLineWidth,
     );
   }
 }

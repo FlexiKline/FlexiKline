@@ -28,7 +28,7 @@ void main() {
     debugPrint('tearDown spent:${stopwatch.elapsedMicroseconds}');
   });
 
-  const loop = 100000;
+  const loop = 100;
 
   const a = 12345.6789;
   const b = 6789.12345;

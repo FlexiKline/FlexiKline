@@ -31,6 +31,8 @@ abstract class _$IndicatorsConfigCWProxy {
 
   IndicatorsConfig subSar(SARIndicator subSar);
 
+  IndicatorsConfig rsi(RSIIndicator rsi);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `IndicatorsConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -50,6 +52,7 @@ abstract class _$IndicatorsConfigCWProxy {
     MAVolumeIndicator? mavol,
     BOLLIndicator? subBoll,
     SARIndicator? subSar,
+    RSIIndicator? rsi,
   });
 }
 
@@ -96,6 +99,9 @@ class _$IndicatorsConfigCWProxyImpl implements _$IndicatorsConfigCWProxy {
   IndicatorsConfig subSar(SARIndicator subSar) => this(subSar: subSar);
 
   @override
+  IndicatorsConfig rsi(RSIIndicator rsi) => this(rsi: rsi);
+
+  @override
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `IndicatorsConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -116,6 +122,7 @@ class _$IndicatorsConfigCWProxyImpl implements _$IndicatorsConfigCWProxy {
     Object? mavol = const $CopyWithPlaceholder(),
     Object? subBoll = const $CopyWithPlaceholder(),
     Object? subSar = const $CopyWithPlaceholder(),
+    Object? rsi = const $CopyWithPlaceholder(),
   }) {
     return IndicatorsConfig(
       candle: candle == const $CopyWithPlaceholder() || candle == null
@@ -166,6 +173,10 @@ class _$IndicatorsConfigCWProxyImpl implements _$IndicatorsConfigCWProxy {
           ? _value.subSar
           // ignore: cast_nullable_to_non_nullable
           : subSar as SARIndicator,
+      rsi: rsi == const $CopyWithPlaceholder() || rsi == null
+          ? _value.rsi
+          // ignore: cast_nullable_to_non_nullable
+          : rsi as RSIIndicator,
     );
   }
 }
@@ -194,6 +205,7 @@ IndicatorsConfig _$IndicatorsConfigFromJson(Map<String, dynamic> json) =>
       mavol: MAVolumeIndicator.fromJson(json['mavol'] as Map<String, dynamic>),
       subBoll: BOLLIndicator.fromJson(json['subBoll'] as Map<String, dynamic>),
       subSar: SARIndicator.fromJson(json['subSar'] as Map<String, dynamic>),
+      rsi: RSIIndicator.fromJson(json['rsi'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$IndicatorsConfigToJson(IndicatorsConfig instance) =>
@@ -210,4 +222,5 @@ Map<String, dynamic> _$IndicatorsConfigToJson(IndicatorsConfig instance) =>
       'mavol': instance.mavol.toJson(),
       'subBoll': instance.subBoll.toJson(),
       'subSar': instance.subSar.toJson(),
+      'rsi': instance.rsi.toJson(),
     };

@@ -39,6 +39,7 @@ class IndicatorsConfig {
     required this.mavol,
     required this.subBoll,
     required this.subSar,
+    required this.rsi,
   });
 
   // IndicatorsConfig({
@@ -94,6 +95,7 @@ class IndicatorsConfig {
   late MAVolumeIndicator mavol;
   late BOLLIndicator subBoll;
   late SARIndicator subSar;
+  late RSIIndicator rsi;
 
   /// 内置主区指标
   Map<ValueKey, SinglePaintObjectIndicator> get _innerMainIndicators => {
@@ -113,6 +115,7 @@ class IndicatorsConfig {
         mavol.key: mavol,
         subBoll.key: subBoll,
         subSar.key: subSar,
+        rsi.key: rsi,
       };
 
   /// 用户自定义主区指标

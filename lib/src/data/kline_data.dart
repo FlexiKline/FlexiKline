@@ -25,6 +25,7 @@ import 'ema_data.dart';
 import 'kdj_data.dart';
 import 'ma_data.dart';
 import 'macd_data.dart';
+import 'rsi_data.dart';
 import 'sar_data.dart';
 import 'volma_data.dart';
 
@@ -37,7 +38,8 @@ class KlineData extends BaseData
         MACDData,
         KDJData,
         BOLLData,
-        SARData {
+        SARData,
+        RSIData {
   KlineData(
     super.req, {
     super.list,

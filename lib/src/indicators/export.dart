@@ -24,3 +24,4 @@ export 'kdj.dart';
 export 'boll.dart';
 export 'time.dart';
 export 'sar.dart';
+export 'rsi.dart';

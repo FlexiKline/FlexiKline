@@ -15,6 +15,7 @@
 import 'dart:math' as math;
 import 'dart:async';
 
+import 'package:decimal/decimal.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -28,6 +29,21 @@ void main() {
       print('scheduleMicrotask:${val++}');
     });
   }
+
+  test('sign rsi', () {
+    Decimal hundred = Decimal.fromInt(100);
+    Decimal sumUp = Decimal.fromJson('14.9');
+    Decimal sumDown = Decimal.fromJson('15.4');
+    Decimal ret = sumUp.div((sumUp + sumDown)) * hundred;
+
+    print(ret.toString());
+
+    Decimal ret2 =
+        sumUp.divDouble(9).div(sumUp.divDouble(9) + sumDown.divDouble(9)) *
+            hundred;
+
+    print(ret2.toString());
+  });
 
   test('math ', () {
     print('math.log(0) ${math.log(0)}');
