@@ -47,8 +47,8 @@ mixin RSIData on BaseData {
     if (key == rsiKey && calcParam is List<RsiParam>) {
       calcuAndCacheRsi(
         calcParam,
-        start: range.start,
-        end: range.end,
+        // start: range.start,
+        // end: range.end,
         reset: reset,
       );
       return;
@@ -81,17 +81,20 @@ mixin RSIData on BaseData {
     int count, {
     required int paramIndex,
     required int paramLen,
-    int? start,
-    int? end,
+    // int? start,
+    // int? end,
   }) {
     final len = list.length;
-    start ??= this.start;
-    end ??= this.end;
-    if (count >= len || !checkStartAndEnd(start, end)) return;
-    logd('calculateRsi [end:$end ~ start:$start] count:$count');
+    // start ??= this.start;
+    // end ??= this.end;
+    // if (count >= len || !checkStartAndEnd(start, end)) return;
+    // logd('calculateRsi [end:$end ~ start:$start] count:$count');
+    if (count >= len || paramIndex >= paramLen) return;
+    logd('calculateRsi [len:$len ~ 0] count:$count');
 
     /// RSI要从end前的count+1个数据开始计算.
-    final index = math.min(end + count, len - 1);
+    // final index = math.min(end + count, len - 1);
+    final index = len - 1;
 
     CandleModel m = list[index];
     BagNum prevClose = m.close;
@@ -147,8 +150,8 @@ mixin RSIData on BaseData {
 
   void calcuAndCacheRsi(
     List<RsiParam> calcParams, {
-    required int start,
-    required int end,
+    // required int start,
+    // required int end,
     bool reset = false,
   }) {
     if (isEmpty || calcParams.isEmpty) return;
@@ -158,8 +161,8 @@ mixin RSIData on BaseData {
         calcParams[i].count,
         paramIndex: i,
         paramLen: paramLen,
-        start: math.max(0, start - calcParams[i].count), // 补起上一次未算数据
-        end: end,
+        // start: math.max(0, start - calcParams[i].count), // 补起上一次未算数据
+        // end: end,
       );
     }
   }
@@ -178,7 +181,8 @@ mixin RSIData on BaseData {
     end = math.min(len - minCount - 1, end - 1);
 
     if (!list[end].isValidRsiList) {
-      calcuAndCacheRsi(calcParams, start: 0, end: len);
+      // calcuAndCacheRsi(calcParams, start: 0, end: len);
+      calcuAndCacheRsi(calcParams);
     }
 
     MinMax? minmax;

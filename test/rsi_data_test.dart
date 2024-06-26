@@ -18,37 +18,17 @@ import 'package:flexi_kline/src/data/export.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'base/mock.dart';
-
 const tipsConfig = TipsConfig();
 const candleReq = CandleReq(instId: 'BTC-USDT');
 
+/// RSI相对强弱指数：股票、公式、计算和策略
+/// https://bigquant.com/wiki/doc/rsi-eUeAulPIqH
 void main() {
   final stopwatch = Stopwatch();
-  late List<CandleModel> list;
   late KlineData klineData;
   late List<RsiParam> rsiParams;
 
   setUpAll(() {
-    list = getCandleModelList();
-    klineData = KlineData(candleReq, list: list);
-    rsiParams = const [
-      RsiParam(count: 6, tips: tipsConfig),
-    ];
-  });
-
-  setUp(() {
-    stopwatch.reset();
-    stopwatch.start();
-  });
-  tearDown(() {
-    stopwatch.stop();
-    debugPrint('tearDown spent:${stopwatch.elapsedMicroseconds}');
-  });
-
-  /// RSI相对强弱指数：股票、公式、计算和策略
-  /// https://bigquant.com/wiki/doc/rsi-eUeAulPIqH
-  test('rsi', () {
     List<String> closeList = [
       '283.46',
       '280.69',
@@ -90,7 +70,20 @@ void main() {
 
     klineData = KlineData(candleReq, list: list);
     rsiParams = [const RsiParam(count: 14, tips: tipsConfig)];
-    klineData.calcuAndCacheRsi(rsiParams, start: 0, end: klineData.length);
+  });
+
+  setUp(() {
+    stopwatch.reset();
+    stopwatch.start();
+  });
+  tearDown(() {
+    stopwatch.stop();
+    debugPrint('tearDown spent:${stopwatch.elapsedMicroseconds}');
+  });
+
+  test('rsi', () {
+    // klineData.calcuAndCacheRsi(rsiParams, start: 0, end: klineData.length);
+    klineData.calcuAndCacheRsi(rsiParams);
 
     for (int i = 0; i < klineData.length; i++) {
       debugPrint('rsi $i => ${klineData.list[i].rsiList}');
