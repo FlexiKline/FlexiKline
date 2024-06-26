@@ -222,4 +222,8 @@ extension CandleModelExt on CandleModel {
     if (range == Decimal.zero) return 0;
     return (range / pre.c).toDouble();
   }
+
+  CandleModel clone() {
+    return CandleModel.fromJson(toJson());
+  }
 }

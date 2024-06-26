@@ -153,12 +153,6 @@ abstract interface class ISetting {
   /// 检查并确保当前指标PaintObject实例化.
   void ensurePaintObjectInstance();
 
-  /// 更新主区指标的布局参数
-  // bool updateMainIndicatorParam({
-  //   double? height,
-  //   EdgeInsets? padding,
-  // });
-
   /// Config
 
   /// 保存到本地

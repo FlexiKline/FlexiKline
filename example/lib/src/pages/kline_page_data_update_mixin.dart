@@ -16,6 +16,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:dio/dio.dart';
+import 'package:example/src/config.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
@@ -58,7 +59,9 @@ mixin KlinePageDataUpdateMixin<T extends ConsumerStatefulWidget>
     cancelToken = null;
     if (resp.success && resp.data != null && resp.data!.isNotEmpty) {
       await flexiKlineController.updateKlineData(request, resp.data!);
-      // _startMockPushTimer(flexiKlineController.curKlineData.req); // 假装推送
+      if (realTimeUpdateKlineData) {
+        _startMockPushTimer(flexiKlineController.curKlineData.req); // 假装推送
+      }
     } else if (resp.msg.isNotEmpty) {
       SmartDialog.showToast(resp.msg);
     }
@@ -67,7 +70,7 @@ mixin KlinePageDataUpdateMixin<T extends ConsumerStatefulWidget>
   /// 更新历史行情的蜡烛数据
   /// [request] 请求[after]时间戳之前（更旧的数据）的分页内容
   Future<void> loadMoreCandles(CandleReq request) async {
-    await Future.delayed(const Duration(milliseconds: 2000)); // 模拟延时, 展示loading
+    // await Future.delayed(const Duration(milliseconds: 2000)); // 模拟延时, 展示loading
     final resp = await api.getHistoryCandles(
       request,
       cancelToken: cancelToken = CancelToken(),

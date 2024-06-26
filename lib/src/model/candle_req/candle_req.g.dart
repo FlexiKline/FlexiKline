@@ -21,6 +21,8 @@ abstract class _$CandleReqCWProxy {
 
   CandleReq state(RequestState state);
 
+  CandleReq displayName(String? displayName);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `CandleReq(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -35,6 +37,7 @@ abstract class _$CandleReqCWProxy {
     int? after,
     int? before,
     RequestState? state,
+    String? displayName,
   });
 }
 
@@ -66,6 +69,9 @@ class _$CandleReqCWProxyImpl implements _$CandleReqCWProxy {
   CandleReq state(RequestState state) => this(state: state);
 
   @override
+  CandleReq displayName(String? displayName) => this(displayName: displayName);
+
+  @override
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `CandleReq(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -81,6 +87,7 @@ class _$CandleReqCWProxyImpl implements _$CandleReqCWProxy {
     Object? after = const $CopyWithPlaceholder(),
     Object? before = const $CopyWithPlaceholder(),
     Object? state = const $CopyWithPlaceholder(),
+    Object? displayName = const $CopyWithPlaceholder(),
   }) {
     return CandleReq(
       instId: instId == const $CopyWithPlaceholder() || instId == null
@@ -111,6 +118,10 @@ class _$CandleReqCWProxyImpl implements _$CandleReqCWProxy {
           ? _value.state
           // ignore: cast_nullable_to_non_nullable
           : state as RequestState,
+      displayName: displayName == const $CopyWithPlaceholder()
+          ? _value.displayName
+          // ignore: cast_nullable_to_non_nullable
+          : displayName as String?,
     );
   }
 }

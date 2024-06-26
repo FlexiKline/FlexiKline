@@ -49,6 +49,9 @@ mixin GestureBinding on KlineBindingBase implements IGestureEvent, IState {
   GestureData? _longData; // 长按监听数据
   GestureData? _tapData;
 
+  /// 双击
+  GestureTapCallback? onDoubleTap;
+
   ///
   /// 点击
   ///

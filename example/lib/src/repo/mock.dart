@@ -103,7 +103,7 @@ Future<List<CandleModel>> genCustomCandleList({
 /// [isHistory] : 是否生成历史数据
 Future<List<CandleModel>> genRandomCandleList({
   int count = 5,
-  double inital = 1000,
+  double inital = 6000,
   double range = 100,
   double initalVol = 100,
   double rangeVol = 50,

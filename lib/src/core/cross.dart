@@ -25,12 +25,13 @@ import 'setting.dart';
 
 /// 定制TooltipInfoList
 /// [model] 当前Cross选中的CandleMode数据.
+///   如果为null, 说明当前Cross线已取消.
 /// [pre] 前一个CandleMode数据
 /// 1. 如果返回null, 则尝试用 [OnCrossI18nTooltipLables] 继续定制.
 /// 2. 如果返回const [], 则不会再展示Tooltip信息.
 typedef OnCrossCustomTooltipCallback = List<TooltipInfo>? Function(
-  CandleModel model, {
-  CandleModel? pre,
+  CandleModel? current, {
+  CandleModel? prev,
 });
 
 /// 定制TooltipLables
@@ -162,6 +163,7 @@ mixin CrossBinding
 
     if (isCrossing) {
       offset = null;
+      onCrossCustomTooltip?.call(null);
       markRepaintChart(); // 当Cross事件结束后, 调用markRepaintChart绘制Painting图层首根蜡烛的tips信息.
       _markRepaint();
       return super.handleTap(data); // 不处理, 向上传递事件.
@@ -230,7 +232,7 @@ mixin CrossBinding
     // 1. 使用定制接口生成TooltipInfoList.
     List<TooltipInfo>? tooltipInfoList;
     if (onCrossCustomTooltip != null) {
-      tooltipInfoList = onCrossCustomTooltip!(model, pre: pre);
+      tooltipInfoList = onCrossCustomTooltip!(model, prev: pre);
     }
 
     if (tooltipInfoList == null) {
@@ -374,9 +376,12 @@ mixin CrossBinding
   }
 
   /// Tooltip定制回调
+  /// 当未实现此接口或定制返回null: 后续将触发[onCrossI18nTooltipLables]接口实现.
+  /// 当定制返回[]空数组时: 说明由用户自行在页面自由定制.
   OnCrossCustomTooltipCallback? onCrossCustomTooltip;
 
   /// TooltipLables多语言回调
+  /// 当未实现此接口或定制返回为null: 将使用[defaultTooltipLables]默认英文Tooltip.
   OnCrossI18nTooltipLables? onCrossI18nTooltipLables;
 
   /// 根据TooltipLables生成TooltipInfoList.

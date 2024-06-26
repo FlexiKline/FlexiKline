@@ -52,6 +52,9 @@ class _GestureViewState extends State<GestureView>
         /// 点击
         onTapUp: widget.controller.onTapUp,
 
+        /// 双击
+        onDoubleTap: widget.controller.onDoubleTap,
+
         /// 移动 缩放
         onScaleStart: widget.controller.onScaleStart,
         onScaleUpdate: widget.controller.onScaleUpdate,

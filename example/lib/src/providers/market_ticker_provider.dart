@@ -15,6 +15,7 @@
 import 'dart:math' as math;
 
 import 'package:dio/dio.dart';
+import 'package:example/src/config.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -34,10 +35,12 @@ final marketTickerProvider =
       instId,
       cancelToken: cancelToken,
     );
-    // Future.delayed(
-    //   Duration(milliseconds: random.nextInt(5000)),
-    //   () => ref.invalidateSelf(),
-    // );
+    if (realTimeUpdateKlineData) {
+      Future.delayed(
+        Duration(milliseconds: random.nextInt(5000)),
+        () => ref.invalidateSelf(),
+      );
+    }
     if (resp.success) {
       ref.keepAlive();
       return resp.data;

@@ -26,15 +26,15 @@ v0.4.0
 - [x] Flutter最低支持版本
 
 v0.5.0
-- [ ] 测试start和end对调性能影响.
-- [ ] 测试蜡烛数据超出double类型精度, 使用ComputeMode.accurate模式. 考虑CandleMode Decimal直接用BagNum替换.
 - [x] 支持横屏.
 - [x] 缩放优化.
-- [ ] 配置管理优化.
+- [x] 配置管理优化.
 - [ ] 自定义指标与替换内置指标.
-- [ ] 增加副图指标.
+- [x] 增加副图指标.
 - [ ] 文档撰写v1.
 - [ ] 第一版: 1. 发布到pub; 2. github开源
+- [ ] 测试start和end对调性能影响.
+- [ ] 测试蜡烛数据超出double类型精度, 使用ComputeMode.accurate模式. 考虑CandleMode Decimal直接用BagNum替换.
 
 v0.6.0
 - [ ] Tooltip可点击实现.

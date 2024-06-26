@@ -17,6 +17,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logger/logger.dart';
 
+// 是否启用实时更新Kline数据.
+bool realTimeUpdateKlineData = false;
+
 class AppProviderObserver extends ProviderObserver {
   AppProviderObserver();
 
@@ -28,6 +31,8 @@ class AppProviderObserver extends ProviderObserver {
     ProviderContainer container,
   ) async {
     if (kDebugMode) {
+      // 如果未指定名字, 或名字以下划线开头, 不打印日志.
+      if (provider.name == null || provider.name!.startsWith('_')) return;
       debugPrint('PROVIDER    : ${provider.name ?? '<NO NAME>'}\n'
           '  Type      : ${provider.runtimeType}\n'
           '  Old value : $previousValue\n'

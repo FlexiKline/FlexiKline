@@ -79,6 +79,8 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage>
 
     controller.onLoadMoreCandles = loadMoreCandles;
 
+    controller.onDoubleTap = openLandscapePage;
+
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       initKlineData(req);
     });
@@ -242,15 +244,16 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage>
     );
   }
 
-  List<TooltipInfo> onCrossCustomTooltip(
-    CandleModel model, {
-    CandleModel? pre,
+  List<TooltipInfo>? onCrossCustomTooltip(
+    CandleModel? current, {
+    CandleModel? prev,
   }) {
+    if (current == null) return [];
     final s = S.of(context);
     final klineTheme = ref.read(bitFlexiKlineThemeProvider);
     final lableStyle = TextStyle(color: klineTheme.textColor, fontSize: 10.sp);
     final valueStyle = TextStyle(color: klineTheme.textColor, fontSize: 10.sp);
-    final valStyle = model.isLong
+    final valStyle = current.isLong
         ? TextStyle(color: klineTheme.long, fontSize: 10.sp)
         : TextStyle(color: klineTheme.short, fontSize: 10.sp);
     final p = req.precision;
@@ -258,57 +261,57 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage>
       TooltipInfo(
         label: s.tooltipTime,
         labelStyle: lableStyle,
-        value: model.formatDateTimeByTimeBar(req.timeBar),
+        value: current.formatDateTimeByTimeBar(req.timeBar),
         valueStyle: valueStyle,
       ),
       TooltipInfo(
         label: s.tooltipOpen,
         labelStyle: lableStyle,
-        value: formatPrice(model.o, precision: p, showThousands: true),
+        value: formatPrice(current.o, precision: p, showThousands: true),
         valueStyle: valueStyle,
       ),
       TooltipInfo(
         label: s.tooltipHigh,
         labelStyle: lableStyle,
-        value: formatPrice(model.h, precision: p, showThousands: true),
+        value: formatPrice(current.h, precision: p, showThousands: true),
         valueStyle: valueStyle,
       ),
       TooltipInfo(
         label: s.tooltipLow,
         labelStyle: lableStyle,
-        value: formatPrice(model.l, precision: p, showThousands: true),
+        value: formatPrice(current.l, precision: p, showThousands: true),
         valueStyle: valueStyle,
       ),
       TooltipInfo(
         label: s.tooltipClose,
         labelStyle: lableStyle,
-        value: formatPrice(model.c, precision: p, showThousands: true),
+        value: formatPrice(current.c, precision: p, showThousands: true),
         valueStyle: valueStyle,
       ),
       TooltipInfo(
         label: s.tooltipAmount,
         labelStyle: lableStyle,
-        value: formatPrice(model.c, precision: p, showThousands: true),
+        value: formatPrice(current.v, precision: p, showThousands: true),
         valueStyle: valueStyle,
       ),
       TooltipInfo(
         label: s.tooltipChg,
         labelStyle: lableStyle,
-        value: formatPrice(model.change, precision: p, showThousands: true),
+        value: formatPrice(current.change, precision: p, showThousands: true),
         valueStyle: valStyle,
       ),
       TooltipInfo(
         label: s.tooltipChgRate,
         labelStyle: lableStyle,
-        value: formatPercentage(model.changeRate),
+        value: formatPercentage(current.changeRate),
         valueStyle: valStyle,
       ),
       TooltipInfo(
         label: s.tooltipRange,
         labelStyle: lableStyle,
-        value: pre != null
-            ? formatPercentage(model.rangeRate(pre))
-            : formatPrice(model.range, precision: p),
+        value: prev != null
+            ? formatPercentage(current.rangeRate(prev))
+            : formatPrice(current.range, precision: p),
         valueStyle: valStyle,
       ),
     ];

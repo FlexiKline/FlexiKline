@@ -21,11 +21,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../config.dart';
 import '../providers/default_kline_config.dart';
+import '../providers/market_candle_provider.dart';
 import '../repo/mock.dart';
 import '../test/canvas_demo.dart';
 import 'components/flexi_kline_indicator_bar.dart';
 import 'components/flexi_kline_mark_view.dart';
 import 'components/flexi_kline_setting_bar.dart';
+import 'components/market_tooltip_custom_view.dart';
 import 'main_nav_page.dart';
 
 class MyDemoPage extends ConsumerStatefulWidget {
@@ -50,9 +52,10 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
   void initState() {
     super.initState();
     req = CandleReq(
-      instId: 'BTC-USDT',
+      instId: '000001',
       bar: TimeBar.D1.bar,
       precision: 2,
+      displayName: '上证指数',
     );
     configuration = DefaultFlexiKlineConfiguration(ref: ref);
     controller = FlexiKlineController(
@@ -60,7 +63,7 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
       logger: logger,
     );
 
-    controller.onCrossI18nTooltipLables = tooltipLables;
+    controller.onCrossCustomTooltip = onCrossCustomTooltip;
 
     controller.onLoadMoreCandles = loadMoreCandles;
 
@@ -69,22 +72,53 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
     });
   }
 
+  /// 初始化加载K线蜡烛数据.
   Future<void> initKlineData(CandleReq request) async {
     controller.switchKlineData(request);
 
     logger.logd('genRandomCandleList Begin ${DateTime.now()}');
     final list = await genRandomCandleList(
-      // count: 50000,
-      count: 80,
+      count: 500,
       bar: request.timeBar!,
     );
     logger.logd('genRandomCandleList End ${DateTime.now()}');
 
     await controller.updateKlineData(request, list);
+
+    emitLatestMarketCandle();
   }
 
   Future<void> loadMoreCandles(CandleReq request) async {
     // TODO: 待实现
+  }
+
+  /// 当crossing时, 自定义Tooltip
+  List<TooltipInfo>? onCrossCustomTooltip(
+    CandleModel? current, {
+    CandleModel? prev,
+  }) {
+    if (current == null) {
+      ref.read(marketCandleProvider.notifier).emitOnCross(null);
+      // Cross事件取消了, 更新行情为最新一根蜡烛数据.
+      emitLatestMarketCandle();
+      return [];
+    }
+
+    final candle = current.clone()..confirm = '';
+    // 暂存振幅到candle的confirm中.
+    if (prev != null) candle.confirm = candle.rangeRate(prev).toString();
+    ref.read(marketCandleProvider.notifier).emitOnCross(candle);
+    // 返回空数组, 自行定制.
+    return [];
+  }
+
+  /// 更新最新的蜡烛数据到行情上.
+  void emitLatestMarketCandle() {
+    if (controller.curKlineData.latest != null) {
+      ref.read(marketCandleProvider.notifier).emit(
+            controller.curKlineData.latest!,
+          );
+    }
   }
 
   void onTapTimeBar(TimeBar bar) {
@@ -105,6 +139,7 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
       }
     });
     return Scaffold(
+      backgroundColor: theme.pageBg,
       appBar: AppBar(
         leading: GestureDetector(
           onTap: () {
@@ -112,13 +147,32 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
           },
           child: const Icon(Icons.menu_outlined),
         ),
-        title: const Text('MyDemo'),
+        title: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Offstage(
+              offstage: req.displayName == null,
+              child: Text(
+                req.displayName ?? '',
+                style: theme.t1s18w700,
+              ),
+            ),
+            Text(
+              req.instId,
+              style: theme.t1s12w400,
+            ),
+          ],
+        ),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            MarketTooltipCustomView(
+              candleReq: req,
+              data: controller.curKlineData.latest,
+            ),
             FlexiKlineSettingBar(
               controller: controller,
               onTapTimeBar: onTapTimeBar,
@@ -161,6 +215,8 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
 
           controller.logd('Add $dateTime, ${req.key}, ${newList.length}');
           controller.updateKlineData(req, newList);
+
+          emitLatestMarketCandle();
         },
         child: const Text('Add'),
       ),

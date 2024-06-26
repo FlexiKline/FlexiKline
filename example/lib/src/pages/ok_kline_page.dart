@@ -75,10 +75,18 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage>
 
     controller.onCrossI18nTooltipLables = tooltipLables;
 
-    // controller.onLoadMoreCandles = loadMoreCandles;
+    controller.onLoadMoreCandles = loadMoreCandles;
+
+    controller.onDoubleTap = setFullScreen;
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       initKlineData(req);
+    });
+  }
+
+  void setFullScreen() {
+    setState(() {
+      isFullScreen = !isFullScreen;
     });
   }
 
@@ -210,11 +218,7 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage>
             icon: Icon(isFullScreen
                 ? Icons.close_fullscreen_outlined
                 : Icons.open_in_full_rounded),
-            onPressed: () {
-              setState(() {
-                isFullScreen = !isFullScreen;
-              });
-            },
+            onPressed: setFullScreen,
           ),
         ),
         Positioned(

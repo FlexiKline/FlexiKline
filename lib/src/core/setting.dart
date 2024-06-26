@@ -55,17 +55,25 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
   /// KlineData整个图表区域大小变化监听器
   final sizeChangeListener = FlexiKlineSizeNotifier(defaultCanvasRectMinRect);
   void invokeSizeChanged() {
+    final oldCanvasRect = sizeChangeListener.value;
+
     if (_fixedCanvasRect != null) {
       final changed = updateMainIndicatorParam(height: mainRect.height);
-      if (!changed) markRepaintChart();
+      if (changed || oldCanvasRect != _fixedCanvasRect) {
+        markRepaintChart(reset: true);
+      }
       sizeChangeListener.value = canvasRect;
       sizeChangeListener.notifyListeners();
+    } else {
+      if (oldCanvasRect != canvasRect) {
+        final changed = updateMainIndicatorParam(height: mainRect.height);
+        if (changed || oldCanvasRect.width != mainRect.width) {
+          markRepaintChart(reset: true);
+        }
+        sizeChangeListener.value = canvasRect;
+      }
     }
-    if (sizeChangeListener.value != canvasRect) {
-      final changed = updateMainIndicatorParam(height: mainRect.height);
-      if (!changed) markRepaintChart();
-      sizeChangeListener.value = canvasRect;
-    }
+
     markRepaintCross();
   }
 
@@ -261,9 +269,6 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
       padding: padding,
       // reset: true,
     );
-    if (changed) {
-      markRepaintChart(reset: true);
-    }
     return changed;
   }
 

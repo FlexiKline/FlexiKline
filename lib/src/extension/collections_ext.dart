@@ -24,6 +24,13 @@ extension ListExt<T> on List<T> {
     return null;
   }
 
+  T? get secondOrNull {
+    var iterator = this.iterator;
+    iterator.moveNext();
+    if (iterator.moveNext()) return iterator.current;
+    return null;
+  }
+
   bool get hasValidData {
     if (isEmpty) return false;
     for (T t in this) {
@@ -60,10 +67,6 @@ extension MapExt<K, V> on Map<K, V> {
   }
 }
 
-extension SetExt<T> on Set<T> {
+extension SetExt<T> on Set<T> {}
 
-}
-
-extension QueueExt<T> on Queue<T> {
-  
-}
+extension QueueExt<T> on Queue<T> {}
