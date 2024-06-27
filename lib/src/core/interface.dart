@@ -39,6 +39,7 @@ abstract interface class IGestureEvent {
 }
 
 /// 手势事件的处理接口
+///
 /// 注: 必须首页调用super.handlexxx(); 向其他绘制模块传递手势数据.
 /// 否则, 此事件的处理仅限出当前绘制模块.
 /// 调用顺序参看kline_controller.dart的mixin倒序.
@@ -57,6 +58,7 @@ abstract interface class IGestureHandler {
   void handleLongMove(GestureData data);
 }
 
+/// 手势事件的处理接口默认实现.
 mixin GestureHanderImpl implements IGestureHandler {
   @override
   bool handleTap(GestureData data) => false;
@@ -72,7 +74,7 @@ mixin GestureHanderImpl implements IGestureHandler {
 
 //////// State ///////
 
-/// 数据源更新
+/// 数据状态接口API
 abstract interface class IState {
   /// 切换[req]请求指定的蜡烛数据
   /// [req] 待切换的[CandleReq]
@@ -130,7 +132,7 @@ abstract interface class IState {
   void calculateCandleDrawIndex();
 }
 
-/// Config接口
+/// Setting API
 abstract interface class ISetting {
   /// 主区指标集
   MultiPaintObjectIndicator get mainIndicator;
@@ -180,7 +182,7 @@ abstract interface class ISetting {
   TooltipConfig get tooltipConfig;
 }
 
-//// Chart层绘制接口
+/// Chart图层API
 abstract interface class IChart {
   Listenable get repaintIndicatorChart;
 
@@ -189,7 +191,7 @@ abstract interface class IChart {
   void markRepaintChart({bool reset = false});
 }
 
-//// 最新价与十字线绘制API
+/// Cross图层API
 abstract interface class ICross {
   Listenable get repaintCross;
 
@@ -204,6 +206,7 @@ abstract interface class ICross {
   void cancelCross();
 }
 
+/// Grid图层API
 abstract interface class IGrid {
   void markRepaintGrid();
 }

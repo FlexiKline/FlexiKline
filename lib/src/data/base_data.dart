@@ -20,6 +20,7 @@ import '../framework/logger.dart';
 import '../model/export.dart';
 
 /// KlineData基类
+///
 /// [req] 蜡烛数据请求
 /// [list] 蜡烛数据列表
 /// [start] 当前绘制区域起始下标
@@ -103,16 +104,18 @@ abstract class BaseData with KlineLog {
     return null;
   }
 
-  /// 当前绘制区域起始下标 右
   int _start = 0;
+
+  /// 当前绘制区域起始下标 右
   int get start => _start;
   set start(int val) {
     _start = val.clamp(0, list.length);
   }
 
+  int _end = 0;
+
   /// 当前绘制区域结束下标 左
   /// 注: 遍历时, 应 < end;
-  int _end = 0;
   int get end => _end;
   set end(int val) {
     _end = val.clamp(0, list.length);

@@ -18,6 +18,7 @@ import '../constant.dart';
 import '../config/export.dart';
 
 /// FlexiKline主题接口.
+/// 
 /// 定义FlexiKline中通用颜色
 abstract interface class IFlexiKlineTheme {
   /// 缓存Key

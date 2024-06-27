@@ -15,6 +15,7 @@
 import 'dart:math' as math;
 
 /// 计算时间差, 并格式化展示
+/// 
 /// 1. 超过1天展示 "md nh"
 /// 2. 小于一天展示 "hh:MM:ss"
 /// 3. 小天一小时展示 "MM:ss"
@@ -38,6 +39,7 @@ String? formatTimeDiff(DateTime nextUpdateDateTime) {
 }
 
 /// 格式化日期时间.
+/// 
 /// 如果与今天时间一致不展示(年月日) 和 (月日)
 /// lg:
 /// DateTime date = DateTime(2024, 3, 27, 19, 50, 32);

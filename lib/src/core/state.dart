@@ -27,10 +27,11 @@ import 'interface.dart';
 import 'setting.dart';
 
 /// LoadMore接口
+/// 
 /// 加载[request]指定范围[after, before]之前的历史数据.
 typedef OnLoadMoreCandles = Future<void> Function(CandleReq request);
 
-/// 状态管理: 负责数据的管理, 缓存, 切换, 计算
+/// 状态管理: 负责数据的管理, 缓存, 切换, 计算.
 mixin StateBinding
     on KlineBindingBase, SettingBinding
     implements IState, IChart, ICross {
@@ -151,13 +152,14 @@ mixin StateBinding
     return paintDxOffset < maxPaintDxOffset;
   }
 
+  double _paintDxOffset = 0;
+
   /// 代表当前绘制区域相对于startIndex右侧的偏移量.
   /// 1. 当为零时(默认) : 说明首根蜡烛在Canvas右边界展示.
   /// 2. 当为负数时     : 代表首根蜡烛到Canvas右边界的距离.
   /// 3. 当为正数时     : 说明首根蜡烛已向右移出Canvas.
   ///     移出右边界的蜡烛数量 = (paintDxOffset / candleActualWidth).floor()
   ///     绘制起始蜡烛的向右边界外的偏移 = paintDxOffset % candleActualWidth;
-  double _paintDxOffset = 0;
   @override
   double get paintDxOffset => _paintDxOffset;
   set paintDxOffset(double val) {

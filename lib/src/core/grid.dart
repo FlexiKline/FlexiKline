@@ -21,6 +21,9 @@ import '../framework/export.dart';
 import 'binding_base.dart';
 import 'interface.dart';
 
+/// 负责Grid图层的绘制
+///
+/// 绘制底层的网络
 mixin GridBinding on KlineBindingBase implements IGrid {
   @override
   void initState() {

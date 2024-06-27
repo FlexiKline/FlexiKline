@@ -17,7 +17,6 @@ import 'core/export.dart';
 class FlexiKlineController extends KlineBindingBase
     with
         SettingBinding,
-        // ConfigBinding,
         StateBinding,
         GestureBinding,
         GridBinding,

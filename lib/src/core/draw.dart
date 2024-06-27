@@ -17,8 +17,7 @@ import 'package:flutter/foundation.dart';
 import '../model/export.dart';
 import 'binding_base.dart';
 
-///
-/// 绘制工具
+/// 负责绘制图层
 ///
 mixin DrawBinding on KlineBindingBase {
   @override

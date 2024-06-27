@@ -24,9 +24,10 @@ import 'interface.dart';
 import 'setting.dart';
 
 /// 定制TooltipInfoList
-/// [model] 当前Cross选中的CandleMode数据.
+///
+/// [current] 当前Cross选中的CandleMode数据.
 ///   如果为null, 说明当前Cross线已取消.
-/// [pre] 前一个CandleMode数据
+/// [prev] 前一个CandleMode数据
 /// 1. 如果返回null, 则尝试用 [OnCrossI18nTooltipLables] 继续定制.
 /// 2. 如果返回const [], 则不会再展示Tooltip信息.
 typedef OnCrossCustomTooltipCallback = List<TooltipInfo>? Function(
@@ -34,11 +35,16 @@ typedef OnCrossCustomTooltipCallback = List<TooltipInfo>? Function(
   CandleModel? prev,
 });
 
-/// 定制TooltipLables
+/// 定制TooltipLables国际化
+///
 /// 1. 如果返回null, 则使用默认[defaultTooltipLables] 生成TooltipInfoList
 /// 2. 如果返回const {}, 则不会再展示Tooltip信息
 typedef OnCrossI18nTooltipLables = Map<TooltipLabel, String>? Function();
 
+/// 负责Cross图层的绘制
+///
+/// 处理cross事件.
+/// Tooltip的绘制.
 mixin CrossBinding
     on KlineBindingBase, SettingBinding
     implements ICross, IState, IChart {

@@ -77,16 +77,18 @@ class GestureData {
   GestureState _state;
   GestureState get state => _state;
 
-  // 最新Offset
   late Offset _offset;
+
+  /// 最新Offset
   Offset get offset => _offset;
   set offset(Offset val) {
     _prevOffset = _offset;
     _offset = val;
   }
 
-  // 上一个Offset
   late Offset _prevOffset;
+
+  /// 上一个Offset
   Offset get prevOffset => _prevOffset;
 
   /// X轴移动增量.
@@ -98,11 +100,13 @@ class GestureData {
   double get dyDelta => offset.dy - prevOffset.dy;
 
   bool get isPan => type == GestureType.pan;
-  // 是否平移
+
+  /// 是否平移
   bool get moved => isPan && offset != prevOffset;
 
   bool get isScale => type == GestureType.scale;
-  // 是否缩放
+
+  /// 是否缩放
   bool get scaled => type == GestureType.scale && scale != 1.0;
 
   bool get isEnd => state == GestureState.end;

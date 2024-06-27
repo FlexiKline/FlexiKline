@@ -45,7 +45,8 @@ String twoDigits(int n) {
   return "0$n";
 }
 
-/// 对value计算精度;
+/// 对[val]计算精度;
+/// 
 /// 如果isFloor为true, 向下截断
 /// 如果isFloor为false, 向上截断
 /// 如果为空, 四舍五入.

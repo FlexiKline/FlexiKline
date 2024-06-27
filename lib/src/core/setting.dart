@@ -32,6 +32,7 @@ class FlexiKlineSizeNotifier extends ValueNotifier<Rect> {
   }
 }
 
+/// 负责FlexiKline的各种设置与配置的获取.
 mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
   @override
   void initState() {

@@ -24,6 +24,7 @@ import 'collection/sortable_hash_set.dart';
 part 'indicator.g.dart';
 
 /// Indicator绘制模式
+/// 
 /// 注: PaintMode仅当Indicator加入MultiPaintObjectIndicator后起作用,
 /// 代表当前Indicator的绘制是否是独立绘制的, 还是依赖于MultiPaintObjectIndicator
 enum PaintMode {
@@ -37,6 +38,7 @@ enum PaintMode {
 }
 
 /// 指标基础配置
+/// 
 /// [key] 唯一指定Indicator
 /// [name] 用于展示
 /// [height] 指标图高度
@@ -152,6 +154,7 @@ abstract class SinglePaintObjectIndicator extends Indicator
 }
 
 /// 多个绘制Indicator的配置.
+/// 
 /// [children] 维护具体的Indicator配置.
 @FlexiIndicatorSerializable
 class MultiPaintObjectIndicator<T extends SinglePaintObjectIndicator>

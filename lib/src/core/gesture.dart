@@ -21,6 +21,7 @@ import '../model/export.dart';
 import 'binding_base.dart';
 import 'interface.dart';
 
+/// 负责各种手势处理
 mixin GestureBinding on KlineBindingBase implements IGestureEvent, IState {
   @override
   void initState() {

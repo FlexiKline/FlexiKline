@@ -28,6 +28,7 @@ Comparator<K> _defaultCompare<K>() {
 }
 
 /// 可排序的HashSet
+/// 
 /// [compare] 排序比较器, 如果不指定, 请确保元素[E]实现Comparable<E>接口.
 /// 主要特性:
 /// 1. 添加元素[add]时, 如果存在, 则更新元素, 并返回true.
