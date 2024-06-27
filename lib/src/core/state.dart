@@ -27,14 +27,12 @@ import 'interface.dart';
 import 'setting.dart';
 
 /// LoadMore接口
-/// 
+///
 /// 加载[request]指定范围[after, before]之前的历史数据.
 typedef OnLoadMoreCandles = Future<void> Function(CandleReq request);
 
 /// 状态管理: 负责数据的管理, 缓存, 切换, 计算.
-mixin StateBinding
-    on KlineBindingBase, SettingBinding
-    implements IState, IChart, ICross {
+mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
   @override
   void initState() {
     super.initState();
@@ -134,7 +132,7 @@ mixin StateBinding
   @override
   double get startCandleDx {
     if (paintDxOffset == 0) {
-      return 0;
+      return mainChartRight;
     } else if (paintDxOffset > 0) {
       return mainChartRight + paintDxOffset % candleActualWidth;
     } else {
@@ -241,8 +239,8 @@ mixin StateBinding
     // 确认当前数据的计算模式
     final computeMode = _computeMode;
 
-    // 收集指标预计算参数.
-    final calcParams = indicatorsConfig.getIndicatorCalcParams();
+    // 待计算的指标参数
+    final calcParams = getIndicatorCalcParams();
 
     final watchPrecompute = Stopwatch();
 

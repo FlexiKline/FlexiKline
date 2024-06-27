@@ -74,6 +74,7 @@ class FlexiKlineConfig {
     for (var key in main) {
       final indicator = indicators.mainIndicators.getItem(key);
       if (indicator != null) {
+        // 使用前先解绑
         indicator.dispose();
         mainIndicator.children.add(indicator);
       }
@@ -89,11 +90,26 @@ class FlexiKlineConfig {
       for (var key in sub) {
         final indicator = indicators.subIndicators.getItem(key);
         if (indicator != null) {
+          // 使用前先解绑
           indicator.dispose();
           subRectIndicatorQueue.append(indicator)?.dispose();
         }
       }
     }
+  }
+
+  /// 收集当前已打开指标的计算参数
+  Map<ValueKey, dynamic> getOpenedIndicatorCalcParams() {
+    final calcParams = <ValueKey, dynamic>{};
+    calcParams.addAll(mainIndicator.getCalcParams());
+    for (var subIndicator in subRectIndicatorQueue) {
+      calcParams.addAll(subIndicator.getCalcParams());
+    }
+    // TODO: 暂时去掉boll和sar在副区的指标参数, 因为主区已经有了.
+    // 后续考虑同指标不同参数的处理逻辑.
+    calcParams.remove(subBollKey);
+    calcParams.remove(subSarKey);
+    return calcParams;
   }
 
   FlexiKlineConfig clone() {

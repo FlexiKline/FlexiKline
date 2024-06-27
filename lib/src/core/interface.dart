@@ -163,6 +163,9 @@ abstract interface class ISetting {
   /// 更新配置[config]
   void updateFlexiKlineConfig(FlexiKlineConfig config);
 
+  /// 待计算的指标参数集合
+  Map<ValueKey, dynamic> getIndicatorCalcParams();
+
   /// IndicatorsConfig
   IndicatorsConfig get indicatorsConfig;
 

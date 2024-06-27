@@ -33,7 +33,8 @@ class FlexiKlineSizeNotifier extends ValueNotifier<Rect> {
 }
 
 /// 负责FlexiKline的各种设置与配置的获取.
-mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
+mixin SettingBinding on KlineBindingBase
+    implements ISetting, IChart, ICross, IGrid {
   @override
   void initState() {
     super.initState();
@@ -245,7 +246,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
   }
 
   @protected
-  FixedHashQueue<Indicator> get subIndicators {
+  FixedHashQueue<Indicator> get subIndicatorQueue {
     return _flexiKlineConfig.subRectIndicatorQueue;
   }
 
@@ -253,9 +254,9 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
   @override
   List<Indicator> get subRectIndicators {
     if (indicatorsConfig.time.position == DrawPosition.bottom) {
-      return [...subIndicators, indicatorsConfig.time];
+      return [...subIndicatorQueue, indicatorsConfig.time];
     } else {
-      return [indicatorsConfig.time, ...subIndicators];
+      return [indicatorsConfig.time, ...subIndicatorQueue];
     }
   }
 
@@ -306,10 +307,8 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
   /// 在主图中添加指标
   void addIndicatorInMain(ValueKey<dynamic> key) {
     if (indicatorsConfig.mainIndicators.containsKey(key)) {
-      mainIndicator.appendIndicator(
-        indicatorsConfig.mainIndicators[key]!,
-        this,
-      );
+      final indicator = indicatorsConfig.mainIndicators[key]!;
+      mainIndicator.appendIndicator(indicator, this);
       markRepaintChart(reset: true);
       markRepaintCross();
     }
@@ -326,7 +325,9 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
   void addIndicatorInSub(ValueKey<dynamic> key) {
     final indicator = indicatorsConfig.subIndicators.getItem(key);
     if (indicator != null) {
-      subIndicators.append(indicator)?.dispose();
+      // 使用前先解绑
+      indicator.dispose();
+      subIndicatorQueue.append(indicator)?.dispose();
       invokeSizeChanged();
     }
     // if (indicatorsConfig.subIndicators.containsKey(key)) {
@@ -342,7 +343,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
   /// 删除副图[key]指定的指标
   void delIndicatorInSub(ValueKey key) {
     bool hasRemove = false;
-    subIndicators.removeWhere((indicator) {
+    subIndicatorQueue.removeWhere((indicator) {
       if (indicator.key == key) {
         indicator.dispose();
         hasRemove = true;
@@ -419,6 +420,14 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
     }
   }
 
+  @override
+  Map<ValueKey, dynamic> getIndicatorCalcParams() {
+    // 收集所有指标预计算参数.
+    // return indicatorsConfig.getAllIndicatorCalcParams();
+    // 收集已打开的指标计算参数.
+    return _flexiKlineConfig.getOpenedIndicatorCalcParams();
+  }
+
   /// IndicatorsConfig
   @override
   IndicatorsConfig get indicatorsConfig => _flexiKlineConfig.indicators;
@@ -465,6 +474,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IChart, ICross {
     _flexiKlineConfig.grid = config;
     markRepaintChart();
     markRepaintCross();
+    markRepaintGrid();
   }
 
   /// CrossConfig
