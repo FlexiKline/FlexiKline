@@ -53,6 +53,9 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
 
   OnLoadMoreCandles? onLoadMoreCandles;
 
+  /// 首根蜡烛是否移出屏幕监听.
+  final isMoveOffScreenListener = ValueNotifier(false);
+
   /// CandleReq变化监听器
   final candleRequestListener = ValueNotifier(KlineData.empty.req);
 
@@ -162,6 +165,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
   double get paintDxOffset => _paintDxOffset;
   set paintDxOffset(double val) {
     _paintDxOffset = clampPaintDxOffset(val);
+    isMoveOffScreenListener.value = _paintDxOffset > 0;
   }
 
   /// PaintDxOffset的最小值
@@ -187,6 +191,12 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
       maxPaintWidth - mainChartWidth, // 不足一屏, 首根蜡烛偏移量等于首根蜡烛右边长度.
       -settingConfig.firstCandleInitOffset, // 满足一屏时, 首根蜡烛相对于主绘制区域最小的偏移量
     );
+  }
+
+  /// 移动蜡烛图回到初始位置
+  void moveToInitialPosition() {
+    initPaintDxOffset();
+    markRepaintChart();
   }
 
   /// 计算绘制蜡烛图的起始数组索引下标

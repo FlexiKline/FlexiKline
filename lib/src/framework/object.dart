@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../config/export.dart';
@@ -143,6 +144,7 @@ mixin PaintObjectBoundingMixin on PaintObjectProxy
   Rect? _topRect;
   Rect? _bottomRect;
 
+  @nonVirtual
   @override
   void resetPaintBounding({int? slot}) {
     if (slot != null) _slot = slot;
@@ -333,6 +335,8 @@ abstract class SinglePaintObjectBox<T extends SinglePaintObjectIndicator>
   @override
   T get indicator => super.indicator as T;
 
+  @protected
+  @nonVirtual
   @override
   MinMax? doInitState(
     int newSlot, {
@@ -361,6 +365,8 @@ abstract class SinglePaintObjectBox<T extends SinglePaintObjectIndicator>
     return _minMax;
   }
 
+  @protected
+  @nonVirtual
   @override
   void doPaintChart(Canvas canvas, Size size) {
     paintChart(canvas, size);
@@ -376,6 +382,8 @@ abstract class SinglePaintObjectBox<T extends SinglePaintObjectIndicator>
     paintExtraAboveChart(canvas, size);
   }
 
+  @protected
+  @nonVirtual
   @override
   void doOnCross(Canvas canvas, Offset offset, {CandleModel? model}) {
     onCross(canvas, offset);
@@ -423,6 +431,7 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
     return topRect.size;
   }
 
+  @nonVirtual
   @override
   void setMinMax(MinMax val) {
     if (_minMax == null) {
@@ -432,6 +441,8 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
     }
   }
 
+  @protected
+  @nonVirtual
   @override
   MinMax? doInitState(
     int newSlot, {
@@ -475,6 +486,8 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
     return _minMax;
   }
 
+  @protected
+  @nonVirtual
   @override
   void doPaintChart(Canvas canvas, Size size) {
     if (indicator.drawBelowTipsArea) {
@@ -506,6 +519,8 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
     }
   }
 
+  @protected
+  @nonVirtual
   @override
   void doOnCross(Canvas canvas, Offset offset, {CandleModel? model}) {
     if (indicator.drawBelowTipsArea) {
@@ -529,6 +544,8 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
     }
   }
 
+  @protected
+  @nonVirtual
   double doPaintTips(Canvas canvas, {CandleModel? model, Offset? offset}) {
     // 每次绘制前, 重置Tips区域大小为0
     double height = 0;

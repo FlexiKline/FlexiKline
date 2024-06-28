@@ -204,6 +204,7 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage>
   Widget _buildKlineMainForgroundView(BuildContext context) {
     final theme = ref.watch(themeProvider);
     return Stack(
+      alignment: AlignmentDirectional.center,
       children: [
         Positioned(
           left: 8.r,
@@ -222,32 +223,53 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage>
           ),
         ),
         Positioned(
+          left: 80.r,
+          right: 0,
+          bottom: 8.r,
           child: ValueListenableBuilder(
-            valueListenable: controller.candleRequestListener,
-            builder: (context, request, child) {
-              return Offstage(
-                offstage: !request.state.showLoading,
-                child: Container(
-                  key: const ValueKey('loadingView'),
-                  alignment: request.state == RequestState.initLoading
-                      ? AlignmentDirectional.center
-                      : AlignmentDirectional.centerStart,
-                  padding: EdgeInsetsDirectional.all(32.r),
-                  child: SizedBox.square(
-                    dimension: 28.r,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 3.r,
-                      backgroundColor: theme.markBg,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        theme.t1,
-                      ),
-                    ),
+            valueListenable: controller.isMoveOffScreenListener,
+            builder: (context, value, child) => Offstage(
+              offstage: !value,
+              child: SizedBox(
+                width: 28.r,
+                height: 28.r,
+                child: IconButton(
+                  // constraints: BoxConstraints.tight(Size(28.r, 28.r)),
+                  padding: EdgeInsets.zero,
+                  style: theme.circleBtnStyle(
+                    bg: theme.markBg.withOpacity(0.6),
+                  ),
+                  iconSize: 16.r,
+                  icon: const Icon(Icons.keyboard_double_arrow_right_outlined),
+                  onPressed: controller.moveToInitialPosition,
+                ),
+              ),
+            ),
+          ),
+        ),
+        ValueListenableBuilder(
+          valueListenable: controller.candleRequestListener,
+          builder: (context, request, child) {
+            return Offstage(
+              offstage: !request.state.showLoading,
+              child: Container(
+                key: const ValueKey('loadingView'),
+                alignment: request.state == RequestState.initLoading
+                    ? AlignmentDirectional.center
+                    : AlignmentDirectional.centerStart,
+                padding: EdgeInsetsDirectional.all(32.r),
+                child: SizedBox.square(
+                  dimension: 28.r,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 3.r,
+                    backgroundColor: theme.markBg,
+                    valueColor: AlwaysStoppedAnimation<Color>(theme.t1),
                   ),
                 ),
-              );
-            },
-          ),
-        )
+              ),
+            );
+          },
+        ),
       ],
     );
   }
