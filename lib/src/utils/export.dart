@@ -15,3 +15,4 @@
 export './convert_util.dart';
 export './date_time.dart';
 export './num_util.dart';
+export './platform_util.dart';

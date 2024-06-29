@@ -63,9 +63,10 @@ mixin SettingBinding on KlineBindingBase
       final changed = updateMainIndicatorParam(height: mainRect.height);
       if (changed || oldCanvasRect != _fixedCanvasRect) {
         markRepaintChart(reset: true);
+
+        sizeChangeListener.value = canvasRect;
+        sizeChangeListener.notifyListeners();
       }
-      sizeChangeListener.value = canvasRect;
-      sizeChangeListener.notifyListeners();
     } else {
       if (oldCanvasRect != canvasRect) {
         final changed = updateMainIndicatorParam(height: mainRect.height);
@@ -138,6 +139,16 @@ mixin SettingBinding on KlineBindingBase
   void setMainSize(Size size) {
     settingConfig.setMainRect(size);
     invokeSizeChanged();
+  }
+
+  /// 适配[FlexiKlineWidget]所在布局的变化
+  ///
+  /// 注: 目前仅考虑适配宽度的变化.
+  ///   这将会导致无法手动调整[FlexiKlineWidget]的宽度.
+  void adaptLayoutChange(Size size) {
+    if (size.width != mainRect.width) {
+      setMainSize(Size(size.width, mainRect.height));
+    }
   }
 
   void exitFixedSize() {

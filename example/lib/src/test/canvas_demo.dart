@@ -68,10 +68,10 @@ class PathCustomPainter extends CustomPainter {
   final ValueNotifier<int> value;
   @override
   void paint(Canvas canvas, Size size) {
-    debugPrint('zp::: paint>>> value${value.value}');
-    debugPrint(
-      'zp::: paint>>> size$size,  screenWidth:${ScreenUtil().screenWidth}',
-    );
+    // debugPrint('zp::: paint>>> value${value.value}');
+    // debugPrint(
+    //   'zp::: paint>>> size$size,  screenWidth:${ScreenUtil().screenWidth}',
+    // );
     drawText3(canvas);
   }
 

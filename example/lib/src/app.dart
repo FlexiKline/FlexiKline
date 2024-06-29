@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:io';
-
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -30,6 +28,7 @@ import 'providers/instruments_provider.dart';
 import 'repo/http_client.dart';
 import 'router.dart';
 import 'theme/export.dart';
+import 'utils/device_util.dart';
 
 class MyApp extends ConsumerStatefulWidget {
   const MyApp({super.key});
@@ -96,26 +95,37 @@ class _MyAppState extends ConsumerState<MyApp> {
   void configDefaultRefresher() {
     EasyRefresh.defaultHeaderBuilder = () {
       final theme = ref.watch(themeProvider);
-      if (Platform.isIOS) {
+      if (DeviceUtil.isAndroid) {
         return CupertinoHeader(
           foregroundColor: theme.t1,
           backgroundColor: theme.markBg,
         );
-      } else {
+      } else if (DeviceUtil.isIOS) {
         return MaterialHeader(
           color: theme.t1,
           backgroundColor: theme.markBg,
         );
+      } else {
+        return const ClassicHeader();
       }
     };
     EasyRefresh.defaultFooterBuilder = () {
       final theme = ref.watch(themeProvider);
-      return CupertinoFooter(
-        emptyWidget: Text(
-          'Protected By FlexiKline',
-          style: theme.t2s12w400,
-        ),
-      );
+      if (DeviceUtil.isAndroid) {
+        return CupertinoFooter(
+          emptyWidget: Text(
+            'Protected By FlexiKline',
+            style: theme.t2s12w400,
+          ),
+        );
+      } else if (DeviceUtil.isIOS) {
+        return MaterialFooter(
+          color: theme.t1,
+          backgroundColor: theme.markBg,
+        );
+      } else {
+        return const ClassicFooter();
+      }
     };
   }
 }

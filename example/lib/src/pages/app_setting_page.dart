@@ -13,12 +13,13 @@
 // limitations under the License.
 
 import 'package:example/generated/l10n.dart';
-import 'package:example/src/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../i18n.dart';
 import '../theme/theme_manager.dart';
+import '../utils/device_util.dart';
 
 class AppSettingDrawer extends StatelessWidget {
   const AppSettingDrawer({super.key});
@@ -27,7 +28,7 @@ class AppSettingDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Drawer(
       key: key,
-      width: ScreenUtil().screenWidth * 0.75,
+      width: DeviceUtil.isMobile ? ScreenUtil().screenWidth * 0.75 : 300.r,
       child: const AppSettingPage(
         key: ValueKey('app_setting'),
       ),
@@ -123,9 +124,12 @@ class _AppSettingPageState extends ConsumerState<AppSettingPage> {
                   leading: const Icon(Icons.error_outline_rounded),
                   children: [
                     ListTile(
-                      title: Text(
-                        'v0.1.0',
-                        style: theme.textTheme.bodyMedium,
+                      title: FutureBuilder(
+                        future: DeviceUtil.version(),
+                        builder: (context, snapshot) => Text(
+                          snapshot.data ?? '',
+                          style: theme.textTheme.bodyMedium,
+                        ),
                       ),
                     ),
                   ],

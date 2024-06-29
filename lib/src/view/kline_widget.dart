@@ -17,10 +17,11 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 
 import '../kline_controller.dart';
+import '../utils/platform_util.dart';
 import 'gesture_view.dart';
 
 class FlexiKlineWidget extends StatefulWidget {
-  const FlexiKlineWidget({
+  FlexiKlineWidget({
     super.key,
     required this.controller,
     this.alignment,
@@ -28,7 +29,8 @@ class FlexiKlineWidget extends StatefulWidget {
     this.foregroundDecoration,
     this.mainforegroundViewBuilder,
     this.mainBackgroundView,
-  });
+    bool? autoAdaptLayout,
+  }) : autoAdaptLayout = autoAdaptLayout ?? !PlatformUtil.isMobile;
 
   final FlexiKlineController controller;
   final AlignmentGeometry? alignment;
@@ -36,6 +38,7 @@ class FlexiKlineWidget extends StatefulWidget {
   final Decoration? foregroundDecoration;
   final WidgetBuilder? mainforegroundViewBuilder;
   final Widget? mainBackgroundView;
+  final bool autoAdaptLayout;
 
   @override
   State<FlexiKlineWidget> createState() => _FlexiKlineWidgetState();
@@ -49,7 +52,9 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
     widget.controller.initState();
 
     widget.controller.sizeChangeListener.addListener(() {
-      setState(() {});
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+        setState(() {});
+      });
     });
   }
 
@@ -61,6 +66,19 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.autoAdaptLayout) {
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          widget.controller.adaptLayoutChange(constraints.biggest);
+          return buildKline(context);
+        },
+      );
+    } else {
+      return buildKline(context);
+    }
+  }
+
+  Widget buildKline(BuildContext context) {
     return Container(
       alignment: widget.alignment,
       width: widget.controller.canvasWidth,
