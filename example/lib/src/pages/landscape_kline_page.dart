@@ -26,7 +26,7 @@ import 'components/flexi_kline_landscape_indicator_bar.dart';
 import 'components/flexi_kline_landscape_setting_bar.dart';
 import 'components/flexi_kline_mark_view.dart';
 import 'components/market_ticker_landscape_view.dart';
-import 'kline_page_data_update_mixin.dart';
+import 'common/kline_page_data_update_mixin.dart';
 
 class LandscapeKlinePage extends ConsumerStatefulWidget {
   const LandscapeKlinePage({

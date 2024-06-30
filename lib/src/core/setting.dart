@@ -434,9 +434,9 @@ mixin SettingBinding on KlineBindingBase
   @override
   Map<ValueKey, dynamic> getIndicatorCalcParams() {
     // 收集所有指标预计算参数.
-    // return indicatorsConfig.getAllIndicatorCalcParams();
-    // 收集已打开的指标计算参数.
-    return _flexiKlineConfig.getOpenedIndicatorCalcParams();
+    return indicatorsConfig.getAllIndicatorCalcParams();
+    // 收集已打开的指标计算参数. TODO: 性能优化后使用.
+    // return _flexiKlineConfig.getOpenedIndicatorCalcParams();
   }
 
   /// IndicatorsConfig

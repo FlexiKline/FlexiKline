@@ -29,6 +29,7 @@ import 'repo/http_client.dart';
 import 'router.dart';
 import 'theme/export.dart';
 import 'utils/device_util.dart';
+// import 'widgets/no_thumb_scroll_behavior.dart';
 
 class MyApp extends ConsumerStatefulWidget {
   const MyApp({super.key});
@@ -87,6 +88,7 @@ class _MyAppState extends ConsumerState<MyApp> {
           themeAnimationCurve: Curves.linear,
           themeAnimationDuration: const Duration(milliseconds: 500),
           // themeAnimationStyle: ActionDispatcher,
+          // scrollBehavior: NoThumbScrollBehavior().copyWith(scrollbars: false),
         );
       },
     );

@@ -21,7 +21,7 @@ import 'package:go_router/go_router.dart';
 import 'pages/bit_kline_page.dart';
 import 'pages/landscape_kline_page.dart';
 import 'pages/ok_kline_page.dart';
-import 'pages/main_nav_page.dart';
+import 'pages/index_page.dart';
 import 'pages/my_demo_page.dart';
 
 final GlobalKey<NavigatorState> globalNavigatorKey = GlobalKey<NavigatorState>(
@@ -70,8 +70,8 @@ final List<RouteBase> routeList = <RouteBase>[
       StatefulNavigationShell navigationShell,
     ) {
       return MaterialPage<void>(
-        restorationId: 'nav',
-        child: MainNavPage(navigationShell: navigationShell),
+        restorationId: 'indexPage',
+        child: IndexPage(navigationShell: navigationShell),
       );
     },
     branches: <StatefulShellBranch>[

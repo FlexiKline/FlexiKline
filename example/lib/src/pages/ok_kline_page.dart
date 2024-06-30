@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import 'package:easy_refresh/easy_refresh.dart';
-import 'package:example/src/theme/flexi_theme.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -23,13 +22,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../config.dart';
 import '../providers/instruments_provider.dart';
 import '../providers/default_kline_config.dart';
+import '../theme/flexi_theme.dart';
 import 'components/flexi_kline_indicator_bar.dart';
 import 'components/flexi_kline_mark_view.dart';
 import 'components/market_ticker_view.dart';
 import 'components/flexi_kline_setting_bar.dart';
 import 'components/trading_pair_select_title.dart';
-import 'kline_page_data_update_mixin.dart';
-import 'main_nav_page.dart';
+import 'common/kline_page_data_update_mixin.dart';
+import 'index_page.dart';
 
 class OkKlinePage extends ConsumerStatefulWidget {
   const OkKlinePage({

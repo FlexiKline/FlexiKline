@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:example/src/theme/flexi_theme.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +21,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../config.dart';
 import '../providers/default_kline_config.dart';
 import '../providers/instruments_provider.dart';
+import '../theme/flexi_theme.dart';
 
 class DoubleKlinePage extends ConsumerStatefulWidget {
   const DoubleKlinePage({

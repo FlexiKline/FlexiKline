@@ -14,7 +14,6 @@
 
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:example/generated/l10n.dart';
-import 'package:example/src/theme/flexi_theme.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -26,13 +25,14 @@ import '../config.dart';
 import '../constants/images.dart';
 import '../providers/bit_kline_config.dart';
 import '../providers/instruments_provider.dart';
+import '../theme/flexi_theme.dart';
 import 'components/flexi_kline_indicator_bar.dart';
 import 'components/flexi_kline_mark_view.dart';
 import 'components/market_ticker_view.dart';
 import 'components/flexi_kline_setting_bar.dart';
 import 'components/trading_pair_select_title.dart';
-import 'kline_page_data_update_mixin.dart';
-import 'main_nav_page.dart';
+import 'common/kline_page_data_update_mixin.dart';
+import 'index_page.dart';
 
 class BitKlinePage extends ConsumerStatefulWidget {
   const BitKlinePage({

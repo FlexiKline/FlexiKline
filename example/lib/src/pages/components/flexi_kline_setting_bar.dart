@@ -14,6 +14,7 @@
 
 import 'package:example/generated/l10n.dart';
 import 'package:flexi_kline/flexi_kline.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -24,7 +25,9 @@ import '../../dialogs/kline_settting_dialog.dart';
 import '../../dialogs/timebar_select_dialog.dart';
 import '../../theme/export.dart';
 import '../../utils/dialog_manager.dart';
+import '../../widgets/no_thumb_scroll_behavior.dart';
 import '../../widgets/text_arrow_button.dart';
+import '../common/wide_screen_mixin.dart';
 
 class FlexiKlineSettingBar extends ConsumerStatefulWidget {
   const FlexiKlineSettingBar({
@@ -46,7 +49,8 @@ class FlexiKlineSettingBar extends ConsumerStatefulWidget {
       _FlexiKlineSettingBarState();
 }
 
-class _FlexiKlineSettingBarState extends ConsumerState<FlexiKlineSettingBar> {
+class _FlexiKlineSettingBarState extends ConsumerState<FlexiKlineSettingBar>
+    with WideScreenMixin {
   @override
   void initState() {
     super.initState();
@@ -61,12 +65,19 @@ class _FlexiKlineSettingBarState extends ConsumerState<FlexiKlineSettingBar> {
 
   List<TimeBar> preferTimeBarList = [
     TimeBar.m15,
+    TimeBar.m30,
     TimeBar.H1,
     TimeBar.H4,
     TimeBar.D1,
+    TimeBar.W1,
+    TimeBar.M1,
   ];
 
   bool isPreferTimeBar(TimeBar bar) => preferTimeBarList.contains(bar);
+
+  List<TimeBar> get showTimeBarList {
+    return wideScreen ? TimeBar.values : preferTimeBarList;
+  }
 
   final timeBarSettingBtnStatus = ValueNotifier(false);
   Future<void> onTapTimeBarSetting() async {
@@ -118,22 +129,37 @@ class _FlexiKlineSettingBarState extends ConsumerState<FlexiKlineSettingBar> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Expanded(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: _buildPreferTimeBarList(context),
+            child: ScrollConfiguration(
+              behavior: NoThumbScrollBehavior().copyWith(scrollbars: false),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                // child: TimeBarTabBar(
+                //   timerBarList: showTimeBarList,
+                //   timeBarListener: widget.controller.timeBarListener,
+                //   onTapTimeBar: widget.onTapTimeBar,
+                // ),
+                child: _buildTimeBarList(
+                  context,
+                  timerBarList: showTimeBarList,
+                ),
+              ),
             ),
           ),
-          ValueListenableBuilder(
-            valueListenable: widget.controller.timeBarListener,
-            builder: (context, value, child) {
-              final showMore = value == null || isPreferTimeBar(value);
-              return TextArrowButton(
-                onPressed: onTapTimeBarSetting,
-                text: showMore ? s.more : value.bar,
-                iconStatus: timeBarSettingBtnStatus,
-                background: showMore ? null : theme.markBg,
-              );
-            },
+          Offstage(
+            offstage: wideScreen,
+            child: ValueListenableBuilder(
+              valueListenable: widget.controller.timeBarListener,
+              builder: (context, value, child) {
+                final showMore = value == null || isPreferTimeBar(value);
+                return TextArrowButton(
+                  onPressed: onTapTimeBarSetting,
+                  text: showMore ? s.more : value.bar,
+                  iconStatus: timeBarSettingBtnStatus,
+                  background: showMore ? null : theme.markBg,
+                );
+              },
+            ),
           ),
           TextArrowButton(
             onPressed: onTapIndicatorSetting,
@@ -153,19 +179,22 @@ class _FlexiKlineSettingBarState extends ConsumerState<FlexiKlineSettingBar> {
     );
   }
 
-  Widget _buildPreferTimeBarList(BuildContext context) {
+  Widget _buildTimeBarList(
+    BuildContext context, {
+    required List<TimeBar> timerBarList,
+  }) {
     return ValueListenableBuilder(
       valueListenable: widget.controller.timeBarListener,
       builder: (context, value, child) {
         final theme = ref.watch(themeProvider);
         return Row(
-          children: preferTimeBarList.map((bar) {
+          children: timerBarList.map((bar) {
             final selected = value == bar;
             return GestureDetector(
               onTap: () => widget.onTapTimeBar(bar),
               child: Container(
                 key: ValueKey(bar),
-                constraints: BoxConstraints(minWidth: 28.r),
+                constraints: BoxConstraints(minWidth: 38.r),
                 alignment: AlignmentDirectional.center,
                 decoration: BoxDecoration(
                   color: selected ? theme.markBg : null,
@@ -179,6 +208,111 @@ class _FlexiKlineSettingBarState extends ConsumerState<FlexiKlineSettingBar> {
                 child: Text(
                   bar.bar,
                   style: selected ? theme.t1s14w700 : theme.t1s14w400,
+                ),
+              ),
+            );
+          }).toList(),
+        );
+      },
+    );
+  }
+}
+
+class TimeBarTabBar extends ConsumerStatefulWidget {
+  const TimeBarTabBar({
+    super.key,
+    required this.timerBarList,
+    required this.timeBarListener,
+    this.onTapTimeBar,
+  });
+
+  final List<TimeBar> timerBarList;
+  final ValueChanged<TimeBar>? onTapTimeBar;
+  final ValueListenable<TimeBar?> timeBarListener;
+
+  @override
+  ConsumerState<ConsumerStatefulWidget> createState() => _TimeTabBarViewState();
+}
+
+class _TimeTabBarViewState extends ConsumerState<TimeBarTabBar>
+    with SingleTickerProviderStateMixin {
+  late final TabController _tabController;
+
+  List<TimeBar> get timerBarList => widget.timerBarList;
+
+  @override
+  void initState() {
+    super.initState();
+    initTabController();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _tabController.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant TimeBarTabBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.timerBarList != widget.timerBarList) {
+      _tabController.dispose();
+      initTabController();
+    }
+  }
+
+  void initTabController() {
+    int index = 0;
+    final bar = widget.timeBarListener.value;
+    if (bar != null) index = timerBarList.indexOf(bar);
+    index = index.clamp(0, timerBarList.length);
+    _tabController = TabController(
+      initialIndex: index,
+      length: timerBarList.length,
+      vsync: this,
+    );
+    _tabController.animateTo(index);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = ref.watch(themeProvider);
+    return ValueListenableBuilder(
+      valueListenable: widget.timeBarListener,
+      builder: (context, value, child) {
+        bool isInList = value != null;
+        if (isInList) {
+          final index = timerBarList.indexOf(value);
+          isInList = index >= 0;
+          if (isInList && index != _tabController.index) {
+            _tabController.animateTo(index);
+          }
+        }
+        return TabBar(
+          controller: _tabController,
+          isScrollable: true,
+          labelPadding: EdgeInsetsDirectional.symmetric(horizontal: 6.r),
+          labelStyle: theme.t1s14w700,
+          unselectedLabelStyle: theme.t2s14w400,
+          indicatorSize: TabBarIndicatorSize.tab,
+          indicator: BoxDecoration(
+            color: isInList ? theme.markBg : null,
+            borderRadius: BorderRadius.circular(8.r),
+          ),
+          indicatorWeight: 0,
+          tabAlignment: TabAlignment.start,
+          onTap: (index) {
+            final timeBar = timerBarList.getItem(index);
+            if (timeBar != null) widget.onTapTimeBar?.call(timeBar);
+          },
+          tabs: timerBarList.map((bar) {
+            return Tab(
+              height: 28.r,
+              child: Container(
+                alignment: AlignmentDirectional.center,
+                width: 40.r,
+                child: FittedBox(
+                  child: Text(bar.bar),
                 ),
               ),
             );
