@@ -7,6 +7,8 @@ part of 'gesture_config.dart';
 // **************************************************************************
 
 abstract class _$GestureConfigCWProxy {
+  GestureConfig isInertialPan(bool isInertialPan);
+
   GestureConfig tolerance(ToleranceConfig? tolerance);
 
   GestureConfig loadMoreWhenNoEnoughDistance(
@@ -25,6 +27,7 @@ abstract class _$GestureConfigCWProxy {
   /// GestureConfig(...).copyWith(id: 12, name: "My name")
   /// ````
   GestureConfig call({
+    bool? isInertialPan,
     ToleranceConfig? tolerance,
     double? loadMoreWhenNoEnoughDistance,
     int? loadMoreWhenNoEnoughCandles,
@@ -38,6 +41,10 @@ class _$GestureConfigCWProxyImpl implements _$GestureConfigCWProxy {
   const _$GestureConfigCWProxyImpl(this._value);
 
   final GestureConfig _value;
+
+  @override
+  GestureConfig isInertialPan(bool isInertialPan) =>
+      this(isInertialPan: isInertialPan);
 
   @override
   GestureConfig tolerance(ToleranceConfig? tolerance) =>
@@ -68,6 +75,7 @@ class _$GestureConfigCWProxyImpl implements _$GestureConfigCWProxy {
   /// GestureConfig(...).copyWith(id: 12, name: "My name")
   /// ````
   GestureConfig call({
+    Object? isInertialPan = const $CopyWithPlaceholder(),
     Object? tolerance = const $CopyWithPlaceholder(),
     Object? loadMoreWhenNoEnoughDistance = const $CopyWithPlaceholder(),
     Object? loadMoreWhenNoEnoughCandles = const $CopyWithPlaceholder(),
@@ -75,6 +83,11 @@ class _$GestureConfigCWProxyImpl implements _$GestureConfigCWProxy {
     Object? scaleSpeed = const $CopyWithPlaceholder(),
   }) {
     return GestureConfig(
+      isInertialPan:
+          isInertialPan == const $CopyWithPlaceholder() || isInertialPan == null
+              ? _value.isInertialPan
+              // ignore: cast_nullable_to_non_nullable
+              : isInertialPan as bool,
       tolerance: tolerance == const $CopyWithPlaceholder()
           ? _value.tolerance
           // ignore: cast_nullable_to_non_nullable
@@ -116,6 +129,7 @@ extension $GestureConfigCopyWith on GestureConfig {
 
 GestureConfig _$GestureConfigFromJson(Map<String, dynamic> json) =>
     GestureConfig(
+      isInertialPan: json['isInertialPan'] as bool? ?? true,
       tolerance: json['tolerance'] == null
           ? null
           : ToleranceConfig.fromJson(json['tolerance'] as Map<String, dynamic>),
@@ -132,6 +146,7 @@ GestureConfig _$GestureConfigFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$GestureConfigToJson(GestureConfig instance) {
   final val = <String, dynamic>{
+    'isInertialPan': instance.isInertialPan,
     'tolerance': instance.tolerance.toJson(),
   };
 

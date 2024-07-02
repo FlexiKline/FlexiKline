@@ -481,18 +481,26 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
   @override
   void handleScale(GestureData data) {
     super.handleScale(data);
-    if (!data.scaled) return;
 
-    if (data.scale > 1 && candleWidth >= candleMaxWidth) return;
-    if (data.scale < 1 && candleWidth <= settingConfig.pixel) return;
+    double? newWidth;
 
-    final dxGrowth = data.scaleDelta * gestureConfig.scaleSpeed;
-    double newWidth = (candleWidth + dxGrowth).clamp(
-      settingConfig.pixel,
-      candleMaxWidth,
-    );
+    if (data.scaled) {
+      // 处理触摸设备的缩放逻辑.
+      if (data.scale > 1 && candleWidth >= candleMaxWidth) return;
+      if (data.scale < 1 && candleWidth <= settingConfig.pixel) return;
 
-    if (newWidth == candleWidth) return;
+      final dxGrowth = data.scaleDelta * gestureConfig.scaleSpeed;
+      newWidth = (candleWidth + dxGrowth).clamp(
+        settingConfig.pixel,
+        candleMaxWidth,
+      );
+    } else if (data.isSignal) {
+      // 处理鼠标滚轴缩放的逻辑.
+
+    }
+
+    if (newWidth == null || newWidth == candleWidth) return;
+
     final scaleFactor =
         (newWidth + settingConfig.candleSpacing) / candleActualWidth;
     // logd('handleScale candleWidth:$candleWidth>$newWidth; factor:$scaleFactor');

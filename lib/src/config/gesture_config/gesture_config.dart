@@ -28,6 +28,7 @@ part 'gesture_config.g.dart';
 @FlexiConfigSerializable
 class GestureConfig {
   GestureConfig({
+    this.isInertialPan = true,
     ToleranceConfig? tolerance,
     this.loadMoreWhenNoEnoughDistance,
     this.loadMoreWhenNoEnoughCandles = 60,
@@ -35,6 +36,9 @@ class GestureConfig {
     double scaleSpeed = 10,
   })  : tolerance = tolerance ?? ToleranceConfig(),
         scaleSpeed = scaleSpeed.clamp(1, 30);
+
+  /// 是否进行惯性平移
+  final bool isInertialPan;
 
   /// 手势平移限制参数
   final ToleranceConfig tolerance;

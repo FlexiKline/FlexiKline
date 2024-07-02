@@ -202,6 +202,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   GestureConfig genGestureConfig(covariant IFlexiKlineTheme theme) {
     return GestureConfig(
+      isInertialPan: true,
       tolerance: ToleranceConfig(),
       loadMoreWhenNoEnoughDistance: null,
       loadMoreWhenNoEnoughCandles: 60,

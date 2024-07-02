@@ -173,6 +173,11 @@ mixin GestureBinding on KlineBindingBase implements IGestureEvent, IState {
       return;
     }
 
+    if (!gestureConfig.isInertialPan) {
+      // 不进行惯性平移.
+      return;
+    }
+
     // <0: 负数代表从右向左滑动.
     // >0: 正数代表从左向右滑动.
     final velocity = details.velocity.pixelsPerSecond.dx;

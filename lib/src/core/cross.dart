@@ -19,6 +19,7 @@ import '../data/export.dart';
 import '../extension/export.dart';
 import '../model/export.dart';
 import '../utils/num_util.dart';
+import '../utils/platform_util.dart';
 import 'binding_base.dart';
 import 'interface.dart';
 import 'setting.dart';
@@ -79,7 +80,7 @@ mixin CrossBinding
 
   // 是否正在绘制Cross
   @override
-  bool get isCrossing => offset?.isFinite == true;
+  bool get isCrossing => !PlatformUtil.isMobile || offset?.isFinite == true;
 
   // 取消当前Cross事件
   @override
@@ -160,7 +161,6 @@ mixin CrossBinding
   }
 
   @override
-  @protected
   bool handleTap(GestureData data) {
     if (crossConfig.enable != true) {
       super.handleTap(data);
@@ -183,7 +183,6 @@ mixin CrossBinding
   }
 
   @override
-  @protected
   void handleMove(GestureData data) {
     if (!isCrossing) {
       return super.handleMove(data);
@@ -193,7 +192,6 @@ mixin CrossBinding
   }
 
   @override
-  @protected
   void handleScale(GestureData data) {
     if (isCrossing) {
       logd('handleMove cross > ${data.offset}');

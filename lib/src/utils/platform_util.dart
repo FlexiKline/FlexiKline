@@ -23,7 +23,7 @@ final class PlatformUtil {
 
   static bool get isMobile => isAndroid || isIOS;
 
-  static bool get isMobile2 =>
+  static bool get isTargetMobile =>
       defaultTargetPlatform == TargetPlatform.android ||
       defaultTargetPlatform == TargetPlatform.iOS;
 

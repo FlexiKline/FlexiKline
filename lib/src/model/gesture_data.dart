@@ -16,19 +16,35 @@ import 'package:flutter/material.dart';
 
 import '../framework/common.dart';
 
+/// 手势执行的状态
 enum GestureState {
   start,
   update,
   end,
 }
 
+/// 手势类型
 enum GestureType {
+  /// Cross平移事件, 触摸设备上手指在Kline图表上的平移.
   tap,
+
+  /// 长按事件, 触摸设备手指长按/非触摸设备指针长按.
   long,
+
+  /// 平移事件, 触摸设备手指在屏幕上滑动/非触摸设备指针按住平移.
   pan,
+
+  /// 缩放事件, 触摸设备上, 双指开合缩放.
   scale,
+
+  /// Croos平移事件, 非触摸设备(鼠标或触摸板)的指针移入Kline图表的Croos平移.
+  hover,
+
+  /// 缩放事件, 非触摸设备鼠标滚轴滚动进行缩放操作.
+  signal,
 }
 
+/// 手势数据针对[GestureType]的封装
 class GestureData {
   GestureData._internal({
     required this.type,
@@ -44,10 +60,16 @@ class GestureData {
 
   GestureData.tap(Offset offset)
       : this._internal(offset: offset, type: GestureType.tap);
+
+  GestureData.hover(Offset offset)
+      : this._internal(offset: offset, type: GestureType.hover);
+
   GestureData.long(Offset offset)
       : this._internal(offset: offset, type: GestureType.long);
+
   GestureData.pan(Offset offset)
       : this._internal(offset: offset, type: GestureType.pan);
+
   GestureData.scale(
     Offset offset, {
     double scale = 1.0,
@@ -56,6 +78,17 @@ class GestureData {
           offset: offset,
           scale: scale,
           type: GestureType.scale,
+          initPosition: position,
+        );
+
+  GestureData.signal(
+    Offset offset, {
+    double scale = 1.0,
+    required ScalePosition position,
+  }) : this._internal(
+          type: GestureType.signal,
+          offset: offset,
+          scale: scale,
           initPosition: position,
         );
 
@@ -106,8 +139,10 @@ class GestureData {
 
   bool get isScale => type == GestureType.scale;
 
+  bool get isSignal => type == GestureType.signal;
+
   /// 是否缩放
-  bool get scaled => type == GestureType.scale && scale != 1.0;
+  bool get scaled => isScale && scale != 1.0;
 
   bool get isEnd => state == GestureState.end;
 

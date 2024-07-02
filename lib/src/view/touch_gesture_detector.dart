@@ -17,8 +17,8 @@ import 'package:flutter/material.dart';
 
 import '../kline_controller.dart';
 
-class GestureView extends StatefulWidget {
-  const GestureView({
+class TouchGestureDetector extends StatefulWidget {
+  const TouchGestureDetector({
     super.key,
     required this.controller,
     required this.child,
@@ -28,10 +28,10 @@ class GestureView extends StatefulWidget {
   final Widget child;
 
   @override
-  State<GestureView> createState() => _GestureViewState();
+  State<TouchGestureDetector> createState() => _TouchGestureDetectorState();
 }
 
-class _GestureViewState extends State<GestureView>
+class _TouchGestureDetectorState extends State<TouchGestureDetector>
     with TickerProviderStateMixin {
   bool isSweeped = false;
 

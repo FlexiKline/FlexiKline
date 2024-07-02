@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -23,6 +25,32 @@ void main() {
   setUp(() {
     WidgetsFlutterBinding.ensureInitialized();
     vsync = const TestVSync();
+  });
+
+  test('onPointerSignal scrollDelta convert to GestureData.scale', () {
+    double scaledSingal(double x, double k, {double kMax = 30}) {
+      if (x < 1) {
+        throw ArgumentError('x must be >= 1');
+      }
+
+      // 归一化 k
+      double kNorm = (k - 1) / (kMax - 1);
+
+      // 使用对数函数处理 x，并结合 Sigmoid 函数
+      double y = 1 / (1 + math.exp(-kNorm * (math.log(x) - 1)));
+
+      return y * 10;
+    }
+
+    List<double> xValues = [1, 4, 8, 10, 50, 100, 200, 300, 400, 500];
+    List<double> kValues = [1, 2, 3, 4, 5, 6, 7, 9, 10];
+
+    for (double x in xValues) {
+      for (double k in kValues) {
+        double y = scaledSingal(x, k);
+        print('x: $x, k: $k, y: $y');
+      }
+    }
   });
 
   test('Animation+Curve+Tween', () {
