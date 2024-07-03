@@ -171,7 +171,7 @@ mixin CrossBinding
       if (crossConfig.showLatestTipsInBlank) {
         model = offsetToCandle(offset);
         // 如果当前model为空, 则根据offset.dx计算当前model是最新的, 还是最后的.
-        if (model == null) {
+        if (model == null && !curKlineData.isEmpty) {
           if (offset.dx > startCandleDx) {
             model = curKlineData.latest;
           } else {

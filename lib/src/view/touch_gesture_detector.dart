@@ -208,7 +208,10 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
     } else if (_panScaleData!.isScale) {
       final newScale = scaledDecelerate(details.scale);
       final change = details.scale - _panScaleData!.scale;
-      // logd("onScaleUpdate scale ${details.scale}>$newScale change:$change");
+      assert(() {
+        logd("onScaleUpdate scale ${details.scale}>$newScale change:$change");
+        return true;
+      }());
       if (change.abs() > 0.01) {
         _panScaleData!.update(
           details.localFocalPoint,

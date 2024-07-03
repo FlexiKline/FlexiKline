@@ -345,7 +345,29 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
   }
 
   void onPointerPanZoomStart(PointerPanZoomStartEvent event) {
-    logd('onPointerPanZoomStart $event');
+    final offset = event.localPosition;
+    if (!controller.canvasRect.include(offset)) {
+      logw('onPointerPanZoomStart $offset is not in the canvas.');
+      _scaleData?.end();
+      _scaleData = null;
+    }
+
+    logd('onPointerPanZoomStart $event > ${event.localPosition}');
+    ScalePosition position = gestureConfig.scalePosition;
+    if (position == ScalePosition.auto) {
+      final third = controller.canvasRect.width / 3;
+      if (offset.dx < third) {
+        position = ScalePosition.left;
+      } else if (offset.dx > (third + third)) {
+        position = ScalePosition.right;
+      } else {
+        position = ScalePosition.middle;
+      }
+    }
+    _scaleData = GestureData.scale(
+      offset,
+      position: position,
+    );
   }
 
   /// 触控板事件更新
@@ -362,11 +384,41 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
   /// /// 到目前为止手势旋转的弧度量
   /// final double rotation;
   void onPointerPanZoomUpdate(PointerPanZoomUpdateEvent event) {
-    logd('onPointerPanZoomUpdate $event');
+    if (_scaleData == null) {
+      logd("onPointerPanZoomUpdate scaleData is empty! $event ${event.scale}");
+      return;
+    }
+
+    if (_scaleData!.isScale) {
+      final newScale = scaledDecelerate(event.scale);
+      final change = event.scale - _scaleData!.scale;
+      assert(() {
+        logd(
+          "onPointerPanZoomUpdate scale ${event.scale}>$newScale change:$change",
+        );
+        return true;
+      }());
+      if (change.abs() > 0.01) {
+        _scaleData!.update(
+          event.localPosition,
+          newScale: newScale,
+        );
+        controller.scaleChart(_scaleData!);
+      }
+    }
   }
 
   void onPointerPanZoomEnd(PointerPanZoomEndEvent event) {
-    logd('onPointerPanZoomEnd $event');
+    if (_scaleData == null) {
+      logd("onPointerPanZoomEnd scaledata is empty! > event:$event");
+      return;
+    }
+
+    if (_scaleData!.isScale) {
+      logd("onPointerPanZoomEnd scale. ${event.localPosition}");
+      _scaleData?.end();
+      _scaleData = null;
+    }
   }
 
   void onScaleStart(ScaleStartDetails details) {
