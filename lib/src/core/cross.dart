@@ -19,7 +19,6 @@ import '../data/export.dart';
 import '../extension/export.dart';
 import '../model/export.dart';
 import '../utils/num_util.dart';
-import '../utils/platform_util.dart';
 import 'binding_base.dart';
 import 'interface.dart';
 import 'setting.dart';
@@ -82,10 +81,6 @@ mixin CrossBinding
   @override
   bool get isCrossing => offset?.isFinite == true;
 
-  /// 是否允许Cross事件与其他事件共存
-  /// 触摸设备两种事件不能共存.
-  bool get isAllowCrossGestureCoexist => PlatformUtil.isNonTouch;
-
   Offset? _offset;
   Offset? get offset => _offset;
   set offset(Offset? val) {
@@ -119,48 +114,13 @@ mixin CrossBinding
     // }
   }
 
-  // @override
-  // bool handleTap(GestureData data) {
-  //   if (startCross(data)) return true;
-  //   super.handleTap(data);
-  //   return false;
-  // }
-
-  // @override
-  // void handleMove(GestureData data) {
-  //   updateCross(data);
-  //   super.handleMove(data);
-  // }
-
-  // @override
-  // void handleScale(GestureData data) {
-  //   if (!isAllowCrossGestureCoexist && isCrossing) {
-  //     logd('handleMove cross > ${data.offset}');
-  //     // 注: 当前正在展示Cross, 不能缩放, 直接return拦截.
-  //     return;
-  //   }
-  //   return super.handleScale(data);
-  // }
-
-  // @override
-  // void handleLongPress(GestureData data) {
-  //   if (startCross(data)) return;
-  //   super.handleLongPress(data);
-  // }
-
-  // @override
-  // void handleLongMove(GestureData data) {
-  //   if (updateCross(data)) return;
-  //   super.handleLongMove(data);
-  // }
-
   /// 启动Cross事件
   @override
-  bool startCross(GestureData data) {
+  bool startCross(GestureData data, {bool force = false}) {
     if (crossConfig.enable) {
       /// 如果其他手势与Cross手势事件允许共存 或者当前不在Crossing中时, 开启Cross.
-      if (isAllowCrossGestureCoexist || !isCrossing) {
-        logd('handleTap cross > ${data.offset}');
+      if (force || !isCrossing) {
+        logd('handleTap cross > $force > ${data.offset}');
         // 更新并校正起始焦点.
         offset = data.offset;
         _markRepaint();
@@ -168,10 +128,21 @@ mixin CrossBinding
         markRepaintChart();
         return true;
       }
+
       cancelCross();
       onCrossCustomTooltip?.call(null);
+      return false;
     }
     return false;
+  }
+
+  /// 更新Cross事件数据.
+  @override
+  void updateCross(GestureData data) {
+    if (crossConfig.enable && isCrossing) {
+      offset = data.offset;
+      _markRepaint();
+    }
   }
 
   /// 取消当前Cross事件
@@ -183,17 +154,6 @@ mixin CrossBinding
       markRepaintChart();
       _markRepaint();
     }
-  }
-
-  /// 更新Cross事件数据.
-  @override
-  bool updateCross(GestureData data) {
-    if (crossConfig.enable && (isAllowCrossGestureCoexist || isCrossing)) {
-      offset = data.offset;
-      _markRepaint();
-      return true;
-    }
-    return false;
   }
 
   /// 绘制最新价与十字线

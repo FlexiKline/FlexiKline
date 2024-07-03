@@ -201,7 +201,7 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
 
     logd('onEnter $event');
     _hoverData = GestureData.hover(offset);
-    controller.startCross(_hoverData!);
+    controller.startCross(_hoverData!, force: true);
   }
 
   /// 鼠标Hover事件.

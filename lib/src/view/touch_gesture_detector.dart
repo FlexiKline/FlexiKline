@@ -108,7 +108,7 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
   // void onPointerDown(PointerDownEvent event) {}
 
   /// 原始移动
-  /// 解决手势冲突, 并响应触摸设备上的Cross平移事件
+  /// 当原始移动时, 当前如果正处在crossing中, 发生冲突, 清理手势竞技场, 响应Cross平移事件
   void onPointerMove(PointerMoveEvent event) {
     if (controller.isCrossing) {
       if (!isSweeped) {
