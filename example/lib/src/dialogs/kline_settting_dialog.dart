@@ -14,7 +14,6 @@
 
 import 'package:example/generated/l10n.dart';
 import 'package:example/src/router.dart';
-import 'package:example/src/utils/dialog_manager.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -25,6 +24,7 @@ import '../providers/kline_controller_state_provider.dart';
 import '../pages/components/flexi_kline_size_slider.dart';
 import '../theme/flexi_theme.dart';
 import '../utils/device_util.dart';
+import '../utils/dialog_manager.dart';
 
 class KlineSettingDialog extends ConsumerStatefulWidget {
   static const String dialogTag = "KlineSettingDialog";
@@ -46,6 +46,13 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
   bool get klineSizeChanging => klineHeightChanging || klineWidthChanging;
 
   Future<void> openLandscapePage() async {
+    if (!DeviceUtil.isMobile) {
+      SmartDialog.showToast(
+        'Landscape operation is not allowed on non-mobile devices',
+      );
+      return;
+    }
+
     SmartDialog.dismiss(tag: KlineSettingDialog.dialogTag);
     widget.controller.storeFlexiKlineConfig();
     final isUpdate = await ref.read(routerProvider).pushNamed(
@@ -279,7 +286,7 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
                   checkColor: theme.tlight,
                 ),
               ),
-              Expanded(child: SizedBox.shrink())
+              const Expanded(child: SizedBox.shrink())
             ],
           )
         ],

@@ -18,9 +18,7 @@ import 'package:flutter/material.dart';
 import '../framework/export.dart';
 import 'interface.dart';
 
-abstract class KlineBindingBase
-    with KlineLog, GestureHanderImpl
-    implements ISetting {
+abstract class KlineBindingBase with KlineLog implements ISetting {
   final IConfiguration configuration;
 
   /// 对于Kline的操作是否自动保存到本地配置中.

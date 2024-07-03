@@ -21,6 +21,26 @@ import '../model/export.dart';
 import 'binding_base.dart';
 import 'interface.dart';
 
+/// Gesture 事件处理接口
+// abstract interface class IGestureEvent {
+//   /// 点击
+//   void onTapUp(TapUpDetails details);
+
+//   /// 原始移动
+//   void onPointerMove(PointerMoveEvent event);
+
+//   /// 移动, 缩放
+//   void onScaleStart(ScaleStartDetails details);
+//   void onScaleUpdate(ScaleUpdateDetails details);
+//   void onScaleEnd(ScaleEndDetails details);
+
+//   /// 长按
+//   void onLongPressStart(LongPressStartDetails details);
+//   void onLongPressMoveUpdate(LongPressMoveUpdateDetails details);
+//   void onLongPressEnd(LongPressEndDetails details);
+// }
+
+
 /// 负责各种手势处理
 mixin GestureBinding on KlineBindingBase implements IGestureEvent, IState {
   @override
@@ -170,17 +190,29 @@ mixin GestureBinding on KlineBindingBase implements IGestureEvent, IState {
       //   _panScaleData?.end();
       //   _panScaleData = null;
       // });
-      return;
-    }
 
-    if (!gestureConfig.isInertialPan) {
-      // 不进行惯性平移.
+      /// 检查并加载更多蜡烛数据
+      checkAndLoadMoreCandlesWhenPanEnd();
       return;
     }
 
     // <0: 负数代表从右向左滑动.
     // >0: 正数代表从左向右滑动.
     final velocity = details.velocity.pixelsPerSecond.dx;
+
+    if (!gestureConfig.isInertialPan ||
+        ticker == null ||
+        curKlineData.isEmpty ||
+        (velocity < 0 && !canPanRTL) ||
+        (velocity > 0 && !canPanLTR)) {
+      logd("onScaleEnd currently can not pan!");
+      _panScaleData?.end();
+      _panScaleData = null;
+
+      /// 检查并加载更多蜡烛数据
+      checkAndLoadMoreCandlesWhenPanEnd();
+      return;
+    }
 
     final tolerance = gestureConfig.tolerance;
 
@@ -195,12 +227,8 @@ mixin GestureBinding on KlineBindingBase implements IGestureEvent, IState {
     /// 惯性平移的最大距离.
     final panDistance = velocity * tolerance.distanceFactor;
 
-    if (ticker == null ||
-        panDistance == 0 ||
-        panDuration <= 1 || // 不足1ms, 无需继续平移
-        curKlineData.isEmpty ||
-        (velocity < 0 && !canPanRTL) ||
-        (velocity > 0 && !canPanLTR)) {
+    // 平移距离为0 或者 不足1ms, 无需继续平移
+    if (panDistance == 0 || panDuration <= 1) {
       logd("onScaleEnd currently not need for inertial movement!");
       _panScaleData?.end();
       _panScaleData = null;

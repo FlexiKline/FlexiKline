@@ -467,8 +467,8 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
   }
 
   @override
-  void handleMove(GestureData data) {
-    super.handleMove(data);
+  void moveChart(GestureData data) {
+    // super.handleMove(data);
     if (!data.moved) return;
 
     final newDxOffset = clampPaintDxOffset(paintDxOffset + data.dxDelta);
@@ -479,8 +479,8 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
   }
 
   @override
-  void handleScale(GestureData data) {
-    super.handleScale(data);
+  void scaleChart(GestureData data) {
+    // super.handleScale(data);
 
     double? newWidth;
 
@@ -495,8 +495,11 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
         candleMaxWidth,
       );
     } else if (data.isSignal) {
-      // 处理鼠标滚轴缩放的逻辑.
-
+      // 处理鼠标滚轴滚动/触控板向上向下的缩放逻辑.
+      newWidth = (candleWidth + data.scale).clamp(
+        settingConfig.pixel,
+        candleMaxWidth,
+      );
     }
 
     if (newWidth == null || newWidth == candleWidth) return;
@@ -541,9 +544,9 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
     markRepaintChart();
   }
 
-  @override
-  void handleLongMove(GestureData data) {
-    super.handleLongMove(data);
-    if (!data.moved) return;
-  }
+  // @override
+  // void handleLongMove(GestureData data) {
+  //   super.handleLongMove(data);
+  //   if (!data.moved) return;
+  // }
 }

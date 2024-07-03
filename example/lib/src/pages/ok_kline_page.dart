@@ -77,8 +77,6 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage>
 
     controller.onLoadMoreCandles = loadMoreCandles;
 
-    controller.onDoubleTap = setFullScreen;
-
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       initKlineData(req);
     });
@@ -155,6 +153,7 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage>
                       ),
                     ),
                     mainforegroundViewBuilder: _buildKlineMainForgroundView,
+                    onDoubleTap: setFullScreen,
                   ),
                   FlexiKlineIndicatorBar(
                     height: 30.r,

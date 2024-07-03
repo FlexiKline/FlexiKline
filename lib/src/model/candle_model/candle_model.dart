@@ -14,10 +14,10 @@
 
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:decimal/decimal.dart';
-import 'package:flexi_kline/src/extension/export.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import '../../constant.dart';
+import '../../extension/collections_ext.dart';
 import '../../framework/serializers.dart';
 import '../../utils/export.dart';
 import '../bag_num.dart';

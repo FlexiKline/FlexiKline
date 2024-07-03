@@ -188,11 +188,11 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
               controller: controller,
             ),
             Container(
-              height: 2,
+              height: 20.r,
               color: theme.dividerLine,
             ),
             // GestureTest(),
-            const CanvasDemo(),
+            // const CanvasDemo(),
           ],
         ),
       ),

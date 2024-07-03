@@ -13,12 +13,12 @@
 // limitations under the License.
 
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:flexi_kline/src/extension/export.dart';
 import 'package:flutter/material.dart';
 
 import '../config/export.dart';
 import '../constant.dart';
 import '../core/export.dart';
+import '../extension/export.dart';
 import '../data/kline_data.dart';
 import '../framework/export.dart';
 import '../model/export.dart';

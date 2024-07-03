@@ -20,13 +20,15 @@ import 'package:package_info_plus/package_info_plus.dart';
 final class DeviceUtil {
   DeviceUtil._();
 
+  /// 是否触摸设备
+  static bool get isTouch => isMobile;
+
+  /// 是否非触摸设备
+  static bool get isNonTouch => !isMobile;
+
   static bool get isDesktop => !isWeb && (isWindows || isLinux || isMacOS);
 
   static bool get isMobile => isAndroid || isIOS;
-
-  static bool get isMobile2 =>
-      defaultTargetPlatform == TargetPlatform.android ||
-      defaultTargetPlatform == TargetPlatform.iOS;
 
   static bool get isWeb => kIsWeb;
 
@@ -41,6 +43,10 @@ final class DeviceUtil {
   static bool get isFuchsia => isWeb ? false : Platform.isFuchsia;
 
   static bool get isIOS => isWeb ? false : Platform.isIOS;
+
+  static bool get isTargetMobile =>
+      defaultTargetPlatform == TargetPlatform.android ||
+      defaultTargetPlatform == TargetPlatform.iOS;
 
   static Future<PackageInfo> getPackageInfo() async {
     PackageInfo packageInfo = await PackageInfo.fromPlatform();

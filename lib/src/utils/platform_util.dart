@@ -19,13 +19,15 @@ import 'package:flutter/foundation.dart';
 final class PlatformUtil {
   PlatformUtil._();
 
+  /// 是否触摸设备
+  static bool get isTouch => isMobile;
+
+  /// 是否非触摸设备
+  static bool get isNonTouch => !isMobile;
+
   static bool get isDesktop => !isWeb && (isWindows || isLinux || isMacOS);
 
   static bool get isMobile => isAndroid || isIOS;
-
-  static bool get isTargetMobile =>
-      defaultTargetPlatform == TargetPlatform.android ||
-      defaultTargetPlatform == TargetPlatform.iOS;
 
   static bool get isWeb => kIsWeb;
 
@@ -40,4 +42,8 @@ final class PlatformUtil {
   static bool get isFuchsia => isWeb ? false : Platform.isFuchsia;
 
   static bool get isIOS => isWeb ? false : Platform.isIOS;
+
+  static bool get isTargetMobile =>
+      defaultTargetPlatform == TargetPlatform.android ||
+      defaultTargetPlatform == TargetPlatform.iOS;
 }

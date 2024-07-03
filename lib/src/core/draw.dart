@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:flutter/foundation.dart';
-
-import '../model/export.dart';
 import 'binding_base.dart';
 
 /// 负责绘制图层
@@ -30,12 +27,5 @@ mixin DrawBinding on KlineBindingBase {
   void dispose() {
     super.dispose();
     logd('dispose draw');
-  }
-
-  @override
-  @protected
-  bool handleTap(GestureData data) {
-    logd('handleTap draw');
-    return super.handleTap(data);
   }
 }

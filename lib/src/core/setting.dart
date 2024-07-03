@@ -14,11 +14,11 @@
 
 import 'dart:math' as math;
 
-import 'package:flexi_kline/src/extension/export.dart';
 import 'package:flutter/material.dart';
 
 import '../config/export.dart';
 import '../constant.dart';
+import '../extension/collections_ext.dart';
 import '../framework/export.dart';
 import 'binding_base.dart';
 import 'interface.dart';

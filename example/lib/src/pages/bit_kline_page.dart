@@ -19,6 +19,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:go_router/go_router.dart';
 
 import '../config.dart';
@@ -26,6 +27,7 @@ import '../constants/images.dart';
 import '../providers/bit_kline_config.dart';
 import '../providers/instruments_provider.dart';
 import '../theme/flexi_theme.dart';
+import '../utils/device_util.dart';
 import 'components/flexi_kline_indicator_bar.dart';
 import 'components/flexi_kline_mark_view.dart';
 import 'components/market_ticker_view.dart';
@@ -79,14 +81,19 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage>
 
     controller.onLoadMoreCandles = loadMoreCandles;
 
-    controller.onDoubleTap = openLandscapePage;
-
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       initKlineData(req);
     });
   }
 
   Future<void> openLandscapePage() async {
+    if (!DeviceUtil.isMobile) {
+      SmartDialog.showToast(
+        'Landscape operation is not allowed on non-mobile devices',
+      );
+      return;
+    }
+
     controller.storeFlexiKlineConfig();
     final isUpdate = await context.pushNamed(
       'landscapeKline',
@@ -163,6 +170,7 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage>
                   showLogo: false,
                 ),
                 mainforegroundViewBuilder: _buildKlineMainForgroundView,
+                onDoubleTap: openLandscapePage,
               ),
               FlexiKlineIndicatorBar(
                 controller: controller,

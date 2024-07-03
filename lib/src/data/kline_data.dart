@@ -47,7 +47,7 @@ class KlineData extends BaseData
   });
 
   static final KlineData empty = KlineData(
-    CandleReq(instId: "", bar: ""),
+    const CandleReq(instId: "", bar: ""),
     list: List.empty(growable: false),
   );
 

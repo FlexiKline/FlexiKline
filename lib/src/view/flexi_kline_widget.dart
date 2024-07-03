@@ -32,7 +32,8 @@ class FlexiKlineWidget extends StatefulWidget {
     this.mainBackgroundView,
     bool? autoAdaptLayout,
     bool? isTouchDevice,
-  })  : isTouchDevice = isTouchDevice ?? PlatformUtil.isMobile,
+    this.onDoubleTap,
+  })  : isTouchDevice = isTouchDevice ?? PlatformUtil.isTouch,
         autoAdaptLayout = autoAdaptLayout ?? !PlatformUtil.isMobile;
 
   final FlexiKlineController controller;
@@ -41,6 +42,7 @@ class FlexiKlineWidget extends StatefulWidget {
   final Decoration? foregroundDecoration;
   final WidgetBuilder? mainforegroundViewBuilder;
   final Widget? mainBackgroundView;
+  final GestureTapCallback? onDoubleTap;
 
   /// 是否自动适配所在布局约束.
   /// 在可以动态调整窗口大小的设备上, 此值为true, 将会动态适配窗口的调整; 否则, 请自行控制.
@@ -98,10 +100,12 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
       child: widget.isTouchDevice
           ? TouchGestureDetector(
               controller: widget.controller,
+              onDoubleTap: widget.onDoubleTap,
               child: _buildKlineView(context),
             )
           : NonTouchGestureDetector(
               controller: widget.controller,
+              onDoubleTap: widget.onDoubleTap,
               child: _buildKlineView(context),
             ),
     );
