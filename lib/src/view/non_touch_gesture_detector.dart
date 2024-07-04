@@ -234,23 +234,26 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
   /// 平移开始.
   ///zp::: web onPanStart DragStartDetails(Offset(232.7, 278.0))
   void onPanStart(DragStartDetails details) {
-    logd('onPanStart $details');
-    if (_panData != null && _panData!.isEnd) {
+    if (_panData != null && !_panData!.isEnd) {
       // 如果上次平移或缩放, 还没有结束, 不允许开始.
+      logd('onPanStart Currently still panning, ignore!!!');
       return;
     }
+    logd('onPanStart $details');
     _panData = GestureData.pan(details.localPosition);
   }
 
   /// 平移中.
   ///zp::: web onPanUpdate DragUpdateDetails(Offset(4.2, 0.0))
   void onPanUpdate(DragUpdateDetails details) {
-    logd('onPanUpdate $details');
     if (_panData == null) {
       logd('onPanUpdate panData is empty! details:$details');
       return;
     }
-
+    assert(() {
+      logd('onPanUpdate $details');
+      return true;
+    }());
     _panData!.update(details.localPosition.clamp(controller.canvasRect));
     controller.moveChart(_panData!);
   }

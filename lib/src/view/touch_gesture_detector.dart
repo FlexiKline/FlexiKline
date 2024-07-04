@@ -157,8 +157,9 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
   /// 移动 缩放
   ///
   void onScaleStart(ScaleStartDetails details) {
-    if (_panScaleData != null && _panScaleData!.isEnd == false) {
+    if (_panScaleData != null && !_panScaleData!.isEnd) {
       // 如果上次平移或缩放, 还没有结束, 不允许开始.
+      logd('onPanStart Currently still panning or zooming, ignore!!!');
       return;
     }
 
@@ -332,26 +333,33 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
   ///
   /// 如果当前正在crossing中时, 不触发后续的长按逻辑.
   void onLongPressStart(LongPressStartDetails details) {
-    logd("onLongPressStart crossing:${controller.isCrossing} details:$details");
-    if (controller.isCrossing) return;
+    if (!gestureConfig.supportLongPressOnTouchDevice || controller.isCrossing) {
+      logd("onLongPressStart ignore! > crossing:${controller.isCrossing}");
+      return;
+    }
+    logd("onLongPressStart > details:$details");
     _longData = GestureData.long(details.localPosition);
     controller.startCross(_longData!);
   }
 
   void onLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
-    if (_longData == null) {
-      logd("onLongPressMoveUpdate details:$details");
+    if (!gestureConfig.supportLongPressOnTouchDevice || _longData == null) {
       return;
     }
+    assert(() {
+      logd("onLongPressMoveUpdate > details:$details");
+      return true;
+    }());
     _longData!.update(details.localPosition);
     controller.updateCross(_longData!);
   }
 
   void onLongPressEnd(LongPressEndDetails details) {
-    if (_longData == null) {
-      logd("onLongPressEnd details:$details");
+    if (!gestureConfig.supportLongPressOnTouchDevice || _longData == null) {
+      logd("onLongPressEnd ignore! > details:$details");
       return;
     }
+    logd("onLongPressEnd details:$details");
     // 长按结束, 尝试取消Cross事件.
     controller.cancelCross();
     _longData?.end();

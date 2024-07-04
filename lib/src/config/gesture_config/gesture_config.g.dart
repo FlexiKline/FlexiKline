@@ -7,6 +7,9 @@ part of 'gesture_config.dart';
 // **************************************************************************
 
 abstract class _$GestureConfigCWProxy {
+  GestureConfig supportLongPressOnTouchDevice(
+      bool supportLongPressOnTouchDevice);
+
   GestureConfig isInertialPan(bool isInertialPan);
 
   GestureConfig tolerance(ToleranceConfig? tolerance);
@@ -27,6 +30,7 @@ abstract class _$GestureConfigCWProxy {
   /// GestureConfig(...).copyWith(id: 12, name: "My name")
   /// ````
   GestureConfig call({
+    bool? supportLongPressOnTouchDevice,
     bool? isInertialPan,
     ToleranceConfig? tolerance,
     double? loadMoreWhenNoEnoughDistance,
@@ -41,6 +45,11 @@ class _$GestureConfigCWProxyImpl implements _$GestureConfigCWProxy {
   const _$GestureConfigCWProxyImpl(this._value);
 
   final GestureConfig _value;
+
+  @override
+  GestureConfig supportLongPressOnTouchDevice(
+          bool supportLongPressOnTouchDevice) =>
+      this(supportLongPressOnTouchDevice: supportLongPressOnTouchDevice);
 
   @override
   GestureConfig isInertialPan(bool isInertialPan) =>
@@ -75,6 +84,7 @@ class _$GestureConfigCWProxyImpl implements _$GestureConfigCWProxy {
   /// GestureConfig(...).copyWith(id: 12, name: "My name")
   /// ````
   GestureConfig call({
+    Object? supportLongPressOnTouchDevice = const $CopyWithPlaceholder(),
     Object? isInertialPan = const $CopyWithPlaceholder(),
     Object? tolerance = const $CopyWithPlaceholder(),
     Object? loadMoreWhenNoEnoughDistance = const $CopyWithPlaceholder(),
@@ -83,6 +93,12 @@ class _$GestureConfigCWProxyImpl implements _$GestureConfigCWProxy {
     Object? scaleSpeed = const $CopyWithPlaceholder(),
   }) {
     return GestureConfig(
+      supportLongPressOnTouchDevice:
+          supportLongPressOnTouchDevice == const $CopyWithPlaceholder() ||
+                  supportLongPressOnTouchDevice == null
+              ? _value.supportLongPressOnTouchDevice
+              // ignore: cast_nullable_to_non_nullable
+              : supportLongPressOnTouchDevice as bool,
       isInertialPan:
           isInertialPan == const $CopyWithPlaceholder() || isInertialPan == null
               ? _value.isInertialPan
@@ -129,6 +145,8 @@ extension $GestureConfigCopyWith on GestureConfig {
 
 GestureConfig _$GestureConfigFromJson(Map<String, dynamic> json) =>
     GestureConfig(
+      supportLongPressOnTouchDevice:
+          json['supportLongPressOnTouchDevice'] as bool? ?? true,
       isInertialPan: json['isInertialPan'] as bool? ?? true,
       tolerance: json['tolerance'] == null
           ? null
@@ -146,6 +164,7 @@ GestureConfig _$GestureConfigFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$GestureConfigToJson(GestureConfig instance) {
   final val = <String, dynamic>{
+    'supportLongPressOnTouchDevice': instance.supportLongPressOnTouchDevice,
     'isInertialPan': instance.isInertialPan,
     'tolerance': instance.tolerance.toJson(),
   };

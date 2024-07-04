@@ -31,6 +31,7 @@ part 'gesture_config.g.dart';
 @FlexiConfigSerializable
 class GestureConfig {
   GestureConfig({
+    this.supportLongPressOnTouchDevice = true,
     this.isInertialPan = true,
     ToleranceConfig? tolerance,
     this.loadMoreWhenNoEnoughDistance,
@@ -39,6 +40,9 @@ class GestureConfig {
     double scaleSpeed = 10,
   })  : tolerance = tolerance ?? ToleranceConfig(),
         scaleSpeed = scaleSpeed.clamp(1, 30);
+
+  /// 在触摸设备上是否支持长按操作
+  final bool supportLongPressOnTouchDevice;
 
   /// 是否进行惯性平移
   final bool isInertialPan;
