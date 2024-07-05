@@ -18,7 +18,7 @@ import 'package:flutter/material.dart';
 const int defaultPrecision = 4;
 
 // 默认Decimal除法精度
-const int defaultScaleOnInfinitePrecision = 18;
+const int defaultScaleOnInfinitePrecision = 16;
 
 // 默认主区指标高度
 const double defaultMainIndicatorHeight = 300;

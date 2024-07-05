@@ -19,6 +19,7 @@ import 'package:decimal/decimal.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/foundation.dart';
 
+/// 生成自定义的蜡烛数据.
 Future<List<CandleModel>> genCustomCandleList({
   int count = 7,
   TimeBar bar = TimeBar.D1,
@@ -209,27 +210,67 @@ Future<List<CandleModel>> _genRandomCandleList({
   return list;
 }
 
-Future<List<CandleModel>> genLocalCandleList({String json = jsonString}) async {
-  final data = jsonDecode(json);
-  if (data is List) {
-    List<CandleModel> list = List.empty(growable: true);
-    for (var i = data.length - 1; i >= 0; i--) {
-      final item = data[i];
-      if (item is List) {
-        list.add(CandleModel(
-          ts: item[0] * 1000,
-          o: Decimal.parse(item[1].toString()),
-          h: Decimal.parse(item[2].toString()),
-          l: Decimal.parse(item[3].toString()),
-          c: Decimal.parse(item[4].toString()),
-          v: Decimal.parse(item[5].toString()),
-          vc: Decimal.parse(item[6].toString()),
-        ));
-      }
-    }
-    return list;
+/// 生成极小值的蜡烛数据.
+/// 生成超出dart中double类型能表示精度之外的数据.
+Future<List<CandleModel>> genLocalMinusculeCandleList({
+  int? count,
+  int exponent = 30,
+}) async {
+  Decimal genMinusculeDecimal(num val, int exponent) {
+    // 将 val 转换为 Decimal
+    Decimal decimalVal = Decimal.parse(val.toString());
+
+    // 计算 10 的 exponent 次方
+    Decimal multiplier = Decimal.fromInt(10).pow(exponent).toDecimal();
+
+    // 将 decimalVal 除以 10 的 exponent 次方
+    Decimal result = (decimalVal / multiplier).toDecimal();
+
+    return result;
   }
-  return [];
+
+  List<dynamic> data = jsonDecode(jsonString);
+  count ??= data.length;
+  count = math.min(count, data.length);
+  final list = <CandleModel>[];
+  for (var i = data.length - 1; i >= data.length - count; i--) {
+    final item = data[i];
+    list.add(CandleModel(
+      ts: item[0] * 1000,
+      o: genMinusculeDecimal(item[1], exponent),
+      h: genMinusculeDecimal(item[2], exponent),
+      l: genMinusculeDecimal(item[3], exponent),
+      c: genMinusculeDecimal(item[4], exponent),
+      v: genMinusculeDecimal(item[5], exponent),
+      vc: genMinusculeDecimal(item[6], exponent),
+    ));
+  }
+  return list;
+}
+
+/// 生成本地JSON组成的蜡烛数据.
+Future<List<CandleModel>> genLocalCandleList({
+  int? count,
+}) async {
+  List<dynamic> data = jsonDecode(jsonString);
+  count ??= data.length;
+  count = math.min(count, data.length);
+  final list = <CandleModel>[];
+  for (var i = data.length - 1; i >= data.length - count; i--) {
+    final item = data[i];
+    if (item is List) {
+      list.add(CandleModel(
+        ts: item[0] * 1000,
+        o: Decimal.parse(item[1].toString()),
+        h: Decimal.parse(item[2].toString()),
+        l: Decimal.parse(item[3].toString()),
+        c: Decimal.parse(item[4].toString()),
+        v: Decimal.parse(item[5].toString()),
+        vc: Decimal.parse(item[6].toString()),
+      ));
+    }
+  }
+  return list;
 }
 
 const jsonString = '''
