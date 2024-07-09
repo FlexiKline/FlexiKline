@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
 /// 绘制位置
@@ -94,6 +93,3 @@ const timeKey = ValueKey<dynamic>(IndicatorType.time);
 abstract interface class IPrecomputable {
   dynamic getCalcParam();
 }
-
-/// 计算参数接口
-abstract interface class ICalculParam {}

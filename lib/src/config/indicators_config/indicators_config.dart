@@ -165,13 +165,19 @@ class IndicatorsConfig {
     mainIndicators.forEach((key, indicator) {
       calcParams.addAll(indicator.getCalcParams());
     });
-    subIndicators.forEach((key, indicator) {
-      calcParams.addAll(indicator.getCalcParams());
-    });
-    // TODO: 暂时去掉boll和sar在副区的指标参数, 因为主区已经有了.
-    // 后续考虑同指标不同参数的处理逻辑.
-    calcParams.remove(subBollKey);
-    calcParams.remove(subSarKey);
+
+    // 暂时 通过key的判断去掉主区与副区相同指标的重复计算参数.
+    for (var entry in subIndicators.entries) {
+      final params = entry.value.getCalcParams();
+      if (entry.key == subBollKey && calcParams[bollKey] == params[entry.key]) {
+        continue;
+      }
+      if (entry.key == subSarKey && calcParams[sarKey] == params[entry.key]) {
+        continue;
+      }
+      calcParams.addAll(params);
+    }
+
     return calcParams;
   }
 

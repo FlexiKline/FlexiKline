@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:math' as math;
-
 import 'package:decimal/decimal.dart';
 
 import '../constant.dart';
@@ -123,7 +121,7 @@ extension FormatDecimal on Decimal {
     Decimal val = this;
     if (mode != null) val = toRoundMode(mode, scale: precision);
     String result;
-    if (val <= exponentMinDecimal || val > exponentMaxDecimal) {
+    if (val.abs() <= exponentMinDecimal || val.abs() > exponentMaxDecimal) {
       result = val.toStringAsExponential(precision);
       isClean = true;
     } else {

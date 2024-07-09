@@ -16,6 +16,7 @@ import 'package:example/generated/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
 import '../i18n.dart';
 import '../theme/theme_manager.dart';
@@ -74,7 +75,7 @@ class _AppSettingPageState extends ConsumerState<AppSettingPage> {
                     style: theme.textTheme.titleMedium,
                   ),
                   leading: const Icon(Icons.language_rounded),
-                  initiallyExpanded: true,
+                  initiallyExpanded: false,
                   children: I18nManager().supportedLocales.map((locale) {
                     return ListTile(
                       key: ValueKey(locale),
@@ -98,7 +99,7 @@ class _AppSettingPageState extends ConsumerState<AppSettingPage> {
                     style: theme.textTheme.titleMedium,
                   ),
                   leading: const Icon(Icons.palette_rounded),
-                  initiallyExpanded: true,
+                  initiallyExpanded: false,
                   children: ThemeMode.values.map((mode) {
                     return ListTile(
                       key: ValueKey(mode),
@@ -114,6 +115,25 @@ class _AppSettingPageState extends ConsumerState<AppSettingPage> {
                       },
                     );
                   }).toList(),
+                ),
+                SizedBox(height: 8.r),
+                ExpansionTile(
+                  title: Text(
+                    'Test Demo',
+                    style: theme.textTheme.titleMedium,
+                  ),
+                  initiallyExpanded: true,
+                  children: [
+                    ListTile(
+                      onTap: () {
+                        context.pushNamed('accurateKline');
+                      },
+                      title: Text(
+                        'Fast Vs Accurate Demo',
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                    ),
+                  ],
                 ),
                 SizedBox(height: 8.r),
                 ExpansionTile(

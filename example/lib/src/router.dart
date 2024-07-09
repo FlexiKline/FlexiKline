@@ -146,10 +146,7 @@ final List<RouteBase> routeList = <RouteBase>[
     pageBuilder: (context, state) {
       return const MaterialPage<void>(
         restorationId: 'accurateKline',
-        child: AccurateKlineDemoPage(
-          isAlonePage: true,
-          useAccurate: true,
-        ),
+        child: AccurateKlineDemoPage(),
       );
     },
   ),

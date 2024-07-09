@@ -18,7 +18,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
-import 'package:go_router/go_router.dart';
 
 import '../config.dart';
 import '../providers/default_kline_config.dart';
@@ -26,7 +25,6 @@ import '../providers/market_candle_provider.dart';
 import '../repo/mock.dart';
 import '../test/canvas_demo.dart';
 import '../theme/flexi_theme.dart';
-import 'demo_accurate_kline_page.dart';
 import 'components/flexi_kline_indicator_bar.dart';
 import 'components/flexi_kline_mark_view.dart';
 import 'components/flexi_kline_setting_bar.dart';
@@ -194,14 +192,6 @@ class _MyDemoPageState extends ConsumerState<MyKlineDemoPage> {
               height: 20.r,
               color: theme.dividerLine,
             ),
-            TextButton(
-              onPressed: () {
-                context.pushNamed('accurateKline');
-              },
-              child: Text('Accurate Page'),
-            ),
-            const AccurateKlineDemoPage(useAccurate: true),
-            const AccurateKlineDemoPage(),
             Container(
               height: 20.r,
               color: theme.dividerLine,

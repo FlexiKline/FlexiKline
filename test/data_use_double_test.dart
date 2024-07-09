@@ -30,7 +30,6 @@ void main() {
     list = getCandleModelList();
     calcParams = const [
       MaParam(
-        key: maKey,
         count: 7,
         tips: TipsConfig(
           label: 'MA7: ',
@@ -44,7 +43,6 @@ void main() {
         ),
       ),
       MaParam(
-        key: maKey,
         count: 30,
         tips: TipsConfig(
           label: 'MA30: ',

@@ -23,19 +23,14 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import '../config.dart';
 import '../providers/default_kline_config.dart';
 import '../repo/mock.dart';
+import 'components/flexi_kline_indicator_bar.dart';
 import 'components/flexi_kline_mark_view.dart';
+import 'components/flexi_kline_setting_bar.dart';
 
 class AccurateKlineDemoPage extends ConsumerStatefulWidget {
   const AccurateKlineDemoPage({
     super.key,
-    this.isAlonePage = false,
-    this.useAccurate = false,
-    this.count,
   });
-
-  final bool isAlonePage;
-  final bool useAccurate;
-  final int? count;
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
@@ -43,10 +38,12 @@ class AccurateKlineDemoPage extends ConsumerStatefulWidget {
 }
 
 class _AccurateKlinePageState extends ConsumerState<AccurateKlineDemoPage> {
-  late final FlexiKlineController controller;
+  late final FlexiKlineController controller1;
+  late final FlexiKlineController controller2;
   late final DefaultFlexiKlineConfiguration configuration;
 
-  late CandleReq req;
+  late CandleReq req1;
+  late CandleReq req2;
 
   final logger = LogPrintImpl(
     debug: kDebugMode,
@@ -56,73 +53,124 @@ class _AccurateKlinePageState extends ConsumerState<AccurateKlineDemoPage> {
   @override
   void initState() {
     super.initState();
-    req = CandleReq(
+    req1 = CandleReq(
       instId: 'SATS-USDT',
       bar: TimeBar.H1.bar,
-      precision: widget.useAccurate ? 33 : 4,
+      precision: 33,
+      displayName: 'Sats',
+    );
+    req2 = CandleReq(
+      instId: 'SATS-USDT',
+      bar: TimeBar.H1.bar,
+      precision: 4,
       displayName: 'Sats',
     );
     configuration = DefaultFlexiKlineConfiguration(ref: ref);
-    controller = FlexiKlineController(
+    controller1 = FlexiKlineController(
+      configuration: configuration,
+      logger: logger,
+    );
+    // controller1.computeMode = ComputeMode.accurate;
+    controller2 = FlexiKlineController(
       configuration: configuration,
       logger: logger,
     );
 
-    // if (widget.useAccurate) {
-    //   controller.computeMode = ComputeMode.accurate;
-    // }
-
-    // controller.onCrossCustomTooltip = onCrossCustomTooltip;
-
-    controller.onLoadMoreCandles = loadMoreCandles;
+    controller1.onLoadMoreCandles = loadMoreCandles;
+    controller2.onLoadMoreCandles = loadMoreCandles;
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      initKlineData(req);
+      initKlineData1(req1);
+      initKlineData2(req2);
     });
   }
 
   /// 初始化加载K线蜡烛数据.
-  Future<void> initKlineData(CandleReq request) async {
-    controller.switchKlineData(request);
+  Future<void> initKlineData1(CandleReq request) async {
+    controller1.switchKlineData(request);
+    final list = await genLocalMinusculeCandleList();
+    await controller1.updateKlineData(request, list);
+  }
 
-    List<CandleModel> list;
-    if (widget.useAccurate) {
-      list = await genLocalMinusculeCandleList(count: widget.count);
-    } else {
-      list = await genLocalCandleList(count: widget.count);
-    }
-
-    await controller.updateKlineData(request, list);
+  /// 初始化加载K线蜡烛数据.
+  Future<void> initKlineData2(CandleReq request) async {
+    controller2.switchKlineData(request);
+    final list = await genLocalCandleList();
+    await controller2.updateKlineData(request, list);
   }
 
   Future<void> loadMoreCandles(CandleReq request) async {
     SmartDialog.showToast('This is a simulation operation!');
   }
 
-  @override
-  Widget build(BuildContext context) {
-    if (widget.isAlonePage) {
-      final theme = ref.watch(themeProvider);
-      return Scaffold(
-        backgroundColor: theme.pageBg,
-        appBar: AppBar(
-          leading: const BackButton(),
-          title: const Text('Accurate Page'),
-          centerTitle: true,
-        ),
-        body: _buildKlineView(context),
-      );
-    } else {
-      return _buildKlineView(context);
+  void onTapTimeBar1(TimeBar bar) {
+    if (bar.bar != req1.bar) {
+      req1 = req1.copyWith(bar: bar.bar);
+      setState(() {});
+      initKlineData1(req1);
     }
   }
 
-  Widget _buildKlineView(BuildContext context) {
-    return FlexiKlineWidget(
-      key: const ValueKey('accurateKline'),
-      controller: controller,
-      mainBackgroundView: FlexiKlineMarkView(
-        margin: EdgeInsetsDirectional.only(bottom: 10.r, start: 10.r),
+  void onTapTimeBar2(TimeBar bar) {
+    if (bar.bar != req2.bar) {
+      req2 = req2.copyWith(bar: bar.bar);
+      setState(() {});
+      initKlineData2(req2);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = ref.watch(themeProvider);
+    return Scaffold(
+      backgroundColor: theme.pageBg,
+      appBar: AppBar(
+        leading: const BackButton(),
+        title: const Text('Fast Vs Accurate'),
+        centerTitle: true,
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            FlexiKlineSettingBar(
+              controller: controller1,
+              onTapTimeBar: onTapTimeBar1,
+            ),
+            FlexiKlineWidget(
+              key: const ValueKey('accurateKline'),
+              controller: controller1,
+              mainBackgroundView: FlexiKlineMarkView(
+                margin: EdgeInsetsDirectional.only(bottom: 10.r, start: 10.r),
+              ),
+            ),
+            FlexiKlineIndicatorBar(
+              controller: controller1,
+            ),
+            Container(
+              height: 20.r,
+              color: theme.dividerLine,
+            ),
+            FlexiKlineSettingBar(
+              controller: controller2,
+              onTapTimeBar: onTapTimeBar2,
+            ),
+            FlexiKlineWidget(
+              key: const ValueKey('fastKline'),
+              controller: controller2,
+              mainBackgroundView: FlexiKlineMarkView(
+                margin: EdgeInsetsDirectional.only(bottom: 10.r, start: 10.r),
+              ),
+            ),
+            FlexiKlineIndicatorBar(
+              controller: controller2,
+            ),
+            Container(
+              height: 80.r,
+              color: theme.dividerLine,
+            ),
+          ],
+        ),
       ),
     );
   }

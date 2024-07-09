@@ -84,7 +84,7 @@ extension FormatNum<T extends num> on T {
     num val = this;
     if (mode != null) val = toRoundMode(mode, precision: precision);
     String result;
-    if (val <= exponentMinDecimal || val > exponentMaxDecimal) {
+    if (val.abs() <= exponentMinDecimal || val.abs() > exponentMaxDecimal) {
       result = val.toStringAsExponential(math.min(precision, 17));
       isClean = true;
     } else {
