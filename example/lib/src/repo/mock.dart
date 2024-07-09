@@ -224,7 +224,9 @@ Future<List<CandleModel>> genLocalMinusculeCandleList({
     Decimal multiplier = Decimal.fromInt(10).pow(exponent).toDecimal();
 
     // 将 decimalVal 除以 10 的 exponent 次方
-    Decimal result = (decimalVal / multiplier).toDecimal();
+    Decimal result = (decimalVal / multiplier).toDecimal(
+      scaleOnInfinitePrecision: defaultScaleOnInfinitePrecision,
+    );
 
     return result;
   }
@@ -241,8 +243,8 @@ Future<List<CandleModel>> genLocalMinusculeCandleList({
       h: genMinusculeDecimal(item[2], exponent),
       l: genMinusculeDecimal(item[3], exponent),
       c: genMinusculeDecimal(item[4], exponent),
-      v: genMinusculeDecimal(item[5], exponent),
-      vc: genMinusculeDecimal(item[6], exponent),
+      v: genMinusculeDecimal(item[5], 2),
+      vc: genMinusculeDecimal(item[6], 2),
     ));
   }
   return list;

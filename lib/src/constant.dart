@@ -18,7 +18,7 @@ import 'package:flutter/material.dart';
 const int defaultPrecision = 4;
 
 // 默认Decimal除法精度
-const int defaultScaleOnInfinitePrecision = 16;
+const int defaultScaleOnInfinitePrecision = 17;
 
 // 默认主区指标高度
 const double defaultMainIndicatorHeight = 300;
@@ -162,3 +162,30 @@ const Map<TooltipLabel, String> defaultTooltipLables = {
   TooltipLabel.amount: 'Amount',
   TooltipLabel.turnover: 'Turnover',
 };
+
+enum ThousandUnit {
+  /// trillion
+  trillion('T'),
+
+  /// billion
+  billion('B'),
+
+  /// million
+  million('M'),
+
+  /// thousand
+  thousand('K'),
+
+  /// less than thousand
+  less('');
+
+  final String value;
+  const ThousandUnit(this.value);
+}
+
+enum RoundMode {
+  round,
+  floor,
+  ceil,
+  truncate,
+}

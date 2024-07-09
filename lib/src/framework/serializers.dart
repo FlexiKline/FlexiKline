@@ -495,6 +495,7 @@ const FlexiIndicatorSerializable = JsonSerializable(
 // ignore: constant_identifier_names
 const FlexiParamSerializable = JsonSerializable(
   converters: [
+    ValueKeyConverter(),
     ColorConverter(),
     EdgeInsetsConverter(),
   ],

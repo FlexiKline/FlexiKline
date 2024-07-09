@@ -39,8 +39,7 @@ void main() {
     print(ret.toString());
 
     Decimal ret2 =
-        sumUp.divDouble(9).div(sumUp.divDouble(9) + sumDown.divDouble(9)) *
-            hundred;
+        sumUp.divNum(9).div(sumUp.divNum(9) + sumDown.divNum(9)) * hundred;
 
     print(ret2.toString());
   });

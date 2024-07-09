@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:example/src/theme/flexi_theme.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -58,7 +59,7 @@ class _AccurateKlinePageState extends ConsumerState<AccurateKlineDemoPage> {
     req = CandleReq(
       instId: 'SATS-USDT',
       bar: TimeBar.H1.bar,
-      precision: widget.useAccurate ? 22 : 4,
+      precision: widget.useAccurate ? 33 : 4,
       displayName: 'Sats',
     );
     configuration = DefaultFlexiKlineConfiguration(ref: ref);
@@ -67,9 +68,9 @@ class _AccurateKlinePageState extends ConsumerState<AccurateKlineDemoPage> {
       logger: logger,
     );
 
-    if (widget.useAccurate) {
-      controller.computeMode = ComputeMode.accurate;
-    }
+    // if (widget.useAccurate) {
+    //   controller.computeMode = ComputeMode.accurate;
+    // }
 
     // controller.onCrossCustomTooltip = onCrossCustomTooltip;
 
@@ -101,7 +102,16 @@ class _AccurateKlinePageState extends ConsumerState<AccurateKlineDemoPage> {
   @override
   Widget build(BuildContext context) {
     if (widget.isAlonePage) {
-      return Container();
+      final theme = ref.watch(themeProvider);
+      return Scaffold(
+        backgroundColor: theme.pageBg,
+        appBar: AppBar(
+          leading: const BackButton(),
+          title: const Text('Accurate Page'),
+          centerTitle: true,
+        ),
+        body: _buildKlineView(context),
+      );
     } else {
       return _buildKlineView(context);
     }

@@ -14,50 +14,9 @@
 
 import 'dart:math' as math;
 
-import 'package:decimal/decimal.dart';
-
 import '../constant.dart';
 
-extension StringExt on String {
-  Decimal? get decimal => Decimal.tryParse(this);
-  Decimal get d => Decimal.tryParse(this) ?? Decimal.zero;
-}
-
-extension DoubleExt on double {
-  Decimal get decimal => d;
-  Decimal get d => Decimal.parse(toString());
-}
-
-extension IntExt on int {
-  Decimal get decimal => d;
-  Decimal get d => Decimal.fromInt(this);
-}
-
-final Decimal two = Decimal.fromInt(2);
-final Decimal three = Decimal.fromInt(3);
-final Decimal twentieth = (Decimal.one / Decimal.fromInt(20)).toDecimal();
-final Decimal fifty = Decimal.fromInt(50);
-final Decimal hundred = Decimal.fromInt(100);
-
-extension FormatDecimal on Decimal {
-  Decimal get half => (this / two).toDecimal(
-        scaleOnInfinitePrecision: defaultScaleOnInfinitePrecision,
-      );
-
-  Decimal divNum(num num) {
-    assert(num != 0, 'divisor cannot be zero');
-    if (num is int) return div(Decimal.fromInt(num));
-    if (num is double) return div(num.d);
-    throw Exception('$num cannot convert to decimal');
-  }
-
-  Decimal div(Decimal other) {
-    assert(other != Decimal.zero, 'divisor cannot be zero');
-    return (this / other).toDecimal(
-      scaleOnInfinitePrecision: defaultScaleOnInfinitePrecision,
-    );
-  }
-
+extension FormatNum<T extends num> on T {
   /// Global configuration for xThousand formatting default [thousandSeparator].
   static String thousandSeparator = ',';
 
@@ -66,10 +25,10 @@ extension FormatDecimal on Decimal {
       (ThousandUnit unit) => unit.value;
 
   /// Global configuration for displayed as the minimum boundary value of the exponent.
-  static Decimal exponentMinDecimal = Decimal.ten.pow(-15).toDecimal();
+  static num exponentMinDecimal = math.pow(10, -15);
 
   /// Global configuration for displayed as the maximum boundary value of the exponent
-  static Decimal exponentMaxDecimal = Decimal.ten.pow(21).toDecimal();
+  static num exponentMaxDecimal = math.pow(10, 21);
 
   /// Format this number with thousands separators
   /// If [precision] is not specified, it defaults to 3.
@@ -86,30 +45,32 @@ extension FormatDecimal on Decimal {
     return '$result$suffix';
   }
 
-  /// use [RoundMode] to handling Decimal
-  Decimal toRoundMode(RoundMode mode, {int? scale}) {
-    Decimal val = this;
-    scale ??= 0;
+  /// use [RoundMode] to handling [T]
+  num toRoundMode(RoundMode mode, {int? precision}) {
+    num val = this;
+    precision ??= 0;
+    if (precision > 0) val = val * math.pow(10, precision);
     switch (mode) {
       case RoundMode.round:
-        val = val.round(scale: scale);
+        val = val.round();
         break;
       case RoundMode.floor:
-        val = val.floor(scale: scale);
+        val = val.floor();
         break;
       case RoundMode.ceil:
-        val = val.ceil(scale: scale);
+        val = val.ceil();
         break;
       case RoundMode.truncate:
-        val = val.truncate(scale: scale);
+        val = val.truncate();
         break;
     }
+    if (precision > 0) val = val / math.pow(10, precision);
     return val;
   }
 
   /// The rational string that correctly represents this number.
   ///
-  /// All [Decimal]s in the range `10^-15` (inclusive) to `10^21` (exclusive)
+  /// All [double]s in the range `10^-15` (inclusive) to `10^21` (exclusive)
   /// are converted to their decimal representation with at least one digit
   /// afer the decimal point. For all other decimal, this method returns an
   /// exponential representation (see [toStringAsExponential]).
@@ -120,23 +81,24 @@ extension FormatDecimal on Decimal {
     RoundMode? mode,
     bool isClean = true,
   }) {
-    Decimal val = this;
-    if (mode != null) val = toRoundMode(mode, scale: precision);
+    num val = this;
+    if (mode != null) val = toRoundMode(mode, precision: precision);
     String result;
     if (val <= exponentMinDecimal || val > exponentMaxDecimal) {
-      result = val.toStringAsExponential(precision);
+      result = val.toStringAsExponential(math.min(precision, 17));
       isClean = true;
     } else {
+      precision = precision.clamp(0, 20);
       result = val.toStringAsFixed(precision);
     }
     if (isClean) result = result.cleaned;
     return result;
   }
 
-  /// Parsing [Decimal] to percentage [String].
-  String get percentage => '${(this * hundred).toStringAsFixed(2).cleaned}%';
+  /// Parsing [T] to percentage [String].
+  String get percentage => '${(this * 100).toStringAsFixed(2).cleaned}%';
 
-  /// Parsing Decimal to thousands [String].
+  /// Parsing [T] to thousands [String].
   String thousands(
     int precision, {
     RoundMode? mode,
@@ -152,47 +114,44 @@ extension FormatDecimal on Decimal {
     );
     return result;
   }
+
+  /// Parsing [T] to ten thousands [String].
+  String tenThousands(int precision, {RoundMode? mode, bool isClean = true}) =>
+      xThousands(
+        precision: precision,
+        count: 4,
+        isClean: isClean,
+      );
+
+  /// Parsing [T] to [count] strings separated by [separator].
+  String xThousands({
+    required int precision,
+    required int count,
+    RoundMode? mode,
+    bool isClean = true,
+    String? separator,
+  }) {
+    String result = formatAsString(
+      precision,
+      mode: mode,
+      isClean: isClean,
+    ).xThousands(
+      count,
+      separator ?? thousandSeparator,
+    );
+    return result;
+  }
 }
 
-extension on Decimal {
-  static final trillionDecimal = Decimal.ten.pow(12).toDecimal();
-  static final billionDecimal = Decimal.ten.pow(9).toDecimal();
-  static final millionDecimal = Decimal.ten.pow(6).toDecimal();
-  static final thousandDecimal = Decimal.ten.pow(3).toDecimal();
-
-  (Decimal, ThousandUnit) get toCompact {
-    final val = abs();
-    if (val >= trillionDecimal) {
-      return (
-        (this / trillionDecimal).toDecimal(
-          scaleOnInfinitePrecision: defaultScaleOnInfinitePrecision,
-        ),
-        ThousandUnit.trillion,
-      );
-    } else if (val >= billionDecimal) {
-      return (
-        (this / billionDecimal).toDecimal(
-          scaleOnInfinitePrecision: defaultScaleOnInfinitePrecision,
-        ),
-        ThousandUnit.billion,
-      );
-    } else if (val >= millionDecimal) {
-      return (
-        (this / millionDecimal).toDecimal(
-          scaleOnInfinitePrecision: defaultScaleOnInfinitePrecision,
-        ),
-        ThousandUnit.million,
-      );
-    } else if (val >= thousandDecimal) {
-      return (
-        (this / thousandDecimal).toDecimal(
-          scaleOnInfinitePrecision: defaultScaleOnInfinitePrecision,
-        ),
-        ThousandUnit.thousand,
-      );
-    } else {
-      return (this, ThousandUnit.less);
-    }
+extension<T extends num> on T {
+  (num, ThousandUnit) get toCompact {
+    return switch (abs()) {
+      >= 1000000000000 => (this / 1000000000000, ThousandUnit.trillion),
+      >= 1000000000 => (this / 1000000000, ThousandUnit.billion),
+      >= 1000000 => (this / 1000000, ThousandUnit.million),
+      >= 1000 => (this / 1000, ThousandUnit.thousand),
+      _ => (this, ThousandUnit.less),
+    };
   }
 }
 
@@ -211,6 +170,17 @@ extension on String {
 
   String thousands(String separator) {
     final regex = RegExp(r'(\d)(?=(\d{3})+(?!\d))');
+    final parts = split('.');
+    return parts[0].replaceAllMapped(
+          regex,
+          (Match match) => '${match[1]}$separator',
+        ) +
+        (parts.length > 1 ? '.${parts[1]}' : '');
+  }
+
+  String xThousands(int count, String separator) {
+    count = math.max(1, count);
+    final regex = RegExp('''(\\d)(?=(\\d{$count})+(?!\\d))''');
     final parts = split('.');
     return parts[0].replaceAllMapped(
           regex,

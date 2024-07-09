@@ -483,11 +483,13 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   MAIndicator genMaIndicator(covariant IFlexiKlineTheme theme) {
     return MAIndicator(
+      key: maKey,
       zIndex: 1,
       height: theme.mainIndicatorHeight,
       padding: theme.mainIndicatorPadding,
       calcParams: [
         MaParam(
+          key: maKey,
           count: 7,
           tips: TipsConfig(
             label: 'MA7: ',
@@ -501,6 +503,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
           ),
         ),
         MaParam(
+          key: maKey,
           count: 30,
           tips: TipsConfig(
             label: 'MA30: ',
@@ -521,11 +524,13 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   EMAIndicator genEmaIndicator(covariant IFlexiKlineTheme theme) {
     return EMAIndicator(
+      key: emaKey,
       zIndex: 2,
       height: theme.mainIndicatorHeight,
       padding: theme.mainIndicatorPadding,
       calcParams: [
         MaParam(
+          key: emaKey,
           count: 5,
           tips: TipsConfig(
             label: 'EMA5: ',
@@ -539,6 +544,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
           ),
         ),
         MaParam(
+          key: emaKey,
           count: 10,
           tips: TipsConfig(
             label: 'EMA10: ',
@@ -552,6 +558,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
           ),
         ),
         MaParam(
+          key: emaKey,
           count: 20,
           tips: TipsConfig(
             label: 'EMA20: ',
@@ -565,6 +572,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
           ),
         ),
         MaParam(
+          key: emaKey,
           count: 60,
           tips: TipsConfig(
             label: 'EMA60: ',
@@ -818,11 +826,13 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   VolMaIndicator genSubVolMaIndicator(covariant IFlexiKlineTheme theme) {
     return VolMaIndicator(
+      key: volMaKey,
       zIndex: 1,
       height: theme.subIndicatorHeight,
       padding: theme.subIndicatorPadding,
       calcParams: [
         MaParam(
+          key: volMaKey,
           count: 5,
           tips: TipsConfig(
             label: 'MA5: ',
@@ -836,6 +846,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
           ),
         ),
         MaParam(
+          key: volMaKey,
           count: 10,
           tips: TipsConfig(
             label: 'MA10: ',

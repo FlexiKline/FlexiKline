@@ -148,6 +148,7 @@ final List<RouteBase> routeList = <RouteBase>[
         restorationId: 'accurateKline',
         child: AccurateKlineDemoPage(
           isAlonePage: true,
+          useAccurate: true,
         ),
       );
     },

@@ -18,7 +18,7 @@ import '../constant.dart';
 import '../data/export.dart';
 import '../extension/export.dart';
 import '../model/export.dart';
-import '../utils/num_util.dart';
+import '../utils/decimal_format_util.dart';
 import 'binding_base.dart';
 import 'interface.dart';
 import 'setting.dart';

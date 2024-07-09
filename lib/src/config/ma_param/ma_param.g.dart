@@ -7,6 +7,8 @@ part of 'ma_param.dart';
 // **************************************************************************
 
 abstract class _$MaParamCWProxy {
+  MaParam key(ValueKey<dynamic> key);
+
   MaParam count(int count);
 
   MaParam tips(TipsConfig tips);
@@ -18,6 +20,7 @@ abstract class _$MaParamCWProxy {
   /// MaParam(...).copyWith(id: 12, name: "My name")
   /// ````
   MaParam call({
+    ValueKey<dynamic>? key,
     int? count,
     TipsConfig? tips,
   });
@@ -28,6 +31,9 @@ class _$MaParamCWProxyImpl implements _$MaParamCWProxy {
   const _$MaParamCWProxyImpl(this._value);
 
   final MaParam _value;
+
+  @override
+  MaParam key(ValueKey<dynamic> key) => this(key: key);
 
   @override
   MaParam count(int count) => this(count: count);
@@ -44,10 +50,15 @@ class _$MaParamCWProxyImpl implements _$MaParamCWProxy {
   /// MaParam(...).copyWith(id: 12, name: "My name")
   /// ````
   MaParam call({
+    Object? key = const $CopyWithPlaceholder(),
     Object? count = const $CopyWithPlaceholder(),
     Object? tips = const $CopyWithPlaceholder(),
   }) {
     return MaParam(
+      key: key == const $CopyWithPlaceholder() || key == null
+          ? _value.key
+          // ignore: cast_nullable_to_non_nullable
+          : key as ValueKey<dynamic>,
       count: count == const $CopyWithPlaceholder() || count == null
           ? _value.count
           // ignore: cast_nullable_to_non_nullable
@@ -71,11 +82,13 @@ extension $MaParamCopyWith on MaParam {
 // **************************************************************************
 
 MaParam _$MaParamFromJson(Map<String, dynamic> json) => MaParam(
+      key: const ValueKeyConverter().fromJson(json['key'] as String),
       count: (json['count'] as num).toInt(),
       tips: TipsConfig.fromJson(json['tips'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$MaParamToJson(MaParam instance) => <String, dynamic>{
+      'key': const ValueKeyConverter().toJson(instance.key),
       'count': instance.count,
       'tips': instance.tips.toJson(),
     };

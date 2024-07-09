@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'package:go_router/go_router.dart';
 
 import '../config.dart';
 import '../providers/default_kline_config.dart';
@@ -192,6 +193,12 @@ class _MyDemoPageState extends ConsumerState<MyKlineDemoPage> {
             Container(
               height: 20.r,
               color: theme.dividerLine,
+            ),
+            TextButton(
+              onPressed: () {
+                context.pushNamed('accurateKline');
+              },
+              child: Text('Accurate Page'),
             ),
             const AccurateKlineDemoPage(useAccurate: true),
             const AccurateKlineDemoPage(),

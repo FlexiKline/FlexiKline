@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'package:copy_with_extension/copy_with_extension.dart';
+import 'package:equatable/equatable.dart';
 
 import '../../framework/serializers.dart';
 
@@ -20,7 +21,7 @@ part 'sar_param.g.dart';
 
 @CopyWith()
 @FlexiParamSerializable
-final class SARParam {
+final class SARParam extends Equatable {
   final double startAf;
   final double step;
   final double maxAf;
@@ -41,4 +42,7 @@ final class SARParam {
   factory SARParam.fromJson(Map<String, dynamic> json) =>
       _$SARParamFromJson(json);
   Map<String, dynamic> toJson() => _$SARParamToJson(this);
+
+  @override
+  List<Object?> get props => [startAf, step, maxAf];
 }

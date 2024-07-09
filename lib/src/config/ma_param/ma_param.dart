@@ -13,6 +13,8 @@
 // limitations under the License.
 
 import 'package:copy_with_extension/copy_with_extension.dart';
+import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 
 import '../../framework/serializers.dart';
 import '../tips_config/tips_config.dart';
@@ -21,11 +23,13 @@ part 'ma_param.g.dart';
 
 @CopyWith()
 @FlexiParamSerializable
-final class MaParam {
+final class MaParam extends Equatable {
+  final ValueKey<dynamic> key;
   final int count;
   final TipsConfig tips;
 
   const MaParam({
+    required this.key,
     required this.count,
     required this.tips,
   });
@@ -53,4 +57,7 @@ final class MaParam {
   factory MaParam.fromJson(Map<String, dynamic> json) =>
       _$MaParamFromJson(json);
   Map<String, dynamic> toJson() => _$MaParamToJson(this);
+
+  @override
+  List<Object?> get props => [key, count];
 }
