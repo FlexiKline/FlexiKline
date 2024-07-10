@@ -44,7 +44,7 @@ mixin BOLLData on BaseData {
     required Range range,
     bool reset = false,
   }) {
-    if (key == bollKey && calcParam is BOLLParam) {
+    if ((key == bollKey || key == subBollKey) && calcParam is BOLLParam) {
       calcuAndCacheBoll(
         param: calcParam,
         start: math.max(0, range.start - calcParam.n), // 补起上一次未算数据

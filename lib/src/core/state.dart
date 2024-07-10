@@ -60,6 +60,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
   final candleRequestListener = ValueNotifier(KlineData.empty.req);
 
   void updateCandleRequestListener(CandleReq request) {
+    logd('updateCandleRequestListener $curDataKey, request:$request');
     if (request.key == curDataKey) {
       candleRequestListener.value = request;
       timeBarListener.value = request.timeBar;
@@ -454,7 +455,8 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
 
     if (newState == RequestState.loadingMore && panDuration != null) {
       Future.delayed(
-        Duration(milliseconds: panDuration),
+        // Duration(milliseconds: panDuration),
+        Duration.zero,
         () => updateCandleRequestListener(request),
       );
     } else {

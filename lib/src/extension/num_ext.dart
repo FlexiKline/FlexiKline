@@ -46,6 +46,7 @@ extension FormatNum<T extends num> on T {
   }
 
   /// use [RoundMode] to handling [T]
+  /// 注: 在超过有效位数后会精度丢失.
   num toRoundMode(RoundMode mode, {int? precision}) {
     num val = this;
     precision ??= 0;

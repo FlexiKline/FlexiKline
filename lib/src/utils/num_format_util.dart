@@ -34,7 +34,7 @@ String formatNum(
   num? val, {
   int precision = 0, // 展示精度
   bool showSign = false, //是否展示符号位+
-  RoundMode? mode,
+  RoundMode? mode, // 注: 在超过有效位数后会精度丢失.
   bool isClean = false, // 是否清理尾部零.
   bool showCompact = false, // 是否压缩大数展示(B, M, K)
   bool showThousands = false, // 是否千分位展示; 优先于正常精度展示
