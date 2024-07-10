@@ -18,7 +18,7 @@ import '../constant.dart';
 import '../data/export.dart';
 import '../extension/export.dart';
 import '../model/export.dart';
-import '../utils/num_util.dart';
+import '../utils/decimal_format_util.dart';
 import 'binding_base.dart';
 import 'interface.dart';
 import 'setting.dart';
@@ -81,13 +81,6 @@ mixin CrossBinding
   @override
   bool get isCrossing => offset?.isFinite == true;
 
-  // 取消当前Cross事件
-  @override
-  void cancelCross() {
-    offset = null;
-    _markRepaint();
-  }
-
   Offset? _offset;
   Offset? get offset => _offset;
   set offset(Offset? val) {
@@ -121,6 +114,48 @@ mixin CrossBinding
     // }
   }
 
+  /// 启动Cross事件
+  @override
+  bool startCross(GestureData data, {bool force = false}) {
+    if (crossConfig.enable) {
+      /// 如果其他手势与Cross手势事件允许共存 或者当前不在Crossing中时, 开启Cross.
+      if (force || !isCrossing) {
+        logd('handleTap cross > $force > ${data.offset}');
+        // 更新并校正起始焦点.
+        offset = data.offset;
+        _markRepaint();
+        // 当Cross事件启动后, 调用markRepaintChart清理Chart图层的tips信息.
+        markRepaintChart();
+        return true;
+      }
+
+      cancelCross();
+      onCrossCustomTooltip?.call(null);
+      return false;
+    }
+    return false;
+  }
+
+  /// 更新Cross事件数据.
+  @override
+  void updateCross(GestureData data) {
+    if (crossConfig.enable && isCrossing) {
+      offset = data.offset;
+      _markRepaint();
+    }
+  }
+
+  /// 取消当前Cross事件
+  @override
+  void cancelCross() {
+    if (isCrossing || offset != null) {
+      offset = null;
+      // 当Cross事件结束后, 调用markRepaintChart触发绘制Chart图层首根蜡烛的tips信息.
+      markRepaintChart();
+      _markRepaint();
+    }
+  }
+
   /// 绘制最新价与十字线
   @override
   void paintCross(Canvas canvas, Size size) {
@@ -136,7 +171,7 @@ mixin CrossBinding
       if (crossConfig.showLatestTipsInBlank) {
         model = offsetToCandle(offset);
         // 如果当前model为空, 则根据offset.dx计算当前model是最新的, 还是最后的.
-        if (model == null) {
+        if (model == null && !curKlineData.isEmpty) {
           if (offset.dx > startCandleDx) {
             model = curKlineData.latest;
           } else {
@@ -157,50 +192,6 @@ mixin CrossBinding
         indicator.paintObject?.doOnCross(canvas, offset, model: model);
       }
     }
-  }
-
-  @override
-  @protected
-  bool handleTap(GestureData data) {
-    if (crossConfig.enable != true) {
-      super.handleTap(data);
-      return false;
-    }
-
-    if (isCrossing) {
-      offset = null;
-      onCrossCustomTooltip?.call(null);
-      markRepaintChart(); // 当Cross事件结束后, 调用markRepaintChart绘制Painting图层首根蜡烛的tips信息.
-      _markRepaint();
-      return super.handleTap(data); // 不处理, 向上传递事件.
-    }
-    logd('handleTap cross > ${data.offset}');
-    // 更新并校正起始焦点.
-    offset = data.offset;
-    _markRepaint();
-    markRepaintChart(); // 当Cross事件启动后, 调用markRepaintChart清理Painting图层的tips信息.
-    return true;
-  }
-
-  @override
-  @protected
-  void handleMove(GestureData data) {
-    if (!isCrossing) {
-      return super.handleMove(data);
-    }
-    offset = data.offset;
-    _markRepaint();
-  }
-
-  @override
-  @protected
-  void handleScale(GestureData data) {
-    if (isCrossing) {
-      logd('handleMove cross > ${data.offset}');
-      // 注: 当前正在展示Cross, 不能缩放, 直接return拦截.
-      return;
-    }
-    return super.handleScale(data);
   }
 
   /// 绘制Cross Line

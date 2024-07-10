@@ -15,7 +15,7 @@
 import 'package:flutter/material.dart';
 
 /// 绘制位置
-/// 
+///
 /// 主要是指定TimeIndicator的绘制位置
 enum DrawPosition {
   // top, // 不支持
@@ -24,7 +24,7 @@ enum DrawPosition {
 }
 
 /// 缩放位置
-/// 
+///
 /// [auto] 会根据当前绽放开始时, 所有焦点位置, 将绘制区域宽度三等分, 从而自动决定缩放位置.
 enum ScalePosition {
   auto,

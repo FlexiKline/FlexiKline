@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'package:copy_with_extension/copy_with_extension.dart';
+import 'package:equatable/equatable.dart';
 
 import '../../framework/serializers.dart';
 
@@ -20,7 +21,7 @@ part 'boll_param.g.dart';
 
 @CopyWith()
 @FlexiParamSerializable
-final class BOLLParam {
+final class BOLLParam extends Equatable {
   final int n;
   final int std;
 
@@ -47,4 +48,7 @@ final class BOLLParam {
   factory BOLLParam.fromJson(Map<String, dynamic> json) =>
       _$BOLLParamFromJson(json);
   Map<String, dynamic> toJson() => _$BOLLParamToJson(this);
+
+  @override
+  List<Object?> get props => [n, std];
 }

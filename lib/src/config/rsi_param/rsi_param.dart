@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'package:copy_with_extension/copy_with_extension.dart';
+import 'package:equatable/equatable.dart';
 
 import '../../framework/serializers.dart';
 import '../tips_config/tips_config.dart';
@@ -21,7 +22,7 @@ part 'rsi_param.g.dart';
 
 @CopyWith()
 @FlexiParamSerializable
-final class RsiParam {
+final class RsiParam extends Equatable {
   final int count;
   final TipsConfig tips;
 
@@ -53,4 +54,7 @@ final class RsiParam {
   factory RsiParam.fromJson(Map<String, dynamic> json) =>
       _$RsiParamFromJson(json);
   Map<String, dynamic> toJson() => _$RsiParamToJson(this);
+
+  @override
+  List<Object?> get props => [count];
 }

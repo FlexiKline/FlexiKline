@@ -162,6 +162,12 @@ abstract class BaseFlexiKlineTheme implements IFlexiKlineTheme {
 /// 通过[IFlexiKlineTheme]来配置FlexiKline基类.
 mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
   @override
+  Iterable<SinglePaintObjectIndicator> customMainIndicators() => const [];
+
+  @override
+  Iterable<Indicator> customSubIndicators() => const [];
+
+  @override
   FlexiKlineConfig getFlexiKlineConfig([covariant IFlexiKlineTheme? theme]);
 
   FlexiKlineConfig genFlexiKlineConfig(covariant IFlexiKlineTheme theme) {
@@ -202,6 +208,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   GestureConfig genGestureConfig(covariant IFlexiKlineTheme theme) {
     return GestureConfig(
+      isInertialPan: true,
       tolerance: ToleranceConfig(),
       loadMoreWhenNoEnoughDistance: null,
       loadMoreWhenNoEnoughCandles: 60,
@@ -347,7 +354,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   CandleIndicator genCandleIndicator(covariant IFlexiKlineTheme theme) {
     return CandleIndicator(
-      zIndex: 0,
+      zIndex: -1,
       height: theme.mainIndicatorHeight,
       padding: theme.mainIndicatorPadding,
       high: MarkConfig(
@@ -452,7 +459,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
   VolumeIndicator genMainVolumeIndicator(covariant IFlexiKlineTheme theme) {
     return VolumeIndicator(
       key: volumeKey,
-      zIndex: -1,
+      zIndex: -2,
       height: theme.subIndicatorHeight,
       padding: theme.subIndicatorPadding,
       paintMode: PaintMode.alone,
@@ -482,7 +489,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   MAIndicator genMaIndicator(covariant IFlexiKlineTheme theme) {
     return MAIndicator(
-      zIndex: 1,
+      key: maKey,
       height: theme.mainIndicatorHeight,
       padding: theme.mainIndicatorPadding,
       calcParams: [
@@ -493,7 +500,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
             // precision: 2,
             style: TextStyle(
               fontSize: theme.normalTextSize,
-              color: const Color(0xFF946F9A),
+              color: Colors.lightBlue,
               overflow: TextOverflow.ellipsis,
               height: defaultTipsTextHeight,
             ),
@@ -506,7 +513,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
             // precision: 2,
             style: TextStyle(
               fontSize: theme.normalTextSize,
-              color: const Color(0xFFF1BF32),
+              color: Colors.purple,
               overflow: TextOverflow.ellipsis,
               height: defaultTipsTextHeight,
             ),
@@ -520,7 +527,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   EMAIndicator genEmaIndicator(covariant IFlexiKlineTheme theme) {
     return EMAIndicator(
-      zIndex: 2,
+      key: emaKey,
       height: theme.mainIndicatorHeight,
       padding: theme.mainIndicatorPadding,
       calcParams: [
@@ -531,7 +538,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
             // precision: 2,
             style: TextStyle(
               fontSize: theme.normalTextSize,
-              color: const Color(0xFF806180),
+              color: Colors.blueGrey,
               overflow: TextOverflow.ellipsis,
               height: defaultTipsTextHeight,
             ),
@@ -544,7 +551,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
             // precision: 2,
             style: TextStyle(
               fontSize: theme.normalTextSize,
-              color: const Color(0xFFEBB736),
+              color: Colors.pink,
               overflow: TextOverflow.ellipsis,
               height: defaultTipsTextHeight,
             ),
@@ -557,7 +564,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
             // precision: 2,
             style: TextStyle(
               fontSize: theme.normalTextSize,
-              color: const Color(0xFFD672D5),
+              color: Colors.deepOrange,
               overflow: TextOverflow.ellipsis,
               height: defaultTipsTextHeight,
             ),
@@ -570,7 +577,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
             // precision: 2,
             style: TextStyle(
               fontSize: theme.normalTextSize,
-              color: const Color.fromARGB(255, 44, 45, 47),
+              color: Colors.deepPurple,
               overflow: TextOverflow.ellipsis,
               height: defaultTipsTextHeight,
             ),
@@ -585,7 +592,6 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
   BOLLIndicator genBollIndicator(covariant IFlexiKlineTheme theme) {
     return BOLLIndicator(
       key: bollKey,
-      zIndex: 3,
       height: theme.mainIndicatorHeight,
       padding: theme.mainIndicatorPadding,
 
@@ -608,7 +614,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
         // precision: 2,
         style: TextStyle(
           fontSize: theme.normalTextSize,
-          color: Colors.orangeAccent,
+          color: Colors.orange,
           overflow: TextOverflow.ellipsis,
           height: defaultTipsTextHeight,
         ),
@@ -635,7 +641,6 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
   SARIndicator genSarIndicator(IFlexiKlineTheme theme) {
     return SARIndicator(
       key: sarKey,
-      zIndex: 4,
       height: theme.mainIndicatorHeight,
       padding: theme.mainIndicatorPadding,
       calcParam: const SARParam(startAf: 0.02, step: 0.02, maxAf: 0.2),
@@ -657,7 +662,6 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   TimeIndicator genTimeIndicator(covariant IFlexiKlineTheme theme) {
     return TimeIndicator(
-      zIndex: 0,
       height: theme.timeIndicatorHeight,
       padding: EdgeInsets.zero,
       position: DrawPosition.middle,
@@ -677,7 +681,6 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   MACDIndicator genMacdIndicator(covariant IFlexiKlineTheme theme) {
     return MACDIndicator(
-      zIndex: 0,
       height: theme.subIndicatorHeight,
       padding: theme.subIndicatorPadding,
 
@@ -724,7 +727,6 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   KDJIndicator genKdjIndicator(covariant IFlexiKlineTheme theme) {
     return KDJIndicator(
-      zIndex: 0,
       height: theme.subIndicatorHeight,
       padding: theme.subIndicatorPadding,
 
@@ -787,7 +789,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
   VolumeIndicator genSubVolumeIndicator(covariant IFlexiKlineTheme theme) {
     return VolumeIndicator(
       key: subVolKey, // 区别于主区volumeKey的地方
-      zIndex: 0,
+      zIndex: -2,
       height: theme.subIndicatorHeight,
       padding: theme.subIndicatorPadding,
       paintMode: PaintMode.combine,
@@ -817,7 +819,8 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   VolMaIndicator genSubVolMaIndicator(covariant IFlexiKlineTheme theme) {
     return VolMaIndicator(
-      zIndex: 1,
+      key: volMaKey,
+      zIndex: 0,
       height: theme.subIndicatorHeight,
       padding: theme.subIndicatorPadding,
       calcParams: [

@@ -145,7 +145,7 @@ EMAIndicator _$EMAIndicatorFromJson(Map<String, dynamic> json) => EMAIndicator(
           ? emaKey
           : const ValueKeyConverter().fromJson(json['key'] as String),
       name: json['name'] as String? ?? 'EMA',
-      zIndex: (json['zIndex'] as num?)?.toInt() ?? 1,
+      zIndex: (json['zIndex'] as num?)?.toInt() ?? 0,
       height: (json['height'] as num).toDouble(),
       padding: json['padding'] == null
           ? defaultMainIndicatorPadding

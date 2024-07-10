@@ -19,58 +19,44 @@ import '../data/export.dart';
 import '../framework/export.dart';
 import '../model/export.dart';
 
-/// Gesture 事件处理接口
-abstract interface class IGestureEvent {
-  /// 点击
-  void onTapUp(TapUpDetails details);
-
-  /// 原始移动
-  void onPointerMove(PointerMoveEvent event);
-
-  /// 移动, 缩放
-  void onScaleStart(ScaleStartDetails details);
-  void onScaleUpdate(ScaleUpdateDetails details);
-  void onScaleEnd(ScaleEndDetails details);
-
-  /// 长按
-  void onLongPressStart(LongPressStartDetails details);
-  void onLongPressMoveUpdate(LongPressMoveUpdateDetails details);
-  void onLongPressEnd(LongPressEndDetails details);
-}
-
 /// 手势事件的处理接口
 ///
-/// 注: 必须首页调用super.handlexxx(); 向其他绘制模块传递手势数据.
+/// 注: 必须首先调用super.handlexxx(); 向其他绘制模块传递手势数据.
 /// 否则, 此事件的处理仅限出当前绘制模块.
 /// 调用顺序参看kline_controller.dart的mixin倒序.
-abstract interface class IGestureHandler {
-  @mustCallSuper
-  bool handleTap(GestureData data);
+// abstract interface class IGestureHandler {
+//   @mustCallSuper
+//   bool handleTap(GestureData data);
 
-  @mustCallSuper
-  void handleMove(GestureData data);
-  @mustCallSuper
-  void handleScale(GestureData data);
+//   @mustCallSuper
+//   void handleMove(GestureData data);
+//   @mustCallSuper
+//   void handleScale(GestureData data);
 
-  @mustCallSuper
-  void handleLongPress(GestureData data);
-  @mustCallSuper
-  void handleLongMove(GestureData data);
-}
+//   @mustCallSuper
+//   void handleLongPress(GestureData data);
+//   @mustCallSuper
+//   void handleLongMove(GestureData data);
+// }
 
-/// 手势事件的处理接口默认实现.
-mixin GestureHanderImpl implements IGestureHandler {
-  @override
-  bool handleTap(GestureData data) => false;
-  @override
-  void handleMove(GestureData data) {}
-  @override
-  void handleScale(GestureData data) {}
-  @override
-  void handleLongPress(GestureData data) {}
-  @override
-  void handleLongMove(GestureData data) {}
-}
+// /// 手势事件的处理接口默认实现.
+// mixin GestureHanderImpl implements IGestureHandler {
+//   /// 点击事件
+//   ///
+//   /// 在触控设备上Gesture框架的设计:
+//   ///   1. 当返回true时, 代表Cross事件处理.
+//   ///   2. 当返回false时, 代表非Cross事件处理.
+//   @override
+//   bool handleTap(GestureData data) => false;
+//   @override
+//   void handleMove(GestureData data) {}
+//   @override
+//   void handleScale(GestureData data) {}
+//   @override
+//   void handleLongPress(GestureData data) {}
+//   @override
+//   void handleLongMove(GestureData data) {}
+// }
 
 //////// State ///////
 
@@ -130,6 +116,12 @@ abstract interface class IState {
 
   /// 计算绘制蜡烛图的起始数组索引下标和绘制偏移量
   void calculateCandleDrawIndex();
+
+  /// 平移图表
+  void moveChart(GestureData data);
+
+  /// 缩放图表
+  void scaleChart(GestureData data);
 }
 
 /// Setting API
@@ -204,6 +196,14 @@ abstract interface class ICross {
 
   /// 是否正在绘制Cross
   bool get isCrossing;
+
+  /// 开始Cross事件
+  /// [force] 将会强制启动cross事件.
+  /// 当返回true时, 说明已开始展示Corss; 否则, 说明之前处在Cross, 结束上次的Cross事件.
+  bool startCross(GestureData data, {bool force = false});
+
+  /// 更新Cross事件数据.
+  void updateCross(GestureData data);
 
   /// 取消当前Cross事件
   void cancelCross();

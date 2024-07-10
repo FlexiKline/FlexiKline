@@ -14,25 +14,27 @@
 
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:example/generated/l10n.dart';
-import 'package:example/src/theme/flexi_theme.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:go_router/go_router.dart';
 
 import '../config.dart';
 import '../constants/images.dart';
 import '../providers/bit_kline_config.dart';
 import '../providers/instruments_provider.dart';
+import '../theme/flexi_theme.dart';
+import '../utils/device_util.dart';
 import 'components/flexi_kline_indicator_bar.dart';
 import 'components/flexi_kline_mark_view.dart';
 import 'components/market_ticker_view.dart';
 import 'components/flexi_kline_setting_bar.dart';
 import 'components/trading_pair_select_title.dart';
-import 'kline_page_data_update_mixin.dart';
-import 'main_nav_page.dart';
+import 'common/kline_page_data_update_mixin.dart';
+import 'index_page.dart';
 
 class BitKlinePage extends ConsumerStatefulWidget {
   const BitKlinePage({
@@ -79,14 +81,19 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage>
 
     controller.onLoadMoreCandles = loadMoreCandles;
 
-    controller.onDoubleTap = openLandscapePage;
-
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       initKlineData(req);
     });
   }
 
   Future<void> openLandscapePage() async {
+    if (!DeviceUtil.isMobile) {
+      SmartDialog.showToast(
+        'Landscape operation is not allowed on non-mobile devices',
+      );
+      return;
+    }
+
     controller.storeFlexiKlineConfig();
     final isUpdate = await context.pushNamed(
       'landscapeKline',
@@ -163,6 +170,7 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage>
                   showLogo: false,
                 ),
                 mainforegroundViewBuilder: _buildKlineMainForgroundView,
+                onDoubleTap: openLandscapePage,
               ),
               FlexiKlineIndicatorBar(
                 controller: controller,

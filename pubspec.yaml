@@ -1,16 +1,17 @@
 name: flexi_kline
 description: "A flexible Kline package project."
-version: 0.5.0
-homepage:
+version: 0.6.0
+homepage: "https://github.com/FlexiKline/FlexiKline"
 
 environment:
-  sdk: ">=3.0.0 <4.0.0"
-  flutter: ">=1.17.0"
+  sdk: ">=3.2.0 <4.0.0"
+  flutter: ">=3.16.0"
 
 dependencies:
   flutter:
     sdk: flutter
   decimal: ^2.3.3
+  equatable: ^2.0.5
   json_annotation: ^4.9.0
   copy_with_extension: ^5.0.4
 

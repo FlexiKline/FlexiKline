@@ -60,6 +60,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
   final candleRequestListener = ValueNotifier(KlineData.empty.req);
 
   void updateCandleRequestListener(CandleReq request) {
+    logd('updateCandleRequestListener $curDataKey, request:$request');
     if (request.key == curDataKey) {
       candleRequestListener.value = request;
       timeBarListener.value = request.timeBar;
@@ -454,7 +455,8 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
 
     if (newState == RequestState.loadingMore && panDuration != null) {
       Future.delayed(
-        Duration(milliseconds: panDuration),
+        // Duration(milliseconds: panDuration),
+        Duration.zero,
         () => updateCandleRequestListener(request),
       );
     } else {
@@ -467,8 +469,8 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
   }
 
   @override
-  void handleMove(GestureData data) {
-    super.handleMove(data);
+  void moveChart(GestureData data) {
+    // super.handleMove(data);
     if (!data.moved) return;
 
     final newDxOffset = clampPaintDxOffset(paintDxOffset + data.dxDelta);
@@ -479,20 +481,31 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
   }
 
   @override
-  void handleScale(GestureData data) {
-    super.handleScale(data);
-    if (!data.scaled) return;
+  void scaleChart(GestureData data) {
+    // super.handleScale(data);
 
-    if (data.scale > 1 && candleWidth >= candleMaxWidth) return;
-    if (data.scale < 1 && candleWidth <= settingConfig.pixel) return;
+    double? newWidth;
 
-    final dxGrowth = data.scaleDelta * gestureConfig.scaleSpeed;
-    double newWidth = (candleWidth + dxGrowth).clamp(
-      settingConfig.pixel,
-      candleMaxWidth,
-    );
+    if (data.scaled) {
+      // 处理触摸设备的缩放逻辑.
+      if (data.scale > 1 && candleWidth >= candleMaxWidth) return;
+      if (data.scale < 1 && candleWidth <= settingConfig.pixel) return;
 
-    if (newWidth == candleWidth) return;
+      final dxGrowth = data.scaleDelta * gestureConfig.scaleSpeed;
+      newWidth = (candleWidth + dxGrowth).clamp(
+        settingConfig.pixel,
+        candleMaxWidth,
+      );
+    } else if (data.isSignal) {
+      // 处理鼠标滚轴滚动/触控板向上向下的缩放逻辑.
+      newWidth = (candleWidth + data.scale).clamp(
+        settingConfig.pixel,
+        candleMaxWidth,
+      );
+    }
+
+    if (newWidth == null || newWidth == candleWidth) return;
+
     final scaleFactor =
         (newWidth + settingConfig.candleSpacing) / candleActualWidth;
     // logd('handleScale candleWidth:$candleWidth>$newWidth; factor:$scaleFactor');
@@ -533,9 +546,9 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
     markRepaintChart();
   }
 
-  @override
-  void handleLongMove(GestureData data) {
-    super.handleLongMove(data);
-    if (!data.moved) return;
-  }
+  // @override
+  // void handleLongMove(GestureData data) {
+  //   super.handleLongMove(data);
+  //   if (!data.moved) return;
+  // }
 }

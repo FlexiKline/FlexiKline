@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// export 'indicator.dart';
 export 'candle.dart';
 export 'volume.dart';
 export 'ma.dart';

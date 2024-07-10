@@ -15,6 +15,7 @@
 import 'dart:math' as math;
 
 import 'package:copy_with_extension/copy_with_extension.dart';
+import 'package:equatable/equatable.dart';
 
 import '../../framework/serializers.dart';
 
@@ -22,7 +23,7 @@ part 'macd_param.g.dart';
 
 @CopyWith()
 @FlexiParamSerializable
-final class MACDParam {
+final class MACDParam extends Equatable {
   final int s;
   final int l;
   final int m;
@@ -55,4 +56,7 @@ final class MACDParam {
   factory MACDParam.fromJson(Map<String, dynamic> json) =>
       _$MACDParamFromJson(json);
   Map<String, dynamic> toJson() => _$MACDParamToJson(this);
+
+  @override
+  List<Object?> get props => [s, l, m];
 }

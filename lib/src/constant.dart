@@ -18,7 +18,7 @@ import 'package:flutter/material.dart';
 const int defaultPrecision = 4;
 
 // 默认Decimal除法精度
-const int defaultScaleOnInfinitePrecision = 18;
+const int defaultScaleOnInfinitePrecision = 17;
 
 // 默认主区指标高度
 const double defaultMainIndicatorHeight = 300;
@@ -85,7 +85,7 @@ enum ComputeMode {
 /// 香港时间开盘价k线：[6H/12H/1D/2D/3D/1W/1M/3M]
 /// UTC时间开盘价k线：[/6Hutc/12Hutc/1Dutc/2Dutc/3Dutc/1Wutc/1Mutc/3Mutc]
 enum TimeBar {
-  time(1000, 'time'),
+  // time(1000, 'time'), // 暂不支持; v0.8.0支持
   s1(1000, '1s'),
   m1(Duration.millisecondsPerMinute, '1m'),
   m3(3 * Duration.millisecondsPerMinute, '3m'),
@@ -162,3 +162,30 @@ const Map<TooltipLabel, String> defaultTooltipLables = {
   TooltipLabel.amount: 'Amount',
   TooltipLabel.turnover: 'Turnover',
 };
+
+enum ThousandUnit {
+  /// trillion
+  trillion('T'),
+
+  /// billion
+  billion('B'),
+
+  /// million
+  million('M'),
+
+  /// thousand
+  thousand('K'),
+
+  /// less than thousand
+  less('');
+
+  final String value;
+  const ThousandUnit(this.value);
+}
+
+enum RoundMode {
+  round,
+  floor,
+  ceil,
+  truncate,
+}

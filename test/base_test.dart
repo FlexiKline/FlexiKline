@@ -39,8 +39,7 @@ void main() {
     print(ret.toString());
 
     Decimal ret2 =
-        sumUp.divDouble(9).div(sumUp.divDouble(9) + sumDown.divDouble(9)) *
-            hundred;
+        sumUp.divNum(9).div(sumUp.divNum(9) + sumDown.divNum(9)) * hundred;
 
     print(ret2.toString());
   });
@@ -48,6 +47,7 @@ void main() {
   test('math ', () {
     print('math.log(0) ${math.log(0)}');
     print('math.log(0.1) ${math.log(0.1)}');
+    print('math.log(0.9) ${math.log(0.9)}');
     print('math.log(1) ${math.log(1)}');
     print('math.log(1.1) ${math.log(1.1)}');
     print('math.log(2) ${math.log(2)}');

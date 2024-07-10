@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:flexi_kline/src/utils/algorithm_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -23,6 +24,37 @@ void main() {
   setUp(() {
     WidgetsFlutterBinding.ensureInitialized();
     vsync = const TestVSync();
+  });
+
+  test('onPointerSignal scrollDelta convert to GestureData.scale', () {
+    List<double> xValues = [
+      -500,
+      -400,
+      -300,
+      -200,
+      -100,
+      -50,
+      -10,
+      -5,
+      -1,
+      1,
+      5,
+      10,
+      50,
+      100,
+      200,
+      300,
+      400,
+      500
+    ];
+    List<double> kValues = [1, 5, 10];
+
+    for (double x in xValues) {
+      for (double k in kValues) {
+        double? y = scaledSingal(x, k);
+        print('x: $x, k: $k, y: $y');
+      }
+    }
   });
 
   test('Animation+Curve+Tween', () {

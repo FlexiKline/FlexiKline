@@ -21,9 +21,9 @@ import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
-import '../models/export.dart';
-import '../providers/instruments_provider.dart';
-import '../repo/api.dart' as api;
+import '../../models/export.dart';
+import '../../providers/instruments_provider.dart';
+import '../../repo/api.dart' as api;
 
 abstract interface class IKlinePage {
   FlexiKlineController get flexiKlineController;

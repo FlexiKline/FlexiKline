@@ -18,10 +18,12 @@ import 'dart:ui';
 
 import 'package:example/generated/l10n.dart';
 import 'package:flexi_kline/flexi_kline.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../config.dart';
+import '../indicators/avl_indicator.dart';
 import '../theme/export.dart';
 import '../utils/cache_util.dart';
 
@@ -147,5 +149,30 @@ class DefaultFlexiKlineConfiguration with FlexiKlineThemeConfigurationMixin {
   void saveFlexiKlineConfig(FlexiKlineConfig config) {
     final jsonSrc = jsonEncode(config);
     CacheUtil().setString(config.key, jsonSrc);
+  }
+
+  @override
+  List<SinglePaintObjectIndicator> customMainIndicators() {
+    final theme = ref.read(defaultKlineThemeProvider);
+    return [
+      AVLIndicator(
+        height: theme.mainIndicatorHeight,
+        padding: theme.mainIndicatorPadding,
+        line: LineConfig(
+          width: 1.r,
+          color: Colors.deepOrange,
+          type: LineType.solid,
+        ),
+        tips: TipsConfig(
+          label: 'AVL',
+          style: TextStyle(
+            color: Colors.deepOrange,
+            fontSize: theme.normalTextSize,
+            height: defaultTextHeight,
+          ),
+        ),
+        tipsPadding: theme.tipsPadding,
+      ),
+    ];
   }
 }

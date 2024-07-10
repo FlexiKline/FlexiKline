@@ -55,7 +55,10 @@ class FlexiKlineConfig {
   @JsonKey(includeFromJson: false, includeToJson: false)
   late final FixedHashQueue<Indicator> subRectIndicatorQueue;
 
-  void init() {
+  void init({
+    required Map<ValueKey, SinglePaintObjectIndicator> customMainIndicators,
+    required Map<ValueKey, Indicator> customSubIndicators,
+  }) {
     mainIndicator = MultiPaintObjectIndicator(
       key: mainChartKey,
       name: IndicatorType.main.label,
@@ -72,7 +75,8 @@ class FlexiKlineConfig {
       main.add(candleKey);
     }
     for (var key in main) {
-      final indicator = indicators.mainIndicators.getItem(key);
+      SinglePaintObjectIndicator? indicator = customMainIndicators.getItem(key);
+      indicator ??= indicators.mainIndicators.getItem(key);
       if (indicator != null) {
         // 使用前先解绑
         indicator.dispose();
@@ -81,14 +85,15 @@ class FlexiKlineConfig {
     }
 
     if (sub.contains(timeKey)) {
-      sub.remove(timeKey);
+      sub.remove(timeKey); // Time指标是默认的
     }
     if (sub.isNotEmpty) {
       if (sub.length > setting.subChartMaxCount) {
         sub = sub.skip(sub.length - setting.subChartMaxCount).toSet();
       }
       for (var key in sub) {
-        final indicator = indicators.subIndicators.getItem(key);
+        Indicator? indicator = customSubIndicators.getItem(key);
+        indicator ??= indicators.subIndicators.getItem(key);
         if (indicator != null) {
           // 使用前先解绑
           indicator.dispose();
@@ -102,13 +107,21 @@ class FlexiKlineConfig {
   Map<ValueKey, dynamic> getOpenedIndicatorCalcParams() {
     final calcParams = <ValueKey, dynamic>{};
     calcParams.addAll(mainIndicator.getCalcParams());
+
     for (var subIndicator in subRectIndicatorQueue) {
-      calcParams.addAll(subIndicator.getCalcParams());
+      final params = subIndicator.getCalcParams();
+
+      // 暂时 通过key的判断去掉主区与副区相同指标的重复计算参数.
+      if (subIndicator.key == subBollKey &&
+          calcParams[bollKey] == params[subBollKey]) {
+        continue;
+      }
+      if (subIndicator.key == subSarKey &&
+          calcParams[sarKey] == params[subSarKey]) {
+        continue;
+      }
+      calcParams.addAll(params);
     }
-    // TODO: 暂时去掉boll和sar在副区的指标参数, 因为主区已经有了.
-    // 后续考虑同指标不同参数的处理逻辑.
-    calcParams.remove(subBollKey);
-    calcParams.remove(subSarKey);
     return calcParams;
   }
 

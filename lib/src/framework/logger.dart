@@ -48,7 +48,7 @@ mixin KlineLog implements ILogger {
   String get logTag => 'FlexiKline';
 
   @override
-  bool get isDebug => loggerDelegate?.isDebug ?? false;
+  bool get isDebug => loggerDelegate?.isDebug ?? kDebugMode;
 
   /// KlineLog的代理者
   ILogger? loggerDelegate;

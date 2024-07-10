@@ -13,12 +13,12 @@
 // limitations under the License.
 
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:flexi_kline/src/extension/export.dart';
 import 'package:flutter/material.dart';
 
 import '../config/export.dart';
 import '../constant.dart';
 import '../core/export.dart';
+import '../extension/export.dart';
 import '../data/kline_data.dart';
 import '../framework/export.dart';
 import '../model/export.dart';
@@ -38,7 +38,7 @@ class SARIndicator extends SinglePaintObjectIndicator
     super.name = 'SAR',
     required super.height,
     super.padding = defaultMainIndicatorPadding,
-    super.zIndex = 3,
+    super.zIndex = 0,
     this.calcParam = const SARParam(startAf: 0.02, step: 0.02, maxAf: 0.2),
     this.radius,
     required this.paint,
@@ -56,7 +56,7 @@ class SARIndicator extends SinglePaintObjectIndicator
   final double? radius;
 
   /// 绘制SAR的画笔.
-  /// 注: 如果paint.color为空, 自动根据sarFlag去确定使用[settingConfig]中的[longColor]或[shortColor].
+  /// 注: 如果paint.color为空, 自动根据当前[CandleModel]中[sarFlag]的值, 使用[settingConfig]中的[longColor]或[shortColor].
   final PaintConfig paint;
   final EdgeInsets tipsPadding;
   final TextStyle tipsStyle;

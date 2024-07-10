@@ -22,12 +22,17 @@ part 'gesture_config.g.dart';
 
 /// GestureConfig 手势平移相关配置
 /// [tolerance] 代表手势平移惯性动画的容忍参数
-/// [loadMoreWhenNoEnoughDistance] 当滑动时, 还剩此距离时, 触发提前LoadMore蜡烛数据, 其优先于[loadMoreWhenNoEnoughCandles].
-/// [loadMoreWhenNoEnoughCandles] 60: 按单根蜡烛宽度默认值计算, 代表还剩一屏半时, 触发LoadMore.
+/// [loadMoreWhenNoEnoughDistance] :
+///   当滑动时, 还剩此距离时, 触发提前LoadMore蜡烛数据, 其优先于[loadMoreWhenNoEnoughCandles].
+/// [loadMoreWhenNoEnoughCandles] :
+///   默认值60: 按单根蜡烛宽度默认值计算, 在触摸设备上, 代表还剩一屏半时, 触发LoadMore.
+///   非触摸设备上, 根据窗口宽度自行计算设定, 或直接使用[loadMoreWhenNoEnoughDistance]更好.
 @CopyWith()
 @FlexiConfigSerializable
 class GestureConfig {
   GestureConfig({
+    this.supportLongPressOnTouchDevice = true,
+    this.isInertialPan = true,
     ToleranceConfig? tolerance,
     this.loadMoreWhenNoEnoughDistance,
     this.loadMoreWhenNoEnoughCandles = 60,
@@ -36,7 +41,13 @@ class GestureConfig {
   })  : tolerance = tolerance ?? ToleranceConfig(),
         scaleSpeed = scaleSpeed.clamp(1, 30);
 
-  /// 手势平移限制参数
+  /// 在触摸设备上是否支持长按操作
+  final bool supportLongPressOnTouchDevice;
+
+  /// 是否进行惯性平移
+  final bool isInertialPan;
+
+  /// 惯性平移限制参数
   final ToleranceConfig tolerance;
 
   /// 当没有足够平移的距离时, 加载更多.

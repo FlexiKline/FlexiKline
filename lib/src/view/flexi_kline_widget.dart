@@ -17,10 +17,12 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 
 import '../kline_controller.dart';
-import 'gesture_view.dart';
+import '../utils/platform_util.dart';
+import 'non_touch_gesture_detector.dart';
+import 'touch_gesture_detector.dart';
 
 class FlexiKlineWidget extends StatefulWidget {
-  const FlexiKlineWidget({
+  FlexiKlineWidget({
     super.key,
     required this.controller,
     this.alignment,
@@ -28,7 +30,11 @@ class FlexiKlineWidget extends StatefulWidget {
     this.foregroundDecoration,
     this.mainforegroundViewBuilder,
     this.mainBackgroundView,
-  });
+    bool? autoAdaptLayout,
+    bool? isTouchDevice,
+    this.onDoubleTap,
+  })  : isTouchDevice = isTouchDevice ?? PlatformUtil.isTouch,
+        autoAdaptLayout = autoAdaptLayout ?? !PlatformUtil.isMobile;
 
   final FlexiKlineController controller;
   final AlignmentGeometry? alignment;
@@ -36,6 +42,15 @@ class FlexiKlineWidget extends StatefulWidget {
   final Decoration? foregroundDecoration;
   final WidgetBuilder? mainforegroundViewBuilder;
   final Widget? mainBackgroundView;
+  final GestureTapCallback? onDoubleTap;
+
+  /// 是否自动适配所在布局约束.
+  /// 在可以动态调整窗口大小的设备上, 此值为true, 将会动态适配窗口的调整; 否则, 请自行控制.
+  /// 非移动设备默认为true.
+  final bool autoAdaptLayout;
+
+  /// 是否是触摸设备.
+  final bool isTouchDevice;
 
   @override
   State<FlexiKlineWidget> createState() => _FlexiKlineWidgetState();
@@ -49,7 +64,9 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
     widget.controller.initState();
 
     widget.controller.sizeChangeListener.addListener(() {
-      setState(() {});
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+        setState(() {});
+      });
     });
   }
 
@@ -61,60 +78,84 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.autoAdaptLayout) {
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          widget.controller.adaptLayoutChange(constraints.biggest);
+          return _buildKlineContainer(context);
+        },
+      );
+    } else {
+      return _buildKlineContainer(context);
+    }
+  }
+
+  Widget _buildKlineContainer(BuildContext context) {
     return Container(
       alignment: widget.alignment,
       width: widget.controller.canvasWidth,
       height: widget.controller.canvasHeight,
       decoration: widget.decoration,
       foregroundDecoration: widget.foregroundDecoration,
-      child: GestureView(
-        controller: widget.controller,
-        child: Stack(
-          children: <Widget>[
-            if (widget.mainBackgroundView != null)
-              Positioned.fromRect(
-                rect: widget.controller.mainRect,
-                child: widget.mainBackgroundView!,
-              ),
-            RepaintBoundary(
-              key: const ValueKey('GridAndChartLayer'),
-              child: CustomPaint(
-                size: Size(
-                  widget.controller.canvasWidth,
-                  widget.controller.canvasHeight,
-                ),
-                painter: GridBackgroundPainter(
-                  controller: widget.controller,
-                ),
-                foregroundPainter: IndicatorChartPainter(
-                  controller: widget.controller,
-                ),
-                isComplex: true,
-              ),
-            ),
-            RepaintBoundary(
-              key: const ValueKey('DrawAndCrossLayer'),
-              child: CustomPaint(
-                size: Size(
-                  widget.controller.canvasWidth,
-                  widget.controller.canvasHeight,
-                ),
-                painter: DrawPainter(
-                  controller: widget.controller,
-                ),
-                foregroundPainter: CrossPainter(
-                  controller: widget.controller,
-                ),
-                isComplex: true,
-              ),
-            ),
-            Positioned.fromRect(
-              rect: widget.controller.mainRect,
-              child: _buildMainForgroundView(context),
+      child: widget.isTouchDevice
+          ? TouchGestureDetector(
+              controller: widget.controller,
+              onDoubleTap: widget.onDoubleTap,
+              child: _buildKlineView(context),
             )
-          ],
+          : NonTouchGestureDetector(
+              controller: widget.controller,
+              onDoubleTap: widget.onDoubleTap,
+              child: _buildKlineView(context),
+            ),
+    );
+  }
+
+  Widget _buildKlineView(BuildContext context) {
+    return Stack(
+      children: <Widget>[
+        if (widget.mainBackgroundView != null)
+          Positioned.fromRect(
+            rect: widget.controller.mainRect,
+            child: widget.mainBackgroundView!,
+          ),
+        RepaintBoundary(
+          key: const ValueKey('GridAndChartLayer'),
+          child: CustomPaint(
+            size: Size(
+              widget.controller.canvasWidth,
+              widget.controller.canvasHeight,
+            ),
+            painter: GridBackgroundPainter(
+              controller: widget.controller,
+            ),
+            foregroundPainter: IndicatorChartPainter(
+              controller: widget.controller,
+            ),
+            isComplex: true,
+          ),
         ),
-      ),
+        RepaintBoundary(
+          key: const ValueKey('DrawAndCrossLayer'),
+          child: CustomPaint(
+            size: Size(
+              widget.controller.canvasWidth,
+              widget.controller.canvasHeight,
+            ),
+            painter: DrawPainter(
+              controller: widget.controller,
+            ),
+            foregroundPainter: CrossPainter(
+              controller: widget.controller,
+            ),
+            isComplex: true,
+          ),
+        ),
+        Positioned.fromRect(
+          rect: widget.controller.mainRect,
+          child: _buildMainForgroundView(context),
+        )
+      ],
     );
   }
 

@@ -12,32 +12,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:example/src/theme/flexi_theme.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
 import '../config.dart';
 import '../providers/default_kline_config.dart';
 import '../providers/market_candle_provider.dart';
 import '../repo/mock.dart';
 import '../test/canvas_demo.dart';
+import '../theme/flexi_theme.dart';
 import 'components/flexi_kline_indicator_bar.dart';
 import 'components/flexi_kline_mark_view.dart';
 import 'components/flexi_kline_setting_bar.dart';
 import 'components/market_tooltip_custom_view.dart';
-import 'main_nav_page.dart';
+import 'index_page.dart';
 
-class MyDemoPage extends ConsumerStatefulWidget {
-  const MyDemoPage({super.key});
+class MyKlineDemoPage extends ConsumerStatefulWidget {
+  const MyKlineDemoPage({super.key});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _MyDemoPageState();
 }
 
-class _MyDemoPageState extends ConsumerState<MyDemoPage> {
+class _MyDemoPageState extends ConsumerState<MyKlineDemoPage> {
   late final FlexiKlineController controller;
   late final DefaultFlexiKlineConfiguration configuration;
 
@@ -53,7 +54,7 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
     super.initState();
     req = CandleReq(
       instId: '000001',
-      bar: TimeBar.D1.bar,
+      bar: TimeBar.H1.bar,
       precision: 2,
       displayName: '上证指数',
     );
@@ -89,7 +90,7 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
   }
 
   Future<void> loadMoreCandles(CandleReq request) async {
-    // TODO: 待实现
+    SmartDialog.showToast('This is a simulation operation!');
   }
 
   /// 当crossing时, 自定义Tooltip
@@ -188,10 +189,13 @@ class _MyDemoPageState extends ConsumerState<MyDemoPage> {
               controller: controller,
             ),
             Container(
-              height: 2,
+              height: 20.r,
               color: theme.dividerLine,
             ),
-            // GestureTest(),
+            Container(
+              height: 20.r,
+              color: theme.dividerLine,
+            ),
             const CanvasDemo(),
           ],
         ),

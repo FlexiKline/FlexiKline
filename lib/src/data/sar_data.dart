@@ -47,7 +47,7 @@ mixin SARData on BaseData {
     required Range range,
     bool reset = false,
   }) {
-    if (key == sarKey && calcParam is SARParam) {
+    if ((key == sarKey || key == subSarKey) && calcParam is SARParam) {
       calcuAndCacheSar(
         param: calcParam,
         // start: range.start,

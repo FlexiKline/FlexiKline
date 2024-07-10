@@ -18,11 +18,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:go_router/go_router.dart';
 
+import 'pages/demo_accurate_kline_page.dart';
 import 'pages/bit_kline_page.dart';
 import 'pages/landscape_kline_page.dart';
 import 'pages/ok_kline_page.dart';
-import 'pages/main_nav_page.dart';
-import 'pages/my_demo_page.dart';
+import 'pages/index_page.dart';
+import 'pages/demo_kline_page.dart';
 
 final GlobalKey<NavigatorState> globalNavigatorKey = GlobalKey<NavigatorState>(
   debugLabel: 'FlexiKlineApp',
@@ -70,8 +71,8 @@ final List<RouteBase> routeList = <RouteBase>[
       StatefulNavigationShell navigationShell,
     ) {
       return MaterialPage<void>(
-        restorationId: 'nav',
-        child: MainNavPage(navigationShell: navigationShell),
+        restorationId: 'indexPage',
+        child: IndexPage(navigationShell: navigationShell),
       );
     },
     branches: <StatefulShellBranch>[
@@ -86,7 +87,7 @@ final List<RouteBase> routeList = <RouteBase>[
             pageBuilder: (BuildContext context, GoRouterState state) {
               return const MaterialPage<void>(
                 restorationId: 'myDemo',
-                child: MyDemoPage(),
+                child: MyKlineDemoPage(),
               );
             },
             routes: const <RouteBase>[],
@@ -136,6 +137,16 @@ final List<RouteBase> routeList = <RouteBase>[
           configuration: param['configuration'],
           candleReq: param['candleReq'],
         ),
+      );
+    },
+  ),
+  GoRoute(
+    name: 'accurateKline',
+    path: '/accurate_kline',
+    pageBuilder: (context, state) {
+      return const MaterialPage<void>(
+        restorationId: 'accurateKline',
+        child: AccurateKlineDemoPage(),
       );
     },
   ),

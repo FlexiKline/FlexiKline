@@ -32,7 +32,7 @@ class CandleIndicator extends SinglePaintObjectIndicator {
   CandleIndicator({
     super.key = candleKey,
     super.name = 'Candle',
-    super.zIndex = 0,
+    super.zIndex = -1,
     required super.height,
     super.padding = defaultMainIndicatorPadding,
 

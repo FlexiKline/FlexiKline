@@ -14,7 +14,10 @@
 
 import 'dart:ui';
 
-import 'package:flexi_kline/flexi_kline.dart';
+import 'package:flexi_kline/src/constant.dart';
+import 'package:flexi_kline/src/framework/export.dart';
+import 'package:flexi_kline/src/kline_controller.dart';
+import 'package:flexi_kline/src/model/export.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 

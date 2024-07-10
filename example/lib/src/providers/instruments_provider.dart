@@ -38,7 +38,7 @@ final instrumentsMgrProvider =
     }
     return InstrumentsManagerNotifier(ref, initVal);
   },
-  name: 'instrumentsManager',
+  name: '_instrumentsManager',
 );
 
 class InstrumentsManagerNotifier

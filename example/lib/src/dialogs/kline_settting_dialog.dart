@@ -14,8 +14,6 @@
 
 import 'package:example/generated/l10n.dart';
 import 'package:example/src/router.dart';
-import 'package:example/src/theme/flexi_theme.dart';
-import 'package:example/src/utils/dialog_manager.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,6 +22,9 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
 import '../providers/kline_controller_state_provider.dart';
 import '../pages/components/flexi_kline_size_slider.dart';
+import '../theme/flexi_theme.dart';
+import '../utils/device_util.dart';
+import '../utils/dialog_manager.dart';
 
 class KlineSettingDialog extends ConsumerStatefulWidget {
   static const String dialogTag = "KlineSettingDialog";
@@ -45,6 +46,13 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
   bool get klineSizeChanging => klineHeightChanging || klineWidthChanging;
 
   Future<void> openLandscapePage() async {
+    if (!DeviceUtil.isMobile) {
+      SmartDialog.showToast(
+        'Landscape operation is not allowed on non-mobile devices',
+      );
+      return;
+    }
+
     SmartDialog.dismiss(tag: KlineSettingDialog.dialogTag);
     widget.controller.storeFlexiKlineConfig();
     final isUpdate = await ref.read(routerProvider).pushNamed(
@@ -77,7 +85,9 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
                 children: [
                   _buildSettingTab(context),
                   _buildDisplaySetting(context),
-                  SizedBox(height: 160.r),
+
+                  /// 图表宽高调整点位
+                  SizedBox(height: DeviceUtil.isMobile ? 160.r : 80.r),
                 ],
               ),
             ),
@@ -87,20 +97,46 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
           left: 0,
           right: 0,
           bottom: 0,
-          child: Container(
-            height: 160.r,
-            margin: EdgeInsetsDirectional.symmetric(horizontal: 8.r),
-            padding: EdgeInsetsDirectional.symmetric(
-              horizontal: 8.r,
-              vertical: 10.r,
-            ),
-            decoration: BoxDecoration(
-              color: theme.pageBg.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(12.r),
-            ),
-            child: _buildKlineHeightSetting(context),
+          child: Column(
+            children: [
+              Offstage(
+                offstage: !DeviceUtil.isMobile,
+                child: Visibility.maintain(
+                  visible: !klineSizeChanging || klineWidthChanging,
+                  child: Container(
+                    // height: 80.r,
+                    margin: EdgeInsetsDirectional.symmetric(horizontal: 8.r),
+                    padding: EdgeInsetsDirectional.symmetric(
+                      horizontal: 8.r,
+                      vertical: 10.r,
+                    ),
+                    decoration: BoxDecoration(
+                      color: theme.pageBg.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                    child: _buildKlineWidthSetting(context),
+                  ),
+                ),
+              ),
+              Visibility.maintain(
+                visible: !klineSizeChanging || klineHeightChanging,
+                child: Container(
+                  // height: 80.r,
+                  margin: EdgeInsetsDirectional.symmetric(horizontal: 8.r),
+                  padding: EdgeInsetsDirectional.symmetric(
+                    horizontal: 8.r,
+                    vertical: 10.r,
+                  ),
+                  decoration: BoxDecoration(
+                    color: theme.pageBg.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  child: _buildKlineHeightSetting(context),
+                ),
+              )
+            ],
           ),
-        )
+        ),
       ],
     );
   }
@@ -250,7 +286,7 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
                   checkColor: theme.tlight,
                 ),
               ),
-              Expanded(child: SizedBox.shrink())
+              const Expanded(child: SizedBox.shrink())
             ],
           )
         ],
@@ -258,7 +294,7 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
     );
   }
 
-  Widget _buildKlineHeightSetting(BuildContext context) {
+  Widget _buildKlineWidthSetting(BuildContext context) {
     final theme = ref.watch(themeProvider);
     final s = S.of(context);
     return Column(
@@ -281,6 +317,16 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
             });
           },
         ),
+      ],
+    );
+  }
+
+  Widget _buildKlineHeightSetting(BuildContext context) {
+    final theme = ref.watch(themeProvider);
+    final s = S.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
         Text(
           s.chartHeight,
           style: theme.t1s14w400,
