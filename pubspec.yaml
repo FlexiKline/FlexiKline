@@ -1,7 +1,7 @@
 name: flexi_kline
 description: "A flexible Kline package project."
-version: 0.5.0
-homepage:
+version: 0.6.0
+homepage: "https://github.com/FlexiKline/FlexiKline"
 
 environment:
   sdk: ">=3.2.0 <4.0.0"
