@@ -22,7 +22,7 @@ jobs:
       - run: flutter config --enable-web
       - run: flutter pub get
       - run: flutter channel master
-      - run: flutter upgrade
+      # - run: flutter upgrade
       - run: cd example && flutter build web --release
       - run: |
           cd example/build/web
