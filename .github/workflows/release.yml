@@ -5,7 +5,7 @@ on:
     #  - main
     # Sequence of patterns matched against refs/tags
     tags:
-      - 'v*'
+      - "v*"
 jobs:
   build:
     name: Build Web
@@ -16,16 +16,15 @@ jobs:
       - uses: actions/checkout@v1
       - uses: subosito/flutter-action@v1
         with:
-          channel: 'stable'
+          channel: "stable"
       # 按照下面的顺序执行打包命令
-      - run: cd example
       - run: flutter config --enable-web
       - run: flutter pub get
       - run: flutter channel master
       - run: flutter upgrade
-      - run: flutter build web --release
+      - run: cd example && flutter build web --release
       - run: |
-          cd build/web
+          cd example/build/web
           git init
           # 改成你的提交邮箱
           git config --global user.email kangqiao610@gmail.com
