@@ -18,7 +18,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logger/logger.dart';
 
 // 是否启用实时更新Kline数据.
-bool realTimeUpdateKlineData = false;
+bool realTimeUpdateKlineData = true;
 
 class AppProviderObserver extends ProviderObserver {
   AppProviderObserver();

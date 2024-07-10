@@ -43,6 +43,9 @@ dependencies:
   flutter_ume_kit_perf_plus: ^2.0.1
   flutter_ume_kit_ui_plus: ^2.0.0
 
+dependency_overrides:
+  vm_service: 14.2.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
