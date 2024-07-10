@@ -20,6 +20,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../config.dart';
+import '../indicators/avl_indicator.dart';
 import '../providers/instruments_provider.dart';
 import '../providers/default_kline_config.dart';
 import '../theme/flexi_theme.dart';
@@ -70,6 +71,28 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage>
       logger: LoggerImpl(
         tag: "OkFlexiKline",
         debug: kDebugMode,
+      ),
+    );
+
+    final klineTheme = ref.read(defaultKlineThemeProvider);
+    controller.addCustomMainIndicatorConfig(
+      AVLIndicator(
+        height: klineTheme.mainIndicatorHeight,
+        padding: klineTheme.mainIndicatorPadding,
+        line: LineConfig(
+          width: 1.r,
+          color: Colors.deepOrangeAccent,
+          type: LineType.solid,
+        ),
+        tips: TipsConfig(
+          label: 'AVL',
+          style: TextStyle(
+            color: Colors.orangeAccent,
+            fontSize: klineTheme.normalTextSize,
+            height: defaultTextHeight,
+          ),
+        ),
+        tipsPadding: klineTheme.tipsPadding,
       ),
     );
 

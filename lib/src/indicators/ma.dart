@@ -33,7 +33,7 @@ class MAIndicator extends SinglePaintObjectIndicator implements IPrecomputable {
   MAIndicator({
     super.key = maKey,
     super.name = 'MA',
-    super.zIndex = 1,
+    super.zIndex = 0,
     required super.height,
     super.padding = defaultMainIndicatorPadding,
     required this.calcParams,

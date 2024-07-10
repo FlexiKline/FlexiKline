@@ -113,7 +113,7 @@ abstract class Indicator {
     paintObject = null;
   }
 
-  Map<String, dynamic> toJson();
+  Map<String, dynamic> toJson() => const {};
 
   static bool canUpdate(Indicator oldIndicator, Indicator newIndicator) {
     return oldIndicator.runtimeType == newIndicator.runtimeType &&

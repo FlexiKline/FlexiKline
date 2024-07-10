@@ -179,7 +179,7 @@ SARIndicator _$SARIndicatorFromJson(Map<String, dynamic> json) => SARIndicator(
           ? defaultMainIndicatorPadding
           : const EdgeInsetsConverter()
               .fromJson(json['padding'] as Map<String, dynamic>),
-      zIndex: (json['zIndex'] as num?)?.toInt() ?? 3,
+      zIndex: (json['zIndex'] as num?)?.toInt() ?? 0,
       calcParam: json['calcParam'] == null
           ? const SARParam(startAf: 0.02, step: 0.02, maxAf: 0.2)
           : SARParam.fromJson(json['calcParam'] as Map<String, dynamic>),

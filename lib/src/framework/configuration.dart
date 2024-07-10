@@ -16,9 +16,10 @@ import 'package:flutter/material.dart';
 
 import '../constant.dart';
 import '../config/export.dart';
+import 'indicator.dart';
 
 /// FlexiKline主题接口.
-/// 
+///
 /// 定义FlexiKline中通用颜色
 abstract interface class IFlexiKlineTheme {
   /// 缓存Key
@@ -140,4 +141,10 @@ abstract interface class IConfiguration {
 
   /// 保存[config]配置信息到本地; 通过FlexiKlineController调用.
   void saveFlexiKlineConfig(FlexiKlineConfig config);
+
+  /// 自定义主区指标列表
+  Iterable<SinglePaintObjectIndicator> customMainIndicators();
+
+  /// 自定义副区指标列表
+  Iterable<Indicator> customSubIndicators();
 }

@@ -234,12 +234,20 @@ mixin SettingBinding on KlineBindingBase
   /// 绘制区域宽度内, 可绘制的蜡烛数
   int get maxCandleCount => (mainChartWidth / candleActualWidth).ceil();
 
+  Map<ValueKey, SinglePaintObjectIndicator> get supportMainIndicators {
+    return {...indicatorsConfig.mainIndicators, ..._customMainIndicators};
+  }
+
+  Map<ValueKey, Indicator> get supportSubIndicators {
+    return {...indicatorsConfig.subIndicators, ..._customSubIndicators};
+  }
+
   Set<ValueKey> get supportMainIndicatorKeys {
-    return indicatorsConfig.mainIndicators.keys.toSet()..remove(candleKey);
+    return supportMainIndicators.keys.toSet()..remove(candleKey);
   }
 
   Set<ValueKey> get supportSubIndicatorKeys {
-    return indicatorsConfig.subIndicators.keys.toSet()..remove(timeKey);
+    return supportSubIndicators.keys.toSet()..remove(timeKey);
   }
 
   Set<ValueKey> get mainIndicatorKeys {
@@ -317,8 +325,8 @@ mixin SettingBinding on KlineBindingBase
 
   /// 在主图中添加指标
   void addIndicatorInMain(ValueKey<dynamic> key) {
-    if (indicatorsConfig.mainIndicators.containsKey(key)) {
-      final indicator = indicatorsConfig.mainIndicators[key]!;
+    if (supportMainIndicators.containsKey(key)) {
+      final indicator = supportMainIndicators[key]!;
       mainIndicator.appendIndicator(indicator, this);
       markRepaintChart(reset: true);
       markRepaintCross();
@@ -334,21 +342,13 @@ mixin SettingBinding on KlineBindingBase
 
   /// 在副图中添加指标
   void addIndicatorInSub(ValueKey<dynamic> key) {
-    final indicator = indicatorsConfig.subIndicators.getItem(key);
+    final indicator = supportSubIndicators.getItem(key);
     if (indicator != null) {
       // 使用前先解绑
       indicator.dispose();
       subIndicatorQueue.append(indicator)?.dispose();
       invokeSizeChanged();
     }
-    // if (indicatorsConfig.subIndicators.containsKey(key)) {
-    //   if (subIndicators.length >= settingConfig.subChartMaxCount) {
-    //     final deleted = subIndicators.removeFirst();
-    //     deleted.dispose();
-    //   }
-    //   subIndicators.addLast(indicatorsConfig.subIndicators[key]!);
-    //   invokeSizeChanged();
-    // }
   }
 
   /// 删除副图[key]指定的指标
@@ -368,6 +368,8 @@ mixin SettingBinding on KlineBindingBase
   FlexiKlineConfig? __flexiKlineConfig;
   FlexiKlineConfig get _flexiKlineConfig {
     if (__flexiKlineConfig == null) {
+      // 初始化设置自定义指标.
+      _updateCustomIndicators();
       final config = configuration.getFlexiKlineConfig();
       _flexiKlineConfig = config;
     }
@@ -376,7 +378,10 @@ mixin SettingBinding on KlineBindingBase
 
   set _flexiKlineConfig(config) {
     __flexiKlineConfig = config.clone();
-    __flexiKlineConfig!.init();
+    __flexiKlineConfig!.init(
+      customMainIndicators: _customMainIndicators,
+      customSubIndicators: _customSubIndicators,
+    );
   }
 
   void initFlexiKlineState({bool isInit = false}) {
@@ -411,6 +416,9 @@ mixin SettingBinding on KlineBindingBase
 
       /// 释放当前配置所有指标
       _flexiKlineConfig.dispose();
+
+      /// 配置变更重置自定义指标.
+      _updateCustomIndicators();
 
       /// 更新当前配置为[config]
       _flexiKlineConfig = config;
@@ -504,5 +512,52 @@ mixin SettingBinding on KlineBindingBase
     _flexiKlineConfig.tooltip = config;
     markRepaintChart();
     markRepaintCross();
+  }
+
+  /// 从配置中心, 更新自定义指标集.
+  /// 1. 初始化时更新
+  /// 2. 配置发生变更时重置.
+  void _updateCustomIndicators() {
+    // 更新自定义指标配置.
+    _customMainIndicators.clear();
+    _customSubIndicators.clear();
+    configuration.customMainIndicators().forEach(
+          (indicator) => addCustomMainIndicatorConfig(indicator),
+        );
+    configuration.customSubIndicators().forEach(
+          (indicator) => addCustomSubIndicatorConfig(indicator),
+        );
+  }
+
+  /// 用户自定义主区指标集合
+  final Map<ValueKey, SinglePaintObjectIndicator> _customMainIndicators = {};
+
+  /// 用户自定义副区指标集合
+  final Map<ValueKey, Indicator> _customSubIndicators = {};
+
+  /// 添加主区指标配置
+  /// [indicator] 指标配置
+  /// 注: 如果指标的key使用内置的ValueKey([IndicatorType]), 将会替换内置的指标.
+  void addCustomMainIndicatorConfig(SinglePaintObjectIndicator indicator) {
+    _customMainIndicators[indicator.key] = indicator;
+  }
+
+  /// 删除[key]对应的指标配置.
+  /// 注: 此处删除的是自定义的主区指标.
+  void delCustomMainIndicatorConifg(ValueKey key) {
+    _customMainIndicators.remove(key);
+  }
+
+  /// 添加副区指标配置
+  /// [indicator] 指标配置
+  /// 注: 如果指标的key使用内置的ValueKey([IndicatorType]), 将会替换内置的指标.
+  void addCustomSubIndicatorConfig(Indicator indicator) {
+    _customSubIndicators[indicator.key] = indicator;
+  }
+
+  /// 删除副区[key]对应的指标配置.
+  /// 注: 此处删除的是自定义的副区指标.
+  void delCustomSubIndicatorConfig(ValueKey key) {
+    _customSubIndicators.remove(key);
   }
 }

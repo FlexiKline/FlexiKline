@@ -164,7 +164,7 @@ VolumeIndicator _$VolumeIndicatorFromJson(Map<String, dynamic> json) =>
     VolumeIndicator(
       key: const ValueKeyConverter().fromJson(json['key'] as String),
       name: json['name'] as String? ?? 'VOL',
-      zIndex: (json['zIndex'] as num?)?.toInt() ?? -1,
+      zIndex: (json['zIndex'] as num?)?.toInt() ?? -2,
       height: (json['height'] as num?)?.toDouble() ?? defaultSubIndicatorHeight,
       padding: json['padding'] == null
           ? defaultSubIndicatorPadding

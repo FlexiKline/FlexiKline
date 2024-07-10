@@ -55,7 +55,10 @@ class FlexiKlineConfig {
   @JsonKey(includeFromJson: false, includeToJson: false)
   late final FixedHashQueue<Indicator> subRectIndicatorQueue;
 
-  void init() {
+  void init({
+    required Map<ValueKey, SinglePaintObjectIndicator> customMainIndicators,
+    required Map<ValueKey, Indicator> customSubIndicators,
+  }) {
     mainIndicator = MultiPaintObjectIndicator(
       key: mainChartKey,
       name: IndicatorType.main.label,
@@ -72,7 +75,8 @@ class FlexiKlineConfig {
       main.add(candleKey);
     }
     for (var key in main) {
-      final indicator = indicators.mainIndicators.getItem(key);
+      SinglePaintObjectIndicator? indicator = customMainIndicators.getItem(key);
+      indicator ??= indicators.mainIndicators.getItem(key);
       if (indicator != null) {
         // 使用前先解绑
         indicator.dispose();
@@ -81,14 +85,15 @@ class FlexiKlineConfig {
     }
 
     if (sub.contains(timeKey)) {
-      sub.remove(timeKey);
+      sub.remove(timeKey); // Time指标是默认的
     }
     if (sub.isNotEmpty) {
       if (sub.length > setting.subChartMaxCount) {
         sub = sub.skip(sub.length - setting.subChartMaxCount).toSet();
       }
       for (var key in sub) {
-        final indicator = indicators.subIndicators.getItem(key);
+        Indicator? indicator = customSubIndicators.getItem(key);
+        indicator ??= indicators.subIndicators.getItem(key);
         if (indicator != null) {
           // 使用前先解绑
           indicator.dispose();

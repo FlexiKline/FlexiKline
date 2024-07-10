@@ -253,10 +253,13 @@ mixin DataInitMixin on PaintObjectProxy implements IPaintDataInit {
     return minMax.max - ((dy - chartRect.top) / dyFactor).toBagNum();
   }
 
-  double? indexToDx(int index) {
-    double dx = chartRect.right - (index * candleActualWidth - paintDxOffset);
-    if (chartRect.inclueDx(dx)) return dx;
-    return null;
+  double? indexToDx(int index, {bool check = true}) {
+    double dx = chartRect.right -
+        (index * candleActualWidth - paintDxOffset) -
+        candleWidthHalf;
+
+    if (!check) return dx;
+    return chartRect.inclueDx(dx) ? dx : null;
   }
 
   int dxToIndex(double dx) {

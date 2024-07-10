@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import 'package:flexi_kline/flexi_kline.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'base/test_flexi_kline_configuration.dart';
@@ -29,7 +28,7 @@ void main() {
     flexiKlineConfig.sub.add(maVolKey);
     flexiKlineConfig.sub.add(sarKey);
 
-    flexiKlineConfig.init();
+    flexiKlineConfig.init(customMainIndicators: {}, customSubIndicators: {});
   });
 
   test('copywith indicator', () {

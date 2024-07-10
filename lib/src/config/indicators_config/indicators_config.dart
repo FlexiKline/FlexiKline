@@ -98,7 +98,7 @@ class IndicatorsConfig {
   late RSIIndicator rsi;
 
   /// 内置主区指标
-  Map<ValueKey, SinglePaintObjectIndicator> get _innerMainIndicators => {
+  Map<ValueKey, SinglePaintObjectIndicator> get mainIndicators => {
         candle.key: candle,
         volume.key: volume,
         ma.key: ma,
@@ -108,7 +108,7 @@ class IndicatorsConfig {
       };
 
   /// 内置副区指标
-  Map<ValueKey, Indicator> get _innerSubIndicators => {
+  Map<ValueKey, Indicator> get subIndicators => {
         time.key: time,
         macd.key: macd,
         kdj.key: kdj,
@@ -116,47 +116,6 @@ class IndicatorsConfig {
         subBoll.key: subBoll,
         subSar.key: subSar,
         rsi.key: rsi,
-      };
-
-  /// 用户自定义主区指标
-  final Map<ValueKey, SinglePaintObjectIndicator> _customMainIndicators = {};
-
-  /// 用户自定义副区指标
-  final Map<ValueKey, Indicator> _customSubIndicators = {};
-
-  /// 添加主区指标
-  /// [indicator] 如果使用内置的ValueKey([IndicatorType]), 将会替换内置的指标.
-  void addMainIndicator(SinglePaintObjectIndicator indicator) {
-    _customMainIndicators[indicator.key] = indicator;
-  }
-
-  /// 删除[key]对应的指标. 注仅能删除自定义的指标.
-  void delMainIndicator(ValueKey key) {
-    _customMainIndicators.remove(key);
-  }
-
-  /// 添加副区指标
-  /// [indicator] 如果使用内置的ValueKey([IndicatorType]), 将会替换内置的指标.
-  void addSubIndicator(Indicator indicator) {
-    _customSubIndicators[indicator.key] = indicator;
-  }
-
-  /// 删除副区[key]对应的指标.
-  /// 注: 仅能删除自定义的指标.
-  void delSubIndicator(ValueKey key) {
-    _customSubIndicators.remove(key);
-  }
-
-  /// 主区指标集
-  Map<ValueKey, SinglePaintObjectIndicator> get mainIndicators => {
-        ..._innerMainIndicators,
-        ..._customMainIndicators,
-      };
-
-  /// 副区指标集
-  Map<ValueKey, Indicator> get subIndicators => {
-        ..._innerSubIndicators,
-        ..._customSubIndicators,
       };
 
   /// 收集当前所有支持的指标的计算参数
@@ -183,14 +142,11 @@ class IndicatorsConfig {
 
   /// 从[oldConfig]指标配置集合更新自定义指标. 并清理无效的旧指标.
   Set<ValueKey> megerAndDisposeOldIndicator(IndicatorsConfig oldConfig) {
-    _customMainIndicators.addAll(oldConfig._customMainIndicators);
-    _customSubIndicators.addAll(oldConfig._customMainIndicators);
-
     Set<ValueKey> keys = {};
 
     /// 清理变更的主区指标
-    oldConfig._innerMainIndicators.forEach((key, value) {
-      final newVale = _innerMainIndicators[key];
+    oldConfig.mainIndicators.forEach((key, value) {
+      final newVale = mainIndicators[key];
       if (!identical(newVale, value)) {
         value.dispose();
         keys.add(key);
@@ -198,8 +154,8 @@ class IndicatorsConfig {
     });
 
     /// 清理变更的副区指标
-    oldConfig._innerSubIndicators.forEach((key, value) {
-      final newVale = _innerSubIndicators[key];
+    oldConfig.subIndicators.forEach((key, value) {
+      final newVale = subIndicators[key];
       if (!identical(newVale, value)) {
         value.dispose();
         keys.add(key);

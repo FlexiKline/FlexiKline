@@ -31,7 +31,7 @@ class VolumeIndicator extends SinglePaintObjectIndicator {
   VolumeIndicator({
     required super.key,
     super.name = 'VOL',
-    super.zIndex = -1,
+    super.zIndex = -2,
     super.height = defaultSubIndicatorHeight,
     super.padding = defaultSubIndicatorPadding,
     super.paintMode = PaintMode.alone,

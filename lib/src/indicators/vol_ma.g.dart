@@ -157,7 +157,7 @@ VolMaIndicator _$VolMaIndicatorFromJson(Map<String, dynamic> json) =>
           ? volMaKey
           : const ValueKeyConverter().fromJson(json['key'] as String),
       name: json['name'] as String? ?? 'VOLMA',
-      zIndex: (json['zIndex'] as num?)?.toInt() ?? 1,
+      zIndex: (json['zIndex'] as num?)?.toInt() ?? 0,
       height: (json['height'] as num?)?.toDouble() ?? defaultSubIndicatorHeight,
       padding: json['padding'] == null
           ? defaultSubIndicatorPadding
