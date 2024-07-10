@@ -45,6 +45,7 @@ dependencies:
 
 dependency_overrides:
   vm_service: 14.2.1
+  intl: ^0.18.1
 
 dev_dependencies:
   flutter_test:
