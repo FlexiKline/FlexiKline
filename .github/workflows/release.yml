@@ -13,14 +13,17 @@ jobs:
       my_secret: ${{secrets.commit_secret}}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - uses: subosito/flutter-action@v1
+      - name: Clone repository
+        uses: actions/checkout@v4
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
         with:
-          # channel: "stable"
-          flutter-version: "3.19.4"
+          channel: stable
+          flutter-version-file: pubspec.yaml # path to pubspec.yaml
+      - run: flutter --version
       # 按照下面的顺序执行打包命令
       - run: flutter config --enable-web
-      - run: flutter pub get
+      - run: cd example && flutter pub get
       - run: flutter channel master
       # - run: flutter upgrade
       - run: cd example && flutter build web --release
