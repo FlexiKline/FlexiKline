@@ -15,7 +15,6 @@
 import 'dart:math' as math;
 import 'package:decimal/decimal.dart';
 import 'package:flexi_kline/flexi_kline.dart';
-import 'package:flexi_kline/src/model/export.dart';
 import 'package:flexi_kline/src/extension/num_ext.dart';
 import 'package:flexi_kline/src/utils/num_format_util.dart';
 import 'package:flutter_test/flutter_test.dart';

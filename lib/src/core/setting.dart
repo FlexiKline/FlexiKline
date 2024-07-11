@@ -258,7 +258,6 @@ mixin SettingBinding on KlineBindingBase
     return subRectIndicators.map((e) => e.key).toSet();
   }
 
-  @protected
   @override
   MultiPaintObjectIndicator get mainIndicator {
     return _flexiKlineConfig.mainIndicator;
@@ -269,7 +268,6 @@ mixin SettingBinding on KlineBindingBase
     return _flexiKlineConfig.subRectIndicatorQueue;
   }
 
-  @protected
   @override
   List<Indicator> get subRectIndicators {
     if (indicatorsConfig.time.position == DrawPosition.bottom) {

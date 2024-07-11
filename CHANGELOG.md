@@ -1,3 +1,16 @@
+## 0.6.0
+* Support Desktop
+* Support Web
+* Refactor gesture recognition framework to adapt to Web/Desktop
+* Demo for custom indicators and replacing built-in indicators.
+
+## 0.5.0
+* Support landscape mode.
+* Optimize zooming functionality.
+* Optimize configuration management.
+* Dispose indicators when unbinding.
+* Add secondary chart indicators.
+
 ## 0.4.0
 * Theme switching implementation.
 * Configuration framework optimization.

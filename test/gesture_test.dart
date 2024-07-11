@@ -92,8 +92,8 @@ void main() {
 
   test('FrictionSimulation', () {
     // 创建一个 FrictionSimulation
-    final double position = 0.0;
-    final double velocity = 900 / 100; // 初始速度
+    // double position = 0.0;
+    double velocity = 900 / 100; // 初始速度
     // final double drag = 0.00135; // 摩擦力
 
     final simulation = FrictionSimulation.through(
