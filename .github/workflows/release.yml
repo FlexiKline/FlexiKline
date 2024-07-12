@@ -5,7 +5,7 @@ on:
     #  - main
     # Sequence of patterns matched against refs/tags
     tags:
-      - "v*"
+      - "r*"
 jobs:
   build:
     name: Build Web
@@ -15,18 +15,24 @@ jobs:
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version-file: pubspec.yaml # path to pubspec.yaml
+          flutter-version: 3.19.4
+          # flutter-version-file: pubspec.yaml # path to pubspec.yaml
+
       - run: flutter --version
+
       # 按照下面的顺序执行打包命令
-      - run: flutter config --enable-web
-      - run: cd example && flutter pub get
-      - run: flutter channel master
-      # - run: flutter upgrade
-      - run: cd example && flutter build web --release
+      - run: |
+          cd example
+          flutter config --enable-web
+          # flutter channel master
+          flutter pub get
+          flutter build web --release
+
       - run: |
           cd example/build/web
           git init

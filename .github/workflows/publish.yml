@@ -1,10 +1,11 @@
 name: Publish to Pub.dev
 
 # 流程触发时机，create当有标签tag创建时触发，如 v1.0.0。当然也可以选择别的触发时机，如 push，release 等
-on: create
-#  push:
-#    branches:
-#      - master
+on:
+  # create
+  push:
+    tags:
+      - "v*.*.*"
 
 jobs:
   publishing:
