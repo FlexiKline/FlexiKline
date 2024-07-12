@@ -53,6 +53,9 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
   /// 平移监听数据
   GestureData? _panData;
 
+  /// 长按监听数据
+  GestureData? _longData;
+
   @override
   String get logTag => 'NonTouchGesture';
 
@@ -109,6 +112,11 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
           // onScaleUpdate: onScaleUpdate,
           // onScaleEnd: onScaleEnd,
           // trackpadScrollCausesScale: true,
+
+          /// 长按
+          onLongPressStart: onLongPressStart,
+          onLongPressMoveUpdate: onLongPressMoveUpdate,
+          onLongPressEnd: onLongPressEnd,
 
           /// 子组件
           child: widget.child,
@@ -422,6 +430,43 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
       _scaleData?.end();
       _scaleData = null;
     }
+  }
+
+  /// 长按
+  ///
+  /// 如果当前正在crossing中时, 不触发后续的长按逻辑.
+  void onLongPressStart(LongPressStartDetails details) {
+    if (!gestureConfig.supportLongPress || controller.isCrossing) {
+      logd("onLongPressStart ignore! > crossing:${controller.isCrossing}");
+      return;
+    }
+    logd("onLongPressStart > details:$details");
+    _longData = GestureData.long(details.localPosition);
+    controller.startCross(_longData!);
+  }
+
+  void onLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
+    if (!gestureConfig.supportLongPress || _longData == null) {
+      return;
+    }
+    assert(() {
+      logd("onLongPressMoveUpdate > details:$details");
+      return true;
+    }());
+    _longData!.update(details.localPosition);
+    controller.updateCross(_longData!);
+  }
+
+  void onLongPressEnd(LongPressEndDetails details) {
+    if (!gestureConfig.supportLongPress || _longData == null) {
+      logd("onLongPressEnd ignore! > details:$details");
+      return;
+    }
+    logd("onLongPressEnd details:$details");
+    // 长按结束, 尝试取消Cross事件.
+    controller.cancelCross();
+    _longData?.end();
+    _longData = null;
   }
 
   void onScaleStart(ScaleStartDetails details) {

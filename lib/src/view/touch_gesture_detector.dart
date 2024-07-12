@@ -333,7 +333,7 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
   ///
   /// 如果当前正在crossing中时, 不触发后续的长按逻辑.
   void onLongPressStart(LongPressStartDetails details) {
-    if (!gestureConfig.supportLongPressOnTouchDevice || controller.isCrossing) {
+    if (!gestureConfig.supportLongPress || controller.isCrossing) {
       logd("onLongPressStart ignore! > crossing:${controller.isCrossing}");
       return;
     }
@@ -343,7 +343,7 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
   }
 
   void onLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
-    if (!gestureConfig.supportLongPressOnTouchDevice || _longData == null) {
+    if (!gestureConfig.supportLongPress || _longData == null) {
       return;
     }
     assert(() {
@@ -355,7 +355,7 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
   }
 
   void onLongPressEnd(LongPressEndDetails details) {
-    if (!gestureConfig.supportLongPressOnTouchDevice || _longData == null) {
+    if (!gestureConfig.supportLongPress || _longData == null) {
       logd("onLongPressEnd ignore! > details:$details");
       return;
     }

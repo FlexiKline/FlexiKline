@@ -192,7 +192,7 @@ CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
           ? candleKey
           : const ValueKeyConverter().fromJson(json['key'] as String),
       name: json['name'] as String? ?? 'Candle',
-      zIndex: (json['zIndex'] as num?)?.toInt() ?? 0,
+      zIndex: (json['zIndex'] as num?)?.toInt() ?? -1,
       height: (json['height'] as num).toDouble(),
       padding: json['padding'] == null
           ? defaultMainIndicatorPadding

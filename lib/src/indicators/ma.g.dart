@@ -145,7 +145,7 @@ MAIndicator _$MAIndicatorFromJson(Map<String, dynamic> json) => MAIndicator(
           ? maKey
           : const ValueKeyConverter().fromJson(json['key'] as String),
       name: json['name'] as String? ?? 'MA',
-      zIndex: (json['zIndex'] as num?)?.toInt() ?? 1,
+      zIndex: (json['zIndex'] as num?)?.toInt() ?? 0,
       height: (json['height'] as num).toDouble(),
       padding: json['padding'] == null
           ? defaultMainIndicatorPadding
