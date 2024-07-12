@@ -2,6 +2,11 @@
 
 一个灵活和可定制的Flutter金融图表。
 
+## Demo
+
+[Web](https://flexikline.github.io/#/demo)
+[Android Apk](./doc/FlexiKline-1.0.6-release.apk)
+
 ## 特性
 
 + 内置多种常用指标, 支持添加自定义指标.
