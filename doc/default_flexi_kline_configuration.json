@@ -1,0 +1,1150 @@
+{
+  "key": "flexi_kline_config_key-light",
+  "grid": {
+    "show": true,
+    "horizontal": {
+      "show": true,
+      "count": 5,
+      "width": 0.3076923076923077,
+      "color": "0xffe9e9e9",
+      "type": "solid",
+      "dashes": [
+        2.0,
+        2.0
+      ]
+    },
+    "vertical": {
+      "show": true,
+      "count": 5,
+      "width": 0.3076923076923077,
+      "color": "0xffe9e9e9",
+      "type": "solid",
+      "dashes": [
+        2.0,
+        2.0
+      ]
+    }
+  },
+  "setting": {
+    "pixel": 0.3076923076923077,
+    "textColor": "0xff000000",
+    "longColor": "0xff33bd65",
+    "shortColor": "0xffe84e74",
+    "opacity": 0.5,
+    "loading": {
+      "size": 22.99941280093952,
+      "strokeWidth": 3.8332354668232536,
+      "background": "0xffececec",
+      "valueColor": "0xff000000"
+    },
+    "mainRect": {
+      "left": 0.0,
+      "top": 0.0,
+      "right": 376.61538461538464,
+      "bottom": 287.492660011744
+    },
+    "mainMinSize": {
+      "width": 19.166177334116266,
+      "height": 19.166177334116266
+    },
+    "mainPadding": {
+      "horizontal": 0.0,
+      "vertical": 4.791544333529067
+    },
+    "mainDrawBelowTipsArea": true,
+    "minPaintBlankRate": 0.5,
+    "alwaysCalculateScreenOfCandlesIfEnough": false,
+    "candleMaxWidth": 38.33235466823253,
+    "candleWidth": 6.708162066940694,
+    "candleFixedSpacing": 0.9583088667058134,
+    "candleSpacingParts": 7,
+    "candleLineWidth": 0.9583088667058134,
+    "firstCandleInitOffset": 76.66470933646507,
+    "showYAxisTick": true,
+    "tickText": {
+      "style": {
+        "color": "0xff949494",
+        "fontSize": 9.583088667058133,
+        "fontFamily": null,
+        "fontStyle": "normal",
+        "height": 1.0,
+        "fontWeight": "w400",
+        "textBaseline": "ideographic",
+        "decoration": "none",
+        "decorationColor": null,
+        "decorationStyle": null
+      },
+      "textAlign": "end",
+      "padding": {
+        "horizontal": 1.9166177334116268,
+        "vertical": 0.0
+      }
+    },
+    "subChartMaxCount": 4
+  },
+  "gesture": {
+    "supportLongPressOnTouchDevice": true,
+    "isInertialPan": true,
+    "tolerance": {
+      "maxDuration": 1000,
+      "distanceFactor": 0.3,
+      "curvestr": "decelerate"
+    },
+    "loadMoreWhenNoEnoughCandles": 60,
+    "scalePosition": "auto",
+    "scaleSpeed": 10.0
+  },
+  "cross": {
+    "enable": true,
+    "crosshair": {
+      "type": "dashed",
+      "color": "0xff000000",
+      "width": 0.4791544333529067,
+      "dashes": [
+        3.0,
+        3.0
+      ]
+    },
+    "point": {
+      "radius": 1.9166177334116268,
+      "width": 5.74985320023488,
+      "color": "0xff000000"
+    },
+    "tickText": {
+      "style": {
+        "color": "0xffffffff",
+        "fontSize": 9.583088667058133,
+        "fontFamily": null,
+        "fontStyle": "normal",
+        "height": 1.0,
+        "fontWeight": "w400",
+        "textBaseline": "ideographic",
+        "decoration": "none",
+        "decorationColor": null,
+        "decorationStyle": null
+      },
+      "textAlign": "start",
+      "background": "0xff111111",
+      "padding": {
+        "horizontal": 1.9166177334116268,
+        "vertical": 1.9166177334116268
+      },
+      "border": {
+        "color": "0xff000000",
+        "width": 0.0,
+        "style": "none"
+      },
+      "borderRadius": {
+        "topLeft": 1.9166177334116268,
+        "topRight": 1.9166177334116268,
+        "bottomLeft": 1.9166177334116268,
+        "bottomRight": 1.9166177334116268
+      }
+    },
+    "spacing": 0.9583088667058134,
+    "showLatestTipsInBlank": true,
+    "moveByCandleInBlank": false
+  },
+  "tooltip": {
+    "show": true,
+    "background": "0xffececec",
+    "margin": {
+      "left": 14.3746330005872,
+      "top": 9.583088667058133,
+      "right": 62.29007633587787,
+      "bottom": 0.0
+    },
+    "padding": {
+      "horizontal": 3.8332354668232536,
+      "vertical": 3.8332354668232536
+    },
+    "radius": {
+      "topLeft": 3.8332354668232536,
+      "topRight": 3.8332354668232536,
+      "bottomLeft": 3.8332354668232536,
+      "bottomRight": 3.8332354668232536
+    },
+    "style": {
+      "color": "0xff000000",
+      "fontSize": 9.583088667058133,
+      "fontFamily": null,
+      "fontStyle": "normal",
+      "height": 1.4,
+      "fontWeight": "w400",
+      "textBaseline": "ideographic",
+      "decoration": "none",
+      "decorationColor": null,
+      "decorationStyle": null
+    }
+  },
+  "indicators": {
+    "candle": {
+      "key": "candle",
+      "name": "Candle",
+      "height": 287.492660011744,
+      "padding": {
+        "left": 0.0,
+        "top": 57.79154433352907,
+        "right": 0.0,
+        "bottom": 4.791544333529067
+      },
+      "zIndex": -1,
+      "high": {
+        "show": true,
+        "spacing": 1.9166177334116268,
+        "line": {
+          "type": "solid",
+          "color": "0xff000000",
+          "length": 19.166177334116266,
+          "width": 0.4791544333529067,
+          "dashes": [
+            3.0,
+            3.0
+          ]
+        },
+        "text": {
+          "style": {
+            "color": "0xff000000",
+            "fontSize": 9.583088667058133,
+            "fontFamily": null,
+            "fontStyle": "normal",
+            "height": 1.0,
+            "fontWeight": "w400",
+            "textBaseline": "ideographic",
+            "decoration": "none",
+            "decorationColor": null,
+            "decorationStyle": null
+          },
+          "textAlign": "start"
+        }
+      },
+      "low": {
+        "show": true,
+        "spacing": 1.9166177334116268,
+        "line": {
+          "type": "solid",
+          "color": "0xff000000",
+          "length": 19.166177334116266,
+          "width": 0.4791544333529067,
+          "dashes": [
+            3.0,
+            3.0
+          ]
+        },
+        "text": {
+          "style": {
+            "color": "0xff000000",
+            "fontSize": 9.583088667058133,
+            "fontFamily": null,
+            "fontStyle": "normal",
+            "height": 1.0,
+            "fontWeight": "w400",
+            "textBaseline": "ideographic",
+            "decoration": "none",
+            "decorationColor": null,
+            "decorationStyle": null
+          },
+          "textAlign": "start"
+        }
+      },
+      "last": {
+        "show": true,
+        "spacing": 0.9583088667058134,
+        "line": {
+          "type": "dashed",
+          "color": "0xff000000",
+          "width": 0.4791544333529067,
+          "dashes": [
+            3.0,
+            3.0
+          ]
+        },
+        "text": {
+          "style": {
+            "color": "0xff000000",
+            "fontSize": 9.583088667058133,
+            "fontFamily": null,
+            "fontStyle": "normal",
+            "height": 1.0,
+            "fontWeight": "w400",
+            "textBaseline": "alphabetic",
+            "decoration": "none",
+            "decorationColor": null,
+            "decorationStyle": null
+          },
+          "textAlign": "start",
+          "background": "0xb3ececec",
+          "padding": {
+            "horizontal": 3.8332354668232536,
+            "vertical": 1.9166177334116268
+          },
+          "border": {
+            "color": "0x00000000",
+            "width": 1.0,
+            "style": "solid"
+          },
+          "borderRadius": {
+            "topLeft": 9.583088667058133,
+            "topRight": 9.583088667058133,
+            "bottomLeft": 9.583088667058133,
+            "bottomRight": 9.583088667058133
+          }
+        }
+      },
+      "latest": {
+        "show": true,
+        "spacing": 0.9583088667058134,
+        "line": {
+          "type": "dashed",
+          "color": "0xff000000",
+          "width": 0.4791544333529067,
+          "dashes": [
+            3.0,
+            3.0
+          ]
+        },
+        "text": {
+          "style": {
+            "color": "0xffffffff",
+            "fontSize": 9.583088667058133,
+            "fontFamily": null,
+            "fontStyle": "normal",
+            "height": 1.0,
+            "fontWeight": "w400",
+            "textBaseline": "ideographic",
+            "decoration": "none",
+            "decorationColor": null,
+            "decorationStyle": null
+          },
+          "textAlign": "center",
+          "minWidth": 45.0,
+          "padding": {
+            "horizontal": 1.9166177334116268,
+            "vertical": 1.9166177334116268
+          },
+          "borderRadius": {
+            "topLeft": 1.9166177334116268,
+            "topRight": 1.9166177334116268,
+            "bottomLeft": 1.9166177334116268,
+            "bottomRight": 1.9166177334116268
+          }
+        }
+      },
+      "useCandleColorAsLatestBg": true,
+      "showCountDown": true,
+      "countDown": {
+        "style": {
+          "color": "0xff000000",
+          "fontSize": 9.583088667058133,
+          "fontFamily": null,
+          "fontStyle": "normal",
+          "height": 1.0,
+          "fontWeight": "w400",
+          "textBaseline": "ideographic",
+          "decoration": "none",
+          "decorationColor": null,
+          "decorationStyle": null
+        },
+        "textAlign": "center",
+        "background": "0xffececec",
+        "padding": {
+          "horizontal": 1.9166177334116268,
+          "vertical": 1.9166177334116268
+        },
+        "borderRadius": {
+          "topLeft": 1.9166177334116268,
+          "topRight": 1.9166177334116268,
+          "bottomLeft": 1.9166177334116268,
+          "bottomRight": 1.9166177334116268
+        }
+      }
+    },
+    "volume": {
+      "key": "volume",
+      "name": "VOL",
+      "height": 57.4985320023488,
+      "padding": {
+        "left": 0.0,
+        "top": 11.49970640046976,
+        "right": 0.0,
+        "bottom": 0.0
+      },
+      "paintMode": "alone",
+      "zIndex": -2,
+      "volTips": {
+        "label": "Vol: ",
+        "precision": 2,
+        "style": {
+          "color": "0xff000000",
+          "fontSize": 9.583088667058133,
+          "fontFamily": null,
+          "fontStyle": "normal",
+          "height": 1.0,
+          "fontWeight": "w400",
+          "textBaseline": "ideographic",
+          "decoration": "none",
+          "decorationColor": null,
+          "decorationStyle": null
+        }
+      },
+      "tipsPadding": {
+        "left": 7.666470933646507,
+        "top": 0.0,
+        "right": 0.0,
+        "bottom": 0.0
+      },
+      "tickCount": 3,
+      "precision": 2
+    },
+    "ma": {
+      "key": "ma",
+      "name": "MA",
+      "height": 287.492660011744,
+      "padding": {
+        "left": 0.0,
+        "top": 57.79154433352907,
+        "right": 0.0,
+        "bottom": 4.791544333529067
+      },
+      "zIndex": 0,
+      "calcParams": [
+        {
+          "count": 7,
+          "tips": {
+            "label": "MA7: ",
+            "style": {
+              "color": "0xff03a9f4",
+              "fontSize": 9.583088667058133,
+              "fontFamily": null,
+              "fontStyle": "normal",
+              "height": 1.2,
+              "fontWeight": "w400",
+              "textBaseline": "ideographic",
+              "decoration": "none",
+              "decorationColor": null,
+              "decorationStyle": null
+            }
+          }
+        },
+        {
+          "count": 30,
+          "tips": {
+            "label": "MA30: ",
+            "style": {
+              "color": "0xff9c27b0",
+              "fontSize": 9.583088667058133,
+              "fontFamily": null,
+              "fontStyle": "normal",
+              "height": 1.2,
+              "fontWeight": "w400",
+              "textBaseline": "ideographic",
+              "decoration": "none",
+              "decorationColor": null,
+              "decorationStyle": null
+            }
+          }
+        }
+      ],
+      "tipsPadding": {
+        "left": 7.666470933646507,
+        "top": 0.0,
+        "right": 0.0,
+        "bottom": 0.0
+      },
+      "lineWidth": 0.9583088667058134
+    },
+    "ema": {
+      "key": "ema",
+      "name": "EMA",
+      "height": 287.492660011744,
+      "padding": {
+        "left": 0.0,
+        "top": 57.79154433352907,
+        "right": 0.0,
+        "bottom": 4.791544333529067
+      },
+      "zIndex": 0,
+      "calcParams": [
+        {
+          "count": 5,
+          "tips": {
+            "label": "EMA5: ",
+            "style": {
+              "color": "0xff607d8b",
+              "fontSize": 9.583088667058133,
+              "fontFamily": null,
+              "fontStyle": "normal",
+              "height": 1.2,
+              "fontWeight": "w400",
+              "textBaseline": "ideographic",
+              "decoration": "none",
+              "decorationColor": null,
+              "decorationStyle": null
+            }
+          }
+        },
+        {
+          "count": 10,
+          "tips": {
+            "label": "EMA10: ",
+            "style": {
+              "color": "0xffe91e63",
+              "fontSize": 9.583088667058133,
+              "fontFamily": null,
+              "fontStyle": "normal",
+              "height": 1.2,
+              "fontWeight": "w400",
+              "textBaseline": "ideographic",
+              "decoration": "none",
+              "decorationColor": null,
+              "decorationStyle": null
+            }
+          }
+        },
+        {
+          "count": 20,
+          "tips": {
+            "label": "EMA20: ",
+            "style": {
+              "color": "0xffff5722",
+              "fontSize": 9.583088667058133,
+              "fontFamily": null,
+              "fontStyle": "normal",
+              "height": 1.2,
+              "fontWeight": "w400",
+              "textBaseline": "ideographic",
+              "decoration": "none",
+              "decorationColor": null,
+              "decorationStyle": null
+            }
+          }
+        },
+        {
+          "count": 60,
+          "tips": {
+            "label": "EMA60: ",
+            "style": {
+              "color": "0xff673ab7",
+              "fontSize": 9.583088667058133,
+              "fontFamily": null,
+              "fontStyle": "normal",
+              "height": 1.2,
+              "fontWeight": "w400",
+              "textBaseline": "ideographic",
+              "decoration": "none",
+              "decorationColor": null,
+              "decorationStyle": null
+            }
+          }
+        }
+      ],
+      "tipsPadding": {
+        "left": 7.666470933646507,
+        "top": 0.0,
+        "right": 0.0,
+        "bottom": 0.0
+      },
+      "lineWidth": 0.9583088667058134
+    },
+    "boll": {
+      "key": "boll",
+      "name": "BOLL",
+      "height": 287.492660011744,
+      "padding": {
+        "left": 0.0,
+        "top": 57.79154433352907,
+        "right": 0.0,
+        "bottom": 4.791544333529067
+      },
+      "zIndex": 0,
+      "calcParam": {
+        "n": 20,
+        "std": 2
+      },
+      "mbTips": {
+        "label": "BOLL(20): ",
+        "style": {
+          "color": "0xffffab40",
+          "fontSize": 9.583088667058133,
+          "fontFamily": null,
+          "fontStyle": "normal",
+          "height": 1.2,
+          "fontWeight": "w400",
+          "textBaseline": "ideographic",
+          "decoration": "none",
+          "decorationColor": null,
+          "decorationStyle": null
+        }
+      },
+      "upTips": {
+        "label": "UB: ",
+        "style": {
+          "color": "0xffff9800",
+          "fontSize": 9.583088667058133,
+          "fontFamily": null,
+          "fontStyle": "normal",
+          "height": 1.2,
+          "fontWeight": "w400",
+          "textBaseline": "ideographic",
+          "decoration": "none",
+          "decorationColor": null,
+          "decorationStyle": null
+        }
+      },
+      "dnTips": {
+        "label": "LB: ",
+        "style": {
+          "color": "0xffffab40",
+          "fontSize": 9.583088667058133,
+          "fontFamily": null,
+          "fontStyle": "normal",
+          "height": 1.2,
+          "fontWeight": "w400",
+          "textBaseline": "ideographic",
+          "decoration": "none",
+          "decorationColor": null,
+          "decorationStyle": null
+        }
+      },
+      "tipsPadding": {
+        "left": 7.666470933646507,
+        "top": 0.0,
+        "right": 0.0,
+        "bottom": 0.0
+      },
+      "lineWidth": 0.9583088667058134,
+      "isFillBetweenUpAndDn": true,
+      "fillColor": "0x1affab40",
+      "tickCount": 3
+    },
+    "sar": {
+      "key": "sar",
+      "name": "SAR",
+      "height": 287.492660011744,
+      "padding": {
+        "left": 0.0,
+        "top": 57.79154433352907,
+        "right": 0.0,
+        "bottom": 4.791544333529067
+      },
+      "zIndex": 0,
+      "calcParam": {
+        "startAf": 0.02,
+        "step": 0.02,
+        "maxAf": 0.2
+      },
+      "radius": null,
+      "paint": {
+        "strokeWidth": 0.9583088667058134,
+        "style": "stroke"
+      },
+      "tipsPadding": {
+        "left": 7.666470933646507,
+        "top": 0.0,
+        "right": 0.0,
+        "bottom": 0.0
+      },
+      "tipsStyle": {
+        "color": "0xff949494",
+        "fontSize": 9.583088667058133,
+        "fontFamily": null,
+        "fontStyle": "normal",
+        "height": 1.0,
+        "fontWeight": "w400",
+        "textBaseline": "ideographic",
+        "decoration": "none",
+        "decorationColor": null,
+        "decorationStyle": null
+      },
+      "tickCount": 3
+    },
+    "time": {
+      "key": "time",
+      "name": "Time",
+      "height": 14.3746330005872,
+      "padding": {
+        
+      },
+      "zIndex": 0,
+      "timeTick": {
+        "style": {
+          "color": "0xff949494",
+          "fontSize": 9.583088667058133,
+          "fontFamily": null,
+          "fontStyle": "normal",
+          "height": 1.0,
+          "fontWeight": "w400",
+          "textBaseline": "ideographic",
+          "decoration": "none",
+          "decorationColor": null,
+          "decorationStyle": null
+        },
+        "textAlign": "center",
+        "textWidth": 76.66470933646507
+      },
+      "position": "middle"
+    },
+    "macd": {
+      "key": "macd",
+      "name": "MACD",
+      "height": 57.4985320023488,
+      "padding": {
+        "left": 0.0,
+        "top": 11.49970640046976,
+        "right": 0.0,
+        "bottom": 0.0
+      },
+      "zIndex": 0,
+      "calcParam": {
+        "s": 12,
+        "l": 26,
+        "m": 9
+      },
+      "difTips": {
+        "label": "DIF: ",
+        "precision": 2,
+        "style": {
+          "color": "0xffdfbf47",
+          "fontSize": 9.583088667058133,
+          "fontFamily": null,
+          "fontStyle": "normal",
+          "height": 1.0,
+          "fontWeight": "w400",
+          "textBaseline": "ideographic",
+          "decoration": "none",
+          "decorationColor": null,
+          "decorationStyle": null
+        }
+      },
+      "deaTips": {
+        "label": "DEA: ",
+        "precision": 2,
+        "style": {
+          "color": "0xff795583",
+          "fontSize": 9.583088667058133,
+          "fontFamily": null,
+          "fontStyle": "normal",
+          "height": 1.0,
+          "fontWeight": "w400",
+          "textBaseline": "ideographic",
+          "decoration": "none",
+          "decorationColor": null,
+          "decorationStyle": null
+        }
+      },
+      "macdTips": {
+        "label": "MACD: ",
+        "precision": 2,
+        "style": {
+          "color": "0xff000000",
+          "fontSize": 9.583088667058133,
+          "fontFamily": null,
+          "fontStyle": "normal",
+          "height": 1.0,
+          "fontWeight": "w400",
+          "textBaseline": "ideographic",
+          "decoration": "none",
+          "decorationColor": null,
+          "decorationStyle": null
+        }
+      },
+      "tipsPadding": {
+        "left": 7.666470933646507,
+        "top": 0.0,
+        "right": 0.0,
+        "bottom": 0.0
+      },
+      "tickCount": 3,
+      "lineWidth": 0.9583088667058134,
+      "precision": 2
+    },
+    "kdj": {
+      "key": "kdj",
+      "name": "KDJ",
+      "height": 57.4985320023488,
+      "padding": {
+        "left": 0.0,
+        "top": 11.49970640046976,
+        "right": 0.0,
+        "bottom": 0.0
+      },
+      "zIndex": 0,
+      "calcParam": {
+        "n": 9,
+        "m1": 3,
+        "m2": 3
+      },
+      "ktips": {
+        "label": "K: ",
+        "precision": 2,
+        "style": {
+          "color": "0xff7a5c79",
+          "fontSize": 9.583088667058133,
+          "fontFamily": null,
+          "fontStyle": "normal",
+          "height": 1.2,
+          "fontWeight": "w400",
+          "textBaseline": "ideographic",
+          "decoration": "none",
+          "decorationColor": null,
+          "decorationStyle": null
+        }
+      },
+      "dtips": {
+        "label": "D: ",
+        "precision": 2,
+        "style": {
+          "color": "0xfffabd3f",
+          "fontSize": 9.583088667058133,
+          "fontFamily": null,
+          "fontStyle": "normal",
+          "height": 1.2,
+          "fontWeight": "w400",
+          "textBaseline": "ideographic",
+          "decoration": "none",
+          "decorationColor": null,
+          "decorationStyle": null
+        }
+      },
+      "jtips": {
+        "label": "D: ",
+        "precision": 2,
+        "style": {
+          "color": "0xffbb72ca",
+          "fontSize": 9.583088667058133,
+          "fontFamily": null,
+          "fontStyle": "normal",
+          "height": 1.2,
+          "fontWeight": "w400",
+          "textBaseline": "ideographic",
+          "decoration": "none",
+          "decorationColor": null,
+          "decorationStyle": null
+        }
+      },
+      "tipsPadding": {
+        "left": 7.666470933646507,
+        "top": 0.0,
+        "right": 0.0,
+        "bottom": 0.0
+      },
+      "tickCount": 3,
+      "lineWidth": 0.9583088667058134,
+      "precision": 2
+    },
+    "mavol": {
+      "key": "maVol",
+      "name": "MAVOL",
+      "height": 57.4985320023488,
+      "padding": {
+        "left": 0.0,
+        "top": 11.49970640046976,
+        "right": 0.0,
+        "bottom": 0.0
+      },
+      "drawBelowTipsArea": false,
+      "volumeIndicator": {
+        "key": "subVol",
+        "name": "VOL",
+        "height": 57.4985320023488,
+        "padding": {
+          "left": 0.0,
+          "top": 11.49970640046976,
+          "right": 0.0,
+          "bottom": 0.0
+        },
+        "paintMode": "combine",
+        "zIndex": -2,
+        "volTips": {
+          "label": "Vol: ",
+          "precision": 2,
+          "style": {
+            "color": "0xff000000",
+            "fontSize": 9.583088667058133,
+            "fontFamily": null,
+            "fontStyle": "normal",
+            "height": 1.0,
+            "fontWeight": "w400",
+            "textBaseline": "ideographic",
+            "decoration": "none",
+            "decorationColor": null,
+            "decorationStyle": null
+          }
+        },
+        "tipsPadding": {
+          "left": 7.666470933646507,
+          "top": 0.0,
+          "right": 0.0,
+          "bottom": 0.0
+        },
+        "tickCount": 3,
+        "precision": 2
+      },
+      "volMaIndicator": {
+        "key": "volMa",
+        "name": "VOLMA",
+        "height": 57.4985320023488,
+        "padding": {
+          "left": 0.0,
+          "top": 11.49970640046976,
+          "right": 0.0,
+          "bottom": 0.0
+        },
+        "zIndex": 0,
+        "calcParams": [
+          {
+            "count": 5,
+            "tips": {
+              "label": "MA5: ",
+              "style": {
+                "color": "0xffff9800",
+                "fontSize": 9.583088667058133,
+                "fontFamily": null,
+                "fontStyle": "normal",
+                "height": 1.2,
+                "fontWeight": "w400",
+                "textBaseline": "ideographic",
+                "decoration": "none",
+                "decorationColor": null,
+                "decorationStyle": null
+              }
+            }
+          },
+          {
+            "count": 10,
+            "tips": {
+              "label": "MA10: ",
+              "style": {
+                "color": "0xff2196f3",
+                "fontSize": 9.583088667058133,
+                "fontFamily": null,
+                "fontStyle": "normal",
+                "height": 1.2,
+                "fontWeight": "w400",
+                "textBaseline": "ideographic",
+                "decoration": "none",
+                "decorationColor": null,
+                "decorationStyle": null
+              }
+            }
+          }
+        ],
+        "tipsPadding": {
+          "left": 7.666470933646507,
+          "top": 0.0,
+          "right": 0.0,
+          "bottom": 0.0
+        },
+        "lineWidth": 0.9583088667058134,
+        "precision": 2
+      }
+    },
+    "subBoll": {
+      "key": "subBoll",
+      "name": "BOLL",
+      "height": 57.4985320023488,
+      "padding": {
+        "left": 0.0,
+        "top": 11.49970640046976,
+        "right": 0.0,
+        "bottom": 0.0
+      },
+      "zIndex": 0,
+      "calcParam": {
+        "n": 20,
+        "std": 2
+      },
+      "mbTips": {
+        "label": "BOLL(20): ",
+        "style": {
+          "color": "0xffffab40",
+          "fontSize": 9.583088667058133,
+          "fontFamily": null,
+          "fontStyle": "normal",
+          "height": 1.2,
+          "fontWeight": "w400",
+          "textBaseline": "ideographic",
+          "decoration": "none",
+          "decorationColor": null,
+          "decorationStyle": null
+        }
+      },
+      "upTips": {
+        "label": "UB: ",
+        "style": {
+          "color": "0xffffab40",
+          "fontSize": 9.583088667058133,
+          "fontFamily": null,
+          "fontStyle": "normal",
+          "height": 1.2,
+          "fontWeight": "w400",
+          "textBaseline": "ideographic",
+          "decoration": "none",
+          "decorationColor": null,
+          "decorationStyle": null
+        }
+      },
+      "dnTips": {
+        "label": "LB: ",
+        "style": {
+          "color": "0xffffab40",
+          "fontSize": 9.583088667058133,
+          "fontFamily": null,
+          "fontStyle": "normal",
+          "height": 1.2,
+          "fontWeight": "w400",
+          "textBaseline": "ideographic",
+          "decoration": "none",
+          "decorationColor": null,
+          "decorationStyle": null
+        }
+      },
+      "tipsPadding": {
+        "left": 7.666470933646507,
+        "top": 0.0,
+        "right": 0.0,
+        "bottom": 0.0
+      },
+      "lineWidth": 0.9583088667058134,
+      "isFillBetweenUpAndDn": true,
+      "fillColor": "0x1affab40",
+      "tickCount": 3
+    },
+    "subSar": {
+      "key": "subSar",
+      "name": "SAR",
+      "height": 57.4985320023488,
+      "padding": {
+        "left": 0.0,
+        "top": 11.49970640046976,
+        "right": 0.0,
+        "bottom": 0.0
+      },
+      "zIndex": 0,
+      "calcParam": {
+        "startAf": 0.02,
+        "step": 0.02,
+        "maxAf": 0.2
+      },
+      "radius": null,
+      "paint": {
+        "strokeWidth": 0.9583088667058134,
+        "style": "stroke"
+      },
+      "tipsPadding": {
+        "left": 7.666470933646507,
+        "top": 0.0,
+        "right": 0.0,
+        "bottom": 0.0
+      },
+      "tipsStyle": {
+        "color": "0xff949494",
+        "fontSize": 9.583088667058133,
+        "fontFamily": null,
+        "fontStyle": "normal",
+        "height": 1.0,
+        "fontWeight": "w400",
+        "textBaseline": "ideographic",
+        "decoration": "none",
+        "decorationColor": null,
+        "decorationStyle": null
+      },
+      "tickCount": 3
+    },
+    "rsi": {
+      "key": "rsi",
+      "name": "RSI",
+      "height": 57.4985320023488,
+      "padding": {
+        "left": 0.0,
+        "top": 11.49970640046976,
+        "right": 0.0,
+        "bottom": 0.0
+      },
+      "zIndex": 0,
+      "calcParams": [
+        {
+          "count": 6,
+          "tips": {
+            "label": "RSI6: ",
+            "precision": 2,
+            "style": {
+              "color": "0xffff6e40",
+              "fontSize": 9.583088667058133,
+              "fontFamily": null,
+              "fontStyle": "normal",
+              "height": 1.2,
+              "fontWeight": "w400",
+              "textBaseline": "ideographic",
+              "decoration": "none",
+              "decorationColor": null,
+              "decorationStyle": null
+            }
+          }
+        },
+        {
+          "count": 12,
+          "tips": {
+            "label": "RSI12: ",
+            "precision": 2,
+            "style": {
+              "color": "0xff448aff",
+              "fontSize": 9.583088667058133,
+              "fontFamily": null,
+              "fontStyle": "normal",
+              "height": 1.2,
+              "fontWeight": "w400",
+              "textBaseline": "ideographic",
+              "decoration": "none",
+              "decorationColor": null,
+              "decorationStyle": null
+            }
+          }
+        },
+        {
+          "count": 24,
+          "tips": {
+            "label": "RSI24: ",
+            "precision": 2,
+            "style": {
+              "color": "0xffff4081",
+              "fontSize": 9.583088667058133,
+              "fontFamily": null,
+              "fontStyle": "normal",
+              "height": 1.2,
+              "fontWeight": "w400",
+              "textBaseline": "ideographic",
+              "decoration": "none",
+              "decorationColor": null,
+              "decorationStyle": null
+            }
+          }
+        }
+      ],
+      "tipsPadding": {
+        "left": 7.666470933646507,
+        "top": 0.0,
+        "right": 0.0,
+        "bottom": 0.0
+      },
+      "tickCount": 3,
+      "lineWidth": 0.9583088667058134,
+      "precision": 2
+    }
+  },
+  "main": [
+    "volume",
+    "candle",
+    "boll",
+    "ema",
+    "ma",
+    "sar",
+    "AVL"
+  ],
+  "sub": [
+    "maVol",
+    "subBoll",
+    "subSar",
+    "rsi"
+  ]
+}
