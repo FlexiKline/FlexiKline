@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,6 +21,8 @@ import 'package:go_router/go_router.dart';
 
 import 'pages/demo_accurate_kline_page.dart';
 import 'pages/bit_kline_page.dart';
+import 'pages/indicator_setting_page.dart';
+import 'pages/kline_setting_page.dart';
 import 'pages/landscape_kline_page.dart';
 import 'pages/ok_kline_page.dart';
 import 'pages/index_page.dart';
@@ -147,6 +150,29 @@ final List<RouteBase> routeList = <RouteBase>[
       return const MaterialPage<void>(
         restorationId: 'accurateKline',
         child: AccurateKlineDemoPage(),
+      );
+    },
+  ),
+  GoRoute(
+    name: 'indicatorSetting',
+    path: '/indicator_setting',
+    pageBuilder: (context, state) {
+      return const MaterialPage<void>(
+        restorationId: 'indicatorSetting',
+        child: IndicatorSettingPage(),
+      );
+    },
+  ),
+  GoRoute(
+    name: 'klineSetting',
+    path: '/kline_setting',
+    pageBuilder: (context, state) {
+      final controller = state.extra as FlexiKlineController;
+      return MaterialPage<void>(
+        restorationId: 'klineSetting',
+        child: KlineSettingPage(
+          controller: controller,
+        ),
       );
     },
   ),

@@ -173,7 +173,9 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
               ),
               TextButton(
                 style: theme.roundBtnStyle,
-                onPressed: () {},
+                onPressed: () {
+                  ref.read(routerProvider).pushNamed('indicatorSetting');
+                },
                 child: Column(
                   children: [
                     Icon(Icons.legend_toggle_rounded, color: theme.t1),
@@ -193,7 +195,12 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
               ),
               TextButton(
                 style: theme.roundBtnStyle,
-                onPressed: () {},
+                onPressed: () {
+                  ref.read(routerProvider).pushNamed(
+                        'klineSetting',
+                        extra: widget.controller,
+                      );
+                },
                 child: Column(
                   children: [
                     Icon(Icons.settings_rounded, color: theme.t1),
@@ -247,6 +254,72 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
               Expanded(
                 child: CheckboxListTile(
                   dense: true,
+                  value: klineState.isShowCountDown,
+                  contentPadding: EdgeInsets.zero,
+                  onChanged: (value) {
+                    klineState.setShowCountDown(!klineState.isShowCountDown);
+                  },
+                  controlAffinity: ListTileControlAffinity.leading,
+                  title: Text(
+                    s.countdown,
+                    style: theme.t1s14w500,
+                  ),
+                  activeColor: theme.t1,
+                  selected: true,
+                  checkColor: theme.tlight,
+                ),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: CheckboxListTile(
+                  dense: true,
+                  value: klineState.isShowCandleHighPrice,
+                  contentPadding: EdgeInsets.zero,
+                  onChanged: (value) {
+                    klineState.setShowCandleHighPrice(
+                      !klineState.isShowCandleHighPrice,
+                    );
+                  },
+                  controlAffinity: ListTileControlAffinity.leading,
+                  title: Text(
+                    s.highPrice,
+                    style: theme.t1s14w500,
+                  ),
+                  activeColor: theme.t1,
+                  selected: true,
+                  checkColor: theme.tlight,
+                ),
+              ),
+              Expanded(
+                child: CheckboxListTile(
+                  dense: true,
+                  value: klineState.isShowCandleLowPrice,
+                  contentPadding: EdgeInsets.zero,
+                  onChanged: (value) {
+                    klineState.setShowCandleLowPrice(
+                      !klineState.isShowCandleLowPrice,
+                    );
+                  },
+                  controlAffinity: ListTileControlAffinity.leading,
+                  title: Text(
+                    s.lowPrice,
+                    style: theme.t1s14w500,
+                  ),
+                  activeColor: theme.t1,
+                  selected: true,
+                  checkColor: theme.tlight,
+                ),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: CheckboxListTile(
+                  dense: true,
                   value: klineState.isShowYAxisTick,
                   contentPadding: EdgeInsets.zero,
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -262,28 +335,6 @@ class _KlineSettingDialogState extends ConsumerState<KlineSettingDialog> {
                   selected: true,
                   checkColor: theme.tlight,
                   // shape: theme.defaultShape,
-                ),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              Expanded(
-                child: CheckboxListTile(
-                  dense: true,
-                  value: klineState.isShowCountDown,
-                  contentPadding: EdgeInsets.zero,
-                  onChanged: (value) {
-                    klineState.setShowCountDown(!klineState.isShowCountDown);
-                  },
-                  controlAffinity: ListTileControlAffinity.leading,
-                  title: Text(
-                    s.countdown,
-                    style: theme.t1s14w500,
-                  ),
-                  activeColor: theme.t1,
-                  selected: true,
-                  checkColor: theme.tlight,
                 ),
               ),
               const Expanded(child: SizedBox.shrink())

@@ -433,7 +433,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
             overflow: TextOverflow.ellipsis,
             height: defaultTextHeight,
           ),
-          minWidth: 45,
+          minWidth: 45 * theme.scale,
           textAlign: TextAlign.center,
           padding: theme.textPading,
           borderRadius: BorderRadius.all(Radius.circular(2 * theme.scale)),

@@ -570,6 +570,26 @@ class S {
     );
   }
 
+  /// `High Price`
+  String get highPrice {
+    return Intl.message(
+      'High Price',
+      name: 'highPrice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Low Price`
+  String get lowPrice {
+    return Intl.message(
+      'Low Price',
+      name: 'lowPrice',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Select Trading Pair`
   String get selectTradingPair {
     return Intl.message(

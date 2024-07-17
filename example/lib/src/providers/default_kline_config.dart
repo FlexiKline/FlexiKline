@@ -135,7 +135,7 @@ class DefaultFlexiKlineConfiguration with FlexiKlineThemeConfigurationMixin {
       if (jsonStr != null && jsonStr.isNotEmpty) {
         final json = jsonDecode(jsonStr);
         if (json is Map<String, dynamic>) {
-          return FlexiKlineConfig.fromJson(json);
+          //return FlexiKlineConfig.fromJson(json);
         }
       }
     } catch (err, stack) {
@@ -149,6 +149,50 @@ class DefaultFlexiKlineConfiguration with FlexiKlineThemeConfigurationMixin {
   void saveFlexiKlineConfig(FlexiKlineConfig config) {
     final jsonSrc = jsonEncode(config);
     CacheUtil().setString(config.key, jsonSrc);
+  }
+
+  @override
+  CandleIndicator genCandleIndicator(covariant IFlexiKlineTheme theme) {
+    return super.genCandleIndicator(theme).copyWith(
+          useCandleColorAsLatestBg: false, // 不使用蜡烛色做背景
+          latest: MarkConfig(
+            show: true,
+            spacing: 1.r,
+            line: LineConfig(
+              type: LineType.dashed,
+              color: theme.priceMarkLine,
+              width: 0.5.r,
+              dashes: [3, 3],
+            ),
+            text: TextAreaConfig(
+              style: TextStyle(
+                fontSize: theme.normalTextSize,
+                color: theme.textColor,
+                overflow: TextOverflow.ellipsis,
+                height: defaultTextHeight,
+              ),
+              background: theme.chartBg,
+              minWidth: 45.r,
+              textAlign: TextAlign.center,
+              padding: theme.textPading,
+              border: BorderSide(color: theme.textColor, width: 0.5.r),
+              borderRadius: BorderRadius.all(Radius.circular(2 * theme.scale)),
+            ),
+          ),
+          countDown: TextAreaConfig(
+            style: TextStyle(
+              fontSize: theme.normalTextSize,
+              color: theme.textColor,
+              overflow: TextOverflow.ellipsis,
+              height: defaultTextHeight,
+            ),
+            textAlign: TextAlign.center,
+            background: theme.countDownTextBg,
+            padding: theme.textPading,
+            border: BorderSide(color: theme.textColor, width: 0.5.r),
+            borderRadius: BorderRadius.all(Radius.circular(2 * theme.scale)),
+          ),
+        );
   }
 
   @override

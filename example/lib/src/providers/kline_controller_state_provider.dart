@@ -74,17 +74,51 @@ class KlineStateNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 蜡烛图中是否展示最新价
+  /// 蜡烛图中是否展示倒计时
   bool get isShowCountDown {
     return controller.indicatorsConfig.candle.showCountDown;
   }
 
-  /// 设置蜡烛图中是否展示最新价
+  /// 设置蜡烛图中是否展示倒计时
   void setShowCountDown(bool isShow) {
     if (isShow == isShowCountDown) return;
     controller.indicatorsConfig = controller.indicatorsConfig.copyWith(
       candle: controller.indicatorsConfig.candle.copyWith(
         showCountDown: isShow,
+      ),
+    );
+    notifyListeners();
+  }
+
+  /// 是否展示蜡烛图最高价
+  bool get isShowCandleHighPrice {
+    return controller.indicatorsConfig.candle.high.show;
+  }
+
+  void setShowCandleHighPrice(bool isShow) {
+    if (isShow == isShowCandleHighPrice) return;
+    controller.indicatorsConfig = controller.indicatorsConfig.copyWith(
+      candle: controller.indicatorsConfig.candle.copyWith(
+        high: controller.indicatorsConfig.candle.high.copyWith(
+          show: isShow,
+        ),
+      ),
+    );
+    notifyListeners();
+  }
+
+  /// 是否展示蜡烛图最低价
+  bool get isShowCandleLowPrice {
+    return controller.indicatorsConfig.candle.low.show;
+  }
+
+  void setShowCandleLowPrice(bool isShow) {
+    if (isShow == isShowCandleLowPrice) return;
+    controller.indicatorsConfig = controller.indicatorsConfig.copyWith(
+      candle: controller.indicatorsConfig.candle.copyWith(
+        low: controller.indicatorsConfig.candle.low.copyWith(
+          show: isShow,
+        ),
       ),
     );
     notifyListeners();
@@ -102,5 +136,76 @@ class KlineStateNotifier extends ChangeNotifier {
       showYAxisTick: isShow,
     );
     notifyListeners();
+  }
+
+  /// 缩放位置
+  ScalePosition get scalePosition {
+    return controller.gestureConfig.scalePosition;
+  }
+
+  void setScalePosition(ScalePosition position) {
+    if (position == scalePosition) return;
+    controller.gestureConfig = controller.gestureConfig.copyWith(
+      scalePosition: position,
+    );
+    notifyListeners();
+  }
+
+  /// 是否支持长按操作
+  bool get supportLongPress {
+    return controller.gestureConfig.supportLongPress;
+  }
+
+  void setSupportLongPress(bool isSupport) {
+    if (isSupport == supportLongPress) return;
+    controller.gestureConfig = controller.gestureConfig.copyWith(
+      supportLongPress: isSupport,
+    );
+    notifyListeners();
+  }
+
+  /// 惯性平移
+  // 容忍参数
+  String get toleranceDesc {
+    final enable = controller.gestureConfig.isInertialPan;
+    if (enable) {
+      final config = controller.gestureConfig.tolerance;
+      return '${config.maxDuration} - ${config.distanceFactor} - ${config.curvestr}';
+    }
+    return '';
+  }
+
+  ToleranceConfig get tolerance {
+    return controller.gestureConfig.tolerance;
+  }
+
+  bool get isInertialPan {
+    return controller.gestureConfig.isInertialPan;
+  }
+
+  void setInertialPan(
+    bool isEnable, {
+    int? maxDuration,
+    double? distanceFactor,
+  }) {
+    if (isEnable) {
+      if (isEnable != isInertialPan ||
+          maxDuration != controller.gestureConfig.tolerance.maxDuration ||
+          distanceFactor != controller.gestureConfig.tolerance.distanceFactor) {
+        controller.gestureConfig = controller.gestureConfig.copyWith(
+          isInertialPan: isEnable,
+          tolerance: controller.gestureConfig.tolerance.copyWith(
+            maxDuration: maxDuration,
+            distanceFactor: distanceFactor,
+          ),
+        );
+        notifyListeners();
+      }
+    } else if (isEnable != isInertialPan) {
+      controller.gestureConfig = controller.gestureConfig.copyWith(
+        isInertialPan: isEnable,
+      );
+      notifyListeners();
+    }
   }
 }

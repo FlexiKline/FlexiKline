@@ -47,6 +47,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "h24_low": MessageLookupByLibrary.simpleMessage("24h low"),
         "h24_turnover": m0,
         "h24_vol": m1,
+        "highPrice": MessageLookupByLibrary.simpleMessage("High Price"),
         "indicatorSetting":
             MessageLookupByLibrary.simpleMessage("Indicator settings"),
         "indicators": MessageLookupByLibrary.simpleMessage("Indicators"),
@@ -58,6 +59,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "landscape": MessageLookupByLibrary.simpleMessage("Landscape"),
         "lastPrice": MessageLookupByLibrary.simpleMessage("Last price"),
         "loadFailed": MessageLookupByLibrary.simpleMessage("Load failed!"),
+        "lowPrice": MessageLookupByLibrary.simpleMessage("Low Price"),
         "mainChartIndicators":
             MessageLookupByLibrary.simpleMessage("Main-chart indicators"),
         "more": MessageLookupByLibrary.simpleMessage("More"),

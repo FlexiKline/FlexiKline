@@ -54,6 +54,8 @@
   "countdown": "倒计时",
   "chartHeight": "图表高度",
   "chartWidth": "图表宽度",
+  "highPrice": "最高价",
+  "lowPrice": "最低价",
 
   "selectTradingPair": "币种选择",
   "labelNameVol": "名称/成交量",

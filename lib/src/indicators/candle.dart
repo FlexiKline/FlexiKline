@@ -208,16 +208,12 @@ class CandlePaintObject<T extends CandleIndicator>
       //   );
       // }
 
-      if (indicator.high.show || indicator.low.show) {
+      if (indicator.high.show) {
         if (hasEnough) {
           // 满足一屏, 根据initData中的最大最小值来记录最大最小偏移量.
           if (m.high == _maxHigh) {
             maxHihgOffset = highOff;
             maxHigh = _maxHigh!;
-          }
-          if (m.low == _minLow) {
-            minLowOffset = lowOff;
-            minLow = _minLow!;
           }
         } else if (dx > 0) {
           // 如果当前绘制不足一屏, 最大最小绘制仅限可见区域.
@@ -225,6 +221,18 @@ class CandlePaintObject<T extends CandleIndicator>
             maxHihgOffset = highOff;
             maxHigh = m.high;
           }
+        }
+      }
+
+      if (indicator.low.show) {
+        if (hasEnough) {
+          // 满足一屏, 根据initData中的最大最小值来记录最大最小偏移量.
+          if (m.low == _minLow) {
+            minLowOffset = lowOff;
+            minLow = _minLow!;
+          }
+        } else {
+          // 如果当前绘制不足一屏, 最大最小绘制仅限可见区域.
           if (m.low <= minLow) {
             minLowOffset = lowOff;
             minLow = m.low;
@@ -233,11 +241,12 @@ class CandlePaintObject<T extends CandleIndicator>
       }
     }
 
-    // 最后绘制在蜡烛图中的最大最小价钱标记
-    if ((indicator.high.show || indicator.low.show) &&
-        (maxHihgOffset != null && maxHigh > BagNum.zero) &&
-        (minLowOffset != null && minLow > BagNum.zero)) {
+    // 最后绘制在蜡烛图中的最大价钱标记
+    if (maxHihgOffset != null && maxHigh > BagNum.zero) {
       paintPriceMark(canvas, maxHihgOffset, maxHigh, indicator.high);
+    }
+    // 最后绘制在蜡烛图中的最小价钱标记
+    if (minLowOffset != null && minLow > BagNum.zero) {
       paintPriceMark(canvas, minLowOffset, minLow, indicator.low);
     }
   }

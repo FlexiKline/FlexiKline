@@ -207,7 +207,7 @@ extension CandleModelExt on CandleModel {
     return null;
   }
 
-  bool get isLong => c > o;
+  bool get isLong => close >= open;
 
   Decimal get change => c - o;
 

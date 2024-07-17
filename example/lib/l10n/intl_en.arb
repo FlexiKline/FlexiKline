@@ -55,6 +55,8 @@
   "countdown": "Countdown",
   "chartHeight": "Chart Height",
   "chartWidth": "Chart Width",
+  "highPrice": "High Price",
+  "lowPrice": "Low Price",
 
   "selectTradingPair": "Select Trading Pair",
   "labelNameVol": "Name/Vol",
