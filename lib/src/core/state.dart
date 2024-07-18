@@ -20,6 +20,7 @@ import 'package:flutter/scheduler.dart';
 import '../constant.dart';
 import '../data/export.dart';
 import '../extension/export.dart';
+import '../framework/collection/fifo_hash_map.dart';
 import '../framework/common.dart';
 import '../model/export.dart';
 import 'binding_base.dart';
@@ -33,6 +34,12 @@ typedef OnLoadMoreCandles = Future<void> Function(CandleReq request);
 
 /// 状态管理: 负责数据的管理, 缓存, 切换, 计算.
 mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
+  @override
+  void init() {
+    super.init();
+    _klineDataCache = FIFOHashMap(capacity: klineDataCacheCapacity);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -82,7 +89,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
     }
   }
 
-  final Map<String, KlineData> _klineDataCache = {};
+  late final FIFOHashMap<String, KlineData> _klineDataCache;
   KlineData _curKlineData = KlineData.empty;
   @override
   KlineData get curKlineData => _curKlineData;
@@ -323,7 +330,8 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
       req.copyWith(state: RequestState.initLoading),
       logger: loggerDelegate,
     );
-    _klineDataCache[req.key] = data;
+    final old = _klineDataCache.append(req.key, data);
+    if (old != null) Future(() => old.dispose());
     _curKlineData = data;
     updateCandleRequestListener(data.req);
     return false;
@@ -381,7 +389,8 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
       reset: reset,
     );
 
-    _klineDataCache[req.key] = data;
+    final old = _klineDataCache.append(req.key, data);
+    if (old != null) Future(() => old.dispose());
 
     if (req.key == curDataKey) {
       if (reset) {

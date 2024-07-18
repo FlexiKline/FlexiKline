@@ -19,5 +19,6 @@ export 'object.dart';
 export 'paint_object_helper.dart';
 export 'serializers.dart';
 export 'configuration.dart';
+export 'collection/fifo_hash_map.dart';
 export 'collection/fixed_hash_queue.dart';
 export 'collection/sortable_hash_set.dart';

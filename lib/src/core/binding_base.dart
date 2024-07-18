@@ -25,14 +25,26 @@ abstract class KlineBindingBase with KlineLog implements ISetting {
   /// 包括: dispose; 增删指标; 调整参数等等.
   final bool autoSave;
 
+  /// klineData数据缓存容量
+  /// 一个FlexiKlineController允许最多维护的KlineData个数.
+  final int? klineDataCacheCapacity;
+
   KlineBindingBase({
     required this.configuration,
     this.autoSave = true,
     ILogger? logger,
+    this.klineDataCacheCapacity,
   }) {
     logd("constrouct");
     loggerDelegate = logger;
     // initFlexiKlineConfig();
+    init();
+  }
+
+  @protected
+  @mustCallSuper
+  void init() {
+    logd("init base");
   }
 
   @protected

@@ -27,5 +27,6 @@ class FlexiKlineController extends KlineBindingBase
     required super.configuration,
     super.autoSave,
     super.logger,
+    super.klineDataCacheCapacity,
   });
 }

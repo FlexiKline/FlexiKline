@@ -72,6 +72,7 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage>
         tag: "OkFlexiKline",
         debug: kDebugMode,
       ),
+      klineDataCacheCapacity: 3,
     );
 
     final klineTheme = ref.read(defaultKlineThemeProvider);

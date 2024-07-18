@@ -22,6 +22,6 @@ void printIterable<T>(Iterable<T> list, {String? tag}) {
 
 void printMap<K, V>(Map<K, V> map, {String? tag}) {
   map.forEach((key, val) {
-    debugPrint('${tag ?? ''}> key:$key val:${val.toString()}');
+    debugPrint('${tag ?? ''}> key:$key \t val:${val.toString()}');
   });
 }

@@ -15,6 +15,7 @@
 import 'dart:collection';
 
 import 'package:flexi_kline/src/framework/collection/fixed_hash_queue.dart';
+import 'package:flexi_kline/src/framework/collection/fifo_hash_map.dart';
 import 'package:flexi_kline/src/framework/collection/sortable_hash_set.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -29,7 +30,10 @@ class Item implements Comparable<Item> {
 
   @override
   int compareTo(Item other) {
-    return weight.compareTo(other.weight);
+    int ret = weight.compareTo(other.weight);
+    if (ret != 0) return ret;
+    if (name == other.name) return 0;
+    return -1;
   }
 
   @override
@@ -77,14 +81,17 @@ void main() {
   });
 
   test('SplayTreeMap', () {
-    SplayTreeMap map = SplayTreeMap<String, Item>();
-    map['zp3'] = Item('zp3', 3);
-    map['zp0'] = Item('zp0', 0);
-    map['zp2'] = Item('zp2', 0);
-    map['zp1'] = Item('zp1', 0);
-    map['zp-1'] = Item('zp-1', -1);
+    SplayTreeMap map = SplayTreeMap<Item, String>();
+    map[Item('zp3', 3)] = 'zp3-3';
+    map[Item('zp0', 0)] = 'zp0-0';
+    map[Item('zp2', -1)] = 'zp2_-1';
+    map[Item('zp1', 0)] = 'zp1_0';
+    map[Item('zp1', -1)] = 'zp1_-1';
 
-    map['zp4'] = Item('zp-4', 0);
+    printMap(map);
+    print('-----');
+    map.remove(map.firstKey());
+    map[Item('zp4', 0)] = 'zp4-0';
     printMap(map);
   });
 
@@ -139,6 +146,23 @@ void main() {
 
     queue.append(Item('D', 1), atFirst: true);
     print(queue);
+  });
+
+  test('FIFOHashMap', () {
+    final map = FIFOHashMap<Item, String>(capacity: 5);
+    map[Item('BTCUSDT-15m', 0)] = 'BTCUSDT-15m-List-0';
+
+    map[Item('ETHUSDT-15m', 2)] = 'ETHUSDT-15m-List-2';
+    map[Item('A10000-15m', 3)] = 'A10000-15m-List-3';
+    map[Item('A10000-1h', 4)] = 'A10000-1h-List-4';
+    map[Item('A10000-1h', 5)] = 'A10000-1h-List-5';
+    map[Item('SOLUSDT-1h', 6)] = 'SOLUSDT-1h-List-6';
+    map[Item('BTCUSDT-15m', 1)] = 'BTCUSDT-15m-List-1';
+    printMap(map);
+    print('---');
+    map[Item('OKBUSDT-1h', 7)] = 'OKBUSDT-1h-List-7';
+
+    printMap(map);
   });
 
   test('merger addAll', () {
