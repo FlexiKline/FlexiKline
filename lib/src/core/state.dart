@@ -134,7 +134,9 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
   /// 将index转换为当前绘制区域对应的X轴坐标. 如果超出范围, 则返回null.
   @override
   double? indexToDx(int index) {
-    double dx = mainChartRight - (index * candleActualWidth - paintDxOffset);
+    double dx = mainChartRight -
+        (index * candleActualWidth - paintDxOffset) -
+        candleWidthHalf;
     if (mainChartRect.inclueDx(dx)) return dx;
     return null;
   }

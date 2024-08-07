@@ -5,14 +5,13 @@ version: 1.0.6
 
 environment:
   sdk: ">=3.3.0 <4.0.0"
-  flutter: 3.19.4
 
 dependencies:
   flutter:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  intl: ^0.18.1
+  intl: ^0.19.0
 
   cupertino_icons: ^1.0.6
 
@@ -39,14 +38,13 @@ dependencies:
   cached_network_image: ^3.3.1
   package_info_plus: ^8.0.0
 
-  flutter_ume_plus: ^3.0.2
-  flutter_ume_kit_dio_plus: ^3.4.5
-  flutter_ume_kit_perf_plus: ^2.0.1
-  flutter_ume_kit_ui_plus: ^2.0.0
+  flutter_ume_plus: ^4.0.0
+  flutter_ume_kit_dio_plus: ^4.0.0
+  flutter_ume_kit_perf_plus: ^4.0.0
+  flutter_ume_kit_ui_plus: ^4.0.0
 
 dependency_overrides:
-  vm_service: 14.2.1
-  intl: ^0.18.1
+  vm_service: ^14.2.1
 
 dev_dependencies:
   flutter_test:
