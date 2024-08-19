@@ -169,7 +169,7 @@ void main() {
     final list1 = List.filled(100000000, fillData1);
     final list2 = List.filled(100000000, fillData2);
 
-    debugPrint('merger add');
+    debugPrint('merger addAll');
     final newList = List.of(list1, growable: true)..addAll(list2);
 
     assert(newList.length == 200000000);
@@ -182,6 +182,16 @@ void main() {
     debugPrint('merger ...');
     final newList = List.of([...list1, ...list2]);
 
+    assert(newList.length == 200000000);
+  });
+
+  test('merger insertAll', () {
+    final list1 = List.filled(100000000, fillData1, growable: true);
+    final list2 = List.filled(100000000, fillData2);
+
+    debugPrint('merger insertAll');
+    final newList = List.of(list1, growable: true);
+    newList.insertAll(newList.length, list2);
     assert(newList.length == 200000000);
   });
 }
