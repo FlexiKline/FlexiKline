@@ -18,3 +18,40 @@ final class Images {
   static const String logo = 'assets/imgs/logo.png';
   static const String logoRound = 'assets/imgs/logo_round.png';
 }
+
+final class SvgRes {
+  SvgRes._();
+
+  // 绘制工具
+  static const String continuousDrawing = 'assets/svgs/continuous_drawing.svg';
+  static const String magnetMode = 'assets/svgs/magnet_mode.svg';
+  static const String lineWeight1 = 'assets/svgs/line_weight_1.svg';
+  static const String lineWeight2 = 'assets/svgs/line_weight_2.svg';
+  static const String lineWeight3 = 'assets/svgs/line_weight_3.svg';
+  static const String lineWeight4 = 'assets/svgs/line_weight_4.svg';
+  static const String lineStyleLine = 'assets/svgs/line_style_line.svg';
+  static const String lineStyleDashed = 'assets/svgs/line_style_dashed.svg';
+  static const String lineStyleDotted = 'assets/svgs/line_style_dotted.svg';
+  static const String visualOrder = 'assets/svgs/visual_order.svg';
+  static const String paintColor = 'assets/svgs/paint_color.svg';
+  static const String lock = 'assets/svgs/lock.svg';
+  static const String unlock = 'assets/svgs/unlock.svg';
+  static const String delete = 'assets/svgs/delete.svg';
+
+  // 绘画类型图标
+  static const String trendLine = 'assets/svgs/trend_line.svg';
+  static const String arrowLine = 'assets/svgs/arrow_line.svg';
+  static const String extendedTrendLine = 'assets/svgs/extended_trend_line.svg';
+  static const String trendAngle = 'assets/svgs/trend_angle.svg';
+  static const String rayLine = 'assets/svgs/ray_line.svg';
+  static const String horizontalTrendLine =
+      'assets/svgs/horizontal_trend_line.svg';
+  static const String horizontalRayLine = 'assets/svgs/horizontal_ray_line.svg';
+  static const String horizontalLine = 'assets/svgs/horizontal_line.svg';
+  static const String verticalLine = 'assets/svgs/vertical_line.svg';
+  static const String crossLine = 'assets/svgs/cross_line.svg';
+  static const String priceLine = 'assets/svgs/price_line.svg';
+  static const String parallelChannel = 'assets/svgs/parallel_channel.svg';
+  static const String fibRetracement = 'assets/svgs/fib_retracement.svg';
+  static const String rectangle = 'assets/svgs/rectangle.svg';
+}

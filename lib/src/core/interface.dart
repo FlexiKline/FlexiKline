@@ -99,8 +99,17 @@ abstract interface class IState {
   int offsetToIndex(Offset offset);
   int dxToIndex(double dx);
 
+  /// 将dx转换为蜡烛数据.
+  CandleModel? dxToCandle(double dx);
+
   /// 将index转换为当前绘制区域对应的X轴坐标. 如果超出范围, 则返回null.
   double? indexToDx(int index);
+
+  /// 将value转换为dy坐标值
+  double? valueToDy(BagNum value, {bool correct = false});
+
+  /// 将dy坐标值转换为value
+  BagNum? dyToValue(double dy);
 
   /// 当前canvas绘制区域第一根蜡烛绘制的偏移量
   double get startCandleDx;
@@ -128,6 +137,8 @@ abstract interface class IState {
 abstract interface class ISetting {
   /// 主区指标集
   MultiPaintObjectIndicator get mainIndicator;
+
+  MultiPaintObjectBox? get mainPaintObject;
 
   /// 副区指标集
   List<Indicator> get subRectIndicators;
@@ -207,6 +218,20 @@ abstract interface class ICross {
 
   /// 取消当前Cross事件
   void cancelCross();
+}
+
+/// Draw图层API
+abstract interface class IDraw {
+  /// 开始
+  // bool onDrawStart(
+  //   GestureData data,
+  // );
+
+  // /// 更新Cross事件数据.
+  // void updateCross(GestureData data);
+
+  // /// 取消当前Cross事件
+  // void cancelCross();
 }
 
 /// Grid图层API

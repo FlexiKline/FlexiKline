@@ -13,10 +13,11 @@
 // limitations under the License.
 
 import 'binding_base.dart';
+import 'interface.dart';
 
 /// 负责绘制图层
 ///
-mixin DrawBinding on KlineBindingBase {
+mixin DrawBinding on KlineBindingBase implements IDraw {
   @override
   void initState() {
     super.initState();
@@ -28,4 +29,22 @@ mixin DrawBinding on KlineBindingBase {
     super.dispose();
     logd('dispose draw');
   }
+
+  // @override
+  // bool onDrawStart(GestureData data, {bool force = false}) {
+  //   // TODO: implement startCross
+  //   throw UnimplementedError();
+  // }
+
+  // /// 更新Cross事件数据.
+  // @override
+  // void updateCross(GestureData data) {
+
+  // }
+
+  // /// 取消当前Cross事件
+  // @override
+  // void cancelCross() {
+
+  // }
 }

@@ -131,6 +131,12 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
     return (dxPaintOffset / candleActualWidth).floor();
   }
 
+  @override
+  CandleModel? dxToCandle(double dx) {
+    final index = dxToIndex(dx);
+    return curKlineData.getCandle(index);
+  }
+
   /// 将index转换为当前绘制区域对应的X轴坐标. 如果超出范围, 则返回null.
   @override
   double? indexToDx(int index) {
@@ -140,6 +146,14 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
     if (mainChartRect.inclueDx(dx)) return dx;
     return null;
   }
+
+  @override
+  double? valueToDy(BagNum value, {bool correct = false}) {
+    return mainPaintObject?.valueToDy(value, correct: correct);
+  }
+
+  @override
+  BagNum? dyToValue(double dy) => mainPaintObject?.dyToValue(dy);
 
   /// 当前canvas绘制区域起始蜡烛右部dx值.
   @override

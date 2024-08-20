@@ -37,6 +37,7 @@ dependencies:
   easy_refresh: ^3.4.0
   cached_network_image: ^3.3.1
   package_info_plus: ^8.0.0
+  flutter_svg: ^2.0.10+1
 
   flutter_ume_plus: ^4.0.0
   flutter_ume_kit_dio_plus: ^4.0.0
@@ -61,6 +62,7 @@ flutter:
   assets:
     - assets/
     - assets/imgs/
+    - assets/svgs/
 
 flutter_intl:
   enabled: true

@@ -41,11 +41,11 @@ class TextArrowButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = ref.watch(themeProvider);
-    return GestureDetector(
+    return InkWell(
       onTap: onPressed,
       child: Container(
         padding: EdgeInsetsDirectional.only(
-          start: 6.r,
+          start: 2.r,
           end: 2.r,
           top: 4.r,
           bottom: 4.r,

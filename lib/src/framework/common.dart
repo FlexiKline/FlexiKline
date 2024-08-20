@@ -93,3 +93,24 @@ const timeKey = ValueKey<dynamic>(IndicatorType.time);
 abstract interface class IPrecomputable {
   dynamic getCalcParam();
 }
+
+enum DrawType {
+  // 单线
+  trendLine, // 趋势线
+  arrowLine, // 箭头
+  extendedTrendLine, // 延长趋势线
+  trendAngle, // 趋势线角度
+  rayLine, // 射线
+  horizontalTrendLine, // 水平趋势线
+  horizontalRayLine, // 水平射线
+  horizontalLine, // 水平线
+  verticalLine, // 垂直线
+  crossLine, // 十字线
+  priceLine, // 价钱线
+  // 多线
+  parallelChannel, // 平行通道
+  // parallelLines, // 平行直线
+  fibRetracement, // 斐波那契回撤
+  // fibExpansion, // 斐波那契扩展
+  rectangle, // 长方形
+}

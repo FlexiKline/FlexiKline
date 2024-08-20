@@ -24,6 +24,7 @@ import '../indicators/avl_indicator.dart';
 import '../providers/instruments_provider.dart';
 import '../providers/default_kline_config.dart';
 import '../theme/flexi_theme.dart';
+import 'components/draw_toolbar.dart';
 import 'components/flexi_kline_indicator_bar.dart';
 import 'components/flexi_kline_mark_view.dart';
 import 'components/market_ticker_view.dart';
@@ -224,11 +225,16 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage>
     );
   }
 
+  /// 绘制工具栏位置坐标
+  Offset _position = Offset.zero;
+
+  /// 构建Kline前景View
   Widget _buildKlineMainForgroundView(BuildContext context) {
     final theme = ref.watch(themeProvider);
     return Stack(
       alignment: AlignmentDirectional.center,
       children: [
+        /// 全屏快捷按钮
         Positioned(
           left: 8.r,
           bottom: 8.r,
@@ -245,6 +251,8 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage>
             onPressed: setFullScreen,
           ),
         ),
+
+        /// 回到初始位置
         Positioned(
           left: 80.r,
           right: 0,
@@ -270,6 +278,26 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage>
             ),
           ),
         ),
+
+        /// 绘制工具栏
+        Positioned(
+          left: _position.dx,
+          top: _position.dy,
+          child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onPanUpdate: (DragUpdateDetails details) {
+              setState(() {
+                _position = Offset(
+                  _position.dx + details.delta.dx,
+                  _position.dy + details.delta.dy,
+                );
+              });
+            },
+            child: DrawToolbar(controller: controller),
+          ),
+        ),
+
+        /// Loading
         ValueListenableBuilder(
           valueListenable: controller.candleRequestListener,
           builder: (context, request, child) {

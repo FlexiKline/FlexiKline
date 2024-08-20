@@ -26,8 +26,10 @@ import '../../dialogs/timebar_select_dialog.dart';
 import '../../theme/export.dart';
 import '../../utils/dialog_manager.dart';
 import '../../widgets/no_thumb_scroll_behavior.dart';
+import '../../widgets/shrink_icon_button.dart';
 import '../../widgets/text_arrow_button.dart';
 import '../common/wide_screen_mixin.dart';
+import 'flexi_kline_draw_tools_bar.dart';
 
 class FlexiKlineSettingBar extends ConsumerStatefulWidget {
   const FlexiKlineSettingBar({
@@ -51,6 +53,8 @@ class FlexiKlineSettingBar extends ConsumerStatefulWidget {
 
 class _FlexiKlineSettingBarState extends ConsumerState<FlexiKlineSettingBar>
     with WideScreenMixin {
+  bool _showDarwTool = false;
+
   @override
   void initState() {
     super.initState();
@@ -65,12 +69,10 @@ class _FlexiKlineSettingBarState extends ConsumerState<FlexiKlineSettingBar>
 
   List<TimeBar> preferTimeBarList = [
     TimeBar.m15,
-    TimeBar.m30,
     TimeBar.H1,
     TimeBar.H4,
     TimeBar.D1,
     TimeBar.W1,
-    TimeBar.M1,
   ];
 
   bool isPreferTimeBar(TimeBar bar) => preferTimeBarList.contains(bar);
@@ -105,7 +107,7 @@ class _FlexiKlineSettingBarState extends ConsumerState<FlexiKlineSettingBar>
     indicatorSettingBtnStatus.value = false;
   }
 
-  void onTabKlineSetting() {
+  void onTapKlineSetting() {
     SmartDialog.show(
       tag: KlineSettingDialog.dialogTag,
       alignment: Alignment.bottomCenter,
@@ -115,14 +117,36 @@ class _FlexiKlineSettingBarState extends ConsumerState<FlexiKlineSettingBar>
     );
   }
 
+  void onTapDrawTool() {
+    // TODO: 通知KlineController 准备.
+    setState(() {
+      _showDarwTool = !_showDarwTool;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        buildSettingBar(context),
+        Visibility(
+          visible: _showDarwTool,
+          child: FlexiKlineDrawToolsBar(
+            controller: widget.controller,
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget buildSettingBar(BuildContext context) {
     final theme = ref.watch(themeProvider);
     final s = S.of(context);
 
     return Container(
       alignment: widget.alignment ?? AlignmentDirectional.centerStart,
-      padding: EdgeInsetsDirectional.only(start: 6.r, end: 6.r),
+      padding: EdgeInsetsDirectional.symmetric(horizontal: 6.r, vertical: 4.r),
       decoration: widget.decoration,
       child: Row(
         mainAxisSize: MainAxisSize.max,
@@ -146,6 +170,12 @@ class _FlexiKlineSettingBarState extends ConsumerState<FlexiKlineSettingBar>
               ),
             ),
           ),
+          Container(
+            color: theme.dividerLine,
+            width: 1.r,
+            height: 18.r,
+            margin: EdgeInsets.symmetric(horizontal: 4.r),
+          ),
           Offstage(
             offstage: wideScreen,
             child: ValueListenableBuilder(
@@ -166,14 +196,22 @@ class _FlexiKlineSettingBarState extends ConsumerState<FlexiKlineSettingBar>
             text: s.indicators,
             iconStatus: indicatorSettingBtnStatus,
           ),
-          IconButton(
-            onPressed: onTabKlineSetting,
-            icon: Icon(
-              Icons.settings_rounded,
-              color: theme.t1,
-              size: 18.r,
-            ),
-          )
+          Container(
+            color: theme.dividerLine,
+            width: 1.r,
+            height: 18.r,
+            margin: EdgeInsets.symmetric(horizontal: 4.r),
+          ),
+          ShrinkIconButton(
+            onPressed: onTapDrawTool,
+            content: Icons.edit_rounded,
+            padding: 6.r,
+          ),
+          ShrinkIconButton(
+            onPressed: onTapKlineSetting,
+            content: Icons.settings_rounded,
+            padding: 6.r,
+          ),
         ],
       ),
     );
@@ -204,7 +242,7 @@ class _FlexiKlineSettingBarState extends ConsumerState<FlexiKlineSettingBar>
                   horizontal: 6.r,
                   vertical: 4.r,
                 ),
-                margin: EdgeInsetsDirectional.symmetric(horizontal: 6.r),
+                margin: EdgeInsetsDirectional.symmetric(horizontal: 2.r),
                 child: Text(
                   bar.bar,
                   style: selected ? theme.t1s14w700 : theme.t1s14w400,

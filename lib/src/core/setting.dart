@@ -263,6 +263,15 @@ mixin SettingBinding on KlineBindingBase
     return _flexiKlineConfig.mainIndicator;
   }
 
+  @override
+  MultiPaintObjectBox? get mainPaintObject {
+    if (mainIndicator.paintObject != null &&
+        mainIndicator.paintObject is MultiPaintObjectBox) {
+      return mainIndicator.paintObject as MultiPaintObjectBox;
+    }
+    return null;
+  }
+
   @protected
   FixedHashQueue<Indicator> get subIndicatorQueue {
     return _flexiKlineConfig.subRectIndicatorQueue;

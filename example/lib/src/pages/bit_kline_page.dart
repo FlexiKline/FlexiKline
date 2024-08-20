@@ -28,6 +28,7 @@ import '../providers/bit_kline_config.dart';
 import '../providers/instruments_provider.dart';
 import '../theme/flexi_theme.dart';
 import '../utils/device_util.dart';
+import 'components/draw_toolbar.dart';
 import 'components/flexi_kline_indicator_bar.dart';
 import 'components/flexi_kline_mark_view.dart';
 import 'components/market_ticker_view.dart';
@@ -203,6 +204,9 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage>
     );
   }
 
+  /// 绘制工具栏位置坐标
+  Offset _position = Offset.zero;
+
   /// Custom Kline Forground UI
   Widget _buildKlineMainForgroundView(BuildContext context) {
     final theme = ref.watch(themeProvider);
@@ -220,6 +224,24 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage>
             iconSize: 20.r,
             icon: const Icon(Icons.fullscreen_rounded),
             onPressed: openLandscapePage,
+          ),
+        ),
+
+        /// 绘制工具栏
+        Positioned(
+          left: _position.dx,
+          top: _position.dy,
+          child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onPanUpdate: (DragUpdateDetails details) {
+              setState(() {
+                _position = Offset(
+                  _position.dx + details.delta.dx,
+                  _position.dy + details.delta.dy,
+                );
+              });
+            },
+            child: DrawToolbar(controller: controller),
           ),
         ),
         Positioned(
