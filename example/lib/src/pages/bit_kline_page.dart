@@ -54,6 +54,12 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage>
   late final FlexiKlineController controller;
   late final BitFlexiKlineConfiguration configuration;
 
+  /// 绘制工具栏位置坐标
+  Offset _position = drawToolbarInitPosition;
+
+  /// 绘制工具栏组件GlobalKey
+  final GlobalKey _drawToolbarKey = GlobalKey();
+
   @override
   FlexiKlineController get flexiKlineController => controller;
 
@@ -84,6 +90,12 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage>
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       initKlineData(req);
+      setState(() {
+        _position = controller.clampInMainRect(
+          _position,
+          size: _drawToolbarKey.currentContext?.size,
+        );
+      });
     });
   }
 
@@ -204,9 +216,6 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage>
     );
   }
 
-  /// 绘制工具栏位置坐标
-  Offset _position = Offset.zero;
-
   /// Custom Kline Forground UI
   Widget _buildKlineMainForgroundView(BuildContext context) {
     final theme = ref.watch(themeProvider);
@@ -229,19 +238,25 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage>
 
         /// 绘制工具栏
         Positioned(
-          left: _position.dx,
           top: _position.dy,
+          left: _position.dx,
           child: GestureDetector(
             behavior: HitTestBehavior.translucent,
             onPanUpdate: (DragUpdateDetails details) {
               setState(() {
-                _position = Offset(
-                  _position.dx + details.delta.dx,
-                  _position.dy + details.delta.dy,
+                _position = controller.clampInMainRect(
+                  Offset(
+                    _position.dx + details.delta.dx,
+                    _position.dy + details.delta.dy,
+                  ),
+                  size: _drawToolbarKey.currentContext?.size,
                 );
               });
             },
-            child: DrawToolbar(controller: controller),
+            child: DrawToolbar(
+              key: _drawToolbarKey,
+              controller: controller,
+            ),
           ),
         ),
         Positioned(

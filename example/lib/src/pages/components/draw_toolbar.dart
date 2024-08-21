@@ -12,13 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:example/src/constants/images.dart';
-import 'package:example/src/theme/flexi_theme.dart';
-import 'package:example/src/widgets/shrink_icon_button.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import '../../constants/images.dart';
+import '../../theme/flexi_theme.dart';
+import '../../widgets/shrink_icon_button.dart';
+
+final drawToolbarInitPosition = Offset(60.r, 200.r);
 
 // 绘制工具栏
 class DrawToolbar extends ConsumerWidget {
@@ -41,9 +44,9 @@ class DrawToolbar extends ConsumerWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          ShrinkIconButton(
-            onPressed: () {},
-            content: Icons.drag_indicator_rounded,
+          Icon(
+            Icons.drag_indicator_rounded,
+            size: defaultShrinkIconSize,
           ),
           ShrinkIconButton(
             onPressed: () {},

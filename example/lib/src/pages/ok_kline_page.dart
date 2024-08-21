@@ -51,6 +51,12 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage>
   late final DefaultFlexiKlineConfiguration configuration;
   bool isFullScreen = false;
 
+  /// 绘制工具栏位置坐标
+  Offset _position = drawToolbarInitPosition;
+
+  /// 绘制工具栏组件GlobalKey
+  final GlobalKey _drawToolbarKey = GlobalKey();
+
   @override
   FlexiKlineController get flexiKlineController => controller;
 
@@ -104,6 +110,13 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage>
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       initKlineData(req);
+
+      setState(() {
+        _position = controller.clampInMainRect(
+          _position,
+          size: _drawToolbarKey.currentContext?.size,
+        );
+      });
     });
   }
 
@@ -225,9 +238,6 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage>
     );
   }
 
-  /// 绘制工具栏位置坐标
-  Offset _position = Offset.zero;
-
   /// 构建Kline前景View
   Widget _buildKlineMainForgroundView(BuildContext context) {
     final theme = ref.watch(themeProvider);
@@ -287,13 +297,19 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage>
             behavior: HitTestBehavior.translucent,
             onPanUpdate: (DragUpdateDetails details) {
               setState(() {
-                _position = Offset(
-                  _position.dx + details.delta.dx,
-                  _position.dy + details.delta.dy,
+                _position = controller.clampInMainRect(
+                  Offset(
+                    _position.dx + details.delta.dx,
+                    _position.dy + details.delta.dy,
+                  ),
+                  size: _drawToolbarKey.currentContext?.size,
                 );
               });
             },
-            child: DrawToolbar(controller: controller),
+            child: DrawToolbar(
+              key: _drawToolbarKey,
+              controller: controller,
+            ),
           ),
         ),
 

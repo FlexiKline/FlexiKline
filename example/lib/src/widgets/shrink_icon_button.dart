@@ -19,6 +19,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 
+final defaultShrinkIconSize = 20.r;
+
 class ShrinkIconButton extends ConsumerWidget {
   const ShrinkIconButton({
     super.key,
@@ -38,7 +40,7 @@ class ShrinkIconButton extends ConsumerWidget {
   final VoidCallback? onPressed;
   final Color? color;
 
-  double get defWidth => 20.r;
+  double get defWidth => defaultShrinkIconSize;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
