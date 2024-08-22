@@ -28,7 +28,7 @@ import '../providers/bit_kline_config.dart';
 import '../providers/instruments_provider.dart';
 import '../theme/flexi_theme.dart';
 import '../utils/device_util.dart';
-import 'components/draw_toolbar.dart';
+import 'components/flexi_kline_draw_toolbar.dart';
 import 'components/flexi_kline_indicator_bar.dart';
 import 'components/flexi_kline_mark_view.dart';
 import 'components/market_ticker_view.dart';
@@ -253,7 +253,7 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage>
                 );
               });
             },
-            child: DrawToolbar(
+            child: FlexiKlineDrawToolbar(
               key: _drawToolbarKey,
               controller: controller,
             ),

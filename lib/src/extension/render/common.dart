@@ -27,6 +27,7 @@ enum DrawDirection {
 }
 
 enum LineType {
+  solid, // 实线
   dashed, // 虚线
-  solid; // 实线
+  dotted; // 点线
 }

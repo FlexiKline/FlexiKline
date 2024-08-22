@@ -24,7 +24,7 @@ import '../indicators/avl_indicator.dart';
 import '../providers/instruments_provider.dart';
 import '../providers/default_kline_config.dart';
 import '../theme/flexi_theme.dart';
-import 'components/draw_toolbar.dart';
+import 'components/flexi_kline_draw_toolbar.dart';
 import 'components/flexi_kline_indicator_bar.dart';
 import 'components/flexi_kline_mark_view.dart';
 import 'components/market_ticker_view.dart';
@@ -294,7 +294,7 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage>
           left: _position.dx,
           top: _position.dy,
           child: GestureDetector(
-            behavior: HitTestBehavior.translucent,
+            // behavior: HitTestBehavior.opaque,
             onPanUpdate: (DragUpdateDetails details) {
               setState(() {
                 _position = controller.clampInMainRect(
@@ -306,7 +306,7 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage>
                 );
               });
             },
-            child: DrawToolbar(
+            child: FlexiKlineDrawToolbar(
               key: _drawToolbarKey,
               controller: controller,
             ),

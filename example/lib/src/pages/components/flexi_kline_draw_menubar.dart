@@ -22,8 +22,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../widgets/no_thumb_scroll_behavior.dart';
 import '../../widgets/shrink_icon_button.dart';
 
-class FlexiKlineDrawToolsBar extends ConsumerStatefulWidget {
-  const FlexiKlineDrawToolsBar({
+// 绘制工具菜单栏
+class FlexiKlineDrawMenubar extends ConsumerStatefulWidget {
+  const FlexiKlineDrawMenubar({
     super.key,
     required this.controller,
   });
@@ -32,11 +33,10 @@ class FlexiKlineDrawToolsBar extends ConsumerStatefulWidget {
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
-      _FlexiKlineDrawToolsBarState();
+      _FlexiKlineDrawMenubarState();
 }
 
-class _FlexiKlineDrawToolsBarState
-    extends ConsumerState<FlexiKlineDrawToolsBar> {
+class _FlexiKlineDrawMenubarState extends ConsumerState<FlexiKlineDrawMenubar> {
   final RegExp _exp = RegExp(r'(?<=[a-z])[A-Z]');
 
   @override
@@ -95,14 +95,6 @@ class _FlexiKlineDrawToolsBarState
             onPressed: () {},
             content: Icons.login_rounded,
           ),
-          // ShrinkIconButton(
-          //   onPressed: () {},
-          //   content: Text(
-          //     'Exit',
-          //     style: theme.t1s14w400,
-          //   ),
-          //   // content: 'Exit',
-          // ),
         ],
       ),
     );

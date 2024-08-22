@@ -29,9 +29,9 @@ final class SvgRes {
   static const String lineWeight2 = 'assets/svgs/line_weight_2.svg';
   static const String lineWeight3 = 'assets/svgs/line_weight_3.svg';
   static const String lineWeight4 = 'assets/svgs/line_weight_4.svg';
-  static const String lineStyleLine = 'assets/svgs/line_style_line.svg';
-  static const String lineStyleDashed = 'assets/svgs/line_style_dashed.svg';
-  static const String lineStyleDotted = 'assets/svgs/line_style_dotted.svg';
+  static const String lineTypeSolid = 'assets/svgs/line_type_solid.svg';
+  static const String lineTypeDashed = 'assets/svgs/line_type_dashed.svg';
+  static const String lineTypeDotted = 'assets/svgs/line_type_dotted.svg';
   static const String visualOrder = 'assets/svgs/visual_order.svg';
   static const String paintColor = 'assets/svgs/paint_color.svg';
   static const String lock = 'assets/svgs/lock.svg';
