@@ -184,6 +184,10 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage>
                 ),
                 mainforegroundViewBuilder: _buildKlineMainForgroundView,
                 onDoubleTap: openLandscapePage,
+                drawToolbar: FlexiKlineDrawToolbar(
+                  key: _drawToolbarKey,
+                  controller: controller,
+                ),
               ),
               FlexiKlineIndicatorBar(
                 controller: controller,
@@ -237,28 +241,29 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage>
         ),
 
         /// 绘制工具栏
-        Positioned(
-          top: _position.dy,
-          left: _position.dx,
-          child: GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onPanUpdate: (DragUpdateDetails details) {
-              setState(() {
-                _position = controller.clampInMainRect(
-                  Offset(
-                    _position.dx + details.delta.dx,
-                    _position.dy + details.delta.dy,
-                  ),
-                  size: _drawToolbarKey.currentContext?.size,
-                );
-              });
-            },
-            child: FlexiKlineDrawToolbar(
-              key: _drawToolbarKey,
-              controller: controller,
-            ),
-          ),
-        ),
+        // Positioned(
+        //   top: _position.dy,
+        //   left: _position.dx,
+        //   child: GestureDetector(
+        //     behavior: HitTestBehavior.translucent,
+        //     onPanUpdate: (DragUpdateDetails details) {
+        //       setState(() {
+        //         _position = controller.clampInMainRect(
+        //           Offset(
+        //             _position.dx + details.delta.dx,
+        //             _position.dy + details.delta.dy,
+        //           ),
+        //           size: _drawToolbarKey.currentContext?.size,
+        //         );
+        //       });
+        //     },
+        //     child: FlexiKlineDrawToolbar(
+        //       key: _drawToolbarKey,
+        //       controller: controller,
+        //     ),
+        //   ),
+        // ),
+
         Positioned(
           child: ValueListenableBuilder(
             valueListenable: controller.candleRequestListener,

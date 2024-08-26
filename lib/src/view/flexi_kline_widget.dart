@@ -14,6 +14,7 @@
 
 import 'dart:developer';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../kline_controller.dart';
@@ -33,6 +34,7 @@ class FlexiKlineWidget extends StatefulWidget {
     bool? autoAdaptLayout,
     bool? isTouchDevice,
     this.onDoubleTap,
+    this.drawToolbar,
   })  : isTouchDevice = isTouchDevice ?? PlatformUtil.isTouch,
         autoAdaptLayout = autoAdaptLayout ?? !PlatformUtil.isMobile;
 
@@ -43,6 +45,7 @@ class FlexiKlineWidget extends StatefulWidget {
   final WidgetBuilder? mainforegroundViewBuilder;
   final Widget? mainBackgroundView;
   final GestureTapCallback? onDoubleTap;
+  final Widget? drawToolbar;
 
   /// 是否自动适配所在布局约束.
   /// 在可以动态调整窗口大小的设备上, 此值为true, 将会动态适配窗口的调整; 否则, 请自行控制.
@@ -57,6 +60,9 @@ class FlexiKlineWidget extends StatefulWidget {
 }
 
 class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
+  Offset _position = Offset.zero;
+  bool _isSweepedDrawToolbar = false;
+
   @override
   void initState() {
     super.initState();
@@ -154,7 +160,13 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
         Positioned.fromRect(
           rect: widget.controller.mainRect,
           child: _buildMainForgroundView(context),
-        )
+        ),
+        if (widget.drawToolbar != null)
+          Positioned(
+            left: _position.dx,
+            top: _position.dy,
+            child: _buildDrawToolbar(context),
+          ),
       ],
     );
   }
@@ -183,6 +195,48 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
                 ),
               ),
             ),
+          ),
+        );
+      },
+    );
+  }
+
+  /// 绘制DrawToolBar
+  /// TODO:
+  /// 1. FlexiKline内部控制是否展示DrawToolbar
+  /// 2. 增加控制DrawToolbar的位置和拖动范围.
+  /// 3. 解决与XXXGestureDetector的手势冲突.
+  Widget _buildDrawToolbar(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: widget.controller.isDrawingLinstener,
+      builder: (context, value, child) {
+        return Visibility(
+          visible: value,
+          child: Listener(
+            onPointerDown: (event) {
+              widget.controller.touchingDrawToolbar = true;
+              _isSweepedDrawToolbar = true;
+            },
+            onPointerMove: (event) {
+              if (!_isSweepedDrawToolbar) {
+                _isSweepedDrawToolbar = true;
+                GestureBinding.instance.gestureArena.sweep(event.pointer);
+              }
+              setState(() {
+                _position = widget.controller.clampInMainRect(
+                  _position + event.delta,
+                );
+              });
+            },
+            onPointerCancel: (event) {
+              if (_isSweepedDrawToolbar) _isSweepedDrawToolbar = false;
+              widget.controller.touchingDrawToolbar = false;
+            },
+            onPointerUp: (event) {
+              if (_isSweepedDrawToolbar) _isSweepedDrawToolbar = false;
+              widget.controller.touchingDrawToolbar = false;
+            },
+            child: widget.drawToolbar!,
           ),
         );
       },

@@ -192,6 +192,10 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage>
                     ),
                     mainforegroundViewBuilder: _buildKlineMainForgroundView,
                     onDoubleTap: setFullScreen,
+                    drawToolbar: FlexiKlineDrawToolbar(
+                      key: _drawToolbarKey,
+                      controller: controller,
+                    ),
                   ),
                   FlexiKlineIndicatorBar(
                     height: 30.r,
@@ -290,28 +294,28 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage>
         ),
 
         /// 绘制工具栏
-        Positioned(
-          left: _position.dx,
-          top: _position.dy,
-          child: GestureDetector(
-            // behavior: HitTestBehavior.opaque,
-            onPanUpdate: (DragUpdateDetails details) {
-              setState(() {
-                _position = controller.clampInMainRect(
-                  Offset(
-                    _position.dx + details.delta.dx,
-                    _position.dy + details.delta.dy,
-                  ),
-                  size: _drawToolbarKey.currentContext?.size,
-                );
-              });
-            },
-            child: FlexiKlineDrawToolbar(
-              key: _drawToolbarKey,
-              controller: controller,
-            ),
-          ),
-        ),
+        // Positioned(
+        //   left: _position.dx,
+        //   top: _position.dy,
+        //   child: GestureDetector(
+        //     // behavior: HitTestBehavior.opaque,
+        //     onPanUpdate: (DragUpdateDetails details) {
+        //       setState(() {
+        //         _position = controller.clampInMainRect(
+        //           Offset(
+        //             _position.dx + details.delta.dx,
+        //             _position.dy + details.delta.dy,
+        //           ),
+        //           size: _drawToolbarKey.currentContext?.size,
+        //         );
+        //       });
+        //     },
+        //     child: FlexiKlineDrawToolbar(
+        //       key: _drawToolbarKey,
+        //       controller: controller,
+        //     ),
+        //   ),
+        // ),
 
         /// Loading
         ValueListenableBuilder(

@@ -51,9 +51,12 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
     }
   }
 
-  bool _isDrawing = false;
+  final ValueNotifier<bool> _isDrawing = ValueNotifier(false);
+  ValueNotifier<bool> get isDrawingLinstener => _isDrawing;
   @override
-  bool get isDrawing => _isDrawing;
+  bool get isDrawing => _isDrawing.value;
+
+  bool touchingDrawToolbar = false;
 
   Offset? _offset;
   void updateOffset(Offset? val) {
@@ -92,7 +95,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
   @override
   void startDraw(DrawType type) {
     currentDrawType.value = type;
-    _isDrawing = true;
+    _isDrawing.value = true;
   }
 
   @override
