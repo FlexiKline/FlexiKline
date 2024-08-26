@@ -34,7 +34,7 @@ class FlexiKlineSizeNotifier extends ValueNotifier<Rect> {
 
 /// 负责FlexiKline的各种设置与配置的获取.
 mixin SettingBinding on KlineBindingBase
-    implements ISetting, IChart, ICross, IGrid {
+    implements ISetting, IGrid, IChart, ICross, IDraw {
   @override
   void initState() {
     super.initState();
@@ -518,6 +518,14 @@ mixin SettingBinding on KlineBindingBase
     _flexiKlineConfig.cross = config;
     markRepaintChart();
     markRepaintCross();
+  }
+
+  @override
+  DrawConfig get drawConfig => _flexiKlineConfig.draw;
+  set drawConfig(DrawConfig config) {
+    _flexiKlineConfig.draw = config;
+    markRepaintChart();
+    markRepaintDraw();
   }
 
   /// TooltipConfig

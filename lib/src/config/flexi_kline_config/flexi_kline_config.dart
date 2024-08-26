@@ -18,6 +18,7 @@ import 'package:json_annotation/json_annotation.dart';
 import '../../extension/export.dart';
 import '../../framework/export.dart';
 import '../cross_config/cross_config.dart';
+import '../draw_config/draw_config.dart';
 import '../gesture_config/gesture_config.dart';
 import '../grid_config/grid_config.dart';
 import '../indicators_config/indicators_config.dart';
@@ -34,6 +35,7 @@ class FlexiKlineConfig {
     required this.setting,
     required this.gesture,
     required this.cross,
+    required this.draw,
     required this.tooltip,
     required this.indicators,
     this.main = const <ValueKey>{},
@@ -45,6 +47,7 @@ class FlexiKlineConfig {
   SettingConfig setting;
   GestureConfig gesture;
   CrossConfig cross;
+  DrawConfig draw;
   TooltipConfig tooltip;
   IndicatorsConfig indicators;
   Set<ValueKey> main;

@@ -109,6 +109,9 @@ class DefaultFlexiKlineTheme extends BaseFlexiKlineTheme
 
   @override
   double setSp(num fontSize) => ScreenUtil().setSp(fontSize);
+
+  @override
+  Color get drawColor => Colors.lightBlue;
 }
 
 final defaultKlineThemeProvider = StateProvider<DefaultFlexiKlineTheme>((ref) {
@@ -152,7 +155,7 @@ class DefaultFlexiKlineConfiguration with FlexiKlineThemeConfigurationMixin {
   }
 
   @override
-  CandleIndicator genCandleIndicator(covariant IFlexiKlineTheme theme) {
+  CandleIndicator genCandleIndicator(DefaultFlexiKlineTheme theme) {
     return super.genCandleIndicator(theme).copyWith(
           useCandleColorAsLatestBg: false, // 不使用蜡烛色做背景
           latest: MarkConfig(

@@ -245,13 +245,13 @@ class IndicatorChartPainter extends CustomPainter {
 class DrawPainter extends CustomPainter {
   DrawPainter({
     required this.controller,
-  }) : super();
+  }) : super(repaint: controller.repaintDraw);
 
   final FlexiKlineController controller;
 
   @override
   void paint(Canvas canvas, Size size) {
-    // TODO: 待实现
+    controller.paintDraw(canvas, size);
   }
 
   @override

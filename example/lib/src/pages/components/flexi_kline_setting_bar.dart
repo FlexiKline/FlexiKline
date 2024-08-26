@@ -53,7 +53,7 @@ class FlexiKlineSettingBar extends ConsumerStatefulWidget {
 
 class _FlexiKlineSettingBarState extends ConsumerState<FlexiKlineSettingBar>
     with WideScreenMixin {
-  bool _showDarwTool = false;
+  bool _showDarwTool = true;
 
   @override
   void initState() {
@@ -118,7 +118,6 @@ class _FlexiKlineSettingBarState extends ConsumerState<FlexiKlineSettingBar>
   }
 
   void onTapDrawTool() {
-    // TODO: 通知KlineController 准备.
     setState(() {
       _showDarwTool = !_showDarwTool;
     });
@@ -206,11 +205,13 @@ class _FlexiKlineSettingBarState extends ConsumerState<FlexiKlineSettingBar>
             onPressed: onTapDrawTool,
             content: Icons.edit_rounded,
             padding: 6.r,
+            color: theme.t1,
           ),
           ShrinkIconButton(
             onPressed: onTapKlineSetting,
             content: Icons.settings_rounded,
             padding: 6.r,
+            color: theme.t1,
           ),
         ],
       ),

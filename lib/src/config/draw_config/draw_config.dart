@@ -20,34 +20,32 @@ import '../point_config/point_config.dart';
 import '../line_config/line_config.dart';
 import '../text_area_config/text_area_config.dart';
 
-part 'cross_config.g.dart';
+part 'draw_config.g.dart';
 
 @CopyWith()
 @FlexiConfigSerializable
-class CrossConfig {
-  CrossConfig({
+class DrawConfig {
+  DrawConfig({
     this.enable = true,
     required this.crosshair,
     required this.point,
+    this.border,
     required this.tickText,
     required this.spacing,
-    this.showLatestTipsInBlank = true,
-    this.moveByCandleInBlank = false,
+    this.gapBackground = Colors.transparent,
   });
 
   final bool enable;
   final LineConfig crosshair;
   final PointConfig point;
+  final PointConfig? border;
   final TextAreaConfig tickText;
 
   /// onCross时, 刻度[tickText]与绘制边界的间距.
   final double spacing;
 
-  /// onCross时, 当移动到空白区域时, Tips区域是否展示最新的蜡烛的Tips数据.
-  bool showLatestTipsInBlank = true;
-
-  ///  onCross时, 当移动到空白区域时, 是否继续按蜡烛宽度移动.
-  bool moveByCandleInBlank = false;
+  /// 两个时间刻度之间的背景色
+  final Color gapBackground;
 
   Paint get crosshairPaint => Paint()
     ..color = crosshair.color
@@ -59,8 +57,16 @@ class CrossConfig {
     ..strokeWidth = point.width
     ..style = PaintingStyle.fill;
 
-  factory CrossConfig.fromJson(Map<String, dynamic> json) =>
-      _$CrossConfigFromJson(json);
+  Paint? get borderPaint {
+    if (border == null) return null;
+    return Paint()
+      ..color = border!.color
+      ..strokeWidth = border!.width
+      ..style = PaintingStyle.stroke;
+  }
 
-  Map<String, dynamic> toJson() => _$CrossConfigToJson(this);
+  factory DrawConfig.fromJson(Map<String, dynamic> json) =>
+      _$DrawConfigFromJson(json);
+
+  Map<String, dynamic> toJson() => _$DrawConfigToJson(this);
 }

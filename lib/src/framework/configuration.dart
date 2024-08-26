@@ -54,6 +54,7 @@ abstract interface class IFlexiKlineTheme {
   /// 分隔线
   Color get gridLine;
   Color get crosshair;
+  Color get drawColor;
   Color get priceMarkLine;
 
   /// 文本颜色配置

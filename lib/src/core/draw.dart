@@ -12,12 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:flutter/material.dart';
+
+import '../extension/export.dart';
+import '../framework/export.dart';
+import '../model/gesture_data.dart';
 import 'binding_base.dart';
 import 'interface.dart';
+import 'setting.dart';
 
 /// 负责绘制图层
 ///
-mixin DrawBinding on KlineBindingBase implements IDraw {
+mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
   @override
   void initState() {
     super.initState();
@@ -30,21 +36,134 @@ mixin DrawBinding on KlineBindingBase implements IDraw {
     logd('dispose draw');
   }
 
-  // @override
-  // bool onDrawStart(GestureData data, {bool force = false}) {
-  //   // TODO: implement startCross
-  //   throw UnimplementedError();
-  // }
+  final ValueNotifier<int> _repaintDraw = ValueNotifier(0);
+  @override
+  Listenable get repaintDraw => _repaintDraw;
+  void _markRepaint() {
+    _repaintDraw.value++;
+  }
 
-  // /// 更新Cross事件数据.
-  // @override
-  // void updateCross(GestureData data) {
+  @override
+  void markRepaintDraw() {
+    if (isDrawing) {
+      updateOffset(_offset);
+      _markRepaint();
+    }
+  }
 
-  // }
+  bool _isDrawing = false;
+  @override
+  bool get isDrawing => _isDrawing;
 
-  // /// 取消当前Cross事件
-  // @override
-  // void cancelCross() {
+  Offset? _offset;
+  void updateOffset(Offset? val) {
+    if (val != null) {
+      _offset = val;
+    } else {
+      _offset = null;
+    }
+  }
 
-  // }
+  /// 矫正Cross
+  Offset? _correctDrawOffset(Offset val) {
+    if (val.isInfinite) return null;
+
+    // Horizontal轴按蜡烛线移动.
+    val = val.clamp(canvasRect);
+    final diff = startCandleDx - val.dx;
+    if (!crossConfig.moveByCandleInBlank && diff < 0) return val;
+    return Offset(
+      val.dx + diff % candleActualWidth - candleWidthHalf,
+      val.dy,
+    );
+
+    // 当超出边界时, 校正到边界.
+    // if (canvasRect.contains(val)) {
+    //   final diff = (startCandleDx - val.dx) % candleActualWidth;
+    //   final dx = val.dx + diff - candleWidthHalf;
+    //   return Offset(dx, val.dy);
+    // } else {
+    //   return val.clamp(canvasRect);
+    // }
+  }
+
+  final ValueNotifier<DrawType?> currentDrawType = ValueNotifier(null);
+
+  @override
+  void startDraw(DrawType type) {
+    currentDrawType.value = type;
+    _isDrawing = true;
+  }
+
+  @override
+  bool startCross(GestureData data, {bool force = false}) {
+    if (drawConfig.enable) {
+      if (force || isDrawing) {
+        logd('handleTap draw > $force > ${data.offset}');
+        // 更新并校正起始焦点.
+        updateOffset(data.offset);
+        _markRepaint();
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @override
+  void updateCross(GestureData data) {
+    if (drawConfig.enable && isDrawing) {
+      updateOffset(data.offset);
+      _markRepaint();
+    }
+  }
+
+  @override
+  void cancelCross() {
+    if (isDrawing || _offset != null) {
+      updateOffset(null);
+      _markRepaint();
+    }
+  }
+
+  /// 绘制Draw图层
+  @override
+  void paintDraw(Canvas canvas, Size size) {
+    if (!drawConfig.enable || !isDrawing) return;
+
+    final offset = _offset;
+    if (offset == null || offset.isInfinite) {
+      return;
+    }
+
+    paintCrossLine(canvas, offset);
+  }
+
+  void paintCrossLine(Canvas canvas, Offset offset) {
+    final path = Path()
+      ..moveTo(mainChartLeft, offset.dy)
+      ..lineTo(mainChartRight, offset.dy)
+      ..moveTo(offset.dx, 0)
+      ..lineTo(offset.dx, canvasHeight);
+
+    canvas.drawLineType(
+      drawConfig.crosshair.type,
+      path,
+      drawConfig.crosshairPaint,
+      dashes: drawConfig.crosshair.dashes,
+    );
+
+    canvas.drawCircle(
+      offset,
+      drawConfig.point.radius,
+      drawConfig.pointPaint,
+    );
+
+    if (drawConfig.border != null) {
+      canvas.drawCircle(
+        offset,
+        drawConfig.border!.radius,
+        drawConfig.borderPaint!,
+      );
+    }
+  }
 }

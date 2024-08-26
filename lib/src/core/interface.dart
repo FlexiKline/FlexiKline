@@ -184,6 +184,9 @@ abstract interface class ISetting {
   /// CrossConfig
   CrossConfig get crossConfig;
 
+  /// DrawConfig
+  DrawConfig get drawConfig;
+
   /// TooltipConfig
   TooltipConfig get tooltipConfig;
 }
@@ -222,16 +225,28 @@ abstract interface class ICross {
 
 /// Draw图层API
 abstract interface class IDraw {
-  /// 开始
-  // bool onDrawStart(
-  //   GestureData data,
-  // );
+  Listenable get repaintDraw;
 
-  // /// 更新Cross事件数据.
-  // void updateCross(GestureData data);
+  void paintDraw(Canvas canvas, Size size);
 
-  // /// 取消当前Cross事件
-  // void cancelCross();
+  void markRepaintDraw();
+
+  /// 开始绘制[type]指定的图形
+  void startDraw(DrawType type);
+
+  /// 是否正在绘制图形中
+  bool get isDrawing;
+
+  /// 开始Cross事件
+  /// [force] 将会强制启动cross事件.
+  /// 当返回true时, 说明已开始展示Corss; 否则, 说明之前处在Cross, 结束上次的Cross事件.
+  bool startCross(GestureData data, {bool force = false});
+
+  /// 更新Cross事件数据.
+  void updateCross(GestureData data);
+
+  /// 取消当前Cross事件
+  void cancelCross();
 }
 
 /// Grid图层API

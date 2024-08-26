@@ -103,6 +103,9 @@ class BitFlexiKlineLightTheme extends BaseBitFlexiKlineTheme {
 
   @override
   Color get tooltipTextColor => textColor;
+
+  @override
+  Color get drawColor => Colors.blue;
 }
 
 class BitFlexiKlineDarkTheme extends BaseBitFlexiKlineTheme {
@@ -144,6 +147,9 @@ class BitFlexiKlineDarkTheme extends BaseBitFlexiKlineTheme {
 
   @override
   Color tooltipTextColor = const Color(0xFF9D9DA1);
+
+  @override
+  Color get drawColor => Colors.lightBlue;
 }
 
 final lightBitFlexiKlineTheme = BitFlexiKlineLightTheme();
@@ -202,7 +208,7 @@ class BitFlexiKlineConfiguration with FlexiKlineThemeConfigurationMixin {
   }
 
   @override
-  CrossConfig genCrossConfig(covariant IFlexiKlineTheme theme) {
+  CrossConfig genCrossConfig(BaseBitFlexiKlineTheme theme) {
     return super.genCrossConfig(theme).copyWith(
           moveByCandleInBlank: true,
         );
@@ -216,7 +222,7 @@ class BitFlexiKlineConfiguration with FlexiKlineThemeConfigurationMixin {
   }
 
   @override
-  SettingConfig genSettingConfig(covariant IFlexiKlineTheme theme) {
+  SettingConfig genSettingConfig(BaseBitFlexiKlineTheme theme) {
     return super.genSettingConfig(theme).copyWith(
           candleFixedSpacing: null,
           candleSpacingParts: 7,
@@ -231,7 +237,7 @@ class BitFlexiKlineConfiguration with FlexiKlineThemeConfigurationMixin {
   }
 
   @override
-  BOLLIndicator genBollIndicator(covariant IFlexiKlineTheme theme) {
+  BOLLIndicator genBollIndicator(BaseBitFlexiKlineTheme theme) {
     final defBoll = super.genBollIndicator(theme);
     return defBoll.copyWith(
       mbTips: defBoll.mbTips.copyWith(
@@ -248,7 +254,7 @@ class BitFlexiKlineConfiguration with FlexiKlineThemeConfigurationMixin {
   }
 
   @override
-  BOLLIndicator genSubBollIndicator(IFlexiKlineTheme theme) {
+  BOLLIndicator genSubBollIndicator(BaseBitFlexiKlineTheme theme) {
     final defBoll = super.genSubBollIndicator(theme);
     return defBoll.copyWith(
       mbTips: defBoll.mbTips.copyWith(
@@ -265,7 +271,7 @@ class BitFlexiKlineConfiguration with FlexiKlineThemeConfigurationMixin {
   }
 
   @override
-  SARIndicator genSarIndicator(IFlexiKlineTheme theme) {
+  SARIndicator genSarIndicator(BaseBitFlexiKlineTheme theme) {
     return super.genSarIndicator(theme).copyWith(
           radius: 2 * theme.scale,
           paint: const PaintConfig(
@@ -276,7 +282,7 @@ class BitFlexiKlineConfiguration with FlexiKlineThemeConfigurationMixin {
   }
 
   @override
-  SARIndicator genSubSarIndicator(IFlexiKlineTheme theme) {
+  SARIndicator genSubSarIndicator(BaseBitFlexiKlineTheme theme) {
     return super.genSubSarIndicator(theme).copyWith(
           radius: 2 * theme.scale,
           paint: const PaintConfig(

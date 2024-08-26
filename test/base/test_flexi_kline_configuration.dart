@@ -93,6 +93,9 @@ class TestFlexiKlineTheme implements IFlexiKlineTheme {
 
   @override
   Color tooltipTextColor = const Color(0xFF949494);
+
+  @override
+  Color get drawColor => Colors.blueAccent;
 }
 
 class TestFlexiKlineConfiguration with FlexiKlineThemeConfigurationMixin {

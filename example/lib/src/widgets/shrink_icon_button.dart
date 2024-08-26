@@ -63,7 +63,7 @@ class ShrinkIconButton extends ConsumerWidget {
       return Icon(
         content,
         size: math.max(width ?? defWidth, height ?? 0),
-        color: color ?? theme.t1,
+        color: color ?? theme.t2,
       );
     } else if (content is String) {
       if (content.endsWith('.svg')) {

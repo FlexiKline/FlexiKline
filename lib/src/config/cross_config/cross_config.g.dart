@@ -11,7 +11,7 @@ abstract class _$CrossConfigCWProxy {
 
   CrossConfig crosshair(LineConfig crosshair);
 
-  CrossConfig point(CrossPointConfig point);
+  CrossConfig point(PointConfig point);
 
   CrossConfig tickText(TextAreaConfig tickText);
 
@@ -30,7 +30,7 @@ abstract class _$CrossConfigCWProxy {
   CrossConfig call({
     bool? enable,
     LineConfig? crosshair,
-    CrossPointConfig? point,
+    PointConfig? point,
     TextAreaConfig? tickText,
     double? spacing,
     bool? showLatestTipsInBlank,
@@ -51,7 +51,7 @@ class _$CrossConfigCWProxyImpl implements _$CrossConfigCWProxy {
   CrossConfig crosshair(LineConfig crosshair) => this(crosshair: crosshair);
 
   @override
-  CrossConfig point(CrossPointConfig point) => this(point: point);
+  CrossConfig point(PointConfig point) => this(point: point);
 
   @override
   CrossConfig tickText(TextAreaConfig tickText) => this(tickText: tickText);
@@ -96,7 +96,7 @@ class _$CrossConfigCWProxyImpl implements _$CrossConfigCWProxy {
       point: point == const $CopyWithPlaceholder() || point == null
           ? _value.point
           // ignore: cast_nullable_to_non_nullable
-          : point as CrossPointConfig,
+          : point as PointConfig,
       tickText: tickText == const $CopyWithPlaceholder() || tickText == null
           ? _value.tickText
           // ignore: cast_nullable_to_non_nullable
@@ -127,77 +127,6 @@ extension $CrossConfigCopyWith on CrossConfig {
   _$CrossConfigCWProxy get copyWith => _$CrossConfigCWProxyImpl(this);
 }
 
-abstract class _$CrossPointConfigCWProxy {
-  CrossPointConfig radius(double radius);
-
-  CrossPointConfig width(double width);
-
-  CrossPointConfig color(Color color);
-
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `CrossPointConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
-  ///
-  /// Usage
-  /// ```dart
-  /// CrossPointConfig(...).copyWith(id: 12, name: "My name")
-  /// ````
-  CrossPointConfig call({
-    double? radius,
-    double? width,
-    Color? color,
-  });
-}
-
-/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfCrossPointConfig.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfCrossPointConfig.copyWith.fieldName(...)`
-class _$CrossPointConfigCWProxyImpl implements _$CrossPointConfigCWProxy {
-  const _$CrossPointConfigCWProxyImpl(this._value);
-
-  final CrossPointConfig _value;
-
-  @override
-  CrossPointConfig radius(double radius) => this(radius: radius);
-
-  @override
-  CrossPointConfig width(double width) => this(width: width);
-
-  @override
-  CrossPointConfig color(Color color) => this(color: color);
-
-  @override
-
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `CrossPointConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
-  ///
-  /// Usage
-  /// ```dart
-  /// CrossPointConfig(...).copyWith(id: 12, name: "My name")
-  /// ````
-  CrossPointConfig call({
-    Object? radius = const $CopyWithPlaceholder(),
-    Object? width = const $CopyWithPlaceholder(),
-    Object? color = const $CopyWithPlaceholder(),
-  }) {
-    return CrossPointConfig(
-      radius: radius == const $CopyWithPlaceholder() || radius == null
-          ? _value.radius
-          // ignore: cast_nullable_to_non_nullable
-          : radius as double,
-      width: width == const $CopyWithPlaceholder() || width == null
-          ? _value.width
-          // ignore: cast_nullable_to_non_nullable
-          : width as double,
-      color: color == const $CopyWithPlaceholder() || color == null
-          ? _value.color
-          // ignore: cast_nullable_to_non_nullable
-          : color as Color,
-    );
-  }
-}
-
-extension $CrossPointConfigCopyWith on CrossPointConfig {
-  /// Returns a callable class that can be used as follows: `instanceOfCrossPointConfig.copyWith(...)` or like so:`instanceOfCrossPointConfig.copyWith.fieldName(...)`.
-  // ignore: library_private_types_in_public_api
-  _$CrossPointConfigCWProxy get copyWith => _$CrossPointConfigCWProxyImpl(this);
-}
-
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
@@ -205,7 +134,7 @@ extension $CrossPointConfigCopyWith on CrossPointConfig {
 CrossConfig _$CrossConfigFromJson(Map<String, dynamic> json) => CrossConfig(
       enable: json['enable'] as bool? ?? true,
       crosshair: LineConfig.fromJson(json['crosshair'] as Map<String, dynamic>),
-      point: CrossPointConfig.fromJson(json['point'] as Map<String, dynamic>),
+      point: PointConfig.fromJson(json['point'] as Map<String, dynamic>),
       tickText:
           TextAreaConfig.fromJson(json['tickText'] as Map<String, dynamic>),
       spacing: (json['spacing'] as num).toDouble(),
@@ -222,20 +151,4 @@ Map<String, dynamic> _$CrossConfigToJson(CrossConfig instance) =>
       'spacing': instance.spacing,
       'showLatestTipsInBlank': instance.showLatestTipsInBlank,
       'moveByCandleInBlank': instance.moveByCandleInBlank,
-    };
-
-CrossPointConfig _$CrossPointConfigFromJson(Map<String, dynamic> json) =>
-    CrossPointConfig(
-      radius: (json['radius'] as num?)?.toDouble() ?? 2,
-      width: (json['width'] as num?)?.toDouble() ?? 6,
-      color: json['color'] == null
-          ? Colors.black
-          : const ColorConverter().fromJson(json['color'] as String),
-    );
-
-Map<String, dynamic> _$CrossPointConfigToJson(CrossPointConfig instance) =>
-    <String, dynamic>{
-      'radius': instance.radius,
-      'width': instance.width,
-      'color': const ColorConverter().toJson(instance.color),
     };

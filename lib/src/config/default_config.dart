@@ -20,6 +20,8 @@ import '../framework/export.dart';
 import '../indicators/export.dart';
 import 'boll_param/boll_param.dart';
 import 'cross_config/cross_config.dart';
+import 'point_config/point_config.dart';
+import 'draw_config/draw_config.dart';
 import 'flexi_kline_config/flexi_kline_config.dart';
 import 'gesture_config/gesture_config.dart';
 import 'grid_config/grid_config.dart';
@@ -177,6 +179,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       setting: genSettingConfig(theme),
       gesture: genGestureConfig(theme),
       cross: genCrossConfig(theme),
+      draw: genDrawConfig(theme),
       tooltip: genTooltipConfig(theme),
       indicators: genIndicatorsConfig(theme),
       main: {},
@@ -279,7 +282,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
         type: LineType.dashed,
         dashes: const [3, 3],
       ),
-      point: CrossPointConfig(
+      point: PointConfig(
         radius: 2 * theme.scale,
         width: 6 * theme.scale,
         color: theme.crosshair,
@@ -301,6 +304,44 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       spacing: 1 * theme.scale,
       // onCross时, 当移动到空白区域时, Tips区域是否展示最新的蜡烛的Tips数据.
       showLatestTipsInBlank: true,
+    );
+  }
+
+  DrawConfig genDrawConfig(covariant IFlexiKlineTheme theme) {
+    return DrawConfig(
+      enable: true,
+      crosshair: LineConfig(
+        width: 0.5 * theme.scale,
+        color: theme.drawColor,
+        type: LineType.dashed,
+        dashes: const [3, 3],
+      ),
+      point: PointConfig(
+        radius: 9 * theme.scale,
+        width: 0 * theme.scale,
+        color: Colors.white,
+      ),
+      border: PointConfig(
+        radius: 10 * theme.scale,
+        width: 1 * theme.scale,
+        color: theme.drawColor,
+      ),
+      tickText: TextAreaConfig(
+        style: TextStyle(
+          color: theme.tickTextColor,
+          fontSize: theme.normalTextSize,
+          fontWeight: FontWeight.normal,
+          height: defaultTextHeight,
+        ),
+        background: theme.crossTextBg,
+        padding: EdgeInsets.all(2 * theme.scale),
+        border: BorderSide.none,
+        borderRadius: BorderRadius.all(
+          Radius.circular(2 * theme.scale),
+        ),
+      ),
+      spacing: 1 * theme.scale,
+      gapBackground: theme.drawColor.withOpacity(0.1),
     );
   }
 
@@ -331,7 +372,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
     );
   }
 
-  IndicatorsConfig genIndicatorsConfig(IFlexiKlineTheme theme) {
+  IndicatorsConfig genIndicatorsConfig(covariant IFlexiKlineTheme theme) {
     return IndicatorsConfig(
       /// 主区
       candle: genCandleIndicator(theme),
@@ -638,7 +679,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
     );
   }
 
-  SARIndicator genSarIndicator(IFlexiKlineTheme theme) {
+  SARIndicator genSarIndicator(covariant IFlexiKlineTheme theme) {
     return SARIndicator(
       key: sarKey,
       height: theme.mainIndicatorHeight,
@@ -857,7 +898,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
     );
   }
 
-  BOLLIndicator genSubBollIndicator(IFlexiKlineTheme theme) {
+  BOLLIndicator genSubBollIndicator(covariant IFlexiKlineTheme theme) {
     return BOLLIndicator(
       key: subBollKey, // 区别于主区bollKey的地方
       height: theme.subIndicatorHeight,
@@ -906,7 +947,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
     );
   }
 
-  SARIndicator genSubSarIndicator(IFlexiKlineTheme theme) {
+  SARIndicator genSubSarIndicator(covariant IFlexiKlineTheme theme) {
     return SARIndicator(
       key: subSarKey, // 区别于主区sarKey的地方
       height: theme.subIndicatorHeight,
@@ -928,7 +969,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
     );
   }
 
-  RSIIndicator genSubRsiIndicator(IFlexiKlineTheme theme) {
+  RSIIndicator genSubRsiIndicator(covariant IFlexiKlineTheme theme) {
     return RSIIndicator(
       height: theme.subIndicatorHeight,
       padding: theme.subIndicatorPadding,

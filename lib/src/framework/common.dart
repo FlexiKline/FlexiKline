@@ -114,3 +114,9 @@ enum DrawType {
   // fibExpansion, // 斐波那契扩展
   rectangle, // 长方形
 }
+
+enum OverlayMode {
+  normal,
+  weakMagnet,
+  strongMagnet;
+}
