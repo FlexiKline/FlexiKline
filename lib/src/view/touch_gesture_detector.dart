@@ -109,6 +109,7 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
 
   /// 原始移动
   /// 当原始移动时, 当前如果正处在crossing中, 发生冲突, 清理手势竞技场, 响应Cross平移事件
+  /// TODO: 后续当isDrawing时, 直接return; 不能清理, 如果清理会导致drawToolbar无法响应事件.
   void onPointerMove(PointerMoveEvent event) {
     if (controller.isCrossing) {
       if (!isSweeped) {

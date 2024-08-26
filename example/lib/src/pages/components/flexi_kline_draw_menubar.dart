@@ -37,7 +37,7 @@ class FlexiKlineDrawMenubar extends ConsumerStatefulWidget {
 }
 
 class _FlexiKlineDrawMenubarState extends ConsumerState<FlexiKlineDrawMenubar> {
-  final RegExp _exp = RegExp(r'(?<=[a-z])[A-Z]');
+  // final RegExp _exp = RegExp(r'(?<=[a-z])[A-Z]');
 
   @override
   Widget build(BuildContext context) {
@@ -58,8 +58,8 @@ class _FlexiKlineDrawMenubarState extends ConsumerState<FlexiKlineDrawMenubar> {
                     return ShrinkIconButton(
                       key: ValueKey(type),
                       onPressed: () {},
-                      content:
-                          'assets/svgs/${type.name.replaceAllMapped(_exp, (m) => '_${m.group(0)}').toLowerCase()}.svg',
+                      content: 'assets/svgs/${type.name}.svg',
+                      // content: 'assets/svgs/${type.name.replaceAllMapped(_exp, (m) => '_${m.group(0)}').toLowerCase()}.svg',
                     );
                   }).toList(),
                 ),

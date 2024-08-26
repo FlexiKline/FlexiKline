@@ -39,19 +39,19 @@ final class SvgRes {
   static const String delete = 'assets/svgs/delete.svg';
 
   // 绘画类型图标
-  static const String trendLine = 'assets/svgs/trend_line.svg';
-  static const String arrowLine = 'assets/svgs/arrow_line.svg';
-  static const String extendedTrendLine = 'assets/svgs/extended_trend_line.svg';
-  static const String trendAngle = 'assets/svgs/trend_angle.svg';
-  static const String rayLine = 'assets/svgs/ray_line.svg';
+  static const String trendLine = 'assets/svgs/trendLine.svg';
+  static const String arrowLine = 'assets/svgs/arrowLine.svg';
+  static const String extendedTrendLine = 'assets/svgs/extendedTrendLine.svg';
+  static const String trendAngle = 'assets/svgs/trendAngle.svg';
+  static const String rayLine = 'assets/svgs/rayLine.svg';
   static const String horizontalTrendLine =
-      'assets/svgs/horizontal_trend_line.svg';
-  static const String horizontalRayLine = 'assets/svgs/horizontal_ray_line.svg';
-  static const String horizontalLine = 'assets/svgs/horizontal_line.svg';
-  static const String verticalLine = 'assets/svgs/vertical_line.svg';
-  static const String crossLine = 'assets/svgs/cross_line.svg';
-  static const String priceLine = 'assets/svgs/price_line.svg';
-  static const String parallelChannel = 'assets/svgs/parallel_channel.svg';
-  static const String fibRetracement = 'assets/svgs/fib_retracement.svg';
+      'assets/svgs/horizontalTrendLine.svg';
+  static const String horizontalRayLine = 'assets/svgs/horizontalRayLine.svg';
+  static const String horizontalLine = 'assets/svgs/horizontalLine.svg';
+  static const String verticalLine = 'assets/svgs/verticalLine.svg';
+  static const String crossLine = 'assets/svgs/crossLine.svg';
+  static const String priceLine = 'assets/svgs/priceLine.svg';
+  static const String parallelChannel = 'assets/svgs/parallelChannel.svg';
+  static const String fibRetracement = 'assets/svgs/fibRetracement.svg';
   static const String rectangle = 'assets/svgs/rectangle.svg';
 }

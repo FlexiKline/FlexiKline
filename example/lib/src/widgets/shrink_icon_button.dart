@@ -66,14 +66,14 @@ class ShrinkIconButton extends ConsumerWidget {
         color: color ?? theme.t1,
       );
     } else if (content is String) {
-      if ((content as String).endsWith('.svg')) {
+      if (content.endsWith('.svg')) {
         return SvgPicture.asset(
           content,
           width: width ?? defWidth,
           height: height,
           colorFilter: ColorFilter.mode(color ?? theme.t1, BlendMode.srcIn),
         );
-      } else if ((content as String).endsWith('.png')) {
+      } else if (content.endsWith('.png')) {
         return Image.asset(
           content,
           width: width ?? defWidth,
@@ -85,12 +85,11 @@ class ShrinkIconButton extends ConsumerWidget {
       return content;
     } else if (width != null || color != null) {
       return Container(
-        key: key,
         width: width,
         height: height,
         color: color,
       );
     }
-    return SizedBox.shrink(key: key);
+    return const SizedBox.shrink();
   }
 }

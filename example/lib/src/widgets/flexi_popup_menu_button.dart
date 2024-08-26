@@ -12,129 +12,153 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:example/src/theme/flexi_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-typedef FlexiPopupMenuItemBuilder<T> = Widget Function(
-  BuildContext context,
-  T value,
-  bool isMenuItem,
-);
-
-class FlexiPopupMenuButton<T> extends ConsumerStatefulWidget {
+class FlexiPopupMenuButton<T> extends PopupMenuButton<T> {
   const FlexiPopupMenuButton({
     super.key,
-    required this.menuItems,
-    required this.itemBuilder,
-    this.initialValue,
-    this.onSelected,
-    this.tooltip,
-    this.padding,
-    this.menuButtonStyle,
-    this.minimumSize,
-    this.maximumSize,
-    this.stateIconSize,
-    this.menuOffset,
-  }) : assert(menuItems.length != 0, 'The menuItems cannot be empty');
-
-  final List<T> menuItems;
-  final FlexiPopupMenuItemBuilder<T> itemBuilder;
-
-  final T? initialValue;
-  final PopupMenuItemSelected<T>? onSelected;
-  final String? tooltip;
-
-  final EdgeInsetsGeometry? padding;
-  final ButtonStyle? menuButtonStyle;
-  final Size? minimumSize;
-  final Size? maximumSize;
-  final double? stateIconSize;
-  final Offset? menuOffset;
+    required super.itemBuilder,
+    super.initialValue,
+    super.onOpened,
+    super.onSelected,
+    super.onCanceled,
+    // super.tooltip, // tooltip 会导致发生手势冲突
+    super.elevation,
+    super.shadowColor,
+    super.surfaceTintColor,
+    super.padding = EdgeInsets.zero,
+    super.menuPadding = EdgeInsets.zero,
+    required Widget child,
+    super.splashRadius,
+    super.icon, // arrowIcon
+    super.iconSize, // arrowIconSize
+    super.offset = Offset.zero,
+    super.enabled = true,
+    super.shape,
+    super.color,
+    super.iconColor, // arrowIconColor
+    // super.enableFeedback,
+    super.constraints = const BoxConstraints(),
+    super.position = PopupMenuPosition.under,
+    super.clipBehavior = Clip.none,
+    super.useRootNavigator = false,
+    super.popUpAnimationStyle,
+    super.routeSettings,
+    super.style,
+  }) : super(child: child);
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() =>
-      _FlexiPopupMenuButtonState<T>();
+  PopupMenuButtonState<T> createState() => FlexiPopupMenuButtonState<T>();
 }
 
-class _FlexiPopupMenuButtonState<T>
-    extends ConsumerState<FlexiPopupMenuButton<T>> {
-  late T _value;
+class FlexiPopupMenuButtonState<T> extends PopupMenuButtonState<T> {
   bool _status = false;
+
   @override
-  void initState() {
-    super.initState();
-    _value = widget.initialValue ?? widget.menuItems.first;
-  }
-
-  void onOpened() {
-    _status = true;
-    setState(() {});
-  }
-
-  void onCanceled() {
-    _status = false;
-    setState(() {});
-  }
-
-  void onSelected(T value) {
-    _status = false;
-    _value = value;
-    setState(() {});
-    widget.onSelected?.call(value);
+  void showButtonMenu() {
+    final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
+    final RenderBox button = context.findRenderObject()! as RenderBox;
+    final RenderBox overlay = Navigator.of(
+      context,
+      rootNavigator: widget.useRootNavigator,
+    ).overlay!.context.findRenderObject()! as RenderBox;
+    final PopupMenuPosition popupMenuPosition =
+        widget.position ?? popupMenuTheme.position ?? PopupMenuPosition.over;
+    late Offset offset;
+    switch (popupMenuPosition) {
+      case PopupMenuPosition.over:
+        offset = widget.offset;
+      case PopupMenuPosition.under:
+        offset = Offset(0.0, button.size.height) + widget.offset;
+        if (widget.child == null) {
+          // Remove the padding of the icon button.
+          offset -= Offset(0.0, widget.padding.vertical / 2);
+        }
+    }
+    final RelativeRect position = RelativeRect.fromRect(
+      Rect.fromPoints(
+        button.localToGlobal(offset, ancestor: overlay),
+        button.localToGlobal(button.size.bottomRight(Offset.zero) + offset,
+            ancestor: overlay),
+      ),
+      Offset.zero & overlay.size,
+    );
+    final List<PopupMenuEntry<T>> items = widget.itemBuilder(context);
+    // Only show the menu if there is something to show
+    if (items.isNotEmpty) {
+      _status = true;
+      setState(() {});
+      widget.onOpened?.call();
+      showMenu<T?>(
+        context: context,
+        elevation: widget.elevation ?? popupMenuTheme.elevation,
+        shadowColor: widget.shadowColor ?? popupMenuTheme.shadowColor,
+        surfaceTintColor:
+            widget.surfaceTintColor ?? popupMenuTheme.surfaceTintColor,
+        items: items,
+        initialValue: widget.initialValue,
+        position: position,
+        shape: widget.shape ?? popupMenuTheme.shape,
+        menuPadding: widget.menuPadding ?? popupMenuTheme.menuPadding,
+        color: widget.color ?? popupMenuTheme.color,
+        constraints: widget.constraints,
+        clipBehavior: widget.clipBehavior,
+        useRootNavigator: widget.useRootNavigator,
+        popUpAnimationStyle: widget.popUpAnimationStyle,
+        routeSettings: widget.routeSettings,
+      ).then<void>((T? newValue) {
+        _status = false;
+        setState(() {});
+        if (!mounted) {
+          return null;
+        }
+        if (newValue == null) {
+          widget.onCanceled?.call();
+          return null;
+        }
+        widget.onSelected?.call(newValue);
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = ref.read(themeProvider);
-    return PopupMenuButton(
-      initialValue: _value,
-      tooltip: widget.tooltip,
-      elevation: 2,
-      position: PopupMenuPosition.under,
-      constraints: BoxConstraints(
-        minWidth: widget.minimumSize?.width ?? 50.r,
-        maxWidth: widget.maximumSize?.width ?? 50.r,
-      ),
-      offset: widget.menuOffset ?? Offset(-5.r, 0.r),
-      menuPadding: EdgeInsets.zero,
-      icon: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          widget.itemBuilder(context, _value, false),
-          RotationTransition(
-            turns: AlwaysStoppedAnimation(_status ? 0.5 : 0),
-            child: Icon(
-              Icons.arrow_drop_down,
-              size: widget.stateIconSize ?? 16.r,
-              color: theme.t1,
-            ),
-          ),
-        ],
-      ),
-      padding: widget.padding ?? EdgeInsets.all(4.r),
-      style: widget.menuButtonStyle ??
+    return TextButton(
+      key: widget.key,
+      onPressed: widget.enabled ? showButtonMenu : null,
+      style: widget.style ??
           ButtonStyle(
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            minimumSize: WidgetStatePropertyAll(widget.minimumSize),
+            padding: WidgetStatePropertyAll(
+              widget.padding,
+            ),
+            shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(widget.splashRadius ?? 8),
+            )),
+            minimumSize: WidgetStatePropertyAll(Size(30.r, 30.r)),
+            maximumSize: WidgetStatePropertyAll(Size(80.r, 30.r)),
           ),
-      // iconSize: defaultShrinkIconSize,
-      itemBuilder: (context) {
-        return widget.menuItems.map((value) {
-          return PopupMenuItem(
-            key: ValueKey(value),
-            value: value,
-            height: 32.r,
-            child: widget.itemBuilder(context, value, true),
-          );
-        }).toList();
-      },
-      onOpened: onOpened,
-      onCanceled: onCanceled,
-      onSelected: onSelected,
+      child: _buildMenu(context),
+    );
+  }
+
+  Widget _buildMenu(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        widget.child!,
+        RotationTransition(
+          turns: AlwaysStoppedAnimation(_status ? 0.5 : 0),
+          child: widget.icon ??
+              Icon(
+                Icons.arrow_drop_down,
+                size: widget.iconSize ?? 14.r,
+                color: widget.iconColor ?? widget.color,
+              ),
+        ),
+      ],
     );
   }
 }

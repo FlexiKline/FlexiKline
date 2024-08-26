@@ -76,57 +76,73 @@ class _FlexiKlineDrawToolbarState extends ConsumerState<FlexiKlineDrawToolbar> {
             size: 20.r,
           ),
           ShrinkIconButton(
-            onPressed: () {},
+            onPressed: () {
+              debugPrint('zp::: draw onTap Paint');
+            },
             content: SvgRes.paintColor,
             width: 18.r,
             padding: 6.r,
           ),
           FlexiPopupMenuButton(
             initialValue: lineWeight,
-            tooltip: 'Line Weight',
-            menuItems: lineWeightList,
-            minimumSize: Size(22.r, 22.r),
-            maximumSize: Size(50.r, 22.r),
-            itemBuilder: (context, value, isMenuItem) {
-              return SizedBox(
-                width: 22.r,
-                height: 22.r,
-                child: SvgPicture.asset(
-                  'assets/svgs/line_weight_$value.svg',
-                  colorFilter: ColorFilter.mode(theme.t1, BlendMode.srcIn),
-                ),
-              );
-            },
             onSelected: onSelectLineWeight,
+            offset: Offset(-8.r, 0),
+            itemBuilder: (context) {
+              return lineWeightList.map((value) {
+                return PopupMenuItem(
+                  key: ValueKey(value),
+                  value: value,
+                  height: 32.r,
+                  child: SvgPicture.asset(
+                    'assets/svgs/line_weight_$value.svg',
+                    colorFilter: ColorFilter.mode(theme.t1, BlendMode.srcIn),
+                  ),
+                );
+              }).toList();
+            },
+            child: SvgPicture.asset(
+              'assets/svgs/line_weight_$lineWeight.svg',
+              colorFilter: ColorFilter.mode(theme.t1, BlendMode.srcIn),
+            ),
           ),
           FlexiPopupMenuButton(
             initialValue: lineType,
-            tooltip: 'Line Type',
-            menuItems: LineType.values,
-            minimumSize: Size(22.r, 22.r),
-            maximumSize: Size(50.r, 22.r),
-            itemBuilder: (context, value, isMenuItem) {
-              return SizedBox(
-                width: 22.r,
-                height: 22.r,
-                child: SvgPicture.asset(
-                  'assets/svgs/line_type_${value.name}.svg',
-                  colorFilter: ColorFilter.mode(theme.t1, BlendMode.srcIn),
-                ),
-              );
-            },
             onSelected: onSelectLineType,
+            offset: Offset(-8.r, 0),
+            itemBuilder: (context) {
+              return LineType.values.map((value) {
+                return PopupMenuItem(
+                  key: ValueKey(value),
+                  value: value,
+                  height: 32.r,
+                  child: SvgPicture.asset(
+                    'assets/svgs/line_type_${value.name}.svg',
+                    colorFilter: ColorFilter.mode(theme.t1, BlendMode.srcIn),
+                  ),
+                );
+              }).toList();
+            },
+            child: SvgPicture.asset(
+              'assets/svgs/line_type_${lineType.name}.svg',
+              colorFilter: ColorFilter.mode(theme.t1, BlendMode.srcIn),
+            ),
           ),
           ShrinkIconButton(
-            onPressed: () {},
+            onPressed: () {
+              debugPrint('zp::: draw onTap Order');
+            },
             content: SvgRes.visualOrder,
           ),
           ShrinkIconButton(
-            onPressed: () {},
+            onPressed: () {
+              debugPrint('zp::: draw onTap Lock');
+            },
             content: SvgRes.unlock,
           ),
           ShrinkIconButton(
-            onPressed: () {},
+            onPressed: () {
+              debugPrint('zp::: draw onTap Delete');
+            },
             content: SvgRes.delete,
           ),
         ],
