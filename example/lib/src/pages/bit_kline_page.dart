@@ -54,12 +54,6 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage>
   late final FlexiKlineController controller;
   late final BitFlexiKlineConfiguration configuration;
 
-  /// 绘制工具栏位置坐标
-  Offset _position = drawToolbarInitPosition;
-
-  /// 绘制工具栏组件GlobalKey
-  final GlobalKey _drawToolbarKey = GlobalKey();
-
   @override
   FlexiKlineController get flexiKlineController => controller;
 
@@ -90,12 +84,6 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage>
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       initKlineData(req);
-      setState(() {
-        _position = controller.clampInMainRect(
-          _position,
-          size: _drawToolbarKey.currentContext?.size,
-        );
-      });
     });
   }
 
@@ -185,7 +173,6 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage>
                 mainforegroundViewBuilder: _buildKlineMainForgroundView,
                 onDoubleTap: openLandscapePage,
                 drawToolbar: FlexiKlineDrawToolbar(
-                  key: _drawToolbarKey,
                   controller: controller,
                 ),
               ),
@@ -239,31 +226,6 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage>
             onPressed: openLandscapePage,
           ),
         ),
-
-        /// 绘制工具栏
-        // Positioned(
-        //   top: _position.dy,
-        //   left: _position.dx,
-        //   child: GestureDetector(
-        //     behavior: HitTestBehavior.translucent,
-        //     onPanUpdate: (DragUpdateDetails details) {
-        //       setState(() {
-        //         _position = controller.clampInMainRect(
-        //           Offset(
-        //             _position.dx + details.delta.dx,
-        //             _position.dy + details.delta.dy,
-        //           ),
-        //           size: _drawToolbarKey.currentContext?.size,
-        //         );
-        //       });
-        //     },
-        //     child: FlexiKlineDrawToolbar(
-        //       key: _drawToolbarKey,
-        //       controller: controller,
-        //     ),
-        //   ),
-        // ),
-
         Positioned(
           child: ValueListenableBuilder(
             valueListenable: controller.candleRequestListener,

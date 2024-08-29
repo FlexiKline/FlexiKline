@@ -28,12 +28,12 @@ class NonTouchGestureDetector extends StatefulWidget {
     super.key,
     required this.controller,
     this.onDoubleTap,
-    required this.child,
+    this.child,
   });
 
   final FlexiKlineController controller;
   final GestureTapCallback? onDoubleTap;
-  final Widget child;
+  final Widget? child;
 
   @override
   State<NonTouchGestureDetector> createState() =>
@@ -79,6 +79,8 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
   @override
   Widget build(BuildContext context) {
     return Listener(
+      behavior: HitTestBehavior.translucent,
+
       /// 鼠标设备滚轴滚动进行缩放,
       /// 在Web中:
       ///   1. 触控板双指同时向上/下进行缩放;
@@ -94,11 +96,15 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
       // onPointerDown: onPointerDown,
       // onPointerCancel: onPointerCancel,
       child: MouseRegion(
+        hitTestBehavior: HitTestBehavior.translucent,
+
         /// Cross平移
         onEnter: onEnter,
         onHover: onHover,
         onExit: onExit,
         child: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+
           /// 双击
           onDoubleTap: widget.onDoubleTap,
 

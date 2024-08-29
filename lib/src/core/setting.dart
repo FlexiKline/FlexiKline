@@ -141,14 +141,6 @@ mixin SettingBinding on KlineBindingBase
     invokeSizeChanged();
   }
 
-  Offset clampInMainRect(Offset offset, {Size? size}) {
-    final rect = mainRect;
-    return Offset(
-      offset.dx.clamp(rect.left, rect.right - (size?.width ?? 0)),
-      offset.dy.clamp(rect.top, rect.bottom - (size?.height ?? 0)),
-    );
-  }
-
   /// 适配[FlexiKlineWidget]所在布局的变化
   ///
   /// 注: 目前仅考虑适配宽度的变化.

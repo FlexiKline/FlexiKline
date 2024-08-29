@@ -72,7 +72,7 @@ mixin CrossBinding
   @override
   void markRepaintCross() {
     if (isCrossing) {
-      updateOffset(_offset);
+      _updateOffset(_offset);
       _markRepaint();
     }
   }
@@ -82,7 +82,7 @@ mixin CrossBinding
   bool get isCrossing => _offset?.isFinite == true;
 
   Offset? _offset;
-  void updateOffset(Offset? val) {
+  void _updateOffset(Offset? val) {
     if (val != null) {
       _offset = _correctCrossOffset(val);
     } else {
@@ -121,7 +121,7 @@ mixin CrossBinding
       if (force || !isCrossing) {
         logd('handleTap cross > $force > ${data.offset}');
         // 更新并校正起始焦点.
-        updateOffset(data.offset);
+        _updateOffset(data.offset);
         _markRepaint();
         // 当Cross事件启动后, 调用markRepaintChart清理Chart图层的tips信息.
         markRepaintChart();
@@ -139,7 +139,7 @@ mixin CrossBinding
   @override
   void updateCross(GestureData data) {
     if (crossConfig.enable && isCrossing) {
-      updateOffset(data.offset);
+      _updateOffset(data.offset);
       _markRepaint();
     }
   }
@@ -148,7 +148,7 @@ mixin CrossBinding
   @override
   void cancelCross() {
     if (isCrossing || _offset != null) {
-      updateOffset(null);
+      _updateOffset(null);
       // 当Cross事件结束后, 调用markRepaintChart触发绘制Chart图层首根蜡烛的tips信息.
       markRepaintChart();
       _markRepaint();

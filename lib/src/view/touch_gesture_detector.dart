@@ -28,12 +28,12 @@ class TouchGestureDetector extends StatefulWidget {
     super.key,
     required this.controller,
     this.onDoubleTap,
-    required this.child,
+    this.child,
   });
 
   final FlexiKlineController controller;
   final GestureTapCallback? onDoubleTap;
-  final Widget child;
+  final Widget? child;
 
   @override
   State<TouchGestureDetector> createState() => _TouchGestureDetectorState();
@@ -78,11 +78,14 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
   @override
   Widget build(BuildContext context) {
     return Listener(
+      behavior: HitTestBehavior.translucent,
       // onPointerDown: onPointerDown,
       onPointerMove: onPointerMove,
       onPointerUp: onPointerUp,
       onPointerCancel: onPointerCancel,
       child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+
         /// 点击
         onTapUp: onTapUp,
 
@@ -111,10 +114,7 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
   /// 当原始移动时, 当前如果正处在crossing中, 发生冲突, 清理手势竞技场, 响应Cross平移事件
   /// TODO: 后续当isDrawing时, 直接return; 不能清理, 如果清理会导致drawToolbar无法响应事件.
   void onPointerMove(PointerMoveEvent event) {
-    /// 如果正在移动DrawToolbar无需要解决冲突.
-    if (controller.touchingDrawToolbar) return;
-
-    if (controller.isCrossing || controller.isDrawing) {
+    if (controller.isCrossing) {
       if (!isSweeped) {
         logi(
           'onPointerMove currently in crossing, need clear the gesture arena!',
@@ -161,9 +161,6 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
   /// 移动 缩放
   ///
   void onScaleStart(ScaleStartDetails details) {
-    /// 如果正在移动DrawToolbar无需要解决冲突.
-    if (controller.touchingDrawToolbar) return;
-
     if (_panScaleData != null && !_panScaleData!.isEnd) {
       // 如果上次平移或缩放, 还没有结束, 不允许开始.
       logd('onPanStart Currently still panning or zooming, ignore!!!');
@@ -202,9 +199,6 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
   }
 
   void onScaleUpdate(ScaleUpdateDetails details) {
-    /// 如果正在移动DrawToolbar无需要解决冲突.
-    if (controller.touchingDrawToolbar) return;
-
     if (_panScaleData == null) {
       logd("onScaleUpdate panScaleData is empty! details:$details");
       return;

@@ -51,12 +51,6 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage>
   late final DefaultFlexiKlineConfiguration configuration;
   bool isFullScreen = false;
 
-  /// 绘制工具栏位置坐标
-  Offset _position = drawToolbarInitPosition;
-
-  /// 绘制工具栏组件GlobalKey
-  final GlobalKey _drawToolbarKey = GlobalKey();
-
   @override
   FlexiKlineController get flexiKlineController => controller;
 
@@ -110,13 +104,6 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage>
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       initKlineData(req);
-
-      setState(() {
-        _position = controller.clampInMainRect(
-          _position,
-          size: _drawToolbarKey.currentContext?.size,
-        );
-      });
     });
   }
 
@@ -193,7 +180,6 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage>
                     mainforegroundViewBuilder: _buildKlineMainForgroundView,
                     onDoubleTap: setFullScreen,
                     drawToolbar: FlexiKlineDrawToolbar(
-                      key: _drawToolbarKey,
                       controller: controller,
                     ),
                   ),
@@ -292,30 +278,6 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage>
             ),
           ),
         ),
-
-        /// 绘制工具栏
-        // Positioned(
-        //   left: _position.dx,
-        //   top: _position.dy,
-        //   child: GestureDetector(
-        //     // behavior: HitTestBehavior.opaque,
-        //     onPanUpdate: (DragUpdateDetails details) {
-        //       setState(() {
-        //         _position = controller.clampInMainRect(
-        //           Offset(
-        //             _position.dx + details.delta.dx,
-        //             _position.dy + details.delta.dy,
-        //           ),
-        //           size: _drawToolbarKey.currentContext?.size,
-        //         );
-        //       });
-        //     },
-        //     child: FlexiKlineDrawToolbar(
-        //       key: _drawToolbarKey,
-        //       controller: controller,
-        //     ),
-        //   ),
-        // ),
 
         /// Loading
         ValueListenableBuilder(

@@ -34,6 +34,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
   void dispose() {
     super.dispose();
     logd('dispose draw');
+    _repaintDraw.dispose();
   }
 
   final ValueNotifier<int> _repaintDraw = ValueNotifier(0);
@@ -46,20 +47,19 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
   @override
   void markRepaintDraw() {
     if (isDrawing) {
-      updateOffset(_offset);
+      _updateOffset(_offset);
       _markRepaint();
     }
   }
 
+  /// 是否在绘制中
   final ValueNotifier<bool> _isDrawing = ValueNotifier(false);
   ValueNotifier<bool> get isDrawingLinstener => _isDrawing;
   @override
   bool get isDrawing => _isDrawing.value;
 
-  bool touchingDrawToolbar = false;
-
   Offset? _offset;
-  void updateOffset(Offset? val) {
+  void _updateOffset(Offset? val) {
     if (val != null) {
       _offset = val;
     } else {
@@ -94,39 +94,44 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
 
   @override
   void startDraw(DrawType type) {
-    currentDrawType.value = type;
-    _isDrawing.value = true;
-  }
-
-  @override
-  bool startCross(GestureData data, {bool force = false}) {
-    if (drawConfig.enable) {
-      if (force || isDrawing) {
-        logd('handleTap draw > $force > ${data.offset}');
-        // 更新并校正起始焦点.
-        updateOffset(data.offset);
-        _markRepaint();
-        return true;
-      }
-    }
-    return false;
-  }
-
-  @override
-  void updateCross(GestureData data) {
-    if (drawConfig.enable && isDrawing) {
-      updateOffset(data.offset);
-      _markRepaint();
+    if (type == currentDrawType.value) {
+      currentDrawType.value = null;
+      _isDrawing.value = false;
+    } else {
+      currentDrawType.value = type;
+      _isDrawing.value = true;
     }
   }
 
-  @override
-  void cancelCross() {
-    if (isDrawing || _offset != null) {
-      updateOffset(null);
-      _markRepaint();
-    }
-  }
+  // @override
+  // bool startCross(GestureData data, {bool force = false}) {
+  //   if (drawConfig.enable) {
+  //     if (force || isDrawing) {
+  //       logd('handleTap draw > $force > ${data.offset}');
+  //       // 更新并校正起始焦点.
+  //       _updateOffset(data.offset);
+  //       _markRepaint();
+  //       return true;
+  //     }
+  //   }
+  //   return false;
+  // }
+
+  // @override
+  // void updateCross(GestureData data) {
+  //   if (drawConfig.enable && isDrawing) {
+  //     _updateOffset(data.offset);
+  //     _markRepaint();
+  //   }
+  // }
+
+  // @override
+  // void cancelCross() {
+  //   if (isDrawing || _offset != null) {
+  //     _updateOffset(null);
+  //     _markRepaint();
+  //   }
+  // }
 
   /// 绘制Draw图层
   @override
@@ -138,10 +143,10 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
       return;
     }
 
-    paintCrossLine(canvas, offset);
+    paintDrawCrossLine(canvas, offset);
   }
 
-  void paintCrossLine(Canvas canvas, Offset offset) {
+  void paintDrawCrossLine(Canvas canvas, Offset offset) {
     final path = Path()
       ..moveTo(mainChartLeft, offset.dy)
       ..lineTo(mainChartRight, offset.dy)
