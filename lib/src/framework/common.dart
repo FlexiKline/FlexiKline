@@ -115,7 +115,7 @@ enum DrawType {
   rectangle, // 长方形
 }
 
-enum OverlayMode {
+enum MagnetMode {
   normal,
   weakMagnet,
   strongMagnet;

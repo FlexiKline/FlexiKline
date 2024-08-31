@@ -178,7 +178,7 @@ class _LandscapeKlinePageState extends ConsumerState<LandscapeKlinePage>
                     start: 36.r,
                   ),
                 ),
-                mainforegroundViewBuilder: _buildKlineMainForgroundView,
+                mainForegroundViewBuilder: _buildKlineMainForgroundView,
               );
             },
           ),

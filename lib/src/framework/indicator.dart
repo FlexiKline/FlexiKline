@@ -105,6 +105,7 @@ abstract class Indicator {
     return reset || hasChange;
   }
 
+  @factory
   PaintObject createPaintObject(KlineBindingBase controller);
 
   @mustCallSuper

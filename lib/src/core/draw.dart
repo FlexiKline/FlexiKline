@@ -16,7 +16,6 @@ import 'package:flutter/material.dart';
 
 import '../extension/export.dart';
 import '../framework/export.dart';
-import '../model/gesture_data.dart';
 import 'binding_base.dart';
 import 'interface.dart';
 import 'setting.dart';

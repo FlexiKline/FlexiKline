@@ -177,7 +177,7 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage>
                         start: 36.r,
                       ),
                     ),
-                    mainforegroundViewBuilder: _buildKlineMainForgroundView,
+                    mainForegroundViewBuilder: _buildKlineMainForgroundView,
                     onDoubleTap: setFullScreen,
                     drawToolbar: FlexiKlineDrawToolbar(
                       controller: controller,

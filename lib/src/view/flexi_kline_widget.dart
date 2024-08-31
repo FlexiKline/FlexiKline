@@ -14,11 +14,13 @@
 
 import 'dart:developer';
 
+import 'package:flexi_kline/src/view/overlay_draw_box.dart';
 import 'package:flutter/material.dart';
 
 import '../kline_controller.dart';
 import '../utils/platform_util.dart';
 import 'non_touch_gesture_detector.dart';
+import 'overlay_draw_gesture_detector.dart';
 import 'touch_gesture_detector.dart';
 
 class FlexiKlineWidget extends StatefulWidget {
@@ -28,7 +30,7 @@ class FlexiKlineWidget extends StatefulWidget {
     this.alignment,
     this.decoration,
     this.foregroundDecoration,
-    this.mainforegroundViewBuilder,
+    this.mainForegroundViewBuilder,
     this.mainBackgroundView,
     bool? autoAdaptLayout,
     bool? isTouchDevice,
@@ -41,7 +43,7 @@ class FlexiKlineWidget extends StatefulWidget {
   final AlignmentGeometry? alignment;
   final BoxDecoration? decoration;
   final Decoration? foregroundDecoration;
-  final WidgetBuilder? mainforegroundViewBuilder;
+  final WidgetBuilder? mainForegroundViewBuilder;
   final Widget? mainBackgroundView;
   final GestureTapCallback? onDoubleTap;
   final Widget? drawToolbar;
@@ -120,7 +122,13 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
     );
   }
 
+  ///
+  /// TODO: 考虑重新组合grid, indicator, cross, draw图层
+  /// 1. grid: 不经常变化
+  /// 2. indicator: 经常变化
+  /// 3. cross / draw: 偶尔变化
   Widget _buildKlineView(BuildContext context) {
+    final canvasSize = widget.controller.canvasRect.size;
     return Stack(
       children: <Widget>[
         if (widget.mainBackgroundView != null)
@@ -131,10 +139,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
         RepaintBoundary(
           key: const ValueKey('GridAndChartLayer'),
           child: CustomPaint(
-            size: Size(
-              widget.controller.canvasWidth,
-              widget.controller.canvasHeight,
-            ),
+            size: canvasSize,
             painter: GridBackgroundPainter(
               controller: widget.controller,
             ),
@@ -147,10 +152,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
         RepaintBoundary(
           key: const ValueKey('DrawAndCrossLayer'),
           child: CustomPaint(
-            size: Size(
-              widget.controller.canvasWidth,
-              widget.controller.canvasHeight,
-            ),
+            size: canvasSize,
             painter: DrawPainter(
               controller: widget.controller,
             ),
@@ -162,10 +164,12 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
         ),
         widget.isTouchDevice
             ? TouchGestureDetector(
+                key: const ValueKey('TouchGestureDetector'),
                 controller: widget.controller,
                 onDoubleTap: widget.onDoubleTap,
               )
             : NonTouchGestureDetector(
+                key: const ValueKey('NonTouchGestureDetector'),
                 controller: widget.controller,
                 onDoubleTap: widget.onDoubleTap,
               ),
@@ -173,14 +177,26 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
           rect: widget.controller.mainRect,
           child: _buildMainForgroundView(context),
         ),
+        OverlayDrawBox(
+          key: const ValueKey('OverlayDrawBox'),
+          controller: widget.controller,
+          child: OverlayDrawGestureDetector(
+            key: const ValueKey('OverlayDrawGestureDetector'),
+            controller: widget.controller,
+            isTouchDevice: widget.isTouchDevice,
+            child: ConstrainedBox(
+              constraints: BoxConstraints.tight(canvasSize),
+            ),
+          ),
+        ),
         _buildDrawToolbar(context),
       ],
     );
   }
 
   Widget _buildMainForgroundView(BuildContext context) {
-    if (widget.mainforegroundViewBuilder != null) {
-      return widget.mainforegroundViewBuilder!(context);
+    if (widget.mainForegroundViewBuilder != null) {
+      return widget.mainForegroundViewBuilder!(context);
     }
 
     return ValueListenableBuilder(

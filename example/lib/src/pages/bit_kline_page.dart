@@ -170,7 +170,7 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage>
                   alignment: AlignmentDirectional.center,
                   showLogo: false,
                 ),
-                mainforegroundViewBuilder: _buildKlineMainForgroundView,
+                mainForegroundViewBuilder: _buildKlineMainForgroundView,
                 onDoubleTap: openLandscapePage,
                 drawToolbar: FlexiKlineDrawToolbar(
                   controller: controller,
