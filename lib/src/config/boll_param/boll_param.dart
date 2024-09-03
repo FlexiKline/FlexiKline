@@ -29,25 +29,12 @@ final class BOLLParam extends Equatable {
 
   bool isValid(int len) => n > 0 && n <= len && std > 0;
 
-  @override
-  int get hashCode => n.hashCode ^ std.hashCode;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is BOLLParam &&
-          runtimeType == other.runtimeType &&
-          n == other.n &&
-          std == other.std;
-
-  @override
-  String toString() {
-    return 'BOLLParam{n:$n, std:$std}';
-  }
-
   factory BOLLParam.fromJson(Map<String, dynamic> json) =>
       _$BOLLParamFromJson(json);
   Map<String, dynamic> toJson() => _$BOLLParamToJson(this);
+
+  @override
+  bool? get stringify => true;
 
   @override
   List<Object?> get props => [n, std];

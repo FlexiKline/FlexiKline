@@ -56,5 +56,8 @@ final class MaParam extends Equatable {
   Map<String, dynamic> toJson() => _$MaParamToJson(this);
 
   @override
+  bool? get stringify => true;
+  
+  @override
   List<Object?> get props => [count];
 }

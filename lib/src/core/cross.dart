@@ -202,17 +202,14 @@ mixin CrossBinding
       ..moveTo(offset.dx, 0)
       ..lineTo(offset.dx, canvasHeight);
 
-    canvas.drawLineType(
-      crossConfig.crosshair.type,
+    canvas.drawLineByConfig(
       path,
-      crossConfig.crosshairPaint,
-      dashes: crossConfig.crosshair.dashes,
+      crossConfig.crosshair,
     );
 
-    canvas.drawCircle(
+    canvas.drawCirclePoint(
       offset,
-      crossConfig.point.radius,
-      crossConfig.pointPaint,
+      crossConfig.crosspoint,
     );
   }
 

@@ -34,14 +34,12 @@ final class SARParam extends Equatable {
 
   bool isValid(int len) => len > 1;
 
-  @override
-  String toString() {
-    return 'SARParam(startAf:$startAf, step:$step, $maxAf)';
-  }
-
   factory SARParam.fromJson(Map<String, dynamic> json) =>
       _$SARParamFromJson(json);
   Map<String, dynamic> toJson() => _$SARParamToJson(this);
+
+  @override
+  bool? get stringify => true;
 
   @override
   List<Object?> get props => [startAf, step, maxAf];

@@ -57,6 +57,9 @@ abstract interface class IFlexiKlineTheme {
   Color get drawColor;
   Color get priceMarkLine;
 
+  /// 主题色
+  Color get themeColor;
+
   /// 文本颜色配置
   Color get textColor;
   Color get tickTextColor;

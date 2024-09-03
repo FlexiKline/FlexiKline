@@ -16,6 +16,7 @@ export 'common.dart';
 export 'indicator.dart';
 export 'logger.dart';
 export 'object.dart';
+export 'overlay.dart';
 export 'paint_object_helper.dart';
 export 'serializers.dart';
 export 'configuration.dart';

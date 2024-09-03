@@ -90,6 +90,9 @@ class BitFlexiKlineLightTheme extends BaseBitFlexiKlineTheme {
   Color get priceMarkLine => textColor;
 
   @override
+  Color get themeColor => Colors.white;
+
+  @override
   Color get textColor => const Color(0xFF111111);
 
   @override
@@ -132,6 +135,9 @@ class BitFlexiKlineDarkTheme extends BaseBitFlexiKlineTheme {
 
   @override
   Color priceMarkLine = const Color(0xFFA0A0A0);
+
+  @override
+  Color get themeColor => Colors.black;
 
   @override
   Color textColor = const Color(0xFFA0A0A0);

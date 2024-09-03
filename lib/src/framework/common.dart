@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart';
 
 /// 绘制位置
@@ -96,23 +97,26 @@ abstract interface class IPrecomputable {
 
 enum DrawType {
   // 单线
-  trendLine, // 趋势线
-  arrowLine, // 箭头
-  extendedTrendLine, // 延长趋势线
-  trendAngle, // 趋势线角度
-  rayLine, // 射线
-  horizontalTrendLine, // 水平趋势线
-  horizontalRayLine, // 水平射线
-  horizontalLine, // 水平线
-  verticalLine, // 垂直线
-  crossLine, // 十字线
-  priceLine, // 价钱线
+  trendLine(2), // 趋势线
+  arrowLine(2), // 箭头
+  extendedTrendLine(2), // 延长趋势线
+  trendAngle(2), // 趋势线角度
+  rayLine(2), // 射线
+  horizontalTrendLine(2), // 水平趋势线
+  horizontalRayLine(2), // 水平射线
+  horizontalLine(1), // 水平线
+  verticalLine(1), // 垂直线
+  crossLine(1), // 十字线
+  priceLine(2), // 价钱线
   // 多线
-  parallelChannel, // 平行通道
+  parallelChannel(2), // 平行通道
   // parallelLines, // 平行直线
-  fibRetracement, // 斐波那契回撤
+  fibRetracement(3), // 斐波那契回撤
   // fibExpansion, // 斐波那契扩展
-  rectangle, // 长方形
+  rectangle(2); // 长方形
+
+  const DrawType(this.steps);
+  final int steps;
 }
 
 enum MagnetMode {

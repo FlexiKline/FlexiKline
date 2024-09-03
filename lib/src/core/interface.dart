@@ -92,6 +92,8 @@ abstract interface class IState {
 
   KlineData get curKlineData;
 
+  String get curDataKey;
+
   /// 将offset转换为蜡烛数据
   CandleModel? offsetToCandle(Offset offset);
 
@@ -227,6 +229,9 @@ abstract interface class ICross {
 abstract interface class IDraw {
   Listenable get repaintDraw;
 
+  String get chartKey;
+  LineConfig get lineConfig;
+
   void paintDraw(Canvas canvas, Size size);
 
   void markRepaintDraw();
@@ -237,16 +242,17 @@ abstract interface class IDraw {
   /// 是否正在绘制图形中
   bool get isDrawing;
 
-  /// 开始Cross事件
-  /// [force] 将会强制启动cross事件.
-  /// 当返回true时, 说明已开始展示Corss; 否则, 说明之前处在Cross, 结束上次的Cross事件.
-  bool startCross(GestureData data, {bool force = false});
+  /// 确认绘制坐标
+  void onConfirm(GestureData data);
 
-  /// 更新Cross事件数据.
-  void updateCross(GestureData data);
+  /// 开始绘制
+  void onDrawStart(GestureData data);
 
-  /// 取消当前Cross事件
-  void cancelCross();
+  /// 绘制更新坐标
+  void onDrawUpdate(GestureData data);
+
+  /// 绘制结束
+  void onDrawEnd();
 }
 
 /// Grid图层API

@@ -16,8 +16,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 
 import '../config/draw_config/draw_config.dart';
+import '../core/interface.dart';
 import '../framework/logger.dart';
 import '../kline_controller.dart';
+import '../model/gesture_data.dart';
 
 class OverlayDrawGestureDetector extends StatefulWidget {
   const OverlayDrawGestureDetector({
@@ -38,17 +40,20 @@ class OverlayDrawGestureDetector extends StatefulWidget {
 
 class _OverlayDrawGestureDetectorState extends State<OverlayDrawGestureDetector>
     with KlineLog {
+  /// Draw确认坐标事件
+  GestureData? _tapData;
+
   @override
   String get logTag => 'OverlayDrawGesture';
 
-  FlexiKlineController get controller => widget.controller;
+  IDraw get drawBinding => widget.controller;
 
   DrawConfig get drawConfig => widget.controller.drawConfig;
 
   @override
   void initState() {
     super.initState();
-    loggerDelegate = controller.loggerDelegate;
+    loggerDelegate = widget.controller.loggerDelegate;
   }
 
   @override
@@ -63,8 +68,10 @@ class _OverlayDrawGestureDetectorState extends State<OverlayDrawGestureDetector>
   Widget _buildTouchGestureDetector(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: onTap,
+      onTapUp: onTapUp,
+      onPanStart: onPanStart,
       onPanUpdate: onPanUpdate,
+      onPanEnd: onPanEnd,
 
       /// 长按
       onLongPressStart: onLongPressStart,
@@ -80,7 +87,7 @@ class _OverlayDrawGestureDetectorState extends State<OverlayDrawGestureDetector>
       onHover: onHover,
       onExit: onExit,
       child: GestureDetector(
-        onTap: onTap,
+        onTapUp: onTapUp,
         onPanUpdate: onPanUpdate,
 
         /// 长按
@@ -93,14 +100,22 @@ class _OverlayDrawGestureDetectorState extends State<OverlayDrawGestureDetector>
   }
 
   /// 点击 - 确认
-  void onTap() {
-    logd('onTap');
+  void onTapUp(TapUpDetails details) {
+    logd("onTapUp details:$details");
+    _tapData = GestureData.tap(details.localPosition);
+    drawBinding.onConfirm(_tapData!);
   }
+
+  /// 平移开始事件
+  void onPanStart(DragStartDetails details) {}
 
   /// 平移更新事件
   void onPanUpdate(DragUpdateDetails details) {
     logd('onPanUpdate $details');
   }
+
+  /// 平移结束事件
+  void onPanEnd(DragEndDetails details) {}
 
   /// 鼠标Hover进入事件.
   void onEnter(PointerEnterEvent event) {

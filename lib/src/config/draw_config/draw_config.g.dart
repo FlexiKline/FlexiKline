@@ -11,9 +11,11 @@ abstract class _$DrawConfigCWProxy {
 
   DrawConfig crosshair(LineConfig crosshair);
 
-  DrawConfig point(PointConfig point);
+  DrawConfig crosspoint(PointConfig crosspoint);
 
-  DrawConfig border(PointConfig? border);
+  DrawConfig drawLine(LineConfig drawLine);
+
+  DrawConfig drawDot(PointConfig drawDot);
 
   DrawConfig tickText(TextAreaConfig tickText);
 
@@ -30,8 +32,9 @@ abstract class _$DrawConfigCWProxy {
   DrawConfig call({
     bool? enable,
     LineConfig? crosshair,
-    PointConfig? point,
-    PointConfig? border,
+    PointConfig? crosspoint,
+    LineConfig? drawLine,
+    PointConfig? drawDot,
     TextAreaConfig? tickText,
     double? spacing,
     Color? gapBackground,
@@ -51,10 +54,13 @@ class _$DrawConfigCWProxyImpl implements _$DrawConfigCWProxy {
   DrawConfig crosshair(LineConfig crosshair) => this(crosshair: crosshair);
 
   @override
-  DrawConfig point(PointConfig point) => this(point: point);
+  DrawConfig crosspoint(PointConfig crosspoint) => this(crosspoint: crosspoint);
 
   @override
-  DrawConfig border(PointConfig? border) => this(border: border);
+  DrawConfig drawLine(LineConfig drawLine) => this(drawLine: drawLine);
+
+  @override
+  DrawConfig drawDot(PointConfig drawDot) => this(drawDot: drawDot);
 
   @override
   DrawConfig tickText(TextAreaConfig tickText) => this(tickText: tickText);
@@ -77,8 +83,9 @@ class _$DrawConfigCWProxyImpl implements _$DrawConfigCWProxy {
   DrawConfig call({
     Object? enable = const $CopyWithPlaceholder(),
     Object? crosshair = const $CopyWithPlaceholder(),
-    Object? point = const $CopyWithPlaceholder(),
-    Object? border = const $CopyWithPlaceholder(),
+    Object? crosspoint = const $CopyWithPlaceholder(),
+    Object? drawLine = const $CopyWithPlaceholder(),
+    Object? drawDot = const $CopyWithPlaceholder(),
     Object? tickText = const $CopyWithPlaceholder(),
     Object? spacing = const $CopyWithPlaceholder(),
     Object? gapBackground = const $CopyWithPlaceholder(),
@@ -92,14 +99,19 @@ class _$DrawConfigCWProxyImpl implements _$DrawConfigCWProxy {
           ? _value.crosshair
           // ignore: cast_nullable_to_non_nullable
           : crosshair as LineConfig,
-      point: point == const $CopyWithPlaceholder() || point == null
-          ? _value.point
+      crosspoint:
+          crosspoint == const $CopyWithPlaceholder() || crosspoint == null
+              ? _value.crosspoint
+              // ignore: cast_nullable_to_non_nullable
+              : crosspoint as PointConfig,
+      drawLine: drawLine == const $CopyWithPlaceholder() || drawLine == null
+          ? _value.drawLine
           // ignore: cast_nullable_to_non_nullable
-          : point as PointConfig,
-      border: border == const $CopyWithPlaceholder()
-          ? _value.border
+          : drawLine as LineConfig,
+      drawDot: drawDot == const $CopyWithPlaceholder() || drawDot == null
+          ? _value.drawDot
           // ignore: cast_nullable_to_non_nullable
-          : border as PointConfig?,
+          : drawDot as PointConfig,
       tickText: tickText == const $CopyWithPlaceholder() || tickText == null
           ? _value.tickText
           // ignore: cast_nullable_to_non_nullable
@@ -130,10 +142,10 @@ extension $DrawConfigCopyWith on DrawConfig {
 DrawConfig _$DrawConfigFromJson(Map<String, dynamic> json) => DrawConfig(
       enable: json['enable'] as bool? ?? true,
       crosshair: LineConfig.fromJson(json['crosshair'] as Map<String, dynamic>),
-      point: PointConfig.fromJson(json['point'] as Map<String, dynamic>),
-      border: json['border'] == null
-          ? null
-          : PointConfig.fromJson(json['border'] as Map<String, dynamic>),
+      crosspoint:
+          PointConfig.fromJson(json['crosspoint'] as Map<String, dynamic>),
+      drawLine: LineConfig.fromJson(json['drawLine'] as Map<String, dynamic>),
+      drawDot: PointConfig.fromJson(json['drawDot'] as Map<String, dynamic>),
       tickText:
           TextAreaConfig.fromJson(json['tickText'] as Map<String, dynamic>),
       spacing: (json['spacing'] as num).toDouble(),
@@ -142,22 +154,14 @@ DrawConfig _$DrawConfigFromJson(Map<String, dynamic> json) => DrawConfig(
           : const ColorConverter().fromJson(json['gapBackground'] as String),
     );
 
-Map<String, dynamic> _$DrawConfigToJson(DrawConfig instance) {
-  final val = <String, dynamic>{
-    'enable': instance.enable,
-    'crosshair': instance.crosshair.toJson(),
-    'point': instance.point.toJson(),
-  };
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('border', instance.border?.toJson());
-  val['tickText'] = instance.tickText.toJson();
-  val['spacing'] = instance.spacing;
-  val['gapBackground'] = const ColorConverter().toJson(instance.gapBackground);
-  return val;
-}
+Map<String, dynamic> _$DrawConfigToJson(DrawConfig instance) =>
+    <String, dynamic>{
+      'enable': instance.enable,
+      'crosshair': instance.crosshair.toJson(),
+      'crosspoint': instance.crosspoint.toJson(),
+      'drawLine': instance.drawLine.toJson(),
+      'drawDot': instance.drawDot.toJson(),
+      'tickText': instance.tickText.toJson(),
+      'spacing': instance.spacing,
+      'gapBackground': const ColorConverter().toJson(instance.gapBackground),
+    };

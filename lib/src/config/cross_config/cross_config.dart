@@ -28,7 +28,7 @@ class CrossConfig {
   CrossConfig({
     this.enable = true,
     required this.crosshair,
-    required this.point,
+    required this.crosspoint,
     required this.tickText,
     required this.spacing,
     this.showLatestTipsInBlank = true,
@@ -37,7 +37,7 @@ class CrossConfig {
 
   final bool enable;
   final LineConfig crosshair;
-  final PointConfig point;
+  final PointConfig crosspoint;
   final TextAreaConfig tickText;
 
   /// onCross时, 刻度[tickText]与绘制边界的间距.
@@ -48,16 +48,6 @@ class CrossConfig {
 
   ///  onCross时, 当移动到空白区域时, 是否继续按蜡烛宽度移动.
   bool moveByCandleInBlank = false;
-
-  Paint get crosshairPaint => Paint()
-    ..color = crosshair.color
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = crosshair.width;
-
-  Paint get pointPaint => Paint()
-    ..color = point.color
-    ..strokeWidth = point.width
-    ..style = PaintingStyle.fill;
 
   factory CrossConfig.fromJson(Map<String, dynamic> json) =>
       _$CrossConfigFromJson(json);

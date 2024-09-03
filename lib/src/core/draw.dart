@@ -14,8 +14,10 @@
 
 import 'package:flutter/material.dart';
 
+import '../config/line_config/line_config.dart';
 import '../extension/export.dart';
 import '../framework/export.dart';
+import '../model/gesture_data.dart';
 import 'binding_base.dart';
 import 'interface.dart';
 import 'setting.dart';
@@ -27,6 +29,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
   void initState() {
     super.initState();
     logd('initState draw');
+    currentDrawType.addListener(() {});
   }
 
   @override
@@ -35,6 +38,12 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
     logd('dispose draw');
     _repaintDraw.dispose();
   }
+
+  @override
+  String get chartKey => curDataKey;
+
+  @override
+  LineConfig get lineConfig => drawConfig.drawLine;
 
   final ValueNotifier<int> _repaintDraw = ValueNotifier(0);
   @override
@@ -66,30 +75,8 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
     }
   }
 
-  /// 矫正Cross
-  Offset? _correctDrawOffset(Offset val) {
-    if (val.isInfinite) return null;
-
-    // Horizontal轴按蜡烛线移动.
-    val = val.clamp(canvasRect);
-    final diff = startCandleDx - val.dx;
-    if (!crossConfig.moveByCandleInBlank && diff < 0) return val;
-    return Offset(
-      val.dx + diff % candleActualWidth - candleWidthHalf,
-      val.dy,
-    );
-
-    // 当超出边界时, 校正到边界.
-    // if (canvasRect.contains(val)) {
-    //   final diff = (startCandleDx - val.dx) % candleActualWidth;
-    //   final dx = val.dx + diff - candleWidthHalf;
-    //   return Offset(dx, val.dy);
-    // } else {
-    //   return val.clamp(canvasRect);
-    // }
-  }
-
   final ValueNotifier<DrawType?> currentDrawType = ValueNotifier(null);
+  bool get isStartDraw => currentDrawType.value != null;
 
   @override
   void startDraw(DrawType type) {
@@ -102,35 +89,42 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
     }
   }
 
-  // @override
-  // bool startCross(GestureData data, {bool force = false}) {
-  //   if (drawConfig.enable) {
-  //     if (force || isDrawing) {
-  //       logd('handleTap draw > $force > ${data.offset}');
-  //       // 更新并校正起始焦点.
-  //       _updateOffset(data.offset);
-  //       _markRepaint();
-  //       return true;
-  //     }
-  //   }
-  //   return false;
-  // }
+  @override
+  void onConfirm(GestureData data) {
+    if (!isStartDraw) return;
+    _offset = data.offset;
+    _markRepaint();
+  }
 
-  // @override
-  // void updateCross(GestureData data) {
-  //   if (drawConfig.enable && isDrawing) {
-  //     _updateOffset(data.offset);
-  //     _markRepaint();
-  //   }
-  // }
+  @override
+  void onDrawStart(GestureData data) {
+    if (drawConfig.enable) {
+      if (isDrawing) {
+        logd('handleTap draw > ${data.offset}');
+        // 更新并校正起始焦点.
+        _updateOffset(data.offset);
+        _markRepaint();
+        return;
+      }
+    }
+    return;
+  }
 
-  // @override
-  // void cancelCross() {
-  //   if (isDrawing || _offset != null) {
-  //     _updateOffset(null);
-  //     _markRepaint();
-  //   }
-  // }
+  @override
+  void onDrawUpdate(GestureData data) {
+    if (drawConfig.enable && isDrawing) {
+      _updateOffset(data.offset);
+      _markRepaint();
+    }
+  }
+
+  @override
+  void onDrawEnd() {
+    if (isDrawing || _offset != null) {
+      _updateOffset(null);
+      _markRepaint();
+    }
+  }
 
   /// 绘制Draw图层
   @override
@@ -155,22 +149,12 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
     canvas.drawLineType(
       drawConfig.crosshair.type,
       path,
-      drawConfig.crosshairPaint,
+      drawConfig.crosshair.linePaint,
       dashes: drawConfig.crosshair.dashes,
     );
 
-    canvas.drawCircle(
-      offset,
-      drawConfig.point.radius,
-      drawConfig.pointPaint,
-    );
+    canvas.drawCirclePoint(offset, drawConfig.crosspoint);
 
-    if (drawConfig.border != null) {
-      canvas.drawCircle(
-        offset,
-        drawConfig.border!.radius,
-        drawConfig.borderPaint!,
-      );
-    }
+    canvas.drawCirclePoint(offset, drawConfig.drawDot);
   }
 }

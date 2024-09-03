@@ -13,12 +13,11 @@
 // limitations under the License.
 
 import 'package:decimal/decimal.dart';
+import 'package:flutter/material.dart';
 
 import '../config/line_config/line_config.dart';
 import '../core/export.dart';
 import 'common.dart';
-import 'draw_object.dart';
-import 'serializers.dart';
 
 /// Overlay 绘制点坐标
 class Point {
@@ -35,6 +34,19 @@ class Point {
   /// 当前canvas中的坐标(实时更新)
   double? dx;
   double? dy;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Point &&
+          runtimeType == other.runtimeType &&
+          ts == other.ts &&
+          value == other.value &&
+          offsetRate == other.offsetRate;
+
+  @override
+  int get hashCode =>
+      runtimeType.hashCode ^ ts.hashCode ^ value.hashCode ^ offsetRate.hashCode;
 }
 
 /// Overlay基础配置
@@ -55,13 +67,23 @@ abstract class Overlay {
     this.visible = true,
     this.mode = MagnetMode.normal,
 
-    /// [type]类型的绘制需要的步数
-    required int steps,
-
     /// 绘制线配置, 默认值:drawConfig.crosshair
     required this.line,
-  }) : points = List.filled(3, null);
+  })  : id = DateTime.now().millisecondsSinceEpoch,
+        points = List.filled(type.steps, null);
 
+  // factory Overlay.type(
+  //   DrawType type,
+  //   IDraw drawer,
+  // ) {
+  //   return Overlay(
+  //     key: drawer.chartKey,
+  //     type: type,
+  //     line: drawer.lineConfig,
+  //   );
+  // }
+
+  final int id;
   final String key;
   final DrawType type;
   int zIndex;
@@ -72,5 +94,78 @@ abstract class Overlay {
 
   List<Point?> points;
 
-  DrawObject createDrawObject(KlineBindingBase controller);
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is Overlay &&
+        runtimeType == other.runtimeType &&
+        id == other.id &&
+        key == other.key &&
+        type == other.type) {
+      // equals 其他属性
+      return true;
+    }
+    return false;
+  }
+
+  @override
+  int get hashCode {
+    int hash =
+        runtimeType.hashCode ^ id.hashCode ^ key.hashCode ^ type.hashCode;
+    // combine其他属性
+    return hash;
+  }
+
+  DrawObject createDrawObject();
+
+  void updateDrawObject(
+    KlineBindingBase controller,
+    covariant DrawObject drawObject,
+  ) {
+    drawObject
+      .._zIndex = zIndex
+      .._lock = lock
+      .._visible = visible
+      .._mode = mode
+      .._line = line
+      .._points = points;
+  }
+}
+
+abstract class DrawObject<T extends Overlay> {
+  DrawObject({
+    required T overlay,
+  })  : id = overlay.id,
+        key = overlay.key,
+        type = overlay.type,
+        _zIndex = overlay.zIndex,
+        _lock = overlay.lock,
+        _visible = overlay.visible,
+        _mode = overlay.mode,
+        _line = overlay.line,
+        _points = overlay.points;
+
+  final int id;
+  final String key;
+  final DrawType type;
+
+  int _zIndex;
+  int get zIndex => _zIndex;
+
+  bool _lock;
+  bool get lock => _lock;
+
+  bool _visible;
+  bool get visible => _visible;
+
+  MagnetMode _mode;
+  MagnetMode get mode => _mode;
+
+  LineConfig _line;
+  LineConfig get line => _line;
+
+  List<Point?> _points;
+  List<Point?> get points => _points;
+
+  void drawOverlay(Canvas canvas, Size size);
 }

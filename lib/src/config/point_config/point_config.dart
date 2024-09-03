@@ -24,13 +24,37 @@ part 'point_config.g.dart';
 class PointConfig {
   const PointConfig({
     this.radius = 2,
-    this.width = 6,
+    this.width = 2,
     this.color = Colors.black,
+    this.borderWidth,
+    this.borderColor,
   });
 
   final double radius;
   final double width;
   final Color color;
+
+  /// 点的边框配置
+  final double? borderWidth;
+  final Color? borderColor;
+
+  Paint get paint => Paint()
+    ..color = color
+    ..strokeWidth = width
+    ..style = PaintingStyle.fill;
+
+  Paint? get borderPaint {
+    if (borderWidth != null &&
+        borderWidth! > 0 &&
+        borderColor != null &&
+        borderColor!.alpha != 0) {
+      return Paint()
+        ..color = borderColor!
+        ..strokeWidth = borderWidth!
+        ..style = PaintingStyle.stroke;
+    }
+    return null;
+  }
 
   factory PointConfig.fromJson(Map<String, dynamic> json) =>
       _$PointConfigFromJson(json);

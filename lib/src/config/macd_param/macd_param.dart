@@ -36,26 +36,12 @@ final class MACDParam extends Equatable {
 
   int get paramCount => math.max(l, s) + m;
 
-  @override
-  int get hashCode => s.hashCode ^ l.hashCode ^ m.hashCode;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is MACDParam &&
-          runtimeType == other.runtimeType &&
-          s == other.s &&
-          l == other.l &&
-          m == other.m;
-
-  @override
-  String toString() {
-    return 'MACDParam{s:$s, l:$l, m:$s}';
-  }
-
   factory MACDParam.fromJson(Map<String, dynamic> json) =>
       _$MACDParamFromJson(json);
   Map<String, dynamic> toJson() => _$MACDParamToJson(this);
+
+  @override
+  bool? get stringify => true;
 
   @override
   List<Object?> get props => [s, l, m];

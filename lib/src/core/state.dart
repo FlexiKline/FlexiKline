@@ -108,6 +108,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
   }
 
   /// 数据缓存Key
+  @override
   String get curDataKey => curKlineData.key;
 
   /// 最大绘制宽度

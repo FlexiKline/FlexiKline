@@ -56,5 +56,8 @@ final class RsiParam extends Equatable {
   Map<String, dynamic> toJson() => _$RsiParamToJson(this);
 
   @override
+  bool? get stringify => true;
+  
+  @override
   List<Object?> get props => [count];
 }

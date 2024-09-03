@@ -56,7 +56,7 @@ abstract class FKTheme {
   late Color t1;
   late Color t2;
   late Color t3;
-  late Color tlight;
+  late Color themeColor;
 
   double? _pixel;
   double get pixel {
@@ -103,7 +103,7 @@ class LightFKTheme extends FKTheme {
   @override
   Color get t3 => const Color(0xFF5F5F5F);
   @override
-  Color get tlight => const Color(0xFFFFFFFF);
+  Color get themeColor => const Color(0xFFFFFFFF);
 }
 
 class DarkFKTheme extends FKTheme {
@@ -141,7 +141,7 @@ class DarkFKTheme extends FKTheme {
   @override
   Color get t3 => const Color(0xFF606060);
   @override
-  Color get tlight => const Color(0xFF000000);
+  Color get themeColor => const Color(0xFF000000);
 }
 
 extension TextStyleFKTheme on FKTheme {

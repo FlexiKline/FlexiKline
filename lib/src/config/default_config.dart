@@ -94,6 +94,7 @@ abstract class BaseFlexiKlineTheme implements IFlexiKlineTheme {
     required this.gridLine,
     required this.crosshair,
     required this.priceMarkLine,
+    required this.themeColor,
     required this.textColor,
     required this.tickTextColor,
     required this.lastPriceTextColor,
@@ -147,6 +148,9 @@ abstract class BaseFlexiKlineTheme implements IFlexiKlineTheme {
   late Color crosshair;
   @override
   late Color priceMarkLine;
+
+  @override
+  late Color themeColor;
 
   /// 文本颜色配置
   @override
@@ -282,10 +286,12 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
         type: LineType.dashed,
         dashes: const [3, 3],
       ),
-      point: PointConfig(
+      crosspoint: PointConfig(
         radius: 2 * theme.scale,
-        width: 6 * theme.scale,
+        width: 0 * theme.scale,
         color: theme.crosshair,
+        borderWidth: 2 * theme.scale,
+        borderColor: theme.crosshair.withOpacity(0.5),
       ),
       tickText: TextAreaConfig(
         style: TextStyle(
@@ -316,15 +322,24 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
         type: LineType.dashed,
         dashes: const [3, 3],
       ),
-      point: PointConfig(
+      crosspoint: PointConfig(
+        radius: 2 * theme.scale,
+        width: 0 * theme.scale,
+        color: theme.drawColor,
+        borderWidth: 2 * theme.scale,
+        borderColor: theme.drawColor.withOpacity(0.5),
+      ),
+      drawLine: LineConfig(
+        width: 0.5 * theme.scale,
+        color: theme.drawColor,
+        type: LineType.solid,
+      ),
+      drawDot: PointConfig(
         radius: 9 * theme.scale,
         width: 0 * theme.scale,
-        color: Colors.white,
-      ),
-      border: PointConfig(
-        radius: 10 * theme.scale,
-        width: 1 * theme.scale,
-        color: theme.drawColor,
+        color: theme.themeColor,
+        borderWidth: 1 * theme.scale,
+        borderColor: theme.drawColor,
       ),
       tickText: TextAreaConfig(
         style: TextStyle(

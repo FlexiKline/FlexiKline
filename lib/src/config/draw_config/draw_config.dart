@@ -28,17 +28,30 @@ class DrawConfig {
   DrawConfig({
     this.enable = true,
     required this.crosshair,
-    required this.point,
-    this.border,
+    required this.crosspoint,
+    required this.drawLine,
+    required this.drawDot,
     required this.tickText,
     required this.spacing,
     this.gapBackground = Colors.transparent,
   });
 
+  /// 是否启用Draw Overlay功能开关
   final bool enable;
+
+  /// 十字线配置
   final LineConfig crosshair;
-  final PointConfig point;
-  final PointConfig? border;
+
+  /// 绘制十字线交叉点配置
+  final PointConfig crosspoint;
+
+  /// 默认绘制线的样式配置
+  final LineConfig drawLine;
+
+  /// 选择绘制点配置
+  final PointConfig drawDot;
+
+  /// 刻度文案配置
   final TextAreaConfig tickText;
 
   /// onCross时, 刻度[tickText]与绘制边界的间距.
@@ -46,24 +59,6 @@ class DrawConfig {
 
   /// 两个时间刻度之间的背景色
   final Color gapBackground;
-
-  Paint get crosshairPaint => Paint()
-    ..color = crosshair.color
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = crosshair.width;
-
-  Paint get pointPaint => Paint()
-    ..color = point.color
-    ..strokeWidth = point.width
-    ..style = PaintingStyle.fill;
-
-  Paint? get borderPaint {
-    if (border == null) return null;
-    return Paint()
-      ..color = border!.color
-      ..strokeWidth = border!.width
-      ..style = PaintingStyle.stroke;
-  }
 
   factory DrawConfig.fromJson(Map<String, dynamic> json) =>
       _$DrawConfigFromJson(json);

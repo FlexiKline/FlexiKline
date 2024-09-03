@@ -80,6 +80,9 @@ class TestFlexiKlineTheme implements IFlexiKlineTheme {
   Color priceMarkLine = const Color(0xFF000000);
 
   @override
+  Color get themeColor => Colors.white;
+
+  @override
   Color textColor = const Color(0xFF000000);
 
   @override

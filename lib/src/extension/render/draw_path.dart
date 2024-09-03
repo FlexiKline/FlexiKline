@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import '../../config/line_config/line_config.dart';
 import 'common.dart';
 
 /// Came from [flutter_path_drawing](https://github.com/dnfield/flutter_path_drawing) library.
@@ -111,6 +112,7 @@ extension PathDraw on Canvas {
   }
 
   /// 绘制线(根据LineType)
+  /// 推荐使用drawLineByConfig
   void drawLineType(
     LineType type,
     Path path,
@@ -122,5 +124,19 @@ extension PathDraw on Canvas {
     } else {
       drawPath(path, paint);
     }
+  }
+
+  /// 绘制线(根据LineConfig)
+  void drawLineByConfig(
+    Path path,
+    LineConfig config,
+  ) {
+    if (config.type == LineType.dashed) {
+      drawDashPath(path, config.linePaint, dashes: config.dashes);
+    } else {
+      drawPath(path, config.linePaint);
+    }
+
+    /// TODO: 待处理LineType.dotted
   }
 }
