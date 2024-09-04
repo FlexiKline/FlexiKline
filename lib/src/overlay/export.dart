@@ -12,18 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:ui';
-
-import '../framework/overlay.dart';
-
-class HorizontalLineDrawObject extends DrawObject {
-  HorizontalLineDrawObject(Overlay overlay) : super(overlay: overlay);
-
-  @override
-  bool hitTest(Offset position) {
-    return super.hitTest(position);
-  }
-
-  @override
-  void drawOverlay(Canvas canvas, Size size) {}
-}
+export './horizontal_line.dart';

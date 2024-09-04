@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:flutter/material.dart';
 
 import '../../framework/serializers.dart';
 import '../point_config/point_config.dart';

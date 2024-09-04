@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Overlay;
 
 import '../config/line_config/line_config.dart';
 import '../extension/export.dart';
 import '../framework/export.dart';
 import '../model/gesture_data.dart';
+import '../overlay/export.dart';
 import 'binding_base.dart';
 import 'interface.dart';
 import 'setting.dart';
@@ -43,7 +44,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
   String get chartKey => curDataKey;
 
   @override
-  LineConfig get lineConfig => drawConfig.drawLine;
+  LineConfig get drawLineConfig => drawConfig.drawLine;
 
   final ValueNotifier<int> _repaintDraw = ValueNotifier(0);
   @override
@@ -75,17 +76,40 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
     }
   }
 
-  final ValueNotifier<DrawType?> currentDrawType = ValueNotifier(null);
   bool get isStartDraw => currentDrawType.value != null;
 
+  /// DrawType的Overlay对应DrawObject的构建生成器集合
+  final Map<IDrawType, DrawObjectBuilder> _overlayBuilders = {
+    DrawType.horizontalLine: HorizontalLineDrawObject.new,
+  };
+
+  Iterable<IDrawType>? _supportDrawType;
+  Iterable<IDrawType> get supportDrawType {
+    return _supportDrawType ??= _overlayBuilders.keys;
+  }
+
+  /// 自定义overlay绘制对象构建器
+  void customOverlayDrawObjectBuilder(
+    IDrawType type,
+    DrawObjectBuilder builder,
+  ) {
+    _overlayBuilders[type] = builder;
+    _supportDrawType = null;
+  }
+
+  Overlay? curOverlay;
+  final ValueNotifier<IDrawType?> currentDrawType = ValueNotifier(null);
+
   @override
-  void startDraw(DrawType type) {
-    if (type == currentDrawType.value) {
-      currentDrawType.value = null;
-      _isDrawing.value = false;
-    } else {
+  void startDraw(IDrawType type) {
+    if (curOverlay == null || curOverlay!.type != type) {
+      curOverlay = type.createOverlay(this);
       currentDrawType.value = type;
       _isDrawing.value = true;
+    } else {
+      curOverlay = null;
+      currentDrawType.value = null;
+      _isDrawing.value = false;
     }
   }
 

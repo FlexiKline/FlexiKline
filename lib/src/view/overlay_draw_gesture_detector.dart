@@ -42,6 +42,7 @@ class _OverlayDrawGestureDetectorState extends State<OverlayDrawGestureDetector>
     with KlineLog {
   /// Draw确认坐标事件
   GestureData? _tapData;
+  GestureData? _panData;
 
   @override
   String get logTag => 'OverlayDrawGesture';
@@ -107,15 +108,25 @@ class _OverlayDrawGestureDetectorState extends State<OverlayDrawGestureDetector>
   }
 
   /// 平移开始事件
-  void onPanStart(DragStartDetails details) {}
+  void onPanStart(DragStartDetails details) {
+    _panData = GestureData.pan(details.localPosition);
+  }
 
   /// 平移更新事件
   void onPanUpdate(DragUpdateDetails details) {
     logd('onPanUpdate $details');
+    if (_panData == null) {
+      return;
+    }
+    _panData!.update(details.localPosition);
+    drawBinding.onDrawUpdate(_panData!);
   }
 
   /// 平移结束事件
-  void onPanEnd(DragEndDetails details) {}
+  void onPanEnd(DragEndDetails details) {
+    _panData?.end();
+    _panData = null;
+  }
 
   /// 鼠标Hover进入事件.
   void onEnter(PointerEnterEvent event) {

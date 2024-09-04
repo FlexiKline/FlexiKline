@@ -58,7 +58,7 @@ class Point {
 /// [mode] 磁吸模式
 /// [steps] 指定Overlay需要几个点来完成绘制操作, 决定points的数量
 /// [line] Overlay绘制时线配置
-abstract class Overlay {
+class Overlay {
   Overlay({
     required this.key,
     required this.type,
@@ -67,25 +67,25 @@ abstract class Overlay {
     this.visible = true,
     this.mode = MagnetMode.normal,
 
-    /// 绘制线配置, 默认值:drawConfig.crosshair
+    /// 绘制线配置, 默认值:drawConfig.drawLine
     required this.line,
   })  : id = DateTime.now().millisecondsSinceEpoch,
         points = List.filled(type.steps, null);
 
   // factory Overlay.type(
-  //   DrawType type,
-  //   IDraw drawer,
+  //   IDrawType type,
+  //   IDraw drawBinding,
   // ) {
   //   return Overlay(
-  //     key: drawer.chartKey,
+  //     key: drawBinding.chartKey,
   //     type: type,
-  //     line: drawer.lineConfig,
+  //     line: drawBinding.drawLineConfig,
   //   );
   // }
 
   final int id;
   final String key;
-  final DrawType type;
+  final IDrawType type;
   int zIndex;
   bool lock;
   bool visible;
@@ -116,7 +116,7 @@ abstract class Overlay {
     return hash;
   }
 
-  DrawObject createDrawObject();
+  // DrawObject createDrawObject();
 
   void updateDrawObject(
     KlineBindingBase controller,
@@ -132,9 +132,9 @@ abstract class Overlay {
   }
 }
 
-abstract class DrawObject<T extends Overlay> {
+abstract class DrawObject {
   DrawObject({
-    required T overlay,
+    required Overlay overlay,
   })  : id = overlay.id,
         key = overlay.key,
         type = overlay.type,
@@ -147,7 +147,7 @@ abstract class DrawObject<T extends Overlay> {
 
   final int id;
   final String key;
-  final DrawType type;
+  final IDrawType type;
 
   int _zIndex;
   int get zIndex => _zIndex;
@@ -166,6 +166,8 @@ abstract class DrawObject<T extends Overlay> {
 
   List<Point?> _points;
   List<Point?> get points => _points;
+
+  bool hitTest(Offset position) => false;
 
   void drawOverlay(Canvas canvas, Size size);
 }

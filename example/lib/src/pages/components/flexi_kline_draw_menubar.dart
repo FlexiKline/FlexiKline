@@ -63,7 +63,7 @@ class _FlexiKlineDrawMenubarState extends ConsumerState<FlexiKlineDrawMenubar> {
                           onPressed: () {
                             widget.controller.startDraw(type);
                           },
-                          content: 'assets/svgs/${type.name}.svg',
+                          content: 'assets/svgs/${type.toString()}.svg',
                           color: value == type ? theme.t1 : theme.t2,
                           // content: 'assets/svgs/${type.name.replaceAllMapped(_exp, (m) => '_${m.group(0)}').toLowerCase()}.svg',
                         );

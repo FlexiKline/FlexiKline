@@ -12,8 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:flexi_kline/flexi_kline.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Overlay;
+
+import '../core/interface.dart';
+import 'overlay.dart';
 
 /// 绘制位置
 ///
@@ -95,7 +97,15 @@ abstract interface class IPrecomputable {
   dynamic getCalcParam();
 }
 
-enum DrawType {
+typedef DrawObjectBuilder = DrawObject Function(Overlay overlay);
+
+abstract interface class IDrawType {
+  int get steps;
+
+  Overlay createOverlay(IDraw drawBinding);
+}
+
+enum DrawType implements IDrawType {
   // 单线
   trendLine(2), // 趋势线
   arrowLine(2), // 箭头
@@ -115,8 +125,21 @@ enum DrawType {
   // fibExpansion, // 斐波那契扩展
   rectangle(2); // 长方形
 
-  const DrawType(this.steps);
-  final int steps;
+  const DrawType(this._steps);
+  final int _steps;
+
+  @override
+  int get steps => _steps;
+
+  @override
+  String toString() => name;
+
+  @override
+  Overlay createOverlay(IDraw drawBinding) => Overlay(
+        key: drawBinding.chartKey,
+        type: this,
+        line: drawBinding.drawLineConfig,
+      );
 }
 
 enum MagnetMode {

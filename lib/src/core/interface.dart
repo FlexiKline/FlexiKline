@@ -230,14 +230,14 @@ abstract interface class IDraw {
   Listenable get repaintDraw;
 
   String get chartKey;
-  LineConfig get lineConfig;
+  LineConfig get drawLineConfig;
 
   void paintDraw(Canvas canvas, Size size);
 
   void markRepaintDraw();
 
   /// 开始绘制[type]指定的图形
-  void startDraw(DrawType type);
+  void startDraw(IDrawType type);
 
   /// 是否正在绘制图形中
   bool get isDrawing;
