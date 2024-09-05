@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import '../config/gesture_config/gesture_config.dart';
 import '../extension/geometry_ext.dart';

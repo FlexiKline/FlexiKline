@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:flutter/material.dart';
+import 'dart:ui';
+
+import 'package:flutter/foundation.dart';
 
 import '../config/export.dart';
-import '../data/export.dart';
+import '../data/kline_data.dart';
 import '../framework/export.dart';
 import '../model/export.dart';
 
@@ -229,30 +231,42 @@ abstract interface class ICross {
 abstract interface class IDraw {
   Listenable get repaintDraw;
 
+  /// 当前KlineDataKey
   String get chartKey;
+
+  /// 当前绘制Overlay的线配置
   LineConfig get drawLineConfig;
+
+  /// 绘制状态监听器
+  ValueListenable<DrawState> get drawStateLinstener;
+
+  /// 绘制类型监听器
+  ValueListenable<IDrawType?> get drawTypeListener;
+
+  /// 当前是否在绘制和编辑图形中监听器
+  ValueListenable<bool> get drawEditingListener;
 
   void paintDraw(Canvas canvas, Size size);
 
   void markRepaintDraw();
 
-  /// 开始绘制[type]指定的图形
-  void startDraw(IDrawType type);
+  /// 绘制准备
+  void onDrawPrepare();
 
-  /// 是否正在绘制图形中
-  bool get isDrawing;
+  /// 选择绘制图形
+  void onDrawStart(IDrawType type);
 
-  /// 确认绘制坐标
-  void onConfirm(GestureData data);
-
-  /// 开始绘制
-  void onDrawStart(GestureData data);
-
-  /// 绘制更新坐标
+  /// 绘制中更新坐标
   void onDrawUpdate(GestureData data);
 
-  /// 绘制结束
-  void onDrawEnd();
+  /// 绘制确认坐标
+  void onDrawConfirm(GestureData data);
+
+  /// 选择已绘制的Overlay
+  void onDrawSelect(Overlay overlay);
+
+  /// 退出绘制: 此时无法选中/编辑(移动)已有Overlay; 也不可以新建Overlay.
+  void onDrawExit();
 }
 
 /// Grid图层API

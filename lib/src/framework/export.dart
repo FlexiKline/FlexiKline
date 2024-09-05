@@ -13,6 +13,7 @@
 // limitations under the License.
 
 export 'common.dart';
+export 'draw_state.dart';
 export 'indicator.dart';
 export 'logger.dart';
 export 'object.dart';

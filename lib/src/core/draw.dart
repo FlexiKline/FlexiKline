@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:flutter/material.dart' hide Overlay;
+import 'dart:ui';
+
+import 'package:flutter/foundation.dart';
 
 import '../config/line_config/line_config.dart';
 import '../extension/export.dart';
@@ -23,20 +25,33 @@ import 'binding_base.dart';
 import 'interface.dart';
 import 'setting.dart';
 
-/// 负责绘制图层
-///
+/// 图形绘制层
+/// 每一种图形绘制主要分为以下几步:
+/// 1. 启动绘制绘制功能, 此时会阻隔事件传递到chart/cross层
+/// 2. 选择绘制图类型, 此时会主动进行第一绘制点待确认状态, 即会以主图区域中心点坐标绘制十字线.
+/// 3. 移动绘制点, 并确认第一绘制点, 并转换成蜡烛数据坐标记录到[Overlay]的points的first位置.
+/// 4. 重复步骤3, 确认绘制图类型所需要的所有绘制点.
+/// 5. 绘制完成后, 当前绘制图形默认为选中状态.
 mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
   @override
   void initState() {
     super.initState();
     logd('initState draw');
-    currentDrawType.addListener(() {});
+    _drawStateListener.addListener(() {
+      // 子状态更新
+      final state = _drawStateListener.value;
+      _drawTypeListener.value = state.overlay?.type;
+      _drawEditingListener.value = state.isEditing;
+    });
   }
 
   @override
   void dispose() {
     super.dispose();
     logd('dispose draw');
+    _drawTypeListener.dispose();
+    _drawEditingListener.dispose();
+    _drawStateListener.dispose();
     _repaintDraw.dispose();
   }
 
@@ -47,6 +62,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
   LineConfig get drawLineConfig => drawConfig.drawLine;
 
   final ValueNotifier<int> _repaintDraw = ValueNotifier(0);
+
   @override
   Listenable get repaintDraw => _repaintDraw;
   void _markRepaint() {
@@ -55,28 +71,8 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
 
   @override
   void markRepaintDraw() {
-    if (isDrawing) {
-      _updateOffset(_offset);
-      _markRepaint();
-    }
+    _markRepaint();
   }
-
-  /// 是否在绘制中
-  final ValueNotifier<bool> _isDrawing = ValueNotifier(false);
-  ValueNotifier<bool> get isDrawingLinstener => _isDrawing;
-  @override
-  bool get isDrawing => _isDrawing.value;
-
-  Offset? _offset;
-  void _updateOffset(Offset? val) {
-    if (val != null) {
-      _offset = val;
-    } else {
-      _offset = null;
-    }
-  }
-
-  bool get isStartDraw => currentDrawType.value != null;
 
   /// DrawType的Overlay对应DrawObject的构建生成器集合
   final Map<IDrawType, DrawObjectBuilder> _overlayBuilders = {
@@ -97,70 +93,66 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
     _supportDrawType = null;
   }
 
-  Overlay? curOverlay;
-  final ValueNotifier<IDrawType?> currentDrawType = ValueNotifier(null);
+  final _drawStateListener = ValueNotifier(DrawState.exited());
+  final _drawTypeListener = ValueNotifier<IDrawType?>(null);
+  final _drawEditingListener = ValueNotifier(false);
+
+  DrawState get drawState => _drawStateListener.value;
 
   @override
-  void startDraw(IDrawType type) {
-    if (curOverlay == null || curOverlay!.type != type) {
-      curOverlay = type.createOverlay(this);
-      currentDrawType.value = type;
-      _isDrawing.value = true;
-    } else {
-      curOverlay = null;
-      currentDrawType.value = null;
-      _isDrawing.value = false;
-    }
+  ValueListenable<DrawState> get drawStateLinstener => _drawStateListener;
+
+  @override
+  ValueListenable<IDrawType?> get drawTypeListener => _drawTypeListener;
+
+  @override
+  ValueListenable<bool> get drawEditingListener => _drawEditingListener;
+
+  @override
+  void onDrawPrepare() {
+    // 如果已不是退出状态, 则无需变更状态.
+    if (!drawState.isExited) return;
+    _drawStateListener.value = const Prepared();
   }
 
   @override
-  void onConfirm(GestureData data) {
-    if (!isStartDraw) return;
-    _offset = data.offset;
-    _markRepaint();
-  }
-
-  @override
-  void onDrawStart(GestureData data) {
-    if (drawConfig.enable) {
-      if (isDrawing) {
-        logd('handleTap draw > ${data.offset}');
-        // 更新并校正起始焦点.
-        _updateOffset(data.offset);
-        _markRepaint();
-        return;
-      }
-    }
-    return;
+  void onDrawStart(IDrawType type) {
+    _drawStateListener.value = Started(type.createOverlay(this));
   }
 
   @override
   void onDrawUpdate(GestureData data) {
-    if (drawConfig.enable && isDrawing) {
-      _updateOffset(data.offset);
-      _markRepaint();
-    }
+    if (!drawState.isEditing) return;
+    _drawStateListener.value = Drawing(drawState.overlay);
   }
 
   @override
-  void onDrawEnd() {
-    if (isDrawing || _offset != null) {
-      _updateOffset(null);
-      _markRepaint();
-    }
+  void onDrawConfirm(GestureData data) {
+    if (!drawState.isEditing) return;
+  }
+
+  @override
+  void onDrawSelect(Overlay overlay) {
+    if (!drawState.isPrepared) return;
+    _drawStateListener.value = DrawState.edit(overlay);
+  }
+
+  @override
+  void onDrawExit() {
+    _drawStateListener.value = const Exited();
   }
 
   /// 绘制Draw图层
   @override
   void paintDraw(Canvas canvas, Size size) {
-    if (!drawConfig.enable || !isDrawing) return;
+    if (!drawConfig.enable) return;
 
-    final offset = _offset;
-    if (offset == null || offset.isInfinite) {
-      return;
-    }
+    // final offset = _offset;
+    // if (offset == null || offset.isInfinite) {
+    //   return;
+    // }
 
-    paintDrawCrossLine(canvas, offset);
+    // paintDrawCrossLine(canvas, offset);
   }
 
   void paintDrawCrossLine(Canvas canvas, Offset offset) {

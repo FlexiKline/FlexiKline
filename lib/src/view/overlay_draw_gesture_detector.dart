@@ -104,7 +104,7 @@ class _OverlayDrawGestureDetectorState extends State<OverlayDrawGestureDetector>
   void onTapUp(TapUpDetails details) {
     logd("onTapUp details:$details");
     _tapData = GestureData.tap(details.localPosition);
-    drawBinding.onConfirm(_tapData!);
+    // drawBinding.onConfirm(_tapData!);
   }
 
   /// 平移开始事件
@@ -119,7 +119,7 @@ class _OverlayDrawGestureDetectorState extends State<OverlayDrawGestureDetector>
       return;
     }
     _panData!.update(details.localPosition);
-    drawBinding.onDrawUpdate(_panData!);
+    // drawBinding.onDrawUpdate(_panData!);
   }
 
   /// 平移结束事件

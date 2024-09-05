@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import 'package:decimal/decimal.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import '../constant.dart';

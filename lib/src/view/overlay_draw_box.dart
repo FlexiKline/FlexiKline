@@ -15,6 +15,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import '../framework/draw_state.dart';
 import '../kline_controller.dart';
 
 class OverlayDrawBox extends SingleChildRenderObjectWidget {
@@ -52,13 +53,28 @@ class RenderOverlayDrawBox extends RenderProxyBox {
 
   @override
   bool hitTest(BoxHitTestResult result, {required Offset position}) {
-    // TODO: 检查position位置是否命中到已绘制的Overlay.
-    if (!controller.isDrawing) return false;
+    switch (controller.drawState) {
+      case Exited():
+        return false;
+      case Started():
+      case Drawing():
+        return false;
+      case Modifying():
+      case Prepared():
+      // TODO: 检查position位置是否命中到已绘制的Overlay.
+    }
+    if (controller.drawState.isExited) return false;
+    if (controller.drawState.isEditing) {
+      // 当前已有Overlay处于
+      return false;
+    } else {
+      // TODO: 检查position位置是否命中到已绘制的Overlay.
+    }
     return super.hitTest(result, position: position);
   }
 
   @override
   bool hitTestSelf(Offset position) {
-    return controller.isDrawing;
+    return controller.drawState.isExited;
   }
 }

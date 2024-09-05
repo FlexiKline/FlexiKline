@@ -14,12 +14,12 @@
 
 import 'dart:developer';
 
-import 'package:flexi_kline/src/view/overlay_draw_box.dart';
 import 'package:flutter/material.dart';
 
 import '../kline_controller.dart';
 import '../utils/platform_util.dart';
 import 'non_touch_gesture_detector.dart';
+import 'overlay_draw_box.dart';
 import 'overlay_draw_gesture_detector.dart';
 import 'touch_gesture_detector.dart';
 
@@ -235,7 +235,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
       left: _position.dx,
       top: _position.dy,
       child: ValueListenableBuilder(
-        valueListenable: widget.controller.isDrawingLinstener,
+        valueListenable: widget.controller.drawEditingListener,
         builder: (context, value, child) {
           return Visibility(
             visible: value,

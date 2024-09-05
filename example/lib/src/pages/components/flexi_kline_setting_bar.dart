@@ -120,6 +120,11 @@ class _FlexiKlineSettingBarState extends ConsumerState<FlexiKlineSettingBar>
   void onTapDrawTool() {
     setState(() {
       _showDarwTool = !_showDarwTool;
+      if (_showDarwTool) {
+        widget.controller.onDrawPrepare();
+      } else {
+        widget.controller.onDrawExit();
+      }
     });
   }
 

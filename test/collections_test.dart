@@ -194,6 +194,13 @@ void main() {
     newList.insertAll(newList.length, list2);
     assert(newList.length == 200000000);
   });
+
+  test('test list is null or empty', () {
+    final list = List<int?>.filled(3, null);
+
+    debugPrint('list.len:${list.length}');
+    debugPrint('list.len:${list.isEmpty}');
+  });
 }
 
 const fillData1 = 'AAABBBCCC';

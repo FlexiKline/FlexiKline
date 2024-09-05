@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:ui';
+
 import 'package:decimal/decimal.dart';
-import 'package:flutter/material.dart';
 
 import '../config/line_config/line_config.dart';
 import '../core/export.dart';
@@ -94,6 +95,15 @@ class Overlay {
 
   List<Point?> points;
 
+  /// 已开始绘制
+  bool get isStarted => points.first == null;
+
+  /// 当前绘制中
+  bool get isDrawing => points.first != null;
+
+  /// 当前绘制已完成, 修正中.
+  bool get isModfying => points.fold(true, (ret, item) => ret && item != null);
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
@@ -102,7 +112,7 @@ class Overlay {
         id == other.id &&
         key == other.key &&
         type == other.type) {
-      // equals 其他属性
+      // equals 其他属性?
       return true;
     }
     return false;
@@ -112,7 +122,7 @@ class Overlay {
   int get hashCode {
     int hash =
         runtimeType.hashCode ^ id.hashCode ^ key.hashCode ^ type.hashCode;
-    // combine其他属性
+    // combine其他属性?
     return hash;
   }
 

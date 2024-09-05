@@ -14,7 +14,7 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 /// 按比例压缩singal手势数据
 ///

@@ -54,14 +54,14 @@ class _FlexiKlineDrawMenubarState extends ConsumerState<FlexiKlineDrawMenubar> {
                 scrollDirection: Axis.horizontal,
                 physics: const BouncingScrollPhysics(),
                 child: ValueListenableBuilder(
-                  valueListenable: widget.controller.currentDrawType,
+                  valueListenable: widget.controller.drawTypeListener,
                   builder: (context, value, child) {
                     return Row(
                       children: DrawType.values.map((type) {
                         return ShrinkIconButton(
                           key: ValueKey(type),
                           onPressed: () {
-                            widget.controller.startDraw(type);
+                            widget.controller.onDrawStart(type);
                           },
                           content: 'assets/svgs/${type.toString()}.svg',
                           color: value == type ? theme.t1 : theme.t2,
