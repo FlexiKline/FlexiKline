@@ -27,7 +27,7 @@ extension DrawCircle on Canvas {
     Color? borderColor,
     Paint? borderPaint,
   }) {
-    drawCircle(offset, radius, paint);
+    if (offset.isInfinite) return;
     borderWidth ??= borderPaint?.strokeWidth;
     borderColor ??= borderPaint?.color;
     if (borderWidth != null &&
@@ -43,17 +43,19 @@ extension DrawCircle on Canvas {
           ..style = PaintingStyle.stroke,
       );
     }
+    drawCircle(offset, radius, paint);
   }
 
   void drawCirclePoint(
     Offset offset,
     PointConfig point,
-  ) =>
-      drawBorderCircle(
-        offset: offset,
-        radius: point.radius,
-        paint: point.paint,
-        borderWidth: point.borderWidth,
-        borderColor: point.borderColor,
-      );
+  ) {
+    drawBorderCircle(
+      offset: offset,
+      radius: point.radius,
+      paint: point.paint,
+      borderWidth: point.borderWidth,
+      borderColor: point.borderColor,
+    );
+  }
 }

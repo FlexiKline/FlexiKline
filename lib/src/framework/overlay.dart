@@ -17,7 +17,6 @@ import 'dart:ui';
 import 'package:decimal/decimal.dart';
 
 import '../config/line_config/line_config.dart';
-import '../core/export.dart';
 import 'common.dart';
 
 /// Overlay 绘制点坐标
@@ -26,6 +25,7 @@ class Point {
     required this.ts,
     required this.value,
     this.offsetRate = 0,
+    this.offset = Offset.infinite,
   });
 
   final int ts;
@@ -33,8 +33,7 @@ class Point {
   final double offsetRate;
 
   /// 当前canvas中的坐标(实时更新)
-  double? dx;
-  double? dy;
+  Offset offset;
 
   @override
   bool operator ==(Object other) =>
@@ -95,14 +94,18 @@ class Overlay {
 
   List<Point?> points;
 
+  /// 当前指针位置
+  Offset pointer = Offset.infinite;
+
   /// 已开始绘制
   bool get isStarted => points.first == null;
 
   /// 当前绘制中
-  bool get isDrawing => points.first != null;
+  bool get isDrawing =>
+      points.firstWhere((e) => e == null, orElse: () => null) == null;
 
   /// 当前绘制已完成, 修正中.
-  bool get isModfying => points.fold(true, (ret, item) => ret && item != null);
+  bool get isEditing => points.fold(true, (ret, item) => ret && item != null);
 
   @override
   bool operator ==(Object other) {
@@ -126,58 +129,107 @@ class Overlay {
     return hash;
   }
 
+  @override
+  String toString() {
+    return "Overlay(id:$id, key:$key, type:$type)";
+  }
+
+  /// 更新point到Overlay的[points]中, 标志着完成一步.
+  /// 1. 如果更新后, 还剩最后一步没有完成. 则返回true, 代表着下一步可以调用drawObject开始绘制了.
+  /// 2.
+  void updatePoint(Point point) {
+    int? index;
+    for (int i = 0; i < points.length; i++) {
+      final p = points[i];
+      if (p == null) {
+        // 说明当前overlay未完成绘制, 填充它.
+        index = i;
+        break;
+      } else if (point.offset - p.offset > const Offset(2, 2)) {
+        // 说明命中
+        index = i;
+      }
+    }
+    if (index != null) {
+      points[index] = point;
+    }
+  }
+
   // DrawObject createDrawObject();
 
-  void updateDrawObject(
-    KlineBindingBase controller,
-    covariant DrawObject drawObject,
-  ) {
-    drawObject
-      .._zIndex = zIndex
-      .._lock = lock
-      .._visible = visible
-      .._mode = mode
-      .._line = line
-      .._points = points;
-  }
+  // void updateDrawObject(
+  //   KlineBindingBase controller,
+  //   covariant DrawObject drawObject,
+  // ) {
+  //   drawObject
+  //     .._zIndex = zIndex
+  //     .._lock = lock
+  //     .._visible = visible
+  //     .._mode = mode
+  //     .._line = line
+  //     .._points = points
+  //     .._pointer = pointer;
+  // }
 }
 
 abstract class DrawObject {
-  DrawObject({
-    required Overlay overlay,
-  })  : id = overlay.id,
-        key = overlay.key,
-        type = overlay.type,
-        _zIndex = overlay.zIndex,
-        _lock = overlay.lock,
-        _visible = overlay.visible,
-        _mode = overlay.mode,
-        _line = overlay.line,
-        _points = overlay.points;
+  DrawObject(this.overlay);
 
-  final int id;
-  final String key;
-  final IDrawType type;
+  final Overlay overlay;
+  // DrawObject({
+  //   required Overlay overlay,
+  // })  : id = overlay.id,
+  //       key = overlay.key,
+  //       type = overlay.type,
+  //       _zIndex = overlay.zIndex,
+  //       _lock = overlay.lock,
+  //       _visible = overlay.visible,
+  //       _mode = overlay.mode,
+  //       _line = overlay.line,
+  //       _points = overlay.points,
+  //       _pointer = overlay.pointer;
 
-  int _zIndex;
-  int get zIndex => _zIndex;
+  // final int id;
+  // final String key;
+  // final IDrawType type;
 
-  bool _lock;
-  bool get lock => _lock;
+  int get id => overlay.id;
+  String get key => overlay.key;
+  IDrawType get type => overlay.type;
 
-  bool _visible;
-  bool get visible => _visible;
+  // int _zIndex;
+  // int get zIndex => _zIndex;
+  int get zIndex => overlay.zIndex;
 
-  MagnetMode _mode;
-  MagnetMode get mode => _mode;
+  // bool _lock;
+  // bool get lock => _lock;
+  bool get lock => overlay.lock;
 
-  LineConfig _line;
-  LineConfig get line => _line;
+  // bool _visible;
+  // bool get visible => _visible;
+  bool get visible => overlay.visible;
 
-  List<Point?> _points;
-  List<Point?> get points => _points;
+  // MagnetMode _mode;
+  // MagnetMode get mode => _mode;
+  MagnetMode get mode => overlay.mode;
+
+  // LineConfig _line;
+  // LineConfig get line => _line;
+  LineConfig get line => overlay.line;
+
+  // List<Point?> _points;
+  // List<Point?> get points => _points;
+  List<Point?> get points => overlay.points;
+
+  // Offset _pointer;
+  // Offset get pointer => _pointer;
+  Offset get pointer => overlay.pointer;
 
   bool hitTest(Offset position) => false;
 
   void drawOverlay(Canvas canvas, Size size);
+
+  void dispose() {
+    /// 清理操作.
+  }
 }

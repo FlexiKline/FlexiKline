@@ -30,9 +30,13 @@ class FlexiKlineDrawToolbar extends ConsumerStatefulWidget {
   const FlexiKlineDrawToolbar({
     super.key,
     required this.controller,
+    this.lineWeight = 1,
+    this.lineType = LineType.solid,
   });
 
   final FlexiKlineController controller;
+  final int lineWeight;
+  final LineType lineType;
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
@@ -40,10 +44,21 @@ class FlexiKlineDrawToolbar extends ConsumerStatefulWidget {
 }
 
 class _FlexiKlineDrawToolbarState extends ConsumerState<FlexiKlineDrawToolbar> {
-  int lineWeight = 1;
+  FlexiKlineController get controller => widget.controller;
+
+  late int lineWeight;
   final List<int> lineWeightList = [1, 2, 3, 4];
 
-  LineType lineType = LineType.solid;
+  late LineType lineType;
+
+  @override
+  void initState() {
+    super.initState();
+    if (lineWeightList.contains(widget.lineWeight)) {
+      lineWeight = widget.lineWeight;
+    }
+    lineType = widget.lineType;
+  }
 
   void onSelectLineWeight(int value) {
     setState(() {
@@ -142,6 +157,7 @@ class _FlexiKlineDrawToolbarState extends ConsumerState<FlexiKlineDrawToolbar> {
           ShrinkIconButton(
             onPressed: () {
               debugPrint('zp::: draw onTap Delete');
+              controller.onDrawDelete();
             },
             content: SvgRes.delete,
           ),

@@ -25,6 +25,7 @@ import '../providers/market_candle_provider.dart';
 import '../repo/mock.dart';
 import '../test/canvas_demo.dart';
 import '../theme/flexi_theme.dart';
+import 'components/flexi_kline_draw_toolbar.dart';
 import 'components/flexi_kline_indicator_bar.dart';
 import 'components/flexi_kline_mark_view.dart';
 import 'components/flexi_kline_setting_bar.dart';
@@ -183,6 +184,9 @@ class _MyDemoPageState extends ConsumerState<MyKlineDemoPage> {
               controller: controller,
               mainBackgroundView: FlexiKlineMarkView(
                 margin: EdgeInsetsDirectional.only(bottom: 10.r, start: 10.r),
+              ),
+              drawToolbar: FlexiKlineDrawToolbar(
+                controller: controller,
               ),
             ),
             FlexiKlineIndicatorBar(

@@ -14,10 +14,11 @@
 
 import 'dart:ui';
 
+import '../extension/render/draw_path.dart';
 import '../framework/overlay.dart';
 
-class HorizontalLineDrawObject extends DrawObject {
-  HorizontalLineDrawObject(super.overlay);
+class TrendLineDrawObject extends DrawObject {
+  TrendLineDrawObject(super.overlay);
 
   @override
   bool hitTest(Offset position) {
@@ -25,5 +26,17 @@ class HorizontalLineDrawObject extends DrawObject {
   }
 
   @override
-  void drawOverlay(Canvas canvas, Size size) {}
+  void drawOverlay(Canvas canvas, Size size) {
+    List<Offset> dotList = [];
+    for (var point in points) {
+      if (point?.offset.isFinite == true) {
+        dotList.add(point!.offset);
+      }
+    }
+    canvas.drawLineType(
+      line.type,
+      Path()..addPolygon(dotList, false),
+      line.linePaint,
+    );
+  }
 }

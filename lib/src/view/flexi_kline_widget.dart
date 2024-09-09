@@ -36,6 +36,7 @@ class FlexiKlineWidget extends StatefulWidget {
     bool? isTouchDevice,
     this.onDoubleTap,
     this.drawToolbar,
+    this.drawToolbarInitHeight = 50,
   })  : isTouchDevice = isTouchDevice ?? PlatformUtil.isTouch,
         autoAdaptLayout = autoAdaptLayout ?? !PlatformUtil.isMobile;
 
@@ -47,6 +48,9 @@ class FlexiKlineWidget extends StatefulWidget {
   final Widget? mainBackgroundView;
   final GestureTapCallback? onDoubleTap;
   final Widget? drawToolbar;
+
+  /// 用于计算[drawToolbar]初始展示的位置向对于canvas底部的位置.
+  final double drawToolbarInitHeight;
 
   /// 是否自动适配所在布局约束.
   /// 在可以动态调整窗口大小的设备上, 此值为true, 将会动态适配窗口的调整; 否则, 请自行控制.
@@ -189,7 +193,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
             ),
           ),
         ),
-        _buildDrawToolbar(context),
+        _buildDrawToolbar(context, canvasSize),
       ],
     );
   }
@@ -225,11 +229,11 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
   }
 
   /// 绘制DrawToolBar
-  Widget _buildDrawToolbar(BuildContext context) {
+  Widget _buildDrawToolbar(BuildContext context, Size canvasSize) {
     if (widget.drawToolbar == null) return const SizedBox.shrink();
     if (_position == Offset.infinite) {
       /// 初始位置为当前canvas区域高度的一半
-      _position = Offset(0, widget.controller.canvasRect.height / 2);
+      _position = Offset(0, canvasSize.height - widget.drawToolbarInitHeight);
     }
     return Positioned(
       left: _position.dx,

@@ -54,27 +54,39 @@ class RenderOverlayDrawBox extends RenderProxyBox {
   @override
   bool hitTest(BoxHitTestResult result, {required Offset position}) {
     switch (controller.drawState) {
+      case Prepared():
+        final overlay = controller.hitTestOverlay(position);
+        if (overlay != null) {
+          controller.onDrawSelect(overlay);
+          result.add(BoxHitTestEntry(this, position));
+          return true;
+        } else {
+          return false;
+        }
+      case Editing():
+        final overlay = controller.hitTestOverlay(position);
+        if (overlay != null) {
+          controller.onDrawSelect(overlay);
+        }
+        return super.hitTest(result, position: position);
+      // case Started():
+      case Drawing():
+        return super.hitTest(result, position: position);
       case Exited():
         return false;
-      case Started():
-      case Drawing():
-        return false;
-      case Modifying():
-      case Prepared():
-      // TODO: 检查position位置是否命中到已绘制的Overlay.
     }
-    if (controller.drawState.isExited) return false;
-    if (controller.drawState.isEditing) {
-      // 当前已有Overlay处于
-      return false;
-    } else {
-      // TODO: 检查position位置是否命中到已绘制的Overlay.
-    }
-    return super.hitTest(result, position: position);
   }
 
   @override
   bool hitTestSelf(Offset position) {
-    return controller.drawState.isExited;
+    switch (controller.drawState) {
+      case Exited():
+        return false;
+      case Prepared():
+      // case Started():
+      case Drawing():
+      case Editing():
+        return true;
+    }
   }
 }

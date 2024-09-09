@@ -330,7 +330,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
         borderColor: theme.drawColor.withOpacity(0.5),
       ),
       drawLine: LineConfig(
-        width: 0.5 * theme.scale,
+        width: 1 * theme.scale,
         color: theme.drawColor,
         type: LineType.solid,
       ),

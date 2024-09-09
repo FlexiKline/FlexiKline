@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:flutter/material.dart' hide Overlay;
+import 'package:flutter/foundation.dart';
 
 import '../core/interface.dart';
 import 'overlay.dart';
@@ -147,6 +147,3 @@ enum MagnetMode {
   weakMagnet,
   strongMagnet;
 }
-
-
-

@@ -15,8 +15,8 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 
+import '../extension/geometry_ext.dart';
 import '../config/draw_config/draw_config.dart';
-import '../core/interface.dart';
 import '../framework/logger.dart';
 import '../kline_controller.dart';
 import '../model/gesture_data.dart';
@@ -47,7 +47,7 @@ class _OverlayDrawGestureDetectorState extends State<OverlayDrawGestureDetector>
   @override
   String get logTag => 'OverlayDrawGesture';
 
-  IDraw get drawBinding => widget.controller;
+  FlexiKlineController get controller => widget.controller;
 
   DrawConfig get drawConfig => widget.controller.drawConfig;
 
@@ -67,18 +67,22 @@ class _OverlayDrawGestureDetectorState extends State<OverlayDrawGestureDetector>
   }
 
   Widget _buildTouchGestureDetector(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTapUp: onTapUp,
-      onPanStart: onPanStart,
-      onPanUpdate: onPanUpdate,
-      onPanEnd: onPanEnd,
+    return Listener(
+      onPointerMove: onPointerMove,
+      onPointerUp: onPointerUp,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        onPanStart: onPanStart,
+        onPanUpdate: onPanUpdate,
+        onPanEnd: onPanEnd,
 
-      /// 长按
-      onLongPressStart: onLongPressStart,
-      onLongPressMoveUpdate: onLongPressMoveUpdate,
-      onLongPressEnd: onLongPressEnd,
-      child: widget.child,
+        /// 长按
+        onLongPressStart: onLongPressStart,
+        onLongPressMoveUpdate: onLongPressMoveUpdate,
+        onLongPressEnd: onLongPressEnd,
+        child: widget.child,
+      ),
     );
   }
 
@@ -88,7 +92,7 @@ class _OverlayDrawGestureDetectorState extends State<OverlayDrawGestureDetector>
       onHover: onHover,
       onExit: onExit,
       child: GestureDetector(
-        onTapUp: onTapUp,
+        onTap: onTap,
         onPanUpdate: onPanUpdate,
 
         /// 长按
@@ -101,25 +105,71 @@ class _OverlayDrawGestureDetectorState extends State<OverlayDrawGestureDetector>
   }
 
   /// 点击 - 确认
-  void onTapUp(TapUpDetails details) {
-    logd("onTapUp details:$details");
-    _tapData = GestureData.tap(details.localPosition);
-    // drawBinding.onConfirm(_tapData!);
+  void onTap() {
+    logd("onTap");
+    final offset = controller.drawState.overlay?.pointer;
+    if (offset != null && offset.isFinite) {
+      _tapData = GestureData.tap(offset);
+      controller.onDrawConfirm(_tapData!);
+    }
+  }
+
+  bool isSweeped = false;
+  void onPointerMove(PointerMoveEvent event) {
+    final offset = controller.drawState.overlay?.pointer;
+    if (offset != null && offset.isFinite) {
+      if (!isSweeped) {
+        isSweeped = true;
+        GestureBinding.instance.gestureArena.sweep(event.pointer);
+      }
+      Offset newOffset = offset + event.delta;
+      final mainRect = controller.mainRect;
+      if (!mainRect.include(newOffset)) {
+        // 限制在主区坐标系内
+        newOffset = newOffset.clamp(mainRect);
+      }
+      _panData ??= GestureData.pan(newOffset);
+      _panData!.update(newOffset);
+      controller.onDrawUpdate(_panData!);
+    }
+  }
+
+  void onPointerUp(PointerUpEvent event) {
+    if (isSweeped) {
+      isSweeped = false;
+    }
+    _panData?.end();
+    _panData = null;
   }
 
   /// 平移开始事件
   void onPanStart(DragStartDetails details) {
-    _panData = GestureData.pan(details.localPosition);
+    final drawState = controller.drawState;
+    if (drawState.isOngoing) {
+      final pointer = drawState.overlay!.pointer;
+      if (pointer.isFinite) {
+        // 说明已经确认了指针位置
+        _panData = GestureData.pan(pointer);
+      } else {
+        // 说明指定位置未初始化
+        _panData = GestureData.pan(details.localPosition);
+      }
+    }
   }
 
   /// 平移更新事件
   void onPanUpdate(DragUpdateDetails details) {
     logd('onPanUpdate $details');
-    if (_panData == null) {
-      return;
+    if (_panData == null) return;
+    // 针对_panData位置增量更新
+    Offset newOffset = _panData!.offset + details.delta;
+    final mainRect = controller.mainRect;
+    if (!mainRect.include(newOffset)) {
+      // 限制在主区坐标系内
+      newOffset = newOffset.clamp(mainRect);
     }
-    _panData!.update(details.localPosition);
-    // drawBinding.onDrawUpdate(_panData!);
+    _panData!.update(newOffset);
+    controller.onDrawUpdate(_panData!);
   }
 
   /// 平移结束事件

@@ -44,7 +44,9 @@ enum GestureType {
   signal,
 }
 
-/// 手势数据针对[GestureType]的封装
+/// 手势事件
+/// TODO: 考虑更名为GestureEvent
+/// 针对[GestureType]的封装
 class GestureData {
   GestureData._internal({
     required this.type,

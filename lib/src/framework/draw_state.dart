@@ -34,27 +34,33 @@ sealed class DrawState {
 
   factory DrawState.exited() => const Exited();
 
-  factory DrawState.start(IDrawType type, IDraw drawBinding) {
-    return Started(type.createOverlay(drawBinding));
+  factory DrawState.draw(IDrawType type, IDraw drawBinding) {
+    return Drawing(type.createOverlay(drawBinding));
   }
 
-  factory DrawState.edit(Overlay overlay) {
-    if (overlay.isStarted) {
-      return Started(overlay);
-    } else if (overlay.isModfying) {
-      return Modifying(overlay);
-    } else {
+  factory DrawState.edit(IDrawType type, IDraw drawBinding) {
+    return Editing(type.createOverlay(drawBinding));
+  }
+
+  factory DrawState.from(Overlay overlay) {
+    if (overlay.isEditing) {
+      return Editing(overlay);
+    }
+    //  else if (overlay.isStarted) {
+    //   return Started(overlay);
+    // }
+    else {
       return Drawing(overlay);
     }
   }
 
   bool get isExited => this is Exited;
   bool get isPrepared => this is Prepared;
-  bool get isStarted => this is Started;
+  // bool get isStarted => this is Started;
   bool get isDrawing => this is Drawing;
-  bool get isModifying => this is Modifying;
-  bool get isEditing {
-    return overlay != null && isStarted && isDrawing && isModifying;
+  bool get isEditing => this is Editing;
+  bool get isOngoing {
+    return overlay != null && (/*isStarted ||*/ isDrawing || isEditing);
   }
 }
 
@@ -62,16 +68,16 @@ class Prepared extends DrawState {
   const Prepared() : super(null);
 }
 
-class Started extends DrawState {
-  const Started(super.overlay);
-}
+// class Started extends DrawState {
+//   const Started(super.overlay);
+// }
 
 class Drawing extends DrawState {
   const Drawing(super.overlay);
 }
 
-class Modifying extends DrawState {
-  const Modifying(super.overlay);
+class Editing extends DrawState {
+  const Editing(super.overlay);
 }
 
 class Exited extends DrawState {

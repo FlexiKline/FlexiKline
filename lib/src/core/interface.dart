@@ -237,14 +237,23 @@ abstract interface class IDraw {
   /// 当前绘制Overlay的线配置
   LineConfig get drawLineConfig;
 
+  /// 当前绘制初始坐标(主区的中心点)
+  Offset get initialPosition;
+
   /// 绘制状态监听器
   ValueListenable<DrawState> get drawStateLinstener;
+
+  /// 当前绘制DrawState
+  DrawState get drawState;
 
   /// 绘制类型监听器
   ValueListenable<IDrawType?> get drawTypeListener;
 
   /// 当前是否在绘制和编辑图形中监听器
   ValueListenable<bool> get drawEditingListener;
+
+  /// 测试[position]位置上是否命中当前已完成绘制操作的Overly.
+  Overlay? hitTestOverlay(Offset position);
 
   void paintDraw(Canvas canvas, Size size);
 
