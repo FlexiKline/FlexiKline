@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 
 import '../framework/export.dart';
 import 'interface.dart';

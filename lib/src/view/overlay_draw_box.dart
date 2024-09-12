@@ -51,27 +51,46 @@ class RenderOverlayDrawBox extends RenderProxyBox {
   FlexiKlineController _controller;
   FlexiKlineController get controller => _controller;
 
+  // @override
+  // bool hitTest(BoxHitTestResult result, {required Offset position}) {
+  //   switch (controller.drawState) {
+  //     case Prepared():
+  //       final overlay = controller.hitTestOverlay(position);
+  //       if (overlay != null) {
+  //         controller.onDrawSelect(overlay);
+  //         result.add(BoxHitTestEntry(this, position));
+  //         return true;
+  //       } else {
+  //         return false;
+  //       }
+  //     case Editing():
+  //       final overlay = controller.hitTestOverlay(position);
+  //       if (overlay != null) {
+  //         controller.onDrawSelect(overlay);
+  //       }
+  //       return super.hitTest(result, position: position);
+  //     // case Started():
+  //     case Drawing():
+  //       return super.hitTest(result, position: position);
+  //     case Exited():
+  //       return false;
+  //   }
+  // }
+
   @override
-  bool hitTest(BoxHitTestResult result, {required Offset position}) {
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     switch (controller.drawState) {
+      case Drawing():
+        return child?.hitTest(result, position: position) ?? false;
       case Prepared():
-        final overlay = controller.hitTestOverlay(position);
-        if (overlay != null) {
-          controller.onDrawSelect(overlay);
-          result.add(BoxHitTestEntry(this, position));
-          return true;
-        } else {
-          return false;
-        }
       case Editing():
         final overlay = controller.hitTestOverlay(position);
         if (overlay != null) {
           controller.onDrawSelect(overlay);
+          return true;
+        } else {
+          return false;
         }
-        return super.hitTest(result, position: position);
-      // case Started():
-      case Drawing():
-        return super.hitTest(result, position: position);
       case Exited():
         return false;
     }
@@ -83,7 +102,6 @@ class RenderOverlayDrawBox extends RenderProxyBox {
       case Exited():
         return false;
       case Prepared():
-      // case Started():
       case Drawing():
       case Editing():
         return true;

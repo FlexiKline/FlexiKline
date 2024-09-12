@@ -35,12 +35,15 @@ mixin GridBinding on KlineBindingBase implements IGrid {
   void dispose() {
     super.dispose();
     logd('dispose grid');
-    repaintGridBg.dispose();
+    _repaintGridBg.dispose();
   }
 
+  final ValueNotifier<int> _repaintGridBg = ValueNotifier(0);
   @override
-  void markRepaintGrid() => repaintGridBg.value++;
-  ValueNotifier<int> repaintGridBg = ValueNotifier(0);
+  Listenable get repaintGridBg => _repaintGridBg;
+
+  @override
+  void markRepaintGrid() => _repaintGridBg.value++;
 
   void paintGridBg(Canvas canvas, Size size) {
     if (gridConfig.show) {

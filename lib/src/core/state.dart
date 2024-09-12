@@ -14,7 +14,8 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
 
 import '../constant.dart';
@@ -50,8 +51,9 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
   void dispose() {
     super.dispose();
     logd('dispose state');
-    candleRequestListener.dispose();
-    timeBarListener.dispose();
+    _candleRequestListener.dispose();
+    _isFirstCandleMoveOffScreenListener.dispose();
+    _timeBarListener.dispose();
     _klineDataCache.forEach((key, data) {
       data.dispose();
     });
@@ -61,21 +63,30 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
   OnLoadMoreCandles? onLoadMoreCandles;
 
   /// 首根蜡烛是否移出屏幕监听.
-  final isMoveOffScreenListener = ValueNotifier(false);
-
-  /// CandleReq变化监听器
-  final candleRequestListener = ValueNotifier(KlineData.empty.req);
-
-  void updateCandleRequestListener(CandleReq request) {
-    logd('updateCandleRequestListener $curDataKey, request:$request');
-    if (request.key == curDataKey) {
-      candleRequestListener.value = request;
-      timeBarListener.value = request.timeBar;
-    }
+  final _isFirstCandleMoveOffScreenListener = ValueNotifier(false);
+  @override
+  ValueListenable<bool> get isFirstCandleMoveOffScreenListener {
+    return _isFirstCandleMoveOffScreenListener;
   }
 
   /// 当KlineData的TimeBar的监听器
-  final timeBarListener = ValueNotifier<TimeBar?>(null);
+  final _timeBarListener = ValueNotifier<TimeBar?>(null);
+  ValueListenable<TimeBar?> get timeBarListener => _timeBarListener;
+
+  /// CandleReq变化监听器
+  final _candleRequestListener = ValueNotifier(KlineData.empty.req);
+  @override
+  ValueListenable<CandleReq> get candleRequestListener {
+    return _candleRequestListener;
+  }
+
+  void _updateCandleRequestListener(CandleReq request) {
+    logd('updateCandleRequestListener $curDataKey, request:$request');
+    if (request.key == curDataKey) {
+      _candleRequestListener.value = request;
+      _timeBarListener.value = request.timeBar;
+    }
+  }
 
   ComputeMode _computeMode = ComputeMode.fast;
   // ComputeMode get computeMode => _computeMode;
@@ -99,9 +110,9 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
   /// 2. 初始化首根蜡烛绘制位置于屏幕右侧[initPaintDxOffset]指定处.
   /// 3. 重绘图表
   /// 4. 取消Cross绘制(如果有)
-  void setCurKlineData(KlineData data) {
+  void _setCurKlineData(KlineData data) {
     _curKlineData = data;
-    updateCandleRequestListener(data.req);
+    _updateCandleRequestListener(data.req);
     initPaintDxOffset();
     markRepaintChart(reset: true);
     cancelCross();
@@ -190,7 +201,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
   double get paintDxOffset => _paintDxOffset;
   set paintDxOffset(double val) {
     _paintDxOffset = clampPaintDxOffset(val);
-    isMoveOffScreenListener.value = _paintDxOffset > 0;
+    _isFirstCandleMoveOffScreenListener.value = _paintDxOffset > 0;
   }
 
   /// PaintDxOffset的最小值
@@ -335,7 +346,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
 
     if (useCacheFirst && data != null && !data.isEmpty) {
       // 如果优先使用缓存且缓存数据不为空时, 设置缓存为当前KlineData, 同时结束loading状态.
-      setCurKlineData(data);
+      _setCurKlineData(data);
       return true;
     }
 
@@ -350,7 +361,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
     final old = _klineDataCache.append(req.key, data);
     if (old != null) Future(() => old.dispose());
     _curKlineData = data;
-    updateCandleRequestListener(data.req);
+    _updateCandleRequestListener(data.req);
     return false;
   }
 
@@ -367,7 +378,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
     reqKey ??= request?.key;
     if (forceStopCurReq || reqKey == curDataKey) {
       if (curKlineData.req.state != RequestState.none) {
-        updateCandleRequestListener(
+        _updateCandleRequestListener(
           curKlineData.updateReqRange(state: RequestState.none),
         );
       }
@@ -411,9 +422,9 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
 
     if (req.key == curDataKey) {
       if (reset) {
-        setCurKlineData(data);
+        _setCurKlineData(data);
       } else {
-        updateCandleRequestListener(data.req);
+        _updateCandleRequestListener(data.req);
         final newLen = data.length;
         if (paintDxOffset < 0 && newLen > oldLen) {
           /// 当数据合并后
@@ -483,10 +494,10 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
       Future.delayed(
         // Duration(milliseconds: panDuration),
         Duration.zero,
-        () => updateCandleRequestListener(request),
+        () => _updateCandleRequestListener(request),
       );
     } else {
-      updateCandleRequestListener(request);
+      _updateCandleRequestListener(request);
     }
 
     if (!oldState.isLoadMore && newState.isLoadMore) {

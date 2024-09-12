@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
 
 import '../constant.dart';
 import '../config/export.dart';
 import 'indicator.dart';
+import 'overlay.dart';
 
 /// FlexiKline主题接口.
 ///
@@ -147,8 +148,16 @@ abstract interface class IConfiguration {
   void saveFlexiKlineConfig(FlexiKlineConfig config);
 
   /// 自定义主区指标列表
+  /// @Deprecated('考虑优化中...')
   Iterable<SinglePaintObjectIndicator> customMainIndicators();
 
   /// 自定义副区指标列表
+  /// @Deprecated('考虑优化中...')
   Iterable<Indicator> customSubIndicators();
+
+  /// 获取instId指定的[Overlay]缓存列表.
+  Iterable<Overlay> getOverlayListConfig(String instId);
+
+  /// 以[instId]为key, 保存[list]到缓存中.
+  void saveOverlayListConfig(String instId, Iterable<Overlay> list);
 }

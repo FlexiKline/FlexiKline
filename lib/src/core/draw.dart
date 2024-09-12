@@ -19,6 +19,7 @@ import 'package:flutter/foundation.dart';
 import '../config/line_config/line_config.dart';
 import '../extension/export.dart';
 import '../framework/export.dart';
+import '../framework/overlay_manager.dart';
 import '../model/gesture_data.dart';
 import '../overlay/export.dart';
 import 'binding_base.dart';
@@ -34,6 +35,12 @@ import 'setting.dart';
 /// 5. 绘制完成后, 当前绘制图形默认为选中状态.
 mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
   @override
+  void init() {
+    super.init();
+    _overlayManager = OverlayManager(configuration: configuration);
+  }
+
+  @override
   void initState() {
     super.initState();
     logd('initState draw');
@@ -42,6 +49,9 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
       final state = _drawStateListener.value;
       _drawTypeListener.value = state.overlay?.type;
       _drawEditingListener.value = state.isEditing;
+    });
+    candleRequestListener.addListener(() {
+      _overlayManager.switchCandleRequest(candleRequestListener.value);
     });
   }
 
@@ -68,9 +78,8 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
 
   @override
   Listenable get repaintDraw => _repaintDraw;
-  void _markRepaint() {
-    _repaintDraw.value++;
-  }
+
+  void _markRepaint() => _repaintDraw.value++;
 
   @override
   void markRepaintDraw() {
@@ -121,6 +130,8 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
 
   @override
   ValueListenable<bool> get drawEditingListener => _drawEditingListener;
+
+  late final OverlayManager _overlayManager;
 
   /// overlay对应的DrawObject集合.
   final _overlayToObjects = <Overlay, DrawObject>{};

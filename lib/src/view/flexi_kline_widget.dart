@@ -77,7 +77,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
 
     widget.controller.initState();
 
-    widget.controller.sizeChangeListener.addListener(() {
+    widget.controller.canvasSizeChangeListener.addListener(() {
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         setState(() {});
       });

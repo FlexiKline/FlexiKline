@@ -14,7 +14,8 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
 
 import '../config/export.dart';
 import '../constant.dart';
@@ -23,8 +24,8 @@ import '../framework/export.dart';
 import 'binding_base.dart';
 import 'interface.dart';
 
-class FlexiKlineSizeNotifier extends ValueNotifier<Rect> {
-  FlexiKlineSizeNotifier(super.value);
+class _CanvasSizeChanageNotifier extends ValueNotifier<Rect> {
+  _CanvasSizeChanageNotifier(super.value);
 
   @override
   void notifyListeners() {
@@ -46,7 +47,7 @@ mixin SettingBinding on KlineBindingBase
   void dispose() {
     super.dispose();
     logd("dispose setting");
-    sizeChangeListener.dispose();
+    _canvasSizeChangeListener.dispose();
     mainIndicator.dispose();
     for (var indicator in subRectIndicators) {
       indicator.dispose();
@@ -55,17 +56,23 @@ mixin SettingBinding on KlineBindingBase
   }
 
   /// KlineData整个图表区域大小变化监听器
-  final sizeChangeListener = FlexiKlineSizeNotifier(defaultCanvasRectMinRect);
+  final _canvasSizeChangeListener =
+      _CanvasSizeChanageNotifier(defaultCanvasRectMinRect);
+  @override
+  ValueListenable<Rect> get canvasSizeChangeListener {
+    return _canvasSizeChangeListener;
+  }
+
   void invokeSizeChanged() {
-    final oldCanvasRect = sizeChangeListener.value;
+    final oldCanvasRect = _canvasSizeChangeListener.value;
 
     if (_fixedCanvasRect != null) {
       final changed = updateMainIndicatorParam(height: mainRect.height);
       if (changed || oldCanvasRect != _fixedCanvasRect) {
         markRepaintChart(reset: true);
 
-        sizeChangeListener.value = canvasRect;
-        sizeChangeListener.notifyListeners();
+        _canvasSizeChangeListener.value = canvasRect;
+        _canvasSizeChangeListener.notifyListeners();
       }
     } else {
       if (oldCanvasRect != canvasRect) {
@@ -73,7 +80,7 @@ mixin SettingBinding on KlineBindingBase
         if (changed || oldCanvasRect.width != mainRect.width) {
           markRepaintChart(reset: true);
         }
-        sizeChangeListener.value = canvasRect;
+        _canvasSizeChangeListener.value = canvasRect;
       }
     }
 

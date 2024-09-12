@@ -96,6 +96,14 @@ abstract interface class IState {
 
   String get curDataKey;
 
+  /// 首根蜡烛是否移出屏幕监听器
+  ValueListenable<bool> get isFirstCandleMoveOffScreenListener;
+
+  /// 蜡烛请求监听器
+  ValueListenable<CandleReq> get candleRequestListener;
+
+  /// TimeBar监听器
+
   /// 将offset转换为蜡烛数据
   CandleModel? offsetToCandle(Offset offset);
 
@@ -139,6 +147,9 @@ abstract interface class IState {
 
 /// Setting API
 abstract interface class ISetting {
+  /// Canvas区域大小监听器
+  ValueListenable<Rect> get canvasSizeChangeListener;
+
   /// 主区指标集
   MultiPaintObjectIndicator get mainIndicator;
 
@@ -280,5 +291,7 @@ abstract interface class IDraw {
 
 /// Grid图层API
 abstract interface class IGrid {
+  Listenable get repaintGridBg;
+
   void markRepaintGrid();
 }

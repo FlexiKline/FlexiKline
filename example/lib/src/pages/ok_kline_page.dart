@@ -258,7 +258,7 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage>
           right: 0,
           bottom: 8.r,
           child: ValueListenableBuilder(
-            valueListenable: controller.isMoveOffScreenListener,
+            valueListenable: controller.isFirstCandleMoveOffScreenListener,
             builder: (context, value, child) => Offstage(
               offstage: !value,
               child: SizedBox(
