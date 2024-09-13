@@ -21,7 +21,6 @@ import '../extension/export.dart';
 import '../framework/export.dart';
 import '../framework/overlay_manager.dart';
 import '../model/gesture_data.dart';
-import '../overlay/export.dart';
 import 'binding_base.dart';
 import 'interface.dart';
 import 'setting.dart';
@@ -37,7 +36,11 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
   @override
   void init() {
     super.init();
-    _overlayManager = OverlayManager(configuration: configuration);
+    _overlayManager = OverlayManager(
+      configuration: configuration,
+      drawBinding: this,
+      logger: loggerDelegate,
+    );
   }
 
   @override
@@ -63,6 +66,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
     _drawEditingListener.dispose();
     _drawStateListener.dispose();
     _repaintDraw.dispose();
+    _overlayManager.saveOverlayListConfig(isClean: true);
   }
 
   @override
@@ -86,29 +90,14 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
     _markRepaint();
   }
 
-  /// DrawType的Overlay对应DrawObject的构建生成器集合
-  final Map<IDrawType, DrawObjectBuilder> _overlayBuilders = {
-    DrawType.trendLine: TrendLineDrawObject.new,
-    DrawType.horizontalLine: HorizontalLineDrawObject.new,
-  };
-
-  Iterable<IDrawType>? _supportDrawType;
-  Iterable<IDrawType> get supportDrawType {
-    return _supportDrawType ??= _overlayBuilders.keys;
-  }
+  Iterable<IDrawType> get supportDrawTypes => _overlayManager.supportDrawTypes;
 
   /// 自定义overlay绘制对象构建器
   void customOverlayDrawObjectBuilder(
     IDrawType type,
     DrawObjectBuilder builder,
   ) {
-    _overlayBuilders[type] = builder;
-    _supportDrawType = null;
-  }
-
-  DrawObject? createDrawObject(Overlay overlay) {
-    final object = _overlayBuilders[overlay.type]?.call(overlay);
-    return object;
+    _overlayManager.customOverlayDrawObjectBuilder(type, builder);
   }
 
   final _drawStateListener = ValueNotifier(DrawState.exited());
@@ -133,16 +122,16 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
 
   late final OverlayManager _overlayManager;
 
-  /// overlay对应的DrawObject集合.
-  final _overlayToObjects = <Overlay, DrawObject>{};
-
   @override
   void onDrawPrepare() {
-    // 如果已不是退出状态, 则无需变更状态.
+    // 如果是非退出状态, 则无需变更状态.
     if (!drawState.isExited) return;
     _drawState = const Prepared();
   }
 
+  /// 开始绘制新的[type]类型
+  /// 1. 重置状态为Drawing
+  /// 2. 初始化第一个Point的位置为[initialPosition]
   @override
   void onDrawStart(IDrawType type) {
     cancelCross();
@@ -150,39 +139,52 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
       _drawState = const Prepared();
     } else {
       _drawState = DrawState.draw(type, this);
-      _drawState.overlay?.pointer = initialPosition;
+      _drawState.overlay?.pointer = Point.pointer(0, initialPosition);
     }
     _markRepaint();
   }
 
+  /// 更新当前指针坐标
   @override
   void onDrawUpdate(GestureData data) {
     if (!drawState.isOngoing) return;
-    drawState.overlay?.pointer = data.offset;
+    drawState.overlay?.pointer?.offset = data.offset;
     _markRepaint();
   }
 
+  /// 确认动作
+  /// 1. 将pointer指针offset转换为蜡烛坐标
+  /// 2. 当前是drawing时:
+  ///   2.1. 添加pointer到points中, 并重置pointer为下一个位置的指针.
+  ///   2.2. 最后检查当前overlay是否绘制完成, 如果绘制完成切换状态为Editing.
+  /// 3. 当状态为Editing时:
+  ///   3.1. 更新pointer到points中, 并清空pointer(等待下一次的选择)
   @override
   void onDrawConfirm(GestureData data) {
-    if (!drawState.isDrawing) return;
-    final offset = data.offset;
-    final point = offsetToPoint(offset);
+    if (!drawState.isOngoing) return;
     final overlay = drawState.overlay;
-    if (point != null && overlay != null) {
-      overlay.updatePoint(point);
-      if (overlay.isEditing == true) {
-        // 说明绘制完成, 更新至_overlayToObjects
-        _drawState = Editing(overlay);
-        final object = createDrawObject(overlay);
-        if (object != null) {
-          _overlayToObjects[overlay] = object;
-        } else {
-          // 没有配置overlay的drawType对应的DrawObjectBuilder时的异常分支.
-          _drawState = const Prepared();
-        }
-      }
-      _markRepaint();
+    if (overlay == null) return;
+
+    final pointer = overlay.pointer;
+    if (pointer == null) return;
+
+    final isOk = _convertPointer(pointer);
+    if (!isOk) {
+      logw('onDrawConfirm updatePointer failed! pointer:$pointer');
+      return;
     }
+
+    if (overlay.isDrawing) {
+      overlay.addPointer(pointer);
+      if (overlay.isEditing) {
+        logi('onDrawConfirm ${overlay.type} draw completed!');
+        _drawState = Editing(overlay);
+      }
+    } else if (overlay.isEditing) {
+      overlay.updatePointer(pointer);
+    }
+
+    _markRepaint();
   }
 
   @override
@@ -200,40 +202,40 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
 
   void onDrawDelete({Overlay? overlay}) {
     if (overlay != null) {
-      final object = _overlayToObjects.remove(overlay);
-      object?.dispose();
-      _markRepaint();
+      if (_overlayManager.removeOverlay(overlay)) {
+        _markRepaint();
+      }
     } else {
       overlay = drawState.overlay;
       if (overlay != null) {
-        final object = _overlayToObjects.remove(overlay);
-        object?.dispose();
+        // final object = _overlayToObjects.remove(overlay);
+        // object?.dispose();
         _drawState = const Prepared();
         _markRepaint();
       }
     }
   }
 
-  Point? offsetToPoint(Offset offset) {
+  bool _convertPointer(Point pointer) {
+    final offset = pointer.offset;
     final model = dxToCandle(offset.dx);
     final value = dyToValue(offset.dy);
     if (model != null && value != null) {
-      return Point(
-        ts: model.ts,
-        value: value.toDecimal(),
-        offset: offset,
-      );
+      pointer.ts = model.ts;
+      pointer.value = value;
+      return true;
     }
-    return null;
+    return false;
   }
 
   @override
   Overlay? hitTestOverlay(Offset position) {
     // 测试[position]位置上是否有命中的Overly.
     Overlay? ret;
-    for (var entry in _overlayToObjects.entries) {
-      if (entry.value.hitTest(position)) {
-        ret = entry.key;
+    for (var overlay in _overlayManager.overlayList) {
+      final object = _overlayManager.getDrawObject(overlay);
+      if (object != null && object.hitTest(position)) {
+        ret = overlay;
         break;
       }
     }
@@ -246,10 +248,12 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
     if (!drawConfig.enable) return;
 
     /// TODO: 遍历已完成绘制的Overlay对应的DrawObject去[paintDrawObject]
-    for (var item in _overlayToObjects.entries) {
+    for (var overlay in _overlayManager.overlayList) {
       // TODO: 首先检测overlay是否在当前绘制区域内, 如果在, 则调用object进行绘制; 否则忽略.
-      // if ()
-      item.value.drawOverlay(canvas, size);
+      final object = _overlayManager.getDrawObject(overlay);
+      if (object != null) {
+        object.drawOverlay(canvas, size);
+      }
     }
 
     paintDrawStateOverlay(canvas, size);
@@ -264,7 +268,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
       }
     } else {
       Offset? last;
-      Offset pointer = overlay.pointer;
+      Point? pointer = overlay.pointer;
       for (var point in overlay.points) {
         if (point != null) {
           final offset = point.offset;
@@ -281,9 +285,9 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
             );
           }
           last = offset;
-        } else {
+        } else if (pointer != null) {
           // TODO: 考虑如何预先创建drawObject
-          _paintPointer(canvas, pointer, last);
+          _paintPointer(canvas, pointer.offset, last);
           break;
         }
       }

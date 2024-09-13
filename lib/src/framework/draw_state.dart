@@ -54,6 +54,7 @@ sealed class DrawState {
     }
   }
 
+  Point? get pointer => overlay?.pointer;
   bool get isExited => this is Exited;
   bool get isPrepared => this is Prepared;
   // bool get isStarted => this is Started;

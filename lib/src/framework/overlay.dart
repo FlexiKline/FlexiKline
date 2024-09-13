@@ -14,26 +14,33 @@
 
 import 'dart:ui';
 
-import 'package:decimal/decimal.dart';
-
 import '../config/line_config/line_config.dart';
+import '../model/export.dart';
 import 'common.dart';
 
 /// Overlay 绘制点坐标
 class Point {
   Point({
-    required this.ts,
-    required this.value,
+    required this.index,
+    required this.offset,
+    this.ts = -1,
+    this.value = BagNum.zero,
     this.offsetRate = 0,
-    this.offset = Offset.infinite,
   });
 
-  final int ts;
-  final Decimal value;
-  final double offsetRate;
+  static pointer(int index, Offset offset) => Point(
+        index: index,
+        offset: offset,
+      );
+
+  final int index;
 
   /// 当前canvas中的坐标(实时更新)
   Offset offset;
+  
+  int ts;
+  BagNum value;
+  double offsetRate;
 
   @override
   bool operator ==(Object other) =>
@@ -58,7 +65,7 @@ class Point {
 /// [mode] 磁吸模式
 /// [steps] 指定Overlay需要几个点来完成绘制操作, 决定points的数量
 /// [line] Overlay绘制时线配置
-class Overlay {
+class Overlay implements Comparable<Overlay> {
   Overlay({
     required this.key,
     required this.type,
@@ -95,7 +102,11 @@ class Overlay {
   List<Point?> points;
 
   /// 当前指针位置
-  Offset pointer = Offset.infinite;
+  Point? pointer;
+
+  bool get hasPointer => pointer != null;
+
+  int get steps => points.length;
 
   /// 已开始绘制
   bool get isStarted => points.first == null;
@@ -134,25 +145,30 @@ class Overlay {
     return "Overlay(id:$id, key:$key, type:$type)";
   }
 
-  /// 更新point到Overlay的[points]中, 标志着完成一步.
-  /// 1. 如果更新后, 还剩最后一步没有完成. 则返回true, 代表着下一步可以调用drawObject开始绘制了.
-  /// 2.
-  void updatePoint(Point point) {
-    int? index;
-    for (int i = 0; i < points.length; i++) {
-      final p = points[i];
-      if (p == null) {
-        // 说明当前overlay未完成绘制, 填充它.
-        index = i;
-        break;
-      } else if (point.offset - p.offset > const Offset(2, 2)) {
-        // 说明命中
-        index = i;
-      }
+  /// 添加指针[p]到[points]中, 并准备下一个指针
+  void addPointer(Point p) {
+    final index = p.index;
+    assert(index >= 0 && index < steps, "point is invalid");
+    assert(points[index] == null, 'The points[$index] is not empyt!');
+    points[index] = p;
+
+    if (index + 1 >= steps) {
+      pointer = null;
     }
-    if (index != null) {
-      points[index] = point;
-    }
+    pointer = Point(index: index + 1, offset: p.offset);
+  }
+
+  void updatePointer(Point p) {
+    final index = p.index;
+    assert(index >= 0 && index < steps, "point is invalid");
+    assert(points[index] != null, 'The points[$index] is not empyt!');
+    points[index] = p;
+    pointer = null;
+  }
+
+  @override
+  int compareTo(Overlay other) {
+    return other.zIndex - zIndex;
   }
 
   // DrawObject createDrawObject();
@@ -223,7 +239,7 @@ abstract class DrawObject {
 
   // Offset _pointer;
   // Offset get pointer => _pointer;
-  Offset get pointer => overlay.pointer;
+  Point? get pointer => overlay.pointer;
 
   bool hitTest(Offset position) => false;
 

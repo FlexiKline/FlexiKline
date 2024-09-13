@@ -107,22 +107,22 @@ class _OverlayDrawGestureDetectorState extends State<OverlayDrawGestureDetector>
   /// 点击 - 确认
   void onTap() {
     logd("onTap");
-    final offset = controller.drawState.overlay?.pointer;
-    if (offset != null && offset.isFinite) {
-      _tapData = GestureData.tap(offset);
+    final pointer = controller.drawState.pointer;
+    if (pointer != null) {
+      _tapData = GestureData.tap(pointer.offset);
       controller.onDrawConfirm(_tapData!);
     }
   }
 
   bool isSweeped = false;
   void onPointerMove(PointerMoveEvent event) {
-    final offset = controller.drawState.overlay?.pointer;
-    if (offset != null && offset.isFinite) {
+    final pointer = controller.drawState.pointer;
+    if (pointer != null) {
       if (!isSweeped) {
         isSweeped = true;
         GestureBinding.instance.gestureArena.sweep(event.pointer);
       }
-      Offset newOffset = offset + event.delta;
+      Offset newOffset = pointer.offset + event.delta;
       final mainRect = controller.mainRect;
       if (!mainRect.include(newOffset)) {
         // 限制在主区坐标系内
@@ -146,10 +146,10 @@ class _OverlayDrawGestureDetectorState extends State<OverlayDrawGestureDetector>
   void onPanStart(DragStartDetails details) {
     final drawState = controller.drawState;
     if (drawState.isOngoing) {
-      final pointer = drawState.overlay!.pointer;
-      if (pointer.isFinite) {
+      final pointer = drawState.pointer;
+      if (pointer != null) {
         // 说明已经确认了指针位置
-        _panData = GestureData.pan(pointer);
+        _panData = GestureData.pan(pointer.offset);
       } else {
         // 说明指定位置未初始化
         _panData = GestureData.pan(details.localPosition);
