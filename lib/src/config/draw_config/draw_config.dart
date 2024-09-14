@@ -27,10 +27,10 @@ part 'draw_config.g.dart';
 class DrawConfig {
   DrawConfig({
     this.enable = true,
-    required this.crosshair,
     required this.crosspoint,
+    required this.crosshair,
+    required this.drawPoint,
     required this.drawLine,
-    required this.drawDot,
     required this.tickText,
     required this.spacing,
     this.gapBackground = Colors.transparent,
@@ -39,17 +39,17 @@ class DrawConfig {
   /// 是否启用Draw Overlay功能开关
   final bool enable;
 
-  /// 十字线配置
-  final LineConfig crosshair;
-
   /// 绘制十字线交叉点配置
   final PointConfig crosspoint;
 
-  /// 默认绘制线的样式配置
-  final LineConfig drawLine;
+  /// 十字线配置
+  final LineConfig crosshair;
 
   /// 选择绘制点配置
-  final PointConfig drawDot;
+  final PointConfig drawPoint;
+
+  /// 默认绘制线的样式配置
+  final LineConfig drawLine;
 
   /// 刻度文案配置
   final TextAreaConfig tickText;

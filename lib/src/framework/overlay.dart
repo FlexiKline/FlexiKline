@@ -14,30 +14,38 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
+
+import '../extension/render/draw_circle.dart';
 import '../config/line_config/line_config.dart';
-import '../model/export.dart';
+import '../config/point_config/point_config.dart';
+import '../model/bag_num.dart';
 import 'common.dart';
 
 /// Overlay 绘制点坐标
 class Point {
   Point({
-    required this.index,
-    required this.offset,
+    this.index = -1,
+    this.offset = Offset.infinite,
     this.ts = -1,
     this.value = BagNum.zero,
     this.offsetRate = 0,
   });
 
-  static pointer(int index, Offset offset) => Point(
-        index: index,
-        offset: offset,
-      );
+  static Point pointer(int index, Offset offset) {
+    assert(index >= 0, 'invalid index($index)');
+    assert(offset.isFinite, 'invalid offset($offset)');
+    return Point(
+      index: index,
+      offset: offset,
+    );
+  }
 
   final int index;
 
   /// 当前canvas中的坐标(实时更新)
   Offset offset;
-  
+
   int ts;
   BagNum value;
   double offsetRate;
@@ -47,13 +55,18 @@ class Point {
       identical(this, other) ||
       other is Point &&
           runtimeType == other.runtimeType &&
+          index == other.index &&
           ts == other.ts &&
-          value == other.value &&
-          offsetRate == other.offsetRate;
+          value == other.value;
 
   @override
   int get hashCode =>
-      runtimeType.hashCode ^ ts.hashCode ^ value.hashCode ^ offsetRate.hashCode;
+      runtimeType.hashCode ^ index.hashCode ^ ts.hashCode ^ value.hashCode;
+
+  @override
+  String toString() {
+    return 'Point($index, $offset, $ts, $value)';
+  }
 }
 
 /// Overlay基础配置
@@ -79,17 +92,6 @@ class Overlay implements Comparable<Overlay> {
   })  : id = DateTime.now().millisecondsSinceEpoch,
         points = List.filled(type.steps, null);
 
-  // factory Overlay.type(
-  //   IDrawType type,
-  //   IDraw drawBinding,
-  // ) {
-  //   return Overlay(
-  //     key: drawBinding.chartKey,
-  //     type: type,
-  //     line: drawBinding.drawLineConfig,
-  //   );
-  // }
-
   final int id;
   final String key;
   final IDrawType type;
@@ -104,6 +106,8 @@ class Overlay implements Comparable<Overlay> {
   /// 当前指针位置
   Point? pointer;
 
+  DrawObject? object;
+
   bool get hasPointer => pointer != null;
 
   int get steps => points.length;
@@ -111,12 +115,52 @@ class Overlay implements Comparable<Overlay> {
   /// 已开始绘制
   bool get isStarted => points.first == null;
 
+  /// 最开始的状态, 即所有points均为空
+  bool get isInitial => points.fold(true, (ret, item) => ret && item == null);
+
   /// 当前绘制中
   bool get isDrawing =>
       points.firstWhere((e) => e == null, orElse: () => null) == null;
 
+  /// 即将完成
+  bool get isComplete {
+    return pointer != null && pointer!.index == steps - 1;
+  }
+
   /// 当前绘制已完成, 修正中.
   bool get isEditing => points.fold(true, (ret, item) => ret && item != null);
+
+  /// 添加指针[p]到[points]中, 并准备下一个指针
+  void addPointer(Point p) {
+    final index = p.index;
+    assert(index >= 0 && index < steps, "point is invalid");
+    assert(points[index] == null, 'The points[$index] is not empyt!');
+    points[index] = p;
+
+    if (index + 1 >= steps) {
+      pointer = null;
+    } else {
+      pointer = Point.pointer(index + 1, p.offset);
+    }
+  }
+
+  void updatePointer(Point p) {
+    final index = p.index;
+    assert(index >= 0 && index < steps, "point is invalid");
+    assert(points[index] != null, 'The points[$index] is not empyt!');
+    points[index] = p;
+    pointer = null;
+  }
+
+  @mustCallSuper
+  void dispose() {
+    object?.dispose();
+  }
+
+  @override
+  int compareTo(Overlay other) {
+    return other.zIndex - zIndex;
+  }
 
   @override
   bool operator ==(Object other) {
@@ -144,108 +188,60 @@ class Overlay implements Comparable<Overlay> {
   String toString() {
     return "Overlay(id:$id, key:$key, type:$type)";
   }
-
-  /// 添加指针[p]到[points]中, 并准备下一个指针
-  void addPointer(Point p) {
-    final index = p.index;
-    assert(index >= 0 && index < steps, "point is invalid");
-    assert(points[index] == null, 'The points[$index] is not empyt!');
-    points[index] = p;
-
-    if (index + 1 >= steps) {
-      pointer = null;
-    }
-    pointer = Point(index: index + 1, offset: p.offset);
-  }
-
-  void updatePointer(Point p) {
-    final index = p.index;
-    assert(index >= 0 && index < steps, "point is invalid");
-    assert(points[index] != null, 'The points[$index] is not empyt!');
-    points[index] = p;
-    pointer = null;
-  }
-
-  @override
-  int compareTo(Overlay other) {
-    return other.zIndex - zIndex;
-  }
-
-  // DrawObject createDrawObject();
-
-  // void updateDrawObject(
-  //   KlineBindingBase controller,
-  //   covariant DrawObject drawObject,
-  // ) {
-  //   drawObject
-  //     .._zIndex = zIndex
-  //     .._lock = lock
-  //     .._visible = visible
-  //     .._mode = mode
-  //     .._line = line
-  //     .._points = points
-  //     .._pointer = pointer;
-  // }
 }
 
-abstract class DrawObject {
-  DrawObject(this.overlay);
+class OverlayObject {
+  const OverlayObject(this._overlay);
 
-  final Overlay overlay;
-  // DrawObject({
-  //   required Overlay overlay,
-  // })  : id = overlay.id,
-  //       key = overlay.key,
-  //       type = overlay.type,
-  //       _zIndex = overlay.zIndex,
-  //       _lock = overlay.lock,
-  //       _visible = overlay.visible,
-  //       _mode = overlay.mode,
-  //       _line = overlay.line,
-  //       _points = overlay.points,
-  //       _pointer = overlay.pointer;
+  final Overlay _overlay;
 
-  // final int id;
-  // final String key;
-  // final IDrawType type;
+  int get id => _overlay.id;
+  String get key => _overlay.key;
+  IDrawType get type => _overlay.type;
+  int get zIndex => _overlay.zIndex;
+  bool get lock => _overlay.lock;
+  bool get visible => _overlay.visible;
+  MagnetMode get mode => _overlay.mode;
+  LineConfig get line => _overlay.line;
+  Iterable<Point?> get points {
+    if (_overlay.pointer == null) return _overlay.points;
+    final pointerIndex = _overlay.pointer!.index;
+    int index = 0;
+    return _overlay.points.map((point) {
+      // 如果当前指针与point的index相等(编辑状态)或者与points中的位置相等(绘制状态), 则使用pointer数据.
+      if (point?.index == pointerIndex || index == pointerIndex) {
+        return _overlay.pointer;
+      }
+      index++;
+      return point;
+    });
+  }
+  // Point? get pointer => overlay.pointer;
+}
 
-  int get id => overlay.id;
-  String get key => overlay.key;
-  IDrawType get type => overlay.type;
+abstract class DrawObject<T extends Overlay> extends OverlayObject
+    with DrawObjectMixin {
+  const DrawObject(super.overlay);
 
-  // int _zIndex;
-  // int get zIndex => _zIndex;
-  int get zIndex => overlay.zIndex;
-
-  // bool _lock;
-  // bool get lock => _lock;
-  bool get lock => overlay.lock;
-
-  // bool _visible;
-  // bool get visible => _visible;
-  bool get visible => overlay.visible;
-
-  // MagnetMode _mode;
-  // MagnetMode get mode => _mode;
-  MagnetMode get mode => overlay.mode;
-
-  // LineConfig _line;
-  // LineConfig get line => _line;
-  LineConfig get line => overlay.line;
-
-  // List<Point?> _points;
-  // List<Point?> get points => _points;
-  List<Point?> get points => overlay.points;
-
-  // Offset _pointer;
-  // Offset get pointer => _pointer;
-  Point? get pointer => overlay.pointer;
-
+  /// 碰撞测试[position]是否命中Overlay
   bool hitTest(Offset position) => false;
 
+  /// 绘制Overlay
   void drawOverlay(Canvas canvas, Size size);
 
+  @mustCallSuper
   void dispose() {
-    /// 清理操作.
+    _overlay.object = null;
+  }
+}
+
+mixin DrawObjectMixin on OverlayObject {
+  /// 绘制[points]中所有点为圆圈, 使用[pointConfig]作为配置
+  void drawPointsAsCircles(Canvas canvas, PointConfig pointConfig) {
+    for (var point in points) {
+      if (point?.offset != null) {
+        canvas.drawCirclePoint(point!.offset, pointConfig);
+      }
+    }
   }
 }

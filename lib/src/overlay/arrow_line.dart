@@ -17,26 +17,11 @@ import 'dart:ui';
 import '../extension/render/draw_path.dart';
 import '../framework/overlay.dart';
 
-class TrendLineDrawObject extends DrawObject {
-  const TrendLineDrawObject(super.overlay);
-
-  @override
-  bool hitTest(Offset position) {
-    return super.hitTest(position);
-  }
+class ArrowLineDrawObject extends DrawObject {
+  ArrowLineDrawObject(super.overlay);
 
   @override
   void drawOverlay(Canvas canvas, Size size) {
-    List<Offset> dotList = [];
-    for (var point in points) {
-      if (point?.offset.isFinite == true) {
-        dotList.add(point!.offset);
-      }
-    }
-    canvas.drawLineType(
-      line.type,
-      Path()..addPolygon(dotList, false),
-      line.linePaint,
-    );
+    // TODO: implement drawOverlay
   }
 }

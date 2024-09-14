@@ -340,7 +340,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
         color: theme.drawColor,
         type: LineType.solid,
       ),
-      drawDot: PointConfig(
+      drawPoint: PointConfig(
         radius: 9 * theme.scale,
         width: 0 * theme.scale,
         color: theme.themeColor,

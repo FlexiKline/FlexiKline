@@ -68,17 +68,14 @@ final class OverlayManager with KlineLog {
   /// 当前KlineData唯一标识
   String _instId = '';
 
-  /// 缓存[Overlay] 对应 [DrawObject]集合
-  final _overlayToObjects = <Overlay, DrawObject>{};
-
   /// 当前[_instId]对应[Overlay]集合
   SortableHashSet<Overlay> _overlayList = SortableHashSet<Overlay>();
   Iterable<Overlay> get overlayList => _overlayList;
 
   /// KlineData数据切换回调
-  void switchCandleRequest(CandleReq request) {
+  void onChangeCandleRequest(CandleReq request) {
     if (request.instId.isEmpty || request.instId == _instId) return;
-    logd('switchCandleRequest $_instId => ${request.instId}');
+    logd('onChangeCandleRequest $_instId => ${request.instId}');
     if (_instId.isNotEmpty) {
       saveOverlayListConfig(isClean: true);
     }
@@ -92,30 +89,59 @@ final class OverlayManager with KlineLog {
   void saveOverlayListConfig({bool isClean = true}) {
     configuration.saveOverlayListConfig(_instId, _overlayList);
     if (isClean) {
+      for (var overlay in _overlayList) {
+        overlay.dispose();
+      }
       _overlayList.clear();
-      _overlayToObjects.clear();
     }
   }
 
-  DrawObject? createDrawObject(Overlay overlay) {
-    final object = _overlayBuilders[overlay.type]?.call(overlay);
-    if (object != null) _overlayToObjects[overlay] = object;
-    return object;
+  /// 通过[type]创建Overlay.
+  /// 在Overlay未完成绘制时, 其line的配置使用crosshair.
+  /// 设置第一个指针位置为[initialPosition]
+  Overlay createOverlay(IDrawType type) {
+    return Overlay(
+      key: _instId,
+      type: type,
+      line: drawBinding.config.crosshair,
+    )..pointer = Point.pointer(0, drawBinding.initialPosition);
   }
 
+  /// 每次都创建新的Object.
+  DrawObject? createDrawObject(Overlay overlay) {
+    logi('createDrawObject => $overlay');
+    return _overlayBuilders[overlay.type]?.call(overlay);
+  }
+
+  /// 首先获取[overlay]内缓存的object, 如果为空, 则创建新的.
   DrawObject? getDrawObject(Overlay overlay) {
-    DrawObject? object = _overlayToObjects[overlay];
-    object ??= createDrawObject(overlay);
-    return object;
+    return overlay.object ??= createDrawObject(overlay);
   }
 
   bool addOverlay(Overlay overlay) => _overlayList.add(overlay);
 
   bool removeOverlay(Overlay overlay) {
-    final object = _overlayToObjects.remove(overlay);
-    object?.dispose();
-    return _overlayList.remove(overlay) || object != null;
+    overlay.dispose();
+    return _overlayList.remove(overlay);
   }
 
-  Overlay? hitTestOverlay(Offset position) {}
+  Overlay? hitTestOverlay(Offset position) {
+    assert(position.isFinite, 'hitTestOverlay($position) position is invalid!');
+    for (var overlay in _overlayList) {
+      if (overlay.object != null && overlay.object!.hitTest(position)) {
+        return overlay;
+      }
+    }
+    return null;
+  }
+
+  void drawOverlayList(Canvas canvas, Size size) {
+    DrawObject? object;
+    for (var overlay in _overlayList) {
+      object = getDrawObject(overlay);
+      if (object != null) {
+        object.drawOverlay(canvas, size);
+      }
+    }
+  }
 }

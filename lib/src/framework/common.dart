@@ -14,7 +14,6 @@
 
 import 'package:flutter/foundation.dart';
 
-import '../core/interface.dart';
 import 'overlay.dart';
 
 /// 绘制位置
@@ -97,12 +96,10 @@ abstract interface class IPrecomputable {
   dynamic getCalcParam();
 }
 
-typedef DrawObjectBuilder = DrawObject Function(Overlay overlay);
+typedef DrawObjectBuilder<T extends Overlay> = DrawObject Function(T overlay);
 
 abstract interface class IDrawType {
   int get steps;
-
-  Overlay createOverlay(IDraw drawBinding);
 }
 
 enum DrawType implements IDrawType {
@@ -125,21 +122,13 @@ enum DrawType implements IDrawType {
   // fibExpansion, // 斐波那契扩展
   rectangle(2); // 长方形
 
-  const DrawType(this._steps);
-  final int _steps;
+  const DrawType(this.steps);
 
   @override
-  int get steps => _steps;
+  final int steps;
 
   @override
   String toString() => name;
-
-  @override
-  Overlay createOverlay(IDraw drawBinding) => Overlay(
-        key: drawBinding.chartKey,
-        type: this,
-        line: drawBinding.drawLineConfig,
-      );
 }
 
 enum MagnetMode {

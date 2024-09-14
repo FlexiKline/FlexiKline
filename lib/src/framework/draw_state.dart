@@ -12,19 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import '../core/export.dart';
 import './overlay.dart';
-import 'common.dart';
 
 /// 图形绘制层状态
 /// 1. prepared   准备就绪
-/// 2. started    开始绘制(overlay中points为空)
-/// 3. drawing    绘制中(overlay中points部分有值, 但未完成)
-/// 4. modifying  修改中(overlay中points所有值都有, 修复中)
-/// 5. exited     退出
+/// 2. drawing    绘制中(overlay中points部分有值, 但未完成)
+/// 3. modifying  修改中(overlay中points所有值都有, 修复中)
+/// 4. exited     退出
 ///
 /// 状态流转
-/// prepared -> started -> drawing -> modifying -> exited
+/// prepared -> drawing -> modifying -> exited
 sealed class DrawState {
   const DrawState(this.overlay);
 
@@ -34,34 +31,23 @@ sealed class DrawState {
 
   factory DrawState.exited() => const Exited();
 
-  factory DrawState.draw(IDrawType type, IDraw drawBinding) {
-    return Drawing(type.createOverlay(drawBinding));
+  factory DrawState.draw(Overlay overlay) {
+    assert(overlay.isInitial, 'Overlay is not initialized!');
+    return Drawing(overlay);
   }
 
-  factory DrawState.edit(IDrawType type, IDraw drawBinding) {
-    return Editing(type.createOverlay(drawBinding));
-  }
-
-  factory DrawState.from(Overlay overlay) {
-    if (overlay.isEditing) {
-      return Editing(overlay);
-    }
-    //  else if (overlay.isStarted) {
-    //   return Started(overlay);
-    // }
-    else {
-      return Drawing(overlay);
-    }
+  factory DrawState.edit(Overlay overlay) {
+    assert(overlay.isEditing, 'Overlay is not finished drawing');
+    return Editing(overlay);
   }
 
   Point? get pointer => overlay?.pointer;
   bool get isExited => this is Exited;
   bool get isPrepared => this is Prepared;
-  // bool get isStarted => this is Started;
   bool get isDrawing => this is Drawing;
   bool get isEditing => this is Editing;
   bool get isOngoing {
-    return overlay != null && (/*isStarted ||*/ isDrawing || isEditing);
+    return overlay != null && (isDrawing || isEditing);
   }
 }
 
@@ -69,12 +55,9 @@ class Prepared extends DrawState {
   const Prepared() : super(null);
 }
 
-// class Started extends DrawState {
-//   const Started(super.overlay);
-// }
-
 class Drawing extends DrawState {
-  const Drawing(super.overlay);
+  Drawing(super.overlay);
+  DrawObject? object;
 }
 
 class Editing extends DrawState {

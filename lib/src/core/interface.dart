@@ -242,11 +242,8 @@ abstract interface class ICross {
 abstract interface class IDraw {
   Listenable get repaintDraw;
 
-  /// 当前KlineDataKey
-  String get chartKey;
-
-  /// 当前绘制Overlay的线配置
-  LineConfig get drawLineConfig;
+  /// DrawConfig
+  DrawConfig get config;
 
   /// 当前绘制初始坐标(主区的中心点)
   Offset get initialPosition;
