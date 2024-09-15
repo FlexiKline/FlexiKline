@@ -163,16 +163,15 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
     final overlay = drawState.overlay;
     if (overlay == null) return;
 
-    final pointer = overlay.pointer;
-    if (pointer == null) return;
-
-    final isOk = _convertPointer(pointer);
-    if (!isOk) {
-      logw('onDrawConfirm updatePointer failed! pointer:$pointer');
-      return;
-    }
-
     if (overlay.isDrawing) {
+      final pointer = overlay.pointer;
+      if (pointer == null) return;
+
+      final isOk = _convertPointer(pointer);
+      if (!isOk) {
+        logw('onDrawConfirm updatePointer failed! pointer:$pointer');
+        return;
+      }
       overlay.addPointer(pointer);
 
       if (overlay.isEditing) {
@@ -183,7 +182,19 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
         _overlayManager.addOverlay(overlay);
       }
     } else if (overlay.isEditing) {
-      overlay.updatePointer(pointer);
+      final pointer = overlay.pointer;
+      if (pointer == null) {
+        // 当前处于编辑状态, 但是pointer又没有被赋值, 此时点击事件, 为确认完成.
+        _overlayManager.addOverlay(overlay);
+        _drawState = const Prepared();
+      } else {
+        final isOk = _convertPointer(pointer);
+        if (!isOk) {
+          logw('onDrawConfirm updatePointer failed! pointer:$pointer');
+          return;
+        }
+        overlay.updatePointer(pointer);
+      }
     }
 
     _markRepaint();

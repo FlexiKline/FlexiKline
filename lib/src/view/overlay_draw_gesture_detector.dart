@@ -107,10 +107,8 @@ class _OverlayDrawGestureDetectorState extends State<OverlayDrawGestureDetector>
   /// 点击 - 确认
   void onTap() {
     logd("onTap");
-    final pointer = controller.drawState.pointer;
-    if (pointer != null) {
-      _tapData = GestureData.tap(pointer.offset);
-      controller.onDrawConfirm(_tapData!);
+    if (controller.drawState.isOngoing) {
+      controller.onDrawConfirm(GestureData.tap(Offset.infinite));
     }
   }
 

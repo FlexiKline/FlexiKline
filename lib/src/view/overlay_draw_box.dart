@@ -81,16 +81,9 @@ class RenderOverlayDrawBox extends RenderProxyBox {
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     switch (controller.drawState) {
       case Drawing():
-        return child?.hitTest(result, position: position) ?? false;
-      case Prepared():
       case Editing():
-        final overlay = controller.hitTestOverlay(position);
-        if (overlay != null) {
-          controller.onDrawSelect(overlay);
-          return true;
-        } else {
-          return false;
-        }
+        return child?.hitTest(result, position: position) ?? true;
+      case Prepared():
       case Exited():
         return false;
     }
@@ -102,6 +95,12 @@ class RenderOverlayDrawBox extends RenderProxyBox {
       case Exited():
         return false;
       case Prepared():
+        final overlay = controller.hitTestOverlay(position);
+        if (overlay != null) {
+          controller.onDrawSelect(overlay);
+          return true;
+        }
+        return false;
       case Drawing():
       case Editing():
         return true;

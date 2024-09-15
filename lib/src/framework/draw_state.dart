@@ -56,8 +56,7 @@ class Prepared extends DrawState {
 }
 
 class Drawing extends DrawState {
-  Drawing(super.overlay);
-  DrawObject? object;
+  const Drawing(super.overlay);
 }
 
 class Editing extends DrawState {

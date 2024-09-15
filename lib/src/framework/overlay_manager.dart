@@ -118,7 +118,15 @@ final class OverlayManager with KlineLog {
     return overlay.object ??= createDrawObject(overlay);
   }
 
-  bool addOverlay(Overlay overlay) => _overlayList.add(overlay);
+  /// 添加新的overlay,
+  bool addOverlay(Overlay overlay) {
+    if (!_overlayList.contains(overlay)) {
+      final old = _overlayList.append(overlay);
+      old?.dispose();
+      return true;
+    }
+    return false;
+  }
 
   bool removeOverlay(Overlay overlay) {
     overlay.dispose();

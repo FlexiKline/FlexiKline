@@ -29,7 +29,7 @@ class Point {
     this.offset = Offset.infinite,
     this.ts = -1,
     this.value = BagNum.zero,
-    this.offsetRate = 0,
+    this.patch = 0,
   });
 
   static Point pointer(int index, Offset offset) {
@@ -46,9 +46,14 @@ class Point {
   /// 当前canvas中的坐标(实时更新)
   Offset offset;
 
+  /// 蜡烛图时间
   int ts;
+
+  /// 蜡烛图价值
   BagNum value;
-  double offsetRate;
+
+  /// 用于对[ts]和[value]组成坐标的修正
+  double patch;
 
   @override
   bool operator ==(Object other) =>
@@ -119,8 +124,7 @@ class Overlay implements Comparable<Overlay> {
   bool get isInitial => points.fold(true, (ret, item) => ret && item == null);
 
   /// 当前绘制中
-  bool get isDrawing =>
-      points.firstWhere((e) => e == null, orElse: () => null) == null;
+  bool get isDrawing => points.fold(false, (ret, item) => ret || item == null);
 
   /// 即将完成
   bool get isComplete {
@@ -155,6 +159,7 @@ class Overlay implements Comparable<Overlay> {
   @mustCallSuper
   void dispose() {
     object?.dispose();
+    object = null;
   }
 
   @override
