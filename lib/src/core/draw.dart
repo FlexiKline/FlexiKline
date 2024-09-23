@@ -56,6 +56,11 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
     candleRequestListener.addListener(() {
       _overlayManager.onChangeCandleRequest(candleRequestListener.value);
     });
+    candleDrawIndexListener.addListener(() {
+      if (candleDrawIndexListener.value != null) {
+        Future(_markRepaint);
+      }
+    });
   }
 
   @override
@@ -240,6 +245,11 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
     return false;
   }
 
+  bool _convertPointToOffset(Point point) {
+    tsToDx(point.ts);
+    return false;
+  }
+
   @override
   Overlay? hitTestOverlay(Offset position) {
     // 测试[position]位置上是否有命中的Overly.
@@ -252,22 +262,36 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
   void paintDraw(Canvas canvas, Size size) {
     if (!drawConfig.enable) return;
 
-    final stateOverlay = drawState.overlay;
-
     /// 首先绘制已完成的overlayList
-    // _overlayManager.drawOverlayList(canvas, size);
+    drawOverlayList(canvas, size);
+
+    /// 最后绘制当前处于Drawing或Editing状态的Overlay.
+    drawStateOverlay(canvas, size);
+  }
+
+  /// 绘制已完成的OverlayList
+  void drawOverlayList(Canvas canvas, Size size) {
+    final stateOverlay = drawState.overlay;
+    final drawRange = curKlineData.drawTimeRange;
+    if (drawRange == null) {
+      logw('drawOverlayList can not draw, because drawRange is null');
+      return;
+    }
+
     for (var overlay in _overlayManager.overlayList) {
       /// 如果是当前编辑的overlay不用绘制
       if (stateOverlay == overlay) continue;
 
-      DrawObject? object = _overlayManager.getDrawObject(overlay);
-      if (object != null) {
-        object.drawOverlay(canvas, size);
+      /// 检查overlay是否在当前蜡烛图绘制范围内, 如何存在才绘制overlay
+      final timeRange = overlay.timeRange;
+      if (timeRange != null && drawRange.contains(timeRange)) {
+        // _calcuatePointsOffset(overlay);
+        DrawObject? object = _overlayManager.getDrawObject(overlay);
+        if (object != null) {
+          object.drawOverlay(canvas, size);
+        }
       }
     }
-
-    /// 最后绘制当前处于Drawing或Editing状态的Overlay.
-    drawStateOverlay(canvas, size);
   }
 
   void drawStateOverlay(Canvas canvas, Size size) {

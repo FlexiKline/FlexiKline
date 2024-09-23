@@ -129,6 +129,22 @@ abstract class BaseData with KlineLog {
     end = startIndex + maxCandleCount;
   }
 
+  Range? get drawTimeRange {
+    if (checkStartAndEnd(start, end)) {
+      return Range(list[start].ts, list[end].ts);
+    }
+    return null;
+  }
+
+  /// 将[ts]转换为当前KlineData数据列表的下标
+  /// 如果ts > 最新价, 将为负
+  int? timestampToIndex(int ts) {
+    if (list.isEmpty || req.timeBar == null) return null;
+    int latestIndex = 0;
+    final latest = list.first;
+    return latestIndex + (latest.ts - ts) ~/ req.timeBar!.milliseconds;
+  }
+
   /// 合并[list]和[newList]为一个新数组
   /// 约定: [newList]和[list]都是按时间倒序排好的, 即最近/新的蜡烛数据以数组0开始依次存放.
   /// 去重: 如两个数组拼接过程中发现重复的, 要去掉[list]中重复的元素.

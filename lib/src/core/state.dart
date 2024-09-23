@@ -54,6 +54,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
     _candleRequestListener.dispose();
     _isFirstCandleMoveOffScreenListener.dispose();
     _timeBarListener.dispose();
+    _candleDrawIndexListener.dispose();
     _klineDataCache.forEach((key, data) {
       data.dispose();
     });
@@ -78,6 +79,13 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
   @override
   ValueListenable<CandleReq> get candleRequestListener {
     return _candleRequestListener;
+  }
+
+  /// 当前KlineData绘制范围监听器
+  final _candleDrawIndexListener = ValueNotifier<Range?>(null);
+  @override
+  ValueListenable<Range?> get candleDrawIndexListener {
+    return _candleDrawIndexListener;
   }
 
   void _updateCandleRequestListener(CandleReq request) {
@@ -156,6 +164,14 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
         (index * candleActualWidth - paintDxOffset) -
         candleWidthHalf;
     if (mainChartRect.inclueDx(dx)) return dx;
+    return null;
+  }
+
+  /// 将[ts]转换为当前绘制区域对应的X轴坐标. 如果超出范围, 则返回null.
+  @override
+  double? tsToDx(int ts) {
+    final index = curKlineData.timestampToIndex(ts);
+    if (index != null) return indexToDx(index);
     return null;
   }
 
@@ -261,6 +277,8 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
         maxCount,
       );
     }
+
+    _candleDrawIndexListener.value = curKlineData.drawTimeRange;
   }
 
   /// 开始预计算Kline指标数据

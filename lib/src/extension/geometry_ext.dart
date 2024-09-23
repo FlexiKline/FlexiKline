@@ -13,8 +13,9 @@
 // limitations under the License.
 
 import 'dart:math' as math;
+import 'dart:ui';
 
-import 'package:flutter/material.dart';
+import '../utils/vector_util.dart';
 
 extension RectExt on Rect {
   /// Whether the point specified by the given offset (which is assumed to be
@@ -51,6 +52,67 @@ extension OffsetExt on Offset {
       dy.clamp(rect.top, rect.bottom),
     );
   }
+
+  double get length => distance;
+
+  /// Normalize this.
+  Offset normalized() {
+    final l = distance;
+    if (l == 0.0) {
+      return Offset.zero;
+    }
+    final d = 1.0 / l;
+    return this * d;
+  }
+
+  /// Distance from this to [arg]
+  double distanceTo(Offset arg) => (this - arg).distance;
+
+  /// Returns the angle between this vector and [other] in radians.
+  double angleTo(Offset other) {
+    if (dy == other.dy && dx == other.dx) {
+      return 0.0;
+    }
+
+    final d = dot(other) / (distance * other.distance);
+
+    return math.acos(d.clamp(-1.0, 1.0));
+  }
+
+  /// Returns the signed angle between this and [other] in radians.
+  double angleToSigned(Offset other) {
+    if (dy == other.dy && dx == other.dx) {
+      return 0.0;
+    }
+
+    final s = cross(other);
+    final c = dot(other);
+
+    return math.atan2(s, c);
+  }
+
+  /// 点乘 Inner product.
+  double dot(Offset other) {
+    return dy * other.dy + dx * other.dx;
+  }
+
+  /// 叉乘 Cross product.
+  double cross(Offset other) {
+    return dx * other.dy - dy * other.dx;
+  }
+
+  /// 当前坐标P到由[A]与[B]两点组成线的距离
+  double distanceToLine(Offset A, Offset B) {
+    return distancePointToLine(this, A, B);
+  }
+
+  /// 将当前坐标到[other]组成的线映射向[rect]边上的坐标
+  Offset reflectInRect(Offset other, Rect rect) {
+    return pointReflectInRect(this, other, rect);
+  }
+
+  /// 斜率
+  double get slope => dy / dx;
 }
 
 extension SizeExt on Size {

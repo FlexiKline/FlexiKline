@@ -20,6 +20,7 @@ import '../extension/render/draw_circle.dart';
 import '../config/line_config/line_config.dart';
 import '../config/point_config/point_config.dart';
 import '../model/bag_num.dart';
+import '../model/range.dart';
 import 'common.dart';
 
 /// Overlay 绘制点坐标
@@ -133,6 +134,23 @@ class Overlay implements Comparable<Overlay> {
 
   /// 当前绘制已完成, 修正中.
   bool get isEditing => points.fold(true, (ret, item) => ret && item != null);
+
+  Range? get timeRange {
+    int? start, end, tmp;
+    for (var p in points) {
+      tmp = p?.ts;
+      if (tmp != null && tmp > 0) {
+        start ??= tmp;
+        end ??= tmp;
+        start = start > tmp ? start : tmp;
+        end = end < tmp ? end : tmp;
+      }
+    }
+    if (start != null && end != null) {
+      return Range(start, end);
+    }
+    return null;
+  }
 
   /// 添加指针[p]到[points]中, 并准备下一个指针
   void addPointer(Point p) {

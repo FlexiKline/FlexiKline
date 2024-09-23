@@ -29,6 +29,14 @@ final class Range {
 
   bool get isNotEmpty => length > 0;
 
+  // bool include(int v) {
+
+  // }
+
+  bool contains(Range r) {
+    return start >= r.start || end <= r.end;
+  }
+
   @override
   int get hashCode => start.hashCode ^ end.hashCode;
 

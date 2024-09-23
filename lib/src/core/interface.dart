@@ -102,6 +102,9 @@ abstract interface class IState {
   /// 蜡烛请求监听器
   ValueListenable<CandleReq> get candleRequestListener;
 
+  /// 当前KlineData绘制范围监听器
+  ValueListenable<Range?> get candleDrawIndexListener;
+
   /// TimeBar监听器
 
   /// 将offset转换为蜡烛数据
@@ -116,6 +119,9 @@ abstract interface class IState {
 
   /// 将index转换为当前绘制区域对应的X轴坐标. 如果超出范围, 则返回null.
   double? indexToDx(int index);
+
+  /// 将[ts]转换为当前绘制区域对应的X轴坐标. 如果超出范围, 则返回null.
+  double? tsToDx(int ts);
 
   /// 将value转换为dy坐标值
   double? valueToDy(BagNum value, {bool correct = false});

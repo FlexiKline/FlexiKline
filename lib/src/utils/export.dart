@@ -16,4 +16,5 @@
 export './convert_util.dart';
 export './date_time.dart';
 export 'decimal_format_util.dart';
+export 'vector_util.dart';
 // export './platform_util.dart';
