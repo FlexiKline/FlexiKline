@@ -56,6 +56,97 @@ double distancePointToLine(Offset P, Offset A, Offset B) {
   return lenPG;
 }
 
+const pi0 = math.pi * 0; // 0∘ | 360∘
+const pi1_4 = math.pi * 0.25; // 45∘
+const pi2_4 = math.pi * 0.5; // 90∘
+const pi3_4 = math.pi * 0.75; // 135∘
+const pi1 = math.pi; // 180∘
+const pi_3_4 = math.pi * -0.75; // 225∘
+const pi_2_4 = math.pi * -0.5; // 270∘
+const pi_1_4 = math.pi * -0.25; // 315∘
+
+/// 计算[A]与[B]两点射在[rect]上的路径.
+Path? reflectPathOnRect(Offset A, Offset B, Rect rect) {
+  final points = reflectPointsOnRect(A, B, rect);
+  if (points.isEmpty) return null;
+  return Path()..addPolygon(points, false);
+}
+
+/// 判断向量V2长度[v2Len]是否大于向量V1的长度[v1Len]
+bool _compareVectorLength(double v1Len, double v2Len) {
+  if (v1Len.sign != v2Len.sign) return false;
+  if (v1Len == 0 && v2Len == 0) return true;
+  if (v1Len.sign > 0) return v2Len > v1Len;
+  if (v1Len.sign < 0) return v2Len < v1Len;
+  return false;
+}
+
+/// 计算[A]与[B]两点射在[rect]上的坐标集合.
+/// 公式: y = kx + b; x = (y - b) / k;
+/// 斜率: k = (By-Ay) / (Bx-Ax)
+/// 截距 b = By - Bx * k = Ay - Ax * k
+List<Offset> reflectPointsOnRect(Offset A, Offset B, Rect rect) {
+  final vAB = B - A;
+  // final direction = vAB.direction;
+  final k = vAB.dx == 0 ? 0 : vAB.dy / vAB.dx;
+  final b = B.dy - B.dx * k;
+
+  List<Offset> points = [];
+
+  if (rect.include(A)) points.add(A);
+  if (rect.include(B)) points.add(B);
+  final dxLen = vAB.dx;
+  final dyLen = vAB.dy;
+
+  /// 垂线
+  if (k == 0) {
+    if (A.dx == B.dx && rect.includeDx(A.dx)) {
+      // 垂直线
+      if (_compareVectorLength(dyLen, 0 - A.dy)) {
+        points.add(Offset(A.dx, 0)); // top
+      }
+      if (_compareVectorLength(dyLen, rect.bottom - A.dy)) {
+        points.add(Offset(A.dx, rect.bottom)); // bottom
+      }
+    } else if (A.dy == B.dy && rect.includeDy(A.dy)) {
+      // 水平线
+      if (_compareVectorLength(dxLen, 0 - A.dx)) {
+        points.add(Offset(0, A.dy)); // left
+      }
+      if (_compareVectorLength(dxLen, rect.right - A.dx)) {
+        points.add(Offset(rect.right, A.dy)); // right
+      }
+    }
+    return points;
+  }
+
+  /// top
+  double dx = k != 0 ? -b / k : B.dx;
+  if (rect.includeDx(dx) && _compareVectorLength(dxLen, dx - A.dx)) {
+    points.add(Offset(dx, 0));
+  }
+
+  /// bottom
+  dx = k != 0 ? dx = (rect.bottom - b) / k : B.dx;
+  if (rect.includeDx(dx) && _compareVectorLength(dxLen, dx - A.dx)) {
+    points.add(Offset(dx, rect.bottom));
+  }
+
+  /// left
+  double dy = b;
+  if (rect.includeDy(dy) && _compareVectorLength(dyLen, dy - A.dy)) {
+    points.add(Offset(0, dy));
+  }
+
+  /// right
+  dy = rect.right * k + b;
+  if (rect.includeDy(dy) && _compareVectorLength(dyLen, dy - A.dy)) {
+    points.add(Offset(rect.right, dy));
+  }
+
+  return points;
+}
+
 /// 计算点[P]与点[O]组成的线射向[rect]边上的坐标
 /// 公式 y = kx + b; x = (y - b) / k
 /// k: 斜率 k = (Oy-Py) / (Ox-Px)
@@ -63,7 +154,7 @@ double distancePointToLine(Offset P, Offset A, Offset B) {
 /// 以canvas绘制建立2D坐标系: 左上角为原点, 向右为x轴, 向下为y轴
 /// 当abs(k) > 1 线会落在上下边;
 /// 当abs(k) < 1 线会落在左右边;
-Offset pointReflectInRect(Offset P, Offset O, Rect rect) {
+Offset reflectPointOnRect(Offset P, Offset O, Rect rect) {
   if (O.dy == P.dy) {
     if (O.dx == P.dx) {
       return Offset(P.dx, P.dy);

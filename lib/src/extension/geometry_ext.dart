@@ -30,11 +30,11 @@ extension RectExt on Rect {
         offset.dy <= bottom;
   }
 
-  bool inclueDx(double dx) {
+  bool includeDx(double dx) {
     return dx >= left && dx <= right;
   }
 
-  bool inclueDy(double dy) {
+  bool includeDy(double dy) {
     return dy >= top && dy <= bottom;
   }
 
@@ -107,12 +107,16 @@ extension OffsetExt on Offset {
   }
 
   /// 将当前坐标到[other]组成的线映射向[rect]边上的坐标
+  @Deprecated('use reflectPathOnRect')
   Offset reflectInRect(Offset other, Rect rect) {
-    return pointReflectInRect(this, other, rect);
+    return reflectPointOnRect(this, other, rect);
   }
 
   /// 斜率
-  double get slope => dy / dx;
+  double get slope {
+    if (dx == 0) return 0;
+    return dy / dx;
+  }
 }
 
 extension SizeExt on Size {

@@ -163,7 +163,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
     double dx = mainChartRight -
         (index * candleActualWidth - paintDxOffset) -
         candleWidthHalf;
-    if (mainChartRect.inclueDx(dx)) return dx;
+    if (mainChartRect.includeDx(dx)) return dx;
     return null;
   }
 

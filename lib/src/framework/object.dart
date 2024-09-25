@@ -249,7 +249,7 @@ mixin DataInitMixin on PaintObjectProxy implements IPaintDataInit {
   }
 
   BagNum? dyToValue(double dy) {
-    if (!drawableRect.inclueDy(dy)) return null;
+    if (!drawableRect.includeDy(dy)) return null;
     return minMax.max - ((dy - chartRect.top) / dyFactor).toBagNum();
   }
 
@@ -259,7 +259,7 @@ mixin DataInitMixin on PaintObjectProxy implements IPaintDataInit {
         candleWidthHalf;
 
     if (!check) return dx;
-    return chartRect.inclueDx(dx) ? dx : null;
+    return chartRect.includeDx(dx) ? dx : null;
   }
 
   int dxToIndex(double dx) {
