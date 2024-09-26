@@ -72,22 +72,20 @@ Path? reflectPathOnRect(Offset A, Offset B, Rect rect) {
   return Path()..addPolygon(points, false);
 }
 
-/// 判断向量V2长度[v2Len]是否大于向量V1的长度[v1Len]
-bool _compareVectorLength(double v1Len, double v2Len) {
-  if (v1Len.sign != v2Len.sign) return false;
-  if (v1Len == 0 && v2Len == 0) return true;
-  if (v1Len.sign > 0) return v2Len > v1Len;
-  if (v1Len.sign < 0) return v2Len < v1Len;
+/// 以[base]为基点, 以[sign]为方向, 判断p是否在此方向上
+bool _isExtendPoint(double base, double sign, double p) {
+  if (sign > 0) return p > base;
+  if (sign < 0) return p < base;
   return false;
 }
 
 /// 计算[A]与[B]两点射在[rect]上的坐标集合.
+/// 以canvas绘制建立2D坐标系: 左上角为原点, 向右为x轴, 向下为y轴
 /// 公式: y = kx + b; x = (y - b) / k;
 /// 斜率: k = (By-Ay) / (Bx-Ax)
 /// 截距 b = By - Bx * k = Ay - Ax * k
 List<Offset> reflectPointsOnRect(Offset A, Offset B, Rect rect) {
   final vAB = B - A;
-  // final direction = vAB.direction;
   final k = vAB.dx == 0 ? 0 : vAB.dy / vAB.dx;
   final b = B.dy - B.dx * k;
 
@@ -98,49 +96,27 @@ List<Offset> reflectPointsOnRect(Offset A, Offset B, Rect rect) {
   final dxLen = vAB.dx;
   final dyLen = vAB.dy;
 
-  /// 垂线
-  if (k == 0) {
-    if (A.dx == B.dx && rect.includeDx(A.dx)) {
-      // 垂直线
-      if (_compareVectorLength(dyLen, 0 - A.dy)) {
-        points.add(Offset(A.dx, 0)); // top
-      }
-      if (_compareVectorLength(dyLen, rect.bottom - A.dy)) {
-        points.add(Offset(A.dx, rect.bottom)); // bottom
-      }
-    } else if (A.dy == B.dy && rect.includeDy(A.dy)) {
-      // 水平线
-      if (_compareVectorLength(dxLen, 0 - A.dx)) {
-        points.add(Offset(0, A.dy)); // left
-      }
-      if (_compareVectorLength(dxLen, rect.right - A.dx)) {
-        points.add(Offset(rect.right, A.dy)); // right
-      }
-    }
-    return points;
-  }
-
   /// top
   double dx = k != 0 ? -b / k : B.dx;
-  if (rect.includeDx(dx) && _compareVectorLength(dxLen, dx - A.dx)) {
+  if (rect.includeDx(dx) && _isExtendPoint(A.dy, dyLen, 0)) {
     points.add(Offset(dx, 0));
   }
 
   /// bottom
   dx = k != 0 ? dx = (rect.bottom - b) / k : B.dx;
-  if (rect.includeDx(dx) && _compareVectorLength(dxLen, dx - A.dx)) {
+  if (rect.includeDx(dx) && _isExtendPoint(A.dy, dyLen, rect.bottom)) {
     points.add(Offset(dx, rect.bottom));
   }
 
   /// left
   double dy = b;
-  if (rect.includeDy(dy) && _compareVectorLength(dyLen, dy - A.dy)) {
+  if (rect.includeDy(dy) && _isExtendPoint(A.dx, dxLen, 0)) {
     points.add(Offset(0, dy));
   }
 
   /// right
   dy = rect.right * k + b;
-  if (rect.includeDy(dy) && _compareVectorLength(dyLen, dy - A.dy)) {
+  if (rect.includeDy(dy) && _isExtendPoint(A.dx, dxLen, rect.right)) {
     points.add(Offset(rect.right, dy));
   }
 
@@ -148,13 +124,16 @@ List<Offset> reflectPointsOnRect(Offset A, Offset B, Rect rect) {
 }
 
 /// 计算点[P]与点[O]组成的线射向[rect]边上的坐标
-/// 公式 y = kx + b; x = (y - b) / k
+/// 约定: 点[P]与点[O]均在[rect]内
+/// 公式: y = kx + b; x = (y - b) / k
 /// k: 斜率 k = (Oy-Py) / (Ox-Px)
 /// b: 截距 b = Oy - Ox * k = Py - Px * k
 /// 以canvas绘制建立2D坐标系: 左上角为原点, 向右为x轴, 向下为y轴
 /// 当abs(k) > 1 线会落在上下边;
 /// 当abs(k) < 1 线会落在左右边;
-Offset reflectPointOnRect(Offset P, Offset O, Rect rect) {
+Offset reflectToRectSide(Offset P, Offset O, Rect rect) {
+  assert(rect.include(P), 'Point P is not in the rect!');
+  assert(rect.include(O), 'Point O is not in the rect!');
   if (O.dy == P.dy) {
     if (O.dx == P.dx) {
       return Offset(P.dx, P.dy);

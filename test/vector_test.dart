@@ -52,11 +52,6 @@ void main() {
   group('reflectPathOnRect', () {
     Offset A = Offset(5, 5);
     Offset B;
-    Path? p;
-
-    void printPath(Path? p) {
-      debugPrint(p.toString());
-    }
 
     double convertTo360Degrees(double radians) {
       double degrees = radians * (180 / math.pi); // 将弧度转换为度数
@@ -163,34 +158,42 @@ void main() {
       B = Offset(10, 6);
       points = reflectPointsOnRect(A, B, rect);
       debugPrint(points.toString());
+      // [Offset(5.0, 5.0), Offset(10.0, 6.0), Offset(14.0, 6.8)]
 
       B = Offset(6, 8);
       points = reflectPointsOnRect(A, B, rect);
       debugPrint(points.toString());
+      // [Offset(5.0, 5.0), Offset(6.0, 8.0), Offset(6.7, 10.0)]
 
       B = Offset(12, 2);
       points = reflectPointsOnRect(A, B, rect);
       debugPrint(points.toString());
+      // [Offset(5.0, 5.0), Offset(12.0, 2.0), Offset(14.0, 1.1)]
 
       B = Offset(7, 1);
       points = reflectPointsOnRect(A, B, rect);
       debugPrint(points.toString());
+      // [Offset(5.0, 5.0), Offset(7.0, 1.0), Offset(7.5, 0.0)]
 
       B = Offset(2, 5);
       points = reflectPointsOnRect(A, B, rect);
       debugPrint(points.toString());
+      // [Offset(5.0, 5.0), Offset(2.0, 5.0), Offset(0.0, 5.0)]
 
       B = Offset(7, 5);
       points = reflectPointsOnRect(A, B, rect);
       debugPrint(points.toString());
+      // [Offset(5.0, 5.0), Offset(7.0, 5.0), Offset(14.0, 5.0)]
 
       B = Offset(5, 2);
       points = reflectPointsOnRect(A, B, rect);
       debugPrint(points.toString());
+      // [Offset(5.0, 5.0), Offset(5.0, 2.0), Offset(5.0, 0.0)]
 
       B = Offset(5, 7);
       points = reflectPointsOnRect(A, B, rect);
       debugPrint(points.toString());
+      // [Offset(5.0, 5.0), Offset(5.0, 7.0), Offset(5.0, 10.0)]
     });
 
     test('test reflectPointsOnRect Point A or point B is outside the rect', () {
@@ -201,42 +204,51 @@ void main() {
       B = Offset(1, 1);
       points = reflectPointsOnRect(A, B, rect);
       debugPrint(points.toString());
+      // 有重复>>> [Offset(1.0, 1.0), Offset(-0.0, 0.0), Offset(10.0, 10.0), Offset(0.0, 0.0)]
 
       B = Offset(-3, -2);
       points = reflectPointsOnRect(A, B, rect);
       debugPrint(points.toString());
+      // [Offset(5.0, 10.0), Offset(0.0, 2.5)]
 
       B = Offset(1, 4);
       points = reflectPointsOnRect(A, B, rect);
       debugPrint(points.toString());
+      // [Offset(1.0, 4.0), Offset(5.0, 10.0), Offset(0.0, 2.5)]
 
       B = Offset(-2, -3);
       points = reflectPointsOnRect(A, B, rect);
       debugPrint(points.toString());
+      // [Offset(2.5, 0.0), Offset(14.0, 7.7)]
 
       /// 从左下向右上射线
-      // A = Offset(-8, 18);
-      // B = Offset(-4, 16);
-      // points = reflectPointsOnRect(A, B, rect);
-      // debugPrint(points.toString());
+      A = Offset(-8, 18);
+      B = Offset(-4, 16);
+      points = reflectPointsOnRect(A, B, rect);
+      debugPrint(points.toString());
+      // [Offset(8.0, 10.0), Offset(14.0, 7.0)]
 
-      // B = Offset(-7, 14);
-      // points = reflectPointsOnRect(A, B, rect);
-      // debugPrint(points.toString());
+      B = Offset(-7, 14);
+      points = reflectPointsOnRect(A, B, rect);
+      debugPrint(points.toString());
+      // []
 
-      // B = Offset(-5, 14);
-      // points = reflectPointsOnRect(A, B, rect);
-      // debugPrint(points.toString());
+      B = Offset(-5, 14);
+      points = reflectPointsOnRect(A, B, rect);
+      debugPrint(points.toString());
+      // [Offset(5.5, 0.0), Offset(0.0, 7.3)]
 
       /// 从右上向左下射线
-      // A = Offset(16, -4);
-      // B = Offset(15, -1);
-      // points = reflectPointsOnRect(A, B, rect);
-      // debugPrint(points.toString());
+      A = Offset(16, -4);
+      B = Offset(15, -1);
+      points = reflectPointsOnRect(A, B, rect);
+      debugPrint(points.toString());
+      // [Offset(11.3, 10.0), Offset(14.0, 2.0)]
 
-      // B = Offset(10, -2);
-      // points = reflectPointsOnRect(A, B, rect);
-      // debugPrint(points.toString());
+      B = Offset(10, -2);
+      points = reflectPointsOnRect(A, B, rect);
+      debugPrint(points.toString());
+      // [Offset(4.0, 0.0), Offset(0.0, 1.3)]
     });
 
     test('test reflectPointsOnRect Point A or point B is vectical or horizonal',
@@ -244,55 +256,65 @@ void main() {
       List<Offset> points;
 
       /// 从下向上射线
-      // A = Offset(7, 15);
-      // B = Offset(7, 13);
-      // points = reflectPointsOnRect(A, B, rect);
-      // debugPrint(points.toString());
+      A = Offset(7, 15);
+      B = Offset(7, 13);
+      points = reflectPointsOnRect(A, B, rect);
+      debugPrint(points.toString());
+      // [Offset(7.0, 0.0), Offset(7.0, 10.0)]
 
-      // B = Offset(7, 8);
-      // points = reflectPointsOnRect(A, B, rect);
-      // debugPrint(points.toString());
+      B = Offset(7, 8);
+      points = reflectPointsOnRect(A, B, rect);
+      debugPrint(points.toString());
+      // [Offset(7.0, 8.0), Offset(7.0, 0.0), Offset(7.0, 10.0)]
 
-      // A = Offset(7, 9);
-      // B = Offset(7, 8);
-      // points = reflectPointsOnRect(A, B, rect);
-      // debugPrint(points.toString());
+      A = Offset(7, 9);
+      B = Offset(7, 8);
+      points = reflectPointsOnRect(A, B, rect);
+      debugPrint(points.toString());
+      // [Offset(7.0, 9.0), Offset(7.0, 8.0), Offset(7.0, 0.0)]
 
       /// 从上向下射线
-      // A = Offset(10, -6);
-      // B = Offset(10, -2);
-      // points = reflectPointsOnRect(A, B, rect);
-      // debugPrint(points.toString());
+      A = Offset(10, -6);
+      B = Offset(10, -2);
+      points = reflectPointsOnRect(A, B, rect);
+      debugPrint(points.toString());
+      // [Offset(10.0, 0.0), Offset(10.0, 10.0)]
 
-      // B = Offset(10, 0);
-      // points = reflectPointsOnRect(A, B, rect);
-      // debugPrint(points.toString());
+      B = Offset(10, 0);
+      points = reflectPointsOnRect(A, B, rect);
+      debugPrint(points.toString());
+      // 有重复>>> [Offset(10.0, 0.0), Offset(10.0, 0.0), Offset(10.0, 10.0)]
 
-      // A = Offset(10, 1);
-      // B = Offset(10, 4);
-      // points = reflectPointsOnRect(A, B, rect);
-      // debugPrint(points.toString());
+      A = Offset(10, 1);
+      B = Offset(10, 4);
+      points = reflectPointsOnRect(A, B, rect);
+      debugPrint(points.toString());
+      // [Offset(10.0, 1.0), Offset(10.0, 4.0), Offset(10.0, 10.0)]
 
       /// 从左向右射线
-      // A = Offset(-6, 4);
-      // B = Offset(-3, 4);
-      // points = reflectPointsOnRect(A, B, rect);
-      // debugPrint(points.toString());
+      A = Offset(-6, 4);
+      B = Offset(-3, 4);
+      points = reflectPointsOnRect(A, B, rect);
+      debugPrint(points.toString());
+      // [Offset(0.0, 4.0), Offset(14.0, 4.0)]
 
-      // B = Offset(2, 4);
-      // points = reflectPointsOnRect(A, B, rect);
-      // debugPrint(points.toString());
+      B = Offset(2, 4);
+      points = reflectPointsOnRect(A, B, rect);
+      debugPrint(points.toString());
+      // [Offset(2.0, 4.0), Offset(0.0, 4.0), Offset(14.0, 4.0)]
 
-      // A = Offset(1, 4);
-      // B = Offset(2, 4);
-      // points = reflectPointsOnRect(A, B, rect);
-      // debugPrint(points.toString());
+      A = Offset(1, 4);
+      B = Offset(2, 4);
+      points = reflectPointsOnRect(A, B, rect);
+      debugPrint(points.toString());
+      // [Offset(1.0, 4.0), Offset(2.0, 4.0), Offset(14.0, 4.0)]
 
       /// 从右向左射线
       A = Offset(15, 4);
       B = Offset(1, 4);
       points = reflectPointsOnRect(A, B, rect);
       debugPrint(points.toString());
+      //[Offset(1.0, 4.0), Offset(0.0, 4.0), Offset(14.0, 4.0)]
     });
   });
 
@@ -300,73 +322,73 @@ void main() {
     final offset = Offset(5, 5);
     test('reflectInRect', () {
       Offset other = Offset(10, 6);
-      Offset ret = offset.reflectInRect(other, rect);
+      Offset ret = offset.reflectRectSide(other, rect);
       debugPrint("1>" + ret.toString()); // 14, 6.8
 
       other = Offset(6, 8);
-      ret = offset.reflectInRect(other, rect);
+      ret = offset.reflectRectSide(other, rect);
       debugPrint("2>" + ret.toString()); // 6.7, 10.0
 
       other = Offset(12, 2);
-      ret = offset.reflectInRect(other, rect);
+      ret = offset.reflectRectSide(other, rect);
       debugPrint("3>" + ret.toString()); // 14.0, 1.1
 
       other = Offset(7, 1);
-      ret = offset.reflectInRect(other, rect);
+      ret = offset.reflectRectSide(other, rect);
       debugPrint("4>" + ret.toString()); // 7.5, 0.0
     });
 
     test('reflectInRect2', () {
       Offset other = Offset(10, 6);
-      Offset ret = other.reflectInRect(offset, rect);
+      Offset ret = other.reflectRectSide(offset, rect);
       debugPrint("1>" + ret.toString()); // 0.0, 4.0
 
       other = Offset(6, 8);
-      ret = other.reflectInRect(offset, rect);
+      ret = other.reflectRectSide(offset, rect);
       debugPrint("2>" + ret.toString()); // 3.3, 0.0
 
       other = Offset(12, 2);
-      ret = other.reflectInRect(offset, rect);
+      ret = other.reflectRectSide(offset, rect);
       debugPrint("3>" + ret.toString()); // 0.0, 7.1
 
       other = Offset(7, 1);
-      ret = other.reflectInRect(offset, rect);
+      ret = other.reflectRectSide(offset, rect);
       debugPrint("4>" + ret.toString()); // 2.5, 10.0
     });
 
     test('reflectInRect vertical horizontal', () {
       Offset other = Offset(2, 5);
-      Offset ret = offset.reflectInRect(other, rect);
+      Offset ret = offset.reflectRectSide(other, rect);
       debugPrint("1>" + ret.toString()); // 0.0, 5.0
 
       other = Offset(7, 5);
-      ret = offset.reflectInRect(other, rect);
+      ret = offset.reflectRectSide(other, rect);
       debugPrint("2>" + ret.toString()); // 14.0, 5.0
 
       other = Offset(5, 2);
-      ret = offset.reflectInRect(other, rect);
+      ret = offset.reflectRectSide(other, rect);
       debugPrint("3>" + ret.toString()); // 5.0, 0.0
 
       other = Offset(5, 7);
-      ret = offset.reflectInRect(other, rect);
+      ret = offset.reflectRectSide(other, rect);
       debugPrint("4>" + ret.toString()); // 5.0, 10
     });
 
     test('reflectInRect outside', () {
       Offset other = Offset(2, 5);
-      Offset ret = offset.reflectInRect(other, rect);
+      Offset ret = offset.reflectRectSide(other, rect);
       debugPrint("1>" + ret.toString()); // 0.0, 5.0
 
       other = Offset(7, 5);
-      ret = offset.reflectInRect(other, rect);
+      ret = offset.reflectRectSide(other, rect);
       debugPrint("2>" + ret.toString()); // 14.0, 5.0
 
       other = Offset(5, 2);
-      ret = offset.reflectInRect(other, rect);
+      ret = offset.reflectRectSide(other, rect);
       debugPrint("3>" + ret.toString()); // 5.0, 0.0
 
       other = Offset(5, 7);
-      ret = offset.reflectInRect(other, rect);
+      ret = offset.reflectRectSide(other, rect);
       debugPrint("4>" + ret.toString()); // 5.0, 10
     });
   });

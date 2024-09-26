@@ -107,9 +107,8 @@ extension OffsetExt on Offset {
   }
 
   /// 将当前坐标到[other]组成的线映射向[rect]边上的坐标
-  @Deprecated('use reflectPathOnRect')
-  Offset reflectInRect(Offset other, Rect rect) {
-    return reflectPointOnRect(this, other, rect);
+  Offset reflectRectSide(Offset other, Rect rect) {
+    return reflectToRectSide(this, other, rect);
   }
 
   /// 斜率
