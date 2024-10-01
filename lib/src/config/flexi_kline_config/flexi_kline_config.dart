@@ -132,7 +132,7 @@ class FlexiKlineConfig {
     try {
       return FlexiKlineConfig.fromJson(toJson());
     } catch (e) {
-      debugPrint('FlexiKlineConfig clonse failed!!!');
+      debugPrint('FlexiKlineConfig clone failed!!!');
     }
     return this;
   }

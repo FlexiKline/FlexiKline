@@ -107,27 +107,20 @@ abstract interface class IState {
 
   /// TimeBar监听器
 
-  /// 将offset转换为蜡烛数据
-  CandleModel? offsetToCandle(Offset offset);
-
-  /// 将offset指定的dx转换为当前绘制区域对应的蜡烛的下标.
-  int offsetToIndex(Offset offset);
-  int dxToIndex(double dx);
-
   /// 将dx转换为蜡烛数据.
   CandleModel? dxToCandle(double dx);
 
-  /// 将index转换为当前绘制区域对应的X轴坐标. 如果超出范围, 则返回null.
-  double? indexToDx(int index);
+  /// 将[dx]转换为当前绘制区域对应的蜡烛的下标.
+  int? dxToIndex(double dx);
 
-  /// 将[ts]转换为当前绘制区域对应的X轴坐标. 如果超出范围, 则返回null.
-  double? tsToDx(int ts);
+  /// 将index转换为当前绘制区域对应的X轴坐标. 如果超出范围, 则返回null.
+  double? indexToDx(int index, {bool check = false});
 
   /// 将value转换为dy坐标值
   double? valueToDy(BagNum value, {bool correct = false});
 
   /// 将dy坐标值转换为value
-  BagNum? dyToValue(double dy);
+  BagNum? dyToValue(double dy, {bool check = false});
 
   /// 当前canvas绘制区域第一根蜡烛绘制的偏移量
   double get startCandleDx;

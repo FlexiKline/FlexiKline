@@ -248,8 +248,8 @@ mixin DataInitMixin on PaintObjectProxy implements IPaintDataInit {
     return chartRect.bottom - (value - minMax.min).toDouble() * dyFactor;
   }
 
-  BagNum? dyToValue(double dy) {
-    if (!drawableRect.includeDy(dy)) return null;
+  BagNum? dyToValue(double dy, {bool check = true}) {
+    if (check && !drawableRect.includeDy(dy)) return null;
     return minMax.max - ((dy - chartRect.top) / dyFactor).toBagNum();
   }
 

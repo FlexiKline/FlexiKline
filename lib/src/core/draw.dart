@@ -20,6 +20,7 @@ import '../config/export.dart';
 import '../extension/export.dart';
 import '../framework/export.dart';
 import '../framework/overlay_manager.dart';
+import '../model/bag_num.dart';
 import '../model/gesture_data.dart';
 import 'binding_base.dart';
 import 'interface.dart';
@@ -172,7 +173,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
       final pointer = overlay.pointer;
       if (pointer == null) return;
 
-      final isOk = _convertPointer(pointer);
+      final isOk = updatePointByOffset(pointer);
       if (!isOk) {
         logw('onDrawConfirm updatePointer failed! pointer:$pointer');
         return;
@@ -193,7 +194,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
         _overlayManager.addOverlay(overlay);
         _drawState = const Prepared();
       } else {
-        final isOk = _convertPointer(pointer);
+        final isOk = updatePointByOffset(pointer);
         if (!isOk) {
           logw('onDrawConfirm updatePointer failed! pointer:$pointer');
           return;
@@ -233,21 +234,39 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
     }
   }
 
-  bool _convertPointer(Point pointer) {
-    final offset = pointer.offset;
-    final model = dxToCandle(offset.dx);
-    final value = dyToValue(offset.dy);
-    if (model != null && value != null) {
-      pointer.ts = model.ts;
-      pointer.value = value;
-      return true;
-    }
-    return false;
+  /// 以当前蜡烛图绘制参数为基础, 将绘制参数[point]转换Offset坐标.
+  bool updatePointByValue(Point point, {int? ts, BagNum? value}) {
+    value ??= point.value;
+    final dy = valueToDy(value);
+    if (dy == null) return false;
+
+    ts ??= point.ts;
+    final index = curKlineData.timestampToIndex(ts);
+    if (index == null) return false;
+    final dx = indexToDx(index);
+    if (dx == null) return false;
+
+    point.ts = ts;
+    point.value = value;
+    point.offset = Offset(dx, dy);
+    return true;
   }
 
-  bool _convertPointToOffset(Point point) {
-    tsToDx(point.ts);
-    return false;
+  /// 以当前蜡烛图绘制参数为基础, 将绘制参数[offset]转换Point坐标.
+  bool updatePointByOffset(Point point, {Offset? offset}) {
+    offset ??= point.offset;
+    final index = dxToIndex(offset.dx);
+    if (index == null) return false;
+    final ts = curKlineData.indexToTimestamp(index);
+    if (ts == null) return false;
+
+    final value = dyToValue(offset.dy);
+    if (value == null) return false;
+
+    point.offset = offset;
+    point.ts = ts;
+    point.value = value;
+    return true;
   }
 
   @override
@@ -260,6 +279,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
   /// 绘制Draw图层
   @override
   void paintDraw(Canvas canvas, Size size) {
+    logd('paintDraw ${canvas.hashCode}');
     if (!drawConfig.enable) return;
 
     /// 首先绘制已完成的overlayList

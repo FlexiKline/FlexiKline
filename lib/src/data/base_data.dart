@@ -89,6 +89,8 @@ abstract class BaseData with KlineLog {
     return list.isNotEmpty && start < end && start >= 0 && end <= list.length;
   }
 
+  bool checkIndex(int index) => index >= 0 && index < length;
+
   /// 初始化基础数据
   void initBasicData(ComputeMode mode, {bool reset = false}) {
     for (var m in _list) {
@@ -143,6 +145,18 @@ abstract class BaseData with KlineLog {
     int latestIndex = 0;
     final latest = list.first;
     return latestIndex + (latest.ts - ts) ~/ req.timeBar!.milliseconds;
+  }
+
+  /// 将[index]转换为以当前KliineData数据范围为基础的timestamp
+  int? indexToTimestamp(int index) {
+    if (list.isEmpty || req.timeBar == null) return null;
+    if (checkIndex(index)) return index;
+    if (index >= length) {
+      return list.last.ts - (index - length + 1) * req.timeBar!.milliseconds;
+    } else if (index < 0) {
+      return list.first.ts + (0 - index) * req.timeBar!.milliseconds;
+    }
+    return null;
   }
 
   /// 合并[list]和[newList]为一个新数组

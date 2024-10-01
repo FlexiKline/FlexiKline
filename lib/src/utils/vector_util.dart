@@ -41,7 +41,7 @@ double distancePointToLine(Offset P, Offset A, Offset B) {
   final lenAB = vAB.length;
   final lenAG = dotProduct / lenAB;
   if (lenAG - lenAB > precisionError) {
-    // 投影AG大于AB长度, 说明超出AB范围, 取BP长试.
+    // 投影AG大于AB长度, 说明超出AB范围, 取BP长度.
     return (P - B).length;
   }
 
@@ -83,7 +83,7 @@ bool _isExtendPoint(double base, double sign, double p) {
 /// 以canvas绘制建立2D坐标系: 左上角为原点, 向右为x轴, 向下为y轴
 /// 公式: y = kx + b; x = (y - b) / k;
 /// 斜率: k = (By-Ay) / (Bx-Ax)
-/// 截距 b = By - Bx * k = Ay - Ax * k
+/// 截距: b = By - Bx * k = Ay - Ax * k
 List<Offset> reflectPointsOnRect(Offset A, Offset B, Rect rect) {
   final vAB = B - A;
   final k = vAB.dx == 0 ? 0 : vAB.dy / vAB.dx;

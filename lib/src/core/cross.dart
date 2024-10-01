@@ -168,7 +168,7 @@ mixin CrossBinding
 
       CandleModel? model;
       if (crossConfig.showLatestTipsInBlank) {
-        model = offsetToCandle(offset);
+        model = dxToCandle(offset.dx);
         // 如果当前model为空, 则根据offset.dx计算当前model是最新的, 还是最后的.
         if (model == null && !curKlineData.isEmpty) {
           if (offset.dx > startCandleDx) {
@@ -216,7 +216,8 @@ mixin CrossBinding
   /// 绘制 Tooltip
   void paintTooltip(Canvas canvas, Offset offset, {CandleModel? model}) {
     if (!tooltipConfig.show) return;
-    int index = offsetToIndex(offset);
+    int? index = dxToIndex(offset.dx);
+    if (index == null) return;
     model ??= curKlineData.getCandle(index);
     final pre = curKlineData.getCandle(index + 1);
     if (model == null) return;

@@ -133,46 +133,30 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
   /// 最大绘制宽度
   double get maxPaintWidth => curKlineData.length * candleActualWidth;
 
-  /// 将offset转换为蜡烛数据
-  @override
-  CandleModel? offsetToCandle(Offset offset) {
-    final index = offsetToIndex(offset);
-    return curKlineData.getCandle(index);
-  }
-
-  /// 将offset指定的dx转换为当前绘制区域对应的蜡烛的下标.
-  @override
-  int offsetToIndex(Offset offset) => dxToIndex(offset.dx);
-
-  @override
-  int dxToIndex(double dx) {
-    final dxPaintOffset = (mainChartRight - dx) + paintDxOffset;
-    // final diff = dxPaintOffset % candleActualWidth;
-    return (dxPaintOffset / candleActualWidth).floor();
-  }
-
   @override
   CandleModel? dxToCandle(double dx) {
     final index = dxToIndex(dx);
     return curKlineData.getCandle(index);
   }
 
-  /// 将index转换为当前绘制区域对应的X轴坐标. 如果超出范围, 则返回null.
+  /// 将[dx]转换为当前绘制区域对应的蜡烛的下标.
   @override
-  double? indexToDx(int index) {
-    double dx = mainChartRight -
-        (index * candleActualWidth - paintDxOffset) -
-        candleWidthHalf;
-    if (mainChartRect.includeDx(dx)) return dx;
-    return null;
+  int? dxToIndex(double dx) {
+    // final dxPaintOffset = (mainChartRight - dx) + paintDxOffset;
+    // // final diff = dxPaintOffset % candleActualWidth;
+    // return (dxPaintOffset / candleActualWidth).floor();
+    return mainPaintObject?.dxToIndex(dx);
   }
 
-  /// 将[ts]转换为当前绘制区域对应的X轴坐标. 如果超出范围, 则返回null.
+  /// 将[index]转换为当前绘制区域对应的X轴坐标.
   @override
-  double? tsToDx(int ts) {
-    final index = curKlineData.timestampToIndex(ts);
-    if (index != null) return indexToDx(index);
-    return null;
+  double? indexToDx(int index, {bool check = false}) {
+    // double dx = mainChartRight -
+    //     (index * candleActualWidth - paintDxOffset) -
+    //     candleWidthHalf;
+    // if (mainChartRect.includeDx(dx)) return dx;
+    // return null;
+    return mainPaintObject?.indexToDx(index, check: check);
   }
 
   @override
@@ -181,7 +165,9 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
   }
 
   @override
-  BagNum? dyToValue(double dy) => mainPaintObject?.dyToValue(dy);
+  BagNum? dyToValue(double dy, {bool check = false}) {
+    return mainPaintObject?.dyToValue(dy, check: check);
+  }
 
   /// 当前canvas绘制区域起始蜡烛右部dx值.
   @override
@@ -327,18 +313,28 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
       //   debugLabel: 'Precompute-Task',
       // );
 
-      /// 使用scheduleTask方式运行预计算
-      return await SchedulerBinding.instance.scheduleTask(
-        () => KlineData.precomputeKlineData(
-          data,
-          newList: newList,
-          computeMode: computeMode,
-          calcParams: calcParams,
-          reset: reset,
-        ),
-        Priority.animation,
-        debugLabel: 'Precompute-Task',
+      // TODO: 暂时直接调用precomputeKlineData,方便测试使用
+      // 后续仍改为SchedulerBinding.instance.scheduleTask方式
+      return KlineData.precomputeKlineData(
+        data,
+        newList: newList,
+        computeMode: computeMode,
+        calcParams: calcParams,
+        reset: reset,
       );
+
+      /// 使用scheduleTask方式运行预计算
+      // return await SchedulerBinding.instance.scheduleTask(
+      //   () => KlineData.precomputeKlineData(
+      //     data,
+      //     newList: newList,
+      //     computeMode: computeMode,
+      //     calcParams: calcParams,
+      //     reset: reset,
+      //   ),
+      //   Priority.animation,
+      //   debugLabel: 'Precompute-Task',
+      // );
     } catch (e, stack) {
       loge('PrecomputeKlineData exception!!!', error: e, stackTrace: stack);
       return data;
