@@ -14,6 +14,7 @@
 
 import 'dart:ui';
 
+import '../core/interface.dart';
 import '../framework/overlay.dart';
 
 class HorizontalLineDrawObject extends DrawObject {
@@ -25,5 +26,5 @@ class HorizontalLineDrawObject extends DrawObject {
   }
 
   @override
-  void drawOverlay(Canvas canvas, Size size) {}
+  void drawOverlay(IDrawContext context, Canvas canvas, Size size) {}
 }

@@ -331,7 +331,16 @@ class DrawPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    controller.paintDraw(canvas, size);
+    try {
+      /// 保存画布状态
+      canvas.save();
+
+      canvas.clipRect(controller.mainRect);
+
+      controller.paintDraw(canvas, size);
+    } finally {
+      canvas.restore();
+    }
   }
 
   @override

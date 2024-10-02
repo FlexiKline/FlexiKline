@@ -72,6 +72,8 @@ final class OverlayManager with KlineLog {
   SortableHashSet<Overlay> _overlayList = SortableHashSet<Overlay>();
   Iterable<Overlay> get overlayList => _overlayList;
 
+  bool get hasOverlay => _overlayList.isNotEmpty;
+
   /// KlineData数据切换回调
   void onChangeCandleRequest(CandleReq request) {
     if (request.instId.isEmpty || request.instId == _instId) return;
@@ -143,12 +145,12 @@ final class OverlayManager with KlineLog {
     return null;
   }
 
-  void drawOverlayList(Canvas canvas, Size size) {
+  void drawOverlayList(IDrawContext context, Canvas canvas, Size size) {
     DrawObject? object;
     for (var overlay in _overlayList) {
       object = getDrawObject(overlay);
       if (object != null) {
-        object.drawOverlay(canvas, size);
+        object.drawOverlay(context, canvas, size);
       }
     }
   }

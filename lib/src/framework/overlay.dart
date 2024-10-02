@@ -16,6 +16,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 
+import '../core/interface.dart';
 import '../extension/render/draw_circle.dart';
 import '../config/line_config/line_config.dart';
 import '../config/point_config/point_config.dart';
@@ -246,11 +247,21 @@ abstract class DrawObject<T extends Overlay> extends OverlayObject
     with DrawObjectMixin {
   const DrawObject(super.overlay);
 
+  /// 初始化所有绘制点坐标
+  bool initPoint(IDrawContext context) {
+    for (var point in _overlay.points) {
+      if (point == null) return false;
+      final succeed = context.updatePointByValue(point);
+      if (!succeed) return false;
+    }
+    return true;
+  }
+
   /// 碰撞测试[position]是否命中Overlay
   bool hitTest(Offset position) => false;
 
   /// 绘制Overlay
-  void drawOverlay(Canvas canvas, Size size);
+  void drawOverlay(IDrawContext context, Canvas canvas, Size size);
 
   @mustCallSuper
   void dispose() {

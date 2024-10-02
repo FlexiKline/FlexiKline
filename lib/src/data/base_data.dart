@@ -150,7 +150,7 @@ abstract class BaseData with KlineLog {
   /// 将[index]转换为以当前KliineData数据范围为基础的timestamp
   int? indexToTimestamp(int index) {
     if (list.isEmpty || req.timeBar == null) return null;
-    if (checkIndex(index)) return index;
+    if (checkIndex(index)) return list[index].ts;
     if (index >= length) {
       return list.last.ts - (index - length + 1) * req.timeBar!.milliseconds;
     } else if (index < 0) {

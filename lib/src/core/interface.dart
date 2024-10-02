@@ -103,7 +103,7 @@ abstract interface class IState {
   ValueListenable<CandleReq> get candleRequestListener;
 
   /// 当前KlineData绘制范围监听器
-  ValueListenable<Range?> get candleDrawIndexListener;
+  // ValueListenable<Range?> get candleDrawIndexListener;
 
   /// TimeBar监听器
 
@@ -262,6 +262,12 @@ abstract interface class IDraw {
   /// 测试[position]位置上是否命中当前已完成绘制操作的Overly.
   Overlay? hitTestOverlay(Offset position);
 
+  /// 以当前蜡烛图绘制参数为基础, 将绘制参数[point]转换Offset坐标.
+  bool updatePointByValue(Point point, {int? ts, BagNum? value});
+
+  /// 以当前蜡烛图绘制参数为基础, 将绘制参数[offset]转换Point坐标
+  bool updatePointByOffset(Point point, {Offset? offset});
+
   void paintDraw(Canvas canvas, Size size);
 
   void markRepaintDraw();
@@ -283,6 +289,33 @@ abstract interface class IDraw {
 
   /// 退出绘制: 此时无法选中/编辑(移动)已有Overlay; 也不可以新建Overlay.
   void onDrawExit();
+}
+
+/// DrawContext 绘制Overlay功能集合
+abstract interface class IDrawContext {
+  /// 主区Size
+  Rect get mainRect;
+
+  /// 将dx转换为蜡烛数据.
+  CandleModel? dxToCandle(double dx);
+
+  /// 将[dx]转换为当前绘制区域对应的蜡烛的下标.
+  int? dxToIndex(double dx);
+
+  /// 将index转换为当前绘制区域对应的X轴坐标. 如果超出范围, 则返回null.
+  double? indexToDx(int index, {bool check = false});
+
+  /// 将value转换为dy坐标值
+  double? valueToDy(BagNum value, {bool correct = false});
+
+  /// 将dy坐标值转换为value
+  BagNum? dyToValue(double dy, {bool check = false});
+
+  /// 以当前蜡烛图绘制参数为基础, 将绘制参数[point]转换Offset坐标.
+  bool updatePointByValue(Point point, {int? ts, BagNum? value});
+
+  /// 以当前蜡烛图绘制参数为基础, 将绘制参数[offset]转换Point坐标
+  bool updatePointByOffset(Point point, {Offset? offset});
 }
 
 /// Grid图层API

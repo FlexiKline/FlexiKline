@@ -33,7 +33,9 @@ import 'setting.dart';
 /// 3. 移动绘制点, 并确认第一绘制点, 并转换成蜡烛数据坐标记录到[Overlay]的points的first位置.
 /// 4. 重复步骤3, 确认绘制图类型所需要的所有绘制点.
 /// 5. 绘制完成后, 当前绘制图形默认为选中状态.
-mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
+mixin DrawBinding
+    on KlineBindingBase, SettingBinding
+    implements IDraw, IState, IDrawContext {
   @override
   void init() {
     super.init();
@@ -57,11 +59,11 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
     candleRequestListener.addListener(() {
       _overlayManager.onChangeCandleRequest(candleRequestListener.value);
     });
-    candleDrawIndexListener.addListener(() {
-      if (candleDrawIndexListener.value != null) {
-        Future(_markRepaint);
-      }
-    });
+    // candleDrawIndexListener.addListener(() {
+    //   if (candleDrawIndexListener.value != null) {
+    //     Future(_markRepaint);
+    //   }
+    // });
   }
 
   @override
@@ -90,7 +92,9 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
 
   @override
   void markRepaintDraw() {
-    _markRepaint();
+    if (drawState.isOngoing || _overlayManager.hasOverlay) {
+      _markRepaint();
+    }
   }
 
   Iterable<IDrawType> get supportDrawTypes => _overlayManager.supportDrawTypes;
@@ -235,6 +239,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
   }
 
   /// 以当前蜡烛图绘制参数为基础, 将绘制参数[point]转换Offset坐标.
+  @override
   bool updatePointByValue(Point point, {int? ts, BagNum? value}) {
     value ??= point.value;
     final dy = valueToDy(value);
@@ -253,6 +258,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
   }
 
   /// 以当前蜡烛图绘制参数为基础, 将绘制参数[offset]转换Point坐标.
+  @override
   bool updatePointByOffset(Point point, {Offset? offset}) {
     offset ??= point.offset;
     final index = dxToIndex(offset.dx);
@@ -279,7 +285,6 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
   /// 绘制Draw图层
   @override
   void paintDraw(Canvas canvas, Size size) {
-    logd('paintDraw ${canvas.hashCode}');
     if (!drawConfig.enable) return;
 
     /// 首先绘制已完成的overlayList
@@ -292,25 +297,17 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
   /// 绘制已完成的OverlayList
   void drawOverlayList(Canvas canvas, Size size) {
     final stateOverlay = drawState.overlay;
-    final drawRange = curKlineData.drawTimeRange;
-    if (drawRange == null) {
-      logw('drawOverlayList can not draw, because drawRange is null');
-      return;
-    }
-
     for (var overlay in _overlayManager.overlayList) {
       /// 如果是当前编辑的overlay不用绘制
       if (stateOverlay == overlay) continue;
 
-      /// 检查overlay是否在当前蜡烛图绘制范围内, 如何存在才绘制overlay
-      final timeRange = overlay.timeRange;
-      if (timeRange != null && drawRange.contains(timeRange)) {
-        // _calcuatePointsOffset(overlay);
-        DrawObject? object = _overlayManager.getDrawObject(overlay);
-        if (object != null) {
-          object.drawOverlay(canvas, size);
-        }
-      }
+      DrawObject? object = _overlayManager.getDrawObject(overlay);
+      if (object == null) continue;
+
+      final succeed = object.initPoint(this);
+      if (!succeed) continue;
+
+      object.drawOverlay(this, canvas, size);
     }
   }
 
@@ -320,20 +317,20 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw, IState {
 
     if (drawState is Editing && overlay.isEditing) {
       final object = _overlayManager.getDrawObject(overlay);
-      object?.drawOverlay(canvas, size);
+      object?.drawOverlay(this, canvas, size);
       // 绘制编辑状态的overlay的points为圆圈.
       object?.drawPointsAsCircles(canvas, config.drawPoint);
     } else if (drawState is Drawing && overlay.isDrawing) {
       // 步数即将完成, 构建object进行预绘制
       if (overlay.isComplete) {
         overlay.object ??= _overlayManager.createDrawObject(overlay);
-        overlay.object?.drawOverlay(canvas, size);
+        overlay.object?.drawOverlay(this, canvas, size);
 
+        // 绘制编辑状态的overlay的points为圆圈.
+        overlay.object?.drawPointsAsCircles(canvas, config.drawPoint);
         if (overlay.pointer != null) {
           _paintPointer(canvas, overlay.pointer!.offset, null);
         }
-        // 绘制编辑状态的overlay的points为圆圈.
-        overlay.object?.drawPointsAsCircles(canvas, config.drawPoint);
       } else {
         // 步数未完成时, 将overlay已确认的points与pointer联合绘制.
         Offset? last;

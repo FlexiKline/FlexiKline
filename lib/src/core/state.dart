@@ -54,7 +54,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
     _candleRequestListener.dispose();
     _isFirstCandleMoveOffScreenListener.dispose();
     _timeBarListener.dispose();
-    _candleDrawIndexListener.dispose();
+    // _candleDrawIndexListener.dispose();
     _klineDataCache.forEach((key, data) {
       data.dispose();
     });
@@ -82,11 +82,11 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
   }
 
   /// 当前KlineData绘制范围监听器
-  final _candleDrawIndexListener = ValueNotifier<Range?>(null);
-  @override
-  ValueListenable<Range?> get candleDrawIndexListener {
-    return _candleDrawIndexListener;
-  }
+  // final _candleDrawIndexListener = ValueNotifier<Range?>(null);
+  // @override
+  // ValueListenable<Range?> get candleDrawIndexListener {
+  //   return _candleDrawIndexListener;
+  // }
 
   void _updateCandleRequestListener(CandleReq request) {
     logd('updateCandleRequestListener $curDataKey, request:$request');
@@ -235,6 +235,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
   void moveToInitialPosition() {
     initPaintDxOffset();
     markRepaintChart();
+    markRepaintDraw();
   }
 
   /// 计算绘制蜡烛图的起始数组索引下标
@@ -264,7 +265,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
       );
     }
 
-    _candleDrawIndexListener.value = curKlineData.drawTimeRange;
+    // _candleDrawIndexListener.value = curKlineData.drawTimeRange;
   }
 
   /// 开始预计算Kline指标数据
@@ -453,6 +454,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
         }
 
         markRepaintChart();
+        markRepaintDraw();
       }
     }
   }
@@ -528,6 +530,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
     if (newDxOffset != paintDxOffset) {
       paintDxOffset = newDxOffset;
       markRepaintChart();
+      markRepaintDraw();
     }
   }
 
@@ -595,6 +598,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
     }
 
     markRepaintChart();
+    markRepaintDraw();
   }
 
   // @override

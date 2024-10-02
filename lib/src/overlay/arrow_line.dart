@@ -14,6 +14,7 @@
 
 import 'dart:ui';
 
+import '../core/interface.dart';
 import '../extension/render/draw_path.dart';
 import '../framework/overlay.dart';
 
@@ -21,7 +22,7 @@ class ArrowLineDrawObject extends DrawObject {
   ArrowLineDrawObject(super.overlay);
 
   @override
-  void drawOverlay(Canvas canvas, Size size) {
+  void drawOverlay(IDrawContext context, Canvas canvas, Size size) {
     // TODO: implement drawOverlay
   }
 }
