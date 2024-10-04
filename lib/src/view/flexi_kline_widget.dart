@@ -19,8 +19,6 @@ import 'package:flutter/material.dart';
 import '../kline_controller.dart';
 import '../utils/platform_util.dart';
 import 'non_touch_gesture_detector.dart';
-import 'overlay_draw_box.dart';
-import 'overlay_draw_gesture_detector.dart';
 import 'touch_gesture_detector.dart';
 
 class FlexiKlineWidget extends StatefulWidget {
@@ -177,23 +175,23 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
                 controller: widget.controller,
                 onDoubleTap: widget.onDoubleTap,
               ),
+        _buildDrawToolbar(context, canvasSize),
         Positioned.fromRect(
           rect: widget.controller.mainRect,
           child: _buildMainForgroundView(context),
         ),
-        OverlayDrawBox(
-          key: const ValueKey('OverlayDrawBox'),
-          controller: widget.controller,
-          child: OverlayDrawGestureDetector(
-            key: const ValueKey('OverlayDrawGestureDetector'),
-            controller: widget.controller,
-            isTouchDevice: widget.isTouchDevice,
-            child: ConstrainedBox(
-              constraints: BoxConstraints.tight(canvasSize),
-            ),
-          ),
-        ),
-        _buildDrawToolbar(context, canvasSize),
+        // OverlayDrawBox(
+        //   key: const ValueKey('OverlayDrawBox'),
+        //   controller: widget.controller,
+        //   child: OverlayDrawGestureDetector(
+        //     key: const ValueKey('OverlayDrawGestureDetector'),
+        //     controller: widget.controller,
+        //     isTouchDevice: widget.isTouchDevice,
+        //     child: ConstrainedBox(
+        //       constraints: BoxConstraints.tight(canvasSize),
+        //     ),
+        //   ),
+        // ),
       ],
     );
   }

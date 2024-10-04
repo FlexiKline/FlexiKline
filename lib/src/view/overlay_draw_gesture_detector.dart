@@ -72,7 +72,8 @@ class _OverlayDrawGestureDetectorState extends State<OverlayDrawGestureDetector>
       onPointerUp: onPointerUp,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: onTap,
+        onTapUp: onTapUp,
+        // onTap: onTap,
         onPanStart: onPanStart,
         onPanUpdate: onPanUpdate,
         onPanEnd: onPanEnd,
@@ -92,7 +93,8 @@ class _OverlayDrawGestureDetectorState extends State<OverlayDrawGestureDetector>
       onHover: onHover,
       onExit: onExit,
       child: GestureDetector(
-        onTap: onTap,
+        onTapUp: onTapUp,
+        // onTap: onTap,
         onPanUpdate: onPanUpdate,
 
         /// 长按
@@ -102,6 +104,18 @@ class _OverlayDrawGestureDetectorState extends State<OverlayDrawGestureDetector>
         child: widget.child,
       ),
     );
+  }
+
+  void onTapUp(TapUpDetails details) {
+    logd("onTapUp");
+    if (controller.drawState.isOngoing) {
+      controller.onDrawConfirm(GestureData.tap(Offset.infinite));
+    } else {
+      final overlay = controller.hitTestOverlay(details.localPosition);
+      if (overlay != null) {
+        controller.onDrawSelect(overlay);
+      }
+    }
   }
 
   /// 点击 - 确认

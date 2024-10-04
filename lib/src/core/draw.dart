@@ -17,7 +17,6 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 
 import '../config/export.dart';
-import '../extension/export.dart';
 import '../framework/export.dart';
 import '../framework/overlay_manager.dart';
 import '../model/bag_num.dart';
@@ -59,11 +58,6 @@ mixin DrawBinding
     candleRequestListener.addListener(() {
       _overlayManager.onChangeCandleRequest(candleRequestListener.value);
     });
-    // candleDrawIndexListener.addListener(() {
-    //   if (candleDrawIndexListener.value != null) {
-    //     Future(_markRepaint);
-    //   }
-    // });
   }
 
   @override
@@ -134,6 +128,7 @@ mixin DrawBinding
     // 如果是非退出状态, 则无需变更状态.
     if (!drawState.isExited) return;
     _drawState = const Prepared();
+    cancelCross();
   }
 
   /// 开始绘制新的[type]类型
@@ -155,7 +150,65 @@ mixin DrawBinding
   @override
   void onDrawUpdate(GestureData data) {
     if (!drawState.isOngoing) return;
-    drawState.overlay?.pointer?.offset = data.offset;
+    if (drawState.overlay?.pointer != null) {
+      drawState.overlay?.pointer?.offset = data.offset;
+      _markRepaint();
+    }
+  }
+
+  bool onDrawMoveStart(GestureData data) {
+    if (!drawState.isEditing) return false; // 未完成的暂不允许移动
+    final overlay = drawState.overlay!;
+
+    final position = data.offset;
+    logd('onDrawMoveStart draw position:$position');
+    // 检查是否在某个绘制点上
+    final point = overlay.object?.hitTestPoint(this, position);
+    if (point != null) {
+      logd('>>> onDrawMoveStart index:${point.index} point:$point');
+      overlay.setPointer(point);
+      return true;
+    } else if (overlay.object?.hitTest(this, position) == true) {
+      // 检查当前焦点是否命中Overlay
+      overlay.setPointer(null);
+      return true;
+    }
+
+    return false;
+  }
+
+  /// 移动Overlay
+  void onDrawMoveUpdate(GestureData data) {
+    if (!drawState.isEditing) return; // 未完成的暂不允许移动
+    final overlay = drawState.overlay!;
+
+    final delta = data.delta;
+    if (overlay.pointer != null) {
+      overlay.pointer?.offset += delta;
+    } else {
+      for (var point in overlay.points) {
+        if (point?.offset.isFinite == true) {
+          point?.offset += delta;
+        }
+      }
+    }
+    _markRepaint();
+  }
+
+  void onDrawMoveEnd() {
+    if (!drawState.isEditing) return; // 未完成的暂不允许移动
+    final overlay = drawState.overlay!;
+
+    final pointer = overlay.pointer;
+    if (pointer != null) {
+      logd('>>> onDrawMoveEnd index:${pointer.index} point:$pointer');
+      overlay.confirmPointer();
+    }
+    for (var point in overlay.points) {
+      if (point != null) {
+        updatePointByOffset(point);
+      }
+    }
     _markRepaint();
   }
 
@@ -168,19 +221,23 @@ mixin DrawBinding
   /// 3. 当状态为Editing时:
   ///   3.1. 更新pointer到points中, 并清空pointer(等待下一次的选择)
   @override
-  void onDrawConfirm(GestureData data) {
-    if (!drawState.isOngoing) return;
+  bool onDrawConfirm(GestureData data) {
     final overlay = drawState.overlay;
-    if (overlay == null) return;
+    if (overlay == null) return false;
 
+    bool result = false;
     if (overlay.isDrawing) {
-      final pointer = overlay.pointer;
-      if (pointer == null) return;
+      Point? pointer = overlay.pointer;
+      if (pointer == null) {
+        // 可能永远不会触发
+        final index = overlay.nextIndex;
+        pointer = Point.pointer(index, data.offset);
+      }
 
       final isOk = updatePointByOffset(pointer);
       if (!isOk) {
         logw('onDrawConfirm updatePointer failed! pointer:$pointer');
-        return;
+        return false;
       }
       overlay.addPointer(pointer);
 
@@ -190,6 +247,9 @@ mixin DrawBinding
         overlay.line = config.drawLine;
         _drawState = Editing(overlay);
         _overlayManager.addOverlay(overlay);
+        result = false;
+      } else {
+        result = true;
       }
     } else if (overlay.isEditing) {
       final pointer = overlay.pointer;
@@ -197,23 +257,27 @@ mixin DrawBinding
         // 当前处于编辑状态, 但是pointer又没有被赋值, 此时点击事件, 为确认完成.
         _overlayManager.addOverlay(overlay);
         _drawState = const Prepared();
+        result = false;
       } else {
         final isOk = updatePointByOffset(pointer);
         if (!isOk) {
           logw('onDrawConfirm updatePointer failed! pointer:$pointer');
-          return;
+          return false;
         }
-        overlay.updatePointer(pointer);
+        overlay.confirmPointer();
+        result = false;
       }
     }
 
     _markRepaint();
+    return result;
   }
 
   @override
   void onDrawSelect(Overlay overlay) {
     if (!drawState.isPrepared) return;
     _drawState = DrawState.edit(overlay);
+    cancelCross();
     _markRepaint();
   }
 
@@ -278,7 +342,7 @@ mixin DrawBinding
   @override
   Overlay? hitTestOverlay(Offset position) {
     // 测试[position]位置上是否有命中的Overly.
-    Overlay? ret = _overlayManager.hitTestOverlay(position);
+    Overlay? ret = _overlayManager.hitTestOverlay(this, position);
     return ret;
   }
 
@@ -304,10 +368,11 @@ mixin DrawBinding
       DrawObject? object = _overlayManager.getDrawObject(overlay);
       if (object == null) continue;
 
+      // TODO: 待优化, 仅在图表移动/缩放/数据源发生变化时, 才需要initPoint
       final succeed = object.initPoint(this);
       if (!succeed) continue;
 
-      object.drawOverlay(this, canvas, size);
+      object.draw(this, canvas, size);
     }
   }
 
@@ -317,73 +382,12 @@ mixin DrawBinding
 
     if (drawState is Editing && overlay.isEditing) {
       final object = _overlayManager.getDrawObject(overlay);
-      object?.drawOverlay(this, canvas, size);
       // 绘制编辑状态的overlay的points为圆圈.
       object?.drawPointsAsCircles(canvas, config.drawPoint);
+      object?.draw(this, canvas, size);
     } else if (drawState is Drawing && overlay.isDrawing) {
-      // 步数即将完成, 构建object进行预绘制
-      if (overlay.isComplete) {
-        overlay.object ??= _overlayManager.createDrawObject(overlay);
-        overlay.object?.drawOverlay(this, canvas, size);
-
-        // 绘制编辑状态的overlay的points为圆圈.
-        overlay.object?.drawPointsAsCircles(canvas, config.drawPoint);
-        if (overlay.pointer != null) {
-          _paintPointer(canvas, overlay.pointer!.offset, null);
-        }
-      } else {
-        // 步数未完成时, 将overlay已确认的points与pointer联合绘制.
-        Offset? last;
-        Point? pointer = overlay.pointer;
-        for (var point in overlay.points) {
-          if (point != null) {
-            final offset = point.offset;
-            canvas.drawCirclePoint(offset, drawConfig.drawPoint);
-            if (last != null) {
-              final linePath = Path()
-                ..moveTo(offset.dx, offset.dy)
-                ..lineTo(last.dx, last.dy);
-              canvas.drawLineType(
-                drawConfig.crosshair.type,
-                linePath,
-                drawConfig.crosshair.linePaint,
-                dashes: drawConfig.crosshair.dashes,
-              );
-            }
-            last = offset;
-          } else if (pointer != null) {
-            _paintPointer(canvas, pointer.offset, last);
-            break;
-          }
-        }
-      }
+      overlay.object ??= _overlayManager.createDrawObject(overlay);
+      overlay.object?.drawing(this, canvas, size);
     }
-  }
-
-  void _paintPointer(Canvas canvas, Offset pointer, Offset? last) {
-    final path = Path()
-      ..moveTo(mainChartLeft, pointer.dy)
-      ..lineTo(mainChartRight, pointer.dy)
-      ..moveTo(pointer.dx, 0)
-      ..lineTo(pointer.dx, mainChartHeight);
-
-    canvas.drawLineType(
-      drawConfig.crosshair.type,
-      path,
-      drawConfig.crosshair.linePaint,
-      dashes: drawConfig.crosshair.dashes,
-    );
-    if (last != null && last.isFinite) {
-      final linePath = Path()
-        ..moveTo(pointer.dx, pointer.dy)
-        ..lineTo(last.dx, last.dy);
-      canvas.drawLineType(
-        drawConfig.crosshair.type,
-        linePath,
-        drawConfig.crosshair.linePaint,
-        dashes: drawConfig.crosshair.dashes,
-      );
-    }
-    canvas.drawCirclePoint(pointer, drawConfig.crosspoint);
   }
 }

@@ -187,7 +187,8 @@ class KVItem extends ConsumerWidget {
     final theme = ref.read(themeProvider);
     return Container(
       width: 100.r,
-      padding: EdgeInsetsDirectional.symmetric(horizontal: 4.r, vertical: 2.r),
+      height: 20.r,
+      margin: EdgeInsetsDirectional.symmetric(horizontal: 4.r, vertical: 2.r),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -196,10 +197,18 @@ class KVItem extends ConsumerWidget {
             label,
             style: theme.t2s12w400,
           ),
-          Text(
-            value,
-            style: theme.t1s12w400,
-          )
+          Expanded(
+            child: FittedBox(
+              fit: BoxFit.fitHeight,
+              alignment: AlignmentDirectional.centerEnd,
+              child: Text(
+                value,
+                style: theme.t1s12w400.copyWith(
+                  height: 20.r / 12.sp,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );

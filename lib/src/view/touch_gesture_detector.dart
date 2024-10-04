@@ -18,6 +18,7 @@ import 'package:flutter/widgets.dart';
 import '../config/gesture_config/gesture_config.dart';
 import '../extension/geometry_ext.dart';
 import '../framework/common.dart';
+import '../framework/draw_state.dart';
 import '../framework/logger.dart';
 import '../kline_controller.dart';
 import '../model/gesture_data.dart';
@@ -61,6 +62,8 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
   FlexiKlineController get controller => widget.controller;
 
   GestureConfig get gestureConfig => widget.controller.gestureConfig;
+
+  DrawState get drawState => controller.drawState;
 
   @override
   void initState() {
@@ -111,10 +114,31 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
   // void onPointerDown(PointerDownEvent event) {}
 
   /// 原始移动
-  /// 当原始移动时, 当前如果正处在crossing中, 发生冲突, 清理手势竞技场, 响应Cross平移事件
-  /// TODO: 后续当isDrawing时, 直接return; 不能清理, 如果清理会导致drawToolbar无法响应事件.
+  /// 当原始移动时, 当前如果正处在crossing或drawing中时, 发生冲突, 清理手势竞技场, 响应Cross/Draw指针平移事件
   void onPointerMove(PointerMoveEvent event) {
-    if (controller.isCrossing) {
+    if (drawState.isDrawing) {
+      final pointer = drawState.pointer;
+      if (pointer != null) {
+        if (!isSweeped) {
+          logi(
+            'onPointerMove currently in drawing, need clear the gesture arena!',
+          );
+          isSweeped = true;
+          GestureBinding.instance.gestureArena.sweep(event.pointer);
+          if (pointer.offset.isFinite) {
+            _tapData ??= GestureData.pan(pointer.offset);
+          }
+        }
+
+        if (_tapData == null) return;
+        Offset newOffset = _tapData!.offset + event.delta;
+        final mainRect = controller.mainRect;
+        if (!mainRect.include(newOffset)) {
+          newOffset = newOffset.clamp(mainRect);
+        }
+        controller.onDrawUpdate(_tapData!..update(newOffset));
+      }
+    } else if (controller.isCrossing) {
       if (!isSweeped) {
         logi(
           'onPointerMove currently in crossing, need clear the gesture arena!',
@@ -124,13 +148,12 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
       }
 
       if (_tapData == null) return;
-      // logd('onPointerMove position:${event.position}, delta:${event.delta}');
       Offset newOffset = _tapData!.offset + event.delta;
-      if (!controller.canvasRect.include(newOffset)) {
-        newOffset = newOffset.clamp(controller.canvasRect);
+      final canvasRect = controller.canvasRect;
+      if (!canvasRect.include(newOffset)) {
+        newOffset = newOffset.clamp(canvasRect);
       }
-      _tapData!.update(newOffset);
-      controller.updateCross(_tapData!);
+      controller.updateCross(_tapData!..update(newOffset));
     }
   }
 
@@ -150,6 +173,23 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
   ///
   void onTapUp(TapUpDetails details) {
     logd("onTapUp details:$details");
+    if (drawState.isOngoing) {
+      final offset = drawState.overlay?.pointer?.offset;
+      _tapData = GestureData.tap(offset ?? details.localPosition);
+      final ret = controller.onDrawConfirm(_tapData!);
+      if (!ret) {
+        _tapData?.end();
+        _tapData = null;
+      }
+      return;
+    } else {
+      final overlay = controller.hitTestOverlay(details.localPosition);
+      if (overlay != null) {
+        controller.onDrawSelect(overlay);
+        return;
+      }
+    }
+
     _tapData = GestureData.tap(details.localPosition);
     final ret = controller.startCross(_tapData!);
     if (!ret) {
@@ -163,9 +203,11 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
   void onScaleStart(ScaleStartDetails details) {
     if (_panScaleData != null && !_panScaleData!.isEnd) {
       // 如果上次平移或缩放, 还没有结束, 不允许开始.
-      logd('onPanStart Currently still panning or zooming, ignore!!!');
+      logd('onPanStart Currently still ongoing, ignore!!!');
       return;
     }
+
+    if (drawState.isOngoing) return;
 
     if (_panScaleData?.isScale == true || details.pointerCount > 1) {
       ScalePosition position =
@@ -203,6 +245,8 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
       logd("onScaleUpdate panScaleData is empty! details:$details");
       return;
     }
+
+    if (drawState.isOngoing) return;
 
     if (_panScaleData!.isPan) {
       _panScaleData!.update(
@@ -251,6 +295,8 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
       controller.checkAndLoadMoreCandlesWhenPanEnd();
       return;
     }
+
+    if (drawState.isOngoing) return;
 
     // <0: 负数代表从右向左滑动.
     // >0: 正数代表从左向右滑动.
@@ -341,9 +387,34 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
       logd("onLongPressStart ignore! > crossing:${controller.isCrossing}");
       return;
     }
-    logd("onLongPressStart > details:$details");
-    _longData = GestureData.long(details.localPosition);
-    controller.startCross(_longData!);
+
+    if (drawState.isOngoing) {
+      if (drawState.isDrawing) {
+        // 未完成的暂不允许移动
+        return;
+      }
+      assert(() {
+        logd("onLongPressStart draw > details:$details");
+        return true;
+      }());
+      _longData = GestureData.long(details.localPosition);
+      final result = controller.onDrawMoveStart(_longData!);
+      if (!result) {
+        _longData?.end();
+        _longData = null;
+      }
+    } else {
+      assert(() {
+        logd("onLongPressStart cross > details:$details");
+        return true;
+      }());
+      _longData = GestureData.long(details.localPosition);
+      final result = controller.startCross(_longData!);
+      if (!result) {
+        _longData?.end();
+        _longData = null;
+      }
+    }
   }
 
   void onLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
@@ -354,8 +425,13 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
       logd("onLongPressMoveUpdate > details:$details");
       return true;
     }());
-    _longData!.update(details.localPosition);
-    controller.updateCross(_longData!);
+    if (drawState.isOngoing) {
+      _longData!.update(details.localPosition);
+      controller.onDrawMoveUpdate(_longData!);
+    } else {
+      _longData!.update(details.localPosition);
+      controller.updateCross(_longData!);
+    }
   }
 
   void onLongPressEnd(LongPressEndDetails details) {
@@ -363,9 +439,17 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
       logd("onLongPressEnd ignore! > details:$details");
       return;
     }
-    logd("onLongPressEnd details:$details");
-    // 长按结束, 尝试取消Cross事件.
-    controller.cancelCross();
+
+    assert(() {
+      logd("onLongPressEnd details:$details");
+      return true;
+    }());
+    if (drawState.isOngoing) {
+      controller.onDrawMoveEnd();
+    } else {
+      // 长按结束, 尝试取消Cross事件.
+      controller.cancelCross();
+    }
     _longData?.end();
     _longData = null;
   }

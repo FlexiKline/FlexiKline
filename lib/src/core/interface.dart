@@ -282,7 +282,7 @@ abstract interface class IDraw {
   void onDrawUpdate(GestureData data);
 
   /// 绘制确认坐标
-  void onDrawConfirm(GestureData data);
+  bool onDrawConfirm(GestureData data);
 
   /// 选择已绘制的Overlay
   void onDrawSelect(Overlay overlay);
@@ -292,9 +292,12 @@ abstract interface class IDraw {
 }
 
 /// DrawContext 绘制Overlay功能集合
-abstract interface class IDrawContext {
+abstract interface class IDrawContext implements ILogger {
   /// 主区Size
   Rect get mainRect;
+
+  /// DrawConfig
+  DrawConfig get config;
 
   /// 将dx转换为蜡烛数据.
   CandleModel? dxToCandle(double dx);

@@ -106,7 +106,7 @@ final class OverlayManager with KlineLog {
       key: _instId,
       type: type,
       line: drawBinding.config.crosshair,
-    )..pointer = Point.pointer(0, drawBinding.initialPosition);
+    )..setPointer(Point.pointer(0, drawBinding.initialPosition));
   }
 
   /// 每次都创建新的Object.
@@ -135,10 +135,10 @@ final class OverlayManager with KlineLog {
     return _overlayList.remove(overlay);
   }
 
-  Overlay? hitTestOverlay(Offset position) {
+  Overlay? hitTestOverlay(IDrawContext context, Offset position) {
     assert(position.isFinite, 'hitTestOverlay($position) position is invalid!');
     for (var overlay in _overlayList) {
-      if (overlay.object != null && overlay.object!.hitTest(position)) {
+      if (overlay.object?.hitTest(context, position) == true) {
         return overlay;
       }
     }
@@ -150,7 +150,7 @@ final class OverlayManager with KlineLog {
     for (var overlay in _overlayList) {
       object = getDrawObject(overlay);
       if (object != null) {
-        object.drawOverlay(context, canvas, size);
+        object.draw(context, canvas, size);
       }
     }
   }

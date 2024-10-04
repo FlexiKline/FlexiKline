@@ -21,10 +21,5 @@ class HorizontalLineDrawObject extends DrawObject {
   HorizontalLineDrawObject(super.overlay);
 
   @override
-  bool hitTest(Offset position) {
-    return super.hitTest(position);
-  }
-
-  @override
-  void drawOverlay(IDrawContext context, Canvas canvas, Size size) {}
+  void draw(IDrawContext context, Canvas canvas, Size size) {}
 }

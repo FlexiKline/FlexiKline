@@ -79,10 +79,11 @@ class _MyDemoPageState extends ConsumerState<MyKlineDemoPage> {
     controller.switchKlineData(request);
 
     logger.logd('genRandomCandleList Begin ${DateTime.now()}');
-    final list = await genRandomCandleList(
-      count: 500,
-      bar: request.timeBar!,
-    );
+    // final list = await genRandomCandleList(
+    //   count: 500,
+    //   bar: request.timeBar!,
+    // );
+    final list = genETHUSDT1HLimit50List();
     logger.logd('genRandomCandleList End ${DateTime.now()}');
 
     await controller.updateKlineData(request, list);

@@ -15,12 +15,10 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
 
 import '../constant.dart';
 import '../data/export.dart';
-import '../extension/export.dart';
 import '../framework/collection/fifo_hash_map.dart';
 import '../framework/common.dart';
 import '../model/export.dart';
@@ -314,28 +312,18 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
       //   debugLabel: 'Precompute-Task',
       // );
 
-      // TODO: 暂时直接调用precomputeKlineData,方便测试使用
-      // 后续仍改为SchedulerBinding.instance.scheduleTask方式
-      return KlineData.precomputeKlineData(
-        data,
-        newList: newList,
-        computeMode: computeMode,
-        calcParams: calcParams,
-        reset: reset,
-      );
-
       /// 使用scheduleTask方式运行预计算
-      // return await SchedulerBinding.instance.scheduleTask(
-      //   () => KlineData.precomputeKlineData(
-      //     data,
-      //     newList: newList,
-      //     computeMode: computeMode,
-      //     calcParams: calcParams,
-      //     reset: reset,
-      //   ),
-      //   Priority.animation,
-      //   debugLabel: 'Precompute-Task',
-      // );
+      return await SchedulerBinding.instance.scheduleTask(
+        () => KlineData.precomputeKlineData(
+          data,
+          newList: newList,
+          computeMode: computeMode,
+          calcParams: calcParams,
+          reset: reset,
+        ),
+        Priority.animation,
+        debugLabel: 'Precompute-Task',
+      );
     } catch (e, stack) {
       loge('PrecomputeKlineData exception!!!', error: e, stackTrace: stack);
       return data;

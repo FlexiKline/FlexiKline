@@ -22,18 +22,14 @@ class TrendLineDrawObject extends DrawObject {
   const TrendLineDrawObject(super.overlay);
 
   @override
-  bool hitTest(Offset position) {
-    return super.hitTest(position);
-  }
-
-  @override
-  void drawOverlay(IDrawContext context, Canvas canvas, Size size) {
+  void draw(IDrawContext context, Canvas canvas, Size size) {
     List<Offset> dotList = [];
     for (var point in points) {
       if (point?.offset.isFinite == true) {
         dotList.add(point!.offset);
       }
     }
+    context.logd('TrendLine dotList]\t:$dotList');
     canvas.drawLineType(
       line.type,
       Path()..addPolygon(dotList, false),

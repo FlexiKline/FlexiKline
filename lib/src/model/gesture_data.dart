@@ -126,6 +126,8 @@ class GestureData {
   /// 上一个Offset
   Offset get prevOffset => _prevOffset;
 
+  Offset get delta => offset - prevOffset;
+
   /// X轴移动增量.
   /// 注: 小于0: 向左滑动; 大于0: 向右滑动
   double get dxDelta => offset.dx - prevOffset.dx;

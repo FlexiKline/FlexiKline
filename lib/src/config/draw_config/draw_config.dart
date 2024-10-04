@@ -34,6 +34,7 @@ class DrawConfig {
     required this.tickText,
     required this.spacing,
     this.gapBackground = Colors.transparent,
+    this.hitTestMinDistance = 20,
   });
 
   /// 是否启用Draw Overlay功能开关
@@ -59,6 +60,10 @@ class DrawConfig {
 
   /// 两个时间刻度之间的背景色
   final Color gapBackground;
+
+  /// 命中测试最小距离.
+  /// 当前位置到Overlay线距离如果小于等于[hitTestMinDistance], 即命中.
+  final double hitTestMinDistance;
 
   factory DrawConfig.fromJson(Map<String, dynamic> json) =>
       _$DrawConfigFromJson(json);

@@ -23,6 +23,8 @@ abstract class _$DrawConfigCWProxy {
 
   DrawConfig gapBackground(Color gapBackground);
 
+  DrawConfig hitTestMinDistance(double hitTestMinDistance);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `DrawConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -38,6 +40,7 @@ abstract class _$DrawConfigCWProxy {
     TextAreaConfig? tickText,
     double? spacing,
     Color? gapBackground,
+    double? hitTestMinDistance,
   });
 }
 
@@ -73,6 +76,10 @@ class _$DrawConfigCWProxyImpl implements _$DrawConfigCWProxy {
       this(gapBackground: gapBackground);
 
   @override
+  DrawConfig hitTestMinDistance(double hitTestMinDistance) =>
+      this(hitTestMinDistance: hitTestMinDistance);
+
+  @override
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `DrawConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -89,6 +96,7 @@ class _$DrawConfigCWProxyImpl implements _$DrawConfigCWProxy {
     Object? tickText = const $CopyWithPlaceholder(),
     Object? spacing = const $CopyWithPlaceholder(),
     Object? gapBackground = const $CopyWithPlaceholder(),
+    Object? hitTestMinDistance = const $CopyWithPlaceholder(),
   }) {
     return DrawConfig(
       enable: enable == const $CopyWithPlaceholder() || enable == null
@@ -125,6 +133,11 @@ class _$DrawConfigCWProxyImpl implements _$DrawConfigCWProxy {
               ? _value.gapBackground
               // ignore: cast_nullable_to_non_nullable
               : gapBackground as Color,
+      hitTestMinDistance: hitTestMinDistance == const $CopyWithPlaceholder() ||
+              hitTestMinDistance == null
+          ? _value.hitTestMinDistance
+          // ignore: cast_nullable_to_non_nullable
+          : hitTestMinDistance as double,
     );
   }
 }
@@ -153,6 +166,8 @@ DrawConfig _$DrawConfigFromJson(Map<String, dynamic> json) => DrawConfig(
       gapBackground: json['gapBackground'] == null
           ? Colors.transparent
           : const ColorConverter().fromJson(json['gapBackground'] as String),
+      hitTestMinDistance:
+          (json['hitTestMinDistance'] as num?)?.toDouble() ?? 20,
     );
 
 Map<String, dynamic> _$DrawConfigToJson(DrawConfig instance) =>
@@ -165,4 +180,5 @@ Map<String, dynamic> _$DrawConfigToJson(DrawConfig instance) =>
       'tickText': instance.tickText.toJson(),
       'spacing': instance.spacing,
       'gapBackground': const ColorConverter().toJson(instance.gapBackground),
+      'hitTestMinDistance': instance.hitTestMinDistance,
     };

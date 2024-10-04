@@ -58,18 +58,12 @@ class RenderOverlayDrawBox extends RenderProxyBox {
   //       final overlay = controller.hitTestOverlay(position);
   //       if (overlay != null) {
   //         controller.onDrawSelect(overlay);
-  //         result.add(BoxHitTestEntry(this, position));
   //         return true;
   //       } else {
   //         return false;
   //       }
   //     case Editing():
-  //       final overlay = controller.hitTestOverlay(position);
-  //       if (overlay != null) {
-  //         controller.onDrawSelect(overlay);
-  //       }
   //       return super.hitTest(result, position: position);
-  //     // case Started():
   //     case Drawing():
   //       return super.hitTest(result, position: position);
   //     case Exited():
@@ -78,19 +72,8 @@ class RenderOverlayDrawBox extends RenderProxyBox {
   // }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
-    switch (controller.drawState) {
-      case Drawing():
-      case Editing():
-        return child?.hitTest(result, position: position) ?? true;
-      case Prepared():
-      case Exited():
-        return false;
-    }
-  }
-
-  @override
-  bool hitTestSelf(Offset position) {
+  bool hitTest(BoxHitTestResult result, {required Offset position}) {
+    controller.logd('hitTest($position) > drawState:${controller.drawState}');
     switch (controller.drawState) {
       case Exited():
         return false;
@@ -98,12 +81,42 @@ class RenderOverlayDrawBox extends RenderProxyBox {
         final overlay = controller.hitTestOverlay(position);
         if (overlay != null) {
           controller.onDrawSelect(overlay);
-          return true;
+          return super.hitTest(result, position: position);
         }
         return false;
       case Drawing():
       case Editing():
-        return true;
+        return super.hitTest(result, position: position);
     }
   }
+
+  // @override
+  // bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+  //   switch (controller.drawState) {
+  //     case Drawing():
+  //     case Editing():
+  //       return child?.hitTest(result, position: position) ?? true;
+  //     case Prepared():
+  //     case Exited():
+  //       return false;
+  //   }
+  // }
+
+  // @override
+  // bool hitTestSelf(Offset position) {
+  //   switch (controller.drawState) {
+  //     case Exited():
+  //       return false;
+  //     case Prepared():
+  //       final overlay = controller.hitTestOverlay(position);
+  //       if (overlay != null) {
+  //         controller.onDrawSelect(overlay);
+  //         return true;
+  //       }
+  //       return false;
+  //     case Drawing():
+  //     case Editing():
+  //       return true;
+  //   }
+  // }
 }
