@@ -65,6 +65,11 @@ class DrawConfig {
   /// 当前位置到Overlay线距离如果小于等于[hitTestMinDistance], 即命中.
   final double hitTestMinDistance;
 
+  Paint get gapBgPaint => Paint()
+    ..color = gapBackground
+    ..style = PaintingStyle.fill
+    ..strokeWidth = 6;
+
   factory DrawConfig.fromJson(Map<String, dynamic> json) =>
       _$DrawConfigFromJson(json);
 

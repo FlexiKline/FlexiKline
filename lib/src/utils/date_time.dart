@@ -14,8 +14,10 @@
 
 import 'dart:math' as math;
 
+import '../constant.dart';
+
 /// 计算时间差, 并格式化展示
-/// 
+///
 /// 1. 超过1天展示 "md nh"
 /// 2. 小于一天展示 "hh:MM:ss"
 /// 3. 小天一小时展示 "MM:ss"
@@ -39,7 +41,7 @@ String? formatTimeDiff(DateTime nextUpdateDateTime) {
 }
 
 /// 格式化日期时间.
-/// 
+///
 /// 如果与今天时间一致不展示(年月日) 和 (月日)
 /// lg:
 /// DateTime date = DateTime(2024, 3, 27, 19, 50, 32);
@@ -81,4 +83,28 @@ String formatyyMMddHHMMss(
   sb.write(fillzero(dateTime.second));
 
   return sb.toString();
+}
+
+String formatDateTimeByTimeBar(
+  int ts, {
+  TimeBar? bar,
+}) {
+  final dt = DateTime.fromMillisecondsSinceEpoch(ts);
+  if (bar == null) {
+    return '${dt.year}/${twoDigits(dt.month)}/${twoDigits(dt.day)} ${twoDigits(dt.hour)}:${twoDigits(dt.minute)}:${twoDigits(dt.second)}';
+  } else if (bar.milliseconds >= Duration.millisecondsPerDay) {
+    // 展示: 年/月/日
+    return '${dt.year}/${twoDigits(dt.month)}/${twoDigits(dt.day)}';
+  } else if (bar.milliseconds >= Duration.millisecondsPerMinute) {
+    // 展示: 月/日 时:分
+    return '${twoDigits(dt.month)}/${twoDigits(dt.day)} ${twoDigits(dt.hour)}:${twoDigits(dt.minute)}';
+  } else {
+    // 展示: 时:分:秒
+    return '${twoDigits(dt.hour)}:${twoDigits(dt.minute)}:${twoDigits(dt.second)}';
+  }
+}
+
+String twoDigits(int n) {
+  if (n >= 10) return "$n";
+  return "0$n";
 }

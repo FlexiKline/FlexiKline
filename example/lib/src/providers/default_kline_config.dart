@@ -55,11 +55,13 @@ class DefaultFlexiKlineTheme extends BaseFlexiKlineTheme
           tooltipBg: theme.markBg,
           countDownTextBg: theme.markBg,
           crossTextBg: theme.lightBg,
+          drawTextBg: Colors.blue,
           transparent: theme.transparent,
           lastPriceTextBg: theme.translucentBg,
           gridLine: theme.gridLine,
-          crosshair: theme.t1,
-          priceMarkLine: theme.t1,
+          crossColor: theme.t1,
+          drawColor: Colors.lightBlue,
+          markLine: theme.t1,
           themeColor: theme.themeColor,
           textColor: theme.t1,
           tickTextColor: theme.t2,
@@ -150,6 +152,11 @@ class DefaultFlexiKlineConfiguration with FlexiKlineThemeConfigurationMixin {
   }
 
   @override
+  FlexiKlineConfig genFlexiKlineConfig(DefaultFlexiKlineTheme theme) {
+    return super.genFlexiKlineConfig(theme)..sub.add(macdKey);
+  }
+
+  @override
   void saveFlexiKlineConfig(FlexiKlineConfig config) {
     final jsonSrc = jsonEncode(config);
     CacheUtil().setString(config.key, jsonSrc);
@@ -164,7 +171,7 @@ class DefaultFlexiKlineConfiguration with FlexiKlineThemeConfigurationMixin {
             spacing: 1.r,
             line: LineConfig(
               type: LineType.dashed,
-              color: theme.priceMarkLine,
+              color: theme.markLine,
               width: 0.5.r,
               dashes: [3, 3],
             ),

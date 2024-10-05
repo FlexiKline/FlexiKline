@@ -273,7 +273,7 @@ class _BitKlinePageState extends ConsumerState<BitKlinePage>
       TooltipInfo(
         label: s.tooltipTime,
         labelStyle: lableStyle,
-        value: current.formatDateTimeByTimeBar(req.timeBar),
+        value: current.formatDateTime(req.timeBar),
         valueStyle: valueStyle,
       ),
       TooltipInfo(

@@ -139,6 +139,29 @@ mixin SettingBinding on KlineBindingBase
     return settingConfig.mainRect;
   }
 
+  /// TimeIndicator区域大小
+  @override
+  Rect get timeRect {
+    Rect? rect = indicatorsConfig.time.paintObject?.chartRect;
+    if (rect != null) return rect;
+    final subRect = this.subRect;
+    if (indicatorsConfig.time.position == DrawPosition.middle) {
+      return Rect.fromLTWH(
+        subRect.left,
+        subRect.top,
+        subRect.width,
+        indicatorsConfig.time.height,
+      );
+    } else {
+      return Rect.fromLTWH(
+        subRect.left,
+        subRect.bottom - indicatorsConfig.time.height,
+        subRect.width,
+        indicatorsConfig.time.height,
+      );
+    }
+  }
+
   /// 主区域最小宽高
   Size get mainMinSize => settingConfig.mainMinSize;
 

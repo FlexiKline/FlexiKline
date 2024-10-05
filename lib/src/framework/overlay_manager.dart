@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:ui';
-
 import '../core/interface.dart';
 import '../model/candle_req/candle_req.dart';
 import '../overlay/export.dart';
@@ -135,23 +133,25 @@ final class OverlayManager with KlineLog {
     return _overlayList.remove(overlay);
   }
 
-  Overlay? hitTestOverlay(IDrawContext context, Offset position) {
-    assert(position.isFinite, 'hitTestOverlay($position) position is invalid!');
-    for (var overlay in _overlayList) {
-      if (overlay.object?.hitTest(context, position) == true) {
-        return overlay;
-      }
-    }
-    return null;
-  }
+  // @Deprecated('')
+  // Overlay? hitTestOverlay(IDrawContext context, Offset position) {
+  //   assert(position.isFinite, 'hitTestOverlay($position) position is invalid!');
+  //   for (var overlay in _overlayList) {
+  //     if (overlay.object?.hitTest(context, position) == true) {
+  //       return overlay;
+  //     }
+  //   }
+  //   return null;
+  // }
 
-  void drawOverlayList(IDrawContext context, Canvas canvas, Size size) {
-    DrawObject? object;
-    for (var overlay in _overlayList) {
-      object = getDrawObject(overlay);
-      if (object != null) {
-        object.draw(context, canvas, size);
-      }
-    }
-  }
+  // @Deprecated('')
+  // void drawOverlayList(IDrawContext context, Canvas canvas, Size size) {
+  //   DrawObject? object;
+  //   for (var overlay in _overlayList) {
+  //     object = getDrawObject(overlay);
+  //     if (object != null) {
+  //       object.draw(context, canvas, size);
+  //     }
+  //   }
+  // }
 }

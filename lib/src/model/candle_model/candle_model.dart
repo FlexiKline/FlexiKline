@@ -180,20 +180,8 @@ extension CandleModelExt on CandleModel {
     return DateTime.fromMillisecondsSinceEpoch(ts);
   }
 
-  String formatDateTimeByTimeBar(TimeBar? bar) {
-    final dt = dateTime;
-    if (bar == null) {
-      return '${dt.year}/${twoDigits(dt.month)}/${twoDigits(dt.day)} ${twoDigits(dt.hour)}:${twoDigits(dt.minute)}:${twoDigits(dt.second)}';
-    } else if (bar.milliseconds >= Duration.millisecondsPerDay) {
-      // 展示: 年/月/日
-      return '${dt.year}/${twoDigits(dt.month)}/${twoDigits(dt.day)}';
-    } else if (bar.milliseconds >= Duration.millisecondsPerMinute) {
-      // 展示: 月/日 时:分
-      return '${twoDigits(dt.month)}/${twoDigits(dt.day)} ${twoDigits(dt.hour)}:${twoDigits(dt.minute)}';
-    } else {
-      // 展示: 时:分:秒
-      return '${twoDigits(dt.hour)}:${twoDigits(dt.minute)}:${twoDigits(dt.second)}';
-    }
+  String formatDateTime(TimeBar? bar) {
+    return formatDateTimeByTimeBar(ts, bar: bar);
   }
 
   DateTime? nextUpdateDateTime(String bar) {

@@ -65,6 +65,9 @@ class TestFlexiKlineTheme implements IFlexiKlineTheme {
   Color crossTextBg = const Color(0xFF111111);
 
   @override
+  Color drawTextBg = Colors.blue;
+
+  @override
   Color transparent = Colors.transparent;
 
   @override
@@ -74,10 +77,13 @@ class TestFlexiKlineTheme implements IFlexiKlineTheme {
   Color gridLine = const Color(0xffE9EDF0);
 
   @override
-  Color crosshair = const Color(0xFF000000);
+  Color crossColor = const Color(0xFF000000);
 
   @override
-  Color priceMarkLine = const Color(0xFF000000);
+  Color get drawColor => Colors.blueAccent;
+
+  @override
+  Color markLine = const Color(0xFF000000);
 
   @override
   Color get themeColor => Colors.white;
@@ -96,9 +102,6 @@ class TestFlexiKlineTheme implements IFlexiKlineTheme {
 
   @override
   Color tooltipTextColor = const Color(0xFF949494);
-
-  @override
-  Color get drawColor => Colors.blueAccent;
 }
 
 class TestFlexiKlineConfiguration with FlexiKlineThemeConfigurationMixin {

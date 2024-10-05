@@ -98,7 +98,7 @@ class TimePaintObject<T extends TimeIndicator> extends SinglePaintObjectBox<T> {
             offset.dy + dyCenterOffset,
           ),
           drawDirection: DrawDirection.center,
-          text: model.formatDateTimeByTimeBar(bar),
+          text: model.formatDateTime(bar),
           textConfig: timeTick,
         );
       }
@@ -112,7 +112,7 @@ class TimePaintObject<T extends TimeIndicator> extends SinglePaintObjectBox<T> {
     final timeBar = klineData.timeBar;
     if (model == null || timeBar == null) return;
 
-    final time = model.formatDateTimeByTimeBar(timeBar);
+    final time = model.formatDateTime(timeBar);
     // final time = formatyyMMddHHMMss(model.dateTime);
 
     final tickText = crossConfig.tickText;

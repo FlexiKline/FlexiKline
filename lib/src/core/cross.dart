@@ -394,7 +394,7 @@ mixin CrossBinding
       switch (key) {
         case TooltipLabel.time:
           final timeBar = curKlineData.timeBar;
-          value = model.formatDateTimeByTimeBar(timeBar);
+          value = model.formatDateTime(timeBar);
           break;
         case TooltipLabel.open:
           value = formatPrice(model.o, precision: p);

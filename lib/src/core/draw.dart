@@ -159,18 +159,27 @@ mixin DrawBinding
   bool onDrawMoveStart(GestureData data) {
     if (!drawState.isEditing) return false; // 未完成的暂不允许移动
     final overlay = drawState.overlay!;
+    final object = _overlayManager.getDrawObject(overlay);
+    if (object == null) {
+      assert(() {
+        loge('onDrawMoveStart Failed to create Object for ${overlay.type}');
+        return true;
+      }());
+      return false;
+    }
 
     final position = data.offset;
-    logd('onDrawMoveStart draw position:$position');
     // 检查是否在某个绘制点上
-    final point = overlay.object?.hitTestPoint(this, position);
+    final point = object.hitTestPoint(this, position);
     if (point != null) {
-      logd('>>> onDrawMoveStart index:${point.index} point:$point');
+      logd('onDrawMoveStart index:${point.index} point:$point');
       overlay.setPointer(point);
+      overlay.setMoveing(true);
       return true;
-    } else if (overlay.object?.hitTest(this, position) == true) {
+    } else if (object.hitTest(this, position) == true) {
       // 检查当前焦点是否命中Overlay
       overlay.setPointer(null);
+      overlay.setMoveing(true);
       return true;
     }
 
@@ -201,7 +210,7 @@ mixin DrawBinding
 
     final pointer = overlay.pointer;
     if (pointer != null) {
-      logd('>>> onDrawMoveEnd index:${pointer.index} point:$pointer');
+      logd('onDrawMoveEnd index:${pointer.index} point:$pointer');
       overlay.confirmPointer();
     }
     for (var point in overlay.points) {
@@ -209,6 +218,7 @@ mixin DrawBinding
         updatePointByOffset(point);
       }
     }
+    overlay.setMoveing(false);
     _markRepaint();
   }
 
@@ -339,11 +349,16 @@ mixin DrawBinding
     return true;
   }
 
+  /// 测试[position]位置上是否有命中的Overly.
   @override
   Overlay? hitTestOverlay(Offset position) {
-    // 测试[position]位置上是否有命中的Overly.
-    Overlay? ret = _overlayManager.hitTestOverlay(this, position);
-    return ret;
+    assert(position.isFinite, 'hitTestOverlay($position) position is invalid!');
+    for (var overlay in _overlayManager.overlayList) {
+      if (overlay.object?.hitTest(this, position) == true) {
+        return overlay;
+      }
+    }
+    return null;
   }
 
   /// 绘制Draw图层
@@ -379,15 +394,49 @@ mixin DrawBinding
   void drawStateOverlay(Canvas canvas, Size size) {
     final overlay = drawState.overlay;
     if (overlay == null) return;
+    final object = _overlayManager.getDrawObject(overlay);
+    if (object == null) {
+      assert(() {
+        loge('drawStateOverlay Failed to create Object for ${overlay.type}');
+        return true;
+      }());
+      return;
+    }
 
     if (drawState is Editing && overlay.isEditing) {
-      final object = _overlayManager.getDrawObject(overlay);
+      object.draw(this, canvas, size);
       // 绘制编辑状态的overlay的points为圆圈.
-      object?.drawPointsAsCircles(canvas, config.drawPoint);
-      object?.draw(this, canvas, size);
+      object.drawPoints(
+        this,
+        canvas,
+        isMoving: overlay.moving,
+      );
     } else if (drawState is Drawing && overlay.isDrawing) {
-      overlay.object ??= _overlayManager.createDrawObject(overlay);
-      overlay.object?.drawing(this, canvas, size);
+      object.drawing(this, canvas, size);
     }
+  }
+
+  /// 绘制当前编辑/绘制中的Overlay的刻度
+  void drawStateTick(Canvas canvas, Size size) {
+    final overlay = drawState.overlay;
+    if (overlay == null) return;
+    final object = _overlayManager.getDrawObject(overlay);
+    if (object == null) {
+      assert(() {
+        loge('drawStateTick Failed to create Object for ${overlay.type}');
+        return true;
+      }());
+      return;
+    }
+
+    /// 计算刻度坐标
+    Rect? coord = object.pointsArea;
+    if (coord == null) {
+      logd('drawStateTick not draw point!');
+      return;
+    }
+
+    // logd('drawStateTick coord:$coord');
+    object.drawTick(this, canvas, coord);
   }
 }

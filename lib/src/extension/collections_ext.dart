@@ -38,6 +38,74 @@ extension ListExt<T> on List<T> {
     }
     return false;
   }
+
+  /// Takes an action for each element.
+  ///
+  /// Calls [action] for each element along with the index in the
+  /// iteration order.
+  void forEachIndexed(void Function(int index, T element) action) {
+    var index = 0;
+    for (var element in this) {
+      action(index++, element);
+    }
+  }
+
+  /// Maps each element and its index to a new value.
+  Iterable<R> mapIndexed<R>(R Function(int index, T element) convert) sync* {
+    var index = 0;
+    for (var element in this) {
+      yield convert(index++, element);
+    }
+  }
+
+  /// The elements whose value and index satisfies [test].
+  Iterable<T> whereIndexed(bool Function(int index, T element) test) sync* {
+    var index = 0;
+    for (var element in this) {
+      if (test(index++, element)) yield element;
+    }
+  }
+
+  /// Combine the elements with each other and the current index.
+  ///
+  /// Calls [combine] for each element except the first.
+  /// The call passes the index of the current element, the result of the
+  /// previous call, or the first element for the first call, and
+  /// the current element.
+  ///
+  /// Returns the result of the last call, or the first element if
+  /// there is only one element.
+  /// There must be at least one element.
+  T reduceIndexed(T Function(int index, T previous, T element) combine) {
+    var iterator = this.iterator;
+    if (!iterator.moveNext()) {
+      throw StateError('no elements');
+    }
+    var index = 1;
+    var result = iterator.current;
+    while (iterator.moveNext()) {
+      result = combine(index++, result, iterator.current);
+    }
+    return result;
+  }
+
+  /// Combine the elements with a value and the current index.
+  ///
+  /// Calls [combine] for each element with the current index,
+  /// the result of the previous call, or [initialValue] for the first element,
+  /// and the current element.
+  ///
+  /// Returns the result of the last call to [combine],
+  /// or [initialValue] if there are no elements.
+  R foldIndexed<R>(
+      R initialValue, R Function(int index, R previous, T element) combine) {
+    var result = initialValue;
+    var index = 0;
+    for (var element in this) {
+      result = combine(index++, result, element);
+    }
+    return result;
+  }
 }
 
 extension MapExt<K, V> on Map<K, V> {

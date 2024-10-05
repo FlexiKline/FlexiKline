@@ -89,11 +89,13 @@ abstract class BaseFlexiKlineTheme implements IFlexiKlineTheme {
     required this.tooltipBg,
     required this.countDownTextBg,
     required this.crossTextBg,
+    required this.drawTextBg,
     this.transparent = Colors.transparent,
     required this.lastPriceTextBg,
     required this.gridLine,
-    required this.crosshair,
-    required this.priceMarkLine,
+    required this.crossColor,
+    required this.drawColor,
+    required this.markLine,
     required this.themeColor,
     required this.textColor,
     required this.tickTextColor,
@@ -116,8 +118,8 @@ abstract class BaseFlexiKlineTheme implements IFlexiKlineTheme {
     required this.crossTextColor,
   })  : tooltipBg = markBg,
         countDownTextBg = markBg,
-        crosshair = color,
-        priceMarkLine = color,
+        crossColor = color,
+        markLine = color,
         textColor = color,
         lastPriceTextColor = color,
         tooltipTextColor = color;
@@ -137,6 +139,8 @@ abstract class BaseFlexiKlineTheme implements IFlexiKlineTheme {
   @override
   late Color crossTextBg;
   @override
+  late Color drawTextBg;
+  @override
   late Color transparent;
   @override
   late Color lastPriceTextBg;
@@ -145,9 +149,11 @@ abstract class BaseFlexiKlineTheme implements IFlexiKlineTheme {
   @override
   late Color gridLine;
   @override
-  late Color crosshair;
+  late Color crossColor;
   @override
-  late Color priceMarkLine;
+  late Color drawColor;
+  @override
+  late Color markLine;
 
   @override
   late Color themeColor;
@@ -288,16 +294,16 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       enable: true,
       crosshair: LineConfig(
         width: 0.5 * theme.scale,
-        color: theme.crosshair,
+        color: theme.crossColor,
         type: LineType.dashed,
         dashes: const [3, 3],
       ),
       crosspoint: PointConfig(
         radius: 2 * theme.scale,
         width: 0 * theme.scale,
-        color: theme.crosshair,
+        color: theme.crossColor,
         borderWidth: 2 * theme.scale,
-        borderColor: theme.crosshair.withOpacity(0.5),
+        borderColor: theme.crossColor.withOpacity(0.5),
       ),
       tickText: TextAreaConfig(
         style: TextStyle(
@@ -349,12 +355,12 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       ),
       tickText: TextAreaConfig(
         style: TextStyle(
-          color: theme.tickTextColor,
+          color: const Color(0xFFFFFFFF),
           fontSize: theme.normalTextSize,
           fontWeight: FontWeight.normal,
           height: defaultTextHeight,
         ),
-        background: theme.crossTextBg,
+        background: theme.drawTextBg,
         padding: EdgeInsets.all(2 * theme.scale),
         border: BorderSide.none,
         borderRadius: BorderRadius.all(
@@ -423,7 +429,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
         spacing: 2 * theme.scale,
         line: LineConfig(
           type: LineType.solid,
-          color: theme.priceMarkLine,
+          color: theme.markLine,
           length: 20 * theme.scale,
           width: 0.5 * theme.scale,
         ),
@@ -440,7 +446,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
         spacing: 2 * theme.scale,
         line: LineConfig(
           type: LineType.solid,
-          color: theme.priceMarkLine,
+          color: theme.markLine,
           length: 20 * theme.scale,
           width: 0.5 * theme.scale,
         ),
@@ -458,7 +464,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
         spacing: 1 * theme.scale,
         line: LineConfig(
           type: LineType.dashed,
-          color: theme.priceMarkLine,
+          color: theme.markLine,
           width: 0.5 * theme.scale,
           dashes: [3, 3],
         ),
@@ -484,7 +490,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
         spacing: 1 * theme.scale,
         line: LineConfig(
           type: LineType.dashed,
-          color: theme.priceMarkLine,
+          color: theme.markLine,
           width: 0.5 * theme.scale,
           dashes: [3, 3],
         ),

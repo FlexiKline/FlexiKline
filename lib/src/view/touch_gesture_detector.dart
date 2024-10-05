@@ -116,7 +116,11 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
   /// 原始移动
   /// 当原始移动时, 当前如果正处在crossing或drawing中时, 发生冲突, 清理手势竞技场, 响应Cross/Draw指针平移事件
   void onPointerMove(PointerMoveEvent event) {
-    if (drawState.isDrawing) {
+    if (drawState.isOngoing) {
+      if (drawState.isEditing) {
+        /// 已完成的移动, 通过[_panScaleData]或[_longData]实现
+        return;
+      }
       final pointer = drawState.pointer;
       if (pointer != null) {
         if (!isSweeped) {
@@ -132,10 +136,10 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
 
         if (_tapData == null) return;
         Offset newOffset = _tapData!.offset + event.delta;
-        final mainRect = controller.mainRect;
-        if (!mainRect.include(newOffset)) {
-          newOffset = newOffset.clamp(mainRect);
-        }
+        // final mainRect = controller.mainRect;
+        // if (!mainRect.include(newOffset)) {
+        //   newOffset = newOffset.clamp(mainRect);
+        // }
         controller.onDrawUpdate(_tapData!..update(newOffset));
       }
     } else if (controller.isCrossing) {
@@ -207,9 +211,22 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
       return;
     }
 
-    if (drawState.isOngoing) return;
-
-    if (_panScaleData?.isScale == true || details.pointerCount > 1) {
+    if (drawState.isOngoing) {
+      if (drawState.isDrawing) {
+        // 未完成的暂不允许移动
+        return;
+      }
+      assert(() {
+        logd("onScaleStart draw > details:$details");
+        return true;
+      }());
+      _panScaleData = GestureData.pan(details.localFocalPoint);
+      final result = controller.onDrawMoveStart(_panScaleData!);
+      if (!result) {
+        _panScaleData?.end();
+        _panScaleData = null;
+      }
+    } else if (_panScaleData?.isScale == true || details.pointerCount > 1) {
       ScalePosition position =
           _panScaleData?.initPosition ?? gestureConfig.scalePosition;
       if (position == ScalePosition.auto) {
@@ -246,9 +263,15 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
       return;
     }
 
-    if (drawState.isOngoing) return;
-
-    if (_panScaleData!.isPan) {
+    if (drawState.isOngoing) {
+      if (_panScaleData!.isPan) {
+        _panScaleData!.update(
+          details.localFocalPoint,
+          newScale: details.scale,
+        );
+        controller.onDrawMoveUpdate(_panScaleData!);
+      }
+    } else if (_panScaleData!.isPan) {
       _panScaleData!.update(
         details.localFocalPoint.clamp(controller.canvasRect),
         newScale: details.scale,
@@ -277,6 +300,15 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
       return;
     }
 
+    if (drawState.isOngoing) {
+      if (_panScaleData!.isPan) {
+        controller.onDrawMoveEnd();
+      }
+      _panScaleData?.end();
+      _panScaleData = null;
+      return;
+    }
+
     if (_panScaleData!.isScale) {
       logd("onScaleEnd scale. ${details.pointerCount}");
       if (details.pointerCount <= 0) {
@@ -295,8 +327,6 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
       controller.checkAndLoadMoreCandlesWhenPanEnd();
       return;
     }
-
-    if (drawState.isOngoing) return;
 
     // <0: 负数代表从右向左滑动.
     // >0: 正数代表从左向右滑动.

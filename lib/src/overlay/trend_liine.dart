@@ -19,7 +19,7 @@ import '../extension/render/draw_path.dart';
 import '../framework/overlay.dart';
 
 class TrendLineDrawObject extends DrawObject {
-  const TrendLineDrawObject(super.overlay);
+  TrendLineDrawObject(super.overlay);
 
   @override
   void draw(IDrawContext context, Canvas canvas, Size size) {

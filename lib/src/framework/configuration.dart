@@ -49,14 +49,15 @@ abstract interface class IFlexiKlineTheme {
   Color get tooltipBg;
   Color get countDownTextBg;
   Color get crossTextBg;
+  Color get drawTextBg;
   Color get transparent;
   Color get lastPriceTextBg;
 
   /// 分隔线
   Color get gridLine;
-  Color get crosshair;
+  Color get crossColor;
   Color get drawColor;
-  Color get priceMarkLine;
+  Color get markLine;
 
   /// 主题色
   Color get themeColor;

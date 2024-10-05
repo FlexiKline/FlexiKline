@@ -339,6 +339,8 @@ class DrawPainter extends CustomPainter {
     } finally {
       canvas.restore();
     }
+
+    controller.drawStateTick(canvas, size);
   }
 
   @override

@@ -43,6 +43,15 @@ extension RectExt on Rect {
   Rect shiftYAxis(double height) {
     return Rect.fromLTRB(left, math.min(top + height, bottom), right, bottom);
   }
+
+  Rect clampRect(Rect rect) {
+    return Rect.fromLTRB(
+      left.clamp(rect.left, rect.right),
+      top.clamp(rect.top, rect.bottom),
+      right.clamp(rect.left, rect.right),
+      bottom.clamp(rect.top, rect.bottom),
+    );
+  }
 }
 
 extension OffsetExt on Offset {

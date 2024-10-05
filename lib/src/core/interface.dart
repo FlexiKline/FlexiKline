@@ -166,6 +166,9 @@ abstract interface class ISetting {
   /// 副区Size
   Rect get subRect;
 
+  /// TimeIndicator区域大小
+  Rect get timeRect;
+
   /// 计算[slot]位置指标的Top坐标
   double calculateIndicatorTop(int slot);
 
@@ -293,8 +296,16 @@ abstract interface class IDraw {
 
 /// DrawContext 绘制Overlay功能集合
 abstract interface class IDrawContext implements ILogger {
+  /// 画板Size = [mainRect] + [subRect]
+  Rect get canvasRect;
+
   /// 主区Size
   Rect get mainRect;
+
+  /// TimeIndicator区域大小
+  Rect get timeRect;
+
+  KlineData get curKlineData;
 
   /// DrawConfig
   DrawConfig get config;

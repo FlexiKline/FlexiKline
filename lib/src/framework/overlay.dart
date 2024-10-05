@@ -17,12 +17,13 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 
 import '../core/interface.dart';
-import '../extension/render/draw_circle.dart';
-import '../extension/render/draw_path.dart';
+import '../data/kline_data.dart';
+import '../extension/export.dart';
 import '../config/line_config/line_config.dart';
-import '../config/point_config/point_config.dart';
 import '../model/bag_num.dart';
 import '../model/range.dart';
+import '../utils/date_time.dart';
+import '../utils/decimal_format_util.dart';
 import '../utils/vector_util.dart';
 import 'common.dart';
 
@@ -83,7 +84,6 @@ class Point {
 /// [type] 绘制类型
 /// [zIndex] Overlay绘制顺序
 /// [lock] 是否锁定
-/// [visible] 是否单独隐藏
 /// [mode] 磁吸模式
 /// [steps] 指定Overlay需要几个点来完成绘制操作, 决定points的数量
 /// [line] Overlay绘制时线配置
@@ -93,7 +93,6 @@ class Overlay implements Comparable<Overlay> {
     required this.type,
     this.zIndex = 0,
     this.lock = false,
-    this.visible = true,
     this.mode = MagnetMode.normal,
 
     /// 绘制线配置, 默认值:drawConfig.drawLine
@@ -106,7 +105,6 @@ class Overlay implements Comparable<Overlay> {
   final IDrawType type;
   int zIndex;
   bool lock;
-  bool visible;
   MagnetMode mode;
   LineConfig line;
 
@@ -115,6 +113,10 @@ class Overlay implements Comparable<Overlay> {
   /// 当前指针位置
   Point? _pointer;
   Point? get pointer => _pointer;
+
+  /// 当前overlay是否在移动中
+  bool _moving = false;
+  bool get moving => _moving;
 
   DrawObject? object;
 
@@ -161,6 +163,29 @@ class Overlay implements Comparable<Overlay> {
     return null;
   }
 
+  /// 获取所有Point包括pointer.
+  Iterable<Point?> get allPoints {
+    final pointer = this.pointer;
+    if (pointer == null) return points;
+    return points.mapIndexed((index, point) {
+      if (index == pointer.index) return pointer;
+      return point;
+    });
+  }
+
+  /// 由所有point构成的区域.
+  Rect? get pointsArea {
+    Offset? pre, offset;
+    Rect? coord;
+    for (var point in allPoints) {
+      offset = point?.offset;
+      if (offset == null || offset.isInfinite) continue;
+      coord = Rect.fromPoints(pre ?? offset, offset);
+      pre = offset;
+    }
+    return coord;
+  }
+
   /// 添加指针[p]到[points]中, 并准备下一个指针
   void addPointer(Point p) {
     final index = p.index;
@@ -182,6 +207,7 @@ class Overlay implements Comparable<Overlay> {
     assert(points[index] != null, 'The points[$index] is not empyt!');
     points[index] = pointer;
     _pointer = null;
+    _moving = false;
   }
 
   void setPointer(Point? p) {
@@ -190,6 +216,10 @@ class Overlay implements Comparable<Overlay> {
     } else {
       _pointer = null;
     }
+  }
+
+  void setMoveing(bool isMoving) {
+    _moving = isMoving;
   }
 
   @mustCallSuper
@@ -241,29 +271,18 @@ class OverlayObject {
   IDrawType get type => _overlay.type;
   int get zIndex => _overlay.zIndex;
   bool get lock => _overlay.lock;
-  bool get visible => _overlay.visible;
+  bool get moving => _overlay.moving;
   MagnetMode get mode => _overlay.mode;
   LineConfig get line => _overlay.line;
-  Iterable<Point?> get points => _overlay.points;
-  // Iterable<Point?> get points {
-  //   if (_overlay.pointer == null) return _overlay.points;
-  //   int index = 0;
-  //   return _overlay.points.map((point) {
-  //     // 如果当前指针与point的index相等(编辑状态)或者与points中的位置相等(绘制状态), 则使用pointer数据.
-  //     if (point == _overlay.pointer || index == _overlay.pointer?.index) {
-  //       return _overlay.pointer;
-  //     }
-  //     index++;
-  //     return point;
-  //   });
-  // }
-
+  List<Point?> get points => _overlay.points;
+  Iterable<Point?> get allPoints => _overlay.allPoints;
+  Rect? get pointsArea => _overlay.pointsArea;
   Point? get pointer => _overlay.pointer;
 }
 
 abstract class DrawObject<T extends Overlay> extends OverlayObject
     with DrawObjectMixin {
-  const DrawObject(super.overlay);
+  DrawObject(super.overlay);
 
   /// 初始化所有绘制点坐标
   bool initPoint(IDrawContext context) {
@@ -318,6 +337,102 @@ abstract class DrawObject<T extends Overlay> extends OverlayObject
     return false;
   }
 
+  Size? __valueTickSize;
+  Size? get valueTickSize => __valueTickSize;
+  set _valueTickSize(Size size) {
+    if (__valueTickSize != null) {
+      if (size.width < __valueTickSize!.width) {
+        __valueTickSize = size;
+      }
+    } else {
+      __valueTickSize = size;
+    }
+  }
+
+  /// 绘制刻度
+  void drawTick(
+    IDrawContext context,
+    Canvas canvas,
+    Rect coord,
+  ) {
+    final mainRect = context.mainRect;
+    final timeRect = context.timeRect;
+    final tickText = context.config.tickText;
+
+    /// 绘制时间刻度
+    if (coord.width > 0) {
+      // 绘制left到right刻度之间的背景
+      canvas.drawRect(
+        Rect.fromLTRB(
+          coord.left,
+          timeRect.top,
+          coord.right,
+          timeRect.top + tickText.areaHeight,
+        ),
+        context.config.gapBgPaint,
+      );
+
+      drawTimeTick(
+        context,
+        canvas,
+        coord.left,
+        drawableRect: timeRect,
+      );
+
+      drawTimeTick(
+        context,
+        canvas,
+        coord.right,
+        drawableRect: timeRect,
+      );
+    } else {
+      drawTimeTick(
+        context,
+        canvas,
+        coord.left,
+        drawableRect: timeRect,
+      );
+    }
+
+    /// 绘制价值刻度
+    if (coord.height > 0) {
+      // 绘制top到bottom刻度之间的背景
+      final txtWidth = valueTickSize?.width ?? 0;
+      if (txtWidth > 0) {
+        canvas.drawRect(
+          Rect.fromLTRB(
+            mainRect.right - context.config.spacing - txtWidth,
+            coord.top.clamp(mainRect.top, mainRect.bottom),
+            mainRect.right - context.config.spacing,
+            coord.bottom.clamp(mainRect.top, mainRect.bottom),
+          ),
+          context.config.gapBgPaint,
+        );
+      }
+
+      _valueTickSize = drawValueTick(
+        context,
+        canvas,
+        coord.top,
+        drawableRect: mainRect,
+      );
+
+      _valueTickSize = drawValueTick(
+        context,
+        canvas,
+        coord.bottom,
+        drawableRect: mainRect,
+      );
+    } else {
+      _valueTickSize = drawValueTick(
+        context,
+        canvas,
+        coord.top,
+        drawableRect: mainRect,
+      );
+    }
+  }
+
   /// 构建Overlay
   void drawing(IDrawContext context, Canvas canvas, Size size) {
     final config = context.config;
@@ -355,11 +470,18 @@ abstract class DrawObject<T extends Overlay> extends OverlayObject
 }
 
 mixin DrawObjectMixin on OverlayObject {
-  /// 绘制[points]中所有点为圆圈, 使用[pointConfig]作为配置
-  void drawPointsAsCircles(Canvas canvas, PointConfig pointConfig) {
+  /// 绘制[points]中所有点.
+  void drawPoints(
+    IDrawContext context,
+    Canvas canvas, {
+    bool isMoving = false,
+  }) {
     for (var point in points) {
-      if (point?.offset != null) {
-        canvas.drawCirclePoint(point!.offset, pointConfig);
+      if (point == null) continue;
+      if (point == pointer || point.index == pointer?.index) {
+        canvas.drawCirclePoint(point.offset, context.config.crosspoint);
+      } else if (point.offset.isFinite) {
+        canvas.drawCirclePoint(point.offset, context.config.drawPoint);
       }
     }
   }
@@ -396,5 +518,71 @@ mixin DrawObjectMixin on OverlayObject {
       );
     }
     canvas.drawCirclePoint(pointer, config.crosspoint);
+  }
+
+  /// 在[drawableRect]区域上, 绘制由[dx]指定的时间刻度
+  Size drawTimeTick(
+    IDrawContext context,
+    Canvas canvas,
+    double dx, {
+    Rect? drawableRect,
+  }) {
+    // TODO: 此处考虑直接从dx转换为ts
+    int? index = context.dxToIndex(dx);
+    if (index == null) return Size.zero;
+
+    final klineData = context.curKlineData;
+    final ts = klineData.indexToTimestamp(index);
+    if (ts == null) return Size.zero;
+
+    final timeTxt = formatDateTimeByTimeBar(ts, bar: klineData.timeBar);
+
+    drawableRect ??= context.timeRect;
+    return canvas.drawTextArea(
+      offset: Offset(
+        dx,
+        drawableRect.top,
+      ),
+      text: timeTxt,
+      textConfig: context.config.tickText,
+      drawDirection: DrawDirection.center,
+      // drawableRect: drawableRect,
+    );
+  }
+
+  /// 在[drawableRect]区域的右侧, 绘制由[dy]指定的价值刻度
+  Size drawValueTick(
+    IDrawContext context,
+    Canvas canvas,
+    double dy, {
+    Rect? drawableRect,
+  }) {
+    final value = context.dyToValue(dy);
+    if (value == null) return Size.zero;
+
+    // TODO: 此处考虑与[CandlePaintObject].formatMarkValueOnCross保持统一.
+    final valTxt = formatNumber(
+      value.toDecimal(),
+      precision: context.curKlineData.precision,
+      defIfZero: '0.00',
+    );
+
+    final txtSpacing = context.config.spacing;
+    final tickText = context.config.tickText;
+    final centerOffset = tickText.areaHeight / 2;
+    drawableRect ??= context.mainRect;
+    return canvas.drawTextArea(
+      offset: Offset(
+        drawableRect.right - txtSpacing,
+        (dy - centerOffset).clamp(
+          drawableRect.top,
+          drawableRect.bottom - centerOffset,
+        ),
+      ),
+      text: valTxt,
+      textConfig: tickText,
+      drawDirection: DrawDirection.rtl,
+      drawableRect: drawableRect,
+    );
   }
 }

@@ -21,7 +21,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../config.dart';
 import '../providers/default_kline_config.dart';
 import '../providers/instruments_provider.dart';
-import '../theme/flexi_theme.dart';
 
 class DoubleKlinePage extends ConsumerStatefulWidget {
   const DoubleKlinePage({
@@ -91,7 +90,6 @@ class _DoubleKlinePageState extends ConsumerState<DoubleKlinePage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = ref.watch(themeProvider);
     ref.listen(defaultKlineThemeProvider, (previous, next) {
       if (previous != next) {
         final config = configuration.getFlexiKlineConfig(next);

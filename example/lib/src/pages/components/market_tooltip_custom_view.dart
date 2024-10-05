@@ -50,6 +50,14 @@ class MarketTooltipCustomView extends ConsumerWidget {
     final s = S.of(context);
     final theme = ref.watch(themeProvider);
     final changeRate = data?.changeRate;
+    final confirm = data?.confirm;
+    // 判断振幅是否暂存到candle的confirm中, 如果是则使用.
+    final range = confirm != null &&
+            confirm.isNotEmpty &&
+            confirm != '1' &&
+            confirm != '0'
+        ? formatPercentage(parseDouble(data?.confirm))
+        : formatPrice(data?.range, precision: p);
     Color rateColor;
     Color? marketBg;
     if (changeRate == null || changeRate == 0) {
@@ -113,7 +121,7 @@ class MarketTooltipCustomView extends ConsumerWidget {
                       maxLines: 1,
                     ),
                     Text(
-                      formatPercentage(parseDouble(data?.confirm)),
+                      range,
                       style: TextStyle(
                         fontSize: 10.sp,
                         color: rateColor,

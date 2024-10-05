@@ -61,7 +61,13 @@ abstract class BaseBitFlexiKlineTheme
   Color transparent = Colors.transparent;
 
   @override
-  Color crosshair = const Color(0xFFF6A701);
+  Color crossColor = const Color(0xFFF6A701);
+
+  @override
+  Color get drawColor => Colors.lightBlue;
+
+  @override
+  Color get drawTextBg => Colors.blue;
 }
 
 class BitFlexiKlineLightTheme extends BaseBitFlexiKlineTheme {
@@ -87,7 +93,7 @@ class BitFlexiKlineLightTheme extends BaseBitFlexiKlineTheme {
   Color get gridLine => const Color(0xFFE9E9E9);
 
   @override
-  Color get priceMarkLine => textColor;
+  Color get markLine => textColor;
 
   @override
   Color get themeColor => Colors.white;
@@ -134,7 +140,7 @@ class BitFlexiKlineDarkTheme extends BaseBitFlexiKlineTheme {
   Color gridLine = const Color(0xFF222222);
 
   @override
-  Color priceMarkLine = const Color(0xFFA0A0A0);
+  Color markLine = const Color(0xFFA0A0A0);
 
   @override
   Color get themeColor => Colors.black;
@@ -209,7 +215,7 @@ class BitFlexiKlineConfiguration with FlexiKlineThemeConfigurationMixin {
   LoadingConfig genInnerLoadingConfig(BaseBitFlexiKlineTheme theme) {
     return super.genInnerLoadingConfig(theme).copyWith(
           background: theme.countDownTextBg,
-          valueColor: theme.crosshair,
+          valueColor: theme.crossColor,
         );
   }
 
