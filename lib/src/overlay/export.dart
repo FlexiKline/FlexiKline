@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export './trend_liine.dart';
+export './trend_line.dart';
 export './cross_line.dart';
 export './horizontal_line.dart';
 export './vertical_line.dart';
+export './extended_trend_line.dart';

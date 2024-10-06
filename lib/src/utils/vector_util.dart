@@ -19,7 +19,27 @@ import '../extension/geometry_ext.dart';
 
 double precisionError = 0.000001;
 
+/// 计算点[P]到由[A]与[B]两点组成延长线的距离
+double distancePointToExtendedLine(Offset P, Offset A, Offset B) {
+  final vAB = B - A;
+  final vAP = P - A;
+
+  final dotProduct = vAB.dot(vAP);
+  final lenAB = vAB.length;
+  final lenAG = dotProduct / lenAB;
+  final lenAP = vAP.length;
+  if (lenAP - lenAG < precisionError) {
+    // 锐角情况下, AP与AG相等, 说明点P在点AB上.
+    return 0;
+  }
+
+  // 计算点P在AB上的垂线PG
+  final lenPG = math.sqrt(lenAP * lenAP - lenAG * lenAG);
+  return lenPG;
+}
+
 /// 计算点[P]到由[A]与[B]两点组成线的距离
+/// 注: 如果超出[A]-[B]计算到[A]或[B]的距离
 /// 点积公式: AB∙AP = |AB| × |AP| × cos𝜃 = |AB| × |AG|
 /// 注: AG为AP在AB上投影; PG为P点到AB上的垂线
 /// dotProduct: 为AP与AB上的点积结果
@@ -84,12 +104,17 @@ bool _isExtendPoint(double base, double sign, double p) {
 /// 公式: y = kx + b; x = (y - b) / k;
 /// 斜率: k = (By-Ay) / (Bx-Ax)
 /// 截距: b = By - Bx * k = Ay - Ax * k
-List<Offset> reflectPointsOnRect(Offset A, Offset B, Rect rect) {
+List<Offset> reflectPointsOnRect(
+  Offset A,
+  Offset B,
+  Rect rect, {
+  Comparator<Offset>? compare,
+}) {
   final vAB = B - A;
   final k = vAB.dx == 0 ? 0 : vAB.dy / vAB.dx;
   final b = B.dy - B.dx * k;
 
-  List<Offset> points = [];
+  final points = <Offset>[];
 
   if (rect.include(A)) points.add(A);
   if (rect.include(B)) points.add(B);
@@ -98,8 +123,8 @@ List<Offset> reflectPointsOnRect(Offset A, Offset B, Rect rect) {
 
   /// top
   double dx = k != 0 ? -b / k : B.dx;
-  if (rect.includeDx(dx) && _isExtendPoint(A.dy, dyLen, 0)) {
-    points.add(Offset(dx, 0));
+  if (rect.includeDx(dx) && _isExtendPoint(A.dy, dyLen, rect.top)) {
+    points.add(Offset(dx, rect.top));
   }
 
   /// bottom
@@ -110,8 +135,8 @@ List<Offset> reflectPointsOnRect(Offset A, Offset B, Rect rect) {
 
   /// left
   double dy = b;
-  if (rect.includeDy(dy) && _isExtendPoint(A.dx, dxLen, 0)) {
-    points.add(Offset(0, dy));
+  if (rect.includeDy(dy) && _isExtendPoint(A.dx, dxLen, rect.left)) {
+    points.add(Offset(rect.left, dy));
   }
 
   /// right
@@ -120,7 +145,20 @@ List<Offset> reflectPointsOnRect(Offset A, Offset B, Rect rect) {
     points.add(Offset(rect.right, dy));
   }
 
+  if (compare != null) {
+    return points..sort(compare);
+  }
   return points;
+}
+
+/// 升序(从小到大)
+int ascOrderOffsetCompare(Offset a, Offset b) {
+  return a >= b ? 1 : -1;
+}
+
+/// 降序(从大到小)
+int descOrderOffsetCompare(Offset a, Offset b) {
+  return b >= a ? 1 : -1;
 }
 
 /// 计算点[P]与点[O]组成的线射向[rect]边上的坐标

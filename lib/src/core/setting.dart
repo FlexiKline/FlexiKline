@@ -24,15 +24,6 @@ import '../framework/export.dart';
 import 'binding_base.dart';
 import 'interface.dart';
 
-class _CanvasSizeChanageNotifier extends ValueNotifier<Rect> {
-  _CanvasSizeChanageNotifier(super.value);
-
-  @override
-  void notifyListeners() {
-    super.notifyListeners();
-  }
-}
-
 /// 负责FlexiKline的各种设置与配置的获取.
 mixin SettingBinding on KlineBindingBase
     implements ISetting, IGrid, IChart, ICross, IDraw {
@@ -57,7 +48,7 @@ mixin SettingBinding on KlineBindingBase
 
   /// KlineData整个图表区域大小变化监听器
   final _canvasSizeChangeListener =
-      _CanvasSizeChanageNotifier(defaultCanvasRectMinRect);
+      KlineStateNotifier(defaultCanvasRectMinRect);
   @override
   ValueListenable<Rect> get canvasSizeChangeListener {
     return _canvasSizeChangeListener;
