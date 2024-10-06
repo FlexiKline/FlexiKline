@@ -46,7 +46,9 @@ final class OverlayManager with KlineLog {
   /// DrawType的Overlay对应DrawObject的构建生成器集合
   final Map<IDrawType, DrawObjectBuilder> _overlayBuilders = {
     DrawType.trendLine: TrendLineDrawObject.new,
+    DrawType.crossLine: CrossLineDrawObject.new,
     DrawType.horizontalLine: HorizontalLineDrawObject.new,
+    DrawType.verticalLine: VerticalLineDrawObject.new,
   };
 
   Iterable<IDrawType>? _supportDrawTypes;
@@ -55,7 +57,7 @@ final class OverlayManager with KlineLog {
   }
 
   /// 自定义[IDrawType]构建器
-  void customOverlayDrawObjectBuilder(
+  void registerOverlayDrawObjectBuilder(
     IDrawType type,
     DrawObjectBuilder builder,
   ) {

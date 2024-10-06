@@ -19,8 +19,8 @@ import '../extension/geometry_ext.dart';
 import '../extension/render/draw_path.dart';
 import '../framework/overlay.dart';
 
-class HorizontalLineDrawObject extends DrawObject {
-  HorizontalLineDrawObject(super.overlay);
+class VerticalLineDrawObject extends DrawObject {
+  VerticalLineDrawObject(super.overlay);
 
   @override
   bool hitTest(
@@ -30,12 +30,12 @@ class HorizontalLineDrawObject extends DrawObject {
   }) {
     final point = points.first;
     if (point == null) return false;
-    final dy = point.offset.dy;
+    final dx = point.offset.dx;
     final mainRect = context.mainRect;
-    if (mainRect.includeDy(dy)) {
+    if (mainRect.includeDx(dx)) {
       final distance = position.distanceToLine(
-        Offset(mainRect.left, dy),
-        Offset(mainRect.right, dy),
+        Offset(dx, mainRect.top),
+        Offset(dx, mainRect.bottom),
       );
       if (distance <= context.config.hitTestMinDistance) {
         return true;
@@ -48,7 +48,7 @@ class HorizontalLineDrawObject extends DrawObject {
   void draw(IDrawContext context, Canvas canvas, Size size) {
     assert(
       points.length == 1,
-      'HorizontalLine only takes one point, but it has ${points.length}',
+      'VerticalLine only takes one point, but it has ${points.length}',
     );
     final point = points.first;
     if (point == null) {
@@ -56,9 +56,9 @@ class HorizontalLineDrawObject extends DrawObject {
       return;
     }
     final mainRect = context.mainRect;
-    final dy = point.offset.dy;
-    if (!mainRect.includeDy(dy)) {
-      context.logi('draw($type), but dy:$dy not in mainRect.');
+    final dx = point.offset.dx;
+    if (!mainRect.includeDx(dx)) {
+      context.logi('draw($type), but dx:$dx not in mainRect.');
       return;
     }
 
@@ -66,7 +66,7 @@ class HorizontalLineDrawObject extends DrawObject {
       line.type,
       Path()
         ..addPolygon(
-          [Offset(mainRect.left, dy), Offset(mainRect.right, dy)],
+          [Offset(dx, mainRect.top), Offset(dx, mainRect.bottom)],
           false,
         ),
       line.linePaint,

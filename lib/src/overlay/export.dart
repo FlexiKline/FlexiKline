@@ -13,4 +13,6 @@
 // limitations under the License.
 
 export './trend_liine.dart';
+export './cross_line.dart';
 export './horizontal_line.dart';
+export './vertical_line.dart';

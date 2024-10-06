@@ -349,7 +349,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       drawPoint: PointConfig(
         radius: 9 * theme.scale,
         width: 0 * theme.scale,
-        color: theme.themeColor,
+        color: const Color(0xFFFFFFFF),
         borderWidth: 1 * theme.scale,
         borderColor: theme.drawColor,
       ),
@@ -367,6 +367,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
           Radius.circular(2 * theme.scale),
         ),
       ),
+      hitTestMinDistance: 10 * theme.scale,
       spacing: 1 * theme.scale,
       gapBackground: theme.drawColor.withOpacity(0.1),
     );

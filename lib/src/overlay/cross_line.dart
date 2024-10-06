@@ -19,8 +19,8 @@ import '../extension/geometry_ext.dart';
 import '../extension/render/draw_path.dart';
 import '../framework/overlay.dart';
 
-class HorizontalLineDrawObject extends DrawObject {
-  HorizontalLineDrawObject(super.overlay);
+class CrossLineDrawObject extends DrawObject {
+  CrossLineDrawObject(super.overlay);
 
   @override
   bool hitTest(
@@ -30,14 +30,24 @@ class HorizontalLineDrawObject extends DrawObject {
   }) {
     final point = points.first;
     if (point == null) return false;
-    final dy = point.offset.dy;
+    final offset = point.offset;
     final mainRect = context.mainRect;
-    if (mainRect.includeDy(dy)) {
-      final distance = position.distanceToLine(
-        Offset(mainRect.left, dy),
-        Offset(mainRect.right, dy),
+    if (mainRect.includeDx(offset.dx) || mainRect.includeDy(offset.dy)) {
+      double distance = position.distanceToLine(
+        Offset(mainRect.left, offset.dy),
+        Offset(mainRect.right, offset.dy),
       );
-      if (distance <= context.config.hitTestMinDistance) {
+      final hitTestMinDistance = isMove
+          ? context.config.hitTestMinDistance * 10
+          : context.config.hitTestMinDistance;
+      if (distance <= hitTestMinDistance) {
+        return true;
+      }
+      distance = position.distanceToLine(
+        Offset(offset.dx, mainRect.top),
+        Offset(offset.dx, mainRect.bottom),
+      );
+      if (distance <= hitTestMinDistance) {
         return true;
       }
     }
@@ -48,7 +58,7 @@ class HorizontalLineDrawObject extends DrawObject {
   void draw(IDrawContext context, Canvas canvas, Size size) {
     assert(
       points.length == 1,
-      'HorizontalLine only takes one point, but it has ${points.length}',
+      'CrossLine only takes one point, but it has ${points.length}',
     );
     final point = points.first;
     if (point == null) {
@@ -56,20 +66,17 @@ class HorizontalLineDrawObject extends DrawObject {
       return;
     }
     final mainRect = context.mainRect;
-    final dy = point.offset.dy;
-    if (!mainRect.includeDy(dy)) {
-      context.logi('draw($type), but dy:$dy not in mainRect.');
-      return;
+    final offset = point.offset;
+    if (mainRect.includeDx(offset.dx) || mainRect.includeDy(offset.dy)) {
+      canvas.drawLineType(
+        line.type,
+        Path()
+          ..moveTo(mainRect.left, offset.dy)
+          ..lineTo(mainRect.right, offset.dy)
+          ..moveTo(offset.dx, mainRect.top)
+          ..lineTo(offset.dx, mainRect.bottom),
+        line.linePaint,
+      );
     }
-
-    canvas.drawLineType(
-      line.type,
-      Path()
-        ..addPolygon(
-          [Offset(mainRect.left, dy), Offset(mainRect.right, dy)],
-          false,
-        ),
-      line.linePaint,
-    );
   }
 }

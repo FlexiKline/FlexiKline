@@ -29,7 +29,6 @@ class TrendLineDrawObject extends DrawObject {
         dotList.add(point!.offset);
       }
     }
-    context.logd('TrendLine dotList]\t:$dotList');
     canvas.drawLineType(
       line.type,
       Path()..addPolygon(dotList, false),

@@ -103,12 +103,12 @@ class Overlay implements Comparable<Overlay> {
   final int id;
   final String key;
   final IDrawType type;
+  final List<Point?> points;
+
   int zIndex;
   bool lock;
   MagnetMode mode;
   LineConfig line;
-
-  List<Point?> points;
 
   /// 当前指针位置
   Point? _pointer;
@@ -184,6 +184,60 @@ class Overlay implements Comparable<Overlay> {
       pre = offset;
     }
     return coord;
+  }
+
+  ///查找距离[position]小于[range]的最小point
+  Point? findPoint(
+    Offset position, {
+    double range = 5,
+  }) {
+    if (range <= 0) return null;
+    Point? result;
+    for (var point in allPoints) {
+      if (point == null || point.offset.isInfinite) continue;
+      final newRange = (position - point.offset).distance;
+      if (newRange < range) {
+        result = point;
+        range = newRange;
+      }
+    }
+    return result;
+  }
+
+  /// 查找距离[dx]小于[range]的最小point
+  Point? findPointByDx(
+    double dx, {
+    double range = 5,
+  }) {
+    if (range <= 0) return null;
+    Point? result;
+    for (var point in allPoints) {
+      if (point == null || point.offset.isInfinite) continue;
+      final newRange = (point.offset.dx - dx).abs();
+      if (newRange < range) {
+        result = point;
+        range = newRange;
+      }
+    }
+    return result;
+  }
+
+  /// 查找距离[dy]小于[range]的最小point
+  Point? findPointByDy(
+    double dy, {
+    double range = 5,
+  }) {
+    if (range <= 0) return null;
+    Point? result;
+    for (var point in allPoints) {
+      if (point == null || point.offset.isInfinite) continue;
+      final newRange = (point.offset.dy - dy).abs();
+      if (newRange < range) {
+        result = point;
+        range = newRange;
+      }
+    }
+    return result;
   }
 
   /// 添加指针[p]到[points]中, 并准备下一个指针
@@ -275,6 +329,7 @@ class OverlayObject {
   MagnetMode get mode => _overlay.mode;
   LineConfig get line => _overlay.line;
   List<Point?> get points => _overlay.points;
+  int get steps => points.length;
   Iterable<Point?> get allPoints => _overlay.allPoints;
   Rect? get pointsArea => _overlay.pointsArea;
   Point? get pointer => _overlay.pointer;
@@ -312,7 +367,12 @@ abstract class DrawObject<T extends Overlay> extends OverlayObject
   }
 
   /// 碰撞测试[position]是否命中Overlay
-  bool hitTest(IDrawContext context, Offset position) {
+  bool hitTest(
+    IDrawContext context,
+    Offset position, {
+    bool isMove = false,
+  }) {
+    assert(points.isNotEmpty, 'hitTest points.length must be greater than 0');
     Point? last;
     for (var point in points) {
       if (point?.offset.isFinite == true && last != null) {
@@ -378,7 +438,6 @@ abstract class DrawObject<T extends Overlay> extends OverlayObject
         coord.left,
         drawableRect: timeRect,
       );
-
       drawTimeTick(
         context,
         canvas,
@@ -416,7 +475,6 @@ abstract class DrawObject<T extends Overlay> extends OverlayObject
         coord.top,
         drawableRect: mainRect,
       );
-
       _valueTickSize = drawValueTick(
         context,
         canvas,

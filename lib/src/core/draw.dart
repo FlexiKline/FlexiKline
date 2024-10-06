@@ -94,11 +94,11 @@ mixin DrawBinding
   Iterable<IDrawType> get supportDrawTypes => _overlayManager.supportDrawTypes;
 
   /// 自定义overlay绘制对象构建器
-  void customOverlayDrawObjectBuilder(
+  void registerOverlayDrawObjectBuilder(
     IDrawType type,
     DrawObjectBuilder builder,
   ) {
-    _overlayManager.customOverlayDrawObjectBuilder(type, builder);
+    _overlayManager.registerOverlayDrawObjectBuilder(type, builder);
   }
 
   final _drawStateListener = ValueNotifier(DrawState.exited());
@@ -175,11 +175,13 @@ mixin DrawBinding
       logd('onDrawMoveStart index:${point.index} point:$point');
       overlay.setPointer(point);
       overlay.setMoveing(true);
+      _markRepaint();
       return true;
-    } else if (object.hitTest(this, position) == true) {
+    } else if (object.hitTest(this, position, isMove: true) == true) {
       // 检查当前焦点是否命中Overlay
       overlay.setPointer(null);
       overlay.setMoveing(true);
+      _markRepaint();
       return true;
     }
 
