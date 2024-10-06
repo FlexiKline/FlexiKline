@@ -16,6 +16,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 
+import '../extension/geometry_ext.dart';
 import '../kline_controller.dart';
 import '../utils/platform_util.dart';
 import 'non_touch_gesture_detector.dart';
@@ -35,6 +36,9 @@ class FlexiKlineWidget extends StatefulWidget {
     this.onDoubleTap,
     this.drawToolbar,
     this.drawToolbarInitHeight = 50,
+    this.showMagnifier = true,
+    this.magnifierSize = const Size(80, 80),
+    this.magnifierMargin = EdgeInsets.zero,
   })  : isTouchDevice = isTouchDevice ?? PlatformUtil.isTouch,
         autoAdaptLayout = autoAdaptLayout ?? !PlatformUtil.isMobile;
 
@@ -57,6 +61,15 @@ class FlexiKlineWidget extends StatefulWidget {
 
   /// 是否是触摸设备.
   final bool isTouchDevice;
+
+  /// 在移动绘制点时, 是否展示放大镜
+  final bool showMagnifier;
+
+  /// 放大镜大小
+  final Size magnifierSize;
+
+  /// 放大镜margin
+  final EdgeInsets magnifierMargin;
 
   @override
   State<FlexiKlineWidget> createState() => _FlexiKlineWidgetState();
@@ -103,96 +116,66 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
   }
 
   Widget _buildKlineContainer(BuildContext context) {
+    final canvasRect = widget.controller.canvasRect;
+    final canvasSize = canvasRect.size;
     return Container(
       alignment: widget.alignment,
-      width: widget.controller.canvasWidth,
-      height: widget.controller.canvasHeight,
+      width: canvasRect.width,
+      height: canvasRect.height,
       decoration: widget.decoration,
       foregroundDecoration: widget.foregroundDecoration,
-      child: _buildKlineView(context),
-      // child: widget.isTouchDevice
-      //     ? TouchGestureDetector(
-      //         controller: widget.controller,
-      //         onDoubleTap: widget.onDoubleTap,
-      //         child: _buildKlineView(context),
-      //       )
-      //     : NonTouchGestureDetector(
-      //         controller: widget.controller,
-      //         onDoubleTap: widget.onDoubleTap,
-      //         child: _buildKlineView(context),
-      //       ),
-    );
-  }
-
-  ///
-  /// TODO: 考虑重新组合grid, indicator, cross, draw图层
-  /// 1. grid: 不经常变化
-  /// 2. indicator: 经常变化
-  /// 3. cross / draw: 偶尔变化
-  Widget _buildKlineView(BuildContext context) {
-    final canvasSize = widget.controller.canvasRect.size;
-    return Stack(
-      children: <Widget>[
-        if (widget.mainBackgroundView != null)
+      child: Stack(
+        children: <Widget>[
+          if (widget.mainBackgroundView != null)
+            Positioned.fromRect(
+              rect: widget.controller.mainRect,
+              child: widget.mainBackgroundView!,
+            ),
+          RepaintBoundary(
+            key: const ValueKey('GridAndChartLayer'),
+            child: CustomPaint(
+              size: canvasSize,
+              painter: GridBackgroundPainter(
+                controller: widget.controller,
+              ),
+              foregroundPainter: IndicatorChartPainter(
+                controller: widget.controller,
+              ),
+              isComplex: true,
+            ),
+          ),
+          RepaintBoundary(
+            key: const ValueKey('DrawAndCrossLayer'),
+            child: CustomPaint(
+              size: canvasSize,
+              painter: DrawPainter(
+                controller: widget.controller,
+              ),
+              foregroundPainter: CrossPainter(
+                controller: widget.controller,
+              ),
+              isComplex: true,
+            ),
+          ),
+          widget.isTouchDevice
+              ? TouchGestureDetector(
+                  key: const ValueKey('TouchGestureDetector'),
+                  controller: widget.controller,
+                  onDoubleTap: widget.onDoubleTap,
+                )
+              : NonTouchGestureDetector(
+                  key: const ValueKey('NonTouchGestureDetector'),
+                  controller: widget.controller,
+                  onDoubleTap: widget.onDoubleTap,
+                ),
+          _buildMagnifier(context, canvasRect),
+          _buildDrawToolbar(context, canvasSize),
           Positioned.fromRect(
             rect: widget.controller.mainRect,
-            child: widget.mainBackgroundView!,
+            child: _buildMainForgroundView(context),
           ),
-        RepaintBoundary(
-          key: const ValueKey('GridAndChartLayer'),
-          child: CustomPaint(
-            size: canvasSize,
-            painter: GridBackgroundPainter(
-              controller: widget.controller,
-            ),
-            foregroundPainter: IndicatorChartPainter(
-              controller: widget.controller,
-            ),
-            isComplex: true,
-          ),
-        ),
-        RepaintBoundary(
-          key: const ValueKey('DrawAndCrossLayer'),
-          child: CustomPaint(
-            size: canvasSize,
-            painter: DrawPainter(
-              controller: widget.controller,
-            ),
-            foregroundPainter: CrossPainter(
-              controller: widget.controller,
-            ),
-            isComplex: true,
-          ),
-        ),
-        widget.isTouchDevice
-            ? TouchGestureDetector(
-                key: const ValueKey('TouchGestureDetector'),
-                controller: widget.controller,
-                onDoubleTap: widget.onDoubleTap,
-              )
-            : NonTouchGestureDetector(
-                key: const ValueKey('NonTouchGestureDetector'),
-                controller: widget.controller,
-                onDoubleTap: widget.onDoubleTap,
-              ),
-        _buildDrawToolbar(context, canvasSize),
-        Positioned.fromRect(
-          rect: widget.controller.mainRect,
-          child: _buildMainForgroundView(context),
-        ),
-        // OverlayDrawBox(
-        //   key: const ValueKey('OverlayDrawBox'),
-        //   controller: widget.controller,
-        //   child: OverlayDrawGestureDetector(
-        //     key: const ValueKey('OverlayDrawGestureDetector'),
-        //     controller: widget.controller,
-        //     isTouchDevice: widget.isTouchDevice,
-        //     child: ConstrainedBox(
-        //       constraints: BoxConstraints.tight(canvasSize),
-        //     ),
-        //   ),
-        // ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -261,6 +244,56 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
                 child: widget.drawToolbar,
               ),
             ),
+          );
+        },
+      ),
+    );
+  }
+
+  /// 放大镜
+  Widget _buildMagnifier(BuildContext context, Rect drawRect) {
+    if (!widget.showMagnifier || widget.magnifierSize.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Positioned(
+      top: 0 + widget.magnifierMargin.top,
+      left: 0 + widget.magnifierMargin.left,
+      child: ValueListenableBuilder(
+        valueListenable: widget.controller.drawStateLinstener,
+        builder: (context, state, child) {
+          final overlay = state.overlay;
+
+          /// 如果overlay是已完成, 且当前正在移动某个绘制点, 则展示放大镜, 否则不展示.
+          if (overlay == null ||
+              !overlay.moving ||
+              overlay.pointer?.offset.isFinite != true ||
+              !overlay.isEditing) {
+            return const SizedBox.shrink();
+          }
+
+          // final drawRect = widget.controller.mainRect;
+          Offset focalPosition = overlay.pointer!.offset;
+          double opacity = 1.0;
+          if (focalPosition.dx < drawRect.left + widget.magnifierSize.width &&
+              focalPosition.dy < drawRect.top + widget.magnifierSize.height) {
+            opacity = 0.75;
+          }
+          focalPosition = Offset(
+            focalPosition.dx - widget.magnifierSize.width / 2,
+            focalPosition.dy - widget.magnifierSize.height / 2,
+          ).clamp(drawRect);
+
+          return RawMagnifier(
+            decoration: MagnifierDecoration(
+              opacity: opacity,
+              shape: CircleBorder(
+                side: widget.controller.drawConfig.magnifierBoder,
+              ),
+            ),
+            size: widget.magnifierSize,
+            focalPointOffset: focalPosition,
+            magnificationScale: 2,
           );
         },
       ),

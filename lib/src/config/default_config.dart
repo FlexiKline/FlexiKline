@@ -367,9 +367,13 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
           Radius.circular(2 * theme.scale),
         ),
       ),
-      hitTestMinDistance: 10 * theme.scale,
       spacing: 1 * theme.scale,
       gapBackground: theme.drawColor.withOpacity(0.1),
+      hitTestMinDistance: 10 * theme.scale,
+      magnifierBoder: BorderSide(
+        color: theme.gridLine,
+        width: 1 * theme.scale,
+      ),
     );
   }
 

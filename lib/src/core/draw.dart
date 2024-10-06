@@ -101,9 +101,12 @@ mixin DrawBinding
     _overlayManager.registerOverlayDrawObjectBuilder(type, builder);
   }
 
-  final _drawStateListener = ValueNotifier(DrawState.exited());
+  final _drawStateListener = KlineStateNotifier(DrawState.exited());
   final _drawTypeListener = ValueNotifier<IDrawType?>(null);
   final _drawEditingListener = ValueNotifier(false);
+
+  /// 主动通知绘制状态变化
+  void _notifyDrawStateChange() => _drawStateListener.notifyListeners();
 
   @override
   DrawState get drawState => _drawStateListener.value;
@@ -175,12 +178,14 @@ mixin DrawBinding
       logd('onDrawMoveStart index:${point.index} point:$point');
       overlay.setPointer(point);
       overlay.setMoveing(true);
+      _notifyDrawStateChange();
       _markRepaint();
       return true;
     } else if (object.hitTest(this, position, isMove: true) == true) {
       // 检查当前焦点是否命中Overlay
       overlay.setPointer(null);
       overlay.setMoveing(true);
+      _notifyDrawStateChange();
       _markRepaint();
       return true;
     }
@@ -203,6 +208,7 @@ mixin DrawBinding
         }
       }
     }
+    _notifyDrawStateChange();
     _markRepaint();
   }
 
@@ -221,6 +227,7 @@ mixin DrawBinding
       }
     }
     overlay.setMoveing(false);
+    _notifyDrawStateChange();
     _markRepaint();
   }
 

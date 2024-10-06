@@ -65,3 +65,13 @@ abstract class KlineBindingBase with KlineLog implements ISetting {
     return instance;
   }
 }
+
+/// Kline状态通知
+class KlineStateNotifier<T> extends ValueNotifier<T> {
+  KlineStateNotifier(super.value);
+
+  @override
+  void notifyListeners() {
+    super.notifyListeners();
+  }
+}

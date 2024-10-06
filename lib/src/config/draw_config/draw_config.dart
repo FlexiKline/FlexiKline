@@ -35,6 +35,7 @@ class DrawConfig {
     required this.spacing,
     this.gapBackground = Colors.transparent,
     this.hitTestMinDistance = 20,
+    required this.magnifierBoder,
   });
 
   /// 是否启用Draw Overlay功能开关
@@ -64,6 +65,9 @@ class DrawConfig {
   /// 命中测试最小距离.
   /// 当前位置到Overlay线距离如果小于等于[hitTestMinDistance], 即命中.
   final double hitTestMinDistance;
+
+  /// 放大镜边框样式
+  final BorderSide magnifierBoder;
 
   Paint get gapBgPaint => Paint()
     ..color = gapBackground
