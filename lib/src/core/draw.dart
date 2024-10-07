@@ -152,11 +152,19 @@ mixin DrawBinding
   /// 更新当前指针坐标
   @override
   void onDrawUpdate(GestureData data) {
-    if (!drawState.isOngoing) return;
-    if (drawState.overlay?.pointer != null) {
-      drawState.overlay?.pointer?.offset = data.offset;
-      _markRepaint();
+    if (!drawState.isDrawing) return;
+    final overlay = drawState.overlay!;
+    final pointer = overlay.pointer;
+    if (pointer == null) {
+      assert(() {
+        logw('onDrawUpdate drawing ${overlay.type}, pointer is null!');
+        return true;
+      }());
+      return;
     }
+    final object = _overlayManager.getDrawObject(overlay);
+    object?.onUpdatePoint(pointer, data.offset);
+    _markRepaint();
   }
 
   bool onDrawMoveStart(GestureData data) {
@@ -200,7 +208,15 @@ mixin DrawBinding
 
     final delta = data.delta;
     if (overlay.pointer != null) {
-      overlay.pointer?.offset += delta;
+      final object = _overlayManager.getDrawObject(overlay);
+      // 当前移动一个编辑状态的Overlay的某个绘制点指针时,
+      // 需要通过[DrawObject]的`onUpdatePoint`接口来校正offset.
+      object?.onUpdatePoint(
+        overlay.pointer!,
+        overlay.pointer!.offset + delta,
+        isMove: true,
+      );
+      // overlay.pointer?.offset += delta;
     } else {
       for (var point in overlay.points) {
         if (point?.offset.isFinite == true) {

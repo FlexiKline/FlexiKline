@@ -15,6 +15,8 @@
 export './trend_line.dart';
 export './cross_line.dart';
 export './horizontal_line.dart';
+export './horizontal_ray_line.dart';
+export './horizontal_trend_line.dart';
 export './vertical_line.dart';
 export './extended_trend_line.dart';
 export './arrow_line.dart';

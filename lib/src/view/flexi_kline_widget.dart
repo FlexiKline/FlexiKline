@@ -355,7 +355,6 @@ class DrawPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    controller.drawStateTick(canvas, size);
     try {
       /// 保存画布状态
       canvas.save();
@@ -366,6 +365,8 @@ class DrawPainter extends CustomPainter {
     } finally {
       canvas.restore();
     }
+
+    controller.drawStateTick(canvas, size);
   }
 
   @override

@@ -395,6 +395,12 @@ abstract class DrawObject<T extends Overlay> extends OverlayObject
     return false;
   }
 
+  /// 更新指针[point]的[offset]
+  /// 实现类中通过此接口控制每一个point的offset位置校正.
+  void onUpdatePoint(Point point, Offset offset, {bool isMove = false}) {
+    point.offset = offset;
+  }
+
   Size? __valueTickSize;
   Size? get valueTickSize => __valueTickSize;
   set _valueTickSize(Size size) {
