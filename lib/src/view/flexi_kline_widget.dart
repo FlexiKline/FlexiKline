@@ -16,7 +16,6 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 
-import '../extension/geometry_ext.dart';
 import '../kline_controller.dart';
 import '../utils/platform_util.dart';
 import 'non_touch_gesture_detector.dart';
@@ -36,9 +35,7 @@ class FlexiKlineWidget extends StatefulWidget {
     this.onDoubleTap,
     this.drawToolbar,
     this.drawToolbarInitHeight = 50,
-    this.showMagnifier = true,
-    this.magnifierSize = const Size(80, 80),
-    this.magnifierMargin = EdgeInsets.zero,
+    this.magnifierDecoration,
   })  : isTouchDevice = isTouchDevice ?? PlatformUtil.isTouch,
         autoAdaptLayout = autoAdaptLayout ?? !PlatformUtil.isMobile;
 
@@ -62,14 +59,8 @@ class FlexiKlineWidget extends StatefulWidget {
   /// 是否是触摸设备.
   final bool isTouchDevice;
 
-  /// 在移动绘制点时, 是否展示放大镜
-  final bool showMagnifier;
-
-  /// 放大镜大小
-  final Size magnifierSize;
-
-  /// 放大镜margin
-  final EdgeInsets magnifierMargin;
+  /// 绘制点放大镜样式
+  final MagnifierDecoration? magnifierDecoration;
 
   @override
   State<FlexiKlineWidget> createState() => _FlexiKlineWidgetState();
@@ -252,13 +243,13 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
 
   /// 放大镜
   Widget _buildMagnifier(BuildContext context, Rect drawRect) {
-    if (!widget.showMagnifier || widget.magnifierSize.isEmpty) {
+    final config = widget.controller.drawConfig.magnifierConfig;
+    if (!config.enable || config.size.isEmpty) {
       return const SizedBox.shrink();
     }
-
     return Positioned(
-      top: 0 + widget.magnifierMargin.top,
-      left: 0 + widget.magnifierMargin.left,
+      top: 0,
+      left: 0,
       child: ValueListenableBuilder(
         valueListenable: widget.controller.drawStateLinstener,
         builder: (context, state, child) {
@@ -274,26 +265,28 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
 
           // final drawRect = widget.controller.mainRect;
           Offset focalPosition = overlay.pointer!.offset;
-          double opacity = 1.0;
-          if (focalPosition.dx < drawRect.left + widget.magnifierSize.width &&
-              focalPosition.dy < drawRect.top + widget.magnifierSize.height) {
-            opacity = 0.75;
+          double opacity = config.opactity;
+          if (focalPosition.dy < (drawRect.top + config.size.height) &&
+              focalPosition.dx < (drawRect.left + config.size.width)) {
+            opacity = config.opactityWhenOverlap;
           }
           focalPosition = Offset(
-            focalPosition.dx - widget.magnifierSize.width / 2,
-            focalPosition.dy - widget.magnifierSize.height / 2,
-          ).clamp(drawRect);
+            focalPosition.dx - config.size.width / 2,
+            focalPosition.dy - config.size.height / 2,
+          );
 
           return RawMagnifier(
-            decoration: MagnifierDecoration(
-              opacity: opacity,
-              shape: CircleBorder(
-                side: widget.controller.drawConfig.magnifierBoder,
-              ),
-            ),
-            size: widget.magnifierSize,
+            key: const ValueKey('KlineMagnifier'),
+            decoration: widget.magnifierDecoration ??
+                MagnifierDecoration(
+                  opacity: opacity,
+                  shape: CircleBorder(
+                    side: config.boder,
+                  ),
+                ),
+            size: config.size,
             focalPointOffset: focalPosition,
-            magnificationScale: 2,
+            magnificationScale: config.times,
           );
         },
       ),
@@ -362,6 +355,7 @@ class DrawPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    controller.drawStateTick(canvas, size);
     try {
       /// 保存画布状态
       canvas.save();
@@ -372,8 +366,6 @@ class DrawPainter extends CustomPainter {
     } finally {
       canvas.restore();
     }
-
-    controller.drawStateTick(canvas, size);
   }
 
   @override

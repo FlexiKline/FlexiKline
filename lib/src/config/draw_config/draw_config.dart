@@ -16,6 +16,7 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flutter/material.dart';
 
 import '../../framework/serializers.dart';
+import '../magnifier_config/magnifier_config.dart';
 import '../point_config/point_config.dart';
 import '../line_config/line_config.dart';
 import '../text_area_config/text_area_config.dart';
@@ -35,7 +36,7 @@ class DrawConfig {
     required this.spacing,
     this.gapBackground = Colors.transparent,
     this.hitTestMinDistance = 20,
-    required this.magnifierBoder,
+    this.magnifierConfig = const MagnifierConfig(),
   });
 
   /// 是否启用Draw Overlay功能开关
@@ -66,8 +67,8 @@ class DrawConfig {
   /// 当前位置到Overlay线距离如果小于等于[hitTestMinDistance], 即命中.
   final double hitTestMinDistance;
 
-  /// 放大镜边框样式
-  final BorderSide magnifierBoder;
+  /// 放大镜配置
+  final MagnifierConfig magnifierConfig;
 
   Paint get gapBgPaint => Paint()
     ..color = gapBackground

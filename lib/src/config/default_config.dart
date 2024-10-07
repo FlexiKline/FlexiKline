@@ -20,6 +20,7 @@ import '../framework/export.dart';
 import '../indicators/export.dart';
 import 'boll_param/boll_param.dart';
 import 'cross_config/cross_config.dart';
+import 'magnifier_config/magnifier_config.dart';
 import 'point_config/point_config.dart';
 import 'draw_config/draw_config.dart';
 import 'flexi_kline_config/flexi_kline_config.dart';
@@ -370,9 +371,15 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       spacing: 1 * theme.scale,
       gapBackground: theme.drawColor.withOpacity(0.1),
       hitTestMinDistance: 10 * theme.scale,
-      magnifierBoder: BorderSide(
-        color: theme.gridLine,
-        width: 1 * theme.scale,
+      magnifierConfig: MagnifierConfig(
+        enable: true,
+        times: 2,
+        margin: EdgeInsets.all(1 * theme.scale),
+        size: Size(80 * theme.scale, 80 * theme.scale),
+        boder: BorderSide(
+          color: theme.gridLine,
+          width: 1 * theme.scale,
+        ),
       ),
     );
   }

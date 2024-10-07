@@ -18,6 +18,7 @@ export 'gesture_config/gesture_config.dart';
 export 'grid_config/grid_config.dart';
 export 'cross_config/cross_config.dart';
 export 'draw_config/draw_config.dart';
+export 'magnifier_config/magnifier_config.dart';
 export 'tips_config/tips_config.dart';
 export 'line_config/line_config.dart';
 export 'point_config/point_config.dart';

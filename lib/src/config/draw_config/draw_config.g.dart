@@ -25,7 +25,7 @@ abstract class _$DrawConfigCWProxy {
 
   DrawConfig hitTestMinDistance(double hitTestMinDistance);
 
-  DrawConfig magnifierBoder(BorderSide magnifierBoder);
+  DrawConfig magnifierConfig(MagnifierConfig magnifierConfig);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `DrawConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -43,7 +43,7 @@ abstract class _$DrawConfigCWProxy {
     double? spacing,
     Color? gapBackground,
     double? hitTestMinDistance,
-    BorderSide? magnifierBoder,
+    MagnifierConfig? magnifierConfig,
   });
 }
 
@@ -83,8 +83,8 @@ class _$DrawConfigCWProxyImpl implements _$DrawConfigCWProxy {
       this(hitTestMinDistance: hitTestMinDistance);
 
   @override
-  DrawConfig magnifierBoder(BorderSide magnifierBoder) =>
-      this(magnifierBoder: magnifierBoder);
+  DrawConfig magnifierConfig(MagnifierConfig magnifierConfig) =>
+      this(magnifierConfig: magnifierConfig);
 
   @override
 
@@ -104,7 +104,7 @@ class _$DrawConfigCWProxyImpl implements _$DrawConfigCWProxy {
     Object? spacing = const $CopyWithPlaceholder(),
     Object? gapBackground = const $CopyWithPlaceholder(),
     Object? hitTestMinDistance = const $CopyWithPlaceholder(),
-    Object? magnifierBoder = const $CopyWithPlaceholder(),
+    Object? magnifierConfig = const $CopyWithPlaceholder(),
   }) {
     return DrawConfig(
       enable: enable == const $CopyWithPlaceholder() || enable == null
@@ -146,11 +146,11 @@ class _$DrawConfigCWProxyImpl implements _$DrawConfigCWProxy {
           ? _value.hitTestMinDistance
           // ignore: cast_nullable_to_non_nullable
           : hitTestMinDistance as double,
-      magnifierBoder: magnifierBoder == const $CopyWithPlaceholder() ||
-              magnifierBoder == null
-          ? _value.magnifierBoder
+      magnifierConfig: magnifierConfig == const $CopyWithPlaceholder() ||
+              magnifierConfig == null
+          ? _value.magnifierConfig
           // ignore: cast_nullable_to_non_nullable
-          : magnifierBoder as BorderSide,
+          : magnifierConfig as MagnifierConfig,
     );
   }
 }
@@ -181,8 +181,10 @@ DrawConfig _$DrawConfigFromJson(Map<String, dynamic> json) => DrawConfig(
           : const ColorConverter().fromJson(json['gapBackground'] as String),
       hitTestMinDistance:
           (json['hitTestMinDistance'] as num?)?.toDouble() ?? 20,
-      magnifierBoder: const BorderSideConvert()
-          .fromJson(json['magnifierBoder'] as Map<String, dynamic>),
+      magnifierConfig: json['magnifierConfig'] == null
+          ? const MagnifierConfig()
+          : MagnifierConfig.fromJson(
+              json['magnifierConfig'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$DrawConfigToJson(DrawConfig instance) =>
@@ -196,6 +198,5 @@ Map<String, dynamic> _$DrawConfigToJson(DrawConfig instance) =>
       'spacing': instance.spacing,
       'gapBackground': const ColorConverter().toJson(instance.gapBackground),
       'hitTestMinDistance': instance.hitTestMinDistance,
-      'magnifierBoder':
-          const BorderSideConvert().toJson(instance.magnifierBoder),
+      'magnifierConfig': instance.magnifierConfig.toJson(),
     };
