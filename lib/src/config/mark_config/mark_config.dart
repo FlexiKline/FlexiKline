@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
 
 import '../../constant.dart';
 import '../../framework/serializers.dart';
@@ -33,7 +33,7 @@ class MarkConfig {
     this.text = const TextAreaConfig(
       style: TextStyle(
         fontSize: defaulTextSize,
-        color: Colors.black,
+        color: Color(0xFF000000),
         overflow: TextOverflow.ellipsis,
         height: defaultTextHeight,
       ),

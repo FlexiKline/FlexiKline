@@ -24,7 +24,6 @@ import '../model/bag_num.dart';
 import '../model/range.dart';
 import '../utils/date_time.dart';
 import '../utils/decimal_format_util.dart';
-import '../utils/vector_util.dart';
 import 'common.dart';
 
 /// Overlay 绘制点坐标
@@ -173,17 +172,17 @@ class Overlay implements Comparable<Overlay> {
     });
   }
 
-  /// 由所有point构成的区域.
-  Rect? get pointsArea {
+  /// 计算所有point点构成的矩形区域.
+  Rect? get pointBounds {
     Offset? pre, offset;
-    Rect? coord;
+    Rect? bounds;
     for (var point in allPoints) {
       offset = point?.offset;
       if (offset == null || offset.isInfinite) continue;
-      coord = Rect.fromPoints(pre ?? offset, offset);
+      bounds = Rect.fromPoints(pre ?? offset, offset);
       pre = offset;
     }
-    return coord;
+    return bounds;
   }
 
   ///查找距离[position]小于[range]的最小point
@@ -331,7 +330,7 @@ class OverlayObject {
   List<Point?> get points => _overlay.points;
   int get steps => points.length;
   Iterable<Point?> get allPoints => _overlay.allPoints;
-  Rect? get pointsArea => _overlay.pointsArea;
+  Rect? get pointBounds => _overlay.pointBounds;
   Point? get pointer => _overlay.pointer;
 }
 
@@ -376,8 +375,7 @@ abstract class DrawObject<T extends Overlay> extends OverlayObject
     Point? last;
     for (var point in points) {
       if (point?.offset.isFinite == true && last != null) {
-        final distance = distancePointToLine(
-          position,
+        final distance = position.distanceToLine(
           last.offset,
           point!.offset,
         );
@@ -413,20 +411,20 @@ abstract class DrawObject<T extends Overlay> extends OverlayObject
   void drawTick(
     IDrawContext context,
     Canvas canvas,
-    Rect coord,
+    Rect bounds,
   ) {
     final mainRect = context.mainRect;
     final timeRect = context.timeRect;
     final tickText = context.config.tickText;
 
     /// 绘制时间刻度
-    if (coord.width > 0) {
+    if (bounds.width > 0) {
       // 绘制left到right刻度之间的背景
       canvas.drawRect(
         Rect.fromLTRB(
-          coord.left,
+          bounds.left,
           timeRect.top,
-          coord.right,
+          bounds.right,
           timeRect.top + tickText.areaHeight,
         ),
         context.config.gapBgPaint,
@@ -435,35 +433,35 @@ abstract class DrawObject<T extends Overlay> extends OverlayObject
       drawTimeTick(
         context,
         canvas,
-        coord.left,
+        bounds.left,
         drawableRect: timeRect,
       );
       drawTimeTick(
         context,
         canvas,
-        coord.right,
+        bounds.right,
         drawableRect: timeRect,
       );
     } else {
       drawTimeTick(
         context,
         canvas,
-        coord.left,
+        bounds.left,
         drawableRect: timeRect,
       );
     }
 
     /// 绘制价值刻度
-    if (coord.height > 0) {
+    if (bounds.height > 0) {
       // 绘制top到bottom刻度之间的背景
       final txtWidth = valueTickSize?.width ?? 0;
       if (txtWidth > 0) {
         canvas.drawRect(
           Rect.fromLTRB(
             mainRect.right - context.config.spacing - txtWidth,
-            coord.top.clamp(mainRect.top, mainRect.bottom),
+            bounds.top.clamp(mainRect.top, mainRect.bottom),
             mainRect.right - context.config.spacing,
-            coord.bottom.clamp(mainRect.top, mainRect.bottom),
+            bounds.bottom.clamp(mainRect.top, mainRect.bottom),
           ),
           context.config.gapBgPaint,
         );
@@ -472,20 +470,20 @@ abstract class DrawObject<T extends Overlay> extends OverlayObject
       _valueTickSize = drawValueTick(
         context,
         canvas,
-        coord.top,
+        bounds.top,
         drawableRect: mainRect,
       );
       _valueTickSize = drawValueTick(
         context,
         canvas,
-        coord.bottom,
+        bounds.bottom,
         drawableRect: mainRect,
       );
     } else {
       _valueTickSize = drawValueTick(
         context,
         canvas,
-        coord.top,
+        bounds.top,
         drawableRect: mainRect,
       );
     }

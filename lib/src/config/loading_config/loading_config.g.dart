@@ -104,7 +104,7 @@ LoadingConfig _$LoadingConfigFromJson(Map<String, dynamic> json) =>
           ? const Color(0xFFECECEC)
           : const ColorConverter().fromJson(json['background'] as String),
       valueColor: json['valueColor'] == null
-          ? Colors.black
+          ? const Color(0xFF000000)
           : const ColorConverter().fromJson(json['valueColor'] as String),
     );
 

@@ -27,6 +27,8 @@ abstract class _$DrawConfigCWProxy {
 
   DrawConfig magnifierConfig(MagnifierConfig magnifierConfig);
 
+  DrawConfig drawParams(DrawParams drawParams);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `DrawConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -44,6 +46,7 @@ abstract class _$DrawConfigCWProxy {
     Color? gapBackground,
     double? hitTestMinDistance,
     MagnifierConfig? magnifierConfig,
+    DrawParams? drawParams,
   });
 }
 
@@ -87,6 +90,9 @@ class _$DrawConfigCWProxyImpl implements _$DrawConfigCWProxy {
       this(magnifierConfig: magnifierConfig);
 
   @override
+  DrawConfig drawParams(DrawParams drawParams) => this(drawParams: drawParams);
+
+  @override
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `DrawConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -105,6 +111,7 @@ class _$DrawConfigCWProxyImpl implements _$DrawConfigCWProxy {
     Object? gapBackground = const $CopyWithPlaceholder(),
     Object? hitTestMinDistance = const $CopyWithPlaceholder(),
     Object? magnifierConfig = const $CopyWithPlaceholder(),
+    Object? drawParams = const $CopyWithPlaceholder(),
   }) {
     return DrawConfig(
       enable: enable == const $CopyWithPlaceholder() || enable == null
@@ -151,6 +158,11 @@ class _$DrawConfigCWProxyImpl implements _$DrawConfigCWProxy {
           ? _value.magnifierConfig
           // ignore: cast_nullable_to_non_nullable
           : magnifierConfig as MagnifierConfig,
+      drawParams:
+          drawParams == const $CopyWithPlaceholder() || drawParams == null
+              ? _value.drawParams
+              // ignore: cast_nullable_to_non_nullable
+              : drawParams as DrawParams,
     );
   }
 }
@@ -177,7 +189,7 @@ DrawConfig _$DrawConfigFromJson(Map<String, dynamic> json) => DrawConfig(
           TextAreaConfig.fromJson(json['tickText'] as Map<String, dynamic>),
       spacing: (json['spacing'] as num).toDouble(),
       gapBackground: json['gapBackground'] == null
-          ? Colors.transparent
+          ? const Color(0x00000000)
           : const ColorConverter().fromJson(json['gapBackground'] as String),
       hitTestMinDistance:
           (json['hitTestMinDistance'] as num?)?.toDouble() ?? 20,
@@ -185,6 +197,9 @@ DrawConfig _$DrawConfigFromJson(Map<String, dynamic> json) => DrawConfig(
           ? const MagnifierConfig()
           : MagnifierConfig.fromJson(
               json['magnifierConfig'] as Map<String, dynamic>),
+      drawParams: json['drawParams'] == null
+          ? const DrawParams()
+          : DrawParams.fromJson(json['drawParams'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$DrawConfigToJson(DrawConfig instance) =>
@@ -199,4 +214,5 @@ Map<String, dynamic> _$DrawConfigToJson(DrawConfig instance) =>
       'gapBackground': const ColorConverter().toJson(instance.gapBackground),
       'hitTestMinDistance': instance.hitTestMinDistance,
       'magnifierConfig': instance.magnifierConfig.toJson(),
+      'drawParams': instance.drawParams.toJson(),
     };

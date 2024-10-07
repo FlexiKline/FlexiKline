@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
 
 import '../../framework/serializers.dart';
 
@@ -26,7 +26,7 @@ class LoadingConfig {
     this.size = 24,
     this.strokeWidth = 4,
     this.background = const Color(0xFFECECEC),
-    this.valueColor = Colors.black,
+    this.valueColor = const Color(0xFF000000),
   });
   final double size;
   final double strokeWidth;

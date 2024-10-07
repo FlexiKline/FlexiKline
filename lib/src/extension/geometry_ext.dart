@@ -120,9 +120,19 @@ extension OffsetExt on Offset {
     return distancePointToExtendedLine(this, A, B);
   }
 
+  /// 当前坐标P到由[A]与[B]两点组成射线的距离
+  double distanceToRayLine(Offset A, Offset B) {
+    return distancePointToRayLine(this, A, B);
+  }
+
   /// 将当前坐标到[other]组成的线映射向[rect]边上的坐标
   Offset reflectRectSide(Offset other, Rect rect) {
     return reflectToRectSide(this, other, rect);
+  }
+
+  /// 将当前向量旋转[radians]弧度
+  Offset rotate(double radians) {
+    return rotateVector(this, radians);
   }
 
   /// 斜率

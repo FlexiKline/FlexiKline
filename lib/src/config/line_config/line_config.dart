@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
 
 import '../../extension/render/common.dart';
 import '../../framework/serializers.dart';
@@ -25,7 +25,7 @@ part 'line_config.g.dart';
 class LineConfig {
   const LineConfig({
     this.type = LineType.solid,
-    this.color = Colors.black,
+    this.color = const Color(0xFF000000),
     this.length,
     this.width = 0.5,
     this.dashes = const [3, 3],

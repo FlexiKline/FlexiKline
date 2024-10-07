@@ -13,7 +13,8 @@
 // limitations under the License.
 
 import 'package:decimal/decimal.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import '../extension/export.dart';
@@ -441,7 +442,7 @@ class ColorConverter implements JsonConverter<Color, String> {
 
   @override
   Color fromJson(String json) {
-    return parseHexColor(json) ?? Colors.transparent;
+    return parseHexColor(json) ?? const Color(0x00000000);
   }
 
   @override

@@ -176,7 +176,7 @@ TextAreaConfig _$TextAreaConfigFromJson(Map<String, dynamic> json) =>
       style: json['style'] == null
           ? const TextStyle(
               fontSize: defaulTextSize,
-              color: Colors.black,
+              color: Color(0xFF000000),
               overflow: TextOverflow.ellipsis,
               height: defaultTextHeight)
           : const TextStyleConverter()

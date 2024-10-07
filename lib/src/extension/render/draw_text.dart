@@ -13,7 +13,8 @@
 // limitations under the License.
 
 import 'dart:math' as math;
-import 'package:flutter/material.dart';
+
+import 'package:flutter/painting.dart';
 
 import '../../config/text_area_config/text_area_config.dart';
 import '../geometry_ext.dart';
@@ -59,7 +60,8 @@ extension DrawTextExt on Canvas {
     @Deprecated('废弃的, 请使用borderRadius') double radius = 0,
     BorderRadius? borderRadius,
     EdgeInsets? padding,
-    @Deprecated('废弃的, 请使用borderSide') Color borderColor = Colors.transparent,
+    @Deprecated('废弃的, 请使用borderSide')
+    Color borderColor = const Color(0x00000000),
     @Deprecated('废弃的, 请使用borderSide') double borderWidth = 0,
     BorderSide? borderSide,
   }) {

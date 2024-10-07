@@ -28,6 +28,26 @@ double distancePointToExtendedLine(Offset P, Offset A, Offset B) {
   final lenAB = vAB.length;
   final lenAG = dotProduct / lenAB;
   final lenAP = vAP.length;
+
+  // 计算点P在AB上的垂线PG
+  final lenPG = math.sqrt(lenAP * lenAP - lenAG * lenAG);
+  return lenPG;
+}
+
+/// 计算点[P]到由[A]与[B]两点组成射线的距离
+double distancePointToRayLine(Offset P, Offset A, Offset B) {
+  final vAB = B - A;
+  final vAP = P - A;
+
+  final dotProduct = vAB.dot(vAP);
+  if (dotProduct <= 0) {
+    // AP与AB的夹角为垂直或钝角, 取AP长度.
+    return vAP.length;
+  }
+
+  final lenAB = vAB.length;
+  final lenAG = dotProduct / lenAB;
+  final lenAP = vAP.length;
   if (lenAP - lenAG < precisionError) {
     // 锐角情况下, AP与AG相等, 说明点P在点AB上.
     return 0;
@@ -38,7 +58,7 @@ double distancePointToExtendedLine(Offset P, Offset A, Offset B) {
   return lenPG;
 }
 
-/// 计算点[P]到由[A]与[B]两点组成线的距离
+/// 计算点[P]到由[A]与[B]两点组成线段的距离
 /// 注: 如果超出[A]-[B]计算到[A]或[B]的距离
 /// 点积公式: AB∙AP = |AB| × |AP| × cos𝜃 = |AB| × |AG|
 /// 注: AG为AP在AB上投影; PG为P点到AB上的垂线
@@ -75,15 +95,6 @@ double distancePointToLine(Offset P, Offset A, Offset B) {
   final lenPG = math.sqrt(lenAP * lenAP - lenAG * lenAG);
   return lenPG;
 }
-
-const pi0 = math.pi * 0; // 0∘ | 360∘
-const pi1_4 = math.pi * 0.25; // 45∘
-const pi2_4 = math.pi * 0.5; // 90∘
-const pi3_4 = math.pi * 0.75; // 135∘
-const pi1 = math.pi; // 180∘
-const pi_3_4 = math.pi * -0.75; // 225∘
-const pi_2_4 = math.pi * -0.5; // 270∘
-const pi_1_4 = math.pi * -0.25; // 315∘
 
 /// 计算[A]与[B]两点射在[rect]上的路径.
 Path? reflectPathOnRect(Offset A, Offset B, Rect rect) {
@@ -208,4 +219,37 @@ Offset reflectToRectSide(Offset P, Offset O, Rect rect) {
       return Offset(rect.right, y);
     }
   }
+}
+
+const pi0 = 0; // 0∘              | 360∘
+const pi15 = math.pi * (1 / 12); // 15∘
+const pi30 = math.pi * (1 / 6); //  30∘
+const pi45 = math.pi * (1 / 4); //  45∘
+const pi60 = math.pi * (2 / 6); //  60∘
+const pi90 = math.pi * (3 / 6); //  90∘
+const pi120 = math.pi * (4 / 6); // 120∘
+const pi135 = math.pi * (3 / 4); // 135∘
+const pi150 = math.pi * (5 / 6); // 150∘
+const pi180 = math.pi; //           180∘
+const pi_150 = -pi150; // 210∘    | -150∘
+const pi_135 = -pi135; // 225∘    | -135∘
+const pi_120 = pi120; // 240∘     | -120∘
+const pi_90 = -pi90; // 270∘      | -90∘
+const pi_60 = -pi60; // 300∘      | -60∘
+const pi_45 = -pi45; // 315∘      | -45∘
+const pi_30 = -pi30; // 330∘      | -30∘
+const pi_15 = -pi15; // 345∘      | -15∘
+
+/// 向量旋转[radians]弧度
+/// 设当前向量AB为(x, y)旋转角度为𝜃, 根据向量旋转公式:
+/// x' = x*cos𝜃 - y*sin𝜃
+/// y' = x*sin𝜃 + y*cos𝜃
+/// 旋转后的向量为(x', y')
+Offset rotateVector(Offset v, double radians) {
+  final sin = math.sin(radians);
+  final cos = math.cos(radians);
+  return Offset(
+    v.dx * cos - v.dy * sin,
+    v.dx * sin + v.dy * cos,
+  );
 }

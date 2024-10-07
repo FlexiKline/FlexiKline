@@ -108,7 +108,7 @@ LineConfig _$LineConfigFromJson(Map<String, dynamic> json) => LineConfig(
           ? LineType.solid
           : const LineTypeConverter().fromJson(json['type'] as String),
       color: json['color'] == null
-          ? Colors.black
+          ? const Color(0xFF000000)
           : const ColorConverter().fromJson(json['color'] as String),
       length: (json['length'] as num?)?.toDouble(),
       width: (json['width'] as num?)?.toDouble() ?? 0.5,

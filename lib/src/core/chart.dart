@@ -14,7 +14,8 @@
 
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
 
 import '../framework/export.dart';
 import 'binding_base.dart';

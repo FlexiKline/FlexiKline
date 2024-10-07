@@ -17,15 +17,16 @@ import 'dart:ui';
 import '../core/interface.dart';
 import '../extension/export.dart';
 import '../framework/overlay.dart';
+import '../utils/vector_util.dart';
 
-class ArrowLineDrawObject extends DrawObject {
-  ArrowLineDrawObject(super.overlay);
+class RayLineDrawObject extends DrawObject {
+  RayLineDrawObject(super.overlay);
 
   @override
   bool hitTest(IDrawContext context, Offset position, {bool isMove = false}) {
     assert(
       points.length == 2,
-      'ArrowLine hitTest points.length:${points.length} must be equals 2',
+      'RayLine hitTest points.length:${points.length} must be equals 2',
     );
     final first = points.firstOrNull;
     final second = points.secondOrNull;
@@ -47,37 +48,23 @@ class ArrowLineDrawObject extends DrawObject {
       'RayLine draw points.length:${points.length} must be equals 2',
     );
 
-    final first = points.firstOrNull?.offset;
-    final second = points.secondOrNull?.offset;
+    final first = points.firstOrNull;
+    final second = points.secondOrNull;
     if (first == null || second == null) {
       return;
     }
 
-    // 画线
-    canvas.drawLineType(
-      line.type,
-      Path()..addPolygon([first, second], false),
-      line.linePaint,
+    final mainRect = context.mainRect;
+    final list = reflectPointsOnRect(
+      first.offset,
+      second.offset,
+      mainRect,
     );
 
-    // 画箭头
-    final drawRect = context.mainRect;
-    if (drawRect.contains(second)) {
-      final params = context.config.drawParams;
-      final vector = (first - second).normalized() * params.arrowsLen;
-      final arrow1 = vector.rotate(params.arrowsRadians) + second;
-      final arrow2 = vector.rotate(-params.arrowsRadians) + second;
-
-      canvas.drawLineType(
-        line.type,
-        Path()..addPolygon([second, arrow1], false),
-        line.linePaint,
-      );
-      canvas.drawLineType(
-        line.type,
-        Path()..addPolygon([second, arrow2], false),
-        line.linePaint,
-      );
-    }
+    canvas.drawLineType(
+      line.type,
+      Path()..addPolygon(list, false),
+      line.linePaint,
+    );
   }
 }

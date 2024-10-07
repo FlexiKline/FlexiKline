@@ -13,9 +13,10 @@
 // limitations under the License.
 
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
 
 import '../../framework/serializers.dart';
+import '../draw_params/draw_params.dart';
 import '../magnifier_config/magnifier_config.dart';
 import '../point_config/point_config.dart';
 import '../line_config/line_config.dart';
@@ -34,9 +35,10 @@ class DrawConfig {
     required this.drawLine,
     required this.tickText,
     required this.spacing,
-    this.gapBackground = Colors.transparent,
+    this.gapBackground = const Color(0x00000000),
     this.hitTestMinDistance = 20,
     this.magnifierConfig = const MagnifierConfig(),
+    this.drawParams = const DrawParams(),
   });
 
   /// 是否启用Draw Overlay功能开关
@@ -69,6 +71,9 @@ class DrawConfig {
 
   /// 放大镜配置
   final MagnifierConfig magnifierConfig;
+
+  /// 绘制Overlay的Object时所需要的参数集
+  final DrawParams drawParams;
 
   Paint get gapBgPaint => Paint()
     ..color = gapBackground

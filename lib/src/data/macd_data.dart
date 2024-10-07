@@ -14,7 +14,7 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 import '../config/macd_param/macd_param.dart';
 import '../framework/common.dart';

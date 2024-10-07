@@ -12,13 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:flutter/painting.dart';
+import 'package:copy_with_extension/copy_with_extension.dart';
 
-extension TextStyleExt on TextStyle {
-  double? get totalHeight {
-    if (height != null && fontSize != null) {
-      return fontSize! * height!;
-    }
-    return null;
-  }
+import '../../utils/vector_util.dart';
+import '../../framework/serializers.dart';
+
+part 'draw_params.g.dart';
+
+@CopyWith()
+@FlexiConfigSerializable
+class DrawParams {
+  const DrawParams({
+    this.arrowsRadians = pi30,
+    this.arrowsLen = 16.0,
+  });
+
+  /// 箭头相对于基线的角度.
+  final double arrowsRadians;
+
+  /// 箭头长度
+  final double arrowsLen;
+
+  factory DrawParams.fromJson(Map<String, dynamic> json) =>
+      _$DrawParamsFromJson(json);
+
+  Map<String, dynamic> toJson() => _$DrawParamsToJson(this);
 }

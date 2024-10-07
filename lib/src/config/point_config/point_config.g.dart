@@ -108,7 +108,7 @@ PointConfig _$PointConfigFromJson(Map<String, dynamic> json) => PointConfig(
       radius: (json['radius'] as num?)?.toDouble() ?? 2,
       width: (json['width'] as num?)?.toDouble() ?? 2,
       color: json['color'] == null
-          ? Colors.black
+          ? const Color(0xFF000000)
           : const ColorConverter().fromJson(json['color'] as String),
       borderWidth: (json['borderWidth'] as num?)?.toDouble(),
       borderColor: _$JsonConverterFromJson<String, Color>(

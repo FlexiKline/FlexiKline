@@ -38,5 +38,8 @@ export 'kdj_param/kdj_param.dart';
 export 'macd_param/macd_param.dart';
 export 'rsi_param/rsi_param.dart';
 
+/// DrawOverlay 参数
+export 'draw_params/draw_params.dart';
+
 /// 内置默认配置
 export 'default_config.dart';

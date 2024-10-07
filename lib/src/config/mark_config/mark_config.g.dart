@@ -102,7 +102,7 @@ MarkConfig _$MarkConfigFromJson(Map<String, dynamic> json) => MarkConfig(
           ? const TextAreaConfig(
               style: TextStyle(
                   fontSize: defaulTextSize,
-                  color: Colors.black,
+                  color: Color(0xFF000000),
                   overflow: TextOverflow.ellipsis,
                   height: defaultTextHeight))
           : TextAreaConfig.fromJson(json['text'] as Map<String, dynamic>),

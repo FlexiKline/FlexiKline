@@ -13,7 +13,8 @@
 // limitations under the License.
 
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import '../core/export.dart';

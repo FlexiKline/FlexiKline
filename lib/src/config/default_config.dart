@@ -18,8 +18,10 @@ import '../constant.dart';
 import '../extension/render/common.dart';
 import '../framework/export.dart';
 import '../indicators/export.dart';
+import '../utils/vector_util.dart';
 import 'boll_param/boll_param.dart';
 import 'cross_config/cross_config.dart';
+import 'draw_params/draw_params.dart';
 import 'magnifier_config/magnifier_config.dart';
 import 'point_config/point_config.dart';
 import 'draw_config/draw_config.dart';
@@ -380,6 +382,10 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
           color: theme.gridLine,
           width: 1 * theme.scale,
         ),
+      ),
+      drawParams: DrawParams(
+        arrowsRadians: pi30,
+        arrowsLen: 16 * theme.scale,
       ),
     );
   }

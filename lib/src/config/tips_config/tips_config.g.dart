@@ -87,7 +87,7 @@ TipsConfig _$TipsConfigFromJson(Map<String, dynamic> json) => TipsConfig(
       style: json['style'] == null
           ? const TextStyle(
               fontSize: defaulTextSize,
-              color: Colors.black,
+              color: Color(0xFF000000),
               overflow: TextOverflow.ellipsis,
               height: defaultTipsTextHeight)
           : const TextStyleConverter()

@@ -248,8 +248,8 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
       return const SizedBox.shrink();
     }
     return Positioned(
-      top: 0,
-      left: 0,
+      top: 0 + config.margin.top,
+      left: 0 + config.margin.left,
       child: ValueListenableBuilder(
         valueListenable: widget.controller.drawStateLinstener,
         builder: (context, state, child) {

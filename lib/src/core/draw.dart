@@ -439,13 +439,13 @@ mixin DrawBinding
     }
 
     /// 计算刻度坐标
-    Rect? coord = object.pointsArea;
-    if (coord == null) {
+    Rect? bounds = object.pointBounds;
+    if (bounds == null) {
       logd('drawStateTick not draw point!');
       return;
     }
 
-    // logd('drawStateTick coord:$coord');
-    object.drawTick(this, canvas, coord);
+    // logd('drawStateTick bounds:$bounds');
+    object.drawTick(this, canvas, bounds);
   }
 }

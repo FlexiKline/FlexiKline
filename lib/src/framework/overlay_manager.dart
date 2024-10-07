@@ -50,6 +50,8 @@ final class OverlayManager with KlineLog {
     DrawType.horizontalLine: HorizontalLineDrawObject.new,
     DrawType.verticalLine: VerticalLineDrawObject.new,
     DrawType.extendedTrendLine: ExtendedTrendLineDrawObject.new,
+    DrawType.arrowLine: ArrowLineDrawObject.new,
+    DrawType.rayLine: RayLineDrawObject.new,
   };
 
   Iterable<IDrawType>? _supportDrawTypes;
