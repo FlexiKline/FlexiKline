@@ -37,14 +37,13 @@ class VerticalLineDrawObject extends DrawObject {
 
     final dx = first.dx;
     final mainRect = context.mainRect;
-    if (mainRect.includeDx(dx)) {
-      final distance = position.distanceToLine(
-        Offset(dx, mainRect.top),
-        Offset(dx, mainRect.bottom),
-      );
-      return distance <= context.config.hitTestMinDistance;
-    }
-    return false;
+    if (!mainRect.includeDx(dx)) return false;
+
+    final distance = position.distanceToLine(
+      Offset(dx, mainRect.top),
+      Offset(dx, mainRect.bottom),
+    );
+    return distance <= context.config.hitTestMinDistance;
   }
 
   @override

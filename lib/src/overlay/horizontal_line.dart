@@ -37,14 +37,13 @@ class HorizontalLineDrawObject extends DrawObject {
 
     final dy = first.dy;
     final mainRect = context.mainRect;
-    if (mainRect.includeDy(dy)) {
-      final distance = position.distanceToLine(
-        Offset(mainRect.left, dy),
-        Offset(mainRect.right, dy),
-      );
-      return distance <= context.config.hitTestMinDistance;
-    }
-    return false;
+    if (!mainRect.includeDy(dy)) return false;
+
+    final distance = position.distanceToLine(
+      Offset(mainRect.left, dy),
+      Offset(mainRect.right, dy),
+    );
+    return distance <= context.config.hitTestMinDistance;
   }
 
   @override

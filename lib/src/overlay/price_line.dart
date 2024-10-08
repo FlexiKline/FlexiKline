@@ -15,8 +15,8 @@
 import 'dart:ui';
 
 import '../core/interface.dart';
-import '../extension/geometry_ext.dart';
-import '../extension/render/draw_path.dart';
+import '../data/kline_data.dart';
+import '../extension/export.dart';
 import '../framework/overlay.dart';
 
 class PriceLineDrawObject extends DrawObject {
@@ -36,14 +36,13 @@ class PriceLineDrawObject extends DrawObject {
     if (first == null) return false;
 
     final mainRect = context.mainRect;
-    if (!mainRect.include(first)) {
-      final distance = position.distanceToLine(
-        first,
-        Offset(mainRect.right, first.dy),
-      );
-      return distance <= context.config.hitTestMinDistance;
-    }
-    return false;
+    if (!mainRect.include(first)) return false;
+
+    final distance = position.distanceToLine(
+      first,
+      Offset(mainRect.right, first.dy),
+    );
+    return distance <= context.config.hitTestMinDistance;
   }
 
   @override
@@ -71,7 +70,26 @@ class PriceLineDrawObject extends DrawObject {
       line.linePaint,
     );
 
-    // 画价钱
-    
+    // 画价值文本区域
+    final value = context.dyToValue(first.dy);
+    if (value != null) {
+      final valTxt = formatValueTick(
+        value,
+        precision: context.curKlineData.precision,
+      );
+      // if (valTxt.isEmpty) return;
+      final tickText = context.config.priceLineText;
+      final margin = context.config.drawParams.priceTextMargin;
+      canvas.drawTextArea(
+        offset: Offset(
+          first.dx + margin.left,
+          first.dy - tickText.areaHeight - margin.bottom,
+        ),
+        text: valTxt,
+        textConfig: tickText,
+        drawDirection: DrawDirection.ltr,
+        // drawableRect: drawableRect,
+      );
+    }
   }
 }

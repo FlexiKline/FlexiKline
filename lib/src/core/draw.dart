@@ -25,13 +25,7 @@ import 'binding_base.dart';
 import 'interface.dart';
 import 'setting.dart';
 
-/// 图形绘制层
-/// 每一种图形绘制主要分为以下几步:
-/// 1. 启动绘制绘制功能, 此时会阻隔事件传递到chart/cross层
-/// 2. 选择绘制图类型, 此时会主动进行第一绘制点待确认状态, 即会以主图区域中心点坐标绘制十字线.
-/// 3. 移动绘制点, 并确认第一绘制点, 并转换成蜡烛数据坐标记录到[Overlay]的points的first位置.
-/// 4. 重复步骤3, 确认绘制图类型所需要的所有绘制点.
-/// 5. 绘制完成后, 当前绘制图形默认为选中状态.
+/// 图形绘制
 mixin DrawBinding
     on KlineBindingBase, SettingBinding
     implements IDraw, IState, IDrawContext {
@@ -207,8 +201,8 @@ mixin DrawBinding
     final overlay = drawState.overlay!;
 
     final delta = data.delta;
+    final object = _overlayManager.getDrawObject(overlay);
     if (overlay.pointer != null) {
-      final object = _overlayManager.getDrawObject(overlay);
       // 当前移动一个编辑状态的Overlay的某个绘制点指针时,
       // 需要通过[DrawObject]的`onUpdatePoint`接口来校正offset.
       object?.onUpdatePoint(
@@ -216,13 +210,8 @@ mixin DrawBinding
         overlay.pointer!.offset + delta,
         isMove: true,
       );
-      // overlay.pointer?.offset += delta;
     } else {
-      for (var point in overlay.points) {
-        if (point?.offset.isFinite == true) {
-          point?.offset += delta;
-        }
-      }
+      object?.onMoveOverlay(delta);
     }
     _notifyDrawStateChange();
     _markRepaint();

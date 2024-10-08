@@ -16,6 +16,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 
+import '../constant.dart';
 import '../core/interface.dart';
 import '../data/kline_data.dart';
 import '../extension/export.dart';
@@ -401,6 +402,15 @@ abstract class DrawObject<T extends Overlay> extends OverlayObject
     point.offset = offset;
   }
 
+  /// 移动Overlay
+  void onMoveOverlay(Offset delta) {
+    for (var point in points) {
+      if (point?.offset.isFinite == true) {
+        point?.offset += delta;
+      }
+    }
+  }
+
   Size? __valueTickSize;
   Size? get valueTickSize => __valueTickSize;
   set _valueTickSize(Size size) {
@@ -583,6 +593,7 @@ mixin DrawObjectMixin on OverlayObject {
   }
 
   /// 在[drawableRect]区域上, 绘制由[dx]指定的时间刻度
+  @protected
   Size drawTimeTick(
     IDrawContext context,
     Canvas canvas,
@@ -597,7 +608,7 @@ mixin DrawObjectMixin on OverlayObject {
     final ts = klineData.indexToTimestamp(index);
     if (ts == null) return Size.zero;
 
-    final timeTxt = formatDateTimeByTimeBar(ts, bar: klineData.timeBar);
+    final timeTxt = formatTimeTick(ts, bar: klineData.timeBar);
 
     drawableRect ??= context.timeRect;
     return canvas.drawTextArea(
@@ -613,6 +624,7 @@ mixin DrawObjectMixin on OverlayObject {
   }
 
   /// 在[drawableRect]区域的右侧, 绘制由[dy]指定的价值刻度
+  @protected
   Size drawValueTick(
     IDrawContext context,
     Canvas canvas,
@@ -622,11 +634,9 @@ mixin DrawObjectMixin on OverlayObject {
     final value = context.dyToValue(dy);
     if (value == null) return Size.zero;
 
-    // TODO: 此处考虑与[CandlePaintObject].formatMarkValueOnCross保持统一.
-    final valTxt = formatNumber(
-      value.toDecimal(),
+    final valTxt = formatValueTick(
+      value,
       precision: context.curKlineData.precision,
-      defIfZero: '0.00',
     );
 
     final txtSpacing = context.config.spacing;
@@ -646,5 +656,18 @@ mixin DrawObjectMixin on OverlayObject {
       drawDirection: DrawDirection.rtl,
       drawableRect: drawableRect,
     );
+  }
+
+  /// 格式化时间刻度文本
+  @protected
+  String formatTimeTick(int ts, {TimeBar? bar}) {
+    return formatDateTimeByTimeBar(ts, bar: bar);
+  }
+
+  /// 格式化价值刻度文本
+  /// TODO: 此处考虑与[CandlePaintObject].formatMarkValueOnCross保持统一.
+  @protected
+  String formatValueTick(BagNum value, {int precision = 0}) {
+    return formatNumber(value.toDecimal(), precision: precision);
   }
 }

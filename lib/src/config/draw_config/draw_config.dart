@@ -80,6 +80,10 @@ class DrawConfig {
     ..style = PaintingStyle.fill
     ..strokeWidth = 6;
 
+  TextAreaConfig get priceLineText {
+    return drawParams.priceText ?? tickText;
+  }
+
   factory DrawConfig.fromJson(Map<String, dynamic> json) =>
       _$DrawConfigFromJson(json);
 

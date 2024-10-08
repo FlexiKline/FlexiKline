@@ -11,6 +11,10 @@ abstract class _$DrawParamsCWProxy {
 
   DrawParams arrowsLen(double arrowsLen);
 
+  DrawParams priceText(TextAreaConfig? priceText);
+
+  DrawParams priceTextMargin(EdgeInsets priceTextMargin);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `DrawParams(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -20,6 +24,8 @@ abstract class _$DrawParamsCWProxy {
   DrawParams call({
     double? arrowsRadians,
     double? arrowsLen,
+    TextAreaConfig? priceText,
+    EdgeInsets? priceTextMargin,
   });
 }
 
@@ -37,6 +43,13 @@ class _$DrawParamsCWProxyImpl implements _$DrawParamsCWProxy {
   DrawParams arrowsLen(double arrowsLen) => this(arrowsLen: arrowsLen);
 
   @override
+  DrawParams priceText(TextAreaConfig? priceText) => this(priceText: priceText);
+
+  @override
+  DrawParams priceTextMargin(EdgeInsets priceTextMargin) =>
+      this(priceTextMargin: priceTextMargin);
+
+  @override
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `DrawParams(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -47,6 +60,8 @@ class _$DrawParamsCWProxyImpl implements _$DrawParamsCWProxy {
   DrawParams call({
     Object? arrowsRadians = const $CopyWithPlaceholder(),
     Object? arrowsLen = const $CopyWithPlaceholder(),
+    Object? priceText = const $CopyWithPlaceholder(),
+    Object? priceTextMargin = const $CopyWithPlaceholder(),
   }) {
     return DrawParams(
       arrowsRadians:
@@ -58,6 +73,15 @@ class _$DrawParamsCWProxyImpl implements _$DrawParamsCWProxy {
           ? _value.arrowsLen
           // ignore: cast_nullable_to_non_nullable
           : arrowsLen as double,
+      priceText: priceText == const $CopyWithPlaceholder()
+          ? _value.priceText
+          // ignore: cast_nullable_to_non_nullable
+          : priceText as TextAreaConfig?,
+      priceTextMargin: priceTextMargin == const $CopyWithPlaceholder() ||
+              priceTextMargin == null
+          ? _value.priceTextMargin
+          // ignore: cast_nullable_to_non_nullable
+          : priceTextMargin as EdgeInsets,
     );
   }
 }
@@ -75,10 +99,29 @@ extension $DrawParamsCopyWith on DrawParams {
 DrawParams _$DrawParamsFromJson(Map<String, dynamic> json) => DrawParams(
       arrowsRadians: (json['arrowsRadians'] as num?)?.toDouble() ?? pi30,
       arrowsLen: (json['arrowsLen'] as num?)?.toDouble() ?? 16.0,
+      priceText: json['priceText'] == null
+          ? null
+          : TextAreaConfig.fromJson(json['priceText'] as Map<String, dynamic>),
+      priceTextMargin: json['priceTextMargin'] == null
+          ? EdgeInsets.zero
+          : const EdgeInsetsConverter()
+              .fromJson(json['priceTextMargin'] as Map<String, dynamic>),
     );
 
-Map<String, dynamic> _$DrawParamsToJson(DrawParams instance) =>
-    <String, dynamic>{
-      'arrowsRadians': instance.arrowsRadians,
-      'arrowsLen': instance.arrowsLen,
-    };
+Map<String, dynamic> _$DrawParamsToJson(DrawParams instance) {
+  final val = <String, dynamic>{
+    'arrowsRadians': instance.arrowsRadians,
+    'arrowsLen': instance.arrowsLen,
+  };
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('priceText', instance.priceText?.toJson());
+  val['priceTextMargin'] =
+      const EdgeInsetsConverter().toJson(instance.priceTextMargin);
+  return val;
+}

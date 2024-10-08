@@ -13,9 +13,11 @@
 // limitations under the License.
 
 import 'package:copy_with_extension/copy_with_extension.dart';
+import 'package:flutter/painting.dart';
 
 import '../../utils/vector_util.dart';
 import '../../framework/serializers.dart';
+import '../text_area_config/text_area_config.dart';
 
 part 'draw_params.g.dart';
 
@@ -25,13 +27,21 @@ class DrawParams {
   const DrawParams({
     this.arrowsRadians = pi30,
     this.arrowsLen = 16.0,
+    this.priceText,
+    this.priceTextMargin = EdgeInsets.zero,
   });
 
-  /// 箭头相对于基线的角度.
+  /// 箭头相对于基线的角
   final double arrowsRadians;
 
   /// 箭头长度
   final double arrowsLen;
+
+  /// 价值线(priceLine)的文本区域配置, 如果不指定, 使用DrawConfig的tickText.
+  final TextAreaConfig? priceText;
+
+  /// 价值线(priceLine)的文本区域相对于价值线的margin
+  final EdgeInsets priceTextMargin;
 
   factory DrawParams.fromJson(Map<String, dynamic> json) =>
       _$DrawParamsFromJson(json);
