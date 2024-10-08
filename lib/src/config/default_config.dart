@@ -384,27 +384,47 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
         ),
       ),
       drawParams: DrawParams(
-          arrowsRadians: pi30,
-          arrowsLen: 16 * theme.scale,
-          priceText: TextAreaConfig(
-            style: TextStyle(
-              // color: const Color(0xFFFFFFFF),
-              color: const Color(0xFFFF0000),
-              fontSize: theme.normalTextSize,
-              fontWeight: FontWeight.normal,
-              height: defaultTextHeight,
-            ),
-            // background: const Color(0xFFFF0000),
-            // padding: EdgeInsets.all(1 * theme.scale),
-            // border: BorderSide.none,
-            // borderRadius: BorderRadius.all(
-            //   Radius.circular(2 * theme.scale),
-            // ),
+        // 箭头(ArrowLine)
+        arrowsRadians: pi30,
+        arrowsLen: 16 * theme.scale,
+        // 价值线(priceLine)
+        priceText: TextAreaConfig(
+          style: TextStyle(
+            // color: const Color(0xFFFFFFFF),
+            color: const Color(0xFFFF0000),
+            fontSize: theme.normalTextSize,
+            fontWeight: FontWeight.normal,
+            height: defaultTextHeight,
           ),
-          priceTextMargin: EdgeInsets.only(
-            left: 12 * theme.scale,
-            bottom: 2 * theme.scale,
-          )),
+          // background: const Color(0xFFFF0000),
+          // padding: EdgeInsets.all(1 * theme.scale),
+          // border: BorderSide.none,
+          // borderRadius: BorderRadius.all(
+          //   Radius.circular(2 * theme.scale),
+          // ),
+        ),
+        priceTextMargin: EdgeInsets.only(
+          left: 12 * theme.scale,
+          bottom: 2 * theme.scale,
+        ),
+        // 趋势线角度(TrendAngle)
+        angleBaseLineMinLen: 80 * theme.scale,
+        angleRadSize: Size.square(50 * theme.scale),
+        angleText: TextAreaConfig(
+          style: TextStyle(
+            color: const Color(0xFFFFFFFF),
+            fontSize: theme.normalTextSize,
+            fontWeight: FontWeight.normal,
+            height: defaultTextHeight,
+          ),
+          background: const Color(0xFFFF0000),
+          padding: EdgeInsets.all(1 * theme.scale),
+          border: BorderSide.none,
+          borderRadius: BorderRadius.all(
+            Radius.circular(2 * theme.scale),
+          ),
+        ),
+      ),
     );
   }
 

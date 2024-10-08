@@ -33,7 +33,7 @@ class TrendLineDrawObject extends DrawObject {
       return false;
     }
 
-    final distance = position.distanceToRayLine(first, second);
+    final distance = position.distanceToLine(first, second);
     return distance <= context.config.hitTestMinDistance;
   }
 

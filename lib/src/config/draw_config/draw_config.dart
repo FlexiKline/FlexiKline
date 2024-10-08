@@ -84,6 +84,10 @@ class DrawConfig {
     return drawParams.priceText ?? tickText;
   }
 
+  TextAreaConfig get angleRadText {
+    return drawParams.angleText ?? tickText;
+  }
+
   factory DrawConfig.fromJson(Map<String, dynamic> json) =>
       _$DrawConfigFromJson(json);
 

@@ -15,6 +15,12 @@ abstract class _$DrawParamsCWProxy {
 
   DrawParams priceTextMargin(EdgeInsets priceTextMargin);
 
+  DrawParams angleText(TextAreaConfig? angleText);
+
+  DrawParams angleBaseLineMinLen(double angleBaseLineMinLen);
+
+  DrawParams angleRadSize(Size angleRadSize);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `DrawParams(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -26,6 +32,9 @@ abstract class _$DrawParamsCWProxy {
     double? arrowsLen,
     TextAreaConfig? priceText,
     EdgeInsets? priceTextMargin,
+    TextAreaConfig? angleText,
+    double? angleBaseLineMinLen,
+    Size? angleRadSize,
   });
 }
 
@@ -50,6 +59,17 @@ class _$DrawParamsCWProxyImpl implements _$DrawParamsCWProxy {
       this(priceTextMargin: priceTextMargin);
 
   @override
+  DrawParams angleText(TextAreaConfig? angleText) => this(angleText: angleText);
+
+  @override
+  DrawParams angleBaseLineMinLen(double angleBaseLineMinLen) =>
+      this(angleBaseLineMinLen: angleBaseLineMinLen);
+
+  @override
+  DrawParams angleRadSize(Size angleRadSize) =>
+      this(angleRadSize: angleRadSize);
+
+  @override
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `DrawParams(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -62,6 +82,9 @@ class _$DrawParamsCWProxyImpl implements _$DrawParamsCWProxy {
     Object? arrowsLen = const $CopyWithPlaceholder(),
     Object? priceText = const $CopyWithPlaceholder(),
     Object? priceTextMargin = const $CopyWithPlaceholder(),
+    Object? angleText = const $CopyWithPlaceholder(),
+    Object? angleBaseLineMinLen = const $CopyWithPlaceholder(),
+    Object? angleRadSize = const $CopyWithPlaceholder(),
   }) {
     return DrawParams(
       arrowsRadians:
@@ -82,6 +105,21 @@ class _$DrawParamsCWProxyImpl implements _$DrawParamsCWProxy {
           ? _value.priceTextMargin
           // ignore: cast_nullable_to_non_nullable
           : priceTextMargin as EdgeInsets,
+      angleText: angleText == const $CopyWithPlaceholder()
+          ? _value.angleText
+          // ignore: cast_nullable_to_non_nullable
+          : angleText as TextAreaConfig?,
+      angleBaseLineMinLen:
+          angleBaseLineMinLen == const $CopyWithPlaceholder() ||
+                  angleBaseLineMinLen == null
+              ? _value.angleBaseLineMinLen
+              // ignore: cast_nullable_to_non_nullable
+              : angleBaseLineMinLen as double,
+      angleRadSize:
+          angleRadSize == const $CopyWithPlaceholder() || angleRadSize == null
+              ? _value.angleRadSize
+              // ignore: cast_nullable_to_non_nullable
+              : angleRadSize as Size,
     );
   }
 }
@@ -106,6 +144,15 @@ DrawParams _$DrawParamsFromJson(Map<String, dynamic> json) => DrawParams(
           ? EdgeInsets.zero
           : const EdgeInsetsConverter()
               .fromJson(json['priceTextMargin'] as Map<String, dynamic>),
+      angleText: json['angleText'] == null
+          ? null
+          : TextAreaConfig.fromJson(json['angleText'] as Map<String, dynamic>),
+      angleBaseLineMinLen:
+          (json['angleBaseLineMinLen'] as num?)?.toDouble() ?? 80,
+      angleRadSize: json['angleRadSize'] == null
+          ? const Size(50, 50)
+          : const SizeConverter()
+              .fromJson(json['angleRadSize'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$DrawParamsToJson(DrawParams instance) {
@@ -123,5 +170,8 @@ Map<String, dynamic> _$DrawParamsToJson(DrawParams instance) {
   writeNotNull('priceText', instance.priceText?.toJson());
   val['priceTextMargin'] =
       const EdgeInsetsConverter().toJson(instance.priceTextMargin);
+  writeNotNull('angleText', instance.angleText?.toJson());
+  val['angleBaseLineMinLen'] = instance.angleBaseLineMinLen;
+  val['angleRadSize'] = const SizeConverter().toJson(instance.angleRadSize);
   return val;
 }

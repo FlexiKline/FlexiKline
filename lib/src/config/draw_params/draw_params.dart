@@ -25,23 +25,38 @@ part 'draw_params.g.dart';
 @FlexiConfigSerializable
 class DrawParams {
   const DrawParams({
+    // 箭头(ArrowLine)
     this.arrowsRadians = pi30,
     this.arrowsLen = 16.0,
+    // 价值线(priceLine)
     this.priceText,
     this.priceTextMargin = EdgeInsets.zero,
+    // 趋势线角度(TrendAngle)
+    this.angleText,
+    this.angleBaseLineMinLen = 80,
+    this.angleRadSize = const Size(50, 50),
   });
 
-  /// 箭头相对于基线的角
+  /// 箭头(ArrowLine)相对于基线的角
   final double arrowsRadians;
 
-  /// 箭头长度
+  /// 箭头(ArrowLine)长度
   final double arrowsLen;
 
-  /// 价值线(priceLine)的文本区域配置, 如果不指定, 使用DrawConfig的tickText.
+  /// 价值线(priceLine)的文本配置, 如果不指定, 使用DrawConfig的tickText.
   final TextAreaConfig? priceText;
 
   /// 价值线(priceLine)的文本区域相对于价值线的margin
   final EdgeInsets priceTextMargin;
+
+  /// 趋势线角度(TrendAngle)的文本配置, 如果不指定, 使用DrawConfig的tickText.
+  final TextAreaConfig? angleText;
+
+  /// 趋势线角度(TrendAngle)的基线长度
+  final double angleBaseLineMinLen;
+
+  /// 趋势线角度(TrendAngle)的圆弧大小
+  final Size angleRadSize;
 
   factory DrawParams.fromJson(Map<String, dynamic> json) =>
       _$DrawParamsFromJson(json);

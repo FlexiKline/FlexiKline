@@ -73,6 +73,8 @@ class PathCustomPainter extends CustomPainter {
     //   'zp::: paint>>> size$size,  screenWidth:${ScreenUtil().screenWidth}',
     // );
     drawText3(canvas);
+
+    addArc(canvas);
   }
 
   @override
