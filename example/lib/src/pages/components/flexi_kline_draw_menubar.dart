@@ -96,7 +96,9 @@ class _FlexiKlineDrawMenubarState extends ConsumerState<FlexiKlineDrawMenubar> {
             // iconData: Icons.visibility_off_outlined,
           ),
           ShrinkIconButton(
-            onPressed: () {},
+            onPressed: () {
+              widget.controller.cleanAllDrawOverlay();
+            },
             content: Icons.cleaning_services_rounded,
           ),
           ShrinkIconButton(

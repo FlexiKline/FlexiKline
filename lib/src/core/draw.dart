@@ -68,7 +68,7 @@ mixin DrawBinding
     _drawEditingListener.dispose();
     _drawStateListener.dispose();
     _repaintDraw.dispose();
-    _overlayManager.saveOverlayListConfig(isClean: true);
+    _overlayManager.disposeSyncAllOverlay();
   }
 
   @override
@@ -336,6 +336,18 @@ mixin DrawBinding
       }
     }
   }
+
+  ////// 操作 //////
+  void cleanAllDrawOverlay() {
+    _overlayManager.cleanAllOverlay();
+    final overlay = drawState.overlay;
+    if (overlay != null) {
+      _overlayManager.removeOverlay(overlay);
+      _drawState = const Prepared();
+    }
+    _markRepaint();
+  }
+  ////// 绘制 //////
 
   /// 以当前蜡烛图绘制参数为基础, 将绘制参数[point]转换Offset坐标.
   @override

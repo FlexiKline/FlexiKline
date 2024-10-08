@@ -19,8 +19,8 @@ import '../extension/geometry_ext.dart';
 import '../extension/render/draw_path.dart';
 import '../framework/overlay.dart';
 
-class VerticalLineDrawObject extends DrawObject {
-  VerticalLineDrawObject(super.overlay);
+class PriceLineDrawObject extends DrawObject {
+  PriceLineDrawObject(super.overlay);
 
   @override
   bool hitTest(
@@ -30,17 +30,16 @@ class VerticalLineDrawObject extends DrawObject {
   }) {
     assert(
       points.length == 1,
-      'VerticalLine only takes one point, but it has ${points.length}',
+      'HorizontalLine only takes one point, but it has ${points.length}',
     );
     final first = points.firstOrNull?.offset;
     if (first == null) return false;
 
-    final dx = first.dx;
     final mainRect = context.mainRect;
-    if (mainRect.includeDx(dx)) {
+    if (!mainRect.include(first)) {
       final distance = position.distanceToLine(
-        Offset(dx, mainRect.top),
-        Offset(dx, mainRect.bottom),
+        first,
+        Offset(mainRect.right, first.dy),
       );
       return distance <= context.config.hitTestMinDistance;
     }
@@ -51,26 +50,28 @@ class VerticalLineDrawObject extends DrawObject {
   void draw(IDrawContext context, Canvas canvas, Size size) {
     assert(
       points.length == 1,
-      'VerticalLine only takes one point, but it has ${points.length}',
+      'PriceLine only takes one point, but it has ${points.length}',
     );
     final first = points.firstOrNull?.offset;
     if (first == null) return;
-
     final mainRect = context.mainRect;
-    final dx = first.dx;
-    if (!mainRect.includeDx(dx)) {
-      context.logi('draw($type), but dx:$dx not in mainRect.');
+    if (!mainRect.include(first)) {
+      context.logi('draw($type), but first:$first not in mainRect.');
       return;
     }
 
+    // 画线
     canvas.drawLineType(
       line.type,
       Path()
         ..addPolygon(
-          [Offset(dx, mainRect.top), Offset(dx, mainRect.bottom)],
+          [first, Offset(mainRect.right, first.dy)],
           false,
         ),
       line.linePaint,
     );
+
+    // 画价钱
+    
   }
 }

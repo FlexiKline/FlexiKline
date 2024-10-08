@@ -28,14 +28,18 @@ class CrossLineDrawObject extends DrawObject {
     Offset position, {
     bool isMove = false,
   }) {
-    final point = points.first;
-    if (point == null) return false;
-    final offset = point.offset;
+    assert(
+      points.length == 1,
+      'CrossLine only takes one point, but it has ${points.length}',
+    );
+    final first = points.firstOrNull?.offset;
+    if (first == null) return false;
+
     final mainRect = context.mainRect;
-    if (mainRect.includeDx(offset.dx) || mainRect.includeDy(offset.dy)) {
+    if (mainRect.includeDx(first.dx) || mainRect.includeDy(first.dy)) {
       double distance = position.distanceToLine(
-        Offset(mainRect.left, offset.dy),
-        Offset(mainRect.right, offset.dy),
+        Offset(mainRect.left, first.dy),
+        Offset(mainRect.right, first.dy),
       );
       final hitTestMinDistance = isMove
           ? context.config.hitTestMinDistance * 10
@@ -44,8 +48,8 @@ class CrossLineDrawObject extends DrawObject {
         return true;
       }
       distance = position.distanceToLine(
-        Offset(offset.dx, mainRect.top),
-        Offset(offset.dx, mainRect.bottom),
+        Offset(first.dx, mainRect.top),
+        Offset(first.dx, mainRect.bottom),
       );
       if (distance <= hitTestMinDistance) {
         return true;
@@ -60,21 +64,18 @@ class CrossLineDrawObject extends DrawObject {
       points.length == 1,
       'CrossLine only takes one point, but it has ${points.length}',
     );
-    final point = points.first;
-    if (point == null) {
-      context.logi('draw($type), not found point!');
-      return;
-    }
+    final first = points.firstOrNull?.offset;
+    if (first == null) return;
+
     final mainRect = context.mainRect;
-    final offset = point.offset;
-    if (mainRect.includeDx(offset.dx) || mainRect.includeDy(offset.dy)) {
+    if (mainRect.includeDx(first.dx) || mainRect.includeDy(first.dy)) {
       canvas.drawLineType(
         line.type,
         Path()
-          ..moveTo(mainRect.left, offset.dy)
-          ..lineTo(mainRect.right, offset.dy)
-          ..moveTo(offset.dx, mainRect.top)
-          ..lineTo(offset.dx, mainRect.bottom),
+          ..moveTo(mainRect.left, first.dy)
+          ..lineTo(mainRect.right, first.dy)
+          ..moveTo(first.dx, mainRect.top)
+          ..lineTo(first.dx, mainRect.bottom),
         line.linePaint,
       );
     }

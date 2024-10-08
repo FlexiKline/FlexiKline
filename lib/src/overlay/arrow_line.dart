@@ -27,16 +27,13 @@ class ArrowLineDrawObject extends DrawObject {
       points.length == 2,
       'ArrowLine hitTest points.length:${points.length} must be equals 2',
     );
-    final first = points.firstOrNull;
-    final second = points.secondOrNull;
+    final first = points.firstOrNull?.offset;
+    final second = points.secondOrNull?.offset;
     if (first == null || second == null) {
       return false;
     }
 
-    final distance = position.distanceToRayLine(
-      first.offset,
-      second.offset,
-    );
+    final distance = position.distanceToRayLine(first, second);
     return distance <= context.config.hitTestMinDistance;
   }
 

@@ -28,16 +28,13 @@ class RayLineDrawObject extends DrawObject {
       points.length == 2,
       'RayLine hitTest points.length:${points.length} must be equals 2',
     );
-    final first = points.firstOrNull;
-    final second = points.secondOrNull;
+    final first = points.firstOrNull?.offset;
+    final second = points.secondOrNull?.offset;
     if (first == null || second == null) {
       return false;
     }
 
-    final distance = position.distanceToRayLine(
-      first.offset,
-      second.offset,
-    );
+    final distance = position.distanceToRayLine(first, second);
     return distance <= context.config.hitTestMinDistance;
   }
 
@@ -48,18 +45,14 @@ class RayLineDrawObject extends DrawObject {
       'RayLine draw points.length:${points.length} must be equals 2',
     );
 
-    final first = points.firstOrNull;
-    final second = points.secondOrNull;
+    final first = points.firstOrNull?.offset;
+    final second = points.secondOrNull?.offset;
     if (first == null || second == null) {
       return;
     }
 
     final mainRect = context.mainRect;
-    final list = reflectPointsOnRect(
-      first.offset,
-      second.offset,
-      mainRect,
-    );
+    final list = reflectPointsOnRect(first, second, mainRect);
 
     canvas.drawLineType(
       line.type,

@@ -17,7 +17,6 @@ import 'dart:ui';
 import '../core/interface.dart';
 import '../extension/export.dart';
 import '../framework/overlay.dart';
-import '../utils/vector_util.dart';
 
 class HorizontalTrendLineDrawObject extends DrawObject {
   HorizontalTrendLineDrawObject(super.overlay);
@@ -28,16 +27,13 @@ class HorizontalTrendLineDrawObject extends DrawObject {
       points.length == 2,
       'HorizontalTrendLine hitTest points.length:${points.length} must be equals 2',
     );
-    final first = points.firstOrNull;
-    final second = points.secondOrNull;
+    final first = points.firstOrNull?.offset;
+    final second = points.secondOrNull?.offset;
     if (first == null || second == null) {
       return false;
     }
 
-    final distance = position.distanceToLine(
-      first.offset,
-      second.offset,
-    );
+    final distance = position.distanceToLine(first, second);
     return distance <= context.config.hitTestMinDistance;
   }
 

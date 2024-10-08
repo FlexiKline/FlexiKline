@@ -114,7 +114,7 @@ enum DrawType implements IDrawType {
   horizontalLine(1), // 水平线
   verticalLine(1), // 垂直线
   crossLine(1), // 十字线
-  priceLine(2), // 价钱线
+  priceLine(1), // 价钱线
   // 多线
   parallelChannel(2), // 平行通道
   // parallelLines, // 平行直线

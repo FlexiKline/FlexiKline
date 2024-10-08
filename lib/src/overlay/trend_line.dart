@@ -15,23 +15,45 @@
 import 'dart:ui';
 
 import '../core/interface.dart';
-import '../extension/render/draw_path.dart';
+import '../extension/export.dart';
 import '../framework/overlay.dart';
 
 class TrendLineDrawObject extends DrawObject {
   TrendLineDrawObject(super.overlay);
 
   @override
-  void draw(IDrawContext context, Canvas canvas, Size size) {
-    List<Offset> dotList = [];
-    for (var point in points) {
-      if (point?.offset.isFinite == true) {
-        dotList.add(point!.offset);
-      }
+  bool hitTest(IDrawContext context, Offset position, {bool isMove = false}) {
+    assert(
+      points.length == 2,
+      'TrendLine hitTest points.length:${points.length} must be equals 2',
+    );
+    final first = points.firstOrNull?.offset;
+    final second = points.secondOrNull?.offset;
+    if (first == null || second == null) {
+      return false;
     }
+
+    final distance = position.distanceToRayLine(first, second);
+    return distance <= context.config.hitTestMinDistance;
+  }
+
+  @override
+  void draw(IDrawContext context, Canvas canvas, Size size) {
+    assert(
+      points.length == 2,
+      'TrendLine draw points.length:${points.length} must be equals 2',
+    );
+
+    final first = points.firstOrNull?.offset;
+    final second = points.secondOrNull?.offset;
+    if (first == null || second == null) {
+      return;
+    }
+
+    // 画线
     canvas.drawLineType(
       line.type,
-      Path()..addPolygon(dotList, false),
+      Path()..addPolygon([first, second], false),
       line.linePaint,
     );
   }

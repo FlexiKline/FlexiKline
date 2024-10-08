@@ -28,16 +28,13 @@ class ExtendedTrendLineDrawObject extends DrawObject {
       points.length == 2,
       'ExtendedTrendLine hitTest points.length:${points.length} must be equals 2',
     );
-    final first = points.firstOrNull;
-    final second = points.secondOrNull;
+    final first = points.firstOrNull?.offset;
+    final second = points.secondOrNull?.offset;
     if (first == null || second == null) {
       return false;
     }
 
-    final distance = position.distanceToExtendedLine(
-      first.offset,
-      second.offset,
-    );
+    final distance = position.distanceToExtendedLine(first, second);
     return distance <= context.config.hitTestMinDistance;
   }
 
@@ -48,23 +45,15 @@ class ExtendedTrendLineDrawObject extends DrawObject {
       'ExtendedTrendLine draw points.length:${points.length} must be equals 2',
     );
 
-    final first = points.firstOrNull;
-    final second = points.secondOrNull;
+    final first = points.firstOrNull?.offset;
+    final second = points.secondOrNull?.offset;
     if (first == null || second == null) {
       return;
     }
 
     final mainRect = context.mainRect;
-    final list1 = reflectPointsOnRect(
-      first.offset,
-      second.offset,
-      mainRect,
-    );
-    final list2 = reflectPointsOnRect(
-      second.offset,
-      first.offset,
-      mainRect,
-    );
+    final list1 = reflectPointsOnRect(first, second, mainRect);
+    final list2 = reflectPointsOnRect(second, first, mainRect);
 
     canvas.drawLineType(
       line.type,

@@ -21,3 +21,4 @@ export './vertical_line.dart';
 export './extended_trend_line.dart';
 export './arrow_line.dart';
 export './ray_line.dart';
+export './price_line.dart';

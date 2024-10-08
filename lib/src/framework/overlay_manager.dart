@@ -54,6 +54,7 @@ final class OverlayManager with KlineLog {
     DrawType.extendedTrendLine: ExtendedTrendLineDrawObject.new,
     DrawType.arrowLine: ArrowLineDrawObject.new,
     DrawType.rayLine: RayLineDrawObject.new,
+    DrawType.priceLine: PriceLineDrawObject.new,
   };
 
   Iterable<IDrawType>? _supportDrawTypes;
@@ -84,24 +85,27 @@ final class OverlayManager with KlineLog {
     if (request.instId.isEmpty || request.instId == _instId) return;
     logd('onChangeCandleRequest $_instId => ${request.instId}');
     if (_instId.isNotEmpty) {
-      saveOverlayListConfig(isClean: true);
+      disposeSyncAllOverlay();
     }
     _instId = request.instId;
     final list = configuration.getOverlayListConfig(_instId);
     _overlayList = SortableHashSet.from(list);
   }
 
-  /// 保存当前配置
-  /// [isClean] 清理当前[_overlayList]和[_overlayToObjects]
-  void saveOverlayListConfig({bool isClean = true}) {
-    configuration.saveOverlayListConfig(_instId, _overlayList);
-    if (isClean) {
-      for (var overlay in _overlayList) {
-        overlay.dispose();
-      }
-      _overlayList.clear();
+  /// 释放所有Overlay并清理[_overlayList].
+  /// [isStore] 是否保存当前OverlayList到本地.
+  /// [isSync] 清理后是否同步清理本地缓存.
+  void disposeSyncAllOverlay({bool isStore = true, bool isSync = false}) {
+    if (isStore) configuration.saveOverlayListConfig(_instId, _overlayList);
+    for (var overlay in _overlayList) {
+      overlay.dispose();
     }
+    _overlayList.clear();
+    if (isSync) configuration.saveOverlayListConfig(_instId, _overlayList);
   }
+
+  /// 清理当前所有的Overlay.
+  void cleanAllOverlay() => disposeSyncAllOverlay(isStore: false, isSync: true);
 
   /// 通过[type]创建Overlay.
   /// 在Overlay未完成绘制时, 其line的配置使用crosshair.

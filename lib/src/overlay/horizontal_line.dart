@@ -28,18 +28,21 @@ class HorizontalLineDrawObject extends DrawObject {
     Offset position, {
     bool isMove = false,
   }) {
-    final point = points.first;
-    if (point == null) return false;
-    final dy = point.offset.dy;
+    assert(
+      points.length == 1,
+      'HorizontalLine only takes one point, but it has ${points.length}',
+    );
+    final first = points.firstOrNull?.offset;
+    if (first == null) return false;
+
+    final dy = first.dy;
     final mainRect = context.mainRect;
     if (mainRect.includeDy(dy)) {
       final distance = position.distanceToLine(
         Offset(mainRect.left, dy),
         Offset(mainRect.right, dy),
       );
-      if (distance <= context.config.hitTestMinDistance) {
-        return true;
-      }
+      return distance <= context.config.hitTestMinDistance;
     }
     return false;
   }
@@ -50,13 +53,11 @@ class HorizontalLineDrawObject extends DrawObject {
       points.length == 1,
       'HorizontalLine only takes one point, but it has ${points.length}',
     );
-    final point = points.first;
-    if (point == null) {
-      context.logi('draw($type), not found point!');
-      return;
-    }
+    final first = points.firstOrNull?.offset;
+    if (first == null) return;
+
     final mainRect = context.mainRect;
-    final dy = point.offset.dy;
+    final dy = first.dy;
     if (!mainRect.includeDy(dy)) {
       context.logi('draw($type), but dy:$dy not in mainRect.');
       return;
