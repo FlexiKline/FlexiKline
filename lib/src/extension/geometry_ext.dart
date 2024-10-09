@@ -140,6 +140,11 @@ extension OffsetExt on Offset {
     if (dx == 0) return 0;
     return dy / dx;
   }
+
+  /// 判断当前坐标是否在ABCD构成的平行四边行通道内
+  bool isInsideParalle(Offset A, Offset B, Offset C, Offset D) {
+    return pointIsInsideParalle2(this, A, B, C, D);
+  }
 }
 
 extension SizeExt on Size {

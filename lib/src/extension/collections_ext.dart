@@ -23,6 +23,16 @@ extension ListExt<T> on List<T> {
     if (checkIndex(index)) return this[index];
     return null;
   }
+}
+
+extension IterableExt<T> on Iterable<T> {
+  bool get hasValidData {
+    if (isEmpty) return false;
+    for (T t in this) {
+      if (t != null) return true;
+    }
+    return false;
+  }
 
   T? get secondOrNull {
     var iterator = this.iterator;
@@ -31,12 +41,13 @@ extension ListExt<T> on List<T> {
     return null;
   }
 
-  bool get hasValidData {
-    if (isEmpty) return false;
-    for (T t in this) {
-      if (t != null) return true;
-    }
-    return false;
+  T? get thirdOrNull {
+    var iterator = this.iterator;
+    iterator
+      ..moveNext()
+      ..moveNext();
+    if (iterator.moveNext()) return iterator.current;
+    return null;
   }
 
   /// Takes an action for each element.
@@ -134,7 +145,5 @@ extension MapExt<K, V> on Map<K, V> {
     return null;
   }
 }
-
-extension SetExt<T> on Set<T> {}
 
 extension QueueExt<T> on Queue<T> {}

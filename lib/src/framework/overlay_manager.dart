@@ -56,6 +56,8 @@ final class OverlayManager with KlineLog {
     DrawType.arrowLine: ArrowLineDrawObject.new,
     DrawType.rayLine: RayLineDrawObject.new,
     DrawType.priceLine: PriceLineDrawObject.new,
+    // 多线
+    DrawType.parallelChannel: ParalleChannelDrawObject.new,
   };
 
   Iterable<IDrawType>? _supportDrawTypes;
