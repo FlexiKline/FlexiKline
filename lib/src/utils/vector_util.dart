@@ -221,16 +221,17 @@ Offset reflectToRectSide(Offset P, Offset O, Rect rect) {
   }
 }
 
-const pi0 = 0; // 0∘              | 360∘
-const pi15 = math.pi * (1 / 12); // 15∘
-const pi30 = math.pi * (1 / 6); //  30∘
-const pi45 = math.pi * (1 / 4); //  45∘
-const pi60 = math.pi * (2 / 6); //  60∘
-const pi90 = math.pi * (3 / 6); //  90∘
-const pi120 = math.pi * (4 / 6); // 120∘
-const pi135 = math.pi * (3 / 4); // 135∘
-const pi150 = math.pi * (5 / 6); // 150∘
-const pi180 = math.pi; //           180∘
+const pi0 = 0; //                     0∘|360∘
+const pi15 = math.pi * (1 / 12); //   15∘
+const pi30 = math.pi * (1 / 6); //    30∘
+const pi45 = math.pi * (1 / 4); //    45∘
+const pi60 = math.pi * (2 / 6); //    60∘
+const pi90 = math.pi * (3 / 6); //    90∘
+const pi120 = math.pi * (4 / 6); //   120∘
+const pi135 = math.pi * (3 / 4); //   135∘
+const pi150 = math.pi * (5 / 6); //   150∘
+const pi165 = math.pi * (11 / 12); // 165∘
+const pi180 = math.pi; //             180∘
 
 /// 向量旋转[radians]弧度
 /// 设当前向量AB为(x, y)旋转角度为𝜃, 根据向量旋转公式:
@@ -246,32 +247,51 @@ Offset rotateVector(Offset v, double radians) {
   );
 }
 
-List<Offset> genParalleChannelPoints(
-  Offset A,
-  Offset B,
-  Offset P, {
-  List<Offset>? out,
-}) {
-  out ??= List.filled(4, Offset.zero);
-  assert(out.length == 4, 'genParalleChannel param out len must be eauals 4');
-  final k = (B - A).slope;
-  final b = P.dy - P.dx * k;
-  out[3] = Offset(A.dx, k * A.dx + b);
-  out[2] = Offset(B.dx, k * B.dx + b);
-  out[0] = A;
-  out[1] = B;
-  return out;
+/// 平行四边行
+final class Parallelogram {
+  Parallelogram._(this.A, this.B, this.C, this.D);
+
+  /// 以[A]和[B]组成的线为平行四边形底边, 创建与[P]点平行的平行四边行ABCD.
+  /// 其中AD两点和BC两点dx相同, 即垂直于2D坐标系.
+  factory Parallelogram.fromChannelPoint(Offset A, Offset B, Offset P) {
+    final k = (B - A).slope;
+    final b = P.dy - P.dx * k;
+    return Parallelogram._(
+      A,
+      B,
+      Offset(B.dx, k * B.dx + b),
+      Offset(A.dx, k * A.dx + b),
+    );
+  }
+
+  final Offset A;
+  final Offset B;
+  final Offset C;
+  final Offset D;
+
+  List<Offset> get points => [A, B, C, D];
+
+  bool pointInside(Offset point) {
+    return isInsideOfParallelogram(point, this);
+  }
+
+  /// 以AB为底边, 获取平行四边行AB边与CD边的平均分隔线
+  List<Offset> get middleLine {
+    final k = (B - A).slope;
+    final center = (A + B + C + D) / 4;
+    final b = center.dy - center.dx * k;
+    return [
+      Offset(B.dx, k * B.dx + b),
+      Offset(A.dx, k * A.dx + b),
+    ];
+  }
 }
 
-/// 判断点[P]是否在ABCD构成的平行四边行通道内(向量法)
-bool pointIsInsideParalle(Offset P, Offset A, Offset B, Offset C, Offset D) {
-  // assert(
-  //   (B - A).slope == (C - D).slope,
-  //   'pointIsInsideParalle ABCD is not paralle channel',
-  // );
-  final vAB = (B - A);
-  final vAD = (D - A);
-  final vAP = (P - A);
+/// 判断点[P]是否在平行四边形[pl]内(平面解析几何法)
+bool isInsideOfParallelogram(Offset P, Parallelogram pl) {
+  final vAB = pl.B - pl.A;
+  final vAD = pl.D - pl.A;
+  final vAP = P - pl.A;
   final denominator = vAB.cross(vAD);
   final s = vAP.cross(vAD) / denominator;
   final t = vAB.cross(vAP) / denominator;
@@ -279,29 +299,21 @@ bool pointIsInsideParalle(Offset P, Offset A, Offset B, Offset C, Offset D) {
   return s >= 0 && s <= 1 && t >= 0 && t <= 1;
 }
 
-/// 判断点[P]是否在ABCD构成的平行四边行通道内(直线公式法)
-bool pointIsInsideParalle2(Offset P, Offset A, Offset B, Offset C, Offset D) {
-  // assert(
-  //   (B - A).slope == (C - D).slope,
-  //   'pointIsInsideParalle ABCD is not paralle channel',
-  // );
-  final vAB = (B - A);
-  // final vDC = (C - D);
-  final k1 = vAB.slope; // vAB与vDC的斜率相等
-  final bAB = A.dy - A.dx * k1;
-  final bDC = D.dy - D.dx * k1;
-  final b1 = P.dy - P.dx * k1;
-  if ((b1 - bAB).sign == (b1 - bDC).sign) {
+/// 判断点[P]是否在平行四边形[pl]内(平面解析几何法)
+bool isInsideParallelogramByGeometry(Offset P, Parallelogram pl) {
+  double k = (pl.B - pl.A).slope; // vAB与vDC的斜率相等
+  double b1 = pl.A.dy - pl.A.dx * k;
+  double b2 = pl.C.dy - pl.C.dx * k;
+  double bp = P.dy - P.dx * k;
+  if ((bp - b1).sign == (bp - b2).sign) {
     return false;
   }
 
-  final vAD = (D - A);
-  // final vBC = (C - B);
-  final k2 = vAD.slope; // vAD与vBC的斜率相等
-  final bAD = A.dy - A.dx * k2;
-  final bBC = B.dy - B.dx * k2;
-  final b2 = P.dy - P.dx * k2;
-  if ((b2 - bAD).sign == (b2 - bBC).sign) {
+  k = (pl.D - pl.A).slope; // vAD与vBC的斜率相等
+  b1 = pl.A.dy - pl.A.dx * k;
+  b2 = pl.C.dy - pl.C.dx * k;
+  bp = P.dy - P.dx * k;
+  if ((bp - b1).sign == (bp - b2).sign) {
     return false;
   }
 

@@ -141,9 +141,14 @@ extension OffsetExt on Offset {
     return dy / dx;
   }
 
+  /// 以[A],[B]两点为线, 创建到当前坐标P的平行四边形通道.
+  Parallelogram genParalleChannelByLine(Offset A, Offset B) {
+    return Parallelogram.fromChannelPoint(A, B, this);
+  }
+
   /// 判断当前坐标是否在ABCD构成的平行四边行通道内
-  bool isInsideParalle(Offset A, Offset B, Offset C, Offset D) {
-    return pointIsInsideParalle2(this, A, B, C, D);
+  bool isInsideOf(Parallelogram parallelogram) {
+    return isInsideOfParallelogram(this, parallelogram);
   }
 }
 

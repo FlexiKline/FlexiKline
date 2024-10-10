@@ -42,6 +42,7 @@ class SARIndicator extends SinglePaintObjectIndicator
     super.zIndex = 0,
     this.calcParam = const SARParam(startAf: 0.02, step: 0.02, maxAf: 0.2),
     this.radius,
+    this.useCandleColor = true,
     required this.paint,
     required this.tipsPadding,
     required this.tipsStyle,
@@ -57,8 +58,10 @@ class SARIndicator extends SinglePaintObjectIndicator
   final double? radius;
 
   /// 绘制SAR的画笔.
-  /// 注: 如果paint.color为空, 自动根据当前[CandleModel]中[sarFlag]的值, 使用[settingConfig]中的[longColor]或[shortColor].
   final PaintConfig paint;
+
+  /// SAR画笔颜色是否使用蜡烛色, 如果设置为true, 则[paint]中的color配置无效.
+  final bool useCandleColor;
   final EdgeInsets tipsPadding;
   final TextStyle tipsStyle;
 
@@ -171,14 +174,7 @@ class SARPaintObject<T extends SARIndicator> extends SinglePaintObjectBox<T>
       paintSimpleCandleChart(canvas, size);
     }
 
-    Paint paint = Paint()..style = indicator.paint.style;
-
-    if (indicator.paint.strokeWidth != null) {
-      paint.strokeWidth = indicator.paint.strokeWidth!;
-    }
-    if (indicator.paint.color != null) {
-      paint.color = indicator.paint.color!;
-    }
+    Paint paint = indicator.paint.paint;
     final radius = indicator.radius ?? setting.candleWidth / 3;
 
     final offset = startCandleDx - candleWidthHalf;
@@ -187,7 +183,7 @@ class SARPaintObject<T extends SARIndicator> extends SinglePaintObjectBox<T>
       m = list[i];
       if (!m.isValidSarData) continue;
       final dx = offset - (i - start) * candleActualWidth;
-      if (indicator.paint.color == null) {
+      if (indicator.useCandleColor) {
         if (m.sarFlag! > 0) {
           paint.color = settingConfig.longColor;
         } else if (m.sarFlag! < 0) {

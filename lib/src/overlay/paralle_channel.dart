@@ -14,14 +14,25 @@
 
 import 'dart:ui';
 
-import 'package:flexi_kline/src/utils/export.dart';
-
+import '../config/line_config/line_config.dart';
 import '../core/interface.dart';
 import '../extension/export.dart';
 import '../framework/overlay.dart';
+import '../utils/vector_util.dart';
 
 class ParalleChannelDrawObject extends DrawObject {
   ParalleChannelDrawObject(super.overlay);
+
+  Parallelogram? getParalleChannel() {
+    final points = allPoints;
+    final first = points.firstOrNull?.offset;
+    final second = points.secondOrNull?.offset;
+    final third = points.thirdOrNull?.offset;
+    if (first == null || second == null || third == null) {
+      return null;
+    }
+    return third.genParalleChannelByLine(first, second);
+  }
 
   @override
   bool hitTest(IDrawContext context, Offset position, {bool isMove = false}) {
@@ -29,22 +40,21 @@ class ParalleChannelDrawObject extends DrawObject {
       points.length == 3,
       'ParalleChannel hitTest points.length:${points.length} must be equals 3',
     );
-    final first = points.firstOrNull?.offset;
-    final second = points.secondOrNull?.offset;
-    final third = points.thirdOrNull?.offset;
-    if (first == null || second == null || third == null) {
-      return false;
+    final channel = getParalleChannel();
+    if (channel == null) return false;
+
+    return position.isInsideOf(channel);
+  }
+
+  @override
+  void drawing(IDrawContext context, Canvas canvas, Size size) {
+    super.drawing(context, canvas, size);
+    if (isReady) {
+      final channel = getParalleChannel();
+      if (channel == null) return;
+
+      _drawParallChannel(context, canvas, channel);
     }
-
-    List<Offset> parallePoints = genParalleChannelPoints(first, second, third);
-
-    return pointIsInsideParalle(
-      position,
-      parallePoints[0],
-      parallePoints[1],
-      parallePoints[2],
-      parallePoints[3],
-    );
   }
 
   @override
@@ -54,46 +64,44 @@ class ParalleChannelDrawObject extends DrawObject {
       'ParalleChannel draw points.length:${points.length} must be equals 3',
     );
 
-    final first = points.firstOrNull?.offset;
-    final second = points.secondOrNull?.offset;
-    final third = points.thirdOrNull?.offset;
-    if (first == null || second == null || third == null) {
-      return;
-    }
+    final channel = getParalleChannel();
+    if (channel == null) return;
 
-    // 画线
-    canvas.drawLineType(
-      line.type,
-      Path()..addPolygon([first, second], false),
-      line.linePaint,
-    );
-
-    // 绘制平行通道
-    _drawParallChannel(context, canvas, first, second, third);
+    _drawParallChannel(context, canvas, channel);
   }
 
+  /// 绘制平行通道
   void _drawParallChannel(
     IDrawContext context,
     Canvas canvas,
-    Offset A,
-    Offset B,
-    Offset P,
+    Parallelogram channel,
   ) {
-    final k = (B - A).slope;
-    final b = P.dy - P.dx * k;
-    final A1 = Offset(A.dx, k * A.dx + b);
-    final B1 = Offset(B.dx, k * B.dx + b);
+    /// 填充通道
+    canvas.drawPath(
+      Path()..addPolygon(channel.points, true),
+      line.copyWith(color: line.color.withOpacity(0.1)).linePaint
+        ..style = PaintingStyle.fill,
+    );
 
-    canvas.drawPoints(
-      PointMode.points,
-      [
-        A1,
-        B1,
-      ],
-      Paint()
-        ..color = const Color(0xFFFF0000)
-        ..strokeWidth = 6
-        ..style = PaintingStyle.stroke,
+    // 画中线
+    canvas.drawLineType(
+      LineType.dashed,
+      Path()..addPolygon(channel.middleLine, false),
+      line.linePaint,
+    );
+
+    // 画基线AB
+    canvas.drawLineType(
+      line.type,
+      Path()..addPolygon([channel.A, channel.B], false),
+      line.linePaint,
+    );
+
+    /// 画平行线CD
+    canvas.drawLineType(
+      line.type,
+      Path()..addPolygon([channel.C, channel.D], false),
+      line.linePaint,
     );
   }
 }

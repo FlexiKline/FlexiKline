@@ -286,8 +286,10 @@ class BitFlexiKlineConfiguration with FlexiKlineThemeConfigurationMixin {
   SARIndicator genSarIndicator(BaseBitFlexiKlineTheme theme) {
     return super.genSarIndicator(theme).copyWith(
           radius: 2 * theme.scale,
+          useCandleColor: false,
           paint: const PaintConfig(
             color: Colors.blue,
+            strokeWidth: 0,
             style: PaintingStyle.fill,
           ),
         );
@@ -297,8 +299,10 @@ class BitFlexiKlineConfiguration with FlexiKlineThemeConfigurationMixin {
   SARIndicator genSubSarIndicator(BaseBitFlexiKlineTheme theme) {
     return super.genSubSarIndicator(theme).copyWith(
           radius: 2 * theme.scale,
+          useCandleColor: false,
           paint: const PaintConfig(
             color: Colors.blue,
+            strokeWidth: 0,
             style: PaintingStyle.fill,
           ),
         );

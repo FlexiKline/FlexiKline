@@ -769,8 +769,9 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       padding: theme.mainIndicatorPadding,
       calcParam: const SARParam(startAf: 0.02, step: 0.02, maxAf: 0.2),
       radius: null, // 2 * theme.scale,
+      useCandleColor: true,
       paint: PaintConfig(
-        color: null,
+        color: const Color(0x00000000),
         strokeWidth: 1 * theme.scale,
         style: PaintingStyle.stroke,
       ),
@@ -1037,8 +1038,9 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       padding: theme.subIndicatorPadding,
       calcParam: const SARParam(startAf: 0.02, step: 0.02, maxAf: 0.2),
       radius: null, // 2 * theme.scale,
+      useCandleColor: true,
       paint: PaintConfig(
-        color: null,
+        color: const Color(0x00000000),
         strokeWidth: 1 * theme.scale,
         style: PaintingStyle.stroke,
       ),

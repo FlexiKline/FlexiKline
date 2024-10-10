@@ -134,7 +134,7 @@ class Overlay implements Comparable<Overlay> {
   bool get isDrawing => points.fold(false, (ret, item) => ret || item == null);
 
   /// 即将完成
-  bool get isComplete {
+  bool get isReady {
     return pointer != null && pointer!.index == steps - 1;
   }
 
@@ -333,6 +333,7 @@ class OverlayObject {
   Iterable<Point?> get allPoints => _overlay.allPoints;
   Rect? get pointBounds => _overlay.pointBounds;
   Point? get pointer => _overlay.pointer;
+  bool get isReady => _overlay.isReady;
 }
 
 abstract class DrawObject<T extends Overlay> extends OverlayObject
@@ -355,7 +356,7 @@ abstract class DrawObject<T extends Overlay> extends OverlayObject
       if (point?.offset.isFinite == true) {
         final distance = (position - point!.offset).distance;
         assert(() {
-          context.logd('hitTestPoint $position > ${point.offset} = $distance');
+          context.logd('hitTestPoint $position > ${point.index} = $distance');
           return true;
         }());
         if (distance <= context.config.hitTestMinDistance) {

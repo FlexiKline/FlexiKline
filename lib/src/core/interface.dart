@@ -247,9 +247,6 @@ abstract interface class IDraw {
   /// DrawConfig
   DrawConfig get config;
 
-  /// 当前绘制初始坐标(主区的中心点)
-  Offset get initialPosition;
-
   /// 绘制状态监听器
   ValueListenable<DrawState> get drawStateLinstener;
 

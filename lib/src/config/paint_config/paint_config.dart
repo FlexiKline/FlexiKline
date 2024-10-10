@@ -23,14 +23,25 @@ part 'paint_config.g.dart';
 @FlexiConfigSerializable
 class PaintConfig {
   const PaintConfig({
-    this.color,
-    this.strokeWidth,
+    required this.color,
+    required this.strokeWidth,
     this.style = PaintingStyle.stroke,
+    this.blendMode = BlendMode.srcOver,
+    this.isAntiAlias = true,
   });
 
-  final Color? color;
-  final double? strokeWidth;
+  final Color color;
+  final double strokeWidth;
   final PaintingStyle style;
+  final BlendMode blendMode;
+  final bool isAntiAlias;
+
+  Paint get paint => Paint()
+    ..color = color
+    ..style = style
+    ..blendMode = blendMode
+    ..isAntiAlias = isAntiAlias
+    ..strokeWidth = strokeWidth;
 
   factory PaintConfig.fromJson(Map<String, dynamic> json) =>
       _$PaintConfigFromJson(json);

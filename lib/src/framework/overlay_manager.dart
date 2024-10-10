@@ -118,7 +118,7 @@ final class OverlayManager with KlineLog {
       key: _instId,
       type: type,
       line: drawBinding.config.crosshair,
-    )..setPointer(Point.pointer(0, drawBinding.initialPosition));
+    );
   }
 
   /// 每次都创建新的Object.

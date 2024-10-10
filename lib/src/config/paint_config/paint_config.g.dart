@@ -7,11 +7,15 @@ part of 'paint_config.dart';
 // **************************************************************************
 
 abstract class _$PaintConfigCWProxy {
-  PaintConfig color(Color? color);
+  PaintConfig color(Color color);
 
-  PaintConfig strokeWidth(double? strokeWidth);
+  PaintConfig strokeWidth(double strokeWidth);
 
   PaintConfig style(PaintingStyle style);
+
+  PaintConfig blendMode(BlendMode blendMode);
+
+  PaintConfig isAntiAlias(bool isAntiAlias);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `PaintConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -23,6 +27,8 @@ abstract class _$PaintConfigCWProxy {
     Color? color,
     double? strokeWidth,
     PaintingStyle? style,
+    BlendMode? blendMode,
+    bool? isAntiAlias,
   });
 }
 
@@ -33,14 +39,19 @@ class _$PaintConfigCWProxyImpl implements _$PaintConfigCWProxy {
   final PaintConfig _value;
 
   @override
-  PaintConfig color(Color? color) => this(color: color);
+  PaintConfig color(Color color) => this(color: color);
 
   @override
-  PaintConfig strokeWidth(double? strokeWidth) =>
-      this(strokeWidth: strokeWidth);
+  PaintConfig strokeWidth(double strokeWidth) => this(strokeWidth: strokeWidth);
 
   @override
   PaintConfig style(PaintingStyle style) => this(style: style);
+
+  @override
+  PaintConfig blendMode(BlendMode blendMode) => this(blendMode: blendMode);
+
+  @override
+  PaintConfig isAntiAlias(bool isAntiAlias) => this(isAntiAlias: isAntiAlias);
 
   @override
 
@@ -54,20 +65,32 @@ class _$PaintConfigCWProxyImpl implements _$PaintConfigCWProxy {
     Object? color = const $CopyWithPlaceholder(),
     Object? strokeWidth = const $CopyWithPlaceholder(),
     Object? style = const $CopyWithPlaceholder(),
+    Object? blendMode = const $CopyWithPlaceholder(),
+    Object? isAntiAlias = const $CopyWithPlaceholder(),
   }) {
     return PaintConfig(
-      color: color == const $CopyWithPlaceholder()
+      color: color == const $CopyWithPlaceholder() || color == null
           ? _value.color
           // ignore: cast_nullable_to_non_nullable
-          : color as Color?,
-      strokeWidth: strokeWidth == const $CopyWithPlaceholder()
-          ? _value.strokeWidth
-          // ignore: cast_nullable_to_non_nullable
-          : strokeWidth as double?,
+          : color as Color,
+      strokeWidth:
+          strokeWidth == const $CopyWithPlaceholder() || strokeWidth == null
+              ? _value.strokeWidth
+              // ignore: cast_nullable_to_non_nullable
+              : strokeWidth as double,
       style: style == const $CopyWithPlaceholder() || style == null
           ? _value.style
           // ignore: cast_nullable_to_non_nullable
           : style as PaintingStyle,
+      blendMode: blendMode == const $CopyWithPlaceholder() || blendMode == null
+          ? _value.blendMode
+          // ignore: cast_nullable_to_non_nullable
+          : blendMode as BlendMode,
+      isAntiAlias:
+          isAntiAlias == const $CopyWithPlaceholder() || isAntiAlias == null
+              ? _value.isAntiAlias
+              // ignore: cast_nullable_to_non_nullable
+              : isAntiAlias as bool,
     );
   }
 }
@@ -83,40 +106,22 @@ extension $PaintConfigCopyWith on PaintConfig {
 // **************************************************************************
 
 PaintConfig _$PaintConfigFromJson(Map<String, dynamic> json) => PaintConfig(
-      color: _$JsonConverterFromJson<String, Color>(
-          json['color'], const ColorConverter().fromJson),
-      strokeWidth: (json['strokeWidth'] as num?)?.toDouble(),
+      color: const ColorConverter().fromJson(json['color'] as String),
+      strokeWidth: (json['strokeWidth'] as num).toDouble(),
       style: json['style'] == null
           ? PaintingStyle.stroke
           : const PaintingStyleConverter().fromJson(json['style'] as String),
+      blendMode: json['blendMode'] == null
+          ? BlendMode.srcOver
+          : const BlendModeConverter().fromJson(json['blendMode'] as String),
+      isAntiAlias: json['isAntiAlias'] as bool? ?? true,
     );
 
-Map<String, dynamic> _$PaintConfigToJson(PaintConfig instance) {
-  final val = <String, dynamic>{};
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull(
-      'color',
-      _$JsonConverterToJson<String, Color>(
-          instance.color, const ColorConverter().toJson));
-  writeNotNull('strokeWidth', instance.strokeWidth);
-  val['style'] = const PaintingStyleConverter().toJson(instance.style);
-  return val;
-}
-
-Value? _$JsonConverterFromJson<Json, Value>(
-  Object? json,
-  Value? Function(Json json) fromJson,
-) =>
-    json == null ? null : fromJson(json as Json);
-
-Json? _$JsonConverterToJson<Json, Value>(
-  Value? value,
-  Json? Function(Value value) toJson,
-) =>
-    value == null ? null : toJson(value);
+Map<String, dynamic> _$PaintConfigToJson(PaintConfig instance) =>
+    <String, dynamic>{
+      'color': const ColorConverter().toJson(instance.color),
+      'strokeWidth': instance.strokeWidth,
+      'style': const PaintingStyleConverter().toJson(instance.style),
+      'blendMode': const BlendModeConverter().toJson(instance.blendMode),
+      'isAntiAlias': instance.isAntiAlias,
+    };

@@ -21,6 +21,8 @@ abstract class _$SARIndicatorCWProxy {
 
   SARIndicator radius(double? radius);
 
+  SARIndicator useCandleColor(bool useCandleColor);
+
   SARIndicator paint(PaintConfig paint);
 
   SARIndicator tipsPadding(EdgeInsets tipsPadding);
@@ -43,6 +45,7 @@ abstract class _$SARIndicatorCWProxy {
     int? zIndex,
     SARParam? calcParam,
     double? radius,
+    bool? useCandleColor,
     PaintConfig? paint,
     EdgeInsets? tipsPadding,
     TextStyle? tipsStyle,
@@ -78,6 +81,10 @@ class _$SARIndicatorCWProxyImpl implements _$SARIndicatorCWProxy {
   SARIndicator radius(double? radius) => this(radius: radius);
 
   @override
+  SARIndicator useCandleColor(bool useCandleColor) =>
+      this(useCandleColor: useCandleColor);
+
+  @override
   SARIndicator paint(PaintConfig paint) => this(paint: paint);
 
   @override
@@ -106,6 +113,7 @@ class _$SARIndicatorCWProxyImpl implements _$SARIndicatorCWProxy {
     Object? zIndex = const $CopyWithPlaceholder(),
     Object? calcParam = const $CopyWithPlaceholder(),
     Object? radius = const $CopyWithPlaceholder(),
+    Object? useCandleColor = const $CopyWithPlaceholder(),
     Object? paint = const $CopyWithPlaceholder(),
     Object? tipsPadding = const $CopyWithPlaceholder(),
     Object? tipsStyle = const $CopyWithPlaceholder(),
@@ -140,6 +148,11 @@ class _$SARIndicatorCWProxyImpl implements _$SARIndicatorCWProxy {
           ? _value.radius
           // ignore: cast_nullable_to_non_nullable
           : radius as double?,
+      useCandleColor: useCandleColor == const $CopyWithPlaceholder() ||
+              useCandleColor == null
+          ? _value.useCandleColor
+          // ignore: cast_nullable_to_non_nullable
+          : useCandleColor as bool,
       paint: paint == const $CopyWithPlaceholder() || paint == null
           ? _value.paint
           // ignore: cast_nullable_to_non_nullable
@@ -184,6 +197,7 @@ SARIndicator _$SARIndicatorFromJson(Map<String, dynamic> json) => SARIndicator(
           ? const SARParam(startAf: 0.02, step: 0.02, maxAf: 0.2)
           : SARParam.fromJson(json['calcParam'] as Map<String, dynamic>),
       radius: (json['radius'] as num?)?.toDouble(),
+      useCandleColor: json['useCandleColor'] as bool? ?? true,
       paint: PaintConfig.fromJson(json['paint'] as Map<String, dynamic>),
       tipsPadding: const EdgeInsetsConverter()
           .fromJson(json['tipsPadding'] as Map<String, dynamic>),
@@ -202,6 +216,7 @@ Map<String, dynamic> _$SARIndicatorToJson(SARIndicator instance) =>
       'calcParam': instance.calcParam.toJson(),
       'radius': instance.radius,
       'paint': instance.paint.toJson(),
+      'useCandleColor': instance.useCandleColor,
       'tipsPadding': const EdgeInsetsConverter().toJson(instance.tipsPadding),
       'tipsStyle': const TextStyleConverter().toJson(instance.tipsStyle),
       'tickCount': instance.tickCount,

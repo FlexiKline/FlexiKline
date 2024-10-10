@@ -68,9 +68,6 @@ mixin DrawBinding
   @override
   DrawConfig get config => drawConfig;
 
-  @override
-  Offset get initialPosition => mainRect.center;
-
   final ValueNotifier<int> _repaintDraw = ValueNotifier(0);
 
   @override
@@ -138,6 +135,8 @@ mixin DrawBinding
       _drawState = const Prepared();
     } else {
       final overlay = _overlayManager.createOverlay(type);
+      // 初始指针为[mainRect]中心
+      overlay.setPointer(Point.pointer(0, mainRect.center));
       _drawState = DrawState.draw(overlay);
     }
     _markRepaint();
@@ -271,6 +270,7 @@ mixin DrawBinding
         overlay.line = config.drawLine;
         _drawState = Editing(overlay);
         _overlayManager.addOverlay(overlay);
+        // TODO: 增加object接口, 校正所有绘制点
         result = false;
       } else {
         result = true;
@@ -280,6 +280,7 @@ mixin DrawBinding
       if (pointer == null) {
         // 当前处于编辑状态, 但是pointer又没有被赋值, 此时点击事件, 为确认完成.
         _overlayManager.addOverlay(overlay);
+        // TODO: 增加object接口, 校正所有绘制点
         _drawState = const Prepared();
         result = false;
       } else {

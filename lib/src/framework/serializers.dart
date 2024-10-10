@@ -135,6 +135,22 @@ class PaintingStyleConverter implements JsonConverter<PaintingStyle, String> {
   }
 }
 
+class BlendModeConverter implements JsonConverter<BlendMode, String> {
+  const BlendModeConverter();
+  @override
+  BlendMode fromJson(String json) {
+    return BlendMode.values.firstWhere(
+      (e) => e.name == json,
+      orElse: () => BlendMode.srcOver,
+    );
+  }
+
+  @override
+  String toJson(BlendMode object) {
+    return object.name;
+  }
+}
+
 class LineTypeConverter implements JsonConverter<LineType, String> {
   const LineTypeConverter();
 
@@ -468,6 +484,7 @@ const _basicConverterList = <JsonConverter>[
   DrawPositionConverter(),
   ScalePositionConverter(),
   PaintingStyleConverter(),
+  BlendModeConverter(),
   LineTypeConverter(),
   EdgeInsetsConverter(),
   SizeConverter(),
