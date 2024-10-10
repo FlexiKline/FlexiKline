@@ -17,6 +17,7 @@ import 'package:flutter/painting.dart';
 
 import '../../extension/render/common.dart';
 import '../../framework/serializers.dart';
+import '../paint_config/paint_config.dart';
 
 part 'line_config.g.dart';
 
@@ -25,22 +26,24 @@ part 'line_config.g.dart';
 class LineConfig {
   const LineConfig({
     this.type = LineType.solid,
-    this.color = const Color(0xFF000000),
     this.length,
-    this.width = 0.5,
     this.dashes = const [3, 3],
+    this.paint = const PaintConfig(strokeWidth: 0.5),
   });
 
+  /// 线类型
   final LineType type;
-  final Color color;
+
+  /// 线长
   final double? length;
-  final double width;
+
+  /// 虚线dashes
   final List<double> dashes;
 
-  Paint get linePaint => Paint()
-    ..color = color
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = width;
+  /// 画笔
+  final PaintConfig paint;
+
+  Paint get linePaint => paint.paint;
 
   factory LineConfig.fromJson(Map<String, dynamic> json) =>
       _$LineConfigFromJson(json);

@@ -79,7 +79,10 @@ class ParalleChannelDrawObject extends DrawObject {
     /// 填充通道
     canvas.drawPath(
       Path()..addPolygon(channel.points, true),
-      line.copyWith(color: line.color.withOpacity(0.1)).linePaint
+      line.linePaint
+        ..color = line.paint.color.withOpacity(
+          context.config.drawParams.paralleBgOpacity,
+        )
         ..style = PaintingStyle.fill,
     );
 

@@ -9,13 +9,11 @@ part of 'line_config.dart';
 abstract class _$LineConfigCWProxy {
   LineConfig type(LineType type);
 
-  LineConfig color(Color color);
-
   LineConfig length(double? length);
 
-  LineConfig width(double width);
-
   LineConfig dashes(List<double> dashes);
+
+  LineConfig paint(PaintConfig paint);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `LineConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -25,10 +23,9 @@ abstract class _$LineConfigCWProxy {
   /// ````
   LineConfig call({
     LineType? type,
-    Color? color,
     double? length,
-    double? width,
     List<double>? dashes,
+    PaintConfig? paint,
   });
 }
 
@@ -42,16 +39,13 @@ class _$LineConfigCWProxyImpl implements _$LineConfigCWProxy {
   LineConfig type(LineType type) => this(type: type);
 
   @override
-  LineConfig color(Color color) => this(color: color);
-
-  @override
   LineConfig length(double? length) => this(length: length);
 
   @override
-  LineConfig width(double width) => this(width: width);
+  LineConfig dashes(List<double> dashes) => this(dashes: dashes);
 
   @override
-  LineConfig dashes(List<double> dashes) => this(dashes: dashes);
+  LineConfig paint(PaintConfig paint) => this(paint: paint);
 
   @override
 
@@ -63,32 +57,27 @@ class _$LineConfigCWProxyImpl implements _$LineConfigCWProxy {
   /// ````
   LineConfig call({
     Object? type = const $CopyWithPlaceholder(),
-    Object? color = const $CopyWithPlaceholder(),
     Object? length = const $CopyWithPlaceholder(),
-    Object? width = const $CopyWithPlaceholder(),
     Object? dashes = const $CopyWithPlaceholder(),
+    Object? paint = const $CopyWithPlaceholder(),
   }) {
     return LineConfig(
       type: type == const $CopyWithPlaceholder() || type == null
           ? _value.type
           // ignore: cast_nullable_to_non_nullable
           : type as LineType,
-      color: color == const $CopyWithPlaceholder() || color == null
-          ? _value.color
-          // ignore: cast_nullable_to_non_nullable
-          : color as Color,
       length: length == const $CopyWithPlaceholder()
           ? _value.length
           // ignore: cast_nullable_to_non_nullable
           : length as double?,
-      width: width == const $CopyWithPlaceholder() || width == null
-          ? _value.width
-          // ignore: cast_nullable_to_non_nullable
-          : width as double,
       dashes: dashes == const $CopyWithPlaceholder() || dashes == null
           ? _value.dashes
           // ignore: cast_nullable_to_non_nullable
           : dashes as List<double>,
+      paint: paint == const $CopyWithPlaceholder() || paint == null
+          ? _value.paint
+          // ignore: cast_nullable_to_non_nullable
+          : paint as PaintConfig,
     );
   }
 }
@@ -107,21 +96,19 @@ LineConfig _$LineConfigFromJson(Map<String, dynamic> json) => LineConfig(
       type: json['type'] == null
           ? LineType.solid
           : const LineTypeConverter().fromJson(json['type'] as String),
-      color: json['color'] == null
-          ? const Color(0xFF000000)
-          : const ColorConverter().fromJson(json['color'] as String),
       length: (json['length'] as num?)?.toDouble(),
-      width: (json['width'] as num?)?.toDouble() ?? 0.5,
       dashes: (json['dashes'] as List<dynamic>?)
               ?.map((e) => (e as num).toDouble())
               .toList() ??
           const [3, 3],
+      paint: json['paint'] == null
+          ? const PaintConfig(strokeWidth: 0.5)
+          : PaintConfig.fromJson(json['paint'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$LineConfigToJson(LineConfig instance) {
   final val = <String, dynamic>{
     'type': const LineTypeConverter().toJson(instance.type),
-    'color': const ColorConverter().toJson(instance.color),
   };
 
   void writeNotNull(String key, dynamic value) {
@@ -131,7 +118,7 @@ Map<String, dynamic> _$LineConfigToJson(LineConfig instance) {
   }
 
   writeNotNull('length', instance.length);
-  val['width'] = instance.width;
   val['dashes'] = instance.dashes;
+  val['paint'] = instance.paint.toJson();
   return val;
 }

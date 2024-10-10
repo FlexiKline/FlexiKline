@@ -171,9 +171,11 @@ class DefaultFlexiKlineConfiguration with FlexiKlineThemeConfigurationMixin {
             spacing: 1.r,
             line: LineConfig(
               type: LineType.dashed,
-              color: theme.markLine,
-              width: 0.5.r,
               dashes: [3, 3],
+              paint: PaintConfig(
+                color: theme.markLine,
+                strokeWidth: 0.5.r,
+              ),
             ),
             text: TextAreaConfig(
               style: TextStyle(
@@ -214,9 +216,11 @@ class DefaultFlexiKlineConfiguration with FlexiKlineThemeConfigurationMixin {
         height: theme.mainIndicatorHeight,
         padding: theme.mainIndicatorPadding,
         line: LineConfig(
-          width: 1.r,
-          color: Colors.deepOrange,
           type: LineType.solid,
+          paint: PaintConfig(
+            color: Colors.deepOrange,
+            strokeWidth: 1.r,
+          ),
         ),
         tips: TipsConfig(
           label: 'AVL',

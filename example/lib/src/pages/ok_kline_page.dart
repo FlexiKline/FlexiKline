@@ -82,9 +82,11 @@ class _OkKlinePageState extends ConsumerState<OkKlinePage>
         height: klineTheme.mainIndicatorHeight,
         padding: klineTheme.mainIndicatorPadding,
         line: LineConfig(
-          width: 1.r,
-          color: Colors.deepOrangeAccent,
           type: LineType.solid,
+          paint: PaintConfig(
+            color: Colors.deepOrangeAccent,
+            strokeWidth: 1.r,
+          ),
         ),
         tips: TipsConfig(
           label: 'AVL',

@@ -264,14 +264,7 @@ class CandlePaintObject<T extends CandleIndicator>
       offset.dx + markConfig.lineLength * flag,
       offset.dy,
     );
-    canvas.drawLine(
-      offset,
-      endOffset,
-      Paint()
-        ..color = markConfig.line.color
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = markConfig.line.width,
-    );
+    canvas.drawLine(offset, endOffset, markConfig.line.linePaint);
 
     final markText = markConfig.text;
 
@@ -403,14 +396,9 @@ class CandlePaintObject<T extends CandleIndicator>
       final latestPath = Path();
       latestPath.moveTo(rdx, dy);
       latestPath.lineTo(ldx, dy);
-      canvas.drawLineType(
-        indicator.latest.line.type,
+      canvas.drawLineByConfig(
         latestPath,
-        Paint()
-          ..color = latest.line.color
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = latest.line.width,
-        dashes: latest.line.dashes,
+        latest.line,
       );
 
       TextAreaConfig textConfig = latest.text;
@@ -512,14 +500,9 @@ class CandlePaintObject<T extends CandleIndicator>
       final lastPath = Path();
       lastPath.moveTo(rdx, dy);
       lastPath.lineTo(ldx, dy);
-      canvas.drawLineType(
-        indicator.last.line.type,
+      canvas.drawLineByConfig(
         lastPath,
-        Paint()
-          ..color = last.line.color
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = last.line.width,
-        dashes: last.line.dashes,
+        last.line,
       );
 
       final text = formatPrice(

@@ -49,11 +49,6 @@ class MarkConfig {
   final LineConfig line;
   final TextAreaConfig text;
 
-  Paint get linePaint => Paint()
-    ..color = line.color
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = line.width;
-
   double get lineLength => line.length ?? 0;
 
   factory MarkConfig.fromJson(Map<String, dynamic> json) =>

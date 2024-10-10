@@ -35,6 +35,8 @@ class DrawParams {
     this.angleText,
     this.angleBaseLineMinLen = 80,
     this.angleRadSize = const Size(50, 50),
+    // 平行通道
+    this.paralleBgOpacity = 0.1,
   });
 
   /// 箭头(ArrowLine)相对于基线的角
@@ -57,6 +59,9 @@ class DrawParams {
 
   /// 趋势线角度(TrendAngle)的圆弧大小
   final Size angleRadSize;
+
+  /// 平行通道背景填充透明度
+  final double paralleBgOpacity;
 
   factory DrawParams.fromJson(Map<String, dynamic> json) =>
       _$DrawParamsFromJson(json);

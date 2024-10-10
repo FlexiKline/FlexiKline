@@ -296,8 +296,10 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
     return CrossConfig(
       enable: true,
       crosshair: LineConfig(
-        width: 0.5 * theme.scale,
-        color: theme.crossColor,
+        paint: PaintConfig(
+          color: theme.crossColor,
+          strokeWidth: 0.5 * theme.scale,
+        ),
         type: LineType.dashed,
         dashes: const [3, 3],
       ),
@@ -332,8 +334,10 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
     return DrawConfig(
       enable: true,
       crosshair: LineConfig(
-        width: 0.5 * theme.scale,
-        color: theme.drawColor,
+        paint: PaintConfig(
+          strokeWidth: 0.5 * theme.scale,
+          color: theme.drawColor,
+        ),
         type: LineType.dashed,
         dashes: const [3, 3],
       ),
@@ -345,8 +349,10 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
         borderColor: theme.drawColor.withOpacity(0.5),
       ),
       drawLine: LineConfig(
-        width: 1 * theme.scale,
-        color: theme.drawColor,
+        paint: PaintConfig(
+          strokeWidth: 1 * theme.scale,
+          color: theme.drawColor,
+        ),
         type: LineType.solid,
       ),
       drawPoint: PointConfig(
@@ -485,9 +491,11 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
         spacing: 2 * theme.scale,
         line: LineConfig(
           type: LineType.solid,
-          color: theme.markLine,
           length: 20 * theme.scale,
-          width: 0.5 * theme.scale,
+          paint: PaintConfig(
+            color: theme.markLine,
+            strokeWidth: 0.5 * theme.scale,
+          ),
         ),
         text: TextAreaConfig(
           style: TextStyle(
@@ -502,9 +510,11 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
         spacing: 2 * theme.scale,
         line: LineConfig(
           type: LineType.solid,
-          color: theme.markLine,
           length: 20 * theme.scale,
-          width: 0.5 * theme.scale,
+          paint: PaintConfig(
+            color: theme.markLine,
+            strokeWidth: 0.5 * theme.scale,
+          ),
         ),
         text: TextAreaConfig(
           style: TextStyle(
@@ -520,9 +530,11 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
         spacing: 1 * theme.scale,
         line: LineConfig(
           type: LineType.dashed,
-          color: theme.markLine,
-          width: 0.5 * theme.scale,
           dashes: [3, 3],
+          paint: PaintConfig(
+            color: theme.markLine,
+            strokeWidth: 0.5 * theme.scale,
+          ),
         ),
         text: TextAreaConfig(
           style: TextStyle(
@@ -546,9 +558,11 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
         spacing: 1 * theme.scale,
         line: LineConfig(
           type: LineType.dashed,
-          color: theme.markLine,
-          width: 0.5 * theme.scale,
           dashes: [3, 3],
+          paint: PaintConfig(
+            color: theme.markLine,
+            strokeWidth: 0.5 * theme.scale,
+          ),
         ),
         text: TextAreaConfig(
           style: TextStyle(

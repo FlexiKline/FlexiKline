@@ -23,8 +23,8 @@ part 'paint_config.g.dart';
 @FlexiConfigSerializable
 class PaintConfig {
   const PaintConfig({
-    required this.color,
-    required this.strokeWidth,
+    this.color = const Color(0x00000000),
+    this.strokeWidth = 0,
     this.style = PaintingStyle.stroke,
     this.blendMode = BlendMode.srcOver,
     this.isAntiAlias = true,
