@@ -23,6 +23,8 @@ abstract class _$DrawParamsCWProxy {
 
   DrawParams paralleBgOpacity(double paralleBgOpacity);
 
+  DrawParams rectangleBgOpacity(double rectangleBgOpacity);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `DrawParams(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -38,6 +40,7 @@ abstract class _$DrawParamsCWProxy {
     double? angleBaseLineMinLen,
     Size? angleRadSize,
     double? paralleBgOpacity,
+    double? rectangleBgOpacity,
   });
 }
 
@@ -77,6 +80,10 @@ class _$DrawParamsCWProxyImpl implements _$DrawParamsCWProxy {
       this(paralleBgOpacity: paralleBgOpacity);
 
   @override
+  DrawParams rectangleBgOpacity(double rectangleBgOpacity) =>
+      this(rectangleBgOpacity: rectangleBgOpacity);
+
+  @override
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `DrawParams(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -93,6 +100,7 @@ class _$DrawParamsCWProxyImpl implements _$DrawParamsCWProxy {
     Object? angleBaseLineMinLen = const $CopyWithPlaceholder(),
     Object? angleRadSize = const $CopyWithPlaceholder(),
     Object? paralleBgOpacity = const $CopyWithPlaceholder(),
+    Object? rectangleBgOpacity = const $CopyWithPlaceholder(),
   }) {
     return DrawParams(
       arrowsRadians:
@@ -133,6 +141,11 @@ class _$DrawParamsCWProxyImpl implements _$DrawParamsCWProxy {
           ? _value.paralleBgOpacity
           // ignore: cast_nullable_to_non_nullable
           : paralleBgOpacity as double,
+      rectangleBgOpacity: rectangleBgOpacity == const $CopyWithPlaceholder() ||
+              rectangleBgOpacity == null
+          ? _value.rectangleBgOpacity
+          // ignore: cast_nullable_to_non_nullable
+          : rectangleBgOpacity as double,
     );
   }
 }
@@ -167,6 +180,8 @@ DrawParams _$DrawParamsFromJson(Map<String, dynamic> json) => DrawParams(
           : const SizeConverter()
               .fromJson(json['angleRadSize'] as Map<String, dynamic>),
       paralleBgOpacity: (json['paralleBgOpacity'] as num?)?.toDouble() ?? 0.1,
+      rectangleBgOpacity:
+          (json['rectangleBgOpacity'] as num?)?.toDouble() ?? 0.1,
     );
 
 Map<String, dynamic> _$DrawParamsToJson(DrawParams instance) {
@@ -188,5 +203,6 @@ Map<String, dynamic> _$DrawParamsToJson(DrawParams instance) {
   val['angleBaseLineMinLen'] = instance.angleBaseLineMinLen;
   val['angleRadSize'] = const SizeConverter().toJson(instance.angleRadSize);
   val['paralleBgOpacity'] = instance.paralleBgOpacity;
+  val['rectangleBgOpacity'] = instance.rectangleBgOpacity;
   return val;
 }

@@ -25,3 +25,4 @@ export './ray_line.dart';
 export './price_line.dart';
 
 export './paralle_channel.dart';
+export './rectangle.dart';

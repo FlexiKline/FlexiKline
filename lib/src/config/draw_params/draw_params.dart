@@ -37,6 +37,8 @@ class DrawParams {
     this.angleRadSize = const Size(50, 50),
     // 平行通道
     this.paralleBgOpacity = 0.1,
+    // 矩形
+    this.rectangleBgOpacity = 0.1,
   });
 
   /// 箭头(ArrowLine)相对于基线的角
@@ -62,6 +64,9 @@ class DrawParams {
 
   /// 平行通道背景填充透明度
   final double paralleBgOpacity;
+
+  /// 矩形背景填充透明度
+  final double rectangleBgOpacity;
 
   factory DrawParams.fromJson(Map<String, dynamic> json) =>
       _$DrawParamsFromJson(json);

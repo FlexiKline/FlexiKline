@@ -17,67 +17,65 @@ import 'dart:ui';
 import '../core/interface.dart';
 import '../extension/export.dart';
 import '../framework/overlay.dart';
-import '../utils/vector_util.dart';
 
-class ParalleChannelDrawObject extends DrawObject {
-  ParalleChannelDrawObject(super.overlay);
+class RectangleDrawObject extends DrawObject {
+  RectangleDrawObject(super.overlay);
 
-  Parallelogram? getParalleChannel() {
+  Rect? getRectangleRect() {
     final points = allPoints;
     final first = points.firstOrNull?.offset;
     final second = points.secondOrNull?.offset;
-    final third = points.thirdOrNull?.offset;
-    if (first == null || second == null || third == null) {
+    if (first == null || second == null) {
       return null;
     }
-    return third.genParalleChannelByLine(first, second);
+    return Rect.fromPoints(first, second);
   }
 
   @override
   bool hitTest(IDrawContext context, Offset position, {bool isMove = false}) {
     assert(
-      points.length == 3,
-      'ParalleChannel hitTest points.length:${points.length} must be equals 3',
+      points.length == 2,
+      'Rectangle hitTest points.length:${points.length} must be equals 2',
     );
-    final channel = getParalleChannel();
-    if (channel == null) return false;
+    final rectangle = getRectangleRect();
+    if (rectangle == null) return false;
 
-    return position.isInsideOf(channel);
+    return rectangle.include(position);
   }
 
   @override
   void drawing(IDrawContext context, Canvas canvas, Size size) {
     super.drawing(context, canvas, size);
     if (isReady) {
-      final channel = getParalleChannel();
-      if (channel == null) return;
+      final rectangle = getRectangleRect();
+      if (rectangle == null) return;
 
-      _drawParallChannel(context, canvas, channel);
+      _drawParallChannel(context, canvas, rectangle);
     }
   }
 
   @override
   void draw(IDrawContext context, Canvas canvas, Size size) {
     assert(
-      points.length == 3,
-      'ParalleChannel draw points.length:${points.length} must be equals 3',
+      points.length == 2,
+      'Rectangle draw points.length:${points.length} must be equals 2',
     );
 
-    final channel = getParalleChannel();
-    if (channel == null) return;
+    final rectangle = getRectangleRect();
+    if (rectangle == null) return;
 
-    _drawParallChannel(context, canvas, channel);
+    _drawParallChannel(context, canvas, rectangle);
   }
 
   /// 绘制平行通道
   void _drawParallChannel(
     IDrawContext context,
     Canvas canvas,
-    Parallelogram channel,
+    Rect rect,
   ) {
-    /// 填充通道
+    /// 画填充背景
     canvas.drawPath(
-      Path()..addPolygon(channel.points, true),
+      Path()..addRect(rect),
       line.linePaint
         ..color = line.paint.color.withOpacity(
           context.config.drawParams.paralleBgOpacity,
@@ -85,24 +83,10 @@ class ParalleChannelDrawObject extends DrawObject {
         ..style = PaintingStyle.fill,
     );
 
-    // 画中线
-    canvas.drawLineType(
-      LineType.dashed,
-      Path()..addPolygon(channel.middleLine, false),
-      line.linePaint,
-    );
-
-    // 画基线AB
+    /// 画矩形四条边线
     canvas.drawLineType(
       line.type,
-      Path()..addPolygon([channel.A, channel.B], false),
-      line.linePaint,
-    );
-
-    /// 画平行线CD
-    canvas.drawLineType(
-      line.type,
-      Path()..addPolygon([channel.C, channel.D], false),
+      Path()..addRect(rect),
       line.linePaint,
     );
   }

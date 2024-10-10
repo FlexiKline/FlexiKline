@@ -430,6 +430,8 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
             Radius.circular(2 * theme.scale),
           ),
         ),
+        paralleBgOpacity: 0.1,
+        rectangleBgOpacity: 0.1,
       ),
     );
   }
