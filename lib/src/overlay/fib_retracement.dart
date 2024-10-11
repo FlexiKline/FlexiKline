@@ -97,6 +97,7 @@ class FibRetracementDrawObject extends DrawObject {
     Offset start, end;
 
     final txtHeightOffset = fibText.areaHeight / 2;
+    final txtOffsetDx = dxLen >= 0 ? first.dx : second.dx;
 
     for (var rate in fibRates) {
       final dy = second.dy + dyLen * rate;
@@ -130,10 +131,7 @@ class FibRetracementDrawObject extends DrawObject {
         canvas.drawTextArea(
           text: '$rate($text)',
           drawDirection: DrawDirection.rtl,
-          offset: Offset(
-            dxLen >= 0 ? first.dx : second.dx,
-            dy - txtHeightOffset,
-          ),
+          offset: Offset(txtOffsetDx, dy - txtHeightOffset),
           textConfig: fibText.copyWith(
             style: fibText.style.copyWith(color: color),
           ),

@@ -432,6 +432,15 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
         ),
         paralleBgOpacity: 0.1,
         rectangleBgOpacity: 0.1,
+        fibBgOpacity: 0.1,
+        fibRateText: TextAreaConfig(
+          style: TextStyle(
+            fontSize: theme.normalTextSize,
+            fontWeight: FontWeight.normal,
+            height: defaultTextHeight,
+          ),
+          padding: EdgeInsets.only(right: 2 * theme.scale),
+        ),
       ),
     );
   }
