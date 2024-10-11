@@ -65,10 +65,9 @@ class HorizontalRayLineDrawObject extends DrawObject {
     final mainRect = context.mainRect;
     final list = reflectPointsOnRect(first, second, mainRect);
 
-    canvas.drawLineType(
-      line.type,
+    canvas.drawLineByConfig(
       Path()..addPolygon(list, false),
-      line.linePaint,
+      line,
     );
   }
 }

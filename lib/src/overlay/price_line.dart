@@ -60,14 +60,13 @@ class PriceLineDrawObject extends DrawObject {
     }
 
     // 画线
-    canvas.drawLineType(
-      line.type,
+    canvas.drawLineByConfig(
       Path()
         ..addPolygon(
           [first, Offset(mainRect.right, first.dy)],
           false,
         ),
-      line.linePaint,
+      line,
     );
 
     // 画价值文本区域

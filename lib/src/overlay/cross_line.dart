@@ -69,14 +69,13 @@ class CrossLineDrawObject extends DrawObject {
 
     final mainRect = context.mainRect;
     if (mainRect.includeDx(first.dx) || mainRect.includeDy(first.dy)) {
-      canvas.drawLineType(
-        line.type,
+      canvas.drawLineByConfig(
         Path()
           ..moveTo(mainRect.left, first.dy)
           ..lineTo(mainRect.right, first.dy)
           ..moveTo(first.dx, mainRect.top)
           ..lineTo(first.dx, mainRect.bottom),
-        line.linePaint,
+        line,
       );
     }
   }

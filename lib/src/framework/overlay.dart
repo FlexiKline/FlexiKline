@@ -163,83 +163,6 @@ class Overlay implements Comparable<Overlay> {
     return null;
   }
 
-  /// 获取所有Point包括pointer.
-  Iterable<Point?> get allPoints {
-    final pointer = this.pointer;
-    if (pointer == null) return points;
-    return points.mapIndexed((index, point) {
-      if (index == pointer.index) return pointer;
-      return point;
-    });
-  }
-
-  /// 计算所有point点构成的矩形区域.
-  Rect? get pointBounds {
-    Offset? pre, offset;
-    Rect? bounds;
-    for (var point in allPoints) {
-      offset = point?.offset;
-      if (offset == null || offset.isInfinite) continue;
-      bounds = Rect.fromPoints(pre ?? offset, offset);
-      pre = offset;
-    }
-    return bounds;
-  }
-
-  ///查找距离[position]小于[range]的最小point
-  Point? findPoint(
-    Offset position, {
-    double range = 5,
-  }) {
-    if (range <= 0) return null;
-    Point? result;
-    for (var point in allPoints) {
-      if (point == null || point.offset.isInfinite) continue;
-      final newRange = (position - point.offset).distance;
-      if (newRange < range) {
-        result = point;
-        range = newRange;
-      }
-    }
-    return result;
-  }
-
-  /// 查找距离[dx]小于[range]的最小point
-  Point? findPointByDx(
-    double dx, {
-    double range = 5,
-  }) {
-    if (range <= 0) return null;
-    Point? result;
-    for (var point in allPoints) {
-      if (point == null || point.offset.isInfinite) continue;
-      final newRange = (point.offset.dx - dx).abs();
-      if (newRange < range) {
-        result = point;
-        range = newRange;
-      }
-    }
-    return result;
-  }
-
-  /// 查找距离[dy]小于[range]的最小point
-  Point? findPointByDy(
-    double dy, {
-    double range = 5,
-  }) {
-    if (range <= 0) return null;
-    Point? result;
-    for (var point in allPoints) {
-      if (point == null || point.offset.isInfinite) continue;
-      final newRange = (point.offset.dy - dy).abs();
-      if (newRange < range) {
-        result = point;
-        range = newRange;
-      }
-    }
-    return result;
-  }
-
   /// 添加指针[p]到[points]中, 并准备下一个指针
   void addPointer(Point p) {
     final index = p.index;
@@ -330,10 +253,59 @@ class OverlayObject {
   LineConfig get line => _overlay.line;
   List<Point?> get points => _overlay.points;
   int get steps => points.length;
-  Iterable<Point?> get allPoints => _overlay.allPoints;
-  Rect? get pointBounds => _overlay.pointBounds;
   Point? get pointer => _overlay.pointer;
   bool get isReady => _overlay.isReady;
+
+  /// 获取所有Point点列表,
+  /// 包括pointer.
+  Iterable<Point?> get allPoints {
+    final pointer = this.pointer;
+    if (pointer == null) return points;
+    return points.mapIndexed((index, point) {
+      if (index == pointer.index) return pointer;
+      return point;
+    });
+  }
+
+  /// 查找距离[dx]与[dy]小于[range]的最小point
+  /// 如果同时指定, 则计算(dx, dy)到[allPoints]中点距离最小于[range]的point
+  Point? findPoint({
+    double? dx,
+    double? dy,
+    double range = 5,
+  }) {
+    if (range <= 0 || (dx == null && dy == null)) return null;
+    Point? result;
+    for (var point in allPoints) {
+      if (point == null || point.offset.isInfinite) continue;
+      double newRange = range;
+      if (dx != null && dy != null) {
+        newRange = (Offset(dx, dy) - point.offset).distance;
+      } else if (dx != null) {
+        newRange = (dx - point.offset.dx).abs();
+      } else if (dy != null) {
+        newRange = (dy - point.offset.dy).abs();
+      }
+      if (newRange < range) {
+        result = point;
+        range = newRange;
+      }
+    }
+    return result;
+  }
+
+  /// 计算所有point点构成的刻度区域矩形.
+  Rect? getTickMarksBounds() {
+    Offset? pre, offset;
+    Rect? bounds;
+    for (var point in allPoints) {
+      offset = point?.offset;
+      if (offset == null || offset.isInfinite) continue;
+      bounds = Rect.fromPoints(pre ?? offset, offset);
+      pre = offset;
+    }
+    return bounds;
+  }
 }
 
 abstract class DrawObject<T extends Overlay> extends OverlayObject
@@ -447,16 +419,26 @@ abstract class DrawObject<T extends Overlay> extends OverlayObject
         context.config.gapBgPaint,
       );
 
+      double startDx = bounds.left;
+      double endDx = bounds.right;
+
+      /// 当前判断顺序绘制顺序
+      final position = pointer?.offset;
+      if (moving && position != null && position.dx == bounds.left) {
+        startDx = bounds.right;
+        endDx = bounds.left;
+      }
+
       drawTimeTick(
         context,
         canvas,
-        bounds.left,
+        startDx,
         drawableRect: timeRect,
       );
       drawTimeTick(
         context,
         canvas,
-        bounds.right,
+        endDx,
         drawableRect: timeRect,
       );
     } else {
@@ -484,16 +466,26 @@ abstract class DrawObject<T extends Overlay> extends OverlayObject
         );
       }
 
+      double topDy = bounds.top;
+      double bottomDy = bounds.bottom;
+
+      /// 判断顺序绘制顺序
+      final position = pointer?.offset;
+      if (moving && position != null && position.dy == bounds.top) {
+        topDy = bounds.bottom;
+        bottomDy = bounds.top;
+      }
+
       _valueTickSize = drawValueTick(
         context,
         canvas,
-        bounds.top,
+        topDy,
         drawableRect: mainRect,
       );
       _valueTickSize = drawValueTick(
         context,
         canvas,
-        bounds.bottom,
+        bottomDy,
         drawableRect: mainRect,
       );
     } else {

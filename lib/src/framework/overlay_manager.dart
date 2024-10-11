@@ -59,6 +59,7 @@ final class OverlayManager with KlineLog {
     // 多线
     DrawType.parallelChannel: ParalleChannelDrawObject.new,
     DrawType.rectangle: RectangleDrawObject.new,
+    DrawType.fibRetracement: FibRetracementDrawObject.new,
   };
 
   Iterable<IDrawType>? _supportDrawTypes;

@@ -51,10 +51,9 @@ class ArrowLineDrawObject extends DrawObject {
     }
 
     // 画线
-    canvas.drawLineType(
-      line.type,
+    canvas.drawLineByConfig(
       Path()..addPolygon([first, second], false),
-      line.linePaint,
+      line,
     );
 
     // 画箭头
@@ -65,15 +64,13 @@ class ArrowLineDrawObject extends DrawObject {
       final arrow1 = vector.rotate(params.arrowsRadians) + second;
       final arrow2 = vector.rotate(-params.arrowsRadians) + second;
 
-      canvas.drawLineType(
-        line.type,
+      canvas.drawLineByConfig(
         Path()..addPolygon([second, arrow1], false),
-        line.linePaint,
+        line,
       );
-      canvas.drawLineType(
-        line.type,
+      canvas.drawLineByConfig(
         Path()..addPolygon([second, arrow2], false),
-        line.linePaint,
+        line,
       );
     }
   }

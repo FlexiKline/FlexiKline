@@ -100,6 +100,7 @@ typedef DrawObjectBuilder<T extends Overlay> = DrawObject Function(T overlay);
 
 abstract interface class IDrawType {
   int get steps;
+  String get id;
 }
 
 enum DrawType implements IDrawType {
@@ -118,8 +119,8 @@ enum DrawType implements IDrawType {
   // 多线
   parallelChannel(3), // 平行通道
   // parallelLines, // 平行直线
-  fibRetracement(3), // 斐波那契回撤
-  // fibExpansion, // 斐波那契扩展
+  fibRetracement(2), // 斐波那契回撤
+  // fibExpansion(3), // 斐波那契扩展
   rectangle(2); // 长方形
 
   const DrawType(this.steps);
@@ -128,7 +129,7 @@ enum DrawType implements IDrawType {
   final int steps;
 
   @override
-  String toString() => name;
+  String get id => name;
 }
 
 enum MagnetMode {

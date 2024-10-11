@@ -457,7 +457,7 @@ mixin DrawBinding
     }
 
     /// 计算刻度坐标
-    Rect? bounds = object.pointBounds;
+    Rect? bounds = object.getTickMarksBounds();
     if (bounds == null) {
       logd('drawStateTick not draw point!');
       return;

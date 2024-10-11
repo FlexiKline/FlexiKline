@@ -62,14 +62,13 @@ class HorizontalLineDrawObject extends DrawObject {
       return;
     }
 
-    canvas.drawLineType(
-      line.type,
+    canvas.drawLineByConfig(
       Path()
         ..addPolygon(
           [Offset(mainRect.left, dy), Offset(mainRect.right, dy)],
           false,
         ),
-      line.linePaint,
+      line,
     );
   }
 }

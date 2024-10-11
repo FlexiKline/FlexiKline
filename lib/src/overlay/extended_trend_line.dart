@@ -55,10 +55,9 @@ class ExtendedTrendLineDrawObject extends DrawObject {
     final list1 = reflectPointsOnRect(first, second, mainRect);
     final list2 = reflectPointsOnRect(second, first, mainRect);
 
-    canvas.drawLineType(
-      line.type,
+    canvas.drawLineByConfig(
       Path()..addPolygon([...list1, ...list2], false),
-      line.linePaint,
+      line,
     );
   }
 }

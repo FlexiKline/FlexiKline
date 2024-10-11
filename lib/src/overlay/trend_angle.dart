@@ -75,10 +75,9 @@ class TrendAngleDrawObject extends DrawObject {
     }
 
     // 画TrendLine
-    canvas.drawLineType(
-      line.type,
+    canvas.drawLineByConfig(
       Path()..addPolygon([first, second], false),
-      line.linePaint,
+      line,
     );
 
     // 画基线与弧度
@@ -105,6 +104,7 @@ class TrendAngleDrawObject extends DrawObject {
       LineType.dashed, // 用虚线
       Path()..addPolygon([A, H], false),
       line.linePaint,
+      dashes: line.dashes,
     );
 
     // 弧度
@@ -124,6 +124,7 @@ class TrendAngleDrawObject extends DrawObject {
           radians,
         ),
       line.linePaint,
+      dashes: line.dashes,
     );
 
     // 画弧度值

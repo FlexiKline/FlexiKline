@@ -61,10 +61,9 @@ class HorizontalTrendLineDrawObject extends DrawObject {
       return;
     }
 
-    canvas.drawLineType(
-      line.type,
+    canvas.drawLineByConfig(
       Path()..addPolygon([first, second], false),
-      line.linePaint,
+      line,
     );
   }
 }

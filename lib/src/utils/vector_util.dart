@@ -285,6 +285,10 @@ final class Parallelogram {
       Offset(A.dx, k * A.dx + b),
     ];
   }
+
+  Rect get bounds {
+    return Rect.fromPoints(A, B).expandToInclude(Rect.fromPoints(C, D));
+  }
 }
 
 /// 判断点[P]是否在平行四边形[pl]内(平面解析几何法)

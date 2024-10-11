@@ -84,10 +84,9 @@ class RectangleDrawObject extends DrawObject {
     );
 
     /// 画矩形四条边线
-    canvas.drawLineType(
-      line.type,
+    canvas.drawLineByConfig(
       Path()..addRect(rect),
-      line.linePaint,
+      line,
     );
   }
 }

@@ -51,10 +51,9 @@ class TrendLineDrawObject extends DrawObject {
     }
 
     // 画线
-    canvas.drawLineType(
-      line.type,
+    canvas.drawLineByConfig(
       Path()..addPolygon([first, second], false),
-      line.linePaint,
+      line,
     );
   }
 }

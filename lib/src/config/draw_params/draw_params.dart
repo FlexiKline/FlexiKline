@@ -39,9 +39,34 @@ class DrawParams {
     this.paralleBgOpacity = 0.1,
     // 矩形
     this.rectangleBgOpacity = 0.1,
+    // 斐波那契回撤
+    this.fibRetracementRates = const [
+      0,
+      0.236,
+      0.382,
+      0.5,
+      0.618,
+      0.786,
+      1.0,
+      1.382,
+      1.5,
+      1.618,
+      2,
+    ],
+    this.fibColors = const [
+      Color(0xFFFF1744),
+      Color(0xFFFF9100),
+      Color(0xFFFFEA00),
+      Color(0xFF00E676),
+      Color(0xFF18FFFF),
+      Color(0xFF2979FF),
+      Color(0xFF651FFF),
+    ],
+    this.fibBgOpacity = 0.1,
+    this.fibRateText = const TextAreaConfig(),
   });
 
-  /// 箭头(ArrowLine)相对于基线的角
+  /// 箭头(ArrowLine)相对于基线的弧度
   final double arrowsRadians;
 
   /// 箭头(ArrowLine)长度
@@ -65,8 +90,22 @@ class DrawParams {
   /// 平行通道背景填充透明度
   final double paralleBgOpacity;
 
-  /// 矩形背景填充透明度
+  /// 矩形背景填充不透明度
   final double rectangleBgOpacity;
+
+  /// 斐波那契回撤比率
+  final List<double> fibRetracementRates;
+
+  /// 斐波那契颜色列表
+  /// 如果为空使用画笔颜色.
+  final List<Color> fibColors;
+
+  /// 斐波那契两条比率线间的背景不透明度
+  /// 注: 如果设置为0表示不填充背景
+  final double fibBgOpacity;
+
+  /// 斐波那契文本配置
+  final TextAreaConfig fibRateText;
 
   factory DrawParams.fromJson(Map<String, dynamic> json) =>
       _$DrawParamsFromJson(json);

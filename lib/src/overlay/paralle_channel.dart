@@ -34,6 +34,13 @@ class ParalleChannelDrawObject extends DrawObject {
   }
 
   @override
+  Rect? getTickMarksBounds() {
+    final channel = getParalleChannel();
+    if (channel == null) return null;
+    return channel.bounds;
+  }
+
+  @override
   bool hitTest(IDrawContext context, Offset position, {bool isMove = false}) {
     assert(
       points.length == 3,
@@ -47,13 +54,13 @@ class ParalleChannelDrawObject extends DrawObject {
 
   @override
   void drawing(IDrawContext context, Canvas canvas, Size size) {
-    super.drawing(context, canvas, size);
     if (isReady) {
       final channel = getParalleChannel();
       if (channel == null) return;
 
       _drawParallChannel(context, canvas, channel);
     }
+    super.drawing(context, canvas, size);
   }
 
   @override
@@ -90,20 +97,19 @@ class ParalleChannelDrawObject extends DrawObject {
       LineType.dashed,
       Path()..addPolygon(channel.middleLine, false),
       line.linePaint,
+      dashes: line.dashes,
     );
 
     // 画基线AB
-    canvas.drawLineType(
-      line.type,
+    canvas.drawLineByConfig(
       Path()..addPolygon([channel.A, channel.B], false),
-      line.linePaint,
+      line,
     );
 
     /// 画平行线CD
-    canvas.drawLineType(
-      line.type,
+    canvas.drawLineByConfig(
       Path()..addPolygon([channel.C, channel.D], false),
-      line.linePaint,
+      line,
     );
   }
 }

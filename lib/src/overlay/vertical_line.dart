@@ -62,14 +62,13 @@ class VerticalLineDrawObject extends DrawObject {
       return;
     }
 
-    canvas.drawLineType(
-      line.type,
+    canvas.drawLineByConfig(
       Path()
         ..addPolygon(
           [Offset(dx, mainRect.top), Offset(dx, mainRect.bottom)],
           false,
         ),
-      line.linePaint,
+      line,
     );
   }
 }
