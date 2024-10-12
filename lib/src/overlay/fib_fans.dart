@@ -56,7 +56,7 @@ class FibFansDrawObject extends DrawObject {
       }
       _drawFibFans(context, canvas, first, second);
     }
-    super.drawing(context, canvas, size);
+    drawConnectingLine(context, canvas, size);
   }
 
   @override

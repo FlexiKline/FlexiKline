@@ -54,7 +54,7 @@ class FibExpansionDrawObject extends DrawObject {
       }
       drawFibonacciLevel(context, canvas, second, third, second.dy - first.dy);
     }
-    super.drawing(context, canvas, size);
+    drawConnectingLine(context, canvas, size);
   }
 
   @override

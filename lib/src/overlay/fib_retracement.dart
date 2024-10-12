@@ -47,7 +47,7 @@ class FibRetracementDrawObject extends FibExpansionDrawObject {
       }
       drawFibonacciLevel(context, canvas, first, second, null);
     }
-    super.drawing(context, canvas, size);
+    drawConnectingLine(context, canvas, size);
   }
 
   @override

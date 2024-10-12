@@ -60,7 +60,7 @@ class ParalleChannelDrawObject extends DrawObject {
 
       _drawParallChannel(context, canvas, channel);
     }
-    super.drawing(context, canvas, size);
+    drawConnectingLine(context, canvas, size);
   }
 
   @override

@@ -45,7 +45,7 @@ class RectangleDrawObject extends DrawObject {
 
   @override
   void drawing(IDrawContext context, Canvas canvas, Size size) {
-    super.drawing(context, canvas, size);
+    drawConnectingLine(context, canvas, size);
     if (isReady) {
       final rectangle = getRectangleRect();
       if (rectangle == null) return;

@@ -384,6 +384,99 @@ abstract class DrawObject<T extends Overlay> extends OverlayObject
     }
   }
 
+  /// 构建Overlay
+  void drawing(IDrawContext context, Canvas canvas, Size size) {
+    drawConnectingLine(context, canvas, size);
+  }
+
+  /// 绘制Overlay
+  void draw(IDrawContext context, Canvas canvas, Size size);
+
+  @mustCallSuper
+  void dispose() {
+    _overlay.object = null;
+  }
+}
+
+mixin DrawObjectMixin on OverlayObject {
+  /// 绘制[points]中所有点.
+  void drawPoints(
+    IDrawContext context,
+    Canvas canvas, {
+    bool isMoving = false,
+  }) {
+    for (var point in points) {
+      if (point == null) continue;
+      if (point == pointer || point.index == pointer?.index) {
+        canvas.drawCirclePoint(point.offset, context.config.crosspoint);
+      } else if (point.offset.isFinite) {
+        canvas.drawCirclePoint(point.offset, context.config.drawPoint);
+      }
+    }
+  }
+
+  /// 绘制连接线
+  void drawConnectingLine(IDrawContext context, Canvas canvas, Size size) {
+    final config = context.config;
+    Offset? last;
+    for (var point in points) {
+      if (point != null) {
+        final offset = point.offset;
+        canvas.drawCirclePoint(offset, config.drawPoint);
+        if (last != null) {
+          final linePath = Path()
+            ..moveTo(offset.dx, offset.dy)
+            ..lineTo(last.dx, last.dy);
+          canvas.drawLineType(
+            config.crosshair.type,
+            linePath,
+            config.crosshair.linePaint,
+            dashes: config.crosshair.dashes,
+          );
+        }
+        last = offset;
+      } else if (pointer != null) {
+        drawPointer(context, canvas, pointer!.offset, last);
+        break;
+      }
+    }
+  }
+
+  /// 绘制指针
+  void drawPointer(
+    IDrawContext context,
+    Canvas canvas,
+    Offset pointer,
+    Offset? last,
+  ) {
+    final mainRect = context.mainRect;
+    final config = context.config;
+    final path = Path()
+      ..moveTo(mainRect.left, pointer.dy)
+      ..lineTo(mainRect.right, pointer.dy)
+      ..moveTo(pointer.dx, mainRect.top)
+      ..lineTo(pointer.dx, mainRect.bottom);
+    canvas.drawLineType(
+      config.crosshair.type,
+      path,
+      config.crosshair.linePaint,
+      dashes: config.crosshair.dashes,
+    );
+
+    if (last != null && last.isFinite) {
+      final linePath = Path()
+        ..moveTo(pointer.dx, pointer.dy)
+        ..lineTo(last.dx, last.dy);
+      canvas.drawLineType(
+        config.crosshair.type,
+        linePath,
+        config.crosshair.linePaint,
+        dashes: config.crosshair.dashes,
+      );
+    }
+    canvas.drawCirclePoint(pointer, config.crosspoint);
+  }
+
   Size? __valueTickSize;
   Size? get valueTickSize => __valueTickSize;
   set _valueTickSize(Size size) {
@@ -396,7 +489,7 @@ abstract class DrawObject<T extends Overlay> extends OverlayObject
     }
   }
 
-  /// 绘制刻度
+  /// 绘制刻度(时间/价值)
   void drawTick(
     IDrawContext context,
     Canvas canvas,
@@ -496,93 +589,6 @@ abstract class DrawObject<T extends Overlay> extends OverlayObject
         drawableRect: mainRect,
       );
     }
-  }
-
-  /// 构建Overlay
-  void drawing(IDrawContext context, Canvas canvas, Size size) {
-    final config = context.config;
-    Offset? last;
-    for (var point in points) {
-      if (point != null) {
-        final offset = point.offset;
-        canvas.drawCirclePoint(offset, config.drawPoint);
-        if (last != null) {
-          final linePath = Path()
-            ..moveTo(offset.dx, offset.dy)
-            ..lineTo(last.dx, last.dy);
-          canvas.drawLineType(
-            config.crosshair.type,
-            linePath,
-            config.crosshair.linePaint,
-            dashes: config.crosshair.dashes,
-          );
-        }
-        last = offset;
-      } else if (pointer != null) {
-        drawPointer(context, canvas, pointer!.offset, last);
-        break;
-      }
-    }
-  }
-
-  /// 绘制Overlay
-  void draw(IDrawContext context, Canvas canvas, Size size);
-
-  @mustCallSuper
-  void dispose() {
-    _overlay.object = null;
-  }
-}
-
-mixin DrawObjectMixin on OverlayObject {
-  /// 绘制[points]中所有点.
-  void drawPoints(
-    IDrawContext context,
-    Canvas canvas, {
-    bool isMoving = false,
-  }) {
-    for (var point in points) {
-      if (point == null) continue;
-      if (point == pointer || point.index == pointer?.index) {
-        canvas.drawCirclePoint(point.offset, context.config.crosspoint);
-      } else if (point.offset.isFinite) {
-        canvas.drawCirclePoint(point.offset, context.config.drawPoint);
-      }
-    }
-  }
-
-  void drawPointer(
-    IDrawContext context,
-    Canvas canvas,
-    Offset pointer,
-    Offset? last,
-  ) {
-    final mainRect = context.mainRect;
-    final config = context.config;
-    final path = Path()
-      ..moveTo(mainRect.left, pointer.dy)
-      ..lineTo(mainRect.right, pointer.dy)
-      ..moveTo(pointer.dx, mainRect.top)
-      ..lineTo(pointer.dx, mainRect.bottom);
-    canvas.drawLineType(
-      config.crosshair.type,
-      path,
-      config.crosshair.linePaint,
-      dashes: config.crosshair.dashes,
-    );
-
-    if (last != null && last.isFinite) {
-      final linePath = Path()
-        ..moveTo(pointer.dx, pointer.dy)
-        ..lineTo(last.dx, last.dy);
-      canvas.drawLineType(
-        config.crosshair.type,
-        linePath,
-        config.crosshair.linePaint,
-        dashes: config.crosshair.dashes,
-      );
-    }
-    canvas.drawCirclePoint(pointer, config.crosspoint);
   }
 
   /// 在[drawableRect]区域上, 绘制由[dx]指定的时间刻度

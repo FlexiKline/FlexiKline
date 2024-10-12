@@ -40,7 +40,7 @@ class TrendAngleDrawObject extends DrawObject {
 
   @override
   void drawing(IDrawContext context, Canvas canvas, Size size) {
-    super.drawing(context, canvas, size);
+    drawConnectingLine(context, canvas, size);
     final first = points.firstOrNull?.offset;
     final second = (points.secondOrNull ?? pointer)?.offset;
     if (first != null && second != null) {
