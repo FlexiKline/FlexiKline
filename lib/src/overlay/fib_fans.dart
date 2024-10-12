@@ -79,21 +79,25 @@ class FibFansDrawObject extends DrawObject {
   void _drawFibFans(
     IDrawContext context,
     Canvas canvas,
-    Offset first,
-    Offset second,
+    Offset A,
+    Offset B,
   ) {
     final mainRect = context.mainRect;
     final drawParams = context.config.drawParams;
     final fibFansParams = drawParams.fibFansParams;
     final fibText = drawParams.fibText;
+    final fibTextColor =
+        fibText.style.color != null && fibText.style.color!.alpha != 0
+            ? fibText.style.color
+            : null;
     final fibGridColor = drawParams.fibFansGridColor;
     final isDrawGrid = fibGridColor != null && fibGridColor.alpha != 0;
     final fibColors = drawParams.fibFansColors;
     final colors = fibColors.isNotEmpty ? fibColors : [line.paint.color];
     int i = 0;
 
-    final dxLen = second.dx - first.dx;
-    final dyLen = second.dy - first.dy;
+    final dxLen = B.dx - A.dx;
+    final dyLen = B.dy - A.dy;
     Offset fans1, fans2, hori, vert;
     double dx, dy;
 
@@ -103,12 +107,12 @@ class FibFansDrawObject extends DrawObject {
     final vertTxtDirection = dxLen >= 0 ? DrawDirection.rtl : DrawDirection.ltr;
 
     for (var rate in fibFansParams) {
-      dx = first.dx + dxLen * rate;
-      dy = first.dy + dyLen * rate;
-      hori = Offset(dx, first.dy);
-      vert = Offset(first.dx, dy);
-      fans1 = Offset(second.dx, dy);
-      fans2 = Offset(dx, second.dy);
+      dx = A.dx + dxLen * rate;
+      dy = A.dy + dyLen * rate;
+      hori = Offset(dx, A.dy);
+      vert = Offset(A.dx, dy);
+      fans1 = Offset(B.dx, dy);
+      fans2 = Offset(dx, B.dy);
 
       if (isDrawGrid) {
         /// 画扇形网格线
@@ -129,14 +133,14 @@ class FibFansDrawObject extends DrawObject {
       final color = colors[i++ % colors.length];
 
       /// 画扇形线
-      final fnas1Points = reflectPointsOnRect(first, fans1, mainRect);
+      final fnas1Points = reflectPointsOnRect(A, fans1, mainRect);
       canvas.drawLineType(
         line.type,
         Path()..addPolygon(fnas1Points, false),
         line.linePaint..color = color,
         dashes: line.dashes,
       );
-      final fnas2Points = reflectPointsOnRect(first, fans2, mainRect);
+      final fnas2Points = reflectPointsOnRect(A, fans2, mainRect);
       canvas.drawLineType(
         line.type,
         Path()..addPolygon(fnas2Points, false),
@@ -148,17 +152,17 @@ class FibFansDrawObject extends DrawObject {
       canvas.drawTextArea(
         text: cutInvalidZero(rate),
         drawDirection: DrawDirection.center,
-        offset: Offset(dx, first.dy - txtHeight),
+        offset: Offset(dx, A.dy - txtHeight),
         textConfig: fibText.copyWith(
-          style: fibText.style.copyWith(color: color),
+          style: fibText.style.copyWith(color: fibTextColor ?? color),
         ),
       );
       canvas.drawTextArea(
         text: cutInvalidZero(rate),
         drawDirection: vertTxtDirection,
-        offset: Offset(first.dx, dy - txtHalft),
+        offset: Offset(A.dx, dy - txtHalft),
         textConfig: fibText.copyWith(
-          style: fibText.style.copyWith(color: color),
+          style: fibText.style.copyWith(color: fibTextColor ?? color),
         ),
       );
     }

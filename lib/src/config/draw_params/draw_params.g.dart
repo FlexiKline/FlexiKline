@@ -294,13 +294,13 @@ DrawParams _$DrawParamsFromJson(Map<String, dynamic> json) => DrawParams(
               ?.map((e) => const ColorConverter().fromJson(e as String))
               .toList() ??
           const [
-            Color(0xFFFF1744),
-            Color(0xFFFF9100),
-            Color(0xFFFFEA00),
-            Color(0xFF00E676),
-            Color(0xFF18FFFF),
+            Color(0xFF651FFF),
             Color(0xFF2979FF),
-            Color(0xFF651FFF)
+            Color(0xFF18FFFF),
+            Color(0xFF00E676),
+            Color(0xFFFFEA00),
+            Color(0xFFFF9100),
+            Color(0xFFFF1744)
           ],
       fibFansGridColor: _$JsonConverterFromJson<String, Color>(
           json['fibFansGridColor'], const ColorConverter().fromJson),

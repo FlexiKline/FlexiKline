@@ -434,19 +434,21 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
         paralleBgOpacity: 0.1,
         // 矩形
         rectangleBgOpacity: 0.1,
-        // 斐波那契回撤
+        // 斐波那契回撤/扩展
         fibBgOpacity: 0.1,
+        // 斐波那契扇形
+        fibFansGridColor: theme.markLine.withOpacity(0.1),
+        // fibFansColors: [], // 如果为空则: 使用当前画笔颜色.
+        // 斐波那契回撤/扩展/扇形文本配置
         fibText: TextAreaConfig(
           style: TextStyle(
+            // color: const Color(0xFF000000),
             fontSize: theme.normalTextSize,
             fontWeight: FontWeight.normal,
             height: defaultTextHeight,
           ),
           padding: EdgeInsets.all(2 * theme.scale),
         ),
-        // 斐波那契扇形
-        fibFansGridColor: theme.markLine.withOpacity(0.1),
-        fibFansColors: [],
       ),
     );
   }

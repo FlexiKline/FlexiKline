@@ -67,13 +67,13 @@ class DrawParams {
     // 斐波那契扇形
     this.fibFansParams = const [0, 0.25, 0.382, 0.5, 0.618, 0.75, 1],
     this.fibFansColors = const [
-      Color(0xFFFF1744),
-      Color(0xFFFF9100),
-      Color(0xFFFFEA00),
-      Color(0xFF00E676),
-      Color(0xFF18FFFF),
-      Color(0xFF2979FF),
       Color(0xFF651FFF),
+      Color(0xFF2979FF),
+      Color(0xFF18FFFF),
+      Color(0xFF00E676),
+      Color(0xFFFFEA00),
+      Color(0xFFFF9100),
+      Color(0xFFFF1744),
     ],
     this.fibFansGridColor,
   });
@@ -117,7 +117,9 @@ class DrawParams {
   final double fibBgOpacity;
 
   /// 斐波那契回撤/扩展/扇形文本配置
-  /// 颜色无需要配置, 由[fibColors]或当前绘制画笔决定.
+  /// 配置中TextStyle颜色配置使用规则:
+  /// 1. 如果配置颜色且不是透明的, 则优先使用.
+  /// 2. 否则根据当前[fibRates]或[fibFansParams]的遍历顺序取用[fibColors]或[fibFansColors]中配置的颜色
   final TextAreaConfig fibText;
 
   /// 斐波那契扇形关键数值

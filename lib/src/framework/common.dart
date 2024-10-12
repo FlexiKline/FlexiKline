@@ -121,7 +121,7 @@ enum DrawType implements IDrawType {
   parallelChannel(3), // 平行通道
   // parallelLines, // 平行直线
   fibRetracement(2), // 斐波那契回撤
-  // fibExpansion(3), // 斐波那契扩展
+  fibExpansion(3), // 斐波那契扩展
   fibFans(2); // 斐波那契扇形
 
   const DrawType(this.steps);

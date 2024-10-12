@@ -60,6 +60,7 @@ final class OverlayManager with KlineLog {
     DrawType.parallelChannel: ParalleChannelDrawObject.new,
     DrawType.rectangle: RectangleDrawObject.new,
     DrawType.fibRetracement: FibRetracementDrawObject.new,
+    DrawType.fibExpansion: FibExpansionDrawObject.new,
     DrawType.fibFans: FibFansDrawObject.new,
   };
 
