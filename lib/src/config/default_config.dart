@@ -430,17 +430,23 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
             Radius.circular(2 * theme.scale),
           ),
         ),
+        // 平行通道
         paralleBgOpacity: 0.1,
+        // 矩形
         rectangleBgOpacity: 0.1,
+        // 斐波那契回撤
         fibBgOpacity: 0.1,
-        fibRateText: TextAreaConfig(
+        fibText: TextAreaConfig(
           style: TextStyle(
             fontSize: theme.normalTextSize,
             fontWeight: FontWeight.normal,
             height: defaultTextHeight,
           ),
-          padding: EdgeInsets.only(right: 2 * theme.scale),
+          padding: EdgeInsets.all(2 * theme.scale),
         ),
+        // 斐波那契扇形
+        fibFansGridColor: theme.markLine.withOpacity(0.1),
+        fibFansColors: [],
       ),
     );
   }

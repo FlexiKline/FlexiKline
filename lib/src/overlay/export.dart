@@ -27,3 +27,4 @@ export './price_line.dart';
 export './paralle_channel.dart';
 export './rectangle.dart';
 export './fib_retracement.dart';
+export './fib_fans.dart';

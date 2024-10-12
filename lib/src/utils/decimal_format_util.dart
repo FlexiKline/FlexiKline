@@ -99,3 +99,20 @@ String formatAmount(
     showCompact: showCompact,
   );
 }
+
+/// 删除[num]尾部无用的零
+String cutInvalidZero(double num) {
+  String cleanInvalidZero(String numStr) {
+    return switch (numStr) {
+      String value when value.endsWith('.') =>
+        value.substring(0, value.length - 1),
+      String value when value.endsWith('0') && numStr.contains('.') =>
+        cleanInvalidZero(value.substring(0, value.length - 1)),
+      String value when value.contains('e') =>
+        value.replaceAll(RegExp(r'(?<=\.\d*?)0+(?!\d)'), ''),
+      _ => numStr,
+    };
+  }
+
+  return cleanInvalidZero(num.toString());
+}

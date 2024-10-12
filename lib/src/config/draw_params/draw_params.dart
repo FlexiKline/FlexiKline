@@ -40,7 +40,7 @@ class DrawParams {
     // 矩形
     this.rectangleBgOpacity = 0.1,
     // 斐波那契回撤
-    this.fibRetracementRates = const [
+    this.fibRates = const [
       0,
       0.236,
       0.382,
@@ -63,7 +63,19 @@ class DrawParams {
       Color(0xFF651FFF),
     ],
     this.fibBgOpacity = 0.1,
-    this.fibRateText = const TextAreaConfig(),
+    this.fibText = const TextAreaConfig(),
+    // 斐波那契扇形
+    this.fibFansParams = const [0, 0.25, 0.382, 0.5, 0.618, 0.75, 1],
+    this.fibFansColors = const [
+      Color(0xFFFF1744),
+      Color(0xFFFF9100),
+      Color(0xFFFFEA00),
+      Color(0xFF00E676),
+      Color(0xFF18FFFF),
+      Color(0xFF2979FF),
+      Color(0xFF651FFF),
+    ],
+    this.fibFansGridColor,
   });
 
   /// 箭头(ArrowLine)相对于基线的弧度
@@ -93,19 +105,31 @@ class DrawParams {
   /// 矩形背景填充不透明度
   final double rectangleBgOpacity;
 
-  /// 斐波那契回撤比率
-  final List<double> fibRetracementRates;
+  /// 斐波那契回撤/扩展比率
+  final List<double> fibRates;
 
-  /// 斐波那契颜色列表
-  /// 如果为空使用画笔颜色.
+  /// 斐波那契回撤/扩展颜色列表
+  /// 如果为空使用指针画笔颜色.
   final List<Color> fibColors;
 
-  /// 斐波那契两条比率线间的背景不透明度
+  /// 斐波那契回撤/扩展两条比率线间的背景不透明度
   /// 注: 如果设置为0表示不填充背景
   final double fibBgOpacity;
 
-  /// 斐波那契文本配置
-  final TextAreaConfig fibRateText;
+  /// 斐波那契回撤/扩展/扇形文本配置
+  /// 颜色无需要配置, 由[fibColors]或当前绘制画笔决定.
+  final TextAreaConfig fibText;
+
+  /// 斐波那契扇形关键数值
+  final List<double> fibFansParams;
+
+  /// 斐波那契扇形颜色列表
+  /// 如果为空使用指针画笔颜色.
+  final List<Color> fibFansColors;
+
+  /// 斐波那契扇形网格线颜色
+  /// 如果为空不绘制扇形网格
+  final Color? fibFansGridColor;
 
   factory DrawParams.fromJson(Map<String, dynamic> json) =>
       _$DrawParamsFromJson(json);

@@ -25,13 +25,19 @@ abstract class _$DrawParamsCWProxy {
 
   DrawParams rectangleBgOpacity(double rectangleBgOpacity);
 
-  DrawParams fibRetracementRates(List<double> fibRetracementRates);
+  DrawParams fibRates(List<double> fibRates);
 
   DrawParams fibColors(List<Color> fibColors);
 
   DrawParams fibBgOpacity(double fibBgOpacity);
 
-  DrawParams fibRateText(TextAreaConfig fibRateText);
+  DrawParams fibText(TextAreaConfig fibText);
+
+  DrawParams fibFansParams(List<double> fibFansParams);
+
+  DrawParams fibFansColors(List<Color> fibFansColors);
+
+  DrawParams fibFansGridColor(Color? fibFansGridColor);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `DrawParams(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -49,10 +55,13 @@ abstract class _$DrawParamsCWProxy {
     Size? angleRadSize,
     double? paralleBgOpacity,
     double? rectangleBgOpacity,
-    List<double>? fibRetracementRates,
+    List<double>? fibRates,
     List<Color>? fibColors,
     double? fibBgOpacity,
-    TextAreaConfig? fibRateText,
+    TextAreaConfig? fibText,
+    List<double>? fibFansParams,
+    List<Color>? fibFansColors,
+    Color? fibFansGridColor,
   });
 }
 
@@ -96,8 +105,7 @@ class _$DrawParamsCWProxyImpl implements _$DrawParamsCWProxy {
       this(rectangleBgOpacity: rectangleBgOpacity);
 
   @override
-  DrawParams fibRetracementRates(List<double> fibRetracementRates) =>
-      this(fibRetracementRates: fibRetracementRates);
+  DrawParams fibRates(List<double> fibRates) => this(fibRates: fibRates);
 
   @override
   DrawParams fibColors(List<Color> fibColors) => this(fibColors: fibColors);
@@ -107,8 +115,19 @@ class _$DrawParamsCWProxyImpl implements _$DrawParamsCWProxy {
       this(fibBgOpacity: fibBgOpacity);
 
   @override
-  DrawParams fibRateText(TextAreaConfig fibRateText) =>
-      this(fibRateText: fibRateText);
+  DrawParams fibText(TextAreaConfig fibText) => this(fibText: fibText);
+
+  @override
+  DrawParams fibFansParams(List<double> fibFansParams) =>
+      this(fibFansParams: fibFansParams);
+
+  @override
+  DrawParams fibFansColors(List<Color> fibFansColors) =>
+      this(fibFansColors: fibFansColors);
+
+  @override
+  DrawParams fibFansGridColor(Color? fibFansGridColor) =>
+      this(fibFansGridColor: fibFansGridColor);
 
   @override
 
@@ -128,10 +147,13 @@ class _$DrawParamsCWProxyImpl implements _$DrawParamsCWProxy {
     Object? angleRadSize = const $CopyWithPlaceholder(),
     Object? paralleBgOpacity = const $CopyWithPlaceholder(),
     Object? rectangleBgOpacity = const $CopyWithPlaceholder(),
-    Object? fibRetracementRates = const $CopyWithPlaceholder(),
+    Object? fibRates = const $CopyWithPlaceholder(),
     Object? fibColors = const $CopyWithPlaceholder(),
     Object? fibBgOpacity = const $CopyWithPlaceholder(),
-    Object? fibRateText = const $CopyWithPlaceholder(),
+    Object? fibText = const $CopyWithPlaceholder(),
+    Object? fibFansParams = const $CopyWithPlaceholder(),
+    Object? fibFansColors = const $CopyWithPlaceholder(),
+    Object? fibFansGridColor = const $CopyWithPlaceholder(),
   }) {
     return DrawParams(
       arrowsRadians:
@@ -177,12 +199,10 @@ class _$DrawParamsCWProxyImpl implements _$DrawParamsCWProxy {
           ? _value.rectangleBgOpacity
           // ignore: cast_nullable_to_non_nullable
           : rectangleBgOpacity as double,
-      fibRetracementRates:
-          fibRetracementRates == const $CopyWithPlaceholder() ||
-                  fibRetracementRates == null
-              ? _value.fibRetracementRates
-              // ignore: cast_nullable_to_non_nullable
-              : fibRetracementRates as List<double>,
+      fibRates: fibRates == const $CopyWithPlaceholder() || fibRates == null
+          ? _value.fibRates
+          // ignore: cast_nullable_to_non_nullable
+          : fibRates as List<double>,
       fibColors: fibColors == const $CopyWithPlaceholder() || fibColors == null
           ? _value.fibColors
           // ignore: cast_nullable_to_non_nullable
@@ -192,11 +212,24 @@ class _$DrawParamsCWProxyImpl implements _$DrawParamsCWProxy {
               ? _value.fibBgOpacity
               // ignore: cast_nullable_to_non_nullable
               : fibBgOpacity as double,
-      fibRateText:
-          fibRateText == const $CopyWithPlaceholder() || fibRateText == null
-              ? _value.fibRateText
+      fibText: fibText == const $CopyWithPlaceholder() || fibText == null
+          ? _value.fibText
+          // ignore: cast_nullable_to_non_nullable
+          : fibText as TextAreaConfig,
+      fibFansParams:
+          fibFansParams == const $CopyWithPlaceholder() || fibFansParams == null
+              ? _value.fibFansParams
               // ignore: cast_nullable_to_non_nullable
-              : fibRateText as TextAreaConfig,
+              : fibFansParams as List<double>,
+      fibFansColors:
+          fibFansColors == const $CopyWithPlaceholder() || fibFansColors == null
+              ? _value.fibFansColors
+              // ignore: cast_nullable_to_non_nullable
+              : fibFansColors as List<Color>,
+      fibFansGridColor: fibFansGridColor == const $CopyWithPlaceholder()
+          ? _value.fibFansGridColor
+          // ignore: cast_nullable_to_non_nullable
+          : fibFansGridColor as Color?,
     );
   }
 }
@@ -233,7 +266,7 @@ DrawParams _$DrawParamsFromJson(Map<String, dynamic> json) => DrawParams(
       paralleBgOpacity: (json['paralleBgOpacity'] as num?)?.toDouble() ?? 0.1,
       rectangleBgOpacity:
           (json['rectangleBgOpacity'] as num?)?.toDouble() ?? 0.1,
-      fibRetracementRates: (json['fibRetracementRates'] as List<dynamic>?)
+      fibRates: (json['fibRates'] as List<dynamic>?)
               ?.map((e) => (e as num).toDouble())
               .toList() ??
           const [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1.0, 1.382, 1.5, 1.618, 2],
@@ -250,10 +283,27 @@ DrawParams _$DrawParamsFromJson(Map<String, dynamic> json) => DrawParams(
             Color(0xFF651FFF)
           ],
       fibBgOpacity: (json['fibBgOpacity'] as num?)?.toDouble() ?? 0.1,
-      fibRateText: json['fibRateText'] == null
+      fibText: json['fibText'] == null
           ? const TextAreaConfig()
-          : TextAreaConfig.fromJson(
-              json['fibRateText'] as Map<String, dynamic>),
+          : TextAreaConfig.fromJson(json['fibText'] as Map<String, dynamic>),
+      fibFansParams: (json['fibFansParams'] as List<dynamic>?)
+              ?.map((e) => (e as num).toDouble())
+              .toList() ??
+          const [0, 0.25, 0.382, 0.5, 0.618, 0.75, 1],
+      fibFansColors: (json['fibFansColors'] as List<dynamic>?)
+              ?.map((e) => const ColorConverter().fromJson(e as String))
+              .toList() ??
+          const [
+            Color(0xFFFF1744),
+            Color(0xFFFF9100),
+            Color(0xFFFFEA00),
+            Color(0xFF00E676),
+            Color(0xFF18FFFF),
+            Color(0xFF2979FF),
+            Color(0xFF651FFF)
+          ],
+      fibFansGridColor: _$JsonConverterFromJson<String, Color>(
+          json['fibFansGridColor'], const ColorConverter().fromJson),
     );
 
 Map<String, dynamic> _$DrawParamsToJson(DrawParams instance) {
@@ -276,10 +326,29 @@ Map<String, dynamic> _$DrawParamsToJson(DrawParams instance) {
   val['angleRadSize'] = const SizeConverter().toJson(instance.angleRadSize);
   val['paralleBgOpacity'] = instance.paralleBgOpacity;
   val['rectangleBgOpacity'] = instance.rectangleBgOpacity;
-  val['fibRetracementRates'] = instance.fibRetracementRates;
+  val['fibRates'] = instance.fibRates;
   val['fibColors'] =
       instance.fibColors.map(const ColorConverter().toJson).toList();
   val['fibBgOpacity'] = instance.fibBgOpacity;
-  val['fibRateText'] = instance.fibRateText.toJson();
+  val['fibText'] = instance.fibText.toJson();
+  val['fibFansParams'] = instance.fibFansParams;
+  val['fibFansColors'] =
+      instance.fibFansColors.map(const ColorConverter().toJson).toList();
+  writeNotNull(
+      'fibFansGridColor',
+      _$JsonConverterToJson<String, Color>(
+          instance.fibFansGridColor, const ColorConverter().toJson));
   return val;
 }
+
+Value? _$JsonConverterFromJson<Json, Value>(
+  Object? json,
+  Value? Function(Json json) fromJson,
+) =>
+    json == null ? null : fromJson(json as Json);
+
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) =>
+    value == null ? null : toJson(value);

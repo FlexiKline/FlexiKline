@@ -84,9 +84,9 @@ class FibRetracementDrawObject extends DrawObject {
   ) {
     final drawParams = context.config.drawParams;
     final precision = context.curKlineData.precision;
-    final fibRates = drawParams.fibRetracementRates;
-    final fibText = drawParams.fibRateText;
-    final fibOpacity = drawParams.fibBgOpacity;
+    final fibRates = drawParams.fibRates;
+    final fibText = drawParams.fibText;
+    final fibBgOpacity = drawParams.fibBgOpacity;
     final fibColors = drawParams.fibColors;
     final colors = fibColors.isNotEmpty ? fibColors : [line.paint.color];
     int i = 0;
@@ -105,12 +105,12 @@ class FibRetracementDrawObject extends DrawObject {
       end = Offset(second.dx - dxLen, dy);
 
       final color = colors[i++ % colors.length];
-      if (fibOpacity > 0) {
+      if (fibBgOpacity > 0) {
         /// 填充背景
         canvas.drawPath(
           Path()..addPolygon([...linePoints, end, start], true),
           Paint()
-            ..color = color.withOpacity(fibOpacity)
+            ..color = color.withOpacity(fibBgOpacity)
             ..style = PaintingStyle.fill,
         );
       }

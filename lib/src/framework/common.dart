@@ -117,11 +117,12 @@ enum DrawType implements IDrawType {
   crossLine(1), // 十字线
   priceLine(1), // 价钱线
   // 多线
+  rectangle(2), // 长方形
   parallelChannel(3), // 平行通道
   // parallelLines, // 平行直线
   fibRetracement(2), // 斐波那契回撤
   // fibExpansion(3), // 斐波那契扩展
-  rectangle(2); // 长方形
+  fibFans(2); // 斐波那契扇形
 
   const DrawType(this.steps);
 
