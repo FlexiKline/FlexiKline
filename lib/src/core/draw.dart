@@ -17,6 +17,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 
 import '../config/export.dart';
+import '../extension/export.dart';
 import '../framework/export.dart';
 import '../framework/overlay_manager.dart';
 import '../model/bag_num.dart';
@@ -336,6 +337,36 @@ mixin DrawBinding
       _drawState = const Prepared();
     }
     _markRepaint();
+  }
+
+  bool setDrawPaintColor(Color color) {
+    final overlay = drawState.overlay;
+    if (overlay == null) return false;
+    overlay.line = overlay.line.copyWith(
+      paint: overlay.line.paint.copyWith(color: color),
+    );
+    _markRepaint();
+    return true;
+  }
+
+  bool setDrawLineWeight(double value) {
+    final overlay = drawState.overlay;
+    if (overlay == null) return false;
+    overlay.line = overlay.line.copyWith(
+      paint: overlay.line.paint.copyWith(strokeWidth: value),
+    );
+    _markRepaint();
+    return true;
+  }
+
+  bool setDrawLineType(LineType type) {
+    final overlay = drawState.overlay;
+    if (overlay == null) return false;
+    overlay.line = overlay.line.copyWith(
+      type: type,
+    );
+    _markRepaint();
+    return true;
   }
   ////// 绘制 //////
 

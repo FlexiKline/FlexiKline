@@ -17,10 +17,10 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 
 import '../constant.dart';
+import '../config/export.dart';
 import '../core/interface.dart';
 import '../data/kline_data.dart';
 import '../extension/export.dart';
-import '../config/line_config/line_config.dart';
 import '../model/bag_num.dart';
 import '../model/range.dart';
 import '../utils/date_time.dart';
@@ -251,6 +251,7 @@ class OverlayObject {
   bool get moving => _overlay.moving;
   MagnetMode get mode => _overlay.mode;
   LineConfig get line => _overlay.line;
+  Color get lineColor => line.paint.color;
   List<Point?> get points => _overlay.points;
   int get steps => points.length;
   Point? get pointer => _overlay.pointer;
@@ -405,12 +406,13 @@ mixin DrawObjectMixin on OverlayObject {
     Canvas canvas, {
     bool isMoving = false,
   }) {
+    final pointConfig = context.config.getDrawPointConfig(lineColor);
     for (var point in points) {
       if (point == null) continue;
       if (point == pointer || point.index == pointer?.index) {
         canvas.drawCirclePoint(point.offset, context.config.crosspoint);
       } else if (point.offset.isFinite) {
-        canvas.drawCirclePoint(point.offset, context.config.drawPoint);
+        canvas.drawCirclePoint(point.offset, pointConfig);
       }
     }
   }
@@ -419,10 +421,11 @@ mixin DrawObjectMixin on OverlayObject {
   void drawConnectingLine(IDrawContext context, Canvas canvas, Size size) {
     final config = context.config;
     Offset? last;
+    final pointConfig = context.config.getDrawPointConfig(lineColor);
     for (var point in points) {
       if (point != null) {
         final offset = point.offset;
-        canvas.drawCirclePoint(offset, config.drawPoint);
+        canvas.drawCirclePoint(offset, pointConfig);
         if (last != null) {
           final linePath = Path()
             ..moveTo(offset.dx, offset.dy)
@@ -497,7 +500,8 @@ mixin DrawObjectMixin on OverlayObject {
   ) {
     final mainRect = context.mainRect;
     final timeRect = context.timeRect;
-    final tickText = context.config.tickText;
+    final tickTextConfig = context.config.getTickTextConfig(lineColor);
+    final ticksGapBgPaint = context.config.getTicksGapBgPaint(lineColor);
 
     /// 绘制时间刻度
     if (bounds.width > 0) {
@@ -507,9 +511,9 @@ mixin DrawObjectMixin on OverlayObject {
           bounds.left,
           timeRect.top,
           bounds.right,
-          timeRect.top + tickText.areaHeight,
+          timeRect.top + tickTextConfig.areaHeight,
         ),
-        context.config.gapBgPaint,
+        ticksGapBgPaint,
       );
 
       double startDx = bounds.left;
@@ -527,12 +531,14 @@ mixin DrawObjectMixin on OverlayObject {
         canvas,
         startDx,
         drawableRect: timeRect,
+        tickTextConfig: tickTextConfig,
       );
       drawTimeTick(
         context,
         canvas,
         endDx,
         drawableRect: timeRect,
+        tickTextConfig: tickTextConfig,
       );
     } else {
       drawTimeTick(
@@ -540,6 +546,7 @@ mixin DrawObjectMixin on OverlayObject {
         canvas,
         bounds.left,
         drawableRect: timeRect,
+        tickTextConfig: tickTextConfig,
       );
     }
 
@@ -555,7 +562,7 @@ mixin DrawObjectMixin on OverlayObject {
             mainRect.right - context.config.spacing,
             bounds.bottom.clamp(mainRect.top, mainRect.bottom),
           ),
-          context.config.gapBgPaint,
+          ticksGapBgPaint,
         );
       }
 
@@ -574,12 +581,14 @@ mixin DrawObjectMixin on OverlayObject {
         canvas,
         topDy,
         drawableRect: mainRect,
+        tickTextConfig: tickTextConfig,
       );
       _valueTickSize = drawValueTick(
         context,
         canvas,
         bottomDy,
         drawableRect: mainRect,
+        tickTextConfig: tickTextConfig,
       );
     } else {
       _valueTickSize = drawValueTick(
@@ -587,6 +596,7 @@ mixin DrawObjectMixin on OverlayObject {
         canvas,
         bounds.top,
         drawableRect: mainRect,
+        tickTextConfig: tickTextConfig,
       );
     }
   }
@@ -598,6 +608,7 @@ mixin DrawObjectMixin on OverlayObject {
     Canvas canvas,
     double dx, {
     Rect? drawableRect,
+    TextAreaConfig? tickTextConfig,
   }) {
     // TODO: 此处考虑直接从dx转换为ts
     int? index = context.dxToIndex(dx);
@@ -610,13 +621,14 @@ mixin DrawObjectMixin on OverlayObject {
     final timeTxt = formatTimeTick(ts, bar: klineData.timeBar);
 
     drawableRect ??= context.timeRect;
+    tickTextConfig ??= context.config.getTickTextConfig(lineColor);
     return canvas.drawTextArea(
       offset: Offset(
         dx,
         drawableRect.top,
       ),
       text: timeTxt,
-      textConfig: context.config.tickText,
+      textConfig: tickTextConfig,
       drawDirection: DrawDirection.center,
       // drawableRect: drawableRect,
     );
@@ -629,6 +641,7 @@ mixin DrawObjectMixin on OverlayObject {
     Canvas canvas,
     double dy, {
     Rect? drawableRect,
+    TextAreaConfig? tickTextConfig,
   }) {
     final value = context.dyToValue(dy);
     if (value == null) return Size.zero;
@@ -639,8 +652,8 @@ mixin DrawObjectMixin on OverlayObject {
     );
 
     final txtSpacing = context.config.spacing;
-    final tickText = context.config.tickText;
-    final centerOffset = tickText.areaHeight / 2;
+    tickTextConfig ??= context.config.getTickTextConfig(lineColor);
+    final centerOffset = tickTextConfig.areaHeight / 2;
     drawableRect ??= context.mainRect;
     return canvas.drawTextArea(
       offset: Offset(
@@ -651,7 +664,7 @@ mixin DrawObjectMixin on OverlayObject {
         ),
       ),
       text: valTxt,
-      textConfig: tickText,
+      textConfig: tickTextConfig,
       drawDirection: DrawDirection.rtl,
       drawableRect: drawableRect,
     );

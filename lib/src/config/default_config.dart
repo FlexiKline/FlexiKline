@@ -339,7 +339,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
           color: theme.drawColor,
         ),
         type: LineType.dashed,
-        dashes: const [3, 3],
+        dashes: const [5, 3],
       ),
       crosspoint: PointConfig(
         radius: 2 * theme.scale,
@@ -354,7 +354,10 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
           color: theme.drawColor,
         ),
         type: LineType.solid,
+        dashes: [5, 3],
       ),
+      // 绘制[drawPoint]和[tickText]刻度时, 是否始终使用[drawLine]指定的颜色.
+      useDrawLineColor: true,
       drawPoint: PointConfig(
         radius: 9 * theme.scale,
         width: 0 * theme.scale,
@@ -377,7 +380,8 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
         ),
       ),
       spacing: 1 * theme.scale,
-      gapBackground: theme.drawColor.withOpacity(0.1),
+      ticksGapBgOpacity: 0.1,
+      // ticksGapBgColor: theme.drawColor.withOpacity(0.1),
       hitTestMinDistance: 10 * theme.scale,
       magnifierConfig: MagnifierConfig(
         enable: true,

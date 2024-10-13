@@ -64,7 +64,7 @@ abstract class BaseBitFlexiKlineTheme
   Color crossColor = const Color(0xFFF6A701);
 
   @override
-  Color get drawColor => Colors.lightBlue;
+  Color get drawColor => Colors.blueAccent;
 
   @override
   Color get drawTextBg => Colors.blue;

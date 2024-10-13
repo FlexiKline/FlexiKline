@@ -31,11 +31,13 @@ class DrawConfig {
     this.enable = true,
     required this.crosspoint,
     required this.crosshair,
-    required this.drawPoint,
     required this.drawLine,
+    this.useDrawLineColor = true,
+    required this.drawPoint,
     required this.tickText,
     required this.spacing,
-    this.gapBackground = const Color(0x00000000),
+    this.ticksGapBgOpacity = 0.1,
+    this.ticksGapBgColor,
     this.hitTestMinDistance = 20,
     this.magnifierConfig = const MagnifierConfig(),
     this.drawParams = const DrawParams(),
@@ -50,20 +52,28 @@ class DrawConfig {
   /// 十字线配置
   final LineConfig crosshair;
 
-  /// 选择绘制点配置
-  final PointConfig drawPoint;
-
   /// 默认绘制线的样式配置
   final LineConfig drawLine;
 
-  /// 刻度文案配置
+  /// 绘制[drawPoint]和[tickText]刻度时, 是否始终使用[drawLine]指定的颜色.
+  final bool useDrawLineColor;
+
+  /// 选择绘制点配置, 优先使用[getDrawPointConfig]
+  final PointConfig drawPoint;
+
+  /// 刻度文案配置, 优先使用[getTickTextConfig]
   final TextAreaConfig tickText;
 
   /// onCross时, 刻度[tickText]与绘制边界的间距.
   final double spacing;
 
-  /// 两个时间刻度之间的背景色
-  final Color gapBackground;
+  /// 两个刻度之间的背景色不透明度
+  /// 如果[ticksGapBgColor]为空, 将对当前画笔颜色设置此不透明度.
+  final double ticksGapBgOpacity;
+
+  /// 两个刻度之间的背景色
+  /// 如果指定, 优先作为刻度间的背景色; 否则使用当前画笔[ticksGapBgOpacity]
+  final Color? ticksGapBgColor;
 
   /// 命中测试最小距离.
   /// 当前位置到Overlay线距离如果小于等于[hitTestMinDistance], 即命中.
@@ -75,17 +85,30 @@ class DrawConfig {
   /// 绘制Overlay的Object时所需要的参数集
   final DrawParams drawParams;
 
-  Paint get gapBgPaint => Paint()
-    ..color = gapBackground
-    ..style = PaintingStyle.fill
-    ..strokeWidth = 6;
-
   TextAreaConfig get priceLineText {
     return drawParams.priceText ?? tickText;
   }
 
   TextAreaConfig get angleRadText {
     return drawParams.angleText ?? tickText;
+  }
+
+  Paint getTicksGapBgPaint(Color color) => Paint()
+    ..color = ticksGapBgColor ?? color.withOpacity(ticksGapBgOpacity)
+    ..style = PaintingStyle.fill;
+
+  TextAreaConfig getTickTextConfig(Color? color) {
+    if (useDrawLineColor && color != null) {
+      return tickText.copyWith(background: color);
+    }
+    return tickText;
+  }
+
+  PointConfig getDrawPointConfig(Color? color) {
+    if (useDrawLineColor && color != null) {
+      return drawPoint.copyWith(borderColor: color);
+    }
+    return drawPoint;
   }
 
   factory DrawConfig.fromJson(Map<String, dynamic> json) =>

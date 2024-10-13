@@ -121,6 +121,13 @@ extension PathDraw on Canvas {
   }) {
     if (type == LineType.dashed) {
       drawDashPath(path, paint, dashes: dashes);
+    } else if (type == LineType.dotted) {
+      // final paint = Paint.from(paint);
+      paint.strokeJoin = StrokeJoin.round;
+      paint.strokeCap = StrokeCap.round;
+      paint.isAntiAlias = true;
+      final width = paint.strokeWidth;
+      drawDashPath(path, paint, dashes: [1, width * 2]);
     } else {
       drawPath(path, paint);
     }
@@ -130,13 +137,11 @@ extension PathDraw on Canvas {
   void drawLineByConfig(
     Path path,
     LineConfig config,
-  ) {
-    if (config.type == LineType.dashed) {
-      drawDashPath(path, config.linePaint, dashes: config.dashes);
-    } else {
-      drawPath(path, config.linePaint);
-    }
-
-    /// TODO: 待处理LineType.dotted
-  }
+  ) =>
+      drawLineType(
+        config.type,
+        path,
+        config.linePaint,
+        dashes: config.dashes,
+      );
 }

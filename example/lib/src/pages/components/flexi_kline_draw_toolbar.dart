@@ -25,18 +25,32 @@ import '../../widgets/shrink_icon_button.dart';
 
 final drawToolbarInitPosition = Offset(60.r, 200.r);
 
+const List<double> flexiKlineLineWeightList = [1, 2, 3, 4];
+const List<Color> flexiKlinePaintColors = [
+  Colors.blueAccent,
+  Colors.redAccent,
+  // Colors.pinkAccent,
+  Colors.purpleAccent,
+  Colors.greenAccent,
+  // Colors.yellowAccent,
+  Colors.orangeAccent,
+  // Colors.indigoAccent,
+];
+
 // 绘制工具条
 class FlexiKlineDrawToolbar extends ConsumerStatefulWidget {
   const FlexiKlineDrawToolbar({
     super.key,
     required this.controller,
-    this.lineWeight = 1,
+    this.lineWeight,
     this.lineType = LineType.solid,
+    this.paintColor,
   });
 
   final FlexiKlineController controller;
-  final int lineWeight;
+  final double? lineWeight;
   final LineType lineType;
+  final Color? paintColor;
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
@@ -46,32 +60,49 @@ class FlexiKlineDrawToolbar extends ConsumerStatefulWidget {
 class _FlexiKlineDrawToolbarState extends ConsumerState<FlexiKlineDrawToolbar> {
   FlexiKlineController get controller => widget.controller;
 
-  late int lineWeight;
-  final List<int> lineWeightList = [1, 2, 3, 4];
-
   late LineType lineType;
+  late double lineWeight;
+  late Color paintColor;
 
   @override
   void initState() {
     super.initState();
-    if (lineWeightList.contains(widget.lineWeight)) {
-      lineWeight = widget.lineWeight;
-    }
     lineType = widget.lineType;
+
+    if (flexiKlineLineWeightList.contains(widget.lineWeight)) {
+      lineWeight = widget.lineWeight!;
+    } else {
+      lineWeight = flexiKlineLineWeightList.first;
+    }
+    if (flexiKlinePaintColors.contains(widget.paintColor)) {
+      paintColor = widget.paintColor!;
+    } else {
+      paintColor = flexiKlinePaintColors.first;
+    }
   }
 
-  void onSelectLineWeight(int value) {
-    setState(() {
-      lineWeight = value;
-    });
-    // TODO: 通过 controller 处理lineWeight的改变.
+  void onSelectPaintColor(Color color) {
+    if (controller.setDrawPaintColor(color)) {
+      setState(() {
+        paintColor = color;
+      });
+    }
+  }
+
+  void onSelectLineWeight(double value) {
+    if (controller.setDrawLineWeight(value)) {
+      setState(() {
+        lineWeight = value;
+      });
+    }
   }
 
   void onSelectLineType(LineType type) {
-    setState(() {
-      lineType = type;
-    });
-    // TODO: 通过 controller 处理lineType的改变.
+    if (controller.setDrawLineType(type)) {
+      setState(() {
+        lineType = type;
+      });
+    }
   }
 
   @override
@@ -90,33 +121,48 @@ class _FlexiKlineDrawToolbarState extends ConsumerState<FlexiKlineDrawToolbar> {
             Icons.drag_indicator_rounded,
             size: 20.r,
           ),
-          ShrinkIconButton(
-            onPressed: () {
-              debugPrint('zp::: draw onTap Paint');
+          FlexiPopupMenuButton(
+            initialValue: paintColor,
+            padding: EdgeInsets.symmetric(horizontal: 4.r),
+            onSelected: onSelectPaintColor,
+            offset: Offset(-8.r, 0),
+            itemBuilder: (context) {
+              return flexiKlinePaintColors.map((value) {
+                return PopupMenuItem(
+                  key: ValueKey(value),
+                  value: value,
+                  height: 32.r,
+                  child: SvgPicture.asset(
+                    SvgRes.paintColor,
+                    colorFilter: ColorFilter.mode(value, BlendMode.srcIn),
+                  ),
+                );
+              }).toList();
             },
-            content: SvgRes.paintColor,
-            width: 18.r,
-            padding: 6.r,
+            child: SvgPicture.asset(
+              SvgRes.paintColor,
+              colorFilter: ColorFilter.mode(paintColor, BlendMode.srcIn),
+            ),
           ),
           FlexiPopupMenuButton(
             initialValue: lineWeight,
             onSelected: onSelectLineWeight,
             offset: Offset(-8.r, 0),
             itemBuilder: (context) {
-              return lineWeightList.map((value) {
+              return flexiKlineLineWeightList.map((value) {
                 return PopupMenuItem(
                   key: ValueKey(value),
                   value: value,
                   height: 32.r,
                   child: SvgPicture.asset(
-                    'assets/svgs/line_weight_$value.svg',
+                    'assets/svgs/line_weight_${cutInvalidZero(value)}.svg',
                     colorFilter: ColorFilter.mode(theme.t1, BlendMode.srcIn),
                   ),
                 );
               }).toList();
             },
             child: SvgPicture.asset(
-              'assets/svgs/line_weight_$lineWeight.svg',
+              'assets/svgs/line_weight_${cutInvalidZero(lineWeight)}.svg',
               colorFilter: ColorFilter.mode(theme.t1, BlendMode.srcIn),
             ),
           ),

@@ -60,7 +60,7 @@ class DefaultFlexiKlineTheme extends BaseFlexiKlineTheme
           lastPriceTextBg: theme.translucentBg,
           gridLine: theme.gridLine,
           crossColor: theme.t1,
-          drawColor: Colors.lightBlue,
+          drawColor: Colors.blueAccent,
           markLine: theme.t1,
           themeColor: theme.themeColor,
           textColor: theme.t1,
@@ -112,9 +112,6 @@ class DefaultFlexiKlineTheme extends BaseFlexiKlineTheme
 
   @override
   double setSp(num fontSize) => ScreenUtil().setSp(fontSize);
-
-  @override
-  Color get drawColor => Colors.lightBlue;
 }
 
 final defaultKlineThemeProvider = StateProvider<DefaultFlexiKlineTheme>((ref) {
