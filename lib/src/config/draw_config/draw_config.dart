@@ -18,6 +18,7 @@ import 'package:flutter/painting.dart';
 import '../../framework/serializers.dart';
 import '../draw_params/draw_params.dart';
 import '../magnifier_config/magnifier_config.dart';
+import '../paint_config/paint_config.dart';
 import '../point_config/point_config.dart';
 import '../line_config/line_config.dart';
 import '../text_area_config/text_area_config.dart';
@@ -37,7 +38,6 @@ class DrawConfig {
     required this.tickText,
     required this.spacing,
     this.ticksGapBgOpacity = 0.1,
-    this.ticksGapBgColor,
     this.hitTestMinDistance = 20,
     this.magnifierConfig = const MagnifierConfig(),
     this.drawParams = const DrawParams(),
@@ -46,10 +46,10 @@ class DrawConfig {
   /// 是否启用Draw Overlay功能开关
   final bool enable;
 
-  /// 绘制十字线交叉点配置
+  /// 绘制十字线交叉点配置, 优先使用[getCrosspointConfig]
   final PointConfig crosspoint;
 
-  /// 十字线配置
+  /// 十字线配置, 优先使用[getCrosshairConfig]
   final LineConfig crosshair;
 
   /// 默认绘制线的样式配置
@@ -68,12 +68,7 @@ class DrawConfig {
   final double spacing;
 
   /// 两个刻度之间的背景色不透明度
-  /// 如果[ticksGapBgColor]为空, 将对当前画笔颜色设置此不透明度.
   final double ticksGapBgOpacity;
-
-  /// 两个刻度之间的背景色
-  /// 如果指定, 优先作为刻度间的背景色; 否则使用当前画笔[ticksGapBgOpacity]
-  final Color? ticksGapBgColor;
 
   /// 命中测试最小距离.
   /// 当前位置到Overlay线距离如果小于等于[hitTestMinDistance], 即命中.
@@ -93,9 +88,37 @@ class DrawConfig {
     return drawParams.angleText ?? tickText;
   }
 
-  Paint getTicksGapBgPaint(Color color) => Paint()
-    ..color = ticksGapBgColor ?? color.withOpacity(ticksGapBgOpacity)
-    ..style = PaintingStyle.fill;
+  PointConfig getCrosspointConfig(Color? color) {
+    if (useDrawLineColor && color != null) {
+      return crosspoint.copyWith(
+        color: color,
+        borderColor: color.withOpacity(crosspoint.borderColor?.opacity ?? 0),
+      );
+    }
+    return crosspoint;
+  }
+
+  LineConfig getCrosshairConfig(Color? color) {
+    if (useDrawLineColor && color != null) {
+      return crosshair.copyWith(
+        paint: crosshair.paint.copyWith(color: color),
+      );
+    }
+    return crosshair;
+  }
+
+  Paint? getTicksGapBgPaint(Color? color) {
+    if (useDrawLineColor && color != null) {
+      return Paint()
+        ..color = color.withOpacity(ticksGapBgOpacity)
+        ..style = PaintingStyle.fill;
+    } else if (tickText.background != null && tickText.background!.alpha != 0) {
+      return Paint()
+        ..color = tickText.background!.withOpacity(ticksGapBgOpacity)
+        ..style = PaintingStyle.fill;
+    }
+    return null;
+  }
 
   TextAreaConfig getTickTextConfig(Color? color) {
     if (useDrawLineColor && color != null) {

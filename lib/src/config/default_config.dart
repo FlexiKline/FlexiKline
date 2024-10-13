@@ -381,7 +381,6 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       ),
       spacing: 1 * theme.scale,
       ticksGapBgOpacity: 0.1,
-      // ticksGapBgColor: theme.drawColor.withOpacity(0.1),
       hitTestMinDistance: 10 * theme.scale,
       magnifierConfig: MagnifierConfig(
         enable: true,

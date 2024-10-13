@@ -407,10 +407,11 @@ mixin DrawObjectMixin on OverlayObject {
     bool isMoving = false,
   }) {
     final pointConfig = context.config.getDrawPointConfig(lineColor);
+    final crosspointConfig = context.config.getCrosspointConfig(lineColor);
     for (var point in points) {
       if (point == null) continue;
       if (point == pointer || point.index == pointer?.index) {
-        canvas.drawCirclePoint(point.offset, context.config.crosspoint);
+        canvas.drawCirclePoint(point.offset, crosspointConfig);
       } else if (point.offset.isFinite) {
         canvas.drawCirclePoint(point.offset, pointConfig);
       }
@@ -422,6 +423,7 @@ mixin DrawObjectMixin on OverlayObject {
     final config = context.config;
     Offset? last;
     final pointConfig = context.config.getDrawPointConfig(lineColor);
+    final crosshairConfig = config.getCrosshairConfig(lineColor);
     for (var point in points) {
       if (point != null) {
         final offset = point.offset;
@@ -431,10 +433,10 @@ mixin DrawObjectMixin on OverlayObject {
             ..moveTo(offset.dx, offset.dy)
             ..lineTo(last.dx, last.dy);
           canvas.drawLineType(
-            config.crosshair.type,
+            crosshairConfig.type,
             linePath,
-            config.crosshair.linePaint,
-            dashes: config.crosshair.dashes,
+            crosshairConfig.linePaint,
+            dashes: crosshairConfig.dashes,
           );
         }
         last = offset;
@@ -453,17 +455,18 @@ mixin DrawObjectMixin on OverlayObject {
     Offset? last,
   ) {
     final mainRect = context.mainRect;
-    final config = context.config;
+    final crosshairConfig = context.config.getCrosshairConfig(lineColor);
+    final crosspointConfig = context.config.getCrosspointConfig(lineColor);
     final path = Path()
       ..moveTo(mainRect.left, pointer.dy)
       ..lineTo(mainRect.right, pointer.dy)
       ..moveTo(pointer.dx, mainRect.top)
       ..lineTo(pointer.dx, mainRect.bottom);
     canvas.drawLineType(
-      config.crosshair.type,
+      crosshairConfig.type,
       path,
-      config.crosshair.linePaint,
-      dashes: config.crosshair.dashes,
+      crosshairConfig.linePaint,
+      dashes: crosshairConfig.dashes,
     );
 
     if (last != null && last.isFinite) {
@@ -471,13 +474,13 @@ mixin DrawObjectMixin on OverlayObject {
         ..moveTo(pointer.dx, pointer.dy)
         ..lineTo(last.dx, last.dy);
       canvas.drawLineType(
-        config.crosshair.type,
+        crosshairConfig.type,
         linePath,
-        config.crosshair.linePaint,
-        dashes: config.crosshair.dashes,
+        crosshairConfig.linePaint,
+        dashes: crosshairConfig.dashes,
       );
     }
-    canvas.drawCirclePoint(pointer, config.crosspoint);
+    canvas.drawCirclePoint(pointer, crosspointConfig);
   }
 
   Size? __valueTickSize;
@@ -504,7 +507,7 @@ mixin DrawObjectMixin on OverlayObject {
     final ticksGapBgPaint = context.config.getTicksGapBgPaint(lineColor);
 
     /// 绘制时间刻度
-    if (bounds.width > 0) {
+    if (bounds.width > 0 && ticksGapBgPaint != null) {
       // 绘制left到right刻度之间的背景
       canvas.drawRect(
         Rect.fromLTRB(
@@ -554,7 +557,7 @@ mixin DrawObjectMixin on OverlayObject {
     if (bounds.height > 0) {
       // 绘制top到bottom刻度之间的背景
       final txtWidth = valueTickSize?.width ?? 0;
-      if (txtWidth > 0) {
+      if (txtWidth > 0 && ticksGapBgPaint != null) {
         canvas.drawRect(
           Rect.fromLTRB(
             mainRect.right - context.config.spacing - txtWidth,

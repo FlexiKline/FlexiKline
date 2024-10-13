@@ -25,8 +25,6 @@ abstract class _$DrawConfigCWProxy {
 
   DrawConfig ticksGapBgOpacity(double ticksGapBgOpacity);
 
-  DrawConfig ticksGapBgColor(Color? ticksGapBgColor);
-
   DrawConfig hitTestMinDistance(double hitTestMinDistance);
 
   DrawConfig magnifierConfig(MagnifierConfig magnifierConfig);
@@ -49,7 +47,6 @@ abstract class _$DrawConfigCWProxy {
     TextAreaConfig? tickText,
     double? spacing,
     double? ticksGapBgOpacity,
-    Color? ticksGapBgColor,
     double? hitTestMinDistance,
     MagnifierConfig? magnifierConfig,
     DrawParams? drawParams,
@@ -92,10 +89,6 @@ class _$DrawConfigCWProxyImpl implements _$DrawConfigCWProxy {
       this(ticksGapBgOpacity: ticksGapBgOpacity);
 
   @override
-  DrawConfig ticksGapBgColor(Color? ticksGapBgColor) =>
-      this(ticksGapBgColor: ticksGapBgColor);
-
-  @override
   DrawConfig hitTestMinDistance(double hitTestMinDistance) =>
       this(hitTestMinDistance: hitTestMinDistance);
 
@@ -124,7 +117,6 @@ class _$DrawConfigCWProxyImpl implements _$DrawConfigCWProxy {
     Object? tickText = const $CopyWithPlaceholder(),
     Object? spacing = const $CopyWithPlaceholder(),
     Object? ticksGapBgOpacity = const $CopyWithPlaceholder(),
-    Object? ticksGapBgColor = const $CopyWithPlaceholder(),
     Object? hitTestMinDistance = const $CopyWithPlaceholder(),
     Object? magnifierConfig = const $CopyWithPlaceholder(),
     Object? drawParams = const $CopyWithPlaceholder(),
@@ -169,10 +161,6 @@ class _$DrawConfigCWProxyImpl implements _$DrawConfigCWProxy {
           ? _value.ticksGapBgOpacity
           // ignore: cast_nullable_to_non_nullable
           : ticksGapBgOpacity as double,
-      ticksGapBgColor: ticksGapBgColor == const $CopyWithPlaceholder()
-          ? _value.ticksGapBgColor
-          // ignore: cast_nullable_to_non_nullable
-          : ticksGapBgColor as Color?,
       hitTestMinDistance: hitTestMinDistance == const $CopyWithPlaceholder() ||
               hitTestMinDistance == null
           ? _value.hitTestMinDistance
@@ -215,8 +203,6 @@ DrawConfig _$DrawConfigFromJson(Map<String, dynamic> json) => DrawConfig(
           TextAreaConfig.fromJson(json['tickText'] as Map<String, dynamic>),
       spacing: (json['spacing'] as num).toDouble(),
       ticksGapBgOpacity: (json['ticksGapBgOpacity'] as num?)?.toDouble() ?? 0.1,
-      ticksGapBgColor: _$JsonConverterFromJson<String, Color>(
-          json['ticksGapBgColor'], const ColorConverter().fromJson),
       hitTestMinDistance:
           (json['hitTestMinDistance'] as num?)?.toDouble() ?? 20,
       magnifierConfig: json['magnifierConfig'] == null
@@ -228,43 +214,18 @@ DrawConfig _$DrawConfigFromJson(Map<String, dynamic> json) => DrawConfig(
           : DrawParams.fromJson(json['drawParams'] as Map<String, dynamic>),
     );
 
-Map<String, dynamic> _$DrawConfigToJson(DrawConfig instance) {
-  final val = <String, dynamic>{
-    'enable': instance.enable,
-    'crosspoint': instance.crosspoint.toJson(),
-    'crosshair': instance.crosshair.toJson(),
-    'drawLine': instance.drawLine.toJson(),
-    'useDrawLineColor': instance.useDrawLineColor,
-    'drawPoint': instance.drawPoint.toJson(),
-    'tickText': instance.tickText.toJson(),
-    'spacing': instance.spacing,
-    'ticksGapBgOpacity': instance.ticksGapBgOpacity,
-  };
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull(
-      'ticksGapBgColor',
-      _$JsonConverterToJson<String, Color>(
-          instance.ticksGapBgColor, const ColorConverter().toJson));
-  val['hitTestMinDistance'] = instance.hitTestMinDistance;
-  val['magnifierConfig'] = instance.magnifierConfig.toJson();
-  val['drawParams'] = instance.drawParams.toJson();
-  return val;
-}
-
-Value? _$JsonConverterFromJson<Json, Value>(
-  Object? json,
-  Value? Function(Json json) fromJson,
-) =>
-    json == null ? null : fromJson(json as Json);
-
-Json? _$JsonConverterToJson<Json, Value>(
-  Value? value,
-  Json? Function(Value value) toJson,
-) =>
-    value == null ? null : toJson(value);
+Map<String, dynamic> _$DrawConfigToJson(DrawConfig instance) =>
+    <String, dynamic>{
+      'enable': instance.enable,
+      'crosspoint': instance.crosspoint.toJson(),
+      'crosshair': instance.crosshair.toJson(),
+      'drawLine': instance.drawLine.toJson(),
+      'useDrawLineColor': instance.useDrawLineColor,
+      'drawPoint': instance.drawPoint.toJson(),
+      'tickText': instance.tickText.toJson(),
+      'spacing': instance.spacing,
+      'ticksGapBgOpacity': instance.ticksGapBgOpacity,
+      'hitTestMinDistance': instance.hitTestMinDistance,
+      'magnifierConfig': instance.magnifierConfig.toJson(),
+      'drawParams': instance.drawParams.toJson(),
+    };
