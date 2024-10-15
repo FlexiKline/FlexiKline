@@ -14,11 +14,11 @@
 
 import 'dart:ui';
 
-import '../core/interface.dart';
 import '../config/text_area_config/text_area_config.dart';
+import '../core/interface.dart';
 import '../data/export.dart';
 import '../extension/export.dart';
-import '../framework/overlay.dart';
+import '../framework/draw/overlay.dart';
 
 class FibExpansionDrawObject extends DrawObject {
   FibExpansionDrawObject(super.overlay);

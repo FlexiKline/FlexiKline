@@ -15,12 +15,12 @@
 import 'dart:ui';
 
 import '../core/interface.dart';
-import '../data/kline_data.dart';
-import '../extension/export.dart';
-import '../framework/overlay.dart';
+import '../extension/geometry_ext.dart';
+import '../extension/render/draw_path.dart';
+import '../framework/draw/overlay.dart';
 
-class PriceLineDrawObject extends DrawObject {
-  PriceLineDrawObject(super.overlay);
+class VerticalLineDrawObject extends DrawObject {
+  VerticalLineDrawObject(super.overlay);
 
   @override
   bool hitTest(
@@ -30,17 +30,18 @@ class PriceLineDrawObject extends DrawObject {
   }) {
     assert(
       points.length == 1,
-      'HorizontalLine only takes one point, but it has ${points.length}',
+      'VerticalLine only takes one point, but it has ${points.length}',
     );
     final first = points.firstOrNull?.offset;
     if (first == null) return false;
 
+    final dx = first.dx;
     final mainRect = context.mainRect;
-    if (!mainRect.include(first)) return false;
+    if (!mainRect.includeDx(dx)) return false;
 
     final distance = position.distanceToLine(
-      first,
-      Offset(mainRect.right, first.dy),
+      Offset(dx, mainRect.top),
+      Offset(dx, mainRect.bottom),
     );
     return distance <= context.config.hitTestMinDistance;
   }
@@ -49,46 +50,25 @@ class PriceLineDrawObject extends DrawObject {
   void draw(IDrawContext context, Canvas canvas, Size size) {
     assert(
       points.length == 1,
-      'PriceLine only takes one point, but it has ${points.length}',
+      'VerticalLine only takes one point, but it has ${points.length}',
     );
     final first = points.firstOrNull?.offset;
     if (first == null) return;
+
     final mainRect = context.mainRect;
-    if (!mainRect.include(first)) {
-      context.logi('draw($type), but first:$first not in mainRect.');
+    final dx = first.dx;
+    if (!mainRect.includeDx(dx)) {
+      context.logi('draw($type), but dx:$dx not in mainRect.');
       return;
     }
 
-    // 画线
     canvas.drawLineByConfig(
       Path()
         ..addPolygon(
-          [first, Offset(mainRect.right, first.dy)],
+          [Offset(dx, mainRect.top), Offset(dx, mainRect.bottom)],
           false,
         ),
       line,
     );
-
-    // 画价值文本区域
-    final value = context.dyToValue(first.dy);
-    if (value != null) {
-      final valTxt = formatValueTick(
-        value,
-        precision: context.curKlineData.precision,
-      );
-      // if (valTxt.isEmpty) return;
-      final tickText = context.config.priceLineText;
-      final margin = context.config.drawParams.priceTextMargin;
-      canvas.drawTextArea(
-        offset: Offset(
-          first.dx + margin.left,
-          first.dy - tickText.areaHeight - margin.bottom,
-        ),
-        text: valTxt,
-        textConfig: tickText,
-        drawDirection: DrawDirection.ltr,
-        // drawableRect: drawableRect,
-      );
-    }
   }
 }

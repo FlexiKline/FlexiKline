@@ -17,7 +17,7 @@ import 'dart:ui';
 import '../core/interface.dart';
 import '../extension/geometry_ext.dart';
 import '../extension/render/draw_path.dart';
-import '../framework/overlay.dart';
+import '../framework/draw/overlay.dart';
 
 class CrossLineDrawObject extends DrawObject {
   CrossLineDrawObject(super.overlay);

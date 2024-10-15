@@ -18,7 +18,7 @@ import 'package:flutter/widgets.dart';
 import '../config/gesture_config/gesture_config.dart';
 import '../extension/geometry_ext.dart';
 import '../framework/common.dart';
-import '../framework/draw_state.dart';
+import '../framework/draw/overlay.dart';
 import '../framework/logger.dart';
 import '../kline_controller.dart';
 import '../model/gesture_data.dart';

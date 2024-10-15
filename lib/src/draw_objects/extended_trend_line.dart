@@ -16,16 +16,17 @@ import 'dart:ui';
 
 import '../core/interface.dart';
 import '../extension/export.dart';
-import '../framework/overlay.dart';
+import '../framework/draw/overlay.dart';
+import '../utils/vector_util.dart';
 
-class HorizontalTrendLineDrawObject extends DrawObject {
-  HorizontalTrendLineDrawObject(super.overlay);
+class ExtendedTrendLineDrawObject extends DrawObject {
+  ExtendedTrendLineDrawObject(super.overlay);
 
   @override
   bool hitTest(IDrawContext context, Offset position, {bool isMove = false}) {
     assert(
       points.length == 2,
-      'HorizontalTrendLine hitTest points.length:${points.length} must be equals 2',
+      'ExtendedTrendLine hitTest points.length:${points.length} must be equals 2',
     );
     final first = points.firstOrNull?.offset;
     final second = points.secondOrNull?.offset;
@@ -33,26 +34,15 @@ class HorizontalTrendLineDrawObject extends DrawObject {
       return false;
     }
 
-    final distance = position.distanceToLine(first, second);
+    final distance = position.distanceToExtendedLine(first, second);
     return distance <= context.config.hitTestMinDistance;
-  }
-
-  @override
-  void onUpdatePoint(Point point, Offset offset, {bool isMove = false}) {
-    // if (point.index == 0) point.offset = offset;
-    final first = points.firstOrNull?.offset;
-    if (first == null) {
-      super.onUpdatePoint(point, offset);
-    } else {
-      super.onUpdatePoint(point, Offset(offset.dx, first.dy));
-    }
   }
 
   @override
   void draw(IDrawContext context, Canvas canvas, Size size) {
     assert(
       points.length == 2,
-      'HorizontalTrendLine draw points.length:${points.length} must be equals 2',
+      'ExtendedTrendLine draw points.length:${points.length} must be equals 2',
     );
 
     final first = points.firstOrNull?.offset;
@@ -61,8 +51,12 @@ class HorizontalTrendLineDrawObject extends DrawObject {
       return;
     }
 
+    final mainRect = context.mainRect;
+    final list1 = reflectPointsOnRect(first, second, mainRect);
+    final list2 = reflectPointsOnRect(second, first, mainRect);
+
     canvas.drawLineByConfig(
-      Path()..addPolygon([first, second], false),
+      Path()..addPolygon([...list1, ...list2], false),
       line,
     );
   }

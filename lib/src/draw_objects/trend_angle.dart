@@ -17,7 +17,7 @@ import 'dart:ui';
 
 import '../core/interface.dart';
 import '../extension/export.dart';
-import '../framework/overlay.dart';
+import '../framework/draw/overlay.dart';
 
 class TrendAngleDrawObject extends DrawObject {
   TrendAngleDrawObject(super.overlay);

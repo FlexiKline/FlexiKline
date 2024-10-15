@@ -18,8 +18,8 @@ import 'package:flutter/foundation.dart';
 
 import '../config/export.dart';
 import '../extension/export.dart';
+import '../framework/draw/overlay.dart';
 import '../framework/export.dart';
-import '../framework/overlay_manager.dart';
 import '../model/bag_num.dart';
 import '../model/gesture_data.dart';
 import 'binding_base.dart';

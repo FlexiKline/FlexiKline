@@ -16,7 +16,7 @@ import 'dart:ui';
 
 import '../core/interface.dart';
 import '../extension/export.dart';
-import '../framework/overlay.dart';
+import '../framework/draw/overlay.dart';
 
 class RectangleDrawObject extends DrawObject {
   RectangleDrawObject(super.overlay);

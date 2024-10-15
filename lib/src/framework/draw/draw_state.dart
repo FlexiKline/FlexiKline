@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import './overlay.dart';
+part of 'overlay.dart';
 
 /// 图形绘制层状态
 /// 1. prepared   准备就绪

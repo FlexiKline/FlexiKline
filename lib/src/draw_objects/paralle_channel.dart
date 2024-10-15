@@ -16,7 +16,7 @@ import 'dart:ui';
 
 import '../core/interface.dart';
 import '../extension/export.dart';
-import '../framework/overlay.dart';
+import '../framework/draw/overlay.dart';
 import '../utils/vector_util.dart';
 
 class ParalleChannelDrawObject extends DrawObject {

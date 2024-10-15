@@ -16,17 +16,16 @@ import 'dart:ui';
 
 import '../core/interface.dart';
 import '../extension/export.dart';
-import '../framework/overlay.dart';
-import '../utils/vector_util.dart';
+import '../framework/draw/overlay.dart';
 
-class ExtendedTrendLineDrawObject extends DrawObject {
-  ExtendedTrendLineDrawObject(super.overlay);
+class ArrowLineDrawObject extends DrawObject {
+  ArrowLineDrawObject(super.overlay);
 
   @override
   bool hitTest(IDrawContext context, Offset position, {bool isMove = false}) {
     assert(
       points.length == 2,
-      'ExtendedTrendLine hitTest points.length:${points.length} must be equals 2',
+      'ArrowLine hitTest points.length:${points.length} must be equals 2',
     );
     final first = points.firstOrNull?.offset;
     final second = points.secondOrNull?.offset;
@@ -34,7 +33,7 @@ class ExtendedTrendLineDrawObject extends DrawObject {
       return false;
     }
 
-    final distance = position.distanceToExtendedLine(first, second);
+    final distance = position.distanceToRayLine(first, second);
     return distance <= context.config.hitTestMinDistance;
   }
 
@@ -42,7 +41,7 @@ class ExtendedTrendLineDrawObject extends DrawObject {
   void draw(IDrawContext context, Canvas canvas, Size size) {
     assert(
       points.length == 2,
-      'ExtendedTrendLine draw points.length:${points.length} must be equals 2',
+      'RayLine draw points.length:${points.length} must be equals 2',
     );
 
     final first = points.firstOrNull?.offset;
@@ -51,13 +50,28 @@ class ExtendedTrendLineDrawObject extends DrawObject {
       return;
     }
 
-    final mainRect = context.mainRect;
-    final list1 = reflectPointsOnRect(first, second, mainRect);
-    final list2 = reflectPointsOnRect(second, first, mainRect);
-
+    // 画线
     canvas.drawLineByConfig(
-      Path()..addPolygon([...list1, ...list2], false),
+      Path()..addPolygon([first, second], false),
       line,
     );
+
+    // 画箭头
+    final drawRect = context.mainRect;
+    if (drawRect.contains(second)) {
+      final params = context.config.drawParams;
+      final vector = (first - second).normalized() * params.arrowsLen;
+      final arrow1 = vector.rotate(params.arrowsRadians) + second;
+      final arrow2 = vector.rotate(-params.arrowsRadians) + second;
+
+      canvas.drawLineByConfig(
+        Path()..addPolygon([second, arrow1], false),
+        line,
+      );
+      canvas.drawLineByConfig(
+        Path()..addPolygon([second, arrow2], false),
+        line,
+      );
+    }
   }
 }

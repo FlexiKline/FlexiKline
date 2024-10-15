@@ -16,17 +16,16 @@ import 'dart:ui';
 
 import '../core/interface.dart';
 import '../extension/export.dart';
-import '../framework/overlay.dart';
-import '../utils/vector_util.dart';
+import '../framework/draw/overlay.dart';
 
-class HorizontalRayLineDrawObject extends DrawObject {
-  HorizontalRayLineDrawObject(super.overlay);
+class TrendLineDrawObject extends DrawObject {
+  TrendLineDrawObject(super.overlay);
 
   @override
   bool hitTest(IDrawContext context, Offset position, {bool isMove = false}) {
     assert(
       points.length == 2,
-      'HorizontalRayLine hitTest points.length:${points.length} must be equals 2',
+      'TrendLine hitTest points.length:${points.length} must be equals 2',
     );
     final first = points.firstOrNull?.offset;
     final second = points.secondOrNull?.offset;
@@ -34,26 +33,15 @@ class HorizontalRayLineDrawObject extends DrawObject {
       return false;
     }
 
-    final distance = position.distanceToRayLine(first, second);
+    final distance = position.distanceToLine(first, second);
     return distance <= context.config.hitTestMinDistance;
-  }
-
-  @override
-  void onUpdatePoint(Point point, Offset offset, {bool isMove = false}) {
-    // if (point.index == 0) point.offset = offset;
-    final first = points.firstOrNull?.offset;
-    if (first == null) {
-      super.onUpdatePoint(point, offset);
-    } else {
-      super.onUpdatePoint(point, Offset(offset.dx, first.dy));
-    }
   }
 
   @override
   void draw(IDrawContext context, Canvas canvas, Size size) {
     assert(
       points.length == 2,
-      'HorizontalRayLine draw points.length:${points.length} must be equals 2',
+      'TrendLine draw points.length:${points.length} must be equals 2',
     );
 
     final first = points.firstOrNull?.offset;
@@ -62,11 +50,9 @@ class HorizontalRayLineDrawObject extends DrawObject {
       return;
     }
 
-    final mainRect = context.mainRect;
-    final list = reflectPointsOnRect(first, second, mainRect);
-
+    // 画线
     canvas.drawLineByConfig(
-      Path()..addPolygon(list, false),
+      Path()..addPolygon([first, second], false),
       line,
     );
   }

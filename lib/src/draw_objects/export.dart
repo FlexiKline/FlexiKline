@@ -12,20 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export './trend_line.dart';
-export './trend_angle.dart';
-export './cross_line.dart';
-export './horizontal_line.dart';
-export './horizontal_ray_line.dart';
-export './horizontal_trend_line.dart';
-export './vertical_line.dart';
-export './extended_trend_line.dart';
-export './arrow_line.dart';
-export './ray_line.dart';
-export './price_line.dart';
+export 'trend_line.dart';
+export 'trend_angle.dart';
+export 'cross_line.dart';
+export 'horizontal_line.dart';
+export 'horizontal_ray_line.dart';
+export 'horizontal_trend_line.dart';
+export 'vertical_line.dart';
+export 'extended_trend_line.dart';
+export 'arrow_line.dart';
+export 'ray_line.dart';
+export 'price_line.dart';
 
-export './paralle_channel.dart';
-export './rectangle.dart';
-export './fib_retracement.dart';
-export './fib_expansion.dart';
-export './fib_fans.dart';
+export 'paralle_channel.dart';
+export 'rectangle.dart';
+export 'fib_retracement.dart';
+export 'fib_expansion.dart';
+export 'fib_fans.dart';

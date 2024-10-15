@@ -15,6 +15,7 @@
 import 'dart:ui';
 
 import 'package:flexi_kline/flexi_kline.dart';
+import 'package:flexi_kline/src/framework/draw/overlay.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 

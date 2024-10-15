@@ -12,14 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import '../core/interface.dart';
-import '../model/candle_req/candle_req.dart';
-import '../overlay/export.dart';
-import 'collection/sortable_hash_set.dart';
-import 'common.dart';
-import 'configuration.dart';
-import 'logger.dart';
-import 'overlay.dart';
+part of 'overlay.dart';
 
 /// [Overlay]管理
 /// 主要负责:
@@ -133,7 +126,7 @@ final class OverlayManager with KlineLog {
 
   /// 首先获取[overlay]内缓存的object, 如果为空, 则创建新的.
   DrawObject? getDrawObject(Overlay overlay) {
-    return overlay.object ??= createDrawObject(overlay);
+    return overlay._object ??= createDrawObject(overlay);
   }
 
   /// 添加新的overlay,

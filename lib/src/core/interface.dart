@@ -18,6 +18,7 @@ import 'package:flutter/foundation.dart';
 
 import '../config/export.dart';
 import '../data/kline_data.dart';
+import '../framework/draw/overlay.dart';
 import '../framework/export.dart';
 import '../model/export.dart';
 

@@ -16,16 +16,17 @@ import 'dart:ui';
 
 import '../core/interface.dart';
 import '../extension/export.dart';
-import '../framework/overlay.dart';
+import '../framework/draw/overlay.dart';
+import '../utils/vector_util.dart';
 
-class ArrowLineDrawObject extends DrawObject {
-  ArrowLineDrawObject(super.overlay);
+class HorizontalRayLineDrawObject extends DrawObject {
+  HorizontalRayLineDrawObject(super.overlay);
 
   @override
   bool hitTest(IDrawContext context, Offset position, {bool isMove = false}) {
     assert(
       points.length == 2,
-      'ArrowLine hitTest points.length:${points.length} must be equals 2',
+      'HorizontalRayLine hitTest points.length:${points.length} must be equals 2',
     );
     final first = points.firstOrNull?.offset;
     final second = points.secondOrNull?.offset;
@@ -38,10 +39,21 @@ class ArrowLineDrawObject extends DrawObject {
   }
 
   @override
+  void onUpdatePoint(Point point, Offset offset, {bool isMove = false}) {
+    // if (point.index == 0) point.offset = offset;
+    final first = points.firstOrNull?.offset;
+    if (first == null) {
+      super.onUpdatePoint(point, offset);
+    } else {
+      super.onUpdatePoint(point, Offset(offset.dx, first.dy));
+    }
+  }
+
+  @override
   void draw(IDrawContext context, Canvas canvas, Size size) {
     assert(
       points.length == 2,
-      'RayLine draw points.length:${points.length} must be equals 2',
+      'HorizontalRayLine draw points.length:${points.length} must be equals 2',
     );
 
     final first = points.firstOrNull?.offset;
@@ -50,28 +62,12 @@ class ArrowLineDrawObject extends DrawObject {
       return;
     }
 
-    // 画线
+    final mainRect = context.mainRect;
+    final list = reflectPointsOnRect(first, second, mainRect);
+
     canvas.drawLineByConfig(
-      Path()..addPolygon([first, second], false),
+      Path()..addPolygon(list, false),
       line,
     );
-
-    // 画箭头
-    final drawRect = context.mainRect;
-    if (drawRect.contains(second)) {
-      final params = context.config.drawParams;
-      final vector = (first - second).normalized() * params.arrowsLen;
-      final arrow1 = vector.rotate(params.arrowsRadians) + second;
-      final arrow2 = vector.rotate(-params.arrowsRadians) + second;
-
-      canvas.drawLineByConfig(
-        Path()..addPolygon([second, arrow1], false),
-        line,
-      );
-      canvas.drawLineByConfig(
-        Path()..addPolygon([second, arrow2], false),
-        line,
-      );
-    }
   }
 }

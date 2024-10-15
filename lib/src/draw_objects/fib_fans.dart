@@ -17,7 +17,7 @@ import 'dart:ui';
 import '../core/interface.dart';
 import '../config/text_area_config/text_area_config.dart';
 import '../extension/export.dart';
-import '../framework/overlay.dart';
+import '../framework/draw/overlay.dart';
 import '../utils/export.dart';
 
 class FibFansDrawObject extends DrawObject {

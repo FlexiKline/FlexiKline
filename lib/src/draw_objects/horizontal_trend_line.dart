@@ -16,16 +16,16 @@ import 'dart:ui';
 
 import '../core/interface.dart';
 import '../extension/export.dart';
-import '../framework/overlay.dart';
+import '../framework/draw/overlay.dart';
 
-class TrendLineDrawObject extends DrawObject {
-  TrendLineDrawObject(super.overlay);
+class HorizontalTrendLineDrawObject extends DrawObject {
+  HorizontalTrendLineDrawObject(super.overlay);
 
   @override
   bool hitTest(IDrawContext context, Offset position, {bool isMove = false}) {
     assert(
       points.length == 2,
-      'TrendLine hitTest points.length:${points.length} must be equals 2',
+      'HorizontalTrendLine hitTest points.length:${points.length} must be equals 2',
     );
     final first = points.firstOrNull?.offset;
     final second = points.secondOrNull?.offset;
@@ -38,10 +38,21 @@ class TrendLineDrawObject extends DrawObject {
   }
 
   @override
+  void onUpdatePoint(Point point, Offset offset, {bool isMove = false}) {
+    // if (point.index == 0) point.offset = offset;
+    final first = points.firstOrNull?.offset;
+    if (first == null) {
+      super.onUpdatePoint(point, offset);
+    } else {
+      super.onUpdatePoint(point, Offset(offset.dx, first.dy));
+    }
+  }
+
+  @override
   void draw(IDrawContext context, Canvas canvas, Size size) {
     assert(
       points.length == 2,
-      'TrendLine draw points.length:${points.length} must be equals 2',
+      'HorizontalTrendLine draw points.length:${points.length} must be equals 2',
     );
 
     final first = points.firstOrNull?.offset;
@@ -50,7 +61,6 @@ class TrendLineDrawObject extends DrawObject {
       return;
     }
 
-    // 画线
     canvas.drawLineByConfig(
       Path()..addPolygon([first, second], false),
       line,
