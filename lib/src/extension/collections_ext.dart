@@ -117,6 +117,25 @@ extension IterableExt<T> on Iterable<T> {
     }
     return result;
   }
+
+  /// The first element satisfying [test], or `null` if there are none.
+  T? firstWhereOrNull(bool Function(T element) test) {
+    for (var element in this) {
+      if (test(element)) return element;
+    }
+    return null;
+  }
+
+  /// The first element whose value and index satisfies [test].
+  ///
+  /// Returns `null` if there are no element and index satisfying [test].
+  T? firstWhereIndexedOrNull(bool Function(int index, T element) test) {
+    var index = 0;
+    for (var element in this) {
+      if (test(index++, element)) return element;
+    }
+    return null;
+  }
 }
 
 extension MapExt<K, V> on Map<K, V> {

@@ -36,6 +36,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
   @override
   void init() {
     super.init();
+    logd("init state");
     _klineDataCache = FIFOHashMap(capacity: klineDataCacheCapacity);
   }
 

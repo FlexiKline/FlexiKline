@@ -15,7 +15,9 @@
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
+import 'package:json_annotation/json_annotation.dart';
 
+import './serializers.dart';
 import '../constant.dart';
 import '../config/export.dart';
 import '../core/interface.dart';
@@ -27,7 +29,10 @@ import '../utils/date_time.dart';
 import '../utils/decimal_format_util.dart';
 import 'common.dart';
 
+part 'overlay.g.dart';
+
 /// Overlay 绘制点坐标
+@FlexiOverlaySerializable
 class Point {
   Point({
     this.index = -1,
@@ -49,6 +54,7 @@ class Point {
   final int index;
 
   /// 当前canvas中的坐标(实时更新)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   Offset offset;
 
   /// 蜡烛图时间
@@ -77,6 +83,9 @@ class Point {
   String toString() {
     return 'Point($index, $offset, $ts, $value)';
   }
+
+  factory Point.fromJson(Map<String, dynamic> json) => _$PointFromJson(json);
+  Map<String, dynamic> toJson() => _$PointToJson(this);
 }
 
 /// Overlay基础配置
@@ -87,6 +96,7 @@ class Point {
 /// [mode] 磁吸模式
 /// [steps] 指定Overlay需要几个点来完成绘制操作, 决定points的数量
 /// [line] Overlay绘制时线配置
+@FlexiOverlaySerializable
 class Overlay implements Comparable<Overlay> {
   Overlay({
     required this.key,
@@ -118,6 +128,7 @@ class Overlay implements Comparable<Overlay> {
   bool _moving = false;
   bool get moving => _moving;
 
+  @JsonKey(includeFromJson: false, includeToJson: false)
   DrawObject? object;
 
   bool get hasPointer => pointer != null;
@@ -236,6 +247,10 @@ class Overlay implements Comparable<Overlay> {
   String toString() {
     return "Overlay(id:$id, key:$key, type:$type) > pointer:$pointer < points:$points";
   }
+
+  factory Overlay.fromJson(Map<String, dynamic> json) =>
+      _$OverlayFromJson(json);
+  Map<String, dynamic> toJson() => _$OverlayToJson(this);
 }
 
 class OverlayObject {
@@ -309,12 +324,45 @@ class OverlayObject {
   }
 }
 
+/// 绘制接口
+abstract interface class IDrawObject {
+  /// 获取绘制参数. 用于自定义[DrawObject]时定制参数.
+  dynamic getDrawParams(IDrawContext context);
+
+  /// 初始化[DrawObject]绑定的[Overlay]中所有points坐标为当前绘制区别坐标.
+  bool initPoints(IDrawContext context);
+
+  /// 命中测试
+  bool hitTest(
+    IDrawContext context,
+    Offset position, {
+    bool isMove = false,
+  });
+
+  /// 更新指针[point]的[offset]
+  void onUpdatePoint(Point point, Offset offset, {bool isMove = false});
+
+  /// 移动Overlay
+  void onMoveOverlay(Offset delta);
+
+  /// 构建Overlay
+  void drawing(IDrawContext context, Canvas canvas, Size size);
+
+  /// 绘制Overlay
+  void draw(IDrawContext context, Canvas canvas, Size size);
+}
+
 abstract class DrawObject<T extends Overlay> extends OverlayObject
-    with DrawObjectMixin {
+    with DrawObjectMixin
+    implements IDrawObject {
   DrawObject(super.overlay);
 
+  @override
+  dynamic getDrawParams(IDrawContext context) {}
+
   /// 初始化所有绘制点坐标
-  bool initPoint(IDrawContext context) {
+  @override
+  bool initPoints(IDrawContext context) {
     for (var point in _overlay.points) {
       if (point == null) return false;
       final succeed = context.updatePointByValue(point);
@@ -341,6 +389,7 @@ abstract class DrawObject<T extends Overlay> extends OverlayObject
   }
 
   /// 碰撞测试[position]是否命中Overlay
+  @override
   bool hitTest(
     IDrawContext context,
     Offset position, {
@@ -372,11 +421,13 @@ abstract class DrawObject<T extends Overlay> extends OverlayObject
 
   /// 更新指针[point]的[offset]
   /// 实现类中通过此接口控制每一个point的offset位置校正.
+  @override
   void onUpdatePoint(Point point, Offset offset, {bool isMove = false}) {
     point.offset = offset;
   }
 
   /// 移动Overlay
+  @override
   void onMoveOverlay(Offset delta) {
     for (var point in points) {
       if (point?.offset.isFinite == true) {
@@ -386,16 +437,35 @@ abstract class DrawObject<T extends Overlay> extends OverlayObject
   }
 
   /// 构建Overlay
+  @override
   void drawing(IDrawContext context, Canvas canvas, Size size) {
     drawConnectingLine(context, canvas, size);
   }
 
   /// 绘制Overlay
+  @override
   void draw(IDrawContext context, Canvas canvas, Size size);
 
   @mustCallSuper
   void dispose() {
     _overlay.object = null;
+  }
+}
+
+/// TODO: 完成样式配置管理
+mixin DrawObjectConfigMgrMixin on OverlayObject {
+  LineConfig? crosshair;
+
+  bool changeOverlayStyle(
+    IDrawContext context, {
+    Color? color,
+    double? strokeWidth,
+    LineType? lineType,
+  }) {
+    bool changed = false;
+    final config = context.config;
+    if (color != null) {}
+    return changed;
   }
 }
 

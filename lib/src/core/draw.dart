@@ -33,6 +33,7 @@ mixin DrawBinding
   @override
   void init() {
     super.init();
+    logd("init draw");
     _overlayManager = OverlayManager(
       configuration: configuration,
       drawBinding: this,
@@ -442,7 +443,7 @@ mixin DrawBinding
       if (object == null) continue;
 
       // TODO: 待优化, 仅在图表移动/缩放/数据源发生变化时, 才需要initPoint
-      final succeed = object.initPoint(this);
+      final succeed = object.initPoints(this);
       if (!succeed) continue;
 
       object.draw(this, canvas, size);

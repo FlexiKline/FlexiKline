@@ -18,6 +18,7 @@ import 'package:flutter/painting.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import '../extension/export.dart';
+import '../model/bag_num.dart';
 import '../utils/convert_util.dart';
 import 'common.dart';
 import 'indicator.dart';
@@ -480,6 +481,60 @@ class DecimalConverter implements JsonConverter<Decimal, dynamic> {
   }
 }
 
+class BagNumConverter implements JsonConverter<BagNum, dynamic> {
+  const BagNumConverter();
+
+  @override
+  BagNum fromJson(dynamic json) {
+    final value = parseDecimal(json);
+    return value != null ? BagNum.fromDecimal(value) : BagNum.zero;
+  }
+
+  @override
+  String toJson(BagNum object) {
+    return convertDecimal(object.toDecimal());
+  }
+}
+
+class MagnetModeConverter implements JsonConverter<MagnetMode, String> {
+  const MagnetModeConverter();
+  @override
+  MagnetMode fromJson(String json) {
+    return MagnetMode.values.firstWhere(
+      (e) => e.name == json,
+      orElse: () => MagnetMode.normal,
+    );
+  }
+
+  @override
+  String toJson(MagnetMode object) {
+    return object.name;
+  }
+}
+
+class IDrawTypeConverter
+    implements JsonConverter<IDrawType, Map<String, dynamic>> {
+  const IDrawTypeConverter();
+
+  @override
+  IDrawType fromJson(Map<String, dynamic> json) {
+    final String? id = json.getItem('id');
+    final int? steps = json.getItem('steps');
+    if (id != null && steps != null) {
+      IDrawType? type = DrawType.values.firstWhereOrNull(
+        (type) => type.id == id && type.steps == steps,
+      );
+      return type ?? FlexiDrawType(id, steps);
+    }
+    return unknownDrawType;
+  }
+
+  @override
+  Map<String, dynamic> toJson(IDrawType object) {
+    return {'id': object.id, 'steps': object.steps};
+  }
+}
+
 const _basicConverterList = <JsonConverter>[
   DrawPositionConverter(),
   ScalePositionConverter(),
@@ -497,7 +552,19 @@ const _basicConverterList = <JsonConverter>[
   StrutStyleConverter(),
   ColorConverter(),
   DecimalConverter(),
+  BagNumConverter(),
 ];
+
+// ignore: constant_identifier_names
+const FlexiOverlaySerializable = JsonSerializable(
+  converters: [
+    IDrawTypeConverter(),
+    MagnetModeConverter(),
+    ..._basicConverterList,
+  ],
+  explicitToJson: true,
+  // genericArgumentFactories: true,
+);
 
 // ignore: constant_identifier_names
 const FlexiIndicatorSerializable = JsonSerializable(

@@ -96,12 +96,38 @@ abstract interface class IPrecomputable {
   dynamic getCalcParam();
 }
 
-typedef DrawObjectBuilder<T extends Overlay> = DrawObject Function(T overlay);
+typedef DrawObjectBuilder<T extends Overlay, R extends DrawObject<T>> = R
+    Function(T overlay);
 
 abstract interface class IDrawType {
   int get steps;
   String get id;
 }
+
+/// 自定义绘制类型
+final class FlexiDrawType implements IDrawType {
+  const FlexiDrawType(this.id, this.steps);
+  @override
+  final String id;
+  @override
+  final int steps;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is FlexiDrawType &&
+        runtimeType == other.runtimeType &&
+        id == other.id &&
+        steps == other.steps;
+  }
+
+  @override
+  int get hashCode {
+    return runtimeType.hashCode ^ id.hashCode ^ steps.hashCode;
+  }
+}
+
+const unknownDrawType = FlexiDrawType('unknown', 0);
 
 enum DrawType implements IDrawType {
   // 单线

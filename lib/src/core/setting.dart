@@ -406,8 +406,8 @@ mixin SettingBinding on KlineBindingBase
 
   set _flexiKlineConfig(config) {
     // __flexiKlineConfig = config.clone();
-    __flexiKlineConfig =
-        config; // TODO: 因clone时会调用toJson(), 此mainIndicator未初始化, 暂不clone; 后续考虑优化
+    // TODO: 因clone时会调用toJson(), 此mainIndicator未初始化, 暂不clone; 后续考虑优化
+    __flexiKlineConfig = config;
     __flexiKlineConfig!.init(
       customMainIndicators: _customMainIndicators,
       customSubIndicators: _customSubIndicators,

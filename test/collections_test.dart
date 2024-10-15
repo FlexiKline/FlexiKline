@@ -66,7 +66,10 @@ void main() {
     debugPrint('spent:${stopwatch.elapsedMicroseconds}');
   });
 
-  test('HashSortSet', () {});
+  test('HashSortSet', () {
+    final l = List.filled(0, null);
+    print(l.length);
+  });
 
   test('SplayTreeSet', () {
     SplayTreeSet set = SplayTreeSet();
