@@ -14,7 +14,7 @@
 
 import 'package:copy_with_extension/copy_with_extension.dart';
 
-import '../../framework/common.dart';
+import '../../framework/chart/indicator.dart';
 import '../../framework/serializers.dart';
 import '../tolerance_config/tolerance_config.dart';
 

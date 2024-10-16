@@ -12,15 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
+part of 'indicator.dart';
 
-import '../config/export.dart';
-import '../extension/export.dart';
-import '../model/export.dart';
-import '../utils/export.dart';
-import 'indicator.dart';
-import 'object.dart';
+
 
 mixin PaintYAxisScaleMixin<T extends SinglePaintObjectIndicator>
     on SinglePaintObjectBox<T> {

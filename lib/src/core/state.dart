@@ -19,8 +19,7 @@ import 'package:flutter/scheduler.dart';
 
 import '../constant.dart';
 import '../data/export.dart';
-import '../framework/collection/fifo_hash_map.dart';
-import '../framework/common.dart';
+import '../framework/export.dart';
 import '../model/export.dart';
 import 'binding_base.dart';
 import 'interface.dart';

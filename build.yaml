@@ -1,0 +1,11 @@
+targets:
+  $default:
+    builders:
+      json_serializable:
+        generate_for:
+          include:
+            - lib/**.dart
+      copy_with_extension_gen:
+        generate_for:
+          include:
+            - lib/**.dart

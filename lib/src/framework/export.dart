@@ -12,12 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export 'common.dart';
+export 'chart/indicator.dart';
 export 'draw/overlay.dart';
-export 'indicator.dart';
 export 'logger.dart';
-export 'object.dart';
-export 'paint_object_helper.dart';
 export 'serializers.dart';
 export 'configuration.dart';
 export 'collection/fifo_hash_map.dart';

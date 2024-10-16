@@ -14,7 +14,7 @@
 
 import 'package:flutter/painting.dart';
 
-import '../framework/common.dart';
+import '../framework/chart/indicator.dart';
 
 /// 手势执行的状态
 enum GestureState {

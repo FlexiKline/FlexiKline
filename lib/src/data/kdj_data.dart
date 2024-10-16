@@ -17,7 +17,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 
 import '../config/kdj_param/kdj_param.dart';
-import '../framework/common.dart';
+import '../framework/chart/indicator.dart';
 import '../model/export.dart';
 import 'base_data.dart';
 import 'candle_data.dart';

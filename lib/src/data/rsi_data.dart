@@ -17,7 +17,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 
 import '../config/rsi_param/rsi_param.dart';
-import '../framework/common.dart';
+import '../framework/chart/indicator.dart';
 import '../model/export.dart';
 import 'base_data.dart';
 

@@ -16,8 +16,8 @@ import 'package:flutter/painting.dart';
 
 import '../constant.dart';
 import '../config/export.dart';
+import 'chart/indicator.dart';
 import 'draw/overlay.dart';
-import 'indicator.dart';
 
 /// FlexiKline主题接口.
 ///

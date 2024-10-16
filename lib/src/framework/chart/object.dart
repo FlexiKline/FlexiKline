@@ -12,16 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
-
-import '../config/export.dart';
-import '../core/export.dart';
-import '../data/export.dart';
-import '../extension/export.dart';
-import '../model/export.dart';
-import 'indicator.dart';
-import 'logger.dart';
+part of 'indicator.dart';
 
 const mainIndicatorSlot = -1;
 
@@ -292,14 +283,14 @@ abstract class PaintObject<T extends Indicator>
   T get indicator => _indicator!;
 
   // 父级PaintObject. 主要用于给其他子级PaintObject限定范围.
-  PaintObject? parent;
+  PaintObject? _parent;
 
-  bool get hasParentObject => parent != null;
+  bool get hasParentObject => _parent != null;
 
   @mustCallSuper
   void dispose() {
     _indicator = null;
-    parent = null;
+    _parent = null;
   }
 
   @protected

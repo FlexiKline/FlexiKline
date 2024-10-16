@@ -12,18 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
-import 'package:json_annotation/json_annotation.dart';
-
-import '../core/export.dart';
-import 'common.dart';
-import 'object.dart';
-import 'serializers.dart';
-import 'collection/sortable_hash_set.dart';
-
-part 'indicator.g.dart';
+part of 'indicator.dart';
 
 /// Indicator绘制模式
 ///
@@ -78,11 +67,11 @@ abstract class Indicator {
     return key.hashCode;
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  PaintObject? paintObject;
+  PaintObject? _paintObject;
+  PaintObject? get paintObject => _paintObject;
 
   void ensurePaintObject(KlineBindingBase controller) {
-    paintObject ??= createPaintObject(controller);
+    _paintObject ??= createPaintObject(controller);
   }
 
   bool updateLayout({
@@ -111,8 +100,8 @@ abstract class Indicator {
 
   @mustCallSuper
   void dispose() {
-    paintObject?.dispose();
-    paintObject = null;
+    _paintObject?.dispose();
+    _paintObject = null;
   }
 
   Map<String, dynamic> toJson() => const {};
@@ -194,9 +183,9 @@ class MultiPaintObjectIndicator<T extends SinglePaintObjectIndicator>
 
   @override
   void ensurePaintObject(KlineBindingBase controller) {
-    paintObject ??= createPaintObject(controller);
+    _paintObject ??= createPaintObject(controller);
     for (var child in children) {
-      if (child.paintObject?.parent != paintObject) {
+      if (child.paintObject?._parent != paintObject) {
         child.paintObject?.dispose();
         _initChildPaintObject(controller, child);
       }
@@ -211,8 +200,8 @@ class MultiPaintObjectIndicator<T extends SinglePaintObjectIndicator>
       height: indicator.paintMode.isCombine ? height : null,
       padding: indicator.paintMode.isCombine ? padding : null,
     );
-    indicator.paintObject = indicator.createPaintObject(controller);
-    indicator.paintObject!.parent = paintObject;
+    indicator._paintObject = indicator.createPaintObject(controller);
+    indicator._paintObject!._parent = paintObject;
   }
 
   @override

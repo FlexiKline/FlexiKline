@@ -20,9 +20,8 @@ import 'package:json_annotation/json_annotation.dart';
 import '../extension/export.dart';
 import '../model/bag_num.dart';
 import '../utils/convert_util.dart';
-import 'common.dart';
+import 'chart/indicator.dart';
 import 'draw/overlay.dart';
-import 'indicator.dart';
 
 ValueKey parseValueKey(String key) {
   if (key.trim().isEmpty) return const ValueKey('');
