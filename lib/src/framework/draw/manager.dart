@@ -24,14 +24,12 @@ part of 'overlay.dart';
 final class OverlayManager with KlineLog {
   OverlayManager({
     required this.configuration,
-    required this.drawBinding,
     ILogger? logger,
   }) {
     loggerDelegate = logger;
   }
 
   final IConfiguration configuration;
-  final IDraw drawBinding;
 
   @override
   String get logTag => 'OverlayMgr';
@@ -109,24 +107,17 @@ final class OverlayManager with KlineLog {
 
   /// 通过[type]创建Overlay.
   /// 在Overlay未完成绘制时, 其line的配置使用crosshair.
-  /// 设置第一个指针位置为[initialPosition]
-  Overlay createOverlay(IDrawType type) {
+  Overlay createOverlay(IDrawType type, LineConfig line) {
     return Overlay(
       key: _instId,
       type: type,
-      line: drawBinding.config.crosshair,
+      line: line,
     );
-  }
-
-  /// 每次都创建新的Object.
-  DrawObject? createDrawObject(Overlay overlay) {
-    logi('createDrawObject => $overlay');
-    return _overlayBuilders[overlay.type]?.call(overlay);
   }
 
   /// 首先获取[overlay]内缓存的object, 如果为空, 则创建新的.
   DrawObject? getDrawObject(Overlay overlay) {
-    return overlay._object ??= createDrawObject(overlay);
+    return overlay._object ??= _overlayBuilders[overlay.type]?.call(overlay);
   }
 
   /// 添加新的overlay,
@@ -144,25 +135,5 @@ final class OverlayManager with KlineLog {
     return _overlayList.remove(overlay);
   }
 
-  // @Deprecated('')
-  // Overlay? hitTestOverlay(IDrawContext context, Offset position) {
-  //   assert(position.isFinite, 'hitTestOverlay($position) position is invalid!');
-  //   for (var overlay in _overlayList) {
-  //     if (overlay.object?.hitTest(context, position) == true) {
-  //       return overlay;
-  //     }
-  //   }
-  //   return null;
-  // }
-
-  // @Deprecated('')
-  // void drawOverlayList(IDrawContext context, Canvas canvas, Size size) {
-  //   DrawObject? object;
-  //   for (var overlay in _overlayList) {
-  //     object = getDrawObject(overlay);
-  //     if (object != null) {
-  //       object.draw(context, canvas, size);
-  //     }
-  //   }
-  // }
+  void reSort() => _overlayList.reSort();
 }

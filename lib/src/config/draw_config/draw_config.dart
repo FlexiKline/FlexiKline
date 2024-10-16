@@ -28,7 +28,7 @@ part 'draw_config.g.dart';
 @CopyWith()
 @FlexiConfigSerializable
 class DrawConfig {
-  DrawConfig({
+  const DrawConfig({
     this.enable = true,
     required this.crosspoint,
     required this.crosshair,
@@ -88,51 +88,51 @@ class DrawConfig {
     return drawParams.angleText ?? tickText;
   }
 
-  PointConfig getCrosspointConfig(Color? color) {
-    if (useDrawLineColor && color != null) {
-      return crosspoint.copyWith(
-        color: color,
-        borderColor: color.withOpacity(crosspoint.borderColor?.opacity ?? 0),
-      );
-    }
-    return crosspoint;
-  }
+  // PointConfig getCrosspointConfig(Color? color) {
+  //   if (useDrawLineColor && color != null) {
+  //     return crosspoint.copyWith(
+  //       color: color,
+  //       borderColor: color.withOpacity(crosspoint.borderColor?.opacity ?? 0),
+  //     );
+  //   }
+  //   return crosspoint;
+  // }
 
-  LineConfig getCrosshairConfig(Color? color) {
-    if (useDrawLineColor && color != null) {
-      return crosshair.copyWith(
-        paint: crosshair.paint.copyWith(color: color),
-      );
-    }
-    return crosshair;
-  }
+  // LineConfig getCrosshairConfig(Color? color) {
+  //   if (useDrawLineColor && color != null) {
+  //     return crosshair.copyWith(
+  //       paint: crosshair.paint.copyWith(color: color),
+  //     );
+  //   }
+  //   return crosshair;
+  // }
 
-  Paint? getTicksGapBgPaint(Color? color) {
-    if (useDrawLineColor && color != null) {
-      return Paint()
-        ..color = color.withOpacity(ticksGapBgOpacity)
-        ..style = PaintingStyle.fill;
-    } else if (tickText.background != null && tickText.background!.alpha != 0) {
-      return Paint()
-        ..color = tickText.background!.withOpacity(ticksGapBgOpacity)
-        ..style = PaintingStyle.fill;
-    }
-    return null;
-  }
+  // Paint? getTicksGapBgPaint(Color? color) {
+  //   if (useDrawLineColor && color != null) {
+  //     return Paint()
+  //       ..color = color.withOpacity(ticksGapBgOpacity)
+  //       ..style = PaintingStyle.fill;
+  //   } else if (tickText.background != null && tickText.background!.alpha != 0) {
+  //     return Paint()
+  //       ..color = tickText.background!.withOpacity(ticksGapBgOpacity)
+  //       ..style = PaintingStyle.fill;
+  //   }
+  //   return null;
+  // }
 
-  TextAreaConfig getTickTextConfig(Color? color) {
-    if (useDrawLineColor && color != null) {
-      return tickText.copyWith(background: color);
-    }
-    return tickText;
-  }
+  // TextAreaConfig getTickTextConfig(Color? color) {
+  //   if (useDrawLineColor && color != null) {
+  //     return tickText.copyWith(background: color);
+  //   }
+  //   return tickText;
+  // }
 
-  PointConfig getDrawPointConfig(Color? color) {
-    if (useDrawLineColor && color != null) {
-      return drawPoint.copyWith(borderColor: color);
-    }
-    return drawPoint;
-  }
+  // PointConfig getDrawPointConfig(Color? color) {
+  //   if (useDrawLineColor && color != null) {
+  //     return drawPoint.copyWith(borderColor: color);
+  //   }
+  //   return drawPoint;
+  // }
 
   factory DrawConfig.fromJson(Map<String, dynamic> json) =>
       _$DrawConfigFromJson(json);

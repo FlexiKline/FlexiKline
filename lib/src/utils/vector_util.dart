@@ -291,7 +291,7 @@ final class Parallelogram {
   }
 }
 
-/// 判断点[P]是否在平行四边形[pl]内(平面解析几何法)
+/// 判断点[P]是否在平行四边形[pl]内(平面向量法)
 bool isInsideOfParallelogram(Offset P, Parallelogram pl) {
   final vAB = pl.B - pl.A;
   final vAD = pl.D - pl.A;

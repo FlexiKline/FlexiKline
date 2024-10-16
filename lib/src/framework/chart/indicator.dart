@@ -30,7 +30,7 @@ import '../logger.dart';
 import '../serializers.dart';
 
 part 'common.dart';
-part 'indicator_model.dart';
+part 'model.dart';
 part 'indicator.g.dart';
 part 'object.dart';
-part 'paint_object_helper.dart';
+part 'object_helper.dart';

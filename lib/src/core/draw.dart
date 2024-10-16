@@ -36,7 +36,6 @@ mixin DrawBinding
     logd("init draw");
     _overlayManager = OverlayManager(
       configuration: configuration,
-      drawBinding: this,
       logger: loggerDelegate,
     );
   }
@@ -50,6 +49,7 @@ mixin DrawBinding
       final state = _drawStateListener.value;
       _drawTypeListener.value = state.overlay?.type;
       _drawEditingListener.value = state.isEditing;
+      _drawLineStyleListener.value = state.overlay?.lineConfig;
     });
     candleRequestListener.addListener(() {
       _overlayManager.onChangeCandleRequest(candleRequestListener.value);
@@ -60,6 +60,7 @@ mixin DrawBinding
   void dispose() {
     super.dispose();
     logd('dispose draw');
+    _drawLineStyleListener.dispose();
     _drawTypeListener.dispose();
     _drawEditingListener.dispose();
     _drawStateListener.dispose();
@@ -97,6 +98,7 @@ mixin DrawBinding
   final _drawStateListener = KlineStateNotifier(DrawState.exited());
   final _drawTypeListener = ValueNotifier<IDrawType?>(null);
   final _drawEditingListener = ValueNotifier(false);
+  final _drawLineStyleListener = KlineStateNotifier<LineConfig?>(null);
 
   /// 主动通知绘制状态变化
   void _notifyDrawStateChange() => _drawStateListener.notifyListeners();
@@ -117,6 +119,9 @@ mixin DrawBinding
   @override
   ValueListenable<bool> get drawEditingListener => _drawEditingListener;
 
+  ValueListenable<LineConfig?> get drawLineStyleListener =>
+      _drawLineStyleListener;
+
   late final OverlayManager _overlayManager;
 
   @override
@@ -129,14 +134,14 @@ mixin DrawBinding
 
   /// 开始绘制新的[type]类型
   /// 1. 重置状态为Drawing
-  /// 2. 初始化第一个Point的位置为[initialPosition]
+  /// 2. 初始化第一个Point的位置为[mainRect]中心
   @override
   void onDrawStart(IDrawType type) {
     cancelCross();
     if (drawState.overlay?.type == type) {
       _drawState = const Prepared();
     } else {
-      final overlay = _overlayManager.createOverlay(type);
+      final overlay = _overlayManager.createOverlay(type, config.crosshair);
       // 初始指针为[mainRect]中心
       overlay.setPointer(Point.pointer(0, mainRect.center));
       _drawState = DrawState.draw(overlay);
@@ -158,8 +163,71 @@ mixin DrawBinding
       return;
     }
     final object = _overlayManager.getDrawObject(overlay);
-    object?.onUpdatePoint(pointer, data.offset);
+    object?.onUpdatePoint(pointer, data.offset); // TODO: 考虑对指针的更新封装到overlay中.
     _markRepaint();
+  }
+
+  /// 确认动作.
+  /// 1. 将pointer指针offset转换为蜡烛坐标
+  /// 2. 当前是drawing时:
+  ///   2.1. 添加pointer到points中, 并重置pointer为下一个位置的指针.
+  ///   2.2. 最后检查当前overlay是否绘制完成, 如果绘制完成切换状态为Editing.
+  ///   2.3. 将overlay加入到_overlayManager中进行管理.
+  /// 3. 当状态为Editing时:
+  ///   3.1. 更新pointer到points中, 并清空pointer(等待下一次的选择)
+  @override
+  bool onDrawConfirm(GestureData data) {
+    final overlay = drawState.overlay;
+    if (overlay == null) return false;
+
+    bool result = false;
+    if (overlay.isDrawing) {
+      Point? pointer = overlay.pointer;
+      if (pointer == null) {
+        // 可能永远不会触发
+        final index = overlay.nextIndex;
+        pointer = Point.pointer(index, data.offset);
+      }
+
+      final isOk = updatePointByOffset(pointer);
+      if (!isOk) {
+        logw('onDrawConfirm updatePointer failed! pointer:$pointer');
+        return false;
+      }
+      overlay.addPointer(pointer);
+
+      if (overlay.isEditing) {
+        logi('onDrawConfirm ${overlay.type} draw completed!');
+        // 绘制完成, 使用drawLine配置绘制实线.
+        _drawState = Editing(overlay);
+        _overlayManager.addOverlay(overlay);
+        final object = _overlayManager.getDrawObject(overlay);
+        object?.setDrawLineConfig(config.drawLine);
+        result = false;
+      } else {
+        result = true;
+      }
+    } else if (overlay.isEditing) {
+      final pointer = overlay.pointer;
+      if (pointer == null) {
+        // 当前处于编辑状态, 但是pointer又没有被赋值, 此时点击事件, 为确认完成.
+        _overlayManager.addOverlay(overlay);
+        // TODO: 增加object接口, 校正所有绘制点
+        _drawState = const Prepared();
+        result = false;
+      } else {
+        final isOk = updatePointByOffset(pointer);
+        if (!isOk) {
+          logw('onDrawConfirm updatePointer failed! pointer:$pointer');
+          return false;
+        }
+        overlay.confirmPointer();
+        result = false;
+      }
+    }
+
+    _markRepaint();
+    return result;
   }
 
   bool onDrawMoveStart(GestureData data) {
@@ -237,72 +305,9 @@ mixin DrawBinding
     _markRepaint();
   }
 
-  /// 确认动作
-  /// 1. 将pointer指针offset转换为蜡烛坐标
-  /// 2. 当前是drawing时:
-  ///   2.1. 添加pointer到points中, 并重置pointer为下一个位置的指针.
-  ///   2.2. 最后检查当前overlay是否绘制完成, 如果绘制完成切换状态为Editing.
-  ///   2.3. 将overlay加入到_overlayManager中进行管理.
-  /// 3. 当状态为Editing时:
-  ///   3.1. 更新pointer到points中, 并清空pointer(等待下一次的选择)
-  @override
-  bool onDrawConfirm(GestureData data) {
-    final overlay = drawState.overlay;
-    if (overlay == null) return false;
-
-    bool result = false;
-    if (overlay.isDrawing) {
-      Point? pointer = overlay.pointer;
-      if (pointer == null) {
-        // 可能永远不会触发
-        final index = overlay.nextIndex;
-        pointer = Point.pointer(index, data.offset);
-      }
-
-      final isOk = updatePointByOffset(pointer);
-      if (!isOk) {
-        logw('onDrawConfirm updatePointer failed! pointer:$pointer');
-        return false;
-      }
-      overlay.addPointer(pointer);
-
-      if (overlay.isEditing) {
-        logi('onDrawConfirm ${overlay.type} draw completed!');
-        // 绘制完成, 使用drawLine配置绘制实线.
-        overlay.line = config.drawLine;
-        _drawState = Editing(overlay);
-        _overlayManager.addOverlay(overlay);
-        // TODO: 增加object接口, 校正所有绘制点
-        result = false;
-      } else {
-        result = true;
-      }
-    } else if (overlay.isEditing) {
-      final pointer = overlay.pointer;
-      if (pointer == null) {
-        // 当前处于编辑状态, 但是pointer又没有被赋值, 此时点击事件, 为确认完成.
-        _overlayManager.addOverlay(overlay);
-        // TODO: 增加object接口, 校正所有绘制点
-        _drawState = const Prepared();
-        result = false;
-      } else {
-        final isOk = updatePointByOffset(pointer);
-        if (!isOk) {
-          logw('onDrawConfirm updatePointer failed! pointer:$pointer');
-          return false;
-        }
-        overlay.confirmPointer();
-        result = false;
-      }
-    }
-
-    _markRepaint();
-    return result;
-  }
-
   @override
   void onDrawSelect(Overlay overlay) {
-    if (!drawState.isPrepared) return;
+    // if (!drawState.isPrepared) return;
     _drawState = DrawState.edit(overlay);
     cancelCross();
     _markRepaint();
@@ -314,6 +319,7 @@ mixin DrawBinding
     _markRepaint();
   }
 
+  ////// 操作 //////
   void onDrawDelete({Overlay? overlay}) {
     if (overlay != null) {
       if (_overlayManager.removeOverlay(overlay)) {
@@ -329,7 +335,6 @@ mixin DrawBinding
     }
   }
 
-  ////// 操作 //////
   void cleanAllDrawOverlay() {
     _overlayManager.cleanAllOverlay();
     final overlay = drawState.overlay;
@@ -340,35 +345,25 @@ mixin DrawBinding
     _markRepaint();
   }
 
-  bool setDrawPaintColor(Color color) {
-    final overlay = drawState.overlay;
-    if (overlay == null) return false;
-    overlay.line = overlay.line.copyWith(
-      paint: overlay.line.paint.copyWith(color: color),
-    );
-    _markRepaint();
-    return true;
+  bool changeDrawLineStyle({
+    Color? color,
+    double? strokeWidth,
+    LineType? lineType,
+  }) {
+    final object = drawState.overlay?.object;
+    if (object == null) return false;
+    if (object.changeDrawLineStyle(
+      color: color,
+      strokeWidth: strokeWidth,
+      lineType: lineType,
+    )) {
+      _drawLineStyleListener.notifyListeners();
+      _markRepaint();
+      return true;
+    }
+    return false;
   }
 
-  bool setDrawLineWeight(double value) {
-    final overlay = drawState.overlay;
-    if (overlay == null) return false;
-    overlay.line = overlay.line.copyWith(
-      paint: overlay.line.paint.copyWith(strokeWidth: value),
-    );
-    _markRepaint();
-    return true;
-  }
-
-  bool setDrawLineType(LineType type) {
-    final overlay = drawState.overlay;
-    if (overlay == null) return false;
-    overlay.line = overlay.line.copyWith(
-      type: type,
-    );
-    _markRepaint();
-    return true;
-  }
   ////// 绘制 //////
 
   /// 以当前蜡烛图绘制参数为基础, 将绘制参数[point]转换Offset坐标.

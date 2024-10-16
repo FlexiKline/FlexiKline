@@ -38,75 +38,16 @@ const List<Color> flexiKlinePaintColors = [
 ];
 
 // 绘制工具条
-class FlexiKlineDrawToolbar extends ConsumerStatefulWidget {
+class FlexiKlineDrawToolbar extends ConsumerWidget {
   const FlexiKlineDrawToolbar({
     super.key,
     required this.controller,
-    this.lineWeight,
-    this.lineType = LineType.solid,
-    this.paintColor,
   });
 
   final FlexiKlineController controller;
-  final double? lineWeight;
-  final LineType lineType;
-  final Color? paintColor;
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() =>
-      _FlexiKlineDrawToolbarState();
-}
-
-class _FlexiKlineDrawToolbarState extends ConsumerState<FlexiKlineDrawToolbar> {
-  FlexiKlineController get controller => widget.controller;
-
-  late LineType lineType;
-  late double lineWeight;
-  late Color paintColor;
-
-  @override
-  void initState() {
-    super.initState();
-    lineType = widget.lineType;
-
-    if (flexiKlineLineWeightList.contains(widget.lineWeight)) {
-      lineWeight = widget.lineWeight!;
-    } else {
-      lineWeight = flexiKlineLineWeightList.first;
-    }
-    if (flexiKlinePaintColors.contains(widget.paintColor)) {
-      paintColor = widget.paintColor!;
-    } else {
-      paintColor = flexiKlinePaintColors.first;
-    }
-  }
-
-  void onSelectPaintColor(Color color) {
-    if (controller.setDrawPaintColor(color)) {
-      setState(() {
-        paintColor = color;
-      });
-    }
-  }
-
-  void onSelectLineWeight(double value) {
-    if (controller.setDrawLineWeight(value)) {
-      setState(() {
-        lineWeight = value;
-      });
-    }
-  }
-
-  void onSelectLineType(LineType type) {
-    if (controller.setDrawLineType(type)) {
-      setState(() {
-        lineType = type;
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = ref.read(themeProvider);
     return Container(
       decoration: BoxDecoration(
@@ -114,100 +55,126 @@ class _FlexiKlineDrawToolbarState extends ConsumerState<FlexiKlineDrawToolbar> {
         borderRadius: BorderRadius.circular(6.r),
       ),
       padding: EdgeInsets.symmetric(horizontal: 2.r, vertical: 4.r),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.drag_indicator_rounded,
-            size: 20.r,
-          ),
-          FlexiPopupMenuButton(
-            initialValue: paintColor,
-            padding: EdgeInsets.symmetric(horizontal: 4.r),
-            onSelected: onSelectPaintColor,
-            offset: Offset(-8.r, 0),
-            itemBuilder: (context) {
-              return flexiKlinePaintColors.map((value) {
-                return PopupMenuItem(
-                  key: ValueKey(value),
-                  value: value,
-                  height: 32.r,
-                  child: SvgPicture.asset(
-                    SvgRes.paintColor,
-                    colorFilter: ColorFilter.mode(value, BlendMode.srcIn),
-                  ),
-                );
-              }).toList();
-            },
-            child: SvgPicture.asset(
-              SvgRes.paintColor,
-              colorFilter: ColorFilter.mode(paintColor, BlendMode.srcIn),
-            ),
-          ),
-          FlexiPopupMenuButton(
-            initialValue: lineWeight,
-            onSelected: onSelectLineWeight,
-            offset: Offset(-8.r, 0),
-            itemBuilder: (context) {
-              return flexiKlineLineWeightList.map((value) {
-                return PopupMenuItem(
-                  key: ValueKey(value),
-                  value: value,
-                  height: 32.r,
-                  child: SvgPicture.asset(
-                    'assets/svgs/line_weight_${cutInvalidZero(value)}.svg',
-                    colorFilter: ColorFilter.mode(theme.t1, BlendMode.srcIn),
-                  ),
-                );
-              }).toList();
-            },
-            child: SvgPicture.asset(
-              'assets/svgs/line_weight_${cutInvalidZero(lineWeight)}.svg',
-              colorFilter: ColorFilter.mode(theme.t1, BlendMode.srcIn),
-            ),
-          ),
-          FlexiPopupMenuButton(
-            initialValue: lineType,
-            onSelected: onSelectLineType,
-            offset: Offset(-8.r, 0),
-            itemBuilder: (context) {
-              return LineType.values.map((value) {
-                return PopupMenuItem(
-                  key: ValueKey(value),
-                  value: value,
-                  height: 32.r,
-                  child: SvgPicture.asset(
-                    'assets/svgs/line_type_${value.name}.svg',
-                    colorFilter: ColorFilter.mode(theme.t1, BlendMode.srcIn),
-                  ),
-                );
-              }).toList();
-            },
-            child: SvgPicture.asset(
-              'assets/svgs/line_type_${lineType.name}.svg',
-              colorFilter: ColorFilter.mode(theme.t1, BlendMode.srcIn),
-            ),
-          ),
-          ShrinkIconButton(
-            onPressed: () {
-              debugPrint('zp::: draw onTap Order');
-            },
-            content: SvgRes.visualOrder,
-          ),
-          ShrinkIconButton(
-            onPressed: () {
-              debugPrint('zp::: draw onTap Lock');
-            },
-            content: SvgRes.unlock,
-          ),
-          ShrinkIconButton(
-            onPressed: () {
-              debugPrint('zp::: draw onTap Delete');
-              controller.onDrawDelete();
-            },
-            content: SvgRes.delete,
-          ),
-        ],
+      child: ValueListenableBuilder(
+        valueListenable: controller.drawLineStyleListener,
+        builder: (context, lineStyle, child) {
+          lineStyle ??= controller.drawConfig.drawLine;
+          Color paintColor = flexiKlinePaintColors.first;
+          if (lineStyle.paint.color != paintColor &&
+              flexiKlinePaintColors.contains(lineStyle.paint.color)) {
+            paintColor = lineStyle.paint.color;
+          }
+          double strokeWidth = flexiKlineLineWeightList.first;
+          if (lineStyle.paint.strokeWidth != strokeWidth &&
+              flexiKlineLineWeightList.contains(lineStyle.paint.strokeWidth)) {
+            strokeWidth = lineStyle.paint.strokeWidth;
+          }
+          LineType lineType = lineStyle.type;
+
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.drag_indicator_rounded,
+                size: 20.r,
+              ),
+              FlexiPopupMenuButton(
+                initialValue: paintColor,
+                padding: EdgeInsets.symmetric(horizontal: 4.r),
+                onSelected: (Color color) {
+                  controller.changeDrawLineStyle(color: color);
+                },
+                offset: Offset(-8.r, 0),
+                itemBuilder: (context) {
+                  return flexiKlinePaintColors.map((value) {
+                    return PopupMenuItem(
+                      key: ValueKey(value),
+                      value: value,
+                      height: 32.r,
+                      child: SvgPicture.asset(
+                        SvgRes.paintColor,
+                        colorFilter: ColorFilter.mode(value, BlendMode.srcIn),
+                      ),
+                    );
+                  }).toList();
+                },
+                child: SvgPicture.asset(
+                  SvgRes.paintColor,
+                  colorFilter: ColorFilter.mode(paintColor, BlendMode.srcIn),
+                ),
+              ),
+              FlexiPopupMenuButton(
+                initialValue: strokeWidth,
+                onSelected: (double value) {
+                  controller.changeDrawLineStyle(strokeWidth: value);
+                },
+                offset: Offset(-8.r, 0),
+                itemBuilder: (context) {
+                  return flexiKlineLineWeightList.map((value) {
+                    return PopupMenuItem(
+                      key: ValueKey(value),
+                      value: value,
+                      height: 32.r,
+                      child: SvgPicture.asset(
+                        'assets/svgs/line_weight_${cutInvalidZero(value)}.svg',
+                        colorFilter:
+                            ColorFilter.mode(theme.t1, BlendMode.srcIn),
+                      ),
+                    );
+                  }).toList();
+                },
+                child: SvgPicture.asset(
+                  'assets/svgs/line_weight_${cutInvalidZero(strokeWidth)}.svg',
+                  colorFilter: ColorFilter.mode(theme.t1, BlendMode.srcIn),
+                ),
+              ),
+              FlexiPopupMenuButton(
+                initialValue: lineType,
+                onSelected: (LineType type) {
+                  controller.changeDrawLineStyle(lineType: type);
+                },
+                offset: Offset(-8.r, 0),
+                itemBuilder: (context) {
+                  return LineType.values.map((value) {
+                    return PopupMenuItem(
+                      key: ValueKey(value),
+                      value: value,
+                      height: 32.r,
+                      child: SvgPicture.asset(
+                        'assets/svgs/line_type_${value.name}.svg',
+                        colorFilter:
+                            ColorFilter.mode(theme.t1, BlendMode.srcIn),
+                      ),
+                    );
+                  }).toList();
+                },
+                child: SvgPicture.asset(
+                  'assets/svgs/line_type_${lineType.name}.svg',
+                  colorFilter: ColorFilter.mode(theme.t1, BlendMode.srcIn),
+                ),
+              ),
+              ShrinkIconButton(
+                onPressed: () {
+                  debugPrint('zp::: draw onTap Order');
+                },
+                content: SvgRes.visualOrder,
+              ),
+              ShrinkIconButton(
+                onPressed: () {
+                  debugPrint('zp::: draw onTap Lock');
+                },
+                content: SvgRes.unlock,
+              ),
+              ShrinkIconButton(
+                onPressed: () {
+                  debugPrint('zp::: draw onTap Delete');
+                  controller.onDrawDelete();
+                },
+                content: SvgRes.delete,
+              ),
+            ],
+          );
+        },
       ),
     );
   }

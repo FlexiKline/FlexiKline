@@ -15,7 +15,7 @@
 part of 'overlay.dart';
 
 class OverlayObject {
-  const OverlayObject(this._overlay);
+  OverlayObject(this._overlay);
 
   final Overlay _overlay;
 
@@ -32,6 +32,10 @@ class OverlayObject {
   int get steps => points.length;
   Point? get pointer => _overlay.pointer;
   bool get isReady => _overlay.isReady;
+  bool get isDrawing => _overlay.isDrawing;
+  bool get isEditing => _overlay.isEditing;
+  bool get isInitial => _overlay.isInitial;
+  int get nextIndex => _overlay.nextIndex;
 
   /// 获取所有Point点列表,
   /// 包括pointer.
@@ -44,7 +48,7 @@ class OverlayObject {
     });
   }
 
-  /// 查找距离[dx]与[dy]小于[range]的最小point
+  /// 查找距离[dx]或[dy]小于[range]的最小point
   /// 如果同时指定, 则计算(dx, dy)到[allPoints]中点距离最小于[range]的point
   Point? findPoint({
     double? dx,
@@ -82,6 +86,108 @@ class OverlayObject {
       pre = offset;
     }
     return bounds;
+  }
+
+  DrawConfig? _config;
+  LineConfig? _crosshair;
+  PointConfig? _crosspoint;
+  Paint? _ticksGapBgPaint;
+  TextAreaConfig? _tickText;
+  PointConfig? _drawPoint;
+}
+
+/// 绘制样式配置管理
+extension OverlayObjectExt on OverlayObject {
+  LineConfig getCrosshairConfig(DrawConfig config) {
+    if (_crosshair != null) return _crosshair!;
+    _crosshair = config.crosshair;
+    if (config.useDrawLineColor) {
+      _crosshair = config.crosshair.copyWith(
+        paint: _crosshair!.paint.copyWith(color: lineColor),
+      );
+    }
+    return _crosshair!;
+  }
+
+  PointConfig getCrosspointConfig(DrawConfig config) {
+    if (_crosspoint != null) return _crosspoint!;
+    _crosspoint = config.crosspoint;
+    if (config.useDrawLineColor) {
+      _crosspoint = config.crosspoint.copyWith(
+        color: lineColor,
+        borderColor: lineColor.withOpacity(
+          _crosspoint!.borderColor?.opacity ?? 0,
+        ),
+      );
+    }
+    return _crosspoint!;
+  }
+
+  Paint? getTicksGapBgPaint(DrawConfig config) {
+    if (_ticksGapBgPaint != null) return _ticksGapBgPaint;
+    final opacity = config.ticksGapBgOpacity.clamp(0.0, 1.0);
+    if (opacity == 0) return null;
+    if (config.useDrawLineColor) {
+      _ticksGapBgPaint = Paint()
+        ..color = lineColor.withOpacity(opacity)
+        ..style = PaintingStyle.fill;
+    } else if (config.tickText.background != null &&
+        config.tickText.background!.alpha != 0) {
+      _ticksGapBgPaint = Paint()
+        ..color = config.tickText.background!.withOpacity(opacity)
+        ..style = PaintingStyle.fill;
+    }
+    return _ticksGapBgPaint;
+  }
+
+  TextAreaConfig getTickTextConfig(DrawConfig config) {
+    if (_tickText != null) return _tickText!;
+    _tickText = config.tickText;
+    if (config.useDrawLineColor) {
+      _tickText = _tickText!.copyWith(background: lineColor);
+    }
+    return _tickText!;
+  }
+
+  PointConfig getDrawPointConfig(DrawConfig config) {
+    if (_drawPoint != null) return _drawPoint!;
+    _drawPoint = config.drawPoint;
+    if (config.useDrawLineColor) {
+      _drawPoint = _drawPoint!.copyWith(borderColor: lineColor);
+    }
+    return _drawPoint!;
+  }
+
+  void setDrawLineConfig(LineConfig line) {
+    _overlay.line = line;
+  }
+
+  bool changeDrawLineStyle({
+    Color? color,
+    double? strokeWidth,
+    LineType? lineType,
+  }) {
+    if (color == null && strokeWidth == null && lineType == null) {
+      return false;
+    }
+    if (color != null) {
+      _ticksGapBgPaint = null;
+      _drawPoint = null;
+      _tickText = null;
+      _crosspoint = null;
+      _crosshair = null;
+    }
+    color ??= line.paint.color;
+    strokeWidth ??= line.paint.strokeWidth;
+    lineType ??= lineType;
+    setDrawLineConfig(line.copyWith(
+      type: lineType,
+      paint: line.paint.copyWith(
+        color: color,
+        strokeWidth: strokeWidth,
+      ),
+    ));
+    return true;
   }
 }
 
@@ -213,23 +319,6 @@ abstract class DrawObject<T extends Overlay> extends OverlayObject
   }
 }
 
-/// TODO: 完成样式配置管理
-mixin DrawObjectConfigMgrMixin on OverlayObject {
-  LineConfig? crosshair;
-
-  bool changeOverlayStyle(
-    IDrawContext context, {
-    Color? color,
-    double? strokeWidth,
-    LineType? lineType,
-  }) {
-    bool changed = false;
-    final config = context.config;
-    if (color != null) {}
-    return changed;
-  }
-}
-
 mixin DrawObjectMixin on OverlayObject {
   /// 绘制[points]中所有点.
   void drawPoints(
@@ -237,8 +326,8 @@ mixin DrawObjectMixin on OverlayObject {
     Canvas canvas, {
     bool isMoving = false,
   }) {
-    final pointConfig = context.config.getDrawPointConfig(lineColor);
-    final crosspointConfig = context.config.getCrosspointConfig(lineColor);
+    final pointConfig = getDrawPointConfig(context.config);
+    final crosspointConfig = getCrosspointConfig(context.config);
     for (var point in points) {
       if (point == null) continue;
       if (point == pointer || point.index == pointer?.index) {
@@ -253,8 +342,8 @@ mixin DrawObjectMixin on OverlayObject {
   void drawConnectingLine(IDrawContext context, Canvas canvas, Size size) {
     final config = context.config;
     Offset? last;
-    final pointConfig = context.config.getDrawPointConfig(lineColor);
-    final crosshairConfig = config.getCrosshairConfig(lineColor);
+    final pointConfig = getDrawPointConfig(config);
+    final crosshairConfig = getCrosshairConfig(config);
     for (var point in points) {
       if (point != null) {
         final offset = point.offset;
@@ -286,8 +375,8 @@ mixin DrawObjectMixin on OverlayObject {
     Offset? last,
   ) {
     final mainRect = context.mainRect;
-    final crosshairConfig = context.config.getCrosshairConfig(lineColor);
-    final crosspointConfig = context.config.getCrosspointConfig(lineColor);
+    final crosshairConfig = getCrosshairConfig(context.config);
+    final crosspointConfig = getCrosspointConfig(context.config);
     final path = Path()
       ..moveTo(mainRect.left, pointer.dy)
       ..lineTo(mainRect.right, pointer.dy)
@@ -334,8 +423,8 @@ mixin DrawObjectMixin on OverlayObject {
   ) {
     final mainRect = context.mainRect;
     final timeRect = context.timeRect;
-    final tickTextConfig = context.config.getTickTextConfig(lineColor);
-    final ticksGapBgPaint = context.config.getTicksGapBgPaint(lineColor);
+    final tickTextConfig = getTickTextConfig(context.config);
+    final ticksGapBgPaint = getTicksGapBgPaint(context.config);
 
     /// 绘制时间刻度
     if (bounds.width > 0 && ticksGapBgPaint != null) {
@@ -455,7 +544,7 @@ mixin DrawObjectMixin on OverlayObject {
     final timeTxt = formatTimeTick(ts, bar: klineData.timeBar);
 
     drawableRect ??= context.timeRect;
-    tickTextConfig ??= context.config.getTickTextConfig(lineColor);
+    tickTextConfig ??= getTickTextConfig(context.config);
     return canvas.drawTextArea(
       offset: Offset(
         dx,
@@ -486,7 +575,7 @@ mixin DrawObjectMixin on OverlayObject {
     );
 
     final txtSpacing = context.config.spacing;
-    tickTextConfig ??= context.config.getTickTextConfig(lineColor);
+    tickTextConfig ??= getTickTextConfig(context.config);
     final centerOffset = tickTextConfig.areaHeight / 2;
     drawableRect ??= context.mainRect;
     return canvas.drawTextArea(

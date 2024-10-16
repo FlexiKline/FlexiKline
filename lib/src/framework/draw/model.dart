@@ -101,7 +101,9 @@ class Overlay implements Comparable<Overlay> {
   int zIndex;
   bool lock;
   MagnetMode mode;
+  @protected
   LineConfig line;
+  LineConfig get lineConfig => line;
 
   /// 当前指针位置
   Point? _pointer;

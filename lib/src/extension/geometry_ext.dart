@@ -150,6 +150,11 @@ extension OffsetExt on Offset {
   bool isInsideOf(Parallelogram parallelogram) {
     return isInsideOfParallelogram(this, parallelogram);
   }
+
+  /// 判断当前坐标是否在ABCD构成的平行四边行通道内
+  bool isInsideOfByGeometry(Parallelogram parallelogram) {
+    return isInsideParallelogramByGeometry(this, parallelogram);
+  }
 }
 
 extension SizeExt on Size {

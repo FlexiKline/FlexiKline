@@ -34,7 +34,7 @@ import '../serializers.dart';
 
 part 'common.dart';
 part 'draw_state.dart';
-part 'overlay_model.dart';
-part 'overlay_manager.dart';
-part 'draw_object.dart';
+part 'model.dart';
+part 'manager.dart';
+part 'object.dart';
 part 'overlay.g.dart';

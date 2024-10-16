@@ -187,6 +187,7 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
       }
       return;
     } else {
+      // if (drawState.isPrepared) 只有在准备状态时, 进行命中测试
       final overlay = controller.hitTestOverlay(details.localPosition);
       if (overlay != null) {
         controller.onDrawSelect(overlay);
