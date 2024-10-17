@@ -19,7 +19,7 @@ import 'package:example/src/utils/cache_util.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/export.dart';
-import '../repo/api.dart' as api;
+import '../repo/okx_api.dart' as api;
 
 const _instrumentsCacheKey = 'instruments_cache_key';
 

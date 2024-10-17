@@ -87,7 +87,11 @@ final class OverlayManager with KlineLog {
     }
     _instId = request.instId;
     final list = configuration.getOverlayListConfig(_instId);
-    _overlayList = SortableHashSet.from(list);
+    // TODO: 检查是否有匹配的[DrawObjectBuilder]
+    for (var overlay in list) {
+      addOverlay(overlay);
+    }
+    // _overlayList = SortableHashSet.from(list);
   }
 
   /// 释放所有Overlay并清理[_overlayList].
@@ -108,6 +112,7 @@ final class OverlayManager with KlineLog {
   /// 通过[type]创建Overlay.
   /// 在Overlay未完成绘制时, 其line的配置使用crosshair.
   Overlay createOverlay(IDrawType type, LineConfig line) {
+    // TODO: 考虑将object集成进来
     return Overlay(
       key: _instId,
       type: type,
@@ -122,7 +127,11 @@ final class OverlayManager with KlineLog {
 
   /// 添加新的overlay,
   bool addOverlay(Overlay overlay) {
+    final builder = _overlayBuilders[overlay.type];
+    if (builder == null) return false;
     if (!_overlayList.contains(overlay)) {
+      // 后续绑定object操作, 也绑定DrawConfig;
+      // overlay.object
       final old = _overlayList.append(overlay);
       old?.dispose();
       return true;

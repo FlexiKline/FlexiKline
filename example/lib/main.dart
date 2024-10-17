@@ -14,13 +14,15 @@
 
 // import 'package:device_preview/device_preview.dart';
 // import 'package:flutter/foundation.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'src/app.dart';
 import 'src/config.dart';
 import 'src/i18n.dart';
-import 'src/repo/http_client.dart';
+import 'src/repo/okx_api.dart';
+import 'src/repo/polygon_api.dart';
 import 'src/theme/theme_manager.dart';
 import 'src/utils/cache_util.dart';
 
@@ -32,7 +34,8 @@ void main() async {
   final locale = I18nManager().init();
   final themeMode = ThemeManager().init();
 
-  initHttpClient();
+  initOkxHttpClient();
+  initPolygonHttpClient(apiKey: 'tCylSupTcgle8GUM0c1wPMZ_AboQsoZ2');
 
   runApp(ProviderScope(
     overrides: [

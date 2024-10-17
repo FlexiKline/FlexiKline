@@ -18,7 +18,49 @@ import 'package:flexi_kline/flexi_kline.dart';
 import '../models/export.dart';
 import 'http_client.dart';
 
-List<CandleModel> dataToCandleList(dynamic data) {
+late final HttpClient okxHttpClient;
+
+void initOkxHttpClient({
+  String baseUrl = "https://aws.okx.com",
+  String? accessKey,
+}) {
+  final initHeaders = <String, dynamic>{};
+  if (accessKey != null) {
+    initHeaders['OK-ACCESS-KEY'] = accessKey;
+  }
+  okxHttpClient = HttpClient(
+    baseUrl: baseUrl,
+    headers: initHeaders,
+    responseConvertor: convertToOkxApiResult,
+  );
+}
+
+ApiResult<T> convertToOkxApiResult<T>(
+  RequestOptions options,
+  dynamic respData,
+  DataConvert<T> convert,
+) {
+  final code = respData['code'] ?? errorCodeInternal;
+  final msg = respData['msg'] ?? '';
+  final success = code == '0' || code == 0;
+  if (success) {
+    return ApiResult(
+      code: '$code',
+      msg: msg,
+      success: success,
+      data: convert(respData['data']),
+    );
+  } else {
+    return ApiResult(
+      code: '$code',
+      msg: msg,
+      success: success,
+      data: null,
+    );
+  }
+}
+
+List<CandleModel> _dataToCandleList(dynamic data) {
   if (data is List<dynamic> && data.isNotEmpty) {
     final list = List<CandleModel>.empty(growable: true);
     for (var json in data) {
@@ -35,9 +77,9 @@ Future<ApiResult<List<CandleModel>>> getMarketCandles(
   CandleReq req, {
   CancelToken? cancelToken,
 }) {
-  return httpClient.request(
+  return okxHttpClient.request(
     '/api/v5/market/candles',
-    dataToCandleList,
+    _dataToCandleList,
     method: HttpMethod.get,
     queryParameters: req.toJson(),
     cancelToken: cancelToken,
@@ -49,9 +91,9 @@ Future<ApiResult<List<CandleModel>>> getHistoryCandles(
   CandleReq req, {
   CancelToken? cancelToken,
 }) {
-  return httpClient.request(
+  return okxHttpClient.request(
     '/api/v5/market/history-candles',
-    dataToCandleList,
+    _dataToCandleList,
     method: HttpMethod.get,
     queryParameters: req.toLoadMoreJson(),
     cancelToken: cancelToken,
@@ -64,7 +106,7 @@ Future<ApiResult<List<Instrument>>> getInstrumentList({
   String? instId,
   CancelToken? cancelToken,
 }) {
-  return httpClient.getList(
+  return okxHttpClient.getList(
     '/api/v5/public/instruments',
     Instrument.fromJson,
     queryParameters: {
@@ -80,7 +122,7 @@ Future<ApiResult<List<MarketTicker>>> getMarketTickerList({
   String instType = 'SPOT',
   CancelToken? cancelToken,
 }) {
-  return httpClient.getList(
+  return okxHttpClient.getList(
     '/api/v5/market/tickers',
     MarketTicker.fromJson,
     queryParameters: {"instType": instType},
@@ -93,7 +135,7 @@ Future<ApiResult<MarketTicker>> getMarketTicker(
   String instId, {
   CancelToken? cancelToken,
 }) {
-  return httpClient
+  return okxHttpClient
       .getList(
         '/api/v5/market/ticker',
         MarketTicker.fromJson,

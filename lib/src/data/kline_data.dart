@@ -163,6 +163,7 @@ extension KlineDataExt on KlineData {
 
   bool get invalid => req.instId.isEmpty;
 
+  // TODO: 解除对CandleReq的依赖.
   CandleReq updateReqRange({RequestState state = RequestState.none}) {
     req = req.copyWith(
       after: list.lastOrNull?.ts,

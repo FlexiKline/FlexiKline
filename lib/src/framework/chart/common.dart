@@ -93,4 +93,3 @@ const timeKey = ValueKey<dynamic>(IndicatorType.time);
 abstract interface class IPrecomputable {
   dynamic getCalcParam();
 }
-

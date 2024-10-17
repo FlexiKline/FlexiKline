@@ -14,8 +14,6 @@
 
 part of 'indicator.dart';
 
-
-
 mixin PaintYAxisScaleMixin<T extends SinglePaintObjectIndicator>
     on SinglePaintObjectBox<T> {
   /// 为副区的指标图绘制Y轴上的刻度信息

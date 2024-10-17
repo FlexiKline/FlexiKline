@@ -491,6 +491,6 @@ mixin DrawBinding
     }
 
     // logd('drawStateTick bounds:$bounds');
-    object.drawTick(this, canvas, bounds);
+    object.drawTicks(this, canvas, bounds);
   }
 }

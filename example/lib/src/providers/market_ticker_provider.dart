@@ -20,7 +20,7 @@ import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/export.dart';
-import '../repo/api.dart' as api;
+import '../repo/okx_api.dart' as api;
 
 final random = math.Random();
 

@@ -88,7 +88,7 @@ class OverlayObject {
     return bounds;
   }
 
-  DrawConfig? _config;
+  late DrawConfig _config; // 是否要在object初始化时设定.
   LineConfig? _crosshair;
   PointConfig? _crosspoint;
   Paint? _ticksGapBgPaint;
@@ -140,7 +140,7 @@ extension OverlayObjectExt on OverlayObject {
     return _ticksGapBgPaint;
   }
 
-  TextAreaConfig getTickTextConfig(DrawConfig config) {
+  TextAreaConfig getTicksTextConfig(DrawConfig config) {
     if (_tickText != null) return _tickText!;
     _tickText = config.tickText;
     if (config.useDrawLineColor) {
@@ -416,14 +416,14 @@ mixin DrawObjectMixin on OverlayObject {
   }
 
   /// 绘制刻度(时间/价值)
-  void drawTick(
+  void drawTicks(
     IDrawContext context,
     Canvas canvas,
     Rect bounds,
   ) {
     final mainRect = context.mainRect;
     final timeRect = context.timeRect;
-    final tickTextConfig = getTickTextConfig(context.config);
+    final ticksTextConfig = getTicksTextConfig(context.config);
     final ticksGapBgPaint = getTicksGapBgPaint(context.config);
 
     /// 绘制时间刻度
@@ -434,7 +434,7 @@ mixin DrawObjectMixin on OverlayObject {
           bounds.left,
           timeRect.top,
           bounds.right,
-          timeRect.top + tickTextConfig.areaHeight,
+          timeRect.top + ticksTextConfig.areaHeight,
         ),
         ticksGapBgPaint,
       );
@@ -449,27 +449,27 @@ mixin DrawObjectMixin on OverlayObject {
         endDx = bounds.left;
       }
 
-      drawTimeTick(
+      drawTimeTicks(
         context,
         canvas,
         startDx,
         drawableRect: timeRect,
-        tickTextConfig: tickTextConfig,
+        tickTextConfig: ticksTextConfig,
       );
-      drawTimeTick(
+      drawTimeTicks(
         context,
         canvas,
         endDx,
         drawableRect: timeRect,
-        tickTextConfig: tickTextConfig,
+        tickTextConfig: ticksTextConfig,
       );
     } else {
-      drawTimeTick(
+      drawTimeTicks(
         context,
         canvas,
         bounds.left,
         drawableRect: timeRect,
-        tickTextConfig: tickTextConfig,
+        tickTextConfig: ticksTextConfig,
       );
     }
 
@@ -499,34 +499,34 @@ mixin DrawObjectMixin on OverlayObject {
         bottomDy = bounds.top;
       }
 
-      _valueTickSize = drawValueTick(
+      _valueTickSize = drawValueTicks(
         context,
         canvas,
         topDy,
         drawableRect: mainRect,
-        tickTextConfig: tickTextConfig,
+        tickTextConfig: ticksTextConfig,
       );
-      _valueTickSize = drawValueTick(
+      _valueTickSize = drawValueTicks(
         context,
         canvas,
         bottomDy,
         drawableRect: mainRect,
-        tickTextConfig: tickTextConfig,
+        tickTextConfig: ticksTextConfig,
       );
     } else {
-      _valueTickSize = drawValueTick(
+      _valueTickSize = drawValueTicks(
         context,
         canvas,
         bounds.top,
         drawableRect: mainRect,
-        tickTextConfig: tickTextConfig,
+        tickTextConfig: ticksTextConfig,
       );
     }
   }
 
   /// 在[drawableRect]区域上, 绘制由[dx]指定的时间刻度
   @protected
-  Size drawTimeTick(
+  Size drawTimeTicks(
     IDrawContext context,
     Canvas canvas,
     double dx, {
@@ -544,7 +544,7 @@ mixin DrawObjectMixin on OverlayObject {
     final timeTxt = formatTimeTick(ts, bar: klineData.timeBar);
 
     drawableRect ??= context.timeRect;
-    tickTextConfig ??= getTickTextConfig(context.config);
+    tickTextConfig ??= getTicksTextConfig(context.config);
     return canvas.drawTextArea(
       offset: Offset(
         dx,
@@ -559,7 +559,7 @@ mixin DrawObjectMixin on OverlayObject {
 
   /// 在[drawableRect]区域的右侧, 绘制由[dy]指定的价值刻度
   @protected
-  Size drawValueTick(
+  Size drawValueTicks(
     IDrawContext context,
     Canvas canvas,
     double dy, {
@@ -575,7 +575,7 @@ mixin DrawObjectMixin on OverlayObject {
     );
 
     final txtSpacing = context.config.spacing;
-    tickTextConfig ??= getTickTextConfig(context.config);
+    tickTextConfig ??= getTicksTextConfig(context.config);
     final centerOffset = tickTextConfig.areaHeight / 2;
     drawableRect ??= context.mainRect;
     return canvas.drawTextArea(

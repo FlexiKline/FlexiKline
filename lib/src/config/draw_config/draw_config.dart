@@ -13,12 +13,12 @@
 // limitations under the License.
 
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:flutter/painting.dart';
+// import 'package:flutter/painting.dart';
 
 import '../../framework/serializers.dart';
 import '../draw_params/draw_params.dart';
 import '../magnifier_config/magnifier_config.dart';
-import '../paint_config/paint_config.dart';
+// import '../paint_config/paint_config.dart';
 import '../point_config/point_config.dart';
 import '../line_config/line_config.dart';
 import '../text_area_config/text_area_config.dart';

@@ -167,7 +167,6 @@ mixin MACDData on BaseData {
   }
 }
 
-
 // @Deprecated('废弃的')
 // mixin MACDData2 on BaseData {
 //   @override

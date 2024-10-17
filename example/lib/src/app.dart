@@ -13,20 +13,21 @@
 // limitations under the License.
 
 import 'package:easy_refresh/easy_refresh.dart';
+import 'package:example/src/repo/polygon_api.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
-import 'package:flutter_ume_kit_dio_plus/flutter_ume_kit_dio_plus.dart';
 import 'package:flutter_ume_kit_perf_plus/flutter_ume_kit_perf_plus.dart';
 import 'package:flutter_ume_kit_ui_plus/flutter_ume_kit_ui_plus.dart';
 import 'package:flutter_ume_plus/flutter_ume_plus.dart';
 
 import 'i18n.dart';
 import 'providers/instruments_provider.dart';
-import 'repo/http_client.dart';
+import 'repo/okx_api.dart';
 import 'router.dart';
+import 'test/app_dio_inspector.dart';
 import 'theme/export.dart';
 import 'utils/device_util.dart';
 // import 'widgets/no_thumb_scroll_behavior.dart';
@@ -45,7 +46,16 @@ class _MyAppState extends ConsumerState<MyApp> {
     configDefaultRefresher();
     if (kDebugMode) {
       PluginManager.instance
-        ..register(DioInspector(dio: httpClient.dio))
+        ..register(AppDioInspector(
+          key: const ValueKey('OKX'),
+          dio: okxHttpClient.dio,
+          showName: 'OKX',
+        ))
+        ..register(AppDioInspector(
+          key: const ValueKey('Polygon'),
+          dio: polygonHttpClient.dio,
+          showName: 'Polygon',
+        ))
         ..register(Performance())
         ..register(const MemoryInfoPage())
         ..register(const WidgetInfoInspector())

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:dio/dio.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +24,7 @@ import '../config.dart';
 import '../providers/default_kline_config.dart';
 import '../providers/market_candle_provider.dart';
 import '../repo/mock.dart';
+import '../repo/polygon_api.dart' as api;
 import '../test/canvas_demo.dart';
 import '../theme/flexi_theme.dart';
 import 'components/flexi_kline_draw_toolbar.dart';
@@ -44,6 +46,8 @@ class _MyDemoPageState extends ConsumerState<MyKlineDemoPage> {
   late final DefaultFlexiKlineConfiguration configuration;
 
   late CandleReq req;
+  CancelToken? cancelToken;
+  bool isFullScreen = false;
 
   final logger = LogPrintImpl(
     debug: kDebugMode,
@@ -53,11 +57,18 @@ class _MyDemoPageState extends ConsumerState<MyKlineDemoPage> {
   @override
   void initState() {
     super.initState();
+    const count = 500;
+    const timeBar = TimeBar.D1;
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final before = now - (now % timeBar.milliseconds);
+    final after = before - count * timeBar.milliseconds;
     req = CandleReq(
-      instId: '000001',
-      bar: TimeBar.H1.bar,
+      instId: 'AAPL',
+      bar: timeBar.bar,
       precision: 2,
-      displayName: '上证指数',
+      displayName: 'Apple Inc.',
+      after: after,
+      before: before,
     );
     configuration = DefaultFlexiKlineConfiguration(ref: ref);
     controller = FlexiKlineController(
@@ -77,22 +88,41 @@ class _MyDemoPageState extends ConsumerState<MyKlineDemoPage> {
   /// 初始化加载K线蜡烛数据.
   Future<void> initKlineData(CandleReq request) async {
     controller.switchKlineData(request);
+    List<CandleModel>? list;
 
-    logger.logd('genRandomCandleList Begin ${DateTime.now()}');
-    // final list = await genRandomCandleList(
+    // list = await genRandomCandleList(
     //   count: 500,
     //   bar: request.timeBar!,
     // );
-    final list = genETHUSDT1HLimit50List();
-    logger.logd('genRandomCandleList End ${DateTime.now()}');
 
-    await controller.updateKlineData(request, list);
+    // list = genETHUSDT1HLimit50List();
 
+    final resp = await api.getHistoryKlineData(
+      request,
+      cancelToken: cancelToken = CancelToken(),
+    );
+    if (resp.success) {
+      list = resp.data;
+    } else {
+      SmartDialog.showToast(resp.msg);
+    }
+
+    await controller.updateKlineData(request, list ?? const []);
     emitLatestMarketCandle();
   }
 
   Future<void> loadMoreCandles(CandleReq request) async {
-    SmartDialog.showToast('This is a simulation operation!');
+    // await Future.delayed(const Duration(milliseconds: 2000)); // 模拟延时, 展示loading
+    final resp = await api.getHistoryKlineData(
+      request,
+      cancelToken: cancelToken = CancelToken(),
+    );
+    cancelToken = null;
+    if (resp.success && resp.data != null && resp.data!.isNotEmpty) {
+      await controller.updateKlineData(request, resp.data!);
+    } else if (resp.msg.isNotEmpty) {
+      SmartDialog.showToast(resp.msg);
+    }
   }
 
   /// 当crossing时, 自定义Tooltip

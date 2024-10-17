@@ -12,6 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export 'instrument/instrument.dart';
-export 'market_ticker/market_ticker.dart';
-export 'stock_ticker/stock_ticker.dart';
+import 'package:flutter_ume_kit_dio_plus/flutter_ume_kit_dio_plus.dart'; // Dio Inspector
+
+class AppDioInspector extends DioInspector {
+  AppDioInspector({
+    super.key,
+    required super.dio,
+    required this.showName,
+  });
+
+  final String showName;
+
+  @override
+  String get name => showName;
+
+  @override
+  String get displayName => showName;
+}

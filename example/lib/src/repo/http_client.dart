@@ -19,8 +19,12 @@ import 'package:talker_dio_logger/talker_dio_logger.dart';
 
 typedef ModelMapper<T> = T Function(Map<String, dynamic>);
 typedef DataConvert<T> = T? Function(dynamic);
+typedef ResponseConvert = ApiResult<T> Function<T>(
+  RequestOptions reqOptions,
+  dynamic resp,
+  DataConvert<T> dataConvert,
+);
 
-String succeedCode = '0';
 const errorCodeCancel = '700';
 const errorCodeInternal = '701';
 const errorCodeUnknown = '600';
@@ -28,23 +32,20 @@ const errorCodeTimeout = '601';
 const errorCodeBadCertificate = '602';
 const errorCodeConnectionError = '603';
 
-const jsonNodeCode = 'code';
-const jsonNodeMsg = 'msg';
-const jsonNodeData = 'data';
-const jsonNodeSuccess = 'success';
-
 class ApiResult<T> {
   final String code;
   final String msg;
   T? data;
   final bool success;
+  final Map<String, dynamic> extra;
 
   ApiResult({
     required this.code,
     required this.msg,
+    required this.success,
     this.data,
-    bool? success,
-  }) : success = success ?? code == succeedCode;
+    this.extra = const {},
+  });
 }
 
 enum HttpMethod {
@@ -71,6 +72,8 @@ final class HttpClient {
   late final Dio _dio;
   Dio get dio => _dio;
 
+  final ResponseConvert responseConvertor;
+
   final Map<String, dynamic> _reqHeaders = {};
   Map<String, dynamic> get reqHeaders => _reqHeaders;
 
@@ -84,13 +87,12 @@ final class HttpClient {
 
   HttpClient({
     required String baseUrl,
-    String? accessKey,
+    Map<String, dynamic>? headers,
+    required this.responseConvertor,
   }) {
     _dio = Dio(BaseOptions(
       baseUrl: baseUrl,
-      headers: {
-        "OK-ACCESS-KEY": accessKey,
-      },
+      headers: headers,
       sendTimeout: const Duration(seconds: 15),
       receiveTimeout: const Duration(seconds: 15),
       connectTimeout: const Duration(seconds: 15),
@@ -142,7 +144,7 @@ final class HttpClient {
         onSendProgress: onSendProgress,
         onReceiveProgress: onReceiveProgress,
       );
-      return handleResponse(resp, dataConvert);
+      return responseConvertor(resp.requestOptions, resp.data, dataConvert);
     } on DioException catch (e) {
       return handleException(e);
     } on Exception catch (e) {
@@ -240,29 +242,6 @@ final class HttpClient {
     );
   }
 
-  ApiResult<T> handleResponse<T>(Response response, DataConvert<T> convert) {
-    final respData = response.data;
-    final code = respData[jsonNodeCode] ?? errorCodeInternal;
-    final msg = respData[jsonNodeMsg];
-    final success = respData[jsonNodeSuccess];
-
-    if (code == succeedCode) {
-      return ApiResult(
-        code: '$code',
-        msg: msg,
-        data: convert(respData[jsonNodeData]),
-        success: success,
-      );
-    } else {
-      return ApiResult(
-        code: '$code',
-        msg: msg,
-        data: null,
-        success: success,
-      );
-    }
-  }
-
   ApiResult<T> handleException<T>(Exception exception) {
     String? code;
     String? msg;
@@ -333,22 +312,15 @@ final class HttpClient {
         code: code,
         msg: msg,
         data: null,
+        success: false,
       );
     } else {
       return ApiResult<T>(
         code: errorCodeInternal,
         msg: exception.toString(),
         data: null,
+        success: false,
       );
     }
   }
-}
-
-late final HttpClient httpClient;
-
-void initHttpClient({
-  String baseUrl = "https://aws.okx.com",
-  String? accessKey,
-}) {
-  httpClient = HttpClient(baseUrl: baseUrl, accessKey: accessKey);
 }

@@ -15,7 +15,7 @@
 import 'dart:collection';
 
 /// 固定大小的Hash队列
-/// 
+///
 /// [fixedCapacity] 固定容量, 必须大于0
 /// 主要特性.
 /// 1. 固定容量.

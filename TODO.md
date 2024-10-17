@@ -59,7 +59,8 @@ v0.8.0
   1. 更新蜡烛数据方式反转, 同步所有计算逻辑.
   2. 按需计算, 增加指标同时触发指标计算后, 再绘制.
   3. 考虑保留上次最新数据计算中间态, 当新数据更新时继续计算.
-- [ ] 蜡烛数据超出double类型精度时, 自动切换使用ComputeMode.accurate模式, 优化CandleModel模型.
+- [ ] 解除对CandleReq的依赖; KlinData中计算数据与CandleModel分离.
+- [ ] 蜡烛数据超出double类型精度时, 自动切换使用ComputeMode.accurate模式.
 - [ ] 文档撰写v2.
 
 v0.9.0
