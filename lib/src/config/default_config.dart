@@ -101,7 +101,7 @@ abstract class BaseFlexiKlineTheme implements IFlexiKlineTheme {
     required this.markLine,
     required this.themeColor,
     required this.textColor,
-    required this.tickTextColor,
+    required this.ticksTextColor,
     required this.lastPriceTextColor,
     required this.crossTextColor,
     required this.tooltipTextColor,
@@ -117,7 +117,7 @@ abstract class BaseFlexiKlineTheme implements IFlexiKlineTheme {
     required this.lastPriceTextBg,
     required Color color,
     required this.gridLine,
-    required this.tickTextColor,
+    required this.ticksTextColor,
     required this.crossTextColor,
   })  : tooltipBg = markBg,
         countDownTextBg = markBg,
@@ -165,7 +165,7 @@ abstract class BaseFlexiKlineTheme implements IFlexiKlineTheme {
   @override
   late Color textColor;
   @override
-  late Color tickTextColor;
+  late Color ticksTextColor;
   @override
   late Color lastPriceTextColor;
   @override
@@ -267,10 +267,10 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       firstCandleInitOffset: 80 * theme.scale,
 
       /// 全局默认的刻度值配置.
-      tickText: TextAreaConfig(
+      ticksText: TextAreaConfig(
         style: TextStyle(
           fontSize: theme.normalTextSize,
-          color: theme.tickTextColor,
+          color: theme.ticksTextColor,
           overflow: TextOverflow.ellipsis,
           height: defaultTextHeight,
         ),
@@ -310,7 +310,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
         borderWidth: 2 * theme.scale,
         borderColor: theme.crossColor.withOpacity(0.5),
       ),
-      tickText: TextAreaConfig(
+      ticksText: TextAreaConfig(
         style: TextStyle(
           color: theme.crossTextColor,
           fontSize: theme.normalTextSize,
@@ -356,7 +356,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
         type: LineType.solid,
         dashes: [5, 3],
       ),
-      // 绘制[drawPoint]和[tickText]刻度时, 是否始终使用[drawLine]指定的颜色.
+      // 绘制[drawPoint]和[ticksText]刻度时, 是否始终使用[drawLine]指定的颜色.
       useDrawLineColor: true,
       drawPoint: PointConfig(
         radius: 9 * theme.scale,
@@ -365,7 +365,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
         borderWidth: 1 * theme.scale,
         borderColor: theme.drawColor,
       ),
-      tickText: TextAreaConfig(
+      ticksText: TextAreaConfig(
         style: TextStyle(
           color: const Color(0xFFFFFFFF),
           fontSize: theme.normalTextSize,
@@ -814,7 +814,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       tipsPadding: theme.tipsPadding,
       tipsStyle: TextStyle(
         fontSize: theme.normalTextSize,
-        color: theme.tickTextColor,
+        color: theme.ticksTextColor,
         overflow: TextOverflow.ellipsis,
         height: defaultTextHeight,
       ),
@@ -830,7 +830,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       timeTick: TextAreaConfig(
         style: TextStyle(
           fontSize: theme.normalTextSize,
-          color: theme.tickTextColor,
+          color: theme.ticksTextColor,
           overflow: TextOverflow.ellipsis,
           height: defaultTextHeight,
         ),
@@ -1083,7 +1083,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       tipsPadding: theme.tipsPadding,
       tipsStyle: TextStyle(
         fontSize: theme.normalTextSize,
-        color: theme.tickTextColor,
+        color: theme.ticksTextColor,
         overflow: TextOverflow.ellipsis,
         height: defaultTextHeight,
       ),

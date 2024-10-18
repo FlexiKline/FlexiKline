@@ -19,7 +19,7 @@ import '../extension/export.dart';
 import '../framework/draw/overlay.dart';
 
 class RectangleDrawObject extends DrawObject {
-  RectangleDrawObject(super.overlay);
+  RectangleDrawObject(super.overlay, super.config);
 
   Rect? getRectangleRect() {
     final points = allPoints;
@@ -78,7 +78,7 @@ class RectangleDrawObject extends DrawObject {
       Path()..addRect(rect),
       line.linePaint
         ..color = line.paint.color.withOpacity(
-          context.config.drawParams.paralleBgOpacity,
+          drawParams.paralleBgOpacity,
         )
         ..style = PaintingStyle.fill,
     );

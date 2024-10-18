@@ -61,7 +61,7 @@ class _FlexiKlineDrawMenubarState extends ConsumerState<FlexiKlineDrawMenubar> {
                         return ShrinkIconButton(
                           key: ValueKey(type),
                           onPressed: () {
-                            widget.controller.onDrawStart(type);
+                            widget.controller.startDraw(type);
                           },
                           content: 'assets/svgs/${type.id}.svg',
                           color: value == type ? theme.t1 : theme.t2,
@@ -97,7 +97,7 @@ class _FlexiKlineDrawMenubarState extends ConsumerState<FlexiKlineDrawMenubar> {
           ),
           ShrinkIconButton(
             onPressed: () {
-              widget.controller.cleanAllDrawOverlay();
+              widget.controller.deleteAllDrawObject();
             },
             content: Icons.cleaning_services_rounded,
           ),

@@ -19,7 +19,7 @@ import '../extension/export.dart';
 import '../framework/draw/overlay.dart';
 
 class HorizontalTrendLineDrawObject extends DrawObject {
-  HorizontalTrendLineDrawObject(super.overlay);
+  HorizontalTrendLineDrawObject(super.overlay, super.config);
 
   @override
   bool hitTest(IDrawContext context, Offset position, {bool isMove = false}) {
@@ -34,17 +34,17 @@ class HorizontalTrendLineDrawObject extends DrawObject {
     }
 
     final distance = position.distanceToLine(first, second);
-    return distance <= context.config.hitTestMinDistance;
+    return distance <= hitTestMinDistance;
   }
 
   @override
-  void onUpdatePoint(Point point, Offset offset, {bool isMove = false}) {
+  void onUpdateDrawPoint(Point point, Offset offset, {bool isMove = false}) {
     // if (point.index == 0) point.offset = offset;
     final first = points.firstOrNull?.offset;
     if (first == null) {
-      super.onUpdatePoint(point, offset);
+      super.onUpdateDrawPoint(point, offset);
     } else {
-      super.onUpdatePoint(point, Offset(offset.dx, first.dy));
+      super.onUpdateDrawPoint(point, Offset(offset.dx, first.dy));
     }
   }
 

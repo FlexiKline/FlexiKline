@@ -58,7 +58,6 @@ class FlexiKlineDrawToolbar extends ConsumerWidget {
       child: ValueListenableBuilder(
         valueListenable: controller.drawLineStyleListener,
         builder: (context, lineStyle, child) {
-          lineStyle ??= controller.drawConfig.drawLine;
           Color paintColor = flexiKlinePaintColors.first;
           if (lineStyle.paint.color != paintColor &&
               flexiKlinePaintColors.contains(lineStyle.paint.color)) {
@@ -168,7 +167,7 @@ class FlexiKlineDrawToolbar extends ConsumerWidget {
               ShrinkIconButton(
                 onPressed: () {
                   debugPrint('zp::: draw onTap Delete');
-                  controller.onDrawDelete();
+                  controller.deleteDrawObject();
                 },
                 content: SvgRes.delete,
               ),

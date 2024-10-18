@@ -46,7 +46,7 @@ abstract class _$SettingConfigCWProxy {
 
   SettingConfig showYAxisTick(bool showYAxisTick);
 
-  SettingConfig tickText(TextAreaConfig tickText);
+  SettingConfig ticksText(TextAreaConfig ticksText);
 
   SettingConfig subChartMaxCount(int subChartMaxCount);
 
@@ -76,7 +76,7 @@ abstract class _$SettingConfigCWProxy {
     double? candleLineWidth,
     double? firstCandleInitOffset,
     bool? showYAxisTick,
-    TextAreaConfig? tickText,
+    TextAreaConfig? ticksText,
     int? subChartMaxCount,
   });
 }
@@ -160,7 +160,8 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
       this(showYAxisTick: showYAxisTick);
 
   @override
-  SettingConfig tickText(TextAreaConfig tickText) => this(tickText: tickText);
+  SettingConfig ticksText(TextAreaConfig ticksText) =>
+      this(ticksText: ticksText);
 
   @override
   SettingConfig subChartMaxCount(int subChartMaxCount) =>
@@ -195,7 +196,7 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
     Object? candleLineWidth = const $CopyWithPlaceholder(),
     Object? firstCandleInitOffset = const $CopyWithPlaceholder(),
     Object? showYAxisTick = const $CopyWithPlaceholder(),
-    Object? tickText = const $CopyWithPlaceholder(),
+    Object? ticksText = const $CopyWithPlaceholder(),
     Object? subChartMaxCount = const $CopyWithPlaceholder(),
   }) {
     return SettingConfig(
@@ -290,10 +291,10 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
               ? _value.showYAxisTick
               // ignore: cast_nullable_to_non_nullable
               : showYAxisTick as bool,
-      tickText: tickText == const $CopyWithPlaceholder() || tickText == null
-          ? _value.tickText
+      ticksText: ticksText == const $CopyWithPlaceholder() || ticksText == null
+          ? _value.ticksText
           // ignore: cast_nullable_to_non_nullable
-          : tickText as TextAreaConfig,
+          : ticksText as TextAreaConfig,
       subChartMaxCount: subChartMaxCount == const $CopyWithPlaceholder() ||
               subChartMaxCount == null
           ? _value.subChartMaxCount
@@ -340,8 +341,8 @@ SettingConfig _$SettingConfigFromJson(Map<String, dynamic> json) =>
       candleLineWidth: (json['candleLineWidth'] as num).toDouble(),
       firstCandleInitOffset: (json['firstCandleInitOffset'] as num).toDouble(),
       showYAxisTick: json['showYAxisTick'] as bool? ?? true,
-      tickText:
-          TextAreaConfig.fromJson(json['tickText'] as Map<String, dynamic>),
+      ticksText:
+          TextAreaConfig.fromJson(json['ticksText'] as Map<String, dynamic>),
       subChartMaxCount: (json['subChartMaxCount'] as num?)?.toInt() ??
           defaultSubChartMaxCount,
     );
@@ -376,7 +377,7 @@ Map<String, dynamic> _$SettingConfigToJson(SettingConfig instance) {
   val['candleLineWidth'] = instance.candleLineWidth;
   val['firstCandleInitOffset'] = instance.firstCandleInitOffset;
   val['showYAxisTick'] = instance.showYAxisTick;
-  val['tickText'] = instance.tickText.toJson();
+  val['ticksText'] = instance.ticksText.toJson();
   val['subChartMaxCount'] = instance.subChartMaxCount;
   return val;
 }

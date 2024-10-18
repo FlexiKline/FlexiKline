@@ -45,17 +45,17 @@ mixin PaintYAxisScaleMixin<T extends SinglePaintObjectIndicator>
 
       final text = fromatTickValue(value, precision: precision);
 
-      final tickText = settingConfig.tickText;
+      final ticksText = settingConfig.ticksText;
 
       canvas.drawTextArea(
         offset: Offset(
           dx,
-          dy - tickText.areaHeight, // 绘制在刻度线之上
+          dy - ticksText.areaHeight, // 绘制在刻度线之上
         ),
         drawDirection: DrawDirection.rtl,
         drawableRect: drawableRect,
         text: text,
-        textConfig: tickText,
+        textConfig: ticksText,
       );
     }
   }
@@ -86,17 +86,17 @@ mixin PaintYAxisMarkOnCrossMixin<T extends SinglePaintObjectIndicator>
 
     final text = formatMarkValueOnCross(value, precision: precision);
 
-    final tickText = crossConfig.tickText;
+    final ticksText = crossConfig.ticksText;
 
     canvas.drawTextArea(
       offset: Offset(
         chartRect.right - crossConfig.spacing,
-        offset.dy - tickText.areaHeight / 2,
+        offset.dy - ticksText.areaHeight / 2,
       ),
       drawDirection: DrawDirection.rtl,
       drawableRect: drawableRect,
       text: text,
-      textConfig: tickText,
+      textConfig: ticksText,
     );
   }
 

@@ -121,9 +121,9 @@ class _FlexiKlineSettingBarState extends ConsumerState<FlexiKlineSettingBar>
     setState(() {
       _showDarwTool = !_showDarwTool;
       if (_showDarwTool) {
-        widget.controller.onDrawPrepare();
+        widget.controller.prepareDraw();
       } else {
-        widget.controller.onDrawExit();
+        widget.controller.exitDraw();
       }
     });
   }

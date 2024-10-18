@@ -64,7 +64,7 @@ class DefaultFlexiKlineTheme extends BaseFlexiKlineTheme
           markLine: theme.t1,
           themeColor: theme.themeColor,
           textColor: theme.t1,
-          tickTextColor: theme.t2,
+          ticksTextColor: theme.t2,
           lastPriceTextColor: theme.t1,
           crossTextColor: theme.themeColor,
           tooltipTextColor: theme.t1,
@@ -81,7 +81,7 @@ class DefaultFlexiKlineTheme extends BaseFlexiKlineTheme
           lastPriceTextBg: theme.translucentBg,
           color: theme.t1,
           gridLine: theme.gridLine,
-          tickTextColor: theme.t2,
+          ticksTextColor: theme.t2,
           crossTextColor: theme.themeColor,
         );
 

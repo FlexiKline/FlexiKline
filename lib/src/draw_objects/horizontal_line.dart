@@ -20,14 +20,10 @@ import '../extension/render/draw_path.dart';
 import '../framework/draw/overlay.dart';
 
 class HorizontalLineDrawObject extends DrawObject {
-  HorizontalLineDrawObject(super.overlay);
+  HorizontalLineDrawObject(super.overlay, super.config);
 
   @override
-  bool hitTest(
-    IDrawContext context,
-    Offset position, {
-    bool isMove = false,
-  }) {
+  bool hitTest(IDrawContext context, Offset position, {bool isMove = false}) {
     assert(
       points.length == 1,
       'HorizontalLine only takes one point, but it has ${points.length}',
@@ -43,7 +39,7 @@ class HorizontalLineDrawObject extends DrawObject {
       Offset(mainRect.left, dy),
       Offset(mainRect.right, dy),
     );
-    return distance <= context.config.hitTestMinDistance;
+    return distance <= hitTestMinDistance;
   }
 
   @override

@@ -20,7 +20,7 @@ import '../framework/draw/overlay.dart';
 import '../utils/vector_util.dart';
 
 class RayLineDrawObject extends DrawObject {
-  RayLineDrawObject(super.overlay);
+  RayLineDrawObject(super.overlay, super.config);
 
   @override
   bool hitTest(IDrawContext context, Offset position, {bool isMove = false}) {
@@ -35,7 +35,7 @@ class RayLineDrawObject extends DrawObject {
     }
 
     final distance = position.distanceToRayLine(first, second);
-    return distance <= context.config.hitTestMinDistance;
+    return distance <= hitTestMinDistance;
   }
 
   @override

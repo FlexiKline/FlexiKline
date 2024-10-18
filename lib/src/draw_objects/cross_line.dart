@@ -20,14 +20,10 @@ import '../extension/render/draw_path.dart';
 import '../framework/draw/overlay.dart';
 
 class CrossLineDrawObject extends DrawObject {
-  CrossLineDrawObject(super.overlay);
+  CrossLineDrawObject(super.overlay, super.config);
 
   @override
-  bool hitTest(
-    IDrawContext context,
-    Offset position, {
-    bool isMove = false,
-  }) {
+  bool hitTest(IDrawContext context, Offset position, {bool isMove = false}) {
     assert(
       points.length == 1,
       'CrossLine only takes one point, but it has ${points.length}',
@@ -37,23 +33,19 @@ class CrossLineDrawObject extends DrawObject {
 
     final mainRect = context.mainRect;
     if (mainRect.includeDx(first.dx) || mainRect.includeDy(first.dy)) {
+      final deviation = isMove ? hitTestMinDistance * 10 : hitTestMinDistance;
+
       double distance = position.distanceToLine(
         Offset(mainRect.left, first.dy),
         Offset(mainRect.right, first.dy),
       );
-      final hitTestMinDistance = isMove
-          ? context.config.hitTestMinDistance * 10
-          : context.config.hitTestMinDistance;
-      if (distance <= hitTestMinDistance) {
-        return true;
-      }
+      if (distance <= deviation) return true;
+
       distance = position.distanceToLine(
         Offset(first.dx, mainRect.top),
         Offset(first.dx, mainRect.bottom),
       );
-      if (distance <= hitTestMinDistance) {
-        return true;
-      }
+      if (distance <= deviation) return true;
     }
     return false;
   }

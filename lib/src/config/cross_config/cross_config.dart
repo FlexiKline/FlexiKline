@@ -28,7 +28,7 @@ class CrossConfig {
     this.enable = true,
     required this.crosshair,
     required this.crosspoint,
-    required this.tickText,
+    required this.ticksText,
     required this.spacing,
     this.showLatestTipsInBlank = true,
     this.moveByCandleInBlank = false,
@@ -37,9 +37,9 @@ class CrossConfig {
   final bool enable;
   final LineConfig crosshair;
   final PointConfig crosspoint;
-  final TextAreaConfig tickText;
+  final TextAreaConfig ticksText;
 
-  /// onCross时, 刻度[tickText]与绘制边界的间距.
+  /// onCross时, 刻度[ticksText]与绘制边界的间距.
   final double spacing;
 
   /// onCross时, 当移动到空白区域时, Tips区域是否展示最新的蜡烛的Tips数据.

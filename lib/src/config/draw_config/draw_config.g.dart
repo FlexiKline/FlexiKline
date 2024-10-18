@@ -21,7 +21,7 @@ abstract class _$DrawConfigCWProxy {
 
   DrawConfig drawPoint(PointConfig drawPoint);
 
-  DrawConfig tickText(TextAreaConfig tickText);
+  DrawConfig ticksText(TextAreaConfig ticksText);
 
   DrawConfig spacing(double spacing);
 
@@ -47,7 +47,7 @@ abstract class _$DrawConfigCWProxy {
     LineConfig? drawLine,
     bool? useDrawLineColor,
     PointConfig? drawPoint,
-    TextAreaConfig? tickText,
+    TextAreaConfig? ticksText,
     double? spacing,
     double? ticksGapBgOpacity,
     double? hitTestMinDistance,
@@ -86,7 +86,7 @@ class _$DrawConfigCWProxyImpl implements _$DrawConfigCWProxy {
   DrawConfig drawPoint(PointConfig drawPoint) => this(drawPoint: drawPoint);
 
   @override
-  DrawConfig tickText(TextAreaConfig tickText) => this(tickText: tickText);
+  DrawConfig ticksText(TextAreaConfig ticksText) => this(ticksText: ticksText);
 
   @override
   DrawConfig spacing(double spacing) => this(spacing: spacing);
@@ -122,7 +122,7 @@ class _$DrawConfigCWProxyImpl implements _$DrawConfigCWProxy {
     Object? drawLine = const $CopyWithPlaceholder(),
     Object? useDrawLineColor = const $CopyWithPlaceholder(),
     Object? drawPoint = const $CopyWithPlaceholder(),
-    Object? tickText = const $CopyWithPlaceholder(),
+    Object? ticksText = const $CopyWithPlaceholder(),
     Object? spacing = const $CopyWithPlaceholder(),
     Object? ticksGapBgOpacity = const $CopyWithPlaceholder(),
     Object? hitTestMinDistance = const $CopyWithPlaceholder(),
@@ -162,10 +162,10 @@ class _$DrawConfigCWProxyImpl implements _$DrawConfigCWProxy {
           ? _value.drawPoint
           // ignore: cast_nullable_to_non_nullable
           : drawPoint as PointConfig,
-      tickText: tickText == const $CopyWithPlaceholder() || tickText == null
-          ? _value.tickText
+      ticksText: ticksText == const $CopyWithPlaceholder() || ticksText == null
+          ? _value.ticksText
           // ignore: cast_nullable_to_non_nullable
-          : tickText as TextAreaConfig,
+          : ticksText as TextAreaConfig,
       spacing: spacing == const $CopyWithPlaceholder() || spacing == null
           ? _value.spacing
           // ignore: cast_nullable_to_non_nullable
@@ -214,8 +214,8 @@ DrawConfig _$DrawConfigFromJson(Map<String, dynamic> json) => DrawConfig(
       useDrawLineColor: json['useDrawLineColor'] as bool? ?? true,
       drawPoint:
           PointConfig.fromJson(json['drawPoint'] as Map<String, dynamic>),
-      tickText:
-          TextAreaConfig.fromJson(json['tickText'] as Map<String, dynamic>),
+      ticksText:
+          TextAreaConfig.fromJson(json['ticksText'] as Map<String, dynamic>),
       spacing: (json['spacing'] as num).toDouble(),
       ticksGapBgOpacity: (json['ticksGapBgOpacity'] as num?)?.toDouble() ?? 0.1,
       hitTestMinDistance:
@@ -238,7 +238,7 @@ Map<String, dynamic> _$DrawConfigToJson(DrawConfig instance) =>
       'drawLine': instance.drawLine.toJson(),
       'useDrawLineColor': instance.useDrawLineColor,
       'drawPoint': instance.drawPoint.toJson(),
-      'tickText': instance.tickText.toJson(),
+      'ticksText': instance.ticksText.toJson(),
       'spacing': instance.spacing,
       'ticksGapBgOpacity': instance.ticksGapBgOpacity,
       'hitTestMinDistance': instance.hitTestMinDistance,

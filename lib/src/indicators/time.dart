@@ -116,9 +116,9 @@ class TimePaintObject<T extends TimeIndicator> extends SinglePaintObjectBox<T> {
     final time = model.formatDateTime(timeBar);
     // final time = formatyyMMddHHMMss(model.dateTime);
 
-    final tickText = crossConfig.tickText;
+    final ticksText = crossConfig.ticksText;
 
-    final dyCenterOffset = (indicator.height - tickText.areaHeight) / 2;
+    final dyCenterOffset = (indicator.height - ticksText.areaHeight) / 2;
     canvas.drawTextArea(
       offset: Offset(
         offset.dx,
@@ -126,7 +126,7 @@ class TimePaintObject<T extends TimeIndicator> extends SinglePaintObjectBox<T> {
       ),
       drawDirection: DrawDirection.center,
       text: time,
-      textConfig: tickText,
+      textConfig: ticksText,
     );
   }
 

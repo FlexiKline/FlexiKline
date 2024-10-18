@@ -20,14 +20,10 @@ import '../extension/render/draw_path.dart';
 import '../framework/draw/overlay.dart';
 
 class VerticalLineDrawObject extends DrawObject {
-  VerticalLineDrawObject(super.overlay);
+  VerticalLineDrawObject(super.overlay, super.config);
 
   @override
-  bool hitTest(
-    IDrawContext context,
-    Offset position, {
-    bool isMove = false,
-  }) {
+  bool hitTest(IDrawContext context, Offset position, {bool isMove = false}) {
     assert(
       points.length == 1,
       'VerticalLine only takes one point, but it has ${points.length}',
@@ -43,7 +39,7 @@ class VerticalLineDrawObject extends DrawObject {
       Offset(dx, mainRect.top),
       Offset(dx, mainRect.bottom),
     );
-    return distance <= context.config.hitTestMinDistance;
+    return distance <= hitTestMinDistance;
   }
 
   @override

@@ -20,7 +20,7 @@ import '../framework/draw/overlay.dart';
 import '../utils/vector_util.dart';
 
 class ExtendedTrendLineDrawObject extends DrawObject {
-  ExtendedTrendLineDrawObject(super.overlay);
+  ExtendedTrendLineDrawObject(super.overlay, super.config);
 
   @override
   bool hitTest(IDrawContext context, Offset position, {bool isMove = false}) {
@@ -35,7 +35,7 @@ class ExtendedTrendLineDrawObject extends DrawObject {
     }
 
     final distance = position.distanceToExtendedLine(first, second);
-    return distance <= context.config.hitTestMinDistance;
+    return distance <= hitTestMinDistance;
   }
 
   @override

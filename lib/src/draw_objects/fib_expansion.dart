@@ -21,7 +21,7 @@ import '../extension/export.dart';
 import '../framework/draw/overlay.dart';
 
 class FibExpansionDrawObject extends DrawObject {
-  FibExpansionDrawObject(super.overlay);
+  FibExpansionDrawObject(super.overlay, super.config);
 
   @override
   bool hitTest(IDrawContext context, Offset position, {bool isMove = false}) {
@@ -32,8 +32,7 @@ class FibExpansionDrawObject extends DrawObject {
     final first = points.firstOrNull?.offset;
     final second = points.secondOrNull?.offset;
     if (first == null || second == null) return false;
-    if (position.distanceToLine(first, second) <=
-        context.config.hitTestMinDistance) {
+    if (position.distanceToLine(first, second) <= hitTestMinDistance) {
       return true;
     }
 
@@ -100,7 +99,6 @@ class FibExpansionDrawObject extends DrawObject {
     Offset B,
     double? dyLen,
   ) {
-    final drawParams = context.config.drawParams;
     final precision = context.curKlineData.precision;
     final fibRates = drawParams.fibRates;
     final fibText = drawParams.fibText;
@@ -149,7 +147,7 @@ class FibExpansionDrawObject extends DrawObject {
       /// 画比率值
       final value = context.dyToValue(start.dy);
       if (value != null) {
-        final text = formatValueTick(value, precision: precision);
+        final text = formatValueTicksText(value, precision: precision);
         canvas.drawTextArea(
           text: '$rate($text)',
           drawDirection: DrawDirection.rtl,

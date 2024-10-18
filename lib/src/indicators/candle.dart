@@ -339,17 +339,17 @@ class CandlePaintObject<T extends CandleIndicator>
         showThousands: true,
       );
 
-      final tickText = settingConfig.tickText;
+      final ticksText = settingConfig.ticksText;
 
       canvas.drawTextArea(
         offset: Offset(
           dx,
-          dy - tickText.areaHeight, // 绘制在刻度线之上
+          dy - ticksText.areaHeight, // 绘制在刻度线之上
         ),
         drawDirection: DrawDirection.rtl,
         drawableRect: drawableRect,
         text: text,
-        textConfig: tickText,
+        textConfig: ticksText,
       );
     }
   }
@@ -536,9 +536,9 @@ class CandlePaintObject<T extends CandleIndicator>
   //   final time = model.formatDateTimeByTimeBar(timeBar);
   //   // final time = formatyyMMddHHMMss(model.dateTime);
 
-  //   final tickText = crossConfig.tickText;
+  //   final ticksText = crossConfig.ticksText;
 
-  //   final dyCenterOffset = (indicator.padding.bottom - tickText.areaHeight) / 2;
+  //   final dyCenterOffset = (indicator.padding.bottom - ticksText.areaHeight) / 2;
   //   canvas.drawTextArea(
   //     offset: Offset(
   //       offset.dx,
@@ -546,7 +546,7 @@ class CandlePaintObject<T extends CandleIndicator>
   //     ),
   //     drawDirection: DrawDirection.center,
   //     text: time,
-  //     textConfig: tickText,
+  //     textConfig: ticksText,
   //   );
   // }
 

@@ -84,13 +84,13 @@ class DrawParams {
   /// 箭头(ArrowLine)长度
   final double arrowsLen;
 
-  /// 价值线(priceLine)的文本配置, 如果不指定, 使用DrawConfig的tickText.
+  /// 价值线(priceLine)的文本配置, 如果不指定, 使用DrawConfig的ticksText.
   final TextAreaConfig? priceText;
 
   /// 价值线(priceLine)的文本区域相对于价值线的margin
   final EdgeInsets priceTextMargin;
 
-  /// 趋势线角度(TrendAngle)的文本配置, 如果不指定, 使用DrawConfig的tickText.
+  /// 趋势线角度(TrendAngle)的文本配置, 如果不指定, 使用DrawConfig的ticksText.
   final TextAreaConfig? angleText;
 
   /// 趋势线角度(TrendAngle)的基线长度

@@ -19,7 +19,7 @@ import '../extension/export.dart';
 import '../framework/draw/overlay.dart';
 
 class TrendLineDrawObject extends DrawObject {
-  TrendLineDrawObject(super.overlay);
+  TrendLineDrawObject(super.overlay, super.config);
 
   @override
   bool hitTest(IDrawContext context, Offset position, {bool isMove = false}) {
@@ -34,7 +34,7 @@ class TrendLineDrawObject extends DrawObject {
     }
 
     final distance = position.distanceToLine(first, second);
-    return distance <= context.config.hitTestMinDistance;
+    return distance <= hitTestMinDistance;
   }
 
   @override

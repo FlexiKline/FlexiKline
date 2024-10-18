@@ -13,7 +13,7 @@ abstract class _$CrossConfigCWProxy {
 
   CrossConfig crosspoint(PointConfig crosspoint);
 
-  CrossConfig tickText(TextAreaConfig tickText);
+  CrossConfig ticksText(TextAreaConfig ticksText);
 
   CrossConfig spacing(double spacing);
 
@@ -31,7 +31,7 @@ abstract class _$CrossConfigCWProxy {
     bool? enable,
     LineConfig? crosshair,
     PointConfig? crosspoint,
-    TextAreaConfig? tickText,
+    TextAreaConfig? ticksText,
     double? spacing,
     bool? showLatestTipsInBlank,
     bool? moveByCandleInBlank,
@@ -55,7 +55,7 @@ class _$CrossConfigCWProxyImpl implements _$CrossConfigCWProxy {
       this(crosspoint: crosspoint);
 
   @override
-  CrossConfig tickText(TextAreaConfig tickText) => this(tickText: tickText);
+  CrossConfig ticksText(TextAreaConfig ticksText) => this(ticksText: ticksText);
 
   @override
   CrossConfig spacing(double spacing) => this(spacing: spacing);
@@ -80,7 +80,7 @@ class _$CrossConfigCWProxyImpl implements _$CrossConfigCWProxy {
     Object? enable = const $CopyWithPlaceholder(),
     Object? crosshair = const $CopyWithPlaceholder(),
     Object? crosspoint = const $CopyWithPlaceholder(),
-    Object? tickText = const $CopyWithPlaceholder(),
+    Object? ticksText = const $CopyWithPlaceholder(),
     Object? spacing = const $CopyWithPlaceholder(),
     Object? showLatestTipsInBlank = const $CopyWithPlaceholder(),
     Object? moveByCandleInBlank = const $CopyWithPlaceholder(),
@@ -99,10 +99,10 @@ class _$CrossConfigCWProxyImpl implements _$CrossConfigCWProxy {
               ? _value.crosspoint
               // ignore: cast_nullable_to_non_nullable
               : crosspoint as PointConfig,
-      tickText: tickText == const $CopyWithPlaceholder() || tickText == null
-          ? _value.tickText
+      ticksText: ticksText == const $CopyWithPlaceholder() || ticksText == null
+          ? _value.ticksText
           // ignore: cast_nullable_to_non_nullable
-          : tickText as TextAreaConfig,
+          : ticksText as TextAreaConfig,
       spacing: spacing == const $CopyWithPlaceholder() || spacing == null
           ? _value.spacing
           // ignore: cast_nullable_to_non_nullable
@@ -138,8 +138,8 @@ CrossConfig _$CrossConfigFromJson(Map<String, dynamic> json) => CrossConfig(
       crosshair: LineConfig.fromJson(json['crosshair'] as Map<String, dynamic>),
       crosspoint:
           PointConfig.fromJson(json['crosspoint'] as Map<String, dynamic>),
-      tickText:
-          TextAreaConfig.fromJson(json['tickText'] as Map<String, dynamic>),
+      ticksText:
+          TextAreaConfig.fromJson(json['ticksText'] as Map<String, dynamic>),
       spacing: (json['spacing'] as num).toDouble(),
       showLatestTipsInBlank: json['showLatestTipsInBlank'] as bool? ?? true,
       moveByCandleInBlank: json['moveByCandleInBlank'] as bool? ?? false,
@@ -150,7 +150,7 @@ Map<String, dynamic> _$CrossConfigToJson(CrossConfig instance) =>
       'enable': instance.enable,
       'crosshair': instance.crosshair.toJson(),
       'crosspoint': instance.crosspoint.toJson(),
-      'tickText': instance.tickText.toJson(),
+      'ticksText': instance.ticksText.toJson(),
       'spacing': instance.spacing,
       'showLatestTipsInBlank': instance.showLatestTipsInBlank,
       'moveByCandleInBlank': instance.moveByCandleInBlank,

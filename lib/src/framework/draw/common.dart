@@ -15,11 +15,12 @@
 part of 'overlay.dart';
 
 typedef DrawObjectBuilder<T extends Overlay, R extends DrawObject<T>> = R
-    Function(T overlay);
+    Function(T overlay, DrawConfig config);
 
 abstract interface class IDrawType {
   int get steps;
   String get id;
+  // TODO: 增加groupId进行分组
 }
 
 /// 自定义绘制类型

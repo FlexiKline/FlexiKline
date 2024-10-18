@@ -211,10 +211,10 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
       left: _position.dx,
       top: _position.dy,
       child: ValueListenableBuilder(
-        valueListenable: widget.controller.drawEditingListener,
-        builder: (context, value, child) {
+        valueListenable: widget.controller.drawStateLinstener,
+        builder: (context, state, child) {
           return Visibility(
-            visible: value,
+            visible: state.isEditing,
             child: GestureDetector(
               onPanUpdate: (DragUpdateDetails details) {
                 /// 计算drawToolbar在canvasRect中的位置; 保证其始终在canvasRect中
@@ -253,7 +253,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
       child: ValueListenableBuilder(
         valueListenable: widget.controller.drawStateLinstener,
         builder: (context, state, child) {
-          final overlay = state.overlay;
+          final overlay = state.object;
 
           /// 如果overlay是已完成, 且当前正在移动某个绘制点, 则展示放大镜, 否则不展示.
           if (overlay == null ||
@@ -355,7 +355,7 @@ class DrawPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    controller.drawStateTick(canvas, size);
+    controller.drawStateAxisTicksText(canvas, size);
     try {
       /// 保存画布状态
       canvas.save();

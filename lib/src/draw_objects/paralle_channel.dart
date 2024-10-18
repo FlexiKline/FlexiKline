@@ -20,7 +20,7 @@ import '../framework/draw/overlay.dart';
 import '../utils/vector_util.dart';
 
 class ParalleChannelDrawObject extends DrawObject {
-  ParalleChannelDrawObject(super.overlay);
+  ParalleChannelDrawObject(super.overlay, super.config);
 
   Parallelogram? getParalleChannel() {
     final points = allPoints;
@@ -34,7 +34,7 @@ class ParalleChannelDrawObject extends DrawObject {
   }
 
   @override
-  Rect? getTickMarksBounds() {
+  Rect? getTicksMarksBounds() {
     final channel = getParalleChannel();
     if (channel == null) return null;
     return channel.bounds;
@@ -87,7 +87,7 @@ class ParalleChannelDrawObject extends DrawObject {
       Path()..addPolygon(channel.points, true),
       line.linePaint
         ..color = line.paint.color.withOpacity(
-          context.config.drawParams.paralleBgOpacity,
+          drawParams.paralleBgOpacity,
         )
         ..style = PaintingStyle.fill,
     );

@@ -61,7 +61,7 @@
     "candleLineWidth": 0.9583088667058134,
     "firstCandleInitOffset": 76.66470933646507,
     "showYAxisTick": true,
-    "tickText": {
+    "ticksText": {
       "style": {
         "color": "0xff949494",
         "fontSize": 9.583088667058133,
@@ -110,7 +110,7 @@
       "width": 5.74985320023488,
       "color": "0xff000000"
     },
-    "tickText": {
+    "ticksText": {
       "style": {
         "color": "0xffffffff",
         "fontSize": 9.583088667058133,

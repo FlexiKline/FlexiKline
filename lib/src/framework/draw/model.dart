@@ -25,7 +25,7 @@ class Point {
     this.patch = 0,
   });
 
-  static Point pointer(int index, Offset offset) {
+  factory Point.pointer(int index, Offset offset) {
     assert(index >= 0, 'invalid index($index)');
     assert(offset.isFinite, 'invalid offset($offset)');
     return Point(
@@ -50,13 +50,14 @@ class Point {
   double patch;
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is Point &&
-          runtimeType == other.runtimeType &&
-          index == other.index &&
-          ts == other.ts &&
-          value == other.value;
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is Point &&
+            runtimeType == other.runtimeType &&
+            index == other.index &&
+            ts == other.ts &&
+            value == other.value);
+  }
 
   @override
   int get hashCode =>
@@ -96,46 +97,18 @@ class Overlay implements Comparable<Overlay> {
   final int id;
   final String key;
   final IDrawType type;
-  final List<Point?> points;
 
+  @protected
+  final List<Point?> points;
+  @protected
   int zIndex;
+  @protected
   bool lock;
   MagnetMode mode;
   @protected
   LineConfig line;
-  LineConfig get lineConfig => line;
-
-  /// 当前指针位置
-  Point? _pointer;
-  Point? get pointer => _pointer;
-
-  /// 当前overlay是否在移动中
-  bool _moving = false;
-  bool get moving => _moving;
-
-  DrawObject? _object;
-  DrawObject? get object => _object;
-
-  bool get hasPointer => pointer != null;
 
   int get steps => points.length;
-
-  /// 已开始绘制
-  bool get isStarted => points.first == null;
-
-  /// 最开始的状态, 即所有points均为空
-  bool get isInitial => points.fold(true, (ret, item) => ret && item == null);
-
-  /// 当前绘制中
-  bool get isDrawing => points.fold(false, (ret, item) => ret || item == null);
-
-  /// 即将完成
-  bool get isReady {
-    return pointer != null && pointer!.index == steps - 1;
-  }
-
-  /// 当前绘制已完成, 修正中.
-  bool get isEditing => points.fold(true, (ret, item) => ret && item != null);
 
   int get nextIndex {
     final index = points.indexWhere((p) => p == null);
@@ -157,48 +130,6 @@ class Overlay implements Comparable<Overlay> {
       return Range(start, end);
     }
     return null;
-  }
-
-  /// 添加指针[p]到[points]中, 并准备下一个指针
-  void addPointer(Point p) {
-    final index = p.index;
-    assert(index >= 0 && index < steps, "point is invalid");
-    assert(points[index] == null, 'The points[$index] is not empyt!');
-    points[index] = p;
-
-    if (index + 1 >= steps) {
-      _pointer = null;
-    } else {
-      _pointer = Point.pointer(index + 1, p.offset);
-    }
-  }
-
-  void confirmPointer() {
-    if (pointer == null) return;
-    final index = pointer!.index;
-    assert(index >= 0 && index < steps, "point is invalid");
-    assert(points[index] != null, 'The points[$index] is not empyt!');
-    points[index] = pointer;
-    _pointer = null;
-    _moving = false;
-  }
-
-  void setPointer(Point? p) {
-    if (p != null && p.index >= 0 && p.index < steps) {
-      _pointer = p;
-    } else {
-      _pointer = null;
-    }
-  }
-
-  void setMoveing(bool isMoving) {
-    _moving = isMoving;
-  }
-
-  @mustCallSuper
-  void dispose() {
-    _object?.dispose();
-    _object = null;
   }
 
   @override
@@ -230,7 +161,7 @@ class Overlay implements Comparable<Overlay> {
 
   @override
   String toString() {
-    return "Overlay(id:$id, key:$key, type:$type) > pointer:$pointer < points:$points";
+    return "Overlay(id:$id, key:$key, type:$type) > points:$points";
   }
 
   factory Overlay.fromJson(Map<String, dynamic> json) =>

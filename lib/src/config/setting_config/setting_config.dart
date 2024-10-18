@@ -59,7 +59,7 @@ class SettingConfig {
     this.showYAxisTick = true,
 
     /// 全局默认的刻度值配置.
-    required this.tickText,
+    required this.ticksText,
 
     /// 副图配置
     // 副区的指标图最大数量
@@ -114,7 +114,7 @@ class SettingConfig {
   final bool showYAxisTick;
 
   /// 全局默认的刻度值配置.
-  final TextAreaConfig tickText;
+  final TextAreaConfig ticksText;
 
   // 副区的指标图最大数量
   final int subChartMaxCount;

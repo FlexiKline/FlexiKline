@@ -20,7 +20,7 @@ import '../framework/draw/overlay.dart';
 import '../utils/vector_util.dart';
 
 class HorizontalRayLineDrawObject extends DrawObject {
-  HorizontalRayLineDrawObject(super.overlay);
+  HorizontalRayLineDrawObject(super.overlay, super.config);
 
   @override
   bool hitTest(IDrawContext context, Offset position, {bool isMove = false}) {
@@ -35,17 +35,17 @@ class HorizontalRayLineDrawObject extends DrawObject {
     }
 
     final distance = position.distanceToRayLine(first, second);
-    return distance <= context.config.hitTestMinDistance;
+    return distance <= hitTestMinDistance;
   }
 
   @override
-  void onUpdatePoint(Point point, Offset offset, {bool isMove = false}) {
+  void onUpdateDrawPoint(Point point, Offset offset, {bool isMove = false}) {
     // if (point.index == 0) point.offset = offset;
     final first = points.firstOrNull?.offset;
     if (first == null) {
-      super.onUpdatePoint(point, offset);
+      super.onUpdateDrawPoint(point, offset);
     } else {
-      super.onUpdatePoint(point, Offset(offset.dx, first.dy));
+      super.onUpdateDrawPoint(point, Offset(offset.dx, first.dy));
     }
   }
 

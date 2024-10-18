@@ -19,7 +19,7 @@ import '../extension/export.dart';
 import '../framework/draw/overlay.dart';
 
 class ArrowLineDrawObject extends DrawObject {
-  ArrowLineDrawObject(super.overlay);
+  ArrowLineDrawObject(super.overlay, super.config);
 
   @override
   bool hitTest(IDrawContext context, Offset position, {bool isMove = false}) {
@@ -34,7 +34,7 @@ class ArrowLineDrawObject extends DrawObject {
     }
 
     final distance = position.distanceToRayLine(first, second);
-    return distance <= context.config.hitTestMinDistance;
+    return distance <= hitTestMinDistance;
   }
 
   @override
@@ -59,10 +59,9 @@ class ArrowLineDrawObject extends DrawObject {
     // 画箭头
     final drawRect = context.mainRect;
     if (drawRect.contains(second)) {
-      final params = context.config.drawParams;
-      final vector = (first - second).normalized() * params.arrowsLen;
-      final arrow1 = vector.rotate(params.arrowsRadians) + second;
-      final arrow2 = vector.rotate(-params.arrowsRadians) + second;
+      final vector = (first - second).normalized() * drawParams.arrowsLen;
+      final arrow1 = vector.rotate(drawParams.arrowsRadians) + second;
+      final arrow2 = vector.rotate(-drawParams.arrowsRadians) + second;
 
       canvas.drawLineByConfig(
         Path()..addPolygon([second, arrow1], false),

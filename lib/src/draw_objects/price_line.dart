@@ -20,14 +20,10 @@ import '../extension/export.dart';
 import '../framework/draw/overlay.dart';
 
 class PriceLineDrawObject extends DrawObject {
-  PriceLineDrawObject(super.overlay);
+  PriceLineDrawObject(super.overlay, super.config);
 
   @override
-  bool hitTest(
-    IDrawContext context,
-    Offset position, {
-    bool isMove = false,
-  }) {
+  bool hitTest(IDrawContext context, Offset position, {bool isMove = false}) {
     assert(
       points.length == 1,
       'HorizontalLine only takes one point, but it has ${points.length}',
@@ -42,7 +38,7 @@ class PriceLineDrawObject extends DrawObject {
       first,
       Offset(mainRect.right, first.dy),
     );
-    return distance <= context.config.hitTestMinDistance;
+    return distance <= hitTestMinDistance;
   }
 
   @override
@@ -72,20 +68,19 @@ class PriceLineDrawObject extends DrawObject {
     // 画价值文本区域
     final value = context.dyToValue(first.dy);
     if (value != null) {
-      final valTxt = formatValueTick(
+      final valTxt = formatValueTicksText(
         value,
         precision: context.curKlineData.precision,
       );
-      // if (valTxt.isEmpty) return;
-      final tickText = context.config.drawParams.priceText ?? getTicksTextConfig(context.config);
-      final margin = context.config.drawParams.priceTextMargin;
+      final ticksText = drawParams.priceText ?? ticksTextConfig;
+      final margin = drawParams.priceTextMargin;
       canvas.drawTextArea(
         offset: Offset(
           first.dx + margin.left,
-          first.dy - tickText.areaHeight - margin.bottom,
+          first.dy - ticksText.areaHeight - margin.bottom,
         ),
         text: valTxt,
-        textConfig: tickText,
+        textConfig: ticksText,
         drawDirection: DrawDirection.ltr,
         // drawableRect: drawableRect,
       );

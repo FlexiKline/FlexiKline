@@ -34,7 +34,7 @@ mixin DrawBinding
   void init() {
     super.init();
     logd("init draw");
-    _overlayManager = OverlayManager(
+    _drawObjectManager = OverlayDrawObjectManager(
       configuration: configuration,
       logger: loggerDelegate,
     );
@@ -44,15 +44,12 @@ mixin DrawBinding
   void initState() {
     super.initState();
     logd('initState draw');
-    _drawStateListener.addListener(() {
-      // 子状态更新
-      final state = _drawStateListener.value;
-      _drawTypeListener.value = state.overlay?.type;
-      _drawEditingListener.value = state.isEditing;
-      _drawLineStyleListener.value = state.overlay?.lineConfig;
-    });
+    _drawLineStyleListener = KlineStateNotifier(drawConfig.drawLine);
     candleRequestListener.addListener(() {
-      _overlayManager.onChangeCandleRequest(candleRequestListener.value);
+      _drawObjectManager.onChangeCandleRequest(
+        candleRequestListener.value,
+        drawConfig,
+      );
     });
   }
 
@@ -62,16 +59,16 @@ mixin DrawBinding
     logd('dispose draw');
     _drawLineStyleListener.dispose();
     _drawTypeListener.dispose();
-    _drawEditingListener.dispose();
     _drawStateListener.dispose();
     _repaintDraw.dispose();
-    _overlayManager.disposeSyncAllOverlay();
+    _drawObjectManager.dispose();
   }
 
-  @override
-  DrawConfig get config => drawConfig;
-
-  final ValueNotifier<int> _repaintDraw = ValueNotifier(0);
+  late final OverlayDrawObjectManager _drawObjectManager;
+  late final KlineStateNotifier<LineConfig> _drawLineStyleListener;
+  final _repaintDraw = ValueNotifier(0);
+  final _drawStateListener = KlineStateNotifier(DrawState.exited());
+  final _drawTypeListener = ValueNotifier<IDrawType?>(null);
 
   @override
   Listenable get repaintDraw => _repaintDraw;
@@ -80,34 +77,35 @@ mixin DrawBinding
 
   @override
   void markRepaintDraw() {
-    if (drawState.isOngoing || _overlayManager.hasOverlay) {
+    if (drawState.isOngoing || _drawObjectManager.hasObject) {
       _markRepaint();
     }
   }
 
-  Iterable<IDrawType> get supportDrawTypes => _overlayManager.supportDrawTypes;
+  Iterable<IDrawType> get supportDrawTypes {
+    return _drawObjectManager.supportDrawTypes;
+  }
 
   /// 自定义overlay绘制对象构建器
-  void registerOverlayDrawObjectBuilder(
+  void registerDrawOverlayObjectBuilder(
     IDrawType type,
     DrawObjectBuilder builder,
   ) {
-    _overlayManager.registerOverlayDrawObjectBuilder(type, builder);
+    _drawObjectManager.registerDrawOverlayObjectBuilder(type, builder);
   }
-
-  final _drawStateListener = KlineStateNotifier(DrawState.exited());
-  final _drawTypeListener = ValueNotifier<IDrawType?>(null);
-  final _drawEditingListener = ValueNotifier(false);
-  final _drawLineStyleListener = KlineStateNotifier<LineConfig?>(null);
 
   /// 主动通知绘制状态变化
   void _notifyDrawStateChange() => _drawStateListener.notifyListeners();
 
   @override
   DrawState get drawState => _drawStateListener.value;
-  // DrawState get _drawState => _drawStateListener.value;
   set _drawState(DrawState state) {
     _drawStateListener.value = state;
+    // 子状态更新
+    _drawTypeListener.value = state.object?.type;
+    if (state.object != null) {
+      _drawLineStyleListener.value = state.object!.line;
+    }
   }
 
   @override
@@ -117,56 +115,64 @@ mixin DrawBinding
   ValueListenable<IDrawType?> get drawTypeListener => _drawTypeListener;
 
   @override
-  ValueListenable<bool> get drawEditingListener => _drawEditingListener;
-
-  ValueListenable<LineConfig?> get drawLineStyleListener =>
+  ValueListenable<LineConfig> get drawLineStyleListener =>
       _drawLineStyleListener;
 
-  late final OverlayManager _overlayManager;
-
   @override
-  void onDrawPrepare() {
+  void prepareDraw() {
     // 如果是非退出状态, 则无需变更状态.
     if (!drawState.isExited) return;
     _drawState = const Prepared();
     cancelCross();
   }
 
+  @override
+  void exitDraw() {
+    drawState.object?.dispose();
+    _drawState = const Exited();
+    _markRepaint();
+  }
+
   /// 开始绘制新的[type]类型
   /// 1. 重置状态为Drawing
   /// 2. 初始化第一个Point的位置为[mainRect]中心
   @override
-  void onDrawStart(IDrawType type) {
+  void startDraw(IDrawType type) {
     cancelCross();
-    if (drawState.overlay?.type == type) {
+    if (drawState.object?.type == type) {
       _drawState = const Prepared();
     } else {
-      final overlay = _overlayManager.createOverlay(type, config.crosshair);
-      // 初始指针为[mainRect]中心
-      overlay.setPointer(Point.pointer(0, mainRect.center));
-      _drawState = DrawState.draw(overlay);
+      final object = _drawObjectManager.createDrawObject(
+        type: type,
+        config: drawConfig,
+      );
+      if (object != null) {
+        // 初始指针为[mainRect]中心
+        object.setPointer(Point.pointer(0, mainRect.center));
+        _drawState = DrawState.draw(object);
+      } else {
+        _drawState = const Prepared();
+      }
     }
     _markRepaint();
   }
 
   /// 更新当前指针坐标
-  @override
   void onDrawUpdate(GestureData data) {
     if (!drawState.isDrawing) return;
-    final overlay = drawState.overlay!;
-    final pointer = overlay.pointer;
+    final object = drawState.object!;
+    final pointer = object.pointer;
     if (pointer == null) {
       assert(() {
-        logw('onDrawUpdate drawing ${overlay.type}, pointer is null!');
+        logw('onDrawUpdate drawing ${object.type}, pointer is null!');
         return true;
       }());
       return;
     }
-    final object = _overlayManager.getDrawObject(overlay);
-    object?.onUpdatePoint(
+    object.onUpdateDrawPoint(
       pointer,
       pointer.offset + data.delta,
-    ); // TODO: 考虑对指针的更新封装到overlay中.
+    );
     _markRepaint();
   }
 
@@ -178,53 +184,52 @@ mixin DrawBinding
   ///   2.3. 将overlay加入到_overlayManager中进行管理.
   /// 3. 当状态为Editing时:
   ///   3.1. 更新pointer到points中, 并清空pointer(等待下一次的选择)
-  @override
   bool onDrawConfirm(GestureData data) {
-    final overlay = drawState.overlay;
-    if (overlay == null) return false;
+    final object = drawState.object;
+    if (object == null) return false;
 
     bool result = false;
-    if (overlay.isDrawing) {
-      Point? pointer = overlay.pointer;
+    if (object.isDrawing) {
+      Point? pointer = object.pointer;
       if (pointer == null) {
         // 可能永远不会触发
-        final index = overlay.nextIndex;
+        final index = object.nextIndex;
         pointer = Point.pointer(index, data.offset);
       }
 
-      final isOk = updatePointByOffset(pointer);
+      final isOk = updateDrawPointByOffset(pointer);
       if (!isOk) {
         logw('onDrawConfirm updatePointer failed! pointer:$pointer');
         return false;
       }
-      overlay.addPointer(pointer);
+      object.addPointer(pointer);
 
-      if (overlay.isEditing) {
-        logi('onDrawConfirm ${overlay.type} draw completed!');
+      if (object.isEditing) {
+        logi('onDrawConfirm ${object.type} draw completed!');
         // 绘制完成, 使用drawLine配置绘制实线.
-        _drawState = Editing(overlay);
-        _overlayManager.addOverlay(overlay);
-        final object = _overlayManager.getDrawObject(overlay);
-        object?.setDrawLineConfig(config.drawLine);
+        _drawObjectManager.addDrawObject(object);
+        object.setDrawLineConfig(drawConfig.drawLine);
+        _drawState = Editing(object);
+        // TODO: 增加object接口, 校正所有绘制点
         result = false;
       } else {
         result = true;
       }
-    } else if (overlay.isEditing) {
-      final pointer = overlay.pointer;
+    } else if (object.isEditing) {
+      final pointer = object.pointer;
       if (pointer == null) {
         // 当前处于编辑状态, 但是pointer又没有被赋值, 此时点击事件, 为确认完成.
-        _overlayManager.addOverlay(overlay);
+        _drawObjectManager.addDrawObject(object);
         // TODO: 增加object接口, 校正所有绘制点
         _drawState = const Prepared();
         result = false;
       } else {
-        final isOk = updatePointByOffset(pointer);
+        final isOk = updateDrawPointByOffset(pointer);
         if (!isOk) {
           logw('onDrawConfirm updatePointer failed! pointer:$pointer');
           return false;
         }
-        overlay.confirmPointer();
+        object.confirmPointer();
         result = false;
       }
     }
@@ -235,114 +240,96 @@ mixin DrawBinding
 
   bool onDrawMoveStart(GestureData data) {
     if (!drawState.isEditing) return false; // 未完成的暂不允许移动
-    final overlay = drawState.overlay!;
-    final object = _overlayManager.getDrawObject(overlay);
-    if (object == null) {
-      assert(() {
-        loge('onDrawMoveStart Failed to create Object for ${overlay.type}');
-        return true;
-      }());
-      return false;
-    }
+    final object = drawState.object!;
 
     final position = data.offset;
     // 检查是否在某个绘制点上
     final point = object.hitTestPoint(this, position);
     if (point != null) {
       logd('onDrawMoveStart index:${point.index} point:$point');
-      overlay.setPointer(point);
-      overlay.setMoveing(true);
+      object.setPointer(point);
+      object.setMoveing(true);
       _notifyDrawStateChange();
       _markRepaint();
       return true;
     } else if (object.hitTest(this, position, isMove: true) == true) {
       // 检查当前焦点是否命中Overlay
-      overlay.setPointer(null);
-      overlay.setMoveing(true);
+      object.setPointer(null);
+      object.setMoveing(true);
       _notifyDrawStateChange();
       _markRepaint();
       return true;
     }
-
     return false;
   }
 
   /// 移动Overlay
   void onDrawMoveUpdate(GestureData data) {
     if (!drawState.isEditing) return; // 未完成的暂不允许移动
-    final overlay = drawState.overlay!;
+    final object = drawState.object!;
 
     final delta = data.delta;
-    final object = _overlayManager.getDrawObject(overlay);
-    if (overlay.pointer != null) {
+    if (object.pointer != null) {
       // 当前移动一个编辑状态的Overlay的某个绘制点指针时,
       // 需要通过[DrawObject]的`onUpdatePoint`接口来校正offset.
-      object?.onUpdatePoint(
-        overlay.pointer!,
-        overlay.pointer!.offset + delta,
+      object.onUpdateDrawPoint(
+        object.pointer!,
+        object.pointer!.offset + delta,
         isMove: true,
       );
     } else {
-      object?.onMoveOverlay(delta);
+      object.onMoveDrawObject(delta);
     }
-    _notifyDrawStateChange();
     _markRepaint();
   }
 
   void onDrawMoveEnd() {
     if (!drawState.isEditing) return; // 未完成的暂不允许移动
-    final overlay = drawState.overlay!;
+    final object = drawState.object!;
 
-    final pointer = overlay.pointer;
+    final pointer = object.pointer;
     if (pointer != null) {
       logd('onDrawMoveEnd index:${pointer.index} point:$pointer');
-      overlay.confirmPointer();
+      object.confirmPointer();
     }
-    for (var point in overlay.points) {
+    for (var point in object.points) {
       if (point != null) {
-        updatePointByOffset(point);
+        updateDrawPointByOffset(point);
       }
     }
-    overlay.setMoveing(false);
+    object.setMoveing(false);
     _notifyDrawStateChange();
     _markRepaint();
   }
 
-  @override
-  void onDrawSelect(Overlay overlay) {
-    // if (!drawState.isPrepared) return;
-    _drawState = DrawState.edit(overlay);
+  void onDrawSelect(DrawObject object) {
+    _drawState = DrawState.edit(object);
     cancelCross();
     _markRepaint();
   }
 
-  @override
-  void onDrawExit() {
-    _drawState = const Exited();
-    _markRepaint();
-  }
-
   ////// 操作 //////
-  void onDrawDelete({Overlay? overlay}) {
-    if (overlay != null) {
-      if (_overlayManager.removeOverlay(overlay)) {
+  /// 删除[object]; 如果不指定, 删除当前绘制[drawState]的object.
+  void deleteDrawObject({DrawObject? object}) {
+    if (object != null) {
+      if (_drawObjectManager.removeDrawObject(object)) {
         _markRepaint();
       }
     } else {
-      overlay = drawState.overlay;
-      if (overlay != null) {
-        _overlayManager.removeOverlay(overlay);
+      object = drawState.object;
+      if (object != null) {
+        _drawObjectManager.removeDrawObject(object);
         _drawState = const Prepared();
         _markRepaint();
       }
     }
   }
 
-  void cleanAllDrawOverlay() {
-    _overlayManager.cleanAllOverlay();
-    final overlay = drawState.overlay;
-    if (overlay != null) {
-      _overlayManager.removeOverlay(overlay);
+  void deleteAllDrawObject() {
+    _drawObjectManager.cleanAllDrawObject();
+    final object = drawState.object;
+    if (object != null) {
+      _drawObjectManager.removeDrawObject(object);
       _drawState = const Prepared();
     }
     _markRepaint();
@@ -353,7 +340,7 @@ mixin DrawBinding
     double? strokeWidth,
     LineType? lineType,
   }) {
-    final object = drawState.overlay?.object;
+    final object = drawState.object;
     if (object == null) return false;
     if (object.changeDrawLineStyle(
       color: color,
@@ -367,11 +354,9 @@ mixin DrawBinding
     return false;
   }
 
-  ////// 绘制 //////
-
   /// 以当前蜡烛图绘制参数为基础, 将绘制参数[point]转换Offset坐标.
   @override
-  bool updatePointByValue(Point point, {int? ts, BagNum? value}) {
+  bool updateDrawPointByValue(Point point, {int? ts, BagNum? value}) {
     value ??= point.value;
     final dy = valueToDy(value);
     if (dy == null) return false;
@@ -390,7 +375,7 @@ mixin DrawBinding
 
   /// 以当前蜡烛图绘制参数为基础, 将绘制参数[offset]转换Point坐标.
   @override
-  bool updatePointByOffset(Point point, {Offset? offset}) {
+  bool updateDrawPointByOffset(Point point, {Offset? offset}) {
     offset ??= point.offset;
     final index = dxToIndex(offset.dx);
     if (index == null) return false;
@@ -408,37 +393,39 @@ mixin DrawBinding
 
   /// 测试[position]位置上是否有命中的Overly.
   @override
-  Overlay? hitTestOverlay(Offset position) {
-    assert(position.isFinite, 'hitTestOverlay($position) position is invalid!');
-    for (var overlay in _overlayManager.overlayList) {
-      if (overlay.object?.hitTest(this, position) == true) {
-        return overlay;
+  DrawObject? hitTestDrawObject(Offset position) {
+    assert(
+      position.isFinite,
+      'hitTestDrawObject($position) position is invalid!',
+    );
+    for (var object in _drawObjectManager.overlayObjectList) {
+      if (object.hitTest(this, position)) {
+        return object;
       }
     }
     return null;
   }
+
+  ////// 绘制 //////
 
   /// 绘制Draw图层
   @override
   void paintDraw(Canvas canvas, Size size) {
     if (!drawConfig.enable) return;
 
-    /// 首先绘制已完成的overlayList
-    drawOverlayList(canvas, size);
+    /// 首先绘制已完成的overlayObjectList
+    drawOverlayObjectList(canvas, size);
 
     /// 最后绘制当前处于Drawing或Editing状态的Overlay.
-    drawStateOverlay(canvas, size);
+    drawStateOverlayObject(canvas, size);
   }
 
   /// 绘制已完成的OverlayList
-  void drawOverlayList(Canvas canvas, Size size) {
-    final stateOverlay = drawState.overlay;
-    for (var overlay in _overlayManager.overlayList) {
+  void drawOverlayObjectList(Canvas canvas, Size size) {
+    final stateObject = drawState.object;
+    for (var object in _drawObjectManager.overlayObjectList) {
       /// 如果是当前编辑的overlay不用绘制
-      if (stateOverlay == overlay) continue;
-
-      DrawObject? object = _overlayManager.getDrawObject(overlay);
-      if (object == null) continue;
+      if (stateObject == object) continue;
 
       // TODO: 待优化, 仅在图表移动/缩放/数据源发生变化时, 才需要initPoint
       final succeed = object.initPoints(this);
@@ -448,52 +435,36 @@ mixin DrawBinding
     }
   }
 
-  void drawStateOverlay(Canvas canvas, Size size) {
-    final overlay = drawState.overlay;
-    if (overlay == null) return;
-    final object = _overlayManager.getDrawObject(overlay);
-    if (object == null) {
-      assert(() {
-        loge('drawStateOverlay Failed to create Object for ${overlay.type}');
-        return true;
-      }());
-      return;
-    }
+  void drawStateOverlayObject(Canvas canvas, Size size) {
+    final object = drawState.object;
+    if (object == null) return;
 
-    if (drawState is Editing && overlay.isEditing) {
+    if (drawState is Editing && object.isEditing) {
       object.draw(this, canvas, size);
       // 绘制编辑状态的overlay的points为圆圈.
       object.drawPoints(
         this,
         canvas,
-        isMoving: overlay.moving,
+        isMoving: object.moving,
       );
-    } else if (drawState is Drawing && overlay.isDrawing) {
+    } else if (drawState is Drawing && object.isDrawing) {
       object.drawing(this, canvas, size);
     }
   }
 
-  /// 绘制当前编辑/绘制中的Overlay的刻度
-  void drawStateTick(Canvas canvas, Size size) {
-    final overlay = drawState.overlay;
-    if (overlay == null) return;
-    final object = _overlayManager.getDrawObject(overlay);
-    if (object == null) {
-      assert(() {
-        loge('drawStateTick Failed to create Object for ${overlay.type}');
-        return true;
-      }());
-      return;
-    }
+  /// 绘制当前编辑/绘制中的Overlay的刻度文本
+  void drawStateAxisTicksText(Canvas canvas, Size size) {
+    final object = drawState.object;
+    if (object == null) return;
 
     /// 计算刻度坐标
-    Rect? bounds = object.getTickMarksBounds();
+    Rect? bounds = object.getTicksMarksBounds();
     if (bounds == null) {
-      logd('drawStateTick not draw point!');
+      logd('drawStateAxisTicksText not draw point!');
       return;
     }
 
-    // logd('drawStateTick bounds:$bounds');
-    object.drawTicks(this, canvas, bounds);
+    // logd('drawStateAxisTicksText bounds:$bounds');
+    object.drawAxisTicksText(this, canvas, bounds);
   }
 }

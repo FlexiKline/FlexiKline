@@ -21,7 +21,7 @@ import '../framework/draw/overlay.dart';
 import '../utils/export.dart';
 
 class FibFansDrawObject extends DrawObject {
-  FibFansDrawObject(super.overlay);
+  FibFansDrawObject(super.overlay, super.config);
 
   Rect? getRectangleRect() {
     final points = allPoints;
@@ -83,7 +83,6 @@ class FibFansDrawObject extends DrawObject {
     Offset B,
   ) {
     final mainRect = context.mainRect;
-    final drawParams = context.config.drawParams;
     final fibFansParams = drawParams.fibFansParams;
     final fibText = drawParams.fibText;
     final fibTextColor =

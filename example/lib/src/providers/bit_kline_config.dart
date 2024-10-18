@@ -102,7 +102,7 @@ class BitFlexiKlineLightTheme extends BaseBitFlexiKlineTheme {
   Color get textColor => const Color(0xFF111111);
 
   @override
-  Color get tickTextColor => const Color(0xFF949494);
+  Color get ticksTextColor => const Color(0xFF949494);
 
   @override
   Color get lastPriceTextColor => crossTextColor;
@@ -149,7 +149,7 @@ class BitFlexiKlineDarkTheme extends BaseBitFlexiKlineTheme {
   Color textColor = const Color(0xFFA0A0A0);
 
   @override
-  Color tickTextColor = const Color(0xFF949494);
+  Color ticksTextColor = const Color(0xFF949494);
 
   @override
   Color lastPriceTextColor = const Color(0xFF5F5F5F);

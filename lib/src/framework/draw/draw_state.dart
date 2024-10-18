@@ -23,31 +23,37 @@ part of 'overlay.dart';
 /// 状态流转
 /// prepared -> drawing -> modifying -> exited
 sealed class DrawState {
-  const DrawState(this.overlay);
+  const DrawState(this.object);
 
-  final Overlay? overlay;
+  final DrawObject? object;
 
   factory DrawState.prepared() => const Prepared();
 
   factory DrawState.exited() => const Exited();
 
-  factory DrawState.draw(Overlay overlay) {
-    assert(overlay.isInitial, 'Overlay is not initialized!');
-    return Drawing(overlay);
+  factory DrawState.draw(DrawObject object) {
+    assert(
+      object.isInitial,
+      'DrawObject${object.toString()} is not initialized',
+    );
+    return Drawing(object);
   }
 
-  factory DrawState.edit(Overlay overlay) {
-    assert(overlay.isEditing, 'Overlay is not finished drawing');
-    return Editing(overlay);
+  factory DrawState.edit(DrawObject object) {
+    assert(
+      object.isEditing,
+      'DrawObject${object.toString()} is not finished drawing',
+    );
+    return Editing(object);
   }
 
-  Point? get pointer => overlay?.pointer;
+  Point? get pointer => object?.pointer;
   bool get isExited => this is Exited;
   bool get isPrepared => this is Prepared;
   bool get isDrawing => this is Drawing;
   bool get isEditing => this is Editing;
   bool get isOngoing {
-    return overlay != null && (isDrawing || isEditing);
+    return object != null && (isDrawing || isEditing);
   }
 }
 
@@ -56,11 +62,11 @@ class Prepared extends DrawState {
 }
 
 class Drawing extends DrawState {
-  const Drawing(super.overlay);
+  const Drawing(super.object);
 }
 
 class Editing extends DrawState {
-  const Editing(super.overlay);
+  const Editing(super.object);
 }
 
 class Exited extends DrawState {

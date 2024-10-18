@@ -18,48 +18,8 @@ import 'package:flutter/foundation.dart';
 
 import '../config/export.dart';
 import '../data/kline_data.dart';
-import '../framework/draw/overlay.dart';
 import '../framework/export.dart';
 import '../model/export.dart';
-
-/// 手势事件的处理接口
-///
-/// 注: 必须首先调用super.handlexxx(); 向其他绘制模块传递手势数据.
-/// 否则, 此事件的处理仅限出当前绘制模块.
-/// 调用顺序参看kline_controller.dart的mixin倒序.
-// abstract interface class IGestureHandler {
-//   @mustCallSuper
-//   bool handleTap(GestureData data);
-
-//   @mustCallSuper
-//   void handleMove(GestureData data);
-//   @mustCallSuper
-//   void handleScale(GestureData data);
-
-//   @mustCallSuper
-//   void handleLongPress(GestureData data);
-//   @mustCallSuper
-//   void handleLongMove(GestureData data);
-// }
-
-// /// 手势事件的处理接口默认实现.
-// mixin GestureHanderImpl implements IGestureHandler {
-//   /// 点击事件
-//   ///
-//   /// 在触控设备上Gesture框架的设计:
-//   ///   1. 当返回true时, 代表Cross事件处理.
-//   ///   2. 当返回false时, 代表非Cross事件处理.
-//   @override
-//   bool handleTap(GestureData data) => false;
-//   @override
-//   void handleMove(GestureData data) {}
-//   @override
-//   void handleScale(GestureData data) {}
-//   @override
-//   void handleLongPress(GestureData data) {}
-//   @override
-//   void handleLongMove(GestureData data) {}
-// }
 
 //////// State ///////
 
@@ -245,51 +205,39 @@ abstract interface class ICross {
 abstract interface class IDraw {
   Listenable get repaintDraw;
 
-  /// DrawConfig
-  DrawConfig get config;
-
-  /// 绘制状态监听器
-  ValueListenable<DrawState> get drawStateLinstener;
+  void markRepaintDraw();
 
   /// 当前绘制DrawState
   DrawState get drawState;
 
+  /// 绘制状态监听器
+  ValueListenable<DrawState> get drawStateLinstener;
+
   /// 绘制类型监听器
   ValueListenable<IDrawType?> get drawTypeListener;
 
-  /// 当前是否在绘制和编辑图形中监听器
-  ValueListenable<bool> get drawEditingListener;
+  /// 当前绘制线样式监听
+  ValueListenable<LineConfig> get drawLineStyleListener;
 
   /// 测试[position]位置上是否命中当前已完成绘制操作的Overly.
-  Overlay? hitTestOverlay(Offset position);
+  DrawObject? hitTestDrawObject(Offset position);
 
   /// 以当前蜡烛图绘制参数为基础, 将绘制参数[point]转换Offset坐标.
-  bool updatePointByValue(Point point, {int? ts, BagNum? value});
+  bool updateDrawPointByValue(Point point, {int? ts, BagNum? value});
 
   /// 以当前蜡烛图绘制参数为基础, 将绘制参数[offset]转换Point坐标
-  bool updatePointByOffset(Point point, {Offset? offset});
+  bool updateDrawPointByOffset(Point point, {Offset? offset});
 
   void paintDraw(Canvas canvas, Size size);
 
-  void markRepaintDraw();
-
   /// 绘制准备
-  void onDrawPrepare();
+  void prepareDraw();
 
   /// 选择绘制图形
-  void onDrawStart(IDrawType type);
+  void startDraw(IDrawType type);
 
-  /// 绘制中更新坐标
-  void onDrawUpdate(GestureData data);
-
-  /// 绘制确认坐标
-  bool onDrawConfirm(GestureData data);
-
-  /// 选择已绘制的Overlay
-  void onDrawSelect(Overlay overlay);
-
-  /// 退出绘制: 此时无法选中/编辑(移动)已有Overlay; 也不可以新建Overlay.
-  void onDrawExit();
+  /// 退出绘制
+  void exitDraw();
 }
 
 /// DrawContext 绘制Overlay功能集合
@@ -304,9 +252,6 @@ abstract interface class IDrawContext implements ILogger {
   Rect get timeRect;
 
   KlineData get curKlineData;
-
-  /// DrawConfig
-  DrawConfig get config;
 
   /// 将dx转换为蜡烛数据.
   CandleModel? dxToCandle(double dx);
@@ -324,10 +269,10 @@ abstract interface class IDrawContext implements ILogger {
   BagNum? dyToValue(double dy, {bool check = false});
 
   /// 以当前蜡烛图绘制参数为基础, 将绘制参数[point]转换Offset坐标.
-  bool updatePointByValue(Point point, {int? ts, BagNum? value});
+  bool updateDrawPointByValue(Point point, {int? ts, BagNum? value});
 
   /// 以当前蜡烛图绘制参数为基础, 将绘制参数[offset]转换Point坐标
-  bool updatePointByOffset(Point point, {Offset? offset});
+  bool updateDrawPointByOffset(Point point, {Offset? offset});
 }
 
 /// Grid图层API

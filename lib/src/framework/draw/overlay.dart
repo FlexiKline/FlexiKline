@@ -37,4 +37,5 @@ part 'draw_state.dart';
 part 'model.dart';
 part 'manager.dart';
 part 'object.dart';
+part 'object_helper.dart';
 part 'overlay.g.dart';

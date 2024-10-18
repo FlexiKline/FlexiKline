@@ -92,7 +92,7 @@ class TestFlexiKlineTheme implements IFlexiKlineTheme {
   Color textColor = const Color(0xFF000000);
 
   @override
-  Color tickTextColor = const Color(0xFF949494);
+  Color ticksTextColor = const Color(0xFF949494);
 
   @override
   Color lastPriceTextColor = const Color(0xFF5F5F5F);

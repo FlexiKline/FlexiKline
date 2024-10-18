@@ -19,7 +19,7 @@ import '../extension/export.dart';
 import 'fib_expansion.dart';
 
 class FibRetracementDrawObject extends FibExpansionDrawObject {
-  FibRetracementDrawObject(super.overlay);
+  FibRetracementDrawObject(super.overlay, super.config);
 
   @override
   bool hitTest(IDrawContext context, Offset position, {bool isMove = false}) {

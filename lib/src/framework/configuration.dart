@@ -64,7 +64,7 @@ abstract interface class IFlexiKlineTheme {
 
   /// 文本颜色配置
   Color get textColor;
-  Color get tickTextColor;
+  Color get ticksTextColor;
   Color get lastPriceTextColor;
   Color get crossTextColor;
   Color get tooltipTextColor;
@@ -97,8 +97,8 @@ mixin FlexiKlineThemeTextStyle implements IFlexiKlineTheme {
         height: defaultTextHeight,
       );
 
-  TextStyle get tickTextStyle => TextStyle(
-        color: tickTextColor,
+  TextStyle get ticksTextStyle => TextStyle(
+        color: ticksTextColor,
         fontSize: setSp(defaulTextSize),
         fontWeight: FontWeight.normal,
         overflow: TextOverflow.ellipsis,

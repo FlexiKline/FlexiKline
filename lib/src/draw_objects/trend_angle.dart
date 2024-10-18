@@ -20,7 +20,7 @@ import '../extension/export.dart';
 import '../framework/draw/overlay.dart';
 
 class TrendAngleDrawObject extends DrawObject {
-  TrendAngleDrawObject(super.overlay);
+  TrendAngleDrawObject(super.overlay, super.config);
 
   @override
   bool hitTest(IDrawContext context, Offset position, {bool isMove = false}) {
@@ -35,7 +35,7 @@ class TrendAngleDrawObject extends DrawObject {
     }
 
     final distance = position.distanceToLine(first, second);
-    return distance <= context.config.hitTestMinDistance;
+    return distance <= hitTestMinDistance;
   }
 
   @override
@@ -47,15 +47,14 @@ class TrendAngleDrawObject extends DrawObject {
       // 当指针2超出, 以指针1为中心和以弧度大小的矩形区域开始绘制.
       final incircleRect = Rect.fromCenter(
         center: first,
-        width: context.config.drawParams.angleRadSize.width,
-        height: context.config.drawParams.angleRadSize.height,
+        width: drawParams.angleRadSize.width,
+        height: drawParams.angleRadSize.height,
       );
       if (!incircleRect.contains(second)) {
         _drawAngleLineAndRadVal(context, canvas, first, second);
       }
       // 当趋势线长度 > 弧度半径时, 开始绘制
-      // if ((second - first).length >
-      //     context.config.drawParams.angleRadSize.longestSide) {
+      // if ((second - first).length > drawParams.angleRadSize.longestSide) {
       //   _drawAngleLineAndRadVal(context, canvas, first, second);
       // }
     }
@@ -91,7 +90,6 @@ class TrendAngleDrawObject extends DrawObject {
     Offset A,
     Offset B,
   ) {
-    final drawParams = context.config.drawParams;
     final vAB = B - A;
     final H = Offset(
       A.dx + math.max(drawParams.angleBaseLineMinLen, vAB.length),
@@ -128,8 +126,7 @@ class TrendAngleDrawObject extends DrawObject {
     );
 
     // 画弧度值
-    final radText = context.config.drawParams.angleText ??
-        getTicksTextConfig(context.config);
+    final radText = drawParams.angleText ?? ticksTextConfig;
     final radVal = (radians * -180 / math.pi).toStringAsFixed(2);
     canvas.drawTextArea(
       offset: Offset(

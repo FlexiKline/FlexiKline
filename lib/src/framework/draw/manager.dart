@@ -14,15 +14,15 @@
 
 part of 'overlay.dart';
 
-/// [Overlay]管理
+/// [OverlayObject]管理
 /// 主要负责:
 /// 1. Overly持久化与加载
 /// 2. 当KlineData的[CandleReq]切换时, 切换Overly配置
 /// 3. 向DrawController提供待绘制的[Overlay]列表.
 /// 4. HitTest列表管理
 /// 5. 管理[IDrawType]对应的[DrawObjectBuilder]构造器
-final class OverlayManager with KlineLog {
-  OverlayManager({
+final class OverlayDrawObjectManager with KlineLog {
+  OverlayDrawObjectManager({
     required this.configuration,
     ILogger? logger,
   }) {
@@ -32,7 +32,7 @@ final class OverlayManager with KlineLog {
   final IConfiguration configuration;
 
   @override
-  String get logTag => 'OverlayMgr';
+  String get logTag => 'OverlayDrawObjectManager';
 
   /// DrawType的Overlay对应DrawObject的构建生成器集合
   final Map<IDrawType, DrawObjectBuilder> _overlayBuilders = {
@@ -61,7 +61,7 @@ final class OverlayManager with KlineLog {
   }
 
   /// 自定义[IDrawType]构建器
-  void registerOverlayDrawObjectBuilder(
+  void registerDrawOverlayObjectBuilder(
     IDrawType type,
     DrawObjectBuilder builder,
   ) {
@@ -73,76 +73,81 @@ final class OverlayManager with KlineLog {
   String _instId = '';
 
   /// 当前[_instId]对应[Overlay]集合
-  SortableHashSet<Overlay> _overlayList = SortableHashSet<Overlay>();
-  Iterable<Overlay> get overlayList => _overlayList;
+  final _overlayObjectList = SortableHashSet<DrawObject>();
+  Iterable<DrawObject> get overlayObjectList => _overlayObjectList;
 
-  bool get hasOverlay => _overlayList.isNotEmpty;
+  bool get hasObject => _overlayObjectList.isNotEmpty;
 
   /// KlineData数据切换回调
-  void onChangeCandleRequest(CandleReq request) {
+  void onChangeCandleRequest(CandleReq request, DrawConfig config) {
     if (request.instId.isEmpty || request.instId == _instId) return;
     logd('onChangeCandleRequest $_instId => ${request.instId}');
-    if (_instId.isNotEmpty) {
-      disposeSyncAllOverlay();
+    // 缓存上一次OverlayObject到本地.
+    if (_instId.isNotEmpty && hasObject) {
+      saveOverlayListToLocal();
     }
+    // 加载新的OverlayObject.
+    _overlayObjectList.clear();
     _instId = request.instId;
     final list = configuration.getOverlayListConfig(_instId);
-    // TODO: 检查是否有匹配的[DrawObjectBuilder]
     for (var overlay in list) {
-      addOverlay(overlay);
+      final object = createDrawObject(overlay: overlay, config: config);
+      if (object != null) {
+        addDrawObject(object);
+      }
     }
-    // _overlayList = SortableHashSet.from(list);
   }
 
-  /// 释放所有Overlay并清理[_overlayList].
-  /// [isStore] 是否保存当前OverlayList到本地.
-  /// [isSync] 清理后是否同步清理本地缓存.
-  void disposeSyncAllOverlay({bool isStore = true, bool isSync = false}) {
-    if (isStore) configuration.saveOverlayListConfig(_instId, _overlayList);
-    for (var overlay in _overlayList) {
-      overlay.dispose();
-    }
-    _overlayList.clear();
-    if (isSync) configuration.saveOverlayListConfig(_instId, _overlayList);
+  /// 将当前[Overlay]列表缓存到本地
+  void saveOverlayListToLocal({bool isDispose = true}) {
+    configuration.saveOverlayListConfig(
+      _instId,
+      _overlayObjectList.map((obj) {
+        if (isDispose) obj.dispose();
+        return obj._overlay;
+      }),
+    );
+    _overlayObjectList.clear();
+  }
+
+  void dispose() {
+    saveOverlayListToLocal();
   }
 
   /// 清理当前所有的Overlay.
-  void cleanAllOverlay() => disposeSyncAllOverlay(isStore: false, isSync: true);
+  void cleanAllDrawObject() {
+    for (var obj in _overlayObjectList) {
+      obj.dispose();
+    }
+    _overlayObjectList.clear();
+    saveOverlayListToLocal(isDispose: false);
+  }
 
   /// 通过[type]创建Overlay.
   /// 在Overlay未完成绘制时, 其line的配置使用crosshair.
-  Overlay createOverlay(IDrawType type, LineConfig line) {
-    // TODO: 考虑将object集成进来
-    return Overlay(
-      key: _instId,
-      type: type,
-      line: line,
-    );
-  }
+  DrawObject? createDrawObject({
+    IDrawType? type,
+    Overlay? overlay,
+    required DrawConfig config,
+  }) {
+    if (overlay == null && type == null) return null;
+    overlay ??= Overlay(key: _instId, type: type!, line: config.drawLine);
 
-  /// 首先获取[overlay]内缓存的object, 如果为空, 则创建新的.
-  DrawObject? getDrawObject(Overlay overlay) {
-    return overlay._object ??= _overlayBuilders[overlay.type]?.call(overlay);
+    final builder = _overlayBuilders[overlay.type];
+    if (builder == null) return null;
+    return builder.call(overlay, config);
   }
 
   /// 添加新的overlay,
-  bool addOverlay(Overlay overlay) {
-    final builder = _overlayBuilders[overlay.type];
-    if (builder == null) return false;
-    if (!_overlayList.contains(overlay)) {
-      // 后续绑定object操作, 也绑定DrawConfig;
-      // overlay.object
-      final old = _overlayList.append(overlay);
-      old?.dispose();
-      return true;
-    }
-    return false;
+  void addDrawObject(DrawObject object) {
+    final old = _overlayObjectList.append(object);
+    old?.dispose();
   }
 
-  bool removeOverlay(Overlay overlay) {
-    overlay.dispose();
-    return _overlayList.remove(overlay);
+  bool removeDrawObject(DrawObject object) {
+    object.dispose();
+    return _overlayObjectList.remove(object);
   }
 
-  void reSort() => _overlayList.reSort();
+  void reSort() => _overlayObjectList.reSort();
 }

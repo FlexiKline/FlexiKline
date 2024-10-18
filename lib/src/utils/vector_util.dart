@@ -103,7 +103,7 @@ Path? reflectPathOnRect(Offset A, Offset B, Rect rect) {
   return Path()..addPolygon(points, false);
 }
 
-/// 以[base]为基点, 以[sign]为方向, 判断p是否在此方向上
+/// 以[base]为基点, 以[sign]为方向, 判断[p]是否在此方向上
 bool _isExtendPoint(double base, double sign, double p) {
   if (sign > 0) return p > base;
   if (sign < 0) return p < base;

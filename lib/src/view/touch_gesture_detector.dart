@@ -178,7 +178,7 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
   void onTapUp(TapUpDetails details) {
     logd("onTapUp details:$details");
     if (drawState.isOngoing) {
-      final offset = drawState.overlay?.pointer?.offset;
+      final offset = drawState.object?.pointer?.offset;
       _tapData = GestureData.tap(offset ?? details.localPosition);
       final ret = controller.onDrawConfirm(_tapData!);
       if (!ret) {
@@ -189,9 +189,9 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
     } else if (drawState.isPrepared ||
         controller.drawConfig.allowSelectWhenExit) {
       // 只有在准备状态时或配置中指定[allowSelectWhenExit]时, 进行命中测试
-      final overlay = controller.hitTestOverlay(details.localPosition);
-      if (overlay != null) {
-        controller.onDrawSelect(overlay);
+      final object = controller.hitTestDrawObject(details.localPosition);
+      if (object != null) {
+        controller.onDrawSelect(object);
         return;
       }
     }
