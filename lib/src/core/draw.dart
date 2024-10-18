@@ -163,7 +163,10 @@ mixin DrawBinding
       return;
     }
     final object = _overlayManager.getDrawObject(overlay);
-    object?.onUpdatePoint(pointer, data.offset); // TODO: 考虑对指针的更新封装到overlay中.
+    object?.onUpdatePoint(
+      pointer,
+      pointer.offset + data.delta,
+    ); // TODO: 考虑对指针的更新封装到overlay中.
     _markRepaint();
   }
 

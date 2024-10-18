@@ -17,7 +17,7 @@ import 'dart:ui';
 
 import '../extension/geometry_ext.dart';
 
-double precisionError = 0.000001;
+const double precisionError = 0.000001;
 
 /// 计算点[P]到由[A]与[B]两点组成延长线的距离
 double distancePointToExtendedLine(Offset P, Offset A, Offset B) {
@@ -133,7 +133,7 @@ List<Offset> reflectPointsOnRect(
   final dyLen = vAB.dy;
 
   /// top
-  double dx = k != 0 ? -b / k : B.dx;
+  double dx = k != 0 ? (rect.top - b) / k : B.dx;
   if (rect.includeDx(dx) && _isExtendPoint(A.dy, dyLen, rect.top)) {
     points.add(Offset(dx, rect.top));
   }
@@ -145,7 +145,7 @@ List<Offset> reflectPointsOnRect(
   }
 
   /// left
-  double dy = b;
+  double dy = rect.left * k + b;
   if (rect.includeDy(dy) && _isExtendPoint(A.dx, dxLen, rect.left)) {
     points.add(Offset(rect.left, dy));
   }
@@ -163,16 +163,16 @@ List<Offset> reflectPointsOnRect(
 }
 
 /// 升序(从小到大)
-int ascOrderOffsetCompare(Offset a, Offset b) {
+int compareOffsetByAsc(Offset a, Offset b) {
   return a >= b ? 1 : -1;
 }
 
 /// 降序(从大到小)
-int descOrderOffsetCompare(Offset a, Offset b) {
+int compareOffsetByDesc(Offset a, Offset b) {
   return b >= a ? 1 : -1;
 }
 
-/// 计算点[P]与点[O]组成的线射向[rect]边上的坐标
+/// 计算由点[P]到点[O]组成的线射在[rect]边上的坐标
 /// 约定: 点[P]与点[O]均在[rect]内
 /// 公式: y = kx + b; x = (y - b) / k
 /// k: 斜率 k = (Oy-Py) / (Ox-Px)
@@ -182,14 +182,14 @@ int descOrderOffsetCompare(Offset a, Offset b) {
 /// 当abs(k) < 1 线会落在左右边;
 Offset reflectToRectSide(Offset P, Offset O, Rect rect) {
   assert(rect.include(P), 'Point P is not in the rect!');
-  assert(rect.include(O), 'Point O is not in the rect!');
+  // assert(rect.include(O), 'Point O is not in the rect!');
   if (O.dy == P.dy) {
     if (O.dx == P.dx) {
       return Offset(P.dx, P.dy);
     } else if (O.dx > P.dx) {
       return Offset(rect.right, P.dy);
     } else {
-      return Offset(0, P.dy);
+      return Offset(rect.left, P.dy);
     }
   } else if (O.dx == P.dx) {
     if (O.dy == P.dy) {
@@ -197,23 +197,23 @@ Offset reflectToRectSide(Offset P, Offset O, Rect rect) {
     } else if (O.dy > P.dy) {
       return Offset(P.dx, rect.bottom);
     } else {
-      return Offset(P.dx, 0);
+      return Offset(P.dx, rect.top);
     }
   }
   final k = (O - P).slope;
   final b = O.dy - O.dx * k;
   if (k.abs() > 1) {
     if (O.dy < P.dy) {
-      final x = -b / k;
-      return Offset(x, 0); // top
+      final x = (rect.top - b) / k;
+      return Offset(x, rect.top); // top
     } else {
       final x = (rect.bottom - b) / k;
       return Offset(x, rect.bottom);
     }
   } else {
     if (O.dx < P.dx) {
-      final y = b;
-      return Offset(0, y); // left
+      final y = rect.top * k + b;
+      return Offset(rect.top, y); // left
     } else {
       final y = rect.right * k + b;
       return Offset(rect.right, y);
@@ -303,11 +303,34 @@ bool isInsideOfParallelogram(Offset P, Parallelogram pl) {
   return s >= 0 && s <= 1 && t >= 0 && t <= 1;
 }
 
+/// 判断点[P]是否在多边形内.
+/// 原理: 四边形内的点都在顺时针或逆时针边的同一边，即夹角都小于0或者都大于0，向量积同向。
+/// 设: AB为多边形由顶点A到顶点B的一条边, res为AB与AP的叉积, 其结果:
+/// res > 0, AP在AB的逆时针方向
+/// res = 0, AB和AP共线
+/// res < 0, AP在AB的顺时针方向
+bool isInsideOfPolygon(Offset P, List<Offset> vertexes) {
+  if (vertexes.length <= 2) return false;
+  double cross1, cross2;
+  bool res1 = true, res2 = true;
+  Offset end, start = vertexes.first;
+  for (int i = 1; i < vertexes.length; i++) {
+    end = vertexes[i];
+    cross1 = cross2 = (end - start).cross((P - start));
+    res1 = res1 && cross1 >= 0;
+    res2 = res2 && cross2 <= 0;
+    if (!res1 && !res2) return false;
+    start = end;
+  }
+  return res1 || res2;
+}
+
 /// 判断点[P]是否在平行四边形[pl]内(平面解析几何法)
+/// 由点P按AB斜率(等于DC/CD的斜率)计算点P的截距, 然后再比较AD
 bool isInsideParallelogramByGeometry(Offset P, Parallelogram pl) {
   double k = (pl.B - pl.A).slope; // vAB与vDC的斜率相等
   double b1 = pl.A.dy - pl.A.dx * k;
-  double b2 = pl.C.dy - pl.C.dx * k;
+  double b2 = pl.D.dy - pl.D.dx * k;
   double bp = P.dy - P.dx * k;
   if ((bp - b1).sign == (bp - b2).sign) {
     return false;

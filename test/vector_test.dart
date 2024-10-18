@@ -319,6 +319,7 @@ void main() {
   });
 
   group('pointReflectInRect', () {
+    const rect = Rect.fromLTRB(0.5, 0.8, 14, 10);
     final offset = Offset(5, 5);
     test('reflectInRect', () {
       Offset other = Offset(10, 6);

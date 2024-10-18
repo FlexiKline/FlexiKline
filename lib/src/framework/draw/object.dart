@@ -15,7 +15,7 @@
 part of 'overlay.dart';
 
 class OverlayObject {
-  OverlayObject(this._overlay);
+  const OverlayObject(this._overlay);
 
   final Overlay _overlay;
 
@@ -87,17 +87,19 @@ class OverlayObject {
     }
     return bounds;
   }
+}
 
-  late DrawConfig _config; // 是否要在object初始化时设定.
+abstract class DrawStateObject extends OverlayObject {
+  DrawStateObject(super.overlay);
+
+  DrawConfig? config;
+
   LineConfig? _crosshair;
   PointConfig? _crosspoint;
   Paint? _ticksGapBgPaint;
   TextAreaConfig? _tickText;
   PointConfig? _drawPoint;
-}
 
-/// 绘制样式配置管理
-extension OverlayObjectExt on OverlayObject {
   LineConfig getCrosshairConfig(DrawConfig config) {
     if (_crosshair != null) return _crosshair!;
     _crosshair = config.crosshair;
@@ -219,7 +221,7 @@ abstract interface class IDrawObject {
   void draw(IDrawContext context, Canvas canvas, Size size);
 }
 
-abstract class DrawObject<T extends Overlay> extends OverlayObject
+abstract class DrawObject<T extends Overlay> extends DrawStateObject
     with DrawObjectMixin
     implements IDrawObject {
   DrawObject(super.overlay);
@@ -319,7 +321,7 @@ abstract class DrawObject<T extends Overlay> extends OverlayObject
   }
 }
 
-mixin DrawObjectMixin on OverlayObject {
+mixin DrawObjectMixin on DrawStateObject {
   /// 绘制[points]中所有点.
   void drawPoints(
     IDrawContext context,

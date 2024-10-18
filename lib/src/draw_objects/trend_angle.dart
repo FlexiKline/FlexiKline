@@ -128,7 +128,8 @@ class TrendAngleDrawObject extends DrawObject {
     );
 
     // 画弧度值
-    final radText = context.config.angleRadText;
+    final radText = context.config.drawParams.angleText ??
+        getTicksTextConfig(context.config);
     final radVal = (radians * -180 / math.pi).toStringAsFixed(2);
     canvas.drawTextArea(
       offset: Offset(

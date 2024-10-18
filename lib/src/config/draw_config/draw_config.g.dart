@@ -9,6 +9,8 @@ part of 'draw_config.dart';
 abstract class _$DrawConfigCWProxy {
   DrawConfig enable(bool enable);
 
+  DrawConfig allowSelectWhenExit(bool allowSelectWhenExit);
+
   DrawConfig crosspoint(PointConfig crosspoint);
 
   DrawConfig crosshair(LineConfig crosshair);
@@ -39,6 +41,7 @@ abstract class _$DrawConfigCWProxy {
   /// ````
   DrawConfig call({
     bool? enable,
+    bool? allowSelectWhenExit,
     PointConfig? crosspoint,
     LineConfig? crosshair,
     LineConfig? drawLine,
@@ -61,6 +64,10 @@ class _$DrawConfigCWProxyImpl implements _$DrawConfigCWProxy {
 
   @override
   DrawConfig enable(bool enable) => this(enable: enable);
+
+  @override
+  DrawConfig allowSelectWhenExit(bool allowSelectWhenExit) =>
+      this(allowSelectWhenExit: allowSelectWhenExit);
 
   @override
   DrawConfig crosspoint(PointConfig crosspoint) => this(crosspoint: crosspoint);
@@ -109,6 +116,7 @@ class _$DrawConfigCWProxyImpl implements _$DrawConfigCWProxy {
   /// ````
   DrawConfig call({
     Object? enable = const $CopyWithPlaceholder(),
+    Object? allowSelectWhenExit = const $CopyWithPlaceholder(),
     Object? crosspoint = const $CopyWithPlaceholder(),
     Object? crosshair = const $CopyWithPlaceholder(),
     Object? drawLine = const $CopyWithPlaceholder(),
@@ -126,6 +134,12 @@ class _$DrawConfigCWProxyImpl implements _$DrawConfigCWProxy {
           ? _value.enable
           // ignore: cast_nullable_to_non_nullable
           : enable as bool,
+      allowSelectWhenExit:
+          allowSelectWhenExit == const $CopyWithPlaceholder() ||
+                  allowSelectWhenExit == null
+              ? _value.allowSelectWhenExit
+              // ignore: cast_nullable_to_non_nullable
+              : allowSelectWhenExit as bool,
       crosspoint:
           crosspoint == const $CopyWithPlaceholder() || crosspoint == null
               ? _value.crosspoint
@@ -192,6 +206,7 @@ extension $DrawConfigCopyWith on DrawConfig {
 
 DrawConfig _$DrawConfigFromJson(Map<String, dynamic> json) => DrawConfig(
       enable: json['enable'] as bool? ?? true,
+      allowSelectWhenExit: json['allowSelectWhenExit'] as bool? ?? true,
       crosspoint:
           PointConfig.fromJson(json['crosspoint'] as Map<String, dynamic>),
       crosshair: LineConfig.fromJson(json['crosshair'] as Map<String, dynamic>),
@@ -217,6 +232,7 @@ DrawConfig _$DrawConfigFromJson(Map<String, dynamic> json) => DrawConfig(
 Map<String, dynamic> _$DrawConfigToJson(DrawConfig instance) =>
     <String, dynamic>{
       'enable': instance.enable,
+      'allowSelectWhenExit': instance.allowSelectWhenExit,
       'crosspoint': instance.crosspoint.toJson(),
       'crosshair': instance.crosshair.toJson(),
       'drawLine': instance.drawLine.toJson(),

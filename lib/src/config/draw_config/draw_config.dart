@@ -30,6 +30,7 @@ part 'draw_config.g.dart';
 class DrawConfig {
   const DrawConfig({
     this.enable = true,
+    this.allowSelectWhenExit = true,
     required this.crosspoint,
     required this.crosshair,
     required this.drawLine,
@@ -46,10 +47,13 @@ class DrawConfig {
   /// 是否启用Draw Overlay功能开关
   final bool enable;
 
-  /// 绘制十字线交叉点配置, 优先使用[getCrosspointConfig]
+  /// 当绘制状态是退出时, 是否允许选择已绘制的Overlay.
+  final bool allowSelectWhenExit;
+
+  /// 指针点配置
   final PointConfig crosspoint;
 
-  /// 十字线配置, 优先使用[getCrosshairConfig]
+  /// 指针十字线配置
   final LineConfig crosshair;
 
   /// 默认绘制线的样式配置
@@ -58,10 +62,10 @@ class DrawConfig {
   /// 绘制[drawPoint]和[tickText]刻度时, 是否始终使用[drawLine]指定的颜色.
   final bool useDrawLineColor;
 
-  /// 选择绘制点配置, 优先使用[getDrawPointConfig]
+  /// 选择绘制点配置
   final PointConfig drawPoint;
 
-  /// 刻度文案配置, 优先使用[getTickTextConfig]
+  /// 刻度文案配置
   final TextAreaConfig tickText;
 
   /// onCross时, 刻度[tickText]与绘制边界的间距.
@@ -71,7 +75,7 @@ class DrawConfig {
   final double ticksGapBgOpacity;
 
   /// 命中测试最小距离.
-  /// 当前位置到Overlay线距离如果小于等于[hitTestMinDistance], 即命中.
+  /// 当前位置到Overlay绘制线距离如果小于等于[hitTestMinDistance], 即命中.
   final double hitTestMinDistance;
 
   /// 放大镜配置
@@ -80,13 +84,13 @@ class DrawConfig {
   /// 绘制Overlay的Object时所需要的参数集
   final DrawParams drawParams;
 
-  TextAreaConfig get priceLineText {
-    return drawParams.priceText ?? tickText;
-  }
+  // TextAreaConfig get priceLineText {
+  //   return drawParams.priceText ?? tickText;
+  // }
 
-  TextAreaConfig get angleRadText {
-    return drawParams.angleText ?? tickText;
-  }
+  // TextAreaConfig get angleRadText {
+  //   return drawParams.angleText ?? tickText;
+  // }
 
   // PointConfig getCrosspointConfig(Color? color) {
   //   if (useDrawLineColor && color != null) {

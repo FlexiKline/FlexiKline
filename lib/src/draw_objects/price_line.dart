@@ -77,7 +77,7 @@ class PriceLineDrawObject extends DrawObject {
         precision: context.curKlineData.precision,
       );
       // if (valTxt.isEmpty) return;
-      final tickText = context.config.priceLineText;
+      final tickText = context.config.drawParams.priceText ?? getTicksTextConfig(context.config);
       final margin = context.config.drawParams.priceTextMargin;
       canvas.drawTextArea(
         offset: Offset(

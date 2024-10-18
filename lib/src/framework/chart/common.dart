@@ -14,6 +14,20 @@
 
 part of 'indicator.dart';
 
+/// Indicator绘制模式
+///
+/// 注: PaintMode仅当Indicator加入MultiPaintObjectIndicator后起作用,
+/// 代表当前Indicator的绘制是否是独立绘制的, 还是依赖于MultiPaintObjectIndicator
+enum PaintMode {
+  /// 组合模式, Indicator会联合其他子Indicator一起绘制, 坐标系共享.
+  combine,
+
+  /// 独立模式下, Indicator会按自己height和minmax独立绘制.
+  alone;
+
+  bool get isCombine => this == PaintMode.combine;
+}
+
 /// 绘制位置
 ///
 /// 主要是指定TimeIndicator的绘制位置
