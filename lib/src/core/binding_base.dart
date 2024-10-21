@@ -74,4 +74,9 @@ class KlineStateNotifier<T> extends ValueNotifier<T> {
   void notifyListeners() {
     super.notifyListeners();
   }
+
+  void updateValue(T val) {
+    value = val;
+    super.notifyListeners();
+  }
 }

@@ -62,6 +62,7 @@ mixin DrawBinding
     _drawStateListener.dispose();
     _repaintDraw.dispose();
     _drawObjectManager.dispose();
+    _drawPointerListener.dispose();
   }
 
   late final OverlayDrawObjectManager _drawObjectManager;
@@ -69,6 +70,7 @@ mixin DrawBinding
   final _repaintDraw = ValueNotifier(0);
   final _drawStateListener = KlineStateNotifier(DrawState.exited());
   final _drawTypeListener = ValueNotifier<IDrawType?>(null);
+  final _drawPointerListener = KlineStateNotifier<Point?>(null);
 
   @override
   Listenable get repaintDraw => _repaintDraw;
@@ -113,6 +115,7 @@ mixin DrawBinding
 
   @override
   ValueListenable<IDrawType?> get drawTypeListener => _drawTypeListener;
+  ValueListenable<Point?> get drawPointerListener => _drawPointerListener;
 
   @override
   ValueListenable<LineConfig> get drawLineStyleListener =>
@@ -197,11 +200,11 @@ mixin DrawBinding
         pointer = Point.pointer(index, data.offset);
       }
 
-      final isOk = updateDrawPointByOffset(pointer);
-      if (!isOk) {
-        logw('onDrawConfirm updatePointer failed! pointer:$pointer');
-        return false;
-      }
+      // final isOk = updateDrawPointByOffset(pointer);
+      // if (!isOk) {
+      //   logw('onDrawConfirm updatePointer failed! pointer:$pointer');
+      //   return false;
+      // }
       object.addPointer(pointer);
 
       if (object.isEditing) {
@@ -221,14 +224,19 @@ mixin DrawBinding
         // 当前处于编辑状态, 但是pointer又没有被赋值, 此时点击事件, 为确认完成.
         _drawObjectManager.addDrawObject(object);
         // TODO: 增加object接口, 校正所有绘制点
+        for (var point in object.points) {
+          if (point != null) {
+            updateDrawPointByOffset(point);
+          }
+        }
         _drawState = const Prepared();
         result = false;
       } else {
-        final isOk = updateDrawPointByOffset(pointer);
-        if (!isOk) {
-          logw('onDrawConfirm updatePointer failed! pointer:$pointer');
-          return false;
-        }
+        // final isOk = updateDrawPointByOffset(pointer);
+        // if (!isOk) {
+        //   logw('onDrawConfirm updatePointer failed! pointer:$pointer');
+        //   return false;
+        // }
         object.confirmPointer();
         result = false;
       }
@@ -249,6 +257,7 @@ mixin DrawBinding
       logd('onDrawMoveStart index:${point.index} point:$point');
       object.setPointer(point);
       object.setMoveing(true);
+      _drawPointerListener.updateValue(object.pointer);
       _notifyDrawStateChange();
       _markRepaint();
       return true;
@@ -256,6 +265,7 @@ mixin DrawBinding
       // 检查当前焦点是否命中Overlay
       object.setPointer(null);
       object.setMoveing(true);
+      _drawPointerListener.updateValue(null);
       _notifyDrawStateChange();
       _markRepaint();
       return true;
@@ -277,9 +287,11 @@ mixin DrawBinding
         object.pointer!.offset + delta,
         isMove: true,
       );
+      _drawPointerListener.updateValue(object.pointer);
     } else {
       object.onMoveDrawObject(delta);
     }
+    // _notifyDrawStateChange();
     _markRepaint();
   }
 
@@ -298,6 +310,7 @@ mixin DrawBinding
       }
     }
     object.setMoveing(false);
+    _drawPointerListener.updateValue(null);
     _notifyDrawStateChange();
     _markRepaint();
   }
@@ -427,7 +440,9 @@ mixin DrawBinding
       /// 如果是当前编辑的overlay不用绘制
       if (stateObject == object) continue;
 
-      // TODO: 待优化, 仅在图表移动/缩放/数据源发生变化时, 才需要initPoint
+      // TODO: 待优化,
+      // 1. 检测points中每个value是否有效.
+      // 2. 当发生图表移动/缩放/数据源发生变化时, 需要initPoint
       final succeed = object.initPoints(this);
       if (!succeed) continue;
 
@@ -442,11 +457,7 @@ mixin DrawBinding
     if (drawState is Editing && object.isEditing) {
       object.draw(this, canvas, size);
       // 绘制编辑状态的overlay的points为圆圈.
-      object.drawPoints(
-        this,
-        canvas,
-        isMoving: object.moving,
-      );
+      object.drawPoints(this, canvas);
     } else if (drawState is Drawing && object.isDrawing) {
       object.drawing(this, canvas, size);
     }

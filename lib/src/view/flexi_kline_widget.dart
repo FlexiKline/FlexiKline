@@ -251,20 +251,24 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
       top: 0 + config.margin.top,
       left: 0 + config.margin.left,
       child: ValueListenableBuilder(
-        valueListenable: widget.controller.drawStateLinstener,
-        builder: (context, state, child) {
-          final overlay = state.object;
+        valueListenable: widget.controller.drawPointerListener,
+        builder: (context, pointer, child) {
+          // final overlay = state.object;
 
-          /// 如果overlay是已完成, 且当前正在移动某个绘制点, 则展示放大镜, 否则不展示.
-          if (overlay == null ||
-              !overlay.moving ||
-              overlay.pointer?.offset.isFinite != true ||
-              !overlay.isEditing) {
+          // /// 如果overlay是已完成, 且当前正在移动某个绘制点, 则展示放大镜, 否则不展示.
+          // if (overlay == null ||
+          //     !overlay.moving ||
+          //     overlay.pointer?.offset.isFinite != true ||
+          //     !overlay.isEditing) {
+          //   return const SizedBox.shrink();
+          // }
+
+          if (pointer == null || pointer.offset.isInfinite) {
             return const SizedBox.shrink();
           }
 
           // final drawRect = widget.controller.mainRect;
-          Offset focalPosition = overlay.pointer!.offset;
+          Offset focalPosition = pointer.offset;
           double opacity = config.opactity;
           if (focalPosition.dy < (drawRect.top + config.size.height) &&
               focalPosition.dx < (drawRect.left + config.size.width)) {

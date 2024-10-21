@@ -49,7 +49,7 @@ class ParalleChannelDrawObject extends DrawObject {
     final channel = getParalleChannel();
     if (channel == null) return false;
 
-    return position.isInsideOf(channel);
+    return channel.include(position, deviation: hitTestMinDistance);
   }
 
   @override

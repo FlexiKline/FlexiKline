@@ -247,6 +247,28 @@ Offset rotateVector(Offset v, double radians) {
   );
 }
 
+/// 判断点[P]是否在多边形内.
+/// 原理: 四边形内的点都在顺时针或逆时针边的同一边，即夹角都小于0或者都大于0，向量积同向。
+/// 设: AB为多边形由顶点A到顶点B的一条边, res为AB与AP的叉积, 其结果:
+/// res > 0, AP在AB的逆时针方向
+/// res = 0, AB和AP共线
+/// res < 0, AP在AB的顺时针方向
+bool isInsideOfPolygon(Offset P, List<Offset> vertexes) {
+  if (vertexes.length <= 2) return false;
+  double cross1, cross2;
+  bool res1 = true, res2 = true;
+  Offset end, start = vertexes.first;
+  for (int i = 1; i < vertexes.length; i++) {
+    end = vertexes[i];
+    cross1 = cross2 = (end - start).cross((P - start));
+    res1 = res1 && cross1 >= 0;
+    res2 = res2 && cross2 <= 0;
+    if (!res1 && !res2) return false;
+    start = end;
+  }
+  return res1 || res2;
+}
+
 /// 平行四边行
 final class Parallelogram {
   Parallelogram._(this.A, this.B, this.C, this.D);
@@ -271,8 +293,17 @@ final class Parallelogram {
 
   List<Offset> get points => [A, B, C, D];
 
-  bool pointInside(Offset point) {
-    return isInsideOfParallelogram(point, this);
+  /// 判断[point]坐标是否在平行四边行通道内
+  /// [deviation]表示允许的最大偏差.
+  bool include(Offset point, {double? deviation}) {
+    if (deviation != null && deviation > 0) {
+      return isInsideParallelogramByGeometry(
+        point,
+        this,
+        deviation: deviation,
+      );
+    }
+    return isInsideOfParallelogramByVector(point, this);
   }
 
   /// 以AB为底边, 获取平行四边行AB边与CD边的平均分隔线
@@ -292,7 +323,7 @@ final class Parallelogram {
 }
 
 /// 判断点[P]是否在平行四边形[pl]内(平面向量法)
-bool isInsideOfParallelogram(Offset P, Parallelogram pl) {
+bool isInsideOfParallelogramByVector(Offset P, Parallelogram pl) {
   final vAB = pl.B - pl.A;
   final vAD = pl.D - pl.A;
   final vAP = P - pl.A;
@@ -303,44 +334,100 @@ bool isInsideOfParallelogram(Offset P, Parallelogram pl) {
   return s >= 0 && s <= 1 && t >= 0 && t <= 1;
 }
 
-/// 判断点[P]是否在多边形内.
-/// 原理: 四边形内的点都在顺时针或逆时针边的同一边，即夹角都小于0或者都大于0，向量积同向。
-/// 设: AB为多边形由顶点A到顶点B的一条边, res为AB与AP的叉积, 其结果:
-/// res > 0, AP在AB的逆时针方向
-/// res = 0, AB和AP共线
-/// res < 0, AP在AB的顺时针方向
-bool isInsideOfPolygon(Offset P, List<Offset> vertexes) {
-  if (vertexes.length <= 2) return false;
-  double cross1, cross2;
-  bool res1 = true, res2 = true;
-  Offset end, start = vertexes.first;
-  for (int i = 1; i < vertexes.length; i++) {
-    end = vertexes[i];
-    cross1 = cross2 = (end - start).cross((P - start));
-    res1 = res1 && cross1 >= 0;
-    res2 = res2 && cross2 <= 0;
-    if (!res1 && !res2) return false;
-    start = end;
-  }
-  return res1 || res2;
-}
-
 /// 判断点[P]是否在平行四边形[pl]内(平面解析几何法)
-/// 由点P按AB斜率(等于DC/CD的斜率)计算点P的截距, 然后再比较AD
-bool isInsideParallelogramByGeometry(Offset P, Parallelogram pl) {
-  double k = (pl.B - pl.A).slope; // vAB与vDC的斜率相等
-  double b1 = pl.A.dy - pl.A.dx * k;
-  double b2 = pl.D.dy - pl.D.dx * k;
-  double bp = P.dy - P.dx * k;
-  if ((bp - b1).sign == (bp - b2).sign) {
+/// 原理: 由点[P]到点O1和点O2拉两条线;
+///       O1位AD线上, O1P平行于AB; O2位于AB线上, O2P平行于AD;
+///       如果点P在平行四边形内部, 则O1在[A, D]之间, O2在[A, B]之间.
+/// AB斜率 = (yb-ya)/(xb-xa) = kAB = kO1P = (yp - y1) / (xp - x1)
+/// AD斜率 = (yd-ya)/(xd-xa) = kAD = kO2P = (yp - y2) / (xp - x2)
+/// AB截距 = bAB = ya - xa * kAB
+/// AD截距 = bAD = ya - xa * kAD
+/// O1P截距 = b1 = yp - yx * kAB
+/// O2P截距 = b2 = yp - yx * kAD
+/// 与AB平行时:
+/// x1 = (y1 - b1) / kAB
+/// y1 = kAB * x1 + b1
+/// x2 = (y2 - b2) / kAD
+/// y2 = kAD * x2 + b2
+/// 与AD平行时:
+/// x1 = (y1 - bAD) / kAD
+/// y1 = kAD * x1 + bAD
+/// x2 = (y2 - bAB) / kAB
+/// y2 = kAB * x2 + bAB
+/// 则:
+/// x1 = (kAD * x1 + bAD - b1) / kAB
+/// x1 * kAB - kAD * x1 = bAD - b1
+/// x1 = (bAD - b1) / (kAB - kAD)
+/// x2 = (kAB * x2 + bAB - b2) / kAD
+/// x2 * kAD - kAB * x2 = bAB - b2
+/// x2 = (bAB - b2) / (kAD - kAB)
+bool isInsideParallelogramByGeometry(
+  Offset P,
+  Parallelogram pl, {
+  double deviation = precisionError,
+}) {
+  final vAB = (pl.B - pl.A);
+  final kAB = vAB.slope;
+  final vAD = (pl.D - pl.A);
+  final kAD = vAD.slope;
+
+  final bAD = pl.A.dy - pl.A.dx * kAD;
+  final b1 = P.dy - P.dx * kAB;
+  double x1, y1; // 点O1(x1, y1) 在AD线上, 且O1P平行于AB.
+  if (vAD.dx == 0) {
+    x1 = pl.A.dx;
+    y1 = kAB * x1 + b1;
+  } else if (vAD.dy == 0) {
+    y1 = pl.A.dy;
+    x1 = (y1 - b1) / kAB;
+  } else if (vAB.dx == 0) {
+    x1 = P.dx;
+    y1 = kAD * x1 + bAD;
+  } else if (vAB.dy == 0) {
+    y1 = P.dy;
+    x1 = (y1 - bAD) / kAD;
+  } else {
+    x1 = (bAD - b1) / (kAB - kAD);
+    y1 = kAB * x1 + b1;
+  }
+  final xADLen = vAD.dx.abs() + deviation;
+  // 判断x1坐标是否在[A.dx, D.dx]之间, 并且具有一定的偏差[deviation]
+  if ((x1 - pl.A.dx).abs() > xADLen || (x1 - pl.D.dx).abs() > xADLen) {
+    return false;
+  }
+  final yADLen = vAD.dy.abs() + deviation;
+  // 判断y1坐标是否在[A.dy, D.dy]之间, 并且具有一定的偏差[deviation]
+  if ((y1 - pl.A.dy).abs() > yADLen || (y1 - pl.D.dy).abs() > yADLen) {
     return false;
   }
 
-  k = (pl.D - pl.A).slope; // vAD与vBC的斜率相等
-  b1 = pl.A.dy - pl.A.dx * k;
-  b2 = pl.C.dy - pl.C.dx * k;
-  bp = P.dy - P.dx * k;
-  if ((bp - b1).sign == (bp - b2).sign) {
+  final bAB = pl.A.dy - pl.A.dx * kAB;
+  final b2 = P.dy - P.dx * kAD;
+  double x2, y2; // 点O2(x2, y2) 在AB线上, 且O2P平行于AD.
+  if (vAB.dx == 0) {
+    x2 = pl.A.dx;
+    y2 = kAD * x2 + b2;
+  } else if (vAB.dy == 0) {
+    y2 = pl.A.dy;
+    x2 = (y2 - b2) / kAD;
+  } else if (vAD.dx == 0) {
+    x2 = P.dx;
+    y2 = kAB * x2 + bAB;
+  } else if (vAD.dy == 0) {
+    y2 = P.dy;
+    x2 = (y2 - bAB) / kAB;
+  } else {
+    x2 = (bAB - b2) / (kAD - kAB);
+    y2 = kAD * x2 + b2;
+  }
+  final xABLen = vAB.dx.abs() + deviation;
+  // 判断x2坐标是否在[A.dx, B.dx]之间, 并且具有一定的偏差[deviation]
+  if ((x2 - pl.A.dx).abs() > xABLen || (x2 - pl.B.dx).abs() > xABLen) {
+    return false;
+  }
+  final yABLen = vAB.dy.abs() + deviation;
+  // 判断y2坐标是否在[A.dy, B.dy]之间, 并且具有一定的偏差[deviation]
+  if ((y2 - pl.A.dy).abs() > yABLen || (y2 - pl.B.dy).abs() > yABLen) {
     return false;
   }
 

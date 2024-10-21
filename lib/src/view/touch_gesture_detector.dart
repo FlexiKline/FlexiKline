@@ -178,7 +178,7 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
   void onTapUp(TapUpDetails details) {
     logd("onTapUp details:$details");
     if (drawState.isOngoing) {
-      final offset = drawState.object?.pointer?.offset;
+      final offset = drawState.pointer?.offset;
       _tapData = GestureData.tap(offset ?? details.localPosition);
       final ret = controller.onDrawConfirm(_tapData!);
       if (!ret) {

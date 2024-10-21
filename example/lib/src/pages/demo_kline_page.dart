@@ -95,34 +95,34 @@ class _MyDemoPageState extends ConsumerState<MyKlineDemoPage> {
     //   bar: request.timeBar!,
     // );
 
-    // list = genETHUSDT1HLimit50List();
+    list = genETHUSDT1DLimit100List();
 
-    final resp = await api.getHistoryKlineData(
-      request,
-      cancelToken: cancelToken = CancelToken(),
-    );
-    if (resp.success) {
-      list = resp.data;
-    } else {
-      SmartDialog.showToast(resp.msg);
-    }
+    // final resp = await api.getHistoryKlineData(
+    //   request,
+    //   cancelToken: cancelToken = CancelToken(),
+    // );
+    // if (resp.success) {
+    //   list = resp.data;
+    // } else {
+    //   SmartDialog.showToast(resp.msg);
+    // }
 
     await controller.updateKlineData(request, list ?? const []);
     emitLatestMarketCandle();
   }
 
   Future<void> loadMoreCandles(CandleReq request) async {
-    // await Future.delayed(const Duration(milliseconds: 2000)); // 模拟延时, 展示loading
-    final resp = await api.getHistoryKlineData(
-      request,
-      cancelToken: cancelToken = CancelToken(),
-    );
-    cancelToken = null;
-    if (resp.success && resp.data != null && resp.data!.isNotEmpty) {
-      await controller.updateKlineData(request, resp.data!);
-    } else if (resp.msg.isNotEmpty) {
-      SmartDialog.showToast(resp.msg);
-    }
+    // // await Future.delayed(const Duration(milliseconds: 2000)); // 模拟延时, 展示loading
+    // final resp = await api.getHistoryKlineData(
+    //   request,
+    //   cancelToken: cancelToken = CancelToken(),
+    // );
+    // cancelToken = null;
+    // if (resp.success && resp.data != null && resp.data!.isNotEmpty) {
+    //   await controller.updateKlineData(request, resp.data!);
+    // } else if (resp.msg.isNotEmpty) {
+    //   SmartDialog.showToast(resp.msg);
+    // }
   }
 
   /// 当crossing时, 自定义Tooltip

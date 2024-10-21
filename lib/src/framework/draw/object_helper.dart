@@ -123,11 +123,7 @@ mixin DrawConfigMixin on OverlayObject {
 
 mixin DrawObjectMixin on DrawStateObject {
   /// 绘制[points]中所有点.
-  void drawPoints(
-    IDrawContext context,
-    Canvas canvas, {
-    bool isMoving = false,
-  }) {
+  void drawPoints(IDrawContext context, Canvas canvas) {
     for (var point in points) {
       if (point == null) continue;
       if (point == pointer || point.index == pointer?.index) {

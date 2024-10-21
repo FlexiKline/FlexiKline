@@ -201,7 +201,7 @@ abstract class DrawObject<T extends Overlay> extends DrawStateObject
   /// 初始化所有绘制点坐标
   @override
   bool initPoints(IDrawContext context) {
-    for (var point in _overlay.points) {
+    for (var point in points) {
       if (point == null) return false;
       final succeed = context.updateDrawPointByValue(point);
       if (!succeed) return false;

@@ -146,9 +146,8 @@ extension OffsetExt on Offset {
     return Parallelogram.fromChannelPoint(A, B, this);
   }
 
-  /// 判断当前坐标是否在ABCD构成的平行四边行通道内
-  bool isInsideOf(Parallelogram parallelogram) {
-    return isInsideOfParallelogram(this, parallelogram);
+  bool isInsideOf(List<Offset> points) {
+    return isInsideOfPolygon(this, points);
   }
 }
 
