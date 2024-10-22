@@ -34,7 +34,7 @@ class PriceLineDrawObject extends DrawObject {
     final mainRect = context.mainRect;
     if (!mainRect.include(first)) return false;
 
-    final distance = position.distanceToLine(
+    final distance = position.distanceToRayLine(
       first,
       Offset(mainRect.right, first.dy),
     );

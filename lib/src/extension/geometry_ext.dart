@@ -111,8 +111,9 @@ extension OffsetExt on Offset {
   }
 
   /// 当前坐标P到由[A]与[B]两点组成线的距离
+  /// 注: 与[distanceToExtendedLine]功能一致, 算法不同
   double distanceToLine(Offset A, Offset B) {
-    return distancePointToLine(this, A, B);
+    return LineEquation.fromPoints(A, B).distanceFrom(this);
   }
 
   /// 当前坐标P到由[A]与[B]两点组成延长线的距离
@@ -123,6 +124,11 @@ extension OffsetExt on Offset {
   /// 当前坐标P到由[A]与[B]两点组成射线的距离
   double distanceToRayLine(Offset A, Offset B) {
     return distancePointToRayLine(this, A, B);
+  }
+
+  /// 当前坐标P到由[A]与[B]两点组成线段的距离
+  double distanceToLineSegment(Offset A, Offset B) {
+    return distancePointToLineSegment(this, A, B);
   }
 
   /// 将当前坐标到[other]组成的线映射向[rect]边上的坐标

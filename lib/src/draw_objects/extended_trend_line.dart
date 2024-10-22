@@ -34,7 +34,7 @@ class ExtendedTrendLineDrawObject extends DrawObject {
       return false;
     }
 
-    final distance = position.distanceToExtendedLine(first, second);
+    final distance = position.distanceToLine(first, second);
     return distance <= hitTestMinDistance;
   }
 

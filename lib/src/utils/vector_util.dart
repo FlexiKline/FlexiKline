@@ -19,6 +19,39 @@ import '../extension/geometry_ext.dart';
 
 const double precisionError = 0.000001;
 
+/// 直线的一般式方程 Ax + By + C = 0
+final class LineEquation {
+  const LineEquation._(this.A, this.B, this.C)
+      : assert(A != 0 || B != 0, 'A and B cannot both be 0');
+
+  factory LineEquation.fromPoints(Offset p1, Offset p2) {
+    return LineEquation._(
+      p2.dy - p1.dy,
+      p1.dx - p2.dx,
+      -p1.cross(p2),
+    );
+  }
+
+  final double A;
+  final double B;
+  final double C;
+
+  /// 斜率
+  double get slope => -A / B;
+
+  /// 计算点[point]在直线一般式方程中的结果
+  double test(Offset point) {
+    return A * point.dx + B * point.dy + C;
+  }
+
+  double get sqrtaabb => math.sqrt(A * A + B * B);
+
+  /// 计算点[point]到直线的距离
+  double distanceFrom(Offset point) {
+    return test(point).abs() / sqrtaabb;
+  }
+}
+
 /// 计算点[P]到由[A]与[B]两点组成延长线的距离
 double distancePointToExtendedLine(Offset P, Offset A, Offset B) {
   final vAB = B - A;
@@ -68,7 +101,7 @@ double distancePointToRayLine(Offset P, Offset A, Offset B) {
 ///
 /// 点到线公式: sqrt√(|AP|² - |AP∙ū|²)
 /// ū: AB上的单位向量
-double distancePointToLine(Offset P, Offset A, Offset B) {
+double distancePointToLineSegment(Offset P, Offset A, Offset B) {
   final vAB = B - A;
   final vAP = P - A;
 
@@ -302,6 +335,11 @@ final class Parallelogram {
         this,
         deviation: deviation,
       );
+      // return isInsideParallelogramByLineEquation(
+      //   point,
+      //   this,
+      //   deviation: deviation,
+      // );
     }
     return isInsideOfParallelogramByVector(point, this);
   }
@@ -429,6 +467,49 @@ bool isInsideParallelogramByGeometry(
   // 判断y2坐标是否在[A.dy, B.dy]之间, 并且具有一定的偏差[deviation]
   if ((y2 - pl.A.dy).abs() > yABLen || (y2 - pl.B.dy).abs() > yABLen) {
     return false;
+  }
+
+  return true;
+}
+
+/// 判断点[point]是否在平行四边形[pl]内(直线一般方程)
+/// 若点[point]在平行四边形内部，则同时满足两个条件LAB(P)*LDC(P)<0和LAD(P)*LBC(P)<0；
+/// 如果指定[deviation]偏差, 则需要计算点[point]到四条边的距离是否在偏差范围内.
+bool isInsideParallelogramByLineEquation(
+  Offset point,
+  Parallelogram pl, {
+  double? deviation,
+}) {
+  final lineAB = LineEquation.fromPoints(pl.A, pl.B);
+  final lineDC = LineEquation.fromPoints(pl.D, pl.C);
+  final pAB = lineAB.test(point);
+  final pDC = lineDC.test(point);
+  if (pAB.sign == pDC.sign) {
+    if (deviation != null && deviation > 0) {
+      final sqrtaabb = lineAB.sqrtaabb;
+      final dist = (lineAB.C - lineDC.C).abs() / sqrtaabb + deviation;
+      final distAB = pAB.abs() / sqrtaabb;
+      final distDC = pDC.abs() / lineDC.sqrtaabb;
+      if (distAB > dist || distDC > dist) return false;
+    } else {
+      return false;
+    }
+  }
+
+  final lineAD = LineEquation.fromPoints(pl.A, pl.D);
+  final lineBC = LineEquation.fromPoints(pl.B, pl.C);
+  final pAD = lineAD.test(point);
+  final pBC = lineBC.test(point);
+  if (pAD.sign == pBC.sign) {
+    if (deviation != null && deviation > 0) {
+      final sqrtaabb = lineAD.sqrtaabb;
+      final dist = (lineAD.C - lineBC.C).abs() / sqrtaabb + deviation;
+      final distAD = pAD.abs() / sqrtaabb;
+      final distBC = pBC.abs() / lineBC.sqrtaabb;
+      if (distAD > dist || distBC > dist) return false;
+    } else {
+      return false;
+    }
   }
 
   return true;

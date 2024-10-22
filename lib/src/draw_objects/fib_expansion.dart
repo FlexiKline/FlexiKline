@@ -32,7 +32,7 @@ class FibExpansionDrawObject extends DrawObject {
     final first = points.firstOrNull?.offset;
     final second = points.secondOrNull?.offset;
     if (first == null || second == null) return false;
-    if (position.distanceToLine(first, second) <= hitTestMinDistance) {
+    if (position.distanceToLineSegment(first, second) <= hitTestMinDistance) {
       return true;
     }
 

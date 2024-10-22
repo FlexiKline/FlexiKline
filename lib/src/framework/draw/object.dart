@@ -233,7 +233,7 @@ abstract class DrawObject<T extends Overlay> extends DrawStateObject
     Point? last;
     for (var point in points) {
       if (point?.offset.isFinite == true && last != null) {
-        final distance = position.distanceToLine(
+        final distance = position.distanceToLineSegment(
           last.offset,
           point!.offset,
         );

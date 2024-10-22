@@ -33,7 +33,7 @@ class ArrowLineDrawObject extends DrawObject {
       return false;
     }
 
-    final distance = position.distanceToRayLine(first, second);
+    final distance = position.distanceToLineSegment(first, second);
     return distance <= hitTestMinDistance;
   }
 

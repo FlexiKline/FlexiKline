@@ -30,21 +30,21 @@ void main() {
     test('test 点在线上', () {
       a = Offset(2, 2);
       b = Offset(8, 8);
-      ret = distancePointToLine(offset, a, b);
+      ret = distancePointToLineSegment(offset, a, b);
       debugPrint('$a -> $b = $ret');
     });
 
     test('test 2', () {
       a = Offset(5, 2);
       b = Offset(8, 8);
-      ret = offset.distanceToLine(a, b);
+      ret = offset.distanceToLineSegment(a, b);
       debugPrint('$a -> $b = $ret');
     });
 
     test('test 3', () {
       a = Offset(5, 2);
       b = Offset(8, 8);
-      ret = offset.distanceToLine(a, b);
+      ret = offset.distanceToLineSegment(a, b);
       debugPrint('$a -> $b = $ret');
     });
   });
