@@ -138,25 +138,31 @@ abstract class BaseData with KlineLog {
     return null;
   }
 
-  /// 将[ts]转换为当前KlineData数据列表的下标
+  /// 将[ts]转换为当前KlineData数据列表的下标和剩余偏移率
   /// 如果ts > 最新价, 将为负
-  int? timestampToIndex(int ts) {
+  Tuple2<int, double>? timestampToIndex(int ts) {
     if (list.isEmpty || req.timeBar == null) return null;
-    int latestIndex = 0;
-    final latest = list.first;
-    return latestIndex + (latest.ts - ts) ~/ req.timeBar!.milliseconds;
+    int latestIndex = 0; // TODO: 后续性能优化考虑数据方向
+    final timespans = req.timeBar!.milliseconds;
+    final distance = list.first.ts - ts;
+    final value = distance / timespans;
+    final index = latestIndex + value.truncate();
+    final patch = value - index;
+    return Tuple2(index, patch);
   }
 
-  /// 将[index]转换为以当前KliineData数据范围为基础的timestamp
-  int? indexToTimestamp(int index) {
+  /// 将[indexPatch]转换为以当前KliineData数据范围为基础的timestamp
+  int? indexToTimestamp(Tuple2<int, double> indexPatch) {
     if (list.isEmpty || req.timeBar == null) return null;
-    if (checkIndex(index)) return list[index].ts;
-    if (index >= length) {
-      return list.last.ts - (index - length + 1) * req.timeBar!.milliseconds;
-    } else if (index < 0) {
-      return list.first.ts + (0 - index) * req.timeBar!.milliseconds;
+    final timespans = req.timeBar!.milliseconds;
+    int ts;
+    if (checkIndex(indexPatch.item1)) {
+      ts = list[indexPatch.item1].ts;
+    } else {
+      ts = list.first.ts - indexPatch.item1 * timespans;
     }
-    return null;
+    ts -= (indexPatch.item2 * timespans).round();
+    return ts;
   }
 
   /// 合并[list]和[newList]为一个新数组

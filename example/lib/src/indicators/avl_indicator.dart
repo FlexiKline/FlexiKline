@@ -78,7 +78,7 @@ class AVLPaintObject extends SinglePaintObjectBox<AVLIndicator> {
       m = list[i];
       if (m.volCcy != null && !m.vol.isZero) {
         points.add(Offset(
-          indexToDx(i, check: false)!,
+          indexToDx(i, check: false)! - candleWidthHalf,
           valueToDy(m.volCcy!.div(m.vol)),
         ));
       }

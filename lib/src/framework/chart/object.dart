@@ -245,17 +245,15 @@ mixin DataInitMixin on PaintObjectProxy implements IPaintDataInit {
   }
 
   double? indexToDx(int index, {bool check = true}) {
-    double dx = chartRect.right -
-        (index * candleActualWidth - paintDxOffset) -
-        candleWidthHalf;
-
+    final indexDx = index * candleActualWidth;
+    double dx = chartRect.right + paintDxOffset - indexDx;
     if (!check) return dx;
     return chartRect.includeDx(dx) ? dx : null;
   }
 
   int dxToIndex(double dx) {
-    final dxPaintOffset = (chartRect.right - dx) + paintDxOffset;
-    return (dxPaintOffset / candleActualWidth).floor();
+    final dxPaintOffset = chartRect.right + paintDxOffset - dx;
+    return dxPaintOffset ~/ candleActualWidth;
   }
 
   CandleModel? dxToCandle(double dx) {

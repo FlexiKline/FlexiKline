@@ -12,14 +12,12 @@ Point _$PointFromJson(Map<String, dynamic> json) => Point(
       value: json['value'] == null
           ? BagNum.zero
           : const BagNumConverter().fromJson(json['value']),
-      patch: (json['patch'] as num?)?.toDouble() ?? 0,
     );
 
 Map<String, dynamic> _$PointToJson(Point instance) => <String, dynamic>{
       'index': instance.index,
       'ts': instance.ts,
       'value': const BagNumConverter().toJson(instance.value),
-      'patch': instance.patch,
     };
 
 Overlay _$OverlayFromJson(Map<String, dynamic> json) => Overlay(

@@ -71,6 +71,12 @@ abstract interface class IState {
   /// 将dx转换为蜡烛数据.
   CandleModel? dxToCandle(double dx);
 
+  /// 将[dx]精确转换时间戳
+  int? dxToTimestamp(double dx);
+
+  /// 将时间戳[ts]精确转换为dx坐标
+  double? timestampToDx(int ts);
+
   /// 将[dx]转换为当前绘制区域对应的蜡烛的下标.
   int? dxToIndex(double dx);
 
@@ -255,6 +261,12 @@ abstract interface class IDrawContext implements ILogger {
 
   /// 将dx转换为蜡烛数据.
   CandleModel? dxToCandle(double dx);
+
+  /// 将[dx]精确转换时间戳
+  int? dxToTimestamp(double dx);
+
+  /// 将时间戳[ts]精确转换为dx坐标
+  double? timestampToDx(int ts);
 
   /// 将[dx]转换为当前绘制区域对应的蜡烛的下标.
   int? dxToIndex(double dx);

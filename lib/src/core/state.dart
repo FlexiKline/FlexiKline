@@ -140,21 +140,35 @@ mixin StateBinding on KlineBindingBase, SettingBinding implements IState {
   /// 将[dx]转换为当前绘制区域对应的蜡烛的下标.
   @override
   int? dxToIndex(double dx) {
-    // final dxPaintOffset = (mainChartRight - dx) + paintDxOffset;
-    // // final diff = dxPaintOffset % candleActualWidth;
-    // return (dxPaintOffset / candleActualWidth).floor();
     return mainPaintObject?.dxToIndex(dx);
   }
 
   /// 将[index]转换为当前绘制区域对应的X轴坐标.
   @override
   double? indexToDx(int index, {bool check = false}) {
-    // double dx = mainChartRight -
-    //     (index * candleActualWidth - paintDxOffset) -
-    //     candleWidthHalf;
-    // if (mainChartRect.includeDx(dx)) return dx;
-    // return null;
     return mainPaintObject?.indexToDx(index, check: check);
+  }
+
+  /// 将[dx]精确转换为蜡烛的时间戳ts, 差异部分补充到ts中.
+  @override
+  int? dxToTimestamp(double dx) {
+    final dxPaintOffset = mainChartRight + paintDxOffset - dx;
+    final value = dxPaintOffset / candleActualWidth;
+    final index = value.truncate();
+    final patch = value - index;
+    final ts = curKlineData.indexToTimestamp(Tuple2(index, patch));
+    if (ts == null) return null;
+    return ts;
+  }
+
+  /// 将时间戳[ts]精确转换为dx坐标, 并将差异部分汇总到dx中.
+  @override
+  double? timestampToDx(int ts) {
+    final indexPatch = curKlineData.timestampToIndex(ts);
+    if (indexPatch == null) return null;
+    final tsDx = (indexPatch.item1 + indexPatch.item2) * candleActualWidth;
+    final dx = mainChartRight + paintDxOffset - tsDx;
+    return dx;
   }
 
   @override

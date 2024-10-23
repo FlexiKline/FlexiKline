@@ -375,9 +375,7 @@ mixin DrawBinding
     if (dy == null) return false;
 
     ts ??= point.ts;
-    final index = curKlineData.timestampToIndex(ts);
-    if (index == null) return false;
-    final dx = indexToDx(index);
+    final dx = timestampToDx(ts);
     if (dx == null) return false;
 
     point.ts = ts;
@@ -390,9 +388,7 @@ mixin DrawBinding
   @override
   bool updateDrawPointByOffset(Point point, {Offset? offset}) {
     offset ??= point.offset;
-    final index = dxToIndex(offset.dx);
-    if (index == null) return false;
-    final ts = curKlineData.indexToTimestamp(index);
+    final ts = dxToTimestamp(offset.dx);
     if (ts == null) return false;
 
     final value = dyToValue(offset.dy);

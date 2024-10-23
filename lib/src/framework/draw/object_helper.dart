@@ -311,14 +311,10 @@ mixin DrawObjectMixin on DrawStateObject {
     double dx, {
     Rect? drawableRect,
   }) {
-    // TODO: 此处考虑直接从dx转换为ts
-    int? index = context.dxToIndex(dx);
-    if (index == null) return Size.zero;
-
-    final klineData = context.curKlineData;
-    final ts = klineData.indexToTimestamp(index);
+    final ts = context.dxToTimestamp(dx);
     if (ts == null) return Size.zero;
 
+    final klineData = context.curKlineData;
     final timeTxt = formatTimeTicksText(ts, bar: klineData.timeBar);
 
     drawableRect ??= context.timeRect;

@@ -22,7 +22,7 @@ class Point {
     this.offset = Offset.infinite,
     this.ts = -1,
     this.value = BagNum.zero,
-    this.patch = 0,
+    // this.patch = 0,
   });
 
   factory Point.pointer(int index, Offset offset) {
@@ -47,7 +47,7 @@ class Point {
   BagNum value;
 
   /// 用于对[ts]和[value]组成坐标的修正
-  double patch;
+  // double patch;
 
   @override
   bool operator ==(Object other) {
