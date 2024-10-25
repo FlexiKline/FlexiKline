@@ -244,20 +244,20 @@ mixin DataInitMixin on PaintObjectProxy implements IPaintDataInit {
     return minMax.max - ((dy - chartRect.top) / dyFactor).toBagNum();
   }
 
-  double? indexToDx(int index, {bool check = true}) {
+  double? indexToDx(num index, {bool check = true}) {
     final indexDx = index * candleActualWidth;
     double dx = chartRect.right + paintDxOffset - indexDx;
     if (!check) return dx;
     return chartRect.includeDx(dx) ? dx : null;
   }
 
-  int dxToIndex(double dx) {
+  double dxToIndex(double dx) {
     final dxPaintOffset = chartRect.right + paintDxOffset - dx;
-    return dxPaintOffset ~/ candleActualWidth;
+    return dxPaintOffset / candleActualWidth;
   }
 
   CandleModel? dxToCandle(double dx) {
-    final index = dxToIndex(dx);
+    final index = dxToIndex(dx).toInt();
     return state.curKlineData.getCandle(index);
   }
 

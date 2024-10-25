@@ -140,29 +140,52 @@ abstract class BaseData with KlineLog {
 
   /// 将[ts]转换为当前KlineData数据列表的下标和剩余偏移率
   /// 如果ts > 最新价, 将为负
-  Tuple2<int, double>? timestampToIndex(int ts) {
+  double? timestampToIndex(int ts) {
     if (list.isEmpty || req.timeBar == null) return null;
     int latestIndex = 0; // TODO: 后续性能优化考虑数据方向
     final timespans = req.timeBar!.milliseconds;
-    final distance = list.first.ts - ts;
-    final value = distance / timespans;
-    final index = latestIndex + value.truncate();
-    final patch = value - index;
-    return Tuple2(index, patch);
+    final first = list.first;
+    final last = list.last;
+    if (ts > first.ts) {
+      // 超出蜡烛数据时间范围, 不予考虑交易时间问题
+      final distance = first.ts - ts;
+      final value = distance / timespans;
+      return latestIndex + value;
+    } else if (ts <= last.ts) {
+      // 超出蜡烛数据时间范围, 不予考虑交易时间问题
+      final distance = last.ts - ts;
+      final value = distance / timespans;
+      return list.length - 1 + value;
+    } else {
+      int i = latestIndex;
+      final distance = first.ts - ts;
+      final indexValue = distance / timespans;
+      final index = indexValue.truncate();
+      final patch = indexValue - index;
+      for (; i < list.length; i++) {
+        if (ts == list[i].ts) break;
+        if (ts > list[i].ts) {
+          i--;
+          break;
+        }
+      }
+      return i + patch;
+    }
   }
 
-  /// 将[indexPatch]转换为以当前KliineData数据范围为基础的timestamp
-  int? indexToTimestamp(Tuple2<int, double> indexPatch) {
+  /// 将[indexValue]转换为以当前KlineData数据范围为基础的timestamp
+  int? indexToTimestamp(double indexValue) {
     if (list.isEmpty || req.timeBar == null) return null;
     final timespans = req.timeBar!.milliseconds;
-    int ts;
-    if (checkIndex(indexPatch.item1)) {
-      ts = list[indexPatch.item1].ts;
+    final index = indexValue.toInt();
+    final patchTs = ((indexValue - index) * timespans).truncate();
+    if (index < 0) {
+      return list.first.ts - index * timespans - patchTs;
+    } else if (index >= list.length - 1) {
+      return list.last.ts - (index + 1 - list.length) * timespans - patchTs;
     } else {
-      ts = list.first.ts - indexPatch.item1 * timespans;
+      return list[index].ts - patchTs;
     }
-    ts -= (indexPatch.item2 * timespans).round();
-    return ts;
   }
 
   /// 合并[list]和[newList]为一个新数组

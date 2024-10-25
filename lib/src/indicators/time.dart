@@ -108,8 +108,7 @@ class TimePaintObject<T extends TimeIndicator> extends SinglePaintObjectBox<T> {
 
   @override
   void onCross(Canvas canvas, Offset offset) {
-    final index = dxToIndex(offset.dx);
-    final model = klineData.getCandle(index);
+    final model = offsetToCandle(offset);
     final timeBar = klineData.timeBar;
     if (model == null || timeBar == null) return;
 

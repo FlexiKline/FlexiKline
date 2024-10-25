@@ -21,4 +21,3 @@ export 'gesture_data.dart';
 export 'minmax.dart';
 export 'bag_num.dart';
 export 'range.dart';
-export 'tuple.dart';

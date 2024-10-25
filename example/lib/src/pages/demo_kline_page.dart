@@ -95,17 +95,17 @@ class _MyDemoPageState extends ConsumerState<MyKlineDemoPage> {
     //   bar: request.timeBar!,
     // );
 
-    list = genETHUSDT1DLimit100List();
+    // list = genETHUSDT1DLimit100List();
 
-    // final resp = await api.getHistoryKlineData(
-    //   request,
-    //   cancelToken: cancelToken = CancelToken(),
-    // );
-    // if (resp.success) {
-    //   list = resp.data;
-    // } else {
-    //   SmartDialog.showToast(resp.msg);
-    // }
+    final resp = await api.getHistoryKlineData(
+      request,
+      cancelToken: cancelToken = CancelToken(),
+    );
+    if (resp.success) {
+      list = resp.data;
+    } else {
+      SmartDialog.showToast(resp.msg);
+    }
 
     await controller.updateKlineData(request, list ?? const []);
     emitLatestMarketCandle();
