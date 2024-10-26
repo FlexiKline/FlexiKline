@@ -118,7 +118,7 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
   void onPointerMove(PointerMoveEvent event) {
     if (drawState.isOngoing) {
       if (drawState.isEditing) {
-        /// 已完成的移动, 通过[_panScaleData]或[_longData]实现
+        /// 已完成的DrawOverlay, 通过[_panScaleData]或[_longData]事件数据更新.
         return;
       }
       final pointer = drawState.pointer;
@@ -174,10 +174,9 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
   }
 
   /// 点击
-  ///
   void onTapUp(TapUpDetails details) {
-    logd("onTapUp details:$details");
     if (drawState.isOngoing) {
+      logd("onTapUp draw confirm details:$details");
       final offset = drawState.pointer?.offset;
       _tapData = GestureData.tap(offset ?? details.localPosition);
       final ret = controller.onDrawConfirm(_tapData!);
@@ -191,11 +190,13 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
       // 只有在准备状态时或配置中指定[allowSelectWhenExit]时, 进行命中测试
       final object = controller.hitTestDrawObject(details.localPosition);
       if (object != null) {
+        logd("onTapUp draw select object:$object");
         controller.onDrawSelect(object);
         return;
       }
     }
 
+    logd("onTapUp cross start details:$details");
     _tapData = GestureData.tap(details.localPosition);
     final ret = controller.startCross(_tapData!);
     if (!ret) {
@@ -204,8 +205,7 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
     }
   }
 
-  /// 移动 缩放
-  ///
+  /// 平移/缩放开始.
   void onScaleStart(ScaleStartDetails details) {
     if (_panScaleData != null && !_panScaleData!.isEnd) {
       // 如果上次平移或缩放, 还没有结束, 不允许开始.
@@ -218,10 +218,7 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
         // 未完成的暂不允许移动
         return;
       }
-      assert(() {
-        logd("onScaleStart draw > details:$details");
-        return true;
-      }());
+      logd("onScaleStart draw > details:$details");
       _panScaleData = GestureData.pan(details.localFocalPoint);
       final result = controller.onDrawMoveStart(_panScaleData!);
       if (!result) {
@@ -242,23 +239,18 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
           position = ScalePosition.middle;
         }
       }
-      assert(() {
-        logd("onScaleStart scale $position focal:${details.localFocalPoint}");
-        return true;
-      }());
+      logd("onScaleStart scale $position focal:${details.localFocalPoint}");
       _panScaleData = GestureData.scale(
         details.localFocalPoint,
         position: position,
       );
     } else {
-      assert(() {
-        logd("onScaleStart pan focal:${details.localFocalPoint}");
-        return true;
-      }());
+      logd("onScaleStart pan focal:${details.localFocalPoint}");
       _panScaleData = GestureData.pan(details.localFocalPoint);
     }
   }
 
+  /// 平移/缩放中...
   void onScaleUpdate(ScaleUpdateDetails details) {
     if (_panScaleData == null) {
       logd("onScaleUpdate panScaleData is empty! details:$details");
@@ -282,10 +274,10 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
     } else if (_panScaleData!.isScale) {
       final newScale = scaledDecelerate(details.scale);
       final change = details.scale - _panScaleData!.scale;
-      assert(() {
-        logd("onScaleUpdate scale ${details.scale}>$newScale change:$change");
-        return true;
-      }());
+      // assert(() {
+      //   logd("onScaleUpdate scale ${details.scale}>$newScale change:$change");
+      //   return true;
+      // }());
       if (change.abs() > 0.01) {
         _panScaleData!.update(
           details.localFocalPoint,
@@ -296,6 +288,7 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
     }
   }
 
+  /// 平移/缩放结束.
   void onScaleEnd(ScaleEndDetails details) {
     if (_panScaleData == null) {
       logd("onScaleEnd panScaledata and ticker is empty! > details:$details");
@@ -419,16 +412,12 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
       logd("onLongPressStart ignore! > crossing:${controller.isCrossing}");
       return;
     }
-
+    logd("onLongPressStart > details:$details");
     if (drawState.isOngoing) {
       if (drawState.isDrawing) {
         // 未完成的暂不允许移动
         return;
       }
-      assert(() {
-        logd("onLongPressStart draw > details:$details");
-        return true;
-      }());
       _longData = GestureData.long(details.localPosition);
       final result = controller.onDrawMoveStart(_longData!);
       if (!result) {
@@ -436,10 +425,10 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
         _longData = null;
       }
     } else {
-      assert(() {
-        logd("onLongPressStart cross > details:$details");
-        return true;
-      }());
+      // assert(() {
+      //   logd("onLongPressStart cross > details:$details");
+      //   return true;
+      // }());
       _longData = GestureData.long(details.localPosition);
       final result = controller.startCross(_longData!);
       if (!result) {
@@ -453,10 +442,10 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
     if (!gestureConfig.supportLongPress || _longData == null) {
       return;
     }
-    assert(() {
-      logd("onLongPressMoveUpdate > details:$details");
-      return true;
-    }());
+    // assert(() {
+    //   logd("onLongPressMoveUpdate > details:$details");
+    //   return true;
+    // }());
     if (drawState.isOngoing) {
       _longData!.update(details.localPosition);
       controller.onDrawMoveUpdate(_longData!);
@@ -471,11 +460,10 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
       logd("onLongPressEnd ignore! > details:$details");
       return;
     }
-
-    assert(() {
-      logd("onLongPressEnd details:$details");
-      return true;
-    }());
+    // assert(() {
+    //   logd("onLongPressEnd details:$details");
+    //   return true;
+    // }());
     if (drawState.isOngoing) {
       controller.onDrawMoveEnd();
     } else {

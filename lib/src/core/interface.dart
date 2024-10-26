@@ -240,7 +240,7 @@ abstract interface class IDraw {
   void prepareDraw();
 
   /// 选择绘制图形
-  void startDraw(IDrawType type);
+  void startDraw(IDrawType type, {bool isInitPointer = true});
 
   /// 退出绘制
   void exitDraw();

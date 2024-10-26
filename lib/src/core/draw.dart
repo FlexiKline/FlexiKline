@@ -22,6 +22,7 @@ import '../framework/draw/overlay.dart';
 import '../framework/export.dart';
 import '../model/bag_num.dart';
 import '../model/gesture_data.dart';
+import '../utils/platform_util.dart';
 import 'binding_base.dart';
 import 'interface.dart';
 import 'setting.dart';
@@ -140,7 +141,7 @@ mixin DrawBinding
   /// 1. 重置状态为Drawing
   /// 2. 初始化第一个Point的位置为[mainRect]中心
   @override
-  void startDraw(IDrawType type) {
+  void startDraw(IDrawType type, {bool? isInitPointer}) {
     cancelCross();
     if (drawState.object?.type == type) {
       _drawState = const Prepared();
@@ -151,7 +152,9 @@ mixin DrawBinding
       );
       if (object != null) {
         // 初始指针为[mainRect]中心
-        object.setPointer(Point.pointer(0, mainRect.center));
+        if (isInitPointer ?? PlatformUtil.isTouch) {
+          object.setPointer(Point.pointer(0, mainRect.center));
+        }
         _drawState = DrawState.draw(object);
       } else {
         _drawState = const Prepared();
@@ -195,7 +198,7 @@ mixin DrawBinding
     if (object.isDrawing) {
       Point? pointer = object.pointer;
       if (pointer == null) {
-        // 可能永远不会触发
+        // 非触摸设备启动时, 不会设置初始指针, 只有在第一次Tap时, pointer才确认第一个指针
         final index = object.nextIndex;
         pointer = Point.pointer(index, data.offset);
       }

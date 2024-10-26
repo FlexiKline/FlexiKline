@@ -18,6 +18,7 @@ import 'package:flutter/widgets.dart';
 import '../config/gesture_config/gesture_config.dart';
 import '../extension/geometry_ext.dart';
 import '../framework/chart/indicator.dart';
+import '../framework/draw/overlay.dart';
 import '../framework/logger.dart';
 import '../kline_controller.dart';
 import '../model/gesture_data.dart';
@@ -63,6 +64,8 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
 
   GestureConfig get gestureConfig => widget.controller.gestureConfig;
 
+  DrawState get drawState => controller.drawState;
+
   @override
   void initState() {
     super.initState();
@@ -104,6 +107,9 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
         onExit: onExit,
         child: GestureDetector(
           behavior: HitTestBehavior.translucent,
+
+          /// 点击
+          onTapUp: onTapUp,
 
           /// 双击
           onDoubleTap: widget.onDoubleTap,
@@ -214,25 +220,52 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
     if (!controller.canvasRect.include(offset)) return;
 
     logd('onEnter $event');
-    _hoverData = GestureData.hover(offset);
-    controller.startCross(_hoverData!, force: true);
+    if (_hoverData != null && drawState.isOngoing) {
+      drawState.object?.pointer?.offset = offset; // TODO: 待优化.
+      _hoverData!.update(offset);
+    } else {
+      _hoverData = GestureData.hover(offset);
+      controller.startCross(_hoverData!, force: true);
+    }
   }
 
   /// 鼠标Hover事件.
   /// onMouseHover _TransformedPointerHoverEvent#1614b(position: Offset(86.5, 343.6))
   void onHover(PointerHoverEvent event) {
     if (_hoverData == null) return;
+    Offset offset = event.localPosition;
 
-    final offset = event.localPosition;
+    if (drawState.isOngoing) {
+      if (drawState.isEditing) {
+        /// 已完成的DrawObject, 通过[_panData]或[_longData]事件数据更新.
+        return;
+      }
+      final pointer = drawState.pointer;
+      if (pointer != null && pointer.offset.isFinite) {
+        if (controller.isCrossing) controller.cancelCross();
+        // final mainRect = controller.mainRect;
+        // if (!mainRect.include(offset)) {
+        //   offset = offset.clamp(mainRect);
+        // }
+        _hoverData ??= GestureData.hover(offset);
+        _hoverData!.update(offset);
+        controller.onDrawUpdate(_hoverData!);
+        return;
+      }
+    }
+
     if (!controller.canvasRect.include(offset)) return;
-
-    assert(() {
-      logd('onHover $event');
-      return true;
-    }());
+    // assert(() {
+    //   logd('onHover cross $event');
+    //   return true;
+    // }());
 
     _hoverData!.update(offset);
-    controller.updateCross(_hoverData!);
+    if (!controller.isCrossing) {
+      controller.startCross(_hoverData!, force: true);
+    } else {
+      controller.updateCross(_hoverData!);
+    }
   }
 
   /// 鼠标Hover退出事件.
@@ -241,42 +274,92 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
     logd('onExit $event');
 
     if (_hoverData == null) return;
+    if (drawState.isOngoing) {
+      // 当处在绘制中状态时, 不清理hover指针数据.
+      return;
+    }
     _hoverData?.end();
     _hoverData = null;
   }
 
+  /// 点击
+  void onTapUp(TapUpDetails details) {
+    if (drawState.isOngoing) {
+      logd("onTapUp draw confirm details:$details");
+      final tapData = GestureData.tap(details.localPosition);
+      final ret = controller.onDrawConfirm(tapData);
+      if (ret && controller.isCrossing) {
+        controller.cancelCross();
+      }
+      tapData.end();
+      return;
+    } else if (drawState.isPrepared ||
+        controller.drawConfig.allowSelectWhenExit) {
+      // 只有在准备状态时或配置中指定[allowSelectWhenExit]时, 进行命中测试
+      final object = controller.hitTestDrawObject(details.localPosition);
+      if (object != null) {
+        logd("onTapUp draw select object:$object");
+        controller.onDrawSelect(object);
+        return;
+      }
+    }
+  }
+
   /// 平移开始.
-  ///zp::: web onPanStart DragStartDetails(Offset(232.7, 278.0))
   void onPanStart(DragStartDetails details) {
     if (_panData != null && !_panData!.isEnd) {
       // 如果上次平移或缩放, 还没有结束, 不允许开始.
       logd('onPanStart Currently still panning, ignore!!!');
       return;
     }
-    logd('onPanStart $details');
-    _panData = GestureData.pan(details.localPosition);
+    if (drawState.isOngoing) {
+      if (drawState.isDrawing) {
+        // 未完成的暂不允许移动
+        return;
+      }
+      logd("onPanStart draw > details:$details");
+      _panData = GestureData.pan(details.localPosition);
+      final result = controller.onDrawMoveStart(_panData!);
+      if (!result) {
+        _panData?.end();
+        _panData = null;
+      }
+    } else {
+      logd('onPanStart pan local:${details.localPosition}');
+      _panData = GestureData.pan(details.localPosition);
+    }
   }
 
-  /// 平移中.
-  ///zp::: web onPanUpdate DragUpdateDetails(Offset(4.2, 0.0))
+  /// 平移中...
   void onPanUpdate(DragUpdateDetails details) {
     if (_panData == null) {
       logd('onPanUpdate panData is empty! details:$details');
       return;
     }
-    assert(() {
-      logd('onPanUpdate $details');
-      return true;
-    }());
-    _panData!.update(details.localPosition.clamp(controller.canvasRect));
-    controller.moveChart(_panData!);
+    // assert(() {
+    //   logd('onPanUpdate $details');
+    //   return true;
+    // }());
+    if (drawState.isOngoing) {
+      _panData!.update(details.localPosition.clamp(controller.mainRect));
+      controller.onDrawMoveUpdate(_panData!);
+    } else {
+      _panData!.update(details.localPosition.clamp(controller.canvasRect));
+      controller.moveChart(_panData!);
+    }
   }
 
   /// 平移结束.
-  ///zp::: web onPanEnd DragEndDetails(Velocity(0.0, 0.0))
   void onPanEnd(DragEndDetails details) {
     if (_panData == null) {
       logd("onPanEnd panData is empty! details:$details");
+      return;
+    }
+
+    if (drawState.isOngoing) {
+      controller.onDrawMoveEnd();
+      _panData?.end();
+      _panData = null;
       return;
     }
 
@@ -409,12 +492,12 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
     if (_scaleData!.isScale) {
       final newScale = scaledDecelerate(event.scale);
       final change = event.scale - _scaleData!.scale;
-      assert(() {
-        logd(
-          "onPointerPanZoomUpdate scale ${event.scale}>$newScale change:$change",
-        );
-        return true;
-      }());
+      // assert(() {
+      //   logd(
+      //     "onPointerPanZoomUpdate scale ${event.scale}>$newScale change:$change",
+      //   );
+      //   return true;
+      // }());
       if (change.abs() > 0.01) {
         _scaleData!.update(
           event.localPosition,
@@ -447,20 +530,46 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
       return;
     }
     logd("onLongPressStart > details:$details");
-    _longData = GestureData.long(details.localPosition);
-    controller.startCross(_longData!);
+    if (drawState.isOngoing) {
+      if (drawState.isDrawing) {
+        // 未完成的暂不允许移动
+        return;
+      }
+      _longData = GestureData.long(details.localPosition);
+      final result = controller.onDrawMoveStart(_longData!);
+      if (!result) {
+        _longData?.end();
+        _longData = null;
+      }
+    } else {
+      // assert(() {
+      //   logd("onLongPressStart cross > details:$details");
+      //   return true;
+      // }());
+      _longData = GestureData.long(details.localPosition);
+      final result = controller.startCross(_longData!);
+      if (!result) {
+        _longData?.end();
+        _longData = null;
+      }
+    }
   }
 
   void onLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
     if (!gestureConfig.supportLongPress || _longData == null) {
       return;
     }
-    assert(() {
-      logd("onLongPressMoveUpdate > details:$details");
-      return true;
-    }());
-    _longData!.update(details.localPosition);
-    controller.updateCross(_longData!);
+    // assert(() {
+    //   logd("onLongPressMoveUpdate > details:$details");
+    //   return true;
+    // }());
+    if (drawState.isOngoing) {
+      _longData!.update(details.localPosition);
+      controller.onDrawMoveUpdate(_longData!);
+    } else {
+      _longData!.update(details.localPosition);
+      controller.updateCross(_longData!);
+    }
   }
 
   void onLongPressEnd(LongPressEndDetails details) {
@@ -468,9 +577,16 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
       logd("onLongPressEnd ignore! > details:$details");
       return;
     }
-    logd("onLongPressEnd details:$details");
-    // 长按结束, 尝试取消Cross事件.
-    controller.cancelCross();
+    // assert(() {
+    //   logd("onLongPressEnd details:$details");
+    //   return true;
+    // }());
+    if (drawState.isOngoing) {
+      controller.onDrawMoveEnd();
+    } else {
+      // 长按结束, 尝试取消Cross事件.
+      controller.cancelCross();
+    }
     _longData?.end();
     _longData = null;
   }
