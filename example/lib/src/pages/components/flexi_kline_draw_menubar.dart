@@ -56,17 +56,16 @@ class _FlexiKlineDrawMenubarState extends ConsumerState<FlexiKlineDrawMenubar> {
                 child: ValueListenableBuilder(
                   valueListenable: widget.controller.drawStateLinstener,
                   builder: (context, state, child) {
+                    final drawType = state.object?.type;
                     return Row(
-                      children: DrawType.values.map((type) {
+                      children: widget.controller.supportDrawTypes.map((type) {
                         return ShrinkIconButton(
                           key: ValueKey(type),
                           onPressed: () {
                             widget.controller.startDraw(type);
                           },
                           content: 'assets/svgs/${type.id}.svg',
-                          color:
-                              state.object?.type == type ? theme.t1 : theme.t2,
-                          // content: 'assets/svgs/${type.name.replaceAllMapped(_exp, (m) => '_${m.group(0)}').toLowerCase()}.svg',
+                          color: drawType == type ? theme.t1 : theme.t2,
                         );
                       }).toList(),
                     );

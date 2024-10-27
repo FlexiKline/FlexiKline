@@ -14,6 +14,7 @@
 
 library overlay;
 
+import 'dart:collection';
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:json_annotation/json_annotation.dart';

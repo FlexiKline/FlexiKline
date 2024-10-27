@@ -60,6 +60,25 @@ final class OverlayDrawObjectManager with KlineLog {
     return _supportDrawTypes ??= _overlayBuilders.keys;
   }
 
+  Map<String, Iterable<IDrawType>>? _supportDrawGroupTypes;
+  Map<String, Iterable<IDrawType>> get supportDrawGroupTypes {
+    if (_supportDrawGroupTypes == null || _supportDrawGroupTypes!.isEmpty) {
+      final groupMap = <String, Set<IDrawType>>{};
+      for (var type in supportDrawTypes) {
+        final set = groupMap[type.groupId] ??= LinkedHashSet<IDrawType>(
+          equals: (p0, p1) {
+            return p0.groupId == p1.groupId &&
+                p0.id == p1.id &&
+                p0.steps == p1.steps;
+          },
+        );
+        set.add(type);
+      }
+      _supportDrawGroupTypes = groupMap;
+    }
+    return _supportDrawGroupTypes!;
+  }
+
   /// 自定义[IDrawType]构建器
   void registerDrawOverlayObjectBuilder(
     IDrawType type,
@@ -67,6 +86,7 @@ final class OverlayDrawObjectManager with KlineLog {
   ) {
     _overlayBuilders[type] = builder;
     _supportDrawTypes = null;
+    _supportDrawGroupTypes = null;
   }
 
   /// 当前KlineData唯一标识

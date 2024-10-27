@@ -20,14 +20,23 @@ typedef DrawObjectBuilder<T extends Overlay, R extends DrawObject<T>> = R
 abstract interface class IDrawType {
   int get steps;
   String get id;
-  // TODO: 增加groupId进行分组
+  String get groupId;
 }
 
 /// 自定义绘制类型
 final class FlexiDrawType implements IDrawType {
-  const FlexiDrawType(this.id, this.steps);
+  const FlexiDrawType(
+    this.id,
+    this.steps, {
+    String? groupId,
+  }) : groupId = groupId ?? drawGroupUnknown;
+
+  @override
+  final String groupId;
+
   @override
   final String id;
+
   @override
   final int steps;
 
@@ -48,34 +57,42 @@ final class FlexiDrawType implements IDrawType {
 
 const unknownDrawType = FlexiDrawType('unknown', 0);
 
+const String drawGroupUnknown = 'unknown';
+const String drawGroupLines = 'lines';
+const String drawGroupProjection = 'projection';
+const String drawGroupFibonacci = 'fibonacci';
+const String drawGroupPatterns = 'patterns';
+
 enum DrawType implements IDrawType {
   // 单线
-  trendLine(2), // 趋势线
-  arrowLine(2), // 箭头
-  extendedTrendLine(2), // 延长趋势线
-  trendAngle(2), // 趋势线角度
-  rayLine(2), // 射线
-  horizontalTrendLine(2), // 水平趋势线
-  horizontalRayLine(2), // 水平射线
-  horizontalLine(1), // 水平线
-  verticalLine(1), // 垂直线
-  crossLine(1), // 十字线
-  priceLine(1), // 价钱线
+  trendLine(drawGroupLines, 2), // 趋势线
+  arrowLine(drawGroupLines, 2), // 箭头
+  extendedTrendLine(drawGroupLines, 2), // 延长趋势线
+  trendAngle(drawGroupLines, 2), // 趋势线角度
+  rayLine(drawGroupLines, 2), // 射线
+  horizontalTrendLine(drawGroupLines, 2), // 水平趋势线
+  horizontalRayLine(drawGroupLines, 2), // 水平射线
+  horizontalLine(drawGroupLines, 1), // 水平线
+  verticalLine(drawGroupLines, 1), // 垂直线
+  crossLine(drawGroupLines, 1), // 十字线
+  priceLine(drawGroupUnknown, 1), // 价钱线
   // 多线
-  rectangle(2), // 长方形
-  parallelChannel(3), // 平行通道
+  rectangle(drawGroupProjection, 2), // 长方形
+  parallelChannel(drawGroupProjection, 3), // 平行通道
   // parallelLines, // 平行直线
-  fibRetracement(2), // 斐波那契回撤
-  fibExpansion(3), // 斐波那契扩展
-  fibFans(2); // 斐波那契扇形
+  fibRetracement(drawGroupPatterns, 2), // 斐波那契回撤
+  fibExpansion(drawGroupPatterns, 3), // 斐波那契扩展
+  fibFans(drawGroupPatterns, 2); // 斐波那契扇形
 
-  const DrawType(this.steps);
-
+  const DrawType(this.groupId, this.steps);
   @override
-  final int steps;
+  final String groupId;
 
   @override
   String get id => name;
+
+  @override
+  final int steps;
 }
 
 enum MagnetMode {

@@ -85,6 +85,10 @@ mixin DrawBinding
     return _drawObjectManager.supportDrawTypes;
   }
 
+  Map<String, Iterable<IDrawType>> get supportDrawGroupTypes {
+    return _drawObjectManager.supportDrawGroupTypes;
+  }
+
   /// 自定义overlay绘制对象构建器
   void registerDrawOverlayObjectBuilder(
     IDrawType type,
