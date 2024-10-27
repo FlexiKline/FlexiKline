@@ -219,8 +219,8 @@ abstract interface class IDraw {
   /// 绘制状态监听器
   ValueListenable<DrawState> get drawStateLinstener;
 
-  /// 绘制类型监听器
-  ValueListenable<IDrawType?> get drawTypeListener;
+  /// 绘制指针监听器(用于放大镜)
+  ValueListenable<Point?> get drawPointerListener;
 
   /// 测试[position]位置上是否命中当前已完成绘制操作的Overly.
   DrawObject? hitTestDrawObject(Offset position);

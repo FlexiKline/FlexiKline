@@ -359,6 +359,8 @@ class DrawPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    if (!controller.drawVisibilityListener.value) return;
+
     controller.drawStateAxisTicksText(canvas, size);
     try {
       /// 保存画布状态

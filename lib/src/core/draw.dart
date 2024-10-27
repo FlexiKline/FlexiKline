@@ -56,18 +56,18 @@ mixin DrawBinding
   void dispose() {
     super.dispose();
     logd('dispose draw');
-    _drawTypeListener.dispose();
     _drawStateListener.dispose();
     _repaintDraw.dispose();
     _drawObjectManager.dispose();
     _drawPointerListener.dispose();
+    _drawVisibilityListener.dispose();
   }
 
   late final OverlayDrawObjectManager _drawObjectManager;
   final _repaintDraw = ValueNotifier(0);
   final _drawStateListener = KlineStateNotifier(DrawState.exited());
-  final _drawTypeListener = ValueNotifier<IDrawType?>(null);
   final _drawPointerListener = KlineStateNotifier<Point?>(null);
+  final _drawVisibilityListener = ValueNotifier<bool>(true);
 
   @override
   Listenable get repaintDraw => _repaintDraw;
@@ -100,16 +100,15 @@ mixin DrawBinding
   DrawState get drawState => _drawStateListener.value;
   set _drawState(DrawState state) {
     _drawStateListener.value = state;
-    // 子状态更新
-    _drawTypeListener.value = state.object?.type;
   }
 
   @override
   ValueListenable<DrawState> get drawStateLinstener => _drawStateListener;
 
   @override
-  ValueListenable<IDrawType?> get drawTypeListener => _drawTypeListener;
   ValueListenable<Point?> get drawPointerListener => _drawPointerListener;
+
+  ValueListenable<bool> get drawVisibilityListener => _drawVisibilityListener;
 
   @override
   void prepareDraw() {
@@ -172,13 +171,6 @@ mixin DrawBinding
   }
 
   /// 确认动作.
-  /// 1. 将pointer指针offset转换为蜡烛坐标
-  /// 2. 当前是drawing时:
-  ///   2.1. 添加pointer到points中, 并重置pointer为下一个位置的指针.
-  ///   2.2. 最后检查当前overlay是否绘制完成, 如果绘制完成切换状态为Editing.
-  ///   2.3. 将overlay加入到_overlayManager中进行管理.
-  /// 3. 当状态为Editing时:
-  ///   3.1. 更新pointer到points中, 并清空pointer(等待下一次的选择)
   bool onDrawConfirm(GestureData data) {
     final object = drawState.object;
     if (object == null) return false;
@@ -192,29 +184,25 @@ mixin DrawBinding
         pointer = Point.pointer(index, data.offset);
       }
 
-      // final isOk = updateDrawPointByOffset(pointer);
-      // if (!isOk) {
-      //   logw('onDrawConfirm updatePointer failed! pointer:$pointer');
-      //   return false;
-      // }
       object.addPointer(pointer);
-
       if (object.isEditing) {
         logi('onDrawConfirm ${object.type} draw completed!');
+        // TODO: 增加object接口, 校正所有绘制点
+        for (var point in object.points) {
+          if (point != null) {
+            updateDrawPointByOffset(point);
+          }
+        }
         // 绘制完成, 使用drawLine配置绘制实线.
-        _drawObjectManager.addDrawObject(object);
         object.setDrawLineConfig(drawConfig.drawLine);
         _drawState = Editing(object);
-        // TODO: 增加object接口, 校正所有绘制点
-        result = false;
+        _drawObjectManager.addDrawObject(object);
       } else {
-        result = true;
+        result = true; // 说明未绘制完成，用于Gesture手势层保留事件数据
       }
     } else if (object.isEditing) {
       final pointer = object.pointer;
       if (pointer == null) {
-        // 当前处于编辑状态, 但是pointer又没有被赋值, 此时点击事件, 为确认完成.
-        _drawObjectManager.addDrawObject(object);
         // TODO: 增加object接口, 校正所有绘制点
         for (var point in object.points) {
           if (point != null) {
@@ -222,15 +210,10 @@ mixin DrawBinding
           }
         }
         _drawState = const Prepared();
-        result = false;
+        // 当前处于编辑状态, 但是pointer又没有被赋值, 此时点击事件为确认完成绘制.
+        _drawObjectManager.addDrawObject(object);
       } else {
-        // final isOk = updateDrawPointByOffset(pointer);
-        // if (!isOk) {
-        //   logw('onDrawConfirm updatePointer failed! pointer:$pointer');
-        //   return false;
-        // }
         object.confirmPointer();
-        result = false;
       }
     }
 
@@ -367,6 +350,14 @@ mixin DrawBinding
     _markRepaint();
     _notifyDrawStateChange();
     return true;
+  }
+
+  void setDrawVisibility(bool isShow) {
+    _drawVisibilityListener.value = isShow;
+    if (!isShow) {
+      _drawState = const Exited();
+    }
+    _markRepaint();
   }
 
   /// 以当前蜡烛图绘制参数为基础, 将绘制参数[point]转换Offset坐标.

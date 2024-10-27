@@ -54,8 +54,8 @@ class _FlexiKlineDrawMenubarState extends ConsumerState<FlexiKlineDrawMenubar> {
                 scrollDirection: Axis.horizontal,
                 physics: const BouncingScrollPhysics(),
                 child: ValueListenableBuilder(
-                  valueListenable: widget.controller.drawTypeListener,
-                  builder: (context, value, child) {
+                  valueListenable: widget.controller.drawStateLinstener,
+                  builder: (context, state, child) {
                     return Row(
                       children: DrawType.values.map((type) {
                         return ShrinkIconButton(
@@ -64,7 +64,8 @@ class _FlexiKlineDrawMenubarState extends ConsumerState<FlexiKlineDrawMenubar> {
                             widget.controller.startDraw(type);
                           },
                           content: 'assets/svgs/${type.id}.svg',
-                          color: value == type ? theme.t1 : theme.t2,
+                          color:
+                              state.object?.type == type ? theme.t1 : theme.t2,
                           // content: 'assets/svgs/${type.name.replaceAllMapped(_exp, (m) => '_${m.group(0)}').toLowerCase()}.svg',
                         );
                       }).toList(),
@@ -90,10 +91,17 @@ class _FlexiKlineDrawMenubarState extends ConsumerState<FlexiKlineDrawMenubar> {
             onPressed: () {},
             content: SvgRes.magnetMode,
           ),
-          ShrinkIconButton(
-            onPressed: () {},
-            content: Icons.visibility_outlined,
-            // iconData: Icons.visibility_off_outlined,
+          ValueListenableBuilder(
+            valueListenable: widget.controller.drawVisibilityListener,
+            builder: (context, isShow, child) => ShrinkIconButton(
+              onPressed: () {
+                widget.controller.setDrawVisibility(!isShow);
+              },
+              content: isShow
+                  ? Icons.visibility_outlined
+                  : Icons.visibility_off_outlined,
+              // iconData: Icons.visibility_off_outlined,
+            ),
           ),
           ShrinkIconButton(
             onPressed: () {
