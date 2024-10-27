@@ -222,9 +222,6 @@ abstract interface class IDraw {
   /// 绘制类型监听器
   ValueListenable<IDrawType?> get drawTypeListener;
 
-  /// 当前绘制线样式监听
-  ValueListenable<LineConfig> get drawLineStyleListener;
-
   /// 测试[position]位置上是否命中当前已完成绘制操作的Overly.
   DrawObject? hitTestDrawObject(Offset position);
 

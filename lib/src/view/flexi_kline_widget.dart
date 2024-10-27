@@ -228,7 +228,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
                 setState(() {});
               },
               onPanEnd: (event) {
-                /// 是否持久化到本地?
+                /// TODO: 将位置持久化到本地
               },
               child: SizedBox(
                 key: _drawToolbarKey,

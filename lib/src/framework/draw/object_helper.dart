@@ -84,6 +84,10 @@ mixin DrawConfigMixin on OverlayObject {
     return _drawPoint!;
   }
 
+  void setDrawLockState(bool isLock) {
+    _overlay.lock = isLock;
+  }
+
   void setDrawLineConfig(LineConfig line) {
     _overlay.line = line;
   }

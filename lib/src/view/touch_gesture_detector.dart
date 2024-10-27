@@ -218,6 +218,7 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
         // 未完成的暂不允许移动
         return;
       }
+      if (drawState.object?.lock == true) return;
       logd("onScaleStart draw > details:$details");
       _panScaleData = GestureData.pan(details.localFocalPoint);
       final result = controller.onDrawMoveStart(_panScaleData!);
@@ -412,12 +413,14 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
       logd("onLongPressStart ignore! > crossing:${controller.isCrossing}");
       return;
     }
-    logd("onLongPressStart > details:$details");
+
     if (drawState.isOngoing) {
       if (drawState.isDrawing) {
         // 未完成的暂不允许移动
         return;
       }
+      if (drawState.object?.lock == true) return;
+      logd("onLongPressStart draw > details:$details");
       _longData = GestureData.long(details.localPosition);
       final result = controller.onDrawMoveStart(_longData!);
       if (!result) {
@@ -425,10 +428,7 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
         _longData = null;
       }
     } else {
-      // assert(() {
-      //   logd("onLongPressStart cross > details:$details");
-      //   return true;
-      // }());
+      logd("onLongPressStart cross > details:$details");
       _longData = GestureData.long(details.localPosition);
       final result = controller.startCross(_longData!);
       if (!result) {

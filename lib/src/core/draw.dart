@@ -16,7 +16,6 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 
-import '../config/export.dart';
 import '../extension/export.dart';
 import '../framework/draw/overlay.dart';
 import '../framework/export.dart';
@@ -45,7 +44,6 @@ mixin DrawBinding
   void initState() {
     super.initState();
     logd('initState draw');
-    _drawLineStyleListener = KlineStateNotifier(drawConfig.drawLine);
     candleRequestListener.addListener(() {
       _drawObjectManager.onChangeCandleRequest(
         candleRequestListener.value,
@@ -58,7 +56,6 @@ mixin DrawBinding
   void dispose() {
     super.dispose();
     logd('dispose draw');
-    _drawLineStyleListener.dispose();
     _drawTypeListener.dispose();
     _drawStateListener.dispose();
     _repaintDraw.dispose();
@@ -67,7 +64,6 @@ mixin DrawBinding
   }
 
   late final OverlayDrawObjectManager _drawObjectManager;
-  late final KlineStateNotifier<LineConfig> _drawLineStyleListener;
   final _repaintDraw = ValueNotifier(0);
   final _drawStateListener = KlineStateNotifier(DrawState.exited());
   final _drawTypeListener = ValueNotifier<IDrawType?>(null);
@@ -106,9 +102,6 @@ mixin DrawBinding
     _drawStateListener.value = state;
     // 子状态更新
     _drawTypeListener.value = state.object?.type;
-    if (state.object != null) {
-      _drawLineStyleListener.value = state.object!.line;
-    }
   }
 
   @override
@@ -117,10 +110,6 @@ mixin DrawBinding
   @override
   ValueListenable<IDrawType?> get drawTypeListener => _drawTypeListener;
   ValueListenable<Point?> get drawPointerListener => _drawPointerListener;
-
-  @override
-  ValueListenable<LineConfig> get drawLineStyleListener =>
-      _drawLineStyleListener;
 
   @override
   void prepareDraw() {
@@ -252,6 +241,7 @@ mixin DrawBinding
   bool onDrawMoveStart(GestureData data) {
     if (!drawState.isEditing) return false; // 未完成的暂不允许移动
     final object = drawState.object!;
+    if (object.lock) return false; // 锁定状态不允许移动
 
     final position = data.offset;
     // 检查是否在某个绘制点上
@@ -363,11 +353,20 @@ mixin DrawBinding
       strokeWidth: strokeWidth,
       lineType: lineType,
     )) {
-      _drawLineStyleListener.notifyListeners();
       _markRepaint();
+      _notifyDrawStateChange();
       return true;
     }
     return false;
+  }
+
+  bool setDrawLockState(bool isLock) {
+    final object = drawState.object;
+    if (object == null) return false;
+    object.setDrawLockState(isLock);
+    _markRepaint();
+    _notifyDrawStateChange();
+    return true;
   }
 
   /// 以当前蜡烛图绘制参数为基础, 将绘制参数[point]转换Offset坐标.

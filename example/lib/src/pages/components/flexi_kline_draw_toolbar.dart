@@ -56,8 +56,11 @@ class FlexiKlineDrawToolbar extends ConsumerWidget {
       ),
       padding: EdgeInsets.symmetric(horizontal: 2.r, vertical: 4.r),
       child: ValueListenableBuilder(
-        valueListenable: controller.drawLineStyleListener,
-        builder: (context, lineStyle, child) {
+        valueListenable: controller.drawStateLinstener,
+        builder: (context, state, child) {
+          final object = state.object;
+          if (object == null) return const SizedBox.shrink();
+          final lineStyle = object.line;
           Color paintColor = flexiKlinePaintColors.first;
           if (lineStyle.paint.color != paintColor &&
               flexiKlinePaintColors.contains(lineStyle.paint.color)) {
@@ -161,8 +164,9 @@ class FlexiKlineDrawToolbar extends ConsumerWidget {
               ShrinkIconButton(
                 onPressed: () {
                   debugPrint('zp::: draw onTap Lock');
+                  controller.setDrawLockState(!object.lock);
                 },
-                content: SvgRes.unlock,
+                content: object.lock ? SvgRes.lock : SvgRes.unlock,
               ),
               ShrinkIconButton(
                 onPressed: () {
