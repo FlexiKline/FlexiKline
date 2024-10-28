@@ -23,6 +23,25 @@ extension ListExt<T> on List<T> {
     if (checkIndex(index)) return this[index];
     return null;
   }
+
+  int binarySearch(int Function(T item) compare) {
+    int min = 0;
+    int max = length;
+    while (min < max) {
+      final int mid = min + ((max - min) >> 1);
+      final T element = this[mid];
+      final int comp = compare(element);
+      if (comp == 0) {
+        return mid;
+      }
+      if (comp < 0) {
+        min = mid + 1;
+      } else {
+        max = mid;
+      }
+    }
+    return -1;
+  }
 }
 
 extension IterableExt<T> on Iterable<T> {

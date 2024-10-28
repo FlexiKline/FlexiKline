@@ -24,7 +24,9 @@ final class SvgRes {
 
   // 绘制工具
   static const String continuousDrawing = 'assets/svgs/continuous_drawing.svg';
-  static const String magnetMode = 'assets/svgs/magnet_mode.svg';
+  static const String magnetModeNormal = 'assets/svgs/magnet_mode_normal.svg';
+  static const String magnetModeWeak = 'assets/svgs/magnet_mode_weak.svg';
+  static const String magnetModeStrong = 'assets/svgs/magnet_mode_strong.svg';
   static const String lineWeight1 = 'assets/svgs/line_weight_1.svg';
   static const String lineWeight2 = 'assets/svgs/line_weight_2.svg';
   static const String lineWeight3 = 'assets/svgs/line_weight_3.svg';

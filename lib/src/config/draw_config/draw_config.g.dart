@@ -29,6 +29,8 @@ abstract class _$DrawConfigCWProxy {
 
   DrawConfig hitTestMinDistance(double hitTestMinDistance);
 
+  DrawConfig magnetMinDistance(double magnetMinDistance);
+
   DrawConfig magnifierConfig(MagnifierConfig magnifierConfig);
 
   DrawConfig drawParams(DrawParams drawParams);
@@ -51,6 +53,7 @@ abstract class _$DrawConfigCWProxy {
     double? spacing,
     double? ticksGapBgOpacity,
     double? hitTestMinDistance,
+    double? magnetMinDistance,
     MagnifierConfig? magnifierConfig,
     DrawParams? drawParams,
   });
@@ -100,6 +103,10 @@ class _$DrawConfigCWProxyImpl implements _$DrawConfigCWProxy {
       this(hitTestMinDistance: hitTestMinDistance);
 
   @override
+  DrawConfig magnetMinDistance(double magnetMinDistance) =>
+      this(magnetMinDistance: magnetMinDistance);
+
+  @override
   DrawConfig magnifierConfig(MagnifierConfig magnifierConfig) =>
       this(magnifierConfig: magnifierConfig);
 
@@ -126,6 +133,7 @@ class _$DrawConfigCWProxyImpl implements _$DrawConfigCWProxy {
     Object? spacing = const $CopyWithPlaceholder(),
     Object? ticksGapBgOpacity = const $CopyWithPlaceholder(),
     Object? hitTestMinDistance = const $CopyWithPlaceholder(),
+    Object? magnetMinDistance = const $CopyWithPlaceholder(),
     Object? magnifierConfig = const $CopyWithPlaceholder(),
     Object? drawParams = const $CopyWithPlaceholder(),
   }) {
@@ -180,6 +188,11 @@ class _$DrawConfigCWProxyImpl implements _$DrawConfigCWProxy {
           ? _value.hitTestMinDistance
           // ignore: cast_nullable_to_non_nullable
           : hitTestMinDistance as double,
+      magnetMinDistance: magnetMinDistance == const $CopyWithPlaceholder() ||
+              magnetMinDistance == null
+          ? _value.magnetMinDistance
+          // ignore: cast_nullable_to_non_nullable
+          : magnetMinDistance as double,
       magnifierConfig: magnifierConfig == const $CopyWithPlaceholder() ||
               magnifierConfig == null
           ? _value.magnifierConfig
@@ -220,6 +233,7 @@ DrawConfig _$DrawConfigFromJson(Map<String, dynamic> json) => DrawConfig(
       ticksGapBgOpacity: (json['ticksGapBgOpacity'] as num?)?.toDouble() ?? 0.1,
       hitTestMinDistance:
           (json['hitTestMinDistance'] as num?)?.toDouble() ?? 20,
+      magnetMinDistance: (json['magnetMinDistance'] as num?)?.toDouble() ?? 40,
       magnifierConfig: json['magnifierConfig'] == null
           ? const MagnifierConfig()
           : MagnifierConfig.fromJson(
@@ -242,6 +256,7 @@ Map<String, dynamic> _$DrawConfigToJson(DrawConfig instance) =>
       'spacing': instance.spacing,
       'ticksGapBgOpacity': instance.ticksGapBgOpacity,
       'hitTestMinDistance': instance.hitTestMinDistance,
+      'magnetMinDistance': instance.magnetMinDistance,
       'magnifierConfig': instance.magnifierConfig.toJson(),
       'drawParams': instance.drawParams.toJson(),
     };

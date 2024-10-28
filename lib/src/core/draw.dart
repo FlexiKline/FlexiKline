@@ -61,6 +61,7 @@ mixin DrawBinding
     _drawObjectManager.dispose();
     _drawPointerListener.dispose();
     _drawVisibilityListener.dispose();
+    _drawMagnetModeListener.dispose();
   }
 
   late final OverlayDrawObjectManager _drawObjectManager;
@@ -68,6 +69,7 @@ mixin DrawBinding
   final _drawStateListener = KlineStateNotifier(DrawState.exited());
   final _drawPointerListener = KlineStateNotifier<Point?>(null);
   final _drawVisibilityListener = ValueNotifier<bool>(true);
+  final _drawMagnetModeListener = ValueNotifier<MagnetMode>(MagnetMode.normal);
 
   @override
   Listenable get repaintDraw => _repaintDraw;
@@ -113,6 +115,11 @@ mixin DrawBinding
   ValueListenable<Point?> get drawPointerListener => _drawPointerListener;
 
   ValueListenable<bool> get drawVisibilityListener => _drawVisibilityListener;
+
+  ValueListenable<MagnetMode> get drawMagnetModeListener =>
+      _drawMagnetModeListener;
+
+  MagnetMode get drawMagnet => _drawMagnetModeListener.value;
 
   @override
   void prepareDraw() {
@@ -360,6 +367,14 @@ mixin DrawBinding
     _drawVisibilityListener.value = isShow;
     if (!isShow) {
       _drawState = const Exited();
+    }
+    _markRepaint();
+  }
+
+  void setDrawMagnetMode(MagnetMode mode) {
+    _drawMagnetModeListener.value = mode;
+    if (mode != MagnetMode.normal && drawState.object?.pointer != null) {
+      // 如果当前指针存在，主动根据[mode]校正指针.
     }
     _markRepaint();
   }

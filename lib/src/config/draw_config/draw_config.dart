@@ -38,6 +38,7 @@ class DrawConfig {
     required this.spacing,
     this.ticksGapBgOpacity = 0.1,
     this.hitTestMinDistance = 20,
+    this.magnetMinDistance = 40,
     this.magnifierConfig = const MagnifierConfig(),
     this.drawParams = const DrawParams(),
   });
@@ -75,6 +76,9 @@ class DrawConfig {
   /// 命中测试最小距离.
   /// 当前位置到Overlay绘制线距离如果小于等于[hitTestMinDistance], 即命中.
   final double hitTestMinDistance;
+
+  /// 磁吸模式(weak)下，最小吸附距离
+  final double magnetMinDistance;
 
   /// 放大镜配置
   final MagnifierConfig magnifierConfig;

@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:example/src/constants/images.dart';
 import 'package:example/src/theme/flexi_theme.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart';
@@ -86,9 +85,15 @@ class _FlexiKlineDrawMenubarState extends ConsumerState<FlexiKlineDrawMenubar> {
             // content: Icons.dynamic_feed_rounded,
             content: Icons.auto_awesome_motion_rounded,
           ),
-          ShrinkIconButton(
-            onPressed: () {},
-            content: SvgRes.magnetMode,
+          ValueListenableBuilder(
+            valueListenable: widget.controller.drawMagnetModeListener,
+            builder: (context, mode, child) => ShrinkIconButton(
+              onPressed: () {
+                widget.controller.setDrawMagnetMode(mode.next);
+              },
+              color: mode.isNormal ? theme.t2 : Colors.blueAccent,
+              content: 'assets/svgs/magnet_mode_${mode.name}.svg',
+            ),
           ),
           ValueListenableBuilder(
             valueListenable: widget.controller.drawVisibilityListener,

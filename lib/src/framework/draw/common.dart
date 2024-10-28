@@ -97,6 +97,19 @@ enum DrawType implements IDrawType {
 
 enum MagnetMode {
   normal,
-  weakMagnet,
-  strongMagnet;
+  weak,
+  strong;
+
+  MagnetMode get next {
+    switch (this) {
+      case MagnetMode.normal:
+        return MagnetMode.weak;
+      case MagnetMode.weak:
+        return MagnetMode.strong;
+      case MagnetMode.strong:
+        return MagnetMode.normal;
+    }
+  }
+
+  bool get isNormal => this == MagnetMode.normal;
 }
