@@ -19,11 +19,10 @@ part of 'overlay.dart';
 class Point {
   Point({
     this.index = -1,
-    this.offset = Offset.infinite,
+    Offset? offset,
     this.ts = -1,
     this.value = BagNum.zero,
-    // this.patch = 0,
-  });
+  }) : offset = offset ?? Offset.infinite;
 
   factory Point.pointer(int index, Offset offset) {
     assert(index >= 0, 'invalid index($index)');
@@ -36,9 +35,11 @@ class Point {
 
   final int index;
 
-  /// 当前canvas中的坐标(实时更新)
+  /// 当前canvas中的坐标(实时更新) // TODO: 防串改处理
   @JsonKey(includeFromJson: false, includeToJson: false)
   Offset offset;
+  // Offset _offset;
+  // Offset get offset => _offset;
 
   /// 蜡烛图时间
   int ts;

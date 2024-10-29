@@ -233,7 +233,7 @@ mixin DrawObjectMixin on DrawStateObject {
 
       /// 当前判断顺序绘制顺序
       final position = pointer?.offset;
-      if (moving && position != null && position.dx == bounds.left) {
+      if (position != null && position.dx == bounds.left) {
         startDx = bounds.right;
         endDx = bounds.left;
       }
@@ -280,7 +280,7 @@ mixin DrawObjectMixin on DrawStateObject {
 
       /// 判断顺序绘制顺序
       final position = pointer?.offset;
-      if (moving && position != null && position.dy == bounds.top) {
+      if (position != null && position.dy == bounds.top) {
         topDy = bounds.bottom;
         bottomDy = bounds.top;
       }

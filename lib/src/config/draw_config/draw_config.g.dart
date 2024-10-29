@@ -232,8 +232,8 @@ DrawConfig _$DrawConfigFromJson(Map<String, dynamic> json) => DrawConfig(
       spacing: (json['spacing'] as num).toDouble(),
       ticksGapBgOpacity: (json['ticksGapBgOpacity'] as num?)?.toDouble() ?? 0.1,
       hitTestMinDistance:
-          (json['hitTestMinDistance'] as num?)?.toDouble() ?? 20,
-      magnetMinDistance: (json['magnetMinDistance'] as num?)?.toDouble() ?? 40,
+          (json['hitTestMinDistance'] as num?)?.toDouble() ?? 10,
+      magnetMinDistance: (json['magnetMinDistance'] as num?)?.toDouble() ?? 10,
       magnifierConfig: json['magnifierConfig'] == null
           ? const MagnifierConfig()
           : MagnifierConfig.fromJson(

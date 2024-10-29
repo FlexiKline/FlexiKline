@@ -221,7 +221,8 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
 
     logd('onEnter $event');
     if (_hoverData != null && drawState.isOngoing) {
-      drawState.object?.pointer?.offset = offset; // TODO: 待优化.
+      // TODO: 待优化: 将所有指针操作移至object内完成.
+      drawState.object?.pointer?.offset = offset;
       _hoverData!.update(offset);
     } else {
       _hoverData = GestureData.hover(offset);
@@ -247,23 +248,18 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
         // if (!mainRect.include(offset)) {
         //   offset = offset.clamp(mainRect);
         // }
-        _hoverData ??= GestureData.hover(offset);
+        // _hoverData ??= GestureData.hover(offset);
         _hoverData!.update(offset);
         controller.onDrawUpdate(_hoverData!);
         return;
       }
     }
 
-    if (!controller.canvasRect.include(offset)) return;
-    // assert(() {
-    //   logd('onHover cross $event');
-    //   return true;
-    // }());
-
-    _hoverData!.update(offset);
     if (!controller.isCrossing) {
+      _hoverData!.update(offset);
       controller.startCross(_hoverData!, force: true);
     } else {
+      _hoverData!.update(offset);
       controller.updateCross(_hoverData!);
     }
   }
@@ -286,12 +282,17 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
   void onTapUp(TapUpDetails details) {
     if (drawState.isOngoing) {
       logd("onTapUp draw confirm details:$details");
-      final tapData = GestureData.tap(details.localPosition);
-      final ret = controller.onDrawConfirm(tapData);
-      if (ret && controller.isCrossing) {
-        controller.cancelCross();
+      final offset = drawState.pointerOffset ?? details.localPosition;
+      if (offset.isFinite) {
+        _hoverData = GestureData.tap(offset);
+        final ret = controller.onDrawConfirm(_hoverData!);
+        if (!ret) {
+          _hoverData?.end();
+          _hoverData = null;
+        } else if (controller.isCrossing) {
+          controller.cancelCross(); // ret为true; 说明未完成绘制, 主动取消cross
+        }
       }
-      tapData.end();
       return;
     } else if (drawState.isPrepared ||
         controller.drawConfig.allowSelectWhenExit) {

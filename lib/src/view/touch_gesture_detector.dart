@@ -121,16 +121,16 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
         /// 已完成的DrawOverlay, 通过[_panScaleData]或[_longData]事件数据更新.
         return;
       }
-      final pointer = drawState.pointer;
-      if (pointer != null) {
+      final pointerOffset = drawState.pointerOffset;
+      if (pointerOffset != null) {
         if (!isSweeped) {
           logi(
             'onPointerMove currently in drawing, need clear the gesture arena!',
           );
           isSweeped = true;
           GestureBinding.instance.gestureArena.sweep(event.pointer);
-          if (pointer.offset.isFinite) {
-            _tapData ??= GestureData.pan(pointer.offset);
+          if (pointerOffset.isFinite) {
+            _tapData = GestureData.pan(pointerOffset);
           }
         }
 
@@ -165,24 +165,30 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
     if (isSweeped) {
       isSweeped = false;
     }
+    _tapData?.end();
+    _tapData = null;
   }
 
   void onPointerCancel(PointerCancelEvent event) {
     if (isSweeped) {
       isSweeped = false;
     }
+    _tapData?.end();
+    _tapData = null;
   }
 
   /// 点击
   void onTapUp(TapUpDetails details) {
     if (drawState.isOngoing) {
       logd("onTapUp draw confirm details:$details");
-      final offset = drawState.pointer?.offset;
-      _tapData = GestureData.tap(offset ?? details.localPosition);
-      final ret = controller.onDrawConfirm(_tapData!);
-      if (!ret) {
-        _tapData?.end();
-        _tapData = null;
+      final pointerOffset = drawState.pointerOffset ?? details.localPosition;
+      if (pointerOffset.isFinite) {
+        _tapData = GestureData.tap(pointerOffset);
+        final ret = controller.onDrawConfirm(_tapData!);
+        if (!ret) {
+          _tapData?.end();
+          _tapData = null;
+        }
       }
       return;
     } else if (drawState.isPrepared ||

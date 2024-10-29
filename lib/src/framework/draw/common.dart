@@ -112,4 +112,6 @@ enum MagnetMode {
   }
 
   bool get isNormal => this == MagnetMode.normal;
+  bool get isWeak => this == MagnetMode.weak;
+  bool get isStrong => this == MagnetMode.strong;
 }

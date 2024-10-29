@@ -256,6 +256,8 @@ abstract interface class IDrawContext implements ILogger {
 
   KlineData get curKlineData;
 
+  MagnetMode get drawMagnet;
+
   /// 将dx转换为蜡烛数据.
   CandleModel? dxToCandle(double dx);
 
@@ -282,6 +284,9 @@ abstract interface class IDrawContext implements ILogger {
 
   /// 以当前蜡烛图绘制参数为基础, 将绘制参数[offset]转换Point坐标
   bool updateDrawPointByOffset(Point point, {Offset? offset});
+
+  /// 将[offset]吸附到蜡烛坐标上
+  Offset magneticSnap(Offset offset);
 }
 
 /// Grid图层API

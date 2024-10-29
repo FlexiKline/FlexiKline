@@ -19,9 +19,9 @@ import 'package:flutter/foundation.dart';
 import '../extension/export.dart';
 import '../framework/draw/overlay.dart';
 import '../framework/export.dart';
-import '../model/bag_num.dart';
-import '../model/gesture_data.dart';
+import '../model/export.dart';
 import '../utils/platform_util.dart';
+import '../utils/vector_util.dart';
 import 'binding_base.dart';
 import 'interface.dart';
 import 'setting.dart';
@@ -119,6 +119,7 @@ mixin DrawBinding
   ValueListenable<MagnetMode> get drawMagnetModeListener =>
       _drawMagnetModeListener;
 
+  @override
   MagnetMode get drawMagnet => _drawMagnetModeListener.value;
 
   @override
@@ -152,7 +153,7 @@ mixin DrawBinding
       if (object != null) {
         // 初始指针为[mainRect]中心
         if (isInitPointer ?? PlatformUtil.isTouch) {
-          object.setPointer(Point.pointer(0, mainRect.center));
+          object.setPointer(Point.pointer(0, magneticSnap(mainRect.center)));
         }
         _drawState = DrawState.draw(object);
       } else {
@@ -174,11 +175,12 @@ mixin DrawBinding
       }());
       return;
     }
-    object.onUpdateDrawPoint(
-      pointer,
-      pointer.offset + data.delta,
-    );
-    _markRepaint();
+    // final newOffset = magneticSnap(pointer.offset + data.delta);
+    final newOffset = magneticSnap(data.offset);
+    if (newOffset != pointer.offset) {
+      object.onUpdateDrawPoint(pointer, newOffset);
+      _markRepaint();
+    }
   }
 
   /// 确认动作.
@@ -191,8 +193,8 @@ mixin DrawBinding
       Point? pointer = object.pointer;
       if (pointer == null) {
         // 非触摸设备启动时, 不会设置初始指针, 只有在第一次Tap时, pointer才确认第一个指针
-        final index = object.nextIndex;
-        pointer = Point.pointer(index, data.offset);
+        final newOffset = magneticSnap(data.offset);
+        pointer = Point.pointer(object.nextIndex, newOffset);
       }
 
       object.addPointer(pointer);
@@ -269,27 +271,39 @@ mixin DrawBinding
     if (object.pointer != null) {
       // 当前移动一个编辑状态的Overlay的某个绘制点指针时,
       // 需要通过[DrawObject]的`onUpdatePoint`接口来校正offset.
-      object.onUpdateDrawPoint(
-        object.pointer!,
-        object.pointer!.offset + delta,
-        isMove: true,
-      );
-      _drawPointerListener.updateValue(object.pointer);
+      final newOffset = magneticSnap(data.offset);
+      if (newOffset != object.pointer!.offset) {
+        object.onUpdateDrawPoint(
+          object.pointer!,
+          newOffset,
+          isMove: true,
+        );
+        _drawPointerListener.updateValue(object.pointer);
+        _markRepaint();
+      }
     } else {
       object.onMoveDrawObject(delta);
+      _markRepaint();
     }
-    // _notifyDrawStateChange();
-    _markRepaint();
   }
 
   void onDrawMoveEnd() {
     if (!drawState.isEditing) return; // 未完成的暂不允许移动
     final object = drawState.object!;
 
-    final pointer = object.pointer;
-    if (pointer != null) {
-      logd('onDrawMoveEnd index:${pointer.index} point:$pointer');
+    if (object.pointer != null) {
+      logd('onDrawMoveEnd pointer:${object.pointer}');
       object.confirmPointer();
+    } else {
+      if (!drawMagnet.isNormal && isMagneticDrawObject(object)) {
+        for (var point in object.points) {
+          if (point == null) continue;
+          final index = dxToIndex(point.offset.dx);
+          if (index == null) continue;
+          final dx = indexToDx(index)! - candleWidthHalf;
+          point.offset = Offset(dx, point.offset.dy);
+        }
+      }
     }
     for (var point in object.points) {
       if (point != null) {
@@ -375,6 +389,10 @@ mixin DrawBinding
     _drawMagnetModeListener.value = mode;
     if (mode != MagnetMode.normal && drawState.object?.pointer != null) {
       // 如果当前指针存在，主动根据[mode]校正指针.
+      drawState.object!.onUpdateDrawPoint(
+        drawState.object!.pointer!,
+        magneticSnap(drawState.object!.pointer!.offset),
+      );
     }
     _markRepaint();
   }
@@ -410,6 +428,82 @@ mixin DrawBinding
     point.ts = ts;
     point.value = value;
     return true;
+  }
+
+  /// 检测[object]中所有point到所在蜡烛中心的距离是否相等.
+  /// 如果相等, 则可以进行磁吸操作
+  bool isMagneticDrawObject(DrawObject object) {
+    double? first;
+    for (var point in object.points) {
+      final pointDx = point?.offset.dx;
+      if (pointDx == null) return false;
+      final index = dxToIndex(pointDx);
+      if (index == null) return false;
+      final dx = indexToDx(index)! - candleWidthHalf;
+      // 计算point实际dx坐标与当前所在蜡烛中心坐标距离.
+      final deltaDx = (pointDx - dx).abs();
+      first ??= deltaDx;
+      // 如果当前point的deltaDx与第一个point的deltaDx不相同, 则不可进行磁吸操作
+      if ((deltaDx - first).abs() > precisionError) return false;
+    }
+    return true;
+  }
+
+  /// 将[offset]吸附到蜡烛坐标上
+  @override
+  Offset magneticSnap(Offset offset) {
+    if (drawMagnet.isNormal) return offset;
+
+    double dx = offset.dx, dy = offset.dy;
+    final index = dxToIndex(dx);
+    if (index != null) {
+      dx = indexToDx(index)! - candleWidthHalf;
+    }
+    BagNum? value = dyToValue(dy);
+    final candle = curKlineData.getCandle(index);
+    if (value != null && candle != null) {
+      final high = candle.high;
+      final low = candle.low;
+      final minDistance = drawConfig.magnetMinDistance;
+      if (value > high) {
+        final highDy = valueToDy(high);
+        if (highDy != null) {
+          if (drawMagnet.isWeak && (highDy - dy) <= minDistance) {
+            dy = highDy;
+          } else if (drawMagnet.isStrong) {
+            dy = highDy;
+          }
+        }
+      } else if (value < low) {
+        final lowDy = valueToDy(low);
+        if (lowDy != null) {
+          if (drawMagnet.isWeak && (dy - lowDy) <= minDistance) {
+            dy = lowDy;
+          } else if (drawMagnet.isStrong) {
+            dy = lowDy;
+          }
+        }
+      } else {
+        BagNum midLow, midHigh;
+        if (candle.isLong) {
+          midLow = candle.open;
+          midHigh = candle.close;
+        } else {
+          midLow = candle.close;
+          midHigh = candle.open;
+        }
+        BagNum? result;
+        if (value < midLow) {
+          result = (midLow - value) > (value - low) ? low : midLow;
+        } else if (value < midHigh) {
+          result = (midHigh - value) > (value - midLow) ? midLow : midHigh;
+        } else if (value < high) {
+          result = (high - value) > (value - midHigh) ? midHigh : high;
+        }
+        if (result != null) dy = valueToDy(result) ?? dy;
+      }
+    }
+    return Offset(dx, dy);
   }
 
   /// 测试[position]位置上是否有命中的Overly.

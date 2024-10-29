@@ -48,6 +48,7 @@ sealed class DrawState {
   }
 
   Point? get pointer => object?.pointer;
+  Offset? get pointerOffset => object?.pointer?.offset;
   bool get isExited => this is Exited;
   bool get isPrepared => this is Prepared;
   bool get isDrawing => this is Drawing;

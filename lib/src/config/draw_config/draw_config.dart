@@ -37,8 +37,8 @@ class DrawConfig {
     required this.ticksText,
     required this.spacing,
     this.ticksGapBgOpacity = 0.1,
-    this.hitTestMinDistance = 20,
-    this.magnetMinDistance = 40,
+    this.hitTestMinDistance = 10,
+    this.magnetMinDistance = 10,
     this.magnifierConfig = const MagnifierConfig(),
     this.drawParams = const DrawParams(),
   });
