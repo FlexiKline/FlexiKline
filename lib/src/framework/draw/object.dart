@@ -25,7 +25,6 @@ class OverlayObject implements Comparable<OverlayObject> {
   IDrawType get type => _overlay.type;
   int get zIndex => _overlay.zIndex;
   bool get lock => _overlay.lock;
-  MagnetMode get mode => _overlay.mode;
   LineConfig get line => _overlay.line;
   List<Point?> get points => _overlay.points;
 
@@ -174,14 +173,11 @@ abstract interface class IDrawObject {
   /// 初始化[DrawObject]绑定的[Overlay]中所有points坐标为当前绘制区别坐标.
   bool initPoints(IDrawContext context);
 
+  /// 更新指针[point]的[offset]
+  void onUpdateDrawPoint(Point point, Offset offset);
+
   /// 命中测试
   bool hitTest(IDrawContext context, Offset position, {bool isMove = false});
-
-  /// 更新指针[point]的[offset]
-  void onUpdateDrawPoint(Point point, Offset offset, {bool isMove = false});
-
-  /// 移动Overlay
-  void onMoveDrawObject(Offset delta);
 
   /// 构建Overlay
   void drawing(IDrawContext context, Canvas canvas, Size size);
@@ -203,10 +199,18 @@ abstract class DrawObject<T extends Overlay> extends DrawStateObject
   bool initPoints(IDrawContext context) {
     for (var point in points) {
       if (point == null) return false;
-      final succeed = context.updateDrawPointByValue(point);
-      if (!succeed) return false;
+      final offset = context.calcuateDrawPointOffset(point);
+      if (offset == null) return false;
+      point._offset = offset;
     }
     return true;
+  }
+
+  /// 更新指针[point]的[offset]
+  /// 实现类中通过此接口控制每一个point的offset位置校正.
+  @override
+  void onUpdateDrawPoint(Point point, Offset offset) {
+    point._offset = offset;
   }
 
   Point? hitTestPoint(IDrawContext context, Offset position) {
@@ -253,23 +257,6 @@ abstract class DrawObject<T extends Overlay> extends DrawStateObject
     return false;
   }
 
-  /// 更新指针[point]的[offset]
-  /// 实现类中通过此接口控制每一个point的offset位置校正.
-  @override
-  void onUpdateDrawPoint(Point point, Offset offset, {bool isMove = false}) {
-    point.offset = offset;
-  }
-
-  /// 移动Overlay
-  @override
-  void onMoveDrawObject(Offset delta) {
-    for (var point in points) {
-      if (point?.offset.isFinite == true) {
-        point?.offset += delta;
-      }
-    }
-  }
-
   /// 构建Overlay
   @override
   void drawing(IDrawContext context, Canvas canvas, Size size) {
@@ -283,5 +270,7 @@ abstract class DrawObject<T extends Overlay> extends DrawStateObject
   @mustCallSuper
   void dispose() {
     _cleanTmpConfig();
+    _pointer = null;
+    _moving = false;
   }
 }

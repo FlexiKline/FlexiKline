@@ -38,8 +38,7 @@ class HorizontalTrendLineDrawObject extends DrawObject {
   }
 
   @override
-  void onUpdateDrawPoint(Point point, Offset offset, {bool isMove = false}) {
-    // if (point.index == 0) point.offset = offset;
+  void onUpdateDrawPoint(Point point, Offset offset) {
     final first = points.firstOrNull?.offset;
     if (first == null) {
       super.onUpdateDrawPoint(point, offset);

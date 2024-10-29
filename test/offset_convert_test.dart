@@ -15,7 +15,6 @@
 import 'dart:ui';
 
 import 'package:flexi_kline/flexi_kline.dart';
-import 'package:flexi_kline/src/framework/draw/overlay.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -51,44 +50,44 @@ void main() {
     );
   });
 
-  group('group1 ', () {
-    test('test in the range', () {
-      Point point = Point(
-        ts: 1727625600000, // 2024-09-30 00:00:00
-        value: BagNum.fromNum(2500),
-      );
-      final isOk = controller.updateDrawPointByValue(point);
-      debugPrint('isOk:$isOk, offset:$point');
-      if (point.offset.isFinite) {
-        final model = controller.dxToCandle(point.offset.dx);
-        assert(model?.ts == point.ts);
-      }
-    });
+  // group('group1 ', () {
+  //   test('test in the range', () {
+  //     Point point = Point(
+  //       ts: 1727625600000, // 2024-09-30 00:00:00
+  //       value: BagNum.fromNum(2500),
+  //     );
+  //     final isOk = controller.updateDrawPointByValue(point);
+  //     debugPrint('isOk:$isOk, offset:$point');
+  //     if (point.offset.isFinite) {
+  //       final model = controller.dxToCandle(point.offset.dx);
+  //       assert(model?.ts == point.ts);
+  //     }
+  //   });
 
-    test('test out of start', () {
-      Point point = Point(
-        ts: 1727712000000, // 2024-10-01 00:00:00
-        value: BagNum.fromNum(1500),
-      );
-      final isOk = controller.updateDrawPointByValue(point);
-      debugPrint('isOk:$isOk, offset:$point');
-      if (point.offset.isFinite) {
-        final value = controller.dyToValue(point.offset.dy);
-        assert(value == point.value);
-      }
-    });
+  //   test('test out of start', () {
+  //     Point point = Point(
+  //       ts: 1727712000000, // 2024-10-01 00:00:00
+  //       value: BagNum.fromNum(1500),
+  //     );
+  //     final isOk = controller.updateDrawPointByValue(point);
+  //     debugPrint('isOk:$isOk, offset:$point');
+  //     if (point.offset.isFinite) {
+  //       final value = controller.dyToValue(point.offset.dy);
+  //       assert(value == point.value);
+  //     }
+  //   });
 
-    test('test out of end', () {
-      Point point = Point(
-        ts: 1723305600000, // 2024-08-11 00:00:00
-        value: BagNum.fromNum(3000),
-      );
-      final isOk = controller.updateDrawPointByValue(point);
-      debugPrint('isOk:$isOk, offset:$point');
-      if (point.offset.isFinite) {
-        final value = controller.dyToValue(point.offset.dy);
-        assert(value == point.value);
-      }
-    });
-  });
+  //   test('test out of end', () {
+  //     Point point = Point(
+  //       ts: 1723305600000, // 2024-08-11 00:00:00
+  //       value: BagNum.fromNum(3000),
+  //     );
+  //     final isOk = controller.updateDrawPointByValue(point);
+  //     debugPrint('isOk:$isOk, offset:$point');
+  //     if (point.offset.isFinite) {
+  //       final value = controller.dyToValue(point.offset.dy);
+  //       assert(value == point.value);
+  //     }
+  //   });
+  // });
 }

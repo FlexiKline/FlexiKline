@@ -28,6 +28,7 @@ import '../../model/export.dart';
 import '../../draw_objects/export.dart';
 import '../../utils/date_time.dart';
 import '../../utils/decimal_format_util.dart';
+import '../../utils/vector_util.dart';
 import '../collection/sortable_hash_set.dart';
 import '../configuration.dart';
 import '../logger.dart';

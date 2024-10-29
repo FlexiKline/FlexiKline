@@ -225,12 +225,6 @@ abstract interface class IDraw {
   /// 测试[position]位置上是否命中当前已完成绘制操作的Overly.
   DrawObject? hitTestDrawObject(Offset position);
 
-  /// 以当前蜡烛图绘制参数为基础, 将绘制参数[point]转换Offset坐标.
-  bool updateDrawPointByValue(Point point, {int? ts, BagNum? value});
-
-  /// 以当前蜡烛图绘制参数为基础, 将绘制参数[offset]转换Point坐标
-  bool updateDrawPointByOffset(Point point, {Offset? offset});
-
   void paintDraw(Canvas canvas, Size size);
 
   /// 绘制准备
@@ -254,9 +248,17 @@ abstract interface class IDrawContext implements ILogger {
   /// TimeIndicator区域大小
   Rect get timeRect;
 
+  /// 当前KlineData数据源
   KlineData get curKlineData;
 
+  /// 当前磁吸模式
   MagnetMode get drawMagnet;
+
+  /// 绘制配置
+  DrawConfig get drawConfig;
+
+  /// 当前蜡烛图蜡烛宽度的一半
+  double get candleWidthHalf;
 
   /// 将dx转换为蜡烛数据.
   CandleModel? dxToCandle(double dx);
@@ -278,15 +280,6 @@ abstract interface class IDrawContext implements ILogger {
 
   /// 将dy坐标值转换为value
   BagNum? dyToValue(double dy, {bool check = false});
-
-  /// 以当前蜡烛图绘制参数为基础, 将绘制参数[point]转换Offset坐标.
-  bool updateDrawPointByValue(Point point, {int? ts, BagNum? value});
-
-  /// 以当前蜡烛图绘制参数为基础, 将绘制参数[offset]转换Point坐标
-  bool updateDrawPointByOffset(Point point, {Offset? offset});
-
-  /// 将[offset]吸附到蜡烛坐标上
-  Offset magneticSnap(Offset offset);
 }
 
 /// Grid图层API

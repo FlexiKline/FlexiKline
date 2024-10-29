@@ -221,8 +221,9 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
 
     logd('onEnter $event');
     if (_hoverData != null && drawState.isOngoing) {
-      // TODO: 待优化: 将所有指针操作移至object内完成.
-      drawState.object?.pointer?.offset = offset;
+      if (drawState.object?.pointer != null) {
+        drawState.object!.onUpdateDrawPoint(drawState.object!.pointer!, offset);
+      }
       _hoverData!.update(offset);
     } else {
       _hoverData = GestureData.hover(offset);
@@ -286,10 +287,7 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
       if (offset.isFinite) {
         _hoverData = GestureData.tap(offset);
         final ret = controller.onDrawConfirm(_hoverData!);
-        if (!ret) {
-          _hoverData?.end();
-          _hoverData = null;
-        } else if (controller.isCrossing) {
+        if (ret && controller.isCrossing) {
           controller.cancelCross(); // ret为true; 说明未完成绘制, 主动取消cross
         }
       }

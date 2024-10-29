@@ -26,9 +26,6 @@ Overlay _$OverlayFromJson(Map<String, dynamic> json) => Overlay(
           .fromJson(json['type'] as Map<String, dynamic>),
       zIndex: (json['zIndex'] as num?)?.toInt() ?? 0,
       lock: json['lock'] as bool? ?? false,
-      mode: json['mode'] == null
-          ? MagnetMode.normal
-          : const MagnetModeConverter().fromJson(json['mode'] as String),
       line: LineConfig.fromJson(json['line'] as Map<String, dynamic>),
     );
 
@@ -37,6 +34,5 @@ Map<String, dynamic> _$OverlayToJson(Overlay instance) => <String, dynamic>{
       'type': const IDrawTypeConverter().toJson(instance.type),
       'zIndex': instance.zIndex,
       'lock': instance.lock,
-      'mode': const MagnetModeConverter().toJson(instance.mode),
       'line': instance.line.toJson(),
     };

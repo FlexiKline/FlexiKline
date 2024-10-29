@@ -381,3 +381,114 @@ mixin DrawObjectMixin on DrawStateObject {
     return formatNumber(value.toDecimal(), precision: precision);
   }
 }
+
+extension IDrawContextExt on IDrawContext {
+  /// 以当前蜡烛图绘制参数为基础, 将绘制参数[point]转换Offset坐标.
+  Offset? calcuateDrawPointOffset(Point point) {
+    final dy = valueToDy(point.value);
+    if (dy == null) return null;
+
+    final dx = timestampToDx(point.ts);
+    if (dx == null) return null;
+
+    return Offset(dx, dy);
+  }
+
+  /// 以当前蜡烛图绘制数据为基础, 将[object]的所有point的坐标更新为蜡烛数据坐标
+  void updateDrawObjectPointsData(DrawObject object) {
+    for (var point in object.points) {
+      if (point != null) {
+        updateDrawPointData(point);
+      }
+    }
+  }
+
+  /// 以当前蜡烛图绘制数据为基础, 将[point]的坐标更新为蜡烛数据坐标
+  bool updateDrawPointData(Point point) {
+    final offset = point.offset;
+    final ts = dxToTimestamp(offset.dx);
+    if (ts == null) return false;
+
+    final value = dyToValue(offset.dy);
+    if (value == null) return false;
+
+    point.ts = ts;
+    point.value = value;
+    return true;
+  }
+
+  /// 将[offset]吸附到蜡烛坐标上
+  Offset magneticSnap(Offset offset) {
+    if (drawMagnet.isNormal) return offset;
+
+    double dx = offset.dx, dy = offset.dy;
+    final index = dxToIndex(dx);
+    if (index != null) {
+      dx = indexToDx(index)! - candleWidthHalf;
+    }
+    BagNum? value = dyToValue(dy);
+    final candle = curKlineData.getCandle(index);
+    if (value != null && candle != null) {
+      final high = candle.high;
+      final low = candle.low;
+      final minDistance = drawConfig.magnetMinDistance;
+      if (value > high) {
+        final highDy = valueToDy(high);
+        if (highDy != null) {
+          if (drawMagnet.isWeak && (highDy - dy) <= minDistance) {
+            dy = highDy;
+          } else if (drawMagnet.isStrong) {
+            dy = highDy;
+          }
+        }
+      } else if (value < low) {
+        final lowDy = valueToDy(low);
+        if (lowDy != null) {
+          if (drawMagnet.isWeak && (dy - lowDy) <= minDistance) {
+            dy = lowDy;
+          } else if (drawMagnet.isStrong) {
+            dy = lowDy;
+          }
+        }
+      } else {
+        BagNum midLow, midHigh;
+        if (candle.isLong) {
+          midLow = candle.open;
+          midHigh = candle.close;
+        } else {
+          midLow = candle.close;
+          midHigh = candle.open;
+        }
+        BagNum? result;
+        if (value < midLow) {
+          result = (midLow - value) > (value - low) ? low : midLow;
+        } else if (value < midHigh) {
+          result = (midHigh - value) > (value - midLow) ? midLow : midHigh;
+        } else if (value < high) {
+          result = (high - value) > (value - midHigh) ? midHigh : high;
+        }
+        if (result != null) dy = valueToDy(result) ?? dy;
+      }
+    }
+    return Offset(dx, dy);
+  }
+
+  /// 检测[object]中所有point到所在蜡烛中心的距离是否相等.
+  /// 如果相等, 则可以进行磁吸操作
+  bool isMagneticDrawObject(DrawObject object) {
+    double? first;
+    for (var point in object.points) {
+      final pointDx = point?.offset.dx;
+      if (pointDx == null) return false;
+      final index = dxToIndex(pointDx);
+      if (index == null) return false;
+      final dx = indexToDx(index)! - candleWidthHalf;
+      // 计算point实际dx坐标与当前所在蜡烛中心坐标距离.
+      final deltaDx = (pointDx - dx).abs();
+      first ??= deltaDx;
+      // 如果当前point的deltaDx与第一个point的deltaDx不相同, 则不可进行磁吸操作
+      if ((deltaDx - first).abs() > precisionError) return false;
+    }
+    return true;
+  }
+}

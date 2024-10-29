@@ -21,7 +21,6 @@ import '../framework/draw/overlay.dart';
 import '../framework/export.dart';
 import '../model/export.dart';
 import '../utils/platform_util.dart';
-import '../utils/vector_util.dart';
 import 'binding_base.dart';
 import 'interface.dart';
 import 'setting.dart';
@@ -151,8 +150,8 @@ mixin DrawBinding
         config: drawConfig,
       );
       if (object != null) {
-        // 初始指针为[mainRect]中心
         if (isInitPointer ?? PlatformUtil.isTouch) {
+          // 初始指针为[mainRect]中心
           object.setPointer(Point.pointer(0, magneticSnap(mainRect.center)));
         }
         _drawState = DrawState.draw(object);
@@ -200,12 +199,7 @@ mixin DrawBinding
       object.addPointer(pointer);
       if (object.isEditing) {
         logi('onDrawConfirm ${object.type} draw completed!');
-        // TODO: 增加object接口, 校正所有绘制点
-        for (var point in object.points) {
-          if (point != null) {
-            updateDrawPointByOffset(point);
-          }
-        }
+        updateDrawObjectPointsData(object);
         // 绘制完成, 使用drawLine配置绘制实线.
         object.setDrawLineConfig(drawConfig.drawLine);
         _drawState = Editing(object);
@@ -216,12 +210,7 @@ mixin DrawBinding
     } else if (object.isEditing) {
       final pointer = object.pointer;
       if (pointer == null) {
-        // TODO: 增加object接口, 校正所有绘制点
-        for (var point in object.points) {
-          if (point != null) {
-            updateDrawPointByOffset(point);
-          }
-        }
+        updateDrawObjectPointsData(object);
         _drawState = const Prepared();
         // 当前处于编辑状态, 但是pointer又没有被赋值, 此时点击事件为确认完成绘制.
         _drawObjectManager.addDrawObject(object);
@@ -268,21 +257,22 @@ mixin DrawBinding
     final object = drawState.object!;
 
     final delta = data.delta;
-    if (object.pointer != null) {
+    final pointer = object.pointer;
+    if (pointer != null) {
       // 当前移动一个编辑状态的Overlay的某个绘制点指针时,
       // 需要通过[DrawObject]的`onUpdatePoint`接口来校正offset.
       final newOffset = magneticSnap(data.offset);
-      if (newOffset != object.pointer!.offset) {
-        object.onUpdateDrawPoint(
-          object.pointer!,
-          newOffset,
-          isMove: true,
-        );
-        _drawPointerListener.updateValue(object.pointer);
+      if (newOffset != pointer.offset) {
+        object.onUpdateDrawPoint(pointer, newOffset);
+        _drawPointerListener.updateValue(pointer);
         _markRepaint();
       }
     } else {
-      object.onMoveDrawObject(delta);
+      for (var point in object.points) {
+        if (point != null && point.offset.isFinite) {
+          object.onUpdateDrawPoint(point, point.offset + delta);
+        }
+      }
       _markRepaint();
     }
   }
@@ -301,15 +291,11 @@ mixin DrawBinding
           final index = dxToIndex(point.offset.dx);
           if (index == null) continue;
           final dx = indexToDx(index)! - candleWidthHalf;
-          point.offset = Offset(dx, point.offset.dy);
+          object.onUpdateDrawPoint(point, Offset(dx, point.offset.dy));
         }
       }
     }
-    for (var point in object.points) {
-      if (point != null) {
-        updateDrawPointByOffset(point);
-      }
-    }
+    updateDrawObjectPointsData(object);
     object.setMoveing(false);
     _drawPointerListener.updateValue(null);
     _notifyDrawStateChange();
@@ -395,115 +381,6 @@ mixin DrawBinding
       );
     }
     _markRepaint();
-  }
-
-  /// 以当前蜡烛图绘制参数为基础, 将绘制参数[point]转换Offset坐标.
-  @override
-  bool updateDrawPointByValue(Point point, {int? ts, BagNum? value}) {
-    value ??= point.value;
-    final dy = valueToDy(value);
-    if (dy == null) return false;
-
-    ts ??= point.ts;
-    final dx = timestampToDx(ts);
-    if (dx == null) return false;
-
-    point.ts = ts;
-    point.value = value;
-    point.offset = Offset(dx, dy);
-    return true;
-  }
-
-  /// 以当前蜡烛图绘制参数为基础, 将绘制参数[offset]转换Point坐标.
-  @override
-  bool updateDrawPointByOffset(Point point, {Offset? offset}) {
-    offset ??= point.offset;
-    final ts = dxToTimestamp(offset.dx);
-    if (ts == null) return false;
-
-    final value = dyToValue(offset.dy);
-    if (value == null) return false;
-
-    point.offset = offset;
-    point.ts = ts;
-    point.value = value;
-    return true;
-  }
-
-  /// 检测[object]中所有point到所在蜡烛中心的距离是否相等.
-  /// 如果相等, 则可以进行磁吸操作
-  bool isMagneticDrawObject(DrawObject object) {
-    double? first;
-    for (var point in object.points) {
-      final pointDx = point?.offset.dx;
-      if (pointDx == null) return false;
-      final index = dxToIndex(pointDx);
-      if (index == null) return false;
-      final dx = indexToDx(index)! - candleWidthHalf;
-      // 计算point实际dx坐标与当前所在蜡烛中心坐标距离.
-      final deltaDx = (pointDx - dx).abs();
-      first ??= deltaDx;
-      // 如果当前point的deltaDx与第一个point的deltaDx不相同, 则不可进行磁吸操作
-      if ((deltaDx - first).abs() > precisionError) return false;
-    }
-    return true;
-  }
-
-  /// 将[offset]吸附到蜡烛坐标上
-  @override
-  Offset magneticSnap(Offset offset) {
-    if (drawMagnet.isNormal) return offset;
-
-    double dx = offset.dx, dy = offset.dy;
-    final index = dxToIndex(dx);
-    if (index != null) {
-      dx = indexToDx(index)! - candleWidthHalf;
-    }
-    BagNum? value = dyToValue(dy);
-    final candle = curKlineData.getCandle(index);
-    if (value != null && candle != null) {
-      final high = candle.high;
-      final low = candle.low;
-      final minDistance = drawConfig.magnetMinDistance;
-      if (value > high) {
-        final highDy = valueToDy(high);
-        if (highDy != null) {
-          if (drawMagnet.isWeak && (highDy - dy) <= minDistance) {
-            dy = highDy;
-          } else if (drawMagnet.isStrong) {
-            dy = highDy;
-          }
-        }
-      } else if (value < low) {
-        final lowDy = valueToDy(low);
-        if (lowDy != null) {
-          if (drawMagnet.isWeak && (dy - lowDy) <= minDistance) {
-            dy = lowDy;
-          } else if (drawMagnet.isStrong) {
-            dy = lowDy;
-          }
-        }
-      } else {
-        BagNum midLow, midHigh;
-        if (candle.isLong) {
-          midLow = candle.open;
-          midHigh = candle.close;
-        } else {
-          midLow = candle.close;
-          midHigh = candle.open;
-        }
-        BagNum? result;
-        if (value < midLow) {
-          result = (midLow - value) > (value - low) ? low : midLow;
-        } else if (value < midHigh) {
-          result = (midHigh - value) > (value - midLow) ? midLow : midHigh;
-        } else if (value < high) {
-          result = (high - value) > (value - midHigh) ? midHigh : high;
-        }
-        if (result != null) dy = valueToDy(result) ?? dy;
-      }
-    }
-    return Offset(dx, dy);
   }
 
   /// 测试[position]位置上是否有命中的Overly.

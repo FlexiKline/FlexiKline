@@ -19,10 +19,10 @@ part of 'overlay.dart';
 class Point {
   Point({
     this.index = -1,
-    Offset? offset,
     this.ts = -1,
     this.value = BagNum.zero,
-  }) : offset = offset ?? Offset.infinite;
+    Offset? offset,
+  }) : _offset = offset ?? Offset.infinite;
 
   factory Point.pointer(int index, Offset offset) {
     assert(index >= 0, 'invalid index($index)');
@@ -35,20 +35,16 @@ class Point {
 
   final int index;
 
-  /// 当前canvas中的坐标(实时更新) // TODO: 防串改处理
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  Offset offset;
-  // Offset _offset;
-  // Offset get offset => _offset;
-
   /// 蜡烛图时间
   int ts;
 
   /// 蜡烛图价值
   BagNum value;
 
-  /// 用于对[ts]和[value]组成坐标的修正
-  // double patch;
+  /// 当前canvas中的临时坐标(实时更新)
+  Offset _offset;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  Offset get offset => _offset;
 
   @override
   bool operator ==(Object other) {
@@ -61,12 +57,13 @@ class Point {
   }
 
   @override
-  int get hashCode =>
-      runtimeType.hashCode ^ index.hashCode ^ ts.hashCode ^ value.hashCode;
+  int get hashCode {
+    return runtimeType.hashCode ^ index.hashCode ^ ts.hashCode ^ value.hashCode;
+  }
 
   @override
   String toString() {
-    return 'Point($index, $offset, $ts, $value)';
+    return 'Point($index, $ts, $value, $offset)';
   }
 
   factory Point.fromJson(Map<String, dynamic> json) => _$PointFromJson(json);
@@ -88,7 +85,6 @@ class Overlay implements Comparable<Overlay> {
     required this.type,
     this.zIndex = 0,
     this.lock = false,
-    this.mode = MagnetMode.normal,
 
     /// 绘制线配置, 默认值:drawConfig.drawLine
     required this.line,
@@ -105,7 +101,6 @@ class Overlay implements Comparable<Overlay> {
   int zIndex;
   @protected
   bool lock;
-  MagnetMode mode;
   @protected
   LineConfig line;
 
