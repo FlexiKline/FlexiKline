@@ -130,7 +130,7 @@ class Overlay implements Comparable<Overlay> {
 
   @override
   int compareTo(Overlay other) {
-    return other.zIndex - zIndex;
+    return zIndex - other.zIndex;
   }
 
   @override

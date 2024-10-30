@@ -45,13 +45,13 @@ class RectangleDrawObject extends DrawObject {
 
   @override
   void drawing(IDrawContext context, Canvas canvas, Size size) {
-    drawConnectingLine(context, canvas, size);
     if (isReady) {
       final rectangle = getRectangleRect();
       if (rectangle == null) return;
 
-      _drawParallChannel(context, canvas, rectangle);
+      _drawRectangle(context, canvas, rectangle);
     }
+    drawConnectingLine(context, canvas, size);
   }
 
   @override
@@ -64,11 +64,11 @@ class RectangleDrawObject extends DrawObject {
     final rectangle = getRectangleRect();
     if (rectangle == null) return;
 
-    _drawParallChannel(context, canvas, rectangle);
+    _drawRectangle(context, canvas, rectangle);
   }
 
-  /// 绘制平行通道
-  void _drawParallChannel(
+  /// 绘制平行四边形
+  void _drawRectangle(
     IDrawContext context,
     Canvas canvas,
     Rect rect,
@@ -78,7 +78,7 @@ class RectangleDrawObject extends DrawObject {
       Path()..addRect(rect),
       line.linePaint
         ..color = line.paint.color.withOpacity(
-          drawParams.paralleBgOpacity,
+          drawParams.rectangleBgOpacity,
         )
         ..style = PaintingStyle.fill,
     );

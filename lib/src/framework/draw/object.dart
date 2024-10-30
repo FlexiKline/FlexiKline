@@ -53,9 +53,7 @@ class OverlayObject implements Comparable<OverlayObject> {
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        (other is OverlayObject &&
-            runtimeType == other.runtimeType &&
-            _overlay == other._overlay);
+        (other is OverlayObject && _overlay == other._overlay);
   }
 
   @override

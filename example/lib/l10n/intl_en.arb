@@ -67,8 +67,7 @@
   "mainChartIndicators": "Main-chart indicators",
   "subChartIndicators": "Sub-chart indicators",
   "indicatorSetting": "Indicator settings",
-  "searchTradingPairHint": "Please enter preferred trading pair"
+  "searchTradingPairHint": "Please enter preferred trading pair",
 
-
-
+  "appExitTips": "Press again to close the app"
 }

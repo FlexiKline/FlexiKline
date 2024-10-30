@@ -14,8 +14,10 @@
 
 import 'package:example/generated/l10n.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:go_router/go_router.dart';
 
 import '../constants/images.dart';
@@ -51,23 +53,40 @@ class _IndexPageState extends ConsumerState<IndexPage> with WideScreenMixin {
         Destination(Icons.pets_rounded, S.current.bit),
       ];
 
+  DateTime? _lastPopTime;
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: mainNavScaffoldKey,
-      drawer: const AppSettingDrawer(
-        key: ValueKey("app_setting"),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        DateTime now = DateTime.now();
+        if (_lastPopTime == null ||
+            now.difference(_lastPopTime!) > const Duration(seconds: 2)) {
+          _lastPopTime = DateTime.now();
+          SmartDialog.showToast(S.current.appExitTips);
+        } else {
+          _lastPopTime = null;
+          SystemNavigator.pop();
+        }
+      },
+      child: Scaffold(
+        key: mainNavScaffoldKey,
+        drawer: const AppSettingDrawer(
+          key: ValueKey("app_setting"),
+        ),
+        drawerEdgeDragWidth: 0.0, // 禁止通过滑动打开drawer
+        body: Row(
+          children: [
+            buildLeftNavigationRail(context),
+            Expanded(
+              child: widget.navigationShell,
+            ),
+          ],
+        ),
+        bottomNavigationBar: buildBottomNavigationBar(context),
       ),
-      drawerEdgeDragWidth: 0.0, // 禁止通过滑动打开drawer
-      body: Row(
-        children: [
-          buildLeftNavigationRail(context),
-          Expanded(
-            child: widget.navigationShell,
-          ),
-        ],
-      ),
-      bottomNavigationBar: buildBottomNavigationBar(context),
     );
   }
 

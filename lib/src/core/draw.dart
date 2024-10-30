@@ -210,7 +210,7 @@ mixin DrawBinding
         updateDrawObjectPointsData(object);
         // 绘制完成, 使用drawLine配置绘制实线.
         object.setDrawLineConfig(drawConfig.drawLine);
-        _drawObjectManager.addDrawObject(object);
+        _drawObjectManager.addDrawObject(object, addToTop: true);
         if (drawContinuousListener.value) {
           final nextObj = _drawObjectManager.createDrawObject(
             type: object.type,
@@ -231,7 +231,7 @@ mixin DrawBinding
       final pointer = object.pointer;
       if (pointer == null) {
         updateDrawObjectPointsData(object);
-        _drawObjectManager.addDrawObject(object);
+        _drawObjectManager.addDrawObject(object, replaceIfPresent: false);
         _drawState = const Prepared();
         // 当前处于编辑状态, 但是pointer又没有被赋值, 此时点击事件为确认完成绘制.
       } else {
@@ -407,6 +407,24 @@ mixin DrawBinding
     _drawContinuousListener.value = isOn;
   }
 
+  bool moveDrawStateObjectToTop() {
+    if (!drawState.isEditing) return false;
+    final object = drawState.object;
+    if (object == null) return false;
+    _drawObjectManager.moveToTop(object);
+    _markRepaint();
+    return true;
+  }
+
+  bool moveDrawStateObjectToBottom() {
+    if (!drawState.isEditing) return false;
+    final object = drawState.object;
+    if (object == null) return false;
+    _drawObjectManager.moveToBottom(object);
+    _markRepaint();
+    return true;
+  }
+
   /// 测试[position]位置上是否有命中的Overly.
   @override
   DrawObject? hitTestDrawObject(Offset position) {
@@ -414,7 +432,7 @@ mixin DrawBinding
       position.isFinite,
       'hitTestDrawObject($position) position is invalid!',
     );
-    for (var object in _drawObjectManager.overlayObjectList) {
+    for (var object in _drawObjectManager.overlayObjectReversedList) {
       if (object.hitTest(this, position)) {
         return object;
       }
@@ -440,16 +458,19 @@ mixin DrawBinding
   void drawOverlayObjectList(Canvas canvas, Size size) {
     final stateObject = drawState.object;
     for (var object in _drawObjectManager.overlayObjectList) {
-      /// 如果是当前编辑的overlay不用绘制
-      if (stateObject == object) continue;
+      if (object.moving) continue;
 
       // TODO: 待优化,
       // 1. 检测points中每个value是否有效.
       // 2. 当发生图表移动/缩放/数据源发生变化时, 需要initPoint
       final succeed = object.initPoints(this);
       if (!succeed) continue;
-
       object.draw(this, canvas, size);
+
+      if (stateObject == object) {
+        // 绘制编辑状态的overlay的points为圆圈.
+        object.drawPoints(this, canvas);
+      }
     }
   }
 
@@ -457,7 +478,7 @@ mixin DrawBinding
     final object = drawState.object;
     if (object == null) return;
 
-    if (drawState is Editing && object.isEditing) {
+    if (drawState is Editing && object.moving) {
       object.draw(this, canvas, size);
       // 绘制编辑状态的overlay的points为圆圈.
       object.drawPoints(this, canvas);

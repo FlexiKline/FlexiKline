@@ -14,6 +14,8 @@
 
 part of 'overlay.dart';
 
+const drawObjectDefaultZIndex = 0;
+
 typedef DrawObjectBuilder<T extends Overlay, R extends DrawObject<T>> = R
     Function(T overlay, DrawConfig config);
 
@@ -106,6 +108,18 @@ enum MagnetMode {
         return MagnetMode.weak;
       case MagnetMode.weak:
         return MagnetMode.strong;
+      case MagnetMode.strong:
+        return MagnetMode.normal;
+    }
+  }
+
+  /// 排除[strong]类型
+  MagnetMode get next2 {
+    switch (this) {
+      case MagnetMode.normal:
+        return MagnetMode.weak;
+      case MagnetMode.weak:
+        return MagnetMode.normal;
       case MagnetMode.strong:
         return MagnetMode.normal;
     }

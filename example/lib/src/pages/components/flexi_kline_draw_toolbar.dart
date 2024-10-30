@@ -16,6 +16,7 @@ import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:flutter_svg/svg.dart';
 
 import '../../constants/images.dart';
@@ -155,11 +156,14 @@ class FlexiKlineDrawToolbar extends ConsumerWidget {
                   colorFilter: ColorFilter.mode(theme.t1, BlendMode.srcIn),
                 ),
               ),
-              ShrinkIconButton(
-                onPressed: () {
-                  debugPrint('zp::: draw onTap Order');
-                },
-                content: SvgRes.visualOrder,
+              Builder(
+                builder: (context) => ShrinkIconButton(
+                  onPressed: () {
+                    debugPrint('zp::: draw onTap visual Order');
+                    showSetVisualOrderDialog(context, ref);
+                  },
+                  content: SvgRes.visualOrder,
+                ),
               ),
               ShrinkIconButton(
                 onPressed: () {
@@ -179,6 +183,49 @@ class FlexiKlineDrawToolbar extends ConsumerWidget {
           );
         },
       ),
+    );
+  }
+
+  void showSetVisualOrderDialog(BuildContext context, WidgetRef ref) {
+    final theme = ref.read(themeProvider);
+    const dialogTag = 'drawObjectVisualOrderDialog';
+    SmartDialog.showAttach(
+      tag: dialogTag,
+      targetContext: context,
+      maskColor: theme.transparent,
+      alignment: Alignment.topCenter,
+      builder: (context) {
+        return Container(
+          margin: EdgeInsets.only(bottom: 4.r),
+          padding: EdgeInsets.symmetric(
+            horizontal: 6.r,
+            vertical: 2.r,
+          ),
+          decoration: BoxDecoration(
+            color: theme.cardBg,
+            borderRadius: BorderRadius.circular(6.r),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ShrinkIconButton(
+                onPressed: () {
+                  controller.moveDrawStateObjectToTop();
+                  SmartDialog.dismiss(tag: dialogTag);
+                },
+                content: Icons.vertical_align_top_rounded,
+              ),
+              ShrinkIconButton(
+                onPressed: () {
+                  SmartDialog.dismiss(tag: dialogTag);
+                  controller.moveDrawStateObjectToBottom();
+                },
+                content: Icons.vertical_align_bottom_rounded,
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

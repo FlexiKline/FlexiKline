@@ -60,12 +60,12 @@ final class SortableHashSet<E> with SetMixin<E> {
     return __list ??= _set.toList(growable: false)..sort(_compare);
   }
 
-  void reSort() => __list = null;
+  void resetSort() => __list = null;
 
   /// 追回[value]并返回旧元素(如果存在).
-  E? append(E value) {
+  E? append(E value, {bool replaceIfPresent = true}) {
     final old = _set.lookup(value);
-    if (add(value)) return old;
+    if (replaceIfPresent && add(value)) return old;
     return null;
   }
 
@@ -116,6 +116,8 @@ final class SortableHashSet<E> with SetMixin<E> {
 
   @override
   Iterator<E> get iterator => _list.iterator;
+
+  Iterable<E> get reversed => _list.reversed;
 
   @override
   int get length => _list.length;

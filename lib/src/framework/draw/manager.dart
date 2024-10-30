@@ -95,6 +95,9 @@ final class OverlayDrawObjectManager with KlineLog {
   /// 当前[_instId]对应[Overlay]集合
   final _overlayObjectList = SortableHashSet<DrawObject>();
   Iterable<DrawObject> get overlayObjectList => _overlayObjectList;
+  Iterable<DrawObject> get overlayObjectReversedList {
+    return _overlayObjectList.reversed;
+  }
 
   bool get hasObject => _overlayObjectList.isNotEmpty;
 
@@ -158,9 +161,19 @@ final class OverlayDrawObjectManager with KlineLog {
     return builder.call(overlay, config);
   }
 
-  /// 添加新的overlay,
-  void addDrawObject(DrawObject object) {
-    final old = _overlayObjectList.append(object);
+  /// 添加新的[object].
+  /// [replaceIfPresent] true: 如果[object]已存在替换之; 否则不处理.
+  /// [addToTop] true: 添加[object]并保持在顶层绘制.
+  void addDrawObject(
+    DrawObject object, {
+    bool replaceIfPresent = true,
+    bool addToTop = false,
+  }) {
+    if (addToTop) moveToTop(object);
+    final old = _overlayObjectList.append(
+      object,
+      replaceIfPresent: replaceIfPresent,
+    );
     old?.dispose();
   }
 
@@ -169,5 +182,19 @@ final class OverlayDrawObjectManager with KlineLog {
     return _overlayObjectList.remove(object);
   }
 
-  void reSort() => _overlayObjectList.reSort();
+  void resetObjectListSort() => _overlayObjectList.resetSort();
+
+  void moveToTop(DrawObject object) {
+    final last = _overlayObjectList.lastOrNull;
+    if (last == object) return;
+    object._overlay.zIndex = (last?.zIndex ?? drawObjectDefaultZIndex) + 1;
+    resetObjectListSort();
+  }
+
+  void moveToBottom(DrawObject object) {
+    final first = _overlayObjectList.firstOrNull;
+    if (first == object) return;
+    object._overlay.zIndex = (first?.zIndex ?? drawObjectDefaultZIndex) - 1;
+    resetObjectListSort();
+  }
 }

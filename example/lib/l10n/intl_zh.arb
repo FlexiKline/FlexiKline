@@ -66,6 +66,8 @@
   "mainChartIndicators": "主图指标",
   "subChartIndicators": "副图指标",
   "indicatorSetting": "指标设置",
-  "searchTradingPairHint": "请输入交易对"
+  "searchTradingPairHint": "请输入交易对",
+
+  "appExitTips": "再按一次退出App"
 
 }

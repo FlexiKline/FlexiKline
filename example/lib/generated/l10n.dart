@@ -689,6 +689,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Press again to close the app`
+  String get appExitTips {
+    return Intl.message(
+      'Press again to close the app',
+      name: 'appExitTips',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
