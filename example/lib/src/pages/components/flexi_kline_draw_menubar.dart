@@ -79,11 +79,17 @@ class _FlexiKlineDrawMenubarState extends ConsumerState<FlexiKlineDrawMenubar> {
             height: 18.r,
             margin: EdgeInsets.symmetric(horizontal: 4.r),
           ),
-          ShrinkIconButton(
-            onPressed: () {},
-            // content: SvgRes.continuousDrawing,
-            // content: Icons.dynamic_feed_rounded,
-            content: Icons.auto_awesome_motion_rounded,
+          ValueListenableBuilder(
+            valueListenable: widget.controller.drawContinuousListener,
+            builder: (context, isOn, child) => ShrinkIconButton(
+              onPressed: () {
+                widget.controller.setDrawContinuous(!isOn);
+              },
+              // content: SvgRes.continuousDrawing,
+              // content: Icons.dynamic_feed_rounded,
+              content: Icons.auto_awesome_motion_rounded,
+              color: isOn ? theme.t1 : theme.t2,
+            ),
           ),
           ValueListenableBuilder(
             valueListenable: widget.controller.drawMagnetModeListener,

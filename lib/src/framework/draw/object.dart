@@ -113,6 +113,9 @@ abstract class DrawStateObject extends OverlayObject with DrawConfigMixin {
     }
   }
 
+  Point? get firstPoint => points.first;
+  Point? get lastPoint => points.last;
+
   /// 获取所有Point点列表,
   /// 包括pointer.
   Iterable<Point?> get allPoints {

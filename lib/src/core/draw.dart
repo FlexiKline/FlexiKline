@@ -61,6 +61,7 @@ mixin DrawBinding
     _drawPointerListener.dispose();
     _drawVisibilityListener.dispose();
     _drawMagnetModeListener.dispose();
+    _drawContinuousListener.dispose();
   }
 
   late final OverlayDrawObjectManager _drawObjectManager;
@@ -69,6 +70,7 @@ mixin DrawBinding
   final _drawPointerListener = KlineStateNotifier<Point?>(null);
   final _drawVisibilityListener = ValueNotifier<bool>(true);
   final _drawMagnetModeListener = ValueNotifier<MagnetMode>(MagnetMode.normal);
+  final _drawContinuousListener = ValueNotifier<bool>(false);
 
   @override
   Listenable get repaintDraw => _repaintDraw;
@@ -118,6 +120,8 @@ mixin DrawBinding
   ValueListenable<MagnetMode> get drawMagnetModeListener =>
       _drawMagnetModeListener;
 
+  ValueListenable<bool> get drawContinuousListener => _drawContinuousListener;
+
   @override
   MagnetMode get drawMagnet => _drawMagnetModeListener.value;
 
@@ -151,8 +155,12 @@ mixin DrawBinding
       );
       if (object != null) {
         if (isInitPointer ?? PlatformUtil.isTouch) {
-          // 初始指针为[mainRect]中心
-          object.setPointer(Point.pointer(0, magneticSnap(mainRect.center)));
+          // 默认初始指针为[mainRect]中心
+          Offset initOffset = mainRect.center;
+          if (drawState.pointerOffset?.isFinite == true) {
+            initOffset = drawState.pointerOffset!;
+          }
+          object.setPointer(Point.pointer(0, magneticSnap(initOffset)));
         }
         _drawState = DrawState.draw(object);
       } else {
@@ -202,8 +210,20 @@ mixin DrawBinding
         updateDrawObjectPointsData(object);
         // 绘制完成, 使用drawLine配置绘制实线.
         object.setDrawLineConfig(drawConfig.drawLine);
-        _drawState = Editing(object);
         _drawObjectManager.addDrawObject(object);
+        if (drawContinuousListener.value) {
+          final nextObj = _drawObjectManager.createDrawObject(
+            type: object.type,
+            config: drawConfig,
+          );
+          if (nextObj != null) {
+            final initOffset = object.lastPoint?.offset ?? data.offset;
+            nextObj.setPointer(Point.pointer(0, magneticSnap(initOffset)));
+            _drawState = DrawState.draw(nextObj);
+          }
+        } else {
+          _drawState = Editing(object);
+        }
       } else {
         result = true; // 说明未绘制完成，用于Gesture手势层保留事件数据
       }
@@ -211,9 +231,9 @@ mixin DrawBinding
       final pointer = object.pointer;
       if (pointer == null) {
         updateDrawObjectPointsData(object);
+        _drawObjectManager.addDrawObject(object);
         _drawState = const Prepared();
         // 当前处于编辑状态, 但是pointer又没有被赋值, 此时点击事件为确认完成绘制.
-        _drawObjectManager.addDrawObject(object);
       } else {
         object.confirmPointer();
       }
@@ -381,6 +401,10 @@ mixin DrawBinding
       );
     }
     _markRepaint();
+  }
+
+  void setDrawContinuous(bool isOn) {
+    _drawContinuousListener.value = isOn;
   }
 
   /// 测试[position]位置上是否有命中的Overly.
