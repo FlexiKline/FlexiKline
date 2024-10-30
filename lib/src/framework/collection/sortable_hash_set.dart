@@ -63,9 +63,11 @@ final class SortableHashSet<E> with SetMixin<E> {
   void resetSort() => __list = null;
 
   /// 追回[value]并返回旧元素(如果存在).
+  /// [replaceIfPresent] true: 如果存在则替换之; 否则不处理.
   E? append(E value, {bool replaceIfPresent = true}) {
     final old = _set.lookup(value);
-    if (replaceIfPresent && add(value)) return old;
+    if (!replaceIfPresent && old != null) return null;
+    if (add(value)) return old;
     return null;
   }
 
