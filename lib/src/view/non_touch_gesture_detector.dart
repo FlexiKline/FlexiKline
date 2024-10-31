@@ -239,7 +239,7 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
 
     if (drawState.isOngoing) {
       if (drawState.isEditing) {
-        /// 已完成的DrawObject, 通过[_panData]或[_longData]事件数据更新.
+        /// 已完成的DrawObject通过平移[_panScaleData]或长按[_longData]事件进行修正.
         return;
       }
       final pointer = drawState.pointer;
@@ -249,18 +249,16 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
         // if (!mainRect.include(offset)) {
         //   offset = offset.clamp(mainRect);
         // }
-        // _hoverData ??= GestureData.hover(offset);
         _hoverData!.update(offset);
         controller.onDrawUpdate(_hoverData!);
         return;
       }
     }
 
+    _hoverData!.update(offset);
     if (!controller.isCrossing) {
-      _hoverData!.update(offset);
       controller.startCross(_hoverData!, force: true);
     } else {
-      _hoverData!.update(offset);
       controller.updateCross(_hoverData!);
     }
   }
@@ -281,26 +279,40 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
 
   /// 点击
   void onTapUp(TapUpDetails details) {
-    if (drawState.isOngoing) {
-      logd("onTapUp draw confirm details:$details");
-      final offset = drawState.pointerOffset ?? details.localPosition;
-      if (offset.isFinite) {
-        _hoverData = GestureData.tap(offset);
-        final ret = controller.onDrawConfirm(_hoverData!);
-        if (ret && controller.isCrossing) {
-          controller.cancelCross(); // ret为true; 说明未完成绘制, 主动取消cross
+    switch (drawState) {
+      case Drawing():
+        final offset = drawState.pointerOffset ?? details.localPosition;
+        if (offset.isFinite) {
+          _hoverData = GestureData.tap(offset);
+          controller.onDrawConfirm(_hoverData!);
+          if (drawState.isDrawing && controller.isCrossing) {
+            controller.cancelCross(); // 如果仍在绘制中, 但是又处在crossing中时, 主动取消cross
+          }
         }
-      }
-      return;
-    } else if (drawState.isPrepared ||
-        controller.drawConfig.allowSelectWhenExit) {
-      // 只有在准备状态时或配置中指定[allowSelectWhenExit]时, 进行命中测试
-      final object = controller.hitTestDrawObject(details.localPosition);
-      if (object != null) {
-        logd("onTapUp draw select object:$object");
-        controller.onDrawSelect(object);
         return;
-      }
+      case Editing():
+        final offset = details.localPosition;
+        final object = controller.hitTestDrawObject(offset);
+        if (object != null && object != drawState.object) {
+          logd("onTapUp draw switch object:$object");
+          controller.onDrawSelect(object);
+        } else {
+          _hoverData = GestureData.tap(offset);
+          controller.onDrawConfirm(_hoverData!);
+          if (!controller.isCrossing) {
+            controller.startCross(_hoverData!);
+          }
+        }
+        return;
+      case Exited():
+        if (!controller.drawConfig.allowSelectWhenExit) break;
+      case Prepared():
+        final object = controller.hitTestDrawObject(details.localPosition);
+        if (object != null) {
+          logd("onTapUp draw select object:$object");
+          controller.onDrawSelect(object);
+          return;
+        }
     }
   }
 

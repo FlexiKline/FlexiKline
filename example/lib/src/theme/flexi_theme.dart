@@ -162,6 +162,8 @@ extension TextStyleFKTheme on FKTheme {
       TextStyle(color: t1, fontSize: 10.sp, fontWeight: FontWeight.w400);
   TextStyle get t1s12w400 =>
       TextStyle(color: t1, fontSize: 12.sp, fontWeight: FontWeight.w400);
+  TextStyle get t1s12w500 =>
+      TextStyle(color: t1, fontSize: 12.sp, fontWeight: FontWeight.w500);
   TextStyle get t1s14w400 =>
       TextStyle(color: t1, fontSize: 14.sp, fontWeight: FontWeight.w400);
   TextStyle get t1s14w500 =>

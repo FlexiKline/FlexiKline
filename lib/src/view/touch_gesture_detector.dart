@@ -118,7 +118,7 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
   void onPointerMove(PointerMoveEvent event) {
     if (drawState.isOngoing) {
       if (drawState.isEditing) {
-        /// 已完成的DrawOverlay, 通过[_panScaleData]或[_longData]事件数据更新.
+        /// 已完成的DrawObject通过平移[_panScaleData]或长按[_longData]事件进行修正.
         return;
       }
       final pointerOffset = drawState.pointerOffset;
@@ -165,41 +165,50 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
     if (isSweeped) {
       isSweeped = false;
     }
-    _tapData?.end();
-    _tapData = null;
   }
 
   void onPointerCancel(PointerCancelEvent event) {
     if (isSweeped) {
       isSweeped = false;
     }
-    _tapData?.end();
-    _tapData = null;
   }
 
   /// 点击
   void onTapUp(TapUpDetails details) {
-    if (drawState.isOngoing) {
-      logd("onTapUp draw confirm details:$details");
-      final pointerOffset = drawState.pointerOffset ?? details.localPosition;
-      if (pointerOffset.isFinite) {
-        _tapData = GestureData.tap(pointerOffset);
-        final ret = controller.onDrawConfirm(_tapData!);
-        if (!ret) {
+    switch (drawState) {
+      case Drawing():
+        final pointerOffset = drawState.pointerOffset;
+        if (pointerOffset != null && pointerOffset.isFinite) {
+          _tapData = GestureData.tap(pointerOffset);
+          controller.onDrawConfirm(_tapData!);
+          if (drawState.isEditing) {
+            _tapData?.end();
+            _tapData = null;
+          }
+        }
+        return;
+      case Editing():
+        final offset = details.localPosition;
+        final object = controller.hitTestDrawObject(offset);
+        if (object != null && object != drawState.object) {
+          logd("onTapUp draw switch object:$object");
+          controller.onDrawSelect(object);
+        } else {
+          _tapData = GestureData.tap(offset);
+          controller.onDrawConfirm(_tapData!);
           _tapData?.end();
           _tapData = null;
         }
-      }
-      return;
-    } else if (drawState.isPrepared ||
-        controller.drawConfig.allowSelectWhenExit) {
-      // 只有在准备状态时或配置中指定[allowSelectWhenExit]时, 进行命中测试
-      final object = controller.hitTestDrawObject(details.localPosition);
-      if (object != null) {
-        logd("onTapUp draw select object:$object");
-        controller.onDrawSelect(object);
         return;
-      }
+      case Exited():
+        if (!controller.drawConfig.allowSelectWhenExit) break;
+      case Prepared():
+        final object = controller.hitTestDrawObject(details.localPosition);
+        if (object != null) {
+          logd("onTapUp draw select object:$object");
+          controller.onDrawSelect(object);
+          return;
+        }
     }
 
     logd("onTapUp cross start details:$details");

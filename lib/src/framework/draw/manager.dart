@@ -197,4 +197,14 @@ final class OverlayDrawObjectManager with KlineLog {
     object._overlay.zIndex = (first?.zIndex ?? drawObjectDefaultZIndex) - 1;
     resetObjectListSort();
   }
+
+  bool isOnTop(DrawObject<Overlay> object) {
+    final last = _overlayObjectList.lastOrNull;
+    return last == object;
+  }
+
+  bool isOnBottom(DrawObject<Overlay> object) {
+    final first = _overlayObjectList.firstOrNull;
+    return first == object;
+  }
 }

@@ -55,13 +55,13 @@ mixin DrawBinding
   void dispose() {
     super.dispose();
     logd('dispose draw');
-    _drawStateListener.dispose();
     _repaintDraw.dispose();
-    _drawObjectManager.dispose();
+    _drawStateListener.dispose();
     _drawPointerListener.dispose();
     _drawVisibilityListener.dispose();
     _drawMagnetModeListener.dispose();
     _drawContinuousListener.dispose();
+    _drawObjectManager.dispose();
   }
 
   late final OverlayDrawObjectManager _drawObjectManager;
@@ -182,7 +182,6 @@ mixin DrawBinding
       }());
       return;
     }
-    // final newOffset = magneticSnap(pointer.offset + data.delta);
     final newOffset = magneticSnap(data.offset);
     if (newOffset != pointer.offset) {
       object.onUpdateDrawPoint(pointer, newOffset);
@@ -191,11 +190,10 @@ mixin DrawBinding
   }
 
   /// 确认动作.
-  bool onDrawConfirm(GestureData data) {
+  void onDrawConfirm(GestureData data) {
     final object = drawState.object;
-    if (object == null) return false;
+    if (object == null) return;
 
-    bool result = false;
     if (object.isDrawing) {
       Point? pointer = object.pointer;
       if (pointer == null) {
@@ -224,23 +222,20 @@ mixin DrawBinding
         } else {
           _drawState = Editing(object);
         }
-      } else {
-        result = true; // 说明未绘制完成，用于Gesture手势层保留事件数据
       }
     } else if (object.isEditing) {
       final pointer = object.pointer;
       if (pointer == null) {
+        // 当前处于编辑状态, 但是pointer又没有被赋值, 此时点击事件为确认完成绘制.
         updateDrawObjectPointsData(object);
         _drawObjectManager.addDrawObject(object, replaceIfPresent: false);
         _drawState = const Prepared();
-        // 当前处于编辑状态, 但是pointer又没有被赋值, 此时点击事件为确认完成绘制.
       } else {
         object.confirmPointer();
       }
     }
 
     _markRepaint();
-    return result;
   }
 
   bool onDrawMoveStart(GestureData data) {
@@ -323,6 +318,9 @@ mixin DrawBinding
   }
 
   void onDrawSelect(DrawObject object) {
+    if (drawState.isEditing) {
+      updateDrawObjectPointsData(drawState.object!);
+    }
     _drawState = DrawState.edit(object);
     cancelCross();
     _markRepaint();
@@ -416,6 +414,12 @@ mixin DrawBinding
     return true;
   }
 
+  bool isDrawOnTop({DrawObject? object}) {
+    object ??= drawState.object;
+    if (object == null) false;
+    return _drawObjectManager.isOnTop(object!);
+  }
+
   bool moveDrawStateObjectToBottom() {
     if (!drawState.isEditing) return false;
     final object = drawState.object;
@@ -423,6 +427,12 @@ mixin DrawBinding
     _drawObjectManager.moveToBottom(object);
     _markRepaint();
     return true;
+  }
+
+  bool isDrawOnBottom({DrawObject? object}) {
+    object ??= drawState.object;
+    if (object == null) false;
+    return _drawObjectManager.isOnBottom(object!);
   }
 
   /// 测试[position]位置上是否有命中的Overly.
