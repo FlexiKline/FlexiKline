@@ -85,7 +85,7 @@ class _FlexiKlineSizeSliderState extends ConsumerState<FlexiKlineSizeSlider> {
       max: maxValue,
       divisions: divisions,
       thumbColor: theme.t1,
-      overlayColor: MaterialStatePropertyAll(theme.transparent),
+      overlayColor: WidgetStatePropertyAll(theme.transparent),
       onChangeStart: (value) {
         widget.onStateChanged?.call(true);
       },

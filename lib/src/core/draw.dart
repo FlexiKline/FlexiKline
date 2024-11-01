@@ -122,8 +122,10 @@ mixin DrawBinding
 
   ValueListenable<bool> get drawContinuousListener => _drawContinuousListener;
 
+  bool get isDrawVisibility => drawVisibilityListener.value;
+
   @override
-  MagnetMode get drawMagnet => _drawMagnetModeListener.value;
+  MagnetMode get drawMagnet => drawMagnetModeListener.value;
 
   @override
   void prepareDraw() {
@@ -131,6 +133,7 @@ mixin DrawBinding
     if (!drawState.isExited) return;
     _drawState = const Prepared();
     cancelCross();
+    _markRepaint();
   }
 
   @override
@@ -145,6 +148,8 @@ mixin DrawBinding
   /// 2. 初始化第一个Point的位置为[mainRect]中心
   @override
   void startDraw(IDrawType type, {bool? isInitPointer}) {
+    if (!isDrawVisibility) return;
+
     cancelCross();
     if (drawState.object?.type == type) {
       _drawState = const Prepared();
@@ -383,10 +388,11 @@ mixin DrawBinding
 
   void setDrawVisibility(bool isShow) {
     _drawVisibilityListener.value = isShow;
-    if (!isShow) {
-      _drawState = const Exited();
+    if (isShow) {
+      prepareDraw();
+    } else {
+      exitDraw();
     }
-    _markRepaint();
   }
 
   void setDrawMagnetMode(MagnetMode mode) {

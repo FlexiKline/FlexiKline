@@ -81,6 +81,9 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
 
     widget.controller.canvasSizeChangeListener.addListener(() {
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+        if (widget.controller.drawState.isEditing) {
+          _updateDrawToolbarPosition(_position);
+        }
         setState(() {});
       });
     });
@@ -200,6 +203,19 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
     );
   }
 
+  bool _updateDrawToolbarPosition(Offset newPosition) {
+    final size = _drawToolbarKey.currentContext?.size;
+    if (size != null && !size.isEmpty) {
+      final canvasRect = widget.controller.canvasRect;
+      _position = Offset(
+        newPosition.dx.clamp(0, canvasRect.right - size.width),
+        newPosition.dy.clamp(0, canvasRect.bottom - size.height),
+      );
+      return true;
+    }
+    return false;
+  }
+
   /// 绘制DrawToolBar
   Widget _buildDrawToolbar(BuildContext context, Size canvasSize) {
     if (widget.drawToolbar == null) return const SizedBox.shrink();
@@ -217,15 +233,9 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
             visible: state.isEditing,
             child: GestureDetector(
               onPanUpdate: (DragUpdateDetails details) {
-                /// 计算drawToolbar在canvasRect中的位置; 保证其始终在canvasRect中
-                final size = _drawToolbarKey.currentContext?.size ?? Size.zero;
-                final canvasRect = widget.controller.canvasRect;
-                _position = _position + details.delta;
-                _position = Offset(
-                  _position.dx.clamp(0, canvasRect.right - size.width),
-                  _position.dy.clamp(0, canvasRect.bottom - size.height),
-                );
-                setState(() {});
+                if (_updateDrawToolbarPosition(_position + details.delta)) {
+                  setState(() {});
+                }
               },
               onPanEnd: (event) {
                 /// TODO: 将位置持久化到本地
@@ -359,7 +369,7 @@ class DrawPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (!controller.drawVisibilityListener.value) return;
+    if (!controller.isDrawVisibility) return;
 
     controller.drawStateAxisTicksText(canvas, size);
     try {

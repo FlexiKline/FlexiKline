@@ -116,7 +116,7 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
   /// 原始移动
   /// 当原始移动时, 当前如果正处在crossing或drawing中时, 发生冲突, 清理手势竞技场, 响应Cross/Draw指针平移事件
   void onPointerMove(PointerMoveEvent event) {
-    if (drawState.isOngoing) {
+    if (controller.isDrawVisibility && drawState.isOngoing) {
       if (drawState.isEditing) {
         /// 已完成的DrawObject通过平移[_panScaleData]或长按[_longData]事件进行修正.
         return;
@@ -175,40 +175,52 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
 
   /// 点击
   void onTapUp(TapUpDetails details) {
-    switch (drawState) {
-      case Drawing():
-        final pointerOffset = drawState.pointerOffset;
-        if (pointerOffset != null && pointerOffset.isFinite) {
-          _tapData = GestureData.tap(pointerOffset);
-          controller.onDrawConfirm(_tapData!);
-          if (drawState.isEditing) {
+    if (controller.isDrawVisibility) {
+      switch (drawState) {
+        case Drawing():
+          final pointerOffset = drawState.pointerOffset;
+          if (pointerOffset != null && pointerOffset.isFinite) {
+            logd("onTapUp draw(editing) confirm pointer:$pointerOffset");
+            _tapData = GestureData.tap(pointerOffset);
+            controller.onDrawConfirm(_tapData!);
+            if (drawState.isEditing) {
+              _tapData?.end();
+              _tapData = null;
+            }
+          }
+          return;
+        case Editing():
+          final offset = details.localPosition;
+          final object = controller.hitTestDrawObject(offset);
+          if (object != null && object != drawState.object) {
+            logd("onTapUp draw(editing) switch object:$object");
+            controller.onDrawSelect(object);
+          } else {
+            logd("onTapUp draw(editing) confirm offset:$offset");
+            _tapData = GestureData.tap(offset);
+            controller.onDrawConfirm(_tapData!);
             _tapData?.end();
             _tapData = null;
           }
-        }
-        return;
-      case Editing():
-        final offset = details.localPosition;
-        final object = controller.hitTestDrawObject(offset);
-        if (object != null && object != drawState.object) {
-          logd("onTapUp draw switch object:$object");
-          controller.onDrawSelect(object);
-        } else {
-          _tapData = GestureData.tap(offset);
-          controller.onDrawConfirm(_tapData!);
-          _tapData?.end();
-          _tapData = null;
-        }
-        return;
-      case Exited():
-        if (!controller.drawConfig.allowSelectWhenExit) break;
-      case Prepared():
-        final object = controller.hitTestDrawObject(details.localPosition);
-        if (object != null) {
-          logd("onTapUp draw select object:$object");
-          controller.onDrawSelect(object);
           return;
-        }
+        case Exited():
+          if (controller.drawConfig.allowSelectWhenExit) {
+            final object = controller.hitTestDrawObject(details.localPosition);
+            if (object != null) {
+              logd("onTapUp draw(exited) select object:$object");
+              controller.onDrawSelect(object);
+              return;
+            }
+          }
+          break;
+        case Prepared():
+          final object = controller.hitTestDrawObject(details.localPosition);
+          if (object != null) {
+            logd("onTapUp draw(prepared) select object:$object");
+            controller.onDrawSelect(object);
+            return;
+          }
+      }
     }
 
     logd("onTapUp cross start details:$details");
@@ -228,7 +240,7 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
       return;
     }
 
-    if (drawState.isOngoing) {
+    if (controller.isDrawVisibility && drawState.isOngoing) {
       if (drawState.isDrawing) {
         // 未完成的暂不允许移动
         return;
@@ -273,7 +285,7 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
       return;
     }
 
-    if (drawState.isOngoing) {
+    if (controller.isDrawVisibility && drawState.isOngoing) {
       if (_panScaleData!.isPan) {
         _panScaleData!.update(
           details.localFocalPoint,
@@ -311,7 +323,7 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
       return;
     }
 
-    if (drawState.isOngoing) {
+    if (controller.isDrawVisibility && drawState.isOngoing) {
       if (_panScaleData!.isPan) {
         controller.onDrawMoveEnd();
       }
@@ -429,7 +441,7 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
       return;
     }
 
-    if (drawState.isOngoing) {
+    if (controller.isDrawVisibility && drawState.isOngoing) {
       if (drawState.isDrawing) {
         // 未完成的暂不允许移动
         return;
@@ -461,7 +473,7 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
     //   logd("onLongPressMoveUpdate > details:$details");
     //   return true;
     // }());
-    if (drawState.isOngoing) {
+    if (controller.isDrawVisibility && drawState.isOngoing) {
       _longData!.update(details.localPosition);
       controller.onDrawMoveUpdate(_longData!);
     } else {
@@ -479,7 +491,7 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
     //   logd("onLongPressEnd details:$details");
     //   return true;
     // }());
-    if (drawState.isOngoing) {
+    if (controller.isDrawVisibility && drawState.isOngoing) {
       controller.onDrawMoveEnd();
     } else {
       // 长按结束, 尝试取消Cross事件.

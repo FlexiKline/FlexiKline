@@ -1,3 +1,7 @@
+## 0.7.0
+* Suport Draw Feature
+* Optimize gesture
+
 ## 0.6.0
 * Support Desktop
 * Support Web

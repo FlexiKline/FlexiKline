@@ -25,7 +25,7 @@ import '../providers/default_kline_config.dart';
 import '../providers/market_candle_provider.dart';
 import '../repo/mock.dart';
 import '../repo/polygon_api.dart' as api;
-import '../test/canvas_demo.dart';
+// import '../test/canvas_demo.dart';
 import '../theme/flexi_theme.dart';
 import 'components/flexi_kline_draw_toolbar.dart';
 import 'components/flexi_kline_indicator_bar.dart';
@@ -224,14 +224,13 @@ class _MyDemoPageState extends ConsumerState<MyKlineDemoPage> {
               controller: controller,
             ),
             Container(
-              height: 20.r,
+              height: 0.5.r,
               color: theme.dividerLine,
             ),
-            Container(
-              height: 20.r,
-              color: theme.dividerLine,
-            ),
-            const CanvasDemo(),
+            // Container(
+            //   height: 200.r,
+            //   child: const CanvasDemo(),
+            // ),
           ],
         ),
       ),

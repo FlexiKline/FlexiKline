@@ -83,6 +83,7 @@ mixin CrossBinding
   bool get isCrossing => _offset?.isFinite == true;
 
   Offset? _offset;
+  Offset? get crossOffset => _offset;
   void _updateOffset(Offset? val) {
     if (val != null) {
       _offset = _correctCrossOffset(val);

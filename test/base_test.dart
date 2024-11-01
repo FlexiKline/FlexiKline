@@ -129,4 +129,24 @@ void main() {
       return true;
     });
   });
+
+  test('future dowhile', () async {
+    DrawState state = DrawState.exited();
+    final aaa = false;
+    debugPrint('>>>>>>');
+    switch (state) {
+      case Drawing():
+        debugPrint('drawing');
+        return;
+      case Editing():
+        debugPrint('editing');
+        break;
+      case Exited():
+        debugPrint('Exited1111');
+      case Prepared():
+        debugPrint('Exited222');
+        debugPrint('prepared');
+    }
+    debugPrint('<<<<<');
+  });
 }
