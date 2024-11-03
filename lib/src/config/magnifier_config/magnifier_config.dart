@@ -24,25 +24,17 @@ part 'magnifier_config.g.dart';
 class MagnifierConfig {
   const MagnifierConfig({
     this.enable = true,
-    this.times = 2,
-    this.opactity = 1.0,
-    this.opactityWhenOverlap = 0.75,
     this.margin = EdgeInsets.zero,
     this.size = const Size(80, 80),
-    this.boder = BorderSide.none,
+    this.magnificationScale = 2,
+    this.clipBehavior = Clip.none,
+    this.decorationOpactity = 1.0,
+    this.decorationShadows,
+    this.shapeSide = BorderSide.none,
   });
 
   /// 是否启用放大镜
   final bool enable;
-
-  /// 放大镜默认背景不透明度
-  final double opactity;
-
-  /// 当与当前指针重叠时, 放大镜背景不透明度
-  final double opactityWhenOverlap;
-
-  /// 放大倍数
-  final double times;
 
   /// 放大镜margin
   final EdgeInsets margin;
@@ -50,8 +42,48 @@ class MagnifierConfig {
   /// 放大镜大小
   final Size size;
 
-  /// 放大镜边框样式
-  final BorderSide boder;
+  /// 放大倍数 参考[RawMagnifier]Widget对应的属性.
+  final double magnificationScale;
+
+  /// Whether and how to clip the parts of [decoration] that render inside the
+  /// loupe.
+  ///
+  /// Defaults to [Clip.none].
+  ///
+  /// See the discussion at [decoration].
+  final Clip clipBehavior;
+
+  /// The opacity of the magnifier and decorations around the magnifier.
+  ///
+  /// When this is 1.0, the magnified image shows in the [shape] of the
+  /// magnifier. When this is less than 1.0, the magnified image is transparent
+  /// and shows through the unmagnified background.
+  ///
+  /// Generally this is only useful for animating the magnifier in and out, as a
+  /// transparent magnifier looks quite confusing.
+  final double decorationOpactity;
+
+  /// A list of shadows cast by the [shape].
+  ///
+  /// If the shadows are offset, consider setting [RawMagnifier.clipBehavior] to
+  /// [Clip.hardEdge] (or similar) to ensure the shadow does not occlude the
+  /// magnifier (the shadow is drawn above the magnifier).
+  ///
+  /// If the shadows are _not_ offset, consider using [BlurStyle.outer] in the
+  /// shadows instead, to avoid having to introduce a clip.
+  ///
+  /// In the event that [shape] consists of a stack of borders, the shadow is
+  /// drawn using the bounds of the last one.
+  ///
+  /// See also:
+  ///
+  ///  * [kElevationToShadow], which defines some shadows for Material design.
+  ///    Those shadows use [BlurStyle.normal] and may need to be converted to
+  ///    [BlurStyle.outer] for use with [MagnifierDecoration].
+  final List<BoxShadow>? decorationShadows;
+
+  /// 放大镜默认圆形边框样式
+  final BorderSide shapeSide;
 
   factory MagnifierConfig.fromJson(Map<String, dynamic> json) =>
       _$MagnifierConfigFromJson(json);

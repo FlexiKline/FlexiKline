@@ -195,6 +195,8 @@ abstract interface class ICross {
   /// 是否正在绘制Cross
   bool get isCrossing;
 
+  Offset? get crossOffset;
+
   /// 开始Cross事件
   /// [force] 将会强制启动cross事件.
   /// 当返回true时, 说明已开始展示Corss; 否则, 说明之前处在Cross, 结束上次的Cross事件.

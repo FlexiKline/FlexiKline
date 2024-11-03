@@ -28,7 +28,7 @@ import 'setting.dart';
 /// 图形绘制
 mixin DrawBinding
     on KlineBindingBase, SettingBinding
-    implements IDraw, IState, IDrawContext {
+    implements IDraw, IState, IDrawContext, ICross {
   @override
   void init() {
     super.init();
@@ -132,7 +132,6 @@ mixin DrawBinding
     // 如果是非退出状态, 则无需变更状态.
     if (!drawState.isExited) return;
     _drawState = const Prepared();
-    cancelCross();
     _markRepaint();
   }
 
@@ -150,7 +149,6 @@ mixin DrawBinding
   void startDraw(IDrawType type, {bool? isInitPointer}) {
     if (!isDrawVisibility) return;
 
-    cancelCross();
     if (drawState.object?.type == type) {
       _drawState = const Prepared();
     } else {
@@ -160,11 +158,13 @@ mixin DrawBinding
       );
       if (object != null) {
         if (isInitPointer ?? PlatformUtil.isTouch) {
-          // 默认初始指针为[mainRect]中心
-          Offset initOffset = mainRect.center;
+          Offset? initOffset;
           if (drawState.pointerOffset?.isFinite == true) {
             initOffset = drawState.pointerOffset!;
+          } else if (crossOffset != null && mainRect.contains(crossOffset!)) {
+            initOffset = crossOffset!;
           }
+          initOffset ??= mainRect.center;
           object.setPointer(Point.pointer(0, magneticSnap(initOffset)));
         }
         _drawState = DrawState.draw(object);
@@ -172,6 +172,7 @@ mixin DrawBinding
         _drawState = const Prepared();
       }
     }
+    cancelCross();
     _markRepaint();
   }
 

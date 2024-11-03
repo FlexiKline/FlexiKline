@@ -9,17 +9,19 @@ part of 'magnifier_config.dart';
 abstract class _$MagnifierConfigCWProxy {
   MagnifierConfig enable(bool enable);
 
-  MagnifierConfig times(double times);
-
-  MagnifierConfig opactity(double opactity);
-
-  MagnifierConfig opactityWhenOverlap(double opactityWhenOverlap);
-
   MagnifierConfig margin(EdgeInsets margin);
 
   MagnifierConfig size(Size size);
 
-  MagnifierConfig boder(BorderSide boder);
+  MagnifierConfig magnificationScale(double magnificationScale);
+
+  MagnifierConfig clipBehavior(Clip clipBehavior);
+
+  MagnifierConfig decorationOpactity(double decorationOpactity);
+
+  MagnifierConfig decorationShadows(List<BoxShadow>? decorationShadows);
+
+  MagnifierConfig shapeSide(BorderSide shapeSide);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `MagnifierConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -29,12 +31,13 @@ abstract class _$MagnifierConfigCWProxy {
   /// ````
   MagnifierConfig call({
     bool? enable,
-    double? times,
-    double? opactity,
-    double? opactityWhenOverlap,
     EdgeInsets? margin,
     Size? size,
-    BorderSide? boder,
+    double? magnificationScale,
+    Clip? clipBehavior,
+    double? decorationOpactity,
+    List<BoxShadow>? decorationShadows,
+    BorderSide? shapeSide,
   });
 }
 
@@ -48,23 +51,29 @@ class _$MagnifierConfigCWProxyImpl implements _$MagnifierConfigCWProxy {
   MagnifierConfig enable(bool enable) => this(enable: enable);
 
   @override
-  MagnifierConfig times(double times) => this(times: times);
-
-  @override
-  MagnifierConfig opactity(double opactity) => this(opactity: opactity);
-
-  @override
-  MagnifierConfig opactityWhenOverlap(double opactityWhenOverlap) =>
-      this(opactityWhenOverlap: opactityWhenOverlap);
-
-  @override
   MagnifierConfig margin(EdgeInsets margin) => this(margin: margin);
 
   @override
   MagnifierConfig size(Size size) => this(size: size);
 
   @override
-  MagnifierConfig boder(BorderSide boder) => this(boder: boder);
+  MagnifierConfig magnificationScale(double magnificationScale) =>
+      this(magnificationScale: magnificationScale);
+
+  @override
+  MagnifierConfig clipBehavior(Clip clipBehavior) =>
+      this(clipBehavior: clipBehavior);
+
+  @override
+  MagnifierConfig decorationOpactity(double decorationOpactity) =>
+      this(decorationOpactity: decorationOpactity);
+
+  @override
+  MagnifierConfig decorationShadows(List<BoxShadow>? decorationShadows) =>
+      this(decorationShadows: decorationShadows);
+
+  @override
+  MagnifierConfig shapeSide(BorderSide shapeSide) => this(shapeSide: shapeSide);
 
   @override
 
@@ -76,32 +85,19 @@ class _$MagnifierConfigCWProxyImpl implements _$MagnifierConfigCWProxy {
   /// ````
   MagnifierConfig call({
     Object? enable = const $CopyWithPlaceholder(),
-    Object? times = const $CopyWithPlaceholder(),
-    Object? opactity = const $CopyWithPlaceholder(),
-    Object? opactityWhenOverlap = const $CopyWithPlaceholder(),
     Object? margin = const $CopyWithPlaceholder(),
     Object? size = const $CopyWithPlaceholder(),
-    Object? boder = const $CopyWithPlaceholder(),
+    Object? magnificationScale = const $CopyWithPlaceholder(),
+    Object? clipBehavior = const $CopyWithPlaceholder(),
+    Object? decorationOpactity = const $CopyWithPlaceholder(),
+    Object? decorationShadows = const $CopyWithPlaceholder(),
+    Object? shapeSide = const $CopyWithPlaceholder(),
   }) {
     return MagnifierConfig(
       enable: enable == const $CopyWithPlaceholder() || enable == null
           ? _value.enable
           // ignore: cast_nullable_to_non_nullable
           : enable as bool,
-      times: times == const $CopyWithPlaceholder() || times == null
-          ? _value.times
-          // ignore: cast_nullable_to_non_nullable
-          : times as double,
-      opactity: opactity == const $CopyWithPlaceholder() || opactity == null
-          ? _value.opactity
-          // ignore: cast_nullable_to_non_nullable
-          : opactity as double,
-      opactityWhenOverlap:
-          opactityWhenOverlap == const $CopyWithPlaceholder() ||
-                  opactityWhenOverlap == null
-              ? _value.opactityWhenOverlap
-              // ignore: cast_nullable_to_non_nullable
-              : opactityWhenOverlap as double,
       margin: margin == const $CopyWithPlaceholder() || margin == null
           ? _value.margin
           // ignore: cast_nullable_to_non_nullable
@@ -110,10 +106,29 @@ class _$MagnifierConfigCWProxyImpl implements _$MagnifierConfigCWProxy {
           ? _value.size
           // ignore: cast_nullable_to_non_nullable
           : size as Size,
-      boder: boder == const $CopyWithPlaceholder() || boder == null
-          ? _value.boder
+      magnificationScale: magnificationScale == const $CopyWithPlaceholder() ||
+              magnificationScale == null
+          ? _value.magnificationScale
           // ignore: cast_nullable_to_non_nullable
-          : boder as BorderSide,
+          : magnificationScale as double,
+      clipBehavior:
+          clipBehavior == const $CopyWithPlaceholder() || clipBehavior == null
+              ? _value.clipBehavior
+              // ignore: cast_nullable_to_non_nullable
+              : clipBehavior as Clip,
+      decorationOpactity: decorationOpactity == const $CopyWithPlaceholder() ||
+              decorationOpactity == null
+          ? _value.decorationOpactity
+          // ignore: cast_nullable_to_non_nullable
+          : decorationOpactity as double,
+      decorationShadows: decorationShadows == const $CopyWithPlaceholder()
+          ? _value.decorationShadows
+          // ignore: cast_nullable_to_non_nullable
+          : decorationShadows as List<BoxShadow>?,
+      shapeSide: shapeSide == const $CopyWithPlaceholder() || shapeSide == null
+          ? _value.shapeSide
+          // ignore: cast_nullable_to_non_nullable
+          : shapeSide as BorderSide,
     );
   }
 }
@@ -131,10 +146,6 @@ extension $MagnifierConfigCopyWith on MagnifierConfig {
 MagnifierConfig _$MagnifierConfigFromJson(Map<String, dynamic> json) =>
     MagnifierConfig(
       enable: json['enable'] as bool? ?? true,
-      times: (json['times'] as num?)?.toDouble() ?? 2,
-      opactity: (json['opactity'] as num?)?.toDouble() ?? 1.0,
-      opactityWhenOverlap:
-          (json['opactityWhenOverlap'] as num?)?.toDouble() ?? 0.75,
       margin: json['margin'] == null
           ? EdgeInsets.zero
           : const EdgeInsetsConverter()
@@ -143,19 +154,43 @@ MagnifierConfig _$MagnifierConfigFromJson(Map<String, dynamic> json) =>
           ? const Size(80, 80)
           : const SizeConverter()
               .fromJson(json['size'] as Map<String, dynamic>),
-      boder: json['boder'] == null
+      magnificationScale: (json['magnificationScale'] as num?)?.toDouble() ?? 2,
+      clipBehavior: json['clipBehavior'] == null
+          ? Clip.none
+          : const ClipConverter().fromJson(json['clipBehavior'] as String),
+      decorationOpactity:
+          (json['decorationOpactity'] as num?)?.toDouble() ?? 1.0,
+      decorationShadows: (json['decorationShadows'] as List<dynamic>?)
+          ?.map((e) =>
+              const BoxShadowConverter().fromJson(e as Map<String, dynamic>))
+          .toList(),
+      shapeSide: json['shapeSide'] == null
           ? BorderSide.none
           : const BorderSideConvert()
-              .fromJson(json['boder'] as Map<String, dynamic>),
+              .fromJson(json['shapeSide'] as Map<String, dynamic>),
     );
 
-Map<String, dynamic> _$MagnifierConfigToJson(MagnifierConfig instance) =>
-    <String, dynamic>{
-      'enable': instance.enable,
-      'opactity': instance.opactity,
-      'opactityWhenOverlap': instance.opactityWhenOverlap,
-      'times': instance.times,
-      'margin': const EdgeInsetsConverter().toJson(instance.margin),
-      'size': const SizeConverter().toJson(instance.size),
-      'boder': const BorderSideConvert().toJson(instance.boder),
-    };
+Map<String, dynamic> _$MagnifierConfigToJson(MagnifierConfig instance) {
+  final val = <String, dynamic>{
+    'enable': instance.enable,
+    'margin': const EdgeInsetsConverter().toJson(instance.margin),
+    'size': const SizeConverter().toJson(instance.size),
+    'magnificationScale': instance.magnificationScale,
+    'clipBehavior': const ClipConverter().toJson(instance.clipBehavior),
+    'decorationOpactity': instance.decorationOpactity,
+  };
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull(
+      'decorationShadows',
+      instance.decorationShadows
+          ?.map(const BoxShadowConverter().toJson)
+          .toList());
+  val['shapeSide'] = const BorderSideConvert().toJson(instance.shapeSide);
+  return val;
+}

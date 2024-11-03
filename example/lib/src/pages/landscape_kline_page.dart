@@ -94,7 +94,7 @@ class _LandscapeKlinePageState extends ConsumerState<LandscapeKlinePage>
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) async {
+      onPopInvokedWithResult: (didPop, result) {
         controller.logd('zp::: LandscapeKlinePage onPopInvoked:$didPop');
         exitPage();
       },

@@ -80,9 +80,10 @@ mixin CrossBinding
 
   // 是否正在绘制Cross
   @override
-  bool get isCrossing => _offset?.isFinite == true;
+  bool get isCrossing => crossOffset?.isFinite == true;
 
   Offset? _offset;
+  @override
   Offset? get crossOffset => _offset;
   void _updateOffset(Offset? val) {
     if (val != null) {

@@ -21,6 +21,11 @@ import '../utils/platform_util.dart';
 import 'non_touch_gesture_detector.dart';
 import 'touch_gesture_detector.dart';
 
+typedef MagnifierDecorationShapBuilder = ShapeBorder Function(
+  BuildContext context,
+  BorderSide side,
+);
+
 class FlexiKlineWidget extends StatefulWidget {
   FlexiKlineWidget({
     super.key,
@@ -35,7 +40,7 @@ class FlexiKlineWidget extends StatefulWidget {
     this.onDoubleTap,
     this.drawToolbar,
     this.drawToolbarInitHeight = 50,
-    this.magnifierDecoration,
+    this.magnifierDecorationShapBuilder,
   })  : isTouchDevice = isTouchDevice ?? PlatformUtil.isTouch,
         autoAdaptLayout = autoAdaptLayout ?? !PlatformUtil.isMobile;
 
@@ -59,8 +64,8 @@ class FlexiKlineWidget extends StatefulWidget {
   /// 是否是触摸设备.
   final bool isTouchDevice;
 
-  /// 绘制点放大镜样式
-  final MagnifierDecoration? magnifierDecoration;
+  /// 绘制点指针放大镜DecorationShape.
+  final MagnifierDecorationShapBuilder? magnifierDecorationShapBuilder;
 
   @override
   State<FlexiKlineWidget> createState() => _FlexiKlineWidgetState();
@@ -253,57 +258,67 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
 
   /// 放大镜
   Widget _buildMagnifier(BuildContext context, Rect drawRect) {
-    final config = widget.controller.drawConfig.magnifierConfig;
+    final config = widget.controller.drawConfig.magnifier;
     if (!config.enable || config.size.isEmpty) {
       return const SizedBox.shrink();
     }
-    return Positioned(
-      top: 0 + config.margin.top,
-      left: 0 + config.margin.left,
-      child: ValueListenableBuilder(
-        valueListenable: widget.controller.drawPointerListener,
-        builder: (context, pointer, child) {
-          // final overlay = state.object;
 
-          // /// 如果overlay是已完成, 且当前正在移动某个绘制点, 则展示放大镜, 否则不展示.
-          // if (overlay == null ||
-          //     !overlay.moving ||
-          //     overlay.pointer?.offset.isFinite != true ||
-          //     !overlay.isEditing) {
-          //   return const SizedBox.shrink();
-          // }
-
-          if (pointer == null || pointer.offset.isInfinite) {
-            return const SizedBox.shrink();
+    return ValueListenableBuilder(
+      valueListenable: widget.controller.drawPointerListener,
+      builder: (context, pointer, child) {
+        bool visible = false;
+        final pointerOffset = pointer?.offset;
+        Offset focalPosition = Offset.zero;
+        AlignmentGeometry alignment = AlignmentDirectional.topStart;
+        EdgeInsets margin = config.margin;
+        if (pointerOffset != null && pointerOffset.isFinite) {
+          visible = true;
+          Offset position;
+          if (pointerOffset.dx > drawRect.width * 0.5) {
+            alignment = AlignmentDirectional.topStart;
+            position = config.size.center(margin.topLeft);
+            position = Offset(
+              drawRect.left + position.dx,
+              drawRect.top + position.dy,
+            );
+          } else {
+            alignment = AlignmentDirectional.topEnd;
+            final valueTxtWidth =
+                widget.controller.drawState.object?.valueTicksSize?.width ?? 0;
+            margin = margin.copyWith(right: margin.right + valueTxtWidth);
+            position = Offset(
+              drawRect.right - margin.right - config.size.width / 2,
+              drawRect.top + margin.top + config.size.height / 2,
+            );
           }
+          focalPosition = pointerOffset - position;
+        }
 
-          // final drawRect = widget.controller.mainRect;
-          Offset focalPosition = pointer.offset;
-          double opacity = config.opactity;
-          if (focalPosition.dy < (drawRect.top + config.size.height) &&
-              focalPosition.dx < (drawRect.left + config.size.width)) {
-            opacity = config.opactityWhenOverlap;
-          }
-          focalPosition = Offset(
-            focalPosition.dx - config.size.width / 2,
-            focalPosition.dy - config.size.height / 2,
-          );
-
-          return RawMagnifier(
-            key: const ValueKey('KlineMagnifier'),
-            decoration: widget.magnifierDecoration ??
-                MagnifierDecoration(
-                  opacity: opacity,
-                  shape: CircleBorder(
-                    side: config.boder,
-                  ),
-                ),
-            size: config.size,
-            focalPointOffset: focalPosition,
-            magnificationScale: config.times,
-          );
-        },
-      ),
+        return Visibility(
+          key: const ValueKey('MagnifierVisibility'),
+          visible: visible,
+          child: Container(
+            key: const ValueKey('MagnifierContainer'),
+            alignment: alignment,
+            margin: margin,
+            child: RawMagnifier(
+              key: const ValueKey('KlineRawMagnifier'),
+              decoration: MagnifierDecoration(
+                opacity: config.decorationOpactity,
+                shadows: config.decorationShadows,
+                shape: widget.magnifierDecorationShapBuilder?.call(
+                      context,
+                      config.shapeSide,
+                    ) ??
+                    CircleBorder(side: config.shapeSide),
+              ),
+              size: config.size,
+              focalPointOffset: focalPosition,
+              magnificationScale: config.magnificationScale,
+            ),
+          ),
+        );
+      },
     );
   }
 }

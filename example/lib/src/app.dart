@@ -107,34 +107,34 @@ class _MyAppState extends ConsumerState<MyApp> {
   void configDefaultRefresher() {
     EasyRefresh.defaultHeaderBuilder = () {
       final theme = ref.watch(themeProvider);
-      if (DeviceUtil.isAndroid) {
+      if (DeviceUtil.isTargetMobile) {
         return CupertinoHeader(
           foregroundColor: theme.t1,
           backgroundColor: theme.markBg,
         );
-      } else if (DeviceUtil.isIOS) {
-        return MaterialHeader(
-          color: theme.t1,
-          backgroundColor: theme.markBg,
-        );
+        // } else if (DeviceUtil.isIOS) {
+        //   return MaterialHeader(
+        //     color: theme.t1,
+        //     backgroundColor: theme.markBg,
+        //   );
       } else {
         return const ClassicHeader();
       }
     };
     EasyRefresh.defaultFooterBuilder = () {
       final theme = ref.watch(themeProvider);
-      if (DeviceUtil.isAndroid) {
+      if (DeviceUtil.isTargetMobile) {
         return CupertinoFooter(
           emptyWidget: Text(
             'Protected By FlexiKline',
             style: theme.t2s12w400,
           ),
         );
-      } else if (DeviceUtil.isIOS) {
-        return MaterialFooter(
-          color: theme.t1,
-          backgroundColor: theme.markBg,
-        );
+        // } else if (DeviceUtil.isIOS) {
+        //   return MaterialFooter(
+        //     color: theme.t1,
+        //     backgroundColor: theme.markBg,
+        //   );
       } else {
         return const ClassicFooter();
       }

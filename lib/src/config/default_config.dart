@@ -383,12 +383,21 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       ticksGapBgOpacity: 0.1,
       hitTestMinDistance: 10 * theme.scale,
       magnetMinDistance: 10 * theme.scale,
-      magnifierConfig: MagnifierConfig(
+      magnifier: MagnifierConfig(
         enable: true,
-        times: 2,
+        magnificationScale: 2,
         margin: EdgeInsets.all(1 * theme.scale),
         size: Size(80 * theme.scale, 80 * theme.scale),
-        boder: BorderSide(
+        decorationOpactity: 1.0,
+        decorationShadows: [
+          BoxShadow(
+            offset: const Offset(0.1, 0.1),
+            blurRadius: 2,
+            spreadRadius: 3,
+            color: theme.themeColor.withOpacity(0.1),
+          )
+        ],
+        shapeSide: BorderSide(
           color: theme.gridLine,
           width: 1 * theme.scale,
         ),

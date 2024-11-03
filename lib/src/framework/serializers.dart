@@ -454,6 +454,77 @@ class StrutStyleConverter
   }
 }
 
+class ClipConverter implements JsonConverter<Clip, String> {
+  const ClipConverter();
+
+  @override
+  Clip fromJson(String clip) {
+    return Clip.values.firstWhere(
+      (e) => e.name == clip,
+      orElse: () => Clip.none,
+    );
+  }
+
+  @override
+  String toJson(Clip clip) {
+    return clip.name;
+  }
+}
+
+class BoxShadowConverter
+    implements JsonConverter<BoxShadow, Map<String, dynamic>> {
+  const BoxShadowConverter();
+
+  @override
+  BoxShadow fromJson(Map<String, dynamic> json) {
+    return BoxShadow(
+      color: parseHexColor(json['color']) ?? const Color(0xFF000000),
+      offset: const OffsetConverter().fromJson(json['offset']),
+      blurRadius: parseDouble(json['blurRadius']) ?? 0.0,
+      spreadRadius: parseDouble(json['spreadRadius']) ?? 0.0,
+      blurStyle: BlurStyle.values.firstWhere(
+        (e) => e.name == json['blurStyle'],
+        orElse: () => BlurStyle.normal,
+      ),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson(BoxShadow shadow) {
+    return {
+      'color': convertHexColor(shadow.color),
+      'offset': const OffsetConverter().toJson(shadow.offset),
+      'blurRadius': convertDouble(shadow.blurRadius),
+      'spreadRadius': convertDouble(shadow.spreadRadius),
+      'blurStyle': shadow.blurStyle.name,
+    };
+  }
+}
+
+class OffsetConverter implements JsonConverter<Offset, Map<String, dynamic>> {
+  const OffsetConverter({this.defaultOffset = Offset.zero});
+
+  final Offset defaultOffset;
+
+  @override
+  Offset fromJson(Map<String, dynamic> json) {
+    final dx = parseDouble(json['dx']);
+    final dy = parseDouble(json['dy']);
+    if (dx != null && dy != null) {
+      return Offset(dx, dy);
+    }
+    return defaultOffset;
+  }
+
+  @override
+  Map<String, dynamic> toJson(Offset offset) {
+    return {
+      'dx': convertDouble(offset.dx),
+      'dy': convertDouble(offset.dy),
+    };
+  }
+}
+
 class ColorConverter implements JsonConverter<Color, String> {
   const ColorConverter();
 
@@ -548,6 +619,9 @@ const _basicConverterList = <JsonConverter>[
   BorderSideConvert(),
   BorderConverter(),
   BorderRadiusConverter(),
+  ClipConverter(),
+  BoxShadowConverter(),
+  OffsetConverter(),
   TextAlignConvert(),
   TextStyleConverter(),
   StrutStyleConverter(),

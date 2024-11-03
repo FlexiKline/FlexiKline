@@ -13,9 +13,11 @@
 // limitations under the License.
 
 import 'package:example/generated/l10n.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:go_router/go_router.dart';
 
 import '../i18n.dart';
@@ -141,7 +143,14 @@ class _AppSettingPageState extends ConsumerState<AppSettingPage> {
                     s.about,
                     style: theme.textTheme.titleMedium,
                   ),
-                  leading: const Icon(Icons.error_outline_rounded),
+                  leading: GestureDetector(
+                    onDoubleTap: () {
+                      SmartDialog.showToast(
+                        'Platform:${defaultTargetPlatform.name} (${kIsWeb ? 'web' : ''})',
+                      );
+                    },
+                    child: const Icon(Icons.error_outline_rounded),
+                  ),
                   children: [
                     ListTile(
                       title: FutureBuilder(

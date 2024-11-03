@@ -39,7 +39,7 @@ class DrawConfig {
     this.ticksGapBgOpacity = 0.1,
     this.hitTestMinDistance = 10,
     this.magnetMinDistance = 10,
-    this.magnifierConfig = const MagnifierConfig(),
+    this.magnifier = const MagnifierConfig(),
     this.drawParams = const DrawParams(),
   });
 
@@ -81,7 +81,7 @@ class DrawConfig {
   final double magnetMinDistance;
 
   /// 放大镜配置
-  final MagnifierConfig magnifierConfig;
+  final MagnifierConfig magnifier;
 
   /// 绘制Overlay的Object时所需要的参数集
   final DrawParams drawParams;

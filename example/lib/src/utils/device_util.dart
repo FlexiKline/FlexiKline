@@ -21,10 +21,10 @@ final class DeviceUtil {
   DeviceUtil._();
 
   /// 是否触摸设备
-  static bool get isTouch => isMobile;
+  static bool get isTouch => isTargetMobile;
 
   /// 是否非触摸设备
-  static bool get isNonTouch => !isMobile;
+  static bool get isNonTouch => !isTargetMobile;
 
   static bool get isDesktop => !isWeb && (isWindows || isLinux || isMacOS);
 

@@ -198,15 +198,15 @@ mixin DrawObjectMixin on DrawStateObject {
     canvas.drawCirclePoint(pointer, crosspointConfig);
   }
 
-  Size? __valueTickSize;
-  Size? get valueTickSize => __valueTickSize;
-  set _valueTickSize(Size size) {
-    if (__valueTickSize != null) {
-      if (size.width < __valueTickSize!.width) {
-        __valueTickSize = size;
+  Size? __valueTicksSize;
+  Size? get valueTicksSize => __valueTicksSize;
+  set _valueTicksSize(Size size) {
+    if (__valueTicksSize != null && __valueTicksSize! > Size.zero) {
+      if (size.width < __valueTicksSize!.width) {
+        __valueTicksSize = size;
       }
     } else {
-      __valueTickSize = size;
+      __valueTicksSize = size;
     }
   }
 
@@ -262,7 +262,7 @@ mixin DrawObjectMixin on DrawStateObject {
     /// 绘制价值刻度
     if (bounds.height > 0) {
       // 绘制top到bottom刻度之间的背景
-      final txtWidth = valueTickSize?.width ?? 0;
+      final txtWidth = valueTicksSize?.width ?? 0;
       if (txtWidth > 0 && ticksGapBgPaint != null) {
         canvas.drawRect(
           Rect.fromLTRB(
@@ -285,20 +285,20 @@ mixin DrawObjectMixin on DrawStateObject {
         bottomDy = bounds.top;
       }
 
-      _valueTickSize = drawValueTicks(
+      _valueTicksSize = drawValueTicks(
         context,
         canvas,
         topDy,
         drawableRect: mainRect,
       );
-      _valueTickSize = drawValueTicks(
+      _valueTicksSize = drawValueTicks(
         context,
         canvas,
         bottomDy,
         drawableRect: mainRect,
       );
     } else {
-      _valueTickSize = drawValueTicks(
+      _valueTicksSize = drawValueTicks(
         context,
         canvas,
         bounds.top,

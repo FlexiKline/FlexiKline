@@ -49,7 +49,8 @@ final defLogger = Logger(
     lineLength: 120, // width of the output
     colors: true, // Colorful log messages
     printEmojis: true, // Print an emoji for each log message
-    printTime: true, // Should each log print contain a timestamp
+    dateTimeFormat: DateTimeFormat.onlyTime,
+    // printTime: true, // Should each log print contain a timestamp
   ),
   output: null, // Use the default LogOutput (-> send everything to console)
 );
