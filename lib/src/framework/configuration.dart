@@ -137,7 +137,7 @@ mixin FlexiKlineThemeTextStyle implements IFlexiKlineTheme {
 
 /// FlexiKline配置接口
 abstract interface class IConfiguration {
-  /// FlexiKline初始或默认的主区的宽高.
+  /// FlexiKline初始化默认的主区的宽高.
   Size get initialMainSize;
 
   /// 获取FlexiKline配置
@@ -145,7 +145,7 @@ abstract interface class IConfiguration {
   /// 2. 如果本地没有缓存, 根据当前主题生成一套FlexiKline配置.
   FlexiKlineConfig getFlexiKlineConfig();
 
-  /// 保存[config]配置信息到本地; 通过FlexiKlineController调用.
+  /// 保存[config]配置信息到本地.
   void saveFlexiKlineConfig(FlexiKlineConfig config);
 
   /// 自定义主区指标列表
@@ -156,9 +156,9 @@ abstract interface class IConfiguration {
   /// @Deprecated('考虑优化中...')
   Iterable<Indicator> customSubIndicators();
 
-  /// 获取instId指定的[Overlay]缓存列表.
+  /// 从本地获取[instId]指定的[Overlay]缓存列表.
   Iterable<Overlay> getOverlayListConfig(String instId);
 
-  /// 以[instId]为key, 保存[list]到缓存中.
+  /// 以[instId]为key, 保存[list]持久化到本地中.
   void saveOverlayListConfig(String instId, Iterable<Overlay> list);
 }

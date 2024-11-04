@@ -1,45 +1,45 @@
 # FlexiKline
 
-一个灵活和可定制的Flutter金融图表。
+FlexiKline是一个灵活且高度可定制化的金融Kline图表框架，旨在满足不同用户的需求. 
 
 ## Demo
 
-[Web](https://flexikline.github.io/#/demo)
-[Android Apk](./doc/FlexiKline-1.0.6-release.apk)
+[https://flexikline.github.io](https://flexikline.github.io)
 
 ## 特性
 
 + 内置多种常用指标, 支持添加自定义指标.
-+ 可定制化的指标样式与指标设置.
-+ 支持全屏/横屏/主区图表宽高动态调整.
-+ 可定制化的手势操作(惯性平移/缩放位置)
-+ 支持多种平台(Android, iOS, Web, MacOs, Windows, Linux...).
++ 内置多种绘图工具, 支持添加自定义绘制工具.
++ 支持全屏/横屏/主副区图表宽高设定与动态调整.
++ 可定制化与持久化样式, 配置, 参数(包括指标/绘制等所有功能).
++ 适配多平台手势操作, 且可定制化操作(惯性平移/缩放位置等).
++ 支持多种平台(Android, iOS, Web, MacOs, Windows, Linux).
 
 
 ## Sample
 
-1. Custom FlexiKlineConfiguration
+### 1. Custom FlexiKlineConfiguration
 
 实现IConfiguration接口.
 ```dart
 /// FlexiKline配置接口
 abstract interface class IConfiguration {
-  /// FlexiKline初始或默认的主区的宽高.
+  /// FlexiKline初始化默认的主区的宽高.
   Size get initialMainSize;
 
   /// 获取FlexiKline配置
   /// 1. 如果本地有缓存, 则从缓存中获取.
   /// 2. 如果本地没有缓存, 根据当前主题生成一套FlexiKline配置.
-  FlexiKlineConfig getFlexiKlineConfig();
+  FlexiKlineConfig getFlexiKlineConfig([covariant IFlexiKlineTheme? theme]);
 
-  /// 保存[config]配置信息到本地; 通过FlexiKlineController调用.
+  /// 保存[config]配置信息到本地.
   void saveFlexiKlineConfig(FlexiKlineConfig config);
 
-  /// 自定义主区指标列表
-  Iterable<SinglePaintObjectIndicator> customMainIndicators();
+  /// 从本地获取[instId]指定的[Overlay]缓存列表.
+  Iterable<Overlay> getOverlayListConfig(String instId);
 
-  /// 自定义副区指标列表
-  Iterable<Indicator> customSubIndicators();
+  /// 以[instId]为key, 保存[list]持久化到本地中.
+  void saveOverlayListConfig(String instId, Iterable<Overlay> list);
 }
 ```
 主题配置[IFlexiKlineTheme](https://github.com/FlexiKline/FlexiKline/blob/main/lib/src/framework/configuration.dart#L24)
@@ -49,7 +49,7 @@ abstract interface class IConfiguration {
 [BitFlexiKlineConfiguration](https://github.com/FlexiKline/FlexiKline/blob/main/example/lib/src/providers/bit_kline_config.dart#L163)
 
 
-1. New FlexiKlineController
+### 2. New FlexiKlineController
 
 ```dart
   controller = FlexiKlineController(
@@ -59,22 +59,41 @@ abstract interface class IConfiguration {
       debug: kDebugMode,
     ),
   );
+
+  // 添加自定义指标
+  controller.addCustomMainIndicatorConfig(XxxIndicator);
+
+  // 注册自定义绘制工具
+  controller.registerDrawOverlayObjectBuilder(IDrawType, DrawObjectBuilder);
 ```
 
-3. UpdateKlineData
+### 3. FlexiKlineWidget
 ```dart
-/// 根据[request]切换[KlineData]数据源, 如果发生变更TimerBar.
+FlexiKlineWidget(
+  controller: controller,
+  mainBackgroundView: FlexiKlineMarkView(),
+  mainForegroundViewBuilder: _buildKlineMainForgroundView,
+  onDoubleTap: setFullScreen,
+  drawToolbar: FlexiKlineDrawToolbar(
+    controller: controller,
+  ),
+),
+```
+
+### 4. UpdateKlineData
+```dart
+/// 根据[request]切换当前Kline图表数据源[KlineData]; 如果发生变更TimerBar时.
 flexiKlineController.switchKlineData(request, useCacheFirst: true);
 
 /// 更新[request]指定的数据
 flexiKlineController.updateKlineData(request, resp.data);
 ```
 
-## 配置
+## 如何配置
 
 ### [FlexiKline完整配置.json](./doc/default_flexi_kline_configuration.json)
 
-更新....
+待更新....
 
 
 ## [TODO](./TODO.md)

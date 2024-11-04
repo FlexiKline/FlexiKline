@@ -259,7 +259,8 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
   /// 放大镜
   Widget _buildMagnifier(BuildContext context, Rect drawRect) {
     final config = widget.controller.drawConfig.magnifier;
-    if (!config.enable || config.size.isEmpty) {
+    // Web平台暂不支持放大镜
+    if (PlatformUtil.isWeb || !config.enable || config.size.isEmpty) {
       return const SizedBox.shrink();
     }
 

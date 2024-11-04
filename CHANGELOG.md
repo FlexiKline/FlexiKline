@@ -1,5 +1,5 @@
 ## 0.7.0
-* Suport Draw Feature
+* Support Draw Feature
 * Optimize gesture
 
 ## 0.6.0
