@@ -26,7 +26,7 @@ class TestFlexiKlineTheme implements IFlexiKlineTheme {
   @override
   double get scale {
     if (_scale != null) return _scale!;
-    final mediaQuery = MediaQueryData.fromWindow(window);
+    final mediaQuery = MediaQueryData.fromView(window);
     _scale = math.min(mediaQuery.size.width, mediaQuery.size.height) / 393;
     return _scale!;
   }
@@ -35,7 +35,7 @@ class TestFlexiKlineTheme implements IFlexiKlineTheme {
   @override
   double get pixel {
     if (_pixel != null) return _pixel!;
-    final mediaQuery = MediaQueryData.fromWindow(window);
+    final mediaQuery = MediaQueryData.fromView(window);
     _pixel = 1.0 / mediaQuery.devicePixelRatio;
     return _pixel!;
   }
@@ -107,7 +107,7 @@ class TestFlexiKlineTheme implements IFlexiKlineTheme {
 class TestFlexiKlineConfiguration with FlexiKlineThemeConfigurationMixin {
   @override
   Size get initialMainSize {
-    final mediaQuery = MediaQueryData.fromWindow(window);
+    final mediaQuery = MediaQueryData.fromView(window);
     return Size(mediaQuery.size.width, 300);
   }
 
