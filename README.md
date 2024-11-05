@@ -44,9 +44,7 @@ abstract interface class IConfiguration {
 ```
 主题配置[IFlexiKlineTheme](https://github.com/FlexiKline/FlexiKline/blob/main/lib/src/framework/configuration.dart#L24)
 
-参考Demo实现:
-[DefaultFlexiKlineConfiguration](https://github.com/FlexiKline/FlexiKline/blob/main/example/lib/src/providers/default_kline_config.dart#L120) 
-[BitFlexiKlineConfiguration](https://github.com/FlexiKline/FlexiKline/blob/main/example/lib/src/providers/bit_kline_config.dart#L163)
+参考[FlexiKlineThemeConfigurationMixin](https://github.com/FlexiKline/FlexiKline/blob/main/lib/src/config/default_config.dart#L178)实现
 
 
 ### 2. New FlexiKlineController
