@@ -42,7 +42,6 @@ v0.6.0
 - [x] 第一版: 1. 发布到pub; 2. github开源
 
 v0.7.0
-- [x] 手势及Tooltip可点击实现.
 - [x] 画图工具实现.
 - [x] 画图框架实现.
 - [x] 序列化/反序列化Overlay.
@@ -56,12 +55,14 @@ v0.7.0
 - [x] DrawType支持group; 
   
 v0.8.0
-- [ ] example独立
-- [ ] UI,绘制图标优化/ demo完善; 
-- [ ] 抽离指标管理功能由manager管理; 优化Indicator与PaintObject依赖关系.
-- [ ] KlinData中指标计算数据与CandleModel分离(保持CandleModel的独立).
-- [ ] 解除对CandleReq的依赖(重新组织蜡烛数据标识, 考虑兼容股票); 
-- [ ] 抽离indicators和drawObjects单独为库.
+- [ ] 抽离指标管理功能, 并统一由manager管理; 优化Indicator与PaintObject依赖关系.
+- [ ] KlinData中指标计算数据与CandleModel分离(保持CandleModel的独立)
+- [ ] 解除对CandleReq的依赖; 重新设计蜡烛数据标识与查询更新方式, 并考虑兼容股市Kline; 
+- [ ] 实现indicators对象和DrawObjects对象与框架分离(API接口优化)
+- [ ] 完善demo; 实现所有配置功能.
+- [ ] 绘制图标优化; 遗留问题修复.
+- [ ] controller与core库接口优化(保护API不被滥用)
+- [ ] Tooltip的绘制优化与可点击实现.
 - [ ] 文档撰写v2.
 
 v0.9.0
