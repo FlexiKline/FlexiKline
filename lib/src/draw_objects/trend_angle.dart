@@ -15,7 +15,7 @@
 import 'dart:math' as math;
 import 'dart:ui';
 
-import '../core/interface.dart';
+import '../core/core.dart';
 import '../extension/export.dart';
 import '../framework/draw/overlay.dart';
 

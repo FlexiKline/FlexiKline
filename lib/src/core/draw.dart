@@ -12,23 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:ui';
-
-import 'package:flutter/foundation.dart';
-
-import '../extension/export.dart';
-import '../framework/draw/overlay.dart';
-import '../framework/export.dart';
-import '../model/export.dart';
-import '../utils/platform_util.dart';
-import 'binding_base.dart';
-import 'interface.dart';
-import 'setting.dart';
+part of 'core.dart';
 
 /// 图形绘制
-mixin DrawBinding
-    on KlineBindingBase, SettingBinding
-    implements IDraw, IState, IDrawContext, ICross {
+mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw {
   @override
   void init() {
     super.init();
@@ -72,15 +59,14 @@ mixin DrawBinding
   final _drawMagnetModeListener = ValueNotifier<MagnetMode>(MagnetMode.normal);
   final _drawContinuousListener = ValueNotifier<bool>(false);
 
-  @override
   Listenable get repaintDraw => _repaintDraw;
 
-  void _markRepaint() => _repaintDraw.value++;
+  void _markRepaintDraw() => _repaintDraw.value++;
 
   @override
   void markRepaintDraw() {
     if (drawState.isOngoing || _drawObjectManager.hasObject) {
-      _markRepaint();
+      _markRepaintDraw();
     }
   }
 
@@ -103,16 +89,13 @@ mixin DrawBinding
   /// 主动通知绘制状态变化
   void _notifyDrawStateChange() => _drawStateListener.notifyListeners();
 
-  @override
   DrawState get drawState => _drawStateListener.value;
   set _drawState(DrawState state) {
     _drawStateListener.value = state;
   }
 
-  @override
   ValueListenable<DrawState> get drawStateLinstener => _drawStateListener;
 
-  @override
   ValueListenable<Point?> get drawPointerListener => _drawPointerListener;
 
   ValueListenable<bool> get drawVisibilityListener => _drawVisibilityListener;
@@ -127,25 +110,22 @@ mixin DrawBinding
   @override
   MagnetMode get drawMagnet => drawMagnetModeListener.value;
 
-  @override
   void prepareDraw() {
     // 如果是非退出状态, 则无需变更状态.
     if (!drawState.isExited) return;
     _drawState = const Prepared();
-    _markRepaint();
+    _markRepaintDraw();
   }
 
-  @override
   void exitDraw() {
     drawState.object?.dispose();
     _drawState = const Exited();
-    _markRepaint();
+    _markRepaintDraw();
   }
 
   /// 开始绘制新的[type]类型
   /// 1. 重置状态为Drawing
   /// 2. 初始化第一个Point的位置为[mainRect]中心
-  @override
   void startDraw(IDrawType type, {bool? isInitPointer}) {
     if (!isDrawVisibility) return;
 
@@ -173,7 +153,7 @@ mixin DrawBinding
       }
     }
     cancelCross();
-    _markRepaint();
+    _markRepaintDraw();
   }
 
   /// 更新当前指针坐标
@@ -191,7 +171,7 @@ mixin DrawBinding
     final newOffset = magneticSnap(data.offset);
     if (newOffset != pointer.offset) {
       object.onUpdateDrawPoint(pointer, newOffset);
-      _markRepaint();
+      _markRepaintDraw();
     }
   }
 
@@ -243,7 +223,7 @@ mixin DrawBinding
       }
     }
 
-    _markRepaint();
+    _markRepaintDraw();
   }
 
   bool onDrawMoveStart(GestureData data) {
@@ -260,7 +240,7 @@ mixin DrawBinding
       object.setMoveing(true);
       _drawPointerListener.updateValue(object.pointer);
       _notifyDrawStateChange();
-      _markRepaint();
+      _markRepaintDraw();
       return true;
     } else if (object.hitTest(this, position, isMove: true) == true) {
       // 检查当前焦点是否命中Overlay
@@ -268,7 +248,7 @@ mixin DrawBinding
       object.setMoveing(true);
       _drawPointerListener.updateValue(null);
       _notifyDrawStateChange();
-      _markRepaint();
+      _markRepaintDraw();
       return true;
     }
     return false;
@@ -288,7 +268,7 @@ mixin DrawBinding
       if (newOffset != pointer.offset) {
         object.onUpdateDrawPoint(pointer, newOffset);
         _drawPointerListener.updateValue(pointer);
-        _markRepaint();
+        _markRepaintDraw();
       }
     } else {
       for (var point in object.points) {
@@ -296,7 +276,7 @@ mixin DrawBinding
           object.onUpdateDrawPoint(point, point.offset + delta);
         }
       }
-      _markRepaint();
+      _markRepaintDraw();
     }
   }
 
@@ -322,7 +302,7 @@ mixin DrawBinding
     object.setMoveing(false);
     _drawPointerListener.updateValue(null);
     _notifyDrawStateChange();
-    _markRepaint();
+    _markRepaintDraw();
   }
 
   void onDrawSelect(DrawObject object) {
@@ -331,7 +311,7 @@ mixin DrawBinding
     }
     _drawState = DrawState.edit(object);
     cancelCross();
-    _markRepaint();
+    _markRepaintDraw();
   }
 
   ////// 操作 //////
@@ -339,14 +319,14 @@ mixin DrawBinding
   void deleteDrawObject({DrawObject? object}) {
     if (object != null) {
       if (_drawObjectManager.removeDrawObject(object)) {
-        _markRepaint();
+        _markRepaintDraw();
       }
     } else {
       object = drawState.object;
       if (object != null) {
         _drawObjectManager.removeDrawObject(object);
         _drawState = const Prepared();
-        _markRepaint();
+        _markRepaintDraw();
       }
     }
   }
@@ -358,7 +338,7 @@ mixin DrawBinding
       _drawObjectManager.removeDrawObject(object);
       _drawState = const Prepared();
     }
-    _markRepaint();
+    _markRepaintDraw();
   }
 
   bool changeDrawLineStyle({
@@ -373,7 +353,7 @@ mixin DrawBinding
       strokeWidth: strokeWidth,
       lineType: lineType,
     )) {
-      _markRepaint();
+      _markRepaintDraw();
       _notifyDrawStateChange();
       return true;
     }
@@ -384,7 +364,7 @@ mixin DrawBinding
     final object = drawState.object;
     if (object == null) return false;
     object.setDrawLockState(isLock);
-    _markRepaint();
+    _markRepaintDraw();
     _notifyDrawStateChange();
     return true;
   }
@@ -407,7 +387,7 @@ mixin DrawBinding
         magneticSnap(drawState.object!.pointer!.offset),
       );
     }
-    _markRepaint();
+    _markRepaintDraw();
   }
 
   void setDrawContinuous(bool isOn) {
@@ -419,7 +399,7 @@ mixin DrawBinding
     final object = drawState.object;
     if (object == null) return false;
     _drawObjectManager.moveToTop(object);
-    _markRepaint();
+    _markRepaintDraw();
     return true;
   }
 
@@ -434,7 +414,7 @@ mixin DrawBinding
     final object = drawState.object;
     if (object == null) return false;
     _drawObjectManager.moveToBottom(object);
-    _markRepaint();
+    _markRepaintDraw();
     return true;
   }
 
@@ -445,7 +425,6 @@ mixin DrawBinding
   }
 
   /// 测试[position]位置上是否有命中的Overly.
-  @override
   DrawObject? hitTestDrawObject(Offset position) {
     assert(
       position.isFinite,
@@ -462,7 +441,6 @@ mixin DrawBinding
   ////// 绘制 //////
 
   /// 绘制Draw图层
-  @override
   void paintDraw(Canvas canvas, Size size) {
     if (!drawConfig.enable) return;
 

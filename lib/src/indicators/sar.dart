@@ -17,7 +17,7 @@ import 'package:flutter/painting.dart';
 
 import '../config/export.dart';
 import '../constant.dart';
-import '../core/export.dart';
+import '../core/core.dart';
 import '../extension/export.dart';
 import '../data/kline_data.dart';
 import '../framework/export.dart';
@@ -174,7 +174,7 @@ class SARPaintObject<T extends SARIndicator> extends SinglePaintObjectBox<T>
     }
 
     Paint paint = indicator.paint.paint;
-    final radius = indicator.radius ?? setting.candleWidth / 3;
+    final radius = indicator.radius ?? controller.candleWidth / 3;
 
     final offset = startCandleDx - candleWidthHalf;
     CandleModel m;

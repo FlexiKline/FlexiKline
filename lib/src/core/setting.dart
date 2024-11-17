@@ -12,17 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:math' as math;
-
-import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
-
-import '../config/export.dart';
-import '../constant.dart';
-import '../extension/collections_ext.dart';
-import '../framework/export.dart';
-import 'binding_base.dart';
-import 'interface.dart';
+part of 'core.dart';
 
 /// 负责FlexiKline的各种设置与配置的获取.
 mixin SettingBinding on KlineBindingBase

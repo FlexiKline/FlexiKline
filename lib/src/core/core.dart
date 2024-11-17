@@ -12,28 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-library indicator;
+library core;
 
-import 'package:copy_with_extension/copy_with_extension.dart';
+import 'dart:async';
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
-import 'package:json_annotation/json_annotation.dart';
+import 'package:flutter/scheduler.dart';
 
-import '../../config/export.dart';
-import '../../core/core.dart';
-import '../../data/kline_data.dart';
-import '../../extension/export.dart';
-import '../../model/export.dart';
-import '../../utils/decimal_format_util.dart';
-import '../collection/sortable_hash_set.dart';
-import '../configuration.dart';
-import '../logger.dart';
-import '../serializers.dart';
+import '../config/export.dart';
+import '../constant.dart';
+import '../extension/export.dart';
+import '../data/export.dart';
+import '../framework/export.dart';
+import '../model/export.dart';
+import '../utils/decimal_format_util.dart';
+import '../utils/platform_util.dart';
 
-part 'common.dart';
-part 'model.dart';
-part 'indicator.g.dart';
-part 'manager.dart';
-part 'object.dart';
-part 'object_helper.dart';
-part 'type_registry.dart';
+part 'binding_base.dart';
+part 'chart.dart';
+part 'state.dart';
+part 'setting.dart';
+part 'cross.dart';
+part 'interface.dart';
+part 'draw.dart';
+part 'grid.dart';

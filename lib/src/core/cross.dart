@@ -12,17 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
-
-import '../constant.dart';
-import '../data/export.dart';
-import '../extension/export.dart';
-import '../model/export.dart';
-import '../utils/decimal_format_util.dart';
-import 'binding_base.dart';
-import 'interface.dart';
-import 'setting.dart';
+part of 'core.dart';
 
 /// 定制TooltipInfoList
 ///
@@ -46,9 +36,7 @@ typedef OnCrossI18nTooltipLables = Map<TooltipLabel, String>? Function();
 ///
 /// 处理cross事件.
 /// Tooltip的绘制.
-mixin CrossBinding
-    on KlineBindingBase, SettingBinding
-    implements ICross, IState, IChart {
+mixin CrossBinding on KlineBindingBase, SettingBinding implements ICross {
   @override
   void initState() {
     super.initState();
@@ -63,9 +51,8 @@ mixin CrossBinding
   }
 
   final ValueNotifier<int> _repaintCross = ValueNotifier(0);
-  @override
   Listenable get repaintCross => _repaintCross;
-  void _markRepaint() {
+  void _markRepaintCross() {
     _repaintCross.value++;
   }
 
@@ -74,7 +61,7 @@ mixin CrossBinding
   void markRepaintCross() {
     if (isCrossing) {
       _updateOffset(_offset);
-      _markRepaint();
+      _markRepaintCross();
     }
   }
 
@@ -117,7 +104,6 @@ mixin CrossBinding
   }
 
   /// 启动Cross事件
-  @override
   bool startCross(GestureData data, {bool force = false}) {
     if (crossConfig.enable) {
       /// 如果其他手势与Cross手势事件允许共存 或者当前不在Crossing中时, 开启Cross.
@@ -125,7 +111,7 @@ mixin CrossBinding
         logd('handleTap cross > $force > ${data.offset}');
         // 更新并校正起始焦点.
         _updateOffset(data.offset);
-        _markRepaint();
+        _markRepaintCross();
         // 当Cross事件启动后, 调用markRepaintChart清理Chart图层的tips信息.
         markRepaintChart();
         return true;
@@ -139,11 +125,10 @@ mixin CrossBinding
   }
 
   /// 更新Cross事件数据.
-  @override
   void updateCross(GestureData data) {
     if (crossConfig.enable && isCrossing) {
       _updateOffset(data.offset);
-      _markRepaint();
+      _markRepaintCross();
     }
   }
 
@@ -154,12 +139,11 @@ mixin CrossBinding
       _updateOffset(null);
       // 当Cross事件结束后, 调用markRepaintChart触发绘制Chart图层首根蜡烛的tips信息.
       markRepaintChart();
-      _markRepaint();
+      _markRepaintCross();
     }
   }
 
   /// 绘制最新价与十字线
-  @override
   void paintCross(Canvas canvas, Size size) {
     if (crossConfig.enable != true) return;
 

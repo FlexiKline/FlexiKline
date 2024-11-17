@@ -346,7 +346,7 @@ class GridBackgroundPainter extends CustomPainter {
 class IndicatorChartPainter extends CustomPainter {
   IndicatorChartPainter({
     required this.controller,
-  }) : super(repaint: controller.repaintIndicatorChart);
+  }) : super(repaint: controller.repaintChart);
 
   final FlexiKlineController controller;
 

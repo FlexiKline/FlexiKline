@@ -88,12 +88,12 @@ abstract interface class IPaintDelegate {
 
 /// FlexiKlineController 状态/配置/接口代理
 mixin ControllerProxyMixin on PaintObject {
-  late final KlineBindingBase controller;
+  late final IPaintContext controller;
 
   /// Binding
-  SettingBinding get setting => controller as SettingBinding;
-  IState get state => controller as IState;
-  ICross get cross => controller as ICross;
+  // SettingBinding get setting => controller as SettingBinding;
+  // IState get state => controller as IState;
+  // ICross get cross => controller as ICross;
   // IConfig get config => controller as IConfig;
 
   /// Config
@@ -101,17 +101,17 @@ mixin ControllerProxyMixin on PaintObject {
   GridConfig get gridConfig => controller.gridConfig;
   CrossConfig get crossConfig => controller.crossConfig;
 
-  double get candleActualWidth => setting.candleActualWidth;
+  double get candleActualWidth => controller.candleActualWidth;
 
-  double get candleWidthHalf => setting.candleWidthHalf;
+  double get candleWidthHalf => controller.candleWidthHalf;
 
-  KlineData get klineData => state.curKlineData;
+  KlineData get klineData => controller.curKlineData;
 
-  double get paintDxOffset => state.paintDxOffset;
+  double get paintDxOffset => controller.paintDxOffset;
 
-  double get startCandleDx => state.startCandleDx;
+  double get startCandleDx => controller.startCandleDx;
 
-  bool get isCrossing => cross.isCrossing;
+  bool get isCrossing => controller.isCrossing;
 }
 
 /// 绘制对象混入边界计算的通用扩展
@@ -149,14 +149,14 @@ mixin PaintObjectBoundingMixin on PaintObjectProxy
   Rect get drawableRect {
     if (_drawableRect != null) return _drawableRect!;
     if (drawInMain) {
-      _drawableRect = setting.mainRect;
+      _drawableRect = controller.mainRect;
     } else {
-      final top = setting.calculateIndicatorTop(slot);
+      final top = controller.calculateIndicatorTop(slot);
       _drawableRect = Rect.fromLTRB(
-        setting.subRect.left,
-        setting.subRect.top + top,
-        setting.subRect.right,
-        setting.subRect.top + top + indicator.height,
+        controller.subRect.left,
+        controller.subRect.top + top,
+        controller.subRect.right,
+        controller.subRect.top + top + indicator.height,
       );
     }
     return _drawableRect!;
@@ -258,7 +258,7 @@ mixin DataInitMixin on PaintObjectProxy implements IPaintDataInit {
 
   CandleModel? dxToCandle(double dx) {
     final index = dxToIndex(dx).toInt();
-    return state.curKlineData.getCandle(index);
+    return klineData.getCandle(index);
   }
 
   CandleModel? offsetToCandle(Offset? offset) {
@@ -301,11 +301,13 @@ abstract class PaintObject<T extends Indicator>
 abstract class PaintObjectProxy<T extends Indicator> extends PaintObject
     with KlineLog, ControllerProxyMixin {
   PaintObjectProxy({
-    required KlineBindingBase controller,
+    required IPaintContext controller,
     required T super.indicator,
   }) {
     this.controller = controller;
-    loggerDelegate = controller.loggerDelegate;
+    if (controller is KlineLog) {
+      loggerDelegate = (controller as KlineLog).loggerDelegate;
+    }
   }
 
   @override
@@ -363,10 +365,10 @@ abstract class SinglePaintObjectBox<T extends SinglePaintObjectIndicator>
   void doPaintChart(Canvas canvas, Size size) {
     paintChart(canvas, size);
 
-    if (!cross.isCrossing) {
+    if (!isCrossing) {
       paintTips(
         canvas,
-        model: state.curKlineData.latest,
+        model: klineData.latest,
         tipsRect: drawableRect,
       );
     }
@@ -484,10 +486,10 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
   void doPaintChart(Canvas canvas, Size size) {
     if (indicator.drawBelowTipsArea) {
       // 1.1 如果设置总是要在Tips区域下绘制指标图, 则要首先绘制完所有Tips.
-      if (!cross.isCrossing) {
+      if (!isCrossing) {
         final tipsHeight = doPaintTips(
           canvas,
-          model: state.curKlineData.latest,
+          model: klineData.latest,
         );
 
         if (indicator.needUpdateLayout(tipsHeight)) {
@@ -501,8 +503,8 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
       for (var child in indicator.children) {
         child.paintObject?.paintChart(canvas, size);
       }
-      if (!cross.isCrossing) {
-        doPaintTips(canvas, model: state.curKlineData.latest);
+      if (!isCrossing) {
+        doPaintTips(canvas, model: klineData.latest);
       }
     }
 
@@ -516,7 +518,7 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
   @override
   void doOnCross(Canvas canvas, Offset offset, {CandleModel? model}) {
     if (indicator.drawBelowTipsArea) {
-      if (cross.isCrossing) {
+      if (isCrossing) {
         final tipsHeight = doPaintTips(canvas, offset: offset, model: model);
 
         if (indicator.needUpdateLayout(tipsHeight)) {
@@ -530,7 +532,7 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
       for (var child in indicator.children) {
         child.paintObject?.onCross(canvas, offset);
       }
-      if (cross.isCrossing) {
+      if (isCrossing) {
         doPaintTips(canvas, offset: offset, model: model);
       }
     }

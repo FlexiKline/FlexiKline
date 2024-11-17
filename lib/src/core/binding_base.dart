@@ -12,12 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:flutter/foundation.dart';
+part of 'core.dart';
 
-import '../framework/export.dart';
-import 'interface.dart';
-
-abstract class KlineBindingBase with KlineLog implements ISetting {
+abstract class KlineBindingBase
+    with KlineLog
+    implements ISetting, IPaintContext, IDrawContext {
   final IConfiguration configuration;
 
   /// 对于Kline的操作是否自动保存到本地配置中.

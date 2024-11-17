@@ -18,7 +18,7 @@ import 'package:flutter/painting.dart';
 
 import '../config/export.dart';
 import '../constant.dart';
-import '../core/export.dart';
+import '../core/core.dart';
 import '../data/export.dart';
 import '../extension/export.dart';
 import '../model/export.dart';
@@ -65,7 +65,7 @@ class TimePaintObject<T extends TimeIndicator> extends SinglePaintObjectBox<T> {
   /// 两个时间刻度间隔的蜡烛数
   int get timeTickIntervalCount {
     return ((math.max(60, indicator.timeTick.textWidth ?? 0)) /
-            setting.candleActualWidth)
+            candleActualWidth)
         .round();
   }
 

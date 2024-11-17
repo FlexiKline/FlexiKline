@@ -14,7 +14,7 @@
 
 import 'dart:ui';
 
-import '../core/interface.dart';
+import '../core/core.dart';
 import '../extension/export.dart';
 import 'fib_expansion.dart';
 

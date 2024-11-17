@@ -14,7 +14,7 @@
 
 import 'dart:ui';
 
-import '../core/interface.dart';
+import '../core/core.dart';
 import '../config/text_area_config/text_area_config.dart';
 import '../extension/export.dart';
 import '../framework/draw/overlay.dart';

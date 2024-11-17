@@ -14,7 +14,7 @@
 
 library flexi_kline;
 
-export 'src/core/binding_base.dart';
+export 'src/core/core.dart';
 export 'src/constant.dart';
 export 'src/config/export.dart';
 export 'src/extension/export.dart';

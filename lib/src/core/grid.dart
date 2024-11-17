@@ -12,14 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:ui';
-
-import 'package:flutter/foundation.dart';
-
-import '../extension/export.dart';
-import '../framework/export.dart';
-import 'binding_base.dart';
-import 'interface.dart';
+part of 'core.dart';
 
 /// 负责Grid图层的绘制
 ///
@@ -39,7 +32,6 @@ mixin GridBinding on KlineBindingBase implements IGrid {
   }
 
   final ValueNotifier<int> _repaintGridBg = ValueNotifier(0);
-  @override
   Listenable get repaintGridBg => _repaintGridBg;
 
   @override
