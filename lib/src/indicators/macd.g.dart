@@ -7,7 +7,7 @@ part of 'macd.dart';
 // **************************************************************************
 
 abstract class _$MACDIndicatorCWProxy {
-  MACDIndicator key(ValueKey<dynamic> key);
+  MACDIndicator key(IIndicatorKey key);
 
   MACDIndicator name(String name);
 
@@ -40,7 +40,7 @@ abstract class _$MACDIndicatorCWProxy {
   /// MACDIndicator(...).copyWith(id: 12, name: "My name")
   /// ````
   MACDIndicator call({
-    ValueKey<dynamic>? key,
+    IIndicatorKey? key,
     String? name,
     int? zIndex,
     double? height,
@@ -63,7 +63,7 @@ class _$MACDIndicatorCWProxyImpl implements _$MACDIndicatorCWProxy {
   final MACDIndicator _value;
 
   @override
-  MACDIndicator key(ValueKey<dynamic> key) => this(key: key);
+  MACDIndicator key(IIndicatorKey key) => this(key: key);
 
   @override
   MACDIndicator name(String name) => this(name: name);
@@ -129,7 +129,7 @@ class _$MACDIndicatorCWProxyImpl implements _$MACDIndicatorCWProxy {
       key: key == const $CopyWithPlaceholder() || key == null
           ? _value.key
           // ignore: cast_nullable_to_non_nullable
-          : key as ValueKey<dynamic>,
+          : key as IIndicatorKey,
       name: name == const $CopyWithPlaceholder() || name == null
           ? _value.name
           // ignore: cast_nullable_to_non_nullable
@@ -196,8 +196,8 @@ extension $MACDIndicatorCopyWith on MACDIndicator {
 MACDIndicator _$MACDIndicatorFromJson(Map<String, dynamic> json) =>
     MACDIndicator(
       key: json['key'] == null
-          ? macdKey
-          : const ValueKeyConverter().fromJson(json['key'] as String),
+          ? IndicatorType.macd
+          : const IIndicatorKeyConvert().fromJson(json['key'] as String),
       name: json['name'] as String? ?? 'MACD',
       zIndex: (json['zIndex'] as num?)?.toInt() ?? 0,
       height: (json['height'] as num?)?.toDouble() ?? defaultSubIndicatorHeight,
@@ -220,7 +220,7 @@ MACDIndicator _$MACDIndicatorFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$MACDIndicatorToJson(MACDIndicator instance) =>
     <String, dynamic>{
-      'key': const ValueKeyConverter().toJson(instance.key),
+      'key': const IIndicatorKeyConvert().toJson(instance.key),
       'name': instance.name,
       'height': instance.height,
       'padding': const EdgeInsetsConverter().toJson(instance.padding),

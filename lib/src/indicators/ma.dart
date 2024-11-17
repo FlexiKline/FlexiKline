@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 import '../config/export.dart';
@@ -32,7 +31,7 @@ part 'ma.g.dart';
 @FlexiIndicatorSerializable
 class MAIndicator extends SinglePaintObjectIndicator implements IPrecomputable {
   MAIndicator({
-    super.key = maKey,
+    super.key = IndicatorType.ma,
     super.name = 'MA',
     super.zIndex = 0,
     required super.height,

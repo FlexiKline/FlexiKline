@@ -32,7 +32,7 @@ abstract class Indicator {
     this.paintMode = PaintMode.combine,
   });
 
-  final ValueKey key;
+  final IIndicatorKey key;
   final String name;
   double height;
   EdgeInsets padding;
@@ -238,7 +238,7 @@ class MultiPaintObjectIndicator<T extends SinglePaintObjectIndicator>
     }
   }
 
-  void deleteIndicator(Key key) {
+  void deleteIndicator(IIndicatorKey key) {
     children.removeWhere((element) {
       if (element.key == key) {
         element.dispose();
@@ -258,28 +258,28 @@ class MultiPaintObjectIndicator<T extends SinglePaintObjectIndicator>
 }
 
 extension IndicatorExt on Indicator {
-  Map<ValueKey, dynamic> getCalcParams() {
+  Map<IIndicatorKey, dynamic> getCalcParams() {
     if (this is SinglePaintObjectIndicator) {
       return (this as SinglePaintObjectIndicator).getCalcParams();
     } else if (this is MultiPaintObjectIndicator) {
       return (this as MultiPaintObjectIndicator).getCalcParams();
     }
-    return const <ValueKey, dynamic>{};
+    return const <IIndicatorKey, dynamic>{};
   }
 }
 
 extension SinglePaintObjectIndicatorExt on SinglePaintObjectIndicator {
-  Map<ValueKey, dynamic> getCalcParams() {
+  Map<IIndicatorKey, dynamic> getCalcParams() {
     if (this is IPrecomputable) {
       return {key: (this as IPrecomputable).getCalcParam()};
     }
-    return const <ValueKey, dynamic>{};
+    return const <IIndicatorKey, dynamic>{};
   }
 }
 
 extension MultiPaintObjectIndicatorExt on MultiPaintObjectIndicator {
-  Map<ValueKey, dynamic> getCalcParams() {
-    final results = <ValueKey, dynamic>{};
+  Map<IIndicatorKey, dynamic> getCalcParams() {
+    final results = <IIndicatorKey, dynamic>{};
     for (var child in children) {
       results.addAll(child.getCalcParams());
     }

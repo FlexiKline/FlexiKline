@@ -16,7 +16,7 @@ part of 'overlay.dart';
 
 const drawObjectDefaultZIndex = 0;
 
-typedef DrawObjectBuilder<T extends Overlay, R extends DrawObject<T>> = R
+typedef DrawObjectBuilder<T extends Overlay, R extends DrawObject<T>> = R?
     Function(T overlay, DrawConfig config);
 
 abstract interface class IDrawType {
@@ -44,7 +44,7 @@ final class FlexiDrawType implements IDrawType {
 
   @override
   bool operator ==(Object other) {
-    // if (identical(this, other)) return true;
+    if (identical(this, other)) return true;
     return other is FlexiDrawType &&
         runtimeType == other.runtimeType &&
         id == other.id &&

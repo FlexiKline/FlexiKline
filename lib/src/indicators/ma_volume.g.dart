@@ -9,8 +9,8 @@ part of 'ma_volume.dart';
 MAVolumeIndicator _$MAVolumeIndicatorFromJson(Map<String, dynamic> json) =>
     MAVolumeIndicator(
       key: json['key'] == null
-          ? maVolKey
-          : const ValueKeyConverter().fromJson(json['key'] as String),
+          ? IndicatorType.maVol
+          : const IIndicatorKeyConvert().fromJson(json['key'] as String),
       name: json['name'] as String? ?? 'MAVOL',
       height: (json['height'] as num?)?.toDouble() ?? defaultSubIndicatorHeight,
       padding: json['padding'] == null
@@ -26,7 +26,7 @@ MAVolumeIndicator _$MAVolumeIndicatorFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$MAVolumeIndicatorToJson(MAVolumeIndicator instance) =>
     <String, dynamic>{
-      'key': const ValueKeyConverter().toJson(instance.key),
+      'key': const IIndicatorKeyConvert().toJson(instance.key),
       'name': instance.name,
       'height': instance.height,
       'padding': const EdgeInsetsConverter().toJson(instance.padding),

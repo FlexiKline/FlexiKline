@@ -14,8 +14,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
-
 import '../config/rsi_param/rsi_param.dart';
 import '../framework/chart/indicator.dart';
 import '../model/export.dart';
@@ -39,12 +37,12 @@ mixin RSIData on BaseData {
 
   @override
   void precompute(
-    ValueKey key, {
+    IIndicatorKey key, {
     dynamic calcParam,
     required Range range,
     bool reset = false,
   }) {
-    if (key == rsiKey && calcParam is List<RsiParam>) {
+    if (key == IndicatorType.rsi && calcParam is List<RsiParam>) {
       calcuAndCacheRsi(
         calcParam,
         // start: range.start,

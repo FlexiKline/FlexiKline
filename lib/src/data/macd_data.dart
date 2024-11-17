@@ -14,8 +14,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
-
 import '../config/macd_param/macd_param.dart';
 import '../framework/chart/indicator.dart';
 import '../model/export.dart';
@@ -39,12 +37,12 @@ mixin MACDData on BaseData {
 
   @override
   void precompute(
-    ValueKey key, {
+    IIndicatorKey key, {
     dynamic calcParam,
     required Range range,
     bool reset = false,
   }) {
-    if (key == macdKey && calcParam is MACDParam) {
+    if (key == IndicatorType.macd && calcParam is MACDParam) {
       calcuAndCacheMacd(
         param: calcParam,
         // start: range.start,

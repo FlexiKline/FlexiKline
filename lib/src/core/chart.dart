@@ -24,6 +24,16 @@ import 'interface.dart';
 /// 负责绘制蜡烛图以及相关指标图
 mixin ChartBinding on KlineBindingBase implements IChart, IState {
   @override
+  void init() {
+    super.init();
+    logd("init chart");
+    _paintObjectManager = IndicatorPaintObjectManager(
+      configuration: configuration,
+      logger: loggerDelegate,
+    );
+  }
+
+  @override
   void initState() {
     super.initState();
     logd('initState indicator');
@@ -38,6 +48,8 @@ mixin ChartBinding on KlineBindingBase implements IChart, IState {
     _lastPriceCountDownTimer?.cancel();
     _lastPriceCountDownTimer = null;
   }
+
+  late final IndicatorPaintObjectManager _paintObjectManager;
 
   final ValueNotifier<int> _repaintCandle = ValueNotifier(0);
   @override

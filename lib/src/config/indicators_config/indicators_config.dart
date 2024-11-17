@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:flutter/foundation.dart';
 
 import '../../framework/export.dart';
 import '../../indicators/export.dart';
@@ -98,7 +97,7 @@ class IndicatorsConfig {
   late RSIIndicator rsi;
 
   /// 内置主区指标
-  Map<ValueKey, SinglePaintObjectIndicator> get mainIndicators => {
+  Map<IIndicatorKey, SinglePaintObjectIndicator> get mainIndicators => {
         candle.key: candle,
         volume.key: volume,
         ma.key: ma,
@@ -108,7 +107,7 @@ class IndicatorsConfig {
       };
 
   /// 内置副区指标
-  Map<ValueKey, Indicator> get subIndicators => {
+  Map<IIndicatorKey, Indicator> get subIndicators => {
         time.key: time,
         macd.key: macd,
         kdj.key: kdj,
@@ -119,8 +118,8 @@ class IndicatorsConfig {
       };
 
   /// 收集当前所有支持的指标的计算参数
-  Map<ValueKey, dynamic> getAllIndicatorCalcParams() {
-    final calcParams = <ValueKey, dynamic>{};
+  Map<IIndicatorKey, dynamic> getAllIndicatorCalcParams() {
+    final calcParams = <IIndicatorKey, dynamic>{};
     mainIndicators.forEach((key, indicator) {
       calcParams.addAll(indicator.getCalcParams());
     });
@@ -128,10 +127,12 @@ class IndicatorsConfig {
     // 暂时 通过key的判断去掉主区与副区相同指标的重复计算参数.
     for (var entry in subIndicators.entries) {
       final params = entry.value.getCalcParams();
-      if (entry.key == subBollKey && calcParams[bollKey] == params[entry.key]) {
+      if (entry.key == IndicatorType.subBoll &&
+          calcParams[IndicatorType.boll] == params[entry.key]) {
         continue;
       }
-      if (entry.key == subSarKey && calcParams[sarKey] == params[entry.key]) {
+      if (entry.key == IndicatorType.subSar &&
+          calcParams[IndicatorType.sar] == params[entry.key]) {
         continue;
       }
       calcParams.addAll(params);
@@ -141,8 +142,8 @@ class IndicatorsConfig {
   }
 
   /// 从[oldConfig]指标配置集合更新自定义指标. 并清理无效的旧指标.
-  Set<ValueKey> megerAndDisposeOldIndicator(IndicatorsConfig oldConfig) {
-    Set<ValueKey> keys = {};
+  Set<IIndicatorKey> megerAndDisposeOldIndicator(IndicatorsConfig oldConfig) {
+    Set<IIndicatorKey> keys = {};
 
     /// 清理变更的主区指标
     oldConfig.mainIndicators.forEach((key, value) {

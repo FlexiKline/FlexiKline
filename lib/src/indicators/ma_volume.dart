@@ -22,7 +22,7 @@ part 'ma_volume.g.dart';
 @FlexiIndicatorSerializable
 class MAVolumeIndicator extends MultiPaintObjectIndicator {
   MAVolumeIndicator({
-    super.key = maVolKey,
+    super.key = IndicatorType.maVol,
     super.name = 'MAVOL',
     super.height = defaultSubIndicatorHeight,
     super.padding = defaultSubIndicatorPadding,

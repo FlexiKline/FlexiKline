@@ -16,6 +16,7 @@ import 'package:flutter/foundation.dart';
 
 import '../constant.dart';
 import '../extension/export.dart';
+import '../framework/chart/indicator.dart';
 import '../framework/logger.dart';
 import '../model/export.dart';
 import 'base_data.dart';
@@ -61,7 +62,7 @@ class KlineData extends BaseData
     KlineData data, {
     required List<CandleModel> newList,
     required ComputeMode computeMode,
-    required Map<ValueKey, dynamic> calcParams,
+    required Map<IIndicatorKey, dynamic> calcParams,
     bool reset = false,
   }) async {
     DateTime beginTime = DateTime.now();
@@ -113,7 +114,7 @@ Future<KlineData> precomputeKlineDataByCompute(
   KlineData data, {
   required List<CandleModel> newList,
   required ComputeMode computeMode,
-  required Map<ValueKey, dynamic> calcParams,
+  required Map<IIndicatorKey, dynamic> calcParams,
   bool reset = false,
   String? debugLabel,
   ILogger? logger,

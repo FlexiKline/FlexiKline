@@ -224,6 +224,8 @@ mixin DrawBinding
             final initOffset = object.lastPoint?.offset ?? data.offset;
             nextObj.setPointer(Point.pointer(0, magneticSnap(initOffset)));
             _drawState = DrawState.draw(nextObj);
+          } else {
+            _drawState = Editing(object);
           }
         } else {
           _drawState = Editing(object);

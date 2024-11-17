@@ -632,7 +632,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   VolumeIndicator genMainVolumeIndicator(covariant IFlexiKlineTheme theme) {
     return VolumeIndicator(
-      key: volumeKey,
+      key: IndicatorType.volume,
       zIndex: -2,
       height: theme.subIndicatorHeight,
       padding: theme.subIndicatorPadding,
@@ -663,7 +663,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   MAIndicator genMaIndicator(covariant IFlexiKlineTheme theme) {
     return MAIndicator(
-      key: maKey,
+      key: IndicatorType.ma,
       height: theme.mainIndicatorHeight,
       padding: theme.mainIndicatorPadding,
       calcParams: [
@@ -701,7 +701,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   EMAIndicator genEmaIndicator(covariant IFlexiKlineTheme theme) {
     return EMAIndicator(
-      key: emaKey,
+      key: IndicatorType.ema,
       height: theme.mainIndicatorHeight,
       padding: theme.mainIndicatorPadding,
       calcParams: [
@@ -765,7 +765,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   BOLLIndicator genBollIndicator(covariant IFlexiKlineTheme theme) {
     return BOLLIndicator(
-      key: bollKey,
+      key: IndicatorType.boll,
       height: theme.mainIndicatorHeight,
       padding: theme.mainIndicatorPadding,
 
@@ -814,7 +814,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   SARIndicator genSarIndicator(covariant IFlexiKlineTheme theme) {
     return SARIndicator(
-      key: sarKey,
+      key: IndicatorType.sar,
       height: theme.mainIndicatorHeight,
       padding: theme.mainIndicatorPadding,
       calcParam: const SARParam(startAf: 0.02, step: 0.02, maxAf: 0.2),
@@ -963,7 +963,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   VolumeIndicator genSubVolumeIndicator(covariant IFlexiKlineTheme theme) {
     return VolumeIndicator(
-      key: subVolKey, // 区别于主区volumeKey的地方
+      key: IndicatorType.subVol, // 区别于主区volumeKey的地方
       zIndex: -2,
       height: theme.subIndicatorHeight,
       padding: theme.subIndicatorPadding,
@@ -994,7 +994,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   VolMaIndicator genSubVolMaIndicator(covariant IFlexiKlineTheme theme) {
     return VolMaIndicator(
-      key: volMaKey,
+      key: IndicatorType.volMa,
       zIndex: 0,
       height: theme.subIndicatorHeight,
       padding: theme.subIndicatorPadding,
@@ -1034,7 +1034,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   BOLLIndicator genSubBollIndicator(covariant IFlexiKlineTheme theme) {
     return BOLLIndicator(
-      key: subBollKey, // 区别于主区bollKey的地方
+      key: IndicatorType.subBoll, // 区别于主区bollKey的地方
       height: theme.subIndicatorHeight,
       padding: theme.subIndicatorPadding,
 
@@ -1083,7 +1083,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   SARIndicator genSubSarIndicator(covariant IFlexiKlineTheme theme) {
     return SARIndicator(
-      key: subSarKey, // 区别于主区sarKey的地方
+      key: IndicatorType.subSar, // 区别于主区sarKey的地方
       height: theme.subIndicatorHeight,
       padding: theme.subIndicatorPadding,
       calcParam: const SARParam(startAf: 0.02, step: 0.02, maxAf: 0.2),

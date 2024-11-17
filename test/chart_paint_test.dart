@@ -48,17 +48,17 @@ void main() {
 
     controller.setMainSize(mainSize);
 
-    controller.addIndicatorInMain(maKey);
-    controller.addIndicatorInMain(emaKey);
-    controller.addIndicatorInMain(bollKey);
-    controller.addIndicatorInMain(volumeKey);
+    controller.addIndicatorInMain(IndicatorType.ma);
+    controller.addIndicatorInMain(IndicatorType.ema);
+    controller.addIndicatorInMain(IndicatorType.boll);
+    controller.addIndicatorInMain(IndicatorType.volume);
 
     controller.curKlineData.ensureStartAndEndIndex(start, end);
 
     controller.mainIndicator.ensurePaintObject(controller);
 
     maIndicator = controller.mainIndicator.children.firstWhere(
-      (child) => child.key == maKey,
+      (child) => child.key == IndicatorType.ma,
     );
   });
 

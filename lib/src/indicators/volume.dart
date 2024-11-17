@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 import '../config/export.dart';
@@ -77,7 +76,7 @@ class VolumePaintObject<T extends VolumeIndicator>
   VolumePaintObject({required super.controller, required super.indicator});
 
   bool? _isInsub;
-  bool get isInSub => _isInsub ??= indicator.key == subVolKey;
+  bool get isInSub => _isInsub ??= indicator.key == IndicatorType.subVol;
 
   @override
   MinMax? initState({required int start, required int end}) {

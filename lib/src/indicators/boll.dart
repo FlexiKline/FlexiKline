@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 import '../config/export.dart';
@@ -100,7 +99,7 @@ class BOLLPaintObject<T extends BOLLIndicator> extends SinglePaintObjectBox<T>
   });
 
   bool? _isInsub;
-  bool get isInSub => _isInsub ??= indicator.key == subBollKey;
+  bool get isInSub => _isInsub ??= indicator.key == IndicatorType.subBoll;
 
   @override
   MinMax? initState({required int start, required int end}) {

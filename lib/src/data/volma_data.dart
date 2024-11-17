@@ -14,8 +14,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
-
 import '../config/ma_param/ma_param.dart';
 import '../framework/chart/indicator.dart';
 import '../model/export.dart';
@@ -39,12 +37,12 @@ mixin VOLMAData on BaseData {
 
   @override
   void precompute(
-    ValueKey key, {
+    IIndicatorKey key, {
     dynamic calcParam,
     required Range range,
     bool reset = false,
   }) {
-    if (key == volMaKey && calcParam is List<MaParam>) {
+    if (key == IndicatorType.volMa && calcParam is List<MaParam>) {
       calcuAndCacheVolMa(
         calcParam,
         start: range.start,

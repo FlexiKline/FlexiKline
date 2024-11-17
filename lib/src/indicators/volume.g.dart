@@ -7,7 +7,7 @@ part of 'volume.dart';
 // **************************************************************************
 
 abstract class _$VolumeIndicatorCWProxy {
-  VolumeIndicator key(ValueKey<dynamic> key);
+  VolumeIndicator key(IIndicatorKey key);
 
   VolumeIndicator name(String name);
 
@@ -34,7 +34,7 @@ abstract class _$VolumeIndicatorCWProxy {
   /// VolumeIndicator(...).copyWith(id: 12, name: "My name")
   /// ````
   VolumeIndicator call({
-    ValueKey<dynamic>? key,
+    IIndicatorKey? key,
     String? name,
     int? zIndex,
     double? height,
@@ -54,7 +54,7 @@ class _$VolumeIndicatorCWProxyImpl implements _$VolumeIndicatorCWProxy {
   final VolumeIndicator _value;
 
   @override
-  VolumeIndicator key(ValueKey<dynamic> key) => this(key: key);
+  VolumeIndicator key(IIndicatorKey key) => this(key: key);
 
   @override
   VolumeIndicator name(String name) => this(name: name);
@@ -108,7 +108,7 @@ class _$VolumeIndicatorCWProxyImpl implements _$VolumeIndicatorCWProxy {
       key: key == const $CopyWithPlaceholder() || key == null
           ? _value.key
           // ignore: cast_nullable_to_non_nullable
-          : key as ValueKey<dynamic>,
+          : key as IIndicatorKey,
       name: name == const $CopyWithPlaceholder() || name == null
           ? _value.name
           // ignore: cast_nullable_to_non_nullable
@@ -162,7 +162,7 @@ extension $VolumeIndicatorCopyWith on VolumeIndicator {
 
 VolumeIndicator _$VolumeIndicatorFromJson(Map<String, dynamic> json) =>
     VolumeIndicator(
-      key: const ValueKeyConverter().fromJson(json['key'] as String),
+      key: const IIndicatorKeyConvert().fromJson(json['key'] as String),
       name: json['name'] as String? ?? 'VOL',
       zIndex: (json['zIndex'] as num?)?.toInt() ?? -2,
       height: (json['height'] as num?)?.toDouble() ?? defaultSubIndicatorHeight,
@@ -182,7 +182,7 @@ VolumeIndicator _$VolumeIndicatorFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$VolumeIndicatorToJson(VolumeIndicator instance) =>
     <String, dynamic>{
-      'key': const ValueKeyConverter().toJson(instance.key),
+      'key': const IIndicatorKeyConvert().toJson(instance.key),
       'name': instance.name,
       'height': instance.height,
       'padding': const EdgeInsetsConverter().toJson(instance.padding),

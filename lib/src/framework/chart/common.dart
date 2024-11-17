@@ -47,7 +47,41 @@ enum ScalePosition {
   right,
 }
 
-enum IndicatorType {
+abstract interface class IIndicatorKey {
+  String get id;
+  String get label;
+}
+
+final class FlexiIndicatorKey implements IIndicatorKey {
+  const FlexiIndicatorKey(
+    this.id, {
+    String? label,
+  }) : label = label ?? id;
+
+  @override
+  final String id;
+
+  @override
+  final String label;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is FlexiIndicatorKey &&
+        runtimeType == other.runtimeType &&
+        id == other.id;
+  }
+
+  @override
+  int get hashCode {
+    return runtimeType.hashCode ^ id.hashCode;
+  }
+}
+
+const unknownIndicatorKey = FlexiIndicatorKey('unknown');
+
+/// 内置IndciatorKey
+enum IndicatorType implements IIndicatorKey {
   /// 主区
   main('MAIN'),
   candle('CANDLE'),
@@ -71,6 +105,10 @@ enum IndicatorType {
 
   const IndicatorType(this.label);
 
+  @override
+  String get id => name;
+
+  @override
   final String label;
 
   @override
@@ -79,27 +117,27 @@ enum IndicatorType {
   }
 }
 
-/// 指标
-/// 主区
-const mainChartKey = ValueKey<dynamic>(IndicatorType.main);
-const candleKey = ValueKey<dynamic>(IndicatorType.candle);
-const maKey = ValueKey<dynamic>(IndicatorType.ma);
-const emaKey = ValueKey<dynamic>(IndicatorType.ema);
-const bollKey = ValueKey<dynamic>(IndicatorType.boll);
-const sarKey = ValueKey<dynamic>(IndicatorType.sar);
-const volumeKey = ValueKey<dynamic>(IndicatorType.volume);
+// /// 指标
+// /// 主区
+// const mainChartKey = ValueKey<dynamic>(IndicatorType.main);
+// const candleKey = ValueKey<dynamic>(IndicatorType.candle);
+// const maKey = ValueKey<dynamic>(IndicatorType.ma);
+// const emaKey = ValueKey<dynamic>(IndicatorType.ema);
+// const bollKey = ValueKey<dynamic>(IndicatorType.boll);
+// const sarKey = ValueKey<dynamic>(IndicatorType.sar);
+// const volumeKey = ValueKey<dynamic>(IndicatorType.volume);
 
-/// 副区
-const volMaKey = ValueKey<dynamic>(IndicatorType.volMa);
-const subVolKey = ValueKey<dynamic>(IndicatorType.subVol);
-const maVolKey = ValueKey<dynamic>(IndicatorType.maVol);
-const macdKey = ValueKey<dynamic>(IndicatorType.macd);
-const kdjKey = ValueKey<dynamic>(IndicatorType.kdj);
-const subBollKey = ValueKey<dynamic>(IndicatorType.subBoll);
-const subSarKey = ValueKey<dynamic>(IndicatorType.subSar);
-const rsiKey = ValueKey<dynamic>(IndicatorType.rsi);
-const stochRsiKey = ValueKey<dynamic>(IndicatorType.stochRsi);
-const timeKey = ValueKey<dynamic>(IndicatorType.time);
+// /// 副区
+// const volMaKey = ValueKey<dynamic>(IndicatorType.volMa);
+// const subVolKey = ValueKey<dynamic>(IndicatorType.subVol);
+// const maVolKey = ValueKey<dynamic>(IndicatorType.maVol);
+// const macdKey = ValueKey<dynamic>(IndicatorType.macd);
+// const kdjKey = ValueKey<dynamic>(IndicatorType.kdj);
+// const subBollKey = ValueKey<dynamic>(IndicatorType.subBoll);
+// const subSarKey = ValueKey<dynamic>(IndicatorType.subSar);
+// const rsiKey = ValueKey<dynamic>(IndicatorType.rsi);
+// const stochRsiKey = ValueKey<dynamic>(IndicatorType.stochRsi);
+// const timeKey = ValueKey<dynamic>(IndicatorType.time);
 
 /// 可预计算接口
 /// 实现 [IPrecomputable] 接口, 即代表当前对象是可以进行预计算.

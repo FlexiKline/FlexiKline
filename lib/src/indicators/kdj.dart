@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 import '../config/export.dart';
@@ -37,7 +36,7 @@ part 'kdj.g.dart';
 class KDJIndicator extends SinglePaintObjectIndicator
     implements IPrecomputable {
   KDJIndicator({
-    super.key = const ValueKey(IndicatorType.kdj),
+    super.key = IndicatorType.kdj,
     super.name = 'KDJ',
     super.zIndex = 0,
     super.height = defaultSubIndicatorHeight,

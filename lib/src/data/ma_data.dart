@@ -14,8 +14,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
-
 import '../config/ma_param/ma_param.dart';
 import '../framework/chart/indicator.dart';
 import '../model/export.dart';
@@ -39,12 +37,12 @@ mixin MAData on BaseData {
 
   @override
   void precompute(
-    ValueKey key, {
+    IIndicatorKey key, {
     dynamic calcParam,
     required Range range,
     bool reset = false,
   }) {
-    if (key == maKey && calcParam is List<MaParam>) {
+    if (key == IndicatorType.ma && calcParam is List<MaParam>) {
       calcuAndCacheMa(
         calcParam,
         start: range.start,

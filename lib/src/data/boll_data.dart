@@ -14,8 +14,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
-
 import '../config/boll_param/boll_param.dart';
 import '../framework/export.dart';
 import '../model/export.dart';
@@ -39,12 +37,13 @@ mixin BOLLData on BaseData {
 
   @override
   void precompute(
-    ValueKey key, {
+    IIndicatorKey key, {
     dynamic calcParam,
     required Range range,
     bool reset = false,
   }) {
-    if ((key == bollKey || key == subBollKey) && calcParam is BOLLParam) {
+    if ((key == IndicatorType.boll || key == IndicatorType.subBoll) &&
+        calcParam is BOLLParam) {
       calcuAndCacheBoll(
         param: calcParam,
         start: math.max(0, range.start - calcParam.n), // 补起上一次未算数据

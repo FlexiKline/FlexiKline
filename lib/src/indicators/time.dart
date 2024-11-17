@@ -14,7 +14,6 @@
 
 import 'dart:math' as math;
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 import '../config/export.dart';
@@ -32,7 +31,7 @@ part 'time.g.dart';
 @FlexiIndicatorSerializable
 class TimeIndicator extends SinglePaintObjectIndicator {
   TimeIndicator({
-    super.key = timeKey,
+    super.key = IndicatorType.time,
     super.name = 'Time',
     super.zIndex = 0,
     super.height = defaultTimeIndicatorHeight,

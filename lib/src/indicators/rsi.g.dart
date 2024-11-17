@@ -7,7 +7,7 @@ part of 'rsi.dart';
 // **************************************************************************
 
 abstract class _$RSIIndicatorCWProxy {
-  RSIIndicator key(ValueKey<dynamic> key);
+  RSIIndicator key(IIndicatorKey key);
 
   RSIIndicator name(String name);
 
@@ -34,7 +34,7 @@ abstract class _$RSIIndicatorCWProxy {
   /// RSIIndicator(...).copyWith(id: 12, name: "My name")
   /// ````
   RSIIndicator call({
-    ValueKey<dynamic>? key,
+    IIndicatorKey? key,
     String? name,
     int? zIndex,
     double? height,
@@ -54,7 +54,7 @@ class _$RSIIndicatorCWProxyImpl implements _$RSIIndicatorCWProxy {
   final RSIIndicator _value;
 
   @override
-  RSIIndicator key(ValueKey<dynamic> key) => this(key: key);
+  RSIIndicator key(IIndicatorKey key) => this(key: key);
 
   @override
   RSIIndicator name(String name) => this(name: name);
@@ -109,7 +109,7 @@ class _$RSIIndicatorCWProxyImpl implements _$RSIIndicatorCWProxy {
       key: key == const $CopyWithPlaceholder() || key == null
           ? _value.key
           // ignore: cast_nullable_to_non_nullable
-          : key as ValueKey<dynamic>,
+          : key as IIndicatorKey,
       name: name == const $CopyWithPlaceholder() || name == null
           ? _value.name
           // ignore: cast_nullable_to_non_nullable
@@ -164,8 +164,8 @@ extension $RSIIndicatorCopyWith on RSIIndicator {
 
 RSIIndicator _$RSIIndicatorFromJson(Map<String, dynamic> json) => RSIIndicator(
       key: json['key'] == null
-          ? rsiKey
-          : const ValueKeyConverter().fromJson(json['key'] as String),
+          ? IndicatorType.rsi
+          : const IIndicatorKeyConvert().fromJson(json['key'] as String),
       name: json['name'] as String? ?? 'RSI',
       zIndex: (json['zIndex'] as num?)?.toInt() ?? 0,
       height: (json['height'] as num?)?.toDouble() ?? defaultSubIndicatorHeight,
@@ -185,7 +185,7 @@ RSIIndicator _$RSIIndicatorFromJson(Map<String, dynamic> json) => RSIIndicator(
 
 Map<String, dynamic> _$RSIIndicatorToJson(RSIIndicator instance) =>
     <String, dynamic>{
-      'key': const ValueKeyConverter().toJson(instance.key),
+      'key': const IIndicatorKeyConvert().toJson(instance.key),
       'name': instance.name,
       'height': instance.height,
       'padding': const EdgeInsetsConverter().toJson(instance.padding),

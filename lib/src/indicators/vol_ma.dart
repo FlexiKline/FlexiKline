@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 import '../config/export.dart';
@@ -33,7 +32,7 @@ part 'vol_ma.g.dart';
 class VolMaIndicator extends SinglePaintObjectIndicator
     implements IPrecomputable {
   VolMaIndicator({
-    super.key = volMaKey,
+    super.key = IndicatorType.volMa,
     super.name = 'VOLMA',
     super.zIndex = 0,
     super.height = defaultSubIndicatorHeight,

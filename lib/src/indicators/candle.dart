@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 import '../config/export.dart';
@@ -31,7 +30,7 @@ part 'candle.g.dart';
 @FlexiIndicatorSerializable
 class CandleIndicator extends SinglePaintObjectIndicator {
   CandleIndicator({
-    super.key = candleKey,
+    super.key = IndicatorType.candle,
     super.name = 'Candle',
     super.zIndex = -1,
     required super.height,

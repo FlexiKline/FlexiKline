@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 import '../config/export.dart';
@@ -38,7 +37,7 @@ part 'ema.g.dart';
 class EMAIndicator extends SinglePaintObjectIndicator
     implements IPrecomputable {
   EMAIndicator({
-    super.key = emaKey,
+    super.key = IndicatorType.ema,
     super.name = 'EMA',
     super.zIndex = 0,
     required super.height,

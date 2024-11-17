@@ -14,8 +14,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
-
 import '../config/kdj_param/kdj_param.dart';
 import '../framework/chart/indicator.dart';
 import '../model/export.dart';
@@ -40,12 +38,12 @@ mixin KDJData on BaseData, CandleData {
 
   @override
   void precompute(
-    ValueKey key, {
+    IIndicatorKey key, {
     dynamic calcParam,
     required Range range,
     bool reset = false,
   }) {
-    if (key == kdjKey && calcParam is KDJParam) {
+    if (key == IndicatorType.kdj && calcParam is KDJParam) {
       calcuAndCacheKDJ(
         param: calcParam,
         start: math.max(0, range.start - calcParam.n), // 补起上一次未算数据

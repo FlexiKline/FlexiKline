@@ -8,7 +8,7 @@ part of 'indicator.dart';
 
 abstract class _$MultiPaintObjectIndicatorCWProxy<
     T extends SinglePaintObjectIndicator> {
-  MultiPaintObjectIndicator<T> key(ValueKey<dynamic> key);
+  MultiPaintObjectIndicator<T> key(IIndicatorKey key);
 
   MultiPaintObjectIndicator<T> name(String name);
 
@@ -27,7 +27,7 @@ abstract class _$MultiPaintObjectIndicatorCWProxy<
   /// MultiPaintObjectIndicator<T>(...).copyWith(id: 12, name: "My name")
   /// ````
   MultiPaintObjectIndicator<T> call({
-    ValueKey<dynamic>? key,
+    IIndicatorKey? key,
     String? name,
     double? height,
     EdgeInsets? padding,
@@ -45,7 +45,7 @@ class _$MultiPaintObjectIndicatorCWProxyImpl<
   final MultiPaintObjectIndicator<T> _value;
 
   @override
-  MultiPaintObjectIndicator<T> key(ValueKey<dynamic> key) => this(key: key);
+  MultiPaintObjectIndicator<T> key(IIndicatorKey key) => this(key: key);
 
   @override
   MultiPaintObjectIndicator<T> name(String name) => this(name: name);
@@ -85,7 +85,7 @@ class _$MultiPaintObjectIndicatorCWProxyImpl<
       key: key == const $CopyWithPlaceholder() || key == null
           ? _value.key
           // ignore: cast_nullable_to_non_nullable
-          : key as ValueKey<dynamic>,
+          : key as IIndicatorKey,
       name: name == const $CopyWithPlaceholder() || name == null
           ? _value.name
           // ignore: cast_nullable_to_non_nullable
@@ -127,7 +127,7 @@ MultiPaintObjectIndicator<T>
     _$MultiPaintObjectIndicatorFromJson<T extends SinglePaintObjectIndicator>(
             Map<String, dynamic> json) =>
         MultiPaintObjectIndicator<T>(
-          key: const ValueKeyConverter().fromJson(json['key'] as String),
+          key: const IIndicatorKeyConvert().fromJson(json['key'] as String),
           name: json['name'] as String,
           height: (json['height'] as num).toDouble(),
           padding: const EdgeInsetsConverter()
@@ -139,7 +139,7 @@ Map<String, dynamic>
     _$MultiPaintObjectIndicatorToJson<T extends SinglePaintObjectIndicator>(
             MultiPaintObjectIndicator<T> instance) =>
         <String, dynamic>{
-          'key': const ValueKeyConverter().toJson(instance.key),
+          'key': const IIndicatorKeyConvert().toJson(instance.key),
           'name': instance.name,
           'height': instance.height,
           'padding': const EdgeInsetsConverter().toJson(instance.padding),

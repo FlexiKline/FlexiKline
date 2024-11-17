@@ -255,27 +255,27 @@ mixin SettingBinding on KlineBindingBase
   /// 绘制区域宽度内, 可绘制的蜡烛数
   int get maxCandleCount => (mainChartWidth / candleActualWidth).ceil();
 
-  Map<ValueKey, SinglePaintObjectIndicator> get supportMainIndicators {
+  Map<IIndicatorKey, SinglePaintObjectIndicator> get supportMainIndicators {
     return {...indicatorsConfig.mainIndicators, ..._customMainIndicators};
   }
 
-  Map<ValueKey, Indicator> get supportSubIndicators {
+  Map<IIndicatorKey, Indicator> get supportSubIndicators {
     return {...indicatorsConfig.subIndicators, ..._customSubIndicators};
   }
 
-  Set<ValueKey> get supportMainIndicatorKeys {
-    return supportMainIndicators.keys.toSet()..remove(candleKey);
+  Set<IIndicatorKey> get supportMainIndicatorKeys {
+    return supportMainIndicators.keys.toSet()..remove(IndicatorType.candle);
   }
 
-  Set<ValueKey> get supportSubIndicatorKeys {
-    return supportSubIndicators.keys.toSet()..remove(timeKey);
+  Set<IIndicatorKey> get supportSubIndicatorKeys {
+    return supportSubIndicators.keys.toSet()..remove(IndicatorType.time);
   }
 
-  Set<ValueKey> get mainIndicatorKeys {
+  Set<IIndicatorKey> get mainIndicatorKeys {
     return mainIndicator.children.map((e) => e.key).toSet();
   }
 
-  Set<ValueKey> get subIndicatorKeys {
+  Set<IIndicatorKey> get subIndicatorKeys {
     return subRectIndicators.map((e) => e.key).toSet();
   }
 
@@ -352,7 +352,7 @@ mixin SettingBinding on KlineBindingBase
   }
 
   /// 在主图中添加指标
-  void addIndicatorInMain(ValueKey<dynamic> key) {
+  void addIndicatorInMain(IIndicatorKey key) {
     if (supportMainIndicators.containsKey(key)) {
       final indicator = supportMainIndicators[key]!;
       mainIndicator.appendIndicator(indicator, this);
@@ -362,14 +362,14 @@ mixin SettingBinding on KlineBindingBase
   }
 
   /// 删除主图中[key]指定的指标
-  void delIndicatorInMain(ValueKey<dynamic> key) {
+  void delIndicatorInMain(IIndicatorKey key) {
     mainIndicator.deleteIndicator(key);
     markRepaintChart(reset: true);
     markRepaintCross();
   }
 
   /// 在副图中添加指标
-  void addIndicatorInSub(ValueKey<dynamic> key) {
+  void addIndicatorInSub(IIndicatorKey key) {
     final indicator = supportSubIndicators.getItem(key);
     if (indicator != null) {
       // 使用前先解绑
@@ -380,7 +380,7 @@ mixin SettingBinding on KlineBindingBase
   }
 
   /// 删除副图[key]指定的指标
-  void delIndicatorInSub(ValueKey key) {
+  void delIndicatorInSub(IIndicatorKey key) {
     bool hasRemove = false;
     subIndicatorQueue.removeWhere((indicator) {
       if (indicator.key == key) {
@@ -470,7 +470,7 @@ mixin SettingBinding on KlineBindingBase
   }
 
   @override
-  Map<ValueKey, dynamic> getIndicatorCalcParams() {
+  Map<IIndicatorKey, dynamic> getIndicatorCalcParams() {
     // 收集所有指标预计算参数.
     return indicatorsConfig.getAllIndicatorCalcParams();
     // 收集已打开的指标计算参数. TODO: 性能优化后使用.
@@ -568,34 +568,35 @@ mixin SettingBinding on KlineBindingBase
   }
 
   /// 用户自定义主区指标集合
-  final Map<ValueKey, SinglePaintObjectIndicator> _customMainIndicators = {};
+  final Map<IIndicatorKey, SinglePaintObjectIndicator> _customMainIndicators =
+      {};
 
   /// 用户自定义副区指标集合
-  final Map<ValueKey, Indicator> _customSubIndicators = {};
+  final Map<IIndicatorKey, Indicator> _customSubIndicators = {};
 
   /// 添加主区指标配置
   /// [indicator] 指标配置
-  /// 注: 如果指标的key使用内置的ValueKey([IndicatorType]), 将会替换内置的指标.
+  /// 注: 如果指标的key使用内置的IIndicatorKey([IndicatorType]), 将会替换内置的指标.
   void addCustomMainIndicatorConfig(SinglePaintObjectIndicator indicator) {
     _customMainIndicators[indicator.key] = indicator;
   }
 
   /// 删除[key]对应的指标配置.
   /// 注: 此处删除的是自定义的主区指标.
-  void delCustomMainIndicatorConifg(ValueKey key) {
+  void delCustomMainIndicatorConifg(IIndicatorKey key) {
     _customMainIndicators.remove(key);
   }
 
   /// 添加副区指标配置
   /// [indicator] 指标配置
-  /// 注: 如果指标的key使用内置的ValueKey([IndicatorType]), 将会替换内置的指标.
+  /// 注: 如果指标的key使用内置的IIndicatorKey([IndicatorType]), 将会替换内置的指标.
   void addCustomSubIndicatorConfig(Indicator indicator) {
     _customSubIndicators[indicator.key] = indicator;
   }
 
   /// 删除副区[key]对应的指标配置.
   /// 注: 此处删除的是自定义的副区指标.
-  void delCustomSubIndicatorConfig(ValueKey key) {
+  void delCustomSubIndicatorConfig(IIndicatorKey key) {
     _customSubIndicators.remove(key);
   }
 }

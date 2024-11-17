@@ -7,7 +7,7 @@ part of 'time.dart';
 // **************************************************************************
 
 abstract class _$TimeIndicatorCWProxy {
-  TimeIndicator key(ValueKey<dynamic> key);
+  TimeIndicator key(IIndicatorKey key);
 
   TimeIndicator name(String name);
 
@@ -28,7 +28,7 @@ abstract class _$TimeIndicatorCWProxy {
   /// TimeIndicator(...).copyWith(id: 12, name: "My name")
   /// ````
   TimeIndicator call({
-    ValueKey<dynamic>? key,
+    IIndicatorKey? key,
     String? name,
     int? zIndex,
     double? height,
@@ -45,7 +45,7 @@ class _$TimeIndicatorCWProxyImpl implements _$TimeIndicatorCWProxy {
   final TimeIndicator _value;
 
   @override
-  TimeIndicator key(ValueKey<dynamic> key) => this(key: key);
+  TimeIndicator key(IIndicatorKey key) => this(key: key);
 
   @override
   TimeIndicator name(String name) => this(name: name);
@@ -86,7 +86,7 @@ class _$TimeIndicatorCWProxyImpl implements _$TimeIndicatorCWProxy {
       key: key == const $CopyWithPlaceholder() || key == null
           ? _value.key
           // ignore: cast_nullable_to_non_nullable
-          : key as ValueKey<dynamic>,
+          : key as IIndicatorKey,
       name: name == const $CopyWithPlaceholder() || name == null
           ? _value.name
           // ignore: cast_nullable_to_non_nullable
@@ -128,8 +128,8 @@ extension $TimeIndicatorCopyWith on TimeIndicator {
 TimeIndicator _$TimeIndicatorFromJson(Map<String, dynamic> json) =>
     TimeIndicator(
       key: json['key'] == null
-          ? timeKey
-          : const ValueKeyConverter().fromJson(json['key'] as String),
+          ? IndicatorType.time
+          : const IIndicatorKeyConvert().fromJson(json['key'] as String),
       name: json['name'] as String? ?? 'Time',
       zIndex: (json['zIndex'] as num?)?.toInt() ?? 0,
       height:
@@ -147,7 +147,7 @@ TimeIndicator _$TimeIndicatorFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$TimeIndicatorToJson(TimeIndicator instance) =>
     <String, dynamic>{
-      'key': const ValueKeyConverter().toJson(instance.key),
+      'key': const IIndicatorKeyConvert().toJson(instance.key),
       'name': instance.name,
       'height': instance.height,
       'padding': const EdgeInsetsConverter().toJson(instance.padding),

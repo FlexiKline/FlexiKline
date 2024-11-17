@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 import '../config/export.dart';
@@ -32,7 +31,7 @@ part 'rsi.g.dart';
 class RSIIndicator extends SinglePaintObjectIndicator
     implements IPrecomputable {
   RSIIndicator({
-    super.key = rsiKey,
+    super.key = IndicatorType.rsi,
     super.name = 'RSI',
     super.zIndex = 0,
     super.height = defaultSubIndicatorHeight,

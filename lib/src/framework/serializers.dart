@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import 'package:decimal/decimal.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -23,49 +22,43 @@ import '../utils/convert_util.dart';
 import 'chart/indicator.dart';
 import 'draw/overlay.dart';
 
-ValueKey parseValueKey(String key) {
-  if (key.trim().isEmpty) return const ValueKey('');
-  final name = key.toLowerCase();
-  final types = IndicatorType.values.where(
-    (type) => type.name.toLowerCase() == name,
-  );
-  if (types.isNotEmpty) return ValueKey(types.first);
-  return ValueKey(key);
-}
-
-String convertValueKey(ValueKey key) {
-  if (key.value is IndicatorType) {
-    return (key.value as IndicatorType).name;
-  }
-  return key.value.toString();
-}
-
-class ValueKeyConverter implements JsonConverter<ValueKey, String> {
-  const ValueKeyConverter();
+class IIndicatorKeyConvert implements JsonConverter<IIndicatorKey, String> {
+  const IIndicatorKeyConvert();
 
   @override
-  ValueKey fromJson(String json) {
-    return parseValueKey(json);
+  IIndicatorKey fromJson(String json) {
+    final splits = json.split(":");
+    final id = splits.getItem(0);
+    if (id == null || id.isEmpty) return unknownIndicatorKey;
+    final indicatorType = IndicatorType.values.firstWhereOrNull(
+      (type) => type.id == id,
+    );
+    if (indicatorType != null) return indicatorType;
+    final label = splits.getItem(1);
+    return FlexiIndicatorKey(id, label: label);
   }
 
   @override
-  String toJson(ValueKey key) {
-    return convertValueKey(key);
+  String toJson(IIndicatorKey key) {
+    if (key is IndicatorType) {
+      return key.id;
+    }
+    return "${key.id}:${key.label}";
   }
 }
 
-class SetValueKeyConverter
-    implements JsonConverter<Set<ValueKey>, List<dynamic>> {
-  const SetValueKeyConverter();
+class SetIndicatorKeyConverter
+    implements JsonConverter<Set<IIndicatorKey>, List<dynamic>> {
+  const SetIndicatorKeyConverter();
 
   @override
-  Set<ValueKey> fromJson(List<dynamic> json) {
-    return json.map((e) => const ValueKeyConverter().fromJson(e)).toSet();
+  Set<IIndicatorKey> fromJson(List<dynamic> json) {
+    return json.map((e) => const IIndicatorKeyConvert().fromJson(e)).toSet();
   }
 
   @override
-  List<dynamic> toJson(Set<ValueKey> object) {
-    return object.map((e) => const ValueKeyConverter().toJson(e)).toList();
+  List<dynamic> toJson(Set<IIndicatorKey> object) {
+    return object.map((e) => const IIndicatorKeyConvert().toJson(e)).toList();
   }
 }
 
@@ -644,7 +637,7 @@ const FlexiOverlaySerializable = JsonSerializable(
 // ignore: constant_identifier_names
 const FlexiIndicatorSerializable = JsonSerializable(
   converters: [
-    ValueKeyConverter(),
+    IIndicatorKeyConvert(),
     PaintModeConverter(),
     ..._basicConverterList,
   ],
@@ -673,7 +666,7 @@ const FlexiModelSerializable = JsonSerializable(
 const FlexiConfigSerializable = JsonSerializable(
   converters: [
     ..._basicConverterList,
-    SetValueKeyConverter(),
+    SetIndicatorKeyConverter(),
   ],
   explicitToJson: true,
   includeIfNull: false,

@@ -16,6 +16,7 @@ import 'package:flutter/foundation.dart';
 
 import '../constant.dart';
 import '../extension/export.dart';
+import '../framework/chart/indicator.dart';
 import '../framework/logger.dart';
 import '../model/export.dart';
 
@@ -63,7 +64,7 @@ abstract class BaseData with KlineLog {
   @protected
   @mustCallSuper
   void precompute(
-    ValueKey key, {
+    IIndicatorKey key, {
     dynamic calcParam,
     required Range range,
     bool reset = false,

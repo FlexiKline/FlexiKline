@@ -14,8 +14,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
-
 import '../config/sar_param/sar_param.dart';
 import '../framework/chart/indicator.dart';
 import '../model/export.dart';
@@ -42,12 +40,13 @@ mixin SARData on BaseData {
 
   @override
   void precompute(
-    ValueKey key, {
+    IIndicatorKey key, {
     dynamic calcParam,
     required Range range,
     bool reset = false,
   }) {
-    if ((key == sarKey || key == subSarKey) && calcParam is SARParam) {
+    if ((key == IndicatorType.sar || key == IndicatorType.subSar) &&
+        calcParam is SARParam) {
       calcuAndCacheSar(
         param: calcParam,
         // start: range.start,

@@ -38,8 +38,8 @@ class FlexiKlineConfig {
     required this.draw,
     required this.tooltip,
     required this.indicators,
-    this.main = const <ValueKey>{},
-    this.sub = const <ValueKey>{},
+    this.main = const <IIndicatorKey>{},
+    this.sub = const <IIndicatorKey>{},
   });
 
   final String key;
@@ -50,8 +50,8 @@ class FlexiKlineConfig {
   DrawConfig draw;
   TooltipConfig tooltip;
   IndicatorsConfig indicators;
-  Set<ValueKey> main;
-  Set<ValueKey> sub;
+  Set<IIndicatorKey> main;
+  Set<IIndicatorKey> sub;
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   late final MultiPaintObjectIndicator mainIndicator;
@@ -59,11 +59,12 @@ class FlexiKlineConfig {
   late final FixedHashQueue<Indicator> subRectIndicatorQueue;
 
   void init({
-    required Map<ValueKey, SinglePaintObjectIndicator> customMainIndicators,
-    required Map<ValueKey, Indicator> customSubIndicators,
+    required Map<IIndicatorKey, SinglePaintObjectIndicator>
+        customMainIndicators,
+    required Map<IIndicatorKey, Indicator> customSubIndicators,
   }) {
     mainIndicator = MultiPaintObjectIndicator(
-      key: mainChartKey,
+      key: IndicatorType.main,
       name: IndicatorType.main.label,
       height: setting.mainRect.height,
       padding: setting.mainPadding,
@@ -74,8 +75,8 @@ class FlexiKlineConfig {
       setting.subChartMaxCount,
     );
 
-    if (!main.contains(candleKey)) {
-      main.add(candleKey);
+    if (!main.contains(IndicatorType.candle)) {
+      main.add(IndicatorType.candle);
     }
     for (var key in main) {
       SinglePaintObjectIndicator? indicator = customMainIndicators.getItem(key);
@@ -87,8 +88,8 @@ class FlexiKlineConfig {
       }
     }
 
-    if (sub.contains(timeKey)) {
-      sub.remove(timeKey); // Time指标是默认的
+    if (sub.contains(IndicatorType.time)) {
+      sub.remove(IndicatorType.time); // Time指标是默认的
     }
     if (sub.isNotEmpty) {
       if (sub.length > setting.subChartMaxCount) {
@@ -107,20 +108,20 @@ class FlexiKlineConfig {
   }
 
   /// 收集当前已打开指标的计算参数
-  Map<ValueKey, dynamic> getOpenedIndicatorCalcParams() {
-    final calcParams = <ValueKey, dynamic>{};
+  Map<IIndicatorKey, dynamic> getOpenedIndicatorCalcParams() {
+    final calcParams = <IIndicatorKey, dynamic>{};
     calcParams.addAll(mainIndicator.getCalcParams());
 
     for (var subIndicator in subRectIndicatorQueue) {
       final params = subIndicator.getCalcParams();
 
       // 暂时 通过key的判断去掉主区与副区相同指标的重复计算参数.
-      if (subIndicator.key == subBollKey &&
-          calcParams[bollKey] == params[subBollKey]) {
+      if (subIndicator.key == IndicatorType.subBoll &&
+          calcParams[IndicatorType.boll] == params[IndicatorType.subBoll]) {
         continue;
       }
-      if (subIndicator.key == subSarKey &&
-          calcParams[sarKey] == params[subSarKey]) {
+      if (subIndicator.key == IndicatorType.subSar &&
+          calcParams[IndicatorType.sar] == params[IndicatorType.subSar]) {
         continue;
       }
       calcParams.addAll(params);
