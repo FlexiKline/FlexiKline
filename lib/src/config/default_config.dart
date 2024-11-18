@@ -19,7 +19,6 @@ import '../extension/render/common.dart';
 import '../framework/export.dart';
 import '../indicators/export.dart';
 import '../utils/vector_util.dart';
-import 'boll_param/boll_param.dart';
 import 'cross_config/cross_config.dart';
 import 'draw_params/draw_params.dart';
 import 'magnifier_config/magnifier_config.dart';
@@ -29,15 +28,11 @@ import 'flexi_kline_config/flexi_kline_config.dart';
 import 'gesture_config/gesture_config.dart';
 import 'grid_config/grid_config.dart';
 import 'indicators_config/indicators_config.dart';
-import 'kdj_param/kdj_param.dart';
 import 'line_config/line_config.dart';
 import 'loading_config/loading_config.dart';
 import 'ma_param/ma_param.dart';
-import 'macd_param/macd_param.dart';
 import 'mark_config/mark_config.dart';
 import 'paint_config/paint_config.dart';
-import 'rsi_param/rsi_param.dart';
-import 'sar_param/sar_param.dart';
 import 'setting_config/setting_config.dart';
 import 'text_area_config/text_area_config.dart';
 import 'tips_config/tips_config.dart';
@@ -503,18 +498,18 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       candle: genCandleIndicator(theme),
       volume: genMainVolumeIndicator(theme),
       ma: genMaIndicator(theme),
-      ema: genEmaIndicator(theme),
-      boll: genBollIndicator(theme),
-      sar: genSarIndicator(theme),
+      // ema: genEmaIndicator(theme),
+      // boll: genBollIndicator(theme),
+      // sar: genSarIndicator(theme),
 
       /// 副区
       time: genTimeIndicator(theme),
-      macd: genMacdIndicator(theme),
-      kdj: genKdjIndicator(theme),
+      // macd: genMacdIndicator(theme),
+      // kdj: genKdjIndicator(theme),
       mavol: genMavolIndicator(theme),
-      subBoll: genSubBollIndicator(theme),
-      subSar: genSubSarIndicator(theme),
-      rsi: genSubRsiIndicator(theme),
+      // subBoll: genSubBollIndicator(theme),
+      // subSar: genSubSarIndicator(theme),
+      // rsi: genSubRsiIndicator(theme),
     );
   }
 
@@ -699,141 +694,141 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
     );
   }
 
-  EMAIndicator genEmaIndicator(covariant IFlexiKlineTheme theme) {
-    return EMAIndicator(
-      key: IndicatorType.ema,
-      height: theme.mainIndicatorHeight,
-      padding: theme.mainIndicatorPadding,
-      calcParams: [
-        MaParam(
-          count: 5,
-          tips: TipsConfig(
-            label: 'EMA5: ',
-            // precision: 2,
-            style: TextStyle(
-              fontSize: theme.normalTextSize,
-              color: Colors.blueGrey,
-              overflow: TextOverflow.ellipsis,
-              height: defaultTipsTextHeight,
-            ),
-          ),
-        ),
-        MaParam(
-          count: 10,
-          tips: TipsConfig(
-            label: 'EMA10: ',
-            // precision: 2,
-            style: TextStyle(
-              fontSize: theme.normalTextSize,
-              color: Colors.pink,
-              overflow: TextOverflow.ellipsis,
-              height: defaultTipsTextHeight,
-            ),
-          ),
-        ),
-        MaParam(
-          count: 20,
-          tips: TipsConfig(
-            label: 'EMA20: ',
-            // precision: 2,
-            style: TextStyle(
-              fontSize: theme.normalTextSize,
-              color: Colors.deepOrange,
-              overflow: TextOverflow.ellipsis,
-              height: defaultTipsTextHeight,
-            ),
-          ),
-        ),
-        MaParam(
-          count: 60,
-          tips: TipsConfig(
-            label: 'EMA60: ',
-            // precision: 2,
-            style: TextStyle(
-              fontSize: theme.normalTextSize,
-              color: Colors.deepPurple,
-              overflow: TextOverflow.ellipsis,
-              height: defaultTipsTextHeight,
-            ),
-          ),
-        ),
-      ],
-      tipsPadding: theme.tipsPadding,
-      lineWidth: theme.indicatorLineWidth,
-    );
-  }
+  // EMAIndicator genEmaIndicator(covariant IFlexiKlineTheme theme) {
+  //   return EMAIndicator(
+  //     key: IndicatorType.ema,
+  //     height: theme.mainIndicatorHeight,
+  //     padding: theme.mainIndicatorPadding,
+  //     calcParams: [
+  //       MaParam(
+  //         count: 5,
+  //         tips: TipsConfig(
+  //           label: 'EMA5: ',
+  //           // precision: 2,
+  //           style: TextStyle(
+  //             fontSize: theme.normalTextSize,
+  //             color: Colors.blueGrey,
+  //             overflow: TextOverflow.ellipsis,
+  //             height: defaultTipsTextHeight,
+  //           ),
+  //         ),
+  //       ),
+  //       MaParam(
+  //         count: 10,
+  //         tips: TipsConfig(
+  //           label: 'EMA10: ',
+  //           // precision: 2,
+  //           style: TextStyle(
+  //             fontSize: theme.normalTextSize,
+  //             color: Colors.pink,
+  //             overflow: TextOverflow.ellipsis,
+  //             height: defaultTipsTextHeight,
+  //           ),
+  //         ),
+  //       ),
+  //       MaParam(
+  //         count: 20,
+  //         tips: TipsConfig(
+  //           label: 'EMA20: ',
+  //           // precision: 2,
+  //           style: TextStyle(
+  //             fontSize: theme.normalTextSize,
+  //             color: Colors.deepOrange,
+  //             overflow: TextOverflow.ellipsis,
+  //             height: defaultTipsTextHeight,
+  //           ),
+  //         ),
+  //       ),
+  //       MaParam(
+  //         count: 60,
+  //         tips: TipsConfig(
+  //           label: 'EMA60: ',
+  //           // precision: 2,
+  //           style: TextStyle(
+  //             fontSize: theme.normalTextSize,
+  //             color: Colors.deepPurple,
+  //             overflow: TextOverflow.ellipsis,
+  //             height: defaultTipsTextHeight,
+  //           ),
+  //         ),
+  //       ),
+  //     ],
+  //     tipsPadding: theme.tipsPadding,
+  //     lineWidth: theme.indicatorLineWidth,
+  //   );
+  // }
 
-  BOLLIndicator genBollIndicator(covariant IFlexiKlineTheme theme) {
-    return BOLLIndicator(
-      key: IndicatorType.boll,
-      height: theme.mainIndicatorHeight,
-      padding: theme.mainIndicatorPadding,
+  // BOLLIndicator genBollIndicator(covariant IFlexiKlineTheme theme) {
+  //   return BOLLIndicator(
+  //     key: IndicatorType.boll,
+  //     height: theme.mainIndicatorHeight,
+  //     padding: theme.mainIndicatorPadding,
 
-      /// BOLL计算参数
-      calcParam: const BOLLParam(n: 20, std: 2),
+  //     /// BOLL计算参数
+  //     calcParam: const BOLLParam(n: 20, std: 2),
 
-      /// 绘制相关参数
-      mbTips: TipsConfig(
-        label: 'BOLL(20): ',
-        // precision: 2,
-        style: TextStyle(
-          fontSize: theme.normalTextSize,
-          color: Colors.orangeAccent,
-          overflow: TextOverflow.ellipsis,
-          height: defaultTipsTextHeight,
-        ),
-      ),
-      upTips: TipsConfig(
-        label: 'UB: ',
-        // precision: 2,
-        style: TextStyle(
-          fontSize: theme.normalTextSize,
-          color: Colors.orange,
-          overflow: TextOverflow.ellipsis,
-          height: defaultTipsTextHeight,
-        ),
-      ),
-      dnTips: TipsConfig(
-        label: 'LB: ',
-        // precision: 2,
-        style: TextStyle(
-          fontSize: theme.normalTextSize,
-          color: Colors.orangeAccent,
-          overflow: TextOverflow.ellipsis,
-          height: defaultTipsTextHeight,
-        ),
-      ),
-      tipsPadding: theme.tipsPadding,
-      lineWidth: theme.indicatorLineWidth,
+  //     /// 绘制相关参数
+  //     mbTips: TipsConfig(
+  //       label: 'BOLL(20): ',
+  //       // precision: 2,
+  //       style: TextStyle(
+  //         fontSize: theme.normalTextSize,
+  //         color: Colors.orangeAccent,
+  //         overflow: TextOverflow.ellipsis,
+  //         height: defaultTipsTextHeight,
+  //       ),
+  //     ),
+  //     upTips: TipsConfig(
+  //       label: 'UB: ',
+  //       // precision: 2,
+  //       style: TextStyle(
+  //         fontSize: theme.normalTextSize,
+  //         color: Colors.orange,
+  //         overflow: TextOverflow.ellipsis,
+  //         height: defaultTipsTextHeight,
+  //       ),
+  //     ),
+  //     dnTips: TipsConfig(
+  //       label: 'LB: ',
+  //       // precision: 2,
+  //       style: TextStyle(
+  //         fontSize: theme.normalTextSize,
+  //         color: Colors.orangeAccent,
+  //         overflow: TextOverflow.ellipsis,
+  //         height: defaultTipsTextHeight,
+  //       ),
+  //     ),
+  //     tipsPadding: theme.tipsPadding,
+  //     lineWidth: theme.indicatorLineWidth,
 
-      /// 填充配置
-      isFillBetweenUpAndDn: true,
-      fillColor: null,
-    );
-  }
+  //     /// 填充配置
+  //     isFillBetweenUpAndDn: true,
+  //     fillColor: null,
+  //   );
+  // }
 
-  SARIndicator genSarIndicator(covariant IFlexiKlineTheme theme) {
-    return SARIndicator(
-      key: IndicatorType.sar,
-      height: theme.mainIndicatorHeight,
-      padding: theme.mainIndicatorPadding,
-      calcParam: const SARParam(startAf: 0.02, step: 0.02, maxAf: 0.2),
-      radius: null, // 2 * theme.scale,
-      useCandleColor: true,
-      paint: PaintConfig(
-        color: const Color(0x00000000),
-        strokeWidth: 1 * theme.scale,
-        style: PaintingStyle.stroke,
-      ),
-      tipsPadding: theme.tipsPadding,
-      tipsStyle: TextStyle(
-        fontSize: theme.normalTextSize,
-        color: theme.ticksTextColor,
-        overflow: TextOverflow.ellipsis,
-        height: defaultTextHeight,
-      ),
-    );
-  }
+  // SARIndicator genSarIndicator(covariant IFlexiKlineTheme theme) {
+  //   return SARIndicator(
+  //     key: IndicatorType.sar,
+  //     height: theme.mainIndicatorHeight,
+  //     padding: theme.mainIndicatorPadding,
+  //     calcParam: const SARParam(startAf: 0.02, step: 0.02, maxAf: 0.2),
+  //     radius: null, // 2 * theme.scale,
+  //     useCandleColor: true,
+  //     paint: PaintConfig(
+  //       color: const Color(0x00000000),
+  //       strokeWidth: 1 * theme.scale,
+  //       style: PaintingStyle.stroke,
+  //     ),
+  //     tipsPadding: theme.tipsPadding,
+  //     tipsStyle: TextStyle(
+  //       fontSize: theme.normalTextSize,
+  //       color: theme.ticksTextColor,
+  //       overflow: TextOverflow.ellipsis,
+  //       height: defaultTextHeight,
+  //     ),
+  //   );
+  // }
 
   TimeIndicator genTimeIndicator(covariant IFlexiKlineTheme theme) {
     return TimeIndicator(
@@ -854,97 +849,97 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
     );
   }
 
-  MACDIndicator genMacdIndicator(covariant IFlexiKlineTheme theme) {
-    return MACDIndicator(
-      height: theme.subIndicatorHeight,
-      padding: theme.subIndicatorPadding,
+  // MACDIndicator genMacdIndicator(covariant IFlexiKlineTheme theme) {
+  //   return MACDIndicator(
+  //     height: theme.subIndicatorHeight,
+  //     padding: theme.subIndicatorPadding,
 
-      /// Macd相关参数
-      calcParam: const MACDParam(s: 12, l: 26, m: 9),
+  //     /// Macd相关参数
+  //     calcParam: const MACDParam(s: 12, l: 26, m: 9),
 
-      /// 绘制相关参数
-      difTips: TipsConfig(
-        label: 'DIF: ',
-        precision: 2,
-        style: TextStyle(
-          fontSize: theme.normalTextSize,
-          color: const Color(0xFFDFBF47),
-          overflow: TextOverflow.ellipsis,
-          height: defaultTextHeight,
-        ),
-      ),
-      deaTips: TipsConfig(
-        label: 'DEA: ',
-        precision: 2,
-        style: TextStyle(
-          fontSize: theme.normalTextSize,
-          color: const Color(0xFF795583),
-          overflow: TextOverflow.ellipsis,
-          height: defaultTextHeight,
-        ),
-      ),
-      macdTips: TipsConfig(
-        label: 'MACD: ',
-        precision: 2,
-        style: TextStyle(
-          fontSize: theme.normalTextSize,
-          color: theme.textColor,
-          overflow: TextOverflow.ellipsis,
-          height: defaultTextHeight,
-        ),
-      ),
-      tipsPadding: theme.tipsPadding,
-      tickCount: defaultSubTickCount,
-      lineWidth: theme.indicatorLineWidth,
-      precision: 2,
-    );
-  }
+  //     /// 绘制相关参数
+  //     difTips: TipsConfig(
+  //       label: 'DIF: ',
+  //       precision: 2,
+  //       style: TextStyle(
+  //         fontSize: theme.normalTextSize,
+  //         color: const Color(0xFFDFBF47),
+  //         overflow: TextOverflow.ellipsis,
+  //         height: defaultTextHeight,
+  //       ),
+  //     ),
+  //     deaTips: TipsConfig(
+  //       label: 'DEA: ',
+  //       precision: 2,
+  //       style: TextStyle(
+  //         fontSize: theme.normalTextSize,
+  //         color: const Color(0xFF795583),
+  //         overflow: TextOverflow.ellipsis,
+  //         height: defaultTextHeight,
+  //       ),
+  //     ),
+  //     macdTips: TipsConfig(
+  //       label: 'MACD: ',
+  //       precision: 2,
+  //       style: TextStyle(
+  //         fontSize: theme.normalTextSize,
+  //         color: theme.textColor,
+  //         overflow: TextOverflow.ellipsis,
+  //         height: defaultTextHeight,
+  //       ),
+  //     ),
+  //     tipsPadding: theme.tipsPadding,
+  //     tickCount: defaultSubTickCount,
+  //     lineWidth: theme.indicatorLineWidth,
+  //     precision: 2,
+  //   );
+  // }
 
-  KDJIndicator genKdjIndicator(covariant IFlexiKlineTheme theme) {
-    return KDJIndicator(
-      height: theme.subIndicatorHeight,
-      padding: theme.subIndicatorPadding,
+  // KDJIndicator genKdjIndicator(covariant IFlexiKlineTheme theme) {
+  //   return KDJIndicator(
+  //     height: theme.subIndicatorHeight,
+  //     padding: theme.subIndicatorPadding,
 
-      /// KDJ计算参数
-      calcParam: const KDJParam(n: 9, m1: 3, m2: 3),
+  //     /// KDJ计算参数
+  //     calcParam: const KDJParam(n: 9, m1: 3, m2: 3),
 
-      /// 绘制相关参数
-      ktips: TipsConfig(
-        label: 'K: ',
-        precision: 2,
-        style: TextStyle(
-          fontSize: theme.normalTextSize,
-          color: const Color(0xFF7A5C79),
-          overflow: TextOverflow.ellipsis,
-          height: defaultTipsTextHeight,
-        ),
-      ),
-      dtips: TipsConfig(
-        label: 'D: ',
-        precision: 2,
-        style: TextStyle(
-          fontSize: theme.normalTextSize,
-          color: const Color(0xFFFABD3F),
-          overflow: TextOverflow.ellipsis,
-          height: defaultTipsTextHeight,
-        ),
-      ),
-      jtips: TipsConfig(
-        label: 'D: ',
-        precision: 2,
-        style: TextStyle(
-          fontSize: theme.normalTextSize,
-          color: const Color(0xFFBB72CA),
-          overflow: TextOverflow.ellipsis,
-          height: defaultTipsTextHeight,
-        ),
-      ),
-      tipsPadding: theme.tipsPadding,
-      tickCount: defaultSubTickCount,
-      lineWidth: theme.indicatorLineWidth,
-      precision: 2,
-    );
-  }
+  //     /// 绘制相关参数
+  //     ktips: TipsConfig(
+  //       label: 'K: ',
+  //       precision: 2,
+  //       style: TextStyle(
+  //         fontSize: theme.normalTextSize,
+  //         color: const Color(0xFF7A5C79),
+  //         overflow: TextOverflow.ellipsis,
+  //         height: defaultTipsTextHeight,
+  //       ),
+  //     ),
+  //     dtips: TipsConfig(
+  //       label: 'D: ',
+  //       precision: 2,
+  //       style: TextStyle(
+  //         fontSize: theme.normalTextSize,
+  //         color: const Color(0xFFFABD3F),
+  //         overflow: TextOverflow.ellipsis,
+  //         height: defaultTipsTextHeight,
+  //       ),
+  //     ),
+  //     jtips: TipsConfig(
+  //       label: 'D: ',
+  //       precision: 2,
+  //       style: TextStyle(
+  //         fontSize: theme.normalTextSize,
+  //         color: const Color(0xFFBB72CA),
+  //         overflow: TextOverflow.ellipsis,
+  //         height: defaultTipsTextHeight,
+  //       ),
+  //     ),
+  //     tipsPadding: theme.tipsPadding,
+  //     tickCount: defaultSubTickCount,
+  //     lineWidth: theme.indicatorLineWidth,
+  //     precision: 2,
+  //   );
+  // }
 
   MAVolumeIndicator genMavolIndicator(
     covariant IFlexiKlineTheme theme, {
@@ -1032,125 +1027,125 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
     );
   }
 
-  BOLLIndicator genSubBollIndicator(covariant IFlexiKlineTheme theme) {
-    return BOLLIndicator(
-      key: IndicatorType.subBoll, // 区别于主区bollKey的地方
-      height: theme.subIndicatorHeight,
-      padding: theme.subIndicatorPadding,
+  // BOLLIndicator genSubBollIndicator(covariant IFlexiKlineTheme theme) {
+  //   return BOLLIndicator(
+  //     key: IndicatorType.subBoll, // 区别于主区bollKey的地方
+  //     height: theme.subIndicatorHeight,
+  //     padding: theme.subIndicatorPadding,
 
-      /// BOLL计算参数
-      calcParam: const BOLLParam(n: 20, std: 2),
+  //     /// BOLL计算参数
+  //     calcParam: const BOLLParam(n: 20, std: 2),
 
-      /// 绘制相关参数
-      mbTips: TipsConfig(
-        label: 'BOLL(20): ',
-        // precision: 2,
-        style: TextStyle(
-          fontSize: theme.normalTextSize,
-          color: Colors.orangeAccent,
-          overflow: TextOverflow.ellipsis,
-          height: defaultTipsTextHeight,
-        ),
-      ),
-      upTips: TipsConfig(
-        label: 'UB: ',
-        // precision: 2,
-        style: TextStyle(
-          fontSize: theme.normalTextSize,
-          color: Colors.orangeAccent,
-          overflow: TextOverflow.ellipsis,
-          height: defaultTipsTextHeight,
-        ),
-      ),
-      dnTips: TipsConfig(
-        label: 'LB: ',
-        // precision: 2,
-        style: TextStyle(
-          fontSize: theme.normalTextSize,
-          color: Colors.orangeAccent,
-          overflow: TextOverflow.ellipsis,
-          height: defaultTipsTextHeight,
-        ),
-      ),
-      tipsPadding: theme.tipsPadding,
-      lineWidth: theme.indicatorLineWidth,
+  //     /// 绘制相关参数
+  //     mbTips: TipsConfig(
+  //       label: 'BOLL(20): ',
+  //       // precision: 2,
+  //       style: TextStyle(
+  //         fontSize: theme.normalTextSize,
+  //         color: Colors.orangeAccent,
+  //         overflow: TextOverflow.ellipsis,
+  //         height: defaultTipsTextHeight,
+  //       ),
+  //     ),
+  //     upTips: TipsConfig(
+  //       label: 'UB: ',
+  //       // precision: 2,
+  //       style: TextStyle(
+  //         fontSize: theme.normalTextSize,
+  //         color: Colors.orangeAccent,
+  //         overflow: TextOverflow.ellipsis,
+  //         height: defaultTipsTextHeight,
+  //       ),
+  //     ),
+  //     dnTips: TipsConfig(
+  //       label: 'LB: ',
+  //       // precision: 2,
+  //       style: TextStyle(
+  //         fontSize: theme.normalTextSize,
+  //         color: Colors.orangeAccent,
+  //         overflow: TextOverflow.ellipsis,
+  //         height: defaultTipsTextHeight,
+  //       ),
+  //     ),
+  //     tipsPadding: theme.tipsPadding,
+  //     lineWidth: theme.indicatorLineWidth,
 
-      /// 填充配置
-      isFillBetweenUpAndDn: true,
-      fillColor: null,
-    );
-  }
+  //     /// 填充配置
+  //     isFillBetweenUpAndDn: true,
+  //     fillColor: null,
+  //   );
+  // }
 
-  SARIndicator genSubSarIndicator(covariant IFlexiKlineTheme theme) {
-    return SARIndicator(
-      key: IndicatorType.subSar, // 区别于主区sarKey的地方
-      height: theme.subIndicatorHeight,
-      padding: theme.subIndicatorPadding,
-      calcParam: const SARParam(startAf: 0.02, step: 0.02, maxAf: 0.2),
-      radius: null, // 2 * theme.scale,
-      useCandleColor: true,
-      paint: PaintConfig(
-        color: const Color(0x00000000),
-        strokeWidth: 1 * theme.scale,
-        style: PaintingStyle.stroke,
-      ),
-      tipsPadding: theme.tipsPadding,
-      tipsStyle: TextStyle(
-        fontSize: theme.normalTextSize,
-        color: theme.ticksTextColor,
-        overflow: TextOverflow.ellipsis,
-        height: defaultTextHeight,
-      ),
-    );
-  }
+  // SARIndicator genSubSarIndicator(covariant IFlexiKlineTheme theme) {
+  //   return SARIndicator(
+  //     key: IndicatorType.subSar, // 区别于主区sarKey的地方
+  //     height: theme.subIndicatorHeight,
+  //     padding: theme.subIndicatorPadding,
+  //     calcParam: const SARParam(startAf: 0.02, step: 0.02, maxAf: 0.2),
+  //     radius: null, // 2 * theme.scale,
+  //     useCandleColor: true,
+  //     paint: PaintConfig(
+  //       color: const Color(0x00000000),
+  //       strokeWidth: 1 * theme.scale,
+  //       style: PaintingStyle.stroke,
+  //     ),
+  //     tipsPadding: theme.tipsPadding,
+  //     tipsStyle: TextStyle(
+  //       fontSize: theme.normalTextSize,
+  //       color: theme.ticksTextColor,
+  //       overflow: TextOverflow.ellipsis,
+  //       height: defaultTextHeight,
+  //     ),
+  //   );
+  // }
 
-  RSIIndicator genSubRsiIndicator(covariant IFlexiKlineTheme theme) {
-    return RSIIndicator(
-      height: theme.subIndicatorHeight,
-      padding: theme.subIndicatorPadding,
-      calcParams: [
-        RsiParam(
-          count: 6,
-          tips: TipsConfig(
-            label: 'RSI6: ',
-            precision: 2,
-            style: TextStyle(
-              fontSize: theme.normalTextSize,
-              color: Colors.deepOrangeAccent,
-              overflow: TextOverflow.ellipsis,
-              height: defaultTipsTextHeight,
-            ),
-          ),
-        ),
-        RsiParam(
-          count: 12,
-          tips: TipsConfig(
-            label: 'RSI12: ',
-            precision: 2,
-            style: TextStyle(
-              fontSize: theme.normalTextSize,
-              color: Colors.blueAccent,
-              overflow: TextOverflow.ellipsis,
-              height: defaultTipsTextHeight,
-            ),
-          ),
-        ),
-        RsiParam(
-          count: 24,
-          tips: TipsConfig(
-            label: 'RSI24: ',
-            precision: 2,
-            style: TextStyle(
-              fontSize: theme.normalTextSize,
-              color: Colors.pinkAccent,
-              overflow: TextOverflow.ellipsis,
-              height: defaultTipsTextHeight,
-            ),
-          ),
-        )
-      ],
-      tipsPadding: theme.tipsPadding,
-      lineWidth: theme.indicatorLineWidth,
-    );
-  }
+  // RSIIndicator genSubRsiIndicator(covariant IFlexiKlineTheme theme) {
+  //   return RSIIndicator(
+  //     height: theme.subIndicatorHeight,
+  //     padding: theme.subIndicatorPadding,
+  //     calcParams: [
+  //       RsiParam(
+  //         count: 6,
+  //         tips: TipsConfig(
+  //           label: 'RSI6: ',
+  //           precision: 2,
+  //           style: TextStyle(
+  //             fontSize: theme.normalTextSize,
+  //             color: Colors.deepOrangeAccent,
+  //             overflow: TextOverflow.ellipsis,
+  //             height: defaultTipsTextHeight,
+  //           ),
+  //         ),
+  //       ),
+  //       RsiParam(
+  //         count: 12,
+  //         tips: TipsConfig(
+  //           label: 'RSI12: ',
+  //           precision: 2,
+  //           style: TextStyle(
+  //             fontSize: theme.normalTextSize,
+  //             color: Colors.blueAccent,
+  //             overflow: TextOverflow.ellipsis,
+  //             height: defaultTipsTextHeight,
+  //           ),
+  //         ),
+  //       ),
+  //       RsiParam(
+  //         count: 24,
+  //         tips: TipsConfig(
+  //           label: 'RSI24: ',
+  //           precision: 2,
+  //           style: TextStyle(
+  //             fontSize: theme.normalTextSize,
+  //             color: Colors.pinkAccent,
+  //             overflow: TextOverflow.ellipsis,
+  //             height: defaultTipsTextHeight,
+  //           ),
+  //         ),
+  //       )
+  //     ],
+  //     tipsPadding: theme.tipsPadding,
+  //     lineWidth: theme.indicatorLineWidth,
+  //   );
+  // }
 }

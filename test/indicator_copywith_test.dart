@@ -32,11 +32,11 @@ void main() {
   });
 
   test('copywith indicator', () {
-    final sar = flexiKlineConfig.indicators.sar;
-    print(sar.toJson());
+    final ma = flexiKlineConfig.indicators.ma;
+    print(ma.toJson());
 
-    final copySar = sar.copyWith();
-    print(copySar.toJson());
+    final copyMa = ma.copyWith();
+    print(copyMa.toJson());
   });
 
   test('copywith multi indicator', () {

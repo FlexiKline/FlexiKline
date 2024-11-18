@@ -27,94 +27,32 @@ class IndicatorsConfig {
     required this.candle,
     required this.volume,
     required this.ma,
-    required this.ema,
-    required this.boll,
-    required this.sar,
 
     /// 副区指标
     required this.time,
-    required this.macd,
-    required this.kdj,
     required this.mavol,
-    required this.subBoll,
-    required this.subSar,
-    required this.rsi,
   });
-
-  // IndicatorsConfig({
-  //   /// 主区指标
-  //   CandleIndicator? candle,
-  //   VolumeIndicator? volume,
-  //   MAIndicator? ma,
-  //   EMAIndicator? ema,
-  //   BOLLIndicator? boll,
-
-  //   /// 副区指标
-  //   TimeIndicator? time,
-  //   MACDIndicator? macd,
-  //   KDJIndicator? kdj,
-  //   MAVolumeIndicator? mavol,
-  // }) {
-  //   /// 主区指标
-  //   this.candle = candle ?? CandleIndicator(height: 0);
-  //   this.volume = volume ?? VolumeIndicator();
-  //   this.ma = ma ?? MAIndicator(height: 0);
-  //   this.ema = ema ?? EMAIndicator(height: 0);
-  //   this.boll = boll ?? BOLLIndicator(height: 0);
-
-  //   /// 副区指标
-  //   this.time = time ?? TimeIndicator();
-  //   this.macd = macd ?? MACDIndicator();
-  //   this.kdj = kdj ?? KDJIndicator();
-  //   this.mavol = mavol ??
-  //       MAVolumeIndicator(
-  //         volumeIndicator: VolumeIndicator(
-  //           paintMode: PaintMode.combine,
-  //           showYAxisTick: true,
-  //           showCrossMark: true,
-  //           showTips: true,
-  //           useTint: false,
-  //         ),
-  //         volMaIndicator: VolMaIndicator(),
-  //       );
-  // }
 
   /// 主区指标
   late CandleIndicator candle;
   late VolumeIndicator volume;
   late MAIndicator ma;
-  late EMAIndicator ema;
-  late BOLLIndicator boll;
-  late SARIndicator sar;
 
   /// 副区指标
   late TimeIndicator time;
-  late MACDIndicator macd;
-  late KDJIndicator kdj;
   late MAVolumeIndicator mavol;
-  late BOLLIndicator subBoll;
-  late SARIndicator subSar;
-  late RSIIndicator rsi;
 
   /// 内置主区指标
   Map<IIndicatorKey, SinglePaintObjectIndicator> get mainIndicators => {
         candle.key: candle,
         volume.key: volume,
         ma.key: ma,
-        ema.key: ema,
-        boll.key: boll,
-        sar.key: sar,
       };
 
   /// 内置副区指标
   Map<IIndicatorKey, Indicator> get subIndicators => {
         time.key: time,
-        macd.key: macd,
-        kdj.key: kdj,
         mavol.key: mavol,
-        subBoll.key: subBoll,
-        subSar.key: subSar,
-        rsi.key: rsi,
       };
 
   /// 收集当前所有支持的指标的计算参数

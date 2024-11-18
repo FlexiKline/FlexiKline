@@ -32,11 +32,6 @@ export 'paint_config/paint_config.dart';
 
 /// Indicator 参数
 export 'ma_param/ma_param.dart';
-export 'boll_param/boll_param.dart';
-export 'sar_param/sar_param.dart';
-export 'kdj_param/kdj_param.dart';
-export 'macd_param/macd_param.dart';
-export 'rsi_param/rsi_param.dart';
 
 /// DrawOverlay 参数
 export 'draw_params/draw_params.dart';

@@ -15,7 +15,6 @@
 import 'dart:ui';
 
 import '../core/core.dart';
-import '../data/kline_data.dart';
 import '../extension/export.dart';
 import '../framework/draw/overlay.dart';
 
