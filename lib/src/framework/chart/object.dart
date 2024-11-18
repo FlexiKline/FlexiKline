@@ -65,12 +65,12 @@ abstract class PaintObject<T extends Indicator>
 abstract class PaintObjectProxy<T extends Indicator> extends PaintObject
     with KlineLog, ControllerProxyMixin {
   PaintObjectProxy({
-    required IPaintContext controller,
+    required IPaintContext context,
     required T super.indicator,
   }) {
-    this.controller = controller;
-    if (controller is KlineLog) {
-      loggerDelegate = (controller as KlineLog).loggerDelegate;
+    this.context = context;
+    if (context is KlineLog) {
+      loggerDelegate = (context as KlineLog).loggerDelegate;
     }
   }
 
@@ -86,7 +86,7 @@ abstract class PaintObjectProxy<T extends Indicator> extends PaintObject
 abstract class SinglePaintObjectBox<T extends SinglePaintObjectIndicator>
     extends PaintObjectProxy with PaintObjectBoundingMixin, DataInitMixin {
   SinglePaintObjectBox({
-    required super.controller,
+    required super.context,
     required T super.indicator,
   });
 
@@ -160,7 +160,7 @@ abstract class SinglePaintObjectBox<T extends SinglePaintObjectIndicator>
 class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
     extends PaintObjectProxy with PaintObjectBoundingMixin, DataInitMixin {
   MultiPaintObjectBox({
-    required super.controller,
+    required super.context,
     required T super.indicator,
   });
 

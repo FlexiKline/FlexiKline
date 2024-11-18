@@ -55,8 +55,8 @@ class EMAIndicator extends SinglePaintObjectIndicator
   dynamic getCalcParam() => calcParams;
 
   @override
-  SinglePaintObjectBox createPaintObject(KlineBindingBase controller) {
-    return EMAPaintObject(controller: controller, indicator: this);
+  SinglePaintObjectBox createPaintObject(IPaintContext context) {
+    return EMAPaintObject(context: context, indicator: this);
   }
 
   factory EMAIndicator.fromJson(Map<String, dynamic> json) =>
@@ -68,7 +68,7 @@ class EMAIndicator extends SinglePaintObjectIndicator
 
 class EMAPaintObject<T extends EMAIndicator> extends SinglePaintObjectBox<T> {
   EMAPaintObject({
-    required super.controller,
+    required super.context,
     required super.indicator,
   });
 

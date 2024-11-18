@@ -57,11 +57,9 @@ class VolumeIndicator extends SinglePaintObjectIndicator {
   // final bool useTint;
 
   @override
-  VolumePaintObject createPaintObject(KlineBindingBase controller) =>
-      VolumePaintObject(
-        controller: controller,
-        indicator: this,
-      );
+  VolumePaintObject createPaintObject(IPaintContext context) {
+    return VolumePaintObject(context: context, indicator: this);
+  }
 
   factory VolumeIndicator.fromJson(Map<String, dynamic> json) =>
       _$VolumeIndicatorFromJson(json);
@@ -73,7 +71,7 @@ class VolumeIndicator extends SinglePaintObjectIndicator {
 class VolumePaintObject<T extends VolumeIndicator>
     extends SinglePaintObjectBox<T>
     with PaintYAxisScaleMixin, PaintYAxisMarkOnCrossMixin {
-  VolumePaintObject({required super.controller, required super.indicator});
+  VolumePaintObject({required super.context, required super.indicator});
 
   bool? _isInsub;
   bool get isInSub => _isInsub ??= indicator.key == IndicatorType.subVol;

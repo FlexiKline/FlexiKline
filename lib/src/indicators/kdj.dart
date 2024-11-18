@@ -72,8 +72,8 @@ class KDJIndicator extends SinglePaintObjectIndicator
   dynamic getCalcParam() => calcParam;
 
   @override
-  KDJPaintObject createPaintObject(KlineBindingBase controller) {
-    return KDJPaintObject(controller: controller, indicator: this);
+  KDJPaintObject createPaintObject(IPaintContext context) {
+    return KDJPaintObject(context: context, indicator: this);
   }
 
   factory KDJIndicator.fromJson(Map<String, dynamic> json) =>
@@ -86,7 +86,7 @@ class KDJIndicator extends SinglePaintObjectIndicator
 class KDJPaintObject<T extends KDJIndicator> extends SinglePaintObjectBox<T>
     with PaintYAxisScaleMixin, PaintYAxisMarkOnCrossMixin {
   KDJPaintObject({
-    required super.controller,
+    required super.context,
     required super.indicator,
   });
 

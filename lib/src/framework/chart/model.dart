@@ -56,8 +56,8 @@ abstract class Indicator {
   PaintObject? _paintObject;
   PaintObject? get paintObject => _paintObject;
 
-  void ensurePaintObject(KlineBindingBase controller) {
-    _paintObject ??= createPaintObject(controller);
+  void ensurePaintObject(IPaintContext context) {
+    _paintObject ??= createPaintObject(context);
   }
 
   bool updateLayout({
@@ -82,7 +82,7 @@ abstract class Indicator {
   }
 
   @factory
-  PaintObject createPaintObject(KlineBindingBase controller);
+  PaintObject createPaintObject(IPaintContext context);
 
   @mustCallSuper
   void dispose() {
@@ -122,7 +122,7 @@ abstract class SinglePaintObjectIndicator extends Indicator
 
   @override
   SinglePaintObjectBox createPaintObject(
-    covariant KlineBindingBase controller,
+    covariant IPaintContext context,
   );
 
   @override
@@ -161,32 +161,30 @@ class MultiPaintObjectIndicator<T extends SinglePaintObjectIndicator>
   }
 
   @override
-  MultiPaintObjectBox createPaintObject(
-    KlineBindingBase controller,
-  ) {
-    return MultiPaintObjectBox(controller: controller, indicator: this);
+  MultiPaintObjectBox createPaintObject(IPaintContext context) {
+    return MultiPaintObjectBox(context: context, indicator: this);
   }
 
   @override
-  void ensurePaintObject(KlineBindingBase controller) {
-    _paintObject ??= createPaintObject(controller);
+  void ensurePaintObject(IPaintContext context) {
+    _paintObject ??= createPaintObject(context);
     for (var child in children) {
       if (child.paintObject?._parent != paintObject) {
         child.paintObject?.dispose();
-        _initChildPaintObject(controller, child);
+        _initChildPaintObject(context, child);
       }
     }
   }
 
   void _initChildPaintObject(
-    KlineBindingBase controller,
+    IPaintContext context,
     Indicator indicator,
   ) {
     indicator.updateLayout(
       height: indicator.paintMode.isCombine ? height : null,
       padding: indicator.paintMode.isCombine ? padding : null,
     );
-    indicator._paintObject = indicator.createPaintObject(controller);
+    indicator._paintObject = indicator.createPaintObject(context);
     indicator._paintObject!._parent = paintObject;
   }
 
@@ -219,22 +217,22 @@ class MultiPaintObjectIndicator<T extends SinglePaintObjectIndicator>
     return hasChange;
   }
 
-  void appendIndicators(Iterable<T> indicators, KlineBindingBase controller) {
+  void appendIndicators(Iterable<T> indicators, IPaintContext context) {
     for (var indicator in indicators) {
-      appendIndicator(indicator, controller);
+      appendIndicator(indicator, context);
     }
   }
 
   void appendIndicator(
     T newIndicator,
-    KlineBindingBase controller,
+    IPaintContext context,
   ) {
     // 使用前先解绑
     newIndicator.dispose();
     children.append(newIndicator)?.dispose();
     if (paintObject != null) {
       // 说明当前父PaintObject已经创建, 需要及时创建新加入的newIndicator,
-      _initChildPaintObject(controller, newIndicator);
+      _initChildPaintObject(context, newIndicator);
     }
   }
 

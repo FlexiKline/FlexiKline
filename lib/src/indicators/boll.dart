@@ -78,8 +78,8 @@ class BOLLIndicator extends SinglePaintObjectIndicator
   dynamic getCalcParam() => calcParam;
 
   @override
-  BOLLPaintObject createPaintObject(KlineBindingBase controller) {
-    return BOLLPaintObject(controller: controller, indicator: this);
+  BOLLPaintObject createPaintObject(IPaintContext context) {
+    return BOLLPaintObject(context: context, indicator: this);
   }
 
   factory BOLLIndicator.fromJson(Map<String, dynamic> json) =>
@@ -94,7 +94,7 @@ class BOLLPaintObject<T extends BOLLIndicator> extends SinglePaintObjectBox<T>
         PaintYAxisMarkOnCrossMixin,
         PaintSimpleCandleMixin {
   BOLLPaintObject({
-    required super.controller,
+    required super.context,
     required super.indicator,
   });
 

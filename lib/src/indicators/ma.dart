@@ -49,8 +49,8 @@ class MAIndicator extends SinglePaintObjectIndicator implements IPrecomputable {
   dynamic getCalcParam() => calcParams;
 
   @override
-  SinglePaintObjectBox createPaintObject(KlineBindingBase controller) {
-    return MAPaintObject(controller: controller, indicator: this);
+  SinglePaintObjectBox createPaintObject(IPaintContext context) {
+    return MAPaintObject(context: context, indicator: this);
   }
 
   factory MAIndicator.fromJson(Map<String, dynamic> json) =>
@@ -62,7 +62,7 @@ class MAIndicator extends SinglePaintObjectIndicator implements IPrecomputable {
 
 class MAPaintObject<T extends MAIndicator> extends SinglePaintObjectBox<T> {
   MAPaintObject({
-    required super.controller,
+    required super.context,
     required super.indicator,
   });
 

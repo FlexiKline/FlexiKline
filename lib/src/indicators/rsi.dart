@@ -54,8 +54,8 @@ class RSIIndicator extends SinglePaintObjectIndicator
   dynamic getCalcParam() => calcParams;
 
   @override
-  SinglePaintObjectBox createPaintObject(KlineBindingBase controller) {
-    return RSIPaintObject(controller: controller, indicator: this);
+  SinglePaintObjectBox createPaintObject(IPaintContext context) {
+    return RSIPaintObject(context: context, indicator: this);
   }
 
   factory RSIIndicator.fromJson(Map<String, dynamic> json) =>
@@ -68,7 +68,7 @@ class RSIIndicator extends SinglePaintObjectIndicator
 class RSIPaintObject<T extends RSIIndicator> extends SinglePaintObjectBox<T>
     with PaintYAxisScaleMixin, PaintYAxisMarkOnCrossMixin {
   RSIPaintObject({
-    required super.controller,
+    required super.context,
     required super.indicator,
   });
 

@@ -71,8 +71,8 @@ class SARIndicator extends SinglePaintObjectIndicator
   dynamic getCalcParam() => calcParam;
 
   @override
-  SARPaintObject createPaintObject(covariant KlineBindingBase controller) {
-    return SARPaintObject(controller: controller, indicator: this);
+  SARPaintObject createPaintObject(covariant IPaintContext context) {
+    return SARPaintObject(context: context, indicator: this);
   }
 
   factory SARIndicator.fromJson(Map<String, dynamic> json) =>
@@ -87,7 +87,7 @@ class SARPaintObject<T extends SARIndicator> extends SinglePaintObjectBox<T>
         PaintYAxisScaleMixin,
         PaintYAxisMarkOnCrossMixin,
         PaintSimpleCandleMixin {
-  SARPaintObject({required super.controller, required super.indicator});
+  SARPaintObject({required super.context, required super.indicator});
 
   bool? _isInsub;
   bool get isInSub => _isInsub ??= indicator.key == IndicatorType.sar;
@@ -174,7 +174,7 @@ class SARPaintObject<T extends SARIndicator> extends SinglePaintObjectBox<T>
     }
 
     Paint paint = indicator.paint.paint;
-    final radius = indicator.radius ?? controller.candleWidth / 3;
+    final radius = indicator.radius ?? context.candleWidth / 3;
 
     final offset = startCandleDx - candleWidthHalf;
     CandleModel m;

@@ -53,8 +53,8 @@ class VolMaIndicator extends SinglePaintObjectIndicator
   dynamic getCalcParam() => calcParams;
 
   @override
-  VolMaPaintObject createPaintObject(KlineBindingBase controller) {
-    return VolMaPaintObject(controller: controller, indicator: this);
+  VolMaPaintObject createPaintObject(IPaintContext context) {
+    return VolMaPaintObject(context: context, indicator: this);
   }
 
   factory VolMaIndicator.fromJson(Map<String, dynamic> json) =>
@@ -67,7 +67,7 @@ class VolMaIndicator extends SinglePaintObjectIndicator
 class VolMaPaintObject<T extends VolMaIndicator>
     extends SinglePaintObjectBox<T> {
   VolMaPaintObject({
-    required super.controller,
+    required super.context,
     required super.indicator,
   });
 

@@ -46,8 +46,8 @@ class TimeIndicator extends SinglePaintObjectIndicator {
   final DrawPosition position;
 
   @override
-  TimePaintObject createPaintObject(covariant KlineBindingBase controller) {
-    return TimePaintObject(controller: controller, indicator: this);
+  TimePaintObject createPaintObject(covariant IPaintContext context) {
+    return TimePaintObject(context: context, indicator: this);
   }
 
   factory TimeIndicator.fromJson(Map<String, dynamic> json) =>
@@ -58,7 +58,7 @@ class TimeIndicator extends SinglePaintObjectIndicator {
 
 class TimePaintObject<T extends TimeIndicator> extends SinglePaintObjectBox<T> {
   TimePaintObject({
-    required super.controller,
+    required super.context,
     required super.indicator,
   });
 

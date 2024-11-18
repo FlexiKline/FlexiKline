@@ -67,8 +67,8 @@ class MACDIndicator extends SinglePaintObjectIndicator
   dynamic getCalcParam() => calcParam;
 
   @override
-  SinglePaintObjectBox createPaintObject(KlineBindingBase controller) {
-    return MACDPaintObject(controller: controller, indicator: this);
+  SinglePaintObjectBox createPaintObject(IPaintContext context) {
+    return MACDPaintObject(context: context, indicator: this);
   }
 
   factory MACDIndicator.fromJson(Map<String, dynamic> json) =>
@@ -80,7 +80,7 @@ class MACDIndicator extends SinglePaintObjectIndicator
 
 class MACDPaintObject<T extends MACDIndicator> extends SinglePaintObjectBox<T>
     with PaintYAxisScaleMixin, PaintYAxisMarkOnCrossMixin {
-  MACDPaintObject({required super.controller, required super.indicator});
+  MACDPaintObject({required super.context, required super.indicator});
 
   @override
   MinMax? initState({required int start, required int end}) {

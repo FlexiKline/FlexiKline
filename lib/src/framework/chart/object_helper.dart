@@ -16,7 +16,7 @@ part of 'indicator.dart';
 
 /// FlexiKlineController 状态/配置/接口代理
 mixin ControllerProxyMixin on PaintObject {
-  late final IPaintContext controller;
+  late final IPaintContext context;
 
   /// Binding
   // SettingBinding get setting => controller as SettingBinding;
@@ -25,21 +25,21 @@ mixin ControllerProxyMixin on PaintObject {
   // IConfig get config => controller as IConfig;
 
   /// Config
-  SettingConfig get settingConfig => controller.settingConfig;
-  GridConfig get gridConfig => controller.gridConfig;
-  CrossConfig get crossConfig => controller.crossConfig;
+  SettingConfig get settingConfig => context.settingConfig;
+  GridConfig get gridConfig => context.gridConfig;
+  CrossConfig get crossConfig => context.crossConfig;
 
-  double get candleActualWidth => controller.candleActualWidth;
+  double get candleActualWidth => context.candleActualWidth;
 
-  double get candleWidthHalf => controller.candleWidthHalf;
+  double get candleWidthHalf => context.candleWidthHalf;
 
-  KlineData get klineData => controller.curKlineData;
+  KlineData get klineData => context.curKlineData;
 
-  double get paintDxOffset => controller.paintDxOffset;
+  double get paintDxOffset => context.paintDxOffset;
 
-  double get startCandleDx => controller.startCandleDx;
+  double get startCandleDx => context.startCandleDx;
 
-  bool get isCrossing => controller.isCrossing;
+  bool get isCrossing => context.isCrossing;
 }
 
 /// 绘制对象混入边界计算的通用扩展
@@ -77,14 +77,14 @@ mixin PaintObjectBoundingMixin on PaintObjectProxy
   Rect get drawableRect {
     if (_drawableRect != null) return _drawableRect!;
     if (drawInMain) {
-      _drawableRect = controller.mainRect;
+      _drawableRect = context.mainRect;
     } else {
-      final top = controller.calculateIndicatorTop(slot);
+      final top = context.calculateIndicatorTop(slot);
       _drawableRect = Rect.fromLTRB(
-        controller.subRect.left,
-        controller.subRect.top + top,
-        controller.subRect.right,
-        controller.subRect.top + top + indicator.height,
+        context.subRect.left,
+        context.subRect.top + top,
+        context.subRect.right,
+        context.subRect.top + top + indicator.height,
       );
     }
     return _drawableRect!;

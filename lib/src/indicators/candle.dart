@@ -79,9 +79,9 @@ class CandleIndicator extends SinglePaintObjectIndicator {
 
   @override
   CandlePaintObject createPaintObject(
-    KlineBindingBase controller,
+    IPaintContext context,
   ) {
-    return CandlePaintObject(controller: controller, indicator: this);
+    return CandlePaintObject(context: context, indicator: this);
   }
 
   factory CandleIndicator.fromJson(Map<String, dynamic> json) =>
@@ -93,7 +93,7 @@ class CandleIndicator extends SinglePaintObjectIndicator {
 class CandlePaintObject<T extends CandleIndicator>
     extends SinglePaintObjectBox<T> with PaintYAxisMarkOnCrossMixin {
   CandlePaintObject({
-    required super.controller,
+    required super.context,
     required super.indicator,
   });
 
