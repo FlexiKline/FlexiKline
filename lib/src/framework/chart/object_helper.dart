@@ -14,6 +14,187 @@
 
 part of 'indicator.dart';
 
+/// FlexiKlineController 状态/配置/接口代理
+mixin ControllerProxyMixin on PaintObject {
+  late final IPaintContext controller;
+
+  /// Binding
+  // SettingBinding get setting => controller as SettingBinding;
+  // IState get state => controller as IState;
+  // ICross get cross => controller as ICross;
+  // IConfig get config => controller as IConfig;
+
+  /// Config
+  SettingConfig get settingConfig => controller.settingConfig;
+  GridConfig get gridConfig => controller.gridConfig;
+  CrossConfig get crossConfig => controller.crossConfig;
+
+  double get candleActualWidth => controller.candleActualWidth;
+
+  double get candleWidthHalf => controller.candleWidthHalf;
+
+  KlineData get klineData => controller.curKlineData;
+
+  double get paintDxOffset => controller.paintDxOffset;
+
+  double get startCandleDx => controller.startCandleDx;
+
+  bool get isCrossing => controller.isCrossing;
+}
+
+/// 绘制对象混入边界计算的通用扩展
+mixin PaintObjectBoundingMixin on PaintObjectProxy
+    implements IPaintBoundingBox {
+  bool get drawInMain => slot == mainIndicatorSlot;
+  bool get drawInSub => slot > mainIndicatorSlot;
+
+  int _slot = mainIndicatorSlot;
+
+  /// 当前指标索引
+  /// <0 代表在主图绘制
+  /// >=0 代表在副图绘制
+  int get slot => _slot;
+
+  @override
+  EdgeInsets get padding => indicator.padding;
+
+  Rect? _drawableRect;
+  Rect? _chartRect;
+  Rect? _topRect;
+  Rect? _bottomRect;
+
+  @nonVirtual
+  @override
+  void resetPaintBounding({int? slot}) {
+    if (slot != null) _slot = slot;
+    _drawableRect = null;
+    _chartRect = null;
+    _topRect = null;
+    _bottomRect = null;
+  }
+
+  @override
+  Rect get drawableRect {
+    if (_drawableRect != null) return _drawableRect!;
+    if (drawInMain) {
+      _drawableRect = controller.mainRect;
+    } else {
+      final top = controller.calculateIndicatorTop(slot);
+      _drawableRect = Rect.fromLTRB(
+        controller.subRect.left,
+        controller.subRect.top + top,
+        controller.subRect.right,
+        controller.subRect.top + top + indicator.height,
+      );
+    }
+    return _drawableRect!;
+  }
+
+  @override
+  Rect get topRect {
+    return _topRect ??= Rect.fromLTRB(
+      drawableRect.left,
+      drawableRect.top,
+      drawableRect.right,
+      drawableRect.top + padding.top,
+    );
+  }
+
+  @override
+  Rect get bottomRect {
+    return _bottomRect ??= Rect.fromLTRB(
+      drawableRect.left,
+      drawableRect.bottom - padding.bottom,
+      drawableRect.right,
+      drawableRect.bottom,
+    );
+  }
+
+  @override
+  Rect get chartRect {
+    if (_chartRect != null) return _chartRect!;
+    final chartBottom = drawableRect.bottom - padding.bottom;
+    double chartTop;
+    if (indicator.paintMode == PaintMode.alone) {
+      chartTop = chartBottom - indicator.height;
+    } else {
+      chartTop = drawableRect.top + padding.top;
+    }
+    return _chartRect = Rect.fromLTRB(
+      drawableRect.left + padding.left,
+      chartTop,
+      drawableRect.right - padding.right,
+      chartBottom,
+    );
+  }
+
+  double get chartRectWidthHalf => chartRect.width / 2;
+
+  double clampDxInChart(double dx) => dx.clamp(chartRect.left, chartRect.right);
+  double clampDyInChart(double dy) => dy.clamp(chartRect.top, chartRect.bottom);
+
+  // Tips区域向下移动height.
+  @override
+  Rect shiftNextTipsRect(double height) {
+    return drawableRect.shiftYAxis(height);
+  }
+}
+
+/// 绘制对象混入数据初始化的通用扩展
+mixin DataInitMixin on PaintObjectProxy implements IPaintDataInit {
+  int? _start;
+  int? _end;
+
+  MinMax? _minMax;
+
+  @override
+  MinMax get minMax => _minMax ?? MinMax.zero;
+
+  @override
+  void setMinMax(MinMax val) {
+    _minMax = val;
+  }
+
+  double? _dyFactor;
+  double get dyFactor {
+    if (_dyFactor != null) return _dyFactor!;
+    if (chartRect.height == 0) return _dyFactor = 1;
+    return _dyFactor = chartRect.height / (minMax.diffDivisor).toDouble();
+  }
+
+  double valueToDy(BagNum value, {bool correct = true}) {
+    if (correct) value = value.clamp(minMax.min, minMax.max);
+    return chartRect.bottom - (value - minMax.min).toDouble() * dyFactor;
+  }
+
+  BagNum? dyToValue(double dy, {bool check = true}) {
+    if (check && !drawableRect.includeDy(dy)) return null;
+    return minMax.max - ((dy - chartRect.top) / dyFactor).toBagNum();
+  }
+
+  double? indexToDx(num index, {bool check = true}) {
+    final indexDx = index * candleActualWidth;
+    double dx = chartRect.right + paintDxOffset - indexDx;
+    if (!check) return dx;
+    return chartRect.includeDx(dx) ? dx : null;
+  }
+
+  double dxToIndex(double dx) {
+    final dxPaintOffset = chartRect.right + paintDxOffset - dx;
+    return dxPaintOffset / candleActualWidth;
+  }
+
+  CandleModel? dxToCandle(double dx) {
+    final index = dxToIndex(dx).toInt();
+    return klineData.getCandle(index);
+  }
+
+  CandleModel? offsetToCandle(Offset? offset) {
+    if (offset != null) return dxToCandle(offset.dx);
+    return null;
+  }
+}
+
 mixin PaintYAxisScaleMixin<T extends SinglePaintObjectIndicator>
     on SinglePaintObjectBox<T> {
   /// 为副区的指标图绘制Y轴上的刻度信息

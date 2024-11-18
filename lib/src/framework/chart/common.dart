@@ -117,31 +117,81 @@ enum IndicatorType implements IIndicatorKey {
   }
 }
 
-// /// 指标
-// /// 主区
-// const mainChartKey = ValueKey<dynamic>(IndicatorType.main);
-// const candleKey = ValueKey<dynamic>(IndicatorType.candle);
-// const maKey = ValueKey<dynamic>(IndicatorType.ma);
-// const emaKey = ValueKey<dynamic>(IndicatorType.ema);
-// const bollKey = ValueKey<dynamic>(IndicatorType.boll);
-// const sarKey = ValueKey<dynamic>(IndicatorType.sar);
-// const volumeKey = ValueKey<dynamic>(IndicatorType.volume);
-
-// /// 副区
-// const volMaKey = ValueKey<dynamic>(IndicatorType.volMa);
-// const subVolKey = ValueKey<dynamic>(IndicatorType.subVol);
-// const maVolKey = ValueKey<dynamic>(IndicatorType.maVol);
-// const macdKey = ValueKey<dynamic>(IndicatorType.macd);
-// const kdjKey = ValueKey<dynamic>(IndicatorType.kdj);
-// const subBollKey = ValueKey<dynamic>(IndicatorType.subBoll);
-// const subSarKey = ValueKey<dynamic>(IndicatorType.subSar);
-// const rsiKey = ValueKey<dynamic>(IndicatorType.rsi);
-// const stochRsiKey = ValueKey<dynamic>(IndicatorType.stochRsi);
-// const timeKey = ValueKey<dynamic>(IndicatorType.time);
-
 /// 可预计算接口
 /// 实现 [IPrecomputable] 接口, 即代表当前对象是可以进行预计算.
 /// [getCalcParam] 返回预计算的参数. 可以为空
 abstract interface class IPrecomputable {
   dynamic getCalcParam();
+}
+
+const mainIndicatorSlot = -1;
+
+/// 指标图的绘制边界接口
+abstract interface class IPaintBoundingBox {
+  /// 当前指标图paint内的padding.
+  /// 增加padding后tipsRect和chartRect将在此以内绘制.
+  /// 一些额外的信息可以通过padding在左上右下方向上增加扩展的绘制区域.
+  /// 1. 主图的XAxis上的时间刻度绘制在pading.bottom上.
+  EdgeInsets get padding => EdgeInsets.zero;
+
+  /// 当前指标图画笔可以绘制的范围
+  Rect get drawableRect;
+
+  /// 当前指标图绘制区域
+  Rect get chartRect;
+
+  /// 当前指标图顶部绘制区域
+  Rect get topRect;
+
+  /// 当前指标图底部绘制区域
+  Rect get bottomRect;
+
+  /// 设置下一个Tips的绘制区域.
+  Rect shiftNextTipsRect(double height);
+
+  void resetPaintBounding({int? slot});
+}
+
+/// 指标图的绘制数据初始化接口
+abstract interface class IPaintDataInit {
+  /// 最大值/最小值
+  MinMax get minMax;
+
+  void setMinMax(MinMax val);
+}
+
+/// 指标图的绘制接口/指标图的Cross事件绘制接口
+abstract interface class IPaintObject {
+  /// 计算指标需要的数据, 并返回 [start] ~ [end] 之间MinMax.
+  MinMax? initState({required int start, required int end});
+
+  /// 绘制指标图
+  void paintChart(Canvas canvas, Size size);
+
+  /// 在所有指标图绘制结束后额外的绘制
+  void paintExtraAboveChart(Canvas canvas, Size size);
+
+  /// 绘制Cross上的刻度值
+  void onCross(Canvas canvas, Offset offset);
+
+  /// 绘制顶部tips信息
+  Size? paintTips(
+    Canvas canvas, {
+    CandleModel? model,
+    Offset? offset,
+    Rect? tipsRect,
+  });
+}
+
+abstract interface class IPaintDelegate {
+  MinMax? doInitState(
+    int newSlot, {
+    required int start,
+    required int end,
+    bool reset = false,
+  });
+
+  void doPaintChart(Canvas canvas, Size size);
+
+  void doOnCross(Canvas canvas, Offset offset, {CandleModel? model});
 }

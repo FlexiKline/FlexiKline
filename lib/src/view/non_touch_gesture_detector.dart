@@ -202,7 +202,7 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
 
         if (newScale != null) {
           _scaleData!.update(offset, newScale: newScale);
-          controller.scaleChart(_scaleData!);
+          controller.onChartScale(_scaleData!);
         }
       } else if (dx > 1 && dx > dy) {
         // 说明可能是触控板的双指横向移动操作
@@ -229,7 +229,7 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
       _hoverData!.update(offset);
     } else {
       _hoverData = GestureData.hover(offset);
-      controller.startCross(_hoverData!, force: true);
+      controller.onCrossStart(_hoverData!, force: true);
     }
   }
 
@@ -259,9 +259,9 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
 
     _hoverData!.update(offset);
     if (!controller.isCrossing) {
-      controller.startCross(_hoverData!, force: true);
+      controller.onCrossStart(_hoverData!, force: true);
     } else {
-      controller.updateCross(_hoverData!);
+      controller.onCrossUpdate(_hoverData!);
     }
   }
 
@@ -305,7 +305,7 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
             _hoverData = GestureData.tap(offset);
             controller.onDrawConfirm(_hoverData!);
             if (!controller.isCrossing) {
-              controller.startCross(_hoverData!);
+              controller.onCrossStart(_hoverData!);
             }
           }
           return;
@@ -372,7 +372,7 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
       controller.onDrawMoveUpdate(_panData!);
     } else {
       _panData!.update(details.localPosition.clamp(controller.canvasRect));
-      controller.moveChart(_panData!);
+      controller.onChartMove(_panData!);
     }
   }
 
@@ -457,7 +457,7 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
           initDx + animation.value,
           _panData!.offset.dy,
         ));
-        controller.moveChart(_panData!);
+        controller.onChartMove(_panData!);
       }
     });
 
@@ -530,7 +530,7 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
           event.localPosition,
           newScale: newScale,
         );
-        controller.scaleChart(_scaleData!);
+        controller.onChartScale(_scaleData!);
       }
     }
   }
@@ -573,7 +573,7 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
     } else {
       logd("onLongPressStart cross > details:$details");
       _longData = GestureData.long(details.localPosition);
-      final result = controller.startCross(_longData!);
+      final result = controller.onCrossStart(_longData!);
       if (!result) {
         _longData?.end();
         _longData = null;
@@ -594,7 +594,7 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
       controller.onDrawMoveUpdate(_longData!);
     } else {
       _longData!.update(details.localPosition);
-      controller.updateCross(_longData!);
+      controller.onCrossUpdate(_longData!);
     }
   }
 

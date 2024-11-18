@@ -181,7 +181,7 @@ mixin ChartBinding
     }
   }
 
-  void moveChart(GestureData data) {
+  void onChartMove(GestureData data) {
     // super.handleMove(data);
     if (!data.moved) return;
 
@@ -193,7 +193,7 @@ mixin ChartBinding
     }
   }
 
-  void scaleChart(GestureData data) {
+  void onChartScale(GestureData data) {
     // super.handleScale(data);
 
     double? newWidth;

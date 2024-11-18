@@ -104,7 +104,7 @@ mixin CrossBinding on KlineBindingBase, SettingBinding implements ICross {
   }
 
   /// 启动Cross事件
-  bool startCross(GestureData data, {bool force = false}) {
+  bool onCrossStart(GestureData data, {bool force = false}) {
     if (crossConfig.enable) {
       /// 如果其他手势与Cross手势事件允许共存 或者当前不在Crossing中时, 开启Cross.
       if (force || !isCrossing) {
@@ -125,7 +125,7 @@ mixin CrossBinding on KlineBindingBase, SettingBinding implements ICross {
   }
 
   /// 更新Cross事件数据.
-  void updateCross(GestureData data) {
+  void onCrossUpdate(GestureData data) {
     if (crossConfig.enable && isCrossing) {
       _updateOffset(data.offset);
       _markRepaintCross();
