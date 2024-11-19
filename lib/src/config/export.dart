@@ -33,8 +33,5 @@ export 'paint_config/paint_config.dart';
 /// Indicator 参数
 export 'ma_param/ma_param.dart';
 
-/// DrawOverlay 参数
-export 'draw_params/draw_params.dart';
-
 /// 内置默认配置
 export 'default_config.dart';

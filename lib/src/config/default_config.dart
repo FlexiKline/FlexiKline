@@ -18,9 +18,7 @@ import '../constant.dart';
 import '../extension/render/common.dart';
 import '../framework/export.dart';
 import '../indicators/export.dart';
-import '../utils/vector_util.dart';
 import 'cross_config/cross_config.dart';
-import 'draw_params/draw_params.dart';
 import 'magnifier_config/magnifier_config.dart';
 import 'point_config/point_config.dart';
 import 'draw_config/draw_config.dart';
@@ -396,71 +394,6 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
           color: theme.gridLine,
           width: 1 * theme.scale,
         ),
-      ),
-      drawParams: genDrawParams(theme),
-    );
-  }
-
-  DrawParams genDrawParams(covariant IFlexiKlineTheme theme) {
-    return DrawParams(
-      // 箭头(ArrowLine)
-      arrowsRadians: pi30,
-      arrowsLen: 16 * theme.scale,
-      // 价值线(priceLine)
-      priceText: TextAreaConfig(
-        style: TextStyle(
-          // color: const Color(0xFFFFFFFF),
-          color: const Color(0xFFFF0000),
-          fontSize: theme.normalTextSize,
-          fontWeight: FontWeight.normal,
-          height: defaultTextHeight,
-        ),
-        // background: const Color(0xFFFF0000),
-        // padding: EdgeInsets.all(1 * theme.scale),
-        // border: BorderSide.none,
-        // borderRadius: BorderRadius.all(
-        //   Radius.circular(2 * theme.scale),
-        // ),
-      ),
-      priceTextMargin: EdgeInsets.only(
-        left: 12 * theme.scale,
-        bottom: 2 * theme.scale,
-      ),
-      // 趋势线角度(TrendAngle)
-      angleBaseLineMinLen: 80 * theme.scale,
-      angleRadSize: Size.square(50 * theme.scale),
-      angleText: TextAreaConfig(
-        style: TextStyle(
-          color: const Color(0xFFFFFFFF),
-          fontSize: theme.normalTextSize,
-          fontWeight: FontWeight.normal,
-          height: defaultTextHeight,
-        ),
-        background: const Color(0xFFFF0000),
-        padding: EdgeInsets.all(1 * theme.scale),
-        border: BorderSide.none,
-        borderRadius: BorderRadius.all(
-          Radius.circular(2 * theme.scale),
-        ),
-      ),
-      // 平行通道
-      paralleBgOpacity: 0.1,
-      // 矩形
-      rectangleBgOpacity: 0.1,
-      // 斐波那契回撤/扩展
-      fibBgOpacity: 0.1,
-      // 斐波那契扇形
-      fibFansGridColor: theme.markLine.withOpacity(0.1),
-      // fibFansColors: [], // 如果为空则: 使用当前画笔颜色.
-      // 斐波那契回撤/扩展/扇形文本配置
-      fibText: TextAreaConfig(
-        style: TextStyle(
-          // color: const Color(0xFF000000),
-          fontSize: theme.normalTextSize,
-          fontWeight: FontWeight.normal,
-          height: defaultTextHeight,
-        ),
-        padding: EdgeInsets.all(2 * theme.scale),
       ),
     );
   }

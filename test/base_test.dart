@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:async';
 
 import 'package:decimal/decimal.dart';
 import 'package:flexi_kline/flexi_kline.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Overlay;
 import 'package:flutter_test/flutter_test.dart';
 
 typedef Runable<T> = FutureOr<T> Function();
@@ -148,5 +149,17 @@ void main() {
         debugPrint('prepared');
     }
     debugPrint('<<<<<');
+  });
+
+  test('Test Overlay', () async {
+    final overlay = Overlay(
+      key: 'BTCUSDT',
+      type: FlexiDrawType('aaa', 1),
+      line: LineConfig(),
+    );
+
+    final str = jsonEncode(overlay);
+
+    debugPrint(str);
   });
 }

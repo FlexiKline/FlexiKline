@@ -25,7 +25,6 @@ import '../../core/core.dart';
 import '../../data/export.dart';
 import '../../extension/export.dart';
 import '../../model/export.dart';
-import '../../draw_objects/export.dart';
 import '../../utils/date_time.dart';
 import '../../utils/decimal_format_util.dart';
 import '../../utils/vector_util.dart';

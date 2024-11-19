@@ -586,17 +586,14 @@ class IDrawTypeConverter
     final String? id = json.getItem('id');
     final int? steps = json.getItem('steps');
     if (id != null && steps != null) {
-      IDrawType? type = DrawType.values.firstWhereOrNull((type) {
-        return type.groupId == groupId && type.id == id && type.steps == steps;
-      });
-      return type ?? FlexiDrawType(id, steps, groupId: groupId);
+      return FlexiDrawType(id, steps, groupId: groupId);
     }
     return unknownDrawType;
   }
 
   @override
   Map<String, dynamic> toJson(IDrawType object) {
-    return {'id': object.id, 'steps': object.steps};
+    return {'id': object.id, 'steps': object.steps, 'groupId': object.groupId};
   }
 }
 

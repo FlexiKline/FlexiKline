@@ -79,7 +79,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw {
   }
 
   /// 自定义overlay绘制对象构建器
-  void registerDrawOverlayObjectBuilder(
+  void registerDrawObjectBuilder(
     IDrawType type,
     DrawObjectBuilder builder,
   ) {
@@ -133,8 +133,8 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw {
       _drawState = const Prepared();
     } else {
       final object = _drawObjectManager.createDrawObject(
-        type: type,
-        config: drawConfig,
+        type,
+        drawConfig: drawConfig,
       );
       if (object != null) {
         if (isInitPointer ?? PlatformUtil.isTouch) {
@@ -196,9 +196,9 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw {
         object.setDrawLineConfig(drawConfig.drawLine);
         _drawObjectManager.addDrawObject(object, addToTop: true);
         if (drawContinuousListener.value) {
-          final nextObj = _drawObjectManager.createDrawObject(
-            type: object.type,
-            config: drawConfig,
+          final nextObj = _drawObjectManager.generateDrawObject(
+            object.clone(),
+            drawConfig,
           );
           if (nextObj != null) {
             final initOffset = object.lastPoint?.offset ?? data.offset;

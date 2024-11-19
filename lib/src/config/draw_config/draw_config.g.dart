@@ -33,8 +33,6 @@ abstract class _$DrawConfigCWProxy {
 
   DrawConfig magnifier(MagnifierConfig magnifier);
 
-  DrawConfig drawParams(DrawParams drawParams);
-
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `DrawConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -55,7 +53,6 @@ abstract class _$DrawConfigCWProxy {
     double? hitTestMinDistance,
     double? magnetMinDistance,
     MagnifierConfig? magnifier,
-    DrawParams? drawParams,
   });
 }
 
@@ -110,9 +107,6 @@ class _$DrawConfigCWProxyImpl implements _$DrawConfigCWProxy {
   DrawConfig magnifier(MagnifierConfig magnifier) => this(magnifier: magnifier);
 
   @override
-  DrawConfig drawParams(DrawParams drawParams) => this(drawParams: drawParams);
-
-  @override
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `DrawConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -134,7 +128,6 @@ class _$DrawConfigCWProxyImpl implements _$DrawConfigCWProxy {
     Object? hitTestMinDistance = const $CopyWithPlaceholder(),
     Object? magnetMinDistance = const $CopyWithPlaceholder(),
     Object? magnifier = const $CopyWithPlaceholder(),
-    Object? drawParams = const $CopyWithPlaceholder(),
   }) {
     return DrawConfig(
       enable: enable == const $CopyWithPlaceholder() || enable == null
@@ -196,11 +189,6 @@ class _$DrawConfigCWProxyImpl implements _$DrawConfigCWProxy {
           ? _value.magnifier
           // ignore: cast_nullable_to_non_nullable
           : magnifier as MagnifierConfig,
-      drawParams:
-          drawParams == const $CopyWithPlaceholder() || drawParams == null
-              ? _value.drawParams
-              // ignore: cast_nullable_to_non_nullable
-              : drawParams as DrawParams,
     );
   }
 }
@@ -235,9 +223,6 @@ DrawConfig _$DrawConfigFromJson(Map<String, dynamic> json) => DrawConfig(
       magnifier: json['magnifier'] == null
           ? const MagnifierConfig()
           : MagnifierConfig.fromJson(json['magnifier'] as Map<String, dynamic>),
-      drawParams: json['drawParams'] == null
-          ? const DrawParams()
-          : DrawParams.fromJson(json['drawParams'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$DrawConfigToJson(DrawConfig instance) =>
@@ -255,5 +240,4 @@ Map<String, dynamic> _$DrawConfigToJson(DrawConfig instance) =>
       'hitTestMinDistance': instance.hitTestMinDistance,
       'magnetMinDistance': instance.magnetMinDistance,
       'magnifier': instance.magnifier.toJson(),
-      'drawParams': instance.drawParams.toJson(),
     };

@@ -35,25 +35,7 @@ final class OverlayDrawObjectManager with KlineLog {
   String get logTag => 'OverlayDrawObjectManager';
 
   /// DrawType的Overlay对应DrawObject的构建生成器集合
-  final Map<IDrawType, DrawObjectBuilder> _overlayBuilders = {
-    DrawType.trendLine: TrendLineDrawObject.new,
-    DrawType.trendAngle: TrendAngleDrawObject.new,
-    DrawType.crossLine: CrossLineDrawObject.new,
-    DrawType.horizontalLine: HorizontalLineDrawObject.new,
-    DrawType.horizontalRayLine: HorizontalRayLineDrawObject.new,
-    DrawType.horizontalTrendLine: HorizontalTrendLineDrawObject.new,
-    DrawType.verticalLine: VerticalLineDrawObject.new,
-    DrawType.extendedTrendLine: ExtendedTrendLineDrawObject.new,
-    DrawType.arrowLine: ArrowLineDrawObject.new,
-    DrawType.rayLine: RayLineDrawObject.new,
-    DrawType.priceLine: PriceLineDrawObject.new,
-    // 多线
-    DrawType.parallelChannel: ParalleChannelDrawObject.new,
-    DrawType.rectangle: RectangleDrawObject.new,
-    DrawType.fibRetracement: FibRetracementDrawObject.new,
-    DrawType.fibExpansion: FibExpansionDrawObject.new,
-    DrawType.fibFans: FibFansDrawObject.new,
-  };
+  final Map<IDrawType, DrawObjectBuilder> _overlayBuilders = {};
 
   Iterable<IDrawType>? _supportDrawTypes;
   Iterable<IDrawType> get supportDrawTypes {
@@ -114,7 +96,7 @@ final class OverlayDrawObjectManager with KlineLog {
     _instId = request.instId;
     final list = configuration.getOverlayListConfig(_instId);
     for (var overlay in list) {
-      final object = createDrawObject(overlay: overlay, config: config);
+      final object = generateDrawObject(overlay, config);
       if (object != null) {
         addDrawObject(object);
       }
@@ -147,15 +129,22 @@ final class OverlayDrawObjectManager with KlineLog {
   }
 
   /// 通过[type]创建Overlay.
-  /// 在Overlay未完成绘制时, 其line的配置使用crosshair.
-  DrawObject? createDrawObject({
-    IDrawType? type,
-    Overlay? overlay,
-    required DrawConfig config,
+  DrawObject? createDrawObject(
+    IDrawType type, {
+    Map<String, dynamic>? drawParam,
+    required DrawConfig drawConfig,
   }) {
-    if (overlay == null && type == null) return null;
-    overlay ??= Overlay(key: _instId, type: type!, line: config.drawLine);
+    return generateDrawObject(
+      Overlay(
+        key: _instId,
+        type: type,
+        line: drawConfig.drawLine,
+      ),
+      drawConfig,
+    );
+  }
 
+  DrawObject? generateDrawObject(Overlay overlay, DrawConfig config) {
     final builder = _overlayBuilders[overlay.type];
     if (builder == null) return null;
     return builder.call(overlay, config);

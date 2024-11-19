@@ -15,7 +15,6 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 
 import '../../framework/serializers.dart';
-import '../draw_params/draw_params.dart';
 import '../magnifier_config/magnifier_config.dart';
 import '../point_config/point_config.dart';
 import '../line_config/line_config.dart';
@@ -40,7 +39,6 @@ class DrawConfig {
     this.hitTestMinDistance = 10,
     this.magnetMinDistance = 10,
     this.magnifier = const MagnifierConfig(),
-    this.drawParams = const DrawParams(),
   });
 
   /// 是否启用Draw Overlay功能开关
@@ -82,9 +80,6 @@ class DrawConfig {
 
   /// 放大镜配置
   final MagnifierConfig magnifier;
-
-  /// 绘制Overlay的Object时所需要的参数集
-  final DrawParams drawParams;
 
   factory DrawConfig.fromJson(Map<String, dynamic> json) =>
       _$DrawConfigFromJson(json);

@@ -143,7 +143,7 @@ abstract interface class IConfiguration {
   /// 获取FlexiKline配置
   /// 1. 如果本地有缓存, 则从缓存中获取.
   /// 2. 如果本地没有缓存, 根据当前主题生成一套FlexiKline配置.
-  FlexiKlineConfig getFlexiKlineConfig();
+  FlexiKlineConfig getFlexiKlineConfig([covariant IFlexiKlineTheme? theme]);
 
   /// 保存[config]配置信息到本地.
   void saveFlexiKlineConfig(FlexiKlineConfig config);

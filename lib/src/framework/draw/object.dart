@@ -45,6 +45,27 @@ class OverlayObject implements Comparable<OverlayObject> {
   /// 当前绘制已完成, 修正中.
   bool get isEditing => points.fold(true, (ret, item) => ret && item != null);
 
+  Overlay clone() {
+    return Overlay(key: key, type: type, line: line);
+  }
+
+  // void setDrawParam<T>(T params) {
+  //   // ignore: avoid_dynamic_calls
+  //   dynamic _defaultToEncodable(dynamic object) => object.toJson();
+  //   _overlay._extra = _defaultToEncodable(params);
+  // }
+
+  // T? getDrawParam<T>(T? Function(Map<String, dynamic> json) fromJson) {
+  //   if (_overlay._extra != null && _overlay._extra!.isNotEmpty) {
+  //     try {
+  //       return fromJson(_overlay._extra!);
+  //     } catch (err) {
+  //       debugPrint('$type getDrawParam catch an exception > ${err.toString()}');
+  //     }
+  //   }
+  //   return null;
+  // }
+
   @override
   int compareTo(OverlayObject other) {
     return _overlay.compareTo(other._overlay);

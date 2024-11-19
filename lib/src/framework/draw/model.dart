@@ -103,6 +103,8 @@ class Overlay implements Comparable<Overlay> {
   bool lock;
   @protected
   LineConfig line;
+  // 额外数据, 内部控制序列化与反序列化
+  // Map<String, dynamic>? _extra;
 
   int get steps => points.length;
 

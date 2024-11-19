@@ -21,7 +21,7 @@ mixin DrawConfigMixin on OverlayObject {
   TextAreaConfig? _ticksText;
   PointConfig? _drawPoint;
 
-  DrawParams get drawParams => config.drawParams;
+  // DrawParams get drawParams => config.drawParams;
   double get hitTestMinDistance => config.hitTestMinDistance;
 
   LineConfig get crosshairConfig {

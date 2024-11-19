@@ -48,54 +48,22 @@ final class FlexiDrawType implements IDrawType {
     return other is FlexiDrawType &&
         runtimeType == other.runtimeType &&
         id == other.id &&
-        steps == other.steps;
+        steps == other.steps &&
+        groupId == other.groupId;
   }
 
   @override
   int get hashCode {
-    return runtimeType.hashCode ^ id.hashCode ^ steps.hashCode;
+    return runtimeType.hashCode ^
+        id.hashCode ^
+        steps.hashCode ^
+        groupId.hashCode;
   }
 }
 
 const unknownDrawType = FlexiDrawType('unknown', 0);
 
 const String drawGroupUnknown = 'unknown';
-const String drawGroupLines = 'lines';
-const String drawGroupProjection = 'projection';
-const String drawGroupFibonacci = 'fibonacci';
-const String drawGroupPatterns = 'patterns';
-
-enum DrawType implements IDrawType {
-  // 单线
-  trendLine(drawGroupLines, 2), // 趋势线
-  arrowLine(drawGroupLines, 2), // 箭头
-  extendedTrendLine(drawGroupLines, 2), // 延长趋势线
-  trendAngle(drawGroupLines, 2), // 趋势线角度
-  rayLine(drawGroupLines, 2), // 射线
-  horizontalTrendLine(drawGroupLines, 2), // 水平趋势线
-  horizontalRayLine(drawGroupLines, 2), // 水平射线
-  horizontalLine(drawGroupLines, 1), // 水平线
-  verticalLine(drawGroupLines, 1), // 垂直线
-  crossLine(drawGroupLines, 1), // 十字线
-  priceLine(drawGroupUnknown, 1), // 价钱线
-  // 多线
-  rectangle(drawGroupProjection, 2), // 长方形
-  parallelChannel(drawGroupProjection, 3), // 平行通道
-  // parallelLines, // 平行直线
-  fibRetracement(drawGroupPatterns, 2), // 斐波那契回撤
-  fibExpansion(drawGroupPatterns, 3), // 斐波那契扩展
-  fibFans(drawGroupPatterns, 2); // 斐波那契扇形
-
-  const DrawType(this.groupId, this.steps);
-  @override
-  final String groupId;
-
-  @override
-  String get id => name;
-
-  @override
-  final int steps;
-}
 
 enum MagnetMode {
   normal,
