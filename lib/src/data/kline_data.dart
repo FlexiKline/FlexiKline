@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+library kline_data;
+
 import 'package:flutter/foundation.dart';
 
 import '../constant.dart';
@@ -19,12 +21,10 @@ import '../extension/export.dart';
 import '../framework/chart/indicator.dart';
 import '../framework/logger.dart';
 import '../model/export.dart';
-import 'base_data.dart';
-import 'candle_data.dart';
-import 'ma_data.dart';
-import 'volma_data.dart';
 
-class KlineData extends BaseData with CandleData, MAData, VOLMAData {
+part 'base_data.dart';
+
+class KlineData extends BaseData {
   KlineData(
     super.req, {
     super.list,

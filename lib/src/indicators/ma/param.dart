@@ -12,9 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export 'candle/candle.dart';
-export 'volume/volume.dart';
-export 'ma/ma.dart';
-export 'ma_volume/ma_volume.dart';
-export 'ma_volume/vol_ma.dart';
-export 'time/time.dart';
+part of 'ma.dart';

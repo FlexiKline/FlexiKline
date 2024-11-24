@@ -14,24 +14,24 @@
 
 import 'dart:math' as math;
 
-import '../config/ma_param/ma_param.dart';
-import '../framework/chart/indicator.dart';
-import '../model/export.dart';
-import 'base_data.dart';
+import '../../config/ma_param/ma_param.dart';
+import '../../framework/chart/indicator.dart';
+import '../../model/export.dart';
+import '../../data/kline_data.dart';
 
-mixin MAData on BaseData {
+mixin VOLMAData on BaseData {
   @override
   void initData() {
     super.initData();
-    logd('init MA');
+    logd('init VOLMA');
   }
 
   @override
   void dispose() {
     super.dispose();
-    logd('dispose MA');
+    logd('dispose VOLMA');
     for (var model in list) {
-      model.maList = null;
+      model.cleanVolMa();
     }
   }
 
@@ -42,12 +42,12 @@ mixin MAData on BaseData {
     required Range range,
     bool reset = false,
   }) {
-    if (key == IndicatorType.ma && calcParam is List<MaParam>) {
-      calcuAndCacheMa(
+    if (key == IndicatorType.volMa && calcParam is List<MaParam>) {
+      calcuAndCacheVolMa(
         calcParam,
         start: range.start,
         end: range.end,
-        reset: reset,
+        // reset: reset,
       );
       return;
     }
@@ -55,7 +55,7 @@ mixin MAData on BaseData {
   }
 
   /// 计算 [index] 位置的 [count] 个数据的Ma指标.
-  BagNum? calcuMa(
+  BagNum? calcuVolMa(
     int index,
     int count,
   ) {
@@ -65,15 +65,15 @@ mixin MAData on BaseData {
 
     final m = list[index];
 
-    BagNum sum = m.close;
+    BagNum sum = m.vol;
     for (int i = index + 1; i < index + count; i++) {
-      sum += list[i].close;
+      sum += list[i].vol;
     }
 
     return sum.divNum(count);
   }
 
-  void _calculateMa(
+  void _calculateVolMa(
     int count, {
     required int paramIndex,
     required int paramLen,
@@ -84,37 +84,36 @@ mixin MAData on BaseData {
     start ??= this.start;
     end ??= this.end;
     if (count > len || !checkStartAndEnd(start, end)) return;
-    logd('calculateMa [end:$end ~ start:$start] count:$count');
+    logd('calculateVolMa [end:$end ~ start:$start] count:$count');
 
     end = math.min(len - count, end - 1);
 
     /// 初始值化[index]位置的MA值
     CandleModel m = list[end];
-    BagNum sum = m.close;
+    BagNum sum = m.vol;
     for (int i = end + 1; i < end + count; i++) {
-      sum += list[i].close;
+      sum += list[i].vol;
     }
-    m.maList ??= List.filled(paramLen, null, growable: false);
-    m.maList![paramIndex] = sum.divNum(count);
+    m.volMaList ??= List.filled(paramLen, null, growable: false);
+    m.volMaList![paramIndex] = sum.divNum(count);
 
     for (int i = end - 1; i >= start; i--) {
       m = list[i];
-      sum = sum - list[i + count].close + m.close;
-      m.maList ??= List.filled(paramLen, null, growable: false);
-      m.maList![paramIndex] = sum.divNum(count);
+      sum = sum - list[i + count].vol + m.vol;
+      m.volMaList ??= List.filled(paramLen, null, growable: false);
+      m.volMaList![paramIndex] = sum.divNum(count);
     }
   }
 
-  void calcuAndCacheMa(
+  void calcuAndCacheVolMa(
     List<MaParam> calcParams, {
     required int start,
     required int end,
-    bool reset = false,
   }) {
     if (isEmpty || calcParams.isEmpty) return;
     final paramLen = calcParams.length;
     for (int i = 0; i < paramLen; i++) {
-      _calculateMa(
+      _calculateVolMa(
         calcParams[i].count,
         paramIndex: i,
         paramLen: paramLen,
@@ -124,10 +123,7 @@ mixin MAData on BaseData {
     }
   }
 
-  /// 计算并缓存MA数据.
-  /// 如果[start]和[end]指定了, 只计算[start] ~ [end]区间内的MA值.
-  /// 否则, 从当前可视区域的[start] ~ [end]开始计算.
-  MinMax? calcuMaMinmax(
+  MinMax? calcuVolMaMinmax(
     List<MaParam> calcParams, {
     int? start,
     int? end,
@@ -140,16 +136,17 @@ mixin MAData on BaseData {
     int minCount = MaParam.getMinCountByList(calcParams)!;
     end = math.min(len - minCount, end - 1);
 
-    if (!list[end].isValidMaList) {
-      calcuAndCacheMa(calcParams, start: 0, end: len);
+    if (end < start) return null;
+    if (!list[end].isValidVolMaList) {
+      calcuAndCacheVolMa(calcParams, start: 0, end: len);
     }
 
     MinMax? minmax;
     CandleModel m;
     for (int i = end; i >= start; i--) {
       m = list[i];
-      minmax ??= m.maListMinmax;
-      minmax?.updateMinMax(m.maListMinmax);
+      minmax ??= m.volMaListMinmax;
+      minmax?.updateMinMax(m.volMaListMinmax);
     }
     return minmax;
   }

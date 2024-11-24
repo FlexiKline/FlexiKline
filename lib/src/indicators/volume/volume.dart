@@ -12,29 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-library core;
+library volume;
 
-import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flutter/painting.dart';
-import 'package:flutter/scheduler.dart';
 
-import '../config/export.dart';
-import '../constant.dart';
-import '../extension/export.dart';
-import '../data/kline_data.dart';
-import '../framework/export.dart';
-import '../model/export.dart';
-import '../utils/decimal_format_util.dart';
-import '../utils/platform_util.dart';
+import '../../config/export.dart';
+import '../../constant.dart';
+import '../../core/core.dart';
+import '../../extension/export.dart';
+import '../../framework/export.dart';
+import '../../model/export.dart';
+import '../../utils/export.dart';
 
-part 'binding_base.dart';
-part 'chart.dart';
-part 'state.dart';
-part 'setting.dart';
-part 'cross.dart';
-part 'interface.dart';
-part 'draw.dart';
-part 'grid.dart';
+part 'data.dart';
+part 'indicator.dart';
+part 'volume.g.dart';

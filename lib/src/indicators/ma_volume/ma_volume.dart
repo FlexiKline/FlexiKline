@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import '../constant.dart';
-import '../framework/export.dart';
+import '../../constant.dart';
+import '../../framework/export.dart';
 import 'vol_ma.dart';
-import 'volume.dart';
+import '../volume/volume.dart';
 
 part 'ma_volume.g.dart';
 

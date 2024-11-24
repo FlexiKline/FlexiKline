@@ -12,60 +12,45 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:flutter/painting.dart';
+part of 'ma.dart';
 
-import '../config/export.dart';
-import '../constant.dart';
-import '../core/core.dart';
-import '../extension/export.dart';
-import '../framework/export.dart';
-import '../model/export.dart';
-import '../utils/export.dart';
-
-part 'vol_ma.g.dart';
-
-/// VolMa 移动平均指标线
+/// MA 移动平均指标线
 @CopyWith()
 @FlexiIndicatorSerializable
-class VolMaIndicator extends SinglePaintObjectIndicator
-    implements IPrecomputable {
-  VolMaIndicator({
-    super.key = IndicatorType.volMa,
-    super.name = 'VOLMA',
+class MAIndicator extends SinglePaintObjectIndicator implements IPrecomputable {
+  MAIndicator({
+    super.key = IndicatorType.ma,
+    super.name = 'MA',
     super.zIndex = 0,
-    super.height = defaultSubIndicatorHeight,
-    super.padding = defaultSubIndicatorPadding,
+    required super.height,
+    super.padding = defaultMainIndicatorPadding,
     required this.calcParams,
     required this.tipsPadding,
     required this.lineWidth,
-    required this.precision,
   });
 
   final List<MaParam> calcParams;
   final EdgeInsets tipsPadding;
   final double lineWidth;
-  // 默认精度
-  final int precision;
 
   @override
   dynamic getCalcParam() => calcParams;
 
   @override
-  VolMaPaintObject createPaintObject(IPaintContext context) {
-    return VolMaPaintObject(context: context, indicator: this);
+  SinglePaintObjectBox createPaintObject(IPaintContext context) {
+    return MAPaintObject(context: context, indicator: this);
   }
 
-  factory VolMaIndicator.fromJson(Map<String, dynamic> json) =>
-      _$VolMaIndicatorFromJson(json);
+  factory MAIndicator.fromJson(Map<String, dynamic> json) =>
+      _$MAIndicatorFromJson(json);
 
   @override
-  Map<String, dynamic> toJson() => _$VolMaIndicatorToJson(this);
+  Map<String, dynamic> toJson() => _$MAIndicatorToJson(this);
 }
 
-class VolMaPaintObject<T extends VolMaIndicator>
-    extends SinglePaintObjectBox<T> {
-  VolMaPaintObject({
+class MAPaintObject<T extends MAIndicator> extends SinglePaintObjectBox<T>
+    with MADataMixin<T> {
+  MAPaintObject({
     required super.context,
     required super.indicator,
   });
@@ -74,7 +59,7 @@ class VolMaPaintObject<T extends VolMaIndicator>
   MinMax? initState({required int start, required int end}) {
     if (!klineData.canPaintChart) return null;
 
-    return klineData.calcuVolMaMinmax(
+    return calcuMaMinmax(
       indicator.calcParams,
       start: start,
       end: end,
@@ -83,7 +68,7 @@ class VolMaPaintObject<T extends VolMaIndicator>
 
   @override
   void paintChart(Canvas canvas, Size size) {
-    paintVolMALine(canvas, size);
+    paintMALine(canvas, size);
   }
 
   @override
@@ -91,8 +76,8 @@ class VolMaPaintObject<T extends VolMaIndicator>
     ///
   }
 
-  /// 绘制VOLMA指标线
-  void paintVolMALine(Canvas canvas, Size size) {
+  /// 绘制MA指标线
+  void paintMALine(Canvas canvas, Size size) {
     if (!klineData.canPaintChart) return;
     if (indicator.calcParams.isEmpty) return;
     final list = klineData.list;
@@ -104,7 +89,7 @@ class VolMaPaintObject<T extends VolMaIndicator>
       BagNum? val;
       final List<Offset> points = [];
       for (int i = start; i < end; i++) {
-        val = list[i].volMaList?.getItem(j);
+        val = list[i].maList?.getItem(j);
         if (val == null) continue;
         points.add(Offset(
           offset - (i - start) * candleActualWidth,
@@ -122,7 +107,7 @@ class VolMaPaintObject<T extends VolMaIndicator>
     }
   }
 
-  /// VOLMA 绘制tips区域
+  /// MA 绘制tips区域
   @override
   Size? paintTips(
     Canvas canvas, {
@@ -131,12 +116,12 @@ class VolMaPaintObject<T extends VolMaIndicator>
     Rect? tipsRect,
   }) {
     model ??= offsetToCandle(offset);
-    if (model == null || !model.isValidVolMaList) return null;
+    if (model == null || !model.isValidMaList) return null;
 
     final children = <TextSpan>[];
     BagNum? val;
-    for (int i = 0; i < model.volMaList!.length; i++) {
-      val = model.volMaList?.getItem(i);
+    for (int i = 0; i < model.maList!.length; i++) {
+      val = model.maList?.getItem(i);
       if (val == null) continue;
       final param = indicator.calcParams.getItem(i);
       if (param == null) continue;

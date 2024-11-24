@@ -15,52 +15,57 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flutter/painting.dart';
 
-import '../config/export.dart';
-import '../constant.dart';
-import '../core/core.dart';
-import '../extension/export.dart';
-import '../framework/export.dart';
-import '../model/export.dart';
-import '../utils/export.dart';
+import '../../config/export.dart';
+import '../../constant.dart';
+import '../../core/core.dart';
+import '../../extension/export.dart';
+import '../../framework/export.dart';
+import '../../model/export.dart';
+import '../../utils/export.dart';
 
-part 'ma.g.dart';
+part 'vol_ma.g.dart';
 
-/// MA 移动平均指标线
+/// VolMa 移动平均指标线
 @CopyWith()
 @FlexiIndicatorSerializable
-class MAIndicator extends SinglePaintObjectIndicator implements IPrecomputable {
-  MAIndicator({
-    super.key = IndicatorType.ma,
-    super.name = 'MA',
+class VolMaIndicator extends SinglePaintObjectIndicator
+    implements IPrecomputable {
+  VolMaIndicator({
+    super.key = IndicatorType.volMa,
+    super.name = 'VOLMA',
     super.zIndex = 0,
-    required super.height,
-    super.padding = defaultMainIndicatorPadding,
+    super.height = defaultSubIndicatorHeight,
+    super.padding = defaultSubIndicatorPadding,
     required this.calcParams,
     required this.tipsPadding,
     required this.lineWidth,
+    required this.precision,
   });
 
   final List<MaParam> calcParams;
   final EdgeInsets tipsPadding;
   final double lineWidth;
+  // 默认精度
+  final int precision;
 
   @override
   dynamic getCalcParam() => calcParams;
 
   @override
-  SinglePaintObjectBox createPaintObject(IPaintContext context) {
-    return MAPaintObject(context: context, indicator: this);
+  VolMaPaintObject createPaintObject(IPaintContext context) {
+    return VolMaPaintObject(context: context, indicator: this);
   }
 
-  factory MAIndicator.fromJson(Map<String, dynamic> json) =>
-      _$MAIndicatorFromJson(json);
+  factory VolMaIndicator.fromJson(Map<String, dynamic> json) =>
+      _$VolMaIndicatorFromJson(json);
 
   @override
-  Map<String, dynamic> toJson() => _$MAIndicatorToJson(this);
+  Map<String, dynamic> toJson() => _$VolMaIndicatorToJson(this);
 }
 
-class MAPaintObject<T extends MAIndicator> extends SinglePaintObjectBox<T> {
-  MAPaintObject({
+class VolMaPaintObject<T extends VolMaIndicator>
+    extends SinglePaintObjectBox<T> {
+  VolMaPaintObject({
     required super.context,
     required super.indicator,
   });
@@ -69,16 +74,18 @@ class MAPaintObject<T extends MAIndicator> extends SinglePaintObjectBox<T> {
   MinMax? initState({required int start, required int end}) {
     if (!klineData.canPaintChart) return null;
 
-    return klineData.calcuMaMinmax(
-      indicator.calcParams,
-      start: start,
-      end: end,
-    );
+    // TODO: 后续合并再处理.
+    // return calcuVolMaMinmax(
+    //   indicator.calcParams,
+    //   start: start,
+    //   end: end,
+    // );
+    return null;
   }
 
   @override
   void paintChart(Canvas canvas, Size size) {
-    paintMALine(canvas, size);
+    paintVolMALine(canvas, size);
   }
 
   @override
@@ -86,8 +93,8 @@ class MAPaintObject<T extends MAIndicator> extends SinglePaintObjectBox<T> {
     ///
   }
 
-  /// 绘制MA指标线
-  void paintMALine(Canvas canvas, Size size) {
+  /// 绘制VOLMA指标线
+  void paintVolMALine(Canvas canvas, Size size) {
     if (!klineData.canPaintChart) return;
     if (indicator.calcParams.isEmpty) return;
     final list = klineData.list;
@@ -99,7 +106,7 @@ class MAPaintObject<T extends MAIndicator> extends SinglePaintObjectBox<T> {
       BagNum? val;
       final List<Offset> points = [];
       for (int i = start; i < end; i++) {
-        val = list[i].maList?.getItem(j);
+        val = list[i].volMaList?.getItem(j);
         if (val == null) continue;
         points.add(Offset(
           offset - (i - start) * candleActualWidth,
@@ -117,7 +124,7 @@ class MAPaintObject<T extends MAIndicator> extends SinglePaintObjectBox<T> {
     }
   }
 
-  /// MA 绘制tips区域
+  /// VOLMA 绘制tips区域
   @override
   Size? paintTips(
     Canvas canvas, {
@@ -126,12 +133,12 @@ class MAPaintObject<T extends MAIndicator> extends SinglePaintObjectBox<T> {
     Rect? tipsRect,
   }) {
     model ??= offsetToCandle(offset);
-    if (model == null || !model.isValidMaList) return null;
+    if (model == null || !model.isValidVolMaList) return null;
 
     final children = <TextSpan>[];
     BagNum? val;
-    for (int i = 0; i < model.maList!.length; i++) {
-      val = model.maList?.getItem(i);
+    for (int i = 0; i < model.volMaList!.length; i++) {
+      val = model.volMaList?.getItem(i);
       if (val == null) continue;
       final param = indicator.calcParams.getItem(i);
       if (param == null) continue;
