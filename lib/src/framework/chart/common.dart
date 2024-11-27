@@ -39,7 +39,7 @@ enum DrawPosition {
 
 /// 缩放位置
 ///
-/// [auto] 会根据当前绽放开始时, 所有焦点位置, 将绘制区域宽度三等分, 从而自动决定缩放位置.
+/// 将绘制区域宽度三等分, [auto] 会根据当前缩放开始时的焦点位置, 自行决定缩放位置.
 enum ScalePosition {
   auto,
   left,
@@ -124,6 +124,20 @@ abstract interface class IPrecomputable {
   dynamic getCalcParam();
 }
 
+/// Indicator Type Convert Adapter
+
+@immutable
+abstract interface class IndicatorTypeAdapter<T extends Indicator> {
+  /// 指标唯一key
+  IIndicatorKey get indicatorKey;
+
+  /// 指标反序列化实现
+  T fromJson(Map<String, dynamic> json);
+
+  /// 指标对象序列化实现
+  Map<String, dynamic> toJson(T obj);
+}
+
 const mainIndicatorSlot = -1;
 
 /// 指标图的绘制边界接口
@@ -156,6 +170,10 @@ abstract interface class IPaintBoundingBox {
 abstract interface class IPaintDataInit {
   /// 最大值/最小值
   MinMax get minMax;
+
+  /// 数据预计算
+  /// 1. 仅在数据源[KlineData]发生变化时回调.
+  void precompute(Range range, {bool reset = false});
 
   void setMinMax(MinMax val);
 }

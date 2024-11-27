@@ -15,9 +15,7 @@
 part of 'indicator.dart';
 
 /// FlexiKlineController 状态/配置/接口代理
-mixin ControllerProxyMixin on PaintObject {
-  late final IPaintContext context;
-
+mixin ConfigStateMixin<T extends Indicator> on PaintObject<T> {
   /// Binding
   // SettingBinding get setting => controller as SettingBinding;
   // IState get state => controller as IState;

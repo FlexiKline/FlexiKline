@@ -33,6 +33,7 @@ mixin ChartBinding
     super.initState();
     logd('initState indicator');
     startLastPriceCountDownTimer();
+    _paintObjectManager.initState(this);
   }
 
   @override

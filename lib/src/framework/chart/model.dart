@@ -23,6 +23,8 @@ part of 'indicator.dart';
 /// [paintMode] 控制多指标图一起的绘制方式.
 ///   [PaintMode.combine] 多指标时, 统一使用父Indicator的高度和padding.
 ///   [PaintMode.alone] 多指标时, 使用自己的height进行绘制.
+/// [zIndex] 确定指标在绘制时的顺序, 按升序排序; 数值大的将会绘制数值小的上面;
+///   主要在[MultiPaintObjectIndicator]中会有用, 确定多个指标在同一区域的绘制顺序.
 abstract class Indicator {
   Indicator({
     required this.key,
@@ -30,14 +32,22 @@ abstract class Indicator {
     required this.height,
     required this.padding,
     this.paintMode = PaintMode.combine,
+    this.zIndex = 0,
   });
 
   final IIndicatorKey key;
+
+  /// TODO: 后续废弃
+  @Deprecated('废弃, 使用key.label')
   final String name;
+
   double height;
+
   EdgeInsets padding;
 
   final PaintMode paintMode;
+
+  final int zIndex;
 
   @override
   bool operator ==(Object other) {
@@ -105,30 +115,18 @@ abstract class Indicator {
 /// 绘制对象的配置
 /// 通过Indicator去创建PaintObject接口
 /// 缓存Indicator对应创建的paintObject.
-/// [zIndex] 确定指标在绘制时的顺序, 按升序排序; 数值大的将会绘制数值小的上面;
-///   主要在[MultiPaintObjectIndicator]中会有用, 确定多个指标在同一区域的绘制顺序.
-abstract class SinglePaintObjectIndicator extends Indicator
-    implements Comparable<SinglePaintObjectIndicator> {
+abstract class SinglePaintObjectIndicator extends Indicator {
   SinglePaintObjectIndicator({
     required super.key,
     required super.name,
     required super.height,
     required super.padding,
     super.paintMode,
-    this.zIndex = 0,
+    super.zIndex,
   });
 
-  final int zIndex;
-
   @override
-  SinglePaintObjectBox createPaintObject(
-    covariant IPaintContext context,
-  );
-
-  @override
-  int compareTo(SinglePaintObjectIndicator other) {
-    return zIndex.compareTo(other.zIndex);
-  }
+  SinglePaintObjectBox createPaintObject(covariant IPaintContext context);
 }
 
 /// 多个绘制Indicator的配置.

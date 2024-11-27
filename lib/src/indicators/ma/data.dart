@@ -14,7 +14,25 @@
 
 part of 'ma.dart';
 
+class MaVal {
+  List<BagNum?>? maList;
+}
+
+extension MaMixin on CandleModel{
+  List<BagNum?>? maList;
+
+  bool get isValidMaList => maList != null && maList!.hasValidData;
+
+  MinMax? get maListMinmax => MinMax.getMinMaxByList(maList);
+
+  void cleanMa() {
+    maList = null;
+  }
+}
+
 mixin MADataMixin<T extends MAIndicator> on SinglePaintObjectBox<T> {
+
+  
   // @override
   // void initData() {
   //   super.initData();

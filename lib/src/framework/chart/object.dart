@@ -14,35 +14,32 @@
 
 part of 'indicator.dart';
 
+/// IndicatorObject: 保存Indicator配置与IPaintContext
+/// PaintObject:
+
 class IndicatorObject<T extends Indicator>
-    implements Comparable<IndicatorObject> {
-  IndicatorObject(this._indicator, this.context);
+    implements Comparable<IndicatorObject<T>> {
+  IndicatorObject(this._indicator);
 
-  late T? _indicator;
+  @protected
+  late T _indicator;
 
-  final IPaintContext context;
-
-  T get indicator => _indicator!;
+  T get indicator => _indicator;
 
   @override
-  int compareTo(IndicatorObject<Indicator> other) {
-    // TODO: implement compareTo
-    throw UnimplementedError();
+  int compareTo(IndicatorObject<T> other) {
+    return indicator.zIndex.compareTo(other.indicator.zIndex);
   }
 }
 
 /// PaintObject
 /// 通过实现对应的接口, 实现Chart的配置, 计算, 绘制, Cross
 // @immutable
-abstract class PaintObject<T extends Indicator>
+abstract class PaintObject<T extends Indicator> extends IndicatorObject<T>
     implements IPaintBoundingBox, IPaintDataInit, IPaintObject, IPaintDelegate {
-  PaintObject({
-    required T indicator,
-  }) : _indicator = indicator;
+  PaintObject(super._indicator, this.context);
 
-  T? _indicator;
-
-  T get indicator => _indicator!;
+  final IPaintContext context;
 
   // 父级PaintObject. 主要用于给其他子级PaintObject限定范围.
   PaintObject? _parent;
@@ -51,7 +48,6 @@ abstract class PaintObject<T extends Indicator>
 
   @mustCallSuper
   void dispose() {
-    _indicator = null;
     _parent = null;
   }
 
@@ -63,12 +59,11 @@ abstract class PaintObject<T extends Indicator>
 /// PaintObjectProxy
 /// 通过参数KlineBindingBase 混入对setting和state的代理
 abstract class PaintObjectProxy<T extends Indicator> extends PaintObject
-    with KlineLog, ControllerProxyMixin {
+    with KlineLog, ConfigStateMixin {
   PaintObjectProxy({
+    required T indicator,
     required IPaintContext context,
-    required T super.indicator,
-  }) {
-    this.context = context;
+  }) : super(indicator, context) {
     if (context is KlineLog) {
       loggerDelegate = (context as KlineLog).loggerDelegate;
     }
@@ -76,6 +71,9 @@ abstract class PaintObjectProxy<T extends Indicator> extends PaintObject
 
   @override
   T get indicator => super.indicator as T;
+
+  @override
+  void precompute(Range range, {bool reset = false}) {}
 
   @override
   String get logTag => '${super.logTag}\t${indicator.key.toString()}';

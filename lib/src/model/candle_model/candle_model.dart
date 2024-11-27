@@ -21,23 +21,22 @@ import '../../extension/collections_ext.dart';
 import '../../framework/serializers.dart';
 import '../../utils/export.dart';
 import '../bag_num.dart';
-import 'candle_mixin.dart';
 
 part 'candle_model.g.dart';
 
+final class CalculateData {
+  CalculateData.init(int indicatorCount)
+      : dataList = List.filled(indicatorCount, null);
+  final List<dynamic> dataList;
+
+  T getData<T>(int index) {
+    return dataList.getItem(index);
+  }
+}
+
 @CopyWith()
 @FlexiModelSerializable
-class CandleModel
-    with
-        MaMixin,
-        VolMaMixin,
-        EmaMixin,
-        BollMixin,
-        SarMixin,
-        MacdMixin,
-        KdjMixin,
-        RsiMixin
-    implements Comparable<CandleModel> {
+class CandleModel implements Comparable<CandleModel> {
   CandleModel({
     required this.ts,
     required this.o,
@@ -87,6 +86,12 @@ class CandleModel
   /// K线状态:  0：K线未完结  1：K线已完结
   @JsonKey()
   String confirm;
+
+  CalculateData? _calcuData;
+
+  CalculateData getCalcuData(int indicatorCount) {
+    return _calcuData ??= CalculateData.init(indicatorCount);
+  }
 
   @override
   int compareTo(CandleModel other) {

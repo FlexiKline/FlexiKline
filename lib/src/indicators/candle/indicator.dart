@@ -14,6 +14,24 @@
 
 part of 'candle.dart';
 
+class CandleIndicatorTypeAdapter
+    implements IndicatorTypeAdapter<CandleIndicator> {
+  const CandleIndicatorTypeAdapter();
+
+  @override
+  IIndicatorKey get indicatorKey => IndicatorType.candle;
+
+  @override
+  CandleIndicator fromJson(Map<String, dynamic> json) {
+    return CandleIndicator.fromJson(json);
+  }
+
+  @override
+  Map<String, dynamic> toJson(CandleIndicator obj) {
+    return obj.toJson();
+  }
+}
+
 @CopyWith()
 @FlexiIndicatorSerializable
 class CandleIndicator extends SinglePaintObjectIndicator {

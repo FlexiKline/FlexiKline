@@ -56,24 +56,30 @@ v0.7.0
   
 v0.8.0
 - [ ] 抽离指标管理功能, 并统一由manager管理; 优化Indicator与PaintObject依赖关系.
+- 1. 根据Indicator和PaintContext创建出PaintObject, 并加入到manager中管理.
+- 2. 当删除指标时, manager通过PaintObject的dispose保存当前指标配置.
+- 3. 当增加指标时, 通过指标配置生成出Indicator, 通过步骤1完成.
+- 4. 当用户设置指标配置后, 通过PaintObject.updateConfig(), 更新其内部_indciator实例.
 - [ ] KlinData中指标计算数据与CandleModel分离(保持CandleModel的独立)
+- [ ] 配置管理与主题ReDesign: 
+- 1. 考虑到Indicator配置太多, 并不都需要暴露给用户进行定制, 这部分由开发者在generate(theme)配置.
+- 2. 需要用户定制的部分加入到Configuration配置中保存. 并通过generate(theme, config)方式设置.
 - [ ] 解除对CandleReq的依赖; 重新设计蜡烛数据标识与查询更新方式, 并考虑兼容股市Kline; 
-- [ ] 实现indicators对象和DrawObjects对象与框架分离(API接口优化)
+- [x] 实现indicators对象和DrawObjects对象与框架分离(API接口优化)
 - [ ] 完善demo; 实现所有配置功能.
-- [ ] 绘制图标优化; 遗留问题修复.
+- [ ] 更新绘制工具图标; 遗留问题修复.
 - [ ] controller与core库接口优化(保护API不被滥用)
 - [ ] Tooltip的绘制优化与可点击实现.
 - [ ] 文档撰写v2.
 
 v0.9.0
 - [ ] 指标计算性能优化: 
-  1. 更新蜡烛数据方式反转, 同步所有计算逻辑.
+  1. 更新蜡烛数据流程优化.
   2. 按需计算, 增加指标同时触发指标计算后, 再绘制.
   3. 考虑保留上次最新数据计算中间态, 当新数据更新时继续计算.
 - [ ] 测试考虑废弃BagNum, 由double完成.
 - [ ] 增加图表移动/数据变化等监听: 仅在需要绘制时重新draw; 
 - [ ] DrawObject增加接口, 根据当前环境参数检测是否需要参与绘制.
-- [ ] 指标/绘制对象实例配置持久化.
 - [ ] 非触摸设备增加键盘事件操作(例如:连续绘制中ESC取消连续绘制等).
 - [ ] bugfix.
 - [ ] 文档撰写v3.
