@@ -16,7 +16,7 @@ import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flexi_kline/flexi_kline.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Overlay;
 
 class TestFlexiKlineTheme implements IFlexiKlineTheme {
   @override
@@ -112,16 +112,21 @@ class TestFlexiKlineConfiguration with FlexiKlineThemeConfigurationMixin {
   }
 
   @override
-  FlexiKlineConfig getFlexiKlineConfig([TestFlexiKlineTheme? theme]) {
-    return genFlexiKlineConfig(TestFlexiKlineTheme());
+  FlexiKlineConfig getFlexiKlineConfig() {
+    return genFlexiKlineConfig();
   }
 
   @override
-  void saveFlexiKlineConfig(FlexiKlineConfig config) {
-    // TODO: implement saveFlexiKlineConfig
+  void saveFlexiKlineConfig(FlexiKlineConfig config) {}
+
+  @override
+  IFlexiKlineTheme get theme => TestFlexiKlineTheme();
+
+  @override
+  Iterable<Overlay> getOverlayListConfig(String instId) {
+    throw UnimplementedError();
   }
 
   @override
-  // TODO: implement theme
-  IFlexiKlineTheme get theme => throw UnimplementedError();
+  void saveOverlayListConfig(String instId, Iterable<Overlay> list) {}
 }

@@ -15,7 +15,6 @@
 import 'package:flutter/material.dart' hide Overlay;
 
 import '../constant.dart';
-import '../core/core.dart';
 import '../extension/render/common.dart';
 import '../framework/export.dart';
 import '../indicators/export.dart';
@@ -26,7 +25,6 @@ import 'draw_config/draw_config.dart';
 import 'flexi_kline_config/flexi_kline_config.dart';
 import 'gesture_config/gesture_config.dart';
 import 'grid_config/grid_config.dart';
-import 'indicators_config/indicators_config.dart';
 import 'line_config/line_config.dart';
 import 'loading_config/loading_config.dart';
 import 'ma_param/ma_param.dart';
@@ -170,34 +168,14 @@ abstract class BaseFlexiKlineTheme implements IFlexiKlineTheme {
 
 /// 通过[IFlexiKlineTheme]来配置FlexiKline基类.
 mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
-  @override
-  Iterable<Overlay> getOverlayListConfig(String instId) => const [];
+  // @override
+  // Iterable<Overlay> getOverlayListConfig(String instId) => const [];
 
-  @override
-  void saveOverlayListConfig(String instId, Iterable<Overlay> list) {}
+  // @override
+  // void saveOverlayListConfig(String instId, Iterable<Overlay> list) {}
 
-  @mustCallSuper
-  @override
-  Map<IIndicatorKey, IndicatorBuilder<Indicator>> customMainIndicatorBuilders(
-    IKlineConfig config,
-  ) {
-    return {
-      IndicatorType.candle: () => genCandleIndicator(),
-    };
-  }
-
-  @mustCallSuper
-  @override
-  Map<IIndicatorKey, IndicatorBuilder<Indicator>> customSubIndicatorBuilders(
-    IKlineConfig config,
-  ) {
-    return {
-      IndicatorType.time: () => genTimeIndicator(),
-    };
-  }
-
-  @override
-  FlexiKlineConfig getFlexiKlineConfig();
+  // @override
+  // FlexiKlineConfig getFlexiKlineConfig();
 
   FlexiKlineConfig genFlexiKlineConfig() {
     return FlexiKlineConfig(
@@ -209,11 +187,32 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       draw: genDrawConfig(),
       tooltip: genTooltipConfig(),
       // indicators: genIndicatorsConfig(theme),
-      main: {},
-      sub: {},
+      main: mainIndicatorKeys,
+      sub: subIndicatorsKeys,
     );
   }
 
+  Set<IIndicatorKey> get mainIndicatorKeys => {};
+
+  Set<IIndicatorKey> get subIndicatorsKeys => {};
+
+  @override
+  IndicatorBuilder get candleIndicatorBuilder {
+    return (setting) => genCandleIndicator(setting);
+  }
+
+  @override
+  IndicatorBuilder get timeIndicatorBuilder {
+    return (setting) => genTimeIndicator(setting);
+  }
+
+  @override
+  Map<IIndicatorKey, IndicatorBuilder> customMainIndicatorBuilders() => {};
+
+  @override
+  Map<IIndicatorKey, IndicatorBuilder> customSubIndicatorBuilders() => {};
+
+  /// Grid配置
   GridConfig genGridConfig() {
     return GridConfig(
       show: true,
@@ -236,6 +235,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
     );
   }
 
+  /// Gesture配置
   GestureConfig genGestureConfig() {
     return GestureConfig(
       isInertialPan: true,
@@ -440,28 +440,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
     );
   }
 
-  IndicatorsConfig genIndicatorsConfig() {
-    return IndicatorsConfig(
-      /// 主区
-      candle: genCandleIndicator(),
-      volume: genMainVolumeIndicator(),
-      ma: genMaIndicator(),
-      // ema: genEmaIndicator(theme),
-      // boll: genBollIndicator(theme),
-      // sar: genSarIndicator(theme),
-
-      /// 副区
-      time: genTimeIndicator(),
-      // macd: genMacdIndicator(theme),
-      // kdj: genKdjIndicator(theme),
-      // mavol: genMavolIndicator(theme),
-      // subBoll: genSubBollIndicator(theme),
-      // subSar: genSubSarIndicator(theme),
-      // rsi: genSubRsiIndicator(theme),
-    );
-  }
-
-  CandleIndicator genCandleIndicator() {
+  CandleIndicator genCandleIndicator(SettingConfig setting) {
     return CandleIndicator(
       zIndex: -1,
       height: theme.mainIndicatorHeight,
@@ -573,7 +552,26 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
     );
   }
 
-  VolumeIndicator genMainVolumeIndicator() {
+  TimeIndicator genTimeIndicator(SettingConfig setting) {
+    return TimeIndicator(
+      height: theme.timeIndicatorHeight,
+      padding: EdgeInsets.zero,
+      position: DrawPosition.middle,
+      // 时间刻度.
+      timeTick: TextAreaConfig(
+        style: TextStyle(
+          fontSize: theme.normalTextSize,
+          color: theme.ticksTextColor,
+          overflow: TextOverflow.ellipsis,
+          height: defaultTextHeight,
+        ),
+        textWidth: 80 * theme.scale,
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
+  VolumeIndicator genMainVolumeIndicator(SettingConfig setting) {
     return VolumeIndicator(
       zIndex: -2,
       height: theme.subIndicatorHeight,
@@ -594,16 +592,10 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       tipsPadding: theme.tipsPadding,
       tickCount: defaultSubTickCount,
       precision: 2,
-
-      /// 控制参数
-      // showYAxisTick: false,
-      // showCrossMark: false,
-      // showTips: false,
-      // useTint: true,
     );
   }
 
-  MAIndicator genMaIndicator() {
+  MAIndicator genMaIndicator(SettingConfig setting) {
     return MAIndicator(
       height: theme.mainIndicatorHeight,
       padding: theme.mainIndicatorPadding,
@@ -637,6 +629,56 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       ],
       tipsPadding: theme.tipsPadding,
       lineWidth: theme.indicatorLineWidth,
+    );
+  }
+
+  VolMaIndicator genSubVolMaIndicator(SettingConfig setting) {
+    return VolMaIndicator(
+      zIndex: 0,
+      height: theme.subIndicatorHeight,
+      padding: theme.subIndicatorPadding,
+      calcParams: [
+        MaParam(
+          count: 5,
+          tips: TipsConfig(
+            label: 'MA5: ',
+            // precision: 2,
+            style: TextStyle(
+              fontSize: theme.normalTextSize,
+              color: Colors.orange,
+              overflow: TextOverflow.ellipsis,
+              height: defaultTipsTextHeight,
+            ),
+          ),
+        ),
+        MaParam(
+          count: 10,
+          tips: TipsConfig(
+            label: 'MA10: ',
+            // precision: 2,
+            style: TextStyle(
+              fontSize: theme.normalTextSize,
+              color: Colors.blue,
+              overflow: TextOverflow.ellipsis,
+              height: defaultTipsTextHeight,
+            ),
+          ),
+        ),
+      ],
+      tipsPadding: theme.tipsPadding,
+      maLineWidth: theme.indicatorLineWidth,
+      volTips: TipsConfig(
+        label: 'Vol: ',
+        precision: 2,
+        style: TextStyle(
+          fontSize: theme.normalTextSize,
+          color: theme.textColor,
+          overflow: TextOverflow.ellipsis,
+          height: defaultTextHeight,
+        ),
+      ),
+      ticksCount: defaultSubTickCount,
+      precision: 2,
     );
   }
 
@@ -776,25 +818,6 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
   //   );
   // }
 
-  TimeIndicator genTimeIndicator() {
-    return TimeIndicator(
-      height: theme.timeIndicatorHeight,
-      padding: EdgeInsets.zero,
-      position: DrawPosition.middle,
-      // 时间刻度.
-      timeTick: TextAreaConfig(
-        style: TextStyle(
-          fontSize: theme.normalTextSize,
-          color: theme.ticksTextColor,
-          overflow: TextOverflow.ellipsis,
-          height: defaultTextHeight,
-        ),
-        textWidth: 80 * theme.scale,
-        textAlign: TextAlign.center,
-      ),
-    );
-  }
-
   // MACDIndicator genMacdIndicator() {
   //   return MACDIndicator(
   //     height: theme.subIndicatorHeight,
@@ -930,56 +953,6 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
   //     // useTint: false,
   //   );
   // }
-
-  VolMaIndicator genSubVolMaIndicator() {
-    return VolMaIndicator(
-      zIndex: 0,
-      height: theme.subIndicatorHeight,
-      padding: theme.subIndicatorPadding,
-      calcParams: [
-        MaParam(
-          count: 5,
-          tips: TipsConfig(
-            label: 'MA5: ',
-            // precision: 2,
-            style: TextStyle(
-              fontSize: theme.normalTextSize,
-              color: Colors.orange,
-              overflow: TextOverflow.ellipsis,
-              height: defaultTipsTextHeight,
-            ),
-          ),
-        ),
-        MaParam(
-          count: 10,
-          tips: TipsConfig(
-            label: 'MA10: ',
-            // precision: 2,
-            style: TextStyle(
-              fontSize: theme.normalTextSize,
-              color: Colors.blue,
-              overflow: TextOverflow.ellipsis,
-              height: defaultTipsTextHeight,
-            ),
-          ),
-        ),
-      ],
-      tipsPadding: theme.tipsPadding,
-      maLineWidth: theme.indicatorLineWidth,
-      volTips: TipsConfig(
-        label: 'Vol: ',
-        precision: 2,
-        style: TextStyle(
-          fontSize: theme.normalTextSize,
-          color: theme.textColor,
-          overflow: TextOverflow.ellipsis,
-          height: defaultTextHeight,
-        ),
-      ),
-      ticksCount: defaultSubTickCount,
-      precision: 2,
-    );
-  }
 
   // BOLLIndicator genSubBollIndicator() {
   //   return BOLLIndicator(

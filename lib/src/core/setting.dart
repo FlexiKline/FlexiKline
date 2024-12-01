@@ -24,7 +24,7 @@ mixin SettingBinding on KlineBindingBase
     _paintObjectManager = IndicatorPaintObjectManager(
       configuration: configuration,
       logger: loggerDelegate,
-    )..initState(this, this);
+    )..initState(this);
   }
 
   @override
@@ -279,14 +279,12 @@ mixin SettingBinding on KlineBindingBase
     _paintObjectManager.registerSubIndicatorBuilder(key, builder);
   }
 
-  Set<IIndicatorKey> get supportMainIndicatorKeys {
-    return _paintObjectManager.supportMainIndicatorKeys.toSet()
-      ..remove(IndicatorType.candle);
+  Iterable<IIndicatorKey> get supportMainIndicatorKeys {
+    return _paintObjectManager.supportMainIndicatorKeys;
   }
 
-  Set<IIndicatorKey> get supportSubIndicatorKeys {
-    return _paintObjectManager.supportSubIndicatorKeys.toSet()
-      ..remove(IndicatorType.time);
+  Iterable<IIndicatorKey> get supportSubIndicatorKeys {
+    return _paintObjectManager.supportSubIndicatorKeys;
   }
 
   Iterable<IIndicatorKey> get mainIndicatorKeys {
@@ -317,7 +315,7 @@ mixin SettingBinding on KlineBindingBase
     return _paintObjectManager.subPaintObjects;
   }
 
-  @override
+  // @override
   // List<Indicator> get subRectIndicators {
   //   if (indicatorsConfig.time.position == DrawPosition.bottom) {
   //     return [...subIndicatorQueue, indicatorsConfig.time];

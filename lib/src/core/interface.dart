@@ -41,9 +41,7 @@ abstract interface class ISetting {
 
   /// 计算[slot]位置指标的Top坐标
   double calculateIndicatorTop(int slot);
-}
 
-abstract interface class IKlineConfig {
   /// Config ///
 
   /// 保存到本地

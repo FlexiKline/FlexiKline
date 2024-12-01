@@ -152,15 +152,17 @@ abstract interface class IConfiguration {
   /// 保存[config]配置信息到本地.
   void saveFlexiKlineConfig(FlexiKlineConfig config);
 
+  /// 蜡烛指标构造器(主区必须提供)
+  IndicatorBuilder get candleIndicatorBuilder;
+
+  /// 时间指标构造器(副区必须提供)
+  IndicatorBuilder get timeIndicatorBuilder;
+
   /// 主区指标定制
-  Map<IIndicatorKey, IndicatorBuilder> customMainIndicatorBuilders(
-    IKlineConfig config,
-  );
+  Map<IIndicatorKey, IndicatorBuilder> customMainIndicatorBuilders();
 
   /// 副区指标定制
-  Map<IIndicatorKey, IndicatorBuilder> customSubIndicatorBuilders(
-    IKlineConfig config,
-  );
+  Map<IIndicatorKey, IndicatorBuilder> customSubIndicatorBuilders();
 
   /// 从本地获取[instId]指定的[Overlay]缓存列表.
   Iterable<Overlay> getOverlayListConfig(String instId);

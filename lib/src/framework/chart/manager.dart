@@ -89,26 +89,26 @@ final class IndicatorPaintObjectManager with KlineLog {
     return _subPaintObjectQueue.map((obj) => obj.key);
   }
 
-  void registerMainIndicatorBuilder<T extends SinglePaintObjectIndicator>(
+  void registerMainIndicatorBuilder(
     IIndicatorKey key,
-    IndicatorBuilder<SinglePaintObjectIndicator> builder,
+    IndicatorBuilder builder,
   ) {
     _mainIndicatorBuilders[key] = builder;
     _supportMainIndicatorKeys = null;
-    // if (!_indicatorDataIndexs.containsKey(key)) {
-    //   _indicatorDataIndexs[key] = _indicatorDataIndexs.length;
-    // }
+    if (!_indicatorDataIndexs.containsKey(key)) {
+      _indicatorDataIndexs[key] = _indicatorDataIndexs.length;
+    }
   }
 
-  void registerSubIndicatorBuilder<T extends SinglePaintObjectIndicator>(
+  void registerSubIndicatorBuilder(
     IIndicatorKey key,
-    IndicatorBuilder<SinglePaintObjectIndicator> builder,
+    IndicatorBuilder builder,
   ) {
     _subIndicatorBuilders[key] = builder;
     _supportSubIndicatorKeys = null;
-    // if (!_indicatorDataIndexs.containsKey(key)) {
-    //   _indicatorDataIndexs[key] = _indicatorDataIndexs.length;
-    // }
+    if (!_indicatorDataIndexs.containsKey(key)) {
+      _indicatorDataIndexs[key] = _indicatorDataIndexs.length;
+    }
   }
 
   int? getIndicatorDataIndex(IIndicatorKey key) {
@@ -119,15 +119,19 @@ final class IndicatorPaintObjectManager with KlineLog {
   /// 1. 确认指标数据在[CandleModel]的[CalculateData]中的index.
   /// 2. 初始化主区绘制对象, 初始化副区绘制对象队列
   /// 3. 从配置中加载缓存的主/副区指标.
-  void initState(IPaintContext context, IKlineConfig config) {
+  void initState(IPaintContext context) {
+    /// 注册指标构造器
     _indicatorDataIndexs.clear();
-    int index = 0;
-    for (var key in [...supportMainIndicatorKeys, ...supportSubIndicatorKeys]) {
-      _indicatorDataIndexs[key] = index++;
+    final mainIndicators = configuration.customMainIndicatorBuilders();
+    for (final MapEntry(key: key, value: builder) in mainIndicators.entries) {
+      registerMainIndicatorBuilder(key, builder);
+    }
+    final subIndicators = configuration.customMainIndicatorBuilders();
+    for (final MapEntry(key: key, value: builder) in subIndicators.entries) {
+      registerSubIndicatorBuilder(key, builder);
     }
 
-    configuration.customMainIndicatorBuilders(config);
-
+    /// 构造主区/副区
     _mainPaintObject = MultiPaintObjectBox(
       context: context,
       indicator: MultiPaintObjectIndicator(
@@ -138,15 +142,30 @@ final class IndicatorPaintObjectManager with KlineLog {
         drawBelowTipsArea: context.settingConfig.mainDrawBelowTipsArea,
       ),
     );
-    addIndicatorInMain(IndicatorType.candle, context);
 
-    final timeIndicator = _createPaintIndicator(IndicatorType.time, context);
-    if (timeIndicator != null) {
-      _timePaintObject = timeIndicator.createPaintObject(context);
-    }
     _subPaintObjectQueue = FixedHashQueue<SinglePaintObjectBox>(
       context.settingConfig.subChartMaxCount,
     );
+
+    /// 配置默认指标蜡烛图指标和时间指标
+    try {
+      final setting = context.settingConfig;
+      final candle = configuration.candleIndicatorBuilder.call(setting);
+      final candleObject = candle.createPaintObject(context);
+      _mainPaintObject.appendPaintObject(candleObject);
+
+      final time = configuration.timeIndicatorBuilder.call(setting);
+      _timePaintObject = time.createPaintObject(context);
+    } catch (error, stack) {
+      loge(
+        'initState catch an exception!',
+        error: error,
+        stackTrace: stack,
+      );
+    }
+
+    /// TODO: 加载历史指标配置
+    // final mainIndciatorKeys = configuration.
   }
 
   Indicator? _createPaintIndicator(
@@ -155,9 +174,9 @@ final class IndicatorPaintObjectManager with KlineLog {
   ) {
     try {
       if (_mainIndicatorBuilders.containsKey(key)) {
-        return _mainIndicatorBuilders[key]?.call();
+        return _mainIndicatorBuilders[key]?.call(context.settingConfig);
       } else if (_subIndicatorBuilders.containsKey(key)) {
-        return _subIndicatorBuilders[key]?.call();
+        return _subIndicatorBuilders[key]?.call(context.settingConfig);
       }
     } catch (error, stack) {
       loge(
