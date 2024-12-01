@@ -30,7 +30,6 @@ part 'time.g.dart';
 @FlexiIndicatorSerializable
 class TimeIndicator extends SinglePaintObjectIndicator {
   TimeIndicator({
-    super.name = 'Time',
     super.zIndex = 0,
     super.height = defaultTimeIndicatorHeight,
     super.padding = EdgeInsets.zero,

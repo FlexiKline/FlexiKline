@@ -16,12 +16,6 @@ part of 'indicator.dart';
 
 /// FlexiKlineController 状态/配置/接口代理
 mixin ConfigStateMixin<T extends Indicator> on IndicatorObject<T> {
-  /// Binding
-  // SettingBinding get setting => controller as SettingBinding;
-  // IState get state => controller as IState;
-  // ICross get cross => controller as ICross;
-  // IConfig get config => controller as IConfig;
-
   /// Config
   SettingConfig get settingConfig => context.settingConfig;
   GridConfig get gridConfig => context.gridConfig;
@@ -47,13 +41,10 @@ mixin PaintObjectBoundingMixin on PaintObject implements IPaintBoundingBox {
 
   int _slot = mainIndicatorSlot;
 
-  /// 当前指标索引
+  /// 当前指标所在位置索引
   /// <0 代表在主图绘制
   /// >=0 代表在副图绘制
   int get slot => _slot;
-
-  @override
-  EdgeInsets get padding => indicator.padding;
 
   Rect? _drawableRect;
   Rect? _chartRect;
@@ -68,12 +59,12 @@ mixin PaintObjectBoundingMixin on PaintObject implements IPaintBoundingBox {
     bool reset = false,
   }) {
     bool hasChange = false;
-    if (height != null && height > 0 && height != _indicator.height) {
+    if (height != null && height > 0 && height != indicator.height) {
       _indicator.height = height;
       hasChange = true;
     }
 
-    if (padding != null && padding != _indicator.padding) {
+    if (padding != null && padding != indicator.padding) {
       _indicator.padding = padding;
       hasChange = true;
     }
@@ -161,7 +152,7 @@ mixin PaintObjectBoundingMixin on PaintObject implements IPaintBoundingBox {
 }
 
 /// 绘制对象混入数据初始化的通用扩展
-mixin DataInitMixin on PaintObject implements IPaintDataInit {
+mixin PaintObjectDataInitMixin on PaintObject implements IPaintDataInit {
   int? _start;
   int? _end;
 
@@ -215,11 +206,12 @@ mixin DataInitMixin on PaintObject implements IPaintDataInit {
   }
 }
 
-mixin PaintYAxisScaleMixin<T extends SinglePaintObjectIndicator>
+/// 绘制当前图表在Y轴上的刻度值
+mixin PaintYAxisTicksMixin<T extends SinglePaintObjectIndicator>
     on SinglePaintObjectBox<T> {
   /// 为副区的指标图绘制Y轴上的刻度信息
   @protected
-  void paintYAxisScale(
+  void paintYAxisTicks(
     Canvas canvas,
     Size size, {
     required int tickCount, // 刻度数量.
@@ -244,7 +236,7 @@ mixin PaintYAxisScaleMixin<T extends SinglePaintObjectIndicator>
       final value = dyToValue(dy);
       if (value == null) continue;
 
-      final text = fromatTickValue(value, precision: precision);
+      final text = fromatTicksValue(value, precision: precision);
 
       final ticksText = settingConfig.ticksText;
 
@@ -263,7 +255,7 @@ mixin PaintYAxisScaleMixin<T extends SinglePaintObjectIndicator>
 
   /// 如果要定制格式化刻度值. 在PaintObject中覆写此方法.
   @protected
-  String fromatTickValue(BagNum value, {required int precision}) {
+  String fromatTicksValue(BagNum value, {required int precision}) {
     return formatNumber(
       value.toDecimal(),
       precision: precision,
@@ -273,11 +265,12 @@ mixin PaintYAxisScaleMixin<T extends SinglePaintObjectIndicator>
   }
 }
 
-mixin PaintYAxisMarkOnCrossMixin<T extends SinglePaintObjectIndicator>
+/// 当Cross事件发生时, 在Y轴上的绘制crossing相应的刻度值
+mixin PaintYAxisTicksOnCrossMixin<T extends SinglePaintObjectIndicator>
     on SinglePaintObjectBox<T> {
   /// onCross时, 绘制Y轴上的刻度值
   @protected
-  void paintYAxisMarkOnCross(
+  void paintYAxisTicksOnCross(
     Canvas canvas,
     Offset offset, {
     required int precision,
@@ -285,7 +278,7 @@ mixin PaintYAxisMarkOnCrossMixin<T extends SinglePaintObjectIndicator>
     final value = dyToValue(offset.dy);
     if (value == null) return;
 
-    final text = formatMarkValueOnCross(value, precision: precision);
+    final text = formatTicksValueOnCross(value, precision: precision);
 
     final ticksText = crossConfig.ticksText;
 
@@ -302,7 +295,7 @@ mixin PaintYAxisMarkOnCrossMixin<T extends SinglePaintObjectIndicator>
   }
 
   @protected
-  String formatMarkValueOnCross(BagNum value, {required int precision}) {
+  String formatTicksValueOnCross(BagNum value, {required int precision}) {
     return formatNumber(
       value.toDecimal(),
       precision: precision,
@@ -367,6 +360,7 @@ mixin PaintSimpleCandleMixin<T extends SinglePaintObjectIndicator>
 }
 
 extension PaintObjectExt on PaintObject {
+  /// 获取当前指标计算参数
   Map<IIndicatorKey, dynamic> getCalcParams() {
     if (calcParams != null) {
       return {key: calcParams};
@@ -376,6 +370,7 @@ extension PaintObjectExt on PaintObject {
 }
 
 extension MultiPaintObjectBoxExt on MultiPaintObjectBox {
+  /// 收集[MultiPaintObjectBox]中子指标的计算参数
   Map<IIndicatorKey, dynamic> getCalcParams() {
     final params = <IIndicatorKey, dynamic>{};
     for (var object in children) {

@@ -127,20 +127,20 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   /// 将[dx]转换为当前绘制区域对应的蜡烛的下标.
   @override
   int? dxToIndex(double dx) {
-    return mainPaintObject?.dxToIndex(dx).toInt();
+    return mainPaintObject.dxToIndex(dx).toInt();
   }
 
   /// 将[index]转换为当前绘制区域对应的X轴坐标.
   @override
   double? indexToDx(int index, {bool check = false}) {
-    return mainPaintObject?.indexToDx(index, check: check);
+    return mainPaintObject.indexToDx(index, check: check);
   }
 
   /// 将[dx]精确转换为蜡烛的时间戳ts, 差异部分补充到ts中.
   @override
   int? dxToTimestamp(double dx) {
-    final indexValue = mainPaintObject?.dxToIndex(dx);
-    if (indexValue == null) return null;
+    final indexValue = mainPaintObject.dxToIndex(dx);
+    // if (indexValue == null) return null;
     final ts = curKlineData.indexToTimestamp(indexValue);
     return ts;
   }
@@ -150,18 +150,18 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   double? timestampToDx(int ts) {
     final indexValue = curKlineData.timestampToIndex(ts);
     if (indexValue == null) return null;
-    final dx = mainPaintObject?.indexToDx(indexValue, check: false);
+    final dx = mainPaintObject.indexToDx(indexValue, check: false);
     return dx;
   }
 
   @override
   double? valueToDy(BagNum value, {bool correct = false}) {
-    return mainPaintObject?.valueToDy(value, correct: correct);
+    return mainPaintObject.valueToDy(value, correct: correct);
   }
 
   @override
   BagNum? dyToValue(double dy, {bool check = false}) {
-    return mainPaintObject?.dyToValue(dy, check: check);
+    return mainPaintObject.dyToValue(dy, check: check);
   }
 
   /// 当前canvas绘制区域起始蜡烛右部dx值.

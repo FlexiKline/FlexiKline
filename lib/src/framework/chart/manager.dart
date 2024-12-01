@@ -119,14 +119,18 @@ final class IndicatorPaintObjectManager with KlineLog {
   /// 1. 确认指标数据在[CandleModel]的[CalculateData]中的index.
   /// 2. 初始化主区绘制对象, 初始化副区绘制对象队列
   /// 3. 从配置中加载缓存的主/副区指标.
-  void initState(IPaintContext context) {
+  void init(
+    IPaintContext context, {
+    Set<IIndicatorKey> initMainIndicatorKeys = const {},
+    Set<IIndicatorKey> initSubIndicatorKeys = const {},
+  }) {
     /// 注册指标构造器
     _indicatorDataIndexs.clear();
     final mainIndicators = configuration.customMainIndicatorBuilders();
     for (final MapEntry(key: key, value: builder) in mainIndicators.entries) {
       registerMainIndicatorBuilder(key, builder);
     }
-    final subIndicators = configuration.customMainIndicatorBuilders();
+    final subIndicators = configuration.customSubIndicatorBuilders();
     for (final MapEntry(key: key, value: builder) in subIndicators.entries) {
       registerSubIndicatorBuilder(key, builder);
     }
@@ -136,7 +140,6 @@ final class IndicatorPaintObjectManager with KlineLog {
       context: context,
       indicator: MultiPaintObjectIndicator(
         key: IndicatorType.main,
-        name: IndicatorType.main.label,
         height: context.settingConfig.mainRect.height,
         padding: context.settingConfig.mainPadding,
         drawBelowTipsArea: context.settingConfig.mainDrawBelowTipsArea,
@@ -164,23 +167,44 @@ final class IndicatorPaintObjectManager with KlineLog {
       );
     }
 
-    /// TODO: 加载历史指标配置
-    // final mainIndciatorKeys = configuration.
+    /// 加载历史选中过的指标
+    for (var key in initMainIndicatorKeys) {
+      addIndicatorInMain(key, context);
+    }
+    for (var key in initSubIndicatorKeys) {
+      addIndicatorInSub(key, context);
+    }
   }
 
-  Indicator? _createPaintIndicator(
+  Indicator? _createMainPaintIndicator(
     IIndicatorKey key,
     IPaintContext context,
   ) {
     try {
       if (_mainIndicatorBuilders.containsKey(key)) {
         return _mainIndicatorBuilders[key]?.call(context.settingConfig);
-      } else if (_subIndicatorBuilders.containsKey(key)) {
+      }
+    } catch (error, stack) {
+      loge(
+        '_createMainPaintIndicator($key) catch an exception!',
+        error: error,
+        stackTrace: stack,
+      );
+    }
+    return null;
+  }
+
+  Indicator? _createSubPaintIndicator(
+    IIndicatorKey key,
+    IPaintContext context,
+  ) {
+    try {
+      if (_subIndicatorBuilders.containsKey(key)) {
         return _subIndicatorBuilders[key]?.call(context.settingConfig);
       }
     } catch (error, stack) {
       loge(
-        'createPaintIndicator($key) catch an exception!',
+        '_createSubPaintIndicator($key) catch an exception!',
         error: error,
         stackTrace: stack,
       );
@@ -190,7 +214,7 @@ final class IndicatorPaintObjectManager with KlineLog {
 
   /// 在主图中添加指标
   bool addIndicatorInMain(IIndicatorKey key, IPaintContext context) {
-    final indicator = _createPaintIndicator(key, context);
+    final indicator = _createMainPaintIndicator(key, context);
     if (indicator == null) return false;
     final object = indicator.createPaintObject(context);
     _mainPaintObject.appendPaintObject(object);
@@ -203,7 +227,7 @@ final class IndicatorPaintObjectManager with KlineLog {
   }
 
   bool addIndicatorInSub(IIndicatorKey key, IPaintContext context) {
-    final indicator = _createPaintIndicator(key, context);
+    final indicator = _createSubPaintIndicator(key, context);
     if (indicator == null) return false;
     final object = indicator.createPaintObject(context);
     final oldObj = _subPaintObjectQueue.append(object);
@@ -225,36 +249,40 @@ final class IndicatorPaintObjectManager with KlineLog {
   }
 
   /// 收集当前指标的计算参数
-  /// TODO: 后续优化: manager中不会出现具体指标参数逻辑.
-  /// 且像subBoll和boll参数有可能不一致. 此处应有业务控制.
   Map<IIndicatorKey, dynamic> getIndicatorCalcParams() {
     final calcParams = mainPaintObject.getCalcParams();
     for (final object in subPaintObjects) {
       final params = object.getCalcParams();
       if (params.isEmpty) continue;
-      if (object.key == IndicatorType.subBoll) {
-        calcParams.putIfAbsent(
-          IndicatorType.boll,
-          params[IndicatorType.subBoll],
-        );
-      } else if (object.key == IndicatorType.subSar) {
-        calcParams.putIfAbsent(
-          IndicatorType.sar,
-          params[IndicatorType.subSar],
-        );
-      } else {
-        calcParams.addAll(params);
-      }
+      calcParams.addAll(params);
+
+      /// TODO: 待考虑在主区/副区同时存在的指标.
+      /// 有两种情况:
+      /// 1. 参数相同, 重复计算.
+      /// 2. 参数不同, 需要分别计算.
+      // if (object.key == IndicatorType.subBoll) {
+      //   calcParams.putIfAbsent(
+      //     IndicatorType.boll,
+      //     params[IndicatorType.subBoll],
+      //   );
+      // } else if (object.key == IndicatorType.subSar) {
+      //   calcParams.putIfAbsent(
+      //     IndicatorType.sar,
+      //     params[IndicatorType.subSar],
+      //   );
+      // } else {
+      //   calcParams.addAll(params);
+      // }
     }
     return calcParams;
   }
 
   void dispose() {
     mainPaintObject.dispose();
+    _timePaintObject?.dispose();
     for (var indicator in subPaintObjects) {
       indicator.dispose();
     }
-    _timePaintObject?.dispose();
     _subPaintObjectQueue.clear();
   }
 }

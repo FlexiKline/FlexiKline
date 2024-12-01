@@ -1,7 +1,7 @@
 ## 0.8.0
 * New Architecture Design
 * Indicator Framework Refactoring
-* Data Update Optimization
+* bugfix
 
 ## 0.7.1
 * Support Draw Feature

@@ -7,8 +7,6 @@ part of 'vol_ma.dart';
 // **************************************************************************
 
 abstract class _$VolMaIndicatorCWProxy {
-  VolMaIndicator name(String name);
-
   VolMaIndicator zIndex(int zIndex);
 
   VolMaIndicator height(double height);
@@ -34,7 +32,6 @@ abstract class _$VolMaIndicatorCWProxy {
   /// VolMaIndicator(...).copyWith(id: 12, name: "My name")
   /// ````
   VolMaIndicator call({
-    String? name,
     int? zIndex,
     double? height,
     EdgeInsets? padding,
@@ -52,9 +49,6 @@ class _$VolMaIndicatorCWProxyImpl implements _$VolMaIndicatorCWProxy {
   const _$VolMaIndicatorCWProxyImpl(this._value);
 
   final VolMaIndicator _value;
-
-  @override
-  VolMaIndicator name(String name) => this(name: name);
 
   @override
   VolMaIndicator zIndex(int zIndex) => this(zIndex: zIndex);
@@ -95,7 +89,6 @@ class _$VolMaIndicatorCWProxyImpl implements _$VolMaIndicatorCWProxy {
   /// VolMaIndicator(...).copyWith(id: 12, name: "My name")
   /// ````
   VolMaIndicator call({
-    Object? name = const $CopyWithPlaceholder(),
     Object? zIndex = const $CopyWithPlaceholder(),
     Object? height = const $CopyWithPlaceholder(),
     Object? padding = const $CopyWithPlaceholder(),
@@ -107,10 +100,6 @@ class _$VolMaIndicatorCWProxyImpl implements _$VolMaIndicatorCWProxy {
     Object? precision = const $CopyWithPlaceholder(),
   }) {
     return VolMaIndicator(
-      name: name == const $CopyWithPlaceholder() || name == null
-          ? _value.name
-          // ignore: cast_nullable_to_non_nullable
-          : name as String,
       zIndex: zIndex == const $CopyWithPlaceholder() || zIndex == null
           ? _value.zIndex
           // ignore: cast_nullable_to_non_nullable
@@ -167,7 +156,6 @@ extension $VolMaIndicatorCopyWith on VolMaIndicator {
 
 VolMaIndicator _$VolMaIndicatorFromJson(Map<String, dynamic> json) =>
     VolMaIndicator(
-      name: json['name'] as String? ?? 'MAVOL',
       zIndex: (json['zIndex'] as num?)?.toInt() ?? 0,
       height: (json['height'] as num?)?.toDouble() ?? defaultSubIndicatorHeight,
       padding: json['padding'] == null
@@ -187,7 +175,6 @@ VolMaIndicator _$VolMaIndicatorFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$VolMaIndicatorToJson(VolMaIndicator instance) =>
     <String, dynamic>{
-      'name': instance.name,
       'height': instance.height,
       'padding': const EdgeInsetsConverter().toJson(instance.padding),
       'zIndex': instance.zIndex,

@@ -36,4 +36,3 @@ part 'indicator.g.dart';
 part 'manager.dart';
 part 'object.dart';
 part 'object_helper.dart';
-part 'type_registry.dart';

@@ -7,8 +7,6 @@ part of 'ma.dart';
 // **************************************************************************
 
 abstract class _$MAIndicatorCWProxy {
-  MAIndicator name(String name);
-
   MAIndicator zIndex(int zIndex);
 
   MAIndicator height(double height);
@@ -28,7 +26,6 @@ abstract class _$MAIndicatorCWProxy {
   /// MAIndicator(...).copyWith(id: 12, name: "My name")
   /// ````
   MAIndicator call({
-    String? name,
     int? zIndex,
     double? height,
     EdgeInsets? padding,
@@ -43,9 +40,6 @@ class _$MAIndicatorCWProxyImpl implements _$MAIndicatorCWProxy {
   const _$MAIndicatorCWProxyImpl(this._value);
 
   final MAIndicator _value;
-
-  @override
-  MAIndicator name(String name) => this(name: name);
 
   @override
   MAIndicator zIndex(int zIndex) => this(zIndex: zIndex);
@@ -76,7 +70,6 @@ class _$MAIndicatorCWProxyImpl implements _$MAIndicatorCWProxy {
   /// MAIndicator(...).copyWith(id: 12, name: "My name")
   /// ````
   MAIndicator call({
-    Object? name = const $CopyWithPlaceholder(),
     Object? zIndex = const $CopyWithPlaceholder(),
     Object? height = const $CopyWithPlaceholder(),
     Object? padding = const $CopyWithPlaceholder(),
@@ -85,10 +78,6 @@ class _$MAIndicatorCWProxyImpl implements _$MAIndicatorCWProxy {
     Object? lineWidth = const $CopyWithPlaceholder(),
   }) {
     return MAIndicator(
-      name: name == const $CopyWithPlaceholder() || name == null
-          ? _value.name
-          // ignore: cast_nullable_to_non_nullable
-          : name as String,
       zIndex: zIndex == const $CopyWithPlaceholder() || zIndex == null
           ? _value.zIndex
           // ignore: cast_nullable_to_non_nullable
@@ -130,7 +119,6 @@ extension $MAIndicatorCopyWith on MAIndicator {
 // **************************************************************************
 
 MAIndicator _$MAIndicatorFromJson(Map<String, dynamic> json) => MAIndicator(
-      name: json['name'] as String? ?? 'MA',
       zIndex: (json['zIndex'] as num?)?.toInt() ?? 0,
       height: (json['height'] as num).toDouble(),
       padding: json['padding'] == null
@@ -147,7 +135,6 @@ MAIndicator _$MAIndicatorFromJson(Map<String, dynamic> json) => MAIndicator(
 
 Map<String, dynamic> _$MAIndicatorToJson(MAIndicator instance) =>
     <String, dynamic>{
-      'name': instance.name,
       'height': instance.height,
       'padding': const EdgeInsetsConverter().toJson(instance.padding),
       'zIndex': instance.zIndex,

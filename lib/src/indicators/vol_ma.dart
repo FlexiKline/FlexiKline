@@ -31,7 +31,6 @@ part 'vol_ma.g.dart';
 class VolMaIndicator extends SinglePaintObjectIndicator
     implements IPrecomputable {
   VolMaIndicator({
-    super.name = 'MAVOL',
     super.zIndex = 0,
     super.height = defaultSubIndicatorHeight,
     super.padding = defaultSubIndicatorPadding,
@@ -67,7 +66,7 @@ class VolMaIndicator extends SinglePaintObjectIndicator
 }
 
 class VolMaPaintObject<T extends VolMaIndicator> extends SinglePaintObjectBox<T>
-    with PaintYAxisScaleMixin, PaintYAxisMarkOnCrossMixin {
+    with PaintYAxisTicksMixin, PaintYAxisTicksOnCrossMixin {
   VolMaPaintObject({
     required super.context,
     required super.indicator,
@@ -106,7 +105,7 @@ class VolMaPaintObject<T extends VolMaIndicator> extends SinglePaintObjectBox<T>
 
     if (settingConfig.showYAxisTick) {
       /// 绘制Y轴刻度值
-      paintYAxisScale(
+      paintYAxisTicks(
         canvas,
         size,
         tickCount: indicator.ticksCount,
@@ -118,7 +117,7 @@ class VolMaPaintObject<T extends VolMaIndicator> extends SinglePaintObjectBox<T>
   @override
   void onCross(Canvas canvas, Offset offset) {
     /// onCross时, 绘制Y轴上的标记值
-    paintYAxisMarkOnCross(
+    paintYAxisTicksOnCross(
       canvas,
       offset,
       precision: indicator.precision,
@@ -204,7 +203,7 @@ class VolMaPaintObject<T extends VolMaIndicator> extends SinglePaintObjectBox<T>
       prefix: indicator.volTips.label,
     );
     children.add(TextSpan(
-      text: text,
+      text: '$text  ',
       style: indicator.volTips.style,
     ));
 

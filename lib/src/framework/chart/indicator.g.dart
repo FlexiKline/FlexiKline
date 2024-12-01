@@ -10,8 +10,6 @@ abstract class _$MultiPaintObjectIndicatorCWProxy<
     T extends SinglePaintObjectIndicator> {
   MultiPaintObjectIndicator<T> key(IIndicatorKey key);
 
-  MultiPaintObjectIndicator<T> name(String name);
-
   MultiPaintObjectIndicator<T> height(double height);
 
   MultiPaintObjectIndicator<T> padding(EdgeInsets padding);
@@ -26,7 +24,6 @@ abstract class _$MultiPaintObjectIndicatorCWProxy<
   /// ````
   MultiPaintObjectIndicator<T> call({
     IIndicatorKey? key,
-    String? name,
     double? height,
     EdgeInsets? padding,
     bool? drawBelowTipsArea,
@@ -43,9 +40,6 @@ class _$MultiPaintObjectIndicatorCWProxyImpl<
 
   @override
   MultiPaintObjectIndicator<T> key(IIndicatorKey key) => this(key: key);
-
-  @override
-  MultiPaintObjectIndicator<T> name(String name) => this(name: name);
 
   @override
   MultiPaintObjectIndicator<T> height(double height) => this(height: height);
@@ -68,7 +62,6 @@ class _$MultiPaintObjectIndicatorCWProxyImpl<
   /// ````
   MultiPaintObjectIndicator<T> call({
     Object? key = const $CopyWithPlaceholder(),
-    Object? name = const $CopyWithPlaceholder(),
     Object? height = const $CopyWithPlaceholder(),
     Object? padding = const $CopyWithPlaceholder(),
     Object? drawBelowTipsArea = const $CopyWithPlaceholder(),
@@ -78,10 +71,6 @@ class _$MultiPaintObjectIndicatorCWProxyImpl<
           ? _value.key
           // ignore: cast_nullable_to_non_nullable
           : key as IIndicatorKey,
-      name: name == const $CopyWithPlaceholder() || name == null
-          ? _value.name
-          // ignore: cast_nullable_to_non_nullable
-          : name as String,
       height: height == const $CopyWithPlaceholder() || height == null
           ? _value.height
           // ignore: cast_nullable_to_non_nullable
@@ -116,7 +105,6 @@ MultiPaintObjectIndicator<T>
             Map<String, dynamic> json) =>
         MultiPaintObjectIndicator<T>(
           key: const IIndicatorKeyConvert().fromJson(json['key'] as String),
-          name: json['name'] as String,
           height: (json['height'] as num).toDouble(),
           padding: const EdgeInsetsConverter()
               .fromJson(json['padding'] as Map<String, dynamic>),
@@ -128,7 +116,6 @@ Map<String, dynamic>
             MultiPaintObjectIndicator<T> instance) =>
         <String, dynamic>{
           'key': const IIndicatorKeyConvert().toJson(instance.key),
-          'name': instance.name,
           'height': instance.height,
           'padding': const EdgeInsetsConverter().toJson(instance.padding),
           'drawBelowTipsArea': instance.drawBelowTipsArea,

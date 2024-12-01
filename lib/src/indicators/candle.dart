@@ -29,7 +29,6 @@ part 'candle.g.dart';
 @FlexiIndicatorSerializable
 class CandleIndicator extends SinglePaintObjectIndicator {
   CandleIndicator({
-    super.name = 'Candle',
     super.zIndex = -1,
     required super.height,
     super.padding = defaultMainIndicatorPadding,
@@ -89,7 +88,7 @@ class CandleIndicator extends SinglePaintObjectIndicator {
 }
 
 class CandlePaintObject<T extends CandleIndicator>
-    extends SinglePaintObjectBox<T> with PaintYAxisMarkOnCrossMixin {
+    extends SinglePaintObjectBox<T> with PaintYAxisTicksOnCrossMixin {
   CandlePaintObject({
     required super.context,
     required super.indicator,
@@ -134,7 +133,7 @@ class CandlePaintObject<T extends CandleIndicator>
   @override
   void onCross(Canvas canvas, Offset offset) {
     /// 绘制Cross Y轴价钱刻度
-    paintYAxisMarkOnCross(
+    paintYAxisTicksOnCross(
       canvas,
       offset,
       precision: klineData.precision,
@@ -146,7 +145,7 @@ class CandlePaintObject<T extends CandleIndicator>
 
   // onCross时, 格式化Y轴上的标记值.
   @override
-  String formatMarkValueOnCross(BagNum value, {required int precision}) {
+  String formatTicksValueOnCross(BagNum value, {required int precision}) {
     return formatPrice(
       value.toDecimal(),
       precision: klineData.precision,

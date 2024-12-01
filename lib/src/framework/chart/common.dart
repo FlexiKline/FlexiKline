@@ -141,11 +141,7 @@ abstract interface class IPaintBoundingBox {
     bool reset = false,
   });
 
-  /// 当前指标图paint内的padding.
-  /// 增加padding后tipsRect和chartRect将在此以内绘制.
-  /// 一些额外的信息可以通过padding在左上右下方向上增加扩展的绘制区域.
-  /// 1. 主图的XAxis上的时间刻度绘制在pading.bottom上.
-  EdgeInsets get padding => EdgeInsets.zero;
+  void resetPaintBounding({int? slot});
 
   /// 当前指标图画笔可以绘制的范围
   Rect get drawableRect;
@@ -161,8 +157,6 @@ abstract interface class IPaintBoundingBox {
 
   /// 设置下一个Tips的绘制区域.
   Rect shiftNextTipsRect(double height);
-
-  void resetPaintBounding({int? slot});
 }
 
 /// 指标图的绘制数据初始化接口

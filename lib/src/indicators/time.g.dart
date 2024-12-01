@@ -7,8 +7,6 @@ part of 'time.dart';
 // **************************************************************************
 
 abstract class _$TimeIndicatorCWProxy {
-  TimeIndicator name(String name);
-
   TimeIndicator zIndex(int zIndex);
 
   TimeIndicator height(double height);
@@ -26,7 +24,6 @@ abstract class _$TimeIndicatorCWProxy {
   /// TimeIndicator(...).copyWith(id: 12, name: "My name")
   /// ````
   TimeIndicator call({
-    String? name,
     int? zIndex,
     double? height,
     EdgeInsets? padding,
@@ -40,9 +37,6 @@ class _$TimeIndicatorCWProxyImpl implements _$TimeIndicatorCWProxy {
   const _$TimeIndicatorCWProxyImpl(this._value);
 
   final TimeIndicator _value;
-
-  @override
-  TimeIndicator name(String name) => this(name: name);
 
   @override
   TimeIndicator zIndex(int zIndex) => this(zIndex: zIndex);
@@ -68,7 +62,6 @@ class _$TimeIndicatorCWProxyImpl implements _$TimeIndicatorCWProxy {
   /// TimeIndicator(...).copyWith(id: 12, name: "My name")
   /// ````
   TimeIndicator call({
-    Object? name = const $CopyWithPlaceholder(),
     Object? zIndex = const $CopyWithPlaceholder(),
     Object? height = const $CopyWithPlaceholder(),
     Object? padding = const $CopyWithPlaceholder(),
@@ -76,10 +69,6 @@ class _$TimeIndicatorCWProxyImpl implements _$TimeIndicatorCWProxy {
     Object? timeTick = const $CopyWithPlaceholder(),
   }) {
     return TimeIndicator(
-      name: name == const $CopyWithPlaceholder() || name == null
-          ? _value.name
-          // ignore: cast_nullable_to_non_nullable
-          : name as String,
       zIndex: zIndex == const $CopyWithPlaceholder() || zIndex == null
           ? _value.zIndex
           // ignore: cast_nullable_to_non_nullable
@@ -116,7 +105,6 @@ extension $TimeIndicatorCopyWith on TimeIndicator {
 
 TimeIndicator _$TimeIndicatorFromJson(Map<String, dynamic> json) =>
     TimeIndicator(
-      name: json['name'] as String? ?? 'Time',
       zIndex: (json['zIndex'] as num?)?.toInt() ?? 0,
       height:
           (json['height'] as num?)?.toDouble() ?? defaultTimeIndicatorHeight,
@@ -133,7 +121,6 @@ TimeIndicator _$TimeIndicatorFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$TimeIndicatorToJson(TimeIndicator instance) =>
     <String, dynamic>{
-      'name': instance.name,
       'height': instance.height,
       'padding': const EdgeInsetsConverter().toJson(instance.padding),
       'zIndex': instance.zIndex,

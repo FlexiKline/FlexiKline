@@ -17,7 +17,6 @@ part of 'indicator.dart';
 /// 指标基础配置
 ///
 /// [key] 唯一指定Indicator
-/// [name] 用于展示
 /// [height] 指标图高度
 /// [padding] 限制指标图绘制区域
 /// [paintMode] 控制多指标图一起的绘制方式.
@@ -28,7 +27,6 @@ part of 'indicator.dart';
 abstract class Indicator implements IPrecomputable {
   Indicator({
     required this.key,
-    required this.name,
     required this.height,
     required this.padding,
     this.paintMode = PaintMode.combine,
@@ -36,10 +34,6 @@ abstract class Indicator implements IPrecomputable {
   });
 
   final IIndicatorKey key;
-
-  /// TODO: 后续废弃
-  @Deprecated('废弃, 使用key.label')
-  final String name;
 
   double height;
 
@@ -49,56 +43,8 @@ abstract class Indicator implements IPrecomputable {
 
   final int zIndex; // TODO: 考虑下放到子类中
 
-  // @override
-  // bool operator ==(Object other) {
-  //   if (identical(this, other)) return true;
-  //   if (other is Indicator) {
-  //     return other.runtimeType == runtimeType && other.key == key;
-  //   }
-  //   return false;
-  // }
-
-  // @override
-  // int get hashCode {
-  //   return key.hashCode;
-  // }
-
-  // PaintObject? _paintObject;
-  // PaintObject? get paintObject => _paintObject;
-
-  // void ensurePaintObject(IPaintContext context) {
-  //   _paintObject ??= createPaintObject(context);
-  // }
-
-  // bool updateLayout({
-  //   double? height,
-  //   EdgeInsets? padding,
-  //   bool reset = false,
-  // }) {
-  //   bool hasChange = false;
-  //   if (height != null && height > 0 && height != this.height) {
-  //     this.height = height;
-  //     hasChange = true;
-  //   }
-
-  //   if (padding != null && padding != this.padding) {
-  //     this.padding = padding;
-  //     hasChange = true;
-  //   }
-  //   if (reset || hasChange) {
-  //     paintObject?.resetPaintBounding();
-  //   }
-  //   return reset || hasChange;
-  // }
-
   @factory
   PaintObject createPaintObject(IPaintContext context);
-
-  // @mustCallSuper
-  // void dispose() {
-  //   _paintObject?.dispose();
-  //   _paintObject = null;
-  // }
 
   Map<String, dynamic> toJson() => const {};
 
@@ -121,7 +67,6 @@ abstract class Indicator implements IPrecomputable {
 abstract class SinglePaintObjectIndicator extends Indicator {
   SinglePaintObjectIndicator({
     required super.key,
-    required super.name,
     required super.height,
     required super.padding,
     super.paintMode,
@@ -133,120 +78,23 @@ abstract class SinglePaintObjectIndicator extends Indicator {
 }
 
 /// 多个绘制Indicator的配置.
-///
-/// [children] 维护具体的Indicator配置.
 @CopyWith()
 @FlexiIndicatorSerializable
 class MultiPaintObjectIndicator<T extends SinglePaintObjectIndicator>
     extends Indicator {
   MultiPaintObjectIndicator({
     required super.key,
-    required super.name,
     required super.height,
     required super.padding,
     this.drawBelowTipsArea = false,
   });
-  //   Iterable<T> children = const [],
-  // })  : children = SortableHashSet<T>.from(children),
-  //       _initialPadding = padding;
 
-  // @JsonKey(includeFromJson: false, includeToJson: false)
-  // final SortableHashSet<T> children;
-
-  bool drawBelowTipsArea;
-
-  // final EdgeInsets _initialPadding;
-
-  // /// 当前[tipsHeight]是否需要更新布局参数
-  // bool needUpdateLayout(double tipsHeight) {
-  //   return _initialPadding.top + tipsHeight != padding.top;
-  // }
+  final bool drawBelowTipsArea;
 
   @override
   MultiPaintObjectBox createPaintObject(IPaintContext context) {
     return MultiPaintObjectBox(context: context, indicator: this);
   }
-
-  // @override
-  // void ensurePaintObject(IPaintContext context) {
-  //   _paintObject ??= createPaintObject(context);
-  //   for (var child in children) {
-  //     if (child.paintObject?._parent != paintObject) {
-  //       child.paintObject?.dispose();
-  //       _initChildPaintObject(context, child);
-  //     }
-  //   }
-  // }
-
-  // void _initChildPaintObject(
-  //   IPaintContext context,
-  //   Indicator indicator,
-  // ) {
-  //   indicator.updateLayout(
-  //     height: indicator.paintMode.isCombine ? height : null,
-  //     padding: indicator.paintMode.isCombine ? padding : null,
-  //   );
-  //   indicator._paintObject = indicator.createPaintObject(context);
-  //   indicator._paintObject!._parent = paintObject;
-  // }
-
-  // @override
-  // bool updateLayout({
-  //   double? height,
-  //   EdgeInsets? padding,
-  //   bool reset = false,
-  //   double? tipsHeight,
-  // }) {
-  //   if (tipsHeight != null) {
-  //     // 如果tipsHeight不为空, 说明是绘制过程中动态调整, 只需要在MultiPaintObjectIndicator原padding基础上增加即可.
-  //     padding = _initialPadding.copyWith(
-  //       top: _initialPadding.top + tipsHeight,
-  //     );
-  //   }
-  //   bool hasChange = super.updateLayout(
-  //     height: height,
-  //     padding: padding,
-  //     reset: reset,
-  //   );
-  //   for (var child in children) {
-  //     final childChange = child.updateLayout(
-  //       height: child.paintMode.isCombine ? this.height : null,
-  //       padding: child.paintMode.isCombine ? this.padding : null,
-  //       reset: reset,
-  //     );
-  //     hasChange = hasChange || childChange;
-  //   }
-  //   return hasChange;
-  // }
-
-  // void appendIndicators(Iterable<T> indicators, IPaintContext context) {
-  //   for (var indicator in indicators) {
-  //     appendIndicator(indicator, context);
-  //   }
-  // }
-
-  // void appendIndicator(
-  //   T newIndicator,
-  //   IPaintContext context,
-  // ) {
-  //   // 使用前先解绑
-  //   newIndicator.dispose();
-  //   children.append(newIndicator)?.dispose();
-  //   if (paintObject != null) {
-  //     // 说明当前父PaintObject已经创建, 需要及时创建新加入的newIndicator,
-  //     _initChildPaintObject(context, newIndicator);
-  //   }
-  // }
-
-  // void deleteIndicator(IIndicatorKey key) {
-  //   children.removeWhere((element) {
-  //     if (element.key == key) {
-  //       element.dispose();
-  //       return true;
-  //     }
-  //     return false;
-  //   });
-  // }
 
   // 从JSON映射转换为Response对象的工厂方法
   factory MultiPaintObjectIndicator.fromJson(Map<String, dynamic> json) =>

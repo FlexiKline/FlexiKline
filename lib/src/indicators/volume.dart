@@ -29,18 +29,16 @@ part 'volume.g.dart';
 @FlexiIndicatorSerializable
 class VolumeIndicator extends SinglePaintObjectIndicator {
   VolumeIndicator({
-    super.name = 'VOL',
     super.zIndex = -2,
     super.height = defaultSubIndicatorHeight,
     super.padding = defaultSubIndicatorPadding,
-    super.paintMode = PaintMode.alone,
 
     /// 绘制相关参数
     required this.volTips,
     required this.tipsPadding,
     this.tickCount = defaultSubTickCount,
     this.precision = 2,
-  }) : super(key: IndicatorType.volume);
+  }) : super(key: IndicatorType.volume, paintMode: PaintMode.alone);
 
   /// 绘制相关参数
   final TipsConfig volTips;
@@ -69,7 +67,7 @@ class VolumeIndicator extends SinglePaintObjectIndicator {
 
 class VolumePaintObject<T extends VolumeIndicator>
     extends SinglePaintObjectBox<T>
-    with PaintYAxisScaleMixin, PaintYAxisMarkOnCrossMixin {
+    with PaintYAxisTicksMixin, PaintYAxisTicksOnCrossMixin {
   VolumePaintObject({required super.context, required super.indicator});
 
   @override
@@ -91,7 +89,7 @@ class VolumePaintObject<T extends VolumeIndicator>
 
     if (settingConfig.showYAxisTick) {
       /// 绘制Y轴刻度值
-      paintYAxisScale(
+      paintYAxisTicks(
         canvas,
         size,
         tickCount: indicator.tickCount,
@@ -103,7 +101,7 @@ class VolumePaintObject<T extends VolumeIndicator>
   @override
   void onCross(Canvas canvas, Offset offset) {
     /// onCross时, 绘制Y轴上的标记值
-    paintYAxisMarkOnCross(
+    paintYAxisTicksOnCross(
       canvas,
       offset,
       precision: indicator.precision,

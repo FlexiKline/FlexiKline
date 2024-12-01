@@ -20,6 +20,7 @@ class IndicatorObject<T extends Indicator>
     implements Comparable<IndicatorObject<T>> {
   IndicatorObject(this._indicator, this.context);
 
+  // ignore: prefer_final_fields
   T _indicator;
   final IPaintContext context;
 
@@ -39,17 +40,12 @@ class IndicatorObject<T extends Indicator>
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other is Indicator) {
-      return other.runtimeType == runtimeType && other.key == key;
-    }
-    return false;
+    return identical(this, other) ||
+        (other is IndicatorObject && key == other.key);
   }
 
   @override
-  int get hashCode {
-    return key.hashCode;
-  }
+  int get hashCode => runtimeType.hashCode ^ key.hashCode;
 }
 
 /// PaintObject
@@ -67,7 +63,7 @@ abstract class PaintObject<T extends Indicator> extends IndicatorObject<T>
     }
   }
 
-  // 父级PaintObject. 主要用于给其他子级PaintObject限定范围.
+  // 父级PaintObject. 主要用于给其子级PaintObject限定范围.
   PaintObject? _parent;
 
   bool get hasParentObject => _parent != null;
@@ -91,24 +87,11 @@ abstract class PaintObject<T extends Indicator> extends IndicatorObject<T>
   String get logTag => '${super.logTag}\t${indicator.key.toString()}';
 }
 
-/// PaintObjectProxy
-// /// 通过参数KlineBindingBase 混入对setting和state的代理
-// abstract class PaintObjectProxy<T extends Indicator> extends PaintObject
-//     with KlineLog, ConfigStateMixin {
-//   PaintObjectProxy({
-//     required T indicator,
-//     required IPaintContext context,
-//   }) : super(indicator, context) {
-//     if (context is KlineLog) {
-//       loggerDelegate = (context as KlineLog).loggerDelegate;
-//     }
-//   }
-// }
-
 /// PaintObjectBox
 /// 通过混入边界计算与数据初始化计算, 简化PaintObject接口.
 abstract class SinglePaintObjectBox<T extends SinglePaintObjectIndicator>
-    extends PaintObject with PaintObjectBoundingMixin, DataInitMixin {
+    extends PaintObject
+    with PaintObjectBoundingMixin, PaintObjectDataInitMixin {
   SinglePaintObjectBox({
     required super.context,
     required T super.indicator,
@@ -179,10 +162,11 @@ abstract class SinglePaintObjectBox<T extends SinglePaintObjectIndicator>
   }
 }
 
-/// 多个Indicator组合绘制
+/// 多个[PaintObject]组合绘制
 /// 主要实现接口遍历转发.
 class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
-    extends PaintObject with PaintObjectBoundingMixin, DataInitMixin {
+    extends PaintObject
+    with PaintObjectBoundingMixin, PaintObjectDataInitMixin {
   MultiPaintObjectBox({
     required super.context,
     required T super.indicator,
@@ -203,6 +187,7 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
     return _initialPadding.top + tipsHeight != padding.top;
   }
 
+  @nonVirtual
   @override
   bool updateLayout({
     double? height,
@@ -232,21 +217,21 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
     return hasChange;
   }
 
-  void appendPaintObjects(Iterable<PaintObject> paintObjects) {
-    for (var object in paintObjects) {
+  void appendPaintObjects(Iterable<PaintObject> objects) {
+    for (var object in objects) {
       appendPaintObject(object);
     }
   }
 
-  void appendPaintObject(PaintObject paintObject) {
+  void appendPaintObject(PaintObject object) {
     // 使用前先解绑: 释放[paintObject]parentObject与数据.
-    paintObject.dispose();
-    paintObject._parent = this;
-    paintObject.updateLayout(
-      height: paintMode.isCombine ? height : null,
-      padding: paintMode.isCombine ? padding : null,
+    object.dispose();
+    object._parent = this;
+    object.updateLayout(
+      height: object.paintMode.isCombine ? height : null,
+      padding: object.paintMode.isCombine ? padding : null,
     );
-    final old = children.append(paintObject);
+    final old = children.append(object);
     old?.dispose();
   }
 
@@ -419,6 +404,7 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
     for (var object in children) {
       object.dispose();
     }
+    children.clear();
     super.dispose();
   }
 }

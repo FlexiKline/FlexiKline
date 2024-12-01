@@ -169,12 +169,6 @@ abstract class BaseFlexiKlineTheme implements IFlexiKlineTheme {
 /// 通过[IFlexiKlineTheme]来配置FlexiKline基类.
 mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
   // @override
-  // Iterable<Overlay> getOverlayListConfig(String instId) => const [];
-
-  // @override
-  // void saveOverlayListConfig(String instId, Iterable<Overlay> list) {}
-
-  // @override
   // FlexiKlineConfig getFlexiKlineConfig();
 
   FlexiKlineConfig genFlexiKlineConfig() {
@@ -186,15 +180,10 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       cross: genCrossConfig(),
       draw: genDrawConfig(),
       tooltip: genTooltipConfig(),
-      // indicators: genIndicatorsConfig(theme),
-      main: mainIndicatorKeys,
-      sub: subIndicatorsKeys,
+      main: {},
+      sub: {},
     );
   }
-
-  Set<IIndicatorKey> get mainIndicatorKeys => {};
-
-  Set<IIndicatorKey> get subIndicatorsKeys => {};
 
   @override
   IndicatorBuilder get candleIndicatorBuilder {
@@ -576,7 +565,6 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       zIndex: -2,
       height: theme.subIndicatorHeight,
       padding: theme.subIndicatorPadding,
-      paintMode: PaintMode.alone,
 
       /// 绘制相关参数
       volTips: TipsConfig(

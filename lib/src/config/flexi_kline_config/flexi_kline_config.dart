@@ -46,85 +46,8 @@ class FlexiKlineConfig {
   CrossConfig cross;
   DrawConfig draw;
   TooltipConfig tooltip;
-  // IndicatorsConfig indicators;
   Set<IIndicatorKey> main;
   Set<IIndicatorKey> sub;
-
-  // @JsonKey(includeFromJson: false, includeToJson: false)
-  // late final MultiPaintObjectIndicator mainIndicator;
-  // @JsonKey(includeFromJson: false, includeToJson: false)
-  // late final FixedHashQueue<Indicator> subRectIndicatorQueue;
-
-  // void init({
-  //   required Map<IIndicatorKey, SinglePaintObjectIndicator>
-  //       customMainIndicators,
-  //   required Map<IIndicatorKey, Indicator> customSubIndicators,
-  // }) {
-  //   mainIndicator = MultiPaintObjectIndicator(
-  //     key: IndicatorType.main,
-  //     name: IndicatorType.main.label,
-  //     height: setting.mainRect.height,
-  //     padding: setting.mainPadding,
-  //     drawBelowTipsArea: setting.mainDrawBelowTipsArea,
-  //   );
-
-  //   subRectIndicatorQueue = FixedHashQueue<Indicator>(
-  //     setting.subChartMaxCount,
-  //   );
-
-  //   if (!main.contains(IndicatorType.candle)) {
-  //     main.add(IndicatorType.candle);
-  //   }
-  //   for (var key in main) {
-  //     SinglePaintObjectIndicator? indicator = customMainIndicators.getItem(key);
-  //     indicator ??= indicators.mainIndicators.getItem(key);
-  //     if (indicator != null) {
-  //       // 使用前先解绑
-  //       indicator.dispose();
-  //       mainIndicator.children.add(indicator);
-  //     }
-  //   }
-
-  //   if (sub.contains(IndicatorType.time)) {
-  //     sub.remove(IndicatorType.time); // Time指标是默认的
-  //   }
-  //   if (sub.isNotEmpty) {
-  //     if (sub.length > setting.subChartMaxCount) {
-  //       sub = sub.skip(sub.length - setting.subChartMaxCount).toSet();
-  //     }
-  //     for (var key in sub) {
-  //       Indicator? indicator = customSubIndicators.getItem(key);
-  //       indicator ??= indicators.subIndicators.getItem(key);
-  //       if (indicator != null) {
-  //         // 使用前先解绑
-  //         indicator.dispose();
-  //         subRectIndicatorQueue.append(indicator)?.dispose();
-  //       }
-  //     }
-  //   }
-  // }
-
-  /// 收集当前已打开指标的计算参数
-  // Map<IIndicatorKey, dynamic> getOpenedIndicatorCalcParams() {
-  //   final calcParams = <IIndicatorKey, dynamic>{};
-  //   calcParams.addAll(mainIndicator.getCalcParams());
-
-  //   for (var subIndicator in subRectIndicatorQueue) {
-  //     final params = subIndicator.getCalcParams();
-
-  //     // 暂时 通过key的判断去掉主区与副区相同指标的重复计算参数.
-  //     if (subIndicator.key == IndicatorType.subBoll &&
-  //         calcParams[IndicatorType.boll] == params[IndicatorType.subBoll]) {
-  //       continue;
-  //     }
-  //     if (subIndicator.key == IndicatorType.subSar &&
-  //         calcParams[IndicatorType.sar] == params[IndicatorType.subSar]) {
-  //       continue;
-  //     }
-  //     calcParams.addAll(params);
-  //   }
-  //   return calcParams;
-  // }
 
   FlexiKlineConfig clone() {
     try {
@@ -140,34 +63,6 @@ class FlexiKlineConfig {
     sub = config.sub;
     setting.update(config.setting);
   }
-
-  /// 更新指标配置
-  // void updateIndicatorsConfig(IndicatorsConfig config) {
-  //   final keys = config.megerAndDisposeOldIndicator(indicators);
-  //   indicators = config;
-
-  //   for (var key in keys) {
-  //     mainIndicator.appendIndicator(newIndicator, controller)
-  //   }
-  //   for (var indicator in mainIndicator.children) {
-  //     if (keys.contains(indicator.key)) {
-  //       indicator.dispose();
-  //     }
-  //   }
-  //   for (var indicator in subIndicators) {
-  //     if (keys.contains(indicator.key)) {
-  //       indicator.dispose();
-  //     }
-  //   }
-  // }
-
-  // void dispose() {
-  //   // indicators.dispose();
-  //   // mainIndicator.dispose();
-  //   // for (var indicator in subRectIndicatorQueue) {
-  //   //   indicator.dispose();
-  //   // }
-  // }
 
   factory FlexiKlineConfig.fromJson(Map<String, dynamic> json) =>
       _$FlexiKlineConfigFromJson(json);

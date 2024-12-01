@@ -19,7 +19,7 @@ void main() {
   group('test-configs', () {
     test('test-indicators', () {
       final json = <String, dynamic>{};
-      final indicators = IndicatorsConfig.fromJson(json);
+      // final indicators = IndicatorsConfig.fromJson(json);
 
       // indicators.volume = VolumeIndicator(paintMode: PaintMode.combine);
       // expect(indicators.mavol.children.length, 2);

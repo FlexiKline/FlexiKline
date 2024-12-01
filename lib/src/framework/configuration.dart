@@ -16,7 +16,6 @@ import 'package:flutter/painting.dart';
 
 import '../constant.dart';
 import '../config/export.dart';
-import '../core/core.dart';
 import 'chart/indicator.dart';
 import 'draw/overlay.dart';
 

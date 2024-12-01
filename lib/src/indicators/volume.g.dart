@@ -7,15 +7,11 @@ part of 'volume.dart';
 // **************************************************************************
 
 abstract class _$VolumeIndicatorCWProxy {
-  VolumeIndicator name(String name);
-
   VolumeIndicator zIndex(int zIndex);
 
   VolumeIndicator height(double height);
 
   VolumeIndicator padding(EdgeInsets padding);
-
-  VolumeIndicator paintMode(PaintMode paintMode);
 
   VolumeIndicator volTips(TipsConfig volTips);
 
@@ -32,11 +28,9 @@ abstract class _$VolumeIndicatorCWProxy {
   /// VolumeIndicator(...).copyWith(id: 12, name: "My name")
   /// ````
   VolumeIndicator call({
-    String? name,
     int? zIndex,
     double? height,
     EdgeInsets? padding,
-    PaintMode? paintMode,
     TipsConfig? volTips,
     EdgeInsets? tipsPadding,
     int? tickCount,
@@ -51,9 +45,6 @@ class _$VolumeIndicatorCWProxyImpl implements _$VolumeIndicatorCWProxy {
   final VolumeIndicator _value;
 
   @override
-  VolumeIndicator name(String name) => this(name: name);
-
-  @override
   VolumeIndicator zIndex(int zIndex) => this(zIndex: zIndex);
 
   @override
@@ -61,9 +52,6 @@ class _$VolumeIndicatorCWProxyImpl implements _$VolumeIndicatorCWProxy {
 
   @override
   VolumeIndicator padding(EdgeInsets padding) => this(padding: padding);
-
-  @override
-  VolumeIndicator paintMode(PaintMode paintMode) => this(paintMode: paintMode);
 
   @override
   VolumeIndicator volTips(TipsConfig volTips) => this(volTips: volTips);
@@ -87,21 +75,15 @@ class _$VolumeIndicatorCWProxyImpl implements _$VolumeIndicatorCWProxy {
   /// VolumeIndicator(...).copyWith(id: 12, name: "My name")
   /// ````
   VolumeIndicator call({
-    Object? name = const $CopyWithPlaceholder(),
     Object? zIndex = const $CopyWithPlaceholder(),
     Object? height = const $CopyWithPlaceholder(),
     Object? padding = const $CopyWithPlaceholder(),
-    Object? paintMode = const $CopyWithPlaceholder(),
     Object? volTips = const $CopyWithPlaceholder(),
     Object? tipsPadding = const $CopyWithPlaceholder(),
     Object? tickCount = const $CopyWithPlaceholder(),
     Object? precision = const $CopyWithPlaceholder(),
   }) {
     return VolumeIndicator(
-      name: name == const $CopyWithPlaceholder() || name == null
-          ? _value.name
-          // ignore: cast_nullable_to_non_nullable
-          : name as String,
       zIndex: zIndex == const $CopyWithPlaceholder() || zIndex == null
           ? _value.zIndex
           // ignore: cast_nullable_to_non_nullable
@@ -114,10 +96,6 @@ class _$VolumeIndicatorCWProxyImpl implements _$VolumeIndicatorCWProxy {
           ? _value.padding
           // ignore: cast_nullable_to_non_nullable
           : padding as EdgeInsets,
-      paintMode: paintMode == const $CopyWithPlaceholder() || paintMode == null
-          ? _value.paintMode
-          // ignore: cast_nullable_to_non_nullable
-          : paintMode as PaintMode,
       volTips: volTips == const $CopyWithPlaceholder() || volTips == null
           ? _value.volTips
           // ignore: cast_nullable_to_non_nullable
@@ -151,16 +129,12 @@ extension $VolumeIndicatorCopyWith on VolumeIndicator {
 
 VolumeIndicator _$VolumeIndicatorFromJson(Map<String, dynamic> json) =>
     VolumeIndicator(
-      name: json['name'] as String? ?? 'VOL',
       zIndex: (json['zIndex'] as num?)?.toInt() ?? -2,
       height: (json['height'] as num?)?.toDouble() ?? defaultSubIndicatorHeight,
       padding: json['padding'] == null
           ? defaultSubIndicatorPadding
           : const EdgeInsetsConverter()
               .fromJson(json['padding'] as Map<String, dynamic>),
-      paintMode: json['paintMode'] == null
-          ? PaintMode.alone
-          : const PaintModeConverter().fromJson(json['paintMode'] as String),
       volTips: TipsConfig.fromJson(json['volTips'] as Map<String, dynamic>),
       tipsPadding: const EdgeInsetsConverter()
           .fromJson(json['tipsPadding'] as Map<String, dynamic>),
@@ -170,10 +144,8 @@ VolumeIndicator _$VolumeIndicatorFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$VolumeIndicatorToJson(VolumeIndicator instance) =>
     <String, dynamic>{
-      'name': instance.name,
       'height': instance.height,
       'padding': const EdgeInsetsConverter().toJson(instance.padding),
-      'paintMode': const PaintModeConverter().toJson(instance.paintMode),
       'zIndex': instance.zIndex,
       'volTips': instance.volTips.toJson(),
       'tipsPadding': const EdgeInsetsConverter().toJson(instance.tipsPadding),
