@@ -7,8 +7,6 @@ part of 'volume.dart';
 // **************************************************************************
 
 abstract class _$VolumeIndicatorCWProxy {
-  VolumeIndicator key(IIndicatorKey key);
-
   VolumeIndicator name(String name);
 
   VolumeIndicator zIndex(int zIndex);
@@ -34,7 +32,6 @@ abstract class _$VolumeIndicatorCWProxy {
   /// VolumeIndicator(...).copyWith(id: 12, name: "My name")
   /// ````
   VolumeIndicator call({
-    IIndicatorKey? key,
     String? name,
     int? zIndex,
     double? height,
@@ -52,9 +49,6 @@ class _$VolumeIndicatorCWProxyImpl implements _$VolumeIndicatorCWProxy {
   const _$VolumeIndicatorCWProxyImpl(this._value);
 
   final VolumeIndicator _value;
-
-  @override
-  VolumeIndicator key(IIndicatorKey key) => this(key: key);
 
   @override
   VolumeIndicator name(String name) => this(name: name);
@@ -93,7 +87,6 @@ class _$VolumeIndicatorCWProxyImpl implements _$VolumeIndicatorCWProxy {
   /// VolumeIndicator(...).copyWith(id: 12, name: "My name")
   /// ````
   VolumeIndicator call({
-    Object? key = const $CopyWithPlaceholder(),
     Object? name = const $CopyWithPlaceholder(),
     Object? zIndex = const $CopyWithPlaceholder(),
     Object? height = const $CopyWithPlaceholder(),
@@ -105,10 +98,6 @@ class _$VolumeIndicatorCWProxyImpl implements _$VolumeIndicatorCWProxy {
     Object? precision = const $CopyWithPlaceholder(),
   }) {
     return VolumeIndicator(
-      key: key == const $CopyWithPlaceholder() || key == null
-          ? _value.key
-          // ignore: cast_nullable_to_non_nullable
-          : key as IIndicatorKey,
       name: name == const $CopyWithPlaceholder() || name == null
           ? _value.name
           // ignore: cast_nullable_to_non_nullable
@@ -162,7 +151,6 @@ extension $VolumeIndicatorCopyWith on VolumeIndicator {
 
 VolumeIndicator _$VolumeIndicatorFromJson(Map<String, dynamic> json) =>
     VolumeIndicator(
-      key: const IIndicatorKeyConvert().fromJson(json['key'] as String),
       name: json['name'] as String? ?? 'VOL',
       zIndex: (json['zIndex'] as num?)?.toInt() ?? -2,
       height: (json['height'] as num?)?.toDouble() ?? defaultSubIndicatorHeight,
@@ -182,7 +170,6 @@ VolumeIndicator _$VolumeIndicatorFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$VolumeIndicatorToJson(VolumeIndicator instance) =>
     <String, dynamic>{
-      'key': const IIndicatorKeyConvert().toJson(instance.key),
       'name': instance.name,
       'height': instance.height,
       'padding': const EdgeInsetsConverter().toJson(instance.padding),

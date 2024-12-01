@@ -15,9 +15,7 @@
 part of 'indicator.dart';
 
 /// FlexiKlineController 状态/配置/接口代理
-mixin ControllerProxyMixin on PaintObject {
-  late final IPaintContext context;
-
+mixin ConfigStateMixin<T extends Indicator> on IndicatorObject<T> {
   /// Binding
   // SettingBinding get setting => controller as SettingBinding;
   // IState get state => controller as IState;
@@ -43,8 +41,7 @@ mixin ControllerProxyMixin on PaintObject {
 }
 
 /// 绘制对象混入边界计算的通用扩展
-mixin PaintObjectBoundingMixin on PaintObjectProxy
-    implements IPaintBoundingBox {
+mixin PaintObjectBoundingMixin on PaintObject implements IPaintBoundingBox {
   bool get drawInMain => slot == mainIndicatorSlot;
   bool get drawInSub => slot > mainIndicatorSlot;
 
@@ -62,6 +59,29 @@ mixin PaintObjectBoundingMixin on PaintObjectProxy
   Rect? _chartRect;
   Rect? _topRect;
   Rect? _bottomRect;
+
+  /// 更新布布局参数
+  @override
+  bool updateLayout({
+    double? height,
+    EdgeInsets? padding,
+    bool reset = false,
+  }) {
+    bool hasChange = false;
+    if (height != null && height > 0 && height != _indicator.height) {
+      _indicator.height = height;
+      hasChange = true;
+    }
+
+    if (padding != null && padding != _indicator.padding) {
+      _indicator.padding = padding;
+      hasChange = true;
+    }
+    if (reset || hasChange) {
+      resetPaintBounding();
+    }
+    return reset || hasChange;
+  }
 
   @nonVirtual
   @override
@@ -141,7 +161,7 @@ mixin PaintObjectBoundingMixin on PaintObjectProxy
 }
 
 /// 绘制对象混入数据初始化的通用扩展
-mixin DataInitMixin on PaintObjectProxy implements IPaintDataInit {
+mixin DataInitMixin on PaintObject implements IPaintDataInit {
   int? _start;
   int? _end;
 
@@ -343,5 +363,26 @@ mixin PaintSimpleCandleMixin<T extends SinglePaintObjectIndicator>
         linePaint,
       );
     }
+  }
+}
+
+extension PaintObjectExt on PaintObject {
+  Map<IIndicatorKey, dynamic> getCalcParams() {
+    if (calcParams != null) {
+      return {key: calcParams};
+    }
+    return const <IIndicatorKey, dynamic>{};
+  }
+}
+
+extension MultiPaintObjectBoxExt on MultiPaintObjectBox {
+  Map<IIndicatorKey, dynamic> getCalcParams() {
+    final params = <IIndicatorKey, dynamic>{};
+    for (var object in children) {
+      if (object.calcParams != null) {
+        params[object.key] = object.calcParams;
+      }
+    }
+    return params;
   }
 }

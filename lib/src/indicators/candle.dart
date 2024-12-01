@@ -29,7 +29,6 @@ part 'candle.g.dart';
 @FlexiIndicatorSerializable
 class CandleIndicator extends SinglePaintObjectIndicator {
   CandleIndicator({
-    super.key = IndicatorType.candle,
     super.name = 'Candle',
     super.zIndex = -1,
     required super.height,
@@ -58,7 +57,7 @@ class CandleIndicator extends SinglePaintObjectIndicator {
     //   textWidth: 80,
     //   textAlign: TextAlign.center,
     // ),
-  });
+  }) : super(key: IndicatorType.candle);
 
   // 最高价
   final MarkConfig high;

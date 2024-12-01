@@ -34,4 +34,208 @@ final class IndicatorPaintObjectManager with KlineLog {
 
   @override
   String get logTag => 'IndicatorPaintObjectManager';
+
+  /// 动态维护指标计算数据存储位置
+  final Map<IIndicatorKey, int> _indicatorDataIndexs = {};
+
+  late final MultiPaintObjectBox _mainPaintObject;
+
+  late final FixedHashQueue<PaintObject> _subPaintObjectQueue;
+
+  PaintObject? _timePaintObject;
+
+  ITimeRectConfig? get timeRectConfig {
+    if (_timePaintObject != null && _timePaintObject is ITimeRectConfig) {
+      return _timePaintObject as ITimeRectConfig;
+    }
+    return null;
+  }
+
+  MultiPaintObjectBox get mainPaintObject => _mainPaintObject;
+
+  Iterable<PaintObject> get subPaintObjects {
+    final objects = _subPaintObjectQueue;
+    if (_timePaintObject != null && timeRectConfig != null) {
+      if (timeRectConfig!.position == DrawPosition.bottom) {
+        return [...objects, _timePaintObject!];
+      } else if (timeRectConfig!.position == DrawPosition.middle) {
+        return [_timePaintObject!, ...objects];
+      }
+    }
+    return objects;
+  }
+
+  /// 主区指标配置构造器
+  final Map<IIndicatorKey, IndicatorBuilder> _mainIndicatorBuilders = {};
+
+  /// 副区指标配置构造器
+  final Map<IIndicatorKey, IndicatorBuilder> _subIndicatorBuilders = {};
+
+  Iterable<IIndicatorKey>? _supportMainIndicatorKeys;
+  Iterable<IIndicatorKey> get supportMainIndicatorKeys {
+    return _supportMainIndicatorKeys ??= _mainIndicatorBuilders.keys;
+  }
+
+  Iterable<IIndicatorKey>? _supportSubIndicatorKeys;
+  Iterable<IIndicatorKey> get supportSubIndicatorKeys {
+    return _supportSubIndicatorKeys ??= _subIndicatorBuilders.keys;
+  }
+
+  Iterable<IIndicatorKey> get mainIndciatorKeys {
+    return _mainPaintObject.children.map((obj) => obj.key);
+  }
+
+  Iterable<IIndicatorKey> get subIndicatorKeys {
+    return _subPaintObjectQueue.map((obj) => obj.key);
+  }
+
+  void registerMainIndicatorBuilder<T extends SinglePaintObjectIndicator>(
+    IIndicatorKey key,
+    IndicatorBuilder<SinglePaintObjectIndicator> builder,
+  ) {
+    _mainIndicatorBuilders[key] = builder;
+    _supportMainIndicatorKeys = null;
+    // if (!_indicatorDataIndexs.containsKey(key)) {
+    //   _indicatorDataIndexs[key] = _indicatorDataIndexs.length;
+    // }
+  }
+
+  void registerSubIndicatorBuilder<T extends SinglePaintObjectIndicator>(
+    IIndicatorKey key,
+    IndicatorBuilder<SinglePaintObjectIndicator> builder,
+  ) {
+    _subIndicatorBuilders[key] = builder;
+    _supportSubIndicatorKeys = null;
+    // if (!_indicatorDataIndexs.containsKey(key)) {
+    //   _indicatorDataIndexs[key] = _indicatorDataIndexs.length;
+    // }
+  }
+
+  int? getIndicatorDataIndex(IIndicatorKey key) {
+    return _indicatorDataIndexs.getItem(key);
+  }
+
+  /// 初始化指标
+  /// 1. 确认指标数据在[CandleModel]的[CalculateData]中的index.
+  /// 2. 初始化主区绘制对象, 初始化副区绘制对象队列
+  /// 3. 从配置中加载缓存的主/副区指标.
+  void initState(IPaintContext context, IKlineConfig config) {
+    _indicatorDataIndexs.clear();
+    int index = 0;
+    for (var key in [...supportMainIndicatorKeys, ...supportSubIndicatorKeys]) {
+      _indicatorDataIndexs[key] = index++;
+    }
+
+    configuration.customMainIndicatorBuilders(config);
+
+    _mainPaintObject = MultiPaintObjectBox(
+      context: context,
+      indicator: MultiPaintObjectIndicator(
+        key: IndicatorType.main,
+        name: IndicatorType.main.label,
+        height: context.settingConfig.mainRect.height,
+        padding: context.settingConfig.mainPadding,
+        drawBelowTipsArea: context.settingConfig.mainDrawBelowTipsArea,
+      ),
+    );
+    addIndicatorInMain(IndicatorType.candle, context);
+
+    final timeIndicator = _createPaintIndicator(IndicatorType.time, context);
+    if (timeIndicator != null) {
+      _timePaintObject = timeIndicator.createPaintObject(context);
+    }
+    _subPaintObjectQueue = FixedHashQueue<SinglePaintObjectBox>(
+      context.settingConfig.subChartMaxCount,
+    );
+  }
+
+  Indicator? _createPaintIndicator(
+    IIndicatorKey key,
+    IPaintContext context,
+  ) {
+    try {
+      if (_mainIndicatorBuilders.containsKey(key)) {
+        return _mainIndicatorBuilders[key]?.call();
+      } else if (_subIndicatorBuilders.containsKey(key)) {
+        return _subIndicatorBuilders[key]?.call();
+      }
+    } catch (error, stack) {
+      loge(
+        'createPaintIndicator($key) catch an exception!',
+        error: error,
+        stackTrace: stack,
+      );
+    }
+    return null;
+  }
+
+  /// 在主图中添加指标
+  bool addIndicatorInMain(IIndicatorKey key, IPaintContext context) {
+    final indicator = _createPaintIndicator(key, context);
+    if (indicator == null) return false;
+    final object = indicator.createPaintObject(context);
+    _mainPaintObject.appendPaintObject(object);
+    return true;
+  }
+
+  /// 删除主图中[key]指定的指标
+  bool delIndicatorInMain(IIndicatorKey key) {
+    return _mainPaintObject.deletePaintObject(key);
+  }
+
+  bool addIndicatorInSub(IIndicatorKey key, IPaintContext context) {
+    final indicator = _createPaintIndicator(key, context);
+    if (indicator == null) return false;
+    final object = indicator.createPaintObject(context);
+    final oldObj = _subPaintObjectQueue.append(object);
+    oldObj?.dispose();
+    return true;
+  }
+
+  bool delIndicatorInSub(IIndicatorKey key) {
+    bool hasRemove = false;
+    _subPaintObjectQueue.removeWhere((obj) {
+      if (obj.indicator.key == key) {
+        obj.dispose();
+        hasRemove = true;
+        return true;
+      }
+      return false;
+    });
+    return hasRemove;
+  }
+
+  /// 收集当前指标的计算参数
+  /// TODO: 后续优化: manager中不会出现具体指标参数逻辑.
+  /// 且像subBoll和boll参数有可能不一致. 此处应有业务控制.
+  Map<IIndicatorKey, dynamic> getIndicatorCalcParams() {
+    final calcParams = mainPaintObject.getCalcParams();
+    for (final object in subPaintObjects) {
+      final params = object.getCalcParams();
+      if (params.isEmpty) continue;
+      if (object.key == IndicatorType.subBoll) {
+        calcParams.putIfAbsent(
+          IndicatorType.boll,
+          params[IndicatorType.subBoll],
+        );
+      } else if (object.key == IndicatorType.subSar) {
+        calcParams.putIfAbsent(
+          IndicatorType.sar,
+          params[IndicatorType.subSar],
+        );
+      } else {
+        calcParams.addAll(params);
+      }
+    }
+    return calcParams;
+  }
+
+  void dispose() {
+    mainPaintObject.dispose();
+    for (var indicator in subPaintObjects) {
+      indicator.dispose();
+    }
+    _timePaintObject?.dispose();
+    _subPaintObjectQueue.clear();
+  }
 }

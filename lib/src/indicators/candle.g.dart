@@ -7,8 +7,6 @@ part of 'candle.dart';
 // **************************************************************************
 
 abstract class _$CandleIndicatorCWProxy {
-  CandleIndicator key(IIndicatorKey key);
-
   CandleIndicator name(String name);
 
   CandleIndicator zIndex(int zIndex);
@@ -38,7 +36,6 @@ abstract class _$CandleIndicatorCWProxy {
   /// CandleIndicator(...).copyWith(id: 12, name: "My name")
   /// ````
   CandleIndicator call({
-    IIndicatorKey? key,
     String? name,
     int? zIndex,
     double? height,
@@ -58,9 +55,6 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
   const _$CandleIndicatorCWProxyImpl(this._value);
 
   final CandleIndicator _value;
-
-  @override
-  CandleIndicator key(IIndicatorKey key) => this(key: key);
 
   @override
   CandleIndicator name(String name) => this(name: name);
@@ -107,7 +101,6 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
   /// CandleIndicator(...).copyWith(id: 12, name: "My name")
   /// ````
   CandleIndicator call({
-    Object? key = const $CopyWithPlaceholder(),
     Object? name = const $CopyWithPlaceholder(),
     Object? zIndex = const $CopyWithPlaceholder(),
     Object? height = const $CopyWithPlaceholder(),
@@ -121,10 +114,6 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
     Object? countDown = const $CopyWithPlaceholder(),
   }) {
     return CandleIndicator(
-      key: key == const $CopyWithPlaceholder() || key == null
-          ? _value.key
-          // ignore: cast_nullable_to_non_nullable
-          : key as IIndicatorKey,
       name: name == const $CopyWithPlaceholder() || name == null
           ? _value.name
           // ignore: cast_nullable_to_non_nullable
@@ -188,9 +177,6 @@ extension $CandleIndicatorCopyWith on CandleIndicator {
 
 CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
     CandleIndicator(
-      key: json['key'] == null
-          ? IndicatorType.candle
-          : const IIndicatorKeyConvert().fromJson(json['key'] as String),
       name: json['name'] as String? ?? 'Candle',
       zIndex: (json['zIndex'] as num?)?.toInt() ?? -1,
       height: (json['height'] as num).toDouble(),
@@ -211,7 +197,6 @@ CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$CandleIndicatorToJson(CandleIndicator instance) =>
     <String, dynamic>{
-      'key': const IIndicatorKeyConvert().toJson(instance.key),
       'name': instance.name,
       'height': instance.height,
       'padding': const EdgeInsetsConverter().toJson(instance.padding),

@@ -104,7 +104,7 @@ mixin GridBinding on KlineBindingBase implements IGrid {
         /// 副图区域
         // 绘制每一个副图的底部线
         double height = 0.0;
-        for (final indicator in subRectIndicators) {
+        for (final indicator in subPaintObjects) {
           height += indicator.height;
           dy = subTop + height;
           canvas.drawLineType(
@@ -140,11 +140,13 @@ mixin GridBinding on KlineBindingBase implements IGrid {
         // 计算排除时间指标后的top和bottom
         double top = subTop;
         double bottom = subBottom;
-        final timeIndicator = indicatorsConfig.time;
-        if (timeIndicator.position == DrawPosition.bottom) {
-          bottom -= timeIndicator.height;
-        } else {
-          top += timeIndicator.height;
+        final timeConfig = timeRectConfig;
+        if (timeConfig != null) {
+          if (timeConfig.position == DrawPosition.bottom) {
+            bottom -= timeConfig.height;
+          } else if (timeConfig.position == DrawPosition.middle) {
+            top += timeConfig.height;
+          }
         }
 
         // 绘制主区/副区的Vertical线

@@ -13,15 +13,12 @@
 // limitations under the License.
 
 import 'package:flutter/foundation.dart';
-import 'package:json_annotation/json_annotation.dart';
 
-import '../../extension/export.dart';
 import '../../framework/export.dart';
 import '../cross_config/cross_config.dart';
 import '../draw_config/draw_config.dart';
 import '../gesture_config/gesture_config.dart';
 import '../grid_config/grid_config.dart';
-import '../indicators_config/indicators_config.dart';
 import '../setting_config/setting_config.dart';
 import '../tooltip_config/tooltip_config.dart';
 
@@ -37,7 +34,7 @@ class FlexiKlineConfig {
     required this.cross,
     required this.draw,
     required this.tooltip,
-    required this.indicators,
+    // required this.indicators,
     this.main = const <IIndicatorKey>{},
     this.sub = const <IIndicatorKey>{},
   });
@@ -49,85 +46,85 @@ class FlexiKlineConfig {
   CrossConfig cross;
   DrawConfig draw;
   TooltipConfig tooltip;
-  IndicatorsConfig indicators;
+  // IndicatorsConfig indicators;
   Set<IIndicatorKey> main;
   Set<IIndicatorKey> sub;
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  late final MultiPaintObjectIndicator mainIndicator;
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  late final FixedHashQueue<Indicator> subRectIndicatorQueue;
+  // @JsonKey(includeFromJson: false, includeToJson: false)
+  // late final MultiPaintObjectIndicator mainIndicator;
+  // @JsonKey(includeFromJson: false, includeToJson: false)
+  // late final FixedHashQueue<Indicator> subRectIndicatorQueue;
 
-  void init({
-    required Map<IIndicatorKey, SinglePaintObjectIndicator>
-        customMainIndicators,
-    required Map<IIndicatorKey, Indicator> customSubIndicators,
-  }) {
-    mainIndicator = MultiPaintObjectIndicator(
-      key: IndicatorType.main,
-      name: IndicatorType.main.label,
-      height: setting.mainRect.height,
-      padding: setting.mainPadding,
-      drawBelowTipsArea: setting.mainDrawBelowTipsArea,
-    );
+  // void init({
+  //   required Map<IIndicatorKey, SinglePaintObjectIndicator>
+  //       customMainIndicators,
+  //   required Map<IIndicatorKey, Indicator> customSubIndicators,
+  // }) {
+  //   mainIndicator = MultiPaintObjectIndicator(
+  //     key: IndicatorType.main,
+  //     name: IndicatorType.main.label,
+  //     height: setting.mainRect.height,
+  //     padding: setting.mainPadding,
+  //     drawBelowTipsArea: setting.mainDrawBelowTipsArea,
+  //   );
 
-    subRectIndicatorQueue = FixedHashQueue<Indicator>(
-      setting.subChartMaxCount,
-    );
+  //   subRectIndicatorQueue = FixedHashQueue<Indicator>(
+  //     setting.subChartMaxCount,
+  //   );
 
-    if (!main.contains(IndicatorType.candle)) {
-      main.add(IndicatorType.candle);
-    }
-    for (var key in main) {
-      SinglePaintObjectIndicator? indicator = customMainIndicators.getItem(key);
-      indicator ??= indicators.mainIndicators.getItem(key);
-      if (indicator != null) {
-        // 使用前先解绑
-        indicator.dispose();
-        mainIndicator.children.add(indicator);
-      }
-    }
+  //   if (!main.contains(IndicatorType.candle)) {
+  //     main.add(IndicatorType.candle);
+  //   }
+  //   for (var key in main) {
+  //     SinglePaintObjectIndicator? indicator = customMainIndicators.getItem(key);
+  //     indicator ??= indicators.mainIndicators.getItem(key);
+  //     if (indicator != null) {
+  //       // 使用前先解绑
+  //       indicator.dispose();
+  //       mainIndicator.children.add(indicator);
+  //     }
+  //   }
 
-    if (sub.contains(IndicatorType.time)) {
-      sub.remove(IndicatorType.time); // Time指标是默认的
-    }
-    if (sub.isNotEmpty) {
-      if (sub.length > setting.subChartMaxCount) {
-        sub = sub.skip(sub.length - setting.subChartMaxCount).toSet();
-      }
-      for (var key in sub) {
-        Indicator? indicator = customSubIndicators.getItem(key);
-        indicator ??= indicators.subIndicators.getItem(key);
-        if (indicator != null) {
-          // 使用前先解绑
-          indicator.dispose();
-          subRectIndicatorQueue.append(indicator)?.dispose();
-        }
-      }
-    }
-  }
+  //   if (sub.contains(IndicatorType.time)) {
+  //     sub.remove(IndicatorType.time); // Time指标是默认的
+  //   }
+  //   if (sub.isNotEmpty) {
+  //     if (sub.length > setting.subChartMaxCount) {
+  //       sub = sub.skip(sub.length - setting.subChartMaxCount).toSet();
+  //     }
+  //     for (var key in sub) {
+  //       Indicator? indicator = customSubIndicators.getItem(key);
+  //       indicator ??= indicators.subIndicators.getItem(key);
+  //       if (indicator != null) {
+  //         // 使用前先解绑
+  //         indicator.dispose();
+  //         subRectIndicatorQueue.append(indicator)?.dispose();
+  //       }
+  //     }
+  //   }
+  // }
 
   /// 收集当前已打开指标的计算参数
-  Map<IIndicatorKey, dynamic> getOpenedIndicatorCalcParams() {
-    final calcParams = <IIndicatorKey, dynamic>{};
-    calcParams.addAll(mainIndicator.getCalcParams());
+  // Map<IIndicatorKey, dynamic> getOpenedIndicatorCalcParams() {
+  //   final calcParams = <IIndicatorKey, dynamic>{};
+  //   calcParams.addAll(mainIndicator.getCalcParams());
 
-    for (var subIndicator in subRectIndicatorQueue) {
-      final params = subIndicator.getCalcParams();
+  //   for (var subIndicator in subRectIndicatorQueue) {
+  //     final params = subIndicator.getCalcParams();
 
-      // 暂时 通过key的判断去掉主区与副区相同指标的重复计算参数.
-      if (subIndicator.key == IndicatorType.subBoll &&
-          calcParams[IndicatorType.boll] == params[IndicatorType.subBoll]) {
-        continue;
-      }
-      if (subIndicator.key == IndicatorType.subSar &&
-          calcParams[IndicatorType.sar] == params[IndicatorType.subSar]) {
-        continue;
-      }
-      calcParams.addAll(params);
-    }
-    return calcParams;
-  }
+  //     // 暂时 通过key的判断去掉主区与副区相同指标的重复计算参数.
+  //     if (subIndicator.key == IndicatorType.subBoll &&
+  //         calcParams[IndicatorType.boll] == params[IndicatorType.subBoll]) {
+  //       continue;
+  //     }
+  //     if (subIndicator.key == IndicatorType.subSar &&
+  //         calcParams[IndicatorType.sar] == params[IndicatorType.subSar]) {
+  //       continue;
+  //     }
+  //     calcParams.addAll(params);
+  //   }
+  //   return calcParams;
+  // }
 
   FlexiKlineConfig clone() {
     try {
@@ -164,20 +161,20 @@ class FlexiKlineConfig {
   //   }
   // }
 
-  void dispose() {
-    indicators.dispose();
-    mainIndicator.dispose();
-    for (var indicator in subRectIndicatorQueue) {
-      indicator.dispose();
-    }
-  }
+  // void dispose() {
+  //   // indicators.dispose();
+  //   // mainIndicator.dispose();
+  //   // for (var indicator in subRectIndicatorQueue) {
+  //   //   indicator.dispose();
+  //   // }
+  // }
 
   factory FlexiKlineConfig.fromJson(Map<String, dynamic> json) =>
       _$FlexiKlineConfigFromJson(json);
 
   Map<String, dynamic> toJson() {
-    main = mainIndicator.children.map((e) => e.key).toSet();
-    sub = subRectIndicatorQueue.map((e) => e.key).toSet();
+    // main = mainIndicator.children.map((e) => e.key).toSet();
+    // sub = subRectIndicatorQueue.map((e) => e.key).toSet();
     return _$FlexiKlineConfigToJson(this);
   }
 }

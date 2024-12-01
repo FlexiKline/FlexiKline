@@ -7,8 +7,6 @@ part of 'ma.dart';
 // **************************************************************************
 
 abstract class _$MAIndicatorCWProxy {
-  MAIndicator key(IIndicatorKey key);
-
   MAIndicator name(String name);
 
   MAIndicator zIndex(int zIndex);
@@ -30,7 +28,6 @@ abstract class _$MAIndicatorCWProxy {
   /// MAIndicator(...).copyWith(id: 12, name: "My name")
   /// ````
   MAIndicator call({
-    IIndicatorKey? key,
     String? name,
     int? zIndex,
     double? height,
@@ -46,9 +43,6 @@ class _$MAIndicatorCWProxyImpl implements _$MAIndicatorCWProxy {
   const _$MAIndicatorCWProxyImpl(this._value);
 
   final MAIndicator _value;
-
-  @override
-  MAIndicator key(IIndicatorKey key) => this(key: key);
 
   @override
   MAIndicator name(String name) => this(name: name);
@@ -82,7 +76,6 @@ class _$MAIndicatorCWProxyImpl implements _$MAIndicatorCWProxy {
   /// MAIndicator(...).copyWith(id: 12, name: "My name")
   /// ````
   MAIndicator call({
-    Object? key = const $CopyWithPlaceholder(),
     Object? name = const $CopyWithPlaceholder(),
     Object? zIndex = const $CopyWithPlaceholder(),
     Object? height = const $CopyWithPlaceholder(),
@@ -92,10 +85,6 @@ class _$MAIndicatorCWProxyImpl implements _$MAIndicatorCWProxy {
     Object? lineWidth = const $CopyWithPlaceholder(),
   }) {
     return MAIndicator(
-      key: key == const $CopyWithPlaceholder() || key == null
-          ? _value.key
-          // ignore: cast_nullable_to_non_nullable
-          : key as IIndicatorKey,
       name: name == const $CopyWithPlaceholder() || name == null
           ? _value.name
           // ignore: cast_nullable_to_non_nullable
@@ -141,9 +130,6 @@ extension $MAIndicatorCopyWith on MAIndicator {
 // **************************************************************************
 
 MAIndicator _$MAIndicatorFromJson(Map<String, dynamic> json) => MAIndicator(
-      key: json['key'] == null
-          ? IndicatorType.ma
-          : const IIndicatorKeyConvert().fromJson(json['key'] as String),
       name: json['name'] as String? ?? 'MA',
       zIndex: (json['zIndex'] as num?)?.toInt() ?? 0,
       height: (json['height'] as num).toDouble(),
@@ -161,7 +147,6 @@ MAIndicator _$MAIndicatorFromJson(Map<String, dynamic> json) => MAIndicator(
 
 Map<String, dynamic> _$MAIndicatorToJson(MAIndicator instance) =>
     <String, dynamic>{
-      'key': const IIndicatorKeyConvert().toJson(instance.key),
       'name': instance.name,
       'height': instance.height,
       'padding': const EdgeInsetsConverter().toJson(instance.padding),

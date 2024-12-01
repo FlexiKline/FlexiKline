@@ -22,10 +22,6 @@ mixin ChartBinding
   void init() {
     super.init();
     logd("init chart");
-    _paintObjectManager = IndicatorPaintObjectManager(
-      configuration: configuration,
-      logger: loggerDelegate,
-    );
   }
 
   @override
@@ -43,8 +39,6 @@ mixin ChartBinding
     _lastPriceCountDownTimer?.cancel();
     _lastPriceCountDownTimer = null;
   }
-
-  late final IndicatorPaintObjectManager _paintObjectManager;
 
   final ValueNotifier<int> _repaintChart = ValueNotifier(0);
   Listenable get repaintChart => _repaintChart;
@@ -101,12 +95,12 @@ mixin ChartBinding
     }
 
     /// 检查主区和副区的PaintObject是否都创建了.
-    ensurePaintObjectInstance();
+    // ensurePaintObjectInstance();
 
     int solt = mainIndicatorSlot;
-    for (var indicator in [mainIndicator, ...subRectIndicators]) {
+    for (var paintObject in [mainPaintObject, ...subPaintObjects]) {
       /// 初始化副区指标数据.
-      indicator.paintObject?.doInitState(
+      paintObject.doInitState(
         solt++,
         start: curKlineData.start,
         end: curKlineData.end,
@@ -114,7 +108,7 @@ mixin ChartBinding
       );
 
       /// 绘制副区的指标图
-      indicator.paintObject?.doPaintChart(canvas, size);
+      paintObject.doPaintChart(canvas, size);
     }
 
     if (_reset) _reset = false;

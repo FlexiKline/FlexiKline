@@ -18,8 +18,6 @@ abstract class _$MultiPaintObjectIndicatorCWProxy<
 
   MultiPaintObjectIndicator<T> drawBelowTipsArea(bool drawBelowTipsArea);
 
-  MultiPaintObjectIndicator<T> children(Iterable<T> children);
-
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `MultiPaintObjectIndicator<T>(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -32,7 +30,6 @@ abstract class _$MultiPaintObjectIndicatorCWProxy<
     double? height,
     EdgeInsets? padding,
     bool? drawBelowTipsArea,
-    Iterable<T>? children,
   });
 }
 
@@ -62,10 +59,6 @@ class _$MultiPaintObjectIndicatorCWProxyImpl<
       this(drawBelowTipsArea: drawBelowTipsArea);
 
   @override
-  MultiPaintObjectIndicator<T> children(Iterable<T> children) =>
-      this(children: children);
-
-  @override
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `MultiPaintObjectIndicator<T>(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -79,7 +72,6 @@ class _$MultiPaintObjectIndicatorCWProxyImpl<
     Object? height = const $CopyWithPlaceholder(),
     Object? padding = const $CopyWithPlaceholder(),
     Object? drawBelowTipsArea = const $CopyWithPlaceholder(),
-    Object? children = const $CopyWithPlaceholder(),
   }) {
     return MultiPaintObjectIndicator<T>(
       key: key == const $CopyWithPlaceholder() || key == null
@@ -103,10 +95,6 @@ class _$MultiPaintObjectIndicatorCWProxyImpl<
           ? _value.drawBelowTipsArea
           // ignore: cast_nullable_to_non_nullable
           : drawBelowTipsArea as bool,
-      children: children == const $CopyWithPlaceholder() || children == null
-          ? _value.children
-          // ignore: cast_nullable_to_non_nullable
-          : children as Iterable<T>,
     );
   }
 }

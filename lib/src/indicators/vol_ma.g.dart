@@ -7,8 +7,6 @@ part of 'vol_ma.dart';
 // **************************************************************************
 
 abstract class _$VolMaIndicatorCWProxy {
-  VolMaIndicator key(IIndicatorKey key);
-
   VolMaIndicator name(String name);
 
   VolMaIndicator zIndex(int zIndex);
@@ -17,11 +15,15 @@ abstract class _$VolMaIndicatorCWProxy {
 
   VolMaIndicator padding(EdgeInsets padding);
 
+  VolMaIndicator volTips(TipsConfig volTips);
+
   VolMaIndicator calcParams(List<MaParam> calcParams);
 
   VolMaIndicator tipsPadding(EdgeInsets tipsPadding);
 
-  VolMaIndicator lineWidth(double lineWidth);
+  VolMaIndicator ticksCount(int ticksCount);
+
+  VolMaIndicator maLineWidth(double maLineWidth);
 
   VolMaIndicator precision(int precision);
 
@@ -32,14 +34,15 @@ abstract class _$VolMaIndicatorCWProxy {
   /// VolMaIndicator(...).copyWith(id: 12, name: "My name")
   /// ````
   VolMaIndicator call({
-    IIndicatorKey? key,
     String? name,
     int? zIndex,
     double? height,
     EdgeInsets? padding,
+    TipsConfig? volTips,
     List<MaParam>? calcParams,
     EdgeInsets? tipsPadding,
-    double? lineWidth,
+    int? ticksCount,
+    double? maLineWidth,
     int? precision,
   });
 }
@@ -49,9 +52,6 @@ class _$VolMaIndicatorCWProxyImpl implements _$VolMaIndicatorCWProxy {
   const _$VolMaIndicatorCWProxyImpl(this._value);
 
   final VolMaIndicator _value;
-
-  @override
-  VolMaIndicator key(IIndicatorKey key) => this(key: key);
 
   @override
   VolMaIndicator name(String name) => this(name: name);
@@ -66,6 +66,9 @@ class _$VolMaIndicatorCWProxyImpl implements _$VolMaIndicatorCWProxy {
   VolMaIndicator padding(EdgeInsets padding) => this(padding: padding);
 
   @override
+  VolMaIndicator volTips(TipsConfig volTips) => this(volTips: volTips);
+
+  @override
   VolMaIndicator calcParams(List<MaParam> calcParams) =>
       this(calcParams: calcParams);
 
@@ -74,7 +77,11 @@ class _$VolMaIndicatorCWProxyImpl implements _$VolMaIndicatorCWProxy {
       this(tipsPadding: tipsPadding);
 
   @override
-  VolMaIndicator lineWidth(double lineWidth) => this(lineWidth: lineWidth);
+  VolMaIndicator ticksCount(int ticksCount) => this(ticksCount: ticksCount);
+
+  @override
+  VolMaIndicator maLineWidth(double maLineWidth) =>
+      this(maLineWidth: maLineWidth);
 
   @override
   VolMaIndicator precision(int precision) => this(precision: precision);
@@ -88,21 +95,18 @@ class _$VolMaIndicatorCWProxyImpl implements _$VolMaIndicatorCWProxy {
   /// VolMaIndicator(...).copyWith(id: 12, name: "My name")
   /// ````
   VolMaIndicator call({
-    Object? key = const $CopyWithPlaceholder(),
     Object? name = const $CopyWithPlaceholder(),
     Object? zIndex = const $CopyWithPlaceholder(),
     Object? height = const $CopyWithPlaceholder(),
     Object? padding = const $CopyWithPlaceholder(),
+    Object? volTips = const $CopyWithPlaceholder(),
     Object? calcParams = const $CopyWithPlaceholder(),
     Object? tipsPadding = const $CopyWithPlaceholder(),
-    Object? lineWidth = const $CopyWithPlaceholder(),
+    Object? ticksCount = const $CopyWithPlaceholder(),
+    Object? maLineWidth = const $CopyWithPlaceholder(),
     Object? precision = const $CopyWithPlaceholder(),
   }) {
     return VolMaIndicator(
-      key: key == const $CopyWithPlaceholder() || key == null
-          ? _value.key
-          // ignore: cast_nullable_to_non_nullable
-          : key as IIndicatorKey,
       name: name == const $CopyWithPlaceholder() || name == null
           ? _value.name
           // ignore: cast_nullable_to_non_nullable
@@ -119,6 +123,10 @@ class _$VolMaIndicatorCWProxyImpl implements _$VolMaIndicatorCWProxy {
           ? _value.padding
           // ignore: cast_nullable_to_non_nullable
           : padding as EdgeInsets,
+      volTips: volTips == const $CopyWithPlaceholder() || volTips == null
+          ? _value.volTips
+          // ignore: cast_nullable_to_non_nullable
+          : volTips as TipsConfig,
       calcParams:
           calcParams == const $CopyWithPlaceholder() || calcParams == null
               ? _value.calcParams
@@ -129,10 +137,16 @@ class _$VolMaIndicatorCWProxyImpl implements _$VolMaIndicatorCWProxy {
               ? _value.tipsPadding
               // ignore: cast_nullable_to_non_nullable
               : tipsPadding as EdgeInsets,
-      lineWidth: lineWidth == const $CopyWithPlaceholder() || lineWidth == null
-          ? _value.lineWidth
-          // ignore: cast_nullable_to_non_nullable
-          : lineWidth as double,
+      ticksCount:
+          ticksCount == const $CopyWithPlaceholder() || ticksCount == null
+              ? _value.ticksCount
+              // ignore: cast_nullable_to_non_nullable
+              : ticksCount as int,
+      maLineWidth:
+          maLineWidth == const $CopyWithPlaceholder() || maLineWidth == null
+              ? _value.maLineWidth
+              // ignore: cast_nullable_to_non_nullable
+              : maLineWidth as double,
       precision: precision == const $CopyWithPlaceholder() || precision == null
           ? _value.precision
           // ignore: cast_nullable_to_non_nullable
@@ -153,34 +167,34 @@ extension $VolMaIndicatorCopyWith on VolMaIndicator {
 
 VolMaIndicator _$VolMaIndicatorFromJson(Map<String, dynamic> json) =>
     VolMaIndicator(
-      key: json['key'] == null
-          ? IndicatorType.volMa
-          : const IIndicatorKeyConvert().fromJson(json['key'] as String),
-      name: json['name'] as String? ?? 'VOLMA',
+      name: json['name'] as String? ?? 'MAVOL',
       zIndex: (json['zIndex'] as num?)?.toInt() ?? 0,
       height: (json['height'] as num?)?.toDouble() ?? defaultSubIndicatorHeight,
       padding: json['padding'] == null
           ? defaultSubIndicatorPadding
           : const EdgeInsetsConverter()
               .fromJson(json['padding'] as Map<String, dynamic>),
+      volTips: TipsConfig.fromJson(json['volTips'] as Map<String, dynamic>),
       calcParams: (json['calcParams'] as List<dynamic>)
           .map((e) => MaParam.fromJson(e as Map<String, dynamic>))
           .toList(),
       tipsPadding: const EdgeInsetsConverter()
           .fromJson(json['tipsPadding'] as Map<String, dynamic>),
-      lineWidth: (json['lineWidth'] as num).toDouble(),
-      precision: (json['precision'] as num).toInt(),
+      ticksCount: (json['ticksCount'] as num?)?.toInt() ?? defaultSubTickCount,
+      maLineWidth: (json['maLineWidth'] as num).toDouble(),
+      precision: (json['precision'] as num?)?.toInt() ?? 2,
     );
 
 Map<String, dynamic> _$VolMaIndicatorToJson(VolMaIndicator instance) =>
     <String, dynamic>{
-      'key': const IIndicatorKeyConvert().toJson(instance.key),
       'name': instance.name,
       'height': instance.height,
       'padding': const EdgeInsetsConverter().toJson(instance.padding),
       'zIndex': instance.zIndex,
+      'volTips': instance.volTips.toJson(),
       'calcParams': instance.calcParams.map((e) => e.toJson()).toList(),
       'tipsPadding': const EdgeInsetsConverter().toJson(instance.tipsPadding),
-      'lineWidth': instance.lineWidth,
+      'ticksCount': instance.ticksCount,
+      'maLineWidth': instance.maLineWidth,
       'precision': instance.precision,
     };

@@ -14,77 +14,101 @@
 
 part of 'indicator.dart';
 
+/// IndicatorObject: 保存Indicator配置
+/// 提供[Indicator]的所有属性
 class IndicatorObject<T extends Indicator>
-    implements Comparable<IndicatorObject> {
+    implements Comparable<IndicatorObject<T>> {
   IndicatorObject(this._indicator, this.context);
 
-  late T? _indicator;
-
+  T _indicator;
   final IPaintContext context;
 
-  T get indicator => _indicator!;
+  T get indicator => _indicator;
+
+  IIndicatorKey get key => _indicator.key;
+  double get height => _indicator.height;
+  EdgeInsets get padding => _indicator.padding;
+  PaintMode get paintMode => _indicator.paintMode;
+  int get zIndex => _indicator.zIndex;
+  dynamic get calcParams => _indicator.calcParams;
 
   @override
-  int compareTo(IndicatorObject<Indicator> other) {
-    // TODO: implement compareTo
-    throw UnimplementedError();
+  int compareTo(IndicatorObject<T> other) {
+    return indicator.zIndex.compareTo(other.indicator.zIndex);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is Indicator) {
+      return other.runtimeType == runtimeType && other.key == key;
+    }
+    return false;
+  }
+
+  @override
+  int get hashCode {
+    return key.hashCode;
   }
 }
 
 /// PaintObject
-/// 通过实现对应的接口, 实现Chart的配置, 计算, 绘制, Cross
-// @immutable
-abstract class PaintObject<T extends Indicator>
+/// 1. 定义PaintObject行为: 通过实现对应的接口, 实现Chart的配置, 计算, 绘制, Cross
+/// 2. [_parent]保存当前绘制对象的父级
+abstract class PaintObject<T extends Indicator> extends IndicatorObject<T>
+    with KlineLog, ConfigStateMixin
     implements IPaintBoundingBox, IPaintDataInit, IPaintObject, IPaintDelegate {
   PaintObject({
     required T indicator,
-  }) : _indicator = indicator;
-
-  T? _indicator;
-
-  T get indicator => _indicator!;
+    required IPaintContext context,
+  }) : super(indicator, context) {
+    if (context is KlineLog) {
+      loggerDelegate = (context as KlineLog).loggerDelegate;
+    }
+  }
 
   // 父级PaintObject. 主要用于给其他子级PaintObject限定范围.
   PaintObject? _parent;
 
   bool get hasParentObject => _parent != null;
 
+  // @override
+  // T get indicator => super.indicator as T;
+
   @mustCallSuper
   void dispose() {
-    _indicator = null;
     _parent = null;
   }
 
   @protected
   @override
   void paintExtraAboveChart(Canvas canvas, Size size) {}
-}
-
-/// PaintObjectProxy
-/// 通过参数KlineBindingBase 混入对setting和state的代理
-abstract class PaintObjectProxy<T extends Indicator> extends PaintObject
-    with KlineLog, ControllerProxyMixin {
-  PaintObjectProxy({
-    required IPaintContext context,
-    required T super.indicator,
-  }) {
-    this.context = context;
-    if (context is KlineLog) {
-      loggerDelegate = (context as KlineLog).loggerDelegate;
-    }
-  }
 
   @override
-  T get indicator => super.indicator as T;
+  void precompute(Range range, {bool reset = false}) {}
 
   @override
   String get logTag => '${super.logTag}\t${indicator.key.toString()}';
 }
 
+/// PaintObjectProxy
+// /// 通过参数KlineBindingBase 混入对setting和state的代理
+// abstract class PaintObjectProxy<T extends Indicator> extends PaintObject
+//     with KlineLog, ConfigStateMixin {
+//   PaintObjectProxy({
+//     required T indicator,
+//     required IPaintContext context,
+//   }) : super(indicator, context) {
+//     if (context is KlineLog) {
+//       loggerDelegate = (context as KlineLog).loggerDelegate;
+//     }
+//   }
+// }
+
 /// PaintObjectBox
 /// 通过混入边界计算与数据初始化计算, 简化PaintObject接口.
 abstract class SinglePaintObjectBox<T extends SinglePaintObjectIndicator>
-    extends PaintObjectProxy with PaintObjectBoundingMixin, DataInitMixin {
+    extends PaintObject with PaintObjectBoundingMixin, DataInitMixin {
   SinglePaintObjectBox({
     required super.context,
     required T super.indicator,
@@ -158,14 +182,86 @@ abstract class SinglePaintObjectBox<T extends SinglePaintObjectIndicator>
 /// 多个Indicator组合绘制
 /// 主要实现接口遍历转发.
 class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
-    extends PaintObjectProxy with PaintObjectBoundingMixin, DataInitMixin {
+    extends PaintObject with PaintObjectBoundingMixin, DataInitMixin {
   MultiPaintObjectBox({
     required super.context,
     required T super.indicator,
-  });
+    // Iterable<T> children = const [],
+  })  : children = SortableHashSet<PaintObject>.from([]),
+        _initialPadding = indicator.padding;
+
+  final SortableHashSet<PaintObject> children;
+  final EdgeInsets _initialPadding;
 
   @override
   T get indicator => super.indicator as T;
+
+  bool get drawBelowTipsArea => indicator.drawBelowTipsArea;
+
+  /// 当前[tipsHeight]是否需要更新布局参数
+  bool _needUpdateLayout(double tipsHeight) {
+    return _initialPadding.top + tipsHeight != padding.top;
+  }
+
+  @override
+  bool updateLayout({
+    double? height,
+    EdgeInsets? padding,
+    bool reset = false,
+    double? tipsHeight,
+  }) {
+    if (tipsHeight != null) {
+      // 如果tipsHeight不为空, 说明是绘制过程中动态调整, 只需要在MultiPaintObjectIndicator原padding基础上增加即可.
+      padding = _initialPadding.copyWith(
+        top: _initialPadding.top + tipsHeight,
+      );
+    }
+    bool hasChange = super.updateLayout(
+      height: height,
+      padding: padding,
+      reset: reset,
+    );
+    for (var object in children) {
+      final childChange = object.updateLayout(
+        height: object.paintMode.isCombine ? this.height : null,
+        padding: object.paintMode.isCombine ? this.padding : null,
+        reset: reset,
+      );
+      hasChange = hasChange || childChange;
+    }
+    return hasChange;
+  }
+
+  void appendPaintObjects(Iterable<PaintObject> paintObjects) {
+    for (var object in paintObjects) {
+      appendPaintObject(object);
+    }
+  }
+
+  void appendPaintObject(PaintObject paintObject) {
+    // 使用前先解绑: 释放[paintObject]parentObject与数据.
+    paintObject.dispose();
+    paintObject._parent = this;
+    paintObject.updateLayout(
+      height: paintMode.isCombine ? height : null,
+      padding: paintMode.isCombine ? padding : null,
+    );
+    final old = children.append(paintObject);
+    old?.dispose();
+  }
+
+  bool deletePaintObject(IIndicatorKey key) {
+    bool hasRemove = false;
+    children.removeWhere((object) {
+      if (object.key == key) {
+        object.dispose();
+        hasRemove = true;
+        return true;
+      }
+      return false;
+    });
+    return hasRemove;
+  }
 
   @override
   MinMax? initState({required int start, required int end}) {
@@ -220,23 +316,21 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
     }
 
     _minMax = null;
-    for (var child in indicator.children) {
-      final childPaintObject = child.paintObject;
-      if (childPaintObject == null) continue;
-      final ret = childPaintObject.doInitState(
+    for (var object in children) {
+      final ret = object.doInitState(
         newSlot,
         start: start,
         end: end,
         reset: reset,
       );
-      if (ret != null && child.paintMode == PaintMode.combine) {
+      if (ret != null && object.paintMode == PaintMode.combine) {
         setMinMax(ret.clone());
       }
     }
 
-    for (var child in indicator.children) {
-      if (child.paintMode == PaintMode.combine) {
-        child.paintObject?.setMinMax(minMax);
+    for (var object in children) {
+      if (object.paintMode == PaintMode.combine) {
+        object.setMinMax(minMax);
       }
     }
 
@@ -256,24 +350,24 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
           model: klineData.latest,
         );
 
-        if (indicator.needUpdateLayout(tipsHeight)) {
-          indicator.updateLayout(tipsHeight: tipsHeight);
+        if (_needUpdateLayout(tipsHeight)) {
+          updateLayout(tipsHeight: tipsHeight);
         }
       }
-      for (var child in indicator.children) {
-        child.paintObject?.paintChart(canvas, size);
+      for (var object in children) {
+        object.paintChart(canvas, size);
       }
     } else {
-      for (var child in indicator.children) {
-        child.paintObject?.paintChart(canvas, size);
+      for (var object in children) {
+        object.paintChart(canvas, size);
       }
       if (!isCrossing) {
         doPaintTips(canvas, model: klineData.latest);
       }
     }
 
-    for (var child in indicator.children) {
-      child.paintObject?.paintExtraAboveChart(canvas, size);
+    for (var object in children) {
+      object.paintExtraAboveChart(canvas, size);
     }
   }
 
@@ -285,16 +379,16 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
       if (isCrossing) {
         final tipsHeight = doPaintTips(canvas, offset: offset, model: model);
 
-        if (indicator.needUpdateLayout(tipsHeight)) {
-          indicator.updateLayout(tipsHeight: tipsHeight);
+        if (_needUpdateLayout(tipsHeight)) {
+          updateLayout(tipsHeight: tipsHeight);
         }
       }
-      for (var child in indicator.children) {
-        child.paintObject?.onCross(canvas, offset);
+      for (var object in children) {
+        object.onCross(canvas, offset);
       }
     } else {
-      for (var child in indicator.children) {
-        child.paintObject?.onCross(canvas, offset);
+      for (var object in children) {
+        object.onCross(canvas, offset);
       }
       if (isCrossing) {
         doPaintTips(canvas, offset: offset, model: model);
@@ -307,8 +401,8 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
   double doPaintTips(Canvas canvas, {CandleModel? model, Offset? offset}) {
     // 每次绘制前, 重置Tips区域大小为0
     double height = 0;
-    for (var child in indicator.children) {
-      final size = child.paintObject?.paintTips(
+    for (var object in children) {
+      final size = object.paintTips(
         canvas,
         model: model,
         offset: offset,
@@ -322,8 +416,8 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
   @override
   @mustCallSuper
   void dispose() {
-    for (var child in indicator.children) {
-      child.paintObject?.dispose();
+    for (var object in children) {
+      object.dispose();
     }
     super.dispose();
   }

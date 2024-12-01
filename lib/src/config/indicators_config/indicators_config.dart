@@ -30,7 +30,7 @@ class IndicatorsConfig {
 
     /// 副区指标
     required this.time,
-    required this.mavol,
+    // required this.mavol,
   });
 
   /// 主区指标
@@ -40,7 +40,7 @@ class IndicatorsConfig {
 
   /// 副区指标
   late TimeIndicator time;
-  late MAVolumeIndicator mavol;
+  // late MAVolumeIndicator mavol;
 
   /// 内置主区指标
   Map<IIndicatorKey, SinglePaintObjectIndicator> get mainIndicators => {
@@ -52,65 +52,65 @@ class IndicatorsConfig {
   /// 内置副区指标
   Map<IIndicatorKey, Indicator> get subIndicators => {
         time.key: time,
-        mavol.key: mavol,
+        // mavol.key: mavol,
       };
 
   /// 收集当前所有支持的指标的计算参数
-  Map<IIndicatorKey, dynamic> getAllIndicatorCalcParams() {
-    final calcParams = <IIndicatorKey, dynamic>{};
-    mainIndicators.forEach((key, indicator) {
-      calcParams.addAll(indicator.getCalcParams());
-    });
+  // Map<IIndicatorKey, dynamic> getAllIndicatorCalcParams() {
+  //   final calcParams = <IIndicatorKey, dynamic>{};
+  //   mainIndicators.forEach((key, indicator) {
+  //     calcParams.addAll(indicator.getCalcParams());
+  //   });
 
-    // 暂时 通过key的判断去掉主区与副区相同指标的重复计算参数.
-    for (var entry in subIndicators.entries) {
-      final params = entry.value.getCalcParams();
-      if (entry.key == IndicatorType.subBoll &&
-          calcParams[IndicatorType.boll] == params[entry.key]) {
-        continue;
-      }
-      if (entry.key == IndicatorType.subSar &&
-          calcParams[IndicatorType.sar] == params[entry.key]) {
-        continue;
-      }
-      calcParams.addAll(params);
-    }
+  //   // 暂时 通过key的判断去掉主区与副区相同指标的重复计算参数.
+  //   for (var entry in subIndicators.entries) {
+  //     final params = entry.value.getCalcParams();
+  //     if (entry.key == IndicatorType.subBoll &&
+  //         calcParams[IndicatorType.boll] == params[entry.key]) {
+  //       continue;
+  //     }
+  //     if (entry.key == IndicatorType.subSar &&
+  //         calcParams[IndicatorType.sar] == params[entry.key]) {
+  //       continue;
+  //     }
+  //     calcParams.addAll(params);
+  //   }
 
-    return calcParams;
-  }
+  //   return calcParams;
+  // }
 
   /// 从[oldConfig]指标配置集合更新自定义指标. 并清理无效的旧指标.
-  Set<IIndicatorKey> megerAndDisposeOldIndicator(IndicatorsConfig oldConfig) {
-    Set<IIndicatorKey> keys = {};
+  // Set<IIndicatorKey> megerAndDisposeOldIndicator(IndicatorsConfig oldConfig) {
+  //   Set<IIndicatorKey> keys = {};
 
-    /// 清理变更的主区指标
-    oldConfig.mainIndicators.forEach((key, value) {
-      final newVale = mainIndicators[key];
-      if (!identical(newVale, value)) {
-        value.dispose();
-        keys.add(key);
-      }
-    });
+  //   /// 清理变更的主区指标
+  //   oldConfig.mainIndicators.forEach((key, value) {
+  //     final newVale = mainIndicators[key];
+  //     if (!identical(newVale, value)) {
+  //       value.dispose();
+  //       keys.add(key);
+  //     }
+  //   });
 
-    /// 清理变更的副区指标
-    oldConfig.subIndicators.forEach((key, value) {
-      final newVale = subIndicators[key];
-      if (!identical(newVale, value)) {
-        value.dispose();
-        keys.add(key);
-      }
-    });
-    return keys;
-  }
+  //   /// 清理变更的副区指标
+  //   oldConfig.subIndicators.forEach((key, value) {
+  //     final newVale = subIndicators[key];
+  //     if (!identical(newVale, value)) {
+  //       value.dispose();
+  //       keys.add(key);
+  //     }
+  //   });
+  //   return keys;
+  // }
 
-  void dispose() {
-    mainIndicators.forEach((key, indicator) {
-      indicator.dispose();
-    });
-    subIndicators.forEach((key, indicator) {
-      indicator.dispose();
-    });
-  }
+  // void dispose() {
+  //   mainIndicators.forEach((key, indicator) {
+  //     indicator.dispose();
+  //   });
+  //   subIndicators.forEach((key, indicator) {
+  //     indicator.dispose();
+  //   });
+  // }
 
   factory IndicatorsConfig.fromJson(Map<String, dynamic> json) =>
       _$IndicatorsConfigFromJson(json);

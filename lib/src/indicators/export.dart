@@ -15,6 +15,5 @@
 export 'candle.dart';
 export 'volume.dart';
 export 'ma.dart';
-export 'ma_volume.dart';
 export 'vol_ma.dart';
 export 'time.dart';

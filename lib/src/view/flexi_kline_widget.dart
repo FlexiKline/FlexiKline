@@ -67,6 +67,10 @@ class FlexiKlineWidget extends StatefulWidget {
   /// 绘制点指针放大镜DecorationShape.
   final MagnifierDecorationShapBuilder? magnifierDecorationShapBuilder;
 
+  /// 支持的主区指标配置列表构造器
+
+  /// 支持的副区指标配置列表构造器
+
   @override
   State<FlexiKlineWidget> createState() => _FlexiKlineWidgetState();
 }
@@ -92,6 +96,18 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
         setState(() {});
       });
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant FlexiKlineWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    widget.controller.logd('View didUpdateWidget');
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    widget.controller.logd('View didChangeDependencies');
   }
 
   @override

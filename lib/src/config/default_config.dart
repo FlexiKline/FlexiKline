@@ -15,6 +15,7 @@
 import 'package:flutter/material.dart' hide Overlay;
 
 import '../constant.dart';
+import '../core/core.dart';
 import '../extension/render/common.dart';
 import '../framework/export.dart';
 import '../indicators/export.dart';
@@ -175,31 +176,45 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
   @override
   void saveOverlayListConfig(String instId, Iterable<Overlay> list) {}
 
+  @mustCallSuper
   @override
-  Iterable<SinglePaintObjectIndicator> customMainIndicators() => const [];
+  Map<IIndicatorKey, IndicatorBuilder<Indicator>> customMainIndicatorBuilders(
+    IKlineConfig config,
+  ) {
+    return {
+      IndicatorType.candle: () => genCandleIndicator(),
+    };
+  }
+
+  @mustCallSuper
+  @override
+  Map<IIndicatorKey, IndicatorBuilder<Indicator>> customSubIndicatorBuilders(
+    IKlineConfig config,
+  ) {
+    return {
+      IndicatorType.time: () => genTimeIndicator(),
+    };
+  }
 
   @override
-  Iterable<Indicator> customSubIndicators() => const [];
+  FlexiKlineConfig getFlexiKlineConfig();
 
-  @override
-  FlexiKlineConfig getFlexiKlineConfig([covariant IFlexiKlineTheme? theme]);
-
-  FlexiKlineConfig genFlexiKlineConfig(covariant IFlexiKlineTheme theme) {
+  FlexiKlineConfig genFlexiKlineConfig() {
     return FlexiKlineConfig(
       key: theme.key,
-      grid: genGridConfig(theme),
-      setting: genSettingConfig(theme),
-      gesture: genGestureConfig(theme),
-      cross: genCrossConfig(theme),
-      draw: genDrawConfig(theme),
-      tooltip: genTooltipConfig(theme),
-      indicators: genIndicatorsConfig(theme),
+      grid: genGridConfig(),
+      setting: genSettingConfig(),
+      gesture: genGestureConfig(),
+      cross: genCrossConfig(),
+      draw: genDrawConfig(),
+      tooltip: genTooltipConfig(),
+      // indicators: genIndicatorsConfig(theme),
       main: {},
       sub: {},
     );
   }
 
-  GridConfig genGridConfig(covariant IFlexiKlineTheme theme) {
+  GridConfig genGridConfig() {
     return GridConfig(
       show: true,
       horizontal: GridAxis(
@@ -221,7 +236,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
     );
   }
 
-  GestureConfig genGestureConfig(covariant IFlexiKlineTheme theme) {
+  GestureConfig genGestureConfig() {
     return GestureConfig(
       isInertialPan: true,
       tolerance: ToleranceConfig(),
@@ -232,7 +247,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
     );
   }
 
-  SettingConfig genSettingConfig(covariant IFlexiKlineTheme theme) {
+  SettingConfig genSettingConfig() {
     return SettingConfig(
       pixel: theme.pixel,
       textColor: theme.textColor,
@@ -241,7 +256,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       opacity: 0.5,
 
       /// 内置LoadingView样式配置
-      loading: genInnerLoadingConfig(theme),
+      loading: genInnerLoadingConfig(),
 
       /// 主/副图区域大小配置
       // mainRect: Rect.zero,
@@ -276,7 +291,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
     );
   }
 
-  LoadingConfig genInnerLoadingConfig(covariant IFlexiKlineTheme theme) {
+  LoadingConfig genInnerLoadingConfig() {
     return LoadingConfig(
       size: 24 * theme.scale,
       strokeWidth: 4 * theme.scale,
@@ -285,7 +300,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
     );
   }
 
-  CrossConfig genCrossConfig(covariant IFlexiKlineTheme theme) {
+  CrossConfig genCrossConfig() {
     return CrossConfig(
       enable: true,
       crosshair: LineConfig(
@@ -323,7 +338,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
     );
   }
 
-  DrawConfig genDrawConfig(covariant IFlexiKlineTheme theme) {
+  DrawConfig genDrawConfig() {
     return DrawConfig(
       enable: true,
       crosshair: LineConfig(
@@ -398,7 +413,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
     );
   }
 
-  TooltipConfig genTooltipConfig(covariant IFlexiKlineTheme theme) {
+  TooltipConfig genTooltipConfig() {
     return TooltipConfig(
       show: true,
 
@@ -425,28 +440,28 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
     );
   }
 
-  IndicatorsConfig genIndicatorsConfig(covariant IFlexiKlineTheme theme) {
+  IndicatorsConfig genIndicatorsConfig() {
     return IndicatorsConfig(
       /// 主区
-      candle: genCandleIndicator(theme),
-      volume: genMainVolumeIndicator(theme),
-      ma: genMaIndicator(theme),
+      candle: genCandleIndicator(),
+      volume: genMainVolumeIndicator(),
+      ma: genMaIndicator(),
       // ema: genEmaIndicator(theme),
       // boll: genBollIndicator(theme),
       // sar: genSarIndicator(theme),
 
       /// 副区
-      time: genTimeIndicator(theme),
+      time: genTimeIndicator(),
       // macd: genMacdIndicator(theme),
       // kdj: genKdjIndicator(theme),
-      mavol: genMavolIndicator(theme),
+      // mavol: genMavolIndicator(theme),
       // subBoll: genSubBollIndicator(theme),
       // subSar: genSubSarIndicator(theme),
       // rsi: genSubRsiIndicator(theme),
     );
   }
 
-  CandleIndicator genCandleIndicator(covariant IFlexiKlineTheme theme) {
+  CandleIndicator genCandleIndicator() {
     return CandleIndicator(
       zIndex: -1,
       height: theme.mainIndicatorHeight,
@@ -558,9 +573,8 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
     );
   }
 
-  VolumeIndicator genMainVolumeIndicator(covariant IFlexiKlineTheme theme) {
+  VolumeIndicator genMainVolumeIndicator() {
     return VolumeIndicator(
-      key: IndicatorType.volume,
       zIndex: -2,
       height: theme.subIndicatorHeight,
       padding: theme.subIndicatorPadding,
@@ -589,9 +603,8 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
     );
   }
 
-  MAIndicator genMaIndicator(covariant IFlexiKlineTheme theme) {
+  MAIndicator genMaIndicator() {
     return MAIndicator(
-      key: IndicatorType.ma,
       height: theme.mainIndicatorHeight,
       padding: theme.mainIndicatorPadding,
       calcParams: [
@@ -627,7 +640,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
     );
   }
 
-  // EMAIndicator genEmaIndicator(covariant IFlexiKlineTheme theme) {
+  // EMAIndicator genEmaIndicator() {
   //   return EMAIndicator(
   //     key: IndicatorType.ema,
   //     height: theme.mainIndicatorHeight,
@@ -691,7 +704,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
   //   );
   // }
 
-  // BOLLIndicator genBollIndicator(covariant IFlexiKlineTheme theme) {
+  // BOLLIndicator genBollIndicator() {
   //   return BOLLIndicator(
   //     key: IndicatorType.boll,
   //     height: theme.mainIndicatorHeight,
@@ -740,7 +753,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
   //   );
   // }
 
-  // SARIndicator genSarIndicator(covariant IFlexiKlineTheme theme) {
+  // SARIndicator genSarIndicator() {
   //   return SARIndicator(
   //     key: IndicatorType.sar,
   //     height: theme.mainIndicatorHeight,
@@ -763,7 +776,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
   //   );
   // }
 
-  TimeIndicator genTimeIndicator(covariant IFlexiKlineTheme theme) {
+  TimeIndicator genTimeIndicator() {
     return TimeIndicator(
       height: theme.timeIndicatorHeight,
       padding: EdgeInsets.zero,
@@ -782,7 +795,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
     );
   }
 
-  // MACDIndicator genMacdIndicator(covariant IFlexiKlineTheme theme) {
+  // MACDIndicator genMacdIndicator() {
   //   return MACDIndicator(
   //     height: theme.subIndicatorHeight,
   //     padding: theme.subIndicatorPadding,
@@ -828,7 +841,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
   //   );
   // }
 
-  // KDJIndicator genKdjIndicator(covariant IFlexiKlineTheme theme) {
+  // KDJIndicator genKdjIndicator() {
   //   return KDJIndicator(
   //     height: theme.subIndicatorHeight,
   //     padding: theme.subIndicatorPadding,
@@ -874,55 +887,52 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
   //   );
   // }
 
-  MAVolumeIndicator genMavolIndicator(
-    covariant IFlexiKlineTheme theme, {
-    double? height,
-    EdgeInsets? padding,
-    bool drawBelowTipsArea = false,
-  }) {
-    return MAVolumeIndicator(
-      height: height ?? theme.subIndicatorHeight,
-      padding: padding ?? theme.subIndicatorPadding,
-      drawBelowTipsArea: drawBelowTipsArea,
-      volumeIndicator: genSubVolumeIndicator(theme),
-      volMaIndicator: genSubVolMaIndicator(theme),
-    );
-  }
+  // VolumeIndicator genMavolIndicator({
+  //   double? height,
+  //   EdgeInsets? padding,
+  //   bool drawBelowTipsArea = false,
+  // }) {
+  //   return MAVolumeIndicator(
+  //     height: height ?? theme.subIndicatorHeight,
+  //     padding: padding ?? theme.subIndicatorPadding,
+  //     drawBelowTipsArea: drawBelowTipsArea,
+  //     volumeIndicator: genSubVolumeIndicator(theme),
+  //     volMaIndicator: genSubVolMaIndicator(theme),
+  //   );
+  // }
 
-  VolumeIndicator genSubVolumeIndicator(covariant IFlexiKlineTheme theme) {
-    return VolumeIndicator(
-      key: IndicatorType.subVol, // 区别于主区volumeKey的地方
-      zIndex: -2,
-      height: theme.subIndicatorHeight,
-      padding: theme.subIndicatorPadding,
-      paintMode: PaintMode.combine,
+  // VolumeIndicator genSubVolumeIndicator() {
+  //   return VolumeIndicator(
+  //     zIndex: -2,
+  //     height: theme.subIndicatorHeight,
+  //     padding: theme.subIndicatorPadding,
+  //     paintMode: PaintMode.combine,
 
-      /// 绘制相关参数
-      volTips: TipsConfig(
-        label: 'Vol: ',
-        precision: 2,
-        style: TextStyle(
-          fontSize: theme.normalTextSize,
-          color: theme.textColor,
-          overflow: TextOverflow.ellipsis,
-          height: defaultTextHeight,
-        ),
-      ),
-      tipsPadding: theme.tipsPadding,
-      tickCount: defaultSubTickCount,
-      precision: 2,
+  //     /// 绘制相关参数
+  //     volTips: TipsConfig(
+  //       label: 'Vol: ',
+  //       precision: 2,
+  //       style: TextStyle(
+  //         fontSize: theme.normalTextSize,
+  //         color: theme.textColor,
+  //         overflow: TextOverflow.ellipsis,
+  //         height: defaultTextHeight,
+  //       ),
+  //     ),
+  //     tipsPadding: theme.tipsPadding,
+  //     tickCount: defaultSubTickCount,
+  //     precision: 2,
 
-      /// 控制参数
-      // showYAxisTick: true,
-      // showCrossMark: true,
-      // showTips: true,
-      // useTint: false,
-    );
-  }
+  //     /// 控制参数
+  //     // showYAxisTick: true,
+  //     // showCrossMark: true,
+  //     // showTips: true,
+  //     // useTint: false,
+  //   );
+  // }
 
-  VolMaIndicator genSubVolMaIndicator(covariant IFlexiKlineTheme theme) {
+  VolMaIndicator genSubVolMaIndicator() {
     return VolMaIndicator(
-      key: IndicatorType.volMa,
       zIndex: 0,
       height: theme.subIndicatorHeight,
       padding: theme.subIndicatorPadding,
@@ -955,12 +965,23 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
         ),
       ],
       tipsPadding: theme.tipsPadding,
-      lineWidth: theme.indicatorLineWidth,
+      maLineWidth: theme.indicatorLineWidth,
+      volTips: TipsConfig(
+        label: 'Vol: ',
+        precision: 2,
+        style: TextStyle(
+          fontSize: theme.normalTextSize,
+          color: theme.textColor,
+          overflow: TextOverflow.ellipsis,
+          height: defaultTextHeight,
+        ),
+      ),
+      ticksCount: defaultSubTickCount,
       precision: 2,
     );
   }
 
-  // BOLLIndicator genSubBollIndicator(covariant IFlexiKlineTheme theme) {
+  // BOLLIndicator genSubBollIndicator() {
   //   return BOLLIndicator(
   //     key: IndicatorType.subBoll, // 区别于主区bollKey的地方
   //     height: theme.subIndicatorHeight,
@@ -1009,7 +1030,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
   //   );
   // }
 
-  // SARIndicator genSubSarIndicator(covariant IFlexiKlineTheme theme) {
+  // SARIndicator genSubSarIndicator() {
   //   return SARIndicator(
   //     key: IndicatorType.subSar, // 区别于主区sarKey的地方
   //     height: theme.subIndicatorHeight,
@@ -1032,7 +1053,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
   //   );
   // }
 
-  // RSIIndicator genSubRsiIndicator(covariant IFlexiKlineTheme theme) {
+  // RSIIndicator genSubRsiIndicator() {
   //   return RSIIndicator(
   //     height: theme.subIndicatorHeight,
   //     padding: theme.subIndicatorPadding,

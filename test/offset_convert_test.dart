@@ -41,13 +41,13 @@ void main() {
     controller.switchKlineData(req);
     await controller.updateKlineData(req, list);
     controller.calculateCandleDrawIndex();
-    controller.ensurePaintObjectInstance();
-    controller.mainIndicator.paintObject?.doInitState(
-      mainIndicatorSlot,
-      start: controller.curKlineData.start,
-      end: controller.curKlineData.end,
-      reset: true,
-    );
+    // controller.ensurePaintObjectInstance();
+    // controller.mainIndicator.paintObject?.doInitState(
+    //   mainIndicatorSlot,
+    //   start: controller.curKlineData.start,
+    //   end: controller.curKlineData.end,
+    //   reset: true,
+    // );
   });
 
   // group('group1 ', () {

@@ -18,6 +18,16 @@ part of 'core.dart';
 mixin SettingBinding on KlineBindingBase
     implements ISetting, IGrid, IChart, ICross, IDraw {
   @override
+  void init() {
+    super.init();
+    logd("init setting");
+    _paintObjectManager = IndicatorPaintObjectManager(
+      configuration: configuration,
+      logger: loggerDelegate,
+    )..initState(this, this);
+  }
+
+  @override
   void initState() {
     super.initState();
     logd("initState setting");
@@ -29,12 +39,10 @@ mixin SettingBinding on KlineBindingBase
     super.dispose();
     logd("dispose setting");
     _canvasSizeChangeListener.dispose();
-    mainIndicator.dispose();
-    for (var indicator in subRectIndicators) {
-      indicator.dispose();
-    }
-    subRectIndicators.clear();
+    _paintObjectManager.dispose();
   }
+
+  late final IndicatorPaintObjectManager _paintObjectManager;
 
   /// KlineData整个图表区域大小变化监听器
   final _canvasSizeChangeListener =
@@ -48,7 +56,7 @@ mixin SettingBinding on KlineBindingBase
     final oldCanvasRect = _canvasSizeChangeListener.value;
 
     if (_fixedCanvasRect != null) {
-      final changed = updateMainIndicatorParam(height: mainRect.height);
+      final changed = updateMainPaintObjectParam(height: mainRect.height);
       if (changed || oldCanvasRect != _fixedCanvasRect) {
         markRepaintChart(reset: true);
 
@@ -57,7 +65,7 @@ mixin SettingBinding on KlineBindingBase
       }
     } else {
       if (oldCanvasRect != canvasRect) {
-        final changed = updateMainIndicatorParam(height: mainRect.height);
+        final changed = updateMainPaintObjectParam(height: mainRect.height);
         if (changed || oldCanvasRect.width != mainRect.width) {
           markRepaintChart(reset: true);
         }
@@ -123,24 +131,25 @@ mixin SettingBinding on KlineBindingBase
   /// TimeIndicator区域大小
   @override
   Rect get timeRect {
-    Rect? rect = indicatorsConfig.time.paintObject?.chartRect;
-    if (rect != null) return rect;
+    final timeConfig = _paintObjectManager.timeRectConfig;
+    if (timeConfig == null) return Rect.zero;
     final subRect = this.subRect;
-    if (indicatorsConfig.time.position == DrawPosition.middle) {
+    if (timeConfig.position == DrawPosition.middle) {
       return Rect.fromLTWH(
         subRect.left,
         subRect.top,
         subRect.width,
-        indicatorsConfig.time.height,
+        timeConfig.height,
       );
-    } else {
+    } else if (timeConfig.position == DrawPosition.bottom) {
       return Rect.fromLTWH(
         subRect.left,
-        subRect.bottom - indicatorsConfig.time.height,
+        subRect.bottom - timeConfig.height,
         subRect.width,
-        indicatorsConfig.time.height,
+        timeConfig.height,
       );
     }
+    return Rect.zero;
   }
 
   /// 主区域最小宽高
@@ -228,6 +237,7 @@ mixin SettingBinding on KlineBindingBase
   // }
 
   /// 单根蜡烛宽度, 限制范围1[pixel] ~ [candleMaxWidth] 之间
+  @override
   double get candleWidth => settingConfig.candleWidth;
   set candleWidth(double width) {
     settingConfig.candleWidth = width.clamp(
@@ -237,73 +247,92 @@ mixin SettingBinding on KlineBindingBase
   }
 
   /// 单根蜡烛所占据实际宽度
+  @override
   double get candleActualWidth => candleWidth + settingConfig.candleSpacing;
 
   /// 单根蜡烛的一半
+  @override
   double get candleWidthHalf => candleActualWidth / 2;
 
   /// 绘制区域宽度内, 可绘制的蜡烛数
   int get maxCandleCount => (mainChartWidth / candleActualWidth).ceil();
 
-  Map<IIndicatorKey, SinglePaintObjectIndicator> get supportMainIndicators {
-    return {...indicatorsConfig.mainIndicators, ..._customMainIndicators};
+  /// 时间刻度指标配置
+  @override
+  ITimeRectConfig? get timeRectConfig {
+    return _paintObjectManager.timeRectConfig;
   }
 
-  Map<IIndicatorKey, Indicator> get supportSubIndicators {
-    return {...indicatorsConfig.subIndicators, ..._customSubIndicators};
+  /// 注册主区指标配置构造器
+  void registerMainIndicatorBuilder(
+    IIndicatorKey key,
+    IndicatorBuilder<SinglePaintObjectIndicator> builder,
+  ) {
+    _paintObjectManager.registerMainIndicatorBuilder(key, builder);
+  }
+
+  /// 注册副区指标配置构造器
+  void registerSubIndicatorBuilder<T extends Indicator>(
+    IIndicatorKey key,
+    IndicatorBuilder<SinglePaintObjectIndicator> builder,
+  ) {
+    _paintObjectManager.registerSubIndicatorBuilder(key, builder);
   }
 
   Set<IIndicatorKey> get supportMainIndicatorKeys {
-    return supportMainIndicators.keys.toSet()..remove(IndicatorType.candle);
+    return _paintObjectManager.supportMainIndicatorKeys.toSet()
+      ..remove(IndicatorType.candle);
   }
 
   Set<IIndicatorKey> get supportSubIndicatorKeys {
-    return supportSubIndicators.keys.toSet()..remove(IndicatorType.time);
+    return _paintObjectManager.supportSubIndicatorKeys.toSet()
+      ..remove(IndicatorType.time);
   }
 
-  Set<IIndicatorKey> get mainIndicatorKeys {
-    return mainIndicator.children.map((e) => e.key).toSet();
+  Iterable<IIndicatorKey> get mainIndicatorKeys {
+    return _paintObjectManager.mainIndciatorKeys;
   }
 
-  Set<IIndicatorKey> get subIndicatorKeys {
-    return subRectIndicators.map((e) => e.key).toSet();
+  Iterable<IIndicatorKey> get subIndicatorKeys {
+    return _paintObjectManager.subIndicatorKeys;
+  }
+
+  // @override
+  // MultiPaintObjectIndicator get mainIndicator {
+  //   return _flexiKlineConfig.mainIndicator;
+  // }
+
+  @override
+  MultiPaintObjectBox get mainPaintObject {
+    // if (mainIndicator.paintObject != null &&
+    //     mainIndicator.paintObject is MultiPaintObjectBox) {
+    //   return mainIndicator.paintObject as MultiPaintObjectBox;
+    // }
+    // return null;
+    return _paintObjectManager.mainPaintObject;
   }
 
   @override
-  MultiPaintObjectIndicator get mainIndicator {
-    return _flexiKlineConfig.mainIndicator;
+  Iterable<PaintObject> get subPaintObjects {
+    return _paintObjectManager.subPaintObjects;
   }
 
   @override
-  MultiPaintObjectBox? get mainPaintObject {
-    if (mainIndicator.paintObject != null &&
-        mainIndicator.paintObject is MultiPaintObjectBox) {
-      return mainIndicator.paintObject as MultiPaintObjectBox;
-    }
-    return null;
-  }
-
-  @protected
-  FixedHashQueue<Indicator> get subIndicatorQueue {
-    return _flexiKlineConfig.subRectIndicatorQueue;
-  }
-
-  @override
-  List<Indicator> get subRectIndicators {
-    if (indicatorsConfig.time.position == DrawPosition.bottom) {
-      return [...subIndicatorQueue, indicatorsConfig.time];
-    } else {
-      return [indicatorsConfig.time, ...subIndicatorQueue];
-    }
-  }
+  // List<Indicator> get subRectIndicators {
+  //   if (indicatorsConfig.time.position == DrawPosition.bottom) {
+  //     return [...subIndicatorQueue, indicatorsConfig.time];
+  //   } else {
+  //     return [indicatorsConfig.time, ...subIndicatorQueue];
+  //   }
+  // }
 
   /// 更新主区指标的布局参数
   @protected
-  bool updateMainIndicatorParam({
+  bool updateMainPaintObjectParam({
     double? height,
     EdgeInsets? padding,
   }) {
-    bool changed = mainIndicator.updateLayout(
+    bool changed = mainPaintObject.updateLayout(
       height: height,
       padding: padding,
       // reset: true,
@@ -314,7 +343,7 @@ mixin SettingBinding on KlineBindingBase
   @override
   double calculateIndicatorTop(int slot) {
     double top = 0;
-    final list = subRectIndicators;
+    final list = subPaintObjects.toList(growable: false);
     if (slot >= 0 && slot < list.length) {
       for (int i = 0; i < slot; i++) {
         top += list[i].height;
@@ -326,26 +355,24 @@ mixin SettingBinding on KlineBindingBase
   @protected
   double get subRectHeight {
     double totalHeight = 0.0;
-    for (final indicator in subRectIndicators) {
+    for (final indicator in subPaintObjects) {
       totalHeight += indicator.height;
     }
     return totalHeight;
   }
 
-  @protected
-  @override
-  void ensurePaintObjectInstance() {
-    mainIndicator.ensurePaintObject(this);
-    for (var indicator in subRectIndicators) {
-      indicator.ensurePaintObject(this);
-    }
-  }
+  // @protected
+  // @override
+  // void ensurePaintObjectInstance() {
+  //   mainIndicator.ensurePaintObject(this);
+  //   for (var indicator in subRectIndicators) {
+  //     indicator.ensurePaintObject(this);
+  //   }
+  // }
 
   /// 在主图中添加指标
   void addIndicatorInMain(IIndicatorKey key) {
-    if (supportMainIndicators.containsKey(key)) {
-      final indicator = supportMainIndicators[key]!;
-      mainIndicator.appendIndicator(indicator, this);
+    if (_paintObjectManager.addIndicatorInMain(key, this)) {
       markRepaintChart(reset: true);
       markRepaintCross();
     }
@@ -353,34 +380,24 @@ mixin SettingBinding on KlineBindingBase
 
   /// 删除主图中[key]指定的指标
   void delIndicatorInMain(IIndicatorKey key) {
-    mainIndicator.deleteIndicator(key);
-    markRepaintChart(reset: true);
-    markRepaintCross();
+    if (_paintObjectManager.delIndicatorInSub(key)) {
+      markRepaintChart(reset: true);
+      markRepaintCross();
+    }
   }
 
   /// 在副图中添加指标
   void addIndicatorInSub(IIndicatorKey key) {
-    final indicator = supportSubIndicators.getItem(key);
-    if (indicator != null) {
-      // 使用前先解绑
-      indicator.dispose();
-      subIndicatorQueue.append(indicator)?.dispose();
+    if (_paintObjectManager.addIndicatorInSub(key, this)) {
       invokeSizeChanged();
     }
   }
 
   /// 删除副图[key]指定的指标
   void delIndicatorInSub(IIndicatorKey key) {
-    bool hasRemove = false;
-    subIndicatorQueue.removeWhere((indicator) {
-      if (indicator.key == key) {
-        indicator.dispose();
-        hasRemove = true;
-        return true;
-      }
-      return false;
-    });
-    if (hasRemove) invokeSizeChanged();
+    if (_paintObjectManager.delIndicatorInSub(key)) {
+      invokeSizeChanged();
+    }
   }
 
   FlexiKlineConfig? __flexiKlineConfig;
@@ -398,10 +415,10 @@ mixin SettingBinding on KlineBindingBase
     // __flexiKlineConfig = config.clone();
     // TODO: 因clone时会调用toJson(), 此mainIndicator未初始化, 暂不clone; 后续考虑优化
     __flexiKlineConfig = config;
-    __flexiKlineConfig!.init(
-      customMainIndicators: _customMainIndicators,
-      customSubIndicators: _customSubIndicators,
-    );
+    // __flexiKlineConfig!.init(
+    //   customMainIndicators: _customMainIndicators,
+    //   customSubIndicators: _customSubIndicators,
+    // );
   }
 
   void initFlexiKlineState({bool isInit = false}) {
@@ -435,7 +452,7 @@ mixin SettingBinding on KlineBindingBase
       config.update(_flexiKlineConfig);
 
       /// 释放当前配置所有指标
-      _flexiKlineConfig.dispose();
+      // _flexiKlineConfig.dispose();
 
       /// 配置变更重置自定义指标.
       _updateCustomIndicators();
@@ -461,29 +478,26 @@ mixin SettingBinding on KlineBindingBase
 
   @override
   Map<IIndicatorKey, dynamic> getIndicatorCalcParams() {
-    // 收集所有指标预计算参数.
-    return indicatorsConfig.getAllIndicatorCalcParams();
-    // 收集已打开的指标计算参数. TODO: 性能优化后使用.
-    // return _flexiKlineConfig.getOpenedIndicatorCalcParams();
+    return _paintObjectManager.getIndicatorCalcParams();
   }
 
   /// IndicatorsConfig
-  @override
-  IndicatorsConfig get indicatorsConfig => _flexiKlineConfig.indicators;
-  set indicatorsConfig(IndicatorsConfig config) {
-    final keys = config.megerAndDisposeOldIndicator(
-      _flexiKlineConfig.indicators,
-    );
-    _flexiKlineConfig.indicators = config;
-    for (var key in keys) {
-      if (indicatorsConfig.mainIndicators.containsKey(key)) {
-        addIndicatorInMain(key);
-      }
-      if (indicatorsConfig.subIndicators.containsKey(key)) {
-        addIndicatorInSub(key);
-      }
-    }
-  }
+  // @override
+  // IndicatorsConfig get indicatorsConfig => _flexiKlineConfig.indicators;
+  // set indicatorsConfig(IndicatorsConfig config) {
+  //   final keys = config.megerAndDisposeOldIndicator(
+  //     _flexiKlineConfig.indicators,
+  //   );
+  //   _flexiKlineConfig.indicators = config;
+  //   for (var key in keys) {
+  //     if (indicatorsConfig.mainIndicators.containsKey(key)) {
+  //       addIndicatorInMain(key);
+  //     }
+  //     if (indicatorsConfig.subIndicators.containsKey(key)) {
+  //       addIndicatorInSub(key);
+  //     }
+  //   }
+  // }
 
   /// SettingConfig
   @override
@@ -549,12 +563,12 @@ mixin SettingBinding on KlineBindingBase
     // 更新自定义指标配置.
     _customMainIndicators.clear();
     _customSubIndicators.clear();
-    configuration.customMainIndicators().forEach(
-          (indicator) => addCustomMainIndicatorConfig(indicator),
-        );
-    configuration.customSubIndicators().forEach(
-          (indicator) => addCustomSubIndicatorConfig(indicator),
-        );
+    // configuration.customMainIndicators().forEach(
+    //       (indicator) => addCustomMainIndicatorConfig(indicator),
+    //     );
+    // configuration.customSubIndicators().forEach(
+    //       (indicator) => addCustomSubIndicatorConfig(indicator),
+    //     );
   }
 
   /// 用户自定义主区指标集合

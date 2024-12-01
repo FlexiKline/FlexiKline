@@ -15,8 +15,6 @@ abstract class _$IndicatorsConfigCWProxy {
 
   IndicatorsConfig time(TimeIndicator time);
 
-  IndicatorsConfig mavol(MAVolumeIndicator mavol);
-
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `IndicatorsConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -28,7 +26,6 @@ abstract class _$IndicatorsConfigCWProxy {
     VolumeIndicator? volume,
     MAIndicator? ma,
     TimeIndicator? time,
-    MAVolumeIndicator? mavol,
   });
 }
 
@@ -51,9 +48,6 @@ class _$IndicatorsConfigCWProxyImpl implements _$IndicatorsConfigCWProxy {
   IndicatorsConfig time(TimeIndicator time) => this(time: time);
 
   @override
-  IndicatorsConfig mavol(MAVolumeIndicator mavol) => this(mavol: mavol);
-
-  @override
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `IndicatorsConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -66,7 +60,6 @@ class _$IndicatorsConfigCWProxyImpl implements _$IndicatorsConfigCWProxy {
     Object? volume = const $CopyWithPlaceholder(),
     Object? ma = const $CopyWithPlaceholder(),
     Object? time = const $CopyWithPlaceholder(),
-    Object? mavol = const $CopyWithPlaceholder(),
   }) {
     return IndicatorsConfig(
       candle: candle == const $CopyWithPlaceholder() || candle == null
@@ -85,10 +78,6 @@ class _$IndicatorsConfigCWProxyImpl implements _$IndicatorsConfigCWProxy {
           ? _value.time
           // ignore: cast_nullable_to_non_nullable
           : time as TimeIndicator,
-      mavol: mavol == const $CopyWithPlaceholder() || mavol == null
-          ? _value.mavol
-          // ignore: cast_nullable_to_non_nullable
-          : mavol as MAVolumeIndicator,
     );
   }
 }
@@ -109,7 +98,6 @@ IndicatorsConfig _$IndicatorsConfigFromJson(Map<String, dynamic> json) =>
       volume: VolumeIndicator.fromJson(json['volume'] as Map<String, dynamic>),
       ma: MAIndicator.fromJson(json['ma'] as Map<String, dynamic>),
       time: TimeIndicator.fromJson(json['time'] as Map<String, dynamic>),
-      mavol: MAVolumeIndicator.fromJson(json['mavol'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$IndicatorsConfigToJson(IndicatorsConfig instance) =>
@@ -118,5 +106,4 @@ Map<String, dynamic> _$IndicatorsConfigToJson(IndicatorsConfig instance) =>
       'volume': instance.volume.toJson(),
       'ma': instance.ma.toJson(),
       'time': instance.time.toJson(),
-      'mavol': instance.mavol.toJson(),
     };

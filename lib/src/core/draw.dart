@@ -78,7 +78,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw {
     return _drawObjectManager.supportDrawGroupTypes;
   }
 
-  /// 自定义overlay绘制对象构建器
+  /// 注册绘制工具构造器
   void registerDrawObjectBuilder(
     IDrawType type,
     DrawObjectBuilder builder,

@@ -39,7 +39,7 @@ enum DrawPosition {
 
 /// 缩放位置
 ///
-/// [auto] 会根据当前绽放开始时, 所有焦点位置, 将绘制区域宽度三等分, 从而自动决定缩放位置.
+/// 将绘制区域宽度三等分, [auto] 会根据当前缩放开始时的焦点位置, 自行决定缩放位置.
 enum ScalePosition {
   auto,
   left,
@@ -80,6 +80,13 @@ final class FlexiIndicatorKey implements IIndicatorKey {
 
 const unknownIndicatorKey = FlexiIndicatorKey('unknown');
 
+typedef IndicatorBuilder<T extends Indicator> = T Function();
+
+abstract interface class ITimeRectConfig {
+  double get height;
+  DrawPosition get position;
+}
+
 /// 内置IndciatorKey
 enum IndicatorType implements IIndicatorKey {
   /// 主区
@@ -93,9 +100,7 @@ enum IndicatorType implements IIndicatorKey {
 
   /// 副区
   time('Time'),
-  volMa('VOLMA'),
-  subVol('VOL'),
-  maVol('MAVOL'),
+  volMa('MAVOL'),
   macd('MACD'),
   kdj('KDJ'),
   subBoll('BOLL'),
@@ -121,13 +126,19 @@ enum IndicatorType implements IIndicatorKey {
 /// 实现 [IPrecomputable] 接口, 即代表当前对象是可以进行预计算.
 /// [getCalcParam] 返回预计算的参数. 可以为空
 abstract interface class IPrecomputable {
-  dynamic getCalcParam();
+  dynamic get calcParams;
 }
 
 const mainIndicatorSlot = -1;
 
 /// 指标图的绘制边界接口
 abstract interface class IPaintBoundingBox {
+  bool updateLayout({
+    double? height,
+    EdgeInsets? padding,
+    bool reset = false,
+  });
+
   /// 当前指标图paint内的padding.
   /// 增加padding后tipsRect和chartRect将在此以内绘制.
   /// 一些额外的信息可以通过padding在左上右下方向上增加扩展的绘制区域.
@@ -156,6 +167,10 @@ abstract interface class IPaintBoundingBox {
 abstract interface class IPaintDataInit {
   /// 最大值/最小值
   MinMax get minMax;
+
+  /// 数据预计算
+  /// 1. 仅在数据源[KlineData]发生变化时回调.
+  void precompute(Range range, {bool reset = false});
 
   void setMinMax(MinMax val);
 }

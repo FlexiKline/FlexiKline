@@ -29,7 +29,6 @@ part 'volume.g.dart';
 @FlexiIndicatorSerializable
 class VolumeIndicator extends SinglePaintObjectIndicator {
   VolumeIndicator({
-    required super.key,
     super.name = 'VOL',
     super.zIndex = -2,
     super.height = defaultSubIndicatorHeight,
@@ -41,7 +40,7 @@ class VolumeIndicator extends SinglePaintObjectIndicator {
     required this.tipsPadding,
     this.tickCount = defaultSubTickCount,
     this.precision = 2,
-  });
+  }) : super(key: IndicatorType.volume);
 
   /// 绘制相关参数
   final TipsConfig volTips;
@@ -73,9 +72,6 @@ class VolumePaintObject<T extends VolumeIndicator>
     with PaintYAxisScaleMixin, PaintYAxisMarkOnCrossMixin {
   VolumePaintObject({required super.context, required super.indicator});
 
-  bool? _isInsub;
-  bool get isInSub => _isInsub ??= indicator.key == IndicatorType.subVol;
-
   @override
   MinMax? initState({required int start, required int end}) {
     if (!klineData.canPaintChart) return null;
@@ -93,7 +89,7 @@ class VolumePaintObject<T extends VolumeIndicator>
     /// 绘制Volume柱状图
     paintVolumeChart(canvas, size);
 
-    if (settingConfig.showYAxisTick && isInSub) {
+    if (settingConfig.showYAxisTick) {
       /// 绘制Y轴刻度值
       paintYAxisScale(
         canvas,
@@ -106,14 +102,12 @@ class VolumePaintObject<T extends VolumeIndicator>
 
   @override
   void onCross(Canvas canvas, Offset offset) {
-    if (isInSub) {
-      /// onCross时, 绘制Y轴上的标记值
-      paintYAxisMarkOnCross(
-        canvas,
-        offset,
-        precision: indicator.precision,
-      );
-    }
+    /// onCross时, 绘制Y轴上的标记值
+    paintYAxisMarkOnCross(
+      canvas,
+      offset,
+      precision: indicator.precision,
+    );
   }
 
   /// 绘制Volume柱状图
@@ -126,12 +120,8 @@ class VolumePaintObject<T extends VolumeIndicator>
     final offset = startCandleDx - candleWidthHalf;
     final dyBottom = chartRect.bottom;
 
-    final longPaint = isInSub
-        ? settingConfig.defLongBarPaint
-        : settingConfig.defLongTintBarPaint;
-    final shortPaint = isInSub
-        ? settingConfig.defShortBarPaint
-        : settingConfig.defShortTintBarPaint;
+    final longPaint = settingConfig.defLongTintBarPaint;
+    final shortPaint = settingConfig.defShortTintBarPaint;
 
     for (var i = start; i < end; i++) {
       final model = list[i];
@@ -157,7 +147,6 @@ class VolumePaintObject<T extends VolumeIndicator>
     Offset? offset,
     Rect? tipsRect,
   }) {
-    if (!isInSub) return null;
     model ??= offsetToCandle(offset);
     if (model == null) return null;
 

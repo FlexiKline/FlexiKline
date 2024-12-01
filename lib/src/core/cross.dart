@@ -172,10 +172,10 @@ mixin CrossBinding on KlineBindingBase, SettingBinding implements ICross {
       /// 绘制 Tooltip
       paintTooltip(canvas, offset, model: model);
 
-      ensurePaintObjectInstance();
+      // ensurePaintObjectInstance();
 
-      for (var indicator in [mainIndicator, ...subRectIndicators]) {
-        indicator.paintObject?.doOnCross(canvas, offset, model: model);
+      for (var paintObject in [mainPaintObject, ...subPaintObjects]) {
+        paintObject.doOnCross(canvas, offset, model: model);
       }
     }
   }
@@ -259,8 +259,8 @@ mixin CrossBinding on KlineBindingBase, SettingBinding implements ICross {
 
     /// 开始绘制
     double top = tooltipConfig.margin.top;
-    if (mainIndicator.drawBelowTipsArea) {
-      top += mainIndicator.padding.top;
+    if (mainPaintObject.drawBelowTipsArea) {
+      top += mainPaintObject.padding.top;
     }
 
     if (offset.dx > mainChartWidthHalf) {

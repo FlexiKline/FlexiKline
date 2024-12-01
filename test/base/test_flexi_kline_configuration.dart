@@ -120,4 +120,8 @@ class TestFlexiKlineConfiguration with FlexiKlineThemeConfigurationMixin {
   void saveFlexiKlineConfig(FlexiKlineConfig config) {
     // TODO: implement saveFlexiKlineConfig
   }
+
+  @override
+  // TODO: implement theme
+  IFlexiKlineTheme get theme => throw UnimplementedError();
 }

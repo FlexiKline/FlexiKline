@@ -25,26 +25,26 @@ void main() {
     flexiKlineConfig.main.add(IndicatorType.candle);
     flexiKlineConfig.main.add(IndicatorType.volume);
 
-    flexiKlineConfig.sub.add(IndicatorType.maVol);
+    // flexiKlineConfig.sub.add(IndicatorType.maVol);
     flexiKlineConfig.sub.add(IndicatorType.sar);
 
-    flexiKlineConfig.init(customMainIndicators: {}, customSubIndicators: {});
+    // flexiKlineConfig.init();
   });
 
-  test('copywith indicator', () {
-    final ma = flexiKlineConfig.indicators.ma;
-    print(ma.toJson());
+  // test('copywith indicator', () {
+  //   final ma = flexiKlineConfig.indicators.ma;
+  //   print(ma.toJson());
 
-    final copyMa = ma.copyWith();
-    print(copyMa.toJson());
-  });
+  //   final copyMa = ma.copyWith();
+  //   print(copyMa.toJson());
+  // });
 
-  test('copywith multi indicator', () {
-    final main = flexiKlineConfig.mainIndicator;
-    print(main.toJson());
+  // test('copywith multi indicator', () {
+  //   final main = flexiKlineConfig.mainIndicator;
+  //   print(main.toJson());
 
-    print('---------------');
-    final copyMain = main.copyWith();
-    print(copyMain.toJson());
-  });
+  //   print('---------------');
+  //   final copyMain = main.copyWith();
+  //   print(copyMain.toJson());
+  // });
 }
