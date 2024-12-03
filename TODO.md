@@ -55,22 +55,25 @@ v0.7.0
 - [x] DrawType支持group; 
   
 v0.8.0
-- [ ] 抽离指标管理功能, 并统一由manager管理; 优化Indicator与PaintObject依赖关系.
+- [x] 抽离指标管理功能, 并统一由manager管理; 优化Indicator与PaintObject依赖关系.
 - [ ] KlinData中指标计算数据与CandleModel分离(保持CandleModel的独立)
-- [ ] 解除对CandleReq的依赖; 重新设计蜡烛数据标识与查询更新方式, 并考虑兼容股市Kline; 
-- [ ] 实现indicators对象和DrawObjects对象与框架分离(API接口优化)
-- [ ] 完善demo; 实现所有配置功能.
-- [ ] 绘制图标优化; 遗留问题修复.
-- [ ] controller与core库接口优化(保护API不被滥用)
+- [ ] 重新设计CandleReq的蜡烛数据标识与查询更新方式, 并考虑兼容股市Kline; 
+- [x] 实现indicators对象和DrawObjects对象与框架分离(API接口优化)
+- [ ] 更新绘制工具图标; 遗留问题修复.
+- [x] controller与core库接口优化(保护API不被滥用)
 - [ ] Tooltip的绘制优化与可点击实现.
+- [ ] timestampToIndex算法优化; bugfix.
+- [ ] websocket更新demo.
 - [ ] 文档撰写v2.
 
 v0.9.0
 - [ ] 指标计算性能优化: 
-  1. 更新蜡烛数据方式反转, 同步所有计算逻辑.
+  1. 更新蜡烛数据流程优化.
   2. 按需计算, 增加指标同时触发指标计算后, 再绘制.
   3. 考虑保留上次最新数据计算中间态, 当新数据更新时继续计算.
+- [ ] 数据更新后绘制bugfix;
 - [ ] 测试考虑废弃BagNum, 由double完成.
+- [ ] 完善demo; 实现所有配置功能.
 - [ ] 增加图表移动/数据变化等监听: 仅在需要绘制时重新draw; 
 - [ ] DrawObject增加接口, 根据当前环境参数检测是否需要参与绘制.
 - [ ] 指标/绘制对象实例配置持久化.

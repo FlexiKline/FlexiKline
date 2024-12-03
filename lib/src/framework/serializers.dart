@@ -30,6 +30,7 @@ class IIndicatorKeyConvert implements JsonConverter<IIndicatorKey, String> {
     final splits = json.split(":");
     final id = splits.getItem(0);
     if (id == null || id.isEmpty) return unknownIndicatorKey;
+    // TODO: 后续废弃, 完全由实现方指定
     final indicatorType = IndicatorType.values.firstWhereOrNull(
       (type) => type.id == id,
     );

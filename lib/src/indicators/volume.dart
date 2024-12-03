@@ -66,8 +66,7 @@ class VolumeIndicator extends SinglePaintObjectIndicator {
 }
 
 class VolumePaintObject<T extends VolumeIndicator>
-    extends SinglePaintObjectBox<T>
-    with PaintYAxisTicksMixin, PaintYAxisTicksOnCrossMixin {
+    extends SinglePaintObjectBox<T> {
   VolumePaintObject({required super.context, required super.indicator});
 
   @override
@@ -86,27 +85,10 @@ class VolumePaintObject<T extends VolumeIndicator>
   void paintChart(Canvas canvas, Size size) {
     /// 绘制Volume柱状图
     paintVolumeChart(canvas, size);
-
-    if (settingConfig.showYAxisTick) {
-      /// 绘制Y轴刻度值
-      paintYAxisTicks(
-        canvas,
-        size,
-        tickCount: indicator.tickCount,
-        precision: indicator.precision,
-      );
-    }
   }
 
   @override
-  void onCross(Canvas canvas, Offset offset) {
-    /// onCross时, 绘制Y轴上的标记值
-    paintYAxisTicksOnCross(
-      canvas,
-      offset,
-      precision: indicator.precision,
-    );
-  }
+  void onCross(Canvas canvas, Offset offset) {}
 
   /// 绘制Volume柱状图
   void paintVolumeChart(Canvas canvas, Size size) {

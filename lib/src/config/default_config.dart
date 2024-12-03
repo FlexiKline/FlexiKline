@@ -47,7 +47,7 @@ extension IFlexiKlineThemeExt on IFlexiKlineTheme {
     return defaultSubIndicatorHeight * scale;
   }
 
-  /// 默认副图指标高度
+  /// 默认主图指标高度
   double get mainIndicatorHeight {
     return defaultMainIndicatorHeight * scale;
   }

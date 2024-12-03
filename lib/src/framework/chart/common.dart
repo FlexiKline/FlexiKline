@@ -90,6 +90,7 @@ abstract interface class ITimeRectConfig {
 }
 
 /// 内置IndciatorKey
+/// TODO: 后续废弃, 完全由实现方指定
 enum IndicatorType implements IIndicatorKey {
   /// 主区
   main('MAIN'),

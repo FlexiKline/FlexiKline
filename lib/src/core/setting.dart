@@ -351,6 +351,7 @@ mixin SettingBinding on KlineBindingBase
   /// 在主图中添加指标
   void addIndicatorInMain(IIndicatorKey key) {
     if (_paintObjectManager.addIndicatorInMain(key, this)) {
+      _flexiKlineConfig.main.add(key);
       markRepaintChart(reset: true);
       markRepaintCross();
     }
@@ -359,6 +360,7 @@ mixin SettingBinding on KlineBindingBase
   /// 删除主图中[key]指定的指标
   void delIndicatorInMain(IIndicatorKey key) {
     if (_paintObjectManager.delIndicatorInMain(key)) {
+      _flexiKlineConfig.main.remove(key);
       markRepaintChart(reset: true);
       markRepaintCross();
     }
@@ -367,6 +369,7 @@ mixin SettingBinding on KlineBindingBase
   /// 在副图中添加指标
   void addIndicatorInSub(IIndicatorKey key) {
     if (_paintObjectManager.addIndicatorInSub(key, this)) {
+      _flexiKlineConfig.sub.add(key);
       _invokeSizeChanged();
     }
   }
@@ -374,6 +377,7 @@ mixin SettingBinding on KlineBindingBase
   /// 删除副图[key]指定的指标
   void delIndicatorInSub(IIndicatorKey key) {
     if (_paintObjectManager.delIndicatorInSub(key)) {
+      _flexiKlineConfig.sub.remove(key);
       _invokeSizeChanged();
     }
   }
