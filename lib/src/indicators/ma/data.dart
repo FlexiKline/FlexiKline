@@ -12,46 +12,45 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:math' as math;
+part of 'ma.dart';
 
-import '../config/ma_param/ma_param.dart';
-import '../framework/chart/indicator.dart';
-import '../model/export.dart';
-import 'base_data.dart';
-
-mixin MAData on BaseData {
-  @override
-  void initData() {
-    super.initData();
-    logd('init MA');
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    logd('dispose MA');
-    for (var model in list) {
-      model.maList = null;
-    }
-  }
-
-  @override
-  void precompute(
-    IIndicatorKey key, {
-    dynamic calcParam,
-    required Range range,
-    bool reset = false,
-  }) {
-    if (key == IndicatorType.ma && calcParam is List<MaParam>) {
-      calcuAndCacheMa(
-        calcParam,
-        start: range.start,
-        end: range.end,
-        reset: reset,
+@visibleForTesting
+extension on CandleModel {
+  List<BagNum?>? getMaList(int dataIndex, [int? paramLen]) {
+    List<BagNum?>? list = calcuData.getData(dataIndex);
+    if (list == null && paramLen != null && paramLen > 0) {
+      calcuData.setData(
+        dataIndex,
+        list = List.filled(paramLen, null, growable: false),
       );
-      return;
     }
-    super.precompute(key, calcParam: calcParam, range: range, reset: reset);
+    return list;
+  }
+
+  bool isValidMaList(int dataIndex) {
+    return getMaList(dataIndex)?.hasValidData ?? false;
+  }
+
+  MinMax? getMaListMinmax(int dataIndex) {
+    return MinMax.getMinMaxByList(getMaList(dataIndex));
+  }
+
+  void cleanMaData(int dataIndex) {
+    calcuData.setData(dataIndex, null);
+  }
+}
+
+mixin MaDataMixin<T extends MAIndicator> on SinglePaintObjectBox<T> {
+  List<MaParam> get calcParam => indicator.calcParams;
+
+  @override
+  void precompute(Range range, {bool reset = false}) {
+    calcuAndCacheMa(
+      calcParam,
+      start: range.start,
+      end: range.end,
+      reset: reset,
+    );
   }
 
   /// 计算 [index] 位置的 [count] 个数据的Ma指标.
@@ -59,15 +58,15 @@ mixin MAData on BaseData {
     int index,
     int count,
   ) {
-    if (isEmpty) return null;
-    int len = list.length;
+    if (klineData.isEmpty) return null;
+    int len = klineData.list.length;
     if (count <= 0 || index < 0 || index + count > len) return null;
 
-    final m = list[index];
+    final m = klineData.list[index];
 
     BagNum sum = m.close;
     for (int i = index + 1; i < index + count; i++) {
-      sum += list[i].close;
+      sum += klineData.list[i].close;
     }
 
     return sum.divNum(count);
@@ -80,28 +79,26 @@ mixin MAData on BaseData {
     int? start,
     int? end,
   }) {
-    final len = list.length;
-    start ??= this.start;
-    end ??= this.end;
-    if (count > len || !checkStartAndEnd(start, end)) return;
+    final len = klineData.list.length;
+    start ??= klineData.start;
+    end ??= klineData.end;
+    if (count > len || !klineData.checkStartAndEnd(start, end)) return;
     logd('calculateMa [end:$end ~ start:$start] count:$count');
 
     end = math.min(len - count, end - 1);
 
     /// 初始值化[index]位置的MA值
-    CandleModel m = list[end];
+    CandleModel m = klineData.list[end];
     BagNum sum = m.close;
     for (int i = end + 1; i < end + count; i++) {
-      sum += list[i].close;
+      sum += klineData.list[i].close;
     }
-    m.maList ??= List.filled(paramLen, null, growable: false);
-    m.maList![paramIndex] = sum.divNum(count);
+    m.getMaList(dataIndex, paramLen)?[paramIndex] = sum.divNum(count);
 
     for (int i = end - 1; i >= start; i--) {
-      m = list[i];
-      sum = sum - list[i + count].close + m.close;
-      m.maList ??= List.filled(paramLen, null, growable: false);
-      m.maList![paramIndex] = sum.divNum(count);
+      m = klineData.list[i];
+      sum = sum - klineData.list[i + count].close + m.close;
+      m.getMaList(dataIndex, paramLen)?[paramIndex] = sum.divNum(count);
     }
   }
 
@@ -111,7 +108,7 @@ mixin MAData on BaseData {
     required int end,
     bool reset = false,
   }) {
-    if (isEmpty || calcParams.isEmpty) return;
+    if (klineData.isEmpty || calcParams.isEmpty) return;
     final paramLen = calcParams.length;
     for (int i = 0; i < paramLen; i++) {
       _calculateMa(
@@ -132,24 +129,27 @@ mixin MAData on BaseData {
     int? start,
     int? end,
   }) {
-    start ??= this.start;
-    end ??= this.end;
-    if (calcParams.isEmpty || !checkStartAndEnd(start, end)) return null;
-    final len = list.length;
+    start ??= klineData.start;
+    end ??= klineData.end;
+    if (calcParams.isEmpty || !klineData.checkStartAndEnd(start, end)) {
+      return null;
+    }
+
+    final len = klineData.list.length;
 
     int minCount = MaParam.getMinCountByList(calcParams)!;
     end = math.min(len - minCount, end - 1);
 
-    if (!list[end].isValidMaList) {
+    if (!klineData.list[end].isValidMaList(dataIndex)) {
       calcuAndCacheMa(calcParams, start: 0, end: len);
     }
 
     MinMax? minmax;
     CandleModel m;
     for (int i = end; i >= start; i--) {
-      m = list[i];
-      minmax ??= m.maListMinmax;
-      minmax?.updateMinMax(m.maListMinmax);
+      m = klineData.list[i];
+      minmax ??= m.getMaListMinmax(dataIndex);
+      minmax?.updateMinMax(m.getMaListMinmax(dataIndex));
     }
     return minmax;
   }

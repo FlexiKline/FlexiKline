@@ -12,18 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:flutter/painting.dart';
-
-import '../config/export.dart';
-import '../constant.dart';
-import '../core/core.dart';
-import '../extension/export.dart';
-import '../model/export.dart';
-import '../utils/export.dart';
-import '../framework/export.dart';
-
-part 'candle.g.dart';
+part of 'candle.dart';
 
 @CopyWith()
 @FlexiIndicatorSerializable
@@ -88,7 +77,8 @@ class CandleIndicator extends SinglePaintObjectIndicator {
 }
 
 class CandlePaintObject<T extends CandleIndicator>
-    extends SinglePaintObjectBox<T> with PaintYAxisTicksOnCrossMixin {
+    extends SinglePaintObjectBox<T>
+    with CandleDataMixin, PaintYAxisTicksOnCrossMixin {
   CandlePaintObject({
     required super.context,
     required super.indicator,
@@ -96,18 +86,11 @@ class CandlePaintObject<T extends CandleIndicator>
 
   BagNum? _maxHigh, _minLow;
 
-  /// 两个时间刻度间隔的蜡烛数
-  // int get timeTickIntervalCount {
-  //   return ((math.max(60, indicator.timeTick.textWidth ?? 0)) /
-  //           setting.candleActualWidth)
-  //       .round();
-  // }
-
   @override
   MinMax? initState({required int start, required int end}) {
     if (!klineData.canPaintChart) return null;
 
-    MinMax? minmax = klineData.calculateMinmax(start: start, end: end);
+    MinMax? minmax = calculateMinmax(start: start, end: end);
     _maxHigh = minmax?.max;
     _minLow = minmax?.min;
     return minmax;

@@ -180,6 +180,9 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
   @override
   T get indicator => super.indicator as T;
 
+  @override
+  int get dataIndex => -1;
+
   bool get drawBelowTipsArea => indicator.drawBelowTipsArea;
 
   /// 当前[tipsHeight]是否需要更新布局参数

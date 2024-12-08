@@ -12,5 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export 'kline_data.dart';
-export 'base_data.dart';
+library candle;
+
+import 'package:copy_with_extension/copy_with_extension.dart';
+import 'package:flutter/painting.dart';
+
+import '../../config/export.dart';
+import '../../constant.dart';
+import '../../core/core.dart';
+import '../../extension/export.dart';
+import '../../model/export.dart';
+import '../../utils/export.dart';
+import '../../framework/export.dart';
+
+part 'candle.g.dart';
+part 'data.dart';
+part 'indicator.dart';

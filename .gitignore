@@ -24,6 +24,7 @@ migrate_working_dir/
 example/
 flexi_kline_indicators/
 flexi_kline_draw_tools/
+flexi_ws/
 .vscode/
 
 # Flutter/Dart/Pub related

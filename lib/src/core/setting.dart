@@ -272,21 +272,21 @@ mixin SettingBinding on KlineBindingBase
     return _paintObjectManager.timeRectConfig;
   }
 
-  /// 注册主区指标配置构造器
-  void registerMainIndicatorBuilder(
-    IIndicatorKey key,
-    IndicatorBuilder<SinglePaintObjectIndicator> builder,
-  ) {
-    _paintObjectManager.registerMainIndicatorBuilder(key, builder);
-  }
+  // /// 注册主区指标配置构造器
+  // void registerMainIndicatorBuilder(
+  //   IIndicatorKey key,
+  //   IndicatorBuilder<SinglePaintObjectIndicator> builder,
+  // ) {
+  //   _paintObjectManager.registerMainIndicatorBuilder(key, builder);
+  // }
 
-  /// 注册副区指标配置构造器
-  void registerSubIndicatorBuilder<T extends Indicator>(
-    IIndicatorKey key,
-    IndicatorBuilder<SinglePaintObjectIndicator> builder,
-  ) {
-    _paintObjectManager.registerSubIndicatorBuilder(key, builder);
-  }
+  // /// 注册副区指标配置构造器
+  // void registerSubIndicatorBuilder<T extends Indicator>(
+  //   IIndicatorKey key,
+  //   IndicatorBuilder<SinglePaintObjectIndicator> builder,
+  // ) {
+  //   _paintObjectManager.registerSubIndicatorBuilder(key, builder);
+  // }
 
   Iterable<IIndicatorKey> get supportMainIndicatorKeys {
     return _paintObjectManager.supportMainIndicatorKeys;
@@ -313,6 +313,14 @@ mixin SettingBinding on KlineBindingBase
   Iterable<PaintObject> get subPaintObjects {
     return _paintObjectManager.subPaintObjects;
   }
+
+  @override
+  int? getDataIndex(IIndicatorKey key) {
+    return _paintObjectManager.getIndicatorDataIndex(key);
+  }
+
+  @override
+  int get indicatorCount => _paintObjectManager.indicatorCount;
 
   /// 更新主区指标的布局参数
   bool _updateMainPaintObjectLayoutParam({

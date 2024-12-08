@@ -32,6 +32,10 @@ mixin ConfigStateMixin<T extends Indicator> on IndicatorObject<T> {
   double get startCandleDx => context.startCandleDx;
 
   bool get isCrossing => context.isCrossing;
+
+  int? _dataIndex;
+  // 注: 如果PaintObject被创建了, 其DataIndex必然有值.
+  int get dataIndex => _dataIndex ??= context.getDataIndex(indicator.key)!;
 }
 
 /// 绘制对象混入边界计算的通用扩展

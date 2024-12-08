@@ -12,5 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export 'kline_data.dart';
-export 'base_data.dart';
+library vol_ma;
+
+import 'dart:math' as math;
+
+import 'package:copy_with_extension/copy_with_extension.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
+
+import '../../config/export.dart';
+import '../../constant.dart';
+import '../../core/core.dart';
+import '../../extension/export.dart';
+import '../../framework/export.dart';
+import '../../model/export.dart';
+import '../../utils/export.dart';
+
+part 'indicator.dart';
+part 'data.dart';
+part 'vol_ma.g.dart';

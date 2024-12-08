@@ -46,7 +46,6 @@ abstract class BaseData with KlineLog {
     logd("init BASE");
   }
 
-  @protected
   @mustCallSuper
   void dispose() {
     logd('dispose BASE');
@@ -93,9 +92,15 @@ abstract class BaseData with KlineLog {
   bool checkIndex(int index) => index >= 0 && index < length;
 
   /// 初始化基础数据
-  void initBasicData(ComputeMode mode, {bool reset = false}) {
-    for (var m in _list) {
-      m.initBasicData(mode, reset: reset);
+  void initBasicData(
+    ComputeMode mode,
+    Range range,
+    int indicatorCount, {
+    bool reset = false,
+  }) {
+    for (int i = range.start; i < range.end; i++) {
+      // for (var m in _list) {
+      _list[i].initBasicData(mode, indicatorCount, reset: reset);
     }
   }
 

@@ -12,18 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:flutter/painting.dart';
-
-import '../config/export.dart';
-import '../constant.dart';
-import '../core/core.dart';
-import '../extension/export.dart';
-import '../framework/export.dart';
-import '../model/export.dart';
-import '../utils/export.dart';
-
-part 'vol_ma.g.dart';
+part of 'vol_ma.dart';
 
 /// VolMa 移动平均指标线
 @CopyWith()
@@ -66,7 +55,7 @@ class VolMaIndicator extends SinglePaintObjectIndicator
 }
 
 class VolMaPaintObject<T extends VolMaIndicator> extends SinglePaintObjectBox<T>
-    with PaintYAxisTicksMixin, PaintYAxisTicksOnCrossMixin {
+    with VolmaDataMixin, PaintYAxisTicksMixin, PaintYAxisTicksOnCrossMixin {
   VolMaPaintObject({
     required super.context,
     required super.indicator,
@@ -76,12 +65,12 @@ class VolMaPaintObject<T extends VolMaIndicator> extends SinglePaintObjectBox<T>
   MinMax? initState({required int start, required int end}) {
     if (!klineData.canPaintChart) return null;
 
-    final volMinmax = klineData.calculateVolMinmax(
+    final volMinmax = calculateVolMinmax(
       start: start,
       end: end,
     );
 
-    final maMinmax = klineData.calcuVolMaMinmax(
+    final maMinmax = calcuVolMaMinmax(
       indicator.calcParams,
       start: start,
       end: end,
@@ -164,7 +153,7 @@ class VolMaPaintObject<T extends VolMaIndicator> extends SinglePaintObjectBox<T>
       BagNum? val;
       final List<Offset> points = [];
       for (int i = start; i < end; i++) {
-        val = list[i].volMaList?.getItem(j);
+        val = list[i].getVolMaList(dataIndex)?.getItem(j);
         if (val == null) continue;
         points.add(Offset(
           offset - (i - start) * candleActualWidth,
@@ -207,11 +196,12 @@ class VolMaPaintObject<T extends VolMaIndicator> extends SinglePaintObjectBox<T>
       style: indicator.volTips.style,
     ));
 
-    if (model.isValidVolMaList) {
+    final volMaList = model.getVolMaList(dataIndex);
+    if (volMaList != null) {
       /// Ma Tips文本
       BagNum? val;
-      for (int i = 0; i < model.volMaList!.length; i++) {
-        val = model.volMaList?.getItem(i);
+      for (int i = 0; i < volMaList.length; i++) {
+        val = volMaList.getItem(i);
         if (val == null) continue;
         final param = indicator.calcParams.getItem(i);
         if (param == null) continue;

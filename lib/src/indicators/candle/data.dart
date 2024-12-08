@@ -12,58 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import '../model/export.dart';
-import 'base_data.dart';
+part of 'candle.dart';
 
-mixin CandleData on BaseData {
+mixin CandleDataMixin<T extends CandleIndicator> on SinglePaintObjectBox<T> {
   @override
-  void initData() {
-    super.initData();
-    logd('init CANDLE');
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    logd('dispose CANDLE');
-  }
+  void precompute(Range range, {bool reset = false}) {}
 
   /// 根据[start, end]下标计算最大最小值
   MinMax? calculateMinmax({
     int? start,
     int? end,
   }) {
-    start ??= this.start;
-    end ??= this.end;
-    if (!checkStartAndEnd(start, end)) return null;
+    start ??= klineData.start;
+    end ??= klineData.end;
+    if (!klineData.checkStartAndEnd(start, end)) return null;
 
-    CandleModel m = list[end - 1];
+    CandleModel m = klineData.list[end - 1];
     BagNum maxHigh = m.high;
     BagNum minLow = m.low;
     for (int i = end - 2; i >= start; i--) {
-      m = list[i];
+      m = klineData.list[i];
       maxHigh = m.high > maxHigh ? m.high : maxHigh;
       minLow = m.low < minLow ? m.low : minLow;
     }
     return MinMax(max: maxHigh, min: minLow);
-  }
-
-  MinMax? calculateVolMinmax({
-    int? start,
-    int? end,
-  }) {
-    start ??= this.start;
-    end ??= this.end;
-    if (!checkStartAndEnd(start, end)) return null;
-
-    CandleModel m = list[end - 1];
-    BagNum minVol = m.vol;
-    BagNum maxVol = m.vol;
-    for (int i = end - 2; i >= start; i--) {
-      m = list[i];
-      maxVol = m.vol > maxVol ? m.vol : maxVol;
-      minVol = m.vol < minVol ? m.vol : minVol;
-    }
-    return MinMax(max: maxVol, min: minVol);
   }
 }

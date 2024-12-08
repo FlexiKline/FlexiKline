@@ -26,7 +26,6 @@ export 'text_area_config/text_area_config.dart';
 export 'mark_config/mark_config.dart';
 export 'tooltip_config/tooltip_config.dart';
 export 'loading_config/loading_config.dart';
-export 'indicators_config/indicators_config.dart';
 export 'tolerance_config/tolerance_config.dart';
 export 'paint_config/paint_config.dart';
 

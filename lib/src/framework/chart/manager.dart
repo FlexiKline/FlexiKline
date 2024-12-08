@@ -35,7 +35,8 @@ final class IndicatorPaintObjectManager with KlineLog {
   @override
   String get logTag => 'IndicatorPaintObjectManager';
 
-  /// 动态维护指标计算数据存储位置
+  /// 动态维护指标计算数据存储位置.
+  /// 注: 仅能通过[configuration]配置去计算指标计算数据存储位置.
   final Map<IIndicatorKey, int> _indicatorDataIndexs = {};
 
   late final MultiPaintObjectBox _mainPaintObject;
@@ -114,6 +115,8 @@ final class IndicatorPaintObjectManager with KlineLog {
   int? getIndicatorDataIndex(IIndicatorKey key) {
     return _indicatorDataIndexs.getItem(key);
   }
+
+  int get indicatorCount => _indicatorDataIndexs.length;
 
   /// 初始化指标
   /// 1. 确认指标数据在[CandleModel]的[CalculateData]中的index.
@@ -249,6 +252,7 @@ final class IndicatorPaintObjectManager with KlineLog {
   }
 
   /// 收集当前指标的计算参数
+  @Deprecated('废弃, 由PaintObject执行precompute')
   Map<IIndicatorKey, dynamic> getIndicatorCalcParams() {
     final calcParams = mainPaintObject.getCalcParams();
     for (final object in subPaintObjects) {

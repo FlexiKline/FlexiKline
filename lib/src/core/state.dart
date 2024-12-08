@@ -310,6 +310,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
       return await SchedulerBinding.instance.scheduleTask(
         () => KlineData.precomputeKlineData(
           data,
+          indicatorCount: indicatorCount,
           newList: newList,
           computeMode: computeMode,
           calcParams: calcParams,

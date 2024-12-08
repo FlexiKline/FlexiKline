@@ -51,6 +51,7 @@ abstract interface class ISetting {
   void updateFlexiKlineConfig(FlexiKlineConfig config);
 
   /// 待计算的指标参数集合
+  @Deprecated('废弃, 由PaintObject执行precompute')
   Map<IIndicatorKey, dynamic> getIndicatorCalcParams();
 
   /// SettingConfig
@@ -144,6 +145,12 @@ abstract interface class IPaintContext implements ILogger {
 
   /// 取消当前Cross事件
   void cancelCross();
+
+  /// 获取[key]对应的计算数据存储位置
+  int? getDataIndex(IIndicatorKey key);
+
+  /// 获取指标数量
+  int get indicatorCount;
 }
 
 /// DrawContext 绘制Overlay功能集合

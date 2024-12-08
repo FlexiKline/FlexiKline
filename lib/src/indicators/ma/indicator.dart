@@ -12,18 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:flutter/painting.dart';
-
-import '../config/export.dart';
-import '../constant.dart';
-import '../core/core.dart';
-import '../extension/export.dart';
-import '../framework/export.dart';
-import '../model/export.dart';
-import '../utils/export.dart';
-
-part 'ma.g.dart';
+part of 'ma.dart';
 
 /// MA 移动平均指标线
 @CopyWith()
@@ -55,7 +44,8 @@ class MAIndicator extends SinglePaintObjectIndicator implements IPrecomputable {
   Map<String, dynamic> toJson() => _$MAIndicatorToJson(this);
 }
 
-class MAPaintObject<T extends MAIndicator> extends SinglePaintObjectBox<T> {
+class MAPaintObject<T extends MAIndicator> extends SinglePaintObjectBox<T>
+    with MaDataMixin {
   MAPaintObject({
     required super.context,
     required super.indicator,
@@ -65,7 +55,7 @@ class MAPaintObject<T extends MAIndicator> extends SinglePaintObjectBox<T> {
   MinMax? initState({required int start, required int end}) {
     if (!klineData.canPaintChart) return null;
 
-    return klineData.calcuMaMinmax(
+    return calcuMaMinmax(
       indicator.calcParams,
       start: start,
       end: end,
@@ -95,7 +85,7 @@ class MAPaintObject<T extends MAIndicator> extends SinglePaintObjectBox<T> {
       BagNum? val;
       final List<Offset> points = [];
       for (int i = start; i < end; i++) {
-        val = list[i].maList?.getItem(j);
+        val = list[i].getMaList(dataIndex)?.getItem(j);
         if (val == null) continue;
         points.add(Offset(
           offset - (i - start) * candleActualWidth,
@@ -122,12 +112,13 @@ class MAPaintObject<T extends MAIndicator> extends SinglePaintObjectBox<T> {
     Rect? tipsRect,
   }) {
     model ??= offsetToCandle(offset);
-    if (model == null || !model.isValidMaList) return null;
+    if (model == null || !model.isValidMaList(dataIndex)) return null;
 
     final children = <TextSpan>[];
     BagNum? val;
-    for (int i = 0; i < model.maList!.length; i++) {
-      val = model.maList?.getItem(i);
+    final maList = model.getMaList(dataIndex)!;
+    for (int i = 0; i < maList.length; i++) {
+      val = maList.getItem(i);
       if (val == null) continue;
       final param = indicator.calcParams.getItem(i);
       if (param == null) continue;

@@ -12,18 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:math' as math;
-import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:flutter/painting.dart';
-
-import '../config/export.dart';
-import '../constant.dart';
-import '../core/core.dart';
-import '../extension/export.dart';
-import '../model/export.dart';
-import '../framework/export.dart';
-
-part 'time.g.dart';
+part of 'time.dart';
 
 /// 时间刻度指标图
 @CopyWith()
