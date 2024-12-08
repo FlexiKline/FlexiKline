@@ -94,7 +94,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw {
     _drawStateListener.value = state;
   }
 
-  ValueListenable<DrawState> get drawStateLinstener => _drawStateListener;
+  ValueListenable<DrawState> get drawStateListener => _drawStateListener;
 
   ValueListenable<Point?> get drawPointerListener => _drawPointerListener;
 

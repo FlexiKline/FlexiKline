@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+library kline_data;
+
 import 'package:flutter/foundation.dart';
 
 import '../constant.dart';
@@ -19,7 +21,8 @@ import '../extension/export.dart';
 import '../framework/chart/indicator.dart';
 import '../framework/logger.dart';
 import '../model/export.dart';
-import 'base_data.dart';
+
+part 'base_data.dart';
 
 class KlineData extends BaseData {
   KlineData(
@@ -62,14 +65,14 @@ class KlineData extends BaseData {
   /// [indicatorCount]指标图个数
   /// [newList] 新增的蜡烛数据
   /// [computeMode] 计算模式
-  /// [calcParams] 指标计算参数
+  /// [paintObjects] 待计算的指标集合
   /// [reset] 是否重置; 如果有, 忽略之前的计算结果.
   static Future<KlineData> precomputeKlineData(
     KlineData data, {
     required int indicatorCount,
     required List<CandleModel> newList,
     required ComputeMode computeMode,
-    required Map<IIndicatorKey, dynamic> calcParams,
+    required List<PaintObject> paintObjects,
     bool reset = false,
   }) async {
     DateTime beginTime = DateTime.now();
@@ -99,15 +102,13 @@ class KlineData extends BaseData {
     );
 
     ///4. 预计算指标数据
-    for (final param in calcParams.entries) {
+    for (final object in paintObjects) {
       await stopwatch.runAsync(
-        () => data.precompute(
-          param.key,
-          calcParam: param.value,
-          range: range!,
+        () => object.precompute(
+          range!,
           reset: reset,
         ),
-        debugLabel: 'precompute${param.key}\t$range|$reset',
+        debugLabel: 'precompute${object.key}\t$range|$reset',
       );
     }
 
@@ -122,49 +123,49 @@ class KlineData extends BaseData {
 /// 实际执行参考[KlineData.precomputeKlineData]
 /// [data]将在MainIsolate和subIsolate之间传递,
 /// [data]的序列化反序列化耗时较大, 暂不使用此方式.
-Future<KlineData> precomputeKlineDataByCompute(
-  KlineData data, {
-  required int indicatorCount,
-  required List<CandleModel> newList,
-  required ComputeMode computeMode,
-  required Map<IIndicatorKey, dynamic> calcParams,
-  bool reset = false,
-  String? debugLabel,
-  ILogger? logger,
-}) async {
-  if (newList.isEmpty) {
-    return data;
-  }
+// Future<KlineData> precomputeKlineDataByCompute(
+//   KlineData data, {
+//   required int indicatorCount,
+//   required List<CandleModel> newList,
+//   required ComputeMode computeMode,
+//   required Map<IIndicatorKey, dynamic> calcParams,
+//   bool reset = false,
+//   String? debugLabel,
+//   ILogger? logger,
+// }) async {
+//   if (newList.isEmpty) {
+//     return data;
+//   }
 
-  try {
-    logger ??= data.loggerDelegate;
-    data.loggerDelegate = null;
+//   try {
+//     logger ??= data.loggerDelegate;
+//     data.loggerDelegate = null;
 
-    logger?.logd('compute Begin:${DateTime.now()}');
-    data = await compute(
-      (List<dynamic> params) async {
-        final newData = await KlineData.precomputeKlineData(
-          params[0],
-          indicatorCount: params[1],
-          newList: params[2],
-          computeMode: params[3],
-          calcParams: params[4],
-          reset: params[5],
-        );
-        return newData;
-      },
-      [data, indicatorCount, newList, computeMode, calcParams, reset],
-      debugLabel: debugLabel,
-    );
-    logger?.logd('compute End:${DateTime.now()}');
-  } on Object catch (e, stack) {
-    logger?.loge(
-      'precomputeKlineDataByCompute exception!!!',
-      error: e,
-      stackTrace: stack,
-    );
-  } finally {
-    data.loggerDelegate = logger;
-  }
-  return data;
-}
+//     logger?.logd('compute Begin:${DateTime.now()}');
+//     data = await compute(
+//       (List<dynamic> params) async {
+//         final newData = await KlineData.precomputeKlineData(
+//           params[0],
+//           indicatorCount: params[1],
+//           newList: params[2],
+//           computeMode: params[3],
+//           calcParams: params[4],
+//           reset: params[5],
+//         );
+//         return newData;
+//       },
+//       [data, indicatorCount, newList, computeMode, calcParams, reset],
+//       debugLabel: debugLabel,
+//     );
+//     logger?.logd('compute End:${DateTime.now()}');
+//   } on Object catch (e, stack) {
+//     logger?.loge(
+//       'precomputeKlineDataByCompute exception!!!',
+//       error: e,
+//       stackTrace: stack,
+//     );
+//   } finally {
+//     data.loggerDelegate = logger;
+//   }
+//   return data;
+// }

@@ -23,8 +23,8 @@ import 'package:flutter/scheduler.dart';
 
 import '../config/export.dart';
 import '../constant.dart';
+import '../data/kline_data.dart';
 import '../extension/export.dart';
-import '../data/export.dart';
 import '../framework/export.dart';
 import '../model/export.dart';
 import '../utils/decimal_format_util.dart';

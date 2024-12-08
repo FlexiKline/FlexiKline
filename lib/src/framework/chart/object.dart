@@ -103,6 +103,13 @@ abstract class SinglePaintObjectBox<T extends SinglePaintObjectIndicator>
   @protected
   @nonVirtual
   @override
+  void doPrecompute(Range range, {bool reset = false}) {
+    precompute(range, reset: reset);
+  }
+
+  @protected
+  @nonVirtual
+  @override
   MinMax? doInitState(
     int newSlot, {
     required int start,
@@ -271,6 +278,14 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
   }) {
     // return Size(topRect.width, nextTipsRect.top - topRect.top);
     return topRect.size;
+  }
+
+  @nonVirtual
+  @override
+  void doPrecompute(Range range, {bool reset = false}) {
+    for (var object in children) {
+      object.precompute(range, reset: reset);
+    }
   }
 
   @nonVirtual

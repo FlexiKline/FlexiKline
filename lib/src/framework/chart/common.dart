@@ -196,6 +196,8 @@ abstract interface class IPaintObject {
 }
 
 abstract interface class IPaintDelegate {
+  void doPrecompute(Range range, {bool reset = false});
+
   MinMax? doInitState(
     int newSlot, {
     required int start,

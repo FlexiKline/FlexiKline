@@ -249,7 +249,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
       left: _position.dx,
       top: _position.dy,
       child: ValueListenableBuilder(
-        valueListenable: widget.controller.drawStateLinstener,
+        valueListenable: widget.controller.drawStateListener,
         builder: (context, state, child) {
           return Visibility(
             visible: state.isEditing,

@@ -282,8 +282,8 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     // 确认当前数据的计算模式
     final computeMode = _computeMode;
 
-    // 待计算的指标参数
-    final calcParams = getIndicatorCalcParams();
+    // 待计算的指标对象集合
+    final paintObjects = [mainPaintObject, ...subPaintObjects];
 
     final watchPrecompute = Stopwatch();
 
@@ -313,7 +313,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
           indicatorCount: indicatorCount,
           newList: newList,
           computeMode: computeMode,
-          calcParams: calcParams,
+          paintObjects: paintObjects,
           reset: reset,
         ),
         Priority.animation,

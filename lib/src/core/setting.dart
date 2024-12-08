@@ -358,7 +358,10 @@ mixin SettingBinding on KlineBindingBase
 
   /// 在主图中添加指标
   void addIndicatorInMain(IIndicatorKey key) {
-    if (_paintObjectManager.addIndicatorInMain(key, this)) {
+    final newObj = _paintObjectManager.addIndicatorInMain(key, this);
+    if (newObj != null) {
+      // TODO: 后续优化执行时机
+      newObj.precompute(Range(0, curKlineData.length), reset: true);
       _flexiKlineConfig.main.add(key);
       markRepaintChart(reset: true);
       markRepaintCross();
@@ -376,7 +379,10 @@ mixin SettingBinding on KlineBindingBase
 
   /// 在副图中添加指标
   void addIndicatorInSub(IIndicatorKey key) {
-    if (_paintObjectManager.addIndicatorInSub(key, this)) {
+    final newObj = _paintObjectManager.addIndicatorInSub(key, this);
+    if (newObj != null) {
+      // TODO: 后续优化执行时机
+      newObj.precompute(Range(0, curKlineData.length), reset: true);
       _flexiKlineConfig.sub.add(key);
       _invokeSizeChanged();
     }
@@ -458,6 +464,7 @@ mixin SettingBinding on KlineBindingBase
   }
 
   @override
+  @Deprecated('废弃, 由PaintObject执行precompute')
   Map<IIndicatorKey, dynamic> getIndicatorCalcParams() {
     return _paintObjectManager.getIndicatorCalcParams();
   }

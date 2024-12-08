@@ -216,12 +216,12 @@ final class IndicatorPaintObjectManager with KlineLog {
   }
 
   /// 在主图中添加指标
-  bool addIndicatorInMain(IIndicatorKey key, IPaintContext context) {
+  PaintObject? addIndicatorInMain(IIndicatorKey key, IPaintContext context) {
     final indicator = _createMainPaintIndicator(key, context);
-    if (indicator == null) return false;
+    if (indicator == null) return null;
     final object = indicator.createPaintObject(context);
     _mainPaintObject.appendPaintObject(object);
-    return true;
+    return object;
   }
 
   /// 删除主图中[key]指定的指标
@@ -229,13 +229,13 @@ final class IndicatorPaintObjectManager with KlineLog {
     return _mainPaintObject.deletePaintObject(key);
   }
 
-  bool addIndicatorInSub(IIndicatorKey key, IPaintContext context) {
+  PaintObject? addIndicatorInSub(IIndicatorKey key, IPaintContext context) {
     final indicator = _createSubPaintIndicator(key, context);
-    if (indicator == null) return false;
+    if (indicator == null) return null;
     final object = indicator.createPaintObject(context);
     final oldObj = _subPaintObjectQueue.append(object);
     oldObj?.dispose();
-    return true;
+    return object;
   }
 
   bool delIndicatorInSub(IIndicatorKey key) {

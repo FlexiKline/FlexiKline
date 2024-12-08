@@ -22,7 +22,7 @@ import 'package:json_annotation/json_annotation.dart';
 import '../../config/export.dart';
 import '../../constant.dart';
 import '../../core/core.dart';
-import '../../data/export.dart';
+import '../../data/kline_data.dart';
 import '../../extension/export.dart';
 import '../../model/export.dart';
 import '../../utils/date_time.dart';
