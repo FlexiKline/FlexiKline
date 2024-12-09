@@ -49,7 +49,7 @@ abstract class Indicator implements IPrecomputable {
   Map<String, dynamic> toJson() => const {};
 
   @override
-  dynamic get calcParams => null;
+  dynamic get calcParam => null;
 
   static bool canUpdate(Indicator oldIndicator, Indicator newIndicator) {
     return oldIndicator.runtimeType == newIndicator.runtimeType &&

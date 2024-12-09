@@ -34,7 +34,7 @@ mixin ConfigStateMixin<T extends Indicator> on IndicatorObject<T> {
   bool get isCrossing => context.isCrossing;
 
   int? _dataIndex;
-  // 注: 如果PaintObject被创建了, 其DataIndex必然有值.
+  // // 注: 如果PaintObject被创建了, 其DataIndex必然有值.
   int get dataIndex => _dataIndex ??= context.getDataIndex(indicator.key)!;
 }
 

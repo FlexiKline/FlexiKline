@@ -29,8 +29,5 @@ export 'loading_config/loading_config.dart';
 export 'tolerance_config/tolerance_config.dart';
 export 'paint_config/paint_config.dart';
 
-/// Indicator 参数
-export 'ma_param/ma_param.dart';
-
 /// 内置默认配置
 export 'default_config.dart';

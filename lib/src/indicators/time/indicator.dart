@@ -25,7 +25,7 @@ class TimeIndicator extends SinglePaintObjectIndicator {
     this.position = DrawPosition.middle,
     // 时间刻度.
     required this.timeTick,
-  }) : super(key: IndicatorType.time);
+  }) : super(key: timeIndicatorKey);
 
   // 时间刻度.
   final TextAreaConfig timeTick;

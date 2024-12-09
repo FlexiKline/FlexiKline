@@ -37,7 +37,10 @@ final class IndicatorPaintObjectManager with KlineLog {
 
   /// 动态维护指标计算数据存储位置.
   /// 注: 仅能通过[configuration]配置去计算指标计算数据存储位置.
-  final Map<IIndicatorKey, int> _indicatorDataIndexs = {};
+  final Map<IIndicatorKey, int> _indicatorDataIndexs = {
+    candleIndicatorKey: 0,
+    timeIndicatorKey: 1,
+  };
 
   late final MultiPaintObjectBox _mainPaintObject;
 
@@ -129,11 +132,11 @@ final class IndicatorPaintObjectManager with KlineLog {
   }) {
     /// 注册指标构造器
     _indicatorDataIndexs.clear();
-    final mainIndicators = configuration.customMainIndicatorBuilders();
+    final mainIndicators = configuration.mainIndicatorBuilders();
     for (final MapEntry(key: key, value: builder) in mainIndicators.entries) {
       registerMainIndicatorBuilder(key, builder);
     }
-    final subIndicators = configuration.customSubIndicatorBuilders();
+    final subIndicators = configuration.subIndicatorBuilders();
     for (final MapEntry(key: key, value: builder) in subIndicators.entries) {
       registerSubIndicatorBuilder(key, builder);
     }
@@ -142,7 +145,7 @@ final class IndicatorPaintObjectManager with KlineLog {
     _mainPaintObject = MultiPaintObjectBox(
       context: context,
       indicator: MultiPaintObjectIndicator(
-        key: IndicatorType.main,
+        key: mainIndicatorKey,
         height: context.settingConfig.mainRect.height,
         padding: context.settingConfig.mainPadding,
         drawBelowTipsArea: context.settingConfig.mainDrawBelowTipsArea,

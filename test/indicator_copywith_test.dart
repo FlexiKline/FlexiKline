@@ -22,11 +22,11 @@ void main() {
   late FlexiKlineConfig flexiKlineConfig;
   setUp(() {
     flexiKlineConfig = configuration.getFlexiKlineConfig();
-    flexiKlineConfig.main.add(IndicatorType.candle);
-    flexiKlineConfig.main.add(IndicatorType.volume);
+    // flexiKlineConfig.main.add(IndicatorType.candle);
+    // flexiKlineConfig.main.add(IndicatorType.volume);
 
     // flexiKlineConfig.sub.add(IndicatorType.maVol);
-    flexiKlineConfig.sub.add(IndicatorType.sar);
+    // flexiKlineConfig.sub.add(IndicatorType.sar);
 
     // flexiKlineConfig.init();
   });

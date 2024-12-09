@@ -48,10 +48,10 @@ void main() {
 
     controller.setMainSize(mainSize);
 
-    controller.addIndicatorInMain(IndicatorType.ma);
-    controller.addIndicatorInMain(IndicatorType.ema);
-    controller.addIndicatorInMain(IndicatorType.boll);
-    controller.addIndicatorInMain(IndicatorType.volume);
+    // controller.addIndicatorInMain(IndicatorType.ma);
+    // controller.addIndicatorInMain(IndicatorType.ema);
+    // controller.addIndicatorInMain(IndicatorType.boll);
+    // controller.addIndicatorInMain(IndicatorType.volume);
 
     controller.curKlineData.ensureStartAndEndIndex(start, end);
 

@@ -89,47 +89,14 @@ abstract interface class ITimeRectConfig {
   DrawPosition get position;
 }
 
-/// 内置IndciatorKey
-/// TODO: 后续废弃, 完全由实现方指定
-enum IndicatorType implements IIndicatorKey {
-  /// 主区
-  main('MAIN'),
-  candle('CANDLE'),
-  ma('MA'),
-  ema('EMA'),
-  boll('BOLL'),
-  sar('SAR'),
-  volume('VOL'),
-
-  /// 副区
-  time('Time'),
-  volMa('MAVOL'),
-  macd('MACD'),
-  kdj('KDJ'),
-  subBoll('BOLL'),
-  subSar('SAR'),
-  rsi('RSI'),
-  stochRsi('StochRSI');
-
-  const IndicatorType(this.label);
-
-  @override
-  String get id => name;
-
-  @override
-  final String label;
-
-  @override
-  String toString() {
-    return label;
-  }
-}
+const mainIndicatorKey = FlexiIndicatorKey('main', label: 'Main');
+const candleIndicatorKey = FlexiIndicatorKey('candle', label: 'Candle');
+const timeIndicatorKey = FlexiIndicatorKey('time', label: 'Time');
 
 /// 可预计算接口
 /// 实现 [IPrecomputable] 接口, 即代表当前对象是可以进行预计算.
-/// [getCalcParam] 返回预计算的参数. 可以为空
 abstract interface class IPrecomputable {
-  dynamic get calcParams;
+  dynamic get calcParam;
 }
 
 const mainIndicatorSlot = -1;

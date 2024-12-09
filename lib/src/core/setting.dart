@@ -361,7 +361,7 @@ mixin SettingBinding on KlineBindingBase
     final newObj = _paintObjectManager.addIndicatorInMain(key, this);
     if (newObj != null) {
       // TODO: 后续优化执行时机
-      newObj.precompute(Range(0, curKlineData.length), reset: true);
+      newObj.doPrecompute(Range(0, curKlineData.length), reset: true);
       _flexiKlineConfig.main.add(key);
       markRepaintChart(reset: true);
       markRepaintCross();
@@ -382,7 +382,7 @@ mixin SettingBinding on KlineBindingBase
     final newObj = _paintObjectManager.addIndicatorInSub(key, this);
     if (newObj != null) {
       // TODO: 后续优化执行时机
-      newObj.precompute(Range(0, curKlineData.length), reset: true);
+      newObj.doPrecompute(Range(0, curKlineData.length), reset: true);
       _flexiKlineConfig.sub.add(key);
       _invokeSizeChanged();
     }

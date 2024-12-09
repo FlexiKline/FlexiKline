@@ -45,7 +45,7 @@ class CandleIndicator extends SinglePaintObjectIndicator {
     //   textWidth: 80,
     //   textAlign: TextAlign.center,
     // ),
-  }) : super(key: IndicatorType.candle);
+  }) : super(key: candleIndicatorKey);
 
   // 最高价
   final MarkConfig high;
@@ -77,8 +77,7 @@ class CandleIndicator extends SinglePaintObjectIndicator {
 }
 
 class CandlePaintObject<T extends CandleIndicator>
-    extends SinglePaintObjectBox<T>
-    with CandleDataMixin, PaintYAxisTicksOnCrossMixin {
+    extends SinglePaintObjectBox<T> with PaintYAxisTicksOnCrossMixin {
   CandlePaintObject({
     required super.context,
     required super.indicator,
@@ -90,7 +89,7 @@ class CandlePaintObject<T extends CandleIndicator>
   MinMax? initState({required int start, required int end}) {
     if (!klineData.canPaintChart) return null;
 
-    MinMax? minmax = calculateMinmax(start: start, end: end);
+    MinMax? minmax = klineData.calculateMinmax(start, end);
     _maxHigh = minmax?.max;
     _minLow = minmax?.min;
     return minmax;

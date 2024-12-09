@@ -27,6 +27,11 @@ final class OverlayDrawObjectManager with KlineLog {
     ILogger? logger,
   }) {
     loggerDelegate = logger;
+    final drawObjectbuilders = configuration.drawObjectBuilders();
+    for (final MapEntry(key: type, value: builder)
+        in drawObjectbuilders.entries) {
+      registerDrawOverlayObjectBuilder(type, builder);
+    }
   }
 
   final IConfiguration configuration;
@@ -131,7 +136,6 @@ final class OverlayDrawObjectManager with KlineLog {
   /// 通过[type]创建Overlay.
   DrawObject? createDrawObject(
     IDrawType type, {
-    Map<String, dynamic>? drawParam,
     required DrawConfig drawConfig,
   }) {
     return generateDrawObject(

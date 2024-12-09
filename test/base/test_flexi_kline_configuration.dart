@@ -129,4 +129,10 @@ class TestFlexiKlineConfiguration with FlexiKlineThemeConfigurationMixin {
 
   @override
   void saveOverlayListConfig(String instId, Iterable<Overlay> list) {}
+
+  @override
+  Map<IDrawType, DrawObjectBuilder<Overlay, DrawObject<Overlay>>>
+      drawObjectBuilders() {
+    return {};
+  }
 }

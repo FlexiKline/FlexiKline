@@ -31,7 +31,7 @@ class IndicatorObject<T extends Indicator>
   EdgeInsets get padding => _indicator.padding;
   PaintMode get paintMode => _indicator.paintMode;
   int get zIndex => _indicator.zIndex;
-  dynamic get calcParams => _indicator.calcParams;
+  dynamic get calcParams => _indicator.calcParam;
 
   @override
   int compareTo(IndicatorObject<T> other) {

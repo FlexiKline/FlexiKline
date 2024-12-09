@@ -98,6 +98,21 @@ abstract class BaseData with KlineLog {
     }
   }
 
+  /// 根据[start, end]下标计算最大最小值
+  MinMax? calculateMinmax(int start, int end) {
+    if (!checkStartAndEnd(start, end)) return null;
+
+    CandleModel m = list[end - 1];
+    BagNum maxHigh = m.high;
+    BagNum minLow = m.low;
+    for (int i = end - 2; i >= start; i--) {
+      m = list[i];
+      maxHigh = m.high > maxHigh ? m.high : maxHigh;
+      minLow = m.low < minLow ? m.low : minLow;
+    }
+    return MinMax(max: maxHigh, min: minLow);
+  }
+
   /// 获取index位置的蜡烛数据.
   CandleModel? getCandle(int? index) {
     if (index != null && index >= 0 && index < list.length) {

@@ -56,7 +56,7 @@ v0.7.0
   
 v0.8.0
 - [x] 抽离指标管理功能, 并统一由manager管理; 优化Indicator与PaintObject依赖关系.
-- [ ] KlinData中指标计算数据与CandleModel分离(保持CandleModel的独立)
+- [x] KlinData中指标计算数据与CandleModel分离(保持CandleModel的独立)
 - [ ] 重新设计CandleReq的蜡烛数据标识与查询更新方式, 并考虑兼容股市Kline; 
 - [x] 实现indicators对象和DrawObjects对象与框架分离(API接口优化)
 - [ ] 更新绘制工具图标; 遗留问题修复.

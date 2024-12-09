@@ -158,10 +158,13 @@ abstract interface class IConfiguration {
   IndicatorBuilder get timeIndicatorBuilder;
 
   /// 主区指标定制
-  Map<IIndicatorKey, IndicatorBuilder> customMainIndicatorBuilders();
+  Map<IIndicatorKey, IndicatorBuilder> mainIndicatorBuilders();
 
   /// 副区指标定制
-  Map<IIndicatorKey, IndicatorBuilder> customSubIndicatorBuilders();
+  Map<IIndicatorKey, IndicatorBuilder> subIndicatorBuilders();
+
+  /// 绘制工具定制
+  Map<IDrawType, DrawObjectBuilder> drawObjectBuilders();
 
   /// 从本地获取[instId]指定的[Overlay]缓存列表.
   Iterable<Overlay> getOverlayListConfig(String instId);

@@ -26,5 +26,4 @@ import '../../utils/export.dart';
 import '../../framework/export.dart';
 
 part 'candle.g.dart';
-part 'data.dart';
 part 'indicator.dart';

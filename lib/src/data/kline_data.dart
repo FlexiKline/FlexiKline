@@ -104,7 +104,7 @@ class KlineData extends BaseData {
     ///4. 预计算指标数据
     for (final object in paintObjects) {
       await stopwatch.runAsync(
-        () => object.precompute(
+        () => object.doPrecompute(
           range!,
           reset: reset,
         ),
