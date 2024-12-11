@@ -151,24 +151,24 @@ abstract interface class IConfiguration {
   /// 保存[config]配置信息到本地.
   void saveFlexiKlineConfig(FlexiKlineConfig config);
 
-  /// 蜡烛指标构造器(主区必须提供)
+  /// 蜡烛指标配置构造器(主区)
   IndicatorBuilder get candleIndicatorBuilder;
 
-  /// 时间指标构造器(副区必须提供)
+  /// 时间指标配置构造器(副区)
   IndicatorBuilder get timeIndicatorBuilder;
 
-  /// 主区指标定制
+  /// 主区指标配置定制
   Map<IIndicatorKey, IndicatorBuilder> mainIndicatorBuilders();
 
-  /// 副区指标定制
+  /// 副区指标配置定制
   Map<IIndicatorKey, IndicatorBuilder> subIndicatorBuilders();
 
   /// 绘制工具定制
   Map<IDrawType, DrawObjectBuilder> drawObjectBuilders();
 
-  /// 从本地获取[instId]指定的[Overlay]缓存列表.
-  Iterable<Overlay> getOverlayListConfig(String instId);
+  /// 从本地获取[instId]对应的绘制实例数据列表.
+  Iterable<Overlay> getDrawOverlayList(String instId);
 
-  /// 以[instId]为key, 保存[list]持久化到本地中.
-  void saveOverlayListConfig(String instId, Iterable<Overlay> list);
+  /// 以[instId]为key, 持久化绘制实例列表[list]到本地中.
+  void saveDrawOverlayList(String instId, Iterable<Overlay> list);
 }

@@ -99,7 +99,7 @@ final class OverlayDrawObjectManager with KlineLog {
     // 加载新的OverlayObject.
     _overlayObjectList.clear();
     _instId = request.instId;
-    final list = configuration.getOverlayListConfig(_instId);
+    final list = configuration.getDrawOverlayList(_instId);
     for (var overlay in list) {
       final object = generateDrawObject(overlay, config);
       if (object != null) {
@@ -110,7 +110,7 @@ final class OverlayDrawObjectManager with KlineLog {
 
   /// 将当前[Overlay]列表缓存到本地
   void saveOverlayListToLocal({bool isDispose = true}) {
-    configuration.saveOverlayListConfig(
+    configuration.saveDrawOverlayList(
       _instId,
       _overlayObjectList.map((obj) {
         if (isDispose) obj.dispose();
