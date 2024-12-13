@@ -375,13 +375,13 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     if (forceStopCurReq || reqKey == curDataKey) {
       if (curKlineData.req.state != RequestState.none) {
         _updateCandleRequestListener(
-          curKlineData.updateReqRange(state: RequestState.none),
+          curKlineData.updateRequest(state: RequestState.none),
         );
       }
     } else {
       if (reqKey != null) data = _klineDataCache[reqKey];
       if (data != null) {
-        data.updateReqRange(state: RequestState.none);
+        data.updateRequest(state: RequestState.none);
       }
     }
   }
@@ -392,7 +392,10 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     List<CandleModel> list,
   ) async {
     // 数据为空, 无需要更新.
-    if (list.isEmpty) return;
+    if (list.isEmpty) {
+      stopLoading(request: req);
+      return;
+    }
 
     KlineData? data = _klineDataCache[req.key];
     bool reset = data == null || data.isEmpty;

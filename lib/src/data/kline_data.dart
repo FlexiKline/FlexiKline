@@ -38,8 +38,7 @@ class KlineData extends BaseData {
   TimeBar? get timeBar => req.timeBar;
   bool get invalid => req.instId.isEmpty;
 
-  // TODO: 解除对CandleReq的依赖.
-  CandleReq updateReqRange({RequestState state = RequestState.none}) {
+  CandleReq updateRequest({RequestState state = RequestState.none}) {
     req = req.copyWith(
       after: list.lastOrNull?.ts,
       before: list.firstOrNull?.ts,
@@ -84,7 +83,7 @@ class KlineData extends BaseData {
       () => data.mergeCandleList(newList),
       debugLabel: 'mergeCandleList\t${newList.length}|$reset',
     );
-    data.updateReqRange(); // 更新当前data的[CandleReq]的请求边界[before, after]
+    data.updateRequest(); // 更新当前data的[CandleReq]的请求边界[before, after]
 
     ///2. 确认要计算的范围.
     range ??= Range.empty;

@@ -404,7 +404,6 @@ class DrawPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (!controller.isDrawVisibility) return;
 
-    controller.drawStateAxisTicksText(canvas, size);
     try {
       /// 保存画布状态
       canvas.save();
@@ -415,6 +414,8 @@ class DrawPainter extends CustomPainter {
     } finally {
       canvas.restore();
     }
+
+    controller.drawStateAxisTicksText(canvas, size);
   }
 
   @override
