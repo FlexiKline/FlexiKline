@@ -86,7 +86,7 @@ class CandlePaintObject<T extends CandleIndicator>
   BagNum? _maxHigh, _minLow;
 
   @override
-  MinMax? initState({required int start, required int end}) {
+  MinMax? initState(int start, int end) {
     if (!klineData.canPaintChart) return null;
 
     MinMax? minmax = klineData.calculateMinmax(start, end);

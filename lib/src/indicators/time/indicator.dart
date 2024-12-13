@@ -60,7 +60,7 @@ class TimePaintObject<T extends TimeIndicator> extends SinglePaintObjectBox<T>
   }
 
   @override
-  MinMax? initState({required int start, required int end}) {
+  MinMax? initState(int start, int end) {
     return null;
   }
 

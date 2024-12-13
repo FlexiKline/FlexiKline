@@ -95,11 +95,12 @@ mixin PaintObjectBoundingMixin on PaintObject implements IPaintBoundingBox {
       _drawableRect = context.mainRect;
     } else {
       final top = context.calculateIndicatorTop(slot);
+      final subRect = context.subRect;
       _drawableRect = Rect.fromLTRB(
-        context.subRect.left,
-        context.subRect.top + top,
-        context.subRect.right,
-        context.subRect.top + top + indicator.height,
+        subRect.left,
+        subRect.top + top,
+        subRect.right,
+        subRect.top + top + indicator.height,
       );
     }
     return _drawableRect!;

@@ -141,8 +141,8 @@ abstract interface class IPaintDataInit {
 
 /// 指标图的绘制接口/指标图的Cross事件绘制接口
 abstract interface class IPaintObject {
-  /// 计算指标需要的数据, 并返回 [start] ~ [end] 之间MinMax.
-  MinMax? initState({required int start, required int end});
+  /// 计算指标需要的数据, 并返回 [start ~ end) 之间MinMax.
+  MinMax? initState(int start, int end);
 
   /// 绘制指标图
   void paintChart(Canvas canvas, Size size);

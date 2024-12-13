@@ -128,7 +128,7 @@ abstract class SinglePaintObjectBox<T extends SinglePaintObjectIndicator>
     }
 
     _minMax = null;
-    final ret = initState(start: start, end: end);
+    final ret = initState(start, end);
     if (ret != null) {
       setMinMax(ret);
     }
@@ -259,7 +259,7 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
   }
 
   @override
-  MinMax? initState({required int start, required int end}) {
+  MinMax? initState(int start, int end) {
     return minMax;
   }
 
