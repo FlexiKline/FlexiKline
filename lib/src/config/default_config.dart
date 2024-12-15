@@ -209,18 +209,37 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       horizontal: GridAxis(
         show: true,
         count: 5,
-        width: theme.pixel,
-        color: theme.gridLine,
-        type: LineType.solid,
-        dashes: const [2, 2],
+        line: LineConfig(
+          type: LineType.solid,
+          dashes: const [2, 2],
+          paint: PaintConfig(
+            color: theme.gridLine,
+            strokeWidth: theme.pixel,
+          ),
+        ),
       ),
       vertical: GridAxis(
         show: true,
         count: 5,
-        width: theme.pixel,
-        color: theme.gridLine,
-        type: LineType.solid,
-        dashes: const [2, 2],
+        line: LineConfig(
+          type: LineType.solid,
+          dashes: const [2, 2],
+          paint: PaintConfig(
+            color: theme.gridLine,
+            strokeWidth: theme.pixel,
+          ),
+        ),
+      ),
+      allowDrag: true,
+      dragHitTestMinDistance: 10 * theme.scale,
+      dragChartMinHeight: theme.subIndicatorHeight / 2,
+      dragLine: LineConfig(
+        type: LineType.dashed,
+        dashes: const [3, 5],
+        paint: PaintConfig(
+          color: theme.markLine,
+          strokeWidth: theme.pixel * 5,
+        ),
       ),
     );
   }

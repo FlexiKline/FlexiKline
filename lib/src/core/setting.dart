@@ -85,6 +85,7 @@ mixin SettingBinding on KlineBindingBase
   }
 
   Rect? _fixedCanvasRect;
+  bool get isFixedSizeMode => _fixedCanvasRect != null;
 
   /// 整个画布区域大小 = 由主图区域 + 副图区域
   @override
@@ -165,6 +166,8 @@ mixin SettingBinding on KlineBindingBase
 
   /// 主区域大小设置
   void setMainSize(Size size) {
+    if (isFixedSizeMode) return;
+    // TODO: 优化: 将mainSize移至mainPaintObject管理.
     settingConfig.setMainRect(size);
     _invokeSizeChanged();
   }

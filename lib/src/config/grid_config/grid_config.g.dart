@@ -13,6 +13,14 @@ abstract class _$GridConfigCWProxy {
 
   GridConfig vertical(GridAxis vertical);
 
+  GridConfig allowDrag(bool allowDrag);
+
+  GridConfig dragHitTestMinDistance(double dragHitTestMinDistance);
+
+  GridConfig dragChartMinHeight(double dragChartMinHeight);
+
+  GridConfig dragLine(LineConfig? dragLine);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GridConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -23,6 +31,10 @@ abstract class _$GridConfigCWProxy {
     bool? show,
     GridAxis? horizontal,
     GridAxis? vertical,
+    bool? allowDrag,
+    double? dragHitTestMinDistance,
+    double? dragChartMinHeight,
+    LineConfig? dragLine,
   });
 }
 
@@ -42,6 +54,20 @@ class _$GridConfigCWProxyImpl implements _$GridConfigCWProxy {
   GridConfig vertical(GridAxis vertical) => this(vertical: vertical);
 
   @override
+  GridConfig allowDrag(bool allowDrag) => this(allowDrag: allowDrag);
+
+  @override
+  GridConfig dragHitTestMinDistance(double dragHitTestMinDistance) =>
+      this(dragHitTestMinDistance: dragHitTestMinDistance);
+
+  @override
+  GridConfig dragChartMinHeight(double dragChartMinHeight) =>
+      this(dragChartMinHeight: dragChartMinHeight);
+
+  @override
+  GridConfig dragLine(LineConfig? dragLine) => this(dragLine: dragLine);
+
+  @override
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GridConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -53,6 +79,10 @@ class _$GridConfigCWProxyImpl implements _$GridConfigCWProxy {
     Object? show = const $CopyWithPlaceholder(),
     Object? horizontal = const $CopyWithPlaceholder(),
     Object? vertical = const $CopyWithPlaceholder(),
+    Object? allowDrag = const $CopyWithPlaceholder(),
+    Object? dragHitTestMinDistance = const $CopyWithPlaceholder(),
+    Object? dragChartMinHeight = const $CopyWithPlaceholder(),
+    Object? dragLine = const $CopyWithPlaceholder(),
   }) {
     return GridConfig(
       show: show == const $CopyWithPlaceholder() || show == null
@@ -68,6 +98,25 @@ class _$GridConfigCWProxyImpl implements _$GridConfigCWProxy {
           ? _value.vertical
           // ignore: cast_nullable_to_non_nullable
           : vertical as GridAxis,
+      allowDrag: allowDrag == const $CopyWithPlaceholder() || allowDrag == null
+          ? _value.allowDrag
+          // ignore: cast_nullable_to_non_nullable
+          : allowDrag as bool,
+      dragHitTestMinDistance:
+          dragHitTestMinDistance == const $CopyWithPlaceholder() ||
+                  dragHitTestMinDistance == null
+              ? _value.dragHitTestMinDistance
+              // ignore: cast_nullable_to_non_nullable
+              : dragHitTestMinDistance as double,
+      dragChartMinHeight: dragChartMinHeight == const $CopyWithPlaceholder() ||
+              dragChartMinHeight == null
+          ? _value.dragChartMinHeight
+          // ignore: cast_nullable_to_non_nullable
+          : dragChartMinHeight as double,
+      dragLine: dragLine == const $CopyWithPlaceholder()
+          ? _value.dragLine
+          // ignore: cast_nullable_to_non_nullable
+          : dragLine as LineConfig?,
     );
   }
 }
@@ -83,13 +132,7 @@ abstract class _$GridAxisCWProxy {
 
   GridAxis count(int count);
 
-  GridAxis width(double width);
-
-  GridAxis color(Color color);
-
-  GridAxis type(LineType type);
-
-  GridAxis dashes(List<double> dashes);
+  GridAxis line(LineConfig line);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GridAxis(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -100,10 +143,7 @@ abstract class _$GridAxisCWProxy {
   GridAxis call({
     bool? show,
     int? count,
-    double? width,
-    Color? color,
-    LineType? type,
-    List<double>? dashes,
+    LineConfig? line,
   });
 }
 
@@ -120,16 +160,7 @@ class _$GridAxisCWProxyImpl implements _$GridAxisCWProxy {
   GridAxis count(int count) => this(count: count);
 
   @override
-  GridAxis width(double width) => this(width: width);
-
-  @override
-  GridAxis color(Color color) => this(color: color);
-
-  @override
-  GridAxis type(LineType type) => this(type: type);
-
-  @override
-  GridAxis dashes(List<double> dashes) => this(dashes: dashes);
+  GridAxis line(LineConfig line) => this(line: line);
 
   @override
 
@@ -142,10 +173,7 @@ class _$GridAxisCWProxyImpl implements _$GridAxisCWProxy {
   GridAxis call({
     Object? show = const $CopyWithPlaceholder(),
     Object? count = const $CopyWithPlaceholder(),
-    Object? width = const $CopyWithPlaceholder(),
-    Object? color = const $CopyWithPlaceholder(),
-    Object? type = const $CopyWithPlaceholder(),
-    Object? dashes = const $CopyWithPlaceholder(),
+    Object? line = const $CopyWithPlaceholder(),
   }) {
     return GridAxis(
       show: show == const $CopyWithPlaceholder() || show == null
@@ -156,22 +184,10 @@ class _$GridAxisCWProxyImpl implements _$GridAxisCWProxy {
           ? _value.count
           // ignore: cast_nullable_to_non_nullable
           : count as int,
-      width: width == const $CopyWithPlaceholder() || width == null
-          ? _value.width
+      line: line == const $CopyWithPlaceholder() || line == null
+          ? _value.line
           // ignore: cast_nullable_to_non_nullable
-          : width as double,
-      color: color == const $CopyWithPlaceholder() || color == null
-          ? _value.color
-          // ignore: cast_nullable_to_non_nullable
-          : color as Color,
-      type: type == const $CopyWithPlaceholder() || type == null
-          ? _value.type
-          // ignore: cast_nullable_to_non_nullable
-          : type as LineType,
-      dashes: dashes == const $CopyWithPlaceholder() || dashes == null
-          ? _value.dashes
-          // ignore: cast_nullable_to_non_nullable
-          : dashes as List<double>,
+          : line as LineConfig,
     );
   }
 }
@@ -194,36 +210,48 @@ GridConfig _$GridConfigFromJson(Map<String, dynamic> json) => GridConfig(
       vertical: json['vertical'] == null
           ? const GridAxis()
           : GridAxis.fromJson(json['vertical'] as Map<String, dynamic>),
+      allowDrag: json['allowDrag'] as bool? ?? true,
+      dragHitTestMinDistance:
+          (json['dragHitTestMinDistance'] as num?)?.toDouble() ?? 10,
+      dragChartMinHeight: (json['dragChartMinHeight'] as num).toDouble(),
+      dragLine: json['dragLine'] == null
+          ? null
+          : LineConfig.fromJson(json['dragLine'] as Map<String, dynamic>),
     );
 
-Map<String, dynamic> _$GridConfigToJson(GridConfig instance) =>
-    <String, dynamic>{
-      'show': instance.show,
-      'horizontal': instance.horizontal.toJson(),
-      'vertical': instance.vertical.toJson(),
-    };
+Map<String, dynamic> _$GridConfigToJson(GridConfig instance) {
+  final val = <String, dynamic>{
+    'show': instance.show,
+    'horizontal': instance.horizontal.toJson(),
+    'vertical': instance.vertical.toJson(),
+    'allowDrag': instance.allowDrag,
+    'dragHitTestMinDistance': instance.dragHitTestMinDistance,
+    'dragChartMinHeight': instance.dragChartMinHeight,
+  };
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('dragLine', instance.dragLine?.toJson());
+  return val;
+}
 
 GridAxis _$GridAxisFromJson(Map<String, dynamic> json) => GridAxis(
       show: json['show'] as bool? ?? true,
       count: (json['count'] as num?)?.toInt() ?? 5,
-      width: (json['width'] as num?)?.toDouble() ?? 0.5,
-      color: json['color'] == null
-          ? const Color(0xffE9EDF0)
-          : const ColorConverter().fromJson(json['color'] as String),
-      type: json['type'] == null
-          ? LineType.solid
-          : const LineTypeConverter().fromJson(json['type'] as String),
-      dashes: (json['dashes'] as List<dynamic>?)
-              ?.map((e) => (e as num).toDouble())
-              .toList() ??
-          const [2, 2],
+      line: json['line'] == null
+          ? const LineConfig(
+              type: LineType.solid,
+              dashes: [2, 2],
+              paint: PaintConfig(strokeWidth: 0.5))
+          : LineConfig.fromJson(json['line'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$GridAxisToJson(GridAxis instance) => <String, dynamic>{
       'show': instance.show,
       'count': instance.count,
-      'width': instance.width,
-      'color': const ColorConverter().toJson(instance.color),
-      'type': const LineTypeConverter().toJson(instance.type),
-      'dashes': instance.dashes,
+      'line': instance.line.toJson(),
     };

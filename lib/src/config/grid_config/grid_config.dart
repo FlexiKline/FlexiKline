@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:flutter/painting.dart';
+import 'package:flexi_kline/src/config/export.dart';
 
 import '../../extension/render/common.dart';
 import '../../framework/serializers.dart';
@@ -27,11 +27,27 @@ class GridConfig {
     this.show = true,
     this.horizontal = const GridAxis(),
     this.vertical = const GridAxis(),
+    this.allowDrag = true,
+    this.dragHitTestMinDistance = 10,
+    required this.dragChartMinHeight,
+    this.dragLine,
   });
 
   final bool show;
   final GridAxis horizontal;
   final GridAxis vertical;
+
+  /// 是否允许通过拖拽Grid线移动指标图表
+  final bool allowDrag;
+
+  /// 移动指标图表时, 命中测试的最小距离偏差
+  final double dragHitTestMinDistance;
+
+  /// 移动指标图表时图表最小高度
+  final double dragChartMinHeight;
+
+  /// 移动指标图表高度时的拖拽线配置
+  final LineConfig? dragLine;
 
   factory GridConfig.fromJson(Map<String, dynamic> json) =>
       _$GridConfigFromJson(json);
@@ -45,23 +61,16 @@ class GridAxis {
   const GridAxis({
     this.show = true,
     this.count = 5,
-    this.width = 0.5,
-    this.color = const Color(0xffE9EDF0),
-    this.type = LineType.solid,
-    this.dashes = const [2, 2],
+    this.line = const LineConfig(
+      type: LineType.solid,
+      dashes: [2, 2],
+      paint: PaintConfig(strokeWidth: 0.5),
+    ),
   });
 
   final bool show;
   final int count;
-  final double width;
-  final Color color;
-  final LineType type;
-  final List<double> dashes;
-
-  Paint get paint => Paint()
-    ..color = color
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = width;
+  final LineConfig line;
 
   factory GridAxis.fromJson(Map<String, dynamic> json) =>
       _$GridAxisFromJson(json);

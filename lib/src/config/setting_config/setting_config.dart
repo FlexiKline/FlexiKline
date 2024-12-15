@@ -80,7 +80,7 @@ class SettingConfig {
 
   /// 主区
   // 主区域大小配置
-  Rect mainRect;
+  Rect mainRect; // TODO: 后续由MainPaintObject管理
   // 主区域最小大小限制,
   final Size mainMinSize;
   // 主区域Padding

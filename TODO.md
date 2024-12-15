@@ -61,6 +61,7 @@ v0.8.0
 - [x] 实现indicators对象和DrawObjects对象与框架分离(API接口优化)
 - [x] 更新绘制工具图标; 遗留问题修复.
 - [x] controller与core库接口优化(保护API不被滥用)
+- [x] 通过对grid的网络线拖拽调整指标图表的高度.
 - [ ] timestampToIndex算法优化; bugfix.
 - [x] 文档撰写v2.
 

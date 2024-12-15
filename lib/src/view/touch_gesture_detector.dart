@@ -454,6 +454,9 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
         _longData?.end();
         _longData = null;
       }
+    } else if (!controller.isCrossing &&
+        controller.onGridMoveStart(details.localPosition)) {
+      _longData = GestureData.long(details.localPosition);
     } else {
       logd("onLongPressStart cross > details:$details");
       _longData = GestureData.long(details.localPosition);
@@ -476,6 +479,9 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
     if (controller.isDrawVisibility && drawState.isOngoing) {
       _longData!.update(details.localPosition);
       controller.onDrawMoveUpdate(_longData!);
+    } else if (controller.isStartDragGrid) {
+      _longData!.update(details.localPosition);
+      controller.onGridMoveUpdate(_longData!);
     } else {
       _longData!.update(details.localPosition);
       controller.onCrossUpdate(_longData!);
@@ -493,6 +499,8 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
     // }());
     if (controller.isDrawVisibility && drawState.isOngoing) {
       controller.onDrawMoveEnd();
+    } else if (controller.isStartDragGrid) {
+      controller.onGridMoveEnd();
     } else {
       // 长按结束, 尝试取消Cross事件.
       controller.cancelCross();

@@ -52,6 +52,14 @@ extension RectExt on Rect {
       bottom.clamp(rect.top, rect.bottom),
     );
   }
+
+  bool hitTestBottom(double dy, {double minDistance = 0}) {
+    return (dy - bottom).abs() <= minDistance;
+  }
+
+  bool hitTestTop(double dy, {double minDistance = 0}) {
+    return (dy - top).abs() <= minDistance;
+  }
 }
 
 extension OffsetExt on Offset {

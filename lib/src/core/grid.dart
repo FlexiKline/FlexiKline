@@ -17,7 +17,7 @@ part of 'core.dart';
 /// 负责Grid图层的绘制
 ///
 /// 绘制底层的网络
-mixin GridBinding on KlineBindingBase implements IGrid {
+mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
   @override
   void initState() {
     super.initState();
@@ -26,6 +26,7 @@ mixin GridBinding on KlineBindingBase implements IGrid {
 
   @override
   void dispose() {
+    _upObject = _downObject = null;
     super.dispose();
     logd('dispose grid');
     _repaintGridBg.dispose();
@@ -51,90 +52,72 @@ mixin GridBinding on KlineBindingBase implements IGrid {
 
       /// 绘制horizontal轴 Grid 线
       if (gridConfig.horizontal.show) {
-        final horiLineType = gridConfig.horizontal.type;
-        final horiPaint = gridConfig.horizontal.paint;
-        final horiDashes = gridConfig.horizontal.dashes;
+        final horiLine = gridConfig.horizontal.line;
+
+        final dragPosition = _upObject?.drawableRect.bottom ?? 0;
+        final minDistance = gridConfig.dragHitTestMinDistance;
+        final dragLineConfig = gridConfig.dragLine ?? horiLine;
 
         double dy = mainTop;
 
         // 绘制Top边框线
-        canvas.drawLineType(
-          horiLineType,
+        canvas.drawLineByConfig(
           Path()
             ..moveTo(mainLeft, dy)
             ..lineTo(mainRight, dy),
-          horiPaint,
-          dashes: horiDashes,
+          horiLine,
         );
 
         // 绘制主图网格横线
         final step = mainBottom / gridConfig.horizontal.count;
         for (int i = 1; i < gridConfig.horizontal.count; i++) {
           dy = i * step;
-          canvas.drawLineType(
-            horiLineType,
+          canvas.drawLineByConfig(
             Path()
               ..moveTo(mainLeft, dy)
               ..lineTo(mainRight, dy),
-            horiPaint,
-            dashes: horiDashes,
+            horiLine,
           );
         }
 
         // 绘制主图mainDrawBottom线
-        canvas.drawLineType(
-          horiLineType,
+        canvas.drawLineByConfig(
           Path()
             ..moveTo(mainLeft, mainBottom)
             ..lineTo(mainRight, mainBottom),
-          horiPaint,
-          dashes: horiDashes,
+          (dragPosition - mainBottom).abs() < minDistance
+              ? dragLineConfig
+              : horiLine,
         );
-
-        // // 绘制副图区域起始线
-        // canvas.drawLineType(
-        //   horiLineType,
-        //   Path()
-        //     ..moveTo(mainLeft, subTop)
-        //     ..lineTo(mainRight, subTop),
-        //   horiPaint,
-        //   dashes: horiDashes,
-        // );
 
         /// 副图区域
         // 绘制每一个副图的底部线
         double height = 0.0;
-        for (final indicator in subPaintObjects) {
-          height += indicator.height;
+        for (final object in subPaintObjects) {
+          height += object.height;
           dy = subTop + height;
-          canvas.drawLineType(
-            horiLineType,
+          canvas.drawLineByConfig(
             Path()
               ..moveTo(mainLeft, dy)
               ..lineTo(mainRight, dy),
-            horiPaint,
-            dashes: horiDashes,
+            (dragPosition - dy).abs() < minDistance ? dragLineConfig : horiLine,
           );
         }
       }
 
       /// 绘制Vertical轴 Grid 线
       if (gridConfig.vertical.show) {
-        final vertLineType = gridConfig.vertical.type;
-        final vertPaint = gridConfig.vertical.paint;
-        final vertDashes = gridConfig.horizontal.dashes;
+        final vertLine = gridConfig.vertical.line;
 
         double dx = mainLeft;
         final step = mainRight / gridConfig.vertical.count;
 
         // 绘制左边框线
-        canvas.drawLineType(
-          vertLineType,
+        canvas.drawLineByConfig(
           Path()
             ..moveTo(dx, mainTop)
             ..lineTo(dx, subBottom),
-          vertPaint,
-          dashes: vertDashes,
+          vertLine,
         );
 
         // 计算排除时间指标后的top和bottom
@@ -154,36 +137,107 @@ mixin GridBinding on KlineBindingBase implements IGrid {
           dx = i * step;
 
           /// 绘制主区的Grid竖线
-          canvas.drawLineType(
-            vertLineType,
+          canvas.drawLineByConfig(
             Path()
               ..moveTo(dx, mainTop)
               ..lineTo(dx, mainBottom),
-            vertPaint,
-            dashes: vertDashes,
+            vertLine,
           );
 
           /// 绘制副区Grid竖线
-          canvas.drawLineType(
-            vertLineType,
+          canvas.drawLineByConfig(
             Path()
               ..moveTo(dx, top)
               ..lineTo(dx, bottom),
-            vertPaint,
-            dashes: vertDashes,
+            vertLine,
           );
         }
 
         // 绘制右边框线
-        canvas.drawLineType(
-          vertLineType,
+        canvas.drawLineByConfig(
           Path()
             ..moveTo(mainRight, mainTop)
             ..lineTo(mainRight, subBottom),
-          vertPaint,
-          dashes: vertDashes,
+          vertLine,
         );
       }
     }
+  }
+
+  PaintObject? _upObject, _downObject;
+  bool get isStartDragGrid => gridConfig.allowDrag && _upObject != null;
+
+  /// 测试[position]是否命中指标图边界
+  bool onGridMoveStart(Offset position) {
+    _upObject = _downObject = null;
+    if (!gridConfig.allowDrag) return false;
+
+    final dy = position.dy;
+    final minDistance = gridConfig.dragHitTestMinDistance;
+    final list = subPaintObjects.where((obj) => obj.key != timeIndicatorKey);
+    for (var object in [mainPaintObject, ...list]) {
+      if (object.drawableRect.hitTestBottom(dy, minDistance: minDistance)) {
+        _upObject = object;
+        continue;
+      }
+      if (_upObject != null) {
+        // if (object.drawableRect.hitTestTop(dy)) {
+        _downObject = object;
+        break;
+      }
+    }
+
+    if (_upObject != null && !isFixedSizeMode) {
+      markRepaintGrid();
+      return true;
+    }
+    _upObject = _downObject = null;
+    return false;
+  }
+
+  /// 更新
+  void onGridMoveUpdate(GestureData data) {
+    if (!isStartDragGrid) return;
+
+    final deltaDy = data.delta.dy;
+    if (deltaDy != 0) {
+      // >0 向下移动; <0 向上移动
+      final bool isMainIndicator = _upObject!.key == mainIndicatorKey;
+
+      final subMinHeight = gridConfig.dragChartMinHeight;
+      final upHeight = _upObject!.height + deltaDy;
+      if ((upHeight < subMinHeight)) return;
+
+      if (_downObject != null) {
+        final height = _downObject!.height - deltaDy;
+        if (height < subMinHeight) return;
+
+        if (isMainIndicator) {
+          setMainSize(Size(canvasWidth, upHeight));
+          _downObject?.updateLayout(height: height);
+          markRepaintChart(reset: true);
+        } else {
+          _upObject?.updateLayout(height: upHeight);
+          _downObject?.updateLayout(height: height);
+          markRepaintChart();
+        }
+      } else {
+        if (isMainIndicator) {
+          setMainSize(Size(canvasWidth, upHeight));
+        } else {
+          _upObject?.updateLayout(height: upHeight);
+          // downObject为空说明在最底部的副区指标, 此时向下移动需要调整整个绘制区域高度
+          _invokeSizeChanged();
+        }
+      }
+
+      markRepaintGrid();
+    }
+  }
+
+  void onGridMoveEnd() {
+    _upObject = _downObject = null;
+    markRepaintGrid();
+    markRepaintChart();
   }
 }

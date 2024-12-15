@@ -1,6 +1,7 @@
 ## 0.8.0
 * New Architecture Design
 * Indicator Framework Refactoring
+* Adjust the height of the indicator chart by dragging the Grid line
 * bugfix
 
 ## 0.7.1

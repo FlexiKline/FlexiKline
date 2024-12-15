@@ -552,7 +552,7 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
   ///
   /// 如果当前正在crossing中时, 不触发后续的长按逻辑.
   void onLongPressStart(LongPressStartDetails details) {
-    if (!gestureConfig.supportLongPress || controller.isCrossing) {
+    if (!gestureConfig.supportLongPress) {
       logd("onLongPressStart ignore! > crossing:${controller.isCrossing}");
       return;
     }
@@ -570,8 +570,12 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
         _longData?.end();
         _longData = null;
       }
+    } else if (controller.onGridMoveStart(details.localPosition)) {
+      _longData = GestureData.long(details.localPosition);
+      controller.cancelCross();
     } else {
       logd("onLongPressStart cross > details:$details");
+      controller.cancelCross();
       _longData = GestureData.long(details.localPosition);
       final result = controller.onCrossStart(_longData!);
       if (!result) {
@@ -592,6 +596,9 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
     if (controller.isDrawVisibility && drawState.isOngoing) {
       _longData!.update(details.localPosition);
       controller.onDrawMoveUpdate(_longData!);
+    } else if (controller.isStartDragGrid) {
+      _longData!.update(details.localPosition);
+      controller.onGridMoveUpdate(_longData!);
     } else {
       _longData!.update(details.localPosition);
       controller.onCrossUpdate(_longData!);
@@ -609,6 +616,8 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
     // }());
     if (controller.isDrawVisibility && drawState.isOngoing) {
       controller.onDrawMoveEnd();
+    } else if (controller.isStartDragGrid) {
+      controller.onGridMoveEnd();
     } else {
       // 长按结束, 尝试取消Cross事件.
       controller.cancelCross();

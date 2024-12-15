@@ -392,6 +392,11 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw {
 
   void setDrawContinuous(bool isOn) {
     _drawContinuousListener.value = isOn;
+    if (!isOn) {
+      drawState.object?.dispose();
+      _drawState = const Prepared();
+      _markRepaintDraw();
+    }
   }
 
   bool moveDrawStateObjectToTop() {
