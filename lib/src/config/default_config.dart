@@ -178,6 +178,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       cross: genCrossConfig(),
       draw: genDrawConfig(),
       tooltip: genTooltipConfig(),
+      mainIndicator: genMainIndicator(),
       main: {},
       sub: {},
     );
@@ -256,6 +257,15 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
     );
   }
 
+  MultiPaintObjectIndicator genMainIndicator() {
+    return MultiPaintObjectIndicator(
+      key: mainIndicatorKey,
+      height: initialMainSize.height,
+      padding: theme.mainIndicatorPadding,
+      drawBelowTipsArea: true,
+    );
+  }
+
   SettingConfig genSettingConfig() {
     return SettingConfig(
       pixel: theme.pixel,
@@ -270,8 +280,8 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       /// 主/副图区域大小配置
       // mainRect: Rect.zero,
       mainMinSize: Size.square(20 * theme.scale),
-      mainPadding: theme.mainIndicatorPadding,
-      mainDrawBelowTipsArea: true,
+      // mainPadding: theme.mainIndicatorPadding,
+      // mainDrawBelowTipsArea: true,
 
       /// 主/副图绘制参数
       minPaintBlankRate: 0.5,

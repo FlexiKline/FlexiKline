@@ -38,8 +38,8 @@ final class IndicatorPaintObjectManager with KlineLog {
   /// 动态维护指标计算数据存储位置.
   /// 注: 仅能通过[configuration]配置去计算指标计算数据存储位置.
   final Map<IIndicatorKey, int> _indicatorDataIndexs = {
-    candleIndicatorKey: 0,
-    timeIndicatorKey: 1,
+    // candleIndicatorKey: 0,
+    // timeIndicatorKey: 1,
   };
 
   late final MultiPaintObjectBox _mainPaintObject;
@@ -127,6 +127,7 @@ final class IndicatorPaintObjectManager with KlineLog {
   /// 3. 从配置中加载缓存的主/副区指标.
   void init(
     IPaintContext context, {
+    required MultiPaintObjectIndicator mainIndicator,
     Set<IIndicatorKey> initMainIndicatorKeys = const {},
     Set<IIndicatorKey> initSubIndicatorKeys = const {},
   }) {
@@ -144,12 +145,13 @@ final class IndicatorPaintObjectManager with KlineLog {
     /// 构造主区/副区
     _mainPaintObject = MultiPaintObjectBox(
       context: context,
-      indicator: MultiPaintObjectIndicator(
-        key: mainIndicatorKey,
-        height: context.settingConfig.mainRect.height,
-        padding: context.settingConfig.mainPadding,
-        drawBelowTipsArea: context.settingConfig.mainDrawBelowTipsArea,
-      ),
+      indicator: mainIndicator,
+      // indicator: MultiPaintObjectIndicator(
+      //   key: mainIndicatorKey,
+      //   height: context.settingConfig.mainRect.height,
+      //   padding: context.settingConfig.mainPadding,
+      //   drawBelowTipsArea: context.settingConfig.mainDrawBelowTipsArea,
+      // ),
     );
 
     _subPaintObjectQueue = FixedHashQueue<SinglePaintObjectBox>(

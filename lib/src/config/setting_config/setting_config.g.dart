@@ -19,13 +19,7 @@ abstract class _$SettingConfigCWProxy {
 
   SettingConfig loading(LoadingConfig loading);
 
-  SettingConfig mainRect(Rect mainRect);
-
   SettingConfig mainMinSize(Size? mainMinSize);
-
-  SettingConfig mainPadding(EdgeInsets mainPadding);
-
-  SettingConfig mainDrawBelowTipsArea(bool mainDrawBelowTipsArea);
 
   SettingConfig minPaintBlankRate(double minPaintBlankRate);
 
@@ -63,10 +57,7 @@ abstract class _$SettingConfigCWProxy {
     Color? shortColor,
     double? opacity,
     LoadingConfig? loading,
-    Rect? mainRect,
     Size? mainMinSize,
-    EdgeInsets? mainPadding,
-    bool? mainDrawBelowTipsArea,
     double? minPaintBlankRate,
     bool? alwaysCalculateScreenOfCandlesIfEnough,
     double? candleMaxWidth,
@@ -106,19 +97,8 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
   SettingConfig loading(LoadingConfig loading) => this(loading: loading);
 
   @override
-  SettingConfig mainRect(Rect mainRect) => this(mainRect: mainRect);
-
-  @override
   SettingConfig mainMinSize(Size? mainMinSize) =>
       this(mainMinSize: mainMinSize);
-
-  @override
-  SettingConfig mainPadding(EdgeInsets mainPadding) =>
-      this(mainPadding: mainPadding);
-
-  @override
-  SettingConfig mainDrawBelowTipsArea(bool mainDrawBelowTipsArea) =>
-      this(mainDrawBelowTipsArea: mainDrawBelowTipsArea);
 
   @override
   SettingConfig minPaintBlankRate(double minPaintBlankRate) =>
@@ -182,10 +162,7 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
     Object? shortColor = const $CopyWithPlaceholder(),
     Object? opacity = const $CopyWithPlaceholder(),
     Object? loading = const $CopyWithPlaceholder(),
-    Object? mainRect = const $CopyWithPlaceholder(),
     Object? mainMinSize = const $CopyWithPlaceholder(),
-    Object? mainPadding = const $CopyWithPlaceholder(),
-    Object? mainDrawBelowTipsArea = const $CopyWithPlaceholder(),
     Object? minPaintBlankRate = const $CopyWithPlaceholder(),
     Object? alwaysCalculateScreenOfCandlesIfEnough =
         const $CopyWithPlaceholder(),
@@ -225,25 +202,10 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
           ? _value.loading
           // ignore: cast_nullable_to_non_nullable
           : loading as LoadingConfig,
-      mainRect: mainRect == const $CopyWithPlaceholder() || mainRect == null
-          ? _value.mainRect
-          // ignore: cast_nullable_to_non_nullable
-          : mainRect as Rect,
       mainMinSize: mainMinSize == const $CopyWithPlaceholder()
           ? _value.mainMinSize
           // ignore: cast_nullable_to_non_nullable
           : mainMinSize as Size?,
-      mainPadding:
-          mainPadding == const $CopyWithPlaceholder() || mainPadding == null
-              ? _value.mainPadding
-              // ignore: cast_nullable_to_non_nullable
-              : mainPadding as EdgeInsets,
-      mainDrawBelowTipsArea:
-          mainDrawBelowTipsArea == const $CopyWithPlaceholder() ||
-                  mainDrawBelowTipsArea == null
-              ? _value.mainDrawBelowTipsArea
-              // ignore: cast_nullable_to_non_nullable
-              : mainDrawBelowTipsArea as bool,
       minPaintBlankRate: minPaintBlankRate == const $CopyWithPlaceholder() ||
               minPaintBlankRate == null
           ? _value.minPaintBlankRate
@@ -322,15 +284,8 @@ SettingConfig _$SettingConfigFromJson(Map<String, dynamic> json) =>
       shortColor: const ColorConverter().fromJson(json['shortColor'] as String),
       opacity: (json['opacity'] as num?)?.toDouble() ?? 0.5,
       loading: LoadingConfig.fromJson(json['loading'] as Map<String, dynamic>),
-      mainRect: json['mainRect'] == null
-          ? Rect.zero
-          : const RectConverter()
-              .fromJson(json['mainRect'] as Map<String, dynamic>),
       mainMinSize: _$JsonConverterFromJson<Map<String, dynamic>, Size>(
           json['mainMinSize'], const SizeConverter().fromJson),
-      mainPadding: const EdgeInsetsConverter()
-          .fromJson(json['mainPadding'] as Map<String, dynamic>),
-      mainDrawBelowTipsArea: json['mainDrawBelowTipsArea'] as bool? ?? true,
       minPaintBlankRate: (json['minPaintBlankRate'] as num?)?.toDouble() ?? 0.5,
       alwaysCalculateScreenOfCandlesIfEnough:
           json['alwaysCalculateScreenOfCandlesIfEnough'] as bool? ?? false,
@@ -355,10 +310,7 @@ Map<String, dynamic> _$SettingConfigToJson(SettingConfig instance) {
     'shortColor': const ColorConverter().toJson(instance.shortColor),
     'opacity': instance.opacity,
     'loading': instance.loading.toJson(),
-    'mainRect': const RectConverter().toJson(instance.mainRect),
     'mainMinSize': const SizeConverter().toJson(instance.mainMinSize),
-    'mainPadding': const EdgeInsetsConverter().toJson(instance.mainPadding),
-    'mainDrawBelowTipsArea': instance.mainDrawBelowTipsArea,
     'minPaintBlankRate': instance.minPaintBlankRate,
     'alwaysCalculateScreenOfCandlesIfEnough':
         instance.alwaysCalculateScreenOfCandlesIfEnough,
