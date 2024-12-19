@@ -31,6 +31,7 @@ import '../logger.dart';
 import '../serializers.dart';
 
 part 'common.dart';
+part 'delegate.dart';
 part 'model.dart';
 part 'indicator.g.dart';
 part 'manager.dart';

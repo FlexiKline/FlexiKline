@@ -15,31 +15,27 @@
 part of 'indicator.dart';
 
 /// FlexiKlineController 状态/配置/接口代理
-mixin ConfigStateMixin<T extends Indicator> on IndicatorObject<T> {
+extension IndicatorObjectExt on IndicatorObject {
   /// Config
-  SettingConfig get settingConfig => context.settingConfig;
-  GridConfig get gridConfig => context.gridConfig;
-  CrossConfig get crossConfig => context.crossConfig;
+  SettingConfig get settingConfig => _context.settingConfig;
+  GridConfig get gridConfig => _context.gridConfig;
+  CrossConfig get crossConfig => _context.crossConfig;
 
-  double get candleActualWidth => context.candleActualWidth;
+  double get candleActualWidth => _context.candleActualWidth;
 
-  double get candleWidthHalf => context.candleWidthHalf;
+  double get candleWidthHalf => _context.candleWidthHalf;
 
-  KlineData get klineData => context.curKlineData;
+  KlineData get klineData => _context.curKlineData;
 
-  double get paintDxOffset => context.paintDxOffset;
+  double get paintDxOffset => _context.paintDxOffset;
 
-  double get startCandleDx => context.startCandleDx;
+  double get startCandleDx => _context.startCandleDx;
 
-  bool get isCrossing => context.isCrossing;
-
-  int? _dataIndex;
-  // // 注: 如果PaintObject被创建了, 其DataIndex必然有值.
-  int get dataIndex => _dataIndex ??= context.getDataIndex(indicator.key)!;
+  bool get isCrossing => _context.isCrossing;
 }
 
 /// 绘制对象混入边界计算的通用扩展
-mixin PaintObjectBoundingMixin on PaintObject implements IPaintBoundingBox {
+mixin PaintObjectBoundingMixin on IndicatorObject implements IPaintBoundingBox {
   bool get drawInMain => slot == mainIndicatorSlot;
   bool get drawInSub => slot > mainIndicatorSlot;
 
@@ -92,10 +88,10 @@ mixin PaintObjectBoundingMixin on PaintObject implements IPaintBoundingBox {
   Rect get drawableRect {
     if (_drawableRect != null) return _drawableRect!;
     if (drawInMain) {
-      _drawableRect = context.mainRect;
+      _drawableRect = _context.mainRect;
     } else {
-      final top = context.calculateIndicatorTop(slot);
-      final subRect = context.subRect;
+      final top = _context.calculateIndicatorTop(slot);
+      final subRect = _context.subRect;
       _drawableRect = Rect.fromLTRB(
         subRect.left,
         subRect.top + top,
@@ -157,7 +153,7 @@ mixin PaintObjectBoundingMixin on PaintObject implements IPaintBoundingBox {
 }
 
 /// 绘制对象混入数据初始化的通用扩展
-mixin PaintObjectDataInitMixin on PaintObject implements IPaintDataInit {
+mixin PaintObjectDataInitMixin on IndicatorObject implements IPaintDataInit {
   int? _start;
   int? _end;
 

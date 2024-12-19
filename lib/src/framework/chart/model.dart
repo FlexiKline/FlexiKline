@@ -78,17 +78,21 @@ abstract class SinglePaintObjectIndicator extends Indicator {
 }
 
 /// 多个绘制Indicator的配置.
+/// TODO: 考虑与MultiPaintObjectBox一起更名为MainXXXPaintObject, 仅供MainIndicator使用, 后续再考虑扩展MultiPaintObject
 @CopyWith()
 @FlexiIndicatorSerializable
 class MultiPaintObjectIndicator<T extends SinglePaintObjectIndicator>
     extends Indicator {
   MultiPaintObjectIndicator({
     required super.key,
-    required super.height,
+    required Size size,
     required super.padding,
     this.drawBelowTipsArea = false,
-  });
+  })  : _size = size,
+        super(height: size.height);
 
+  late Size _size;
+  Size get size => _size;
   final bool drawBelowTipsArea;
 
   @override

@@ -260,7 +260,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
   MultiPaintObjectIndicator genMainIndicator() {
     return MultiPaintObjectIndicator(
       key: mainIndicatorKey,
-      height: initialMainSize.height,
+      size: initialMainSize,
       padding: theme.mainIndicatorPadding,
       drawBelowTipsArea: true,
     );

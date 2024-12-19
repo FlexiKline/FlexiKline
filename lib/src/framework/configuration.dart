@@ -141,6 +141,7 @@ abstract interface class IConfiguration {
   IFlexiKlineTheme get theme;
 
   /// FlexiKline初始化默认的主区的宽高.
+  /// TODO:后续废弃, 由MainIndicator控制.
   Size get initialMainSize;
 
   /// 获取FlexiKline配置

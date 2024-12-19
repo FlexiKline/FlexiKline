@@ -94,11 +94,16 @@ mixin ChartBinding
       return;
     }
 
-    /// 检查主区和副区的PaintObject是否都创建了.
-    // ensurePaintObjectInstance();
-
     int solt = mainIndicatorSlot;
-    for (var paintObject in [mainPaintObject, ...subPaintObjects]) {
+    mainPaintObject.doInitState(
+      solt++,
+      start: curKlineData.start,
+      end: curKlineData.end,
+      reset: _reset,
+    );
+    mainPaintObject.doPaintChart(canvas, size);
+
+    for (var paintObject in subPaintObjects) {
       /// 初始化副区指标数据.
       paintObject.doInitState(
         solt++,

@@ -162,17 +162,23 @@ abstract interface class IPaintObject {
   });
 }
 
-abstract interface class IPaintDelegate {
-  void doPrecompute(Range range, {bool reset = false});
+// abstract interface class IPaintDelegate {
 
-  MinMax? doInitState(
-    int newSlot, {
-    required int start,
-    required int end,
-    bool reset = false,
-  });
+//   bool doUpdateLayout({
+//     Size? size,
+//     EdgeInsets? padding,
+//     bool reset = false,
+//     double? tipsHeight,
+//   });
 
-  void doPaintChart(Canvas canvas, Size size);
+//   MinMax? doInitState(
+//     int newSlot, {
+//     required int start,
+//     required int end,
+//     bool reset = false,
+//   });
 
-  void doOnCross(Canvas canvas, Offset offset, {CandleModel? model});
-}
+//   void doPaintChart(Canvas canvas, Size size);
+
+//   void doOnCross(Canvas canvas, Offset offset, {CandleModel? model});
+// }
