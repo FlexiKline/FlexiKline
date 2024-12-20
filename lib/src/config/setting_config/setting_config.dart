@@ -37,13 +37,8 @@ class SettingConfig {
     /// 内置LoadingView样式配置
     required this.loading,
 
-    /// 主/副图区域大小配置
-    // this.mainRect = Rect.zero,
-
     ///  如果不指定默认为设置为20*20的逻辑像素区域.
-    Size? mainMinSize,
-    // required this.mainPadding,
-    // this.mainDrawBelowTipsArea = true,
+    this.mainMinSize = const Size(20, 20),
 
     /// 主/副图绘制参数
     this.minPaintBlankRate = 0.5,
@@ -64,7 +59,7 @@ class SettingConfig {
     /// 副图配置
     // 副区的指标图最大数量
     this.subChartMaxCount = defaultSubChartMaxCount,
-  }) : mainMinSize = mainMinSize ?? Size(20 * pixel, 20 * pixel);
+  });
 
   /// 单个像素值
   final double pixel;
@@ -78,15 +73,8 @@ class SettingConfig {
   /// 内置LoadingView样式配置
   final LoadingConfig loading;
 
-  /// 主区
-  // 主区域大小配置
-  // Rect mainRect; // TODO: 后续由MainPaintObject管理
   // 主区域最小大小限制,
   final Size mainMinSize;
-  // // 主区域Padding
-  // final EdgeInsets mainPadding;
-  // // 主区图表的绘制是否在Tips区域下
-  // final bool mainDrawBelowTipsArea;
 
   /// 绘制区域最少留白比例
   /// 例如: 当蜡烛数量不足以绘制一屏, 向右移动到末尾时, 绘制区域左边最少留白区域占可绘制区域(canvasWidth)的比例
@@ -99,6 +87,7 @@ class SettingConfig {
   /// 蜡烛配置
   // 最大蜡烛宽度[1, 50]
   final double candleMaxWidth;
+  // TODO: 待整合, 保持SettingConfig为const
   // 单根蜡烛宽度
   double candleWidth;
   // 固定蜡烛间距
@@ -126,34 +115,6 @@ class SettingConfig {
     _candleSpacing = _candleSpacing! < pixel ? pixel : _candleSpacing;
     return _candleSpacing!;
   }
-
-  // void setMainRect(Size size) {
-  //   if (size >= mainMinSize) {
-  //     mainRect = Rect.fromLTRB(
-  //       0,
-  //       0,
-  //       size.width,
-  //       size.height,
-  //     );
-  //   }
-  // }
-
-  // 确保最小Size必须小于MainSize.
-  // void checkAndFixMinSize() {
-  //   final mainSize = mainRect.size;
-  //   if (mainMinSize.width > mainSize.width) {
-  //     mainMinSize = Size(mainSize.width, mainMinSize.height);
-  //   }
-  //   if (mainMinSize.height > mainSize.height) {
-  //     mainMinSize = Size(mainMinSize.width, mainSize.height);
-  //   }
-  // }
-
-  // void update(SettingConfig config) {
-  //   mainRect = config.mainRect;
-  //   // mainMinSize = config.mainMinSize;
-  //   candleWidth = config.candleWidth;
-  // }
 
   factory SettingConfig.fromJson(Map<String, dynamic> json) =>
       _$SettingConfigFromJson(json);

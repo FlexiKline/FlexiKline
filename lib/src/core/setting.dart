@@ -21,15 +21,12 @@ mixin SettingBinding on KlineBindingBase
   void init() {
     super.init();
     logd("init setting");
-    _paintObjectManager = IndicatorPaintObjectManager(
-      configuration: configuration,
-      logger: loggerDelegate,
-    )..init(
-        this,
-        mainIndicator: _flexiKlineConfig.mainIndicator,
-        initMainIndicatorKeys: _flexiKlineConfig.main,
-        initSubIndicatorKeys: _flexiKlineConfig.sub,
-      );
+    _paintObjectManager.init(
+      this,
+      mainIndicator: _flexiKlineConfig.mainIndicator,
+      initMainIndicatorKeys: _flexiKlineConfig.main,
+      initSubIndicatorKeys: _flexiKlineConfig.sub,
+    );
     _canvasSizeChangeListener = KlineStateNotifier(canvasRect);
   }
 
@@ -44,10 +41,7 @@ mixin SettingBinding on KlineBindingBase
     super.dispose();
     logd("dispose setting");
     _canvasSizeChangeListener.dispose();
-    _paintObjectManager.dispose();
   }
-
-  late final IndicatorPaintObjectManager _paintObjectManager;
 
   /// KlineData整个图表区域大小变化监听器
   late final KlineStateNotifier<Rect> _canvasSizeChangeListener;
@@ -122,7 +116,7 @@ mixin SettingBinding on KlineBindingBase
   /// TimeIndicator区域大小
   @override
   Rect get timeRect {
-    return _paintObjectManager.timePaintObject.drawableRect;
+    return _paintObjectManager.timePaintParam.drawableRect;
   }
 
   /// 主区域最小宽高
@@ -262,17 +256,6 @@ mixin SettingBinding on KlineBindingBase
   }
 
   @override
-  MainPaintObject get mainPaintObject {
-    return _paintObjectManager.mainPaintObject;
-  }
-
-  @override
-  Iterable<PaintObject> get subPaintObjects {
-    return _paintObjectManager.subPaintObjects;
-  }
-
-  @Deprecated('废弃的')
-  @override
   int? getDataIndex(IIndicatorKey key) {
     return _paintObjectManager.getIndicatorDataIndex(key);
   }
@@ -348,20 +331,6 @@ mixin SettingBinding on KlineBindingBase
     __flexiKlineConfig = config;
   }
 
-  // void initFlexiKlineState({bool isInit = false}) {
-  //   /// 修正mainRect大小
-  //   if (mainRect.isEmpty) {
-  //     final initSize = configuration.initialMainSize;
-  //     if (isInit && initSize < settingConfig.mainMinSize) {
-  //       throw Exception('initMainRect(size:$initSize) is invalid!!!');
-  //     }
-  //     settingConfig.setMainRect(initSize);
-  //     _invokeSizeChanged();
-  //   }
-
-  //   /// TODO: 此处考虑对其他参数的修正
-  // }
-
   /// 保存当前FlexiKline配置到本地
   @override
   void storeFlexiKlineConfig() {
@@ -383,41 +352,21 @@ mixin SettingBinding on KlineBindingBase
       /// 更新当前配置为[config]
       _flexiKlineConfig = config;
 
-      /// 初始化状态
-      // initFlexiKlineState();
-
       /// 保存当前配置
       if (autoSave) storeFlexiKlineConfig();
     } else {
       _flexiKlineConfig = config;
-
-      /// 初始化状态
-      // initFlexiKlineState();
 
       /// 保存当前配置
       if (autoSave) storeFlexiKlineConfig();
     }
   }
 
-  @override
-  @Deprecated('废弃, 由PaintObject执行precompute')
-  Map<IIndicatorKey, dynamic> getIndicatorCalcParams() {
-    return _paintObjectManager.getIndicatorCalcParams();
-  }
-
   /// SettingConfig
   @override
   SettingConfig get settingConfig => _flexiKlineConfig.setting;
   set settingConfig(SettingConfig config) {
-    // final isChangeSize = config.mainRect != mainRect;
     _flexiKlineConfig.setting = config;
-    // initFlexiKlineState();
-    // if (isChangeSize) {
-    //   _invokeSizeChanged();
-    // } else {
-    //   markRepaintChart();
-    //   markRepaintCross();
-    // }
     markRepaintChart();
     markRepaintCross();
   }

@@ -84,6 +84,13 @@ typedef IndicatorBuilder<T extends Indicator> = T Function(
   SettingConfig setting,
 );
 
+/// 时间绘制对象参数
+abstract interface class ITimePaintParam {
+  double get height;
+  DrawPosition get position;
+  Rect get drawableRect;
+}
+
 const mainIndicatorKey = FlexiIndicatorKey('main', label: 'Main');
 const candleIndicatorKey = FlexiIndicatorKey('candle', label: 'Candle');
 const timeIndicatorKey = FlexiIndicatorKey('time', label: 'Time');
@@ -98,12 +105,6 @@ const mainIndicatorSlot = -1;
 
 /// 指标图的绘制边界接口
 abstract interface class IPaintBoundingBox {
-  // bool updateLayout({
-  //   double? height,
-  //   EdgeInsets? padding,
-  //   bool reset = false,
-  // });
-
   void resetPaintBounding({int? slot});
 
   /// 当前指标图画笔可以绘制的范围
@@ -156,24 +157,3 @@ abstract interface class IPaintObject {
     Rect? tipsRect,
   });
 }
-
-// abstract interface class IPaintDelegate {
-
-//   bool doUpdateLayout({
-//     Size? size,
-//     EdgeInsets? padding,
-//     bool reset = false,
-//     double? tipsHeight,
-//   });
-
-//   MinMax? doInitState(
-//     int newSlot, {
-//     required int start,
-//     required int end,
-//     bool reset = false,
-//   });
-
-//   void doPaintChart(Canvas canvas, Size size);
-
-//   void doOnCross(Canvas canvas, Offset offset, {CandleModel? model});
-// }

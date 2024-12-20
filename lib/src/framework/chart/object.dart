@@ -37,11 +37,6 @@ abstract class IndicatorObject<T extends Indicator>
   int get zIndex => _indicator.zIndex;
   dynamic get calcParams => _indicator.calcParam;
 
-  // TODO: 将其移至[manager]创建时.
-  int? _dataIndex;
-  // 注: 如果PaintObject被创建了, 其DataIndex必然有值.
-  int get dataIndex => _dataIndex ??= _context.getDataIndex(indicator.key)!;
-
   @override
   int compareTo(IndicatorObject<T> other) {
     return indicator.zIndex.compareTo(other.indicator.zIndex);
@@ -65,11 +60,16 @@ abstract class PaintObject<T extends Indicator> extends IndicatorObject
   PaintObject({
     required T indicator,
     required IPaintContext context,
-  }) : super(indicator, context) {
+  })  : _dataIndex = context.getDataIndex(indicator.key),
+        super(indicator, context) {
     if (context is KlineLog) {
       loggerDelegate = (context as KlineLog).loggerDelegate;
     }
   }
+
+  // 当前绘制对象的指标计算数据存储下标
+  final int? _dataIndex;
+  int get dataIndex => _dataIndex ?? -1;
 
   // 父级PaintObject. 主要用于给其子级PaintObject限定范围.
   PaintObject? _parent;

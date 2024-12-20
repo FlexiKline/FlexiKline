@@ -27,12 +27,18 @@ abstract class KlineBindingBase
   /// 一个FlexiKlineController允许最多维护的KlineData个数.
   final int? klineDataCacheCapacity;
 
+  /// 指标绘制对象管理
+  final IndicatorPaintObjectManager _paintObjectManager;
+
   KlineBindingBase({
     required this.configuration,
     this.autoSave = true,
     ILogger? logger,
     this.klineDataCacheCapacity,
-  }) {
+  }) : _paintObjectManager = IndicatorPaintObjectManager(
+          configuration: configuration,
+          logger: logger,
+        ) {
     logd("constrouct");
     loggerDelegate = logger;
     // initFlexiKlineConfig();
@@ -55,6 +61,7 @@ abstract class KlineBindingBase
   @mustCallSuper
   void dispose() {
     logd("dispose base");
+    _paintObjectManager.dispose();
     if (autoSave) storeFlexiKlineConfig();
   }
 
@@ -62,6 +69,17 @@ abstract class KlineBindingBase
 
   T getInstance<T extends KlineBindingBase>(T instance) {
     return instance;
+  }
+}
+
+/// KlineController内部扩展
+extension on KlineBindingBase {
+  MainPaintObject get mainPaintObject {
+    return _paintObjectManager.mainPaintObject;
+  }
+
+  Iterable<PaintObject> get subPaintObjects {
+    return _paintObjectManager.subPaintObjects;
   }
 }
 

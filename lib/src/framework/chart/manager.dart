@@ -44,19 +44,20 @@ final class IndicatorPaintObjectManager with KlineLog {
 
   late final MainPaintObject _mainPaintObject;
 
-  late final TimePaintObject _timePaintObject;
+  late final PaintObject _timePaintObject;
+  late final ITimePaintParam _timePaintParam;
 
   MainPaintObject get mainPaintObject => _mainPaintObject;
 
-  TimePaintObject get timePaintObject => _timePaintObject;
+  ITimePaintParam get timePaintParam => _timePaintParam;
 
   Iterable<PaintObject> get subPaintObjects {
     final objects = _subPaintObjectQueue;
-    switch (timePaintObject.position) {
+    switch (timePaintParam.position) {
       case DrawPosition.middle:
-        return [...objects, _timePaintObject];
-      case DrawPosition.bottom:
         return [_timePaintObject, ...objects];
+      case DrawPosition.bottom:
+        return [...objects, _timePaintObject];
     }
   }
 
@@ -153,10 +154,12 @@ final class IndicatorPaintObjectManager with KlineLog {
       _mainPaintObject.appendPaintObject(candleObject);
 
       final time = configuration.timeIndicatorBuilder.call(setting);
-      _timePaintObject = time.createPaintObject(context);
+      final timeObject = time.createPaintObject(context);
+      _timePaintObject = timeObject;
+      _timePaintParam = timeObject;
     } catch (error, stack) {
       loge(
-        'initState catch an exception!',
+        'init catch an exception!',
         error: error,
         stackTrace: stack,
       );

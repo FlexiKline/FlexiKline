@@ -59,18 +59,16 @@ class FlexiKlineConfig {
     return this;
   }
 
+  // TODO: 废弃
   void update(FlexiKlineConfig config) {
     main = config.main;
     sub = config.sub;
-    // setting.update(config.setting);
   }
 
   factory FlexiKlineConfig.fromJson(Map<String, dynamic> json) =>
       _$FlexiKlineConfigFromJson(json);
 
   Map<String, dynamic> toJson() {
-    // main = mainIndicator.children.map((e) => e.key).toSet();
-    // sub = subRectIndicatorQueue.map((e) => e.key).toSet();
     return _$FlexiKlineConfigToJson(this);
   }
 }

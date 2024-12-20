@@ -90,7 +90,7 @@ extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
   }
 }
 
-extension MultiPaintDelegateExt on MainPaintObject {
+extension MainPaintDelegateExt on MainPaintObject {
   void setMinMax(MinMax val) {
     if (_minMax == null) {
       _minMax = val;
@@ -249,7 +249,7 @@ extension MultiPaintDelegateExt on MainPaintObject {
   }
 }
 
-extension MainPaintObjectManagerExt<T extends MainPaintObjectIndicator>
+extension MainPaintManagerExt<T extends MainPaintObjectIndicator>
     on MainPaintObject<T> {
   void appendPaintObjects(Iterable<PaintObject> objects) {
     for (var object in objects) {

@@ -18,7 +18,6 @@ class FlexiKlineController extends KlineBindingBase
     with
         SettingBinding,
         StateBinding,
-        // GestureBinding,
         GridBinding,
         ChartBinding,
         CrossBinding,

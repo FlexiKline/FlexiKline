@@ -62,7 +62,7 @@ v0.8.0
 - [x] 更新绘制工具图标; 遗留问题修复.
 - [x] controller与core库接口优化(保护API不被滥用)
 - [x] 通过对grid的网络线拖拽调整指标图表的高度.
-- [ ] timestampToIndex算法优化; bugfix.
+- [x] 整体框架重构3.
 - [x] 文档撰写v2.
 
 v0.9.0
@@ -76,6 +76,7 @@ v0.9.0
 - [ ] DrawObject增加接口, 根据当前环境参数检测是否需要参与绘制.
 - [ ] websocket更新demo.
 - [ ] 非触摸设备增加键盘事件操作(例如:连续绘制中ESC取消连续绘制等).
+- [ ] timestampToIndex算法优化; bugfix.
 - [ ] bugfix.
 - [ ] 文档撰写v3.
 

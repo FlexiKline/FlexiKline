@@ -19,29 +19,6 @@ abstract interface class ISetting {
   /// Canvas区域大小监听器
   ValueListenable<Rect> get canvasSizeChangeListener;
 
-  /// 主区指标集
-  // MultiPaintObjectIndicator get mainIndicator;
-
-  MainPaintObject get mainPaintObject;
-
-  /// 副区指标集
-  Iterable<PaintObject> get subPaintObjects;
-
-  /// 画板Size = [mainRect] + [subRect]
-  Rect get canvasRect;
-
-  /// 主区Size
-  Rect get mainRect;
-
-  /// 副区Size
-  Rect get subRect;
-
-  /// TimeIndicator区域大小
-  Rect get timeRect;
-
-  /// 计算[slot]位置指标的Top坐标
-  double calculateIndicatorTop(int slot);
-
   /// Config ///
 
   /// 保存到本地
@@ -49,10 +26,6 @@ abstract interface class ISetting {
 
   /// 更新配置[config]
   void updateFlexiKlineConfig(FlexiKlineConfig config);
-
-  /// 待计算的指标参数集合
-  @Deprecated('废弃, 由PaintObject执行precompute')
-  Map<IIndicatorKey, dynamic> getIndicatorCalcParams();
 
   /// SettingConfig
   SettingConfig get settingConfig;

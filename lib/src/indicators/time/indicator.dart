@@ -42,12 +42,14 @@ class TimeIndicator extends PaintObjectIndicator {
   Map<String, dynamic> toJson() => _$TimeIndicatorToJson(this);
 }
 
-class TimePaintObject<T extends TimeIndicator> extends PaintObjectBox<T> {
+class TimePaintObject<T extends TimeIndicator> extends PaintObjectBox<T>
+    implements ITimePaintParam {
   TimePaintObject({
     required super.context,
     required super.indicator,
   });
 
+  @override
   DrawPosition get position => indicator.position;
 
   /// 两个时间刻度间隔的蜡烛数

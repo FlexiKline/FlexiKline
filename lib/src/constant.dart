@@ -39,10 +39,6 @@ const EdgeInsets defaultMainIndicatorPadding = EdgeInsets.only(
   bottom: 5, // 底部留白, 5: 最低价字体高度的一半, 保证最低价文本不会绘制到边线上.
 );
 
-// 默认主图区域最小Size
-// const Size defaultMainRectMinSize = Size(20, 20);
-// const Rect defaultCanvasRectMinRect = Rect.fromLTWH(0, 0, 20, 20);
-
 // 默认副图指标最大数量
 const int defaultSubChartMaxCount = 4;
 
@@ -66,9 +62,6 @@ const double defaultMultiTextHeight = 1.4;
 
 // 默认Tips文本高度
 const double defaultTipsTextHeight = 1.2;
-
-// 默认指标图TipsHeight
-// const double defaultIndicatorTipsHeight = 15;
 
 // 默认Tips文本区域的Padding: 左边缩进8个单位
 const EdgeInsets defaultTipsPadding = EdgeInsets.only(left: 8);

@@ -268,11 +268,8 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       /// 内置LoadingView样式配置
       loading: genInnerLoadingConfig(),
 
-      /// 主/副图区域大小配置
-      // mainRect: Rect.zero,
+      /// 主区域最小Size
       mainMinSize: Size.square(20 * theme.scale),
-      // mainPadding: theme.mainIndicatorPadding,
-      // mainDrawBelowTipsArea: true,
 
       /// 主/副图绘制参数
       minPaintBlankRate: 0.5,

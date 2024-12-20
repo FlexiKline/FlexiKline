@@ -27,9 +27,6 @@ abstract interface class IConfiguration {
   /// 当前配置主题
   IFlexiKlineTheme get theme;
 
-  /// FlexiKline初始化默认的主区的宽高.
-  Size get initialMainSize;
-
   /// 获取FlexiKline配置
   /// 1. 如果本地有缓存, 则从缓存中获取.
   /// 2. 如果本地没有缓存, 根据当前主题生成一套FlexiKline配置.
@@ -39,10 +36,10 @@ abstract interface class IConfiguration {
   void saveFlexiKlineConfig(FlexiKlineConfig config);
 
   /// 蜡烛指标配置构造器(主区)
-  IndicatorBuilder get candleIndicatorBuilder;
+  IndicatorBuilder<CandleIndicator> get candleIndicatorBuilder;
 
   /// 时间指标配置构造器(副区)
-  IndicatorBuilder get timeIndicatorBuilder;
+  IndicatorBuilder<TimeIndicator> get timeIndicatorBuilder;
 
   /// 主区指标配置定制
   Map<IIndicatorKey, IndicatorBuilder> mainIndicatorBuilders();

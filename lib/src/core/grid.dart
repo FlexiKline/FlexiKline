@@ -123,12 +123,12 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
         // 计算排除时间指标后的top和bottom
         double top = subTop;
         double bottom = subBottom;
-        final timeIndicator = _paintObjectManager.timePaintObject.indicator;
-        switch (timeIndicator.position) {
+        final timeParam = _paintObjectManager.timePaintParam;
+        switch (timeParam.position) {
           case DrawPosition.middle:
-            top += timeIndicator.height;
+            top += timeParam.height;
           case DrawPosition.bottom:
-            bottom -= timeIndicator.height;
+            bottom -= timeParam.height;
         }
 
         // 绘制主区/副区的Vertical线
@@ -194,15 +194,14 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
     return false;
   }
 
-  /// 更新
-  /// TODO: 待适配MainPaintObject的delegate改变.
+  /// 更新指标高度
   void onGridMoveUpdate(GestureData data) {
     if (!isStartDragGrid) return;
 
     final deltaDy = data.delta.dy;
     if (deltaDy != 0) {
       // >0 向下移动; <0 向上移动
-      final bool isMainIndicator = _upObject!.key == mainIndicatorKey;
+      final bool isMainIndicator = _upObject is MainPaintObject;
 
       final subMinHeight = gridConfig.dragChartMinHeight;
       final upHeight = _upObject!.height + deltaDy;
@@ -213,9 +212,8 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
         if (height < subMinHeight) return;
 
         if (isMainIndicator) {
-          setMainSize(Size(canvasWidth, upHeight));
           _downObject?.doUpdateLayout(height: height);
-          markRepaintChart(reset: true);
+          setMainSize(Size(canvasWidth, upHeight));
         } else {
           _upObject?.doUpdateLayout(height: upHeight);
           _downObject?.doUpdateLayout(height: height);
@@ -226,7 +224,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
           setMainSize(Size(canvasWidth, upHeight));
         } else {
           _upObject?.doUpdateLayout(height: upHeight);
-          // downObject为空说明在最底部的副区指标, 此时向下移动需要调整整个绘制区域高度
+          // downObject为空说明[_upObject]已是最底部的指标, 此时向下移动需要通知整个绘制区域高度.
           _invokeSizeChanged();
         }
       }
