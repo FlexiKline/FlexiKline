@@ -17,7 +17,7 @@ part of 'time.dart';
 /// 时间刻度指标图
 @CopyWith()
 @FlexiIndicatorSerializable
-class TimeIndicator extends SinglePaintObjectIndicator {
+class TimeIndicator extends PaintObjectIndicator {
   TimeIndicator({
     super.zIndex = 0,
     super.height = defaultTimeIndicatorHeight,
@@ -42,15 +42,13 @@ class TimeIndicator extends SinglePaintObjectIndicator {
   Map<String, dynamic> toJson() => _$TimeIndicatorToJson(this);
 }
 
-class TimePaintObject<T extends TimeIndicator> extends SinglePaintObjectBox<T>
-    implements ITimeRectConfig {
+class TimePaintObject<T extends TimeIndicator> extends PaintObjectBox<T> {
   TimePaintObject({
     required super.context,
     required super.indicator,
   });
 
-  @override
-  get position => indicator.position;
+  DrawPosition get position => indicator.position;
 
   /// 两个时间刻度间隔的蜡烛数
   int get timeTickIntervalCount {

@@ -22,7 +22,7 @@ abstract interface class ISetting {
   /// 主区指标集
   // MultiPaintObjectIndicator get mainIndicator;
 
-  MultiPaintObjectBox get mainPaintObject;
+  MainPaintObject get mainPaintObject;
 
   /// 副区指标集
   Iterable<PaintObject> get subPaintObjects;
@@ -95,7 +95,7 @@ abstract interface class IDraw {
 
 /// PaintContext 绘制Indicator功能集合
 abstract interface class IPaintContext implements ILogger {
-  ITimeRectConfig? get timeRectConfig;
+  // ITimeRectConfig? get timeRectConfig;
 
   /// 当前canvas绘制区域第一根蜡烛绘制的偏移量
   double get startCandleDx;

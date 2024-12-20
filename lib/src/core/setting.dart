@@ -21,8 +21,6 @@ mixin SettingBinding on KlineBindingBase
   void init() {
     super.init();
     logd("init setting");
-    final initMainSize = configuration.initialMainSize;
-    _mainRect = Rect.fromLTWH(0, 0, initMainSize.width, initMainSize.height);
     _paintObjectManager = IndicatorPaintObjectManager(
       configuration: configuration,
       logger: loggerDelegate,
@@ -32,13 +30,13 @@ mixin SettingBinding on KlineBindingBase
         initMainIndicatorKeys: _flexiKlineConfig.main,
         initSubIndicatorKeys: _flexiKlineConfig.sub,
       );
+    _canvasSizeChangeListener = KlineStateNotifier(canvasRect);
   }
 
   @override
   void initState() {
     super.initState();
     logd("initState setting");
-    // initFlexiKlineState();
   }
 
   @override
@@ -52,8 +50,7 @@ mixin SettingBinding on KlineBindingBase
   late final IndicatorPaintObjectManager _paintObjectManager;
 
   /// KlineData整个图表区域大小变化监听器
-  final _canvasSizeChangeListener =
-      KlineStateNotifier(defaultCanvasRectMinRect);
+  late final KlineStateNotifier<Rect> _canvasSizeChangeListener;
   @override
   ValueListenable<Rect> get canvasSizeChangeListener {
     return _canvasSizeChangeListener;
@@ -64,38 +61,28 @@ mixin SettingBinding on KlineBindingBase
     if (force) _canvasSizeChangeListener.notifyListeners();
     markRepaintChart(reset: force);
     markRepaintCross();
-    // final oldCanvasRect = _canvasSizeChangeListener.value;
-
-    // if (_fixedCanvasRect != null) {
-    //   final changed = _updateMainPaintObjectLayoutParam(
-    //     height: mainRect.height,
-    //   );
-    //   if (changed || oldCanvasRect != _fixedCanvasRect) {
-    //     markRepaintChart(reset: true);
-
-    //     _canvasSizeChangeListener.value = canvasRect;
-    //     _canvasSizeChangeListener.notifyListeners();
-    //   }
-    // } else {
-    //   if (oldCanvasRect != canvasRect) {
-    //     final changed = _updateMainPaintObjectLayoutParam(
-    //       height: mainRect.height,
-    //     );
-    //     if (changed || oldCanvasRect.width != mainRect.width) {
-    //       markRepaintChart(reset: true);
-    //     }
-    //     _canvasSizeChangeListener.value = canvasRect;
-    //   }
-    // }
-
-    // markRepaintCross();
   }
 
-  late Rect _mainRect;
+  /// 临时变量: 记录首次进入固定大小模式时主区的大小, 用于退出固定大小模式时, 恢复使用.
+  Size? _mainSize;
   Rect? _fixedCanvasRect;
   bool get isFixedSizeMode => _fixedCanvasRect != null;
 
-  /// 整个画布区域大小 = 由主图区域 + 副图区域
+  /// 主区大小
+  @override
+  Rect get mainRect {
+    if (_fixedCanvasRect != null) {
+      return Rect.fromLTRB(
+        _fixedCanvasRect!.left,
+        _fixedCanvasRect!.top,
+        _fixedCanvasRect!.right,
+        _fixedCanvasRect!.bottom - subRectHeight,
+      );
+    }
+    return mainPaintObject.drawableRect;
+  }
+
+  /// 整个画布区域大小 = 主区 + 副区
   @override
   Rect get canvasRect {
     if (_fixedCanvasRect != null) {
@@ -104,7 +91,8 @@ mixin SettingBinding on KlineBindingBase
     return Rect.fromLTRB(
       mainRect.left,
       mainRect.top,
-      math.max(mainRect.width, subRect.width),
+      // math.max(mainRect.width, subRect.width),
+      mainRect.width, // 整个图表宽度完全由mainRect决定
       mainRect.height + subRectHeight,
     );
   }
@@ -112,7 +100,7 @@ mixin SettingBinding on KlineBindingBase
   double get canvasWidth => canvasRect.width;
   double get canvasHeight => canvasRect.height;
 
-  /// 副图整个区域
+  /// 副区大小
   @override
   Rect get subRect {
     if (_fixedCanvasRect != null) {
@@ -131,42 +119,10 @@ mixin SettingBinding on KlineBindingBase
     );
   }
 
-  /// 主区域大小
-  @override
-  Rect get mainRect {
-    if (_fixedCanvasRect != null) {
-      return Rect.fromLTRB(
-        _fixedCanvasRect!.left,
-        _fixedCanvasRect!.top,
-        _fixedCanvasRect!.right,
-        _fixedCanvasRect!.bottom - subRectHeight,
-      );
-    }
-    return _mainRect;
-  }
-
   /// TimeIndicator区域大小
   @override
   Rect get timeRect {
-    final timeConfig = _paintObjectManager.timeRectConfig;
-    if (timeConfig == null) return Rect.zero;
-    final subRect = this.subRect;
-    if (timeConfig.position == DrawPosition.middle) {
-      return Rect.fromLTWH(
-        subRect.left,
-        subRect.top,
-        subRect.width,
-        timeConfig.height,
-      );
-    } else if (timeConfig.position == DrawPosition.bottom) {
-      return Rect.fromLTWH(
-        subRect.left,
-        subRect.bottom - timeConfig.height,
-        subRect.width,
-        timeConfig.height,
-      );
-    }
-    return Rect.zero;
+    return _paintObjectManager.timePaintObject.drawableRect;
   }
 
   /// 主区域最小宽高
@@ -175,24 +131,15 @@ mixin SettingBinding on KlineBindingBase
   /// 主区域大小设置
   void setMainSize(Size size) {
     if (isFixedSizeMode) return;
-    // TODO: 优化: 考虑将_mainRect移至mainPaintObject管理.
-    // settingConfig.setMainRect(size);
-    if (size.width != _mainRect.width || size.height != _mainRect.height) {
-      _mainRect = Rect.fromLTWH(
-        _mainRect.left,
-        _mainRect.top,
-        size.width,
-        size.height,
-      );
-      final changed = mainPaintObject.updateLayout(height: size.height);
+    if (size != mainPaintObject.size) {
+      final changed = mainPaintObject.doUpdateLayout(size: size);
       _invokeSizeChanged(force: changed);
     }
   }
 
-  /// 适配[FlexiKlineWidget]所在布局的变化
-  ///
-  /// 注: 目前仅考虑适配宽度的变化.
-  ///   这将会导致无法手动调整[FlexiKlineWidget]的宽度.
+  /// 自适应[FlexiKlineWidget]所在父组件的布局的变化
+  /// 注: 目前仅主区的宽度会适配父组件宽度的变化
+  /// 这主要是通过[FlexiKlineWidget]的autoAdaptLayout配置决定, 并会导致无法手动调整[FlexiKlineWidget]的宽度.
   void adaptLayoutChange(Size size) {
     if (size.width != mainRect.width) {
       setMainSize(Size(size.width, mainRect.height));
@@ -200,10 +147,11 @@ mixin SettingBinding on KlineBindingBase
   }
 
   void exitFixedSizeMode() {
-    if (!isFixedSizeMode) return;
+    if (_fixedCanvasRect == null) return;
 
     _fixedCanvasRect = null;
-    final changed = mainPaintObject.updateLayout(height: _mainRect.height);
+    final changed = mainPaintObject.doUpdateLayout(size: _mainSize);
+    _mainSize = null;
     _invokeSizeChanged(force: changed);
   }
 
@@ -217,9 +165,19 @@ mixin SettingBinding on KlineBindingBase
       return;
     }
 
+    _mainSize ??= mainPaintObject.size;
     _fixedCanvasRect = Rect.fromLTRB(0, 0, size.width, size.height);
-    final changed = mainPaintObject.updateLayout(height: mainRect.height);
+    final changed = mainPaintObject.doUpdateLayout(size: size);
     _invokeSizeChanged(force: changed);
+  }
+
+  @protected
+  double get subRectHeight {
+    double totalHeight = 0.0;
+    for (final indicator in subPaintObjects) {
+      totalHeight += indicator.height;
+    }
+    return totalHeight;
   }
 
   /// 主图区域大小
@@ -287,28 +245,6 @@ mixin SettingBinding on KlineBindingBase
   /// 绘制区域宽度内, 可绘制的蜡烛数
   int get maxCandleCount => (mainChartWidth / candleActualWidth).ceil();
 
-  /// 时间刻度指标配置
-  @override
-  ITimeRectConfig? get timeRectConfig {
-    return _paintObjectManager.timeRectConfig;
-  }
-
-  // /// 注册主区指标配置构造器
-  // void registerMainIndicatorBuilder(
-  //   IIndicatorKey key,
-  //   IndicatorBuilder<SinglePaintObjectIndicator> builder,
-  // ) {
-  //   _paintObjectManager.registerMainIndicatorBuilder(key, builder);
-  // }
-
-  // /// 注册副区指标配置构造器
-  // void registerSubIndicatorBuilder<T extends Indicator>(
-  //   IIndicatorKey key,
-  //   IndicatorBuilder<SinglePaintObjectIndicator> builder,
-  // ) {
-  //   _paintObjectManager.registerSubIndicatorBuilder(key, builder);
-  // }
-
   Iterable<IIndicatorKey> get supportMainIndicatorKeys {
     return _paintObjectManager.supportMainIndicatorKeys;
   }
@@ -326,7 +262,7 @@ mixin SettingBinding on KlineBindingBase
   }
 
   @override
-  MultiPaintObjectBox get mainPaintObject {
+  MainPaintObject get mainPaintObject {
     return _paintObjectManager.mainPaintObject;
   }
 
@@ -335,6 +271,7 @@ mixin SettingBinding on KlineBindingBase
     return _paintObjectManager.subPaintObjects;
   }
 
+  @Deprecated('废弃的')
   @override
   int? getDataIndex(IIndicatorKey key) {
     return _paintObjectManager.getIndicatorDataIndex(key);
@@ -342,19 +279,6 @@ mixin SettingBinding on KlineBindingBase
 
   @override
   int get indicatorCount => _paintObjectManager.indicatorCount;
-
-  /// 更新主区指标的布局参数
-  bool _updateMainPaintObjectLayoutParam({
-    double? height,
-    EdgeInsets? padding,
-  }) {
-    bool changed = mainPaintObject.updateLayout(
-      height: height,
-      padding: padding,
-      // reset: true,
-    );
-    return changed;
-  }
 
   @override
   double calculateIndicatorTop(int slot) {
@@ -366,15 +290,6 @@ mixin SettingBinding on KlineBindingBase
       }
     }
     return top;
-  }
-
-  @protected
-  double get subRectHeight {
-    double totalHeight = 0.0;
-    for (final indicator in subPaintObjects) {
-      totalHeight += indicator.height;
-    }
-    return totalHeight;
   }
 
   /// 在主图中添加指标

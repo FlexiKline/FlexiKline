@@ -28,7 +28,7 @@ void main() {
   final stopwatch = Stopwatch();
   final configuration = TestFlexiKlineConfiguration();
   final controller = FlexiKlineController(configuration: configuration);
-  late SinglePaintObjectIndicator maIndicator;
+  late PaintObjectIndicator maIndicator;
   final canvas = Canvas(PictureRecorder());
   const mainSize = Size(400, 300);
   int start = 50;

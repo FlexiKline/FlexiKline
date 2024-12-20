@@ -37,6 +37,7 @@ abstract class IndicatorObject<T extends Indicator>
   int get zIndex => _indicator.zIndex;
   dynamic get calcParams => _indicator.calcParam;
 
+  // TODO: 将其移至[manager]创建时.
   int? _dataIndex;
   // 注: 如果PaintObject被创建了, 其DataIndex必然有值.
   int get dataIndex => _dataIndex ??= _context.getDataIndex(indicator.key)!;
@@ -93,9 +94,9 @@ abstract class PaintObject<T extends Indicator> extends IndicatorObject
 
 /// PaintObjectBox
 /// 通过混入边界计算与数据初始化计算, 简化PaintObject接口.
-abstract class SinglePaintObjectBox<T extends SinglePaintObjectIndicator>
+abstract class PaintObjectBox<T extends PaintObjectIndicator>
     extends PaintObject {
-  SinglePaintObjectBox({
+  PaintObjectBox({
     required super.context,
     required T super.indicator,
   });
@@ -104,14 +105,12 @@ abstract class SinglePaintObjectBox<T extends SinglePaintObjectIndicator>
   T get indicator => super.indicator as T;
 }
 
-/// 多个[PaintObject]组合绘制
-/// 主要实现接口遍历转发.
-class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
+/// 主区绘制对象
+final class MainPaintObject<T extends MainPaintObjectIndicator>
     extends PaintObject {
-  MultiPaintObjectBox({
+  MainPaintObject({
     required super.context,
     required T super.indicator,
-    // Iterable<T> children = const [],
   })  : children = SortableHashSet<PaintObject>.from([]),
         _initialPadding = indicator.padding;
 
@@ -126,73 +125,13 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
 
   bool get drawBelowTipsArea => indicator.drawBelowTipsArea;
 
-  /// 当前[tipsHeight]是否需要更新布局参数
-  bool _needUpdateLayout(double tipsHeight) {
-    return _initialPadding.top + tipsHeight != padding.top;
-  }
+  Size get size => indicator.size;
 
-  @nonVirtual
   @override
-  bool updateLayout({
-    double? height,
-    EdgeInsets? padding,
-    bool reset = false,
-    double? tipsHeight,
-  }) {
-    if (drawBelowTipsArea && tipsHeight != null) {
-      // 如果tipsHeight不为空, 说明是绘制过程中动态调整, 只需要在MultiPaintObjectIndicator原padding基础上增加即可.
-      padding = _initialPadding.copyWith(
-        top: _initialPadding.top + tipsHeight,
-      );
-    }
-    bool hasChange = super.updateLayout(
-      height: height,
-      padding: padding,
-      reset: reset,
-    );
-    for (var object in children) {
-      final childChange = object.updateLayout(
-        height: object.paintMode.isCombine ? this.height : null,
-        padding: object.paintMode.isCombine ? this.padding : null,
-        reset: reset,
-      );
-      hasChange = hasChange || childChange;
-    }
-    return hasChange;
+  Rect get drawableRect {
+    return _drawableRect ??= Rect.fromLTWH(0, 0, size.width, size.height);
   }
 
-  void appendPaintObjects(Iterable<PaintObject> objects) {
-    for (var object in objects) {
-      appendPaintObject(object);
-    }
-  }
-
-  void appendPaintObject(PaintObject object) {
-    // 使用前先解绑: 释放[paintObject]parentObject与数据.
-    object.dispose();
-    object._parent = this;
-    object.updateLayout(
-      height: object.paintMode.isCombine ? height : null,
-      padding: object.paintMode.isCombine ? padding : null,
-    );
-    final old = children.append(object);
-    old?.dispose();
-  }
-
-  bool deletePaintObject(IIndicatorKey key) {
-    bool hasRemove = false;
-    children.removeWhere((object) {
-      if (object.key == key) {
-        object.dispose();
-        hasRemove = true;
-        return true;
-      }
-      return false;
-    });
-    return hasRemove;
-  }
-
-  @nonVirtual
   @override
   void precompute(Range range, {bool reset = false}) {
     for (var object in children) {
@@ -218,12 +157,10 @@ class MultiPaintObjectBox<T extends MultiPaintObjectIndicator>
     Offset? offset,
     Rect? tipsRect,
   }) {
-    // return Size(topRect.width, nextTipsRect.top - topRect.top);
     return topRect.size;
   }
 
   @override
-  @mustCallSuper
   void dispose() {
     for (var object in children) {
       object.dispose();

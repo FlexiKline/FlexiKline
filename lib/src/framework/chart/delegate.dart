@@ -15,6 +15,27 @@
 part of 'indicator.dart';
 
 extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
+  /// 更新布布局参数
+  bool doUpdateLayout({
+    double? height,
+    EdgeInsets? padding,
+    bool reset = false,
+  }) {
+    bool hasChange = false;
+    if (height != null && height > 0 && height != indicator.height) {
+      _indicator.height = height;
+      hasChange = true;
+    }
+
+    if (padding != null && padding != indicator.padding) {
+      _indicator.padding = padding;
+      hasChange = true;
+    }
+
+    if (reset || hasChange) resetPaintBounding();
+    return reset || hasChange;
+  }
+
   MinMax? doInitState(
     int newSlot, {
     required int start,
@@ -32,6 +53,7 @@ extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
       _end = end;
     }
 
+    // TODO: 如果start与end未发生变化, 则蜡烛数据未更新时, 可不用执行initState计算操作. 暂不优化此项, 待数据计算优化完成再考虑.
     _minMax = null;
     final ret = initState(start, end);
     if (ret != null) {
@@ -68,14 +90,55 @@ extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
   }
 }
 
-extension MultiPaintDelegateExt<T extends MultiPaintObjectIndicator>
-    on MultiPaintObjectBox<T> {
+extension MultiPaintDelegateExt on MainPaintObject {
   void setMinMax(MinMax val) {
     if (_minMax == null) {
       _minMax = val;
     } else {
       _minMax!.updateMinMax(val);
     }
+  }
+
+  /// 当前[tipsHeight]是否需要更新布局参数
+  bool _needUpdateLayout(double tipsHeight) {
+    return drawBelowTipsArea && _initialPadding.top + tipsHeight != padding.top;
+  }
+
+  bool doUpdateLayout({
+    Size? size,
+    EdgeInsets? padding,
+    bool reset = false,
+    double? tipsHeight,
+  }) {
+    if (drawBelowTipsArea && tipsHeight != null) {
+      // 如果tipsHeight不为空, 说明是绘制过程中动态调整, 只需要在MultiPaintObjectIndicator原padding基础上增加即可.
+      padding = _initialPadding.copyWith(
+        top: _initialPadding.top + tipsHeight,
+      );
+    }
+
+    bool hasChange = false;
+    if (padding != null && padding != indicator.padding) {
+      indicator.padding == padding;
+      hasChange = true;
+    }
+    if (size != null && size != indicator.size) {
+      indicator._size = size;
+      indicator.height = size.height;
+      hasChange = true;
+    }
+
+    for (var object in children) {
+      final childChange = object.doUpdateLayout(
+        height: object.paintMode.isCombine ? height : null,
+        padding: object.paintMode.isCombine ? padding : null,
+        reset: reset,
+      );
+      hasChange = hasChange || childChange;
+    }
+
+    if (reset || hasChange) resetPaintBounding();
+    return reset || hasChange;
   }
 
   MinMax? doInitState(
@@ -128,7 +191,7 @@ extension MultiPaintDelegateExt<T extends MultiPaintObjectIndicator>
         );
 
         if (_needUpdateLayout(tipsHeight)) {
-          updateLayout(tipsHeight: tipsHeight);
+          doUpdateLayout(tipsHeight: tipsHeight);
         }
       }
       for (var object in children) {
@@ -154,7 +217,7 @@ extension MultiPaintDelegateExt<T extends MultiPaintObjectIndicator>
         final tipsHeight = doPaintTips(canvas, offset: offset, model: model);
 
         if (_needUpdateLayout(tipsHeight)) {
-          updateLayout(tipsHeight: tipsHeight);
+          doUpdateLayout(tipsHeight: tipsHeight);
         }
       }
       for (var object in children) {
@@ -183,5 +246,40 @@ extension MultiPaintDelegateExt<T extends MultiPaintObjectIndicator>
       if (size != null) height += size.height;
     }
     return height;
+  }
+}
+
+extension MainPaintObjectManagerExt<T extends MainPaintObjectIndicator>
+    on MainPaintObject<T> {
+  void appendPaintObjects(Iterable<PaintObject> objects) {
+    for (var object in objects) {
+      appendPaintObject(object);
+    }
+  }
+
+  void appendPaintObject(PaintObject object) {
+    // 使用前先解绑: 释放[paintObject]parentObject与数据.
+    object.dispose();
+    object._parent = this;
+    // 重置object布局参数为MainPaintObject的
+    object.doUpdateLayout(
+      height: object.paintMode.isCombine ? height : null,
+      padding: object.paintMode.isCombine ? padding : null,
+    );
+    final old = children.append(object);
+    old?.dispose();
+  }
+
+  bool deletePaintObject(IIndicatorKey key) {
+    bool hasRemove = false;
+    children.removeWhere((object) {
+      if (object.key == key) {
+        object.dispose();
+        hasRemove = true;
+        return true;
+      }
+      return false;
+    });
+    return hasRemove;
   }
 }

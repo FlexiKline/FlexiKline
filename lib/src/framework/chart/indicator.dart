@@ -22,6 +22,7 @@ import '../../config/export.dart';
 import '../../core/core.dart';
 import '../../data/kline_data.dart';
 import '../../extension/export.dart';
+import '../../indicators/time/time.dart';
 import '../../model/export.dart';
 import '../../utils/decimal_format_util.dart';
 import '../collection/fixed_hash_queue.dart';

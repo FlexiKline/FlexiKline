@@ -40,8 +40,8 @@ const EdgeInsets defaultMainIndicatorPadding = EdgeInsets.only(
 );
 
 // 默认主图区域最小Size
-const Size defaultMainRectMinSize = Size(20, 20);
-const Rect defaultCanvasRectMinRect = Rect.fromLTWH(0, 0, 20, 20);
+// const Size defaultMainRectMinSize = Size(20, 20);
+// const Rect defaultCanvasRectMinRect = Rect.fromLTWH(0, 0, 20, 20);
 
 // 默认副图指标最大数量
 const int defaultSubChartMaxCount = 4;

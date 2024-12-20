@@ -123,13 +123,12 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
         // 计算排除时间指标后的top和bottom
         double top = subTop;
         double bottom = subBottom;
-        final timeConfig = timeRectConfig;
-        if (timeConfig != null) {
-          if (timeConfig.position == DrawPosition.bottom) {
-            bottom -= timeConfig.height;
-          } else if (timeConfig.position == DrawPosition.middle) {
-            top += timeConfig.height;
-          }
+        final timeIndicator = _paintObjectManager.timePaintObject.indicator;
+        switch (timeIndicator.position) {
+          case DrawPosition.middle:
+            top += timeIndicator.height;
+          case DrawPosition.bottom:
+            bottom -= timeIndicator.height;
         }
 
         // 绘制主区/副区的Vertical线
@@ -196,6 +195,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
   }
 
   /// 更新
+  /// TODO: 待适配MainPaintObject的delegate改变.
   void onGridMoveUpdate(GestureData data) {
     if (!isStartDragGrid) return;
 
@@ -214,18 +214,18 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
 
         if (isMainIndicator) {
           setMainSize(Size(canvasWidth, upHeight));
-          _downObject?.updateLayout(height: height);
+          _downObject?.doUpdateLayout(height: height);
           markRepaintChart(reset: true);
         } else {
-          _upObject?.updateLayout(height: upHeight);
-          _downObject?.updateLayout(height: height);
+          _upObject?.doUpdateLayout(height: upHeight);
+          _downObject?.doUpdateLayout(height: height);
           markRepaintChart();
         }
       } else {
         if (isMainIndicator) {
           setMainSize(Size(canvasWidth, upHeight));
         } else {
-          _upObject?.updateLayout(height: upHeight);
+          _upObject?.doUpdateLayout(height: upHeight);
           // downObject为空说明在最底部的副区指标, 此时向下移动需要调整整个绘制区域高度
           _invokeSizeChanged();
         }

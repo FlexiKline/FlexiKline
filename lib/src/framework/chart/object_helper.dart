@@ -51,29 +51,6 @@ mixin PaintObjectBoundingMixin on IndicatorObject implements IPaintBoundingBox {
   Rect? _topRect;
   Rect? _bottomRect;
 
-  /// 更新布布局参数
-  @override
-  bool updateLayout({
-    double? height,
-    EdgeInsets? padding,
-    bool reset = false,
-  }) {
-    bool hasChange = false;
-    if (height != null && height > 0 && height != indicator.height) {
-      _indicator.height = height;
-      hasChange = true;
-    }
-
-    if (padding != null && padding != indicator.padding) {
-      _indicator.padding = padding;
-      hasChange = true;
-    }
-    if (reset || hasChange) {
-      resetPaintBounding();
-    }
-    return reset || hasChange;
-  }
-
   @nonVirtual
   @override
   void resetPaintBounding({int? slot}) {
@@ -208,8 +185,8 @@ mixin PaintObjectDataInitMixin on IndicatorObject implements IPaintDataInit {
 }
 
 /// 绘制当前图表在Y轴上的刻度值
-mixin PaintYAxisTicksMixin<T extends SinglePaintObjectIndicator>
-    on SinglePaintObjectBox<T> {
+mixin PaintYAxisTicksMixin<T extends PaintObjectIndicator>
+    on PaintObjectBox<T> {
   /// 为副区的指标图绘制Y轴上的刻度信息
   @protected
   void paintYAxisTicks(
@@ -267,8 +244,8 @@ mixin PaintYAxisTicksMixin<T extends SinglePaintObjectIndicator>
 }
 
 /// 当Cross事件发生时, 在Y轴上的绘制crossing相应的刻度值
-mixin PaintYAxisTicksOnCrossMixin<T extends SinglePaintObjectIndicator>
-    on SinglePaintObjectBox<T> {
+mixin PaintYAxisTicksOnCrossMixin<T extends PaintObjectIndicator>
+    on PaintObjectBox<T> {
   /// onCross时, 绘制Y轴上的刻度值
   @protected
   void paintYAxisTicksOnCross(
@@ -308,8 +285,8 @@ mixin PaintYAxisTicksOnCrossMixin<T extends SinglePaintObjectIndicator>
 
 /// 绘制简易蜡烛图
 /// 主要用于SubBoll图和SubSar图中
-mixin PaintSimpleCandleMixin<T extends SinglePaintObjectIndicator>
-    on SinglePaintObjectBox<T> {
+mixin PaintSimpleCandleMixin<T extends PaintObjectIndicator>
+    on PaintObjectBox<T> {
   void paintSimpleCandleChart(
     Canvas canvas,
     Size size, {
@@ -370,8 +347,8 @@ extension PaintObjectExt on PaintObject {
   }
 }
 
-extension MultiPaintObjectBoxExt on MultiPaintObjectBox {
-  /// 收集[MultiPaintObjectBox]中子指标的计算参数
+extension MultiPaintObjectBoxExt on MainPaintObject {
+  /// 收集[MainPaintObject]中子指标的计算参数
   Map<IIndicatorKey, dynamic> getCalcParams() {
     final params = <IIndicatorKey, dynamic>{};
     for (var object in children) {

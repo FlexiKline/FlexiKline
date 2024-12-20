@@ -26,7 +26,7 @@ void main() {
   late FlexiKlineController controller;
   late CandleReq req;
   const mainSize = Size(400, 300);
-  late MultiPaintObjectIndicator mainIndicator;
+  late MainPaintObjectIndicator mainIndicator;
 
   setUpAll(() async {
     debugPrint('setUpAll');

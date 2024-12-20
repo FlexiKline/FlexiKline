@@ -16,12 +16,10 @@ part of 'indicator.dart';
 
 /// [PaintObject]管理
 /// 主要负责:
-/// 1. 初始加载Kline时从配置中根据Indicator配置实例化[PaintObject].
-/// 2. 将当前Kline的PaintObject关联Indicator持久化到本地
-/// 3. 为ChartController提供待绘制的[PaintObject]列表.
-/// 4. 管理主区与副区[PaintObject]的顺序/切换/更新/
-/// 5. 管理所有[Indicator]配置, 当发生更新时重建[PaintObject]
-/// 6. 提供定制[Indicator]的定制功能
+/// 1. 根据配置初始化指标绘制对象.
+/// 2. 管理所有指标构造器
+/// 3. 负责指标对象的创建/销毁
+/// 4. 管理副图指标绘制对象队列
 final class IndicatorPaintObjectManager with KlineLog {
   IndicatorPaintObjectManager({
     required this.configuration,
@@ -42,31 +40,24 @@ final class IndicatorPaintObjectManager with KlineLog {
     // timeIndicatorKey: 1,
   };
 
-  late final MultiPaintObjectBox _mainPaintObject;
-
   late final FixedHashQueue<PaintObject> _subPaintObjectQueue;
 
-  PaintObject? _timePaintObject;
+  late final MainPaintObject _mainPaintObject;
 
-  ITimeRectConfig? get timeRectConfig {
-    if (_timePaintObject != null && _timePaintObject is ITimeRectConfig) {
-      return _timePaintObject as ITimeRectConfig;
-    }
-    return null;
-  }
+  late final TimePaintObject _timePaintObject;
 
-  MultiPaintObjectBox get mainPaintObject => _mainPaintObject;
+  MainPaintObject get mainPaintObject => _mainPaintObject;
+
+  TimePaintObject get timePaintObject => _timePaintObject;
 
   Iterable<PaintObject> get subPaintObjects {
     final objects = _subPaintObjectQueue;
-    if (_timePaintObject != null && timeRectConfig != null) {
-      if (timeRectConfig!.position == DrawPosition.bottom) {
-        return [...objects, _timePaintObject!];
-      } else if (timeRectConfig!.position == DrawPosition.middle) {
-        return [_timePaintObject!, ...objects];
-      }
+    switch (timePaintObject.position) {
+      case DrawPosition.middle:
+        return [...objects, _timePaintObject];
+      case DrawPosition.bottom:
+        return [_timePaintObject, ...objects];
     }
-    return objects;
   }
 
   /// 主区指标配置构造器
@@ -100,6 +91,7 @@ final class IndicatorPaintObjectManager with KlineLog {
     _mainIndicatorBuilders[key] = builder;
     _supportMainIndicatorKeys = null;
     if (!_indicatorDataIndexs.containsKey(key)) {
+      logi('registerMainIndicatorBuilder $key:${_indicatorDataIndexs.length}');
       _indicatorDataIndexs[key] = _indicatorDataIndexs.length;
     }
   }
@@ -111,6 +103,7 @@ final class IndicatorPaintObjectManager with KlineLog {
     _subIndicatorBuilders[key] = builder;
     _supportSubIndicatorKeys = null;
     if (!_indicatorDataIndexs.containsKey(key)) {
+      logi('registerSubIndicatorBuilder $key:${_indicatorDataIndexs.length}');
       _indicatorDataIndexs[key] = _indicatorDataIndexs.length;
     }
   }
@@ -127,7 +120,7 @@ final class IndicatorPaintObjectManager with KlineLog {
   /// 3. 从配置中加载缓存的主/副区指标.
   void init(
     IPaintContext context, {
-    required MultiPaintObjectIndicator mainIndicator,
+    required MainPaintObjectIndicator mainIndicator,
     Set<IIndicatorKey> initMainIndicatorKeys = const {},
     Set<IIndicatorKey> initSubIndicatorKeys = const {},
   }) {
@@ -143,18 +136,12 @@ final class IndicatorPaintObjectManager with KlineLog {
     }
 
     /// 构造主区/副区
-    _mainPaintObject = MultiPaintObjectBox(
+    _mainPaintObject = MainPaintObject(
       context: context,
       indicator: mainIndicator,
-      // indicator: MultiPaintObjectIndicator(
-      //   key: mainIndicatorKey,
-      //   height: context.settingConfig.mainRect.height,
-      //   padding: context.settingConfig.mainPadding,
-      //   drawBelowTipsArea: context.settingConfig.mainDrawBelowTipsArea,
-      // ),
     );
 
-    _subPaintObjectQueue = FixedHashQueue<SinglePaintObjectBox>(
+    _subPaintObjectQueue = FixedHashQueue<PaintObjectBox>(
       context.settingConfig.subChartMaxCount,
     );
 
@@ -288,7 +275,7 @@ final class IndicatorPaintObjectManager with KlineLog {
 
   void dispose() {
     mainPaintObject.dispose();
-    _timePaintObject?.dispose();
+    // _timePaintObject.dispose();
     for (var indicator in subPaintObjects) {
       indicator.dispose();
     }

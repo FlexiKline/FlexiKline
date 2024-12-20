@@ -15,9 +15,8 @@ FlexiKlineConfig _$FlexiKlineConfigFromJson(Map<String, dynamic> json) =>
       cross: CrossConfig.fromJson(json['cross'] as Map<String, dynamic>),
       draw: DrawConfig.fromJson(json['draw'] as Map<String, dynamic>),
       tooltip: TooltipConfig.fromJson(json['tooltip'] as Map<String, dynamic>),
-      mainIndicator:
-          MultiPaintObjectIndicator<SinglePaintObjectIndicator>.fromJson(
-              json['mainIndicator'] as Map<String, dynamic>),
+      mainIndicator: MainPaintObjectIndicator<PaintObjectIndicator>.fromJson(
+          json['mainIndicator'] as Map<String, dynamic>),
       main: json['main'] == null
           ? const <IIndicatorKey>{}
           : const SetIndicatorKeyConverter().fromJson(json['main'] as List),

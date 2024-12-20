@@ -46,7 +46,7 @@ class FlexiKlineConfig {
   CrossConfig cross;
   DrawConfig draw;
   TooltipConfig tooltip;
-  MultiPaintObjectIndicator mainIndicator;
+  MainPaintObjectIndicator mainIndicator;
   Set<IIndicatorKey> main;
   Set<IIndicatorKey> sub;
 
