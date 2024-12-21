@@ -89,13 +89,6 @@ typedef IndicatorBuilder<T extends Indicator> = T Function(
   SettingConfig setting,
 );
 
-/// 时间绘制对象参数
-abstract interface class ITimePaintParam {
-  double get height;
-  DrawPosition get position;
-  Rect get drawableRect;
-}
-
 const mainIndicatorKey = FlexiIndicatorKey('main', label: 'Main');
 const candleIndicatorKey = FlexiIndicatorKey('candle', label: 'Candle');
 const timeIndicatorKey = FlexiIndicatorKey('time', label: 'Time');

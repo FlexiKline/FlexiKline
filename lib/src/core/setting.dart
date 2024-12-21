@@ -121,7 +121,7 @@ mixin SettingBinding on KlineBindingBase
   /// TimeIndicator区域大小
   @override
   Rect get timeRect {
-    return _paintObjectManager.timePaintParam.drawableRect;
+    return timePaintObject.drawableRect;
   }
 
   /// 主区域最小宽高

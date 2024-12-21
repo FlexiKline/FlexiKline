@@ -123,12 +123,11 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
         // 计算排除时间指标后的top和bottom
         double top = subTop;
         double bottom = subBottom;
-        final timeParam = _paintObjectManager.timePaintParam;
-        switch (timeParam.position) {
+        switch (timePaintObject.position) {
           case DrawPosition.middle:
-            top += timeParam.height;
+            top += timePaintObject.height;
           case DrawPosition.bottom:
-            bottom -= timeParam.height;
+            bottom -= timePaintObject.height;
         }
 
         // 绘制主区/副区的Vertical线

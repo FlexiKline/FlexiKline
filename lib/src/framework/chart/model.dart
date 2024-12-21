@@ -65,7 +65,7 @@ abstract class PaintObjectIndicator extends Indicator {
   });
 
   @override
-  PaintObjectBox createPaintObject(covariant IPaintContext context);
+  PaintObject createPaintObject(covariant IPaintContext context);
 }
 
 /// MainIndicator的配置.

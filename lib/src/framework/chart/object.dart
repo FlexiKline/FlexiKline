@@ -105,6 +105,20 @@ abstract class PaintObjectBox<T extends PaintObjectIndicator>
   T get indicator => super.indicator as T;
 }
 
+/// 时间轴指标绘制对象
+abstract class TimePaintObjectBox<T extends PaintObjectIndicator>
+    extends PaintObjectBox {
+  TimePaintObjectBox({
+    required super.context,
+    required T super.indicator,
+  });
+
+  DrawPosition get position;
+
+  @override
+  T get indicator => super.indicator as T;
+}
+
 /// 主区绘制对象
 final class MainPaintObject<T extends MainPaintObjectIndicator>
     extends PaintObject {
