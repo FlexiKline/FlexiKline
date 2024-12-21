@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import '../config/gesture_config/gesture_config.dart';
@@ -45,6 +46,9 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
     with TickerProviderStateMixin, KlineLog {
   AnimationController? animationController;
 
+  // focus node to capture keyboard events
+  final FocusNode _keyboardFocusNode = FocusNode();
+
   /// 缩放监听数据
   GestureData? _scaleData;
 
@@ -70,17 +74,52 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
   void initState() {
     super.initState();
     loggerDelegate = controller.loggerDelegate;
+    if (gestureConfig.supportKeyboardShortcuts) {
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+        controller.drawStateListener.addListener(() {
+          switch (drawState) {
+            case Drawing():
+              if (!_keyboardFocusNode.hasFocus) {
+                _keyboardFocusNode.requestFocus();
+              }
+            case Editing():
+              if (!_keyboardFocusNode.hasFocus) {
+                _keyboardFocusNode.requestFocus();
+              }
+            case Prepared():
+              FocusManager.instance.primaryFocus?.unfocus();
+            case Exited():
+              FocusManager.instance.primaryFocus?.unfocus();
+          }
+        });
+      });
+    }
   }
 
   @override
   void dispose() {
+    _keyboardFocusNode.dispose();
     animationController?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (gestureConfig.supportKeyboardShortcuts) {
+      return KeyboardListener(
+        key: const ValueKey('NonTouchKeyboradListener'),
+        focusNode: _keyboardFocusNode,
+        autofocus: false, // 后续支持更多组合按键时, 再考虑放开
+        onKeyEvent: onKeyEvent,
+        child: buildGestureDetectorView(context),
+      );
+    }
+    return buildGestureDetectorView(context);
+  }
+
+  Widget buildGestureDetectorView(BuildContext context) {
     return Listener(
+      key: const ValueKey('NonTouchListener'),
       behavior: HitTestBehavior.translucent,
 
       /// 鼠标设备滚轴滚动进行缩放,
@@ -649,5 +688,17 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
 
   void onPointerCancel(PointerCancelEvent event) {
     logd('onPointerCancel $event');
+  }
+
+  void onKeyEvent(KeyEvent event) {
+    if (event is KeyUpEvent) {
+      if (event.logicalKey == LogicalKeyboardKey.escape) {
+        // ESC按键
+        logd('onKeyEvent > ESC');
+        if (drawState.isOngoing) {
+          controller.prepareDraw(force: true);
+        }
+      }
+    }
   }
 }

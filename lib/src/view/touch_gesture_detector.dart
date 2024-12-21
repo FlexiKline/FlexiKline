@@ -81,6 +81,7 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
   @override
   Widget build(BuildContext context) {
     return Listener(
+      key: const ValueKey('TouchListener'),
       behavior: HitTestBehavior.translucent,
       // onPointerDown: onPointerDown,
       onPointerMove: onPointerMove,

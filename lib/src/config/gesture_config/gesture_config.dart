@@ -38,6 +38,7 @@ class GestureConfig {
     this.loadMoreWhenNoEnoughCandles = 60,
     this.scalePosition = ScalePosition.auto,
     double scaleSpeed = 10,
+    this.supportKeyboardShortcuts = true,
   })  : tolerance = tolerance ?? ToleranceConfig(),
         scaleSpeed = scaleSpeed.clamp(1, 30);
 
@@ -61,6 +62,9 @@ class GestureConfig {
 
   /// 缩放速度. 取值范围[1~30], 建议10.
   final double scaleSpeed;
+
+  /// 是否支持键盘操作
+  final bool supportKeyboardShortcuts;
 
   factory GestureConfig.fromJson(Map<String, dynamic> json) =>
       _$GestureConfigFromJson(json);

@@ -110,9 +110,10 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw {
   @override
   MagnetMode get drawMagnet => drawMagnetModeListener.value;
 
-  void prepareDraw() {
+  void prepareDraw({bool force = false}) {
     // 如果是非退出状态, 则无需变更状态.
-    if (!drawState.isExited) return;
+    if (!force && !drawState.isExited) return;
+    drawState.object?.dispose();
     _drawState = const Prepared();
     _markRepaintDraw();
   }
