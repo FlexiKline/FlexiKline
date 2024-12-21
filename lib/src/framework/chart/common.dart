@@ -76,6 +76,11 @@ final class FlexiIndicatorKey implements IIndicatorKey {
   int get hashCode {
     return runtimeType.hashCode ^ id.hashCode;
   }
+
+  @override
+  String toString() {
+    return '$id:$label';
+  }
 }
 
 const unknownIndicatorKey = FlexiIndicatorKey('unknown');

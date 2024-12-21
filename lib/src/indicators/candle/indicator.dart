@@ -163,9 +163,7 @@ class CandlePaintObject<T extends CandleIndicator> extends PaintObjectBox<T>
       canvas.drawLine(
         highOff,
         lowOff,
-        isLong
-            ? settingConfig.defLongLinePaint
-            : settingConfig.defShortLinePaint,
+        isLong ? defLongLinePaint : defShortLinePaint,
       );
 
       final openOff = Offset(dx, valueToDy(m.open));
@@ -173,7 +171,7 @@ class CandlePaintObject<T extends CandleIndicator> extends PaintObjectBox<T>
       canvas.drawLine(
         openOff,
         closeOff,
-        isLong ? settingConfig.defLongBarPaint : settingConfig.defShortBarPaint,
+        isLong ? defLongBarPaint : defShortBarPaint,
       );
 
       // if (bar != null && i % timeTickIntervalCount == 0) {
@@ -390,9 +388,7 @@ class CandlePaintObject<T extends CandleIndicator> extends PaintObjectBox<T>
 
       Color? background = textConfig.background;
       if (indicator.useCandleColorAsLatestBg) {
-        background = model.close >= model.open
-            ? settingConfig.longColor
-            : settingConfig.shortColor;
+        background = model.close >= model.open ? longColor : shortColor;
       }
 
       BorderRadius? borderRadius = textConfig.borderRadius;

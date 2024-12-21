@@ -25,7 +25,7 @@ part 'setting_config.g.dart';
 @CopyWith()
 @FlexiConfigSerializable
 class SettingConfig {
-  SettingConfig({
+  const SettingConfig({
     required this.pixel,
 
     /// Long/Short颜色配置
@@ -38,15 +38,17 @@ class SettingConfig {
     required this.loading,
 
     ///  如果不指定默认为设置为20*20的逻辑像素区域.
-    this.mainMinSize = const Size(20, 20),
+    this.mainMinSize = const Size(120, 80),
+    this.subMinHeight = 30,
 
-    /// 主/副图绘制参数
+    /// 蜡烛图绘制配置
     this.minPaintBlankRate = 0.5,
     this.alwaysCalculateScreenOfCandlesIfEnough = false,
     required this.candleMaxWidth,
     required this.candleWidth,
     this.candleFixedSpacing,
     this.candleSpacingParts = 7,
+    required this.candleHollowBarBorderWidth,
     required this.candleLineWidth,
     required this.firstCandleInitOffset,
 
@@ -73,8 +75,10 @@ class SettingConfig {
   /// 内置LoadingView样式配置
   final LoadingConfig loading;
 
-  // 主区域最小大小限制,
+  // 主区指标图的最小大小限制
   final Size mainMinSize;
+  // 副区指标图的最小高度
+  final double subMinHeight;
 
   /// 绘制区域最少留白比例
   /// 例如: 当蜡烛数量不足以绘制一屏, 向右移动到末尾时, 绘制区域左边最少留白区域占可绘制区域(canvasWidth)的比例
@@ -87,14 +91,15 @@ class SettingConfig {
   /// 蜡烛配置
   // 最大蜡烛宽度[1, 50]
   final double candleMaxWidth;
-  // TODO: 待整合, 保持SettingConfig为const
-  // 单根蜡烛宽度
-  double candleWidth;
-  // 固定蜡烛间距
+  // 单根蜡烛柱的宽度
+  final double candleWidth;
+  // 蜡烛间的固定间距
   final double? candleFixedSpacing;
-  // 蜡烛间距按蜡烛宽度平分[candleSpacingParts]份
+  // 蜡烛间的间距按蜡烛宽度平分[candleSpacingParts]份
   final int candleSpacingParts;
-  // 蜡烛线宽(high, low)
+  // 蜡烛空心柱的边框宽度
+  final double candleHollowBarBorderWidth;
+  // 蜡烛高低线宽(high, low)
   final double candleLineWidth;
   // Candle 第一根Candle相对于mainRect右边的偏移
   final double firstCandleInitOffset;
@@ -108,58 +113,24 @@ class SettingConfig {
   // 副区的指标图最大数量
   final int subChartMaxCount;
 
-  /// 蜡烛间距 [candleFixedSpacing] 优先于 [candleSpacingParts]
-  double? _candleSpacing;
-  double get candleSpacing {
-    _candleSpacing = candleFixedSpacing ?? candleWidth / candleSpacingParts;
-    _candleSpacing = _candleSpacing! < pixel ? pixel : _candleSpacing;
-    return _candleSpacing!;
+  bool get isFixedCandleSpacing {
+    return candleFixedSpacing != null && candleFixedSpacing! > pixel;
   }
+
+  int get spacingCandleParts {
+    return candleSpacingParts.clamp(1, candleWidth.toInt());
+  }
+
+  // /// 蜡烛间距 [candleFixedSpacing] 优先于 [candleSpacingParts]
+  // double? _candleSpacing;
+  // double get candleSpacing {
+  //   _candleSpacing = candleFixedSpacing ?? candleWidth / candleSpacingParts;
+  //   _candleSpacing = _candleSpacing! < pixel ? pixel : _candleSpacing;
+  //   return _candleSpacing!;
+  // }
 
   factory SettingConfig.fromJson(Map<String, dynamic> json) =>
       _$SettingConfigFromJson(json);
 
   Map<String, dynamic> toJson() => _$SettingConfigToJson(this);
-}
-
-extension SettingDataExt on SettingConfig {
-  /// 指标图 涨跌 bar/line 配置
-  Color get longTintColor => longColor.withOpacity(opacity);
-  Color get shortTintColor => shortColor.withOpacity(opacity);
-  // 实心
-  Paint get defLongBarPaint => Paint()
-    ..color = longColor
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = candleWidth;
-  Paint get defShortBarPaint => Paint()
-    ..color = shortColor
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = candleWidth;
-  // 实心, 浅色
-  Paint get defLongTintBarPaint => Paint()
-    ..color = longTintColor
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = candleWidth;
-  Paint get defShortTintBarPaint => Paint()
-    ..color = shortTintColor
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = candleWidth;
-  // 空心
-  Paint get defLongHollowBarPaint => Paint()
-    ..color = longColor
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = 1;
-  Paint get defShortHollowBarPaint => Paint()
-    ..color = shortColor
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = 1;
-  // 线
-  Paint get defLongLinePaint => Paint()
-    ..color = longColor
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = candleLineWidth;
-  Paint get defShortLinePaint => Paint()
-    ..color = shortColor
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = candleLineWidth;
 }

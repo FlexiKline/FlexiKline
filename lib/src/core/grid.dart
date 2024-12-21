@@ -164,12 +164,14 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
   }
 
   PaintObject? _upObject, _downObject;
-  bool get isStartDragGrid => gridConfig.allowDrag && _upObject != null;
+  bool get isStartDragGrid {
+    return gridConfig.isAllowDragIndicatorHeight && _upObject != null;
+  }
 
   /// 测试[position]是否命中指标图边界
   bool onGridMoveStart(Offset position) {
     _upObject = _downObject = null;
-    if (!gridConfig.allowDrag) return false;
+    if (!gridConfig.isAllowDragIndicatorHeight) return false;
 
     final dy = position.dy;
     final minDistance = gridConfig.dragHitTestMinDistance;
@@ -203,9 +205,13 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
       // >0 向下移动; <0 向上移动
       final bool isMainIndicator = _upObject is MainPaintObject;
 
-      final subMinHeight = gridConfig.dragChartMinHeight;
+      final subMinHeight = settingConfig.subMinHeight;
       final upHeight = _upObject!.height + deltaDy;
-      if ((upHeight < subMinHeight)) return;
+      if (isMainIndicator && upHeight < mainMinimumHeight) {
+        return;
+      } else if (upHeight < subMinHeight) {
+        return;
+      }
 
       if (_downObject != null) {
         final height = _downObject!.height - deltaDy;

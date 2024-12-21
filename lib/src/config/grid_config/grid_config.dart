@@ -27,9 +27,8 @@ class GridConfig {
     this.show = true,
     this.horizontal = const GridAxis(),
     this.vertical = const GridAxis(),
-    this.allowDrag = true,
+    this.isAllowDragIndicatorHeight = true,
     this.dragHitTestMinDistance = 10,
-    required this.dragChartMinHeight,
     this.dragLine,
   });
 
@@ -38,13 +37,10 @@ class GridConfig {
   final GridAxis vertical;
 
   /// 是否允许通过拖拽Grid线移动指标图表
-  final bool allowDrag;
+  final bool isAllowDragIndicatorHeight;
 
   /// 移动指标图表时, 命中测试的最小距离偏差
   final double dragHitTestMinDistance;
-
-  /// 移动指标图表时图表最小高度
-  final double dragChartMinHeight;
 
   /// 移动指标图表高度时的拖拽线配置
   final LineConfig? dragLine;

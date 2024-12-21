@@ -95,6 +95,8 @@ abstract interface class IPaintContext implements ILogger {
 
   double get candleWidth;
 
+  double get candleSpacing;
+
   double get candleActualWidth;
 
   double get candleWidthHalf;

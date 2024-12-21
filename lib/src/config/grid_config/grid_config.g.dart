@@ -13,11 +13,9 @@ abstract class _$GridConfigCWProxy {
 
   GridConfig vertical(GridAxis vertical);
 
-  GridConfig allowDrag(bool allowDrag);
+  GridConfig isAllowDragIndicatorHeight(bool isAllowDragIndicatorHeight);
 
   GridConfig dragHitTestMinDistance(double dragHitTestMinDistance);
-
-  GridConfig dragChartMinHeight(double dragChartMinHeight);
 
   GridConfig dragLine(LineConfig? dragLine);
 
@@ -31,9 +29,8 @@ abstract class _$GridConfigCWProxy {
     bool? show,
     GridAxis? horizontal,
     GridAxis? vertical,
-    bool? allowDrag,
+    bool? isAllowDragIndicatorHeight,
     double? dragHitTestMinDistance,
-    double? dragChartMinHeight,
     LineConfig? dragLine,
   });
 }
@@ -54,15 +51,12 @@ class _$GridConfigCWProxyImpl implements _$GridConfigCWProxy {
   GridConfig vertical(GridAxis vertical) => this(vertical: vertical);
 
   @override
-  GridConfig allowDrag(bool allowDrag) => this(allowDrag: allowDrag);
+  GridConfig isAllowDragIndicatorHeight(bool isAllowDragIndicatorHeight) =>
+      this(isAllowDragIndicatorHeight: isAllowDragIndicatorHeight);
 
   @override
   GridConfig dragHitTestMinDistance(double dragHitTestMinDistance) =>
       this(dragHitTestMinDistance: dragHitTestMinDistance);
-
-  @override
-  GridConfig dragChartMinHeight(double dragChartMinHeight) =>
-      this(dragChartMinHeight: dragChartMinHeight);
 
   @override
   GridConfig dragLine(LineConfig? dragLine) => this(dragLine: dragLine);
@@ -79,9 +73,8 @@ class _$GridConfigCWProxyImpl implements _$GridConfigCWProxy {
     Object? show = const $CopyWithPlaceholder(),
     Object? horizontal = const $CopyWithPlaceholder(),
     Object? vertical = const $CopyWithPlaceholder(),
-    Object? allowDrag = const $CopyWithPlaceholder(),
+    Object? isAllowDragIndicatorHeight = const $CopyWithPlaceholder(),
     Object? dragHitTestMinDistance = const $CopyWithPlaceholder(),
-    Object? dragChartMinHeight = const $CopyWithPlaceholder(),
     Object? dragLine = const $CopyWithPlaceholder(),
   }) {
     return GridConfig(
@@ -98,21 +91,18 @@ class _$GridConfigCWProxyImpl implements _$GridConfigCWProxy {
           ? _value.vertical
           // ignore: cast_nullable_to_non_nullable
           : vertical as GridAxis,
-      allowDrag: allowDrag == const $CopyWithPlaceholder() || allowDrag == null
-          ? _value.allowDrag
-          // ignore: cast_nullable_to_non_nullable
-          : allowDrag as bool,
+      isAllowDragIndicatorHeight:
+          isAllowDragIndicatorHeight == const $CopyWithPlaceholder() ||
+                  isAllowDragIndicatorHeight == null
+              ? _value.isAllowDragIndicatorHeight
+              // ignore: cast_nullable_to_non_nullable
+              : isAllowDragIndicatorHeight as bool,
       dragHitTestMinDistance:
           dragHitTestMinDistance == const $CopyWithPlaceholder() ||
                   dragHitTestMinDistance == null
               ? _value.dragHitTestMinDistance
               // ignore: cast_nullable_to_non_nullable
               : dragHitTestMinDistance as double,
-      dragChartMinHeight: dragChartMinHeight == const $CopyWithPlaceholder() ||
-              dragChartMinHeight == null
-          ? _value.dragChartMinHeight
-          // ignore: cast_nullable_to_non_nullable
-          : dragChartMinHeight as double,
       dragLine: dragLine == const $CopyWithPlaceholder()
           ? _value.dragLine
           // ignore: cast_nullable_to_non_nullable
@@ -210,10 +200,10 @@ GridConfig _$GridConfigFromJson(Map<String, dynamic> json) => GridConfig(
       vertical: json['vertical'] == null
           ? const GridAxis()
           : GridAxis.fromJson(json['vertical'] as Map<String, dynamic>),
-      allowDrag: json['allowDrag'] as bool? ?? true,
+      isAllowDragIndicatorHeight:
+          json['isAllowDragIndicatorHeight'] as bool? ?? true,
       dragHitTestMinDistance:
           (json['dragHitTestMinDistance'] as num?)?.toDouble() ?? 10,
-      dragChartMinHeight: (json['dragChartMinHeight'] as num).toDouble(),
       dragLine: json['dragLine'] == null
           ? null
           : LineConfig.fromJson(json['dragLine'] as Map<String, dynamic>),
@@ -224,9 +214,8 @@ Map<String, dynamic> _$GridConfigToJson(GridConfig instance) {
     'show': instance.show,
     'horizontal': instance.horizontal.toJson(),
     'vertical': instance.vertical.toJson(),
-    'allowDrag': instance.allowDrag,
+    'isAllowDragIndicatorHeight': instance.isAllowDragIndicatorHeight,
     'dragHitTestMinDistance': instance.dragHitTestMinDistance,
-    'dragChartMinHeight': instance.dragChartMinHeight,
   };
 
   void writeNotNull(String key, dynamic value) {

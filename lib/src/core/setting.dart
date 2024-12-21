@@ -28,6 +28,7 @@ mixin SettingBinding on KlineBindingBase
       initSubIndicatorKeys: _flexiKlineConfig.sub,
     );
     _canvasSizeChangeListener = KlineStateNotifier(canvasRect);
+    _candleWidth = settingConfig.candleWidth;
   }
 
   @override
@@ -42,6 +43,10 @@ mixin SettingBinding on KlineBindingBase
     logd("dispose setting");
     _canvasSizeChangeListener.dispose();
   }
+
+  /// 蜡烛宽度
+  late double _candleWidth;
+  double? _candleSpacing;
 
   /// KlineData整个图表区域大小变化监听器
   late final KlineStateNotifier<Rect> _canvasSizeChangeListener;
@@ -122,9 +127,22 @@ mixin SettingBinding on KlineBindingBase
   /// 主区域最小宽高
   Size get mainMinSize => settingConfig.mainMinSize;
 
+  /// 当前主区最低限制高度
+  double get mainMinimumHeight {
+    return math.max(
+      mainPaintObject.padding.height + settingConfig.subMinHeight,
+      mainMinSize.height,
+    );
+  }
+
   /// 主区域大小设置
   void setMainSize(Size size) {
-    if (isFixedSizeMode || size < mainMinSize) return;
+    if (isFixedSizeMode ||
+        size.width < mainMinSize.width ||
+        size.height < mainMinimumHeight) {
+      return;
+    }
+
     if (size != mainPaintObject.size) {
       final changed = mainPaintObject.doUpdateLayout(size: size);
       _invokeSizeChanged(force: changed);
@@ -154,8 +172,9 @@ mixin SettingBinding on KlineBindingBase
   /// [size] 当前Kline主区+副区的大小.
   /// 注: 设置是临时的, 并不会更新到配置中.
   void entryFixedSizeMode(Size size) {
-    if (size < mainMinSize ||
-        (_fixedCanvasRect != null && _fixedCanvasRect!.size == size)) {
+    if ((_fixedCanvasRect != null && _fixedCanvasRect!.size == size) ||
+        size.width < mainMinSize.width ||
+        size.height < mainMinimumHeight) {
       return;
     }
 
@@ -213,24 +232,38 @@ mixin SettingBinding on KlineBindingBase
 
   /// 最大蜡烛宽度[1, 50]
   double get candleMaxWidth => settingConfig.candleMaxWidth;
-  // set candleMaxWidth(double width) {
-  //   settingConfig.candleMaxWidth = width.clamp(1.0, 50.0);
-  // }
 
   /// 单根蜡烛宽度, 限制范围1[pixel] ~ [candleMaxWidth] 之间
   @override
-  double get candleWidth => settingConfig.candleWidth;
-  @protected
-  set candleWidth(double width) {
-    settingConfig.candleWidth = width.clamp(
-      settingConfig.pixel,
-      candleMaxWidth,
-    );
+  double get candleWidth => _candleWidth;
+  _setCandleWidth(double width, {bool sync = false}) {
+    _candleWidth = width;
+    if (!settingConfig.isFixedCandleSpacing) _candleSpacing = null;
+    if (sync) {
+      settingConfig = settingConfig.copyWith(
+        candleWidth: width.clamp(
+          settingConfig.pixel,
+          candleMaxWidth,
+        ),
+      );
+    }
+  }
+
+  /// 蜡烛间距 [candleFixedSpacing] 优先于 [candleSpacingParts]
+  @override
+  double get candleSpacing {
+    if (settingConfig.isFixedCandleSpacing) {
+      return settingConfig.candleFixedSpacing!;
+    }
+    if (_candleSpacing != null && _candleSpacing! > 0) return _candleSpacing!;
+    _candleSpacing = candleWidth / settingConfig.spacingCandleParts;
+    _candleSpacing!.clamp(settingConfig.pixel, candleWidthHalf);
+    return _candleSpacing!;
   }
 
   /// 单根蜡烛所占据实际宽度
   @override
-  double get candleActualWidth => candleWidth + settingConfig.candleSpacing;
+  double get candleActualWidth => candleWidth + candleSpacing;
 
   /// 单根蜡烛的一半
   @override

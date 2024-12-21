@@ -338,6 +338,7 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
         _panScaleData?.end();
         _panScaleData = null;
       }
+      controller.onChartScaleEnd();
       // 如果是scale操作, 不需要惯性平移, 直接return
       // 为了防止缩放后的平移, 延时结束.
       // Future.delayed(const Duration(milliseconds: 200), () {

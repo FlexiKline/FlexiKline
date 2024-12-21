@@ -231,9 +231,8 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
           ),
         ),
       ),
-      allowDrag: true,
+      isAllowDragIndicatorHeight: true,
       dragHitTestMinDistance: 10 * theme.scale,
-      dragChartMinHeight: theme.subIndicatorHeight / 2,
       dragLine: LineConfig(
         type: LineType.dashed,
         dashes: const [3, 5],
@@ -269,7 +268,8 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       loading: genInnerLoadingConfig(),
 
       /// 主区域最小Size
-      mainMinSize: Size.square(20 * theme.scale),
+      mainMinSize: Size(120 * theme.scale, 80 * theme.scale),
+      subMinHeight: 30 * theme.scale,
 
       /// 主/副图绘制参数
       minPaintBlankRate: 0.5,
@@ -278,6 +278,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       candleWidth: 7 * theme.scale,
       candleSpacingParts: 7,
       candleFixedSpacing: 1 * theme.scale,
+      candleHollowBarBorderWidth: 1 * theme.scale,
       candleLineWidth: 1 * theme.scale,
       firstCandleInitOffset: 80 * theme.scale,
 

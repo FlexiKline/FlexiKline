@@ -192,6 +192,7 @@ mixin ChartBinding
     }
   }
 
+  /// 蜡烛图缩放中...
   void onChartScale(GestureData data) {
     // super.handleScale(data);
 
@@ -217,12 +218,11 @@ mixin ChartBinding
 
     if (newWidth == null || newWidth == candleWidth) return;
 
-    final scaleFactor =
-        (newWidth + settingConfig.candleSpacing) / candleActualWidth;
+    final scaleFactor = (newWidth + candleSpacing) / candleActualWidth;
     // logd('handleScale candleWidth:$candleWidth>$newWidth; factor:$scaleFactor');
 
     /// 更新蜡烛宽度
-    candleWidth = newWidth;
+    _setCandleWidth(newWidth);
 
     double newDxOffset;
     switch (data.initPosition) {
@@ -256,5 +256,10 @@ mixin ChartBinding
 
     markRepaintChart();
     markRepaintDraw();
+  }
+
+  // 蜡烛图缩放结束
+  void onChartScaleEnd() {
+    _setCandleWidth(candleWidth, sync: true);
   }
 }

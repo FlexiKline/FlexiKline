@@ -13,7 +13,8 @@
 // limitations under the License.
 
 import 'dart:math' as math;
-import 'dart:ui';
+
+import 'package:flutter/painting.dart';
 
 import '../utils/vector_util.dart';
 
@@ -167,4 +168,10 @@ extension OffsetExt on Offset {
 
 extension SizeExt on Size {
   bool get nonzero => width > 0 || height > 0;
+}
+
+extension PaddingExt on EdgeInsets {
+  double get height {
+    return top + bottom;
+  }
 }

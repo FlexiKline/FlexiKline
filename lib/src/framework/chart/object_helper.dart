@@ -18,20 +18,72 @@ part of 'indicator.dart';
 extension IndicatorObjectExt on IndicatorObject {
   /// Config
   SettingConfig get settingConfig => _context.settingConfig;
+
   GridConfig get gridConfig => _context.gridConfig;
+
   CrossConfig get crossConfig => _context.crossConfig;
 
-  double get candleActualWidth => _context.candleActualWidth;
-
-  double get candleWidthHalf => _context.candleWidthHalf;
-
   KlineData get klineData => _context.curKlineData;
+
+  bool get isCrossing => _context.isCrossing;
 
   double get paintDxOffset => _context.paintDxOffset;
 
   double get startCandleDx => _context.startCandleDx;
 
-  bool get isCrossing => _context.isCrossing;
+  double get candleWidth => _context.candleWidth;
+
+  double get candleSpacing => _context.candleSpacing;
+
+  double get candleActualWidth => _context.candleActualWidth;
+
+  double get candleWidthHalf => _context.candleWidthHalf;
+
+  double get candleLineWidth => settingConfig.candleLineWidth;
+
+  Color get longColor => settingConfig.longColor;
+
+  Color get shortColor => settingConfig.shortColor;
+
+  /// 指标图 涨跌 bar/line 配置
+  Color get longTintColor => longColor.withOpacity(settingConfig.opacity);
+  Color get shortTintColor => shortColor.withOpacity(settingConfig.opacity);
+  // 实心
+  Paint get defLongBarPaint => Paint()
+    ..color = longColor
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = candleWidth;
+  Paint get defShortBarPaint => Paint()
+    ..color = shortColor
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = candleWidth;
+  // 实心, 浅色
+  Paint get defLongTintBarPaint => Paint()
+    ..color = longTintColor
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = candleWidth;
+  Paint get defShortTintBarPaint => Paint()
+    ..color = shortTintColor
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = candleWidth;
+  // 空心
+  Paint get defLongHollowBarPaint => Paint()
+    ..color = longColor
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = settingConfig.candleHollowBarBorderWidth;
+  Paint get defShortHollowBarPaint => Paint()
+    ..color = shortColor
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = settingConfig.candleHollowBarBorderWidth;
+  // 线
+  Paint get defLongLinePaint => Paint()
+    ..color = longColor
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = candleLineWidth;
+  Paint get defShortLinePaint => Paint()
+    ..color = shortColor
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = candleLineWidth;
 }
 
 /// 绘制对象混入边界计算的通用扩展
@@ -305,9 +357,7 @@ mixin PaintSimpleCandleMixin<T extends PaintObjectIndicator>
       final dx = offset - (i - start) * candleActualWidth;
       final isLong = m.close >= m.open;
 
-      final linePaint = isLong
-          ? settingConfig.defLongLinePaint
-          : settingConfig.defShortLinePaint;
+      final linePaint = isLong ? defLongLinePaint : defShortLinePaint;
 
       if (lineWidth != null) linePaint.strokeWidth = lineWidth;
 

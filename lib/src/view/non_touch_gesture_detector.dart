@@ -183,6 +183,7 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
             }());
             _scaleData?.end();
             _scaleData = null;
+            controller.onChartScaleEnd();
 
             /// 检查并加载更多蜡烛数据
             controller.checkAndLoadMoreCandlesWhenPanEnd();
@@ -544,6 +545,7 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
       logd("onPointerPanZoomEnd scale. ${event.localPosition}");
       _scaleData?.end();
       _scaleData = null;
+      controller.onChartScaleEnd();
     }
   }
 
