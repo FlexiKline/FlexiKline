@@ -22,7 +22,7 @@ part 'tooltip_config.g.dart';
 @CopyWith()
 @FlexiConfigSerializable
 class TooltipConfig {
-  TooltipConfig({
+  const TooltipConfig({
     this.show = true,
 
     /// tooltip 区域设置

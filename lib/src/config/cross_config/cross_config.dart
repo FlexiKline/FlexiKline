@@ -24,7 +24,7 @@ part 'cross_config.g.dart';
 @CopyWith()
 @FlexiConfigSerializable
 class CrossConfig {
-  CrossConfig({
+  const CrossConfig({
     this.enable = true,
     required this.crosshair,
     required this.crosspoint,
@@ -43,10 +43,10 @@ class CrossConfig {
   final double spacing;
 
   /// onCross时, 当移动到空白区域时, Tips区域是否展示最新的蜡烛的Tips数据.
-  bool showLatestTipsInBlank = true;
+  final bool showLatestTipsInBlank;
 
   ///  onCross时, 当移动到空白区域时, 是否继续按蜡烛宽度移动.
-  bool moveByCandleInBlank = false;
+  final bool moveByCandleInBlank;
 
   factory CrossConfig.fromJson(Map<String, dynamic> json) =>
       _$CrossConfigFromJson(json);

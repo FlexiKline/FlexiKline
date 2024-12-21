@@ -124,7 +124,7 @@ mixin SettingBinding on KlineBindingBase
 
   /// 主区域大小设置
   void setMainSize(Size size) {
-    if (isFixedSizeMode) return;
+    if (isFixedSizeMode || size < mainMinSize) return;
     if (size != mainPaintObject.size) {
       final changed = mainPaintObject.doUpdateLayout(size: size);
       _invokeSizeChanged(force: changed);
@@ -154,8 +154,8 @@ mixin SettingBinding on KlineBindingBase
   /// [size] 当前Kline主区+副区的大小.
   /// 注: 设置是临时的, 并不会更新到配置中.
   void entryFixedSizeMode(Size size) {
-    if ((_fixedCanvasRect != null && _fixedCanvasRect!.size == size) ||
-        size < settingConfig.mainMinSize) {
+    if (size < mainMinSize ||
+        (_fixedCanvasRect != null && _fixedCanvasRect!.size == size)) {
       return;
     }
 

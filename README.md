@@ -99,7 +99,7 @@ flexiKlineController.updateKlineData(request, resp.data);
 ## 自定义指标
 ```dart
 /// MA 移动平均指标线指标配置
-class MAIndicator extends SinglePaintObjectIndicator {
+class MAIndicator extends PaintObjectIndicator {
   MAIndicator({
     super.zIndex = 0,
     required super.height,
@@ -120,7 +120,7 @@ class MAIndicator extends SinglePaintObjectIndicator {
 }
 
 /// MA指标绘制对象
-class MAPaintObject<T extends MAIndicator> extends SinglePaintObjectBox<T> {
+class MAPaintObject<T extends MAIndicator> extends PaintObjectBox<T> {
 
   @override
   void precompute(Range range, {bool reset = false}) {

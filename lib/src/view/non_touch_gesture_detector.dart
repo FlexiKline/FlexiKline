@@ -70,7 +70,6 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
   void initState() {
     super.initState();
     loggerDelegate = controller.loggerDelegate;
-    // widget.controller.
   }
 
   @override

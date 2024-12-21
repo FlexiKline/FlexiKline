@@ -33,6 +33,7 @@ class FlexiKlineWidget extends StatefulWidget {
     this.alignment,
     this.decoration,
     this.foregroundDecoration,
+    this.mainSize,
     this.mainForegroundViewBuilder,
     this.mainBackgroundView,
     bool? autoAdaptLayout,
@@ -45,12 +46,27 @@ class FlexiKlineWidget extends StatefulWidget {
         autoAdaptLayout = autoAdaptLayout ?? !PlatformUtil.isMobile;
 
   final FlexiKlineController controller;
+
+  /// Container属性配置
   final AlignmentGeometry? alignment;
   final BoxDecoration? decoration;
   final Decoration? foregroundDecoration;
+
+  /// 主区初始大小. 注: 仅在首次加载有效
+  final Size? mainSize;
+
+  /// 主区前台View构造器
+  /// 用于扩展定制Loading/自定义按钮等
   final WidgetBuilder? mainForegroundViewBuilder;
+
+  /// 主区后台View
+  /// 用于扩展展示Logo/watermark等静态View
   final Widget? mainBackgroundView;
+
+  /// 整个图表双击事件
   final GestureTapCallback? onDoubleTap;
+
+  /// 绘制工具条仅在绘制完成或选中某个DrawOverlay时展示.
   final Widget? drawToolbar;
 
   /// 用于计算[drawToolbar]初始展示的位置向对于canvas底部的位置.
@@ -66,10 +82,6 @@ class FlexiKlineWidget extends StatefulWidget {
 
   /// 绘制点指针放大镜DecorationShape.
   final MagnifierDecorationShapBuilder? magnifierDecorationShapBuilder;
-
-  /// 支持的主区指标配置列表构造器
-
-  /// 支持的副区指标配置列表构造器
 
   @override
   State<FlexiKlineWidget> createState() => _FlexiKlineWidgetState();
@@ -87,6 +99,9 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
     super.initState();
 
     widget.controller.initState();
+    if (widget.mainSize != null) {
+      widget.controller.setMainSize(widget.mainSize!);
+    }
 
     widget.controller.canvasSizeChangeListener.addListener(() {
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
@@ -143,6 +158,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
         children: <Widget>[
           if (widget.mainBackgroundView != null)
             Positioned.fromRect(
+              key: const ValueKey('MainBackground'),
               rect: widget.controller.mainRect,
               child: widget.mainBackgroundView!,
             ),
@@ -150,10 +166,10 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
             key: const ValueKey('GridAndChartLayer'),
             child: CustomPaint(
               size: canvasSize,
-              painter: GridBackgroundPainter(
+              painter: GridPainter(
                 controller: widget.controller,
               ),
-              foregroundPainter: IndicatorChartPainter(
+              foregroundPainter: ChartPainter(
                 controller: widget.controller,
               ),
               isComplex: true,
@@ -229,8 +245,8 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
     if (size != null && !size.isEmpty) {
       final canvasRect = widget.controller.canvasRect;
       _position = Offset(
-        newPosition.dx.clamp(0, canvasRect.right - size.width),
-        newPosition.dy.clamp(0, canvasRect.bottom - size.height),
+        newPosition.dx.clamp(canvasRect.left, canvasRect.right - size.width),
+        newPosition.dy.clamp(canvasRect.top, canvasRect.bottom - size.height),
       );
       return true;
     }
@@ -341,8 +357,8 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
   }
 }
 
-class GridBackgroundPainter extends CustomPainter {
-  GridBackgroundPainter({
+class GridPainter extends CustomPainter {
+  GridPainter({
     required this.controller,
   }) : super(repaint: controller.repaintGridBg);
 
@@ -359,8 +375,8 @@ class GridBackgroundPainter extends CustomPainter {
   }
 }
 
-class IndicatorChartPainter extends CustomPainter {
-  IndicatorChartPainter({
+class ChartPainter extends CustomPainter {
+  ChartPainter({
     required this.controller,
   }) : super(repaint: controller.repaintChart);
 
