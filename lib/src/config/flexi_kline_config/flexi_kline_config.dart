@@ -35,7 +35,6 @@ class FlexiKlineConfig {
     required this.draw,
     required this.tooltip,
     required this.mainIndicator,
-    this.main = const <IIndicatorKey>{},
     this.sub = const <IIndicatorKey>{},
   });
 
@@ -47,7 +46,6 @@ class FlexiKlineConfig {
   DrawConfig draw;
   TooltipConfig tooltip;
   MainPaintObjectIndicator mainIndicator;
-  Set<IIndicatorKey> main;
   Set<IIndicatorKey> sub;
 
   FlexiKlineConfig clone() {
@@ -61,7 +59,6 @@ class FlexiKlineConfig {
 
   // TODO: 废弃
   void update(FlexiKlineConfig config) {
-    main = config.main;
     sub = config.sub;
   }
 

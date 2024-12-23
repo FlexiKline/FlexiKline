@@ -179,7 +179,6 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       draw: genDrawConfig(),
       tooltip: genTooltipConfig(),
       mainIndicator: genMainIndicator(),
-      main: {},
       sub: {},
     );
   }

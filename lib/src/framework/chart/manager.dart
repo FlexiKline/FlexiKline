@@ -121,7 +121,6 @@ final class IndicatorPaintObjectManager with KlineLog {
   void init(
     IPaintContext context, {
     required MainPaintObjectIndicator mainIndicator,
-    Set<IIndicatorKey> initMainIndicatorKeys = const {},
     Set<IIndicatorKey> initSubIndicatorKeys = const {},
   }) {
     /// 注册指标构造器
@@ -163,7 +162,7 @@ final class IndicatorPaintObjectManager with KlineLog {
     }
 
     /// 加载历史选中过的指标
-    for (var key in initMainIndicatorKeys) {
+    for (var key in mainIndicator.indicatorKeys) {
       addIndicatorInMain(key, context);
     }
     for (var key in initSubIndicatorKeys) {

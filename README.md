@@ -15,6 +15,7 @@ FlexiKline是一个灵活且高度可定制化的金融Kline图表框架，旨�
 + 适配多平台手势操作, 且可定制化操作(惯性平移/缩放位置等).
 + 支持多种平台(Android, iOS, Web, MacOs, Windows, Linux).
 
+![架构](./doc/archiecture.excalidraw.png)
 
 ## Sample
 
@@ -36,10 +37,10 @@ abstract interface class IConfiguration {
   void saveFlexiKlineConfig(FlexiKlineConfig config);
 
   /// 蜡烛指标配置构造器(主区)
-  IndicatorBuilder<CandleIndicator> get candleIndicatorBuilder;
+  IndicatorBuilder<CandleBaseIndicator> get candleIndicatorBuilder;
 
   /// 时间指标配置构造器(副区)
-  IndicatorBuilder<TimeIndicator> get timeIndicatorBuilder;
+  IndicatorBuilder<TimeBaseIndicator> get timeIndicatorBuilder;
 
   /// 主区指标配置定制
   Map<IIndicatorKey, IndicatorBuilder> mainIndicatorBuilders();

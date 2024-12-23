@@ -268,6 +268,7 @@ extension MainPaintManagerExt<T extends MainPaintObjectIndicator>
       padding: object.paintMode.isCombine ? padding : null,
     );
     final old = children.append(object);
+    indicator.indicatorKeys.add(object.key);
     old?.dispose();
   }
 
@@ -276,6 +277,7 @@ extension MainPaintManagerExt<T extends MainPaintObjectIndicator>
     children.removeWhere((object) {
       if (object.key == key) {
         object.dispose();
+        indicator.indicatorKeys.remove(object.key);
         hasRemove = true;
         return true;
       }

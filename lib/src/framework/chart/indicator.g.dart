@@ -14,6 +14,8 @@ abstract class _$MainPaintObjectIndicatorCWProxy<
 
   MainPaintObjectIndicator<T> drawBelowTipsArea(bool drawBelowTipsArea);
 
+  MainPaintObjectIndicator<T> indicatorKeys(Set<IIndicatorKey>? indicatorKeys);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `MainPaintObjectIndicator<T>(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -24,6 +26,7 @@ abstract class _$MainPaintObjectIndicatorCWProxy<
     Size? size,
     EdgeInsets? padding,
     bool? drawBelowTipsArea,
+    Set<IIndicatorKey>? indicatorKeys,
   });
 }
 
@@ -46,6 +49,11 @@ class _$MainPaintObjectIndicatorCWProxyImpl<T extends PaintObjectIndicator>
       this(drawBelowTipsArea: drawBelowTipsArea);
 
   @override
+  MainPaintObjectIndicator<T> indicatorKeys(
+          Set<IIndicatorKey>? indicatorKeys) =>
+      this(indicatorKeys: indicatorKeys);
+
+  @override
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `MainPaintObjectIndicator<T>(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -57,6 +65,7 @@ class _$MainPaintObjectIndicatorCWProxyImpl<T extends PaintObjectIndicator>
     Object? size = const $CopyWithPlaceholder(),
     Object? padding = const $CopyWithPlaceholder(),
     Object? drawBelowTipsArea = const $CopyWithPlaceholder(),
+    Object? indicatorKeys = const $CopyWithPlaceholder(),
   }) {
     return MainPaintObjectIndicator<T>(
       size: size == const $CopyWithPlaceholder() || size == null
@@ -72,6 +81,10 @@ class _$MainPaintObjectIndicatorCWProxyImpl<T extends PaintObjectIndicator>
           ? _value.drawBelowTipsArea
           // ignore: cast_nullable_to_non_nullable
           : drawBelowTipsArea as bool,
+      indicatorKeys: indicatorKeys == const $CopyWithPlaceholder()
+          ? _value.indicatorKeys
+          // ignore: cast_nullable_to_non_nullable
+          : indicatorKeys as Set<IIndicatorKey>?,
     );
   }
 }
@@ -97,6 +110,9 @@ MainPaintObjectIndicator<T>
           padding: const EdgeInsetsConverter()
               .fromJson(json['padding'] as Map<String, dynamic>),
           drawBelowTipsArea: json['drawBelowTipsArea'] as bool? ?? false,
+          indicatorKeys: (json['indicatorKeys'] as List<dynamic>?)
+              ?.map((e) => const IIndicatorKeyConvert().fromJson(e as String))
+              .toSet(),
         )..height = (json['height'] as num).toDouble();
 
 Map<String, dynamic>
@@ -107,4 +123,7 @@ Map<String, dynamic>
           'padding': const EdgeInsetsConverter().toJson(instance.padding),
           'size': const SizeConverter().toJson(instance.size),
           'drawBelowTipsArea': instance.drawBelowTipsArea,
+          'indicatorKeys': instance.indicatorKeys
+              .map(const IIndicatorKeyConvert().toJson)
+              .toList(),
         };

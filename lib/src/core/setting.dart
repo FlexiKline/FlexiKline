@@ -24,7 +24,6 @@ mixin SettingBinding on KlineBindingBase
     _paintObjectManager.init(
       this,
       mainIndicator: _flexiKlineConfig.mainIndicator,
-      initMainIndicatorKeys: _flexiKlineConfig.main,
       initSubIndicatorKeys: _flexiKlineConfig.sub,
     );
     _canvasSizeChangeListener = KlineStateNotifier(canvasRect);
@@ -314,7 +313,6 @@ mixin SettingBinding on KlineBindingBase
     if (newObj != null) {
       // TODO: 后续优化执行时机
       newObj.precompute(Range(0, curKlineData.length), reset: true);
-      _flexiKlineConfig.main.add(key);
       markRepaintChart(reset: true);
       markRepaintCross();
     }
@@ -323,7 +321,6 @@ mixin SettingBinding on KlineBindingBase
   /// 删除主图中[key]指定的指标
   void delIndicatorInMain(IIndicatorKey key) {
     if (_paintObjectManager.delIndicatorInMain(key)) {
-      _flexiKlineConfig.main.remove(key);
       markRepaintChart(reset: true);
       markRepaintCross();
     }
@@ -367,7 +364,7 @@ mixin SettingBinding on KlineBindingBase
   /// 保存当前FlexiKline配置到本地
   @override
   void storeFlexiKlineConfig() {
-    _flexiKlineConfig.main = _paintObjectManager.mainIndciatorKeys.toSet();
+    // _flexiKlineConfig.main = _paintObjectManager.mainIndciatorKeys.toSet();
     _flexiKlineConfig.sub = _paintObjectManager.subIndicatorKeys.toSet();
     configuration.saveFlexiKlineConfig(_flexiKlineConfig);
   }

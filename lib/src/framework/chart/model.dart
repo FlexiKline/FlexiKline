@@ -106,12 +106,17 @@ class MainPaintObjectIndicator<T extends PaintObjectIndicator>
     required Size size,
     required super.padding,
     this.drawBelowTipsArea = false,
+    Set<IIndicatorKey>? indicatorKeys,
   })  : _size = size,
+        indicatorKeys = indicatorKeys ?? <IIndicatorKey>{},
         super(key: mainIndicatorKey, height: size.height);
 
   late Size _size;
   Size get size => _size;
   final bool drawBelowTipsArea;
+
+  /// 当前主区已选中指标集合(由PaintObjectManager管理)
+  final Set<IIndicatorKey> indicatorKeys;
 
   @override
   MainPaintObject createPaintObject(IPaintContext context) {
