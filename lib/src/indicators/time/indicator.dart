@@ -17,24 +17,21 @@ part of 'time.dart';
 /// 时间刻度指标图
 @CopyWith()
 @FlexiIndicatorSerializable
-class TimeIndicator extends PaintObjectIndicator {
+class TimeIndicator extends TimeBaseIndicator {
   TimeIndicator({
     super.zIndex = 0,
     super.height = defaultTimeIndicatorHeight,
     super.padding = EdgeInsets.zero,
-    this.position = DrawPosition.middle,
+    super.position = DrawPosition.middle,
     // 时间刻度.
     required this.timeTick,
-  }) : super(key: timeIndicatorKey);
+  });
 
   // 时间刻度.
   final TextAreaConfig timeTick;
-  final DrawPosition position;
 
   @override
-  TimePaintObjectBox<TimeIndicator> createPaintObject(
-    covariant IPaintContext context,
-  ) {
+  TimePaintObject createPaintObject(IPaintContext context) {
     return TimePaintObject(context: context, indicator: this);
   }
 
@@ -44,14 +41,11 @@ class TimeIndicator extends PaintObjectIndicator {
   Map<String, dynamic> toJson() => _$TimeIndicatorToJson(this);
 }
 
-class TimePaintObject<T extends TimeIndicator> extends TimePaintObjectBox<T> {
+class TimePaintObject<T extends TimeIndicator> extends TimeBasePaintObject<T> {
   TimePaintObject({
     required super.context,
     required super.indicator,
   });
-
-  @override
-  DrawPosition get position => indicator.position;
 
   /// 两个时间刻度间隔的蜡烛数
   int get timeTickIntervalCount {

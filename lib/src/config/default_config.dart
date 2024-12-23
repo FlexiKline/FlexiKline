@@ -186,12 +186,12 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   @override
   IndicatorBuilder<CandleIndicator> get candleIndicatorBuilder {
-    return (setting) => genCandleIndicator(setting);
+    return genCandleIndicator;
   }
 
   @override
   IndicatorBuilder<TimeIndicator> get timeIndicatorBuilder {
-    return (setting) => genTimeIndicator(setting);
+    return genTimeIndicator;
   }
 
   @override

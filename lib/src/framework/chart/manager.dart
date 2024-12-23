@@ -44,11 +44,11 @@ final class IndicatorPaintObjectManager with KlineLog {
 
   late final MainPaintObject _mainPaintObject;
 
-  late final TimePaintObjectBox _timePaintObject;
+  late final TimeBasePaintObject _timePaintObject;
 
   MainPaintObject get mainPaintObject => _mainPaintObject;
 
-  TimePaintObjectBox get timePaintObject => _timePaintObject;
+  TimeBasePaintObject get timePaintObject => _timePaintObject;
 
   Iterable<PaintObject> get subPaintObjects {
     final objects = _subPaintObjectQueue;
@@ -244,6 +244,7 @@ final class IndicatorPaintObjectManager with KlineLog {
   }
 
   /// 收集当前指标的计算参数
+  /// 考虑在主区/副区同时存在的指标.
   @Deprecated('废弃, 由PaintObject执行precompute')
   Map<IIndicatorKey, dynamic> getIndicatorCalcParams() {
     final calcParams = mainPaintObject.getCalcParams();
@@ -251,24 +252,6 @@ final class IndicatorPaintObjectManager with KlineLog {
       final params = object.getCalcParams();
       if (params.isEmpty) continue;
       calcParams.addAll(params);
-
-      /// TODO: 待考虑在主区/副区同时存在的指标.
-      /// 有两种情况:
-      /// 1. 参数相同, 重复计算.
-      /// 2. 参数不同, 需要分别计算.
-      // if (object.key == IndicatorType.subBoll) {
-      //   calcParams.putIfAbsent(
-      //     IndicatorType.boll,
-      //     params[IndicatorType.subBoll],
-      //   );
-      // } else if (object.key == IndicatorType.subSar) {
-      //   calcParams.putIfAbsent(
-      //     IndicatorType.sar,
-      //     params[IndicatorType.subSar],
-      //   );
-      // } else {
-      //   calcParams.addAll(params);
-      // }
     }
     return calcParams;
   }

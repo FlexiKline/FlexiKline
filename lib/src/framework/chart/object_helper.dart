@@ -237,8 +237,7 @@ mixin PaintObjectDataInitMixin on IndicatorObject implements IPaintDataInit {
 }
 
 /// 绘制当前图表在Y轴上的刻度值
-mixin PaintYAxisTicksMixin<T extends PaintObjectIndicator>
-    on PaintObjectBox<T> {
+mixin PaintYAxisTicksMixin<T extends Indicator> on PaintObject<T> {
   /// 为副区的指标图绘制Y轴上的刻度信息
   @protected
   void paintYAxisTicks(
@@ -296,8 +295,7 @@ mixin PaintYAxisTicksMixin<T extends PaintObjectIndicator>
 }
 
 /// 当Cross事件发生时, 在Y轴上的绘制crossing相应的刻度值
-mixin PaintYAxisTicksOnCrossMixin<T extends PaintObjectIndicator>
-    on PaintObjectBox<T> {
+mixin PaintYAxisTicksOnCrossMixin<T extends Indicator> on PaintObject<T> {
   /// onCross时, 绘制Y轴上的刻度值
   @protected
   void paintYAxisTicksOnCross(
@@ -337,8 +335,7 @@ mixin PaintYAxisTicksOnCrossMixin<T extends PaintObjectIndicator>
 
 /// 绘制简易蜡烛图
 /// 主要用于SubBoll图和SubSar图中
-mixin PaintSimpleCandleMixin<T extends PaintObjectIndicator>
-    on PaintObjectBox<T> {
+mixin PaintSimpleCandleMixin<T extends Indicator> on PaintObject<T> {
   void paintSimpleCandleChart(
     Canvas canvas,
     Size size, {
@@ -397,7 +394,7 @@ extension PaintObjectExt on PaintObject {
   }
 }
 
-extension MultiPaintObjectBoxExt on MainPaintObject {
+extension MultiPaintObjectExt on MainPaintObject {
   /// 收集[MainPaintObject]中子指标的计算参数
   Map<IIndicatorKey, dynamic> getCalcParams() {
     final params = <IIndicatorKey, dynamic>{};

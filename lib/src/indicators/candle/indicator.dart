@@ -16,7 +16,7 @@ part of 'candle.dart';
 
 @CopyWith()
 @FlexiIndicatorSerializable
-class CandleIndicator extends PaintObjectIndicator {
+class CandleIndicator extends CandleBaseIndicator {
   CandleIndicator({
     super.zIndex = -1,
     required super.height,
@@ -45,7 +45,7 @@ class CandleIndicator extends PaintObjectIndicator {
     //   textWidth: 80,
     //   textAlign: TextAlign.center,
     // ),
-  }) : super(key: candleIndicatorKey);
+  });
 
   // 最高价
   final MarkConfig high;
@@ -64,9 +64,7 @@ class CandleIndicator extends PaintObjectIndicator {
   // final TextAreaConfig timeTick;
 
   @override
-  CandlePaintObject createPaintObject(
-    IPaintContext context,
-  ) {
+  CandlePaintObject createPaintObject(IPaintContext context) {
     return CandlePaintObject(context: context, indicator: this);
   }
 
@@ -76,8 +74,8 @@ class CandleIndicator extends PaintObjectIndicator {
   Map<String, dynamic> toJson() => _$CandleIndicatorToJson(this);
 }
 
-class CandlePaintObject<T extends CandleIndicator> extends PaintObjectBox<T>
-    with PaintYAxisTicksOnCrossMixin {
+class CandlePaintObject<T extends CandleIndicator>
+    extends CandleBasePaintObject<T> with PaintYAxisTicksOnCrossMixin {
   CandlePaintObject({
     required super.context,
     required super.indicator,

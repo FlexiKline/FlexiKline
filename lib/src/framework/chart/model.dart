@@ -41,7 +41,7 @@ abstract class Indicator implements IPrecomputable {
 
   final PaintMode paintMode;
 
-  final int zIndex; // TODO: 考虑下放到子类中
+  final int zIndex;
 
   @factory
   PaintObject createPaintObject(IPaintContext context);
@@ -65,7 +65,36 @@ abstract class PaintObjectIndicator extends Indicator {
   });
 
   @override
-  PaintObject createPaintObject(covariant IPaintContext context);
+  PaintObjectBox createPaintObject(IPaintContext context);
+}
+
+/// 蜡烛指标配置基类
+abstract class CandleBaseIndicator extends Indicator {
+  CandleBaseIndicator({
+    required super.height,
+    required super.padding,
+    super.paintMode,
+    super.zIndex,
+  }) : super(key: candleIndicatorKey);
+
+  @override
+  CandleBasePaintObject createPaintObject(covariant IPaintContext context);
+}
+
+/// 时间指标配置基类
+abstract class TimeBaseIndicator extends Indicator {
+  TimeBaseIndicator({
+    required super.height,
+    required super.padding,
+    super.paintMode,
+    super.zIndex,
+    required this.position,
+  }) : super(key: timeIndicatorKey);
+
+  final DrawPosition position;
+
+  @override
+  TimeBasePaintObject createPaintObject(IPaintContext context);
 }
 
 /// MainIndicator的配置.

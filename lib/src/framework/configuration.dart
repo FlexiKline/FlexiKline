@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:flexi_kline/src/indicators/export.dart';
 import 'package:flutter/painting.dart';
 
 import '../constant.dart';
@@ -150,10 +149,10 @@ abstract interface class IConfiguration {
   void saveFlexiKlineConfig(FlexiKlineConfig config);
 
   /// 蜡烛指标配置构造器(主区)
-  IndicatorBuilder<CandleIndicator> get candleIndicatorBuilder;
+  IndicatorBuilder<CandleBaseIndicator> get candleIndicatorBuilder;
 
   /// 时间指标配置构造器(副区)
-  IndicatorBuilder<TimeIndicator> get timeIndicatorBuilder;
+  IndicatorBuilder<TimeBaseIndicator> get timeIndicatorBuilder;
 
   /// 主区指标配置定制
   Map<IIndicatorKey, IndicatorBuilder> mainIndicatorBuilders();

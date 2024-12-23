@@ -90,7 +90,8 @@ extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
   }
 }
 
-extension MainPaintDelegateExt on MainPaintObject {
+extension MainPaintDelegateExt<T extends MainPaintObjectIndicator>
+    on MainPaintObject<T> {
   void setMinMax(MinMax val) {
     if (_minMax == null) {
       _minMax = val;

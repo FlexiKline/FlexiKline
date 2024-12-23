@@ -124,6 +124,6 @@ Map<String, dynamic> _$TimeIndicatorToJson(TimeIndicator instance) =>
       'height': instance.height,
       'padding': const EdgeInsetsConverter().toJson(instance.padding),
       'zIndex': instance.zIndex,
-      'timeTick': instance.timeTick.toJson(),
       'position': const DrawPositionConverter().toJson(instance.position),
+      'timeTick': instance.timeTick.toJson(),
     };

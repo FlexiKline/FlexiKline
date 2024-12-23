@@ -78,7 +78,7 @@ extension on KlineBindingBase {
     return _paintObjectManager.mainPaintObject;
   }
 
-  TimePaintObjectBox get timePaintObject {
+  TimeBasePaintObject get timePaintObject {
     return _paintObjectManager.timePaintObject;
   }
 

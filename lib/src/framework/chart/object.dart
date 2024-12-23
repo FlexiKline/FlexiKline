@@ -53,6 +53,7 @@ abstract class IndicatorObject<T extends Indicator>
 }
 
 /// PaintObject
+/// 通过混入边界计算与数据初始化计算, 简化PaintObject接口.
 /// 1. 定义PaintObject行为: 通过实现对应的接口, 实现Chart的配置, 计算, 绘制, Cross
 /// 2. [_parent]保存当前绘制对象的父级
 abstract class PaintObject<T extends Indicator> extends IndicatorObject
@@ -70,6 +71,9 @@ abstract class PaintObject<T extends Indicator> extends IndicatorObject
   // 当前绘制对象的指标计算数据存储下标
   final int? _dataIndex;
   int get dataIndex => _dataIndex ?? -1;
+
+  @override
+  T get indicator => super.indicator as T;
 
   // 父级PaintObject. 主要用于给其子级PaintObject限定范围.
   PaintObject? _parent;
@@ -93,7 +97,6 @@ abstract class PaintObject<T extends Indicator> extends IndicatorObject
 }
 
 /// PaintObjectBox
-/// 通过混入边界计算与数据初始化计算, 简化PaintObject接口.
 abstract class PaintObjectBox<T extends PaintObjectIndicator>
     extends PaintObject {
   PaintObjectBox({
@@ -102,21 +105,33 @@ abstract class PaintObjectBox<T extends PaintObjectIndicator>
   });
 
   @override
-  T get indicator => super.indicator as T;
+  T get indicator => _indicator as T;
 }
 
-/// 时间轴指标绘制对象
-abstract class TimePaintObjectBox<T extends PaintObjectIndicator>
-    extends PaintObjectBox {
-  TimePaintObjectBox({
+/// 蜡烛图绘制对象
+abstract class CandleBasePaintObject<T extends CandleBaseIndicator>
+    extends PaintObject {
+  CandleBasePaintObject({
     required super.context,
     required T super.indicator,
   });
 
-  DrawPosition get position;
+  @override
+  T get indicator => _indicator as T;
+}
+
+/// 时间轴指标绘制对象
+abstract class TimeBasePaintObject<T extends TimeBaseIndicator>
+    extends PaintObject {
+  TimeBasePaintObject({
+    required super.context,
+    required T super.indicator,
+  });
+
+  DrawPosition get position => indicator.position;
 
   @override
-  T get indicator => super.indicator as T;
+  T get indicator => _indicator as T;
 }
 
 /// 主区绘制对象
@@ -132,7 +147,7 @@ final class MainPaintObject<T extends MainPaintObjectIndicator>
   final EdgeInsets _initialPadding;
 
   @override
-  T get indicator => super.indicator as T;
+  T get indicator => _indicator as T;
 
   @override
   int get dataIndex => -1;
