@@ -86,7 +86,7 @@ final class FlexiIndicatorKey implements IIndicatorKey {
 const unknownIndicatorKey = FlexiIndicatorKey('unknown');
 
 typedef IndicatorBuilder<T extends Indicator> = T Function(
-  SettingConfig setting,
+  Map<String, dynamic>?,
 );
 
 const mainIndicatorKey = FlexiIndicatorKey('main', label: 'Main');

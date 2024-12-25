@@ -135,4 +135,16 @@ class TestFlexiKlineConfiguration with FlexiKlineThemeConfigurationMixin {
     // TODO: implement genMainIndicator
     throw UnimplementedError();
   }
+
+  @override
+  Map<String, dynamic>? getConfig(String key) {
+    // TODO: implement getConfig
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<bool> setConfig(String key, Map<String, dynamic> value) {
+    // TODO: implement setConfig
+    throw UnimplementedError();
+  }
 }

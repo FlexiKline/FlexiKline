@@ -88,6 +88,10 @@ extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
       tipsRect: drawableRect,
     );
   }
+
+  void doUpdateIndicator<E extends Indicator>(E indicator) {
+    _indicator = indicator;
+  }
 }
 
 extension MainPaintDelegateExt<T extends MainPaintObjectIndicator>
@@ -284,5 +288,9 @@ extension MainPaintManagerExt<T extends MainPaintObjectIndicator>
       return false;
     });
     return hasRemove;
+  }
+
+  PaintObject? getChildPaintObject(IIndicatorKey key) {
+    return children.firstWhereOrNull((obj) => obj.key == key);
   }
 }

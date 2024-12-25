@@ -309,7 +309,7 @@ mixin SettingBinding on KlineBindingBase
 
   /// 在主图中添加指标
   void addIndicatorInMain(IIndicatorKey key) {
-    final newObj = _paintObjectManager.addIndicatorInMain(key, this);
+    final newObj = _paintObjectManager.addMainIndicator(key, this);
     if (newObj != null) {
       // TODO: 后续优化执行时机
       newObj.precompute(Range(0, curKlineData.length), reset: true);
@@ -320,7 +320,7 @@ mixin SettingBinding on KlineBindingBase
 
   /// 删除主图中[key]指定的指标
   void delIndicatorInMain(IIndicatorKey key) {
-    if (_paintObjectManager.delIndicatorInMain(key)) {
+    if (_paintObjectManager.delMainIndicator(key)) {
       markRepaintChart(reset: true);
       markRepaintCross();
     }
@@ -328,7 +328,7 @@ mixin SettingBinding on KlineBindingBase
 
   /// 在副图中添加指标
   void addIndicatorInSub(IIndicatorKey key) {
-    final newObj = _paintObjectManager.addIndicatorInSub(key, this);
+    final newObj = _paintObjectManager.addSubIndicator(key, this);
     if (newObj != null) {
       // TODO: 后续优化执行时机
       newObj.precompute(Range(0, curKlineData.length), reset: true);
@@ -339,7 +339,7 @@ mixin SettingBinding on KlineBindingBase
 
   /// 删除副图[key]指定的指标
   void delIndicatorInSub(IIndicatorKey key) {
-    if (_paintObjectManager.delIndicatorInSub(key)) {
+    if (_paintObjectManager.delSubIndicator(key)) {
       _flexiKlineConfig.sub.remove(key);
       _invokeSizeChanged();
     }
@@ -445,5 +445,21 @@ mixin SettingBinding on KlineBindingBase
     _flexiKlineConfig.tooltip = config;
     markRepaintChart();
     markRepaintCross();
+  }
+
+  /// 更新主区指标配置
+  bool updateMainIndicator<E extends Indicator>(E indicator) {
+    return _paintObjectManager.updateMainIndicator(indicator);
+  }
+
+  /// 更新副区指标配置
+  bool updateSubIndicator<E extends Indicator>(E indicator) {
+    return _paintObjectManager.updateSubIndicator(indicator);
+  }
+
+  /// 设置时间指标配置
+  void setTimeIndicator<E extends TimeBaseIndicator>(E indicator) {
+    timePaintObject.doUpdateIndicator(indicator);
+    markRepaintChart();
   }
 }

@@ -185,12 +185,16 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   @override
   IndicatorBuilder<CandleIndicator> get candleIndicatorBuilder {
-    return genCandleIndicator;
+    return (json) => genCandleIndicator(
+          getInstance(json, CandleIndicator.fromJson),
+        );
   }
 
   @override
   IndicatorBuilder<TimeIndicator> get timeIndicatorBuilder {
-    return genTimeIndicator;
+    return (json) => genTimeIndicator(
+          getInstance(json, TimeIndicator.fromJson),
+        );
   }
 
   @override
@@ -449,7 +453,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   MainPaintObjectIndicator genMainIndicator();
 
-  CandleIndicator genCandleIndicator(SettingConfig setting) {
+  CandleIndicator genCandleIndicator(CandleIndicator? instance) {
     return CandleIndicator(
       zIndex: -1,
       height: theme.mainIndicatorHeight,
@@ -561,11 +565,11 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
     );
   }
 
-  TimeIndicator genTimeIndicator(SettingConfig setting) {
+  TimeIndicator genTimeIndicator(TimeIndicator? instance) {
     return TimeIndicator(
       height: theme.timeIndicatorHeight,
       padding: EdgeInsets.zero,
-      position: DrawPosition.middle,
+      position: instance?.position ?? DrawPosition.middle,
       // 时间刻度.
       timeTick: TextAreaConfig(
         style: TextStyle(

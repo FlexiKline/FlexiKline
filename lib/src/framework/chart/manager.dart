@@ -84,6 +84,14 @@ final class IndicatorPaintObjectManager with KlineLog {
     return _subPaintObjectQueue.map((obj) => obj.key);
   }
 
+  bool hasRegisterInMain(IIndicatorKey key) {
+    return _mainIndicatorBuilders.containsKey(key) || key == candleIndicatorKey;
+  }
+
+  bool hasRegisterInSub(IIndicatorKey key) {
+    return _subIndicatorBuilders.containsKey(key) || key == timeIndicatorKey;
+  }
+
   void registerMainIndicatorBuilder(
     IIndicatorKey key,
     IndicatorBuilder builder,
@@ -146,12 +154,16 @@ final class IndicatorPaintObjectManager with KlineLog {
 
     /// 配置默认指标蜡烛图指标和时间指标
     try {
-      final setting = context.settingConfig;
-      final candle = configuration.candleIndicatorBuilder.call(setting);
+      // final setting = context.settingConfig;
+      final candle = configuration.candleIndicatorBuilder.call(
+        configuration.getConfig(candleIndicatorKey.id),
+      );
       final candleObject = candle.createPaintObject(context);
       _mainPaintObject.appendPaintObject(candleObject);
 
-      final time = configuration.timeIndicatorBuilder.call(setting);
+      final time = configuration.timeIndicatorBuilder.call(
+        configuration.getConfig(timeIndicatorKey.id),
+      );
       _timePaintObject = time.createPaintObject(context);
     } catch (error, stack) {
       loge(
@@ -163,10 +175,10 @@ final class IndicatorPaintObjectManager with KlineLog {
 
     /// 加载历史选中过的指标
     for (var key in mainIndicator.indicatorKeys) {
-      addIndicatorInMain(key, context);
+      addMainIndicator(key, context);
     }
     for (var key in initSubIndicatorKeys) {
-      addIndicatorInSub(key, context);
+      addSubIndicator(key, context);
     }
   }
 
@@ -175,8 +187,10 @@ final class IndicatorPaintObjectManager with KlineLog {
     IPaintContext context,
   ) {
     try {
-      if (_mainIndicatorBuilders.containsKey(key)) {
-        return _mainIndicatorBuilders[key]?.call(context.settingConfig);
+      if (hasRegisterInMain(key)) {
+        var json = getMainPaintObject(key)?.indicator.toJson();
+        json ??= configuration.getConfig(key.id);
+        return _mainIndicatorBuilders[key]?.call(json);
       }
     } catch (error, stack) {
       loge(
@@ -193,8 +207,10 @@ final class IndicatorPaintObjectManager with KlineLog {
     IPaintContext context,
   ) {
     try {
-      if (_subIndicatorBuilders.containsKey(key)) {
-        return _subIndicatorBuilders[key]?.call(context.settingConfig);
+      if (hasRegisterInSub(key)) {
+        var json = getSubPaintObject(key)?.indicator.toJson();
+        json ??= configuration.getConfig(key.id);
+        return _subIndicatorBuilders[key]?.call(json);
       }
     } catch (error, stack) {
       loge(
@@ -206,8 +222,22 @@ final class IndicatorPaintObjectManager with KlineLog {
     return null;
   }
 
-  /// 在主图中添加指标
-  PaintObject? addIndicatorInMain(IIndicatorKey key, IPaintContext context) {
+  ///// 主区指标操作 /////
+
+  /// 获取[key]指定的主区已载入的绘制对象
+  PaintObject? getMainPaintObject(IIndicatorKey key) {
+    return _mainPaintObject.getChildPaintObject(key);
+  }
+
+  /// 获取主区[key]指定的指标配置实例
+  Indicator? getMainIndicator(IIndicatorKey key) {
+    if (!hasRegisterInMain(key)) return null;
+    final json = configuration.getConfig(key.id);
+    return _mainIndicatorBuilders[key]?.call(json);
+  }
+
+  /// 在主区中添加[key]指定的指标
+  PaintObject? addMainIndicator(IIndicatorKey key, IPaintContext context) {
     final indicator = _createMainPaintIndicator(key, context);
     if (indicator == null) return null;
     final object = indicator.createPaintObject(context);
@@ -215,12 +245,43 @@ final class IndicatorPaintObjectManager with KlineLog {
     return object;
   }
 
-  /// 删除主图中[key]指定的指标
-  bool delIndicatorInMain(IIndicatorKey key) {
+  /// 在已载入主区绘制对象中, 删除[key]指定的绘制对象
+  bool delMainIndicator(IIndicatorKey key) {
     return _mainPaintObject.deletePaintObject(key);
   }
 
-  PaintObject? addIndicatorInSub(IIndicatorKey key, IPaintContext context) {
+  /// 更新主区中指标配置[indicator]
+  bool updateMainIndicator(Indicator indicator) {
+    final key = indicator.key;
+    if (!hasRegisterInMain(key)) return false;
+    final json = indicator.toJson();
+    final object = getMainPaintObject(key);
+    if (object == null) {
+      // 指标未被载入
+      configuration.setConfig(key.id, json);
+    } else {
+      // 指标已载入
+      object.doUpdateIndicator(indicator);
+    }
+    return true;
+  }
+
+  ///// 副区指标操作 /////
+
+  /// 获取[key]指定的副区已载入的绘制对象
+  PaintObject? getSubPaintObject(IIndicatorKey key) {
+    return _subPaintObjectQueue.firstWhereOrNull((obj) => obj.key == key);
+  }
+
+  /// 获取副区[key]指定的指标配置实例
+  Indicator? getSubIndicator(IIndicatorKey key) {
+    if (!hasRegisterInSub(key)) return null;
+    final json = configuration.getConfig(key.id);
+    return _subIndicatorBuilders[key]?.call(json);
+  }
+
+  /// 在副区中添加[key]指定的指标
+  PaintObject? addSubIndicator(IIndicatorKey key, IPaintContext context) {
     final indicator = _createSubPaintIndicator(key, context);
     if (indicator == null) return null;
     final object = indicator.createPaintObject(context);
@@ -229,7 +290,8 @@ final class IndicatorPaintObjectManager with KlineLog {
     return object;
   }
 
-  bool delIndicatorInSub(IIndicatorKey key) {
+  /// 在已载入副区绘制对象中, 删除[key]指定的绘制对象
+  bool delSubIndicator(IIndicatorKey key) {
     bool hasRemove = false;
     _subPaintObjectQueue.removeWhere((obj) {
       if (obj.indicator.key == key) {
@@ -240,6 +302,22 @@ final class IndicatorPaintObjectManager with KlineLog {
       return false;
     });
     return hasRemove;
+  }
+
+  /// 更新主区中指标配置[indicator]
+  bool updateSubIndicator(Indicator indicator) {
+    final key = indicator.key;
+    if (!hasRegisterInSub(key)) return false;
+    final json = indicator.toJson();
+    final object = getSubPaintObject(key);
+    if (object == null) {
+      // 指标未被载入
+      configuration.setConfig(key.id, json);
+    } else {
+      // 指标已载入
+      object.doUpdateIndicator(indicator);
+    }
+    return true;
   }
 
   /// 收集当前指标的计算参数

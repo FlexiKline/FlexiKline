@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 import '../constant.dart';
@@ -168,4 +169,23 @@ abstract interface class IConfiguration {
 
   /// 以[instId]为key, 持久化绘制实例列表[list]到本地中.
   void saveDrawOverlayList(String instId, Iterable<Overlay> list);
+
+  Map<String, dynamic>? getConfig(String key);
+
+  Future<bool> setConfig(String key, Map<String, dynamic> value);
+}
+
+extension IConfigurationExt on IConfiguration {
+  T? getInstance<T extends Indicator>(
+    Map<String, dynamic>? json,
+    T Function(Map<String, dynamic>) fromJson,
+  ) {
+    if (json == null || json.isEmpty) return null;
+    try {
+      return fromJson(json);
+    } catch (error, _) {
+      debugPrint(error.toString());
+    }
+    return null;
+  }
 }
