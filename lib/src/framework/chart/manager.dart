@@ -92,6 +92,7 @@ final class IndicatorPaintObjectManager with KlineLog {
     return _subIndicatorBuilders.containsKey(key) || key == timeIndicatorKey;
   }
 
+  // TODO: 废弃的, 保持使用configuration中的.
   void registerMainIndicatorBuilder(
     IIndicatorKey key,
     IndicatorBuilder builder,
@@ -104,6 +105,7 @@ final class IndicatorPaintObjectManager with KlineLog {
     }
   }
 
+  // TODO: 废弃的, 保持使用configuration中的.
   void registerSubIndicatorBuilder(
     IIndicatorKey key,
     IndicatorBuilder builder,
@@ -132,12 +134,13 @@ final class IndicatorPaintObjectManager with KlineLog {
     Set<IIndicatorKey> initSubIndicatorKeys = const {},
   }) {
     /// 注册指标构造器
+    /// TODO: 待重构
     _indicatorDataIndexs.clear();
-    final mainIndicators = configuration.mainIndicatorBuilders();
+    final mainIndicators = configuration.mainIndicatorBuilders;
     for (final MapEntry(key: key, value: builder) in mainIndicators.entries) {
       registerMainIndicatorBuilder(key, builder);
     }
-    final subIndicators = configuration.subIndicatorBuilders();
+    final subIndicators = configuration.subIndicatorBuilders;
     for (final MapEntry(key: key, value: builder) in subIndicators.entries) {
       registerSubIndicatorBuilder(key, builder);
     }
@@ -229,13 +232,6 @@ final class IndicatorPaintObjectManager with KlineLog {
     return _mainPaintObject.getChildPaintObject(key);
   }
 
-  /// 获取主区[key]指定的指标配置实例
-  Indicator? getMainIndicator(IIndicatorKey key) {
-    if (!hasRegisterInMain(key)) return null;
-    final json = configuration.getConfig(key.id);
-    return _mainIndicatorBuilders[key]?.call(json);
-  }
-
   /// 在主区中添加[key]指定的指标
   PaintObject? addMainIndicator(IIndicatorKey key, IPaintContext context) {
     final indicator = _createMainPaintIndicator(key, context);
@@ -273,12 +269,12 @@ final class IndicatorPaintObjectManager with KlineLog {
     return _subPaintObjectQueue.firstWhereOrNull((obj) => obj.key == key);
   }
 
-  /// 获取副区[key]指定的指标配置实例
-  Indicator? getSubIndicator(IIndicatorKey key) {
-    if (!hasRegisterInSub(key)) return null;
-    final json = configuration.getConfig(key.id);
-    return _subIndicatorBuilders[key]?.call(json);
-  }
+  // /// 获取副区[key]指定的指标配置实例
+  // Indicator? getSubIndicator(IIndicatorKey key) {
+  //   if (!hasRegisterInSub(key)) return null;
+  //   final json = configuration.getConfig(key.id);
+  //   return _subIndicatorBuilders[key]?.call(json);
+  // }
 
   /// 在副区中添加[key]指定的指标
   PaintObject? addSubIndicator(IIndicatorKey key, IPaintContext context) {
@@ -304,20 +300,57 @@ final class IndicatorPaintObjectManager with KlineLog {
     return hasRemove;
   }
 
-  /// 更新主区中指标配置[indicator]
-  bool updateSubIndicator(Indicator indicator) {
-    final key = indicator.key;
-    if (!hasRegisterInSub(key)) return false;
-    final json = indicator.toJson();
-    final object = getSubPaintObject(key);
-    if (object == null) {
-      // 指标未被载入
-      configuration.setConfig(key.id, json);
-    } else {
-      // 指标已载入
-      object.doUpdateIndicator(indicator);
+  // /// 更新主区中指标配置[indicator]
+  // bool updateSubIndicator(Indicator indicator) {
+  //   final key = indicator.key;
+  //   if (!hasRegisterInSub(key)) return false;
+  //   final json = indicator.toJson();
+  //   final object = getSubPaintObject(key);
+  //   if (object == null) {
+  //     // 指标未被载入
+  //     configuration.setConfig(key.id, json);
+  //   } else {
+  //     // 指标已载入
+  //     object.doUpdateIndicator(indicator);
+  //   }
+  //   return true;
+  // }
+
+  /// 获取主区[key]指定的指标配置实例
+  /// 1. 先从当前载入的指标中查找
+  /// 2. 如果不存在, 则从配置缓存中加载[key]对应的指标
+  T? getIndicator<T extends Indicator>(IIndicatorKey key) {
+    if (hasRegisterInMain(key)) {
+      Indicator? indicator = mainPaintObject.getChildIndicator(key);
+      indicator ??= configuration.getIndicator(key);
+      return indicator is T ? indicator : null;
+    } else if (hasRegisterInSub(key)) {
+      final object = subPaintObjects.firstWhereOrNull((obj) => obj.key == key);
+      var indicator = object?.indicator;
+      indicator ??= configuration.getIndicator(key);
+      return indicator is T ? indicator : null;
     }
-    return true;
+    return null;
+  }
+
+  bool updateIndicator<T extends Indicator>(T indicator) {
+    final key = indicator.key;
+    if (hasRegisterInMain(key)) {
+      bool updated = mainPaintObject.updateChildIndicator(indicator);
+      if (!updated) {
+        updated = configuration.saveIndicator(indicator);
+      }
+      return updated;
+    } else if (hasRegisterInSub(key)) {
+      final object = subPaintObjects.firstWhereOrNull((obj) => obj.key == key);
+      if (object != null) {
+        object._indicator = indicator;
+        return true;
+      } else {
+        return configuration.saveIndicator(indicator);
+      }
+    }
+    return false;
   }
 
   /// 收集当前指标的计算参数

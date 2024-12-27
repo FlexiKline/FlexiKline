@@ -27,7 +27,7 @@ final class OverlayDrawObjectManager with KlineLog {
     ILogger? logger,
   }) {
     loggerDelegate = logger;
-    final drawObjectbuilders = configuration.drawObjectBuilders();
+    final drawObjectbuilders = configuration.drawObjectBuilders;
     for (final MapEntry(key: type, value: builder)
         in drawObjectbuilders.entries) {
       registerDrawOverlayObjectBuilder(type, builder);

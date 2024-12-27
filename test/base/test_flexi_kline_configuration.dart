@@ -117,16 +117,8 @@ class TestFlexiKlineConfiguration with FlexiKlineThemeConfigurationMixin {
   IFlexiKlineTheme get theme => TestFlexiKlineTheme();
 
   @override
-  Iterable<Overlay> getDrawOverlayList(String instId) {
-    throw UnimplementedError();
-  }
-
-  @override
-  void saveDrawOverlayList(String instId, Iterable<Overlay> list) {}
-
-  @override
   Map<IDrawType, DrawObjectBuilder<Overlay, DrawObject<Overlay>>>
-      drawObjectBuilders() {
+      get drawObjectBuilders {
     return {};
   }
 

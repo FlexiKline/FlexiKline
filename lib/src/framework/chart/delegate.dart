@@ -293,4 +293,17 @@ extension MainPaintManagerExt<T extends MainPaintObjectIndicator>
   PaintObject? getChildPaintObject(IIndicatorKey key) {
     return children.firstWhereOrNull((obj) => obj.key == key);
   }
+
+  Indicator? getChildIndicator(IIndicatorKey key) {
+    return getChildPaintObject(key)?.indicator;
+  }
+
+  bool updateChildIndicator(Indicator indicator) {
+    final paintObject = getChildPaintObject(indicator.key);
+    if (paintObject != null) {
+      paintObject._indicator = indicator;
+      return true;
+    }
+    return false;
+  }
 }

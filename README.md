@@ -42,20 +42,14 @@ abstract interface class IConfiguration {
   /// 时间指标配置构造器(副区)
   IndicatorBuilder<TimeBaseIndicator> get timeIndicatorBuilder;
 
-  /// 主区指标配置定制
-  Map<IIndicatorKey, IndicatorBuilder> mainIndicatorBuilders();
+ /// 主区指标配置定制
+  Map<IIndicatorKey, IndicatorBuilder> get mainIndicatorBuilders;
 
   /// 副区指标配置定制
-  Map<IIndicatorKey, IndicatorBuilder> subIndicatorBuilders();
+  Map<IIndicatorKey, IndicatorBuilder> get subIndicatorBuilders;
 
   /// 绘制工具定制
-  Map<IDrawType, DrawObjectBuilder> drawObjectBuilders();
-
-  /// 从本地获取[instId]对应的绘制实例数据列表.
-  Iterable<Overlay> getDrawOverlayList(String instId);
-
-  /// 以[instId]为key, 持久化绘制实例列表[list]到本地中.
-  void saveDrawOverlayList(String instId, Iterable<Overlay> list);
+  Map<IDrawType, DrawObjectBuilder> get drawObjectBuilders;
 }
 ```
 主题配置[IFlexiKlineTheme](https://github.com/FlexiKline/FlexiKline/blob/main/lib/src/framework/configuration.dart#L24)
@@ -117,6 +111,12 @@ class MAIndicator extends PaintObjectIndicator {
   @override
   PaintObjectBox createPaintObject(IPaintContext context) {
     return MAPaintObject(context: context, indicator: this);
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    // TODO: Generate the MA indicator config that you need to save.
+    return {"calcParam": calcParam.map((e) => e.toJson()).toList()};
   }
 }
 

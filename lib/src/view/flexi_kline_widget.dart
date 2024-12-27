@@ -16,6 +16,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 
+import '../framework/configuration.dart';
 import '../kline_controller.dart';
 import '../utils/platform_util.dart';
 import 'non_touch_gesture_detector.dart';
@@ -94,6 +95,8 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
   /// 绘制工具条位置
   Offset _position = Offset.infinite;
 
+  IConfiguration get configuration => widget.controller.configuration;
+
   @override
   void initState() {
     super.initState();
@@ -102,6 +105,8 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
     if (widget.mainSize != null) {
       widget.controller.setMainSize(widget.mainSize!);
     }
+
+    _position = configuration.getDrawToolbarPosition();
 
     widget.controller.canvasSizeChangeListener.addListener(() {
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
@@ -127,6 +132,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
 
   @override
   void dispose() {
+    configuration.saveDrawToolbarPosition(_position);
     widget.controller.dispose();
     super.dispose();
   }
@@ -200,7 +206,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
                   onDoubleTap: widget.onDoubleTap,
                 ),
           _buildMagnifier(context, canvasRect),
-          _buildDrawToolbar(context, canvasSize),
+          _buildDrawToolbar(context, canvasRect),
           Positioned.fromRect(
             rect: widget.controller.mainRect,
             child: _buildMainForgroundView(context),
@@ -254,12 +260,11 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
   }
 
   /// 绘制DrawToolBar
-  Widget _buildDrawToolbar(BuildContext context, Size canvasSize) {
+  Widget _buildDrawToolbar(BuildContext context, Rect canvasRect) {
     if (widget.drawToolbar == null) return const SizedBox.shrink();
-    if (_position == Offset.infinite) {
-      /// 初始位置为当前canvas区域左下角.
-      /// TODO: 从缓存获取上次的位置
-      _position = Offset(0, canvasSize.height - widget.drawToolbarInitHeight);
+    if (_position == Offset.infinite || !canvasRect.contains(_position)) {
+      // 如果_position无效, 则重置其为当前canvas区域左下角.
+      _position = Offset(0, canvasRect.height - widget.drawToolbarInitHeight);
     }
     return Positioned(
       left: _position.dx,
@@ -276,7 +281,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
                 }
               },
               onPanEnd: (event) {
-                /// TODO: 将位置持久化到本地
+                configuration.saveDrawToolbarPosition(_position);
               },
               child: SizedBox(
                 key: _drawToolbarKey,

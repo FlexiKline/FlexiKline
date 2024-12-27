@@ -166,6 +166,8 @@ abstract class BaseFlexiKlineTheme implements IFlexiKlineTheme {
 
 /// 通过[IFlexiKlineTheme]来配置FlexiKline基类.
 mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
+  /// 扩展[key]
+  String getCacheKey(String key) => key;
   // @override
   // FlexiKlineConfig getFlexiKlineConfig();
 
@@ -186,25 +188,28 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
   @override
   IndicatorBuilder<CandleIndicator> get candleIndicatorBuilder {
     return (json) => genCandleIndicator(
-          getInstance(json, CandleIndicator.fromJson),
+          jsonToInstance(json, CandleIndicator.fromJson),
         );
   }
 
   @override
   IndicatorBuilder<TimeIndicator> get timeIndicatorBuilder {
     return (json) => genTimeIndicator(
-          getInstance(json, TimeIndicator.fromJson),
+          jsonToInstance(json, TimeIndicator.fromJson),
         );
   }
 
   @override
-  Map<IIndicatorKey, IndicatorBuilder> mainIndicatorBuilders() => {};
+  @mustCallSuper
+  Map<IIndicatorKey, IndicatorBuilder> get mainIndicatorBuilders => {};
 
   @override
-  Map<IIndicatorKey, IndicatorBuilder> subIndicatorBuilders() => {};
+  @mustCallSuper
+  Map<IIndicatorKey, IndicatorBuilder> get subIndicatorBuilders => {};
 
   @override
-  Map<IDrawType, DrawObjectBuilder> drawObjectBuilders() => {};
+  @mustCallSuper
+  Map<IDrawType, DrawObjectBuilder> get drawObjectBuilders => {};
 
   /// Grid配置
   GridConfig genGridConfig() {

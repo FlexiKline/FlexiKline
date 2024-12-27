@@ -95,6 +95,7 @@ const timeIndicatorKey = FlexiIndicatorKey('time', label: 'Time');
 
 /// 可预计算接口
 /// 实现 [IPrecomputable] 接口, 即代表当前对象是可以进行预计算.
+@Deprecated('废弃, 性能优化完成后删除')
 abstract interface class IPrecomputable {
   dynamic get calcParam;
 }

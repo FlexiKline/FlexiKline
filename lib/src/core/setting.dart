@@ -447,19 +447,35 @@ mixin SettingBinding on KlineBindingBase
     markRepaintCross();
   }
 
-  /// 更新主区指标配置
-  bool updateMainIndicator<E extends Indicator>(E indicator) {
-    return _paintObjectManager.updateMainIndicator(indicator);
+  /// 获取[key]指定的指标实例
+  /// 1. 如果已载入, 则直接返回绘制对象的指标实例
+  /// 2. 如果示载入, 则从本地缓存中加载, 并创建指标实现.
+  T? getIndicator<T extends Indicator>(IIndicatorKey key) {
+    return _paintObjectManager.getIndicator(key);
   }
 
-  /// 更新副区指标配置
-  bool updateSubIndicator<E extends Indicator>(E indicator) {
-    return _paintObjectManager.updateSubIndicator(indicator);
+  /// 更新[indicator]指标配置
+  /// 1. 如果已载入, 则更新当前绘制对象的指标
+  /// 2. 如果未载入, 则保存到本地缓存中, 以备后续使用
+  bool updateIndicator<T extends Indicator>(T indicator) {
+    final updated = _paintObjectManager.updateIndicator(indicator);
+    if (updated) markRepaintChart();
+    return updated;
   }
+
+  // /// 更新主区指标配置
+  // bool updateMainIndicator<E extends Indicator>(E indicator) {
+  //   return _paintObjectManager.updateMainIndicator(indicator);
+  // }
+
+  // /// 更新副区指标配置
+  // bool updateSubIndicator<E extends Indicator>(E indicator) {
+  //   return _paintObjectManager.updateSubIndicator(indicator);
+  // }
 
   /// 设置时间指标配置
-  void setTimeIndicator<E extends TimeBaseIndicator>(E indicator) {
-    timePaintObject.doUpdateIndicator(indicator);
-    markRepaintChart();
-  }
+  // void setTimeIndicator<E extends TimeBaseIndicator>(E indicator) {
+  //   timePaintObject.doUpdateIndicator(indicator);
+  //   markRepaintChart();
+  // }
 }

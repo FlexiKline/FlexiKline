@@ -19,6 +19,11 @@ import '../constant.dart';
 import '../config/export.dart';
 import 'chart/indicator.dart';
 import 'draw/overlay.dart';
+import 'serializers.dart';
+
+const drawOverlayListConfigKey = '_draw_overlay_list_config';
+const drawOverlayListKey = 'list';
+const drawToolbarPositionKey = '_draw_toolbar_position';
 
 /// FlexiKline主题接口.
 ///
@@ -156,19 +161,13 @@ abstract interface class IConfiguration {
   IndicatorBuilder<TimeBaseIndicator> get timeIndicatorBuilder;
 
   /// 主区指标配置定制
-  Map<IIndicatorKey, IndicatorBuilder> mainIndicatorBuilders();
+  Map<IIndicatorKey, IndicatorBuilder> get mainIndicatorBuilders;
 
   /// 副区指标配置定制
-  Map<IIndicatorKey, IndicatorBuilder> subIndicatorBuilders();
+  Map<IIndicatorKey, IndicatorBuilder> get subIndicatorBuilders;
 
   /// 绘制工具定制
-  Map<IDrawType, DrawObjectBuilder> drawObjectBuilders();
-
-  /// 从本地获取[instId]对应的绘制实例数据列表.
-  Iterable<Overlay> getDrawOverlayList(String instId);
-
-  /// 以[instId]为key, 持久化绘制实例列表[list]到本地中.
-  void saveDrawOverlayList(String instId, Iterable<Overlay> list);
+  Map<IDrawType, DrawObjectBuilder> get drawObjectBuilders;
 
   Map<String, dynamic>? getConfig(String key);
 
@@ -176,7 +175,8 @@ abstract interface class IConfiguration {
 }
 
 extension IConfigurationExt on IConfiguration {
-  T? getInstance<T extends Indicator>(
+  /// 通过[fromJson]函数将[json]数据转换为类型[T]的实例
+  T? jsonToInstance<T>(
     Map<String, dynamic>? json,
     T Function(Map<String, dynamic>) fromJson,
   ) {
@@ -187,5 +187,57 @@ extension IConfigurationExt on IConfiguration {
       debugPrint(error.toString());
     }
     return null;
+  }
+
+  /// 从本地获取加载[key]指定的指标配置, 并转换成[Indicator]实例.
+  T? getIndicator<T extends Indicator>(IIndicatorKey key) {
+    final json = getConfig(key.id);
+    if (json == null || json.isEmpty) return null;
+    var builder = mainIndicatorBuilders[key];
+    builder ??= subIndicatorBuilders[key];
+    if (builder == null) return null;
+    final indicator = builder.call(json);
+    if (indicator is T) return indicator;
+    return null;
+  }
+
+  /// 保存[indicator]配置到本地.
+  bool saveIndicator<T extends Indicator>(T indicator) {
+    final json = indicator.toJson();
+    if (json.isEmpty) return false;
+    setConfig(indicator.key.id, json);
+    return true;
+  }
+
+  /// 从本地获取[instId]对应的绘制实例数据列表.
+  Iterable<Overlay> getDrawOverlayList(String instId) {
+    final json = getConfig('$instId$drawOverlayListConfigKey');
+    if (json == null || json.isEmpty) return [];
+    final data = json[drawOverlayListKey];
+    if (data is List<dynamic>) {
+      return data.map((e) => Overlay.fromJson(e)).toList();
+    }
+    return [];
+  }
+
+  /// 以[instId]为key, 持久化绘制实例列表[list]到本地中.
+  void saveDrawOverlayList(String instId, Iterable<Overlay> list) {
+    if (list.isEmpty) return;
+    setConfig('$instId$drawOverlayListConfigKey', {
+      drawOverlayListKey: list.map((e) => e.toJson()).toList(),
+    });
+  }
+
+  /// 获取DrawToolbar上次缓存的位置
+  Offset getDrawToolbarPosition() {
+    final json = getConfig(drawToolbarPositionKey);
+    if (json == null || json.isEmpty) return Offset.infinite;
+    return const OffsetConverter(defaultOffset: Offset.infinite).fromJson(json);
+  }
+
+  /// 保存DrawToolbar位置[position]
+  void saveDrawToolbarPosition(Offset position) {
+    final json = const OffsetConverter().toJson(position);
+    setConfig(drawToolbarPositionKey, json);
   }
 }
