@@ -277,6 +277,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
             child: GestureDetector(
               onPanUpdate: (DragUpdateDetails details) {
                 if (_updateDrawToolbarPosition(_position + details.delta)) {
+                  // TODO: 优化此处避免使用setState
                   setState(() {});
                 }
               },

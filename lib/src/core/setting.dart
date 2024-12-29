@@ -55,6 +55,13 @@ mixin SettingBinding on KlineBindingBase
   }
 
   void _invokeSizeChanged({bool force = false}) {
+    if (isFixedSizeMode) {
+      final mainSize = mainRect.size;
+      if (mainSize != mainPaintObject.size) {
+        final updated = mainPaintObject.doUpdateLayout(size: mainSize);
+        force = updated || force;
+      }
+    }
     _canvasSizeChangeListener.value = canvasRect;
     if (force) _canvasSizeChangeListener.notifyListeners();
     markRepaintChart(reset: force);
@@ -136,9 +143,7 @@ mixin SettingBinding on KlineBindingBase
 
   /// 主区域大小设置
   void setMainSize(Size size) {
-    if (isFixedSizeMode ||
-        size.width < mainMinSize.width ||
-        size.height < mainMinimumHeight) {
+    if (size.width < mainMinSize.width || size.height < mainMinimumHeight) {
       return;
     }
 
@@ -309,7 +314,7 @@ mixin SettingBinding on KlineBindingBase
 
   /// 在主图中添加指标
   void addIndicatorInMain(IIndicatorKey key) {
-    final newObj = _paintObjectManager.addMainIndicator(key, this);
+    final newObj = _paintObjectManager.addPaintObjectInMain(key, this);
     if (newObj != null) {
       // TODO: 后续优化执行时机
       newObj.precompute(Range(0, curKlineData.length), reset: true);
@@ -320,7 +325,7 @@ mixin SettingBinding on KlineBindingBase
 
   /// 删除主图中[key]指定的指标
   void delIndicatorInMain(IIndicatorKey key) {
-    if (_paintObjectManager.delMainIndicator(key)) {
+    if (_paintObjectManager.delPaintObjectInMain(key)) {
       markRepaintChart(reset: true);
       markRepaintCross();
     }
@@ -328,7 +333,7 @@ mixin SettingBinding on KlineBindingBase
 
   /// 在副图中添加指标
   void addIndicatorInSub(IIndicatorKey key) {
-    final newObj = _paintObjectManager.addSubIndicator(key, this);
+    final newObj = _paintObjectManager.addPaintObjectInSub(key, this);
     if (newObj != null) {
       // TODO: 后续优化执行时机
       newObj.precompute(Range(0, curKlineData.length), reset: true);
@@ -339,7 +344,7 @@ mixin SettingBinding on KlineBindingBase
 
   /// 删除副图[key]指定的指标
   void delIndicatorInSub(IIndicatorKey key) {
-    if (_paintObjectManager.delSubIndicator(key)) {
+    if (_paintObjectManager.delPaintObjectInSub(key)) {
       _flexiKlineConfig.sub.remove(key);
       _invokeSizeChanged();
     }
@@ -462,20 +467,4 @@ mixin SettingBinding on KlineBindingBase
     if (updated) markRepaintChart();
     return updated;
   }
-
-  // /// 更新主区指标配置
-  // bool updateMainIndicator<E extends Indicator>(E indicator) {
-  //   return _paintObjectManager.updateMainIndicator(indicator);
-  // }
-
-  // /// 更新副区指标配置
-  // bool updateSubIndicator<E extends Indicator>(E indicator) {
-  //   return _paintObjectManager.updateSubIndicator(indicator);
-  // }
-
-  /// 设置时间指标配置
-  // void setTimeIndicator<E extends TimeBaseIndicator>(E indicator) {
-  //   timePaintObject.doUpdateIndicator(indicator);
-  //   markRepaintChart();
-  // }
 }

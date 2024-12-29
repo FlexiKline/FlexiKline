@@ -80,8 +80,17 @@ abstract class PaintObject<T extends Indicator> extends IndicatorObject
 
   bool get hasParentObject => _parent != null;
 
+  // 指标配置发生变改
+  void didUpdateIndicator(T oldIndicator) {}
+
   @mustCallSuper
   void dispose() {
+    final json = indicator.toJson();
+    assert(() {
+      logi('dispose > PaintOjbect[$key] > $json');
+      return true;
+    }());
+    _context.setConfig(key.id, json);
     _parent = null;
   }
 

@@ -67,7 +67,7 @@ abstract interface class IDraw {
 }
 
 /// PaintContext 绘制Indicator功能集合
-abstract interface class IPaintContext implements ILogger {
+abstract interface class IPaintContext implements IStorage, ILogger {
   // ITimeRectConfig? get timeRectConfig;
 
   /// 当前canvas绘制区域第一根蜡烛绘制的偏移量
@@ -129,7 +129,7 @@ abstract interface class IPaintContext implements ILogger {
 }
 
 /// DrawContext 绘制Overlay功能集合
-abstract interface class IDrawContext implements ILogger {
+abstract interface class IDrawContext implements IStorage, ILogger {
   /// 画板Size = [mainRect] + [subRect]
   Rect get canvasRect;
 

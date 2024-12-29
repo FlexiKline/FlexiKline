@@ -141,8 +141,14 @@ mixin FlexiKlineThemeTextStyle implements IFlexiKlineTheme {
       );
 }
 
+abstract interface class IStorage {
+  Map<String, dynamic>? getConfig(String key);
+
+  Future<bool> setConfig(String key, Map<String, dynamic> value);
+}
+
 /// FlexiKline配置接口
-abstract interface class IConfiguration {
+abstract interface class IConfiguration implements IStorage {
   /// 当前配置主题
   IFlexiKlineTheme get theme;
 
@@ -168,36 +174,45 @@ abstract interface class IConfiguration {
 
   /// 绘制工具定制
   Map<IDrawType, DrawObjectBuilder> get drawObjectBuilders;
+}
 
-  Map<String, dynamic>? getConfig(String key);
+typedef FromJson<T> = T Function(Map<String, dynamic>);
 
-  Future<bool> setConfig(String key, Map<String, dynamic> value);
+extension FromJsonExt<T> on FromJson<T> {
+  /// 将[json]数据转换为类型[T]的实例
+  T? toInstance(Map<String, dynamic>? json) {
+    return jsonToInstance(json, this);
+  }
+}
+
+/// 通过[fromJson]函数将[json]数据转换为类型[T]的实例
+T? jsonToInstance<T>(Map<String, dynamic>? json, FromJson<T> fromJson) {
+  if (json == null || json.isEmpty) return null;
+  try {
+    return fromJson(json);
+  } catch (error, stack) {
+    debugPrintStack(stackTrace: stack, label: error.toString());
+  }
+  return null;
 }
 
 extension IConfigurationExt on IConfiguration {
-  /// 通过[fromJson]函数将[json]数据转换为类型[T]的实例
-  T? jsonToInstance<T>(
-    Map<String, dynamic>? json,
-    T Function(Map<String, dynamic>) fromJson,
-  ) {
-    if (json == null || json.isEmpty) return null;
-    try {
-      return fromJson(json);
-    } catch (error, _) {
-      debugPrint(error.toString());
-    }
-    return null;
-  }
-
   /// 从本地获取加载[key]指定的指标配置, 并转换成[Indicator]实例.
-  T? getIndicator<T extends Indicator>(IIndicatorKey key) {
-    final json = getConfig(key.id);
-    if (json == null || json.isEmpty) return null;
-    var builder = mainIndicatorBuilders[key];
-    builder ??= subIndicatorBuilders[key];
-    if (builder == null) return null;
-    final indicator = builder.call(json);
-    if (indicator is T) return indicator;
+  /// 如果指定[builder], 则不会从配置中查找.
+  T? getIndicator<T extends Indicator>(
+    IIndicatorKey key, {
+    IndicatorBuilder? builder,
+  }) {
+    try {
+      final json = getConfig(key.id);
+      builder ??= mainIndicatorBuilders[key];
+      builder ??= subIndicatorBuilders[key];
+      if (builder == null) return null;
+      final indicator = builder.call(json);
+      if (indicator is T) return indicator;
+    } catch (error, stack) {
+      debugPrintStack(stackTrace: stack, label: error.toString());
+    }
     return null;
   }
 

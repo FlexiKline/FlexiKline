@@ -187,7 +187,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
       }
     }
 
-    if (_upObject != null && !isFixedSizeMode) {
+    if (_upObject != null) {
       markRepaintGrid();
       return true;
     }

@@ -89,8 +89,10 @@ extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
     );
   }
 
-  void doUpdateIndicator<E extends Indicator>(E indicator) {
-    _indicator = indicator;
+  void doDidUpdateIndicator(T newIndicator) {
+    final T oldIndicator = indicator;
+    _indicator = newIndicator;
+    didUpdateIndicator(oldIndicator);
   }
 }
 
@@ -301,7 +303,7 @@ extension MainPaintManagerExt<T extends MainPaintObjectIndicator>
   bool updateChildIndicator(Indicator indicator) {
     final paintObject = getChildPaintObject(indicator.key);
     if (paintObject != null) {
-      paintObject._indicator = indicator;
+      paintObject.doDidUpdateIndicator(indicator);
       return true;
     }
     return false;

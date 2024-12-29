@@ -70,6 +70,16 @@ abstract class KlineBindingBase
   T getInstance<T extends KlineBindingBase>(T instance) {
     return instance;
   }
+
+  @override
+  Map<String, dynamic>? getConfig(String key) {
+    return configuration.getConfig(key);
+  }
+
+  @override
+  Future<bool> setConfig(String key, Map<String, dynamic> value) {
+    return configuration.setConfig(key, value);
+  }
 }
 
 /// KlineController内部扩展
