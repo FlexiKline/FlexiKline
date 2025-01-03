@@ -81,9 +81,17 @@ abstract class PaintObject<T extends Indicator> extends IndicatorObject
   bool get hasParentObject => _parent != null;
 
   // 指标配置发生变改
-  void didUpdateIndicator(T oldIndicator) {}
+  @mustCallSuper
+  @protected
+  void didUpdateIndicator(covariant T oldIndicator) {
+    final newCalcParam = indicator.calcParam;
+    if (oldIndicator.calcParam != newCalcParam && newCalcParam != null) {
+      precompute(klineData.computableRange, reset: true);
+    }
+  }
 
   @mustCallSuper
+  @protected
   void dispose() {
     final json = indicator.toJson();
     assert(() {

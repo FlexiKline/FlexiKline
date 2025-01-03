@@ -129,6 +129,12 @@ class MAPaintObject<T extends MAIndicator> extends PaintObjectBox<T> {
   }
 
   @override
+  void didUpdateIndicator(MAIndicator oldIndicator) {
+    super.didUpdateIndicator(oldIndicator);
+    // TODO: Check the old and new indicator configurations
+  }
+
+  @override
   MinMax? initState(int start, int end) {
     // TODO: 返回[start ~ end)之间的数据范围, 即最大最小的MA指标值.
   }

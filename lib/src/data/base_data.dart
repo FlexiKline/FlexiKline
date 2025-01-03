@@ -146,6 +146,8 @@ abstract class BaseData with KlineLog {
     end = startIndex + maxCandleCount;
   }
 
+  Range get computableRange => Range(0, length);
+
   Range? get drawTimeRange {
     if (checkStartAndEnd(start, end)) {
       return Range(list[start].ts, list[end].ts);
