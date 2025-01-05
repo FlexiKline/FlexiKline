@@ -28,6 +28,7 @@ class TipsConfig {
   const TipsConfig({
     this.label = '',
     this.precision,
+    this.isShow = true,
     this.style = const TextStyle(
       fontSize: defaulTextSize,
       color: Color(0xFF000000),
@@ -39,6 +40,7 @@ class TipsConfig {
   TipsConfig.style({
     this.label = '',
     this.precision,
+    this.isShow = true,
     Color color = const Color(0xFF000000),
     double fontSize = 10,
     TextOverflow overflow = TextOverflow.ellipsis,
@@ -64,6 +66,7 @@ class TipsConfig {
 
   final String label;
   final int? precision;
+  final bool isShow;
   final TextStyle style;
 
   // 如果未指定精度, 使用默认精度4
@@ -72,6 +75,7 @@ class TipsConfig {
   // 获取展示精度; 如果precision未指定, 使用def值.
   int getP(int def) => precision ?? def;
 
+  @Deprecated('废弃') // TODO: 废弃
   Color get color => style.color ?? const Color(0xFF000000);
 
   double get textHeight => textSize * (style.height ?? defaultTextHeight);

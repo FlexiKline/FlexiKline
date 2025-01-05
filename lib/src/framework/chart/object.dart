@@ -80,12 +80,17 @@ abstract class PaintObject<T extends Indicator> extends IndicatorObject
 
   bool get hasParentObject => _parent != null;
 
+  @protected
+  bool shouldPrecompute(covariant T oldIndicator) {
+    return oldIndicator.calcParam != indicator.calcParam &&
+        indicator.calcParam != null;
+  }
+
   // 指标配置发生变改
   @mustCallSuper
   @protected
   void didUpdateIndicator(covariant T oldIndicator) {
-    final newCalcParam = indicator.calcParam;
-    if (oldIndicator.calcParam != newCalcParam && newCalcParam != null) {
+    if (shouldPrecompute(oldIndicator)) {
       precompute(klineData.computableRange, reset: true);
     }
   }

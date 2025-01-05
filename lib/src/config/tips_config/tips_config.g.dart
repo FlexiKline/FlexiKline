@@ -11,6 +11,8 @@ abstract class _$TipsConfigCWProxy {
 
   TipsConfig precision(int? precision);
 
+  TipsConfig isShow(bool isShow);
+
   TipsConfig style(TextStyle style);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `TipsConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
@@ -22,6 +24,7 @@ abstract class _$TipsConfigCWProxy {
   TipsConfig call({
     String? label,
     int? precision,
+    bool? isShow,
     TextStyle? style,
   });
 }
@@ -39,6 +42,9 @@ class _$TipsConfigCWProxyImpl implements _$TipsConfigCWProxy {
   TipsConfig precision(int? precision) => this(precision: precision);
 
   @override
+  TipsConfig isShow(bool isShow) => this(isShow: isShow);
+
+  @override
   TipsConfig style(TextStyle style) => this(style: style);
 
   @override
@@ -52,6 +58,7 @@ class _$TipsConfigCWProxyImpl implements _$TipsConfigCWProxy {
   TipsConfig call({
     Object? label = const $CopyWithPlaceholder(),
     Object? precision = const $CopyWithPlaceholder(),
+    Object? isShow = const $CopyWithPlaceholder(),
     Object? style = const $CopyWithPlaceholder(),
   }) {
     return TipsConfig(
@@ -63,6 +70,10 @@ class _$TipsConfigCWProxyImpl implements _$TipsConfigCWProxy {
           ? _value.precision
           // ignore: cast_nullable_to_non_nullable
           : precision as int?,
+      isShow: isShow == const $CopyWithPlaceholder() || isShow == null
+          ? _value.isShow
+          // ignore: cast_nullable_to_non_nullable
+          : isShow as bool,
       style: style == const $CopyWithPlaceholder() || style == null
           ? _value.style
           // ignore: cast_nullable_to_non_nullable
@@ -84,6 +95,7 @@ extension $TipsConfigCopyWith on TipsConfig {
 TipsConfig _$TipsConfigFromJson(Map<String, dynamic> json) => TipsConfig(
       label: json['label'] as String? ?? '',
       precision: (json['precision'] as num?)?.toInt(),
+      isShow: json['isShow'] as bool? ?? true,
       style: json['style'] == null
           ? const TextStyle(
               fontSize: defaulTextSize,
@@ -106,6 +118,7 @@ Map<String, dynamic> _$TipsConfigToJson(TipsConfig instance) {
   }
 
   writeNotNull('precision', instance.precision);
+  val['isShow'] = instance.isShow;
   val['style'] = const TextStyleConverter().toJson(instance.style);
   return val;
 }
