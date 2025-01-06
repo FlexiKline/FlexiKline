@@ -49,6 +49,15 @@ class OverlayObject implements Comparable<OverlayObject> {
     return Overlay(key: key, type: type, line: line);
   }
 
+  void assertCheck([bool ignore = false]) {
+    if (ignore) return;
+    assert(
+      points.length == type.steps,
+      '${type.id}(${type.groupId}) only takes ${type.steps} point, but it has ${points.length}',
+      //'${type.id}(${type.groupId}) draw points.length:${points.length} must be equals ${type.steps}',
+    );
+  }
+
   // void setDrawParam<T>(T params) {
   //   // ignore: avoid_dynamic_calls
   //   dynamic _defaultToEncodable(dynamic object) => object.toJson();

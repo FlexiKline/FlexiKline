@@ -312,6 +312,20 @@ mixin SettingBinding on KlineBindingBase
     return top;
   }
 
+  ///// Indicator operation /////
+
+  bool hasRegisterInMain(IIndicatorKey key) {
+    return _paintObjectManager.hasRegisterInMain(key);
+  }
+
+  bool hasRegisterInSub(IIndicatorKey key) {
+    return _paintObjectManager.hasRegisterInSub(key);
+  }
+
+  bool hasRegisterIndicator(IIndicatorKey key) {
+    return hasRegisterInMain(key) || hasRegisterInSub(key);
+  }
+
   /// 在主图中添加指标
   void addIndicatorInMain(IIndicatorKey key) {
     final newObj = _paintObjectManager.addPaintObjectInMain(key, this);
@@ -348,6 +362,16 @@ mixin SettingBinding on KlineBindingBase
       _flexiKlineConfig.sub.remove(key);
       _invokeSizeChanged();
     }
+  }
+
+  /// 恢复所有注册的指标配置为默认
+  bool restoreAllIndicator() {
+    return _paintObjectManager.restoreAllIndicator();
+  }
+
+  /// 恢复[key]指定的指标配置为默认
+  bool restoreIndicator(IIndicatorKey key) {
+    return _paintObjectManager.restoreIndicator(key);
   }
 
   //// Config ////

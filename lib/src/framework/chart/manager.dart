@@ -289,6 +289,23 @@ final class IndicatorPaintObjectManager with KlineLog {
     return false;
   }
 
+  bool restoreIndicator(IIndicatorKey key) {
+    configuration.delIndicator(key);
+    final indicator = configuration.getIndicator(key);
+    if (indicator != null) {
+      return updateIndicator(indicator);
+    }
+    return false;
+  }
+
+  bool restoreAllIndicator() {
+    bool result = false;
+    for (var key in [...supportMainIndicatorKeys, ...supportSubIndicatorKeys]) {
+      result = restoreIndicator(key) && result;
+    }
+    return result;
+  }
+
   /// 收集当前指标的计算参数
   /// 考虑在主区/副区同时存在的指标.
   @Deprecated('废弃, 由PaintObject执行precompute')

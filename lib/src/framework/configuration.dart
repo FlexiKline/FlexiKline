@@ -224,6 +224,10 @@ extension IConfigurationExt on IConfiguration {
     return true;
   }
 
+  void delIndicator(IIndicatorKey key) {
+    setConfig(key.id, {});
+  }
+
   /// 从本地获取[instId]对应的绘制实例数据列表.
   Iterable<Overlay> getDrawOverlayList(String instId) {
     final json = getConfig('$instId$drawOverlayListConfigKey');
