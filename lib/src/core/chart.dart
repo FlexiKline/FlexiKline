@@ -262,4 +262,13 @@ mixin ChartBinding
   void onChartScaleEnd() {
     _setCandleWidth(candleWidth, sync: true);
   }
+
+  @override
+  bool onTap(Offset position) {
+    if (super.onTap(position)) return true;
+    for (var paintObject in [mainPaintObject, ...subPaintObjects]) {
+      if (paintObject.handleTap(position)) return true;
+    }
+    return false;
+  }
 }

@@ -183,7 +183,6 @@ mixin PaintObjectBoundingMixin on IndicatorObject implements IPaintBoundingBox {
   double clampDyInChart(double dy) => dy.clamp(chartRect.top, chartRect.bottom);
 
   // Tips区域向下移动height.
-  @override
   Rect shiftNextTipsRect(double height) {
     return drawableRect.shiftYAxis(height);
   }

@@ -102,6 +102,10 @@ class TestFlexiKlineTheme implements IFlexiKlineTheme {
 
   @override
   Color tooltipTextColor = const Color(0xFF949494);
+
+  @override
+  // TODO: implement latestPriceTextBg
+  Color get latestPriceTextBg => throw UnimplementedError();
 }
 
 class TestFlexiKlineConfiguration with FlexiKlineThemeConfigurationMixin {

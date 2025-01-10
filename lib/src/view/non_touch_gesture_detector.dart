@@ -368,6 +368,13 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
           break;
       }
     }
+
+    // 这里检测是否命中指标图定制位置
+    final ret = controller.onTap(details.localPosition);
+    if (ret) {
+      logd("onTapUp handled! :$details");
+      return;
+    }
   }
 
   /// 平移开始.

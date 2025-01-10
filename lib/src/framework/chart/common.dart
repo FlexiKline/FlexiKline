@@ -116,9 +116,6 @@ abstract interface class IPaintBoundingBox {
 
   /// 当前指标图底部绘制区域
   Rect get bottomRect;
-
-  /// 设置下一个Tips的绘制区域.
-  Rect shiftNextTipsRect(double height);
 }
 
 /// 指标图的绘制数据初始化接口

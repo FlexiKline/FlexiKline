@@ -26,7 +26,7 @@ abstract class IndicatorObject<T extends Indicator>
 
   // ignore: prefer_final_fields
   T _indicator;
-  final IPaintContext _context;
+  late final IPaintContext _context;
 
   T get indicator => _indicator;
 
@@ -114,6 +114,10 @@ abstract class PaintObject<T extends Indicator> extends IndicatorObject
   @override
   void precompute(Range range, {bool reset = false}) {}
 
+  /// 处理Tap事件
+  /// 注: 自行处理[position]位置的点击事件
+  bool handleTap(Offset position) => false;
+
   @override
   String get logTag => '${super.logTag}\t${indicator.key.toString()}';
 }
@@ -137,6 +141,10 @@ abstract class CandleBasePaintObject<T extends CandleBaseIndicator>
     required super.context,
     required T super.indicator,
   });
+
+  void moveToInitialPosition() {
+    (_context as StateBinding).moveToInitialPosition();
+  }
 
   @override
   T get indicator => _indicator as T;
@@ -181,6 +189,14 @@ final class MainPaintObject<T extends MainPaintObjectIndicator>
   @override
   Rect get drawableRect {
     return _drawableRect ??= Rect.fromLTWH(0, 0, size.width, size.height);
+  }
+
+  @override
+  bool handleTap(Offset position) {
+    for (var object in children) {
+      if (object.handleTap(position)) return true;
+    }
+    return false;
   }
 
   @override

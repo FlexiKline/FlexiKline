@@ -65,6 +65,13 @@ abstract class KlineBindingBase
     if (autoSave) storeFlexiKlineConfig();
   }
 
+  @protected
+  @mustCallSuper
+  bool onTap(Offset position) {
+    logd("onTap base");
+    return false;
+  }
+
   KlineBindingBase get instance => this;
 
   T getInstance<T extends KlineBindingBase>(T instance) {

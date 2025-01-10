@@ -224,6 +224,15 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
       }
     }
 
+    if (!controller.isCrossing) {
+      // 这里检测是否命中指标图定制位置
+      final ret = controller.onTap(details.localPosition);
+      if (ret) {
+        logd("onTapUp handled! :$details");
+        return;
+      }
+    }
+
     logd("onTapUp cross start details:$details");
     _tapData = GestureData.tap(details.localPosition);
     final ret = controller.onCrossStart(_tapData!);

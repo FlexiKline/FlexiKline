@@ -281,9 +281,9 @@ class CandlePaintObject<T extends CandleIndicator>
     // 计算最新价YAxis位置.
     double dy;
     if (model.close >= minMax.max) {
-      dy = chartRect.top; // 画板顶部展示.
+      dy = drawableRect.top; // 画板顶部展示.
     } else if (model.close <= minMax.min) {
-      dy = chartRect.bottom; // 画板底部展示.
+      dy = drawableRect.bottom; // 画板底部展示.
     } else {
       dy = clampDyInChart(valueToDy(model.close));
     }
@@ -312,14 +312,14 @@ class CandlePaintObject<T extends CandleIndicator>
     }
 
     // 计算最新价YAxis位置.
-    double dy;
-    if (model.close >= minMax.max) {
-      dy = chartRect.top; // 画板顶部展示.
-    } else if (model.close <= minMax.min) {
-      dy = chartRect.bottom; // 画板底部展示.
-    } else {
-      dy = clampDyInChart(valueToDy(model.close));
-    }
+    double dy = clampDyInChart(valueToDy(model.close));
+    // if (model.close >= minMax.max) {
+    //   dy = chartRect.top; // 画板顶部展示.
+    // } else if (model.close <= minMax.min) {
+    //   dy = chartRect.bottom; // 画板底部展示.
+    // } else {
+    //   dy = clampDyInChart(valueToDy(model.close));
+    // }
 
     // 计算最新价XAxis位置.
     final rdx = chartRect.right;
@@ -333,17 +333,7 @@ class CandlePaintObject<T extends CandleIndicator>
 
       ldx = startCandleDx;
 
-      /// 绘制首根蜡烛到rdx的刻度线.
-      final latestPath = Path();
-      latestPath.moveTo(rdx, dy);
-      latestPath.lineTo(ldx, dy);
-      canvas.drawLineByConfig(
-        latestPath,
-        latest.line.of(paintColor: theme.markLine),
-      );
-
       TextAreaConfig textConfig;
-
       if (indicator.useCandleColorAsLatestBg) {
         textConfig = latest.text.copyWith(
           style: latest.text.style.copyWith(color: const Color(0xFFFFFFFF)),
@@ -359,6 +349,23 @@ class CandlePaintObject<T extends CandleIndicator>
       }
 
       Color? background = textConfig.background;
+      BorderRadius? borderRadius = textConfig.borderRadius;
+
+      final halfHeight = textConfig.areaHeight / 2;
+      // 修正dy位置
+      dy = dy.clamp(
+        drawableRect.top + halfHeight,
+        drawableRect.bottom - halfHeight,
+      );
+
+      /// 绘制首根蜡烛到rdx的刻度线.
+      final latestPath = Path();
+      latestPath.moveTo(rdx, dy);
+      latestPath.lineTo(ldx, dy);
+      canvas.drawLineByConfig(
+        latestPath,
+        latest.line.of(paintColor: theme.markLine),
+      );
 
       /// 最新价文本和样式配置
       final text = formatPrice(
@@ -366,8 +373,6 @@ class CandlePaintObject<T extends CandleIndicator>
         precision: klineData.req.precision,
         cutInvalidZero: false,
       );
-
-      BorderRadius? borderRadius = textConfig.borderRadius;
 
       /// 倒计时Text
       String? countDownText;
@@ -389,7 +394,7 @@ class CandlePaintObject<T extends CandleIndicator>
 
       final offset = Offset(
         rdx - latest.spacing,
-        dy - latest.text.areaHeight / 2, // 垂直居中
+        dy - halfHeight, // 垂直居中
       );
 
       /// 绘制最新价标记
@@ -458,6 +463,18 @@ class CandlePaintObject<T extends CandleIndicator>
 
       ldx = 0;
 
+      final lastText = last.text.of(
+        textColor: theme.lastPriceTextColor,
+        background: theme.lastPriceTextBg,
+      );
+
+      final halfHeight = lastText.areaHeight / 2;
+      // 修正dy位置
+      dy = dy.clamp(
+        drawableRect.top + halfHeight,
+        drawableRect.bottom - halfHeight,
+      );
+
       /// 绘制横穿画板的最后价刻度线.
       final lastPath = Path();
       if (_lastTextSize != null) {
@@ -481,16 +498,11 @@ class CandlePaintObject<T extends CandleIndicator>
         cutInvalidZero: true,
       );
 
-      final lastText = last.text.of(
-        textColor: theme.lastPriceTextColor,
-        background: theme.lastPriceTextBg,
-      );
-
       /// 绘制最后价标记
       _lastTextSize = canvas.drawTextArea(
         offset: Offset(
           rdx + _latestTextOffset - last.spacing,
-          dy - lastText.areaHeight / 2, // 居中
+          dy - halfHeight, // 居中
         ),
         drawDirection: DrawDirection.rtl,
         drawableRect: drawableRect,
@@ -508,5 +520,15 @@ class CandlePaintObject<T extends CandleIndicator>
     Rect? tipsRect,
   }) {
     return null;
+  }
+
+  @override
+  bool handleTap(Offset position) {
+    if (lastTextAreaRect != null && lastTextAreaRect!.include(position)) {
+      // 命中最后价区域, 此时应该移动到蜡烛图初始位置
+      moveToInitialPosition();
+      return true;
+    }
+    return false;
   }
 }
