@@ -41,9 +41,17 @@ extension IndicatorObjectExt on IndicatorObject {
 
   double get candleLineWidth => settingConfig.candleLineWidth;
 
-  Color get longColor => settingConfig.longColor;
+  /// Theme Color
+  IFlexiKlineTheme get theme => _context.theme;
 
-  Color get shortColor => settingConfig.shortColor;
+  /// 全局默认的刻度值文本配置.
+  TextAreaConfig get defTicksTextConfig => settingConfig.ticksText.of(
+        textColor: theme.ticksTextColor,
+      );
+
+  Color get longColor => theme.long;
+
+  Color get shortColor => theme.short;
 
   /// 指标图 涨跌 bar/line 配置
   Color get longTintColor => longColor.withOpacity(settingConfig.opacity);
@@ -267,7 +275,7 @@ mixin PaintYAxisTicksMixin<T extends Indicator> on PaintObject<T> {
 
       final text = fromatTicksValue(value, precision: precision);
 
-      final ticksText = settingConfig.ticksText;
+      final ticksText = defTicksTextConfig;
 
       canvas.drawTextArea(
         offset: Offset(

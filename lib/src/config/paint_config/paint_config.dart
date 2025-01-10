@@ -36,6 +36,11 @@ class PaintConfig {
   final BlendMode blendMode;
   final bool isAntiAlias;
 
+  PaintConfig of({Color? color}) {
+    if (color == null || this.color == color) return this;
+    return copyWith(color: color);
+  }
+
   Paint get paint => Paint()
     ..color = color
     ..style = style

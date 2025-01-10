@@ -43,6 +43,11 @@ class LineConfig {
   /// 画笔
   final PaintConfig paint;
 
+  LineConfig of({Color? paintColor}) {
+    if (paintColor == null || paintColor == paint.color) return this;
+    return copyWith(paint: paint.of(color: paintColor));
+  }
+
   Paint get linePaint => paint.paint;
 
   factory LineConfig.fromJson(Map<String, dynamic> json) =>

@@ -80,11 +80,12 @@ abstract class BaseFlexiKlineTheme implements IFlexiKlineTheme {
     required this.short,
     required this.chartBg,
     required this.tooltipBg,
-    required this.countDownTextBg,
     required this.crossTextBg,
     required this.drawTextBg,
     this.transparent = Colors.transparent,
+    required this.latestPriceTextBg,
     required this.lastPriceTextBg,
+    required this.countDownTextBg,
     required this.gridLine,
     required this.crossColor,
     required this.drawColor,
@@ -104,6 +105,7 @@ abstract class BaseFlexiKlineTheme implements IFlexiKlineTheme {
     required Color markBg,
     required this.crossTextBg,
     this.transparent = Colors.transparent,
+    required this.latestPriceTextBg,
     required this.lastPriceTextBg,
     required Color color,
     required this.gridLine,
@@ -128,15 +130,17 @@ abstract class BaseFlexiKlineTheme implements IFlexiKlineTheme {
   @override
   late Color tooltipBg;
   @override
-  late Color countDownTextBg;
-  @override
   late Color crossTextBg;
   @override
   late Color drawTextBg;
   @override
   late Color transparent;
   @override
+  late Color latestPriceTextBg;
+  @override
   late Color lastPriceTextBg;
+  @override
+  late Color countDownTextBg;
 
   /// 分隔线
   @override
@@ -267,9 +271,6 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
   SettingConfig genSettingConfig() {
     return SettingConfig(
       pixel: theme.pixel,
-      textColor: theme.textColor,
-      longColor: theme.long,
-      shortColor: theme.short,
       opacity: 0.5,
 
       /// 内置LoadingView样式配置
@@ -294,7 +295,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       ticksText: TextAreaConfig(
         style: TextStyle(
           fontSize: theme.normalTextSize,
-          color: theme.ticksTextColor,
+          // color: theme.ticksTextColor,
           overflow: TextOverflow.ellipsis,
           height: defaultTextHeight,
         ),
@@ -336,12 +337,12 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       ),
       ticksText: TextAreaConfig(
         style: TextStyle(
-          color: theme.crossTextColor,
+          // color: theme.crossTextColor,
           fontSize: theme.normalTextSize,
           fontWeight: FontWeight.normal,
           height: defaultTextHeight,
         ),
-        background: theme.crossTextBg,
+        // background: theme.crossTextBg,
         padding: EdgeInsets.all(2 * theme.scale),
         border: BorderSide.none,
         borderRadius: BorderRadius.all(
@@ -469,14 +470,14 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
           type: LineType.solid,
           length: 20 * theme.scale,
           paint: PaintConfig(
-            color: theme.markLine,
+            // color: theme.markLine,
             strokeWidth: 0.5 * theme.scale,
           ),
         ),
         text: TextAreaConfig(
           style: TextStyle(
             fontSize: theme.normalTextSize,
-            color: theme.textColor,
+            // color: theme.textColor,
             overflow: TextOverflow.ellipsis,
             height: defaultTextHeight,
           ),
@@ -488,14 +489,14 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
           type: LineType.solid,
           length: 20 * theme.scale,
           paint: PaintConfig(
-            color: theme.markLine,
+            // color: theme.markLine,
             strokeWidth: 0.5 * theme.scale,
           ),
         ),
         text: TextAreaConfig(
           style: TextStyle(
             fontSize: theme.normalTextSize,
-            color: theme.textColor,
+            // color: theme.textColor,
             overflow: TextOverflow.ellipsis,
             height: defaultTextHeight,
           ),
@@ -508,24 +509,24 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
           type: LineType.dashed,
           dashes: [3, 3],
           paint: PaintConfig(
-            color: theme.markLine,
+            // color: theme.markLine,
             strokeWidth: 0.5 * theme.scale,
           ),
         ),
         text: TextAreaConfig(
           style: TextStyle(
             fontSize: theme.normalTextSize,
-            color: theme.lastPriceTextColor,
+            // color: theme.lastPriceTextColor,
             overflow: TextOverflow.ellipsis,
             height: defaultTextHeight,
             textBaseline: TextBaseline.alphabetic,
           ),
-          background: theme.lastPriceTextBg,
+          // background: theme.lastPriceTextBg,
           padding: EdgeInsets.symmetric(
             horizontal: 4 * theme.scale,
             vertical: 2 * theme.scale,
           ),
-          border: BorderSide(color: theme.transparent),
+          // border: BorderSide(color: theme.transparent),
           borderRadius: BorderRadius.all(Radius.circular(10 * theme.scale)),
         ),
       ),
@@ -536,7 +537,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
           type: LineType.dashed,
           dashes: [3, 3],
           paint: PaintConfig(
-            color: theme.markLine,
+            // color: theme.markLine,
             strokeWidth: 0.5 * theme.scale,
           ),
         ),
@@ -558,12 +559,12 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       countDown: TextAreaConfig(
         style: TextStyle(
           fontSize: theme.normalTextSize,
-          color: theme.textColor,
+          // color: theme.textColor,
           overflow: TextOverflow.ellipsis,
           height: defaultTextHeight,
         ),
         textAlign: TextAlign.center,
-        background: theme.countDownTextBg,
+        // background: theme.countDownTextBg,
         padding: theme.textPading,
         borderRadius: BorderRadius.all(Radius.circular(2 * theme.scale)),
       ),
@@ -579,7 +580,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       timeTick: TextAreaConfig(
         style: TextStyle(
           fontSize: theme.normalTextSize,
-          color: theme.ticksTextColor,
+          // color: theme.ticksTextColor,
           overflow: TextOverflow.ellipsis,
           height: defaultTextHeight,
         ),

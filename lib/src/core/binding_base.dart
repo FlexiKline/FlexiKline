@@ -72,6 +72,9 @@ abstract class KlineBindingBase
   }
 
   @override
+  IFlexiKlineTheme get theme => configuration.theme;
+
+  @override
   Map<String, dynamic>? getConfig(String key) {
     return configuration.getConfig(key);
   }

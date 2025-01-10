@@ -75,7 +75,9 @@ class TimePaintObject<T extends TimeIndicator> extends TimeBasePaintObject<T> {
         final offset = Offset(dx, chartRect.top);
 
         // 绘制时间刻度.
-        final timeTick = indicator.timeTick;
+        final timeTick = indicator.timeTick.of(
+          textColor: theme.ticksTextColor,
+        );
         final dyCenterOffset = (indicator.height - timeTick.areaHeight) / 2;
         canvas.drawTextArea(
           offset: Offset(
@@ -99,7 +101,10 @@ class TimePaintObject<T extends TimeIndicator> extends TimeBasePaintObject<T> {
     final time = model.formatDateTime(timeBar);
     // final time = formatyyMMddHHMMss(model.dateTime);
 
-    final ticksText = crossConfig.ticksText;
+    final ticksText = crossConfig.ticksText.of(
+      textColor: theme.crossTextColor,
+      background: theme.crossTextBg,
+    );
 
     final dyCenterOffset = (indicator.height - ticksText.areaHeight) / 2;
     canvas.drawTextArea(

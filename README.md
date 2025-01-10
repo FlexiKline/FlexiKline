@@ -129,9 +129,14 @@ class MAPaintObject<T extends MAIndicator> extends PaintObjectBox<T> {
   }
 
   @override
+  bool shouldPrecompute(MAIndicator oldIndicator) {
+    // TODO: (optional) 判断新旧指标配置的变化是否需要执行预计算
+  }
+
+  @override
   void didUpdateIndicator(MAIndicator oldIndicator) {
     super.didUpdateIndicator(oldIndicator);
-    // TODO: Check the old and new indicator configurations
+    // TODO: (optional) Check the old and new indicator configurations
   }
 
   @override

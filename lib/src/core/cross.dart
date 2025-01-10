@@ -246,9 +246,9 @@ mixin CrossBinding on KlineBindingBase, SettingBinding implements ICross {
       ));
       TextStyle valStyle = info.valueStyle ?? tooltipConfig.style;
       if (info.riseOrFall > 0) {
-        valStyle = valStyle.copyWith(color: settingConfig.longColor);
+        valStyle = valStyle.copyWith(color: theme.long);
       } else if (info.riseOrFall < 0) {
-        valStyle = valStyle.copyWith(color: settingConfig.shortColor);
+        valStyle = valStyle.copyWith(color: theme.short);
       }
       valueSpanList.add(TextSpan(
         text: info.value + br,

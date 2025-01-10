@@ -33,7 +33,6 @@ class MarkConfig {
     this.text = const TextAreaConfig(
       style: TextStyle(
         fontSize: defaulTextSize,
-        color: Color(0xFF000000),
         overflow: TextOverflow.ellipsis,
         height: defaultTextHeight,
       ),
@@ -50,6 +49,21 @@ class MarkConfig {
   final TextAreaConfig text;
 
   double get lineLength => line.length ?? 0;
+
+  MarkConfig of(
+      {Color? paintColor,
+      Color? textColor,
+      Color? background,
+      Color? borderColor}) {
+    return copyWith(
+      line: line.of(paintColor: paintColor),
+      text: text.of(
+        textColor: textColor,
+        background: background,
+        borderColor: borderColor,
+      ),
+    );
+  }
 
   factory MarkConfig.fromJson(Map<String, dynamic> json) =>
       _$MarkConfigFromJson(json);

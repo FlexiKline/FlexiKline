@@ -28,7 +28,7 @@ class TextAreaConfig {
     /// 文本样式
     this.style = const TextStyle(
       fontSize: defaulTextSize,
-      color: Color(0xFF000000),
+      // color: Color(0xFF000000),
       overflow: TextOverflow.ellipsis,
       height: defaultTextHeight,
     ),
@@ -68,6 +68,19 @@ class TextAreaConfig {
   double get textHeight => textSize * (style.height ?? defaultTextHeight);
 
   double get textSize => style.fontSize ?? defaulTextSize;
+
+  TextAreaConfig of({Color? textColor, Color? background, Color? borderColor}) {
+    if (style.color == textColor &&
+        this.background == background &&
+        border?.color == borderColor) {
+      return this;
+    }
+    return copyWith(
+      style: style.copyWith(color: textColor),
+      background: background,
+      border: border?.copyWith(color: borderColor),
+    );
+  }
 
   factory TextAreaConfig.fromJson(Map<String, dynamic> json) =>
       _$TextAreaConfigFromJson(json);

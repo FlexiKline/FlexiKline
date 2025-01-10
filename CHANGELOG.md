@@ -1,3 +1,10 @@
+## 0.9.0
+* Configuration management refactoring
+* Optimization indicator framework
+* Add keyboard event handling on non-touch devices
+* Optimize indicator calculation performance
+* bugfix
+
 ## 0.8.0
 * New Architecture Design
 * Indicator Framework Refactoring
@@ -7,6 +14,12 @@
 ## 0.7.1
 * Support Draw Feature
 * Optimize gesture
+
+## 0.7.0
+* Drawing overlay framework implementation
+* Optimize coordinate conversion of indicator chart data
+* Optimize drawing gesture processing
+* Added drawing magnifying glass
 
 ## 0.6.0
 * Support Desktop

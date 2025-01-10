@@ -70,6 +70,8 @@ abstract interface class IDraw {
 abstract interface class IPaintContext implements IStorage, ILogger {
   // ITimeRectConfig? get timeRectConfig;
 
+  IFlexiKlineTheme get theme;
+
   /// 当前canvas绘制区域第一根蜡烛绘制的偏移量
   double get startCandleDx;
 
