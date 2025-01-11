@@ -467,15 +467,6 @@ mixin SettingBinding on KlineBindingBase
     markRepaintDraw();
   }
 
-  /// TooltipConfig
-  @override
-  TooltipConfig get tooltipConfig => _flexiKlineConfig.tooltip;
-  set tooltipConfig(TooltipConfig config) {
-    _flexiKlineConfig.tooltip = config;
-    markRepaintChart();
-    markRepaintCross();
-  }
-
   /// 获取[key]指定的指标实例
   /// 1. 如果已载入, 则直接返回绘制对象的指标实例
   /// 2. 如果示载入, 则从本地缓存中加载, 并创建指标实现.

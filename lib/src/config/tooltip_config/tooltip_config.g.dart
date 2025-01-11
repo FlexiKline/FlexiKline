@@ -9,8 +9,6 @@ part of 'tooltip_config.dart';
 abstract class _$TooltipConfigCWProxy {
   TooltipConfig show(bool show);
 
-  TooltipConfig background(Color background);
-
   TooltipConfig margin(EdgeInsets margin);
 
   TooltipConfig padding(EdgeInsets padding);
@@ -27,7 +25,6 @@ abstract class _$TooltipConfigCWProxy {
   /// ````
   TooltipConfig call({
     bool? show,
-    Color? background,
     EdgeInsets? margin,
     EdgeInsets? padding,
     BorderRadius? radius,
@@ -43,9 +40,6 @@ class _$TooltipConfigCWProxyImpl implements _$TooltipConfigCWProxy {
 
   @override
   TooltipConfig show(bool show) => this(show: show);
-
-  @override
-  TooltipConfig background(Color background) => this(background: background);
 
   @override
   TooltipConfig margin(EdgeInsets margin) => this(margin: margin);
@@ -69,7 +63,6 @@ class _$TooltipConfigCWProxyImpl implements _$TooltipConfigCWProxy {
   /// ````
   TooltipConfig call({
     Object? show = const $CopyWithPlaceholder(),
-    Object? background = const $CopyWithPlaceholder(),
     Object? margin = const $CopyWithPlaceholder(),
     Object? padding = const $CopyWithPlaceholder(),
     Object? radius = const $CopyWithPlaceholder(),
@@ -80,11 +73,6 @@ class _$TooltipConfigCWProxyImpl implements _$TooltipConfigCWProxy {
           ? _value.show
           // ignore: cast_nullable_to_non_nullable
           : show as bool,
-      background:
-          background == const $CopyWithPlaceholder() || background == null
-              ? _value.background
-              // ignore: cast_nullable_to_non_nullable
-              : background as Color,
       margin: margin == const $CopyWithPlaceholder() || margin == null
           ? _value.margin
           // ignore: cast_nullable_to_non_nullable
@@ -118,7 +106,6 @@ extension $TooltipConfigCopyWith on TooltipConfig {
 TooltipConfig _$TooltipConfigFromJson(Map<String, dynamic> json) =>
     TooltipConfig(
       show: json['show'] as bool? ?? true,
-      background: const ColorConverter().fromJson(json['background'] as String),
       margin: const EdgeInsetsConverter()
           .fromJson(json['margin'] as Map<String, dynamic>),
       padding: const EdgeInsetsConverter()
@@ -132,7 +119,6 @@ TooltipConfig _$TooltipConfigFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$TooltipConfigToJson(TooltipConfig instance) =>
     <String, dynamic>{
       'show': instance.show,
-      'background': const ColorConverter().toJson(instance.background),
       'margin': const EdgeInsetsConverter().toJson(instance.margin),
       'padding': const EdgeInsetsConverter().toJson(instance.padding),
       'radius': const BorderRadiusConverter().toJson(instance.radius),

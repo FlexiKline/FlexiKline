@@ -21,6 +21,8 @@ abstract class _$CrossConfigCWProxy {
 
   CrossConfig moveByCandleInBlank(bool moveByCandleInBlank);
 
+  CrossConfig tooltipConfig(TooltipConfig tooltipConfig);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `CrossConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -35,6 +37,7 @@ abstract class _$CrossConfigCWProxy {
     double? spacing,
     bool? showLatestTipsInBlank,
     bool? moveByCandleInBlank,
+    TooltipConfig? tooltipConfig,
   });
 }
 
@@ -69,6 +72,10 @@ class _$CrossConfigCWProxyImpl implements _$CrossConfigCWProxy {
       this(moveByCandleInBlank: moveByCandleInBlank);
 
   @override
+  CrossConfig tooltipConfig(TooltipConfig tooltipConfig) =>
+      this(tooltipConfig: tooltipConfig);
+
+  @override
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `CrossConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -84,6 +91,7 @@ class _$CrossConfigCWProxyImpl implements _$CrossConfigCWProxy {
     Object? spacing = const $CopyWithPlaceholder(),
     Object? showLatestTipsInBlank = const $CopyWithPlaceholder(),
     Object? moveByCandleInBlank = const $CopyWithPlaceholder(),
+    Object? tooltipConfig = const $CopyWithPlaceholder(),
   }) {
     return CrossConfig(
       enable: enable == const $CopyWithPlaceholder() || enable == null
@@ -119,6 +127,11 @@ class _$CrossConfigCWProxyImpl implements _$CrossConfigCWProxy {
               ? _value.moveByCandleInBlank
               // ignore: cast_nullable_to_non_nullable
               : moveByCandleInBlank as bool,
+      tooltipConfig:
+          tooltipConfig == const $CopyWithPlaceholder() || tooltipConfig == null
+              ? _value.tooltipConfig
+              // ignore: cast_nullable_to_non_nullable
+              : tooltipConfig as TooltipConfig,
     );
   }
 }
@@ -143,6 +156,17 @@ CrossConfig _$CrossConfigFromJson(Map<String, dynamic> json) => CrossConfig(
       spacing: (json['spacing'] as num).toDouble(),
       showLatestTipsInBlank: json['showLatestTipsInBlank'] as bool? ?? true,
       moveByCandleInBlank: json['moveByCandleInBlank'] as bool? ?? false,
+      tooltipConfig: json['tooltipConfig'] == null
+          ? const TooltipConfig(
+              margin: EdgeInsets.only(left: 15, right: 65, top: 10),
+              padding: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+              radius: BorderRadius.all(Radius.circular(4)),
+              style: TextStyle(
+                  fontSize: defaulTextSize,
+                  overflow: TextOverflow.ellipsis,
+                  height: defaultMultiTextHeight))
+          : TooltipConfig.fromJson(
+              json['tooltipConfig'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$CrossConfigToJson(CrossConfig instance) =>
@@ -151,6 +175,7 @@ Map<String, dynamic> _$CrossConfigToJson(CrossConfig instance) =>
       'crosshair': instance.crosshair.toJson(),
       'crosspoint': instance.crosspoint.toJson(),
       'ticksText': instance.ticksText.toJson(),
+      'tooltipConfig': instance.tooltipConfig.toJson(),
       'spacing': instance.spacing,
       'showLatestTipsInBlank': instance.showLatestTipsInBlank,
       'moveByCandleInBlank': instance.moveByCandleInBlank,

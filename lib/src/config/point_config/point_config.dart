@@ -38,6 +38,11 @@ class PointConfig {
   final double? borderWidth;
   final Color? borderColor;
 
+  PointConfig of({Color? color}) {
+    if (color == null || this.color == color) return this;
+    return copyWith(color: color);
+  }
+
   Paint get paint => Paint()
     ..color = color
     ..strokeWidth = width

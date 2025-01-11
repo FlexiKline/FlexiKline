@@ -26,7 +26,6 @@ class TooltipConfig {
     this.show = true,
 
     /// tooltip 区域设置
-    required this.background,
     required this.margin,
     required this.padding,
     required this.radius,
@@ -38,13 +37,22 @@ class TooltipConfig {
   final bool show;
 
   /// tooltip 区域设置
-  final Color background;
   final EdgeInsets margin;
   final EdgeInsets padding;
   final BorderRadius radius;
 
   /// tooltip 文本设置
+  /// 注: style的颜色由FKTheme.tooltipTextColor替换.
   final TextStyle style;
+
+  // TooltipConfig of({Color? textColor}) {
+  //   if (style.color == textColor) {
+  //     return this;
+  //   }
+  //   return copyWith(
+  //     style: style.copyWith(color: textColor),
+  //   );
+  // }
 
   factory TooltipConfig.fromJson(Map<String, dynamic> json) =>
       _$TooltipConfigFromJson(json);

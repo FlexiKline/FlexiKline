@@ -190,18 +190,24 @@ mixin CrossBinding on KlineBindingBase, SettingBinding implements ICross {
 
     canvas.drawLineByConfig(
       path,
-      crossConfig.crosshair,
+      crossConfig.crosshair.of(paintColor: theme.crossColor),
     );
 
     canvas.drawCirclePoint(
       offset,
       crossConfig.crosspoint,
+      color: theme.crossColor,
     );
   }
 
   /// 绘制 Tooltip
   void paintTooltip(Canvas canvas, Offset offset, {CandleModel? model}) {
+    final tooltipConfig = crossConfig.tooltipConfig;
     if (!tooltipConfig.show) return;
+    final tooltipTextStyle = tooltipConfig.style.copyWith(
+      color: theme.tooltipTextColor,
+    );
+
     int? index = dxToIndex(offset.dx);
     if (index == null) return;
     model ??= curKlineData.getCandle(index);
@@ -242,9 +248,9 @@ mixin CrossBinding on KlineBindingBase, SettingBinding implements ICross {
       String br = i < tooltipInfoList.length - 1 ? '\n' : '';
       labelSpanList.add(TextSpan(
         text: info.label + br,
-        style: info.labelStyle ?? tooltipConfig.style,
+        style: info.labelStyle ?? tooltipTextStyle,
       ));
-      TextStyle valStyle = info.valueStyle ?? tooltipConfig.style;
+      TextStyle valStyle = info.valueStyle ?? tooltipTextStyle;
       if (info.riseOrFall > 0) {
         valStyle = valStyle.copyWith(color: theme.long);
       } else if (info.riseOrFall < 0) {
@@ -275,12 +281,12 @@ mixin CrossBinding on KlineBindingBase, SettingBinding implements ICross {
         drawableRect: mainChartRect,
         textSpan: TextSpan(
           children: labelSpanList,
-          style: tooltipConfig.style,
+          style: tooltipTextStyle,
         ),
         textAlign: TextAlign.start,
         textWidthBasis: TextWidthBasis.longestLine,
         padding: tooltipConfig.padding,
-        backgroundColor: tooltipConfig.background,
+        backgroundColor: theme.tooltipBg,
         borderRadius: BorderRadius.only(
           topLeft: tooltipConfig.radius.topLeft,
           bottomLeft: tooltipConfig.radius.bottomLeft,
@@ -296,12 +302,12 @@ mixin CrossBinding on KlineBindingBase, SettingBinding implements ICross {
         drawableRect: mainChartRect,
         textSpan: TextSpan(
           children: valueSpanList,
-          style: tooltipConfig.style,
+          style: tooltipTextStyle,
         ),
         textAlign: TextAlign.end,
         textWidthBasis: TextWidthBasis.longestLine,
         padding: tooltipConfig.padding,
-        backgroundColor: tooltipConfig.background,
+        backgroundColor: theme.tooltipBg,
         borderRadius: BorderRadius.only(
           topRight: tooltipConfig.radius.topRight,
           bottomRight: tooltipConfig.radius.bottomRight,
@@ -320,12 +326,12 @@ mixin CrossBinding on KlineBindingBase, SettingBinding implements ICross {
         drawableRect: mainChartRect,
         textSpan: TextSpan(
           children: valueSpanList,
-          style: tooltipConfig.style,
+          style: tooltipTextStyle,
         ),
         textAlign: TextAlign.end,
         textWidthBasis: TextWidthBasis.longestLine,
         padding: tooltipConfig.padding,
-        backgroundColor: tooltipConfig.background,
+        backgroundColor: theme.tooltipBg,
         borderRadius: BorderRadius.only(
           topRight: tooltipConfig.radius.topRight,
           bottomRight: tooltipConfig.radius.bottomRight,
@@ -341,12 +347,12 @@ mixin CrossBinding on KlineBindingBase, SettingBinding implements ICross {
         drawableRect: mainChartRect,
         textSpan: TextSpan(
           children: labelSpanList,
-          style: tooltipConfig.style,
+          style: tooltipTextStyle,
         ),
         textAlign: TextAlign.start,
         textWidthBasis: TextWidthBasis.longestLine,
         padding: tooltipConfig.padding,
-        backgroundColor: tooltipConfig.background,
+        backgroundColor: theme.tooltipBg,
         borderRadius: BorderRadius.only(
           topLeft: tooltipConfig.radius.topLeft,
           bottomLeft: tooltipConfig.radius.bottomLeft,

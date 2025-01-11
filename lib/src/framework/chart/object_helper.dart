@@ -315,7 +315,10 @@ mixin PaintYAxisTicksOnCrossMixin<T extends Indicator> on PaintObject<T> {
 
     final text = formatTicksValueOnCross(value, precision: precision);
 
-    final ticksText = crossConfig.ticksText;
+    final ticksText = crossConfig.ticksText.of(
+      textColor: theme.crossTextColor,
+      background: theme.crossTextBg,
+    );
 
     canvas.drawTextArea(
       offset: Offset(

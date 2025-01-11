@@ -183,7 +183,6 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       gesture: genGestureConfig(),
       cross: genCrossConfig(),
       draw: genDrawConfig(),
-      tooltip: genTooltipConfig(),
       mainIndicator: genMainIndicator(),
       sub: {},
     );
@@ -322,7 +321,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       enable: true,
       crosshair: LineConfig(
         paint: PaintConfig(
-          color: theme.crossColor,
+          // color: theme.crossColor,
           strokeWidth: 0.5 * theme.scale,
         ),
         type: LineType.dashed,
@@ -331,7 +330,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       crosspoint: PointConfig(
         radius: 2 * theme.scale,
         width: 0 * theme.scale,
-        color: theme.crossColor,
+        // color: theme.crossColor,
         borderWidth: 2 * theme.scale,
         borderColor: theme.crossColor.withOpacity(0.5),
       ),
@@ -352,6 +351,29 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       spacing: 1 * theme.scale,
       // onCross时, 当移动到空白区域时, Tips区域是否展示最新的蜡烛的Tips数据.
       showLatestTipsInBlank: true,
+      tooltipConfig: TooltipConfig(
+        show: true,
+
+        /// tooltip 区域设置
+        margin: EdgeInsets.only(
+          left: 15 * theme.scale,
+          right: 65 * theme.scale,
+          top: 10 * theme.scale,
+        ),
+        padding: EdgeInsets.symmetric(
+          horizontal: 4 * theme.scale,
+          vertical: 4 * theme.scale,
+        ),
+        radius: BorderRadius.all(Radius.circular(4 * theme.scale)),
+
+        /// tooltip 文本设置
+        style: TextStyle(
+          fontSize: theme.normalTextSize,
+          // color: theme.tooltipTextColor,
+          overflow: TextOverflow.ellipsis,
+          height: defaultMultiTextHeight,
+        ),
+      ),
     );
   }
 
@@ -426,33 +448,6 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
           color: theme.gridLine,
           width: 1 * theme.scale,
         ),
-      ),
-    );
-  }
-
-  TooltipConfig genTooltipConfig() {
-    return TooltipConfig(
-      show: true,
-
-      /// tooltip 区域设置
-      background: theme.tooltipBg,
-      margin: EdgeInsets.only(
-        left: 15 * theme.scale,
-        right: 65 * theme.scale,
-        top: 10 * theme.scale,
-      ),
-      padding: EdgeInsets.symmetric(
-        horizontal: 4 * theme.scale,
-        vertical: 4 * theme.scale,
-      ),
-      radius: BorderRadius.all(Radius.circular(4 * theme.scale)),
-
-      /// tooltip 文本设置
-      style: TextStyle(
-        fontSize: theme.normalTextSize,
-        color: theme.tooltipTextColor,
-        overflow: TextOverflow.ellipsis,
-        height: defaultMultiTextHeight,
       ),
     );
   }

@@ -33,7 +33,7 @@ class FlexiKlineConfig {
     required this.gesture,
     required this.cross,
     required this.draw,
-    required this.tooltip,
+    // required this.tooltip,
     required this.mainIndicator,
     this.sub = const <IIndicatorKey>{},
   });
@@ -44,7 +44,7 @@ class FlexiKlineConfig {
   GestureConfig gesture;
   CrossConfig cross;
   DrawConfig draw;
-  TooltipConfig tooltip;
+  // TooltipConfig tooltip;
   MainPaintObjectIndicator mainIndicator;
   Set<IIndicatorKey> sub;
 

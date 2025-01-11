@@ -13,11 +13,14 @@
 // limitations under the License.
 
 import 'package:copy_with_extension/copy_with_extension.dart';
+import 'package:flutter/painting.dart';
 
+import '../../constant.dart';
 import '../../framework/serializers.dart';
 import '../point_config/point_config.dart';
 import '../line_config/line_config.dart';
 import '../text_area_config/text_area_config.dart';
+import '../tooltip_config/tooltip_config.dart';
 
 part 'cross_config.g.dart';
 
@@ -32,12 +35,30 @@ class CrossConfig {
     required this.spacing,
     this.showLatestTipsInBlank = true,
     this.moveByCandleInBlank = false,
+    this.tooltipConfig = const TooltipConfig(
+      margin: EdgeInsets.only(
+        left: 15,
+        right: 65,
+        top: 10,
+      ),
+      padding: EdgeInsets.symmetric(
+        horizontal: 4,
+        vertical: 4,
+      ),
+      radius: BorderRadius.all(Radius.circular(4)),
+      style: TextStyle(
+        fontSize: defaulTextSize,
+        overflow: TextOverflow.ellipsis,
+        height: defaultMultiTextHeight,
+      ),
+    ),
   });
 
   final bool enable;
   final LineConfig crosshair;
   final PointConfig crosspoint;
   final TextAreaConfig ticksText;
+  final TooltipConfig tooltipConfig;
 
   /// onCross时, 刻度[ticksText]与绘制边界的间距.
   final double spacing;

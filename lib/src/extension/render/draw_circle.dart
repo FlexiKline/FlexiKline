@@ -22,7 +22,8 @@ extension DrawCircle on Canvas {
     ///绘制启始坐标位置
     required Offset offset,
     required double radius,
-    required Paint paint,
+    required Color color,
+    required double strokeWidth,
     double? borderWidth,
     Color? borderColor,
     Paint? borderPaint,
@@ -43,17 +44,26 @@ extension DrawCircle on Canvas {
           ..style = PaintingStyle.stroke,
       );
     }
-    drawCircle(offset, radius, paint);
+    drawCircle(
+      offset,
+      radius,
+      Paint()
+        ..color = color
+        ..strokeWidth = strokeWidth
+        ..style = PaintingStyle.fill,
+    );
   }
 
   void drawCirclePoint(
     Offset offset,
-    PointConfig point,
-  ) {
+    PointConfig point, {
+    Color? color,
+  }) {
     drawBorderCircle(
       offset: offset,
       radius: point.radius,
-      paint: point.paint,
+      strokeWidth: point.width,
+      color: color ?? point.color,
       borderWidth: point.borderWidth,
       borderColor: point.borderColor,
     );
