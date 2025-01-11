@@ -31,7 +31,7 @@ class DrawConfig {
     required this.crosspoint,
     required this.crosshair,
     required this.drawLine,
-    this.useDrawLineColor = true,
+    // this.useDrawLineColor = true,
     required this.drawPoint,
     required this.ticksText,
     required this.spacing,
@@ -56,8 +56,8 @@ class DrawConfig {
   /// 默认绘制线的样式配置
   final LineConfig drawLine;
 
-  /// 绘制[drawPoint]和[ticksText]刻度时, 是否始终使用[drawLine]指定的颜色.
-  final bool useDrawLineColor;
+  // /// 绘制[drawPoint]和[ticksText]刻度时, 是否始终使用[drawLine]指定的颜色.
+  // final bool useDrawLineColor;
 
   /// 选择绘制点配置
   final PointConfig drawPoint;

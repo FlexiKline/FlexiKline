@@ -70,9 +70,9 @@ class TextAreaConfig {
   double get textSize => style.fontSize ?? defaulTextSize;
 
   TextAreaConfig of({Color? textColor, Color? background, Color? borderColor}) {
-    if (style.color == textColor &&
-        this.background == background &&
-        border?.color == borderColor) {
+    if ((textColor == null || style.color == textColor) &&
+        (background == null || this.background == background) &&
+        (borderColor == null || border?.color == borderColor)) {
       return this;
     }
     return copyWith(

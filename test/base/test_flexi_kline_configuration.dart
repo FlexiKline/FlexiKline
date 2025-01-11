@@ -64,8 +64,8 @@ class TestFlexiKlineTheme implements IFlexiKlineTheme {
   @override
   Color crossTextBg = const Color(0xFF111111);
 
-  @override
-  Color drawTextBg = Colors.blue;
+  // @override
+  // Color drawTextBg = Colors.blue;
 
   @override
   Color transparent = Colors.transparent;

@@ -26,26 +26,31 @@ mixin DrawConfigMixin on OverlayObject {
 
   LineConfig get crosshairConfig {
     if (_crosshair != null) return _crosshair!;
-    _crosshair = config.crosshair;
-    if (config.useDrawLineColor) {
-      _crosshair = config.crosshair.copyWith(
-        paint: _crosshair!.paint.copyWith(color: lineColor),
-      );
-    }
+    _crosshair = config.crosshair.of(paintColor: lineColor);
+    // if (config.useDrawLineColor) {
+    //   _crosshair = config.crosshair.copyWith(
+    //     paint: _crosshair!.paint.copyWith(color: lineColor),
+    //   );
+    // }
     return _crosshair!;
   }
 
   PointConfig get crosspointConfig {
     if (_crosspoint != null) return _crosspoint!;
-    _crosspoint = config.crosspoint;
-    if (config.useDrawLineColor) {
-      _crosspoint = config.crosspoint.copyWith(
-        color: lineColor,
-        borderColor: lineColor.withOpacity(
-          _crosspoint!.borderColor?.opacity ?? 0,
-        ),
-      );
-    }
+    _crosspoint = config.crosspoint.of(
+      color: lineColor,
+      borderColor: lineColor.withOpacity(
+        config.crosspoint.borderColor?.opacity ?? 0,
+      ),
+    );
+    // if (config.useDrawLineColor) {
+    //   _crosspoint = config.crosspoint.copyWith(
+    //     color: lineColor,
+    //     borderColor: lineColor.withOpacity(
+    //       _crosspoint!.borderColor?.opacity ?? 0,
+    //     ),
+    //   );
+    // }
     return _crosspoint!;
   }
 
@@ -53,34 +58,37 @@ mixin DrawConfigMixin on OverlayObject {
     if (_ticksGapBgPaint != null) return _ticksGapBgPaint;
     final opacity = config.ticksGapBgOpacity.clamp(0.0, 1.0);
     if (opacity == 0) return null;
-    if (config.useDrawLineColor) {
-      _ticksGapBgPaint = Paint()
-        ..color = lineColor.withOpacity(opacity)
-        ..style = PaintingStyle.fill;
-    } else if (config.ticksText.background != null &&
-        config.ticksText.background!.alpha != 0) {
-      _ticksGapBgPaint = Paint()
-        ..color = config.ticksText.background!.withOpacity(opacity)
-        ..style = PaintingStyle.fill;
-    }
+    _ticksGapBgPaint = Paint()
+      ..color = lineColor.withOpacity(opacity)
+      ..style = PaintingStyle.fill;
+    // if (config.useDrawLineColor) {
+    //   _ticksGapBgPaint = Paint()
+    //     ..color = lineColor.withOpacity(opacity)
+    //     ..style = PaintingStyle.fill;
+    // } else if (config.ticksText.background != null &&
+    //     config.ticksText.background!.alpha != 0) {
+    //   _ticksGapBgPaint = Paint()
+    //     ..color = config.ticksText.background!.withOpacity(opacity)
+    //     ..style = PaintingStyle.fill;
+    // }
     return _ticksGapBgPaint;
   }
 
   TextAreaConfig get ticksTextConfig {
     if (_ticksText != null) return _ticksText!;
-    _ticksText = config.ticksText;
-    if (config.useDrawLineColor) {
-      _ticksText = _ticksText!.copyWith(background: lineColor);
-    }
+    _ticksText = config.ticksText.of(background: lineColor);
+    // if (config.useDrawLineColor) {
+    //   _ticksText = _ticksText!.copyWith(background: lineColor);
+    // }
     return _ticksText!;
   }
 
   PointConfig get drawPointConfig {
     if (_drawPoint != null) return _drawPoint!;
-    _drawPoint = config.drawPoint;
-    if (config.useDrawLineColor) {
-      _drawPoint = _drawPoint!.copyWith(borderColor: lineColor);
-    }
+    _drawPoint = config.drawPoint.of(borderColor: lineColor);
+    // if (config.useDrawLineColor) {
+    //   _drawPoint = _drawPoint!.copyWith(borderColor: lineColor);
+    // }
     return _drawPoint!;
   }
 

@@ -17,8 +17,6 @@ abstract class _$DrawConfigCWProxy {
 
   DrawConfig drawLine(LineConfig drawLine);
 
-  DrawConfig useDrawLineColor(bool useDrawLineColor);
-
   DrawConfig drawPoint(PointConfig drawPoint);
 
   DrawConfig ticksText(TextAreaConfig ticksText);
@@ -45,7 +43,6 @@ abstract class _$DrawConfigCWProxy {
     PointConfig? crosspoint,
     LineConfig? crosshair,
     LineConfig? drawLine,
-    bool? useDrawLineColor,
     PointConfig? drawPoint,
     TextAreaConfig? ticksText,
     double? spacing,
@@ -77,10 +74,6 @@ class _$DrawConfigCWProxyImpl implements _$DrawConfigCWProxy {
 
   @override
   DrawConfig drawLine(LineConfig drawLine) => this(drawLine: drawLine);
-
-  @override
-  DrawConfig useDrawLineColor(bool useDrawLineColor) =>
-      this(useDrawLineColor: useDrawLineColor);
 
   @override
   DrawConfig drawPoint(PointConfig drawPoint) => this(drawPoint: drawPoint);
@@ -120,7 +113,6 @@ class _$DrawConfigCWProxyImpl implements _$DrawConfigCWProxy {
     Object? crosspoint = const $CopyWithPlaceholder(),
     Object? crosshair = const $CopyWithPlaceholder(),
     Object? drawLine = const $CopyWithPlaceholder(),
-    Object? useDrawLineColor = const $CopyWithPlaceholder(),
     Object? drawPoint = const $CopyWithPlaceholder(),
     Object? ticksText = const $CopyWithPlaceholder(),
     Object? spacing = const $CopyWithPlaceholder(),
@@ -153,11 +145,6 @@ class _$DrawConfigCWProxyImpl implements _$DrawConfigCWProxy {
           ? _value.drawLine
           // ignore: cast_nullable_to_non_nullable
           : drawLine as LineConfig,
-      useDrawLineColor: useDrawLineColor == const $CopyWithPlaceholder() ||
-              useDrawLineColor == null
-          ? _value.useDrawLineColor
-          // ignore: cast_nullable_to_non_nullable
-          : useDrawLineColor as bool,
       drawPoint: drawPoint == const $CopyWithPlaceholder() || drawPoint == null
           ? _value.drawPoint
           // ignore: cast_nullable_to_non_nullable
@@ -210,7 +197,6 @@ DrawConfig _$DrawConfigFromJson(Map<String, dynamic> json) => DrawConfig(
           PointConfig.fromJson(json['crosspoint'] as Map<String, dynamic>),
       crosshair: LineConfig.fromJson(json['crosshair'] as Map<String, dynamic>),
       drawLine: LineConfig.fromJson(json['drawLine'] as Map<String, dynamic>),
-      useDrawLineColor: json['useDrawLineColor'] as bool? ?? true,
       drawPoint:
           PointConfig.fromJson(json['drawPoint'] as Map<String, dynamic>),
       ticksText:
@@ -232,7 +218,6 @@ Map<String, dynamic> _$DrawConfigToJson(DrawConfig instance) =>
       'crosspoint': instance.crosspoint.toJson(),
       'crosshair': instance.crosshair.toJson(),
       'drawLine': instance.drawLine.toJson(),
-      'useDrawLineColor': instance.useDrawLineColor,
       'drawPoint': instance.drawPoint.toJson(),
       'ticksText': instance.ticksText.toJson(),
       'spacing': instance.spacing,

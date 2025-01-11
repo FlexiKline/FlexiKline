@@ -95,22 +95,26 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
   /// 绘制工具条位置
   Offset _position = Offset.infinite;
 
-  IConfiguration get configuration => widget.controller.configuration;
+  FlexiKlineController get controller => widget.controller;
+
+  IConfiguration get configuration => controller.configuration;
+
+  IFlexiKlineTheme get theme => configuration.theme;
 
   @override
   void initState() {
     super.initState();
 
-    widget.controller.initState();
+    controller.initState();
     if (widget.mainSize != null) {
-      widget.controller.setMainSize(widget.mainSize!);
+      controller.setMainSize(widget.mainSize!);
     }
 
     _position = configuration.getDrawToolbarPosition();
 
-    widget.controller.canvasSizeChangeListener.addListener(() {
+    controller.canvasSizeChangeListener.addListener(() {
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-        if (widget.controller.drawState.isEditing) {
+        if (controller.drawState.isEditing) {
           _updateDrawToolbarPosition(_position);
         }
         setState(() {});
@@ -121,19 +125,19 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
   @override
   void didUpdateWidget(covariant FlexiKlineWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    widget.controller.logd('View didUpdateWidget');
+    controller.logd('View didUpdateWidget');
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    widget.controller.logd('View didChangeDependencies');
+    controller.logd('View didChangeDependencies');
   }
 
   @override
   void dispose() {
     configuration.saveDrawToolbarPosition(_position);
-    widget.controller.dispose();
+    controller.dispose();
     super.dispose();
   }
 
@@ -142,7 +146,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
     if (widget.autoAdaptLayout) {
       return LayoutBuilder(
         builder: (context, constraints) {
-          widget.controller.adaptLayoutChange(constraints.biggest);
+          controller.adaptLayoutChange(constraints.biggest);
           return _buildKlineContainer(context);
         },
       );
@@ -152,7 +156,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
   }
 
   Widget _buildKlineContainer(BuildContext context) {
-    final canvasRect = widget.controller.canvasRect;
+    final canvasRect = controller.canvasRect;
     final canvasSize = canvasRect.size;
     return Container(
       alignment: widget.alignment,
@@ -165,7 +169,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
           if (widget.mainBackgroundView != null)
             Positioned.fromRect(
               key: const ValueKey('MainBackground'),
-              rect: widget.controller.mainRect,
+              rect: controller.mainRect,
               child: widget.mainBackgroundView!,
             ),
           RepaintBoundary(
@@ -173,10 +177,10 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
             child: CustomPaint(
               size: canvasSize,
               painter: GridPainter(
-                controller: widget.controller,
+                controller: controller,
               ),
               foregroundPainter: ChartPainter(
-                controller: widget.controller,
+                controller: controller,
               ),
               isComplex: true,
             ),
@@ -186,10 +190,10 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
             child: CustomPaint(
               size: canvasSize,
               painter: DrawPainter(
-                controller: widget.controller,
+                controller: controller,
               ),
               foregroundPainter: CrossPainter(
-                controller: widget.controller,
+                controller: controller,
               ),
               isComplex: true,
             ),
@@ -197,18 +201,18 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
           widget.isTouchDevice
               ? TouchGestureDetector(
                   key: const ValueKey('TouchGestureDetector'),
-                  controller: widget.controller,
+                  controller: controller,
                   onDoubleTap: widget.onDoubleTap,
                 )
               : NonTouchGestureDetector(
                   key: const ValueKey('NonTouchGestureDetector'),
-                  controller: widget.controller,
+                  controller: controller,
                   onDoubleTap: widget.onDoubleTap,
                 ),
           _buildMagnifier(context, canvasRect),
           _buildDrawToolbar(context, canvasRect),
           Positioned.fromRect(
-            rect: widget.controller.mainRect,
+            rect: controller.mainRect,
             child: _buildMainForgroundView(context),
           ),
         ],
@@ -222,21 +226,19 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
     }
 
     return ValueListenableBuilder(
-      valueListenable: widget.controller.candleRequestListener,
+      valueListenable: controller.candleRequestListener,
       builder: (context, request, child) {
         return Offstage(
           offstage: !request.state.showLoading,
           child: Center(
             key: const ValueKey('loadingView'),
             child: SizedBox.square(
-              dimension: widget.controller.settingConfig.loading.size,
+              dimension: controller.settingConfig.loading.size,
               child: CircularProgressIndicator(
-                strokeWidth:
-                    widget.controller.settingConfig.loading.strokeWidth,
-                backgroundColor:
-                    widget.controller.settingConfig.loading.background,
+                strokeWidth: controller.settingConfig.loading.strokeWidth,
+                backgroundColor: controller.settingConfig.loading.background,
                 valueColor: AlwaysStoppedAnimation<Color>(
-                  widget.controller.settingConfig.loading.valueColor,
+                  controller.settingConfig.loading.valueColor,
                 ),
               ),
             ),
@@ -249,7 +251,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
   bool _updateDrawToolbarPosition(Offset newPosition) {
     final size = _drawToolbarKey.currentContext?.size;
     if (size != null && !size.isEmpty) {
-      final canvasRect = widget.controller.canvasRect;
+      final canvasRect = controller.canvasRect;
       _position = Offset(
         newPosition.dx.clamp(canvasRect.left, canvasRect.right - size.width),
         newPosition.dy.clamp(canvasRect.top, canvasRect.bottom - size.height),
@@ -270,7 +272,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
       left: _position.dx,
       top: _position.dy,
       child: ValueListenableBuilder(
-        valueListenable: widget.controller.drawStateListener,
+        valueListenable: controller.drawStateListener,
         builder: (context, state, child) {
           return Visibility(
             visible: state.isEditing,
@@ -297,14 +299,14 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
 
   /// 放大镜
   Widget _buildMagnifier(BuildContext context, Rect drawRect) {
-    final config = widget.controller.drawConfig.magnifier;
+    final config = controller.drawConfig.magnifier;
     // Web平台暂不支持放大镜; TODO: 后续适配
     if (PlatformUtil.isWeb || !config.enable || config.size.isEmpty) {
       return const SizedBox.shrink();
     }
 
     return ValueListenableBuilder(
-      valueListenable: widget.controller.drawPointerListener,
+      valueListenable: controller.drawPointerListener,
       builder: (context, pointer, child) {
         bool visible = false;
         final pointerOffset = pointer?.offset;
@@ -324,7 +326,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
           } else {
             alignment = AlignmentDirectional.topEnd;
             final valueTxtWidth =
-                widget.controller.drawState.object?.valueTicksSize?.width ?? 0;
+                controller.drawState.object?.valueTicksSize?.width ?? 0;
             margin = margin.copyWith(right: margin.right + valueTxtWidth);
             position = Offset(
               drawRect.right - margin.right - config.size.width / 2,
@@ -333,7 +335,6 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
           }
           focalPosition = pointerOffset - position;
         }
-
         return Visibility(
           key: const ValueKey('MagnifierVisibility'),
           visible: visible,
@@ -348,9 +349,11 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
                 shadows: config.decorationShadows,
                 shape: widget.magnifierDecorationShapBuilder?.call(
                       context,
-                      config.shapeSide,
+                      config.shapeSide.copyWith(color: theme.gridLine),
                     ) ??
-                    CircleBorder(side: config.shapeSide),
+                    CircleBorder(
+                      side: config.shapeSide.copyWith(color: theme.gridLine),
+                    ),
               ),
               size: config.size,
               focalPointOffset: focalPosition,

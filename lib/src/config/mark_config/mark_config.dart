@@ -50,11 +50,12 @@ class MarkConfig {
 
   double get lineLength => line.length ?? 0;
 
-  MarkConfig of(
-      {Color? paintColor,
-      Color? textColor,
-      Color? background,
-      Color? borderColor}) {
+  MarkConfig of({
+    Color? paintColor,
+    Color? textColor,
+    Color? background,
+    Color? borderColor,
+  }) {
     return copyWith(
       line: line.of(paintColor: paintColor),
       text: text.of(

@@ -81,7 +81,7 @@ abstract class BaseFlexiKlineTheme implements IFlexiKlineTheme {
     required this.chartBg,
     required this.tooltipBg,
     required this.crossTextBg,
-    required this.drawTextBg,
+    // required this.drawTextBg,
     this.transparent = Colors.transparent,
     required this.latestPriceTextBg,
     required this.lastPriceTextBg,
@@ -131,8 +131,8 @@ abstract class BaseFlexiKlineTheme implements IFlexiKlineTheme {
   late Color tooltipBg;
   @override
   late Color crossTextBg;
-  @override
-  late Color drawTextBg;
+  // @override
+  // late Color drawTextBg;
   @override
   late Color transparent;
   @override
@@ -383,7 +383,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       crosshair: LineConfig(
         paint: PaintConfig(
           strokeWidth: 0.5 * theme.scale,
-          color: theme.drawColor,
+          // color: theme.drawColor,
         ),
         type: LineType.dashed,
         dashes: const [5, 3],
@@ -391,35 +391,35 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       crosspoint: PointConfig(
         radius: 2 * theme.scale,
         width: 0 * theme.scale,
-        color: theme.drawColor,
+        // color: theme.drawColor,
         borderWidth: 2 * theme.scale,
         borderColor: theme.drawColor.withOpacity(0.5),
       ),
       drawLine: LineConfig(
         paint: PaintConfig(
           strokeWidth: 1 * theme.scale,
-          color: theme.drawColor,
+          color: theme.drawColor, // 必须指定
         ),
         type: LineType.solid,
         dashes: [5, 3],
       ),
       // 绘制[drawPoint]和[ticksText]刻度时, 是否始终使用[drawLine]指定的颜色.
-      useDrawLineColor: true,
+      // useDrawLineColor: true,
       drawPoint: PointConfig(
         radius: 9 * theme.scale,
         width: 0 * theme.scale,
-        color: const Color(0xFFFFFFFF),
+        color: const Color(0xFFFFFFFF), // 必须指定
         borderWidth: 1 * theme.scale,
         borderColor: theme.drawColor,
       ),
       ticksText: TextAreaConfig(
         style: TextStyle(
-          color: const Color(0xFFFFFFFF),
+          color: const Color(0xFFFFFFFF), // 必须指定
           fontSize: theme.normalTextSize,
           fontWeight: FontWeight.normal,
           height: defaultTextHeight,
         ),
-        background: theme.drawTextBg,
+        // background: theme.drawTextBg, // 已废弃
         padding: EdgeInsets.all(2 * theme.scale),
         border: BorderSide.none,
         borderRadius: BorderRadius.all(
@@ -441,11 +441,11 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
             offset: const Offset(0.1, 0.1),
             blurRadius: 2,
             spreadRadius: 3,
-            color: theme.themeColor.withOpacity(0.1),
+            color: theme.themeColor.withOpacity(0.1), // 此处不适配Theme
           )
         ],
         shapeSide: BorderSide(
-          color: theme.gridLine,
+          // color: theme.gridLine,
           width: 1 * theme.scale,
         ),
       ),

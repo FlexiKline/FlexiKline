@@ -20,7 +20,6 @@ import '../draw_config/draw_config.dart';
 import '../gesture_config/gesture_config.dart';
 import '../grid_config/grid_config.dart';
 import '../setting_config/setting_config.dart';
-import '../tooltip_config/tooltip_config.dart';
 
 part 'flexi_kline_config.g.dart';
 
