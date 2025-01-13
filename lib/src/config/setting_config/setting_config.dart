@@ -18,7 +18,6 @@ import 'package:flutter/painting.dart';
 import '../../constant.dart';
 import '../../framework/serializers.dart';
 import '../loading_config/loading_config.dart';
-import '../text_area_config/text_area_config.dart';
 
 part 'setting_config.g.dart';
 
@@ -53,7 +52,7 @@ class SettingConfig {
     this.showYAxisTick = true,
 
     /// 全局默认的刻度值配置.
-    required this.ticksText,
+    // required this.ticksText, // 已移至GridConfig
 
     /// 副图配置
     // 副区的指标图最大数量
@@ -103,7 +102,7 @@ class SettingConfig {
   final bool showYAxisTick;
 
   /// 全局默认的刻度值文本配置.
-  final TextAreaConfig ticksText;
+  // final TextAreaConfig ticksText; // 已移至GridConfig
 
   // 副区的指标图最大数量
   final int subChartMaxCount;

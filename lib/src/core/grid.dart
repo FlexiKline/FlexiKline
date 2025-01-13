@@ -38,6 +38,18 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
   @override
   void markRepaintGrid() => _repaintGridBg.value++;
 
+  LineConfig? _horiLine;
+  LineConfig? _vertLine;
+  LineConfig? _dragLine;
+
+  @override
+  void onThemeChanged([covariant IFlexiKlineTheme? oldTheme]) {
+    super.onThemeChanged(oldTheme);
+    _horiLine = null;
+    _vertLine = null;
+    _dragLine = null;
+  }
+
   void paintGridBg(Canvas canvas, Size size) {
     if (gridConfig.show) {
       // 主图图Grid X轴起始值
@@ -52,11 +64,12 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
 
       /// 绘制horizontal轴 Grid 线
       if (gridConfig.horizontal.show) {
-        final horiLine = gridConfig.horizontal.line;
+        _horiLine ??= gridConfig.horizontal.line.of(paintColor: theme.gridLine);
+        _dragLine ??=
+            gridConfig.dragLine?.of(paintColor: theme.markLine) ?? _horiLine;
 
         final dragPosition = _upObject?.drawableRect.bottom ?? 0;
         final minDistance = gridConfig.dragHitTestMinDistance;
-        final dragLineConfig = gridConfig.dragLine ?? horiLine;
 
         double dy = mainTop;
 
@@ -65,7 +78,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
           Path()
             ..moveTo(mainLeft, dy)
             ..lineTo(mainRight, dy),
-          horiLine,
+          _horiLine!,
         );
 
         // 绘制主图网格横线
@@ -76,7 +89,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
             Path()
               ..moveTo(mainLeft, dy)
               ..lineTo(mainRight, dy),
-            horiLine,
+            _horiLine!,
           );
         }
 
@@ -86,8 +99,8 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
             ..moveTo(mainLeft, mainBottom)
             ..lineTo(mainRight, mainBottom),
           (dragPosition - mainBottom).abs() < minDistance
-              ? dragLineConfig
-              : horiLine,
+              ? _dragLine!
+              : _horiLine!,
         );
 
         /// 副图区域
@@ -100,14 +113,14 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
             Path()
               ..moveTo(mainLeft, dy)
               ..lineTo(mainRight, dy),
-            (dragPosition - dy).abs() < minDistance ? dragLineConfig : horiLine,
+            (dragPosition - dy).abs() < minDistance ? _dragLine! : _horiLine!,
           );
         }
       }
 
       /// 绘制Vertical轴 Grid 线
       if (gridConfig.vertical.show) {
-        final vertLine = gridConfig.vertical.line;
+        _vertLine ??= gridConfig.vertical.line.of(paintColor: theme.gridLine);
 
         double dx = mainLeft;
         final step = mainRight / gridConfig.vertical.count;
@@ -117,7 +130,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
           Path()
             ..moveTo(dx, mainTop)
             ..lineTo(dx, subBottom),
-          vertLine,
+          _vertLine!,
         );
 
         // 计算排除时间指标后的top和bottom
@@ -139,7 +152,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
             Path()
               ..moveTo(dx, mainTop)
               ..lineTo(dx, mainBottom),
-            vertLine,
+            _vertLine!,
           );
 
           /// 绘制副区Grid竖线
@@ -147,7 +160,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
             Path()
               ..moveTo(dx, top)
               ..lineTo(dx, bottom),
-            vertLine,
+            _vertLine!,
           );
         }
 
@@ -156,7 +169,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
           Path()
             ..moveTo(mainRight, mainTop)
             ..lineTo(mainRight, subBottom),
-          vertLine,
+          _vertLine!,
         );
       }
     }

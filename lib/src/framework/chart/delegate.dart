@@ -94,6 +94,10 @@ extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
     _indicator = newIndicator;
     didUpdateIndicator(oldIndicator);
   }
+
+  void doDidChangeTheme() {
+    didChangeTheme();
+  }
 }
 
 extension MainPaintDelegateExt<T extends MainPaintObjectIndicator>

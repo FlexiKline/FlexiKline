@@ -19,6 +19,8 @@ abstract class _$GridConfigCWProxy {
 
   GridConfig dragLine(LineConfig? dragLine);
 
+  GridConfig ticksText(TextAreaConfig ticksText);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GridConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -32,6 +34,7 @@ abstract class _$GridConfigCWProxy {
     bool? isAllowDragIndicatorHeight,
     double? dragHitTestMinDistance,
     LineConfig? dragLine,
+    TextAreaConfig? ticksText,
   });
 }
 
@@ -62,6 +65,9 @@ class _$GridConfigCWProxyImpl implements _$GridConfigCWProxy {
   GridConfig dragLine(LineConfig? dragLine) => this(dragLine: dragLine);
 
   @override
+  GridConfig ticksText(TextAreaConfig ticksText) => this(ticksText: ticksText);
+
+  @override
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GridConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -76,6 +82,7 @@ class _$GridConfigCWProxyImpl implements _$GridConfigCWProxy {
     Object? isAllowDragIndicatorHeight = const $CopyWithPlaceholder(),
     Object? dragHitTestMinDistance = const $CopyWithPlaceholder(),
     Object? dragLine = const $CopyWithPlaceholder(),
+    Object? ticksText = const $CopyWithPlaceholder(),
   }) {
     return GridConfig(
       show: show == const $CopyWithPlaceholder() || show == null
@@ -107,6 +114,10 @@ class _$GridConfigCWProxyImpl implements _$GridConfigCWProxy {
           ? _value.dragLine
           // ignore: cast_nullable_to_non_nullable
           : dragLine as LineConfig?,
+      ticksText: ticksText == const $CopyWithPlaceholder() || ticksText == null
+          ? _value.ticksText
+          // ignore: cast_nullable_to_non_nullable
+          : ticksText as TextAreaConfig,
     );
   }
 }
@@ -207,6 +218,8 @@ GridConfig _$GridConfigFromJson(Map<String, dynamic> json) => GridConfig(
       dragLine: json['dragLine'] == null
           ? null
           : LineConfig.fromJson(json['dragLine'] as Map<String, dynamic>),
+      ticksText:
+          TextAreaConfig.fromJson(json['ticksText'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$GridConfigToJson(GridConfig instance) {
@@ -225,6 +238,7 @@ Map<String, dynamic> _$GridConfigToJson(GridConfig instance) {
   }
 
   writeNotNull('dragLine', instance.dragLine?.toJson());
+  val['ticksText'] = instance.ticksText.toJson();
   return val;
 }
 

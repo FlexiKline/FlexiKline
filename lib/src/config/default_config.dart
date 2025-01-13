@@ -252,6 +252,17 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
           strokeWidth: theme.pixel * 5,
         ),
       ),
+      // 全局默认的刻度值配置.
+      ticksText: TextAreaConfig(
+        style: TextStyle(
+          fontSize: theme.normalTextSize,
+          // color: theme.ticksTextColor,
+          overflow: TextOverflow.ellipsis,
+          height: defaultTextHeight,
+        ),
+        textAlign: TextAlign.end,
+        padding: EdgeInsets.symmetric(horizontal: 2 * theme.scale),
+      ),
     );
   }
 
@@ -289,18 +300,6 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       candleHollowBarBorderWidth: 1 * theme.scale,
       candleLineWidth: 1 * theme.scale,
       firstCandleInitOffset: 80 * theme.scale,
-
-      /// 全局默认的刻度值配置.
-      ticksText: TextAreaConfig(
-        style: TextStyle(
-          fontSize: theme.normalTextSize,
-          // color: theme.ticksTextColor,
-          overflow: TextOverflow.ellipsis,
-          height: defaultTextHeight,
-        ),
-        textAlign: TextAlign.end,
-        padding: EdgeInsets.symmetric(horizontal: 2 * theme.scale),
-      ),
 
       /// 副区的指标图最大数量
       subChartMaxCount: defaultSubChartMaxCount,

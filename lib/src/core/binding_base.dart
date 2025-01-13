@@ -67,6 +67,12 @@ abstract class KlineBindingBase
 
   @protected
   @mustCallSuper
+  void onThemeChanged([covariant IFlexiKlineTheme? oldTheme]) {
+     logd("onThemeChanged base");
+  }
+
+  @protected
+  @mustCallSuper
   bool onTap(Offset position) {
     logd("onTap base");
     return false;

@@ -23,7 +23,7 @@ abstract interface class IFlexiKlinePage {
 
 mixin FlexiKlinePageMixin<T extends StatefulWidget> on State<T>
     implements IFlexiKlinePage {
-  IFlexiKlineTheme? get flexiTheme => null;
+  IFlexiKlineTheme get flexiTheme => klineController.theme;
 
   @mustCallSuper
   void didChangeFlexiTheme(IFlexiKlineTheme theme) {

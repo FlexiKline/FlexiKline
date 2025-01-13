@@ -40,6 +40,14 @@ mixin ChartBinding
     _lastPriceCountDownTimer = null;
   }
 
+  @override
+  void onThemeChanged([covariant IFlexiKlineTheme? oldTheme]) {
+    super.onThemeChanged(oldTheme);
+    for (var paintObject in [mainPaintObject, ...subPaintObjects]) {
+      paintObject.doDidChangeTheme();
+    }
+  }
+
   final ValueNotifier<int> _repaintChart = ValueNotifier(0);
   Listenable get repaintChart => _repaintChart;
   void _markRepaintChart() {

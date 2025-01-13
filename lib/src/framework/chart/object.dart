@@ -95,6 +95,9 @@ abstract class PaintObject<T extends Indicator> extends IndicatorObject
     }
   }
 
+  @protected
+  void didChangeTheme() {}
+
   @mustCallSuper
   @protected
   void dispose() {
@@ -203,6 +206,13 @@ final class MainPaintObject<T extends MainPaintObjectIndicator>
   void precompute(Range range, {bool reset = false}) {
     for (var object in children) {
       object.precompute(range, reset: reset);
+    }
+  }
+
+  @override
+  void didChangeTheme() {
+    for (var object in children) {
+      object.didChangeTheme();
     }
   }
 

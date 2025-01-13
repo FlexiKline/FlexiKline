@@ -45,7 +45,7 @@ extension IndicatorObjectExt on IndicatorObject {
   IFlexiKlineTheme get theme => _context.theme;
 
   /// 全局默认的刻度值文本配置.
-  TextAreaConfig get defTicksTextConfig => settingConfig.ticksText.of(
+  TextAreaConfig get defTicksTextConfig => gridConfig.ticksText.of(
         textColor: theme.ticksTextColor,
       );
 

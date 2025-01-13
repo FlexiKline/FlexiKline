@@ -30,6 +30,8 @@ class GridConfig {
     this.isAllowDragIndicatorHeight = true,
     this.dragHitTestMinDistance = 10,
     this.dragLine,
+    // 全局默认的刻度值配置.
+    required this.ticksText,
   });
 
   final bool show;
@@ -44,6 +46,9 @@ class GridConfig {
 
   /// 移动指标图表高度时的拖拽线配置
   final LineConfig? dragLine;
+
+  /// 全局默认的刻度值文本配置.
+  final TextAreaConfig ticksText;
 
   factory GridConfig.fromJson(Map<String, dynamic> json) =>
       _$GridConfigFromJson(json);

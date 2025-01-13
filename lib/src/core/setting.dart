@@ -43,6 +43,11 @@ mixin SettingBinding on KlineBindingBase
     _canvasSizeChangeListener.dispose();
   }
 
+  @override
+  void onThemeChanged([covariant IFlexiKlineTheme? oldTheme]) {
+    super.onThemeChanged(oldTheme);
+  }
+
   /// 蜡烛宽度
   late double _candleWidth;
   double? _candleSpacing;

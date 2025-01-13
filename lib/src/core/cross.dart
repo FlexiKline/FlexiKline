@@ -65,6 +65,16 @@ mixin CrossBinding on KlineBindingBase, SettingBinding implements ICross {
     }
   }
 
+  LineConfig? _crosshair;
+  PointConfig? _crosspoint;
+
+  @override
+  void onThemeChanged([covariant IFlexiKlineTheme? oldTheme]) {
+    super.onThemeChanged(oldTheme);
+    _crosshair = null;
+    _crosspoint = null;
+  }
+
   // 是否正在绘制Cross
   @override
   bool get isCrossing => crossOffset?.isFinite == true;
@@ -188,15 +198,17 @@ mixin CrossBinding on KlineBindingBase, SettingBinding implements ICross {
       ..moveTo(offset.dx, 0)
       ..lineTo(offset.dx, canvasHeight);
 
+    _crosshair ??= crossConfig.crosshair.of(paintColor: theme.crossColor);
+
     canvas.drawLineByConfig(
       path,
-      crossConfig.crosshair.of(paintColor: theme.crossColor),
+      _crosshair!,
     );
 
+    _crosspoint ??= crossConfig.crosspoint.of(color: theme.crossColor);
     canvas.drawCirclePoint(
       offset,
-      crossConfig.crosspoint,
-      color: theme.crossColor,
+      _crosspoint!,
     );
   }
 
