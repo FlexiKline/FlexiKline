@@ -171,13 +171,11 @@ abstract class BaseFlexiKlineTheme implements IFlexiKlineTheme {
 /// 通过[IFlexiKlineTheme]来配置FlexiKline基类.
 mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
   /// 扩展[key]
-  String getCacheKey(String key) => key;
-  // @override
-  // FlexiKlineConfig getFlexiKlineConfig();
+  String getCacheKey(String key) => '$configKey-$key';
 
-  FlexiKlineConfig genFlexiKlineConfig() {
+  @override
+  FlexiKlineConfig generateFlexiKlineConfig([Map<String, dynamic>? origin]) {
     return FlexiKlineConfig(
-      key: theme.key,
       grid: genGridConfig(),
       setting: genSettingConfig(),
       gesture: genGestureConfig(),

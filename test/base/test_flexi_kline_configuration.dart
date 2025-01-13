@@ -110,14 +110,6 @@ class TestFlexiKlineTheme implements IFlexiKlineTheme {
 
 class TestFlexiKlineConfiguration with FlexiKlineThemeConfigurationMixin {
   @override
-  FlexiKlineConfig getFlexiKlineConfig() {
-    return genFlexiKlineConfig();
-  }
-
-  @override
-  void saveFlexiKlineConfig(FlexiKlineConfig config) {}
-
-  @override
   IFlexiKlineTheme get theme => TestFlexiKlineTheme();
 
   @override
@@ -128,19 +120,19 @@ class TestFlexiKlineConfiguration with FlexiKlineThemeConfigurationMixin {
 
   @override
   MainPaintObjectIndicator<PaintObjectIndicator> genMainIndicator() {
-    // TODO: implement genMainIndicator
     throw UnimplementedError();
   }
 
   @override
   Map<String, dynamic>? getConfig(String key) {
-    // TODO: implement getConfig
     throw UnimplementedError();
   }
 
   @override
   Future<bool> setConfig(String key, Map<String, dynamic> value) {
-    // TODO: implement setConfig
     throw UnimplementedError();
   }
+
+  @override
+  String get configKey => 'test';
 }

@@ -21,17 +21,15 @@ import 'chart/indicator.dart';
 import 'draw/overlay.dart';
 import 'serializers.dart';
 
-const drawOverlayListConfigKey = '_draw_overlay_list_config';
+const flexiKlineConfigKey = 'flexi_kline_config';
+const drawOverlayListConfigKey = 'draw_overlay_list_config';
 const drawOverlayListKey = 'list';
-const drawToolbarPositionKey = '_draw_toolbar_position';
+const drawToolbarPositionKey = 'draw_toolbar_position';
 
 /// FlexiKline主题接口.
 ///
 /// 定义FlexiKline中通用颜色
 abstract interface class IFlexiKlineTheme {
-  /// 缓存Key
-  String get key;
-
   /// 实际尺寸与UI设计的比例
   double get scale;
 
@@ -158,13 +156,13 @@ abstract interface class IConfiguration implements IStorage {
   /// 当前配置主题
   IFlexiKlineTheme get theme;
 
-  /// 获取FlexiKline配置
-  /// 1. 如果本地有缓存, 则从缓存中获取.
-  /// 2. 如果本地没有缓存, 根据当前主题生成一套FlexiKline配置.
-  FlexiKlineConfig getFlexiKlineConfig();
+  String get configKey;
 
-  /// 保存[config]配置信息到本地.
-  void saveFlexiKlineConfig(FlexiKlineConfig config);
+  /// 生成FlexiKline配置
+  /// 调用场景:
+  /// 1. 首次加载(无缓存)情况下, 生成默认的FlexiKlineConfig
+  /// 2. 从缓存中反序列化实现时调用, [origin]即是原始缓存配置, 这可能出现在后续追加/删除/修改配置时, 原有配置无法反序列化.
+  FlexiKlineConfig generateFlexiKlineConfig([Map<String, dynamic>? origin]);
 
   /// 蜡烛指标配置构造器(主区)
   IndicatorBuilder<CandleBaseIndicator> get candleIndicatorBuilder;
@@ -203,6 +201,24 @@ T? jsonToInstance<T>(Map<String, dynamic>? json, FromJson<T> fromJson) {
 }
 
 extension IConfigurationExt on IConfiguration {
+  FlexiKlineConfig getFlexiKlineConfig() {
+    Map<String, dynamic>? json;
+    try {
+      json = getConfig(flexiKlineConfigKey);
+      if (json is Map<String, dynamic>) {
+        return FlexiKlineConfig.fromJson(json);
+      }
+    } catch (error, stack) {
+      debugPrintStack(stackTrace: stack, label: 'getFlexiKlineConfig$error');
+    }
+
+    return generateFlexiKlineConfig(json);
+  }
+
+  void saveFlexiKlineConfig(FlexiKlineConfig config) {
+    setConfig(flexiKlineConfigKey, config.toJson());
+  }
+
   /// 从本地获取加载[key]指定的指标配置, 并转换成[Indicator]实例.
   /// 如果指定[builder], 则不会从配置中查找.
   T? getIndicator<T extends Indicator>(
@@ -217,7 +233,7 @@ extension IConfigurationExt on IConfiguration {
       final indicator = builder.call(json);
       if (indicator is T) return indicator;
     } catch (error, stack) {
-      debugPrintStack(stackTrace: stack, label: error.toString());
+      debugPrintStack(stackTrace: stack, label: 'getIndicator$error');
     }
     return null;
   }
@@ -236,7 +252,7 @@ extension IConfigurationExt on IConfiguration {
 
   /// 从本地获取[instId]对应的绘制实例数据列表.
   Iterable<Overlay> getDrawOverlayList(String instId) {
-    final json = getConfig('$instId$drawOverlayListConfigKey');
+    final json = getConfig('$instId-$drawOverlayListConfigKey');
     if (json == null || json.isEmpty) return [];
     final data = json[drawOverlayListKey];
     if (data is List<dynamic>) {
@@ -248,7 +264,7 @@ extension IConfigurationExt on IConfiguration {
   /// 以[instId]为key, 持久化绘制实例列表[list]到本地中.
   void saveDrawOverlayList(String instId, Iterable<Overlay> list) {
     if (list.isEmpty) return;
-    setConfig('$instId$drawOverlayListConfigKey', {
+    setConfig('$instId-$drawOverlayListConfigKey', {
       drawOverlayListKey: list.map((e) => e.toJson()).toList(),
     });
   }

@@ -25,7 +25,7 @@ abstract interface class ISetting {
   void storeFlexiKlineConfig();
 
   /// 更新配置[config]
-  void updateFlexiKlineConfig(FlexiKlineConfig config);
+  // void updateFlexiKlineConfig(FlexiKlineConfig config);
 
   /// SettingConfig
   SettingConfig get settingConfig;

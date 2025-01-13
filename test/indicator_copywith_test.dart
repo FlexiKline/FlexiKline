@@ -21,7 +21,7 @@ void main() {
   TestFlexiKlineConfiguration configuration = TestFlexiKlineConfiguration();
   late FlexiKlineConfig flexiKlineConfig;
   setUp(() {
-    flexiKlineConfig = configuration.getFlexiKlineConfig();
+    flexiKlineConfig = configuration.generateFlexiKlineConfig();
     // flexiKlineConfig.main.add(IndicatorType.candle);
     // flexiKlineConfig.main.add(IndicatorType.volume);
 

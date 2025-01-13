@@ -8,7 +8,6 @@ part of 'flexi_kline_config.dart';
 
 FlexiKlineConfig _$FlexiKlineConfigFromJson(Map<String, dynamic> json) =>
     FlexiKlineConfig(
-      key: json['key'] as String,
       grid: GridConfig.fromJson(json['grid'] as Map<String, dynamic>),
       setting: SettingConfig.fromJson(json['setting'] as Map<String, dynamic>),
       gesture: GestureConfig.fromJson(json['gesture'] as Map<String, dynamic>),
@@ -23,7 +22,6 @@ FlexiKlineConfig _$FlexiKlineConfigFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$FlexiKlineConfigToJson(FlexiKlineConfig instance) =>
     <String, dynamic>{
-      'key': instance.key,
       'grid': instance.grid.toJson(),
       'setting': instance.setting.toJson(),
       'gesture': instance.gesture.toJson(),

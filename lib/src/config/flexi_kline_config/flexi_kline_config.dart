@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:flutter/foundation.dart';
-
 import '../../framework/export.dart';
 import '../cross_config/cross_config.dart';
 import '../draw_config/draw_config.dart';
@@ -26,7 +24,6 @@ part 'flexi_kline_config.g.dart';
 @FlexiConfigSerializable
 class FlexiKlineConfig {
   FlexiKlineConfig({
-    required this.key,
     required this.grid,
     required this.setting,
     required this.gesture,
@@ -37,7 +34,6 @@ class FlexiKlineConfig {
     this.sub = const <IIndicatorKey>{},
   });
 
-  final String key;
   GridConfig grid;
   SettingConfig setting;
   GestureConfig gesture;
@@ -47,19 +43,19 @@ class FlexiKlineConfig {
   MainPaintObjectIndicator mainIndicator;
   Set<IIndicatorKey> sub;
 
-  FlexiKlineConfig clone() {
-    try {
-      return FlexiKlineConfig.fromJson(toJson());
-    } catch (e) {
-      debugPrint('FlexiKlineConfig clone failed!!!');
-    }
-    return this;
-  }
+  // FlexiKlineConfig clone() {
+  //   try {
+  //     return FlexiKlineConfig.fromJson(toJson());
+  //   } catch (e) {
+  //     debugPrint('FlexiKlineConfig clone failed!!!');
+  //   }
+  //   return this;
+  // }
 
-  // TODO: 废弃
-  void update(FlexiKlineConfig config) {
-    sub = config.sub;
-  }
+  // 废弃
+  // void update(FlexiKlineConfig config) {
+  //   sub = config.sub;
+  // }
 
   factory FlexiKlineConfig.fromJson(Map<String, dynamic> json) =>
       _$FlexiKlineConfigFromJson(json);

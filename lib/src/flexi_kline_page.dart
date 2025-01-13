@@ -25,9 +25,9 @@ mixin FlexiKlinePageMixin<T extends StatefulWidget> on State<T>
     implements IFlexiKlinePage {
   IFlexiKlineTheme get flexiTheme => klineController.theme;
 
-  @mustCallSuper
-  void didChangeFlexiTheme(IFlexiKlineTheme theme) {
-    final config = klineController.configuration.getFlexiKlineConfig();
-    klineController.updateFlexiKlineConfig(config);
-  }
+  // @mustCallSuper
+  // void didChangeFlexiTheme(IFlexiKlineTheme theme) {
+  //   final config = klineController.configuration.getFlexiKlineConfig();
+  //   klineController.updateFlexiKlineConfig(config);
+  // }
 }

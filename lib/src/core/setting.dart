@@ -385,15 +385,15 @@ mixin SettingBinding on KlineBindingBase
   FlexiKlineConfig get _flexiKlineConfig {
     if (__flexiKlineConfig == null) {
       final config = configuration.getFlexiKlineConfig();
-      _flexiKlineConfig = config;
+      __flexiKlineConfig = config;
     }
     return __flexiKlineConfig!;
   }
 
-  set _flexiKlineConfig(config) {
-    // __flexiKlineConfig = config.clone();
-    __flexiKlineConfig = config;
-  }
+  // set _flexiKlineConfig(config) {
+  //   // __flexiKlineConfig = config.clone();
+  //   __flexiKlineConfig = config;
+  // }
 
   /// 保存当前FlexiKline配置到本地
   @override
@@ -403,28 +403,28 @@ mixin SettingBinding on KlineBindingBase
     configuration.saveFlexiKlineConfig(_flexiKlineConfig);
   }
 
-  /// 更新[config]到[_flexiKlineConfig]
-  @override
-  void updateFlexiKlineConfig(FlexiKlineConfig config) {
-    if (config.key != _flexiKlineConfig.key) {
-      /// 保存当前配置
-      storeFlexiKlineConfig();
+  // /// 更新[config]到[_flexiKlineConfig]
+  // @override
+  // void updateFlexiKlineConfig(FlexiKlineConfig config) {
+  //   if (config.key != _flexiKlineConfig.key) {
+  //     /// 保存当前配置
+  //     storeFlexiKlineConfig();
 
-      /// 使用当前配置更新config
-      config.update(_flexiKlineConfig);
+  //     /// 使用当前配置更新config
+  //     config.update(_flexiKlineConfig);
 
-      /// 更新当前配置为[config]
-      _flexiKlineConfig = config;
+  //     /// 更新当前配置为[config]
+  //     _flexiKlineConfig = config;
 
-      /// 保存当前配置
-      if (autoSave) storeFlexiKlineConfig();
-    } else {
-      _flexiKlineConfig = config;
+  //     /// 保存当前配置
+  //     if (autoSave) storeFlexiKlineConfig();
+  //   } else {
+  //     _flexiKlineConfig = config;
 
-      /// 保存当前配置
-      if (autoSave) storeFlexiKlineConfig();
-    }
-  }
+  //     /// 保存当前配置
+  //     if (autoSave) storeFlexiKlineConfig();
+  //   }
+  // }
 
   /// SettingConfig
   @override

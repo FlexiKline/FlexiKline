@@ -23,18 +23,21 @@ FlexiKline是一个灵活且高度可定制化的金融Kline图表框架，旨�
 
 实现IConfiguration接口.
 ```dart
+abstract interface class IStorage {
+  Map<String, dynamic>? getConfig(String key);
+
+  Future<bool> setConfig(String key, Map<String, dynamic> value);
+}
+
 /// FlexiKline配置接口
-abstract interface class IConfiguration {
+abstract interface class IConfiguration implements IStorage {
   /// 当前配置主题
   IFlexiKlineTheme get theme;
 
-  /// 获取FlexiKline配置
-  /// 1. 如果本地有缓存, 则从缓存中获取.
-  /// 2. 如果本地没有缓存, 根据当前主题生成一套FlexiKline配置.
-  FlexiKlineConfig getFlexiKlineConfig();
+  String get configKey;
 
-  /// 保存[config]配置信息到本地.
-  void saveFlexiKlineConfig(FlexiKlineConfig config);
+  /// 生成FlexiKline配置
+  FlexiKlineConfig generateFlexiKlineConfig([Map<String, dynamic>? origin]);
 
   /// 蜡烛指标配置构造器(主区)
   IndicatorBuilder<CandleBaseIndicator> get candleIndicatorBuilder;
