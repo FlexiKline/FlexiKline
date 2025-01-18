@@ -167,12 +167,23 @@ mixin SettingBinding on KlineBindingBase
     }
   }
 
-  void exitFixedSizeMode() {
-    if (_fixedCanvasRect == null) return;
+  /// 退出固定大小模式
+  /// [layoutWidth]代表当前Kline所在布局的最大宽度, 如果指定, 则校正当前Kline宽度不能大于此宽度.
+  void exitFixedSizeMode([double? layoutWidth]) {
+    if (_fixedCanvasRect == null && layoutWidth == null) {
+      return;
+    }
+    Size mainSize = _mainSize ?? mainPaintObject.size;
+    if (layoutWidth != null) {
+      mainSize = Size(
+        mainSize.width.clamp(mainMinSize.width, layoutWidth),
+        mainSize.height, // 高度暂不校正
+      );
+    }
 
     _fixedCanvasRect = null;
-    final changed = mainPaintObject.doUpdateLayout(size: _mainSize);
     _mainSize = null;
+    final changed = mainPaintObject.doUpdateLayout(size: mainSize);
     _invokeSizeChanged(force: changed);
   }
 
@@ -399,6 +410,9 @@ mixin SettingBinding on KlineBindingBase
   @override
   void storeFlexiKlineConfig() {
     // _flexiKlineConfig.main = _paintObjectManager.mainIndciatorKeys.toSet();
+    mainPaintObject.doUpdateLayout(
+      size: 
+    );
     _flexiKlineConfig.sub = _paintObjectManager.subIndicatorKeys.toSet();
     configuration.saveFlexiKlineConfig(_flexiKlineConfig);
   }

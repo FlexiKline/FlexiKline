@@ -99,6 +99,17 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   @override
   KlineData get curKlineData => _curKlineData;
 
+  void cleanUnlessKlineData() {
+    final curKey = curDataKey;
+    _klineDataCache.removeWhere((key, data) {
+      if (key != curKey) {
+        data.dispose();
+        return true;
+      }
+      return false;
+    });
+  }
+
   /// 设置当前KlineData:
   /// 1. 通知timeBar变更
   /// 2. 初始化首根蜡烛绘制位置于屏幕右侧[initPaintDxOffset]指定处.

@@ -17,6 +17,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 
 import '../framework/configuration.dart';
+import '../framework/logger.dart';
 import '../kline_controller.dart';
 import '../utils/platform_util.dart';
 import 'non_touch_gesture_detector.dart';
@@ -88,7 +89,11 @@ class FlexiKlineWidget extends StatefulWidget {
   State<FlexiKlineWidget> createState() => _FlexiKlineWidgetState();
 }
 
-class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
+class _FlexiKlineWidgetState extends State<FlexiKlineWidget>
+    with WidgetsBindingObserver, KlineLog {
+  @override
+  String get logTag => 'KlineView';
+
   /// 绘制工具条globalKey: 用于获取其大小
   final GlobalKey _drawToolbarKey = GlobalKey();
 
@@ -105,6 +110,8 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
   void initState() {
     super.initState();
 
+    loggerDelegate = controller.loggerDelegate;
+
     controller.initState();
     if (widget.mainSize != null) {
       controller.setMainSize(widget.mainSize!);
@@ -114,10 +121,12 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
 
     controller.canvasSizeChangeListener.addListener(() {
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-        if (controller.drawState.isEditing) {
-          _updateDrawToolbarPosition(_position);
+        if (mounted) {
+          if (controller.drawState.isEditing) {
+            _updateDrawToolbarPosition(_position);
+          }
+          setState(() {});
         }
-        setState(() {});
       });
     });
   }
@@ -125,13 +134,25 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> {
   @override
   void didUpdateWidget(covariant FlexiKlineWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    controller.logd('View didUpdateWidget');
+    logd('didUpdateWidget');
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    controller.logd('View didChangeDependencies');
+    logd('didChangeDependencies');
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    logd('didChangeAppLifecycleState($state)');
+    if (state == AppLifecycleState.resumed) {
+    } else {}
+  }
+
+  @override
+  void didHaveMemoryPressure() {
+    controller.cleanUnlessKlineData();
   }
 
   @override

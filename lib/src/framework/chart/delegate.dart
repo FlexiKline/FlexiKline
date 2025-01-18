@@ -21,7 +21,7 @@ extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
     EdgeInsets? padding,
     bool reset = false,
   }) {
-    bool hasChange = false;
+    bool hasChange = reset;
     if (height != null && height > 0 && height != indicator.height) {
       _indicator.height = height;
       hasChange = true;
@@ -32,8 +32,8 @@ extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
       hasChange = true;
     }
 
-    if (reset || hasChange) resetPaintBounding();
-    return reset || hasChange;
+    if (hasChange) resetPaintBounding();
+    return hasChange;
   }
 
   MinMax? doInitState(
@@ -128,7 +128,7 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator>
       );
     }
 
-    bool hasChange = false;
+    bool hasChange = reset;
     if (padding != null && padding != indicator.padding) {
       indicator.padding == padding;
       hasChange = true;
@@ -138,6 +138,7 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator>
       indicator.height = size.height;
       hasChange = true;
     }
+    if (hasChange) resetPaintBounding();
 
     for (var object in children) {
       final childChange = object.doUpdateLayout(
@@ -148,8 +149,7 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator>
       hasChange = hasChange || childChange;
     }
 
-    if (reset || hasChange) resetPaintBounding();
-    return reset || hasChange;
+    return hasChange;
   }
 
   MinMax? doInitState(
