@@ -219,7 +219,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
 
       final subMinHeight = settingConfig.subMinHeight;
       final upHeight = _upObject!.height + deltaDy;
-      if (isMainIndicator && upHeight < mainMinimumHeight) {
+      if (isMainIndicator && upHeight < mainMinSize.height) {
         return;
       } else if (upHeight < subMinHeight) {
         return;

@@ -167,7 +167,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget>
     if (widget.autoAdaptLayout) {
       return LayoutBuilder(
         builder: (context, constraints) {
-          controller.adaptLayoutChange(constraints.biggest);
+          controller.setAdaptLayoutMode(constraints.biggest.width);
           return _buildKlineContainer(context);
         },
       );

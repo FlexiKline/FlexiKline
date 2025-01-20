@@ -29,7 +29,6 @@ class FlexiKlineConfig {
     required this.gesture,
     required this.cross,
     required this.draw,
-    // required this.tooltip,
     required this.mainIndicator,
     this.sub = const <IIndicatorKey>{},
   });
@@ -39,23 +38,8 @@ class FlexiKlineConfig {
   GestureConfig gesture;
   CrossConfig cross;
   DrawConfig draw;
-  // TooltipConfig tooltip;
   MainPaintObjectIndicator mainIndicator;
   Set<IIndicatorKey> sub;
-
-  // FlexiKlineConfig clone() {
-  //   try {
-  //     return FlexiKlineConfig.fromJson(toJson());
-  //   } catch (e) {
-  //     debugPrint('FlexiKlineConfig clone failed!!!');
-  //   }
-  //   return this;
-  // }
-
-  // 废弃
-  // void update(FlexiKlineConfig config) {
-  //   sub = config.sub;
-  // }
 
   factory FlexiKlineConfig.fromJson(Map<String, dynamic> json) =>
       _$FlexiKlineConfigFromJson(json);

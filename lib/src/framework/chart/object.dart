@@ -191,7 +191,7 @@ final class MainPaintObject<T extends MainPaintObjectIndicator>
 
   @override
   Rect get drawableRect {
-    return _drawableRect ??= Rect.fromLTWH(0, 0, size.width, size.height);
+    return _drawableRect ??= Offset.zero & size;
   }
 
   @override

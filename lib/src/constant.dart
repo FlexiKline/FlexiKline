@@ -15,13 +15,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
-/// 布局模式
-enum LayoutMode {
-  normal, // 正常模式(可自由调节宽高)
-  adapt, // 自适应模式(Web/桌面端根据父布局宽度变化页变化)
-  fixed; // 固定大小模式(全屏/横屏)
-}
-
 /// 默认数据格式化精度
 const int defaultPrecision = 4;
 

@@ -35,6 +35,6 @@ part 'chart.dart';
 part 'state.dart';
 part 'setting.dart';
 part 'cross.dart';
-part 'interface.dart';
+part 'common.dart';
 part 'draw.dart';
 part 'grid.dart';

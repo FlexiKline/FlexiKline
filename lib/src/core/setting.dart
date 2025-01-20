@@ -21,9 +21,11 @@ mixin SettingBinding on KlineBindingBase
   void init() {
     super.init();
     logd("init setting");
+    final mainIndicator = _flexiKlineConfig.mainIndicator;
+    _layoutMode = NormalLayoutMode(mainIndicator.size);
     _paintObjectManager.init(
       this,
-      mainIndicator: _flexiKlineConfig.mainIndicator,
+      mainIndicator: mainIndicator,
       initSubIndicatorKeys: _flexiKlineConfig.sub,
     );
     _canvasSizeChangeListener = KlineStateNotifier(canvasRect);
@@ -60,7 +62,7 @@ mixin SettingBinding on KlineBindingBase
   }
 
   void _invokeSizeChanged({bool force = false}) {
-    if (isFixedSizeMode) {
+    if (_layoutMode is FixedLayoutMode) {
       final mainSize = mainRect.size;
       if (mainSize != mainPaintObject.size) {
         final updated = mainPaintObject.doUpdateLayout(size: mainSize);
@@ -73,21 +75,19 @@ mixin SettingBinding on KlineBindingBase
     markRepaintCross();
   }
 
-  /// 临时变量: 记录首次进入固定大小模式时主区的大小, 用于退出固定大小模式时, 恢复使用.
-  Size? _mainSize;
-  Rect? _fixedCanvasRect;
-  bool get isFixedSizeMode => _fixedCanvasRect != null;
+  late LayoutMode _layoutMode;
+  bool get isFixedLayoutMode => _layoutMode is FixedLayoutMode;
+  Size? get fixedSize {
+    if (!isFixedLayoutMode) return null;
+    return (_layoutMode as FixedLayoutMode).fixedSize;
+  }
 
   /// 主区大小
   @override
   Rect get mainRect {
-    if (_fixedCanvasRect != null) {
-      return Rect.fromLTRB(
-        _fixedCanvasRect!.left,
-        _fixedCanvasRect!.top,
-        _fixedCanvasRect!.right,
-        _fixedCanvasRect!.bottom - subRectHeight,
-      );
+    if (_layoutMode is FixedLayoutMode) {
+      final size = (_layoutMode as FixedLayoutMode).fixedSize;
+      return Offset.zero & Size(size.width, size.height - subRectHeight);
     }
     return mainPaintObject.drawableRect;
   }
@@ -95,8 +95,8 @@ mixin SettingBinding on KlineBindingBase
   /// 整个画布区域大小 = 主区 + 副区
   @override
   Rect get canvasRect {
-    if (_fixedCanvasRect != null) {
-      return _fixedCanvasRect!;
+    if (_layoutMode is FixedLayoutMode) {
+      return Offset.zero & (_layoutMode as FixedLayoutMode).fixedSize;
     }
     return Rect.fromLTRB(
       mainRect.left,
@@ -113,12 +113,13 @@ mixin SettingBinding on KlineBindingBase
   /// 副区大小
   @override
   Rect get subRect {
-    if (_fixedCanvasRect != null) {
+    if (_layoutMode is FixedLayoutMode) {
+      final size = (_layoutMode as FixedLayoutMode).fixedSize;
       return Rect.fromLTRB(
-        _fixedCanvasRect!.left,
-        _fixedCanvasRect!.bottom - subRectHeight,
-        _fixedCanvasRect!.right,
-        _fixedCanvasRect!.bottom,
+        0,
+        size.height - subRectHeight,
+        size.width,
+        size.height,
       );
     }
     return Rect.fromLTRB(
@@ -138,52 +139,43 @@ mixin SettingBinding on KlineBindingBase
   /// 主区域最小宽高
   Size get mainMinSize => settingConfig.mainMinSize;
 
-  /// 当前主区最低限制高度
-  double get mainMinimumHeight {
-    return math.max(
-      mainPaintObject.padding.height + settingConfig.subMinHeight,
-      mainMinSize.height,
-    );
-  }
-
   /// 主区域大小设置
   void setMainSize(Size size) {
-    if (size.width < mainMinSize.width || size.height < mainMinimumHeight) {
-      return;
-    }
-
-    if (size != mainPaintObject.size) {
-      final changed = mainPaintObject.doUpdateLayout(size: size);
-      _invokeSizeChanged(force: changed);
-    }
+    if (!(size > mainMinSize)) return;
+    if (size == _layoutMode.mainSize) return;
+    _layoutMode.mainSize = size;
+    final changed = mainPaintObject.doUpdateLayout(size: size);
+    _invokeSizeChanged(force: changed);
   }
 
   /// 自适应[FlexiKlineWidget]所在父组件的布局的变化
-  /// 注: 目前仅主区的宽度会适配父组件宽度的变化
+  /// 注: 仅适配主区的宽度变化
   /// 这主要是通过[FlexiKlineWidget]的autoAdaptLayout配置决定, 并会导致无法手动调整[FlexiKlineWidget]的宽度.
-  void adaptLayoutChange(Size size) {
-    if (size.width != mainRect.width) {
-      setMainSize(Size(size.width, mainRect.height));
-    }
-  }
-
-  /// 退出固定大小模式
-  /// [layoutWidth]代表当前Kline所在布局的最大宽度, 如果指定, 则校正当前Kline宽度不能大于此宽度.
-  void exitFixedSizeMode([double? layoutWidth]) {
-    if (_fixedCanvasRect == null && layoutWidth == null) {
+  void setAdaptLayoutMode(double width) {
+    if (width < mainMinSize.width) return;
+    if (_layoutMode is AdaptLayoutMode &&
+        (_layoutMode as AdaptLayoutMode).mainSize.width == width) {
       return;
     }
-    Size mainSize = _mainSize ?? mainPaintObject.size;
-    if (layoutWidth != null) {
-      mainSize = Size(
-        mainSize.width.clamp(mainMinSize.width, layoutWidth),
-        mainSize.height, // 高度暂不校正
+    _layoutMode = _layoutMode.adaptMode(width);
+    final changed = mainPaintObject.doUpdateLayout(size: _layoutMode.mainSize);
+    _invokeSizeChanged(force: changed);
+  }
+
+  /// 进入正常布局模式
+  /// [size] 代表正常布局大小
+  /// [limitSize] 代表当前Kline所在正常布局模式下的最大宽高, 如果指定, 则校正当前Kline宽高不能大于此宽高.
+  void setNormalLayoutMode({Size? size, Size? limitSize}) {
+    size ??= _layoutMode.mainSize;
+    if (limitSize != null) {
+      size = Size(
+        size.width.clamp(mainMinSize.width, limitSize.width),
+        size.height.clamp(mainMinSize.height, limitSize.height),
       );
     }
-
-    _fixedCanvasRect = null;
-    _mainSize = null;
-    final changed = mainPaintObject.doUpdateLayout(size: mainSize);
+    if (size == mainPaintObject.size) return;
+    _layoutMode = _layoutMode.normalMode(size);
+    final changed = mainPaintObject.doUpdateLayout(size: _layoutMode.mainSize);
     _invokeSizeChanged(force: changed);
   }
 
@@ -191,16 +183,15 @@ mixin SettingBinding on KlineBindingBase
   /// 当设置[_fixedCanvasRect]后, 主区高度=[_fixedCanvasRect]的总高度 - [subRectHeight]副区所有指标高度
   /// [size] 当前Kline主区+副区的大小.
   /// 注: 设置是临时的, 并不会更新到配置中.
-  void entryFixedSizeMode(Size size) {
-    if ((_fixedCanvasRect != null && _fixedCanvasRect!.size == size) ||
-        size.width < mainMinSize.width ||
-        size.height < mainMinimumHeight) {
+  void setFixedLayoutMode(Size size) {
+    if (!(size > mainMinSize)) return;
+    if (_layoutMode is FixedLayoutMode &&
+        (_layoutMode as FixedLayoutMode).fixedSize == size) {
       return;
     }
 
-    _mainSize ??= mainPaintObject.size;
-    _fixedCanvasRect = Rect.fromLTRB(0, 0, size.width, size.height);
-    final changed = mainPaintObject.doUpdateLayout(size: size);
+    _layoutMode = _layoutMode.fixedMode(size);
+    final changed = mainPaintObject.doUpdateLayout(size: mainRect.size);
     _invokeSizeChanged(force: changed);
   }
 
@@ -401,44 +392,15 @@ mixin SettingBinding on KlineBindingBase
     return __flexiKlineConfig!;
   }
 
-  // set _flexiKlineConfig(config) {
-  //   // __flexiKlineConfig = config.clone();
-  //   __flexiKlineConfig = config;
-  // }
-
   /// 保存当前FlexiKline配置到本地
   @override
   void storeFlexiKlineConfig() {
-    // _flexiKlineConfig.main = _paintObjectManager.mainIndciatorKeys.toSet();
-    mainPaintObject.doUpdateLayout(
-      size: 
+    _flexiKlineConfig.mainIndicator = mainPaintObject.indicator.copyWith(
+      size: _layoutMode.mainSize,
     );
     _flexiKlineConfig.sub = _paintObjectManager.subIndicatorKeys.toSet();
     configuration.saveFlexiKlineConfig(_flexiKlineConfig);
   }
-
-  // /// 更新[config]到[_flexiKlineConfig]
-  // @override
-  // void updateFlexiKlineConfig(FlexiKlineConfig config) {
-  //   if (config.key != _flexiKlineConfig.key) {
-  //     /// 保存当前配置
-  //     storeFlexiKlineConfig();
-
-  //     /// 使用当前配置更新config
-  //     config.update(_flexiKlineConfig);
-
-  //     /// 更新当前配置为[config]
-  //     _flexiKlineConfig = config;
-
-  //     /// 保存当前配置
-  //     if (autoSave) storeFlexiKlineConfig();
-  //   } else {
-  //     _flexiKlineConfig = config;
-
-  //     /// 保存当前配置
-  //     if (autoSave) storeFlexiKlineConfig();
-  //   }
-  // }
 
   /// SettingConfig
   @override

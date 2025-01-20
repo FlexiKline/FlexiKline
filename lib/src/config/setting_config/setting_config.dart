@@ -51,9 +51,6 @@ class SettingConfig {
     /// 是否展示Y轴刻度.
     this.showYAxisTick = true,
 
-    /// 全局默认的刻度值配置.
-    // required this.ticksText, // 已移至GridConfig
-
     /// 副图配置
     // 副区的指标图最大数量
     this.subChartMaxCount = defaultSubChartMaxCount,
@@ -101,9 +98,6 @@ class SettingConfig {
   /// 是否展示Y轴刻度.
   final bool showYAxisTick;
 
-  /// 全局默认的刻度值文本配置.
-  // final TextAreaConfig ticksText; // 已移至GridConfig
-
   // 副区的指标图最大数量
   final int subChartMaxCount;
 
@@ -114,14 +108,6 @@ class SettingConfig {
   int get spacingCandleParts {
     return candleSpacingParts.clamp(1, candleWidth.toInt());
   }
-
-  // /// 蜡烛间距 [candleFixedSpacing] 优先于 [candleSpacingParts]
-  // double? _candleSpacing;
-  // double get candleSpacing {
-  //   _candleSpacing = candleFixedSpacing ?? candleWidth / candleSpacingParts;
-  //   _candleSpacing = _candleSpacing! < pixel ? pixel : _candleSpacing;
-  //   return _candleSpacing!;
-  // }
 
   factory SettingConfig.fromJson(Map<String, dynamic> json) =>
       _$SettingConfigFromJson(json);

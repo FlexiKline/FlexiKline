@@ -14,6 +14,44 @@
 
 part of 'core.dart';
 
+/// 布局模式
+sealed class LayoutMode {
+  LayoutMode(this.mainSize);
+  // 主区正常模式下大小
+  Size mainSize;
+
+  NormalLayoutMode normalMode(Size size) => NormalLayoutMode(size);
+  FixedLayoutMode fixedMode(Size size) => FixedLayoutMode(mainSize, size);
+  AdaptLayoutMode adaptMode(double width) => AdaptLayoutMode(
+        mainSize,
+        Size(width, mainSize.height),
+      );
+  ScaleLayoutMode scaleMode(Rect rect) => ScaleLayoutMode(mainSize, rect);
+}
+
+/// 正常模式(可自由调节宽高)
+class NormalLayoutMode extends LayoutMode {
+  NormalLayoutMode(super.mainSize);
+}
+
+/// 自适应模式(Web/桌面端根据父布局宽度变化页变化)
+class AdaptLayoutMode extends LayoutMode {
+  AdaptLayoutMode(super.mainSize, this.adaptSize);
+  Size adaptSize;
+}
+
+/// 固定大小模式(全屏/横屏)
+class FixedLayoutMode extends LayoutMode {
+  FixedLayoutMode(super.mainSize, this.fixedSize);
+  Size fixedSize;
+}
+
+/// 缩放模式(可自由移动图表绘制位置)
+class ScaleLayoutMode extends LayoutMode {
+  ScaleLayoutMode(super.mainSize, this.mainRect);
+  Rect mainRect;
+}
+
 /// Setting API
 abstract interface class ISetting {
   /// Canvas区域大小监听器
