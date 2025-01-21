@@ -63,9 +63,10 @@ mixin SettingBinding on KlineBindingBase
 
   void _invokeSizeChanged({bool force = false}) {
     if (_layoutMode is FixedLayoutMode) {
-      final mainSize = mainRect.size;
-      if (mainSize != mainPaintObject.size) {
-        final updated = mainPaintObject.doUpdateLayout(size: mainSize);
+      final size = mainRect.size;
+      if (size != mainPaintObject.size) {
+        _layoutMode = _layoutMode.copyWith(mainSize: size);
+        final updated = mainPaintObject.doUpdateLayout(size: size);
         force = updated || force;
       }
     }
@@ -143,7 +144,7 @@ mixin SettingBinding on KlineBindingBase
   void setMainSize(Size size) {
     if (!(size > mainMinSize)) return;
     if (size == _layoutMode.mainSize) return;
-    _layoutMode.mainSize = size;
+    _layoutMode = _layoutMode.copyWith(mainSize: size);
     final changed = mainPaintObject.doUpdateLayout(size: size);
     _invokeSizeChanged(force: changed);
   }
@@ -154,11 +155,11 @@ mixin SettingBinding on KlineBindingBase
   void setAdaptLayoutMode(double width) {
     if (width < mainMinSize.width) return;
     if (_layoutMode is AdaptLayoutMode &&
-        (_layoutMode as AdaptLayoutMode).mainSize.width == width) {
+        (_layoutMode as AdaptLayoutMode).adaptSize.width == width) {
       return;
     }
-    _layoutMode = _layoutMode.adaptMode(width);
-    final changed = mainPaintObject.doUpdateLayout(size: _layoutMode.mainSize);
+    final adaptMode = _layoutMode = _layoutMode.adaptMode(width);
+    final changed = mainPaintObject.doUpdateLayout(size: adaptMode.adaptSize);
     _invokeSizeChanged(force: changed);
   }
 

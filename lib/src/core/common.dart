@@ -16,9 +16,11 @@ part of 'core.dart';
 
 /// 布局模式
 sealed class LayoutMode {
-  LayoutMode(this.mainSize);
+  const LayoutMode(this.mainSize);
   // 主区正常模式下大小
-  Size mainSize;
+  final Size mainSize;
+
+  LayoutMode copyWith({Size? mainSize});
 
   NormalLayoutMode normalMode(Size size) => NormalLayoutMode(size);
   FixedLayoutMode fixedMode(Size size) => FixedLayoutMode(mainSize, size);
@@ -31,25 +33,56 @@ sealed class LayoutMode {
 
 /// 正常模式(可自由调节宽高)
 class NormalLayoutMode extends LayoutMode {
-  NormalLayoutMode(super.mainSize);
+  const NormalLayoutMode(super.mainSize);
+
+  @override
+  NormalLayoutMode copyWith({Size? mainSize}) {
+    return NormalLayoutMode(
+      mainSize ?? this.mainSize,
+    );
+  }
 }
 
 /// 自适应模式(Web/桌面端根据父布局宽度变化页变化)
 class AdaptLayoutMode extends LayoutMode {
-  AdaptLayoutMode(super.mainSize, this.adaptSize);
-  Size adaptSize;
+  const AdaptLayoutMode(super.mainSize, this.adaptSize);
+  final Size adaptSize;
+
+  @override
+  AdaptLayoutMode copyWith({Size? mainSize, Size? adaptSize}) {
+    return AdaptLayoutMode(
+      mainSize ?? this.mainSize,
+      adaptSize ?? this.adaptSize,
+    );
+  }
 }
 
 /// 固定大小模式(全屏/横屏)
 class FixedLayoutMode extends LayoutMode {
-  FixedLayoutMode(super.mainSize, this.fixedSize);
-  Size fixedSize;
+  const FixedLayoutMode(super.mainSize, this.fixedSize);
+  final Size fixedSize;
+
+  @override
+  FixedLayoutMode copyWith({Size? mainSize, Size? fixedSize}) {
+    return FixedLayoutMode(
+      mainSize ?? this.mainSize,
+      fixedSize ?? this.fixedSize,
+    );
+  }
 }
 
 /// 缩放模式(可自由移动图表绘制位置)
 class ScaleLayoutMode extends LayoutMode {
-  ScaleLayoutMode(super.mainSize, this.mainRect);
-  Rect mainRect;
+  const ScaleLayoutMode(super.mainSize, this.mainRect);
+  final Rect mainRect;
+
+  @override
+  ScaleLayoutMode copyWith({Size? mainSize, Rect? mainRect}) {
+    return ScaleLayoutMode(
+      mainSize ?? this.mainSize,
+      mainRect ?? this.mainRect,
+    );
+  }
 }
 
 /// Setting API

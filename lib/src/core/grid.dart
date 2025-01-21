@@ -200,7 +200,8 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
       }
     }
 
-    if (_upObject != null) {
+    // 注: 固定模式下不允许调整画布的高度(即_downObject不能为空)
+    if (_upObject != null && (!isFixedLayoutMode || _downObject != null)) {
       markRepaintGrid();
       return true;
     }
