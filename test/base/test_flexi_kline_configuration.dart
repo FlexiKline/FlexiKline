@@ -106,6 +106,10 @@ class TestFlexiKlineTheme implements IFlexiKlineTheme {
   @override
   // TODO: implement latestPriceTextBg
   Color get latestPriceTextBg => throw UnimplementedError();
+
+  @override
+  // TODO: implement dragBg
+  Color get dragBg => throw UnimplementedError();
 }
 
 class TestFlexiKlineConfiguration with FlexiKlineThemeConfigurationMixin {

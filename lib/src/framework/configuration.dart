@@ -50,11 +50,12 @@ abstract interface class IFlexiKlineTheme {
 
   Color get transparent;
 
-  // 背景色
+  /// 背景色
+  // 拖拽区域背景色
+  Color get dragBg;
   Color get chartBg;
   Color get tooltipBg;
   Color get crossTextBg;
-  // Color get drawTextBg;
   Color get latestPriceTextBg;
   Color get lastPriceTextBg;
   Color get countDownTextBg;
@@ -72,7 +73,7 @@ abstract interface class IFlexiKlineTheme {
   Color get textColor;
   // 刻度文本颜色
   Color get ticksTextColor;
-  // 最
+  // 最后价文本颜色
   Color get lastPriceTextColor;
   // corssing时文本颜色
   Color get crossTextColor;

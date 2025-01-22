@@ -75,13 +75,13 @@ extension IFlexiKlineThemeExt on IFlexiKlineTheme {
 }
 
 abstract class BaseFlexiKlineTheme implements IFlexiKlineTheme {
-  BaseFlexiKlineTheme({
+  const BaseFlexiKlineTheme({
     required this.long,
     required this.short,
+    required this.dragBg,
     required this.chartBg,
     required this.tooltipBg,
     required this.crossTextBg,
-    // required this.drawTextBg,
     this.transparent = Colors.transparent,
     required this.latestPriceTextBg,
     required this.lastPriceTextBg,
@@ -98,74 +98,53 @@ abstract class BaseFlexiKlineTheme implements IFlexiKlineTheme {
     required this.tooltipTextColor,
   });
 
-  BaseFlexiKlineTheme.simple({
-    required this.long,
-    required this.short,
-    required this.chartBg,
-    required Color markBg,
-    required this.crossTextBg,
-    this.transparent = Colors.transparent,
-    required this.latestPriceTextBg,
-    required this.lastPriceTextBg,
-    required Color color,
-    required this.gridLine,
-    required this.ticksTextColor,
-    required this.crossTextColor,
-  })  : tooltipBg = markBg,
-        countDownTextBg = markBg,
-        crossColor = color,
-        markLine = color,
-        textColor = color,
-        lastPriceTextColor = color,
-        tooltipTextColor = color;
-
   @override
-  late Color long;
+  final Color long;
   @override
-  late Color short;
+  final Color short;
 
   /// 背景色
   @override
-  late Color chartBg;
+  final Color dragBg;
   @override
-  late Color tooltipBg;
+  final Color chartBg;
   @override
-  late Color crossTextBg;
-  // @override
-  // late Color drawTextBg;
+  final Color tooltipBg;
   @override
-  late Color transparent;
+  final Color crossTextBg;
   @override
-  late Color latestPriceTextBg;
+  final Color transparent;
   @override
-  late Color lastPriceTextBg;
+  final Color latestPriceTextBg;
   @override
-  late Color countDownTextBg;
+  final Color lastPriceTextBg;
+  @override
+  final Color countDownTextBg;
 
   /// 分隔线
   @override
-  late Color gridLine;
+  final Color gridLine;
   @override
-  late Color crossColor;
+  final Color crossColor;
   @override
-  late Color drawColor;
+  final Color drawColor;
   @override
-  late Color markLine;
+  final Color markLine;
 
   @override
-  late Color themeColor;
+  final Color themeColor;
 
   /// 文本颜色配置
   @override
-  late Color textColor;
+  final Color textColor;
   @override
-  late Color ticksTextColor;
+  final Color ticksTextColor;
   @override
-  late Color lastPriceTextColor;
+  final Color lastPriceTextColor;
   @override
-  late Color crossTextColor;
+  final Color crossTextColor;
   @override
-  late Color tooltipTextColor;
+  final Color tooltipTextColor;
 }
 
 /// 通过[IFlexiKlineTheme]来配置FlexiKline基类.
@@ -245,11 +224,13 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       dragLine: LineConfig(
         type: LineType.dashed,
         dashes: const [3, 5],
+        length: 20,
         paint: PaintConfig(
           color: theme.markLine,
           strokeWidth: theme.pixel * 5,
         ),
       ),
+      dragLineOpacity: 0.1,
       // 全局默认的刻度值配置.
       ticksText: TextAreaConfig(
         style: TextStyle(

@@ -43,7 +43,7 @@ class NormalLayoutMode extends LayoutMode {
   }
 }
 
-/// 自适应模式(Web/桌面端根据父布局宽度变化页变化)
+/// 自适应模式(Web/桌面端根据父布局宽度变化而变化)
 class AdaptLayoutMode extends LayoutMode {
   const AdaptLayoutMode(super.mainSize, this.adaptSize);
   final Size adaptSize;
@@ -94,9 +94,6 @@ abstract interface class ISetting {
 
   /// 保存到本地
   void storeFlexiKlineConfig();
-
-  /// 更新配置[config]
-  // void updateFlexiKlineConfig(FlexiKlineConfig config);
 
   /// SettingConfig
   SettingConfig get settingConfig;

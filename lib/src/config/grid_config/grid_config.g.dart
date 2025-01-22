@@ -17,7 +17,13 @@ abstract class _$GridConfigCWProxy {
 
   GridConfig dragHitTestMinDistance(double dragHitTestMinDistance);
 
+  GridConfig draggingBgOpacity(double draggingBgOpacity);
+
+  GridConfig dragBgOpacity(double dragBgOpacity);
+
   GridConfig dragLine(LineConfig? dragLine);
+
+  GridConfig dragLineOpacity(double dragLineOpacity);
 
   GridConfig ticksText(TextAreaConfig ticksText);
 
@@ -33,7 +39,10 @@ abstract class _$GridConfigCWProxy {
     GridAxis? vertical,
     bool? isAllowDragIndicatorHeight,
     double? dragHitTestMinDistance,
+    double? draggingBgOpacity,
+    double? dragBgOpacity,
     LineConfig? dragLine,
+    double? dragLineOpacity,
     TextAreaConfig? ticksText,
   });
 }
@@ -62,7 +71,19 @@ class _$GridConfigCWProxyImpl implements _$GridConfigCWProxy {
       this(dragHitTestMinDistance: dragHitTestMinDistance);
 
   @override
+  GridConfig draggingBgOpacity(double draggingBgOpacity) =>
+      this(draggingBgOpacity: draggingBgOpacity);
+
+  @override
+  GridConfig dragBgOpacity(double dragBgOpacity) =>
+      this(dragBgOpacity: dragBgOpacity);
+
+  @override
   GridConfig dragLine(LineConfig? dragLine) => this(dragLine: dragLine);
+
+  @override
+  GridConfig dragLineOpacity(double dragLineOpacity) =>
+      this(dragLineOpacity: dragLineOpacity);
 
   @override
   GridConfig ticksText(TextAreaConfig ticksText) => this(ticksText: ticksText);
@@ -81,7 +102,10 @@ class _$GridConfigCWProxyImpl implements _$GridConfigCWProxy {
     Object? vertical = const $CopyWithPlaceholder(),
     Object? isAllowDragIndicatorHeight = const $CopyWithPlaceholder(),
     Object? dragHitTestMinDistance = const $CopyWithPlaceholder(),
+    Object? draggingBgOpacity = const $CopyWithPlaceholder(),
+    Object? dragBgOpacity = const $CopyWithPlaceholder(),
     Object? dragLine = const $CopyWithPlaceholder(),
+    Object? dragLineOpacity = const $CopyWithPlaceholder(),
     Object? ticksText = const $CopyWithPlaceholder(),
   }) {
     return GridConfig(
@@ -110,10 +134,25 @@ class _$GridConfigCWProxyImpl implements _$GridConfigCWProxy {
               ? _value.dragHitTestMinDistance
               // ignore: cast_nullable_to_non_nullable
               : dragHitTestMinDistance as double,
+      draggingBgOpacity: draggingBgOpacity == const $CopyWithPlaceholder() ||
+              draggingBgOpacity == null
+          ? _value.draggingBgOpacity
+          // ignore: cast_nullable_to_non_nullable
+          : draggingBgOpacity as double,
+      dragBgOpacity:
+          dragBgOpacity == const $CopyWithPlaceholder() || dragBgOpacity == null
+              ? _value.dragBgOpacity
+              // ignore: cast_nullable_to_non_nullable
+              : dragBgOpacity as double,
       dragLine: dragLine == const $CopyWithPlaceholder()
           ? _value.dragLine
           // ignore: cast_nullable_to_non_nullable
           : dragLine as LineConfig?,
+      dragLineOpacity: dragLineOpacity == const $CopyWithPlaceholder() ||
+              dragLineOpacity == null
+          ? _value.dragLineOpacity
+          // ignore: cast_nullable_to_non_nullable
+          : dragLineOpacity as double,
       ticksText: ticksText == const $CopyWithPlaceholder() || ticksText == null
           ? _value.ticksText
           // ignore: cast_nullable_to_non_nullable
@@ -215,9 +254,12 @@ GridConfig _$GridConfigFromJson(Map<String, dynamic> json) => GridConfig(
           json['isAllowDragIndicatorHeight'] as bool? ?? true,
       dragHitTestMinDistance:
           (json['dragHitTestMinDistance'] as num?)?.toDouble() ?? 10,
+      draggingBgOpacity: (json['draggingBgOpacity'] as num?)?.toDouble() ?? 0.1,
+      dragBgOpacity: (json['dragBgOpacity'] as num?)?.toDouble() ?? 0,
       dragLine: json['dragLine'] == null
           ? null
           : LineConfig.fromJson(json['dragLine'] as Map<String, dynamic>),
+      dragLineOpacity: (json['dragLineOpacity'] as num?)?.toDouble() ?? 0.1,
       ticksText:
           TextAreaConfig.fromJson(json['ticksText'] as Map<String, dynamic>),
     );
@@ -238,6 +280,9 @@ Map<String, dynamic> _$GridConfigToJson(GridConfig instance) {
   }
 
   writeNotNull('dragLine', instance.dragLine?.toJson());
+  val['dragLineOpacity'] = instance.dragLineOpacity;
+  val['draggingBgOpacity'] = instance.draggingBgOpacity;
+  val['dragBgOpacity'] = instance.dragBgOpacity;
   val['ticksText'] = instance.ticksText.toJson();
   return val;
 }

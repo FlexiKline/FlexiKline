@@ -41,6 +41,11 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
   LineConfig? _horiLine;
   LineConfig? _vertLine;
   LineConfig? _dragLine;
+  PaintObject? _upObject, _downObject;
+
+  bool get isStartDragGrid {
+    return gridConfig.isAllowDragIndicatorHeight && _upObject != null;
+  }
 
   @override
   void onThemeChanged([covariant IFlexiKlineTheme? oldTheme]) {
@@ -52,132 +57,186 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
 
   void paintGridBg(Canvas canvas, Size size) {
     if (gridConfig.show) {
-      // 主图图Grid X轴起始值
-      final mainLeft = mainRect.left;
-      final mainRight = mainRect.right;
-      // 主图图Grid Y轴起始值
-      final mainTop = mainRect.top;
-      final mainBottom = mainRect.bottom;
-      // 副图Grid Y轴起始值
-      final subTop = subRect.top;
-      final subBottom = subRect.bottom;
-
       /// 绘制horizontal轴 Grid 线
-      if (gridConfig.horizontal.show) {
-        _horiLine ??= gridConfig.horizontal.line.of(paintColor: theme.gridLine);
-        _dragLine ??=
-            gridConfig.dragLine?.of(paintColor: theme.markLine) ?? _horiLine;
-
-        final dragPosition = _upObject?.drawableRect.bottom ?? 0;
-        final minDistance = gridConfig.dragHitTestMinDistance;
-
-        double dy = mainTop;
-
-        // 绘制Top边框线
-        canvas.drawLineByConfig(
-          Path()
-            ..moveTo(mainLeft, dy)
-            ..lineTo(mainRight, dy),
-          _horiLine!,
-        );
-
-        // 绘制主图网格横线
-        final step = mainBottom / gridConfig.horizontal.count;
-        for (int i = 1; i < gridConfig.horizontal.count; i++) {
-          dy = i * step;
-          canvas.drawLineByConfig(
-            Path()
-              ..moveTo(mainLeft, dy)
-              ..lineTo(mainRight, dy),
-            _horiLine!,
-          );
-        }
-
-        // 绘制主图mainDrawBottom线
-        canvas.drawLineByConfig(
-          Path()
-            ..moveTo(mainLeft, mainBottom)
-            ..lineTo(mainRight, mainBottom),
-          (dragPosition - mainBottom).abs() < minDistance
-              ? _dragLine!
-              : _horiLine!,
-        );
-
-        /// 副图区域
-        // 绘制每一个副图的底部线
-        double height = 0.0;
-        for (final object in subPaintObjects) {
-          height += object.height;
-          dy = subTop + height;
-          canvas.drawLineByConfig(
-            Path()
-              ..moveTo(mainLeft, dy)
-              ..lineTo(mainRight, dy),
-            (dragPosition - dy).abs() < minDistance ? _dragLine! : _horiLine!,
-          );
-        }
-      }
+      _paintHorizontalGrid(canvas, size);
 
       /// 绘制Vertical轴 Grid 线
-      if (gridConfig.vertical.show) {
-        _vertLine ??= gridConfig.vertical.line.of(paintColor: theme.gridLine);
+      _paintVerticalGrid(canvas, size);
+    }
 
-        double dx = mainLeft;
-        final step = mainRight / gridConfig.vertical.count;
+    /// 绘制拖拽分隔线
+    _paintDragableLine(canvas, size);
+  }
 
-        // 绘制左边框线
-        canvas.drawLineByConfig(
-          Path()
-            ..moveTo(dx, mainTop)
-            ..lineTo(dx, subBottom),
-          _vertLine!,
-        );
+  /// 绘制可拖拽线标识与正在拖拽的线
+  void _paintDragableLine(Canvas canvas, Size size) {
+    final dragBg = theme.dragBg;
 
-        // 计算排除时间指标后的top和bottom
-        double top = subTop;
-        double bottom = subBottom;
-        switch (timePaintObject.position) {
-          case DrawPosition.middle:
-            top += timePaintObject.height;
-          case DrawPosition.bottom:
-            bottom -= timePaintObject.height;
-        }
+    _dragLine ??= gridConfig.dragLine?.of(paintColor: theme.dragBg);
+    final dragLineHalf = (_dragLine?.paint.strokeWidth ?? 0) / 2;
+    final dragLineLen = _dragLine?.length ?? 0;
 
-        // 绘制主区/副区的Vertical线
-        for (int i = 1; i < gridConfig.vertical.count; i++) {
-          dx = i * step;
+    final minDistance = gridConfig.dragHitTestMinDistance;
+    final minDistanceHalf = minDistance / 2;
 
-          /// 绘制主区的Grid竖线
+    final list = subPaintObjects.where((obj) => obj.key != timeIndicatorKey);
+    for (var object in [mainPaintObject, ...list]) {
+      final objRect = object.drawableRect;
+      if (_upObject != null && _upObject == object) {
+        if (_dragLine != null) {
           canvas.drawLineByConfig(
             Path()
-              ..moveTo(dx, mainTop)
-              ..lineTo(dx, mainBottom),
-            _vertLine!,
+              ..moveTo(objRect.left, objRect.bottom - dragLineHalf)
+              ..lineTo(objRect.right, objRect.bottom - dragLineHalf),
+            _dragLine!,
           );
-
-          /// 绘制副区Grid竖线
-          canvas.drawLineByConfig(
-            Path()
-              ..moveTo(dx, top)
-              ..lineTo(dx, bottom),
-            _vertLine!,
+        } else if (gridConfig.draggingBgOpacity > 0) {
+          // 绘制正在拖拽的object的底部线
+          canvas.drawRectBackground(
+            offset: Offset(
+              objRect.left,
+              objRect.bottom - minDistanceHalf,
+            ),
+            size: Size(objRect.width, minDistance),
+            backgroundColor: dragBg.withOpacity(gridConfig.draggingBgOpacity),
           );
         }
-
-        // 绘制右边框线
-        canvas.drawLineByConfig(
-          Path()
-            ..moveTo(mainRight, mainTop)
-            ..lineTo(mainRight, subBottom),
-          _vertLine!,
-        );
+      } else {
+        if (_dragLine != null) {
+          if (dragLineLen > 0) {
+            final delta = (objRect.width - dragLineLen) / 2;
+            canvas.drawLineType(
+              LineType.solid,
+              Path()
+                ..moveTo(objRect.left + delta, objRect.bottom - dragLineHalf)
+                ..lineTo(objRect.right - delta, objRect.bottom - dragLineHalf),
+              _dragLine!.paint.copyWith(color: dragBg.withOpacity(0.1)).paint,
+              dashes: _dragLine!.dashes,
+            );
+          }
+        } else if (gridConfig.dragBgOpacity > 0) {
+          // 绘制当前object线底部拖拽标志
+          canvas.drawRectBackground(
+            offset: Offset(
+              objRect.left,
+              objRect.bottom - minDistanceHalf,
+            ),
+            size: Size(objRect.width, minDistance),
+            backgroundColor: dragBg.withOpacity(gridConfig.dragBgOpacity),
+          );
+        }
       }
     }
   }
 
-  PaintObject? _upObject, _downObject;
-  bool get isStartDragGrid {
-    return gridConfig.isAllowDragIndicatorHeight && _upObject != null;
+  /// 绘制horizontal轴 Grid 线
+  void _paintHorizontalGrid(Canvas canvas, Size size) {
+    if (!gridConfig.horizontal.show) return;
+    final main = mainRect;
+    final sub = subRect;
+
+    _horiLine ??= gridConfig.horizontal.line.of(paintColor: theme.gridLine);
+    double dy = main.top;
+
+    // 绘制Top边框线
+    canvas.drawLineByConfig(
+      Path()
+        ..moveTo(main.left, dy)
+        ..lineTo(main.right, dy),
+      _horiLine!,
+    );
+
+    // 绘制主图网格横线
+    final step = main.bottom / gridConfig.horizontal.count;
+    for (int i = 1; i < gridConfig.horizontal.count; i++) {
+      dy = i * step;
+      canvas.drawLineByConfig(
+        Path()
+          ..moveTo(main.left, dy)
+          ..lineTo(main.right, dy),
+        _horiLine!,
+      );
+    }
+
+    // 绘制主图mainDrawBottom线
+    canvas.drawLineByConfig(
+      Path()
+        ..moveTo(main.left, main.bottom)
+        ..lineTo(main.right, main.bottom),
+      _horiLine!,
+    );
+
+    /// 副图区域
+    // 绘制每一个副图的底部线
+    double height = 0.0;
+    for (final object in subPaintObjects) {
+      height += object.height;
+      dy = sub.top + height;
+      canvas.drawLineByConfig(
+        Path()
+          ..moveTo(main.left, dy)
+          ..lineTo(main.right, dy),
+        _horiLine!,
+      );
+    }
+  }
+
+  /// 绘制Vertical轴 Grid 线
+  void _paintVerticalGrid(Canvas canvas, Size size) {
+    if (!gridConfig.vertical.show) return;
+    final main = mainRect;
+    final sub = subRect;
+    _vertLine ??= gridConfig.vertical.line.of(paintColor: theme.gridLine);
+
+    double dx = main.left;
+    final step = main.right / gridConfig.vertical.count;
+
+    // 绘制左边框线
+    canvas.drawLineByConfig(
+      Path()
+        ..moveTo(dx, main.top)
+        ..lineTo(dx, sub.bottom),
+      _vertLine!,
+    );
+
+    // 计算排除时间指标后的top和bottom
+    double top = sub.top;
+    double bottom = sub.bottom;
+    switch (timePaintObject.position) {
+      case DrawPosition.middle:
+        top += timePaintObject.height;
+      case DrawPosition.bottom:
+        bottom -= timePaintObject.height;
+    }
+
+    // 绘制主区/副区的Vertical线
+    for (int i = 1; i < gridConfig.vertical.count; i++) {
+      dx = i * step;
+
+      /// 绘制主区的Grid竖线
+      canvas.drawLineByConfig(
+        Path()
+          ..moveTo(dx, main.top)
+          ..lineTo(dx, main.bottom),
+        _vertLine!,
+      );
+
+      /// 绘制副区Grid竖线
+      canvas.drawLineByConfig(
+        Path()
+          ..moveTo(dx, top)
+          ..lineTo(dx, bottom),
+        _vertLine!,
+      );
+    }
+
+    // 绘制右边框线
+    canvas.drawLineByConfig(
+      Path()
+        ..moveTo(main.right, main.top)
+        ..lineTo(main.right, sub.bottom),
+      _vertLine!,
+    );
   }
 
   /// 测试[position]是否命中指标图边界
