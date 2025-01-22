@@ -80,7 +80,12 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
     final minDistanceHalf = minDistance / 2;
 
     final list = subPaintObjects.where((obj) => obj.key != timeIndicatorKey);
+    final lastObj = list.lastOrNull;
     for (var object in [mainPaintObject, ...list]) {
+      if (isFixedLayoutMode && object == lastObj) {
+        // 如果是固定布局模式, 最后一个指标图不能拖动
+        return;
+      }
       final objRect = object.drawableRect;
       if (_upObject != null && _upObject == object) {
         if (_dragLine != null) {
@@ -110,7 +115,8 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
               Path()
                 ..moveTo(objRect.left + delta, objRect.bottom - dragLineHalf)
                 ..lineTo(objRect.right - delta, objRect.bottom - dragLineHalf),
-              _dragLine!.paint.copyWith(color: dragBg.withOpacity(0.1)).paint,
+              _dragLine!.linePaint
+                ..color = dragBg.withOpacity(gridConfig.dragLineOpacity),
               dashes: _dragLine!.dashes,
             );
           }
@@ -246,9 +252,14 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
 
     final dy = position.dy;
     final minDistance = gridConfig.dragHitTestMinDistance;
+    final minDistanceHalf = minDistance / 2;
     final list = subPaintObjects.where((obj) => obj.key != timeIndicatorKey);
+    final lastObj = list.lastOrNull;
     for (var object in [mainPaintObject, ...list]) {
-      if (object.drawableRect.hitTestBottom(dy, minDistance: minDistance)) {
+      if (object.drawableRect.hitTestBottom(
+        dy - (object == lastObj ? minDistanceHalf : 0),
+        minDistance: minDistance,
+      )) {
         _upObject = object;
         continue;
       }

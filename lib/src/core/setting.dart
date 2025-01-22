@@ -141,26 +141,28 @@ mixin SettingBinding on KlineBindingBase
   Size get mainMinSize => settingConfig.mainMinSize;
 
   /// 主区域大小设置
-  void setMainSize(Size size) {
-    if (!(size > mainMinSize)) return;
-    if (size == _layoutMode.mainSize) return;
+  bool setMainSize(Size size) {
+    if (!(size > mainMinSize)) return false;
+    if (size == _layoutMode.mainSize) return false;
     _layoutMode = _layoutMode.copyWith(mainSize: size);
     final changed = mainPaintObject.doUpdateLayout(size: size);
     _invokeSizeChanged(force: changed);
+    return true;
   }
 
   /// 自适应[FlexiKlineWidget]所在父组件的布局的变化
   /// 注: 仅适配主区的宽度变化
   /// 这主要是通过[FlexiKlineWidget]的autoAdaptLayout配置决定, 并会导致无法手动调整[FlexiKlineWidget]的宽度.
-  void setAdaptLayoutMode(double width) {
-    if (width < mainMinSize.width) return;
+  bool setAdaptLayoutMode(double width) {
+    if (width < mainMinSize.width) return false;
     if (_layoutMode is AdaptLayoutMode &&
         (_layoutMode as AdaptLayoutMode).adaptSize.width == width) {
-      return;
+      return true;
     }
     final adaptMode = _layoutMode = _layoutMode.adaptMode(width);
     final changed = mainPaintObject.doUpdateLayout(size: adaptMode.adaptSize);
     _invokeSizeChanged(force: changed);
+    return true;
   }
 
   /// 进入正常布局模式
@@ -174,8 +176,8 @@ mixin SettingBinding on KlineBindingBase
         size.height.clamp(mainMinSize.height, limitSize.height),
       );
     }
-    if (size == mainPaintObject.size) return;
     _layoutMode = _layoutMode.normalMode(size);
+    if (size == mainPaintObject.size) return;
     final changed = mainPaintObject.doUpdateLayout(size: _layoutMode.mainSize);
     _invokeSizeChanged(force: changed);
   }
@@ -184,16 +186,17 @@ mixin SettingBinding on KlineBindingBase
   /// 当设置[_fixedCanvasRect]后, 主区高度=[_fixedCanvasRect]的总高度 - [subRectHeight]副区所有指标高度
   /// [size] 当前Kline主区+副区的大小.
   /// 注: 设置是临时的, 并不会更新到配置中.
-  void setFixedLayoutMode(Size size) {
-    if (!(size > mainMinSize)) return;
+  bool setFixedLayoutMode(Size size) {
+    if (!(size > mainMinSize)) return false;
     if (_layoutMode is FixedLayoutMode &&
         (_layoutMode as FixedLayoutMode).fixedSize == size) {
-      return;
+      return true;
     }
 
     _layoutMode = _layoutMode.fixedMode(size);
     final changed = mainPaintObject.doUpdateLayout(size: mainRect.size);
     _invokeSizeChanged(force: changed);
+    return true;
   }
 
   @protected
@@ -451,7 +454,7 @@ mixin SettingBinding on KlineBindingBase
 
   /// 获取[key]指定的指标实例
   /// 1. 如果已载入, 则直接返回绘制对象的指标实例
-  /// 2. 如果示载入, 则从本地缓存中加载, 并创建指标实现.
+  /// 2. 如果未载入, 则从本地缓存中加载, 并创建指标实现.
   T? getIndicator<T extends Indicator>(IIndicatorKey key) {
     return _paintObjectManager.getIndicator(key);
   }
