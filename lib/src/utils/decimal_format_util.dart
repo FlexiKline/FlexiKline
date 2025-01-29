@@ -14,22 +14,7 @@
 
 import 'package:decimal/decimal.dart';
 
-import '../constant.dart';
-import '../extension/export.dart';
-
-/// 百分比
-String formatPercentage(
-  double? val, {
-  int precision = 2,
-  String defIfNull = '-%', // 如果为空或无效值时的默认展示.
-}) {
-  if (val == null) return defIfNull;
-  return formatNumber(
-    (val * 100).d,
-    precision: 2,
-    suffix: '%',
-  );
-}
+import '../extension/decimal_ext.dart';
 
 String formatNumber(
   Decimal? val, {
@@ -39,6 +24,7 @@ String formatNumber(
   bool cutInvalidZero = false, //删除尾部零.
   bool showCompact = false, // 是否压缩大数展示(T, B, M, K)
   bool showThousands = false, // 是否千分位展示; 优先于正常精度展示
+  bool useZeroPadding = false, // 是否使用0来填充小数部分. 例如0.0000123=>0.0{4}123
   String prefix = '', // 前缀
   String suffix = '', // 后缀
   String? defIfZero, // 如果为0时的默认展示.
@@ -63,23 +49,54 @@ String formatNumber(
     ret += val.formatAsString(precision, mode: mode, isClean: cutInvalidZero);
   }
 
+  if (useZeroPadding) {
+    ret = ret.zeroPadding;
+  }
+
   return '$prefix$ret$suffix';
+}
+
+/// 百分比
+String formatPercentage(
+  double? val, {
+  int precision = 2,
+  RoundMode mode = RoundMode.floor,
+  bool cutInvalidZero = false,
+  String defIfNull = '-%', // 如果为空或无效值时的默认展示.
+}) {
+  if (val == null) return defIfNull;
+  return formatNumber(
+    (val * 100).d,
+    precision: precision,
+    mode: mode,
+    cutInvalidZero: cutInvalidZero,
+    suffix: '%',
+    defIfNull: defIfNull,
+  );
 }
 
 /// 格式化价钱
 String formatPrice(
   Decimal? val, {
   required int precision,
+  RoundMode mode = RoundMode.floor,
   bool cutInvalidZero = true,
-  bool showThousands = false,
+  bool showThousands = true,
+  bool useZeroPadding = true,
+  String prefix = '',
+  String suffix = '',
   String? defIfZero,
 }) {
   return formatNumber(
     val,
     precision: precision,
+    mode: mode,
+    prefix: prefix,
+    suffix: suffix,
     defIfZero: defIfZero,
     cutInvalidZero: cutInvalidZero,
     showThousands: showThousands,
+    useZeroPadding: useZeroPadding,
   );
 }
 
@@ -98,21 +115,4 @@ String formatAmount(
     cutInvalidZero: cutInvalidZero,
     showCompact: showCompact,
   );
-}
-
-/// 删除[num]尾部无用的零
-String cutInvalidZero(double num) {
-  String cleanInvalidZero(String numStr) {
-    return switch (numStr) {
-      String value when value.endsWith('.') =>
-        value.substring(0, value.length - 1),
-      String value when value.endsWith('0') && numStr.contains('.') =>
-        cleanInvalidZero(value.substring(0, value.length - 1)),
-      String value when value.contains('e') =>
-        value.replaceAll(RegExp(r'(?<=\.\d*?)0+(?!\d)'), ''),
-      _ => numStr,
-    };
-  }
-
-  return cleanInvalidZero(num.toString());
 }

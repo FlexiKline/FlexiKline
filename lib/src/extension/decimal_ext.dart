@@ -14,11 +14,44 @@
 
 import 'package:decimal/decimal.dart';
 
-import '../constant.dart';
+// 默认Decimal除法精度
+const int defaultScaleOnInfinitePrecision = 17;
+
+enum ThousandUnit {
+  /// trillion
+  trillion('T'),
+
+  /// billion
+  billion('B'),
+
+  /// million
+  million('M'),
+
+  /// thousand
+  thousand('K'),
+
+  /// less than thousand
+  less('');
+
+  final String value;
+  const ThousandUnit(this.value);
+}
+
+enum RoundMode {
+  round,
+  floor,
+  ceil,
+  truncate,
+}
 
 extension StringExt on String {
   Decimal? get decimal => Decimal.tryParse(this);
   Decimal get d => Decimal.tryParse(this) ?? Decimal.zero;
+}
+
+extension BigIntExt on BigInt {
+  Decimal get decimal => d;
+  Decimal get d => Decimal.fromBigInt(this);
 }
 
 extension DoubleExt on double {
@@ -55,6 +88,9 @@ extension FormatDecimal on Decimal {
       scaleOnInfinitePrecision: defaultScaleOnInfinitePrecision,
     );
   }
+
+  /// Global configuration for decimal point default [decimalSeparator].
+  static String decimalSeparator = '.';
 
   /// Global configuration for xThousand formatting default [thousandSeparator].
   static String thousandSeparator = ',';
@@ -194,12 +230,14 @@ extension on Decimal {
   }
 }
 
-extension on String {
+extension FormatNumString on String {
   String get cleaned {
     return switch (this) {
-      String value when value.endsWith('.') =>
+      String value when value.endsWith(FormatDecimal.decimalSeparator) =>
         value.substring(0, value.length - 1),
-      String value when value.endsWith('0') && contains('.') =>
+      String value
+          when value.endsWith('0') &&
+              contains(FormatDecimal.decimalSeparator) =>
         value.substring(0, value.length - 1).cleaned,
       String value when value.contains('e') =>
         value.replaceAll(RegExp(r'(?<=\.\d*?)0+(?!\d)'), ''),
@@ -209,11 +247,26 @@ extension on String {
 
   String thousands(String separator) {
     final regex = RegExp(r'(\d)(?=(\d{3})+(?!\d))');
-    final parts = split('.');
-    return parts[0].replaceAllMapped(
-          regex,
-          (Match match) => '${match[1]}$separator',
-        ) +
-        (parts.length > 1 ? '.${parts[1]}' : '');
+    final parts = split(FormatDecimal.decimalSeparator);
+    final forattedInteger = parts[0].replaceAllMapped(
+      regex,
+      (Match match) => '${match[1]}$separator',
+    );
+
+    return forattedInteger + (parts.length > 1 ? '.${parts[1]}' : '');
+  }
+
+  String get zeroPadding {
+    final dotIndex = lastIndexOf(FormatDecimal.decimalSeparator);
+    if (dotIndex == -1) return this;
+
+    final decimalPart = substring(dotIndex + 1);
+    final regex = RegExp(r'(0{4,})(?=[1-9]|$)');
+    final formattedDecimal = decimalPart.replaceAllMapped(
+      regex,
+      (Match match) => '0{${match[1]!.length}}',
+    );
+
+    return '${substring(0, dotIndex)}${FormatDecimal.decimalSeparator}$formattedDecimal';
   }
 }

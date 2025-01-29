@@ -16,7 +16,7 @@ import 'dart:math' as math;
 
 import 'package:decimal/decimal.dart';
 
-import '../constant.dart';
+import '../extension/decimal_ext.dart';
 
 extension NumBagExt on num {
   BagNum toBagNum() => BagNum.fromNum(this);

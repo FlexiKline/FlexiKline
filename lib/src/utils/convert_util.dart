@@ -15,7 +15,7 @@
 import 'package:decimal/decimal.dart';
 import 'package:flutter/widgets.dart';
 
-import '../constant.dart';
+import '../extension/decimal_ext.dart';
 
 int valueToInt(dynamic value) {
   return parseInt(value) ?? 0;
