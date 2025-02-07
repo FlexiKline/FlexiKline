@@ -246,14 +246,22 @@ extension FormatNumString on String {
   }
 
   String thousands(String separator) {
+    final dotIndex = indexOf(FormatDecimal.decimalSeparator);
+    String integerPart, decimalPart;
+    if (dotIndex == -1) {
+      integerPart = this;
+      decimalPart = '';
+    } else {
+      integerPart = substring(0, dotIndex);
+      decimalPart = substring(dotIndex, length);
+    }
     final regex = RegExp(r'(\d)(?=(\d{3})+(?!\d))');
-    final parts = split(FormatDecimal.decimalSeparator);
-    final forattedInteger = parts[0].replaceAllMapped(
+    final formattedInteger = integerPart.replaceAllMapped(
       regex,
       (Match match) => '${match[1]}$separator',
     );
 
-    return forattedInteger + (parts.length > 1 ? '.${parts[1]}' : '');
+    return formattedInteger + decimalPart;
   }
 
   String get zeroPadding {
@@ -269,4 +277,11 @@ extension FormatNumString on String {
 
     return '${substring(0, dotIndex)}${FormatDecimal.decimalSeparator}$formattedDecimal';
   }
+
+  /// https://unicode.org/reports/tr9/
+  /// 从左到右嵌入
+  String get ltr => '\u202a$this\u202c';
+
+  /// 从右到左嵌入
+  String get rtl => '\u202b$this\u202c';
 }

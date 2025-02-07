@@ -63,7 +63,7 @@ void main() {
   });
 
   test('test formatNumber', () {
-    FormatDecimal.thousandSeparator = '.';
+    FormatDecimal.thousandSeparator = ' ';
     var result = formatNumber(
       123456.000000789.d,
       precision: 100,
@@ -74,6 +74,6 @@ void main() {
       suffix: 'USDT',
       showSign: true,
     );
-    expect(result, "\$+123.456.0{6}789USDT");
+    expect(result, "\$+123 456.0{6}789USDT");
   });
 }
