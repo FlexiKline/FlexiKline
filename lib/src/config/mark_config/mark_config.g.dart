@@ -22,10 +22,10 @@ abstract class _$MarkConfigCWProxy {
   /// MarkConfig(...).copyWith(id: 12, name: "My name")
   /// ````
   MarkConfig call({
-    bool? show,
-    double? spacing,
-    LineConfig? line,
-    TextAreaConfig? text,
+    bool show,
+    double spacing,
+    LineConfig line,
+    TextAreaConfig text,
   });
 }
 
@@ -62,19 +62,19 @@ class _$MarkConfigCWProxyImpl implements _$MarkConfigCWProxy {
     Object? text = const $CopyWithPlaceholder(),
   }) {
     return MarkConfig(
-      show: show == const $CopyWithPlaceholder() || show == null
+      show: show == const $CopyWithPlaceholder()
           ? _value.show
           // ignore: cast_nullable_to_non_nullable
           : show as bool,
-      spacing: spacing == const $CopyWithPlaceholder() || spacing == null
+      spacing: spacing == const $CopyWithPlaceholder()
           ? _value.spacing
           // ignore: cast_nullable_to_non_nullable
           : spacing as double,
-      line: line == const $CopyWithPlaceholder() || line == null
+      line: line == const $CopyWithPlaceholder()
           ? _value.line
           // ignore: cast_nullable_to_non_nullable
           : line as LineConfig,
-      text: text == const $CopyWithPlaceholder() || text == null
+      text: text == const $CopyWithPlaceholder()
           ? _value.text
           // ignore: cast_nullable_to_non_nullable
           : text as TextAreaConfig,

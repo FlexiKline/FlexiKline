@@ -32,15 +32,15 @@ abstract class _$CandleModelCWProxy {
   /// CandleModel(...).copyWith(id: 12, name: "My name")
   /// ````
   CandleModel call({
-    int? ts,
-    Decimal? o,
-    Decimal? h,
-    Decimal? l,
-    Decimal? c,
-    Decimal? v,
+    int ts,
+    Decimal o,
+    Decimal h,
+    Decimal l,
+    Decimal c,
+    Decimal v,
     Decimal? vc,
     Decimal? vcq,
-    String? confirm,
+    String confirm,
   });
 }
 
@@ -97,27 +97,27 @@ class _$CandleModelCWProxyImpl implements _$CandleModelCWProxy {
     Object? confirm = const $CopyWithPlaceholder(),
   }) {
     return CandleModel(
-      ts: ts == const $CopyWithPlaceholder() || ts == null
+      ts: ts == const $CopyWithPlaceholder()
           ? _value.ts
           // ignore: cast_nullable_to_non_nullable
           : ts as int,
-      o: o == const $CopyWithPlaceholder() || o == null
+      o: o == const $CopyWithPlaceholder()
           ? _value.o
           // ignore: cast_nullable_to_non_nullable
           : o as Decimal,
-      h: h == const $CopyWithPlaceholder() || h == null
+      h: h == const $CopyWithPlaceholder()
           ? _value.h
           // ignore: cast_nullable_to_non_nullable
           : h as Decimal,
-      l: l == const $CopyWithPlaceholder() || l == null
+      l: l == const $CopyWithPlaceholder()
           ? _value.l
           // ignore: cast_nullable_to_non_nullable
           : l as Decimal,
-      c: c == const $CopyWithPlaceholder() || c == null
+      c: c == const $CopyWithPlaceholder()
           ? _value.c
           // ignore: cast_nullable_to_non_nullable
           : c as Decimal,
-      v: v == const $CopyWithPlaceholder() || v == null
+      v: v == const $CopyWithPlaceholder()
           ? _value.v
           // ignore: cast_nullable_to_non_nullable
           : v as Decimal,
@@ -129,7 +129,7 @@ class _$CandleModelCWProxyImpl implements _$CandleModelCWProxy {
           ? _value.vcq
           // ignore: cast_nullable_to_non_nullable
           : vcq as Decimal?,
-      confirm: confirm == const $CopyWithPlaceholder() || confirm == null
+      confirm: confirm == const $CopyWithPlaceholder()
           ? _value.confirm
           // ignore: cast_nullable_to_non_nullable
           : confirm as String,
@@ -159,33 +159,29 @@ CandleModel _$CandleModelFromJson(Map<String, dynamic> json) => CandleModel(
       confirm: json['confirm'] as String? ?? '1',
     );
 
-Map<String, dynamic> _$CandleModelToJson(CandleModel instance) {
-  final val = <String, dynamic>{
-    'ts': intToString(instance.ts),
-  };
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('o', const DecimalConverter().toJson(instance.o));
-  writeNotNull('h', const DecimalConverter().toJson(instance.h));
-  writeNotNull('l', const DecimalConverter().toJson(instance.l));
-  writeNotNull('c', const DecimalConverter().toJson(instance.c));
-  writeNotNull('v', const DecimalConverter().toJson(instance.v));
-  writeNotNull(
-      'vc',
-      _$JsonConverterToJson<dynamic, Decimal>(
-          instance.vc, const DecimalConverter().toJson));
-  writeNotNull(
-      'vcq',
-      _$JsonConverterToJson<dynamic, Decimal>(
-          instance.vcq, const DecimalConverter().toJson));
-  val['confirm'] = instance.confirm;
-  return val;
-}
+Map<String, dynamic> _$CandleModelToJson(CandleModel instance) =>
+    <String, dynamic>{
+      'ts': intToString(instance.ts),
+      if (const DecimalConverter().toJson(instance.o) case final value?)
+        'o': value,
+      if (const DecimalConverter().toJson(instance.h) case final value?)
+        'h': value,
+      if (const DecimalConverter().toJson(instance.l) case final value?)
+        'l': value,
+      if (const DecimalConverter().toJson(instance.c) case final value?)
+        'c': value,
+      if (const DecimalConverter().toJson(instance.v) case final value?)
+        'v': value,
+      if (_$JsonConverterToJson<dynamic, Decimal>(
+              instance.vc, const DecimalConverter().toJson)
+          case final value?)
+        'vc': value,
+      if (_$JsonConverterToJson<dynamic, Decimal>(
+              instance.vcq, const DecimalConverter().toJson)
+          case final value?)
+        'vcq': value,
+      'confirm': instance.confirm,
+    };
 
 Json? _$JsonConverterToJson<Json, Value>(
   Value? value,

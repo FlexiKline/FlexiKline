@@ -31,14 +31,14 @@ abstract class _$GestureConfigCWProxy {
   /// GestureConfig(...).copyWith(id: 12, name: "My name")
   /// ````
   GestureConfig call({
-    bool? supportLongPress,
-    bool? isInertialPan,
+    bool supportLongPress,
+    bool isInertialPan,
     ToleranceConfig? tolerance,
     double? loadMoreWhenNoEnoughDistance,
-    int? loadMoreWhenNoEnoughCandles,
-    ScalePosition? scalePosition,
-    double? scaleSpeed,
-    bool? supportKeyboardShortcuts,
+    int loadMoreWhenNoEnoughCandles,
+    ScalePosition scalePosition,
+    double scaleSpeed,
+    bool supportKeyboardShortcuts,
   });
 }
 
@@ -99,16 +99,14 @@ class _$GestureConfigCWProxyImpl implements _$GestureConfigCWProxy {
     Object? supportKeyboardShortcuts = const $CopyWithPlaceholder(),
   }) {
     return GestureConfig(
-      supportLongPress: supportLongPress == const $CopyWithPlaceholder() ||
-              supportLongPress == null
+      supportLongPress: supportLongPress == const $CopyWithPlaceholder()
           ? _value.supportLongPress
           // ignore: cast_nullable_to_non_nullable
           : supportLongPress as bool,
-      isInertialPan:
-          isInertialPan == const $CopyWithPlaceholder() || isInertialPan == null
-              ? _value.isInertialPan
-              // ignore: cast_nullable_to_non_nullable
-              : isInertialPan as bool,
+      isInertialPan: isInertialPan == const $CopyWithPlaceholder()
+          ? _value.isInertialPan
+          // ignore: cast_nullable_to_non_nullable
+          : isInertialPan as bool,
       tolerance: tolerance == const $CopyWithPlaceholder()
           ? _value.tolerance
           // ignore: cast_nullable_to_non_nullable
@@ -119,24 +117,20 @@ class _$GestureConfigCWProxyImpl implements _$GestureConfigCWProxy {
               // ignore: cast_nullable_to_non_nullable
               : loadMoreWhenNoEnoughDistance as double?,
       loadMoreWhenNoEnoughCandles:
-          loadMoreWhenNoEnoughCandles == const $CopyWithPlaceholder() ||
-                  loadMoreWhenNoEnoughCandles == null
+          loadMoreWhenNoEnoughCandles == const $CopyWithPlaceholder()
               ? _value.loadMoreWhenNoEnoughCandles
               // ignore: cast_nullable_to_non_nullable
               : loadMoreWhenNoEnoughCandles as int,
-      scalePosition:
-          scalePosition == const $CopyWithPlaceholder() || scalePosition == null
-              ? _value.scalePosition
-              // ignore: cast_nullable_to_non_nullable
-              : scalePosition as ScalePosition,
-      scaleSpeed:
-          scaleSpeed == const $CopyWithPlaceholder() || scaleSpeed == null
-              ? _value.scaleSpeed
-              // ignore: cast_nullable_to_non_nullable
-              : scaleSpeed as double,
+      scalePosition: scalePosition == const $CopyWithPlaceholder()
+          ? _value.scalePosition
+          // ignore: cast_nullable_to_non_nullable
+          : scalePosition as ScalePosition,
+      scaleSpeed: scaleSpeed == const $CopyWithPlaceholder()
+          ? _value.scaleSpeed
+          // ignore: cast_nullable_to_non_nullable
+          : scaleSpeed as double,
       supportKeyboardShortcuts:
-          supportKeyboardShortcuts == const $CopyWithPlaceholder() ||
-                  supportKeyboardShortcuts == null
+          supportKeyboardShortcuts == const $CopyWithPlaceholder()
               ? _value.supportKeyboardShortcuts
               // ignore: cast_nullable_to_non_nullable
               : supportKeyboardShortcuts as bool,
@@ -174,25 +168,16 @@ GestureConfig _$GestureConfigFromJson(Map<String, dynamic> json) =>
           json['supportKeyboardShortcuts'] as bool? ?? true,
     );
 
-Map<String, dynamic> _$GestureConfigToJson(GestureConfig instance) {
-  final val = <String, dynamic>{
-    'supportLongPress': instance.supportLongPress,
-    'isInertialPan': instance.isInertialPan,
-    'tolerance': instance.tolerance.toJson(),
-  };
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull(
-      'loadMoreWhenNoEnoughDistance', instance.loadMoreWhenNoEnoughDistance);
-  val['loadMoreWhenNoEnoughCandles'] = instance.loadMoreWhenNoEnoughCandles;
-  val['scalePosition'] =
-      const ScalePositionConverter().toJson(instance.scalePosition);
-  val['scaleSpeed'] = instance.scaleSpeed;
-  val['supportKeyboardShortcuts'] = instance.supportKeyboardShortcuts;
-  return val;
-}
+Map<String, dynamic> _$GestureConfigToJson(GestureConfig instance) =>
+    <String, dynamic>{
+      'supportLongPress': instance.supportLongPress,
+      'isInertialPan': instance.isInertialPan,
+      'tolerance': instance.tolerance.toJson(),
+      if (instance.loadMoreWhenNoEnoughDistance case final value?)
+        'loadMoreWhenNoEnoughDistance': value,
+      'loadMoreWhenNoEnoughCandles': instance.loadMoreWhenNoEnoughCandles,
+      'scalePosition':
+          const ScalePositionConverter().toJson(instance.scalePosition),
+      'scaleSpeed': instance.scaleSpeed,
+      'supportKeyboardShortcuts': instance.supportKeyboardShortcuts,
+    };

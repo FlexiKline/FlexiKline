@@ -30,14 +30,14 @@ abstract class _$CrossConfigCWProxy {
   /// CrossConfig(...).copyWith(id: 12, name: "My name")
   /// ````
   CrossConfig call({
-    bool? enable,
-    LineConfig? crosshair,
-    PointConfig? crosspoint,
-    TextAreaConfig? ticksText,
-    double? spacing,
-    bool? showLatestTipsInBlank,
-    bool? moveByCandleInBlank,
-    TooltipConfig? tooltipConfig,
+    bool enable,
+    LineConfig crosshair,
+    PointConfig crosspoint,
+    TextAreaConfig ticksText,
+    double spacing,
+    bool showLatestTipsInBlank,
+    bool moveByCandleInBlank,
+    TooltipConfig tooltipConfig,
   });
 }
 
@@ -94,44 +94,39 @@ class _$CrossConfigCWProxyImpl implements _$CrossConfigCWProxy {
     Object? tooltipConfig = const $CopyWithPlaceholder(),
   }) {
     return CrossConfig(
-      enable: enable == const $CopyWithPlaceholder() || enable == null
+      enable: enable == const $CopyWithPlaceholder()
           ? _value.enable
           // ignore: cast_nullable_to_non_nullable
           : enable as bool,
-      crosshair: crosshair == const $CopyWithPlaceholder() || crosshair == null
+      crosshair: crosshair == const $CopyWithPlaceholder()
           ? _value.crosshair
           // ignore: cast_nullable_to_non_nullable
           : crosshair as LineConfig,
-      crosspoint:
-          crosspoint == const $CopyWithPlaceholder() || crosspoint == null
-              ? _value.crosspoint
-              // ignore: cast_nullable_to_non_nullable
-              : crosspoint as PointConfig,
-      ticksText: ticksText == const $CopyWithPlaceholder() || ticksText == null
+      crosspoint: crosspoint == const $CopyWithPlaceholder()
+          ? _value.crosspoint
+          // ignore: cast_nullable_to_non_nullable
+          : crosspoint as PointConfig,
+      ticksText: ticksText == const $CopyWithPlaceholder()
           ? _value.ticksText
           // ignore: cast_nullable_to_non_nullable
           : ticksText as TextAreaConfig,
-      spacing: spacing == const $CopyWithPlaceholder() || spacing == null
+      spacing: spacing == const $CopyWithPlaceholder()
           ? _value.spacing
           // ignore: cast_nullable_to_non_nullable
           : spacing as double,
       showLatestTipsInBlank:
-          showLatestTipsInBlank == const $CopyWithPlaceholder() ||
-                  showLatestTipsInBlank == null
+          showLatestTipsInBlank == const $CopyWithPlaceholder()
               ? _value.showLatestTipsInBlank
               // ignore: cast_nullable_to_non_nullable
               : showLatestTipsInBlank as bool,
-      moveByCandleInBlank:
-          moveByCandleInBlank == const $CopyWithPlaceholder() ||
-                  moveByCandleInBlank == null
-              ? _value.moveByCandleInBlank
-              // ignore: cast_nullable_to_non_nullable
-              : moveByCandleInBlank as bool,
-      tooltipConfig:
-          tooltipConfig == const $CopyWithPlaceholder() || tooltipConfig == null
-              ? _value.tooltipConfig
-              // ignore: cast_nullable_to_non_nullable
-              : tooltipConfig as TooltipConfig,
+      moveByCandleInBlank: moveByCandleInBlank == const $CopyWithPlaceholder()
+          ? _value.moveByCandleInBlank
+          // ignore: cast_nullable_to_non_nullable
+          : moveByCandleInBlank as bool,
+      tooltipConfig: tooltipConfig == const $CopyWithPlaceholder()
+          ? _value.tooltipConfig
+          // ignore: cast_nullable_to_non_nullable
+          : tooltipConfig as TooltipConfig,
     );
   }
 }

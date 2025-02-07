@@ -22,10 +22,10 @@ abstract class _$LoadingConfigCWProxy {
   /// LoadingConfig(...).copyWith(id: 12, name: "My name")
   /// ````
   LoadingConfig call({
-    double? size,
-    double? strokeWidth,
-    Color? background,
-    Color? valueColor,
+    double size,
+    double strokeWidth,
+    Color background,
+    Color valueColor,
   });
 }
 
@@ -63,25 +63,22 @@ class _$LoadingConfigCWProxyImpl implements _$LoadingConfigCWProxy {
     Object? valueColor = const $CopyWithPlaceholder(),
   }) {
     return LoadingConfig(
-      size: size == const $CopyWithPlaceholder() || size == null
+      size: size == const $CopyWithPlaceholder()
           ? _value.size
           // ignore: cast_nullable_to_non_nullable
           : size as double,
-      strokeWidth:
-          strokeWidth == const $CopyWithPlaceholder() || strokeWidth == null
-              ? _value.strokeWidth
-              // ignore: cast_nullable_to_non_nullable
-              : strokeWidth as double,
-      background:
-          background == const $CopyWithPlaceholder() || background == null
-              ? _value.background
-              // ignore: cast_nullable_to_non_nullable
-              : background as Color,
-      valueColor:
-          valueColor == const $CopyWithPlaceholder() || valueColor == null
-              ? _value.valueColor
-              // ignore: cast_nullable_to_non_nullable
-              : valueColor as Color,
+      strokeWidth: strokeWidth == const $CopyWithPlaceholder()
+          ? _value.strokeWidth
+          // ignore: cast_nullable_to_non_nullable
+          : strokeWidth as double,
+      background: background == const $CopyWithPlaceholder()
+          ? _value.background
+          // ignore: cast_nullable_to_non_nullable
+          : background as Color,
+      valueColor: valueColor == const $CopyWithPlaceholder()
+          ? _value.valueColor
+          // ignore: cast_nullable_to_non_nullable
+          : valueColor as Color,
     );
   }
 }

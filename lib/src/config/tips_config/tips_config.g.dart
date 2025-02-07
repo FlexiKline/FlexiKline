@@ -22,10 +22,10 @@ abstract class _$TipsConfigCWProxy {
   /// TipsConfig(...).copyWith(id: 12, name: "My name")
   /// ````
   TipsConfig call({
-    String? label,
+    String label,
     int? precision,
-    bool? isShow,
-    TextStyle? style,
+    bool isShow,
+    TextStyle style,
   });
 }
 
@@ -62,7 +62,7 @@ class _$TipsConfigCWProxyImpl implements _$TipsConfigCWProxy {
     Object? style = const $CopyWithPlaceholder(),
   }) {
     return TipsConfig(
-      label: label == const $CopyWithPlaceholder() || label == null
+      label: label == const $CopyWithPlaceholder()
           ? _value.label
           // ignore: cast_nullable_to_non_nullable
           : label as String,
@@ -70,11 +70,11 @@ class _$TipsConfigCWProxyImpl implements _$TipsConfigCWProxy {
           ? _value.precision
           // ignore: cast_nullable_to_non_nullable
           : precision as int?,
-      isShow: isShow == const $CopyWithPlaceholder() || isShow == null
+      isShow: isShow == const $CopyWithPlaceholder()
           ? _value.isShow
           // ignore: cast_nullable_to_non_nullable
           : isShow as bool,
-      style: style == const $CopyWithPlaceholder() || style == null
+      style: style == const $CopyWithPlaceholder()
           ? _value.style
           // ignore: cast_nullable_to_non_nullable
           : style as TextStyle,
@@ -106,19 +106,10 @@ TipsConfig _$TipsConfigFromJson(Map<String, dynamic> json) => TipsConfig(
               .fromJson(json['style'] as Map<String, dynamic>),
     );
 
-Map<String, dynamic> _$TipsConfigToJson(TipsConfig instance) {
-  final val = <String, dynamic>{
-    'label': instance.label,
-  };
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('precision', instance.precision);
-  val['isShow'] = instance.isShow;
-  val['style'] = const TextStyleConverter().toJson(instance.style);
-  return val;
-}
+Map<String, dynamic> _$TipsConfigToJson(TipsConfig instance) =>
+    <String, dynamic>{
+      'label': instance.label,
+      if (instance.precision case final value?) 'precision': value,
+      'isShow': instance.isShow,
+      'style': const TextStyleConverter().toJson(instance.style),
+    };

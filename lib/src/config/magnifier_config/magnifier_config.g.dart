@@ -30,14 +30,14 @@ abstract class _$MagnifierConfigCWProxy {
   /// MagnifierConfig(...).copyWith(id: 12, name: "My name")
   /// ````
   MagnifierConfig call({
-    bool? enable,
-    EdgeInsets? margin,
-    Size? size,
-    double? magnificationScale,
-    Clip? clipBehavior,
-    double? decorationOpactity,
+    bool enable,
+    EdgeInsets margin,
+    Size size,
+    double magnificationScale,
+    Clip clipBehavior,
+    double decorationOpactity,
     List<BoxShadow>? decorationShadows,
-    BorderSide? shapeSide,
+    BorderSide shapeSide,
   });
 }
 
@@ -94,30 +94,27 @@ class _$MagnifierConfigCWProxyImpl implements _$MagnifierConfigCWProxy {
     Object? shapeSide = const $CopyWithPlaceholder(),
   }) {
     return MagnifierConfig(
-      enable: enable == const $CopyWithPlaceholder() || enable == null
+      enable: enable == const $CopyWithPlaceholder()
           ? _value.enable
           // ignore: cast_nullable_to_non_nullable
           : enable as bool,
-      margin: margin == const $CopyWithPlaceholder() || margin == null
+      margin: margin == const $CopyWithPlaceholder()
           ? _value.margin
           // ignore: cast_nullable_to_non_nullable
           : margin as EdgeInsets,
-      size: size == const $CopyWithPlaceholder() || size == null
+      size: size == const $CopyWithPlaceholder()
           ? _value.size
           // ignore: cast_nullable_to_non_nullable
           : size as Size,
-      magnificationScale: magnificationScale == const $CopyWithPlaceholder() ||
-              magnificationScale == null
+      magnificationScale: magnificationScale == const $CopyWithPlaceholder()
           ? _value.magnificationScale
           // ignore: cast_nullable_to_non_nullable
           : magnificationScale as double,
-      clipBehavior:
-          clipBehavior == const $CopyWithPlaceholder() || clipBehavior == null
-              ? _value.clipBehavior
-              // ignore: cast_nullable_to_non_nullable
-              : clipBehavior as Clip,
-      decorationOpactity: decorationOpactity == const $CopyWithPlaceholder() ||
-              decorationOpactity == null
+      clipBehavior: clipBehavior == const $CopyWithPlaceholder()
+          ? _value.clipBehavior
+          // ignore: cast_nullable_to_non_nullable
+          : clipBehavior as Clip,
+      decorationOpactity: decorationOpactity == const $CopyWithPlaceholder()
           ? _value.decorationOpactity
           // ignore: cast_nullable_to_non_nullable
           : decorationOpactity as double,
@@ -125,7 +122,7 @@ class _$MagnifierConfigCWProxyImpl implements _$MagnifierConfigCWProxy {
           ? _value.decorationShadows
           // ignore: cast_nullable_to_non_nullable
           : decorationShadows as List<BoxShadow>?,
-      shapeSide: shapeSide == const $CopyWithPlaceholder() || shapeSide == null
+      shapeSide: shapeSide == const $CopyWithPlaceholder()
           ? _value.shapeSide
           // ignore: cast_nullable_to_non_nullable
           : shapeSide as BorderSide,
@@ -170,27 +167,18 @@ MagnifierConfig _$MagnifierConfigFromJson(Map<String, dynamic> json) =>
               .fromJson(json['shapeSide'] as Map<String, dynamic>),
     );
 
-Map<String, dynamic> _$MagnifierConfigToJson(MagnifierConfig instance) {
-  final val = <String, dynamic>{
-    'enable': instance.enable,
-    'margin': const EdgeInsetsConverter().toJson(instance.margin),
-    'size': const SizeConverter().toJson(instance.size),
-    'magnificationScale': instance.magnificationScale,
-    'clipBehavior': const ClipConverter().toJson(instance.clipBehavior),
-    'decorationOpactity': instance.decorationOpactity,
-  };
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull(
-      'decorationShadows',
-      instance.decorationShadows
-          ?.map(const BoxShadowConverter().toJson)
-          .toList());
-  val['shapeSide'] = const BorderSideConvert().toJson(instance.shapeSide);
-  return val;
-}
+Map<String, dynamic> _$MagnifierConfigToJson(MagnifierConfig instance) =>
+    <String, dynamic>{
+      'enable': instance.enable,
+      'margin': const EdgeInsetsConverter().toJson(instance.margin),
+      'size': const SizeConverter().toJson(instance.size),
+      'magnificationScale': instance.magnificationScale,
+      'clipBehavior': const ClipConverter().toJson(instance.clipBehavior),
+      'decorationOpactity': instance.decorationOpactity,
+      if (instance.decorationShadows
+              ?.map(const BoxShadowConverter().toJson)
+              .toList()
+          case final value?)
+        'decorationShadows': value,
+      'shapeSide': const BorderSideConvert().toJson(instance.shapeSide),
+    };

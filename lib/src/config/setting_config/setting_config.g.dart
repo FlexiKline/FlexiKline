@@ -47,22 +47,22 @@ abstract class _$SettingConfigCWProxy {
   /// SettingConfig(...).copyWith(id: 12, name: "My name")
   /// ````
   SettingConfig call({
-    double? pixel,
-    double? opacity,
-    LoadingConfig? loading,
-    Size? mainMinSize,
-    double? subMinHeight,
-    double? minPaintBlankRate,
-    bool? alwaysCalculateScreenOfCandlesIfEnough,
-    double? candleMaxWidth,
-    double? candleWidth,
+    double pixel,
+    double opacity,
+    LoadingConfig loading,
+    Size mainMinSize,
+    double subMinHeight,
+    double minPaintBlankRate,
+    bool alwaysCalculateScreenOfCandlesIfEnough,
+    double candleMaxWidth,
+    double candleWidth,
     double? candleFixedSpacing,
-    int? candleSpacingParts,
-    double? candleHollowBarBorderWidth,
-    double? candleLineWidth,
-    double? firstCandleInitOffset,
-    bool? showYAxisTick,
-    int? subChartMaxCount,
+    int candleSpacingParts,
+    double candleHollowBarBorderWidth,
+    double candleLineWidth,
+    double firstCandleInitOffset,
+    bool showYAxisTick,
+    int subChartMaxCount,
   });
 }
 
@@ -163,83 +163,70 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
     Object? subChartMaxCount = const $CopyWithPlaceholder(),
   }) {
     return SettingConfig(
-      pixel: pixel == const $CopyWithPlaceholder() || pixel == null
+      pixel: pixel == const $CopyWithPlaceholder()
           ? _value.pixel
           // ignore: cast_nullable_to_non_nullable
           : pixel as double,
-      opacity: opacity == const $CopyWithPlaceholder() || opacity == null
+      opacity: opacity == const $CopyWithPlaceholder()
           ? _value.opacity
           // ignore: cast_nullable_to_non_nullable
           : opacity as double,
-      loading: loading == const $CopyWithPlaceholder() || loading == null
+      loading: loading == const $CopyWithPlaceholder()
           ? _value.loading
           // ignore: cast_nullable_to_non_nullable
           : loading as LoadingConfig,
-      mainMinSize:
-          mainMinSize == const $CopyWithPlaceholder() || mainMinSize == null
-              ? _value.mainMinSize
-              // ignore: cast_nullable_to_non_nullable
-              : mainMinSize as Size,
-      subMinHeight:
-          subMinHeight == const $CopyWithPlaceholder() || subMinHeight == null
-              ? _value.subMinHeight
-              // ignore: cast_nullable_to_non_nullable
-              : subMinHeight as double,
-      minPaintBlankRate: minPaintBlankRate == const $CopyWithPlaceholder() ||
-              minPaintBlankRate == null
+      mainMinSize: mainMinSize == const $CopyWithPlaceholder()
+          ? _value.mainMinSize
+          // ignore: cast_nullable_to_non_nullable
+          : mainMinSize as Size,
+      subMinHeight: subMinHeight == const $CopyWithPlaceholder()
+          ? _value.subMinHeight
+          // ignore: cast_nullable_to_non_nullable
+          : subMinHeight as double,
+      minPaintBlankRate: minPaintBlankRate == const $CopyWithPlaceholder()
           ? _value.minPaintBlankRate
           // ignore: cast_nullable_to_non_nullable
           : minPaintBlankRate as double,
       alwaysCalculateScreenOfCandlesIfEnough:
-          alwaysCalculateScreenOfCandlesIfEnough ==
-                      const $CopyWithPlaceholder() ||
-                  alwaysCalculateScreenOfCandlesIfEnough == null
+          alwaysCalculateScreenOfCandlesIfEnough == const $CopyWithPlaceholder()
               ? _value.alwaysCalculateScreenOfCandlesIfEnough
               // ignore: cast_nullable_to_non_nullable
               : alwaysCalculateScreenOfCandlesIfEnough as bool,
-      candleMaxWidth: candleMaxWidth == const $CopyWithPlaceholder() ||
-              candleMaxWidth == null
+      candleMaxWidth: candleMaxWidth == const $CopyWithPlaceholder()
           ? _value.candleMaxWidth
           // ignore: cast_nullable_to_non_nullable
           : candleMaxWidth as double,
-      candleWidth:
-          candleWidth == const $CopyWithPlaceholder() || candleWidth == null
-              ? _value.candleWidth
-              // ignore: cast_nullable_to_non_nullable
-              : candleWidth as double,
+      candleWidth: candleWidth == const $CopyWithPlaceholder()
+          ? _value.candleWidth
+          // ignore: cast_nullable_to_non_nullable
+          : candleWidth as double,
       candleFixedSpacing: candleFixedSpacing == const $CopyWithPlaceholder()
           ? _value.candleFixedSpacing
           // ignore: cast_nullable_to_non_nullable
           : candleFixedSpacing as double?,
-      candleSpacingParts: candleSpacingParts == const $CopyWithPlaceholder() ||
-              candleSpacingParts == null
+      candleSpacingParts: candleSpacingParts == const $CopyWithPlaceholder()
           ? _value.candleSpacingParts
           // ignore: cast_nullable_to_non_nullable
           : candleSpacingParts as int,
       candleHollowBarBorderWidth:
-          candleHollowBarBorderWidth == const $CopyWithPlaceholder() ||
-                  candleHollowBarBorderWidth == null
+          candleHollowBarBorderWidth == const $CopyWithPlaceholder()
               ? _value.candleHollowBarBorderWidth
               // ignore: cast_nullable_to_non_nullable
               : candleHollowBarBorderWidth as double,
-      candleLineWidth: candleLineWidth == const $CopyWithPlaceholder() ||
-              candleLineWidth == null
+      candleLineWidth: candleLineWidth == const $CopyWithPlaceholder()
           ? _value.candleLineWidth
           // ignore: cast_nullable_to_non_nullable
           : candleLineWidth as double,
       firstCandleInitOffset:
-          firstCandleInitOffset == const $CopyWithPlaceholder() ||
-                  firstCandleInitOffset == null
+          firstCandleInitOffset == const $CopyWithPlaceholder()
               ? _value.firstCandleInitOffset
               // ignore: cast_nullable_to_non_nullable
               : firstCandleInitOffset as double,
-      showYAxisTick:
-          showYAxisTick == const $CopyWithPlaceholder() || showYAxisTick == null
-              ? _value.showYAxisTick
-              // ignore: cast_nullable_to_non_nullable
-              : showYAxisTick as bool,
-      subChartMaxCount: subChartMaxCount == const $CopyWithPlaceholder() ||
-              subChartMaxCount == null
+      showYAxisTick: showYAxisTick == const $CopyWithPlaceholder()
+          ? _value.showYAxisTick
+          // ignore: cast_nullable_to_non_nullable
+          : showYAxisTick as bool,
+      subChartMaxCount: subChartMaxCount == const $CopyWithPlaceholder()
           ? _value.subChartMaxCount
           // ignore: cast_nullable_to_non_nullable
           : subChartMaxCount as int,
@@ -283,32 +270,24 @@ SettingConfig _$SettingConfigFromJson(Map<String, dynamic> json) =>
           defaultSubChartMaxCount,
     );
 
-Map<String, dynamic> _$SettingConfigToJson(SettingConfig instance) {
-  final val = <String, dynamic>{
-    'pixel': instance.pixel,
-    'opacity': instance.opacity,
-    'loading': instance.loading.toJson(),
-    'mainMinSize': const SizeConverter().toJson(instance.mainMinSize),
-    'subMinHeight': instance.subMinHeight,
-    'minPaintBlankRate': instance.minPaintBlankRate,
-    'alwaysCalculateScreenOfCandlesIfEnough':
-        instance.alwaysCalculateScreenOfCandlesIfEnough,
-    'candleMaxWidth': instance.candleMaxWidth,
-    'candleWidth': instance.candleWidth,
-  };
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('candleFixedSpacing', instance.candleFixedSpacing);
-  val['candleSpacingParts'] = instance.candleSpacingParts;
-  val['candleHollowBarBorderWidth'] = instance.candleHollowBarBorderWidth;
-  val['candleLineWidth'] = instance.candleLineWidth;
-  val['firstCandleInitOffset'] = instance.firstCandleInitOffset;
-  val['showYAxisTick'] = instance.showYAxisTick;
-  val['subChartMaxCount'] = instance.subChartMaxCount;
-  return val;
-}
+Map<String, dynamic> _$SettingConfigToJson(SettingConfig instance) =>
+    <String, dynamic>{
+      'pixel': instance.pixel,
+      'opacity': instance.opacity,
+      'loading': instance.loading.toJson(),
+      'mainMinSize': const SizeConverter().toJson(instance.mainMinSize),
+      'subMinHeight': instance.subMinHeight,
+      'minPaintBlankRate': instance.minPaintBlankRate,
+      'alwaysCalculateScreenOfCandlesIfEnough':
+          instance.alwaysCalculateScreenOfCandlesIfEnough,
+      'candleMaxWidth': instance.candleMaxWidth,
+      'candleWidth': instance.candleWidth,
+      if (instance.candleFixedSpacing case final value?)
+        'candleFixedSpacing': value,
+      'candleSpacingParts': instance.candleSpacingParts,
+      'candleHollowBarBorderWidth': instance.candleHollowBarBorderWidth,
+      'candleLineWidth': instance.candleLineWidth,
+      'firstCandleInitOffset': instance.firstCandleInitOffset,
+      'showYAxisTick': instance.showYAxisTick,
+      'subChartMaxCount': instance.subChartMaxCount,
+    };

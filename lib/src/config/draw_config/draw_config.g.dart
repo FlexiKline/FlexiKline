@@ -38,18 +38,18 @@ abstract class _$DrawConfigCWProxy {
   /// DrawConfig(...).copyWith(id: 12, name: "My name")
   /// ````
   DrawConfig call({
-    bool? enable,
-    bool? allowSelectWhenExit,
-    PointConfig? crosspoint,
-    LineConfig? crosshair,
-    LineConfig? drawLine,
-    PointConfig? drawPoint,
-    TextAreaConfig? ticksText,
-    double? spacing,
-    double? ticksGapBgOpacity,
-    double? hitTestMinDistance,
-    double? magnetMinDistance,
-    MagnifierConfig? magnifier,
+    bool enable,
+    bool allowSelectWhenExit,
+    PointConfig crosspoint,
+    LineConfig crosshair,
+    LineConfig drawLine,
+    PointConfig drawPoint,
+    TextAreaConfig ticksText,
+    double spacing,
+    double ticksGapBgOpacity,
+    double hitTestMinDistance,
+    double magnetMinDistance,
+    MagnifierConfig magnifier,
   });
 }
 
@@ -122,57 +122,51 @@ class _$DrawConfigCWProxyImpl implements _$DrawConfigCWProxy {
     Object? magnifier = const $CopyWithPlaceholder(),
   }) {
     return DrawConfig(
-      enable: enable == const $CopyWithPlaceholder() || enable == null
+      enable: enable == const $CopyWithPlaceholder()
           ? _value.enable
           // ignore: cast_nullable_to_non_nullable
           : enable as bool,
-      allowSelectWhenExit:
-          allowSelectWhenExit == const $CopyWithPlaceholder() ||
-                  allowSelectWhenExit == null
-              ? _value.allowSelectWhenExit
-              // ignore: cast_nullable_to_non_nullable
-              : allowSelectWhenExit as bool,
-      crosspoint:
-          crosspoint == const $CopyWithPlaceholder() || crosspoint == null
-              ? _value.crosspoint
-              // ignore: cast_nullable_to_non_nullable
-              : crosspoint as PointConfig,
-      crosshair: crosshair == const $CopyWithPlaceholder() || crosshair == null
+      allowSelectWhenExit: allowSelectWhenExit == const $CopyWithPlaceholder()
+          ? _value.allowSelectWhenExit
+          // ignore: cast_nullable_to_non_nullable
+          : allowSelectWhenExit as bool,
+      crosspoint: crosspoint == const $CopyWithPlaceholder()
+          ? _value.crosspoint
+          // ignore: cast_nullable_to_non_nullable
+          : crosspoint as PointConfig,
+      crosshair: crosshair == const $CopyWithPlaceholder()
           ? _value.crosshair
           // ignore: cast_nullable_to_non_nullable
           : crosshair as LineConfig,
-      drawLine: drawLine == const $CopyWithPlaceholder() || drawLine == null
+      drawLine: drawLine == const $CopyWithPlaceholder()
           ? _value.drawLine
           // ignore: cast_nullable_to_non_nullable
           : drawLine as LineConfig,
-      drawPoint: drawPoint == const $CopyWithPlaceholder() || drawPoint == null
+      drawPoint: drawPoint == const $CopyWithPlaceholder()
           ? _value.drawPoint
           // ignore: cast_nullable_to_non_nullable
           : drawPoint as PointConfig,
-      ticksText: ticksText == const $CopyWithPlaceholder() || ticksText == null
+      ticksText: ticksText == const $CopyWithPlaceholder()
           ? _value.ticksText
           // ignore: cast_nullable_to_non_nullable
           : ticksText as TextAreaConfig,
-      spacing: spacing == const $CopyWithPlaceholder() || spacing == null
+      spacing: spacing == const $CopyWithPlaceholder()
           ? _value.spacing
           // ignore: cast_nullable_to_non_nullable
           : spacing as double,
-      ticksGapBgOpacity: ticksGapBgOpacity == const $CopyWithPlaceholder() ||
-              ticksGapBgOpacity == null
+      ticksGapBgOpacity: ticksGapBgOpacity == const $CopyWithPlaceholder()
           ? _value.ticksGapBgOpacity
           // ignore: cast_nullable_to_non_nullable
           : ticksGapBgOpacity as double,
-      hitTestMinDistance: hitTestMinDistance == const $CopyWithPlaceholder() ||
-              hitTestMinDistance == null
+      hitTestMinDistance: hitTestMinDistance == const $CopyWithPlaceholder()
           ? _value.hitTestMinDistance
           // ignore: cast_nullable_to_non_nullable
           : hitTestMinDistance as double,
-      magnetMinDistance: magnetMinDistance == const $CopyWithPlaceholder() ||
-              magnetMinDistance == null
+      magnetMinDistance: magnetMinDistance == const $CopyWithPlaceholder()
           ? _value.magnetMinDistance
           // ignore: cast_nullable_to_non_nullable
           : magnetMinDistance as double,
-      magnifier: magnifier == const $CopyWithPlaceholder() || magnifier == null
+      magnifier: magnifier == const $CopyWithPlaceholder()
           ? _value.magnifier
           // ignore: cast_nullable_to_non_nullable
           : magnifier as MagnifierConfig,

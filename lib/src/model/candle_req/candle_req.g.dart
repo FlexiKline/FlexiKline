@@ -30,13 +30,13 @@ abstract class _$CandleReqCWProxy {
   /// CandleReq(...).copyWith(id: 12, name: "My name")
   /// ````
   CandleReq call({
-    String? instId,
-    String? bar,
-    int? limit,
-    int? precision,
+    String instId,
+    String bar,
+    int limit,
+    int precision,
     int? after,
     int? before,
-    RequestState? state,
+    RequestState state,
     String? displayName,
   });
 }
@@ -90,19 +90,19 @@ class _$CandleReqCWProxyImpl implements _$CandleReqCWProxy {
     Object? displayName = const $CopyWithPlaceholder(),
   }) {
     return CandleReq(
-      instId: instId == const $CopyWithPlaceholder() || instId == null
+      instId: instId == const $CopyWithPlaceholder()
           ? _value.instId
           // ignore: cast_nullable_to_non_nullable
           : instId as String,
-      bar: bar == const $CopyWithPlaceholder() || bar == null
+      bar: bar == const $CopyWithPlaceholder()
           ? _value.bar
           // ignore: cast_nullable_to_non_nullable
           : bar as String,
-      limit: limit == const $CopyWithPlaceholder() || limit == null
+      limit: limit == const $CopyWithPlaceholder()
           ? _value.limit
           // ignore: cast_nullable_to_non_nullable
           : limit as int,
-      precision: precision == const $CopyWithPlaceholder() || precision == null
+      precision: precision == const $CopyWithPlaceholder()
           ? _value.precision
           // ignore: cast_nullable_to_non_nullable
           : precision as int,
@@ -114,7 +114,7 @@ class _$CandleReqCWProxyImpl implements _$CandleReqCWProxy {
           ? _value.before
           // ignore: cast_nullable_to_non_nullable
           : before as int?,
-      state: state == const $CopyWithPlaceholder() || state == null
+      state: state == const $CopyWithPlaceholder()
           ? _value.state
           // ignore: cast_nullable_to_non_nullable
           : state as RequestState,
@@ -144,20 +144,10 @@ CandleReq _$CandleReqFromJson(Map<String, dynamic> json) => CandleReq(
       before: (json['before'] as num?)?.toInt(),
     );
 
-Map<String, dynamic> _$CandleReqToJson(CandleReq instance) {
-  final val = <String, dynamic>{
-    'instId': instance.instId,
-  };
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('after', instance.after);
-  writeNotNull('before', instance.before);
-  val['bar'] = instance.bar;
-  val['limit'] = instance.limit;
-  return val;
-}
+Map<String, dynamic> _$CandleReqToJson(CandleReq instance) => <String, dynamic>{
+      'instId': instance.instId,
+      if (instance.after case final value?) 'after': value,
+      if (instance.before case final value?) 'before': value,
+      'bar': instance.bar,
+      'limit': instance.limit,
+    };

@@ -34,16 +34,16 @@ abstract class _$CandleIndicatorCWProxy {
   /// CandleIndicator(...).copyWith(id: 12, name: "My name")
   /// ````
   CandleIndicator call({
-    int? zIndex,
-    double? height,
-    EdgeInsets? padding,
-    MarkConfig? high,
-    MarkConfig? low,
-    MarkConfig? last,
-    MarkConfig? latest,
-    bool? useCandleColorAsLatestBg,
-    bool? showCountDown,
-    TextAreaConfig? countDown,
+    int zIndex,
+    double height,
+    EdgeInsets padding,
+    MarkConfig high,
+    MarkConfig low,
+    MarkConfig last,
+    MarkConfig latest,
+    bool useCandleColorAsLatestBg,
+    bool showCountDown,
+    TextAreaConfig countDown,
   });
 }
 
@@ -107,46 +107,44 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
     Object? countDown = const $CopyWithPlaceholder(),
   }) {
     return CandleIndicator(
-      zIndex: zIndex == const $CopyWithPlaceholder() || zIndex == null
+      zIndex: zIndex == const $CopyWithPlaceholder()
           ? _value.zIndex
           // ignore: cast_nullable_to_non_nullable
           : zIndex as int,
-      height: height == const $CopyWithPlaceholder() || height == null
+      height: height == const $CopyWithPlaceholder()
           ? _value.height
           // ignore: cast_nullable_to_non_nullable
           : height as double,
-      padding: padding == const $CopyWithPlaceholder() || padding == null
+      padding: padding == const $CopyWithPlaceholder()
           ? _value.padding
           // ignore: cast_nullable_to_non_nullable
           : padding as EdgeInsets,
-      high: high == const $CopyWithPlaceholder() || high == null
+      high: high == const $CopyWithPlaceholder()
           ? _value.high
           // ignore: cast_nullable_to_non_nullable
           : high as MarkConfig,
-      low: low == const $CopyWithPlaceholder() || low == null
+      low: low == const $CopyWithPlaceholder()
           ? _value.low
           // ignore: cast_nullable_to_non_nullable
           : low as MarkConfig,
-      last: last == const $CopyWithPlaceholder() || last == null
+      last: last == const $CopyWithPlaceholder()
           ? _value.last
           // ignore: cast_nullable_to_non_nullable
           : last as MarkConfig,
-      latest: latest == const $CopyWithPlaceholder() || latest == null
+      latest: latest == const $CopyWithPlaceholder()
           ? _value.latest
           // ignore: cast_nullable_to_non_nullable
           : latest as MarkConfig,
       useCandleColorAsLatestBg:
-          useCandleColorAsLatestBg == const $CopyWithPlaceholder() ||
-                  useCandleColorAsLatestBg == null
+          useCandleColorAsLatestBg == const $CopyWithPlaceholder()
               ? _value.useCandleColorAsLatestBg
               // ignore: cast_nullable_to_non_nullable
               : useCandleColorAsLatestBg as bool,
-      showCountDown:
-          showCountDown == const $CopyWithPlaceholder() || showCountDown == null
-              ? _value.showCountDown
-              // ignore: cast_nullable_to_non_nullable
-              : showCountDown as bool,
-      countDown: countDown == const $CopyWithPlaceholder() || countDown == null
+      showCountDown: showCountDown == const $CopyWithPlaceholder()
+          ? _value.showCountDown
+          // ignore: cast_nullable_to_non_nullable
+          : showCountDown as bool,
+      countDown: countDown == const $CopyWithPlaceholder()
           ? _value.countDown
           // ignore: cast_nullable_to_non_nullable
           : countDown as TextAreaConfig,

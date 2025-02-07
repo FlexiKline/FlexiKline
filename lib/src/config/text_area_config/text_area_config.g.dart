@@ -36,8 +36,8 @@ abstract class _$TextAreaConfigCWProxy {
   /// TextAreaConfig(...).copyWith(id: 12, name: "My name")
   /// ````
   TextAreaConfig call({
-    TextStyle? style,
-    TextAlign? textAlign,
+    TextStyle style,
+    TextAlign textAlign,
     StrutStyle? strutStyle,
     double? textWidth,
     double? minWidth,
@@ -113,11 +113,11 @@ class _$TextAreaConfigCWProxyImpl implements _$TextAreaConfigCWProxy {
     Object? borderRadius = const $CopyWithPlaceholder(),
   }) {
     return TextAreaConfig(
-      style: style == const $CopyWithPlaceholder() || style == null
+      style: style == const $CopyWithPlaceholder()
           ? _value.style
           // ignore: cast_nullable_to_non_nullable
           : style as TextStyle,
-      textAlign: textAlign == const $CopyWithPlaceholder() || textAlign == null
+      textAlign: textAlign == const $CopyWithPlaceholder()
           ? _value.textAlign
           // ignore: cast_nullable_to_non_nullable
           : textAlign as TextAlign,
@@ -199,44 +199,35 @@ TextAreaConfig _$TextAreaConfigFromJson(Map<String, dynamic> json) =>
           json['borderRadius'], const BorderRadiusConverter().fromJson),
     );
 
-Map<String, dynamic> _$TextAreaConfigToJson(TextAreaConfig instance) {
-  final val = <String, dynamic>{
-    'style': const TextStyleConverter().toJson(instance.style),
-    'textAlign': const TextAlignConvert().toJson(instance.textAlign),
-  };
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull(
-      'strutStyle',
-      _$JsonConverterToJson<Map<String, dynamic>, StrutStyle>(
-          instance.strutStyle, const StrutStyleConverter().toJson));
-  writeNotNull('textWidth', instance.textWidth);
-  writeNotNull('minWidth', instance.minWidth);
-  writeNotNull('maxWidth', instance.maxWidth);
-  writeNotNull('maxLines', instance.maxLines);
-  writeNotNull(
-      'background',
-      _$JsonConverterToJson<String, Color>(
-          instance.background, const ColorConverter().toJson));
-  writeNotNull(
-      'padding',
-      _$JsonConverterToJson<Map<String, dynamic>, EdgeInsets>(
-          instance.padding, const EdgeInsetsConverter().toJson));
-  writeNotNull(
-      'border',
-      _$JsonConverterToJson<Map<String, dynamic>, BorderSide>(
-          instance.border, const BorderSideConvert().toJson));
-  writeNotNull(
-      'borderRadius',
-      _$JsonConverterToJson<Map<String, dynamic>, BorderRadius>(
-          instance.borderRadius, const BorderRadiusConverter().toJson));
-  return val;
-}
+Map<String, dynamic> _$TextAreaConfigToJson(TextAreaConfig instance) =>
+    <String, dynamic>{
+      'style': const TextStyleConverter().toJson(instance.style),
+      'textAlign': const TextAlignConvert().toJson(instance.textAlign),
+      if (_$JsonConverterToJson<Map<String, dynamic>, StrutStyle>(
+              instance.strutStyle, const StrutStyleConverter().toJson)
+          case final value?)
+        'strutStyle': value,
+      if (instance.textWidth case final value?) 'textWidth': value,
+      if (instance.minWidth case final value?) 'minWidth': value,
+      if (instance.maxWidth case final value?) 'maxWidth': value,
+      if (instance.maxLines case final value?) 'maxLines': value,
+      if (_$JsonConverterToJson<String, Color>(
+              instance.background, const ColorConverter().toJson)
+          case final value?)
+        'background': value,
+      if (_$JsonConverterToJson<Map<String, dynamic>, EdgeInsets>(
+              instance.padding, const EdgeInsetsConverter().toJson)
+          case final value?)
+        'padding': value,
+      if (_$JsonConverterToJson<Map<String, dynamic>, BorderSide>(
+              instance.border, const BorderSideConvert().toJson)
+          case final value?)
+        'border': value,
+      if (_$JsonConverterToJson<Map<String, dynamic>, BorderRadius>(
+              instance.borderRadius, const BorderRadiusConverter().toJson)
+          case final value?)
+        'borderRadius': value,
+    };
 
 Value? _$JsonConverterFromJson<Json, Value>(
   Object? json,

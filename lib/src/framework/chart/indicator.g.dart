@@ -23,9 +23,9 @@ abstract class _$MainPaintObjectIndicatorCWProxy<
   /// MainPaintObjectIndicator<T>(...).copyWith(id: 12, name: "My name")
   /// ````
   MainPaintObjectIndicator<T> call({
-    Size? size,
-    EdgeInsets? padding,
-    bool? drawBelowTipsArea,
+    Size size,
+    EdgeInsets padding,
+    bool drawBelowTipsArea,
     Set<IIndicatorKey>? indicatorKeys,
   });
 }
@@ -68,16 +68,15 @@ class _$MainPaintObjectIndicatorCWProxyImpl<T extends PaintObjectIndicator>
     Object? indicatorKeys = const $CopyWithPlaceholder(),
   }) {
     return MainPaintObjectIndicator<T>(
-      size: size == const $CopyWithPlaceholder() || size == null
+      size: size == const $CopyWithPlaceholder()
           ? _value.size
           // ignore: cast_nullable_to_non_nullable
           : size as Size,
-      padding: padding == const $CopyWithPlaceholder() || padding == null
+      padding: padding == const $CopyWithPlaceholder()
           ? _value.padding
           // ignore: cast_nullable_to_non_nullable
           : padding as EdgeInsets,
-      drawBelowTipsArea: drawBelowTipsArea == const $CopyWithPlaceholder() ||
-              drawBelowTipsArea == null
+      drawBelowTipsArea: drawBelowTipsArea == const $CopyWithPlaceholder()
           ? _value.drawBelowTipsArea
           // ignore: cast_nullable_to_non_nullable
           : drawBelowTipsArea as bool,

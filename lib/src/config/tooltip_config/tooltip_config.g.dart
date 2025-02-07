@@ -24,11 +24,11 @@ abstract class _$TooltipConfigCWProxy {
   /// TooltipConfig(...).copyWith(id: 12, name: "My name")
   /// ````
   TooltipConfig call({
-    bool? show,
-    EdgeInsets? margin,
-    EdgeInsets? padding,
-    BorderRadius? radius,
-    TextStyle? style,
+    bool show,
+    EdgeInsets margin,
+    EdgeInsets padding,
+    BorderRadius radius,
+    TextStyle style,
   });
 }
 
@@ -69,23 +69,23 @@ class _$TooltipConfigCWProxyImpl implements _$TooltipConfigCWProxy {
     Object? style = const $CopyWithPlaceholder(),
   }) {
     return TooltipConfig(
-      show: show == const $CopyWithPlaceholder() || show == null
+      show: show == const $CopyWithPlaceholder()
           ? _value.show
           // ignore: cast_nullable_to_non_nullable
           : show as bool,
-      margin: margin == const $CopyWithPlaceholder() || margin == null
+      margin: margin == const $CopyWithPlaceholder()
           ? _value.margin
           // ignore: cast_nullable_to_non_nullable
           : margin as EdgeInsets,
-      padding: padding == const $CopyWithPlaceholder() || padding == null
+      padding: padding == const $CopyWithPlaceholder()
           ? _value.padding
           // ignore: cast_nullable_to_non_nullable
           : padding as EdgeInsets,
-      radius: radius == const $CopyWithPlaceholder() || radius == null
+      radius: radius == const $CopyWithPlaceholder()
           ? _value.radius
           // ignore: cast_nullable_to_non_nullable
           : radius as BorderRadius,
-      style: style == const $CopyWithPlaceholder() || style == null
+      style: style == const $CopyWithPlaceholder()
           ? _value.style
           // ignore: cast_nullable_to_non_nullable
           : style as TextStyle,

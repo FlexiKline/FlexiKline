@@ -22,10 +22,10 @@ abstract class _$LineConfigCWProxy {
   /// LineConfig(...).copyWith(id: 12, name: "My name")
   /// ````
   LineConfig call({
-    LineType? type,
+    LineType type,
     double? length,
-    List<double>? dashes,
-    PaintConfig? paint,
+    List<double> dashes,
+    PaintConfig paint,
   });
 }
 
@@ -62,7 +62,7 @@ class _$LineConfigCWProxyImpl implements _$LineConfigCWProxy {
     Object? paint = const $CopyWithPlaceholder(),
   }) {
     return LineConfig(
-      type: type == const $CopyWithPlaceholder() || type == null
+      type: type == const $CopyWithPlaceholder()
           ? _value.type
           // ignore: cast_nullable_to_non_nullable
           : type as LineType,
@@ -70,11 +70,11 @@ class _$LineConfigCWProxyImpl implements _$LineConfigCWProxy {
           ? _value.length
           // ignore: cast_nullable_to_non_nullable
           : length as double?,
-      dashes: dashes == const $CopyWithPlaceholder() || dashes == null
+      dashes: dashes == const $CopyWithPlaceholder()
           ? _value.dashes
           // ignore: cast_nullable_to_non_nullable
           : dashes as List<double>,
-      paint: paint == const $CopyWithPlaceholder() || paint == null
+      paint: paint == const $CopyWithPlaceholder()
           ? _value.paint
           // ignore: cast_nullable_to_non_nullable
           : paint as PaintConfig,
@@ -106,19 +106,10 @@ LineConfig _$LineConfigFromJson(Map<String, dynamic> json) => LineConfig(
           : PaintConfig.fromJson(json['paint'] as Map<String, dynamic>),
     );
 
-Map<String, dynamic> _$LineConfigToJson(LineConfig instance) {
-  final val = <String, dynamic>{
-    'type': const LineTypeConverter().toJson(instance.type),
-  };
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('length', instance.length);
-  val['dashes'] = instance.dashes;
-  val['paint'] = instance.paint.toJson();
-  return val;
-}
+Map<String, dynamic> _$LineConfigToJson(LineConfig instance) =>
+    <String, dynamic>{
+      'type': const LineTypeConverter().toJson(instance.type),
+      if (instance.length case final value?) 'length': value,
+      'dashes': instance.dashes,
+      'paint': instance.paint.toJson(),
+    };

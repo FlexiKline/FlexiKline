@@ -20,9 +20,9 @@ abstract class _$ToleranceConfigCWProxy {
   /// ToleranceConfig(...).copyWith(id: 12, name: "My name")
   /// ````
   ToleranceConfig call({
-    int? maxDuration,
-    double? distanceFactor,
-    String? curvestr,
+    int maxDuration,
+    double distanceFactor,
+    String curvestr,
   });
 }
 
@@ -57,17 +57,15 @@ class _$ToleranceConfigCWProxyImpl implements _$ToleranceConfigCWProxy {
     Object? curvestr = const $CopyWithPlaceholder(),
   }) {
     return ToleranceConfig(
-      maxDuration:
-          maxDuration == const $CopyWithPlaceholder() || maxDuration == null
-              ? _value.maxDuration
-              // ignore: cast_nullable_to_non_nullable
-              : maxDuration as int,
-      distanceFactor: distanceFactor == const $CopyWithPlaceholder() ||
-              distanceFactor == null
+      maxDuration: maxDuration == const $CopyWithPlaceholder()
+          ? _value.maxDuration
+          // ignore: cast_nullable_to_non_nullable
+          : maxDuration as int,
+      distanceFactor: distanceFactor == const $CopyWithPlaceholder()
           ? _value.distanceFactor
           // ignore: cast_nullable_to_non_nullable
           : distanceFactor as double,
-      curvestr: curvestr == const $CopyWithPlaceholder() || curvestr == null
+      curvestr: curvestr == const $CopyWithPlaceholder()
           ? _value.curvestr
           // ignore: cast_nullable_to_non_nullable
           : curvestr as String,

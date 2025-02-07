@@ -40,8 +40,10 @@ class PointConfig {
 
   PointConfig of({Color? color, Color? borderColor}) {
     if ((color == null || this.color == color) &&
-        (borderColor == null || this.borderColor == borderColor)) return this;
-    return copyWith(color: color, borderColor: borderColor);
+        (borderColor == null || this.borderColor == borderColor)) {
+      return this;
+    }
+    return copyWith(color: color ?? this.color, borderColor: borderColor);
   }
 
   Paint get paint => Paint()

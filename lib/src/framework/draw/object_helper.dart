@@ -113,7 +113,7 @@ mixin DrawConfigMixin on OverlayObject {
     }
     color ??= line.paint.color;
     strokeWidth ??= line.paint.strokeWidth;
-    lineType ??= lineType;
+    lineType ??= line.type;
     setDrawLineConfig(line.copyWith(
       type: lineType,
       paint: line.paint.copyWith(

@@ -24,11 +24,11 @@ abstract class _$TimeIndicatorCWProxy {
   /// TimeIndicator(...).copyWith(id: 12, name: "My name")
   /// ````
   TimeIndicator call({
-    int? zIndex,
-    double? height,
-    EdgeInsets? padding,
-    DrawPosition? position,
-    TextAreaConfig? timeTick,
+    int zIndex,
+    double height,
+    EdgeInsets padding,
+    DrawPosition position,
+    TextAreaConfig timeTick,
   });
 }
 
@@ -69,23 +69,23 @@ class _$TimeIndicatorCWProxyImpl implements _$TimeIndicatorCWProxy {
     Object? timeTick = const $CopyWithPlaceholder(),
   }) {
     return TimeIndicator(
-      zIndex: zIndex == const $CopyWithPlaceholder() || zIndex == null
+      zIndex: zIndex == const $CopyWithPlaceholder()
           ? _value.zIndex
           // ignore: cast_nullable_to_non_nullable
           : zIndex as int,
-      height: height == const $CopyWithPlaceholder() || height == null
+      height: height == const $CopyWithPlaceholder()
           ? _value.height
           // ignore: cast_nullable_to_non_nullable
           : height as double,
-      padding: padding == const $CopyWithPlaceholder() || padding == null
+      padding: padding == const $CopyWithPlaceholder()
           ? _value.padding
           // ignore: cast_nullable_to_non_nullable
           : padding as EdgeInsets,
-      position: position == const $CopyWithPlaceholder() || position == null
+      position: position == const $CopyWithPlaceholder()
           ? _value.position
           // ignore: cast_nullable_to_non_nullable
           : position as DrawPosition,
-      timeTick: timeTick == const $CopyWithPlaceholder() || timeTick == null
+      timeTick: timeTick == const $CopyWithPlaceholder()
           ? _value.timeTick
           // ignore: cast_nullable_to_non_nullable
           : timeTick as TextAreaConfig,
