@@ -319,10 +319,24 @@ final class IndicatorPaintObjectManager with KlineLog {
     return calcParams;
   }
 
+  void restoreHeight() {
+    mainPaintObject.restoreSize();
+    for (var object in subPaintObjects) {
+      object.restoreHeight();
+    }
+  }
+
+  void storeIndicatorsConfig() {
+    mainPaintObject.doStoreConfig();
+    for (var object in subPaintObjects) {
+      object.doStoreConfig();
+    }
+  }
+
   void dispose() {
     mainPaintObject.dispose();
-    for (var indicator in subPaintObjects) {
-      indicator.dispose();
+    for (var object in subPaintObjects) {
+      object.dispose();
     }
     _subPaintObjectQueue.clear();
   }

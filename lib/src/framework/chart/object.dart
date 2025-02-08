@@ -31,7 +31,10 @@ abstract class IndicatorObject<T extends Indicator>
   T get indicator => _indicator;
 
   IIndicatorKey get key => _indicator.key;
-  double get height => _indicator.height;
+
+  double? _tmpHeight;
+  double get height => _tmpHeight ?? _indicator.height;
+
   EdgeInsets get padding => _indicator.padding;
   PaintMode get paintMode => _indicator.paintMode;
   int get zIndex => _indicator.zIndex;
@@ -101,12 +104,6 @@ abstract class PaintObject<T extends Indicator> extends IndicatorObject
   @mustCallSuper
   @protected
   void dispose() {
-    final json = indicator.toJson();
-    assert(() {
-      logi('dispose > PaintOjbect[$key] > $json');
-      return true;
-    }());
-    _context.setConfig(key.id, json);
     _parent = null;
   }
 
@@ -187,7 +184,8 @@ final class MainPaintObject<T extends MainPaintObjectIndicator>
 
   bool get drawBelowTipsArea => indicator.drawBelowTipsArea;
 
-  Size get size => indicator.size;
+  Size? _tmpSize;
+  Size get size => _tmpSize ?? indicator.size;
 
   @override
   Rect get drawableRect {
@@ -239,10 +237,10 @@ final class MainPaintObject<T extends MainPaintObjectIndicator>
 
   @override
   void dispose() {
+    super.dispose();
     for (var object in children) {
       object.dispose();
     }
     children.clear();
-    super.dispose();
   }
 }

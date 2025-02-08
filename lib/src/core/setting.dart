@@ -65,7 +65,6 @@ mixin SettingBinding on KlineBindingBase
     if (_layoutMode is FixedLayoutMode) {
       final size = mainRect.size;
       if (size != mainPaintObject.size) {
-        _layoutMode = _layoutMode.copyWith(mainSize: size);
         final updated = mainPaintObject.doUpdateLayout(size: size);
         force = updated || force;
       }
@@ -77,6 +76,8 @@ mixin SettingBinding on KlineBindingBase
   }
 
   late LayoutMode _layoutMode;
+  @override
+  LayoutMode get layoutMode => _layoutMode;
   bool get isFixedLayoutMode => _layoutMode is FixedLayoutMode;
   Size? get fixedSize {
     if (!isFixedLayoutMode) return null;
@@ -143,8 +144,15 @@ mixin SettingBinding on KlineBindingBase
   /// 主区域大小设置
   bool setMainSize(Size size) {
     if (!(size > mainMinSize)) return false;
-    if (size == _layoutMode.mainSize) return false;
-    _layoutMode = _layoutMode.copyWith(mainSize: size);
+    if (size == mainPaintObject.size) return false;
+    switch (_layoutMode) {
+      case NormalLayoutMode():
+        _layoutMode = _layoutMode.normalMode(size);
+      case AdaptLayoutMode():
+        _layoutMode = _layoutMode.adaptMode(size.width, size.height);
+      case FixedLayoutMode():
+      case ScaleLayoutMode():
+    }
     final changed = mainPaintObject.doUpdateLayout(size: size);
     _invokeSizeChanged(force: changed);
     return true;
@@ -154,6 +162,10 @@ mixin SettingBinding on KlineBindingBase
   /// 注: 仅适配主区的宽度变化
   /// 这主要是通过[FlexiKlineWidget]的autoAdaptLayout配置决定, 并会导致无法手动调整[FlexiKlineWidget]的宽度.
   bool setAdaptLayoutMode(double width) {
+    if (_layoutMode is FixedLayoutMode) {
+      final fixedSize = (_layoutMode as FixedLayoutMode).fixedSize;
+      return setFixedLayoutMode(Size(width, fixedSize.height));
+    }
     if (width < mainMinSize.width) return false;
     if (_layoutMode is AdaptLayoutMode &&
         (_layoutMode as AdaptLayoutMode).adaptSize.width == width) {
@@ -179,6 +191,8 @@ mixin SettingBinding on KlineBindingBase
     _layoutMode = _layoutMode.normalMode(size);
     if (size == mainPaintObject.size) return;
     final changed = mainPaintObject.doUpdateLayout(size: _layoutMode.mainSize);
+    // 将所有副区对象恢复正常布局下的高度.
+    _paintObjectManager.restoreHeight();
     _invokeSizeChanged(force: changed);
   }
 
@@ -202,8 +216,8 @@ mixin SettingBinding on KlineBindingBase
   @protected
   double get subRectHeight {
     double totalHeight = 0.0;
-    for (final indicator in subPaintObjects) {
-      totalHeight += indicator.height;
+    for (final object in subPaintObjects) {
+      totalHeight += object.height;
     }
     return totalHeight;
   }
@@ -398,12 +412,12 @@ mixin SettingBinding on KlineBindingBase
 
   /// 保存当前FlexiKline配置到本地
   @override
-  void storeFlexiKlineConfig() {
-    _flexiKlineConfig.mainIndicator = mainPaintObject.indicator.copyWith(
-      size: _layoutMode.mainSize,
-    );
+  void storeFlexiKlineConfig([bool storeIndicators = true]) {
     _flexiKlineConfig.sub = _paintObjectManager.subIndicatorKeys.toSet();
     configuration.saveFlexiKlineConfig(_flexiKlineConfig);
+    if (storeIndicators) {
+      _paintObjectManager.storeIndicatorsConfig();
+    }
   }
 
   /// SettingConfig

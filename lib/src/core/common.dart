@@ -20,13 +20,11 @@ sealed class LayoutMode {
   // 主区正常模式下大小
   final Size mainSize;
 
-  LayoutMode copyWith({Size? mainSize});
-
   NormalLayoutMode normalMode(Size size) => NormalLayoutMode(size);
   FixedLayoutMode fixedMode(Size size) => FixedLayoutMode(mainSize, size);
-  AdaptLayoutMode adaptMode(double width) => AdaptLayoutMode(
-        mainSize,
-        Size(width, mainSize.height),
+  AdaptLayoutMode adaptMode(double width, [double? height]) => AdaptLayoutMode(
+        height != null ? Size(mainSize.width, height) : mainSize,
+        Size(width, height ?? mainSize.height),
       );
   ScaleLayoutMode scaleMode(Rect rect) => ScaleLayoutMode(mainSize, rect);
 }
@@ -34,55 +32,24 @@ sealed class LayoutMode {
 /// 正常模式(可自由调节宽高)
 class NormalLayoutMode extends LayoutMode {
   const NormalLayoutMode(super.mainSize);
-
-  @override
-  NormalLayoutMode copyWith({Size? mainSize}) {
-    return NormalLayoutMode(
-      mainSize ?? this.mainSize,
-    );
-  }
 }
 
 /// 自适应模式(Web/桌面端根据父布局宽度变化而变化)
 class AdaptLayoutMode extends LayoutMode {
   const AdaptLayoutMode(super.mainSize, this.adaptSize);
   final Size adaptSize;
-
-  @override
-  AdaptLayoutMode copyWith({Size? mainSize, Size? adaptSize}) {
-    return AdaptLayoutMode(
-      mainSize ?? this.mainSize,
-      adaptSize ?? this.adaptSize,
-    );
-  }
 }
 
 /// 固定大小模式(全屏/横屏)
 class FixedLayoutMode extends LayoutMode {
   const FixedLayoutMode(super.mainSize, this.fixedSize);
   final Size fixedSize;
-
-  @override
-  FixedLayoutMode copyWith({Size? mainSize, Size? fixedSize}) {
-    return FixedLayoutMode(
-      mainSize ?? this.mainSize,
-      fixedSize ?? this.fixedSize,
-    );
-  }
 }
 
 /// 缩放模式(可自由移动图表绘制位置)
 class ScaleLayoutMode extends LayoutMode {
   const ScaleLayoutMode(super.mainSize, this.mainRect);
   final Rect mainRect;
-
-  @override
-  ScaleLayoutMode copyWith({Size? mainSize, Rect? mainRect}) {
-    return ScaleLayoutMode(
-      mainSize ?? this.mainSize,
-      mainRect ?? this.mainRect,
-    );
-  }
 }
 
 /// Setting API
@@ -93,7 +60,7 @@ abstract interface class ISetting {
   /// Config ///
 
   /// 保存到本地
-  void storeFlexiKlineConfig();
+  void storeFlexiKlineConfig([bool storeIndicators = false]);
 
   /// SettingConfig
   SettingConfig get settingConfig;
@@ -134,6 +101,9 @@ abstract interface class IDraw {
 /// PaintContext 绘制Indicator功能集合
 abstract interface class IPaintContext implements IStorage, ILogger {
   IFlexiKlineTheme get theme;
+
+  // 是否是正常布局模式
+  LayoutMode get layoutMode;
 
   /// 当前canvas绘制区域第一根蜡烛绘制的偏移量
   double get startCandleDx;

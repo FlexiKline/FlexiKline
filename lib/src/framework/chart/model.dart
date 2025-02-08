@@ -103,16 +103,18 @@ abstract class TimeBaseIndicator extends Indicator {
 class MainPaintObjectIndicator<T extends PaintObjectIndicator>
     extends Indicator {
   MainPaintObjectIndicator({
-    required Size size,
+    required this.size,
     required super.padding,
     this.drawBelowTipsArea = false,
     Set<IIndicatorKey>? indicatorKeys,
-  })  : _size = size,
-        indicatorKeys = indicatorKeys ?? <IIndicatorKey>{},
+  })  : indicatorKeys = indicatorKeys ?? <IIndicatorKey>{},
         super(key: mainIndicatorKey, height: size.height);
 
-  late Size _size;
-  Size get size => _size;
+  @protected
+  late Size size;
+
+  @override
+  double get height => size.height;
   final bool drawBelowTipsArea;
 
   /// 当前主区已选中指标集合(由PaintObjectManager管理)

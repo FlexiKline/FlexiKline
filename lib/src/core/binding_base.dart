@@ -62,13 +62,13 @@ abstract class KlineBindingBase
   void dispose() {
     logd("dispose base");
     _paintObjectManager.dispose();
-    if (autoSave) storeFlexiKlineConfig();
+    if (autoSave) storeFlexiKlineConfig(true);
   }
 
   @protected
   @mustCallSuper
   void onThemeChanged([covariant IFlexiKlineTheme? oldTheme]) {
-     logd("onThemeChanged base");
+    logd("onThemeChanged base");
   }
 
   @protected

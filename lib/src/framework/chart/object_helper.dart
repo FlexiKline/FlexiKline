@@ -16,6 +16,11 @@ part of 'indicator.dart';
 
 /// FlexiKlineController 状态/配置/接口代理
 extension IndicatorObjectExt on IndicatorObject {
+  bool get isAllowUpdateHeight {
+    return _context.layoutMode is NormalLayoutMode ||
+        _context.layoutMode is AdaptLayoutMode;
+  }
+
   /// Config
   SettingConfig get settingConfig => _context.settingConfig;
 
@@ -133,7 +138,7 @@ mixin PaintObjectBoundingMixin on IndicatorObject implements IPaintBoundingBox {
         subRect.left,
         subRect.top + top,
         subRect.right,
-        subRect.top + top + indicator.height,
+        subRect.top + top + height,
       );
     }
     return _drawableRect!;
@@ -164,8 +169,8 @@ mixin PaintObjectBoundingMixin on IndicatorObject implements IPaintBoundingBox {
     if (_chartRect != null) return _chartRect!;
     final chartBottom = drawableRect.bottom - padding.bottom;
     double chartTop;
-    if (indicator.paintMode == PaintMode.alone) {
-      chartTop = chartBottom - indicator.height;
+    if (paintMode == PaintMode.alone) {
+      chartTop = chartBottom - height;
     } else {
       chartTop = drawableRect.top + padding.top;
     }

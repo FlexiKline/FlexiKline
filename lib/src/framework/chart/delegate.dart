@@ -15,6 +15,24 @@
 part of 'indicator.dart';
 
 extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
+  void setHeight(double height) {
+    if (isAllowUpdateHeight) {
+      _tmpHeight = null;
+      // indicator中只保留正常布局模式/适配模式下的高度, 其他模式会根据当前父布局自适应.
+      indicator.height = height;
+    } else {
+      _tmpHeight = height;
+    }
+  }
+
+  void restoreHeight() {
+    _tmpHeight = indicator.height;
+  }
+
+  void setPadding(EdgeInsets padding) {
+    indicator.padding = padding;
+  }
+
   /// 更新布布局参数
   bool doUpdateLayout({
     double? height,
@@ -22,13 +40,13 @@ extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
     bool reset = false,
   }) {
     bool hasChange = reset;
-    if (height != null && height > 0 && height != indicator.height) {
-      _indicator.height = height;
+    if (height != null && height > 0 && height != this.height) {
+      setHeight(height);
       hasChange = true;
     }
 
-    if (padding != null && padding != indicator.padding) {
-      _indicator.padding = padding;
+    if (padding != null && padding != this.padding) {
+      setPadding(padding);
       hasChange = true;
     }
 
@@ -98,10 +116,30 @@ extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
   void doDidChangeTheme() {
     didChangeTheme();
   }
+
+  Future<bool> doStoreConfig() {
+    return _context.setConfig(key.id, indicator.toJson());
+  }
 }
 
 extension MainPaintDelegateExt<T extends MainPaintObjectIndicator>
     on MainPaintObject<T> {
+  @protected
+  void setSize(Size size) {
+    if (isAllowUpdateHeight) {
+      _tmpSize = null;
+      indicator.size = size;
+    } else {
+      _tmpSize = size;
+    }
+    setHeight(size.height);
+  }
+
+  void restoreSize() {
+    _tmpSize = indicator.size;
+    _tmpHeight = indicator.size.height;
+  }
+
   void setMinMax(MinMax val) {
     if (_minMax == null) {
       _minMax = val;
@@ -129,13 +167,12 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator>
     }
 
     bool hasChange = reset;
-    if (padding != null && padding != indicator.padding) {
-      indicator.padding == padding;
+    if (padding != null && padding != this.padding) {
+      setPadding(padding);
       hasChange = true;
     }
-    if (size != null && size != indicator.size) {
-      indicator._size = size;
-      indicator.height = size.height;
+    if (size != null && size != this.size) {
+      setSize(size);
       hasChange = true;
     }
     if (hasChange) resetPaintBounding();
@@ -311,5 +348,13 @@ extension MainPaintManagerExt<T extends MainPaintObjectIndicator>
       return true;
     }
     return false;
+  }
+
+  Future<bool> doStoreConfig() async {
+    await _context.setConfig(key.id, indicator.toJson());
+    for (var object in children) {
+      object.doStoreConfig();
+    }
+    return true;
   }
 }

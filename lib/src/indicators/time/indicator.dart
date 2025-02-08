@@ -78,7 +78,7 @@ class TimePaintObject<T extends TimeIndicator> extends TimeBasePaintObject<T> {
         final timeTick = indicator.timeTick.of(
           textColor: theme.ticksTextColor,
         );
-        final dyCenterOffset = (indicator.height - timeTick.areaHeight) / 2;
+        final dyCenterOffset = (height - timeTick.areaHeight) / 2;
         canvas.drawTextArea(
           offset: Offset(
             offset.dx,
@@ -106,7 +106,7 @@ class TimePaintObject<T extends TimeIndicator> extends TimeBasePaintObject<T> {
       background: theme.crossTextBg,
     );
 
-    final dyCenterOffset = (indicator.height - ticksText.areaHeight) / 2;
+    final dyCenterOffset = (height - ticksText.areaHeight) / 2;
     canvas.drawTextArea(
       offset: Offset(
         offset.dx,
