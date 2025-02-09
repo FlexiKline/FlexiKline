@@ -110,7 +110,6 @@ class MainPaintObjectIndicator<T extends PaintObjectIndicator>
   })  : indicatorKeys = indicatorKeys ?? <IIndicatorKey>{},
         super(key: mainIndicatorKey, height: size.height);
 
-  @protected
   late Size size;
 
   @override

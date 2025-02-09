@@ -54,10 +54,12 @@ final class IndicatorPaintObjectManager with KlineLog {
 
   late final MainPaintObject _mainPaintObject;
 
+  late final CandleBasePaintObject _candlePaintObject;
   late final TimeBasePaintObject _timePaintObject;
 
   MainPaintObject get mainPaintObject => _mainPaintObject;
 
+  CandleBasePaintObject get candlePaintObject => _candlePaintObject;
   TimeBasePaintObject get timePaintObject => _timePaintObject;
 
   Iterable<PaintObject> get subPaintObjects {
@@ -156,8 +158,8 @@ final class IndicatorPaintObjectManager with KlineLog {
       final candle = configuration.candleIndicatorBuilder.call(
         configuration.getConfig(candleIndicatorKey.id),
       );
-      final candleObject = candle.createPaintObject(context);
-      _mainPaintObject.appendPaintObject(candleObject);
+      _candlePaintObject = candle.createPaintObject(context);
+      _mainPaintObject.appendPaintObject(_candlePaintObject);
 
       final time = configuration.timeIndicatorBuilder.call(
         configuration.getConfig(timeIndicatorKey.id),

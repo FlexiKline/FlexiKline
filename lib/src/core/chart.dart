@@ -49,10 +49,14 @@ mixin ChartBinding
   }
 
   final ValueNotifier<int> _repaintChart = ValueNotifier(0);
+  final _chartZoomingListener = ValueNotifier<bool>(false);
+  ValueListenable<bool> get chartZoomingListener => _chartZoomingListener;
   Listenable get repaintChart => _repaintChart;
   void _markRepaintChart() {
     _repaintChart.value++;
   }
+
+  bool get isStartZoomChart => chartZoomingListener.value;
 
   //// Latest Price ////
   Timer? _lastPriceCountDownTimer;
@@ -269,6 +273,22 @@ mixin ChartBinding
   // 蜡烛图缩放结束
   void onChartScaleEnd() {
     _setCandleWidth(candleWidth, sync: true);
+  }
+
+  bool onChartZoomStart(Offset position) {
+    final isStart = candlePaintObject.hitTestStartZoom(position);
+    _chartZoomingListener.value = isStart;
+    return isStart;
+  }
+
+  void onChartZoomUpdate(GestureData data) {
+    final delta = data.dyDelta;
+    if (delta < 0.1) return;
+    logd('onChartZoomUpdate $data -> $delta');
+  }
+
+  void onChartZoomEnd() {
+    _chartZoomingListener.value = false;
   }
 
   @override

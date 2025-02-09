@@ -151,7 +151,7 @@ mixin SettingBinding on KlineBindingBase
       case AdaptLayoutMode():
         _layoutMode = _layoutMode.adaptMode(size.width, size.height);
       case FixedLayoutMode():
-      case ScaleLayoutMode():
+      case ZoomLayoutMode():
     }
     final changed = mainPaintObject.doUpdateLayout(size: size);
     _invokeSizeChanged(force: changed);
@@ -210,6 +210,10 @@ mixin SettingBinding on KlineBindingBase
     _layoutMode = _layoutMode.fixedMode(size);
     final changed = mainPaintObject.doUpdateLayout(size: mainRect.size);
     _invokeSizeChanged(force: changed);
+    return true;
+  }
+
+  bool setZoomLayoutMode() {
     return true;
   }
 

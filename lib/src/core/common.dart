@@ -26,7 +26,7 @@ sealed class LayoutMode {
         height != null ? Size(mainSize.width, height) : mainSize,
         Size(width, height ?? mainSize.height),
       );
-  ScaleLayoutMode scaleMode(Rect rect) => ScaleLayoutMode(mainSize, rect);
+  ZoomLayoutMode zoomMode(Rect rect) => ZoomLayoutMode(mainSize, rect);
 }
 
 /// 正常模式(可自由调节宽高)
@@ -47,8 +47,8 @@ class FixedLayoutMode extends LayoutMode {
 }
 
 /// 缩放模式(可自由移动图表绘制位置)
-class ScaleLayoutMode extends LayoutMode {
-  const ScaleLayoutMode(super.mainSize, this.mainRect);
+class ZoomLayoutMode extends LayoutMode {
+  const ZoomLayoutMode(super.mainSize, this.mainRect);
   final Rect mainRect;
 }
 

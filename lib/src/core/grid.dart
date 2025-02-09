@@ -313,8 +313,8 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
           setMainSize(Size(canvasWidth, upHeight));
         } else {
           _upObject?.doUpdateLayout(height: upHeight);
-          // downObject为空说明[_upObject]已是最底部的指标, 此时向下移动需要通知整个绘制区域高度.
-          _invokeSizeChanged();
+          // downObject为空说明[_upObject]已是最底部的指标, 此时向下向上移动将会导致整个canvas区域变化, 固force需要通知整个绘制区域高度.
+          _invokeSizeChanged(force: true);
         }
       }
 

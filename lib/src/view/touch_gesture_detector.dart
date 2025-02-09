@@ -53,6 +53,9 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
   /// 长按监听数据
   GestureData? _longData;
 
+  /// 缩放监听数据
+  GestureData? _zoomData;
+
   /// 是否已清理过手势竞技场(解决手势冲突), 避免重复操作.
   bool isSweeped = false;
 
@@ -69,7 +72,6 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
   void initState() {
     super.initState();
     loggerDelegate = controller.loggerDelegate;
-    // widget.controller.isAllowCrossGestureCoexist = true;
   }
 
   @override
@@ -467,6 +469,10 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
       }
     } else if (!controller.isCrossing &&
         controller.onGridMoveStart(details.localPosition)) {
+      logd("onLongPressStart move > details:$details");
+      _longData = GestureData.long(details.localPosition);
+    } else if (controller.onChartZoomStart(details.localPosition)) {
+      logd("onLongPressStart zoom > details:$details");
       _longData = GestureData.long(details.localPosition);
     } else {
       logd("onLongPressStart cross > details:$details");
@@ -493,6 +499,9 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
     } else if (controller.isStartDragGrid) {
       _longData!.update(details.localPosition);
       controller.onGridMoveUpdate(_longData!);
+    } else if (controller.isStartZoomChart) {
+      _longData!.update(details.localPosition);
+      controller.onChartZoomUpdate(_longData!);
     } else {
       _longData!.update(details.localPosition);
       controller.onCrossUpdate(_longData!);
@@ -512,6 +521,8 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
       controller.onDrawMoveEnd();
     } else if (controller.isStartDragGrid) {
       controller.onGridMoveEnd();
+    } else if (controller.isStartZoomChart) {
+      controller.onChartZoomEnd();
     } else {
       // 长按结束, 尝试取消Cross事件.
       controller.cancelCross();

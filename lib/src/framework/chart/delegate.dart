@@ -26,7 +26,7 @@ extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
   }
 
   void restoreHeight() {
-    _tmpHeight = indicator.height;
+    _tmpHeight = null;
   }
 
   void setPadding(EdgeInsets padding) {
@@ -136,8 +136,8 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator>
   }
 
   void restoreSize() {
-    _tmpSize = indicator.size;
-    _tmpHeight = indicator.size.height;
+    _tmpSize = null;
+    _tmpHeight = null;
   }
 
   void setMinMax(MinMax val) {

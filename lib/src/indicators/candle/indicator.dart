@@ -234,6 +234,9 @@ class CandlePaintObject<T extends CandleIndicator>
     );
   }
 
+  /// 缓存价钱刻度文本区域大小
+  Size? _priceTicksTextSize;
+
   /// 绘制蜡烛图右侧价钱刻度
   /// 根据Grid horizontal配置来绘制, 保证在grid.horizontal线之上.
   void paintYAxisPriceTick(Canvas canvas, Size size) {
@@ -254,7 +257,7 @@ class CandlePaintObject<T extends CandleIndicator>
 
       final ticksText = defTicksTextConfig;
 
-      canvas.drawTextArea(
+      _priceTicksTextSize = canvas.drawTextArea(
         offset: Offset(
           dx,
           dy - ticksText.areaHeight, // 绘制在刻度线之上
@@ -530,5 +533,17 @@ class CandlePaintObject<T extends CandleIndicator>
       return true;
     }
     return false;
+  }
+
+  @override
+  bool hitTestStartZoom(Offset position) {
+    if (_priceTicksTextSize == null) return false;
+    final priceTicksRect = Rect.fromLTWH(
+      chartRect.right - _priceTicksTextSize!.width,
+      chartRect.top,
+      _priceTicksTextSize!.width,
+      chartRect.height,
+    );
+    return priceTicksRect.include(position);
   }
 }
