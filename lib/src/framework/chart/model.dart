@@ -37,7 +37,7 @@ abstract class Indicator implements IPrecomputable {
 
   double height;
 
-  EdgeInsets padding;
+  final EdgeInsets padding;
 
   final PaintMode paintMode;
 

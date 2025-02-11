@@ -16,6 +16,7 @@ part of 'indicator.dart';
 
 extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
   void setHeight(double height) {
+    // TODO: 增加配置项
     if (isAllowUpdateHeight) {
       _tmpHeight = null;
       // indicator中只保留正常布局模式/适配模式下的高度, 其他模式会根据当前父布局自适应.
@@ -30,7 +31,7 @@ extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
   }
 
   void setPadding(EdgeInsets padding) {
-    indicator.padding = padding;
+    _tmpPadding = padding;
   }
 
   /// 更新布布局参数
@@ -148,24 +149,11 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator>
     }
   }
 
-  /// 当前[tipsHeight]是否需要更新布局参数
-  bool _needUpdateLayout(double tipsHeight) {
-    return drawBelowTipsArea && _initialPadding.top + tipsHeight != padding.top;
-  }
-
   bool doUpdateLayout({
     Size? size,
     EdgeInsets? padding,
     bool reset = false,
-    double? tipsHeight,
   }) {
-    if (drawBelowTipsArea && tipsHeight != null) {
-      // 如果tipsHeight不为空, 说明是绘制过程中动态调整, 只需要在MultiPaintObjectIndicator原padding基础上增加即可.
-      padding = _initialPadding.copyWith(
-        top: _initialPadding.top + tipsHeight,
-      );
-    }
-
     bool hasChange = reset;
     if (padding != null && padding != this.padding) {
       setPadding(padding);
@@ -229,17 +217,25 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator>
     return _minMax;
   }
 
+  /// 是否首先绘制Tips区域
+  /// 1. drawBelowTipsArea标识为true
+  /// 2. 当前不处在Zooming中时
+  bool get isFirstDrawTipsArea {
+    return indicator.drawBelowTipsArea && !_context.isStartZoomChart;
+  }
+
   void doPaintChart(Canvas canvas, Size size) {
-    if (drawBelowTipsArea) {
+    if (isFirstDrawTipsArea) {
       // 1.1 如果设置总是要在Tips区域下绘制指标图, 则要首先绘制完所有Tips.
       if (!isCrossing) {
-        final tipsHeight = doPaintTips(
-          canvas,
-          model: klineData.latest,
-        );
+        final tipsHeight = doPaintTips(canvas, model: klineData.latest);
 
-        if (_needUpdateLayout(tipsHeight)) {
-          doUpdateLayout(tipsHeight: tipsHeight);
+        if (indicator.padding.top + tipsHeight != padding.top) {
+          doUpdateLayout(
+            padding: indicator.padding.copyWith(
+              top: indicator.padding.top + tipsHeight,
+            ),
+          );
         }
       }
       for (var object in children) {
@@ -260,12 +256,16 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator>
   }
 
   void doOnCross(Canvas canvas, Offset offset, {CandleModel? model}) {
-    if (drawBelowTipsArea) {
+    if (isFirstDrawTipsArea) {
       if (isCrossing) {
         final tipsHeight = doPaintTips(canvas, offset: offset, model: model);
 
-        if (_needUpdateLayout(tipsHeight)) {
-          doUpdateLayout(tipsHeight: tipsHeight);
+        if (indicator.padding.top + tipsHeight != padding.top) {
+          doUpdateLayout(
+            padding: indicator.padding.copyWith(
+              top: indicator.padding.top + tipsHeight,
+            ),
+          );
         }
       }
       for (var object in children) {

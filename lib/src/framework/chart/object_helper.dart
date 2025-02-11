@@ -147,9 +147,9 @@ mixin PaintObjectBoundingMixin on IndicatorObject implements IPaintBoundingBox {
   @override
   Rect get topRect {
     return _topRect ??= Rect.fromLTRB(
-      drawableRect.left,
+      drawableRect.left + padding.left,
       drawableRect.top,
-      drawableRect.right,
+      drawableRect.right - padding.right,
       drawableRect.top + padding.top,
     );
   }
@@ -157,9 +157,9 @@ mixin PaintObjectBoundingMixin on IndicatorObject implements IPaintBoundingBox {
   @override
   Rect get bottomRect {
     return _bottomRect ??= Rect.fromLTRB(
-      drawableRect.left,
+      drawableRect.left + padding.left,
       drawableRect.bottom - padding.bottom,
-      drawableRect.right,
+      drawableRect.right - padding.right,
       drawableRect.bottom,
     );
   }
@@ -167,12 +167,12 @@ mixin PaintObjectBoundingMixin on IndicatorObject implements IPaintBoundingBox {
   @override
   Rect get chartRect {
     if (_chartRect != null) return _chartRect!;
-    final chartBottom = drawableRect.bottom - padding.bottom;
+    final chartBottom = bottomRect.top;
     double chartTop;
     if (paintMode == PaintMode.alone) {
-      chartTop = chartBottom - height;
+      chartTop = math.max(chartBottom - height, topRect.bottom);
     } else {
-      chartTop = drawableRect.top + padding.top;
+      chartTop = topRect.bottom;
     }
     return _chartRect = Rect.fromLTRB(
       drawableRect.left + padding.left,

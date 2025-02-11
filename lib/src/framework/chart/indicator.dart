@@ -14,6 +14,8 @@
 
 library indicator;
 
+import 'dart:math' as math;
+
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';

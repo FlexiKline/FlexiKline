@@ -151,7 +151,6 @@ mixin SettingBinding on KlineBindingBase
       case AdaptLayoutMode():
         _layoutMode = _layoutMode.adaptMode(size.width, size.height);
       case FixedLayoutMode():
-      case ZoomLayoutMode():
     }
     final changed = mainPaintObject.doUpdateLayout(size: size);
     _invokeSizeChanged(force: changed);
@@ -213,10 +212,6 @@ mixin SettingBinding on KlineBindingBase
     return true;
   }
 
-  bool setZoomLayoutMode() {
-    return true;
-  }
-
   @protected
   double get subRectHeight {
     double totalHeight = 0.0;
@@ -227,15 +222,7 @@ mixin SettingBinding on KlineBindingBase
   }
 
   /// 主图区域大小
-  Rect get mainChartRect {
-    final mainPadding = mainPaintObject.padding;
-    return Rect.fromLTRB(
-      mainRect.left + mainPadding.left,
-      mainRect.top + mainPadding.top,
-      mainRect.right - mainPadding.right,
-      mainRect.bottom - mainPadding.bottom,
-    );
-  }
+  Rect get mainChartRect => mainPaintObject.chartRect;
 
   /// 主图区域宽.
   double get mainChartWidth => mainChartRect.width;

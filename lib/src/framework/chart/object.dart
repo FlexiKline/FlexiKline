@@ -35,7 +35,9 @@ abstract class IndicatorObject<T extends Indicator>
   double? _tmpHeight;
   double get height => _tmpHeight ?? _indicator.height;
 
-  EdgeInsets get padding => _indicator.padding;
+  EdgeInsets? _tmpPadding;
+  EdgeInsets get padding => _tmpPadding ?? indicator.padding;
+
   PaintMode get paintMode => _indicator.paintMode;
   int get zIndex => _indicator.zIndex;
   dynamic get calcParams => _indicator.calcParam;
@@ -146,7 +148,7 @@ abstract class CandleBasePaintObject<T extends CandleBaseIndicator>
     (_context as StateBinding).moveToInitialPosition();
   }
 
-  bool hitTestStartZoom(Offset position);
+  bool hitTestStartZoom(Offset position) => false;
 
   @override
   T get indicator => _indicator as T;
@@ -172,19 +174,15 @@ final class MainPaintObject<T extends MainPaintObjectIndicator>
   MainPaintObject({
     required super.context,
     required T super.indicator,
-  })  : children = SortableHashSet<PaintObject>.from([]),
-        _initialPadding = indicator.padding;
+  }) : children = SortableHashSet<PaintObject>.from([]);
 
   final SortableHashSet<PaintObject> children;
-  final EdgeInsets _initialPadding;
 
   @override
   T get indicator => _indicator as T;
 
   @override
   int get dataIndex => -1;
-
-  bool get drawBelowTipsArea => indicator.drawBelowTipsArea;
 
   Size? _tmpSize;
   Size get size => _tmpSize ?? indicator.size;

@@ -26,7 +26,6 @@ sealed class LayoutMode {
         height != null ? Size(mainSize.width, height) : mainSize,
         Size(width, height ?? mainSize.height),
       );
-  ZoomLayoutMode zoomMode(Rect rect) => ZoomLayoutMode(mainSize, rect);
 }
 
 /// 正常模式(可自由调节宽高)
@@ -44,12 +43,6 @@ class AdaptLayoutMode extends LayoutMode {
 class FixedLayoutMode extends LayoutMode {
   const FixedLayoutMode(super.mainSize, this.fixedSize);
   final Size fixedSize;
-}
-
-/// 缩放模式(可自由移动图表绘制位置)
-class ZoomLayoutMode extends LayoutMode {
-  const ZoomLayoutMode(super.mainSize, this.mainRect);
-  final Rect mainRect;
 }
 
 /// Setting API
@@ -102,8 +95,11 @@ abstract interface class IDraw {
 abstract interface class IPaintContext implements IStorage, ILogger {
   IFlexiKlineTheme get theme;
 
-  // 是否是正常布局模式
+  /// 是否是正常布局模式
   LayoutMode get layoutMode;
+
+  /// 指标图是否已开始缩放
+  bool get isStartZoomChart;
 
   /// 当前canvas绘制区域第一根蜡烛绘制的偏移量
   double get startCandleDx;

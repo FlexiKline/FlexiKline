@@ -53,9 +53,6 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
   /// 长按监听数据
   GestureData? _longData;
 
-  /// 缩放监听数据
-  GestureData? _zoomData;
-
   /// 是否已清理过手势竞技场(解决手势冲突), 避免重复操作.
   bool isSweeped = false;
 

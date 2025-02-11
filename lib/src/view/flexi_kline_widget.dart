@@ -23,9 +23,15 @@ import '../utils/platform_util.dart';
 import 'non_touch_gesture_detector.dart';
 import 'touch_gesture_detector.dart';
 
-typedef MagnifierDecorationShapBuilder = ShapeBorder Function(
+typedef MagnifierDecorationShapeBuilder = ShapeBorder Function(
   BuildContext context,
   BorderSide side,
+);
+
+typedef ExitZoomWidgetBuilder = Widget Function(
+  BuildContext context,
+  Rect mainRect,
+  VoidCallback exitZoomCallback,
 );
 
 class FlexiKlineWidget extends StatefulWidget {
@@ -43,7 +49,8 @@ class FlexiKlineWidget extends StatefulWidget {
     this.onDoubleTap,
     this.drawToolbar,
     this.drawToolbarInitHeight = 50,
-    this.magnifierDecorationShapBuilder,
+    this.magnifierDecorationShapeBuilder,
+    this.exitZoomButtonBuilder,
   })  : isTouchDevice = isTouchDevice ?? PlatformUtil.isTouch,
         autoAdaptLayout = autoAdaptLayout ?? !PlatformUtil.isMobile;
 
@@ -83,7 +90,10 @@ class FlexiKlineWidget extends StatefulWidget {
   final bool isTouchDevice;
 
   /// 绘制点指针放大镜DecorationShape.
-  final MagnifierDecorationShapBuilder? magnifierDecorationShapBuilder;
+  final MagnifierDecorationShapeBuilder? magnifierDecorationShapeBuilder;
+
+  /// 退出指标缩放按钮
+  final ExitZoomWidgetBuilder? exitZoomButtonBuilder;
 
   @override
   State<FlexiKlineWidget> createState() => _FlexiKlineWidgetState();
@@ -92,7 +102,7 @@ class FlexiKlineWidget extends StatefulWidget {
 class _FlexiKlineWidgetState extends State<FlexiKlineWidget>
     with WidgetsBindingObserver, KlineLog {
   @override
-  String get logTag => 'KlineView';
+  String get logTag => 'FlexiKlineWidget';
 
   /// 绘制工具条globalKey: 用于获取其大小
   final GlobalKey _drawToolbarKey = GlobalKey();
@@ -179,6 +189,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget>
   Widget _buildKlineContainer(BuildContext context) {
     final canvasRect = controller.canvasRect;
     final canvasSize = canvasRect.size;
+    final mainRect = controller.mainRect;
     return Container(
       alignment: widget.alignment,
       width: canvasRect.width,
@@ -190,7 +201,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget>
           if (widget.mainBackgroundView != null)
             Positioned.fromRect(
               key: const ValueKey('MainBackground'),
-              rect: controller.mainRect,
+              rect: mainRect,
               child: widget.mainBackgroundView!,
             ),
           RepaintBoundary(
@@ -231,9 +242,10 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget>
                   onDoubleTap: widget.onDoubleTap,
                 ),
           _buildMagnifier(context, canvasRect),
+          _buildZoomButton(context, mainRect),
           _buildDrawToolbar(context, canvasRect),
           Positioned.fromRect(
-            rect: controller.mainRect,
+            rect: mainRect,
             child: _buildMainForgroundView(context),
           ),
         ],
@@ -368,7 +380,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget>
               decoration: MagnifierDecoration(
                 opacity: config.decorationOpactity,
                 shadows: config.decorationShadows,
-                shape: widget.magnifierDecorationShapBuilder?.call(
+                shape: widget.magnifierDecorationShapeBuilder?.call(
                       context,
                       config.shapeSide.copyWith(color: theme.gridLine),
                     ) ??
@@ -381,6 +393,45 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget>
               magnificationScale: config.magnificationScale,
             ),
           ),
+        );
+      },
+    );
+  }
+
+  /// 退出Zoom缩放按钮
+  Widget _buildZoomButton(BuildContext context, Rect mainRect) {
+    return ValueListenableBuilder(
+      valueListenable: controller.chartZoomListener,
+      builder: (context, isZomming, child) {
+        return Visibility(
+          visible: isZomming,
+          child: widget.exitZoomButtonBuilder?.call(
+                context,
+                mainRect,
+                controller.exitChartZoom,
+              ) ??
+              Container(
+                width: mainRect.width,
+                height: mainRect.height,
+                alignment: AlignmentDirectional.bottomEnd,
+                padding: EdgeInsets.all(12),
+                child: IconButton(
+                  onPressed: controller.exitChartZoom,
+                  constraints: const BoxConstraints(),
+                  style: IconButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    fixedSize: Size(20, 20),
+                    foregroundColor: theme.tooltipTextColor,
+                    backgroundColor: theme.tooltipBg.withValues(alpha: 0.8),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    side: BorderSide(color: theme.gridLine, width: 1),
+                  ),
+                  icon: Text('A', style: TextStyle(fontSize: 12)),
+                ),
+              ),
         );
       },
     );
@@ -416,19 +467,15 @@ class ChartPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     Timeline.startSync("Flexi-PaintChart");
 
-    try {
-      /// 保存画布状态
-      canvas.save();
-
-      canvas.clipRect(controller.canvasRect);
-
-      controller.calculateCandleDrawIndex();
-
-      controller.paintChart(canvas, size);
-    } finally {
-      /// 恢复画布状态
-      canvas.restore();
-    }
+    // try {
+    //   /// 保存画布状态
+    //   canvas.save();
+    //   canvas.clipRect(controller.canvasRect);
+    controller.paintChart(canvas, size);
+    // } finally {
+    //   /// 恢复画布状态
+    //   canvas.restore();
+    // }
 
     Timeline.finishSync();
   }
@@ -479,7 +526,14 @@ class CrossPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    controller.paintCross(canvas, size);
+    try {
+      canvas.save();
+      canvas.clipRect(controller.canvasRect);
+
+      controller.paintCross(canvas, size);
+    } finally {
+      canvas.restore();
+    }
   }
 
   @override

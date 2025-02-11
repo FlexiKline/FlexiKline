@@ -75,6 +75,12 @@ mixin CrossBinding on KlineBindingBase, SettingBinding implements ICross {
     _crosspoint = null;
   }
 
+  @override
+  void onLanguageChanged() {
+    super.onLanguageChanged();
+    markRepaintCross();
+  }
+
   // 是否正在绘制Cross
   @override
   bool get isCrossing => crossOffset?.isFinite == true;
@@ -276,7 +282,9 @@ mixin CrossBinding on KlineBindingBase, SettingBinding implements ICross {
 
     /// 开始绘制
     double top = tooltipConfig.margin.top;
-    if (mainPaintObject.drawBelowTipsArea) {
+    if (isStartZoomChart) {
+      top += mainPaintObject.indicator.padding.top;
+    } else {
       top += mainPaintObject.padding.top;
     }
 

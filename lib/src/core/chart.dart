@@ -49,14 +49,15 @@ mixin ChartBinding
   }
 
   final ValueNotifier<int> _repaintChart = ValueNotifier(0);
-  final _chartZoomingListener = ValueNotifier<bool>(false);
-  ValueListenable<bool> get chartZoomingListener => _chartZoomingListener;
+  final _chartZoomListener = ValueNotifier<bool>(false);
+  ValueListenable<bool> get chartZoomListener => _chartZoomListener;
   Listenable get repaintChart => _repaintChart;
   void _markRepaintChart() {
     _repaintChart.value++;
   }
 
-  bool get isStartZoomChart => chartZoomingListener.value;
+  @override
+  bool get isStartZoomChart => chartZoomListener.value;
 
   //// Latest Price ////
   Timer? _lastPriceCountDownTimer;
@@ -106,14 +107,24 @@ mixin ChartBinding
       return;
     }
 
+    calculateCandleDrawIndex();
     int solt = mainIndicatorSlot;
-    mainPaintObject.doInitState(
-      solt++,
-      start: curKlineData.start,
-      end: curKlineData.end,
-      reset: _reset,
-    );
-    mainPaintObject.doPaintChart(canvas, size);
+
+    try {
+      /// 保存画布状态
+      canvas.save();
+      canvas.clipRect(mainRect);
+      mainPaintObject.doInitState(
+        solt++,
+        start: curKlineData.start,
+        end: curKlineData.end,
+        reset: _reset,
+      );
+      mainPaintObject.doPaintChart(canvas, size);
+    } finally {
+      /// 恢复画布状态
+      canvas.restore();
+    }
 
     for (var paintObject in subPaintObjects) {
       /// 初始化副区指标数据.
@@ -206,8 +217,6 @@ mixin ChartBinding
 
   /// 蜡烛图缩放中...
   void onChartScale(GestureData data) {
-    // super.handleScale(data);
-
     double? newWidth;
 
     if (data.scaled) {
@@ -231,7 +240,7 @@ mixin ChartBinding
     if (newWidth == null || newWidth == candleWidth) return;
 
     final scaleFactor = (newWidth + candleSpacing) / candleActualWidth;
-    // logd('handleScale candleWidth:$candleWidth>$newWidth; factor:$scaleFactor');
+    // logd('onChartScale candleWidth:$candleWidth>$newWidth; factor:$scaleFactor');
 
     /// 更新蜡烛宽度
     _setCandleWidth(newWidth);
@@ -275,20 +284,46 @@ mixin ChartBinding
     _setCandleWidth(candleWidth, sync: true);
   }
 
+  /// 退出指标图的缩放
+  void exitChartZoom() {
+    _chartZoomListener.value = false;
+    final changed = mainPaintObject.doUpdateLayout(
+      padding: mainPaintObject.indicator.padding,
+    );
+    markRepaintChart(reset: changed);
+  }
+
+  /// 检测是否开始指标图缩放
   bool onChartZoomStart(Offset position) {
     final isStart = candlePaintObject.hitTestStartZoom(position);
-    _chartZoomingListener.value = isStart;
+    _chartZoomListener.value = isStart;
     return isStart;
   }
 
+  /// 指标图缩放更新
   void onChartZoomUpdate(GestureData data) {
-    final delta = data.dyDelta;
-    if (delta < 0.1) return;
-    logd('onChartZoomUpdate $data -> $delta');
+    if (mainChartHeight < mainMinSize.height) {
+      logw(
+        'onChartZoomUpdate > cannot zoom, chart heigt($mainChartHeight) is below the minimum height(${mainMinSize.height})',
+      );
+      return;
+    }
+
+    final delta = data.dyDelta / 2;
+    final padding = mainPaintObject.padding;
+    final changed = mainPaintObject.doUpdateLayout(
+      padding: padding.copyWith(
+        top: padding.top + delta,
+        bottom: padding.bottom + delta,
+      ),
+    );
+    markRepaintChart(reset: changed);
   }
 
   void onChartZoomEnd() {
-    _chartZoomingListener.value = false;
+    final isZoom = mainPaintObject.indicator.padding != mainPaintObject.padding;
+    _chartZoomListener.value = isZoom;
+    if (!isZoom) exitChartZoom();
   }
 
   @override

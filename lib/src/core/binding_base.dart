@@ -73,6 +73,12 @@ abstract class KlineBindingBase
 
   @protected
   @mustCallSuper
+  void onLanguageChanged() {
+    logd("onLanguageChanged base");
+  }
+
+  @protected
+  @mustCallSuper
   bool onTap(Offset position) {
     logd("onTap base");
     return false;
