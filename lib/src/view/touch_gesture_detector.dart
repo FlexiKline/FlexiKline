@@ -28,13 +28,16 @@ class TouchGestureDetector extends StatefulWidget {
   const TouchGestureDetector({
     super.key,
     required this.controller,
+    required this.canvasSize,
     this.onDoubleTap,
-    this.child,
+    // this.child,
   });
 
   final FlexiKlineController controller;
   final GestureTapCallback? onDoubleTap;
-  final Widget? child;
+  final Size canvasSize;
+  // @Deprecated('无用, 会影响手势响应范围')
+  // final Widget? child;
 
   @override
   State<TouchGestureDetector> createState() => _TouchGestureDetectorState();
@@ -46,6 +49,12 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
 
   /// 平移/缩放监听数据
   GestureData? _panScaleData;
+
+  /// 缩放主区图表事件监听数据
+  GestureData? _zoomData;
+
+  /// 移动图表监听数据
+  GestureData? _moveData;
 
   /// Cross平移/触发/监听数据
   GestureData? _tapData;
@@ -65,6 +74,8 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
 
   DrawState get drawState => controller.drawState;
 
+  Rect get mainRect => controller.mainRect;
+
   @override
   void initState() {
     super.initState();
@@ -82,7 +93,7 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
     return Listener(
       key: const ValueKey('TouchListener'),
       behavior: HitTestBehavior.translucent,
-      // onPointerDown: onPointerDown,
+      onPointerDown: onPointerDown,
       onPointerMove: onPointerMove,
       onPointerUp: onPointerUp,
       onPointerCancel: onPointerCancel,
@@ -106,12 +117,45 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
         onLongPressEnd: onLongPressEnd,
 
         /// 子组件
-        child: widget.child,
+        child: SizedBox(
+          width: widget.canvasSize.width,
+          height: widget.canvasSize.height,
+          child: ValueListenableBuilder(
+            valueListenable: controller.chartZoomSlideBarRectListener,
+            builder: (context, rect, child) => Stack(
+              children: [
+                Positioned.fromRect(
+                  rect: rect,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onVerticalDragDown: onVerticalDragDown,
+                    onVerticalDragStart: onVerticalDragStart,
+                    onVerticalDragUpdate: onVerticalDragUpdate,
+                    onVerticalDragEnd: onVerticalDragEnd,
+                    onVerticalDragCancel: onVerticalDragEnd,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
 
-  // void onPointerDown(PointerDownEvent event) {}
+  void onPointerDown(PointerDownEvent event) {
+    final position = event.localPosition;
+    if (controller.isDrawVisibility && drawState.isOngoing) {
+      // TODO: 优化Drawing的处理
+    } else if (controller.isCrossing) {
+      // TODO: 优化Crossing的处理
+    } else if (_zoomData == null &&
+        controller.isStartZoomChart &&
+        mainRect.include(position)) {
+      logd("onPointerDown position:$position");
+      _moveData = GestureData.move(position);
+    }
+  }
 
   /// 原始移动
   /// 当原始移动时, 当前如果正处在crossing或drawing中时, 发生冲突, 清理手势竞技场, 响应Cross/Draw指针平移事件
@@ -158,6 +202,17 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
         newOffset = newOffset.clamp(canvasRect);
       }
       controller.onCrossUpdate(_tapData!..update(newOffset));
+    } else if (controller.isStartZoomChart && _moveData != null) {
+      if (!isSweeped) {
+        logi(
+          'onPointerMove currently in zooming, need clear the gesture arena!',
+        );
+        isSweeped = true;
+        GestureBinding.instance.gestureArena.sweep(event.pointer);
+      }
+
+      Offset newOffset = _moveData!.offset + event.delta;
+      controller.onChartMove(_moveData!..update(newOffset));
     }
   }
 
@@ -165,12 +220,14 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
     if (isSweeped) {
       isSweeped = false;
     }
+    _moveData = null;
   }
 
   void onPointerCancel(PointerCancelEvent event) {
     if (isSweeped) {
       isSweeped = false;
     }
+    _moveData = null;
   }
 
   /// 点击
@@ -468,9 +525,6 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
         controller.onGridMoveStart(details.localPosition)) {
       logd("onLongPressStart move > details:$details");
       _longData = GestureData.long(details.localPosition);
-    } else if (controller.onChartZoomStart(details.localPosition)) {
-      logd("onLongPressStart zoom > details:$details");
-      _longData = GestureData.long(details.localPosition);
     } else {
       logd("onLongPressStart cross > details:$details");
       _longData = GestureData.long(details.localPosition);
@@ -496,9 +550,6 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
     } else if (controller.isStartDragGrid) {
       _longData!.update(details.localPosition);
       controller.onGridMoveUpdate(_longData!);
-    } else if (controller.isStartZoomChart) {
-      _longData!.update(details.localPosition);
-      controller.onChartZoomUpdate(_longData!);
     } else {
       _longData!.update(details.localPosition);
       controller.onCrossUpdate(_longData!);
@@ -518,13 +569,39 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
       controller.onDrawMoveEnd();
     } else if (controller.isStartDragGrid) {
       controller.onGridMoveEnd();
-    } else if (controller.isStartZoomChart) {
-      controller.onChartZoomEnd();
     } else {
       // 长按结束, 尝试取消Cross事件.
       controller.cancelCross();
     }
     _longData?.end();
     _longData = null;
+  }
+
+  void onVerticalDragDown(DragDownDetails details) {
+    if (controller.onChartZoomStart(details.localPosition)) {
+      logd("onVerticalDragDown zoom > details:$details");
+      _zoomData = GestureData.zoom(details.localPosition);
+    }
+  }
+
+  void onVerticalDragStart(DragStartDetails details) {
+    if (controller.onChartZoomStart(details.localPosition)) {
+      logd("onVerticalDragStart zoom > details:$details");
+      _zoomData = GestureData.zoom(details.localPosition);
+    }
+  }
+
+  void onVerticalDragUpdate(DragUpdateDetails details) {
+    if (_zoomData == null) return;
+    logd('onVerticalDragUpdate $details');
+    _zoomData!.update(details.localPosition);
+    controller.onChartZoomUpdate(_zoomData!);
+  }
+
+  void onVerticalDragEnd([DragEndDetails? details]) {
+    logd('onVerticalDragEnd $details');
+    controller.onChartZoomEnd();
+    _zoomData?.end();
+    _zoomData = null;
   }
 }

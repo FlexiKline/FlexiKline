@@ -36,6 +36,8 @@ mixin ChartBinding
     super.dispose();
     logd('dispose indicator');
     _repaintChart.dispose();
+    _isChartStartZoom.dispose();
+    _chartZoomSlideBarRect.dispose();
     _lastPriceCountDownTimer?.cancel();
     _lastPriceCountDownTimer = null;
   }
@@ -49,15 +51,22 @@ mixin ChartBinding
   }
 
   final ValueNotifier<int> _repaintChart = ValueNotifier(0);
-  final _chartZoomListener = ValueNotifier<bool>(false);
-  ValueListenable<bool> get chartZoomListener => _chartZoomListener;
+  final _isChartStartZoom = ValueNotifier<bool>(false);
+  final _chartZoomSlideBarRect = ValueNotifier(Rect.zero);
+
   Listenable get repaintChart => _repaintChart;
   void _markRepaintChart() {
     _repaintChart.value++;
   }
 
+  ValueListenable<bool> get chartStartZoomListener => _isChartStartZoom;
+
   @override
-  bool get isStartZoomChart => chartZoomListener.value;
+  bool get isStartZoomChart => chartStartZoomListener.value;
+
+  ValueListenable<Rect> get chartZoomSlideBarRectListener {
+    return _chartZoomSlideBarRect;
+  }
 
   //// Latest Price ////
   Timer? _lastPriceCountDownTimer;
@@ -207,9 +216,26 @@ mixin ChartBinding
     // super.handleMove(data);
     if (!data.moved) return;
 
+    bool changed = false;
     final newDxOffset = clampPaintDxOffset(paintDxOffset + data.dxDelta);
     if (newDxOffset != paintDxOffset) {
       paintDxOffset = newDxOffset;
+      changed = true;
+    }
+
+    double dyDelta;
+    if (data.isMove && (dyDelta = data.dyDelta) != 0) {
+      final padding = mainPaintObject.padding;
+      changed = mainPaintObject.doUpdateLayout(
+            padding: padding.copyWith(
+              top: padding.top + dyDelta,
+              bottom: padding.bottom - dyDelta,
+            ),
+          ) ||
+          changed;
+    }
+
+    if (changed) {
       markRepaintChart();
       markRepaintDraw();
     }
@@ -286,30 +312,39 @@ mixin ChartBinding
 
   /// 退出指标图的缩放
   void exitChartZoom() {
-    _chartZoomListener.value = false;
+    _isChartStartZoom.value = false;
     final changed = mainPaintObject.doUpdateLayout(
       padding: mainPaintObject.indicator.padding,
     );
     markRepaintChart(reset: changed);
   }
 
+  /// 设置指标图中用于缩放操作的滑竿区域
+  /// 注: 此区域是相对于mainRect
+  void setChartZoomSlideBarRect(Rect rect) {
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _chartZoomSlideBarRect.value = rect;
+    });
+  }
+
   /// 检测是否开始指标图缩放
   bool onChartZoomStart(Offset position) {
-    final isStart = candlePaintObject.hitTestStartZoom(position);
-    _chartZoomListener.value = isStart;
-    return isStart;
+    final slideBarRect = _chartZoomSlideBarRect.value;
+    if (slideBarRect.isEmpty) return false;
+    position += Offset(mainRect.right - slideBarRect.width, mainRect.top);
+    return _isChartStartZoom.value = slideBarRect.include(position);
   }
 
   /// 指标图缩放更新
   void onChartZoomUpdate(GestureData data) {
-    if (mainChartHeight < mainMinSize.height) {
+    final delta = data.dyDelta / 2;
+    if (mainChartHeight < mainMinSize.height && delta >= 0) {
       logw(
-        'onChartZoomUpdate > cannot zoom, chart heigt($mainChartHeight) is below the minimum height(${mainMinSize.height})',
+        'onChartZoomUpdate > cannot zoom($delta), chart heigt($mainChartHeight) is below the minimum height(${mainMinSize.height})',
       );
       return;
     }
 
-    final delta = data.dyDelta / 2;
     final padding = mainPaintObject.padding;
     final changed = mainPaintObject.doUpdateLayout(
       padding: padding.copyWith(
@@ -317,12 +352,15 @@ mixin ChartBinding
         bottom: padding.bottom + delta,
       ),
     );
-    markRepaintChart(reset: changed);
+    if (changed) {
+      markRepaintChart();
+      markRepaintDraw();
+    }
   }
 
   void onChartZoomEnd() {
     final isZoom = mainPaintObject.indicator.padding != mainPaintObject.padding;
-    _chartZoomListener.value = isZoom;
+    _isChartStartZoom.value = isZoom;
     if (!isZoom) exitChartZoom();
   }
 

@@ -34,8 +34,14 @@ enum GestureType {
   /// 平移事件, 触摸设备手指在屏幕上滑动/非触摸设备指针按住平移.
   pan,
 
-  /// 缩放事件, 触摸设备上, 双指开合缩放.
+  /// 按比例缩放事件, 触摸设备上, 双指开合缩放.
   scale,
+
+  /// 缩放事件
+  zoom,
+
+  /// 移动图表位置事件, 触摸设备上, 移动指标图绘制位置.
+  move,
 
   /// Croos平移事件, 非触摸设备(鼠标或触摸板)的指针移入Kline图表的Croos平移.
   hover,
@@ -71,6 +77,12 @@ class GestureData {
 
   GestureData.pan(Offset offset)
       : this._internal(offset: offset, type: GestureType.pan);
+
+  GestureData.move(Offset offset)
+      : this._internal(offset: offset, type: GestureType.move);
+
+  GestureData.zoom(Offset offset)
+      : this._internal(offset: offset, type: GestureType.zoom);
 
   GestureData.scale(
     Offset offset, {
@@ -138,8 +150,10 @@ class GestureData {
 
   bool get isPan => type == GestureType.pan;
 
+  bool get isMove => type == GestureType.move;
+
   /// 是否平移
-  bool get moved => isPan && offset != prevOffset;
+  bool get moved => (isPan || isMove) && offset != prevOffset;
 
   bool get isScale => type == GestureType.scale;
 

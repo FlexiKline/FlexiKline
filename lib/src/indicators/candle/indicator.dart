@@ -234,7 +234,7 @@ class CandlePaintObject<T extends CandleIndicator>
     );
   }
 
-  /// 缓存价钱刻度文本区域大小
+  /// 缓存价钱刻度文本区域大小, 用于定位缩放拖拽条区域
   Size? _priceTicksTextSize;
 
   /// 绘制蜡烛图右侧价钱刻度
@@ -257,7 +257,7 @@ class CandlePaintObject<T extends CandleIndicator>
 
       final ticksText = defTicksTextConfig;
 
-      _priceTicksTextSize = canvas.drawTextArea(
+      final size = canvas.drawTextArea(
         offset: Offset(
           dx,
           dy - ticksText.areaHeight, // 绘制在刻度线之上
@@ -267,6 +267,15 @@ class CandlePaintObject<T extends CandleIndicator>
         text: text,
         textConfig: ticksText,
       );
+      if (size != _priceTicksTextSize) {
+        _priceTicksTextSize = size;
+        updateZoomSlideBarRect(Rect.fromLTWH(
+          drawableRect.right - size.width,
+          drawableRect.top,
+          size.width,
+          drawableRect.height,
+        ));
+      }
     }
   }
 
@@ -533,17 +542,5 @@ class CandlePaintObject<T extends CandleIndicator>
       return true;
     }
     return false;
-  }
-
-  @override
-  bool hitTestStartZoom(Offset position) {
-    if (_priceTicksTextSize == null) return false;
-    final priceTicksRect = Rect.fromLTWH(
-      chartRect.right - _priceTicksTextSize!.width,
-      chartRect.top,
-      _priceTicksTextSize!.width,
-      chartRect.height,
-    );
-    return priceTicksRect.include(position);
   }
 }

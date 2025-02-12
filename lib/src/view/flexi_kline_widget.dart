@@ -28,12 +28,6 @@ typedef MagnifierDecorationShapeBuilder = ShapeBorder Function(
   BorderSide side,
 );
 
-typedef ExitZoomWidgetBuilder = Widget Function(
-  BuildContext context,
-  Rect mainRect,
-  VoidCallback exitZoomCallback,
-);
-
 class FlexiKlineWidget extends StatefulWidget {
   FlexiKlineWidget({
     super.key,
@@ -51,6 +45,8 @@ class FlexiKlineWidget extends StatefulWidget {
     this.drawToolbarInitHeight = 50,
     this.magnifierDecorationShapeBuilder,
     this.exitZoomButtonBuilder,
+    this.exitZoomButtonAlignment = AlignmentDirectional.bottomEnd,
+    this.exitZoomButtonPadding = const EdgeInsetsDirectional.all(12),
   })  : isTouchDevice = isTouchDevice ?? PlatformUtil.isTouch,
         autoAdaptLayout = autoAdaptLayout ?? !PlatformUtil.isMobile;
 
@@ -92,8 +88,14 @@ class FlexiKlineWidget extends StatefulWidget {
   /// 绘制点指针放大镜DecorationShape.
   final MagnifierDecorationShapeBuilder? magnifierDecorationShapeBuilder;
 
-  /// 退出指标缩放按钮
-  final ExitZoomWidgetBuilder? exitZoomButtonBuilder;
+  /// 自定义退出指标缩放按钮
+  final WidgetBuilder? exitZoomButtonBuilder;
+
+  /// 退出指标缩放按钮Alignment
+  final AlignmentGeometry exitZoomButtonAlignment;
+
+  /// 缩放按钮Padding
+  final EdgeInsetsGeometry exitZoomButtonPadding;
 
   @override
   State<FlexiKlineWidget> createState() => _FlexiKlineWidgetState();
@@ -234,6 +236,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget>
               ? TouchGestureDetector(
                   key: const ValueKey('TouchGestureDetector'),
                   controller: controller,
+                  canvasSize: canvasSize,
                   onDoubleTap: widget.onDoubleTap,
                 )
               : NonTouchGestureDetector(
@@ -242,7 +245,10 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget>
                   onDoubleTap: widget.onDoubleTap,
                 ),
           _buildMagnifier(context, canvasRect),
-          _buildZoomButton(context, mainRect),
+          Positioned.fromRect(
+            rect: mainRect,
+            child: _buildExitZoomButton(context, mainRect),
+          ),
           _buildDrawToolbar(context, canvasRect),
           Positioned.fromRect(
             rect: mainRect,
@@ -399,41 +405,33 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget>
   }
 
   /// 退出Zoom缩放按钮
-  Widget _buildZoomButton(BuildContext context, Rect mainRect) {
+  Widget _buildExitZoomButton(BuildContext context, Rect mainRect) {
     return ValueListenableBuilder(
-      valueListenable: controller.chartZoomListener,
-      builder: (context, isZomming, child) {
-        return Visibility(
-          visible: isZomming,
-          child: widget.exitZoomButtonBuilder?.call(
-                context,
-                mainRect,
-                controller.exitChartZoom,
-              ) ??
-              Container(
-                width: mainRect.width,
-                height: mainRect.height,
-                alignment: AlignmentDirectional.bottomEnd,
-                padding: EdgeInsets.all(12),
-                child: IconButton(
-                  onPressed: controller.exitChartZoom,
-                  constraints: const BoxConstraints(),
-                  style: IconButton.styleFrom(
-                    padding: EdgeInsets.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    fixedSize: Size(20, 20),
-                    foregroundColor: theme.tooltipTextColor,
-                    backgroundColor: theme.tooltipBg.withValues(alpha: 0.8),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    side: BorderSide(color: theme.gridLine, width: 1),
+      valueListenable: controller.chartStartZoomListener,
+      builder: (context, isStartZomming, child) => Visibility(
+        visible: isStartZomming,
+        child: Container(
+          alignment: widget.exitZoomButtonAlignment,
+          padding: widget.exitZoomButtonPadding,
+          child: widget.exitZoomButtonBuilder?.call(context) ??
+              IconButton(
+                onPressed: controller.exitChartZoom,
+                constraints: const BoxConstraints(),
+                style: IconButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  fixedSize: Size(20, 20),
+                  foregroundColor: theme.tooltipTextColor,
+                  backgroundColor: theme.tooltipBg.withOpacity(0.8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
                   ),
-                  icon: Text('A', style: TextStyle(fontSize: 12)),
+                  side: BorderSide(color: theme.gridLine, width: 1),
                 ),
+                icon: Text('A', style: TextStyle(fontSize: 12)),
               ),
-        );
-      },
+        ),
+      ),
     );
   }
 }

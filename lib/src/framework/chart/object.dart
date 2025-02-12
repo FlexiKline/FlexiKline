@@ -148,7 +148,9 @@ abstract class CandleBasePaintObject<T extends CandleBaseIndicator>
     (_context as StateBinding).moveToInitialPosition();
   }
 
-  bool hitTestStartZoom(Offset position) => false;
+  void updateZoomSlideBarRect(Rect rect) {
+    (_context as ChartBinding).setChartZoomSlideBarRect(rect);
+  }
 
   @override
   T get indicator => _indicator as T;
