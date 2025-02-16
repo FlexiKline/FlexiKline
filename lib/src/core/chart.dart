@@ -225,11 +225,10 @@ mixin ChartBinding
 
     double dyDelta;
     if (data.isMove && (dyDelta = data.dyDelta) != 0) {
-      final padding = mainPaintObject.padding;
       changed = mainPaintObject.doUpdateLayout(
-            padding: padding.copyWith(
-              top: padding.top + dyDelta,
-              bottom: padding.bottom - dyDelta,
+            padding: mainPadding.copyWith(
+              top: mainPadding.top + dyDelta,
+              bottom: mainPadding.bottom - dyDelta,
             ),
           ) ||
           changed;
@@ -314,7 +313,7 @@ mixin ChartBinding
   void exitChartZoom() {
     _isChartStartZoom.value = false;
     final changed = mainPaintObject.doUpdateLayout(
-      padding: mainPaintObject.indicator.padding,
+      padding: mainOriginPadding,
     );
     markRepaintChart(reset: changed);
   }
@@ -331,25 +330,28 @@ mixin ChartBinding
   bool onChartZoomStart(Offset position) {
     final slideBarRect = _chartZoomSlideBarRect.value;
     if (slideBarRect.isEmpty) return false;
-    position += Offset(mainRect.right - slideBarRect.width, mainRect.top);
+    position += slideBarRect.topLeft;
     return _isChartStartZoom.value = slideBarRect.include(position);
   }
 
   /// 指标图缩放更新
   void onChartZoomUpdate(GestureData data) {
     final delta = data.dyDelta / 2;
-    if (mainChartHeight < mainMinSize.height && delta >= 0) {
+    if (delta == 0) return;
+    if (delta > 0 &&
+        (!canSetMainSize() ||
+            (mainChartHeight + mainOriginPadding.height) <
+                mainMinSize.height)) {
       logw(
-        'onChartZoomUpdate > cannot zoom($delta), chart heigt($mainChartHeight) is below the minimum height(${mainMinSize.height})',
+        'onChartZoomUpdate > cannot zoom($delta), mainSize:$mainSize is smaller than the minSize:$mainMinSize)',
       );
       return;
     }
 
-    final padding = mainPaintObject.padding;
     final changed = mainPaintObject.doUpdateLayout(
-      padding: padding.copyWith(
-        top: padding.top + delta,
-        bottom: padding.bottom + delta,
+      padding: mainPadding.copyWith(
+        top: mainPadding.top + delta,
+        bottom: mainPadding.bottom + delta,
       ),
     );
     if (changed) {
@@ -359,9 +361,9 @@ mixin ChartBinding
   }
 
   void onChartZoomEnd() {
-    final isZoom = mainPaintObject.indicator.padding != mainPaintObject.padding;
-    _isChartStartZoom.value = isZoom;
-    if (!isZoom) exitChartZoom();
+    if (mainOriginPadding == mainPadding) {
+      exitChartZoom();
+    }
   }
 
   @override

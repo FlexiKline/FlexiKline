@@ -64,8 +64,11 @@ mixin SettingBinding on KlineBindingBase
   void _invokeSizeChanged({bool force = false}) {
     if (_layoutMode is FixedLayoutMode) {
       final size = mainRect.size;
-      if (size != mainPaintObject.size) {
-        final updated = mainPaintObject.doUpdateLayout(size: size);
+      if (size != mainSize) {
+        final updated = mainPaintObject.doUpdateLayout(
+          size: size,
+          padding: _scaleMainPaddingByMainSize(size.height / mainSize.height),
+        );
         force = updated || force;
       }
     }
@@ -138,13 +141,30 @@ mixin SettingBinding on KlineBindingBase
     return timePaintObject.drawableRect;
   }
 
+  /// 如果已是zoom缩放图表时, 需要按比例[scale]缩放Padding.
+  EdgeInsets? _scaleMainPaddingByMainSize(double scale) {
+    if (!isStartZoomChart) return null;
+    return mainPadding.copyWith(
+      top: mainPadding.top * scale,
+      bottom: mainPadding.bottom * scale,
+    );
+  }
+
   /// 主区域最小宽高
   Size get mainMinSize => settingConfig.mainMinSize;
 
+  /// 主区域当前大小
+  Size get mainSize => mainPaintObject.size;
+
+  /// 是否能设置主区域大小
+  bool canSetMainSize([Size? size]) {
+    return (size ?? mainSize) > mainMinSize;
+    // todo: 有小误差(0.12)
+  }
+
   /// 主区域大小设置
   bool setMainSize(Size size) {
-    if (!(size > mainMinSize)) return false;
-    if (size == mainPaintObject.size) return false;
+    if (!canSetMainSize(size) || size == mainSize) return false;
     switch (_layoutMode) {
       case NormalLayoutMode():
         _layoutMode = _layoutMode.normalMode(size);
@@ -152,7 +172,10 @@ mixin SettingBinding on KlineBindingBase
         _layoutMode = _layoutMode.adaptMode(size.width, size.height);
       case FixedLayoutMode():
     }
-    final changed = mainPaintObject.doUpdateLayout(size: size);
+    final changed = mainPaintObject.doUpdateLayout(
+      size: size,
+      padding: _scaleMainPaddingByMainSize(size.height / mainSize.height),
+    );
     _invokeSizeChanged(force: changed);
     return true;
   }
@@ -188,8 +211,11 @@ mixin SettingBinding on KlineBindingBase
       );
     }
     _layoutMode = _layoutMode.normalMode(size);
-    if (size == mainPaintObject.size) return;
-    final changed = mainPaintObject.doUpdateLayout(size: _layoutMode.mainSize);
+    if (size == mainSize) return;
+    final changed = mainPaintObject.doUpdateLayout(
+      size: size,
+      padding: _scaleMainPaddingByMainSize(size.height / mainSize.height),
+    );
     // 将所有副区对象恢复正常布局下的高度.
     _paintObjectManager.restoreHeight();
     _invokeSizeChanged(force: changed);
@@ -200,14 +226,18 @@ mixin SettingBinding on KlineBindingBase
   /// [size] 当前Kline主区+副区的大小.
   /// 注: 设置是临时的, 并不会更新到配置中.
   bool setFixedLayoutMode(Size size) {
-    if (!(size > mainMinSize)) return false;
+    if (!canSetMainSize(size)) return false;
     if (_layoutMode is FixedLayoutMode &&
         (_layoutMode as FixedLayoutMode).fixedSize == size) {
       return true;
     }
 
+    final oldMainHeight = mainRect.height;
     _layoutMode = _layoutMode.fixedMode(size);
-    final changed = mainPaintObject.doUpdateLayout(size: mainRect.size);
+    final changed = mainPaintObject.doUpdateLayout(
+      size: mainRect.size,
+      padding: _scaleMainPaddingByMainSize(mainRect.height / oldMainHeight),
+    );
     _invokeSizeChanged(force: changed);
     return true;
   }
@@ -220,6 +250,12 @@ mixin SettingBinding on KlineBindingBase
     }
     return totalHeight;
   }
+
+  /// 主区当前Padding
+  EdgeInsets get mainPadding => mainPaintObject.padding;
+
+  /// 主区原始配置Padding
+  EdgeInsets get mainOriginPadding => mainPaintObject.indicator.padding;
 
   /// 主图区域大小
   Rect get mainChartRect => mainPaintObject.chartRect;

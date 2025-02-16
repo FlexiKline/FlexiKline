@@ -110,9 +110,9 @@ extension on KlineBindingBase {
     return _paintObjectManager.mainPaintObject;
   }
 
-  CandleBasePaintObject get candlePaintObject {
-    return _paintObjectManager.candlePaintObject;
-  }
+  // CandleBasePaintObject get candlePaintObject {
+  //   return _paintObjectManager.candlePaintObject;
+  // }
 
   TimeBasePaintObject get timePaintObject {
     return _paintObjectManager.timePaintObject;

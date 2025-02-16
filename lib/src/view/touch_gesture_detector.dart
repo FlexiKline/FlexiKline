@@ -74,8 +74,6 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
 
   DrawState get drawState => controller.drawState;
 
-  Rect get mainRect => controller.mainRect;
-
   @override
   void initState() {
     super.initState();
@@ -151,7 +149,7 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
       // TODO: 优化Crossing的处理
     } else if (_zoomData == null &&
         controller.isStartZoomChart &&
-        mainRect.include(position)) {
+        controller.mainRect.include(position)) {
       logd("onPointerDown position:$position");
       _moveData = GestureData.move(position);
     }
@@ -237,7 +235,7 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
         case Drawing():
           final pointerOffset = drawState.pointerOffset;
           if (pointerOffset != null && pointerOffset.isFinite) {
-            logd("onTapUp draw(editing) confirm pointer:$pointerOffset");
+            logd("onTapUp draw(drawing) confirm pointer:$pointerOffset");
             _tapData = GestureData.tap(pointerOffset);
             controller.onDrawConfirm(_tapData!);
             if (drawState.isEditing) {
@@ -587,6 +585,11 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
   void onVerticalDragStart(DragStartDetails details) {
     if (controller.onChartZoomStart(details.localPosition)) {
       logd("onVerticalDragStart zoom > details:$details");
+      if ((controller.isDrawVisibility && drawState.isOngoing) ||
+          controller.isCrossing) {
+        _zoomData = null;
+        return;
+      }
       _zoomData = GestureData.zoom(details.localPosition);
     }
   }
