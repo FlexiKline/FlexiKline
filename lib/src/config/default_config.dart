@@ -254,6 +254,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       loadMoreWhenNoEnoughCandles: 60,
       scalePosition: ScalePosition.auto,
       scaleSpeed: 10,
+      zoomSpeed: 1,
     );
   }
 
@@ -268,6 +269,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       /// 主区域最小Size
       mainMinSize: Size(120 * theme.scale, 80 * theme.scale),
       subMinHeight: 30 * theme.scale,
+      useCandleTicksAsZoomSlideBar: true,
 
       /// 主/副图绘制参数
       minPaintBlankRate: 0.5,
@@ -486,6 +488,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
             strokeWidth: 0.5 * theme.scale,
           ),
         ),
+        hitTestMargin: 4,
         text: TextAreaConfig(
           style: TextStyle(
             fontSize: theme.normalTextSize,

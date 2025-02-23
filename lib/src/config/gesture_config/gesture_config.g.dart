@@ -24,6 +24,8 @@ abstract class _$GestureConfigCWProxy {
 
   GestureConfig supportKeyboardShortcuts(bool supportKeyboardShortcuts);
 
+  GestureConfig zoomSpeed(int zoomSpeed);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GestureConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -39,6 +41,7 @@ abstract class _$GestureConfigCWProxy {
     ScalePosition scalePosition,
     double scaleSpeed,
     bool supportKeyboardShortcuts,
+    int zoomSpeed,
   });
 }
 
@@ -81,6 +84,9 @@ class _$GestureConfigCWProxyImpl implements _$GestureConfigCWProxy {
       this(supportKeyboardShortcuts: supportKeyboardShortcuts);
 
   @override
+  GestureConfig zoomSpeed(int zoomSpeed) => this(zoomSpeed: zoomSpeed);
+
+  @override
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GestureConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -97,6 +103,7 @@ class _$GestureConfigCWProxyImpl implements _$GestureConfigCWProxy {
     Object? scalePosition = const $CopyWithPlaceholder(),
     Object? scaleSpeed = const $CopyWithPlaceholder(),
     Object? supportKeyboardShortcuts = const $CopyWithPlaceholder(),
+    Object? zoomSpeed = const $CopyWithPlaceholder(),
   }) {
     return GestureConfig(
       supportLongPress: supportLongPress == const $CopyWithPlaceholder()
@@ -134,6 +141,10 @@ class _$GestureConfigCWProxyImpl implements _$GestureConfigCWProxy {
               ? _value.supportKeyboardShortcuts
               // ignore: cast_nullable_to_non_nullable
               : supportKeyboardShortcuts as bool,
+      zoomSpeed: zoomSpeed == const $CopyWithPlaceholder()
+          ? _value.zoomSpeed
+          // ignore: cast_nullable_to_non_nullable
+          : zoomSpeed as int,
     );
   }
 }
@@ -166,6 +177,7 @@ GestureConfig _$GestureConfigFromJson(Map<String, dynamic> json) =>
       scaleSpeed: (json['scaleSpeed'] as num?)?.toDouble() ?? 10,
       supportKeyboardShortcuts:
           json['supportKeyboardShortcuts'] as bool? ?? true,
+      zoomSpeed: (json['zoomSpeed'] as num?)?.toInt() ?? 1,
     );
 
 Map<String, dynamic> _$GestureConfigToJson(GestureConfig instance) =>
@@ -180,4 +192,5 @@ Map<String, dynamic> _$GestureConfigToJson(GestureConfig instance) =>
           const ScalePositionConverter().toJson(instance.scalePosition),
       'scaleSpeed': instance.scaleSpeed,
       'supportKeyboardShortcuts': instance.supportKeyboardShortcuts,
+      'zoomSpeed': instance.zoomSpeed,
     };

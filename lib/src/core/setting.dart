@@ -67,7 +67,7 @@ mixin SettingBinding on KlineBindingBase
       if (size != mainSize) {
         final updated = mainPaintObject.doUpdateLayout(
           size: size,
-          padding: _scaleMainPaddingByMainSize(size.height / mainSize.height),
+          padding: _zoomMainPaddingByScale(size.height / mainSize.height),
         );
         force = updated || force;
       }
@@ -142,7 +142,7 @@ mixin SettingBinding on KlineBindingBase
   }
 
   /// 如果已是zoom缩放图表时, 需要按比例[scale]缩放Padding.
-  EdgeInsets? _scaleMainPaddingByMainSize(double scale) {
+  EdgeInsets? _zoomMainPaddingByScale(double scale) {
     if (!isStartZoomChart) return null;
     return mainPadding.copyWith(
       top: mainPadding.top * scale,
@@ -174,7 +174,7 @@ mixin SettingBinding on KlineBindingBase
     }
     final changed = mainPaintObject.doUpdateLayout(
       size: size,
-      padding: _scaleMainPaddingByMainSize(size.height / mainSize.height),
+      padding: _zoomMainPaddingByScale(size.height / mainSize.height),
     );
     _invokeSizeChanged(force: changed);
     return true;
@@ -214,7 +214,7 @@ mixin SettingBinding on KlineBindingBase
     if (size == mainSize) return;
     final changed = mainPaintObject.doUpdateLayout(
       size: size,
-      padding: _scaleMainPaddingByMainSize(size.height / mainSize.height),
+      padding: _zoomMainPaddingByScale(size.height / mainSize.height),
     );
     // 将所有副区对象恢复正常布局下的高度.
     _paintObjectManager.restoreHeight();
@@ -236,7 +236,7 @@ mixin SettingBinding on KlineBindingBase
     _layoutMode = _layoutMode.fixedMode(size);
     final changed = mainPaintObject.doUpdateLayout(
       size: mainRect.size,
-      padding: _scaleMainPaddingByMainSize(mainRect.height / oldMainHeight),
+      padding: _zoomMainPaddingByScale(mainRect.height / oldMainHeight),
     );
     _invokeSizeChanged(force: changed);
     return true;

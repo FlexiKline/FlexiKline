@@ -36,6 +36,7 @@ class SettingConfig {
     ///  如果不指定默认为设置为20*20的逻辑像素区域.
     this.mainMinSize = const Size(120, 80),
     this.subMinHeight = 30,
+    this.useCandleTicksAsZoomSlideBar = true,
 
     /// 蜡烛图绘制配置
     this.minPaintBlankRate = 0.5,
@@ -70,6 +71,9 @@ class SettingConfig {
   final Size mainMinSize;
   // 副区指标图的最小高度
   final double subMinHeight;
+
+  /// 使用蜡烛图的刻度作为进行缩放拖拽滑动条
+  final bool useCandleTicksAsZoomSlideBar;
 
   /// 绘制区域最少留白比例
   /// 例如: 当蜡烛数量不足以绘制一屏, 向右移动到末尾时, 绘制区域左边最少留白区域占可绘制区域(canvasWidth)的比例

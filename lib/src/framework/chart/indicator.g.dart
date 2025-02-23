@@ -118,9 +118,9 @@ Map<String, dynamic>
     _$MainPaintObjectIndicatorToJson<T extends PaintObjectIndicator>(
             MainPaintObjectIndicator<T> instance) =>
         <String, dynamic>{
-          'height': instance.height,
           'padding': const EdgeInsetsConverter().toJson(instance.padding),
           'size': const SizeConverter().toJson(instance.size),
+          'height': instance.height,
           'drawBelowTipsArea': instance.drawBelowTipsArea,
           'indicatorKeys': instance.indicatorKeys
               .map(const IIndicatorKeyConvert().toJson)

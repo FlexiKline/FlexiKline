@@ -2,7 +2,8 @@
 * Configuration management refactoring
 * Optimization indicator framework
 * Add keyboard event handling on non-touch devices
-* Optimize indicator calculation performance
+* Add layout mode: normal, adapt, fixed
+* Add zoom chart feature
 * bugfix
 
 ## 0.8.0

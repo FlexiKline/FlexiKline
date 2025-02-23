@@ -15,6 +15,8 @@ abstract class _$MarkConfigCWProxy {
 
   MarkConfig text(TextAreaConfig text);
 
+  MarkConfig hitTestMargin(double hitTestMargin);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `MarkConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -26,6 +28,7 @@ abstract class _$MarkConfigCWProxy {
     double spacing,
     LineConfig line,
     TextAreaConfig text,
+    double hitTestMargin,
   });
 }
 
@@ -48,6 +51,10 @@ class _$MarkConfigCWProxyImpl implements _$MarkConfigCWProxy {
   MarkConfig text(TextAreaConfig text) => this(text: text);
 
   @override
+  MarkConfig hitTestMargin(double hitTestMargin) =>
+      this(hitTestMargin: hitTestMargin);
+
+  @override
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `MarkConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -60,6 +67,7 @@ class _$MarkConfigCWProxyImpl implements _$MarkConfigCWProxy {
     Object? spacing = const $CopyWithPlaceholder(),
     Object? line = const $CopyWithPlaceholder(),
     Object? text = const $CopyWithPlaceholder(),
+    Object? hitTestMargin = const $CopyWithPlaceholder(),
   }) {
     return MarkConfig(
       show: show == const $CopyWithPlaceholder()
@@ -78,6 +86,10 @@ class _$MarkConfigCWProxyImpl implements _$MarkConfigCWProxy {
           ? _value.text
           // ignore: cast_nullable_to_non_nullable
           : text as TextAreaConfig,
+      hitTestMargin: hitTestMargin == const $CopyWithPlaceholder()
+          ? _value.hitTestMargin
+          // ignore: cast_nullable_to_non_nullable
+          : hitTestMargin as double,
     );
   }
 }
@@ -105,6 +117,7 @@ MarkConfig _$MarkConfigFromJson(Map<String, dynamic> json) => MarkConfig(
                   overflow: TextOverflow.ellipsis,
                   height: defaultTextHeight))
           : TextAreaConfig.fromJson(json['text'] as Map<String, dynamic>),
+      hitTestMargin: (json['hitTestMargin'] as num?)?.toDouble() ?? 0,
     );
 
 Map<String, dynamic> _$MarkConfigToJson(MarkConfig instance) =>
@@ -113,4 +126,5 @@ Map<String, dynamic> _$MarkConfigToJson(MarkConfig instance) =>
       'spacing': instance.spacing,
       'line': instance.line.toJson(),
       'text': instance.text.toJson(),
+      'hitTestMargin': instance.hitTestMargin,
     };

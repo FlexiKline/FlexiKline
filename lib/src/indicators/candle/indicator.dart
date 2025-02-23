@@ -235,7 +235,7 @@ class CandlePaintObject<T extends CandleIndicator>
   }
 
   /// 缓存价钱刻度文本区域大小, 用于定位缩放拖拽条区域
-  Size? _priceTicksTextSize;
+  Size? _zoomSlideBarize;
 
   /// 绘制蜡烛图右侧价钱刻度
   /// 根据Grid horizontal配置来绘制, 保证在grid.horizontal线之上.
@@ -267,14 +267,17 @@ class CandlePaintObject<T extends CandleIndicator>
         text: text,
         textConfig: ticksText,
       );
-      if (size != _priceTicksTextSize) {
-        _priceTicksTextSize = size;
-        updateZoomSlideBarRect(Rect.fromLTWH(
-          drawableRect.right - size.width,
-          drawableRect.top,
-          size.width,
-          drawableRect.height,
-        ));
+      if (settingConfig.useCandleTicksAsZoomSlideBar) {
+        final newSize = Size(size.width, drawableRect.height);
+        if (newSize != _zoomSlideBarize) {
+          _zoomSlideBarize = newSize;
+          updateZoomSlideBarRect(Rect.fromLTWH(
+            drawableRect.right - newSize.width,
+            drawableRect.top,
+            newSize.width,
+            newSize.height,
+          ));
+        }
       }
     }
   }
@@ -536,7 +539,8 @@ class CandlePaintObject<T extends CandleIndicator>
 
   @override
   bool handleTap(Offset position) {
-    if (lastTextAreaRect != null && lastTextAreaRect!.include(position)) {
+    final lastTxtRect = lastTextAreaRect?.inflate(indicator.last.hitTestMargin);
+    if (lastTxtRect != null && lastTxtRect.include(position)) {
       // 命中最后价区域, 此时应该移动到蜡烛图初始位置
       moveToInitialPosition();
       return true;

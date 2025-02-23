@@ -184,15 +184,17 @@ abstract class DrawStateObject extends OverlayObject with DrawConfigMixin {
 
   /// 计算所有point点构成的刻度区域矩形.
   Rect? getTicksMarksBounds() {
-    Offset? pre, offset;
-    Rect? bounds;
+    Offset? min, max, offset;
     for (var point in allPoints) {
       offset = point?.offset;
       if (offset == null || offset.isInfinite) continue;
-      bounds = Rect.fromPoints(pre ?? offset, offset);
-      pre = offset;
+      min = offset.min(min);
+      max = offset.max(max);
     }
-    return bounds;
+    if (min != null && max != null) {
+      return Rect.fromPoints(min, max);
+    }
+    return null;
   }
 }
 

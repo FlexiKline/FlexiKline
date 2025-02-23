@@ -225,13 +225,16 @@ mixin ChartBinding
 
     double dyDelta;
     if (data.isMove && (dyDelta = data.dyDelta) != 0) {
-      changed = mainPaintObject.doUpdateLayout(
-            padding: mainPadding.copyWith(
-              top: mainPadding.top + dyDelta,
-              bottom: mainPadding.bottom - dyDelta,
-            ),
-          ) ||
-          changed;
+      final newPadding = mainPadding.copyWith(
+        top: mainPadding.top + dyDelta,
+        bottom: mainPadding.bottom - dyDelta,
+      );
+      if (newPadding.top > mainSize.height ||
+          newPadding.bottom > mainSize.height) {
+        return;
+      }
+
+      changed = mainPaintObject.doUpdateLayout(padding: newPadding) || changed;
     }
 
     if (changed) {
@@ -336,24 +339,29 @@ mixin ChartBinding
 
   /// 指标图缩放更新
   void onChartZoomUpdate(GestureData data) {
-    final delta = data.dyDelta / 2;
+    double delta = data.dyDelta / 2;
     if (delta == 0) return;
     if (delta > 0 &&
         (!canSetMainSize() ||
-            (mainChartHeight + mainOriginPadding.height) <
-                mainMinSize.height)) {
+            mainMinSize.height >
+                (mainChartHeight + mainOriginPadding.height))) {
       logw(
-        'onChartZoomUpdate > cannot zoom($delta), mainSize:$mainSize is smaller than the minSize:$mainMinSize)',
+        'onChartZoomUpdate > cannot zoom($delta), mainSize:$mainSize is smaller than the minSize:$mainMinSize',
       );
       return;
     }
 
-    final changed = mainPaintObject.doUpdateLayout(
-      padding: mainPadding.copyWith(
-        top: mainPadding.top + delta,
-        bottom: mainPadding.bottom + delta,
-      ),
+    delta = delta * gestureConfig.zoomSpeed;
+    final newPadding = mainPadding.copyWith(
+      top: mainPadding.top + delta,
+      bottom: mainPadding.bottom + delta,
     );
+    if (newPadding.top > mainSize.height ||
+        newPadding.bottom > mainSize.height) {
+      return;
+    }
+
+    final changed = mainPaintObject.doUpdateLayout(padding: newPadding);
     if (changed) {
       markRepaintChart();
       markRepaintDraw();

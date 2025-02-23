@@ -144,12 +144,16 @@ abstract class CandleBasePaintObject<T extends CandleBaseIndicator>
     required T super.indicator,
   });
 
+  @nonVirtual
   void moveToInitialPosition() {
     (_context as StateBinding).moveToInitialPosition();
   }
 
+  @nonVirtual
   void updateZoomSlideBarRect(Rect rect) {
-    (_context as ChartBinding).setChartZoomSlideBarRect(rect);
+    if (settingConfig.useCandleTicksAsZoomSlideBar) {
+      (_context as ChartBinding).setChartZoomSlideBarRect(rect);
+    }
   }
 
   @override

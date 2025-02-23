@@ -17,6 +17,8 @@ abstract class _$SettingConfigCWProxy {
 
   SettingConfig subMinHeight(double subMinHeight);
 
+  SettingConfig useCandleTicksAsZoomSlideBar(bool useCandleTicksAsZoomSlideBar);
+
   SettingConfig minPaintBlankRate(double minPaintBlankRate);
 
   SettingConfig alwaysCalculateScreenOfCandlesIfEnough(
@@ -52,6 +54,7 @@ abstract class _$SettingConfigCWProxy {
     LoadingConfig loading,
     Size mainMinSize,
     double subMinHeight,
+    bool useCandleTicksAsZoomSlideBar,
     double minPaintBlankRate,
     bool alwaysCalculateScreenOfCandlesIfEnough,
     double candleMaxWidth,
@@ -87,6 +90,11 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
   @override
   SettingConfig subMinHeight(double subMinHeight) =>
       this(subMinHeight: subMinHeight);
+
+  @override
+  SettingConfig useCandleTicksAsZoomSlideBar(
+          bool useCandleTicksAsZoomSlideBar) =>
+      this(useCandleTicksAsZoomSlideBar: useCandleTicksAsZoomSlideBar);
 
   @override
   SettingConfig minPaintBlankRate(double minPaintBlankRate) =>
@@ -149,6 +157,7 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
     Object? loading = const $CopyWithPlaceholder(),
     Object? mainMinSize = const $CopyWithPlaceholder(),
     Object? subMinHeight = const $CopyWithPlaceholder(),
+    Object? useCandleTicksAsZoomSlideBar = const $CopyWithPlaceholder(),
     Object? minPaintBlankRate = const $CopyWithPlaceholder(),
     Object? alwaysCalculateScreenOfCandlesIfEnough =
         const $CopyWithPlaceholder(),
@@ -183,6 +192,11 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
           ? _value.subMinHeight
           // ignore: cast_nullable_to_non_nullable
           : subMinHeight as double,
+      useCandleTicksAsZoomSlideBar:
+          useCandleTicksAsZoomSlideBar == const $CopyWithPlaceholder()
+              ? _value.useCandleTicksAsZoomSlideBar
+              // ignore: cast_nullable_to_non_nullable
+              : useCandleTicksAsZoomSlideBar as bool,
       minPaintBlankRate: minPaintBlankRate == const $CopyWithPlaceholder()
           ? _value.minPaintBlankRate
           // ignore: cast_nullable_to_non_nullable
@@ -254,6 +268,8 @@ SettingConfig _$SettingConfigFromJson(Map<String, dynamic> json) =>
           : const SizeConverter()
               .fromJson(json['mainMinSize'] as Map<String, dynamic>),
       subMinHeight: (json['subMinHeight'] as num?)?.toDouble() ?? 30,
+      useCandleTicksAsZoomSlideBar:
+          json['useCandleTicksAsZoomSlideBar'] as bool? ?? true,
       minPaintBlankRate: (json['minPaintBlankRate'] as num?)?.toDouble() ?? 0.5,
       alwaysCalculateScreenOfCandlesIfEnough:
           json['alwaysCalculateScreenOfCandlesIfEnough'] as bool? ?? false,
@@ -277,6 +293,7 @@ Map<String, dynamic> _$SettingConfigToJson(SettingConfig instance) =>
       'loading': instance.loading.toJson(),
       'mainMinSize': const SizeConverter().toJson(instance.mainMinSize),
       'subMinHeight': instance.subMinHeight,
+      'useCandleTicksAsZoomSlideBar': instance.useCandleTicksAsZoomSlideBar,
       'minPaintBlankRate': instance.minPaintBlankRate,
       'alwaysCalculateScreenOfCandlesIfEnough':
           instance.alwaysCalculateScreenOfCandlesIfEnough,

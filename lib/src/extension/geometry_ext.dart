@@ -71,6 +71,16 @@ extension OffsetExt on Offset {
     );
   }
 
+  Offset min(Offset? min) {
+    if (min == null) return this;
+    return Offset(math.min(min.dx, dx), math.min(min.dy, dy));
+  }
+
+  Offset max(Offset? max) {
+    if (max == null) return this;
+    return Offset(math.max(max.dx, dx), math.max(max.dy, dy));
+  }
+
   double get length => distance;
 
   /// Normalize this.

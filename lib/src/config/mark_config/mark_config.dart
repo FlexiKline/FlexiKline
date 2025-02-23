@@ -37,6 +37,7 @@ class MarkConfig {
         height: defaultTextHeight,
       ),
     ),
+    this.hitTestMargin = 0,
   });
 
   final bool show;
@@ -47,6 +48,9 @@ class MarkConfig {
   final double spacing;
   final LineConfig line;
   final TextAreaConfig text;
+
+  /// 用于扩大点击测试的区域, 如[MarkConfig]无需点击事件, 不用配置.
+  final double hitTestMargin;
 
   double get lineLength => line.length ?? 0;
 
