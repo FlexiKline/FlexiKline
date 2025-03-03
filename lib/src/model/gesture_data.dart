@@ -57,10 +57,11 @@ class GestureData {
   GestureData._internal({
     required this.type,
     required Offset offset,
+    Offset? prevOffset,
     double scale = 1.0,
     GestureState state = GestureState.start,
     this.initPosition = ScalePosition.auto,
-  })  : _prevOffset = offset,
+  })  : _prevOffset = prevOffset ?? offset,
         _offset = offset,
         _scale = scale,
         _prevScale = scale,
@@ -81,8 +82,12 @@ class GestureData {
   GestureData.move(Offset offset)
       : this._internal(offset: offset, type: GestureType.move);
 
-  GestureData.zoom(Offset offset)
-      : this._internal(offset: offset, type: GestureType.zoom);
+  GestureData.zoom(Offset offset, {Offset? delta})
+      : this._internal(
+          offset: offset,
+          prevOffset: delta != null ? offset - delta : null,
+          type: GestureType.zoom,
+        );
 
   GestureData.scale(
     Offset offset, {

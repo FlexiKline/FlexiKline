@@ -68,6 +68,8 @@ mixin ChartBinding
     return _chartZoomSlideBarRect;
   }
 
+  Rect get chartZoomSlideBarRect => _chartZoomSlideBarRect.value;
+
   //// Latest Price ////
   Timer? _lastPriceCountDownTimer;
   @protected
@@ -319,6 +321,7 @@ mixin ChartBinding
       padding: mainOriginPadding,
     );
     markRepaintChart(reset: changed);
+    markRepaintDraw();
   }
 
   /// 设置指标图中用于缩放操作的滑竿区域
@@ -330,11 +333,11 @@ mixin ChartBinding
   }
 
   /// 检测是否开始指标图缩放
-  bool onChartZoomStart(Offset position) {
-    final slideBarRect = _chartZoomSlideBarRect.value;
-    if (slideBarRect.isEmpty) return false;
-    position += slideBarRect.topLeft;
-    return _isChartStartZoom.value = slideBarRect.include(position);
+  /// [isConvert] 是否转换为canvas区域坐标
+  bool onChartZoomStart(Offset position, [bool isConvert = true]) {
+    if (chartZoomSlideBarRect.isEmpty) return false;
+    if (isConvert) position += chartZoomSlideBarRect.topLeft;
+    return _isChartStartZoom.value = chartZoomSlideBarRect.include(position);
   }
 
   /// 指标图缩放更新

@@ -44,6 +44,9 @@ class NonTouchGestureDetector extends StatefulWidget {
 
 class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
     with TickerProviderStateMixin, KlineLog {
+  @override
+  String get logTag => 'NonTouchGesture';
+
   AnimationController? animationController;
 
   // focus node to capture keyboard events
@@ -61,14 +64,25 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
   /// 长按监听数据
   GestureData? _longData;
 
-  @override
-  String get logTag => 'NonTouchGesture';
+  final _mouseCursor = ValueNotifier(SystemMouseCursors.precise);
 
   FlexiKlineController get controller => widget.controller;
 
   GestureConfig get gestureConfig => widget.controller.gestureConfig;
 
   DrawState get drawState => controller.drawState;
+
+  void setCursorToPrecise() {
+    _mouseCursor.value = SystemMouseCursors.precise;
+  }
+
+  void setCursorToZoom() {
+    _mouseCursor.value = SystemMouseCursors.resizeUpDown;
+  }
+
+  void setCursorToClick() {
+    _mouseCursor.value = SystemMouseCursors.click;
+  }
 
   @override
   void initState() {
@@ -136,40 +150,48 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
       // onPointerMove: onPointerMove,
       // onPointerDown: onPointerDown,
       // onPointerCancel: onPointerCancel,
-      child: MouseRegion(
-        hitTestBehavior: HitTestBehavior.translucent,
+      child: ValueListenableBuilder(
+        valueListenable: _mouseCursor,
+        builder: (context, cursor, child) => MouseRegion(
+          // cursor: SystemMouseCursors.resizeUpDown, //上下缩放
+          // cursor: SystemMouseCursors.cell, // 粗十字
+          // cursor: SystemMouseCursors.precise, // 细十字
+          // cursor: SystemMouseCursors.progress, // wait:指针右下角有加载中.
+          cursor: cursor,
+          hitTestBehavior: HitTestBehavior.translucent,
 
-        /// Cross平移
-        onEnter: onEnter,
-        onHover: onHover,
-        onExit: onExit,
-        child: GestureDetector(
-          behavior: HitTestBehavior.translucent,
+          /// Cross平移
+          onEnter: onEnter,
+          onHover: onHover,
+          onExit: onExit,
+          child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
 
-          /// 点击
-          onTapUp: onTapUp,
+            /// 点击
+            onTapUp: onTapUp,
 
-          /// 双击
-          onDoubleTap: widget.onDoubleTap,
+            /// 双击
+            onDoubleTap: widget.onDoubleTap,
 
-          /// 按下平移
-          onPanStart: onPanStart,
-          onPanUpdate: onPanUpdate,
-          onPanEnd: onPanEnd,
+            /// 按下平移
+            onPanStart: onPanStart,
+            onPanUpdate: onPanUpdate,
+            onPanEnd: onPanEnd,
 
-          /// 移动 缩放
-          // onScaleStart: onScaleStart,
-          // onScaleUpdate: onScaleUpdate,
-          // onScaleEnd: onScaleEnd,
-          // trackpadScrollCausesScale: true,
+            /// 移动 缩放
+            // onScaleStart: onScaleStart,
+            // onScaleUpdate: onScaleUpdate,
+            // onScaleEnd: onScaleEnd,
+            // trackpadScrollCausesScale: true,
 
-          /// 长按
-          onLongPressStart: onLongPressStart,
-          onLongPressMoveUpdate: onLongPressMoveUpdate,
-          onLongPressEnd: onLongPressEnd,
+            /// 长按
+            onLongPressStart: onLongPressStart,
+            onLongPressMoveUpdate: onLongPressMoveUpdate,
+            onLongPressEnd: onLongPressEnd,
 
-          /// 子组件
-          child: widget.child,
+            /// 子组件
+            child: widget.child,
+          ),
         ),
       ),
     );
@@ -189,10 +211,39 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
         _scaleData = null;
       }
 
-      final dx = event.scrollDelta.dx.abs();
-      final dy = event.scrollDelta.dy.abs();
+      final scrollDelta = event.scrollDelta;
+      final dx = scrollDelta.dx.abs();
+      final dy = scrollDelta.dy.abs();
       if (dy > 1 && dy > dx) {
         // 说明可能是(鼠标滚轴或触控板双指)向上向下进行缩放
+
+        /// 纵向缩放图表(zoom)
+        if (controller.chartZoomSlideBarRect.include(offset)) {
+          // 如果命中ZommSlideBar区域, 即代表要进行缩放图表
+          if (!controller.isStartZoomChart &&
+              controller.onChartZoomStart(offset, false)) {
+            Future.delayed(const Duration(milliseconds: 1000), () {
+              assert(() {
+                logd('onPointerSignal V>Zoom onChartZoomEnd()');
+                return true;
+              }());
+              // 由于没有开始结束事件回调, 此处1秒后执行缩放结束动作-检查.
+              controller.onChartZoomEnd();
+            });
+          }
+
+          assert(() {
+            logd('onPointerSignal V>Zoom $offset, $scrollDelta');
+            return true;
+          }());
+          controller.onChartZoomUpdate(GestureData.zoom(
+            offset,
+            delta: scrollDelta,
+          ));
+          return;
+        }
+
+        /// 横向缩放图表(scale)
         if (_scaleData == null) {
           ScalePosition position = gestureConfig.scalePosition;
           if (position == ScalePosition.auto) {
@@ -216,7 +267,7 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
           Future.delayed(const Duration(milliseconds: 1000), () {
             assert(() {
               logd(
-                'onPointerSignal V> clean _scaleData${_scaleData?.initPosition}',
+                'onPointerSignal V>Scale clean _scaleData${_scaleData?.initPosition}',
               );
               return true;
             }());
@@ -230,12 +281,12 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
         }
 
         final newScale = scaledSingal(
-          event.scrollDelta.dy,
+          scrollDelta.dy,
           gestureConfig.scaleSpeed,
         );
 
         assert(() {
-          logd('onPointerSignal V> $offset, ${event.scrollDelta}, $newScale');
+          logd('onPointerSignal V>Scale $offset, $scrollDelta, $newScale');
           return true;
         }());
 
@@ -246,7 +297,7 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
       } else if (dx > 1 && dx > dy) {
         // 说明可能是触控板的双指横向移动操作
         assert(() {
-          logd('onPointerSignal H> $offset, ${event.scrollDelta},');
+          logd('onPointerSignal H> $offset, $scrollDelta,');
           return true;
         }());
       }
@@ -258,16 +309,18 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
     final offset = event.localPosition;
     if (!controller.canvasRect.include(offset)) return;
 
-    logd('onEnter $event');
     if (_hoverData != null &&
         controller.isDrawVisibility &&
         drawState.isOngoing) {
+      logd('onEnter draw: $event');
       if (drawState.object?.pointer != null) {
         drawState.object!.onUpdateDrawPoint(drawState.object!.pointer!, offset);
       }
       _hoverData!.update(offset);
     } else {
+      logd('onEnter cross: $event');
       _hoverData = GestureData.hover(offset);
+      setCursorToPrecise();
       controller.onCrossStart(_hoverData!, force: true);
     }
   }
@@ -281,6 +334,7 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
     if (controller.isDrawVisibility && drawState.isOngoing) {
       if (drawState.isEditing) {
         /// 已完成的DrawObject通过平移[_panScaleData]或长按[_longData]事件进行修正.
+        setCursorToClick();
         return;
       }
       final pointer = drawState.pointer;
@@ -290,14 +344,20 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
         // if (!mainRect.include(offset)) {
         //   offset = offset.clamp(mainRect);
         // }
+        setCursorToPrecise();
         _hoverData!.update(offset);
         controller.onDrawUpdate(_hoverData!);
         return;
       }
+    } else if (controller.chartZoomSlideBarRect.include(offset)) {
+      controller.cancelCross();
+      setCursorToZoom();
+      return;
     }
 
     _hoverData!.update(offset);
     if (!controller.isCrossing) {
+      setCursorToPrecise();
       controller.onCrossStart(_hoverData!, force: true);
     } else {
       controller.onCrossUpdate(_hoverData!);
@@ -344,6 +404,7 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
             _hoverData = GestureData.tap(offset);
             controller.onDrawConfirm(_hoverData!);
             if (!controller.isCrossing) {
+              setCursorToPrecise();
               controller.onCrossStart(_hoverData!);
             }
           }
@@ -384,6 +445,7 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
       logd('onPanStart Currently still panning, ignore!!!');
       return;
     }
+    final position = details.localPosition;
     if (controller.isDrawVisibility && drawState.isOngoing) {
       if (drawState.isDrawing) {
         // 未完成的暂不允许移动
@@ -391,15 +453,19 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
       }
       if (drawState.object?.lock == true) return;
       logd("onPanStart draw > details:$details");
-      _panData = GestureData.pan(details.localPosition);
+      _panData = GestureData.pan(position);
       final result = controller.onDrawMoveStart(_panData!);
       if (!result) {
         _panData?.end();
         _panData = null;
       }
     } else {
-      logd('onPanStart pan local:${details.localPosition}');
-      _panData = GestureData.pan(details.localPosition);
+      logd('onPanStart pan local:$position');
+      if (controller.isStartZoomChart) {
+        _panData = GestureData.move(position);
+      } else {
+        _panData = GestureData.pan(position);
+      }
     }
   }
 
@@ -419,6 +485,7 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
     } else {
       _panData!.update(details.localPosition.clamp(controller.canvasRect));
       controller.onChartMove(_panData!);
+      controller.onCrossUpdate(_panData!);
     }
   }
 
@@ -434,6 +501,9 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
       _panData?.end();
       _panData = null;
       return;
+    } else if (_panData!.isMove) {
+      _panData?.end();
+      _panData = null;
     }
 
     // <0: 负数代表从右向左滑动.
@@ -616,6 +686,8 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
       if (!result) {
         _longData?.end();
         _longData = null;
+      } else {
+        setCursorToPrecise();
       }
     } else if (controller.onGridMoveStart(details.localPosition)) {
       _longData = GestureData.long(details.localPosition);
@@ -624,6 +696,7 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
       logd("onLongPressStart cross > details:$details");
       controller.cancelCross();
       _longData = GestureData.long(details.localPosition);
+      setCursorToPrecise();
       final result = controller.onCrossStart(_longData!);
       if (!result) {
         _longData?.end();
