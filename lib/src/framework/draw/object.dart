@@ -46,7 +46,7 @@ class OverlayObject implements Comparable<OverlayObject> {
   bool get isEditing => points.fold(true, (ret, item) => ret && item != null);
 
   Overlay clone() {
-    return Overlay(key: key, type: type, line: line);
+    return Overlay.fromType(key: key, type: type, line: line);
   }
 
   void assertCheck([bool ignore = false]) {

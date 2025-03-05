@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:math' as math;
+
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flutter/painting.dart';
 
@@ -110,7 +112,7 @@ class SettingConfig {
   }
 
   int get spacingCandleParts {
-    return candleSpacingParts.clamp(1, candleWidth.toInt());
+    return candleSpacingParts.clamp(1, math.max(1, candleWidth.toInt()));
   }
 
   factory SettingConfig.fromJson(Map<String, dynamic> json) =>

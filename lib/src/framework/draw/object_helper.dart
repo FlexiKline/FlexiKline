@@ -139,7 +139,11 @@ mixin DrawObjectMixin on DrawStateObject {
     for (var point in points) {
       if (point == null) continue;
       if (point == pointer || point.index == pointer?.index) {
-        canvas.drawCirclePoint(point.offset, crosspointConfig);
+        if (moving) {
+          drawPointer(context, canvas, point.offset, null);
+        } else {
+          canvas.drawCirclePoint(point.offset, crosspointConfig);
+        }
       } else if (point.offset.isFinite) {
         canvas.drawCirclePoint(point.offset, drawPointConfig);
       }

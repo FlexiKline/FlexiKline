@@ -50,6 +50,7 @@ double scaledDecelerate(double scale) {
 /// 测试当限定参数[maxDuration]等于1000(1秒时), [velocity]带入后结果变化为:
 /// 100000 > 1151.29; 10000 > 921.03; 9000 > 910.49; 5000 > 851.71; 2000 > 760.09; 800 > 668.46; 100 > 460.51
 int calcuInertialPanDuration(double velocity, {required int maxDuration}) {
+  assert(maxDuration > 0);
   final v = math.max(1, velocity.abs());
   if (v == 1) return 0;
   return (math.log(v) * maxDuration / 10).round().clamp(0, maxDuration);

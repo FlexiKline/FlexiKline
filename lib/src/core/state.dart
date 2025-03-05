@@ -79,6 +79,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     if (request.key == curDataKey) {
       _candleRequestListener.value = request;
       _timeBarListener.value = request.timeBar;
+      _drawObjectManager.onChangeCandleRequest(request, drawConfig);
     }
   }
 
@@ -120,6 +121,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     _updateCandleRequestListener(data.req);
     initPaintDxOffset();
     markRepaintChart(reset: true);
+    markRepaintDraw();
     cancelCross();
   }
 

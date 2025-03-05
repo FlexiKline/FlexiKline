@@ -20,22 +20,12 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw {
   void init() {
     super.init();
     logd("init draw");
-    _drawObjectManager = OverlayDrawObjectManager(
-      configuration: configuration,
-      logger: loggerDelegate,
-    );
   }
 
   @override
   void initState() {
     super.initState();
     logd('initState draw');
-    candleRequestListener.addListener(() {
-      _drawObjectManager.onChangeCandleRequest(
-        candleRequestListener.value,
-        drawConfig,
-      );
-    });
   }
 
   @override
@@ -48,10 +38,8 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw {
     _drawVisibilityListener.dispose();
     _drawMagnetModeListener.dispose();
     _drawContinuousListener.dispose();
-    _drawObjectManager.dispose();
   }
 
-  late final OverlayDrawObjectManager _drawObjectManager;
   final _repaintDraw = ValueNotifier(0);
   final _drawStateListener = KlineStateNotifier(DrawState.exited());
   final _drawPointerListener = KlineStateNotifier<Point?>(null);

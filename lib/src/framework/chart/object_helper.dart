@@ -184,8 +184,14 @@ mixin PaintObjectBoundingMixin on IndicatorObject implements IPaintBoundingBox {
 
   double get chartRectWidthHalf => chartRect.width / 2;
 
-  double clampDxInChart(double dx) => dx.clamp(chartRect.left, chartRect.right);
-  double clampDyInChart(double dy) => dy.clamp(chartRect.top, chartRect.bottom);
+  double clampDxInChart(double dx) => dx.clamp(
+        chartRect.left,
+        math.max(chartRect.left, chartRect.right),
+      );
+  double clampDyInChart(double dy) => dy.clamp(
+        chartRect.top,
+        math.max(chartRect.top, chartRect.bottom),
+      );
 
   // Tips区域向下移动height.
   Rect shiftNextTipsRect(double height) {

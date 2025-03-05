@@ -152,7 +152,7 @@ void main() {
   });
 
   test('Test Overlay', () async {
-    final overlay = Overlay(
+    final overlay = Overlay.fromType(
       key: 'BTCUSDT',
       type: FlexiDrawType('aaa', 1),
       line: LineConfig(),

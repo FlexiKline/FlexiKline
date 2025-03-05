@@ -30,12 +30,18 @@ abstract class KlineBindingBase
   /// 指标绘制对象管理
   final IndicatorPaintObjectManager _paintObjectManager;
 
+  final OverlayDrawObjectManager _drawObjectManager;
+
   KlineBindingBase({
     required this.configuration,
     this.autoSave = true,
     ILogger? logger,
     this.klineDataCacheCapacity,
-  }) : _paintObjectManager = IndicatorPaintObjectManager(
+  })  : _paintObjectManager = IndicatorPaintObjectManager(
+          configuration: configuration,
+          logger: logger,
+        ),
+        _drawObjectManager = OverlayDrawObjectManager(
           configuration: configuration,
           logger: logger,
         ) {
@@ -61,8 +67,9 @@ abstract class KlineBindingBase
   @mustCallSuper
   void dispose() {
     logd("dispose base");
+    if (autoSave) storeFlexiKlineConfig();
     _paintObjectManager.dispose();
-    if (autoSave) storeFlexiKlineConfig(true);
+    _drawObjectManager.dispose();
   }
 
   @protected

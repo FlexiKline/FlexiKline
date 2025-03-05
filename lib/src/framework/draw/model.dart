@@ -75,12 +75,12 @@ class Point {
 /// [type] 绘制类型
 /// [zIndex] Overlay绘制顺序
 /// [lock] 是否锁定
-/// [mode] 磁吸模式
 /// [steps] 指定Overlay需要几个点来完成绘制操作, 决定points的数量
 /// [line] Overlay绘制时线配置
 @FlexiOverlaySerializable
 class Overlay implements Comparable<Overlay> {
   Overlay({
+    required this.id,
     required this.key,
     required this.type,
     this.zIndex = 0,
@@ -88,8 +88,21 @@ class Overlay implements Comparable<Overlay> {
 
     /// 绘制线配置, 默认值:drawConfig.drawLine
     required this.line,
-  })  : id = DateTime.now().millisecondsSinceEpoch,
-        points = List.filled(type.steps, null);
+    required this.points,
+  });
+
+  factory Overlay.fromType({
+    required String key,
+    required IDrawType type,
+    required LineConfig line,
+  }) =>
+      Overlay(
+        id: DateTime.now().millisecondsSinceEpoch,
+        key: key,
+        type: type,
+        line: line,
+        points: List.filled(type.steps, null),
+      );
 
   final int id;
   final String key;

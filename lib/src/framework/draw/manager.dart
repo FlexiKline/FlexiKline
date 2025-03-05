@@ -94,7 +94,7 @@ final class OverlayDrawObjectManager with KlineLog {
     logd('onChangeCandleRequest $_instId => ${request.instId}');
     // 缓存上一次OverlayObject到本地.
     if (_instId.isNotEmpty && hasObject) {
-      saveOverlayListToLocal();
+      cleanAllDrawObject();
     }
     // 加载新的OverlayObject.
     _overlayObjectList.clear();
@@ -109,28 +109,27 @@ final class OverlayDrawObjectManager with KlineLog {
   }
 
   /// 将当前[Overlay]列表缓存到本地
-  void saveOverlayListToLocal({bool isDispose = true}) {
+  void storeDrawOverlaysConfig() {
     configuration.saveDrawOverlayList(
       _instId,
-      _overlayObjectList.map((obj) {
-        if (isDispose) obj.dispose();
-        return obj._overlay;
-      }),
+      _overlayObjectList.map((obj) => obj._overlay),
     );
-    _overlayObjectList.clear();
   }
 
   void dispose() {
-    saveOverlayListToLocal();
-  }
-
-  /// 清理当前所有的Overlay.
-  void cleanAllDrawObject() {
     for (var obj in _overlayObjectList) {
       obj.dispose();
     }
     _overlayObjectList.clear();
-    saveOverlayListToLocal(isDispose: false);
+  }
+
+  /// 清理当前所有的Overlay.
+  void cleanAllDrawObject() {
+    storeDrawOverlaysConfig();
+    for (var obj in _overlayObjectList) {
+      obj.dispose();
+    }
+    _overlayObjectList.clear();
   }
 
   /// 通过[type]创建Overlay.
@@ -139,7 +138,7 @@ final class OverlayDrawObjectManager with KlineLog {
     required DrawConfig drawConfig,
   }) {
     return generateDrawObject(
-      Overlay(
+      Overlay.fromType(
         key: _instId,
         type: type,
         line: drawConfig.drawLine,

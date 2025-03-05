@@ -53,7 +53,10 @@ abstract interface class ISetting {
   /// Config ///
 
   /// 保存到本地
-  void storeFlexiKlineConfig([bool storeIndicators = false]);
+  void storeFlexiKlineConfig({
+    bool storeIndicators = true,
+    bool storeDrawOverlays = true,
+  });
 
   /// SettingConfig
   SettingConfig get settingConfig;

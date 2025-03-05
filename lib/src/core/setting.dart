@@ -206,8 +206,14 @@ mixin SettingBinding on KlineBindingBase
     size ??= _layoutMode.mainSize;
     if (limitSize != null) {
       size = Size(
-        size.width.clamp(mainMinSize.width, limitSize.width),
-        size.height.clamp(mainMinSize.height, limitSize.height),
+        size.width.clamp(
+          mainMinSize.width,
+          math.max(mainMinSize.width, limitSize.width),
+        ),
+        size.height.clamp(
+          mainMinSize.height,
+          math.max(mainMinSize.height, limitSize.height),
+        ),
       );
     }
     _layoutMode = _layoutMode.normalMode(size);
@@ -287,7 +293,10 @@ mixin SettingBinding on KlineBindingBase
   }
 
   /// 最大蜡烛宽度[1, 50]
-  double get candleMaxWidth => settingConfig.candleMaxWidth;
+  double get candleMaxWidth => math.max(
+        settingConfig.pixel,
+        settingConfig.candleMaxWidth,
+      );
 
   /// 单根蜡烛宽度, 限制范围1[pixel] ~ [candleMaxWidth] 之间
   @override
@@ -313,7 +322,10 @@ mixin SettingBinding on KlineBindingBase
     }
     if (_candleSpacing != null && _candleSpacing! > 0) return _candleSpacing!;
     _candleSpacing = candleWidth / settingConfig.spacingCandleParts;
-    _candleSpacing!.clamp(settingConfig.pixel, candleWidthHalf);
+    _candleSpacing!.clamp(
+      settingConfig.pixel,
+      math.max(settingConfig.pixel, candleWidthHalf),
+    );
     return _candleSpacing!;
   }
 
@@ -439,11 +451,17 @@ mixin SettingBinding on KlineBindingBase
 
   /// 保存当前FlexiKline配置到本地
   @override
-  void storeFlexiKlineConfig([bool storeIndicators = true]) {
+  void storeFlexiKlineConfig({
+    bool storeIndicators = true,
+    bool storeDrawOverlays = true,
+  }) {
     _flexiKlineConfig.sub = _paintObjectManager.subIndicatorKeys.toSet();
     configuration.saveFlexiKlineConfig(_flexiKlineConfig);
     if (storeIndicators) {
       _paintObjectManager.storeIndicatorsConfig();
+    }
+    if (storeDrawOverlays) {
+      _drawObjectManager.storeDrawOverlaysConfig();
     }
   }
 

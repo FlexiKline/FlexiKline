@@ -21,17 +21,24 @@ Map<String, dynamic> _$PointToJson(Point instance) => <String, dynamic>{
     };
 
 Overlay _$OverlayFromJson(Map<String, dynamic> json) => Overlay(
+      id: (json['id'] as num).toInt(),
       key: json['key'] as String,
       type: const IDrawTypeConverter()
           .fromJson(json['type'] as Map<String, dynamic>),
       zIndex: (json['zIndex'] as num?)?.toInt() ?? 0,
       lock: json['lock'] as bool? ?? false,
       line: LineConfig.fromJson(json['line'] as Map<String, dynamic>),
+      points: (json['points'] as List<dynamic>)
+          .map((e) =>
+              e == null ? null : Point.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
 
 Map<String, dynamic> _$OverlayToJson(Overlay instance) => <String, dynamic>{
+      'id': instance.id,
       'key': instance.key,
       'type': const IDrawTypeConverter().toJson(instance.type),
+      'points': instance.points.map((e) => e?.toJson()).toList(),
       'zIndex': instance.zIndex,
       'lock': instance.lock,
       'line': instance.line.toJson(),

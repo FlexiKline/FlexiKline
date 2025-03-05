@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:math' as math;
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
@@ -292,8 +293,14 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget>
     if (size != null && !size.isEmpty) {
       final canvasRect = controller.canvasRect;
       _position = Offset(
-        newPosition.dx.clamp(canvasRect.left, canvasRect.right - size.width),
-        newPosition.dy.clamp(canvasRect.top, canvasRect.bottom - size.height),
+        newPosition.dx.clamp(
+          canvasRect.left,
+          math.max(canvasRect.left, canvasRect.right - size.width),
+        ),
+        newPosition.dy.clamp(
+          canvasRect.top,
+          math.max(canvasRect.top, canvasRect.bottom - size.height),
+        ),
       );
       return true;
     }
