@@ -61,23 +61,8 @@ mixin SettingBinding on KlineBindingBase
     return _canvasSizeChangeListener;
   }
 
-  void _invokeSizeChanged({bool force = false}) {
-    if (_layoutMode is FixedLayoutMode) {
-      final size = mainRect.size;
-      if (size != mainSize) {
-        final updated = mainPaintObject.doUpdateLayout(
-          size: size,
-          padding: _zoomMainPaddingByScale(size.height / mainSize.height),
-        );
-        force = updated || force;
-      }
-    }
-    _canvasSizeChangeListener.value = canvasRect;
-    if (force) _canvasSizeChangeListener.notifyListeners();
-    markRepaintChart(reset: force);
-    markRepaintCross();
-  }
-
+  /// 当前而已模式.
+  /// 初始值为NormalLayoutMode(mainIndicator.size)
   late LayoutMode _layoutMode;
   @override
   LayoutMode get layoutMode => _layoutMode;
@@ -143,7 +128,7 @@ mixin SettingBinding on KlineBindingBase
 
   /// 如果已是zoom缩放图表时, 需要按比例[scale]缩放Padding.
   EdgeInsets? _zoomMainPaddingByScale(double scale) {
-    if (!isStartZoomChart) return null;
+    if (!isStartZoomChart || scale == 1) return null;
     return mainPadding.copyWith(
       top: mainPadding.top * scale,
       bottom: mainPadding.bottom * scale,
@@ -158,8 +143,25 @@ mixin SettingBinding on KlineBindingBase
 
   /// 是否能设置主区域大小
   bool canSetMainSize([Size? size]) {
-    return (size ?? mainSize) > mainMinSize;
+    return (size ?? mainSize).gt(mainMinSize);
     // todo: 有小误差(0.12)
+  }
+
+  void _invokeSizeChanged({bool force = false}) {
+    if (_layoutMode is FixedLayoutMode) {
+      final size = mainRect.size;
+      if (!size.equlas(mainSize)) {
+        final updated = mainPaintObject.doUpdateLayout(
+          size: size,
+          padding: _zoomMainPaddingByScale(size.height / mainSize.height),
+        );
+        force = updated || force;
+      }
+    }
+    _canvasSizeChangeListener.value = canvasRect;
+    if (force) _canvasSizeChangeListener.notifyListeners();
+    markRepaintChart(reset: force);
+    markRepaintCross();
   }
 
   /// 主区域大小设置
@@ -167,10 +169,10 @@ mixin SettingBinding on KlineBindingBase
     if (!canSetMainSize(size) || size == mainSize) return false;
     switch (_layoutMode) {
       case NormalLayoutMode():
-        _layoutMode = _layoutMode.normalMode(size);
       case AdaptLayoutMode():
-        _layoutMode = _layoutMode.adaptMode(size.width, size.height);
+        _layoutMode = _layoutMode.update(size);
       case FixedLayoutMode():
+      // _layoutMode = _layoutMode.updateMainSize(size);
     }
     final changed = mainPaintObject.doUpdateLayout(
       size: size,
@@ -180,29 +182,10 @@ mixin SettingBinding on KlineBindingBase
     return true;
   }
 
-  /// 自适应[FlexiKlineWidget]所在父组件的布局的变化
-  /// 注: 仅适配主区的宽度变化
-  /// 这主要是通过[FlexiKlineWidget]的autoAdaptLayout配置决定, 并会导致无法手动调整[FlexiKlineWidget]的宽度.
-  bool setAdaptLayoutMode(double width) {
-    if (_layoutMode is FixedLayoutMode) {
-      final fixedSize = (_layoutMode as FixedLayoutMode).fixedSize;
-      return setFixedLayoutMode(Size(width, fixedSize.height));
-    }
-    if (width < mainMinSize.width) return false;
-    if (_layoutMode is AdaptLayoutMode &&
-        (_layoutMode as AdaptLayoutMode).adaptSize.width == width) {
-      return true;
-    }
-    final adaptMode = _layoutMode = _layoutMode.adaptMode(width);
-    final changed = mainPaintObject.doUpdateLayout(size: adaptMode.adaptSize);
-    _invokeSizeChanged(force: changed);
-    return true;
-  }
-
   /// 进入正常布局模式
   /// [size] 代表正常布局大小
   /// [limitSize] 代表当前Kline所在正常布局模式下的最大宽高, 如果指定, 则校正当前Kline宽高不能大于此宽高.
-  void setNormalLayoutMode({Size? size, Size? limitSize}) {
+  void setNormalLayoutMode(Size? size, [Size? limitSize]) {
     size ??= _layoutMode.mainSize;
     if (limitSize != null) {
       size = Size(
@@ -216,7 +199,12 @@ mixin SettingBinding on KlineBindingBase
         ),
       );
     }
-    _layoutMode = _layoutMode.normalMode(size);
+    if (_layoutMode.isNormal) {
+      _layoutMode = _layoutMode.update(size);
+    } else {
+      _layoutMode = NormalLayoutMode(size);
+    }
+
     if (size == mainSize) return;
     final changed = mainPaintObject.doUpdateLayout(
       size: size,
@@ -227,25 +215,68 @@ mixin SettingBinding on KlineBindingBase
     _invokeSizeChanged(force: changed);
   }
 
-  /// 设置Kline固定大小(主要在全屏或横屏场景中使用此API)
-  /// 当设置[_fixedCanvasRect]后, 主区高度=[_fixedCanvasRect]的总高度 - [subRectHeight]副区所有指标高度
-  /// [size] 当前Kline主区+副区的大小.
-  /// 注: 设置是临时的, 并不会更新到配置中.
-  bool setFixedLayoutMode(Size size) {
-    if (!canSetMainSize(size)) return false;
-    if (_layoutMode is FixedLayoutMode &&
-        (_layoutMode as FixedLayoutMode).fixedSize == size) {
-      return true;
+  /// 自适应[FlexiKlineWidget]所在父组件的布局的变化
+  /// 注: 仅适配主区的宽度变化
+  /// 这主要是通过[FlexiKlineWidget]的autoAdaptLayout配置决定, 并会导致无法手动调整[FlexiKlineWidget]的宽度.
+  /// [syncMainSize] 是否同步更新MainSize
+  bool setAdaptLayoutMode(Size size, {bool syncMainSize = false}) {
+    if (!canSetMainSize(fixedSize)) return false;
+
+    if (_layoutMode.isAdapt) {
+      if ((_layoutMode as AdaptLayoutMode).mainSize == size) {
+        return true;
+      }
+      // TODO: 待考虑是否删除sync标识
+      _layoutMode = _layoutMode.update(
+        size,
+        syncMainSize,
+      );
+    } else {
+      _layoutMode = AdaptLayoutMode(size, _layoutMode);
     }
 
+    final changed = mainPaintObject.doUpdateLayout(size: _layoutMode.mainSize);
+    _invokeSizeChanged(force: changed);
+    return true;
+  }
+
+  /// 设置Kline固定大小(主要在全屏或横屏场景中使用此API)
+  /// 当设置[_fixedCanvasRect]后, 主区高度=[_fixedCanvasRect]的总高度 - [subRectHeight]副区所有指标高度
+  /// [fixedSize] 当前Kline主区+副区的大小.
+  /// 注: 设置是临时的, 并不会更新到配置中.
+  bool setFixedLayoutMode(Size fixedSize) {
+    if (!canSetMainSize(fixedSize)) return false;
+
     final oldMainHeight = mainRect.height;
-    _layoutMode = _layoutMode.fixedMode(size);
+    if (_layoutMode.isFixed) {
+      if ((_layoutMode as FixedLayoutMode).fixedSize == fixedSize) {
+        return true;
+      }
+      _layoutMode = _layoutMode.update(fixedSize);
+    } else {
+      _layoutMode = FixedLayoutMode(fixedSize, _layoutMode);
+    }
     final changed = mainPaintObject.doUpdateLayout(
       size: mainRect.size,
       padding: _zoomMainPaddingByScale(mainRect.height / oldMainHeight),
     );
     _invokeSizeChanged(force: changed);
     return true;
+  }
+
+  bool exitCurrentLayoutMode() {
+    final prevMode = _layoutMode.prevMode;
+    switch (prevMode) {
+      case null:
+        return true;
+      case NormalLayoutMode():
+        setNormalLayoutMode(prevMode.mainSize);
+        return true;
+      case AdaptLayoutMode():
+        return setAdaptLayoutMode(prevMode.mainSize);
+      case FixedLayoutMode():
+        return false;
+    }
   }
 
   @protected

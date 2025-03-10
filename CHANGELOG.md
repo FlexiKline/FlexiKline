@@ -1,3 +1,7 @@
+## 0.9.1
+* Rearrange layout mode And bugfix.
+* Optimize web gestures.
+
 ## 0.9.0
 * Configuration management refactoring
 * Optimization indicator framework

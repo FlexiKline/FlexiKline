@@ -15,6 +15,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
+/// double类型的计算精度误差
+const double precisionError = 0.000001;
+
 /// 默认数据格式化精度
 const int defaultPrecision = 4;
 

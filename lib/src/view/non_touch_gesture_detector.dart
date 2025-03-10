@@ -331,8 +331,9 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
 
   /// 鼠标Hover进入事件.
   void onEnter(PointerEnterEvent event) {
+    if (controller.isStartDragGrid) return;
     final offset = event.localPosition;
-    if (!controller.canvasRect.include(offset)) return;
+    // if (!controller.canvasRect.include(offset)) return;
 
     if (_hoverData != null &&
         controller.isDrawVisibility &&
@@ -352,8 +353,9 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
   /// 鼠标Hover事件.
   /// onMouseHover _TransformedPointerHoverEvent#1614b(position: Offset(86.5, 343.6))
   void onHover(PointerHoverEvent event) {
-    if (_hoverData == null) return;
+    // if (_hoverData == null) return;
     Offset offset = event.localPosition;
+    _hoverData ??= GestureData.hover(offset);
 
     if (controller.isDrawVisibility && drawState.isOngoing) {
       if (drawState.isEditing) {
@@ -377,11 +379,11 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
       return;
     }
 
-    _hoverData!.update(offset);
     if (!controller.isCrossing) {
       setCursorToPrecise();
       controller.onCrossStart(_hoverData!, force: true);
     } else {
+      _hoverData!.update(offset);
       controller.onCrossUpdate(_hoverData!);
     }
   }
@@ -720,7 +722,7 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
     } else if (controller.onGridMoveStart(details.localPosition)) {
       _longData = GestureData.long(details.localPosition);
       controller.cancelCross();
-      setCursorToGrabbing();
+      setCursorToNone();
     } else {
       logd("onLongPressStart cross > details:$details");
       controller.cancelCross();

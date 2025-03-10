@@ -15,9 +15,8 @@
 import 'dart:math' as math;
 import 'dart:ui';
 
+import '../constant.dart';
 import '../extension/geometry_ext.dart';
-
-const double precisionError = 0.000001;
 
 /// 直线的一般式方程 Ax + By + C = 0
 final class LineEquation {

@@ -17,6 +17,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 
+import '../core/core.dart';
 import '../framework/configuration.dart';
 import '../framework/logger.dart';
 import '../kline_controller.dart';
@@ -180,7 +181,22 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget>
     if (widget.autoAdaptLayout) {
       return LayoutBuilder(
         builder: (context, constraints) {
-          controller.setAdaptLayoutMode(constraints.biggest.width);
+          switch (controller.layoutMode) {
+            case FixedLayoutMode(fixedSize: final size):
+              controller.setFixedLayoutMode(Size(
+                constraints.biggest.width,
+                size.height,
+              ));
+            case NormalLayoutMode(mainSize: final size):
+            case AdaptLayoutMode(mainSize: final size):
+              controller.setAdaptLayoutMode(
+                Size(
+                  constraints.biggest.width,
+                  size.height,
+                ),
+                syncMainSize: true,
+              );
+          }
           return _buildKlineContainer(context);
         },
       );

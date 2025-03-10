@@ -16,6 +16,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/painting.dart';
 
+import '../constant.dart';
 import '../utils/vector_util.dart';
 
 extension RectExt on Rect {
@@ -178,6 +179,17 @@ extension OffsetExt on Offset {
 
 extension SizeExt on Size {
   bool get nonzero => width > 0 || height > 0;
+
+  /// 等于(带浮点数计算误差的判断)
+  bool equlas(Size size, {double precision = precisionError}) {
+    return (width - size.width).abs() < precision &&
+        (height - size.height).abs() < precision;
+  }
+
+  /// 大于(带浮点数计算误差的判断)
+  bool gt(Size size, {double precision = precisionError}) {
+    return width - size.width > precision && height - size.height > precision;
+  }
 }
 
 extension PaddingExt on EdgeInsets {
