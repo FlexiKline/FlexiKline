@@ -112,7 +112,8 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget>
   final GlobalKey _drawToolbarKey = GlobalKey();
 
   /// 绘制工具条位置
-  Offset _position = Offset.infinite;
+  late final ValueNotifier<Offset> _drawToolbarPosition;
+  Offset get drawToolbarPosition => _drawToolbarPosition.value;
 
   FlexiKlineController get controller => widget.controller;
 
@@ -131,18 +132,9 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget>
       controller.setMainSize(widget.mainSize!);
     }
 
-    _position = configuration.getDrawToolbarPosition();
-
-    controller.canvasSizeChangeListener.addListener(() {
-      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-        if (mounted) {
-          if (controller.drawState.isEditing) {
-            _updateDrawToolbarPosition(_position);
-          }
-          setState(() {});
-        }
-      });
-    });
+    _drawToolbarPosition = ValueNotifier(
+      configuration.getDrawToolbarPosition(),
+    );
   }
 
   @override
@@ -171,7 +163,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget>
 
   @override
   void dispose() {
-    configuration.saveDrawToolbarPosition(_position);
+    configuration.saveDrawToolbarPosition(drawToolbarPosition);
     controller.dispose();
     super.dispose();
   }
@@ -206,7 +198,22 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget>
   }
 
   Widget _buildKlineContainer(BuildContext context) {
-    final canvasRect = controller.canvasRect;
+    return ValueListenableBuilder(
+      valueListenable: controller.canvasSizeChangeListener,
+      builder: (context, canvasRect, child) {
+        if (controller.drawState.isEditing) {
+          // 考虑移回initState中.
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _updateDrawToolbarPosition(drawToolbarPosition);
+          });
+        }
+        return _buildKlineContent(context, canvasRect);
+      },
+    );
+  }
+
+  Widget _buildKlineContent(BuildContext context, Rect canvasRect) {
+    // final canvasRect = controller.canvasRect;
     final canvasSize = canvasRect.size;
     final mainRect = controller.mainRect;
     return Container(
@@ -308,7 +315,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget>
     final size = _drawToolbarKey.currentContext?.size;
     if (size != null && !size.isEmpty) {
       final canvasRect = controller.canvasRect;
-      _position = Offset(
+      _drawToolbarPosition.value = Offset(
         newPosition.dx.clamp(
           canvasRect.left,
           math.max(canvasRect.left, canvasRect.right - size.width),
@@ -326,35 +333,43 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget>
   /// 绘制DrawToolBar
   Widget _buildDrawToolbar(BuildContext context, Rect canvasRect) {
     if (widget.drawToolbar == null) return const SizedBox.shrink();
-    if (_position == Offset.infinite || !canvasRect.contains(_position)) {
-      // 如果_position无效, 则重置其为当前canvas区域左下角.
-      _position = Offset(0, canvasRect.height - widget.drawToolbarInitHeight);
-    }
-    return Positioned(
-      left: _position.dx,
-      top: _position.dy,
-      child: ValueListenableBuilder(
-        valueListenable: controller.drawStateListener,
-        builder: (context, state, child) {
-          return Visibility(
-            visible: state.isEditing,
-            child: GestureDetector(
-              onPanUpdate: (DragUpdateDetails details) {
-                if (_updateDrawToolbarPosition(_position + details.delta)) {
-                  // TODO: 优化此处避免使用setState
-                  setState(() {});
-                }
-              },
-              onPanEnd: (event) {
-                configuration.saveDrawToolbarPosition(_position);
-              },
-              child: SizedBox(
-                key: _drawToolbarKey,
-                child: widget.drawToolbar,
+    return ValueListenableBuilder(
+      valueListenable: controller.drawStateListener,
+      builder: (context, state, child) => Visibility(
+        visible: state.isEditing,
+        child: ValueListenableBuilder(
+          valueListenable: _drawToolbarPosition,
+          builder: (context, position, child) {
+            if (position == Offset.infinite || !canvasRect.contains(position)) {
+              // 如果position无效, 则重置其为当前canvas区域左下角.
+              position = Offset(
+                0,
+                canvasRect.height - widget.drawToolbarInitHeight,
+              );
+            }
+            return Positioned(
+              left: position.dx,
+              top: position.dy,
+              child: MouseRegion(
+                cursor: SystemMouseCursors.move,
+                child: GestureDetector(
+                  onPanUpdate: (DragUpdateDetails details) {
+                    _updateDrawToolbarPosition(
+                      position + details.delta,
+                    );
+                  },
+                  onPanEnd: (event) {
+                    configuration.saveDrawToolbarPosition(position);
+                  },
+                  child: SizedBox(
+                    key: _drawToolbarKey,
+                    child: widget.drawToolbar,
+                  ),
+                ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
@@ -362,8 +377,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget>
   /// 放大镜
   Widget _buildMagnifier(BuildContext context, Rect drawRect) {
     final config = controller.drawConfig.magnifier;
-    // Web平台暂不支持放大镜; TODO: 后续适配
-    if (PlatformUtil.isWeb || !config.enable || config.size.isEmpty) {
+    if (!config.enable || config.size.isEmpty) {
       return const SizedBox.shrink();
     }
 
@@ -445,7 +459,9 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget>
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   fixedSize: Size(20, 20),
                   foregroundColor: theme.tooltipTextColor,
-                  backgroundColor: theme.tooltipBg.withOpacity(0.8),
+                  backgroundColor: theme.tooltipBg.withAlpha(
+                    (0xFF * 0.8).round(),
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(4),
                   ),

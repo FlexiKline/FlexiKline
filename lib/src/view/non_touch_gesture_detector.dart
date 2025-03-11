@@ -412,8 +412,8 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
             logd("onTapUp draw(drawing) confirm pointer:$offset");
             _hoverData = GestureData.tap(offset);
             controller.onDrawConfirm(_hoverData!);
-            if (drawState.isDrawing && controller.isCrossing) {
-              controller.cancelCross(); // 如果仍在绘制中, 但是又处在crossing中时, 主动取消cross
+            if (controller.isCrossing) {
+              controller.cancelCross();
             }
           }
           return;
