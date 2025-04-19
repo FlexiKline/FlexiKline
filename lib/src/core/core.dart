@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-library core;
+library;
 
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flexi_formatter/flexi_formatter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
@@ -27,7 +28,6 @@ import '../data/kline_data.dart';
 import '../extension/export.dart';
 import '../framework/export.dart';
 import '../model/export.dart';
-import '../utils/decimal_format_util.dart';
 import '../utils/platform_util.dart';
 
 part 'binding_base.dart';

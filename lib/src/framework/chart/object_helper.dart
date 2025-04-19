@@ -307,7 +307,7 @@ mixin PaintYAxisTicksMixin<T extends Indicator> on PaintObject<T> {
       value.toDecimal(),
       precision: precision,
       defIfZero: '0.00',
-      showCompact: true,
+      enableCompact: true,
     );
   }
 }
@@ -349,7 +349,7 @@ mixin PaintYAxisTicksOnCrossMixin<T extends Indicator> on PaintObject<T> {
       value.toDecimal(),
       precision: precision,
       defIfZero: '0.00',
-      showCompact: true,
+      enableCompact: true,
     );
   }
 }

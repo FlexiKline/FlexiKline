@@ -17,6 +17,7 @@ import 'dart:math' as math;
 import 'dart:async';
 
 import 'package:decimal/decimal.dart';
+import 'package:flexi_formatter/flexi_formatter.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart' hide Overlay;
 import 'package:flutter_test/flutter_test.dart';

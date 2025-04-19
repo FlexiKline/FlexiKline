@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-library indicator;
+library;
 
 import 'dart:math' as math;
 
 import 'package:copy_with_extension/copy_with_extension.dart';
+import 'package:flexi_formatter/flexi_formatter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
@@ -25,7 +26,6 @@ import '../../core/core.dart';
 import '../../data/kline_data.dart';
 import '../../extension/export.dart';
 import '../../model/export.dart';
-import '../../utils/decimal_format_util.dart';
 import '../collection/fixed_hash_queue.dart';
 import '../collection/sortable_hash_set.dart';
 import '../configuration.dart';

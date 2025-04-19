@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-library overlay;
+library;
 
 import 'dart:collection';
 import 'dart:ui';
+import 'package:flexi_formatter/flexi_formatter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -26,8 +27,6 @@ import '../../data/kline_data.dart';
 import '../../extension/export.dart';
 import '../../model/export.dart';
 import '../../utils/date_time.dart';
-import '../../utils/decimal_format_util.dart';
-import '../../utils/vector_util.dart';
 import '../collection/sortable_hash_set.dart';
 import '../configuration.dart';
 import '../logger.dart';

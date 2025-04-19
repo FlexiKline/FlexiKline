@@ -35,12 +35,10 @@ abstract class BaseData with KlineLog {
   }
 
   @protected
-  @mustCallSuper
   void initData() {
     logd("init BASE");
   }
 
-  @mustCallSuper
   void dispose() {
     logd('dispose BASE');
     loggerDelegate = null;

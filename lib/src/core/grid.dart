@@ -55,7 +55,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
     _dragLine = null;
   }
 
-  void paintGridBg(Canvas canvas, Size size) {
+  void paintGrid(Canvas canvas, Size size) {
     if (gridConfig.show) {
       /// 绘制horizontal轴 Grid 线
       _paintHorizontalGrid(canvas, size);

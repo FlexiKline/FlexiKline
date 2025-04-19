@@ -152,8 +152,9 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     logd('didChangeAppLifecycleState($state)');
-    if (state == AppLifecycleState.resumed) {
-    } else {}
+    // if (state == AppLifecycleState.resumed) {
+    // } else {
+    // }
   }
 
   @override
@@ -202,7 +203,6 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget>
       valueListenable: controller.canvasSizeChangeListener,
       builder: (context, canvasRect, child) {
         if (controller.drawState.isEditing) {
-          // 考虑移回initState中.
           WidgetsBinding.instance.addPostFrameCallback((_) {
             _updateDrawToolbarPosition(drawToolbarPosition);
           });
@@ -484,7 +484,7 @@ class GridPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    controller.paintGridBg(canvas, size);
+    controller.paintGrid(canvas, size);
   }
 
   @override
@@ -535,9 +535,7 @@ class DrawPainter extends CustomPainter {
     if (!controller.isDrawVisibility) return;
 
     try {
-      /// 保存画布状态
       canvas.save();
-
       canvas.clipRect(controller.mainRect);
 
       controller.paintDraw(canvas, size);

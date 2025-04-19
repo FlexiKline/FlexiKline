@@ -424,12 +424,12 @@ mixin CrossBinding on KlineBindingBase, SettingBinding implements ICross {
           value = formatPrice(model.change, precision: p);
           break;
         case TooltipLabel.chgRate:
-          value = formatPercentage(model.changeRate);
+          value = formatPercentage(model.changeRate.d);
           riseOrFall = model.change.signum;
           break;
         case TooltipLabel.range:
           if (pre != null) {
-            value = formatPercentage(model.rangeRate(pre));
+            value = formatPercentage(model.rangeRate(pre).d);
           } else {
             value = formatPrice(model.range, precision: p);
           }
