@@ -80,6 +80,14 @@ extension IterableExt<T> on Iterable<T> {
     }
   }
 
+  /// Map each element and filter out the non-empty ones.
+  Iterable<R> mapNonNullList<R>(R? Function(T element) convert) sync* {
+    for (var element in this) {
+      final item = convert(element);
+      if (item != null) yield item;
+    }
+  }
+
   /// Maps each element and its index to a new value.
   Iterable<R> mapIndexed<R>(R Function(int index, T element) convert) sync* {
     var index = 0;
