@@ -114,7 +114,7 @@ class CandleModel implements Comparable<CandleModel> {
     );
   }
 
-  static List<CandleModel> fromDataList(List<List<dynamic>>? dataList) {
+  static List<CandleModel> fromDataList(List<dynamic>? dataList) {
     if (dataList == null || dataList.isEmpty) return [];
     return dataList.mapNonNullList((list) => fromList(list)).toList();
   }

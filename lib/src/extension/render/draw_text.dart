@@ -20,7 +20,7 @@ import '../../config/text_area_config/text_area_config.dart';
 import '../geometry_ext.dart';
 import 'common.dart';
 
-extension DrawTextExt on Canvas {
+extension FlexiDrawTextExt on Canvas {
   /// 绘制文本
   Size drawText({
     ///绘制启始坐标位置

@@ -16,7 +16,7 @@ import 'package:flutter/painting.dart';
 
 import '../../config/point_config/point_config.dart';
 
-extension DrawCircle on Canvas {
+extension FlexiDrawCircle on Canvas {
   /// 绘制一个带边框的圆点.
   void drawBorderCircle({
     ///绘制启始坐标位置

@@ -18,6 +18,7 @@ import 'package:flutter/widgets.dart';
 
 import '../config/gesture_config/gesture_config.dart';
 import '../extension/geometry_ext.dart';
+import '../extension/functions_ext.dart';
 import '../framework/chart/indicator.dart';
 import '../framework/draw/overlay.dart';
 import '../framework/logger.dart';
@@ -38,8 +39,7 @@ class NonTouchGestureDetector extends StatefulWidget {
   final Widget? child;
 
   @override
-  State<NonTouchGestureDetector> createState() =>
-      _NonTouchGestureDetectorState();
+  State<NonTouchGestureDetector> createState() => _NonTouchGestureDetectorState();
 }
 
 class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
@@ -197,7 +197,7 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
 
             /// 按下平移
             onPanStart: onPanStart,
-            onPanUpdate: onPanUpdate,
+            onPanUpdate: onPanUpdate.throttleOnFps,
             onPanEnd: onPanEnd,
 
             /// 移动 缩放
@@ -208,7 +208,7 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
 
             /// 长按
             onLongPressStart: onLongPressStart,
-            onLongPressMoveUpdate: onLongPressMoveUpdate,
+            onLongPressMoveUpdate: onLongPressMoveUpdate.throttleOnFps,
             onLongPressEnd: onLongPressEnd,
 
             /// 子组件
@@ -242,8 +242,7 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
         /// 纵向缩放图表(zoom)
         if (controller.chartZoomSlideBarRect.include(offset)) {
           // 如果命中ZommSlideBar区域, 即代表要进行缩放图表
-          if (!controller.isStartZoomChart &&
-              controller.onChartZoomStart(offset, false)) {
+          if (!controller.isStartZoomChart && controller.onChartZoomStart(offset, false)) {
             Future.delayed(const Duration(milliseconds: 1000), () {
               assert(() {
                 logd('onPointerSignal V>Zoom onChartZoomEnd()');
@@ -335,9 +334,7 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
     final offset = event.localPosition;
     // if (!controller.canvasRect.include(offset)) return;
 
-    if (_hoverData != null &&
-        controller.isDrawVisibility &&
-        drawState.isOngoing) {
+    if (_hoverData != null && controller.isDrawVisibility && drawState.isOngoing) {
       logd('onEnter draw: $event');
       if (drawState.object?.pointer != null) {
         drawState.object!.onUpdateDrawPoint(drawState.object!.pointer!, offset);
@@ -501,7 +498,7 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
       return;
     }
     // assert(() {
-    //   logd('onPanUpdate $details');
+    //   logd('onPanUpdate move> ${DateTime.now().millisecond} > $details');
     //   return true;
     // }());
     if (controller.isDrawVisibility && drawState.isOngoing) {
@@ -596,7 +593,7 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
 
     final initDx = _panData!.offset.dx;
     animation.addListener(() {
-      // logd('onPanEnd animation.value:${animation.value}');
+      // logd('onPanEnd move> ${DateTime.now().millisecond} > animation.value:${animation.value}');
       if (_panData != null) {
         _panData!.update(Offset(
           initDx + animation.value,
@@ -604,7 +601,7 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
         ));
         controller.onChartMove(_panData!);
       }
-    });
+    }.throttleOnFps);
 
     animationController?.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
@@ -742,7 +739,7 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
       return;
     }
     // assert(() {
-    //   logd("onLongPressMoveUpdate > details:$details");
+    //   logd("onLongPressMoveUpdate ${DateTime.now().millisecond} > details:$details");
     //   return true;
     // }());
     if (controller.isDrawVisibility && drawState.isOngoing) {

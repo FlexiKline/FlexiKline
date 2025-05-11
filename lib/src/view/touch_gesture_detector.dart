@@ -17,6 +17,7 @@ import 'package:flutter/widgets.dart';
 
 import '../config/gesture_config/gesture_config.dart';
 import '../extension/geometry_ext.dart';
+import '../extension/functions_ext.dart';
 import '../framework/chart/indicator.dart';
 import '../framework/draw/overlay.dart';
 import '../framework/logger.dart';
@@ -106,12 +107,12 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
 
         /// 移动 缩放
         onScaleStart: onScaleStart,
-        onScaleUpdate: onScaleUpdate,
+        onScaleUpdate: onScaleUpdate.throttleOnFps,
         onScaleEnd: onScaleEnd,
 
         /// 长按
         onLongPressStart: onLongPressStart,
-        onLongPressMoveUpdate: onLongPressMoveUpdate,
+        onLongPressMoveUpdate: onLongPressMoveUpdate.throttleOnFps,
         onLongPressEnd: onLongPressEnd,
 
         /// 子组件
@@ -128,7 +129,7 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
                     behavior: HitTestBehavior.translucent,
                     onVerticalDragDown: onVerticalDragDown,
                     onVerticalDragStart: onVerticalDragStart,
-                    onVerticalDragUpdate: onVerticalDragUpdate,
+                    onVerticalDragUpdate: onVerticalDragUpdate.throttleOnFps,
                     onVerticalDragEnd: onVerticalDragEnd,
                     onVerticalDragCancel: onVerticalDragEnd,
                   ),
@@ -318,8 +319,7 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
         _panScaleData = null;
       }
     } else if (_panScaleData?.isScale == true || details.pointerCount > 1) {
-      ScalePosition position =
-          _panScaleData?.initPosition ?? gestureConfig.scalePosition;
+      ScalePosition position = _panScaleData?.initPosition ?? gestureConfig.scalePosition;
       if (position == ScalePosition.auto) {
         final third = controller.canvasRect.width / 3;
         final dx = details.localFocalPoint.dx;
@@ -349,6 +349,7 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
       return;
     }
 
+    // logd('onScaleUpdate move> ${DateTime.now().millisecond} details:${details.localFocalPoint}');
     if (controller.isDrawVisibility && drawState.isOngoing) {
       if (_panScaleData!.isPan) {
         _panScaleData!.update(
@@ -477,7 +478,7 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
 
     final initDx = _panScaleData!.offset.dx;
     animation.addListener(() {
-      // logd('onScaleEnd animation.value:${animation.value}');
+      // logd('onScaleEnd move> ${DateTime.now().millisecond} animation.value:${animation.value}');
       if (_panScaleData != null) {
         _panScaleData!.update(Offset(
           initDx + animation.value,
@@ -485,7 +486,7 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
         ));
         controller.onChartMove(_panScaleData!);
       }
-    });
+    }.throttleOnFps);
 
     animationController?.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
@@ -519,8 +520,7 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
         _longData?.end();
         _longData = null;
       }
-    } else if (!controller.isCrossing &&
-        controller.onGridMoveStart(details.localPosition)) {
+    } else if (!controller.isCrossing && controller.onGridMoveStart(details.localPosition)) {
       logd("onLongPressStart move > details:$details");
       _longData = GestureData.long(details.localPosition);
     } else {
@@ -539,7 +539,9 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
       return;
     }
     // assert(() {
-    //   logd("onLongPressMoveUpdate > details:$details");
+    //   logd(
+    //     "onLongPressMoveUpdate ${DateTime.now().millisecond} > details:${details.localPosition}",
+    //   );
     //   return true;
     // }());
     if (controller.isDrawVisibility && drawState.isOngoing) {
@@ -584,9 +586,8 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
 
   void onVerticalDragStart(DragStartDetails details) {
     if (controller.onChartZoomStart(details.localPosition)) {
-      logd("onVerticalDragStart zoom > details:$details");
-      if ((controller.isDrawVisibility && drawState.isOngoing) ||
-          controller.isCrossing) {
+      logd("onVerticalDragStart zoom  ${DateTime.now().millisecond} > details:$details");
+      if ((controller.isDrawVisibility && drawState.isOngoing) || controller.isCrossing) {
         _zoomData = null;
         return;
       }
@@ -596,13 +597,13 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
 
   void onVerticalDragUpdate(DragUpdateDetails details) {
     if (_zoomData == null) return;
-    logd('onVerticalDragUpdate $details');
+    // logd('onVerticalDragUpdate zoom ${DateTime.now().millisecond} > $details');
     _zoomData!.update(details.localPosition);
     controller.onChartZoomUpdate(_zoomData!);
   }
 
   void onVerticalDragEnd([DragEndDetails? details]) {
-    logd('onVerticalDragEnd $details');
+    logd('onVerticalDragEnd zoom ${DateTime.now().millisecond} > $details');
     controller.onChartZoomEnd();
     _zoomData?.end();
     _zoomData = null;

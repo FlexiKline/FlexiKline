@@ -68,6 +68,8 @@ abstract class BaseData with KlineLog {
   List<CandleModel> _list;
   List<CandleModel> get list => _list;
 
+  CandleModel? operator [](int index) => index >= 0 && index < length ? _list[index] : null;
+
   int get length => list.length;
   bool get isEmpty => list.isEmpty;
 

@@ -19,7 +19,7 @@ import 'package:flutter/painting.dart';
 import '../constant.dart';
 import '../utils/vector_util.dart';
 
-extension RectExt on Rect {
+extension FlexiRectExt on Rect {
   /// Whether the point specified by the given offset (which is assumed to be
   /// relative to the origin) lies between the left and right and the top and
   /// bottom edges of this rectangle.
@@ -64,7 +64,7 @@ extension RectExt on Rect {
   }
 }
 
-extension OffsetExt on Offset {
+extension FlexiOffsetExt on Offset {
   Offset clamp(Rect rect) {
     return Offset(
       dx.clamp(rect.left, rect.right),
@@ -177,7 +177,7 @@ extension OffsetExt on Offset {
   }
 }
 
-extension SizeExt on Size {
+extension FlexiSizeExt on Size {
   bool get nonzero => width > 0 || height > 0;
 
   /// 等于(带浮点数计算误差的判断)
@@ -192,7 +192,7 @@ extension SizeExt on Size {
   }
 }
 
-extension PaddingExt on EdgeInsets {
+extension FlexiPaddingExt on EdgeInsets {
   double get height {
     return top + bottom;
   }

@@ -1,4 +1,20 @@
+// Copyright 2024 Andy.Zhao
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 import 'dart:async';
+
+import 'package:flutter/scheduler.dart';
 
 /// 防抖操作时长
 const defaultDebounceTime = Duration(milliseconds: 400);
@@ -6,8 +22,18 @@ const defaultDebounceTime = Duration(milliseconds: 400);
 /// 默认节流时长
 const defaultThrottleTime = Duration(milliseconds: 200);
 
-/// 手势操作节流时长
-const gestureThrottleTime = Duration(milliseconds: 16);
+/// 获取当前设备刷新率
+double? _currentFps;
+double get currentFps {
+  return _currentFps ??=
+      SchedulerBinding.instance.platformDispatcher.views.first.display.refreshRate;
+}
+
+/// 当前设备帧刷新率间隔
+Duration? _refreshInerval;
+Duration get refreshInterval {
+  return _refreshInerval ??= Duration(microseconds: (1e6 / currentFps).round());
+}
 
 /// 防抖
 /// 避免高频事件的重复触发，通常用于用户主动触发的场景，需要等待用户停止操作后再执行逻辑。
@@ -109,7 +135,7 @@ FutureOr<void> Function(T1, T2) binaryThrottle<T1, T2>(
   return callback;
 }
 
-extension FunctionExt on FutureOr<void> Function() {
+extension FlexiFunctionExt on FutureOr<void> Function() {
   FutureOr<void> Function() get debounce {
     Timer? timer;
     return () {
@@ -127,27 +153,39 @@ extension FunctionExt on FutureOr<void> Function() {
       }
     };
   }
+
+  FutureOr<void> Function() get throttleOnFps {
+    Timer? timer;
+    return () {
+      if (timer == null || !timer!.isActive) {
+        timer = Timer(refreshInterval, () => timer = null);
+        call();
+      }
+    };
+  }
 }
 
-extension UnaryFunctionExt<T> on FutureOr<void> Function(T) {
+extension FlexiUnaryFunctionExt<T> on FutureOr<void> Function(T) {
   FutureOr<void> Function(T) get debounce => unaryDebounce(this);
   FutureOr<void> Function(T) debounceDelay(Duration delay) {
     return unaryDebounce(this, delay);
   }
 
   FutureOr<void> Function(T) get throttle => unaryThrottle(this);
+  FutureOr<void> Function(T) get throttleOnFps => unaryThrottle(this, refreshInterval);
   FutureOr<void> Function(T) throttleDelay(Duration delay) {
     return unaryThrottle(this, delay);
   }
 }
 
-extension BinaryFunctionExt<T1, T2> on FutureOr<void> Function(T1, T2) {
+extension FlexiBinaryFunctionExt<T1, T2> on FutureOr<void> Function(T1, T2) {
   FutureOr<void> Function(T1, T2) get debounce => binaryDebounce(this);
   FutureOr<void> Function(T1, T2) debounceDelay(Duration delay) {
     return binaryDebounce(this, delay);
   }
 
   FutureOr<void> Function(T1, T2) get throttle => binaryThrottle(this);
+  FutureOr<void> Function(T1, T2) get throttleOnFps => binaryThrottle(this, refreshInterval);
   FutureOr<void> Function(T1, T2) throttleDelay(Duration delay) {
     return binaryThrottle(this, delay);
   }

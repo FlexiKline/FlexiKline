@@ -93,7 +93,7 @@ class CircularIntervalList<T> {
   }
 }
 
-extension PathDraw on Canvas {
+extension FlexiPathDraw on Canvas {
   /// 绘制虚线
   void drawDashPath(
     Path path,

@@ -18,7 +18,7 @@ import 'package:flutter/painting.dart';
 
 import 'common.dart';
 
-extension DrawRect on Canvas {
+extension FlexiDrawRect on Canvas {
   /// 绘制一个背景区域.
   Offset drawRectBackground({
     ///绘制启始坐标位置

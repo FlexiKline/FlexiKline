@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-library kline_data;
+library;
 
 import 'package:flutter/foundation.dart';
 
@@ -107,7 +107,7 @@ class KlineData extends BaseData {
           range!,
           reset: reset,
         ),
-        debugLabel: 'precompute${object.key}\t$range|$reset',
+        debugLabel: 'precompute:${object.key}\t$range|$reset',
       );
     }
 

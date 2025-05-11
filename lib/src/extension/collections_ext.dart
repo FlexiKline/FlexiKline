@@ -14,7 +14,7 @@
 
 import 'dart:collection';
 
-extension ListExt<T> on List<T> {
+extension FlexiListExt<T> on List<T> {
   bool checkIndex(int index) {
     return index >= 0 && index < length;
   }
@@ -44,7 +44,7 @@ extension ListExt<T> on List<T> {
   }
 }
 
-extension IterableExt<T> on Iterable<T> {
+extension FlexiIterableExt<T> on Iterable<T> {
   bool get hasValidData {
     if (isEmpty) return false;
     for (T t in this) {
@@ -165,7 +165,7 @@ extension IterableExt<T> on Iterable<T> {
   }
 }
 
-extension MapExt<K, V> on Map<K, V> {
+extension FlexiMapExt<K, V> on Map<K, V> {
   V? getItem(K? key) {
     if (key != null) return this[key];
     return null;
