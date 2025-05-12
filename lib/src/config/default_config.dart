@@ -16,6 +16,7 @@ import 'package:flutter/material.dart' hide Overlay;
 
 import '../constant.dart';
 import '../extension/render/common.dart';
+import '../extension/num_ext.dart';
 import '../framework/export.dart';
 import '../indicators/export.dart';
 import 'cross_config/cross_config.dart';
@@ -312,7 +313,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
         width: 0 * theme.scale,
         // color: theme.crossColor,
         borderWidth: 2 * theme.scale,
-        borderColor: theme.crossColor.withOpacity(0.5),
+        borderColor: theme.crossColor.withAlpha(0.5.alpha),
       ),
       ticksText: TextAreaConfig(
         style: TextStyle(
@@ -373,7 +374,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
         width: 0 * theme.scale,
         // color: theme.drawColor,
         borderWidth: 2 * theme.scale,
-        borderColor: theme.drawColor.withOpacity(0.5),
+        borderColor: theme.drawColor.withAlpha(0.5.alpha),
       ),
       drawLine: LineConfig(
         paint: PaintConfig(
@@ -421,7 +422,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
             offset: const Offset(0.1, 0.1),
             blurRadius: 2,
             spreadRadius: 3,
-            color: theme.themeColor.withOpacity(0.1), // 此处不适配Theme
+            color: theme.themeColor.withAlpha(0.1.alpha), // 此处不适配Theme
           )
         ],
         shapeSide: BorderSide(

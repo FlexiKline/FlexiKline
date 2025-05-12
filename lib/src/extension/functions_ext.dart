@@ -165,7 +165,7 @@ extension FlexiFunctionExt on FutureOr<void> Function() {
   }
 }
 
-extension FlexiUnaryFunctionExt<T> on FutureOr<void> Function(T) {
+extension FlexiKlineUnaryFunctionExt<T> on FutureOr<void> Function(T) {
   FutureOr<void> Function(T) get debounce => unaryDebounce(this);
   FutureOr<void> Function(T) debounceDelay(Duration delay) {
     return unaryDebounce(this, delay);
@@ -178,7 +178,7 @@ extension FlexiUnaryFunctionExt<T> on FutureOr<void> Function(T) {
   }
 }
 
-extension FlexiBinaryFunctionExt<T1, T2> on FutureOr<void> Function(T1, T2) {
+extension FlexiKlineBinaryFunctionExt<T1, T2> on FutureOr<void> Function(T1, T2) {
   FutureOr<void> Function(T1, T2) get debounce => binaryDebounce(this);
   FutureOr<void> Function(T1, T2) debounceDelay(Duration delay) {
     return binaryDebounce(this, delay);

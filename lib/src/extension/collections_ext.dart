@@ -12,9 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:collection';
-
-extension FlexiListExt<T> on List<T> {
+extension FlexiKlineListExt<T> on List<T> {
   bool checkIndex(int index) {
     return index >= 0 && index < length;
   }
@@ -135,8 +133,7 @@ extension FlexiIterableExt<T> on Iterable<T> {
   ///
   /// Returns the result of the last call to [combine],
   /// or [initialValue] if there are no elements.
-  R foldIndexed<R>(
-      R initialValue, R Function(int index, R previous, T element) combine) {
+  R foldIndexed<R>(R initialValue, R Function(int index, R previous, T element) combine) {
     var result = initialValue;
     var index = 0;
     for (var element in this) {
@@ -191,5 +188,3 @@ extension FlexiMapExt<K, V> on Map<K, V> {
     return null;
   }
 }
-
-extension QueueExt<T> on Queue<T> {}

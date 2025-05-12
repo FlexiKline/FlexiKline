@@ -134,7 +134,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   @override
   CandleModel? dxToCandle(double dx) {
     final index = dxToIndex(dx);
-    return curKlineData.getCandle(index);
+    return curKlineData.get(index);
   }
 
   /// 将[dx]转换为当前绘制区域对应的蜡烛的下标.
@@ -354,7 +354,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   }) {
     KlineData? data = _klineDataCache[req.key];
 
-    if (useCacheFirst && data != null && !data.isEmpty) {
+    if (useCacheFirst && data != null && data.isNotEmpty) {
       // 如果优先使用缓存且缓存数据不为空时, 设置缓存为当前KlineData, 同时结束loading状态.
       _setCurKlineData(data);
       return true;

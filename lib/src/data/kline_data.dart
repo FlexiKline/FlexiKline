@@ -23,36 +23,16 @@ import '../framework/logger.dart';
 import '../model/export.dart';
 
 part 'base_data.dart';
+part 'request.dart';
+part 'candle_list.dart';
+part 'paint_draw.dart';
 
-class KlineData extends BaseData {
+class KlineData extends BaseData with RequestData, CandleListData, PaintDrawData {
   KlineData(
     super.req, {
     super.list,
     super.logger,
   });
-
-  String get instId => req.instId;
-  int get precision => req.precision;
-  String get key => req.key;
-  String get reqKey => req.reqKey;
-  TimeBar? get timeBar => req.timeBar;
-  bool get invalid => req.instId.isEmpty;
-
-  CandleReq updateRequest({RequestState state = RequestState.none}) {
-    req = req.copyWith(
-      after: list.lastOrNull?.ts,
-      before: list.firstOrNull?.ts,
-      state: state,
-    );
-    return req;
-  }
-
-  CandleReq getLoadMoreRequest() {
-    return req.copyWith(
-      after: list.lastOrNull?.ts,
-      before: null,
-    );
-  }
 
   static final KlineData empty = KlineData(
     const CandleReq(instId: "", bar: ""),
@@ -87,7 +67,7 @@ class KlineData extends BaseData {
 
     ///2. 确认要计算的范围.
     range ??= Range.empty;
-    if (reset) range = Range(0, data.length);
+    if (reset || range.start > 0) range = Range(0, data.length); // TODO: 待优化
 
     ///3. 根据计算模式初始化基础数据
     await stopwatch.runAsync(
@@ -168,3 +148,18 @@ class KlineData extends BaseData {
 //   }
 //   return data;
 // }
+
+/// 去重
+List<CandleModel> removeDuplicate(List<CandleModel> list) {
+  int n = list.length;
+  int fast = 1;
+  int slow = 1;
+  while (fast < n) {
+    if (list[fast].ts != list[fast - 1].ts) {
+      list[slow] = list[fast];
+      ++slow;
+    }
+    ++fast;
+  }
+  return list.sublist(0, slow);
+}

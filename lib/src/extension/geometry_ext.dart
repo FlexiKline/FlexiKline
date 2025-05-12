@@ -19,17 +19,14 @@ import 'package:flutter/painting.dart';
 import '../constant.dart';
 import '../utils/vector_util.dart';
 
-extension FlexiRectExt on Rect {
+extension FlexiKlineRectExt on Rect {
   /// Whether the point specified by the given offset (which is assumed to be
   /// relative to the origin) lies between the left and right and the top and
   /// bottom edges of this rectangle.
   ///
   /// Rectangles include their top, left, bottom and right edges.
   bool include(Offset offset) {
-    return offset.dx >= left &&
-        offset.dx <= right &&
-        offset.dy >= top &&
-        offset.dy <= bottom;
+    return offset.dx >= left && offset.dx <= right && offset.dy >= top && offset.dy <= bottom;
   }
 
   bool includeDx(double dx) {
@@ -182,8 +179,7 @@ extension FlexiSizeExt on Size {
 
   /// 等于(带浮点数计算误差的判断)
   bool equlas(Size size, {double precision = precisionError}) {
-    return (width - size.width).abs() < precision &&
-        (height - size.height).abs() < precision;
+    return (width - size.width).abs() < precision && (height - size.height).abs() < precision;
   }
 
   /// 大于(带浮点数计算误差的判断)

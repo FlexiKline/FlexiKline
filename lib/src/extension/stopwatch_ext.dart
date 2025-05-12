@@ -19,7 +19,7 @@ import 'package:flutter/scheduler.dart';
 
 import '../framework/logger.dart';
 
-extension FlexiStopwatchExt on Stopwatch {
+extension FlexiKlineStopwatchExt on Stopwatch {
   /// 同步运行[runable]任务, 并打印耗时.
   T run<T>(
     ValueGetter runable, {

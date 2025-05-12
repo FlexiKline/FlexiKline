@@ -173,7 +173,7 @@ mixin CrossBinding on KlineBindingBase, SettingBinding implements ICross {
       if (crossConfig.showLatestTipsInBlank) {
         model = dxToCandle(offset.dx);
         // 如果当前model为空, 则根据offset.dx计算当前model是最新的, 还是最后的.
-        if (model == null && !curKlineData.isEmpty) {
+        if (model == null && curKlineData.isNotEmpty) {
           if (offset.dx > startCandleDx) {
             model = curKlineData.latest;
           } else {
@@ -228,8 +228,8 @@ mixin CrossBinding on KlineBindingBase, SettingBinding implements ICross {
 
     int? index = dxToIndex(offset.dx);
     if (index == null) return;
-    model ??= curKlineData.getCandle(index);
-    final pre = curKlineData.getCandle(index + 1);
+    model ??= curKlineData.get(index);
+    final pre = curKlineData.get(index + 1);
     if (model == null) return;
 
     /// 准备数据

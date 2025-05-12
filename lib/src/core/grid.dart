@@ -103,7 +103,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
               objRect.bottom - minDistanceHalf,
             ),
             size: Size(objRect.width, minDistance),
-            backgroundColor: dragBg.withOpacity(gridConfig.draggingBgOpacity),
+            backgroundColor: dragBg.withAlpha(gridConfig.draggingBgOpacity.alpha),
           );
         }
       } else {
@@ -115,8 +115,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
               Path()
                 ..moveTo(objRect.left + delta, objRect.bottom - dragLineHalf)
                 ..lineTo(objRect.right - delta, objRect.bottom - dragLineHalf),
-              _dragLine!.linePaint
-                ..color = dragBg.withOpacity(gridConfig.dragLineOpacity),
+              _dragLine!.linePaint..color = dragBg.withAlpha(gridConfig.dragLineOpacity.alpha),
               dashes: _dragLine!.dashes,
             );
           }
@@ -128,7 +127,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
               objRect.bottom - minDistanceHalf,
             ),
             size: Size(objRect.width, minDistance),
-            backgroundColor: dragBg.withOpacity(gridConfig.dragBgOpacity),
+            backgroundColor: dragBg.withAlpha(gridConfig.dragBgOpacity.alpha),
           );
         }
       }

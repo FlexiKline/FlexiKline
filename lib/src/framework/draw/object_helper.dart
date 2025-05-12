@@ -39,8 +39,8 @@ mixin DrawConfigMixin on OverlayObject {
     if (_crosspoint != null) return _crosspoint!;
     _crosspoint = config.crosspoint.of(
       color: lineColor,
-      borderColor: lineColor.withOpacity(
-        config.crosspoint.borderColor?.opacity ?? 0,
+      borderColor: lineColor.withValues(
+        alpha: config.crosspoint.borderColor?.a ?? 0,
       ),
     );
     // if (config.useDrawLineColor) {
@@ -59,7 +59,7 @@ mixin DrawConfigMixin on OverlayObject {
     final opacity = config.ticksGapBgOpacity.clamp(0.0, 1.0);
     if (opacity == 0) return null;
     _ticksGapBgPaint = Paint()
-      ..color = lineColor.withOpacity(opacity)
+      ..color = lineColor.withAlpha(opacity.alpha)
       ..style = PaintingStyle.fill;
     // if (config.useDrawLineColor) {
     //   _ticksGapBgPaint = Paint()
@@ -439,7 +439,7 @@ extension IDrawContextExt on IDrawContext {
       dx = indexToDx(index)! - candleWidthHalf;
     }
     BagNum? value = dyToValue(dy);
-    final candle = curKlineData.getCandle(index);
+    final candle = curKlineData.get(index);
     if (value != null && candle != null) {
       final high = candle.high;
       final low = candle.low;

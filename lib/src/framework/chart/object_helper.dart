@@ -17,8 +17,7 @@ part of 'indicator.dart';
 /// FlexiKlineController 状态/配置/接口代理
 extension IndicatorObjectExt on IndicatorObject {
   bool get isAllowUpdateHeight {
-    return _context.layoutMode is NormalLayoutMode ||
-        _context.layoutMode is AdaptLayoutMode;
+    return _context.layoutMode is NormalLayoutMode || _context.layoutMode is AdaptLayoutMode;
   }
 
   /// Config
@@ -59,8 +58,8 @@ extension IndicatorObjectExt on IndicatorObject {
   Color get shortColor => theme.short;
 
   /// 指标图 涨跌 bar/line 配置
-  Color get longTintColor => longColor.withOpacity(settingConfig.opacity);
-  Color get shortTintColor => shortColor.withOpacity(settingConfig.opacity);
+  Color get longTintColor => longColor.withAlpha(settingConfig.opacity.alpha);
+  Color get shortTintColor => shortColor.withAlpha(settingConfig.opacity.alpha);
   // 实心
   Paint get defLongBarPaint => Paint()
     ..color = longColor
@@ -245,7 +244,7 @@ mixin PaintObjectDataInitMixin on IndicatorObject implements IPaintDataInit {
 
   CandleModel? dxToCandle(double dx) {
     final index = dxToIndex(dx).toInt();
-    return klineData.getCandle(index);
+    return klineData.get(index);
   }
 
   CandleModel? offsetToCandle(Offset? offset) {
