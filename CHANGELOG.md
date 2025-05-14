@@ -1,3 +1,7 @@
+## 1.0.0
+* Optimize the calculation performance of indicators
+* Optimize the performance of chart draw tools
+
 ## 0.9.1
 * Rearrange layout mode And bugfix.
 * Optimize web gestures.

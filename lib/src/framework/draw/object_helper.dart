@@ -383,7 +383,7 @@ mixin DrawObjectMixin on DrawStateObject {
   /// 格式化时间刻度文本
   @protected
   String formatTimeTicksText(int ts, {TimeBar? bar}) {
-    return formatDateTimeByTimeBar(ts, bar: bar);
+    return ts.dateTimeInMillisecond.formatByUnit(bar?.unit);
   }
 
   /// 格式化价值刻度文本

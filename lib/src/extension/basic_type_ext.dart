@@ -17,3 +17,21 @@ extension FlexiKlineNumExt on num {
     return (0xFF * this).round();
   }
 }
+
+extension FlexiKlineString on String {
+  /// 首字母大写
+  String capitalize() {
+    if (isEmpty) return '';
+    return "${this[0].toUpperCase()}${substring(1).toLowerCase()}";
+  }
+
+  /// Case-insensitive equals check
+  bool equalsIgnoreCase(String? other) {
+    return other != null && toLowerCase() == other.toLowerCase();
+  }
+
+  /// Case-insensitive contains check
+  bool containsIgnoreCase(String? value) {
+    return value != null && toLowerCase().contains(value.toLowerCase());
+  }
+}

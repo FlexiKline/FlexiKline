@@ -15,7 +15,7 @@
 export 'geometry_ext.dart';
 export 'collections_ext.dart';
 export 'functions_ext.dart';
-export 'num_ext.dart';
+export 'basic_type_ext.dart';
 export 'render/common.dart';
 export 'render/draw_circle.dart';
 export 'render/draw_path.dart';

@@ -192,7 +192,9 @@ class EdgeInsetsConverter
     if (edgeInsets.left == 0 &&
         edgeInsets.top == 0 &&
         edgeInsets.right == 0 &&
-        edgeInsets.bottom == 0) return {};
+        edgeInsets.bottom == 0) {
+      return {};
+    }
 
     if (edgeInsets.left == edgeInsets.right &&
         edgeInsets.top == edgeInsets.bottom) {

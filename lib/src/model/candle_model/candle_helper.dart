@@ -39,7 +39,7 @@ extension CandleModelExt on CandleModel {
   }
 
   String formatDateTime(TimeBar? bar) {
-    return formatDateTimeByTimeBar(ts, bar: bar);
+    return dateTime.formatByUnit(bar?.unit);
   }
 
   DateTime? nextUpdateDateTime(String bar) {

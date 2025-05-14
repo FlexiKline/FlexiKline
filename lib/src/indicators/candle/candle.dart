@@ -23,7 +23,6 @@ import '../../constant.dart';
 import '../../core/core.dart';
 import '../../extension/export.dart';
 import '../../model/export.dart';
-import '../../utils/export.dart';
 import '../../framework/export.dart';
 
 part 'candle.g.dart';

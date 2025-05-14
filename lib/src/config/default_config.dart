@@ -16,7 +16,7 @@ import 'package:flutter/material.dart' hide Overlay;
 
 import '../constant.dart';
 import '../extension/render/common.dart';
-import '../extension/num_ext.dart';
+import '../extension/basic_type_ext.dart';
 import '../framework/export.dart';
 import '../indicators/export.dart';
 import 'cross_config/cross_config.dart';

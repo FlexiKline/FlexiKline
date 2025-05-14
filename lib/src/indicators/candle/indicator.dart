@@ -55,14 +55,13 @@ class CandleIndicator extends CandleBaseIndicator {
     return CandlePaintObject(context: context, indicator: this);
   }
 
-  factory CandleIndicator.fromJson(Map<String, dynamic> json) =>
-      _$CandleIndicatorFromJson(json);
+  factory CandleIndicator.fromJson(Map<String, dynamic> json) => _$CandleIndicatorFromJson(json);
   @override
   Map<String, dynamic> toJson() => _$CandleIndicatorToJson(this);
 }
 
-class CandlePaintObject<T extends CandleIndicator>
-    extends CandleBasePaintObject<T> with PaintYAxisTicksOnCrossMixin {
+class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject<T>
+    with PaintYAxisTicksOnCrossMixin {
   CandlePaintObject({
     required super.context,
     required super.indicator,
@@ -303,10 +302,7 @@ class CandlePaintObject<T extends CandleIndicator>
       dy = clampDyInChart(valueToDy(model.close));
     }
     return Rect.fromLTWH(
-      chartRect.right +
-          _latestTextOffset -
-          indicator.last.spacing -
-          _lastTextSize!.width,
+      chartRect.right + _latestTextOffset - indicator.last.spacing - _lastTextSize!.width,
       dy,
       _lastTextSize!.width,
       _lastTextSize!.height,
@@ -394,7 +390,7 @@ class CandlePaintObject<T extends CandleIndicator>
       if (indicator.showCountDown) {
         final nextUpdateDateTime = model.nextUpdateDateTime(klineData.req.bar);
         if (nextUpdateDateTime != null) {
-          countDownText = formatTimeDiff(nextUpdateDateTime);
+          countDownText = nextUpdateDateTime.diffAsCountdown();
         }
       }
       if (countDownText != null) {
