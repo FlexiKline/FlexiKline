@@ -27,6 +27,14 @@ abstract class _$CandleIndicatorCWProxy {
 
   CandleIndicator countDown(TextAreaConfig countDown);
 
+  CandleIndicator longCandleUseHollow(bool longCandleUseHollow);
+
+  CandleIndicator shortCandleUseHollow(bool shortCandleUseHollow);
+
+  CandleIndicator longColor(Color? longColor);
+
+  CandleIndicator shortColor(Color? shortColor);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `CandleIndicator(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -44,6 +52,10 @@ abstract class _$CandleIndicatorCWProxy {
     bool useCandleColorAsLatestBg,
     bool showCountDown,
     TextAreaConfig countDown,
+    bool longCandleUseHollow,
+    bool shortCandleUseHollow,
+    Color? longColor,
+    Color? shortColor,
   });
 }
 
@@ -87,6 +99,20 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
       this(countDown: countDown);
 
   @override
+  CandleIndicator longCandleUseHollow(bool longCandleUseHollow) =>
+      this(longCandleUseHollow: longCandleUseHollow);
+
+  @override
+  CandleIndicator shortCandleUseHollow(bool shortCandleUseHollow) =>
+      this(shortCandleUseHollow: shortCandleUseHollow);
+
+  @override
+  CandleIndicator longColor(Color? longColor) => this(longColor: longColor);
+
+  @override
+  CandleIndicator shortColor(Color? shortColor) => this(shortColor: shortColor);
+
+  @override
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `CandleIndicator(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -105,6 +131,10 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
     Object? useCandleColorAsLatestBg = const $CopyWithPlaceholder(),
     Object? showCountDown = const $CopyWithPlaceholder(),
     Object? countDown = const $CopyWithPlaceholder(),
+    Object? longCandleUseHollow = const $CopyWithPlaceholder(),
+    Object? shortCandleUseHollow = const $CopyWithPlaceholder(),
+    Object? longColor = const $CopyWithPlaceholder(),
+    Object? shortColor = const $CopyWithPlaceholder(),
   }) {
     return CandleIndicator(
       zIndex: zIndex == const $CopyWithPlaceholder()
@@ -148,6 +178,22 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
           ? _value.countDown
           // ignore: cast_nullable_to_non_nullable
           : countDown as TextAreaConfig,
+      longCandleUseHollow: longCandleUseHollow == const $CopyWithPlaceholder()
+          ? _value.longCandleUseHollow
+          // ignore: cast_nullable_to_non_nullable
+          : longCandleUseHollow as bool,
+      shortCandleUseHollow: shortCandleUseHollow == const $CopyWithPlaceholder()
+          ? _value.shortCandleUseHollow
+          // ignore: cast_nullable_to_non_nullable
+          : shortCandleUseHollow as bool,
+      longColor: longColor == const $CopyWithPlaceholder()
+          ? _value.longColor
+          // ignore: cast_nullable_to_non_nullable
+          : longColor as Color?,
+      shortColor: shortColor == const $CopyWithPlaceholder()
+          ? _value.shortColor
+          // ignore: cast_nullable_to_non_nullable
+          : shortColor as Color?,
     );
   }
 }
@@ -179,6 +225,12 @@ CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
       showCountDown: json['showCountDown'] as bool? ?? true,
       countDown:
           TextAreaConfig.fromJson(json['countDown'] as Map<String, dynamic>),
+      longCandleUseHollow: json['longCandleUseHollow'] as bool? ?? false,
+      shortCandleUseHollow: json['shortCandleUseHollow'] as bool? ?? false,
+      longColor: _$JsonConverterFromJson<String, Color>(
+          json['longColor'], const ColorConverter().fromJson),
+      shortColor: _$JsonConverterFromJson<String, Color>(
+          json['shortColor'], const ColorConverter().fromJson),
     );
 
 Map<String, dynamic> _$CandleIndicatorToJson(CandleIndicator instance) =>
@@ -193,4 +245,22 @@ Map<String, dynamic> _$CandleIndicatorToJson(CandleIndicator instance) =>
       'useCandleColorAsLatestBg': instance.useCandleColorAsLatestBg,
       'showCountDown': instance.showCountDown,
       'countDown': instance.countDown.toJson(),
+      'longCandleUseHollow': instance.longCandleUseHollow,
+      'shortCandleUseHollow': instance.shortCandleUseHollow,
+      'longColor': _$JsonConverterToJson<String, Color>(
+          instance.longColor, const ColorConverter().toJson),
+      'shortColor': _$JsonConverterToJson<String, Color>(
+          instance.shortColor, const ColorConverter().toJson),
     };
+
+Value? _$JsonConverterFromJson<Json, Value>(
+  Object? json,
+  Value? Function(Json json) fromJson,
+) =>
+    json == null ? null : fromJson(json as Json);
+
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) =>
+    value == null ? null : toJson(value);

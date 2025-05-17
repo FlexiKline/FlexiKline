@@ -34,6 +34,10 @@ class CandleIndicator extends CandleBaseIndicator {
     // 倒计时, 在latest最新价之下展示
     this.showCountDown = true,
     required this.countDown,
+    this.longCandleUseHollow = false,
+    this.shortCandleUseHollow = false,
+    this.longColor,
+    this.shortColor,
   });
 
   // 最高价
@@ -50,6 +54,16 @@ class CandleIndicator extends CandleBaseIndicator {
   final bool showCountDown;
   final TextAreaConfig countDown;
 
+  // 上涨是否使用空心蜡烛柱
+  final bool longCandleUseHollow;
+  // 下跌是否使用空心蜡烛柱
+  final bool shortCandleUseHollow;
+
+  // 自定义上涨颜色
+  final Color? longColor;
+  // 自定义下跌颜色
+  final Color? shortColor;
+
   @override
   CandlePaintObject createPaintObject(IPaintContext context) {
     return CandlePaintObject(context: context, indicator: this);
@@ -61,11 +75,17 @@ class CandleIndicator extends CandleBaseIndicator {
 }
 
 class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject<T>
-    with PaintYAxisTicksOnCrossMixin {
+    with PaintYAxisTicksOnCrossMixin, PaintCandleHelperMixin {
   CandlePaintObject({
     required super.context,
     required super.indicator,
   });
+
+  @override
+  Color get longColor => indicator.longColor ?? theme.long;
+
+  @override
+  Color get shortColor => indicator.shortColor ?? theme.short;
 
   BagNum? _maxHigh, _minLow;
 
@@ -128,7 +148,8 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
     int end = klineData.end;
 
     final offset = startCandleDx - candleWidthHalf;
-    // final bar = klineData.timeBar;
+    final barWidthHalf = candleWidthHalf - candleSpacing;
+
     Offset? maxHihgOffset, minLowOffset;
     bool hasEnough = paintDxOffset > 0;
     BagNum maxHigh = list[start].high;
@@ -137,34 +158,30 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
     for (var i = start; i < end; i++) {
       m = list[i];
       final dx = offset - (i - start) * candleActualWidth;
-      final isLong = m.close >= m.open;
-
-      final highOff = Offset(dx, valueToDy(m.high));
-      final lowOff = Offset(dx, valueToDy(m.low));
-      canvas.drawLine(
-        highOff,
-        lowOff,
-        isLong ? defLongLinePaint : defShortLinePaint,
-      );
-
-      var (openDy, closeDy) = ensureMinDistance(valueToDy(m.open), valueToDy(m.close));
-      canvas.drawLine(
-        Offset(dx, openDy),
-        Offset(dx, closeDy),
-        isLong ? defLongBarPaint : defShortBarPaint,
+      final hight = valueToDy(m.high);
+      final low = valueToDy(m.low);
+      paintCandleBar(
+        canvas,
+        m,
+        dx: dx,
+        high: hight,
+        low: low,
+        barWidthHalf: barWidthHalf,
+        longCandleUseHollow: indicator.longCandleUseHollow,
+        shortCandleUseHollow: indicator.shortCandleUseHollow,
       );
 
       if (indicator.high.show) {
         if (hasEnough) {
           // 满足一屏, 根据initData中的最大最小值来记录最大最小偏移量.
           if (m.high == _maxHigh) {
-            maxHihgOffset = highOff;
+            maxHihgOffset = Offset(dx, hight);
             maxHigh = _maxHigh!;
           }
         } else if (dx > 0) {
           // 如果当前绘制不足一屏, 最大最小绘制仅限可见区域.
           if (m.high >= maxHigh) {
-            maxHihgOffset = highOff;
+            maxHihgOffset = Offset(dx, hight);
             maxHigh = m.high;
           }
         }
@@ -174,13 +191,13 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
         if (hasEnough) {
           // 满足一屏, 根据initData中的最大最小值来记录最大最小偏移量.
           if (m.low == _minLow) {
-            minLowOffset = lowOff;
+            minLowOffset = Offset(dx, low);
             minLow = _minLow!;
           }
         } else {
           // 如果当前绘制不足一屏, 最大最小绘制仅限可见区域.
           if (m.low <= minLow) {
-            minLowOffset = lowOff;
+            minLowOffset = Offset(dx, low);
             minLow = m.low;
           }
         }

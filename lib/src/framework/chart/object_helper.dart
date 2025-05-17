@@ -54,10 +54,6 @@ extension IndicatorObjectExt on IndicatorObject {
         textColor: theme.ticksTextColor,
       );
 
-  Color get longColor => theme.long;
-
-  Color get shortColor => theme.short;
-
   /// 指标图 涨跌 bar/line 配置
   Color get longTintColor => longColor.withAlpha(settingConfig.opacity.alpha);
   Color get shortTintColor => shortColor.withAlpha(settingConfig.opacity.alpha);
@@ -354,53 +350,129 @@ mixin PaintYAxisTicksOnCrossMixin<T extends Indicator> on PaintObject<T> {
   }
 }
 
-/// 绘制简易蜡烛图
-/// 主要用于SubBoll图和SubSar图中
-mixin PaintSimpleCandleMixin<T extends Indicator> on PaintObject<T> {
+/// 绘制蜡烛图辅助Mixin
+mixin PaintCandleHelperMixin<T extends Indicator> on PaintObject<T> {
+  /// 主要用于SubBoll图和SubSar图中
   void paintSimpleCandleChart(
     Canvas canvas,
     Size size, {
     double? lineWidth, // 简易蜡烛线宽.
   }) {
     if (!klineData.canPaintChart) return;
-    final list = klineData.list;
-    int start = klineData.start;
-    int end = klineData.end;
+    final start = klineData.start;
+    final end = klineData.end;
 
     final offset = startCandleDx - candleWidthHalf;
-
-    CandleModel m;
+    final barWidthHalf = candleWidthHalf;
     for (var i = start; i < end; i++) {
-      m = list[i];
-      final dx = offset - (i - start) * candleActualWidth;
-      final isLong = m.close >= m.open;
-
-      final linePaint = isLong ? defLongLinePaint : defShortLinePaint;
-
-      if (lineWidth != null) linePaint.strokeWidth = lineWidth;
-
-      final highOff = Offset(dx, valueToDy(m.high));
-      final lowOff = Offset(dx, valueToDy(m.low));
-
-      canvas.drawLine(
-        highOff,
-        lowOff,
-        linePaint,
+      paintSimpleCandleBar(
+        canvas,
+        klineData[i],
+        dx: offset - (i - start) * candleActualWidth,
+        barWidthHalf: barWidthHalf,
       );
+    }
+  }
 
-      final openDy = valueToDy(m.open);
-      canvas.drawLine(
-        Offset(dx - candleWidthHalf, openDy),
-        Offset(dx, openDy),
-        linePaint,
-      );
+  /// 绘制单根简易蜡烛柱
+  void paintSimpleCandleBar(
+    Canvas canvas,
+    CandleModel m, {
+    required double dx,
+    double? high,
+    double? low,
+    double? open,
+    double? close,
+    double? barWidthHalf,
+  }) {
+    barWidthHalf ??= candleWidthHalf - candleSpacing;
+    final isLong = m.close >= m.open;
+    high ??= valueToDy(m.high);
+    low ??= valueToDy(m.low);
+    open ??= valueToDy(m.open);
+    close ??= valueToDy(m.close);
+    final barPath = Path();
+    barPath.moveTo(dx, high);
+    barPath.lineTo(dx, low);
+    barPath.moveTo(dx - barWidthHalf, open);
+    barPath.lineTo(dx, open);
+    barPath.moveTo(dx + barWidthHalf, close);
+    barPath.lineTo(dx, close);
+    canvas.drawPath(
+      barPath,
+      isLong ? defLongLinePaint : defShortLinePaint,
+    );
+  }
 
-      final closeDy = valueToDy(m.close);
-      canvas.drawLine(
-        Offset(dx, closeDy),
-        Offset(dx + candleWidthHalf, closeDy),
-        linePaint,
-      );
+  /// 绘制单根蜡烛柱(支持上涨下跌柱为空心或实心)
+  /// [open], [close], [low], [high]为蜡烛[m]在当前图表中转换后的坐标值, 若不传, 则实时计算.
+  /// [barWidthHalf]为蜡烛柱的宽度的一半, 若不传, 则实时计算.
+  /// [longCandleUseHollow]为上涨蜡烛柱是否使用空心绘制, 默认为false.
+  /// [shortCandleUseHollow]为下跌蜡烛柱是否使用空心绘制, 默认为false.
+  void paintCandleBar(
+    Canvas canvas,
+    CandleModel m, {
+    required double dx,
+    double? high,
+    double? low,
+    double? open,
+    double? close,
+    double? barWidthHalf,
+    bool longCandleUseHollow = false,
+    bool shortCandleUseHollow = false,
+  }) {
+    barWidthHalf ??= candleWidthHalf - candleSpacing;
+    final isLong = m.close >= m.open;
+    high ??= valueToDy(m.high);
+    low ??= valueToDy(m.low);
+    (open, close) = ensureMinDistance(
+      open ?? valueToDy(m.open),
+      close ?? valueToDy(m.close),
+    );
+    final barPath = Path();
+    barPath.moveTo(dx, high);
+    if (isLong) {
+      if (longCandleUseHollow) {
+        barPath.lineTo(dx, close);
+        barPath.addRect(Rect.fromPoints(
+          Offset(dx - barWidthHalf, close),
+          Offset(dx + barWidthHalf, open),
+        ));
+        if (low > open) {
+          barPath.moveTo(dx, low);
+          barPath.lineTo(dx, open);
+        }
+        canvas.drawPath(barPath, defLongLinePaint);
+      } else {
+        barPath.lineTo(dx, low);
+        canvas.drawPath(barPath, defLongLinePaint);
+        canvas.drawLine(
+          Offset(dx, open),
+          Offset(dx, close),
+          defLongBarPaint,
+        );
+      }
+    } else {
+      if (shortCandleUseHollow) {
+        barPath.lineTo(dx, open);
+        barPath.addRect(Rect.fromPoints(
+          Offset(dx - barWidthHalf, open),
+          Offset(dx + barWidthHalf, close),
+        ));
+        if (low > close) {
+          barPath.moveTo(dx, low);
+          barPath.lineTo(dx, close);
+        }
+        canvas.drawPath(barPath, defShortHollowBarPaint);
+      } else {
+        barPath.lineTo(dx, low);
+        canvas.drawPath(barPath, defShortLinePaint);
+        canvas.drawLine(
+          Offset(dx, open),
+          Offset(dx, close),
+          defShortBarPaint,
+        );
+      }
     }
   }
 }

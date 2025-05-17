@@ -17,11 +17,7 @@ part of 'indicator.dart';
 /// IndicatorObject: 保存Indicator配置
 /// 提供[Indicator]的所有属性
 abstract class IndicatorObject<T extends Indicator>
-    implements
-        Comparable<IndicatorObject<T>>,
-        IPaintBoundingBox,
-        IPaintDataInit,
-        IPaintObject {
+    implements Comparable<IndicatorObject<T>>, IPaintBoundingBox, IPaintDataInit, IPaintObject {
   IndicatorObject(this._indicator, this._context);
 
   // ignore: prefer_final_fields
@@ -42,6 +38,10 @@ abstract class IndicatorObject<T extends Indicator>
   int get zIndex => _indicator.zIndex;
   dynamic get calcParams => _indicator.calcParam;
 
+  /// 当前指标所使用的涨跌颜色
+  Color get longColor => theme.long;
+  Color get shortColor => theme.short;
+
   @override
   int compareTo(IndicatorObject<T> other) {
     return indicator.zIndex.compareTo(other.indicator.zIndex);
@@ -49,8 +49,7 @@ abstract class IndicatorObject<T extends Indicator>
 
   @override
   bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other is IndicatorObject && key == other.key);
+    return identical(this, other) || (other is IndicatorObject && key == other.key);
   }
 
   @override
@@ -87,8 +86,7 @@ abstract class PaintObject<T extends Indicator> extends IndicatorObject
 
   @protected
   bool shouldPrecompute(covariant T oldIndicator) {
-    return oldIndicator.calcParam != indicator.calcParam &&
-        indicator.calcParam != null;
+    return oldIndicator.calcParam != indicator.calcParam && indicator.calcParam != null;
   }
 
   // 指标配置发生变改
@@ -125,8 +123,7 @@ abstract class PaintObject<T extends Indicator> extends IndicatorObject
 }
 
 /// PaintObjectBox
-abstract class PaintObjectBox<T extends PaintObjectIndicator>
-    extends PaintObject {
+abstract class PaintObjectBox<T extends PaintObjectIndicator> extends PaintObject {
   PaintObjectBox({
     required super.context,
     required T super.indicator,
@@ -137,8 +134,7 @@ abstract class PaintObjectBox<T extends PaintObjectIndicator>
 }
 
 /// 蜡烛图绘制对象
-abstract class CandleBasePaintObject<T extends CandleBaseIndicator>
-    extends PaintObject {
+abstract class CandleBasePaintObject<T extends CandleBaseIndicator> extends PaintObject {
   CandleBasePaintObject({
     required super.context,
     required T super.indicator,
@@ -161,8 +157,7 @@ abstract class CandleBasePaintObject<T extends CandleBaseIndicator>
 }
 
 /// 时间轴指标绘制对象
-abstract class TimeBasePaintObject<T extends TimeBaseIndicator>
-    extends PaintObject {
+abstract class TimeBasePaintObject<T extends TimeBaseIndicator> extends PaintObject {
   TimeBasePaintObject({
     required super.context,
     required T super.indicator,
@@ -175,8 +170,7 @@ abstract class TimeBasePaintObject<T extends TimeBaseIndicator>
 }
 
 /// 主区绘制对象
-final class MainPaintObject<T extends MainPaintObjectIndicator>
-    extends PaintObject {
+final class MainPaintObject<T extends MainPaintObjectIndicator> extends PaintObject {
   MainPaintObject({
     required super.context,
     required T super.indicator,
