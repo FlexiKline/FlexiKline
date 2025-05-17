@@ -147,11 +147,10 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
         isLong ? defLongLinePaint : defShortLinePaint,
       );
 
-      final openOff = Offset(dx, valueToDy(m.open));
-      final closeOff = Offset(dx, valueToDy(m.close));
+      var (openDy, closeDy) = ensureMinDistance(valueToDy(m.open), valueToDy(m.close));
       canvas.drawLine(
-        openOff,
-        closeOff,
+        Offset(dx, openDy),
+        Offset(dx, closeDy),
         isLong ? defLongBarPaint : defShortBarPaint,
       );
 

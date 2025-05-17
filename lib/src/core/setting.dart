@@ -15,8 +15,7 @@
 part of 'core.dart';
 
 /// 负责FlexiKline的各种设置与配置的获取.
-mixin SettingBinding on KlineBindingBase
-    implements ISetting, IGrid, IChart, ICross, IDraw {
+mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICross, IDraw {
   @override
   void init() {
     super.init();
@@ -64,9 +63,15 @@ mixin SettingBinding on KlineBindingBase
   /// 当前而已模式.
   /// 初始值为NormalLayoutMode(mainIndicator.size)
   late LayoutMode _layoutMode;
-  @override
+
   LayoutMode get layoutMode => _layoutMode;
   bool get isFixedLayoutMode => _layoutMode is FixedLayoutMode;
+  @override
+  bool get isAllowUpdateLayoutHeight {
+    if (layoutMode is NormalLayoutMode) return true;
+    return layoutMode is AdaptLayoutMode;
+  }
+
   Size? get fixedSize {
     if (!isFixedLayoutMode) return null;
     return (_layoutMode as FixedLayoutMode).fixedSize;
@@ -226,7 +231,7 @@ mixin SettingBinding on KlineBindingBase
       if ((_layoutMode as AdaptLayoutMode).mainSize == size) {
         return true;
       }
-      // TODO: 待考虑是否删除sync标识
+      //~~ 是否删除sync标识 ~~
       _layoutMode = _layoutMode.update(
         size,
         syncMainSize,

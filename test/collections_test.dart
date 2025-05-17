@@ -14,6 +14,7 @@
 
 import 'dart:collection';
 
+import 'package:flexi_kline/src/extension/export.dart';
 import 'package:flexi_kline/src/framework/collection/fixed_hash_queue.dart';
 import 'package:flexi_kline/src/framework/collection/fifo_hash_map.dart';
 import 'package:flexi_kline/src/framework/collection/sortable_hash_set.dart';
@@ -203,6 +204,21 @@ void main() {
 
     debugPrint('list.len:${list.length}');
     debugPrint('list.len:${list.isEmpty}');
+  });
+
+  test('test secondWhereOrNull', () {
+    final list = [0, 1, 2];
+    var result = list.secondWhereOrNull((item) => item > 0);
+    debugPrint('result:$result');
+    expect(result, 2);
+
+    result = list.secondWhereOrNull((item) => item > 1);
+    debugPrint('result:$result');
+    expect(result, isNull);
+
+    result = list.secondWhereOrNull((item) => item > 2);
+    debugPrint('result:$result');
+    expect(result, isNull);
   });
 }
 

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'package:flexi_kline/src/model/export.dart';
+import 'package:flexi_kline/src/utils/algorithm_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -64,6 +65,24 @@ void main() {
   tearDownAll(() {
     stopwatch.stop();
     debugPrint('total spent:${stopwatch.elapsedMicroseconds}');
+  });
+
+  test('ensureMinDistance test', () {
+    var (a, b) = ensureMinDistance(0.1, 0.2);
+    debugPrint('a:$a ~ b:$b');
+    expect((a - b).abs() == 1, true);
+
+    (a, b) = ensureMinDistance(0.2, 0.1);
+    debugPrint('a:$a ~ b:$b');
+    expect((a - b).abs() == 1, true);
+
+    (a, b) = ensureMinDistance(10.2, 11.0);
+    debugPrint('a:$a ~ b:$b');
+    expect((a - b).abs() == 1, true);
+
+    (a, b) = ensureMinDistance(11.0, 10.2);
+    debugPrint('a:$a ~ b:$b');
+    expect((a - b).abs() == 1, true);
   });
 
   test('mergeCandleList empty list', () {
@@ -152,12 +171,7 @@ void main() {
 
   test('mergeCandleList before4', () {
     final curList = [Item(10), Item(9), Item(8)];
-    final newList = [
-      Item(10, '10-new'),
-      Item(9, '9-new'),
-      Item(8, '8-new'),
-      Item(7, '7-new')
-    ];
+    final newList = [Item(10, '10-new'), Item(9, '9-new'), Item(8, '8-new'), Item(7, '7-new')];
 
     final kData = KlineData(curList);
     final range = kData.mergeCandleLists(newList);
@@ -266,8 +280,7 @@ class KlineData {
 
     if (list.first.timestamp <= newList.first.timestamp) {
       int start = 0;
-      while (start < list.length &&
-          list[start].timestamp >= newList.last.timestamp) {
+      while (start < list.length && list[start].timestamp >= newList.last.timestamp) {
         start++;
       }
       final curIterable = list.getRange(start, list.length);

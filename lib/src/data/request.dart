@@ -22,7 +22,7 @@ mixin RequestData on BaseData {
   TimeBar? get timeBar => req.timeBar;
   bool get invalid => req.instId.isEmpty;
 
-  CandleReq updateRequest({RequestState state = RequestState.none}) {
+  CandleReq updateState({RequestState state = RequestState.none}) {
     req = req.copyWith(
       after: list.lastOrNull?.ts,
       before: list.firstOrNull?.ts,
@@ -35,6 +35,17 @@ mixin RequestData on BaseData {
     return req.copyWith(
       after: list.lastOrNull?.ts,
       before: null,
+    );
+  }
+
+  CandleReq getRefreshRequest([bool isRest = false]) {
+    if (isEmpty || isRest) {
+      return req.copyWith(after: null, before: null);
+    }
+    final model = list.secondWhereOrNull((m) => m.calcuData.dataList.hasValidData);
+    return req.copyWith(
+      after: null,
+      before: model?.ts,
     );
   }
 }

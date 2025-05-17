@@ -51,7 +51,6 @@ enum GestureType {
 }
 
 /// 手势事件
-/// TODO: 考虑更名为GestureEvent
 /// 针对[GestureType]的封装
 class GestureData {
   GestureData._internal({
@@ -67,20 +66,15 @@ class GestureData {
         _prevScale = scale,
         _state = state;
 
-  GestureData.tap(Offset offset)
-      : this._internal(offset: offset, type: GestureType.tap);
+  GestureData.tap(Offset offset) : this._internal(offset: offset, type: GestureType.tap);
 
-  GestureData.hover(Offset offset)
-      : this._internal(offset: offset, type: GestureType.hover);
+  GestureData.hover(Offset offset) : this._internal(offset: offset, type: GestureType.hover);
 
-  GestureData.long(Offset offset)
-      : this._internal(offset: offset, type: GestureType.long);
+  GestureData.long(Offset offset) : this._internal(offset: offset, type: GestureType.long);
 
-  GestureData.pan(Offset offset)
-      : this._internal(offset: offset, type: GestureType.pan);
+  GestureData.pan(Offset offset) : this._internal(offset: offset, type: GestureType.pan);
 
-  GestureData.move(Offset offset)
-      : this._internal(offset: offset, type: GestureType.move);
+  GestureData.move(Offset offset) : this._internal(offset: offset, type: GestureType.move);
 
   GestureData.zoom(Offset offset, {Offset? delta})
       : this._internal(

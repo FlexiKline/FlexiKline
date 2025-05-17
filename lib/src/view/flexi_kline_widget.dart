@@ -18,6 +18,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 
 import '../core/core.dart';
+import '../extension/basic_type_ext.dart';
 import '../framework/configuration.dart';
 import '../framework/logger.dart';
 import '../kline_controller.dart';
@@ -103,8 +104,7 @@ class FlexiKlineWidget extends StatefulWidget {
   State<FlexiKlineWidget> createState() => _FlexiKlineWidgetState();
 }
 
-class _FlexiKlineWidgetState extends State<FlexiKlineWidget>
-    with WidgetsBindingObserver, KlineLog {
+class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBindingObserver, KlineLog {
   @override
   String get logTag => 'FlexiKlineWidget';
 
@@ -401,8 +401,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget>
             );
           } else {
             alignment = AlignmentDirectional.topEnd;
-            final valueTxtWidth =
-                controller.drawState.object?.valueTicksSize?.width ?? 0;
+            final valueTxtWidth = controller.drawState.object?.valueTicksSize?.width ?? 0;
             margin = margin.copyWith(right: margin.right + valueTxtWidth);
             position = Offset(
               drawRect.right - margin.right - config.size.width / 2,
@@ -459,9 +458,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget>
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   fixedSize: Size(20, 20),
                   foregroundColor: theme.tooltipTextColor,
-                  backgroundColor: theme.tooltipBg.withAlpha(
-                    (0xFF * 0.8).round(),
-                  ),
+                  backgroundColor: theme.tooltipBg.withAlpha(0.8.alpha),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(4),
                   ),

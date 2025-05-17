@@ -49,8 +49,7 @@ class NormalLayoutMode extends LayoutMode {
 /// 自适应模式(Web/桌面端根据父布局[宽度]变化而变化)
 class AdaptLayoutMode extends LayoutMode {
   /// 适配模式可以从正常模式进入
-  const AdaptLayoutMode._(this.mainSize, [NormalLayoutMode? mode])
-      : super(mode);
+  const AdaptLayoutMode._(this.mainSize, [NormalLayoutMode? mode]) : super(mode);
 
   /// 根据[mainSize]与[mode]生成AdaptLayoutMode
   factory AdaptLayoutMode(Size mainSize, [LayoutMode? mode]) {
@@ -63,9 +62,7 @@ class AdaptLayoutMode extends LayoutMode {
       case FixedLayoutMode():
         return AdaptLayoutMode._(
           mainSize,
-          mode.prevMode is NormalLayoutMode
-              ? mode.prevMode as NormalLayoutMode
-              : null,
+          mode.prevMode is NormalLayoutMode ? mode.prevMode as NormalLayoutMode : null,
         );
     }
   }
@@ -179,7 +176,10 @@ abstract interface class IPaintContext implements IStorage, ILogger {
   IFlexiKlineTheme get theme;
 
   /// 是否是正常布局模式
-  LayoutMode get layoutMode;
+  // LayoutMode get layoutMode;
+  /// 是否允许更新而已高度
+  /// 注: 目前仅支持正常模式和适配模式下缓存高度的变化.
+  bool get isAllowUpdateLayoutHeight;
 
   /// 指标图是否已开始缩放
   bool get isStartZoomChart;

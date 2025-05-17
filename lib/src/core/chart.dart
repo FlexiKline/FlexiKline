@@ -15,9 +15,7 @@
 part of 'core.dart';
 
 /// 负责绘制蜡烛图以及相关指标图
-mixin ChartBinding
-    on KlineBindingBase, SettingBinding, StateBinding
-    implements IChart {
+mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding implements IChart {
   @override
   void init() {
     super.init();
@@ -105,10 +103,7 @@ mixin ChartBinding
   DateTime _lastPaintTime = DateTime.now();
   int get diffTime {
     // 计算两次绘制时间差
-    return _lastPaintTime
-        .difference(_lastPaintTime = DateTime.now())
-        .inMilliseconds
-        .abs();
+    return _lastPaintTime.difference(_lastPaintTime = DateTime.now()).inMilliseconds.abs();
   }
 
   void paintChart(Canvas canvas, Size size) {
@@ -196,7 +191,7 @@ mixin ChartBinding
       newState = RequestState.none;
     }
 
-    final request = curKlineData.updateRequest(state: newState);
+    final request = curKlineData.updateState(state: newState);
     logd('checkAndLoadMoreCandlesWhenPanEnd new candle request:$request');
 
     if (newState == RequestState.loadingMore && panDuration != null) {
@@ -231,8 +226,7 @@ mixin ChartBinding
         top: mainPadding.top + dyDelta,
         bottom: mainPadding.bottom - dyDelta,
       );
-      if (newPadding.top > mainSize.height ||
-          newPadding.bottom > mainSize.height) {
+      if (newPadding.top > mainSize.height || newPadding.bottom > mainSize.height) {
         return;
       }
 
@@ -345,9 +339,7 @@ mixin ChartBinding
     double delta = data.dyDelta / 2;
     if (delta == 0) return;
     if (delta > 0 &&
-        (!canSetMainSize() ||
-            mainMinSize.height >
-                (mainChartHeight + mainOriginPadding.height))) {
+        (!canSetMainSize() || mainMinSize.height > (mainChartHeight + mainOriginPadding.height))) {
       logw(
         'onChartZoomUpdate > cannot zoom($delta), mainSize:$mainSize is smaller than the minSize:$mainMinSize',
       );
@@ -359,8 +351,7 @@ mixin ChartBinding
       top: mainPadding.top + delta,
       bottom: mainPadding.bottom + delta,
     );
-    if (newPadding.top > mainSize.height ||
-        newPadding.bottom > mainSize.height) {
+    if (newPadding.top > mainSize.height || newPadding.bottom > mainSize.height) {
       return;
     }
 

@@ -142,6 +142,19 @@ extension FlexiIterableExt<T> on Iterable<T> {
     return result;
   }
 
+  /// The second element that continuously satisfying [test], or `null` element if there are none.
+  T? secondWhereOrNull(bool Function(T element) test) {
+    var iterator = this.iterator;
+    while (iterator.moveNext()) {
+      if (test(iterator.current)) {
+        if (iterator.moveNext() && test(iterator.current)) {
+          return iterator.current;
+        }
+      }
+    }
+    return null;
+  }
+
   /// The first element satisfying [test], or `null` if there are none.
   T? firstWhereOrNull(bool Function(T element) test) {
     for (var element in this) {

@@ -40,8 +40,7 @@ class IIndicatorKeyConvert implements JsonConverter<IIndicatorKey, String> {
   }
 }
 
-class SetIndicatorKeyConverter
-    implements JsonConverter<Set<IIndicatorKey>, List<dynamic>> {
+class SetIndicatorKeyConverter implements JsonConverter<Set<IIndicatorKey>, List<dynamic>> {
   const SetIndicatorKeyConverter();
 
   @override
@@ -155,8 +154,7 @@ class LineTypeConverter implements JsonConverter<LineType, String> {
   }
 }
 
-class EdgeInsetsConverter
-    implements JsonConverter<EdgeInsets, Map<String, dynamic>> {
+class EdgeInsetsConverter implements JsonConverter<EdgeInsets, Map<String, dynamic>> {
   const EdgeInsetsConverter();
 
   @override
@@ -196,8 +194,7 @@ class EdgeInsetsConverter
       return {};
     }
 
-    if (edgeInsets.left == edgeInsets.right &&
-        edgeInsets.top == edgeInsets.bottom) {
+    if (edgeInsets.left == edgeInsets.right && edgeInsets.top == edgeInsets.bottom) {
       return {
         "horizontal": edgeInsets.left,
         "vertical": edgeInsets.top,
@@ -269,8 +266,7 @@ class RectConverter implements JsonConverter<Rect, Map<String, dynamic>> {
   }
 }
 
-class BorderSideConvert
-    implements JsonConverter<BorderSide, Map<String, dynamic>> {
+class BorderSideConvert implements JsonConverter<BorderSide, Map<String, dynamic>> {
   const BorderSideConvert();
 
   @override
@@ -319,8 +315,7 @@ class BorderConverter implements JsonConverter<Border, Map<String, dynamic>> {
 }
 
 // 仅支持圆角类型
-class BorderRadiusConverter
-    implements JsonConverter<BorderRadius, Map<String, dynamic>> {
+class BorderRadiusConverter implements JsonConverter<BorderRadius, Map<String, dynamic>> {
   const BorderRadiusConverter();
 
   @override
@@ -368,13 +363,12 @@ class TextAlignConvert implements JsonConverter<TextAlign, String> {
   }
 }
 
-class TextStyleConverter
-    implements JsonConverter<TextStyle, Map<String, dynamic>> {
+class TextStyleConverter implements JsonConverter<TextStyle, Map<String, dynamic>> {
   const TextStyleConverter();
 
   @override
   TextStyle fromJson(Map<String, dynamic> json) {
-    if (json.isEmpty) return const TextStyle(); // TODO: 待优化.
+    if (json.isEmpty) return const TextStyle();
     return TextStyle(
       color: parseHexColor(json['color']),
       fontSize: parseDouble(json['fontSize']),
@@ -406,8 +400,7 @@ class TextStyleConverter
   }
 }
 
-class StrutStyleConverter
-    implements JsonConverter<StrutStyle, Map<String, dynamic>> {
+class StrutStyleConverter implements JsonConverter<StrutStyle, Map<String, dynamic>> {
   const StrutStyleConverter();
 
   @override
@@ -459,8 +452,7 @@ class ClipConverter implements JsonConverter<Clip, String> {
   }
 }
 
-class BoxShadowConverter
-    implements JsonConverter<BoxShadow, Map<String, dynamic>> {
+class BoxShadowConverter implements JsonConverter<BoxShadow, Map<String, dynamic>> {
   const BoxShadowConverter();
 
   @override
@@ -571,8 +563,7 @@ class MagnetModeConverter implements JsonConverter<MagnetMode, String> {
   }
 }
 
-class IDrawTypeConverter
-    implements JsonConverter<IDrawType, Map<String, dynamic>> {
+class IDrawTypeConverter implements JsonConverter<IDrawType, Map<String, dynamic>> {
   const IDrawTypeConverter();
 
   @override

@@ -16,7 +16,6 @@ part of 'indicator.dart';
 
 extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
   void setHeight(double height) {
-    // TODO: 增加配置项
     if (isAllowUpdateHeight) {
       _tmpHeight = null;
       // indicator中只保留正常布局模式/适配模式下的高度, 其他模式会根据当前父布局自适应.
@@ -123,8 +122,7 @@ extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
   }
 }
 
-extension MainPaintDelegateExt<T extends MainPaintObjectIndicator>
-    on MainPaintObject<T> {
+extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintObject<T> {
   @protected
   void setSize(Size size) {
     if (isAllowUpdateHeight) {
@@ -297,8 +295,7 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator>
   }
 }
 
-extension MainPaintManagerExt<T extends MainPaintObjectIndicator>
-    on MainPaintObject<T> {
+extension MainPaintManagerExt<T extends MainPaintObjectIndicator> on MainPaintObject<T> {
   void appendPaintObjects(Iterable<PaintObject> objects) {
     for (var object in objects) {
       appendPaintObject(object);

@@ -63,7 +63,7 @@ class KlineData extends BaseData with RequestData, CandleListData, PaintDrawData
       () => data.mergeCandleList(newList),
       debugLabel: 'mergeCandleList\t${newList.length}|$reset',
     );
-    data.updateRequest(); // 更新当前data的[CandleReq]的请求边界[before, after]
+    data.updateState(); // 更新当前data的[CandleReq]的请求边界[before, after]
 
     ///2. 确认要计算的范围.
     range ??= Range.empty;

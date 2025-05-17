@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-library flexi_kline;
+library;
 
 export 'src/core/core.dart';
 export 'src/constant.dart';
@@ -20,11 +20,7 @@ export 'src/config/export.dart';
 export 'src/data/kline_data.dart';
 export 'src/extension/export.dart';
 export 'src/framework/export.dart'
-    hide
-        PaintDelegateExt,
-        MainPaintDelegateExt,
-        MainPaintManagerExt,
-        IConfigurationExt;
+    hide PaintDelegateExt, MainPaintDelegateExt, MainPaintManagerExt, IConfigurationExt;
 export 'src/indicators/export.dart';
 export 'src/model/export.dart' hide GestureData;
 export 'src/utils/export.dart';

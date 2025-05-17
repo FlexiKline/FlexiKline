@@ -75,15 +75,14 @@ class TipsConfig {
   // 获取展示精度; 如果precision未指定, 使用def值.
   int getP(int def) => precision ?? def;
 
-  @Deprecated('废弃') // TODO: 废弃
-  Color get color => style.color ?? const Color(0xFF000000);
+  // @Deprecated('废弃')
+  //Color get color => style.color ?? const Color(0xFF000000);
 
   double get textHeight => textSize * (style.height ?? defaultTextHeight);
 
   double get textSize => style.fontSize ?? defaulTextSize;
 
-  factory TipsConfig.fromJson(Map<String, dynamic> json) =>
-      _$TipsConfigFromJson(json);
+  factory TipsConfig.fromJson(Map<String, dynamic> json) => _$TipsConfigFromJson(json);
 
   Map<String, dynamic> toJson() => _$TipsConfigToJson(this);
 }

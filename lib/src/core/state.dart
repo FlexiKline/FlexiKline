@@ -388,13 +388,13 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     if (forceStopCurReq || reqKey == curDataKey) {
       if (curKlineData.req.state != RequestState.none) {
         _updateCandleRequestListener(
-          curKlineData.updateRequest(state: RequestState.none),
+          curKlineData.updateState(state: RequestState.none),
         );
       }
     } else {
       if (reqKey != null) data = _klineDataCache[reqKey];
       if (data != null) {
-        data.updateRequest(state: RequestState.none);
+        data.updateState(state: RequestState.none);
       }
     }
   }

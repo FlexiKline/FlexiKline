@@ -17,7 +17,8 @@ part of 'indicator.dart';
 /// FlexiKlineController 状态/配置/接口代理
 extension IndicatorObjectExt on IndicatorObject {
   bool get isAllowUpdateHeight {
-    return _context.layoutMode is NormalLayoutMode || _context.layoutMode is AdaptLayoutMode;
+    // return _context.layoutMode is NormalLayoutMode || _context.layoutMode is AdaptLayoutMode;
+    return _context.isAllowUpdateLayoutHeight;
   }
 
   /// Config
