@@ -35,6 +35,10 @@ abstract class _$CandleIndicatorCWProxy {
 
   CandleIndicator shortColor(Color? shortColor);
 
+  CandleIndicator lineColor(Color? lineColor);
+
+  CandleIndicator klineZoomStyle(bool klineZoomStyle);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `CandleIndicator(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -56,6 +60,8 @@ abstract class _$CandleIndicatorCWProxy {
     bool shortCandleUseHollow,
     Color? longColor,
     Color? shortColor,
+    Color? lineColor,
+    bool klineZoomStyle,
   });
 }
 
@@ -113,6 +119,13 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
   CandleIndicator shortColor(Color? shortColor) => this(shortColor: shortColor);
 
   @override
+  CandleIndicator lineColor(Color? lineColor) => this(lineColor: lineColor);
+
+  @override
+  CandleIndicator klineZoomStyle(bool klineZoomStyle) =>
+      this(klineZoomStyle: klineZoomStyle);
+
+  @override
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `CandleIndicator(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -135,6 +148,8 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
     Object? shortCandleUseHollow = const $CopyWithPlaceholder(),
     Object? longColor = const $CopyWithPlaceholder(),
     Object? shortColor = const $CopyWithPlaceholder(),
+    Object? lineColor = const $CopyWithPlaceholder(),
+    Object? klineZoomStyle = const $CopyWithPlaceholder(),
   }) {
     return CandleIndicator(
       zIndex: zIndex == const $CopyWithPlaceholder()
@@ -194,6 +209,14 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
           ? _value.shortColor
           // ignore: cast_nullable_to_non_nullable
           : shortColor as Color?,
+      lineColor: lineColor == const $CopyWithPlaceholder()
+          ? _value.lineColor
+          // ignore: cast_nullable_to_non_nullable
+          : lineColor as Color?,
+      klineZoomStyle: klineZoomStyle == const $CopyWithPlaceholder()
+          ? _value.klineZoomStyle
+          // ignore: cast_nullable_to_non_nullable
+          : klineZoomStyle as bool,
     );
   }
 }
@@ -231,6 +254,9 @@ CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
           json['longColor'], const ColorConverter().fromJson),
       shortColor: _$JsonConverterFromJson<String, Color>(
           json['shortColor'], const ColorConverter().fromJson),
+      lineColor: _$JsonConverterFromJson<String, Color>(
+          json['lineColor'], const ColorConverter().fromJson),
+      klineZoomStyle: json['klineZoomStyle'] as bool? ?? true,
     );
 
 Map<String, dynamic> _$CandleIndicatorToJson(CandleIndicator instance) =>
@@ -251,6 +277,9 @@ Map<String, dynamic> _$CandleIndicatorToJson(CandleIndicator instance) =>
           instance.longColor, const ColorConverter().toJson),
       'shortColor': _$JsonConverterToJson<String, Color>(
           instance.shortColor, const ColorConverter().toJson),
+      'lineColor': _$JsonConverterToJson<String, Color>(
+          instance.lineColor, const ColorConverter().toJson),
+      'klineZoomStyle': instance.klineZoomStyle,
     };
 
 Value? _$JsonConverterFromJson<Json, Value>(

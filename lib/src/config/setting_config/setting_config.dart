@@ -96,7 +96,7 @@ class SettingConfig {
   final int candleSpacingParts;
   // 蜡烛空心柱的边框宽度
   final double candleHollowBarBorderWidth;
-  // 蜡烛高低线宽(high, low)
+  // 蜡烛空心线宽; 高低线宽(high, low)
   final double candleLineWidth;
   // Candle 第一根Candle相对于mainRect右边的偏移
   final double firstCandleInitOffset;
@@ -115,8 +115,7 @@ class SettingConfig {
     return candleSpacingParts.clamp(1, math.max(1, candleWidth.toInt()));
   }
 
-  factory SettingConfig.fromJson(Map<String, dynamic> json) =>
-      _$SettingConfigFromJson(json);
+  factory SettingConfig.fromJson(Map<String, dynamic> json) => _$SettingConfigFromJson(json);
 
   Map<String, dynamic> toJson() => _$SettingConfigToJson(this);
 }

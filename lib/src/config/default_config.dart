@@ -90,7 +90,8 @@ abstract class BaseFlexiKlineTheme implements IFlexiKlineTheme {
     required this.gridLine,
     required this.crossColor,
     required this.drawColor,
-    required this.markLine,
+    required this.markLineColor,
+    required this.lineChartColor,
     required this.themeColor,
     required this.textColor,
     required this.ticksTextColor,
@@ -130,7 +131,9 @@ abstract class BaseFlexiKlineTheme implements IFlexiKlineTheme {
   @override
   final Color drawColor;
   @override
-  final Color markLine;
+  final Color markLineColor;
+  @override
+  final Color lineChartColor;
 
   @override
   final Color themeColor;
@@ -227,7 +230,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
         dashes: const [3, 5],
         length: 20,
         paint: PaintConfig(
-          color: theme.markLine,
+          color: theme.markLineColor,
           strokeWidth: theme.pixel * 5,
         ),
       ),

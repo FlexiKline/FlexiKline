@@ -38,6 +38,8 @@ class CandleIndicator extends CandleBaseIndicator {
     this.shortCandleUseHollow = false,
     this.longColor,
     this.shortColor,
+    this.lineColor,
+    this.klineZoomStyle = true,
   });
 
   // 最高价
@@ -63,6 +65,10 @@ class CandleIndicator extends CandleBaseIndicator {
   final Color? longColor;
   // 自定义下跌颜色
   final Color? shortColor;
+  // 自定义line图颜色
+  final Color? lineColor;
+  // kline缩放样式: (true: CandleBar; false: LineChart)
+  final bool klineZoomStyle;
 
   @override
   CandlePaintObject createPaintObject(IPaintContext context) {
@@ -101,8 +107,22 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
 
   @override
   void paintChart(Canvas canvas, Size size) {
-    /// 绘制蜡烛图
-    paintCandleChart(canvas, size);
+    if (indicator.klineZoomStyle && candleWidth > 1) {
+      /// 绘制蜡烛柱状图
+      paintCandleBarChart(canvas, size);
+    } else {
+      /// 绘制蜡烛线图
+      parintCandleLineChart(
+        canvas,
+        start: klineData.start,
+        end: klineData.end,
+        startOffset: startCandleDx - candleWidthHalf,
+        linePaint: getLinePaint(
+          color: indicator.lineColor,
+          strokeWidth: candleLineWidth,
+        ),
+      );
+    }
 
     /// 绘制价钱刻度数据
     if (settingConfig.showYAxisTick) {
@@ -136,14 +156,13 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
     );
   }
 
-  /// 绘制蜡烛图
-  void paintCandleChart(Canvas canvas, Size size) {
+  /// 绘制蜡烛柱状图
+  void paintCandleBarChart(Canvas canvas, Size size) {
     if (!klineData.canPaintChart) {
       logw('paintCandleChart Data.list is empty or Index is out of bounds');
       return;
     }
 
-    final list = klineData.list;
     int start = klineData.start;
     int end = klineData.end;
 
@@ -152,11 +171,11 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
 
     Offset? maxHihgOffset, minLowOffset;
     bool hasEnough = paintDxOffset > 0;
-    BagNum maxHigh = list[start].high;
-    BagNum minLow = list[start].low;
+    BagNum maxHigh = klineData[start].high;
+    BagNum minLow = klineData[start].low;
     CandleModel m;
     for (var i = start; i < end; i++) {
-      m = list[i];
+      m = klineData[i];
       final dx = offset - (i - start) * candleActualWidth;
       final hight = valueToDy(m.high);
       final low = valueToDy(m.low);
@@ -229,7 +248,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
     canvas.drawLine(
       offset,
       endOffset,
-      markConfig.line.of(paintColor: theme.markLine).linePaint,
+      markConfig.line.of(paintColor: theme.markLineColor).linePaint,
     );
 
     final markText = markConfig.text.of(textColor: theme.textColor);
@@ -371,7 +390,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
         textConfig = latest.text.of(
           textColor: theme.textColor,
           background: theme.latestPriceTextBg,
-          borderColor: theme.markLine,
+          borderColor: theme.markLineColor,
         );
       }
 
@@ -391,7 +410,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
       latestPath.lineTo(ldx, dy);
       canvas.drawLineByConfig(
         latestPath,
-        latest.line.of(paintColor: theme.markLine),
+        latest.line.of(paintColor: theme.markLineColor),
       );
 
       /// 最新价文本和样式配置
@@ -447,7 +466,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
           countDown = indicator.countDown.of(
             textColor: theme.textColor,
             background: theme.countDownTextBg,
-            borderColor: theme.markLine,
+            borderColor: theme.markLineColor,
           );
         }
 
@@ -516,7 +535,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
       }
       canvas.drawLineByConfig(
         lastPath,
-        last.line.of(paintColor: theme.markLine),
+        last.line.of(paintColor: theme.markLineColor),
       );
 
       final text = formatPrice(

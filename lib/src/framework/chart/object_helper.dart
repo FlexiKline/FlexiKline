@@ -55,9 +55,11 @@ extension IndicatorObjectExt on IndicatorObject {
       );
 
   /// 指标图 涨跌 bar/line 配置
+  /// 涨跌浅色
   Color get longTintColor => longColor.withAlpha(settingConfig.opacity.alpha);
   Color get shortTintColor => shortColor.withAlpha(settingConfig.opacity.alpha);
-  // 实心
+
+  /// 涨跌色实心柱画笔
   Paint get defLongBarPaint => Paint()
     ..color = longColor
     ..style = PaintingStyle.stroke
@@ -66,7 +68,8 @@ extension IndicatorObjectExt on IndicatorObject {
     ..color = shortColor
     ..style = PaintingStyle.stroke
     ..strokeWidth = candleWidth;
-  // 实心, 浅色
+
+  /// 涨跌浅色实心柱画笔
   Paint get defLongTintBarPaint => Paint()
     ..color = longTintColor
     ..style = PaintingStyle.stroke
@@ -75,7 +78,8 @@ extension IndicatorObjectExt on IndicatorObject {
     ..color = shortTintColor
     ..style = PaintingStyle.stroke
     ..strokeWidth = candleWidth;
-  // 空心
+
+  /// 涨跌色空心柱画笔
   Paint get defLongHollowBarPaint => Paint()
     ..color = longColor
     ..style = PaintingStyle.stroke
@@ -84,7 +88,8 @@ extension IndicatorObjectExt on IndicatorObject {
     ..color = shortColor
     ..style = PaintingStyle.stroke
     ..strokeWidth = settingConfig.candleHollowBarBorderWidth;
-  // 线
+
+  /// 涨跌色线画笔
   Paint get defLongLinePaint => Paint()
     ..color = longColor
     ..style = PaintingStyle.stroke
@@ -93,6 +98,12 @@ extension IndicatorObjectExt on IndicatorObject {
     ..color = shortColor
     ..style = PaintingStyle.stroke
     ..strokeWidth = candleLineWidth;
+
+  /// 定制线画笔
+  Paint getLinePaint({Color? color, double? strokeWidth}) => Paint()
+    ..color = color ?? theme.lineChartColor
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = strokeWidth ?? candleLineWidth;
 }
 
 /// 绘制对象混入边界计算的通用扩展
@@ -356,20 +367,28 @@ mixin PaintCandleHelperMixin<T extends Indicator> on PaintObject<T> {
   void paintSimpleCandleChart(
     Canvas canvas,
     Size size, {
-    double? lineWidth, // 简易蜡烛线宽.
+    int? start,
+    int? end,
+    double? startOffset, // 起始偏移量.
+    double? strokeWidth, // 简易蜡烛线画笔宽度.
   }) {
     if (!klineData.canPaintChart) return;
-    final start = klineData.start;
-    final end = klineData.end;
+    start ??= klineData.start;
+    end ??= klineData.end;
+    startOffset ??= startCandleDx - candleWidthHalf;
 
-    final offset = startCandleDx - candleWidthHalf;
+    final longLinePaint = getLinePaint(color: longColor, strokeWidth: strokeWidth);
+    final shortLinePaint = getLinePaint(color: shortColor, strokeWidth: strokeWidth);
+
     final barWidthHalf = candleWidthHalf;
     for (var i = start; i < end; i++) {
       paintSimpleCandleBar(
         canvas,
         klineData[i],
-        dx: offset - (i - start) * candleActualWidth,
+        dx: startOffset - (i - start) * candleActualWidth,
         barWidthHalf: barWidthHalf,
+        longLinePaint: longLinePaint,
+        shortLinePaint: shortLinePaint,
       );
     }
   }
@@ -384,6 +403,8 @@ mixin PaintCandleHelperMixin<T extends Indicator> on PaintObject<T> {
     double? open,
     double? close,
     double? barWidthHalf,
+    required Paint longLinePaint,
+    required Paint shortLinePaint,
   }) {
     barWidthHalf ??= candleWidthHalf - candleSpacing;
     final isLong = m.close >= m.open;
@@ -398,10 +419,7 @@ mixin PaintCandleHelperMixin<T extends Indicator> on PaintObject<T> {
     barPath.lineTo(dx, open);
     barPath.moveTo(dx + barWidthHalf, close);
     barPath.lineTo(dx, close);
-    canvas.drawPath(
-      barPath,
-      isLong ? defLongLinePaint : defShortLinePaint,
-    );
+    canvas.drawPath(barPath, isLong ? longLinePaint : shortLinePaint);
   }
 
   /// 绘制单根蜡烛柱(支持上涨下跌柱为空心或实心)
@@ -474,6 +492,55 @@ mixin PaintCandleHelperMixin<T extends Indicator> on PaintObject<T> {
         );
       }
     }
+  }
+
+  /// 绘制蜡烛线图
+  void parintCandleLineChart(
+    Canvas canvas, {
+    int? start,
+    int? end,
+    double? startOffset, // 起始偏移量.
+    Paint? linePaint, // 蜡烛线图画笔.
+  }) {
+    if (!klineData.canPaintChart) return;
+    start ??= klineData.start;
+    end ??= klineData.end;
+    startOffset ??= startCandleDx - candleWidthHalf;
+
+    List<Offset> points = [];
+    CandleModel m;
+    for (var i = start; i < end; i++) {
+      m = klineData[i];
+      points.add(Offset(
+        startOffset - (i - start) * candleActualWidth,
+        valueToDy(m.close, correct: false),
+      ));
+    }
+    linePaint ??= getLinePaint();
+    canvas.drawPath(
+      Path()..addPolygon(points, false),
+      linePaint,
+    );
+
+    points.add(Offset(
+      startOffset - (end - start) * candleActualWidth,
+      chartRect.bottom,
+    ));
+    points.add(Offset(startOffset, chartRect.bottom));
+    canvas.drawPath(
+      Path()..addPolygon(points, true),
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: <Color>[
+            linePaint.color.withAlpha(0.5.alpha),
+            theme.transparent,
+          ],
+          stops: [0, 1],
+          tileMode: TileMode.decal,
+        ).createShader(chartRect),
+    );
   }
 }
 

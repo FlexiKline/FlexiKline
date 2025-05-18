@@ -83,7 +83,7 @@ class TestFlexiKlineTheme implements IFlexiKlineTheme {
   Color get drawColor => Colors.blueAccent;
 
   @override
-  Color markLine = const Color(0xFF000000);
+  Color markLineColor = Colors.blue;
 
   @override
   Color get themeColor => Colors.white;
@@ -110,6 +110,10 @@ class TestFlexiKlineTheme implements IFlexiKlineTheme {
   @override
   // TODO: implement dragBg
   Color get dragBg => throw UnimplementedError();
+
+  @override
+  // TODO: implement lineChartColor
+  Color get lineChartColor => throw UnimplementedError();
 }
 
 class TestFlexiKlineConfiguration with FlexiKlineThemeConfigurationMixin {
@@ -117,8 +121,7 @@ class TestFlexiKlineConfiguration with FlexiKlineThemeConfigurationMixin {
   IFlexiKlineTheme get theme => TestFlexiKlineTheme();
 
   @override
-  Map<IDrawType, DrawObjectBuilder<Overlay, DrawObject<Overlay>>>
-      get drawObjectBuilders {
+  Map<IDrawType, DrawObjectBuilder<Overlay, DrawObject<Overlay>>> get drawObjectBuilders {
     return {};
   }
 
