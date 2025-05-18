@@ -548,10 +548,11 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
         padding: theme.textPading,
         borderRadius: BorderRadius.all(Radius.circular(2 * theme.scale)),
       ),
-      longCandleUseHollow: instance?.longCandleUseHollow ?? false,
-      shortCandleUseHollow: instance?.shortCandleUseHollow ?? false,
+      klineChartStyle: instance?.klineChartStyle ?? ChartStyle.allSolid,
+      useLineChartForZoom: instance?.useLineChartForZoom ?? true,
       longColor: instance?.longColor,
       shortColor: instance?.shortColor,
+      lineColor: instance?.lineColor,
     );
   }
 

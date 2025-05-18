@@ -34,12 +34,11 @@ class CandleIndicator extends CandleBaseIndicator {
     // 倒计时, 在latest最新价之下展示
     this.showCountDown = true,
     required this.countDown,
-    this.longCandleUseHollow = false,
-    this.shortCandleUseHollow = false,
+    this.klineChartStyle = ChartStyle.allSolid,
+    this.useLineChartForZoom = true,
     this.longColor,
     this.shortColor,
     this.lineColor,
-    this.klineZoomStyle = true,
   });
 
   // 最高价
@@ -56,10 +55,10 @@ class CandleIndicator extends CandleBaseIndicator {
   final bool showCountDown;
   final TextAreaConfig countDown;
 
-  // 上涨是否使用空心蜡烛柱
-  final bool longCandleUseHollow;
-  // 下跌是否使用空心蜡烛柱
-  final bool shortCandleUseHollow;
+  // Kline图表样式
+  final ChartStyle klineChartStyle;
+  // Kline缩放到最小单位时使用线图
+  final bool useLineChartForZoom;
 
   // 自定义上涨颜色
   final Color? longColor;
@@ -67,8 +66,6 @@ class CandleIndicator extends CandleBaseIndicator {
   final Color? shortColor;
   // 自定义line图颜色
   final Color? lineColor;
-  // kline缩放样式: (true: CandleBar; false: LineChart)
-  final bool klineZoomStyle;
 
   @override
   CandlePaintObject createPaintObject(IPaintContext context) {
@@ -107,10 +104,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
 
   @override
   void paintChart(Canvas canvas, Size size) {
-    if (indicator.klineZoomStyle && candleWidth > 1) {
-      /// 绘制蜡烛柱状图
-      paintCandleBarChart(canvas, size);
-    } else {
+    if (indicator.useLineChartForZoom && candleWidth < 1) {
       /// 绘制蜡烛线图
       parintCandleLineChart(
         canvas,
@@ -122,6 +116,9 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
           strokeWidth: candleLineWidth,
         ),
       );
+    } else {
+      /// 绘制蜡烛柱状图
+      paintCandleChart(canvas, size);
     }
 
     /// 绘制价钱刻度数据
@@ -157,7 +154,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
   }
 
   /// 绘制蜡烛柱状图
-  void paintCandleBarChart(Canvas canvas, Size size) {
+  void paintCandleChart(Canvas canvas, Size size) {
     if (!klineData.canPaintChart) {
       logw('paintCandleChart Data.list is empty or Index is out of bounds');
       return;
@@ -186,8 +183,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
         high: hight,
         low: low,
         barWidthHalf: barWidthHalf,
-        longCandleUseHollow: indicator.longCandleUseHollow,
-        shortCandleUseHollow: indicator.shortCandleUseHollow,
+        chartStyle: indicator.klineChartStyle,
       );
 
       if (indicator.high.show) {

@@ -27,17 +27,15 @@ abstract class _$CandleIndicatorCWProxy {
 
   CandleIndicator countDown(TextAreaConfig countDown);
 
-  CandleIndicator longCandleUseHollow(bool longCandleUseHollow);
+  CandleIndicator klineChartStyle(ChartStyle klineChartStyle);
 
-  CandleIndicator shortCandleUseHollow(bool shortCandleUseHollow);
+  CandleIndicator useLineChartForZoom(bool useLineChartForZoom);
 
   CandleIndicator longColor(Color? longColor);
 
   CandleIndicator shortColor(Color? shortColor);
 
   CandleIndicator lineColor(Color? lineColor);
-
-  CandleIndicator klineZoomStyle(bool klineZoomStyle);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `CandleIndicator(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -56,12 +54,11 @@ abstract class _$CandleIndicatorCWProxy {
     bool useCandleColorAsLatestBg,
     bool showCountDown,
     TextAreaConfig countDown,
-    bool longCandleUseHollow,
-    bool shortCandleUseHollow,
+    ChartStyle klineChartStyle,
+    bool useLineChartForZoom,
     Color? longColor,
     Color? shortColor,
     Color? lineColor,
-    bool klineZoomStyle,
   });
 }
 
@@ -105,12 +102,12 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
       this(countDown: countDown);
 
   @override
-  CandleIndicator longCandleUseHollow(bool longCandleUseHollow) =>
-      this(longCandleUseHollow: longCandleUseHollow);
+  CandleIndicator klineChartStyle(ChartStyle klineChartStyle) =>
+      this(klineChartStyle: klineChartStyle);
 
   @override
-  CandleIndicator shortCandleUseHollow(bool shortCandleUseHollow) =>
-      this(shortCandleUseHollow: shortCandleUseHollow);
+  CandleIndicator useLineChartForZoom(bool useLineChartForZoom) =>
+      this(useLineChartForZoom: useLineChartForZoom);
 
   @override
   CandleIndicator longColor(Color? longColor) => this(longColor: longColor);
@@ -120,10 +117,6 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
 
   @override
   CandleIndicator lineColor(Color? lineColor) => this(lineColor: lineColor);
-
-  @override
-  CandleIndicator klineZoomStyle(bool klineZoomStyle) =>
-      this(klineZoomStyle: klineZoomStyle);
 
   @override
 
@@ -144,12 +137,11 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
     Object? useCandleColorAsLatestBg = const $CopyWithPlaceholder(),
     Object? showCountDown = const $CopyWithPlaceholder(),
     Object? countDown = const $CopyWithPlaceholder(),
-    Object? longCandleUseHollow = const $CopyWithPlaceholder(),
-    Object? shortCandleUseHollow = const $CopyWithPlaceholder(),
+    Object? klineChartStyle = const $CopyWithPlaceholder(),
+    Object? useLineChartForZoom = const $CopyWithPlaceholder(),
     Object? longColor = const $CopyWithPlaceholder(),
     Object? shortColor = const $CopyWithPlaceholder(),
     Object? lineColor = const $CopyWithPlaceholder(),
-    Object? klineZoomStyle = const $CopyWithPlaceholder(),
   }) {
     return CandleIndicator(
       zIndex: zIndex == const $CopyWithPlaceholder()
@@ -193,14 +185,14 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
           ? _value.countDown
           // ignore: cast_nullable_to_non_nullable
           : countDown as TextAreaConfig,
-      longCandleUseHollow: longCandleUseHollow == const $CopyWithPlaceholder()
-          ? _value.longCandleUseHollow
+      klineChartStyle: klineChartStyle == const $CopyWithPlaceholder()
+          ? _value.klineChartStyle
           // ignore: cast_nullable_to_non_nullable
-          : longCandleUseHollow as bool,
-      shortCandleUseHollow: shortCandleUseHollow == const $CopyWithPlaceholder()
-          ? _value.shortCandleUseHollow
+          : klineChartStyle as ChartStyle,
+      useLineChartForZoom: useLineChartForZoom == const $CopyWithPlaceholder()
+          ? _value.useLineChartForZoom
           // ignore: cast_nullable_to_non_nullable
-          : shortCandleUseHollow as bool,
+          : useLineChartForZoom as bool,
       longColor: longColor == const $CopyWithPlaceholder()
           ? _value.longColor
           // ignore: cast_nullable_to_non_nullable
@@ -213,10 +205,6 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
           ? _value.lineColor
           // ignore: cast_nullable_to_non_nullable
           : lineColor as Color?,
-      klineZoomStyle: klineZoomStyle == const $CopyWithPlaceholder()
-          ? _value.klineZoomStyle
-          // ignore: cast_nullable_to_non_nullable
-          : klineZoomStyle as bool,
     );
   }
 }
@@ -248,15 +236,17 @@ CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
       showCountDown: json['showCountDown'] as bool? ?? true,
       countDown:
           TextAreaConfig.fromJson(json['countDown'] as Map<String, dynamic>),
-      longCandleUseHollow: json['longCandleUseHollow'] as bool? ?? false,
-      shortCandleUseHollow: json['shortCandleUseHollow'] as bool? ?? false,
+      klineChartStyle: json['klineChartStyle'] == null
+          ? ChartStyle.allSolid
+          : const ChartStyleConverter()
+              .fromJson(json['klineChartStyle'] as String),
+      useLineChartForZoom: json['useLineChartForZoom'] as bool? ?? true,
       longColor: _$JsonConverterFromJson<String, Color>(
           json['longColor'], const ColorConverter().fromJson),
       shortColor: _$JsonConverterFromJson<String, Color>(
           json['shortColor'], const ColorConverter().fromJson),
       lineColor: _$JsonConverterFromJson<String, Color>(
           json['lineColor'], const ColorConverter().fromJson),
-      klineZoomStyle: json['klineZoomStyle'] as bool? ?? true,
     );
 
 Map<String, dynamic> _$CandleIndicatorToJson(CandleIndicator instance) =>
@@ -271,15 +261,15 @@ Map<String, dynamic> _$CandleIndicatorToJson(CandleIndicator instance) =>
       'useCandleColorAsLatestBg': instance.useCandleColorAsLatestBg,
       'showCountDown': instance.showCountDown,
       'countDown': instance.countDown.toJson(),
-      'longCandleUseHollow': instance.longCandleUseHollow,
-      'shortCandleUseHollow': instance.shortCandleUseHollow,
+      'klineChartStyle':
+          const ChartStyleConverter().toJson(instance.klineChartStyle),
+      'useLineChartForZoom': instance.useLineChartForZoom,
       'longColor': _$JsonConverterToJson<String, Color>(
           instance.longColor, const ColorConverter().toJson),
       'shortColor': _$JsonConverterToJson<String, Color>(
           instance.shortColor, const ColorConverter().toJson),
       'lineColor': _$JsonConverterToJson<String, Color>(
           instance.lineColor, const ColorConverter().toJson),
-      'klineZoomStyle': instance.klineZoomStyle,
     };
 
 Value? _$JsonConverterFromJson<Json, Value>(

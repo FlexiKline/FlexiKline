@@ -14,6 +14,19 @@
 
 part of 'indicator.dart';
 
+/// K线图绘制样式
+enum ChartStyle {
+  allSolid, // 全实心
+  allHollow, // 全空心
+  upHollow, // 上涨空心
+  downHollow, // 下跌空心
+  ohlcChart; // Open-high-low-close chart(美国线)
+
+  bool get isHollowUp => this == ChartStyle.upHollow || this == ChartStyle.allHollow;
+
+  bool get isHollowDown => this == ChartStyle.downHollow || this == ChartStyle.allHollow;
+}
+
 /// Indicator绘制模式
 ///
 /// 注: PaintMode仅当Indicator加入MultiPaintObjectIndicator后起作用,
@@ -67,9 +80,7 @@ final class FlexiIndicatorKey implements IIndicatorKey {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is FlexiIndicatorKey &&
-        runtimeType == other.runtimeType &&
-        id == other.id;
+    return other is FlexiIndicatorKey && runtimeType == other.runtimeType && id == other.id;
   }
 
   @override
