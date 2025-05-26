@@ -14,13 +14,20 @@
 
 part of 'indicator.dart';
 
+// K线图绘制类型
+enum ChartType {
+  bar, // 蜡烛图
+  line, // 折线图
+  lineUpdown; // 涨跌线图
+}
+
 /// K线图绘制样式
 enum ChartStyle {
   allSolid, // 全实心
   allHollow, // 全空心
   upHollow, // 上涨空心
   downHollow, // 下跌空心
-  ohlcChart; // Open-high-low-close chart(美国线)
+  ohlc; // Open-high-low-close chart(美国线)
 
   bool get isHollowUp => this == ChartStyle.upHollow || this == ChartStyle.allHollow;
 

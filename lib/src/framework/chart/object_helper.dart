@@ -290,7 +290,7 @@ mixin PaintYAxisTicksMixin<T extends Indicator> on PaintObject<T> {
       final value = dyToValue(dy);
       if (value == null) continue;
 
-      final text = fromatTicksValue(value, precision: precision);
+      final text = formatTicksValue(value, precision: precision);
 
       final ticksText = defTicksTextConfig;
 
@@ -309,12 +309,11 @@ mixin PaintYAxisTicksMixin<T extends Indicator> on PaintObject<T> {
 
   /// 如果要定制格式化刻度值. 在PaintObject中覆写此方法.
   @protected
-  String fromatTicksValue(BagNum value, {required int precision}) {
-    return formatNumber(
+  String formatTicksValue(BagNum value, {required int precision}) {
+    return formatPrice(
       value.toDecimal(),
       precision: precision,
       defIfZero: '0.00',
-      enableCompact: true,
     );
   }
 }
@@ -352,11 +351,10 @@ mixin PaintYAxisTicksOnCrossMixin<T extends Indicator> on PaintObject<T> {
 
   @protected
   String formatTicksValueOnCross(BagNum value, {required int precision}) {
-    return formatNumber(
+    return formatPrice(
       value.toDecimal(),
       precision: precision,
       defIfZero: '0.00',
-      enableCompact: true,
     );
   }
 }
@@ -383,7 +381,7 @@ mixin PaintCandleHelperMixin<T extends Indicator> on PaintObject<T> {
         klineData[i],
         dx: startOffset - (i - start) * candleActualWidth,
         barWidthHalf: barWidthHalf,
-        chartStyle: ChartStyle.ohlcChart,
+        chartStyle: ChartStyle.ohlc,
       );
     }
   }
@@ -413,7 +411,7 @@ mixin PaintCandleHelperMixin<T extends Indicator> on PaintObject<T> {
     );
 
     final path = Path()..moveTo(dx, high);
-    if (chartStyle == ChartStyle.ohlcChart) {
+    if (chartStyle == ChartStyle.ohlc) {
       path.moveTo(dx, high);
       path.lineTo(dx, low);
       path.moveTo(dx - barWidthHalf, open);
@@ -467,7 +465,7 @@ mixin PaintCandleHelperMixin<T extends Indicator> on PaintObject<T> {
   }
 
   /// 绘制蜡烛线图
-  void parintCandleLineChart(
+  void paintCandleLineChart(
     Canvas canvas, {
     int? start,
     int? end,
@@ -488,31 +486,118 @@ mixin PaintCandleHelperMixin<T extends Indicator> on PaintObject<T> {
         valueToDy(m.close, correct: false),
       ));
     }
-    linePaint ??= getLinePaint();
+
+    final linePaint = getLinePaint();
+    _paintLineChart(
+      canvas,
+      points: points,
+      boundLeft: Offset(points.last.dx, chartRect.bottom),
+      boundRight: Offset(points.first.dx, chartRect.bottom),
+      linePaint: linePaint,
+      shader: LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: <Color>[
+          linePaint.color.withAlpha(0.5.alpha),
+          theme.transparent,
+        ],
+        stops: [0, 1],
+        tileMode: TileMode.decal,
+      ),
+    );
+  }
+
+  void _paintLineChart(
+    Canvas canvas, {
+    required List<Offset> points, // 绘制线
+    required Offset boundLeft, // 左边界坐标
+    required Offset boundRight, // 右边界坐标
+    required Paint linePaint, // 蜡烛线图画笔.
+    required LinearGradient shader, // 阴影配置.
+  }) {
     canvas.drawPath(
       Path()..addPolygon(points, false),
       linePaint,
     );
-
-    points.add(Offset(
-      startOffset - (end - start) * candleActualWidth,
-      chartRect.bottom,
-    ));
-    points.add(Offset(startOffset, chartRect.bottom));
+    points.add(boundLeft);
+    points.add(boundRight);
+    final path = Path()..addPolygon(points, true);
     canvas.drawPath(
-      Path()..addPolygon(points, true),
-      Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: <Color>[
-            linePaint.color.withAlpha(0.5.alpha),
-            theme.transparent,
-          ],
-          stops: [0, 1],
-          tileMode: TileMode.decal,
-        ).createShader(chartRect),
+      path,
+      Paint()..shader = shader.createShader(path.getBounds()),
     );
+  }
+
+  /// 绘制蜡烛线图(涨跌)
+  void parintCandleLineUpDownChart(
+    Canvas canvas, {
+    int? start,
+    int? end,
+    double? startOffset, // 起始偏移量.
+  }) {
+    if (!klineData.canPaintChart) return;
+    start ??= klineData.start;
+    end ??= klineData.end;
+    startOffset ??= startCandleDx - candleWidthHalf;
+
+    final barWidthHalf = candleWidthHalf;
+    final double latestDy = valueToDy(klineData.latest!.close, correct: false);
+    List<Offset> points = [];
+    double dx, dy;
+    bool isLong = valueToDy(klineData[start].close, correct: false) <= latestDy;
+    for (var i = start; i < end; i++) {
+      dx = startOffset - (i - start) * candleActualWidth;
+      dy = valueToDy(klineData[i].close, correct: false);
+      if (dy <= latestDy == isLong) {
+        points.add(Offset(dx, dy));
+      } else {
+        points.add(Offset(dx + barWidthHalf, latestDy));
+        if (isLong) {
+          // 绘制上涨区间的线图
+          _paintLineChart(
+            canvas,
+            points: points,
+            boundLeft: Offset(points.last.dx, latestDy),
+            boundRight: Offset(points.first.dx, latestDy),
+            linePaint: getLinePaint(color: theme.long),
+            shader: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: <Color>[
+                theme.long.withAlpha(0.5.alpha),
+                theme.transparent,
+              ],
+              stops: [0, 1],
+              tileMode: TileMode.decal,
+            ),
+          );
+        } else {
+          // 绘制下跌区间的线图
+          _paintLineChart(
+            canvas,
+            points: points,
+            boundLeft: Offset(points.last.dx, latestDy),
+            boundRight: Offset(points.first.dx, latestDy),
+            linePaint: getLinePaint(color: theme.short),
+            shader: LinearGradient(
+              begin: Alignment.bottomCenter,
+              end: Alignment.topCenter,
+              colors: <Color>[
+                theme.short.withAlpha(0.5.alpha),
+                theme.transparent,
+              ],
+              stops: [0, 1],
+              tileMode: TileMode.decal,
+            ),
+          );
+        }
+        points.clear();
+        isLong = !isLong;
+        points.add(Offset(dx + barWidthHalf, latestDy));
+        points.add(Offset(dx, dy));
+        points.add(Offset(dx - barWidthHalf, latestDy));
+      }
+    }
   }
 }
 

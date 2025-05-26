@@ -34,7 +34,8 @@ class CandleIndicator extends CandleBaseIndicator {
     // 倒计时, 在latest最新价之下展示
     this.showCountDown = true,
     required this.countDown,
-    this.klineChartStyle = ChartStyle.allSolid,
+    this.chartType = ChartType.bar,
+    this.chartStyle = ChartStyle.allSolid,
     this.useLineChartForZoom = true,
     this.longColor,
     this.shortColor,
@@ -55,8 +56,10 @@ class CandleIndicator extends CandleBaseIndicator {
   final bool showCountDown;
   final TextAreaConfig countDown;
 
+  // Kline图表类型
+  final ChartType chartType;
   // Kline图表样式
-  final ChartStyle klineChartStyle;
+  final ChartStyle chartStyle;
   // Kline缩放到最小单位时使用线图
   final bool useLineChartForZoom;
 
@@ -104,21 +107,44 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
 
   @override
   void paintChart(Canvas canvas, Size size) {
-    if (indicator.useLineChartForZoom && candleWidth < 1) {
-      /// 绘制蜡烛线图
-      parintCandleLineChart(
-        canvas,
-        start: klineData.start,
-        end: klineData.end,
-        startOffset: startCandleDx - candleWidthHalf,
-        linePaint: getLinePaint(
-          color: indicator.lineColor,
-          strokeWidth: candleLineWidth,
-        ),
-      );
-    } else {
-      /// 绘制蜡烛柱状图
-      paintCandleChart(canvas, size);
+    switch (indicator.chartType) {
+      case ChartType.bar:
+        if (indicator.useLineChartForZoom && candleWidth < 1) {
+          /// 绘制蜡烛线图
+          paintCandleLineChart(
+            canvas,
+            start: klineData.start,
+            end: klineData.end,
+            startOffset: startCandleDx - candleWidthHalf,
+            linePaint: getLinePaint(
+              color: indicator.lineColor,
+              strokeWidth: candleLineWidth,
+            ),
+          );
+        } else {
+          /// 绘制蜡烛柱状图
+          paintCandleBarChart(canvas, size);
+        }
+      case ChartType.line:
+        // 绘制蜡烛线图
+        paintCandleLineChart(
+          canvas,
+          start: klineData.start,
+          end: klineData.end,
+          startOffset: startCandleDx - candleWidthHalf,
+          linePaint: getLinePaint(
+            color: indicator.lineColor,
+            strokeWidth: candleLineWidth,
+          ),
+        );
+      case ChartType.lineUpdown:
+        // 绘制蜡烛线图
+        parintCandleLineUpDownChart(
+          canvas,
+          start: klineData.start,
+          end: klineData.end,
+          startOffset: startCandleDx - candleWidthHalf,
+        );
     }
 
     /// 绘制价钱刻度数据
@@ -154,9 +180,9 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
   }
 
   /// 绘制蜡烛柱状图
-  void paintCandleChart(Canvas canvas, Size size) {
+  void paintCandleBarChart(Canvas canvas, Size size) {
     if (!klineData.canPaintChart) {
-      logw('paintCandleChart Data.list is empty or Index is out of bounds');
+      logw('paintCandleBarChart Data.list is empty or Index is out of bounds');
       return;
     }
 
@@ -183,7 +209,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
         high: hight,
         low: low,
         barWidthHalf: barWidthHalf,
-        chartStyle: indicator.klineChartStyle,
+        chartStyle: indicator.chartStyle,
       );
 
       if (indicator.high.show) {

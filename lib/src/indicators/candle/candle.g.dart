@@ -27,7 +27,9 @@ abstract class _$CandleIndicatorCWProxy {
 
   CandleIndicator countDown(TextAreaConfig countDown);
 
-  CandleIndicator klineChartStyle(ChartStyle klineChartStyle);
+  CandleIndicator chartType(ChartType chartType);
+
+  CandleIndicator chartStyle(ChartStyle chartStyle);
 
   CandleIndicator useLineChartForZoom(bool useLineChartForZoom);
 
@@ -54,7 +56,8 @@ abstract class _$CandleIndicatorCWProxy {
     bool useCandleColorAsLatestBg,
     bool showCountDown,
     TextAreaConfig countDown,
-    ChartStyle klineChartStyle,
+    ChartType chartType,
+    ChartStyle chartStyle,
     bool useLineChartForZoom,
     Color? longColor,
     Color? shortColor,
@@ -102,8 +105,11 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
       this(countDown: countDown);
 
   @override
-  CandleIndicator klineChartStyle(ChartStyle klineChartStyle) =>
-      this(klineChartStyle: klineChartStyle);
+  CandleIndicator chartType(ChartType chartType) => this(chartType: chartType);
+
+  @override
+  CandleIndicator chartStyle(ChartStyle chartStyle) =>
+      this(chartStyle: chartStyle);
 
   @override
   CandleIndicator useLineChartForZoom(bool useLineChartForZoom) =>
@@ -137,7 +143,8 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
     Object? useCandleColorAsLatestBg = const $CopyWithPlaceholder(),
     Object? showCountDown = const $CopyWithPlaceholder(),
     Object? countDown = const $CopyWithPlaceholder(),
-    Object? klineChartStyle = const $CopyWithPlaceholder(),
+    Object? chartType = const $CopyWithPlaceholder(),
+    Object? chartStyle = const $CopyWithPlaceholder(),
     Object? useLineChartForZoom = const $CopyWithPlaceholder(),
     Object? longColor = const $CopyWithPlaceholder(),
     Object? shortColor = const $CopyWithPlaceholder(),
@@ -185,10 +192,14 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
           ? _value.countDown
           // ignore: cast_nullable_to_non_nullable
           : countDown as TextAreaConfig,
-      klineChartStyle: klineChartStyle == const $CopyWithPlaceholder()
-          ? _value.klineChartStyle
+      chartType: chartType == const $CopyWithPlaceholder()
+          ? _value.chartType
           // ignore: cast_nullable_to_non_nullable
-          : klineChartStyle as ChartStyle,
+          : chartType as ChartType,
+      chartStyle: chartStyle == const $CopyWithPlaceholder()
+          ? _value.chartStyle
+          // ignore: cast_nullable_to_non_nullable
+          : chartStyle as ChartStyle,
       useLineChartForZoom: useLineChartForZoom == const $CopyWithPlaceholder()
           ? _value.useLineChartForZoom
           // ignore: cast_nullable_to_non_nullable
@@ -236,10 +247,12 @@ CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
       showCountDown: json['showCountDown'] as bool? ?? true,
       countDown:
           TextAreaConfig.fromJson(json['countDown'] as Map<String, dynamic>),
-      klineChartStyle: json['klineChartStyle'] == null
+      chartType: json['chartType'] == null
+          ? ChartType.bar
+          : const ChartTypeConverter().fromJson(json['chartType'] as String),
+      chartStyle: json['chartStyle'] == null
           ? ChartStyle.allSolid
-          : const ChartStyleConverter()
-              .fromJson(json['klineChartStyle'] as String),
+          : const ChartStyleConverter().fromJson(json['chartStyle'] as String),
       useLineChartForZoom: json['useLineChartForZoom'] as bool? ?? true,
       longColor: _$JsonConverterFromJson<String, Color>(
           json['longColor'], const ColorConverter().fromJson),
@@ -261,8 +274,8 @@ Map<String, dynamic> _$CandleIndicatorToJson(CandleIndicator instance) =>
       'useCandleColorAsLatestBg': instance.useCandleColorAsLatestBg,
       'showCountDown': instance.showCountDown,
       'countDown': instance.countDown.toJson(),
-      'klineChartStyle':
-          const ChartStyleConverter().toJson(instance.klineChartStyle),
+      'chartType': const ChartTypeConverter().toJson(instance.chartType),
+      'chartStyle': const ChartStyleConverter().toJson(instance.chartStyle),
       'useLineChartForZoom': instance.useLineChartForZoom,
       'longColor': _$JsonConverterToJson<String, Color>(
           instance.longColor, const ColorConverter().toJson),

@@ -69,6 +69,21 @@ class PaintModeConverter implements JsonConverter<PaintMode, String> {
   String toJson(PaintMode mode) => mode.name;
 }
 
+class ChartTypeConverter implements JsonConverter<ChartType, String> {
+  const ChartTypeConverter();
+
+  @override
+  ChartType fromJson(String json) {
+    return ChartType.values.firstWhere(
+      (e) => e.name.equalsIgnoreCase(json),
+      orElse: () => ChartType.bar,
+    );
+  }
+
+  @override
+  String toJson(ChartType style) => style.name;
+}
+
 class ChartStyleConverter implements JsonConverter<ChartStyle, String> {
   const ChartStyleConverter();
 
@@ -638,6 +653,7 @@ const FlexiIndicatorSerializable = JsonSerializable(
     IIndicatorKeyConvert(),
     PaintModeConverter(),
     ChartStyleConverter(),
+    ChartTypeConverter(),
     ..._basicConverterList,
   ],
   explicitToJson: true,

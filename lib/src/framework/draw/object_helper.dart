@@ -387,10 +387,13 @@ mixin DrawObjectMixin on DrawStateObject {
   }
 
   /// 格式化价值刻度文本
-  /// TODO: 此处考虑与[CandlePaintObject].formatMarkValueOnCross保持统一.
   @protected
   String formatValueTicksText(BagNum value, {int precision = 0}) {
-    return formatNumber(value.toDecimal(), precision: precision);
+    return formatPrice(
+      value.toDecimal(),
+      precision: precision,
+      cutInvalidZero: false,
+    );
   }
 }
 

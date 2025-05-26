@@ -34,4 +34,37 @@ extension FlexiKlineString on String {
   bool containsIgnoreCase(String? value) {
     return value != null && toLowerCase().contains(value.toLowerCase());
   }
+
+  /// Convert to camelCase
+  String toCamelCase() {
+    // Handle empty or null string
+    if (isEmpty) return '';
+
+    // Split the string by underscores or hyphens
+    List<String> words = split(RegExp(r'[_\-\s]'));
+
+    // Capitalize each word except the first
+    return words.asMap().entries.map((entry) {
+      int index = entry.key;
+      String word = entry.value;
+
+      // First word stays lowercase, others get capitalized
+      return index == 0 ? word.toLowerCase() : word.capitalize();
+    }).join();
+  }
+
+  /// Convert to snake_case
+  String toSnakeCase() {
+    return replaceAllMapped(RegExp(r'([A-Z])'), (Match match) {
+      return '_${match.group(0)!.toLowerCase()}';
+    }).toLowerCase();
+  }
+
+  /// Remove all whitespace
+  String get removeWhitespace => replaceAll(RegExp(r'\s+'), '');
+
+  /// Remove special characters
+  String trimSpecialCharacters() {
+    return replaceAll(RegExp(r'[^a-zA-Z0-9 ]'), '');
+  }
 }

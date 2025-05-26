@@ -84,7 +84,7 @@ enum ComputeMode {
 /// 香港时间开盘价k线：[6H/12H/1D/2D/3D/1W/1M/3M]
 /// UTC时间开盘价k线：[/6Hutc/12Hutc/1Dutc/2Dutc/3Dutc/1Wutc/1Mutc/3Mutc]
 enum TimeBar {
-  // time(1000, 'time'), // 暂不支持; v0.8.0支持
+  // time('1m', 1, TimeUnit.minute), // 1分钟线图
   s1('1s', 1, TimeUnit.second),
   m1('1m', 1, TimeUnit.minute),
   m3('3m', 3, TimeUnit.minute),
