@@ -548,6 +548,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
         padding: theme.textPading,
         borderRadius: BorderRadius.all(Radius.circular(2 * theme.scale)),
       ),
+      chartType: instance?.chartType ?? ChartType.bar,
       chartStyle: instance?.chartStyle ?? ChartStyle.allSolid,
       useLineChartForZoom: instance?.useLineChartForZoom ?? true,
       longColor: instance?.longColor,

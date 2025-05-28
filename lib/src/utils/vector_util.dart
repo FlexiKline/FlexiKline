@@ -51,7 +51,23 @@ final class LineEquation {
   }
 }
 
-/// 计算点[P]到由[A]与[B]两点组成延长线的距离
+/// 计算Y轴坐标[dy]在由[A]-[B]两点组成的直线的斜率上对应的X轴坐标[dx]
+double getDxAtDyOnAB(Offset A, Offset B, double dy) {
+  if (A.dy == B.dy) return A.dx;
+  if (A.dx == B.dx) return dy;
+  final k = (B.dy - A.dy) / (B.dx - A.dx);
+  return (dy - B.dy) / k + B.dx;
+}
+
+/// 计算X轴坐标[dx]在由[A]-[B]两点组成的直线的斜率上对应的Y轴坐标[dy]
+double getDyAtDxOnAB(Offset A, Offset B, double dx) {
+  if (A.dy == B.dy) return A.dy;
+  if (A.dx == B.dx) return dx;
+  final k = (B.dy - A.dy) / (B.dx - A.dx);
+  return (dx - B.dx) * k + B.dy;
+}
+
+/// 计算点[P]到由[A]  与[B]两点组成延长线的距离
 double distancePointToExtendedLine(Offset P, Offset A, Offset B) {
   final vAB = B - A;
   final vAP = P - A;
@@ -482,8 +498,7 @@ bool isInsideParallelogramByLineEquation(
   final lineDC = LineEquation.fromPoints(pl.D, pl.C);
   double sqrtaabb = lineAB.sqrtaabb;
   double dist = (lineAB.C - lineDC.C).abs() / sqrtaabb + deviation;
-  if (lineAB.test(point).abs() / sqrtaabb > dist ||
-      lineDC.test(point).abs() / sqrtaabb > dist) {
+  if (lineAB.test(point).abs() / sqrtaabb > dist || lineDC.test(point).abs() / sqrtaabb > dist) {
     return false;
   }
 
@@ -491,8 +506,7 @@ bool isInsideParallelogramByLineEquation(
   final lineBC = LineEquation.fromPoints(pl.B, pl.C);
   sqrtaabb = lineAD.sqrtaabb;
   dist = (lineAD.C - lineBC.C).abs() / lineAD.sqrtaabb + deviation;
-  if (lineAD.test(point).abs() / sqrtaabb > dist ||
-      lineBC.test(point).abs() / sqrtaabb > dist) {
+  if (lineAD.test(point).abs() / sqrtaabb > dist || lineBC.test(point).abs() / sqrtaabb > dist) {
     return false;
   }
 

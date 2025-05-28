@@ -55,8 +55,7 @@ void main() {
 
     double convertTo360Degrees(double radians) {
       double degrees = radians * (180 / math.pi); // 将弧度转换为度数
-      double positiveDegrees =
-          degrees < 0 ? 360 + degrees : degrees; // 将负值转换为正值
+      double positiveDegrees = degrees < 0 ? 360 + degrees : degrees; // 将负值转换为正值
 
       return positiveDegrees % 360; // 将角度值限制在 0 到 360 度之间
     }
@@ -129,7 +128,7 @@ void main() {
     });
 
     test('test direction2', () {
-      bool _compareVectorLength(double ab, double ac) {
+      bool compareVectorLength(double ab, double ac) {
         if (ab.sign != ac.sign) return false;
         if (ab.sign > 0) return ac > ab;
         if (ab.sign < 0) return ac < ab;
@@ -139,7 +138,7 @@ void main() {
       void printResult(double a, double b, double c) {
         double ab = b - a;
         double ac = c - a;
-        debugPrint('ab:$ab} vs ac:$ac = ${_compareVectorLength(ab, ac)}');
+        debugPrint('ab:$ab} vs ac:$ac = ${compareVectorLength(ab, ac)}');
       }
 
       printResult(5, 8, 14);
@@ -251,8 +250,7 @@ void main() {
       // [Offset(4.0, 0.0), Offset(0.0, 1.3)]
     });
 
-    test('test reflectPointsOnRect Point A or point B is vectical or horizonal',
-        () {
+    test('test reflectPointsOnRect Point A or point B is vectical or horizonal', () {
       List<Offset> points;
 
       /// 从下向上射线
@@ -324,73 +322,89 @@ void main() {
     test('reflectInRect', () {
       Offset other = Offset(10, 6);
       Offset ret = offset.reflectRectSide(other, rect);
-      debugPrint("1>" + ret.toString()); // 14, 6.8
+      debugPrint("1>$ret"); // 14, 6.8
 
       other = Offset(6, 8);
       ret = offset.reflectRectSide(other, rect);
-      debugPrint("2>" + ret.toString()); // 6.7, 10.0
+      debugPrint("2>$ret"); // 6.7, 10.0
 
       other = Offset(12, 2);
       ret = offset.reflectRectSide(other, rect);
-      debugPrint("3>" + ret.toString()); // 14.0, 1.1
+      debugPrint("3>$ret"); // 14.0, 1.1
 
       other = Offset(7, 1);
       ret = offset.reflectRectSide(other, rect);
-      debugPrint("4>" + ret.toString()); // 7.5, 0.0
+      debugPrint("4>$ret"); // 7.5, 0.0
     });
 
     test('reflectInRect2', () {
       Offset other = Offset(10, 6);
       Offset ret = other.reflectRectSide(offset, rect);
-      debugPrint("1>" + ret.toString()); // 0.0, 4.0
+      debugPrint("1>$ret"); // 0.0, 4.0
 
       other = Offset(6, 8);
       ret = other.reflectRectSide(offset, rect);
-      debugPrint("2>" + ret.toString()); // 3.3, 0.0
+      debugPrint("2>$ret"); // 3.3, 0.0
 
       other = Offset(12, 2);
       ret = other.reflectRectSide(offset, rect);
-      debugPrint("3>" + ret.toString()); // 0.0, 7.1
+      debugPrint("3>$ret"); // 0.0, 7.1
 
       other = Offset(7, 1);
       ret = other.reflectRectSide(offset, rect);
-      debugPrint("4>" + ret.toString()); // 2.5, 10.0
+      debugPrint("4>$ret"); // 2.5, 10.0
     });
 
     test('reflectInRect vertical horizontal', () {
       Offset other = Offset(2, 5);
       Offset ret = offset.reflectRectSide(other, rect);
-      debugPrint("1>" + ret.toString()); // 0.0, 5.0
+      debugPrint("1>$ret"); // 0.0, 5.0
 
       other = Offset(7, 5);
       ret = offset.reflectRectSide(other, rect);
-      debugPrint("2>" + ret.toString()); // 14.0, 5.0
+      debugPrint("2>$ret"); // 14.0, 5.0
 
       other = Offset(5, 2);
       ret = offset.reflectRectSide(other, rect);
-      debugPrint("3>" + ret.toString()); // 5.0, 0.0
+      debugPrint("3>$ret"); // 5.0, 0.0
 
       other = Offset(5, 7);
       ret = offset.reflectRectSide(other, rect);
-      debugPrint("4>" + ret.toString()); // 5.0, 10
+      debugPrint("4>$ret"); // 5.0, 10
     });
 
     test('reflectInRect outside', () {
       Offset other = Offset(2, 5);
       Offset ret = offset.reflectRectSide(other, rect);
-      debugPrint("1>" + ret.toString()); // 0.0, 5.0
+      debugPrint("1>$ret"); // 0.0, 5.0
 
       other = Offset(7, 5);
       ret = offset.reflectRectSide(other, rect);
-      debugPrint("2>" + ret.toString()); // 14.0, 5.0
+      debugPrint("2>$ret"); // 14.0, 5.0
 
       other = Offset(5, 2);
       ret = offset.reflectRectSide(other, rect);
-      debugPrint("3>" + ret.toString()); // 5.0, 0.0
+      debugPrint("3>$ret"); // 5.0, 0.0
 
       other = Offset(5, 7);
       ret = offset.reflectRectSide(other, rect);
-      debugPrint("4>" + ret.toString()); // 5.0, 10
+      debugPrint("4>$ret"); // 5.0, 10
+    });
+  });
+
+  group('getDxByDy', () {
+    test('getDxByDy', () {
+      double dx = getDxAtDyOnAB(Offset(20, 20), Offset(0, 0), 10);
+      debugPrint("offset:$dx"); // 10.0
+
+      dx = getDxAtDyOnAB(Offset(0, 0), Offset(20, 20), 10);
+      debugPrint("offset:$dx"); // 10.0
+
+      dx = getDxAtDyOnAB(Offset(0, 0), Offset(0, 20), 10);
+      debugPrint("offset:$dx"); // 10
+
+      dx = getDxAtDyOnAB(Offset(0, 20), Offset(20, 20), 10);
+      debugPrint("offset:$dx"); // 0
     });
   });
 }

@@ -111,7 +111,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
       case ChartType.bar:
         if (indicator.useLineChartForZoom && candleWidth < 1) {
           /// 绘制蜡烛线图
-          paintCandleLineChart(
+          paintLineTypeCandleChart(
             canvas,
             start: klineData.start,
             end: klineData.end,
@@ -123,11 +123,11 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
           );
         } else {
           /// 绘制蜡烛柱状图
-          paintCandleBarChart(canvas, size);
+          paintBarTypeCandleChart(canvas, size);
         }
       case ChartType.line:
         // 绘制蜡烛线图
-        paintCandleLineChart(
+        paintLineTypeCandleChart(
           canvas,
           start: klineData.start,
           end: klineData.end,
@@ -137,9 +137,9 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
             strokeWidth: candleLineWidth,
           ),
         );
-      case ChartType.lineUpdown:
+      case ChartType.upDownLine:
         // 绘制蜡烛线图
-        parintCandleLineUpDownChart(
+        parintUpDownLineTypeCandleChart(
           canvas,
           start: klineData.start,
           end: klineData.end,
@@ -180,9 +180,9 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
   }
 
   /// 绘制蜡烛柱状图
-  void paintCandleBarChart(Canvas canvas, Size size) {
+  void paintBarTypeCandleChart(Canvas canvas, Size size) {
     if (!klineData.canPaintChart) {
-      logw('paintCandleBarChart Data.list is empty or Index is out of bounds');
+      logw('paintBarTypeCandleChart Data.list is empty or Index is out of bounds');
       return;
     }
 

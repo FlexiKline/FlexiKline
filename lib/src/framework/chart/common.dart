@@ -18,10 +18,10 @@ part of 'indicator.dart';
 enum ChartType {
   bar, // 蜡烛图
   line, // 折线图
-  lineUpdown; // 涨跌线图
+  upDownLine; // 涨跌线图
 }
 
-/// K线图绘制样式
+/// K线柱状图的绘制样式
 enum ChartStyle {
   allSolid, // 全实心
   allHollow, // 全空心
