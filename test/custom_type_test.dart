@@ -15,8 +15,9 @@
 import 'package:decimal/decimal.dart';
 import 'package:flexi_formatter/flexi_formatter.dart';
 import 'package:flexi_kline/flexi_kline.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'utils.dart';
 
 void main() {
   final stopwatch = Stopwatch();
@@ -26,7 +27,7 @@ void main() {
   });
   tearDown(() {
     stopwatch.stop();
-    debugPrint('tearDown spent:${stopwatch.elapsedMicroseconds}');
+    logMsg('tearDown spent:${stopwatch.elapsedMicroseconds}');
   });
 
   const loop = 100;
@@ -49,7 +50,7 @@ void main() {
         num1D + num2;
         num1D + num2D;
       }
-      debugPrint('BagNum preheat =>');
+      logMsg('BagNum preheat =>');
     });
 
     test('BagNum double + Decimal', () {
@@ -57,7 +58,7 @@ void main() {
       for (int i = 0; i < loop; i++) {
         num3 = num1 + num2D;
       }
-      debugPrint('BagNum double + Decimal =>$num3');
+      logMsg('BagNum double + Decimal =>$num3');
     });
 
     test('BagNum Decimal + double', () {
@@ -65,7 +66,7 @@ void main() {
       for (int i = 0; i < loop; i++) {
         num3 = num1D + num2;
       }
-      debugPrint('BagNum Decimal + double =>$num3');
+      logMsg('BagNum Decimal + double =>$num3');
     });
 
     test('double operator +', () {
@@ -73,7 +74,7 @@ void main() {
       for (int i = 0; i < loop; i++) {
         num3 = a + b;
       }
-      debugPrint('double operator + =>$num3');
+      logMsg('double operator + =>$num3');
     });
 
     test('BagNum double + double', () {
@@ -82,7 +83,7 @@ void main() {
         num3 = num1 + num2;
       }
 
-      debugPrint('BagNum double + double =>$num3');
+      logMsg('BagNum double + double =>$num3');
     });
 
     test('Decimal operator +', () {
@@ -90,7 +91,7 @@ void main() {
       for (int i = 0; i < loop; i++) {
         num3 = aD + bD;
       }
-      debugPrint('Decimal operator + =>$num3');
+      logMsg('Decimal operator + =>$num3');
     });
 
     test('BagNum Decimal + Decimal', () {
@@ -98,7 +99,7 @@ void main() {
       for (int i = 0; i < loop; i++) {
         num3 = num1D + num2D;
       }
-      debugPrint('BagNum Decimal + Decimal =>$num3');
+      logMsg('BagNum Decimal + Decimal =>$num3');
     });
   });
 
@@ -111,7 +112,7 @@ void main() {
         num1D - num2;
         num1D - num2D;
       }
-      debugPrint('BagNum preheat =>');
+      logMsg('BagNum preheat =>');
     });
 
     test('BagNum double - Decimal', () {
@@ -119,7 +120,7 @@ void main() {
       for (int i = 0; i < loop; i++) {
         num3 = num1 - num2D;
       }
-      debugPrint('BagNum double - Decimal =>$num3');
+      logMsg('BagNum double - Decimal =>$num3');
     });
 
     test('BagNum Decimal - double', () {
@@ -127,7 +128,7 @@ void main() {
       for (int i = 0; i < loop; i++) {
         num3 = num1D - num2;
       }
-      debugPrint('BagNum Decimal - double =>$num3');
+      logMsg('BagNum Decimal - double =>$num3');
     });
 
     test('double operator -', () {
@@ -135,7 +136,7 @@ void main() {
       for (int i = 0; i < loop; i++) {
         num3 = a - b;
       }
-      debugPrint('double operator - =>$num3');
+      logMsg('double operator - =>$num3');
     });
 
     test('BagNum double - double', () {
@@ -144,7 +145,7 @@ void main() {
         num3 = num1 - num2;
       }
 
-      debugPrint('BagNum double - double =>$num3');
+      logMsg('BagNum double - double =>$num3');
     });
 
     test('Decimal operator -', () {
@@ -152,7 +153,7 @@ void main() {
       for (int i = 0; i < loop; i++) {
         num3 = aD - bD;
       }
-      debugPrint('Decimal operator - =>$num3');
+      logMsg('Decimal operator - =>$num3');
     });
 
     test('BagNum Decimal - Decimal', () {
@@ -160,7 +161,7 @@ void main() {
       for (int i = 0; i < loop; i++) {
         num3 = num1D - num2D;
       }
-      debugPrint('BagNum Decimal - Decimal =>$num3');
+      logMsg('BagNum Decimal - Decimal =>$num3');
     });
   });
 
@@ -173,7 +174,7 @@ void main() {
         num1D * num2;
         num1D * num2D;
       }
-      debugPrint('BagNum preheat =>');
+      logMsg('BagNum preheat =>');
     });
 
     test('BagNum double * Decimal', () {
@@ -181,7 +182,7 @@ void main() {
       for (int i = 0; i < loop; i++) {
         num3 = num1 * num2D;
       }
-      debugPrint('BagNum double * Decimal =>$num3');
+      logMsg('BagNum double * Decimal =>$num3');
     });
 
     test('BagNum Decimal * double', () {
@@ -189,7 +190,7 @@ void main() {
       for (int i = 0; i < loop; i++) {
         num3 = num1D * num2;
       }
-      debugPrint('BagNum Decimal * double =>$num3');
+      logMsg('BagNum Decimal * double =>$num3');
     });
 
     test('double operator *', () {
@@ -197,7 +198,7 @@ void main() {
       for (int i = 0; i < loop; i++) {
         num3 = a * b;
       }
-      debugPrint('double operator * =>$num3');
+      logMsg('double operator * =>$num3');
     });
 
     test('BagNum double * double', () {
@@ -206,7 +207,7 @@ void main() {
         num3 = num1 * num2;
       }
 
-      debugPrint('BagNum double * double =>$num3');
+      logMsg('BagNum double * double =>$num3');
     });
 
     test('Decimal operator *', () {
@@ -214,7 +215,7 @@ void main() {
       for (int i = 0; i < loop; i++) {
         num3 = aD * bD;
       }
-      debugPrint('Decimal operator * =>$num3');
+      logMsg('Decimal operator * =>$num3');
     });
 
     test('BagNum Decimal * Decimal', () {
@@ -222,7 +223,7 @@ void main() {
       for (int i = 0; i < loop; i++) {
         num3 = num1D * num2D;
       }
-      debugPrint('BagNum Decimal * Decimal =>$num3');
+      logMsg('BagNum Decimal * Decimal =>$num3');
     });
   });
 
@@ -235,7 +236,7 @@ void main() {
         num1D / num2;
         num1D / num2D;
       }
-      debugPrint('BagNum preheat =>');
+      logMsg('BagNum preheat =>');
     });
 
     test('BagNum double / Decimal', () {
@@ -243,7 +244,7 @@ void main() {
       for (int i = 0; i < loop; i++) {
         num3 = num1 / num2D;
       }
-      debugPrint('BagNum double / Decimal =>$num3');
+      logMsg('BagNum double / Decimal =>$num3');
     });
 
     test('BagNum Decimal / double', () {
@@ -251,7 +252,7 @@ void main() {
       for (int i = 0; i < loop; i++) {
         num3 = num1D / num2;
       }
-      debugPrint('BagNum Decimal / double =>${num3.doubleString()}');
+      logMsg('BagNum Decimal / double =>${num3.doubleString()}');
     });
 
     test('double operator /', () {
@@ -260,7 +261,7 @@ void main() {
         num3 = a / b;
       }
 
-      debugPrint('double operator / =>$num3');
+      logMsg('double operator / =>$num3');
     });
 
     test('BagNum double / double', () {
@@ -269,7 +270,7 @@ void main() {
         num3 = num1 / num2;
       }
 
-      debugPrint('BagNum double / double =>$num3');
+      logMsg('BagNum double / double =>$num3');
     });
 
     test('Decimal operator /', () {
@@ -280,7 +281,7 @@ void main() {
         );
       }
 
-      debugPrint('Decimal operator / =>${num3.toStringAsFixed(
+      logMsg('Decimal operator / =>${num3.toStringAsFixed(
         defaultScaleOnInfinitePrecision,
       )}');
     });
@@ -290,7 +291,7 @@ void main() {
       for (int i = 0; i < loop; i++) {
         num3 = num1D / num2D;
       }
-      debugPrint('BagNum Decimal / Decimal =>${num3.doubleString()}');
+      logMsg('BagNum Decimal / Decimal =>${num3.doubleString()}');
     });
   });
 }

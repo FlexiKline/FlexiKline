@@ -365,15 +365,14 @@ mixin PaintCandleHelperMixin<T extends Indicator> on PaintObject<T> {
   /// 主区: 蜡烛图
   /// 副区: 用于SubBoll图和SubSar图中
   void paintOHPLStyleCandleChart(
-    Canvas canvas,
-    Size size, {
+    Canvas canvas, {
     int? start,
     int? end,
     double? startOffset, // 起始偏移量.
   }) {
     if (!klineData.canPaintChart) return;
     start ??= klineData.start;
-    end ??= klineData.end;
+    end ??= (klineData.end + 1).clamp(start, klineData.length); // 多绘制一根蜡烛;
     startOffset ??= startCandleDx - candleWidthHalf;
     final barWidthHalf = candleWidthHalf;
     for (var i = start; i < end; i++) {
@@ -475,7 +474,7 @@ mixin PaintCandleHelperMixin<T extends Indicator> on PaintObject<T> {
   }) {
     if (!klineData.canPaintChart) return;
     start ??= klineData.start;
-    end ??= klineData.end;
+    end ??= (klineData.end + 1).clamp(start, klineData.length); // 多绘制一根蜡烛;
     startOffset ??= startCandleDx - candleWidthHalf;
 
     List<Offset> points = [];
@@ -533,7 +532,7 @@ mixin PaintCandleHelperMixin<T extends Indicator> on PaintObject<T> {
   }
 
   /// 绘制涨跌线类型的蜡烛图
-  void parintUpDownLineTypeCandleChart(
+  void paintUpDownLineTypeCandleChart(
     Canvas canvas, {
     int? start,
     int? end,
@@ -541,27 +540,29 @@ mixin PaintCandleHelperMixin<T extends Indicator> on PaintObject<T> {
   }) {
     if (!klineData.canPaintChart) return;
     start ??= klineData.start;
-    end ??= klineData.end;
+    end ??= (klineData.end + 1).clamp(start, klineData.length); // 多绘制一根蜡烛;
     startOffset ??= startCandleDx - candleWidthHalf;
 
     final latestDy = valueToDy(klineData.latest!.close, correct: false);
-    Offset boundStart, boundEnd, prev, curr;
+    Offset boundStart, boundEnd, prev, point;
     boundStart = Offset(startOffset.clamp(chartRect.left, chartRect.right), latestDy);
-    prev = curr = Offset(startOffset, valueToDy(klineData[start].close, correct: false));
-    final points = [curr];
-    bool isLong = curr.dy <= latestDy;
-    for (var i = start + 1; i < end; i++) {
-      curr = Offset(
-        startOffset - (i - start) * candleActualWidth,
-        valueToDy(klineData[i].close, correct: false),
-      );
-      if (curr.dy <= latestDy != isLong || i == end - 1) {
-        if (i == end - 1) {
-          points.add(curr);
-          boundEnd = Offset(curr.dx, boundStart.dy);
-        } else {
-          boundEnd = Offset(latestDy.getDxAtDy(prev, curr), latestDy);
+    prev = point = Offset(startOffset, valueToDy(klineData[start].close, correct: false));
+    final points = [point];
+    bool isLong = point.dy <= latestDy;
+    for (var i = start + 1; i <= end; i++) {
+      if (i < end) {
+        point = Offset(
+          startOffset - (i - start) * candleActualWidth,
+          valueToDy(klineData[i].close, correct: false),
+        );
+      }
+      if (point.dy <= latestDy != isLong || i == end) {
+        if (point.dy <= latestDy != isLong) {
+          boundEnd = Offset(latestDy.toDxOnAB(prev, point), latestDy);
           points.add(boundEnd);
+        } else {
+          points.add(point);
+          boundEnd = Offset(point.dx, boundStart.dy);
         }
         if (isLong) {
           // 绘制上涨区间的线图
@@ -607,8 +608,8 @@ mixin PaintCandleHelperMixin<T extends Indicator> on PaintObject<T> {
         points.clear();
         points.add(boundEnd);
       }
-      points.add(curr);
-      prev = curr;
+      points.add(point);
+      prev = point;
     }
   }
 }

@@ -18,7 +18,6 @@ import 'package:flexi_kline/src/extension/export.dart';
 import 'package:flexi_kline/src/framework/collection/fixed_hash_queue.dart';
 import 'package:flexi_kline/src/framework/collection/fifo_hash_map.dart';
 import 'package:flexi_kline/src/framework/collection/sortable_hash_set.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'utils.dart';
@@ -64,12 +63,12 @@ void main() {
 
   tearDown(() {
     stopwatch.stop();
-    debugPrint('spent:${stopwatch.elapsedMicroseconds}');
+    logMsg('spent:${stopwatch.elapsedMicroseconds}');
   });
 
   test('HashSortSet', () {
     final l = List.filled(0, null);
-    print(l.length);
+    logMsg(l.length);
   });
 
   test('SplayTreeSet', () {
@@ -93,7 +92,7 @@ void main() {
     map[Item('zp1', -1)] = 'zp1_-1';
 
     printMap(map);
-    print('-----');
+    logMsg('-----');
     map.remove(map.firstKey());
     map[Item('zp4', 0)] = 'zp4-0';
     printMap(map);
@@ -119,21 +118,21 @@ void main() {
     set.add(Item('b', -2));
     set.add(Item('c', -3));
 
-    print(set);
+    logMsg(set);
 
     set.add(Item('B', 0));
     set.add(Item('b', 0));
 
-    print(set);
+    logMsg(set);
 
     set.remove(Item('A', 1111));
-    print(set);
+    logMsg(set);
 
     set.removeWhere((element) {
       return element.name.toLowerCase() == 'b';
     });
 
-    print(set);
+    logMsg(set);
   });
 
   test('FixedHashQueue', () {
@@ -142,14 +141,14 @@ void main() {
     queue.append(Item('B', 2));
     queue.append(Item('C', 3));
 
-    print(queue);
+    logMsg(queue);
 
     final old = queue.append(Item('B', 4));
-    print(old);
-    print(queue);
+    logMsg(old);
+    logMsg(queue);
 
     queue.append(Item('D', 1), atFirst: true);
-    print(queue);
+    logMsg(queue);
   });
 
   test('FIFOHashMap', () {
@@ -163,7 +162,7 @@ void main() {
     map[Item('SOLUSDT-1h', 6)] = 'SOLUSDT-1h-List-6';
     map[Item('BTCUSDT-15m', 1)] = 'BTCUSDT-15m-List-1';
     printMap(map);
-    print('---');
+    logMsg('---');
     map[Item('OKBUSDT-1h', 7)] = 'OKBUSDT-1h-List-7';
 
     printMap(map);
@@ -173,7 +172,7 @@ void main() {
     final list1 = List.filled(100000000, fillData1);
     final list2 = List.filled(100000000, fillData2);
 
-    debugPrint('merger addAll');
+    logMsg('merger addAll');
     final newList = List.of(list1, growable: true)..addAll(list2);
 
     assert(newList.length == 200000000);
@@ -183,7 +182,7 @@ void main() {
     final list1 = List.filled(100000000, fillData1);
     final list2 = List.filled(100000000, fillData2);
 
-    debugPrint('merger ...');
+    logMsg('merger ...');
     final newList = List.of([...list1, ...list2]);
 
     assert(newList.length == 200000000);
@@ -193,7 +192,7 @@ void main() {
     final list1 = List.filled(100000000, fillData1, growable: true);
     final list2 = List.filled(100000000, fillData2);
 
-    debugPrint('merger insertAll');
+    logMsg('merger insertAll');
     final newList = List.of(list1, growable: true);
     newList.insertAll(newList.length, list2);
     assert(newList.length == 200000000);
@@ -202,22 +201,22 @@ void main() {
   test('test list is null or empty', () {
     final list = List<int?>.filled(3, null);
 
-    debugPrint('list.len:${list.length}');
-    debugPrint('list.len:${list.isEmpty}');
+    logMsg('list.len:${list.length}');
+    logMsg('list.len:${list.isEmpty}');
   });
 
   test('test secondWhereOrNull', () {
     final list = [0, 1, 2];
     var result = list.secondWhereOrNull((item) => item > 0);
-    debugPrint('result:$result');
+    logMsg('result:$result');
     expect(result, 2);
 
     result = list.secondWhereOrNull((item) => item > 1);
-    debugPrint('result:$result');
+    logMsg('result:$result');
     expect(result, isNull);
 
     result = list.secondWhereOrNull((item) => item > 2);
-    debugPrint('result:$result');
+    logMsg('result:$result');
     expect(result, isNull);
   });
 }

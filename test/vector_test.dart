@@ -16,8 +16,9 @@ import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flexi_kline/flexi_kline.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'utils.dart';
 
 void main() {
   const rect = Rect.fromLTRB(0, 0, 14, 10);
@@ -31,21 +32,21 @@ void main() {
       a = Offset(2, 2);
       b = Offset(8, 8);
       ret = distancePointToLineSegment(offset, a, b);
-      debugPrint('$a -> $b = $ret');
+      logMsg('$a -> $b = $ret');
     });
 
     test('test 2', () {
       a = Offset(5, 2);
       b = Offset(8, 8);
       ret = offset.distanceToLineSegment(a, b);
-      debugPrint('$a -> $b = $ret');
+      logMsg('$a -> $b = $ret');
     });
 
     test('test 3', () {
       a = Offset(5, 2);
       b = Offset(8, 8);
       ret = offset.distanceToLineSegment(a, b);
-      debugPrint('$a -> $b = $ret');
+      logMsg('$a -> $b = $ret');
     });
   });
 
@@ -64,7 +65,7 @@ void main() {
       final vAB = B - A;
       final direction = (B - A).direction;
       final degrees = convertTo360Degrees(direction);
-      debugPrint('$A - $B\t> k:${vAB.slope} \t:$degrees∘ \t:$direction');
+      logMsg('$A - $B\t> k:${vAB.slope} \t:$degrees∘ \t:$direction');
     }
 
     /// PI * 0,         0.0
@@ -77,19 +78,17 @@ void main() {
     /// PI * -1/4,      -0.7853981633974483
     test('test PI', () {
       double val = -0.00000000;
-      debugPrint(
-          '$val -> ${val.sign} -> ${val.toString() == '-0.0'} -> ${val.toString() == '0.0'}');
+      logMsg('$val -> ${val.sign} -> ${val.toString() == '-0.0'} -> ${val.toString() == '0.0'}');
       val = 0.0;
-      debugPrint(
-          '$val -> ${val.sign} -> ${val.toString() == '-0.0'} -> ${val.toString() == '0.0'}');
-      debugPrint('PI * 0, \t${math.pi * 0}');
-      debugPrint('PI * 1/4, \t${math.pi * 1 / 4}');
-      debugPrint('PI * 2/4, \t${math.pi * 2 / 4}');
-      debugPrint('PI * 3/4, \t${math.pi * 3 / 4}');
-      debugPrint('PI * 4/4, \t${math.pi * 1}');
-      debugPrint('PI * -3/4, \t${math.pi * -3 / 4}');
-      debugPrint('PI * -2/4, \t${math.pi * -2 / 4}');
-      debugPrint('PI * -1/4, \t${math.pi * -1 / 4}');
+      logMsg('$val -> ${val.sign} -> ${val.toString() == '-0.0'} -> ${val.toString() == '0.0'}');
+      logMsg('PI * 0, \t${math.pi * 0}');
+      logMsg('PI * 1/4, \t${math.pi * 1 / 4}');
+      logMsg('PI * 2/4, \t${math.pi * 2 / 4}');
+      logMsg('PI * 3/4, \t${math.pi * 3 / 4}');
+      logMsg('PI * 4/4, \t${math.pi * 1}');
+      logMsg('PI * -3/4, \t${math.pi * -3 / 4}');
+      logMsg('PI * -2/4, \t${math.pi * -2 / 4}');
+      logMsg('PI * -1/4, \t${math.pi * -1 / 4}');
     });
 
     /// Offset(0.0, 0.0) - Offset(5.0, 0.0)     > k:0.0         :0.0∘   :0.0
@@ -138,7 +137,7 @@ void main() {
       void printResult(double a, double b, double c) {
         double ab = b - a;
         double ac = c - a;
-        debugPrint('ab:$ab} vs ac:$ac = ${compareVectorLength(ab, ac)}');
+        logMsg('ab:$ab} vs ac:$ac = ${compareVectorLength(ab, ac)}');
       }
 
       printResult(5, 8, 14);
@@ -156,42 +155,42 @@ void main() {
 
       B = Offset(10, 6);
       points = reflectPointsOnRect(A, B, rect);
-      debugPrint(points.toString());
+      logMsg(points.toString());
       // [Offset(5.0, 5.0), Offset(10.0, 6.0), Offset(14.0, 6.8)]
 
       B = Offset(6, 8);
       points = reflectPointsOnRect(A, B, rect);
-      debugPrint(points.toString());
+      logMsg(points.toString());
       // [Offset(5.0, 5.0), Offset(6.0, 8.0), Offset(6.7, 10.0)]
 
       B = Offset(12, 2);
       points = reflectPointsOnRect(A, B, rect);
-      debugPrint(points.toString());
+      logMsg(points.toString());
       // [Offset(5.0, 5.0), Offset(12.0, 2.0), Offset(14.0, 1.1)]
 
       B = Offset(7, 1);
       points = reflectPointsOnRect(A, B, rect);
-      debugPrint(points.toString());
+      logMsg(points.toString());
       // [Offset(5.0, 5.0), Offset(7.0, 1.0), Offset(7.5, 0.0)]
 
       B = Offset(2, 5);
       points = reflectPointsOnRect(A, B, rect);
-      debugPrint(points.toString());
+      logMsg(points.toString());
       // [Offset(5.0, 5.0), Offset(2.0, 5.0), Offset(0.0, 5.0)]
 
       B = Offset(7, 5);
       points = reflectPointsOnRect(A, B, rect);
-      debugPrint(points.toString());
+      logMsg(points.toString());
       // [Offset(5.0, 5.0), Offset(7.0, 5.0), Offset(14.0, 5.0)]
 
       B = Offset(5, 2);
       points = reflectPointsOnRect(A, B, rect);
-      debugPrint(points.toString());
+      logMsg(points.toString());
       // [Offset(5.0, 5.0), Offset(5.0, 2.0), Offset(5.0, 0.0)]
 
       B = Offset(5, 7);
       points = reflectPointsOnRect(A, B, rect);
-      debugPrint(points.toString());
+      logMsg(points.toString());
       // [Offset(5.0, 5.0), Offset(5.0, 7.0), Offset(5.0, 10.0)]
     });
 
@@ -202,51 +201,51 @@ void main() {
       A = Offset(-5, -5);
       B = Offset(1, 1);
       points = reflectPointsOnRect(A, B, rect);
-      debugPrint(points.toString());
+      logMsg(points.toString());
       // 有重复>>> [Offset(1.0, 1.0), Offset(-0.0, 0.0), Offset(10.0, 10.0), Offset(0.0, 0.0)]
 
       B = Offset(-3, -2);
       points = reflectPointsOnRect(A, B, rect);
-      debugPrint(points.toString());
+      logMsg(points.toString());
       // [Offset(5.0, 10.0), Offset(0.0, 2.5)]
 
       B = Offset(1, 4);
       points = reflectPointsOnRect(A, B, rect);
-      debugPrint(points.toString());
+      logMsg(points.toString());
       // [Offset(1.0, 4.0), Offset(5.0, 10.0), Offset(0.0, 2.5)]
 
       B = Offset(-2, -3);
       points = reflectPointsOnRect(A, B, rect);
-      debugPrint(points.toString());
+      logMsg(points.toString());
       // [Offset(2.5, 0.0), Offset(14.0, 7.7)]
 
       /// 从左下向右上射线
       A = Offset(-8, 18);
       B = Offset(-4, 16);
       points = reflectPointsOnRect(A, B, rect);
-      debugPrint(points.toString());
+      logMsg(points.toString());
       // [Offset(8.0, 10.0), Offset(14.0, 7.0)]
 
       B = Offset(-7, 14);
       points = reflectPointsOnRect(A, B, rect);
-      debugPrint(points.toString());
+      logMsg(points.toString());
       // []
 
       B = Offset(-5, 14);
       points = reflectPointsOnRect(A, B, rect);
-      debugPrint(points.toString());
+      logMsg(points.toString());
       // [Offset(5.5, 0.0), Offset(0.0, 7.3)]
 
       /// 从右上向左下射线
       A = Offset(16, -4);
       B = Offset(15, -1);
       points = reflectPointsOnRect(A, B, rect);
-      debugPrint(points.toString());
+      logMsg(points.toString());
       // [Offset(11.3, 10.0), Offset(14.0, 2.0)]
 
       B = Offset(10, -2);
       points = reflectPointsOnRect(A, B, rect);
-      debugPrint(points.toString());
+      logMsg(points.toString());
       // [Offset(4.0, 0.0), Offset(0.0, 1.3)]
     });
 
@@ -257,61 +256,61 @@ void main() {
       A = Offset(7, 15);
       B = Offset(7, 13);
       points = reflectPointsOnRect(A, B, rect);
-      debugPrint(points.toString());
+      logMsg(points.toString());
       // [Offset(7.0, 0.0), Offset(7.0, 10.0)]
 
       B = Offset(7, 8);
       points = reflectPointsOnRect(A, B, rect);
-      debugPrint(points.toString());
+      logMsg(points.toString());
       // [Offset(7.0, 8.0), Offset(7.0, 0.0), Offset(7.0, 10.0)]
 
       A = Offset(7, 9);
       B = Offset(7, 8);
       points = reflectPointsOnRect(A, B, rect);
-      debugPrint(points.toString());
+      logMsg(points.toString());
       // [Offset(7.0, 9.0), Offset(7.0, 8.0), Offset(7.0, 0.0)]
 
       /// 从上向下射线
       A = Offset(10, -6);
       B = Offset(10, -2);
       points = reflectPointsOnRect(A, B, rect);
-      debugPrint(points.toString());
+      logMsg(points.toString());
       // [Offset(10.0, 0.0), Offset(10.0, 10.0)]
 
       B = Offset(10, 0);
       points = reflectPointsOnRect(A, B, rect);
-      debugPrint(points.toString());
+      logMsg(points.toString());
       // 有重复>>> [Offset(10.0, 0.0), Offset(10.0, 0.0), Offset(10.0, 10.0)]
 
       A = Offset(10, 1);
       B = Offset(10, 4);
       points = reflectPointsOnRect(A, B, rect);
-      debugPrint(points.toString());
+      logMsg(points.toString());
       // [Offset(10.0, 1.0), Offset(10.0, 4.0), Offset(10.0, 10.0)]
 
       /// 从左向右射线
       A = Offset(-6, 4);
       B = Offset(-3, 4);
       points = reflectPointsOnRect(A, B, rect);
-      debugPrint(points.toString());
+      logMsg(points.toString());
       // [Offset(0.0, 4.0), Offset(14.0, 4.0)]
 
       B = Offset(2, 4);
       points = reflectPointsOnRect(A, B, rect);
-      debugPrint(points.toString());
+      logMsg(points.toString());
       // [Offset(2.0, 4.0), Offset(0.0, 4.0), Offset(14.0, 4.0)]
 
       A = Offset(1, 4);
       B = Offset(2, 4);
       points = reflectPointsOnRect(A, B, rect);
-      debugPrint(points.toString());
+      logMsg(points.toString());
       // [Offset(1.0, 4.0), Offset(2.0, 4.0), Offset(14.0, 4.0)]
 
       /// 从右向左射线
       A = Offset(15, 4);
       B = Offset(1, 4);
       points = reflectPointsOnRect(A, B, rect);
-      debugPrint(points.toString());
+      logMsg(points.toString());
       //[Offset(1.0, 4.0), Offset(0.0, 4.0), Offset(14.0, 4.0)]
     });
   });
@@ -322,89 +321,89 @@ void main() {
     test('reflectInRect', () {
       Offset other = Offset(10, 6);
       Offset ret = offset.reflectRectSide(other, rect);
-      debugPrint("1>$ret"); // 14, 6.8
+      logMsg("1>$ret"); // 14, 6.8
 
       other = Offset(6, 8);
       ret = offset.reflectRectSide(other, rect);
-      debugPrint("2>$ret"); // 6.7, 10.0
+      logMsg("2>$ret"); // 6.7, 10.0
 
       other = Offset(12, 2);
       ret = offset.reflectRectSide(other, rect);
-      debugPrint("3>$ret"); // 14.0, 1.1
+      logMsg("3>$ret"); // 14.0, 1.1
 
       other = Offset(7, 1);
       ret = offset.reflectRectSide(other, rect);
-      debugPrint("4>$ret"); // 7.5, 0.0
+      logMsg("4>$ret"); // 7.5, 0.0
     });
 
     test('reflectInRect2', () {
       Offset other = Offset(10, 6);
       Offset ret = other.reflectRectSide(offset, rect);
-      debugPrint("1>$ret"); // 0.0, 4.0
+      logMsg("1>$ret"); // 0.0, 4.0
 
       other = Offset(6, 8);
       ret = other.reflectRectSide(offset, rect);
-      debugPrint("2>$ret"); // 3.3, 0.0
+      logMsg("2>$ret"); // 3.3, 0.0
 
       other = Offset(12, 2);
       ret = other.reflectRectSide(offset, rect);
-      debugPrint("3>$ret"); // 0.0, 7.1
+      logMsg("3>$ret"); // 0.0, 7.1
 
       other = Offset(7, 1);
       ret = other.reflectRectSide(offset, rect);
-      debugPrint("4>$ret"); // 2.5, 10.0
+      logMsg("4>$ret"); // 2.5, 10.0
     });
 
     test('reflectInRect vertical horizontal', () {
       Offset other = Offset(2, 5);
       Offset ret = offset.reflectRectSide(other, rect);
-      debugPrint("1>$ret"); // 0.0, 5.0
+      logMsg("1>$ret"); // 0.0, 5.0
 
       other = Offset(7, 5);
       ret = offset.reflectRectSide(other, rect);
-      debugPrint("2>$ret"); // 14.0, 5.0
+      logMsg("2>$ret"); // 14.0, 5.0
 
       other = Offset(5, 2);
       ret = offset.reflectRectSide(other, rect);
-      debugPrint("3>$ret"); // 5.0, 0.0
+      logMsg("3>$ret"); // 5.0, 0.0
 
       other = Offset(5, 7);
       ret = offset.reflectRectSide(other, rect);
-      debugPrint("4>$ret"); // 5.0, 10
+      logMsg("4>$ret"); // 5.0, 10
     });
 
     test('reflectInRect outside', () {
       Offset other = Offset(2, 5);
       Offset ret = offset.reflectRectSide(other, rect);
-      debugPrint("1>$ret"); // 0.0, 5.0
+      logMsg("1>$ret"); // 0.0, 5.0
 
       other = Offset(7, 5);
       ret = offset.reflectRectSide(other, rect);
-      debugPrint("2>$ret"); // 14.0, 5.0
+      logMsg("2>$ret"); // 14.0, 5.0
 
       other = Offset(5, 2);
       ret = offset.reflectRectSide(other, rect);
-      debugPrint("3>$ret"); // 5.0, 0.0
+      logMsg("3>$ret"); // 5.0, 0.0
 
       other = Offset(5, 7);
       ret = offset.reflectRectSide(other, rect);
-      debugPrint("4>$ret"); // 5.0, 10
+      logMsg("4>$ret"); // 5.0, 10
     });
   });
 
   group('getDxByDy', () {
     test('getDxByDy', () {
       double dx = getDxAtDyOnAB(Offset(20, 20), Offset(0, 0), 10);
-      debugPrint("offset:$dx"); // 10.0
+      logMsg("offset:$dx"); // 10.0
 
       dx = getDxAtDyOnAB(Offset(0, 0), Offset(20, 20), 10);
-      debugPrint("offset:$dx"); // 10.0
+      logMsg("offset:$dx"); // 10.0
 
       dx = getDxAtDyOnAB(Offset(0, 0), Offset(0, 20), 10);
-      debugPrint("offset:$dx"); // 10
+      logMsg("offset:$dx"); // 10
 
       dx = getDxAtDyOnAB(Offset(0, 20), Offset(20, 20), 10);
-      debugPrint("offset:$dx"); // 0
+      logMsg("offset:$dx"); // 0
     });
   });
 }

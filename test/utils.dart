@@ -25,3 +25,7 @@ void printMap<K, V>(Map<K, V> map, {String? tag}) {
     debugPrint('${tag ?? ''}> key:$key \t val:${val.toString()}');
   });
 }
+
+void logMsg(dynamic msg) {
+  debugPrint(msg.toString());
+}

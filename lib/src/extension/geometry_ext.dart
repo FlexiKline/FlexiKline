@@ -175,11 +175,11 @@ extension FlexiOffsetExt on Offset {
 }
 
 extension FlexiOffsetDoubleExt on double {
-  double getDxAtDy(Offset A, Offset B) {
+  double toDxOnAB(Offset A, Offset B) {
     return getDxAtDyOnAB(A, B, this);
   }
 
-  double getDyAtDx(Offset A, Offset B) {
+  double toDyOnAB(Offset A, Offset B) {
     return getDyAtDxOnAB(A, B, this);
   }
 }

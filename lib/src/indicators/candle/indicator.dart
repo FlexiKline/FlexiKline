@@ -113,8 +113,6 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
           /// 绘制蜡烛线图
           paintLineTypeCandleChart(
             canvas,
-            start: klineData.start,
-            end: klineData.end,
             startOffset: startCandleDx - candleWidthHalf,
             linePaint: getLinePaint(
               color: indicator.lineColor,
@@ -129,8 +127,6 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
         // 绘制蜡烛线图
         paintLineTypeCandleChart(
           canvas,
-          start: klineData.start,
-          end: klineData.end,
           startOffset: startCandleDx - candleWidthHalf,
           linePaint: getLinePaint(
             color: indicator.lineColor,
@@ -139,10 +135,8 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
         );
       case ChartType.upDownLine:
         // 绘制蜡烛线图
-        parintUpDownLineTypeCandleChart(
+        paintUpDownLineTypeCandleChart(
           canvas,
-          start: klineData.start,
-          end: klineData.end,
           startOffset: startCandleDx - candleWidthHalf,
         );
     }
