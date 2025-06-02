@@ -175,12 +175,12 @@ extension FlexiOffsetExt on Offset {
 }
 
 extension FlexiOffsetDoubleExt on double {
-  double toDxOnAB(Offset A, Offset B) {
-    return getDxAtDyOnAB(A, B, this);
+  Offset offsetWithDyOnAB(Offset A, Offset B) {
+    return Offset(getDxAtDyOnAB(A, B, this), this);
   }
 
-  double toDyOnAB(Offset A, Offset B) {
-    return getDyAtDxOnAB(A, B, this);
+  Offset offsetWithDxOnAB(Offset A, Offset B) {
+    return Offset(this, getDyAtDxOnAB(A, B, this));
   }
 }
 

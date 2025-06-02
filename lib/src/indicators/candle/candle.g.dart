@@ -29,7 +29,7 @@ abstract class _$CandleIndicatorCWProxy {
 
   CandleIndicator chartType(ChartType chartType);
 
-  CandleIndicator chartStyle(ChartStyle chartStyle);
+  CandleIndicator chartBarStyle(ChartBarStyle chartBarStyle);
 
   CandleIndicator useLineChartForZoom(bool useLineChartForZoom);
 
@@ -57,7 +57,7 @@ abstract class _$CandleIndicatorCWProxy {
     bool showCountDown,
     TextAreaConfig countDown,
     ChartType chartType,
-    ChartStyle chartStyle,
+    ChartBarStyle chartBarStyle,
     bool useLineChartForZoom,
     Color? longColor,
     Color? shortColor,
@@ -108,8 +108,8 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
   CandleIndicator chartType(ChartType chartType) => this(chartType: chartType);
 
   @override
-  CandleIndicator chartStyle(ChartStyle chartStyle) =>
-      this(chartStyle: chartStyle);
+  CandleIndicator chartBarStyle(ChartBarStyle chartBarStyle) =>
+      this(chartBarStyle: chartBarStyle);
 
   @override
   CandleIndicator useLineChartForZoom(bool useLineChartForZoom) =>
@@ -144,7 +144,7 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
     Object? showCountDown = const $CopyWithPlaceholder(),
     Object? countDown = const $CopyWithPlaceholder(),
     Object? chartType = const $CopyWithPlaceholder(),
-    Object? chartStyle = const $CopyWithPlaceholder(),
+    Object? chartBarStyle = const $CopyWithPlaceholder(),
     Object? useLineChartForZoom = const $CopyWithPlaceholder(),
     Object? longColor = const $CopyWithPlaceholder(),
     Object? shortColor = const $CopyWithPlaceholder(),
@@ -196,10 +196,10 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
           ? _value.chartType
           // ignore: cast_nullable_to_non_nullable
           : chartType as ChartType,
-      chartStyle: chartStyle == const $CopyWithPlaceholder()
-          ? _value.chartStyle
+      chartBarStyle: chartBarStyle == const $CopyWithPlaceholder()
+          ? _value.chartBarStyle
           // ignore: cast_nullable_to_non_nullable
-          : chartStyle as ChartStyle,
+          : chartBarStyle as ChartBarStyle,
       useLineChartForZoom: useLineChartForZoom == const $CopyWithPlaceholder()
           ? _value.useLineChartForZoom
           // ignore: cast_nullable_to_non_nullable
@@ -250,9 +250,10 @@ CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
       chartType: json['chartType'] == null
           ? ChartType.bar
           : const ChartTypeConverter().fromJson(json['chartType'] as String),
-      chartStyle: json['chartStyle'] == null
-          ? ChartStyle.allSolid
-          : const ChartStyleConverter().fromJson(json['chartStyle'] as String),
+      chartBarStyle: json['chartBarStyle'] == null
+          ? ChartBarStyle.allSolid
+          : const ChartBarStyleConverter()
+              .fromJson(json['chartBarStyle'] as String),
       useLineChartForZoom: json['useLineChartForZoom'] as bool? ?? true,
       longColor: _$JsonConverterFromJson<String, Color>(
           json['longColor'], const ColorConverter().fromJson),
@@ -275,7 +276,8 @@ Map<String, dynamic> _$CandleIndicatorToJson(CandleIndicator instance) =>
       'showCountDown': instance.showCountDown,
       'countDown': instance.countDown.toJson(),
       'chartType': const ChartTypeConverter().toJson(instance.chartType),
-      'chartStyle': const ChartStyleConverter().toJson(instance.chartStyle),
+      'chartBarStyle':
+          const ChartBarStyleConverter().toJson(instance.chartBarStyle),
       'useLineChartForZoom': instance.useLineChartForZoom,
       'longColor': _$JsonConverterToJson<String, Color>(
           instance.longColor, const ColorConverter().toJson),

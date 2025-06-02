@@ -381,7 +381,7 @@ mixin PaintCandleHelperMixin<T extends Indicator> on PaintObject<T> {
         klineData[i],
         dx: startOffset - (i - start) * candleActualWidth,
         barWidthHalf: barWidthHalf,
-        chartStyle: ChartStyle.ohlc,
+        chartStyle: ChartBarStyle.ohlc,
       );
     }
   }
@@ -399,7 +399,7 @@ mixin PaintCandleHelperMixin<T extends Indicator> on PaintObject<T> {
     double? open,
     double? close,
     double? barWidthHalf,
-    required ChartStyle chartStyle,
+    required ChartBarStyle chartStyle,
   }) {
     barWidthHalf ??= candleWidthHalf - candleSpacing;
     final isLong = m.close >= m.open;
@@ -411,7 +411,7 @@ mixin PaintCandleHelperMixin<T extends Indicator> on PaintObject<T> {
     );
 
     final path = Path()..moveTo(dx, high);
-    if (chartStyle == ChartStyle.ohlc) {
+    if (chartStyle == ChartBarStyle.ohlc) {
       path.moveTo(dx, high);
       path.lineTo(dx, low);
       path.moveTo(dx - barWidthHalf, open);
@@ -487,7 +487,7 @@ mixin PaintCandleHelperMixin<T extends Indicator> on PaintObject<T> {
       ));
     }
 
-    final linePaint = getLinePaint();
+    linePaint ??= getLinePaint();
     paintLineChart(
       canvas,
       points: points,
@@ -558,7 +558,7 @@ mixin PaintCandleHelperMixin<T extends Indicator> on PaintObject<T> {
       }
       if (point.dy <= latestDy != isLong || i == end) {
         if (point.dy <= latestDy != isLong) {
-          boundEnd = Offset(latestDy.toDxOnAB(prev, point), latestDy);
+          boundEnd = latestDy.offsetWithDyOnAB(prev, point);
           points.add(boundEnd);
         } else {
           points.add(point);
@@ -571,12 +571,12 @@ mixin PaintCandleHelperMixin<T extends Indicator> on PaintObject<T> {
             points: points,
             boundEnd: boundEnd,
             boundStart: boundStart, //Offset(points.first.dx, latestDy),
-            linePaint: getLinePaint(color: theme.long),
+            linePaint: getLinePaint(color: longColor),
             shader: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: <Color>[
-                theme.long.withAlpha(0.5.alpha),
+                longColor.withAlpha(0.5.alpha),
                 theme.transparent,
               ],
               stops: [0, 1],
@@ -590,12 +590,12 @@ mixin PaintCandleHelperMixin<T extends Indicator> on PaintObject<T> {
             points: points,
             boundEnd: boundEnd,
             boundStart: boundStart, //Offset(points.first.dx, latestDy),
-            linePaint: getLinePaint(color: theme.short),
+            linePaint: getLinePaint(color: shortColor),
             shader: LinearGradient(
               begin: Alignment.bottomCenter,
               end: Alignment.topCenter,
               colors: <Color>[
-                theme.short.withAlpha(0.5.alpha),
+                shortColor.withAlpha(0.5.alpha),
                 theme.transparent,
               ],
               stops: [0, 1],

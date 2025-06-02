@@ -22,16 +22,16 @@ enum ChartType {
 }
 
 /// K线柱状图的绘制样式
-enum ChartStyle {
+enum ChartBarStyle {
   allSolid, // 全实心
   allHollow, // 全空心
   upHollow, // 上涨空心
   downHollow, // 下跌空心
   ohlc; // Open-high-low-close chart(美国线)
 
-  bool get isHollowUp => this == ChartStyle.upHollow || this == ChartStyle.allHollow;
+  bool get isHollowUp => this == ChartBarStyle.upHollow || this == ChartBarStyle.allHollow;
 
-  bool get isHollowDown => this == ChartStyle.downHollow || this == ChartStyle.allHollow;
+  bool get isHollowDown => this == ChartBarStyle.downHollow || this == ChartBarStyle.allHollow;
 }
 
 /// Indicator绘制模式

@@ -35,7 +35,7 @@ class CandleIndicator extends CandleBaseIndicator {
     this.showCountDown = true,
     required this.countDown,
     this.chartType = ChartType.bar,
-    this.chartStyle = ChartStyle.allSolid,
+    this.chartBarStyle = ChartBarStyle.allSolid,
     this.useLineChartForZoom = true,
     this.longColor,
     this.shortColor,
@@ -59,7 +59,7 @@ class CandleIndicator extends CandleBaseIndicator {
   // Kline图表类型
   final ChartType chartType;
   // Kline图表样式
-  final ChartStyle chartStyle;
+  final ChartBarStyle chartBarStyle;
   // Kline缩放到最小单位时使用线图
   final bool useLineChartForZoom;
 
@@ -203,7 +203,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
         high: hight,
         low: low,
         barWidthHalf: barWidthHalf,
-        chartStyle: indicator.chartStyle,
+        chartStyle: indicator.chartBarStyle,
       );
 
       if (indicator.high.show) {

@@ -549,7 +549,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
         borderRadius: BorderRadius.all(Radius.circular(2 * theme.scale)),
       ),
       chartType: instance?.chartType ?? ChartType.bar,
-      chartStyle: instance?.chartStyle ?? ChartStyle.allSolid,
+      chartBarStyle: instance?.chartBarStyle ?? ChartBarStyle.allSolid,
       useLineChartForZoom: instance?.useLineChartForZoom ?? true,
       longColor: instance?.longColor,
       shortColor: instance?.shortColor,

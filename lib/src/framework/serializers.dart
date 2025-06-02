@@ -84,19 +84,19 @@ class ChartTypeConverter implements JsonConverter<ChartType, String> {
   String toJson(ChartType style) => style.name;
 }
 
-class ChartStyleConverter implements JsonConverter<ChartStyle, String> {
-  const ChartStyleConverter();
+class ChartBarStyleConverter implements JsonConverter<ChartBarStyle, String> {
+  const ChartBarStyleConverter();
 
   @override
-  ChartStyle fromJson(String json) {
-    return ChartStyle.values.firstWhere(
+  ChartBarStyle fromJson(String json) {
+    return ChartBarStyle.values.firstWhere(
       (e) => e.name.equalsIgnoreCase(json),
-      orElse: () => ChartStyle.allSolid,
+      orElse: () => ChartBarStyle.allSolid,
     );
   }
 
   @override
-  String toJson(ChartStyle style) => style.name;
+  String toJson(ChartBarStyle style) => style.name;
 }
 
 /// 基础样式转换
@@ -652,7 +652,7 @@ const FlexiIndicatorSerializable = JsonSerializable(
   converters: [
     IIndicatorKeyConvert(),
     PaintModeConverter(),
-    ChartStyleConverter(),
+    ChartBarStyleConverter(),
     ChartTypeConverter(),
     ..._basicConverterList,
   ],

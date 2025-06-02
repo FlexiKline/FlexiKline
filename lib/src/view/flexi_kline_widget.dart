@@ -19,6 +19,7 @@ import 'package:flutter/material.dart';
 
 import '../core/core.dart';
 import '../extension/basic_type_ext.dart';
+import '../extension/functions_ext.dart';
 import '../framework/configuration.dart';
 import '../framework/logger.dart';
 import '../kline_controller.dart';
@@ -204,7 +205,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
       builder: (context, canvasRect, child) {
         if (controller.drawState.isEditing) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            _updateDrawToolbarPosition(drawToolbarPosition);
+            _updateDrawToolbarPosition(drawToolbarPosition, canvasRect);
           });
         }
         return _buildKlineContent(context, canvasRect);
@@ -311,10 +312,10 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
     );
   }
 
-  bool _updateDrawToolbarPosition(Offset newPosition) {
+  bool _updateDrawToolbarPosition(Offset newPosition, [Rect? canvasRect]) {
     final size = _drawToolbarKey.currentContext?.size;
     if (size != null && !size.isEmpty) {
-      final canvasRect = controller.canvasRect;
+      canvasRect ??= controller.canvasRect;
       _drawToolbarPosition.value = Offset(
         newPosition.dx.clamp(
           canvasRect.left,
@@ -342,10 +343,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
           builder: (context, position, child) {
             if (position == Offset.infinite || !canvasRect.contains(position)) {
               // 如果position无效, 则重置其为当前canvas区域左下角.
-              position = Offset(
-                0,
-                canvasRect.height - widget.drawToolbarInitHeight,
-              );
+              position = Offset(0, canvasRect.height - widget.drawToolbarInitHeight);
             }
             return Positioned(
               left: position.dx,
@@ -354,9 +352,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
                 cursor: SystemMouseCursors.move,
                 child: GestureDetector(
                   onPanUpdate: (DragUpdateDetails details) {
-                    _updateDrawToolbarPosition(
-                      position + details.delta,
-                    );
+                    _updateDrawToolbarPosition(position + details.delta, canvasRect);
                   },
                   onPanEnd: (event) {
                     configuration.saveDrawToolbarPosition(position);
@@ -451,7 +447,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
           padding: widget.exitZoomButtonPadding,
           child: widget.exitZoomButtonBuilder?.call(context) ??
               IconButton(
-                onPressed: controller.exitChartZoom,
+                onPressed: controller.exitChartZoom.debounce(),
                 constraints: const BoxConstraints(),
                 style: IconButton.styleFrom(
                   padding: EdgeInsets.zero,
