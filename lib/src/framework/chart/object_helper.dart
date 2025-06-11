@@ -313,6 +313,7 @@ mixin PaintYAxisTicksMixin<T extends Indicator> on PaintObject<T> {
     return formatPrice(
       value.toDecimal(),
       precision: precision,
+      cutInvalidZero: false,
       defIfZero: '0.00',
     );
   }
@@ -354,6 +355,7 @@ mixin PaintYAxisTicksOnCrossMixin<T extends Indicator> on PaintObject<T> {
     return formatPrice(
       value.toDecimal(),
       precision: precision,
+      cutInvalidZero: false,
       defIfZero: '0.00',
     );
   }

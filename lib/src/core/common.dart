@@ -177,7 +177,7 @@ abstract interface class IPaintContext implements IStorage, ILogger {
 
   /// 是否是正常布局模式
   // LayoutMode get layoutMode;
-  /// 是否允许更新而已高度
+  /// 是否允许更新布局高度
   /// 注: 目前仅支持正常模式和适配模式下缓存高度的变化.
   bool get isAllowUpdateLayoutHeight;
 

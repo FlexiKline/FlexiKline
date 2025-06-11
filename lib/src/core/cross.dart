@@ -409,37 +409,37 @@ mixin CrossBinding on KlineBindingBase, SettingBinding implements ICross {
           value = model.formatDateTime(timeBar);
           break;
         case TooltipLabel.open:
-          value = formatPrice(model.o, precision: p);
+          value = formatPrice(model.o, precision: p, cutInvalidZero: false);
           break;
         case TooltipLabel.high:
-          value = formatPrice(model.h, precision: p);
+          value = formatPrice(model.h, precision: p, cutInvalidZero: false);
           break;
         case TooltipLabel.low:
-          value = formatPrice(model.l, precision: p);
+          value = formatPrice(model.l, precision: p, cutInvalidZero: false);
           break;
         case TooltipLabel.close:
-          value = formatPrice(model.c, precision: p);
+          value = formatPrice(model.c, precision: p, cutInvalidZero: false);
           break;
         case TooltipLabel.chg:
-          value = formatPrice(model.change, precision: p);
+          value = formatPrice(model.change, precision: p, cutInvalidZero: false);
           break;
         case TooltipLabel.chgRate:
-          value = formatPercentage(model.changeRate.d);
+          value = formatPercentage(model.changeRate.d, precision: 2);
           riseOrFall = model.change.signum;
           break;
         case TooltipLabel.range:
           if (pre != null) {
-            value = formatPercentage(model.rangeRate(pre).d);
+            value = formatPercentage(model.rangeRate(pre).d, precision: 2);
           } else {
-            value = formatPrice(model.range, precision: p);
+            value = formatPrice(model.range, precision: p, cutInvalidZero: false);
           }
           break;
         case TooltipLabel.amount:
-          value = formatAmount(model.v);
+          value = formatAmount(model.v, precision: 2);
           break;
         case TooltipLabel.turnover:
           if (model.vc != null) {
-            value = formatAmount(model.vc);
+            value = formatAmount(model.vc, precision: 2);
           }
           break;
       }

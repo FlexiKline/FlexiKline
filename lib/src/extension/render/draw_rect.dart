@@ -44,8 +44,8 @@ extension FlexiDrawRect on Canvas {
     Color borderColor = const Color(0x00000000),
     double borderWidth = 0,
   }) {
-    final isDrawBg = backgroundColor.alpha != 0;
-    final isDrawBorder = borderColor.alpha != 0 && borderWidth > 0;
+    final isDrawBg = backgroundColor.a != 0;
+    final isDrawBorder = borderColor.a != 0 && borderWidth > 0;
     if (size.isEmpty && !isDrawBg && !isDrawBorder) {
       return offset;
     }

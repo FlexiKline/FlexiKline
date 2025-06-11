@@ -17,7 +17,7 @@ import 'dart:async';
 import 'package:flutter/scheduler.dart';
 
 /// 防抖操作时长
-const defaultDebounceTime = Duration(milliseconds: 400);
+const defaultDebounceTime = Duration(milliseconds: 320);
 
 /// 默认节流时长
 const defaultThrottleTime = Duration(milliseconds: 200);

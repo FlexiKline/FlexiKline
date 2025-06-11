@@ -31,10 +31,7 @@ extension FlexiDrawCircle on Canvas {
     if (offset.isInfinite) return;
     borderWidth ??= borderPaint?.strokeWidth;
     borderColor ??= borderPaint?.color;
-    if (borderWidth != null &&
-        borderWidth > 0 &&
-        borderColor != null &&
-        borderColor.alpha != 0) {
+    if (borderWidth != null && borderWidth > 0 && borderColor != null && borderColor.a != 0) {
       drawCircle(
         offset,
         radius + borderWidth / 2,
