@@ -82,8 +82,7 @@ class OverlayObject implements Comparable<OverlayObject> {
 
   @override
   bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other is OverlayObject && _overlay == other._overlay);
+    return identical(this, other) || (other is OverlayObject && _overlay == other._overlay);
   }
 
   @override
@@ -92,6 +91,9 @@ class OverlayObject implements Comparable<OverlayObject> {
 
 abstract class DrawStateObject extends OverlayObject with DrawConfigMixin {
   DrawStateObject(super.overlay, super.config);
+
+  @protected
+  void didChangeTheme(IFlexiKlineTheme theme) {}
 
   /// 当前指针位置
   Point? _pointer;

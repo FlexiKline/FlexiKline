@@ -19,9 +19,6 @@ import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart' hide Overlay;
 
 class TestFlexiKlineTheme implements IFlexiKlineTheme {
-  @override
-  String key = 'flexi_kline_config_key_test';
-
   double? _scale;
   @override
   double get scale {

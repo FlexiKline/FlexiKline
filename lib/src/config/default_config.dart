@@ -184,15 +184,12 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
   }
 
   @override
-  @mustCallSuper
   Map<IIndicatorKey, IndicatorBuilder> get mainIndicatorBuilders => {};
 
   @override
-  @mustCallSuper
   Map<IIndicatorKey, IndicatorBuilder> get subIndicatorBuilders => {};
 
   @override
-  @mustCallSuper
   Map<IDrawType, DrawObjectBuilder> get drawObjectBuilders => {};
 
   /// Grid配置

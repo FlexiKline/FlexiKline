@@ -88,8 +88,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw {
 
   ValueListenable<bool> get drawVisibilityListener => _drawVisibilityListener;
 
-  ValueListenable<MagnetMode> get drawMagnetModeListener =>
-      _drawMagnetModeListener;
+  ValueListenable<MagnetMode> get drawMagnetModeListener => _drawMagnetModeListener;
 
   ValueListenable<bool> get drawContinuousListener => _drawContinuousListener;
 
@@ -97,6 +96,17 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw {
 
   @override
   MagnetMode get drawMagnet => drawMagnetModeListener.value;
+
+  @override
+  void onThemeChanged([covariant IFlexiKlineTheme? oldTheme]) {
+    super.onThemeChanged(oldTheme);
+    if (drawState is Drawing) {
+      drawState.object?.doDidChangeTheme(theme);
+    }
+    for (var object in _drawObjectManager.overlayObjectList) {
+      object.doDidChangeTheme(theme);
+    }
+  }
 
   void prepareDraw({bool force = false}) {
     // 如果是非退出状态, 则无需变更状态.

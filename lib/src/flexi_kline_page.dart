@@ -107,10 +107,4 @@ mixin FlexiKlinePageMixin<T extends StatefulWidget> on State<T> implements IFlex
 
   /// 不可见或失去焦点
   void onInactive() => log('onInactive');
-
-  // @mustCallSuper
-  // void didChangeFlexiTheme(IFlexiKlineTheme theme) {
-  //   final config = klineController.configuration.getFlexiKlineConfig();
-  //   klineController.updateFlexiKlineConfig(config);
-  // }
 }

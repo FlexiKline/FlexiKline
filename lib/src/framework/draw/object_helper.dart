@@ -134,6 +134,10 @@ mixin DrawConfigMixin on OverlayObject {
 }
 
 mixin DrawObjectMixin on DrawStateObject {
+  void doDidChangeTheme(IFlexiKlineTheme theme) {
+    didChangeTheme(theme);
+  }
+
   /// 绘制[points]中所有点.
   void drawPoints(IDrawContext context, Canvas canvas) {
     for (var point in points) {
