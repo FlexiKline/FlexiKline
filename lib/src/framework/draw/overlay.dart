@@ -18,6 +18,7 @@ import 'dart:collection';
 import 'dart:ui';
 import 'package:flexi_formatter/flexi_formatter.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import '../../config/export.dart';

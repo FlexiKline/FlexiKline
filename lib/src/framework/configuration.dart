@@ -265,11 +265,24 @@ extension IConfigurationExt on IConfiguration {
 
   /// 以[instId]为key, 持久化绘制实例列表[list]到本地中.
   void saveDrawOverlayList(String instId, Iterable<Overlay> list) {
-    if (list.isEmpty) return;
     setConfig('$instId-$drawOverlayListConfigKey', {
       drawOverlayListKey: list.map((e) => e.toJson()).toList(),
     });
   }
+
+  /// 从缓存中删除[instId]指定的所有绘制实例数据
+  void delDrawOverlayList(String instId) {
+    setConfig('$instId-$drawOverlayListConfigKey', {});
+  }
+
+  /// 从缓存中删除单个绘制实例数据
+  // void delDrawOverlay(String instId, Overlay overlay) {
+  //   var list = getDrawOverlayList(instId);
+  //   if (list.isNotEmpty) {
+  //     list = list.where((e) => e.id != overlay.id);
+  //   }
+  //   saveDrawOverlayList(instId, list);
+  // }
 
   /// 获取DrawToolbar上次缓存的位置
   Offset getDrawToolbarPosition() {

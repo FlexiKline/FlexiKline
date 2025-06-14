@@ -28,8 +28,7 @@ final class OverlayDrawObjectManager with KlineLog {
   }) {
     loggerDelegate = logger;
     final drawObjectbuilders = configuration.drawObjectBuilders;
-    for (final MapEntry(key: type, value: builder)
-        in drawObjectbuilders.entries) {
+    for (final MapEntry(key: type, value: builder) in drawObjectbuilders.entries) {
       registerDrawOverlayObjectBuilder(type, builder);
     }
   }
@@ -54,9 +53,7 @@ final class OverlayDrawObjectManager with KlineLog {
       for (var type in supportDrawTypes) {
         final set = groupMap[type.groupId] ??= LinkedHashSet<IDrawType>(
           equals: (p0, p1) {
-            return p0.groupId == p1.groupId &&
-                p0.id == p1.id &&
-                p0.steps == p1.steps;
+            return p0.groupId == p1.groupId && p0.id == p1.id && p0.steps == p1.steps;
           },
         );
         set.add(type);
@@ -94,7 +91,7 @@ final class OverlayDrawObjectManager with KlineLog {
     logd('onChangeCandleRequest $_instId => ${request.instId}');
     // 缓存上一次OverlayObject到本地.
     if (_instId.isNotEmpty && hasObject) {
-      cleanAllDrawObject();
+      storeAndCleanAllDrawObject();
     }
     // 加载新的OverlayObject.
     _overlayObjectList.clear();
@@ -124,7 +121,7 @@ final class OverlayDrawObjectManager with KlineLog {
   }
 
   /// 清理当前所有的Overlay.
-  void cleanAllDrawObject() {
+  void storeAndCleanAllDrawObject() {
     storeDrawOverlaysConfig();
     for (var obj in _overlayObjectList) {
       obj.dispose();
@@ -150,7 +147,9 @@ final class OverlayDrawObjectManager with KlineLog {
   DrawObject? generateDrawObject(Overlay overlay, DrawConfig config) {
     final builder = _overlayBuilders[overlay.type];
     if (builder == null) return null;
-    return builder.call(overlay, config);
+    final object = builder.call(overlay, config);
+    object?.doDidChangeTheme(configuration.theme);
+    return object;
   }
 
   /// 添加新的[object].
@@ -169,9 +168,17 @@ final class OverlayDrawObjectManager with KlineLog {
     old?.dispose();
   }
 
+  void removeAllDrawObject() {
+    dispose();
+    configuration.delDrawOverlayList(_instId);
+  }
+
   bool removeDrawObject(DrawObject object) {
     object.dispose();
-    return _overlayObjectList.remove(object);
+    final removed = _overlayObjectList.remove(object);
+    // configuration.delDrawOverlay(_instId, object._overlay);
+    configuration.saveDrawOverlayList(_instId, _overlayObjectList.map((e) => e._overlay));
+    return removed;
   }
 
   void resetObjectListSort() => _overlayObjectList.resetSort();

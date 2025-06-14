@@ -77,9 +77,9 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   void _updateCandleRequestListener(CandleReq request) {
     logd('updateCandleRequestListener $curDataKey, request:$request');
     if (request.key == curDataKey) {
+      onRequestChanged(_candleRequestListener.value);
       _candleRequestListener.value = request;
       _timeBarListener.value = request.timeBar;
-      _drawObjectManager.onChangeCandleRequest(request, drawConfig);
     }
   }
 

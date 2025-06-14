@@ -14,9 +14,7 @@
 
 part of 'core.dart';
 
-abstract class KlineBindingBase
-    with KlineLog
-    implements ISetting, IPaintContext, IDrawContext {
+abstract class KlineBindingBase with KlineLog implements ISetting, IPaintContext, IDrawContext {
   final IConfiguration configuration;
 
   /// 对于Kline的操作是否自动保存到本地配置中.
@@ -82,6 +80,12 @@ abstract class KlineBindingBase
   @mustCallSuper
   void onLanguageChanged() {
     logd("onLanguageChanged base");
+  }
+
+  @protected
+  @mustCallSuper
+  void onRequestChanged(CandleReq oldRequest) {
+    logd("onRequestChanged base");
   }
 
   @protected

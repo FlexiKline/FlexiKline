@@ -108,6 +108,16 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw {
     }
   }
 
+  @override
+  void onRequestChanged(CandleReq oldRequest) {
+    super.onRequestChanged(oldRequest);
+    final request = curKlineData.req;
+    if (request.instId != oldRequest.instId) {
+      _drawObjectManager.onChangeCandleRequest(request, drawConfig);
+      exitDraw();
+    }
+  }
+
   void prepareDraw({bool force = false}) {
     // 如果是非退出状态, 则无需变更状态.
     if (!force && !drawState.isExited) return;
@@ -315,7 +325,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw {
 
   ////// 操作 //////
   /// 删除[object]; 如果不指定, 删除当前绘制[drawState]的object.
-  void deleteDrawObject({DrawObject? object}) {
+  void removeDrawObject({DrawObject? object}) {
     if (object != null) {
       if (_drawObjectManager.removeDrawObject(object)) {
         _markRepaintDraw();
@@ -330,8 +340,8 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw {
     }
   }
 
-  void deleteAllDrawObject() {
-    _drawObjectManager.cleanAllDrawObject();
+  void removeAllDrawObject() {
+    _drawObjectManager.removeAllDrawObject();
     final object = drawState.object;
     if (object != null) {
       _drawObjectManager.removeDrawObject(object);
