@@ -57,10 +57,10 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding implements 
     _repaintChart.value++;
   }
 
-  ValueListenable<bool> get chartStartZoomListener => _isChartStartZoom;
+  ValueListenable<bool> get isStartZoomChartListener => _isChartStartZoom;
 
   @override
-  bool get isStartZoomChart => chartStartZoomListener.value;
+  bool get isStartZoomChart => isStartZoomChartListener.value;
 
   ValueListenable<Rect> get chartZoomSlideBarRectListener {
     return _chartZoomSlideBarRect;

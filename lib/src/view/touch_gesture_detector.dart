@@ -29,14 +29,12 @@ class TouchGestureDetector extends StatefulWidget {
   const TouchGestureDetector({
     super.key,
     required this.controller,
-    required this.canvasSize,
     this.onDoubleTap,
     // this.child,
   });
 
   final FlexiKlineController controller;
   final GestureTapCallback? onDoubleTap;
-  final Size canvasSize;
   // @Deprecated('无用, 会影响手势响应范围')
   // final Widget? child;
 
@@ -116,14 +114,15 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
         onLongPressEnd: onLongPressEnd,
 
         /// 子组件
-        child: SizedBox(
-          width: widget.canvasSize.width,
-          height: widget.canvasSize.height,
-          child: ValueListenableBuilder(
-            valueListenable: controller.chartZoomSlideBarRectListener,
-            builder: (context, rect, child) => Stack(
-              children: [
-                Positioned.fromRect(
+        child: ValueListenableBuilder(
+          valueListenable: controller.canvasSizeChangeListener,
+          builder: (context, canvasSize, child) => SizedBox(
+            width: canvasSize.width,
+            height: canvasSize.height,
+            child: Stack(children: [
+              ValueListenableBuilder(
+                valueListenable: controller.chartZoomSlideBarRectListener,
+                builder: (context, rect, child) => Positioned.fromRect(
                   rect: rect,
                   child: GestureDetector(
                     behavior: HitTestBehavior.translucent,
@@ -134,8 +133,8 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
                     onVerticalDragCancel: onVerticalDragEnd,
                   ),
                 ),
-              ],
-            ),
+              ),
+            ]),
           ),
         ),
       ),

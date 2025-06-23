@@ -20,6 +20,7 @@ import 'package:flutter/material.dart';
 import '../core/core.dart';
 import '../extension/basic_type_ext.dart';
 import '../extension/functions_ext.dart';
+import '../extension/geometry_ext.dart';
 import '../framework/configuration.dart';
 import '../framework/logger.dart';
 import '../kline_controller.dart';
@@ -47,6 +48,7 @@ class FlexiKlineWidget extends StatefulWidget {
     this.onDoubleTap,
     this.drawToolbar,
     this.drawToolbarInitHeight = 50,
+    this.keepDrawToolbarFullyVisible = true,
     this.magnifierDecorationShapeBuilder,
     this.exitZoomButtonBuilder,
     this.exitZoomButtonAlignment = AlignmentDirectional.bottomEnd,
@@ -81,6 +83,9 @@ class FlexiKlineWidget extends StatefulWidget {
   /// 用于计算[drawToolbar]初始展示的位置向对于canvas底部的位置.
   final double drawToolbarInitHeight;
 
+  /// 是否保持[drawToolbar]完全可见.
+  final bool keepDrawToolbarFullyVisible;
+
   /// 是否自动适配所在布局约束.
   /// 在可以动态调整窗口大小的设备上, 此值为true, 将会动态适配窗口的调整; 否则, 请自行控制.
   /// 非移动设备默认为true.
@@ -110,7 +115,8 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
   String get logTag => 'FlexiKlineWidget';
 
   /// 绘制工具条globalKey: 用于获取其大小
-  final GlobalKey _drawToolbarKey = GlobalKey();
+  GlobalKey? _drawToolbarKey;
+  GlobalKey get drawToolbarKey => _drawToolbarKey ??= GlobalKey();
 
   /// 绘制工具条位置
   late final ValueNotifier<Offset> _drawToolbarPosition;
@@ -261,7 +267,6 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
               ? TouchGestureDetector(
                   key: const ValueKey('TouchGestureDetector'),
                   controller: controller,
-                  canvasSize: canvasSize,
                   onDoubleTap: widget.onDoubleTap,
                 )
               : NonTouchGestureDetector(
@@ -312,11 +317,11 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
     );
   }
 
-  bool _updateDrawToolbarPosition(Offset newPosition, [Rect? canvasRect]) {
-    final size = _drawToolbarKey.currentContext?.size;
-    if (size != null && !size.isEmpty) {
-      canvasRect ??= controller.canvasRect;
-      _drawToolbarPosition.value = Offset(
+  void _updateDrawToolbarPosition(Offset newPosition, [Rect? canvasRect]) {
+    canvasRect ??= controller.canvasRect;
+    final size = drawToolbarKey.currentContext?.size;
+    if (widget.keepDrawToolbarFullyVisible && size != null && size.isFinite) {
+      newPosition = Offset(
         newPosition.dx.clamp(
           canvasRect.left,
           math.max(canvasRect.left, canvasRect.right - size.width),
@@ -326,14 +331,20 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
           math.max(canvasRect.top, canvasRect.bottom - size.height),
         ),
       );
-      return true;
+    } else {
+      newPosition = newPosition.clamp(canvasRect);
     }
-    return false;
+    _drawToolbarPosition.value = newPosition;
+    configuration.saveDrawToolbarPosition(newPosition);
   }
 
   /// 绘制DrawToolBar
-  Widget _buildDrawToolbar(BuildContext context, Rect canvasRect) {
+  Widget _buildDrawToolbar(BuildContext flexiKlineContext, Rect canvasRect) {
     if (widget.drawToolbar == null) return const SizedBox.shrink();
+    final drawToolbarWrapper = SizedBox(
+      key: drawToolbarKey,
+      child: widget.drawToolbar!,
+    );
     return ValueListenableBuilder(
       valueListenable: controller.drawStateListener,
       builder: (context, state, child) => Visibility(
@@ -350,17 +361,16 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
               top: position.dy,
               child: MouseRegion(
                 cursor: SystemMouseCursors.move,
-                child: GestureDetector(
-                  onPanUpdate: (DragUpdateDetails details) {
-                    _updateDrawToolbarPosition(position + details.delta, canvasRect);
+                child: Draggable(
+                  key: const ValueKey('DrawToolbarDraggable'),
+                  feedback: drawToolbarWrapper,
+                  childWhenDragging: const SizedBox.shrink(),
+                  child: drawToolbarWrapper,
+                  onDragEnd: (details) {
+                    final box = flexiKlineContext.findRenderObject() as RenderBox;
+                    final newPosition = box.globalToLocal(details.offset);
+                    _updateDrawToolbarPosition(newPosition, canvasRect);
                   },
-                  onPanEnd: (event) {
-                    configuration.saveDrawToolbarPosition(position);
-                  },
-                  child: SizedBox(
-                    key: _drawToolbarKey,
-                    child: widget.drawToolbar,
-                  ),
                 ),
               ),
             );
@@ -368,6 +378,40 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
         ),
       ),
     );
+    // return ValueListenableBuilder(
+    //   valueListenable: controller.drawStateListener,
+    //   builder: (context, state, child) => Visibility(
+    //     visible: state.isEditing,
+    //     child: ValueListenableBuilder(
+    //       valueListenable: _drawToolbarPosition,
+    //       builder: (context, position, child) {
+    //         if (position == Offset.infinite || !canvasRect.contains(position)) {
+    //           // 如果position无效, 则重置其为当前canvas区域左下角.
+    //           position = Offset(0, canvasRect.height - widget.drawToolbarInitHeight);
+    //         }
+    //         return Positioned(
+    //           left: position.dx,
+    //           top: position.dy,
+    //           child: MouseRegion(
+    //             cursor: SystemMouseCursors.move,
+    //             child: GestureDetector(
+    //               onPanUpdate: (DragUpdateDetails details) {
+    //                 _updateDrawToolbarPosition(position + details.delta, canvasRect);
+    //               },
+    //               onPanEnd: (event) {
+    //                 configuration.saveDrawToolbarPosition(position);
+    //               },
+    //               child: SizedBox(
+    //                 key: drawToolbarKey,
+    //                 child: widget.drawToolbar,
+    //               ),
+    //             ),
+    //           ),
+    //         );
+    //       },
+    //     ),
+    //   ),
+    // );
   }
 
   /// 放大镜
@@ -439,7 +483,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
   /// 退出Zoom缩放按钮
   Widget _buildExitZoomButton(BuildContext context, Rect mainRect) {
     return ValueListenableBuilder(
-      valueListenable: controller.chartStartZoomListener,
+      valueListenable: controller.isStartZoomChartListener,
       builder: (context, isStartZomming, child) => Visibility(
         visible: isStartZomming,
         child: Container(
