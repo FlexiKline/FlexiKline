@@ -173,6 +173,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
   void dispose() {
     configuration.saveDrawToolbarPosition(drawToolbarPosition);
     controller.dispose();
+    _drawToolbarKey = null;
     super.dispose();
   }
 
@@ -211,7 +212,9 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
       builder: (context, canvasRect, child) {
         if (controller.drawState.isEditing) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            _updateDrawToolbarPosition(drawToolbarPosition, canvasRect);
+            configuration.saveDrawToolbarPosition(
+              _updateDrawToolbarPosition(drawToolbarPosition, canvasRect),
+            );
           });
         }
         return _buildKlineContent(context, canvasRect);
@@ -317,7 +320,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
     );
   }
 
-  void _updateDrawToolbarPosition(Offset newPosition, [Rect? canvasRect]) {
+  Offset _updateDrawToolbarPosition(Offset newPosition, [Rect? canvasRect]) {
     canvasRect ??= controller.canvasRect;
     final size = drawToolbarKey.currentContext?.size;
     if (widget.keepDrawToolbarFullyVisible && size != null && size.isFinite) {
@@ -334,8 +337,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
     } else {
       newPosition = newPosition.clamp(canvasRect);
     }
-    _drawToolbarPosition.value = newPosition;
-    configuration.saveDrawToolbarPosition(newPosition);
+    return _drawToolbarPosition.value = newPosition;
   }
 
   /// 绘制DrawToolBar
@@ -369,7 +371,9 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
                   onDragEnd: (details) {
                     final box = flexiKlineContext.findRenderObject() as RenderBox;
                     final newPosition = box.globalToLocal(details.offset);
-                    _updateDrawToolbarPosition(newPosition, canvasRect);
+                    configuration.saveDrawToolbarPosition(
+                      _updateDrawToolbarPosition(newPosition, canvasRect),
+                    );
                   },
                 ),
               ),

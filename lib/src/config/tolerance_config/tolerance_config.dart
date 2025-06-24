@@ -45,8 +45,7 @@ class ToleranceConfig {
     return 'Tolerance($maxDuration, $distanceFactor, $curvestr)';
   }
 
-  factory ToleranceConfig.fromJson(Map<String, dynamic> json) =>
-      _$ToleranceConfigFromJson(json);
+  factory ToleranceConfig.fromJson(Map<String, dynamic> json) => _$ToleranceConfigFromJson(json);
 
   Map<String, dynamic> toJson() => _$ToleranceConfigToJson(this);
 }

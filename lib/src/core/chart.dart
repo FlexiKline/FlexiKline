@@ -210,7 +210,6 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding implements 
   }
 
   void onChartMove(GestureData data) {
-    // super.handleMove(data);
     if (!data.moved) return;
 
     bool changed = false;

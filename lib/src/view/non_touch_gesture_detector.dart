@@ -16,38 +16,29 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import '../config/gesture_config/gesture_config.dart';
+import '../constant.dart';
 import '../extension/geometry_ext.dart';
 import '../extension/functions_ext.dart';
 import '../framework/chart/indicator.dart';
 import '../framework/draw/overlay.dart';
-import '../framework/logger.dart';
-import '../kline_controller.dart';
 import '../model/gesture_data.dart';
 import '../utils/algorithm_util.dart';
+import 'gesture_detector_widget.dart';
 
-class NonTouchGestureDetector extends StatefulWidget {
+class NonTouchGestureDetector extends GestureDetectorWidget {
   const NonTouchGestureDetector({
     super.key,
-    required this.controller,
-    this.onDoubleTap,
-    this.child,
+    required super.controller,
+    super.onDoubleTap,
   });
 
-  final FlexiKlineController controller;
-  final GestureTapCallback? onDoubleTap;
-  final Widget? child;
-
   @override
-  State<NonTouchGestureDetector> createState() => _NonTouchGestureDetectorState();
+  GestureDetectorState<NonTouchGestureDetector> createState() => _NonTouchGestureDetectorState();
 }
 
-class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
-    with TickerProviderStateMixin, KlineLog {
+class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGestureDetector> {
   @override
   String get logTag => 'NonTouchGesture';
-
-  AnimationController? animationController;
 
   // focus node to capture keyboard events
   final FocusNode _keyboardFocusNode = FocusNode();
@@ -65,14 +56,6 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
   GestureData? _longData;
 
   final _mouseCursor = ValueNotifier(SystemMouseCursors.precise);
-
-  FlexiKlineController get controller => widget.controller;
-
-  GestureConfig get gestureConfig => widget.controller.gestureConfig;
-
-  bool get isSupportKeyboardShortcuts => gestureConfig.supportKeyboardShortcuts;
-
-  DrawState get drawState => controller.drawState;
 
   void setCursorToPrecise() {
     _mouseCursor.value = SystemMouseCursors.precise;
@@ -101,7 +84,6 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
   @override
   void initState() {
     super.initState();
-    loggerDelegate = controller.loggerDelegate;
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       controller.drawStateListener.addListener(() {
         /// 控制指针形状
@@ -139,7 +121,6 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
   @override
   void dispose() {
     _keyboardFocusNode.dispose();
-    animationController?.dispose();
     super.dispose();
   }
 
@@ -210,9 +191,6 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
             onLongPressStart: onLongPressStart,
             onLongPressMoveUpdate: onLongPressMoveUpdate.throttleOnFps,
             onLongPressEnd: onLongPressEnd,
-
-            /// 子组件
-            child: widget.child,
           ),
         ),
       ),
@@ -550,19 +528,19 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
 
     final tolerance = controller.gestureConfig.tolerance;
 
+    /// 惯性平移的最大距离.
+    final panDistance = velocity * tolerance.distanceFactor;
+
     /// 确认继续平移时间 (利用log指数函数特点: 随着自变量velocity的增大，函数值的增长速度逐渐减慢)
     /// 测试当限定参数[tolerance.maxDuration]等于1000(1秒时), [velocity]带入后[duration]变化为:
     /// 100000 > 1151.29; 10000 > 921.03; 9000 > 910.49; 5000 > 851.71; 2000 > 760.09; 800 > 668.46; 100 > 460.51
     final panDuration = calcuInertialPanDuration(
-      velocity,
+      panDistance,
       maxDuration: tolerance.maxDuration,
     );
 
-    /// 惯性平移的最大距离.
-    final panDistance = velocity * tolerance.distanceFactor;
-
     // 平移距离为0 或者 不足1ms, 无需继续平移
-    if (panDistance == 0 || panDuration <= 1) {
+    if (panDistance.abs() < precisionError || panDuration <= 1) {
       logd("onPanEnd currently not need for inertial movement!");
       _panData?.end();
       _panData = null;
@@ -579,39 +557,21 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
       panDuration: panDuration,
     );
 
-    logi('onPanEnd inertial movement, velocity:$velocity => $tolerance');
-
-    animationController?.dispose();
-    animationController = AnimationController(
-      vsync: this,
-      duration: Duration(milliseconds: panDuration),
+    logi(
+      'onPanEnd inertial movement, velocity:$velocity, panDistance:$panDistance, panDuration:$panDuration',
     );
 
-    final animation = Tween(begin: 0.0, end: panDistance)
-        .chain(CurveTween(curve: tolerance.curve))
-        .animate(animationController!);
-
-    final initDx = _panData!.offset.dx;
-    animation.addListener(() {
-      // logd('onPanEnd move> ${DateTime.now().millisecond} > animation.value:${animation.value}');
-      if (_panData != null) {
-        _panData!.update(Offset(
-          initDx + animation.value,
-          _panData!.offset.dy,
-        ));
-        controller.onChartMove(_panData!);
-      }
-    }.throttleOnFps);
-
-    animationController?.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
+    animateToPosition(
+      _panData!.offset.dx,
+      _panData!.offset.dx + panDistance,
+      panDuration: Duration(milliseconds: panDuration),
+      tolerance: tolerance,
+      onCompleted: () {
         _panData?.end();
         _panData = null;
         setCursorToPrecise();
-      }
-    });
-
-    animationController?.forward();
+      },
+    );
   }
 
   void onPointerPanZoomStart(PointerPanZoomStartEvent event) {
@@ -645,14 +605,14 @@ class _NonTouchGestureDetectorState extends State<NonTouchGestureDetector>
   /// 支持平台: iPadOs, MacOs, ChromeOs, Windows, Linux,
   /// 注: Web不支持.
   /// [PointerPanZoomUpdateEvent] 将包含一些额外字段，用于表示平移、缩放和旋转手势的组合。
-  /// /// 手势的总平移偏移量
-  /// final Offset pan;
-  /// /// 自上一个事件以来平移偏移量的变化量
-  /// final Offset panDelta;
-  /// /// 手势的缩放比例
-  /// final double scale;
-  /// /// 到目前为止手势旋转的弧度量
-  /// final double rotation;
+  ///   手势的总平移偏移量
+  ///   final Offset pan;
+  ///   自上一个事件以来平移偏移量的变化量
+  ///   final Offset panDelta;
+  ///   手势的缩放比例
+  ///   final double scale;
+  ///   到目前为止手势旋转的弧度量
+  ///   final double rotation;
   void onPointerPanZoomUpdate(PointerPanZoomUpdateEvent event) {
     if (_scaleData == null) {
       logd("onPointerPanZoomUpdate scaleData is empty! $event ${event.scale}");

@@ -46,9 +46,15 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
       data.dispose();
     });
     _klineDataCache.clear();
+    onLoadMoreCandles = null;
+    moveToInitialPositionCallback = null;
   }
 
+  /// 加载更多回调
   OnLoadMoreCandles? onLoadMoreCandles;
+
+  /// 返回到初始位置动画回调.
+  VoidCallback? moveToInitialPositionCallback;
 
   /// 首根蜡烛是否移出屏幕监听.
   final _isFirstCandleMoveOffScreenListener = ValueNotifier(false);
@@ -113,13 +119,13 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
 
   /// 设置当前KlineData:
   /// 1. 通知timeBar变更
-  /// 2. 初始化首根蜡烛绘制位置于屏幕右侧[initPaintDxOffset]指定处.
+  /// 2. 初始化首根蜡烛绘制位置于屏幕右侧[getInitPaintDxOffset]指定处.
   /// 3. 重绘图表
   /// 4. 取消Cross绘制(如果有)
   void _setCurKlineData(KlineData data) {
     _curKlineData = data;
     _updateCandleRequestListener(data.req);
-    initPaintDxOffset();
+    paintDxOffset = getInitPaintDxOffset();
     markRepaintChart(reset: true);
     markRepaintDraw();
     cancelCross();
@@ -230,8 +236,8 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     return dxOffset.clamp(minPaintDxOffset, maxPaintDxOffset);
   }
 
-  void initPaintDxOffset() {
-    paintDxOffset = math.min(
+  double getInitPaintDxOffset() {
+    return math.min(
       maxPaintWidth - mainChartWidth, // 不足一屏, 首根蜡烛偏移量等于首根蜡烛右边长度.
       -settingConfig.firstCandleInitOffset, // 满足一屏时, 首根蜡烛相对于主绘制区域最小的偏移量
     );
@@ -239,7 +245,11 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
 
   /// 移动蜡烛图回到初始位置
   void moveToInitialPosition() {
-    initPaintDxOffset();
+    if (moveToInitialPositionCallback != null) {
+      moveToInitialPositionCallback?.call();
+      return;
+    }
+    paintDxOffset = getInitPaintDxOffset();
     markRepaintChart();
     markRepaintDraw();
   }

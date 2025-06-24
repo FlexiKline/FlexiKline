@@ -15,37 +15,28 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 
-import '../config/gesture_config/gesture_config.dart';
+import '../constant.dart';
 import '../extension/geometry_ext.dart';
 import '../extension/functions_ext.dart';
 import '../framework/chart/indicator.dart';
 import '../framework/draw/overlay.dart';
 import '../framework/logger.dart';
-import '../kline_controller.dart';
 import '../model/gesture_data.dart';
 import '../utils/algorithm_util.dart';
+import 'gesture_detector_widget.dart';
 
-class TouchGestureDetector extends StatefulWidget {
+class TouchGestureDetector extends GestureDetectorWidget {
   const TouchGestureDetector({
     super.key,
-    required this.controller,
-    this.onDoubleTap,
-    // this.child,
+    required super.controller,
+    super.onDoubleTap,
   });
 
-  final FlexiKlineController controller;
-  final GestureTapCallback? onDoubleTap;
-  // @Deprecated('无用, 会影响手势响应范围')
-  // final Widget? child;
-
   @override
-  State<TouchGestureDetector> createState() => _TouchGestureDetectorState();
+  GestureDetectorState<TouchGestureDetector> createState() => _TouchGestureDetectorState();
 }
 
-class _TouchGestureDetectorState extends State<TouchGestureDetector>
-    with TickerProviderStateMixin, KlineLog {
-  AnimationController? animationController;
-
+class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetector> with KlineLog {
   /// 平移/缩放监听数据
   GestureData? _panScaleData;
 
@@ -66,24 +57,6 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
 
   @override
   String get logTag => 'TouchGesture';
-
-  FlexiKlineController get controller => widget.controller;
-
-  GestureConfig get gestureConfig => widget.controller.gestureConfig;
-
-  DrawState get drawState => controller.drawState;
-
-  @override
-  void initState() {
-    super.initState();
-    loggerDelegate = controller.loggerDelegate;
-  }
-
-  @override
-  void dispose() {
-    animationController?.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -403,13 +376,6 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
         _panScaleData = null;
       }
       controller.onChartScaleEnd();
-      // 如果是scale操作, 不需要惯性平移, 直接return
-      // 为了防止缩放后的平移, 延时结束.
-      // Future.delayed(const Duration(milliseconds: 200), () {
-      //   logd("onScaleEnd scale.");
-      //   _panScaleData?.end();
-      //   _panScaleData = null;
-      // });
 
       /// 检查并加载更多蜡烛数据
       controller.checkAndLoadMoreCandlesWhenPanEnd();
@@ -435,19 +401,19 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
 
     final tolerance = gestureConfig.tolerance;
 
+    /// 惯性平移的最大距离.
+    final panDistance = velocity * tolerance.distanceFactor;
+
     /// 确认继续平移时间 (利用log指数函数特点: 随着自变量velocity的增大，函数值的增长速度逐渐减慢)
     /// 测试当限定参数[tolerance.maxDuration]等于1000(1秒时), [velocity]带入后[duration]变化为:
     /// 100000 > 1151.29; 10000 > 921.03; 9000 > 910.49; 5000 > 851.71; 2000 > 760.09; 800 > 668.46; 100 > 460.51
     final panDuration = calcuInertialPanDuration(
-      velocity,
+      panDistance,
       maxDuration: tolerance.maxDuration,
     );
 
-    /// 惯性平移的最大距离.
-    final panDistance = velocity * tolerance.distanceFactor;
-
     // 平移距离为0 或者 不足1ms, 无需继续平移
-    if (panDistance == 0 || panDuration <= 1) {
+    if (panDistance.abs() < precisionError || panDuration <= 1) {
       logd("onScaleEnd currently not need for inertial movement!");
       _panScaleData?.end();
       _panScaleData = null;
@@ -463,38 +429,20 @@ class _TouchGestureDetectorState extends State<TouchGestureDetector>
       panDuration: panDuration,
     );
 
-    logi('onScaleEnd inertial movement, velocity:$velocity => $tolerance');
-
-    animationController?.dispose();
-    animationController = AnimationController(
-      vsync: this,
-      duration: Duration(milliseconds: panDuration),
+    logi(
+      'onScaleEnd inertial movement, velocity:$velocity, panDistance:$panDistance, panDuration:$panDuration',
     );
 
-    final animation = Tween(begin: 0.0, end: panDistance)
-        .chain(CurveTween(curve: tolerance.curve))
-        .animate(animationController!);
-
-    final initDx = _panScaleData!.offset.dx;
-    animation.addListener(() {
-      // logd('onScaleEnd move> ${DateTime.now().millisecond} animation.value:${animation.value}');
-      if (_panScaleData != null) {
-        _panScaleData!.update(Offset(
-          initDx + animation.value,
-          _panScaleData!.offset.dy,
-        ));
-        controller.onChartMove(_panScaleData!);
-      }
-    }.throttleOnFps);
-
-    animationController?.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
+    animateToPosition(
+      _panScaleData!.offset.dx,
+      _panScaleData!.offset.dx + panDistance,
+      panDuration: Duration(milliseconds: panDuration),
+      tolerance: tolerance,
+      onCompleted: () {
         _panScaleData?.end();
         _panScaleData = null;
-      }
-    });
-
-    animationController?.forward();
+      },
+    );
   }
 
   /// 长按
