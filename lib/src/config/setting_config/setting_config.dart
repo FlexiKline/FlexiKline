@@ -51,6 +51,9 @@ class SettingConfig {
     required this.candleLineWidth,
     required this.firstCandleInitOffset,
 
+    /// 绘制额外内容是否在允许在主图绘制区域之外
+    this.allowPaintExtraOutsideMainRect = true,
+
     /// 是否展示Y轴刻度.
     this.showYAxisTick = true,
 
@@ -100,6 +103,9 @@ class SettingConfig {
   final double candleLineWidth;
   // Candle 第一根Candle相对于mainRect右边的偏移
   final double firstCandleInitOffset;
+
+  /// 绘制额外内容是否在允许在主图绘制区域之外
+  final bool allowPaintExtraOutsideMainRect;
 
   /// 是否展示Y轴刻度.
   final bool showYAxisTick;

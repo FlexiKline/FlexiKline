@@ -62,6 +62,7 @@ abstract class GestureDetectorState<T extends GestureDetectorWidget> extends Sta
   /// [panDuration] 移动时长, 单位毫秒; 如果未指定, 则根据[begin]和[end]的差值计算出合适的时长
   /// [tolerance] 惯性平移参数
   /// [onCompleted] 动画完成回调
+  @protected
   void animateToPosition(
     double begin,
     double end, {

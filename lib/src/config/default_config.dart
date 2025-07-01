@@ -283,6 +283,12 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       candleLineWidth: 1 * theme.scale,
       firstCandleInitOffset: 80 * theme.scale,
 
+      /// 绘制额外内容是否在允许在主图绘制区域之外
+      allowPaintExtraOutsideMainRect: true,
+
+      /// 是否展示Y轴刻度.
+      showYAxisTick: true,
+
       /// 副区的指标图最大数量
       subChartMaxCount: defaultSubChartMaxCount,
     );

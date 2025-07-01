@@ -116,6 +116,8 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding implements 
     calculateCandleDrawIndex();
     int solt = mainIndicatorSlot;
 
+    /// 绘制额外内容是否在允许在主图绘制区域之外
+    final allowPaintExtraOutsideMainRect = settingConfig.allowPaintExtraOutsideMainRect;
     try {
       /// 保存画布状态
       canvas.save();
@@ -126,10 +128,21 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding implements 
         end: curKlineData.end,
         reset: _reset,
       );
-      mainPaintObject.doPaintChart(canvas, size);
+      mainPaintObject.doPaintChart(
+        canvas,
+        size,
+      );
+
+      if (!allowPaintExtraOutsideMainRect) {
+        mainPaintObject.doPaintExtraAboveChart(canvas, size);
+      }
     } finally {
       /// 恢复画布状态
       canvas.restore();
+    }
+
+    if (allowPaintExtraOutsideMainRect) {
+      mainPaintObject.doPaintExtraAboveChart(canvas, size);
     }
 
     for (var paintObject in subPaintObjects) {
@@ -143,6 +156,8 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding implements 
 
       /// 绘制副区的指标图
       paintObject.doPaintChart(canvas, size);
+
+      paintObject.doPaintExtraAboveChart(canvas, size);
     }
 
     if (_reset) _reset = false;

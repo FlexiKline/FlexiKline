@@ -92,7 +92,9 @@ extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
         tipsRect: drawableRect,
       );
     }
+  }
 
+  void doPaintExtraAboveChart(Canvas canvas, Size size) {
     paintExtraAboveChart(canvas, size);
   }
 
@@ -247,7 +249,9 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
         doPaintTips(canvas, model: klineData.latest);
       }
     }
+  }
 
+  void doPaintExtraAboveChart(Canvas canvas, Size size) {
     for (var object in children) {
       object.paintExtraAboveChart(canvas, size);
     }

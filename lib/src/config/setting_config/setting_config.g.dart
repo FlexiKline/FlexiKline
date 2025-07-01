@@ -38,6 +38,9 @@ abstract class _$SettingConfigCWProxy {
 
   SettingConfig firstCandleInitOffset(double firstCandleInitOffset);
 
+  SettingConfig allowPaintExtraOutsideMainRect(
+      bool allowPaintExtraOutsideMainRect);
+
   SettingConfig showYAxisTick(bool showYAxisTick);
 
   SettingConfig subChartMaxCount(int subChartMaxCount);
@@ -64,6 +67,7 @@ abstract class _$SettingConfigCWProxy {
     double candleHollowBarBorderWidth,
     double candleLineWidth,
     double firstCandleInitOffset,
+    bool allowPaintExtraOutsideMainRect,
     bool showYAxisTick,
     int subChartMaxCount,
   });
@@ -136,6 +140,11 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
       this(firstCandleInitOffset: firstCandleInitOffset);
 
   @override
+  SettingConfig allowPaintExtraOutsideMainRect(
+          bool allowPaintExtraOutsideMainRect) =>
+      this(allowPaintExtraOutsideMainRect: allowPaintExtraOutsideMainRect);
+
+  @override
   SettingConfig showYAxisTick(bool showYAxisTick) =>
       this(showYAxisTick: showYAxisTick);
 
@@ -168,6 +177,7 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
     Object? candleHollowBarBorderWidth = const $CopyWithPlaceholder(),
     Object? candleLineWidth = const $CopyWithPlaceholder(),
     Object? firstCandleInitOffset = const $CopyWithPlaceholder(),
+    Object? allowPaintExtraOutsideMainRect = const $CopyWithPlaceholder(),
     Object? showYAxisTick = const $CopyWithPlaceholder(),
     Object? subChartMaxCount = const $CopyWithPlaceholder(),
   }) {
@@ -236,6 +246,11 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
               ? _value.firstCandleInitOffset
               // ignore: cast_nullable_to_non_nullable
               : firstCandleInitOffset as double,
+      allowPaintExtraOutsideMainRect:
+          allowPaintExtraOutsideMainRect == const $CopyWithPlaceholder()
+              ? _value.allowPaintExtraOutsideMainRect
+              // ignore: cast_nullable_to_non_nullable
+              : allowPaintExtraOutsideMainRect as bool,
       showYAxisTick: showYAxisTick == const $CopyWithPlaceholder()
           ? _value.showYAxisTick
           // ignore: cast_nullable_to_non_nullable
@@ -281,6 +296,8 @@ SettingConfig _$SettingConfigFromJson(Map<String, dynamic> json) =>
           (json['candleHollowBarBorderWidth'] as num).toDouble(),
       candleLineWidth: (json['candleLineWidth'] as num).toDouble(),
       firstCandleInitOffset: (json['firstCandleInitOffset'] as num).toDouble(),
+      allowPaintExtraOutsideMainRect:
+          json['allowPaintExtraOutsideMainRect'] as bool? ?? true,
       showYAxisTick: json['showYAxisTick'] as bool? ?? true,
       subChartMaxCount: (json['subChartMaxCount'] as num?)?.toInt() ??
           defaultSubChartMaxCount,
@@ -305,6 +322,7 @@ Map<String, dynamic> _$SettingConfigToJson(SettingConfig instance) =>
       'candleHollowBarBorderWidth': instance.candleHollowBarBorderWidth,
       'candleLineWidth': instance.candleLineWidth,
       'firstCandleInitOffset': instance.firstCandleInitOffset,
+      'allowPaintExtraOutsideMainRect': instance.allowPaintExtraOutsideMainRect,
       'showYAxisTick': instance.showYAxisTick,
       'subChartMaxCount': instance.subChartMaxCount,
     };
