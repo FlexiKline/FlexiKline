@@ -672,7 +672,7 @@ const FlexiParamSerializable = JsonSerializable(
 // ignore: constant_identifier_names
 const FlexiModelSerializable = JsonSerializable(
   converters: _basicConverterList,
-  ignoreUnannotated: true,
+  // ignoreUnannotated: true,
   explicitToJson: true,
   includeIfNull: false,
 );

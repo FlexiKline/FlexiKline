@@ -48,8 +48,6 @@ class BagNum implements Comparable<BagNum> {
   static const BagNum fifty = BagNum._(50);
   static const BagNum hundred = BagNum._(100);
 
-  // @Deprecated('unsafe')
-  // factory BagNum.form(dynamic value) => BagNum._(value);
   factory BagNum.fromDecimal(Decimal value) => BagNum._(value);
   factory BagNum.fromNum(num value) => BagNum._(value);
   factory BagNum.fromInt(num value) => BagNum._(value);

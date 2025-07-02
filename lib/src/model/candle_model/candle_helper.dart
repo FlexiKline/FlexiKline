@@ -20,10 +20,11 @@ final class CalculateData {
     int indicatorCount,
   ) : this._(List.filled(indicatorCount, null, growable: false));
 
-  final List<dynamic> dataList;
+  final List<Object?> dataList;
 
   T? getData<T>(int index) {
-    return dataList.getItem(index);
+    final obj = dataList.getItem(index);
+    return obj is T ? obj : null;
   }
 
   bool setData<T>(int index, T data) {

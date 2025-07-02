@@ -122,10 +122,10 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   /// 2. 初始化首根蜡烛绘制位置于屏幕右侧[getInitPaintDxOffset]指定处.
   /// 3. 重绘图表
   /// 4. 取消Cross绘制(如果有)
-  void _setCurKlineData(KlineData data) {
+  void _setCurKlineData(KlineData data, {bool resetPaintDxOffset = true}) {
     _curKlineData = data;
     _updateCandleRequestListener(data.req);
-    paintDxOffset = getInitPaintDxOffset();
+    if (resetPaintDxOffset) paintDxOffset = getInitPaintDxOffset();
     markRepaintChart(reset: true);
     markRepaintDraw();
     cancelCross();
@@ -355,18 +355,23 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   /// 切换[req]请求指定的蜡烛数据
   /// [req] 待切换的[CandleReq]
   /// [useCacheFirst] 优先使用缓存. 注: 如果有缓存数据(说明之前加载过), loading不会展示.
+  /// [useCachePaintDxOffset] 是否仍使用缓存的绘制位置(如果当前没有切换请求);
   /// return
   ///   1. true:  代表使用了缓存, [curKlineData]的请求状态为[RequestState.none], 不展示loading
   ///   2. false: 代表未使用缓存; 且[curKlineData]数据会被清空(如果有).
   bool switchKlineData(
     CandleReq req, {
     bool useCacheFirst = true,
+    bool useCachePaintDxOffset = false,
   }) {
     KlineData? data = _klineDataCache[req.key];
 
     if (useCacheFirst && data != null && data.isNotEmpty) {
       // 如果优先使用缓存且缓存数据不为空时, 设置缓存为当前KlineData, 同时结束loading状态.
-      _setCurKlineData(data);
+      _setCurKlineData(
+        data,
+        resetPaintDxOffset: req.key != curDataKey ? true : useCachePaintDxOffset,
+      );
       return true;
     }
 

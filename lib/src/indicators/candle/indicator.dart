@@ -557,7 +557,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
       final text = formatPrice(
         model.close.toDecimal(),
         precision: klineData.precision,
-        cutInvalidZero: true,
+        cutInvalidZero: false,
       );
 
       /// 绘制最后价标记

@@ -148,7 +148,7 @@ extension $CandleModelCopyWith on CandleModel {
 // **************************************************************************
 
 CandleModel _$CandleModelFromJson(Map<String, dynamic> json) => CandleModel(
-      ts: valueToInt(json['ts']),
+      ts: (json['ts'] as num).toInt(),
       o: const DecimalConverter().fromJson(json['o']),
       h: const DecimalConverter().fromJson(json['h']),
       l: const DecimalConverter().fromJson(json['l']),
@@ -161,7 +161,7 @@ CandleModel _$CandleModelFromJson(Map<String, dynamic> json) => CandleModel(
 
 Map<String, dynamic> _$CandleModelToJson(CandleModel instance) =>
     <String, dynamic>{
-      'ts': intToString(instance.ts),
+      'ts': instance.ts,
       if (const DecimalConverter().toJson(instance.o) case final value?)
         'o': value,
       if (const DecimalConverter().toJson(instance.h) case final value?)
