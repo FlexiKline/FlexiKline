@@ -27,7 +27,7 @@ part 'request.dart';
 part 'candle_list.dart';
 part 'paint_draw.dart';
 
-class KlineData extends BaseData with RequestData, CandleListData, PaintDrawData {
+class KlineData extends BaseData {
   KlineData(
     super.req, {
     super.list,
@@ -53,15 +53,17 @@ class KlineData extends BaseData with RequestData, CandleListData, PaintDrawData
     required ComputeMode computeMode,
     required List<PaintObject> paintObjects,
     bool reset = false,
+    Stopwatch? stopwatch,
+    String? debugLabel,
   }) async {
     DateTime beginTime = DateTime.now();
-    data.logd('WatchRun precomputeKlineData Begin:$beginTime');
-    final stopwatch = Stopwatch();
+    data.logd('precomputeKlineData $debugLabel Begin:$beginTime');
+    stopwatch ??= Stopwatch();
 
     ///1. 合并[newList]到[data]中
     Range? range = await stopwatch.runAsync(
       () => data.mergeCandleList(newList),
-      debugLabel: 'mergeCandleList\t${newList.length}|$reset',
+      debugLabel: '$debugLabel-mergeCandleList',
     );
     data.updateState(); // 更新当前data的[CandleReq]的请求边界[before, after]
 
@@ -77,7 +79,7 @@ class KlineData extends BaseData with RequestData, CandleListData, PaintDrawData
         indicatorCount,
         reset: reset,
       ),
-      debugLabel: 'initBasicData\t$range|$reset',
+      debugLabel: '$debugLabel-initBasicData-$range',
     );
 
     ///4. 预计算指标数据
@@ -87,13 +89,13 @@ class KlineData extends BaseData with RequestData, CandleListData, PaintDrawData
           range!,
           reset: reset,
         ),
-        debugLabel: 'precompute:${object.key}\t$range|$reset',
+        debugLabel: '$debugLabel-precompute:${object.key}-$range',
       );
     }
 
     final endTime = DateTime.now();
     final spent = endTime.difference(beginTime).inMicroseconds;
-    data.logd('WatchRun precomputeKlineData End:$endTime, spent:$spentμs');
+    data.logd('precomputeKlineData $debugLabel End:$endTime, spent:$spentμs');
     return data;
   }
 }

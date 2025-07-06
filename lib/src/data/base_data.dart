@@ -72,5 +72,7 @@ abstract class BaseData with KlineLog {
     _end = val.clamp(0, length);
   }
 
-  bool checkStartAndEnd(int start, int end);
+  bool checkStartAndEnd(int start, int end) {
+    return isNotEmpty && start < end && start >= 0 && end <= length;
+  }
 }

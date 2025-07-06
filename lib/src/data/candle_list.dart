@@ -14,7 +14,7 @@
 
 part of 'kline_data.dart';
 
-mixin CandleListData on BaseData {
+extension CandleListData on BaseData {
   CandleModel? get latest => list.firstOrNull;
 
   bool checkIndex(int index) => index >= 0 && index < length;

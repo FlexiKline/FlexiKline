@@ -50,6 +50,8 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     moveToInitialPositionCallback = null;
   }
 
+  final Stopwatch _watchPrecompute = Stopwatch();
+
   /// 加载更多回调
   OnLoadMoreCandles? onLoadMoreCandles;
 
@@ -254,8 +256,8 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     markRepaintDraw();
   }
 
-  /// 计算绘制蜡烛图的起始数组索引下标
-  void calculateCandleDrawIndex() {
+  /// 计算绘制蜡烛图的范围
+  void calculatePaintChartRange() {
     if (paintDxOffset > 0) {
       final startIndex = (paintDxOffset / candleActualWidth).floor();
       final diff = paintDxOffset % candleActualWidth;
@@ -292,14 +294,14 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   /// 数据合并更新结果的处理:
   /// 1. 对于历史数据追加, 像EMA这类依赖于历史数据会适时考虑从头计算.
   /// 2. 对于实时数据更新, 会仅计算[newList]部分.
-  Future<KlineData> _startPrecomputeKlineData(
+  Future<void> _startPrecomputeKlineData(
     KlineData data, {
     List<CandleModel> newList = const [],
     bool reset = false,
   }) async {
     if (newList.isEmpty) {
       // 无需计算; 直接返回
-      return data;
+      return;
     }
 
     // 确认当前数据的计算模式
@@ -308,11 +310,13 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     // 待计算的指标对象集合
     final paintObjects = [mainPaintObject, ...subPaintObjects];
 
-    final watchPrecompute = Stopwatch();
+    _watchPrecompute.reset();
+    final beginTime = DateTime.now().millisecondsSinceEpoch;
+    final precomputeLabel = 'Precompute-$beginTime-${newList.length}-$reset';
 
     try {
-      logd('PrecomputeKlineData Begin:${DateTime.now()}');
-      watchPrecompute.start();
+      logd('PrecomputeKlineData Begin: $precomputeLabel');
+      _watchPrecompute.start();
 
       /// 使用scheduleTask + compute方式运行预计算
       // return await SchedulerBinding.instance.scheduleTask(
@@ -338,17 +342,20 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
           computeMode: computeMode,
           paintObjects: paintObjects,
           reset: reset,
+          stopwatch: _watchPrecompute,
+          debugLabel: precomputeLabel,
         ),
         Priority.animation,
-        debugLabel: 'Precompute-Task',
+        debugLabel: precomputeLabel,
       );
     } catch (e, stack) {
       loge('PrecomputeKlineData exception!!!', error: e, stackTrace: stack);
-      return data;
     } finally {
-      watchPrecompute.stop();
-      logd('PrecomputeKlineData End:${DateTime.now()}');
-      logi('PrecomputeKlineData spent:${watchPrecompute.elapsedMicroseconds}');
+      _watchPrecompute.stop();
+      logd(
+        'PrecomputeKlineData End: $precomputeLabel spent:${DateTime.now().millisecondsSinceEpoch - beginTime}(ms',
+      );
+      logi('PrecomputeKlineData spent:${_watchPrecompute.elapsedMicroseconds}');
     }
   }
 
@@ -391,26 +398,20 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   }
 
   /// 结束加载中状态
-  /// [forceStopCurReq] 强制结束当前请求蜡烛数据[curKlineData]的加载中状态
   /// [request]和[reqKey]指定要结束加载状态的请求, 如果[request]请求的状态非[RequestState.none], 即结束加载中状态
   void stopLoading({
     CandleReq? request,
     String? reqKey,
-    bool forceStopCurReq = false,
   }) {
-    KlineData? data;
     reqKey ??= request?.key;
-    if (forceStopCurReq || reqKey == curDataKey) {
+    if (reqKey == curDataKey) {
       if (curKlineData.req.state != RequestState.none) {
         _updateCandleRequestListener(
           curKlineData.updateState(state: RequestState.none),
         );
       }
     } else {
-      if (reqKey != null) data = _klineDataCache[reqKey];
-      if (data != null) {
-        data.updateState(state: RequestState.none);
-      }
+      _klineDataCache.getItem(reqKey)?.updateState(state: RequestState.none);
     }
   }
 
@@ -427,7 +428,6 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
 
     KlineData? data = _klineDataCache[req.key];
     bool reset = data == null || data.isEmpty;
-    final oldLen = data?.length ?? 0;
 
     data ??= KlineData(
       req.copyWith(state: RequestState.initLoading),
@@ -437,34 +437,32 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     /// 首先结束[stat.req]的请求状态为[RequestState.none]
     stopLoading(request: data.req);
 
-    data = await _startPrecomputeKlineData(
+    await _startPrecomputeKlineData(
       data,
       newList: list,
       reset: reset,
     );
-
-    final old = _klineDataCache.append(req.key, data);
-    if (old != null) Future(() => old.dispose());
 
     if (req.key == curDataKey) {
       if (reset) {
         _setCurKlineData(data);
       } else {
         _updateCandleRequestListener(data.req);
-        final newLen = data.length;
-        if (paintDxOffset < 0 && newLen > oldLen) {
-          /// 当数据合并后
-          /// 1. 如果paintDxOffset > 0 说明满足一屏, 且最新蜡烛被用户移动到绘制区域外面, 无需调整偏移量paintDxOffset, 重绘时, 仍按此偏移量计算后, 当前首根蜡烛向左移动一个蜡烛.
-          /// 2. 如果paintDxOffset == 0 说明当前最新蜡烛在屏幕第一位(最右边)展示. 无需调整偏移量paintDxOffset, 重绘时calculateCandleIndexAndOffset, 会计算startIndex = 0;
-          /// 2. 如果paintDxOffset < 0 说明未满足一屏, 需要减小偏移量, 以保证新数据能够展示.
-          ///    注: 如果调整后 paintDxOffset > 0 则要置为0, 以保证最新蜡烛在最右边展示.
-          paintDxOffset = math.min(
-            0,
-            paintDxOffset + (newLen - oldLen) * candleActualWidth,
-          );
-        }
+        // final newLen = data.length;
+        // if (paintDxOffset < 0 && newLen > oldLen) {
+        //   /// 当数据合并后
+        //   /// 1. 如果paintDxOffset > 0 说明满足一屏, 且最新蜡烛被用户移动到绘制区域外面, 无需调整偏移量paintDxOffset, 重绘时, 仍按此偏移量计算后, 当前首根蜡烛向左移动一个蜡烛.
+        //   /// 2. 如果paintDxOffset == 0 说明当前最新蜡烛在屏幕第一位(最右边)展示. 无需调整偏移量paintDxOffset, 重绘时calculateCandleIndexAndOffset, 会计算startIndex = 0;
+        //   /// 2. 如果paintDxOffset < 0 说明未满足一屏, 需要减小偏移量, 以保证新数据能够展示.
+        //   ///    注: 如果调整后 paintDxOffset > 0 则要置为0, 以保证最新蜡烛在最右边展示.
+        //   paintDxOffset = math.min(
+        //     0,
+        //     paintDxOffset + (newLen - oldLen) * candleActualWidth,
+        //   );
+        // }
 
         markRepaintChart();
+        markRepaintCross();
         markRepaintDraw();
       }
     }

@@ -14,7 +14,7 @@
 
 part of 'kline_data.dart';
 
-mixin RequestData on BaseData {
+extension RequestData on BaseData {
   String get instId => req.instId;
   int get precision => req.precision;
   String get key => req.key;

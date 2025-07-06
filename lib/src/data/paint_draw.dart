@@ -14,14 +14,9 @@
 
 part of 'kline_data.dart';
 
-mixin PaintDrawData on BaseData {
+extension PaintDrawData on BaseData {
   bool get canPaintChart {
     return isNotEmpty && list.checkIndex(start); // TODO && list.checkIndex(end);
-  }
-
-  @override
-  bool checkStartAndEnd(int start, int end) {
-    return isNotEmpty && start < end && start >= 0 && end <= length;
   }
 
   void ensureStartAndEndIndex(

@@ -113,7 +113,7 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding implements 
       return;
     }
 
-    calculateCandleDrawIndex();
+    calculatePaintChartRange();
     int solt = mainIndicatorSlot;
 
     /// 绘制额外内容是否在允许在主图绘制区域之外
