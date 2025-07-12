@@ -50,8 +50,6 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     moveToInitialPositionCallback = null;
   }
 
-  final Stopwatch _watchPrecompute = Stopwatch();
-
   /// 加载更多回调
   OnLoadMoreCandles? onLoadMoreCandles;
 
@@ -98,6 +96,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
       _computeMode = mode;
       _startPrecomputeKlineData(
         curKlineData,
+        newList: curKlineData.list,
         reset: true,
       );
     }
@@ -299,7 +298,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     List<CandleModel> newList = const [],
     bool reset = false,
   }) async {
-    if (newList.isEmpty) {
+    if (!reset && newList.isEmpty) {
       // 无需计算; 直接返回
       return;
     }
@@ -308,55 +307,43 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     final computeMode = _computeMode;
 
     // 待计算的指标对象集合
-    final paintObjects = [mainPaintObject, ...subPaintObjects];
+    // final paintObjects = [mainPaintObject, ...subPaintObjects];
 
-    _watchPrecompute.reset();
     final beginTime = DateTime.now().millisecondsSinceEpoch;
     final precomputeLabel = 'Precompute-$beginTime-${newList.length}-$reset';
 
-    try {
-      logd('PrecomputeKlineData Begin: $precomputeLabel');
-      _watchPrecompute.start();
+    logd('startPrecompute Begin: $precomputeLabel');
 
-      /// 使用scheduleTask + compute方式运行预计算
-      // return await SchedulerBinding.instance.scheduleTask(
-      //   () => precomputeKlineDataByCompute(
-      //     data,
-      //     newList: newList,
-      //     computeMode: computeMode,
-      //     calcParams: calcParams,
-      //     reset: reset,
-      //     debugLabel: 'Precompute-Compute',
-      //     logger: loggerDelegate,
-      //   ),
-      //   Priority.animation,
-      //   debugLabel: 'Precompute-Task',
-      // );
+    /// 使用scheduleTask + compute方式运行预计算
+    // return await SchedulerBinding.instance.scheduleTask(
+    //   () => precomputeKlineDataByCompute(
+    //     data,
+    //     newList: newList,
+    //     computeMode: computeMode,
+    //     calcParams: calcParams,
+    //     reset: reset,
+    //     debugLabel: 'Precompute-Compute',
+    //     logger: loggerDelegate,
+    //   ),
+    //   Priority.animation,
+    //   debugLabel: 'Precompute-Task',
+    // );
 
-      /// 使用scheduleTask方式运行预计算
-      return await SchedulerBinding.instance.scheduleTask(
-        () => KlineData.precomputeKlineData(
-          data,
-          indicatorCount: indicatorCount,
-          newList: newList,
-          computeMode: computeMode,
-          paintObjects: paintObjects,
-          reset: reset,
-          stopwatch: _watchPrecompute,
-          debugLabel: precomputeLabel,
-        ),
-        Priority.animation,
-        debugLabel: precomputeLabel,
-      );
-    } catch (e, stack) {
-      loge('PrecomputeKlineData exception!!!', error: e, stackTrace: stack);
-    } finally {
-      _watchPrecompute.stop();
-      logd(
-        'PrecomputeKlineData End: $precomputeLabel spent:${DateTime.now().millisecondsSinceEpoch - beginTime}(ms',
-      );
-      logi('PrecomputeKlineData spent:${_watchPrecompute.elapsedMicroseconds}');
-    }
+    /// 使用scheduleTask方式运行预计算
+    await SchedulerBinding.instance.scheduleTask(
+      () => data.precomputeKlineData(
+        newList: newList,
+        computeMode: computeMode,
+        mainPaintObject: mainPaintObject,
+        subPaintObjects: subPaintObjects,
+        reset: reset,
+      ),
+      Priority.animation,
+      debugLabel: precomputeLabel,
+    );
+    logd(
+      'startPrecompute End:$precomputeLabel spent:${DateTime.now().millisecondsSinceEpoch - beginTime}ms',
+    );
   }
 
   /// 切换[req]请求指定的蜡烛数据
@@ -388,6 +375,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     // 重置当前KlineData为[req]请求指定的KlineData, 并更新到缓存中.
     data = KlineData(
       req.copyWith(state: RequestState.initLoading),
+      indicatorCount,
       logger: loggerDelegate,
     );
     final old = _klineDataCache.append(req.key, data);
@@ -431,6 +419,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
 
     data ??= KlineData(
       req.copyWith(state: RequestState.initLoading),
+      indicatorCount,
       logger: loggerDelegate,
     );
 

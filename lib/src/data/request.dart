@@ -22,6 +22,8 @@ extension RequestData on BaseData {
   TimeBar? get timeBar => req.timeBar;
   bool get invalid => req.instId.isEmpty;
 
+  bool get isTimeChart => timeBar == TimeBar.s1;
+
   CandleReq updateState({RequestState state = RequestState.none}) {
     req = req.copyWith(
       after: list.lastOrNull?.ts,

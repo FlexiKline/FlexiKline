@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:math' as math;
+
 final class Range {
   const Range(this.start, this.end);
 
@@ -20,14 +22,16 @@ final class Range {
 
   static Range get empty => const Range(0, 0);
 
-  @override
-  String toString() {
-    return 'Range[$start, $end]';
-  }
-
   int get length => end - start;
 
+  bool get isEmpty => length <= 0;
+
   bool get isNotEmpty => length > 0;
+
+  Range merge(Range range) => Range(
+        math.min(start, range.start),
+        math.max(end, range.end),
+      );
 
   @override
   int get hashCode => start.hashCode ^ end.hashCode;
@@ -39,4 +43,9 @@ final class Range {
           runtimeType == other.runtimeType &&
           start == other.start &&
           end == other.end;
+
+  @override
+  String toString() {
+    return 'Range[$start, $end]';
+  }
 }

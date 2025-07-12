@@ -15,35 +15,67 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/scheduler.dart';
 
-import '../framework/logger.dart';
+typedef LogPrint = void Function(String message);
 
-extension FlexiKlineStopwatchExt on Stopwatch {
-  /// 同步运行[runable]任务, 并打印耗时.
+class FlexiStopwatch extends Stopwatch {
+  FlexiStopwatch() : super();
+
+  int? _spentTicks;
+
+  @override
+  void start() {
+    if (!isRunning) _spentTicks = null;
+    super.start();
+  }
+
+  @override
+  void stop() {
+    super.stop();
+    _spentTicks = null;
+  }
+
+  void lap() {
+    _spentTicks = elapsedTicks;
+  }
+
+  @override
+  void reset() {
+    super.reset();
+    _spentTicks = null;
+  }
+
+  int get spentTicks => elapsedTicks - (_spentTicks ?? 0);
+
+  int get spentMicroseconds => spentTicks * 1e6 ~/ frequency;
+
+  int get spentMilliseconds => spentMicroseconds ~/ 1000;
+
+  Duration get spent {
+    return Duration(microseconds: spentMicroseconds);
+  }
+
+  /// 同步运行[computation]任务, 并打印耗时.
   T run<T>(
-    ValueGetter runable, {
-    String debugLabel = 'runSync',
-    ILogger? logger,
+    T Function() computation, {
+    String label = '',
+    LogPrint? logger,
   }) {
-    reset();
-    start();
-    final result = runable();
-    stop();
-    debugPrint('WatchRun:::\t$debugLabel\tspent:$elapsedMicrosecondsμs');
+    lap();
+    final result = computation();
+    (logger ?? debugPrint).call('Run:::\t$label\tspent:$spentMicrosecondsμs');
     return result;
   }
 
-  /// 异步运行[computation]任务, 并打印耗时.
-  Future<T> runAsync<T>(
-    TaskCallback<T> computation, {
-    String debugLabel = 'runAsync',
+  /// 运行[task]任务, 并打印耗时.
+  Future<T> exec<T>(
+    FutureOr<T> Function() task, {
+    String label = '',
+    LogPrint? logger,
   }) async {
-    reset();
-    start();
-    final result = await Future(() => computation());
-    stop();
-    debugPrint('WatchRunAsync:::\t$debugLabel\tspent:$elapsedMicrosecondsμs');
+    lap();
+    final result = await Future(() => task());
+    (logger ?? debugPrint).call('Exec:::\t$label\tspent:$spentMicrosecondsμs');
     return result;
   }
 }

@@ -65,17 +65,6 @@ void main() {
     }
   });
 
-  test('test future', () async {
-    final stopwatch = Stopwatch();
-    for (var element in [1, 2, 3, 4]) {
-      microtask();
-      await stopwatch.runAsync(
-        () => debugPrint('$element'),
-      );
-      microtask();
-    }
-  });
-
   test('test futureOr', () async {
     Future<T> logValue<T>(FutureOr<T> value) async {
       if (value is Future<T>) {

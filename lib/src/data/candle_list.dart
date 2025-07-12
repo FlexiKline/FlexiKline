@@ -17,6 +17,8 @@ part of 'kline_data.dart';
 extension CandleListData on BaseData {
   CandleModel? get latest => list.firstOrNull;
 
+  Range get allRange => Range(0, list.length);
+
   bool checkIndex(int index) => index >= 0 && index < length;
 
   /// 获取index位置的蜡烛数据.
@@ -51,6 +53,31 @@ extension CandleListData on BaseData {
       minLow = m.low < minLow ? m.low : minLow;
     }
     return MinMax(max: maxHigh, min: minLow);
+  }
+
+  Range? mergeCandleData(
+    List<List<CandleModel>> data, {
+    ComputeMode computeMode = ComputeMode.fast,
+  }) {
+    if (data.isEmpty) return null;
+    Range? result;
+    for (List<CandleModel> newList in data) {
+      /// 合并[newList]到[data]中
+      final range = mergeCandleList(newList);
+      if (range != null) {
+        // 初始化[range]内的数据.
+        initBasicData(
+          computeMode,
+          range,
+          indicatorCount,
+          // reset: reset,
+        );
+        result ??= range;
+        result = result.merge(range);
+      }
+    }
+    updateState();
+    return result;
   }
 
   /// 合并[list]和[newList]为一个新数组

@@ -26,7 +26,8 @@ abstract class BaseData with KlineLog {
   String get logTag => req.key;
 
   BaseData(
-    this.req, {
+    this.req,
+    this.indicatorCount, {
     List<CandleModel> list = const [],
     ILogger? logger,
   }) : _list = List.of(list) {
@@ -46,6 +47,8 @@ abstract class BaseData with KlineLog {
     start = 0;
     end = 0;
   }
+
+  final int indicatorCount;
 
   CandleReq req;
 
@@ -75,4 +78,7 @@ abstract class BaseData with KlineLog {
   bool checkStartAndEnd(int start, int end) {
     return isNotEmpty && start < end && start >= 0 && end <= length;
   }
+
+  /// 未合并的数据
+  List<List<CandleModel>> waitingData = List.empty(growable: true);
 }
