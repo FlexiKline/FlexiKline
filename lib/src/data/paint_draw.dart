@@ -14,7 +14,7 @@
 
 part of 'kline_data.dart';
 
-extension PaintDrawData on BaseData {
+mixin PaintDrawData on BaseData {
   bool get canPaintChart {
     return isNotEmpty && list.checkIndex(start); // TODO && list.checkIndex(end);
   }

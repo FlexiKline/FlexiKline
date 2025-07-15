@@ -23,15 +23,17 @@ import '../framework/logger.dart';
 import '../model/export.dart';
 
 part 'base_data.dart';
-part 'request.dart';
+part 'candle_req.dart';
 part 'candle_list.dart';
 part 'paint_draw.dart';
+part 'indicator.dart';
 
-class KlineData extends BaseData {
+class KlineData extends BaseData with CandleReqData, CandleListData, PaintDrawData, IndicatorData {
   KlineData(
     super.req,
     super.indicatorCount, {
     super.list,
+    super.computeMode,
     super.logger,
   });
 
@@ -46,19 +48,17 @@ class KlineData extends BaseData {
   /// 预计算Kline指标数据
   /// [indicatorCount]指标图个数
   /// [newList] 新增的蜡烛数据
-  /// [computeMode] 计算模式
   /// [subPaintObjects] 待计算的指标集合
   /// [reset] 是否重置; 如果有, 忽略之前的计算结果.
   Future<void> precomputeKlineData({
     required List<CandleModel> newList,
-    required MainPaintObject mainPaintObject,
+    required Iterable<PaintObject> mainPaintObjects,
     required Iterable<PaintObject> subPaintObjects,
-    ComputeMode computeMode = ComputeMode.fast,
     bool reset = false,
   }) async {
     if (stopwatch.isRunning) {
-      logd('precomputeKlineData is running, waitingData.size:${waitingData.length}');
-      waitingData.add(newList);
+      logd('precomputeKlineData is running, waitingData.size:${_waitingData.length}');
+      _waitingData.add(newList);
       return;
     }
 
@@ -68,12 +68,12 @@ class KlineData extends BaseData {
         ..start();
 
       /// 1. 合并数据
-      final data = newList.isEmpty ? waitingData : [newList, ...waitingData];
+      final data = newList.isEmpty ? _waitingData : [newList, ..._waitingData];
       Range? range = stopwatch.run(
-        () => mergeCandleData(data, computeMode: computeMode),
+        () => mergeCandleData(data),
         label: '$logTag-mergeCandleData-${data.length}',
       );
-      waitingData.clear();
+      _waitingData.clear();
 
       /// 2. 确认要计算的范围.
       if (reset) range = allRange;
@@ -89,7 +89,7 @@ class KlineData extends BaseData {
 
       /// 3. 计算指标数据
       logd('precomputeKlineData Start Main $reset-$range');
-      for (final object in mainPaintObject.children) {
+      for (final object in mainPaintObjects) {
         await stopwatch.exec(
           () => object.precompute(
             range!,
@@ -114,12 +114,11 @@ class KlineData extends BaseData {
       loge('precomputeKlineData catch an exception!!!', error: e, stackTrace: stack);
     } finally {
       stopwatch.stop();
-      if (waitingData.isNotEmpty) {
+      if (_waitingData.isNotEmpty) {
         precomputeKlineData(
           newList: [],
-          mainPaintObject: mainPaintObject,
+          mainPaintObjects: mainPaintObjects,
           subPaintObjects: subPaintObjects,
-          computeMode: computeMode,
         );
       }
     }
@@ -134,7 +133,6 @@ class KlineData extends BaseData {
 //   KlineData data, {
 //   required int indicatorCount,
 //   required List<CandleModel> newList,
-//   required ComputeMode computeMode,
 //   required Map<IIndicatorKey, dynamic> calcParams,
 //   bool reset = false,
 //   String? debugLabel,
@@ -155,13 +153,12 @@ class KlineData extends BaseData {
 //           params[0],
 //           indicatorCount: params[1],
 //           newList: params[2],
-//           computeMode: params[3],
-//           calcParams: params[4],
-//           reset: params[5],
+//           calcParams: params[3],
+//           reset: params[4],
 //         );
 //         return newData;
 //       },
-//       [data, indicatorCount, newList, computeMode, calcParams, reset],
+//       [data, indicatorCount, newList, calcParams, reset],
 //       debugLabel: debugLabel,
 //     );
 //     logger?.logd('compute End:${DateTime.now()}');

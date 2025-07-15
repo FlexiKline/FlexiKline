@@ -89,19 +89,6 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     }
   }
 
-  ComputeMode _computeMode = ComputeMode.fast;
-  // ComputeMode get computeMode => _computeMode;
-  set computeMode(mode) {
-    if (mode != _computeMode) {
-      _computeMode = mode;
-      _startPrecomputeKlineData(
-        curKlineData,
-        newList: curKlineData.list,
-        reset: true,
-      );
-    }
-  }
-
   late final FIFOHashMap<String, KlineData> _klineDataCache;
   KlineData _curKlineData = KlineData.empty;
   @override
@@ -303,9 +290,6 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
       return;
     }
 
-    // 确认当前数据的计算模式
-    final computeMode = _computeMode;
-
     // 待计算的指标对象集合
     // final paintObjects = [mainPaintObject, ...subPaintObjects];
 
@@ -319,7 +303,6 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     //   () => precomputeKlineDataByCompute(
     //     data,
     //     newList: newList,
-    //     computeMode: computeMode,
     //     calcParams: calcParams,
     //     reset: reset,
     //     debugLabel: 'Precompute-Compute',
@@ -333,8 +316,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     await SchedulerBinding.instance.scheduleTask(
       () => data.precomputeKlineData(
         newList: newList,
-        computeMode: computeMode,
-        mainPaintObject: mainPaintObject,
+        mainPaintObjects: mainPaintObject.children,
         subPaintObjects: subPaintObjects,
         reset: reset,
       ),
@@ -355,6 +337,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   ///   2. false: 代表未使用缓存; 且[curKlineData]数据会被清空(如果有).
   bool switchKlineData(
     CandleReq req, {
+    ComputeMode computeMode = ComputeMode.fast,
     bool useCacheFirst = true,
     bool useCachePaintDxOffset = false,
   }) {
@@ -376,6 +359,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     data = KlineData(
       req.copyWith(state: RequestState.initLoading),
       indicatorCount,
+      computeMode: computeMode,
       logger: loggerDelegate,
     );
     final old = _klineDataCache.append(req.key, data);
@@ -415,13 +399,12 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     }
 
     KlineData? data = _klineDataCache[req.key];
-    bool reset = data == null || data.isEmpty;
+    if (data == null) {
+      logw('updateKlineData: cannot found klineData by $req');
+      return;
+    }
 
-    data ??= KlineData(
-      req.copyWith(state: RequestState.initLoading),
-      indicatorCount,
-      logger: loggerDelegate,
-    );
+    bool reset = data.isEmpty;
 
     /// 首先结束[stat.req]的请求状态为[RequestState.none]
     stopLoading(request: data.req);

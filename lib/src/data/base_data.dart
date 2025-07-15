@@ -26,18 +26,20 @@ abstract class BaseData with KlineLog {
   String get logTag => req.key;
 
   BaseData(
-    this.req,
+    CandleReq req,
     this.indicatorCount, {
     List<CandleModel> list = const [],
+    this.computeMode = ComputeMode.fast,
     ILogger? logger,
-  }) : _list = List.of(list) {
+  })  : _req = req,
+        _list = List.of(list) {
     loggerDelegate = logger;
     initData();
   }
 
   @protected
   void initData() {
-    logd("init BASE");
+    logd("initData BASE");
   }
 
   void dispose() {
@@ -49,8 +51,10 @@ abstract class BaseData with KlineLog {
   }
 
   final int indicatorCount;
+  final ComputeMode computeMode;
 
-  CandleReq req;
+  CandleReq _req;
+  CandleReq get req => _req;
 
   List<CandleModel> _list;
   List<CandleModel> get list => _list;
@@ -79,6 +83,8 @@ abstract class BaseData with KlineLog {
     return isNotEmpty && start < end && start >= 0 && end <= length;
   }
 
+  CandleReq updateState({RequestState state = RequestState.none});
+
   /// 未合并的数据
-  List<List<CandleModel>> waitingData = List.empty(growable: true);
+  final List<List<CandleModel>> _waitingData = List.empty(growable: true);
 }

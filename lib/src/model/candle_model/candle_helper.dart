@@ -16,9 +16,12 @@ part of 'candle_model.dart';
 
 final class CalculateData {
   CalculateData._(this.dataList);
-  CalculateData.init(
+
+  factory CalculateData.init(
     int indicatorCount,
-  ) : this._(List.filled(indicatorCount, null, growable: false));
+  ) {
+    return CalculateData._(List.filled(indicatorCount, null, growable: false));
+  }
 
   final List<Object?> dataList;
 

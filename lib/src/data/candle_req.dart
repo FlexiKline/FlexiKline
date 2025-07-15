@@ -14,7 +14,7 @@
 
 part of 'kline_data.dart';
 
-extension RequestData on BaseData {
+mixin CandleReqData on BaseData {
   String get instId => req.instId;
   int get precision => req.precision;
   String get key => req.key;
@@ -24,13 +24,13 @@ extension RequestData on BaseData {
 
   bool get isTimeChart => timeBar == TimeBar.s1;
 
+  @override
   CandleReq updateState({RequestState state = RequestState.none}) {
-    req = req.copyWith(
+    return _req = req.copyWith(
       after: list.lastOrNull?.ts,
       before: list.firstOrNull?.ts,
       state: state,
     );
-    return req;
   }
 
   CandleReq getLoadMoreRequest() {
