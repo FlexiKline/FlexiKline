@@ -226,11 +226,11 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
 
   void doPaintChart(Canvas canvas, Size size) {
     if (isFirstDrawTipsArea) {
-      // 1.1 如果设置总是要在Tips区域下绘制指标图, 则要首先绘制完所有Tips.
+      // 如果设置总是要在Tips区域下绘制指标图, 则要首先绘制完所有Tips.
       if (!isCrossing) {
         final tipsHeight = doPaintTips(canvas, model: klineData.latest);
 
-        if (indicator.padding.top + tipsHeight != padding.top) {
+        if (indicator.padding.top + tipsHeight > padding.top) {
           doUpdateLayout(
             padding: indicator.padding.copyWith(
               top: indicator.padding.top + tipsHeight,
@@ -262,7 +262,7 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
       if (isCrossing) {
         final tipsHeight = doPaintTips(canvas, offset: offset, model: model);
 
-        if (indicator.padding.top + tipsHeight != padding.top) {
+        if (indicator.padding.top + tipsHeight > padding.top) {
           doUpdateLayout(
             padding: indicator.padding.copyWith(
               top: indicator.padding.top + tipsHeight,
@@ -286,7 +286,7 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
   double doPaintTips(Canvas canvas, {CandleModel? model, Offset? offset}) {
     // 每次绘制前, 重置Tips区域大小为0
     double height = 0;
-    for (var object in children) {
+    for (var object in children.originList) {
       final size = object.paintTips(
         canvas,
         model: model,
@@ -327,6 +327,8 @@ extension MainPaintManagerExt<T extends MainPaintObjectIndicator> on MainPaintOb
         object.dispose();
         indicator.indicatorKeys.remove(object.key);
         hasRemove = true;
+        _tmpHeight = null;
+        _tmpPadding = null;
         return true;
       }
       return false;

@@ -56,6 +56,9 @@ final class SortableHashSet<E> with SetMixin<E> {
     return __list ??= _set.toList(growable: false)..sort(_compare);
   }
 
+  /// 返回未排序的原始列表
+  Iterable<E> get originList => _set;
+
   void resetSort() => __list = null;
 
   /// 追回[value]并返回旧元素(如果存在).
