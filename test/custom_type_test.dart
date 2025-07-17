@@ -277,12 +277,12 @@ void main() {
       late Decimal num3;
       for (int i = 0; i < loop; i++) {
         num3 = (aD / bD).toDecimal(
-          scaleOnInfinitePrecision: defaultScaleOnInfinitePrecision,
+          scaleOnInfinitePrecision: FlexiFormatter.scaleOnInfinitePrecision,
         );
       }
 
       logMsg('Decimal operator / =>${num3.toStringAsFixed(
-        defaultScaleOnInfinitePrecision,
+        FlexiFormatter.scaleOnInfinitePrecision,
       )}');
     });
 

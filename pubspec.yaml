@@ -13,7 +13,7 @@ dependencies:
   flutter:
     sdk: flutter
   decimal: ^2.3.3
-  flexi_formatter: ^1.6.6
+  flexi_formatter: ^1.7.0
   equatable: ^2.0.7
   json_annotation: ^4.9.0
   copy_with_extension: ^6.0.1

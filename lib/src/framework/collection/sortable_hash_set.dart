@@ -37,19 +37,15 @@ Comparator<K> _defaultCompare<K>() {
 final class SortableHashSet<E> with SetMixin<E> {
   SortableHashSet([
     Set<E>? set,
-    Comparator? compare,
+    Comparator<E>? compare,
   ])  : _compare = compare ?? _defaultCompare<E>(),
         _set = set ?? <E>{};
 
   factory SortableHashSet.from(
-    Iterable<dynamic> elements, [
-    Comparator? compare,
+    Iterable<E> elements, [
+    Comparator<E>? compare,
   ]) {
-    LinkedHashSet<E> result = LinkedHashSet<E>();
-    for (final element in elements) {
-      result.add(element as E);
-    }
-    return SortableHashSet(result, compare);
+    return SortableHashSet(elements.toSet(), compare);
   }
 
   Comparator<E> _compare;

@@ -174,7 +174,7 @@ final class MainPaintObject<T extends MainPaintObjectIndicator> extends PaintObj
   MainPaintObject({
     required super.context,
     required T super.indicator,
-  }) : children = SortableHashSet<PaintObject>.from([]);
+  }) : children = SortableHashSet<PaintObject>.from(<PaintObject>[], (a, b) => a.compareTo(b));
 
   final SortableHashSet<PaintObject> children;
 

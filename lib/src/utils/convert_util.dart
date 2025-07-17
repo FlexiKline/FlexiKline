@@ -88,7 +88,7 @@ Decimal? parseDecimal(dynamic value, {Decimal? def}) {
 }
 
 String convertDecimal(Decimal value) {
-  return value.toStringAsFixed(defaultScaleOnInfinitePrecision);
+  return value.toStringAsFixed(FlexiFormatter.scaleOnInfinitePrecision);
 }
 
 double? parseDouble(dynamic value, {double? def}) {
@@ -237,9 +237,7 @@ TextBaseline parseTextBaseline(
   TextBaseline def = TextBaseline.ideographic,
 }) {
   if (textBaseline == null) return def;
-  return 'alphabetic' == textBaseline
-      ? TextBaseline.alphabetic
-      : TextBaseline.ideographic;
+  return 'alphabetic' == textBaseline ? TextBaseline.alphabetic : TextBaseline.ideographic;
 }
 
 String convertTextBaseline(

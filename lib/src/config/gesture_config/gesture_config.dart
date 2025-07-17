@@ -39,6 +39,7 @@ class GestureConfig {
     this.scalePosition = ScalePosition.auto,
     double scaleSpeed = 10,
     this.supportKeyboardShortcuts = true,
+    this.zoomStartMinDistance = 5,
     this.zoomSpeed = 1,
   })  : tolerance = tolerance ?? ToleranceConfig(),
         scaleSpeed = scaleSpeed.clamp(1, 30);
@@ -67,11 +68,13 @@ class GestureConfig {
   /// 是否支持键盘操作
   final bool supportKeyboardShortcuts;
 
+  /// Zoom缩放操作启动最小距离. 默认5. 注: 仅支持触摸设备.
+  final int zoomStartMinDistance;
+
   /// Zoom缩放速度主区图表速度. 默认1.
   final int zoomSpeed;
 
-  factory GestureConfig.fromJson(Map<String, dynamic> json) =>
-      _$GestureConfigFromJson(json);
+  factory GestureConfig.fromJson(Map<String, dynamic> json) => _$GestureConfigFromJson(json);
 
   Map<String, dynamic> toJson() => _$GestureConfigToJson(this);
 }

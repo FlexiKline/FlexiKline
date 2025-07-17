@@ -525,32 +525,39 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
   }
 
   void onVerticalDragDown(DragDownDetails details) {
-    if (controller.onChartZoomStart(details.localPosition)) {
-      logd("onVerticalDragDown zoom > details:$details");
-      _zoomData = GestureData.zoom(details.localPosition);
+    if ((controller.isDrawVisibility && drawState.isOngoing) || controller.isCrossing) {
+      _zoomData = null;
+      return;
     }
+    logd("onVerticalDragDown zoom > details:$details");
+    _zoomData = GestureData.zoom(details.localPosition);
   }
 
   void onVerticalDragStart(DragStartDetails details) {
-    if (controller.onChartZoomStart(details.localPosition)) {
-      logd("onVerticalDragStart zoom  ${DateTime.now().millisecond} > details:$details");
-      if ((controller.isDrawVisibility && drawState.isOngoing) || controller.isCrossing) {
-        _zoomData = null;
-        return;
-      }
-      _zoomData = GestureData.zoom(details.localPosition);
+    if (_zoomData == null ||
+        (controller.isDrawVisibility && drawState.isOngoing) ||
+        controller.isCrossing) {
+      _zoomData = null;
+      return;
+    }
+    _zoomData!.update(details.localPosition);
+    logd("onVerticalDragStart zoom > vertical starting distance:${_zoomData!.dyDelta}");
+    if (_zoomData!.dyDelta.abs() < gestureConfig.zoomStartMinDistance ||
+        !controller.onChartZoomStart(details.localPosition)) {
+      _zoomData?.end();
+      _zoomData = null;
     }
   }
 
   void onVerticalDragUpdate(DragUpdateDetails details) {
     if (_zoomData == null) return;
-    // logd('onVerticalDragUpdate zoom ${DateTime.now().millisecond} > $details');
+    // logd('onVerticalDragUpdate zoom > $details');
     _zoomData!.update(details.localPosition);
     controller.onChartZoomUpdate(_zoomData!);
   }
 
   void onVerticalDragEnd([DragEndDetails? details]) {
-    logd('onVerticalDragEnd zoom ${DateTime.now().millisecond} > $details');
+    logd('onVerticalDragEnd zoom > $details');
     controller.onChartZoomEnd();
     _zoomData?.end();
     _zoomData = null;
