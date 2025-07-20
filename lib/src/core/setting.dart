@@ -28,6 +28,9 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
       initSubIndicatorKeys: _flexiKlineConfig.sub,
     );
     _canvasSizeChangeListener = KlineStateNotifier(canvasRect);
+    _subHeightListListener = KlineStateNotifier<List<double>>(
+      getSubIndiatorHeights().toList(growable: false),
+    );
     _candleWidth = settingConfig.candleWidth;
   }
 
@@ -42,6 +45,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
     super.dispose();
     logd("dispose setting");
     _canvasSizeChangeListener.dispose();
+    _subHeightListListener.dispose();
   }
 
   @override
@@ -52,6 +56,13 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
   /// 蜡烛宽度
   late double _candleWidth;
   double? _candleSpacing;
+
+  /// 副区指标图高度变化监听(不包括时间轴高度)
+  late final ValueNotifier<List<double>> _subHeightListListener;
+  ValueListenable<List<double>> get subHeightListListener => _subHeightListListener;
+  void _updateSubHeightList() {
+    _subHeightListListener.value = getSubIndiatorHeights().toList(growable: false);
+  }
 
   /// KlineData整个图表区域大小变化监听器
   late final KlineStateNotifier<Rect> _canvasSizeChangeListener;
@@ -167,6 +178,11 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
     if (force) _canvasSizeChangeListener.notifyListeners();
     markRepaintChart(reset: force);
     markRepaintCross();
+  }
+
+  /// 设置绘制区域大小.
+  bool setCanvasSize(Size size) {
+    return setMainSize(Size(size.width, size.height - subRectHeight));
   }
 
   /// 主区域大小设置
@@ -286,11 +302,15 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
 
   @protected
   double get subRectHeight {
-    double totalHeight = 0.0;
-    for (final object in subPaintObjects) {
-      totalHeight += object.height;
-    }
-    return totalHeight;
+    return subPaintObjects.fold(0.0, (total, e) => total + e.height);
+  }
+
+  /// 获取当前副区指标高度列表
+  /// [includeTime] 是否包含时间轴高度
+  Iterable<double> getSubIndiatorHeights([bool includeTime = false]) {
+    return subPaintObjects.mapNonNullList(
+      (object) => (includeTime || object.key != timeIndicatorKey) ? object.height : null,
+    );
   }
 
   /// 主区当前Padding
@@ -412,23 +432,23 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
     return top;
   }
 
-  ///// Indicator operation /////
+  /// Indicator operation ///
 
-  bool hasRegisterInMain(IIndicatorKey key) {
-    return _paintObjectManager.hasRegisterInMain(key);
+  bool hasRegisteredInMain(IIndicatorKey key) {
+    return _paintObjectManager.hasRegisteredInMain(key);
   }
 
-  bool hasRegisterInSub(IIndicatorKey key) {
-    return _paintObjectManager.hasRegisterInSub(key);
+  bool hasRegisteredInSub(IIndicatorKey key) {
+    return _paintObjectManager.hasRegisteredInSub(key);
   }
 
-  bool hasRegisterIndicator(IIndicatorKey key) {
-    return hasRegisterInMain(key) || hasRegisterInSub(key);
+  bool hasRegistered(IIndicatorKey key) {
+    return hasRegisteredInMain(key) || hasRegisteredInSub(key);
   }
 
   /// 在主图中添加指标
-  void addIndicatorInMain(IIndicatorKey key) {
-    final newObj = _paintObjectManager.addPaintObjectInMain(key, this);
+  void addMainIndicator(IIndicatorKey key) {
+    final newObj = _paintObjectManager.addMainPaintObject(key, this);
     if (newObj != null) {
       // TODO: 后续优化执行时机
       newObj.precompute(curKlineData.computableRange, reset: true);
@@ -438,29 +458,31 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
   }
 
   /// 删除主图中[key]指定的指标
-  void delIndicatorInMain(IIndicatorKey key) {
-    if (_paintObjectManager.delPaintObjectInMain(key)) {
+  void removeMainIndicator(IIndicatorKey key) {
+    if (_paintObjectManager.removeMainPaintObject(key)) {
       markRepaintChart(reset: true);
       markRepaintCross();
     }
   }
 
   /// 在副图中添加指标
-  void addIndicatorInSub(IIndicatorKey key) {
-    final newObj = _paintObjectManager.addPaintObjectInSub(key, this);
+  void addSubIndicator(IIndicatorKey key) {
+    final newObj = _paintObjectManager.addSubPaintObject(key, this);
     if (newObj != null) {
       // TODO: 后续优化执行时机
       newObj.precompute(curKlineData.computableRange, reset: true);
       _flexiKlineConfig.sub.add(key);
       _invokeSizeChanged();
+      _updateSubHeightList();
     }
   }
 
   /// 删除副图[key]指定的指标
-  void delIndicatorInSub(IIndicatorKey key) {
-    if (_paintObjectManager.delPaintObjectInSub(key)) {
+  void removeSubIndicator(IIndicatorKey key) {
+    if (_paintObjectManager.removeSubPaintObject(key)) {
       _flexiKlineConfig.sub.remove(key);
       _invokeSizeChanged();
+      _updateSubHeightList();
     }
   }
 
@@ -474,7 +496,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
     return _paintObjectManager.restoreIndicator(key);
   }
 
-  //// Config ////
+  /// Config ///
 
   FlexiKlineConfig? __flexiKlineConfig;
   FlexiKlineConfig get _flexiKlineConfig {
@@ -561,5 +583,15 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
     final updated = _paintObjectManager.updateIndicator(indicator);
     if (updated) markRepaintChart();
     return updated;
+  }
+
+  /// 获取蜡烛图指标配置
+  T getCandleIndicator<T extends CandleBaseIndicator>() {
+    return candlePaintObject.indicator as T;
+  }
+
+  /// 获取时间轴指标配置
+  T getTimeIndicator<T extends TimeBaseIndicator>() {
+    return timePaintObject.indicator as T;
   }
 }

@@ -188,10 +188,10 @@ mixin CrossBinding on KlineBindingBase, SettingBinding implements ICross {
       /// 绘制 Tooltip
       paintTooltip(canvas, offset, model: model);
 
-      mainPaintObject.doOnCross(canvas, offset, model: model);
       for (var paintObject in subPaintObjects) {
         paintObject.doOnCross(canvas, offset, model: model);
       }
+      mainPaintObject.doOnCross(canvas, offset, model: model);
     }
   }
 

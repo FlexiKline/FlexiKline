@@ -219,6 +219,18 @@ void main() {
     logMsg('result:$result');
     expect(result, isNull);
   });
+
+  test('test range', () {
+    var list = <double>[];
+    var result = list.range(1);
+    logMsg('iter: $result');
+    expect(result, isEmpty);
+
+    list = [1, 2, 3];
+    result = list.range(1);
+    logMsg('iter: $result');
+    expect(result, [2, 3]);
+  });
 }
 
 const fillData1 = 'AAABBBCCC';

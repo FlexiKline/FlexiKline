@@ -96,11 +96,11 @@ final class IndicatorPaintObjectManager with KlineLog {
     return _subPaintObjectQueue.map((obj) => obj.key);
   }
 
-  bool hasRegisterInMain(IIndicatorKey key) {
+  bool hasRegisteredInMain(IIndicatorKey key) {
     return _mainIndicatorBuilders.containsKey(key) || key == candleIndicatorKey;
   }
 
-  bool hasRegisterInSub(IIndicatorKey key) {
+  bool hasRegisteredInSub(IIndicatorKey key) {
     return _subIndicatorBuilders.containsKey(key) || key == timeIndicatorKey;
   }
 
@@ -175,17 +175,17 @@ final class IndicatorPaintObjectManager with KlineLog {
 
     /// 加载历史选中过的指标
     for (var key in mainIndicator.indicatorKeys) {
-      addPaintObjectInMain(key, context);
+      addMainPaintObject(key, context);
     }
     for (var key in initSubIndicatorKeys) {
-      addPaintObjectInSub(key, context);
+      addSubPaintObject(key, context);
     }
   }
 
-  ///// 主区指标操作 /////
+  /// 主区指标操作 ///
   /// 在主区中添加[key]指定的指标
-  PaintObject? addPaintObjectInMain(IIndicatorKey key, IPaintContext context) {
-    if (!hasRegisterInMain(key)) {
+  PaintObject? addMainPaintObject(IIndicatorKey key, IPaintContext context) {
+    if (!hasRegisteredInMain(key)) {
       logw('addPaintObjectInMain $key not registered yet.');
       return null;
     }
@@ -205,14 +205,14 @@ final class IndicatorPaintObjectManager with KlineLog {
   }
 
   /// 在已载入主区绘制对象中, 删除[key]指定的绘制对象
-  bool delPaintObjectInMain(IIndicatorKey key) {
+  bool removeMainPaintObject(IIndicatorKey key) {
     return _mainPaintObject.deletePaintObject(key);
   }
 
-  ///// 副区指标操作 /////
+  /// 副区指标操作 ///
   /// 在副区中添加[key]指定的指标
-  PaintObject? addPaintObjectInSub(IIndicatorKey key, IPaintContext context) {
-    if (!hasRegisterInSub(key)) {
+  PaintObject? addSubPaintObject(IIndicatorKey key, IPaintContext context) {
+    if (!hasRegisteredInSub(key)) {
       logw('addPaintObjectInSub $key not registered yet.');
       return null;
     }
@@ -235,7 +235,7 @@ final class IndicatorPaintObjectManager with KlineLog {
   }
 
   /// 在已载入副区绘制对象中, 删除[key]指定的绘制对象
-  bool delPaintObjectInSub(IIndicatorKey key) {
+  bool removeSubPaintObject(IIndicatorKey key) {
     bool hasRemove = false;
     _subPaintObjectQueue.removeWhere((obj) {
       if (obj.indicator.key == key) {
@@ -252,14 +252,14 @@ final class IndicatorPaintObjectManager with KlineLog {
   /// 1. 先从当前载入的指标中查找
   /// 2. 如果不存在, 则从配置缓存中加载[key]对应的指标
   T? getIndicator<T extends Indicator>(IIndicatorKey key) {
-    if (hasRegisterInMain(key)) {
+    if (hasRegisteredInMain(key)) {
       Indicator? indicator = mainPaintObject.getChildIndicator(key);
       indicator ??= configuration.getIndicator(
         key,
         builder: _mainIndicatorBuilders[key],
       );
       return indicator is T ? indicator : null;
-    } else if (hasRegisterInSub(key)) {
+    } else if (hasRegisteredInSub(key)) {
       final object = subPaintObjects.firstWhereOrNull((obj) => obj.key == key);
       var indicator = object?.indicator;
       indicator ??= configuration.getIndicator(
@@ -273,13 +273,13 @@ final class IndicatorPaintObjectManager with KlineLog {
 
   bool updateIndicator<T extends Indicator>(T indicator) {
     final key = indicator.key;
-    if (hasRegisterInMain(key)) {
+    if (hasRegisteredInMain(key)) {
       bool updated = mainPaintObject.updateChildIndicator(indicator);
       if (!updated) {
         updated = configuration.saveIndicator(indicator);
       }
       return updated;
-    } else if (hasRegisterInSub(key)) {
+    } else if (hasRegisteredInSub(key)) {
       final object = subPaintObjects.firstWhereOrNull((obj) => obj.key == key);
       if (object != null) {
         object.doDidUpdateIndicator(indicator);

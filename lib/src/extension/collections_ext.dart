@@ -115,6 +115,23 @@ extension FlexiIterableExt<T> on Iterable<T> {
     }
   }
 
+  /// obtain the elements in the range [start, end).
+  Iterable<T> range(int start, [int? end]) sync* {
+    if (start < 0) throw ArgumentError('start:$start must be non-negative');
+    if (end != null && end <= start) {
+      throw ArgumentError('end:$end must be greater than start:$start');
+    }
+    // assert(start >= 0, 'start:$start must be non-negative');
+    // assert(end == null || end >= start, 'end:$end must be greater than start:$start');
+    var index = 0;
+    for (var element in this) {
+      if (index >= start && (end == null || index < end)) {
+        yield element;
+      }
+      index++;
+    }
+  }
+
   /// Combine the elements with each other and the current index.
   ///
   /// Calls [combine] for each element except the first.
