@@ -45,6 +45,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     _klineDataCache.forEach((key, data) {
       data.dispose();
     });
+    _curKlineData = KlineData.empty;
     _klineDataCache.clear();
     onLoadMoreCandles = null;
     moveToInitialPositionCallback = null;

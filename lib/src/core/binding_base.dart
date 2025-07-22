@@ -33,10 +33,12 @@ abstract class KlineBindingBase with KlineLog implements ISetting, IPaintContext
   KlineBindingBase({
     required this.configuration,
     this.autoSave = true,
+    int subIndicatorMaxCount = defaultSubIndicatorMaxCount,
     ILogger? logger,
     this.klineDataCacheCapacity,
   })  : _paintObjectManager = IndicatorPaintObjectManager(
           configuration: configuration,
+          subIndicatorMaxCount: subIndicatorMaxCount,
           logger: logger,
         ),
         _drawObjectManager = OverlayDrawObjectManager(
@@ -45,7 +47,6 @@ abstract class KlineBindingBase with KlineLog implements ISetting, IPaintContext
         ) {
     logd("constrouct");
     loggerDelegate = logger;
-    // initFlexiKlineConfig();
     init();
   }
 
@@ -117,6 +118,10 @@ abstract class KlineBindingBase with KlineLog implements ISetting, IPaintContext
 
 /// KlineController内部扩展
 extension on KlineBindingBase {
+  FlexiKlineConfig get flexiKlineConfig {
+    return _paintObjectManager.flexiKlineConfig;
+  }
+
   MainPaintObject get mainPaintObject {
     return _paintObjectManager.mainPaintObject;
   }

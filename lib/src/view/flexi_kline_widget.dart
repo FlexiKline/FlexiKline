@@ -172,7 +172,6 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
   @override
   void dispose() {
     configuration.saveDrawToolbarPosition(drawToolbarPosition);
-    controller.dispose();
     _drawToolbarKey = null;
     super.dispose();
   }

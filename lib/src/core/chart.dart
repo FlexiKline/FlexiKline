@@ -68,7 +68,7 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding implements 
 
   Rect get chartZoomSlideBarRect => _chartZoomSlideBarRect.value;
 
-  //// Latest Price ////
+  /// Latest Price ///
   Timer? _lastPriceCountDownTimer;
   @protected
   void markRepaintLastPrice({bool latestPriceUpdated = false}) {

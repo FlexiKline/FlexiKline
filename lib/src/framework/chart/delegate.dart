@@ -316,7 +316,7 @@ extension MainPaintManagerExt<T extends MainPaintObjectIndicator> on MainPaintOb
       padding: object.paintMode.isCombine ? padding : null,
     );
     final old = children.append(object);
-    indicator.indicatorKeys.add(object.key);
+    indicator.children.add(object.key);
     old?.dispose();
   }
 
@@ -325,7 +325,7 @@ extension MainPaintManagerExt<T extends MainPaintObjectIndicator> on MainPaintOb
     children.removeWhere((object) {
       if (object.key == key) {
         object.dispose();
-        indicator.indicatorKeys.remove(object.key);
+        indicator.children.remove(object.key);
         hasRemove = true;
         _tmpHeight = null;
         _tmpPadding = null;

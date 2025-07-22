@@ -45,7 +45,7 @@ abstract interface class ILogger {
 
 mixin KlineLog implements ILogger {
   @override
-  String get logTag => 'FlexiKline';
+  String get logTag => loggerDelegate?.logTag ?? 'FlexiKline';
 
   @override
   bool get isDebug => loggerDelegate?.isDebug ?? kDebugMode;

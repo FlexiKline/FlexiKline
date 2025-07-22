@@ -43,8 +43,6 @@ abstract class _$SettingConfigCWProxy {
 
   SettingConfig showYAxisTick(bool showYAxisTick);
 
-  SettingConfig subChartMaxCount(int subChartMaxCount);
-
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `SettingConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -69,7 +67,6 @@ abstract class _$SettingConfigCWProxy {
     double firstCandleInitOffset,
     bool allowPaintExtraOutsideMainRect,
     bool showYAxisTick,
-    int subChartMaxCount,
   });
 }
 
@@ -149,10 +146,6 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
       this(showYAxisTick: showYAxisTick);
 
   @override
-  SettingConfig subChartMaxCount(int subChartMaxCount) =>
-      this(subChartMaxCount: subChartMaxCount);
-
-  @override
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `SettingConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -179,7 +172,6 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
     Object? firstCandleInitOffset = const $CopyWithPlaceholder(),
     Object? allowPaintExtraOutsideMainRect = const $CopyWithPlaceholder(),
     Object? showYAxisTick = const $CopyWithPlaceholder(),
-    Object? subChartMaxCount = const $CopyWithPlaceholder(),
   }) {
     return SettingConfig(
       pixel: pixel == const $CopyWithPlaceholder()
@@ -255,10 +247,6 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
           ? _value.showYAxisTick
           // ignore: cast_nullable_to_non_nullable
           : showYAxisTick as bool,
-      subChartMaxCount: subChartMaxCount == const $CopyWithPlaceholder()
-          ? _value.subChartMaxCount
-          // ignore: cast_nullable_to_non_nullable
-          : subChartMaxCount as int,
     );
   }
 }
@@ -299,8 +287,6 @@ SettingConfig _$SettingConfigFromJson(Map<String, dynamic> json) =>
       allowPaintExtraOutsideMainRect:
           json['allowPaintExtraOutsideMainRect'] as bool? ?? true,
       showYAxisTick: json['showYAxisTick'] as bool? ?? true,
-      subChartMaxCount: (json['subChartMaxCount'] as num?)?.toInt() ??
-          defaultSubChartMaxCount,
     );
 
 Map<String, dynamic> _$SettingConfigToJson(SettingConfig instance) =>
@@ -324,5 +310,4 @@ Map<String, dynamic> _$SettingConfigToJson(SettingConfig instance) =>
       'firstCandleInitOffset': instance.firstCandleInitOffset,
       'allowPaintExtraOutsideMainRect': instance.allowPaintExtraOutsideMainRect,
       'showYAxisTick': instance.showYAxisTick,
-      'subChartMaxCount': instance.subChartMaxCount,
     };

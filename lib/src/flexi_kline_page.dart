@@ -83,6 +83,7 @@ mixin FlexiKlinePageMixin<T extends StatefulWidget> on State<T> implements IFlex
   @override
   void dispose() {
     _listener.dispose();
+    klineController.dispose();
     super.dispose();
   }
 

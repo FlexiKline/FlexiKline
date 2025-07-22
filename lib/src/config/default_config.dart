@@ -288,9 +288,6 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
       /// 是否展示Y轴刻度.
       showYAxisTick: true,
-
-      /// 副区的指标图最大数量
-      subChartMaxCount: defaultSubChartMaxCount,
     );
   }
 

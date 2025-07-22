@@ -100,14 +100,13 @@ abstract class TimeBaseIndicator extends Indicator {
 /// MainIndicator的配置.
 @CopyWith()
 @FlexiIndicatorSerializable
-class MainPaintObjectIndicator<T extends PaintObjectIndicator>
-    extends Indicator {
+class MainPaintObjectIndicator<T extends PaintObjectIndicator> extends Indicator {
   MainPaintObjectIndicator({
     required this.size,
     required super.padding,
     this.drawBelowTipsArea = false,
-    Set<IIndicatorKey>? indicatorKeys,
-  })  : indicatorKeys = indicatorKeys ?? <IIndicatorKey>{},
+    Set<IIndicatorKey>? children,
+  })  : children = children ?? <IIndicatorKey>{},
         super(key: mainIndicatorKey, height: size.height);
 
   late Size size;
@@ -117,7 +116,7 @@ class MainPaintObjectIndicator<T extends PaintObjectIndicator>
   final bool drawBelowTipsArea;
 
   /// 当前主区已选中指标集合(由PaintObjectManager管理)
-  final Set<IIndicatorKey> indicatorKeys;
+  final Set<IIndicatorKey> children;
 
   @override
   MainPaintObject createPaintObject(IPaintContext context) {

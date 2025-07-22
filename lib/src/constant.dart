@@ -45,7 +45,7 @@ const EdgeInsets defaultMainIndicatorPadding = EdgeInsets.only(
 );
 
 // 默认副图指标最大数量
-const int defaultSubChartMaxCount = 4;
+const int defaultSubIndicatorMaxCount = 4;
 
 // 默认副图指标刻度数量: 高中低=>top, middle, bottom
 const int defaultSubTickCount = 3;

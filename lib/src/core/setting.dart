@@ -20,18 +20,13 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
   void init() {
     super.init();
     logd("init setting");
-    final mainIndicator = _flexiKlineConfig.mainIndicator;
-    _layoutMode = NormalLayoutMode(mainIndicator.size);
-    _paintObjectManager.init(
-      this,
-      mainIndicator: mainIndicator,
-      initSubIndicatorKeys: _flexiKlineConfig.sub,
-    );
+    _candleWidth = settingConfig.candleWidth;
+    _layoutMode = NormalLayoutMode(flexiKlineConfig.mainIndicator.size);
+    _paintObjectManager.init(this);
     _canvasSizeChangeListener = KlineStateNotifier(canvasRect);
     _subHeightListListener = KlineStateNotifier<List<double>>(
       getSubIndiatorHeights().toList(growable: false),
     );
-    _candleWidth = settingConfig.candleWidth;
   }
 
   @override
@@ -405,7 +400,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
   }
 
   Iterable<IIndicatorKey> get mainIndicatorKeys {
-    return _paintObjectManager.mainIndciatorKeys;
+    return _paintObjectManager.mainIndicatorKeys;
   }
 
   Iterable<IIndicatorKey> get subIndicatorKeys {
@@ -450,7 +445,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
   void addMainIndicator(IIndicatorKey key) {
     final newObj = _paintObjectManager.addMainPaintObject(key, this);
     if (newObj != null) {
-      // TODO: 后续优化执行时机
+      // 优化执行时机
       newObj.precompute(curKlineData.computableRange, reset: true);
       markRepaintChart(reset: true);
       markRepaintCross();
@@ -465,13 +460,17 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
     }
   }
 
+  /// 是否已添加主图[key]指定的指标
+  bool hasAddedMainIndicator(IIndicatorKey key) {
+    return mainIndicatorKeys.contains(key);
+  }
+
   /// 在副图中添加指标
   void addSubIndicator(IIndicatorKey key) {
     final newObj = _paintObjectManager.addSubPaintObject(key, this);
     if (newObj != null) {
-      // TODO: 后续优化执行时机
+      // 优化执行时机
       newObj.precompute(curKlineData.computableRange, reset: true);
-      _flexiKlineConfig.sub.add(key);
       _invokeSizeChanged();
       _updateSubHeightList();
     }
@@ -480,10 +479,14 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
   /// 删除副图[key]指定的指标
   void removeSubIndicator(IIndicatorKey key) {
     if (_paintObjectManager.removeSubPaintObject(key)) {
-      _flexiKlineConfig.sub.remove(key);
       _invokeSizeChanged();
       _updateSubHeightList();
     }
+  }
+
+  /// 是否已添加副图[key]指定的指标
+  bool hasAddedSubIndicator(IIndicatorKey key) {
+    return subIndicatorKeys.contains(key);
   }
 
   /// 恢复所有注册的指标配置为默认
@@ -497,55 +500,48 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
   }
 
   /// Config ///
-
-  FlexiKlineConfig? __flexiKlineConfig;
-  FlexiKlineConfig get _flexiKlineConfig {
-    if (__flexiKlineConfig == null) {
-      final config = configuration.getFlexiKlineConfig();
-      __flexiKlineConfig = config;
-    }
-    return __flexiKlineConfig!;
-  }
-
   /// 保存当前FlexiKline配置到本地
   @override
   void storeFlexiKlineConfig({
     bool storeIndicators = true,
     bool storeDrawOverlays = true,
   }) {
-    _flexiKlineConfig.sub = _paintObjectManager.subIndicatorKeys.toSet();
-    configuration.saveFlexiKlineConfig(_flexiKlineConfig);
-    if (storeIndicators) {
-      _paintObjectManager.storeIndicatorsConfig();
-    }
+    _paintObjectManager.storeFlexiKlineConfig(storeIndicators: storeIndicators);
     if (storeDrawOverlays) {
       _drawObjectManager.storeDrawOverlaysConfig();
     }
   }
 
+  /// 更新FlexiKlineConfig
+  void updateFlexiKlineConfig() {
+    _paintObjectManager.updateFlexiKlineConfig(this, mainSize: mainSize);
+    _invokeSizeChanged(force: true);
+    _updateSubHeightList();
+  }
+
   /// SettingConfig
   @override
-  SettingConfig get settingConfig => _flexiKlineConfig.setting;
+  SettingConfig get settingConfig => flexiKlineConfig.setting;
   set settingConfig(SettingConfig config) {
-    _flexiKlineConfig.setting = config;
+    flexiKlineConfig.setting = config;
     markRepaintChart();
     markRepaintCross();
   }
 
   /// SettingConfig
   @override
-  GestureConfig get gestureConfig => _flexiKlineConfig.gesture;
+  GestureConfig get gestureConfig => flexiKlineConfig.gesture;
   set gestureConfig(GestureConfig config) {
-    _flexiKlineConfig.gesture = config;
+    flexiKlineConfig.gesture = config;
     markRepaintChart();
     markRepaintCross();
   }
 
   /// GridConfig
   @override
-  GridConfig get gridConfig => _flexiKlineConfig.grid;
+  GridConfig get gridConfig => flexiKlineConfig.grid;
   set gridConfig(GridConfig config) {
-    _flexiKlineConfig.grid = config;
+    flexiKlineConfig.grid = config;
     markRepaintChart();
     markRepaintCross();
     markRepaintGrid();
@@ -553,18 +549,18 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
 
   /// CrossConfig
   @override
-  CrossConfig get crossConfig => _flexiKlineConfig.cross;
+  CrossConfig get crossConfig => flexiKlineConfig.cross;
   set crossConfig(CrossConfig config) {
-    _flexiKlineConfig.cross = config;
+    flexiKlineConfig.cross = config;
     markRepaintChart();
     markRepaintCross();
   }
 
   /// DrawConfig
   @override
-  DrawConfig get drawConfig => _flexiKlineConfig.draw;
+  DrawConfig get drawConfig => flexiKlineConfig.draw;
   set drawConfig(DrawConfig config) {
-    _flexiKlineConfig.draw = config;
+    flexiKlineConfig.draw = config;
     markRepaintChart();
     markRepaintDraw();
   }

@@ -17,7 +17,6 @@ import 'dart:math' as math;
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flutter/painting.dart';
 
-import '../../constant.dart';
 import '../../framework/serializers.dart';
 import '../loading_config/loading_config.dart';
 
@@ -56,10 +55,6 @@ class SettingConfig {
 
     /// 是否展示Y轴刻度.
     this.showYAxisTick = true,
-
-    /// 副图配置
-    // 副区的指标图最大数量
-    this.subChartMaxCount = defaultSubChartMaxCount,
   });
 
   /// 单个像素值
@@ -109,9 +104,6 @@ class SettingConfig {
 
   /// 是否展示Y轴刻度.
   final bool showYAxisTick;
-
-  // 副区的指标图最大数量
-  final int subChartMaxCount;
 
   bool get isFixedCandleSpacing {
     return candleFixedSpacing != null && candleFixedSpacing! > pixel;
