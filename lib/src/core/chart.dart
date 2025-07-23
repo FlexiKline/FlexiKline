@@ -260,17 +260,17 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding implements 
     if (data.scaled) {
       // 处理触摸设备的缩放逻辑.
       if (data.scale > 1 && candleWidth >= candleMaxWidth) return;
-      if (data.scale < 1 && candleWidth <= settingConfig.pixel) return;
+      if (data.scale < 1 && candleWidth <= candleMinWidth) return;
 
       final dxGrowth = data.scaleDelta * gestureConfig.scaleSpeed;
       newWidth = (candleWidth + dxGrowth).clamp(
-        settingConfig.pixel,
+        candleMinWidth,
         candleMaxWidth,
       );
     } else if (data.isSignal) {
       // 处理鼠标滚轴滚动/触控板向上向下的缩放逻辑.
       newWidth = (candleWidth + data.scale).clamp(
-        settingConfig.pixel,
+        candleMinWidth,
         candleMaxWidth,
       );
     }

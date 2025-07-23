@@ -26,8 +26,6 @@ part 'setting_config.g.dart';
 @FlexiConfigSerializable
 class SettingConfig {
   const SettingConfig({
-    required this.pixel,
-
     /// Long/Short 浅色不透明度 [longTintColor] 和 [shortTintColor]
     this.opacity = 0.5,
 
@@ -42,6 +40,7 @@ class SettingConfig {
     /// 蜡烛图绘制配置
     this.minPaintBlankRate = 0.5,
     this.alwaysCalculateScreenOfCandlesIfEnough = false,
+    required this.candleMinWidth,
     required this.candleMaxWidth,
     required this.candleWidth,
     this.candleFixedSpacing,
@@ -57,13 +56,9 @@ class SettingConfig {
     this.showYAxisTick = true,
   });
 
-  /// 单个像素值
-  final double pixel;
-
   /// Long/Short 浅色不透明度 [longTintColor] 和 [shortTintColor]
   final double opacity;
 
-  // TODO: 待适配主题管理
   /// 内置LoadingView样式配置
   final LoadingConfig loading;
 
@@ -84,6 +79,8 @@ class SettingConfig {
   final bool alwaysCalculateScreenOfCandlesIfEnough;
 
   /// 蜡烛配置
+  /// 最小蜡烛宽度[1, 50]
+  final double candleMinWidth;
   // 最大蜡烛宽度[1, 50]
   final double candleMaxWidth;
   // 单根蜡烛柱的宽度
@@ -106,7 +103,7 @@ class SettingConfig {
   final bool showYAxisTick;
 
   bool get isFixedCandleSpacing {
-    return candleFixedSpacing != null && candleFixedSpacing! > pixel;
+    return candleFixedSpacing != null && candleFixedSpacing! > candleMinWidth;
   }
 
   int get spacingCandleParts {

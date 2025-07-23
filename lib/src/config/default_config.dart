@@ -261,7 +261,6 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   SettingConfig genSettingConfig() {
     return SettingConfig(
-      pixel: theme.pixel,
       opacity: 0.5,
 
       /// 内置LoadingView样式配置
@@ -275,6 +274,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       /// 主/副图绘制参数
       minPaintBlankRate: 0.5,
       alwaysCalculateScreenOfCandlesIfEnough: false,
+      candleMinWidth: theme.pixel,
       candleMaxWidth: 40 * theme.scale,
       candleWidth: 7 * theme.scale,
       candleSpacingParts: 7,
@@ -548,9 +548,10 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
         padding: theme.textPading,
         borderRadius: BorderRadius.all(Radius.circular(2 * theme.scale)),
       ),
-      chartType: instance?.chartType ?? ChartType.bar,
       chartBarStyle: instance?.chartBarStyle ?? ChartBarStyle.allSolid,
-      useLineChartForZoom: instance?.useLineChartForZoom ?? true,
+      chartType: instance?.chartType ?? ChartType.bar,
+      zoomToMinChartType: instance?.zoomToMinChartType ?? ChartType.line,
+      secondsChartType: instance?.secondsChartType ?? ChartType.line,
       longColor: instance?.longColor,
       shortColor: instance?.shortColor,
       lineColor: instance?.lineColor,

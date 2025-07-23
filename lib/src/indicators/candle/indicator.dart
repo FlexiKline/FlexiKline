@@ -34,9 +34,10 @@ class CandleIndicator extends CandleBaseIndicator {
     // 倒计时, 在latest最新价之下展示
     this.showCountDown = true,
     required this.countDown,
-    this.chartType = ChartType.bar,
     this.chartBarStyle = ChartBarStyle.allSolid,
-    this.useLineChartForZoom = true,
+    this.chartType = ChartType.bar,
+    this.zoomToMinChartType,
+    this.secondsChartType,
     this.longColor,
     this.shortColor,
     this.lineColor,
@@ -56,12 +57,14 @@ class CandleIndicator extends CandleBaseIndicator {
   final bool showCountDown;
   final TextAreaConfig countDown;
 
+  // Kline图表柱状图样式
+  final ChartBarStyle chartBarStyle;
   // Kline图表类型
   final ChartType chartType;
-  // Kline图表样式
-  final ChartBarStyle chartBarStyle;
-  // Kline缩放到最小单位时使用线图
-  final bool useLineChartForZoom;
+  // Kline缩放到最小蜡烛宽度时图表类型
+  final ChartType? zoomToMinChartType;
+  // 秒级Kline图表类型
+  final ChartType? secondsChartType;
 
   // 自定义上涨颜色
   final Color? longColor;
@@ -95,6 +98,16 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
 
   BagNum? _maxHigh, _minLow;
 
+  ChartType getChartType() {
+    if (klineData.isTimeChart) {
+      return indicator.secondsChartType ?? indicator.chartType;
+    } else if (candleWidth <= settingConfig.candleMinWidth) {
+      return indicator.zoomToMinChartType ?? indicator.chartType;
+    } else {
+      return indicator.chartType;
+    }
+  }
+
   @override
   MinMax? initState(int start, int end) {
     if (!klineData.canPaintChart) return null;
@@ -107,22 +120,10 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
 
   @override
   void paintChart(Canvas canvas, Size size) {
-    switch (indicator.chartType) {
+    switch (getChartType()) {
       case ChartType.bar:
-        if (indicator.useLineChartForZoom && candleWidth < 1) {
-          /// 绘制蜡烛线图
-          paintLineTypeCandleChart(
-            canvas,
-            startOffset: startCandleDx - candleWidthHalf,
-            linePaint: getLinePaint(
-              color: indicator.lineColor,
-              strokeWidth: candleLineWidth,
-            ),
-          );
-        } else {
-          /// 绘制蜡烛柱状图
-          paintBarTypeCandleChart(canvas, size);
-        }
+        // 绘制蜡烛柱状图
+        paintBarTypeCandleChart(canvas, size);
       case ChartType.line:
         // 绘制蜡烛线图
         paintLineTypeCandleChart(
@@ -134,7 +135,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
           ),
         );
       case ChartType.upDownLine:
-        // 绘制蜡烛线图
+        // 绘制蜡烛涨跌线图
         paintUpDownLineTypeCandleChart(
           canvas,
           startOffset: startCandleDx - candleWidthHalf,

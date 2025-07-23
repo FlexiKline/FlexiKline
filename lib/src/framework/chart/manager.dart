@@ -182,12 +182,15 @@ final class IndicatorPaintObjectManager with KlineLog {
   /// 更新FlexiKline配置与指标配置.
   void updateFlexiKlineConfig(
     IPaintContext context, {
+    bool updateIndicator = true,
     Size? mainSize,
   }) {
     _flexiKlineConfig = configuration.getFlexiKlineConfig();
     if (mainSize != null) {
       _flexiKlineConfig.mainIndicator.size = mainSize;
     }
+
+    if (!updateIndicator) return;
 
     /// 配置默认指标蜡烛图指标和时间指标
     try {

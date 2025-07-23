@@ -634,6 +634,8 @@ const _basicConverterList = <JsonConverter>[
   ColorConverter(),
   DecimalConverter(),
   BagNumConverter(),
+  ChartTypeConverter(),
+  ChartBarStyleConverter(),
 ];
 
 // ignore: constant_identifier_names
@@ -652,8 +654,6 @@ const FlexiIndicatorSerializable = JsonSerializable(
   converters: [
     IIndicatorKeyConvert(),
     PaintModeConverter(),
-    ChartBarStyleConverter(),
-    ChartTypeConverter(),
     ..._basicConverterList,
   ],
   explicitToJson: true,

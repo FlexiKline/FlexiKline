@@ -27,11 +27,13 @@ abstract class _$CandleIndicatorCWProxy {
 
   CandleIndicator countDown(TextAreaConfig countDown);
 
-  CandleIndicator chartType(ChartType chartType);
-
   CandleIndicator chartBarStyle(ChartBarStyle chartBarStyle);
 
-  CandleIndicator useLineChartForZoom(bool useLineChartForZoom);
+  CandleIndicator chartType(ChartType chartType);
+
+  CandleIndicator zoomToMinChartType(ChartType? zoomToMinChartType);
+
+  CandleIndicator secondsChartType(ChartType? secondsChartType);
 
   CandleIndicator longColor(Color? longColor);
 
@@ -56,9 +58,10 @@ abstract class _$CandleIndicatorCWProxy {
     bool useCandleColorAsLatestBg,
     bool showCountDown,
     TextAreaConfig countDown,
-    ChartType chartType,
     ChartBarStyle chartBarStyle,
-    bool useLineChartForZoom,
+    ChartType chartType,
+    ChartType? zoomToMinChartType,
+    ChartType? secondsChartType,
     Color? longColor,
     Color? shortColor,
     Color? lineColor,
@@ -105,15 +108,19 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
       this(countDown: countDown);
 
   @override
-  CandleIndicator chartType(ChartType chartType) => this(chartType: chartType);
-
-  @override
   CandleIndicator chartBarStyle(ChartBarStyle chartBarStyle) =>
       this(chartBarStyle: chartBarStyle);
 
   @override
-  CandleIndicator useLineChartForZoom(bool useLineChartForZoom) =>
-      this(useLineChartForZoom: useLineChartForZoom);
+  CandleIndicator chartType(ChartType chartType) => this(chartType: chartType);
+
+  @override
+  CandleIndicator zoomToMinChartType(ChartType? zoomToMinChartType) =>
+      this(zoomToMinChartType: zoomToMinChartType);
+
+  @override
+  CandleIndicator secondsChartType(ChartType? secondsChartType) =>
+      this(secondsChartType: secondsChartType);
 
   @override
   CandleIndicator longColor(Color? longColor) => this(longColor: longColor);
@@ -143,9 +150,10 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
     Object? useCandleColorAsLatestBg = const $CopyWithPlaceholder(),
     Object? showCountDown = const $CopyWithPlaceholder(),
     Object? countDown = const $CopyWithPlaceholder(),
-    Object? chartType = const $CopyWithPlaceholder(),
     Object? chartBarStyle = const $CopyWithPlaceholder(),
-    Object? useLineChartForZoom = const $CopyWithPlaceholder(),
+    Object? chartType = const $CopyWithPlaceholder(),
+    Object? zoomToMinChartType = const $CopyWithPlaceholder(),
+    Object? secondsChartType = const $CopyWithPlaceholder(),
     Object? longColor = const $CopyWithPlaceholder(),
     Object? shortColor = const $CopyWithPlaceholder(),
     Object? lineColor = const $CopyWithPlaceholder(),
@@ -192,18 +200,22 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
           ? _value.countDown
           // ignore: cast_nullable_to_non_nullable
           : countDown as TextAreaConfig,
-      chartType: chartType == const $CopyWithPlaceholder()
-          ? _value.chartType
-          // ignore: cast_nullable_to_non_nullable
-          : chartType as ChartType,
       chartBarStyle: chartBarStyle == const $CopyWithPlaceholder()
           ? _value.chartBarStyle
           // ignore: cast_nullable_to_non_nullable
           : chartBarStyle as ChartBarStyle,
-      useLineChartForZoom: useLineChartForZoom == const $CopyWithPlaceholder()
-          ? _value.useLineChartForZoom
+      chartType: chartType == const $CopyWithPlaceholder()
+          ? _value.chartType
           // ignore: cast_nullable_to_non_nullable
-          : useLineChartForZoom as bool,
+          : chartType as ChartType,
+      zoomToMinChartType: zoomToMinChartType == const $CopyWithPlaceholder()
+          ? _value.zoomToMinChartType
+          // ignore: cast_nullable_to_non_nullable
+          : zoomToMinChartType as ChartType?,
+      secondsChartType: secondsChartType == const $CopyWithPlaceholder()
+          ? _value.secondsChartType
+          // ignore: cast_nullable_to_non_nullable
+          : secondsChartType as ChartType?,
       longColor: longColor == const $CopyWithPlaceholder()
           ? _value.longColor
           // ignore: cast_nullable_to_non_nullable
@@ -247,14 +259,17 @@ CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
       showCountDown: json['showCountDown'] as bool? ?? true,
       countDown:
           TextAreaConfig.fromJson(json['countDown'] as Map<String, dynamic>),
-      chartType: json['chartType'] == null
-          ? ChartType.bar
-          : const ChartTypeConverter().fromJson(json['chartType'] as String),
       chartBarStyle: json['chartBarStyle'] == null
           ? ChartBarStyle.allSolid
           : const ChartBarStyleConverter()
               .fromJson(json['chartBarStyle'] as String),
-      useLineChartForZoom: json['useLineChartForZoom'] as bool? ?? true,
+      chartType: json['chartType'] == null
+          ? ChartType.bar
+          : const ChartTypeConverter().fromJson(json['chartType'] as String),
+      zoomToMinChartType: _$JsonConverterFromJson<String, ChartType>(
+          json['zoomToMinChartType'], const ChartTypeConverter().fromJson),
+      secondsChartType: _$JsonConverterFromJson<String, ChartType>(
+          json['secondsChartType'], const ChartTypeConverter().fromJson),
       longColor: _$JsonConverterFromJson<String, Color>(
           json['longColor'], const ColorConverter().fromJson),
       shortColor: _$JsonConverterFromJson<String, Color>(
@@ -275,10 +290,13 @@ Map<String, dynamic> _$CandleIndicatorToJson(CandleIndicator instance) =>
       'useCandleColorAsLatestBg': instance.useCandleColorAsLatestBg,
       'showCountDown': instance.showCountDown,
       'countDown': instance.countDown.toJson(),
-      'chartType': const ChartTypeConverter().toJson(instance.chartType),
       'chartBarStyle':
           const ChartBarStyleConverter().toJson(instance.chartBarStyle),
-      'useLineChartForZoom': instance.useLineChartForZoom,
+      'chartType': const ChartTypeConverter().toJson(instance.chartType),
+      'zoomToMinChartType': _$JsonConverterToJson<String, ChartType>(
+          instance.zoomToMinChartType, const ChartTypeConverter().toJson),
+      'secondsChartType': _$JsonConverterToJson<String, ChartType>(
+          instance.secondsChartType, const ChartTypeConverter().toJson),
       'longColor': _$JsonConverterToJson<String, Color>(
           instance.longColor, const ColorConverter().toJson),
       'shortColor': _$JsonConverterToJson<String, Color>(

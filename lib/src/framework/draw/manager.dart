@@ -113,6 +113,18 @@ final class OverlayDrawObjectManager with KlineLog {
     );
   }
 
+  /// 从本地缓存重新加载OverlayObject列表
+  void updateDrawOverlaysConfig(DrawConfig config) {
+    _overlayObjectList.clear();
+    final list = configuration.getDrawOverlayList(_instId);
+    for (var overlay in list) {
+      final object = generateDrawObject(overlay, config);
+      if (object != null) {
+        addDrawObject(object);
+      }
+    }
+  }
+
   void dispose() {
     for (var obj in _overlayObjectList) {
       obj.dispose();

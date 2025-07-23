@@ -343,24 +343,21 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
     return mainChartWidth * settingConfig.minPaintBlankRate.clamp(0, 0.9);
   }
 
-  /// 最大蜡烛宽度[1, 50]
-  double get candleMaxWidth => math.max(
-        settingConfig.pixel,
-        settingConfig.candleMaxWidth,
-      );
+  /// 最小蜡烛宽度[1, 50]
+  double get candleMinWidth => settingConfig.candleMinWidth;
 
-  /// 单根蜡烛宽度, 限制范围1[pixel] ~ [candleMaxWidth] 之间
+  /// 最大蜡烛宽度[1, 50]
+  double get candleMaxWidth => math.max(candleMinWidth, settingConfig.candleMaxWidth);
+
+  /// 单根蜡烛宽度, 限制范围1[candleMinWidth] ~ [candleMaxWidth] 之间
   @override
   double get candleWidth => _candleWidth;
-  _setCandleWidth(double width, {bool sync = false}) {
+  void _setCandleWidth(double width, {bool sync = false}) {
     _candleWidth = width;
     if (!settingConfig.isFixedCandleSpacing) _candleSpacing = null;
     if (sync) {
       settingConfig = settingConfig.copyWith(
-        candleWidth: width.clamp(
-          settingConfig.pixel,
-          candleMaxWidth,
-        ),
+        candleWidth: width.clamp(candleMinWidth, candleMaxWidth),
       );
     }
   }
@@ -374,8 +371,8 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
     if (_candleSpacing != null && _candleSpacing! > 0) return _candleSpacing!;
     _candleSpacing = candleWidth / settingConfig.spacingCandleParts;
     _candleSpacing!.clamp(
-      settingConfig.pixel,
-      math.max(settingConfig.pixel, candleWidthHalf),
+      candleMinWidth,
+      math.max(candleMinWidth, candleWidthHalf),
     );
     return _candleSpacing!;
   }
@@ -513,10 +510,17 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
   }
 
   /// 更新FlexiKlineConfig
-  void updateFlexiKlineConfig() {
+  void updateFlexiKlineConfig({
+    bool updateIndicators = true,
+    bool updateDrawOverlays = true,
+  }) {
     _paintObjectManager.updateFlexiKlineConfig(this, mainSize: mainSize);
-    _invokeSizeChanged(force: true);
+    _invokeSizeChanged(force: updateIndicators);
     _updateSubHeightList();
+    if (updateDrawOverlays) {
+      _drawObjectManager.updateDrawOverlaysConfig(drawConfig);
+      markRepaintDraw();
+    }
   }
 
   /// SettingConfig

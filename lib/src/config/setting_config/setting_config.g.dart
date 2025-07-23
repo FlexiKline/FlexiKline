@@ -7,8 +7,6 @@ part of 'setting_config.dart';
 // **************************************************************************
 
 abstract class _$SettingConfigCWProxy {
-  SettingConfig pixel(double pixel);
-
   SettingConfig opacity(double opacity);
 
   SettingConfig loading(LoadingConfig loading);
@@ -23,6 +21,8 @@ abstract class _$SettingConfigCWProxy {
 
   SettingConfig alwaysCalculateScreenOfCandlesIfEnough(
       bool alwaysCalculateScreenOfCandlesIfEnough);
+
+  SettingConfig candleMinWidth(double candleMinWidth);
 
   SettingConfig candleMaxWidth(double candleMaxWidth);
 
@@ -50,7 +50,6 @@ abstract class _$SettingConfigCWProxy {
   /// SettingConfig(...).copyWith(id: 12, name: "My name")
   /// ````
   SettingConfig call({
-    double pixel,
     double opacity,
     LoadingConfig loading,
     Size mainMinSize,
@@ -58,6 +57,7 @@ abstract class _$SettingConfigCWProxy {
     bool useCandleTicksAsZoomSlideBar,
     double minPaintBlankRate,
     bool alwaysCalculateScreenOfCandlesIfEnough,
+    double candleMinWidth,
     double candleMaxWidth,
     double candleWidth,
     double? candleFixedSpacing,
@@ -75,9 +75,6 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
   const _$SettingConfigCWProxyImpl(this._value);
 
   final SettingConfig _value;
-
-  @override
-  SettingConfig pixel(double pixel) => this(pixel: pixel);
 
   @override
   SettingConfig opacity(double opacity) => this(opacity: opacity);
@@ -107,6 +104,10 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
       this(
           alwaysCalculateScreenOfCandlesIfEnough:
               alwaysCalculateScreenOfCandlesIfEnough);
+
+  @override
+  SettingConfig candleMinWidth(double candleMinWidth) =>
+      this(candleMinWidth: candleMinWidth);
 
   @override
   SettingConfig candleMaxWidth(double candleMaxWidth) =>
@@ -154,7 +155,6 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
   /// SettingConfig(...).copyWith(id: 12, name: "My name")
   /// ````
   SettingConfig call({
-    Object? pixel = const $CopyWithPlaceholder(),
     Object? opacity = const $CopyWithPlaceholder(),
     Object? loading = const $CopyWithPlaceholder(),
     Object? mainMinSize = const $CopyWithPlaceholder(),
@@ -163,6 +163,7 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
     Object? minPaintBlankRate = const $CopyWithPlaceholder(),
     Object? alwaysCalculateScreenOfCandlesIfEnough =
         const $CopyWithPlaceholder(),
+    Object? candleMinWidth = const $CopyWithPlaceholder(),
     Object? candleMaxWidth = const $CopyWithPlaceholder(),
     Object? candleWidth = const $CopyWithPlaceholder(),
     Object? candleFixedSpacing = const $CopyWithPlaceholder(),
@@ -174,10 +175,6 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
     Object? showYAxisTick = const $CopyWithPlaceholder(),
   }) {
     return SettingConfig(
-      pixel: pixel == const $CopyWithPlaceholder()
-          ? _value.pixel
-          // ignore: cast_nullable_to_non_nullable
-          : pixel as double,
       opacity: opacity == const $CopyWithPlaceholder()
           ? _value.opacity
           // ignore: cast_nullable_to_non_nullable
@@ -208,6 +205,10 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
               ? _value.alwaysCalculateScreenOfCandlesIfEnough
               // ignore: cast_nullable_to_non_nullable
               : alwaysCalculateScreenOfCandlesIfEnough as bool,
+      candleMinWidth: candleMinWidth == const $CopyWithPlaceholder()
+          ? _value.candleMinWidth
+          // ignore: cast_nullable_to_non_nullable
+          : candleMinWidth as double,
       candleMaxWidth: candleMaxWidth == const $CopyWithPlaceholder()
           ? _value.candleMaxWidth
           // ignore: cast_nullable_to_non_nullable
@@ -263,7 +264,6 @@ extension $SettingConfigCopyWith on SettingConfig {
 
 SettingConfig _$SettingConfigFromJson(Map<String, dynamic> json) =>
     SettingConfig(
-      pixel: (json['pixel'] as num).toDouble(),
       opacity: (json['opacity'] as num?)?.toDouble() ?? 0.5,
       loading: LoadingConfig.fromJson(json['loading'] as Map<String, dynamic>),
       mainMinSize: json['mainMinSize'] == null
@@ -276,6 +276,7 @@ SettingConfig _$SettingConfigFromJson(Map<String, dynamic> json) =>
       minPaintBlankRate: (json['minPaintBlankRate'] as num?)?.toDouble() ?? 0.5,
       alwaysCalculateScreenOfCandlesIfEnough:
           json['alwaysCalculateScreenOfCandlesIfEnough'] as bool? ?? false,
+      candleMinWidth: (json['candleMinWidth'] as num).toDouble(),
       candleMaxWidth: (json['candleMaxWidth'] as num).toDouble(),
       candleWidth: (json['candleWidth'] as num).toDouble(),
       candleFixedSpacing: (json['candleFixedSpacing'] as num?)?.toDouble(),
@@ -291,7 +292,6 @@ SettingConfig _$SettingConfigFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$SettingConfigToJson(SettingConfig instance) =>
     <String, dynamic>{
-      'pixel': instance.pixel,
       'opacity': instance.opacity,
       'loading': instance.loading.toJson(),
       'mainMinSize': const SizeConverter().toJson(instance.mainMinSize),
@@ -300,6 +300,7 @@ Map<String, dynamic> _$SettingConfigToJson(SettingConfig instance) =>
       'minPaintBlankRate': instance.minPaintBlankRate,
       'alwaysCalculateScreenOfCandlesIfEnough':
           instance.alwaysCalculateScreenOfCandlesIfEnough,
+      'candleMinWidth': instance.candleMinWidth,
       'candleMaxWidth': instance.candleMaxWidth,
       'candleWidth': instance.candleWidth,
       if (instance.candleFixedSpacing case final value?)
