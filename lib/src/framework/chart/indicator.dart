@@ -28,6 +28,7 @@ import '../../data/kline_data.dart';
 import '../../extension/export.dart';
 import '../../model/export.dart';
 import '../../utils/algorithm_util.dart';
+import '../../utils/platform_util.dart';
 import '../collection/fixed_hash_queue.dart';
 import '../collection/sortable_hash_set.dart';
 import '../configuration.dart';

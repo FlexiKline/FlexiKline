@@ -272,83 +272,26 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     // _candleDrawIndexListener.value = curKlineData.drawTimeRange;
   }
 
-  /// 开始预计算Kline指标数据
-  /// [data] 待计算的Kline蜡烛数据
-  /// [newList] 待计算的蜡烛数据范围
-  /// [reset] 是否重置[data],
-  /// 1. true: 重新计算[data]的指标数据;
-  /// 2. false: 仅计算[data]与[newList]合并后的部分.
-  /// 数据合并更新结果的处理:
-  /// 1. 对于历史数据追加, 像EMA这类依赖于历史数据会适时考虑从头计算.
-  /// 2. 对于实时数据更新, 会仅计算[newList]部分.
-  Future<void> _startPrecomputeKlineData(
-    KlineData data, {
-    List<CandleModel> newList = const [],
-    bool reset = false,
-  }) async {
-    if (!reset && newList.isEmpty) {
-      // 无需计算; 直接返回
-      return;
-    }
-
-    // 待计算的指标对象集合
-    // final paintObjects = [mainPaintObject, ...subPaintObjects];
-
-    final beginTime = DateTime.now().millisecondsSinceEpoch;
-    final precomputeLabel = 'Precompute-$beginTime-${newList.length}-$reset';
-
-    logd('startPrecompute Begin: $precomputeLabel');
-
-    /// 使用scheduleTask + compute方式运行预计算
-    // return await SchedulerBinding.instance.scheduleTask(
-    //   () => precomputeKlineDataByCompute(
-    //     data,
-    //     newList: newList,
-    //     calcParams: calcParams,
-    //     reset: reset,
-    //     debugLabel: 'Precompute-Compute',
-    //     logger: loggerDelegate,
-    //   ),
-    //   Priority.animation,
-    //   debugLabel: 'Precompute-Task',
-    // );
-
-    /// 使用scheduleTask方式运行预计算
-    await SchedulerBinding.instance.scheduleTask(
-      () => data.precomputeKlineData(
-        newList: newList,
-        mainPaintObjects: mainPaintObject.children,
-        subPaintObjects: subPaintObjects,
-        reset: reset,
-      ),
-      Priority.animation,
-      debugLabel: precomputeLabel,
-    );
-    logd(
-      'startPrecompute End:$precomputeLabel spent:${DateTime.now().millisecondsSinceEpoch - beginTime}ms',
-    );
-  }
-
-  /// 切换[req]请求指定的蜡烛数据
-  /// [req] 待切换的[CandleReq]
-  /// [useCacheFirst] 优先使用缓存. 注: 如果有缓存数据(说明之前加载过), loading不会展示.
+  /// 切换[request]请求指定的蜡烛数据
+  /// [request] 待切换的[CandleReq]
+  /// [useCacheFirst] 是否优先使用缓存. 注: 如果有缓存数据(说明之前加载过), loading不会展示.
   /// [useCachePaintDxOffset] 是否仍使用缓存的绘制位置(如果当前没有切换请求);
   /// return
   ///   1. true:  代表使用了缓存, [curKlineData]的请求状态为[RequestState.none], 不展示loading
   ///   2. false: 代表未使用缓存; 且[curKlineData]数据会被清空(如果有).
   bool switchKlineData(
-    CandleReq req, {
+    CandleReq request, {
     ComputeMode computeMode = ComputeMode.fast,
     bool useCacheFirst = true,
     bool useCachePaintDxOffset = false,
   }) {
-    KlineData? data = _klineDataCache[req.key];
+    KlineData? data = _klineDataCache[request.key];
 
     if (useCacheFirst && data != null && data.isNotEmpty) {
       // 如果优先使用缓存且缓存数据不为空时, 设置缓存为当前KlineData, 同时结束loading状态.
       _setCurKlineData(
         data,
-        resetPaintDxOffset: req.key != curDataKey ? true : useCachePaintDxOffset,
+        resetPaintDxOffset: request.key != curDataKey ? true : useCachePaintDxOffset,
       );
       return true;
     }
@@ -358,12 +301,12 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
 
     // 重置当前KlineData为[req]请求指定的KlineData, 并更新到缓存中.
     data = KlineData(
-      req.copyWith(state: RequestState.initLoading),
+      request.copyWith(state: RequestState.initLoading),
       indicatorCount,
       computeMode: computeMode,
       logger: loggerDelegate,
     );
-    final old = _klineDataCache.append(req.key, data);
+    final old = _klineDataCache.append(request.key, data);
     if (old != null) Future(() => old.dispose());
     _curKlineData = data;
     _updateCandleRequestListener(data.req);
@@ -388,24 +331,25 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     }
   }
 
-  /// 更新[list]到[req]请求指定的[KlineData]中
+  /// 更新[list]到[request]请求指定的[KlineData]中
   Future<void> updateKlineData(
-    CandleReq req,
-    List<CandleModel> list,
-  ) async {
+    CandleReq request,
+    List<CandleModel> list, {
+    bool reset = false,
+  }) async {
     // 数据为空, 无需要更新.
     if (list.isEmpty) {
-      stopLoading(request: req);
+      stopLoading(request: request);
       return;
     }
 
-    KlineData? data = _klineDataCache[req.key];
+    KlineData? data = _klineDataCache[request.key];
     if (data == null) {
-      logw('updateKlineData: cannot found klineData by $req');
+      logw('updateKlineData: cannot found klineData by $request');
       return;
     }
 
-    bool reset = data.isEmpty;
+    reset = reset || data.isEmpty;
 
     /// 首先结束[stat.req]的请求状态为[RequestState.none]
     stopLoading(request: data.req);
@@ -416,7 +360,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
       reset: reset,
     );
 
-    if (req.key == curDataKey) {
+    if (request.key == curDataKey) {
       if (reset) {
         _setCurKlineData(data);
       } else {
@@ -439,5 +383,45 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
         markRepaintDraw();
       }
     }
+  }
+
+  /// 开始预计算Kline指标数据
+  /// [data] 待计算的Kline蜡烛数据
+  /// [newList] 待计算的蜡烛数据范围
+  /// [reset] 是否重置[data],
+  /// 1. true: 重新计算[data]的指标数据;
+  /// 2. false: 仅计算[data]与[newList]合并后的部分.
+  /// 数据合并更新结果的处理:
+  /// 1. 对于历史数据追加, 像EMA这类依赖于历史数据会适时考虑从头计算.
+  /// 2. 对于实时数据更新, 会仅计算[newList]部分.
+  Future<void> _startPrecomputeKlineData(
+    KlineData data, {
+    List<CandleModel> newList = const [],
+    bool reset = false,
+  }) async {
+    if (!reset && newList.isEmpty) {
+      // 无需计算; 直接返回
+      return;
+    }
+
+    final beginTime = DateTime.now().millisecondsSinceEpoch;
+    final precomputeLabel = 'Precompute-$beginTime-${newList.length}-$reset';
+
+    logd('startPrecompute Begin: $precomputeLabel');
+
+    /// 使用scheduleTask方式运行预计算
+    await SchedulerBinding.instance.scheduleTask(
+      () => data.precomputeKlineData(
+        newList: newList,
+        mainPaintObjects: mainPaintObject.children,
+        subPaintObjects: subPaintObjects,
+        reset: reset,
+      ),
+      Priority.animation,
+      debugLabel: precomputeLabel,
+    );
+    logd(
+      'startPrecompute End:$precomputeLabel spent:${DateTime.now().millisecondsSinceEpoch - beginTime}ms',
+    );
   }
 }

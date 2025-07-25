@@ -40,8 +40,8 @@ mixin CandleReqData on BaseData {
     );
   }
 
-  CandleReq getRefreshRequest([bool isRest = false]) {
-    if (isEmpty || isRest) {
+  CandleReq getRefreshRequest([bool reset = false]) {
+    if (isEmpty || reset) {
       return req.copyWith(after: null, before: null);
     }
     final model = list.secondWhereOrNull((m) => m.calcuData.dataList.hasValidData);

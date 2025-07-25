@@ -190,11 +190,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
             case NormalLayoutMode(mainSize: final size):
             case AdaptLayoutMode(mainSize: final size):
               controller.setAdaptLayoutMode(
-                Size(
-                  constraints.biggest.width,
-                  size.height,
-                ),
-                syncMainSize: true,
+                Size(constraints.biggest.width, size.height),
               );
           }
           return _buildKlineContainer(context);

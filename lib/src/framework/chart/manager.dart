@@ -147,7 +147,7 @@ final class IndicatorPaintObjectManager with KlineLog {
     final mainIndicator = flexiKlineConfig.mainIndicator;
     _mainPaintObject = MainPaintObject(
       context: context,
-      indicator: mainIndicator,
+      indicator: mainIndicator.copyWith(),
     );
 
     /// 配置默认指标蜡烛图指标和时间指标
@@ -183,17 +183,17 @@ final class IndicatorPaintObjectManager with KlineLog {
   void updateFlexiKlineConfig(
     IPaintContext context, {
     bool updateIndicator = true,
-    Size? mainSize,
   }) {
     _flexiKlineConfig = configuration.getFlexiKlineConfig();
-    if (mainSize != null) {
-      _flexiKlineConfig.mainIndicator.size = mainSize;
-    }
-
     if (!updateIndicator) return;
 
     /// 配置默认指标蜡烛图指标和时间指标
+    final mainIndicator = flexiKlineConfig.mainIndicator;
     try {
+      mainPaintObject.doDidUpdateIndicator(mainIndicator.copyWith(
+        size: mainPaintObject.size,
+      ));
+
       final candle = configuration.candleIndicatorBuilder.call(
         configuration.getConfig(candleIndicatorKey.id),
       );
@@ -211,7 +211,7 @@ final class IndicatorPaintObjectManager with KlineLog {
       );
     }
 
-    final newMainKeys = _flexiKlineConfig.mainIndicator.children;
+    final newMainKeys = mainIndicator.children;
     for (final key in supportMainIndicatorKeys) {
       if (newMainKeys.contains(key)) {
         addMainPaintObject(key, context, reset: true);
@@ -220,7 +220,7 @@ final class IndicatorPaintObjectManager with KlineLog {
       }
     }
 
-    final newSubKeys = _flexiKlineConfig.sub;
+    final newSubKeys = flexiKlineConfig.sub;
     for (final key in supportSubIndicatorKeys) {
       if (newSubKeys.contains(key)) {
         addSubPaintObject(key, context, reset: true);
@@ -398,11 +398,22 @@ final class IndicatorPaintObjectManager with KlineLog {
     }
   }
 
+  /// 保存所有FlexiKline配置及主区和副区的指标设置.
+  /// [storeIndicators] 是否存储主区指标和副区指标的设置.
+  /// [layoutMode] 布局模式; 注: 仅保存NormalLayoutMode模式下的宽高 和 非移动设备时AdaptLayoutMode模式下的宽高.
   void storeFlexiKlineConfig({
     bool storeIndicators = true,
+    required LayoutMode layoutMode,
   }) {
     flexiKlineConfig.sub = subIndicatorKeys.toSet();
-    flexiKlineConfig.mainIndicator = mainPaintObject.indicator;
+    final configMainSize = flexiKlineConfig.mainIndicator.size;
+    flexiKlineConfig.mainIndicator = mainPaintObject.indicator.copyWith(
+      size: switch (layoutMode) {
+        NormalLayoutMode() => mainPaintObject.size,
+        AdaptLayoutMode() => PlatformUtil.isMobile ? configMainSize : mainPaintObject.size,
+        FixedLayoutMode() => configMainSize,
+      },
+    );
     configuration.saveFlexiKlineConfig(_flexiKlineConfig);
     if (storeIndicators) {
       mainPaintObject.doStoreConfig();

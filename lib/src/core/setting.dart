@@ -234,19 +234,15 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
   /// 自适应[FlexiKlineWidget]所在父组件的布局的变化
   /// 注: 仅适配主区的宽度变化
   /// 这主要是通过[FlexiKlineWidget]的autoAdaptLayout配置决定, 并会导致无法手动调整[FlexiKlineWidget]的宽度.
-  /// [syncMainSize] 是否同步更新MainSize
-  bool setAdaptLayoutMode(Size size, {bool syncMainSize = false}) {
-    if (!canSetMainSize(fixedSize)) return false;
+  /// //[syncMainSize] 是否同步更新MainSize
+  bool setAdaptLayoutMode(Size size) {
+    if (!canSetMainSize(size)) return false;
 
     if (_layoutMode.isAdapt) {
       if ((_layoutMode as AdaptLayoutMode).mainSize == size) {
         return true;
       }
-      //~~ 是否删除sync标识 ~~
-      _layoutMode = _layoutMode.update(
-        size,
-        syncMainSize,
-      );
+      _layoutMode = _layoutMode.update(size);
     } else {
       _layoutMode = AdaptLayoutMode(size, _layoutMode);
     }
@@ -503,7 +499,10 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
     bool storeIndicators = true,
     bool storeDrawOverlays = true,
   }) {
-    _paintObjectManager.storeFlexiKlineConfig(storeIndicators: storeIndicators);
+    _paintObjectManager.storeFlexiKlineConfig(
+      storeIndicators: storeIndicators,
+      layoutMode: layoutMode,
+    );
     if (storeDrawOverlays) {
       _drawObjectManager.storeDrawOverlaysConfig();
     }
@@ -514,7 +513,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
     bool updateIndicators = true,
     bool updateDrawOverlays = true,
   }) {
-    _paintObjectManager.updateFlexiKlineConfig(this, mainSize: mainSize);
+    _paintObjectManager.updateFlexiKlineConfig(this);
     _invokeSizeChanged(force: updateIndicators);
     _updateSubHeightList();
     if (updateDrawOverlays) {
