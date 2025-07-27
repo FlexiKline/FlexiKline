@@ -28,9 +28,9 @@ part 'tolerance_config.g.dart';
 @FlexiConfigSerializable
 class ToleranceConfig {
   ToleranceConfig({
-    this.maxDuration = 1000,
-    this.distanceFactor = 0.3,
-    this.curvestr = 'decelerate',
+    this.maxDuration = 1500,
+    this.distanceFactor = 0.5,
+    this.curvestr = 'easeOutCirc',
   }) : _curve = parseCurve(curvestr);
 
   final int maxDuration;

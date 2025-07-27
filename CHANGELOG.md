@@ -1,6 +1,13 @@
 ## 1.0.0
 * Optimize the calculation performance of indicators
-* Optimize the performance of chart draw tools
+* Optimize gesture detector performance.
+* Optimize configuration management: load, store, update.
+* Optimize KlineData structure.
+* Added multiple chart types and styles for candlestick charts.
+* Provide FlexiKlinePage mixin to assist development.
+* Optimize indicator chart painting performance and configuration.
+* Optimize scrolling animation.
+* bugfix.
 
 ## 0.9.1
 * Rearrange layout mode And bugfix.

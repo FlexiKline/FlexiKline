@@ -31,7 +31,7 @@ abstract interface class IStorage {
 
 /// FlexiKline配置接口
 abstract interface class IConfiguration implements IStorage {
-  /// 当前配置主题
+    /// 当前配置主题
   IFlexiKlineTheme get theme;
 
   String get configKey;
@@ -45,7 +45,7 @@ abstract interface class IConfiguration implements IStorage {
   /// 时间指标配置构造器(副区)
   IndicatorBuilder<TimeBaseIndicator> get timeIndicatorBuilder;
 
- /// 主区指标配置定制
+  /// 主区指标配置定制
   Map<IIndicatorKey, IndicatorBuilder> get mainIndicatorBuilders;
 
   /// 副区指标配置定制
@@ -63,12 +63,15 @@ abstract interface class IConfiguration implements IStorage {
 ### 2. New FlexiKlineController
 
 ```dart
+final configuration = FlexiKlineConfiguration();
 controller = FlexiKlineController(
   configuration: configuration,
   logger: LoggerImpl(
     tag: "FlexiKline",
     debug: kDebugMode,
   ),
+  subIndicatorMaxCount: defaultSubIndicatorMaxCount,
+  klineDataCacheCapacity: 3,
 );
 ```
 
@@ -87,7 +90,7 @@ FlexiKlineWidget(
 
 ### 4. UpdateKlineData
 ```dart
-/// 根据[request]切换当前Kline图表数据源[KlineData]; 如果发生变更TimerBar时.
+/// 根据[request]切换当前Kline图表数据源[KlineData]; 如发生变更TimerBar时.
 flexiKlineController.switchKlineData(request, useCacheFirst: true);
 
 /// 更新[request]指定的数据

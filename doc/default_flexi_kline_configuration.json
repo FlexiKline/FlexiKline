@@ -63,7 +63,6 @@
     }
   },
   "setting": {
-    "pixel": 0.3076923076923077,
     "opacity": 0.5,
     "loading": {
       "size": 22.99941280093952,
@@ -79,6 +78,7 @@
     "useCandleTicksAsZoomSlideBar": true,
     "minPaintBlankRate": 0.5,
     "alwaysCalculateScreenOfCandlesIfEnough": false,
+    "candleMinWidth": 0.3076923076923077,
     "candleMaxWidth": 38.33235466823253,
     "candleWidth": 6.708162066940694,
     "candleFixedSpacing": 0.9583088667058134,
@@ -93,9 +93,9 @@
     "supportLongPress": true,
     "isInertialPan": true,
     "tolerance": {
-      "maxDuration": 1000,
-      "distanceFactor": 0.3,
-      "curvestr": "decelerate"
+      "maxDuration": 1500,
+      "distanceFactor": 0.5,
+      "curvestr": "easeOutCirc"
     },
     "loadMoreWhenNoEnoughCandles": 60,
     "scalePosition": "auto",
@@ -309,16 +309,24 @@
       "vertical": 4.791544333529067
     },
     "size": {
-      "width": 744.9628024557602,
-      "height": 312.94497696691013
+      "width": 376.61538461538464,
+      "height": 287.492660011744
     },
-    "height": 312.94497696691013,
+    "height": 287.492660011744,
     "drawBelowTipsArea": true,
-    "indicatorKeys": [
-      "candle:Candle"
+    "children": [
+      "candle:Candle",
+      "volume:Vol",
+      "ma:MA",
+      "ema:EMA",
+      "boll:BOLL",
+      "sar:SAR"
     ]
   },
   "sub": [
-    
+    "macd:MACD",
+    "kdj:KDJ",
+    "volMa:MAVOL",
+    "rsi:RSI"
   ]
 }
