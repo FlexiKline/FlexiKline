@@ -1,10 +1,11 @@
-# FlexiKline
-
+# FlexiKline [![pub package](https://img.shields.io/pub/v/flexi_kline.svg)](https://pub.dev/packages/flexi_kline)
 FlexiKline是一个灵活且高度可定制化的金融Kline图表框架，旨在满足不同用户的需求. 
 
 ## Demo
 
 [https://flexikline.github.io](https://flexikline.github.io)
+
+[Android apk](https://github.com/FlexiKline/FlexiKline.github.io/blob/main/mobile/flexi_kline_app.apk)
 
 ## 特性
 
