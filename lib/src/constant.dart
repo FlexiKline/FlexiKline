@@ -79,11 +79,19 @@ enum ComputeMode {
   accurate,
 }
 
+abstract interface class ITimeBar {
+  String get bar;
+
+  int get multiplier;
+
+  TimeUnit get unit;
+}
+
 /// 时间粒度，默认值1m
 /// 如 [1m/3m/5m/15m/30m/1H/2H/4H]
 /// 香港时间开盘价k线：[6H/12H/1D/2D/3D/1W/1M/3M]
 /// UTC时间开盘价k线：[/6Hutc/12Hutc/1Dutc/2Dutc/3Dutc/1Wutc/1Mutc/3Mutc]
-enum TimeBar {
+enum TimeBar implements ITimeBar {
   // time('1m', 1, TimeUnit.minute), // 1分钟线图
   s1('1s', 1, TimeUnit.second),
   m1('1m', 1, TimeUnit.minute),
@@ -113,8 +121,11 @@ enum TimeBar {
 
   const TimeBar(this.bar, this.multiplier, this.unit);
 
+  @override
   final String bar;
+  @override
   final int multiplier;
+  @override
   final TimeUnit unit;
 
   int get milliseconds => unit.microseconds ~/ 1000 * multiplier;

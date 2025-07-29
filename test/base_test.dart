@@ -131,4 +131,35 @@ void main() {
 
     debugPrint(str);
   });
+
+  group('test is vs case', () {
+    final stopwatch = Stopwatch();
+    dynamic value = 0;
+    setUp(() {
+      value = 0;
+      stopwatch.reset();
+    });
+
+    test('test is', () {
+      final stopwatch = Stopwatch()..start();
+      for (var i = 0; i < 10000000; i++) {
+        if (value is int) {
+          value = value + 1;
+        }
+      }
+      stopwatch.stop();
+      debugPrint('is:  ${stopwatch.elapsedMicroseconds} μs');
+    });
+
+    test('test case', () {
+      final stopwatch = Stopwatch()..start();
+      for (var i = 0; i < 10000000; i++) {
+        if (value case int val) {
+          value = val + 1;
+        }
+      }
+      stopwatch.stop();
+      debugPrint('case:  ${stopwatch.elapsedMicroseconds} μs');
+    });
+  });
 }

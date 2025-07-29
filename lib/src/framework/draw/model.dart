@@ -20,9 +20,9 @@ class Point {
   Point({
     this.index = -1,
     this.ts = -1,
-    this.value = BagNum.zero,
+    BagNum? value,
     Offset? offset,
-  }) : _offset = offset ?? Offset.infinite;
+  }) : _offset = offset ?? Offset.infinite, value = value ?? BagNum.zero;
 
   factory Point.pointer(int index, Offset offset) {
     assert(index >= 0, 'invalid index($index)');

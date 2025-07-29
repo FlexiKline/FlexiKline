@@ -294,4 +294,50 @@ void main() {
       logMsg('BagNum Decimal / Decimal =>${num3.doubleString()}');
     });
   });
+
+  group('BagNum %', () {
+    test('BagNum num % num', () {
+      logMsg('1 % 5 =>${1 % 5}');
+      BagNum num1 = BagNum.fromInt(1);
+      BagNum num2 = BagNum.fromInt(5);
+      logMsg('num1 % num2 =>${num1 % num2}');
+    });
+
+    test('BagNum decimal % decimal', () {
+      logMsg('1.d % 5.d =>${1.d % 5.d}');
+      BagNum num1 = BagNum.fromDecimal(1.d);
+      BagNum num2 = BagNum.fromDecimal(5.d);
+      logMsg('num1 % num2 =>${num1 % num2}');
+    });
+
+    test('BagNum num % decimal', () {
+      logMsg('1.d % 5.d =>${1.d % 5.d}');
+      BagNum num1 = BagNum.fromNum(1);
+      BagNum num2 = BagNum.fromDecimal(5.d);
+      logMsg('num1 % num2 =>${num1 % num2}');
+    });
+
+    test('BagNum decimal % num', () {
+      logMsg('1.d % 5.d =>${1.d % 5.d}');
+      BagNum num1 = BagNum.fromDecimal(1.d);
+      BagNum num2 = BagNum.fromInt(5);
+      logMsg('num1 % num2 =>${num1 % num2}');
+    });
+
+    test('BagNum remainderNum', () {
+      BagNum num1 = BagNum.fromNum(1);
+      num num2 = 5;
+      logMsg('num1.remainderNum(num2) =>${num1.remainderNum(num2)}');
+      num1 = BagNum.fromDecimal(1.d);
+      logMsg('num1.remainderNum(num2) =>${num1.remainderNum(num2)}');
+    });
+
+    test('BagNum remainderDecimal', () {
+      BagNum num1 = BagNum.fromNum(1);
+      Decimal num2 = 5.d;
+      logMsg('num1.remainderDecimal(num2) =>${num1.remainderDecimal(num2)}');
+      num1 = BagNum.fromDecimal(1.d);
+      logMsg('num1.remainderDecimal(num2) =>${num1.remainderDecimal(num2)}');
+    });
+  });
 }

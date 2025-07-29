@@ -96,7 +96,7 @@ abstract class GestureDetectorState<T extends GestureDetectorWidget> extends Sta
         .animate(animationController!);
 
     animation.addListener(() {
-      logd('animateToPosition move> ${DateTime.now().millisecond} value:${animation.value}');
+      // logd('animateToPosition move> ${DateTime.now().millisecond} value:${animation.value}');
       gestureData.update(Offset(
         animation.value,
         gestureData.offset.dy,

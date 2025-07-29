@@ -35,24 +35,20 @@ final class BagNumException implements Exception {
   const BagNumException([this.message = '']);
 }
 
-/// 自定义包装数字.
+/// 自定义数值类型Wrapper.
 /// 主要用于指标数据计算, 适配精确模式(Decimal)和快速模式(fast mode)
-class BagNum implements Comparable<BagNum> {
-  const BagNum._(this._value);
-
-  static const BagNum zero = BagNum._(0);
-  static const BagNum one = BagNum._(1);
-  static const BagNum two = BagNum._(2);
-  static const BagNum three = BagNum._(3);
-  static const BagNum ten = BagNum._(10);
-  static const BagNum fifty = BagNum._(50);
-  static const BagNum hundred = BagNum._(100);
+extension type BagNum._(Object _value) {
+  static final BagNum zero = BagNum._(0);
+  static final BagNum one = BagNum._(1);
+  static final BagNum two = BagNum._(2);
+  static final BagNum three = BagNum._(3);
+  static final BagNum ten = BagNum._(10);
+  static final BagNum fifty = BagNum._(50);
+  static final BagNum hundred = BagNum._(100);
 
   factory BagNum.fromDecimal(Decimal value) => BagNum._(value);
   factory BagNum.fromNum(num value) => BagNum._(value);
   factory BagNum.fromInt(num value) => BagNum._(value);
-
-  final dynamic _value;
 
   Decimal toDecimal() {
     if (_value is Decimal) return _value;
@@ -148,13 +144,13 @@ class BagNum implements Comparable<BagNum> {
   BagNum operator %(BagNum other) {
     if (_value is num) {
       if (other._value is num) {
-        return BagNum._(_value / other._value);
+        return BagNum._(_value % other._value);
       } else if (other._value is Decimal) {
-        return BagNum._(_value / other._value.toDouble());
+        return BagNum._(_value % other._value.toDouble());
       }
     } else if (_value is Decimal) {
       if (other._value is Decimal) {
-        return BagNum._(_value + other._value);
+        return BagNum._(_value % other._value);
       } else if (other._value is num) {
         return BagNum._(_value % other._value.toDecimal());
       }
@@ -538,10 +534,10 @@ class BagNum implements Comparable<BagNum> {
     throw const BagNumException('BagNum shift Type not match!');
   }
 
-  @override
-  int compareTo(BagNum other) {
-    return _value.compareTo(other._value);
-  }
+  // @override
+  // int compareTo(BagNum other) {
+  //   return _value.compareTo(other._value);
+  // }
 
   BagNum calcuMin(BagNum other) {
     if (this > other) return other;
@@ -553,16 +549,16 @@ class BagNum implements Comparable<BagNum> {
     return this;
   }
 
-  @override
-  bool operator ==(Object other) => other is BagNum && _value == other._value;
+  // @override
+  // bool operator ==(Object other) => other is BagNum && _value == other._value;
 
-  @override
-  int get hashCode => _value.hashCode;
+  // @override
+  // int get hashCode => _value.hashCode;
 
-  @override
-  String toString() {
-    return 'BagNum:${doubleString()}';
-  }
+  // @override
+  // String toString() {
+  //   return 'BagNum:${doubleString()}';
+  // }
 
   String doubleString() {
     if (_value is Decimal) {
