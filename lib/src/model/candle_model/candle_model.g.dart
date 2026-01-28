@@ -7,23 +7,23 @@ part of 'candle_model.dart';
 // **************************************************************************
 
 abstract class _$CandleModelCWProxy {
-  CandleModel ts(int ts);
+  CandleModel timestamp(int timestamp);
 
-  CandleModel o(Decimal o);
+  CandleModel open(Object open);
 
-  CandleModel h(Decimal h);
+  CandleModel high(Object high);
 
-  CandleModel l(Decimal l);
+  CandleModel low(Object low);
 
-  CandleModel c(Decimal c);
+  CandleModel close(Object close);
 
-  CandleModel v(Decimal v);
+  CandleModel volume(Object volume);
 
-  CandleModel vc(Decimal? vc);
+  CandleModel turnover(Object? turnover);
 
-  CandleModel vcq(Decimal? vcq);
+  CandleModel tradeCount(int? tradeCount);
 
-  CandleModel confirm(String confirm);
+  CandleModel confirmed(bool confirmed);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `CandleModel(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -32,15 +32,15 @@ abstract class _$CandleModelCWProxy {
   /// CandleModel(...).copyWith(id: 12, name: "My name")
   /// ````
   CandleModel call({
-    int ts,
-    Decimal o,
-    Decimal h,
-    Decimal l,
-    Decimal c,
-    Decimal v,
-    Decimal? vc,
-    Decimal? vcq,
-    String confirm,
+    int timestamp,
+    Object open,
+    Object high,
+    Object low,
+    Object close,
+    Object volume,
+    Object? turnover,
+    int? tradeCount,
+    bool confirmed,
   });
 }
 
@@ -51,31 +51,31 @@ class _$CandleModelCWProxyImpl implements _$CandleModelCWProxy {
   final CandleModel _value;
 
   @override
-  CandleModel ts(int ts) => this(ts: ts);
+  CandleModel timestamp(int timestamp) => this(timestamp: timestamp);
 
   @override
-  CandleModel o(Decimal o) => this(o: o);
+  CandleModel open(Object open) => this(open: open);
 
   @override
-  CandleModel h(Decimal h) => this(h: h);
+  CandleModel high(Object high) => this(high: high);
 
   @override
-  CandleModel l(Decimal l) => this(l: l);
+  CandleModel low(Object low) => this(low: low);
 
   @override
-  CandleModel c(Decimal c) => this(c: c);
+  CandleModel close(Object close) => this(close: close);
 
   @override
-  CandleModel v(Decimal v) => this(v: v);
+  CandleModel volume(Object volume) => this(volume: volume);
 
   @override
-  CandleModel vc(Decimal? vc) => this(vc: vc);
+  CandleModel turnover(Object? turnover) => this(turnover: turnover);
 
   @override
-  CandleModel vcq(Decimal? vcq) => this(vcq: vcq);
+  CandleModel tradeCount(int? tradeCount) => this(tradeCount: tradeCount);
 
   @override
-  CandleModel confirm(String confirm) => this(confirm: confirm);
+  CandleModel confirmed(bool confirmed) => this(confirmed: confirmed);
 
   @override
 
@@ -86,53 +86,53 @@ class _$CandleModelCWProxyImpl implements _$CandleModelCWProxy {
   /// CandleModel(...).copyWith(id: 12, name: "My name")
   /// ````
   CandleModel call({
-    Object? ts = const $CopyWithPlaceholder(),
-    Object? o = const $CopyWithPlaceholder(),
-    Object? h = const $CopyWithPlaceholder(),
-    Object? l = const $CopyWithPlaceholder(),
-    Object? c = const $CopyWithPlaceholder(),
-    Object? v = const $CopyWithPlaceholder(),
-    Object? vc = const $CopyWithPlaceholder(),
-    Object? vcq = const $CopyWithPlaceholder(),
-    Object? confirm = const $CopyWithPlaceholder(),
+    Object? timestamp = const $CopyWithPlaceholder(),
+    Object? open = const $CopyWithPlaceholder(),
+    Object? high = const $CopyWithPlaceholder(),
+    Object? low = const $CopyWithPlaceholder(),
+    Object? close = const $CopyWithPlaceholder(),
+    Object? volume = const $CopyWithPlaceholder(),
+    Object? turnover = const $CopyWithPlaceholder(),
+    Object? tradeCount = const $CopyWithPlaceholder(),
+    Object? confirmed = const $CopyWithPlaceholder(),
   }) {
     return CandleModel(
-      ts: ts == const $CopyWithPlaceholder()
-          ? _value.ts
+      timestamp: timestamp == const $CopyWithPlaceholder()
+          ? _value.timestamp
           // ignore: cast_nullable_to_non_nullable
-          : ts as int,
-      o: o == const $CopyWithPlaceholder()
-          ? _value.o
+          : timestamp as int,
+      open: open == const $CopyWithPlaceholder()
+          ? _value.open
           // ignore: cast_nullable_to_non_nullable
-          : o as Decimal,
-      h: h == const $CopyWithPlaceholder()
-          ? _value.h
+          : open as Object,
+      high: high == const $CopyWithPlaceholder()
+          ? _value.high
           // ignore: cast_nullable_to_non_nullable
-          : h as Decimal,
-      l: l == const $CopyWithPlaceholder()
-          ? _value.l
+          : high as Object,
+      low: low == const $CopyWithPlaceholder()
+          ? _value.low
           // ignore: cast_nullable_to_non_nullable
-          : l as Decimal,
-      c: c == const $CopyWithPlaceholder()
-          ? _value.c
+          : low as Object,
+      close: close == const $CopyWithPlaceholder()
+          ? _value.close
           // ignore: cast_nullable_to_non_nullable
-          : c as Decimal,
-      v: v == const $CopyWithPlaceholder()
-          ? _value.v
+          : close as Object,
+      volume: volume == const $CopyWithPlaceholder()
+          ? _value.volume
           // ignore: cast_nullable_to_non_nullable
-          : v as Decimal,
-      vc: vc == const $CopyWithPlaceholder()
-          ? _value.vc
+          : volume as Object,
+      turnover: turnover == const $CopyWithPlaceholder()
+          ? _value.turnover
           // ignore: cast_nullable_to_non_nullable
-          : vc as Decimal?,
-      vcq: vcq == const $CopyWithPlaceholder()
-          ? _value.vcq
+          : turnover as Object?,
+      tradeCount: tradeCount == const $CopyWithPlaceholder()
+          ? _value.tradeCount
           // ignore: cast_nullable_to_non_nullable
-          : vcq as Decimal?,
-      confirm: confirm == const $CopyWithPlaceholder()
-          ? _value.confirm
+          : tradeCount as int?,
+      confirmed: confirmed == const $CopyWithPlaceholder()
+          ? _value.confirmed
           // ignore: cast_nullable_to_non_nullable
-          : confirm as String,
+          : confirmed as bool,
     );
   }
 }
@@ -142,49 +142,3 @@ extension $CandleModelCopyWith on CandleModel {
   // ignore: library_private_types_in_public_api
   _$CandleModelCWProxy get copyWith => _$CandleModelCWProxyImpl(this);
 }
-
-// **************************************************************************
-// JsonSerializableGenerator
-// **************************************************************************
-
-CandleModel _$CandleModelFromJson(Map<String, dynamic> json) => CandleModel(
-      ts: (json['ts'] as num).toInt(),
-      o: const DecimalConverter().fromJson(json['o']),
-      h: const DecimalConverter().fromJson(json['h']),
-      l: const DecimalConverter().fromJson(json['l']),
-      c: const DecimalConverter().fromJson(json['c']),
-      v: const DecimalConverter().fromJson(json['v']),
-      vc: const DecimalConverter().fromJson(json['vc']),
-      vcq: const DecimalConverter().fromJson(json['vcq']),
-      confirm: json['confirm'] as String? ?? '1',
-    );
-
-Map<String, dynamic> _$CandleModelToJson(CandleModel instance) =>
-    <String, dynamic>{
-      'ts': instance.ts,
-      if (const DecimalConverter().toJson(instance.o) case final value?)
-        'o': value,
-      if (const DecimalConverter().toJson(instance.h) case final value?)
-        'h': value,
-      if (const DecimalConverter().toJson(instance.l) case final value?)
-        'l': value,
-      if (const DecimalConverter().toJson(instance.c) case final value?)
-        'c': value,
-      if (const DecimalConverter().toJson(instance.v) case final value?)
-        'v': value,
-      if (_$JsonConverterToJson<dynamic, Decimal>(
-              instance.vc, const DecimalConverter().toJson)
-          case final value?)
-        'vc': value,
-      if (_$JsonConverterToJson<dynamic, Decimal>(
-              instance.vcq, const DecimalConverter().toJson)
-          case final value?)
-        'vcq': value,
-      'confirm': instance.confirm,
-    };
-
-Json? _$JsonConverterToJson<Json, Value>(
-  Value? value,
-  Json? Function(Value value) toJson,
-) =>
-    value == null ? null : toJson(value);

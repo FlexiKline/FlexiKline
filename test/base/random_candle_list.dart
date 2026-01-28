@@ -67,12 +67,12 @@ Future<List<CandleModel>> genRandomCandleList({
     if (h < l) [h, l] = [l, h];
     v = genVal(v, rangeVol);
     m = CandleModel(
-      ts: dateTime.add(Duration(milliseconds: flag * i * timeBar.milliseconds)).millisecondsSinceEpoch,
-      h: h.d,
-      o: o.d,
-      c: c.d,
-      l: l.d,
-      v: v.d,
+      timestamp: dateTime.add(Duration(milliseconds: flag * i * timeBar.milliseconds)).millisecondsSinceEpoch,
+      high: h.d,
+      open: o.d,
+      close: c.d,
+      low: l.d,
+      volume: v.d,
     );
     if (isHistory) {
       list.add(m);

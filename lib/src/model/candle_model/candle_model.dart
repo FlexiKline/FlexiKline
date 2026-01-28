@@ -13,151 +13,146 @@
 // limitations under the License.
 
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:decimal/decimal.dart';
-import 'package:flexi_formatter/date_time.dart';
 
-import '../../constant.dart';
-import '../../extension/export.dart';
-import '../../framework/serializers.dart';
-import '../../utils/export.dart';
-import '../bag_num.dart';
+import '../../extension/collections_ext.dart' show FlexiIterableExt, FlexiKlineListExt;
+import '../../utils/convert_util.dart' show parseInt;
+import '../../utils/export.dart' show parseBool;
+import '../flexi_candle_model.dart' show ICandleModel, FlexiCandleModel;
 
-part 'candle_helper.dart';
 part 'candle_model.g.dart';
 
+/// FlexiKline 提供的 K 线参考模型。
+///
+/// 本类仅为参考实现，并非必须使用。你可以在自己的业务模型上实现 [ICandleModel]，
+/// 达到与 [CandleModel] 相同的效果，从而减少在 FlexiKline 内部的转换操作，
+/// 直接使用自有模型参与计算与渲染。
 @CopyWith()
-@FlexiModelSerializable
-class CandleModel implements Comparable<CandleModel> {
+class CandleModel implements ICandleModel, Comparable<ICandleModel> {
   CandleModel({
-    required this.ts,
-    required this.o,
-    required this.h,
-    required this.l,
-    required this.c,
-    required this.v,
-    this.vc,
-    this.vcq,
-    this.confirm = '1',
+    required this.timestamp,
+    required this.open,
+    required this.high,
+    required this.low,
+    required this.close,
+    required this.volume,
+    this.turnover,
+    this.tradeCount,
+    this.confirmed = true,
   });
 
-  /// 开始时间，Unix时间戳的毫秒数格式，如 1597026383085
-  final int ts;
+  /// 时间戳（毫秒）
+  ///
+  /// K 线的开始时间，Unix 时间戳格式。
+  @override
+  final int timestamp;
 
-  /// 开盘价格
-  final Decimal o;
+  /// 开盘价
+  @override
+  final Object open;
 
-  /// 最高价格
-  final Decimal h;
+  /// 最高价
+  @override
+  final Object high;
 
-  ///最低价格
-  final Decimal l;
+  /// 最低价
+  @override
+  final Object low;
 
-  /// 收盘价格
-  final Decimal c;
+  /// 收盘价
+  @override
+  final Object close;
 
-  /// 交易量，以张为单位: 如果是衍生品合约，数值为合约的张数。如果是币币/币币杠杆，数值为交易货币的数量。
-  final Decimal v;
+  /// 成交量
+  ///
+  /// 以基础货币/股数计量的交易数量。
+  @override
+  final Object volume;
 
-  /// 交易量(成交额)，以币为单位: 如果是衍生品合约，数值为交易货币的数量。如果是币币/币币杠杆，数值为计价货币的数量。
-  Decimal? vc;
+  /// 成交额 - 可选
+  ///
+  /// 以计价货币计量的交易金额。
+  /// 股票市场称为"成交额"，加密货币称为 quoteVolume。
+  @override
+  final Object? turnover;
 
-  ///交易量(成交额)，以计价货币为单位: 如 BTC-USDT和BTC-USDT-SWAP，单位均是USDT。BTC-USD-SWAP单位是USD。
-  Decimal? vcq;
+  /// 成交笔数 - 可选
+  ///
+  /// 该 K 线周期内的交易次数。
+  @override
+  final int? tradeCount;
 
-  /// K线状态:  0：K线未完结  1：K线已完结
-  String confirm;
-
-  CalculateData? _calcuData;
-
-  CalculateData get calcuData => _calcuData!;
+  /// K 线是否已完结
+  ///
+  /// - true: K 线已完结（历史数据）
+  /// - false: K 线未完结（实时更新中）
+  @override
+  final bool confirmed;
 
   @override
-  int compareTo(CandleModel other) {
-    return other.ts - ts;
+  int compareTo(ICandleModel other) {
+    return other.timestamp - timestamp;
   }
 
-  static CandleModel? fromList(List<dynamic> data) {
-    if (data.isEmpty || data.length < 6) return null;
-    final ts = parseInt(data.getItem(0));
-    if (ts == null) return null;
-    final o = parseDecimal(data.getItem(1));
-    if (o == null) return null;
-    final h = parseDecimal(data.getItem(2));
-    if (h == null) return null;
-    final l = parseDecimal(data.getItem(3));
-    if (l == null) return null;
-    final c = parseDecimal(data.getItem(4));
-    if (c == null) return null;
-    final v = parseDecimal(data.getItem(5));
-    if (v == null) return null;
+  Map<String, dynamic> toJson() {
+    return {
+      'timestamp': timestamp,
+      'open': open,
+      'high': high,
+      'low': low,
+      'close': close,
+      'volume': volume,
+      if (turnover != null) 'turnover': turnover,
+      if (tradeCount != null) 'tradeCount': tradeCount,
+      'confirmed': confirmed,
+    };
+  }
+
+  factory CandleModel.fromJson(Map<String, dynamic> json) {
     return CandleModel(
-      ts: ts,
-      o: o,
-      h: h,
-      l: l,
-      c: c,
-      v: v,
-      vc: parseDecimal(data.getItem(6)),
-      vcq: parseDecimal(data.getItem(7)),
-      confirm: data.getItem(8).toString(),
+      timestamp: json['timestamp'],
+      open: json['open'],
+      high: json['high'],
+      low: json['low'],
+      close: json['close'],
+      volume: json['volume'],
+      turnover: json['turnover'],
+      tradeCount: json['tradeCount'],
+      confirmed: json['confirmed'],
+    );
+  }
+
+  factory CandleModel.fromFlexiCandleModel(FlexiCandleModel model) {
+    return CandleModel(
+      timestamp: model.ts,
+      open: model.open.toDecimal(),
+      high: model.high.toDecimal(),
+      low: model.low.toDecimal(),
+      close: model.close.toDecimal(),
+      volume: model.vol.toDecimal(),
+      turnover: model.turnover?.toDecimal(),
+      tradeCount: model.tradeCount,
+      confirmed: model.confirmed,
+    );
+  }
+
+  factory CandleModel.fromList(List<dynamic> data) {
+    assert(data.length >= 6, 'data length must be greater than 6');
+    final cfd = data.getItem(8);
+    return CandleModel(
+      timestamp: int.parse(data[0]),
+      open: data[1],
+      high: data[2],
+      low: data[3],
+      close: data[4],
+      volume: data[5],
+      turnover: data.getItem(6),
+      tradeCount: parseInt(data.getItem(7)),
+      confirmed: parseBool(cfd) ?? cfd == '1',
     );
   }
 
   static List<CandleModel> fromDataList(List<dynamic>? dataList) {
     if (dataList == null || dataList.isEmpty) return [];
-    return dataList.mapNonNullList((list) => fromList(list)).toList();
-  }
-
-  factory CandleModel.fromJson(Map<String, dynamic> json) => _$CandleModelFromJson(json);
-
-  Map<String, dynamic> toJson() => _$CandleModelToJson(this);
-
-  BagNum? _open;
-  BagNum get open => _open ??= BagNum.fromDecimal(o);
-  BagNum? _high;
-  BagNum get high => _high ??= BagNum.fromDecimal(h);
-  BagNum? _low;
-  BagNum get low => _low ??= BagNum.fromDecimal(l);
-  BagNum? _close;
-  BagNum get close => _close ??= BagNum.fromDecimal(c);
-  BagNum? _vol;
-  BagNum get vol => _vol ??= BagNum.fromDecimal(v);
-  BagNum? _volCcy;
-  BagNum? get volCcy {
-    if (vc != null) return _volCcy ??= BagNum.fromDecimal(vc!);
-    return null;
-  }
-
-  BagNum? _volCcyQuote;
-  BagNum? get volCcyQuote {
-    if (vcq != null) return _volCcyQuote ??= BagNum.fromDecimal(vcq!);
-    return null;
-  }
-
-  void initBasicData(
-    ComputeMode mode,
-    int indicatorCount, {
-    bool reset = false,
-  }) {
-    if (reset || _open == null || _high == null || _low == null || _close == null || _vol == null) {
-      if (mode == ComputeMode.fast) {
-        _open = BagNum.fromNum(o.toDouble());
-        _high = BagNum.fromNum(h.toDouble());
-        _low = BagNum.fromNum(l.toDouble());
-        _close = BagNum.fromNum(c.toDouble());
-        _vol = BagNum.fromNum(v.toDouble());
-        _volCcy = vc != null ? BagNum.fromNum(vc!.toDouble()) : null;
-        _volCcyQuote = vcq != null ? BagNum.fromNum(vcq!.toDouble()) : null;
-      } else {
-        _open = BagNum.fromDecimal(o);
-        _high = BagNum.fromDecimal(h);
-        _low = BagNum.fromDecimal(l);
-        _close = BagNum.fromDecimal(c);
-        _vol = BagNum.fromDecimal(v);
-        _volCcy = vc != null ? BagNum.fromDecimal(vc!) : null;
-        _volCcyQuote = vcq != null ? BagNum.fromDecimal(vcq!) : null;
-      }
-    }
-    _calcuData = CalculateData.init(indicatorCount);
+    return dataList.mapNonNullList((list) => CandleModel.fromList(list)).toList();
   }
 }

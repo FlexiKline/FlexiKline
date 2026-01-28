@@ -31,5 +31,5 @@ class TooltipInfo {
   final TextStyle? labelStyle;
   final String value;
   final TextStyle? valueStyle;
-  final int riseOrFall;
+  final num riseOrFall;
 }

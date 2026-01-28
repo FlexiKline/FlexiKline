@@ -28,7 +28,7 @@ abstract class BaseData with KlineLog {
   BaseData(
     CandleReq req,
     this.indicatorCount, {
-    List<CandleModel> list = const [],
+    List<FlexiCandleModel> list = const [],
     this.computeMode = ComputeMode.fast,
     ILogger? logger,
   })  : _req = req,
@@ -56,8 +56,8 @@ abstract class BaseData with KlineLog {
   CandleReq _req;
   CandleReq get req => _req;
 
-  List<CandleModel> _list;
-  List<CandleModel> get list => _list;
+  List<FlexiCandleModel> _list;
+  List<FlexiCandleModel> get list => _list;
   int get length => _list.length;
   bool get isEmpty => _list.isEmpty;
   bool get isNotEmpty => _list.isNotEmpty;
@@ -86,5 +86,5 @@ abstract class BaseData with KlineLog {
   CandleReq updateState({RequestState state = RequestState.none});
 
   /// 未合并的数据
-  final List<List<CandleModel>> _waitingData = List.empty(growable: true);
+  final List<List<ICandleModel>> _waitingData = List.empty(growable: true);
 }

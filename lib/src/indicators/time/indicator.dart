@@ -108,7 +108,7 @@ class TimePaintObject<T extends TimeIndicator> extends TimeBasePaintObject<T> {
     }
   }
 
-  String formatDateTime(CandleModel model, ITimeBar timeBar) {
+  String formatDateTime(FlexiCandleModel model, ITimeBar timeBar) {
     if (indicator.tickFormatter != null) {
       return indicator.tickFormatter!.call(model.dateTime, timeBar);
     }
@@ -141,7 +141,7 @@ class TimePaintObject<T extends TimeIndicator> extends TimeBasePaintObject<T> {
   @override
   Size? paintTips(
     Canvas canvas, {
-    CandleModel? model,
+    FlexiCandleModel? model,
     Offset? offset,
     Rect? tipsRect,
   }) {

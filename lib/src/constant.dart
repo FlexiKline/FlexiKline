@@ -146,7 +146,7 @@ final class FlexiTimeBar implements ITimeBar {
   String toString() => '$bar:$milliseconds';
 }
 
-const invalidTimeBar = FlexiTimeBar('', 0, TimeUnit.microsecond);
+const invalidTimeBar = FlexiTimeBar('', 0, TimeUnit.millisecond);
 
 /// 内置: 时间粒度，默认值1m
 /// 如 [1m/3m/5m/15m/30m/1H/2H/4H]

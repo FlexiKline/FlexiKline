@@ -280,7 +280,7 @@ abstract interface class IDrawContext implements IStorage, ILogger {
   double get candleWidthHalf;
 
   /// 将dx转换为蜡烛数据.
-  CandleModel? dxToCandle(double dx);
+  FlexiCandleModel? dxToCandle(double dx);
 
   /// 将[dx]精确转换时间戳
   int? dxToTimestamp(double dx);

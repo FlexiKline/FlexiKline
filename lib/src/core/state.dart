@@ -127,7 +127,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   double get maxPaintWidth => curKlineData.length * candleActualWidth;
 
   @override
-  CandleModel? dxToCandle(double dx) {
+  FlexiCandleModel? dxToCandle(double dx) {
     final index = dxToIndex(dx);
     return curKlineData.get(index);
   }
@@ -346,7 +346,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   /// 更新[list]到[request]请求指定的[KlineData]中
   Future<void> updateKlineData(
     CandleReq request,
-    List<CandleModel> list, {
+    List<ICandleModel> list, {
     bool reset = false,
   }) async {
     // 数据为空, 无需要更新.
@@ -408,7 +408,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   /// 2. 对于实时数据更新, 会仅计算[newList]部分.
   Future<void> _startPrecomputeKlineData(
     KlineData data, {
-    List<CandleModel> newList = const [],
+    List<ICandleModel> newList = const [],
     bool reset = false,
   }) async {
     if (!reset && newList.isEmpty) {

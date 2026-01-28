@@ -43,7 +43,7 @@ mixin CandleReqData on BaseData {
       return req.copyWith(after: null, before: null);
     }
     final model = list.secondWhereOrNull(
-      (m) => m.calcuData.dataList.hasValidData,
+      (m) => m.hasValidData,
     );
     return req.copyWith(
       after: null,

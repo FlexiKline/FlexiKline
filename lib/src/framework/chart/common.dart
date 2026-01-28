@@ -286,7 +286,7 @@ abstract interface class IPaintObject {
   /// 绘制顶部tips信息
   Size? paintTips(
     Canvas canvas, {
-    CandleModel? model,
+    FlexiCandleModel? model,
     Offset? offset,
     Rect? tipsRect,
   });

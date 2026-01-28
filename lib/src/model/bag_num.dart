@@ -17,6 +17,16 @@ import 'dart:math' as math;
 import 'package:decimal/decimal.dart';
 import 'package:flexi_formatter/flexi_formatter.dart';
 
+import '../constant.dart';
+import 'minmax.dart';
+
+extension ListBagNumExt on List<BagNum?> {
+  MinMax? get minmax {
+    if (isEmpty) return null;
+    return MinMax.getMinMaxByList(this);
+  }
+}
+
 extension NumBagExt on num {
   BagNum toBagNum() => BagNum.fromNum(this);
 
@@ -56,6 +66,39 @@ extension type BagNum._(Object _value) {
   factory BagNum.fromNum(num value) => BagNum._(value);
   factory BagNum.fromInt(int value) => BagNum._(value);
   factory BagNum.fromBigInt(BigInt value) => BagNum._(value.toDecimal());
+
+  /// 从任意 Object 转换为 BagNum（根据计算模式）
+  ///
+  /// 支持类型：num | Decimal | String | BigInt
+  /// [mode] 计算模式：fast 使用 double，accurate 使用 Decimal
+  static BagNum fromAny(Object value, ComputeMode mode) {
+    final isFastMode = mode == ComputeMode.fast;
+    return switch (value) {
+      final num v => isFastMode ? BagNum._(v) : BagNum._(v.toDecimal()),
+      final Decimal v => isFastMode ? BagNum._(v.toDouble()) : BagNum._(v),
+      final String v => isFastMode ? BagNum._(double.parse(v)) : BagNum._(Decimal.parse(v)),
+      final BigInt v => isFastMode ? BagNum._(v.toDouble()) : BagNum._(v.toDecimal()),
+      _ => throw BagNumException('Unsupported type: ${value.runtimeType}'),
+    };
+  }
+
+  static BagNum? fromAnyOrNull(Object? value, ComputeMode mode) {
+    if (value == null) return null;
+    return fromAny(value, mode);
+  }
+
+  ComputeMode get mode {
+    if (_value is num) return ComputeMode.fast;
+    if (_value is Decimal) return ComputeMode.accurate;
+    throw const BagNumException('BagNum mode Type not match!');
+  }
+
+  BagNum reset(ComputeMode mode) {
+    return switch (mode) {
+      ComputeMode.fast => BagNum._(toDouble()),
+      ComputeMode.accurate => BagNum._(toDecimal()),
+    };
+  }
 
   Decimal toDecimal() {
     if (_value is Decimal) return _value;
@@ -340,6 +383,27 @@ extension type BagNum._(Object _value) {
       ));
     }
     throw const BagNumException('BagNum divDecimal Type not match!');
+  }
+
+  /// 除以BagNum, 如果value为0, 则返回def, 否则返回this / value
+  /// [def] 默认值
+  BagNum divSafe(BagNum value, [BagNum? def]) {
+    if (value.isZero) return def ?? BagNum.zero;
+    return div(value);
+  }
+
+  /// 除以Num, 如果value为0, 则返回def, 否则返回this / value
+  /// [def] 默认值
+  BagNum divSafeNum(num value, [num? def]) {
+    if (value == 0) return def != null ? BagNum.fromNum(def) : BagNum.zero;
+    return divNum(value);
+  }
+
+  /// 除以Decimal, 如果value为0, 则返回def, 否则返回this / value
+  /// [def] 默认值
+  BagNum divSafeDecimal(Decimal value, [Decimal? def]) {
+    if (value == Decimal.zero) return def != null ? BagNum.fromDecimal(def) : BagNum.zero;
+    return divDecimal(value);
   }
 
   /// 取余BagNum

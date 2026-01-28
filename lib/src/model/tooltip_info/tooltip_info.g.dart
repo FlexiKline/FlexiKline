@@ -15,7 +15,7 @@ abstract class _$TooltipInfoCWProxy {
 
   TooltipInfo valueStyle(TextStyle? valueStyle);
 
-  TooltipInfo riseOrFall(int riseOrFall);
+  TooltipInfo riseOrFall(num riseOrFall);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `TooltipInfo(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -28,7 +28,7 @@ abstract class _$TooltipInfoCWProxy {
     TextStyle? labelStyle,
     String value,
     TextStyle? valueStyle,
-    int riseOrFall,
+    num riseOrFall,
   });
 }
 
@@ -51,7 +51,7 @@ class _$TooltipInfoCWProxyImpl implements _$TooltipInfoCWProxy {
   TooltipInfo valueStyle(TextStyle? valueStyle) => this(valueStyle: valueStyle);
 
   @override
-  TooltipInfo riseOrFall(int riseOrFall) => this(riseOrFall: riseOrFall);
+  TooltipInfo riseOrFall(num riseOrFall) => this(riseOrFall: riseOrFall);
 
   @override
 
@@ -88,7 +88,7 @@ class _$TooltipInfoCWProxyImpl implements _$TooltipInfoCWProxy {
       riseOrFall: riseOrFall == const $CopyWithPlaceholder()
           ? _value.riseOrFall
           // ignore: cast_nullable_to_non_nullable
-          : riseOrFall as int,
+          : riseOrFall as num,
     );
   }
 }

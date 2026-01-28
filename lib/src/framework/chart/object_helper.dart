@@ -258,12 +258,12 @@ mixin PaintObjectDataInitMixin on IndicatorObject implements IPaintDataInit {
     return dxPaintOffset / candleActualWidth;
   }
 
-  CandleModel? dxToCandle(double dx) {
+  FlexiCandleModel? dxToCandle(double dx) {
     final index = dxToIndex(dx).toInt();
     return klineData.get(index);
   }
 
-  CandleModel? offsetToCandle(Offset? offset) {
+  FlexiCandleModel? offsetToCandle(Offset? offset) {
     if (offset != null) return dxToCandle(offset.dx);
     return null;
   }
@@ -407,7 +407,7 @@ mixin PaintCandleHelperMixin<T extends Indicator> on PaintObject<T> {
   /// [chartStyle]为蜡烛柱的样式, 支持: ohlcChart, upHollow, downHollow
   void paintCandleBar(
     Canvas canvas,
-    CandleModel m, {
+    FlexiCandleModel m, {
     required double dx,
     double? high,
     double? low,
@@ -494,7 +494,7 @@ mixin PaintCandleHelperMixin<T extends Indicator> on PaintObject<T> {
     startOffset ??= startCandleDx - candleWidthHalf;
 
     final points = <Offset>[];
-    CandleModel m;
+    FlexiCandleModel m;
     for (var i = start; i < end; i++) {
       m = klineData[i];
       points.add(Offset(

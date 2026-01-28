@@ -269,7 +269,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
     final hasEnough = paintDxOffset > 0;
     BagNum maxHigh = klineData[start].high;
     BagNum minLow = klineData[start].low;
-    CandleModel m;
+    FlexiCandleModel m;
     for (var i = start; i < end; i++) {
       m = klineData[i];
       final dx = offset - (i - start) * candleActualWidth;
@@ -678,7 +678,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
   @override
   Size? paintTips(
     Canvas canvas, {
-    CandleModel? model,
+    FlexiCandleModel? model,
     Offset? offset,
     Rect? tipsRect,
   }) {

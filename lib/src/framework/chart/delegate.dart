@@ -98,7 +98,7 @@ extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
     paintExtraAboveChart(canvas, size);
   }
 
-  void doOnCross(Canvas canvas, Offset offset, {CandleModel? model}) {
+  void doOnCross(Canvas canvas, Offset offset, {FlexiCandleModel? model}) {
     onCross(canvas, offset);
 
     paintTips(
@@ -257,7 +257,7 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
     }
   }
 
-  void doOnCross(Canvas canvas, Offset offset, {CandleModel? model}) {
+  void doOnCross(Canvas canvas, Offset offset, {FlexiCandleModel? model}) {
     if (isFirstDrawTipsArea) {
       if (isCrossing) {
         final tipsHeight = doPaintTips(canvas, offset: offset, model: model);
@@ -283,7 +283,7 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
     }
   }
 
-  double doPaintTips(Canvas canvas, {CandleModel? model, Offset? offset}) {
+  double doPaintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset}) {
     // 每次绘制前, 重置Tips区域大小为0
     double height = 0;
     for (final object in paintableChildren) {

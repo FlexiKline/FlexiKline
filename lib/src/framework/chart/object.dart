@@ -277,12 +277,12 @@ final class MainPaintObject<T extends MainPaintObjectIndicator> extends PaintObj
   void paintChart(Canvas canvas, Size size) {}
 
   @override
-  void onCross(Canvas canvas, Offset offset, {CandleModel? model}) {}
+  void onCross(Canvas canvas, Offset offset, {FlexiCandleModel? model}) {}
 
   @override
   Size? paintTips(
     Canvas canvas, {
-    CandleModel? model,
+    FlexiCandleModel? model,
     Offset? offset,
     Rect? tipsRect,
   }) {

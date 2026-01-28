@@ -142,7 +142,7 @@ final class IndicatorPaintObjectManager with KlineLog {
   int get indicatorCount => _indicatorDataIndexs.length;
 
   /// 初始化主区/副区指标
-  /// 1. 确认指标数据在[CandleModel]的[CalculateData]中的index.
+  /// 1. 确认指标数据在[FlexiCandleModel]的[slots]中的index.
   /// 2. 初始化主区绘制对象, 初始化副区绘制对象队列
   /// 3. 从配置中加载缓存的主/副区指标.
   void init(IPaintContext context) {

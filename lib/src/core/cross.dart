@@ -22,8 +22,8 @@ part of 'core.dart';
 /// 1. 如果返回null, 则尝试用 [OnCrossI18nTooltipLabels] 继续定制.
 /// 2. 如果返回const [], 则不会再展示Tooltip信息.
 typedef OnCrossCustomTooltipCallback = List<TooltipInfo>? Function(
-  CandleModel? current, {
-  CandleModel? prev,
+  FlexiCandleModel? current, {
+  FlexiCandleModel? prev,
 });
 
 /// 定制TooltipLabels国际化
@@ -159,7 +159,7 @@ mixin CrossBinding on KlineBindingBase, SettingBinding implements ICross {
         return;
       }
 
-      CandleModel? model;
+      FlexiCandleModel? model;
       if (crossConfig.showLatestTipsInBlank) {
         model = dxToCandle(offset.dx);
         // 如果当前model为空, 则根据offset.dx计算当前model是最新的, 还是最后的.
@@ -200,7 +200,7 @@ mixin CrossBinding on KlineBindingBase, SettingBinding implements ICross {
   }
 
   /// 绘制 Tooltip
-  void paintTooltip(Canvas canvas, Offset offset, {CandleModel? model}) {
+  void paintTooltip(Canvas canvas, Offset offset, {FlexiCandleModel? model}) {
     final tooltipConfig = crossConfig.tooltipConfig;
     if (!tooltipConfig.show) return;
     final tooltipTextStyle = tooltipConfig.style;
@@ -372,8 +372,8 @@ mixin CrossBinding on KlineBindingBase, SettingBinding implements ICross {
   /// 根据TooltipLabels生成TooltipInfoList.
   List<TooltipInfo> genTooltipInfoListByLabels(
     Map<TooltipLabel, String> tooltipLabels, {
-    required CandleModel model,
-    CandleModel? pre,
+    required FlexiCandleModel model,
+    FlexiCandleModel? pre,
   }) {
     if (tooltipLabels.isEmpty) return const [];
     final p = curKlineData.precision;
@@ -381,44 +381,44 @@ mixin CrossBinding on KlineBindingBase, SettingBinding implements ICross {
     final list = <TooltipInfo>[];
     tooltipLabels.forEach((key, label) {
       String? value;
-      int riseOrFall = 0;
+      num riseOrFall = 0;
       switch (key) {
         case TooltipLabel.time:
           final timeBar = curKlineData.timeBar;
           value = model.formatDateTime(timeBar);
           break;
         case TooltipLabel.open:
-          value = formatPrice(model.o, precision: p, cutInvalidZero: false);
+          value = formatPrice(model.open.toDecimal(), precision: p, cutInvalidZero: false);
           break;
         case TooltipLabel.high:
-          value = formatPrice(model.h, precision: p, cutInvalidZero: false);
+          value = formatPrice(model.high.toDecimal(), precision: p, cutInvalidZero: false);
           break;
         case TooltipLabel.low:
-          value = formatPrice(model.l, precision: p, cutInvalidZero: false);
+          value = formatPrice(model.low.toDecimal(), precision: p, cutInvalidZero: false);
           break;
         case TooltipLabel.close:
-          value = formatPrice(model.c, precision: p, cutInvalidZero: false);
+          value = formatPrice(model.close.toDecimal(), precision: p, cutInvalidZero: false);
           break;
         case TooltipLabel.chg:
-          value = formatPrice(model.change, precision: p, cutInvalidZero: false);
+          value = formatPrice(model.change.toDecimal(), precision: p, cutInvalidZero: false);
           break;
         case TooltipLabel.chgRate:
-          value = formatPercentage(model.changeRate.d, precision: 2);
+          value = formatPercentage(model.changeRate.toDecimal(), precision: 2);
           riseOrFall = model.change.signum;
           break;
         case TooltipLabel.range:
           if (pre != null) {
-            value = formatPercentage(model.rangeRate(pre).d, precision: 2);
+            value = formatPercentage(model.rangeRate(pre).toDecimal(), precision: 2);
           } else {
-            value = formatPrice(model.range, precision: p, cutInvalidZero: false);
+            value = formatPrice(model.range.toDecimal(), precision: p, cutInvalidZero: false);
           }
           break;
         case TooltipLabel.amount:
-          value = formatAmount(model.v, precision: 2);
+          value = formatAmount(model.vol.toDecimal(), precision: 2);
           break;
         case TooltipLabel.turnover:
-          if (model.vc != null) {
-            value = formatAmount(model.vc, precision: 2);
+          if (model.turnover != null) {
+            value = formatAmount(model.turnover!.toDecimal(), precision: 2);
           }
           break;
       }

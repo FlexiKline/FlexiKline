@@ -15,17 +15,17 @@
 part of 'kline_data.dart';
 
 mixin CandleListData on BaseData {
-  CandleModel? get latest => list.firstOrNull;
+  FlexiCandleModel? get latest => list.firstOrNull;
 
   Range get allRange => Range(0, list.length);
 
   bool checkIndex(int index) => index >= 0 && index < length;
 
   /// 获取index位置的蜡烛数据.
-  CandleModel operator [](int index) => _list[index];
+  FlexiCandleModel operator [](int index) => _list[index];
 
   /// 获取index位置的蜡烛数据.
-  CandleModel? get(int? index) => index != null && checkIndex(index) ? _list[index] : null;
+  FlexiCandleModel? get(int? index) => index != null && checkIndex(index) ? _list[index] : null;
 
   int? tsToIndex(int ts) {
     final index = list.indexWhere((m) => m.ts == ts);
@@ -44,7 +44,7 @@ mixin CandleListData on BaseData {
     bool reset = false,
   }) {
     for (int i = range.start; i < range.end; i++) {
-      _list[i].initBasicData(computeMode, indicatorCount, reset: reset);
+      _list[i].reset(computeMode, indicatorCount);
     }
   }
 
@@ -52,7 +52,7 @@ mixin CandleListData on BaseData {
   MinMax? calculateMinmax(int start, int end) {
     if (!checkStartAndEnd(start, end)) return null;
 
-    CandleModel m = list[end - 1];
+    FlexiCandleModel m = list[end - 1];
     BagNum maxHigh = m.high;
     BagNum minLow = m.low;
     for (int i = end - 2; i >= start; i--) {
@@ -63,18 +63,13 @@ mixin CandleListData on BaseData {
     return MinMax(max: maxHigh, min: minLow);
   }
 
-  Range? mergeCandleData(List<List<CandleModel>> data) {
+  Range? mergeCandleData(List<List<ICandleModel>> data) {
     if (data.isEmpty) return null;
     Range? result;
     for (final newList in data) {
       /// 合并[newList]到[data]中
       final range = mergeCandleList(newList);
       if (range != null) {
-        // 初始化[range]内的数据.
-        initBasicData(
-          range,
-          // reset: reset,
-        );
         result ??= range;
         result = result.merge(range);
       }
@@ -83,17 +78,19 @@ mixin CandleListData on BaseData {
     return result;
   }
 
-  /// 合并[list]和[newList]为一个新数组
-  /// 约定: [newList]和[list]都是按时间倒序排好的, 即最近/新的蜡烛数据以数组0开始依次存放.
+  /// 合并[list]和[candleList]为一个新数组
+  /// 约定: [candleList]和[list]都是按时间倒序排好的, 即最近/新的蜡烛数据以数组0开始依次存放.
   /// 去重: 如两个数组拼接过程中发现重复的, 要去掉[list]中重复的元素.
   /// return: 返回新列表中被更新的范围[start] ~ [end]
-  Range? mergeCandleList(List<CandleModel> newList) {
-    if (newList.isEmpty) {
-      logw('mergeCandleList newList is empty!');
+  Range? mergeCandleList(List<ICandleModel> candleList) {
+    if (candleList.isEmpty) {
+      logw('mergeCandleList candleList is empty!');
       return null;
     }
+
+    final newList = candleList.map((e) => e.toFlexiCandleModel(indicatorCount, computeMode));
     if (list.isEmpty) {
-      logw('mergeCandleList Use newList directly!');
+      logw('mergeCandleList Use candleList directly!');
       _list = List.of(newList);
       return Range(0, newList.length);
     }

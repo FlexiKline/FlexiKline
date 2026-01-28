@@ -51,7 +51,7 @@ class KlineData extends BaseData with CandleReqData, CandleListData, PaintDrawDa
   /// [subPaintObjects] 待计算的指标集合
   /// [reset] 是否重置; 如果有, 忽略之前的计算结果.
   Future<void> precomputeKlineData({
-    required List<CandleModel> newList,
+    required List<ICandleModel> newList,
     required Iterable<PaintObject> mainPaintObjects,
     required Iterable<PaintObject> subPaintObjects,
     bool reset = false,
