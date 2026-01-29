@@ -363,7 +363,7 @@ mixin DrawObjectMixin on DrawStateObject {
 
   /// 格式化价值刻度文本
   @protected
-  String formatValueTicksText(BagNum value, {int precision = 0}) {
+  String formatValueTicksText(FlexiNum value, {int precision = 0}) {
     return formatPrice(
       value.toDecimal(),
       precision: precision,
@@ -441,7 +441,7 @@ extension IDrawContextExt on IDrawContext {
           }
         }
       } else {
-        BagNum midLow, midHigh;
+        FlexiNum midLow, midHigh;
         if (candle.isLong) {
           midLow = candle.open;
           midHigh = candle.close;
@@ -449,7 +449,7 @@ extension IDrawContextExt on IDrawContext {
           midLow = candle.close;
           midHigh = candle.open;
         }
-        BagNum? result;
+        FlexiNum? result;
         if (value < midLow) {
           result = (midLow - value) > (value - low) ? low : midLow;
         } else if (value < midHigh) {

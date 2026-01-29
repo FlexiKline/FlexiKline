@@ -19,7 +19,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 import '../constant.dart';
 import '../extension/export.dart';
-import '../model/bag_num.dart';
+import '../model/flexi_num.dart';
 import '../utils/convert_util.dart';
 import 'chart/indicator.dart';
 import 'draw/overlay.dart';
@@ -820,17 +820,17 @@ class DecimalConverter implements JsonConverter<Decimal, dynamic> {
   }
 }
 
-class BagNumConverter implements JsonConverter<BagNum, dynamic> {
-  const BagNumConverter();
+class FlexiNumConverter implements JsonConverter<FlexiNum, dynamic> {
+  const FlexiNumConverter();
 
   @override
-  BagNum fromJson(dynamic json) {
+  FlexiNum fromJson(dynamic json) {
     final value = parseDecimal(json);
-    return value != null ? BagNum.fromDecimal(value) : BagNum.zero;
+    return value != null ? FlexiNum.fromDecimal(value) : FlexiNum.zero;
   }
 
   @override
-  String toJson(BagNum object) {
+  String toJson(FlexiNum object) {
     return convertDecimal(object.toDecimal());
   }
 }
@@ -894,7 +894,7 @@ const _basicConverterList = <JsonConverter>[
   StrutStyleConverter(),
   ColorConverter(),
   DecimalConverter(),
-  BagNumConverter(),
+  FlexiNumConverter(),
   FlexiChartTypeConverter(),
   FlexiChartBarStyleConverter(),
   FlexiChartLineStyleConverter(),

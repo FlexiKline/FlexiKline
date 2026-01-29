@@ -17,7 +17,7 @@ export 'candle_req/candle_req.dart';
 export 'tooltip_info/tooltip_info.dart';
 
 // 内置数据类型
-export 'bag_num.dart';
+export 'flexi_num.dart';
 export 'flexi_candle_model.dart';
 export 'gesture_data.dart';
 export 'minmax.dart';

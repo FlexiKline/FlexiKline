@@ -230,14 +230,14 @@ mixin PaintObjectDataInitMixin on IndicatorObject implements IPaintDataInit {
     return _dyFactor = chartRect.height / minMax.diffDivisor.toDouble();
   }
 
-  double valueToDy(BagNum value, {bool correct = true}) {
+  double valueToDy(FlexiNum value, {bool correct = true}) {
     if (correct) value = value.clamp(minMax.min, minMax.max);
     return chartRect.bottom - (value - minMax.min).toDouble() * dyFactor;
   }
 
-  BagNum? dyToValue(double dy, {bool check = true}) {
+  FlexiNum? dyToValue(double dy, {bool check = true}) {
     if (check && !drawableRect.includeDy(dy)) return null;
-    return minMax.max - ((dy - chartRect.top) / dyFactor).toBagNum();
+    return minMax.max - ((dy - chartRect.top) / dyFactor).toFlexiNum();
   }
 
   double? indexToDx(num index, {bool check = true}) {
@@ -268,11 +268,11 @@ mixin PaintObjectDataInitMixin on IndicatorObject implements IPaintDataInit {
     return null;
   }
 
-  double valueToDyOnCandle(BagNum value, {bool correct = false}) {
+  double valueToDyOnCandle(FlexiNum value, {bool correct = false}) {
     return _context.valueToDyOnCandle(value, correct: correct);
   }
 
-  BagNum? dyToValueOnCandle(double dy, {bool check = false}) {
+  FlexiNum? dyToValueOnCandle(double dy, {bool check = false}) {
     return _context.dyToValueOnCandle(dy, check: check);
   }
 }
@@ -325,7 +325,7 @@ mixin PaintYAxisTicksMixin<T extends Indicator> on PaintObject<T> {
 
   /// 如果要定制格式化刻度值. 在PaintObject中覆写此方法.
   @protected
-  String formatTicksValue(BagNum value, {required int precision}) {
+  String formatTicksValue(FlexiNum value, {required int precision}) {
     return formatPrice(
       value.toDecimal(),
       precision: precision,
@@ -364,7 +364,7 @@ mixin PaintYAxisTicksOnCrossMixin<T extends Indicator> on PaintObject<T> {
   }
 
   @protected
-  String formatTicksValueOnCross(BagNum value, {required int precision}) {
+  String formatTicksValueOnCross(FlexiNum value, {required int precision}) {
     return formatPrice(
       value.toDecimal(),
       precision: precision,

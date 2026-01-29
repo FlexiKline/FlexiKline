@@ -53,8 +53,8 @@ mixin CandleListData on BaseData {
     if (!checkStartAndEnd(start, end)) return null;
 
     FlexiCandleModel m = list[end - 1];
-    BagNum maxHigh = m.high;
-    BagNum minLow = m.low;
+    FlexiNum maxHigh = m.high;
+    FlexiNum minLow = m.low;
     for (int i = end - 2; i >= start; i--) {
       m = list[i];
       maxHigh = m.high > maxHigh ? m.high : maxHigh;

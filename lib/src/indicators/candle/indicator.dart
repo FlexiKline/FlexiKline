@@ -138,7 +138,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
   @override
   Color get shortColor => indicator.shortColor ?? theme.short;
 
-  BagNum? _maxHigh, _minLow;
+  FlexiNum? _maxHigh, _minLow;
 
   @override
   bool get hideIndicatorsWhenLineChart => indicator.hideIndicatorsWhenLineChart;
@@ -244,7 +244,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
 
   // onCross时, 格式化Y轴上的标记值.
   @override
-  String formatTicksValueOnCross(BagNum value, {required int precision}) {
+  String formatTicksValueOnCross(FlexiNum value, {required int precision}) {
     return formatPrice(
       value.toDecimal(),
       precision: klineData.precision,
@@ -267,8 +267,8 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
 
     Offset? maxHighOffset, minLowOffset;
     final hasEnough = paintDxOffset > 0;
-    BagNum maxHigh = klineData[start].high;
-    BagNum minLow = klineData[start].low;
+    FlexiNum maxHigh = klineData[start].high;
+    FlexiNum minLow = klineData[start].low;
     FlexiCandleModel m;
     for (var i = start; i < end; i++) {
       m = klineData[i];
@@ -319,11 +319,11 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
     }
 
     // 最后绘制在蜡烛图中的最大价钱标记
-    if (maxHighOffset != null && maxHigh > BagNum.zero) {
+    if (maxHighOffset != null && maxHigh > FlexiNum.zero) {
       paintPriceMark(canvas, maxHighOffset, maxHigh, indicator.high);
     }
     // 最后绘制在蜡烛图中的最小价钱标记
-    if (minLowOffset != null && minLow > BagNum.zero) {
+    if (minLowOffset != null && minLow > FlexiNum.zero) {
       paintPriceMark(canvas, minLowOffset, minLow, indicator.low);
     }
   }
@@ -332,7 +332,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
   void paintPriceMark(
     Canvas canvas,
     Offset offset,
-    BagNum val,
+    FlexiNum val,
     MarkConfig markConfig,
   ) {
     final flag = offset.dx > chartRectWidthHalf ? -1 : 1;

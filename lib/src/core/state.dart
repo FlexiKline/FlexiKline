@@ -163,22 +163,22 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   }
 
   @override
-  double valueToDy(BagNum value, {bool correct = false}) {
+  double valueToDy(FlexiNum value, {bool correct = false}) {
     return mainPaintObject.valueToDy(value, correct: correct);
   }
 
   @override
-  BagNum? dyToValue(double dy, {bool check = false}) {
+  FlexiNum? dyToValue(double dy, {bool check = false}) {
     return mainPaintObject.dyToValue(dy, check: check);
   }
 
   @override
-  double valueToDyOnCandle(BagNum value, {bool correct = false}) {
+  double valueToDyOnCandle(FlexiNum value, {bool correct = false}) {
     return candlePaintObject.valueToDy(value, correct: correct);
   }
 
   @override
-  BagNum? dyToValueOnCandle(double dy, {bool check = false}) {
+  FlexiNum? dyToValueOnCandle(double dy, {bool check = false}) {
     return candlePaintObject.dyToValue(dy, check: check);
   }
 

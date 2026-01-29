@@ -38,37 +38,37 @@ void main() {
   const b = 6789.12345;
   final aD = Decimal.parse('12345.6789');
   final bD = Decimal.parse('6789.12345');
-  final num1 = BagNum.fromNum(a);
-  final num2 = BagNum.fromNum(b);
-  final num1D = BagNum.fromDecimal(aD);
-  final num2D = BagNum.fromDecimal(bD);
+  final num1 = FlexiNum.fromNum(a);
+  final num2 = FlexiNum.fromNum(b);
+  final num1D = FlexiNum.fromDecimal(aD);
+  final num2D = FlexiNum.fromDecimal(bD);
 
-  group('BagNum +', () {
-    test('BagNum preheat', () {
-      // late BagNum num3;
+  group('FlexiNum +', () {
+    test('FlexiNum preheat', () {
+      // late FlexiNum num3;
       for (int i = 0; i < loop; i++) {
         num1 + num2;
         num1 + num2D;
         num1D + num2;
         num1D + num2D;
       }
-      logMsg('BagNum preheat =>');
+      logMsg('FlexiNum preheat =>');
     });
 
-    test('BagNum double + Decimal', () {
-      late BagNum num3;
+    test('FlexiNum double + Decimal', () {
+      late FlexiNum num3;
       for (int i = 0; i < loop; i++) {
         num3 = num1 + num2D;
       }
-      logMsg('BagNum double + Decimal =>$num3');
+      logMsg('FlexiNum double + Decimal =>$num3');
     });
 
-    test('BagNum Decimal + double', () {
-      late BagNum num3;
+    test('FlexiNum Decimal + double', () {
+      late FlexiNum num3;
       for (int i = 0; i < loop; i++) {
         num3 = num1D + num2;
       }
-      logMsg('BagNum Decimal + double =>$num3');
+      logMsg('FlexiNum Decimal + double =>$num3');
     });
 
     test('double operator +', () {
@@ -79,13 +79,13 @@ void main() {
       logMsg('double operator + =>$num3');
     });
 
-    test('BagNum double + double', () {
-      late BagNum num3;
+    test('FlexiNum double + double', () {
+      late FlexiNum num3;
       for (int i = 0; i < loop; i++) {
         num3 = num1 + num2;
       }
 
-      logMsg('BagNum double + double =>$num3');
+      logMsg('FlexiNum double + double =>$num3');
     });
 
     test('Decimal operator +', () {
@@ -96,41 +96,41 @@ void main() {
       logMsg('Decimal operator + =>$num3');
     });
 
-    test('BagNum Decimal + Decimal', () {
-      late BagNum num3;
+    test('FlexiNum Decimal + Decimal', () {
+      late FlexiNum num3;
       for (int i = 0; i < loop; i++) {
         num3 = num1D + num2D;
       }
-      logMsg('BagNum Decimal + Decimal =>$num3');
+      logMsg('FlexiNum Decimal + Decimal =>$num3');
     });
   });
 
-  group('BagNum -', () {
-    test('BagNum preheat', () {
-      // late BagNum num3;
+  group('FlexiNum -', () {
+    test('FlexiNum preheat', () {
+      // late FlexiNum num3;
       for (int i = 0; i < loop; i++) {
         num1 - num2;
         num1 - num2D;
         num1D - num2;
         num1D - num2D;
       }
-      logMsg('BagNum preheat =>');
+      logMsg('FlexiNum preheat =>');
     });
 
-    test('BagNum double - Decimal', () {
-      late BagNum num3;
+    test('FlexiNum double - Decimal', () {
+      late FlexiNum num3;
       for (int i = 0; i < loop; i++) {
         num3 = num1 - num2D;
       }
-      logMsg('BagNum double - Decimal =>$num3');
+      logMsg('FlexiNum double - Decimal =>$num3');
     });
 
-    test('BagNum Decimal - double', () {
-      late BagNum num3;
+    test('FlexiNum Decimal - double', () {
+      late FlexiNum num3;
       for (int i = 0; i < loop; i++) {
         num3 = num1D - num2;
       }
-      logMsg('BagNum Decimal - double =>$num3');
+      logMsg('FlexiNum Decimal - double =>$num3');
     });
 
     test('double operator -', () {
@@ -141,13 +141,13 @@ void main() {
       logMsg('double operator - =>$num3');
     });
 
-    test('BagNum double - double', () {
-      late BagNum num3;
+    test('FlexiNum double - double', () {
+      late FlexiNum num3;
       for (int i = 0; i < loop; i++) {
         num3 = num1 - num2;
       }
 
-      logMsg('BagNum double - double =>$num3');
+      logMsg('FlexiNum double - double =>$num3');
     });
 
     test('Decimal operator -', () {
@@ -158,41 +158,41 @@ void main() {
       logMsg('Decimal operator - =>$num3');
     });
 
-    test('BagNum Decimal - Decimal', () {
-      late BagNum num3;
+    test('FlexiNum Decimal - Decimal', () {
+      late FlexiNum num3;
       for (int i = 0; i < loop; i++) {
         num3 = num1D - num2D;
       }
-      logMsg('BagNum Decimal - Decimal =>$num3');
+      logMsg('FlexiNum Decimal - Decimal =>$num3');
     });
   });
 
-  group('BagNum *', () {
-    test('BagNum preheat', () {
-      // late BagNum num3;
+  group('FlexiNum *', () {
+    test('FlexiNum preheat', () {
+      // late FlexiNum num3;
       for (int i = 0; i < loop; i++) {
         num1 * num2;
         num1 * num2D;
         num1D * num2;
         num1D * num2D;
       }
-      logMsg('BagNum preheat =>');
+      logMsg('FlexiNum preheat =>');
     });
 
-    test('BagNum double * Decimal', () {
-      late BagNum num3;
+    test('FlexiNum double * Decimal', () {
+      late FlexiNum num3;
       for (int i = 0; i < loop; i++) {
         num3 = num1 * num2D;
       }
-      logMsg('BagNum double * Decimal =>$num3');
+      logMsg('FlexiNum double * Decimal =>$num3');
     });
 
-    test('BagNum Decimal * double', () {
-      late BagNum num3;
+    test('FlexiNum Decimal * double', () {
+      late FlexiNum num3;
       for (int i = 0; i < loop; i++) {
         num3 = num1D * num2;
       }
-      logMsg('BagNum Decimal * double =>$num3');
+      logMsg('FlexiNum Decimal * double =>$num3');
     });
 
     test('double operator *', () {
@@ -203,13 +203,13 @@ void main() {
       logMsg('double operator * =>$num3');
     });
 
-    test('BagNum double * double', () {
-      late BagNum num3;
+    test('FlexiNum double * double', () {
+      late FlexiNum num3;
       for (int i = 0; i < loop; i++) {
         num3 = num1 * num2;
       }
 
-      logMsg('BagNum double * double =>$num3');
+      logMsg('FlexiNum double * double =>$num3');
     });
 
     test('Decimal operator *', () {
@@ -220,41 +220,41 @@ void main() {
       logMsg('Decimal operator * =>$num3');
     });
 
-    test('BagNum Decimal * Decimal', () {
-      late BagNum num3;
+    test('FlexiNum Decimal * Decimal', () {
+      late FlexiNum num3;
       for (int i = 0; i < loop; i++) {
         num3 = num1D * num2D;
       }
-      logMsg('BagNum Decimal * Decimal =>$num3');
+      logMsg('FlexiNum Decimal * Decimal =>$num3');
     });
   });
 
-  group('BagNum /', () {
-    test('BagNum preheat', () {
-      // late BagNum num3;
+  group('FlexiNum /', () {
+    test('FlexiNum preheat', () {
+      // late FlexiNum num3;
       for (int i = 0; i < loop; i++) {
         num1 / num2;
         num1 / num2D;
         num1D / num2;
         num1D / num2D;
       }
-      logMsg('BagNum preheat =>');
+      logMsg('FlexiNum preheat =>');
     });
 
-    test('BagNum double / Decimal', () {
-      late BagNum num3;
+    test('FlexiNum double / Decimal', () {
+      late FlexiNum num3;
       for (int i = 0; i < loop; i++) {
         num3 = num1 / num2D;
       }
-      logMsg('BagNum double / Decimal =>$num3');
+      logMsg('FlexiNum double / Decimal =>$num3');
     });
 
-    test('BagNum Decimal / double', () {
-      late BagNum num3;
+    test('FlexiNum Decimal / double', () {
+      late FlexiNum num3;
       for (int i = 0; i < loop; i++) {
         num3 = num1D / num2;
       }
-      logMsg('BagNum Decimal / double =>${num3.doubleString()}');
+      logMsg('FlexiNum Decimal / double =>${num3.valueString()}');
     });
 
     test('double operator /', () {
@@ -266,13 +266,13 @@ void main() {
       logMsg('double operator / =>$num3');
     });
 
-    test('BagNum double / double', () {
-      late BagNum num3;
+    test('FlexiNum double / double', () {
+      late FlexiNum num3;
       for (int i = 0; i < loop; i++) {
         num3 = num1 / num2;
       }
 
-      logMsg('BagNum double / double =>$num3');
+      logMsg('FlexiNum double / double =>$num3');
     });
 
     test('Decimal operator /', () {
@@ -288,57 +288,57 @@ void main() {
       )}');
     });
 
-    test('BagNum Decimal / Decimal', () {
-      late BagNum num3;
+    test('FlexiNum Decimal / Decimal', () {
+      late FlexiNum num3;
       for (int i = 0; i < loop; i++) {
         num3 = num1D / num2D;
       }
-      logMsg('BagNum Decimal / Decimal =>${num3.doubleString()}');
+      logMsg('FlexiNum Decimal / Decimal =>${num3.valueString()}');
     });
   });
 
-  group('BagNum %', () {
-    test('BagNum num % num', () {
+  group('FlexiNum %', () {
+    test('FlexiNum num % num', () {
       logMsg('1 % 5 =>${1 % 5}');
-      BagNum num1 = BagNum.fromInt(1);
-      BagNum num2 = BagNum.fromInt(5);
+      FlexiNum num1 = FlexiNum.fromInt(1);
+      FlexiNum num2 = FlexiNum.fromInt(5);
       logMsg('num1 % num2 =>${num1 % num2}');
     });
 
-    test('BagNum decimal % decimal', () {
+    test('FlexiNum decimal % decimal', () {
       logMsg('1.d % 5.d =>${1.d % 5.d}');
-      BagNum num1 = BagNum.fromDecimal(1.d);
-      BagNum num2 = BagNum.fromDecimal(5.d);
+      FlexiNum num1 = FlexiNum.fromDecimal(1.d);
+      FlexiNum num2 = FlexiNum.fromDecimal(5.d);
       logMsg('num1 % num2 =>${num1 % num2}');
     });
 
-    test('BagNum num % decimal', () {
+    test('FlexiNum num % decimal', () {
       logMsg('1.d % 5.d =>${1.d % 5.d}');
-      BagNum num1 = BagNum.fromNum(1);
-      BagNum num2 = BagNum.fromDecimal(5.d);
+      FlexiNum num1 = FlexiNum.fromNum(1);
+      FlexiNum num2 = FlexiNum.fromDecimal(5.d);
       logMsg('num1 % num2 =>${num1 % num2}');
     });
 
-    test('BagNum decimal % num', () {
+    test('FlexiNum decimal % num', () {
       logMsg('1.d % 5.d =>${1.d % 5.d}');
-      BagNum num1 = BagNum.fromDecimal(1.d);
-      BagNum num2 = BagNum.fromInt(5);
+      FlexiNum num1 = FlexiNum.fromDecimal(1.d);
+      FlexiNum num2 = FlexiNum.fromInt(5);
       logMsg('num1 % num2 =>${num1 % num2}');
     });
 
-    test('BagNum remainderNum', () {
-      BagNum num1 = BagNum.fromNum(1);
+    test('FlexiNum remainderNum', () {
+      FlexiNum num1 = FlexiNum.fromNum(1);
       num num2 = 5;
       logMsg('num1.remainderNum(num2) =>${num1.remainderNum(num2)}');
-      num1 = BagNum.fromDecimal(1.d);
+      num1 = FlexiNum.fromDecimal(1.d);
       logMsg('num1.remainderNum(num2) =>${num1.remainderNum(num2)}');
     });
 
-    test('BagNum remainderDecimal', () {
-      BagNum num1 = BagNum.fromNum(1);
+    test('FlexiNum remainderDecimal', () {
+      FlexiNum num1 = FlexiNum.fromNum(1);
       Decimal num2 = 5.d;
       logMsg('num1.remainderDecimal(num2) =>${num1.remainderDecimal(num2)}');
-      num1 = BagNum.fromDecimal(1.d);
+      num1 = FlexiNum.fromDecimal(1.d);
       logMsg('num1.remainderDecimal(num2) =>${num1.remainderDecimal(num2)}');
     });
   });

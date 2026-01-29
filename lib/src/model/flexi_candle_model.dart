@@ -17,13 +17,13 @@ import 'package:flexi_formatter/flexi_formatter.dart';
 
 import '../constant.dart';
 import '../utils/convert_util.dart' show parseDecimal, parseDouble;
-import 'bag_num.dart';
+import 'flexi_num.dart';
 
 /// K 线蜡烛图数据接口
 ///
 /// 定义 K 线数据的标准字段，兼容股票、加密货币、外汇等市场。
 /// 价格和成交量字段支持 [String]、[num]、[Decimal] 类型，
-/// 框架会根据计算模式自动转换为 [BagNum]。
+/// 框架会根据计算模式自动转换为 [FlexiNum]。
 abstract interface class ICandleModel {
   /// 时间戳（毫秒）
   ///
@@ -145,12 +145,12 @@ int flexiCandleModelCompare(FlexiCandleModel a, FlexiCandleModel b) => b.ts - a.
 extension type FlexiCandleModel._(
     ({
       int ts,
-      BagNum o,
-      BagNum h,
-      BagNum l,
-      BagNum c,
-      BagNum v,
-      BagNum? tn,
+      FlexiNum o,
+      FlexiNum h,
+      FlexiNum l,
+      FlexiNum c,
+      FlexiNum v,
+      FlexiNum? tn,
       int? tc,
       bool cfm,
       List<Object?> slots,
@@ -167,12 +167,12 @@ extension type FlexiCandleModel._(
   }) {
     return FlexiCandleModel._((
       ts: candle.timestamp,
-      o: BagNum.fromAny(candle.open, mode),
-      h: BagNum.fromAny(candle.high, mode),
-      l: BagNum.fromAny(candle.low, mode),
-      c: BagNum.fromAny(candle.close, mode),
-      v: BagNum.fromAny(candle.volume, mode),
-      tn: candle.turnover != null ? BagNum.fromAny(candle.turnover!, mode) : null,
+      o: FlexiNum.fromAny(candle.open, mode),
+      h: FlexiNum.fromAny(candle.high, mode),
+      l: FlexiNum.fromAny(candle.low, mode),
+      c: FlexiNum.fromAny(candle.close, mode),
+      v: FlexiNum.fromAny(candle.volume, mode),
+      tn: candle.turnover != null ? FlexiNum.fromAny(candle.turnover!, mode) : null,
       tc: candle.tradeCount,
       cfm: candle.confirmed,
       slots: List<Object?>.filled(count, null, growable: false),
@@ -186,22 +186,22 @@ extension type FlexiCandleModel._(
   int get ts => _m.ts;
 
   /// 开盘价格
-  BagNum get open => _m.o;
+  FlexiNum get open => _m.o;
 
   /// 最高价格
-  BagNum get high => _m.h;
+  FlexiNum get high => _m.h;
 
   /// 最低价格
-  BagNum get low => _m.l;
+  FlexiNum get low => _m.l;
 
   /// 收盘价格
-  BagNum get close => _m.c;
+  FlexiNum get close => _m.c;
 
   /// 成交量
-  BagNum get vol => _m.v;
+  FlexiNum get vol => _m.v;
 
   /// 成交额（计价货币）
-  BagNum? get turnover => _m.tn;
+  FlexiNum? get turnover => _m.tn;
 
   /// 成交笔数
   int? get tradeCount => _m.tc;
@@ -216,7 +216,7 @@ extension type FlexiCandleModel._(
   bool get isShort => close < open;
 
   /// 涨跌幅
-  BagNum get change => close - open;
+  FlexiNum get change => close - open;
 
   /// 涨跌幅(百分比)
   double get changeRate {
@@ -226,7 +226,7 @@ extension type FlexiCandleModel._(
   }
 
   /// 振幅
-  BagNum get range => high - low;
+  FlexiNum get range => high - low;
 
   /// 振幅率(百分比)
   double rangeRate(FlexiCandleModel pre) {
@@ -445,15 +445,30 @@ extension type FlexiCandleModel._(
     final originalMode = mode;
     return FlexiCandleModel._((
       ts: ts ?? _m.ts,
-      o: BagNum.fromAnyOrNull(open, originalMode) ?? _m.o,
-      h: BagNum.fromAnyOrNull(high, originalMode) ?? _m.h,
-      l: BagNum.fromAnyOrNull(low, originalMode) ?? _m.l,
-      c: BagNum.fromAnyOrNull(close, originalMode) ?? _m.c,
-      v: BagNum.fromAnyOrNull(volume, originalMode) ?? _m.v,
-      tn: BagNum.fromAnyOrNull(turnover, originalMode),
+      o: FlexiNum.fromAnyOrNull(open, originalMode) ?? _m.o,
+      h: FlexiNum.fromAnyOrNull(high, originalMode) ?? _m.h,
+      l: FlexiNum.fromAnyOrNull(low, originalMode) ?? _m.l,
+      c: FlexiNum.fromAnyOrNull(close, originalMode) ?? _m.c,
+      v: FlexiNum.fromAnyOrNull(volume, originalMode) ?? _m.v,
+      tn: FlexiNum.fromAnyOrNull(turnover, originalMode),
       tc: tradeCount ?? _m.tc,
       cfm: confirmed ?? _m.cfm,
       slots: slots ?? _m.slots,
     ));
+  }
+
+  String valueString() {
+    return '''{
+      'ts': $ts   ,
+      'o': ${open.valueString()},
+      'h': ${high.valueString()},
+      'l': ${low.valueString()},
+      'c': ${close.valueString()},
+      'v': ${vol.valueString()},
+      'tn': ${turnover?.valueString()},
+      'tc': $tradeCount,
+      'cfm': $confirmed,
+      'slots': ${_m.slots.map((e) => e?.toString()).join(',')},
+    }''';
   }
 }

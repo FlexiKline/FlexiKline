@@ -9,13 +9,13 @@ part of 'overlay.dart';
 Point _$PointFromJson(Map<String, dynamic> json) => Point(
       index: (json['index'] as num?)?.toInt() ?? -1,
       ts: (json['ts'] as num?)?.toInt() ?? -1,
-      value: const BagNumConverter().fromJson(json['value']),
+      value: const FlexiNumConverter().fromJson(json['value']),
     );
 
 Map<String, dynamic> _$PointToJson(Point instance) => <String, dynamic>{
       'index': instance.index,
       'ts': instance.ts,
-      'value': const BagNumConverter().toJson(instance.value),
+      'value': const FlexiNumConverter().toJson(instance.value),
     };
 
 Overlay _$OverlayFromJson(Map<String, dynamic> json) => Overlay(

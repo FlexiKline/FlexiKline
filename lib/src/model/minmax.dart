@@ -14,39 +14,39 @@
 
 import 'package:decimal/decimal.dart';
 
-import 'bag_num.dart';
+import 'flexi_num.dart';
 import '../extension/collections_ext.dart';
 
 class MinMax {
-  static final MinMax zero = MinMax(max: BagNum.zero, min: BagNum.zero);
+  static final MinMax zero = MinMax(max: FlexiNum.zero, min: FlexiNum.zero);
 
   MinMax({required this.max, required this.min});
 
-  factory MinMax.same(BagNum val) => MinMax(max: val, min: val);
+  factory MinMax.same(FlexiNum val) => MinMax(max: val, min: val);
 
-  factory MinMax.from(BagNum a, BagNum b) {
+  factory MinMax.from(FlexiNum a, FlexiNum b) {
     if (a < b) (a, b) = (b, a);
     return MinMax(max: a, min: b);
   }
 
   MinMax clone() => MinMax(max: max, min: min);
 
-  BagNum max;
-  BagNum min;
+  FlexiNum max;
+  FlexiNum min;
 
-  void updateMinMaxBy(BagNum val) {
+  void updateMinMaxBy(FlexiNum val) {
     if (max < val) max = val;
     if (min > val) min = val;
   }
 
   void updateMinMaxByNum(num val) {
-    if (max.ltNum(val)) max = BagNum.fromNum(val);
-    if (min.gtNum(val)) min = BagNum.fromNum(val);
+    if (max.ltNum(val)) max = FlexiNum.fromNum(val);
+    if (min.gtNum(val)) min = FlexiNum.fromNum(val);
   }
 
   void updateMinMaxByDecimal(Decimal val) {
-    if (max.ltDecimal(val)) max = BagNum.fromDecimal(val);
-    if (min.gtDecimal(val)) min = BagNum.fromDecimal(val);
+    if (max.ltDecimal(val)) max = FlexiNum.fromDecimal(val);
+    if (min.gtDecimal(val)) min = FlexiNum.fromDecimal(val);
   }
 
   void updateMinMax(MinMax? minmax) {
@@ -75,22 +75,22 @@ class MinMax {
   }
 
   void minToZero() {
-    min = min > BagNum.zero ? BagNum.zero : min;
+    min = min > FlexiNum.zero ? FlexiNum.zero : min;
   }
 
-  BagNum get middle => size / BagNum.two;
+  FlexiNum get middle => size / FlexiNum.two;
 
-  BagNum get size => max - min;
+  FlexiNum get size => max - min;
 
   /// 最大最小值做为除数
-  BagNum get diffDivisor => max == min ? BagNum.one : max - min;
+  FlexiNum get diffDivisor => max == min ? FlexiNum.one : max - min;
 
-  bool get isZero => max == BagNum.zero && min == BagNum.zero;
+  bool get isZero => max == FlexiNum.zero && min == FlexiNum.zero;
 
   bool get isSame => max == min;
 
-  /// 计算给定集合[list]中的所有[BagNum]的最大最小值
-  static MinMax? getMinMaxByList(List<BagNum?>? list) {
+  /// 计算给定集合[list]中的所有[FlexiNum]的最大最小值
+  static MinMax? getMinMaxByList(List<FlexiNum?>? list) {
     if (list == null || list.isEmpty) return null;
     MinMax? minmax;
     for (final val in list) {

@@ -219,10 +219,10 @@ abstract interface class IPaintContext implements IStorage, ILogger {
   double get candleWidthHalf;
 
   /// 将value转换为蜡烛图中dy坐标值
-  double valueToDyOnCandle(BagNum value, {bool correct = false});
+  double valueToDyOnCandle(FlexiNum value, {bool correct = false});
 
   /// 将dy坐标值转换为蜡烛图中value
-  BagNum? dyToValueOnCandle(double dy, {bool check = false});
+  FlexiNum? dyToValueOnCandle(double dy, {bool check = false});
 
   /// 画板Size = [mainRect] + [subRect]
   Rect get canvasRect;
@@ -295,8 +295,8 @@ abstract interface class IDrawContext implements IStorage, ILogger {
   double? indexToDx(int index, {bool check = false});
 
   /// 将value转换为dy坐标值
-  double? valueToDy(BagNum value, {bool correct = false});
+  double? valueToDy(FlexiNum value, {bool correct = false});
 
   /// 将dy坐标值转换为value
-  BagNum? dyToValue(double dy, {bool check = false});
+  FlexiNum? dyToValue(double dy, {bool check = false});
 }

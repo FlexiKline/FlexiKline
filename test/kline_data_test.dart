@@ -300,15 +300,15 @@ void main() {
     test('operator[] should work with complex types', () {
       final list = ['a', 'b', 'c'];
       final map = {'key': 'value'};
-      final bagNum = BagNum.fromNum(100.5);
+      final flexiNum = FlexiNum.fromNum(100.5);
 
       model[0] = list;
       model[1] = map;
-      model[2] = bagNum;
+      model[2] = flexiNum;
 
       expect(model[0], list);
       expect(model[1], map);
-      expect(model[2], bagNum);
+      expect(model[2], flexiNum);
     });
 
     test('operator[]= with null should clear the slot', () {

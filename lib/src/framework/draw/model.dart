@@ -20,10 +20,10 @@ class Point {
   Point({
     this.index = -1,
     this.ts = -1,
-    BagNum? value,
+    FlexiNum? value,
     Offset? offset,
   })  : _offset = offset ?? Offset.infinite,
-        value = value ?? BagNum.zero;
+        value = value ?? FlexiNum.zero;
 
   factory Point.pointer(int index, Offset offset) {
     assert(index >= 0, 'invalid index($index)');
@@ -40,7 +40,7 @@ class Point {
   int ts;
 
   /// 蜡烛图价值
-  BagNum value;
+  FlexiNum value;
 
   /// 当前canvas中的临时坐标(实时更新)
   Offset _offset;

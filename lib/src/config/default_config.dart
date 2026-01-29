@@ -584,7 +584,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       ).of(
         paintColor: theme.markLineColor,
         textColor: theme.textColor,
-        background: instance?.high.text.style.color,
+        background: instance?.high.text.background,
         borderColor: instance?.high.text.border?.color,
       ),
       low: obtainConfig(
@@ -611,8 +611,8 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       ).of(
         paintColor: theme.markLineColor,
         textColor: theme.textColor,
-        background: instance?.high.text.style.color,
-        borderColor: instance?.high.text.border?.color,
+        background: instance?.low.text.background,
+        borderColor: instance?.low.text.border?.color,
       ),
       last: obtainConfig(
         instance?.last,
