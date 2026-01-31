@@ -90,24 +90,30 @@ class KlineData extends BaseData with CandleReqData, CandleListData, PaintDrawDa
       /// 3. 计算指标数据
       logd('precomputeKlineData Start Main $reset-$range');
       for (final object in mainPaintObjects) {
-        await stopwatch.exec(
-          () => object.precompute(
-            range!,
-            reset: reset,
-          ),
-          label: '$logTag-Main-precompute:${object.key}-$range',
-        );
+        final computable = object as IComputablePainter?;
+        if (computable != null) {
+          await stopwatch.exec(
+            () => computable.precompute(
+              range!,
+              reset: reset,
+            ),
+            label: '$logTag-Main-precompute:${object.key}-$range',
+          );
+        }
       }
 
       logd('precomputeKlineData Start Sub $reset-$range');
       for (final object in subPaintObjects) {
-        await stopwatch.exec(
-          () => object.precompute(
-            range!,
-            reset: reset,
-          ),
-          label: '$logTag-Sub-precompute:${object.key}-$range',
-        );
+        final computable = object as IComputablePainter?;
+        if (computable != null) {
+          await stopwatch.exec(
+            () => computable.precompute(
+              range!,
+              reset: reset,
+            ),
+            label: '$logTag-Sub-precompute:${object.key}-$range',
+          );
+        }
       }
       logd('precomputeKlineData End $reset-$range');
     } catch (e, stack) {

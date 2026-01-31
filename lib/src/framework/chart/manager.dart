@@ -438,16 +438,16 @@ final class IndicatorPaintObjectManager with KlineLog {
 
   /// 收集当前指标的计算参数
   /// 考虑在主区/副区同时存在的指标.
-  @Deprecated('废弃, 由PaintObject执行precompute')
-  Map<IIndicatorKey, dynamic> getIndicatorCalcParams() {
-    final calcParams = mainPaintObject.getCalcParams();
-    for (final object in subPaintObjects) {
-      final params = object.getCalcParams();
-      if (params.isEmpty) continue;
-      calcParams.addAll(params);
-    }
-    return calcParams;
-  }
+  // @Deprecated('废弃, 由PaintObject执行precompute')
+  // Map<IIndicatorKey, dynamic> getIndicatorCalcParams() {
+  //   final calcParams = mainPaintObject.getCalcParams();
+  //   for (final object in subPaintObjects) {
+  //     final params = object.getCalcParams();
+  //     if (params.isEmpty) continue;
+  //     calcParams.addAll(params);
+  //   }
+  //   return calcParams;
+  // }
 
   void restoreHeight() {
     mainPaintObject.restoreSize();

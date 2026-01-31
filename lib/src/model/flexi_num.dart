@@ -561,7 +561,7 @@ extension type FlexiNum._(Object _value) {
     if (_value is num) {
       return _value.sign;
     } else if (_value is Decimal) {
-      return _value.signum;
+      return _value.sign;
     }
     throw const FlexiNumException('FlexiNum signum Type not match!');
   }

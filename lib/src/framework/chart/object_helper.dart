@@ -107,9 +107,7 @@ extension IndicatorObjectExt on IndicatorObject {
 }
 
 /// 绘制对象混入边界计算的通用扩展
-mixin PaintObjectBoundingMixin<T extends Indicator<IIndicatorKey>>
-    on IndicatorObject<T>
-    implements IPaintBoundingBox {
+mixin PaintObjectBoundingMixin<T extends Indicator<IIndicatorKey>> on IndicatorObject<T> implements IPaintBounding {
   bool get drawInMain => slot == mainIndicatorSlot;
   bool get drawInSub => slot > mainIndicatorSlot;
 
@@ -208,10 +206,10 @@ mixin PaintObjectBoundingMixin<T extends Indicator<IIndicatorKey>>
   }
 }
 
-/// 绘制对象混入数据初始化的通用扩展
-mixin PaintObjectDataInitMixin<T extends Indicator<IIndicatorKey>>
-    on IndicatorObject<T>
-    implements IPaintDataInit {
+/// 绘制对象混入状态管理的通用扩展
+///
+/// 提供 minMax 管理、坐标转换等功能。
+mixin PaintObjectStateMixin<T extends Indicator<IIndicatorKey>> on IndicatorObject<T> implements IPaintState {
   int? _start;
   int? _end;
 
@@ -228,6 +226,7 @@ mixin PaintObjectDataInitMixin<T extends Indicator<IIndicatorKey>>
   }
 
   double? _dyFactor;
+  @override
   double get dyFactor {
     if (_dyFactor != null) return _dyFactor!;
     if (chartRect.height == 0) return _dyFactor = 1;
@@ -278,6 +277,30 @@ mixin PaintObjectDataInitMixin<T extends Indicator<IIndicatorKey>>
 
   FlexiNum? dyToValueOnCandle(double dy, {bool check = false}) {
     return _context.dyToValueOnCandle(dy, check: check);
+  }
+
+  @override
+  MinMax? initState(int start, int end) {
+    // 默认实现返回 null，表示使用当前 minMax
+    // 子类可以 override 此方法提供自定义实现
+    return null;
+  }
+}
+
+/// 绘制对象混入数据预计算的扩展
+///
+/// 提供数据预计算能力，仅用于 DataPaintObject。
+mixin PaintObjectComputableMixin<T extends DataIndicator> on PaintObject<T> {
+  /// 判断是否需要重新预计算
+  ///
+  /// 当指标配置参数发生变化时，判断是否需要重新计算。
+  bool shouldPrecompute(covariant T oldIndicator) {
+    return oldIndicator.calcParam != indicator.calcParam && indicator.calcParam != null;
+  }
+
+  /// 数据预计算（空实现，供子类 override）
+  void precompute(Range range, {bool reset = false}) {
+    // 空实现
   }
 }
 
@@ -613,25 +636,25 @@ mixin PaintCandleHelperMixin<T extends Indicator> on PaintObject<T> {
   }
 }
 
-extension PaintObjectExt on PaintObject {
-  /// 获取当前指标计算参数
-  Map<IIndicatorKey, dynamic> getCalcParams() {
-    if (calcParams != null) {
-      return {key: calcParams};
-    }
-    return const <IIndicatorKey, dynamic>{};
-  }
-}
+// extension PaintObjectExt on PaintObject {
+//   /// 获取当前指标计算参数
+//   Map<IIndicatorKey, dynamic> getCalcParams() {
+//     if (calcParams != null) {
+//       return {key: calcParams};
+//     }
+//     return const <IIndicatorKey, dynamic>{};
+//   }
+// }
 
-extension MultiPaintObjectExt on MainPaintObject {
-  /// 收集[MainPaintObject]中子指标的计算参数
-  Map<IIndicatorKey, dynamic> getCalcParams() {
-    final params = <IIndicatorKey, dynamic>{};
-    for (final object in children) {
-      if (object.calcParams != null) {
-        params[object.key] = object.calcParams;
-      }
-    }
-    return params;
-  }
-}
+// extension MultiPaintObjectExt on MainPaintObject {
+//   /// 收集[MainPaintObject]中子指标的计算参数
+//   Map<IIndicatorKey, dynamic> getCalcParams() {
+//     final params = <IIndicatorKey, dynamic>{};
+//     for (final object in children) {
+//       if (object.calcParams != null) {
+//         params[object.key] = object.calcParams;
+//       }
+//     }
+//     return params;
+//   }
+// }

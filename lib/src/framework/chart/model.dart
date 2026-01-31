@@ -102,7 +102,7 @@ abstract class BusinessIndicator extends Indicator<BusinessIndicatorKey> {
 
   @override
   BusinessPaintObject<BusinessIndicator> createPaintObject(
-    IPaintContext context,
+    covariant IPaintContext context,
   );
 }
 
@@ -139,7 +139,7 @@ abstract class TimeBaseIndicator extends NormalIndicator {
 
   @override
   TimeBasePaintObject<TimeBaseIndicator> createPaintObject(
-    IPaintContext context,
+    covariant IPaintContext context,
   );
 }
 
@@ -149,7 +149,7 @@ abstract class TimeBaseIndicator extends NormalIndicator {
 /// [children] 存储当前主区已选中的子指标 Key 集合。
 @CopyWith()
 @FlexiIndicatorSerializable
-class MainPaintObjectIndicator<T extends Indicator<IIndicatorKey>> extends NormalIndicator {
+class MainPaintObjectIndicator<T extends Indicator<IIndicatorKey>> extends Indicator {
   MainPaintObjectIndicator({
     required this.size,
     required super.padding,

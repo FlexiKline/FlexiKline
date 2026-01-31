@@ -18,7 +18,7 @@ part of 'indicator.dart';
 ///
 /// 提供 [Indicator] 的所有属性。
 abstract class IndicatorObject<T extends Indicator>
-    implements Comparable<IndicatorObject<T>>, IPaintBoundingBox, IPaintDataInit {
+    implements Comparable<IndicatorObject<T>>, IPaintBounding, IPaintState {
   IndicatorObject(this._indicator, this._context);
 
   T _indicator;
@@ -62,7 +62,7 @@ abstract class IndicatorObject<T extends Indicator>
 /// 1. 定义 PaintObject 行为：通过实现对应的接口，实现 Chart 的配置、计算、绘制、Cross。
 /// 2. [_parent] 保存当前绘制对象的父级。
 abstract class PaintObject<T extends Indicator<IIndicatorKey>> extends IndicatorObject<T>
-    with KlineLog, PaintObjectBoundingMixin<T>, PaintObjectDataInitMixin<T>
+    with KlineLog, PaintObjectBoundingMixin<T>, PaintObjectStateMixin<T>
     implements IPaintObject {
   PaintObject({
     required T indicator,
@@ -78,18 +78,11 @@ abstract class PaintObject<T extends Indicator<IIndicatorKey>> extends Indicator
 
   bool get hasParentObject => _parent != null;
 
-  @protected
-  bool shouldPrecompute(covariant T oldIndicator) {
-    return oldIndicator.calcParam != indicator.calcParam && indicator.calcParam != null;
-  }
-
-  // 指标配置发生变改
+  /// 指标配置发生变改
   @mustCallSuper
   @protected
   void didUpdateIndicator(covariant T oldIndicator) {
-    if (shouldPrecompute(oldIndicator)) {
-      precompute(klineData.computableRange, reset: true);
-    }
+    // 基类不处理 precompute，由 DataPaintObject 处理
   }
 
   @protected
@@ -106,7 +99,7 @@ abstract class PaintObject<T extends Indicator<IIndicatorKey>> extends Indicator
   void paintExtraAboveChart(Canvas canvas, Size size) {}
 
   @override
-  void precompute(Range range, {bool reset = false}) {}
+  void onCross(Canvas canvas, Offset offset) {}
 
   /// 处理 Tap 事件
   ///
@@ -145,7 +138,7 @@ abstract class PaintObject<T extends Indicator<IIndicatorKey>> extends Indicator
 /// 普通指标绘制对象
 ///
 /// 用于 Candle、Time、Main、Volume 等框架内置指标，不占 slot。
-abstract class NormalPaintObject<T extends NormalIndicator> extends PaintObject<T> {
+abstract class NormalPaintObject<T extends NormalIndicator> extends PaintObject<T> implements IBasePainter {
   NormalPaintObject({
     required super.context,
     required super.indicator,
@@ -156,22 +149,36 @@ abstract class NormalPaintObject<T extends NormalIndicator> extends PaintObject<
 ///
 /// 用于 KDJ、MACD、MA 等需要 precompute 并写入 FlexiCandleModel.slots 的指标。
 /// 持有 [dataIndex]，用于在 slots 中存取计算数据。
-abstract class DataPaintObject<T extends DataIndicator> extends PaintObject<T> {
+abstract class DataPaintObject<T extends DataIndicator> extends PaintObject<T>
+    with PaintObjectComputableMixin<T>
+    implements IComputablePainter {
   DataPaintObject({
     required super.context,
     required super.indicator,
   }) : dataIndex = context.getDataIndex(indicator.key) ?? -1;
-  // TODO: 这里需要优化，如果数据索引不存在，则返回 -1，导致绘制失败。
 
   /// 当前绘制对象的指标计算数据存储下标
+  ///
+  /// 用于在 FlexiCandleModel.slots 中存取计算数据。
   late final int dataIndex;
+
+  /// 指标配置发生变改
+  @mustCallSuper
+  @override
+  @protected
+  void didUpdateIndicator(covariant T oldIndicator) {
+    super.didUpdateIndicator(oldIndicator);
+    if (shouldPrecompute(oldIndicator)) {
+      precompute(klineData.computableRange, reset: true);
+    }
+  }
 }
 
 /// 业务指标绘制对象
 ///
 /// 用于 Trade 等由业务数据或用户操作驱动的指标，不占 slot。
 /// 子类可按需 override [loadBusinessData] 加载业务数据。
-abstract class BusinessPaintObject<T extends BusinessIndicator> extends PaintObject<T> {
+abstract class BusinessPaintObject<T extends BusinessIndicator> extends PaintObject<T> implements IBusinessPainter {
   BusinessPaintObject({
     required super.context,
     required super.indicator,
@@ -181,6 +188,7 @@ abstract class BusinessPaintObject<T extends BusinessIndicator> extends PaintObj
   ///
   /// 框架在适当时机（如首次显示、数据刷新）调用。
   /// 子类按需 override 实现具体加载逻辑。
+  @override
   @protected
   void loadBusinessData() {}
 }
@@ -229,7 +237,7 @@ abstract class TimeBasePaintObject<T extends TimeBaseIndicator> extends NormalPa
 ///
 /// 使用 [NormalIndicatorKey]，属于基础/系统指标，不占 slot。
 /// [children] 存储主区内的所有子绘制对象。
-final class MainPaintObject<T extends MainPaintObjectIndicator> extends NormalPaintObject<T> {
+final class MainPaintObject<T extends MainPaintObjectIndicator> extends PaintObject<T> implements IComputablePainter {
   MainPaintObject({
     required super.context,
     required super.indicator,
@@ -281,9 +289,22 @@ final class MainPaintObject<T extends MainPaintObjectIndicator> extends NormalPa
   }
 
   @override
+  bool shouldPrecompute(MainPaintObjectIndicator oldIndicator) {
+    if (oldIndicator.children != indicator.children) {
+      return true;
+    }
+    return false;
+  }
+
+  /// 委托子对象的 precompute 方法
+  ///
+  /// MainPaintObject 本身不需要 precompute，但需要将调用委托给子对象。
+  @override
   void precompute(Range range, {bool reset = false}) {
     for (final object in children) {
-      object.precompute(range, reset: reset);
+      if (object is IComputablePainter) {
+        (object as IComputablePainter).precompute(range, reset: reset);
+      }
     }
   }
 
@@ -301,9 +322,6 @@ final class MainPaintObject<T extends MainPaintObjectIndicator> extends NormalPa
 
   @override
   void paintChart(Canvas canvas, Size size) {}
-
-  @override
-  void onCross(Canvas canvas, Offset offset, {FlexiCandleModel? model}) {}
 
   @override
   Size? paintTips(
