@@ -45,7 +45,7 @@ abstract class Indicator<K extends IIndicatorKey> implements IPrecomputable {
   final int zIndex;
 
   @factory
-  PaintObject<Indicator<K>> createPaintObject(IPaintContext context);
+  PaintObject<Indicator<K>> createPaintObject();
 
   Map<String, dynamic> toJson() => const {};
 
@@ -67,7 +67,7 @@ abstract class NormalIndicator extends Indicator<NormalIndicatorKey> {
   });
 
   @override
-  NormalPaintObject<NormalIndicator> createPaintObject(IPaintContext context);
+  NormalPaintObject<NormalIndicator> createPaintObject();
 }
 
 /// 数据指标配置基类
@@ -84,7 +84,7 @@ abstract class DataIndicator extends Indicator<DataIndicatorKey> {
   });
 
   @override
-  DataPaintObject<DataIndicator> createPaintObject(IPaintContext context);
+  DataPaintObject<DataIndicator> createPaintObject();
 }
 
 /// 业务指标配置基类
@@ -101,9 +101,7 @@ abstract class BusinessIndicator extends Indicator<BusinessIndicatorKey> {
   });
 
   @override
-  BusinessPaintObject<BusinessIndicator> createPaintObject(
-    covariant IPaintContext context,
-  );
+  BusinessPaintObject<BusinessIndicator> createPaintObject();
 }
 
 /// 蜡烛指标配置基类
@@ -118,9 +116,7 @@ abstract class CandleBaseIndicator extends NormalIndicator {
   }) : super(key: candleIndicatorKey);
 
   @override
-  CandleBasePaintObject<CandleBaseIndicator> createPaintObject(
-    covariant IPaintContext context,
-  );
+  CandleBasePaintObject<CandleBaseIndicator> createPaintObject();
 }
 
 /// 时间指标配置基类
@@ -138,9 +134,7 @@ abstract class TimeBaseIndicator extends NormalIndicator {
   final DrawPosition position;
 
   @override
-  TimeBasePaintObject<TimeBaseIndicator> createPaintObject(
-    covariant IPaintContext context,
-  );
+  TimeBasePaintObject<TimeBaseIndicator> createPaintObject();
 }
 
 /// MainIndicator 的配置
@@ -168,8 +162,8 @@ class MainPaintObjectIndicator<T extends Indicator<IIndicatorKey>> extends Indic
   final Set<IIndicatorKey> children;
 
   @override
-  MainPaintObject createPaintObject(IPaintContext context) {
-    return MainPaintObject(context: context, indicator: this);
+  MainPaintObject createPaintObject() {
+    return MainPaintObject();
   }
 
   factory MainPaintObjectIndicator.fromJson(Map<String, dynamic> json) => _$MainPaintObjectIndicatorFromJson(json);

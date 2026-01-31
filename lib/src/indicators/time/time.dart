@@ -22,7 +22,6 @@ import 'package:json_annotation/json_annotation.dart';
 
 import '../../config/export.dart';
 import '../../constant.dart';
-import '../../core/core.dart';
 import '../../extension/export.dart';
 import '../../model/export.dart';
 import '../../framework/export.dart';

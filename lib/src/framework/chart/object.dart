@@ -19,24 +19,34 @@ part of 'indicator.dart';
 /// 提供 [Indicator] 的所有属性。
 abstract class IndicatorObject<T extends Indicator>
     implements Comparable<IndicatorObject<T>>, IPaintBounding, IPaintState {
-  IndicatorObject(this._indicator, this._context);
+  IndicatorObject();
 
-  T _indicator;
-  late final IPaintContext _context;
+  T? _indicator;
+  IPaintContext? __context;
 
-  T get indicator => _indicator;
+  /// 获取创建此对象的 Indicator
+  T get indicator {
+    assert(_indicator != null, 'indicator 尚未设置，请确保已通过框架创建');
+    return _indicator!;
+  }
 
-  IIndicatorKey get key => _indicator.key;
+  /// 获取绘制上下文
+  IPaintContext get _context {
+    assert(__context != null, 'context 尚未设置，请确保已通过框架创建');
+    return __context!;
+  }
+
+  IIndicatorKey get key => indicator.key;
 
   double? _tmpHeight;
-  double get height => _tmpHeight ?? _indicator.height;
+  double get height => _tmpHeight ?? indicator.height;
 
   EdgeInsets? _tmpPadding;
   EdgeInsets get padding => _tmpPadding ?? indicator.padding;
 
-  PaintMode get paintMode => _indicator.paintMode;
-  int get zIndex => _indicator.zIndex;
-  dynamic get calcParams => _indicator.calcParam;
+  PaintMode get paintMode => indicator.paintMode;
+  int get zIndex => indicator.zIndex;
+  dynamic get calcParams => indicator.calcParam;
 
   /// 当前指标所使用的涨跌颜色
   Color get longColor => theme.long;
@@ -54,6 +64,14 @@ abstract class IndicatorObject<T extends Indicator>
 
   @override
   int get hashCode => runtimeType.hashCode ^ key.hashCode;
+
+  @visibleForTesting
+  @protected
+  @Deprecated('警告：这是仅用于测试的函数，严禁在生产环境中调用 (This is a test-only method. DO NOT use in production.)')
+  void init(IPaintContext context, T indicator) {
+    _indicator = indicator;
+    __context = context;
+  }
 }
 
 /// PaintObject
@@ -64,15 +82,6 @@ abstract class IndicatorObject<T extends Indicator>
 abstract class PaintObject<T extends Indicator<IIndicatorKey>> extends IndicatorObject<T>
     with KlineLog, PaintObjectBoundingMixin<T>, PaintObjectStateMixin<T>
     implements IPaintObject {
-  PaintObject({
-    required T indicator,
-    required IPaintContext context,
-  }) : super(indicator, context) {
-    if (context is KlineLog) {
-      loggerDelegate = (context as KlineLog).loggerDelegate;
-    }
-  }
-
   // 父级 PaintObject，主要用于给其子级 PaintObject 限定范围。
   PaintObject? _parent;
 
@@ -139,10 +148,7 @@ abstract class PaintObject<T extends Indicator<IIndicatorKey>> extends Indicator
 ///
 /// 用于 Candle、Time、Main、Volume 等框架内置指标，不占 slot。
 abstract class NormalPaintObject<T extends NormalIndicator> extends PaintObject<T> implements IBasePainter {
-  NormalPaintObject({
-    required super.context,
-    required super.indicator,
-  });
+  // 构造函数完全省略
 }
 
 /// 数据指标绘制对象
@@ -152,15 +158,15 @@ abstract class NormalPaintObject<T extends NormalIndicator> extends PaintObject<
 abstract class DataPaintObject<T extends DataIndicator> extends PaintObject<T>
     with PaintObjectComputableMixin<T>
     implements IComputablePainter {
-  DataPaintObject({
-    required super.context,
-    required super.indicator,
-  }) : dataIndex = context.getDataIndex(indicator.key) ?? -1;
-
   /// 当前绘制对象的指标计算数据存储下标
   ///
   /// 用于在 FlexiCandleModel.slots 中存取计算数据。
-  late final int dataIndex;
+  /// 延迟初始化，在首次访问时计算。
+  int get dataIndex {
+    return _dataIndex ??= _context.getDataIndex(indicator.key) ?? -1;
+  }
+
+  int? _dataIndex;
 
   /// 指标配置发生变改
   @mustCallSuper
@@ -179,11 +185,6 @@ abstract class DataPaintObject<T extends DataIndicator> extends PaintObject<T>
 /// 用于 Trade 等由业务数据或用户操作驱动的指标，不占 slot。
 /// 子类可按需 override [loadBusinessData] 加载业务数据。
 abstract class BusinessPaintObject<T extends BusinessIndicator> extends PaintObject<T> implements IBusinessPainter {
-  BusinessPaintObject({
-    required super.context,
-    required super.indicator,
-  });
-
   /// 加载业务数据
   ///
   /// 框架在适当时机（如首次显示、数据刷新）调用。
@@ -197,11 +198,6 @@ abstract class BusinessPaintObject<T extends BusinessIndicator> extends PaintObj
 ///
 /// 使用 [NormalIndicatorKey]，属于基础/系统指标，不占 slot。
 abstract class CandleBasePaintObject<T extends CandleBaseIndicator> extends NormalPaintObject<T> {
-  CandleBasePaintObject({
-    required super.context,
-    required super.indicator,
-  });
-
   /// 获取当前蜡烛图的绘制类型
   FlexiChartType getChartType();
 
@@ -225,10 +221,7 @@ abstract class CandleBasePaintObject<T extends CandleBaseIndicator> extends Norm
 ///
 /// 使用 [NormalIndicatorKey]，属于基础/系统指标，不占 slot。
 abstract class TimeBasePaintObject<T extends TimeBaseIndicator> extends NormalPaintObject<T> {
-  TimeBasePaintObject({
-    required super.context,
-    required super.indicator,
-  });
+  // 构造函数完全省略
 
   DrawPosition get position => indicator.position;
 }
@@ -238,15 +231,15 @@ abstract class TimeBasePaintObject<T extends TimeBaseIndicator> extends NormalPa
 /// 使用 [NormalIndicatorKey]，属于基础/系统指标，不占 slot。
 /// [children] 存储主区内的所有子绘制对象。
 final class MainPaintObject<T extends MainPaintObjectIndicator> extends PaintObject<T> implements IComputablePainter {
-  MainPaintObject({
-    required super.context,
-    required super.indicator,
-  }) : children = SortableHashSet<PaintObject>.from(
-          <PaintObject>[],
-          (a, b) => a.compareTo(b),
-        );
+  // 需要显式构造函数，因为需要在构造函数体中初始化 children
+  MainPaintObject() : super() {
+    children = SortableHashSet<PaintObject>.from(
+      <PaintObject>[],
+      (a, b) => a.compareTo(b),
+    );
+  }
 
-  final SortableHashSet<PaintObject> children;
+  late final SortableHashSet<PaintObject> children;
 
   Set<PaintObject> get paintableChildren {
     if (onlyMainChart) {

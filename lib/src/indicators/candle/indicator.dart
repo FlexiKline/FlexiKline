@@ -116,22 +116,16 @@ class CandleIndicator extends CandleBaseIndicator {
   final GradientConfig? shortGradientConfig;
 
   @override
-  CandlePaintObject createPaintObject(IPaintContext context) {
-    return CandlePaintObject(context: context, indicator: this);
-  }
+  CandlePaintObject createPaintObject() => CandlePaintObject();
 
   factory CandleIndicator.fromJson(Map<String, dynamic> json) => _$CandleIndicatorFromJson(json);
+
   @override
   Map<String, dynamic> toJson() => _$CandleIndicatorToJson(this);
 }
 
 class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject<T>
     with PaintYAxisTicksOnCrossMixin, PaintCandleHelperMixin {
-  CandlePaintObject({
-    required super.context,
-    required super.indicator,
-  });
-
   @override
   Color get longColor => indicator.longColor ?? theme.long;
 

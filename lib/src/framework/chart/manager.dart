@@ -142,29 +142,50 @@ final class IndicatorPaintObjectManager with KlineLog {
 
   int get indicatorCount => _indicatorDataIndexs.length;
 
+  /// 创建并初始化 PaintObject
+  PaintObject _createAndInitPaintObject<T extends Indicator>(
+    T indicator,
+    IPaintContext context,
+  ) {
+    final paintObject = indicator.createPaintObject();
+
+    paintObject._indicator = indicator;
+    paintObject.__context = context;
+
+    // paintObject 已经混入了 KlineLog，所以直接设置
+    if (context is KlineLog && context is KlineLog) {
+      (paintObject as KlineLog).loggerDelegate = (context as KlineLog).loggerDelegate;
+    }
+
+    return paintObject;
+  }
+
   /// 初始化主区/副区指标
   /// 1. 确认指标数据在[FlexiCandleModel]的[slots]中的index.
   /// 2. 初始化主区绘制对象, 初始化副区绘制对象队列
   /// 3. 从配置中加载缓存的主/副区指标.
   void init(IPaintContext context) {
     final mainIndicator = flexiKlineConfig.mainIndicator;
-    _mainPaintObject = MainPaintObject(
-      context: context,
-      indicator: mainIndicator.copyWith(),
-    );
+    _mainPaintObject = MainPaintObject();
+    _mainPaintObject._indicator = mainIndicator.copyWith();
+    _mainPaintObject.__context = context;
+    // _mainPaintObject 已经混入了 KlineLog，所以直接设置
+    if (context is KlineLog) {
+      (_mainPaintObject as KlineLog).loggerDelegate = (context as KlineLog).loggerDelegate;
+    }
 
     /// 配置默认指标蜡烛图指标和时间指标
     try {
       final candle = configuration.candleIndicatorBuilder.call(
         configuration.getConfig(candleIndicatorKey.id),
       );
-      _candlePaintObject = candle.createPaintObject(context);
+      _candlePaintObject = _createAndInitPaintObject(candle, context) as CandleBasePaintObject;
       _mainPaintObject.appendPaintObject(_candlePaintObject);
 
       final time = configuration.timeIndicatorBuilder.call(
         configuration.getConfig(timeIndicatorKey.id),
       );
-      _timePaintObject = time.createPaintObject(context);
+      _timePaintObject = _createAndInitPaintObject(time, context) as TimeBasePaintObject;
     } catch (error, stack) {
       loge(
         'init catch an exception!',
@@ -193,18 +214,22 @@ final class IndicatorPaintObjectManager with KlineLog {
     /// 配置默认指标蜡烛图指标和时间指标
     final mainIndicator = flexiKlineConfig.mainIndicator;
     try {
-      mainPaintObject.doDidUpdateIndicator(mainIndicator.copyWith(
+      final newMainIndicator = mainIndicator.copyWith(
         size: mainPaintObject.size,
-      ));
+      );
+      mainPaintObject._indicator = newMainIndicator; // 手动更新
+      mainPaintObject.doDidUpdateIndicator(newMainIndicator);
 
       final candle = configuration.candleIndicatorBuilder.call(
         configuration.getConfig(candleIndicatorKey.id),
       );
+      candlePaintObject._indicator = candle; // 手动更新
       candlePaintObject.doDidUpdateIndicator(candle);
 
       final time = configuration.timeIndicatorBuilder.call(
         configuration.getConfig(timeIndicatorKey.id),
       );
+      timePaintObject._indicator = time; // 手动更新
       timePaintObject.doDidUpdateIndicator(time);
     } catch (error, stack) {
       loge(
@@ -306,7 +331,8 @@ final class IndicatorPaintObjectManager with KlineLog {
       builder: _mainIndicatorBuilders[key],
     );
     if (indicator == null) return null;
-    final newObj = indicator.createPaintObject(context);
+
+    final newObj = _createAndInitPaintObject(indicator, context);
     _mainPaintObject.appendPaintObject(newObj);
     return newObj;
   }
@@ -345,7 +371,8 @@ final class IndicatorPaintObjectManager with KlineLog {
       builder: _subIndicatorBuilders[key],
     );
     if (indicator == null) return null;
-    final newObj = indicator.createPaintObject(context);
+
+    final newObj = _createAndInitPaintObject(indicator, context);
     flexiKlineConfig.sub.add(key);
     final oldObj = _subPaintObjectQueue.append(newObj);
     oldObj?.dispose();

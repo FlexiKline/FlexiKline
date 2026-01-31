@@ -39,21 +39,15 @@ class TimeIndicator extends TimeBaseIndicator {
   final DateTimeFormatter? tickFormatter;
 
   @override
-  TimePaintObject createPaintObject(IPaintContext context) {
-    return TimePaintObject(context: context, indicator: this);
-  }
+  TimePaintObject createPaintObject() => TimePaintObject();
 
   factory TimeIndicator.fromJson(Map<String, dynamic> json) => _$TimeIndicatorFromJson(json);
+
   @override
   Map<String, dynamic> toJson() => _$TimeIndicatorToJson(this);
 }
 
 class TimePaintObject<T extends TimeIndicator> extends TimeBasePaintObject<T> {
-  TimePaintObject({
-    required super.context,
-    required super.indicator,
-  });
-
   /// 两个时间刻度间隔的蜡烛数
   int get timeTickIntervalCount {
     return ((math.max(60, indicator.timeTick.textWidth ?? 0)) / candleActualWidth).round();
