@@ -46,91 +46,87 @@ class IIndicatorKeyConvert implements JsonConverter<IIndicatorKey, String> {
     final label = parts.sublist(2).join(':');
 
     return switch (type) {
-      'data' => FlexiDataIndicatorKey(id, label: label),
-      'business' => FlexiBusinessIndicatorKey(id, label: label),
-      _ => FlexiIndicatorKey(id, label: label),
+      final typeName when typeName == (DataIndicatorKey).toString() => DataIndicatorKey(id, label: label),
+      final typeName when typeName == (BusinessIndicatorKey).toString() => BusinessIndicatorKey(id, label: label),
+      final typeName when typeName == (NormalIndicatorKey).toString() => NormalIndicatorKey(id, label: label),
+      _ => NormalIndicatorKey(id, label: label), // unknownIndicatorKey
     };
   }
 
   @override
   String toJson(IIndicatorKey key) {
-    final prefix = switch (key) {
-      FlexiDataIndicatorKey() => 'data',
-      FlexiBusinessIndicatorKey() => 'business',
-      FlexiIndicatorKey() => 'base',
-    };
-    return '$prefix:${key.id}:${key.label}';
+    return key.toString();
   }
 }
 
-/// FlexiIndicatorKey 序列化转换器
+/// NormalIndicatorKey 序列化转换器
 ///
-/// 专门用于处理 FlexiIndicatorKey 类型的序列化，
+/// 专门用于处理 NormalIndicatorKey 类型的序列化，
 /// 让 json_serializable 能够识别并生成正确的序列化代码。
-class FlexiIndicatorKeyConvert implements JsonConverter<FlexiIndicatorKey, String> {
-  const FlexiIndicatorKeyConvert();
+class NormalIndicatorKeyConvert implements JsonConverter<NormalIndicatorKey, String> {
+  const NormalIndicatorKeyConvert();
 
   @override
-  FlexiIndicatorKey fromJson(String json) {
+  NormalIndicatorKey fromJson(String json) {
     final result = const IIndicatorKeyConvert().fromJson(json);
-    if (result is FlexiIndicatorKey) {
+    if (result is NormalIndicatorKey) {
       return result;
     }
-    // 如果解析结果不是 FlexiIndicatorKey，返回一个默认值
+    // 如果解析结果不是 NormalIndicatorKey，返回一个默认值
     // 这种情况理论上不应该发生，但为了类型安全需要处理
-    return FlexiIndicatorKey(result.id, label: result.label);
+    return NormalIndicatorKey(result.id, label: result.label);
   }
 
   @override
-  String toJson(FlexiIndicatorKey key) {
+  String toJson(NormalIndicatorKey key) {
     return const IIndicatorKeyConvert().toJson(key);
   }
 }
 
-/// FlexiDataIndicatorKey 序列化转换器
+/// DataIndicatorKey 序列化转换器
 ///
-/// 专门用于处理 FlexiDataIndicatorKey 类型的序列化，
+/// 专门用于处理 DataIndicatorKey 类型的序列化，
 /// 让 json_serializable 能够识别并生成正确的序列化代码。
-class FlexiDataIndicatorKeyConvert implements JsonConverter<FlexiDataIndicatorKey, String> {
-  const FlexiDataIndicatorKeyConvert();
+class DataIndicatorKeyConvert implements JsonConverter<DataIndicatorKey, String> {
+  const DataIndicatorKeyConvert();
 
   @override
-  FlexiDataIndicatorKey fromJson(String json) {
+  DataIndicatorKey fromJson(String json) {
     final result = const IIndicatorKeyConvert().fromJson(json);
-    if (result is FlexiDataIndicatorKey) {
+    if (result is DataIndicatorKey) {
       return result;
     }
-    // 如果解析结果不是 FlexiDataIndicatorKey，返回一个默认值
+    // 如果解析结果不是 DataIndicatorKey，返回一个默认值
     // 这种情况理论上不应该发生，但为了类型安全需要处理
-    return FlexiDataIndicatorKey(result.id, label: result.label);
+    return DataIndicatorKey(result.id, label: result.label);
   }
 
   @override
-  String toJson(FlexiDataIndicatorKey key) {
+  String toJson(DataIndicatorKey key) {
     return const IIndicatorKeyConvert().toJson(key);
   }
 }
 
-/// FlexiBusinessIndicatorKey 序列化转换器
+/// BusinessIndicatorKey 序列化转换器
 ///
-/// 专门用于处理 FlexiBusinessIndicatorKey 类型的序列化，
+/// 专门用于处理 BusinessIndicatorKey 类型的序列化，
 /// 让 json_serializable 能够识别并生成正确的序列化代码。
-class FlexiBusinessIndicatorKeyConvert implements JsonConverter<FlexiBusinessIndicatorKey, String> {
-  const FlexiBusinessIndicatorKeyConvert();
+class BusinessIndicatorKeyConvert implements JsonConverter<BusinessIndicatorKey, String> {
+  const BusinessIndicatorKeyConvert();
 
   @override
-  FlexiBusinessIndicatorKey fromJson(String json) {
+  BusinessIndicatorKey fromJson(String json) {
     final result = const IIndicatorKeyConvert().fromJson(json);
-    if (result is FlexiBusinessIndicatorKey) {
+    if (result is BusinessIndicatorKey) {
       return result;
     }
-    // 如果解析结果不是 FlexiBusinessIndicatorKey，返回一个默认值
+    // 如果解析结果不是 BusinessIndicatorKey，返回一个默认值
     // 这种情况理论上不应该发生，但为了类型安全需要处理
-    return FlexiBusinessIndicatorKey(result.id, label: result.label);
+    return BusinessIndicatorKey(result.id, label: result.label);
   }
 
   @override
-  String toJson(FlexiBusinessIndicatorKey key) {
+  String toJson(BusinessIndicatorKey key) {
     return const IIndicatorKeyConvert().toJson(key);
   }
 }
@@ -1010,9 +1006,9 @@ const FlexiOverlaySerializable = JsonSerializable(
 // ignore: constant_identifier_names
 const FlexiIndicatorSerializable = JsonSerializable(
   converters: [
-    FlexiBusinessIndicatorKeyConvert(),
-    FlexiDataIndicatorKeyConvert(),
-    FlexiIndicatorKeyConvert(),
+    BusinessIndicatorKeyConvert(),
+    DataIndicatorKeyConvert(),
+    NormalIndicatorKeyConvert(),
     IIndicatorKeyConvert(),
     PaintModeConverter(),
     TimeBarChartTypesConverter(),

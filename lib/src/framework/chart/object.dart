@@ -142,12 +142,22 @@ abstract class PaintObject<T extends Indicator<IIndicatorKey>> extends Indicator
   String get logTag => '${super.logTag}\t${indicator.key.toString()}';
 }
 
+/// 普通指标绘制对象
+///
+/// 用于 Candle、Time、Main、Volume 等框架内置指标，不占 slot。
+abstract class NormalPaintObject<T extends NormalIndicator> extends PaintObject<T> {
+  NormalPaintObject({
+    required super.context,
+    required super.indicator,
+  });
+}
+
 /// 数据指标绘制对象
 ///
 /// 用于 KDJ、MACD、MA 等需要 precompute 并写入 FlexiCandleModel.slots 的指标。
 /// 持有 [dataIndex]，用于在 slots 中存取计算数据。
-abstract class PaintDataObject<T extends PaintDataIndicator> extends PaintObject<T> {
-  PaintDataObject({
+abstract class DataPaintObject<T extends DataIndicator> extends PaintObject<T> {
+  DataPaintObject({
     required super.context,
     required super.indicator,
   }) : dataIndex = context.getDataIndex(indicator.key) ?? -1;
@@ -161,8 +171,8 @@ abstract class PaintDataObject<T extends PaintDataIndicator> extends PaintObject
 ///
 /// 用于 Trade 等由业务数据或用户操作驱动的指标，不占 slot。
 /// 子类可按需 override [loadBusinessData] 加载业务数据。
-abstract class PaintBusinessObject<T extends PaintBusinessIndicator> extends PaintObject<T> {
-  PaintBusinessObject({
+abstract class BusinessPaintObject<T extends BusinessIndicator> extends PaintObject<T> {
+  BusinessPaintObject({
     required super.context,
     required super.indicator,
   });
@@ -177,8 +187,8 @@ abstract class PaintBusinessObject<T extends PaintBusinessIndicator> extends Pai
 
 /// 蜡烛图绘制对象
 ///
-/// 使用 [FlexiIndicatorKey]，属于基础/系统指标，不占 slot。
-abstract class CandleBasePaintObject<T extends CandleBaseIndicator> extends PaintObject<T> {
+/// 使用 [NormalIndicatorKey]，属于基础/系统指标，不占 slot。
+abstract class CandleBasePaintObject<T extends CandleBaseIndicator> extends NormalPaintObject<T> {
   CandleBasePaintObject({
     required super.context,
     required super.indicator,
@@ -205,8 +215,8 @@ abstract class CandleBasePaintObject<T extends CandleBaseIndicator> extends Pain
 
 /// 时间轴指标绘制对象
 ///
-/// 使用 [FlexiIndicatorKey]，属于基础/系统指标，不占 slot。
-abstract class TimeBasePaintObject<T extends TimeBaseIndicator> extends PaintObject<T> {
+/// 使用 [NormalIndicatorKey]，属于基础/系统指标，不占 slot。
+abstract class TimeBasePaintObject<T extends TimeBaseIndicator> extends NormalPaintObject<T> {
   TimeBasePaintObject({
     required super.context,
     required super.indicator,
@@ -217,9 +227,9 @@ abstract class TimeBasePaintObject<T extends TimeBaseIndicator> extends PaintObj
 
 /// 主区绘制对象
 ///
-/// 使用 [FlexiIndicatorKey]，属于基础/系统指标，不占 slot。
+/// 使用 [NormalIndicatorKey]，属于基础/系统指标，不占 slot。
 /// [children] 存储主区内的所有子绘制对象。
-final class MainPaintObject<T extends MainPaintObjectIndicator> extends PaintObject<T> {
+final class MainPaintObject<T extends MainPaintObjectIndicator> extends NormalPaintObject<T> {
   MainPaintObject({
     required super.context,
     required super.indicator,

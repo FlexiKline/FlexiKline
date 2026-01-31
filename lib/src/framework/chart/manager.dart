@@ -52,9 +52,9 @@ final class IndicatorPaintObjectManager with KlineLog {
 
   /// 动态维护指标计算数据存储位置
   ///
-  /// 仅对 [FlexiDataIndicatorKey]（数据指标）分配 slot。
+  /// 仅对 [DataIndicatorKey]（数据指标）分配 slot。
   /// 注：仅能通过 [configuration] 配置去计算指标计算数据存储位置。
-  final Map<FlexiDataIndicatorKey, int> _indicatorDataIndexs = {};
+  final Map<DataIndicatorKey, int> _indicatorDataIndexs = {};
 
   late final FixedHashQueue<PaintObject> _subPaintObjectQueue;
 
@@ -108,8 +108,8 @@ final class IndicatorPaintObjectManager with KlineLog {
   ) {
     _mainIndicatorBuilders[key] = builder;
     _supportMainIndicatorKeys = null;
-    // 仅对 FlexiDataIndicatorKey 分配 slot
-    if (key is FlexiDataIndicatorKey && !_indicatorDataIndexs.containsKey(key)) {
+    // 仅对 DataIndicatorKey 分配 slot
+    if (key is DataIndicatorKey && !_indicatorDataIndexs.containsKey(key)) {
       logi('registerMainIndicatorBuilder $key:${_indicatorDataIndexs.length}');
       _indicatorDataIndexs[key] = _indicatorDataIndexs.length;
     }
@@ -121,8 +121,8 @@ final class IndicatorPaintObjectManager with KlineLog {
   ) {
     _subIndicatorBuilders[key] = builder;
     _supportSubIndicatorKeys = null;
-    // 仅对 FlexiDataIndicatorKey 分配 slot
-    if (key is FlexiDataIndicatorKey && !_indicatorDataIndexs.containsKey(key)) {
+    // 仅对 DataIndicatorKey 分配 slot
+    if (key is DataIndicatorKey && !_indicatorDataIndexs.containsKey(key)) {
       logi('registerSubIndicatorBuilder $key:${_indicatorDataIndexs.length}');
       _indicatorDataIndexs[key] = _indicatorDataIndexs.length;
     }
@@ -136,7 +136,7 @@ final class IndicatorPaintObjectManager with KlineLog {
     return _subIndicatorBuilders.containsKey(key) || key == timeIndicatorKey;
   }
 
-  int? getIndicatorDataIndex(FlexiDataIndicatorKey key) {
+  int? getIndicatorDataIndex(DataIndicatorKey key) {
     return _indicatorDataIndexs[key];
   }
 

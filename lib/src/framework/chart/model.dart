@@ -53,12 +53,12 @@ abstract class Indicator<K extends IIndicatorKey> implements IPrecomputable {
   dynamic get calcParam => null;
 }
 
-/// 数据指标配置基类
+/// 普通指标配置基类
 ///
-/// 用于 KDJ、MACD、MA 等需要 precompute 并写入 FlexiCandleModel.slots 的指标。
-/// 注册时会分配 dataIndex，对应 [PaintDataObject]。
-abstract class PaintDataIndicator extends Indicator<FlexiDataIndicatorKey> {
-  PaintDataIndicator({
+/// 用于 Candle、Time、Main、Volume 等框架内置指标，不占 slot。
+/// 对应 [NormalPaintObject]。
+abstract class NormalIndicator extends Indicator<NormalIndicatorKey> {
+  NormalIndicator({
     required super.key,
     required super.height,
     required super.padding,
@@ -67,15 +67,32 @@ abstract class PaintDataIndicator extends Indicator<FlexiDataIndicatorKey> {
   });
 
   @override
-  PaintDataObject<PaintDataIndicator> createPaintObject(IPaintContext context);
+  NormalPaintObject<NormalIndicator> createPaintObject(IPaintContext context);
+}
+
+/// 数据指标配置基类
+///
+/// 用于 KDJ、MACD、MA 等需要 precompute 并写入 FlexiCandleModel.slots 的指标。
+/// 注册时会分配 dataIndex，对应 [DataPaintObject]。
+abstract class DataIndicator extends Indicator<DataIndicatorKey> {
+  DataIndicator({
+    required super.key,
+    required super.height,
+    required super.padding,
+    super.paintMode,
+    super.zIndex,
+  });
+
+  @override
+  DataPaintObject<DataIndicator> createPaintObject(IPaintContext context);
 }
 
 /// 业务指标配置基类
 ///
 /// 用于 Trade 等由业务数据或用户操作驱动的指标，不占 slot。
-/// 对应 [PaintBusinessObject]。
-abstract class PaintBusinessIndicator extends Indicator<FlexiBusinessIndicatorKey> {
-  PaintBusinessIndicator({
+/// 对应 [BusinessPaintObject]。
+abstract class BusinessIndicator extends Indicator<BusinessIndicatorKey> {
+  BusinessIndicator({
     required super.key,
     required super.height,
     required super.padding,
@@ -84,15 +101,15 @@ abstract class PaintBusinessIndicator extends Indicator<FlexiBusinessIndicatorKe
   });
 
   @override
-  PaintBusinessObject<PaintBusinessIndicator> createPaintObject(
+  BusinessPaintObject<BusinessIndicator> createPaintObject(
     IPaintContext context,
   );
 }
 
 /// 蜡烛指标配置基类
 ///
-/// 使用 [FlexiIndicatorKey]，属于基础/系统指标，不占 slot。
-abstract class CandleBaseIndicator extends Indicator<FlexiIndicatorKey> {
+/// 使用 [NormalIndicatorKey]，属于基础/系统指标，不占 slot。
+abstract class CandleBaseIndicator extends NormalIndicator {
   CandleBaseIndicator({
     required super.height,
     required super.padding,
@@ -108,8 +125,8 @@ abstract class CandleBaseIndicator extends Indicator<FlexiIndicatorKey> {
 
 /// 时间指标配置基类
 ///
-/// 使用 [FlexiIndicatorKey]，属于基础/系统指标，不占 slot。
-abstract class TimeBaseIndicator extends Indicator<FlexiIndicatorKey> {
+/// 使用 [NormalIndicatorKey]，属于基础/系统指标，不占 slot。
+abstract class TimeBaseIndicator extends NormalIndicator {
   TimeBaseIndicator({
     required super.height,
     required super.padding,
@@ -128,11 +145,11 @@ abstract class TimeBaseIndicator extends Indicator<FlexiIndicatorKey> {
 
 /// MainIndicator 的配置
 ///
-/// 使用 [FlexiIndicatorKey]，属于基础/系统指标，不占 slot。
+/// 使用 [NormalIndicatorKey]，属于基础/系统指标，不占 slot。
 /// [children] 存储当前主区已选中的子指标 Key 集合。
 @CopyWith()
 @FlexiIndicatorSerializable
-class MainPaintObjectIndicator<T extends Indicator<IIndicatorKey>> extends Indicator<FlexiIndicatorKey> {
+class MainPaintObjectIndicator<T extends Indicator<IIndicatorKey>> extends NormalIndicator {
   MainPaintObjectIndicator({
     required this.size,
     required super.padding,

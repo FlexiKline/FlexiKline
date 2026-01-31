@@ -246,8 +246,8 @@ abstract interface class IPaintContext implements IStorage, ILogger {
 
   /// 获取 [key] 对应的计算数据存储位置
   ///
-  /// 仅对 [FlexiDataIndicatorKey]（数据指标）有效。
-  int? getDataIndex(FlexiDataIndicatorKey key);
+  /// 仅对 [DataIndicatorKey]（数据指标）有效。
+  int? getDataIndex(DataIndicatorKey key);
 
   /// 获取指标数量
   int get indicatorCount;
