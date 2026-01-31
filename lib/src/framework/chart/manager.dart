@@ -40,7 +40,7 @@ final class IndicatorPaintObjectManager with KlineLog {
       }
     }
     _flexiKlineConfig = configuration.getFlexiKlineConfig();
-    _subPaintObjectQueue = FixedHashQueue<PaintObjectBox>(subIndicatorMaxCount);
+    _subPaintObjectQueue = FixedHashQueue<PaintObject>(subIndicatorMaxCount);
   }
 
   @override
@@ -50,12 +50,11 @@ final class IndicatorPaintObjectManager with KlineLog {
   late FlexiKlineConfig _flexiKlineConfig;
   FlexiKlineConfig get flexiKlineConfig => _flexiKlineConfig;
 
-  /// 动态维护指标计算数据存储位置.
-  /// 注: 仅能通过[configuration]配置去计算指标计算数据存储位置.
-  final Map<IIndicatorKey, int> _indicatorDataIndexs = {
-    // candleIndicatorKey: 0,
-    // timeIndicatorKey: 1,
-  };
+  /// 动态维护指标计算数据存储位置
+  ///
+  /// 仅对 [FlexiDataIndicatorKey]（数据指标）分配 slot。
+  /// 注：仅能通过 [configuration] 配置去计算指标计算数据存储位置。
+  final Map<FlexiDataIndicatorKey, int> _indicatorDataIndexs = {};
 
   late final FixedHashQueue<PaintObject> _subPaintObjectQueue;
 
@@ -109,7 +108,8 @@ final class IndicatorPaintObjectManager with KlineLog {
   ) {
     _mainIndicatorBuilders[key] = builder;
     _supportMainIndicatorKeys = null;
-    if (!_indicatorDataIndexs.containsKey(key)) {
+    // 仅对 FlexiDataIndicatorKey 分配 slot
+    if (key is FlexiDataIndicatorKey && !_indicatorDataIndexs.containsKey(key)) {
       logi('registerMainIndicatorBuilder $key:${_indicatorDataIndexs.length}');
       _indicatorDataIndexs[key] = _indicatorDataIndexs.length;
     }
@@ -121,7 +121,8 @@ final class IndicatorPaintObjectManager with KlineLog {
   ) {
     _subIndicatorBuilders[key] = builder;
     _supportSubIndicatorKeys = null;
-    if (!_indicatorDataIndexs.containsKey(key)) {
+    // 仅对 FlexiDataIndicatorKey 分配 slot
+    if (key is FlexiDataIndicatorKey && !_indicatorDataIndexs.containsKey(key)) {
       logi('registerSubIndicatorBuilder $key:${_indicatorDataIndexs.length}');
       _indicatorDataIndexs[key] = _indicatorDataIndexs.length;
     }
@@ -135,8 +136,8 @@ final class IndicatorPaintObjectManager with KlineLog {
     return _subIndicatorBuilders.containsKey(key) || key == timeIndicatorKey;
   }
 
-  int? getIndicatorDataIndex(IIndicatorKey key) {
-    return _indicatorDataIndexs.getItem(key);
+  int? getIndicatorDataIndex(FlexiDataIndicatorKey key) {
+    return _indicatorDataIndexs[key];
   }
 
   int get indicatorCount => _indicatorDataIndexs.length;

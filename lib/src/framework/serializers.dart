@@ -24,21 +24,114 @@ import '../utils/convert_util.dart';
 import 'chart/indicator.dart';
 import 'draw/overlay.dart';
 
+/// IndicatorKey 序列化转换器
+///
+/// 格式：`type:id:label`，其中 type 为 `base` | `data` | `business`。
+/// - toJson：根据 Key 类型写入对应前缀。
+/// - fromJson：根据 type 前缀还原为对应 Key 子类型。
 class IIndicatorKeyConvert implements JsonConverter<IIndicatorKey, String> {
   const IIndicatorKeyConvert();
 
   @override
   IIndicatorKey fromJson(String json) {
-    final splits = json.split(':');
-    final id = splits.getItem(0);
-    if (id == null || id.isEmpty) return unknownIndicatorKey;
-    final label = splits.getItem(1);
-    return FlexiIndicatorKey(id, label: label);
+    final parts = json.split(':');
+    // 格式要求至少 3 段：type:id:label
+    if (parts.length < 3) return unknownIndicatorKey;
+
+    final type = parts[0];
+    final id = parts[1];
+    if (id.isEmpty) return unknownIndicatorKey;
+
+    // 第三段起整体视为 label（兼容 label 含 `:` 的情况）
+    final label = parts.sublist(2).join(':');
+
+    return switch (type) {
+      'data' => FlexiDataIndicatorKey(id, label: label),
+      'business' => FlexiBusinessIndicatorKey(id, label: label),
+      _ => FlexiIndicatorKey(id, label: label),
+    };
   }
 
   @override
   String toJson(IIndicatorKey key) {
-    return '${key.id}:${key.label}';
+    final prefix = switch (key) {
+      FlexiDataIndicatorKey() => 'data',
+      FlexiBusinessIndicatorKey() => 'business',
+      FlexiIndicatorKey() => 'base',
+    };
+    return '$prefix:${key.id}:${key.label}';
+  }
+}
+
+/// FlexiIndicatorKey 序列化转换器
+///
+/// 专门用于处理 FlexiIndicatorKey 类型的序列化，
+/// 让 json_serializable 能够识别并生成正确的序列化代码。
+class FlexiIndicatorKeyConvert implements JsonConverter<FlexiIndicatorKey, String> {
+  const FlexiIndicatorKeyConvert();
+
+  @override
+  FlexiIndicatorKey fromJson(String json) {
+    final result = const IIndicatorKeyConvert().fromJson(json);
+    if (result is FlexiIndicatorKey) {
+      return result;
+    }
+    // 如果解析结果不是 FlexiIndicatorKey，返回一个默认值
+    // 这种情况理论上不应该发生，但为了类型安全需要处理
+    return FlexiIndicatorKey(result.id, label: result.label);
+  }
+
+  @override
+  String toJson(FlexiIndicatorKey key) {
+    return const IIndicatorKeyConvert().toJson(key);
+  }
+}
+
+/// FlexiDataIndicatorKey 序列化转换器
+///
+/// 专门用于处理 FlexiDataIndicatorKey 类型的序列化，
+/// 让 json_serializable 能够识别并生成正确的序列化代码。
+class FlexiDataIndicatorKeyConvert implements JsonConverter<FlexiDataIndicatorKey, String> {
+  const FlexiDataIndicatorKeyConvert();
+
+  @override
+  FlexiDataIndicatorKey fromJson(String json) {
+    final result = const IIndicatorKeyConvert().fromJson(json);
+    if (result is FlexiDataIndicatorKey) {
+      return result;
+    }
+    // 如果解析结果不是 FlexiDataIndicatorKey，返回一个默认值
+    // 这种情况理论上不应该发生，但为了类型安全需要处理
+    return FlexiDataIndicatorKey(result.id, label: result.label);
+  }
+
+  @override
+  String toJson(FlexiDataIndicatorKey key) {
+    return const IIndicatorKeyConvert().toJson(key);
+  }
+}
+
+/// FlexiBusinessIndicatorKey 序列化转换器
+///
+/// 专门用于处理 FlexiBusinessIndicatorKey 类型的序列化，
+/// 让 json_serializable 能够识别并生成正确的序列化代码。
+class FlexiBusinessIndicatorKeyConvert implements JsonConverter<FlexiBusinessIndicatorKey, String> {
+  const FlexiBusinessIndicatorKeyConvert();
+
+  @override
+  FlexiBusinessIndicatorKey fromJson(String json) {
+    final result = const IIndicatorKeyConvert().fromJson(json);
+    if (result is FlexiBusinessIndicatorKey) {
+      return result;
+    }
+    // 如果解析结果不是 FlexiBusinessIndicatorKey，返回一个默认值
+    // 这种情况理论上不应该发生，但为了类型安全需要处理
+    return FlexiBusinessIndicatorKey(result.id, label: result.label);
+  }
+
+  @override
+  String toJson(FlexiBusinessIndicatorKey key) {
+    return const IIndicatorKeyConvert().toJson(key);
   }
 }
 
@@ -917,6 +1010,9 @@ const FlexiOverlaySerializable = JsonSerializable(
 // ignore: constant_identifier_names
 const FlexiIndicatorSerializable = JsonSerializable(
   converters: [
+    FlexiBusinessIndicatorKeyConvert(),
+    FlexiDataIndicatorKeyConvert(),
+    FlexiIndicatorKeyConvert(),
     IIndicatorKeyConvert(),
     PaintModeConverter(),
     TimeBarChartTypesConverter(),

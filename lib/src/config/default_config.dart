@@ -552,7 +552,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
   }
 
   MainPaintObjectIndicator genMainIndicator(
-    MainPaintObjectIndicator<PaintObjectIndicator>? mainIndicator,
+    MainPaintObjectIndicator<Indicator>? mainIndicator,
   );
 
   CandleIndicator genCandleIndicator(CandleIndicator? instance) {

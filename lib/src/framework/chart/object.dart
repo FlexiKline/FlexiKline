@@ -14,10 +14,11 @@
 
 part of 'indicator.dart';
 
-/// IndicatorObject: 保存Indicator配置
-/// 提供[Indicator]的所有属性
+/// IndicatorObject: 保存 Indicator 配置
+///
+/// 提供 [Indicator] 的所有属性。
 abstract class IndicatorObject<T extends Indicator>
-    implements Comparable<IndicatorObject<T>>, IPaintBoundingBox, IPaintDataInit, IPaintObject {
+    implements Comparable<IndicatorObject<T>>, IPaintBoundingBox, IPaintDataInit {
   IndicatorObject(this._indicator, this._context);
 
   T _indicator;
@@ -42,7 +43,7 @@ abstract class IndicatorObject<T extends Indicator>
   Color get shortColor => theme.short;
 
   @override
-  int compareTo(IndicatorObject<T> other) {
+  int compareTo(IndicatorObject other) {
     return indicator.zIndex.compareTo(other.indicator.zIndex);
   }
 
@@ -56,29 +57,23 @@ abstract class IndicatorObject<T extends Indicator>
 }
 
 /// PaintObject
-/// 通过混入边界计算与数据初始化计算, 简化PaintObject接口.
-/// 1. 定义PaintObject行为: 通过实现对应的接口, 实现Chart的配置, 计算, 绘制, Cross
-/// 2. [_parent]保存当前绘制对象的父级
-abstract class PaintObject<T extends Indicator> extends IndicatorObject
-    with KlineLog, PaintObjectBoundingMixin, PaintObjectDataInitMixin {
+///
+/// 通过混入边界计算与数据初始化计算，简化 PaintObject 接口。
+/// 1. 定义 PaintObject 行为：通过实现对应的接口，实现 Chart 的配置、计算、绘制、Cross。
+/// 2. [_parent] 保存当前绘制对象的父级。
+abstract class PaintObject<T extends Indicator<IIndicatorKey>> extends IndicatorObject<T>
+    with KlineLog, PaintObjectBoundingMixin<T>, PaintObjectDataInitMixin<T>
+    implements IPaintObject {
   PaintObject({
     required T indicator,
     required IPaintContext context,
-  })  : _dataIndex = context.getDataIndex(indicator.key),
-        super(indicator, context) {
+  }) : super(indicator, context) {
     if (context is KlineLog) {
       loggerDelegate = (context as KlineLog).loggerDelegate;
     }
   }
 
-  // 当前绘制对象的指标计算数据存储下标
-  final int? _dataIndex;
-  int get dataIndex => _dataIndex ?? -1;
-
-  @override
-  T get indicator => super.indicator as T;
-
-  // 父级PaintObject. 主要用于给其子级PaintObject限定范围.
+  // 父级 PaintObject，主要用于给其子级 PaintObject 限定范围。
   PaintObject? _parent;
 
   bool get hasParentObject => _parent != null;
@@ -113,8 +108,9 @@ abstract class PaintObject<T extends Indicator> extends IndicatorObject
   @override
   void precompute(Range range, {bool reset = false}) {}
 
-  /// 处理Tap事件
-  /// 注: 自行处理[position]位置的点击事件
+  /// 处理 Tap 事件
+  ///
+  /// 注：自行处理 [position] 位置的点击事件。
   bool handleTap(Offset position) => false;
 
   /// 触发重新绘制
@@ -146,25 +142,49 @@ abstract class PaintObject<T extends Indicator> extends IndicatorObject
   String get logTag => '${super.logTag}\t${indicator.key.toString()}';
 }
 
-/// PaintObjectBox
-abstract class PaintObjectBox<T extends PaintObjectIndicator> extends PaintObject {
-  PaintObjectBox({
+/// 数据指标绘制对象
+///
+/// 用于 KDJ、MACD、MA 等需要 precompute 并写入 FlexiCandleModel.slots 的指标。
+/// 持有 [dataIndex]，用于在 slots 中存取计算数据。
+abstract class PaintDataObject<T extends PaintDataIndicator> extends PaintObject<T> {
+  PaintDataObject({
     required super.context,
-    required T super.indicator,
+    required super.indicator,
+  }) : dataIndex = context.getDataIndex(indicator.key) ?? -1;
+  // TODO: 这里需要优化，如果数据索引不存在，则返回 -1，导致绘制失败。
+
+  /// 当前绘制对象的指标计算数据存储下标
+  late final int dataIndex;
+}
+
+/// 业务指标绘制对象
+///
+/// 用于 Trade 等由业务数据或用户操作驱动的指标，不占 slot。
+/// 子类可按需 override [loadBusinessData] 加载业务数据。
+abstract class PaintBusinessObject<T extends PaintBusinessIndicator> extends PaintObject<T> {
+  PaintBusinessObject({
+    required super.context,
+    required super.indicator,
   });
 
-  @override
-  T get indicator => _indicator as T;
+  /// 加载业务数据
+  ///
+  /// 框架在适当时机（如首次显示、数据刷新）调用。
+  /// 子类按需 override 实现具体加载逻辑。
+  @protected
+  void loadBusinessData() {}
 }
 
 /// 蜡烛图绘制对象
-abstract class CandleBasePaintObject<T extends CandleBaseIndicator> extends PaintObject {
+///
+/// 使用 [FlexiIndicatorKey]，属于基础/系统指标，不占 slot。
+abstract class CandleBasePaintObject<T extends CandleBaseIndicator> extends PaintObject<T> {
   CandleBasePaintObject({
     required super.context,
-    required T super.indicator,
+    required super.indicator,
   });
 
-  /// 获取当前蜡烛图的绘制类型.
+  /// 获取当前蜡烛图的绘制类型
   FlexiChartType getChartType();
 
   /// 是否在蜡烛图类型为线图时隐藏指标
@@ -181,30 +201,32 @@ abstract class CandleBasePaintObject<T extends CandleBaseIndicator> extends Pain
       (_context as ChartBinding).setChartZoomSlideBarRect(rect);
     }
   }
-
-  @override
-  T get indicator => _indicator as T;
 }
 
 /// 时间轴指标绘制对象
-abstract class TimeBasePaintObject<T extends TimeBaseIndicator> extends PaintObject {
+///
+/// 使用 [FlexiIndicatorKey]，属于基础/系统指标，不占 slot。
+abstract class TimeBasePaintObject<T extends TimeBaseIndicator> extends PaintObject<T> {
   TimeBasePaintObject({
     required super.context,
-    required T super.indicator,
+    required super.indicator,
   });
 
   DrawPosition get position => indicator.position;
-
-  @override
-  T get indicator => _indicator as T;
 }
 
 /// 主区绘制对象
-final class MainPaintObject<T extends MainPaintObjectIndicator> extends PaintObject {
+///
+/// 使用 [FlexiIndicatorKey]，属于基础/系统指标，不占 slot。
+/// [children] 存储主区内的所有子绘制对象。
+final class MainPaintObject<T extends MainPaintObjectIndicator> extends PaintObject<T> {
   MainPaintObject({
     required super.context,
-    required T super.indicator,
-  }) : children = SortableHashSet<PaintObject>.from(<PaintObject>[], (a, b) => a.compareTo(b));
+    required super.indicator,
+  }) : children = SortableHashSet<PaintObject>.from(
+          <PaintObject>[],
+          (a, b) => a.compareTo(b),
+        );
 
   final SortableHashSet<PaintObject> children;
 
@@ -231,12 +253,6 @@ final class MainPaintObject<T extends MainPaintObjectIndicator> extends PaintObj
     // 1. 优先检查配置项hideIndicatorsWhenLineChart是否为true, 如果为true, 则检查当前图表类型是否为线图
     return candleObject.hideIndicatorsWhenLineChart && candleObject.getChartType().isLine;
   }
-
-  @override
-  T get indicator => _indicator as T;
-
-  @override
-  int get dataIndex => -1;
 
   Size? _tmpSize;
   Size get size => _tmpSize ?? indicator.size;

@@ -7,7 +7,7 @@ part of 'indicator.dart';
 // **************************************************************************
 
 abstract class _$MainPaintObjectIndicatorCWProxy<
-    T extends PaintObjectIndicator> {
+    T extends Indicator<IIndicatorKey>> {
   MainPaintObjectIndicator<T> size(Size size);
 
   MainPaintObjectIndicator<T> padding(EdgeInsets padding);
@@ -31,7 +31,7 @@ abstract class _$MainPaintObjectIndicatorCWProxy<
 }
 
 /// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfMainPaintObjectIndicator.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfMainPaintObjectIndicator.copyWith.fieldName(...)`
-class _$MainPaintObjectIndicatorCWProxyImpl<T extends PaintObjectIndicator>
+class _$MainPaintObjectIndicatorCWProxyImpl<T extends Indicator<IIndicatorKey>>
     implements _$MainPaintObjectIndicatorCWProxy<T> {
   const _$MainPaintObjectIndicatorCWProxyImpl(this._value);
 
@@ -87,7 +87,7 @@ class _$MainPaintObjectIndicatorCWProxyImpl<T extends PaintObjectIndicator>
   }
 }
 
-extension $MainPaintObjectIndicatorCopyWith<T extends PaintObjectIndicator>
+extension $MainPaintObjectIndicatorCopyWith<T extends Indicator<IIndicatorKey>>
     on MainPaintObjectIndicator<T> {
   /// Returns a callable class that can be used as follows: `instanceOfMainPaintObjectIndicator.copyWith(...)` or like so:`instanceOfMainPaintObjectIndicator.copyWith.fieldName(...)`.
   // ignore: library_private_types_in_public_api
@@ -100,7 +100,7 @@ extension $MainPaintObjectIndicatorCopyWith<T extends PaintObjectIndicator>
 // **************************************************************************
 
 MainPaintObjectIndicator<T>
-    _$MainPaintObjectIndicatorFromJson<T extends PaintObjectIndicator>(
+    _$MainPaintObjectIndicatorFromJson<T extends Indicator<IIndicatorKey>>(
             Map<String, dynamic> json) =>
         MainPaintObjectIndicator<T>(
           size: const SizeConverter()
@@ -114,7 +114,7 @@ MainPaintObjectIndicator<T>
         )..height = (json['height'] as num).toDouble();
 
 Map<String, dynamic>
-    _$MainPaintObjectIndicatorToJson<T extends PaintObjectIndicator>(
+    _$MainPaintObjectIndicatorToJson<T extends Indicator<IIndicatorKey>>(
             MainPaintObjectIndicator<T> instance) =>
         <String, dynamic>{
           'padding': const EdgeInsetsConverter().toJson(instance.padding),

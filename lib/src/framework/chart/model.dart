@@ -16,15 +16,16 @@ part of 'indicator.dart';
 
 /// 指标基础配置
 ///
-/// [key] 唯一指定Indicator
-/// [height] 指标图高度
-/// [padding] 限制指标图绘制区域
-/// [paintMode] 控制多指标图一起的绘制方式.
-///   [PaintMode.combine] 多指标时, 统一使用父Indicator的高度和padding.
-///   [PaintMode.alone] 多指标时, 使用自己的height进行绘制.
-/// [zIndex] 确定指标在绘制时的顺序, 按升序排序; 数值大的将会绘制数值小的上面;
-///   主要在[MainPaintObjectIndicator]中会有用, 确定多个指标在同一区域的绘制顺序.
-abstract class Indicator implements IPrecomputable {
+/// [K] 指标 Key 类型，用于区分指标类别（基础/数据/业务）。
+/// [key] 唯一指定 Indicator。
+/// [height] 指标图高度。
+/// [padding] 限制指标图绘制区域。
+/// [paintMode] 控制多指标图一起的绘制方式。
+///   [PaintMode.combine] 多指标时，统一使用父 Indicator 的高度和 padding。
+///   [PaintMode.alone] 多指标时，使用自己的 height 进行绘制。
+/// [zIndex] 确定指标在绘制时的顺序，按升序排序；数值大的将会绘制在数值小的上面；
+///   主要在 [MainPaintObjectIndicator] 中有用，确定多个指标在同一区域的绘制顺序。
+abstract class Indicator<K extends IIndicatorKey> implements IPrecomputable {
   Indicator({
     required this.key,
     required this.height,
@@ -33,7 +34,7 @@ abstract class Indicator implements IPrecomputable {
     this.zIndex = 0,
   });
 
-  final IIndicatorKey key;
+  final K key;
 
   double height;
 
@@ -44,7 +45,7 @@ abstract class Indicator implements IPrecomputable {
   final int zIndex;
 
   @factory
-  PaintObject createPaintObject(IPaintContext context);
+  PaintObject<Indicator<K>> createPaintObject(IPaintContext context);
 
   Map<String, dynamic> toJson() => const {};
 
@@ -52,11 +53,12 @@ abstract class Indicator implements IPrecomputable {
   dynamic get calcParam => null;
 }
 
-/// 绘制对象的配置
-/// 通过Indicator去创建PaintObject接口
-/// 缓存Indicator对应创建的paintObject.
-abstract class PaintObjectIndicator extends Indicator {
-  PaintObjectIndicator({
+/// 数据指标配置基类
+///
+/// 用于 KDJ、MACD、MA 等需要 precompute 并写入 FlexiCandleModel.slots 的指标。
+/// 注册时会分配 dataIndex，对应 [PaintDataObject]。
+abstract class PaintDataIndicator extends Indicator<FlexiDataIndicatorKey> {
+  PaintDataIndicator({
     required super.key,
     required super.height,
     required super.padding,
@@ -65,11 +67,32 @@ abstract class PaintObjectIndicator extends Indicator {
   });
 
   @override
-  PaintObjectBox createPaintObject(IPaintContext context);
+  PaintDataObject<PaintDataIndicator> createPaintObject(IPaintContext context);
+}
+
+/// 业务指标配置基类
+///
+/// 用于 Trade 等由业务数据或用户操作驱动的指标，不占 slot。
+/// 对应 [PaintBusinessObject]。
+abstract class PaintBusinessIndicator extends Indicator<FlexiBusinessIndicatorKey> {
+  PaintBusinessIndicator({
+    required super.key,
+    required super.height,
+    required super.padding,
+    super.paintMode,
+    super.zIndex,
+  });
+
+  @override
+  PaintBusinessObject<PaintBusinessIndicator> createPaintObject(
+    IPaintContext context,
+  );
 }
 
 /// 蜡烛指标配置基类
-abstract class CandleBaseIndicator extends Indicator {
+///
+/// 使用 [FlexiIndicatorKey]，属于基础/系统指标，不占 slot。
+abstract class CandleBaseIndicator extends Indicator<FlexiIndicatorKey> {
   CandleBaseIndicator({
     required super.height,
     required super.padding,
@@ -78,11 +101,15 @@ abstract class CandleBaseIndicator extends Indicator {
   }) : super(key: candleIndicatorKey);
 
   @override
-  CandleBasePaintObject createPaintObject(covariant IPaintContext context);
+  CandleBasePaintObject<CandleBaseIndicator> createPaintObject(
+    covariant IPaintContext context,
+  );
 }
 
 /// 时间指标配置基类
-abstract class TimeBaseIndicator extends Indicator {
+///
+/// 使用 [FlexiIndicatorKey]，属于基础/系统指标，不占 slot。
+abstract class TimeBaseIndicator extends Indicator<FlexiIndicatorKey> {
   TimeBaseIndicator({
     required super.height,
     required super.padding,
@@ -94,13 +121,18 @@ abstract class TimeBaseIndicator extends Indicator {
   final DrawPosition position;
 
   @override
-  TimeBasePaintObject createPaintObject(IPaintContext context);
+  TimeBasePaintObject<TimeBaseIndicator> createPaintObject(
+    IPaintContext context,
+  );
 }
 
-/// MainIndicator的配置.
+/// MainIndicator 的配置
+///
+/// 使用 [FlexiIndicatorKey]，属于基础/系统指标，不占 slot。
+/// [children] 存储当前主区已选中的子指标 Key 集合。
 @CopyWith()
 @FlexiIndicatorSerializable
-class MainPaintObjectIndicator<T extends PaintObjectIndicator> extends Indicator {
+class MainPaintObjectIndicator<T extends Indicator<IIndicatorKey>> extends Indicator<FlexiIndicatorKey> {
   MainPaintObjectIndicator({
     required this.size,
     required super.padding,
@@ -115,7 +147,7 @@ class MainPaintObjectIndicator<T extends PaintObjectIndicator> extends Indicator
   double get height => size.height;
   final bool drawBelowTipsArea;
 
-  /// 当前主区已选中指标集合(由PaintObjectManager管理)
+  /// 当前主区已选中指标集合（由 PaintObjectManager 管理）
   final Set<IIndicatorKey> children;
 
   @override
@@ -123,8 +155,7 @@ class MainPaintObjectIndicator<T extends PaintObjectIndicator> extends Indicator
     return MainPaintObject(context: context, indicator: this);
   }
 
-  factory MainPaintObjectIndicator.fromJson(Map<String, dynamic> json) =>
-      _$MainPaintObjectIndicatorFromJson(json);
+  factory MainPaintObjectIndicator.fromJson(Map<String, dynamic> json) => _$MainPaintObjectIndicatorFromJson(json);
 
   @override
   Map<String, dynamic> toJson() => _$MainPaintObjectIndicatorToJson(this);

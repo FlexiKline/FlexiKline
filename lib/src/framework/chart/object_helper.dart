@@ -107,7 +107,9 @@ extension IndicatorObjectExt on IndicatorObject {
 }
 
 /// 绘制对象混入边界计算的通用扩展
-mixin PaintObjectBoundingMixin on IndicatorObject implements IPaintBoundingBox {
+mixin PaintObjectBoundingMixin<T extends Indicator<IIndicatorKey>>
+    on IndicatorObject<T>
+    implements IPaintBoundingBox {
   bool get drawInMain => slot == mainIndicatorSlot;
   bool get drawInSub => slot > mainIndicatorSlot;
 
@@ -207,7 +209,9 @@ mixin PaintObjectBoundingMixin on IndicatorObject implements IPaintBoundingBox {
 }
 
 /// 绘制对象混入数据初始化的通用扩展
-mixin PaintObjectDataInitMixin on IndicatorObject implements IPaintDataInit {
+mixin PaintObjectDataInitMixin<T extends Indicator<IIndicatorKey>>
+    on IndicatorObject<T>
+    implements IPaintDataInit {
   int? _start;
   int? _end;
 

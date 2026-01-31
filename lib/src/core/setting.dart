@@ -397,7 +397,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
   }
 
   @override
-  int? getDataIndex(IIndicatorKey key) {
+  int? getDataIndex(FlexiDataIndicatorKey key) {
     return _paintObjectManager.getIndicatorDataIndex(key);
   }
 

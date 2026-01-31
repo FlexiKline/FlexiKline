@@ -188,11 +188,19 @@ enum ScalePosition {
   right,
 }
 
-abstract interface class IIndicatorKey {
+/// 指标 Key 基类（sealed，仅允许三种子类型）
+///
+/// - [FlexiIndicatorKey]：基础/系统指标（Candle、Time、Main 等），不占 slot。
+/// - [FlexiDataIndicatorKey]：数据指标（KDJ、MACD 等），占 slot，需要 precompute。
+/// - [FlexiBusinessIndicatorKey]：业务指标（Trade 等），不占 slot，由业务数据驱动。
+sealed class IIndicatorKey {
   String get id;
   String get label;
 }
 
+/// 基础/系统指标 Key
+///
+/// 用于 Candle、Time、Main 等框架内置指标，不参与 slot 分配。
 final class FlexiIndicatorKey implements IIndicatorKey {
   const FlexiIndicatorKey(
     this.id, {
@@ -208,7 +216,9 @@ final class FlexiIndicatorKey implements IIndicatorKey {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is FlexiIndicatorKey && runtimeType == other.runtimeType && id == other.id;
+    return other is FlexiIndicatorKey &&
+        runtimeType == other.runtimeType &&
+        id == other.id;
   }
 
   @override
@@ -218,13 +228,83 @@ final class FlexiIndicatorKey implements IIndicatorKey {
 
   @override
   String toString() {
-    return '$id:$label';
+    return 'base:$id:$label';
+  }
+}
+
+/// 数据指标 Key
+///
+/// 用于 KDJ、MACD、MA 等需要 precompute 并写入 FlexiCandleModel.slots 的指标。
+/// 注册时会分配 dataIndex，对应 PaintDataIndicator / PaintDataObject。
+final class FlexiDataIndicatorKey implements IIndicatorKey {
+  const FlexiDataIndicatorKey(
+    this.id, {
+    String? label,
+  }) : label = label ?? id;
+
+  @override
+  final String id;
+
+  @override
+  final String label;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is FlexiDataIndicatorKey &&
+        runtimeType == other.runtimeType &&
+        id == other.id;
+  }
+
+  @override
+  int get hashCode {
+    return runtimeType.hashCode ^ id.hashCode;
+  }
+
+  @override
+  String toString() {
+    return 'data:$id:$label';
+  }
+}
+
+/// 业务指标 Key
+///
+/// 用于 Trade 等由业务数据或用户操作驱动的指标，不占 slot。
+/// 对应 PaintBusinessIndicator / PaintBusinessObject。
+final class FlexiBusinessIndicatorKey implements IIndicatorKey {
+  const FlexiBusinessIndicatorKey(
+    this.id, {
+    String? label,
+  }) : label = label ?? id;
+
+  @override
+  final String id;
+
+  @override
+  final String label;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is FlexiBusinessIndicatorKey &&
+        runtimeType == other.runtimeType &&
+        id == other.id;
+  }
+
+  @override
+  int get hashCode {
+    return runtimeType.hashCode ^ id.hashCode;
+  }
+
+  @override
+  String toString() {
+    return 'business:$id:$label';
   }
 }
 
 const unknownIndicatorKey = FlexiIndicatorKey('unknown');
 
-typedef IndicatorBuilder<T extends Indicator> = T Function(
+typedef IndicatorBuilder<T extends Indicator<IIndicatorKey>> = T Function(
   Map<String, dynamic>?,
 );
 

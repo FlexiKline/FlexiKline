@@ -244,8 +244,10 @@ abstract interface class IPaintContext implements IStorage, ILogger {
   /// 取消当前Cross事件
   void cancelCross();
 
-  /// 获取[key]对应的计算数据存储位置
-  int? getDataIndex(IIndicatorKey key);
+  /// 获取 [key] 对应的计算数据存储位置
+  ///
+  /// 仅对 [FlexiDataIndicatorKey]（数据指标）有效。
+  int? getDataIndex(FlexiDataIndicatorKey key);
 
   /// 获取指标数量
   int get indicatorCount;
