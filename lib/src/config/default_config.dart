@@ -729,7 +729,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       ),
       chartType: instance?.chartType ?? FlexiChartType.barSolid,
       minWidthLineType: instance?.minWidthLineType,
-      timeBarChartTypes: instance?.timeBarChartTypes ?? const {TimeBar.m1: FlexiChartType.lineNormal},
+      timeBarChartTypes: instance?.timeBarChartTypes ?? {timeBar1m: FlexiChartType.lineNormal},
       hideIndicatorsWhenLineChart: instance?.hideIndicatorsWhenLineChart ?? true,
       longColor: instance?.longColor,
       shortColor: instance?.shortColor,

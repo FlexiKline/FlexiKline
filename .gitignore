@@ -26,9 +26,8 @@ migrate_working_dir/
 example/
 flexi_kline_indicators/
 flexi_kline_draw_tools/
-flexi_ws/
+flexi_network/
 .vscode/
-private.md
 
 # Flutter/Dart/Pub related
 # Libraries should not include pubspec.lock, per https://dart.dev/guides/libraries/private-files#pubspeclock.
@@ -37,10 +36,6 @@ private.md
 .dart_tool/
 build/
 doc/development/
-
-.cursor/
-openspec/
-AGENTS.md
 
 # FVM Version Cache
 .fvm/

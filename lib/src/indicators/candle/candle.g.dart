@@ -335,7 +335,7 @@ CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
               json['minWidthLineType'],
               const LineChartTypeConverter().fromJson),
       timeBarChartTypes: json['timeBarChartTypes'] == null
-          ? const {TimeBar.m1: FlexiChartType.lineNormal}
+          ? const {}
           : const TimeBarChartTypesConverter()
               .fromJson(json['timeBarChartTypes'] as List?),
       hideIndicatorsWhenLineChart:

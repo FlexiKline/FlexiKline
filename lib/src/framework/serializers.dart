@@ -144,7 +144,7 @@ class ITimeBarConvert implements JsonConverter<ITimeBar, Map<String, dynamic>> {
       unit = TimeUnit.values.firstWhereOrNull((e) => e.name == unitName);
     }
     unit ??= TimeUnit.microsecond;
-    return TimeBar.from(bar, multiplier, unit) ?? FlexiTimeBar(bar, multiplier, unit);
+    return FlexiTimeBar(bar, multiplier, unit);
   }
 
   @override

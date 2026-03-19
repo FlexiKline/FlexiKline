@@ -45,7 +45,7 @@ class CandleIndicator extends CandleBaseIndicator {
     required this.countDown,
     required this.chartType,
     this.minWidthLineType,
-    this.timeBarChartTypes = const {TimeBar.m1: FlexiChartType.lineNormal},
+    this.timeBarChartTypes = const {},
     this.hideIndicatorsWhenLineChart = false,
     this.longColor,
     this.shortColor,
@@ -505,7 +505,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
       /// 倒计时Text
       String? countDownText;
       // 时间周期 > 1秒时才显示倒计时
-      if (indicator.showCountDown && klineData.timeBar.milliseconds > TimeBar.s1.milliseconds) {
+      if (indicator.showCountDown && klineData.timeBar.milliseconds > Duration.millisecondsPerSecond) {
         final nextUpdateDateTime = model.nextUpdateDateTime(klineData.req.timeBar);
         if (nextUpdateDateTime != null &&
             nextUpdateDateTime.millisecondsSinceEpoch > DateTime.now().millisecondsSinceEpoch) {

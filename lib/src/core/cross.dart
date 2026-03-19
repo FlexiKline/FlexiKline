@@ -111,7 +111,7 @@ mixin CrossBinding on KlineBindingBase, SettingBinding implements ICross {
 
   /// 启动Cross事件
   bool onCrossStart(GestureData data, {bool force = false}) {
-    if (crossConfig.enable) {
+    if (crossConfig.enable && curKlineData.canPaintChart) {
       /// 如果其他手势与Cross手势事件允许共存 或者当前不在Crossing中时, 开启Cross.
       if (force || !isCrossing) {
         logd('handleTap cross > $force > ${data.offset}');

@@ -139,7 +139,7 @@ extension $CandleReqCopyWith on CandleReq {
 CandleReq _$CandleReqFromJson(Map<String, dynamic> json) => CandleReq(
       instId: json['instId'] as String,
       timeBar: json['timeBar'] == null
-          ? TimeBar.m1
+          ? timeBar1m
           : const ITimeBarConvert()
               .fromJson(json['timeBar'] as Map<String, dynamic>),
       limit: (json['limit'] as num?)?.toInt() ?? 100,

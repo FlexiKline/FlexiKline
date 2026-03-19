@@ -46,7 +46,7 @@ enum RequestState {
 class CandleReq {
   const CandleReq({
     required this.instId,
-    this.timeBar = TimeBar.m1,
+    this.timeBar = timeBar1m,
     this.limit = 100,
     this.precision = defaultPrecision,
     this.after,

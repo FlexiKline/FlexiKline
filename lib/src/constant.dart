@@ -18,7 +18,6 @@ import 'package:flexi_formatter/date_time.dart';
 import 'package:flutter/painting.dart';
 
 import 'extension/basic_type_ext.dart';
-import 'extension/collections_ext.dart';
 
 /// double类型的计算精度误差
 const double precisionError = 0.000001;
@@ -148,61 +147,12 @@ final class FlexiTimeBar implements ITimeBar {
 
 const invalidTimeBar = FlexiTimeBar('', 0, TimeUnit.millisecond);
 
-/// 内置: 时间粒度，默认值1m
-/// 如 [1m/3m/5m/15m/30m/1H/2H/4H]
-/// 香港时间开盘价k线：[6H/12H/1D/2D/3D/1W/1M/3M]
-/// UTC时间开盘价k线：[/6Hutc/12Hutc/1Dutc/2Dutc/3Dutc/1Wutc/1Mutc/3Mutc]
-enum TimeBar implements ITimeBar {
-  s1('1s', 1, TimeUnit.second),
-  m1('1m', 1, TimeUnit.minute),
-  m3('3m', 3, TimeUnit.minute),
-  m5('5m', 5, TimeUnit.minute),
-  m15('15m', 15, TimeUnit.minute),
-  m30('30m', 30, TimeUnit.minute),
-  H1('1H', 1, TimeUnit.hour),
-  H2('2H', 2, TimeUnit.hour),
-  H4('4H', 4, TimeUnit.hour),
-  H6('6H', 6, TimeUnit.hour),
-  H12('12H', 12, TimeUnit.hour),
-  D1('1D', 1, TimeUnit.day),
-  D2('2D', 2, TimeUnit.day),
-  D3('3D', 3, TimeUnit.day),
-  W1('1W', 1, TimeUnit.week),
-  M1('1M', 1, TimeUnit.month),
-  M3('3M', 3, TimeUnit.month),
-  utc6H('6Hutc', 6, TimeUnit.hour),
-  utc12H('12Hutc', 12, TimeUnit.hour),
-  utc1D('1Dutc', 1, TimeUnit.day),
-  utc2D('2Dutc', 2, TimeUnit.day),
-  utc3D('3Dutc', 3, TimeUnit.day),
-  utc1W('1Wutc', 1, TimeUnit.week),
-  utc1M('1Mutc', 1, TimeUnit.month),
-  utc3M('3Mutc', 3, TimeUnit.month);
-
-  const TimeBar(this.bar, this.multiplier, this.unit);
-
-  @override
-  final String bar;
-  @override
-  final int multiplier;
-  @override
-  final TimeUnit unit;
-
-  bool get isUtc {
-    return name.containsIgnoreCase('utc') || bar.containsIgnoreCase('utc');
-  }
-
-  @override
-  String toString() => '$bar:$milliseconds';
-
-  static TimeBar? from(String bar, int multiplier, TimeUnit unit) {
-    return TimeBar.values.firstWhereOrNull((e) {
-      return (e.bar.equalsIgnoreCase(bar) || e.name.equalsIgnoreCase(bar)) &&
-          e.multiplier == multiplier &&
-          e.unit == unit;
-    });
-  }
-}
+/// 内置: 时间粒度
+const timeBar1s = FlexiTimeBar('1s', 1, TimeUnit.second);
+const timeBar1m = FlexiTimeBar('1m', 1, TimeUnit.minute);
+const timeBar1H = FlexiTimeBar('1H', 1, TimeUnit.hour);
+const timeBar1D = FlexiTimeBar('1D', 1, TimeUnit.day);
+const timeBar1W = FlexiTimeBar('1W', 1, TimeUnit.week);
 
 /// 内置TooltipLabel
 enum TooltipLabel {
