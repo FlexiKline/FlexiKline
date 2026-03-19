@@ -40,6 +40,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     logd('dispose state');
     _candleRequestListener.dispose();
     _isFirstCandleMoveOffScreenListener.dispose();
+    _isMultiTouchNotifier.dispose();
     _timeBarListener.dispose();
     _paintRangeListener.dispose();
     _klineDataCache.forEach((key, data) {
@@ -61,6 +62,15 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   final _isFirstCandleMoveOffScreenListener = ValueNotifier(false);
   ValueListenable<bool> get isFirstCandleMoveOffScreenListener {
     return _isFirstCandleMoveOffScreenListener;
+  }
+
+  /// 当前是否处于多指触摸（双指缩放）状态.
+  final _isMultiTouchNotifier = ValueNotifier<bool>(false);
+  ValueListenable<bool> get isMultiTouchNotifier => _isMultiTouchNotifier;
+  void setMultiTouch(bool value) {
+    if (_isMultiTouchNotifier.value != value) {
+      _isMultiTouchNotifier.value = value;
+    }
   }
 
   /// 当KlineData的TimeBar的监听器
