@@ -274,11 +274,12 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
   /// Gesture配置
   GestureConfig genGestureConfig([GestureConfig? gesture]) {
     return GestureConfig(
-      supportLongPress: gesture?.supportLongPress ?? true,
-      isInertialPan: gesture?.isInertialPan ?? true,
+      enableLongPress: gesture?.enableLongPress ?? true,
+      enableInertialPan: gesture?.enableInertialPan ?? true,
       tolerance: gesture?.tolerance ?? ToleranceConfig(),
       loadMoreWhenNoEnoughDistance: gesture?.loadMoreWhenNoEnoughDistance,
       loadMoreWhenNoEnoughCandles: gesture?.loadMoreWhenNoEnoughCandles ?? 60,
+      enableScale: gesture?.enableScale ?? true,
       scalePosition: gesture?.scalePosition ?? ScalePosition.auto,
       scaleSpeed: gesture?.scaleSpeed ?? 10,
       supportKeyboardShortcuts: gesture?.supportKeyboardShortcuts ?? true,

@@ -245,56 +245,58 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
           return;
         }
 
-        /// 横向缩放图表(scale)
-        if (_scaleData == null) {
-          ScalePosition position = gestureConfig.scalePosition;
-          if (position == ScalePosition.auto) {
-            final third = controller.canvasRect.width / 3;
-            if (offset.dx < third) {
-              position = ScalePosition.left;
-            } else if (offset.dx > (third + third)) {
-              position = ScalePosition.right;
-            } else {
-              position = ScalePosition.middle;
+        /// 横向缩放图表(scale)，与触摸缩放手势一致受 [GestureConfig.enableScale] 约束.
+        if (gestureConfig.enableScale) {
+          if (_scaleData == null) {
+            ScalePosition position = gestureConfig.scalePosition;
+            if (position == ScalePosition.auto) {
+              final third = controller.canvasRect.width / 3;
+              if (offset.dx < third) {
+                position = ScalePosition.left;
+              } else if (offset.dx > (third + third)) {
+                position = ScalePosition.right;
+              } else {
+                position = ScalePosition.middle;
+              }
             }
+
+            /// 转换滚轮为touch设备的缩放速度[0 ~ 1 ~ n]
+            _scaleData = GestureData.signal(
+              offset,
+              position: position,
+            );
+
+            /// 由于没有开始结束事件回调, 此处1秒后将[_scaleData]置空, 重新开始测量位置.
+            Future.delayed(const Duration(milliseconds: 1000), () {
+              assert(() {
+                logd(
+                  'onPointerSignal V>Scale clean _scaleData${_scaleData?.initPosition}',
+                );
+                return true;
+              }());
+              _scaleData?.end();
+              _scaleData = null;
+              controller.onChartScaleEnd();
+
+              /// 检查并加载更多蜡烛数据
+              controller.checkAndLoadMoreCandlesWhenPanEnd();
+            });
           }
 
-          /// 转换滚轮为touch设备的缩放速度[0 ~ 1 ~ n]
-          _scaleData = GestureData.signal(
-            offset,
-            position: position,
+          final newScale = scaledSingal(
+            scrollDelta.dy,
+            gestureConfig.scaleSpeed,
           );
 
-          /// 由于没有开始结束事件回调, 此处1秒后将[_scaleData]置空, 重新开始测量位置.
-          Future.delayed(const Duration(milliseconds: 1000), () {
-            assert(() {
-              logd(
-                'onPointerSignal V>Scale clean _scaleData${_scaleData?.initPosition}',
-              );
-              return true;
-            }());
-            _scaleData?.end();
-            _scaleData = null;
-            controller.onChartScaleEnd();
+          assert(() {
+            logd('onPointerSignal V>Scale $offset, $scrollDelta, $newScale');
+            return true;
+          }());
 
-            /// 检查并加载更多蜡烛数据
-            controller.checkAndLoadMoreCandlesWhenPanEnd();
-          });
-        }
-
-        final newScale = scaledSingal(
-          scrollDelta.dy,
-          gestureConfig.scaleSpeed,
-        );
-
-        assert(() {
-          logd('onPointerSignal V>Scale $offset, $scrollDelta, $newScale');
-          return true;
-        }());
-
-        if (newScale != null) {
-          _scaleData!.update(offset, newScale: newScale);
-          controller.onChartScale(_scaleData!);
+          if (newScale != null) {
+            _scaleData!.update(offset, newScale: newScale);
+            controller.onChartScale(_scaleData!);
+          }
         }
       } else if (dx > 1 && dx > dy) {
         // 说明可能是触控板的双指横向移动操作
@@ -512,7 +514,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
     // >0: 正数代表从左向右滑动.
     final velocity = details.velocity.pixelsPerSecond.dx;
 
-    if (!gestureConfig.isInertialPan ||
+    if (!gestureConfig.enableInertialPan ||
         controller.curKlineData.isEmpty ||
         (velocity < 0 && !controller.canPanRTL) ||
         (velocity > 0 && !controller.canPanLTR)) {
@@ -580,24 +582,27 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
       logw('onPointerPanZoomStart $offset is not in the canvas.');
       _scaleData?.end();
       _scaleData = null;
+      return;
     }
 
-    logd('onPointerPanZoomStart $event > ${event.localPosition}');
-    ScalePosition position = gestureConfig.scalePosition;
-    if (position == ScalePosition.auto) {
-      final third = controller.canvasRect.width / 3;
-      if (offset.dx < third) {
-        position = ScalePosition.left;
-      } else if (offset.dx > (third + third)) {
-        position = ScalePosition.right;
-      } else {
-        position = ScalePosition.middle;
+    if (gestureConfig.enableScale) {
+      logd('onPointerPanZoomStart $event > ${event.localPosition}');
+      ScalePosition position = gestureConfig.scalePosition;
+      if (position == ScalePosition.auto) {
+        final third = controller.canvasRect.width / 3;
+        if (offset.dx < third) {
+          position = ScalePosition.left;
+        } else if (offset.dx > (third + third)) {
+          position = ScalePosition.right;
+        } else {
+          position = ScalePosition.middle;
+        }
       }
+      _scaleData = GestureData.scale(
+        offset,
+        position: position,
+      );
     }
-    _scaleData = GestureData.scale(
-      offset,
-      position: position,
-    );
   }
 
   /// 触控板事件更新
@@ -619,7 +624,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
       return;
     }
 
-    if (_scaleData!.isScale) {
+    if (gestureConfig.enableScale && _scaleData!.isScale) {
       final newScale = scaledDecelerate(event.scale);
       final change = event.scale - _scaleData!.scale;
       // assert(() {
@@ -656,7 +661,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
   ///
   /// 如果当前正在crossing中时, 不触发后续的长按逻辑.
   void onLongPressStart(LongPressStartDetails details) {
-    if (!gestureConfig.supportLongPress) {
+    if (!gestureConfig.enableLongPress) {
       logd('onLongPressStart ignore! > crossing:${controller.isCrossing}');
       return;
     }
@@ -695,7 +700,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
   }
 
   void onLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
-    if (!gestureConfig.supportLongPress || _longData == null) {
+    if (!gestureConfig.enableLongPress || _longData == null) {
       return;
     }
     // assert(() {
@@ -715,7 +720,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
   }
 
   void onLongPressEnd(LongPressEndDetails details) {
-    if (!gestureConfig.supportLongPress || _longData == null) {
+    if (!gestureConfig.enableLongPress || _longData == null) {
       logd('onLongPressEnd ignore! > details:$details');
       return;
     }

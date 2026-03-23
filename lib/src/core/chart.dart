@@ -263,8 +263,9 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding implements 
 
   /// 蜡烛图缩放中...
   void onChartScale(GestureData data) {
-    double? newWidth;
+    if (!gestureConfig.enableScale) return;
 
+    double? newWidth;
     if (data.scaled) {
       // 处理触摸设备的缩放逻辑.
       if (data.scale > 1 && candleWidth >= candleMaxWidth) return;

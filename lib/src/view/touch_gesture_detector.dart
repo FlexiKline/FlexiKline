@@ -304,7 +304,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
         _panScaleData?.end();
         _panScaleData = null;
       }
-    } else if (details.pointerCount > 1) {
+    } else if (gestureConfig.enableScale && details.pointerCount > 1) {
       ScalePosition position = _panScaleData?.initPosition ?? gestureConfig.scalePosition;
       if (position == ScalePosition.auto) {
         final third = controller.canvasRect.width / 3;
@@ -344,13 +344,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
         );
         controller.onDrawMoveUpdate(_panScaleData!);
       }
-    } else if (_panScaleData!.isPan) {
-      _panScaleData!.update(
-        details.localFocalPoint.clamp(controller.canvasRect),
-        newScale: details.scale,
-      );
-      controller.onChartMove(_panScaleData!);
-    } else if (_panScaleData!.isScale) {
+    } else if (gestureConfig.enableScale && _panScaleData!.isScale) {
       final newScale = scaledDecelerate(details.scale);
       final change = details.scale - _panScaleData!.scale;
       // assert(() {
@@ -364,6 +358,12 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
         );
         controller.onChartScale(_panScaleData!);
       }
+    } else if (_panScaleData!.isPan) {
+      _panScaleData!.update(
+        details.localFocalPoint.clamp(controller.canvasRect),
+        newScale: details.scale,
+      );
+      controller.onChartMove(_panScaleData!);
     }
   }
 
@@ -398,7 +398,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
     // >0: 正数代表从左向右滑动.
     final velocity = details.velocity.pixelsPerSecond.dx;
 
-    if (!gestureConfig.isInertialPan ||
+    if (!gestureConfig.enableInertialPan ||
         controller.curKlineData.isEmpty ||
         (velocity < 0 && !controller.canPanRTL) ||
         (velocity > 0 && !controller.canPanLTR)) {
@@ -461,7 +461,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
   ///
   /// 如果当前正在crossing中时, 不触发后续的长按逻辑.
   void onLongPressStart(LongPressStartDetails details) {
-    if (!gestureConfig.supportLongPress || controller.isCrossing) {
+    if (!gestureConfig.enableLongPress || controller.isCrossing) {
       logd('onLongPressStart ignore! > crossing:${controller.isCrossing}');
       return;
     }
@@ -494,7 +494,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
   }
 
   void onLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
-    if (!gestureConfig.supportLongPress || _longData == null) {
+    if (!gestureConfig.enableLongPress || _longData == null) {
       return;
     }
     // assert(() {
@@ -516,7 +516,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
   }
 
   void onLongPressEnd(LongPressEndDetails details) {
-    if (!gestureConfig.supportLongPress || _longData == null) {
+    if (!gestureConfig.enableLongPress || _longData == null) {
       logd('onLongPressEnd ignore! > details:$details');
       return;
     }

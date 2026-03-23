@@ -20,6 +20,24 @@ import 'framework/configuration.dart';
 import 'kline_controller.dart';
 import 'model/candle_req/candle_req.dart';
 
+abstract interface class IFlexiKlineDataCenter {
+  /// 请求参数
+  CandleReq createRequest();
+
+  /// 创建FlexiKline配置
+  IConfiguration createFlexiKlineConfig();
+
+  /// 创建FlexiKline控制器
+  FlexiKlineController createFlexiKlineController();
+
+  /// 刷新K线数据
+  /// @param [reset] 是否重置当前KlineData所有数据
+  Future<void> refreshKlineData({bool reset = false});
+
+  /// 加载更多蜡烛数据
+  Future<void> loadMoreCandles(CandleReq request);
+}
+
 abstract interface class IFlexiKlinePage {
   FlexiKlineController get klineController;
 

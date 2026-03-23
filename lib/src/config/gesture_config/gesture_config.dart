@@ -31,11 +31,12 @@ part 'gesture_config.g.dart';
 @FlexiConfigSerializable
 class GestureConfig {
   GestureConfig({
-    this.supportLongPress = true,
-    this.isInertialPan = true,
+    this.enableLongPress = true,
+    this.enableInertialPan = true,
     ToleranceConfig? tolerance,
     this.loadMoreWhenNoEnoughDistance,
     this.loadMoreWhenNoEnoughCandles = 60,
+    this.enableScale = true,
     this.scalePosition = ScalePosition.auto,
     double scaleSpeed = 10,
     this.supportKeyboardShortcuts = true,
@@ -46,11 +47,11 @@ class GestureConfig {
   })  : tolerance = tolerance ?? ToleranceConfig(),
         scaleSpeed = scaleSpeed.clamp(1, 30);
 
-  /// 是否支持长按操作
-  final bool supportLongPress;
+  /// 是否启用长按操作
+  final bool enableLongPress;
 
   /// 是否进行惯性平移
-  final bool isInertialPan;
+  final bool enableInertialPan;
 
   /// 惯性平移限制参数
   final ToleranceConfig tolerance;
@@ -61,16 +62,19 @@ class GestureConfig {
   /// 当没有足够平移的蜡烛时, 加载更多.
   final int loadMoreWhenNoEnoughCandles;
 
+  /// 是否启用缩放操作
+  final bool enableScale;
+
   /// 缩放操作位置
   final ScalePosition scalePosition;
 
   /// 按比例缩放蜡烛图速度. 取值范围[1~30], 建议10.
   final double scaleSpeed;
 
-  /// 是否支持键盘操作
+  /// 是否启用键盘操作
   final bool supportKeyboardShortcuts;
 
-  /// 是否启用Zoom缩放操作
+  /// 是否启用缩放操作
   final bool enableZoom;
 
   /// Zoom缩放操作启动最小距离. 默认5. 注: 仅支持触摸设备.

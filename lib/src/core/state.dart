@@ -66,7 +66,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
 
   /// 当前是否处于多指触摸（双指缩放）状态.
   final _isMultiTouchNotifier = ValueNotifier<bool>(false);
-  ValueListenable<bool> get isMultiTouchNotifier => _isMultiTouchNotifier;
+  ValueListenable<bool> get isMultiTouchListener => _isMultiTouchNotifier;
   void setMultiTouch(bool value) {
     if (_isMultiTouchNotifier.value != value) {
       _isMultiTouchNotifier.value = value;

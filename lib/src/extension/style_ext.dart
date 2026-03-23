@@ -18,6 +18,8 @@ extension FlexiKlineTextStyleExt on TextStyle {
   double? get totalHeight {
     if (height != null && fontSize != null) {
       return fontSize! * height!;
+    } else if (fontSize != null) {
+      return fontSize!;
     }
     return null;
   }

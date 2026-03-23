@@ -7,9 +7,9 @@ part of 'gesture_config.dart';
 // **************************************************************************
 
 abstract class _$GestureConfigCWProxy {
-  GestureConfig supportLongPress(bool supportLongPress);
+  GestureConfig enableLongPress(bool enableLongPress);
 
-  GestureConfig isInertialPan(bool isInertialPan);
+  GestureConfig enableInertialPan(bool enableInertialPan);
 
   GestureConfig tolerance(ToleranceConfig? tolerance);
 
@@ -17,6 +17,8 @@ abstract class _$GestureConfigCWProxy {
       double? loadMoreWhenNoEnoughDistance);
 
   GestureConfig loadMoreWhenNoEnoughCandles(int loadMoreWhenNoEnoughCandles);
+
+  GestureConfig enableScale(bool enableScale);
 
   GestureConfig scalePosition(ScalePosition scalePosition);
 
@@ -39,11 +41,12 @@ abstract class _$GestureConfigCWProxy {
   /// GestureConfig(...).copyWith(id: 12, name: "My name")
   /// ````
   GestureConfig call({
-    bool supportLongPress,
-    bool isInertialPan,
+    bool enableLongPress,
+    bool enableInertialPan,
     ToleranceConfig? tolerance,
     double? loadMoreWhenNoEnoughDistance,
     int loadMoreWhenNoEnoughCandles,
+    bool enableScale,
     ScalePosition scalePosition,
     double scaleSpeed,
     bool supportKeyboardShortcuts,
@@ -61,12 +64,12 @@ class _$GestureConfigCWProxyImpl implements _$GestureConfigCWProxy {
   final GestureConfig _value;
 
   @override
-  GestureConfig supportLongPress(bool supportLongPress) =>
-      this(supportLongPress: supportLongPress);
+  GestureConfig enableLongPress(bool enableLongPress) =>
+      this(enableLongPress: enableLongPress);
 
   @override
-  GestureConfig isInertialPan(bool isInertialPan) =>
-      this(isInertialPan: isInertialPan);
+  GestureConfig enableInertialPan(bool enableInertialPan) =>
+      this(enableInertialPan: enableInertialPan);
 
   @override
   GestureConfig tolerance(ToleranceConfig? tolerance) =>
@@ -80,6 +83,9 @@ class _$GestureConfigCWProxyImpl implements _$GestureConfigCWProxy {
   @override
   GestureConfig loadMoreWhenNoEnoughCandles(int loadMoreWhenNoEnoughCandles) =>
       this(loadMoreWhenNoEnoughCandles: loadMoreWhenNoEnoughCandles);
+
+  @override
+  GestureConfig enableScale(bool enableScale) => this(enableScale: enableScale);
 
   @override
   GestureConfig scalePosition(ScalePosition scalePosition) =>
@@ -115,11 +121,12 @@ class _$GestureConfigCWProxyImpl implements _$GestureConfigCWProxy {
   /// GestureConfig(...).copyWith(id: 12, name: "My name")
   /// ````
   GestureConfig call({
-    Object? supportLongPress = const $CopyWithPlaceholder(),
-    Object? isInertialPan = const $CopyWithPlaceholder(),
+    Object? enableLongPress = const $CopyWithPlaceholder(),
+    Object? enableInertialPan = const $CopyWithPlaceholder(),
     Object? tolerance = const $CopyWithPlaceholder(),
     Object? loadMoreWhenNoEnoughDistance = const $CopyWithPlaceholder(),
     Object? loadMoreWhenNoEnoughCandles = const $CopyWithPlaceholder(),
+    Object? enableScale = const $CopyWithPlaceholder(),
     Object? scalePosition = const $CopyWithPlaceholder(),
     Object? scaleSpeed = const $CopyWithPlaceholder(),
     Object? supportKeyboardShortcuts = const $CopyWithPlaceholder(),
@@ -129,14 +136,14 @@ class _$GestureConfigCWProxyImpl implements _$GestureConfigCWProxy {
     Object? isManualSetZoomRect = const $CopyWithPlaceholder(),
   }) {
     return GestureConfig(
-      supportLongPress: supportLongPress == const $CopyWithPlaceholder()
-          ? _value.supportLongPress
+      enableLongPress: enableLongPress == const $CopyWithPlaceholder()
+          ? _value.enableLongPress
           // ignore: cast_nullable_to_non_nullable
-          : supportLongPress as bool,
-      isInertialPan: isInertialPan == const $CopyWithPlaceholder()
-          ? _value.isInertialPan
+          : enableLongPress as bool,
+      enableInertialPan: enableInertialPan == const $CopyWithPlaceholder()
+          ? _value.enableInertialPan
           // ignore: cast_nullable_to_non_nullable
-          : isInertialPan as bool,
+          : enableInertialPan as bool,
       tolerance: tolerance == const $CopyWithPlaceholder()
           ? _value.tolerance
           // ignore: cast_nullable_to_non_nullable
@@ -151,6 +158,10 @@ class _$GestureConfigCWProxyImpl implements _$GestureConfigCWProxy {
               ? _value.loadMoreWhenNoEnoughCandles
               // ignore: cast_nullable_to_non_nullable
               : loadMoreWhenNoEnoughCandles as int,
+      enableScale: enableScale == const $CopyWithPlaceholder()
+          ? _value.enableScale
+          // ignore: cast_nullable_to_non_nullable
+          : enableScale as bool,
       scalePosition: scalePosition == const $CopyWithPlaceholder()
           ? _value.scalePosition
           // ignore: cast_nullable_to_non_nullable
@@ -196,8 +207,8 @@ extension $GestureConfigCopyWith on GestureConfig {
 
 GestureConfig _$GestureConfigFromJson(Map<String, dynamic> json) =>
     GestureConfig(
-      supportLongPress: json['supportLongPress'] as bool? ?? true,
-      isInertialPan: json['isInertialPan'] as bool? ?? true,
+      enableLongPress: json['enableLongPress'] as bool? ?? true,
+      enableInertialPan: json['enableInertialPan'] as bool? ?? true,
       tolerance: json['tolerance'] == null
           ? null
           : ToleranceConfig.fromJson(json['tolerance'] as Map<String, dynamic>),
@@ -205,6 +216,7 @@ GestureConfig _$GestureConfigFromJson(Map<String, dynamic> json) =>
           (json['loadMoreWhenNoEnoughDistance'] as num?)?.toDouble(),
       loadMoreWhenNoEnoughCandles:
           (json['loadMoreWhenNoEnoughCandles'] as num?)?.toInt() ?? 60,
+      enableScale: json['enableScale'] as bool? ?? true,
       scalePosition: json['scalePosition'] == null
           ? ScalePosition.auto
           : const ScalePositionConverter()
@@ -221,12 +233,13 @@ GestureConfig _$GestureConfigFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$GestureConfigToJson(GestureConfig instance) =>
     <String, dynamic>{
-      'supportLongPress': instance.supportLongPress,
-      'isInertialPan': instance.isInertialPan,
+      'enableLongPress': instance.enableLongPress,
+      'enableInertialPan': instance.enableInertialPan,
       'tolerance': instance.tolerance.toJson(),
       if (instance.loadMoreWhenNoEnoughDistance case final value?)
         'loadMoreWhenNoEnoughDistance': value,
       'loadMoreWhenNoEnoughCandles': instance.loadMoreWhenNoEnoughCandles,
+      'enableScale': instance.enableScale,
       'scalePosition':
           const ScalePositionConverter().toJson(instance.scalePosition),
       'scaleSpeed': instance.scaleSpeed,

@@ -91,9 +91,10 @@ abstract class GestureDetectorState<T extends GestureDetectorWidget> extends Sta
 
     logd('animateToPosition begin:$begin end:$end panDuration:${panDuration.inMilliseconds}');
     final gestureData = GestureData.pan(Offset(begin, 0.0));
-    final animation = Tween(begin: begin, end: end)
-        .chain(CurveTween(curve: tolerance.curve))
-        .animate(animationController!);
+    final animation = Tween(
+      begin: begin,
+      end: end,
+    ).chain(CurveTween(curve: tolerance.curve)).animate(animationController!);
 
     animation.addListener(() {
       // logd('animateToPosition move> ${DateTime.now().millisecond} value:${animation.value}');

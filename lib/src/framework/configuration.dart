@@ -26,6 +26,9 @@ const drawOverlayListConfigKey = 'draw_overlay_list_config';
 const drawOverlayListKey = 'list';
 const drawToolbarPositionKey = 'draw_toolbar_position';
 
+/// 获取FlexiKline主题的函数类型
+typedef FlexiKlineThemeGetter<T extends IFlexiKlineTheme> = T Function();
+
 /// FlexiKline主题接口.
 ///
 /// 定义FlexiKline中通用颜色
