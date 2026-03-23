@@ -486,7 +486,10 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
       controller.onDrawMoveUpdate(_panData!);
     } else {
       _panData!.update(details.localPosition.clamp(controller.canvasRect));
-      controller.onChartMove(_panData!);
+      controller.onChartMove(
+        _panData!,
+        gestureConfig.tolerance.effectivePanSmoothFactor,
+      );
       controller.onCrossUpdate(_panData!);
     }
   }
@@ -521,6 +524,8 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
       logd('onPanEnd currently can not pan!');
       _panData?.end();
       _panData = null;
+      controller.onPanEnd();
+
       setCursorToPrecise();
 
       /// 检查并加载更多蜡烛数据
@@ -533,9 +538,6 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
     /// 惯性平移的最大距离.
     final panDistance = velocity * tolerance.distanceFactor;
 
-    /// 确认继续平移时间 (利用log指数函数特点: 随着自变量velocity的增大，函数值的增长速度逐渐减慢)
-    /// 测试当限定参数[tolerance.maxDuration]等于1000(1秒时), [velocity]带入后[duration]变化为:
-    /// 100000 > 1151.29; 10000 > 921.03; 9000 > 910.49; 5000 > 851.71; 2000 > 760.09; 800 > 668.46; 100 > 460.51
     final panDuration = calcuInertialPanDuration(
       panDistance,
       maxDuration: tolerance.maxDuration,
@@ -546,6 +548,8 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
       logd('onPanEnd currently not need for inertial movement!');
       _panData?.end();
       _panData = null;
+      controller.onPanEnd();
+
       setCursorToPrecise();
 
       /// 检查并加载更多蜡烛数据
@@ -571,6 +575,8 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
       onCompleted: () {
         _panData?.end();
         _panData = null;
+        controller.onPanEnd();
+
         setCursorToPrecise();
       },
     );

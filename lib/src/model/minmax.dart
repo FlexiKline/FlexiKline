@@ -102,6 +102,18 @@ class MinMax {
     return minmax;
   }
 
+  /// 线性插值: 从 [a] 到 [b], 按 [t] 比例过渡 (t=0 返回 a, t=1 返回 b)
+  static MinMax lerp(MinMax a, MinMax b, double t) {
+    if (t >= 1 || a == b) return b.clone();
+    if (t <= 0) return a.clone();
+    final tNum = FlexiNum.fromNum(t);
+    final oneMinusT = FlexiNum.fromNum(1 - t);
+    return MinMax(
+      max: a.max * oneMinusT + b.max * tNum,
+      min: a.min * oneMinusT + b.min * tNum,
+    );
+  }
+
   @override
   String toString() {
     return 'MinMax(max:${max.toString()}, min:${min.toString()})';

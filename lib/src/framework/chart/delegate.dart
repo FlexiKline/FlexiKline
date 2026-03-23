@@ -59,6 +59,7 @@ extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
     required int start,
     required int end,
     bool reset = false,
+    double panSmoothFactor = 1.0,
   }) {
     if (reset || newSlot != slot) {
       resetPaintBounding(slot: newSlot);
@@ -66,16 +67,20 @@ extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
       _dyFactor = null;
     }
 
-    if (_start != start || _end != end || _minMax == null) {
-      _start = start;
-      _end = end;
+    // 数据范围未变、已有minMax、且平滑已完成时, 跳过重算
+    if (!reset && _start == start && _end == end && _minMax != null && _smoothMinMax == null) {
+      _dyFactor = null;
+      return _minMax;
     }
 
-    // TODO: 如果start与end未发生变化, 则蜡烛数据未更新时, 可不用执行initState计算操作. 暂不优化此项, 待数据计算优化完成再考虑.
+    _start = start;
+    _end = end;
     _minMax = null;
     final ret = initState(start, end);
+
     if (ret != null) {
       setMinMax(ret);
+      smoothMinMax(smoothFactor: panSmoothFactor);
     }
 
     _dyFactor = null;
@@ -141,7 +146,15 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
     _tmpHeight = null;
   }
 
-  void setMinMax(MinMax val) {
+  /// 清除自身及所有子指标的 _dyFactor 缓存, 强制下次绘制重算
+  void invalidateDyFactor() {
+    _dyFactor = null;
+    for (final object in paintableChildren) {
+      object._dyFactor = null;
+    }
+  }
+
+  void updateMinMax(MinMax val) {
     if (_minMax == null) {
       _minMax = val;
     } else {
@@ -182,6 +195,7 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
     required int start,
     required int end,
     bool reset = false,
+    double panSmoothFactor = 1.0,
   }) {
     if (reset || newSlot != slot) {
       resetPaintBounding(slot: newSlot);
@@ -189,13 +203,19 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
       _dyFactor = null;
     }
 
-    if (_start != start || _end != end) {
-      _start = start;
-      _end = end;
+    // 数据范围未变、已有minMax、且平滑已完成时, 跳过重算
+    if (!reset && _start == start && _end == end && _minMax != null && _smoothMinMax == null) {
+      invalidateDyFactor();
+      return _minMax;
     }
 
+    _start = start;
+    _end = end;
     _minMax = null;
     for (final object in paintableChildren) {
+      // 平滑活跃时, 子对象的 _minMax 已被 setMinMax(smoothed) 污染为平滑值,
+      // 必须清除以强制 initState 重算精确值, 否则 smoothMinMax 的收敛目标是错的
+      if (_smoothMinMax != null) object._minMax = null;
       final ret = object.doInitState(
         newSlot,
         start: start,
@@ -203,9 +223,11 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
         reset: reset,
       );
       if (ret != null && object.paintMode == PaintMode.combine) {
-        setMinMax(ret.clone());
+        updateMinMax(ret.clone());
       }
     }
+
+    smoothMinMax(smoothFactor: panSmoothFactor);
 
     for (final object in paintableChildren) {
       if (object.paintMode == PaintMode.combine) {

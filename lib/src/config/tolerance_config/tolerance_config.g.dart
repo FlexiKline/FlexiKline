@@ -13,6 +13,10 @@ abstract class _$ToleranceConfigCWProxy {
 
   ToleranceConfig curvestr(String curvestr);
 
+  ToleranceConfig panSmoothFactor(double panSmoothFactor);
+
+  ToleranceConfig convergenceRatio(double convergenceRatio);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `ToleranceConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -23,6 +27,8 @@ abstract class _$ToleranceConfigCWProxy {
     int maxDuration,
     double distanceFactor,
     String curvestr,
+    double panSmoothFactor,
+    double convergenceRatio,
   });
 }
 
@@ -44,6 +50,14 @@ class _$ToleranceConfigCWProxyImpl implements _$ToleranceConfigCWProxy {
   ToleranceConfig curvestr(String curvestr) => this(curvestr: curvestr);
 
   @override
+  ToleranceConfig panSmoothFactor(double panSmoothFactor) =>
+      this(panSmoothFactor: panSmoothFactor);
+
+  @override
+  ToleranceConfig convergenceRatio(double convergenceRatio) =>
+      this(convergenceRatio: convergenceRatio);
+
+  @override
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `ToleranceConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -55,6 +69,8 @@ class _$ToleranceConfigCWProxyImpl implements _$ToleranceConfigCWProxy {
     Object? maxDuration = const $CopyWithPlaceholder(),
     Object? distanceFactor = const $CopyWithPlaceholder(),
     Object? curvestr = const $CopyWithPlaceholder(),
+    Object? panSmoothFactor = const $CopyWithPlaceholder(),
+    Object? convergenceRatio = const $CopyWithPlaceholder(),
   }) {
     return ToleranceConfig(
       maxDuration: maxDuration == const $CopyWithPlaceholder()
@@ -69,6 +85,14 @@ class _$ToleranceConfigCWProxyImpl implements _$ToleranceConfigCWProxy {
           ? _value.curvestr
           // ignore: cast_nullable_to_non_nullable
           : curvestr as String,
+      panSmoothFactor: panSmoothFactor == const $CopyWithPlaceholder()
+          ? _value.panSmoothFactor
+          // ignore: cast_nullable_to_non_nullable
+          : panSmoothFactor as double,
+      convergenceRatio: convergenceRatio == const $CopyWithPlaceholder()
+          ? _value.convergenceRatio
+          // ignore: cast_nullable_to_non_nullable
+          : convergenceRatio as double,
     );
   }
 }
@@ -85,9 +109,11 @@ extension $ToleranceConfigCopyWith on ToleranceConfig {
 
 ToleranceConfig _$ToleranceConfigFromJson(Map<String, dynamic> json) =>
     ToleranceConfig(
-      maxDuration: (json['maxDuration'] as num?)?.toInt() ?? 1500,
-      distanceFactor: (json['distanceFactor'] as num?)?.toDouble() ?? 0.5,
-      curvestr: json['curvestr'] as String? ?? 'easeOutCirc',
+      maxDuration: (json['maxDuration'] as num?)?.toInt() ?? 2000,
+      distanceFactor: (json['distanceFactor'] as num?)?.toDouble() ?? 0.6,
+      curvestr: json['curvestr'] as String? ?? 'easeOutCubic',
+      panSmoothFactor: (json['panSmoothFactor'] as num?)?.toDouble() ?? 0.15,
+      convergenceRatio: (json['convergenceRatio'] as num?)?.toDouble() ?? 0.7,
     );
 
 Map<String, dynamic> _$ToleranceConfigToJson(ToleranceConfig instance) =>
@@ -95,4 +121,6 @@ Map<String, dynamic> _$ToleranceConfigToJson(ToleranceConfig instance) =>
       'maxDuration': instance.maxDuration,
       'distanceFactor': instance.distanceFactor,
       'curvestr': instance.curvestr,
+      'panSmoothFactor': instance.panSmoothFactor,
+      'convergenceRatio': instance.convergenceRatio,
     };

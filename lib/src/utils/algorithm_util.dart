@@ -46,14 +46,14 @@ double scaledDecelerate(double scale) {
 
 /// 根据[velocity]计算惯性平移的时间
 ///
-/// 确认继续平移时间 (利用log指数函数特点: 随着自变量velocity的增大，函数值的增长速度逐渐减慢)
-/// 测试当限定参数[maxDuration]等于1000(1秒时), [velocity]带入后结果变化为:
-/// 100000 > 1151.29; 10000 > 921.03; 9000 > 910.49; 5000 > 851.71; 2000 > 760.09; 800 > 668.46; 100 > 460.51
+/// 使用sqrt函数: 高速滑动获得更长的惯性时间, 低速滑动时间更短(避免拖沓).
+/// 测试当限定参数[maxDuration]等于2000时, [velocity]带入后结果变化为:
+/// 500 > 447; 1000 > 632; 2000 > 894; 3000 > 1095; 5000 > 1414; 10000 > 2000
 int calcuInertialPanDuration(double velocity, {required int maxDuration}) {
   assert(maxDuration > 0);
   final v = math.max(1, velocity.abs());
   if (v == 1) return 0;
-  return (math.log(v) * maxDuration / 10).round().clamp(0, maxDuration);
+  return (math.sqrt(v) * maxDuration / 100).round().clamp(0, maxDuration);
 }
 
 /// 确保两数[d1]和[d2]的距离不小于[minDistance]

@@ -1,11 +1,11 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
 
 import '../config/gesture_config/gesture_config.dart';
 import '../config/tolerance_config/tolerance_config.dart';
 import '../constant.dart';
-import '../extension/functions_ext.dart';
 import '../framework/draw/overlay.dart';
 import '../framework/logger.dart';
 import '../kline_controller.dart';
@@ -55,6 +55,7 @@ abstract class GestureDetectorState<T extends GestureDetectorWidget> extends Sta
     animateToPosition(
       controller.paintDxOffset,
       controller.getInitPaintDxOffset(),
+      onCompleted: () => controller.onPanEnd(),
     );
   }
 
@@ -97,13 +98,18 @@ abstract class GestureDetectorState<T extends GestureDetectorWidget> extends Sta
     ).chain(CurveTween(curve: tolerance.curve)).animate(animationController!);
 
     animation.addListener(() {
-      // logd('animateToPosition move> ${DateTime.now().millisecond} value:${animation.value}');
       gestureData.update(Offset(
         animation.value,
         gestureData.offset.dy,
       ));
-      controller.onChartMove(gestureData);
-    }.throttleOnFps);
+      final progress = animationController!.value;
+      final sf = tolerance!.effectivePanSmoothFactor;
+      final tp = tolerance.effectiveConvergenceRatio;
+      final smoothFactor = progress < tp
+          ? sf
+          : lerpDouble(sf, 1.0, (progress - tp) / (1.0 - tp))!;
+      controller.onChartMove(gestureData, smoothFactor);
+    });
 
     animationController?.addStatusListener((status) {
       if (status == AnimationStatus.completed) {

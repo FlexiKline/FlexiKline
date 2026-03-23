@@ -82,6 +82,10 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding implements 
   /// 控制doInitState操作是否重置计算结果
   bool _reset = false;
 
+  /// 平移过程中Y轴平滑插值因子
+  /// 1.0 = 精确值(无平滑), 0.15 = 平滑过渡
+  double _panSmoothFactor = 1.0;
+
   /// 触发重绘蜡烛线.
   @override
   @protected
@@ -127,12 +131,13 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding implements 
     try {
       /// 保存画布状态
       canvas.save();
-      canvas.clipRect(mainRect);
+      canvas.clipRect(_panSmoothFactor >= 1.0 ? mainRect : canvasRect);
       mainPaintObject.doInitState(
         solt++,
         start: curKlineData.start,
         end: curKlineData.end,
         reset: _reset,
+        panSmoothFactor: _panSmoothFactor,
       );
       mainPaintObject.doPaintChart(
         canvas,
@@ -154,6 +159,7 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding implements 
         start: curKlineData.start,
         end: curKlineData.end,
         reset: _reset,
+        panSmoothFactor: _panSmoothFactor,
       );
 
       /// 绘制副区的指标图
@@ -232,8 +238,11 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding implements 
     }
   }
 
-  void onChartMove(GestureData data) {
+  void onChartMove(GestureData data, [double smoothFactor = 1.0]) {
     if (!data.moved) return;
+    // logd('onChartMove ${DateTime.now().format(HHmmssSSS)} data:$data smoothFactor:$smoothFactor');
+
+    _panSmoothFactor = smoothFactor;
 
     bool changed = false;
     final newDxOffset = clampPaintDxOffset(paintDxOffset + data.dxDelta);
@@ -258,7 +267,17 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding implements 
     if (changed) {
       markRepaintChart();
       markRepaintDraw();
+    } else if (smoothFactor < 1.0) {
+      // offset 被 clamp 未变化时, 仍需触发重绘以继续 smoothMinMax 收敛
+      markRepaintChart();
     }
+  }
+
+  /// 平移结束(包括惯性平移完成后), 重置平滑因子并触发一次精确重绘
+  void onPanEnd() {
+    logd('onPanEnd');
+    _panSmoothFactor = 1.0;
+    markRepaintChart(reset: true);
   }
 
   /// 蜡烛图缩放中...

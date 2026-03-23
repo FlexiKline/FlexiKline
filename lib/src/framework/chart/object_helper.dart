@@ -215,6 +215,9 @@ mixin PaintObjectStateMixin<T extends Indicator<IIndicatorKey>> on IndicatorObje
 
   MinMax? _minMax;
 
+  /// 用于平移过程中 Y 轴边界平滑过渡的缓存
+  MinMax? _smoothMinMax;
+
   @override
   MinMax get minMax => _minMax ?? MinMax.zero;
 
@@ -223,6 +226,19 @@ mixin PaintObjectStateMixin<T extends Indicator<IIndicatorKey>> on IndicatorObje
     if (val.isSame) val.expandByRatios(settingConfig.expandRatiosOfSameMinmax);
     _minMax = val;
     _dyFactor = null;
+  }
+
+  /// 对 minMax 做平滑插值, 减少平移过程中 Y 轴坐标系的跳变
+  /// [smoothFactor] 控制平滑程度: 值越小越平滑(但响应越慢), 建议 0.1~0.25
+  /// 当 factor=1.0 时, lerp 直接返回精确值, 无需特殊处理
+  void smoothMinMax({double smoothFactor = 1.0}) {
+    if (_minMax == null) return;
+    if (smoothFactor >= 1.0) {
+      _smoothMinMax = null;
+    } else {
+      _smoothMinMax = MinMax.lerp(_smoothMinMax ?? _minMax!, _minMax!, smoothFactor);
+      setMinMax(_smoothMinMax!);
+    }
   }
 
   double? _dyFactor;

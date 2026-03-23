@@ -28,21 +28,36 @@ part 'tolerance_config.g.dart';
 @FlexiConfigSerializable
 class ToleranceConfig {
   ToleranceConfig({
-    this.maxDuration = 1500,
-    this.distanceFactor = 0.5,
-    this.curvestr = 'easeOutCirc',
+    this.maxDuration = 2000,
+    this.distanceFactor = 0.6,
+    this.curvestr = 'easeOutCubic',
+    this.panSmoothFactor = 0.15,
+    this.convergenceRatio = 0.7,
   }) : _curve = parseCurve(curvestr);
 
   final int maxDuration;
   final double distanceFactor;
   final String curvestr;
 
+  /// 平移过程中 Y 轴平滑插值因子 (值越小越平滑, 建议 0.1~0.25)
+  final double panSmoothFactor;
+
+  /// 惯性动画尾部开始将 smoothFactor 收敛到 1.0 的动画进度比 (0~1)
+  final double convergenceRatio;
+
   late final Curve _curve;
   Curve get curve => _curve;
 
+  /// 经过 clamp 验证的平滑因子
+  double get effectivePanSmoothFactor => panSmoothFactor.clamp(0.1, 1.0);
+
+  /// 经过 clamp 验证的收敛起始进度
+  double get effectiveConvergenceRatio => convergenceRatio.clamp(0.0, 1.0);
+
   @override
   String toString() {
-    return 'Tolerance($maxDuration, $distanceFactor, $curvestr)';
+    return 'Tolerance($maxDuration, $distanceFactor, $curvestr, '
+        'panSmoothFactor: $panSmoothFactor, convergenceRatio: $convergenceRatio)';
   }
 
   factory ToleranceConfig.fromJson(Map<String, dynamic> json) => _$ToleranceConfigFromJson(json);
