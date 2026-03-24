@@ -18,8 +18,11 @@ import 'package:flexi_kline/src/model/export.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  // ---------------------------------------------------------------------------
+  // FlexiCandleModel.init
+  // ---------------------------------------------------------------------------
   group('FlexiCandleModel.init', () {
-    test('should create FlexiCandleModel from CandleModel with fast mode', () {
+    test('fast mode: 从 CandleModel 正确初始化', () {
       final candle = CandleModel(
         timestamp: 1715769600000,
         open: '100.5',
@@ -47,7 +50,7 @@ void main() {
       expect(model.confirmed, isTrue);
     });
 
-    test('should create FlexiCandleModel from CandleModel with accurate mode', () {
+    test('accurate mode: 从 CandleModel 正确初始化', () {
       final candle = CandleModel(
         timestamp: 1715769600000,
         open: '100.123456789',
@@ -69,10 +72,11 @@ void main() {
       expect(model.close.toDecimal(), Decimal.parse('105.555555555'));
       expect(model.vol.toDecimal(), Decimal.parse('1000.12345'));
       expect(model.turnover, isNull);
+      // 默认 confirmed 为 true
       expect(model.confirmed, isTrue);
     });
 
-    test('should initialize slots with correct count', () {
+    test('初始化后所有槽位为 null', () {
       final candle = CandleModel(
         timestamp: 1715769600000,
         open: '100',
@@ -83,13 +87,15 @@ void main() {
       );
       final model = FlexiCandleModel.init(candle: candle, count: 15);
 
-      // 所有槽位初始为 null
       for (int i = 0; i < 15; i++) {
         expect(model.get<Object>(i), isNull);
       }
     });
   });
 
+  // ---------------------------------------------------------------------------
+  // OHLCV getters
+  // ---------------------------------------------------------------------------
   group('FlexiCandleModel OHLCV getters', () {
     late FlexiCandleModel model;
 
@@ -108,40 +114,45 @@ void main() {
       model = FlexiCandleModel.init(candle: candle, count: 5);
     });
 
-    test('should return correct ts', () {
-      expect(model.ts, 1715769600000);
-    });
+    test('ts', () => expect(model.ts, 1715769600000));
+    test('open', () => expect(model.open.toDouble(), 100.0));
+    test('high', () => expect(model.high.toDouble(), 120.0));
+    test('low', () => expect(model.low.toDouble(), 80.0));
+    test('close', () => expect(model.close.toDouble(), 110.0));
+    test('vol', () => expect(model.vol.toDouble(), 5000.0));
+    test('turnover', () => expect(model.turnover?.toDouble(), 500000.0));
+    test('tradeCount', () => expect(model.tradeCount, 100));
+    test('confirmed', () => expect(model.confirmed, isTrue));
 
-    test('should return correct open', () {
-      expect(model.open.toDouble(), 100.0);
+    test('isLong: close > open', () => expect(model.isLong, isTrue));
+    test('isShort: close < open', () {
+      final short = CandleModel(
+        timestamp: 1715769600000,
+        open: '110',
+        high: '120',
+        low: '80',
+        close: '100',
+        volume: '100',
+      );
+      expect(FlexiCandleModel.init(candle: short, count: 1).isShort, isTrue);
     });
-
-    test('should return correct high', () {
-      expect(model.high.toDouble(), 120.0);
-    });
-
-    test('should return correct low', () {
-      expect(model.low.toDouble(), 80.0);
-    });
-
-    test('should return correct close', () {
-      expect(model.close.toDouble(), 110.0);
-    });
-
-    test('should return correct vol', () {
-      expect(model.vol.toDouble(), 5000.0);
-    });
-
-    test('should return correct turnover', () {
-      expect(model.turnover?.toDouble(), 500000.0);
-    });
-
-    test('should return correct confirmed', () {
-      expect(model.confirmed, isTrue);
+    test('isLong: close == open', () {
+      final doji = CandleModel(
+        timestamp: 1715769600000,
+        open: '100',
+        high: '120',
+        low: '80',
+        close: '100',
+        volume: '100',
+      );
+      expect(FlexiCandleModel.init(candle: doji, count: 1).isLong, isTrue);
     });
   });
 
-  group('FlexiCandleModel getData/setData', () {
+  // ---------------------------------------------------------------------------
+  // getData / setData (get / set)
+  // ---------------------------------------------------------------------------
+  group('FlexiCandleModel get / set', () {
     late FlexiCandleModel model;
 
     setUp(() {
@@ -156,7 +167,7 @@ void main() {
       model = FlexiCandleModel.init(candle: candle, count: 10);
     });
 
-    test('should setData and getData correctly', () {
+    test('set 后 get 返回正确值', () {
       model.set(0, '100');
       model.set(1, '101');
       model.set(2, '102');
@@ -166,7 +177,7 @@ void main() {
       expect(model.get<String>(2), '102');
     });
 
-    test('should setData with different types', () {
+    test('set 支持多种类型', () {
       model.set(0, 'string_value');
       model.set(1, 123);
       model.set(2, 3.14);
@@ -182,16 +193,15 @@ void main() {
       expect(model.get<Map<String, String>>(5), {'key': 'value'});
     });
 
-    test('should return null for type mismatch', () {
+    test('get 类型不匹配返回 null', () {
       model.set(0, 'string_value');
       model.set(1, 123);
 
-      // 类型不匹配时返回 null
       expect(model.get<int>(0), isNull);
       expect(model.get<String>(1), isNull);
     });
 
-    test('should overwrite existing data', () {
+    test('set 覆盖已有数据', () {
       model.set(0, 'first');
       expect(model.get<String>(0), 'first');
 
@@ -203,25 +213,29 @@ void main() {
       expect(model.get<String>(0), isNull);
     });
 
-    test('setData should return true on success', () {
+    test('set 有效索引返回 true', () {
       expect(model.set(0, 'value'), isTrue);
       expect(model.set(9, 'value'), isTrue);
     });
 
-    test('setData should return false on out of bounds', () {
+    test('set 越界返回 false', () {
       expect(model.set(-1, 'value'), isFalse);
       expect(model.set(10, 'value'), isFalse);
       expect(model.set(100, 'value'), isFalse);
     });
 
-    test('getData should return null for out of bounds', () {
+    test('get 越界返回 null', () {
       expect(model.get<String>(-1), isNull);
       expect(model.get<String>(10), isNull);
       expect(model.get<String>(100), isNull);
     });
   });
 
-  group('FlexiCandleModel operator[] and operator[]=', () {
+  // ---------------------------------------------------------------------------
+  // operator[] / operator[]=
+  // 注：[] 越界按文档抛 RangeError
+  // ---------------------------------------------------------------------------
+  group('FlexiCandleModel operator[] / operator[]=', () {
     late FlexiCandleModel model;
 
     setUp(() {
@@ -236,7 +250,7 @@ void main() {
       model = FlexiCandleModel.init(candle: candle, count: 10);
     });
 
-    test('operator[]= should set data correctly', () {
+    test('operator[]= 赋值后 operator[] 读取正确', () {
       model[0] = 'value0';
       model[1] = 123;
       model[2] = 3.14;
@@ -246,13 +260,13 @@ void main() {
       expect(model[2], 3.14);
     });
 
-    test('operator[] should return null for empty slot', () {
+    test('operator[] 空槽返回 null', () {
       expect(model[0], isNull);
       expect(model[5], isNull);
       expect(model[9], isNull);
     });
 
-    test('operator[]= should overwrite existing data', () {
+    test('operator[]= 覆盖已有值', () {
       model[0] = 'first';
       expect(model[0], 'first');
 
@@ -263,41 +277,37 @@ void main() {
       expect(model[0], 999);
     });
 
-    test('operator[] should return null for out of bounds', () {
-      expect(model[-1], isNull);
-      expect(model[10], isNull);
-      expect(model[100], isNull);
+    /// 越界读取抛 RangeError（文档明确说明）
+    test('operator[] 越界抛 RangeError', () {
+      expect(() => model[-1], throwsA(isA<RangeError>()));
+      expect(() => model[10], throwsA(isA<RangeError>()));
+      expect(() => model[100], throwsA(isA<RangeError>()));
     });
 
-    test('operator[]= should silently ignore out of bounds', () {
-      // 不应抛出异常
-      model[-1] = 'value';
-      model[10] = 'value';
-      model[100] = 'value';
-
-      // 验证有效范围内的数据未受影响
-      expect(model[0], isNull);
-      expect(model[9], isNull);
+    /// 越界写入抛 RangeError（文档明确说明）
+    test('operator[]= 越界抛 RangeError', () {
+      expect(() => model[-1] = 'value', throwsA(isA<RangeError>()));
+      expect(() => model[10] = 'value', throwsA(isA<RangeError>()));
+      expect(() => model[100] = 'value', throwsA(isA<RangeError>()));
     });
 
-    test('operator[] and getData should return same value', () {
+    test('operator[] 与 get<T> 访问同一槽位结果一致', () {
       model[0] = 'test_value';
       model.set(1, 'another_value');
 
-      // 两种方式访问应该返回相同的值
       expect(model[0], model.get<String>(0));
       expect(model[1], model.get<String>(1));
     });
 
-    test('operator[]= and setData should be interchangeable', () {
+    test('operator[]= 与 set 互换后数据一致', () {
       model[0] = 'via_operator';
-      model.set(1, 'via_setData');
+      model.set(1, 'via_set');
 
       expect(model.get<String>(0), 'via_operator');
-      expect(model[1], 'via_setData');
+      expect(model[1], 'via_set');
     });
 
-    test('operator[] should work with complex types', () {
+    test('operator[] 支持复杂类型', () {
       final list = ['a', 'b', 'c'];
       final map = {'key': 'value'};
       final flexiNum = FlexiNum.fromNum(100.5);
@@ -311,18 +321,21 @@ void main() {
       expect(model[2], flexiNum);
     });
 
-    test('operator[]= with null should clear the slot', () {
+    test('operator[]= 赋 null 后槽位变为空', () {
       model[0] = 'value';
       expect(model[0], 'value');
-      expect(model.isEmpty(0), isTrue);
+      expect(model.isEmpty(0), isFalse); // 有数据，isEmpty 为 false
 
       model[0] = null;
       expect(model[0], isNull);
-      expect(model.isEmpty(0), isFalse);
+      expect(model.isEmpty(0), isTrue); // null 后，isEmpty 为 true
     });
   });
 
-  group('FlexiCandleModel hasData/clearData', () {
+  // ---------------------------------------------------------------------------
+  // isEmpty / isNotEmpty / clean / cleanAll
+  // ---------------------------------------------------------------------------
+  group('FlexiCandleModel isEmpty / clean / cleanAll', () {
     late FlexiCandleModel model;
 
     setUp(() {
@@ -337,51 +350,56 @@ void main() {
       model = FlexiCandleModel.init(candle: candle, count: 5);
     });
 
-    test('hasData should return false for empty slot', () {
-      expect(model.isEmpty(0), isFalse);
-      expect(model.isEmpty(1), isFalse);
-      expect(model.isEmpty(4), isFalse);
+    test('初始化后所有槽位 isEmpty 为 true', () {
+      expect(model.isEmpty(0), isTrue);
+      expect(model.isEmpty(1), isTrue);
+      expect(model.isEmpty(4), isTrue);
     });
 
-    test('hasData should return true for non-empty slot', () {
+    test('set 数据后 isEmpty 为 false', () {
       model.set(0, 'value');
       model.set(2, 123);
 
-      expect(model.isEmpty(0), isTrue);
-      expect(model.isEmpty(1), isFalse);
-      expect(model.isEmpty(2), isTrue);
+      expect(model.isEmpty(0), isFalse); // 有数据
+      expect(model.isEmpty(1), isTrue);  // 未赋值
+      expect(model.isEmpty(2), isFalse); // 有数据
     });
 
-    test('hasData should return false for out of bounds', () {
-      expect(model.isEmpty(-1), isFalse);
-      expect(model.isEmpty(5), isFalse);
-      expect(model.isEmpty(100), isFalse);
+    test('越界索引 isEmpty 为 true', () {
+      expect(model.isEmpty(-1), isTrue);
+      expect(model.isEmpty(5), isTrue);
+      expect(model.isEmpty(100), isTrue);
     });
 
-    test('clearData should clear specific slot', () {
+    test('clean 清除指定槽位', () {
       model.set(0, 'value0');
       model.set(1, 'value1');
       model.set(2, 'value2');
 
       model.clean(1);
 
-      expect(model.isEmpty(0), isTrue);
-      expect(model.isEmpty(1), isFalse);
-      expect(model.isEmpty(2), isTrue);
+      expect(model.isEmpty(0), isFalse); // 未清除
+      expect(model.isEmpty(1), isTrue);  // 已清除
+      expect(model.isEmpty(2), isFalse); // 未清除
       expect(model.get<String>(1), isNull);
     });
 
-    test('clearData should handle out of bounds gracefully', () {
+    test('clean 返回值：越界返回 false，有效返回 true', () {
       model.set(0, 'value');
 
-      // 不应该抛出异常
-      model.clean(-1);
-      model.clean(10);
-
-      expect(model.isEmpty(0), isTrue);
+      expect(model.clean(0), isTrue);    // 有效索引
+      expect(model.clean(-1), isFalse);  // 越界
+      expect(model.clean(10), isFalse);  // 越界
     });
 
-    test('clearAllData should clear all slots', () {
+    test('clean 越界不抛异常', () {
+      model.set(0, 'value');
+      expect(() => model.clean(-1), returnsNormally);
+      expect(() => model.clean(10), returnsNormally);
+      expect(model.isEmpty(0), isFalse); // 未受影响
+    });
+
+    test('cleanAll 清除所有槽位', () {
       model.set(0, 'value0');
       model.set(1, 'value1');
       model.set(2, 'value2');
@@ -391,12 +409,15 @@ void main() {
       model.cleanAll();
 
       for (int i = 0; i < 5; i++) {
-        expect(model.isEmpty(i), isFalse);
+        expect(model.isEmpty(i), isTrue);
         expect(model.get<String>(i), isNull);
       }
     });
   });
 
+  // ---------------------------------------------------------------------------
+  // hasValidData
+  // ---------------------------------------------------------------------------
   group('FlexiCandleModel hasValidData', () {
     late FlexiCandleModel model;
 
@@ -412,16 +433,16 @@ void main() {
       model = FlexiCandleModel.init(candle: candle, count: 5);
     });
 
-    test('hasValidData should return false when all slots are empty', () {
+    test('所有槽位为空时 hasValidData 为 false', () {
       expect(model.hasValidData, isFalse);
     });
 
-    test('hasValidData should return true when any slot has data', () {
+    test('任一槽位有数据时 hasValidData 为 true', () {
       model.set(2, 'some_value');
       expect(model.hasValidData, isTrue);
     });
 
-    test('hasValidData should return false after clearAllData', () {
+    test('cleanAll 后 hasValidData 为 false', () {
       model.set(0, 'value');
       expect(model.hasValidData, isTrue);
 
@@ -430,52 +451,11 @@ void main() {
     });
   });
 
-  group('FlexiCandleModel isLong', () {
-    test('isLong should return true when close >= open', () {
-      final candle = CandleModel(
-        timestamp: 1715769600000,
-        open: '100',
-        high: '120',
-        low: '95',
-        close: '110',
-        volume: '100',
-      );
-      final model = FlexiCandleModel.init(candle: candle, count: 5);
-
-      expect(model.isLong, isTrue);
-    });
-
-    test('isLong should return true when close == open', () {
-      final candle = CandleModel(
-        timestamp: 1715769600000,
-        open: '100',
-        high: '120',
-        low: '95',
-        close: '100',
-        volume: '100',
-      );
-      final model = FlexiCandleModel.init(candle: candle, count: 5);
-
-      expect(model.isLong, isTrue);
-    });
-
-    test('isLong should return false when close < open', () {
-      final candle = CandleModel(
-        timestamp: 1715769600000,
-        open: '100',
-        high: '105',
-        low: '85',
-        close: '90',
-        volume: '100',
-      );
-      final model = FlexiCandleModel.init(candle: candle, count: 5);
-
-      expect(model.isLong, isFalse);
-    });
-  });
-
+  // ---------------------------------------------------------------------------
+  // ComputeMode
+  // ---------------------------------------------------------------------------
   group('FlexiCandleModel ComputeMode', () {
-    test('fast mode should use double internally', () {
+    test('fast mode 内部使用 double，存在精度损失', () {
       final candle = CandleModel(
         timestamp: 1715769600000,
         open: '100.123456789123456789',
@@ -490,12 +470,11 @@ void main() {
         mode: ComputeMode.fast,
       );
 
-      // fast mode 使用 double，会有精度损失
       final openDouble = model.open.toDouble();
       expect(openDouble, closeTo(100.12345678912346, 0.0000001));
     });
 
-    test('accurate mode should use Decimal internally', () {
+    test('accurate mode 内部使用 Decimal，保持精度', () {
       final candle = CandleModel(
         timestamp: 1715769600000,
         open: '100.123456789123456789',
@@ -510,14 +489,16 @@ void main() {
         mode: ComputeMode.accurate,
       );
 
-      // accurate mode 使用 Decimal，保持精度
       final openDecimal = model.open.toDecimal();
       expect(openDecimal, Decimal.parse('100.123456789123456789'));
     });
   });
 
-  group('FlexiCandleModel edge cases', () {
-    test('should handle zero count', () {
+  // ---------------------------------------------------------------------------
+  // 边界情况
+  // ---------------------------------------------------------------------------
+  group('FlexiCandleModel 边界情况', () {
+    test('count=0 时越界，isEmpty 为 true，set 返回 false', () {
       final candle = CandleModel(
         timestamp: 1715769600000,
         open: '100',
@@ -530,11 +511,11 @@ void main() {
 
       expect(model.get<String>(0), isNull);
       expect(model.set(0, 'value'), isFalse);
-      expect(model.isEmpty(0), isFalse);
+      expect(model.isEmpty(0), isTrue); // 越界，返回 true
       expect(model.hasValidData, isFalse);
     });
 
-    test('should handle null turnover', () {
+    test('turnover 为 null', () {
       final candle = CandleModel(
         timestamp: 1715769600000,
         open: '100',
@@ -549,7 +530,7 @@ void main() {
       expect(model.turnover, isNull);
     });
 
-    test('should handle large indicator count', () {
+    test('大量槽位时首尾正常写读', () {
       final candle = CandleModel(
         timestamp: 1715769600000,
         open: '100',

@@ -1,3 +1,18 @@
+## 2.0.0
+* Replace BagNum with FlexiNum for numeric representation (Breaking Changes).
+* Introduce ICandleModel interface and FlexiCandleModel; unify candle model to support custom models (Breaking Changes).
+* Refactor Indicator to generic class with typed key system: IIndicatorKey sealed class with DataIndicatorKey, BusinessIndicatorKey and NormalIndicatorKey subtypes (Breaking Changes).
+* Split PaintObjectIndicator into DataIndicator and BusinessIndicator with corresponding DataPaintObject and BusinessPaintObject (Breaking Changes).
+* Refactor paint object interfaces: rename IPaintBoundingBox to IPaintBounding, introduce IBasePainter/IComputablePainter/IBusinessPainter, add PaintObjectComputableMixin (Breaking Changes).
+* Change PaintObject initialization to lazy pattern; remove context and indicator from constructors (Breaking Changes).
+* Deprecate TimeBar enum and unify with ITimeBar (Breaking Changes).
+* Rename supportLongPress to enableLongPress in GestureConfig (Breaking Changes).
+* Add enableScale property to GestureConfig to allow disabling scale/zoom gestures.
+* Resolve two-finger zoom gesture conflicts and optimize zoom experience.
+* Add Y-axis smooth interpolation during pan to reduce coordinate jumps.
+* Add panSmoothFactor and convergenceRatio to ToleranceConfig for configurable smoothing.
+* Update inertial pan duration formula from log to sqrt for better velocity-to-duration mapping.
+
 ## 1.2.1
 * Refactor ChartType to FlexiChartType with improved structure and key property (Breaking Changes).
 * Add negative number constants to BagNum (minusHundred, minusFifty, minusTen, minusThree, minusTwo, minusOne).

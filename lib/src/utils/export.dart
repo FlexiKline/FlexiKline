@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// export './algorithm_util.dart';
+export './algorithm_util.dart';
 export './convert_util.dart';
 export 'vector_util.dart';
 // export './platform_util.dart';

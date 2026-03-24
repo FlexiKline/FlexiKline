@@ -25,4 +25,3 @@ export 'src/model/export.dart';
 export 'src/utils/export.dart';
 export 'src/view/flexi_kline_widget.dart';
 export 'src/kline_controller.dart';
-export 'src/flexi_kline_page.dart';

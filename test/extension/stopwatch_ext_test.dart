@@ -16,26 +16,9 @@ import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'base/log_print_impl.dart';
+import '../helpers/log_print_impl.dart';
 
 void main() {
-  test('test Stopwatch', () async {
-    final stopwatch = Stopwatch();
-
-    stopwatch.start();
-    expect(stopwatch.isRunning, true);
-
-    await Future.delayed(Duration(milliseconds: 100));
-    debugPrint('elapsed:${stopwatch.elapsedMicroseconds}μs');
-
-    await Future.delayed(Duration(milliseconds: 200));
-    debugPrint('elapsed:${stopwatch.elapsedMicroseconds}μs');
-
-    stopwatch.stop();
-    debugPrint('elapsed:${stopwatch.elapsedMicroseconds}μs');
-    expect(stopwatch.isRunning, false);
-  });
-
   group('FlexiStopwatch', () {
     final ILogger defaultLogger = LogPrintImpl(tag: 'FlexiStopwatch');
     final FlexiStopwatch stopwatch = FlexiStopwatch();
@@ -49,44 +32,36 @@ void main() {
       stopwatch.stop();
     });
 
-    test('test FlexiStopwatch', () async {
+    test('lap / spentMicroseconds', () async {
       stopwatch.lap();
-      await Future.delayed(Duration(milliseconds: 100));
+      await Future.delayed(const Duration(milliseconds: 100));
       debugPrint('spent:${stopwatch.spentMicroseconds}μs');
 
-      expect(stopwatch.isRunning, true);
+      expect(stopwatch.isRunning, isTrue);
 
       stopwatch.lap();
-      await Future.delayed(Duration(milliseconds: 200));
+      await Future.delayed(const Duration(milliseconds: 100));
       debugPrint('spent:${stopwatch.spentMicroseconds}μs');
     });
 
-    test('test FlexiStopwatch run', () {
-      stopwatch
-        ..reset()
-        ..start();
-
+    test('run 同步：运行后秒表仍在计时', () {
       stopwatch.run(
         () {
-          for (int i = 0; i < 1000000; i++) {
-            // do something
-          }
+          for (int i = 0; i < 100000; i++) {}
         },
         label: 'sync',
         logger: defaultLogger.logd,
       );
-      expect(stopwatch.isRunning, true);
-      debugPrint('runSync end');
+      expect(stopwatch.isRunning, isTrue);
     });
 
-    test('test FlexiStopwatch runAsync', () async {
+    test('exec 异步：执行后秒表仍在计时', () async {
       await stopwatch.exec(
-        () => Future.delayed(Duration(milliseconds: 1000)),
+        () => Future.delayed(const Duration(milliseconds: 50)),
         label: 'async',
         logger: defaultLogger.logd,
       );
-      expect(stopwatch.isRunning, true);
-      debugPrint('runAsync end');
+      expect(stopwatch.isRunning, isTrue);
     });
   });
 }

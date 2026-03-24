@@ -18,6 +18,9 @@ import 'package:flexi_formatter/date_time.dart';
 import 'package:flutter/painting.dart';
 
 import 'extension/basic_type_ext.dart';
+import 'framework/configuration.dart';
+import 'kline_controller.dart';
+import 'model/candle_req/candle_req.dart';
 
 /// double类型的计算精度误差
 const double precisionError = 0.000001;
@@ -180,3 +183,23 @@ const Map<TooltipLabel, String> defaultTooltipLabels = {
   TooltipLabel.amount: 'Amount',
   TooltipLabel.turnover: 'Turnover',
 };
+
+/// Kline数据中心接口抽象类
+abstract interface class IFlexiKlineDataCenter {
+  /// 请求参数
+  CandleReq createRequest();
+
+  /// 创建FlexiKline配置
+  IConfiguration createFlexiKlineConfig();
+
+  /// 创建FlexiKline控制器
+  FlexiKlineController createFlexiKlineController();
+
+  /// 刷新当前KlineController的K线数据
+  /// @param [reset] 是否重置当前KlineData所有数据
+  Future<void> refreshKlineData({bool reset = false});
+
+  /// 加载更多当前KlineController的K线数据
+  /// @param [request] 请求参数
+  Future<void> loadMoreCandles(CandleReq request);
+}

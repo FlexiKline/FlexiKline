@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// ignore_for_file: deprecated_member_use
-
-import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flexi_kline/flexi_kline.dart';
@@ -25,8 +22,11 @@ class TestFlexiKlineTheme implements IFlexiKlineTheme {
   @override
   double get scale {
     if (_scale != null) return _scale!;
-    final mediaQuery = MediaQueryData.fromView(window);
-    _scale = math.min(mediaQuery.size.width, mediaQuery.size.height) / 393;
+    final view = PlatformDispatcher.instance.implicitView;
+    final size = view != null
+        ? view.physicalSize / view.devicePixelRatio
+        : const Size(393, 852);
+    _scale = size.shortestSide / 393;
     return _scale!;
   }
 
@@ -34,8 +34,8 @@ class TestFlexiKlineTheme implements IFlexiKlineTheme {
   @override
   double get pixel {
     if (_pixel != null) return _pixel!;
-    final mediaQuery = MediaQueryData.fromView(window);
-    _pixel = 1.0 / mediaQuery.devicePixelRatio;
+    final view = PlatformDispatcher.instance.implicitView;
+    _pixel = view != null ? 1.0 / view.devicePixelRatio : 1.0;
     return _pixel!;
   }
 
@@ -62,9 +62,6 @@ class TestFlexiKlineTheme implements IFlexiKlineTheme {
 
   @override
   Color crossTextBg = const Color(0xFF111111);
-
-  // @override
-  // Color drawTextBg = Colors.blue;
 
   @override
   Color transparent = Colors.transparent;
