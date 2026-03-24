@@ -13,10 +13,11 @@
 // limitations under the License.
 
 export 'chart/indicator.dart';
-export 'draw/overlay.dart';
-export 'logger.dart';
-export 'serializers.dart';
-export 'configuration.dart';
+export 'chart_type.dart';
 export 'collection/fifo_hash_map.dart';
 export 'collection/fixed_hash_queue.dart';
 export 'collection/sortable_hash_set.dart';
+export 'configuration.dart';
+export 'draw/overlay.dart';
+export 'logger.dart';
+export 'serializers.dart';

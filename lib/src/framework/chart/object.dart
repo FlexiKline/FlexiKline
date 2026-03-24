@@ -144,12 +144,10 @@ abstract class PaintObject<T extends Indicator<IIndicatorKey>> extends Indicator
   String get logTag => '${super.logTag}\t${indicator.key.toString()}';
 }
 
-/// 普通指标绘制对象
+/// 普通指标绘制对象，不占 slot，无需预计算。
 ///
-/// 用于 Candle、Time、Main、Volume 等框架内置指标，不占 slot。
-abstract class NormalPaintObject<T extends NormalIndicator> extends PaintObject<T> implements IBasePainter {
-  // 构造函数完全省略
-}
+/// 内置的 Candle、Time、Volume 等均基于此，自定义指标也可继承。
+abstract class NormalPaintObject<T extends NormalIndicator> extends PaintObject<T> implements IBasePainter {}
 
 /// 数据指标绘制对象
 ///
@@ -221,8 +219,6 @@ abstract class CandleBasePaintObject<T extends CandleBaseIndicator> extends Norm
 ///
 /// 使用 [NormalIndicatorKey]，属于基础/系统指标，不占 slot。
 abstract class TimeBasePaintObject<T extends TimeBaseIndicator> extends NormalPaintObject<T> {
-  // 构造函数完全省略
-
   DrawPosition get position => indicator.position;
 }
 
@@ -250,9 +246,9 @@ final class MainPaintObject<T extends MainPaintObjectIndicator> extends PaintObj
 
   /// 获取蜡烛图绘制对象
   CandleBasePaintObject? get _candlePaintObject {
-    return children.firstWhereOrNull(
-      (obj) => obj.key == candleIndicatorKey,
-    ) as CandleBasePaintObject?;
+    return children.whereType<CandleBasePaintObject>().firstWhereOrNull(
+          (obj) => obj.key == candleIndicatorKey,
+        );
   }
 
   /// 是否只绘制蜡烛图（隐藏技术指标）
@@ -260,8 +256,6 @@ final class MainPaintObject<T extends MainPaintObjectIndicator> extends PaintObj
   bool get onlyMainChart {
     final candleObject = _candlePaintObject;
     if (candleObject == null) return false;
-
-    // 1. 优先检查配置项hideIndicatorsWhenLineChart是否为true, 如果为true, 则检查当前图表类型是否为线图
     return candleObject.hideIndicatorsWhenLineChart && candleObject.getChartType().isLine;
   }
 
@@ -294,10 +288,8 @@ final class MainPaintObject<T extends MainPaintObjectIndicator> extends PaintObj
   /// MainPaintObject 本身不需要 precompute，但需要将调用委托给子对象。
   @override
   void precompute(Range range, {bool reset = false}) {
-    for (final object in children) {
-      if (object is IComputablePainter) {
-        (object as IComputablePainter).precompute(range, reset: reset);
-      }
+    for (final computable in children.whereType<IComputablePainter>()) {
+      computable.precompute(range, reset: reset);
     }
   }
 

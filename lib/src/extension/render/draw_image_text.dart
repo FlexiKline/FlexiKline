@@ -20,7 +20,7 @@ import 'package:flutter/painting.dart';
 import '../geometry_ext.dart';
 import './draw_image.dart';
 
-import 'common.dart';
+import 'types.dart';
 
 extension FlexiDrawImageText on Canvas {
   /// 绘制图片区域.
@@ -198,7 +198,7 @@ extension FlexiDrawImageText on Canvas {
           offset.dy,
           offset.dx + containerSize.width,
           offset.dy + containerSize.height,
-          Radius.circular(0),
+          const Radius.circular(0),
         ));
       }
 

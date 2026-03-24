@@ -17,11 +17,12 @@ import 'package:flexi_formatter/date_time.dart';
 import 'package:flutter/painting.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-import '../constant.dart';
 import '../extension/export.dart';
 import '../model/flexi_num.dart';
+import '../model/time_bar.dart';
 import '../utils/convert_util.dart';
 import 'chart/indicator.dart';
+import 'chart_type.dart';
 import 'draw/overlay.dart';
 
 /// IndicatorKey 序列化转换器

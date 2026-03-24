@@ -12,18 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:math' as math;
 import 'dart:developer';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../core/core.dart';
 import '../extension/basic_type_ext.dart';
 import '../extension/functions_ext.dart';
 import '../extension/geometry_ext.dart';
 import '../framework/configuration.dart';
 import '../framework/logger.dart';
 import '../kline_controller.dart';
+import '../model/layout_mode.dart';
 import '../utils/platform_util.dart';
 import 'non_touch_gesture_detector.dart';
 import 'touch_gesture_detector.dart';
@@ -495,7 +495,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
                 style: IconButton.styleFrom(
                   padding: EdgeInsets.zero,
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  fixedSize: Size(20, 20),
+                  fixedSize: const Size(20, 20),
                   foregroundColor: theme.tooltipTextColor,
                   backgroundColor: theme.tooltipBg.withAlpha(0.8.alpha),
                   shape: RoundedRectangleBorder(
@@ -503,7 +503,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
                   ),
                   side: BorderSide(color: theme.gridLine, width: 1),
                 ),
-                icon: Text('A', style: TextStyle(fontSize: 12)),
+                icon: const Text('A', style: TextStyle(fontSize: 12)),
               ),
         ),
       ),

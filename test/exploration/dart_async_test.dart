@@ -65,8 +65,8 @@ void main() {
   test('Overlay JSON 序列化演示', () {
     final overlay = Overlay.fromType(
       key: 'BTCUSDT',
-      type: FlexiDrawType('aaa', 1),
-      line: LineConfig(),
+      type: const FlexiDrawType('aaa', 1),
+      line: const LineConfig(),
     );
     final str = jsonEncode(overlay);
     debugPrint(str);

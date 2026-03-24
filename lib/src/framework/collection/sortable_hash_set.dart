@@ -19,7 +19,7 @@ int _dynamicCompare(dynamic a, dynamic b) => Comparable.compare(a, b);
 Comparator<K> _defaultCompare<K>() {
   // If K <: Comparable, then we can just use Comparable.compare
   // with no casts.
-  final Object compare = Comparable.compare;
+  const Object compare = Comparable.compare;
   if (compare is Comparator<K>) {
     return compare;
   }

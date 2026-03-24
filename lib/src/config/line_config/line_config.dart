@@ -15,7 +15,7 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flutter/painting.dart';
 
-import '../../extension/render/common.dart';
+import '../../extension/render/types.dart';
 import '../../framework/serializers.dart';
 import '../paint_config/paint_config.dart';
 

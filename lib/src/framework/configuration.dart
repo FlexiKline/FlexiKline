@@ -15,8 +15,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
-import '../constant.dart';
 import '../config/export.dart';
+import '../constant.dart';
 import 'chart/indicator.dart';
 import 'draw/overlay.dart';
 import 'serializers.dart';

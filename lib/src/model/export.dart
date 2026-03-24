@@ -14,11 +14,12 @@
 
 export 'candle_model/candle_model.dart';
 export 'candle_req/candle_req.dart';
-export 'tooltip_info/tooltip_info.dart';
-
+export 'flexi_candle_model.dart';
 // 内置数据类型
 export 'flexi_num.dart';
-export 'flexi_candle_model.dart';
 export 'gesture_data.dart';
+export 'layout_mode.dart';
 export 'minmax.dart';
 export 'range.dart';
+export 'time_bar.dart';
+export 'tooltip_info/tooltip_info.dart';

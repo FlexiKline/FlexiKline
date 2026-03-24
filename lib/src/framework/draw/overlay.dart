@@ -30,7 +30,7 @@ import '../configuration.dart';
 import '../logger.dart';
 import '../serializers.dart';
 
-part 'common.dart';
+part 'types.dart';
 part 'draw_state.dart';
 part 'model.dart';
 part 'manager.dart';

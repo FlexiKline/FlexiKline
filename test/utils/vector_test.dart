@@ -94,7 +94,7 @@ void main() {
 
     test('向右下方延伸交于右边界', () {
       // k=0.2, b=4; x=14 → y=0.2*14+4=6.8
-      final B = Offset(10, 6);
+      const B = Offset(10, 6);
       final points = reflectPointsOnRect(A, B, rect);
       logMsg(points.toString());
       expect(points, isNotEmpty);
@@ -105,7 +105,7 @@ void main() {
 
     test('向右下方延伸交于下边界', () {
       // k=3, b=-10; y=10 → x=20/3≈6.667
-      final B = Offset(6, 8);
+      const B = Offset(6, 8);
       final points = reflectPointsOnRect(A, B, rect);
       logMsg(points.toString());
       expect(points, isNotEmpty);
@@ -116,7 +116,7 @@ void main() {
 
     test('向右上方延伸交于右边界', () {
       // k=-3/7, b=50/7; x=14 → y=8/7
-      final B = Offset(12, 2);
+      const B = Offset(12, 2);
       final points = reflectPointsOnRect(A, B, rect);
       logMsg(points.toString());
       expect(points, isNotEmpty);
@@ -126,7 +126,7 @@ void main() {
     });
 
     test('向左延伸交于左边界', () {
-      final B = Offset(2, 5);
+      const B = Offset(2, 5);
       final points = reflectPointsOnRect(A, B, rect);
       logMsg(points.toString());
       expect(points, isNotEmpty);
@@ -137,7 +137,7 @@ void main() {
     });
 
     test('向右延伸交于右边界', () {
-      final B = Offset(7, 5);
+      const B = Offset(7, 5);
       final points = reflectPointsOnRect(A, B, rect);
       logMsg(points.toString());
       expect(points, isNotEmpty);
@@ -148,7 +148,7 @@ void main() {
     });
 
     test('垂直向上交于上边界', () {
-      final B = Offset(5, 2);
+      const B = Offset(5, 2);
       final points = reflectPointsOnRect(A, B, rect);
       logMsg(points.toString());
       expect(points, isNotEmpty);
@@ -158,7 +158,7 @@ void main() {
     });
 
     test('垂直向下交于下边界', () {
-      final B = Offset(5, 7);
+      const B = Offset(5, 7);
       final points = reflectPointsOnRect(A, B, rect);
       logMsg(points.toString());
       expect(points, isNotEmpty);
@@ -168,7 +168,7 @@ void main() {
     });
 
     test('携带 compare 参数按升序排列', () {
-      final B = Offset(10, 6);
+      const B = Offset(10, 6);
       final sorted = reflectPointsOnRect(A, B, rect, compare: compareOffsetByAsc);
       expect(sorted.length, greaterThanOrEqualTo(2));
       // 升序后首点 dx 不大于末点 dx
@@ -186,38 +186,38 @@ void main() {
   // ---------------------------------------------------------------------------
   group('pointReflectInRect', () {
     const testRect = Rect.fromLTRB(0.5, 0.8, 14, 10);
-    final offset = Offset(5, 5);
+    const offset = Offset(5, 5);
 
     test('向右下延伸落在右边界', () {
-      final other = Offset(10, 6);
+      const other = Offset(10, 6);
       final ret = offset.reflectRectSide(other, testRect);
       logMsg('1>$ret');
       expect(ret.dx, closeTo(testRect.right, 1e-6));
     });
 
     test('向右下延伸落在下边界', () {
-      final other = Offset(6, 8);
+      const other = Offset(6, 8);
       final ret = offset.reflectRectSide(other, testRect);
       logMsg('2>$ret');
       expect(ret.dy, closeTo(testRect.bottom, 1e-6));
     });
 
     test('向右上延伸落在右边界', () {
-      final other = Offset(12, 2);
+      const other = Offset(12, 2);
       final ret = offset.reflectRectSide(other, testRect);
       logMsg('3>$ret');
       expect(ret.dx, closeTo(testRect.right, 1e-6));
     });
 
     test('向左上延伸落在上边界', () {
-      final other = Offset(7, 1);
+      const other = Offset(7, 1);
       final ret = offset.reflectRectSide(other, testRect);
       logMsg('4>$ret');
       expect(ret.dy, closeTo(testRect.top, 1e-6));
     });
 
     test('水平向左延伸落在左边界', () {
-      final other = Offset(2, 5);
+      const other = Offset(2, 5);
       final ret = offset.reflectRectSide(other, testRect);
       logMsg('1>$ret');
       expect(ret.dx, closeTo(testRect.left, 1e-6));
@@ -225,7 +225,7 @@ void main() {
     });
 
     test('水平向右延伸落在右边界', () {
-      final other = Offset(7, 5);
+      const other = Offset(7, 5);
       final ret = offset.reflectRectSide(other, testRect);
       logMsg('2>$ret');
       expect(ret.dx, closeTo(testRect.right, 1e-6));
@@ -233,7 +233,7 @@ void main() {
     });
 
     test('垂直向上延伸落在上边界', () {
-      final other = Offset(5, 2);
+      const other = Offset(5, 2);
       final ret = offset.reflectRectSide(other, testRect);
       logMsg('3>$ret');
       expect(ret.dy, closeTo(testRect.top, 1e-6));
@@ -241,7 +241,7 @@ void main() {
     });
 
     test('垂直向下延伸落在下边界', () {
-      final other = Offset(5, 7);
+      const other = Offset(5, 7);
       final ret = offset.reflectRectSide(other, testRect);
       logMsg('4>$ret');
       expect(ret.dy, closeTo(testRect.bottom, 1e-6));

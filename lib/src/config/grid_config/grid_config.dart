@@ -15,7 +15,7 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flexi_kline/src/config/export.dart';
 
-import '../../extension/render/common.dart';
+import '../../extension/render/types.dart';
 import '../../framework/serializers.dart';
 
 part 'grid_config.g.dart';

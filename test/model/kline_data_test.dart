@@ -102,7 +102,7 @@ void main() {
       final newList = [_makeCandle(10), _makeCandle(9), _makeCandle(8)];
       final (list, range) = combineCandleList([], newList);
       expect(list.map((e) => e.ts).toList(), [10, 9, 8]);
-      expect(range, Range(0, 3));
+      expect(range, const Range(0, 3));
     });
 
     test('newList 比 oldList 新（前插）', () {
@@ -110,7 +110,7 @@ void main() {
       final newList = [_makeCandle(12), _makeCandle(11)];
       final (list, range) = combineCandleList(old, newList);
       expect(list.map((e) => e.ts).toList(), [12, 11, 10, 9, 8]);
-      expect(range, Range(0, 2));
+      expect(range, const Range(0, 2));
     });
 
     test('newList 与 oldList 首端重叠（覆盖最新）', () {
@@ -118,7 +118,7 @@ void main() {
       final newList = [_makeCandle(11), _makeCandle(10), _makeCandle(9)];
       final (list, range) = combineCandleList(old, newList);
       expect(list.map((e) => e.ts).toList(), [11, 10, 9, 8]);
-      expect(range, Range(0, 3));
+      expect(range, const Range(0, 3));
     });
 
     test('newList 比 oldList 旧（尾追加）', () {
@@ -126,7 +126,7 @@ void main() {
       final newList = [_makeCandle(7), _makeCandle(6)];
       final (list, range) = combineCandleList(old, newList);
       expect(list.map((e) => e.ts).toList(), [10, 9, 8, 7, 6]);
-      expect(range, Range(3, 5));
+      expect(range, const Range(3, 5));
     });
 
     test('newList 与 oldList 尾端重叠（覆盖历史）', () {
@@ -134,7 +134,7 @@ void main() {
       final newList = [_makeCandle(9), _makeCandle(8), _makeCandle(7)];
       final (list, range) = combineCandleList(old, newList);
       expect(list.map((e) => e.ts).toList(), [10, 9, 8, 7]);
-      expect(range, Range(1, 4));
+      expect(range, const Range(1, 4));
     });
 
     test('newList 完全覆盖 oldList', () {
@@ -147,7 +147,7 @@ void main() {
       ];
       final (list, range) = combineCandleList(old, newList);
       expect(list.map((e) => e.ts).toList(), [10, 9, 8, 7]);
-      expect(range, Range(0, 4));
+      expect(range, const Range(0, 4));
     });
 
     test('newList 完全在 oldList 内部（不处理，返回原列表）', () {
@@ -195,7 +195,7 @@ void main() {
       final newList = [_Item(10, '10-new')];
       final r = _merge(cur, newList);
       expect(_listEq(r.list, [...newList, _Item(9), _Item(8)]), isTrue);
-      expect(r.range, Range(0, 1));
+      expect(r.range, const Range(0, 1));
     });
 
     test('before3：newList 更新超出最新', () {
@@ -203,7 +203,7 @@ void main() {
       final newList = [_Item(11, '11-new')];
       final r = _merge(cur, newList);
       expect(_listEq(r.list, [...newList, ...cur]), isTrue);
-      expect(r.range, Range(0, 1));
+      expect(r.range, const Range(0, 1));
     });
 
     test('before4：newList 覆盖全部 curList', () {

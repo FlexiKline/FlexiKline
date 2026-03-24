@@ -17,10 +17,8 @@
 import 'package:flexi_formatter/date_time.dart';
 import 'package:flutter/painting.dart';
 
-import 'extension/basic_type_ext.dart';
-import 'framework/configuration.dart';
-import 'kline_controller.dart';
-import 'model/candle_req/candle_req.dart';
+import 'model/time_bar.dart';
+import 'types.dart';
 
 /// double类型的计算精度误差
 const double precisionError = 0.000001;
@@ -73,81 +71,6 @@ const double defaultTipsTextHeight = 1.2;
 // 默认Tips文本区域的Padding: 左边缩进8个单位
 const EdgeInsets defaultTipsPadding = EdgeInsets.only(left: 8);
 
-/// 计算模式
-/// [fast] 使用(IEEE 754 二进制浮点数算术标准)计算指标数据. (用double类型计算)
-/// [accurate] 使用Decimal基于十进制算术的精确计算指标数据. (用Decimal类型计算)
-enum ComputeMode {
-  fast,
-  accurate,
-}
-
-/// 按[timeBar]格式化时间[dateTime]
-typedef DateTimeFormatter = String Function(DateTime dateTime, [ITimeBar? timeBar]);
-
-abstract interface class ITimeBar {
-  String get bar;
-
-  int get multiplier;
-
-  TimeUnit get unit;
-}
-
-extension ITimeBarExt on ITimeBar {
-  /// 是否是有效的时间粒度
-  bool get isValid {
-    return bar.isNotEmpty && multiplier > 0 && unit != TimeUnit.microsecond;
-  }
-
-  /// 当前时间粒度对应的毫秒数
-  int get milliseconds => unit.microseconds ~/ 1000 * multiplier;
-
-  bool get isUtc {
-    return bar.equalsIgnoreCase('utc');
-  }
-
-  /// 比较两个时间粒度是否相同
-  bool isSameAs(ITimeBar other) {
-    return bar == other.bar && milliseconds == other.milliseconds;
-  }
-}
-
-/// 比较两个时间粒度是否相同
-bool compareTimeBar(ITimeBar a, ITimeBar b) {
-  return a.bar == b.bar && a.milliseconds == b.milliseconds;
-}
-
-/// 自定义时间粒度
-final class FlexiTimeBar implements ITimeBar {
-  const FlexiTimeBar(
-    this.bar,
-    this.multiplier,
-    this.unit,
-  );
-  @override
-  final String bar;
-
-  @override
-  final int multiplier;
-
-  @override
-  final TimeUnit unit;
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is ITimeBar &&
-        runtimeType == other.runtimeType &&
-        bar == other.bar &&
-        milliseconds == other.milliseconds;
-  }
-
-  @override
-  int get hashCode => runtimeType.hashCode ^ bar.hashCode ^ milliseconds.hashCode;
-
-  @override
-  String toString() => '$bar:$milliseconds';
-}
-
 const invalidTimeBar = FlexiTimeBar('', 0, TimeUnit.millisecond);
 
 /// 内置: 时间粒度
@@ -157,20 +80,7 @@ const timeBar1H = FlexiTimeBar('1H', 1, TimeUnit.hour);
 const timeBar1D = FlexiTimeBar('1D', 1, TimeUnit.day);
 const timeBar1W = FlexiTimeBar('1W', 1, TimeUnit.week);
 
-/// 内置TooltipLabel
-enum TooltipLabel {
-  time,
-  open,
-  high,
-  low,
-  close,
-  chg,
-  chgRate,
-  range,
-  amount,
-  turnover;
-}
-
+/// 内置TooltipLabel默认文本
 const Map<TooltipLabel, String> defaultTooltipLabels = {
   TooltipLabel.time: 'Time',
   TooltipLabel.open: 'Open',
@@ -183,23 +93,3 @@ const Map<TooltipLabel, String> defaultTooltipLabels = {
   TooltipLabel.amount: 'Amount',
   TooltipLabel.turnover: 'Turnover',
 };
-
-/// Kline数据中心接口抽象类
-abstract interface class IFlexiKlineDataCenter {
-  /// 请求参数
-  CandleReq createRequest();
-
-  /// 创建FlexiKline配置
-  IConfiguration createFlexiKlineConfig();
-
-  /// 创建FlexiKline控制器
-  FlexiKlineController createFlexiKlineController();
-
-  /// 刷新当前KlineController的K线数据
-  /// @param [reset] 是否重置当前KlineData所有数据
-  Future<void> refreshKlineData({bool reset = false});
-
-  /// 加载更多当前KlineController的K线数据
-  /// @param [request] 请求参数
-  Future<void> loadMoreCandles(CandleReq request);
-}

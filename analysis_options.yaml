@@ -14,7 +14,35 @@ formatter:
 
 linter:
   rules:
+    ## Import ordering
+    directives_ordering: true
+
+    ## Type safety & readability
+    always_declare_return_types: true
+    annotate_overrides: true
+    avoid_void_async: true
+    prefer_typing_uninitialized_variables: true
+
+    ## Public API quality
+    public_member_api_docs: false
+
+    ## Code style
     prefer_final_locals: true
     prefer_final_in_for_each: true
     prefer_single_quotes: true
     unnecessary_parenthesis: true
+    unnecessary_this: true
+    cascade_invocations: false
+
+    ## Const optimization
+    prefer_const_constructors: true
+    prefer_const_declarations: true
+
+    ## Collection checks
+    prefer_is_empty: true
+    prefer_is_not_empty: true
+
+    ## Safety
+    no_duplicate_case_values: true
+    use_key_in_widget_constructors: true
+    avoid_print: true

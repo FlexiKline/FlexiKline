@@ -17,8 +17,8 @@ import 'package:flutter/painting.dart';
 
 import '../../constant.dart';
 import '../../framework/serializers.dart';
-import '../point_config/point_config.dart';
 import '../line_config/line_config.dart';
+import '../point_config/point_config.dart';
 import '../text_area_config/text_area_config.dart';
 import '../tooltip_config/tooltip_config.dart';
 

@@ -15,22 +15,22 @@
 import 'package:flutter/material.dart' hide Overlay;
 
 import '../constant.dart';
-import '../extension/render/common.dart';
 import '../extension/basic_type_ext.dart';
+import '../extension/render/types.dart';
 import '../framework/export.dart';
 import '../indicators/export.dart';
 import 'cross_config/cross_config.dart';
-import 'gradient_config/gradient_config.dart';
-import 'magnifier_config/magnifier_config.dart';
-import 'point_config/point_config.dart';
 import 'draw_config/draw_config.dart';
 import 'flexi_kline_config/flexi_kline_config.dart';
 import 'gesture_config/gesture_config.dart';
+import 'gradient_config/gradient_config.dart';
 import 'grid_config/grid_config.dart';
 import 'line_config/line_config.dart';
 import 'loading_config/loading_config.dart';
+import 'magnifier_config/magnifier_config.dart';
 import 'mark_config/mark_config.dart';
 import 'paint_config/paint_config.dart';
+import 'point_config/point_config.dart';
 import 'setting_config/setting_config.dart';
 import 'text_area_config/text_area_config.dart';
 import 'tolerance_config/tolerance_config.dart';

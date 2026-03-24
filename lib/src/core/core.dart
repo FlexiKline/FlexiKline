@@ -28,6 +28,7 @@ import '../data/kline_data.dart';
 import '../extension/export.dart';
 import '../framework/export.dart';
 import '../model/export.dart';
+import '../types.dart';
 import '../utils/platform_util.dart';
 
 part 'binding_base.dart';
@@ -35,6 +36,6 @@ part 'chart.dart';
 part 'state.dart';
 part 'setting.dart';
 part 'cross.dart';
-part 'common.dart';
+part 'interfaces.dart';
 part 'draw.dart';
 part 'grid.dart';

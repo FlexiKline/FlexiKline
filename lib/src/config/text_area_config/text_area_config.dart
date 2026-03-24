@@ -17,8 +17,8 @@ import 'package:flutter/painting.dart';
 
 import '../../constant.dart';
 import '../../extension/export.dart';
-import '../../framework/serializers.dart';
 import '../../framework/configuration.dart';
+import '../../framework/serializers.dart';
 
 part 'text_area_config.g.dart';
 

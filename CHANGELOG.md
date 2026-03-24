@@ -7,11 +7,15 @@
 * Change PaintObject initialization to lazy pattern; remove context and indicator from constructors (Breaking Changes).
 * Deprecate TimeBar enum and unify with ITimeBar (Breaking Changes).
 * Rename supportLongPress to enableLongPress in GestureConfig (Breaking Changes).
+* Refactor project structure: extract `TimeBar`, `LayoutMode`, `FlexiChartType`, indicator keys and paint interfaces into independent modules; rename `common.dart` files to `types.dart` / `interfaces.dart`.
+* Add `FlexiUpdater<T>` typedef and `updateXxxConfig` convenience methods to SettingBinding.
+* Improve type safety: replace manual casts with `whereType<IComputablePainter>()`.
 * Add enableScale property to GestureConfig to allow disabling scale/zoom gestures.
 * Resolve two-finger zoom gesture conflicts and optimize zoom experience.
 * Add Y-axis smooth interpolation during pan to reduce coordinate jumps.
 * Add panSmoothFactor and convergenceRatio to ToleranceConfig for configurable smoothing.
 * Update inertial pan duration formula from log to sqrt for better velocity-to-duration mapping.
+* Enhance lint rules and apply fixes across codebase.
 
 ## 1.2.1
 * Refactor ChartType to FlexiChartType with improved structure and key property (Breaking Changes).

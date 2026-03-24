@@ -12,23 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+export 'cross_config/cross_config.dart';
+export 'default_config.dart';
+export 'draw_config/draw_config.dart';
 export 'flexi_kline_config/flexi_kline_config.dart';
-export 'setting_config/setting_config.dart';
 export 'gesture_config/gesture_config.dart';
 export 'gradient_config/gradient_config.dart';
 export 'grid_config/grid_config.dart';
-export 'cross_config/cross_config.dart';
-export 'draw_config/draw_config.dart';
-export 'magnifier_config/magnifier_config.dart';
-export 'tips_config/tips_config.dart';
 export 'line_config/line_config.dart';
-export 'point_config/point_config.dart';
-export 'text_area_config/text_area_config.dart';
-export 'mark_config/mark_config.dart';
-export 'tooltip_config/tooltip_config.dart';
 export 'loading_config/loading_config.dart';
-export 'tolerance_config/tolerance_config.dart';
+export 'magnifier_config/magnifier_config.dart';
+export 'mark_config/mark_config.dart';
 export 'paint_config/paint_config.dart';
-
-/// 内置默认配置
-export 'default_config.dart';
+export 'point_config/point_config.dart';
+export 'setting_config/setting_config.dart';
+export 'text_area_config/text_area_config.dart';
+export 'tips_config/tips_config.dart';
+export 'tolerance_config/tolerance_config.dart';
+export 'tooltip_config/tooltip_config.dart';

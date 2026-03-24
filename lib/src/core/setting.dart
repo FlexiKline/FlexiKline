@@ -61,7 +61,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
     return _canvasSizeChangeListener;
   }
 
-  /// 当前而已模式.
+  /// 当前布局模式.
   /// 初始值为NormalLayoutMode(mainIndicator.size)
   late LayoutMode _layoutMode;
 
@@ -230,7 +230,6 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
   /// 自适应[FlexiKlineWidget]所在父组件的布局的变化
   /// 注: 仅适配主区的宽度变化
   /// 这主要是通过[FlexiKlineWidget]的autoAdaptLayout配置决定, 并会导致无法手动调整[FlexiKlineWidget]的宽度.
-  /// //[syncMainSize] 是否同步更新MainSize
   bool setAdaptLayoutMode(Size size) {
     if (!canSetMainSize(size)) return false;
 
@@ -341,7 +340,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
   /// 最大蜡烛宽度[1, 50]
   double get candleMaxWidth => math.max(candleMinWidth, settingConfig.candleMaxWidth);
 
-  /// 单根蜡烛宽度, 限制范围1[candleMinWidth] ~ [candleMaxWidth] 之间
+  /// 单根蜡烛宽度, 限制范围[candleMinWidth] ~ [candleMaxWidth] 之间
   @override
   double get candleWidth => _candleWidth;
   void _setCandleWidth(double width, {bool sync = false}) {
@@ -373,7 +372,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
   @override
   double get candleActualWidth => candleWidth + candleSpacing;
 
-  /// 单根蜡烛的一半
+  /// 单根蜡烛实际宽度（含间距）的一半
   @override
   double get candleWidthHalf => candleActualWidth / 2;
 
@@ -461,9 +460,8 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
     final newObj = _paintObjectManager.addSubPaintObject(key, this);
     if (newObj != null) {
       // 优化执行时机
-      final computable = newObj as IComputablePainter?;
-      if (computable != null) {
-        computable.precompute(curKlineData.computableRange, reset: true);
+      if (newObj is IComputablePainter) {
+        (newObj as IComputablePainter).precompute(curKlineData.computableRange, reset: true);
       }
       _invokeSizeChanged();
       _updateSubHeightList();
@@ -535,13 +533,21 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
     markRepaintCross();
   }
 
-  /// SettingConfig
+  void updateSettingConfig(FlexiUpdater<SettingConfig> builder) {
+    settingConfig = builder(settingConfig);
+  }
+
+  /// GestureConfig
   @override
   GestureConfig get gestureConfig => flexiKlineConfig.gesture;
   set gestureConfig(GestureConfig config) {
     flexiKlineConfig.gesture = config;
     markRepaintChart();
     markRepaintCross();
+  }
+
+  void updateGestureConfig(FlexiUpdater<GestureConfig> builder) {
+    gestureConfig = builder(gestureConfig);
   }
 
   /// GridConfig
@@ -554,6 +560,10 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
     markRepaintGrid();
   }
 
+  void updateGridConfig(FlexiUpdater<GridConfig> builder) {
+    gridConfig = builder(gridConfig);
+  }
+
   /// CrossConfig
   @override
   CrossConfig get crossConfig => flexiKlineConfig.cross;
@@ -563,6 +573,10 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
     markRepaintCross();
   }
 
+  void updateCrossConfig(FlexiUpdater<CrossConfig> builder) {
+    crossConfig = builder(crossConfig);
+  }
+
   /// DrawConfig
   @override
   DrawConfig get drawConfig => flexiKlineConfig.draw;
@@ -570,6 +584,10 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
     flexiKlineConfig.draw = config;
     markRepaintChart();
     markRepaintDraw();
+  }
+
+  void updateDrawConfig(FlexiUpdater<DrawConfig> builder) {
+    drawConfig = builder(drawConfig);
   }
 
   /// 获取[key]指定的指标实例

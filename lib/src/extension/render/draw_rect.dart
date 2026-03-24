@@ -16,7 +16,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/painting.dart';
 
-import 'common.dart';
+import 'types.dart';
 
 extension FlexiDrawRect on Canvas {
   /// 绘制一个背景区域.

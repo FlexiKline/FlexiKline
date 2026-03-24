@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/// 绘制方向
 enum DrawDirection {
   /// The draw flows from left to right.
   ltr,
@@ -26,12 +27,14 @@ enum DrawDirection {
   bool get isrtl => this == rtl;
 }
 
+/// 线条类型
 enum LineType {
   solid, // 实线
   dashed, // 虚线
   dotted; // 点线
 }
 
+/// Y轴对齐方式
 enum YAxisAlign {
   top,
   center,

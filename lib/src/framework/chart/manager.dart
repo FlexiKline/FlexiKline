@@ -153,17 +153,16 @@ final class IndicatorPaintObjectManager with KlineLog {
     paintObject.__context = context;
 
     // paintObject 已经混入了 KlineLog，所以直接设置
-    if (context is KlineLog && context is KlineLog) {
-      (paintObject as KlineLog).loggerDelegate = (context as KlineLog).loggerDelegate;
+    if (context is KlineLog) {
+      paintObject.loggerDelegate = (context as KlineLog).loggerDelegate;
     }
 
     return paintObject;
   }
 
   /// 初始化主区/副区指标
-  /// 1. 确认指标数据在[FlexiCandleModel]的[slots]中的index.
-  /// 2. 初始化主区绘制对象, 初始化副区绘制对象队列
-  /// 3. 从配置中加载缓存的主/副区指标.
+  /// 1. 初始化主区绘制对象（MainPaintObject）及蜡烛图、时间轴绘制对象
+  /// 2. 从配置中加载缓存的主/副区指标.
   void init(IPaintContext context) {
     final mainIndicator = flexiKlineConfig.mainIndicator;
     _mainPaintObject = MainPaintObject();
@@ -171,7 +170,7 @@ final class IndicatorPaintObjectManager with KlineLog {
     _mainPaintObject.__context = context;
     // _mainPaintObject 已经混入了 KlineLog，所以直接设置
     if (context is KlineLog) {
-      (_mainPaintObject as KlineLog).loggerDelegate = (context as KlineLog).loggerDelegate;
+      _mainPaintObject.loggerDelegate = (context as KlineLog).loggerDelegate;
     }
 
     /// 配置默认指标蜡烛图指标和时间指标
@@ -394,9 +393,9 @@ final class IndicatorPaintObjectManager with KlineLog {
     return hasRemove;
   }
 
-  /// 获取主区[key]指定的指标配置实例
-  /// 1. 先从当前载入的指标中查找
-  /// 2. 如果不存在, 则从配置缓存中加载[key]对应的指标
+  /// 获取[key]指定的指标配置实例（先查主区, 再查副区）
+  /// 1. 先从当前载入的绘制对象中查找
+  /// 2. 如果未载入, 则从配置缓存中加载[key]对应的指标
   T? getIndicator<T extends Indicator>(IIndicatorKey key) {
     if (hasRegisteredInMain(key)) {
       Indicator? indicator = mainPaintObject.getChildIndicator(key);

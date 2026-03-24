@@ -14,8 +14,8 @@
 
 import 'package:decimal/decimal.dart';
 
-import 'flexi_num.dart';
 import '../extension/collections_ext.dart';
+import 'flexi_num.dart';
 
 class MinMax {
   static final MinMax zero = MinMax(max: FlexiNum.zero, min: FlexiNum.zero);

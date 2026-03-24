@@ -18,7 +18,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/painting.dart';
 import '../geometry_ext.dart';
 
-import 'common.dart';
+import 'types.dart';
 
 extension FlexiDrawImage on Canvas {
   /// 绘制图片区域.
@@ -135,7 +135,7 @@ extension FlexiDrawImage on Canvas {
           offset.dy,
           offset.dx + viewSize.width,
           offset.dy + viewSize.height,
-          Radius.circular(0),
+          const Radius.circular(0),
         ));
       }
 

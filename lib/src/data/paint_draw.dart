@@ -42,7 +42,7 @@ mixin PaintDrawData on BaseData {
   /// 如果ts > 最新价, 将为负
   double? timestampToIndex(int ts) {
     if (list.isEmpty || !req.timeBar.isValid) return null;
-    final latestIndex = 0; // 后续性能优化考虑数据方向
+    const latestIndex = 0; // 后续性能优化考虑数据方向
     final timespans = req.timeBar.milliseconds;
     final first = list.first;
     final last = list.last;

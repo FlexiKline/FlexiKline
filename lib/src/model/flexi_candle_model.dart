@@ -15,9 +15,10 @@
 import 'package:decimal/decimal.dart';
 import 'package:flexi_formatter/flexi_formatter.dart';
 
-import '../constant.dart';
+import '../types.dart';
 import '../utils/convert_util.dart' show parseDecimal, parseDouble;
 import 'flexi_num.dart';
+import 'time_bar.dart';
 
 /// K 线蜡烛图数据接口
 ///

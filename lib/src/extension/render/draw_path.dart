@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 import '../../config/line_config/line_config.dart';
-import 'common.dart';
+import 'types.dart';
 
 /// Came from [flutter_path_drawing](https://github.com/dnfield/flutter_path_drawing) library.
 /// Creates a new path that is drawn from the segments of `source`.
@@ -64,9 +64,7 @@ class DashOffset {
   final _DashOffsetType _dashOffsetType;
 
   double _calculate(double length) {
-    return _dashOffsetType == _DashOffsetType.absolute
-        ? _rawVal
-        : length * _rawVal;
+    return _dashOffsetType == _DashOffsetType.absolute ? _rawVal : length * _rawVal;
   }
 }
 

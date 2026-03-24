@@ -22,8 +22,8 @@ import 'package:flutter/painting.dart';
 import '../../config/export.dart';
 import '../../constant.dart';
 import '../../extension/export.dart';
-import '../../model/export.dart';
 import '../../framework/export.dart';
+import '../../model/export.dart';
 
 part 'candle.g.dart';
 part 'indicator.dart';

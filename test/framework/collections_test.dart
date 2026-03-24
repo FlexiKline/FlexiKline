@@ -14,8 +14,8 @@
 
 // ignore_for_file: prefer_final_locals
 
-import 'package:flexi_kline/src/framework/collection/fixed_hash_queue.dart';
 import 'package:flexi_kline/src/framework/collection/fifo_hash_map.dart';
+import 'package:flexi_kline/src/framework/collection/fixed_hash_queue.dart';
 import 'package:flexi_kline/src/framework/collection/sortable_hash_set.dart';
 import 'package:flutter_test/flutter_test.dart';
 

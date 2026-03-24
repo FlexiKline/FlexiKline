@@ -129,7 +129,7 @@ void main() {
       // scale 从 2 翻倍到 4，线性增幅 100%，对数增幅应 < 50%
       final y2 = scaledDecelerate(2.0);
       final y4 = scaledDecelerate(4.0);
-      final linearGrowth = (4.0 - 2.0) / 2.0;       // 100%
+      const linearGrowth = (4.0 - 2.0) / 2.0;       // 100%
       final logGrowth = (y4 - y2) / y2;
       expect(logGrowth, lessThan(linearGrowth));
     });
@@ -243,7 +243,7 @@ void main() {
     test('调整后中点不变（对称扩张）', () {
       const d1 = 3.3;
       const d2 = 3.6;
-      final mid = (d1 + d2) / 2;
+      const mid = (d1 + d2) / 2;
       final (a, b) = ensureMinDistance(d1, d2);
       expect((a + b) / 2, closeTo(mid, 1e-9));
     });
