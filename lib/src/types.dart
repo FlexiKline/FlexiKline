@@ -48,8 +48,9 @@ typedef FlexiUpdater<T> = T Function(T current);
 
 /// Kline数据中心接口抽象类
 abstract interface class IFlexiKlineDataCenter {
-  /// 请求参数
-  CandleReq createRequest();
+  /// 创建新的请求参数, 建议在instId变更时调用
+  /// [last] 上次请求参数, 用于创建新的请求参数
+  CandleReq createRequest([CandleReq? last]);
 
   /// 创建FlexiKline配置
   IConfiguration createFlexiKlineConfig();

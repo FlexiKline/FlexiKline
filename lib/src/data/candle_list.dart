@@ -35,16 +35,13 @@ mixin CandleListData on BaseData {
   @override
   void initData() {
     super.initData();
-    initBasicData(allRange, reset: true);
+    initBasicData(allRange);
   }
 
   /// 初始化基础数据
-  void initBasicData(
-    Range range, {
-    bool reset = false,
-  }) {
+  void initBasicData(Range range) {
     for (int i = range.start; i < range.end; i++) {
-      _list[i].reset(computeMode, indicatorCount);
+      _list[i] = _list[i].reset(computeMode, indicatorCount);
     }
   }
 

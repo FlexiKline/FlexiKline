@@ -35,7 +35,6 @@ flexi_network/
 **/doc/api/
 .dart_tool/
 build/
-doc/development/
 
 # FVM Version Cache
 .fvm/
