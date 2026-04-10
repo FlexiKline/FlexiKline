@@ -41,9 +41,9 @@ mixin PaintDrawData on BaseData {
   /// 将[ts]转换为当前KlineData数据列表的下标和剩余偏移率
   /// 如果ts > 最新价, 将为负
   double? timestampToIndex(int ts) {
-    if (list.isEmpty || !req.timeBar.isValid) return null;
+    if (list.isEmpty || !spec.timeBar.isValid) return null;
     const latestIndex = 0; // 后续性能优化考虑数据方向
-    final timespans = req.timeBar.milliseconds;
+    final timespans = spec.timeBar.milliseconds;
     final first = list.first;
     final last = list.last;
     if (ts > first.ts) {
@@ -75,8 +75,8 @@ mixin PaintDrawData on BaseData {
 
   /// 将[indexValue]转换为以当前KlineData数据范围为基础的timestamp
   int? indexToTimestamp(double indexValue) {
-    if (list.isEmpty || !req.timeBar.isValid) return null;
-    final timespans = req.timeBar.milliseconds;
+    if (list.isEmpty || !spec.timeBar.isValid) return null;
+    final timespans = spec.timeBar.milliseconds;
     final index = indexValue.toInt();
     final patchTs = ((indexValue - index) * timespans).truncate();
     if (index < 0) {

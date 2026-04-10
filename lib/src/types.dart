@@ -14,7 +14,7 @@
 
 import 'framework/configuration.dart';
 import 'kline_controller.dart';
-import 'model/candle_req/candle_req.dart';
+import 'model/kline_spec/kline_spec.dart';
 import 'model/time_bar.dart';
 
 /// 计算模式
@@ -48,9 +48,8 @@ typedef FlexiUpdater<T> = T Function(T current);
 
 /// Kline数据中心接口抽象类
 abstract interface class IFlexiKlineDataCenter {
-  /// 创建新的请求参数, 建议在instId变更时调用
-  /// [last] 上次请求参数, 用于创建新的请求参数
-  CandleReq createRequest([CandleReq? last]);
+  /// 创建 KlineSpec, 在品种或周期变更时调用
+  KlineSpec createKlineSpec([KlineSpec? last]);
 
   /// 创建FlexiKline配置
   IConfiguration createFlexiKlineConfig();
@@ -58,11 +57,9 @@ abstract interface class IFlexiKlineDataCenter {
   /// 创建FlexiKline控制器
   FlexiKlineController createFlexiKlineController();
 
-  /// 刷新当前KlineController的K线数据
-  /// @param [reset] 是否重置当前KlineData所有数据
+  /// 刷新K线数据; [reset] 为 true 时清空已有数据重新加载
   Future<void> refreshKlineData({bool reset = false});
 
-  /// 加载更多当前KlineController的K线数据
-  /// @param [request] 请求参数
-  Future<void> loadMoreCandles(CandleReq request);
+  /// 加载更多K线数据
+  Future<void> loadMoreCandles(KlineSpec spec);
 }

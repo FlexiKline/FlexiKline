@@ -521,3 +521,11 @@ TileMode? parseTileMode(String? modeStr) {
 String convertTileMode(TileMode mode) {
   return mode.name;
 }
+
+/// 按指定分隔符拆分字符串。
+///
+/// 未传 [pattern] 时按加密货币交易对常见分隔符拆分：`-`、`_`、`|`、`/`、空格（正则 `[-_|/ ]+`），并去掉空段。
+Iterable<String> splitPair(String value, [Pattern? pattern]) {
+  final p = pattern ?? RegExp(r'[-_|/ ]+');
+  return value.split(p).where((s) => s.isNotEmpty);
+}

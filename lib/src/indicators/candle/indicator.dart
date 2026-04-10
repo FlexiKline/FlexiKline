@@ -498,7 +498,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
       /// 最新价文本和样式配置
       final text = formatPrice(
         model.close.toDecimal(),
-        precision: klineData.req.precision,
+        precision: klineData.precision,
         cutInvalidZero: false,
       );
 
@@ -506,7 +506,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
       String? countDownText;
       // 时间周期 > 1秒时才显示倒计时
       if (indicator.showCountDown && klineData.timeBar.milliseconds > Duration.millisecondsPerSecond) {
-        final nextUpdateDateTime = model.nextUpdateDateTime(klineData.req.timeBar);
+        final nextUpdateDateTime = model.nextUpdateDateTime(klineData.timeBar);
         if (nextUpdateDateTime != null &&
             nextUpdateDateTime.millisecondsSinceEpoch > DateTime.now().millisecondsSinceEpoch) {
           countDownText = nextUpdateDateTime.diffAsCountdown();

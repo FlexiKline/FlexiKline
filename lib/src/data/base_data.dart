@@ -16,22 +16,25 @@ part of 'kline_data.dart';
 
 /// KlineData基类
 ///
-/// [req] 蜡烛数据请求
+/// [spec] K线规格配置
+/// [loadingState] K线加载状态
 /// [list] 蜡烛数据列表
 /// [start] 当前绘制区域起始下标
 /// [end] 当前绘制区域结束下标
 /// 注: 对于BaseData的指标计算mixin: 仅保留计算逻辑, 不持有状态, 计算结果统一整合在[CandleModel]中.
 abstract class BaseData with KlineLog {
   @override
-  String get logTag => req.key;
+  String get logTag => spec.key;
 
   BaseData(
-    CandleReq req,
+    KlineSpec spec,
     this.indicatorCount, {
+    KlineLoadingState loadingState = KlineLoadingState.none,
     List<FlexiCandleModel> list = const [],
     this.computeMode = ComputeMode.fast,
     ILogger? logger,
-  })  : _req = req,
+  })  : _spec = spec,
+        _loadingState = loadingState,
         _list = List.of(list) {
     loggerDelegate = logger;
     initData();
@@ -53,8 +56,13 @@ abstract class BaseData with KlineLog {
   final int indicatorCount;
   final ComputeMode computeMode;
 
-  CandleReq _req;
-  CandleReq get req => _req;
+  KlineSpec _spec;
+  KlineSpec get spec => _spec;
+
+  KlineLoadingState _loadingState;
+  KlineLoadingState get loadingState => _loadingState;
+
+  bool get invalid => spec.symbol.isEmpty;
 
   List<FlexiCandleModel> _list;
   List<FlexiCandleModel> get list => _list;
@@ -83,7 +91,7 @@ abstract class BaseData with KlineLog {
     return isNotEmpty && start < end && start >= 0 && end <= length;
   }
 
-  CandleReq updateState({RequestState state = RequestState.none});
+  void updateState({KlineLoadingState state = KlineLoadingState.none});
 
   /// 未合并的数据
   final List<List<ICandleModel>> _waitingData = List.empty(growable: true);

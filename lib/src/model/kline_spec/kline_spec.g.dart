@@ -120,26 +120,3 @@ extension $KlineSpecCopyWith on KlineSpec {
   // ignore: library_private_types_in_public_api
   _$KlineSpecCWProxy get copyWith => _$KlineSpecCWProxyImpl(this);
 }
-
-// **************************************************************************
-// JsonSerializableGenerator
-// **************************************************************************
-
-KlineSpec _$KlineSpecFromJson(Map<String, dynamic> json) => KlineSpec(
-      symbol: json['symbol'] as String,
-      timeBar: json['timeBar'] == null
-          ? timeBar1m
-          : const ITimeBarConvert()
-              .fromJson(json['timeBar'] as Map<String, dynamic>),
-      limit: (json['limit'] as num?)?.toInt() ?? 100,
-      from: (json['from'] as num?)?.toInt(),
-      to: (json['to'] as num?)?.toInt(),
-    );
-
-Map<String, dynamic> _$KlineSpecToJson(KlineSpec instance) => <String, dynamic>{
-      'symbol': instance.symbol,
-      'timeBar': const ITimeBarConvert().toJson(instance.timeBar),
-      'limit': instance.limit,
-      if (instance.from case final value?) 'from': value,
-      if (instance.to case final value?) 'to': value,
-    };

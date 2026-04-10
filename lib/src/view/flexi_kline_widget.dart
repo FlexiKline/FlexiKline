@@ -293,10 +293,10 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
     }
 
     return ValueListenableBuilder(
-      valueListenable: controller.candleRequestListener,
-      builder: (context, request, child) {
+      valueListenable: controller.loadingStateListener,
+      builder: (context, loadingState, child) {
         return Offstage(
-          offstage: !(request.state.showLoading && controller.settingConfig.autoLoadMoreData),
+          offstage: !(loadingState.showLoading && controller.settingConfig.autoLoadMoreData),
           child: Center(
             key: const ValueKey('loadingView'),
             child: SizedBox.square(

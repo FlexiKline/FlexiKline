@@ -13,11 +13,10 @@
 // limitations under the License.
 
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:json_annotation/json_annotation.dart';
 
 import '../../constant.dart';
-import '../../extension/export.dart';
-import '../../framework/serializers.dart';
+import '../../extension/export.dart' show FlexiIterableExt;
+import '../../utils/export.dart' show splitPair;
 import '../time_bar.dart';
 
 part 'kline_spec.g.dart';
@@ -39,7 +38,6 @@ enum KlineLoadingState {
 }
 
 @CopyWith()
-@FlexiModelSerializable
 class KlineSpec {
   const KlineSpec({
     required this.symbol,
@@ -60,18 +58,16 @@ class KlineSpec {
   /// 分页条数，最大 300，默认 100
   final int limit;
 
-  /// 分页游标起点（更旧一侧），毫秒时间戳；数据加载后自动同步为最旧蜡烛 ts
+  /// 分页游标起点（更旧一侧），毫秒时间戳
   final int? from;
 
-  /// 分页游标终点（更新一侧），毫秒时间戳；数据加载后自动同步为最新蜡烛 ts
+  /// 分页游标终点（更新一侧），毫秒时间戳
   final int? to;
 
-  /// 价格精度（UI 渲染用，不参与序列化）
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  /// 价格精度（UI 渲染用）
   final int precision;
 
-  /// 可选显示标签（不参与序列化）
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  /// 可选显示标签
   final String? label;
 
   @override
@@ -93,30 +89,18 @@ class KlineSpec {
 
   @override
   int get hashCode => symbol.hashCode ^ timeBar.hashCode ^ precision.hashCode;
-
-  factory KlineSpec.fromJson(Map<String, dynamic> json) => _$KlineSpecFromJson(json);
-  Map<String, dynamic> toJson() => _$KlineSpecToJson(this);
-
-  Map<String, dynamic> toRequestParams() {
-    return toJson()
-      ..remove('timeBar')
-      ..['bar'] = timeBar.bar;
-  }
 }
 
 extension KlineSpecExt on KlineSpec {
   String get key => '$symbol-$timeBar';
   String get rangeKey => '$symbol-$timeBar-$from-$to';
 
-  /// 加载更多时使用的 HTTP 参数（不含 to，向旧方向无限翻页）
-  Map<String, dynamic> toLoadMoreParams() => toRequestParams()..remove('to');
-
-  /// 清除分页游标，返回初始规格（用于首次加载或重置）
+  /// 清除分页游标，返回初始规格
   KlineSpec initial() => copyWith(from: null, to: null);
 
-  /// 加密货币专用：base 货币（BTC-USDT 中的 BTC）
-  String get base => symbol.split('-').firstOrNull ?? symbol;
+  /// 加密货币专用：base 货币（如 BTC-USDT、BTC_USDT、BTC/USDT → BTC）
+  String get base => splitPair(symbol).firstOrNull ?? symbol;
 
-  /// 加密货币专用：quote 货币（BTC-USDT 中的 USDT）
-  String get quote => symbol.split('-').getItem(1) ?? '';
+  /// 加密货币专用：quote 货币（如 BTC-USDT → USDT）
+  String get quote => splitPair(symbol).secondOrNull ?? '';
 }

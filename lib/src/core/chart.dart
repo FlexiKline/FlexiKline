@@ -175,20 +175,16 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding implements 
     if (_reset) _reset = false;
   }
 
-  /// 当前平移结束(惯性平移之前)时,检查并加载更多蜡烛数据
-  /// [panDistance] 代表数据将要惯性平移的距离
-  /// [panDuration] 代表数据将要惯性平移的时长(单们ms)
-  /// [loadMoreDistanceOffset]的计算规则: [gestureConfig.loadMoreWhenNoEnoughDistance] 优先 [gestureConfig.loadMoreWhenNoEnoughCandles]
-  /// 以[paintDxOffset]为基础继续平移[panDistance],
-  ///   1. 当大于最大平移宽度[maxPaintDxOffset]减去[loadMoreDistanceOffset]的距离时, 请求状态为[RequestState.loadMore], 提前加载更多历史数据, 此时不展示loading.
-  ///   2. 当大于最大平移宽度[maxPaintDxOffset]时, 请求状态为[RequestState.loadingMore], 提前加载更多历史数据, 等待[panDuration]ms展示loading.
-  ///   3. 否则, 请求状态为[RequestState.none], 取消loading的展示.
+  /// 惯性平移前检查是否需要加载更多
+  /// [panDistance] 惯性平移距离, [panDuration] 惯性时长(ms)
+  /// 越过 loadMore 阈值 → [KlineLoadingState.loadMore](静默预加载)
+  /// 越过 max → [KlineLoadingState.loadingMore](展示 loading)
   void checkAndLoadMoreCandlesWhenPanEnd({
     double? panDistance,
     int? panDuration,
   }) {
-    final oldState = curKlineData.req.state;
-    if (oldState == RequestState.initLoading) {
+    final oldState = curKlineData.loadingState;
+    if (oldState == KlineLoadingState.initLoading) {
       logw('checkAndLoadMoreCandlesWhenPanEnd currently in init, no loadMore');
       return;
     }
@@ -205,35 +201,35 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding implements 
     final destination = paintDxOffset + panDistance;
     final loadMoreMinPaintDxOffset = maxPaintDxOffset - loadMoreDistanceOffset;
 
-    RequestState newState;
+    KlineLoadingState newState;
     if (destination > loadMoreMinPaintDxOffset) {
       if (destination >= maxPaintDxOffset) {
-        newState = RequestState.loadingMore;
+        newState = KlineLoadingState.loadingMore;
       } else {
-        newState = RequestState.loadMore;
+        newState = KlineLoadingState.loadMore;
       }
     } else if (oldState.isLoadMore) {
-      newState = RequestState.loadMore;
+      newState = KlineLoadingState.loadMore;
     } else {
-      newState = RequestState.none;
+      newState = KlineLoadingState.none;
     }
 
-    final request = curKlineData.updateState(state: newState);
-    logd('checkAndLoadMoreCandlesWhenPanEnd new candle request:$request');
+    curKlineData.updateState(state: newState);
+    logd('checkAndLoadMoreCandlesWhenPanEnd new loading state:$newState');
 
-    if (newState == RequestState.loadingMore && panDuration != null) {
+    if (newState == KlineLoadingState.loadingMore && panDuration != null) {
       Future.delayed(
         // Duration(milliseconds: panDuration),
         Duration.zero,
-        () => _updateCandleRequestListener(request),
+        () => _notifyLoadingState(newState, curDataKey),
       );
     } else {
-      _updateCandleRequestListener(request);
+      _notifyLoadingState(newState, curDataKey);
     }
 
     if (!oldState.isLoadMore && newState.isLoadMore) {
       if (settingConfig.autoLoadMoreData) {
-        onLoadMoreCandles?.call(request);
+        onLoadMoreCandles?.call(curKlineData.getLoadMoreSpec());
       }
     }
   }

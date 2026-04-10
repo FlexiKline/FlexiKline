@@ -24,15 +24,16 @@ import '../model/export.dart';
 import '../types.dart';
 
 part 'base_data.dart';
-part 'candle_req.dart';
+part 'kline_spec.dart';
 part 'candle_list.dart';
 part 'paint_draw.dart';
 part 'indicator.dart';
 
-class KlineData extends BaseData with CandleReqData, CandleListData, PaintDrawData, IndicatorData {
+class KlineData extends BaseData with KlineSpecData, CandleListData, PaintDrawData, IndicatorData {
   KlineData(
-    super.req,
+    super.spec,
     super.indicatorCount, {
+    super.loadingState,
     super.list,
     super.computeMode,
     super.logger,
@@ -41,7 +42,7 @@ class KlineData extends BaseData with CandleReqData, CandleListData, PaintDrawDa
   final FlexiStopwatch stopwatch = FlexiStopwatch();
 
   static final KlineData empty = KlineData(
-    const CandleReq(instId: '', timeBar: invalidTimeBar),
+    const KlineSpec(symbol: '', timeBar: invalidTimeBar),
     0,
     list: List.empty(growable: false),
   );

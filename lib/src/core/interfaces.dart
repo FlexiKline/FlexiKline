@@ -87,8 +87,11 @@ abstract interface class IPaintContext implements IStorage, ILogger {
 
   KlineData get curKlineData;
 
-  /// 蜡烛请求监听器
-  ValueListenable<CandleReq> get candleRequestListener;
+  /// K线规格变化监听器
+  ValueListenable<KlineSpec> get klineSpecListener;
+
+  /// K线加载状态变化监听器
+  ValueListenable<KlineLoadingState> get loadingStateListener;
 
   /// SettingConfig
   SettingConfig get settingConfig;

@@ -16,8 +16,8 @@ part of 'core.dart';
 
 /// LoadMore接口
 ///
-/// 加载[request]指定范围[after, before]之前的历史数据.
-typedef OnLoadMoreCandles = Future<void> Function(CandleReq request);
+/// 加载[spec]指定范围内的历史数据.
+typedef OnLoadMoreCandles = Future<void> Function(KlineSpec spec);
 
 /// 状态管理: 负责数据的管理, 缓存, 切换, 计算.
 mixin StateBinding on KlineBindingBase, SettingBinding {
@@ -38,7 +38,8 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   void dispose() {
     super.dispose();
     logd('dispose state');
-    _candleRequestListener.dispose();
+    _klineSpecNotifier.dispose();
+    _loadingStateNotifier.dispose();
     _isFirstCandleMoveOffScreenListener.dispose();
     _isMultiTouchNotifier.dispose();
     _timeBarListener.dispose();
@@ -77,12 +78,17 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   final _timeBarListener = ValueNotifier<ITimeBar?>(null);
   ValueListenable<ITimeBar?> get timeBarListener => _timeBarListener;
 
-  /// CandleReq变化监听器
-  final _candleRequestListener = ValueNotifier(KlineData.empty.req);
+  /// KlineSpec变化监听器
+  final _klineSpecNotifier = ValueNotifier<KlineSpec>(KlineData.empty.spec);
+
+  /// 加载状态变化监听器
+  final _loadingStateNotifier = ValueNotifier<KlineLoadingState>(KlineLoadingState.none);
+
   @override
-  ValueListenable<CandleReq> get candleRequestListener {
-    return _candleRequestListener;
-  }
+  ValueListenable<KlineSpec> get klineSpecListener => _klineSpecNotifier;
+
+  @override
+  ValueListenable<KlineLoadingState> get loadingStateListener => _loadingStateNotifier;
 
   /// 当前KlineData绘制范围监听器
   final _paintRangeListener = ValueNotifier<Range?>(null);
@@ -91,12 +97,19 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     return _paintRangeListener;
   }
 
-  void _updateCandleRequestListener(CandleReq request) {
-    logd('updateCandleRequestListener $curDataKey, request:$request');
-    if (request.key == curDataKey) {
-      onRequestChanged(_candleRequestListener.value);
-      _candleRequestListener.value = request;
-      _timeBarListener.value = request.timeBar;
+  void _notifySpecChange(KlineSpec spec) {
+    logd('_notifySpecChange $curDataKey, spec:$spec');
+    if (spec.key == curDataKey) {
+      onKlineSpecChanged(_klineSpecNotifier.value);
+      _klineSpecNotifier.value = spec;
+      _timeBarListener.value = spec.timeBar;
+    }
+  }
+
+  void _notifyLoadingState(KlineLoadingState state, String key) {
+    logd('_notifyLoadingState key:$key, state:$state');
+    if (key == curDataKey) {
+      _loadingStateNotifier.value = state;
     }
   }
 
@@ -123,7 +136,8 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   /// 4. 取消Cross绘制(如果有)
   void _setCurKlineData(KlineData data, {bool resetPaintDxOffset = true}) {
     _curKlineData = data;
-    _updateCandleRequestListener(data.req);
+    _notifySpecChange(data.spec);
+    _notifyLoadingState(data.loadingState, data.key);
     if (resetPaintDxOffset) paintDxOffset = getInitPaintDxOffset();
     markRepaintChart(reset: true);
     markRepaintDraw();
@@ -294,26 +308,26 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     });
   }
 
-  /// 切换[request]请求指定的蜡烛数据
-  /// [request] 待切换的[CandleReq]
+  /// 切换[spec]规格指定的蜡烛数据
+  /// [spec] 待切换的[KlineSpec]
   /// [useCacheFirst] 是否优先使用缓存. 注: 如果有缓存数据(说明之前加载过), loading不会展示.
   /// [useCachePaintDxOffset] 是否仍使用缓存的绘制位置(如果当前没有切换请求);
   /// return
-  ///   1. true:  代表使用了缓存, [curKlineData]的请求状态为[RequestState.none], 不展示loading
+  ///   1. true:  代表使用了缓存, [curKlineData]的加载状态为[KlineLoadingState.none], 不展示loading
   ///   2. false: 代表未使用缓存; 且[curKlineData]数据会被清空(如果有).
   bool switchKlineData(
-    CandleReq request, {
+    KlineSpec spec, {
     ComputeMode computeMode = ComputeMode.fast,
     bool useCacheFirst = true,
     bool useCachePaintDxOffset = false,
   }) {
-    KlineData? data = _klineDataCache[request.key];
+    KlineData? data = _klineDataCache[spec.key];
 
     if (useCacheFirst && data != null && data.isNotEmpty) {
       // 如果优先使用缓存且缓存数据不为空时, 设置缓存为当前KlineData, 同时结束loading状态.
       _setCurKlineData(
         data,
-        resetPaintDxOffset: request.key != curDataKey ? true : useCachePaintDxOffset,
+        resetPaintDxOffset: spec.key != curDataKey ? true : useCachePaintDxOffset,
       );
       return true;
     }
@@ -321,60 +335,59 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     // 清理历史缓存数据.
     data?.dispose();
 
-    // 重置当前KlineData为[req]请求指定的KlineData, 并更新到缓存中.
+    // 重置当前KlineData为[spec]规格指定的KlineData, 并更新到缓存中.
     data = KlineData(
-      request.copyWith(state: RequestState.initLoading),
+      spec,
       indicatorCount,
+      loadingState: KlineLoadingState.initLoading,
       computeMode: computeMode,
       logger: loggerDelegate,
     );
-    final old = _klineDataCache.append(request.key, data);
+    final old = _klineDataCache.append(spec.key, data);
     if (old != null) Future(() => old.dispose());
     _curKlineData = data;
-    _updateCandleRequestListener(data.req);
+    _notifySpecChange(data.spec);
+    _notifyLoadingState(KlineLoadingState.initLoading, data.key);
     return false;
   }
 
-  /// 结束加载中状态
-  /// [request]和[reqKey]指定要结束加载状态的请求, 如果[request]请求的状态非[RequestState.none], 即结束加载中状态
-  void stopLoading({
-    CandleReq? request,
-    String? reqKey,
-  }) {
-    reqKey ??= request?.key;
-    if (reqKey == curDataKey) {
-      if (curKlineData.req.state != RequestState.none) {
-        _updateCandleRequestListener(
-          curKlineData.updateState(state: RequestState.none),
-        );
+  /// 停止加载状态
+  /// [spec] 待停止的[KlineSpec]
+  /// [specKey] 待停止的[KlineSpec]的key
+  void stopLoading({KlineSpec? spec, String? specKey}) {
+    specKey ??= spec?.key;
+    if (specKey == null) return;
+    if (specKey == curDataKey) {
+      if (curKlineData.loadingState != KlineLoadingState.none) {
+        curKlineData.updateState(state: KlineLoadingState.none);
+        _notifyLoadingState(KlineLoadingState.none, specKey);
       }
     } else {
-      _klineDataCache.getItem(reqKey)?.updateState(state: RequestState.none);
+      _klineDataCache.getItem(specKey)?.updateState(state: KlineLoadingState.none);
     }
   }
 
-  /// 更新[list]到[request]请求指定的[KlineData]中
+  /// 更新[list]到[spec]规格指定的[KlineData]中
   Future<void> updateKlineData(
-    CandleReq request,
+    KlineSpec spec,
     List<ICandleModel> list, {
     bool reset = false,
   }) async {
     // 数据为空, 无需要更新.
     if (list.isEmpty) {
-      stopLoading(request: request);
+      stopLoading(spec: spec);
       return;
     }
 
-    final data = _klineDataCache[request.key];
+    final data = _klineDataCache[spec.key];
     if (data == null) {
-      logw('updateKlineData: cannot found klineData by $request');
+      logw('updateKlineData: cannot found klineData by $spec');
       return;
     }
 
     reset = reset || data.isEmpty;
 
-    /// 首先结束[stat.req]的请求状态为[RequestState.none]
-    stopLoading(request: data.req);
+    stopLoading(spec: data.spec);
 
     await _startPrecomputeKlineData(
       data,
@@ -382,11 +395,11 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
       reset: reset,
     );
 
-    if (request.key == curDataKey) {
+    if (spec.key == curDataKey) {
       if (reset) {
         _setCurKlineData(data);
       } else {
-        _updateCandleRequestListener(data.req);
+        _notifySpecChange(data.spec);
         // final newLen = data.length;
         // if (paintDxOffset < 0 && newLen > oldLen) {
         //   /// 当数据合并后

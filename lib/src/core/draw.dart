@@ -109,11 +109,11 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw {
   }
 
   @override
-  void onRequestChanged(CandleReq oldRequest) {
-    super.onRequestChanged(oldRequest);
-    final request = curKlineData.req;
-    if (request.instId != oldRequest.instId) {
-      _drawObjectManager.onChangeCandleRequest(request, drawConfig);
+  void onKlineSpecChanged(KlineSpec oldSpec) {
+    super.onKlineSpecChanged(oldSpec);
+    final spec = curKlineData.spec;
+    if (spec.symbol != oldSpec.symbol) {
+      _drawObjectManager.onSymbolChanged(spec, drawConfig);
       exitDraw();
     }
   }

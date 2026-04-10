@@ -86,8 +86,8 @@ abstract class KlineBindingBase with KlineLog implements ISetting, IPaintContext
 
   @protected
   @mustCallSuper
-  void onRequestChanged(CandleReq oldRequest) {
-    logd('onRequestChanged base');
+  void onKlineSpecChanged(KlineSpec oldSpec) {
+    logd('onKlineSpecChanged base');
   }
 
   @protected
