@@ -17,7 +17,7 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 import '../../constant.dart';
 import '../../extension/export.dart' show FlexiIterableExt;
 import '../../utils/export.dart' show splitPair;
-import '../time_bar.dart';
+import '../time_interval.dart';
 
 part 'kline_spec.g.dart';
 
@@ -41,7 +41,7 @@ enum KlineLoadingState {
 class KlineSpec {
   const KlineSpec({
     required this.symbol,
-    this.timeBar = timeBar1m,
+    this.timeBar = interval1m,
     this.limit = 100,
     this.precision = defaultPrecision,
     this.from,
@@ -53,7 +53,7 @@ class KlineSpec {
   final String symbol;
 
   /// 时间粒度，默认 1m
-  final ITimeBar timeBar;
+  final ITimeInterval timeBar;
 
   /// 分页条数，最大 300，默认 100
   final int limit;

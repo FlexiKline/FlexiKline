@@ -15,7 +15,7 @@
 import 'framework/configuration.dart';
 import 'kline_controller.dart';
 import 'model/kline_spec/kline_spec.dart';
-import 'model/time_bar.dart';
+import 'model/time_interval.dart';
 
 /// 计算模式
 /// [fast] 使用(IEEE 754 二进制浮点数算术标准)计算指标数据. (用double类型计算)
@@ -40,7 +40,10 @@ enum TooltipLabel {
 }
 
 /// 按[timeBar]格式化时间[dateTime]
-typedef DateTimeFormatter = String Function(DateTime dateTime, [ITimeBar? timeBar]);
+typedef DateTimeFormatter = String Function(
+  DateTime dateTime, [
+  ITimeInterval? timeBar,
+]);
 
 /// 更新器函数类型
 /// [current] 当前值, 返回更新后的值

@@ -42,7 +42,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     _loadingStateNotifier.dispose();
     _isFirstCandleMoveOffScreenListener.dispose();
     _isMultiTouchNotifier.dispose();
-    _timeBarListener.dispose();
+    _intervalListener.dispose();
     _paintRangeListener.dispose();
     _klineDataCache.forEach((key, data) {
       data.dispose();
@@ -74,9 +74,9 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     }
   }
 
-  /// 当KlineData的TimeBar的监听器
-  final _timeBarListener = ValueNotifier<ITimeBar?>(null);
-  ValueListenable<ITimeBar?> get timeBarListener => _timeBarListener;
+  /// 当KlineData的TimeInterval的监听器
+  final _intervalListener = ValueNotifier<ITimeInterval?>(null);
+  ValueListenable<ITimeInterval?> get intervalListener => _intervalListener;
 
   /// KlineSpec变化监听器
   final _klineSpecNotifier = ValueNotifier<KlineSpec>(KlineData.empty.spec);
@@ -102,7 +102,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     if (spec.key == curDataKey) {
       onKlineSpecChanged(_klineSpecNotifier.value);
       _klineSpecNotifier.value = spec;
-      _timeBarListener.value = spec.timeBar;
+      _intervalListener.value = spec.timeBar;
     }
   }
 
@@ -130,7 +130,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   }
 
   /// 设置当前KlineData:
-  /// 1. 通知timeBar变更
+  /// 1. 通知timeInterval变更
   /// 2. 初始化首根蜡烛绘制位置于屏幕右侧[getInitPaintDxOffset]指定处.
   /// 3. 重绘图表
   /// 4. 取消Cross绘制(如果有)

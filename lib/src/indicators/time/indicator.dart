@@ -102,7 +102,7 @@ class TimePaintObject<T extends TimeIndicator> extends TimeBasePaintObject<T> {
     }
   }
 
-  String formatDateTime(FlexiCandleModel model, ITimeBar timeBar) {
+  String formatDateTime(FlexiCandleModel model, ITimeInterval timeBar) {
     if (indicator.tickFormatter != null) {
       return indicator.tickFormatter!.call(model.dateTime, timeBar);
     }

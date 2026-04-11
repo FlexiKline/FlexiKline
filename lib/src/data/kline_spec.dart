@@ -19,7 +19,7 @@ mixin KlineSpecData on BaseData {
   int get precision => spec.precision;
   String get key => spec.key;
   String get rangeKey => spec.rangeKey;
-  ITimeBar get timeBar => spec.timeBar;
+  ITimeInterval get timeBar => spec.timeBar;
 
   @override
   void updateState({KlineLoadingState state = KlineLoadingState.none}) {

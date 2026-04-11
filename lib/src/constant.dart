@@ -17,7 +17,7 @@
 import 'package:flexi_formatter/date_time.dart';
 import 'package:flutter/painting.dart';
 
-import 'model/time_bar.dart';
+import 'model/time_interval.dart';
 import 'types.dart';
 
 /// double类型的计算精度误差
@@ -71,14 +71,17 @@ const double defaultTipsTextHeight = 1.2;
 // 默认Tips文本区域的Padding: 左边缩进8个单位
 const EdgeInsets defaultTipsPadding = EdgeInsets.only(left: 8);
 
-const invalidTimeBar = FlexiTimeBar('', 0, TimeUnit.millisecond);
+const invalidInterval = FlexiTimeInterval(0, TimeUnit.millisecond);
 
-/// 内置: 时间粒度
-const timeBar1s = FlexiTimeBar('1s', 1, TimeUnit.second);
-const timeBar1m = FlexiTimeBar('1m', 1, TimeUnit.minute);
-const timeBar1H = FlexiTimeBar('1H', 1, TimeUnit.hour);
-const timeBar1D = FlexiTimeBar('1D', 1, TimeUnit.day);
-const timeBar1W = FlexiTimeBar('1W', 1, TimeUnit.week);
+/// 内置: 时间周期
+const interval1s = FlexiTimeInterval(1, TimeUnit.second);
+const interval1m = FlexiTimeInterval(1, TimeUnit.minute);
+const interval5m = FlexiTimeInterval(5, TimeUnit.minute);
+const interval15m = FlexiTimeInterval(15, TimeUnit.minute);
+const interval1H = FlexiTimeInterval(1, TimeUnit.hour);
+const interval4H = FlexiTimeInterval(4, TimeUnit.hour);
+const interval1D = FlexiTimeInterval(1, TimeUnit.day);
+const interval1W = FlexiTimeInterval(1, TimeUnit.week);
 
 /// 内置TooltipLabel默认文本
 const Map<TooltipLabel, String> defaultTooltipLabels = {

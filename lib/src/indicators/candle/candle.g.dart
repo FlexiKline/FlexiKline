@@ -35,8 +35,8 @@ abstract class _$CandleIndicatorCWProxy {
 
   CandleIndicator minWidthLineType(FlexiLineChartType? minWidthLineType);
 
-  CandleIndicator timeBarChartTypes(
-      Map<ITimeBar, FlexiChartType>? timeBarChartTypes);
+  CandleIndicator intervalChartTypes(
+      Map<ITimeInterval, FlexiChartType>? intervalChartTypes);
 
   CandleIndicator hideIndicatorsWhenLineChart(bool hideIndicatorsWhenLineChart);
 
@@ -73,7 +73,7 @@ abstract class _$CandleIndicatorCWProxy {
     TextAreaConfig countDown,
     FlexiChartType chartType,
     FlexiLineChartType? minWidthLineType,
-    Map<ITimeBar, FlexiChartType>? timeBarChartTypes,
+    Map<ITimeInterval, FlexiChartType>? intervalChartTypes,
     bool hideIndicatorsWhenLineChart,
     Color? longColor,
     Color? shortColor,
@@ -140,9 +140,9 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
       this(minWidthLineType: minWidthLineType);
 
   @override
-  CandleIndicator timeBarChartTypes(
-          Map<ITimeBar, FlexiChartType>? timeBarChartTypes) =>
-      this(timeBarChartTypes: timeBarChartTypes);
+  CandleIndicator intervalChartTypes(
+          Map<ITimeInterval, FlexiChartType>? intervalChartTypes) =>
+      this(intervalChartTypes: intervalChartTypes);
 
   @override
   CandleIndicator hideIndicatorsWhenLineChart(
@@ -193,7 +193,7 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
     Object? countDown = const $CopyWithPlaceholder(),
     Object? chartType = const $CopyWithPlaceholder(),
     Object? minWidthLineType = const $CopyWithPlaceholder(),
-    Object? timeBarChartTypes = const $CopyWithPlaceholder(),
+    Object? intervalChartTypes = const $CopyWithPlaceholder(),
     Object? hideIndicatorsWhenLineChart = const $CopyWithPlaceholder(),
     Object? longColor = const $CopyWithPlaceholder(),
     Object? shortColor = const $CopyWithPlaceholder(),
@@ -260,10 +260,10 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
           ? _value.minWidthLineType
           // ignore: cast_nullable_to_non_nullable
           : minWidthLineType as FlexiLineChartType?,
-      timeBarChartTypes: timeBarChartTypes == const $CopyWithPlaceholder()
-          ? _value.timeBarChartTypes
+      intervalChartTypes: intervalChartTypes == const $CopyWithPlaceholder()
+          ? _value.intervalChartTypes
           // ignore: cast_nullable_to_non_nullable
-          : timeBarChartTypes as Map<ITimeBar, FlexiChartType>?,
+          : intervalChartTypes as Map<ITimeInterval, FlexiChartType>?,
       hideIndicatorsWhenLineChart:
           hideIndicatorsWhenLineChart == const $CopyWithPlaceholder()
               ? _value.hideIndicatorsWhenLineChart
@@ -334,10 +334,10 @@ CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
           _$JsonConverterFromJson<Map<String, dynamic>, FlexiLineChartType>(
               json['minWidthLineType'],
               const LineChartTypeConverter().fromJson),
-      timeBarChartTypes: json['timeBarChartTypes'] == null
+      intervalChartTypes: json['intervalChartTypes'] == null
           ? const {}
-          : const TimeBarChartTypesConverter()
-              .fromJson(json['timeBarChartTypes'] as List?),
+          : const IntervalChartTypesConverter()
+              .fromJson(json['intervalChartTypes'] as List?),
       hideIndicatorsWhenLineChart:
           json['hideIndicatorsWhenLineChart'] as bool? ?? false,
       longColor: _$JsonConverterFromJson<String, Color>(
@@ -378,8 +378,8 @@ Map<String, dynamic> _$CandleIndicatorToJson(CandleIndicator instance) =>
       'minWidthLineType':
           _$JsonConverterToJson<Map<String, dynamic>, FlexiLineChartType>(
               instance.minWidthLineType, const LineChartTypeConverter().toJson),
-      'timeBarChartTypes':
-          const TimeBarChartTypesConverter().toJson(instance.timeBarChartTypes),
+      'intervalChartTypes': const IntervalChartTypesConverter()
+          .toJson(instance.intervalChartTypes),
       'hideIndicatorsWhenLineChart': instance.hideIndicatorsWhenLineChart,
       'longColor': _$JsonConverterToJson<String, Color>(
           instance.longColor, const ColorConverter().toJson),

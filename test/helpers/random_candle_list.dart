@@ -32,7 +32,7 @@ Future<List<CandleModel>> genRandomCandleList({
   double range = 100,
   double initalVol = 100,
   double rangeVol = 50,
-  ITimeBar timeBar = timeBar1D,
+  ITimeInterval timeBar = interval1D,
   DateTime? dateTime,
   bool isHistory = true,
 }) async {

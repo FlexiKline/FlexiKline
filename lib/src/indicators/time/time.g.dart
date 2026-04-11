@@ -20,7 +20,7 @@ abstract class _$TimeIndicatorCWProxy {
   TimeIndicator ensurePaintInDrawableRect(bool ensurePaintInDrawableRect);
 
   TimeIndicator tickFormatter(
-      String Function(DateTime, [ITimeBar?])? tickFormatter);
+      String Function(DateTime, [ITimeInterval?])? tickFormatter);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `TimeIndicator(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -35,7 +35,7 @@ abstract class _$TimeIndicatorCWProxy {
     DrawPosition position,
     TextAreaConfig timeTick,
     bool ensurePaintInDrawableRect,
-    String Function(DateTime, [ITimeBar?])? tickFormatter,
+    String Function(DateTime, [ITimeInterval?])? tickFormatter,
   });
 }
 
@@ -66,7 +66,7 @@ class _$TimeIndicatorCWProxyImpl implements _$TimeIndicatorCWProxy {
 
   @override
   TimeIndicator tickFormatter(
-          String Function(DateTime, [ITimeBar?])? tickFormatter) =>
+          String Function(DateTime, [ITimeInterval?])? tickFormatter) =>
       this(tickFormatter: tickFormatter);
 
   @override
@@ -115,7 +115,7 @@ class _$TimeIndicatorCWProxyImpl implements _$TimeIndicatorCWProxy {
       tickFormatter: tickFormatter == const $CopyWithPlaceholder()
           ? _value.tickFormatter
           // ignore: cast_nullable_to_non_nullable
-          : tickFormatter as String Function(DateTime, [ITimeBar?])?,
+          : tickFormatter as String Function(DateTime, [ITimeInterval?])?,
     );
   }
 }

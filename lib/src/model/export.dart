@@ -21,5 +21,5 @@ export 'kline_spec/kline_spec.dart';
 export 'layout_mode.dart';
 export 'minmax.dart';
 export 'range.dart';
-export 'time_bar.dart';
+export 'time_interval.dart';
 export 'tooltip_info/tooltip_info.dart';

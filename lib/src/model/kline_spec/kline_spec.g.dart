@@ -9,7 +9,7 @@ part of 'kline_spec.dart';
 abstract class _$KlineSpecCWProxy {
   KlineSpec symbol(String symbol);
 
-  KlineSpec timeBar(ITimeBar timeBar);
+  KlineSpec timeBar(ITimeInterval timeBar);
 
   KlineSpec limit(int limit);
 
@@ -29,7 +29,7 @@ abstract class _$KlineSpecCWProxy {
   /// ````
   KlineSpec call({
     String symbol,
-    ITimeBar timeBar,
+    ITimeInterval timeBar,
     int limit,
     int precision,
     int? from,
@@ -48,7 +48,7 @@ class _$KlineSpecCWProxyImpl implements _$KlineSpecCWProxy {
   KlineSpec symbol(String symbol) => this(symbol: symbol);
 
   @override
-  KlineSpec timeBar(ITimeBar timeBar) => this(timeBar: timeBar);
+  KlineSpec timeBar(ITimeInterval timeBar) => this(timeBar: timeBar);
 
   @override
   KlineSpec limit(int limit) => this(limit: limit);
@@ -90,7 +90,7 @@ class _$KlineSpecCWProxyImpl implements _$KlineSpecCWProxy {
       timeBar: timeBar == const $CopyWithPlaceholder()
           ? _value.timeBar
           // ignore: cast_nullable_to_non_nullable
-          : timeBar as ITimeBar,
+          : timeBar as ITimeInterval,
       limit: limit == const $CopyWithPlaceholder()
           ? _value.limit
           // ignore: cast_nullable_to_non_nullable

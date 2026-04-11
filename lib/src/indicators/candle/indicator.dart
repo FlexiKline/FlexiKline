@@ -45,7 +45,7 @@ class CandleIndicator extends CandleBaseIndicator {
     required this.countDown,
     required this.chartType,
     this.minWidthLineType,
-    this.timeBarChartTypes = const {},
+    this.intervalChartTypes = const {},
     this.hideIndicatorsWhenLineChart = false,
     this.longColor,
     this.shortColor,
@@ -91,8 +91,9 @@ class CandleIndicator extends CandleBaseIndicator {
   /// 指定时间周期使用的图表类型映射
   /// Key: 时间周期，Value: 对应的图表类型
   /// 优先级高于 minWidthLineType
-  /// 匹配规则：基于 milliseconds 匹配，支持 TimeBar 和 FlexiTimeBar 互相等效
-  final Map<ITimeBar, FlexiChartType>? timeBarChartTypes;
+  /// 匹配规则：基于 milliseconds 匹配，支持不同 [ITimeInterval] 实现互相等效
+  @IntervalChartTypesConverter()
+  final Map<ITimeInterval, FlexiChartType>? intervalChartTypes;
 
   /// 当图表类型为线图时，是否隐藏主区的技术指标（如 MA 等）
   /// 用于避免主线图与技术指标线重合，影响可读性
@@ -141,7 +142,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
   FlexiChartType getChartType() {
     // 1. 优先检查时间周期映射（基于 milliseconds 匹配）
     final timeBar = klineData.timeBar;
-    final chartTypes = indicator.timeBarChartTypes;
+    final chartTypes = indicator.intervalChartTypes;
     if (chartTypes != null && chartTypes.isNotEmpty) {
       for (final entry in chartTypes.entries) {
         if (entry.key.milliseconds == timeBar.milliseconds) {

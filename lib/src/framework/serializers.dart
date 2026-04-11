@@ -19,7 +19,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 import '../extension/export.dart';
 import '../model/flexi_num.dart';
-import '../model/time_bar.dart';
+import '../model/time_interval.dart';
 import '../utils/convert_util.dart';
 import 'chart/indicator.dart';
 import 'chart_type.dart';
@@ -132,12 +132,12 @@ class BusinessIndicatorKeyConvert implements JsonConverter<BusinessIndicatorKey,
   }
 }
 
-class ITimeBarConvert implements JsonConverter<ITimeBar, Map<String, dynamic>> {
-  const ITimeBarConvert();
+class ITimeIntervalConvert
+    implements JsonConverter<ITimeInterval, Map<String, dynamic>> {
+  const ITimeIntervalConvert();
 
   @override
-  ITimeBar fromJson(Map<String, dynamic> json) {
-    final bar = json['bar']?.toString().trim() ?? '';
+  ITimeInterval fromJson(Map<String, dynamic> json) {
     final multiplier = parseInt(json['multiplier']) ?? 0;
     final unitName = json['unit']?.toString().trim();
     TimeUnit? unit;
@@ -145,15 +145,14 @@ class ITimeBarConvert implements JsonConverter<ITimeBar, Map<String, dynamic>> {
       unit = TimeUnit.values.firstWhereOrNull((e) => e.name == unitName);
     }
     unit ??= TimeUnit.microsecond;
-    return FlexiTimeBar(bar, multiplier, unit);
+    return FlexiTimeInterval(multiplier, unit);
   }
 
   @override
-  Map<String, dynamic> toJson(ITimeBar timeBar) {
+  Map<String, dynamic> toJson(ITimeInterval interval) {
     return {
-      'bar': timeBar.bar,
-      'multiplier': timeBar.multiplier,
-      'unit': timeBar.unit.name,
+      'multiplier': interval.multiplier,
+      'unit': interval.unit.name,
     };
   }
 }
@@ -293,27 +292,30 @@ class BarChartTypeConverter implements JsonConverter<FlexiBarChartType, Map<Stri
 }
 
 /// 时间周期图表类型映射的序列化转换器
-class TimeBarChartTypesConverter implements JsonConverter<Map<ITimeBar, FlexiChartType>?, List<dynamic>?> {
-  const TimeBarChartTypesConverter();
+class IntervalChartTypesConverter
+    implements JsonConverter<Map<ITimeInterval, FlexiChartType>?, List<dynamic>?> {
+  const IntervalChartTypesConverter();
 
   @override
-  Map<ITimeBar, FlexiChartType>? fromJson(List<dynamic>? json) {
+  Map<ITimeInterval, FlexiChartType>? fromJson(List<dynamic>? json) {
     if (json == null) return null;
     return Map.fromEntries(json.map((e) {
       final map = e as Map<String, dynamic>;
       return MapEntry(
-        const ITimeBarConvert().fromJson(map['timeBar'] as Map<String, dynamic>),
-        const FlexiChartTypeConverter().fromJson(map['chartType'] as Map<String, dynamic>),
+        const ITimeIntervalConvert().fromJson(
+            map['interval'] as Map<String, dynamic>),
+        const FlexiChartTypeConverter().fromJson(
+            map['chartType'] as Map<String, dynamic>),
       );
     }));
   }
 
   @override
-  List<dynamic>? toJson(Map<ITimeBar, FlexiChartType>? map) {
+  List<dynamic>? toJson(Map<ITimeInterval, FlexiChartType>? map) {
     if (map == null) return null;
     return map.entries
         .map((e) => {
-              'timeBar': const ITimeBarConvert().toJson(e.key),
+              'interval': const ITimeIntervalConvert().toJson(e.key),
               'chartType': const FlexiChartTypeConverter().toJson(e.value),
             })
         .toList();
@@ -990,7 +992,7 @@ const _basicConverterList = <JsonConverter>[
   FlexiChartLineStyleConverter(),
   LineChartTypeConverter(),
   BarChartTypeConverter(),
-  ITimeBarConvert(),
+  ITimeIntervalConvert(),
 ];
 
 // ignore: constant_identifier_names
@@ -1012,7 +1014,7 @@ const FlexiIndicatorSerializable = JsonSerializable(
     NormalIndicatorKeyConvert(),
     IIndicatorKeyConvert(),
     PaintModeConverter(),
-    TimeBarChartTypesConverter(),
+    IntervalChartTypesConverter(),
     ..._basicConverterList,
   ],
   explicitToJson: true,

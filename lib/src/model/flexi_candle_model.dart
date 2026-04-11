@@ -18,7 +18,7 @@ import 'package:flexi_formatter/flexi_formatter.dart';
 import '../types.dart';
 import '../utils/convert_util.dart' show parseDecimal, parseDouble;
 import 'flexi_num.dart';
-import 'time_bar.dart';
+import 'time_interval.dart';
 
 /// K 线蜡烛图数据接口
 ///
@@ -377,18 +377,15 @@ extension type FlexiCandleModel._(
   ///
   /// [timeBar] 时间粒度
   /// 返回: 格式化后的时间字符串
-  String formatDateTime(ITimeBar timeBar) => dateTime.formatByUnit(timeBar.unit);
+  String formatDateTime(ITimeInterval timeBar) => dateTime.formatByUnit(timeBar.unit);
 
   /// 下一个更新时刻
   ///
   /// [timeBar] 时间粒度
   /// 返回: 下一更新时刻的 [DateTime]，[timeBar] 无效时返回 null
-  DateTime? nextUpdateDateTime(ITimeBar timeBar) {
+  DateTime? nextUpdateDateTime(ITimeInterval timeBar) {
     if (timeBar.isValid) {
-      return DateTime.fromMillisecondsSinceEpoch(
-        ts + timeBar.milliseconds,
-        isUtc: timeBar.isUtc,
-      );
+      return DateTime.fromMillisecondsSinceEpoch(ts + timeBar.milliseconds);
     }
     return null;
   }
