@@ -20,13 +20,13 @@ part of 'indicator.dart';
 /// 2. 管理所有指标构造器
 /// 3. 负责指标对象的创建/销毁
 /// 4. 管理副图指标绘制对象队列
-final class IndicatorPaintObjectManager with KlineLog {
+final class IndicatorPaintObjectManager with FlexiLog {
   IndicatorPaintObjectManager({
     required this.configuration,
     int subIndicatorMaxCount = defaultSubIndicatorMaxCount,
-    ILogger? logger,
+    IFlexiLogger? logger,
   }) {
-    loggerDelegate = logger;
+    this.logger = logger;
     // 注册指标构造器(仅在构建时, 使用一次)
     _indicatorDataIndexs.clear();
     final mainIndicators = configuration.mainIndicatorBuilders;
@@ -153,8 +153,8 @@ final class IndicatorPaintObjectManager with KlineLog {
     paintObject.__context = context;
 
     // paintObject 已经混入了 KlineLog，所以直接设置
-    if (context is KlineLog) {
-      paintObject.loggerDelegate = (context as KlineLog).loggerDelegate;
+    if (context is FlexiLog) {
+      paintObject.logger = (context as FlexiLog).logger;
     }
 
     return paintObject;
@@ -169,8 +169,8 @@ final class IndicatorPaintObjectManager with KlineLog {
     _mainPaintObject._indicator = mainIndicator.copyWith();
     _mainPaintObject.__context = context;
     // _mainPaintObject 已经混入了 KlineLog，所以直接设置
-    if (context is KlineLog) {
-      _mainPaintObject.loggerDelegate = (context as KlineLog).loggerDelegate;
+    if (context is FlexiLog) {
+      _mainPaintObject.logger = (context as FlexiLog).logger;
     }
 
     /// 配置默认指标蜡烛图指标和时间指标

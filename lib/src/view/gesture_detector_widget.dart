@@ -27,7 +27,7 @@ abstract class GestureDetectorWidget extends StatefulWidget {
 }
 
 abstract class GestureDetectorState<T extends GestureDetectorWidget> extends State<T>
-    with TickerProviderStateMixin, KlineLog {
+    with TickerProviderStateMixin, FlexiLog {
   AnimationController? animationController;
 
   FlexiKlineController get controller => widget.controller;
@@ -39,7 +39,7 @@ abstract class GestureDetectorState<T extends GestureDetectorWidget> extends Sta
   @override
   void initState() {
     super.initState();
-    loggerDelegate = controller.loggerDelegate;
+    logger = controller.logger;
     controller.moveToInitialPositionCallback = moveToInitialPosition;
   }
 
@@ -105,9 +105,7 @@ abstract class GestureDetectorState<T extends GestureDetectorWidget> extends Sta
       final progress = animationController!.value;
       final sf = tolerance!.effectivePanSmoothFactor;
       final tp = tolerance.effectiveConvergenceRatio;
-      final smoothFactor = progress < tp
-          ? sf
-          : lerpDouble(sf, 1.0, (progress - tp) / (1.0 - tp))!;
+      final smoothFactor = progress < tp ? sf : lerpDouble(sf, 1.0, (progress - tp) / (1.0 - tp))!;
       controller.onChartMove(gestureData, smoothFactor);
     });
 

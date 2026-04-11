@@ -16,11 +16,8 @@ import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../helpers/log_print_impl.dart';
-
 void main() {
   group('FlexiStopwatch', () {
-    final ILogger defaultLogger = LogPrintImpl(tag: 'FlexiStopwatch');
     final FlexiStopwatch stopwatch = FlexiStopwatch();
 
     setUp(() {
@@ -50,7 +47,7 @@ void main() {
           for (int i = 0; i < 100000; i++) {}
         },
         label: 'sync',
-        logger: defaultLogger.logd,
+        logger: debugPrint,
       );
       expect(stopwatch.isRunning, isTrue);
     });
@@ -59,7 +56,7 @@ void main() {
       await stopwatch.exec(
         () => Future.delayed(const Duration(milliseconds: 50)),
         label: 'async',
-        logger: defaultLogger.logd,
+        logger: debugPrint,
       );
       expect(stopwatch.isRunning, isTrue);
     });

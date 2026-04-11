@@ -14,7 +14,10 @@
 
 part of 'core.dart';
 
-abstract class KlineBindingBase with KlineLog implements ISetting, IPaintContext, IDrawContext {
+abstract class KlineBindingBase with FlexiLog implements ISetting, IPaintContext, IDrawContext {
+  @override
+  String get logTag => 'Controller';
+
   final IConfiguration configuration;
 
   /// 对于Kline的操作是否自动保存到本地配置中.
@@ -34,7 +37,7 @@ abstract class KlineBindingBase with KlineLog implements ISetting, IPaintContext
     required this.configuration,
     this.autoSave = true,
     int subIndicatorMaxCount = defaultSubIndicatorMaxCount,
-    ILogger? logger,
+    IFlexiLogger? logger,
     this.klineDataCacheCapacity,
   })  : _paintObjectManager = IndicatorPaintObjectManager(
           configuration: configuration,
@@ -46,7 +49,7 @@ abstract class KlineBindingBase with KlineLog implements ISetting, IPaintContext
           logger: logger,
         ) {
     logd('construct');
-    loggerDelegate = logger;
+    this.logger = logger;
     init();
   }
 

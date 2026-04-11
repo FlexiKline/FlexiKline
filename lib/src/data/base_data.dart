@@ -22,9 +22,9 @@ part of 'kline_data.dart';
 /// [start] 当前绘制区域起始下标
 /// [end] 当前绘制区域结束下标
 /// 注: 对于BaseData的指标计算mixin: 仅保留计算逻辑, 不持有状态, 计算结果统一整合在[CandleModel]中.
-abstract class BaseData with KlineLog {
+abstract class BaseData with FlexiLog {
   @override
-  String get logTag => spec.key;
+  String get logTag => '${spec.label ?? spec.symbol}-${spec.timeBar.bar}';
 
   BaseData(
     KlineSpec spec,
@@ -32,11 +32,11 @@ abstract class BaseData with KlineLog {
     KlineLoadingState loadingState = KlineLoadingState.none,
     List<FlexiCandleModel> list = const [],
     this.computeMode = ComputeMode.fast,
-    ILogger? logger,
+    IFlexiLogger? logger,
   })  : _spec = spec,
         _loadingState = loadingState,
         _list = List.of(list) {
-    loggerDelegate = logger;
+    this.logger = logger;
     initData();
   }
 
@@ -47,7 +47,7 @@ abstract class BaseData with KlineLog {
 
   void dispose() {
     logd('dispose BASE');
-    loggerDelegate = null;
+    logger = null;
     list.clear();
     start = 0;
     end = 0;

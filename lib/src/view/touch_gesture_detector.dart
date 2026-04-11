@@ -20,7 +20,6 @@ import '../extension/functions_ext.dart';
 import '../extension/geometry_ext.dart';
 import '../framework/chart/indicator.dart';
 import '../framework/draw/overlay.dart';
-import '../framework/logger.dart';
 import '../model/gesture_data.dart';
 import '../utils/algorithm_util.dart';
 import 'gesture_detector_widget.dart';
@@ -36,7 +35,7 @@ class TouchGestureDetector extends GestureDetectorWidget {
   GestureDetectorState<TouchGestureDetector> createState() => _TouchGestureDetectorState();
 }
 
-class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetector> with KlineLog {
+class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetector> {
   /// 平移/缩放监听数据
   GestureData? _panScaleData;
 

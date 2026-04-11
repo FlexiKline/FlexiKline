@@ -16,8 +16,6 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
-typedef LogPrint = void Function(String message);
-
 class FlexiStopwatch extends Stopwatch {
   FlexiStopwatch() : super();
 
@@ -59,7 +57,7 @@ class FlexiStopwatch extends Stopwatch {
   T run<T>(
     T Function() computation, {
     String label = '',
-    LogPrint? logger,
+    DebugPrintCallback? logger,
   }) {
     lap();
     final result = computation();
@@ -71,7 +69,7 @@ class FlexiStopwatch extends Stopwatch {
   Future<T> exec<T>(
     FutureOr<T> Function() task, {
     String label = '',
-    LogPrint? logger,
+    DebugPrintCallback? logger,
   }) async {
     lap();
     final result = await Future(() => task());

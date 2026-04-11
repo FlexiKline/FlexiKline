@@ -110,7 +110,7 @@ class FlexiKlineWidget extends StatefulWidget {
   State<FlexiKlineWidget> createState() => _FlexiKlineWidgetState();
 }
 
-class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBindingObserver, KlineLog {
+class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBindingObserver, FlexiLog {
   @override
   String get logTag => 'FlexiKlineWidget';
 
@@ -132,7 +132,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
   void initState() {
     super.initState();
 
-    loggerDelegate = controller.loggerDelegate;
+    logger = controller.logger;
 
     controller.initState();
     if (widget.mainSize != null) {

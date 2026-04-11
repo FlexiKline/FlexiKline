@@ -80,7 +80,7 @@ abstract class IndicatorObject<T extends Indicator>
 /// 1. 定义 PaintObject 行为：通过实现对应的接口，实现 Chart 的配置、计算、绘制、Cross。
 /// 2. [_parent] 保存当前绘制对象的父级。
 abstract class PaintObject<T extends Indicator<IIndicatorKey>> extends IndicatorObject<T>
-    with KlineLog, PaintObjectBoundingMixin<T>, PaintObjectStateMixin<T>
+    with FlexiLog, PaintObjectBoundingMixin<T>, PaintObjectStateMixin<T>
     implements IPaintObject {
   // 父级 PaintObject，主要用于给其子级 PaintObject 限定范围。
   PaintObject? _parent;
@@ -141,7 +141,7 @@ abstract class PaintObject<T extends Indicator<IIndicatorKey>> extends Indicator
   }
 
   @override
-  String get logTag => '${super.logTag}\t${indicator.key.toString()}';
+  String get logTag => indicator.key.toString();
 }
 
 /// 普通指标绘制对象，不占 slot，无需预计算。

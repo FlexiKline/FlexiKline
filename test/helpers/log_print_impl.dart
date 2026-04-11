@@ -15,57 +15,38 @@
 import 'package:flexi_kline/src/framework/logger.dart';
 import 'package:flutter/foundation.dart';
 
-class LogPrintImpl implements ILogger {
-  final String? tag;
-  bool debug;
-
+class LogPrintImpl implements IFlexiLogger {
   LogPrintImpl({
-    this.tag,
-    this.debug = false,
+    required this.logTag,
+    this.debugMode = kDebugMode,
   });
-  @override
-  bool get isDebug => debug;
+
+  final String logTag;
 
   @override
-  String? get logTag => tag;
+  final bool debugMode;
 
   @override
-  void logd(
+  void log(
+    FlexiLogLevel level,
+    String tag,
     String msg, {
-    DateTime? time,
     Object? error,
     StackTrace? stackTrace,
   }) {
-    debugPrint('zp:::Debug $logTag\t$msg');
-  }
-
-  @override
-  void logi(
-    String msg, {
-    DateTime? time,
-    Object? error,
-    StackTrace? stackTrace,
-  }) {
-    debugPrint('zp:::Info $logTag\t$msg');
-  }
-
-  @override
-  void logw(
-    String msg, {
-    DateTime? time,
-    Object? error,
-    StackTrace? stackTrace,
-  }) {
-    debugPrint('zp:::Warn $logTag\t$msg');
-  }
-
-  @override
-  void loge(
-    String msg, {
-    DateTime? time,
-    Object? error,
-    StackTrace? stackTrace,
-  }) {
-    debugPrint('zp:::Error $logTag\t$msg');
+    final levelStr = switch (level) {
+      FlexiLogLevel.debug => 'Debug',
+      FlexiLogLevel.info => 'Info',
+      FlexiLogLevel.warn => 'Warn',
+      FlexiLogLevel.error => 'Error',
+    };
+    debugPrint('[$levelStr] [$logTag] [$tag] $msg');
+    if (error != null || stackTrace != null) {
+      final errLabel = error != null ? ' error:${error.toString()}' : '';
+      debugPrintStack(
+        stackTrace: stackTrace,
+        label: '[$levelStr] [$logTag] [$tag]$errLabel',
+      );
+    }
   }
 }

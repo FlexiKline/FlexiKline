@@ -341,7 +341,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
       indicatorCount,
       loadingState: KlineLoadingState.initLoading,
       computeMode: computeMode,
-      logger: loggerDelegate,
+      logger: logger,
     );
     final old = _klineDataCache.append(spec.key, data);
     if (old != null) Future(() => old.dispose());

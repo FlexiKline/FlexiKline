@@ -15,12 +15,12 @@
 part of 'overlay.dart';
 
 /// Overlay 管理：持久化/加载、品种切换时保存/恢复、HitTest 列表、DrawObjectBuilder 注册
-final class OverlayDrawObjectManager with KlineLog {
+final class OverlayDrawObjectManager with FlexiLog {
   OverlayDrawObjectManager({
     required this.configuration,
-    ILogger? logger,
+    IFlexiLogger? logger,
   }) {
-    loggerDelegate = logger;
+    this.logger = logger;
     final drawObjectbuilders = configuration.drawObjectBuilders;
     for (final MapEntry(key: type, value: builder) in drawObjectbuilders.entries) {
       registerDrawOverlayObjectBuilder(type, builder);
