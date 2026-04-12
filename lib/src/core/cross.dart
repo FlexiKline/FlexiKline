@@ -384,8 +384,8 @@ mixin CrossBinding on KlineBindingBase, SettingBinding implements ICross {
       num riseOrFall = 0;
       switch (key) {
         case TooltipLabel.time:
-          final timeBar = curKlineData.timeBar;
-          value = model.formatDateTime(timeBar);
+          final interval = curKlineData.interval;
+          value = model.formatDateTime(interval);
           break;
         case TooltipLabel.open:
           value = formatPrice(model.open.toDecimal(), precision: p, cutInvalidZero: false);

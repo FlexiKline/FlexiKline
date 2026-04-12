@@ -23,7 +23,7 @@ import 'package:flexi_kline/flexi_kline.dart';
 /// [range] : 开/收/高/低价的随机波动范围
 /// [initalVol] : 初始交易量
 /// [rangeVol] : 交易量的随机波动范围
-/// [timeBar] : 时间间隔
+/// [interval] : 时间间隔
 /// [dateTime] : 初始时间
 /// [isHistory] : 是否生成历史数据
 Future<List<CandleModel>> genRandomCandleList({
@@ -32,7 +32,7 @@ Future<List<CandleModel>> genRandomCandleList({
   double range = 100,
   double initalVol = 100,
   double rangeVol = 50,
-  ITimeInterval timeBar = interval1D,
+  ITimeInterval interval = interval1D,
   DateTime? dateTime,
   bool isHistory = true,
 }) async {
@@ -67,7 +67,7 @@ Future<List<CandleModel>> genRandomCandleList({
     if (h < l) [h, l] = [l, h];
     v = genVal(v, rangeVol);
     m = CandleModel(
-      timestamp: dateTime.add(Duration(milliseconds: flag * i * timeBar.milliseconds)).millisecondsSinceEpoch,
+      timestamp: dateTime.add(Duration(milliseconds: flag * i * interval.milliseconds)).millisecondsSinceEpoch,
       high: h.d,
       open: o.d,
       close: c.d,

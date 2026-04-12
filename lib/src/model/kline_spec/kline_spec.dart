@@ -41,7 +41,7 @@ enum KlineLoadingState {
 class KlineSpec {
   const KlineSpec({
     required this.symbol,
-    this.timeBar = interval1m,
+    this.interval = interval1D,
     this.limit = 100,
     this.precision = defaultPrecision,
     this.from,
@@ -52,8 +52,8 @@ class KlineSpec {
   /// 交易对标识，如 BTC-USDT、AAPL
   final String symbol;
 
-  /// 时间粒度，默认 1m
-  final ITimeInterval timeBar;
+  /// 时间粒度，默认 1D
+  final ITimeInterval interval;
 
   /// 分页条数，最大 300，默认 100
   final int limit;
@@ -71,7 +71,7 @@ class KlineSpec {
   final String? label;
 
   @override
-  String toString() => 'KlineSpec($symbol-$label, $timeBar, $limit, $precision, $from, $to)';
+  String toString() => 'KlineSpec($symbol-$label, $interval, $limit, $precision, $from, $to)';
 
   @override
   bool operator ==(Object other) {
@@ -79,7 +79,7 @@ class KlineSpec {
     if (other is KlineSpec) {
       return other.runtimeType == runtimeType &&
           other.symbol == symbol &&
-          other.timeBar == timeBar &&
+          other.interval == interval &&
           other.from == from &&
           other.to == to &&
           other.precision == precision;
@@ -88,12 +88,12 @@ class KlineSpec {
   }
 
   @override
-  int get hashCode => symbol.hashCode ^ timeBar.hashCode ^ precision.hashCode;
+  int get hashCode => symbol.hashCode ^ interval.hashCode ^ precision.hashCode;
 }
 
 extension KlineSpecExt on KlineSpec {
-  String get key => '$symbol-$timeBar';
-  String get rangeKey => '$symbol-$timeBar-$from-$to';
+  String get key => '$symbol-$interval';
+  String get rangeKey => '$symbol-$interval-$from-$to';
 
   /// 清除分页游标，返回初始规格
   KlineSpec initial() => copyWith(from: null, to: null);

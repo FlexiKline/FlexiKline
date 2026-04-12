@@ -141,11 +141,11 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
   @override
   FlexiChartType getChartType() {
     // 1. 优先检查时间周期映射（基于 milliseconds 匹配）
-    final timeBar = klineData.timeBar;
+    final interval = klineData.interval;
     final chartTypes = indicator.intervalChartTypes;
     if (chartTypes != null && chartTypes.isNotEmpty) {
       for (final entry in chartTypes.entries) {
-        if (entry.key.milliseconds == timeBar.milliseconds) {
+        if (entry.key.milliseconds == interval.milliseconds) {
           return entry.value;
         }
       }
@@ -506,8 +506,8 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
       /// 倒计时Text
       String? countDownText;
       // 时间周期 > 1秒时才显示倒计时
-      if (indicator.showCountDown && klineData.timeBar.milliseconds > Duration.millisecondsPerSecond) {
-        final nextUpdateDateTime = model.nextUpdateDateTime(klineData.timeBar);
+      if (indicator.showCountDown && klineData.interval.milliseconds > Duration.millisecondsPerSecond) {
+        final nextUpdateDateTime = model.nextUpdateDateTime(klineData.interval);
         if (nextUpdateDateTime != null &&
             nextUpdateDateTime.millisecondsSinceEpoch > DateTime.now().millisecondsSinceEpoch) {
           countDownText = nextUpdateDateTime.diffAsCountdown();

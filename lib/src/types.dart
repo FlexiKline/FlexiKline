@@ -39,10 +39,10 @@ enum TooltipLabel {
   turnover;
 }
 
-/// 按[timeBar]格式化时间[dateTime]
+/// 按[interval]格式化时间[dateTime]
 typedef DateTimeFormatter = String Function(
   DateTime dateTime, [
-  ITimeInterval? timeBar,
+  ITimeInterval? interval,
 ]);
 
 /// 更新器函数类型

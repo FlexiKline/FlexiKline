@@ -77,11 +77,11 @@ class TimePaintObject<T extends TimeIndicator> extends TimeBasePaintObject<T> {
     final end = data.end;
 
     final offset = startCandleDx - candleWidthHalf;
-    final timeBar = data.timeBar;
+    final interval = data.interval;
     for (var i = start; i < end; i++) {
       final model = data.list[i];
       final dx = offset - (i - start) * candleActualWidth;
-      if (timeBar.isValid && i % timeTickIntervalCount == 0) {
+      if (interval.isValid && i % timeTickIntervalCount == 0) {
         final offset = Offset(dx, chartRect.top);
 
         // 绘制时间刻度.
@@ -95,27 +95,27 @@ class TimePaintObject<T extends TimeIndicator> extends TimeBasePaintObject<T> {
             offset.dy + dyCenterOffset,
           ),
           drawDirection: DrawDirection.center,
-          text: formatDateTime(model, timeBar),
+          text: formatDateTime(model, interval),
           textConfig: timeTick,
         );
       }
     }
   }
 
-  String formatDateTime(FlexiCandleModel model, ITimeInterval timeBar) {
+  String formatDateTime(FlexiCandleModel model, ITimeInterval interval) {
     if (indicator.tickFormatter != null) {
-      return indicator.tickFormatter!.call(model.dateTime, timeBar);
+      return indicator.tickFormatter!.call(model.dateTime, interval);
     }
-    return model.formatDateTime(timeBar);
+    return model.formatDateTime(interval);
   }
 
   @override
   void onCross(Canvas canvas, Offset offset) {
     final model = offsetToCandle(offset);
-    final timeBar = klineData.timeBar;
-    if (model == null || !timeBar.isValid) return;
+    final interval = klineData.interval;
+    if (model == null || !interval.isValid) return;
 
-    final time = formatDateTime(model, timeBar);
+    final time = formatDateTime(model, interval);
     // final time = formatyyMMddHHMMss(model.dateTime);
 
     final ticksText = crossConfig.ticksText;

@@ -306,7 +306,7 @@ mixin DrawObjectMixin on DrawStateObject {
     if (ts == null) return Size.zero;
 
     final klineData = context.curKlineData;
-    final timeTxt = formatTimeTicksText(ts, klineData.timeBar.unit);
+    final timeTxt = formatTimeTicksText(ts, klineData.interval.unit);
 
     drawableRect ??= context.timeRect;
     return canvas.drawTextArea(

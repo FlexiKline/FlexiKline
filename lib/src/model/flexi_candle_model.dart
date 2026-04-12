@@ -375,17 +375,17 @@ extension type FlexiCandleModel._(
 
   /// 格式化时间，[DateTime] 格式
   ///
-  /// [timeBar] 时间粒度
+  /// [interval] 时间粒度
   /// 返回: 格式化后的时间字符串
-  String formatDateTime(ITimeInterval timeBar) => dateTime.formatByUnit(timeBar.unit);
+  String formatDateTime(ITimeInterval interval) => dateTime.formatByUnit(interval.unit);
 
   /// 下一个更新时刻
   ///
-  /// [timeBar] 时间粒度
-  /// 返回: 下一更新时刻的 [DateTime]，[timeBar] 无效时返回 null
-  DateTime? nextUpdateDateTime(ITimeInterval timeBar) {
-    if (timeBar.isValid) {
-      return DateTime.fromMillisecondsSinceEpoch(ts + timeBar.milliseconds);
+  /// [interval] 时间粒度
+  /// 返回: 下一更新时刻的 [DateTime]，[interval] 无效时返回 null
+  DateTime? nextUpdateDateTime(ITimeInterval interval) {
+    if (interval.isValid) {
+      return DateTime.fromMillisecondsSinceEpoch(ts + interval.milliseconds);
     }
     return null;
   }

@@ -102,7 +102,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     if (spec.key == curDataKey) {
       onKlineSpecChanged(_klineSpecNotifier.value);
       _klineSpecNotifier.value = spec;
-      _intervalListener.value = spec.timeBar;
+      _intervalListener.value = spec.interval;
     }
   }
 

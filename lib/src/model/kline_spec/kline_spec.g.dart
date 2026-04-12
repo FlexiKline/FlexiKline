@@ -9,7 +9,7 @@ part of 'kline_spec.dart';
 abstract class _$KlineSpecCWProxy {
   KlineSpec symbol(String symbol);
 
-  KlineSpec timeBar(ITimeInterval timeBar);
+  KlineSpec interval(ITimeInterval interval);
 
   KlineSpec limit(int limit);
 
@@ -29,7 +29,7 @@ abstract class _$KlineSpecCWProxy {
   /// ````
   KlineSpec call({
     String symbol,
-    ITimeInterval timeBar,
+    ITimeInterval interval,
     int limit,
     int precision,
     int? from,
@@ -48,7 +48,7 @@ class _$KlineSpecCWProxyImpl implements _$KlineSpecCWProxy {
   KlineSpec symbol(String symbol) => this(symbol: symbol);
 
   @override
-  KlineSpec timeBar(ITimeInterval timeBar) => this(timeBar: timeBar);
+  KlineSpec interval(ITimeInterval interval) => this(interval: interval);
 
   @override
   KlineSpec limit(int limit) => this(limit: limit);
@@ -75,7 +75,7 @@ class _$KlineSpecCWProxyImpl implements _$KlineSpecCWProxy {
   /// ````
   KlineSpec call({
     Object? symbol = const $CopyWithPlaceholder(),
-    Object? timeBar = const $CopyWithPlaceholder(),
+    Object? interval = const $CopyWithPlaceholder(),
     Object? limit = const $CopyWithPlaceholder(),
     Object? precision = const $CopyWithPlaceholder(),
     Object? from = const $CopyWithPlaceholder(),
@@ -87,10 +87,10 @@ class _$KlineSpecCWProxyImpl implements _$KlineSpecCWProxy {
           ? _value.symbol
           // ignore: cast_nullable_to_non_nullable
           : symbol as String,
-      timeBar: timeBar == const $CopyWithPlaceholder()
-          ? _value.timeBar
+      interval: interval == const $CopyWithPlaceholder()
+          ? _value.interval
           // ignore: cast_nullable_to_non_nullable
-          : timeBar as ITimeInterval,
+          : interval as ITimeInterval,
       limit: limit == const $CopyWithPlaceholder()
           ? _value.limit
           // ignore: cast_nullable_to_non_nullable
