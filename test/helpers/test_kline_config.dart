@@ -12,95 +12,60 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:ui';
-
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart' hide Overlay;
 
 class TestFlexiKlineTheme implements IFlexiKlineTheme {
-  double? _scale;
   @override
-  double get scale {
-    if (_scale != null) return _scale!;
-    final view = PlatformDispatcher.instance.implicitView;
-    final size = view != null
-        ? view.physicalSize / view.devicePixelRatio
-        : const Size(393, 852);
-    _scale = size.shortestSide / 393;
-    return _scale!;
-  }
-
-  double? _pixel;
-  @override
-  double get pixel {
-    if (_pixel != null) return _pixel!;
-    final view = PlatformDispatcher.instance.implicitView;
-    _pixel = view != null ? 1.0 / view.devicePixelRatio : 1.0;
-    return _pixel!;
-  }
+  Color get longColor => const Color(0xFF33BD65);
 
   @override
-  double setDp(num size) => size * scale;
+  Color get shortColor => const Color(0xFFE84E74);
 
   @override
-  double setSp(num fontSize) => fontSize * scale;
+  Color get chartBg => const Color(0xFFFFFFFF);
 
   @override
-  Color long = const Color(0xFF33BD65);
+  Color get tooltipBg => const Color(0xFFF2F2F2);
 
   @override
-  Color short = const Color(0xFFE84E74);
+  Color get countDownBg => const Color(0xFFBDBDBD);
 
   @override
-  Color chartBg = const Color(0xFFFFFFFF);
+  Color get crossTextBg => const Color(0xFF111111);
 
   @override
-  Color tooltipBg = const Color(0xFFF2F2F2);
+  Color get lastPriceBg => Colors.black54;
 
   @override
-  Color countDownTextBg = const Color(0xFFBDBDBD);
+  Color get gridLineColor => const Color(0xffE9EDF0);
 
   @override
-  Color crossTextBg = const Color(0xFF111111);
+  Color get crosshairColor => const Color(0xFF000000);
 
   @override
-  Color transparent = Colors.transparent;
+  Color get drawToolColor => Colors.blueAccent;
 
   @override
-  Color lastPriceTextBg = Colors.black54;
+  Color get markLineColor => Colors.blue;
 
   @override
-  Color gridLine = const Color(0xffE9EDF0);
+  Color get textColor => const Color(0xFF000000);
 
   @override
-  Color crossColor = const Color(0xFF000000);
+  Color get ticksTextColor => const Color(0xFF949494);
 
   @override
-  Color get drawColor => Colors.blueAccent;
+  Color get lastPriceColor => const Color(0xFF5F5F5F);
 
   @override
-  Color markLineColor = Colors.blue;
+  Color get crossTextColor => const Color(0xFFFFFFFF);
 
   @override
-  Color get themeColor => Colors.white;
+  Color get tooltipTextColor => const Color(0xFF949494);
 
   @override
-  Color textColor = const Color(0xFF000000);
-
-  @override
-  Color ticksTextColor = const Color(0xFF949494);
-
-  @override
-  Color lastPriceTextColor = const Color(0xFF5F5F5F);
-
-  @override
-  Color crossTextColor = const Color(0xFFFFFFFF);
-
-  @override
-  Color tooltipTextColor = const Color(0xFF949494);
-
-  @override
-  Color get latestPriceTextBg => throw UnimplementedError();
+  Color get latestPriceBg => throw UnimplementedError();
 
   @override
   Color get dragBg => throw UnimplementedError();

@@ -16,7 +16,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 import '../config/export.dart';
-import '../constant.dart';
 import 'chart/indicator.dart';
 import 'draw/overlay.dart';
 import 'serializers.dart';
@@ -29,125 +28,34 @@ const drawToolbarPositionKey = 'draw_toolbar_position';
 /// 获取FlexiKline主题的函数类型
 typedef FlexiKlineThemeGetter<T extends IFlexiKlineTheme> = T Function();
 
-/// FlexiKline主题接口.
-///
-/// 定义FlexiKline中通用颜色
+/// FlexiKline 主题接口。
 abstract interface class IFlexiKlineTheme {
-  /// 实际尺寸与UI设计的比例
-  double get scale;
+  // ─── 涨跌色 ───────────────────────────────────────────
+  Color get longColor;            // 蜡烛上涨色、Tooltip 涨值文本色
+  Color get shortColor;           // 蜡烛下跌色、Tooltip 跌值文本色
 
-  /// 一个物理像素的值
-  double get pixel;
+  // ─── 背景色 ───────────────────────────────────────────
+  Color get chartBg;              // K 线组件默认背景色，支持独立主题
+  Color get tooltipBg;            // Tooltip 背景色、Loading 背景色
+  Color get crossTextBg;          // 十字线刻度文本背景色
+  Color get latestPriceBg;        // 最新价标签背景色（最新蜡烛在视口内时）
+  Color get lastPriceBg;          // 最后价标签背景色（最新蜡烛滚出视口时）
+  Color get countDownBg;          // 倒计时标签背景色
+  Color get dragBg;               // 拖拽指标高度时的区域背景色
 
-  ///根据宽度或高度中的较小值进行适配
-  /// - [size] UI设计上的尺寸大小, 单位dp.
-  double setDp(num size);
+  // ─── 线色 ─────────────────────────────────────────────
+  Color get gridLineColor;        // 网格线颜色
+  Color get crosshairColor;       // 十字线颜色
+  Color get drawToolColor;        // 绘制工具（趋势线、标尺等）颜色
+  Color get markLineColor;        // 标记线（最高、最低、最新价、最后价、倒计时边框、拖拽线）颜色
+  Color get lineChartColor;       // 折线图默认颜色
 
-  //字体大小适配方法
-  ///- [fontSize] UI设计上字体的大小,单位dp.
-  double setSp(num fontSize);
-
-  /// 涨跌颜色
-  Color get long;
-  Color get short;
-
-  Color get transparent;
-
-  /// 背景色
-  // 拖拽区域背景色
-  Color get dragBg;
-  Color get chartBg;
-  Color get tooltipBg;
-  Color get crossTextBg;
-  Color get latestPriceTextBg;
-  Color get lastPriceTextBg;
-  Color get countDownTextBg;
-
-  /// 线
-  Color get gridLine; // grid网格线颜色
-  Color get crossColor; // 十字线颜色
-  Color get drawColor; // 绘制工具线颜色(十字线)
-  Color get markLineColor; // 指示线颜色(最高,最低, 最新价, 拖拽底色)
-  Color get lineChartColor; // line图默认颜色
-
-  /// 主题色
-  Color get themeColor;
-
-  /// 文本颜色配置
-  Color get textColor;
-  // 刻度文本颜色
-  Color get ticksTextColor;
-  // 最后价文本颜色
-  Color get lastPriceTextColor;
-  // corssing时文本颜色
-  Color get crossTextColor;
-  // Tips 文本默认颜色
-  Color get tooltipTextColor;
-}
-
-mixin FlexiKlineThemeTextStyle implements IFlexiKlineTheme {
-  TextStyle getTextStyle(
-    Color color, {
-    double? fontSize,
-    FontWeight? fontWeight,
-    TextOverflow? overflow,
-    double height = defaultTextHeight,
-    TextBaseline textBaseline = TextBaseline.alphabetic,
-  }) {
-    return TextStyle(
-      color: color,
-      fontSize: fontSize ?? defaultTextSize * scale,
-      fontWeight: fontWeight,
-      overflow: overflow,
-      height: height,
-      textBaseline: textBaseline,
-    );
-  }
-
-  TextStyle get normalTextyStyle => TextStyle(
-        color: textColor,
-        fontSize: setSp(defaultTextSize),
-        fontWeight: FontWeight.normal,
-        overflow: TextOverflow.ellipsis,
-        height: defaultTextHeight,
-      );
-
-  TextStyle get ticksTextStyle => TextStyle(
-        color: ticksTextColor,
-        fontSize: setSp(defaultTextSize),
-        fontWeight: FontWeight.normal,
-        overflow: TextOverflow.ellipsis,
-        height: defaultTextHeight,
-      );
-
-  TextStyle get lastPriceTextStyle => TextStyle(
-        color: lastPriceTextColor,
-        fontSize: setSp(defaultTextSize),
-        fontWeight: FontWeight.normal,
-        overflow: TextOverflow.ellipsis,
-        height: defaultTextHeight,
-      );
-
-  TextStyle get crossTextStyle => TextStyle(
-        color: crossTextColor,
-        fontSize: setSp(defaultTextSize),
-        fontWeight: FontWeight.normal,
-        height: defaultTextHeight,
-      );
-
-  TextStyle get tooltipTextStyle => TextStyle(
-        color: tooltipTextColor,
-        fontSize: setSp(defaultTextSize),
-        overflow: TextOverflow.ellipsis,
-        height: defaultMultiTextHeight,
-      );
-
-  TextStyle getTipsTextStyle(Color tipsColor) => TextStyle(
-        color: tipsColor,
-        fontSize: setSp(defaultTextSize),
-        overflow: TextOverflow.ellipsis,
-        height: defaultTipsTextHeight,
-      );
+  // ─── 文本色 ───────────────────────────────────────────
+  Color get textColor;            // 主文本色、Loading 文本色
+  Color get ticksTextColor;       // Y 轴/时间轴刻度文本色
+  Color get lastPriceColor;       // 最后价标签文本色
+  Color get crossTextColor;       // 十字线刻度文本色
+  Color get tooltipTextColor;     // Tooltip 文本色
 }
 
 abstract interface class IStorage {

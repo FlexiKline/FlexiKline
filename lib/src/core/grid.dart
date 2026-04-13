@@ -84,7 +84,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
             Path()
               ..moveTo(objRect.left, objRect.bottom - dragLineHalf)
               ..lineTo(objRect.right, objRect.bottom - dragLineHalf),
-            dragLine,
+            dragLine.of(paintColor: theme.markLineColor),
           );
         } else if (gridConfig.draggingBgOpacity > 0) {
           // 绘制正在拖拽的object的底部线
@@ -131,7 +131,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
     final main = mainRect;
     final sub = subRect;
 
-    final horiLine = gridConfig.horizontal.line;
+    final horiLine = gridConfig.horizontal.line.of(paintColor: theme.gridLineColor);
     double dy = main.top;
 
     // 绘制Top边框线
@@ -182,7 +182,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
     if (!gridConfig.vertical.show) return;
     final main = mainRect;
     final sub = subRect;
-    final vertLine = gridConfig.vertical.line;
+    final vertLine = gridConfig.vertical.line.of(paintColor: theme.gridLineColor);
 
     double dx = main.left;
     final step = main.right / gridConfig.vertical.count;

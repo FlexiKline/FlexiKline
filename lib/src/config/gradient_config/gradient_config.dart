@@ -92,15 +92,13 @@ class GradientConfig {
   /// 创建 LinearGradient
   ///
   /// [baseColor] 基础颜色，当 [colors] 为 null 时使用
-  /// [transparentColor] 透明颜色，默认为完全透明
   LinearGradient createGradient({
     required Color baseColor,
-    Color transparentColor = const Color(0x00000000),
   }) {
     final gradientColors = colors ??
         [
           baseColor.withAlpha(startAlpha.alpha),
-          transparentColor.withAlpha(endAlpha.alpha),
+          baseColor.withAlpha(endAlpha.alpha),
         ];
 
     return LinearGradient(

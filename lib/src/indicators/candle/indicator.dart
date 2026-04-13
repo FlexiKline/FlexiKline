@@ -128,10 +128,10 @@ class CandleIndicator extends CandleBaseIndicator {
 class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject<T>
     with PaintYAxisTicksOnCrossMixin, PaintCandleHelperMixin {
   @override
-  Color get longColor => indicator.longColor ?? theme.long;
+  Color get longColor => indicator.longColor ?? theme.longColor;
 
   @override
-  Color get shortColor => indicator.shortColor ?? theme.short;
+  Color get shortColor => indicator.shortColor ?? theme.shortColor;
 
   FlexiNum? _maxHigh, _minLow;
 
@@ -191,7 +191,6 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
               ),
               gradient: indicator.lineGradientConfig?.createGradient(
                 baseColor: indicator.lineColor ?? theme.lineChartColor,
-                transparentColor: theme.transparent,
               ),
             );
             paintLatestCandlePoint(canvas, size);
@@ -204,11 +203,9 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
               shortLinePaint: getLinePaint(color: shortColor),
               longGradient: indicator.longGradientConfig?.createGradient(
                 baseColor: longColor,
-                transparentColor: theme.transparent,
               ),
               shortGradient: indicator.shortGradientConfig?.createGradient(
                 baseColor: shortColor,
-                transparentColor: theme.transparent,
               ),
             );
             paintLatestCandlePoint(canvas, size);
@@ -465,13 +462,13 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
           paintColor: latest.lineColor.a == 0 ? updownColor : null,
           textColor: const Color(0xFFFFFFFF),
           background: updownColor,
-          borderColor: theme.transparent,
+          borderColor: const Color(0x00000000),
         );
       } else {
         latest = latest.of(
           paintColor: latest.lineColor.a == 0 ? theme.markLineColor : null,
           textColor: theme.textColor,
-          background: theme.latestPriceTextBg,
+          background: theme.latestPriceBg,
           borderColor: theme.markLineColor,
         );
       }
@@ -545,13 +542,13 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
         if (indicator.useCandleColorAsLatestBg) {
           countDown = indicator.countDown.of(
             textColor: theme.textColor,
-            background: theme.countDownTextBg,
-            borderColor: theme.transparent,
+            background: theme.countDownBg,
+            borderColor: const Color(0x00000000),
           );
         } else {
           countDown = indicator.countDown.of(
             textColor: theme.textColor,
-            background: theme.countDownTextBg,
+            background: theme.countDownBg,
             borderColor: theme.markLineColor,
           );
         }
@@ -596,8 +593,8 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
       ldx = 0;
 
       final lastText = last.text.of(
-        textColor: theme.lastPriceTextColor,
-        background: theme.lastPriceTextBg,
+        textColor: theme.lastPriceColor,
+        background: theme.lastPriceBg,
       );
 
       final halfHeight = lastText.areaHeight / 2;

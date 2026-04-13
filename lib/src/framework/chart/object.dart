@@ -49,8 +49,8 @@ abstract class IndicatorObject<T extends Indicator>
   dynamic get calcParams => indicator.calcParam;
 
   /// 当前指标所使用的涨跌颜色
-  Color get longColor => theme.long;
-  Color get shortColor => theme.short;
+  Color get longColor => theme.longColor;
+  Color get shortColor => theme.shortColor;
 
   @override
   int compareTo(IndicatorObject other) {

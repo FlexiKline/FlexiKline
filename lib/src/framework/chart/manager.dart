@@ -258,11 +258,18 @@ final class IndicatorPaintObjectManager with FlexiLog {
   }
 
   /// 刷新FlexiKline配置与指标配置.
+  /// 
+  /// 过渡方案: 支持跳过 Config 重建(refreshConfig: false), 仅进行 indicator rebuild
+  /// 正常情况下 refreshConfig 为 true (默认值)
+  /// v3.1 后 indicator rebuild 部分将被移除
   void refreshFlexiKlineConfig(
     IPaintContext context, {
+    bool refreshConfig = true,
     bool refreshIndicator = true,
   }) {
-    _flexiKlineConfig = configuration.getFlexiKlineConfig();
+    if (refreshConfig) {
+      _flexiKlineConfig = configuration.getFlexiKlineConfig();
+    }
     if (!refreshIndicator) return;
 
     /// 配置默认指标蜡烛图指标和时间指标

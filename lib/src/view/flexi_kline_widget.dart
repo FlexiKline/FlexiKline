@@ -225,7 +225,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
       alignment: widget.alignment,
       width: canvasRect.width,
       height: canvasRect.height,
-      decoration: widget.decoration,
+      decoration: widget.decoration ?? BoxDecoration(color: controller.theme.chartBg),
       foregroundDecoration: widget.foregroundDecoration,
       child: Stack(
         children: <Widget>[
@@ -501,7 +501,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(4),
                   ),
-                  side: BorderSide(color: theme.gridLine, width: 1),
+                  side: BorderSide(color: theme.gridLineColor, width: 1),
                 ),
                 icon: const Text('A', style: TextStyle(fontSize: 12)),
               ),

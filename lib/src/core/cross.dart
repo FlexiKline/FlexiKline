@@ -194,9 +194,9 @@ mixin CrossBinding on KlineBindingBase, SettingBinding implements ICross {
       ..moveTo(offset.dx, 0)
       ..lineTo(offset.dx, canvasHeight);
 
-    canvas.drawLineByConfig(path, crossConfig.crosshair);
+    canvas.drawLineByConfig(path, crossConfig.crosshair.of(paintColor: theme.crosshairColor));
 
-    canvas.drawCirclePoint(offset, crossConfig.crosspoint);
+    canvas.drawCirclePoint(offset, crossConfig.crosspoint.of(color: theme.crosshairColor, borderColor: theme.crosshairColor.withAlpha(0.2.alpha)));
   }
 
   /// 绘制 Tooltip
@@ -249,9 +249,9 @@ mixin CrossBinding on KlineBindingBase, SettingBinding implements ICross {
       ));
       TextStyle valStyle = info.valueStyle ?? tooltipTextStyle;
       if (info.riseOrFall > 0) {
-        valStyle = valStyle.copyWith(color: theme.long);
+        valStyle = valStyle.copyWith(color: theme.longColor);
       } else if (info.riseOrFall < 0) {
-        valStyle = valStyle.copyWith(color: theme.short);
+        valStyle = valStyle.copyWith(color: theme.shortColor);
       }
       valueSpanList.add(TextSpan(
         text: info.value + br,
