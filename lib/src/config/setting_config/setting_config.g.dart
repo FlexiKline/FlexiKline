@@ -292,7 +292,9 @@ extension $SettingConfigCopyWith on SettingConfig {
 SettingConfig _$SettingConfigFromJson(Map<String, dynamic> json) =>
     SettingConfig(
       opacity: (json['opacity'] as num?)?.toDouble() ?? 0.5,
-      loading: LoadingConfig.fromJson(json['loading'] as Map<String, dynamic>),
+      loading: json['loading'] == null
+          ? const LoadingConfig(size: 26, strokeWidth: 4)
+          : LoadingConfig.fromJson(json['loading'] as Map<String, dynamic>),
       mainMinSize: json['mainMinSize'] == null
           ? const Size(120, 80)
           : const SizeConverter()
@@ -301,15 +303,16 @@ SettingConfig _$SettingConfigFromJson(Map<String, dynamic> json) =>
       minPaintBlankRate: (json['minPaintBlankRate'] as num?)?.toDouble() ?? 0.5,
       alwaysCalculateScreenOfCandlesIfEnough:
           json['alwaysCalculateScreenOfCandlesIfEnough'] as bool? ?? false,
-      candleMinWidth: (json['candleMinWidth'] as num).toDouble(),
-      candleMaxWidth: (json['candleMaxWidth'] as num).toDouble(),
-      candleWidth: (json['candleWidth'] as num).toDouble(),
-      candleFixedSpacing: (json['candleFixedSpacing'] as num?)?.toDouble(),
+      candleMinWidth: (json['candleMinWidth'] as num?)?.toDouble() ?? 1,
+      candleMaxWidth: (json['candleMaxWidth'] as num?)?.toDouble() ?? 40,
+      candleWidth: (json['candleWidth'] as num?)?.toDouble() ?? 7,
+      candleFixedSpacing: (json['candleFixedSpacing'] as num?)?.toDouble() ?? 1,
       candleSpacingParts: (json['candleSpacingParts'] as num?)?.toInt() ?? 7,
       candleHollowBarBorderWidth:
-          (json['candleHollowBarBorderWidth'] as num).toDouble(),
-      candleLineWidth: (json['candleLineWidth'] as num).toDouble(),
-      firstCandleInitOffset: (json['firstCandleInitOffset'] as num).toDouble(),
+          (json['candleHollowBarBorderWidth'] as num?)?.toDouble() ?? 1,
+      candleLineWidth: (json['candleLineWidth'] as num?)?.toDouble() ?? 1,
+      firstCandleInitOffset:
+          (json['firstCandleInitOffset'] as num?)?.toDouble() ?? 80,
       allowPaintExtraOutsideMainRect:
           json['allowPaintExtraOutsideMainRect'] as bool? ?? true,
       showYAxisTick: json['showYAxisTick'] as bool? ?? true,

@@ -187,15 +187,35 @@ extension $DrawConfigCopyWith on DrawConfig {
 DrawConfig _$DrawConfigFromJson(Map<String, dynamic> json) => DrawConfig(
       enable: json['enable'] as bool? ?? false,
       allowSelectWhenExit: json['allowSelectWhenExit'] as bool? ?? true,
-      crosspoint:
-          PointConfig.fromJson(json['crosspoint'] as Map<String, dynamic>),
-      crosshair: LineConfig.fromJson(json['crosshair'] as Map<String, dynamic>),
-      drawLine: LineConfig.fromJson(json['drawLine'] as Map<String, dynamic>),
-      drawPoint:
-          PointConfig.fromJson(json['drawPoint'] as Map<String, dynamic>),
-      ticksText:
-          TextAreaConfig.fromJson(json['ticksText'] as Map<String, dynamic>),
-      spacing: (json['spacing'] as num).toDouble(),
+      crosspoint: json['crosspoint'] == null
+          ? const PointConfig(radius: 2, width: 0, borderWidth: 2)
+          : PointConfig.fromJson(json['crosspoint'] as Map<String, dynamic>),
+      crosshair: json['crosshair'] == null
+          ? const LineConfig(
+              paint: PaintConfig(strokeWidth: 0.5),
+              type: LineType.dashed,
+              dashes: [5, 3])
+          : LineConfig.fromJson(json['crosshair'] as Map<String, dynamic>),
+      drawLine: json['drawLine'] == null
+          ? const LineConfig(
+              paint: PaintConfig(strokeWidth: 1),
+              type: LineType.solid,
+              dashes: [5, 3])
+          : LineConfig.fromJson(json['drawLine'] as Map<String, dynamic>),
+      drawPoint: json['drawPoint'] == null
+          ? const PointConfig(radius: 9, width: 0, borderWidth: 1)
+          : PointConfig.fromJson(json['drawPoint'] as Map<String, dynamic>),
+      ticksText: json['ticksText'] == null
+          ? const TextAreaConfig(
+              style: TextStyle(
+                  fontSize: defaultTextSize,
+                  fontWeight: FontWeight.normal,
+                  height: defaultTextHeight),
+              padding: EdgeInsets.all(2),
+              border: null,
+              borderRadius: BorderRadius.all(Radius.circular(2)))
+          : TextAreaConfig.fromJson(json['ticksText'] as Map<String, dynamic>),
+      spacing: (json['spacing'] as num?)?.toDouble() ?? 1,
       ticksGapBgOpacity: (json['ticksGapBgOpacity'] as num?)?.toDouble() ?? 0.1,
       hitTestMinDistance:
           (json['hitTestMinDistance'] as num?)?.toDouble() ?? 10,

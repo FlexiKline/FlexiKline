@@ -251,11 +251,22 @@ GridConfig _$GridConfigFromJson(Map<String, dynamic> json) => GridConfig(
       draggingBgOpacity: (json['draggingBgOpacity'] as num?)?.toDouble() ?? 0.1,
       dragBgOpacity: (json['dragBgOpacity'] as num?)?.toDouble() ?? 0,
       dragLine: json['dragLine'] == null
-          ? null
+          ? const LineConfig(
+              type: LineType.dashed,
+              dashes: [3, 5],
+              length: 20,
+              paint: PaintConfig(strokeWidth: 5 * 0.5))
           : LineConfig.fromJson(json['dragLine'] as Map<String, dynamic>),
       dragLineOpacity: (json['dragLineOpacity'] as num?)?.toDouble() ?? 0.1,
-      ticksText:
-          TextAreaConfig.fromJson(json['ticksText'] as Map<String, dynamic>),
+      ticksText: json['ticksText'] == null
+          ? const TextAreaConfig(
+              style: TextStyle(
+                  fontSize: defaultTextSize,
+                  overflow: TextOverflow.ellipsis,
+                  height: defaultTextHeight),
+              textAlign: TextAlign.end,
+              padding: EdgeInsets.symmetric(horizontal: 2))
+          : TextAreaConfig.fromJson(json['ticksText'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$GridConfigToJson(GridConfig instance) =>

@@ -361,7 +361,7 @@ dynamic convertRadius(Radius radius) {
 }
 
 // Ref: https://api.flutter.dev/flutter/animation/Curves-class.html
-Curve parseCurve(String curvestr) {
+Curve parseCurve(String curvestr, [Curve defaultCurve = Curves.easeOutCubic]) {
   switch (curvestr) {
     case 'decelerate':
       return Curves.decelerate;
@@ -446,7 +446,7 @@ Curve parseCurve(String curvestr) {
     case 'bounceOut':
       return Curves.bounceOut;
   }
-  return Curves.decelerate;
+  return defaultCurve;
 }
 
 /// 解析 Alignment 对象

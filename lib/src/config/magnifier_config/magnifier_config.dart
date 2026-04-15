@@ -24,7 +24,7 @@ part 'magnifier_config.g.dart';
 class MagnifierConfig {
   const MagnifierConfig({
     this.enable = true,
-    this.margin = EdgeInsets.zero,
+    this.margin = const EdgeInsets.all(1),
     this.size = const Size(80, 80),
     this.magnificationScale = 2,
     this.clipBehavior = Clip.none,

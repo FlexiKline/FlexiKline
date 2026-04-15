@@ -132,8 +132,7 @@ class BusinessIndicatorKeyConvert implements JsonConverter<BusinessIndicatorKey,
   }
 }
 
-class ITimeIntervalConvert
-    implements JsonConverter<ITimeInterval, Map<String, dynamic>> {
+class ITimeIntervalConvert implements JsonConverter<ITimeInterval, Map<String, dynamic>> {
   const ITimeIntervalConvert();
 
   @override
@@ -292,8 +291,7 @@ class BarChartTypeConverter implements JsonConverter<FlexiBarChartType, Map<Stri
 }
 
 /// 时间周期图表类型映射的序列化转换器
-class IntervalChartTypesConverter
-    implements JsonConverter<Map<ITimeInterval, FlexiChartType>?, List<dynamic>?> {
+class IntervalChartTypesConverter implements JsonConverter<Map<ITimeInterval, FlexiChartType>?, List<dynamic>?> {
   const IntervalChartTypesConverter();
 
   @override
@@ -302,10 +300,8 @@ class IntervalChartTypesConverter
     return Map.fromEntries(json.map((e) {
       final map = e as Map<String, dynamic>;
       return MapEntry(
-        const ITimeIntervalConvert().fromJson(
-            map['interval'] as Map<String, dynamic>),
-        const FlexiChartTypeConverter().fromJson(
-            map['chartType'] as Map<String, dynamic>),
+        const ITimeIntervalConvert().fromJson(map['interval'] as Map<String, dynamic>),
+        const FlexiChartTypeConverter().fromJson(map['chartType'] as Map<String, dynamic>),
       );
     }));
   }

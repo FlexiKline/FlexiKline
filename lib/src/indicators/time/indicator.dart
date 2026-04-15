@@ -24,7 +24,15 @@ class TimeIndicator extends TimeBaseIndicator {
     super.padding = EdgeInsets.zero,
     super.position = DrawPosition.middle,
     // 时间刻度.
-    required this.timeTick,
+    this.timeTick = const TextAreaConfig(
+      style: TextStyle(
+        fontSize: defaultTextSize,
+        overflow: TextOverflow.ellipsis,
+        height: defaultTextHeight,
+      ),
+      textWidth: 80,
+      textAlign: TextAlign.center,
+    ),
     this.ensurePaintInDrawableRect = false,
     this.tickFormatter,
   });

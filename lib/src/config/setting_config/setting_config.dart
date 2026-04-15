@@ -30,7 +30,10 @@ class SettingConfig {
     this.opacity = 0.5,
 
     /// 内置LoadingView样式配置
-    required this.loading,
+    this.loading = const LoadingConfig(
+      size: 26,
+      strokeWidth: 4,
+    ),
 
     ///  如果不指定默认为设置为20*20的逻辑像素区域.
     this.mainMinSize = const Size(120, 80),
@@ -39,14 +42,14 @@ class SettingConfig {
     /// 蜡烛图绘制配置
     this.minPaintBlankRate = 0.5,
     this.alwaysCalculateScreenOfCandlesIfEnough = false,
-    required this.candleMinWidth,
-    required this.candleMaxWidth,
-    required this.candleWidth,
-    this.candleFixedSpacing,
+    this.candleMinWidth = 1,
+    this.candleMaxWidth = 40,
+    this.candleWidth = 7,
+    this.candleFixedSpacing = 1,
     this.candleSpacingParts = 7,
-    required this.candleHollowBarBorderWidth,
-    required this.candleLineWidth,
-    required this.firstCandleInitOffset,
+    this.candleHollowBarBorderWidth = 1,
+    this.candleLineWidth = 1,
+    this.firstCandleInitOffset = 80,
 
     /// 绘制额外内容是否在允许在主图绘制区域之外
     this.allowPaintExtraOutsideMainRect = true,

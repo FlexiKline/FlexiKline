@@ -19,34 +19,126 @@ part of 'candle.dart';
 class CandleIndicator extends CandleBaseIndicator {
   CandleIndicator({
     super.zIndex = -1,
-    required super.height,
+    super.height = defaultMainIndicatorHeight,
     super.padding = defaultMainIndicatorPadding,
 
     // 最高价
-    required this.high,
+    this.high = const MarkConfig(
+      spacing: 2,
+      line: LineConfig(
+        type: LineType.solid,
+        length: 20,
+        paint: PaintConfig(
+          strokeWidth: 0.5,
+        ),
+      ),
+      text: TextAreaConfig(
+        style: TextStyle(
+          fontSize: defaultTextSize,
+          overflow: TextOverflow.ellipsis,
+          height: defaultTextHeight,
+        ),
+      ),
+    ),
     // 最低价
-    required this.low,
+    this.low = const MarkConfig(
+      spacing: 2,
+      line: LineConfig(
+        type: LineType.solid,
+        length: 20,
+        paint: PaintConfig(
+          strokeWidth: 0.5,
+        ),
+      ),
+      text: TextAreaConfig(
+        style: TextStyle(
+          fontSize: defaultTextSize,
+          overflow: TextOverflow.ellipsis,
+          height: defaultTextHeight,
+        ),
+      ),
+    ),
 
     /// 最后价: 当最新蜡烛不在可视区域时使用.
     /// 注: 如果其中线的配置颜色透明度为0(默认为0) 且useCandleColorAsLatestBg为true,则会采用涨跌色
-    required this.last,
+    this.last = const MarkConfig(
+      show: true,
+      spacing: 1,
+      line: LineConfig(
+        type: LineType.dashed,
+        dashes: [3, 3],
+        paint: PaintConfig(
+          strokeWidth: 0.5,
+        ),
+      ),
+      hitTestMargin: 4,
+      text: TextAreaConfig(
+        style: TextStyle(
+          fontSize: defaultTextSize,
+          overflow: TextOverflow.ellipsis,
+          height: defaultTextHeight,
+          textBaseline: TextBaseline.alphabetic,
+        ),
+        padding: EdgeInsets.symmetric(
+          horizontal: 4,
+          vertical: 2,
+        ),
+        borderRadius: BorderRadius.all(Radius.circular(10)),
+      ),
+    ),
 
     /// 最新价: 当最新蜡烛在可视区域时使用.
     /// 注: 如果其中线的配置颜色透明度为0(默认为0) 且useCandleColorAsLatestBg为true,则会采用涨跌色
-    required this.latest,
-    this.latestPoint,
+    this.latest = const MarkConfig(
+      show: true,
+      spacing: 1,
+      line: LineConfig(
+        type: LineType.dashed,
+        dashes: [3, 3],
+        paint: PaintConfig(
+          strokeWidth: 0.5,
+        ),
+      ),
+      text: TextAreaConfig(
+        style: TextStyle(
+          fontSize: defaultTextSize,
+          overflow: TextOverflow.ellipsis,
+          height: defaultTextHeight,
+        ),
+        textAlign: TextAlign.center,
+        padding: EdgeInsets.all(2),
+        border: BorderSide(width: 0.5),
+        borderRadius: BorderRadius.all(Radius.circular(2)),
+      ),
+    ),
+
+    /// 最新蜡烛点: 仅在线图中使用.
     this.showLatestPoint = true,
+    this.latestPoint = const PointConfig(
+      radius: 2,
+      width: 0,
+      borderWidth: 2,
+    ),
 
     /// 使用蜡烛颜色做为Latest的背景
     this.useCandleColorAsLatestBg = true,
 
     /// 倒计时, 在latest最新价之下展示
     this.showCountDown = true,
-    required this.countDown,
-    required this.chartType,
+    this.countDown = const TextAreaConfig(
+      style: TextStyle(
+        fontSize: defaultTextSize,
+        overflow: TextOverflow.ellipsis,
+        height: defaultTextHeight,
+      ),
+      textAlign: TextAlign.center,
+      padding: EdgeInsets.all(2),
+      borderRadius: BorderRadius.all(Radius.circular(2)),
+    ),
+    this.chartType = FlexiChartType.barSolid,
     this.minWidthLineType,
     this.intervalChartTypes = const {},
-    this.hideIndicatorsWhenLineChart = false,
+    this.hideIndicatorsWhenLineChart = true,
     this.longColor,
     this.shortColor,
     this.lineColor,
@@ -522,7 +614,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
         themeBackgroundColor: useCandleColor ? updownColor : theme.latestPriceBg,
         themeBorderColor: useCandleColor ? null : theme.markLineColor,
         borderRadius: borderRadius,
-        borderSide: useCandleColor ? textConfig.border?.copyWith(color: null) : null,
+        borderSide: useCandleColor ? textConfig.border?.copyWith(color: transparent) : null,
       );
       latestTextOffset = -(size.width + latest.spacing);
 

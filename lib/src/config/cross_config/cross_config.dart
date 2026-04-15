@@ -16,8 +16,10 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flutter/painting.dart';
 
 import '../../constant.dart';
+import '../../extension/render/types.dart';
 import '../../framework/serializers.dart';
 import '../line_config/line_config.dart';
+import '../paint_config/paint_config.dart';
 import '../point_config/point_config.dart';
 import '../text_area_config/text_area_config.dart';
 import '../tooltip_config/tooltip_config.dart';
@@ -29,23 +31,48 @@ part 'cross_config.g.dart';
 class CrossConfig {
   const CrossConfig({
     this.enable = true,
-    required this.crosshair,
-    required this.crosspoint,
-    required this.ticksText,
-    required this.spacing,
+    this.crosshair = const LineConfig(
+      paint: PaintConfig(
+        strokeWidth: 0.5,
+      ),
+      type: LineType.dashed,
+      dashes: [3, 3],
+    ),
+    this.crosspoint = const PointConfig(
+      radius: 2,
+      width: 0,
+      borderWidth: 3,
+    ),
+    this.ticksText = const TextAreaConfig(
+      style: TextStyle(
+        fontSize: defaultTextSize,
+        fontWeight: FontWeight.normal,
+        height: defaultTipsTextHeight,
+      ),
+      padding: EdgeInsets.all(2),
+      border: BorderSide.none,
+      borderRadius: BorderRadius.all(
+        Radius.circular(2),
+      ),
+      textAlign: TextAlign.end,
+    ),
+    this.spacing = 1,
     this.showLatestTipsInBlank = true,
     this.moveByCandleInBlank = false,
     this.tooltipConfig = const TooltipConfig(
+      show: true,
+      // tooltip 区域设置
       margin: EdgeInsets.only(
         left: 15,
         right: 65,
         top: 10,
       ),
       padding: EdgeInsets.symmetric(
-        horizontal: 4,
-        vertical: 4,
+        horizontal: 8,
+        vertical: 8,
       ),
-      radius: BorderRadius.all(Radius.circular(4)),
+      radius: BorderRadius.all(Radius.circular(6)),
+      // tooltip 文本设置
       style: TextStyle(
         fontSize: defaultTextSize,
         overflow: TextOverflow.ellipsis,

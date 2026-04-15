@@ -143,19 +143,35 @@ extension $CrossConfigCopyWith on CrossConfig {
 
 CrossConfig _$CrossConfigFromJson(Map<String, dynamic> json) => CrossConfig(
       enable: json['enable'] as bool? ?? true,
-      crosshair: LineConfig.fromJson(json['crosshair'] as Map<String, dynamic>),
-      crosspoint:
-          PointConfig.fromJson(json['crosspoint'] as Map<String, dynamic>),
-      ticksText:
-          TextAreaConfig.fromJson(json['ticksText'] as Map<String, dynamic>),
-      spacing: (json['spacing'] as num).toDouble(),
+      crosshair: json['crosshair'] == null
+          ? const LineConfig(
+              paint: PaintConfig(strokeWidth: 0.5),
+              type: LineType.dashed,
+              dashes: [3, 3])
+          : LineConfig.fromJson(json['crosshair'] as Map<String, dynamic>),
+      crosspoint: json['crosspoint'] == null
+          ? const PointConfig(radius: 2, width: 0, borderWidth: 3)
+          : PointConfig.fromJson(json['crosspoint'] as Map<String, dynamic>),
+      ticksText: json['ticksText'] == null
+          ? const TextAreaConfig(
+              style: TextStyle(
+                  fontSize: defaultTextSize,
+                  fontWeight: FontWeight.normal,
+                  height: defaultTipsTextHeight),
+              padding: EdgeInsets.all(2),
+              border: BorderSide.none,
+              borderRadius: BorderRadius.all(Radius.circular(2)),
+              textAlign: TextAlign.end)
+          : TextAreaConfig.fromJson(json['ticksText'] as Map<String, dynamic>),
+      spacing: (json['spacing'] as num?)?.toDouble() ?? 1,
       showLatestTipsInBlank: json['showLatestTipsInBlank'] as bool? ?? true,
       moveByCandleInBlank: json['moveByCandleInBlank'] as bool? ?? false,
       tooltipConfig: json['tooltipConfig'] == null
           ? const TooltipConfig(
+              show: true,
               margin: EdgeInsets.only(left: 15, right: 65, top: 10),
-              padding: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-              radius: BorderRadius.all(Radius.circular(4)),
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              radius: BorderRadius.all(Radius.circular(6)),
               style: TextStyle(
                   fontSize: defaultTextSize,
                   overflow: TextOverflow.ellipsis,

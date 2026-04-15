@@ -142,8 +142,15 @@ TimeIndicator _$TimeIndicatorFromJson(Map<String, dynamic> json) =>
       position: json['position'] == null
           ? DrawPosition.middle
           : const DrawPositionConverter().fromJson(json['position'] as String),
-      timeTick:
-          TextAreaConfig.fromJson(json['timeTick'] as Map<String, dynamic>),
+      timeTick: json['timeTick'] == null
+          ? const TextAreaConfig(
+              style: TextStyle(
+                  fontSize: defaultTextSize,
+                  overflow: TextOverflow.ellipsis,
+                  height: defaultTextHeight),
+              textWidth: 80,
+              textAlign: TextAlign.center)
+          : TextAreaConfig.fromJson(json['timeTick'] as Map<String, dynamic>),
       ensurePaintInDrawableRect:
           json['ensurePaintInDrawableRect'] as bool? ?? false,
     );

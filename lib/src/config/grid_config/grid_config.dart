@@ -13,10 +13,14 @@
 // limitations under the License.
 
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:flexi_kline/src/config/export.dart';
+import 'package:flutter/painting.dart';
 
+import '../../constant.dart';
 import '../../extension/render/types.dart';
 import '../../framework/serializers.dart';
+import '../line_config/line_config.dart';
+import '../paint_config/paint_config.dart';
+import '../text_area_config/text_area_config.dart';
 
 part 'grid_config.g.dart';
 
@@ -42,10 +46,25 @@ class GridConfig {
     this.dragHitTestMinDistance = 10,
     this.draggingBgOpacity = 0.1,
     this.dragBgOpacity = 0,
-    this.dragLine,
+    this.dragLine = const LineConfig(
+      type: LineType.dashed,
+      dashes: [3, 5],
+      length: 20,
+      paint: PaintConfig(
+        strokeWidth: 5 * 0.5,
+      ),
+    ),
     this.dragLineOpacity = 0.1,
     // 全局默认的刻度值配置.
-    required this.ticksText,
+    this.ticksText = const TextAreaConfig(
+      style: TextStyle(
+        fontSize: defaultTextSize,
+        overflow: TextOverflow.ellipsis,
+        height: defaultTextHeight,
+      ),
+      textAlign: TextAlign.end,
+      padding: EdgeInsets.symmetric(horizontal: 2),
+    ),
   });
 
   final bool show;

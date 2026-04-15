@@ -13,10 +13,14 @@
 // limitations under the License.
 
 import 'package:copy_with_extension/copy_with_extension.dart';
+import 'package:flutter/painting.dart';
 
+import '../../constant.dart';
+import '../../extension/render/types.dart';
 import '../../framework/serializers.dart';
 import '../line_config/line_config.dart';
 import '../magnifier_config/magnifier_config.dart';
+import '../paint_config/paint_config.dart';
 import '../point_config/point_config.dart';
 import '../text_area_config/text_area_config.dart';
 
@@ -28,12 +32,43 @@ class DrawConfig {
   const DrawConfig({
     this.enable = false,
     this.allowSelectWhenExit = true,
-    required this.crosspoint,
-    required this.crosshair,
-    required this.drawLine,
-    required this.drawPoint,
-    required this.ticksText,
-    required this.spacing,
+    this.crosspoint = const PointConfig(
+      radius: 2,
+      width: 0,
+      borderWidth: 2,
+    ),
+    this.crosshair = const LineConfig(
+      paint: PaintConfig(
+        strokeWidth: 0.5,
+      ),
+      type: LineType.dashed,
+      dashes: [5, 3],
+    ),
+    this.drawLine = const LineConfig(
+      paint: PaintConfig(
+        strokeWidth: 1,
+      ),
+      type: LineType.solid,
+      dashes: [5, 3],
+    ),
+    this.drawPoint = const PointConfig(
+      radius: 9,
+      width: 0,
+      borderWidth: 1,
+    ),
+    this.ticksText = const TextAreaConfig(
+      style: TextStyle(
+        fontSize: defaultTextSize,
+        fontWeight: FontWeight.normal,
+        height: defaultTextHeight,
+      ),
+      padding: EdgeInsets.all(2),
+      border: null,
+      borderRadius: BorderRadius.all(
+        Radius.circular(2),
+      ),
+    ),
+    this.spacing = 1,
     this.ticksGapBgOpacity = 0.1,
     this.hitTestMinDistance = 10,
     this.magnetMinDistance = 10,
