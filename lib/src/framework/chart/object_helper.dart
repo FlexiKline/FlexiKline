@@ -362,6 +362,7 @@ mixin PaintYAxisTicksMixin<T extends Indicator> on PaintObject<T> {
         drawableRect: drawableRect,
         text: text,
         textConfig: ticksText,
+        themeTextColor: theme.ticksTextColor,
       );
     }
   }
@@ -386,6 +387,9 @@ mixin PaintYAxisTicksOnCrossMixin<T extends Indicator> on PaintObject<T> {
     Canvas canvas,
     Offset offset, {
     required int precision,
+    Color? textColor,
+    Color? bgColor,
+    Color? borderColor,
   }) {
     final value = dyToValue(offset.dy);
     if (value == null) return null;
@@ -403,6 +407,9 @@ mixin PaintYAxisTicksOnCrossMixin<T extends Indicator> on PaintObject<T> {
       drawableRect: drawableRect,
       text: text,
       textConfig: ticksText,
+      themeTextColor: textColor ?? theme.crossTextColor,
+      themeBackgroundColor: bgColor ?? theme.crossTextBg,
+      themeBorderColor: borderColor,
     );
   }
 

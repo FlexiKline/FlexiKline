@@ -21,7 +21,7 @@ abstract class _$TextAreaConfigCWProxy {
 
   TextAreaConfig maxLines(int? maxLines);
 
-  TextAreaConfig background(Color? background);
+  TextAreaConfig backgroundColor(Color? backgroundColor);
 
   TextAreaConfig padding(EdgeInsets? padding);
 
@@ -43,7 +43,7 @@ abstract class _$TextAreaConfigCWProxy {
     double? minWidth,
     double? maxWidth,
     int? maxLines,
-    Color? background,
+    Color? backgroundColor,
     EdgeInsets? padding,
     BorderSide? border,
     BorderRadius? borderRadius,
@@ -79,7 +79,8 @@ class _$TextAreaConfigCWProxyImpl implements _$TextAreaConfigCWProxy {
   TextAreaConfig maxLines(int? maxLines) => this(maxLines: maxLines);
 
   @override
-  TextAreaConfig background(Color? background) => this(background: background);
+  TextAreaConfig backgroundColor(Color? backgroundColor) =>
+      this(backgroundColor: backgroundColor);
 
   @override
   TextAreaConfig padding(EdgeInsets? padding) => this(padding: padding);
@@ -107,7 +108,7 @@ class _$TextAreaConfigCWProxyImpl implements _$TextAreaConfigCWProxy {
     Object? minWidth = const $CopyWithPlaceholder(),
     Object? maxWidth = const $CopyWithPlaceholder(),
     Object? maxLines = const $CopyWithPlaceholder(),
-    Object? background = const $CopyWithPlaceholder(),
+    Object? backgroundColor = const $CopyWithPlaceholder(),
     Object? padding = const $CopyWithPlaceholder(),
     Object? border = const $CopyWithPlaceholder(),
     Object? borderRadius = const $CopyWithPlaceholder(),
@@ -141,10 +142,10 @@ class _$TextAreaConfigCWProxyImpl implements _$TextAreaConfigCWProxy {
           ? _value.maxLines
           // ignore: cast_nullable_to_non_nullable
           : maxLines as int?,
-      background: background == const $CopyWithPlaceholder()
-          ? _value.background
+      backgroundColor: backgroundColor == const $CopyWithPlaceholder()
+          ? _value.backgroundColor
           // ignore: cast_nullable_to_non_nullable
-          : background as Color?,
+          : backgroundColor as Color?,
       padding: padding == const $CopyWithPlaceholder()
           ? _value.padding
           // ignore: cast_nullable_to_non_nullable
@@ -189,8 +190,8 @@ TextAreaConfig _$TextAreaConfigFromJson(Map<String, dynamic> json) =>
       minWidth: (json['minWidth'] as num?)?.toDouble(),
       maxWidth: (json['maxWidth'] as num?)?.toDouble(),
       maxLines: (json['maxLines'] as num?)?.toInt(),
-      background: _$JsonConverterFromJson<String, Color>(
-          json['background'], const ColorConverter().fromJson),
+      backgroundColor: _$JsonConverterFromJson<String, Color>(
+          json['backgroundColor'], const ColorConverter().fromJson),
       padding: _$JsonConverterFromJson<Map<String, dynamic>, EdgeInsets>(
           json['padding'], const EdgeInsetsConverter().fromJson),
       border: _$JsonConverterFromJson<Map<String, dynamic>, BorderSide>(
@@ -212,9 +213,9 @@ Map<String, dynamic> _$TextAreaConfigToJson(TextAreaConfig instance) =>
       if (instance.maxWidth case final value?) 'maxWidth': value,
       if (instance.maxLines case final value?) 'maxLines': value,
       if (_$JsonConverterToJson<String, Color>(
-              instance.background, const ColorConverter().toJson)
+              instance.backgroundColor, const ColorConverter().toJson)
           case final value?)
-        'background': value,
+        'backgroundColor': value,
       if (_$JsonConverterToJson<Map<String, dynamic>, EdgeInsets>(
               instance.padding, const EdgeInsetsConverter().toJson)
           case final value?)

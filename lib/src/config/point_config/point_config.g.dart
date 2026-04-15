@@ -11,7 +11,7 @@ abstract class _$PointConfigCWProxy {
 
   PointConfig width(double width);
 
-  PointConfig color(Color color);
+  PointConfig color(Color? color);
 
   PointConfig borderWidth(double? borderWidth);
 
@@ -26,7 +26,7 @@ abstract class _$PointConfigCWProxy {
   PointConfig call({
     double radius,
     double width,
-    Color color,
+    Color? color,
     double? borderWidth,
     Color? borderColor,
   });
@@ -45,7 +45,7 @@ class _$PointConfigCWProxyImpl implements _$PointConfigCWProxy {
   PointConfig width(double width) => this(width: width);
 
   @override
-  PointConfig color(Color color) => this(color: color);
+  PointConfig color(Color? color) => this(color: color);
 
   @override
   PointConfig borderWidth(double? borderWidth) =>
@@ -81,7 +81,7 @@ class _$PointConfigCWProxyImpl implements _$PointConfigCWProxy {
       color: color == const $CopyWithPlaceholder()
           ? _value.color
           // ignore: cast_nullable_to_non_nullable
-          : color as Color,
+          : color as Color?,
       borderWidth: borderWidth == const $CopyWithPlaceholder()
           ? _value.borderWidth
           // ignore: cast_nullable_to_non_nullable
@@ -107,9 +107,8 @@ extension $PointConfigCopyWith on PointConfig {
 PointConfig _$PointConfigFromJson(Map<String, dynamic> json) => PointConfig(
       radius: (json['radius'] as num?)?.toDouble() ?? 2,
       width: (json['width'] as num?)?.toDouble() ?? 2,
-      color: json['color'] == null
-          ? const Color(0xFF000000)
-          : const ColorConverter().fromJson(json['color'] as String),
+      color: _$JsonConverterFromJson<String, Color>(
+          json['color'], const ColorConverter().fromJson),
       borderWidth: (json['borderWidth'] as num?)?.toDouble(),
       borderColor: _$JsonConverterFromJson<String, Color>(
           json['borderColor'], const ColorConverter().fromJson),
@@ -119,7 +118,10 @@ Map<String, dynamic> _$PointConfigToJson(PointConfig instance) =>
     <String, dynamic>{
       'radius': instance.radius,
       'width': instance.width,
-      'color': const ColorConverter().toJson(instance.color),
+      if (_$JsonConverterToJson<String, Color>(
+              instance.color, const ColorConverter().toJson)
+          case final value?)
+        'color': value,
       if (instance.borderWidth case final value?) 'borderWidth': value,
       if (_$JsonConverterToJson<String, Color>(
               instance.borderColor, const ColorConverter().toJson)

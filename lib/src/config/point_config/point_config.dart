@@ -15,6 +15,8 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flutter/painting.dart';
 
+import '../../constant.dart';
+import '../../extension/style_ext.dart';
 import '../../framework/serializers.dart';
 
 part 'point_config.g.dart';
@@ -25,28 +27,39 @@ class PointConfig {
   const PointConfig({
     this.radius = 2,
     this.width = 2,
-    this.color = const Color(0xFF000000),
+    this.color,
     this.borderWidth,
     this.borderColor,
   });
 
   final double radius;
   final double width;
-  final Color color;
+  final Color? color;
 
   /// 点的边框配置
   final double? borderWidth;
   final Color? borderColor;
 
-  PointConfig of({Color? color, Color? borderColor}) {
-    if (this.color == color && this.borderColor == borderColor) {
+  /// 确保画笔颜色不为空
+  PointConfig ensure({Color? themeColor, Color? themeBorderColor}) {
+    if ((color.isValid || themeColor.isInvalid) && (borderColor.isValid || themeBorderColor.isInvalid)) {
       return this;
     }
-    return copyWith(color: color ?? this.color, borderColor: borderColor);
+    return copyWith(
+      color: color.or(themeColor),
+      borderColor: borderColor.or(themeBorderColor),
+    );
   }
 
+  /// 获取画笔(考虑颜色)
+  Paint getPaint(Color themeColor) => Paint()
+    ..color = color.ensure(themeColor)
+    ..strokeWidth = width
+    ..style = PaintingStyle.fill;
+
+  /// 获取画笔(使用 paint color 或 transparent)
   Paint get paint => Paint()
-    ..color = color
+    ..color = color ?? transparent
     ..strokeWidth = width
     ..style = PaintingStyle.fill;
 

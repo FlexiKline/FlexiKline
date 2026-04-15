@@ -1,6 +1,8 @@
 import 'dart:ui';
 
 import '../../config/line_config/line_config.dart';
+import '../../constant.dart';
+import '../style_ext.dart';
 import 'types.dart';
 
 /// Came from [flutter_path_drawing](https://github.com/dnfield/flutter_path_drawing) library.
@@ -20,7 +22,7 @@ Path dashPath(
   assert(dashArray != null); // ignore: unnecessary_null_comparison
 
   dashOffset = dashOffset ?? const DashOffset.absolute(0);
-  // TODO(imaNNeo): Is there some way to determine how much of a path would be visible today?
+  // (imaNNeo): Is there some way to determine how much of a path would be visible today?
 
   final dest = Path();
   for (final metric in source.computeMetrics()) {
@@ -98,6 +100,7 @@ extension FlexiPathDraw on Canvas {
     Paint paint, {
     List<double>? dashes,
   }) {
+    if (paint.color.isInvalid) return;
     drawPath(
       dashPath(
         path,
@@ -117,6 +120,7 @@ extension FlexiPathDraw on Canvas {
     Paint paint, {
     List<double>? dashes,
   }) {
+    if (paint.color.isInvalid) return;
     if (type == LineType.dashed) {
       drawDashPath(path, paint, dashes: dashes);
     } else if (type == LineType.dotted) {
@@ -134,12 +138,16 @@ extension FlexiPathDraw on Canvas {
   /// 绘制线(根据LineConfig)
   void drawLineByConfig(
     Path path,
-    LineConfig config,
-  ) =>
-      drawLineType(
-        config.type,
-        path,
-        config.linePaint,
-        dashes: config.dashes,
-      );
+    LineConfig config, {
+    Color? themeColor,
+  }) {
+    if (config.paint.color.isInvalid && themeColor.isInvalid) return;
+    final linePaint = config.getLinePaint(themeColor ?? transparent);
+    drawLineType(
+      config.type,
+      path,
+      linePaint,
+      dashes: config.dashes,
+    );
+  }
 }

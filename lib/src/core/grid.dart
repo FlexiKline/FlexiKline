@@ -84,7 +84,8 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
             Path()
               ..moveTo(objRect.left, objRect.bottom - dragLineHalf)
               ..lineTo(objRect.right, objRect.bottom - dragLineHalf),
-            dragLine.of(paintColor: theme.markLineColor),
+            dragLine,
+            themeColor: theme.markLineColor,
           );
         } else if (gridConfig.draggingBgOpacity > 0) {
           // 绘制正在拖拽的object的底部线
@@ -106,7 +107,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
               Path()
                 ..moveTo(objRect.left + delta, objRect.bottom - dragLineHalf)
                 ..lineTo(objRect.right - delta, objRect.bottom - dragLineHalf),
-              dragLine.linePaint..color = dragBg.withAlpha(gridConfig.dragLineOpacity.alpha),
+              dragLine.getLinePaint(dragBg.withAlpha(gridConfig.dragLineOpacity.alpha)),
               dashes: dragLine.dashes,
             );
           }
@@ -131,7 +132,6 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
     final main = mainRect;
     final sub = subRect;
 
-    final horiLine = gridConfig.horizontal.line.of(paintColor: theme.gridLineColor);
     double dy = main.top;
 
     // 绘制Top边框线
@@ -139,7 +139,8 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
       Path()
         ..moveTo(main.left, dy)
         ..lineTo(main.right, dy),
-      horiLine,
+      gridConfig.horizontal.line,
+      themeColor: theme.gridLineColor,
     );
 
     // 绘制主图网格横线
@@ -150,7 +151,8 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
         Path()
           ..moveTo(main.left, dy)
           ..lineTo(main.right, dy),
-        horiLine,
+        gridConfig.horizontal.line,
+        themeColor: theme.gridLineColor,
       );
     }
 
@@ -159,7 +161,8 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
       Path()
         ..moveTo(main.left, main.bottom)
         ..lineTo(main.right, main.bottom),
-      horiLine,
+      gridConfig.horizontal.line,
+      themeColor: theme.gridLineColor,
     );
 
     /// 副图区域
@@ -172,7 +175,8 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
         Path()
           ..moveTo(main.left, dy)
           ..lineTo(main.right, dy),
-        horiLine,
+        gridConfig.horizontal.line,
+        themeColor: theme.gridLineColor,
       );
     }
   }
@@ -182,8 +186,6 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
     if (!gridConfig.vertical.show) return;
     final main = mainRect;
     final sub = subRect;
-    final vertLine = gridConfig.vertical.line.of(paintColor: theme.gridLineColor);
-
     double dx = main.left;
     final step = main.right / gridConfig.vertical.count;
 
@@ -192,7 +194,8 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
       Path()
         ..moveTo(dx, main.top)
         ..lineTo(dx, sub.bottom),
-      vertLine,
+      gridConfig.vertical.line,
+      themeColor: theme.gridLineColor,
     );
 
     // 计算排除时间指标后的top和bottom
@@ -214,7 +217,8 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
         Path()
           ..moveTo(dx, main.top)
           ..lineTo(dx, main.bottom),
-        vertLine,
+        gridConfig.vertical.line,
+        themeColor: theme.gridLineColor,
       );
 
       /// 绘制副区Grid竖线
@@ -222,7 +226,8 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
         Path()
           ..moveTo(dx, top)
           ..lineTo(dx, bottom),
-        vertLine,
+        gridConfig.vertical.line,
+        themeColor: theme.gridLineColor,
       );
     }
 
@@ -231,7 +236,8 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
       Path()
         ..moveTo(main.right, main.top)
         ..lineTo(main.right, sub.bottom),
-      vertLine,
+      gridConfig.vertical.line,
+      themeColor: theme.gridLineColor,
     );
   }
 

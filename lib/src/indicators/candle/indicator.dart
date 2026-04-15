@@ -335,14 +335,12 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
     canvas.drawLine(
       offset,
       endOffset,
-      markConfig.line.of(paintColor: theme.markLineColor).linePaint,
+      markConfig.line.getLinePaint(theme.markLineColor),
     );
-
-    final markText = markConfig.text.of(textColor: theme.textColor);
 
     endOffset = Offset(
       endOffset.dx + flag * markConfig.spacing,
-      endOffset.dy - (markText.areaHeight) / 2,
+      endOffset.dy - markConfig.text.areaHeight / 2,
     );
 
     final text = formatPrice(val.toDecimal(), precision: klineData.precision);
@@ -351,7 +349,8 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
       offset: endOffset,
       drawDirection: flag < 0 ? DrawDirection.rtl : DrawDirection.ltr,
       text: text,
-      textConfig: markText,
+      textConfig: markConfig.text,
+      themeTextColor: theme.textColor,
     );
   }
 
@@ -388,6 +387,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
         drawableRect: drawableRect,
         text: text,
         textConfig: ticksText,
+        themeTextColor: theme.ticksTextColor,
       );
 
       if (size.width > maxTickWidth) maxTickWidth = size.width;
@@ -451,30 +451,15 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
     if (paintDxOffset < latestTextOffset) {
       lastTextSize = null;
       // 绘制最新价和倒计时
-      MarkConfig latest = indicator.latest;
+      final MarkConfig latest = indicator.latest;
       if (!latest.show) return;
 
       ldx = startCandleDx;
 
-      if (indicator.useCandleColorAsLatestBg) {
-        final updownColor = model.close >= model.open ? longColor : shortColor;
-        latest = latest.of(
-          paintColor: latest.lineColor.a == 0 ? updownColor : null,
-          textColor: const Color(0xFFFFFFFF),
-          background: updownColor,
-          borderColor: const Color(0x00000000),
-        );
-      } else {
-        latest = latest.of(
-          paintColor: latest.lineColor.a == 0 ? theme.markLineColor : null,
-          textColor: theme.textColor,
-          background: theme.latestPriceBg,
-          borderColor: theme.markLineColor,
-        );
-      }
+      final useCandleColor = indicator.useCandleColorAsLatestBg;
+      final updownColor = model.close >= model.open ? longColor : shortColor;
 
-      final textConfig = latest.text;
-      final background = textConfig.background;
+      final textConfig = indicator.latest.text;
       BorderRadius? borderRadius = textConfig.borderRadius;
 
       final halfHeight = textConfig.areaHeight / 2;
@@ -490,7 +475,8 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
       latestPath.lineTo(ldx, dy);
       canvas.drawLineByConfig(
         latestPath,
-        latest.line,
+        indicator.latest.line,
+        themeColor: useCandleColor ? updownColor : theme.markLineColor,
       );
 
       /// 最新价文本和样式配置
@@ -532,27 +518,16 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
         drawableRect: drawableRect,
         text: text,
         textConfig: textConfig,
-        backgroundColor: background,
+        themeTextColor: useCandleColor ? white : theme.textColor,
+        themeBackgroundColor: useCandleColor ? updownColor : theme.latestPriceBg,
+        themeBorderColor: useCandleColor ? null : theme.markLineColor,
         borderRadius: borderRadius,
+        borderSide: useCandleColor ? textConfig.border?.copyWith(color: null) : null,
       );
       latestTextOffset = -(size.width + latest.spacing);
 
       if (countDownText != null) {
-        TextAreaConfig countDown;
-        if (indicator.useCandleColorAsLatestBg) {
-          countDown = indicator.countDown.of(
-            textColor: theme.textColor,
-            background: theme.countDownBg,
-            borderColor: const Color(0x00000000),
-          );
-        } else {
-          countDown = indicator.countDown.of(
-            textColor: theme.textColor,
-            background: theme.countDownBg,
-            borderColor: theme.markLineColor,
-          );
-        }
-
+        final countDown = indicator.countDown;
         // 展示倒计时, 倒计时radius始终使用最新价的, 且保留底部radius
         borderRadius = borderRadius?.copyWith(
           topLeft: const Radius.circular(0),
@@ -571,6 +546,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
           drawableRect: drawableRect,
           text: countDownText,
           style: countDown.style.copyWith(
+            color: theme.textColor,
             // 修正倒计时文本区域高度:
             // 由于倒计时使用了固定宽度(最新价的size.width), 保持与最新价同宽.
             // 此处无法再为countDown设置padding, 固在此处修正
@@ -579,9 +555,12 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
           textAlign: countDown.textAlign,
           textWidth: size.width,
           // padding: countDown.padding,
-          backgroundColor: countDown.background,
+          backgroundColor: theme.countDownBg,
           borderRadius: borderRadius,
-          borderSide: countDown.border,
+          borderSide: BorderSide(
+            color: useCandleColor ? const Color(0x00000000) : theme.markLineColor,
+            width: countDown.border?.width ?? 0.5,
+          ),
           maxLines: countDown.maxLines ?? 1,
         );
       }
@@ -592,12 +571,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
 
       ldx = 0;
 
-      final lastText = last.text.of(
-        textColor: theme.lastPriceColor,
-        background: theme.lastPriceBg,
-      );
-
-      final halfHeight = lastText.areaHeight / 2;
+      final halfHeight = last.text.areaHeight / 2;
       // 修正dy位置
       dy = dy.clamp(
         drawableRect.top + halfHeight,
@@ -618,7 +592,8 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
       }
       canvas.drawLineByConfig(
         lastPath,
-        last.line.of(paintColor: theme.markLineColor),
+        last.line,
+        themeColor: theme.markLineColor,
       );
 
       final text = formatPrice(
@@ -636,7 +611,9 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
         drawDirection: DrawDirection.rtl,
         drawableRect: drawableRect,
         text: '$text ▸', // ➤➤▹►▸▶︎≻
-        textConfig: lastText,
+        textConfig: last.text,
+        themeTextColor: theme.lastPriceColor,
+        themeBackgroundColor: theme.lastPriceBg,
       );
     }
   }
@@ -664,6 +641,8 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
     canvas.drawCirclePoint(
       offset,
       point,
+      themeColor: theme.lineChartColor,
+      themeBorderColor: theme.lineChartColor.withAlpha(0x7F),
     );
   }
 

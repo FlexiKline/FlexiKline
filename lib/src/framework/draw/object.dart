@@ -28,7 +28,7 @@ class OverlayObject implements Comparable<OverlayObject> {
   LineConfig get line => _overlay.line;
   List<Point?> get points => _overlay.points;
 
-  Color get lineColor => line.paint.color;
+  Color get lineColor => line.paint.color!;
   int get steps => points.length;
 
   int get nextIndex => _overlay.nextIndex;

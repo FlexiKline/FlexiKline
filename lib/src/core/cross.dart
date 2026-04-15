@@ -194,16 +194,25 @@ mixin CrossBinding on KlineBindingBase, SettingBinding implements ICross {
       ..moveTo(offset.dx, 0)
       ..lineTo(offset.dx, canvasHeight);
 
-    canvas.drawLineByConfig(path, crossConfig.crosshair.of(paintColor: theme.crosshairColor));
+    canvas.drawLineByConfig(
+      path,
+      crossConfig.crosshair,
+      themeColor: theme.crosshairColor,
+    );
 
-    canvas.drawCirclePoint(offset, crossConfig.crosspoint.of(color: theme.crosshairColor, borderColor: theme.crosshairColor.withAlpha(0.2.alpha)));
+    canvas.drawCirclePoint(
+      offset,
+      crossConfig.crosspoint,
+      themeColor: theme.crosshairColor,
+      themeBorderColor: theme.crosshairColor.withAlpha(0.2.alpha),
+    );
   }
 
   /// 绘制 Tooltip
   void paintTooltip(Canvas canvas, Offset offset, {FlexiCandleModel? model}) {
     final tooltipConfig = crossConfig.tooltipConfig;
     if (!tooltipConfig.show) return;
-    final tooltipTextStyle = tooltipConfig.style;
+    final tooltipTextStyle = tooltipConfig.style.ensure(theme.tooltipTextColor);
 
     final index = dxToIndex(offset.dx);
     if (index == null) return;
@@ -245,9 +254,9 @@ mixin CrossBinding on KlineBindingBase, SettingBinding implements ICross {
       final br = i < tooltipInfoList.length - 1 ? '\n' : '';
       labelSpanList.add(TextSpan(
         text: info.label + br,
-        style: info.labelStyle ?? tooltipTextStyle,
+        style: info.labelStyle?.ensure(theme.tooltipTextColor) ?? tooltipTextStyle,
       ));
-      TextStyle valStyle = info.valueStyle ?? tooltipTextStyle;
+      TextStyle valStyle = info.valueStyle?.ensure(theme.tooltipTextColor) ?? tooltipTextStyle;
       if (info.riseOrFall > 0) {
         valStyle = valStyle.copyWith(color: theme.longColor);
       } else if (info.riseOrFall < 0) {

@@ -15,7 +15,6 @@
 import 'package:flutter/material.dart' hide Overlay;
 
 import '../constant.dart';
-import '../extension/basic_type_ext.dart';
 import '../extension/render/types.dart';
 import '../framework/export.dart';
 import '../indicators/export.dart';
@@ -86,15 +85,13 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
         count: grid?.horizontal.count ?? 5,
         line: obtainConfig(
           grid?.horizontal.line,
-          LineConfig(
+          const LineConfig(
             type: LineType.solid,
-            dashes: const [2, 2],
+            dashes: [2, 2],
             paint: PaintConfig(
               strokeWidth: 0.5,
             ),
           ),
-        ).of(
-          paintColor: theme.gridLineColor,
         ),
       ),
       vertical: GridAxis(
@@ -102,15 +99,13 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
         count: grid?.vertical.count ?? 5,
         line: obtainConfig(
           grid?.vertical.line,
-          LineConfig(
+          const LineConfig(
             type: LineType.solid,
-            dashes: const [2, 2],
+            dashes: [2, 2],
             paint: PaintConfig(
               strokeWidth: 0.5,
             ),
           ),
-        ).of(
-          paintColor: theme.gridLineColor,
         ),
       ),
       isAllowDragIndicatorHeight: grid?.isAllowDragIndicatorHeight ?? false,
@@ -119,22 +114,20 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       dragBgOpacity: grid?.dragBgOpacity ?? 0,
       dragLine: obtainConfig(
         grid?.dragLine,
-        LineConfig(
+        const LineConfig(
           type: LineType.dashed,
-          dashes: const [3, 5],
+          dashes: [3, 5],
           length: 20,
           paint: PaintConfig(
             strokeWidth: 5 * 0.5,
           ),
         ),
-      ).of(
-        paintColor: theme.markLineColor,
       ),
       dragLineOpacity: grid?.dragLineOpacity ?? 0.1,
       // 全局默认的刻度值配置.
       ticksText: obtainConfig(
         grid?.ticksText,
-        TextAreaConfig(
+        const TextAreaConfig(
           style: TextStyle(
             fontSize: defaultTextSize,
             overflow: TextOverflow.ellipsis,
@@ -143,10 +136,6 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
           textAlign: TextAlign.end,
           padding: EdgeInsets.symmetric(horizontal: 2),
         ),
-      ).of(
-        textColor: theme.ticksTextColor,
-        background: null,
-        borderColor: null,
       ),
     );
   }
@@ -177,7 +166,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       loading: genInnerLoadingConfig(setting?.loading),
 
       /// 主区域最小Size
-      mainMinSize: setting?.mainMinSize ?? Size(120, 80),
+      mainMinSize: setting?.mainMinSize ?? const Size(120, 80),
       subMinHeight: setting?.subMinHeight ?? 30,
 
       /// 主/副图绘制参数
@@ -203,15 +192,10 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
   LoadingConfig genInnerLoadingConfig([LoadingConfig? loading]) {
     return obtainConfig(
       loading,
-      LoadingConfig(
+      const LoadingConfig(
         size: 24,
         strokeWidth: 4,
-        background: theme.tooltipBg,
-        valueColor: theme.textColor,
       ),
-    ).of(
-      valueColor: theme.textColor,
-      background: theme.tooltipBg,
     );
   }
 
@@ -222,43 +206,34 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       /// 十字线
       crosshair: obtainConfig(
         cross?.crosshair,
-        LineConfig(
+        const LineConfig(
           paint: PaintConfig(
             strokeWidth: 0.5,
           ),
           type: LineType.dashed,
-          dashes: const [3, 3],
+          dashes: [3, 3],
         ),
-      ).of(
-        paintColor: theme.crosshairColor,
       ),
 
       /// 十字线坐标点配置
       crosspoint: obtainConfig(
         cross?.crosspoint,
-        PointConfig(
+        const PointConfig(
           radius: 2,
           width: 0,
-          color: theme.crosshairColor,
           borderWidth: 3,
-          borderColor: theme.crosshairColor.withAlpha(0.2.alpha),
         ),
-      ).of(
-        color: theme.crosshairColor,
-        borderColor: theme.crosshairColor.withAlpha(0.2.alpha),
       ),
 
       /// 十字线实时Tips的样式配置.
       ticksText: obtainConfig(
         cross?.ticksText,
-        TextAreaConfig(
+        const TextAreaConfig(
           style: TextStyle(
-            color: theme.crossTextColor,
             fontSize: defaultTextSize,
             fontWeight: FontWeight.normal,
             height: defaultTipsTextHeight,
           ),
-          background: theme.crossTextBg,
           padding: EdgeInsets.all(2),
           border: BorderSide.none,
           borderRadius: BorderRadius.all(
@@ -266,10 +241,6 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
           ),
           textAlign: TextAlign.end,
         ),
-      ).of(
-        textColor: theme.crossTextColor,
-        background: theme.crossTextBg,
-        borderColor: null,
       ),
 
       /// onCross时, 刻度[ticksText]与绘制边界的间距.
@@ -284,7 +255,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       /// tooltip 区域样式设置
       tooltipConfig: obtainConfig(
         cross?.tooltipConfig,
-        TooltipConfig(
+        const TooltipConfig(
           show: true,
           // tooltip 区域设置
           margin: EdgeInsets.only(
@@ -301,13 +272,10 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
           /// tooltip 文本设置
           style: TextStyle(
             fontSize: defaultTextSize,
-            color: theme.tooltipTextColor,
             overflow: TextOverflow.ellipsis,
             height: defaultMultiTextHeight,
           ),
         ),
-      ).of(
-        textColor: theme.tooltipTextColor,
       ),
     );
   }
@@ -322,67 +290,52 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       /// 绘制指针十字线配置
       crosshair: obtainConfig(
         draw?.crosshair,
-        LineConfig(
+        const LineConfig(
           paint: PaintConfig(
             strokeWidth: 0.5,
           ),
           type: LineType.dashed,
-          dashes: const [5, 3],
+          dashes: [5, 3],
         ),
-      ).of(
-        paintColor: theme.drawToolColor,
       ),
 
       /// 指针点配置
       crosspoint: obtainConfig(
         draw?.crosspoint,
-        PointConfig(
+        const PointConfig(
           radius: 2,
           width: 0,
-          color: theme.drawToolColor,
           borderWidth: 2,
-          borderColor: theme.drawToolColor.withAlpha(0.5.alpha),
         ),
-      ).of(
-        color: theme.drawToolColor,
-        borderColor: theme.drawToolColor.withAlpha(0.5.alpha),
       ),
 
       /// 默认绘制线的样式配置
       drawLine: obtainConfig(
         draw?.drawLine,
-        LineConfig(
+        const LineConfig(
           paint: PaintConfig(
             strokeWidth: 1,
           ),
           type: LineType.solid,
           dashes: [5, 3],
         ),
-      ).of(
-        paintColor: theme.drawToolColor,
       ),
 
       /// 选择绘制点配置
       drawPoint: obtainConfig(
         draw?.drawPoint,
-        PointConfig(
+        const PointConfig(
           radius: 9,
           width: 0,
-          color: const Color(0xFFFFFFFF), // 必须指定
           borderWidth: 1,
-          borderColor: theme.drawToolColor,
         ),
-      ).of(
-        color: const Color(0xFFFFFFFF),
-        borderColor: theme.drawToolColor,
       ),
 
       /// 刻度文案配置
       ticksText: obtainConfig(
         draw?.ticksText,
-        TextAreaConfig(
+        const TextAreaConfig(
           style: TextStyle(
-            color: const Color(0xFFFFFFFF), // 必须指定
             fontSize: defaultTextSize,
             fontWeight: FontWeight.normal,
             height: defaultTextHeight,
@@ -393,10 +346,6 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
             Radius.circular(2),
           ),
         ),
-      ).of(
-        textColor: const Color(0xFFFFFFFF),
-        background: null,
-        borderColor: null,
       ),
       spacing: draw?.spacing ?? 1,
       ticksGapBgOpacity: draw?.ticksGapBgOpacity ?? 0.1,
@@ -404,27 +353,14 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       magnetMinDistance: draw?.magnetMinDistance ?? 10,
       magnifier: obtainConfig(
         draw?.magnifier,
-        MagnifierConfig(
+        const MagnifierConfig(
           enable: true,
           magnificationScale: 2,
           margin: EdgeInsets.all(1),
           size: Size(80, 80),
           decorationOpacity: 1.0,
-          decorationShadows: [
-            BoxShadow(
-              offset: const Offset(0.1, 0.1),
-              blurRadius: 2,
-              spreadRadius: 3,
-              color: theme.gridLineColor.withAlpha(0.1.alpha), // 用 gridLineColor 替代已移除的 themeColor
-            )
-          ],
-          shapeSide: BorderSide(
-            color: theme.gridLineColor,
-            width: 1,
-          ),
+          shapeSide: BorderSide.none,
         ),
-      ).of(
-        sideColor: theme.gridLineColor,
       ),
     );
   }
@@ -437,10 +373,10 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
     return CandleIndicator(
       zIndex: instance?.zIndex ?? -1,
       height: instance?.height ?? defaultMainIndicatorHeight,
-      padding: instance?.padding ?? EdgeInsets.only(top: 5, bottom: 5),
+      padding: instance?.padding ?? const EdgeInsets.only(top: 5, bottom: 5),
       high: obtainConfig(
         instance?.high,
-        MarkConfig(
+        const MarkConfig(
           spacing: 2,
           line: LineConfig(
             type: LineType.solid,
@@ -457,15 +393,10 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
             ),
           ),
         ),
-      ).of(
-        paintColor: theme.markLineColor,
-        textColor: theme.textColor,
-        background: instance?.high.text.background,
-        borderColor: instance?.high.text.border?.color,
       ),
       low: obtainConfig(
         instance?.low,
-        MarkConfig(
+        const MarkConfig(
           spacing: 2,
           line: LineConfig(
             type: LineType.solid,
@@ -477,21 +408,15 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
           text: TextAreaConfig(
             style: TextStyle(
               fontSize: defaultTextSize,
-              color: theme.textColor,
               overflow: TextOverflow.ellipsis,
               height: defaultTextHeight,
             ),
           ),
         ),
-      ).of(
-        paintColor: theme.markLineColor,
-        textColor: theme.textColor,
-        background: instance?.low.text.background,
-        borderColor: instance?.low.text.border?.color,
       ),
       last: obtainConfig(
         instance?.last,
-        MarkConfig(
+        const MarkConfig(
           show: true,
           spacing: 1,
           line: LineConfig(
@@ -505,12 +430,10 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
           text: TextAreaConfig(
             style: TextStyle(
               fontSize: defaultTextSize,
-              color: theme.lastPriceColor,
               overflow: TextOverflow.ellipsis,
               height: defaultTextHeight,
               textBaseline: TextBaseline.alphabetic,
             ),
-            background: theme.lastPriceBg,
             padding: EdgeInsets.symmetric(
               horizontal: 4,
               vertical: 2,
@@ -518,29 +441,19 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
             borderRadius: BorderRadius.all(Radius.circular(10)),
           ),
         ),
-      ).of(
-        paintColor: theme.markLineColor,
-        textColor: theme.lastPriceColor,
-        background: theme.lastPriceBg,
-        borderColor: instance?.high.text.border?.color,
       ),
       showLatestPoint: instance?.showLatestPoint ?? true,
       latestPoint: obtainConfig(
         instance?.latestPoint,
-        PointConfig(
+        const PointConfig(
           radius: 2,
           width: 0,
-          color: theme.lineChartColor,
-          borderColor: theme.lineChartColor.withAlpha(0.5.alpha),
           borderWidth: 2,
         ),
-      ).of(
-        color: theme.lineChartColor,
-        borderColor: theme.lineChartColor.withAlpha(0.5.alpha),
       ),
       latest: obtainConfig(
         instance?.latest,
-        MarkConfig(
+        const MarkConfig(
           show: true,
           spacing: 1,
           line: LineConfig(
@@ -558,43 +471,25 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
             ),
             textAlign: TextAlign.center,
             padding: EdgeInsets.all(2),
-            background: theme.latestPriceBg,
-            border: BorderSide(
-              color: theme.markLineColor,
-              width: 0.5,
-            ),
+            border: BorderSide(width: 0.5),
             borderRadius: BorderRadius.all(Radius.circular(2)),
           ),
         ),
-      ).of(
-        textColor: theme.textColor,
-        background: theme.latestPriceBg,
-        borderColor: theme.markLineColor,
       ),
       useCandleColorAsLatestBg: instance?.useCandleColorAsLatestBg ?? true,
       showCountDown: instance?.showCountDown ?? true,
       countDown: obtainConfig(
         instance?.countDown,
-        TextAreaConfig(
+        const TextAreaConfig(
           style: TextStyle(
             fontSize: defaultTextSize,
-            color: theme.textColor,
             overflow: TextOverflow.ellipsis,
             height: defaultTextHeight,
           ),
           textAlign: TextAlign.center,
           padding: EdgeInsets.all(2),
-          background: theme.countDownBg,
-          border: BorderSide(
-            color: theme.markLineColor,
-            width: 0.5,
-          ),
           borderRadius: BorderRadius.all(Radius.circular(2)),
         ),
-      ).of(
-        textColor: theme.textColor,
-        background: theme.countDownBg,
-        borderColor: theme.markLineColor,
       ),
       chartType: instance?.chartType ?? FlexiChartType.barSolid,
       minWidthLineType: instance?.minWidthLineType,
@@ -617,20 +512,15 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
       // 时间刻度.
       timeTick: obtainConfig(
         instance?.timeTick,
-        TextAreaConfig(
+        const TextAreaConfig(
           style: TextStyle(
             fontSize: defaultTextSize,
-            color: theme.ticksTextColor,
             overflow: TextOverflow.ellipsis,
             height: defaultTextHeight,
           ),
           textWidth: 80,
           textAlign: TextAlign.center,
         ),
-      ).of(
-        textColor: theme.ticksTextColor,
-        background: null,
-        borderColor: null,
       ),
     );
   }

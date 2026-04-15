@@ -56,8 +56,7 @@ class ToleranceConfig {
 
   @override
   String toString() {
-    return 'Tolerance($maxDuration, $distanceFactor, $curvestr, '
-        'panSmoothFactor: $panSmoothFactor, convergenceRatio: $convergenceRatio)';
+    return 'Tolerance($maxDuration, $distanceFactor, $curvestr, $panSmoothFactor, $convergenceRatio)';
   }
 
   factory ToleranceConfig.fromJson(Map<String, dynamic> json) => _$ToleranceConfigFromJson(json);

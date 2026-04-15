@@ -15,7 +15,7 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flutter/painting.dart';
 
-import '../../framework/configuration.dart';
+import '../../extension/style_ext.dart';
 import '../../framework/serializers.dart';
 
 part 'tooltip_config.g.dart';
@@ -46,10 +46,15 @@ class TooltipConfig {
   /// 注: style的颜色由FKTheme.tooltipTextColor替换.
   final TextStyle style;
 
-  TooltipConfig of({Color? textColor}) {
-    if (style.color == textColor) return this;
+  /// 确保文本颜色不为空
+  TooltipConfig ensure(Color? themeTextColor) {
+    if (style.color.isValid || themeTextColor.isInvalid) {
+      return this;
+    }
     return copyWith(
-      style: style.of(color: textColor),
+      style: style.copyWith(
+        color: style.color.or(themeTextColor),
+      ),
     );
   }
 

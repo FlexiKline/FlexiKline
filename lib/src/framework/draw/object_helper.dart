@@ -26,15 +26,15 @@ mixin DrawConfigMixin on OverlayObject {
 
   LineConfig get crosshairConfig {
     if (_crosshair != null) return _crosshair!;
-    _crosshair = config.crosshair.of(paintColor: lineColor);
+    _crosshair = config.crosshair.ensure(lineColor);
     return _crosshair!;
   }
 
   PointConfig get crosspointConfig {
     if (_crosspoint != null) return _crosspoint!;
-    _crosspoint = config.crosspoint.of(
-      color: lineColor,
-      borderColor: lineColor.withValues(
+    _crosspoint = config.crosspoint.ensure(
+      themeColor: lineColor,
+      themeBorderColor: lineColor.withValues(
         alpha: config.crosspoint.borderColor?.a ?? 0,
       ),
     );
@@ -53,13 +53,19 @@ mixin DrawConfigMixin on OverlayObject {
 
   TextAreaConfig get ticksTextConfig {
     if (_ticksText != null) return _ticksText!;
-    _ticksText = config.ticksText.of(background: lineColor);
+    _ticksText = config.ticksText.ensure(
+      themeTextColor: white,
+      themeBackgroundColor: lineColor,
+    );
     return _ticksText!;
   }
 
   PointConfig get drawPointConfig {
     if (_drawPoint != null) return _drawPoint!;
-    _drawPoint = config.drawPoint.of(borderColor: lineColor);
+    _drawPoint = config.drawPoint.ensure(
+      themeColor: white,
+      themeBorderColor: lineColor,
+    );
     return _drawPoint!;
   }
 
@@ -125,7 +131,7 @@ mixin DrawObjectMixin on DrawStateObject {
     }
   }
 
-  /// 绘制连接线
+  /// 绘制选择圆和选择绘制线
   void drawConnectingLine(IDrawContext context, Canvas canvas, Size size) {
     Offset? last;
     for (final point in points) {
@@ -136,11 +142,9 @@ mixin DrawObjectMixin on DrawStateObject {
           final linePath = Path()
             ..moveTo(offset.dx, offset.dy)
             ..lineTo(last.dx, last.dy);
-          canvas.drawLineType(
-            crosshairConfig.type,
+          canvas.drawLineByConfig(
             linePath,
-            crosshairConfig.linePaint,
-            dashes: crosshairConfig.dashes,
+            crosshairConfig,
           );
         }
         last = offset;
@@ -164,22 +168,18 @@ mixin DrawObjectMixin on DrawStateObject {
       ..lineTo(mainRect.right, pointer.dy)
       ..moveTo(pointer.dx, mainRect.top)
       ..lineTo(pointer.dx, mainRect.bottom);
-    canvas.drawLineType(
-      crosshairConfig.type,
+    canvas.drawLineByConfig(
       path,
-      crosshairConfig.linePaint,
-      dashes: crosshairConfig.dashes,
+      crosshairConfig,
     );
 
     if (last != null && last.isFinite) {
       final linePath = Path()
         ..moveTo(pointer.dx, pointer.dy)
         ..lineTo(last.dx, last.dy);
-      canvas.drawLineType(
-        crosshairConfig.type,
+      canvas.drawLineByConfig(
         linePath,
-        crosshairConfig.linePaint,
-        dashes: crosshairConfig.dashes,
+        crosshairConfig,
       );
     }
     canvas.drawCirclePoint(pointer, crosspointConfig);

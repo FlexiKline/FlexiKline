@@ -104,9 +104,9 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
     }
     final position = event.localPosition;
     if (controller.isDrawVisibility && drawState.isOngoing) {
-      // TODO: 优化Drawing的处理
+      // 优化Drawing的处理
     } else if (controller.isCrossing) {
-      // TODO: 优化Crossing的处理
+      // 优化Crossing的处理
     } else if (gestureConfig.enableZoom && _zoomData == null && controller.chartZoomSlideBarRect.include(position)) {
       logd('onPointerDown zoom > position:$position');
       _zoomData = GestureData.zoom(position);

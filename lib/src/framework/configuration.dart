@@ -31,31 +31,31 @@ typedef FlexiKlineThemeGetter<T extends IFlexiKlineTheme> = T Function();
 /// FlexiKline 主题接口。
 abstract interface class IFlexiKlineTheme {
   // ─── 涨跌色 ───────────────────────────────────────────
-  Color get longColor;            // 蜡烛上涨色、Tooltip 涨值文本色
-  Color get shortColor;           // 蜡烛下跌色、Tooltip 跌值文本色
+  Color get longColor; // 蜡烛上涨色、Tooltip 涨值文本色
+  Color get shortColor; // 蜡烛下跌色、Tooltip 跌值文本色
 
   // ─── 背景色 ───────────────────────────────────────────
-  Color get chartBg;              // K 线组件默认背景色，支持独立主题
-  Color get tooltipBg;            // Tooltip 背景色、Loading 背景色
-  Color get crossTextBg;          // 十字线刻度文本背景色
-  Color get latestPriceBg;        // 最新价标签背景色（最新蜡烛在视口内时）
-  Color get lastPriceBg;          // 最后价标签背景色（最新蜡烛滚出视口时）
-  Color get countDownBg;          // 倒计时标签背景色
-  Color get dragBg;               // 拖拽指标高度时的区域背景色
+  Color get chartBg; // K 线组件默认背景色，支持独立主题
+  Color get tooltipBg; // Tooltip 背景色、Loading 背景色
+  Color get crossTextBg; // 十字线刻度文本背景色
+  Color get latestPriceBg; // 最新价标签背景色（最新蜡烛在视口内时）
+  Color get lastPriceBg; // 最后价标签背景色（最新蜡烛滚出视口时）
+  Color get countDownBg; // 倒计时标签背景色
+  Color get dragBg; // 拖拽指标高度时的区域背景色
 
   // ─── 线色 ─────────────────────────────────────────────
-  Color get gridLineColor;        // 网格线颜色
-  Color get crosshairColor;       // 十字线颜色
-  Color get drawToolColor;        // 绘制工具（趋势线、标尺等）颜色
-  Color get markLineColor;        // 标记线（最高、最低、最新价、最后价、倒计时边框、拖拽线）颜色
-  Color get lineChartColor;       // 折线图默认颜色
+  Color get gridLineColor; // 网格线颜色
+  Color get crosshairColor; // 十字线颜色
+  Color get drawToolColor; // 绘制工具（趋势线、标尺等）颜色
+  Color get markLineColor; // 标记线（最高、最低、最新价、最后价、倒计时边框、拖拽线）颜色
+  Color get lineChartColor; // 折线图默认颜色
 
   // ─── 文本色 ───────────────────────────────────────────
-  Color get textColor;            // 主文本色、Loading 文本色
-  Color get ticksTextColor;       // Y 轴/时间轴刻度文本色
-  Color get lastPriceColor;       // 最后价标签文本色
-  Color get crossTextColor;       // 十字线刻度文本色
-  Color get tooltipTextColor;     // Tooltip 文本色
+  Color get textColor; // 主文本色、Loading 文本色
+  Color get ticksTextColor; // Y 轴/时间轴刻度文本色
+  Color get lastPriceColor; // 最后价标签文本色
+  Color get crossTextColor; // 十字线刻度文本色
+  Color get tooltipTextColor; // Tooltip 文本色
 }
 
 abstract interface class IStorage {
@@ -209,19 +209,5 @@ extension IConfigurationExt on IConfiguration {
   void saveDrawToolbarPosition(Offset position) {
     final json = const OffsetConverter().toJson(position);
     setConfig(drawToolbarPositionKey, json);
-  }
-}
-
-extension TextStyleExt on TextStyle {
-  TextStyle of({Color? color}) {
-    if (color == this.color) return this;
-    return copyWith(color: color);
-  }
-}
-
-extension BorderSideExt on BorderSide {
-  BorderSide of({Color? color}) {
-    if (color == this.color) return this;
-    return copyWith(color: color);
   }
 }

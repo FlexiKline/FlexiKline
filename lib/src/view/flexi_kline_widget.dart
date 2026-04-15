@@ -295,17 +295,18 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
     return ValueListenableBuilder(
       valueListenable: controller.loadingStateListener,
       builder: (context, loadingState, child) {
+        final loadingConfig = controller.settingConfig.loading;
         return Offstage(
           offstage: !(loadingState.showLoading && controller.settingConfig.autoLoadMoreData),
           child: Center(
             key: const ValueKey('loadingView'),
             child: SizedBox.square(
-              dimension: controller.settingConfig.loading.size,
+              dimension: loadingConfig.size,
               child: CircularProgressIndicator(
-                strokeWidth: controller.settingConfig.loading.strokeWidth,
-                backgroundColor: controller.settingConfig.loading.background,
+                strokeWidth: loadingConfig.strokeWidth,
+                backgroundColor: loadingConfig.backgroundColor ?? controller.theme.tooltipBg,
                 valueColor: AlwaysStoppedAnimation<Color>(
-                  controller.settingConfig.loading.valueColor,
+                  loadingConfig.valueColor ?? controller.theme.textColor,
                 ),
               ),
             ),
@@ -460,13 +461,26 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
               key: const ValueKey('KlineRawMagnifier'),
               decoration: MagnifierDecoration(
                 opacity: config.decorationOpacity,
-                shadows: config.decorationShadows,
+                shadows: config.decorationShadows ??
+                    [
+                      BoxShadow(
+                        offset: const Offset(0.1, 0.1),
+                        blurRadius: 2,
+                        spreadRadius: 3,
+                        color: controller.theme.gridLineColor.withAlpha(0.1.alpha),
+                      ),
+                    ],
                 shape: widget.magnifierDecorationShapeBuilder?.call(
                       context,
                       config.shapeSide,
                     ) ??
                     CircleBorder(
-                      side: config.shapeSide,
+                      side: config.shapeSide == BorderSide.none
+                          ? BorderSide(
+                              color: controller.theme.gridLineColor,
+                              width: 1,
+                            )
+                          : config.shapeSide,
                     ),
               ),
               size: config.size,

@@ -16,6 +16,7 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flutter/painting.dart';
 
 import '../../extension/render/types.dart';
+import '../../extension/style_ext.dart';
 import '../../framework/serializers.dart';
 import '../paint_config/paint_config.dart';
 
@@ -43,11 +44,16 @@ class LineConfig {
   /// 画笔
   final PaintConfig paint;
 
-  LineConfig of({Color? paintColor}) {
-    if (paintColor == null || paintColor == paint.color) return this;
-    return copyWith(paint: paint.of(color: paintColor));
+  /// 确保画笔颜色不为空
+  LineConfig ensure(Color themeColor) {
+    if (paint.color.isValid) return this;
+    return copyWith(paint: paint.ensure(themeColor));
   }
 
+  /// 获取画笔(考虑颜色)
+  Paint getLinePaint(Color themeColor) => paint.getPaint(themeColor);
+
+  /// 获取画笔(使用 paint color 或 transparent)
   Paint get linePaint => paint.paint;
 
   factory LineConfig.fromJson(Map<String, dynamic> json) => _$LineConfigFromJson(json);

@@ -52,25 +52,7 @@ class MarkConfig {
   /// 用于扩大点击测试的区域, 如[MarkConfig]无需点击事件, 则不用配置.
   final double hitTestMargin;
 
-  Color get lineColor => line.paint.color;
-
   double get lineLength => line.length ?? 0;
-
-  MarkConfig of({
-    Color? paintColor,
-    Color? textColor,
-    Color? background,
-    Color? borderColor,
-  }) {
-    return copyWith(
-      line: line.of(paintColor: paintColor),
-      text: text.of(
-        textColor: textColor,
-        background: background,
-        borderColor: borderColor,
-      ),
-    );
-  }
 
   factory MarkConfig.fromJson(Map<String, dynamic> json) => _$MarkConfigFromJson(json);
 

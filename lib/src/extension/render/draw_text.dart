@@ -18,6 +18,7 @@ import 'package:flutter/painting.dart';
 
 import '../../config/text_area_config/text_area_config.dart';
 import '../geometry_ext.dart';
+import '../style_ext.dart';
 import 'types.dart';
 
 extension FlexiDrawTextExt on Canvas {
@@ -194,18 +195,30 @@ extension FlexiDrawTextExt on Canvas {
     /// 可绘制区域大小
     Rect? drawableRect,
 
-    /// 文本,样式设置. (注: text与textSpan必须设置一个, 否则不绘制)
+    /// 文本,样式设置。(注: text与textSpan必须设置一个, 否则不绘制)
     String? text,
     InlineSpan? textSpan,
 
-    /// 文本区域配置
+    /// 文本区域配置。
     required TextAreaConfig textConfig,
 
-    /// 文本内容的背景区域设置
-    Color? backgroundColor,
+    /// 文本内容的边框圆角设置（优先级高于 [TextAreaConfig.borderRadius]）。
     BorderRadius? borderRadius,
+
+    /// 文本内容的边框（优先级高于 config 与主题边框色兜底）。
     BorderSide? borderSide,
+
+    /// 文本内容的内边距设置（优先级高于 [TextAreaConfig.padding]）。
     EdgeInsets? padding,
+
+    /// 文本颜色兜底：仅当 [TextAreaConfig.style] 未设置 color 时使用。
+    Color? themeTextColor,
+
+    /// 背景色兜底：仅当 [TextAreaConfig.backgroundColor] 未设置时使用。
+    Color? themeBackgroundColor,
+
+    /// 边框颜色兜底：在无显式 [borderSide] 且无 [TextAreaConfig.border] 时用于构造 [BorderSide]。
+    Color? themeBorderColor,
   }) {
     return drawText(
       offset: offset,
@@ -214,7 +227,7 @@ extension FlexiDrawTextExt on Canvas {
       text: text,
       textSpan: textSpan,
       // 文本
-      style: textConfig.style,
+      style: textConfig.style.ensure(themeTextColor),
       strutStyle: textConfig.strutStyle,
       textAlign: textConfig.textAlign,
       maxLines: textConfig.maxLines,
@@ -222,9 +235,9 @@ extension FlexiDrawTextExt on Canvas {
       minWidth: textConfig.minWidth ?? 0.0,
       maxWidth: textConfig.maxWidth ?? double.infinity,
       // 文本区域
-      backgroundColor: backgroundColor ?? textConfig.background,
+      backgroundColor: textConfig.backgroundColor.or(themeBackgroundColor),
       borderRadius: borderRadius ?? textConfig.borderRadius,
-      borderSide: borderSide ?? textConfig.border,
+      borderSide: (borderSide ?? textConfig.border).ensure(themeBorderColor),
       padding: padding ?? textConfig.padding,
     );
   }

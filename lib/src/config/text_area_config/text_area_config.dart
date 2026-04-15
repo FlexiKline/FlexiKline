@@ -17,7 +17,6 @@ import 'package:flutter/painting.dart';
 
 import '../../constant.dart';
 import '../../extension/export.dart';
-import '../../framework/configuration.dart';
 import '../../framework/serializers.dart';
 
 part 'text_area_config.g.dart';
@@ -29,7 +28,6 @@ class TextAreaConfig {
     /// 文本样式
     this.style = const TextStyle(
       fontSize: defaultTextSize,
-      // color: Color(0xFF000000),
       overflow: TextOverflow.ellipsis,
       height: defaultTextHeight,
     ),
@@ -41,7 +39,7 @@ class TextAreaConfig {
     this.maxLines,
 
     /// Area区域设置
-    this.background,
+    this.backgroundColor,
     this.padding,
     this.border,
     this.borderRadius,
@@ -57,7 +55,7 @@ class TextAreaConfig {
   final int? maxLines;
 
   /// Area区域设置
-  final Color? background;
+  final Color? backgroundColor;
   final EdgeInsets? padding;
   final BorderSide? border;
   final BorderRadius? borderRadius;
@@ -70,18 +68,22 @@ class TextAreaConfig {
 
   double get textSize => style.fontSize ?? defaultTextSize;
 
-  TextAreaConfig of({
-    Color? textColor,
-    Color? background,
-    Color? borderColor,
+  /// 确保文本颜色、背景颜色和边框颜色兜底
+  TextAreaConfig ensure({
+    Color? themeTextColor,
+    Color? themeBackgroundColor,
+    Color? themeBorderColor,
   }) {
-    if (style.color == textColor && this.background == background && border?.color == borderColor) {
+    final ensureTextColor = style.color.or(themeTextColor);
+    final ensureBgColor = backgroundColor.or(themeBackgroundColor);
+    final ensureBorderColor = border?.color.or(themeBorderColor);
+    if (ensureTextColor == style.color && ensureBgColor == backgroundColor && ensureBorderColor == border?.color) {
       return this;
     }
     return copyWith(
-      style: style.of(color: textColor ),
-      background: background ?? this.background,
-      border: border?.of(color: borderColor),
+      style: style.copyWith(color: ensureTextColor),
+      backgroundColor: ensureBgColor,
+      border: border?.copyWith(color: ensureBorderColor),
     );
   }
 

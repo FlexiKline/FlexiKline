@@ -15,6 +15,7 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flutter/painting.dart';
 
+import '../../extension/style_ext.dart';
 import '../../framework/serializers.dart';
 
 part 'loading_config.g.dart';
@@ -25,21 +26,23 @@ class LoadingConfig {
   const LoadingConfig({
     this.size = 24,
     this.strokeWidth = 4,
-    this.background = const Color(0xFFECECEC),
-    this.valueColor = const Color(0xFF000000),
+    this.backgroundColor,
+    this.valueColor,
   });
   final double size;
   final double strokeWidth;
-  final Color background;
-  final Color valueColor;
+  final Color? backgroundColor;
+  final Color? valueColor;
 
-  LoadingConfig of({Color? valueColor, Color? background}) {
-    if (valueColor == this.valueColor && background == this.background) {
+  /// 确保值颜色和背景颜色不为空
+  LoadingConfig ensure({Color? themeValueColor, Color? themeBackgroundColor}) {
+    if ((valueColor.isValid || themeValueColor.isInvalid) &&
+        (backgroundColor.isValid || themeBackgroundColor.isInvalid)) {
       return this;
     }
     return copyWith(
-      valueColor: valueColor ?? this.valueColor,
-      background: background ?? this.background,
+      valueColor: valueColor.or(themeValueColor),
+      backgroundColor: backgroundColor.or(themeBackgroundColor),
     );
   }
 

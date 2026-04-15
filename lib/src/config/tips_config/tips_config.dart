@@ -16,7 +16,7 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flutter/painting.dart';
 
 import '../../constant.dart';
-import '../../framework/configuration.dart';
+import '../../extension/style_ext.dart';
 import '../../framework/serializers.dart';
 
 part 'tips_config.g.dart';
@@ -32,7 +32,6 @@ class TipsConfig {
     this.isShow = true,
     this.style = const TextStyle(
       fontSize: defaultTextSize,
-      color: Color(0xFF000000),
       overflow: TextOverflow.ellipsis,
       height: defaultTipsTextHeight,
     ),
@@ -42,7 +41,7 @@ class TipsConfig {
     this.label = '',
     this.precision,
     this.isShow = true,
-    Color color = const Color(0xFF000000),
+    Color? color,
     double fontSize = 10,
     TextOverflow overflow = TextOverflow.ellipsis,
     double height = defaultTipsTextHeight,
@@ -76,17 +75,19 @@ class TipsConfig {
   // 获取展示精度; 如果precision未指定, 使用def值.
   int getP(int def) => precision ?? def;
 
-  // @Deprecated('废弃')
-  //Color get color => style.color ?? const Color(0xFF000000);
-
   double get textHeight => textSize * (style.height ?? defaultTextHeight);
 
   double get textSize => style.fontSize ?? defaultTextSize;
 
-  TipsConfig of({Color? textColor}) {
-    if (style.color == textColor) return this;
+  /// 确保文本颜色不为空
+  TipsConfig ensure(Color? themeTextColor) {
+    if (style.color.isValid || themeTextColor.isInvalid) {
+      return this;
+    }
     return copyWith(
-      style: style.of(color: textColor),
+      style: style.copyWith(
+        color: style.color.or(themeTextColor),
+      ),
     );
   }
 

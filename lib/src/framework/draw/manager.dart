@@ -29,6 +29,8 @@ final class OverlayDrawObjectManager with FlexiLog {
 
   final IConfiguration configuration;
 
+  IFlexiKlineTheme get theme => configuration.theme;
+
   @override
   String get logTag => 'OverlayDrawObjectManager';
 
@@ -144,7 +146,7 @@ final class OverlayDrawObjectManager with FlexiLog {
       Overlay.fromType(
         key: _instId,
         type: type,
-        line: drawConfig.drawLine,
+        line: drawConfig.drawLine.ensure(theme.drawToolColor),
       ),
       drawConfig,
     );

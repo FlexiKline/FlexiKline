@@ -85,10 +85,7 @@ class TimePaintObject<T extends TimeIndicator> extends TimeBasePaintObject<T> {
         final offset = Offset(dx, chartRect.top);
 
         // 绘制时间刻度.
-        final timeTick = indicator.timeTick.of(
-          textColor: theme.ticksTextColor,
-        );
-        final dyCenterOffset = (height - timeTick.areaHeight) / 2;
+        final dyCenterOffset = (height - indicator.timeTick.areaHeight) / 2;
         canvas.drawTextArea(
           offset: Offset(
             offset.dx,
@@ -96,7 +93,8 @@ class TimePaintObject<T extends TimeIndicator> extends TimeBasePaintObject<T> {
           ),
           drawDirection: DrawDirection.center,
           text: formatDateTime(model, interval),
-          textConfig: timeTick,
+          textConfig: indicator.timeTick,
+          themeTextColor: theme.ticksTextColor,
         );
       }
     }
@@ -118,9 +116,7 @@ class TimePaintObject<T extends TimeIndicator> extends TimeBasePaintObject<T> {
     final time = formatDateTime(model, interval);
     // final time = formatyyMMddHHMMss(model.dateTime);
 
-    final ticksText = crossConfig.ticksText;
-
-    final dyCenterOffset = (height - ticksText.areaHeight) / 2;
+    final dyCenterOffset = (height - crossConfig.ticksText.areaHeight) / 2;
     canvas.drawTextArea(
       offset: Offset(
         offset.dx,
@@ -128,7 +124,9 @@ class TimePaintObject<T extends TimeIndicator> extends TimeBasePaintObject<T> {
       ),
       drawDirection: DrawDirection.center,
       text: time,
-      textConfig: ticksText,
+      textConfig: crossConfig.ticksText,
+      themeTextColor: theme.crossTextColor,
+      themeBackgroundColor: theme.crossTextBg,
     );
   }
 

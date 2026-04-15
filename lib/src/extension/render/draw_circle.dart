@@ -22,9 +22,9 @@ extension FlexiDrawCircle on Canvas {
     ///绘制启始坐标位置
     required Offset offset,
     required double radius,
-    required Color color,
     required double strokeWidth,
     double? borderWidth,
+    Color? color,
     Color? borderColor,
     Paint? borderPaint,
   }) {
@@ -41,28 +41,31 @@ extension FlexiDrawCircle on Canvas {
           ..style = PaintingStyle.stroke,
       );
     }
-    drawCircle(
-      offset,
-      radius,
-      Paint()
-        ..color = color
-        ..strokeWidth = strokeWidth
-        ..style = PaintingStyle.fill,
-    );
+    if (color != null && color.a != 0) {
+      drawCircle(
+        offset,
+        radius,
+        Paint()
+          ..color = color
+          ..strokeWidth = strokeWidth
+          ..style = PaintingStyle.fill,
+      );
+    }
   }
 
   void drawCirclePoint(
     Offset offset,
     PointConfig point, {
-    Color? color,
+    Color? themeColor,
+    Color? themeBorderColor,
   }) {
     drawBorderCircle(
       offset: offset,
       radius: point.radius,
       strokeWidth: point.width,
-      color: color ?? point.color,
+      color: point.color ?? themeColor,
       borderWidth: point.borderWidth,
-      borderColor: point.borderColor,
+      borderColor: point.borderColor ?? themeBorderColor,
     );
   }
 }

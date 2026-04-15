@@ -7,7 +7,7 @@ part of 'paint_config.dart';
 // **************************************************************************
 
 abstract class _$PaintConfigCWProxy {
-  PaintConfig color(Color color);
+  PaintConfig color(Color? color);
 
   PaintConfig strokeWidth(double strokeWidth);
 
@@ -24,7 +24,7 @@ abstract class _$PaintConfigCWProxy {
   /// PaintConfig(...).copyWith(id: 12, name: "My name")
   /// ````
   PaintConfig call({
-    Color color,
+    Color? color,
     double strokeWidth,
     PaintingStyle style,
     BlendMode blendMode,
@@ -39,7 +39,7 @@ class _$PaintConfigCWProxyImpl implements _$PaintConfigCWProxy {
   final PaintConfig _value;
 
   @override
-  PaintConfig color(Color color) => this(color: color);
+  PaintConfig color(Color? color) => this(color: color);
 
   @override
   PaintConfig strokeWidth(double strokeWidth) => this(strokeWidth: strokeWidth);
@@ -72,7 +72,7 @@ class _$PaintConfigCWProxyImpl implements _$PaintConfigCWProxy {
       color: color == const $CopyWithPlaceholder()
           ? _value.color
           // ignore: cast_nullable_to_non_nullable
-          : color as Color,
+          : color as Color?,
       strokeWidth: strokeWidth == const $CopyWithPlaceholder()
           ? _value.strokeWidth
           // ignore: cast_nullable_to_non_nullable
@@ -104,9 +104,8 @@ extension $PaintConfigCopyWith on PaintConfig {
 // **************************************************************************
 
 PaintConfig _$PaintConfigFromJson(Map<String, dynamic> json) => PaintConfig(
-      color: json['color'] == null
-          ? const Color(0x00000000)
-          : const ColorConverter().fromJson(json['color'] as String),
+      color: _$JsonConverterFromJson<String, Color>(
+          json['color'], const ColorConverter().fromJson),
       strokeWidth: (json['strokeWidth'] as num?)?.toDouble() ?? 0,
       style: json['style'] == null
           ? PaintingStyle.stroke
@@ -119,9 +118,24 @@ PaintConfig _$PaintConfigFromJson(Map<String, dynamic> json) => PaintConfig(
 
 Map<String, dynamic> _$PaintConfigToJson(PaintConfig instance) =>
     <String, dynamic>{
-      'color': const ColorConverter().toJson(instance.color),
+      if (_$JsonConverterToJson<String, Color>(
+              instance.color, const ColorConverter().toJson)
+          case final value?)
+        'color': value,
       'strokeWidth': instance.strokeWidth,
       'style': const PaintingStyleConverter().toJson(instance.style),
       'blendMode': const BlendModeConverter().toJson(instance.blendMode),
       'isAntiAlias': instance.isAntiAlias,
     };
+
+Value? _$JsonConverterFromJson<Json, Value>(
+  Object? json,
+  Value? Function(Json json) fromJson,
+) =>
+    json == null ? null : fromJson(json as Json);
+
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) =>
+    value == null ? null : toJson(value);

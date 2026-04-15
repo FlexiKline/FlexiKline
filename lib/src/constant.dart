@@ -20,6 +20,12 @@ import 'package:flutter/painting.dart';
 import 'model/time_interval.dart';
 import 'types.dart';
 
+/// 透明色
+const Color transparent = Color(0x00000000);
+
+/// 白色
+const Color white = Color(0xFFFFFFFF);
+
 /// double类型的计算精度误差
 const double precisionError = 0.000001;
 

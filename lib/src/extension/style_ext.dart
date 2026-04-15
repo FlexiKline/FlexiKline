@@ -23,4 +23,38 @@ extension FlexiKlineTextStyleExt on TextStyle {
     }
     return null;
   }
+
+  /// 确保文本颜色不为空
+  TextStyle ensure(Color? themeTextColor) {
+    if (color.isValid || themeTextColor.isInvalid) return this;
+    return copyWith(color: themeTextColor);
+  }
+}
+
+extension FlexiKlineColorExt on Color? {
+  /// 是否有效
+  bool get isValid => this != null && this!.a != 0;
+
+  /// 是否无效
+  bool get isInvalid => !isValid;
+
+  /// 确保颜色不为空
+  Color ensure(Color color) {
+    if (isValid) return this!;
+    return color;
+  }
+
+  /// 如果颜色为空, 返回默认颜色
+  Color? or(Color? color) {
+    if (isValid) return this;
+    if (color.isValid) return color;
+    return this;
+  }
+}
+
+extension FlexiKlineBorderSideExt on BorderSide? {
+  BorderSide? ensure(Color? borderColor) {
+    if (this == null || this!.color.isValid || borderColor.isInvalid) return this;
+    return this!.copyWith(color: borderColor);
+  }
 }

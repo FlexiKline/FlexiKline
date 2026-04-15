@@ -15,6 +15,8 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flutter/painting.dart';
 
+import '../../constant.dart';
+import '../../extension/export.dart';
 import '../../framework/serializers.dart';
 
 part 'paint_config.g.dart';
@@ -23,26 +25,37 @@ part 'paint_config.g.dart';
 @FlexiConfigSerializable
 class PaintConfig {
   const PaintConfig({
-    this.color = const Color(0x00000000),
+    this.color,
     this.strokeWidth = 0,
     this.style = PaintingStyle.stroke,
     this.blendMode = BlendMode.srcOver,
     this.isAntiAlias = true,
   });
 
-  final Color color;
+  /// 画笔颜色；null 表示未设置（走主题）。
+  final Color? color;
   final double strokeWidth;
   final PaintingStyle style;
   final BlendMode blendMode;
   final bool isAntiAlias;
 
-  PaintConfig of({Color? color}) {
-    if (color == null || this.color == color) return this;
-    return copyWith(color: color);
+  /// 确保画笔颜色不为空
+  PaintConfig ensure(Color themeColor) {
+    if (color.isValid) return this;
+    return copyWith(color: themeColor);
   }
 
+  /// 获取画笔(考虑颜色)
+  Paint getPaint(Color themeColor) => Paint()
+    ..color = color.ensure(themeColor)
+    ..style = style
+    ..blendMode = blendMode
+    ..isAntiAlias = isAntiAlias
+    ..strokeWidth = strokeWidth;
+
+  /// 获取画笔(使用 paint color 或 transparent)
   Paint get paint => Paint()
-    ..color = color
+    ..color = color ?? transparent
     ..style = style
     ..blendMode = blendMode
     ..isAntiAlias = isAntiAlias
