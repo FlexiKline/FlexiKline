@@ -1,3 +1,17 @@
+## 2.1.0
+* Simplify configuration system: config color fields are now nullable, theme colors are injected at paint time via .ensure() pattern (Breaking Changes).
+* Decouple theme colors from config objects: replace hardcoded color defaults with lazy injection mechanism (Breaking Changes).
+* Redesign IFlexiKlineTheme: remove scale/pixel/setDp/setSp methods and BaseFlexiKlineTheme class; rename color properties for clarity (long→longColor, short→shortColor, gridLine→gridLineColor, etc.) (Breaking Changes).
+* Rename timeBar parameter to interval for consistency across the codebase (Breaking Changes).
+* Simplify time interval interface: introduce ITimeInterval/FlexiTimeInterval to replace TimeBar enum (Breaking Changes).
+* Restructure logging system: introduce layered IFlexiLogger/FlexiLog architecture with cleaner separation of concerns (Breaking Changes).
+* Update kline data structures: add KlineSpec class and KlineLoadingState enum to replace CandleReq (Breaking Changes).
+* Add Color? extension methods (isValid, ensure, or) in style_ext.dart for nullable color handling.
+* Add themeColor params to drawing primitives (drawLineByConfig, drawCirclePoint, drawTextArea).
+* Rename TextAreaConfig.background to backgroundColor for consistency.
+* Make default configs const where possible for better performance.
+* Clean up configuration framework and improve serialization handling.
+
 ## 2.0.0
 * Replace BagNum with FlexiNum for numeric representation (Breaking Changes).
 * Introduce ICandleModel interface and FlexiCandleModel; unify candle model to support custom models (Breaking Changes).

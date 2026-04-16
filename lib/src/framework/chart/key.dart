@@ -39,7 +39,7 @@ sealed class IIndicatorKey {
 
   @override
   String toString() {
-    return '$id:$label';
+    return '$runtimeType:$id:$label';
   }
 }
 

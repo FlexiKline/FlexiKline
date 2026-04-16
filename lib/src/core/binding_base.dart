@@ -78,8 +78,8 @@ abstract class KlineBindingBase with FlexiLog implements ISetting, IPaintContext
   @mustCallSuper
   void onThemeChanged([covariant IFlexiKlineTheme? oldTheme]) {
     logd('onThemeChanged base');
-    // 过渡方案: 跳过 FlexiKlineConfig 重建(L265), 保留 indicator rebuild(L269-303)
-    // v3.1 时将完全移除此调用, 仅保留 markRepaint
+    // 先保存配置, 再重新获取配置. 后续优化掉.
+    storeFlexiKlineConfig();
     _paintObjectManager.refreshFlexiKlineConfig(this, refreshConfig: false);
   }
 

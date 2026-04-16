@@ -233,7 +233,9 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
             Positioned.fromRect(
               key: const ValueKey('MainBackground'),
               rect: mainRect,
-              child: widget.mainBackgroundView!,
+              child: IgnorePointer(
+                child: widget.mainBackgroundView!,
+              ),
             ),
           RepaintBoundary(
             key: const ValueKey('GridAndChartLayer'),

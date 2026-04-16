@@ -26,7 +26,7 @@ FlexiKline 是一个高度灵活且可定制的 Flutter 金融 K 线图表框架
 
 ```yaml
 dependencies:
-  flexi_kline: ^2.0.0
+  flexi_kline: ^2.1.0
 ```
 
 然后运行：
@@ -95,11 +95,11 @@ FlexiKlineWidget(
 ### 4. 更新数据
 
 ```dart
-/// 切换数据源（如切换 TimeBar 时）
-controller.switchKlineData(request);
+/// 切换数据源（如切换时间周期时）
+controller.switchKlineData(spec);
 
-/// 更新指定请求的数据
-controller.updateKlineData(request, list);
+/// 更新指定规格的数据
+controller.updateKlineData(spec, list);
 ```
 
 ## 自定义指标
