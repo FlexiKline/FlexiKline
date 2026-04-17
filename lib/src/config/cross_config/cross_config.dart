@@ -50,7 +50,7 @@ class CrossConfig {
         height: defaultTipsTextHeight,
       ),
       padding: EdgeInsets.all(2),
-      border: BorderSide.none,
+      border: defaultBorderSide,
       borderRadius: BorderRadius.all(
         Radius.circular(2),
       ),

@@ -358,6 +358,7 @@ CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
                       height: defaultTextHeight,
                       textBaseline: TextBaseline.alphabetic),
                   padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                  border: defaultBorderSide,
                   borderRadius: BorderRadius.all(Radius.circular(10))))
           : MarkConfig.fromJson(json['last'] as Map<String, dynamic>),
       latest: json['latest'] == null
@@ -375,7 +376,7 @@ CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
                       height: defaultTextHeight),
                   textAlign: TextAlign.center,
                   padding: EdgeInsets.all(2),
-                  border: BorderSide(width: 0.5),
+                  border: BorderSide(color: transparent, width: 0.5),
                   borderRadius: BorderRadius.all(Radius.circular(2))))
           : MarkConfig.fromJson(json['latest'] as Map<String, dynamic>),
       showLatestPoint: json['showLatestPoint'] as bool? ?? true,

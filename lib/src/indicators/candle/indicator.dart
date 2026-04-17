@@ -83,6 +83,7 @@ class CandleIndicator extends CandleBaseIndicator {
           horizontal: 4,
           vertical: 2,
         ),
+        border: defaultBorderSide,
         borderRadius: BorderRadius.all(Radius.circular(10)),
       ),
     ),
@@ -107,7 +108,10 @@ class CandleIndicator extends CandleBaseIndicator {
         ),
         textAlign: TextAlign.center,
         padding: EdgeInsets.all(2),
-        border: BorderSide(width: 0.5),
+        border: BorderSide(
+          color: transparent,
+          width: 0.5,
+        ),
         borderRadius: BorderRadius.all(Radius.circular(2)),
       ),
     ),
@@ -650,7 +654,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
           backgroundColor: theme.countDownBg,
           borderRadius: borderRadius,
           borderSide: BorderSide(
-            color: useCandleColor ? const Color(0x00000000) : theme.markLineColor,
+            color: useCandleColor ? transparent : theme.markLineColor,
             width: countDown.border?.width ?? 0.5,
           ),
           maxLines: countDown.maxLines ?? 1,

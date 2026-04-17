@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import '../constant.dart';
 import '../framework/export.dart';
 import '../indicators/export.dart';
 import 'cross_config/cross_config.dart';
@@ -40,16 +41,17 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   @override
   IndicatorBuilder<CandleIndicator> get candleIndicatorBuilder {
-    return (json) => genCandleIndicator(
-          jsonToInstance(json, CandleIndicator.fromJson),
-        );
+    return (json) =>
+        jsonToInstance(json, CandleIndicator.fromJson) ??
+        CandleIndicator(intervalChartTypes: {
+          interval1s: FlexiChartType.lineNormal,
+          interval1m: FlexiChartType.lineNormal,
+        });
   }
 
   @override
   IndicatorBuilder<TimeIndicator> get timeIndicatorBuilder {
-    return (json) => genTimeIndicator(
-          jsonToInstance(json, TimeIndicator.fromJson),
-        );
+    return (json) => jsonToInstance(json, TimeIndicator.fromJson) ?? TimeIndicator();
   }
 
   MainPaintObjectIndicator genMainIndicator(MainPaintObjectIndicator<Indicator>? mainIndicator);
@@ -85,13 +87,5 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   DrawConfig genDrawConfig([DrawConfig? draw]) {
     return draw ?? const DrawConfig();
-  }
-
-  CandleIndicator genCandleIndicator(CandleIndicator? instance) {
-    return instance ?? CandleIndicator();
-  }
-
-  TimeIndicator genTimeIndicator(TimeIndicator? instance) {
-    return instance ?? TimeIndicator();
   }
 }

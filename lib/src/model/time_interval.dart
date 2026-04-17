@@ -26,6 +26,26 @@ extension ITimeIntervalExt on ITimeInterval {
   bool isSameAs(ITimeInterval other) {
     return milliseconds == other.milliseconds;
   }
+
+  /// 调试标签
+  ///
+  /// 采用 K 线行业惯例的时间单位缩写：
+  /// `1s` / `1m`（分钟）/ `1H` / `1D` / `1W` / `1M`（月）/ `1Y`。
+  /// 其中分钟用小写 `m` 与月份大写 `M` 区分，避免歧义。
+  String get debugLabel {
+    final suffix = switch (unit) {
+      TimeUnit.year => 'Y',
+      TimeUnit.month => 'M',
+      TimeUnit.week => 'W',
+      TimeUnit.day => 'D',
+      TimeUnit.hour => 'H',
+      TimeUnit.minute => 'm',
+      TimeUnit.second => 's',
+      TimeUnit.millisecond => 'ms',
+      TimeUnit.microsecond => 'us',
+    };
+    return '$multiplier$suffix';
+  }
 }
 
 /// 默认时间周期实现

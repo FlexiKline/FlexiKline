@@ -77,6 +77,18 @@ const double defaultTipsTextHeight = 1.2;
 // 默认Tips文本区域的Padding: 左边缩进8个单位
 const EdgeInsets defaultTipsPadding = EdgeInsets.only(left: 8);
 
+/// 配置默认 BorderSide 哨兵值
+///
+/// 与 Flutter `BorderSide.none` 的区别：
+/// 后者 `color` 默认为 `0xFF000000`（黑），会被误判为"用户设置了黑色"；
+/// 这里显式使用 `transparent`，配合"颜色透明视为未设置"的配置色原则，
+/// 使渲染端能正确回退到主题色。
+const BorderSide defaultBorderSide = BorderSide(
+  color: transparent,
+  width: 0,
+  style: BorderStyle.none,
+);
+
 const invalidInterval = FlexiTimeInterval(0, TimeUnit.millisecond);
 
 /// 内置: 时间周期

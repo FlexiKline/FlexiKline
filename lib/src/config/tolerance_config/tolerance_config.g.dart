@@ -109,11 +109,11 @@ extension $ToleranceConfigCopyWith on ToleranceConfig {
 
 ToleranceConfig _$ToleranceConfigFromJson(Map<String, dynamic> json) =>
     ToleranceConfig(
-      maxDuration: (json['maxDuration'] as num?)?.toInt() ?? 2000,
-      distanceFactor: (json['distanceFactor'] as num?)?.toDouble() ?? 0.6,
+      maxDuration: (json['maxDuration'] as num?)?.toInt() ?? 3000,
+      distanceFactor: (json['distanceFactor'] as num?)?.toDouble() ?? 0.8,
       curvestr: json['curvestr'] as String? ?? 'easeOutCubic',
       panSmoothFactor: (json['panSmoothFactor'] as num?)?.toDouble() ?? 0.15,
-      convergenceRatio: (json['convergenceRatio'] as num?)?.toDouble() ?? 0.7,
+      convergenceRatio: (json['convergenceRatio'] as num?)?.toDouble() ?? 0.85,
     );
 
 Map<String, dynamic> _$ToleranceConfigToJson(ToleranceConfig instance) =>

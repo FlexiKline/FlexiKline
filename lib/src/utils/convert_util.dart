@@ -16,6 +16,8 @@ import 'package:decimal/decimal.dart';
 import 'package:flexi_formatter/flexi_formatter.dart';
 import 'package:flutter/widgets.dart';
 
+import '../constant.dart';
+
 int valueToInt(dynamic value) {
   return parseInt(value) ?? 0;
 }
@@ -317,10 +319,10 @@ String? convertTextLeadingDistribution(TextLeadingDistribution? distribution) {
 }
 
 BorderSide parseBorderSide(Map<String, dynamic>? json) {
-  if (json == null || json.isEmpty) return BorderSide.none;
+  if (json == null || json.isEmpty) return defaultBorderSide;
   final style = json['style']?.toString() ?? BorderStyle.solid.name;
   return BorderSide(
-    color: parseHexColor(json['color']) ?? const Color(0xFF000000),
+    color: parseHexColor(json['color']) ?? transparent,
     width: parseDouble(json['width']) ?? 1.0,
     style: BorderStyle.values.firstWhere(
       (e) => e.name == style,

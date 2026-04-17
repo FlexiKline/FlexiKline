@@ -159,7 +159,7 @@ CrossConfig _$CrossConfigFromJson(Map<String, dynamic> json) => CrossConfig(
                   fontWeight: FontWeight.normal,
                   height: defaultTipsTextHeight),
               padding: EdgeInsets.all(2),
-              border: BorderSide.none,
+              border: defaultBorderSide,
               borderRadius: BorderRadius.all(Radius.circular(2)),
               textAlign: TextAlign.end)
           : TextAreaConfig.fromJson(json['ticksText'] as Map<String, dynamic>),

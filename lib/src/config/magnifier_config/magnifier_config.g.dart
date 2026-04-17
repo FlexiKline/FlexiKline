@@ -161,7 +161,7 @@ MagnifierConfig _$MagnifierConfigFromJson(Map<String, dynamic> json) =>
               const BoxShadowConverter().fromJson(e as Map<String, dynamic>))
           .toList(),
       shapeSide: json['shapeSide'] == null
-          ? BorderSide.none
+          ? defaultBorderSide
           : const BorderSideConvert()
               .fromJson(json['shapeSide'] as Map<String, dynamic>),
     );

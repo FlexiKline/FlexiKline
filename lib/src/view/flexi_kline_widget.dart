@@ -17,6 +17,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../constant.dart';
 import '../extension/basic_type_ext.dart';
 import '../extension/functions_ext.dart';
 import '../extension/geometry_ext.dart';
@@ -477,12 +478,15 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
                       config.shapeSide,
                     ) ??
                     CircleBorder(
-                      side: config.shapeSide == BorderSide.none
-                          ? BorderSide(
-                              color: controller.theme.gridLineColor,
-                              width: 1,
-                            )
-                          : config.shapeSide,
+                      side: BorderSide(
+                        color: config.shapeSide.color == transparent
+                            ? controller.theme.gridLineColor
+                            : config.shapeSide.color,
+                        width: config.shapeSide.width <= 0 ? 1 : config.shapeSide.width,
+                        style: config.shapeSide.style == BorderStyle.none
+                            ? BorderStyle.solid
+                            : config.shapeSide.style,
+                      ),
                     ),
               ),
               size: config.size,
