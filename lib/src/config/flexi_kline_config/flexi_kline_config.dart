@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:ui';
+
+import '../../constant.dart';
 import '../../framework/export.dart';
 import '../cross_config/cross_config.dart';
 import '../draw_config/draw_config.dart';
@@ -41,8 +44,25 @@ class FlexiKlineConfig {
   MainPaintObjectIndicator mainIndicator;
   Set<IIndicatorKey> sub;
 
-  factory FlexiKlineConfig.fromJson(Map<String, dynamic> json) =>
-      _$FlexiKlineConfigFromJson(json);
+  factory FlexiKlineConfig.fromJson(Map<String, dynamic> json) => _$FlexiKlineConfigFromJson(json);
+
+  /// 默认配置工厂方法。
+  ///
+  /// 在无缓存配置时作为兜底方案，替代已移除的
+  /// `IConfiguration.generateFlexiKlineConfig`。
+  factory FlexiKlineConfig.defaultConfig() {
+    return FlexiKlineConfig(
+      grid: const GridConfig(),
+      setting: const SettingConfig(),
+      gesture: GestureConfig(),
+      cross: const CrossConfig(),
+      draw: const DrawConfig(),
+      mainIndicator: MainPaintObjectIndicator(
+        size: const Size(0, defaultMainIndicatorHeight),
+        padding: defaultMainIndicatorPadding,
+      ),
+    );
+  }
 
   Map<String, dynamic> toJson() {
     return _$FlexiKlineConfigToJson(this);

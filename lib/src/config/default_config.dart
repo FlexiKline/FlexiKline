@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:ui';
+
 import '../constant.dart';
 import '../framework/export.dart';
-import '../indicators/export.dart';
 import 'cross_config/cross_config.dart';
 import 'draw_config/draw_config.dart';
 import 'flexi_kline_config/flexi_kline_config.dart';
@@ -22,10 +23,7 @@ import 'gesture_config/gesture_config.dart';
 import 'grid_config/grid_config.dart';
 import 'setting_config/setting_config.dart';
 
-/// 通过[IFlexiKlineTheme]来配置FlexiKline基类.
-mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
-  String getCacheKey(String key) => '$configKey-$key';
-
+mixin FlexiKlineConfigurationMixin implements IConfiguration {
   @override
   FlexiKlineConfig generateFlexiKlineConfig([FlexiKlineConfig? origin]) {
     return FlexiKlineConfig(
@@ -39,35 +37,17 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
     );
   }
 
-  @override
-  IndicatorBuilder<CandleIndicator> get candleIndicatorBuilder {
-    return (json) =>
-        jsonToInstance(json, CandleIndicator.fromJson) ??
-        CandleIndicator(intervalChartTypes: {
-          interval1s: FlexiChartType.lineNormal,
-          interval1m: FlexiChartType.lineNormal,
-        });
+  MainPaintObjectIndicator genMainIndicator(MainPaintObjectIndicator<Indicator>? mainIndicator) {
+    return mainIndicator ??
+        MainPaintObjectIndicator(
+          size: const Size(0, defaultMainIndicatorHeight),
+          padding: defaultMainIndicatorPadding,
+        );
   }
-
-  @override
-  IndicatorBuilder<TimeIndicator> get timeIndicatorBuilder {
-    return (json) => jsonToInstance(json, TimeIndicator.fromJson) ?? TimeIndicator();
-  }
-
-  MainPaintObjectIndicator genMainIndicator(MainPaintObjectIndicator<Indicator>? mainIndicator);
 
   Set<IIndicatorKey> genSubIndicators([Set<IIndicatorKey>? sub]) {
     return sub ?? {};
   }
-
-  @override
-  Map<IIndicatorKey, IndicatorBuilder> get mainIndicatorBuilders => {};
-
-  @override
-  Map<IIndicatorKey, IndicatorBuilder> get subIndicatorBuilders => {};
-
-  @override
-  Map<IDrawType, DrawObjectBuilder> get drawObjectBuilders => {};
 
   GridConfig genGridConfig([GridConfig? grid]) {
     return grid ?? const GridConfig();
@@ -88,4 +68,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
   DrawConfig genDrawConfig([DrawConfig? draw]) {
     return draw ?? const DrawConfig();
   }
+
+  @override
+  Map<IDrawType, DrawObjectBuilder> get drawObjectBuilders => {};
 }

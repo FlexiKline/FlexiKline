@@ -21,6 +21,7 @@ import '../constant.dart';
 import '../extension/basic_type_ext.dart';
 import '../extension/functions_ext.dart';
 import '../extension/geometry_ext.dart';
+import '../framework/chart/indicator.dart';
 import '../framework/configuration.dart';
 import '../framework/logger.dart';
 import '../kline_controller.dart';
@@ -38,6 +39,10 @@ class FlexiKlineWidget extends StatefulWidget {
   FlexiKlineWidget({
     super.key,
     required this.controller,
+    required this.candle,
+    required this.time,
+    this.mainIndicators = const [],
+    this.subIndicators = const [],
     this.alignment,
     this.decoration,
     this.foregroundDecoration,
@@ -57,7 +62,46 @@ class FlexiKlineWidget extends StatefulWidget {
   })  : isTouchDevice = isTouchDevice ?? PlatformUtil.isTouch,
         autoAdaptLayout = autoAdaptLayout ?? !PlatformUtil.isMobile;
 
+  FlexiKlineWidget.indicator({
+    super.key,
+    required this.controller,
+    required IIndicatorConfig indicatorConfig,
+    this.alignment,
+    this.decoration,
+    this.foregroundDecoration,
+    this.mainSize,
+    this.mainForegroundViewBuilder,
+    this.mainBackgroundView,
+    bool? autoAdaptLayout,
+    bool? isTouchDevice,
+    this.onDoubleTap,
+    this.drawToolbar,
+    this.drawToolbarInitHeight = 50,
+    this.keepDrawToolbarFullyVisible = true,
+    this.magnifierDecorationShapeBuilder,
+    this.exitZoomButtonBuilder,
+    this.exitZoomButtonAlignment = AlignmentDirectional.bottomEnd,
+    this.exitZoomButtonPadding = const EdgeInsetsDirectional.all(12),
+  })  : candle = indicatorConfig.candle,
+        time = indicatorConfig.time,
+        mainIndicators = indicatorConfig.mainIndicators,
+        subIndicators = indicatorConfig.subIndicators,
+        isTouchDevice = isTouchDevice ?? PlatformUtil.isTouch,
+        autoAdaptLayout = autoAdaptLayout ?? !PlatformUtil.isMobile;
+
   final FlexiKlineController controller;
+
+  /// 蜡烛图指标
+  final CandleBaseIndicator candle;
+
+  /// 时间轴指标
+  final TimeBaseIndicator time;
+
+  /// 主区可选指标列表
+  final List<Indicator> mainIndicators;
+
+  /// 副区可选指标列表
+  final List<Indicator> subIndicators;
 
   /// Container属性配置
   final AlignmentGeometry? alignment;
@@ -135,7 +179,21 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
 
     logger = controller.logger;
 
+    /// 1. 声明层：注册 slot + 缓存 Indicator + 创建 candle/time PaintObject
+    controller.syncAllIndicators(
+      candle: widget.candle,
+      time: widget.time,
+      mainIndicators: widget.mainIndicators,
+      subIndicators: widget.subIndicators,
+    );
+
+    /// 2. 激活层：创建 MainPaintObject + 从持久化 key 恢复激活指标
     controller.initState();
+
+    /// 3. 处理挂载前暂存的数据
+    controller.flushPendingKlineData();
+
+    /// 4. 设置主区大小（可选）
     if (widget.mainSize != null) {
       controller.setMainSize(widget.mainSize!);
     }
@@ -149,6 +207,18 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
   void didUpdateWidget(covariant FlexiKlineWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     logd('didUpdateWidget');
+
+    /// 增量同步：diff 声明集合 + 更新缓存 + 同步已激活 PaintObject
+    controller.syncIndicators(
+      oldCandle: oldWidget.candle,
+      newCandle: widget.candle,
+      oldTime: oldWidget.time,
+      newTime: widget.time,
+      oldMainIndicators: oldWidget.mainIndicators,
+      newMainIndicators: widget.mainIndicators,
+      oldSubIndicators: oldWidget.subIndicators,
+      newSubIndicators: widget.subIndicators,
+    );
   }
 
   @override
@@ -483,9 +553,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
                             ? controller.theme.gridLineColor
                             : config.shapeSide.color,
                         width: config.shapeSide.width <= 0 ? 1 : config.shapeSide.width,
-                        style: config.shapeSide.style == BorderStyle.none
-                            ? BorderStyle.solid
-                            : config.shapeSide.style,
+                        style: config.shapeSide.style == BorderStyle.none ? BorderStyle.solid : config.shapeSide.style,
                       ),
                     ),
               ),

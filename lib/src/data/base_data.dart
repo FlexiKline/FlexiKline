@@ -27,8 +27,7 @@ abstract class BaseData with FlexiLog {
   String get logTag => '${spec.label ?? spec.symbol}-${spec.interval}';
 
   BaseData(
-    KlineSpec spec,
-    this.indicatorCount, {
+    KlineSpec spec, {
     KlineLoadingState loadingState = KlineLoadingState.none,
     List<FlexiCandleModel> list = const [],
     this.computeMode = ComputeMode.fast,
@@ -53,7 +52,6 @@ abstract class BaseData with FlexiLog {
     end = 0;
   }
 
-  final int indicatorCount;
   final ComputeMode computeMode;
 
   KlineSpec _spec;
@@ -95,4 +93,17 @@ abstract class BaseData with FlexiLog {
 
   /// 未合并的数据
   final List<List<ICandleModel>> _waitingData = List.empty(growable: true);
+
+  /// 是否有待合并的暂存数据
+  bool get hasWaitingData => _waitingData.isNotEmpty;
+
+  /// 待合并数据的数量
+  int get waitingDataLength => _waitingData.length;
+
+  /// 追加待合并数据，等待后续统一 precompute。
+  void enqueueWaitingData(List<ICandleModel> data) {
+    if (data.isNotEmpty) {
+      _waitingData.add(data);
+    }
+  }
 }

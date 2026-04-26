@@ -41,8 +41,8 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw {
   }
 
   final _repaintDraw = ValueNotifier(0);
-  final _drawStateListener = KlineStateNotifier(DrawState.exited());
-  final _drawPointerListener = KlineStateNotifier<Point?>(null);
+  final _drawStateListener = FlexiStateNotifier(DrawState.exited());
+  final _drawPointerListener = FlexiStateNotifier<Point?>(null);
   final _drawVisibilityListener = ValueNotifier<bool>(true);
   final _drawMagnetModeListener = ValueNotifier<MagnetMode>(MagnetMode.normal);
   final _drawContinuousListener = ValueNotifier<bool>(false);

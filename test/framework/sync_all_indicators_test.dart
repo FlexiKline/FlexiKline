@@ -1,0 +1,247 @@
+// Copyright 2024 Andy.Zhao
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+/// 属性测试：syncAllIndicators 声明层完整性
+///
+/// **Validates: Requirements 1.1, 1.2**
+///
+/// 验证 IndicatorPaintObjectManager.syncAllIndicators 的核心不变量：
+/// 1. `_declaredIndicators` 包含所有 mainIndicators 和 subIndicators 的 key
+/// 2. `_indicatorDataIndexs` 为每个 DataIndicatorKey 分配唯一 slot
+/// 3. `indicatorCount` 等于 DataIndicator 的数量
+/// 4. candle/time PaintObject 已创建
+/// 5. 主区/副区绘制队列为空（不含 main/sub PaintObject）
+library;
+
+import 'package:flexi_kline/flexi_kline.dart';
+import 'package:glados/glados.dart';
+
+import '../helpers/indicator_test_helpers.dart';
+import '../helpers/test_indicators.dart';
+import '../helpers/test_paint_context.dart';
+
+void main() {
+  final gen = mainSubGen();
+
+  group(
+    'Feature: widget-style-indicator-system-v4, '
+    'Property 1: syncAllIndicators 声明层完整性',
+    () {
+      // ---------------------------------------------------------------
+      // 属性 1：_declaredIndicators 包含所有 mainIndicators 和 subIndicators 的 key
+      // ---------------------------------------------------------------
+      Glados(gen, ExploreConfig(numRuns: 100)).test(
+        '_declaredIndicators 包含所有传入的 mainIndicators 和 subIndicators 的 key',
+        (input) {
+          final manager = createManager();
+          final context = TestPaintContext();
+
+          final mainIndicators = input.main.map(createIndicator).toList();
+          final subIndicators = input.sub.map(createIndicator).toList();
+
+          manager.syncAllIndicators(
+            candle: TestCandleIndicator(),
+            time: TestTimeIndicator(),
+            mainIndicators: mainIndicators,
+            subIndicators: subIndicators,
+            context: context,
+          );
+
+          final allExpectedKeys = <IIndicatorKey>{
+            ...mainIndicators.map((i) => i.key),
+            ...subIndicators.map((i) => i.key),
+          };
+
+          // 验证每个 DataIndicatorKey 都有 slot 分配
+          for (final key in allExpectedKeys) {
+            if (key is DataIndicatorKey) {
+              final slot = manager.getIndicatorDataIndex(key);
+              expect(
+                slot,
+                isNotNull,
+                reason: 'DataIndicatorKey $key 应该有 slot 分配，但返回 null',
+              );
+            }
+          }
+        },
+      );
+
+      // ---------------------------------------------------------------
+      // 属性 2：_indicatorDataIndexs 为每个 DataIndicatorKey 分配唯一 slot
+      // ---------------------------------------------------------------
+      Glados(gen, ExploreConfig(numRuns: 100)).test(
+        '_indicatorDataIndexs 为每个 DataIndicatorKey 分配唯一 slot index',
+        (input) {
+          final manager = createManager();
+          final context = TestPaintContext();
+
+          final mainIndicators = input.main.map(createIndicator).toList();
+          final subIndicators = input.sub.map(createIndicator).toList();
+
+          manager.syncAllIndicators(
+            candle: TestCandleIndicator(),
+            time: TestTimeIndicator(),
+            mainIndicators: mainIndicators,
+            subIndicators: subIndicators,
+            context: context,
+          );
+
+          final dataKeys = <DataIndicatorKey>[
+            for (final i in mainIndicators)
+              if (i.key is DataIndicatorKey) i.key as DataIndicatorKey,
+            for (final i in subIndicators)
+              if (i.key is DataIndicatorKey) i.key as DataIndicatorKey,
+          ];
+
+          final assignedSlots = <int>{};
+          for (final key in dataKeys) {
+            final slot = manager.getIndicatorDataIndex(key)!;
+            expect(
+              assignedSlots.add(slot),
+              isTrue,
+              reason: 'slot $slot 被多个 DataIndicatorKey 共享，违反唯一性',
+            );
+          }
+        },
+      );
+
+      // ---------------------------------------------------------------
+      // 属性 3：indicatorCount 等于 DataIndicator 的数量
+      // ---------------------------------------------------------------
+      Glados(gen, ExploreConfig(numRuns: 100)).test(
+        'indicatorCount 等于所有 DataIndicator 的数量',
+        (input) {
+          final manager = createManager();
+          final context = TestPaintContext();
+
+          final mainIndicators = input.main.map(createIndicator).toList();
+          final subIndicators = input.sub.map(createIndicator).toList();
+
+          manager.syncAllIndicators(
+            candle: TestCandleIndicator(),
+            time: TestTimeIndicator(),
+            mainIndicators: mainIndicators,
+            subIndicators: subIndicators,
+            context: context,
+          );
+
+          final dataCount = [...mainIndicators, ...subIndicators].where((i) => i.key is DataIndicatorKey).length;
+
+          expect(
+            manager.indicatorCount,
+            equals(dataCount),
+            reason: 'indicatorCount 应为 $dataCount（DataIndicator 数量），'
+                '但实际为 ${manager.indicatorCount}',
+          );
+        },
+      );
+
+      // ---------------------------------------------------------------
+      // 属性 4：candle/time PaintObject 已创建
+      // ---------------------------------------------------------------
+      Glados(gen, ExploreConfig(numRuns: 100)).test(
+        'candle/time PaintObject 在 syncAllIndicators 后已创建',
+        (input) {
+          final manager = createManager();
+          final context = TestPaintContext();
+
+          final mainIndicators = input.main.map(createIndicator).toList();
+          final subIndicators = input.sub.map(createIndicator).toList();
+
+          manager.syncAllIndicators(
+            candle: TestCandleIndicator(),
+            time: TestTimeIndicator(),
+            mainIndicators: mainIndicators,
+            subIndicators: subIndicators,
+            context: context,
+          );
+
+          expect(
+            manager.candlePaintObject,
+            isA<CandleBasePaintObject>(),
+            reason: 'candlePaintObject 应已创建',
+          );
+          expect(
+            manager.timePaintObject,
+            isA<TimeBasePaintObject>(),
+            reason: 'timePaintObject 应已创建',
+          );
+        },
+      );
+
+      // ---------------------------------------------------------------
+      // 属性 5：主区/副区绘制队列为空
+      // ---------------------------------------------------------------
+      Glados(gen, ExploreConfig(numRuns: 100)).test(
+        '主区/副区绘制队列在 syncAllIndicators 后为空（不含 main/sub PaintObject）',
+        (input) {
+          final manager = createManager();
+          final context = TestPaintContext();
+
+          final mainIndicators = input.main.map(createIndicator).toList();
+          final subIndicators = input.sub.map(createIndicator).toList();
+
+          manager.syncAllIndicators(
+            candle: TestCandleIndicator(),
+            time: TestTimeIndicator(),
+            mainIndicators: mainIndicators,
+            subIndicators: subIndicators,
+            context: context,
+          );
+
+          expect(
+            manager.subIndicatorKeys,
+            isEmpty,
+            reason: '副区绘制队列应为空，但包含 ${manager.subIndicatorKeys}',
+          );
+        },
+      );
+
+      // ---------------------------------------------------------------
+      // 属性 6：所有 slot index 在 [0, indicatorCount) 范围内
+      // ---------------------------------------------------------------
+      Glados(gen, ExploreConfig(numRuns: 100)).test(
+        '所有已分配的 slot index 在 [0, indicatorCount) 范围内',
+        (input) {
+          final manager = createManager();
+          final context = TestPaintContext();
+
+          final mainIndicators = input.main.map(createIndicator).toList();
+          final subIndicators = input.sub.map(createIndicator).toList();
+
+          manager.syncAllIndicators(
+            candle: TestCandleIndicator(),
+            time: TestTimeIndicator(),
+            mainIndicators: mainIndicators,
+            subIndicators: subIndicators,
+            context: context,
+          );
+
+          final count = manager.indicatorCount;
+          final allIndicators = [...mainIndicators, ...subIndicators];
+
+          for (final indicator in allIndicators) {
+            if (indicator.key is DataIndicatorKey) {
+              final slot = manager.getIndicatorDataIndex(
+                indicator.key as DataIndicatorKey,
+              )!;
+              expect(slot, greaterThanOrEqualTo(0), reason: '${indicator.key} 的 slot $slot < 0');
+              expect(slot, lessThan(count), reason: '${indicator.key} 的 slot $slot >= indicatorCount $count');
+            }
+          }
+        },
+      );
+    },
+  );
+}

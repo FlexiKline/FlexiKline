@@ -69,7 +69,7 @@ final class BusinessIndicatorKey extends IIndicatorKey {
 const unknownIndicatorKey = NormalIndicatorKey('unknown');
 
 typedef IndicatorBuilder<T extends Indicator<IIndicatorKey>> = T Function(
-  Map<String, dynamic>?,
+  Map<String, dynamic>,
 );
 
 const mainIndicatorKey = NormalIndicatorKey('main', label: 'Main');

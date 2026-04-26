@@ -1,6 +1,6 @@
 name: flexi_kline
 description: "A flexible Kline framework package project."
-version: 2.1.0
+version: 2.2.0
 homepage: https://flexikline.github.io
 repository: https://github.com/FlexiKline/FlexiKline
 issue_tracker: https://github.com/FlexiKline/FlexiKline/issues
@@ -28,6 +28,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ">=5.0.0 <7.0.0"
+  glados: ^1.1.1
 
   build_runner: ^2.4.15
   json_serializable: ^6.9.5

@@ -69,25 +69,11 @@ abstract interface class IConfiguration implements IStorage {
   /// 当前配置主题
   IFlexiKlineTheme get theme;
 
-  String get configKey;
-
   /// 生成FlexiKline配置
   /// 调用场景:
   /// 1. 首次加载(无缓存)情况下, 生成默认的FlexiKlineConfig
   /// 2. 从缓存中反序列化实现时调用, [origin]即是原始缓存配置, 这可能出现在后续追加/删除/修改配置时, 原有配置无法反序列化.
   FlexiKlineConfig generateFlexiKlineConfig([FlexiKlineConfig? origin]);
-
-  /// 蜡烛指标配置构造器(主区)
-  IndicatorBuilder<CandleBaseIndicator> get candleIndicatorBuilder;
-
-  /// 时间指标配置构造器(副区)
-  IndicatorBuilder<TimeBaseIndicator> get timeIndicatorBuilder;
-
-  /// 主区指标配置定制
-  Map<IIndicatorKey, IndicatorBuilder> get mainIndicatorBuilders;
-
-  /// 副区指标配置定制
-  Map<IIndicatorKey, IndicatorBuilder> get subIndicatorBuilders;
 
   /// 绘制工具定制
   Map<IDrawType, DrawObjectBuilder> get drawObjectBuilders;
@@ -132,40 +118,9 @@ extension IConfigurationExt on IConfiguration {
     setConfig(flexiKlineConfigKey, config.toJson());
   }
 
-  /// 从本地获取加载[key]指定的指标配置, 并转换成[Indicator]实例.
-  /// 如果指定[builder], 则不会从配置中查找.
-  T? getIndicator<T extends Indicator>(
-    IIndicatorKey key, {
-    IndicatorBuilder? builder,
-  }) {
-    try {
-      final json = getConfig(key.id);
-      builder ??= mainIndicatorBuilders[key];
-      builder ??= subIndicatorBuilders[key];
-      if (builder == null) return null;
-      final indicator = builder.call(json);
-      if (indicator is T) return indicator;
-    } catch (error, stack) {
-      debugPrintStack(stackTrace: stack, label: 'getIndicator$error');
-    }
-    return null;
-  }
-
-  /// 保存[indicator]配置到本地.
-  bool saveIndicator<T extends Indicator>(T indicator) {
-    final json = indicator.toJson();
-    if (json.isEmpty) return false;
-    setConfig(indicator.key.id, json);
-    return true;
-  }
-
-  void delIndicator(IIndicatorKey key) {
-    setConfig(key.id, {});
-  }
-
-  /// 从本地获取[instId]对应的绘制实例数据列表.
-  Iterable<Overlay> getDrawOverlayList(String instId) {
-    final json = getConfig('$instId-$drawOverlayListConfigKey');
+  /// 从本地获取[symbol]对应的绘制实例数据列表.
+  Iterable<Overlay> getDrawOverlayList(String symbol) {
+    final json = getConfig('$symbol-$drawOverlayListConfigKey');
     if (json == null || json.isEmpty) return [];
     final data = json[drawOverlayListKey];
     if (data is List<dynamic>) {
@@ -174,16 +129,16 @@ extension IConfigurationExt on IConfiguration {
     return [];
   }
 
-  /// 以[instId]为key, 持久化绘制实例列表[list]到本地中.
-  void saveDrawOverlayList(String instId, Iterable<Overlay> list) {
-    setConfig('$instId-$drawOverlayListConfigKey', {
+  /// 以[symbol]为key, 持久化绘制实例列表[list]到本地中.
+  void saveDrawOverlayList(String symbol, Iterable<Overlay> list) {
+    setConfig('$symbol-$drawOverlayListConfigKey', {
       drawOverlayListKey: list.map((e) => e.toJson()).toList(),
     });
   }
 
-  /// 从缓存中删除[instId]指定的所有绘制实例数据
-  void delDrawOverlayList(String instId) {
-    setConfig('$instId-$drawOverlayListConfigKey', {});
+  /// 从缓存中删除[symbol]指定的所有绘制实例数据
+  void delDrawOverlayList(String symbol) {
+    setConfig('$symbol-$drawOverlayListConfigKey', {});
   }
 
   /// 从缓存中删除单个绘制实例数据
@@ -208,3 +163,91 @@ extension IConfigurationExt on IConfiguration {
     setConfig(drawToolbarPositionKey, json);
   }
 }
+
+/// Kline 指标配置提供者
+///
+/// 与 [IConfiguration]（框架配置）平行的指标配置接口。
+/// 负责提供 [FlexiKlineWidget] 所需的蜡烛图、时间轴、主副区指标实例。
+/// 继承 [IStorage] 以支持指标参数的持久化读写。
+abstract interface class IIndicatorConfig implements IStorage {
+  /// 蜡烛图指标
+  CandleBaseIndicator get candle;
+
+  /// 时间轴指标
+  TimeBaseIndicator get time;
+
+  /// 主区可选指标列表
+  List<Indicator> get mainIndicators;
+
+  /// 副区可选指标列表
+  List<Indicator> get subIndicators;
+}
+
+extension IIndicatorConfigExt on IIndicatorConfig {
+  /// 从本地获取加载[key]指定的指标配置, 并通过[builder]转换成[Indicator]实例.
+  T? getIndicator<T extends Indicator>(IIndicatorKey key, IndicatorBuilder builder) {
+    try {
+      final json = getConfig(key.id);
+      if (json == null || json.isEmpty) return null;
+      final indicator = builder.call(json);
+      if (indicator is T) return indicator;
+    } catch (error, stack) {
+      debugPrintStack(stackTrace: stack, label: 'getIndicator$error');
+    }
+    return null;
+  }
+
+  /// 保存[indicator]配置到本地.
+  bool saveIndicator<T extends Indicator>(T indicator) {
+    final json = indicator.toJson();
+    if (json.isEmpty) return false;
+    setConfig(indicator.key.id, json);
+    return true;
+  }
+
+  void delIndicator(IIndicatorKey key) {
+    setConfig(key.id, {});
+  }
+}
+
+// class FlexiIndicatorState<T extends Indicator<IIndicatorKey>> {
+//   FlexiIndicatorState(this.initial, this.builder, this.storage);
+//   final T initial;
+//   final IndicatorBuilder builder;
+//   final IStorage storage;
+
+//   T? _indicator;
+//   T get indicator {
+//     _indicator ??= getIndicator(initial.key, builder);
+//     return _indicator ??= initial;
+//   }
+
+//   set indicator(T value) {
+//     _indicator = value;
+//     saveIndicator(value);
+//   }
+
+//   T? getIndicator(IIndicatorKey key, IndicatorBuilder builder) {
+//     try {
+//       final json = storage.getConfig(key.id);
+//       if (json == null || json.isEmpty) return null;
+//       final indicator = builder.call(json);
+//       if (indicator is T) return indicator;
+//     } catch (error, stack) {
+//       debugPrintStack(stackTrace: stack, label: 'getIndicator$error');
+//     }
+//     return null;
+//   }
+
+//   /// 保存[indicator]配置到本地.
+//   bool saveIndicator(T indicator) {
+//     final json = indicator.toJson();
+//     if (json.isEmpty) return false;
+//     storage.setConfig(indicator.key.id, json);
+//     return true;
+//   }
+
+//   void delIndicator(IIndicatorKey key) {
+//     storage.setConfig(key.id, {});
+//   }
+// }

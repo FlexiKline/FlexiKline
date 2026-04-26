@@ -242,6 +242,9 @@ extension type FlexiCandleModel._(
   /// 返回: 若槽位索引在有效范围内（未越界）则返回 true
   bool checkIndex(int index) => index >= 0 && index < _m.slots.length;
 
+  /// 当前数据槽位数量
+  int get slotCount => _m.slots.length;
+
   /// 获取指定槽位的指标数据
   ///
   /// [index] 数据槽位索引
@@ -368,6 +371,30 @@ extension type FlexiCandleModel._(
     for (int i = 0; i < _m.slots.length; i++) {
       this[i] = null;
     }
+  }
+
+  /// 重建 slots 到新容量
+  ///
+  /// 如果当前 slots.length 已满足 [newCount]，返回自身；
+  /// 否则创建新的固定长度 List，拷贝旧数据，返回新实例。
+  FlexiCandleModel rebuildSlots(int newCount) {
+    if (_m.slots.length >= newCount) return this;
+    final newSlots = List<Object?>.filled(newCount, null, growable: false);
+    for (int i = 0; i < _m.slots.length; i++) {
+      newSlots[i] = _m.slots[i];
+    }
+    return FlexiCandleModel._((
+      ts: ts,
+      o: _m.o,
+      h: _m.h,
+      l: _m.l,
+      c: _m.c,
+      v: _m.v,
+      tn: _m.tn,
+      tc: _m.tc,
+      cfm: _m.cfm,
+      slots: newSlots,
+    ));
   }
 
   /// 开始时间，[DateTime] 格式

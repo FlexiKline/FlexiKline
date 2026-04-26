@@ -65,16 +65,25 @@ class TestFlexiKlineTheme implements IFlexiKlineTheme {
   Color get tooltipTextColor => const Color(0xFF949494);
 
   @override
-  Color get latestPriceBg => throw UnimplementedError();
+  Color get latestPriceBg => const Color(0xFF000000);
 
   @override
-  Color get dragBg => throw UnimplementedError();
+  Color get dragBg => const Color(0x33000000);
 
   @override
-  Color get lineChartColor => throw UnimplementedError();
+  Color get lineChartColor => const Color(0xFF0066FF);
 }
 
-class TestFlexiKlineConfiguration with FlexiKlineThemeConfigurationMixin {
+class TestFlexiKlineConfiguration with FlexiKlineConfigurationMixin {
+  TestFlexiKlineConfiguration({
+    Set<IIndicatorKey>? mainChildren,
+    Set<IIndicatorKey>? subKeys,
+  })  : _mainChildren = mainChildren,
+        _subKeys = subKeys;
+
+  final Set<IIndicatorKey>? _mainChildren;
+  final Set<IIndicatorKey>? _subKeys;
+
   @override
   IFlexiKlineTheme get theme => TestFlexiKlineTheme();
 
@@ -87,19 +96,25 @@ class TestFlexiKlineConfiguration with FlexiKlineThemeConfigurationMixin {
   MainPaintObjectIndicator<Indicator> genMainIndicator(
     MainPaintObjectIndicator<Indicator>? mainIndicator,
   ) {
-    throw UnimplementedError();
+    return MainPaintObjectIndicator(
+      size: mainIndicator?.size ?? const Size(0, 300),
+      padding: mainIndicator?.padding ?? EdgeInsets.zero,
+      children: _mainChildren,
+    );
+  }
+
+  @override
+  Set<IIndicatorKey> genSubIndicators([Set<IIndicatorKey>? sub]) {
+    return _subKeys ?? sub ?? {};
   }
 
   @override
   Map<String, dynamic>? getConfig(String key) {
-    throw UnimplementedError();
+    return null;
   }
 
   @override
-  Future<bool> setConfig(String key, Map<String, dynamic> value) {
-    throw UnimplementedError();
+  Future<bool> setConfig(String key, Map<String, dynamic> value) async {
+    return true;
   }
-
-  @override
-  String get configKey => 'test';
 }

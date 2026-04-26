@@ -138,7 +138,9 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     _curKlineData = data;
     _notifySpecChange(data.spec);
     _notifyLoadingState(data.loadingState, data.key);
-    if (resetPaintDxOffset) paintDxOffset = getInitPaintDxOffset();
+    if (resetPaintDxOffset && _paintObjectManager.isInitialized) {
+      paintDxOffset = getInitPaintDxOffset();
+    }
     markRepaintChart(reset: true);
     markRepaintDraw();
     cancelCross();
@@ -338,7 +340,6 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     // 重置当前KlineData为[spec]规格指定的KlineData, 并更新到缓存中.
     data = KlineData(
       spec,
-      indicatorCount,
       loadingState: KlineLoadingState.initLoading,
       computeMode: computeMode,
       logger: logger,
@@ -434,8 +435,15 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     List<ICandleModel> newList = const [],
     bool reset = false,
   }) async {
-    if (!reset && newList.isEmpty) {
+    if (!reset && newList.isEmpty && !data.hasWaitingData) {
       // 无需计算; 直接返回
+      return;
+    }
+
+    // Widget 未挂载完成前，mainPaintObject 尚未初始化。
+    // 此时只暂存数据，等 flushPendingKlineData 统一处理。
+    if (!_paintObjectManager.isInitialized) {
+      data.enqueueWaitingData(newList);
       return;
     }
 
@@ -447,6 +455,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     /// 使用scheduleTask方式运行预计算
     await SchedulerBinding.instance.scheduleTask(
       () => data.precomputeKlineData(
+        indicatorCount: indicatorCount,
         newList: newList,
         mainPaintObjects: mainPaintObject.children,
         subPaintObjects: subPaintObjects,
@@ -458,5 +467,35 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     logd(
       'startPrecompute End:$precomputeLabel spent:${DateTime.now().millisecondsSinceEpoch - beginTime}ms',
     );
+  }
+
+  /// 刷新挂载前暂存的待处理数据
+  ///
+  /// 在 FlexiKlineWidget.initState 完成（syncAllIndicators + controller.initState 之后）时调用。
+  /// 检查 [curKlineData] 中是否有未合并的 `_waitingData`，若有则使用当前已确定的
+  /// [indicatorCount] 合并数据并对所有已激活指标执行 precompute，最后触发 markRepaintChart。
+  ///
+  /// 场景：Widget 挂载前调用 switchKlineData 和 updateKlineData，数据暂存到 _waitingData；
+  /// Widget initState 完成后调用此方法，使用已确定的 indicatorCount 处理暂存数据。
+  /// _Requirements: 11.1, 11.2, 11.3, 11.4
+  @override
+  void flushPendingKlineData() {
+    // 检查当前 KlineData 是否有待合并的数据
+    if (!curKlineData.hasWaitingData) {
+      logd('flushPendingKlineData: no waiting data');
+      return;
+    }
+
+    logd('flushPendingKlineData: flushing ${curKlineData.waitingDataLength} pending data');
+
+    // 使用当前 indicatorCount 合并数据并执行 precompute
+    _startPrecomputeKlineData(
+      curKlineData,
+      newList: const [],
+      reset: false,
+    ).then((_) {
+      // precompute 完成后触发重绘
+      markRepaintChart();
+    });
   }
 }

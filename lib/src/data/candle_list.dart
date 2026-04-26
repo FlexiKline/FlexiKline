@@ -39,9 +39,12 @@ mixin CandleListData on BaseData {
   }
 
   /// 初始化基础数据
+  ///
+  /// 重置 [range] 范围内每条蜡烛的 OHLCV 数值，
+  /// 保留原有 slots 长度（不依赖外部 indicatorCount）。
   void initBasicData(Range range) {
     for (int i = range.start; i < range.end; i++) {
-      _list[i] = _list[i].reset(computeMode, indicatorCount);
+      _list[i] = _list[i].reset(computeMode, _list[i].slotCount);
     }
   }
 
@@ -60,12 +63,18 @@ mixin CandleListData on BaseData {
     return MinMax(max: maxHigh, min: minLow);
   }
 
-  Range? mergeCandleData(List<List<ICandleModel>> data) {
+  /// 合并多批蜡烛数据到当前列表中。
+  ///
+  /// [indicatorCount] 指定新蜡烛模型的 slots 数量，传递给 [mergeCandleList]。
+  Range? mergeCandleData(
+    List<List<ICandleModel>> data, {
+    required int indicatorCount,
+  }) {
     if (data.isEmpty) return null;
     Range? result;
     for (final newList in data) {
       /// 合并[newList]到[data]中
-      final range = mergeCandleList(newList);
+      final range = mergeCandleList(newList, indicatorCount: indicatorCount);
       if (range != null) {
         result ??= range;
         result = result.merge(range);
@@ -76,10 +85,15 @@ mixin CandleListData on BaseData {
   }
 
   /// 合并[list]和[candleList]为一个新数组
+  ///
   /// 约定: [candleList]和[list]都是按时间倒序排好的, 即最近/新的蜡烛数据以数组0开始依次存放.
   /// 去重: 如两个数组拼接过程中发现重复的, 要去掉[list]中重复的元素.
+  /// [indicatorCount] 指定新蜡烛模型的 slots 数量，由调用方（Manager）提供。
   /// return: 返回新列表中被更新的范围[start] ~ [end]
-  Range? mergeCandleList(List<ICandleModel> candleList) {
+  Range? mergeCandleList(
+    List<ICandleModel> candleList, {
+    required int indicatorCount,
+  }) {
     if (candleList.isEmpty) {
       logw('mergeCandleList candleList is empty!');
       return null;

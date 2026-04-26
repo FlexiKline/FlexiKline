@@ -31,8 +31,7 @@ part 'indicator.dart';
 
 class KlineData extends BaseData with KlineSpecData, CandleListData, PaintDrawData, IndicatorData {
   KlineData(
-    super.spec,
-    super.indicatorCount, {
+    super.spec, {
     super.loadingState,
     super.list,
     super.computeMode,
@@ -41,18 +40,31 @@ class KlineData extends BaseData with KlineSpecData, CandleListData, PaintDrawDa
 
   final FlexiStopwatch stopwatch = FlexiStopwatch();
 
+  /// 重建所有蜡烛的 slots 到新容量
+  ///
+  /// 遍历 [_list] 中每条蜡烛，调用 [FlexiCandleModel.rebuildSlots] 并写回
+  /// （extension type 值语义要求必须写回）。
+  /// 当 [indicatorCount] 增加导致需要扩容时，由 Manager 调用此方法。
+  void rebuildSlots(int newCount) {
+    for (int i = 0; i < _list.length; i++) {
+      _list[i] = _list[i].rebuildSlots(newCount);
+    }
+  }
+
   static final KlineData empty = KlineData(
     const KlineSpec(symbol: '', interval: invalidInterval),
-    0,
     list: List.empty(growable: false),
   );
 
   /// 预计算Kline指标数据
+  ///
+  /// [indicatorCount] 指定新蜡烛模型的 slots 数量，传递给 [mergeCandleData]
   /// [newList] 新增的蜡烛数据
   /// [mainPaintObjects] 主区待计算的指标集合
   /// [subPaintObjects] 副区待计算的指标集合
   /// [reset] 是否重置; 如果有, 忽略之前的计算结果.
   Future<void> precomputeKlineData({
+    required int indicatorCount,
     required List<ICandleModel> newList,
     required Iterable<PaintObject> mainPaintObjects,
     required Iterable<PaintObject> subPaintObjects,
@@ -72,7 +84,7 @@ class KlineData extends BaseData with KlineSpecData, CandleListData, PaintDrawDa
       /// 1. 合并数据
       final data = newList.isEmpty ? _waitingData : [newList, ..._waitingData];
       Range? range = stopwatch.run(
-        () => mergeCandleData(data),
+        () => mergeCandleData(data, indicatorCount: indicatorCount),
         label: '$logTag-mergeCandleData-${data.length}',
       );
       _waitingData.clear();
@@ -112,6 +124,7 @@ class KlineData extends BaseData with KlineSpecData, CandleListData, PaintDrawDa
       stopwatch.stop();
       if (_waitingData.isNotEmpty) {
         precomputeKlineData(
+          indicatorCount: indicatorCount,
           newList: [],
           mainPaintObjects: mainPaintObjects,
           subPaintObjects: subPaintObjects,

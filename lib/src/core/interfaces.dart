@@ -19,11 +19,8 @@ abstract interface class ISetting {
   /// Canvas区域大小监听器
   ValueListenable<Rect> get canvasSizeChangeListener;
 
-  /// Config ///
-
   /// 保存到本地
   void storeFlexiKlineConfig({
-    bool storeIndicators = true,
     bool storeDrawOverlays = true,
   });
 
