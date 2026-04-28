@@ -64,14 +64,6 @@ abstract class IndicatorObject<T extends Indicator>
 
   @override
   int get hashCode => runtimeType.hashCode ^ key.hashCode;
-
-  @visibleForTesting
-  @protected
-  @Deprecated('警告：这是仅用于测试的函数，严禁在生产环境中调用 (This is a test-only method. DO NOT use in production.)')
-  void init(IPaintContext context, T indicator) {
-    _indicator = indicator;
-    __context = context;
-  }
 }
 
 /// PaintObject
@@ -86,6 +78,22 @@ abstract class PaintObject<T extends Indicator<IIndicatorKey>> extends Indicator
   PaintObject? _parent;
 
   bool get hasParentObject => _parent != null;
+
+  /// 将 PaintObject 挂载到绘制系统。
+  /// 子类可 override 此方法在挂载时做额外初始化，但必须先调用 `super.mount()`。
+  @mustCallSuper
+  @protected
+  void mount(T indicator, IPaintContext context) {
+    assert(!_mounted, 'PaintObject(${indicator.key}) 已经 mount，不能重复调用');
+    _mounted = true;
+    _indicator = indicator;
+    __context = context;
+    if (context is FlexiLog) {
+      logger = (context as FlexiLog).logger;
+    }
+  }
+
+  bool _mounted = false;
 
   /// 指标配置发生变改
   @mustCallSuper
@@ -156,15 +164,24 @@ abstract class NormalPaintObject<T extends NormalIndicator> extends PaintObject<
 abstract class DataPaintObject<T extends DataIndicator> extends PaintObject<T>
     with PaintObjectComputableMixin<T>
     implements IComputablePainter {
-  /// 当前绘制对象的指标计算数据存储下标
-  ///
-  /// 用于在 FlexiCandleModel.slots 中存取计算数据。
-  /// 延迟初始化，在首次访问时计算。
+  /// 当前绘制对象的指标计算数据存储下标，用于在 FlexiCandleModel.slots 中存取计算数据。
+  /// mount 时由框架注入；若未能获取（如测试 mock），首次访问时懒加载。
   int get dataIndex {
     return _dataIndex ??= _context.getDataIndex(indicator.key) ?? -1;
   }
 
   int? _dataIndex;
+
+  /// mount 时提前注入 dataIndex，避免首次访问时的懒加载。
+  /// 若 context 尚未分配 slot（如测试 mock），保持 null，由 getter 懒加载兜底。
+  @visibleForTesting
+  @override
+  @mustCallSuper
+  @protected
+  void mount(T indicator, IPaintContext context) {
+    super.mount(indicator, context);
+    _dataIndex = context.getDataIndex(indicator.key);
+  }
 
   /// 指标配置发生变改
   @mustCallSuper

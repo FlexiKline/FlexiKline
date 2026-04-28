@@ -140,11 +140,14 @@ final class IndicatorPaintObjectManager with FlexiLog {
     }
   }
 
-  /// 首次全量同步（initState 时调用）
+  /// 挂载所有指标（Widget initState 时调用）
   ///
-  /// 注册 [DataIndicatorKey] → 分配 slot → 缓存 [Indicator]
-  /// → 创建 candle/time [PaintObject]（不创建 main/sub PaintObject）。
-  void syncAllIndicators({
+  /// 将声明层的 Indicator 配置挂载为运行时的 PaintObject：
+  /// 1. 注册 [DataIndicatorKey] → 分配 slot
+  /// 2. 缓存所有 Indicator 实例
+  /// 3. 创建系统级 PaintObject（candle/time/main）
+  /// 4. 从持久化 key 恢复已选中的主区/副区指标
+  void mountIndicators({
     required CandleBaseIndicator candle,
     required TimeBaseIndicator time,
     required List<Indicator> mainIndicators,
@@ -160,7 +163,7 @@ final class IndicatorPaintObjectManager with FlexiLog {
     ];
     registerDataIndicatorKeys(dataKeys);
 
-    // 2. 缓存所有 Indicator 实例到 _declaredIndicators
+    // 2. 缓存所有 Indicator 实例
     for (final indicator in mainIndicators) {
       _mainIndicatorBuilders[indicator.key] = indicator;
     }
@@ -168,17 +171,32 @@ final class IndicatorPaintObjectManager with FlexiLog {
       _subIndicatorBuilders[indicator.key] = indicator;
     }
 
-    // 3. 创建 candle/time PaintObject（系统必须）
-    _candlePaintObject = _createAndInitPaintObject(candle, context) as CandleBasePaintObject;
-    _timePaintObject = _createAndInitPaintObject(time, context) as TimeBasePaintObject;
+    // 3. 创建系统级 PaintObject（candle/time/main）
+    _candlePaintObject = _inflateIndicator<CandleBaseIndicator, CandleBasePaintObject>(candle, context);
+    _timePaintObject = _inflateIndicator<TimeBaseIndicator, TimeBasePaintObject>(time, context);
+
+    final mainIndicator = flexiKlineConfig.mainIndicator;
+    _mainPaintObject = _inflateIndicator<MainPaintObjectIndicator, MainPaintObject>(mainIndicator, context);
+
+    // 4. 将 candle 追加到主区，并从持久化 key 恢复已选中指标
+    _mainPaintObject.appendPaintObject(_candlePaintObject);
+
+    for (final key in mainIndicator.children) {
+      addMainPaintObject(key, context);
+    }
+
+    for (final key in flexiKlineConfig.sub) {
+      addSubPaintObject(key, context);
+    }
+    _isInitialized = true;
   }
 
-  /// 增量同步（didUpdateWidget 时调用）
+  /// 增量更新指标（didUpdateWidget 时调用）
   ///
   /// 1. candle/time 无条件更新（E1 策略）
   /// 2. diff main 声明集合
   /// 3. diff sub 声明集合
-  void syncIndicators({
+  void updateIndicators({
     required IPaintContext context,
     required CandleBaseIndicator oldCandle,
     required CandleBaseIndicator newCandle,
@@ -209,17 +227,14 @@ final class IndicatorPaintObjectManager with FlexiLog {
       newIndicators: newSubIndicators,
     );
 
-    logi('syncIndicators 完成: indicatorCount=$indicatorCount');
+    logi('updateIndicators 完成: indicatorCount=$indicatorCount');
   }
 
-  /// 基于 key set 的 diff 同步指标声明集合。
+  /// 基于 key set 的 diff 同步主区指标声明集合。
   ///
-  /// - 移除的指标：回收 slot + 从 [_declaredIndicators] 删除 +
-  ///   如果已激活（PaintObject 存在）则销毁 PaintObject
-  /// - 新增的指标：注册 slot + 缓存到 [_declaredIndicators]
-  ///   （不自动激活，不创建 PaintObject）
-  /// - 配置变化的指标（key 相同，实例不同）：更新 [_declaredIndicators] 缓存 +
-  ///   如果已激活则调用 [PaintObject.doDidUpdateIndicator]
+  /// - 移除：回收 slot + 从 [_mainIndicatorBuilders] 删除 + 销毁已激活的 PaintObject
+  /// - 新增：注册 slot + 缓存到 [_mainIndicatorBuilders]（不自动激活）
+  /// - 变化（key 相同）：更新缓存 + 已激活则调用 [PaintObject.doDidUpdateIndicator]
   void _mainDiffAndSync({
     required IPaintContext context,
     required List<Indicator> oldIndicators,
@@ -272,14 +287,11 @@ final class IndicatorPaintObjectManager with FlexiLog {
     }
   }
 
-  /// 基于 key set 的 diff 同步指标声明集合。
+  /// 基于 key set 的 diff 同步副区指标声明集合。
   ///
-  /// - 移除的指标：回收 slot + 从 [_declaredIndicators] 删除 +
-  ///   如果已激活（PaintObject 存在）则销毁 PaintObject
-  /// - 新增的指标：注册 slot + 缓存到 [_declaredIndicators]
-  ///   （不自动激活，不创建 PaintObject）
-  /// - 配置变化的指标（key 相同，实例不同）：更新 [_declaredIndicators] 缓存 +
-  ///   如果已激活则调用 [PaintObject.doDidUpdateIndicator]
+  /// - 移除：回收 slot + 从 [_subIndicatorBuilders] 删除 + 销毁已激活的 PaintObject
+  /// - 新增：注册 slot + 缓存到 [_subIndicatorBuilders]（不自动激活）
+  /// - 变化（key 相同）：更新缓存 + 已激活则调用 [PaintObject.doDidUpdateIndicator]
   void _subDiffAndSync({
     required List<Indicator> oldIndicators,
     required List<Indicator> newIndicators,
@@ -334,64 +346,21 @@ final class IndicatorPaintObjectManager with FlexiLog {
     }
   }
 
-  /// 创建并初始化 PaintObject
-  PaintObject _createAndInitPaintObject<T extends Indicator>(
+  /// 将 [Indicator] 实例化为 PaintObject 并挂载，类比 Flutter 的 inflateWidget + Element.mount。
+  /// 泛型 [P] 指定期望的 PaintObject 子类型，避免调用方手动 cast。
+  P _inflateIndicator<T extends Indicator, P extends PaintObject>(
     T indicator,
     IPaintContext context,
   ) {
     final paintObject = indicator.createPaintObject();
-
-    paintObject._indicator = indicator;
-    paintObject.__context = context;
-
-    // paintObject 已经混入了 KlineLog，所以直接设置
-    if (context is FlexiLog) {
-      paintObject.logger = (context as FlexiLog).logger;
-    }
-
-    return paintObject;
+    paintObject.mount(indicator, context);
+    return paintObject as P;
   }
 
-  /// 初始化主区/副区指标
+  /// 在主区中添加 [key] 指定的指标。
   ///
-  /// 1. 创建 MainPaintObject（空壳）
-  /// 2. 将 syncAllIndicators 已创建的 candle PaintObject 追加到主区
-  /// 3. 从 [FlexiKlineConfig.mainIndicator.children] 读取持久化 key，
-  ///    调用 [addMainPaintObject] 从 [_declaredIndicators] 创建 PaintObject
-  /// 4. 从 [FlexiKlineConfig.sub] 读取持久化 key，
-  ///    调用 [addSubPaintObject] 创建 PaintObject
-  void init(IPaintContext context) {
-    final mainIndicator = flexiKlineConfig.mainIndicator;
-
-    // 1. 创建 MainPaintObject（空壳）
-    _mainPaintObject = MainPaintObject();
-    _mainPaintObject._indicator = mainIndicator.copyWith();
-    _mainPaintObject.__context = context;
-    if (context is FlexiLog) {
-      _mainPaintObject.logger = (context as FlexiLog).logger;
-    }
-
-    // 2. 将 syncAllIndicators 已创建的 candle PaintObject 追加到主区
-    _mainPaintObject.appendPaintObject(_candlePaintObject);
-
-    // 3. 从持久化 key 恢复主区指标
-    for (final key in mainIndicator.children) {
-      addMainPaintObject(key, context);
-    }
-
-    // 4. 从持久化 key 恢复副区指标
-    for (final key in flexiKlineConfig.sub) {
-      addSubPaintObject(key, context);
-    }
-    _isInitialized = true;
-  }
-
-  /// 主区指标操作 ///
-  /// 在主区中添加 [key] 指定的指标
-  ///
-  /// 从 [_declaredIndicators] 缓存中获取 Indicator 实例，
-  /// 创建 PaintObject 并添加到主区绘制队列。
-  /// 如果 key 不在 [_declaredIndicators] 中，静默跳过并记录警告。
+  /// 从 [_mainIndicatorBuilders] 缓存中获取 Indicator，inflate 后追加到主区绘制队列。
+  /// key 未注册时静默跳过并记录警告。
   PaintObject? addMainPaintObject(
     IIndicatorKey key,
     IPaintContext context, {
@@ -415,7 +384,7 @@ final class IndicatorPaintObjectManager with FlexiLog {
     final indicator = _mainIndicatorBuilders[key];
     if (indicator == null) return null;
 
-    final newObj = _createAndInitPaintObject(indicator, context);
+    final newObj = _inflateIndicator(indicator, context);
     _mainPaintObject.appendPaintObject(newObj);
     return newObj;
   }
@@ -425,12 +394,10 @@ final class IndicatorPaintObjectManager with FlexiLog {
     return _mainPaintObject.deletePaintObject(key);
   }
 
-  /// 副区指标操作 ///
-  /// 在副区中添加 [key] 指定的指标
+  /// 在副区中添加 [key] 指定的指标。
   ///
-  /// 从 [_declaredIndicators] 缓存中获取 Indicator 实例，
-  /// 创建 PaintObject 并添加到副区绘制队列。
-  /// 如果 key 不在 [_declaredIndicators] 中，静默跳过并记录警告。
+  /// 从 [_subIndicatorBuilders] 缓存中获取 Indicator，inflate 后追加到副区绘制队列。
+  /// key 未注册时静默跳过并记录警告。
   PaintObject? addSubPaintObject(
     IIndicatorKey key,
     IPaintContext context, {
@@ -456,7 +423,7 @@ final class IndicatorPaintObjectManager with FlexiLog {
     final indicator = _subIndicatorBuilders[key];
     if (indicator == null) return null;
 
-    final newObj = _createAndInitPaintObject(indicator, context);
+    final newObj = _inflateIndicator(indicator, context);
     flexiKlineConfig.sub.add(key);
     final oldObj = _subPaintObjectQueue.append(newObj);
     oldObj?.dispose();
@@ -477,57 +444,6 @@ final class IndicatorPaintObjectManager with FlexiLog {
     });
     return hasRemove;
   }
-
-  /// 获取[key]指定的指标配置实例（先查主区, 再查副区）
-  /// 1. 先从当前载入的绘制对象中查找
-  /// 2. 如果未载入, 则从配置缓存中加载[key]对应的指标
-  T? getIndicator<T extends Indicator>(IIndicatorKey key) {
-    if (hasRegisteredInMain(key)) {
-      Indicator? indicator = mainPaintObject.getChildIndicator(key);
-      indicator ??= _mainIndicatorBuilders[key];
-      return indicator is T ? indicator : null;
-    } else if (hasRegisteredInSub(key)) {
-      Indicator? indicator = subPaintObjects.firstWhereOrNull((obj) => obj.key == key)?.indicator;
-      indicator ??= _subIndicatorBuilders[key];
-      return indicator is T ? indicator : null;
-    }
-    return null;
-  }
-
-  /// 更新[indicator]指标配置
-  ///
-  /// WIS v4 模型下，指标配置由 Widget 参数声明，
-  /// 配置变更走 Widget params → didUpdateWidget → syncIndicators 路径。
-  /// 此方法仅保留运行时更新已激活 PaintObject 的能力，不再持久化。
-  @Deprecated('WIS v4 模型下，指标配置由 Widget 参数声明，'
-      '配置变更走 Widget params → didUpdateWidget → syncIndicators 路径。'
-      '请勿再通过 updateIndicator 持久化指标配置。')
-  bool updateIndicator<T extends Indicator>(T indicator, [bool forceSave = false]) {
-    final key = indicator.key;
-    if (hasRegisteredInMain(key)) {
-      return mainPaintObject.updateChildIndicator(indicator);
-    } else if (hasRegisteredInSub(key)) {
-      final object = subPaintObjects.firstWhereOrNull((obj) => obj.key == key);
-      if (object != null) {
-        object.doDidUpdateIndicator(indicator);
-        return true;
-      }
-    }
-    return false;
-  }
-
-  /// 收集当前指标的计算参数
-  /// 考虑在主区/副区同时存在的指标.
-  // @Deprecated('废弃, 由PaintObject执行precompute')
-  // Map<IIndicatorKey, dynamic> getIndicatorCalcParams() {
-  //   final calcParams = mainPaintObject.getCalcParams();
-  //   for (final object in subPaintObjects) {
-  //     final params = object.getCalcParams();
-  //     if (params.isEmpty) continue;
-  //     calcParams.addAll(params);
-  //   }
-  //   return calcParams;
-  // }
 
   void restoreHeight() {
     mainPaintObject.restoreSize();

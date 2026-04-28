@@ -12,16 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// 属性测试：syncAllIndicators 声明层完整性
+/// 属性测试：mountIndicators 声明层完整性
 ///
 /// **Validates: Requirements 1.1, 1.2**
 ///
-/// 验证 IndicatorPaintObjectManager.syncAllIndicators 的核心不变量：
+/// 验证 IndicatorPaintObjectManager.mountIndicators 的核心不变量：
 /// 1. `_declaredIndicators` 包含所有 mainIndicators 和 subIndicators 的 key
 /// 2. `_indicatorDataIndexs` 为每个 DataIndicatorKey 分配唯一 slot
 /// 3. `indicatorCount` 等于 DataIndicator 的数量
-/// 4. candle/time PaintObject 已创建
-/// 5. 主区/副区绘制队列为空（不含 main/sub PaintObject）
+/// 4. candle/time/main PaintObject 已创建
+/// 5. 副区绘制队列为空（默认配置无持久化 sub key）
+/// 6. 所有 slot index 在 [0, indicatorCount) 范围内
 library;
 
 import 'package:flexi_kline/flexi_kline.dart';
@@ -36,7 +37,7 @@ void main() {
 
   group(
     'Feature: widget-style-indicator-system-v4, '
-    'Property 1: syncAllIndicators 声明层完整性',
+    'Property 1: mountIndicators 声明层完整性',
     () {
       // ---------------------------------------------------------------
       // 属性 1：_declaredIndicators 包含所有 mainIndicators 和 subIndicators 的 key
@@ -50,7 +51,7 @@ void main() {
           final mainIndicators = input.main.map(createIndicator).toList();
           final subIndicators = input.sub.map(createIndicator).toList();
 
-          manager.syncAllIndicators(
+          manager.mountIndicators(
             candle: TestCandleIndicator(),
             time: TestTimeIndicator(),
             mainIndicators: mainIndicators,
@@ -89,7 +90,7 @@ void main() {
           final mainIndicators = input.main.map(createIndicator).toList();
           final subIndicators = input.sub.map(createIndicator).toList();
 
-          manager.syncAllIndicators(
+          manager.mountIndicators(
             candle: TestCandleIndicator(),
             time: TestTimeIndicator(),
             mainIndicators: mainIndicators,
@@ -128,7 +129,7 @@ void main() {
           final mainIndicators = input.main.map(createIndicator).toList();
           final subIndicators = input.sub.map(createIndicator).toList();
 
-          manager.syncAllIndicators(
+          manager.mountIndicators(
             candle: TestCandleIndicator(),
             time: TestTimeIndicator(),
             mainIndicators: mainIndicators,
@@ -148,10 +149,10 @@ void main() {
       );
 
       // ---------------------------------------------------------------
-      // 属性 4：candle/time PaintObject 已创建
+      // 属性 4：candle/time/main PaintObject 已创建
       // ---------------------------------------------------------------
       Glados(gen, ExploreConfig(numRuns: 100)).test(
-        'candle/time PaintObject 在 syncAllIndicators 后已创建',
+        'candle/time/main PaintObject 在 mountIndicators 后已创建',
         (input) {
           final manager = createManager();
           final context = TestPaintContext();
@@ -159,7 +160,7 @@ void main() {
           final mainIndicators = input.main.map(createIndicator).toList();
           final subIndicators = input.sub.map(createIndicator).toList();
 
-          manager.syncAllIndicators(
+          manager.mountIndicators(
             candle: TestCandleIndicator(),
             time: TestTimeIndicator(),
             mainIndicators: mainIndicators,
@@ -177,14 +178,19 @@ void main() {
             isA<TimeBasePaintObject>(),
             reason: 'timePaintObject 应已创建',
           );
+          expect(
+            manager.mainPaintObject,
+            isA<MainPaintObject>(),
+            reason: 'mainPaintObject 应已创建',
+          );
         },
       );
 
       // ---------------------------------------------------------------
-      // 属性 5：主区/副区绘制队列为空
+      // 属性 5：副区绘制队列为空（默认配置无持久化 sub key）
       // ---------------------------------------------------------------
       Glados(gen, ExploreConfig(numRuns: 100)).test(
-        '主区/副区绘制队列在 syncAllIndicators 后为空（不含 main/sub PaintObject）',
+        '副区绘制队列在 mountIndicators 后为空（默认配置无持久化 sub key）',
         (input) {
           final manager = createManager();
           final context = TestPaintContext();
@@ -192,7 +198,7 @@ void main() {
           final mainIndicators = input.main.map(createIndicator).toList();
           final subIndicators = input.sub.map(createIndicator).toList();
 
-          manager.syncAllIndicators(
+          manager.mountIndicators(
             candle: TestCandleIndicator(),
             time: TestTimeIndicator(),
             mainIndicators: mainIndicators,
@@ -220,7 +226,7 @@ void main() {
           final mainIndicators = input.main.map(createIndicator).toList();
           final subIndicators = input.sub.map(createIndicator).toList();
 
-          manager.syncAllIndicators(
+          manager.mountIndicators(
             candle: TestCandleIndicator(),
             time: TestTimeIndicator(),
             mainIndicators: mainIndicators,

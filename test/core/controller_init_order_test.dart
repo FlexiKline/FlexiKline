@@ -54,7 +54,7 @@ void main() {
       expect(controller.curKlineData.hasWaitingData, isTrue);
       expect(controller.curKlineData.isEmpty, isTrue);
 
-      controller.syncAllIndicators(
+      controller.mountIndicators(
         candle: TestCandleIndicator(),
         time: TestTimeIndicator(),
         mainIndicators: const [],

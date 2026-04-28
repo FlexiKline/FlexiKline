@@ -33,7 +33,7 @@ enum IndicatorType { data, business }
 
 /// 指标描述：类型 + 唯一 id + height
 ///
-/// [height] 用于区分同 key 不同配置的实例（syncIndicators diff 场景）。
+/// [height] 用于区分同 key 不同配置的实例（updateIndicators diff 场景）。
 /// 不需要区分配置时可忽略（默认 100）。
 class IndicatorDesc {
   const IndicatorDesc(this.type, this.id, [this.height = 100]);

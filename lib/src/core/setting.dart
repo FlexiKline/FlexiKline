@@ -30,7 +30,6 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
   void initState() {
     super.initState();
     logd('initState setting');
-    _paintObjectManager.init(this);
     _canvasSizeChangeListener.value = canvasRect;
     _subHeightListListener.value = getSubIndiatorHeights().toList(growable: false);
   }
@@ -417,19 +416,14 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
 
   /// Indicator operation ///
 
-  /// 首次全量同步指标（Widget initState 时调用）
-  ///
-  /// 注册 DataIndicatorKey → 分配 slot → 缓存 Indicator
-  /// → 创建 candle/time PaintObject（不创建 main/sub PaintObject）。
-  ///
-  /// 委托给 Manager 的 syncAllIndicators 方法。
-  void syncAllIndicators({
+  /// 挂载所有指标（Widget initState 时调用），委托给 [IndicatorPaintObjectManager.mountIndicators]。
+  void mountIndicators({
     required CandleBaseIndicator candle,
     required TimeBaseIndicator time,
     required List<Indicator> mainIndicators,
     required List<Indicator> subIndicators,
   }) {
-    _paintObjectManager.syncAllIndicators(
+    _paintObjectManager.mountIndicators(
       candle: candle,
       time: time,
       mainIndicators: mainIndicators,
@@ -438,15 +432,8 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
     );
   }
 
-  /// 增量同步指标（Widget didUpdateWidget 时调用）
-  ///
-  /// candle/time 无条件更新 → diff main/sub 声明集合
-  /// → 移除的指标回收 slot + 删缓存 + 销毁 PaintObject
-  /// → 新增的指标注册 slot + 缓存（不自动激活）
-  /// → 配置变化的指标更新缓存 + doDidUpdateIndicator。
-  ///
-  /// 委托给 Manager 的 syncIndicators 方法。
-  void syncIndicators({
+  /// 增量更新指标（Widget didUpdateWidget 时调用），委托给 [IndicatorPaintObjectManager.updateIndicators]。
+  void updateIndicators({
     required CandleBaseIndicator oldCandle,
     required CandleBaseIndicator newCandle,
     required TimeBaseIndicator oldTime,
@@ -456,7 +443,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
     required List<Indicator> oldSubIndicators,
     required List<Indicator> newSubIndicators,
   }) {
-    _paintObjectManager.syncIndicators(
+    _paintObjectManager.updateIndicators(
       oldCandle: oldCandle,
       newCandle: newCandle,
       oldTime: oldTime,
@@ -469,17 +456,11 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
     );
   }
 
-  /// 处理 Widget 挂载前暂存的待处理数据
+  /// 处理 Widget 挂载前暂存的待处理数据（mountIndicators + controller.initState 之后调用）。
   ///
-  /// 在 Widget initState 完成（syncAllIndicators + controller.initState 之后）时调用，
   /// 使用已确定的 indicatorCount 合并 _waitingData，对所有已激活指标执行 precompute，
-  /// 并触发 markRepaintChart。
-  ///
-  /// 委托给 StateBinding 的 flushPendingKlineData 方法。
-  void flushPendingKlineData() {
-    // 此方法由 StateBinding mixin 实现
-    // 这里仅作为公开 API 入口
-  }
+  /// 并触发 markRepaintChart。由 StateBinding mixin 实现。
+  void flushPendingKlineData() {}
 
   /// 检查指标是否在主区声明集合中
   bool hasRegisteredInMain(IIndicatorKey key) {
@@ -561,23 +542,6 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
     }
   }
 
-  /// 更新FlexiKlineConfig
-  // void updateFlexiKlineConfig({
-  //   bool updateIndicators = true,
-  //   bool updateDrawOverlays = true,
-  // }) {
-  //   _paintObjectManager.updateFlexiKlineConfig(
-  //     this,
-  //     updateIndicator: updateIndicators,
-  //   );
-  //   _invokeSizeChanged(force: updateIndicators);
-  //   _updateSubHeightList();
-  //   if (updateDrawOverlays && drawConfig.enable) {
-  //     _drawObjectManager.updateDrawOverlaysConfig(drawConfig);
-  //     markRepaintDraw();
-  //   }
-  // }
-
   /// SettingConfig
   @override
   SettingConfig get settingConfig => flexiKlineConfig.setting;
@@ -642,27 +606,6 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
 
   void updateDrawConfig(FlexiUpdater<DrawConfig> builder) {
     drawConfig = builder(drawConfig);
-  }
-
-  /// 获取[key]指定的指标实例
-  /// 1. 如果已载入, 则直接返回绘制对象的指标实例
-  /// 2. 如果未载入, 则从本地缓存中加载, 并创建指标实现.
-  // T? getIndicator<T extends Indicator>(IIndicatorKey key) {
-  //   return _paintObjectManager.getIndicator(key);
-  // }
-
-  /// 更新[indicator]指标配置
-  ///
-  /// WIS v4 模型下，指标配置由 Widget 参数声明，
-  /// 配置变更走 Widget params → didUpdateWidget → syncIndicators 路径。
-  /// 此方法仅保留运行时更新已激活 PaintObject 的能力，不再持久化。
-  @Deprecated('WIS v4 模型下，指标配置由 Widget 参数声明，'
-      '配置变更走 Widget params → didUpdateWidget → syncIndicators 路径。'
-      '请勿再通过 updateIndicator 持久化指标配置。')
-  bool updateIndicator<T extends Indicator>(T indicator) {
-    final updated = _paintObjectManager.updateIndicator(indicator);
-    if (updated) markRepaintChart();
-    return updated;
   }
 
   /// 获取蜡烛图指标配置

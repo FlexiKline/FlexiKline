@@ -179,15 +179,15 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
 
     logger = controller.logger;
 
-    /// 1. 声明层：注册 slot + 缓存 Indicator + 创建 candle/time PaintObject
-    controller.syncAllIndicators(
+    /// 1. 挂载指标：注册 slot + 缓存 Indicator + 创建所有 PaintObject + 恢复已选中指标
+    controller.mountIndicators(
       candle: widget.candle,
       time: widget.time,
       mainIndicators: widget.mainIndicators,
       subIndicators: widget.subIndicators,
     );
 
-    /// 2. 激活层：创建 MainPaintObject + 从持久化 key 恢复激活指标
+    /// 2. 同步 controller 生命周期
     controller.initState();
 
     /// 3. 处理挂载前暂存的数据
@@ -208,8 +208,8 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
     super.didUpdateWidget(oldWidget);
     logd('didUpdateWidget');
 
-    /// 增量同步：diff 声明集合 + 更新缓存 + 同步已激活 PaintObject
-    controller.syncIndicators(
+    /// 增量更新：diff 声明集合 + 更新缓存 + 同步已激活 PaintObject
+    controller.updateIndicators(
       oldCandle: oldWidget.candle,
       newCandle: widget.candle,
       oldTime: oldWidget.time,

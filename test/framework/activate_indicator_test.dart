@@ -40,7 +40,7 @@ void main() {
     () {
       /// **Validates: Requirements 1.3, 1.4**
       ///
-      /// 对于任意已通过 syncAllIndicators 声明的 Indicator 集合，以及该集合的
+      /// 对于任意已通过 mountIndicators 声明的 Indicator 集合，以及该集合的
       /// 任意子集 S，对 S 中每个 key 调用 addMainPaintObject 或
       /// addSubPaintObject 后，对应区域的 PaintObject 集合的 key 应恰好等于 S，
       /// 且每个 PaintObject 的 indicator 应与 _declaredIndicators 中缓存的实例一致。
@@ -62,7 +62,7 @@ void main() {
         ),
         ExploreConfig(numRuns: 100),
       ).test(
-        'syncAllIndicators + init 后 PaintObject 集合的 key 等于激活子集 S，'
+        'mountIndicators 后 PaintObject 集合的 key 等于激活子集 S，'
         '且每个 PaintObject 的 indicator 与缓存一致',
         (input) {
           final context = TestPaintContext();
@@ -84,17 +84,14 @@ void main() {
           );
           final manager = createManager(config);
 
-          // 1. 声明层：注册 slot + 缓存 Indicator
-          manager.syncAllIndicators(
+          // 1. 挂载指标：注册 slot + 缓存 + 创建 PaintObject + 恢复已选中指标
+          manager.mountIndicators(
             candle: TestCandleIndicator(),
             time: TestTimeIndicator(),
             mainIndicators: mainIndicators,
             subIndicators: subIndicators,
             context: context,
           );
-
-          // 2. 激活层：init() 从持久化 key 恢复
-          manager.init(context);
 
           // 3. 验证主区 PaintObject 集合的 key（排除 candle）
           final actualMainKeysFiltered = manager.mainIndicatorKeys.where((k) => k != candleIndicatorKey).toSet();
@@ -194,14 +191,13 @@ void main() {
           );
           final manager = createManager(config);
 
-          manager.syncAllIndicators(
+          manager.mountIndicators(
             candle: TestCandleIndicator(),
             time: TestTimeIndicator(),
             mainIndicators: mainIndicators,
             subIndicators: subIndicators,
             context: context,
           );
-          manager.init(context);
 
           // 记录激活后的 slot 映射快照
           final allKeys = <IIndicatorKey>{...allMainKeys, ...allSubKeys};
@@ -346,14 +342,13 @@ void main() {
           );
           final manager = createManager(config);
 
-          manager.syncAllIndicators(
+          manager.mountIndicators(
             candle: TestCandleIndicator(),
             time: TestTimeIndicator(),
             mainIndicators: mainIndicators,
             subIndicators: subIndicators,
             context: context,
           );
-          manager.init(context);
 
           // 验证主区激活 key 集合（排除 candle）
           final actualMainKeys = manager.mainIndicatorKeys.where((k) => k != candleIndicatorKey).toSet();

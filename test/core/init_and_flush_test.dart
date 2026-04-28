@@ -17,7 +17,7 @@
 /// **Validates: Requirements 3.1, 11.3, 11.4**
 ///
 /// 验证 FlexiKlineWidget.initState 中的调用顺序和 flushPendingKlineData 的功能：
-/// 1. 验证 syncAllIndicators → initState → flushPendingKlineData 的调用顺序
+/// 1. 验证 mountIndicators → initState → flushPendingKlineData 的调用顺序
 /// 2. 验证 Widget 挂载前数据暂存到 `_waitingData`
 /// 3. 验证 flushPendingKlineData 后正确合并数据
 library;
@@ -146,8 +146,8 @@ void main() {
     /// 验证 Widget.initState 中的调用顺序：
     /// 1. switchKlineData（创建 KlineData）
     /// 2. updateKlineData（数据暂存到 _waitingData）
-    /// 3. syncAllIndicators（注册 slot + 缓存 Indicator）
-    /// 4. controller.initState()（创建 MainPaintObject + 恢复激活指标）
+    /// 3. mountIndicators（注册 slot + 缓存 Indicator + 创建 PaintObject）
+    /// 4. controller.initState()（同步 controller 生命周期）
     /// 5. flushPendingKlineData()（合并 _waitingData）
     ///
     /// **Validates: Requirements 3.1, 11.3, 11.4**
@@ -162,11 +162,10 @@ void main() {
       // 注：实际的数据暂存发生在 StateBinding.updateKlineData 中
       expect(data.hasWaitingData, isFalse);
 
-      // 3. syncAllIndicators（注册 slot + 缓存 Indicator）
+      // 3. mountIndicators（注册 slot + 缓存 Indicator + 创建 PaintObject）
       // 注：这发生在 Manager 中
 
-      // 4. controller.initState()（创建 MainPaintObject + 恢复激活指标）
-      // 注：这发生在 Manager.init() 中
+      // 4. controller.initState()（同步 controller 生命周期）
 
       // 5. flushPendingKlineData()（合并 _waitingData）
       // 注：这发生在 StateBinding.flushPendingKlineData() 中

@@ -658,26 +658,3 @@ mixin PaintCandleHelperMixin<T extends Indicator> on PaintObject<T> {
     }
   }
 }
-
-// extension PaintObjectExt on PaintObject {
-//   /// 获取当前指标计算参数
-//   Map<IIndicatorKey, dynamic> getCalcParams() {
-//     if (calcParams != null) {
-//       return {key: calcParams};
-//     }
-//     return const <IIndicatorKey, dynamic>{};
-//   }
-// }
-
-// extension MultiPaintObjectExt on MainPaintObject {
-//   /// 收集[MainPaintObject]中子指标的计算参数
-//   Map<IIndicatorKey, dynamic> getCalcParams() {
-//     final params = <IIndicatorKey, dynamic>{};
-//     for (final object in children) {
-//       if (object.calcParams != null) {
-//         params[object.key] = object.calcParams;
-//       }
-//     }
-//     return params;
-//   }
-// }

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// 属性测试：syncIndicators 增量同步
+/// 属性测试：updateIndicators 增量更新
 ///
 /// 包含以下属性：
 /// - **Property 5: candle/time 无条件更新** — Validates: Requirements 4.2
@@ -64,7 +64,7 @@ void main() {
         ),
         ExploreConfig(numRuns: 100),
       ).test(
-        'syncIndicators 后 candle/time PaintObject 的 indicator 等于新实例',
+        'updateIndicators 后 candle/time PaintObject 的 indicator 等于新实例',
         (input) {
           final manager = createManager();
           final context = TestPaintContext();
@@ -74,8 +74,8 @@ void main() {
           final newCandle = TestCandleIndicator(height: input.newCandleH);
           final newTime = TestTimeIndicator(height: input.newTimeH);
 
-          // 1. 首次全量同步
-          manager.syncAllIndicators(
+          // 1. 首次挂载
+          manager.mountIndicators(
             candle: oldCandle,
             time: oldTime,
             mainIndicators: [],
@@ -86,8 +86,8 @@ void main() {
           expect(identical(manager.candlePaintObject.indicator, oldCandle), isTrue);
           expect(identical(manager.timePaintObject.indicator, oldTime), isTrue);
 
-          // 2. 增量同步（无条件更新 candle/time）
-          manager.syncIndicators(
+          // 2. 增量更新（无条件更新 candle/time）
+          manager.updateIndicators(
             oldCandle: oldCandle,
             newCandle: newCandle,
             oldTime: oldTime,
@@ -102,12 +102,12 @@ void main() {
           expect(
             identical(manager.candlePaintObject.indicator, newCandle),
             isTrue,
-            reason: 'syncIndicators 后 candlePaintObject.indicator 应为新实例',
+            reason: 'updateIndicators 后 candlePaintObject.indicator 应为新实例',
           );
           expect(
             identical(manager.timePaintObject.indicator, newTime),
             isTrue,
-            reason: 'syncIndicators 后 timePaintObject.indicator 应为新实例',
+            reason: 'updateIndicators 后 timePaintObject.indicator 应为新实例',
           );
         },
       );
@@ -167,15 +167,14 @@ void main() {
 
           final manager = createManager();
 
-          // 1. 首次全量同步
-          manager.syncAllIndicators(
+          // 1. 首次挂载
+          manager.mountIndicators(
             candle: TestCandleIndicator(),
             time: TestTimeIndicator(),
             mainIndicators: oldMainIndicators,
             subIndicators: oldSubIndicators,
             context: context,
           );
-          manager.init(context);
 
           // 记录同步前的状态
           final oldMainKeys = oldMainIndicators.map((i) => i.key).toSet();
@@ -190,8 +189,8 @@ void main() {
             }
           }
 
-          // 2. 增量同步
-          manager.syncIndicators(
+          // 2. 增量更新
+          manager.updateIndicators(
             oldCandle: TestCandleIndicator(),
             newCandle: TestCandleIndicator(),
             oldTime: TestTimeIndicator(),
@@ -304,22 +303,21 @@ void main() {
           final config = TestFlexiKlineConfiguration(mainChildren: mainChildrenKeys);
           final manager = createManager(config);
 
-          manager.syncAllIndicators(
+          manager.mountIndicators(
             candle: TestCandleIndicator(),
             time: TestTimeIndicator(),
             mainIndicators: oldMainIndicators,
             subIndicators: [],
             context: context,
           );
-          manager.init(context);
 
           // 验证指标已激活
           for (final pair in indicatorPairs) {
             expect(manager.mainIndicatorKeys.toSet().contains(pair.key), isTrue, reason: '${pair.key} 应已激活');
           }
 
-          // syncIndicators 传入 key 相同但 height 不同的新指标
-          manager.syncIndicators(
+          // updateIndicators 传入 key 相同但 height 不同的新指标
+          manager.updateIndicators(
             oldCandle: TestCandleIndicator(),
             newCandle: TestCandleIndicator(),
             oldTime: TestTimeIndicator(),

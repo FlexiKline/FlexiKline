@@ -471,7 +471,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
 
   /// 刷新挂载前暂存的待处理数据
   ///
-  /// 在 FlexiKlineWidget.initState 完成（syncAllIndicators + controller.initState 之后）时调用。
+  /// 在 FlexiKlineWidget.initState 完成（mountIndicators + controller.initState 之后）时调用。
   /// 检查 [curKlineData] 中是否有未合并的 `_waitingData`，若有则使用当前已确定的
   /// [indicatorCount] 合并数据并对所有已激活指标执行 precompute，最后触发 markRepaintChart。
   ///
