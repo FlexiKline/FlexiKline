@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 void printIterable<T>(Iterable<T> list, {String? tag}) {
   for (final val in list) {

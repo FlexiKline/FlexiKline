@@ -138,7 +138,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     _curKlineData = data;
     _notifySpecChange(data.spec);
     _notifyLoadingState(data.loadingState, data.key);
-    if (resetPaintDxOffset && _paintObjectManager.isInitialized) {
+    if (resetPaintDxOffset && isMounted) {
       paintDxOffset = getInitPaintDxOffset();
     }
     markRepaintChart(reset: true);
@@ -274,6 +274,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
       moveToInitialPositionCallback?.call();
       return;
     }
+    if (!isMounted) return;
     paintDxOffset = getInitPaintDxOffset();
     markRepaintChart();
     markRepaintDraw();
@@ -442,7 +443,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
 
     // Widget 未挂载完成前，mainPaintObject 尚未初始化。
     // 此时只暂存数据，等 flushPendingKlineData 统一处理。
-    if (!_paintObjectManager.isInitialized) {
+    if (!isMounted) {
       data.enqueueWaitingData(newList);
       return;
     }

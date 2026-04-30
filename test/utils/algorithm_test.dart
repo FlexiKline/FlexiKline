@@ -15,7 +15,7 @@
 import 'dart:math' as math;
 
 import 'package:flexi_kline/src/utils/algorithm_util.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/test_utils.dart';
@@ -129,7 +129,7 @@ void main() {
       // scale 从 2 翻倍到 4，线性增幅 100%，对数增幅应 < 50%
       final y2 = scaledDecelerate(2.0);
       final y4 = scaledDecelerate(4.0);
-      const linearGrowth = (4.0 - 2.0) / 2.0;       // 100%
+      const linearGrowth = (4.0 - 2.0) / 2.0; // 100%
       final logGrowth = (y4 - y2) / y2;
       expect(logGrowth, lessThan(linearGrowth));
     });
@@ -248,6 +248,4 @@ void main() {
       expect((a + b) / 2, closeTo(mid, 1e-9));
     });
   });
-
 }
-

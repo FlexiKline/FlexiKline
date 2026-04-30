@@ -22,6 +22,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
     logd('init setting');
     _candleWidth = settingConfig.candleWidth;
     _layoutMode = NormalLayoutMode(flexiKlineConfig.mainIndicator.size);
+    _lifecycleListener = FlexiStateNotifier(FlexiKlineLifecycle.initial);
     _canvasSizeChangeListener = FlexiStateNotifier(Rect.zero);
     _subHeightListListener = FlexiStateNotifier<List<double>>(const []);
   }
@@ -30,14 +31,20 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
   void initState() {
     super.initState();
     logd('initState setting');
-    _canvasSizeChangeListener.value = canvasRect;
-    _subHeightListListener.value = getSubIndiatorHeights().toList(growable: false);
+    // FixedLayoutMode 下将 _layoutMode.fixedSize 同步到 mainPaintObject.size
+    _syncMainPaintObjectLayout();
+    // build 阶段不能触发 listener 通知，用 setSilently 写入初始值，
+    // 订阅者 build 时直接读到正确值。
+    _canvasSizeChangeListener.setSilently(canvasRect);
+    _subHeightListListener.setSilently(getSubIndiatorHeights().toList(growable: false));
   }
 
   @override
   void dispose() {
     super.dispose();
     logd('dispose setting');
+    _lifecycleListener.value = FlexiKlineLifecycle.disposed;
+    _lifecycleListener.dispose();
     _canvasSizeChangeListener.dispose();
     _subHeightListListener.dispose();
   }
@@ -46,8 +53,12 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
   late double _candleWidth;
   double? _candleSpacing;
 
+  /// Controller 生命周期状态监听器。
+  late final FlexiStateNotifier<FlexiKlineLifecycle> _lifecycleListener;
+  ValueListenable<FlexiKlineLifecycle> get lifecycleListener => _lifecycleListener;
+
   /// 副区指标图高度变化监听(不包括时间轴高度)
-  late final ValueNotifier<List<double>> _subHeightListListener;
+  late final FlexiStateNotifier<List<double>> _subHeightListListener;
   ValueListenable<List<double>> get subHeightListListener => _subHeightListListener;
   void _updateSubHeightList() {
     _subHeightListListener.value = getSubIndiatorHeights().toList(growable: false);
@@ -152,17 +163,22 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
     // todo: 有小误差(0.12)
   }
 
+  /// [FixedLayoutMode] 下将 [_layoutMode.fixedSize] 同步到 [mainPaintObject.size]。
+  ///
+  /// [Normal]/[Adapt] 模式下由各 set 方法的 [doUpdateLayout] 直接维护，无需此方法。
+  bool _syncMainPaintObjectLayout() {
+    if (_layoutMode is! FixedLayoutMode) return false;
+    final size = mainRect.size;
+    if (size.equlas(mainSize)) return false;
+    return mainPaintObject.doUpdateLayout(
+      size: size,
+      padding: _zoomMainPaddingByScale(size.height / mainSize.height),
+    );
+  }
+
   void _invokeSizeChanged({bool force = false}) {
-    if (_layoutMode is FixedLayoutMode) {
-      final size = mainRect.size;
-      if (!size.equlas(mainSize)) {
-        final updated = mainPaintObject.doUpdateLayout(
-          size: size,
-          padding: _zoomMainPaddingByScale(size.height / mainSize.height),
-        );
-        force = updated || force;
-      }
-    }
+    final synced = _syncMainPaintObjectLayout();
+    force = synced || force;
     _canvasSizeChangeListener.value = canvasRect;
     if (force) _canvasSizeChangeListener.notifyListeners();
     markRepaintChart(reset: force);
@@ -171,7 +187,9 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
   }
 
   /// 设置绘制区域大小.
+  /// mount 前守卫：参数阶段就访问 subRectHeight，必须在此拦截。
   bool setCanvasSize(Size size) {
+    if (!isMounted) return false;
     return setMainSize(Size(size.width, size.height - subRectHeight));
   }
 
@@ -185,6 +203,8 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
       case FixedLayoutMode():
       // _layoutMode = _layoutMode.updateMainSize(size);
     }
+    // mount 前只更新 _layoutMode
+    if (!isMounted) return true;
     final changed = mainPaintObject.doUpdateLayout(
       size: size,
       padding: _zoomMainPaddingByScale(size.height / mainSize.height),
@@ -241,6 +261,8 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
       _layoutMode = AdaptLayoutMode(size, _layoutMode);
     }
 
+    // mount 前只更新 _layoutMode
+    if (!isMounted) return true;
     final changed = mainPaintObject.doUpdateLayout(size: _layoutMode.mainSize);
     _invokeSizeChanged(force: changed);
     return true;
@@ -253,7 +275,6 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
   bool setFixedLayoutMode(Size fixedSize) {
     if (!canSetMainSize(fixedSize)) return false;
 
-    final oldMainHeight = mainRect.height;
     if (_layoutMode.isFixed) {
       if ((_layoutMode as FixedLayoutMode).fixedSize == fixedSize) {
         return true;
@@ -262,6 +283,10 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
     } else {
       _layoutMode = FixedLayoutMode(fixedSize, _layoutMode);
     }
+
+    // mount 前只更新 _layoutMode
+    if (!isMounted) return true;
+    final oldMainHeight = mainRect.height;
     final changed = mainPaintObject.doUpdateLayout(
       size: mainRect.size,
       padding: _zoomMainPaddingByScale(mainRect.height / oldMainHeight),
@@ -378,6 +403,9 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
   /// 绘制区域宽度内, 可绘制的蜡烛数
   int get maxCandleCount => (mainChartWidth / candleActualWidth).ceil();
 
+  /// Controller 是否已完成挂载（PaintObject 已创建且生命周期处于 mounted）。
+  bool get isMounted => _paintObjectManager.isInitialized && _lifecycleListener.value.isMounted;
+
   Iterable<IIndicatorKey> get supportMainIndicatorKeys {
     return _paintObjectManager.supportMainIndicatorKeys;
   }
@@ -430,6 +458,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
       subIndicators: subIndicators,
       context: this,
     );
+    _lifecycleListener.value = FlexiKlineLifecycle.mounted;
   }
 
   /// 增量更新指标（Widget didUpdateWidget 时调用），委托给 [IndicatorPaintObjectManager.updateIndicators]。

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import 'package:flexi_kline/flexi_kline.dart';
-import 'package:flutter/material.dart' hide Overlay;
+import 'package:flutter/painting.dart';
 
 class TestFlexiKlineTheme implements IFlexiKlineTheme {
   @override
@@ -35,7 +35,7 @@ class TestFlexiKlineTheme implements IFlexiKlineTheme {
   Color get crossTextBg => const Color(0xFF111111);
 
   @override
-  Color get lastPriceBg => Colors.black54;
+  Color get lastPriceBg => const Color(0x8A000000); // Colors.black54
 
   @override
   Color get gridLineColor => const Color(0xffE9EDF0);
@@ -44,10 +44,10 @@ class TestFlexiKlineTheme implements IFlexiKlineTheme {
   Color get crosshairColor => const Color(0xFF000000);
 
   @override
-  Color get drawToolColor => Colors.blueAccent;
+  Color get drawToolColor => const Color(0xFF448AFF); // Colors.blueAccent;
 
   @override
-  Color get markLineColor => Colors.blue;
+  Color get markLineColor => const Color(0xFF2196F3); // Colors.blue;
 
   @override
   Color get textColor => const Color(0xFF000000);

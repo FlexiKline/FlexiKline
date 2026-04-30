@@ -45,6 +45,7 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding implements 
   @override
   void onThemeChanged([covariant IFlexiKlineTheme? oldTheme]) {
     super.onThemeChanged(oldTheme);
+    if (!isMounted) return;
     for (final paintObject in [mainPaintObject, ...subPaintObjects]) {
       paintObject.doDidChangeTheme();
     }

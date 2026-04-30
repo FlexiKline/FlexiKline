@@ -143,13 +143,46 @@ extension on KlineBindingBase {
   }
 }
 
+/// FlexiKline Controller 生命周期状态，借鉴 Flutter `_ElementLifecycle`。
+///
+/// ```
+/// initial ──mountIndicators()──▶ mounted ──dispose()──▶ disposed
+/// ```
+enum FlexiKlineLifecycle {
+  /// 构造完成，`init()` 已执行，PaintObject 尚未创建。
+  initial,
+
+  /// `mountIndicators()` 完成，PaintObject 就绪，可正常运行。
+  mounted,
+
+  /// `dispose()` 已调用，资源已释放。
+  disposed,
+}
+
+/// [FlexiKlineLifecycle] 便捷扩展。
+extension FlexiKlineLifecycleExt on FlexiKlineLifecycle {
+  /// 是否处于 [FlexiKlineLifecycle.mounted] 状态。
+  bool get isMounted => this == FlexiKlineLifecycle.mounted;
+}
+
 /// Kline状态通知
 class FlexiStateNotifier<T> extends ValueNotifier<T> {
   FlexiStateNotifier(super.value);
 
+  bool _silent = false;
+
   @override
   void notifyListeners() {
+    if (_silent) return;
     super.notifyListeners();
+  }
+
+  /// 静默赋值，不触发 [notifyListeners]。
+  /// 用于 build 阶段设置初始值，避免触发订阅者 setState。
+  void setSilently(T val) {
+    _silent = true;
+    value = val;
+    _silent = false;
   }
 
   void updateValue(T val) {
