@@ -175,7 +175,9 @@ final class IndicatorPaintObjectManager with FlexiLog {
     _candlePaintObject = _inflateIndicator<CandleBaseIndicator, CandleBasePaintObject>(candle, context);
     _timePaintObject = _inflateIndicator<TimeBaseIndicator, TimeBasePaintObject>(time, context);
 
-    final mainIndicator = flexiKlineConfig.mainIndicator;
+    /// copyWith() 隔离 config 与运行时 indicator 的引用，
+    /// 防止 doUpdateLayout → setSize 意外污染 flexiKlineConfig.mainIndicator.size。
+    final mainIndicator = flexiKlineConfig.mainIndicator.copyWith();
     _mainPaintObject = _inflateIndicator<MainPaintObjectIndicator, MainPaintObject>(mainIndicator, context);
 
     // 4. 将 candle 追加到主区，并从持久化 key 恢复已选中指标
@@ -453,7 +455,11 @@ final class IndicatorPaintObjectManager with FlexiLog {
   }
 
   /// 保存 FlexiKlineConfig（Activation_State + 布局信息）。
-  /// 不再持久化单个指标配置。
+  ///
+  /// 保存规则（移动端与 Web/桌面端统一）：
+  /// - Normal：保存宽高（用户完全控制尺寸）
+  /// - Adapt：宽度从 prevMode 取（保留进入 Adapt 前的用户调整），高度保存（用户可拖拽调整）
+  /// - Fixed：完全不动（横屏/全屏是临时状态，不应污染持久化配置）
   void storeFlexiKlineConfig({
     required LayoutMode layoutMode,
   }) {
@@ -462,7 +468,10 @@ final class IndicatorPaintObjectManager with FlexiLog {
     flexiKlineConfig.mainIndicator = mainPaintObject.indicator.copyWith(
       size: switch (layoutMode) {
         NormalLayoutMode() => mainPaintObject.size,
-        AdaptLayoutMode() => PlatformUtil.isMobile ? configMainSize : mainPaintObject.size,
+        AdaptLayoutMode(prevMode: final prev) => Size(
+            prev?.mainSize.width ?? configMainSize.width,
+            mainPaintObject.height,
+          ),
         FixedLayoutMode() => configMainSize,
       },
     );

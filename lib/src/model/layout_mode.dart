@@ -14,6 +14,26 @@
 
 import 'dart:ui';
 
+/// [FlexiKlineWidget] 的布局类型，决定 Widget 层的构建策略。
+///
+/// - [adapt]：默认值。内部用 LayoutBuilder 包裹，宽度跟随父容器约束，
+///   高度由用户控制。适用于大多数场景（竖屏、折叠屏、Web/桌面）。
+/// - [fixed]：内部用 LayoutBuilder 包裹，宽高都跟随父容器约束。
+///   适用于横屏/全屏场景，图表撑满可用空间。
+/// - [normal]：不使用 LayoutBuilder，宽高完全由用户代码控制
+///   （通过 [setMainSize] 等 API）。适用于嵌入式图表、多图表并排等
+///   需要精确控制尺寸的场景。
+enum FlexiLayoutType {
+  /// 自适应模式：宽度跟随父容器，高度用户可调。
+  adapt,
+
+  /// 固定模式：宽高都跟随父容器（横屏/全屏）。
+  fixed,
+
+  /// 正常模式：宽高完全由用户代码控制。
+  normal,
+}
+
 /// 布局模式
 sealed class LayoutMode {
   const LayoutMode(this.prevMode);

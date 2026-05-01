@@ -248,7 +248,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
 
   /// 自适应[FlexiKlineWidget]所在父组件的布局的变化
   /// 注: 仅适配主区的宽度变化
-  /// 这主要是通过[FlexiKlineWidget]的autoAdaptLayout配置决定, 并会导致无法手动调整[FlexiKlineWidget]的宽度.
+  /// 这主要是通过[FlexiKlineWidget]的[FlexiLayoutType.adapt]配置决定, 并会导致无法手动调整[FlexiKlineWidget]的宽度.
   bool setAdaptLayoutMode(Size size) {
     if (!canSetMainSize(size)) return false;
 

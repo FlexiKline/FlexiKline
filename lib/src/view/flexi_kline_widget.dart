@@ -36,7 +36,7 @@ typedef MagnifierDecorationShapeBuilder = ShapeBorder Function(
 );
 
 class FlexiKlineWidget extends StatefulWidget {
-  FlexiKlineWidget({
+  const FlexiKlineWidget({
     super.key,
     required this.controller,
     required this.candle,
@@ -49,8 +49,8 @@ class FlexiKlineWidget extends StatefulWidget {
     this.mainSize,
     this.mainForegroundViewBuilder,
     this.mainBackgroundView,
-    bool? autoAdaptLayout,
-    bool? isTouchDevice,
+    this.layoutType = FlexiLayoutType.adapt,
+    this.isTouchDevice,
     this.onDoubleTap,
     this.drawToolbar,
     this.drawToolbarInitHeight = 50,
@@ -59,8 +59,7 @@ class FlexiKlineWidget extends StatefulWidget {
     this.exitZoomButtonBuilder,
     this.exitZoomButtonAlignment = AlignmentDirectional.bottomEnd,
     this.exitZoomButtonPadding = const EdgeInsetsDirectional.all(12),
-  })  : isTouchDevice = isTouchDevice ?? PlatformUtil.isTouch,
-        autoAdaptLayout = autoAdaptLayout ?? !PlatformUtil.isMobile;
+  });
 
   FlexiKlineWidget.indicator({
     super.key,
@@ -72,8 +71,8 @@ class FlexiKlineWidget extends StatefulWidget {
     this.mainSize,
     this.mainForegroundViewBuilder,
     this.mainBackgroundView,
-    bool? autoAdaptLayout,
-    bool? isTouchDevice,
+    this.layoutType = FlexiLayoutType.adapt,
+    this.isTouchDevice,
     this.onDoubleTap,
     this.drawToolbar,
     this.drawToolbarInitHeight = 50,
@@ -85,9 +84,7 @@ class FlexiKlineWidget extends StatefulWidget {
   })  : candle = indicatorConfig.candle,
         time = indicatorConfig.time,
         mainIndicators = indicatorConfig.mainIndicators,
-        subIndicators = indicatorConfig.subIndicators,
-        isTouchDevice = isTouchDevice ?? PlatformUtil.isTouch,
-        autoAdaptLayout = autoAdaptLayout ?? !PlatformUtil.isMobile;
+        subIndicators = indicatorConfig.subIndicators;
 
   final FlexiKlineController controller;
 
@@ -131,13 +128,18 @@ class FlexiKlineWidget extends StatefulWidget {
   /// 是否保持[drawToolbar]完全可见.
   final bool keepDrawToolbarFullyVisible;
 
-  /// 是否自动适配所在布局约束.
-  /// 在可以动态调整窗口大小的设备上, 此值为true, 将会动态适配窗口的调整; 否则, 请自行控制.
-  /// 非移动设备默认为true.
-  final bool autoAdaptLayout;
+  /// 布局类型，决定 Widget 层的构建策略。
+  ///
+  /// - [FlexiLayoutType.adapt]（默认）：内部用 LayoutBuilder 包裹，
+  ///   宽度跟随父容器约束，高度由用户控制。
+  /// - [FlexiLayoutType.fixed]：内部用 LayoutBuilder 包裹，
+  ///   宽高都跟随父容器约束（横屏/全屏场景）。
+  /// - [FlexiLayoutType.normal]：不使用 LayoutBuilder，
+  ///   宽高完全由用户代码控制。
+  final FlexiLayoutType layoutType;
 
   /// 是否是触摸设备.
-  final bool isTouchDevice;
+  final bool? isTouchDevice;
 
   /// 绘制点指针放大镜DecorationShape.
   final MagnifierDecorationShapeBuilder? magnifierDecorationShapeBuilder;
@@ -158,6 +160,8 @@ class FlexiKlineWidget extends StatefulWidget {
 class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBindingObserver, FlexiLog {
   @override
   String get logTag => 'FlexiKlineWidget';
+
+  bool get isTouchDevice => widget.isTouchDevice ?? PlatformUtil.isTouch;
 
   /// 绘制工具条globalKey: 用于获取其大小
   GlobalKey? _drawToolbarKey;
@@ -249,26 +253,34 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
 
   @override
   Widget build(BuildContext context) {
-    if (widget.autoAdaptLayout) {
-      return LayoutBuilder(
-        builder: (context, constraints) {
-          switch (controller.layoutMode) {
-            case FixedLayoutMode(fixedSize: final size):
-              controller.setFixedLayoutMode(Size(
-                constraints.biggest.width,
-                size.height,
-              ));
-            case NormalLayoutMode(mainSize: final size):
-            case AdaptLayoutMode(mainSize: final size):
-              controller.setAdaptLayoutMode(
-                Size(constraints.biggest.width, size.height),
-              );
-          }
-          return _buildKlineContainer(context);
-        },
-      );
-    } else {
-      return _buildKlineContainer(context);
+    switch (widget.layoutType) {
+      case FlexiLayoutType.normal:
+        return _buildKlineContainer(context);
+      case FlexiLayoutType.adapt:
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            switch (controller.layoutMode) {
+              case FixedLayoutMode(fixedSize: final size):
+                controller.setFixedLayoutMode(Size(
+                  constraints.biggest.width,
+                  size.height,
+                ));
+              case NormalLayoutMode(mainSize: final size):
+              case AdaptLayoutMode(mainSize: final size):
+                controller.setAdaptLayoutMode(
+                  Size(constraints.biggest.width, size.height),
+                );
+            }
+            return _buildKlineContainer(context);
+          },
+        );
+      case FlexiLayoutType.fixed:
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            controller.setFixedLayoutMode(constraints.biggest);
+            return _buildKlineContainer(context);
+          },
+        );
     }
   }
 
@@ -334,7 +346,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
               isComplex: true,
             ),
           ),
-          widget.isTouchDevice
+          isTouchDevice
               ? TouchGestureDetector(
                   key: const ValueKey('TouchGestureDetector'),
                   controller: controller,
