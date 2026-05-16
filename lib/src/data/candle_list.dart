@@ -75,41 +75,64 @@ mixin CandleListData on BaseData {
     return result;
   }
 
-  /// 合并[list]和[candleList]为一个新数组
-  /// 约定: [candleList]和[list]都是按时间倒序排好的, 即最近/新的蜡烛数据以数组0开始依次存放.
-  /// 去重: 如两个数组拼接过程中发现重复的, 要去掉[list]中重复的元素.
-  /// return: 返回新列表中被更新的范围[start] ~ [end]
+  /// 合并 [candleList] 到当前 [list] 中.
+  ///
+  /// 约定: [candleList] 与 [list] 都按时间倒序排列, 即最新的蜡烛位于 0 号位.
+  /// 去重: 如两数组在时间维度上有重叠, 重叠位置以 [candleList] 为准.
+  /// 返回: 新列表中被更新的范围 [start] ~ [end], 没有更新返回 null.
   Range? mergeCandleList(List<ICandleModel> candleList) {
     if (candleList.isEmpty) {
       logw('mergeCandleList candleList is empty!');
       return null;
     }
 
-    final newList = candleList.map((e) => e.toFlexiCandleModel(indicatorCount, computeMode));
+    final newList = candleList.map((e) => e.toFlexiCandleModel(indicatorCount, computeMode)).toList(growable: false);
+
     if (list.isEmpty) {
       logw('mergeCandleList Use candleList directly!');
       _list = List.of(newList);
       return Range(0, newList.length);
     }
 
-    if (list.first.ts <= newList.first.ts) {
+    final firstNew = newList.first.ts;
+    final lastNew = newList.last.ts;
+
+    if (list.first.ts <= firstNew) {
       int start = 0;
-      while (start < list.length && list[start].ts >= newList.last.ts) {
+      while (start < list.length && list[start].ts >= lastNew) {
         start++;
       }
-      final curIterable = list.getRange(start, list.length);
-      _list = List.of(newList, growable: true)..addAll(curIterable);
-      // _list = List.of([...newList, ...curIterable]);
+
+      if (newList.length == start) {
+        // 快路径: 头部对齐且数量一致, 原地覆盖前 N 根, 不重建 List.
+        for (int i = 0; i < newList.length; i++) {
+          _list[i] = newList[i];
+        }
+      } else {
+        _list = List.of(newList, growable: true)..addAll(list.getRange(start, list.length));
+      }
       return Range(0, newList.length);
-    } else if (list.last.ts >= newList.last.ts) {
+    } else if (list.last.ts >= lastNew) {
       int end = list.length - 1;
-      while (end >= 0 && list[end].ts <= newList.first.ts) {
+      while (end >= 0 && list[end].ts <= firstNew) {
         end--;
       }
-      final curIterable = list.getRange(0, end + 1);
-      _list = List.of(curIterable, growable: true)..addAll(newList);
-      // _list =  List.of([...curIterable, ...newList]);
-      return Range(end + 1, _list.length);
+      final tailStart = end + 1;
+      final oldTailCount = list.length - tailStart;
+
+      if (newList.length == oldTailCount) {
+        // 快路径: 尾部对齐且数量一致, 原地覆盖末尾 N 根.
+        for (int i = 0; i < newList.length; i++) {
+          _list[tailStart + i] = newList[i];
+        }
+      } else {
+        // 原地截断 + 追加, 避免把 [0, tailStart) 段元素重复拷一次.
+        if (tailStart < _list.length) {
+          _list.length = tailStart;
+        }
+        _list.addAll(newList);
+      }
+      return Range(tailStart, _list.length);
     }
     return null;
   }

@@ -340,6 +340,11 @@ extension MainPaintManagerExt<T extends MainPaintObjectIndicator> on MainPaintOb
     final old = children.append(object);
     indicator.children.add(object.key);
     old?.dispose();
+    // 子指标增删后必须让主区下一帧走完整 [doInitState]。
+    // 否则在 start/end 未变时 [MainPaintObject.doInitState] 会早退，新子对象收不到 [setMinMax]，
+    // combine 指标（如 MA）仍用默认 [MinMax.zero]，[valueToDy] 会把所有点画在底部一条线上。
+    _minMax = null;
+    _smoothMinMax = null;
   }
 
   bool deletePaintObject(IIndicatorKey key) {
@@ -351,6 +356,8 @@ extension MainPaintManagerExt<T extends MainPaintObjectIndicator> on MainPaintOb
         hasRemove = true;
         _tmpHeight = null;
         _tmpPadding = null;
+        _minMax = null;
+        _smoothMinMax = null;
         return true;
       }
       return false;

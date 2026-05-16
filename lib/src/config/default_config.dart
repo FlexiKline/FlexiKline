@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import '../constant.dart';
 import '../framework/export.dart';
 import '../indicators/export.dart';
 import 'cross_config/cross_config.dart';
@@ -41,12 +40,7 @@ mixin FlexiKlineThemeConfigurationMixin implements IConfiguration {
 
   @override
   IndicatorBuilder<CandleIndicator> get candleIndicatorBuilder {
-    return (json) =>
-        jsonToInstance(json, CandleIndicator.fromJson) ??
-        CandleIndicator(intervalChartTypes: {
-          interval1s: FlexiChartType.lineNormal,
-          interval1m: FlexiChartType.lineNormal,
-        });
+    return (json) => jsonToInstance(json, CandleIndicator.fromJson) ?? CandleIndicator();
   }
 
   @override

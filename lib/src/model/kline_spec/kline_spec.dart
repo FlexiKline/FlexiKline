@@ -41,8 +41,8 @@ enum KlineLoadingState {
 class KlineSpec {
   const KlineSpec({
     required this.symbol,
-    this.interval = interval1D,
-    this.limit = 100,
+    required this.interval,
+    this.limit = 200,
     this.precision = defaultPrecision,
     this.from,
     this.to,
@@ -52,10 +52,10 @@ class KlineSpec {
   /// 交易对标识，如 BTC-USDT、AAPL
   final String symbol;
 
-  /// 时间粒度，默认 1D
+  /// 时间粒度
   final ITimeInterval interval;
 
-  /// 分页条数，最大 300，默认 100
+  /// 分页条数，默认 200.
   final int limit;
 
   /// 分页游标起点（更旧一侧），毫秒时间戳

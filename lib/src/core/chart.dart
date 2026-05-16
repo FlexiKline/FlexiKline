@@ -68,6 +68,7 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding implements 
     return _chartZoomSlideBarRect;
   }
 
+  @override
   Rect get chartZoomSlideBarRect => _chartZoomSlideBarRect.value;
 
   /// Latest Price ///

@@ -16,7 +16,6 @@ library;
 
 import 'package:flutter/foundation.dart';
 
-import '../constant.dart';
 import '../extension/export.dart';
 import '../framework/chart/indicator.dart';
 import '../framework/logger.dart';

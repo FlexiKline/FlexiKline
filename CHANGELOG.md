@@ -1,3 +1,13 @@
+## 2.1.1
+* Optimize `mergeCandleList` performance: add in-place fast paths for head/tail aligned updates to reduce unnecessary list copies on hot path.
+* Fix `getLoadMoreSpec()` from/to direction for loading more historical data.
+* Fix combine sub-indicator (e.g. MA) min/max not refreshed after add/remove, which caused lines to be drawn at chart bottom.
+* Fix candle interval chart-type lookup to use `ITimeInterval` equality instead of milliseconds comparison.
+* Expose `chartZoomSlideBarRect` on `IPaintContext` and indicator paint context for custom hit-testing or overlay layout.
+* Remove built-in interval constants (`interval1m`, `interval1D`, etc.) from `constant.dart`; use `FlexiTimeInterval` or custom `ITimeInterval` implementations instead (Breaking Changes).
+* `KlineSpec.interval` is now required; default `limit` changed from 100 to 200.
+* Default `CandleIndicator` no longer pre-configures line chart for 1s/1m intervals.
+
 ## 2.1.0
 * Simplify configuration system: config color fields are now nullable, theme colors are injected at paint time via .ensure() pattern (Breaking Changes).
 * Decouple theme colors from config objects: replace hardcoded color defaults with lazy injection mechanism (Breaking Changes).
