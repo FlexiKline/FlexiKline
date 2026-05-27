@@ -15,16 +15,12 @@
 import 'core/core.dart';
 
 class FlexiKlineController extends KlineBindingBase
-    with
-        SettingBinding,
-        StateBinding,
-        GridBinding,
-        ChartBinding,
-        CrossBinding,
-        DrawBinding {
+    with SettingBinding, StateBinding, GridBinding, ChartBinding, CrossBinding, DrawBinding {
   FlexiKlineController({
     required super.configuration,
     super.autoSave,
+    super.initialLayoutMode,
+    super.initialFixedSize,
     super.subIndicatorMaxCount,
     super.logger,
     super.klineDataCacheCapacity,

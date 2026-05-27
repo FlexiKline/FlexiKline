@@ -25,8 +25,7 @@ const defaultThrottleTime = Duration(milliseconds: 200);
 /// 获取当前设备刷新率
 double? _currentFps;
 double get currentFps {
-  return _currentFps ??=
-      SchedulerBinding.instance.platformDispatcher.views.first.display.refreshRate;
+  return _currentFps ??= SchedulerBinding.instance.platformDispatcher.views.first.display.refreshRate;
 }
 
 /// 当前设备帧刷新率间隔

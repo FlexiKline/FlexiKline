@@ -12,132 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:ui';
-
-/// [FlexiKlineWidget] 的布局类型，决定 Widget 层的构建策略。
-///
-/// - [adapt]：默认值。内部用 LayoutBuilder 包裹，宽度跟随父容器约束，
-///   高度由用户控制。适用于大多数场景（竖屏、折叠屏、Web/桌面）。
-/// - [fixed]：内部用 LayoutBuilder 包裹，宽高都跟随父容器约束。
-///   适用于横屏/全屏场景，图表撑满可用空间。
-/// - [normal]：不使用 LayoutBuilder，宽高完全由用户代码控制
-///   （通过 [setMainSize] 等 API）。适用于嵌入式图表、多图表并排等
-///   需要精确控制尺寸的场景。
-enum FlexiLayoutType {
-  /// 自适应模式：宽度跟随父容器，高度用户可调。
+/// FlexiKline 的布局模式，决定画布尺寸来源。
+enum FlexiLayoutMode {
+  /// 自适应模式（默认）：宽度跟随父约束，高度由主区配置或拖拽控制。
+  ///
+  /// 新增副区指标时，总高度增长，主区不被压缩。
   adapt,
 
-  /// 固定模式：宽高都跟随父容器（横屏/全屏）。
+  /// 固定模式：画布尺寸完全固定（横屏/全屏）。
+  ///
+  /// 新增副区指标时，总高度不变，主区与副区在固定高度内重新分配。
+  /// 父约束无限时，需通过 `initialFixedSize` 或 `setFixedLayoutMode` 提供尺寸。
   fixed,
-
-  /// 正常模式：宽高完全由用户代码控制。
-  normal,
-}
-
-/// 布局模式
-sealed class LayoutMode {
-  const LayoutMode(this.prevMode);
-
-  final LayoutMode? prevMode;
-
-  Size get mainSize;
-
-  /// 更新当前布局模式的[size]
-  /// [sync] 是否同步到[mainSize]中.
-  ///   Adapt模式下仅同步更新高度
-  LayoutMode update(Size size, [bool sync = false]);
-
-  bool get isFixed => this is FixedLayoutMode;
-  bool get isAdapt => this is AdaptLayoutMode;
-  bool get isNormal => this is NormalLayoutMode;
-}
-
-/// 正常模式(可自由调节宽高)
-class NormalLayoutMode extends LayoutMode {
-  const NormalLayoutMode(this.mainSize) : super(null);
-
-  /// 主区正常模式下大小
-  @override
-  final Size mainSize;
-
-  @override
-  NormalLayoutMode update(Size size, [bool sync = false]) {
-    return NormalLayoutMode(size);
-  }
-}
-
-/// 自适应模式(Web/桌面端根据父布局[宽度]变化而变化)
-class AdaptLayoutMode extends LayoutMode {
-  /// 适配模式可以从正常模式进入
-  const AdaptLayoutMode._(this.mainSize, [NormalLayoutMode? mode]) : super(mode);
-
-  /// 根据[mainSize]与[mode]生成AdaptLayoutMode
-  factory AdaptLayoutMode(Size mainSize, [LayoutMode? mode]) {
-    switch (mode) {
-      case null:
-        return AdaptLayoutMode._(mainSize);
-      case NormalLayoutMode():
-        return AdaptLayoutMode._(mainSize, mode);
-      case AdaptLayoutMode():
-      case FixedLayoutMode():
-        return AdaptLayoutMode._(
-          mainSize,
-          mode.prevMode is NormalLayoutMode ? mode.prevMode as NormalLayoutMode : null,
-        );
-    }
-  }
-
-  /// 主区适配宽度模式下大小
-  @override
-  final Size mainSize;
-
-  @override
-  AdaptLayoutMode update(Size size, [bool sync = false]) {
-    if (prevMode != null && prevMode is NormalLayoutMode) {
-      if (sync) {
-        return AdaptLayoutMode._(
-          size,
-          NormalLayoutMode(Size(
-            prevMode!.mainSize.width,
-            size.height,
-          )),
-        );
-      } else {
-        return AdaptLayoutMode._(size, prevMode as NormalLayoutMode);
-      }
-    }
-    return AdaptLayoutMode._(size);
-  }
-}
-
-/// 固定大小模式(全屏/横屏)
-class FixedLayoutMode extends LayoutMode {
-  const FixedLayoutMode._(this.fixedSize, LayoutMode mode) : super(mode);
-
-  /// 根据[fixedSize]和[mode]生成FixedLayoutMode
-  factory FixedLayoutMode(Size fixedSize, LayoutMode mode) {
-    switch (mode) {
-      case NormalLayoutMode():
-      case AdaptLayoutMode():
-        return FixedLayoutMode._(fixedSize, mode);
-      case FixedLayoutMode():
-        assert(mode.prevMode != null, 'fixed prevMode must cannot be null');
-        return FixedLayoutMode._(fixedSize, mode.prevMode!);
-    }
-  }
-
-  /// 整体绘制区域固定大小
-  final Size fixedSize;
-
-  @override
-  Size get mainSize {
-    assert(prevMode != null, 'prevMode must cannot be null');
-    return prevMode!.mainSize;
-  }
-
-  @override
-  FixedLayoutMode update(Size size, [bool sync = false]) {
-    assert(prevMode != null, 'prevMode must cannot be null');
-    return FixedLayoutMode._(size, prevMode!);
-  }
 }

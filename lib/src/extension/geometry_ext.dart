@@ -188,7 +188,8 @@ extension FlexiSizeExt on Size {
   bool get nonzero => width > 0 || height > 0;
 
   /// 等于(带浮点数计算误差的判断)
-  bool equlas(Size size, {double precision = precisionError}) {
+  bool equlas(Size? size, {double precision = precisionError}) {
+    if (size == null) return false;
     return (width - size.width).abs() < precision && (height - size.height).abs() < precision;
   }
 

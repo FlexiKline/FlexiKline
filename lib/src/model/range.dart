@@ -39,10 +39,7 @@ final class Range {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is Range &&
-          runtimeType == other.runtimeType &&
-          start == other.start &&
-          end == other.end;
+      other is Range && runtimeType == other.runtimeType && start == other.start && end == other.end;
 
   @override
   String toString() {

@@ -14,9 +14,9 @@
 
 part of 'core.dart';
 
-/// 负责Grid图层的绘制
+/// 负责 Grid 图层绘制。
 ///
-/// 绘制底层的网络
+/// 包含网格线与指标高度拖拽线。
 mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
   @override
   void initState() {
@@ -46,14 +46,14 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
 
   void paintGrid(Canvas canvas, Size size) {
     if (gridConfig.show) {
-      /// 绘制horizontal轴 Grid 线
+      // 横向网格线
       _paintHorizontalGrid(canvas, size);
 
-      /// 绘制Vertical轴 Grid 线
+      // 纵向网格线
       _paintVerticalGrid(canvas, size);
     }
 
-    /// 绘制拖拽分隔线
+    // 拖拽分隔线
     if (gridConfig.isAllowDragIndicatorHeight) {
       _paintDragableLine(canvas, size);
     }
@@ -74,7 +74,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
     final lastObj = list.lastOrNull;
     for (final object in [mainPaintObject, ...list]) {
       if (isFixedLayoutMode && object == lastObj) {
-        // 如果是固定布局模式, 最后一个指标图不能拖动
+        // fixed 下最后一个副区不能继续向下拖动。
         return;
       }
       final objRect = object.drawableRect;
@@ -88,7 +88,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
             themeColor: theme.markLineColor,
           );
         } else if (gridConfig.draggingBgOpacity > 0) {
-          // 绘制正在拖拽的object的底部线
+          // 正在拖拽的底部热区。
           canvas.drawRectBackground(
             offset: Offset(
               objRect.left,
@@ -112,7 +112,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
             );
           }
         } else if (gridConfig.dragBgOpacity > 0) {
-          // 绘制当前object线底部拖拽标志
+          // 可拖拽的底部热区。
           canvas.drawRectBackground(
             offset: Offset(
               objRect.left,
@@ -126,7 +126,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
     }
   }
 
-  /// 绘制horizontal轴 Grid 线
+  /// 绘制横向网格线。
   void _paintHorizontalGrid(Canvas canvas, Size size) {
     if (!gridConfig.horizontal.show) return;
     final main = mainRect;
@@ -134,7 +134,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
 
     double dy = main.top;
 
-    // 绘制Top边框线
+    // 顶部边框线
     canvas.drawLineByConfig(
       Path()
         ..moveTo(main.left, dy)
@@ -143,7 +143,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
       themeColor: theme.gridLineColor,
     );
 
-    // 绘制主图网格横线
+    // 主区网格线
     final step = main.bottom / gridConfig.horizontal.count;
     for (int i = 1; i < gridConfig.horizontal.count; i++) {
       dy = i * step;
@@ -156,7 +156,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
       );
     }
 
-    // 绘制主图mainDrawBottom线
+    // 主区底部分隔线
     canvas.drawLineByConfig(
       Path()
         ..moveTo(main.left, main.bottom)
@@ -165,8 +165,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
       themeColor: theme.gridLineColor,
     );
 
-    /// 副图区域
-    // 绘制每一个副图的底部线
+    // 副区底部分隔线
     double height = 0.0;
     for (final object in subPaintObjects) {
       height += object.height;
@@ -181,7 +180,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
     }
   }
 
-  /// 绘制Vertical轴 Grid 线
+  /// 绘制纵向网格线。
   void _paintVerticalGrid(Canvas canvas, Size size) {
     if (!gridConfig.vertical.show) return;
     final main = mainRect;
@@ -189,7 +188,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
     double dx = main.left;
     final step = main.right / gridConfig.vertical.count;
 
-    // 绘制左边框线
+    // 左边框线
     canvas.drawLineByConfig(
       Path()
         ..moveTo(dx, main.top)
@@ -198,7 +197,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
       themeColor: theme.gridLineColor,
     );
 
-    // 计算排除时间指标后的top和bottom
+    // 时间轴不绘制纵向副区网格线。
     double top = sub.top;
     double bottom = sub.bottom;
     switch (timePaintObject.position) {
@@ -208,11 +207,11 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
         bottom -= timePaintObject.height;
     }
 
-    // 绘制主区/副区的Vertical线
+    // 主区与副区纵向网格线
     for (int i = 1; i < gridConfig.vertical.count; i++) {
       dx = i * step;
 
-      /// 绘制主区的Grid竖线
+      // 主区竖线
       canvas.drawLineByConfig(
         Path()
           ..moveTo(dx, main.top)
@@ -221,7 +220,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
         themeColor: theme.gridLineColor,
       );
 
-      /// 绘制副区Grid竖线
+      // 副区竖线
       canvas.drawLineByConfig(
         Path()
           ..moveTo(dx, top)
@@ -231,7 +230,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
       );
     }
 
-    // 绘制右边框线
+    // 右边框线
     canvas.drawLineByConfig(
       Path()
         ..moveTo(main.right, main.top)
@@ -241,7 +240,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
     );
   }
 
-  /// 测试[position]是否命中指标图边界
+  /// 测试 [position] 是否命中指标分隔线。
   bool onGridMoveStart(Offset position) {
     _upObject = _downObject = null;
     if (!gridConfig.isAllowDragIndicatorHeight) return false;
@@ -260,13 +259,12 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
         continue;
       }
       if (_upObject != null) {
-        // if (object.drawableRect.hitTestTop(dy)) {
         _downObject = object;
         break;
       }
     }
 
-    // 注: 固定模式下不允许调整画布的高度(即_downObject不能为空)
+    // fixed 下只能在两个区域之间分配高度，不能改变画布总高度。
     if (_upObject != null && (!isFixedLayoutMode || _downObject != null)) {
       markRepaintGrid();
       return true;
@@ -275,13 +273,13 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
     return false;
   }
 
-  /// 更新指标高度
+  /// 拖拽更新指标高度。
   void onGridMoveUpdate(GestureData data) {
     if (!isStartDragGrid) return;
 
     final deltaDy = data.delta.dy;
     if (deltaDy != 0) {
-      // >0 向下移动; <0 向上移动
+      // >0 向下，<0 向上。
       final bool isMainIndicator = _upObject is MainPaintObject;
 
       final subMinHeight = settingConfig.subMinHeight;
@@ -310,8 +308,8 @@ mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
           setMainSize(Size(canvasWidth, upHeight));
         } else {
           _upObject?.doUpdateLayout(height: upHeight);
-          // downObject为空说明[_upObject]已是最底部的指标, 此时向下向上移动将会导致整个canvas区域变化, 固force需要通知整个绘制区域高度.
-          _invokeSizeChanged(force: true);
+          // 最底部副区改变高度会改变 adapt 画布总高度，需要强制通知。
+          _notifyCanvasSizeChanged(force: true);
         }
       }
     }

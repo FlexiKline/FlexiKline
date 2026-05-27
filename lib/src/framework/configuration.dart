@@ -136,7 +136,7 @@ extension IConfigurationExt on IConfiguration {
     });
   }
 
-  /// 从缓存中删除[symbol]指定的所有绘制实例数据
+  /// 删除 [symbol] 对应的所有绘制实例数据。
   void delDrawOverlayList(String symbol) {
     setConfig('$symbol-$drawOverlayListConfigKey', {});
   }
@@ -150,21 +150,21 @@ extension IConfigurationExt on IConfiguration {
   //   saveDrawOverlayList(instId, list);
   // }
 
-  /// 获取DrawToolbar上次缓存的位置
+  /// 获取 DrawToolbar 上次缓存的位置。
   Offset getDrawToolbarPosition() {
     final json = getConfig(drawToolbarPositionKey);
     if (json == null || json.isEmpty) return Offset.infinite;
     return const OffsetConverter(defaultOffset: Offset.infinite).fromJson(json);
   }
 
-  /// 保存DrawToolbar位置[position]
+  /// 保存 DrawToolbar 位置。
   void saveDrawToolbarPosition(Offset position) {
     final json = const OffsetConverter().toJson(position);
     setConfig(drawToolbarPositionKey, json);
   }
 }
 
-/// Kline 指标配置提供者
+/// Kline 指标配置提供者。
 ///
 /// 与 [IConfiguration]（框架配置）平行的指标配置接口。
 /// 负责提供 [FlexiKlineWidget] 所需的蜡烛图、时间轴、主副区指标实例。
@@ -184,7 +184,7 @@ abstract interface class IIndicatorConfig implements IStorage {
 }
 
 extension IIndicatorConfigExt on IIndicatorConfig {
-  /// 从本地获取加载[key]指定的指标配置, 并通过[builder]转换成[Indicator]实例.
+  /// 读取 [key] 对应的本地指标配置，并通过 [builder] 转为指标实例。
   T? getIndicator<T extends Indicator>(IIndicatorKey key, IndicatorBuilder builder) {
     try {
       final json = getConfig(key.id);
@@ -197,7 +197,7 @@ extension IIndicatorConfigExt on IIndicatorConfig {
     return null;
   }
 
-  /// 保存[indicator]配置到本地.
+  /// 保存 [indicator] 配置到本地。
   bool saveIndicator<T extends Indicator>(T indicator) {
     final json = indicator.toJson();
     if (json.isEmpty) return false;
@@ -208,46 +208,10 @@ extension IIndicatorConfigExt on IIndicatorConfig {
   void delIndicator(IIndicatorKey key) {
     setConfig(key.id, {});
   }
+
+  /// 支持的主区指标 key。
+  Iterable<IIndicatorKey> get supportMainIndicatorKeys => mainIndicators.map((e) => e.key);
+
+  /// 支持的副区指标 key。
+  Iterable<IIndicatorKey> get supportSubIndicatorKeys => subIndicators.map((e) => e.key);
 }
-
-// class FlexiIndicatorState<T extends Indicator<IIndicatorKey>> {
-//   FlexiIndicatorState(this.initial, this.builder, this.storage);
-//   final T initial;
-//   final IndicatorBuilder builder;
-//   final IStorage storage;
-
-//   T? _indicator;
-//   T get indicator {
-//     _indicator ??= getIndicator(initial.key, builder);
-//     return _indicator ??= initial;
-//   }
-
-//   set indicator(T value) {
-//     _indicator = value;
-//     saveIndicator(value);
-//   }
-
-//   T? getIndicator(IIndicatorKey key, IndicatorBuilder builder) {
-//     try {
-//       final json = storage.getConfig(key.id);
-//       if (json == null || json.isEmpty) return null;
-//       final indicator = builder.call(json);
-//       if (indicator is T) return indicator;
-//     } catch (error, stack) {
-//       debugPrintStack(stackTrace: stack, label: 'getIndicator$error');
-//     }
-//     return null;
-//   }
-
-//   /// 保存[indicator]配置到本地.
-//   bool saveIndicator(T indicator) {
-//     final json = indicator.toJson();
-//     if (json.isEmpty) return false;
-//     storage.setConfig(indicator.key.id, json);
-//     return true;
-//   }
-
-//   void delIndicator(IIndicatorKey key) {
-//     storage.setConfig(key.id, {});
-//   }
-// }

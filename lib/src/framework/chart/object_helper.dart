@@ -14,14 +14,11 @@
 
 part of 'indicator.dart';
 
-/// FlexiKlineController 状态/配置/接口代理
+/// FlexiKlineController 状态、配置与绘制接口代理。
 extension IndicatorObjectExt on IndicatorObject {
-  bool get isAllowUpdateHeight {
-    // return _context.layoutMode is NormalLayoutMode || _context.layoutMode is AdaptLayoutMode;
-    return _context.isAllowUpdateLayoutHeight;
-  }
+  bool get isAllowUpdateHeight => _context.isAllowUpdateLayoutHeight;
 
-  /// Config
+  /// 设置配置。
   SettingConfig get settingConfig => _context.settingConfig;
 
   GridConfig get gridConfig => _context.gridConfig;
@@ -48,18 +45,17 @@ extension IndicatorObjectExt on IndicatorObject {
 
   double get candleLineWidth => settingConfig.candleLineWidth;
 
-  /// Theme Color
+  /// 主题。
   IFlexiKlineTheme get theme => _context.theme;
 
-  /// 全局默认的刻度值文本配置.
+  /// 全局默认刻度文本配置。
   TextAreaConfig get defTicksTextConfig => gridConfig.ticksText;
 
-  /// 指标图 涨跌 bar/line 配置
-  /// 涨跌浅色
+  /// 涨跌浅色。
   Color get longTintColor => longColor.withAlpha(settingConfig.opacity.alpha);
   Color get shortTintColor => shortColor.withAlpha(settingConfig.opacity.alpha);
 
-  /// 涨跌色实心柱画笔
+  /// 涨跌色实心柱画笔。
   Paint get defLongBarPaint => Paint()
     ..color = longColor
     ..style = PaintingStyle.stroke
@@ -69,7 +65,7 @@ extension IndicatorObjectExt on IndicatorObject {
     ..style = PaintingStyle.stroke
     ..strokeWidth = candleWidth;
 
-  /// 涨跌浅色实心柱画笔
+  /// 涨跌浅色实心柱画笔。
   Paint get defLongTintBarPaint => Paint()
     ..color = longTintColor
     ..style = PaintingStyle.stroke
@@ -79,7 +75,7 @@ extension IndicatorObjectExt on IndicatorObject {
     ..style = PaintingStyle.stroke
     ..strokeWidth = candleWidth;
 
-  /// 涨跌色空心柱画笔
+  /// 涨跌色空心柱画笔。
   Paint get defLongHollowBarPaint => Paint()
     ..color = longColor
     ..style = PaintingStyle.stroke
@@ -89,7 +85,7 @@ extension IndicatorObjectExt on IndicatorObject {
     ..style = PaintingStyle.stroke
     ..strokeWidth = settingConfig.candleHollowBarBorderWidth;
 
-  /// 涨跌色线画笔
+  /// 涨跌色线画笔。
   Paint get defLongLinePaint => Paint()
     ..color = longColor
     ..style = PaintingStyle.stroke
@@ -99,23 +95,21 @@ extension IndicatorObjectExt on IndicatorObject {
     ..style = PaintingStyle.stroke
     ..strokeWidth = candleLineWidth;
 
-  /// 定制线画笔
+  /// 定制线画笔。
   Paint getLinePaint({Color? color, double? strokeWidth}) => Paint()
     ..color = color ?? theme.lineChartColor
     ..style = PaintingStyle.stroke
     ..strokeWidth = strokeWidth ?? candleLineWidth;
 }
 
-/// 绘制对象混入边界计算的通用扩展
+/// 绘制对象边界计算能力。
 mixin PaintObjectBoundingMixin<T extends Indicator<IIndicatorKey>> on IndicatorObject<T> implements IPaintBounding {
   bool get drawInMain => slot == mainIndicatorSlot;
   bool get drawInSub => slot > mainIndicatorSlot;
 
   int _slot = mainIndicatorSlot;
 
-  /// 当前指标所在位置索引
-  /// <0 代表在主图绘制
-  /// >=0 代表在副图绘制
+  /// 当前指标所在位置索引：<0 为主区，>=0 为副区。
   int get slot => _slot;
 
   Rect? _drawableRect;

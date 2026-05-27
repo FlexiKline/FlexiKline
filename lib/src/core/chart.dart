@@ -379,7 +379,7 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding implements 
   void onChartZoomUpdate(GestureData data) {
     double delta = data.dyDelta / 2;
     if (delta == 0) return;
-    if (delta > 0 && (!canSetMainSize() || mainMinSize.height > (mainChartHeight + mainOriginPadding.height))) {
+    if (delta > 0 && (!canSetMainSize(mainSize) || mainMinSize.height > (mainChartHeight + mainOriginPadding.height))) {
       logw(
         'onChartZoomUpdate > cannot zoom($delta), mainSize:$mainSize is smaller than the minSize:$mainMinSize',
       );

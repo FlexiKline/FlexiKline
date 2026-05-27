@@ -46,10 +46,8 @@ class FlexiKlineWidget extends StatefulWidget {
     this.alignment,
     this.decoration,
     this.foregroundDecoration,
-    this.mainSize,
     this.mainForegroundViewBuilder,
     this.mainBackgroundView,
-    this.layoutType = FlexiLayoutType.adapt,
     this.isTouchDevice,
     this.onDoubleTap,
     this.drawToolbar,
@@ -68,10 +66,8 @@ class FlexiKlineWidget extends StatefulWidget {
     this.alignment,
     this.decoration,
     this.foregroundDecoration,
-    this.mainSize,
     this.mainForegroundViewBuilder,
     this.mainBackgroundView,
-    this.layoutType = FlexiLayoutType.adapt,
     this.isTouchDevice,
     this.onDoubleTap,
     this.drawToolbar,
@@ -105,9 +101,6 @@ class FlexiKlineWidget extends StatefulWidget {
   final BoxDecoration? decoration;
   final Decoration? foregroundDecoration;
 
-  /// 主区初始大小. 注: 仅在首次加载有效
-  final Size? mainSize;
-
   /// 主区前台View构造器
   /// 用于扩展定制Loading/自定义按钮等
   final WidgetBuilder? mainForegroundViewBuilder;
@@ -127,16 +120,6 @@ class FlexiKlineWidget extends StatefulWidget {
 
   /// 是否保持[drawToolbar]完全可见.
   final bool keepDrawToolbarFullyVisible;
-
-  /// 布局类型，决定 Widget 层的构建策略。
-  ///
-  /// - [FlexiLayoutType.adapt]（默认）：内部用 LayoutBuilder 包裹，
-  ///   宽度跟随父容器约束，高度由用户控制。
-  /// - [FlexiLayoutType.fixed]：内部用 LayoutBuilder 包裹，
-  ///   宽高都跟随父容器约束（横屏/全屏场景）。
-  /// - [FlexiLayoutType.normal]：不使用 LayoutBuilder，
-  ///   宽高完全由用户代码控制。
-  final FlexiLayoutType layoutType;
 
   /// 是否是触摸设备.
   final bool? isTouchDevice;
@@ -163,7 +146,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
 
   bool get isTouchDevice => widget.isTouchDevice ?? PlatformUtil.isTouch;
 
-  /// 绘制工具条globalKey: 用于获取其大小
+  /// 绘制工具条 Key，用于获取尺寸。
   GlobalKey? _drawToolbarKey;
   GlobalKey get drawToolbarKey => _drawToolbarKey ??= GlobalKey();
 
@@ -183,7 +166,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
 
     logger = controller.logger;
 
-    /// 1. 挂载指标：注册 slot + 缓存 Indicator + 创建所有 PaintObject + 恢复已选中指标
+    // 挂载指标并恢复已激活的 PaintObject。
     controller.mountIndicators(
       candle: widget.candle,
       time: widget.time,
@@ -191,16 +174,11 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
       subIndicators: widget.subIndicators,
     );
 
-    /// 2. 同步 controller 生命周期
+    // 同步 controller 生命周期。
     controller.initState();
 
-    /// 3. 处理挂载前暂存的数据
+    // 处理挂载前暂存的数据。
     controller.flushPendingKlineData();
-
-    /// 4. 设置主区大小（可选）
-    if (widget.mainSize != null) {
-      controller.setMainSize(widget.mainSize!);
-    }
 
     _drawToolbarPosition = ValueNotifier(
       configuration.getDrawToolbarPosition(),
@@ -212,7 +190,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
     super.didUpdateWidget(oldWidget);
     logd('didUpdateWidget');
 
-    /// 增量更新：diff 声明集合 + 更新缓存 + 同步已激活 PaintObject
+    // 按 Widget 新旧声明增量同步指标。
     controller.updateIndicators(
       oldCandle: oldWidget.candle,
       newCandle: widget.candle,
@@ -232,14 +210,6 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    logd('didChangeAppLifecycleState($state)');
-    // if (state == AppLifecycleState.resumed) {
-    // } else {
-    // }
-  }
-
-  @override
   void didHaveMemoryPressure() {
     controller.cleanUnlessKlineData();
   }
@@ -253,35 +223,42 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
 
   @override
   Widget build(BuildContext context) {
-    switch (widget.layoutType) {
-      case FlexiLayoutType.normal:
-        return _buildKlineContainer(context);
-      case FlexiLayoutType.adapt:
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            switch (controller.layoutMode) {
-              case FixedLayoutMode(fixedSize: final size):
-                controller.setFixedLayoutMode(Size(
-                  constraints.biggest.width,
-                  size.height,
-                ));
-              case NormalLayoutMode(mainSize: final size):
-              case AdaptLayoutMode(mainSize: final size):
-                controller.setAdaptLayoutMode(
-                  Size(constraints.biggest.width, size.height),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final biggest = constraints.biggest;
+        return ValueListenableBuilder<FlexiLayoutMode>(
+          valueListenable: controller.layoutModeListener,
+          child: _buildKlineContainer(context),
+          builder: (context, layoutMode, child) {
+            if (layoutMode == FlexiLayoutMode.adapt) {
+              // adapt 只消费父约束宽度。
+              if (biggest.width.isFinite) {
+                controller.setAdaptLayoutMode(width: biggest.width);
+              }
+            } else if (layoutMode == FlexiLayoutMode.fixed) {
+              // fixed 优先使用完整有限约束。
+              if (biggest.width.isFinite && biggest.height.isFinite) {
+                controller.setFixedLayoutMode(biggest);
+              } else if (biggest.width.isFinite && controller.fixedSize != null) {
+                // 滚动容器只给宽度时，沿用业务侧提供的 fixed 高度。
+                final h = controller.fixedSize!.height;
+                if (h.isFinite) {
+                  controller.setFixedLayoutMode(Size(biggest.width, h));
+                }
+              } else {
+                assert(
+                  controller.fixedSize != null,
+                  'FlexiLayoutMode.fixed requires a finite canvas size. '
+                  'Use a bounded parent, pass initialFixedSize, or call '
+                  'setFixedLayoutMode(size) before first fixed render in scrollable parents.',
                 );
+              }
             }
-            return _buildKlineContainer(context);
+            return child!;
           },
         );
-      case FlexiLayoutType.fixed:
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            controller.setFixedLayoutMode(constraints.biggest);
-            return _buildKlineContainer(context);
-          },
-        );
-    }
+      },
+    );
   }
 
   Widget _buildKlineContainer(BuildContext context) {
@@ -301,7 +278,6 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
   }
 
   Widget _buildKlineContent(BuildContext context, Rect canvasRect) {
-    // final canvasRect = controller.canvasRect;
     final canvasSize = canvasRect.size;
     final mainRect = controller.mainRect;
     return Container(
@@ -421,7 +397,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
     return _drawToolbarPosition.value = newPosition;
   }
 
-  /// 绘制DrawToolBar
+  /// 绘制工具条。
   Widget _buildDrawToolbar(BuildContext flexiKlineContext, Rect canvasRect) {
     if (widget.drawToolbar == null) return const SizedBox.shrink();
     final drawToolbarWrapper = SizedBox(
@@ -436,7 +412,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
           valueListenable: _drawToolbarPosition,
           builder: (context, position, child) {
             if (position == Offset.infinite || !canvasRect.contains(position)) {
-              // 如果position无效, 则重置其为当前canvas区域左下角.
+              // 无效位置重置到画布左下角。
               position = Offset(0, canvasRect.height - widget.drawToolbarInitHeight);
             }
             return Positioned(
@@ -463,40 +439,6 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
         ),
       ),
     );
-    // return ValueListenableBuilder(
-    //   valueListenable: controller.drawStateListener,
-    //   builder: (context, state, child) => Visibility(
-    //     visible: state.isEditing,
-    //     child: ValueListenableBuilder(
-    //       valueListenable: _drawToolbarPosition,
-    //       builder: (context, position, child) {
-    //         if (position == Offset.infinite || !canvasRect.contains(position)) {
-    //           // 如果position无效, 则重置其为当前canvas区域左下角.
-    //           position = Offset(0, canvasRect.height - widget.drawToolbarInitHeight);
-    //         }
-    //         return Positioned(
-    //           left: position.dx,
-    //           top: position.dy,
-    //           child: MouseRegion(
-    //             cursor: SystemMouseCursors.move,
-    //             child: GestureDetector(
-    //               onPanUpdate: (DragUpdateDetails details) {
-    //                 _updateDrawToolbarPosition(position + details.delta, canvasRect);
-    //               },
-    //               onPanEnd: (event) {
-    //                 configuration.saveDrawToolbarPosition(position);
-    //               },
-    //               child: SizedBox(
-    //                 key: drawToolbarKey,
-    //                 child: widget.drawToolbar,
-    //               ),
-    //             ),
-    //           ),
-    //         );
-    //       },
-    //     ),
-    //   ),
-    // );
   }
 
   /// 放大镜

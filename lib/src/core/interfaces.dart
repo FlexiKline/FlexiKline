@@ -14,12 +14,12 @@
 
 part of 'core.dart';
 
-/// Setting API
+/// 设置相关 API。
 abstract interface class ISetting {
-  /// Canvas区域大小监听器
+  /// 画布区域变化监听器。
   ValueListenable<Rect> get canvasSizeChangeListener;
 
-  /// 保存到本地
+  /// 保存配置。
   void storeFlexiKlineConfig({
     bool storeDrawOverlays = true,
   });
@@ -40,43 +40,42 @@ abstract interface class ISetting {
   DrawConfig get drawConfig;
 }
 
-/// Grid图层API
+/// Grid 图层 API。
 abstract interface class IGrid {
   void markRepaintGrid();
 }
 
-/// Chart图层API
+/// Chart 图层 API。
 abstract interface class IChart {
   void markRepaintChart({bool reset = false});
 }
 
-/// Cross图层API
+/// Cross 图层 API。
 abstract interface class ICross {
   void markRepaintCross();
 }
 
-/// Draw图层API
+/// Draw 图层 API。
 abstract interface class IDraw {
   void markRepaintDraw();
 }
 
-/// PaintContext 绘制Indicator功能集合
+/// Indicator 绘制上下文。
 abstract interface class IPaintContext implements IStorage, ILogger {
   IFlexiKlineTheme get theme;
 
-  /// 是否是正常布局模式
-  // LayoutMode get layoutMode;
-  /// 是否允许更新布局高度
-  /// 注: 目前仅支持正常模式和适配模式下缓存高度的变化.
+  /// 是否允许指标写回布局高度。
+  ///
+  /// adapt 下写回原始高度；fixed 下只写入临时高度。
   bool get isAllowUpdateLayoutHeight;
 
   /// 指标图是否已开始缩放
   bool get isStartZoomChart;
 
-  /// 当前canvas绘制区域第一根蜡烛绘制的偏移量
+  /// 当前画布内第一根蜡烛的绘制偏移。
   double get startCandleDx;
 
-  /// 代表当前绘制区域相对于startIndex右侧的偏移量.
+  /// 当前绘制区域相对 startIndex 右侧的偏移。
   double get paintDxOffset;
 
   /// 是否正在绘制Cross
@@ -116,19 +115,19 @@ abstract interface class IPaintContext implements IStorage, ILogger {
   /// 将dy坐标值转换为蜡烛图中value
   FlexiNum? dyToValueOnCandle(double dy, {bool check = false});
 
-  /// 画板Size = [mainRect] + [subRect]
+  /// 画布区域。
   Rect get canvasRect;
 
-  /// 主区Size
+  /// 主区区域。
   Rect get mainRect;
 
-  /// 副区Size
+  /// 副区区域。
   Rect get subRect;
 
-  /// TimeIndicator区域大小
+  /// 时间轴区域。
   Rect get timeRect;
 
-  /// 计算[slot]位置指标的Top坐标
+  /// 计算 [slot] 对应副区的 top。
   double calculateIndicatorTop(int slot);
 
   Offset? get crossOffset;
@@ -148,17 +147,17 @@ abstract interface class IPaintContext implements IStorage, ILogger {
   void requestRepaint();
 }
 
-/// DrawContext 绘制Overlay功能集合
+/// Overlay 绘制上下文。
 abstract interface class IDrawContext implements IStorage, ILogger {
   IFlexiKlineTheme get theme;
 
-  /// 画板Size = [mainRect] + [subRect]
+  /// 画布区域。
   Rect get canvasRect;
 
-  /// 主区Size
+  /// 主区区域。
   Rect get mainRect;
 
-  /// TimeIndicator区域大小
+  /// 时间轴区域。
   Rect get timeRect;
 
   /// 当前KlineData数据源

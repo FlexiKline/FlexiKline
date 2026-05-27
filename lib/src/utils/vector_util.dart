@@ -20,8 +20,11 @@ import '../extension/geometry_ext.dart';
 
 /// 直线的一般式方程 Ax + By + C = 0
 final class LineEquation {
-  const LineEquation._(this.A, this.B, this.C)
-      : assert(A != 0 || B != 0, 'A and B cannot both be 0');
+  const LineEquation._(
+    this.A,
+    this.B,
+    this.C,
+  ) : assert(A != 0 || B != 0, 'A and B cannot both be 0');
 
   factory LineEquation.fromPoints(Offset p1, Offset p2) {
     return LineEquation._(

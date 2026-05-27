@@ -20,15 +20,25 @@ abstract class KlineBindingBase with FlexiLog implements ISetting, IPaintContext
 
   final IConfiguration configuration;
 
-  /// 对于Kline的操作是否自动保存到本地配置中.
-  /// 包括: dispose; 增删指标; 调整参数等等.
+  /// 是否自动保存 Kline 配置。
   final bool autoSave;
 
-  /// klineData数据缓存容量
-  /// 一个FlexiKlineController允许最多维护的KlineData个数.
+  /// 初始布局模式。默认 [FlexiLayoutMode.adapt]（覆盖大多数场景）。
+  final FlexiLayoutMode _initialLayoutMode;
+
+  /// Fixed 模式下的初始画布尺寸（主区 + 副区），可为空。
+  ///
+  /// 父级能提供有限宽高约束时可不传；父级高度无限时（如滚动容器内），
+  /// 需传入该值或在首次 fixed 渲染前调用 `setFixedLayoutMode`。
+  final Size? _initialFixedSize;
+
+  /// KlineData 缓存容量。
   final int? klineDataCacheCapacity;
 
-  /// 指标绘制对象管理
+  /// 副区指标最大数量。
+  final int subIndicatorMaxCount;
+
+  /// 指标绘制对象管理器。
   final IndicatorPaintObjectManager _paintObjectManager;
 
   final OverlayDrawObjectManager _drawObjectManager;
@@ -36,10 +46,14 @@ abstract class KlineBindingBase with FlexiLog implements ISetting, IPaintContext
   KlineBindingBase({
     required this.configuration,
     this.autoSave = true,
-    int subIndicatorMaxCount = defaultSubIndicatorMaxCount,
+    FlexiLayoutMode initialLayoutMode = FlexiLayoutMode.adapt,
+    Size? initialFixedSize,
+    this.subIndicatorMaxCount = defaultSubIndicatorMaxCount,
     IFlexiLogger? logger,
     this.klineDataCacheCapacity,
-  })  : _paintObjectManager = IndicatorPaintObjectManager(
+  })  : _initialLayoutMode = initialLayoutMode,
+        _initialFixedSize = initialFixedSize,
+        _paintObjectManager = IndicatorPaintObjectManager(
           configuration: configuration,
           subIndicatorMaxCount: subIndicatorMaxCount,
           logger: logger,
@@ -120,7 +134,7 @@ abstract class KlineBindingBase with FlexiLog implements ISetting, IPaintContext
   }
 }
 
-/// KlineController内部扩展
+/// KlineController 内部访问扩展。
 extension on KlineBindingBase {
   FlexiKlineConfig get flexiKlineConfig {
     return _paintObjectManager.flexiKlineConfig;
@@ -165,7 +179,7 @@ extension FlexiKlineLifecycleExt on FlexiKlineLifecycle {
   bool get isMounted => this == FlexiKlineLifecycle.mounted;
 }
 
-/// Kline状态通知
+/// Kline 状态通知。
 class FlexiStateNotifier<T> extends ValueNotifier<T> {
   FlexiStateNotifier(super.value);
 

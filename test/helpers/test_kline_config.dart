@@ -78,11 +78,15 @@ class TestFlexiKlineConfiguration with FlexiKlineConfigurationMixin {
   TestFlexiKlineConfiguration({
     Set<IIndicatorKey>? mainChildren,
     Set<IIndicatorKey>? subKeys,
+    /// 当 [genMainIndicator] 的入参为 null 时用作主区默认尺寸（布局等测试可设为大于 [mainMinSize] 的值）。
+    this.mainIndicatorDefaultSize,
   })  : _mainChildren = mainChildren,
         _subKeys = subKeys;
 
   final Set<IIndicatorKey>? _mainChildren;
   final Set<IIndicatorKey>? _subKeys;
+
+  final Size? mainIndicatorDefaultSize;
 
   @override
   IFlexiKlineTheme get theme => TestFlexiKlineTheme();
@@ -97,9 +101,18 @@ class TestFlexiKlineConfiguration with FlexiKlineConfigurationMixin {
     MainPaintObjectIndicator<Indicator>? mainIndicator,
   ) {
     return MainPaintObjectIndicator(
-      size: mainIndicator?.size ?? const Size(0, 300),
+      size: mainIndicator?.size ?? mainIndicatorDefaultSize ?? const Size(0, 300),
       padding: mainIndicator?.padding ?? EdgeInsets.zero,
       children: _mainChildren,
+    );
+  }
+
+  @override
+  SettingConfig genSettingConfig([SettingConfig? setting]) {
+    final base = setting ?? const SettingConfig();
+    return base.copyWith(
+      autoStartLastPriceCountDownTimer: false,
+      autoLoadMoreData: false,
     );
   }
 
