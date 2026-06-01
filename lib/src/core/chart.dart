@@ -92,7 +92,7 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding implements 
   @override
   @protected
   void markRepaintChart({bool reset = false}) {
-    _reset = reset;
+    _reset = _reset || reset;
     _markRepaintChart();
   }
 

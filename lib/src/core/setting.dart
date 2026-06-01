@@ -158,10 +158,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
   Size get _minFixedCanvasSize {
     double subMinHeight = 0;
     if (isMounted) {
-      subMinHeight = subPaintObjects.fold(0.0, (total, object) {
-        if (object.key == timeIndicatorKey) return total + object.indicator.height;
-        return total + settingConfig.subMinHeight;
-      });
+      subMinHeight = timePaintObject.indicator.height + settingConfig.subMinHeight * subIndicatorKeys.length;
     }
     return Size(mainMinSize.width, mainMinSize.height + subMinHeight);
   }
@@ -310,14 +307,9 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
     assert(layoutMode == FlexiLayoutMode.fixed && _fixedSize != null);
     final fixedHeight = _fixedSize!.height;
     final fixedSubObjects = subPaintObjects.where((object) => object.key != timeIndicatorKey).toList(growable: false);
-    final timeObjects = subPaintObjects.where((object) => object.key == timeIndicatorKey).toList(growable: false);
 
-    // 时间轴固定使用自身高度，不参与普通副区分配。
-    for (final object in timeObjects) {
-      object.doUpdateLayout(height: object.indicator.height);
-    }
-
-    final timeHeight = timeObjects.fold(0.0, (total, object) => total + object.indicator.height);
+    // 时间轴固定使用配置高度，不参与普通副区分配与 _tmpHeight 压缩。
+    final timeHeight = timePaintObject.indicator.height;
     // 始终以原始高度计算，避免基于上次压缩结果继续压缩。
     final originalSubHeight = fixedSubObjects.fold(0.0, (total, object) => total + object.indicator.height);
     final availableSubHeight = fixedHeight - mainMinSize.height - timeHeight;
