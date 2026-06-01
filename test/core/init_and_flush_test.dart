@@ -23,8 +23,11 @@
 library;
 
 import 'package:decimal/decimal.dart';
+import 'package:flexi_formatter/date_time.dart' show TimeUnit;
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+const _testInterval1D = FlexiTimeInterval(1, TimeUnit.day);
 
 void main() {
   group('BaseData waiting data management', () {
@@ -32,7 +35,7 @@ void main() {
     ///
     /// **Validates: Requirements 11.3**
     test('hasWaitingData should be false initially', () {
-      const spec = KlineSpec(symbol: 'TEST', interval: interval1D);
+      const spec = KlineSpec(symbol: 'TEST', interval: _testInterval1D);
       final data = KlineData(spec);
       expect(data.hasWaitingData, isFalse);
     });
@@ -41,7 +44,7 @@ void main() {
     ///
     /// **Validates: Requirements 11.3**
     test('waitingDataLength should be 0 initially', () {
-      const spec = KlineSpec(symbol: 'TEST', interval: interval1D);
+      const spec = KlineSpec(symbol: 'TEST', interval: _testInterval1D);
       final data = KlineData(spec);
       expect(data.waitingDataLength, equals(0));
     });
@@ -51,7 +54,7 @@ void main() {
     /// 验证 KlineData 构造器不再接受 indicatorCount 参数
     /// **Validates: Requirements 7.1, 7.2**
     test('KlineData constructor should not require indicatorCount', () {
-      const spec = KlineSpec(symbol: 'TEST', interval: interval1D);
+      const spec = KlineSpec(symbol: 'TEST', interval: _testInterval1D);
 
       // 应该能够创建 KlineData 而不传入 indicatorCount
       final data = KlineData(spec);
@@ -64,7 +67,7 @@ void main() {
     /// 验证 KlineData 有 rebuildSlots 方法用于扩容
     /// **Validates: Requirements 6.3, 6.4**
     test('KlineData should have rebuildSlots method', () {
-      const spec = KlineSpec(symbol: 'TEST', interval: interval1D);
+      const spec = KlineSpec(symbol: 'TEST', interval: _testInterval1D);
       final data = KlineData(spec);
 
       // 应该能够调用 rebuildSlots 方法
@@ -81,7 +84,7 @@ void main() {
       // 这个测试验证的是 switchKlineData 的基本功能
       // 完整的初始化顺序测试需要在 Widget 集成测试中进行
 
-      const spec = KlineSpec(symbol: 'TEST', interval: interval1D);
+      const spec = KlineSpec(symbol: 'TEST', interval: _testInterval1D);
       final data = KlineData(spec);
 
       // 验证 KlineData 已创建但为空
@@ -93,7 +96,7 @@ void main() {
     ///
     /// **Validates: Requirements 11.1, 11.2**
     test('updateKlineData should store data to _waitingData before Widget mounted', () {
-      const spec = KlineSpec(symbol: 'TEST', interval: interval1D);
+      const spec = KlineSpec(symbol: 'TEST', interval: _testInterval1D);
       final data = KlineData(spec);
 
       // 创建测试数据
@@ -130,7 +133,7 @@ void main() {
     ///
     /// **Validates: Requirements 11.1, 11.2**
     test('multiple updateKlineData calls should accumulate in _waitingData', () {
-      const spec = KlineSpec(symbol: 'TEST', interval: interval1D);
+      const spec = KlineSpec(symbol: 'TEST', interval: _testInterval1D);
       final data = KlineData(spec);
 
       // 验证初始状态
@@ -152,7 +155,7 @@ void main() {
     ///
     /// **Validates: Requirements 3.1, 11.3, 11.4**
     test('flushPendingKlineData should handle waiting data correctly', () {
-      const spec = KlineSpec(symbol: 'TEST', interval: interval1D);
+      const spec = KlineSpec(symbol: 'TEST', interval: _testInterval1D);
 
       // 1. switchKlineData
       final data = KlineData(spec);
@@ -176,7 +179,7 @@ void main() {
     /// 验证 switchKlineData 创建的 KlineData 不包含 indicatorCount 参数
     /// **Validates: Requirements 7.1, 7.2, 14.5**
     test('switchKlineData should create KlineData without indicatorCount', () {
-      const spec = KlineSpec(symbol: 'TEST', interval: interval1D);
+      const spec = KlineSpec(symbol: 'TEST', interval: _testInterval1D);
 
       // 验证 KlineData 已创建
       final data = KlineData(spec);
@@ -189,7 +192,7 @@ void main() {
     /// 验证 precomputeKlineData 方法签名包含 indicatorCount 参数
     /// **Validates: Requirements 7.3, 7.4, 14.6**
     test('precomputeKlineData should accept indicatorCount parameter', () {
-      const spec = KlineSpec(symbol: 'TEST', interval: interval1D);
+      const spec = KlineSpec(symbol: 'TEST', interval: _testInterval1D);
       final data = KlineData(spec);
 
       // 验证 precomputeKlineData 方法存在且接受 indicatorCount

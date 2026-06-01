@@ -127,6 +127,9 @@ abstract interface class IPaintContext implements IStorage, ILogger {
   /// 时间轴区域。
   Rect get timeRect;
 
+  /// 指标图缩放滑竿区域。
+  Rect get chartZoomSlideBarRect;
+
   /// 计算 [slot] 对应副区的 top。
   double calculateIndicatorTop(int slot);
 

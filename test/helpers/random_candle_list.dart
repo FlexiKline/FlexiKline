@@ -32,7 +32,7 @@ Future<List<CandleModel>> genRandomCandleList({
   double range = 100,
   double initalVol = 100,
   double rangeVol = 50,
-  ITimeInterval interval = interval1D,
+  ITimeInterval interval = const FlexiTimeInterval(1, TimeUnit.day),
   DateTime? dateTime,
   bool isHistory = true,
 }) async {

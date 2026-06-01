@@ -241,7 +241,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
     final chartTypes = indicator.intervalChartTypes;
     if (chartTypes != null && chartTypes.isNotEmpty) {
       for (final entry in chartTypes.entries) {
-        if (entry.key.milliseconds == interval.milliseconds) {
+        if (entry.key == interval) {
           return entry.value;
         }
       }

@@ -23,8 +23,11 @@
 /// 4. 触发 markRepaintChart
 library;
 
+import 'package:flexi_formatter/date_time.dart' show TimeUnit;
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+const _testInterval1D = FlexiTimeInterval(1, TimeUnit.day);
 
 void main() {
   group('StateBinding.flushPendingKlineData', () {
@@ -55,13 +58,13 @@ void main() {
 
   group('BaseData waiting data getters', () {
     test('hasWaitingData should return false when _waitingData is empty', () {
-      const spec = KlineSpec(symbol: 'TEST', interval: interval1D);
+      const spec = KlineSpec(symbol: 'TEST', interval: _testInterval1D);
       final data = KlineData(spec);
       expect(data.hasWaitingData, isFalse);
     });
 
     test('waitingDataLength should return 0 when _waitingData is empty', () {
-      const spec = KlineSpec(symbol: 'TEST', interval: interval1D);
+      const spec = KlineSpec(symbol: 'TEST', interval: _testInterval1D);
       final data = KlineData(spec);
       expect(data.waitingDataLength, equals(0));
     });

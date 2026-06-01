@@ -70,3 +70,5 @@ final class FlexiTimeInterval implements ITimeInterval {
   @override
   String toString() => '$multiplier${unit.name}';
 }
+
+const invalidInterval = FlexiTimeInterval(0, TimeUnit.millisecond);

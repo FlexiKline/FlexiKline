@@ -45,6 +45,8 @@ extension IndicatorObjectExt on IndicatorObject {
 
   double get candleLineWidth => settingConfig.candleLineWidth;
 
+  Rect get chartZoomSlideBarRect => _context.chartZoomSlideBarRect;
+
   /// 主题。
   IFlexiKlineTheme get theme => _context.theme;
 

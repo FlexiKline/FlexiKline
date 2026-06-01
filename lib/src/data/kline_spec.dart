@@ -34,8 +34,8 @@ mixin KlineSpecData on BaseData {
   /// 返回用于加载更多历史数据的规格（to 置空，向旧方向无限翻页）
   KlineSpec getLoadMoreSpec() {
     return spec.copyWith(
-      from: null,
-      to: list.lastOrNull?.ts,
+      from: list.lastOrNull?.ts,
+      to: null,
     );
   }
 

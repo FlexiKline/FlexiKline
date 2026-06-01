@@ -15,6 +15,7 @@
 library;
 
 import 'package:decimal/decimal.dart';
+import 'package:flexi_formatter/date_time.dart' show TimeUnit;
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -34,7 +35,10 @@ void main() {
       final controller = FlexiKlineController(
         configuration: TestFlexiKlineConfiguration(),
       );
-      const spec = KlineSpec(symbol: 'TEST', interval: interval1m);
+      const spec = KlineSpec(
+        symbol: 'TEST',
+        interval: FlexiTimeInterval(1, TimeUnit.minute),
+      );
 
       controller.switchKlineData(spec);
       await controller.updateKlineData(

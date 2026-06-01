@@ -91,6 +91,8 @@ class TestPaintContext implements IPaintContext {
   @override
   Rect get timeRect => Rect.zero;
   @override
+  Rect get chartZoomSlideBarRect => Rect.zero;
+  @override
   double calculateIndicatorTop(int slot) => 0;
   @override
   Offset? get crossOffset => null;

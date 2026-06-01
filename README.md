@@ -95,7 +95,16 @@ FlexiKlineWidget(
 ### 4. 更新数据
 
 ```dart
-/// 切换数据源（如切换时间周期时）
+import 'package:flexi_kline/flexi_kline.dart';
+import 'package:flexi_formatter/date_time.dart' show TimeUnit;
+
+/// 定义 K 线规格（symbol、周期等）
+final spec = KlineSpec(
+  symbol: 'BTC-USDT',
+  interval: const FlexiTimeInterval(1, TimeUnit.day),
+);
+
+/// 切换数据源（如切换交易对或周期）
 controller.switchKlineData(spec);
 
 /// 更新指定规格的数据
