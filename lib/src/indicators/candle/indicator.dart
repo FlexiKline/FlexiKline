@@ -60,8 +60,8 @@ class CandleIndicator extends CandleBaseIndicator {
     ),
 
     /// 最后价: 当最新蜡烛不在可视区域时使用.
-    /// 注: 如果其中线的配置颜色透明度为0(默认为0) 且useCandleColorAsLatestBg为true,则会采用涨跌色
-    this.last = const MarkConfig(
+    /// 注: 如果其中线的配置颜色透明度为0(默认为0) 且useCandleColorForLatestPriceBackground为true,则会采用涨跌色
+    this.offViewPriceMark = const MarkConfig(
       show: true,
       spacing: 1,
       line: LineConfig(
@@ -89,8 +89,8 @@ class CandleIndicator extends CandleBaseIndicator {
     ),
 
     /// 最新价: 当最新蜡烛在可视区域时使用.
-    /// 注: 如果其中线的配置颜色透明度为0(默认为0) 且useCandleColorAsLatestBg为true,则会采用涨跌色
-    this.latest = const MarkConfig(
+    /// 注: 如果其中线的配置颜色透明度为0(默认为0) 且useCandleColorForLatestPriceBackground为true,则会采用涨跌色
+    this.inViewPriceMark = const MarkConfig(
       show: true,
       spacing: 1,
       line: LineConfig(
@@ -125,11 +125,11 @@ class CandleIndicator extends CandleBaseIndicator {
     ),
 
     /// 使用蜡烛颜色做为Latest的背景
-    this.useCandleColorAsLatestBg = true,
+    this.useCandleColorForLatestPriceBackground = true,
 
     /// 倒计时, 在latest最新价之下展示
-    this.showCountDown = true,
-    this.countDown = const TextAreaConfig(
+    this.showCountdown = true,
+    this.countdown = const TextAreaConfig(
       style: TextStyle(
         fontSize: defaultTextSize,
         overflow: TextOverflow.ellipsis,
@@ -142,7 +142,7 @@ class CandleIndicator extends CandleBaseIndicator {
     this.chartType = FlexiChartType.barSolid,
     this.minWidthLineType,
     this.intervalChartTypes = const {},
-    this.hideIndicatorsWhenLineChart = true,
+    this.hideMainIndicatorsInLineChartMode = true,
     this.longColor,
     this.shortColor,
     this.lineColor,
@@ -158,23 +158,23 @@ class CandleIndicator extends CandleBaseIndicator {
   final MarkConfig low;
 
   /// 最后价: 当最新蜡烛不在可视区域时使用.
-  /// 注: 如果其中线的配置颜色透明度为0(默认为0) 且useCandleColorAsLatestBg为true,则会采用涨跌色
-  final MarkConfig last;
+  /// 注: 如果其中线的配置颜色透明度为0(默认为0) 且useCandleColorForLatestPriceBackground为true,则会采用涨跌色
+  final MarkConfig offViewPriceMark;
 
   /// 最新价: 当最新蜡烛在可视区域时使用.
-  /// 注: 如果其中线的配置颜色透明度为0(默认为0) 且useCandleColorAsLatestBg为true,则会采用涨跌色
-  final MarkConfig latest;
+  /// 注: 如果其中线的配置颜色透明度为0(默认为0) 且useCandleColorForLatestPriceBackground为true,则会采用涨跌色
+  final MarkConfig inViewPriceMark;
 
   /// 最新蜡烛点: 仅在线图中使用.
   final bool showLatestPoint;
   final PointConfig? latestPoint;
 
   /// 使用蜡烛颜色做为Latest的背景
-  final bool useCandleColorAsLatestBg;
+  final bool useCandleColorForLatestPriceBackground;
 
   /// 倒计时, 在latest最新价之下展示
-  final bool showCountDown;
-  final TextAreaConfig countDown;
+  final bool showCountdown;
+  final TextAreaConfig countdown;
 
   /// 主区蜡烛图表默认类型（包含样式）
   final FlexiChartType chartType;
@@ -194,7 +194,7 @@ class CandleIndicator extends CandleBaseIndicator {
   /// 当图表类型为线图时，是否隐藏主区的技术指标（如 MA 等）
   /// 用于避免主线图与技术指标线重合，影响可读性
   /// 默认值为 false，即显示所有指标
-  final bool hideIndicatorsWhenLineChart;
+  final bool hideMainIndicatorsInLineChartMode;
 
   // 自定义上涨颜色
   final Color? longColor;
@@ -232,10 +232,10 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
   FlexiNum? _maxHigh, _minLow;
 
   @override
-  bool get hideIndicatorsWhenLineChart => indicator.hideIndicatorsWhenLineChart;
+  bool get hideMainIndicatorsInLineChartMode => indicator.hideMainIndicatorsInLineChartMode;
 
   @override
-  FlexiChartType getChartType() {
+  FlexiChartType resolveChartType() {
     // 1. 优先检查时间周期映射（基于 milliseconds 匹配）
     final interval = klineData.interval;
     final chartTypes = indicator.intervalChartTypes;
@@ -257,7 +257,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
   }
 
   @override
-  MinMax? initState(int start, int end) {
+  MinMax? computeVisibleMinMax(int start, int end) {
     if (!klineData.canPaintChart) return null;
 
     final minmax = klineData.calculateMinmax(start, end);
@@ -267,13 +267,13 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
   }
 
   @override
-  void paintChart(Canvas canvas, Size size) {
-    final chartType = getChartType();
+  void paint(Canvas canvas, Size size) {
+    final chartType = resolveChartType();
 
     switch (chartType) {
       case FlexiBarChartType(:final style):
         // 绘制蜡烛柱状图，传入样式
-        paintBarTypeCandleChart(canvas, size, style);
+        paintCandleBars(canvas, size, style);
       case FlexiLineChartType(:final style):
         switch (style) {
           case ChartLineStyle.normal:
@@ -289,7 +289,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
                 baseColor: indicator.lineColor ?? theme.lineChartColor,
               ),
             );
-            paintLatestCandlePoint(canvas, size);
+            paintLatestPoint(canvas, size);
           case ChartLineStyle.updown:
             // 绘制涨跌线图
             paintCandleUpDownLineChart(
@@ -304,24 +304,24 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
                 baseColor: shortColor,
               ),
             );
-            paintLatestCandlePoint(canvas, size);
+            paintLatestPoint(canvas, size);
         }
     }
 
     /// 绘制价钱刻度数据
     if (settingConfig.showYAxisTick) {
-      paintYAxisPriceTick(canvas, size);
+      paintYAxisPriceLabels(canvas, size);
     }
   }
 
   @override
-  void paintExtraAboveChart(Canvas canvas, Size size) {
+  void paintOverlay(Canvas canvas, Size size) {
     /// 绘制最新价刻度线与价钱标记
-    paintLatestPriceMark(canvas, size);
+    paintLatestPriceMarkers(canvas, size);
   }
 
   @override
-  void onCross(Canvas canvas, Offset offset) {
+  void paintCross(Canvas canvas, Offset offset, {FlexiCandleModel? model}) {
     /// 绘制Cross Y轴价钱刻度
     paintYAxisTicksOnCross(
       canvas,
@@ -341,9 +341,9 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
   }
 
   /// 绘制蜡烛柱状图
-  void paintBarTypeCandleChart(Canvas canvas, Size size, ChartBarStyle style) {
+  void paintCandleBars(Canvas canvas, Size size, ChartBarStyle style) {
     if (!klineData.canPaintChart) {
-      logw('paintBarTypeCandleChart Data.list is empty or Index is out of bounds');
+      logw('paintCandleBars Data.list is empty or Index is out of bounds');
       return;
     }
 
@@ -455,7 +455,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
 
   /// 绘制蜡烛图右侧价钱刻度
   /// 根据Grid horizontal配置来绘制, 保证在grid.horizontal线之上.
-  void paintYAxisPriceTick(Canvas canvas, Size size) {
+  void paintYAxisPriceLabels(Canvas canvas, Size size) {
     final dyStep = drawableRect.height / gridConfig.horizontal.count;
     final dx = chartRect.right;
     double dy = 0;
@@ -503,24 +503,24 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
 
   /// 缓存latest文本相对于屏幕右侧的负偏移量
   @protected
-  double latestTextOffset = 0.0;
+  double latestPriceLabelOffsetX = 0.0;
 
   /// 缓存last文本所占大小
   @protected
-  Size? lastTextSize;
+  Size? offViewPriceLabelSize;
 
   /// 最后价文本区域位置, 用于后续点击事件命中测试.
-  Rect? get lastTextAreaRect {
-    if (lastTextSize == null) return null;
+  Rect? get offViewPriceLabelRect {
+    if (offViewPriceLabelSize == null) return null;
     final model = klineData.latest;
     if (model == null) return null;
     // 计算最新价YAxis位置.
     final dy = clampDyInChart(valueToDy(model.close));
     return Rect.fromLTWH(
-      chartRect.right + latestTextOffset - indicator.last.spacing - lastTextSize!.width,
+      chartRect.right + latestPriceLabelOffsetX - indicator.offViewPriceMark.spacing - offViewPriceLabelSize!.width,
       dy,
-      lastTextSize!.width,
-      lastTextSize!.height,
+      offViewPriceLabelSize!.width,
+      offViewPriceLabelSize!.height,
     );
   }
 
@@ -529,11 +529,11 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
   /// 2. 最新价向右移出屏幕后, 刻度线横穿整屏.
   ///    且展示在指定价钱区间内, 如超出边界, 则停靠在最高最低线上.
   /// 3. 最新价向左移动后, 刻度线根据最新价蜡烛线平行移动.
-  void paintLatestPriceMark(Canvas canvas, Size size) {
-    if (!indicator.latest.show && !indicator.last.show) return;
+  void paintLatestPriceMarkers(Canvas canvas, Size size) {
+    if (!indicator.inViewPriceMark.show && !indicator.offViewPriceMark.show) return;
     final model = klineData.latest;
     if (model == null) {
-      logd('paintLatestPriceMark > on data!');
+      logd('paintLatestPriceMarkers > on data!');
       return;
     }
 
@@ -544,18 +544,18 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
     final rdx = chartRect.right;
     double ldx = 0; // 计算最新价刻度线lineTo参数X轴的dx值. 默认0: 代表橫穿整个Canvas.
 
-    if (paintDxOffset < latestTextOffset) {
-      lastTextSize = null;
+    if (paintDxOffset < latestPriceLabelOffsetX) {
+      offViewPriceLabelSize = null;
       // 绘制最新价和倒计时
-      final MarkConfig latest = indicator.latest;
-      if (!latest.show) return;
+      final MarkConfig inViewPriceMark = indicator.inViewPriceMark;
+      if (!inViewPriceMark.show) return;
 
       ldx = startCandleDx;
 
-      final useCandleColor = indicator.useCandleColorAsLatestBg;
+      final useCandleColor = indicator.useCandleColorForLatestPriceBackground;
       final updownColor = model.close >= model.open ? longColor : shortColor;
 
-      final textConfig = indicator.latest.text;
+      final textConfig = indicator.inViewPriceMark.text;
       BorderRadius? borderRadius = textConfig.borderRadius;
 
       final halfHeight = textConfig.areaHeight / 2;
@@ -571,7 +571,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
       latestPath.lineTo(ldx, dy);
       canvas.drawLineByConfig(
         latestPath,
-        indicator.latest.line,
+        indicator.inViewPriceMark.line,
         themeColor: useCandleColor ? updownColor : theme.markLineColor,
       );
 
@@ -583,16 +583,16 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
       );
 
       /// 倒计时Text
-      String? countDownText;
+      String? countdownText;
       // 时间周期 > 1秒时才显示倒计时
-      if (indicator.showCountDown && klineData.interval.milliseconds > Duration.millisecondsPerSecond) {
+      if (indicator.showCountdown && klineData.interval.milliseconds > Duration.millisecondsPerSecond) {
         final nextUpdateDateTime = model.nextUpdateDateTime(klineData.interval);
         if (nextUpdateDateTime != null &&
             nextUpdateDateTime.millisecondsSinceEpoch > DateTime.now().millisecondsSinceEpoch) {
-          countDownText = nextUpdateDateTime.diffAsCountdown();
+          countdownText = nextUpdateDateTime.diffAsCountdown();
         }
       }
-      if (countDownText != null) {
+      if (countdownText != null) {
         // 如果展示倒计时, 最新价仅保留顶部radius
         borderRadius = borderRadius?.copyWith(
           topLeft: borderRadius.topLeft,
@@ -603,7 +603,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
       }
 
       final offset = Offset(
-        rdx - latest.spacing,
+        rdx - inViewPriceMark.spacing,
         dy - halfHeight, // 垂直居中
       );
 
@@ -620,10 +620,10 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
         borderRadius: borderRadius,
         borderSide: useCandleColor ? textConfig.border?.copyWith(color: transparent) : null,
       );
-      latestTextOffset = -(size.width + latest.spacing);
+      latestPriceLabelOffsetX = -(size.width + inViewPriceMark.spacing);
 
-      if (countDownText != null) {
-        final countDown = indicator.countDown;
+      if (countdownText != null) {
+        final countdown = indicator.countdown;
         // 展示倒计时, 倒计时radius始终使用最新价的, 且保留底部radius
         borderRadius = borderRadius?.copyWith(
           topLeft: const Radius.circular(0),
@@ -640,34 +640,34 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
           ),
           drawDirection: DrawDirection.rtl,
           drawableRect: drawableRect,
-          text: countDownText,
-          style: countDown.style.copyWith(
+          text: countdownText,
+          style: countdown.style.copyWith(
             color: theme.textColor,
             // 修正倒计时文本区域高度:
             // 由于倒计时使用了固定宽度(最新价的size.width), 保持与最新价同宽.
-            // 此处无法再为countDown设置padding, 固在此处修正
-            height: (countDown.areaHeight - 1) / countDown.textHeight,
+            // 此处无法再为countdown设置padding, 固在此处修正
+            height: (countdown.areaHeight - 1) / countdown.textHeight,
           ),
-          textAlign: countDown.textAlign,
+          textAlign: countdown.textAlign,
           textWidth: size.width,
-          // padding: countDown.padding,
-          backgroundColor: theme.countDownBg,
+          // padding: countdown.padding,
+          backgroundColor: theme.countdownBg,
           borderRadius: borderRadius,
           borderSide: BorderSide(
             color: useCandleColor ? transparent : theme.markLineColor,
-            width: countDown.border?.width ?? 0.5,
+            width: countdown.border?.width ?? 0.5,
           ),
-          maxLines: countDown.maxLines ?? 1,
+          maxLines: countdown.maxLines ?? 1,
         );
       }
     } else {
       /// 绘制最后价
-      final last = indicator.last;
-      if (!last.show) return;
+      final offViewPriceMark = indicator.offViewPriceMark;
+      if (!offViewPriceMark.show) return;
 
       ldx = 0;
 
-      final halfHeight = last.text.areaHeight / 2;
+      final halfHeight = offViewPriceMark.text.areaHeight / 2;
       // 修正dy位置
       dy = dy.clamp(
         drawableRect.top + halfHeight,
@@ -676,11 +676,11 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
 
       /// 绘制横穿画板的最后价刻度线.
       final lastPath = Path();
-      if (lastTextSize != null) {
-        final lastTextAreaRight = rdx + latestTextOffset - last.spacing;
+      if (offViewPriceLabelSize != null) {
+        final lastTextAreaRight = rdx + latestPriceLabelOffsetX - offViewPriceMark.spacing;
         lastPath.moveTo(rdx, dy);
         lastPath.lineTo(lastTextAreaRight, dy);
-        lastPath.moveTo(lastTextAreaRight - lastTextSize!.width, dy);
+        lastPath.moveTo(lastTextAreaRight - offViewPriceLabelSize!.width, dy);
         lastPath.lineTo(ldx, dy);
       } else {
         lastPath.moveTo(rdx, dy);
@@ -688,7 +688,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
       }
       canvas.drawLineByConfig(
         lastPath,
-        last.line,
+        offViewPriceMark.line,
         themeColor: theme.markLineColor,
       );
 
@@ -699,15 +699,15 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
       );
 
       /// 绘制最后价标记
-      lastTextSize = canvas.drawTextArea(
+      offViewPriceLabelSize = canvas.drawTextArea(
         offset: Offset(
-          rdx + latestTextOffset - last.spacing,
+          rdx + latestPriceLabelOffsetX - offViewPriceMark.spacing,
           dy - halfHeight, // 居中
         ),
         drawDirection: DrawDirection.rtl,
         drawableRect: drawableRect,
         text: '$text ▸', // ➤➤▹►▸▶︎≻
-        textConfig: last.text,
+        textConfig: offViewPriceMark.text,
         themeTextColor: theme.lastPriceColor,
         themeBackgroundColor: theme.lastPriceBg,
       );
@@ -715,17 +715,17 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
   }
 
   /// 绘制最新蜡烛点
-  void paintLatestCandlePoint(Canvas canvas, Size size) {
+  void paintLatestPoint(Canvas canvas, Size size) {
     if (!indicator.showLatestPoint) return;
     if (indicator.latestPoint == null) return;
     final model = klineData.latest;
     if (model == null) {
-      logd('paintLatestCandlePoint > on data!');
+      logd('paintLatestPoint > on data!');
       return;
     }
-    if (paintDxOffset > latestTextOffset) {
+    if (paintDxOffset > latestPriceLabelOffsetX) {
       // 最新价在屏幕右侧, 不绘制点
-      // logd('paintLatestCandlePoint > latestPoint is on the right of the screen!');
+      // logd('paintLatestPoint > latestPoint is on the right of the screen!');
       return;
     }
 
@@ -743,7 +743,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
   }
 
   @override
-  Size? paintTips(
+  Size? paintTooltip(
     Canvas canvas, {
     FlexiCandleModel? model,
     Offset? offset,
@@ -754,7 +754,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
 
   @override
   bool handleTap(Offset position) {
-    final lastTxtRect = lastTextAreaRect?.inflate(indicator.last.hitTestMargin);
+    final lastTxtRect = offViewPriceLabelRect?.inflate(indicator.offViewPriceMark.hitTestMargin);
     if (lastTxtRect != null && lastTxtRect.include(position)) {
       // 命中最后价区域, 此时应该移动到蜡烛图初始位置
       moveToInitialPosition();

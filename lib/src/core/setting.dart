@@ -89,7 +89,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
   bool get isFixedLayoutMode => layoutMode == FlexiLayoutMode.fixed;
 
   @override
-  bool get isAllowUpdateLayoutHeight => layoutMode == FlexiLayoutMode.adapt;
+  bool get canUpdateLayoutHeight => layoutMode == FlexiLayoutMode.adapt;
 
   Size? get fixedSize => isFixedLayoutMode ? _fixedSize : null;
 
@@ -147,7 +147,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
 
   /// 缩放过程中按主区高度比例调整 padding。
   EdgeInsets? _zoomMainPaddingByScale(double scale) {
-    if (!isStartZoomChart || scale == 1) return null;
+    if (!isChartZooming || scale == 1) return null;
     return mainPadding.copyWith(
       top: mainPadding.top * scale,
       bottom: mainPadding.bottom * scale,
@@ -450,19 +450,19 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
   }
 
   @override
-  int? getDataIndex(DataIndicatorKey key) {
-    return _paintObjectManager.getIndicatorDataIndex(key);
+  int? getComputedDataIndex(ComputedIndicatorKey key) {
+    return _paintObjectManager.getComputedDataIndex(key);
   }
 
   @override
-  int get indicatorCount => _paintObjectManager.indicatorCount;
+  int get computedDataCount => _paintObjectManager.computedDataCount;
 
   @override
-  double calculateIndicatorTop(int slot) {
+  double calculatePaneTop(int paneIndex) {
     double top = 0;
     final list = subPaintObjects.toList(growable: false);
-    if (slot >= 0 && slot < list.length) {
-      for (int i = 0; i < slot; i++) {
+    if (paneIndex >= 0 && paneIndex < list.length) {
+      for (int i = 0; i < paneIndex; i++) {
         top += list[i].height;
       }
     }
@@ -533,8 +533,8 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
   bool addMainIndicator(IIndicatorKey key) {
     final newObj = _paintObjectManager.addMainPaintObject(key, this);
     if (newObj == null) return false;
-    if (newObj is IComputablePainter) {
-      (newObj as IComputablePainter).precompute(curKlineData.computableRange, reset: true);
+    if (newObj is IComputedPainter) {
+      (newObj as IComputedPainter).compute(curKlineData.computableRange, reset: true);
     }
     markRepaintChart(reset: true);
     markRepaintCross();
@@ -563,8 +563,8 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
       logw('addSubIndicator failed: fixed canvas size is too small for $key.');
       return false;
     }
-    if (newObj is IComputablePainter) {
-      (newObj as IComputablePainter).precompute(curKlineData.computableRange, reset: true);
+    if (newObj is IComputedPainter) {
+      (newObj as IComputedPainter).compute(curKlineData.computableRange, reset: true);
     }
     _onSubIndicatorsChanged();
     return true;

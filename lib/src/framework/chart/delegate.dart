@@ -16,7 +16,7 @@ part of 'indicator.dart';
 
 extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
   void setHeight(double height) {
-    if (isAllowUpdateHeight) {
+    if (canUpdateHeight) {
       _tmpHeight = null;
       // indicator中只保留正常布局模式/适配模式下的高度, 其他模式会根据当前父布局自适应.
       indicator.height = height;
@@ -55,14 +55,14 @@ extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
   }
 
   MinMax? doInitState(
-    int newSlot, {
+    int newPaneIndex, {
     required int start,
     required int end,
     bool reset = false,
     double panSmoothFactor = 1.0,
   }) {
-    if (reset || newSlot != slot) {
-      resetPaintBounding(slot: newSlot);
+    if (reset || newPaneIndex != paneIndex) {
+      resetPaintBounding(paneIndex: newPaneIndex);
       _minMax = null;
       _dyFactor = null;
     }
@@ -76,7 +76,7 @@ extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
     _start = start;
     _end = end;
     _minMax = null;
-    final ret = initState(start, end);
+    final ret = computeVisibleMinMax(start, end);
 
     if (ret != null) {
       setMinMax(ret);
@@ -88,10 +88,10 @@ extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
   }
 
   void doPaintChart(Canvas canvas, Size size) {
-    paintChart(canvas, size);
+    paint(canvas, size);
 
     if (!isCrossing) {
-      paintTips(
+      paintTooltip(
         canvas,
         model: klineData.latest,
         tipsRect: drawableRect,
@@ -100,13 +100,13 @@ extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
   }
 
   void doPaintExtraAboveChart(Canvas canvas, Size size) {
-    paintExtraAboveChart(canvas, size);
+    paintOverlay(canvas, size);
   }
 
   void doOnCross(Canvas canvas, Offset offset, {FlexiCandleModel? model}) {
-    onCross(canvas, offset);
+    paintCross(canvas, offset, model: model);
 
-    paintTips(
+    paintTooltip(
       canvas,
       offset: offset,
       model: model,
@@ -135,7 +135,7 @@ extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
 extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintObject<T> {
   @protected
   void setSize(Size size) {
-    if (isAllowUpdateHeight) {
+    if (canUpdateHeight) {
       _tmpSize = null;
       indicator.size = size;
     } else {
@@ -194,14 +194,14 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
   }
 
   MinMax? doInitState(
-    int newSlot, {
+    int newPaneIndex, {
     required int start,
     required int end,
     bool reset = false,
     double panSmoothFactor = 1.0,
   }) {
-    if (reset || newSlot != slot) {
-      resetPaintBounding(slot: newSlot);
+    if (reset || newPaneIndex != paneIndex) {
+      resetPaintBounding(paneIndex: newPaneIndex);
       _minMax = null;
       _dyFactor = null;
     }
@@ -220,7 +220,7 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
       // 必须清除以强制 initState 重算精确值, 否则 smoothMinMax 的收敛目标是错的
       if (_smoothMinMax != null) object._minMax = null;
       final ret = object.doInitState(
-        newSlot,
+        newPaneIndex,
         start: start,
         end: end,
         reset: reset,
@@ -246,7 +246,7 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
   /// 1. drawBelowTipsArea标识为true
   /// 2. 当前不处在Zooming中时
   bool get isFirstDrawTipsArea {
-    return indicator.drawBelowTipsArea && !_context.isStartZoomChart;
+    return indicator.drawBelowTipsArea && !_context.isChartZooming;
   }
 
   void doPaintChart(Canvas canvas, Size size) {
@@ -264,11 +264,11 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
         }
       }
       for (final object in paintableChildren) {
-        object.paintChart(canvas, size);
+        object.paint(canvas, size);
       }
     } else {
       for (final object in paintableChildren) {
-        object.paintChart(canvas, size);
+        object.paint(canvas, size);
       }
       if (!isCrossing) {
         doPaintTips(canvas, model: klineData.latest);
@@ -278,7 +278,7 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
 
   void doPaintExtraAboveChart(Canvas canvas, Size size) {
     for (final object in paintableChildren) {
-      object.paintExtraAboveChart(canvas, size);
+      object.paintOverlay(canvas, size);
     }
   }
 
@@ -296,11 +296,11 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
         }
       }
       for (final object in paintableChildren) {
-        object.onCross(canvas, offset);
+        object.paintCross(canvas, offset, model: model);
       }
     } else {
       for (final object in paintableChildren) {
-        object.onCross(canvas, offset);
+        object.paintCross(canvas, offset, model: model);
       }
       if (isCrossing) {
         doPaintTips(canvas, offset: offset, model: model);
@@ -312,7 +312,7 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
     // 每次绘制前, 重置Tips区域大小为0
     double height = 0;
     for (final object in paintableChildren) {
-      final size = object.paintTips(
+      final size = object.paintTooltip(
         canvas,
         model: model,
         offset: offset,

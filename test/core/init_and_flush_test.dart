@@ -49,14 +49,14 @@ void main() {
       expect(data.waitingDataLength, equals(0));
     });
 
-    /// 测试 3：验证 KlineData 不包含 indicatorCount 字段
+    /// 测试 3：验证 KlineData 不包含 computedDataCount 字段
     ///
-    /// 验证 KlineData 构造器不再接受 indicatorCount 参数
+    /// 验证 KlineData 构造器不再接受 computedDataCount 参数
     /// **Validates: Requirements 7.1, 7.2**
-    test('KlineData constructor should not require indicatorCount', () {
+    test('KlineData constructor should not require computedDataCount', () {
       const spec = KlineSpec(symbol: 'TEST', interval: _testInterval1D);
 
-      // 应该能够创建 KlineData 而不传入 indicatorCount
+      // 应该能够创建 KlineData 而不传入 computedDataCount
       final data = KlineData(spec);
       expect(data.spec, equals(spec));
       expect(data.isEmpty, isTrue);
@@ -174,11 +174,11 @@ void main() {
       // 注：这发生在 StateBinding.flushPendingKlineData() 中
     });
 
-    /// 测试 9：验证 switchKlineData 不传入 indicatorCount
+    /// 测试 9：验证 switchKlineData 不传入 computedDataCount
     ///
-    /// 验证 switchKlineData 创建的 KlineData 不包含 indicatorCount 参数
+    /// 验证 switchKlineData 创建的 KlineData 不包含 computedDataCount 参数
     /// **Validates: Requirements 7.1, 7.2, 14.5**
-    test('switchKlineData should create KlineData without indicatorCount', () {
+    test('switchKlineData should create KlineData without computedDataCount', () {
       const spec = KlineSpec(symbol: 'TEST', interval: _testInterval1D);
 
       // 验证 KlineData 已创建
@@ -187,15 +187,15 @@ void main() {
       expect(data.isEmpty, isTrue);
     });
 
-    /// 测试 10：验证 precomputeKlineData 接受 indicatorCount 参数
+    /// 测试 10：验证 precomputeKlineData 接受 computedDataCount 参数
     ///
-    /// 验证 precomputeKlineData 方法签名包含 indicatorCount 参数
+    /// 验证 precomputeKlineData 方法签名包含 computedDataCount 参数
     /// **Validates: Requirements 7.3, 7.4, 14.6**
-    test('precomputeKlineData should accept indicatorCount parameter', () {
+    test('precomputeKlineData should accept computedDataCount parameter', () {
       const spec = KlineSpec(symbol: 'TEST', interval: _testInterval1D);
       final data = KlineData(spec);
 
-      // 验证 precomputeKlineData 方法存在且接受 indicatorCount
+      // 验证 precomputeKlineData 方法存在且接受 computedDataCount
       // 注：实际的调用需要 PaintObject 列表，这里仅验证方法签名
       expect(data.precomputeKlineData, isNotNull);
     });

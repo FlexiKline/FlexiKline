@@ -115,20 +115,20 @@ controller.updateKlineData(spec, list);
 
 v2.0.0 引入了类型化的指标体系，通过 `IIndicatorKey` sealed class 区分三类指标：
 
-| 指标类型 | Key 类型 | Indicator 基类 | PaintObject 基类 | 说明 |
-|---------|----------|---------------|-----------------|------|
-| 普通指标 | `NormalIndicatorKey` | `NormalIndicator` | `NormalPaintObject` | 不占 slot，无需预计算；内置 Candle、Time 等均基于此，可自定义继承 |
-| 数据指标 | `DataIndicatorKey` | `DataIndicator` | `DataPaintObject` | 需要 precompute，占 slot |
-| 业务指标 | `BusinessIndicatorKey` | `BusinessIndicator` | `BusinessPaintObject` | 由业务数据驱动，不占 slot |
+| 指标类型     | Key 类型               | Indicator 基类      | PaintObject 基类      | 说明                                                            |
+| ------------ | ---------------------- | ------------------- | --------------------- | --------------------------------------------------------------- |
+| 直接绘制指标 | `DirectIndicatorKey`   | `DirectIndicator`   | `DirectPaintObject`   | 直接基于当前 K 线数据和绘制上下文绘制，不占 computed data index |
+| 计算型指标   | `ComputedIndicatorKey` | `ComputedIndicator` | `ComputedPaintObject` | 需要提前计算，并将结果写入 `FlexiCandleModel.slots`             |
+| 外部数据指标 | `ExternalIndicatorKey` | `ExternalIndicator` | `ExternalPaintObject` | 由外部数据或用户操作驱动，不占 computed data index              |
 
 ### 示例：自定义数据指标
 
 ```dart
 /// 指标 Key
-const maIndicatorKey = DataIndicatorKey('MA', label: 'MA');
+const maIndicatorKey = ComputedIndicatorKey('MA', label: 'MA');
 
 /// 指标配置
-class MAIndicator extends DataIndicator {
+class MAIndicator extends ComputedIndicator {
   MAIndicator({
     super.zIndex = 0,
     required super.height,
@@ -143,7 +143,7 @@ class MAIndicator extends DataIndicator {
   final double lineWidth;
 
   @override
-  DataPaintObject<MAIndicator> createPaintObject() => MAPaintObject();
+  ComputedPaintObject<MAIndicator> createPaintObject() => MAPaintObject();
 
   @override
   Map<String, dynamic> toJson() {
@@ -152,41 +152,46 @@ class MAIndicator extends DataIndicator {
 }
 
 /// 指标绘制对象
-class MAPaintObject extends DataPaintObject<MAIndicator> {
+class MAPaintObject extends ComputedPaintObject<MAIndicator> {
 
   @override
-  bool shouldPrecompute(MAIndicator oldIndicator) {
-    // 判断新旧指标配置的变化是否需要执行预计算
+  bool shouldRecompute(MAIndicator oldIndicator) {
+    // 判断新旧指标配置的变化是否需要重新计算
   }
 
   @override
-  void precompute(Range range, {bool reset = false}) {
-    // 针对 [range] 范围内的数据进行预计算（仅在数据更新时回调）
+  void compute(Range range, {bool reset = false}) {
+    // 针对 [range] 范围内的数据进行计算（仅在数据更新时回调）
   }
 
   @override
-  MinMax? initState(int start, int end) {
+  MinMax? computeVisibleMinMax(int start, int end) {
     // 返回 [start ~ end) 之间的指标最大最小值
   }
 
   @override
-  void paintChart(Canvas canvas, Size size) {
+  void paint(Canvas canvas, Size size) {
     // 绘制指标线
   }
 
   @override
-  void onCross(Canvas canvas, Offset offset) {
-    // 十字线移动时回调
+  void paintOverlay(Canvas canvas, Size size) {
+    // 主图绘制完成后叠加绘制（如最新价标记等），与 Cross 图层无关
   }
 
   @override
-  Size? paintTips(
+  void paintCross(Canvas canvas, Offset offset, {FlexiCandleModel? model}) {
+    // Cross 状态下绘制指标附加内容
+  }
+
+  @override
+  Size? paintTooltip(
     Canvas canvas, {
-    CandleModel? model,
+    FlexiCandleModel? model,
     Offset? offset,
     Rect? tipsRect,
   }) {
-    // 绘制顶部 Tips 信息
+    // 绘制顶部 tooltip 信息
   }
 }
 ```

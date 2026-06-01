@@ -14,8 +14,8 @@
 
 /// 测试用 Indicator / PaintObject 子类
 ///
-/// 提供 [CandleBaseIndicator]、[TimeBaseIndicator]、[DataIndicator]、
-/// [BusinessIndicator] 的最小化实现，用于 [IndicatorPaintObjectManager]
+/// 提供 [CandleBaseIndicator]、[TimeBaseIndicator]、[ComputedIndicator]、
+/// [ExternalIndicator] 的最小化实现，用于 [IndicatorPaintObjectManager]
 /// 的单元测试和属性测试。
 library;
 
@@ -36,13 +36,13 @@ class TestCandleIndicator extends CandleBaseIndicator {
 
 class _TestCandlePaintObject extends CandleBasePaintObject<TestCandleIndicator> {
   @override
-  FlexiChartType getChartType() => FlexiChartType.barSolid;
+  FlexiChartType resolveChartType() => FlexiChartType.barSolid;
   @override
-  MinMax? initState(int start, int end) => null;
+  MinMax? computeVisibleMinMax(int start, int end) => null;
   @override
-  void paintChart(Canvas canvas, Size size) {}
+  void paint(Canvas canvas, Size size) {}
   @override
-  Size? paintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
+  Size? paintTooltip(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
 }
 
 // ---------------------------------------------------------------------------
@@ -59,55 +59,55 @@ class TestTimeIndicator extends TimeBaseIndicator {
 
 class _TestTimePaintObject extends TimeBasePaintObject<TestTimeIndicator> {
   @override
-  MinMax? initState(int start, int end) => null;
+  MinMax? computeVisibleMinMax(int start, int end) => null;
   @override
-  void paintChart(Canvas canvas, Size size) {}
+  void paint(Canvas canvas, Size size) {}
   @override
-  Size? paintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
+  Size? paintTooltip(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
 }
 
 // ---------------------------------------------------------------------------
 // Data
 // ---------------------------------------------------------------------------
 
-/// 测试用 [DataIndicator] 子类，支持自定义 key 和 height
-class TestDataIndicator extends DataIndicator {
-  TestDataIndicator({required super.key, super.height = 100}) : super(padding: EdgeInsets.zero);
+/// 测试用 [ComputedIndicator] 子类，支持自定义 key 和 height
+class TestComputedIndicator extends ComputedIndicator {
+  TestComputedIndicator({required super.key, super.height = 100}) : super(padding: EdgeInsets.zero);
 
   @override
-  DataPaintObject<DataIndicator> createPaintObject() => _TestDataPaintObject();
+  ComputedPaintObject<ComputedIndicator> createPaintObject() => _TestComputedPaintObject();
 }
 
-class _TestDataPaintObject extends DataPaintObject<TestDataIndicator> {
+class _TestComputedPaintObject extends ComputedPaintObject<TestComputedIndicator> {
   @override
-  MinMax? initState(int start, int end) => null;
+  MinMax? computeVisibleMinMax(int start, int end) => null;
   @override
-  void paintChart(Canvas canvas, Size size) {}
+  void paint(Canvas canvas, Size size) {}
   @override
-  Size? paintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
+  Size? paintTooltip(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
   @override
-  bool shouldPrecompute(covariant TestDataIndicator oldIndicator) => false;
+  bool shouldRecompute(covariant TestComputedIndicator oldIndicator) => false;
   @override
-  void precompute(Range range, {bool reset = false}) {}
+  void compute(Range range, {bool reset = false}) {}
 }
 
 // ---------------------------------------------------------------------------
 // Business
 // ---------------------------------------------------------------------------
 
-/// 测试用 [BusinessIndicator] 子类，支持自定义 key 和 height
-class TestBusinessIndicator extends BusinessIndicator {
-  TestBusinessIndicator({required super.key, super.height = 80}) : super(padding: EdgeInsets.zero);
+/// 测试用 [ExternalIndicator] 子类，支持自定义 key 和 height
+class TestExternalIndicator extends ExternalIndicator {
+  TestExternalIndicator({required super.key, super.height = 80}) : super(padding: EdgeInsets.zero);
 
   @override
-  BusinessPaintObject<BusinessIndicator> createPaintObject() => _TestBusinessPaintObject();
+  ExternalPaintObject<ExternalIndicator> createPaintObject() => _TestExternalPaintObject();
 }
 
-class _TestBusinessPaintObject extends BusinessPaintObject<TestBusinessIndicator> {
+class _TestExternalPaintObject extends ExternalPaintObject<TestExternalIndicator> {
   @override
-  MinMax? initState(int start, int end) => null;
+  MinMax? computeVisibleMinMax(int start, int end) => null;
   @override
-  void paintChart(Canvas canvas, Size size) {}
+  void paint(Canvas canvas, Size size) {}
   @override
-  Size? paintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
+  Size? paintTooltip(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
 }

@@ -24,7 +24,7 @@ class TimeIndicator extends TimeBaseIndicator {
     super.padding = EdgeInsets.zero,
     super.position = DrawPosition.middle,
     // 时间刻度.
-    this.timeTick = const TextAreaConfig(
+    this.timeLabel = const TextAreaConfig(
       style: TextStyle(
         fontSize: defaultTextSize,
         overflow: TextOverflow.ellipsis,
@@ -33,15 +33,15 @@ class TimeIndicator extends TimeBaseIndicator {
       textWidth: 80,
       textAlign: TextAlign.center,
     ),
-    this.ensurePaintInDrawableRect = false,
+    this.clipToDrawableRect = false,
     this.tickFormatter,
   });
 
   /// 时间刻度.
-  final TextAreaConfig timeTick;
+  final TextAreaConfig timeLabel;
 
   /// 确保在时间刻度绘制区域内画图: 启用会启用裁切
-  final bool ensurePaintInDrawableRect;
+  final bool clipToDrawableRect;
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   final DateTimeFormatter? tickFormatter;
@@ -57,18 +57,18 @@ class TimeIndicator extends TimeBaseIndicator {
 
 class TimePaintObject<T extends TimeIndicator> extends TimeBasePaintObject<T> {
   /// 两个时间刻度间隔的蜡烛数
-  int get timeTickIntervalCount {
-    return ((math.max(60, indicator.timeTick.textWidth ?? 0)) / candleActualWidth).round();
+  int get timeLabelIntervalCount {
+    return ((math.max(60, indicator.timeLabel.textWidth ?? 0)) / candleActualWidth).round();
   }
 
   @override
-  MinMax? initState(int start, int end) {
+  MinMax? computeVisibleMinMax(int start, int end) {
     return null;
   }
 
   @override
-  void paintChart(Canvas canvas, Size size) {
-    if (indicator.ensurePaintInDrawableRect) {
+  void paint(Canvas canvas, Size size) {
+    if (indicator.clipToDrawableRect) {
       canvas.save();
       canvas.clipRect(drawableRect);
       paintTimeChart(canvas, size);
@@ -89,26 +89,26 @@ class TimePaintObject<T extends TimeIndicator> extends TimeBasePaintObject<T> {
     for (var i = start; i < end; i++) {
       final model = data.list[i];
       final dx = offset - (i - start) * candleActualWidth;
-      if (interval.isValid && i % timeTickIntervalCount == 0) {
+      if (interval.isValid && i % timeLabelIntervalCount == 0) {
         final offset = Offset(dx, chartRect.top);
 
         // 绘制时间刻度.
-        final dyCenterOffset = (height - indicator.timeTick.areaHeight) / 2;
+        final dyCenterOffset = (height - indicator.timeLabel.areaHeight) / 2;
         canvas.drawTextArea(
           offset: Offset(
             offset.dx,
             offset.dy + dyCenterOffset,
           ),
           drawDirection: DrawDirection.center,
-          text: formatDateTime(model, interval),
-          textConfig: indicator.timeTick,
+          text: formatTimeLabel(model, interval),
+          textConfig: indicator.timeLabel,
           themeTextColor: theme.ticksTextColor,
         );
       }
     }
   }
 
-  String formatDateTime(FlexiCandleModel model, ITimeInterval interval) {
+  String formatTimeLabel(FlexiCandleModel model, ITimeInterval interval) {
     if (indicator.tickFormatter != null) {
       return indicator.tickFormatter!.call(model.dateTime, interval);
     }
@@ -116,12 +116,12 @@ class TimePaintObject<T extends TimeIndicator> extends TimeBasePaintObject<T> {
   }
 
   @override
-  void onCross(Canvas canvas, Offset offset) {
-    final model = offsetToCandle(offset);
+  void paintCross(Canvas canvas, Offset offset, {FlexiCandleModel? model}) {
+    final selectedModel = model ?? offsetToCandle(offset);
     final interval = klineData.interval;
-    if (model == null || !interval.isValid) return;
+    if (selectedModel == null || !interval.isValid) return;
 
-    final time = formatDateTime(model, interval);
+    final time = formatTimeLabel(selectedModel, interval);
     // final time = formatyyMMddHHMMss(model.dateTime);
 
     final dyCenterOffset = (height - crossConfig.ticksText.areaHeight) / 2;
@@ -139,7 +139,7 @@ class TimePaintObject<T extends TimeIndicator> extends TimeBasePaintObject<T> {
   }
 
   @override
-  Size? paintTips(
+  Size? paintTooltip(
     Canvas canvas, {
     FlexiCandleModel? model,
     Offset? offset,

@@ -99,7 +99,7 @@ abstract class PaintObject<T extends Indicator<IIndicatorKey>> extends Indicator
   @mustCallSuper
   @protected
   void didUpdateIndicator(covariant T oldIndicator) {
-    // 基类不处理 precompute，由 DataPaintObject 处理
+    // 基类不处理 precompute，由 ComputedPaintObject 处理
   }
 
   @protected
@@ -113,10 +113,10 @@ abstract class PaintObject<T extends Indicator<IIndicatorKey>> extends Indicator
 
   @protected
   @override
-  void paintExtraAboveChart(Canvas canvas, Size size) {}
+  void paintOverlay(Canvas canvas, Size size) {}
 
   @override
-  void onCross(Canvas canvas, Offset offset) {}
+  void paintCross(Canvas canvas, Offset offset, {FlexiCandleModel? model}) {}
 
   /// 处理 Tap 事件
   ///
@@ -155,19 +155,19 @@ abstract class PaintObject<T extends Indicator<IIndicatorKey>> extends Indicator
 /// 普通指标绘制对象，不占 slot，无需预计算。
 ///
 /// 内置的 Candle、Time、Volume 等均基于此，自定义指标也可继承。
-abstract class NormalPaintObject<T extends NormalIndicator> extends PaintObject<T> implements IBasePainter {}
+abstract class DirectPaintObject<T extends DirectIndicator> extends PaintObject<T> implements IDirectPainter {}
 
 /// 数据指标绘制对象
 ///
 /// 用于 KDJ、MACD、MA 等需要 precompute 并写入 FlexiCandleModel.slots 的指标。
 /// 持有 [dataIndex]，用于在 slots 中存取计算数据。
-abstract class DataPaintObject<T extends DataIndicator> extends PaintObject<T>
-    with PaintObjectComputableMixin<T>
-    implements IComputablePainter {
+abstract class ComputedPaintObject<T extends ComputedIndicator> extends PaintObject<T>
+    with PaintObjectComputedMixin<T>
+    implements IComputedPainter {
   /// 当前绘制对象的指标计算数据存储下标，用于在 FlexiCandleModel.slots 中存取计算数据。
   /// mount 时由框架注入；若未能获取（如测试 mock），首次访问时懒加载。
   int get dataIndex {
-    return _dataIndex ??= _context.getDataIndex(indicator.key) ?? -1;
+    return _dataIndex ??= _context.getComputedDataIndex(indicator.key) ?? -1;
   }
 
   int? _dataIndex;
@@ -180,7 +180,7 @@ abstract class DataPaintObject<T extends DataIndicator> extends PaintObject<T>
   @protected
   void mount(T indicator, IPaintContext context) {
     super.mount(indicator, context);
-    _dataIndex = context.getDataIndex(indicator.key);
+    _dataIndex = context.getComputedDataIndex(indicator.key);
   }
 
   /// 指标配置发生变改
@@ -189,8 +189,8 @@ abstract class DataPaintObject<T extends DataIndicator> extends PaintObject<T>
   @protected
   void didUpdateIndicator(covariant T oldIndicator) {
     super.didUpdateIndicator(oldIndicator);
-    if (shouldPrecompute(oldIndicator)) {
-      precompute(klineData.computableRange, reset: true);
+    if (shouldRecompute(oldIndicator)) {
+      this.compute(klineData.computableRange, reset: true);
     }
   }
 }
@@ -199,7 +199,7 @@ abstract class DataPaintObject<T extends DataIndicator> extends PaintObject<T>
 ///
 /// 用于 Trade 等由业务数据或用户操作驱动的指标，不占 slot。
 /// 子类可按需 override [loadBusinessData] 加载业务数据。
-abstract class BusinessPaintObject<T extends BusinessIndicator> extends PaintObject<T> implements IBusinessPainter {
+abstract class ExternalPaintObject<T extends ExternalIndicator> extends PaintObject<T> implements IExternalPainter {
   /// 加载业务数据
   ///
   /// 框架在适当时机（如首次显示、数据刷新）调用。
@@ -211,13 +211,13 @@ abstract class BusinessPaintObject<T extends BusinessIndicator> extends PaintObj
 
 /// 蜡烛图绘制对象
 ///
-/// 使用 [NormalIndicatorKey]，属于基础/系统指标，不占 slot。
-abstract class CandleBasePaintObject<T extends CandleBaseIndicator> extends NormalPaintObject<T> {
+/// 使用 [DirectIndicatorKey]，属于基础/系统指标，不占 slot。
+abstract class CandleBasePaintObject<T extends CandleBaseIndicator> extends DirectPaintObject<T> {
   /// 获取当前蜡烛图的绘制类型
-  FlexiChartType getChartType();
+  FlexiChartType resolveChartType();
 
   /// 是否在蜡烛图类型为线图时隐藏指标
-  bool get hideIndicatorsWhenLineChart => false;
+  bool get hideMainIndicatorsInLineChartMode => false;
 
   @nonVirtual
   void moveToInitialPosition() {
@@ -234,16 +234,16 @@ abstract class CandleBasePaintObject<T extends CandleBaseIndicator> extends Norm
 
 /// 时间轴指标绘制对象
 ///
-/// 使用 [NormalIndicatorKey]，属于基础/系统指标，不占 slot。
-abstract class TimeBasePaintObject<T extends TimeBaseIndicator> extends NormalPaintObject<T> {
+/// 使用 [DirectIndicatorKey]，属于基础/系统指标，不占 slot。
+abstract class TimeBasePaintObject<T extends TimeBaseIndicator> extends DirectPaintObject<T> {
   DrawPosition get position => indicator.position;
 }
 
 /// 主区绘制对象
 ///
-/// 使用 [NormalIndicatorKey]，属于基础/系统指标，不占 slot。
+/// 使用 [DirectIndicatorKey]，属于基础/系统指标，不占 slot。
 /// [children] 存储主区内的所有子绘制对象。
-final class MainPaintObject<T extends MainPaintObjectIndicator> extends PaintObject<T> implements IComputablePainter {
+final class MainPaintObject<T extends MainPaintObjectIndicator> extends PaintObject<T> implements IComputedPainter {
   // 需要显式构造函数，因为需要在构造函数体中初始化 children
   MainPaintObject() : super() {
     children = SortableHashSet<PaintObject>.from(
@@ -273,7 +273,7 @@ final class MainPaintObject<T extends MainPaintObjectIndicator> extends PaintObj
   bool get onlyMainChart {
     final candleObject = _candlePaintObject;
     if (candleObject == null) return false;
-    return candleObject.hideIndicatorsWhenLineChart && candleObject.getChartType().isLine;
+    return candleObject.hideMainIndicatorsInLineChartMode && candleObject.resolveChartType().isLine;
   }
 
   Size? _tmpSize;
@@ -293,7 +293,7 @@ final class MainPaintObject<T extends MainPaintObjectIndicator> extends PaintObj
   }
 
   @override
-  bool shouldPrecompute(MainPaintObjectIndicator oldIndicator) {
+  bool shouldRecompute(MainPaintObjectIndicator oldIndicator) {
     if (oldIndicator.children != indicator.children) {
       return true;
     }
@@ -304,9 +304,9 @@ final class MainPaintObject<T extends MainPaintObjectIndicator> extends PaintObj
   ///
   /// MainPaintObject 本身不需要 precompute，但需要将调用委托给子对象。
   @override
-  void precompute(Range range, {bool reset = false}) {
-    for (final computable in children.whereType<IComputablePainter>()) {
-      computable.precompute(range, reset: reset);
+  void compute(Range range, {bool reset = false}) {
+    for (final computable in children.whereType<IComputedPainter>()) {
+      computable.compute(range, reset: reset);
     }
   }
 
@@ -318,15 +318,15 @@ final class MainPaintObject<T extends MainPaintObjectIndicator> extends PaintObj
   }
 
   @override
-  MinMax? initState(int start, int end) {
+  MinMax? computeVisibleMinMax(int start, int end) {
     return minMax;
   }
 
   @override
-  void paintChart(Canvas canvas, Size size) {}
+  void paint(Canvas canvas, Size size) {}
 
   @override
-  Size? paintTips(
+  Size? paintTooltip(
     Canvas canvas, {
     FlexiCandleModel? model,
     Offset? offset,

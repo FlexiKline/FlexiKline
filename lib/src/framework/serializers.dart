@@ -47,10 +47,10 @@ class IIndicatorKeyConvert implements JsonConverter<IIndicatorKey, String> {
     final label = parts.sublist(2).join(':');
 
     return switch (type) {
-      final typeName when typeName == (DataIndicatorKey).toString() => DataIndicatorKey(id, label: label),
-      final typeName when typeName == (BusinessIndicatorKey).toString() => BusinessIndicatorKey(id, label: label),
-      final typeName when typeName == (NormalIndicatorKey).toString() => NormalIndicatorKey(id, label: label),
-      _ => NormalIndicatorKey(id, label: label), // unknownIndicatorKey
+      final typeName when typeName == (ComputedIndicatorKey).toString() => ComputedIndicatorKey(id, label: label),
+      final typeName when typeName == (ExternalIndicatorKey).toString() => ExternalIndicatorKey(id, label: label),
+      final typeName when typeName == (DirectIndicatorKey).toString() => DirectIndicatorKey(id, label: label),
+      _ => DirectIndicatorKey(id, label: label), // unknownIndicatorKey
     };
   }
 
@@ -60,74 +60,74 @@ class IIndicatorKeyConvert implements JsonConverter<IIndicatorKey, String> {
   }
 }
 
-/// NormalIndicatorKey 序列化转换器
+/// DirectIndicatorKey 序列化转换器
 ///
-/// 专门用于处理 NormalIndicatorKey 类型的序列化，
+/// 专门用于处理 DirectIndicatorKey 类型的序列化，
 /// 让 json_serializable 能够识别并生成正确的序列化代码。
-class NormalIndicatorKeyConvert implements JsonConverter<NormalIndicatorKey, String> {
-  const NormalIndicatorKeyConvert();
+class DirectIndicatorKeyConvert implements JsonConverter<DirectIndicatorKey, String> {
+  const DirectIndicatorKeyConvert();
 
   @override
-  NormalIndicatorKey fromJson(String json) {
+  DirectIndicatorKey fromJson(String json) {
     final result = const IIndicatorKeyConvert().fromJson(json);
-    if (result is NormalIndicatorKey) {
+    if (result is DirectIndicatorKey) {
       return result;
     }
-    // 如果解析结果不是 NormalIndicatorKey，返回一个默认值
+    // 如果解析结果不是 DirectIndicatorKey，返回一个默认值
     // 这种情况理论上不应该发生，但为了类型安全需要处理
-    return NormalIndicatorKey(result.id, label: result.label);
+    return DirectIndicatorKey(result.id, label: result.label);
   }
 
   @override
-  String toJson(NormalIndicatorKey key) {
+  String toJson(DirectIndicatorKey key) {
     return const IIndicatorKeyConvert().toJson(key);
   }
 }
 
-/// DataIndicatorKey 序列化转换器
+/// ComputedIndicatorKey 序列化转换器
 ///
-/// 专门用于处理 DataIndicatorKey 类型的序列化，
+/// 专门用于处理 ComputedIndicatorKey 类型的序列化，
 /// 让 json_serializable 能够识别并生成正确的序列化代码。
-class DataIndicatorKeyConvert implements JsonConverter<DataIndicatorKey, String> {
-  const DataIndicatorKeyConvert();
+class ComputedIndicatorKeyConvert implements JsonConverter<ComputedIndicatorKey, String> {
+  const ComputedIndicatorKeyConvert();
 
   @override
-  DataIndicatorKey fromJson(String json) {
+  ComputedIndicatorKey fromJson(String json) {
     final result = const IIndicatorKeyConvert().fromJson(json);
-    if (result is DataIndicatorKey) {
+    if (result is ComputedIndicatorKey) {
       return result;
     }
-    // 如果解析结果不是 DataIndicatorKey，返回一个默认值
+    // 如果解析结果不是 ComputedIndicatorKey，返回一个默认值
     // 这种情况理论上不应该发生，但为了类型安全需要处理
-    return DataIndicatorKey(result.id, label: result.label);
+    return ComputedIndicatorKey(result.id, label: result.label);
   }
 
   @override
-  String toJson(DataIndicatorKey key) {
+  String toJson(ComputedIndicatorKey key) {
     return const IIndicatorKeyConvert().toJson(key);
   }
 }
 
-/// BusinessIndicatorKey 序列化转换器
+/// ExternalIndicatorKey 序列化转换器
 ///
-/// 专门用于处理 BusinessIndicatorKey 类型的序列化，
+/// 专门用于处理 ExternalIndicatorKey 类型的序列化，
 /// 让 json_serializable 能够识别并生成正确的序列化代码。
-class BusinessIndicatorKeyConvert implements JsonConverter<BusinessIndicatorKey, String> {
-  const BusinessIndicatorKeyConvert();
+class ExternalIndicatorKeyConvert implements JsonConverter<ExternalIndicatorKey, String> {
+  const ExternalIndicatorKeyConvert();
 
   @override
-  BusinessIndicatorKey fromJson(String json) {
+  ExternalIndicatorKey fromJson(String json) {
     final result = const IIndicatorKeyConvert().fromJson(json);
-    if (result is BusinessIndicatorKey) {
+    if (result is ExternalIndicatorKey) {
       return result;
     }
-    // 如果解析结果不是 BusinessIndicatorKey，返回一个默认值
+    // 如果解析结果不是 ExternalIndicatorKey，返回一个默认值
     // 这种情况理论上不应该发生，但为了类型安全需要处理
-    return BusinessIndicatorKey(result.id, label: result.label);
+    return ExternalIndicatorKey(result.id, label: result.label);
   }
 
   @override
-  String toJson(BusinessIndicatorKey key) {
+  String toJson(ExternalIndicatorKey key) {
     return const IIndicatorKeyConvert().toJson(key);
   }
 }
@@ -1005,9 +1005,9 @@ const FlexiOverlaySerializable = JsonSerializable(
 // ignore: constant_identifier_names
 const FlexiIndicatorSerializable = JsonSerializable(
   converters: [
-    BusinessIndicatorKeyConvert(),
-    DataIndicatorKeyConvert(),
-    NormalIndicatorKeyConvert(),
+    ExternalIndicatorKeyConvert(),
+    ComputedIndicatorKeyConvert(),
+    DirectIndicatorKeyConvert(),
     IIndicatorKeyConvert(),
     PaintModeConverter(),
     IntervalChartTypesConverter(),

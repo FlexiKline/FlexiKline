@@ -67,10 +67,10 @@ abstract interface class IPaintContext implements IStorage, ILogger {
   /// 是否允许指标写回布局高度。
   ///
   /// adapt 下写回原始高度；fixed 下只写入临时高度。
-  bool get isAllowUpdateLayoutHeight;
+  bool get canUpdateLayoutHeight;
 
   /// 指标图是否已开始缩放
-  bool get isStartZoomChart;
+  bool get isChartZooming;
 
   /// 当前画布内第一根蜡烛的绘制偏移。
   double get startCandleDx;
@@ -110,10 +110,10 @@ abstract interface class IPaintContext implements IStorage, ILogger {
   double get candleWidthHalf;
 
   /// 将value转换为蜡烛图中dy坐标值
-  double valueToDyOnCandle(FlexiNum value, {bool correct = false});
+  double candleValueToDy(FlexiNum value, {bool correct = false});
 
   /// 将dy坐标值转换为蜡烛图中value
-  FlexiNum? dyToValueOnCandle(double dy, {bool check = false});
+  FlexiNum? dyToCandleValue(double dy, {bool check = false});
 
   /// 画布区域。
   Rect get canvasRect;
@@ -130,8 +130,8 @@ abstract interface class IPaintContext implements IStorage, ILogger {
   /// 指标图缩放滑竿区域。
   Rect get chartZoomSlideBarRect;
 
-  /// 计算 [slot] 对应副区的 top。
-  double calculateIndicatorTop(int slot);
+  /// 计算 [paneIndex] 对应副区的 top。
+  double calculatePaneTop(int paneIndex);
 
   Offset? get crossOffset;
 
@@ -140,11 +140,11 @@ abstract interface class IPaintContext implements IStorage, ILogger {
 
   /// 获取 [key] 对应的计算数据存储位置
   ///
-  /// 仅对 [DataIndicatorKey]（数据指标）有效。
-  int? getDataIndex(DataIndicatorKey key);
+  /// 仅对 [ComputedIndicatorKey]（数据指标）有效。
+  int? getComputedDataIndex(ComputedIndicatorKey key);
 
-  /// 获取指标数量
-  int get indicatorCount;
+  /// 获取已分配 computed data index 的数量。
+  int get computedDataCount;
 
   /// 重绘
   void requestRepaint();

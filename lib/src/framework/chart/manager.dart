@@ -16,7 +16,7 @@ part of 'indicator.dart';
 
 /// [PaintObject] 管理器。
 ///
-/// 负责声明指标缓存、激活对象创建，以及 DataIndicator slot 分配。
+/// 负责声明指标缓存、激活对象创建，以及 ComputedIndicator slot 分配。
 final class IndicatorPaintObjectManager with FlexiLog {
   IndicatorPaintObjectManager({
     required this.configuration,
@@ -37,10 +37,10 @@ final class IndicatorPaintObjectManager with FlexiLog {
   late FlexiKlineConfig _flexiKlineConfig;
   FlexiKlineConfig get flexiKlineConfig => _flexiKlineConfig;
 
-  /// DataIndicator 计算数据的 slot 映射。
+  /// ComputedIndicator 计算数据的 slot 映射。
   ///
-  /// 仅对 [DataIndicatorKey]（数据指标）分配 slot。
-  final Map<DataIndicatorKey, int> _indicatorDataIndexs = {};
+  /// 仅对 [ComputedIndicatorKey]（数据指标）分配 slot。
+  final Map<ComputedIndicatorKey, int> _computedDataIndexes = {};
 
   /// 已回收的 slot，按 FIFO 复用。
   final Queue<int> _recycledSlots = Queue<int>();
@@ -99,40 +99,40 @@ final class IndicatorPaintObjectManager with FlexiLog {
     return _subIndicatorBuilders.containsKey(key) || key == timeIndicatorKey;
   }
 
-  int? getIndicatorDataIndex(DataIndicatorKey key) {
-    return _indicatorDataIndexs[key];
+  int? getComputedDataIndex(ComputedIndicatorKey key) {
+    return _computedDataIndexes[key];
   }
 
-  int get indicatorCount => _indicatorDataIndexs.length;
+  int get computedDataCount => _computedDataIndexes.length;
 
-  /// 注册 [DataIndicatorKey] 列表，为每个 key 分配 slot。
+  /// 注册 [ComputedIndicatorKey] 列表，为每个 key 分配 slot。
   ///
   /// 优先从 [_recycledSlots] 复用已回收的 slot index；
   /// 已注册的 key 会被跳过。
-  int registerDataIndicatorKeys(List<DataIndicatorKey> keys) {
+  int allocateComputedDataIndexes(List<ComputedIndicatorKey> keys) {
     for (final key in keys) {
-      if (_indicatorDataIndexs.containsKey(key)) continue;
+      if (_computedDataIndexes.containsKey(key)) continue;
       final int slot;
       if (_recycledSlots.isNotEmpty) {
         slot = _recycledSlots.removeFirst();
       } else {
-        slot = _indicatorDataIndexs.length;
+        slot = _computedDataIndexes.length;
       }
-      _indicatorDataIndexs[key] = slot;
-      logi('registerDataIndicatorKey $key:$slot');
+      _computedDataIndexes[key] = slot;
+      logi('allocateComputedDataIndex $key:$slot');
     }
-    return _indicatorDataIndexs.length;
+    return _computedDataIndexes.length;
   }
 
-  /// 回收 [DataIndicatorKey] 的 slot。
+  /// 回收 [ComputedIndicatorKey] 的 slot。
   ///
   /// 将 slot index 加入 [_recycledSlots] 以供后续复用，
   /// 不清理蜡烛数据中对应位置的值（惰性清理，下次复用时自然覆盖）。
-  void recycleDataIndicatorSlot(DataIndicatorKey key) {
-    final index = _indicatorDataIndexs.remove(key);
+  void releaseComputedDataIndex(ComputedIndicatorKey key) {
+    final index = _computedDataIndexes.remove(key);
     if (index != null) {
       _recycledSlots.addLast(index);
-      logi('recycleDataIndicatorSlot $key:$index');
+      logi('releaseComputedDataIndex $key:$index');
     }
   }
 
@@ -148,14 +148,14 @@ final class IndicatorPaintObjectManager with FlexiLog {
       logw('mountIndicators: already initialized, skip re-mount.');
       return;
     }
-    // 收集 DataIndicatorKey 并分配 slot。
-    final dataKeys = <DataIndicatorKey>[
+    // 收集 ComputedIndicatorKey 并分配 slot。
+    final dataKeys = <ComputedIndicatorKey>[
       for (final indicator in mainIndicators)
-        if (indicator.key is DataIndicatorKey) indicator.key as DataIndicatorKey,
+        if (indicator.key is ComputedIndicatorKey) indicator.key as ComputedIndicatorKey,
       for (final indicator in subIndicators)
-        if (indicator.key is DataIndicatorKey) indicator.key as DataIndicatorKey,
+        if (indicator.key is ComputedIndicatorKey) indicator.key as ComputedIndicatorKey,
     ];
-    registerDataIndicatorKeys(dataKeys);
+    allocateComputedDataIndexes(dataKeys);
 
     // 缓存声明层指标。
     for (final indicator in mainIndicators) {
@@ -217,7 +217,7 @@ final class IndicatorPaintObjectManager with FlexiLog {
       newIndicators: newSubIndicators,
     );
 
-    logi('updateIndicators 完成: indicatorCount=$indicatorCount');
+    logi('updateIndicators 完成: computedDataCount=$computedDataCount');
   }
 
   /// 同步主区声明集合；新增只缓存，不自动激活。
@@ -233,8 +233,8 @@ final class IndicatorPaintObjectManager with FlexiLog {
     for (final key in oldMap.keys) {
       if (newMap.containsKey(key)) continue;
 
-      if (key is DataIndicatorKey) {
-        recycleDataIndicatorSlot(key);
+      if (key is ComputedIndicatorKey) {
+        releaseComputedDataIndex(key);
       }
 
       _mainIndicatorBuilders.remove(key);
@@ -250,11 +250,11 @@ final class IndicatorPaintObjectManager with FlexiLog {
       final newIndicator = entry.value;
 
       if (!oldMap.containsKey(key)) {
-        if (key is DataIndicatorKey) {
-          registerDataIndicatorKeys([key]);
+        if (key is ComputedIndicatorKey) {
+          allocateComputedDataIndexes([key]);
         }
         _mainIndicatorBuilders[key] = newIndicator;
-        logi('_mainDiffAndSync: 新增指标 $key $indicatorCount');
+        logi('_mainDiffAndSync: 新增指标 $key $computedDataCount');
       } else {
         _mainIndicatorBuilders[key] = newIndicator;
 
@@ -280,8 +280,8 @@ final class IndicatorPaintObjectManager with FlexiLog {
     for (final key in oldMap.keys) {
       if (newMap.containsKey(key)) continue;
 
-      if (key is DataIndicatorKey) {
-        recycleDataIndicatorSlot(key);
+      if (key is ComputedIndicatorKey) {
+        releaseComputedDataIndex(key);
       }
 
       _subIndicatorBuilders.remove(key);
@@ -297,11 +297,11 @@ final class IndicatorPaintObjectManager with FlexiLog {
       final newIndicator = entry.value;
 
       if (!oldMap.containsKey(key)) {
-        if (key is DataIndicatorKey) {
-          registerDataIndicatorKeys([key]);
+        if (key is ComputedIndicatorKey) {
+          allocateComputedDataIndexes([key]);
         }
         _subIndicatorBuilders[key] = newIndicator;
-        logi('_subDiffAndSync: 新增指标 $key $indicatorCount');
+        logi('_subDiffAndSync: 新增指标 $key $computedDataCount');
       } else {
         _subIndicatorBuilders[key] = newIndicator;
 

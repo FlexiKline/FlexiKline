@@ -110,7 +110,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
     } else if (gestureConfig.enableZoom && _zoomData == null && controller.chartZoomSlideBarRect.include(position)) {
       logd('onPointerDown zoom > position:$position');
       _zoomData = GestureData.zoom(position);
-    } else if (_zoomData == null && controller.isStartZoomChart && controller.mainRect.include(position)) {
+    } else if (_zoomData == null && controller.isChartZooming && controller.mainRect.include(position)) {
       logd('onPointerDown position:$position');
       _moveData = GestureData.move(position);
     }
@@ -175,7 +175,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
       } else {
         controller.onChartZoomUpdate(_zoomData!);
       }
-    } else if (controller.isStartZoomChart && _moveData != null) {
+    } else if (controller.isChartZooming && _moveData != null) {
       if (!isSweeped) {
         logi('onPointerMove currently in zooming, need clear the gesture arena!');
         isSweeped = true;

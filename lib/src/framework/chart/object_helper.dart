@@ -16,7 +16,7 @@ part of 'indicator.dart';
 
 /// FlexiKlineController 状态、配置与绘制接口代理。
 extension IndicatorObjectExt on IndicatorObject {
-  bool get isAllowUpdateHeight => _context.isAllowUpdateLayoutHeight;
+  bool get canUpdateHeight => _context.canUpdateLayoutHeight;
 
   /// 设置配置。
   SettingConfig get settingConfig => _context.settingConfig;
@@ -106,13 +106,13 @@ extension IndicatorObjectExt on IndicatorObject {
 
 /// 绘制对象边界计算能力。
 mixin PaintObjectBoundingMixin<T extends Indicator<IIndicatorKey>> on IndicatorObject<T> implements IPaintBounding {
-  bool get drawInMain => slot == mainIndicatorSlot;
-  bool get drawInSub => slot > mainIndicatorSlot;
+  bool get drawInMain => paneIndex == mainPaneIndex;
+  bool get drawInSub => paneIndex > mainPaneIndex;
 
-  int _slot = mainIndicatorSlot;
+  int _paneIndex = mainPaneIndex;
 
   /// 当前指标所在位置索引：<0 为主区，>=0 为副区。
-  int get slot => _slot;
+  int get paneIndex => _paneIndex;
 
   Rect? _drawableRect;
   Rect? _chartRect;
@@ -121,8 +121,8 @@ mixin PaintObjectBoundingMixin<T extends Indicator<IIndicatorKey>> on IndicatorO
 
   @nonVirtual
   @override
-  void resetPaintBounding({int? slot}) {
-    if (slot != null) _slot = slot;
+  void resetPaintBounding({int? paneIndex}) {
+    if (paneIndex != null) _paneIndex = paneIndex;
     _drawableRect = null;
     _chartRect = null;
     _topRect = null;
@@ -135,7 +135,7 @@ mixin PaintObjectBoundingMixin<T extends Indicator<IIndicatorKey>> on IndicatorO
     if (drawInMain) {
       _drawableRect = _context.mainRect;
     } else {
-      final top = _context.calculateIndicatorTop(slot);
+      final top = _context.calculatePaneTop(paneIndex);
       final subRect = _context.subRect;
       _drawableRect = Rect.fromLTRB(
         subRect.left,
@@ -283,16 +283,16 @@ mixin PaintObjectStateMixin<T extends Indicator<IIndicatorKey>> on IndicatorObje
     return null;
   }
 
-  double valueToDyOnCandle(FlexiNum value, {bool correct = false}) {
-    return _context.valueToDyOnCandle(value, correct: correct);
+  double candleValueToDy(FlexiNum value, {bool correct = false}) {
+    return _context.candleValueToDy(value, correct: correct);
   }
 
-  FlexiNum? dyToValueOnCandle(double dy, {bool check = false}) {
-    return _context.dyToValueOnCandle(dy, check: check);
+  FlexiNum? dyToCandleValue(double dy, {bool check = false}) {
+    return _context.dyToCandleValue(dy, check: check);
   }
 
   @override
-  MinMax? initState(int start, int end) {
+  MinMax? computeVisibleMinMax(int start, int end) {
     // 默认实现返回 null，表示使用当前 minMax
     // 子类可以 override 此方法提供自定义实现
     return null;
@@ -301,17 +301,17 @@ mixin PaintObjectStateMixin<T extends Indicator<IIndicatorKey>> on IndicatorObje
 
 /// 绘制对象混入数据预计算的扩展
 ///
-/// 提供数据预计算能力，仅用于 DataPaintObject。
-mixin PaintObjectComputableMixin<T extends DataIndicator> on PaintObject<T> {
+/// 提供数据预计算能力，仅用于 ComputedPaintObject。
+mixin PaintObjectComputedMixin<T extends ComputedIndicator> on PaintObject<T> {
   /// 判断是否需要重新预计算
   ///
   /// 当指标配置参数发生变化时，判断是否需要重新计算。
-  bool shouldPrecompute(covariant T oldIndicator) {
+  bool shouldRecompute(covariant T oldIndicator) {
     return oldIndicator.calcParam != indicator.calcParam && indicator.calcParam != null;
   }
 
   /// 数据预计算（空实现，供子类 override）
-  void precompute(Range range, {bool reset = false}) {
+  void compute(Range range, {bool reset = false}) {
     // 空实现
   }
 }

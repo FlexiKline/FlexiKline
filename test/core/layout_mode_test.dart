@@ -57,7 +57,7 @@ void main() {
       addTearDown(c.dispose);
       expect(c.layoutMode, FlexiLayoutMode.adapt);
       expect(c.fixedSize, isNull);
-      expect(c.isAllowUpdateLayoutHeight, isTrue);
+      expect(c.canUpdateLayoutHeight, isTrue);
     });
 
     test('initial fixed implies fixedSize null until set', () {
@@ -65,7 +65,7 @@ void main() {
       addTearDown(c.dispose);
       expect(c.layoutMode, FlexiLayoutMode.fixed);
       expect(c.fixedSize, isNull);
-      expect(c.isAllowUpdateLayoutHeight, isFalse);
+      expect(c.canUpdateLayoutHeight, isFalse);
     });
 
     test('initial fixed can use initialFixedSize before layout constraints arrive', () {
@@ -155,14 +155,14 @@ void main() {
     });
 
     test('adding and removing sub indicators keeps fixed regions non-overlapping', () {
-      const macdKey = DataIndicatorKey('macd');
-      const kdjKey = DataIndicatorKey('kdj');
+      const macdKey = ComputedIndicatorKey('macd');
+      const kdjKey = ComputedIndicatorKey('kdj');
       final c = _createController();
       _mount(
         c,
         subIndicators: [
-          TestDataIndicator(key: macdKey, height: 120),
-          TestDataIndicator(key: kdjKey, height: 80),
+          TestComputedIndicator(key: macdKey, height: 120),
+          TestComputedIndicator(key: kdjKey, height: 80),
         ],
       );
       addTearDown(c.dispose);
@@ -182,14 +182,14 @@ void main() {
     });
 
     test('fixed compression keeps every sub indicator at least subMinHeight', () {
-      const bigKey = DataIndicatorKey('big');
-      const smallKey = DataIndicatorKey('small');
+      const bigKey = ComputedIndicatorKey('big');
+      const smallKey = ComputedIndicatorKey('small');
       final c = _createController();
       _mount(
         c,
         subIndicators: [
-          TestDataIndicator(key: bigKey, height: 1000),
-          TestDataIndicator(key: smallKey, height: 10),
+          TestComputedIndicator(key: bigKey, height: 1000),
+          TestComputedIndicator(key: smallKey, height: 10),
         ],
       );
       addTearDown(c.dispose);
@@ -204,12 +204,12 @@ void main() {
     });
 
     test('addSubIndicator returns false and rolls back when fixed height is insufficient', () {
-      const macdKey = DataIndicatorKey('macd');
+      const macdKey = ComputedIndicatorKey('macd');
       final c = _createController();
       _mount(
         c,
         subIndicators: [
-          TestDataIndicator(key: macdKey, height: 120),
+          TestComputedIndicator(key: macdKey, height: 120),
         ],
       );
       addTearDown(c.dispose);

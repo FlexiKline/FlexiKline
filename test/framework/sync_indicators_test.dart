@@ -181,10 +181,10 @@ void main() {
           final oldSubKeys = oldSubIndicators.map((i) => i.key).toSet();
           final oldAllKeys = {...oldMainKeys, ...oldSubKeys};
 
-          final oldDataSlots = <DataIndicatorKey, int>{};
+          final oldDataSlots = <ComputedIndicatorKey, int>{};
           for (final key in oldAllKeys) {
-            if (key is DataIndicatorKey) {
-              final slot = manager.getIndicatorDataIndex(key);
+            if (key is ComputedIndicatorKey) {
+              final slot = manager.getComputedDataIndex(key);
               if (slot != null) oldDataSlots[key] = slot;
             }
           }
@@ -209,37 +209,37 @@ void main() {
           final removedKeys = oldAllKeys.difference(newAllKeys);
           final addedKeys = newAllKeys.difference(oldAllKeys);
 
-          // 3. 验证：移除的 DataIndicator slot 被回收
+          // 3. 验证：移除的 ComputedIndicator slot 被回收
           for (final key in removedKeys) {
-            if (key is DataIndicatorKey) {
-              expect(manager.getIndicatorDataIndex(key), isNull, reason: '移除的 $key 的 slot 应被回收');
+            if (key is ComputedIndicatorKey) {
+              expect(manager.getComputedDataIndex(key), isNull, reason: '移除的 $key 的 slot 应被回收');
             }
           }
 
-          // 4. 验证：新增的 DataIndicator 获得 slot
+          // 4. 验证：新增的 ComputedIndicator 获得 slot
           for (final key in addedKeys) {
-            if (key is DataIndicatorKey) {
-              final slot = manager.getIndicatorDataIndex(key);
+            if (key is ComputedIndicatorKey) {
+              final slot = manager.getComputedDataIndex(key);
               expect(slot, isNotNull, reason: '新增的 $key 应获得 slot');
               expect(slot, greaterThanOrEqualTo(0), reason: '$key 的 slot < 0');
             }
           }
 
-          // 5. 验证：保留的 DataIndicator slot 不变
+          // 5. 验证：保留的 ComputedIndicator slot 不变
           final keptKeys = {
             ...oldMainKeys.intersection(newMainKeys),
             ...oldSubKeys.intersection(newSubKeys),
           };
           for (final key in keptKeys) {
-            if (key is DataIndicatorKey) {
-              expect(manager.getIndicatorDataIndex(key), equals(oldDataSlots[key]), reason: '保留的 $key 的 slot 应不变');
+            if (key is ComputedIndicatorKey) {
+              expect(manager.getComputedDataIndex(key), equals(oldDataSlots[key]), reason: '保留的 $key 的 slot 应不变');
             }
           }
 
-          // 6. 验证：indicatorCount 等于新声明集合中 DataIndicator 的数量
-          final expectedCount = newAllKeys.whereType<DataIndicatorKey>().length;
-          expect(manager.indicatorCount, equals(expectedCount),
-              reason: 'indicatorCount 应等于新声明 DataIndicator 数量 $expectedCount');
+          // 6. 验证：computedDataCount 等于新声明集合中 ComputedIndicator 的数量
+          final expectedCount = newAllKeys.whereType<ComputedIndicatorKey>().length;
+          expect(manager.computedDataCount, equals(expectedCount),
+              reason: 'computedDataCount 应等于新声明 ComputedIndicator 数量 $expectedCount');
 
           // 7. 验证：新增指标不自动创建 PaintObject
           final mainKeysExcludingCandle = manager.mainIndicatorKeys.where((k) => k != candleIndicatorKey).toSet();
@@ -281,18 +281,18 @@ void main() {
           final context = TestPaintContext();
 
           final indicatorPairs = <({
-            DataIndicatorKey key,
-            TestDataIndicator oldInd,
-            TestDataIndicator newInd,
+            ComputedIndicatorKey key,
+            TestComputedIndicator oldInd,
+            TestComputedIndicator newInd,
           })>[];
 
           for (int i = 0; i < input.pairs.length; i++) {
             final pair = input.pairs[i];
-            final key = DataIndicatorKey('cfg_$i');
+            final key = ComputedIndicatorKey('cfg_$i');
             indicatorPairs.add((
               key: key,
-              oldInd: TestDataIndicator(key: key, height: pair.oldHeight),
-              newInd: TestDataIndicator(key: key, height: pair.newHeight),
+              oldInd: TestComputedIndicator(key: key, height: pair.oldHeight),
+              newInd: TestComputedIndicator(key: key, height: pair.newHeight),
             ));
           }
 

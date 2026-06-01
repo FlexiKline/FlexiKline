@@ -27,7 +27,7 @@ import 'package:glados/glados.dart';
 /// Slot 操作的 sealed 类型
 sealed class TestSlotOp {
   const TestSlotOp(this.key);
-  final DataIndicatorKey key;
+  final ComputedIndicatorKey key;
 }
 
 /// 注册操作
@@ -48,10 +48,10 @@ class TestRecycleOp extends TestSlotOp {
 // Glados 生成器
 // ---------------------------------------------------------------------------
 
-/// 生成随机 DataIndicatorKey（id 范围限制在 key_0 ~ key_9，
+/// 生成随机 ComputedIndicatorKey（id 范围限制在 key_0 ~ key_9，
 /// 保证操作序列中有足够的 key 碰撞以触发回收复用场景）
 final slotKeyGen = any.intInRange(0, 10).map(
-      (i) => DataIndicatorKey('key_$i'),
+      (i) => ComputedIndicatorKey('key_$i'),
     );
 
 /// 生成随机操作序列（长度 1 ~ 50，Register 和 Recycle 混合）

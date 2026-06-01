@@ -29,7 +29,7 @@ class TestFlexiKlineTheme implements IFlexiKlineTheme {
   Color get tooltipBg => const Color(0xFFF2F2F2);
 
   @override
-  Color get countDownBg => const Color(0xFFBDBDBD);
+  Color get countdownBg => const Color(0xFFBDBDBD);
 
   @override
   Color get crossTextBg => const Color(0xFF111111);
@@ -78,6 +78,7 @@ class TestFlexiKlineConfiguration with FlexiKlineConfigurationMixin {
   TestFlexiKlineConfiguration({
     Set<IIndicatorKey>? mainChildren,
     Set<IIndicatorKey>? subKeys,
+
     /// 当 [genMainIndicator] 的入参为 null 时用作主区默认尺寸（布局等测试可设为大于 [mainMinSize] 的值）。
     this.mainIndicatorDefaultSize,
   })  : _mainChildren = mainChildren,

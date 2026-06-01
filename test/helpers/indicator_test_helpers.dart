@@ -98,13 +98,13 @@ Generator<({List<IndicatorDesc> main, List<IndicatorDesc> sub})> mainSubGen([
 Indicator createIndicator(IndicatorDesc desc) {
   switch (desc.type) {
     case IndicatorType.data:
-      return TestDataIndicator(
-        key: DataIndicatorKey('data_${desc.id}'),
+      return TestComputedIndicator(
+        key: ComputedIndicatorKey('data_${desc.id}'),
         height: desc.height,
       );
     case IndicatorType.business:
-      return TestBusinessIndicator(
-        key: BusinessIndicatorKey('biz_${desc.id}'),
+      return TestExternalIndicator(
+        key: ExternalIndicatorKey('biz_${desc.id}'),
         height: desc.height,
       );
   }
@@ -114,9 +114,9 @@ Indicator createIndicator(IndicatorDesc desc) {
 IIndicatorKey descToKey(IndicatorDesc desc) {
   switch (desc.type) {
     case IndicatorType.data:
-      return DataIndicatorKey('data_${desc.id}');
+      return ComputedIndicatorKey('data_${desc.id}');
     case IndicatorType.business:
-      return BusinessIndicatorKey('biz_${desc.id}');
+      return ExternalIndicatorKey('biz_${desc.id}');
   }
 }
 

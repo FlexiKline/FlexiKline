@@ -220,7 +220,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
         /// 纵向缩放图表(zoom)
         if (gestureConfig.enableZoom && controller.chartZoomSlideBarRect.include(offset)) {
           // 如果命中ZommSlideBar区域, 即代表要进行缩放图表
-          if (!controller.isStartZoomChart && controller.onChartZoomStart(offset, false)) {
+          if (!controller.isChartZooming && controller.onChartZoomStart(offset, false)) {
             Future.delayed(const Duration(milliseconds: 1000), () {
               assert(() {
                 logd('onPointerSignal V>Zoom onChartZoomEnd()');
@@ -461,7 +461,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
       }
     } else {
       logd('onPanStart pan local:$position');
-      if (controller.isStartZoomChart) {
+      if (controller.isChartZooming) {
         setCursorToMove();
         _panData = GestureData.move(position);
       } else {

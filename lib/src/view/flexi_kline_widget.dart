@@ -524,7 +524,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
   /// 退出Zoom缩放按钮
   Widget _buildExitZoomButton(BuildContext context, Rect mainRect) {
     return ValueListenableBuilder(
-      valueListenable: controller.isStartZoomChartListener,
+      valueListenable: controller.isChartZoomingListener,
       builder: (context, isStartZomming, child) => Visibility(
         visible: isStartZomming,
         child: Container(

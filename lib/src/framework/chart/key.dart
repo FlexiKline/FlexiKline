@@ -16,9 +16,9 @@ part of 'indicator.dart';
 
 /// 指标 Key 基类（sealed，仅允许三种子类型）
 ///
-/// - [NormalIndicatorKey]：基础/系统指标（Candle、Time、Main 等），不占 slot。
-/// - [DataIndicatorKey]：数据指标（KDJ、MACD 等），占 slot，需要 precompute。
-/// - [BusinessIndicatorKey]：业务指标（Trade 等），不占 slot，由业务数据驱动。
+/// - [DirectIndicatorKey]：基础/系统指标（Candle、Time、Main 等），不占 slot。
+/// - [ComputedIndicatorKey]：数据指标（KDJ、MACD 等），占 slot，需要 precompute。
+/// - [ExternalIndicatorKey]：业务指标（Trade 等），不占 slot，由业务数据驱动。
 sealed class IIndicatorKey {
   const IIndicatorKey(
     this.id, {
@@ -46,35 +46,35 @@ sealed class IIndicatorKey {
 /// 基础/系统指标 Key
 ///
 /// 用于 Candle、Time、Main 等框架内置指标，不参与 slot 分配。
-final class NormalIndicatorKey extends IIndicatorKey {
-  const NormalIndicatorKey(super.id, {super.label});
+final class DirectIndicatorKey extends IIndicatorKey {
+  const DirectIndicatorKey(super.id, {super.label});
 }
 
 /// 数据指标 Key
 ///
 /// 用于 KDJ、MACD、MA 等需要 precompute 并写入 FlexiCandleModel.slots 的指标。
-/// 注册时会分配 dataIndex，对应 DataIndicator / DataPaintObject。
-final class DataIndicatorKey extends IIndicatorKey {
-  const DataIndicatorKey(super.id, {super.label});
+/// 注册时会分配 dataIndex，对应 ComputedIndicator / ComputedPaintObject。
+final class ComputedIndicatorKey extends IIndicatorKey {
+  const ComputedIndicatorKey(super.id, {super.label});
 }
 
 /// 业务指标 Key
 ///
 /// 用于 Trade 等由业务数据或用户操作驱动的指标，不占 slot。
-/// 对应 BusinessIndicator / BusinessPaintObject。
-final class BusinessIndicatorKey extends IIndicatorKey {
-  const BusinessIndicatorKey(super.id, {super.label});
+/// 对应 ExternalIndicator / ExternalPaintObject。
+final class ExternalIndicatorKey extends IIndicatorKey {
+  const ExternalIndicatorKey(super.id, {super.label});
 }
 
-const unknownIndicatorKey = NormalIndicatorKey('unknown');
+const unknownIndicatorKey = DirectIndicatorKey('unknown');
 
 typedef IndicatorBuilder<T extends Indicator<IIndicatorKey>> = T Function(
   Map<String, dynamic>,
 );
 
-const mainIndicatorKey = NormalIndicatorKey('main', label: 'Main');
-const candleIndicatorKey = NormalIndicatorKey('candle', label: 'Candle');
-const timeIndicatorKey = NormalIndicatorKey('time', label: 'Time');
+const mainIndicatorKey = DirectIndicatorKey('main', label: 'Main');
+const candleIndicatorKey = DirectIndicatorKey('candle', label: 'Candle');
+const timeIndicatorKey = DirectIndicatorKey('time', label: 'Time');
 
 /// 可预计算接口
 /// 实现 [IPrecomputable] 接口, 即代表当前对象是可以进行预计算.
@@ -82,7 +82,7 @@ abstract interface class IPrecomputable {
   dynamic get calcParam;
 }
 
-const mainIndicatorSlot = -1;
+const mainPaneIndex = -1;
 
 /// Indicator绘制模式
 ///

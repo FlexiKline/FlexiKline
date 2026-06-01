@@ -270,7 +270,7 @@ mixin CrossBinding on KlineBindingBase, SettingBinding implements ICross {
 
     /// 开始绘制
     double top = tooltipConfig.margin.top;
-    if (isStartZoomChart) {
+    if (isChartZooming) {
       top += mainOriginPadding.top;
     } else {
       top += mainPadding.top;

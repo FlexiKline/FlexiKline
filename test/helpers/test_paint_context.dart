@@ -46,9 +46,9 @@ class TestPaintContext implements IPaintContext {
   Future<bool> setConfig(String key, Map<String, dynamic> value) async => true;
 
   @override
-  bool get isAllowUpdateLayoutHeight => false;
+  bool get canUpdateLayoutHeight => false;
   @override
-  bool get isStartZoomChart => false;
+  bool get isChartZooming => false;
   @override
   double get startCandleDx => 0;
   @override
@@ -79,9 +79,9 @@ class TestPaintContext implements IPaintContext {
   @override
   double get candleWidthHalf => 4;
   @override
-  FlexiNum? dyToValueOnCandle(double dy, {bool check = false}) => null;
+  FlexiNum? dyToCandleValue(double dy, {bool check = false}) => null;
   @override
-  double valueToDyOnCandle(FlexiNum value, {bool correct = false}) => 0;
+  double candleValueToDy(FlexiNum value, {bool correct = false}) => 0;
   @override
   Rect get canvasRect => Rect.zero;
   @override
@@ -93,15 +93,15 @@ class TestPaintContext implements IPaintContext {
   @override
   Rect get chartZoomSlideBarRect => Rect.zero;
   @override
-  double calculateIndicatorTop(int slot) => 0;
+  double calculatePaneTop(int slot) => 0;
   @override
   Offset? get crossOffset => null;
   @override
   void cancelCross() {}
   @override
-  int? getDataIndex(DataIndicatorKey key) => null;
+  int? getComputedDataIndex(ComputedIndicatorKey key) => null;
   @override
-  int get indicatorCount => 0;
+  int get computedDataCount => 0;
   @override
   void requestRepaint() {}
 }

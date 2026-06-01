@@ -17,19 +17,20 @@ abstract class _$CandleIndicatorCWProxy {
 
   CandleIndicator low(MarkConfig low);
 
-  CandleIndicator last(MarkConfig last);
+  CandleIndicator offViewPriceMark(MarkConfig offViewPriceMark);
 
-  CandleIndicator latest(MarkConfig latest);
+  CandleIndicator inViewPriceMark(MarkConfig inViewPriceMark);
 
   CandleIndicator showLatestPoint(bool showLatestPoint);
 
   CandleIndicator latestPoint(PointConfig? latestPoint);
 
-  CandleIndicator useCandleColorAsLatestBg(bool useCandleColorAsLatestBg);
+  CandleIndicator useCandleColorForLatestPriceBackground(
+      bool useCandleColorForLatestPriceBackground);
 
-  CandleIndicator showCountDown(bool showCountDown);
+  CandleIndicator showCountdown(bool showCountdown);
 
-  CandleIndicator countDown(TextAreaConfig countDown);
+  CandleIndicator countdown(TextAreaConfig countdown);
 
   CandleIndicator chartType(FlexiChartType chartType);
 
@@ -38,7 +39,8 @@ abstract class _$CandleIndicatorCWProxy {
   CandleIndicator intervalChartTypes(
       Map<ITimeInterval, FlexiChartType>? intervalChartTypes);
 
-  CandleIndicator hideIndicatorsWhenLineChart(bool hideIndicatorsWhenLineChart);
+  CandleIndicator hideMainIndicatorsInLineChartMode(
+      bool hideMainIndicatorsInLineChartMode);
 
   CandleIndicator longColor(Color? longColor);
 
@@ -64,17 +66,17 @@ abstract class _$CandleIndicatorCWProxy {
     EdgeInsets padding,
     MarkConfig high,
     MarkConfig low,
-    MarkConfig last,
-    MarkConfig latest,
+    MarkConfig offViewPriceMark,
+    MarkConfig inViewPriceMark,
     bool showLatestPoint,
     PointConfig? latestPoint,
-    bool useCandleColorAsLatestBg,
-    bool showCountDown,
-    TextAreaConfig countDown,
+    bool useCandleColorForLatestPriceBackground,
+    bool showCountdown,
+    TextAreaConfig countdown,
     FlexiChartType chartType,
     FlexiLineChartType? minWidthLineType,
     Map<ITimeInterval, FlexiChartType>? intervalChartTypes,
-    bool hideIndicatorsWhenLineChart,
+    bool hideMainIndicatorsInLineChartMode,
     Color? longColor,
     Color? shortColor,
     Color? lineColor,
@@ -106,10 +108,12 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
   CandleIndicator low(MarkConfig low) => this(low: low);
 
   @override
-  CandleIndicator last(MarkConfig last) => this(last: last);
+  CandleIndicator offViewPriceMark(MarkConfig offViewPriceMark) =>
+      this(offViewPriceMark: offViewPriceMark);
 
   @override
-  CandleIndicator latest(MarkConfig latest) => this(latest: latest);
+  CandleIndicator inViewPriceMark(MarkConfig inViewPriceMark) =>
+      this(inViewPriceMark: inViewPriceMark);
 
   @override
   CandleIndicator showLatestPoint(bool showLatestPoint) =>
@@ -120,16 +124,19 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
       this(latestPoint: latestPoint);
 
   @override
-  CandleIndicator useCandleColorAsLatestBg(bool useCandleColorAsLatestBg) =>
-      this(useCandleColorAsLatestBg: useCandleColorAsLatestBg);
+  CandleIndicator useCandleColorForLatestPriceBackground(
+          bool useCandleColorForLatestPriceBackground) =>
+      this(
+          useCandleColorForLatestPriceBackground:
+              useCandleColorForLatestPriceBackground);
 
   @override
-  CandleIndicator showCountDown(bool showCountDown) =>
-      this(showCountDown: showCountDown);
+  CandleIndicator showCountdown(bool showCountdown) =>
+      this(showCountdown: showCountdown);
 
   @override
-  CandleIndicator countDown(TextAreaConfig countDown) =>
-      this(countDown: countDown);
+  CandleIndicator countdown(TextAreaConfig countdown) =>
+      this(countdown: countdown);
 
   @override
   CandleIndicator chartType(FlexiChartType chartType) =>
@@ -145,9 +152,10 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
       this(intervalChartTypes: intervalChartTypes);
 
   @override
-  CandleIndicator hideIndicatorsWhenLineChart(
-          bool hideIndicatorsWhenLineChart) =>
-      this(hideIndicatorsWhenLineChart: hideIndicatorsWhenLineChart);
+  CandleIndicator hideMainIndicatorsInLineChartMode(
+          bool hideMainIndicatorsInLineChartMode) =>
+      this(
+          hideMainIndicatorsInLineChartMode: hideMainIndicatorsInLineChartMode);
 
   @override
   CandleIndicator longColor(Color? longColor) => this(longColor: longColor);
@@ -184,17 +192,18 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
     Object? padding = const $CopyWithPlaceholder(),
     Object? high = const $CopyWithPlaceholder(),
     Object? low = const $CopyWithPlaceholder(),
-    Object? last = const $CopyWithPlaceholder(),
-    Object? latest = const $CopyWithPlaceholder(),
+    Object? offViewPriceMark = const $CopyWithPlaceholder(),
+    Object? inViewPriceMark = const $CopyWithPlaceholder(),
     Object? showLatestPoint = const $CopyWithPlaceholder(),
     Object? latestPoint = const $CopyWithPlaceholder(),
-    Object? useCandleColorAsLatestBg = const $CopyWithPlaceholder(),
-    Object? showCountDown = const $CopyWithPlaceholder(),
-    Object? countDown = const $CopyWithPlaceholder(),
+    Object? useCandleColorForLatestPriceBackground =
+        const $CopyWithPlaceholder(),
+    Object? showCountdown = const $CopyWithPlaceholder(),
+    Object? countdown = const $CopyWithPlaceholder(),
     Object? chartType = const $CopyWithPlaceholder(),
     Object? minWidthLineType = const $CopyWithPlaceholder(),
     Object? intervalChartTypes = const $CopyWithPlaceholder(),
-    Object? hideIndicatorsWhenLineChart = const $CopyWithPlaceholder(),
+    Object? hideMainIndicatorsInLineChartMode = const $CopyWithPlaceholder(),
     Object? longColor = const $CopyWithPlaceholder(),
     Object? shortColor = const $CopyWithPlaceholder(),
     Object? lineColor = const $CopyWithPlaceholder(),
@@ -223,14 +232,14 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
           ? _value.low
           // ignore: cast_nullable_to_non_nullable
           : low as MarkConfig,
-      last: last == const $CopyWithPlaceholder()
-          ? _value.last
+      offViewPriceMark: offViewPriceMark == const $CopyWithPlaceholder()
+          ? _value.offViewPriceMark
           // ignore: cast_nullable_to_non_nullable
-          : last as MarkConfig,
-      latest: latest == const $CopyWithPlaceholder()
-          ? _value.latest
+          : offViewPriceMark as MarkConfig,
+      inViewPriceMark: inViewPriceMark == const $CopyWithPlaceholder()
+          ? _value.inViewPriceMark
           // ignore: cast_nullable_to_non_nullable
-          : latest as MarkConfig,
+          : inViewPriceMark as MarkConfig,
       showLatestPoint: showLatestPoint == const $CopyWithPlaceholder()
           ? _value.showLatestPoint
           // ignore: cast_nullable_to_non_nullable
@@ -239,19 +248,19 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
           ? _value.latestPoint
           // ignore: cast_nullable_to_non_nullable
           : latestPoint as PointConfig?,
-      useCandleColorAsLatestBg:
-          useCandleColorAsLatestBg == const $CopyWithPlaceholder()
-              ? _value.useCandleColorAsLatestBg
+      useCandleColorForLatestPriceBackground:
+          useCandleColorForLatestPriceBackground == const $CopyWithPlaceholder()
+              ? _value.useCandleColorForLatestPriceBackground
               // ignore: cast_nullable_to_non_nullable
-              : useCandleColorAsLatestBg as bool,
-      showCountDown: showCountDown == const $CopyWithPlaceholder()
-          ? _value.showCountDown
+              : useCandleColorForLatestPriceBackground as bool,
+      showCountdown: showCountdown == const $CopyWithPlaceholder()
+          ? _value.showCountdown
           // ignore: cast_nullable_to_non_nullable
-          : showCountDown as bool,
-      countDown: countDown == const $CopyWithPlaceholder()
-          ? _value.countDown
+          : showCountdown as bool,
+      countdown: countdown == const $CopyWithPlaceholder()
+          ? _value.countdown
           // ignore: cast_nullable_to_non_nullable
-          : countDown as TextAreaConfig,
+          : countdown as TextAreaConfig,
       chartType: chartType == const $CopyWithPlaceholder()
           ? _value.chartType
           // ignore: cast_nullable_to_non_nullable
@@ -264,11 +273,11 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
           ? _value.intervalChartTypes
           // ignore: cast_nullable_to_non_nullable
           : intervalChartTypes as Map<ITimeInterval, FlexiChartType>?,
-      hideIndicatorsWhenLineChart:
-          hideIndicatorsWhenLineChart == const $CopyWithPlaceholder()
-              ? _value.hideIndicatorsWhenLineChart
+      hideMainIndicatorsInLineChartMode:
+          hideMainIndicatorsInLineChartMode == const $CopyWithPlaceholder()
+              ? _value.hideMainIndicatorsInLineChartMode
               // ignore: cast_nullable_to_non_nullable
-              : hideIndicatorsWhenLineChart as bool,
+              : hideMainIndicatorsInLineChartMode as bool,
       longColor: longColor == const $CopyWithPlaceholder()
           ? _value.longColor
           // ignore: cast_nullable_to_non_nullable
@@ -342,7 +351,7 @@ CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
                       overflow: TextOverflow.ellipsis,
                       height: defaultTextHeight)))
           : MarkConfig.fromJson(json['low'] as Map<String, dynamic>),
-      last: json['last'] == null
+      offViewPriceMark: json['offViewPriceMark'] == null
           ? const MarkConfig(
               show: true,
               spacing: 1,
@@ -360,8 +369,9 @@ CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
                   padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                   border: defaultBorderSide,
                   borderRadius: BorderRadius.all(Radius.circular(10))))
-          : MarkConfig.fromJson(json['last'] as Map<String, dynamic>),
-      latest: json['latest'] == null
+          : MarkConfig.fromJson(
+              json['offViewPriceMark'] as Map<String, dynamic>),
+      inViewPriceMark: json['inViewPriceMark'] == null
           ? const MarkConfig(
               show: true,
               spacing: 1,
@@ -378,15 +388,16 @@ CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
                   padding: EdgeInsets.all(2),
                   border: BorderSide(color: transparent, width: 0.5),
                   borderRadius: BorderRadius.all(Radius.circular(2))))
-          : MarkConfig.fromJson(json['latest'] as Map<String, dynamic>),
+          : MarkConfig.fromJson(
+              json['inViewPriceMark'] as Map<String, dynamic>),
       showLatestPoint: json['showLatestPoint'] as bool? ?? true,
       latestPoint: json['latestPoint'] == null
           ? const PointConfig(radius: 2, width: 0, borderWidth: 2)
           : PointConfig.fromJson(json['latestPoint'] as Map<String, dynamic>),
-      useCandleColorAsLatestBg:
-          json['useCandleColorAsLatestBg'] as bool? ?? true,
-      showCountDown: json['showCountDown'] as bool? ?? true,
-      countDown: json['countDown'] == null
+      useCandleColorForLatestPriceBackground:
+          json['useCandleColorForLatestPriceBackground'] as bool? ?? true,
+      showCountdown: json['showCountdown'] as bool? ?? true,
+      countdown: json['countdown'] == null
           ? const TextAreaConfig(
               style: TextStyle(
                   fontSize: defaultTextSize,
@@ -395,7 +406,7 @@ CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
               textAlign: TextAlign.center,
               padding: EdgeInsets.all(2),
               borderRadius: BorderRadius.all(Radius.circular(2)))
-          : TextAreaConfig.fromJson(json['countDown'] as Map<String, dynamic>),
+          : TextAreaConfig.fromJson(json['countdown'] as Map<String, dynamic>),
       chartType: json['chartType'] == null
           ? FlexiChartType.barSolid
           : const FlexiChartTypeConverter()
@@ -408,8 +419,8 @@ CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
           ? const {}
           : const IntervalChartTypesConverter()
               .fromJson(json['intervalChartTypes'] as List?),
-      hideIndicatorsWhenLineChart:
-          json['hideIndicatorsWhenLineChart'] as bool? ?? true,
+      hideMainIndicatorsInLineChartMode:
+          json['hideMainIndicatorsInLineChartMode'] as bool? ?? true,
       longColor: _$JsonConverterFromJson<String, Color>(
           json['longColor'], const ColorConverter().fromJson),
       shortColor: _$JsonConverterFromJson<String, Color>(
@@ -437,20 +448,22 @@ Map<String, dynamic> _$CandleIndicatorToJson(CandleIndicator instance) =>
       'zIndex': instance.zIndex,
       'high': instance.high.toJson(),
       'low': instance.low.toJson(),
-      'last': instance.last.toJson(),
-      'latest': instance.latest.toJson(),
+      'offViewPriceMark': instance.offViewPriceMark.toJson(),
+      'inViewPriceMark': instance.inViewPriceMark.toJson(),
       'showLatestPoint': instance.showLatestPoint,
       'latestPoint': instance.latestPoint?.toJson(),
-      'useCandleColorAsLatestBg': instance.useCandleColorAsLatestBg,
-      'showCountDown': instance.showCountDown,
-      'countDown': instance.countDown.toJson(),
+      'useCandleColorForLatestPriceBackground':
+          instance.useCandleColorForLatestPriceBackground,
+      'showCountdown': instance.showCountdown,
+      'countdown': instance.countdown.toJson(),
       'chartType': const FlexiChartTypeConverter().toJson(instance.chartType),
       'minWidthLineType':
           _$JsonConverterToJson<Map<String, dynamic>, FlexiLineChartType>(
               instance.minWidthLineType, const LineChartTypeConverter().toJson),
       'intervalChartTypes': const IntervalChartTypesConverter()
           .toJson(instance.intervalChartTypes),
-      'hideIndicatorsWhenLineChart': instance.hideIndicatorsWhenLineChart,
+      'hideMainIndicatorsInLineChartMode':
+          instance.hideMainIndicatorsInLineChartMode,
       'longColor': _$JsonConverterToJson<String, Color>(
           instance.longColor, const ColorConverter().toJson),
       'shortColor': _$JsonConverterToJson<String, Color>(

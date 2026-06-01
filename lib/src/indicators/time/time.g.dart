@@ -15,9 +15,9 @@ abstract class _$TimeIndicatorCWProxy {
 
   TimeIndicator position(DrawPosition position);
 
-  TimeIndicator timeTick(TextAreaConfig timeTick);
+  TimeIndicator timeLabel(TextAreaConfig timeLabel);
 
-  TimeIndicator ensurePaintInDrawableRect(bool ensurePaintInDrawableRect);
+  TimeIndicator clipToDrawableRect(bool clipToDrawableRect);
 
   TimeIndicator tickFormatter(
       String Function(DateTime, [ITimeInterval?])? tickFormatter);
@@ -33,8 +33,8 @@ abstract class _$TimeIndicatorCWProxy {
     double height,
     EdgeInsets padding,
     DrawPosition position,
-    TextAreaConfig timeTick,
-    bool ensurePaintInDrawableRect,
+    TextAreaConfig timeLabel,
+    bool clipToDrawableRect,
     String Function(DateTime, [ITimeInterval?])? tickFormatter,
   });
 }
@@ -58,11 +58,12 @@ class _$TimeIndicatorCWProxyImpl implements _$TimeIndicatorCWProxy {
   TimeIndicator position(DrawPosition position) => this(position: position);
 
   @override
-  TimeIndicator timeTick(TextAreaConfig timeTick) => this(timeTick: timeTick);
+  TimeIndicator timeLabel(TextAreaConfig timeLabel) =>
+      this(timeLabel: timeLabel);
 
   @override
-  TimeIndicator ensurePaintInDrawableRect(bool ensurePaintInDrawableRect) =>
-      this(ensurePaintInDrawableRect: ensurePaintInDrawableRect);
+  TimeIndicator clipToDrawableRect(bool clipToDrawableRect) =>
+      this(clipToDrawableRect: clipToDrawableRect);
 
   @override
   TimeIndicator tickFormatter(
@@ -82,8 +83,8 @@ class _$TimeIndicatorCWProxyImpl implements _$TimeIndicatorCWProxy {
     Object? height = const $CopyWithPlaceholder(),
     Object? padding = const $CopyWithPlaceholder(),
     Object? position = const $CopyWithPlaceholder(),
-    Object? timeTick = const $CopyWithPlaceholder(),
-    Object? ensurePaintInDrawableRect = const $CopyWithPlaceholder(),
+    Object? timeLabel = const $CopyWithPlaceholder(),
+    Object? clipToDrawableRect = const $CopyWithPlaceholder(),
     Object? tickFormatter = const $CopyWithPlaceholder(),
   }) {
     return TimeIndicator(
@@ -103,15 +104,14 @@ class _$TimeIndicatorCWProxyImpl implements _$TimeIndicatorCWProxy {
           ? _value.position
           // ignore: cast_nullable_to_non_nullable
           : position as DrawPosition,
-      timeTick: timeTick == const $CopyWithPlaceholder()
-          ? _value.timeTick
+      timeLabel: timeLabel == const $CopyWithPlaceholder()
+          ? _value.timeLabel
           // ignore: cast_nullable_to_non_nullable
-          : timeTick as TextAreaConfig,
-      ensurePaintInDrawableRect:
-          ensurePaintInDrawableRect == const $CopyWithPlaceholder()
-              ? _value.ensurePaintInDrawableRect
-              // ignore: cast_nullable_to_non_nullable
-              : ensurePaintInDrawableRect as bool,
+          : timeLabel as TextAreaConfig,
+      clipToDrawableRect: clipToDrawableRect == const $CopyWithPlaceholder()
+          ? _value.clipToDrawableRect
+          // ignore: cast_nullable_to_non_nullable
+          : clipToDrawableRect as bool,
       tickFormatter: tickFormatter == const $CopyWithPlaceholder()
           ? _value.tickFormatter
           // ignore: cast_nullable_to_non_nullable
@@ -142,7 +142,7 @@ TimeIndicator _$TimeIndicatorFromJson(Map<String, dynamic> json) =>
       position: json['position'] == null
           ? DrawPosition.middle
           : const DrawPositionConverter().fromJson(json['position'] as String),
-      timeTick: json['timeTick'] == null
+      timeLabel: json['timeLabel'] == null
           ? const TextAreaConfig(
               style: TextStyle(
                   fontSize: defaultTextSize,
@@ -150,9 +150,8 @@ TimeIndicator _$TimeIndicatorFromJson(Map<String, dynamic> json) =>
                   height: defaultTextHeight),
               textWidth: 80,
               textAlign: TextAlign.center)
-          : TextAreaConfig.fromJson(json['timeTick'] as Map<String, dynamic>),
-      ensurePaintInDrawableRect:
-          json['ensurePaintInDrawableRect'] as bool? ?? false,
+          : TextAreaConfig.fromJson(json['timeLabel'] as Map<String, dynamic>),
+      clipToDrawableRect: json['clipToDrawableRect'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$TimeIndicatorToJson(TimeIndicator instance) =>
@@ -161,6 +160,6 @@ Map<String, dynamic> _$TimeIndicatorToJson(TimeIndicator instance) =>
       'padding': const EdgeInsetsConverter().toJson(instance.padding),
       'zIndex': instance.zIndex,
       'position': const DrawPositionConverter().toJson(instance.position),
-      'timeTick': instance.timeTick.toJson(),
-      'ensurePaintInDrawableRect': instance.ensurePaintInDrawableRect,
+      'timeLabel': instance.timeLabel.toJson(),
+      'clipToDrawableRect': instance.clipToDrawableRect,
     };

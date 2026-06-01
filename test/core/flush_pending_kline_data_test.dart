@@ -18,7 +18,7 @@
 ///
 /// 验证 flushPendingKlineData 方法的功能：
 /// 1. 检查 curKlineData 是否为空或没有待合并数据
-/// 2. 使用当前 indicatorCount 合并 _waitingData
+/// 2. 使用当前 computedDataCount 合并 _waitingData
 /// 3. 对所有已激活指标执行 precompute
 /// 4. 触发 markRepaintChart
 library;
@@ -43,8 +43,8 @@ void main() {
       expect(true, isTrue);
     });
 
-    test('should merge waiting data with current indicatorCount', () {
-      // 此测试验证 flushPendingKlineData 使用当前 indicatorCount 合并数据
+    test('should merge waiting data with current computedDataCount', () {
+      // 此测试验证 flushPendingKlineData 使用当前 computedDataCount 合并数据
       // 由于 StateBinding 是 mixin，无法直接测试，此处作为文档说明
       expect(true, isTrue);
     });

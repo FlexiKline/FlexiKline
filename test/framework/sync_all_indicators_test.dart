@@ -18,11 +18,11 @@
 ///
 /// 验证 IndicatorPaintObjectManager.mountIndicators 的核心不变量：
 /// 1. `_declaredIndicators` 包含所有 mainIndicators 和 subIndicators 的 key
-/// 2. `_indicatorDataIndexs` 为每个 DataIndicatorKey 分配唯一 slot
-/// 3. `indicatorCount` 等于 DataIndicator 的数量
+/// 2. `_computedDataIndexes` 为每个 ComputedIndicatorKey 分配唯一 slot
+/// 3. `computedDataCount` 等于 ComputedIndicator 的数量
 /// 4. candle/time/main PaintObject 已创建
 /// 5. 副区绘制队列为空（默认配置无持久化 sub key）
-/// 6. 所有 slot index 在 [0, indicatorCount) 范围内
+/// 6. 所有 slot index 在 [0, computedDataCount) 范围内
 library;
 
 import 'package:flexi_kline/flexi_kline.dart';
@@ -64,14 +64,14 @@ void main() {
             ...subIndicators.map((i) => i.key),
           };
 
-          // 验证每个 DataIndicatorKey 都有 slot 分配
+          // 验证每个 ComputedIndicatorKey 都有 slot 分配
           for (final key in allExpectedKeys) {
-            if (key is DataIndicatorKey) {
-              final slot = manager.getIndicatorDataIndex(key);
+            if (key is ComputedIndicatorKey) {
+              final slot = manager.getComputedDataIndex(key);
               expect(
                 slot,
                 isNotNull,
-                reason: 'DataIndicatorKey $key 应该有 slot 分配，但返回 null',
+                reason: 'ComputedIndicatorKey $key 应该有 slot 分配，但返回 null',
               );
             }
           }
@@ -79,10 +79,10 @@ void main() {
       );
 
       // ---------------------------------------------------------------
-      // 属性 2：_indicatorDataIndexs 为每个 DataIndicatorKey 分配唯一 slot
+      // 属性 2：_computedDataIndexes 为每个 ComputedIndicatorKey 分配唯一 slot
       // ---------------------------------------------------------------
       Glados(gen, ExploreConfig(numRuns: 100)).test(
-        '_indicatorDataIndexs 为每个 DataIndicatorKey 分配唯一 slot index',
+        '_computedDataIndexes 为每个 ComputedIndicatorKey 分配唯一 slot index',
         (input) {
           final manager = createManager();
           final context = TestPaintContext();
@@ -98,30 +98,30 @@ void main() {
             context: context,
           );
 
-          final dataKeys = <DataIndicatorKey>[
+          final dataKeys = <ComputedIndicatorKey>[
             for (final i in mainIndicators)
-              if (i.key is DataIndicatorKey) i.key as DataIndicatorKey,
+              if (i.key is ComputedIndicatorKey) i.key as ComputedIndicatorKey,
             for (final i in subIndicators)
-              if (i.key is DataIndicatorKey) i.key as DataIndicatorKey,
+              if (i.key is ComputedIndicatorKey) i.key as ComputedIndicatorKey,
           ];
 
           final assignedSlots = <int>{};
           for (final key in dataKeys) {
-            final slot = manager.getIndicatorDataIndex(key)!;
+            final slot = manager.getComputedDataIndex(key)!;
             expect(
               assignedSlots.add(slot),
               isTrue,
-              reason: 'slot $slot 被多个 DataIndicatorKey 共享，违反唯一性',
+              reason: 'slot $slot 被多个 ComputedIndicatorKey 共享，违反唯一性',
             );
           }
         },
       );
 
       // ---------------------------------------------------------------
-      // 属性 3：indicatorCount 等于 DataIndicator 的数量
+      // 属性 3：computedDataCount 等于 ComputedIndicator 的数量
       // ---------------------------------------------------------------
       Glados(gen, ExploreConfig(numRuns: 100)).test(
-        'indicatorCount 等于所有 DataIndicator 的数量',
+        'computedDataCount 等于所有 ComputedIndicator 的数量',
         (input) {
           final manager = createManager();
           final context = TestPaintContext();
@@ -137,13 +137,13 @@ void main() {
             context: context,
           );
 
-          final dataCount = [...mainIndicators, ...subIndicators].where((i) => i.key is DataIndicatorKey).length;
+          final dataCount = [...mainIndicators, ...subIndicators].where((i) => i.key is ComputedIndicatorKey).length;
 
           expect(
-            manager.indicatorCount,
+            manager.computedDataCount,
             equals(dataCount),
-            reason: 'indicatorCount 应为 $dataCount（DataIndicator 数量），'
-                '但实际为 ${manager.indicatorCount}',
+            reason: 'computedDataCount 应为 $dataCount（ComputedIndicator 数量），'
+                '但实际为 ${manager.computedDataCount}',
           );
         },
       );
@@ -215,10 +215,10 @@ void main() {
       );
 
       // ---------------------------------------------------------------
-      // 属性 6：所有 slot index 在 [0, indicatorCount) 范围内
+      // 属性 6：所有 slot index 在 [0, computedDataCount) 范围内
       // ---------------------------------------------------------------
       Glados(gen, ExploreConfig(numRuns: 100)).test(
-        '所有已分配的 slot index 在 [0, indicatorCount) 范围内',
+        '所有已分配的 slot index 在 [0, computedDataCount) 范围内',
         (input) {
           final manager = createManager();
           final context = TestPaintContext();
@@ -234,16 +234,16 @@ void main() {
             context: context,
           );
 
-          final count = manager.indicatorCount;
+          final count = manager.computedDataCount;
           final allIndicators = [...mainIndicators, ...subIndicators];
 
           for (final indicator in allIndicators) {
-            if (indicator.key is DataIndicatorKey) {
-              final slot = manager.getIndicatorDataIndex(
-                indicator.key as DataIndicatorKey,
+            if (indicator.key is ComputedIndicatorKey) {
+              final slot = manager.getComputedDataIndex(
+                indicator.key as ComputedIndicatorKey,
               )!;
               expect(slot, greaterThanOrEqualTo(0), reason: '${indicator.key} 的 slot $slot < 0');
-              expect(slot, lessThan(count), reason: '${indicator.key} 的 slot $slot >= indicatorCount $count');
+              expect(slot, lessThan(count), reason: '${indicator.key} 的 slot $slot >= computedDataCount $count');
             }
           }
         },

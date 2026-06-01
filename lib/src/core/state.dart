@@ -199,12 +199,12 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   }
 
   @override
-  double valueToDyOnCandle(FlexiNum value, {bool correct = false}) {
+  double candleValueToDy(FlexiNum value, {bool correct = false}) {
     return candlePaintObject.valueToDy(value, correct: correct);
   }
 
   @override
-  FlexiNum? dyToValueOnCandle(double dy, {bool check = false}) {
+  FlexiNum? dyToCandleValue(double dy, {bool check = false}) {
     return candlePaintObject.dyToValue(dy, check: check);
   }
 
@@ -456,7 +456,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     /// 使用scheduleTask方式运行预计算
     await SchedulerBinding.instance.scheduleTask(
       () => data.precomputeKlineData(
-        indicatorCount: indicatorCount,
+        computedDataCount: computedDataCount,
         newList: newList,
         mainPaintObjects: mainPaintObject.children,
         subPaintObjects: subPaintObjects,
@@ -474,10 +474,10 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   ///
   /// 在 FlexiKlineWidget.initState 完成（mountIndicators + controller.initState 之后）时调用。
   /// 检查 [curKlineData] 中是否有未合并的 `_waitingData`，若有则使用当前已确定的
-  /// [indicatorCount] 合并数据并对所有已激活指标执行 precompute，最后触发 markRepaintChart。
+  /// [computedDataCount] 合并数据并对所有已激活指标执行 precompute，最后触发 markRepaintChart。
   ///
   /// 场景：Widget 挂载前调用 switchKlineData 和 updateKlineData，数据暂存到 _waitingData；
-  /// Widget initState 完成后调用此方法，使用已确定的 indicatorCount 处理暂存数据。
+  /// Widget initState 完成后调用此方法，使用已确定的 computedDataCount 处理暂存数据。
   /// _Requirements: 11.1, 11.2, 11.3, 11.4
   @override
   void flushPendingKlineData() {
@@ -489,7 +489,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
 
     logd('flushPendingKlineData: flushing ${curKlineData.waitingDataLength} pending data');
 
-    // 使用当前 indicatorCount 合并数据并执行 precompute
+    // 使用当前 computedDataCount 合并数据并执行 precompute
     _startPrecomputeKlineData(
       curKlineData,
       newList: const [],

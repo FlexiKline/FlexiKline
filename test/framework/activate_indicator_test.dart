@@ -201,14 +201,14 @@ void main() {
 
           // 记录激活后的 slot 映射快照
           final allKeys = <IIndicatorKey>{...allMainKeys, ...allSubKeys};
-          final slotSnapshot = <DataIndicatorKey, int>{};
+          final slotSnapshot = <ComputedIndicatorKey, int>{};
           for (final key in allKeys) {
-            if (key is DataIndicatorKey) {
-              final slot = manager.getIndicatorDataIndex(key);
+            if (key is ComputedIndicatorKey) {
+              final slot = manager.getComputedDataIndex(key);
               if (slot != null) slotSnapshot[key] = slot;
             }
           }
-          final indicatorCountBefore = manager.indicatorCount;
+          final computedDataCountBefore = manager.computedDataCount;
 
           // 执行 remove 操作
           final removeMainKeys = input.removeMain.map(descToKey).toSet();
@@ -240,14 +240,15 @@ void main() {
           // 验证：slot 映射不变
           for (final entry in slotSnapshot.entries) {
             expect(
-              manager.getIndicatorDataIndex(entry.key),
+              manager.getComputedDataIndex(entry.key),
               equals(entry.value),
               reason: 'remove 后 ${entry.key} 的 slot 应保持 ${entry.value}',
             );
           }
 
-          // 验证：indicatorCount 不变
-          expect(manager.indicatorCount, equals(indicatorCountBefore), reason: 'remove 后 indicatorCount 应保持不变');
+          // 验证：computedDataCount 不变
+          expect(manager.computedDataCount, equals(computedDataCountBefore),
+              reason: 'remove 后 computedDataCount 应保持不变');
 
           // 验证：缓存不变（重新 add 应成功）
           for (final key in removeMainKeys) {

@@ -40,7 +40,7 @@ abstract interface class IFlexiKlineTheme {
   Color get crossTextBg; // 十字线刻度文本背景色
   Color get latestPriceBg; // 最新价标签背景色（最新蜡烛在视口内时）
   Color get lastPriceBg; // 最后价标签背景色（最新蜡烛滚出视口时）
-  Color get countDownBg; // 倒计时标签背景色
+  Color get countdownBg; // 倒计时标签背景色
   Color get dragBg; // 拖拽指标高度时的区域背景色
 
   // ─── 线色 ─────────────────────────────────────────────

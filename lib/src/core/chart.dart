@@ -60,10 +60,10 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding implements 
     _repaintChart.value++;
   }
 
-  ValueListenable<bool> get isStartZoomChartListener => _isChartStartZoom;
+  ValueListenable<bool> get isChartZoomingListener => _isChartStartZoom;
 
   @override
-  bool get isStartZoomChart => isStartZoomChartListener.value;
+  bool get isChartZooming => isChartZoomingListener.value;
 
   ValueListenable<Rect> get chartZoomSlideBarRectListener {
     return _chartZoomSlideBarRect;
@@ -126,7 +126,7 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding implements 
     }
 
     calculatePaintChartRange();
-    int solt = mainIndicatorSlot;
+    int paneIndex = mainPaneIndex;
 
     /// 绘制额外内容是否在允许在主图绘制区域之外
     final allowPaintExtraOutsideMainRect = settingConfig.allowPaintExtraOutsideMainRect;
@@ -135,7 +135,7 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding implements 
       canvas.save();
       canvas.clipRect(_panSmoothFactor >= 1.0 ? mainRect : canvasRect);
       mainPaintObject.doInitState(
-        solt++,
+        paneIndex++,
         start: curKlineData.start,
         end: curKlineData.end,
         reset: _reset,
@@ -157,7 +157,7 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding implements 
     for (final paintObject in subPaintObjects) {
       /// 初始化副区指标数据.
       paintObject.doInitState(
-        solt++,
+        paneIndex++,
         start: curKlineData.start,
         end: curKlineData.end,
         reset: _reset,
