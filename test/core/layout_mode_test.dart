@@ -199,7 +199,7 @@ void main() {
       expect(c.addSubIndicator(smallKey), isTrue);
 
       expect(c.mainRect.height, closeTo(c.mainMinSize.height, 0.01));
-      expect(c.getSubIndiatorHeights().toList(), everyElement(greaterThanOrEqualTo(c.settingConfig.subMinHeight)));
+      expect(c.getSubIndicatorHeights().toList(), everyElement(greaterThanOrEqualTo(c.settingConfig.subMinHeight)));
       expect(c.mainRect.height + c.subRect.height, closeTo(160, 0.01));
     });
 

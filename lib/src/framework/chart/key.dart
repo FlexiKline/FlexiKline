@@ -76,12 +76,6 @@ const mainIndicatorKey = DirectIndicatorKey('main', label: 'Main');
 const candleIndicatorKey = DirectIndicatorKey('candle', label: 'Candle');
 const timeIndicatorKey = DirectIndicatorKey('time', label: 'Time');
 
-/// 可预计算接口
-/// 实现 [IPrecomputable] 接口, 即代表当前对象是可以进行预计算.
-abstract interface class IPrecomputable {
-  dynamic get calcParam;
-}
-
 const mainPaneIndex = -1;
 
 /// Indicator绘制模式

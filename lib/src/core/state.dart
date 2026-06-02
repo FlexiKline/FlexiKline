@@ -40,10 +40,10 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     logd('dispose state');
     _klineSpecNotifier.dispose();
     _loadingStateNotifier.dispose();
-    _isFirstCandleMoveOffScreenListener.dispose();
+    _isFirstCandleMovedOffScreenNotifier.dispose();
     _isMultiTouchNotifier.dispose();
-    _intervalListener.dispose();
-    _paintRangeListener.dispose();
+    _intervalNotifier.dispose();
+    _paintRangeNotifier.dispose();
     _klineDataCache.forEach((key, data) {
       data.dispose();
     });
@@ -59,42 +59,42 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   /// 返回到初始位置动画回调.
   VoidCallback? moveToInitialPositionCallback;
 
-  /// 首根蜡烛是否移出屏幕监听.
-  final _isFirstCandleMoveOffScreenListener = ValueNotifier(false);
-  ValueListenable<bool> get isFirstCandleMoveOffScreenListener {
-    return _isFirstCandleMoveOffScreenListener;
+  /// 首根蜡烛是否移出屏幕 listenable。
+  final _isFirstCandleMovedOffScreenNotifier = ValueNotifier(false);
+  ValueListenable<bool> get isFirstCandleMovedOffScreenListenable {
+    return _isFirstCandleMovedOffScreenNotifier;
   }
 
   /// 当前是否处于多指触摸（双指缩放）状态.
   final _isMultiTouchNotifier = ValueNotifier<bool>(false);
-  ValueListenable<bool> get isMultiTouchListener => _isMultiTouchNotifier;
+  ValueListenable<bool> get isMultiTouchListenable => _isMultiTouchNotifier;
   void setMultiTouch(bool value) {
     if (_isMultiTouchNotifier.value != value) {
       _isMultiTouchNotifier.value = value;
     }
   }
 
-  /// 当KlineData的TimeInterval的监听器
-  final _intervalListener = ValueNotifier<ITimeInterval?>(null);
-  ValueListenable<ITimeInterval?> get intervalListener => _intervalListener;
+  /// 当前 KlineData 的 TimeInterval listenable。
+  final _intervalNotifier = ValueNotifier<ITimeInterval?>(null);
+  ValueListenable<ITimeInterval?> get intervalListenable => _intervalNotifier;
 
-  /// KlineSpec变化监听器
+  /// KlineSpec 变化 notifier。
   final _klineSpecNotifier = ValueNotifier<KlineSpec>(KlineData.empty.spec);
 
-  /// 加载状态变化监听器
+  /// 加载状态变化 notifier。
   final _loadingStateNotifier = ValueNotifier<KlineLoadingState>(KlineLoadingState.none);
 
   @override
-  ValueListenable<KlineSpec> get klineSpecListener => _klineSpecNotifier;
+  ValueListenable<KlineSpec> get klineSpecListenable => _klineSpecNotifier;
 
   @override
-  ValueListenable<KlineLoadingState> get loadingStateListener => _loadingStateNotifier;
+  ValueListenable<KlineLoadingState> get loadingStateListenable => _loadingStateNotifier;
 
-  /// 当前KlineData绘制范围监听器
-  final _paintRangeListener = ValueNotifier<Range?>(null);
+  /// 当前 KlineData 绘制范围 listenable。
+  final _paintRangeNotifier = ValueNotifier<Range?>(null);
 
-  ValueListenable<Range?> get paintRangeListener {
-    return _paintRangeListener;
+  ValueListenable<Range?> get paintRangeListenable {
+    return _paintRangeNotifier;
   }
 
   void _notifySpecChange(KlineSpec spec) {
@@ -102,7 +102,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     if (spec.key == klineDataKey) {
       onKlineSpecChanged(_klineSpecNotifier.value);
       _klineSpecNotifier.value = spec;
-      _intervalListener.value = spec.interval;
+      _intervalNotifier.value = spec.interval;
     }
   }
 
@@ -122,7 +122,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   /// 当前 K 线数据缓存 key。
   String get klineDataKey => klineData.key;
 
-  void cleanUnlessKlineData() {
+  void evictInactiveKlineDataCache() {
     final retainedKey = klineDataKey;
     _klineDataCache.removeWhere((key, data) {
       if (key != retainedKey) {
@@ -241,7 +241,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   double get paintDxOffset => _paintDxOffset;
   set paintDxOffset(double val) {
     _paintDxOffset = clampPaintDxOffset(val);
-    _isFirstCandleMoveOffScreenListener.value = _paintDxOffset > 0;
+    _isFirstCandleMovedOffScreenNotifier.value = _paintDxOffset > 0;
   }
 
   /// PaintDxOffset的最小值
@@ -309,7 +309,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     }
 
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      _paintRangeListener.value = klineData.paintIndexRange;
+      _paintRangeNotifier.value = klineData.paintIndexRange;
     });
   }
 
@@ -393,7 +393,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
 
     stopLoading(spec: data.spec);
 
-    await _startPrecomputeKlineData(
+    await _schedulePrecomputeKlineData(
       data,
       newList: list,
       reset: reset,
@@ -433,7 +433,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   /// 数据合并更新结果的处理:
   /// 1. 对于历史数据追加, 像EMA这类依赖于历史数据会适时考虑从头计算.
   /// 2. 对于实时数据更新, 会仅计算[newList]部分.
-  Future<void> _startPrecomputeKlineData(
+  Future<void> _schedulePrecomputeKlineData(
     KlineData data, {
     List<ICandleModel> newList = const [],
     bool reset = false,
@@ -492,7 +492,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     logd('flushPendingKlineData: flushing ${klineData.waitingDataLength} pending data');
 
     // 使用当前 computedDataCount 合并数据并执行 precompute
-    _startPrecomputeKlineData(
+    _schedulePrecomputeKlineData(
       klineData,
       newList: const [],
       reset: false,

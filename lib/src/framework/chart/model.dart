@@ -25,7 +25,7 @@ part of 'indicator.dart';
 ///   [PaintMode.alone] 多指标时，使用自己的 height 进行绘制。
 /// [zIndex] 确定指标在绘制时的顺序，按升序排序；数值大的将会绘制在数值小的上面；
 ///   主要在 [MainPaintObjectIndicator] 中有用，确定多个指标在同一区域的绘制顺序。
-abstract class Indicator<K extends IIndicatorKey> implements IPrecomputable {
+abstract class Indicator<K extends IIndicatorKey> {
   Indicator({
     required this.key,
     required this.height,
@@ -48,9 +48,6 @@ abstract class Indicator<K extends IIndicatorKey> implements IPrecomputable {
   PaintObject<Indicator<K>> createPaintObject();
 
   Map<String, dynamic> toJson() => const {};
-
-  @override
-  dynamic get calcParam => null;
 }
 
 /// 普通指标配置基类
@@ -85,6 +82,11 @@ abstract class ComputedIndicator extends Indicator<ComputedIndicatorKey> {
 
   @override
   ComputedPaintObject<ComputedIndicator> createPaintObject();
+
+  /// 指标计算参数。
+  ///
+  /// 用于判断配置变化后是否需要重新预计算。
+  dynamic get calcParam => null;
 }
 
 /// 业务指标配置基类

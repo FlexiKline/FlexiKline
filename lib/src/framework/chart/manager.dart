@@ -67,20 +67,20 @@ final class IndicatorPaintObjectManager with FlexiLog {
     }
   }
 
-  /// 主区指标构造器缓存。
-  final Map<IIndicatorKey, Indicator> _mainIndicatorBuilders = {};
+  /// 主区指标声明注册表。
+  final Map<IIndicatorKey, Indicator> _mainIndicatorRegistry = {};
 
-  /// 副区指标构造器缓存。
-  final Map<IIndicatorKey, Indicator> _subIndicatorBuilders = {};
+  /// 副区指标声明注册表。
+  final Map<IIndicatorKey, Indicator> _subIndicatorRegistry = {};
 
   Iterable<IIndicatorKey>? _supportMainIndicatorKeys;
   Iterable<IIndicatorKey> get supportMainIndicatorKeys {
-    return _supportMainIndicatorKeys ??= _mainIndicatorBuilders.keys;
+    return _supportMainIndicatorKeys ??= _mainIndicatorRegistry.keys;
   }
 
   Iterable<IIndicatorKey>? _supportSubIndicatorKeys;
   Iterable<IIndicatorKey> get supportSubIndicatorKeys {
-    return _supportSubIndicatorKeys ??= _subIndicatorBuilders.keys;
+    return _supportSubIndicatorKeys ??= _subIndicatorRegistry.keys;
   }
 
   Iterable<IIndicatorKey> get mainIndicatorKeys {
@@ -92,11 +92,11 @@ final class IndicatorPaintObjectManager with FlexiLog {
   }
 
   bool hasRegisteredInMain(IIndicatorKey key) {
-    return _mainIndicatorBuilders.containsKey(key) || key == candleIndicatorKey;
+    return _mainIndicatorRegistry.containsKey(key) || key == candleIndicatorKey;
   }
 
   bool hasRegisteredInSub(IIndicatorKey key) {
-    return _subIndicatorBuilders.containsKey(key) || key == timeIndicatorKey;
+    return _subIndicatorRegistry.containsKey(key) || key == timeIndicatorKey;
   }
 
   int? getComputedDataIndex(ComputedIndicatorKey key) {
@@ -159,10 +159,10 @@ final class IndicatorPaintObjectManager with FlexiLog {
 
     // 缓存声明层指标。
     for (final indicator in mainIndicators) {
-      _mainIndicatorBuilders[indicator.key] = indicator;
+      _mainIndicatorRegistry[indicator.key] = indicator;
     }
     for (final indicator in subIndicators) {
-      _subIndicatorBuilders[indicator.key] = indicator;
+      _subIndicatorRegistry[indicator.key] = indicator;
     }
 
     // 创建系统级 PaintObject。
@@ -237,9 +237,9 @@ final class IndicatorPaintObjectManager with FlexiLog {
         releaseComputedDataIndex(key);
       }
 
-      _mainIndicatorBuilders.remove(key);
+      _mainIndicatorRegistry.remove(key);
 
-      final result = _mainPaintObject.deletePaintObject(key);
+      final result = _mainPaintObject.removePaintObject(key);
 
       logi('_mainDiffAndSync: 移除指标 $key > $result');
     }
@@ -253,10 +253,10 @@ final class IndicatorPaintObjectManager with FlexiLog {
         if (key is ComputedIndicatorKey) {
           allocateComputedDataIndexes([key]);
         }
-        _mainIndicatorBuilders[key] = newIndicator;
+        _mainIndicatorRegistry[key] = newIndicator;
         logi('_mainDiffAndSync: 新增指标 $key $computedDataCount');
       } else {
-        _mainIndicatorBuilders[key] = newIndicator;
+        _mainIndicatorRegistry[key] = newIndicator;
 
         final paintObject = _mainPaintObject.getChildPaintObject(key);
         if (paintObject != null) {
@@ -284,7 +284,7 @@ final class IndicatorPaintObjectManager with FlexiLog {
         releaseComputedDataIndex(key);
       }
 
-      _subIndicatorBuilders.remove(key);
+      _subIndicatorRegistry.remove(key);
 
       final result = removeSubPaintObject(key);
 
@@ -300,10 +300,10 @@ final class IndicatorPaintObjectManager with FlexiLog {
         if (key is ComputedIndicatorKey) {
           allocateComputedDataIndexes([key]);
         }
-        _subIndicatorBuilders[key] = newIndicator;
+        _subIndicatorRegistry[key] = newIndicator;
         logi('_subDiffAndSync: 新增指标 $key $computedDataCount');
       } else {
-        _subIndicatorBuilders[key] = newIndicator;
+        _subIndicatorRegistry[key] = newIndicator;
 
         final paintObject = _subPaintObjectQueue.firstWhereOrNull(
           (obj) => obj.key == key,
@@ -328,7 +328,7 @@ final class IndicatorPaintObjectManager with FlexiLog {
 
   /// 在主区中添加 [key] 指定的指标。
   ///
-  /// 从 [_mainIndicatorBuilders] 缓存中获取 Indicator，inflate 后追加到主区绘制队列。
+  /// 从 [_mainIndicatorRegistry] 中获取 Indicator，inflate 后追加到主区绘制队列。
   /// key 未注册时静默跳过并记录警告。
   PaintObject? addMainPaintObject(
     IIndicatorKey key,
@@ -350,7 +350,7 @@ final class IndicatorPaintObjectManager with FlexiLog {
       }
     }
 
-    final indicator = _mainIndicatorBuilders[key];
+    final indicator = _mainIndicatorRegistry[key];
     if (indicator == null) return null;
 
     final newObj = _inflateIndicator(indicator, context);
@@ -360,12 +360,12 @@ final class IndicatorPaintObjectManager with FlexiLog {
 
   /// 删除已激活的主区指标。
   bool removeMainPaintObject(IIndicatorKey key) {
-    return _mainPaintObject.deletePaintObject(key);
+    return _mainPaintObject.removePaintObject(key);
   }
 
   /// 在副区中添加 [key] 指定的指标。
   ///
-  /// 从 [_subIndicatorBuilders] 缓存中获取 Indicator，inflate 后追加到副区绘制队列。
+  /// 从 [_subIndicatorRegistry] 中获取 Indicator，inflate 后追加到副区绘制队列。
   /// key 未注册时静默跳过并记录警告。
   PaintObject? addSubPaintObject(
     IIndicatorKey key,
@@ -389,7 +389,7 @@ final class IndicatorPaintObjectManager with FlexiLog {
       }
     }
 
-    final indicator = _subIndicatorBuilders[key];
+    final indicator = _subIndicatorRegistry[key];
     if (indicator == null) return null;
 
     final newObj = _inflateIndicator(indicator, context);

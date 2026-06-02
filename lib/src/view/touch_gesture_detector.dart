@@ -103,7 +103,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
       controller.setMultiTouch(true);
     }
     final position = event.localPosition;
-    if (controller.isDrawVisibility && drawState.isOngoing) {
+    if (controller.isDrawVisible && drawState.isOngoing) {
       // 优化Drawing的处理
     } else if (controller.isCrossing) {
       // 优化Crossing的处理
@@ -119,7 +119,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
   /// 原始移动
   /// 当原始移动时, 当前如果正处在crossing或drawing中时, 发生冲突, 清理手势竞技场, 响应Cross/Draw指针平移事件
   void onPointerMove(PointerMoveEvent event) {
-    if (controller.isDrawVisibility && drawState.isOngoing) {
+    if (controller.isDrawVisible && drawState.isOngoing) {
       if (drawState.isEditing) {
         /// 已完成的DrawObject通过平移[_panScaleData]或长按[_longData]事件进行修正.
         return;
@@ -213,7 +213,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
 
   /// 点击
   void onTapUp(TapUpDetails details) {
-    if (controller.isDrawVisibility) {
+    if (controller.isDrawVisible) {
       switch (drawState) {
         case Drawing():
           final pointerOffset = drawState.pointerOffset;
@@ -290,7 +290,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
       return;
     }
 
-    if (controller.isDrawVisibility && drawState.isOngoing) {
+    if (controller.isDrawVisible && drawState.isOngoing) {
       if (drawState.isDrawing) {
         // 未完成的暂不允许移动
         return;
@@ -335,7 +335,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
     }
 
     // logd('onScaleUpdate move> ${DateTime.now().millisecond} details:${details.localFocalPoint}');
-    if (controller.isDrawVisibility && drawState.isOngoing) {
+    if (controller.isDrawVisible && drawState.isOngoing) {
       if (_panScaleData!.isPan) {
         _panScaleData!.update(
           details.localFocalPoint,
@@ -376,7 +376,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
       return;
     }
 
-    if (controller.isDrawVisibility && drawState.isOngoing) {
+    if (controller.isDrawVisible && drawState.isOngoing) {
       if (_panScaleData!.isPan) {
         controller.onDrawMoveEnd();
       }
@@ -468,7 +468,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
       return;
     }
 
-    if (controller.isDrawVisibility && drawState.isOngoing) {
+    if (controller.isDrawVisible && drawState.isOngoing) {
       if (drawState.isDrawing) {
         // 未完成的暂不允许移动
         return;
@@ -481,7 +481,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
         _longData?.end();
         _longData = null;
       }
-    } else if (!controller.isCrossing && controller.onGridMoveStart(details.localPosition)) {
+    } else if (!controller.isCrossing && controller.onGridResizeStart(details.localPosition)) {
       logd('onLongPressStart move > details:$details');
       _longData = GestureData.long(details.localPosition);
     } else {
@@ -505,12 +505,12 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
     //   );
     //   return true;
     // }());
-    if (controller.isDrawVisibility && drawState.isOngoing) {
+    if (controller.isDrawVisible && drawState.isOngoing) {
       _longData!.update(details.localPosition);
       controller.onDrawMoveUpdate(_longData!);
     } else if (controller.isStartDragGrid) {
       _longData!.update(details.localPosition);
-      controller.onGridMoveUpdate(_longData!);
+      controller.onGridResizeUpdate(_longData!);
     } else {
       _longData!.update(details.localPosition);
       controller.onCrossUpdate(_longData!);
@@ -526,10 +526,10 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
     //   logd("onLongPressEnd details:$details");
     //   return true;
     // }());
-    if (controller.isDrawVisibility && drawState.isOngoing) {
+    if (controller.isDrawVisible && drawState.isOngoing) {
       controller.onDrawMoveEnd();
     } else if (controller.isStartDragGrid) {
-      controller.onGridMoveEnd();
+      controller.onGridResizeEnd();
     } else {
       // 长按结束, 尝试取消Cross事件.
       controller.requestCancelCross();

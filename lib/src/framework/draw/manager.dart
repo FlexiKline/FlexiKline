@@ -176,7 +176,7 @@ final class OverlayDrawObjectManager with FlexiLog {
     old?.dispose();
   }
 
-  void removeAllDrawObject() {
+  void removeAllDrawObjects() {
     dispose();
     configuration.delDrawOverlayList(_instId);
   }

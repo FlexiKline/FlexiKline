@@ -249,7 +249,7 @@ mixin PaintObjectGeometryStateMixin<T extends Indicator<IIndicatorKey>> on Indic
     return chartRect.includeDx(dx) ? dx : null;
   }
 
-  double? tsToDx(int ts, {bool check = true}) {
+  double? timestampToDx(int ts, {bool check = true}) {
     final index = klineData.tsToIndex(ts);
     if (index == null) return null;
     return indexToDx(index, check: check);
@@ -409,10 +409,10 @@ mixin PaintYAxisTicksOnCrossMixin<T extends Indicator> on PaintObject<T> {
 
 /// 绘制基于蜡烛数据的图表能力。
 mixin PaintCandleChartMixin<T extends Indicator> on PaintObject<T> {
-  /// 绘制Open-high-low-close样式的蜡烛图(美国线图)
+  /// 绘制 Open-high-low-close 样式的蜡烛图（美国线图）
   /// 主区: 蜡烛图
   /// 副区: 用于SubBoll图和SubSar图中
-  void paintOHPLStyleCandleChart(
+  void paintOHLCStyleCandleChart(
     Canvas canvas, {
     int? start,
     int? end,

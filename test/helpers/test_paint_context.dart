@@ -58,10 +58,10 @@ class TestPaintContext implements PaintContext {
   @override
   KlineData get klineData => KlineData.empty;
   @override
-  ValueListenable<KlineSpec> get klineSpecListener =>
+  ValueListenable<KlineSpec> get klineSpecListenable =>
       ValueNotifier(const KlineSpec(symbol: '', interval: invalidInterval));
   @override
-  ValueListenable<KlineLoadingState> get loadingStateListener => ValueNotifier(KlineLoadingState.none);
+  ValueListenable<KlineLoadingState> get loadingStateListenable => ValueNotifier(KlineLoadingState.none);
   @override
   SettingConfig get settingConfig => const SettingConfig();
   @override

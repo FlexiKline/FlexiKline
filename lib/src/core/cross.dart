@@ -236,7 +236,7 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
       // 3. 使用FlexiKline内置(默认En)的Labels生成TooltipInfoList
       tooltipLabels ??= defaultTooltipLabels;
 
-      tooltipInfoList = genTooltipInfoListByLabels(
+      tooltipInfoList = generateTooltipInfoListByLabels(
         tooltipLabels,
         model: model,
         pre: pre,
@@ -379,7 +379,7 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
   OnCrossI18nTooltipLabels? onCrossI18nTooltipLabels;
 
   /// 根据TooltipLabels生成TooltipInfoList.
-  List<TooltipInfo> genTooltipInfoListByLabels(
+  List<TooltipInfo> generateTooltipInfoListByLabels(
     Map<TooltipLabel, String> tooltipLabels, {
     required FlexiCandleModel model,
     FlexiCandleModel? pre,

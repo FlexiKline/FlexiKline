@@ -135,12 +135,6 @@ abstract class KlineBindingBase with FlexiLog implements PaintContext, DrawConte
     return false;
   }
 
-  KlineBindingBase get instance => this;
-
-  T getInstance<T extends KlineBindingBase>(T instance) {
-    return instance;
-  }
-
   @override
   IFlexiKlineTheme get theme => configuration.theme;
 

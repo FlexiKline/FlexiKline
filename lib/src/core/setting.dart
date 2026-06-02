@@ -26,9 +26,9 @@ mixin SettingBinding on KlineBindingBase {
       assert(_initialFixedSize == null || _initialFixedSize.isFinite);
       _fixedSize = _initialFixedSize;
     }
-    _lifecycleListener = FlexiStateNotifier(FlexiKlineLifecycle.initial);
-    _canvasSizeChangeListener = FlexiStateNotifier(Rect.zero);
-    _subHeightListListener = FlexiStateNotifier<List<double>>(const []);
+    _lifecycleNotifier = FlexiStateNotifier(FlexiKlineLifecycle.initial);
+    _canvasRectNotifier = FlexiStateNotifier(Rect.zero);
+    _subIndicatorHeightsNotifier = FlexiStateNotifier<List<double>>(const []);
   }
 
   @override
@@ -38,48 +38,48 @@ mixin SettingBinding on KlineBindingBase {
     _layoutFixedGeometry();
     // build 阶段不能触发 listener 通知，用 setSilently 写入初始值，
     // 订阅者 build 时直接读到正确值。
-    _canvasSizeChangeListener.setSilently(canvasRect);
-    _subHeightListListener.setSilently(getSubIndiatorHeights().toList(growable: false));
+    _canvasRectNotifier.setSilently(canvasRect);
+    _subIndicatorHeightsNotifier.setSilently(getSubIndicatorHeights().toList(growable: false));
   }
 
   @override
   void dispose() {
     super.dispose();
     logd('dispose setting');
-    _lifecycleListener.value = FlexiKlineLifecycle.disposed;
-    _lifecycleListener.dispose();
+    _lifecycleNotifier.value = FlexiKlineLifecycle.disposed;
+    _lifecycleNotifier.dispose();
     _layoutModeNotifier.dispose();
-    _canvasSizeChangeListener.dispose();
-    _subHeightListListener.dispose();
+    _canvasRectNotifier.dispose();
+    _subIndicatorHeightsNotifier.dispose();
   }
 
   /// 蜡烛宽度
   late double _candleWidth;
   double? _candleSpacing;
 
-  /// Controller 生命周期状态监听器。
-  late final FlexiStateNotifier<FlexiKlineLifecycle> _lifecycleListener;
-  ValueListenable<FlexiKlineLifecycle> get lifecycleListener => _lifecycleListener;
+  /// Controller 生命周期状态 listenable。
+  late final FlexiStateNotifier<FlexiKlineLifecycle> _lifecycleNotifier;
+  ValueListenable<FlexiKlineLifecycle> get lifecycleListenable => _lifecycleNotifier;
 
-  /// 副区指标高度变化监听（不含时间轴）。
-  late final FlexiStateNotifier<List<double>> _subHeightListListener;
-  ValueListenable<List<double>> get subHeightListListener => _subHeightListListener;
-  void _updateSubHeightList() {
-    _subHeightListListener.value = getSubIndiatorHeights().toList(growable: false);
+  /// 副区指标高度变化 listenable（不含时间轴）。
+  late final FlexiStateNotifier<List<double>> _subIndicatorHeightsNotifier;
+  ValueListenable<List<double>> get subIndicatorHeightsListenable => _subIndicatorHeightsNotifier;
+  void _updateSubIndicatorHeights() {
+    _subIndicatorHeightsNotifier.value = getSubIndicatorHeights().toList(growable: false);
   }
 
-  /// 图表画布区域变化监听器。
-  late final FlexiStateNotifier<Rect> _canvasSizeChangeListener;
-  ValueListenable<Rect> get canvasSizeChangeListener {
-    return _canvasSizeChangeListener;
+  /// 图表画布区域变化 listenable。
+  late final FlexiStateNotifier<Rect> _canvasRectNotifier;
+  ValueListenable<Rect> get canvasRectListenable {
+    return _canvasRectNotifier;
   }
 
   /// 当前布局模式。
   /// 初始值由 [KlineBindingBase.initialLayoutMode] 决定。
   late final FlexiStateNotifier<FlexiLayoutMode> _layoutModeNotifier;
 
-  /// 布局模式变化监听器，Widget 层通过 [ValueListenableBuilder] 订阅。
-  ValueListenable<FlexiLayoutMode> get layoutModeListener => _layoutModeNotifier;
+  /// 布局模式变化 listenable，Widget 层通过 [ValueListenableBuilder] 订阅。
+  ValueListenable<FlexiLayoutMode> get layoutModeListenable => _layoutModeNotifier;
 
   /// fixed 模式下的画布固定尺寸（主区 + 副区）。
   Size? _fixedSize;
@@ -213,8 +213,8 @@ mixin SettingBinding on KlineBindingBase {
   /// 通知画布变化并触发相关图层重绘。
   void _notifyCanvasSizeChanged({bool force = false}) {
     _syncMainSizeToConfig();
-    _canvasSizeChangeListener.value = canvasRect;
-    if (force) _canvasSizeChangeListener.notifyListeners();
+    _canvasRectNotifier.value = canvasRect;
+    if (force) _canvasRectNotifier.notifyListeners();
     markRepaintChart(reset: force);
     markRepaintCross();
     markRepaintGrid();
@@ -224,7 +224,7 @@ mixin SettingBinding on KlineBindingBase {
   void _onSubIndicatorsChanged() {
     final changed = _layoutFixedGeometry();
     _notifyCanvasSizeChanged(force: changed || isFixedLayoutMode);
-    _updateSubHeightList();
+    _updateSubIndicatorHeights();
   }
 
   /// 设置主区尺寸。拖拽分隔线和模式切换都会走这里。
@@ -343,7 +343,7 @@ mixin SettingBinding on KlineBindingBase {
   }
 
   /// 当前副区指标高度列表；[includeTime] 控制是否包含时间轴。
-  Iterable<double> getSubIndiatorHeights([bool includeTime = false]) {
+  Iterable<double> getSubIndicatorHeights([bool includeTime = false]) {
     return subPaintObjects.mapNonNullList(
       (object) => (includeTime || object.key != timeIndicatorKey) ? object.height : null,
     );
@@ -430,7 +430,7 @@ mixin SettingBinding on KlineBindingBase {
   int get maxCandleCount => (mainChartWidth / candleActualWidth).ceil();
 
   /// PaintObject 已创建且 Controller 处于 mounted。
-  bool get isMounted => _paintObjectManager.isInitialized && _lifecycleListener.value.isMounted;
+  bool get isMounted => _paintObjectManager.isInitialized && _lifecycleNotifier.value.isMounted;
 
   Iterable<IIndicatorKey> get supportMainIndicatorKeys {
     return _paintObjectManager.supportMainIndicatorKeys;
@@ -484,7 +484,7 @@ mixin SettingBinding on KlineBindingBase {
       subIndicators: subIndicators,
       context: this,
     );
-    _lifecycleListener.value = FlexiKlineLifecycle.mounted;
+    _lifecycleNotifier.value = FlexiKlineLifecycle.mounted;
   }
 
   /// 按 Widget 新旧声明增量同步指标。

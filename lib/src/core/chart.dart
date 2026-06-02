@@ -60,12 +60,12 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
     _repaintChart.value++;
   }
 
-  ValueListenable<bool> get isChartZoomingListener => _isChartStartZoom;
+  ValueListenable<bool> get isChartZoomingListenable => _isChartStartZoom;
 
   @override
-  bool get isChartZooming => isChartZoomingListener.value;
+  bool get isChartZooming => isChartZoomingListenable.value;
 
-  ValueListenable<Rect> get chartZoomSlideBarRectListener {
+  ValueListenable<Rect> get chartZoomSlideBarRectListenable {
     return _chartZoomSlideBarRect;
   }
 
@@ -81,7 +81,7 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
     _markRepaintChart();
   }
 
-  /// 控制doInitState操作是否重置计算结果
+  /// 控制 doUpdateVisibleMinMax 操作是否重置计算结果
   bool _reset = false;
 
   /// 平移过程中Y轴平滑插值因子
@@ -134,7 +134,7 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
       /// 保存画布状态
       canvas.save();
       canvas.clipRect(_panSmoothFactor >= 1.0 ? mainRect : canvasRect);
-      mainPaintObject.doInitState(
+      mainPaintObject.doUpdateVisibleMinMax(
         paneIndex++,
         start: klineData.start,
         end: klineData.end,
@@ -155,8 +155,8 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
     }
 
     for (final paintObject in subPaintObjects) {
-      /// 初始化副区指标数据.
-      paintObject.doInitState(
+      /// 更新副区指标可见区间状态.
+      paintObject.doUpdateVisibleMinMax(
         paneIndex++,
         start: klineData.start,
         end: klineData.end,

@@ -67,7 +67,6 @@ abstract class IndicatorObject<T extends Indicator>
 
   PaintMode get paintMode => indicator.paintMode;
   int get zIndex => indicator.zIndex;
-  dynamic get calcParams => indicator.calcParam;
 
   @override
   int compareTo(IndicatorObject other) {

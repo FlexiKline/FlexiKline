@@ -211,7 +211,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
 
   @override
   void didHaveMemoryPressure() {
-    controller.cleanUnlessKlineData();
+    controller.evictInactiveKlineDataCache();
   }
 
   @override
@@ -227,7 +227,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
       builder: (context, constraints) {
         final biggest = constraints.biggest;
         return ValueListenableBuilder<FlexiLayoutMode>(
-          valueListenable: controller.layoutModeListener,
+          valueListenable: controller.layoutModeListenable,
           child: _buildKlineContainer(context),
           builder: (context, layoutMode, child) {
             if (layoutMode == FlexiLayoutMode.adapt) {
@@ -263,7 +263,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
 
   Widget _buildKlineContainer(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: controller.canvasSizeChangeListener,
+      valueListenable: controller.canvasRectListenable,
       builder: (context, canvasRect, child) {
         if (controller.drawState.isEditing) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -354,7 +354,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
     }
 
     return ValueListenableBuilder(
-      valueListenable: controller.loadingStateListener,
+      valueListenable: controller.loadingStateListenable,
       builder: (context, loadingState, child) {
         final loadingConfig = controller.settingConfig.loading;
         return Offstage(
@@ -405,7 +405,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
       child: widget.drawToolbar!,
     );
     return ValueListenableBuilder(
-      valueListenable: controller.drawStateListener,
+      valueListenable: controller.drawStateListenable,
       builder: (context, state, child) => Visibility(
         visible: state.isEditing,
         child: ValueListenableBuilder(
@@ -449,7 +449,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
     }
 
     return ValueListenableBuilder(
-      valueListenable: controller.drawPointerListener,
+      valueListenable: controller.drawPointerListenable,
       builder: (context, pointer, child) {
         bool visible = false;
         final pointerOffset = pointer?.offset;
@@ -524,7 +524,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
   /// 退出Zoom缩放按钮
   Widget _buildExitZoomButton(BuildContext context, Rect mainRect) {
     return ValueListenableBuilder(
-      valueListenable: controller.isChartZoomingListener,
+      valueListenable: controller.isChartZoomingListenable,
       builder: (context, isStartZomming, child) => Visibility(
         visible: isStartZomming,
         child: Container(
@@ -610,7 +610,7 @@ class DrawPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (!controller.isDrawVisibility) return;
+    if (!controller.isDrawVisible) return;
 
     try {
       canvas.save();

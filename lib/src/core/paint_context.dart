@@ -32,16 +32,16 @@ abstract interface class PaintEnvironment {
   GestureConfig get gestureConfig;
 }
 
-/// 绘制数据：K 线数据、数据监听器与 computed 指标数据槽。
+/// 绘制数据：K 线数据、数据 listenable 与 computed 指标数据槽。
 abstract interface class PaintDataScope {
   /// 当前绘制使用的 K 线数据。
   KlineData get klineData;
 
-  /// 当前 K 线规格变化监听器。
-  ValueListenable<KlineSpec> get klineSpecListener;
+  /// 当前 K 线规格变化 listenable。
+  ValueListenable<KlineSpec> get klineSpecListenable;
 
-  /// 当前 K 线加载状态监听器。
-  ValueListenable<KlineLoadingState> get loadingStateListener;
+  /// 当前 K 线加载状态 listenable。
+  ValueListenable<KlineLoadingState> get loadingStateListenable;
 
   /// 获取 [key] 对应的 computed data index。
   int? getComputedDataIndex(ComputedIndicatorKey key);
@@ -124,10 +124,4 @@ abstract interface class PaintRuntimeScope {
 
 /// PaintObject 对外可见的绘制上下文。
 abstract interface class PaintContext
-    implements
-        PaintEnvironment,
-        PaintDataScope,
-        PaintGeometryScope,
-        PaintRuntimeScope,
-        IStorage,
-        ILogger {}
+    implements PaintEnvironment, PaintDataScope, PaintGeometryScope, PaintRuntimeScope, IStorage, ILogger {}

@@ -54,7 +54,7 @@ extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
     return hasChange;
   }
 
-  MinMax? doInitState(
+  MinMax? doUpdateVisibleMinMax(
     int newPaneIndex, {
     required int start,
     required int end,
@@ -193,7 +193,7 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
     return hasChange;
   }
 
-  MinMax? doInitState(
+  MinMax? doUpdateVisibleMinMax(
     int newPaneIndex, {
     required int start,
     required int end,
@@ -217,9 +217,9 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
     _minMax = null;
     for (final object in paintableChildren) {
       // 平滑活跃时, 子对象的 _minMax 已被 setMinMax(smoothed) 污染为平滑值,
-      // 必须清除以强制 initState 重算精确值, 否则 smoothMinMax 的收敛目标是错的
+      // 必须清除以强制重新计算可见区间 MinMax, 否则 smoothMinMax 的收敛目标是错的
       if (_smoothMinMax != null) object._minMax = null;
-      final ret = object.doInitState(
+      final ret = object.doUpdateVisibleMinMax(
         newPaneIndex,
         start: start,
         end: end,
@@ -343,14 +343,14 @@ extension MainPaintManagerExt<T extends MainPaintObjectIndicator> on MainPaintOb
     final old = children.append(object);
     indicator.children.add(object.key);
     old?.dispose();
-    // 子指标增删后必须让主区下一帧走完整 [doInitState]。
-    // 否则在 start/end 未变时 [MainPaintObject.doInitState] 会早退，新子对象收不到 [setMinMax]，
+    // 子指标增删后必须让主区下一帧走完整 [doUpdateVisibleMinMax]。
+    // 否则在 start/end 未变时 [MainPaintObject.doUpdateVisibleMinMax] 会早退，新子对象收不到 [setMinMax]，
     // combine 指标（如 MA）仍用默认 [MinMax.zero]，[valueToDy] 会把所有点画在底部一条线上。
     _minMax = null;
     _smoothMinMax = null;
   }
 
-  bool deletePaintObject(IIndicatorKey key) {
+  bool removePaintObject(IIndicatorKey key) {
     bool hasRemove = false;
     children.removeWhere((object) {
       if (object.key == key) {

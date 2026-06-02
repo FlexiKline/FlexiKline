@@ -33,19 +33,19 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
     super.dispose();
     logd('dispose draw');
     _repaintDraw.dispose();
-    _drawStateListener.dispose();
-    _drawPointerListener.dispose();
-    _drawVisibilityListener.dispose();
-    _drawMagnetModeListener.dispose();
-    _drawContinuousListener.dispose();
+    _drawStateNotifier.dispose();
+    _drawPointerNotifier.dispose();
+    _drawVisibilityNotifier.dispose();
+    _drawMagnetModeNotifier.dispose();
+    _drawContinuousNotifier.dispose();
   }
 
   final _repaintDraw = ValueNotifier(0);
-  final _drawStateListener = FlexiStateNotifier(DrawState.exited());
-  final _drawPointerListener = FlexiStateNotifier<Point?>(null);
-  final _drawVisibilityListener = ValueNotifier<bool>(true);
-  final _drawMagnetModeListener = ValueNotifier<MagnetMode>(MagnetMode.normal);
-  final _drawContinuousListener = ValueNotifier<bool>(false);
+  final _drawStateNotifier = FlexiStateNotifier(DrawState.exited());
+  final _drawPointerNotifier = FlexiStateNotifier<Point?>(null);
+  final _drawVisibilityNotifier = ValueNotifier<bool>(true);
+  final _drawMagnetModeNotifier = ValueNotifier<MagnetMode>(MagnetMode.normal);
+  final _drawContinuousNotifier = ValueNotifier<bool>(false);
 
   Listenable get repaintDraw => _repaintDraw;
 
@@ -75,27 +75,27 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
   }
 
   /// 主动通知绘制状态变化
-  void _notifyDrawStateChange() => _drawStateListener.notifyListeners();
+  void _notifyDrawStateChange() => _drawStateNotifier.notifyListeners();
 
-  DrawState get drawState => _drawStateListener.value;
+  DrawState get drawState => _drawStateNotifier.value;
   set _drawState(DrawState state) {
-    _drawStateListener.value = state;
+    _drawStateNotifier.value = state;
   }
 
-  ValueListenable<DrawState> get drawStateListener => _drawStateListener;
+  ValueListenable<DrawState> get drawStateListenable => _drawStateNotifier;
 
-  ValueListenable<Point?> get drawPointerListener => _drawPointerListener;
+  ValueListenable<Point?> get drawPointerListenable => _drawPointerNotifier;
 
-  ValueListenable<bool> get drawVisibilityListener => _drawVisibilityListener;
+  ValueListenable<bool> get drawVisibilityListenable => _drawVisibilityNotifier;
 
-  ValueListenable<MagnetMode> get drawMagnetModeListener => _drawMagnetModeListener;
+  ValueListenable<MagnetMode> get drawMagnetModeListenable => _drawMagnetModeNotifier;
 
-  ValueListenable<bool> get drawContinuousListener => _drawContinuousListener;
+  ValueListenable<bool> get drawContinuousListenable => _drawContinuousNotifier;
 
-  bool get isDrawVisibility => drawVisibilityListener.value;
+  bool get isDrawVisible => drawVisibilityListenable.value;
 
   @override
-  MagnetMode get drawMagnet => drawMagnetModeListener.value;
+  MagnetMode get drawMagnet => drawMagnetModeListenable.value;
 
   @override
   void onThemeChanged([covariant IFlexiKlineTheme? oldTheme]) {
@@ -136,7 +136,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
   /// 1. 重置状态为Drawing
   /// 2. 初始化第一个Point的位置为[mainRect]中心
   void startDraw(IDrawType type, {bool? isInitPointer}) {
-    if (!isDrawVisibility) return;
+    if (!isDrawVisible) return;
 
     if (drawState.object?.type == type) {
       _drawState = const Prepared();
@@ -204,7 +204,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
         // 绘制完成, 使用line配置绘制实线.
         object.setDrawLineConfig(object.line);
         _drawObjectManager.addDrawObject(object, addToTop: true);
-        if (drawContinuousListener.value) {
+        if (drawContinuousListenable.value) {
           final nextObj = _drawObjectManager.generateDrawObject(
             object.clone(),
             drawConfig,
@@ -247,7 +247,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
       logd('onDrawMoveStart index:${point.index} point:$point');
       object.setPointer(point);
       object.setMoveing(true);
-      _drawPointerListener.updateValue(object.pointer);
+      _drawPointerNotifier.updateValue(object.pointer);
       _notifyDrawStateChange();
       _markRepaintDraw();
       return true;
@@ -255,7 +255,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
       // 检查当前焦点是否命中Overlay
       object.setPointer(null);
       object.setMoveing(true);
-      _drawPointerListener.updateValue(null);
+      _drawPointerNotifier.updateValue(null);
       _notifyDrawStateChange();
       _markRepaintDraw();
       return true;
@@ -276,7 +276,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
       final newOffset = magneticSnap(data.offset);
       if (newOffset != pointer.offset) {
         object.onUpdateDrawPoint(pointer, newOffset);
-        _drawPointerListener.updateValue(pointer);
+        _drawPointerNotifier.updateValue(pointer);
         _markRepaintDraw();
       }
     } else {
@@ -309,7 +309,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
     }
     updateDrawObjectPointsData(object);
     object.setMoveing(false);
-    _drawPointerListener.updateValue(null);
+    _drawPointerNotifier.updateValue(null);
     _notifyDrawStateChange();
     _markRepaintDraw();
   }
@@ -340,8 +340,8 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
     }
   }
 
-  void removeAllDrawObject() {
-    _drawObjectManager.removeAllDrawObject();
+  void removeAllDrawObjects() {
+    _drawObjectManager.removeAllDrawObjects();
     final object = drawState.object;
     if (object != null) {
       _drawObjectManager.removeDrawObject(object);
@@ -378,9 +378,9 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
     return true;
   }
 
-  void setDrawVisibility(bool isShow) {
-    _drawVisibilityListener.value = isShow;
-    if (isShow) {
+  void setDrawVisible(bool visible) {
+    _drawVisibilityNotifier.value = visible;
+    if (visible) {
       prepareDraw();
     } else {
       exitDraw();
@@ -388,7 +388,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
   }
 
   void setDrawMagnetMode(MagnetMode mode) {
-    _drawMagnetModeListener.value = mode;
+    _drawMagnetModeNotifier.value = mode;
     if (mode != MagnetMode.normal && drawState.object?.pointer != null) {
       // 如果当前指针存在，主动根据[mode]校正指针.
       drawState.object!.onUpdateDrawPoint(
@@ -400,7 +400,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
   }
 
   void setDrawContinuous(bool isOn) {
-    _drawContinuousListener.value = isOn;
+    _drawContinuousNotifier.value = isOn;
     if (!isOn) {
       drawState.object?.dispose();
       _drawState = const Prepared();

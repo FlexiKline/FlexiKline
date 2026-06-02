@@ -55,12 +55,12 @@ mixin GridBinding on KlineBindingBase, SettingBinding {
 
     // 拖拽分隔线
     if (gridConfig.isAllowDragIndicatorHeight) {
-      _paintDragableLine(canvas, size);
+      _paintDraggableLine(canvas, size);
     }
   }
 
   /// 绘制可拖拽线标识与正在拖拽的线
-  void _paintDragableLine(Canvas canvas, Size size) {
+  void _paintDraggableLine(Canvas canvas, Size size) {
     final dragBg = theme.dragBg;
 
     final dragLine = gridConfig.dragLine;
@@ -241,7 +241,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding {
   }
 
   /// 测试 [position] 是否命中指标分隔线。
-  bool onGridMoveStart(Offset position) {
+  bool onGridResizeStart(Offset position) {
     _upObject = _downObject = null;
     if (!gridConfig.isAllowDragIndicatorHeight) return false;
 
@@ -274,7 +274,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding {
   }
 
   /// 拖拽更新指标高度。
-  void onGridMoveUpdate(GestureData data) {
+  void onGridResizeUpdate(GestureData data) {
     if (!isStartDragGrid) return;
 
     final deltaDy = data.delta.dy;
@@ -315,7 +315,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding {
     }
   }
 
-  void onGridMoveEnd() {
+  void onGridResizeEnd() {
     _upObject = _downObject = null;
     markRepaintGrid();
     markRepaintChart();
