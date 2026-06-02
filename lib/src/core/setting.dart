@@ -15,7 +15,7 @@
 part of 'core.dart';
 
 /// 负责 FlexiKline 的设置、布局与指标配置。
-mixin SettingBinding on KlineBindingBase implements ISetting {
+mixin SettingBinding on KlineBindingBase {
   @override
   void init() {
     super.init();
@@ -70,7 +70,6 @@ mixin SettingBinding on KlineBindingBase implements ISetting {
 
   /// 图表画布区域变化监听器。
   late final FlexiStateNotifier<Rect> _canvasSizeChangeListener;
-  @override
   ValueListenable<Rect> get canvasSizeChangeListener {
     return _canvasSizeChangeListener;
   }

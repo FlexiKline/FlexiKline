@@ -232,18 +232,13 @@ abstract class CandleBasePaintObject<T extends CandleBaseIndicator> extends Dire
 
   /// 是否在蜡烛图类型为线图时隐藏指标
   bool get hideMainIndicatorsInLineChartMode => false;
-
-  @nonVirtual
-  void updateZoomSlideBarRect(Rect rect) {
-    context.reportChartZoomSlideBarRect(rect);
-  }
 }
 
 /// 时间轴指标绘制对象
 ///
 /// 使用 [DirectIndicatorKey]，属于基础/系统指标，不占 slot。
 abstract class TimeBasePaintObject<T extends TimeBaseIndicator> extends DirectPaintObject<T> {
-  ///
+  /// 获取当前时间轴的绘制位置
   DrawPosition get position => indicator.position;
 }
 

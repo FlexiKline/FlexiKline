@@ -14,7 +14,7 @@
 
 part of 'core.dart';
 
-abstract class KlineBindingBase with FlexiLog implements ISetting, PaintContext, IDrawContext {
+abstract class KlineBindingBase with FlexiLog implements PaintContext, DrawContext {
   @override
   String get logTag => 'Controller';
 
@@ -104,6 +104,11 @@ abstract class KlineBindingBase with FlexiLog implements ISetting, PaintContext,
     _drawObjectManager.dispose();
   }
 
+  /// 保存当前 FlexiKline 配置。
+  void storeFlexiKlineConfig({
+    bool storeDrawOverlays = true,
+  });
+
   @protected
   @mustCallSuper
   void onThemeChanged([covariant IFlexiKlineTheme? oldTheme]) {
@@ -186,11 +191,8 @@ enum FlexiKlineLifecycle {
   mounted,
 
   /// `dispose()` 已调用，资源已释放。
-  disposed,
-}
+  disposed;
 
-/// [FlexiKlineLifecycle] 便捷扩展。
-extension FlexiKlineLifecycleExt on FlexiKlineLifecycle {
   /// 是否处于 [FlexiKlineLifecycle.mounted] 状态。
   bool get isMounted => this == FlexiKlineLifecycle.mounted;
 }

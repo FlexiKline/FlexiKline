@@ -493,7 +493,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
         (_zoomSlideBarSize == null || _zoomSlideBarSize!.width != maxTickWidth)) {
       final barSize = Size(maxTickWidth, drawableRect.height);
       _zoomSlideBarSize = barSize;
-      updateZoomSlideBarRect(Rect.fromLTWH(
+      context.reportChartZoomSlideBarRect(Rect.fromLTWH(
         drawableRect.right - barSize.width,
         drawableRect.top,
         barSize.width,

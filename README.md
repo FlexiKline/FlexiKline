@@ -203,12 +203,12 @@ class RayLineDrawObject extends DrawObject {
   RayLineDrawObject(super.overlay, super.config);
 
   @override
-  bool hitTest(IDrawContext context, Offset position, {bool isMove = false}) {
+  bool hitTest(DrawContext context, Offset position, {bool isMove = false}) {
     // 判断 [position] 是否命中当前绘制对象
   }
 
   @override
-  void draw(IDrawContext context, Canvas canvas, Size size) {
+  void draw(DrawContext context, Canvas canvas, Size size) {
     // 绘制图形
   }
 }

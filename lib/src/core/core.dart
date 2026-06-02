@@ -33,10 +33,10 @@ import '../utils/platform_util.dart';
 
 part 'binding_base.dart';
 part 'chart.dart';
-part 'state.dart';
-part 'setting.dart';
 part 'cross.dart';
-part 'interfaces.dart';
-part 'paint_context.dart';
 part 'draw.dart';
+part 'draw_context.dart';
 part 'grid.dart';
+part 'paint_context.dart';
+part 'setting.dart';
+part 'state.dart';

@@ -203,33 +203,33 @@ abstract class DrawStateObject extends OverlayObject with DrawConfigMixin {
 /// 绘制接口
 abstract interface class IDrawObject {
   /// 获取绘制参数. 用于自定义[DrawObject]时定制参数.
-  dynamic getDrawParams(IDrawContext context);
+  dynamic getDrawParams(DrawContext context);
 
   /// 初始化[DrawObject]绑定的[Overlay]中所有points坐标为当前绘制区别坐标.
-  bool initPoints(IDrawContext context);
+  bool initPoints(DrawContext context);
 
   /// 更新指针[point]的[offset]
   void onUpdateDrawPoint(Point point, Offset offset);
 
   /// 命中测试
-  bool hitTest(IDrawContext context, Offset position, {bool isMove = false});
+  bool hitTest(DrawContext context, Offset position, {bool isMove = false});
 
   /// 构建Overlay
-  void drawing(IDrawContext context, Canvas canvas, Size size);
+  void drawing(DrawContext context, Canvas canvas, Size size);
 
   /// 绘制Overlay
-  void draw(IDrawContext context, Canvas canvas, Size size);
+  void draw(DrawContext context, Canvas canvas, Size size);
 }
 
 abstract class DrawObject<T extends Overlay> extends DrawStateObject with DrawObjectMixin implements IDrawObject {
   DrawObject(super.overlay, super.config);
 
   @override
-  dynamic getDrawParams(IDrawContext context) {}
+  dynamic getDrawParams(DrawContext context) {}
 
   /// 初始化所有绘制点坐标
   @override
-  bool initPoints(IDrawContext context) {
+  bool initPoints(DrawContext context) {
     for (final point in points) {
       if (point == null) return false;
       final offset = context.calculateDrawPointOffset(point);
@@ -246,7 +246,7 @@ abstract class DrawObject<T extends Overlay> extends DrawStateObject with DrawOb
     point._offset = offset;
   }
 
-  Point? hitTestPoint(IDrawContext context, Offset position) {
+  Point? hitTestPoint(DrawContext context, Offset position) {
     assert(position.isFinite, 'hitTestPoint > position$position is infinite!');
     for (final point in points) {
       if (point?.offset.isFinite == true) {
@@ -265,7 +265,7 @@ abstract class DrawObject<T extends Overlay> extends DrawStateObject with DrawOb
 
   /// 碰撞测试[position]是否命中Overlay
   @override
-  bool hitTest(IDrawContext context, Offset position, {bool isMove = false}) {
+  bool hitTest(DrawContext context, Offset position, {bool isMove = false}) {
     assert(points.isNotEmpty, 'hitTest points.length must be greater than 0');
     Point? last;
     for (final point in points) {
@@ -292,13 +292,13 @@ abstract class DrawObject<T extends Overlay> extends DrawStateObject with DrawOb
 
   /// 构建Overlay
   @override
-  void drawing(IDrawContext context, Canvas canvas, Size size) {
+  void drawing(DrawContext context, Canvas canvas, Size size) {
     drawConnectingLine(context, canvas, size);
   }
 
   /// 绘制Overlay
   @override
-  void draw(IDrawContext context, Canvas canvas, Size size);
+  void draw(DrawContext context, Canvas canvas, Size size);
 
   @mustCallSuper
   void dispose() {
