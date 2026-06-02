@@ -55,8 +55,8 @@ void main() {
         ],
       );
 
-      expect(controller.curKlineData.hasWaitingData, isTrue);
-      expect(controller.curKlineData.isEmpty, isTrue);
+      expect(controller.klineData.hasWaitingData, isTrue);
+      expect(controller.klineData.isEmpty, isTrue);
 
       controller.mountIndicators(
         candle: TestCandleIndicator(),

@@ -341,7 +341,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
       }
       final pointer = drawState.pointer;
       if (pointer != null && pointer.offset.isFinite) {
-        if (controller.isCrossing) controller.cancelCross();
+        if (controller.isCrossing) controller.requestCancelCross();
         // final mainRect = controller.mainRect;
         // if (!mainRect.include(offset)) {
         //   offset = offset.clamp(mainRect);
@@ -351,7 +351,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
         return;
       }
     } else if (gestureConfig.enableZoom && controller.chartZoomSlideBarRect.include(offset)) {
-      controller.cancelCross();
+      controller.requestCancelCross();
       setCursorToZoom();
       return;
     }
@@ -367,7 +367,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
 
   /// 鼠标Hover退出事件.
   void onExit(PointerExitEvent event) {
-    controller.cancelCross();
+    controller.requestCancelCross();
     logd('onExit $event');
 
     if (_hoverData == null) return;
@@ -390,7 +390,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
             _hoverData = GestureData.tap(offset);
             controller.onDrawConfirm(_hoverData!);
             if (controller.isCrossing) {
-              controller.cancelCross();
+              controller.requestCancelCross();
             }
           }
           return;
@@ -518,7 +518,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
     final velocity = details.velocity.pixelsPerSecond.dx;
 
     if (!gestureConfig.enableInertialPan ||
-        controller.curKlineData.isEmpty ||
+        controller.klineData.isEmpty ||
         (velocity < 0 && !controller.canPanRTL) ||
         (velocity > 0 && !controller.canPanLTR)) {
       logd('onPanEnd currently can not pan!');
@@ -689,11 +689,11 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
       }
     } else if (controller.onGridMoveStart(details.localPosition)) {
       _longData = GestureData.long(details.localPosition);
-      controller.cancelCross();
+      controller.requestCancelCross();
       setCursorToNone();
     } else {
       logd('onLongPressStart cross > details:$details');
-      controller.cancelCross();
+      controller.requestCancelCross();
       _longData = GestureData.long(details.localPosition);
       final result = controller.onCrossStart(_longData!);
       if (!result) {
@@ -742,7 +742,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
       setCursorToPrecise();
     } else {
       // 长按结束, 尝试取消Cross事件.
-      controller.cancelCross();
+    controller.requestCancelCross();
       setCursorToPrecise();
     }
 

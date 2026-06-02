@@ -142,7 +142,7 @@ final class IndicatorPaintObjectManager with FlexiLog {
     required TimeBaseIndicator time,
     required List<Indicator> mainIndicators,
     required List<Indicator> subIndicators,
-    required IPaintContext context,
+    required PaintContext context,
   }) {
     if (_isInitialized) {
       logw('mountIndicators: already initialized, skip re-mount.');
@@ -188,7 +188,7 @@ final class IndicatorPaintObjectManager with FlexiLog {
 
   /// 按 Widget 新旧声明增量同步指标。
   void updateIndicators({
-    required IPaintContext context,
+    required PaintContext context,
     required CandleBaseIndicator oldCandle,
     required CandleBaseIndicator newCandle,
     required TimeBaseIndicator oldTime,
@@ -222,7 +222,7 @@ final class IndicatorPaintObjectManager with FlexiLog {
 
   /// 同步主区声明集合；新增只缓存，不自动激活。
   void _mainDiffAndSync({
-    required IPaintContext context,
+    required PaintContext context,
     required List<Indicator> oldIndicators,
     required List<Indicator> newIndicators,
   }) {
@@ -271,7 +271,7 @@ final class IndicatorPaintObjectManager with FlexiLog {
   void _subDiffAndSync({
     required List<Indicator> oldIndicators,
     required List<Indicator> newIndicators,
-    required IPaintContext context,
+    required PaintContext context,
   }) {
     final oldMap = {for (final ind in oldIndicators) ind.key: ind};
     final newMap = {for (final ind in newIndicators) ind.key: ind};
@@ -319,7 +319,7 @@ final class IndicatorPaintObjectManager with FlexiLog {
   /// 将 [Indicator] 实例化为 [PaintObject] 并挂载。
   P _inflateIndicator<T extends Indicator, P extends PaintObject>(
     T indicator,
-    IPaintContext context,
+    PaintContext context,
   ) {
     final paintObject = indicator.createPaintObject();
     paintObject.mount(indicator, context);
@@ -332,7 +332,7 @@ final class IndicatorPaintObjectManager with FlexiLog {
   /// key 未注册时静默跳过并记录警告。
   PaintObject? addMainPaintObject(
     IIndicatorKey key,
-    IPaintContext context, {
+    PaintContext context, {
     bool reset = false,
   }) {
     if (!hasRegisteredInMain(key)) {
@@ -369,7 +369,7 @@ final class IndicatorPaintObjectManager with FlexiLog {
   /// key 未注册时静默跳过并记录警告。
   PaintObject? addSubPaintObject(
     IIndicatorKey key,
-    IPaintContext context, {
+    PaintContext context, {
     bool reset = false,
   }) {
     if (!hasRegisteredInSub(key)) {

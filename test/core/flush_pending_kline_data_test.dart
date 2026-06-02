@@ -17,7 +17,7 @@
 /// **Validates: Requirements 11.1, 11.2, 11.3, 11.4**
 ///
 /// 验证 flushPendingKlineData 方法的功能：
-/// 1. 检查 curKlineData 是否为空或没有待合并数据
+/// 1. 检查 klineData 是否为空或没有待合并数据
 /// 2. 使用当前 computedDataCount 合并 _waitingData
 /// 3. 对所有已激活指标执行 precompute
 /// 4. 触发 markRepaintChart
@@ -31,8 +31,8 @@ const _testInterval1D = FlexiTimeInterval(1, TimeUnit.day);
 
 void main() {
   group('StateBinding.flushPendingKlineData', () {
-    test('should return early if curKlineData is empty', () {
-      // 此测试验证当 curKlineData 为空时，flushPendingKlineData 应该提前返回
+    test('should return early if klineData is empty', () {
+      // 此测试验证当 klineData 为空时，flushPendingKlineData 应该提前返回
       // 由于 StateBinding 是 mixin，无法直接测试，此处作为文档说明
       expect(true, isTrue);
     });

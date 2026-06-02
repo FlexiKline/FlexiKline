@@ -37,5 +37,6 @@ part 'state.dart';
 part 'setting.dart';
 part 'cross.dart';
 part 'interfaces.dart';
+part 'paint_context.dart';
 part 'draw.dart';
 part 'grid.dart';

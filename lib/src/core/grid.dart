@@ -17,7 +17,7 @@ part of 'core.dart';
 /// 负责 Grid 图层绘制。
 ///
 /// 包含网格线与指标高度拖拽线。
-mixin GridBinding on KlineBindingBase, SettingBinding implements IGrid, IChart {
+mixin GridBinding on KlineBindingBase, SettingBinding {
   @override
   void initState() {
     super.initState();

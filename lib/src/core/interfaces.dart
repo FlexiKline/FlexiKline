@@ -40,116 +40,6 @@ abstract interface class ISetting {
   DrawConfig get drawConfig;
 }
 
-/// Grid 图层 API。
-abstract interface class IGrid {
-  void markRepaintGrid();
-}
-
-/// Chart 图层 API。
-abstract interface class IChart {
-  void markRepaintChart({bool reset = false});
-}
-
-/// Cross 图层 API。
-abstract interface class ICross {
-  void markRepaintCross();
-}
-
-/// Draw 图层 API。
-abstract interface class IDraw {
-  void markRepaintDraw();
-}
-
-/// Indicator 绘制上下文。
-abstract interface class IPaintContext implements IStorage, ILogger {
-  IFlexiKlineTheme get theme;
-
-  /// 是否允许指标写回布局高度。
-  ///
-  /// adapt 下写回原始高度；fixed 下只写入临时高度。
-  bool get canUpdateLayoutHeight;
-
-  /// 指标图是否已开始缩放
-  bool get isChartZooming;
-
-  /// 当前画布内第一根蜡烛的绘制偏移。
-  double get startCandleDx;
-
-  /// 当前绘制区域相对 startIndex 右侧的偏移。
-  double get paintDxOffset;
-
-  /// 是否正在绘制Cross
-  bool get isCrossing;
-
-  KlineData get curKlineData;
-
-  /// K线规格变化监听器
-  ValueListenable<KlineSpec> get klineSpecListener;
-
-  /// K线加载状态变化监听器
-  ValueListenable<KlineLoadingState> get loadingStateListener;
-
-  /// SettingConfig
-  SettingConfig get settingConfig;
-
-  /// GridConfig
-  GridConfig get gridConfig;
-
-  /// CrossConfig
-  CrossConfig get crossConfig;
-
-  /// GestureConfig
-  GestureConfig get gestureConfig;
-
-  double get candleWidth;
-
-  double get candleSpacing;
-
-  double get candleActualWidth;
-
-  double get candleWidthHalf;
-
-  /// 将value转换为蜡烛图中dy坐标值
-  double candleValueToDy(FlexiNum value, {bool correct = false});
-
-  /// 将dy坐标值转换为蜡烛图中value
-  FlexiNum? dyToCandleValue(double dy, {bool check = false});
-
-  /// 画布区域。
-  Rect get canvasRect;
-
-  /// 主区区域。
-  Rect get mainRect;
-
-  /// 副区区域。
-  Rect get subRect;
-
-  /// 时间轴区域。
-  Rect get timeRect;
-
-  /// 指标图缩放滑竿区域。
-  Rect get chartZoomSlideBarRect;
-
-  /// 计算 [paneIndex] 对应副区的 top。
-  double calculatePaneTop(int paneIndex);
-
-  Offset? get crossOffset;
-
-  /// 取消当前Cross事件
-  void cancelCross();
-
-  /// 获取 [key] 对应的计算数据存储位置
-  ///
-  /// 仅对 [ComputedIndicatorKey]（数据指标）有效。
-  int? getComputedDataIndex(ComputedIndicatorKey key);
-
-  /// 获取已分配 computed data index 的数量。
-  int get computedDataCount;
-
-  /// 重绘
-  void requestRepaint();
-}
-
 /// Overlay 绘制上下文。
 abstract interface class IDrawContext implements IStorage, ILogger {
   IFlexiKlineTheme get theme;
@@ -163,8 +53,8 @@ abstract interface class IDrawContext implements IStorage, ILogger {
   /// 时间轴区域。
   Rect get timeRect;
 
-  /// 当前KlineData数据源
-  KlineData get curKlineData;
+  /// 当前 K 线数据源。
+  KlineData get klineData;
 
   /// 当前磁吸模式
   MagnetMode get drawMagnet;

@@ -15,7 +15,7 @@
 part of 'core.dart';
 
 /// 图形绘制
-mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw {
+mixin DrawBinding on KlineBindingBase, SettingBinding {
   @override
   void init() {
     super.init();
@@ -111,7 +111,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw {
   @override
   void onKlineSpecChanged(KlineSpec oldSpec) {
     super.onKlineSpecChanged(oldSpec);
-    final spec = curKlineData.spec;
+    final spec = klineData.spec;
     if (spec.symbol != oldSpec.symbol) {
       _drawObjectManager.onSymbolChanged(spec, drawConfig);
       exitDraw();
@@ -161,7 +161,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw {
         _drawState = const Prepared();
       }
     }
-    cancelCross();
+    requestCancelCross();
     _markRepaintDraw();
   }
 
@@ -319,7 +319,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding implements IDraw {
       updateDrawObjectPointsData(drawState.object!);
     }
     _drawState = DrawState.edit(object);
-    cancelCross();
+    requestCancelCross();
     _markRepaintDraw();
   }
 

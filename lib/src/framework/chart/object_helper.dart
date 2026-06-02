@@ -14,90 +14,77 @@
 
 part of 'indicator.dart';
 
-/// FlexiKlineController 状态、配置与绘制接口代理。
-extension IndicatorObjectExt on IndicatorObject {
-  bool get canUpdateHeight => _context.canUpdateLayoutHeight;
+/// 常用绘制样式与画笔。
+mixin PaintStyleMixin<T extends Indicator<IIndicatorKey>> on IndicatorObject<T> {
+  /// 主题。
+  @override
+  IFlexiKlineTheme get theme => context.theme;
 
-  /// 设置配置。
-  SettingConfig get settingConfig => _context.settingConfig;
+  /// 当前指标所使用的涨跌颜色
+  Color get longColor => theme.longColor;
+  Color get shortColor => theme.shortColor;
 
-  GridConfig get gridConfig => _context.gridConfig;
-
-  CrossConfig get crossConfig => _context.crossConfig;
-
-  GestureConfig get gestureConfig => _context.gestureConfig;
-
-  KlineData get klineData => _context.curKlineData;
-
-  bool get isCrossing => _context.isCrossing;
-
-  double get paintDxOffset => _context.paintDxOffset;
-
-  double get startCandleDx => _context.startCandleDx;
-
-  double get candleWidth => _context.candleWidth;
-
-  double get candleSpacing => _context.candleSpacing;
-
-  double get candleActualWidth => _context.candleActualWidth;
-
-  double get candleWidthHalf => _context.candleWidthHalf;
-
+  /// 蜡烛线条宽度。
   double get candleLineWidth => settingConfig.candleLineWidth;
 
-  Rect get chartZoomSlideBarRect => _context.chartZoomSlideBarRect;
-
-  /// 主题。
-  IFlexiKlineTheme get theme => _context.theme;
-
-  /// 全局默认刻度文本配置。
+  /// 默认坐标轴刻度文本配置。
   TextAreaConfig get defTicksTextConfig => gridConfig.ticksText;
 
-  /// 涨跌浅色。
+  /// 上涨浅色。
   Color get longTintColor => longColor.withAlpha(settingConfig.opacity.alpha);
+
+  /// 下跌浅色。
   Color get shortTintColor => shortColor.withAlpha(settingConfig.opacity.alpha);
 
-  /// 涨跌色实心柱画笔。
+  /// 上涨实心柱画笔。
   Paint get defLongBarPaint => Paint()
     ..color = longColor
     ..style = PaintingStyle.stroke
     ..strokeWidth = candleWidth;
+
+  /// 下跌实心柱画笔。
   Paint get defShortBarPaint => Paint()
     ..color = shortColor
     ..style = PaintingStyle.stroke
     ..strokeWidth = candleWidth;
 
-  /// 涨跌浅色实心柱画笔。
+  /// 上涨浅色实心柱画笔。
   Paint get defLongTintBarPaint => Paint()
     ..color = longTintColor
     ..style = PaintingStyle.stroke
     ..strokeWidth = candleWidth;
+
+  /// 下跌浅色实心柱画笔。
   Paint get defShortTintBarPaint => Paint()
     ..color = shortTintColor
     ..style = PaintingStyle.stroke
     ..strokeWidth = candleWidth;
 
-  /// 涨跌色空心柱画笔。
+  /// 上涨空心柱画笔。
   Paint get defLongHollowBarPaint => Paint()
     ..color = longColor
     ..style = PaintingStyle.stroke
     ..strokeWidth = settingConfig.candleHollowBarBorderWidth;
+
+  /// 下跌空心柱画笔。
   Paint get defShortHollowBarPaint => Paint()
     ..color = shortColor
     ..style = PaintingStyle.stroke
     ..strokeWidth = settingConfig.candleHollowBarBorderWidth;
 
-  /// 涨跌色线画笔。
+  /// 上涨线条画笔。
   Paint get defLongLinePaint => Paint()
     ..color = longColor
     ..style = PaintingStyle.stroke
     ..strokeWidth = candleLineWidth;
+
+  /// 下跌线条画笔。
   Paint get defShortLinePaint => Paint()
     ..color = shortColor
     ..style = PaintingStyle.stroke
     ..strokeWidth = candleLineWidth;
 
-  /// 定制线画笔。
+  /// 创建自定义线条画笔。
   Paint getLinePaint({Color? color, double? strokeWidth}) => Paint()
     ..color = color ?? theme.lineChartColor
     ..style = PaintingStyle.stroke
@@ -133,10 +120,10 @@ mixin PaintObjectBoundingMixin<T extends Indicator<IIndicatorKey>> on IndicatorO
   Rect get drawableRect {
     if (_drawableRect != null) return _drawableRect!;
     if (drawInMain) {
-      _drawableRect = _context.mainRect;
+      _drawableRect = context.mainRect;
     } else {
-      final top = _context.calculatePaneTop(paneIndex);
-      final subRect = _context.subRect;
+      final top = context.calculatePaneTop(paneIndex);
+      final subRect = context.subRect;
       _drawableRect = Rect.fromLTRB(
         subRect.left,
         subRect.top + top,
@@ -202,10 +189,10 @@ mixin PaintObjectBoundingMixin<T extends Indicator<IIndicatorKey>> on IndicatorO
   }
 }
 
-/// 绘制对象混入状态管理的通用扩展
+/// 绘制对象几何状态与坐标映射能力。
 ///
-/// 提供 minMax 管理、坐标转换等功能。
-mixin PaintObjectStateMixin<T extends Indicator<IIndicatorKey>> on IndicatorObject<T> implements IPaintState {
+/// 提供 minMax 管理、Y 轴换算、X 轴 index/dx 映射等功能。
+mixin PaintObjectGeometryStateMixin<T extends Indicator<IIndicatorKey>> on IndicatorObject<T> implements IPaintState {
   int? _start;
   int? _end;
 
@@ -284,11 +271,11 @@ mixin PaintObjectStateMixin<T extends Indicator<IIndicatorKey>> on IndicatorObje
   }
 
   double candleValueToDy(FlexiNum value, {bool correct = false}) {
-    return _context.candleValueToDy(value, correct: correct);
+    return context.candleValueToDy(value, correct: correct);
   }
 
   FlexiNum? dyToCandleValue(double dy, {bool check = false}) {
-    return _context.dyToCandleValue(dy, check: check);
+    return context.dyToCandleValue(dy, check: check);
   }
 
   @override
@@ -420,8 +407,8 @@ mixin PaintYAxisTicksOnCrossMixin<T extends Indicator> on PaintObject<T> {
   }
 }
 
-/// 绘制蜡烛图辅助Mixin
-mixin PaintCandleHelperMixin<T extends Indicator> on PaintObject<T> {
+/// 绘制基于蜡烛数据的图表能力。
+mixin PaintCandleChartMixin<T extends Indicator> on PaintObject<T> {
   /// 绘制Open-high-low-close样式的蜡烛图(美国线图)
   /// 主区: 蜡烛图
   /// 副区: 用于SubBoll图和SubSar图中

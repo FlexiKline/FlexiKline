@@ -47,7 +47,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     _klineDataCache.forEach((key, data) {
       data.dispose();
     });
-    _curKlineData = KlineData.empty;
+    _klineData = KlineData.empty;
     _klineDataCache.clear();
     onLoadMoreCandles = null;
     moveToInitialPositionCallback = null;
@@ -98,8 +98,8 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   }
 
   void _notifySpecChange(KlineSpec spec) {
-    logd('_notifySpecChange $curDataKey, spec:$spec');
-    if (spec.key == curDataKey) {
+    logd('_notifySpecChange $klineDataKey, spec:$spec');
+    if (spec.key == klineDataKey) {
       onKlineSpecChanged(_klineSpecNotifier.value);
       _klineSpecNotifier.value = spec;
       _intervalListener.value = spec.interval;
@@ -108,20 +108,24 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
 
   void _notifyLoadingState(KlineLoadingState state, String key) {
     logd('_notifyLoadingState key:$key, state:$state');
-    if (key == curDataKey) {
+    if (key == klineDataKey) {
       _loadingStateNotifier.value = state;
     }
   }
 
   late final FIFOHashMap<String, KlineData> _klineDataCache;
-  KlineData _curKlineData = KlineData.empty;
+  KlineData _klineData = KlineData.empty;
+
   @override
-  KlineData get curKlineData => _curKlineData;
+  KlineData get klineData => _klineData;
+
+  /// 当前 K 线数据缓存 key。
+  String get klineDataKey => klineData.key;
 
   void cleanUnlessKlineData() {
-    final curKey = curDataKey;
+    final retainedKey = klineDataKey;
     _klineDataCache.removeWhere((key, data) {
-      if (key != curKey) {
+      if (key != retainedKey) {
         data.dispose();
         return true;
       }
@@ -134,8 +138,8 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   /// 2. 初始化首根蜡烛绘制位置于屏幕右侧[getInitPaintDxOffset]指定处.
   /// 3. 重绘图表
   /// 4. 取消Cross绘制(如果有)
-  void _setCurKlineData(KlineData data, {bool resetPaintDxOffset = true}) {
-    _curKlineData = data;
+  void _setKlineData(KlineData data, {bool resetPaintDxOffset = true}) {
+    _klineData = data;
     _notifySpecChange(data.spec);
     _notifyLoadingState(data.loadingState, data.key);
     if (resetPaintDxOffset && isMounted) {
@@ -143,19 +147,16 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     }
     markRepaintChart(reset: true);
     markRepaintDraw();
-    cancelCross();
+    requestCancelCross();
   }
 
-  /// 数据缓存Key
-  String get curDataKey => curKlineData.key;
-
   /// 最大绘制宽度
-  double get maxPaintWidth => curKlineData.length * candleActualWidth;
+  double get maxPaintWidth => klineData.length * candleActualWidth;
 
   @override
   FlexiCandleModel? dxToCandle(double dx) {
     final index = dxToIndex(dx);
-    return curKlineData.get(index);
+    return klineData.get(index);
   }
 
   /// 将[dx]转换为当前绘制区域对应的蜡烛的下标.
@@ -175,14 +176,14 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   int? dxToTimestamp(double dx) {
     final indexValue = mainPaintObject.dxToIndex(dx);
     // if (indexValue == null) return null;
-    final ts = curKlineData.indexToTimestamp(indexValue);
+    final ts = klineData.indexToTimestamp(indexValue);
     return ts;
   }
 
   /// 将时间戳[ts]精确转换为dx坐标, 并将差异部分汇总到dx中.
   @override
   double? timestampToDx(int ts) {
-    final indexValue = curKlineData.timestampToIndex(ts);
+    final indexValue = klineData.timestampToIndex(ts);
     if (indexValue == null) return null;
     final dx = mainPaintObject.indexToDx(indexValue, check: false);
     return dx;
@@ -268,8 +269,9 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     );
   }
 
-  /// 移动蜡烛图回到初始位置
-  void moveToInitialPosition() {
+  /// 请求移动蜡烛图回到初始位置。
+  @override
+  void requestMoveToInitialPosition() {
     if (moveToInitialPositionCallback != null) {
       moveToInitialPositionCallback?.call();
       return;
@@ -286,7 +288,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
       final startIndex = (paintDxOffset / candleActualWidth).floor();
       final diff = paintDxOffset % candleActualWidth;
       final maxCount = ((mainChartWidth + diff) / candleActualWidth).round();
-      curKlineData.ensureStartAndEndIndex(
+      klineData.ensureStartAndEndIndex(
         startIndex,
         maxCount,
       );
@@ -300,14 +302,14 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
         final offsetIndex = (paintDxOffset.abs() / candleActualWidth).round();
         maxCount = maxCandleCount - offsetIndex;
       }
-      curKlineData.ensureStartAndEndIndex(
+      klineData.ensureStartAndEndIndex(
         0,
         maxCount,
       );
     }
 
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      _paintRangeListener.value = curKlineData.paintIndexRange;
+      _paintRangeListener.value = klineData.paintIndexRange;
     });
   }
 
@@ -316,8 +318,8 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   /// [useCacheFirst] 是否优先使用缓存. 注: 如果有缓存数据(说明之前加载过), loading不会展示.
   /// [useCachePaintDxOffset] 是否仍使用缓存的绘制位置(如果当前没有切换请求);
   /// return
-  ///   1. true:  代表使用了缓存, [curKlineData]的加载状态为[KlineLoadingState.none], 不展示loading
-  ///   2. false: 代表未使用缓存; 且[curKlineData]数据会被清空(如果有).
+  ///   1. true:  代表使用了缓存, [klineData] 的加载状态为 [KlineLoadingState.none], 不展示 loading
+  ///   2. false: 代表未使用缓存; 且 [klineData] 数据会被清空(如果有).
   bool switchKlineData(
     KlineSpec spec, {
     ComputeMode computeMode = ComputeMode.fast,
@@ -328,9 +330,9 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
 
     if (useCacheFirst && data != null && data.isNotEmpty) {
       // 如果优先使用缓存且缓存数据不为空时, 设置缓存为当前KlineData, 同时结束loading状态.
-      _setCurKlineData(
+      _setKlineData(
         data,
-        resetPaintDxOffset: spec.key != curDataKey ? true : useCachePaintDxOffset,
+        resetPaintDxOffset: spec.key != klineDataKey ? true : useCachePaintDxOffset,
       );
       return true;
     }
@@ -347,7 +349,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     );
     final old = _klineDataCache.append(spec.key, data);
     if (old != null) Future(() => old.dispose());
-    _curKlineData = data;
+    _klineData = data;
     _notifySpecChange(data.spec);
     _notifyLoadingState(KlineLoadingState.initLoading, data.key);
     return false;
@@ -359,9 +361,9 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   void stopLoading({KlineSpec? spec, String? specKey}) {
     specKey ??= spec?.key;
     if (specKey == null) return;
-    if (specKey == curDataKey) {
-      if (curKlineData.loadingState != KlineLoadingState.none) {
-        curKlineData.updateState(state: KlineLoadingState.none);
+    if (specKey == klineDataKey) {
+      if (klineData.loadingState != KlineLoadingState.none) {
+        klineData.updateState(state: KlineLoadingState.none);
         _notifyLoadingState(KlineLoadingState.none, specKey);
       }
     } else {
@@ -397,9 +399,9 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
       reset: reset,
     );
 
-    if (spec.key == curDataKey) {
+    if (spec.key == klineDataKey) {
       if (reset) {
-        _setCurKlineData(data);
+        _setKlineData(data);
       } else {
         _notifySpecChange(data.spec);
         // final newLen = data.length;
@@ -473,7 +475,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   /// 刷新挂载前暂存的待处理数据
   ///
   /// 在 FlexiKlineWidget.initState 完成（mountIndicators + controller.initState 之后）时调用。
-  /// 检查 [curKlineData] 中是否有未合并的 `_waitingData`，若有则使用当前已确定的
+  /// 检查 [klineData] 中是否有未合并的 `_waitingData`，若有则使用当前已确定的
   /// [computedDataCount] 合并数据并对所有已激活指标执行 precompute，最后触发 markRepaintChart。
   ///
   /// 场景：Widget 挂载前调用 switchKlineData 和 updateKlineData，数据暂存到 _waitingData；
@@ -482,16 +484,16 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   @override
   void flushPendingKlineData() {
     // 检查当前 KlineData 是否有待合并的数据
-    if (!curKlineData.hasWaitingData) {
+    if (!klineData.hasWaitingData) {
       logd('flushPendingKlineData: no waiting data');
       return;
     }
 
-    logd('flushPendingKlineData: flushing ${curKlineData.waitingDataLength} pending data');
+    logd('flushPendingKlineData: flushing ${klineData.waitingDataLength} pending data');
 
     // 使用当前 computedDataCount 合并数据并执行 precompute
     _startPrecomputeKlineData(
-      curKlineData,
+      klineData,
       newList: const [],
       reset: false,
     ).then((_) {

@@ -401,7 +401,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
     final velocity = details.velocity.pixelsPerSecond.dx;
 
     if (!gestureConfig.enableInertialPan ||
-        controller.curKlineData.isEmpty ||
+        controller.klineData.isEmpty ||
         (velocity < 0 && !controller.canPanRTL) ||
         (velocity > 0 && !controller.canPanLTR)) {
       logd('onScaleEnd currently can not pan!');
@@ -532,7 +532,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
       controller.onGridMoveEnd();
     } else {
       // 长按结束, 尝试取消Cross事件.
-      controller.cancelCross();
+      controller.requestCancelCross();
     }
     _longData?.end();
     _longData = null;

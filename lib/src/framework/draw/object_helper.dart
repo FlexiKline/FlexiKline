@@ -305,7 +305,7 @@ mixin DrawObjectMixin on DrawStateObject {
     final ts = context.dxToTimestamp(dx);
     if (ts == null) return Size.zero;
 
-    final klineData = context.curKlineData;
+    final klineData = context.klineData;
     final timeTxt = formatTimeTicksText(ts, klineData.interval.unit);
 
     drawableRect ??= context.timeRect;
@@ -334,7 +334,7 @@ mixin DrawObjectMixin on DrawStateObject {
 
     final valTxt = formatValueTicksText(
       value,
-      precision: context.curKlineData.precision,
+      precision: context.klineData.precision,
     );
 
     final txtSpacing = config.spacing;
@@ -417,7 +417,7 @@ extension IDrawContextExt on IDrawContext {
       dx = indexToDx(index)! - candleWidthHalf;
     }
     final value = dyToValue(dy);
-    final candle = curKlineData.get(index);
+    final candle = klineData.get(index);
     if (value != null && candle != null) {
       final high = candle.high;
       final low = candle.low;

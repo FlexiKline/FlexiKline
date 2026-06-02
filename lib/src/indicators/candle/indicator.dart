@@ -222,7 +222,7 @@ class CandleIndicator extends CandleBaseIndicator {
 }
 
 class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject<T>
-    with PaintYAxisTicksOnCrossMixin, PaintCandleHelperMixin {
+    with PaintYAxisTicksOnCrossMixin, PaintCandleChartMixin {
   @override
   Color get longColor => indicator.longColor ?? theme.longColor;
 
@@ -489,7 +489,8 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
       if (size.width > maxTickWidth) maxTickWidth = size.width;
     }
 
-    if (!gestureConfig.isManualSetZoomRect && (_zoomSlideBarSize == null || _zoomSlideBarSize!.width != maxTickWidth)) {
+    if (!context.gestureConfig.isManualSetZoomRect &&
+        (_zoomSlideBarSize == null || _zoomSlideBarSize!.width != maxTickWidth)) {
       final barSize = Size(maxTickWidth, drawableRect.height);
       _zoomSlideBarSize = barSize;
       updateZoomSlideBarRect(Rect.fromLTWH(
@@ -757,7 +758,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
     final lastTxtRect = offViewPriceLabelRect?.inflate(indicator.offViewPriceMark.hitTestMargin);
     if (lastTxtRect != null && lastTxtRect.include(position)) {
       // 命中最后价区域, 此时应该移动到蜡烛图初始位置
-      moveToInitialPosition();
+      context.requestMoveToInitialPosition();
       return true;
     }
     return false;

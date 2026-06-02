@@ -22,7 +22,7 @@ abstract class IndicatorObject<T extends Indicator>
   IndicatorObject();
 
   T? _indicator;
-  IPaintContext? __context;
+  PaintContext? __context;
 
   /// 获取创建此对象的 Indicator
   T get indicator {
@@ -30,13 +30,34 @@ abstract class IndicatorObject<T extends Indicator>
     return _indicator!;
   }
 
-  /// 获取绘制上下文
-  IPaintContext get _context {
+  /// 绘制上下文（挂载后可用）。
+  PaintContext get context {
     assert(__context != null, 'context 尚未设置，请确保已通过框架创建');
     return __context!;
   }
 
   IIndicatorKey get key => indicator.key;
+
+  /// 常用配置。
+  SettingConfig get settingConfig => context.settingConfig;
+  GridConfig get gridConfig => context.gridConfig;
+  CrossConfig get crossConfig => context.crossConfig;
+
+  /// 当前 K 线数据。
+  KlineData get klineData => context.klineData;
+
+  /// 当前绘制偏移。
+  double get paintDxOffset => context.paintDxOffset;
+  double get startCandleDx => context.startCandleDx;
+
+  /// 蜡烛绘制尺寸。
+  double get candleWidth => context.candleWidth;
+  double get candleSpacing => context.candleSpacing;
+  double get candleActualWidth => context.candleActualWidth;
+  double get candleWidthHalf => context.candleWidthHalf;
+
+  /// 当前主题。
+  IFlexiKlineTheme get theme => context.theme;
 
   double? _tmpHeight;
   double get height => _tmpHeight ?? indicator.height;
@@ -47,10 +68,6 @@ abstract class IndicatorObject<T extends Indicator>
   PaintMode get paintMode => indicator.paintMode;
   int get zIndex => indicator.zIndex;
   dynamic get calcParams => indicator.calcParam;
-
-  /// 当前指标所使用的涨跌颜色
-  Color get longColor => theme.longColor;
-  Color get shortColor => theme.shortColor;
 
   @override
   int compareTo(IndicatorObject other) {
@@ -72,7 +89,7 @@ abstract class IndicatorObject<T extends Indicator>
 /// 1. 定义 PaintObject 行为：通过实现对应的接口，实现 Chart 的配置、计算、绘制、Cross。
 /// 2. [_parent] 保存当前绘制对象的父级。
 abstract class PaintObject<T extends Indicator<IIndicatorKey>> extends IndicatorObject<T>
-    with FlexiLog, PaintObjectBoundingMixin<T>, PaintObjectStateMixin<T>
+    with FlexiLog, PaintStyleMixin<T>, PaintObjectBoundingMixin<T>, PaintObjectGeometryStateMixin<T>
     implements IPaintObject {
   // 父级 PaintObject，主要用于给其子级 PaintObject 限定范围。
   PaintObject? _parent;
@@ -83,14 +100,11 @@ abstract class PaintObject<T extends Indicator<IIndicatorKey>> extends Indicator
   /// 子类可 override 此方法在挂载时做额外初始化，但必须先调用 `super.mount()`。
   @mustCallSuper
   @protected
-  void mount(T indicator, IPaintContext context) {
+  void mount(T indicator, PaintContext context) {
     assert(!_mounted, 'PaintObject(${indicator.key}) 已经 mount，不能重复调用');
     _mounted = true;
     _indicator = indicator;
     __context = context;
-    if (context is FlexiLog) {
-      logger = (context as FlexiLog).logger;
-    }
   }
 
   bool _mounted = false;
@@ -145,7 +159,7 @@ abstract class PaintObject<T extends Indicator<IIndicatorKey>> extends Indicator
       //   setState(() => x = 3);
       return true;
     }());
-    _context.requestRepaint();
+    context.requestRepaint();
   }
 
   @override
@@ -167,7 +181,7 @@ abstract class ComputedPaintObject<T extends ComputedIndicator> extends PaintObj
   /// 当前绘制对象的指标计算数据存储下标，用于在 FlexiCandleModel.slots 中存取计算数据。
   /// mount 时由框架注入；若未能获取（如测试 mock），首次访问时懒加载。
   int get dataIndex {
-    return _dataIndex ??= _context.getComputedDataIndex(indicator.key) ?? -1;
+    return _dataIndex ??= context.getComputedDataIndex(indicator.key) ?? -1;
   }
 
   int? _dataIndex;
@@ -178,7 +192,7 @@ abstract class ComputedPaintObject<T extends ComputedIndicator> extends PaintObj
   @override
   @mustCallSuper
   @protected
-  void mount(T indicator, IPaintContext context) {
+  void mount(T indicator, PaintContext context) {
     super.mount(indicator, context);
     _dataIndex = context.getComputedDataIndex(indicator.key);
   }
@@ -220,15 +234,8 @@ abstract class CandleBasePaintObject<T extends CandleBaseIndicator> extends Dire
   bool get hideMainIndicatorsInLineChartMode => false;
 
   @nonVirtual
-  void moveToInitialPosition() {
-    (_context as StateBinding).moveToInitialPosition();
-  }
-
-  @nonVirtual
   void updateZoomSlideBarRect(Rect rect) {
-    if (!gestureConfig.isManualSetZoomRect) {
-      (_context as ChartBinding).setChartZoomSlideBarRect(rect);
-    }
+    context.reportChartZoomSlideBarRect(rect);
   }
 }
 
@@ -236,6 +243,7 @@ abstract class CandleBasePaintObject<T extends CandleBaseIndicator> extends Dire
 ///
 /// 使用 [DirectIndicatorKey]，属于基础/系统指标，不占 slot。
 abstract class TimeBasePaintObject<T extends TimeBaseIndicator> extends DirectPaintObject<T> {
+  ///
   DrawPosition get position => indicator.position;
 }
 

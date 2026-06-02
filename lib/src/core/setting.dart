@@ -15,7 +15,7 @@
 part of 'core.dart';
 
 /// 负责 FlexiKline 的设置、布局与指标配置。
-mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICross, IDraw {
+mixin SettingBinding on KlineBindingBase implements ISetting {
   @override
   void init() {
     super.init();
@@ -534,7 +534,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
     final newObj = _paintObjectManager.addMainPaintObject(key, this);
     if (newObj == null) return false;
     if (newObj is IComputedPainter) {
-      (newObj as IComputedPainter).compute(curKlineData.computableRange, reset: true);
+      (newObj as IComputedPainter).compute(klineData.computableRange, reset: true);
     }
     markRepaintChart(reset: true);
     markRepaintCross();
@@ -564,7 +564,7 @@ mixin SettingBinding on KlineBindingBase implements ISetting, IGrid, IChart, ICr
       return false;
     }
     if (newObj is IComputedPainter) {
-      (newObj as IComputedPainter).compute(curKlineData.computableRange, reset: true);
+      (newObj as IComputedPainter).compute(klineData.computableRange, reset: true);
     }
     _onSubIndicatorsChanged();
     return true;

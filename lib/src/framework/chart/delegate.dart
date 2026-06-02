@@ -16,7 +16,7 @@ part of 'indicator.dart';
 
 extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
   void setHeight(double height) {
-    if (canUpdateHeight) {
+    if (context.canUpdateLayoutHeight) {
       _tmpHeight = null;
       // indicator中只保留正常布局模式/适配模式下的高度, 其他模式会根据当前父布局自适应.
       indicator.height = height;
@@ -90,7 +90,7 @@ extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
   void doPaintChart(Canvas canvas, Size size) {
     paint(canvas, size);
 
-    if (!isCrossing) {
+    if (!context.isCrossing) {
       paintTooltip(
         canvas,
         model: klineData.latest,
@@ -128,14 +128,14 @@ extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
     'WIS v4 模型下，指标配置持久化由用户代码层管理，框架不再自动持久化单个指标配置。',
   )
   Future<bool> doStoreConfig() {
-    return _context.setConfig(key.id, indicator.toJson());
+    return context.setConfig(key.id, indicator.toJson());
   }
 }
 
 extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintObject<T> {
   @protected
   void setSize(Size size) {
-    if (canUpdateHeight) {
+    if (context.canUpdateLayoutHeight) {
       _tmpSize = null;
       indicator.size = size;
     } else {
@@ -246,13 +246,13 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
   /// 1. drawBelowTipsArea标识为true
   /// 2. 当前不处在Zooming中时
   bool get isFirstDrawTipsArea {
-    return indicator.drawBelowTipsArea && !_context.isChartZooming;
+    return indicator.drawBelowTipsArea && !context.isChartZooming;
   }
 
   void doPaintChart(Canvas canvas, Size size) {
     if (isFirstDrawTipsArea) {
       // 如果设置总是要在Tips区域下绘制指标图, 则要首先绘制完所有Tips.
-      if (!isCrossing) {
+      if (!context.isCrossing) {
         final tipsHeight = doPaintTips(canvas, model: klineData.latest);
 
         if (indicator.padding.top + tipsHeight > padding.top) {
@@ -270,7 +270,7 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
       for (final object in paintableChildren) {
         object.paint(canvas, size);
       }
-      if (!isCrossing) {
+      if (!context.isCrossing) {
         doPaintTips(canvas, model: klineData.latest);
       }
     }
@@ -284,7 +284,7 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
 
   void doOnCross(Canvas canvas, Offset offset, {FlexiCandleModel? model}) {
     if (isFirstDrawTipsArea) {
-      if (isCrossing) {
+      if (context.isCrossing) {
         final tipsHeight = doPaintTips(canvas, offset: offset, model: model);
 
         if (indicator.padding.top + tipsHeight > padding.top) {
@@ -302,7 +302,7 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
       for (final object in paintableChildren) {
         object.paintCross(canvas, offset, model: model);
       }
-      if (isCrossing) {
+      if (context.isCrossing) {
         doPaintTips(canvas, offset: offset, model: model);
       }
     }
@@ -389,7 +389,7 @@ extension MainPaintManagerExt<T extends MainPaintObjectIndicator> on MainPaintOb
     'WIS v4 模型下，指标配置持久化由用户代码层管理，框架不再自动持久化单个指标配置。',
   )
   void doStoreConfig() {
-    _context.setConfig(key.id, indicator.toJson());
+    context.setConfig(key.id, indicator.toJson());
     for (final object in children) {
       object.doStoreConfig();
     }

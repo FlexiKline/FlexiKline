@@ -76,10 +76,10 @@ void main() {
   });
 
   group('Widget mount timing and flushPendingKlineData', () {
-    /// 测试 5：验证 Widget 挂载前调用 switchKlineData 时 curKlineData 为空
+    /// 测试 5：验证 Widget 挂载前调用 switchKlineData 时 klineData 为空
     ///
     /// **Validates: Requirements 11.1**
-    test('curKlineData should be empty after switchKlineData before Widget mounted', () {
+    test('klineData should be empty after switchKlineData before Widget mounted', () {
       // 注：由于 FlexiKlineController 构造时会初始化 Manager，
       // 这个测试验证的是 switchKlineData 的基本功能
       // 完整的初始化顺序测试需要在 Widget 集成测试中进行

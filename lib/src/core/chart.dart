@@ -15,7 +15,7 @@
 part of 'core.dart';
 
 /// 负责绘制蜡烛图以及相关指标图
-mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding implements IChart {
+mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
   @override
   void init() {
     super.init();
@@ -120,7 +120,7 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding implements 
 
   void paintChart(Canvas canvas, Size size) {
     // logd('$diffTime paintChart >>>>');
-    if (!curKlineData.canPaintChart) {
+    if (!klineData.canPaintChart) {
       logd('chartBinding paintChart data is being prepared!');
       return;
     }
@@ -136,8 +136,8 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding implements 
       canvas.clipRect(_panSmoothFactor >= 1.0 ? mainRect : canvasRect);
       mainPaintObject.doInitState(
         paneIndex++,
-        start: curKlineData.start,
-        end: curKlineData.end,
+        start: klineData.start,
+        end: klineData.end,
         reset: _reset,
         panSmoothFactor: _panSmoothFactor,
       );
@@ -158,8 +158,8 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding implements 
       /// 初始化副区指标数据.
       paintObject.doInitState(
         paneIndex++,
-        start: curKlineData.start,
-        end: curKlineData.end,
+        start: klineData.start,
+        end: klineData.end,
         reset: _reset,
         panSmoothFactor: _panSmoothFactor,
       );
@@ -185,7 +185,7 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding implements 
     double? panDistance,
     int? panDuration,
   }) {
-    final oldState = curKlineData.loadingState;
+    final oldState = klineData.loadingState;
     if (oldState == KlineLoadingState.initLoading) {
       logw('checkAndLoadMoreCandlesWhenPanEnd currently in init, no loadMore');
       return;
@@ -197,7 +197,7 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding implements 
         gestureConfig.loadMoreWhenNoEnoughDistance ?? gestureConfig.loadMoreWhenNoEnoughCandles * candleActualWidth;
 
     logd(
-      'checkAndLoadMoreCandlesWhenPanEnd(panDistance:$panDistance, panDuration:$panDuration) => length:${curKlineData.length}, paintDxOffset:$paintDxOffset, maxPaintDxOffset:$maxPaintDxOffset, loadMoreDistanceOffset:$loadMoreDistanceOffset',
+      'checkAndLoadMoreCandlesWhenPanEnd(panDistance:$panDistance, panDuration:$panDuration) => length:${klineData.length}, paintDxOffset:$paintDxOffset, maxPaintDxOffset:$maxPaintDxOffset, loadMoreDistanceOffset:$loadMoreDistanceOffset',
     );
 
     final destination = paintDxOffset + panDistance;
@@ -216,22 +216,22 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding implements 
       newState = KlineLoadingState.none;
     }
 
-    curKlineData.updateState(state: newState);
+    klineData.updateState(state: newState);
     logd('checkAndLoadMoreCandlesWhenPanEnd new loading state:$newState');
 
     if (newState == KlineLoadingState.loadingMore && panDuration != null) {
       Future.delayed(
         // Duration(milliseconds: panDuration),
         Duration.zero,
-        () => _notifyLoadingState(newState, curDataKey),
+        () => _notifyLoadingState(newState, klineDataKey),
       );
     } else {
-      _notifyLoadingState(newState, curDataKey);
+      _notifyLoadingState(newState, klineDataKey);
     }
 
     if (!oldState.isLoadMore && newState.isLoadMore) {
       if (settingConfig.autoLoadMoreData) {
-        onLoadMoreCandles?.call(curKlineData.getLoadMoreSpec());
+        onLoadMoreCandles?.call(klineData.getLoadMoreSpec());
       }
     }
   }
@@ -365,6 +365,13 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding implements 
       SchedulerBinding.instance.addPostFrameCallback((_) {
         _chartZoomSlideBarRect.value = rect.clampRect(canvasRect);
       });
+    }
+  }
+
+  @override
+  void reportChartZoomSlideBarRect(Rect rect) {
+    if (!gestureConfig.isManualSetZoomRect) {
+      setChartZoomSlideBarRect(rect);
     }
   }
 

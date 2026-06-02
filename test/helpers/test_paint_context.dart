@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// 测试用 [IPaintContext] 最小化实现
+/// 测试用 [PaintContext] 最小化实现
 ///
-/// 提供 [IPaintContext] 接口的空壳实现，用于不需要真实绑定环境的
+/// 提供 [PaintContext] 接口的空壳实现，用于不需要真实绑定环境的
 /// 单元测试（如 [IndicatorPaintObjectManager] 的属性测试）。
 library;
 
@@ -24,7 +24,7 @@ import 'package:flutter/painting.dart';
 
 import 'test_kline_config.dart';
 
-class TestPaintContext implements IPaintContext {
+class TestPaintContext implements PaintContext {
   @override
   IFlexiKlineTheme get theme => TestFlexiKlineTheme();
 
@@ -56,7 +56,7 @@ class TestPaintContext implements IPaintContext {
   @override
   bool get isCrossing => false;
   @override
-  KlineData get curKlineData => KlineData.empty;
+  KlineData get klineData => KlineData.empty;
   @override
   ValueListenable<KlineSpec> get klineSpecListener =>
       ValueNotifier(const KlineSpec(symbol: '', interval: invalidInterval));
@@ -97,7 +97,11 @@ class TestPaintContext implements IPaintContext {
   @override
   Offset? get crossOffset => null;
   @override
-  void cancelCross() {}
+  void requestCancelCross() {}
+  @override
+  void requestMoveToInitialPosition() {}
+  @override
+  void reportChartZoomSlideBarRect(Rect rect) {}
   @override
   int? getComputedDataIndex(ComputedIndicatorKey key) => null;
   @override

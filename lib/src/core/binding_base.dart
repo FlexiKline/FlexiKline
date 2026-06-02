@@ -14,9 +14,25 @@
 
 part of 'core.dart';
 
-abstract class KlineBindingBase with FlexiLog implements ISetting, IPaintContext, IDrawContext {
+abstract class KlineBindingBase with FlexiLog implements ISetting, PaintContext, IDrawContext {
   @override
   String get logTag => 'Controller';
+
+  /// 请求重绘 Grid 图层。
+  @protected
+  void markRepaintGrid();
+
+  /// 请求重绘 Chart 图层。
+  @protected
+  void markRepaintChart({bool reset = false});
+
+  /// 请求重绘 Cross 图层。
+  @protected
+  void markRepaintCross();
+
+  /// 请求重绘 Draw 图层。
+  @protected
+  void markRepaintDraw();
 
   final IConfiguration configuration;
 

@@ -36,7 +36,7 @@ typedef OnCrossI18nTooltipLabels = Map<TooltipLabel, String>? Function();
 ///
 /// 处理cross事件.
 /// Tooltip的绘制.
-mixin CrossBinding on KlineBindingBase, SettingBinding implements ICross {
+mixin CrossBinding on KlineBindingBase, SettingBinding {
   @override
   void initState() {
     super.initState();
@@ -111,7 +111,7 @@ mixin CrossBinding on KlineBindingBase, SettingBinding implements ICross {
 
   /// 启动Cross事件
   bool onCrossStart(GestureData data, {bool force = false}) {
-    if (crossConfig.enable && curKlineData.canPaintChart) {
+    if (crossConfig.enable && klineData.canPaintChart) {
       /// 如果其他手势与Cross手势事件允许共存 或者当前不在Crossing中时, 开启Cross.
       if (force || !isCrossing) {
         logd('handleTap cross > $force > ${data.offset}');
@@ -123,7 +123,7 @@ mixin CrossBinding on KlineBindingBase, SettingBinding implements ICross {
         return true;
       }
 
-      cancelCross();
+      requestCancelCross();
       onCrossCustomTooltip?.call(null);
       return false;
     }
@@ -138,9 +138,9 @@ mixin CrossBinding on KlineBindingBase, SettingBinding implements ICross {
     }
   }
 
-  /// 取消当前Cross事件
+  /// 请求取消当前 cross。
   @override
-  void cancelCross() {
+  void requestCancelCross() {
     if (isCrossing || _offset != null) {
       _updateOffset(null);
       // 当Cross事件结束后, 调用markRepaintChart触发绘制Chart图层首根蜡烛的tips信息.
@@ -163,11 +163,11 @@ mixin CrossBinding on KlineBindingBase, SettingBinding implements ICross {
       if (crossConfig.showLatestTipsInBlank) {
         model = dxToCandle(offset.dx);
         // 如果当前model为空, 则根据offset.dx计算当前model是最新的, 还是最后的.
-        if (model == null && curKlineData.isNotEmpty) {
+        if (model == null && klineData.isNotEmpty) {
           if (offset.dx > startCandleDx) {
-            model = curKlineData.latest;
+            model = klineData.latest;
           } else {
-            model = curKlineData.list.last;
+            model = klineData.list.last;
           }
         }
       }
@@ -216,8 +216,8 @@ mixin CrossBinding on KlineBindingBase, SettingBinding implements ICross {
 
     final index = dxToIndex(offset.dx);
     if (index == null) return;
-    model ??= curKlineData.get(index);
-    final pre = curKlineData.get(index + 1);
+    model ??= klineData.get(index);
+    final pre = klineData.get(index + 1);
     if (model == null) return;
 
     /// 准备数据
@@ -385,7 +385,7 @@ mixin CrossBinding on KlineBindingBase, SettingBinding implements ICross {
     FlexiCandleModel? pre,
   }) {
     if (tooltipLabels.isEmpty) return const [];
-    final p = curKlineData.precision;
+    final p = klineData.precision;
 
     final list = <TooltipInfo>[];
     tooltipLabels.forEach((key, label) {
@@ -393,7 +393,7 @@ mixin CrossBinding on KlineBindingBase, SettingBinding implements ICross {
       num riseOrFall = 0;
       switch (key) {
         case TooltipLabel.time:
-          final interval = curKlineData.interval;
+          final interval = klineData.interval;
           value = model.formatDateTime(interval);
           break;
         case TooltipLabel.open:
