@@ -93,6 +93,26 @@ abstract interface class IPaintObject {
   });
 }
 
+/// PaintObject 统一生命周期能力（参照 Flutter State 设计）。
+///
+/// 三种类型的 PaintObject 共享同一套生命周期词汇；存活差异由 [keepAlive] 决定。
+abstract interface class IPaintLifecycle {
+  /// mount 之后一次性初始化（几何尚未生效）。
+  void initState();
+
+  /// K 线依赖（spec.key）变化回调。
+  void didChangeDependencies(KlineSpec oldSpec);
+
+  /// 进入绘制树（几何首次有效）。
+  void didAttach();
+
+  /// 离开绘制树。
+  void didDetach();
+
+  /// 出树是否保活（不 dispose）。
+  bool get keepAlive;
+}
+
 /// 基础指标绘制接口
 ///
 /// 用于框架内置的基础/系统指标（Candle、Time、Main 等），不占 slot。
@@ -125,9 +145,8 @@ abstract interface class IComputedPainter extends IPaintObject {
 /// 用于由业务数据或用户操作驱动的指标（Trade 等），不占 slot。
 /// 这些指标的数据由业务逻辑提供，而非通过预计算获得。
 abstract interface class IExternalPainter extends IPaintObject {
-  /// 加载业务数据
+  /// 业务数据加载便捷入口。
   ///
-  /// 框架在适当时机（如首次显示、数据刷新）调用。
-  /// 子类按需 override 实现具体加载逻辑。
+  /// [initState] 默认调用它；复杂指标应优先 override 明确生命周期方法。
   void loadBusinessData();
 }

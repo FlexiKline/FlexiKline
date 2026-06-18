@@ -170,12 +170,12 @@ void main() {
       expect(c.setFixedLayoutMode(const Size(600, 500)), isTrue);
       final initialMainHeight = c.mainRect.height;
 
-      expect(c.addSubIndicator(macdKey), isTrue);
+      expect(c.showSubIndicator(macdKey), isTrue);
       expect(c.canvasRect.size, equals(const Size(600, 500)));
       expect(c.mainRect.bottom, closeTo(c.subRect.top, 0.01));
       expect(c.mainRect.height, lessThan(initialMainHeight));
 
-      expect(c.removeSubIndicator(macdKey), isTrue);
+      expect(c.hideSubIndicator(macdKey), isTrue);
       expect(c.canvasRect.size, equals(const Size(600, 500)));
       expect(c.mainRect.bottom, closeTo(c.subRect.top, 0.01));
       expect(c.mainRect.height, closeTo(initialMainHeight, 0.01));
@@ -195,15 +195,15 @@ void main() {
       addTearDown(c.dispose);
 
       expect(c.setFixedLayoutMode(const Size(600, 160)), isTrue);
-      expect(c.addSubIndicator(bigKey), isTrue);
-      expect(c.addSubIndicator(smallKey), isTrue);
+      expect(c.showSubIndicator(bigKey), isTrue);
+      expect(c.showSubIndicator(smallKey), isTrue);
 
       expect(c.mainRect.height, closeTo(c.mainMinSize.height, 0.01));
       expect(c.getSubIndicatorHeights().toList(), everyElement(greaterThanOrEqualTo(c.settingConfig.subMinHeight)));
       expect(c.mainRect.height + c.subRect.height, closeTo(160, 0.01));
     });
 
-    test('addSubIndicator returns false and rolls back when fixed height is insufficient', () {
+    test('showSubIndicator returns false and rolls back when fixed height is insufficient', () {
       const macdKey = ComputedIndicatorKey('macd');
       final c = _createController();
       _mount(
@@ -215,7 +215,7 @@ void main() {
       addTearDown(c.dispose);
 
       expect(c.setFixedLayoutMode(const Size(600, 110)), isTrue);
-      expect(c.addSubIndicator(macdKey), isFalse);
+      expect(c.showSubIndicator(macdKey), isFalse);
       expect(c.hasAddedSubIndicator(macdKey), isFalse);
       expect(c.canvasRect.size, equals(const Size(600, 110)));
     });

@@ -22,7 +22,7 @@ abstract class IndicatorObject<T extends Indicator>
   IndicatorObject();
 
   T? _indicator;
-  PaintContext? __context;
+  PaintContext? _context;
 
   /// 获取创建此对象的 Indicator
   T get indicator {
@@ -32,8 +32,8 @@ abstract class IndicatorObject<T extends Indicator>
 
   /// 绘制上下文（挂载后可用）。
   PaintContext get context {
-    assert(__context != null, 'context 尚未设置，请确保已通过框架创建');
-    return __context!;
+    assert(_context != null, 'context 尚未设置，请确保已通过框架创建');
+    return _context!;
   }
 
   IIndicatorKey get key => indicator.key;
@@ -89,7 +89,7 @@ abstract class IndicatorObject<T extends Indicator>
 /// 2. [_parent] 保存当前绘制对象的父级。
 abstract class PaintObject<T extends Indicator<IIndicatorKey>> extends IndicatorObject<T>
     with FlexiLog, PaintStyleMixin<T>, PaintObjectBoundingMixin<T>, PaintObjectGeometryStateMixin<T>
-    implements IPaintObject {
+    implements IPaintObject, IPaintLifecycle {
   // 父级 PaintObject，主要用于给其子级 PaintObject 限定范围。
   PaintObject? _parent;
 
@@ -103,13 +103,27 @@ abstract class PaintObject<T extends Indicator<IIndicatorKey>> extends Indicator
     assert(!_mounted, 'PaintObject(${indicator.key}) 已经 mount，不能重复调用');
     _mounted = true;
     _indicator = indicator;
-    __context = context;
+    _context = context;
   }
 
   bool _mounted = false;
+  bool _initialized = false;
+  bool _attached = false;
+
+  /// 业务/一次性初始化。mount 之后由框架触发一次。
+  ///
+  /// 此时几何（drawableRect/paneIndex/minMax）尚未生效；依赖几何的逻辑应放到 [didAttach]。
+  @protected
+  @mustCallSuper
+  @override
+  void initState() {}
+
+  /// K 线依赖（spec.key：symbol/interval）变化时回调，参数为旧 spec。
+  @protected
+  @override
+  void didChangeDependencies(KlineSpec oldSpec) {}
 
   /// 指标配置发生变改
-  @mustCallSuper
   @protected
   void didUpdateIndicator(covariant T oldIndicator) {
     // 基类不处理 precompute，由 ComputedPaintObject 处理
@@ -118,9 +132,31 @@ abstract class PaintObject<T extends Indicator<IIndicatorKey>> extends Indicator
   @protected
   void didChangeTheme() {}
 
+  /// 进入绘制树（几何首次有效）时回调。默认无操作。
+  @protected
+  @override
+  void didAttach() {}
+
+  /// 离开绘制树时回调。默认无操作。
+  @protected
+  @override
+  void didDetach() {}
+
+  /// 出树时是否保活（不 dispose、由 manager 留缓存复用）。
+  ///
+  /// 注意：若 [ComputedPaintObject] 复写为 `true`，隐藏后其 compute slot 会随对象一起保留，
+  /// 直到 controller `dispose()` 才释放。多指标/大数据场景需评估常驻内存占用。
+  @override
+  bool get keepAlive => false;
+
+  bool _disposed = false;
+  bool get isDisposed => _disposed;
+
   @mustCallSuper
   @protected
   void dispose() {
+    if (_disposed) return;
+    _disposed = true;
     _parent = null;
   }
 
@@ -177,13 +213,13 @@ abstract class DirectPaintObject<T extends DirectIndicator> extends PaintObject<
 abstract class ComputedPaintObject<T extends ComputedIndicator> extends PaintObject<T>
     with PaintObjectComputedMixin<T>
     implements IComputedPainter {
+  int? _dataIndex;
+
   /// 当前绘制对象的指标计算数据存储下标，用于在 FlexiCandleModel.slots 中存取计算数据。
   /// mount 时由框架注入；若未能获取（如测试 mock），首次访问时懒加载。
   int get dataIndex {
     return _dataIndex ??= context.getComputedDataIndex(indicator.key) ?? -1;
   }
-
-  int? _dataIndex;
 
   /// mount 时提前注入 dataIndex，避免首次访问时的懒加载。
   /// 若 context 尚未分配 slot（如测试 mock），保持 null，由 getter 懒加载兜底。
@@ -211,14 +247,25 @@ abstract class ComputedPaintObject<T extends ComputedIndicator> extends PaintObj
 /// 业务指标绘制对象
 ///
 /// 用于 Trade 等由业务数据或用户操作驱动的指标，不占 slot。
-/// 子类可按需 override [loadBusinessData] 加载业务数据。
+/// 声明即常驻（keepAlive=true）：显示 attach、隐藏 detach 保活、显式移除才 dispose。
+/// 子类可按需 override 明确生命周期方法；简单指标可只 override [loadBusinessData]。
 abstract class ExternalPaintObject<T extends ExternalIndicator> extends PaintObject<T> implements IExternalPainter {
-  /// 加载业务数据
-  ///
-  /// 框架在适当时机（如首次显示、数据刷新）调用。
-  /// 子类按需 override 实现具体加载逻辑。
+  /// 业务指标默认常驻，不释放
   @override
+  bool get keepAlive => true;
+
+  /// 业务初始化。框架在常驻对象创建后调用一次。
   @protected
+  @mustCallSuper
+  @override
+  void initState() {
+    super.initState();
+    loadBusinessData();
+  }
+
+  /// 简单业务指标的便捷入口；复杂指标应优先 override 明确生命周期方法。
+  @protected
+  @override
   void loadBusinessData() {}
 }
 

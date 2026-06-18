@@ -124,6 +124,42 @@ extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
     didChangeTheme();
   }
 
+  /// 框架内部：保证 initState 仅触发一次。
+  void doInitState() {
+    if (_initialized) return;
+    _initialized = true;
+    initState();
+  }
+
+  /// 框架内部：进树触发 didAttach（带去重）。
+  void doAttach() {
+    if (_attached) return;
+    _attached = true;
+    didAttach();
+  }
+
+  /// 框架内部：出树触发 didDetach（仅在已 attach 时）。
+  void doDetach() {
+    if (!_attached) return;
+    _attached = false;
+    didDetach();
+  }
+
+  /// 框架内部：被加入绘制树时调用。
+  void onEnterTree() => doAttach();
+
+  /// 框架内部：被移出绘制树时调用。
+  /// 先触发 didDetach，再按 [keepAlive] 决定是否真销毁。
+  void onExitTree() {
+    doDetach();
+    if (!keepAlive) dispose();
+  }
+
+  /// 框架内部：转发依赖变化。
+  void doDidChangeDependencies(KlineSpec oldSpec) {
+    didChangeDependencies(oldSpec);
+  }
+
   @Deprecated(
     'WIS v4 模型下，指标配置持久化由用户代码层管理，框架不再自动持久化单个指标配置。',
   )
@@ -332,8 +368,7 @@ extension MainPaintManagerExt<T extends MainPaintObjectIndicator> on MainPaintOb
   }
 
   void appendPaintObject(PaintObject object) {
-    // 使用前先解绑: 释放[paintObject]parentObject与数据.
-    object.dispose();
+    // 使用前先解绑父级（不销毁，external 需保活）。
     object._parent = this;
     // 重置object布局参数为MainPaintObject的
     object.doUpdateLayout(
@@ -342,7 +377,10 @@ extension MainPaintManagerExt<T extends MainPaintObjectIndicator> on MainPaintOb
     );
     final old = children.append(object);
     indicator.children.add(object.key);
-    old?.dispose();
+    // 被替换对象走多态退树：普通指标 dispose，external 仅 detach 保活。
+    old?.onExitTree();
+    // 进树钩子：external 触发 didAttach，普通指标 no-op。
+    object.onEnterTree();
     // 子指标增删后必须让主区下一帧走完整 [doUpdateVisibleMinMax]。
     // 否则在 start/end 未变时 [MainPaintObject.doUpdateVisibleMinMax] 会早退，新子对象收不到 [setMinMax]，
     // combine 指标（如 MA）仍用默认 [MinMax.zero]，[valueToDy] 会把所有点画在底部一条线上。
@@ -354,7 +392,7 @@ extension MainPaintManagerExt<T extends MainPaintObjectIndicator> on MainPaintOb
     bool hasRemove = false;
     children.removeWhere((object) {
       if (object.key == key) {
-        object.dispose();
+        object.onExitTree();
         indicator.children.remove(object.key);
         hasRemove = true;
         _tmpHeight = null;

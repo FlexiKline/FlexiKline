@@ -528,8 +528,8 @@ mixin SettingBinding on KlineBindingBase {
     return hasRegisteredInMain(key) || hasRegisteredInSub(key);
   }
 
-  /// 在主图中激活指标。
-  bool addMainIndicator(IIndicatorKey key) {
+  /// 在主图中显示指标。
+  bool showMainIndicator(IIndicatorKey key) {
     final newObj = _paintObjectManager.addMainPaintObject(key, this);
     if (newObj == null) return false;
     if (newObj is IComputedPainter) {
@@ -541,7 +541,7 @@ mixin SettingBinding on KlineBindingBase {
   }
 
   /// 在主图中隐藏指标。
-  bool removeMainIndicator(IIndicatorKey key) {
+  bool hideMainIndicator(IIndicatorKey key) {
     if (!_paintObjectManager.removeMainPaintObject(key)) return false;
     markRepaintChart(reset: true);
     markRepaintCross();
@@ -553,13 +553,13 @@ mixin SettingBinding on KlineBindingBase {
     return mainIndicatorKeys.contains(key);
   }
 
-  /// 在副图中激活指标。
-  bool addSubIndicator(IIndicatorKey key) {
+  /// 在副图中显示指标。
+  bool showSubIndicator(IIndicatorKey key) {
     final newObj = _paintObjectManager.addSubPaintObject(key, this);
     if (newObj == null) return false;
     if (isFixedLayoutMode && _fixedSize != null && !_canApplyFixedSize(_fixedSize!, debugAssert: false)) {
       _paintObjectManager.removeSubPaintObject(key);
-      logw('addSubIndicator failed: fixed canvas size is too small for $key.');
+      logw('showSubIndicator failed: fixed canvas size is too small for $key.');
       return false;
     }
     if (newObj is IComputedPainter) {
@@ -570,7 +570,7 @@ mixin SettingBinding on KlineBindingBase {
   }
 
   /// 在副图中隐藏指标。
-  bool removeSubIndicator(IIndicatorKey key) {
+  bool hideSubIndicator(IIndicatorKey key) {
     if (!_paintObjectManager.removeSubPaintObject(key)) return false;
     _onSubIndicatorsChanged();
     return true;

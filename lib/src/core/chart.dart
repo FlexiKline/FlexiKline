@@ -51,6 +51,15 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
     }
   }
 
+  @override
+  void onKlineSpecChanged(KlineSpec oldSpec) {
+    super.onKlineSpecChanged(oldSpec);
+    // 仅 symbol/interval（spec.key）变化才通知 external 重载业务数据。
+    if (klineData.spec.key != oldSpec.key) {
+      _paintObjectManager.notifySpecChanged(oldSpec);
+    }
+  }
+
   final ValueNotifier<int> _repaintChart = ValueNotifier(0);
   final _isChartStartZoom = ValueNotifier<bool>(false);
   final _chartZoomSlideBarRect = ValueNotifier(Rect.zero);
