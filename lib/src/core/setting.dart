@@ -179,7 +179,7 @@ mixin SettingBinding on KlineBindingBase {
     _layoutFixedSubHeights();
 
     final size = mainRect.size;
-    if (size.equlas(mainSize)) return false;
+    if (size.equals(mainSize)) return false;
     return mainPaintObject.doUpdateLayout(
       size: size,
       padding: _zoomMainPaddingByScale(size.height / mainSize.height),
@@ -236,7 +236,7 @@ mixin SettingBinding on KlineBindingBase {
       _syncMainSizeToConfig(size);
       return true;
     }
-    if (size.equlas(mainSize)) return false;
+    if (size.equals(mainSize)) return false;
     final changed = mainPaintObject.doUpdateLayout(
       size: size,
       padding: _zoomMainPaddingByScale(size.height / mainSize.height),
@@ -281,7 +281,7 @@ mixin SettingBinding on KlineBindingBase {
 
     if (layoutMode == FlexiLayoutMode.fixed) {
       // fixed 内只更新尺寸，不切换模式。
-      if (fixedSize.equlas(_fixedSize)) return true;
+      if (fixedSize.equals(_fixedSize)) return true;
       _fixedSize = fixedSize;
     } else {
       // adapt -> fixed：先保存 adapt 尺寸，退出 fixed 时用于恢复。

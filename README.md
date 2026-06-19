@@ -39,29 +39,15 @@ flutter pub get
 
 ### 1. 实现 IConfiguration 接口
 
-自定义配置类，实现主题、指标构建器和绘制工具的定义。推荐混入 [FlexiKlineThemeConfigurationMixin](https://github.com/FlexiKline/FlexiKline/blob/main/lib/src/config/default_config.dart) 获取默认配置。
+自定义配置类，实现主题和全局配置。推荐混入 [FlexiKlineConfigurationMixin](https://github.com/FlexiKline/FlexiKline/blob/main/lib/src/config/default_config.dart) 获取默认配置。
 
 ```dart
 abstract interface class IConfiguration implements IStorage {
   /// 当前配置主题
   IFlexiKlineTheme get theme;
 
-  String get configKey;
-
   /// 生成FlexiKline配置
   FlexiKlineConfig generateFlexiKlineConfig([FlexiKlineConfig? origin]);
-
-  /// 蜡烛指标配置构造器(主区)
-  IndicatorBuilder<CandleBaseIndicator> get candleIndicatorBuilder;
-
-  /// 时间指标配置构造器(副区)
-  IndicatorBuilder<TimeBaseIndicator> get timeIndicatorBuilder;
-
-  /// 主区指标配置定制
-  Map<IIndicatorKey, IndicatorBuilder> get mainIndicatorBuilders;
-
-  /// 副区指标配置定制
-  Map<IIndicatorKey, IndicatorBuilder> get subIndicatorBuilders;
 
   /// 绘制工具定制
   Map<IDrawType, DrawObjectBuilder> get drawObjectBuilders;
@@ -83,12 +69,25 @@ controller = FlexiKlineController(
 ### 3. 使用 FlexiKlineWidget
 
 ```dart
-FlexiKlineWidget(
+FlexiKlineWidget.indicator(
   controller: controller,
+  indicatorConfig: indicatorConfig,
   mainBackgroundView: FlexiKlineMarkView(),
   mainForegroundViewBuilder: _buildKlineMainForgroundView,
   onDoubleTap: setFullScreen,
   drawToolbar: FlexiKlineDrawToolbar(controller: controller),
+)
+```
+
+也可直接传入指标实例：
+
+```dart
+FlexiKlineWidget(
+  controller: controller,
+  candle: CandleIndicator(),
+  time: TimeIndicator(),
+  mainIndicators: [maIndicator, bollIndicator],
+  subIndicators: [macdIndicator, kdjIndicator],
 )
 ```
 
@@ -113,13 +112,30 @@ controller.updateKlineData(spec, list);
 
 ## 自定义指标
 
-v2.0.0 引入了类型化的指标体系，通过 `IIndicatorKey` sealed class 区分三类指标：
+v2.2.0 引入了类型化的指标体系，通过 `IIndicatorKey` sealed class 区分三类指标：
 
 | 指标类型     | Key 类型               | Indicator 基类      | PaintObject 基类      | 说明                                                            |
 | ------------ | ---------------------- | ------------------- | --------------------- | --------------------------------------------------------------- |
 | 直接绘制指标 | `DirectIndicatorKey`   | `DirectIndicator`   | `DirectPaintObject`   | 直接基于当前 K 线数据和绘制上下文绘制，不占 computed data index |
 | 计算型指标   | `ComputedIndicatorKey` | `ComputedIndicator` | `ComputedPaintObject` | 需要提前计算，并将结果写入 `FlexiCandleModel.slots`             |
-| 外部数据指标 | `ExternalIndicatorKey` | `ExternalIndicator` | `ExternalPaintObject` | 由外部数据或用户操作驱动，不占 computed data index              |
+| 外部数据指标 | `ExternalIndicatorKey` | `ExternalIndicator` | `ExternalPaintObject` | 由外部数据或用户操作驱动，声明即常驻，hide 保活                 |
+
+### PaintObject 生命周期
+
+三类指标共享同一套生命周期回调（参照 Flutter `State`）：
+
+| 回调 | 触发时机 |
+| ---- | -------- |
+| `initState` | mount 后一次（此时绘制布局尚未绑定，勿依赖 `drawableRect` / `minMax`） |
+| `didChangeDependencies` | `spec.key`（symbol / interval）变化 |
+| `didUpdateIndicator` | 指标配置变化 |
+| `didChangeTheme` | 主题变化（仅 attached 对象） |
+| `didAttach` / `didDetach` | 进入 / 离开绘制树（几何首次有效） |
+| `dispose` | 实例销毁 |
+
+- **Direct / Computed**：show 时创建、hide 时销毁。
+- **External**：声明时 eager 创建；`initState` 默认调用 `loadBusinessData()` 加载业务数据。
+- 继承 `ComputedPaintObject` 时，覆写 `didUpdateIndicator` 需调用 `super` 以触发重算。
 
 ### 示例：自定义数据指标
 
@@ -160,6 +176,11 @@ class MAPaintObject extends ComputedPaintObject<MAIndicator> {
   }
 
   @override
+  void didUpdateIndicator(MAIndicator oldIndicator) {
+    super.didUpdateIndicator(oldIndicator); // 必须调用 super 以触发重算
+  }
+
+  @override
   void compute(Range range, {bool reset = false}) {
     // 针对 [range] 范围内的数据进行计算（仅在数据更新时回调）
   }
@@ -192,6 +213,29 @@ class MAPaintObject extends ComputedPaintObject<MAIndicator> {
     Rect? tipsRect,
   }) {
     // 绘制顶部 tooltip 信息
+  }
+}
+```
+
+### 示例：自定义外部数据指标
+
+```dart
+class TradePaintObject extends ExternalPaintObject<TradeIndicator> {
+  @override
+  void loadBusinessData() {
+    // initState 默认调用；也可 override initState / didChangeDependencies 等
+  }
+
+  @override
+  void didChangeDependencies(KlineSpec oldSpec) {
+    // symbol / interval 变化时重新加载
+    loadBusinessData();
+    setState();
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // 绘制业务 overlay
   }
 }
 ```

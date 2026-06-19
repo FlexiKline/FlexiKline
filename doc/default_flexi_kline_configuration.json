@@ -6,13 +6,9 @@
       "count": 5,
       "line": {
         "type": "solid",
-        "dashes": [
-          2.0,
-          2.0
-        ],
+        "dashes": [2.0, 2.0],
         "paint": {
-          "color": "0xffe9e9e9",
-          "strokeWidth": 0.3076923076923077,
+          "strokeWidth": 0.5,
           "style": "stroke",
           "blendMode": "srcOver",
           "isAntiAlias": true
@@ -24,40 +20,47 @@
       "count": 5,
       "line": {
         "type": "solid",
-        "dashes": [
-          2.0,
-          2.0
-        ],
+        "dashes": [2.0, 2.0],
         "paint": {
-          "color": "0xffe9e9e9",
-          "strokeWidth": 0.3076923076923077,
+          "strokeWidth": 0.5,
           "style": "stroke",
           "blendMode": "srcOver",
           "isAntiAlias": true
         }
       }
     },
-    "isAllowDragIndicatorHeight": true,
-    "dragHitTestMinDistance": 9.583088667058133,
+    "isAllowDragIndicatorHeight": false,
+    "dragHitTestMinDistance": 10.0,
+    "dragLine": {
+      "type": "dashed",
+      "length": 20.0,
+      "dashes": [3.0, 5.0],
+      "paint": {
+        "strokeWidth": 2.5,
+        "style": "stroke",
+        "blendMode": "srcOver",
+        "isAntiAlias": true
+      }
+    },
     "dragLineOpacity": 0.1,
     "draggingBgOpacity": 0.1,
-    "dragBgOpacity": 0.01,
+    "dragBgOpacity": 0.0,
     "ticksText": {
       "style": {
         "color": null,
-        "fontSize": 9.583088667058133,
+        "fontSize": 10.0,
         "fontFamily": null,
-        "fontStyle": "normal",
+        "fontStyle": null,
         "height": 1.0,
-        "fontWeight": "w400",
-        "textBaseline": "ideographic",
-        "decoration": "none",
+        "fontWeight": null,
+        "textBaseline": null,
+        "decoration": null,
         "decorationColor": null,
-        "decorationStyle": "solid"
+        "decorationStyle": null
       },
       "textAlign": "end",
       "padding": {
-        "horizontal": 1.9166177334116268,
+        "horizontal": 2.0,
         "vertical": 0.0
       }
     }
@@ -65,152 +68,145 @@
   "setting": {
     "opacity": 0.5,
     "loading": {
-      "size": 22.99941280093952,
-      "strokeWidth": 3.8332354668232536,
-      "background": "0xccececec",
-      "valueColor": "0xff000000"
+      "size": 26.0,
+      "strokeWidth": 4.0
     },
     "mainMinSize": {
-      "width": 114.9970640046976,
-      "height": 76.66470933646507
+      "width": 120.0,
+      "height": 80.0
     },
-    "subMinHeight": 28.7492660011744,
+    "subMinHeight": 30.0,
     "minPaintBlankRate": 0.5,
     "alwaysCalculateScreenOfCandlesIfEnough": false,
-    "candleMinWidth": 0.3076923076923077,
-    "candleMaxWidth": 38.33235466823253,
-    "candleWidth": 6.708162066940694,
-    "candleFixedSpacing": 0.9583088667058134,
+    "candleMinWidth": 1.0,
+    "candleMaxWidth": 40.0,
+    "candleWidth": 7.0,
+    "candleFixedSpacing": 1.0,
     "candleSpacingParts": 7,
-    "candleHollowBarBorderWidth": 0.9583088667058134,
-    "candleLineWidth": 0.9583088667058134,
-    "firstCandleInitOffset": 76.66470933646507,
+    "candleHollowBarBorderWidth": 1.0,
+    "candleLineWidth": 1.0,
+    "firstCandleInitOffset": 80.0,
     "allowPaintExtraOutsideMainRect": true,
-    "showYAxisTick": true
+    "showYAxisTick": true,
+    "autoStartLastPriceCountDownTimer": true,
+    "autoLoadMoreData": true,
+    "expandRatiosOfSameMinmax": [0.1, 0.05]
   },
   "gesture": {
-    "supportLongPress": true,
-    "isInertialPan": true,
+    "enableLongPress": true,
+    "enableInertialPan": true,
     "tolerance": {
-      "maxDuration": 1500,
-      "distanceFactor": 0.5,
-      "curvestr": "easeOutCirc"
+      "maxDuration": 3000,
+      "distanceFactor": 0.8,
+      "curvestr": "easeOutCubic",
+      "panSmoothFactor": 0.15,
+      "convergenceRatio": 0.85
     },
     "loadMoreWhenNoEnoughCandles": 60,
+    "enableScale": true,
     "scalePosition": "auto",
     "scaleSpeed": 10.0,
     "supportKeyboardShortcuts": true,
-    "enableZoom": true,
+    "enableZoom": false,
     "zoomStartMinDistance": 5,
-    "zoomSpeed": 1
+    "zoomSpeed": 1,
+    "isManualSetZoomRect": false
   },
   "cross": {
     "enable": true,
     "crosshair": {
       "type": "dashed",
-      "dashes": [
-        3.0,
-        3.0
-      ],
+      "dashes": [3.0, 3.0],
       "paint": {
-        "color": "0x00000000",
-        "strokeWidth": 0.4791544333529067,
+        "strokeWidth": 0.5,
         "style": "stroke",
         "blendMode": "srcOver",
         "isAntiAlias": true
       }
     },
     "crosspoint": {
-      "radius": 1.9166177334116268,
+      "radius": 2.0,
       "width": 0.0,
-      "color": "0xff000000",
-      "borderWidth": 1.9166177334116268,
-      "borderColor": "0x80000000"
+      "borderWidth": 3.0
     },
     "ticksText": {
       "style": {
         "color": null,
-        "fontSize": 9.583088667058133,
+        "fontSize": 10.0,
         "fontFamily": null,
-        "fontStyle": "normal",
-        "height": 1.0,
+        "fontStyle": null,
+        "height": 1.2,
         "fontWeight": "w400",
-        "textBaseline": "ideographic",
-        "decoration": "none",
+        "textBaseline": null,
+        "decoration": null,
         "decorationColor": null,
-        "decorationStyle": "solid"
+        "decorationStyle": null
       },
-      "textAlign": "start",
+      "textAlign": "end",
       "padding": {
-        "horizontal": 1.9166177334116268,
-        "vertical": 1.9166177334116268
+        "horizontal": 2.0,
+        "vertical": 2.0
       },
       "border": {
-        "color": "0xff000000",
+        "color": "0x00000000",
         "width": 0.0,
         "style": "none"
       },
       "borderRadius": {
-        "topLeft": 1.9166177334116268,
-        "topRight": 1.9166177334116268,
-        "bottomLeft": 1.9166177334116268,
-        "bottomRight": 1.9166177334116268
+        "topLeft": 2.0,
+        "topRight": 2.0,
+        "bottomLeft": 2.0,
+        "bottomRight": 2.0
       }
     },
     "tooltipConfig": {
       "show": true,
       "margin": {
-        "left": 14.3746330005872,
-        "top": 9.583088667058133,
-        "right": 62.29007633587787,
+        "left": 15.0,
+        "top": 10.0,
+        "right": 65.0,
         "bottom": 0.0
       },
       "padding": {
-        "horizontal": 3.8332354668232536,
-        "vertical": 3.8332354668232536
+        "horizontal": 8.0,
+        "vertical": 8.0
       },
       "radius": {
-        "topLeft": 3.8332354668232536,
-        "topRight": 3.8332354668232536,
-        "bottomLeft": 3.8332354668232536,
-        "bottomRight": 3.8332354668232536
+        "topLeft": 6.0,
+        "topRight": 6.0,
+        "bottomLeft": 6.0,
+        "bottomRight": 6.0
       },
       "style": {
         "color": null,
-        "fontSize": 9.583088667058133,
+        "fontSize": 10.0,
         "fontFamily": null,
-        "fontStyle": "normal",
+        "fontStyle": null,
         "height": 1.4,
-        "fontWeight": "w400",
-        "textBaseline": "ideographic",
-        "decoration": "none",
+        "fontWeight": null,
+        "textBaseline": null,
+        "decoration": null,
         "decorationColor": null,
-        "decorationStyle": "solid"
+        "decorationStyle": null
       }
     },
-    "spacing": 0.9583088667058134,
+    "spacing": 1.0,
     "showLatestTipsInBlank": true,
     "moveByCandleInBlank": false
   },
   "draw": {
-    "enable": true,
+    "enable": false,
     "allowSelectWhenExit": true,
     "crosspoint": {
-      "radius": 1.9166177334116268,
+      "radius": 2.0,
       "width": 0.0,
-      "color": "0xff000000",
-      "borderWidth": 1.9166177334116268,
-      "borderColor": "0x80448aff"
+      "borderWidth": 2.0
     },
     "crosshair": {
       "type": "dashed",
-      "dashes": [
-        5.0,
-        3.0
-      ],
+      "dashes": [5.0, 3.0],
       "paint": {
-        "color": "0x00000000",
-        "strokeWidth": 0.4791544333529067,
+        "strokeWidth": 0.5,
         "style": "stroke",
         "blendMode": "srcOver",
         "isAntiAlias": true
@@ -218,115 +214,82 @@
     },
     "drawLine": {
       "type": "solid",
-      "dashes": [
-        5.0,
-        3.0
-      ],
+      "dashes": [5.0, 3.0],
       "paint": {
-        "color": "0xff448aff",
-        "strokeWidth": 0.9583088667058134,
+        "strokeWidth": 1.0,
         "style": "stroke",
         "blendMode": "srcOver",
         "isAntiAlias": true
       }
     },
     "drawPoint": {
-      "radius": 8.62477980035232,
+      "radius": 9.0,
       "width": 0.0,
-      "color": "0xffffffff",
-      "borderWidth": 0.9583088667058134,
-      "borderColor": "0xff448aff"
+      "borderWidth": 1.0
     },
     "ticksText": {
       "style": {
-        "color": "0xffffffff",
-        "fontSize": 9.583088667058133,
+        "color": null,
+        "fontSize": 10.0,
         "fontFamily": null,
-        "fontStyle": "normal",
+        "fontStyle": null,
         "height": 1.0,
         "fontWeight": "w400",
-        "textBaseline": "ideographic",
-        "decoration": "none",
+        "textBaseline": null,
+        "decoration": null,
         "decorationColor": null,
-        "decorationStyle": "solid"
+        "decorationStyle": null
       },
       "textAlign": "start",
       "padding": {
-        "horizontal": 1.9166177334116268,
-        "vertical": 1.9166177334116268
-      },
-      "border": {
-        "color": "0xff000000",
-        "width": 0.0,
-        "style": "none"
+        "horizontal": 2.0,
+        "vertical": 2.0
       },
       "borderRadius": {
-        "topLeft": 1.9166177334116268,
-        "topRight": 1.9166177334116268,
-        "bottomLeft": 1.9166177334116268,
-        "bottomRight": 1.9166177334116268
+        "topLeft": 2.0,
+        "topRight": 2.0,
+        "bottomLeft": 2.0,
+        "bottomRight": 2.0
       }
     },
-    "spacing": 0.9583088667058134,
+    "spacing": 1.0,
     "ticksGapBgOpacity": 0.1,
-    "hitTestMinDistance": 9.583088667058133,
-    "magnetMinDistance": 9.583088667058133,
+    "hitTestMinDistance": 10.0,
+    "magnetMinDistance": 10.0,
     "magnifier": {
       "enable": true,
       "margin": {
-        "horizontal": 0.9583088667058134,
-        "vertical": 0.9583088667058134
+        "horizontal": 1.0,
+        "vertical": 1.0
       },
       "size": {
-        "width": 76.66470933646507,
-        "height": 76.66470933646507
+        "width": 80.0,
+        "height": 80.0
       },
       "magnificationScale": 2.0,
       "clipBehavior": "none",
-      "decorationOpactity": 1.0,
-      "decorationShadows": [
-        {
-          "color": "0x1affffff",
-          "offset": {
-            "dx": "0.1",
-            "dy": "0.1"
-          },
-          "blurRadius": "2.0",
-          "spreadRadius": "3.0",
-          "blurStyle": "normal"
-        }
-      ],
+      "decorationOpacity": 1.0,
       "shapeSide": {
-        "color": "0xff000000",
-        "width": 0.9583088667058134,
-        "style": "solid"
+        "color": "0x00000000",
+        "width": 0.0,
+        "style": "none"
       }
     }
   },
   "mainIndicator": {
     "padding": {
-      "horizontal": 0.0,
-      "vertical": 4.791544333529067
+      "left": 0.0,
+      "top": 5.0,
+      "right": 0.0,
+      "bottom": 5.0
     },
     "size": {
-      "width": 376.61538461538464,
-      "height": 287.492660011744
+      "width": 0.0,
+      "height": 300.0
     },
-    "height": 287.492660011744,
-    "drawBelowTipsArea": true,
-    "children": [
-      "candle:Candle",
-      "volume:Vol",
-      "ma:MA",
-      "ema:EMA",
-      "boll:BOLL",
-      "sar:SAR"
-    ]
+    "height": 300.0,
+    "drawBelowTipsArea": false,
+    "children": []
   },
-  "sub": [
-    "macd:MACD",
-    "kdj:KDJ",
-    "volMa:MAVOL",
-    "rsi:RSI"
-  ]
+  "sub": []
 }

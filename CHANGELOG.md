@@ -1,3 +1,23 @@
+## 2.2.0
+* Redesign widget-level indicator declaration: `FlexiKlineWidget` now accepts `candle`, `time`, `mainIndicators`, `subIndicators` directly; add `FlexiKlineWidget.indicator` named constructor for `IIndicatorConfig` (Breaking Changes).
+* Simplify `IConfiguration` interface: remove `configKey`, `candleIndicatorBuilder`, `timeIndicatorBuilder`, `mainIndicatorBuilders`, `subIndicatorBuilders`; retain only `theme`, `generateFlexiKlineConfig`, `drawObjectBuilders` (Breaking Changes).
+* Introduce `IIndicatorConfig` interface to decouple indicator provision from framework configuration; user-owned storage replaces built-in persistence (Breaking Changes).
+* Rename indicator taxonomy: Normal→Direct, Data→Computed, Business→External; `NormalIndicatorKey`→`DirectIndicatorKey`, `DataIndicatorKey`→`ComputedIndicatorKey`, `BusinessIndicatorKey`→`ExternalIndicatorKey` (Breaking Changes).
+* Rename PaintObject base classes: `DataPaintObject`→`ComputedPaintObject`, `BusinessPaintObject`→`ExternalPaintObject`, `NormalPaintObject`→`DirectPaintObject` (Breaking Changes).
+* Introduce `IPaintLifecycle` interface with unified lifecycle hooks: `initState`, `didChangeDependencies`, `didAttach`, `didDetach` (Breaking Changes).
+* Replace `syncAllIndicators()`/`init()` with `mountIndicators()`; rename `syncIndicators()` to `updateIndicators()` (Breaking Changes).
+* Replace `LayoutMode` class hierarchy with `FlexiLayoutMode` enum (`adapt`/`fixed`); add `FlexiKlineController.initialLayoutMode` parameter (Breaking Changes).
+* Replace `autoAdaptLayout` bool on `FlexiKlineWidget` with `FlexiLayoutType` enum (`adapt`/`fixed`/`normal`) (Breaking Changes).
+* Split `IPaintContext` into scoped interfaces: `PaintEnvironment`, `PaintDataScope`, `PaintGeometryScope`, `PaintRuntimeScope` (Breaking Changes).
+* Split `IDrawContext` into scoped interfaces: `DrawEnvironment`, `DrawDataScope`, `DrawGeometryScope`, `DrawRuntimeScope` (Breaking Changes).
+* Rename `curKlineData` to `klineData`; rename `cancelCross` to `requestCancelCross` (Breaking Changes).
+* Rename `FlexiKlineThemeConfigurationMixin` to `FlexiKlineConfigurationMixin` (Breaking Changes).
+* Add `FlexiKlineLifecycle` enum (`initial`/`mounted`/`disposed`) with `lifecycleListenable` for controller state observation.
+* Add `PaintObject.mount()` lifecycle method (mirrors Flutter `Element.mount`); inject indicator/context/logger at mount time.
+* Add `isMounted` guards to controller APIs (`setCanvasSize`, `setMainSize`, `onThemeChanged`, etc.) to prevent late-field access before `mountIndicators` completes.
+* Add `FlexiStateNotifier.setSilently` for build-phase value initialization without triggering subscriber `setState`.
+* Move grid/chart/cross/draw repaint triggers onto `KlineBindingBase`; internalize layer repaint APIs.
+
 ## 2.1.1
 * Optimize `mergeCandleList` performance: add in-place fast paths for head/tail aligned updates to reduce unnecessary list copies on hot path.
 * Fix `getLoadMoreSpec()` from/to direction for loading more historical data.
