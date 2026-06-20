@@ -12,13 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// Slot 操作模型与 Glados 生成器
+/// Slot 操作模型与随机生成器
 ///
 /// 用于 [IndicatorPaintObjectManager] 的 slot 管理属性测试。
 library;
 
+import 'dart:math';
+
 import 'package:flexi_kline/flexi_kline.dart';
-import 'package:glados/glados.dart';
 
 // ---------------------------------------------------------------------------
 // 操作模型：Register 或 Recycle
@@ -45,22 +46,20 @@ class TestRecycleOp extends TestSlotOp {
 }
 
 // ---------------------------------------------------------------------------
-// Glados 生成器
+// 随机生成函数
 // ---------------------------------------------------------------------------
 
 /// 生成随机 ComputedIndicatorKey（id 范围限制在 key_0 ~ key_9，
 /// 保证操作序列中有足够的 key 碰撞以触发回收复用场景）
-final slotKeyGen = any.intInRange(0, 10).map(
-      (i) => ComputedIndicatorKey('key_$i'),
-    );
+ComputedIndicatorKey randomSlotKey(Random rng) {
+  return ComputedIndicatorKey('key_${rng.nextInt(10)}');
+}
 
 /// 生成随机操作序列（长度 1 ~ 50，Register 和 Recycle 混合）
-final slotOpsGen = any.intInRange(1, 51).bind(
-      (len) => any.listWithLength(
-        len,
-        any.either(
-          slotKeyGen.map((k) => TestRegisterOp(k) as TestSlotOp),
-          slotKeyGen.map((k) => TestRecycleOp(k) as TestSlotOp),
-        ),
-      ),
-    );
+List<TestSlotOp> randomSlotOps(Random rng) {
+  final len = 1 + rng.nextInt(50);
+  return List.generate(len, (_) {
+    final key = randomSlotKey(rng);
+    return rng.nextBool() ? TestRegisterOp(key) : TestRecycleOp(key);
+  });
+}

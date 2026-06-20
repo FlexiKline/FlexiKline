@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// 测试用 Indicator / PaintObject 子类
+/// 测试用 Indicator / PaintObject 子类（v2.2.0 三类型体系）
 ///
-/// 提供 [CandleBaseIndicator]、[TimeBaseIndicator]、[ComputedIndicator]、
-/// [ExternalIndicator] 的最小化实现，用于 [IndicatorPaintObjectManager]
-/// 的单元测试和属性测试。
+/// 提供 [CandleBaseIndicator]、[TimeBaseIndicator]、[DirectIndicator]、
+/// [ComputedIndicator]、[ExternalIndicator] 的最小化实现，
+/// 用于 [IndicatorPaintObjectManager] 的单元测试和属性测试。
 library;
 
 import 'package:flexi_kline/flexi_kline.dart';
@@ -67,12 +67,39 @@ class _TestTimePaintObject extends TimeBasePaintObject<TestTimeIndicator> {
 }
 
 // ---------------------------------------------------------------------------
-// Data
+// Direct
 // ---------------------------------------------------------------------------
 
-/// 测试用 [ComputedIndicator] 子类，支持自定义 key 和 height
+/// 测试用 [DirectIndicator] 子类，支持自定义 key 和 height
+class TestDirectIndicator extends DirectIndicator {
+  TestDirectIndicator({required super.key, super.height = 100}) : super(padding: EdgeInsets.zero);
+
+  @override
+  DirectPaintObject<DirectIndicator> createPaintObject() => _TestDirectPaintObject();
+}
+
+class _TestDirectPaintObject extends DirectPaintObject<TestDirectIndicator> {
+  @override
+  MinMax? computeVisibleMinMax(int start, int end) => null;
+  @override
+  void paint(Canvas canvas, Size size) {}
+  @override
+  Size? paintTooltip(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
+}
+
+// ---------------------------------------------------------------------------
+// Computed
+// ---------------------------------------------------------------------------
+
+/// 测试用 [ComputedIndicator] 子类，支持自定义 key、height 和 param
 class TestComputedIndicator extends ComputedIndicator {
-  TestComputedIndicator({required super.key, super.height = 100}) : super(padding: EdgeInsets.zero);
+  TestComputedIndicator({required super.key, super.height = 100, this.param}) : super(padding: EdgeInsets.zero);
+
+  /// 可选计算参数，暴露给 [calcParam] getter
+  final dynamic param;
+
+  @override
+  dynamic get calcParam => param;
 
   @override
   ComputedPaintObject<ComputedIndicator> createPaintObject() => _TestComputedPaintObject();
@@ -92,7 +119,7 @@ class _TestComputedPaintObject extends ComputedPaintObject<TestComputedIndicator
 }
 
 // ---------------------------------------------------------------------------
-// Business
+// External
 // ---------------------------------------------------------------------------
 
 /// 测试用 [ExternalIndicator] 子类，支持自定义 key 和 height

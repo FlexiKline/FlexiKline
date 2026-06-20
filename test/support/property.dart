@@ -12,20 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:flutter/foundation.dart';
+/// 属性测试入口：generate 生成输入，check 做断言。
+library;
 
-void printIterable<T>(Iterable<T> list, {String? tag}) {
-  for (final val in list) {
-    debugPrint('${tag ?? ''}>${val.toString()}');
+import 'dart:math';
+
+/// seed 默认由 [description] 派生，免去手工 seed 簿记。
+void forAll<T>(
+  String description, {
+  required T Function(Random rng) generate,
+  required void Function(T value) check,
+  int runs = 100,
+  int? seed,
+}) {
+  final s = seed ?? description.hashCode;
+  final rng = Random(s);
+  for (int run = 0; run < runs; run++) {
+    final value = generate(rng);
+    check(value);
   }
-}
-
-void printMap<K, V>(Map<K, V> map, {String? tag}) {
-  map.forEach((key, val) {
-    debugPrint('${tag ?? ''}> key:$key \t val:${val.toString()}');
-  });
-}
-
-void logMsg(dynamic msg) {
-  debugPrint(msg.toString());
 }

@@ -18,6 +18,7 @@
 ///
 /// 这些测试用于演示 double 与 Decimal 在精度上的行为差异，属于探索性用例。
 /// 不对外暴露业务逻辑问题，CI 可视情况跳过此目录。
+@Tags(['exploration'])
 library;
 
 import 'dart:math' as math;
@@ -27,7 +28,7 @@ import 'package:flexi_formatter/flexi_formatter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../helpers/test_utils.dart';
+import '../support/support.dart';
 
 void main() {
   test('0.1 + 0.2 精度差异', () {

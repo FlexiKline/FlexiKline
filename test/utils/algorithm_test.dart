@@ -18,7 +18,7 @@ import 'package:flexi_kline/src/utils/algorithm_util.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../helpers/test_utils.dart';
+import '../support/support.dart';
 
 void main() {
   // ---------------------------------------------------------------------------

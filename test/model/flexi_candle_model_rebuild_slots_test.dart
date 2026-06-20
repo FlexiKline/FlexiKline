@@ -52,8 +52,7 @@ class MockCandle implements ICandleModel {
 
 void main() {
   group('FlexiCandleModel.rebuildSlots', () {
-    /// **Property 9: rebuildSlots 数据保留**
-    /// **Validates: Requirements 6.2, 6.3**
+    /// **M9: rebuildSlots 数据保留**
     ///
     /// 对于任意 FlexiCandleModel 实例和任意 newCount：
     /// - 如果 slots.length >= newCount，rebuildSlots 应返回自身（引用相等）

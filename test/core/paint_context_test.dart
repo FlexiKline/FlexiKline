@@ -18,13 +18,13 @@ import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../helpers/test_kline_config.dart';
+import '../support/support.dart';
 
 void main() {
   group('PaintContext controller implementation', () {
     test('controller implements PaintContext', () {
       final controller = FlexiKlineController(
-        configuration: TestFlexiKlineConfiguration(),
+        configuration: FakeFlexiKlineConfiguration(),
       );
 
       expect(controller, isA<PaintContext>());
@@ -33,7 +33,7 @@ void main() {
 
     test('requestMoveToInitialPosition delegates through controller callback', () {
       final controller = FlexiKlineController(
-        configuration: TestFlexiKlineConfiguration(),
+        configuration: FakeFlexiKlineConfiguration(),
       );
 
       var moved = false;
@@ -49,7 +49,7 @@ void main() {
 
     test('reportChartZoomSlideBarRect respects manual zoom rect config', () {
       final controller = FlexiKlineController(
-        configuration: TestFlexiKlineConfiguration(),
+        configuration: FakeFlexiKlineConfiguration(),
       );
 
       controller.gestureConfig = controller.gestureConfig.copyWith(

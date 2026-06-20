@@ -21,24 +21,21 @@ import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flexi_kline/src/framework/chart/indicator.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../helpers/lifecycle_spy.dart';
-import '../helpers/test_indicators.dart';
-import '../helpers/test_kline_config.dart';
-import '../helpers/test_paint_context.dart';
+import '../support/support.dart';
 
 void main() {
   group('PaintObject 单对象生命周期', () {
     SpyExternalPaintObject mountedExternal(LifecycleLog log, {String id = 'a'}) {
-      final indicator = SpyExternalIndicator(key: ExternalIndicatorKey('biz_$id'), log: log);
+      final indicator = SpyExternalIndicator(key: ExternalIndicatorKey('ext_$id'), log: log);
       final obj = indicator.createPaintObject() as SpyExternalPaintObject;
-      obj.mount(indicator, TestPaintContext());
+      obj.mount(indicator, FakePaintContext());
       return obj;
     }
 
     SpyComputedPaintObject mountedComputed(LifecycleLog log, {String id = 'c', bool keepAlive = false}) {
       final indicator = SpyComputedIndicator(key: ComputedIndicatorKey('cp_$id'), log: log, keepAlive: keepAlive);
       final obj = indicator.createPaintObject() as SpyComputedPaintObject;
-      obj.mount(indicator, TestPaintContext());
+      obj.mount(indicator, FakePaintContext());
       return obj;
     }
 
@@ -49,7 +46,7 @@ void main() {
       obj.doInitState();
       obj.doInitState();
 
-      expect(log.countOf('initState:biz_a'), 1);
+      expect(log.countOf('initState:ext_a'), 1);
     });
 
     test('onEnterTree 触发 didAttach，重复 enter 不重复触发', () {
@@ -59,7 +56,7 @@ void main() {
       obj.onEnterTree();
       obj.onEnterTree();
 
-      expect(log.countOf('didAttach:biz_a'), 1);
+      expect(log.countOf('didAttach:ext_a'), 1);
     });
 
     test('keepAlive=true：onExitTree 触发 didDetach 且不 dispose', () {
@@ -70,8 +67,8 @@ void main() {
 
       obj.onExitTree();
 
-      expect(log.countOf('didDetach:biz_a'), 1);
-      expect(log.countOf('dispose:biz_a'), 0);
+      expect(log.countOf('didDetach:ext_a'), 1);
+      expect(log.countOf('dispose:ext_a'), 0);
     });
 
     test('keepAlive=false：onExitTree 触发 didDetach 后 dispose', () {
@@ -104,7 +101,7 @@ void main() {
 
       obj.onExitTree();
 
-      expect(log.countOf('didDetach:biz_a'), 0);
+      expect(log.countOf('didDetach:ext_a'), 0);
     });
 
     test('dispose 幂等，不重复执行', () {
@@ -114,14 +111,14 @@ void main() {
       obj.dispose();
       obj.dispose();
 
-      expect(log.countOf('dispose:biz_a'), 1);
+      expect(log.countOf('dispose:ext_a'), 1);
     });
   });
 
   group('manager 驱动的 external 生命周期', () {
     IndicatorPaintObjectManager build(LifecycleLog log, {int subMax = 3}) {
       return IndicatorPaintObjectManager(
-        configuration: TestFlexiKlineConfiguration(),
+        configuration: FakeFlexiKlineConfiguration(),
         subIndicatorMaxCount: subMax,
       );
     }
@@ -138,52 +135,52 @@ void main() {
 
     test('声明挂载即创建常驻对象并 initState 一次（未激活也创建）', () {
       final log = LifecycleLog();
-      final ctx = TestPaintContext();
+      final ctx = FakePaintContext();
       final m = build(log);
-      final ext = SpyExternalIndicator(key: const ExternalIndicatorKey('biz_a'), log: log);
+      final ext = SpyExternalIndicator(key: const ExternalIndicatorKey('ext_a'), log: log);
 
       mount(m, [ext], const [], ctx);
 
-      expect(log.countOf('initState:biz_a'), 1);
-      expect(log.countOf('didAttach:biz_a'), 0); // 未激活，不进树
+      expect(log.countOf('initState:ext_a'), 1);
+      expect(log.countOf('didAttach:ext_a'), 0); // 未激活，不进树
     });
 
     test('show 复用常驻对象触发 didAttach，不重复 initState', () {
       final log = LifecycleLog();
-      final ctx = TestPaintContext();
+      final ctx = FakePaintContext();
       final m = build(log);
-      final ext = SpyExternalIndicator(key: const ExternalIndicatorKey('biz_a'), log: log);
+      final ext = SpyExternalIndicator(key: const ExternalIndicatorKey('ext_a'), log: log);
       mount(m, [ext], const [], ctx);
 
-      m.addMainPaintObject(const ExternalIndicatorKey('biz_a'), ctx);
+      m.addMainPaintObject(const ExternalIndicatorKey('ext_a'), ctx);
 
-      expect(log.countOf('didAttach:biz_a'), 1);
-      expect(log.countOf('initState:biz_a'), 1);
+      expect(log.countOf('didAttach:ext_a'), 1);
+      expect(log.countOf('initState:ext_a'), 1);
     });
 
     test('hide 后再 show：detach 保活、不 dispose、不重复 initState', () {
       final log = LifecycleLog();
-      final ctx = TestPaintContext();
+      final ctx = FakePaintContext();
       final m = build(log);
-      const key = ExternalIndicatorKey('biz_a');
+      const key = ExternalIndicatorKey('ext_a');
       mount(m, [SpyExternalIndicator(key: key, log: log)], const [], ctx);
 
       m.addMainPaintObject(key, ctx);
       m.removeMainPaintObject(key);
       m.addMainPaintObject(key, ctx);
 
-      expect(log.countOf('initState:biz_a'), 1);
-      expect(log.countOf('didDetach:biz_a'), 1);
-      expect(log.countOf('didAttach:biz_a'), 2);
-      expect(log.countOf('dispose:biz_a'), 0);
+      expect(log.countOf('initState:ext_a'), 1);
+      expect(log.countOf('didDetach:ext_a'), 1);
+      expect(log.countOf('didAttach:ext_a'), 2);
+      expect(log.countOf('dispose:ext_a'), 0);
     });
 
     test('副区容量驱逐：被挤出的 external 走保活 detach，不 dispose', () {
       final log = LifecycleLog();
-      final ctx = TestPaintContext();
+      final ctx = FakePaintContext();
       final m = build(log, subMax: 1);
-      const a = ExternalIndicatorKey('biz_a');
-      const b = ExternalIndicatorKey('biz_b');
+      const a = ExternalIndicatorKey('ext_a');
+      const b = ExternalIndicatorKey('ext_b');
       mount(
         m,
         const [],
@@ -194,34 +191,34 @@ void main() {
       m.addSubPaintObject(a, ctx);
       m.addSubPaintObject(b, ctx); // a 被挤出
 
-      expect(log.countOf('didAttach:biz_a'), 1);
-      expect(log.countOf('didDetach:biz_a'), 1);
-      expect(log.countOf('dispose:biz_a'), 0);
+      expect(log.countOf('didAttach:ext_a'), 1);
+      expect(log.countOf('didDetach:ext_a'), 1);
+      expect(log.countOf('dispose:ext_a'), 0);
     });
 
     test('controller dispose：常驻 external 各 dispose 一次，无重复', () {
       final log = LifecycleLog();
-      final ctx = TestPaintContext();
+      final ctx = FakePaintContext();
       final m = build(log);
-      const key = ExternalIndicatorKey('biz_a');
+      const key = ExternalIndicatorKey('ext_a');
       mount(m, [SpyExternalIndicator(key: key, log: log)], const [], ctx);
       m.addMainPaintObject(key, ctx); // 激活，挂在主区
 
       m.dispose();
 
-      expect(log.countOf('dispose:biz_a'), 1);
+      expect(log.countOf('dispose:ext_a'), 1);
     });
   });
 
   group('updateIndicators 的 external 增删改', () {
     IndicatorPaintObjectManager build(LifecycleLog log) =>
-        IndicatorPaintObjectManager(configuration: TestFlexiKlineConfiguration());
+        IndicatorPaintObjectManager(configuration: FakeFlexiKlineConfiguration());
 
     test('声明移除 external 时 dispose 并清出缓存', () {
       final log = LifecycleLog();
-      final ctx = TestPaintContext();
+      final ctx = FakePaintContext();
       final m = build(log);
-      const key = ExternalIndicatorKey('biz_a');
+      const key = ExternalIndicatorKey('ext_a');
       final ext = SpyExternalIndicator(key: key, log: log);
       m.mountIndicators(
         candle: TestCandleIndicator(),
@@ -243,14 +240,14 @@ void main() {
         newSubIndicators: const [],
       );
 
-      expect(log.countOf('dispose:biz_a'), 1);
+      expect(log.countOf('dispose:ext_a'), 1);
     });
 
     test('同 key external 配置变化触发 didUpdateIndicator', () {
       final log = LifecycleLog();
-      final ctx = TestPaintContext();
+      final ctx = FakePaintContext();
       final m = build(log);
-      const key = ExternalIndicatorKey('biz_a');
+      const key = ExternalIndicatorKey('ext_a');
       final oldExt = SpyExternalIndicator(key: key, log: log, height: 80);
       final newExt = SpyExternalIndicator(key: key, log: log, height: 120);
       m.mountIndicators(
@@ -273,12 +270,12 @@ void main() {
         newSubIndicators: const [],
       );
 
-      expect(log.countOf('didUpdateIndicator:biz_a'), 1);
+      expect(log.countOf('didUpdateIndicator:ext_a'), 1);
     });
 
     test('新增 external 声明创建常驻并 initState', () {
       final log = LifecycleLog();
-      final ctx = TestPaintContext();
+      final ctx = FakePaintContext();
       final m = build(log);
       m.mountIndicators(
         candle: TestCandleIndicator(),
@@ -287,7 +284,7 @@ void main() {
         subIndicators: const [],
         context: ctx,
       );
-      const key = ExternalIndicatorKey('biz_a');
+      const key = ExternalIndicatorKey('ext_a');
       final ext = SpyExternalIndicator(key: key, log: log);
 
       m.updateIndicators(
@@ -302,14 +299,14 @@ void main() {
         newSubIndicators: const [],
       );
 
-      expect(log.countOf('initState:biz_a'), 1);
+      expect(log.countOf('initState:ext_a'), 1);
     });
 
     test('副区 external 移除后再以同 key 新增：缓存不残留已销毁对象', () {
       final log = LifecycleLog();
-      final ctx = TestPaintContext();
+      final ctx = FakePaintContext();
       final m = build(log);
-      const key = ExternalIndicatorKey('biz_s');
+      const key = ExternalIndicatorKey('ext_s');
       final ext = SpyExternalIndicator(key: key, log: log);
       m.mountIndicators(
         candle: TestCandleIndicator(),
@@ -349,18 +346,18 @@ void main() {
         newSubIndicators: [freshExt],
       );
 
-      expect(log.countOf('dispose:biz_s'), 1);
-      expect(log.countOf('initState:biz_s'), 2);
+      expect(log.countOf('dispose:ext_s'), 1);
+      expect(log.countOf('initState:ext_s'), 2);
     });
   });
 
   group('依赖变化通知', () {
     test('notifySpecChanged 触达 attached 与 detached 常驻对象（去重）', () {
       final log = LifecycleLog();
-      final ctx = TestPaintContext();
-      final m = IndicatorPaintObjectManager(configuration: TestFlexiKlineConfiguration());
-      const a = ExternalIndicatorKey('biz_a'); // 主区，激活
-      const b = ExternalIndicatorKey('biz_b'); // 副区，未激活（常驻 detached）
+      final ctx = FakePaintContext();
+      final m = IndicatorPaintObjectManager(configuration: FakeFlexiKlineConfiguration());
+      const a = ExternalIndicatorKey('ext_a'); // 主区，激活
+      const b = ExternalIndicatorKey('ext_b'); // 副区，未激活（常驻 detached）
       m.mountIndicators(
         candle: TestCandleIndicator(),
         time: TestTimeIndicator(),
@@ -373,16 +370,16 @@ void main() {
       const oldSpec = KlineSpec(symbol: 'OLD', interval: invalidInterval);
       m.notifySpecChanged(oldSpec);
 
-      expect(log.countOf('didChangeDependencies:biz_a'), 1); // 去重，不因双集合触发两次
-      expect(log.countOf('didChangeDependencies:biz_b'), 1); // detached 也收到
+      expect(log.countOf('didChangeDependencies:ext_a'), 1); // 去重，不因双集合触发两次
+      expect(log.countOf('didChangeDependencies:ext_b'), 1); // detached 也收到
     });
   });
 
   group('keepAlive Computed 复用', () {
     test('副区 hide 后再 show：复用实例、不重复 initState、不 dispose', () {
       final log = LifecycleLog();
-      final ctx = TestPaintContext();
-      final m = IndicatorPaintObjectManager(configuration: TestFlexiKlineConfiguration());
+      final ctx = FakePaintContext();
+      final m = IndicatorPaintObjectManager(configuration: FakeFlexiKlineConfiguration());
       const key = ComputedIndicatorKey('cp_k');
       m.mountIndicators(
         candle: TestCandleIndicator(),
@@ -407,8 +404,8 @@ void main() {
 
     test('keepAlive=false Computed：hide 即 dispose、再 show 重建', () {
       final log = LifecycleLog();
-      final ctx = TestPaintContext();
-      final m = IndicatorPaintObjectManager(configuration: TestFlexiKlineConfiguration());
+      final ctx = FakePaintContext();
+      final m = IndicatorPaintObjectManager(configuration: FakeFlexiKlineConfiguration());
       const key = ComputedIndicatorKey('cp_n');
       m.mountIndicators(
         candle: TestCandleIndicator(),

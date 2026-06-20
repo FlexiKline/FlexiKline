@@ -13,6 +13,7 @@
 // limitations under the License.
 
 /// Dart 标准库 Stopwatch 基础行为演示。
+@Tags(['exploration'])
 library;
 
 import 'package:flutter/foundation.dart';

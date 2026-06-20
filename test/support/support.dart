@@ -12,19 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/// 测试支撑 barrel：领域测试统一 `import '../support/support.dart';`
 library;
 
-import 'package:flexi_kline/flexi_kline.dart';
-import 'package:flutter_test/flutter_test.dart';
-
-import '../support/support.dart';
-
-void main() {
-  test('公开面可见：用户生命周期回调 + External 默认 keepAlive', () {
-    final log = LifecycleLog();
-    final obj = SpyExternalIndicator(key: const ExternalIndicatorKey('ext_a'), log: log).createPaintObject();
-    // 本测试仅验证公开面可用；do* 的不外泄由 flexi_kline.dart 的 hide + 静态扫描保障。
-    expect(obj, isA<ExternalPaintObject>());
-    expect(obj.keepAlive, isTrue);
-  });
-}
+export 'builders/controller_scenario.dart';
+export 'builders/manager_scenario.dart';
+export 'doubles/fake_kline_config.dart';
+export 'doubles/fake_paint_context.dart';
+export 'doubles/lifecycle_spy.dart';
+export 'doubles/log_print_impl.dart';
+export 'doubles/test_indicators.dart';
+export 'fixtures/candle_factory.dart';
+export 'fixtures/mock_candle_data.dart';
+export 'generators/indicator_desc.dart';
+export 'generators/slot_ops.dart';
+export 'matchers/indicator_matchers.dart';
+export 'property.dart';

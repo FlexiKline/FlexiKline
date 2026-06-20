@@ -17,6 +17,7 @@
 /// Dart 异步机制探索演示：Future / scheduleMicrotask / Timer / FutureOr
 ///
 /// 属于探索性测试，无业务断言，CI 可选择性跳过此目录。
+@Tags(['exploration'])
 library;
 
 import 'dart:async';

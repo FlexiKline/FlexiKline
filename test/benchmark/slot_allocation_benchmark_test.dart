@@ -12,19 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+@Tags(['benchmark'])
 library;
 
+import 'dart:math';
+
 import 'package:flexi_kline/flexi_kline.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/support.dart';
 
 void main() {
-  test('公开面可见：用户生命周期回调 + External 默认 keepAlive', () {
-    final log = LifecycleLog();
-    final obj = SpyExternalIndicator(key: const ExternalIndicatorKey('ext_a'), log: log).createPaintObject();
-    // 本测试仅验证公开面可用；do* 的不外泄由 flexi_kline.dart 的 hide + 静态扫描保障。
-    expect(obj, isA<ExternalPaintObject>());
-    expect(obj.keepAlive, isTrue);
+  test('slot register/recycle 100k ops', () {
+    final m = IndicatorPaintObjectManager(
+      configuration: FakeFlexiKlineConfiguration(),
+    );
+    final rng = Random(0);
+    final sw = Stopwatch()..start();
+    for (int i = 0; i < 100000; i++) {
+      final key = ComputedIndicatorKey('k_${rng.nextInt(50)}');
+      if (rng.nextBool()) {
+        m.allocateComputedDataIndexes([key]);
+      } else {
+        m.releaseComputedDataIndex(key);
+      }
+    }
+    sw.stop();
+    debugPrint('slot_allocation: 100k ops in ${sw.elapsedMilliseconds}ms');
+    expect(sw.elapsedMilliseconds, greaterThanOrEqualTo(0));
   });
 }

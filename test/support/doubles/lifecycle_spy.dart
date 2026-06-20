@@ -12,11 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// 记录 PaintObject 生命周期事件，供生命周期测试断言。
+/// 生命周期 Spy：记录 PaintObject 生命周期事件，供测试断言。
 library;
 
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/painting.dart';
+
+// ---------------------------------------------------------------------------
+// 事件记录器
+// ---------------------------------------------------------------------------
 
 /// 生命周期事件记录器。
 class LifecycleLog {
@@ -30,7 +34,11 @@ class LifecycleLog {
   String toString() => events.toString();
 }
 
-/// Spy External 指标：createPaintObject 返回记录生命周期的 PaintObject。
+// ---------------------------------------------------------------------------
+// Spy External
+// ---------------------------------------------------------------------------
+
+/// Spy External 指标：记录生命周期事件。
 class SpyExternalIndicator extends ExternalIndicator {
   SpyExternalIndicator({
     required super.key,
@@ -61,7 +69,8 @@ class SpyExternalPaintObject extends ExternalPaintObject<SpyExternalIndicator> {
   void didDetach() => _log.events.add('didDetach:$_id');
 
   @override
-  void didChangeDependencies(KlineSpec oldSpec) => _log.events.add('didChangeDependencies:$_id');
+  void didChangeDependencies(KlineSpec oldSpec) =>
+      _log.events.add('didChangeDependencies:$_id');
 
   @override
   void didUpdateIndicator(covariant SpyExternalIndicator oldIndicator) {
@@ -81,31 +90,59 @@ class SpyExternalPaintObject extends ExternalPaintObject<SpyExternalIndicator> {
   @override
   void paint(Canvas canvas, Size size) {}
   @override
-  Size? paintTooltip(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
+  Size? paintTooltip(Canvas canvas,
+          {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) =>
+      null;
 }
 
-/// Spy Computed 指标：默认 keepAlive=false；可传 keepAlive=true 验证用户复写。
+// ---------------------------------------------------------------------------
+// Spy Computed（增强：可控 shouldRecompute + compute 记录）
+// ---------------------------------------------------------------------------
+
+/// Spy Computed 指标：可控 [recompute] 决定 shouldRecompute 返回值。
 class SpyComputedIndicator extends ComputedIndicator {
   SpyComputedIndicator({
     required super.key,
     required this.log,
     this.keepAlive = false,
+    this.recompute = false,
     super.height = 100,
   }) : super(padding: EdgeInsets.zero);
 
   final LifecycleLog log;
   final bool keepAlive;
 
+  /// 控制 [SpyComputedPaintObject.shouldRecompute] 返回值
+  final bool recompute;
+
   @override
-  ComputedPaintObject<ComputedIndicator> createPaintObject() => SpyComputedPaintObject();
+  ComputedPaintObject<ComputedIndicator> createPaintObject() =>
+      SpyComputedPaintObject();
 }
 
 class SpyComputedPaintObject extends ComputedPaintObject<SpyComputedIndicator> {
   String get _id => indicator.key.id;
   LifecycleLog get _log => indicator.log;
 
+  /// compute 被调用次数
+  int computeCount = 0;
+
+  /// 最近一次 compute 的 reset 参数
+  bool? lastReset;
+
   @override
   bool get keepAlive => indicator.keepAlive;
+
+  @override
+  bool shouldRecompute(covariant SpyComputedIndicator oldIndicator) =>
+      indicator.recompute;
+
+  @override
+  void compute(Range range, {bool reset = false}) {
+    computeCount++;
+    lastReset = reset;
+    _log.events.add('compute:$_id(reset:$reset)');
+  }
 
   @override
   void initState() {
@@ -120,6 +157,12 @@ class SpyComputedPaintObject extends ComputedPaintObject<SpyComputedIndicator> {
   void didDetach() => _log.events.add('didDetach:$_id');
 
   @override
+  void didUpdateIndicator(covariant SpyComputedIndicator oldIndicator) {
+    super.didUpdateIndicator(oldIndicator);
+    _log.events.add('didUpdateIndicator:$_id');
+  }
+
+  @override
   void dispose() {
     if (isDisposed) return;
     _log.events.add('dispose:$_id');
@@ -131,9 +174,7 @@ class SpyComputedPaintObject extends ComputedPaintObject<SpyComputedIndicator> {
   @override
   void paint(Canvas canvas, Size size) {}
   @override
-  Size? paintTooltip(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
-  @override
-  bool shouldRecompute(covariant SpyComputedIndicator oldIndicator) => false;
-  @override
-  void compute(Range range, {bool reset = false}) {}
+  Size? paintTooltip(Canvas canvas,
+          {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) =>
+      null;
 }

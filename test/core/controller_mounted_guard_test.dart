@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/// 集成测试：isMounted 守卫
 library;
 
 import 'package:flexi_kline/flexi_kline.dart';
@@ -20,11 +21,20 @@ import 'package:flutter_test/flutter_test.dart';
 import '../support/support.dart';
 
 void main() {
-  test('公开面可见：用户生命周期回调 + External 默认 keepAlive', () {
-    final log = LifecycleLog();
-    final obj = SpyExternalIndicator(key: const ExternalIndicatorKey('ext_a'), log: log).createPaintObject();
-    // 本测试仅验证公开面可用；do* 的不外泄由 flexi_kline.dart 的 hide + 静态扫描保障。
-    expect(obj, isA<ExternalPaintObject>());
-    expect(obj.keepAlive, isTrue);
+  group('v2.2.0/FlexiKlineController/mounted_guard', () {
+    test('mount 前调用受守卫 API 不抛异常', () {
+      final c = FlexiKlineController(
+        configuration: FakeFlexiKlineConfiguration(),
+      );
+      addTearDown(c.dispose);
+
+      expect(c.isMounted, isFalse);
+
+      // onThemeChanged 含 isMounted 守卫（chart.dart:48）
+      expect(() => c.onThemeChanged(), returnsNormally);
+
+      // requestMoveToInitialPosition 含 isMounted 守卫（state.dart:279）
+      expect(() => c.requestMoveToInitialPosition(), returnsNormally);
+    });
   });
 }

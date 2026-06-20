@@ -19,15 +19,14 @@ import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../helpers/test_indicators.dart';
-import '../helpers/test_kline_config.dart';
+import '../support/support.dart';
 
 FlexiKlineController _createController({
   FlexiLayoutMode initialLayoutMode = FlexiLayoutMode.adapt,
   Size? initialFixedSize,
 }) {
   return FlexiKlineController(
-    configuration: TestFlexiKlineConfiguration(
+    configuration: FakeFlexiKlineConfiguration(
       mainIndicatorDefaultSize: const Size(400, 300),
     ),
     initialLayoutMode: initialLayoutMode,

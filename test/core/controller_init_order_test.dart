@@ -19,21 +19,20 @@ import 'package:flexi_formatter/date_time.dart' show TimeUnit;
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../helpers/test_indicators.dart';
-import '../helpers/test_kline_config.dart';
+import '../support/support.dart';
 
 void main() {
   group('FlexiKlineController initialization order', () {
     test('constructor should not throw before indicator sync', () {
       expect(
-        () => FlexiKlineController(configuration: TestFlexiKlineConfiguration()),
+        () => FlexiKlineController(configuration: FakeFlexiKlineConfiguration()),
         returnsNormally,
       );
     });
 
     testWidgets('updateKlineData before initState should queue waiting data', (tester) async {
       final controller = FlexiKlineController(
-        configuration: TestFlexiKlineConfiguration(),
+        configuration: FakeFlexiKlineConfiguration(),
       );
       const spec = KlineSpec(
         symbol: 'TEST',

@@ -12,20 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/// K 线数据工厂：随机生成 + 调试打印工具。
+library;
+
 import 'dart:math' as math;
 
 import 'package:flexi_formatter/flexi_formatter.dart';
 import 'package:flexi_kline/flexi_kline.dart';
+import 'package:flutter/foundation.dart';
 
-/// 随机生成CandleModel列表
-/// [count] : 返回列表数量
-/// [inital] : 初始收盘价
-/// [range] : 开/收/高/低价的随机波动范围
-/// [initalVol] : 初始交易量
-/// [rangeVol] : 交易量的随机波动范围
-/// [interval] : 时间间隔
-/// [dateTime] : 初始时间
-/// [isHistory] : 是否生成历史数据
+// ---------------------------------------------------------------------------
+// 随机 K 线生成
+// ---------------------------------------------------------------------------
+
+/// 随机生成 [CandleModel] 列表
 Future<List<CandleModel>> genRandomCandleList({
   int count = 5,
   double inital = 1000,
@@ -39,22 +39,13 @@ Future<List<CandleModel>> genRandomCandleList({
   final List<CandleModel> list = [];
   dateTime ??= DateTime.now();
   final random = math.Random();
-  CandleModel? m;
   double h, l, o, c = inital, v = initalVol;
 
   double genVal(double m, double k, {bool? isUp}) {
-    double val;
     double r = random.nextDouble();
-    if (isUp != null) {
-      r = r * r;
-    }
+    if (isUp != null) r = r * r;
     isUp ??= random.nextBool();
-    if (isUp) {
-      val = m + r * k;
-    } else {
-      val = m - r * k;
-    }
-    return val;
+    return isUp ? m + r * k : m - r * k;
   }
 
   final int flag = isHistory ? -1 : 1;
@@ -66,7 +57,7 @@ Future<List<CandleModel>> genRandomCandleList({
     l = genVal(math.min(o, c), range, isUp: false);
     if (h < l) [h, l] = [l, h];
     v = genVal(v, rangeVol);
-    m = CandleModel(
+    final m = CandleModel(
       timestamp: dateTime.add(Duration(milliseconds: flag * i * interval.milliseconds)).millisecondsSinceEpoch,
       high: h.d,
       open: o.d,
@@ -80,6 +71,28 @@ Future<List<CandleModel>> genRandomCandleList({
       list.insert(0, m);
     }
   }
-
   return list;
+}
+
+// ---------------------------------------------------------------------------
+// 调试打印工具
+// ---------------------------------------------------------------------------
+
+/// 逐行打印可迭代集合
+void printIterable<T>(Iterable<T> list, {String? tag}) {
+  for (final val in list) {
+    debugPrint('${tag ?? ''}>${val.toString()}');
+  }
+}
+
+/// 逐行打印 Map
+void printMap<K, V>(Map<K, V> map, {String? tag}) {
+  map.forEach((key, val) {
+    debugPrint('${tag ?? ''}> key:$key \t val:${val.toString()}');
+  });
+}
+
+/// 简易日志打印
+void logMsg(dynamic msg) {
+  debugPrint(msg.toString());
 }

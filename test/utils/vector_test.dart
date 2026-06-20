@@ -18,7 +18,7 @@ import 'dart:ui';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../helpers/test_utils.dart';
+import '../support/support.dart';
 
 void main() {
   const rect = Rect.fromLTRB(0, 0, 14, 10);
