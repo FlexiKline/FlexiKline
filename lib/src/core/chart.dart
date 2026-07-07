@@ -129,7 +129,7 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
 
   void paintChart(Canvas canvas, Size size) {
     // logd('$diffTime paintChart >>>>');
-    if (!klineData.canPaintChart) {
+    if (!isMounted || !klineData.canPaintChart) {
       logd('chartBinding paintChart data is being prepared!');
       return;
     }

@@ -236,18 +236,20 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
                 controller.setAdaptLayoutMode(width: biggest.width);
               }
             } else if (layoutMode == FlexiLayoutMode.fixed) {
-              // fixed 优先使用完整有限约束。
-              if (biggest.width.isFinite && biggest.height.isFinite) {
-                controller.setFixedLayoutMode(biggest);
-              } else if (biggest.width.isFinite && controller.fixedSize != null) {
-                // 滚动容器只给宽度时，沿用业务侧提供的 fixed 高度。
-                final h = controller.fixedSize!.height;
-                if (h.isFinite) {
-                  controller.setFixedLayoutMode(Size(biggest.width, h));
-                }
+              // fixed 每个维度独立决策：biggest 优先，fixedSize 补位。
+              final userSize = controller.fixedSize;
+              final w = biggest.width.isFinite ? biggest.width : userSize?.width;
+              final h = biggest.height.isFinite ? biggest.height : userSize?.height;
+
+              if (w != null && w.isFinite && h != null && h.isFinite) {
+                controller.setFixedLayoutMode(Size(w, h));
               } else {
+                logw(
+                  'FlexiLayoutMode.fixed: cannot resolve finite canvas size. '
+                  'biggest=$biggest, fixedSize=$userSize',
+                );
                 assert(
-                  controller.fixedSize != null,
+                  false,
                   'FlexiLayoutMode.fixed requires a finite canvas size. '
                   'Use a bounded parent, pass initialFixedSize, or call '
                   'setFixedLayoutMode(size) before first fixed render in scrollable parents.',

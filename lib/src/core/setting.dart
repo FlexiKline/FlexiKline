@@ -23,7 +23,11 @@ mixin SettingBinding on KlineBindingBase {
     _candleWidth = settingConfig.candleWidth;
     _layoutModeNotifier = FlexiStateNotifier<FlexiLayoutMode>(_initialLayoutMode);
     if (_initialLayoutMode == FlexiLayoutMode.fixed) {
-      assert(_initialFixedSize == null || _initialFixedSize.isFinite);
+      assert(
+        _initialFixedSize == null || _initialFixedSize.height.isFinite,
+        'initialFixedSize.height must be finite when provided in fixed layout mode. '
+        'Width can be resolved from parent constraints, but height cannot in scrollable parents.',
+      );
       _fixedSize = _initialFixedSize;
     }
     _lifecycleNotifier = FlexiStateNotifier(FlexiKlineLifecycle.initial);

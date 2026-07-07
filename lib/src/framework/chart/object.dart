@@ -167,6 +167,9 @@ abstract class PaintObject<T extends Indicator<IIndicatorKey>> extends Indicator
   @override
   void paintCross(Canvas canvas, Offset offset, {FlexiCandleModel? model}) {}
 
+  @override
+  Size? paintTooltip(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
+
   /// 处理 Tap 事件
   ///
   /// 注：自行处理 [position] 位置的点击事件。
