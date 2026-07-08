@@ -168,7 +168,7 @@ abstract class PaintObject<T extends Indicator<IIndicatorKey>> extends Indicator
   void paintCross(Canvas canvas, Offset offset, {FlexiCandleModel? model}) {}
 
   @override
-  Size? paintTooltip(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
+  Size? paintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
 
   /// 处理 Tap 事件
   ///
@@ -378,7 +378,7 @@ final class MainPaintObject<T extends MainPaintObjectIndicator> extends PaintObj
   void paint(Canvas canvas, Size size) {}
 
   @override
-  Size? paintTooltip(
+  Size? paintTips(
     Canvas canvas, {
     FlexiCandleModel? model,
     Offset? offset,

@@ -1,3 +1,12 @@
+## 2.2.1
+* Improve `FlexiLayoutMode.fixed` canvas size resolution: resolve width and height independently (parent constraints first, `fixedSize` fallback) to cover more constraint combinations.
+* Relax `initialFixedSize` assert in fixed layout mode: only `height` must be finite when provided; width can be resolved from parent constraints.
+* Add `isMounted` guard in `paintChart` to prevent accessing uninitialized PaintObjects during early render frames.
+* Align paint naming by drawing position: rename indicator top-bar hook `paintTooltip` to `paintTips`; Cross-layer floating box APIs (`TooltipInfo`, `TooltipConfig`, `CrossBinding.paintTooltip`) remain unchanged (Breaking Changes).
+* Rename `allowPaintExtraOutsideMainRect` to `allowOverlayOutsideMainRect` in `SettingConfig` and JSON serialization (Breaking Changes).
+* Add default no-op `paintTips` implementation on base `PaintObject`.
+* Remove redundant `computeVisibleMinMax` and `paintTips` overrides from `TimePaintObject`.
+
 ## 2.2.0
 * Redesign widget-level indicator declaration: `FlexiKlineWidget` now accepts `candle`, `time`, `mainIndicators`, `subIndicators` directly; add `FlexiKlineWidget.indicator` named constructor for `IIndicatorConfig` (Breaking Changes).
 * Simplify `IConfiguration` interface: remove `configKey`, `candleIndicatorBuilder`, `timeIndicatorBuilder`, `mainIndicatorBuilders`, `subIndicatorBuilders`; retain only `theme`, `generateFlexiKlineConfig`, `drawObjectBuilders` (Breaking Changes).

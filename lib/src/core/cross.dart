@@ -179,9 +179,9 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
       paintTooltip(canvas, offset, model: model);
 
       for (final paintObject in subPaintObjects) {
-        paintObject.doOnCross(canvas, offset, model: model);
+        paintObject.doPaintCross(canvas, offset, model: model);
       }
-      mainPaintObject.doOnCross(canvas, offset, model: model);
+      mainPaintObject.doPaintCross(canvas, offset, model: model);
     }
   }
 

@@ -86,7 +86,7 @@
     "candleHollowBarBorderWidth": 1.0,
     "candleLineWidth": 1.0,
     "firstCandleInitOffset": 80.0,
-    "allowPaintExtraOutsideMainRect": true,
+    "allowOverlayOutsideMainRect": true,
     "showYAxisTick": true,
     "autoStartLastPriceCountDownTimer": true,
     "autoLoadMoreData": true,

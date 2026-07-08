@@ -42,7 +42,7 @@ class _TestCandlePaintObject extends CandleBasePaintObject<TestCandleIndicator> 
   @override
   void paint(Canvas canvas, Size size) {}
   @override
-  Size? paintTooltip(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
+  Size? paintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
 }
 
 // ---------------------------------------------------------------------------
@@ -63,7 +63,7 @@ class _TestTimePaintObject extends TimeBasePaintObject<TestTimeIndicator> {
   @override
   void paint(Canvas canvas, Size size) {}
   @override
-  Size? paintTooltip(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
+  Size? paintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
 }
 
 // ---------------------------------------------------------------------------
@@ -84,7 +84,7 @@ class _TestDirectPaintObject extends DirectPaintObject<TestDirectIndicator> {
   @override
   void paint(Canvas canvas, Size size) {}
   @override
-  Size? paintTooltip(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
+  Size? paintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
 }
 
 // ---------------------------------------------------------------------------
@@ -111,7 +111,7 @@ class _TestComputedPaintObject extends ComputedPaintObject<TestComputedIndicator
   @override
   void paint(Canvas canvas, Size size) {}
   @override
-  Size? paintTooltip(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
+  Size? paintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
   @override
   bool shouldRecompute(covariant TestComputedIndicator oldIndicator) => false;
   @override
@@ -136,5 +136,5 @@ class _TestExternalPaintObject extends ExternalPaintObject<TestExternalIndicator
   @override
   void paint(Canvas canvas, Size size) {}
   @override
-  Size? paintTooltip(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
+  Size? paintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
 }

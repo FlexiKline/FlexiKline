@@ -91,7 +91,7 @@ extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
     paint(canvas, size);
 
     if (!context.isCrossing) {
-      paintTooltip(
+      paintTips(
         canvas,
         model: klineData.latest,
         tipsRect: drawableRect,
@@ -99,14 +99,14 @@ extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
     }
   }
 
-  void doPaintExtraAboveChart(Canvas canvas, Size size) {
+  void doPaintOverlay(Canvas canvas, Size size) {
     paintOverlay(canvas, size);
   }
 
-  void doOnCross(Canvas canvas, Offset offset, {FlexiCandleModel? model}) {
+  void doPaintCross(Canvas canvas, Offset offset, {FlexiCandleModel? model}) {
     paintCross(canvas, offset, model: model);
 
-    paintTooltip(
+    paintTips(
       canvas,
       offset: offset,
       model: model,
@@ -312,13 +312,13 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
     }
   }
 
-  void doPaintExtraAboveChart(Canvas canvas, Size size) {
+  void doPaintOverlay(Canvas canvas, Size size) {
     for (final object in paintableChildren) {
       object.paintOverlay(canvas, size);
     }
   }
 
-  void doOnCross(Canvas canvas, Offset offset, {FlexiCandleModel? model}) {
+  void doPaintCross(Canvas canvas, Offset offset, {FlexiCandleModel? model}) {
     if (isFirstDrawTipsArea) {
       if (context.isCrossing) {
         final tipsHeight = doPaintTips(canvas, offset: offset, model: model);
@@ -348,7 +348,7 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
     // 每次绘制前, 重置Tips区域大小为0
     double height = 0;
     for (final object in paintableChildren) {
-      final size = object.paintTooltip(
+      final size = object.paintTips(
         canvas,
         model: model,
         offset: offset,

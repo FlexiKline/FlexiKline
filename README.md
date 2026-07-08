@@ -206,13 +206,13 @@ class MAPaintObject extends ComputedPaintObject<MAIndicator> {
   }
 
   @override
-  Size? paintTooltip(
+  Size? paintTips(
     Canvas canvas, {
     FlexiCandleModel? model,
     Offset? offset,
     Rect? tipsRect,
   }) {
-    // 绘制顶部 tooltip 信息
+    // 绘制顶部 Tips 信息条
   }
 }
 ```

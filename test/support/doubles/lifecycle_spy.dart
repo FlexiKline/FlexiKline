@@ -90,7 +90,7 @@ class SpyExternalPaintObject extends ExternalPaintObject<SpyExternalIndicator> {
   @override
   void paint(Canvas canvas, Size size) {}
   @override
-  Size? paintTooltip(Canvas canvas,
+  Size? paintTips(Canvas canvas,
           {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) =>
       null;
 }
@@ -174,7 +174,7 @@ class SpyComputedPaintObject extends ComputedPaintObject<SpyComputedIndicator> {
   @override
   void paint(Canvas canvas, Size size) {}
   @override
-  Size? paintTooltip(Canvas canvas,
+  Size? paintTips(Canvas canvas,
           {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) =>
       null;
 }

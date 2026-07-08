@@ -137,8 +137,8 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
     calculatePaintChartRange();
     int paneIndex = mainPaneIndex;
 
-    /// 绘制额外内容是否在允许在主图绘制区域之外
-    final allowPaintExtraOutsideMainRect = settingConfig.allowPaintExtraOutsideMainRect;
+    /// overlay 是否允许绘制在主图 rect 之外
+    final allowOverlayOutsideMainRect = settingConfig.allowOverlayOutsideMainRect;
     try {
       /// 保存画布状态
       canvas.save();
@@ -155,8 +155,8 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
         size,
       );
 
-      if (!allowPaintExtraOutsideMainRect) {
-        mainPaintObject.doPaintExtraAboveChart(canvas, size);
+      if (!allowOverlayOutsideMainRect) {
+        mainPaintObject.doPaintOverlay(canvas, size);
       }
     } finally {
       /// 恢复画布状态
@@ -176,11 +176,11 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
       /// 绘制副区的指标图
       paintObject.doPaintChart(canvas, size);
 
-      paintObject.doPaintExtraAboveChart(canvas, size);
+      paintObject.doPaintOverlay(canvas, size);
     }
 
-    if (allowPaintExtraOutsideMainRect) {
-      mainPaintObject.doPaintExtraAboveChart(canvas, size);
+    if (allowOverlayOutsideMainRect) {
+      mainPaintObject.doPaintOverlay(canvas, size);
     }
 
     if (_reset) _reset = false;

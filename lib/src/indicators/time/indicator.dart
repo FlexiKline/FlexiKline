@@ -62,11 +62,6 @@ class TimePaintObject<T extends TimeIndicator> extends TimeBasePaintObject<T> {
   }
 
   @override
-  MinMax? computeVisibleMinMax(int start, int end) {
-    return null;
-  }
-
-  @override
   void paint(Canvas canvas, Size size) {
     if (indicator.clipToDrawableRect) {
       canvas.save();
@@ -136,15 +131,5 @@ class TimePaintObject<T extends TimeIndicator> extends TimeBasePaintObject<T> {
       themeTextColor: theme.crossTextColor,
       themeBackgroundColor: theme.crossTextBg,
     );
-  }
-
-  @override
-  Size? paintTooltip(
-    Canvas canvas, {
-    FlexiCandleModel? model,
-    Offset? offset,
-    Rect? tipsRect,
-  }) {
-    return null;
   }
 }

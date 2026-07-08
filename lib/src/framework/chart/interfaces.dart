@@ -77,15 +77,15 @@ abstract interface class IPaintObject {
   /// [offset] Cross 位置
   void paintCross(Canvas canvas, Offset offset, {FlexiCandleModel? model});
 
-  /// 绘制顶部 tooltip 信息
+  /// 绘制顶部 Tips 信息条
   ///
   /// [canvas] 画布
   /// [model] 当前选中的蜡烛数据
   /// [offset] Cross 位置（如果有）
-  /// [tipsRect] tooltip 绘制区域
+  /// [tipsRect] Tips 绘制区域
   ///
-  /// 返回绘制的 tooltip 高度，用于布局计算
-  Size? paintTooltip(
+  /// 返回绘制的 Tips 高度，用于布局计算
+  Size? paintTips(
     Canvas canvas, {
     FlexiCandleModel? model,
     Offset? offset,

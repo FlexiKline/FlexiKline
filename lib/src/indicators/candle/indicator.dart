@@ -744,7 +744,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
   }
 
   @override
-  Size? paintTooltip(
+  Size? paintTips(
     Canvas canvas, {
     FlexiCandleModel? model,
     Offset? offset,
