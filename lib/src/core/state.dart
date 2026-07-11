@@ -133,6 +133,15 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     });
   }
 
+  @override
+  @protected
+  void syncComputedSlotCapacity() {
+    // 当前数据：按最新容量扩容已有蜡烛的 slots。
+    klineData.rebuildSlots(computedDataCapacity);
+    // 其余缓存：指标声明已变，其 slot 值已陈旧，直接丢弃，下次切换重新加载。
+    evictInactiveKlineDataCache();
+  }
+
   /// 设置当前KlineData:
   /// 1. 通知timeInterval变更
   /// 2. 初始化首根蜡烛绘制位置于屏幕右侧[getInitPaintDxOffset]指定处.
@@ -458,7 +467,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     /// 使用scheduleTask方式运行预计算
     await SchedulerBinding.instance.scheduleTask(
       () => data.precomputeKlineData(
-        computedDataCount: computedDataCount,
+        slotCount: computedDataCapacity,
         newList: newList,
         mainPaintObjects: mainPaintObject.children,
         subPaintObjects: subPaintObjects,
@@ -476,11 +485,10 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   ///
   /// 在 FlexiKlineWidget.initState 完成（mountIndicators + controller.initState 之后）时调用。
   /// 检查 [klineData] 中是否有未合并的 `_waitingData`，若有则使用当前已确定的
-  /// [computedDataCount] 合并数据并对所有已激活指标执行 precompute，最后触发 markRepaintChart。
+  /// [computedDataCapacity] 合并数据并对所有已激活指标执行 precompute，最后触发 markRepaintChart。
   ///
   /// 场景：Widget 挂载前调用 switchKlineData 和 updateKlineData，数据暂存到 _waitingData；
-  /// Widget initState 完成后调用此方法，使用已确定的 computedDataCount 处理暂存数据。
-  /// _Requirements: 11.1, 11.2, 11.3, 11.4
+  /// Widget initState 完成后调用此方法，使用已确定的 computedDataCapacity 处理暂存数据。
   @override
   void flushPendingKlineData() {
     // 检查当前 KlineData 是否有待合并的数据
@@ -491,7 +499,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
 
     logd('flushPendingKlineData: flushing ${klineData.waitingDataLength} pending data');
 
-    // 使用当前 computedDataCount 合并数据并执行 precompute
+    // 使用当前 computedDataCapacity 合并数据并执行 precompute
     _schedulePrecomputeKlineData(
       klineData,
       newList: const [],

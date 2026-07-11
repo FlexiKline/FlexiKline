@@ -43,7 +43,7 @@ class KlineData extends BaseData with KlineSpecData, CandleListData, PaintDrawDa
   ///
   /// 遍历 [_list] 中每条蜡烛，调用 [FlexiCandleModel.rebuildSlots] 并写回
   /// （extension type 值语义要求必须写回）。
-  /// 当 [computedDataCount] 增加导致需要扩容时，由 Manager 调用此方法。
+  /// 当 [computedDataCapacity] 增加导致需要扩容时，由 StateBinding 调用此方法。
   void rebuildSlots(int newCount) {
     for (int i = 0; i < _list.length; i++) {
       _list[i] = _list[i].rebuildSlots(newCount);
@@ -57,13 +57,13 @@ class KlineData extends BaseData with KlineSpecData, CandleListData, PaintDrawDa
 
   /// 预计算Kline指标数据
   ///
-  /// [computedDataCount] 指定新蜡烛模型的 slots 数量，传递给 [mergeCandleData]
+  /// [slotCount] 指定新蜡烛模型的 slots 数量，传递给 [mergeCandleData]
   /// [newList] 新增的蜡烛数据
   /// [mainPaintObjects] 主区待计算的指标集合
   /// [subPaintObjects] 副区待计算的指标集合
   /// [reset] 是否重置; 如果有, 忽略之前的计算结果.
   Future<void> precomputeKlineData({
-    required int computedDataCount,
+    required int slotCount,
     required List<ICandleModel> newList,
     required Iterable<PaintObject> mainPaintObjects,
     required Iterable<PaintObject> subPaintObjects,
@@ -83,7 +83,7 @@ class KlineData extends BaseData with KlineSpecData, CandleListData, PaintDrawDa
       /// 1. 合并数据
       final data = newList.isEmpty ? _waitingData : [newList, ..._waitingData];
       Range? range = stopwatch.run(
-        () => mergeCandleData(data, computedDataCount: computedDataCount),
+        () => mergeCandleData(data, slotCount: slotCount),
         label: '$logTag-mergeCandleData-${data.length}',
       );
       _waitingData.clear();
@@ -123,7 +123,7 @@ class KlineData extends BaseData with KlineSpecData, CandleListData, PaintDrawDa
       stopwatch.stop();
       if (_waitingData.isNotEmpty) {
         precomputeKlineData(
-          computedDataCount: computedDataCount,
+          slotCount: slotCount,
           newList: [],
           mainPaintObjects: mainPaintObjects,
           subPaintObjects: subPaintObjects,

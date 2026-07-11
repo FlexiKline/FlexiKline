@@ -114,12 +114,8 @@ void main() {
             final oldSubDescsRaw = randomIndicatorList(rng, randomIndicatorDescWithHeight);
             final newSubDescsRaw = randomIndicatorList(rng, randomIndicatorDescWithHeight);
 
-            final oldSubDescs = oldSubDescsRaw
-                .map((d) => IndicatorDesc(d.kind, d.id + 20, d.height))
-                .toList();
-            final newSubDescs = newSubDescsRaw
-                .map((d) => IndicatorDesc(d.kind, d.id + 20, d.height))
-                .toList();
+            final oldSubDescs = oldSubDescsRaw.map((d) => IndicatorDesc(d.kind, d.id + 20, d.height)).toList();
+            final newSubDescs = newSubDescsRaw.map((d) => IndicatorDesc(d.kind, d.id + 20, d.height)).toList();
 
             final oldMainIndicators = oldMainDescs.map(createIndicator).toList();
             final oldSubIndicators = oldSubDescs.map(createIndicator).toList();
@@ -174,8 +170,7 @@ void main() {
             // 验证：移除的 ComputedIndicator slot 被回收
             for (final key in removedKeys) {
               if (key is ComputedIndicatorKey) {
-                expect(manager.getComputedDataIndex(key), isNull,
-                    reason: 'run#$run: 移除的 $key 的 slot 应被回收');
+                expect(manager.getComputedDataIndex(key), isNull, reason: 'run#$run: 移除的 $key 的 slot 应被回收');
               }
             }
 
@@ -200,18 +195,21 @@ void main() {
               }
             }
 
-            // 验证：computedDataCount 等于新声明集合中 ComputedIndicator 的数量
-            final expectedCount = newAllKeys.whereType<ComputedIndicatorKey>().length;
-            expect(manager.computedDataCount, equals(expectedCount),
-                reason: 'run#$run: computedDataCount 应等于 $expectedCount');
+            // 验证：computedDataCapacity 是高水位容量，覆盖所有存活 slot
+            //（只增不减，不随删除回退）
+            for (final key in newAllKeys) {
+              if (key is ComputedIndicatorKey) {
+                final slot = manager.getComputedDataIndex(key)!;
+                expect(manager.computedDataCapacity, greaterThan(slot),
+                    reason: 'run#$run: computedDataCapacity '
+                        '(${manager.computedDataCapacity}) 必须 > 存活 $key 的 slot $slot');
+              }
+            }
 
             // 验证：新增指标不自动创建 PaintObject
-            final mainKeysExcludingCandle =
-                manager.mainIndicatorKeys.where((k) => k != candleIndicatorKey).toSet();
-            expect(mainKeysExcludingCandle, isEmpty,
-                reason: 'run#$run: 新增指标不应自动创建主区 PaintObject');
-            expect(manager.subIndicatorKeys, isEmpty,
-                reason: 'run#$run: 新增指标不应自动创建副区 PaintObject');
+            final mainKeysExcludingCandle = manager.mainIndicatorKeys.where((k) => k != candleIndicatorKey).toSet();
+            expect(mainKeysExcludingCandle, isEmpty, reason: 'run#$run: 新增指标不应自动创建主区 PaintObject');
+            expect(manager.subIndicatorKeys, isEmpty, reason: 'run#$run: 新增指标不应自动创建副区 PaintObject');
           }
         },
       );
@@ -249,12 +247,9 @@ void main() {
               ));
             }
 
-            final oldMainIndicators =
-                indicatorPairs.map((p) => p.oldInd as Indicator).toList();
-            final newMainIndicators =
-                indicatorPairs.map((p) => p.newInd as Indicator).toList();
-            final mainChildrenKeys =
-                indicatorPairs.map((p) => p.key as IIndicatorKey).toSet();
+            final oldMainIndicators = indicatorPairs.map((p) => p.oldInd as Indicator).toList();
+            final newMainIndicators = indicatorPairs.map((p) => p.newInd as Indicator).toList();
+            final mainChildrenKeys = indicatorPairs.map((p) => p.key as IIndicatorKey).toSet();
 
             final config = FakeFlexiKlineConfiguration(mainChildren: mainChildrenKeys);
             final manager = IndicatorPaintObjectManager(configuration: config);
@@ -287,10 +282,8 @@ void main() {
 
             // 验证已激活 PaintObject 的 indicator 等于新实例
             for (final pair in indicatorPairs) {
-              final paintObject = manager.mainPaintObject.children
-                  .firstWhereOrNull((obj) => obj.key == pair.key);
-              expect(paintObject, isNotNull,
-                  reason: 'run#$run: ${pair.key} 的 PaintObject 应仍存在');
+              final paintObject = manager.mainPaintObject.children.firstWhereOrNull((obj) => obj.key == pair.key);
+              expect(paintObject, isNotNull, reason: 'run#$run: ${pair.key} 的 PaintObject 应仍存在');
               expect(
                 identical(paintObject!.indicator, pair.newInd),
                 isTrue,

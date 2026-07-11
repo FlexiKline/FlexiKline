@@ -45,6 +45,12 @@ final class IndicatorPaintObjectManager with FlexiLog {
   /// 已回收的 slot，按 FIFO 复用。
   final Queue<int> _recycledSlots = Queue<int>();
 
+  /// 已分配过的 slot 容量，只增不减（高水位）。
+  ///
+  /// 回收 slot 只放回 [_recycledSlots]，不缩减此容量，
+  /// 以保证 [computedDataCapacity] 始终大于任意存活指标的 slot 索引。
+  int _computedDataCapacity = 0;
+
   /// keepAlive 常驻对象缓存，按 key 管理。
   /// PaintObject 在 hide 时若 keepAlive=true，则进入此缓存供下次 show 复用。
   final Map<IIndicatorKey, PaintObject> _keepAlivePaintObjects = {};
@@ -107,7 +113,11 @@ final class IndicatorPaintObjectManager with FlexiLog {
     return _computedDataIndexes[key];
   }
 
-  int get computedDataCount => _computedDataIndexes.length;
+  /// 已分配的 computed data slot 容量（高水位），而非当前存活声明数量。
+  ///
+  /// 用于给新蜡烛的 slots 数组定长；容量只增不减，
+  /// 确保删除中间指标后，仍存活的高位 slot 不会越界。
+  int get computedDataCapacity => _computedDataCapacity;
 
   /// 注册 [ComputedIndicatorKey] 列表，为每个 key 分配 slot。
   ///
@@ -120,7 +130,7 @@ final class IndicatorPaintObjectManager with FlexiLog {
       if (_recycledSlots.isNotEmpty) {
         slot = _recycledSlots.removeFirst();
       } else {
-        slot = _computedDataIndexes.length;
+        slot = _computedDataCapacity++;
       }
       _computedDataIndexes[key] = slot;
       logi('allocateComputedDataIndex $key:$slot');
@@ -227,7 +237,7 @@ final class IndicatorPaintObjectManager with FlexiLog {
       newIndicators: newSubIndicators,
     );
 
-    logi('updateIndicators 完成: computedDataCount=$computedDataCount');
+    logi('updateIndicators 完成: computedDataCapacity=$computedDataCapacity');
     return (main: mainKeys, sub: subKeys);
   }
 
@@ -269,7 +279,7 @@ final class IndicatorPaintObjectManager with FlexiLog {
         }
         _mainIndicatorRegistry[key] = newIndicator;
         if (newIndicator.autoActivate) toActivate.add(key);
-        logi('_mainDiffAndSync: 新增指标 $key $computedDataCount');
+        logi('_mainDiffAndSync: 新增指标 $key $computedDataCapacity');
       } else {
         final oldIndicator = oldMap[key]!;
         _mainIndicatorRegistry[key] = newIndicator;
@@ -327,7 +337,7 @@ final class IndicatorPaintObjectManager with FlexiLog {
         }
         _subIndicatorRegistry[key] = newIndicator;
         if (newIndicator.autoActivate) toActivate.add(key);
-        logi('_subDiffAndSync: 新增指标 $key $computedDataCount');
+        logi('_subDiffAndSync: 新增指标 $key $computedDataCapacity');
       } else {
         final oldIndicator = oldMap[key]!;
         _subIndicatorRegistry[key] = newIndicator;

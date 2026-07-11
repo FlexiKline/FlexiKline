@@ -18,22 +18,6 @@ abstract class KlineBindingBase with FlexiLog implements PaintContext, DrawConte
   @override
   String get logTag => 'Controller';
 
-  /// 请求重绘 Grid 图层。
-  @protected
-  void markRepaintGrid();
-
-  /// 请求重绘 Chart 图层。
-  @protected
-  void markRepaintChart({bool reset = false});
-
-  /// 请求重绘 Cross 图层。
-  @protected
-  void markRepaintCross();
-
-  /// 请求重绘 Draw 图层。
-  @protected
-  void markRepaintDraw();
-
   final IConfiguration configuration;
 
   /// 是否自动保存 Kline 配置。
@@ -104,11 +88,6 @@ abstract class KlineBindingBase with FlexiLog implements PaintContext, DrawConte
     _drawObjectManager.dispose();
   }
 
-  /// 保存当前 FlexiKline 配置。
-  void storeFlexiKlineConfig({
-    bool storeDrawOverlays = true,
-  });
-
   @protected
   @mustCallSuper
   void onThemeChanged([covariant IFlexiKlineTheme? oldTheme]) {
@@ -147,6 +126,38 @@ abstract class KlineBindingBase with FlexiLog implements PaintContext, DrawConte
   Future<bool> setConfig(String key, Map<String, dynamic> value) {
     return configuration.setConfig(key, value);
   }
+
+  /// 保存当前 FlexiKline 配置。
+  void storeFlexiKlineConfig({
+    bool storeDrawOverlays = true,
+  });
+
+  /// 请求重绘 Grid 图层。
+  @protected
+  void markRepaintGrid();
+
+  /// 请求重绘 Chart 图层。
+  @protected
+  void markRepaintChart({bool reset = false});
+
+  /// 请求重绘 Cross 图层。
+  @protected
+  void markRepaintCross();
+
+  /// 请求重绘 Draw 图层。
+  @protected
+  void markRepaintDraw();
+
+  /// 处理 Widget 挂载前暂存的数据。由 StateBinding 实现，view 层在 initState 后调用。
+  void flushPendingKlineData();
+
+  /// 按当前 [computedDataCapacity] 重建当前 KlineData 的 slots，并使其余缓存失效。
+  ///
+  /// 在 computed 指标声明增长（slot 容量高水位上升）后调用，确保当前数据能容纳
+  /// 新增高位指标；其余缓存数据因指标声明已变、其 slot 值已陈旧，统一丢弃，
+  /// 下次切换时重新加载。由 StateBinding 实现。
+  @protected
+  void syncComputedSlotCapacity();
 }
 
 /// KlineController 内部访问扩展。

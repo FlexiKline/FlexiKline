@@ -53,12 +53,12 @@ void main() {
     final kd = KlineData(
       const KlineSpec(symbol: 'BENCH', interval: invalidInterval),
     );
-    kd.mergeCandleList(candles, computedDataCount: m.computedDataCount);
+    kd.mergeCandleList(candles, slotCount: m.computedDataCapacity);
 
     final sw = Stopwatch()..start();
     for (int i = 0; i < 50; i++) {
       await kd.precomputeKlineData(
-        computedDataCount: m.computedDataCount,
+        slotCount: m.computedDataCapacity,
         newList: candles,
         mainPaintObjects: m.mainPaintObject.children,
         subPaintObjects: const [],
@@ -66,8 +66,7 @@ void main() {
       );
     }
     sw.stop();
-    debugPrint(
-        'precompute: 50x(1000 candles x $indicatorCount indicators) in ${sw.elapsedMilliseconds}ms');
+    debugPrint('precompute: 50x(1000 candles x $indicatorCount indicators) in ${sw.elapsedMilliseconds}ms');
     expect(sw.elapsedMilliseconds, greaterThanOrEqualTo(0));
   });
 }

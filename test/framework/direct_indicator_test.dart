@@ -36,7 +36,7 @@ void main() {
       );
 
       // 不占 computed slot
-      expect(m.computedDataCount, 0);
+      expect(m.computedDataCapacity, 0);
       // 已注册
       expect(m.hasRegisteredInMain(directKey(1)), isTrue);
       // 激活后进入主区绘制队列

@@ -46,8 +46,8 @@ abstract interface class PaintDataScope {
   /// 获取 [key] 对应的 computed data index。
   int? getComputedDataIndex(ComputedIndicatorKey key);
 
-  /// 已分配的 computed data index 数量。
-  int get computedDataCount;
+  /// 已分配的 computed data slot 容量（高水位，只增不减）。
+  int get computedDataCapacity;
 }
 
 /// 绘制几何：区域、蜡烛尺寸、坐标换算与 pane 布局。

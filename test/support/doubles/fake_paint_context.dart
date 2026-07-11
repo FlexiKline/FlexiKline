@@ -67,8 +67,7 @@ class FakePaintContext implements PaintContext {
       ValueNotifier(const KlineSpec(symbol: '', interval: invalidInterval));
 
   @override
-  ValueListenable<KlineLoadingState> get loadingStateListenable =>
-      ValueNotifier(KlineLoadingState.none);
+  ValueListenable<KlineLoadingState> get loadingStateListenable => ValueNotifier(KlineLoadingState.none);
 
   @override
   SettingConfig get settingConfig => const SettingConfig();
@@ -134,7 +133,7 @@ class FakePaintContext implements PaintContext {
   int? getComputedDataIndex(ComputedIndicatorKey key) => null;
 
   @override
-  int get computedDataCount => 0;
+  int get computedDataCapacity => 0;
 
   @override
   void requestRepaint() {}
@@ -147,11 +146,10 @@ class ManagerBackedPaintContext extends FakePaintContext {
   final IndicatorPaintObjectManager manager;
 
   @override
-  int? getComputedDataIndex(ComputedIndicatorKey key) =>
-      manager.getComputedDataIndex(key);
+  int? getComputedDataIndex(ComputedIndicatorKey key) => manager.getComputedDataIndex(key);
 
   @override
-  int get computedDataCount => manager.computedDataCount;
+  int get computedDataCapacity => manager.computedDataCapacity;
 }
 
 /// 内联的最小 [IFlexiKlineTheme] 实现，避免外部依赖。

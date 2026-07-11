@@ -45,9 +45,7 @@ void main() {
 
             // 随机选择激活子集
             final activateMain = randomSubset(rng, pair.main);
-            final activateSub = randomSubset(rng, pair.sub)
-                .take(defaultSubIndicatorMaxCount)
-                .toList();
+            final activateSub = randomSubset(rng, pair.sub).take(defaultSubIndicatorMaxCount).toList();
 
             final mainChildrenKeys = activateMain.map(descToKey).toSet();
             final subKeys = activateSub.map(descToKey).toSet();
@@ -70,8 +68,7 @@ void main() {
             );
 
             // 验证主区 PaintObject 集合的 key（排除 candle）
-            final actualMainKeysFiltered =
-                manager.mainIndicatorKeys.where((k) => k != candleIndicatorKey).toSet();
+            final actualMainKeysFiltered = manager.mainIndicatorKeys.where((k) => k != candleIndicatorKey).toSet();
             expect(
               actualMainKeysFiltered,
               equals(expectedMainChildrenKeys),
@@ -79,8 +76,7 @@ void main() {
             );
 
             // 验证副区 PaintObject 集合的 key（排除 time）
-            final actualSubKeysFiltered =
-                manager.subIndicatorKeys.where((k) => k != timeIndicatorKey).toSet();
+            final actualSubKeysFiltered = manager.subIndicatorKeys.where((k) => k != timeIndicatorKey).toSet();
             expect(
               actualSubKeysFiltered,
               equals(expectedSubKeys),
@@ -89,8 +85,7 @@ void main() {
 
             // 验证每个主区 PaintObject 的 indicator 与传入的 Indicator 实例一致
             for (final key in expectedMainChildrenKeys) {
-              final paintObject = manager.mainPaintObject.children
-                  .firstWhereOrNull((obj) => obj.key == key);
+              final paintObject = manager.mainPaintObject.children.firstWhereOrNull((obj) => obj.key == key);
               expect(paintObject, isNotNull, reason: 'run#$run: 主区应包含 key=$key');
               final expectedIndicator = mainIndicators.firstWhere((i) => i.key == key);
               expect(
@@ -102,8 +97,7 @@ void main() {
 
             // 验证每个副区 PaintObject 的 indicator 与传入的 Indicator 实例一致
             for (final key in expectedSubKeys) {
-              final paintObject =
-                  manager.subPaintObjects.firstWhereOrNull((obj) => obj.key == key);
+              final paintObject = manager.subPaintObjects.firstWhereOrNull((obj) => obj.key == key);
               expect(paintObject, isNotNull, reason: 'run#$run: 副区应包含 key=$key');
               final expectedIndicator = subIndicators.firstWhere((i) => i.key == key);
               expect(
@@ -163,7 +157,7 @@ void main() {
                 if (slot != null) slotSnapshot[key] = slot;
               }
             }
-            final computedDataCountBefore = manager.computedDataCount;
+            final computedDataCapacityBefore = manager.computedDataCapacity;
 
             // 随机选择要移除的子集
             final removeMainKeys = randomSubset(rng, pair.main).map(descToKey).toSet();
@@ -201,9 +195,9 @@ void main() {
               );
             }
 
-            // 验证：computedDataCount 不变
-            expect(manager.computedDataCount, equals(computedDataCountBefore),
-                reason: 'run#$run: remove 后 computedDataCount 应保持不变');
+            // 验证：computedDataCapacity 不变
+            expect(manager.computedDataCapacity, equals(computedDataCapacityBefore),
+                reason: 'run#$run: remove 后 computedDataCapacity 应保持不变');
 
             // 验证：缓存不变（重新 add 应成功）
             for (final key in removeMainKeys) {
@@ -245,13 +239,11 @@ void main() {
             final persistSubDescs = randomIndicatorList(rng);
             // 去重
             final seenMain = <String>{};
-            final uniquePersistMain =
-                persistMainDescs.where((d) => seenMain.add(d.keyToken)).toList();
+            final uniquePersistMain = persistMainDescs.where((d) => seenMain.add(d.keyToken)).toList();
             final seenSub = <String>{
               ...uniquePersistMain.map((d) => d.keyToken),
             };
-            final uniquePersistSub =
-                persistSubDescs.where((d) => seenSub.add(d.keyToken)).toList();
+            final uniquePersistSub = persistSubDescs.where((d) => seenSub.add(d.keyToken)).toList();
 
             final persistMainKeys = uniquePersistMain.map(descToKey).toSet();
             final persistSubKeys = uniquePersistSub.map(descToKey).toSet();
@@ -274,14 +266,12 @@ void main() {
             );
 
             // 验证主区激活 key 集合（排除 candle）
-            final actualMainKeys =
-                manager.mainIndicatorKeys.where((k) => k != candleIndicatorKey).toSet();
+            final actualMainKeys = manager.mainIndicatorKeys.where((k) => k != candleIndicatorKey).toSet();
             expect(actualMainKeys, equals(expectedMainActivated),
                 reason: 'run#$run: 主区激活 key 应等于 persistMainKeys ∩ declaredMainKeys');
 
             // 验证副区激活 key 集合（排除 time）
-            final actualSubKeys =
-                manager.subIndicatorKeys.where((k) => k != timeIndicatorKey).toSet();
+            final actualSubKeys = manager.subIndicatorKeys.where((k) => k != timeIndicatorKey).toSet();
             expect(actualSubKeys, equals(expectedSubActivated),
                 reason: 'run#$run: 副区激活 key 应等于 persistSubKeys ∩ declaredSubKeys');
           }

@@ -462,7 +462,7 @@ mixin SettingBinding on KlineBindingBase {
   }
 
   @override
-  int get computedDataCount => _paintObjectManager.computedDataCount;
+  int get computedDataCapacity => _paintObjectManager.computedDataCapacity;
 
   @override
   double calculatePaneTop(int paneIndex) {
@@ -506,6 +506,7 @@ mixin SettingBinding on KlineBindingBase {
     required List<Indicator> oldSubIndicators,
     required List<Indicator> newSubIndicators,
   }) {
+    final oldComputedDataCapacity = computedDataCapacity;
     final pending = _paintObjectManager.updateIndicators(
       oldCandle: oldCandle,
       newCandle: newCandle,
@@ -517,6 +518,11 @@ mixin SettingBinding on KlineBindingBase {
       newSubIndicators: newSubIndicators,
       context: this,
     );
+    // slot 容量增长（新增 computed 指标突破高水位）时，先对齐当前数据 slots
+    // 并使其余缓存失效，再激活指标（show* 会触发 compute 写入 slot）。
+    if (computedDataCapacity > oldComputedDataCapacity) {
+      syncComputedSlotCapacity();
+    }
     for (final key in pending.main) {
       showMainIndicator(key);
     }
@@ -524,9 +530,6 @@ mixin SettingBinding on KlineBindingBase {
       showSubIndicator(key);
     }
   }
-
-  /// 处理 Widget 挂载前暂存的数据。由 StateBinding 实现。
-  void flushPendingKlineData() {}
 
   /// 指标是否在主区声明集合中。
   bool hasRegisteredInMain(IIndicatorKey key) {

@@ -118,10 +118,11 @@ void main() {
       );
 
       // ---------------------------------------------------------------
-      // 属性 3：computedDataCount 等于 ComputedIndicator 的数量
+      // 属性 3：挂载后 computedDataCapacity 等于声明的 ComputedIndicator 数量
+      //（首次分配、无回收，容量即声明数）
       // ---------------------------------------------------------------
       test(
-        'computedDataCount 等于所有 ComputedIndicator 的数量',
+        'computedDataCapacity 等于所有 ComputedIndicator 的数量',
         () {
           final rng = Random(44);
           for (int run = 0; run < numRuns; run++) {
@@ -142,14 +143,12 @@ void main() {
               context: context,
             );
 
-            final dataCount = [...mainIndicators, ...subIndicators]
-                .where((i) => i.key is ComputedIndicatorKey)
-                .length;
+            final dataCount = [...mainIndicators, ...subIndicators].where((i) => i.key is ComputedIndicatorKey).length;
 
             expect(
-              manager.computedDataCount,
+              manager.computedDataCapacity,
               equals(dataCount),
-              reason: 'run#$run: computedDataCount 应为 $dataCount',
+              reason: 'run#$run: computedDataCapacity 应为 $dataCount',
             );
           }
         },
@@ -222,10 +221,10 @@ void main() {
       );
 
       // ---------------------------------------------------------------
-      // 属性 6：所有 slot index 在 [0, computedDataCount) 范围内
+      // 属性 6：所有 slot index 在 [0, computedDataCapacity) 范围内
       // ---------------------------------------------------------------
       test(
-        '所有已分配的 slot index 在 [0, computedDataCount) 范围内',
+        '所有已分配的 slot index 在 [0, computedDataCapacity) 范围内',
         () {
           final rng = Random(47);
           for (int run = 0; run < numRuns; run++) {
@@ -246,7 +245,7 @@ void main() {
               context: context,
             );
 
-            final count = manager.computedDataCount;
+            final count = manager.computedDataCapacity;
             final allIndicators = [...mainIndicators, ...subIndicators];
 
             for (final indicator in allIndicators) {
@@ -254,10 +253,8 @@ void main() {
                 final slot = manager.getComputedDataIndex(
                   indicator.key as ComputedIndicatorKey,
                 )!;
-                expect(slot, greaterThanOrEqualTo(0),
-                    reason: 'run#$run: ${indicator.key} slot $slot < 0');
-                expect(slot, lessThan(count),
-                    reason: 'run#$run: ${indicator.key} slot $slot >= $count');
+                expect(slot, greaterThanOrEqualTo(0), reason: 'run#$run: ${indicator.key} slot $slot < 0');
+                expect(slot, lessThan(count), reason: 'run#$run: ${indicator.key} slot $slot >= $count');
               }
             }
           }

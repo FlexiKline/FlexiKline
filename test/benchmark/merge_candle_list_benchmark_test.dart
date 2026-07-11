@@ -32,11 +32,10 @@ void main() {
       final kd = KlineData(
         const KlineSpec(symbol: 'BENCH', interval: invalidInterval),
       );
-      kd.mergeCandleList(spec, computedDataCount: 0);
+      kd.mergeCandleList(spec, slotCount: 0);
     }
     sw.stop();
-    debugPrint(
-        'merge_candle_list: 100x2000 candles in ${sw.elapsedMilliseconds}ms');
+    debugPrint('merge_candle_list: 100x2000 candles in ${sw.elapsedMilliseconds}ms');
     expect(sw.elapsedMilliseconds, greaterThanOrEqualTo(0));
   });
 }
