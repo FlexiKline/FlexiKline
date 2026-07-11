@@ -66,17 +66,14 @@ class IndicatorDesc {
 // ---------------------------------------------------------------------------
 
 /// 创建 direct 类型描述
-IndicatorDesc direct(int id, [double h = 100]) =>
-    IndicatorDesc(IndicatorKind.direct, id, h);
+IndicatorDesc direct(int id, [double h = 100]) => IndicatorDesc(IndicatorKind.direct, id, h);
 
 /// 创建 computed 类型描述
-IndicatorDesc computed(int id, [double h = 100]) =>
-    IndicatorDesc(IndicatorKind.computed, id, h);
+IndicatorDesc computed(int id, [double h = 100]) => IndicatorDesc(IndicatorKind.computed, id, h);
 
 /// 创建 external 类型描述
 // ignore: non_constant_identifier_names
-IndicatorDesc external_(int id, [double h = 80]) =>
-    IndicatorDesc(IndicatorKind.external_, id, h);
+IndicatorDesc external_(int id, [double h = 80]) => IndicatorDesc(IndicatorKind.external_, id, h);
 
 /// 创建 direct 类型 key
 DirectIndicatorKey directKey(int id) => DirectIndicatorKey('direct_$id');
@@ -111,6 +108,7 @@ Indicator createIndicator(IndicatorDesc d) => switch (d.kind) {
       IndicatorKind.external_ => TestExternalIndicator(
           key: externalKey(d.id),
           height: d.height,
+          autoActivate: false,
         ),
     };
 

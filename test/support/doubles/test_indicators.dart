@@ -51,7 +51,9 @@ class _TestCandlePaintObject extends CandleBasePaintObject<TestCandleIndicator> 
 
 /// 测试用 [TimeBaseIndicator] 子类，支持自定义 height
 class TestTimeIndicator extends TimeBaseIndicator {
-  TestTimeIndicator({super.height = 20}) : super(padding: EdgeInsets.zero, position: DrawPosition.middle);
+  TestTimeIndicator({
+    super.height = 20,
+  }) : super(padding: EdgeInsets.zero, position: DrawPosition.middle);
 
   @override
   TimeBasePaintObject<TimeBaseIndicator> createPaintObject() => _TestTimePaintObject();
@@ -72,7 +74,11 @@ class _TestTimePaintObject extends TimeBasePaintObject<TestTimeIndicator> {
 
 /// 测试用 [DirectIndicator] 子类，支持自定义 key 和 height
 class TestDirectIndicator extends DirectIndicator {
-  TestDirectIndicator({required super.key, super.height = 100}) : super(padding: EdgeInsets.zero);
+  TestDirectIndicator({
+    required super.key,
+    super.height = 100,
+    super.autoActivate = false,
+  }) : super(padding: EdgeInsets.zero);
 
   @override
   DirectPaintObject<DirectIndicator> createPaintObject() => _TestDirectPaintObject();
@@ -93,7 +99,12 @@ class _TestDirectPaintObject extends DirectPaintObject<TestDirectIndicator> {
 
 /// 测试用 [ComputedIndicator] 子类，支持自定义 key、height 和 param
 class TestComputedIndicator extends ComputedIndicator {
-  TestComputedIndicator({required super.key, super.height = 100, this.param}) : super(padding: EdgeInsets.zero);
+  TestComputedIndicator({
+    required super.key,
+    super.height = 100,
+    super.autoActivate = false,
+    this.param,
+  }) : super(padding: EdgeInsets.zero);
 
   /// 可选计算参数，暴露给 [calcParam] getter
   final dynamic param;
@@ -124,7 +135,11 @@ class _TestComputedPaintObject extends ComputedPaintObject<TestComputedIndicator
 
 /// 测试用 [ExternalIndicator] 子类，支持自定义 key 和 height
 class TestExternalIndicator extends ExternalIndicator {
-  TestExternalIndicator({required super.key, super.height = 80}) : super(padding: EdgeInsets.zero);
+  TestExternalIndicator({
+    required super.key,
+    super.height = 80,
+    super.autoActivate = true,
+  }) : super(padding: EdgeInsets.zero);
 
   @override
   ExternalPaintObject<ExternalIndicator> createPaintObject() => _TestExternalPaintObject();

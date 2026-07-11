@@ -133,16 +133,28 @@ void main() {
       );
     }
 
-    test('声明挂载即创建常驻对象并 initState 一次（未激活也创建）', () {
+    test('autoActivate=false 声明在 mount 时不创建对象（惰性）', () {
       final log = LifecycleLog();
       final ctx = FakePaintContext();
       final m = build(log);
-      final ext = SpyExternalIndicator(key: const ExternalIndicatorKey('ext_a'), log: log);
+      final ext = SpyExternalIndicator(key: const ExternalIndicatorKey('ext_a'), log: log, autoActivate: false);
+
+      mount(m, [ext], const [], ctx);
+
+      expect(log.countOf('initState:ext_a'), 0); // 未激活 → 不创建
+      expect(log.countOf('didAttach:ext_a'), 0);
+    });
+
+    test('autoActivate=true 声明在 mount 时自动激活（创建 + initState + didAttach）', () {
+      final log = LifecycleLog();
+      final ctx = FakePaintContext();
+      final m = build(log);
+      final ext = SpyExternalIndicator(key: const ExternalIndicatorKey('ext_a'), log: log); // 默认 true
 
       mount(m, [ext], const [], ctx);
 
       expect(log.countOf('initState:ext_a'), 1);
-      expect(log.countOf('didAttach:ext_a'), 0); // 未激活，不进树
+      expect(log.countOf('didAttach:ext_a'), 1);
     });
 
     test('show 复用常驻对象触发 didAttach，不重复 initState', () {
@@ -184,7 +196,10 @@ void main() {
       mount(
         m,
         const [],
-        [SpyExternalIndicator(key: a, log: log), SpyExternalIndicator(key: b, log: log)],
+        [
+          SpyExternalIndicator(key: a, log: log, autoActivate: false),
+          SpyExternalIndicator(key: b, log: log, autoActivate: false)
+        ],
         ctx,
       );
 
@@ -273,7 +288,7 @@ void main() {
       expect(log.countOf('didUpdateIndicator:ext_a'), 1);
     });
 
-    test('新增 external 声明创建常驻并 initState', () {
+    test('新增 external 声明由 updateIndicators 返回待激活 key（manager 内不创建）', () {
       final log = LifecycleLog();
       final ctx = FakePaintContext();
       final m = build(log);
@@ -285,9 +300,9 @@ void main() {
         context: ctx,
       );
       const key = ExternalIndicatorKey('ext_a');
-      final ext = SpyExternalIndicator(key: key, log: log);
+      final ext = SpyExternalIndicator(key: key, log: log); // 默认 autoActivate=true
 
-      m.updateIndicators(
+      final pending = m.updateIndicators(
         context: ctx,
         oldCandle: TestCandleIndicator(),
         newCandle: TestCandleIndicator(),
@@ -299,6 +314,11 @@ void main() {
         newSubIndicators: const [],
       );
 
+      expect(pending.main, contains(key)); // 待激活
+      expect(log.countOf('initState:ext_a'), 0); // manager 未创建
+
+      // 模拟上层 show：激活后才创建。
+      m.addMainPaintObject(key, ctx);
       expect(log.countOf('initState:ext_a'), 1);
     });
 
@@ -307,7 +327,7 @@ void main() {
       final ctx = FakePaintContext();
       final m = build(log);
       const key = ExternalIndicatorKey('ext_s');
-      final ext = SpyExternalIndicator(key: key, log: log);
+      final ext = SpyExternalIndicator(key: key, log: log, autoActivate: false);
       m.mountIndicators(
         candle: TestCandleIndicator(),
         time: TestTimeIndicator(),
@@ -319,7 +339,7 @@ void main() {
       // 激活到副区绘制树。
       m.addSubPaintObject(key, ctx);
 
-      // 声明移除 → _disposeResident（经 removeSubPaintObject 回写后须被清除）。
+      // 声明移除 → 强制 dispose，并清出 keepAlive 缓存。
       m.updateIndicators(
         context: ctx,
         oldCandle: TestCandleIndicator(),
@@ -332,8 +352,8 @@ void main() {
         newSubIndicators: const [],
       );
 
-      // 以同 key 新增全新实例 → _ensureEagerResident 应创建新对象（而非复用已销毁的）。
-      final freshExt = SpyExternalIndicator(key: key, log: log);
+      // 以同 key 新增全新实例并再次激活 → 应创建新对象，而非复用已销毁的。
+      final freshExt = SpyExternalIndicator(key: key, log: log, autoActivate: false);
       m.updateIndicators(
         context: ctx,
         oldCandle: TestCandleIndicator(),
@@ -345,6 +365,7 @@ void main() {
         oldSubIndicators: const [],
         newSubIndicators: [freshExt],
       );
+      m.addSubPaintObject(key, ctx);
 
       expect(log.countOf('dispose:ext_s'), 1);
       expect(log.countOf('initState:ext_s'), 2);
@@ -393,7 +414,7 @@ void main() {
       expect(log.countOf('initState:cp_k'), 0);
 
       m.addSubPaintObject(key, ctx); // 首次 show → 创建 + initState + attach
-      m.removeSubPaintObject(key);   // hide → didDetach，不 dispose，入缓存
+      m.removeSubPaintObject(key); // hide → didDetach，不 dispose，入缓存
       m.addSubPaintObject(key, ctx); // 再 show → 复用
 
       expect(log.countOf('initState:cp_k'), 1);
@@ -420,7 +441,7 @@ void main() {
       m.addSubPaintObject(key, ctx);
 
       expect(log.countOf('initState:cp_n'), 2); // 重建两次
-      expect(log.countOf('dispose:cp_n'), 1);   // hide 一次销毁
+      expect(log.countOf('dispose:cp_n'), 1); // hide 一次销毁
     });
   });
 }

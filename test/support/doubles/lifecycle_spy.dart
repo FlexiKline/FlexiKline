@@ -44,6 +44,7 @@ class SpyExternalIndicator extends ExternalIndicator {
     required super.key,
     required this.log,
     super.height = 80,
+    super.autoActivate = true,
   }) : super(padding: EdgeInsets.zero);
 
   final LifecycleLog log;
@@ -69,8 +70,7 @@ class SpyExternalPaintObject extends ExternalPaintObject<SpyExternalIndicator> {
   void didDetach() => _log.events.add('didDetach:$_id');
 
   @override
-  void didChangeDependencies(KlineSpec oldSpec) =>
-      _log.events.add('didChangeDependencies:$_id');
+  void didChangeDependencies(KlineSpec oldSpec) => _log.events.add('didChangeDependencies:$_id');
 
   @override
   void didUpdateIndicator(covariant SpyExternalIndicator oldIndicator) {
@@ -90,9 +90,7 @@ class SpyExternalPaintObject extends ExternalPaintObject<SpyExternalIndicator> {
   @override
   void paint(Canvas canvas, Size size) {}
   @override
-  Size? paintTips(Canvas canvas,
-          {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) =>
-      null;
+  Size? paintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
 }
 
 // ---------------------------------------------------------------------------
@@ -107,6 +105,7 @@ class SpyComputedIndicator extends ComputedIndicator {
     this.keepAlive = false,
     this.recompute = false,
     super.height = 100,
+    super.autoActivate = false,
   }) : super(padding: EdgeInsets.zero);
 
   final LifecycleLog log;
@@ -116,8 +115,7 @@ class SpyComputedIndicator extends ComputedIndicator {
   final bool recompute;
 
   @override
-  ComputedPaintObject<ComputedIndicator> createPaintObject() =>
-      SpyComputedPaintObject();
+  ComputedPaintObject<ComputedIndicator> createPaintObject() => SpyComputedPaintObject();
 }
 
 class SpyComputedPaintObject extends ComputedPaintObject<SpyComputedIndicator> {
@@ -134,8 +132,7 @@ class SpyComputedPaintObject extends ComputedPaintObject<SpyComputedIndicator> {
   bool get keepAlive => indicator.keepAlive;
 
   @override
-  bool shouldRecompute(covariant SpyComputedIndicator oldIndicator) =>
-      indicator.recompute;
+  bool shouldRecompute(covariant SpyComputedIndicator oldIndicator) => indicator.recompute;
 
   @override
   void compute(Range range, {bool reset = false}) {
@@ -174,7 +171,5 @@ class SpyComputedPaintObject extends ComputedPaintObject<SpyComputedIndicator> {
   @override
   void paint(Canvas canvas, Size size) {}
   @override
-  Size? paintTips(Canvas canvas,
-          {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) =>
-      null;
+  Size? paintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
 }

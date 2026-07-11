@@ -20,6 +20,7 @@ part of 'indicator.dart';
 /// [key] 唯一指定 Indicator。
 /// [height] 指标图高度。
 /// [padding] 限制指标图绘制区域。
+/// [autoActivate] 是否在首次声明或从 false 变为 true 时自动激活。
 /// [paintMode] 控制多指标图一起的绘制方式。
 ///   [PaintMode.combine] 多指标时，统一使用父 Indicator 的高度和 padding。
 ///   [PaintMode.alone] 多指标时，使用自己的 height 进行绘制。
@@ -30,6 +31,7 @@ abstract class Indicator<K extends IIndicatorKey> {
     required this.key,
     required this.height,
     required this.padding,
+    required this.autoActivate,
     this.paintMode = PaintMode.combine,
     this.zIndex = 0,
   });
@@ -39,6 +41,11 @@ abstract class Indicator<K extends IIndicatorKey> {
   double height;
 
   final EdgeInsets padding;
+
+  /// 是否在首次声明或从 false 变为 true 时自动激活。
+  ///
+  /// 该属性只触发自动 show；变为 false 不会自动 hide。
+  final bool autoActivate;
 
   final PaintMode paintMode;
 
@@ -59,6 +66,7 @@ abstract class DirectIndicator extends Indicator<DirectIndicatorKey> {
     required super.key,
     required super.height,
     required super.padding,
+    super.autoActivate = false,
     super.paintMode,
     super.zIndex,
   });
@@ -76,6 +84,7 @@ abstract class ComputedIndicator extends Indicator<ComputedIndicatorKey> {
     required super.key,
     required super.height,
     required super.padding,
+    super.autoActivate = false,
     super.paintMode,
     super.zIndex,
   });
@@ -98,6 +107,7 @@ abstract class ExternalIndicator extends Indicator<ExternalIndicatorKey> {
     required super.key,
     required super.height,
     required super.padding,
+    super.autoActivate = true,
     super.paintMode,
     super.zIndex,
   });
@@ -115,7 +125,7 @@ abstract class CandleBaseIndicator extends DirectIndicator {
     required super.padding,
     super.paintMode,
     super.zIndex,
-  }) : super(key: candleIndicatorKey);
+  }) : super(key: candleIndicatorKey, autoActivate: true);
 
   @override
   CandleBasePaintObject<CandleBaseIndicator> createPaintObject();
@@ -131,7 +141,7 @@ abstract class TimeBaseIndicator extends DirectIndicator {
     super.paintMode,
     super.zIndex,
     required this.position,
-  }) : super(key: timeIndicatorKey);
+  }) : super(key: timeIndicatorKey, autoActivate: true);
 
   final DrawPosition position;
 
@@ -152,7 +162,7 @@ class MainPaintObjectIndicator<T extends Indicator<IIndicatorKey>> extends Indic
     this.drawBelowTipsArea = false,
     Set<IIndicatorKey>? children,
   })  : children = children ?? <IIndicatorKey>{},
-        super(key: mainIndicatorKey, height: size.height);
+        super(key: mainIndicatorKey, height: size.height, autoActivate: true);
 
   late Size size;
 

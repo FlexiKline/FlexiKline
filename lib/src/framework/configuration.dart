@@ -209,9 +209,17 @@ extension IIndicatorConfigExt on IIndicatorConfig {
     setConfig(key.id, {});
   }
 
-  /// 支持的主区指标 key。
-  Iterable<IIndicatorKey> get supportMainIndicatorKeys => mainIndicators.map((e) => e.key);
+  /// 主区可选指标 key；[includeExternal]=true 时并入 External 业务指标（默认排除）。
+  Iterable<IIndicatorKey> getSupportMainIndicatorKeys([bool includeExternal = false]) {
+    final keys = mainIndicators.map((e) => e.key);
+    if (includeExternal) return keys;
+    return keys.where((key) => key is! ExternalIndicatorKey);
+  }
 
-  /// 支持的副区指标 key。
-  Iterable<IIndicatorKey> get supportSubIndicatorKeys => subIndicators.map((e) => e.key);
+  /// 副区可选指标 key；[includeExternal]=true 时并入 External 业务指标（默认排除）。
+  Iterable<IIndicatorKey> getSupportSubIndicatorKeys([bool includeExternal = false]) {
+    final keys = subIndicators.map((e) => e.key);
+    if (includeExternal) return keys;
+    return keys.where((key) => key is! ExternalIndicatorKey);
+  }
 }

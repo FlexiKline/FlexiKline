@@ -436,12 +436,16 @@ mixin SettingBinding on KlineBindingBase {
   /// PaintObject 已创建且 Controller 处于 mounted。
   bool get isMounted => _paintObjectManager.isInitialized && _lifecycleNotifier.value.isMounted;
 
-  Iterable<IIndicatorKey> get supportMainIndicatorKeys {
-    return _paintObjectManager.supportMainIndicatorKeys;
+  /// 主区已注册指标 key；默认过滤 External 业务指标，[includeExternal]=true 则全返回。
+  Iterable<IIndicatorKey> getSupportMainIndicatorKeys([bool includeExternal = false]) {
+    if (includeExternal) return _paintObjectManager.supportMainIndicatorKeys;
+    return _paintObjectManager.supportMainIndicatorKeys.where((key) => key is! ExternalIndicatorKey);
   }
 
-  Iterable<IIndicatorKey> get supportSubIndicatorKeys {
-    return _paintObjectManager.supportSubIndicatorKeys;
+  /// 副区已注册指标 key；默认过滤 External 业务指标，[includeExternal]=true 则全返回。
+  Iterable<IIndicatorKey> getSupportSubIndicatorKeys([bool includeExternal = false]) {
+    if (includeExternal) return _paintObjectManager.supportSubIndicatorKeys;
+    return _paintObjectManager.supportSubIndicatorKeys.where((key) => key is! ExternalIndicatorKey);
   }
 
   Iterable<IIndicatorKey> get mainIndicatorKeys {
@@ -502,7 +506,7 @@ mixin SettingBinding on KlineBindingBase {
     required List<Indicator> oldSubIndicators,
     required List<Indicator> newSubIndicators,
   }) {
-    _paintObjectManager.updateIndicators(
+    final pending = _paintObjectManager.updateIndicators(
       oldCandle: oldCandle,
       newCandle: newCandle,
       oldTime: oldTime,
@@ -513,6 +517,12 @@ mixin SettingBinding on KlineBindingBase {
       newSubIndicators: newSubIndicators,
       context: this,
     );
+    for (final key in pending.main) {
+      showMainIndicator(key);
+    }
+    for (final key in pending.sub) {
+      showSubIndicator(key);
+    }
   }
 
   /// 处理 Widget 挂载前暂存的数据。由 StateBinding 实现。

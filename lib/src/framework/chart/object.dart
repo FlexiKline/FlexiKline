@@ -250,7 +250,7 @@ abstract class ComputedPaintObject<T extends ComputedIndicator> extends PaintObj
 /// 业务指标绘制对象
 ///
 /// 用于 Trade 等由业务数据或用户操作驱动的指标，不占 slot。
-/// 声明即常驻（keepAlive=true）：显示 attach、隐藏 detach 保活、显式移除才 dispose。
+/// 首次激活时创建；隐藏后默认保活（keepAlive=true），重新显示时复用；声明移除时 dispose。
 /// 子类可按需 override 明确生命周期方法；简单指标可只 override [loadBusinessData]。
 abstract class ExternalPaintObject<T extends ExternalIndicator> extends PaintObject<T> implements IExternalPainter {
   /// 业务指标默认常驻，不释放
