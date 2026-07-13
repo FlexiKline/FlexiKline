@@ -26,7 +26,7 @@ test/
 ## 运行命令
 
 ```bash
-# 常规测试（排除 exploration 和 benchmark）— 当前 620 tests
+# 常规测试（排除 exploration 和 benchmark）— 当前 646 tests
 flutter test --exclude-tags "exploration,benchmark"
 
 # 性能基准
@@ -35,7 +35,7 @@ flutter test --tags benchmark
 # 探索性测试 — 当前 20 tests
 flutter test --tags exploration
 
-# 全量 — 当前 640 tests
+# 全量 — 当前 669 tests
 flutter test
 ```
 

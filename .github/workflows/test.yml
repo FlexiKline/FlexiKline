@@ -34,7 +34,7 @@ jobs:
 
       - run: flutter pub get
       - run: flutter analyze
-      - run: flutter test
+      - run: flutter test --exclude-tags "exploration,benchmark"
       - name: Publish dry-run
         if: ${{ matrix.flutter-version == '' }}
         run: dart pub publish --dry-run
