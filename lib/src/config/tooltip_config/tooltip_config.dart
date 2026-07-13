@@ -30,6 +30,8 @@ class TooltipConfig {
     required this.margin,
     required this.padding,
     required this.radius,
+    this.spacing = 2,
+    this.hitTestMargin = 2,
 
     /// tooltip 文本设置
     required this.style,
@@ -41,6 +43,13 @@ class TooltipConfig {
   final EdgeInsets margin;
   final EdgeInsets padding;
   final BorderRadius radius;
+
+  /// tooltip 两列之间的间距
+  final double spacing;
+
+  /// 扩大 Tooltip 行点击命中区域；向四周各扩展 [hitTestMargin] 逻辑像素。
+  /// 仅影响点击检测，不影响绘制布局。
+  final double hitTestMargin;
 
   /// tooltip 文本设置
   /// 注: style的颜色由FKTheme.tooltipTextColor替换.

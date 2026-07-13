@@ -15,7 +15,7 @@ abstract class _$TooltipInfoCWProxy {
 
   TooltipInfo valueStyle(TextStyle? valueStyle);
 
-  TooltipInfo riseOrFall(num riseOrFall);
+  TooltipInfo onTap(void Function()? onTap);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `TooltipInfo(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -28,7 +28,7 @@ abstract class _$TooltipInfoCWProxy {
     TextStyle? labelStyle,
     String value,
     TextStyle? valueStyle,
-    num riseOrFall,
+    void Function()? onTap,
   });
 }
 
@@ -51,7 +51,7 @@ class _$TooltipInfoCWProxyImpl implements _$TooltipInfoCWProxy {
   TooltipInfo valueStyle(TextStyle? valueStyle) => this(valueStyle: valueStyle);
 
   @override
-  TooltipInfo riseOrFall(num riseOrFall) => this(riseOrFall: riseOrFall);
+  TooltipInfo onTap(void Function()? onTap) => this(onTap: onTap);
 
   @override
 
@@ -66,7 +66,7 @@ class _$TooltipInfoCWProxyImpl implements _$TooltipInfoCWProxy {
     Object? labelStyle = const $CopyWithPlaceholder(),
     Object? value = const $CopyWithPlaceholder(),
     Object? valueStyle = const $CopyWithPlaceholder(),
-    Object? riseOrFall = const $CopyWithPlaceholder(),
+    Object? onTap = const $CopyWithPlaceholder(),
   }) {
     return TooltipInfo(
       label: label == const $CopyWithPlaceholder()
@@ -85,10 +85,10 @@ class _$TooltipInfoCWProxyImpl implements _$TooltipInfoCWProxy {
           ? _value.valueStyle
           // ignore: cast_nullable_to_non_nullable
           : valueStyle as TextStyle?,
-      riseOrFall: riseOrFall == const $CopyWithPlaceholder()
-          ? _value.riseOrFall
+      onTap: onTap == const $CopyWithPlaceholder()
+          ? _value.onTap
           // ignore: cast_nullable_to_non_nullable
-          : riseOrFall as num,
+          : onTap as void Function()?,
     );
   }
 }

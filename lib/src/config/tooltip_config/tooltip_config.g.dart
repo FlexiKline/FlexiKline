@@ -15,6 +15,10 @@ abstract class _$TooltipConfigCWProxy {
 
   TooltipConfig radius(BorderRadius radius);
 
+  TooltipConfig spacing(double spacing);
+
+  TooltipConfig hitTestMargin(double hitTestMargin);
+
   TooltipConfig style(TextStyle style);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `TooltipConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
@@ -28,6 +32,8 @@ abstract class _$TooltipConfigCWProxy {
     EdgeInsets margin,
     EdgeInsets padding,
     BorderRadius radius,
+    double spacing,
+    double hitTestMargin,
     TextStyle style,
   });
 }
@@ -51,6 +57,13 @@ class _$TooltipConfigCWProxyImpl implements _$TooltipConfigCWProxy {
   TooltipConfig radius(BorderRadius radius) => this(radius: radius);
 
   @override
+  TooltipConfig spacing(double spacing) => this(spacing: spacing);
+
+  @override
+  TooltipConfig hitTestMargin(double hitTestMargin) =>
+      this(hitTestMargin: hitTestMargin);
+
+  @override
   TooltipConfig style(TextStyle style) => this(style: style);
 
   @override
@@ -66,6 +79,8 @@ class _$TooltipConfigCWProxyImpl implements _$TooltipConfigCWProxy {
     Object? margin = const $CopyWithPlaceholder(),
     Object? padding = const $CopyWithPlaceholder(),
     Object? radius = const $CopyWithPlaceholder(),
+    Object? spacing = const $CopyWithPlaceholder(),
+    Object? hitTestMargin = const $CopyWithPlaceholder(),
     Object? style = const $CopyWithPlaceholder(),
   }) {
     return TooltipConfig(
@@ -85,6 +100,14 @@ class _$TooltipConfigCWProxyImpl implements _$TooltipConfigCWProxy {
           ? _value.radius
           // ignore: cast_nullable_to_non_nullable
           : radius as BorderRadius,
+      spacing: spacing == const $CopyWithPlaceholder()
+          ? _value.spacing
+          // ignore: cast_nullable_to_non_nullable
+          : spacing as double,
+      hitTestMargin: hitTestMargin == const $CopyWithPlaceholder()
+          ? _value.hitTestMargin
+          // ignore: cast_nullable_to_non_nullable
+          : hitTestMargin as double,
       style: style == const $CopyWithPlaceholder()
           ? _value.style
           // ignore: cast_nullable_to_non_nullable
@@ -112,6 +135,8 @@ TooltipConfig _$TooltipConfigFromJson(Map<String, dynamic> json) =>
           .fromJson(json['padding'] as Map<String, dynamic>),
       radius: const BorderRadiusConverter()
           .fromJson(json['radius'] as Map<String, dynamic>),
+      spacing: (json['spacing'] as num?)?.toDouble() ?? 2,
+      hitTestMargin: (json['hitTestMargin'] as num?)?.toDouble() ?? 0,
       style: const TextStyleConverter()
           .fromJson(json['style'] as Map<String, dynamic>),
     );
@@ -122,5 +147,7 @@ Map<String, dynamic> _$TooltipConfigToJson(TooltipConfig instance) =>
       'margin': const EdgeInsetsConverter().toJson(instance.margin),
       'padding': const EdgeInsetsConverter().toJson(instance.padding),
       'radius': const BorderRadiusConverter().toJson(instance.radius),
+      'spacing': instance.spacing,
+      'hitTestMargin': instance.hitTestMargin,
       'style': const TextStyleConverter().toJson(instance.style),
     };

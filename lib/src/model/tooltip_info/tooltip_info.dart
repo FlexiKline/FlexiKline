@@ -24,12 +24,16 @@ class TooltipInfo {
     this.labelStyle,
     required this.value,
     this.valueStyle,
-    this.riseOrFall = 0,
+    this.onTap,
   });
 
   final String label;
   final TextStyle? labelStyle;
   final String value;
   final TextStyle? valueStyle;
-  final num riseOrFall;
+
+  /// 点击该 Tooltip 行时触发的回调。
+  ///
+  /// 仅在 Cross 显示且点击位置命中当前行时调用。
+  final VoidCallback? onTap;
 }

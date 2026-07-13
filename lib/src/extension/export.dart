@@ -22,6 +22,7 @@ export 'render/draw_image_text.dart';
 export 'render/draw_path.dart';
 export 'render/draw_rect.dart';
 export 'render/draw_text.dart';
+export 'render/draw_tooltip_infos.dart';
 export 'render/types.dart';
 export 'stopwatch_ext.dart';
 export 'style_ext.dart';

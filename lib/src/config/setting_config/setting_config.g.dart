@@ -36,8 +36,7 @@ abstract class _$SettingConfigCWProxy {
 
   SettingConfig firstCandleInitOffset(double firstCandleInitOffset);
 
-  SettingConfig allowOverlayOutsideMainRect(
-      bool allowOverlayOutsideMainRect);
+  SettingConfig allowOverlayOutsideMainRect(bool allowOverlayOutsideMainRect);
 
   SettingConfig showYAxisTick(bool showYAxisTick);
 
@@ -140,8 +139,7 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
       this(firstCandleInitOffset: firstCandleInitOffset);
 
   @override
-  SettingConfig allowOverlayOutsideMainRect(
-          bool allowOverlayOutsideMainRect) =>
+  SettingConfig allowOverlayOutsideMainRect(bool allowOverlayOutsideMainRect) =>
       this(allowOverlayOutsideMainRect: allowOverlayOutsideMainRect);
 
   @override
