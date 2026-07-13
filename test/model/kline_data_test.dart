@@ -265,6 +265,47 @@ void main() {
     });
   });
 
+  group('indexAtOrBefore', () {
+    KlineData createData(List<int> timestamps) {
+      final data = KlineData(
+        const KlineSpec(symbol: 'TEST', interval: invalidInterval),
+      );
+      data.mergeCandleList(
+        timestamps.map(_makeCandle).toList(),
+        slotCount: 0,
+      );
+      return data;
+    }
+
+    test('精确时间戳返回对应真实蜡烛下标', () {
+      final data = createData([100, 80, 50]);
+      addTearDown(data.dispose);
+
+      expect(data.indexAtOrBefore(100), 0);
+      expect(data.indexAtOrBefore(80), 1);
+      expect(data.indexAtOrBefore(50), 2);
+    });
+
+    test('时间缺口返回不晚于目标的最近真实蜡烛', () {
+      final data = createData([100, 80, 50]);
+      addTearDown(data.dispose);
+
+      expect(data.indexAtOrBefore(90), 1);
+      expect(data.indexAtOrBefore(79), 2);
+    });
+
+    test('空数据或目标超出已加载范围返回null', () {
+      final empty = createData([]);
+      final data = createData([100, 80, 50]);
+      addTearDown(empty.dispose);
+      addTearDown(data.dispose);
+
+      expect(empty.indexAtOrBefore(80), isNull);
+      expect(data.indexAtOrBefore(101), isNull);
+      expect(data.indexAtOrBefore(49), isNull);
+    });
+  });
+
   // ---------------------------------------------------------------------------
   // removeDuplicate — 去重算法
   // ---------------------------------------------------------------------------

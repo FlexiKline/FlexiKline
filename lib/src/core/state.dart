@@ -19,6 +19,12 @@ part of 'core.dart';
 /// 加载[spec]指定范围内的历史数据.
 typedef OnLoadMoreCandles = Future<void> Function(KlineSpec spec);
 
+/// 将蜡烛图从[begin]动画移动到[end].
+typedef MoveToPositionCallback = void Function(
+  double begin,
+  double end,
+);
+
 /// 状态管理: 负责数据的管理, 缓存, 切换, 计算.
 mixin StateBinding on KlineBindingBase, SettingBinding {
   @override
@@ -50,14 +56,14 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     _klineData = KlineData.empty;
     _klineDataCache.clear();
     onLoadMoreCandles = null;
-    moveToInitialPositionCallback = null;
+    moveToPositionCallback = null;
   }
 
   /// 加载更多回调
   OnLoadMoreCandles? onLoadMoreCandles;
 
-  /// 返回到初始位置动画回调.
-  VoidCallback? moveToInitialPositionCallback;
+  /// 蜡烛图位置动画回调，由手势Widget在挂载后注入.
+  MoveToPositionCallback? moveToPositionCallback;
 
   /// 首根蜡烛是否移出屏幕 listenable。
   final _isFirstCandleMovedOffScreenNotifier = ValueNotifier(false);
@@ -278,17 +284,52 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     );
   }
 
+  /// 将视口移动到[target]对应的绘制偏移.
+  ///
+  /// 优先通过[moveToPositionCallback]走动画; 无回调时立即更新[paintDxOffset]并重绘.
+  void _moveToPaintDxOffset(double target) {
+    if (!isMounted) return;
+
+    final begin = paintDxOffset;
+    final end = clampPaintDxOffset(target);
+
+    final callback = moveToPositionCallback;
+    if (callback != null) {
+      callback(begin, end);
+      return;
+    }
+
+    if ((begin - end).abs() < precisionError) return;
+    paintDxOffset = end;
+    markRepaintChart(reset: true);
+    markRepaintDraw();
+  }
+
+  /// 移动到不晚于[dateTime]的最近一根已加载蜡烛.
+  ///
+  /// 数据充足时目标蜡烛居中; 靠近数据两端时沿用当前绘制边界.
+  /// 未挂载、无数据或[dateTime]超出已加载时间范围时返回false.
+  bool moveToDateTime(DateTime dateTime) {
+    if (!isMounted || klineData.isEmpty || mainChartWidth <= 0) {
+      return false;
+    }
+
+    final index = klineData.indexAtOrBefore(
+      dateTime.millisecondsSinceEpoch,
+    );
+    if (index == null) return false;
+
+    final target = index * candleActualWidth + candleWidthHalf - mainChartWidthHalf;
+    requestCancelCross();
+    _moveToPaintDxOffset(target);
+    return true;
+  }
+
   /// 请求移动蜡烛图回到初始位置。
   @override
   void requestMoveToInitialPosition() {
-    if (moveToInitialPositionCallback != null) {
-      moveToInitialPositionCallback?.call();
-      return;
-    }
     if (!isMounted) return;
-    paintDxOffset = getInitPaintDxOffset();
-    markRepaintChart();
-    markRepaintDraw();
+    _moveToPaintDxOffset(getInitPaintDxOffset());
   }
 
   /// 计算绘制蜡烛图的范围

@@ -31,20 +31,37 @@ void main() {
       expect((controller as PaintContext).klineData, same(controller.klineData));
     });
 
-    test('requestMoveToInitialPosition delegates through controller callback', () {
+    test('requestMoveToInitialPosition delegates begin and end through controller callback', () {
       final controller = FlexiKlineController(
-        configuration: FakeFlexiKlineConfiguration(),
+        configuration: FakeFlexiKlineConfiguration(
+          mainIndicatorDefaultSize: const Size(400, 300),
+        ),
       );
+      addTearDown(controller.dispose);
+      controller.mountIndicators(
+        candle: TestCandleIndicator(),
+        time: TestTimeIndicator(),
+        mainIndicators: const [],
+        subIndicators: const [],
+      );
+      controller.initState();
 
-      var moved = false;
-      controller.moveToInitialPositionCallback = () {
-        moved = true;
+      double? actualBegin;
+      double? actualEnd;
+      controller.moveToPositionCallback = (begin, end) {
+        actualBegin = begin;
+        actualEnd = end;
       };
+      final expectedBegin = controller.paintDxOffset;
+      final expectedEnd = controller.clampPaintDxOffset(
+        controller.getInitPaintDxOffset(),
+      );
 
       (controller as PaintContext).requestMoveToInitialPosition();
 
-      expect(moved, isTrue);
-      controller.moveToInitialPositionCallback = null;
+      expect(actualBegin, expectedBegin);
+      expect(actualEnd, expectedEnd);
+      controller.moveToPositionCallback = null;
     });
 
     test('reportChartZoomSlideBarRect respects manual zoom rect config', () {

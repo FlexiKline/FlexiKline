@@ -32,6 +32,27 @@ mixin CandleListData on BaseData {
     return checkIndex(index) ? index : null;
   }
 
+  /// 返回不晚于[ts]的最近一根真实蜡烛下标.
+  ///
+  /// 数据按时间降序排列. 空数据或[ts]超出已加载时间范围时返回null.
+  int? indexAtOrBefore(int ts) {
+    if (list.isEmpty || ts > list.first.ts || ts < list.last.ts) {
+      return null;
+    }
+
+    var low = 0;
+    var high = list.length - 1;
+    while (low < high) {
+      final mid = low + ((high - low) >> 1);
+      if (list[mid].ts <= ts) {
+        high = mid;
+      } else {
+        low = mid + 1;
+      }
+    }
+    return low;
+  }
+
   @override
   void initData() {
     super.initData();

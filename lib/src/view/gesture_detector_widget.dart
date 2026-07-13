@@ -40,22 +40,24 @@ abstract class GestureDetectorState<T extends GestureDetectorWidget> extends Sta
   void initState() {
     super.initState();
     logger = controller.logger;
-    controller.moveToInitialPositionCallback = moveToInitialPosition;
+    controller.moveToPositionCallback = moveToPosition;
   }
 
   @override
   void dispose() {
     animationController?.dispose();
-    controller.moveToInitialPositionCallback = null;
+    controller.moveToPositionCallback = null;
     super.dispose();
   }
 
-  /// 以动画的形式返回到初始位置
-  void moveToInitialPosition() {
+  /// 以动画的形式从[begin]移动到[end].
+  void moveToPosition(double begin, double end) {
+    if (!mounted || !controller.isMounted) return;
+
     animateToPosition(
-      controller.paintDxOffset,
-      controller.getInitPaintDxOffset(),
-      onCompleted: () => controller.onPanEnd(),
+      begin,
+      end,
+      onCompleted: controller.onPanEnd,
     );
   }
 
@@ -71,8 +73,11 @@ abstract class GestureDetectorState<T extends GestureDetectorWidget> extends Sta
     ToleranceConfig? tolerance,
     FutureOr<void> Function()? onCompleted,
   }) {
+    animationController?.dispose();
+    animationController = null;
     if ((begin - end).abs() < precisionError) {
       logd('animateToPosition begin:$begin end:$end no need to move!');
+      onCompleted?.call();
       return;
     }
 
@@ -84,7 +89,6 @@ abstract class GestureDetectorState<T extends GestureDetectorWidget> extends Sta
       ),
     );
 
-    animationController?.dispose();
     animationController = AnimationController(
       vsync: this,
       duration: panDuration,

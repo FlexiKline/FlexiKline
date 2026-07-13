@@ -30,11 +30,12 @@ void main() {
 
       expect(c.isMounted, isFalse);
 
-      // onThemeChanged 含 isMounted 守卫（chart.dart:48）
+      // onThemeChanged 含 isMounted 守卫
       expect(() => c.onThemeChanged(), returnsNormally);
 
-      // requestMoveToInitialPosition 含 isMounted 守卫（state.dart:279）
+      // requestMoveToInitialPosition、moveToDateTime 含 isMounted 守卫
       expect(() => c.requestMoveToInitialPosition(), returnsNormally);
+      expect(c.moveToDateTime(DateTime.utc(2026, 7, 10)), isFalse);
     });
   });
 }
