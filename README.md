@@ -26,7 +26,7 @@ FlexiKline 是一个高度灵活且可定制的 Flutter 金融 K 线图表框架
 
 ```yaml
 dependencies:
-  flexi_kline: ^2.2.0
+  flexi_kline: ^2.3.0
 ```
 
 然后运行：
@@ -108,6 +108,9 @@ controller.switchKlineData(spec);
 
 /// 更新指定规格的数据
 controller.updateKlineData(spec, list);
+
+/// 跳转到指定日期（动画滚动到最近一根已加载蜡烛）
+controller.moveToDateTime(DateTime(2024, 6, 15));
 ```
 
 ## 自定义指标
@@ -118,7 +121,7 @@ v2.2.0 引入了类型化的指标体系，通过 `IIndicatorKey` sealed class �
 | ------------ | ---------------------- | ------------------- | --------------------- | --------------------------------------------------------------- |
 | 直接绘制指标 | `DirectIndicatorKey`   | `DirectIndicator`   | `DirectPaintObject`   | 直接基于当前 K 线数据和绘制上下文绘制，不占 computed data index |
 | 计算型指标   | `ComputedIndicatorKey` | `ComputedIndicator` | `ComputedPaintObject` | 需要提前计算，并将结果写入 `FlexiCandleModel.slots`             |
-| 外部数据指标 | `ExternalIndicatorKey` | `ExternalIndicator` | `ExternalPaintObject` | 由外部数据或用户操作驱动，声明即常驻，hide 保活                 |
+| 外部数据指标 | `ExternalIndicatorKey` | `ExternalIndicator` | `ExternalPaintObject` | 由外部数据或用户操作驱动，默认 `autoActivate: true`             |
 
 ### PaintObject 生命周期
 
@@ -133,8 +136,8 @@ v2.2.0 引入了类型化的指标体系，通过 `IIndicatorKey` sealed class �
 | `didAttach` / `didDetach` | 进入 / 离开绘制树（几何首次有效） |
 | `dispose` | 实例销毁 |
 
-- **Direct / Computed**：show 时创建、hide 时销毁。
-- **External**：声明时 eager 创建；`initState` 默认调用 `loadBusinessData()` 加载业务数据。
+- **Direct / Computed**：`autoActivate` 默认 `false`；show 时创建、hide 时销毁（`keepAlive` 可保活复用）。
+- **External**：`autoActivate` 默认 `true`，首次激活时创建；`initState` 默认调用 `loadBusinessData()` 加载业务数据。
 - 继承 `ComputedPaintObject` 时，覆写 `didUpdateIndicator` 需调用 `super` 以触发重算。
 
 ### 示例：自定义数据指标

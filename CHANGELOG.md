@@ -1,4 +1,4 @@
-## 2.2.1
+## 2.3.0
 * Improve `FlexiLayoutMode.fixed` canvas size resolution: resolve width and height independently (parent constraints first, `fixedSize` fallback) to cover more constraint combinations.
 * Relax `initialFixedSize` assert in fixed layout mode: only `height` must be finite when provided; width can be resolved from parent constraints.
 * Add `isMounted` guard in `paintChart` to prevent accessing uninitialized PaintObjects during early render frames.
@@ -6,6 +6,14 @@
 * Rename `allowPaintExtraOutsideMainRect` to `allowOverlayOutsideMainRect` in `SettingConfig` and JSON serialization (Breaking Changes).
 * Add default no-op `paintTips` implementation on base `PaintObject`.
 * Remove redundant `computeVisibleMinMax` and `paintTips` overrides from `TimePaintObject`.
+* Add `Indicator.autoActivate` to control auto-show on mount or false→true update; Direct/Computed default `false`, External default `true`, Candle/Time/Main fixed `true`; turning to `false` does not auto-hide (Breaking Changes).
+* Defer PaintObject creation to activation time: External indicators are no longer eagerly created on declaration; `keepAlive` only controls dispose-on-hide (Breaking Changes).
+* `mountIndicators` now activates the deduplicated union of persisted keys and `autoActivate` declarations; `updateIndicators` returns pending activation keys for `showMainIndicator`/`showSubIndicator`.
+* Fix computed slot capacity as a high-water mark so deleting middle indicators does not shrink `slots` array below surviving high-index data.
+* Add `FlexiKlineController.moveToDateTime(DateTime)` with animated viewport positioning; add `KlineData.indexAtOrBefore` for nearest loaded candle lookup.
+* Unify Cross tooltip rendering via `Canvas.drawTooltipInfos` for aligned two-column layout; add `TooltipInfo.onTap` with configurable `TooltipConfig.hitTestMargin` and `TooltipConfig.spacing` (Breaking Changes).
+* Remove `TooltipInfo.riseOrFall` in favor of `valueStyle` at the data layer (Breaking Changes).
+* Stabilize tooltip width during crossing via session-level `minContentWidth` tracking.
 
 ## 2.2.0
 * Redesign widget-level indicator declaration: `FlexiKlineWidget` now accepts `candle`, `time`, `mainIndicators`, `subIndicators` directly; add `FlexiKlineWidget.indicator` named constructor for `IIndicatorConfig` (Breaking Changes).

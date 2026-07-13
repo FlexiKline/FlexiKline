@@ -177,6 +177,8 @@
         "bottomLeft": 6.0,
         "bottomRight": 6.0
       },
+      "spacing": 2.0,
+      "hitTestMargin": 2.0,
       "style": {
         "color": null,
         "fontSize": 10.0,
