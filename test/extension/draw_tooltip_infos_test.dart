@@ -71,24 +71,77 @@ void main() {
     recorder.endRecording().dispose();
   });
 
-  test('drawTooltipInfos 超宽时只约束 value 列宽度', () {
+  test('drawTooltipInfos maxContentWidth 超宽时只约束 value 列宽度', () {
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder);
     const style = TextStyle(fontSize: 10, height: 1);
 
     Rect? bounds;
+    Size? size;
 
-    canvas.drawTooltipInfos(
+    size = canvas.drawTooltipInfos(
       offset: const Offset(0, 0),
       tooltipInfos: [
         TooltipInfo(label: 'Label', value: 'VeryLongValueText'),
       ],
       defaultStyle: style,
-      maxWidth: 60,
+      maxContentWidth: 60,
       onLayout: (cardBounds, _) => bounds = cardBounds,
     );
 
-    expect(bounds!.width, lessThanOrEqualTo(60));
+    expect(size.width, lessThanOrEqualTo(60));
+    expect(bounds!.width, size.width);
+
+    recorder.endRecording().dispose();
+  });
+
+  test('drawTooltipInfos minContentWidth 撑开窄内容', () {
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+    const style = TextStyle(fontSize: 10, height: 1);
+    const padding = EdgeInsets.symmetric(horizontal: 8);
+
+    final size = canvas.drawTooltipInfos(
+      offset: const Offset(0, 0),
+      tooltipInfos: [
+        TooltipInfo(label: 'A', value: '1'),
+      ],
+      defaultStyle: style,
+      minContentWidth: 80,
+      padding: padding,
+    );
+
+    expect(size.width, 80 + padding.horizontal);
+
+    recorder.endRecording().dispose();
+  });
+
+  test('drawTooltipInfos minContentWidth 优先于自然宽度且不误触发 value 换行', () {
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+    const style = TextStyle(fontSize: 10, height: 1);
+
+    Size? wideSize;
+    Size? stableSize;
+
+    wideSize = canvas.drawTooltipInfos(
+      offset: const Offset(0, 0),
+      tooltipInfos: [
+        TooltipInfo(label: 'Open', value: '12345.678'),
+      ],
+      defaultStyle: style,
+    );
+
+    stableSize = canvas.drawTooltipInfos(
+      offset: const Offset(0, 0),
+      tooltipInfos: [
+        TooltipInfo(label: 'Open', value: '9.99'),
+      ],
+      defaultStyle: style,
+      minContentWidth: wideSize.width,
+    );
+
+    expect(stableSize.width, wideSize.width);
 
     recorder.endRecording().dispose();
   });

@@ -83,11 +83,15 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
       _offset = _correctCrossOffset(val);
     } else {
       _offset = null;
+      _tooltipStableContentWidth = null;
     }
     _clearTooltipHitTestData();
   }
 
   final List<_TooltipTapTarget> _tooltipTapTargets = [];
+
+  /// 当前 crossing 会话内观测到的最大 Tooltip 内容区宽度（不含 padding）。
+  double? _tooltipStableContentWidth;
 
   void _clearTooltipHitTestData() {
     _tooltipTapTargets.clear();
@@ -276,13 +280,14 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
       availableWidth - tooltipConfig.padding.horizontal,
     );
 
-    canvas.drawTooltipInfos(
+    final size = canvas.drawTooltipInfos(
       offset: tooltipOffset,
       tooltipInfos: list,
       drawDirection: drawDirection,
       drawableRect: mainChartRect,
       defaultStyle: tooltipTextStyle,
-      maxWidth: maxContentWidth,
+      minContentWidth: _tooltipStableContentWidth,
+      maxContentWidth: maxContentWidth,
       yAxisAlign: YAxisAlign.center,
       backgroundColor: theme.tooltipBg,
       borderRadius: tooltipConfig.radius,
@@ -301,6 +306,12 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
           );
         }
       },
+    );
+
+    final contentWidth = size.width - tooltipConfig.padding.horizontal;
+    _tooltipStableContentWidth = math.max(
+      _tooltipStableContentWidth ?? 0,
+      contentWidth,
     );
   }
 

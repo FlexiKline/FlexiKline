@@ -23,6 +23,7 @@ extension FlexiDrawTooltipInfosExt on Canvas {
   /// 将 [tooltipInfos] 绘制为左右两列的 Tooltip 卡片。
   ///
   /// label 在内容区左对齐，value 在内容区右对齐。
+  /// [minContentWidth] 与 [maxContentWidth] 均指内容区宽度，不包含 [padding]。
   /// 返回包含 padding 的卡片实际尺寸。
   Size drawTooltipInfos({
     required Offset offset,
@@ -36,7 +37,8 @@ extension FlexiDrawTooltipInfosExt on Canvas {
     TextScaler textScaler = TextScaler.noScaling,
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
     double spacing = 0,
-    double maxWidth = double.infinity,
+    double? minContentWidth,
+    double maxContentWidth = double.infinity,
     YAxisAlign yAxisAlign = YAxisAlign.center,
     Color? backgroundColor,
     BorderRadius? borderRadius,
@@ -48,7 +50,8 @@ extension FlexiDrawTooltipInfosExt on Canvas {
     )? onLayout,
   }) {
     assert(spacing >= 0);
-    assert(maxWidth >= 0);
+    assert(minContentWidth == null || minContentWidth >= 0);
+    assert(maxContentWidth >= 0);
 
     if (tooltipInfos.isEmpty) {
       return Size.zero;
@@ -102,9 +105,14 @@ extension FlexiDrawTooltipInfosExt on Canvas {
       final naturalContentWidth = maxLabelWidth + columnSpacing + maxValueWidth;
 
       double contentWidth = naturalContentWidth;
-      if (maxWidth.isFinite && naturalContentWidth > maxWidth && maxWidth > maxLabelWidth + columnSpacing) {
-        contentWidth = maxWidth;
-        final valueMaxWidth = maxWidth - maxLabelWidth - columnSpacing;
+      if (minContentWidth != null && minContentWidth > contentWidth) {
+        contentWidth = minContentWidth;
+      }
+      if (maxContentWidth.isFinite &&
+          contentWidth > maxContentWidth &&
+          maxContentWidth > maxLabelWidth + columnSpacing) {
+        contentWidth = maxContentWidth;
+        final valueMaxWidth = maxContentWidth - maxLabelWidth - columnSpacing;
 
         for (final painter in valuePainters) {
           painter.layout(maxWidth: valueMaxWidth);
