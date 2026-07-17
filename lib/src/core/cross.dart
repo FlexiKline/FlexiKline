@@ -333,6 +333,16 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
     if (tooltipLabels.isEmpty) return const [];
     final p = klineData.precision;
 
+    final tooltipTextStyle = crossConfig.tooltipConfig.style;
+    TextStyle? getValueStyle(num signum) {
+      if (signum > 0) {
+        return tooltipTextStyle.ensure(theme.longColor);
+      } else if (signum < 0) {
+        return tooltipTextStyle.ensure(theme.shortColor);
+      }
+      return null;
+    }
+
     final list = <TooltipInfo>[];
     tooltipLabels.forEach((key, label) {
       String? value;
@@ -356,20 +366,19 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
           break;
         case TooltipLabel.chg:
           value = formatPrice(model.change.toDecimal(), precision: p, cutInvalidZero: false);
+          valueStyle = getValueStyle(model.change.signum);
           break;
         case TooltipLabel.chgRate:
           value = formatPercentage(model.changeRate.toDecimal(), precision: 2);
-          if (model.change.signum > 0) {
-            valueStyle = TextStyle(color: theme.longColor);
-          } else if (model.change.signum < 0) {
-            valueStyle = TextStyle(color: theme.shortColor);
-          }
+          valueStyle = getValueStyle(model.change.signum);
           break;
         case TooltipLabel.range:
           if (pre != null) {
             value = formatPercentage(model.rangeRate(pre).toDecimal(), precision: 2);
+            valueStyle = getValueStyle(model.rangeRate(pre));
           } else {
             value = formatPrice(model.range.toDecimal(), precision: p, cutInvalidZero: false);
+            valueStyle = getValueStyle(model.range.signum);
           }
           break;
         case TooltipLabel.amount:
