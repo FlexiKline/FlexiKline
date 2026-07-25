@@ -528,20 +528,22 @@ mixin PaintCandleChartMixin<T extends Indicator> on PaintObject<T> {
 
     final points = <Offset>[];
     FlexiCandleModel m;
+    double boundDy = chartRect.bottom;
     for (var i = start; i < end; i++) {
       m = klineData[i];
+      final dy = valueToDy(m.close, correct: false);
       points.add(Offset(
         startOffset - (i - start) * candleActualWidth,
-        valueToDy(m.close, correct: false),
+        dy,
       ));
+      boundDy = math.max(boundDy, dy);
     }
 
-    // 默认策略：填充到底部
     paintLineChart(
       canvas,
       points: points,
-      boundEnd: Offset(points.last.dx, chartRect.bottom),
-      boundStart: Offset(points.first.dx, chartRect.bottom),
+      boundEnd: Offset(points.last.dx, boundDy),
+      boundStart: Offset(points.first.dx, boundDy),
       linePaint: linePaint,
       shader: gradient,
     );
@@ -561,9 +563,7 @@ mixin PaintCandleChartMixin<T extends Indicator> on PaintObject<T> {
       linePaint,
     );
     if (boundEnd != null && boundStart != null && shader != null) {
-      points.add(boundEnd);
-      points.add(boundStart);
-      final path = Path()..addPolygon(points, true);
+      final path = Path()..addPolygon([...points, boundEnd, boundStart], true);
       canvas.drawPath(
         path,
         Paint()..shader = shader.createShader(path.getBounds()),
