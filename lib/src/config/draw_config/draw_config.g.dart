@@ -192,7 +192,7 @@ DrawConfig _$DrawConfigFromJson(Map<String, dynamic> json) => DrawConfig(
           : PointConfig.fromJson(json['crosspoint'] as Map<String, dynamic>),
       crosshair: json['crosshair'] == null
           ? const LineConfig(
-              paint: PaintConfig(strokeWidth: 0.5),
+              paint: PaintConfig(strokeWidth: defaultAuxiliaryLineWidth),
               type: LineType.dashed,
               dashes: [5, 3])
           : LineConfig.fromJson(json['crosshair'] as Map<String, dynamic>),

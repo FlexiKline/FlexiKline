@@ -6,7 +6,10 @@
       "count": 5,
       "line": {
         "type": "solid",
-        "dashes": [2.0, 2.0],
+        "dashes": [
+          2.0,
+          2.0
+        ],
         "paint": {
           "strokeWidth": 0.5,
           "style": "stroke",
@@ -20,7 +23,10 @@
       "count": 5,
       "line": {
         "type": "solid",
-        "dashes": [2.0, 2.0],
+        "dashes": [
+          2.0,
+          2.0
+        ],
         "paint": {
           "strokeWidth": 0.5,
           "style": "stroke",
@@ -34,9 +40,12 @@
     "dragLine": {
       "type": "dashed",
       "length": 20.0,
-      "dashes": [3.0, 5.0],
+      "dashes": [
+        3.0,
+        5.0
+      ],
       "paint": {
-        "strokeWidth": 2.5,
+        "strokeWidth": 3.0,
         "style": "stroke",
         "blendMode": "srcOver",
         "isAntiAlias": true
@@ -90,7 +99,10 @@
     "showYAxisTick": true,
     "autoStartLastPriceCountDownTimer": true,
     "autoLoadMoreData": true,
-    "expandRatiosOfSameMinmax": [0.1, 0.05]
+    "expandRatiosOfSameMinmax": [
+      0.1,
+      0.05
+    ]
   },
   "gesture": {
     "enableLongPress": true,
@@ -116,7 +128,10 @@
     "enable": true,
     "crosshair": {
       "type": "dashed",
-      "dashes": [3.0, 3.0],
+      "dashes": [
+        3.0,
+        3.0
+      ],
       "paint": {
         "strokeWidth": 0.5,
         "style": "stroke",
@@ -206,7 +221,10 @@
     },
     "crosshair": {
       "type": "dashed",
-      "dashes": [5.0, 3.0],
+      "dashes": [
+        5.0,
+        3.0
+      ],
       "paint": {
         "strokeWidth": 0.5,
         "style": "stroke",
@@ -216,7 +234,10 @@
     },
     "drawLine": {
       "type": "solid",
-      "dashes": [5.0, 3.0],
+      "dashes": [
+        5.0,
+        3.0
+      ],
       "paint": {
         "strokeWidth": 1.0,
         "style": "stroke",
@@ -273,8 +294,8 @@
       "decorationOpacity": 1.0,
       "shapeSide": {
         "color": "0x00000000",
-        "width": 0.0,
-        "style": "none"
+        "width": 0.5,
+        "style": "solid"
       }
     }
   },

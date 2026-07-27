@@ -29,7 +29,7 @@ class CandleIndicator extends CandleBaseIndicator {
         type: LineType.solid,
         length: 20,
         paint: PaintConfig(
-          strokeWidth: 0.5,
+          strokeWidth: defaultAuxiliaryLineWidth,
         ),
       ),
       text: TextAreaConfig(
@@ -47,7 +47,7 @@ class CandleIndicator extends CandleBaseIndicator {
         type: LineType.solid,
         length: 20,
         paint: PaintConfig(
-          strokeWidth: 0.5,
+          strokeWidth: defaultAuxiliaryLineWidth,
         ),
       ),
       text: TextAreaConfig(
@@ -68,7 +68,7 @@ class CandleIndicator extends CandleBaseIndicator {
         type: LineType.dashed,
         dashes: [3, 3],
         paint: PaintConfig(
-          strokeWidth: 0.5,
+          strokeWidth: defaultAuxiliaryLineWidth,
         ),
       ),
       hitTestMargin: 4,
@@ -97,7 +97,7 @@ class CandleIndicator extends CandleBaseIndicator {
         type: LineType.dashed,
         dashes: [3, 3],
         paint: PaintConfig(
-          strokeWidth: 0.5,
+          strokeWidth: defaultAuxiliaryLineWidth,
         ),
       ),
       text: TextAreaConfig(

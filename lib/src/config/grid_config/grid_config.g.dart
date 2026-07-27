@@ -255,7 +255,7 @@ GridConfig _$GridConfigFromJson(Map<String, dynamic> json) => GridConfig(
               type: LineType.dashed,
               dashes: [3, 5],
               length: 20,
-              paint: PaintConfig(strokeWidth: 5 * 0.5))
+              paint: PaintConfig(strokeWidth: 2))
           : LineConfig.fromJson(json['dragLine'] as Map<String, dynamic>),
       dragLineOpacity: (json['dragLineOpacity'] as num?)?.toDouble() ?? 0.1,
       ticksText: json['ticksText'] == null
@@ -290,7 +290,7 @@ GridAxis _$GridAxisFromJson(Map<String, dynamic> json) => GridAxis(
           ? const LineConfig(
               type: LineType.solid,
               dashes: [2, 2],
-              paint: PaintConfig(strokeWidth: 0.5))
+              paint: PaintConfig(strokeWidth: defaultAuxiliaryLineWidth))
           : LineConfig.fromJson(json['line'] as Map<String, dynamic>),
     );
 

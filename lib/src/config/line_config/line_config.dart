@@ -15,6 +15,7 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flutter/painting.dart';
 
+import '../../constant.dart';
 import '../../extension/render/types.dart';
 import '../../extension/style_ext.dart';
 import '../../framework/serializers.dart';
@@ -29,7 +30,9 @@ class LineConfig {
     this.type = LineType.solid,
     this.length,
     this.dashes = const [3, 3],
-    this.paint = const PaintConfig(strokeWidth: 0.5),
+    this.paint = const PaintConfig(
+      strokeWidth: defaultAuxiliaryLineWidth,
+    ),
   });
 
   /// 线类型

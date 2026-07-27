@@ -136,7 +136,7 @@ TooltipConfig _$TooltipConfigFromJson(Map<String, dynamic> json) =>
       radius: const BorderRadiusConverter()
           .fromJson(json['radius'] as Map<String, dynamic>),
       spacing: (json['spacing'] as num?)?.toDouble() ?? 2,
-      hitTestMargin: (json['hitTestMargin'] as num?)?.toDouble() ?? 0,
+      hitTestMargin: (json['hitTestMargin'] as num?)?.toDouble() ?? 2,
       style: const TextStyleConverter()
           .fromJson(json['style'] as Map<String, dynamic>),
     );

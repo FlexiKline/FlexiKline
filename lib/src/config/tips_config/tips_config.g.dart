@@ -13,6 +13,8 @@ abstract class _$TipsConfigCWProxy {
 
   TipsConfig isShow(bool isShow);
 
+  TipsConfig lineWidth(double? lineWidth);
+
   TipsConfig style(TextStyle style);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `TipsConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
@@ -25,6 +27,7 @@ abstract class _$TipsConfigCWProxy {
     String label,
     int? precision,
     bool isShow,
+    double? lineWidth,
     TextStyle style,
   });
 }
@@ -45,6 +48,9 @@ class _$TipsConfigCWProxyImpl implements _$TipsConfigCWProxy {
   TipsConfig isShow(bool isShow) => this(isShow: isShow);
 
   @override
+  TipsConfig lineWidth(double? lineWidth) => this(lineWidth: lineWidth);
+
+  @override
   TipsConfig style(TextStyle style) => this(style: style);
 
   @override
@@ -59,6 +65,7 @@ class _$TipsConfigCWProxyImpl implements _$TipsConfigCWProxy {
     Object? label = const $CopyWithPlaceholder(),
     Object? precision = const $CopyWithPlaceholder(),
     Object? isShow = const $CopyWithPlaceholder(),
+    Object? lineWidth = const $CopyWithPlaceholder(),
     Object? style = const $CopyWithPlaceholder(),
   }) {
     return TipsConfig(
@@ -74,6 +81,10 @@ class _$TipsConfigCWProxyImpl implements _$TipsConfigCWProxy {
           ? _value.isShow
           // ignore: cast_nullable_to_non_nullable
           : isShow as bool,
+      lineWidth: lineWidth == const $CopyWithPlaceholder()
+          ? _value.lineWidth
+          // ignore: cast_nullable_to_non_nullable
+          : lineWidth as double?,
       style: style == const $CopyWithPlaceholder()
           ? _value.style
           // ignore: cast_nullable_to_non_nullable
@@ -96,6 +107,7 @@ TipsConfig _$TipsConfigFromJson(Map<String, dynamic> json) => TipsConfig(
       label: json['label'] as String? ?? '',
       precision: (json['precision'] as num?)?.toInt(),
       isShow: json['isShow'] as bool? ?? true,
+      lineWidth: (json['lineWidth'] as num?)?.toDouble(),
       style: json['style'] == null
           ? const TextStyle(
               fontSize: defaultTextSize,
@@ -110,5 +122,6 @@ Map<String, dynamic> _$TipsConfigToJson(TipsConfig instance) =>
       'label': instance.label,
       if (instance.precision case final value?) 'precision': value,
       'isShow': instance.isShow,
+      if (instance.lineWidth case final value?) 'lineWidth': value,
       'style': const TextStyleConverter().toJson(instance.style),
     };

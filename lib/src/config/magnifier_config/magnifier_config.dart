@@ -31,7 +31,10 @@ class MagnifierConfig {
     this.clipBehavior = Clip.none,
     this.decorationOpacity = 1.0,
     this.decorationShadows,
-    this.shapeSide = defaultBorderSide,
+    this.shapeSide = const BorderSide(
+      color: transparent,
+      width: 0.5,
+    ),
   });
 
   /// 是否启用放大镜
@@ -83,7 +86,9 @@ class MagnifierConfig {
   ///    [BlurStyle.outer] for use with [MagnifierDecoration].
   final List<BoxShadow>? decorationShadows;
 
-  /// 放大镜默认圆形边框样式
+  /// 放大镜圆形边框样式。
+  ///
+  /// 默认 width 为 1、实线；[color] 为 [transparent] 时视为未指定，渲染端回退到主题网格线色。
   final BorderSide shapeSide;
 
   MagnifierConfig of({

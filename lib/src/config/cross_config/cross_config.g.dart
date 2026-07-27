@@ -145,7 +145,7 @@ CrossConfig _$CrossConfigFromJson(Map<String, dynamic> json) => CrossConfig(
       enable: json['enable'] as bool? ?? true,
       crosshair: json['crosshair'] == null
           ? const LineConfig(
-              paint: PaintConfig(strokeWidth: 0.5),
+              paint: PaintConfig(strokeWidth: defaultAuxiliaryLineWidth),
               type: LineType.dashed,
               dashes: [3, 3])
           : LineConfig.fromJson(json['crosshair'] as Map<String, dynamic>),

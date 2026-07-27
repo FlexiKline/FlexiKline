@@ -30,6 +30,7 @@ class TipsConfig {
     this.label = '',
     this.precision,
     this.isShow = true,
+    this.lineWidth,
     this.style = const TextStyle(
       fontSize: defaultTextSize,
       overflow: TextOverflow.ellipsis,
@@ -41,6 +42,7 @@ class TipsConfig {
     this.label = '',
     this.precision,
     this.isShow = true,
+    this.lineWidth,
     Color? color,
     double fontSize = 10,
     TextOverflow overflow = TextOverflow.ellipsis,
@@ -67,6 +69,9 @@ class TipsConfig {
   final String label;
   final int? precision;
   final bool isShow;
+
+  /// 指标线宽，仅在绘制 tips 对应的指标线时生效，颜色取自 [style]。
+  final double? lineWidth;
   final TextStyle style;
 
   // 如果未指定精度, 使用默认精度4

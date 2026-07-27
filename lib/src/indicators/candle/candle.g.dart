@@ -331,7 +331,7 @@ CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
               line: LineConfig(
                   type: LineType.solid,
                   length: 20,
-                  paint: PaintConfig(strokeWidth: 0.5)),
+                  paint: PaintConfig(strokeWidth: defaultAuxiliaryLineWidth)),
               text: TextAreaConfig(
                   style: TextStyle(
                       fontSize: defaultTextSize,
@@ -344,7 +344,7 @@ CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
               line: LineConfig(
                   type: LineType.solid,
                   length: 20,
-                  paint: PaintConfig(strokeWidth: 0.5)),
+                  paint: PaintConfig(strokeWidth: defaultAuxiliaryLineWidth)),
               text: TextAreaConfig(
                   style: TextStyle(
                       fontSize: defaultTextSize,
@@ -358,7 +358,7 @@ CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
               line: LineConfig(
                   type: LineType.dashed,
                   dashes: [3, 3],
-                  paint: PaintConfig(strokeWidth: 0.5)),
+                  paint: PaintConfig(strokeWidth: defaultAuxiliaryLineWidth)),
               hitTestMargin: 4,
               text: TextAreaConfig(
                   style: TextStyle(
@@ -378,7 +378,7 @@ CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
               line: LineConfig(
                   type: LineType.dashed,
                   dashes: [3, 3],
-                  paint: PaintConfig(strokeWidth: 0.5)),
+                  paint: PaintConfig(strokeWidth: defaultAuxiliaryLineWidth)),
               text: TextAreaConfig(
                   style: TextStyle(
                       fontSize: defaultTextSize,

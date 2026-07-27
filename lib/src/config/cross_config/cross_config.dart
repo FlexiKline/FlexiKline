@@ -33,7 +33,7 @@ class CrossConfig {
     this.enable = true,
     this.crosshair = const LineConfig(
       paint: PaintConfig(
-        strokeWidth: 0.5,
+        strokeWidth: defaultAuxiliaryLineWidth,
       ),
       type: LineType.dashed,
       dashes: [3, 3],

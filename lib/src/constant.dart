@@ -57,6 +57,10 @@ const int defaultSubTickCount = 3;
 // 默认指标线图的宽度
 const double defaultIndicatorLineWidth = 1;
 
+/// 默认辅助线宽度（十字线、网格线、价格标注线等）。
+/// 0.5 为有意的半像素细线。
+const double defaultAuxiliaryLineWidth = 0.5;
+
 // 默认文本配置
 const double defaultTextSize = 10;
 

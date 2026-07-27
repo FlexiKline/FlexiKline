@@ -102,7 +102,7 @@ LineConfig _$LineConfigFromJson(Map<String, dynamic> json) => LineConfig(
               .toList() ??
           const [3, 3],
       paint: json['paint'] == null
-          ? const PaintConfig(strokeWidth: 0.5)
+          ? const PaintConfig(strokeWidth: defaultAuxiliaryLineWidth)
           : PaintConfig.fromJson(json['paint'] as Map<String, dynamic>),
     );
 

@@ -39,7 +39,7 @@ class DrawConfig {
     ),
     this.crosshair = const LineConfig(
       paint: PaintConfig(
-        strokeWidth: 0.5,
+        strokeWidth: defaultAuxiliaryLineWidth,
       ),
       type: LineType.dashed,
       dashes: [5, 3],

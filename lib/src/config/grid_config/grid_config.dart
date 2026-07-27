@@ -51,7 +51,7 @@ class GridConfig {
       dashes: [3, 5],
       length: 20,
       paint: PaintConfig(
-        strokeWidth: 5 * 0.5,
+        strokeWidth: 2,
       ),
     ),
     this.dragLineOpacity = 0.1,
@@ -106,7 +106,7 @@ class GridAxis {
     this.line = const LineConfig(
       type: LineType.solid,
       dashes: [2, 2],
-      paint: PaintConfig(strokeWidth: 0.5),
+      paint: PaintConfig(strokeWidth: defaultAuxiliaryLineWidth),
     ),
   });
 

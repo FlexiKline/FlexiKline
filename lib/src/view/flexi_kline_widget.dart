@@ -504,12 +504,10 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
                       config.shapeSide,
                     ) ??
                     CircleBorder(
-                      side: BorderSide(
+                      side: config.shapeSide.copyWith(
                         color: config.shapeSide.color == transparent
                             ? controller.theme.gridLineColor
                             : config.shapeSide.color,
-                        width: config.shapeSide.width <= 0 ? 1 : config.shapeSide.width,
-                        style: config.shapeSide.style == BorderStyle.none ? BorderStyle.solid : config.shapeSide.style,
                       ),
                     ),
               ),
