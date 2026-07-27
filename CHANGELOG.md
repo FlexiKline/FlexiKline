@@ -1,3 +1,9 @@
+## 2.3.1
+* Add optional `TipsConfig.lineWidth` to override the width of the indicator line a tips represents (color still derived from `style`); when null it falls back to the indicator-level `lineWidth`.
+* Add `defaultAuxiliaryLineWidth` constant (0.5) and apply it to auxiliary lines (crosshair, grid, high/low and latest-price mark lines), replacing scattered `0.5` literals and distinguishing them from data lines (`defaultIndicatorLineWidth`).
+* Simplify magnifier `CircleBorder` resolution: only the border color falls back to the theme grid-line color when transparent; the configured `width` and `style` are now respected (previously `width <= 0` was forced to `1` and `BorderStyle.none` to solid). `MagnifierConfig.shapeSide` default is now `BorderSide(color: transparent, width: 0.5)`.
+* Fix `TooltipConfig` JSON deserialization to default `hitTestMargin` to `2`, matching the constructor default.
+
 ## 2.3.0
 * Improve `FlexiLayoutMode.fixed` canvas size resolution: resolve width and height independently (parent constraints first, `fixedSize` fallback) to cover more constraint combinations.
 * Relax `initialFixedSize` assert in fixed layout mode: only `height` must be finite when provided; width can be resolved from parent constraints.
