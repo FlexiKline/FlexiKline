@@ -63,6 +63,7 @@ extension FlexiDrawImageText on Canvas {
 
     /// 可绘制区域大小
     /// 主要用于边界矫正, 当绘制超出边界区域时, 会主动反向调整, 以保证内容区域完全展示. 如为null: 则不做边界矫正.
+    /// 当 [maxLines] 未设置或大于 1 时，也会限制文本的最大布局宽度。
     /// 1. 当绘制方向DrawDirection.ltr, 检测超出drawableSize右边界, 会主动向左调整offset xAxis偏移量, 且不超过左边界, 以保证内容区域完全展示.
     /// 2. 当绘制方向DrawDirection.rtl, 检测超出drawableSize左边界, 会主动向右调整offset xAxis偏移量, 且不超过右边界, 以保证内容区域完全展示.
     /// 3. 当绘制高度超出drawableSize规定高度时, 会主动向上调整offset yAxis轴偏移量, 且不超过上边界, 以保证内容区域完全展示.
@@ -100,6 +101,7 @@ extension FlexiDrawImageText on Canvas {
     final originImgSize = Size(image.width.toDouble(), image.height.toDouble());
     final isDrawImage = !(originImgSize.isEmpty || imgSize.isEmpty);
     Size containerSize = isDrawImage ? imgSize : Size.zero;
+    spacing = math.max(0, spacing);
 
     final textPainter = TextPainter(
       text: textSpan ??
@@ -115,13 +117,18 @@ extension FlexiDrawImageText on Canvas {
       strutStyle: strutStyle,
     );
 
+    final limitWidth = drawableRect != null && textWidth == null && (maxLines == null || maxLines > 1);
+    final rectMaxWidth = limitWidth
+        ? math.max(0.0, drawableRect.width - padding.horizontal - containerSize.width - spacing)
+        : double.infinity;
+    final layoutMaxWidth = textWidth ?? math.min(maxWidth, rectMaxWidth);
+
     textPainter.layout(
-      minWidth: textWidth ?? minWidth,
-      maxWidth: textWidth ?? maxWidth,
+      minWidth: math.min(minWidth, layoutMaxWidth),
+      maxWidth: layoutMaxWidth,
     );
     final textSize = textPainter.size;
 
-    spacing = spacing > 0 ? spacing : 0;
     containerSize = Size(
       containerSize.width + spacing + textSize.width,
       math.max(containerSize.height, textSize.height),

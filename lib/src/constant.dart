@@ -64,6 +64,9 @@ const double defaultAuxiliaryLineWidth = 0.5;
 // 默认文本配置
 const double defaultTextSize = 10;
 
+/// 不换行空格，用于保持关联文本在同一行。
+const String nbsp = '\u{00A0}';
+
 // 默认文本区域Padding
 const EdgeInsets defaultTextPadding = EdgeInsets.all(2);
 
