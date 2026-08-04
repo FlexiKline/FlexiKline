@@ -48,6 +48,7 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
     super.dispose();
     logd('dispose cross');
     _repaintCross.dispose();
+    _crossOffsetNotifier.dispose();
   }
 
   final ValueNotifier<int> _repaintCross = ValueNotifier(0);
@@ -60,7 +61,7 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
   @override
   void markRepaintCross() {
     if (isCrossing) {
-      _updateOffset(_offset);
+      _updateOffset(crossOffset);
       _markRepaintCross();
     }
   }
@@ -74,15 +75,19 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
   // 是否正在绘制Cross
   @override
   bool get isCrossing => crossOffset?.isFinite == true;
-
-  Offset? _offset;
   @override
-  Offset? get crossOffset => _offset;
+  Offset? get crossOffset => _crossOffsetNotifier.value;
+
+  /// 对外暴露 Cross 焦点的可监听对象, 供外部订阅焦点变化.
+  ValueListenable<Offset?> get crossOffsetListenable => _crossOffsetNotifier;
+
+  /// 当前 Cross 焦点位置, 为 null 时表示未处于 crossing 状态.
+  final _crossOffsetNotifier = FlexiStateNotifier<Offset?>(null);
   void _updateOffset(Offset? val) {
     if (val != null) {
-      _offset = _correctCrossOffset(val);
+      _crossOffsetNotifier.value = _correctCrossOffset(val);
     } else {
-      _offset = null;
+      _crossOffsetNotifier.value = null;
       _tooltipStableContentWidth = null;
     }
     _clearTooltipHitTestData();
@@ -152,7 +157,7 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
   /// 请求取消当前 cross。
   @override
   void requestCancelCross() {
-    if (isCrossing || _offset != null) {
+    if (isCrossing || crossOffset != null) {
       _updateOffset(null);
       // 当Cross事件结束后, 调用markRepaintChart触发绘制Chart图层首根蜡烛的tips信息.
       markRepaintChart();
@@ -165,7 +170,7 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
     if (!crossConfig.enable) return;
 
     if (isCrossing) {
-      final offset = _offset;
+      final offset = crossOffset;
       if (offset == null || offset.isInfinite) {
         return;
       }
