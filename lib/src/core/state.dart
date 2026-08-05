@@ -20,7 +20,7 @@ part of 'core.dart';
 typedef OnLoadMoreCandles = Future<void> Function(KlineSpec spec);
 
 /// 将蜡烛图从[begin]动画移动到[end].
-typedef MoveToPositionCallback = void Function(
+typedef MoveToPositionCallback = Future<bool> Function(
   double begin,
   double end,
 );
@@ -186,6 +186,16 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     return mainPaintObject.indexToDx(index, check: check);
   }
 
+  /// 将 [index] 转换为蜡烛中心的 X 坐标。
+  double? indexToCandleDx(int index, {bool check = false}) {
+    final dx = indexToDx(index, check: false);
+    if (dx == null) return null;
+
+    final candleDx = dx - candleWidthHalf;
+    if (check && !mainChartRect.includeDx(candleDx)) return null;
+    return candleDx;
+  }
+
   /// 将[dx]精确转换为蜡烛的时间戳ts, 差异部分补充到ts中.
   @override
   int? dxToTimestamp(double dx) {
@@ -287,49 +297,58 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   /// 将视口移动到[target]对应的绘制偏移.
   ///
   /// 优先通过[moveToPositionCallback]走动画; 无回调时立即更新[paintDxOffset]并重绘.
-  void _moveToPaintDxOffset(double target) {
-    if (!isMounted) return;
+  /// 返回动画是否完整完成.
+  Future<bool> _moveToPaintDxOffset(double target) async {
+    if (!isMounted) return false;
 
     final begin = paintDxOffset;
     final end = clampPaintDxOffset(target);
 
     final callback = moveToPositionCallback;
     if (callback != null) {
-      callback(begin, end);
-      return;
+      return callback(begin, end);
     }
 
-    if ((begin - end).abs() < precisionError) return;
-    paintDxOffset = end;
-    markRepaintChart(reset: true);
-    markRepaintDraw();
+    if ((begin - end).abs() >= precisionError) {
+      paintDxOffset = end;
+      markRepaintChart(reset: true);
+      markRepaintDraw();
+    }
+    return true;
   }
 
   /// 移动到不晚于[dateTime]的最近一根已加载蜡烛.
   ///
   /// 数据充足时目标蜡烛居中; 靠近数据两端时沿用当前绘制边界.
-  /// 未挂载、无数据或[dateTime]超出已加载时间范围时返回false.
-  bool moveToDateTime(DateTime dateTime) {
+  /// 未挂载、无数据、动画中断或目标蜡烛发生变化时返回null.
+  ///
+  /// 成功时返回目标蜡烛在当前[KlineData]中的下标.
+  Future<int?> moveToDateTime(DateTime dateTime) async {
     if (!isMounted || klineData.isEmpty || mainChartWidth <= 0) {
-      return false;
+      return null;
     }
 
-    final index = klineData.indexAtOrBefore(
+    final data = klineData;
+    final index = data.indexAtOrBefore(
       dateTime.millisecondsSinceEpoch,
     );
-    if (index == null) return false;
+    if (index == null) return null;
+    final targetTimestamp = data.get(index)?.ts;
+    if (targetTimestamp == null) return null;
 
     final target = index * candleActualWidth + candleWidthHalf - mainChartWidthHalf;
     requestCancelCross();
-    _moveToPaintDxOffset(target);
-    return true;
+    if (!await _moveToPaintDxOffset(target)) return null;
+    if (!isMounted || !identical(klineData, data)) return null;
+    if (klineData.get(index)?.ts != targetTimestamp) return null;
+    return index;
   }
 
   /// 请求移动蜡烛图回到初始位置。
   @override
   void requestMoveToInitialPosition() {
     if (!isMounted) return;
-    _moveToPaintDxOffset(getInitPaintDxOffset());
+    unawaited(_moveToPaintDxOffset(getInitPaintDxOffset()));
   }
 
   /// 计算绘制蜡烛图的范围

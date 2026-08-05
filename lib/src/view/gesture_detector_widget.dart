@@ -45,16 +45,24 @@ abstract class GestureDetectorState<T extends GestureDetectorWidget> extends Sta
 
   @override
   void dispose() {
-    animationController?.dispose();
+    cancelPositionAnimation();
     controller.moveToPositionCallback = null;
     super.dispose();
   }
 
-  /// 以动画的形式从[begin]移动到[end].
-  void moveToPosition(double begin, double end) {
-    if (!mounted || !controller.isMounted) return;
+  /// 取消当前的位置动画。
+  @protected
+  void cancelPositionAnimation() {
+    final current = animationController;
+    animationController = null;
+    current?.dispose();
+  }
 
-    animateToPosition(
+  /// 以动画的形式从[begin]移动到[end].
+  Future<bool> moveToPosition(double begin, double end) {
+    if (!mounted || !controller.isMounted) return Future.value(false);
+
+    return animateToPosition(
       begin,
       end,
       onCompleted: controller.onPanEnd,
@@ -66,59 +74,69 @@ abstract class GestureDetectorState<T extends GestureDetectorWidget> extends Sta
   /// [tolerance] 惯性平移参数
   /// [onCompleted] 动画完成回调
   @protected
-  void animateToPosition(
+  Future<bool> animateToPosition(
     double begin,
     double end, {
     Duration? panDuration,
     ToleranceConfig? tolerance,
     FutureOr<void> Function()? onCompleted,
-  }) {
-    animationController?.dispose();
-    animationController = null;
+  }) async {
+    cancelPositionAnimation();
+    if (!mounted || !controller.isMounted) return false;
+
     if ((begin - end).abs() < precisionError) {
       logd('animateToPosition begin:$begin end:$end no need to move!');
-      onCompleted?.call();
-      return;
+      await onCompleted?.call();
+      await WidgetsBinding.instance.endOfFrame;
+      return mounted && controller.isMounted;
     }
 
-    tolerance ??= gestureConfig.tolerance;
-    panDuration ??= Duration(
-      milliseconds: calcuInertialPanDuration(
-        (begin - end).abs(),
-        maxDuration: tolerance.maxDuration,
-      ),
-    );
+    final effectiveTolerance = tolerance ?? gestureConfig.tolerance;
+    final effectivePanDuration = panDuration ??
+        Duration(
+          milliseconds: calcuInertialPanDuration(
+            (begin - end).abs(),
+            maxDuration: effectiveTolerance.maxDuration,
+          ),
+        );
 
-    animationController = AnimationController(
+    final current = AnimationController(
       vsync: this,
-      duration: panDuration,
+      duration: effectivePanDuration,
     );
+    animationController = current;
 
-    logd('animateToPosition begin:$begin end:$end panDuration:${panDuration.inMilliseconds}');
+    logd('animateToPosition begin:$begin end:$end panDuration:${effectivePanDuration.inMilliseconds}');
     final gestureData = GestureData.pan(Offset(begin, 0.0));
     final animation = Tween(
       begin: begin,
       end: end,
-    ).chain(CurveTween(curve: tolerance.curve)).animate(animationController!);
+    ).chain(CurveTween(curve: effectiveTolerance.curve)).animate(current);
 
     animation.addListener(() {
       gestureData.update(Offset(
         animation.value,
         gestureData.offset.dy,
       ));
-      final progress = animationController!.value;
-      final sf = tolerance!.effectivePanSmoothFactor;
-      final tp = tolerance.effectiveConvergenceRatio;
+      final progress = current.value;
+      final sf = effectiveTolerance.effectivePanSmoothFactor;
+      final tp = effectiveTolerance.effectiveConvergenceRatio;
       final smoothFactor = progress < tp ? sf : lerpDouble(sf, 1.0, (progress - tp) / (1.0 - tp))!;
       controller.onChartMove(gestureData, smoothFactor);
     });
 
-    animationController?.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        onCompleted?.call();
+    try {
+      await current.forward().orCancel;
+      await onCompleted?.call();
+      await WidgetsBinding.instance.endOfFrame;
+      return mounted && controller.isMounted;
+    } on TickerCanceled {
+      return false;
+    } finally {
+      if (identical(animationController, current)) {
+        animationController = null;
+        current.dispose();
       }
-    });
-
-    animationController?.forward();
+    }
   }
 }

@@ -22,7 +22,7 @@ import '../support/support.dart';
 
 void main() {
   group('v2.2.0/FlexiKlineController/mounted_guard', () {
-    test('mount 前调用受守卫 API 不抛异常', () {
+    test('mount 前调用受守卫 API 不抛异常', () async {
       final c = FlexiKlineController(
         configuration: FakeFlexiKlineConfiguration(),
       );
@@ -35,7 +35,7 @@ void main() {
 
       // requestMoveToInitialPosition、moveToDateTime 含 isMounted 守卫
       expect(() => c.requestMoveToInitialPosition(), returnsNormally);
-      expect(c.moveToDateTime(DateTime.utc(2026, 7, 10)), isFalse);
+      expect(await c.moveToDateTime(DateTime.utc(2026, 7, 10)), isNull);
     });
   });
 }

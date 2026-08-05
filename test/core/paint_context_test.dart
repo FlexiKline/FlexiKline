@@ -48,9 +48,10 @@ void main() {
 
       double? actualBegin;
       double? actualEnd;
-      controller.moveToPositionCallback = (begin, end) {
+      controller.moveToPositionCallback = (begin, end) async {
         actualBegin = begin;
         actualEnd = end;
+        return true;
       };
       final expectedBegin = controller.paintDxOffset;
       final expectedEnd = controller.clampPaintDxOffset(

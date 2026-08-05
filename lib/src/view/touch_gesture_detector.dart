@@ -170,6 +170,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
       if (!_isZoomStarted) {
         if (_zoomData!.dyDelta.abs() >= gestureConfig.zoomStartMinDistance &&
             controller.onChartZoomStart(event.localPosition, false)) {
+          cancelPositionAnimation();
           _isZoomStarted = true;
         }
       } else {
@@ -183,6 +184,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
       }
 
       final newOffset = _moveData!.offset + event.delta;
+      cancelPositionAnimation();
       controller.onChartMove(_moveData!..update(newOffset));
     }
   }
@@ -303,7 +305,11 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
         _panScaleData?.end();
         _panScaleData = null;
       }
-    } else if (gestureConfig.enableScale && details.pointerCount > 1) {
+      return;
+    }
+
+    cancelPositionAnimation();
+    if (gestureConfig.enableScale && details.pointerCount > 1) {
       ScalePosition position = _panScaleData?.initPosition ?? gestureConfig.scalePosition;
       if (position == ScalePosition.auto) {
         final third = controller.canvasRect.width / 3;
