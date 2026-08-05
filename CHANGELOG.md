@@ -1,3 +1,8 @@
+## 2.3.2
+* Add `crossOffsetListenable` so external consumers can subscribe to Cross focus changes.
+* Constrain multiline `drawText` and `drawImageText` layouts to their `drawableRect`, while retaining existing single-line width behavior.
+* Change `FlexiKlineController.moveToDateTime(DateTime)` to an awaitable API returning `Future<int?>`: it completes after the movement animation and returns the resolved candle index, or `null` when the request cannot complete (Breaking Changes).
+
 ## 2.3.1
 * Add optional `TipsConfig.lineWidth` to override the width of the indicator line a tips represents (color still derived from `style`); when null it falls back to the indicator-level `lineWidth`.
 * Add `defaultAuxiliaryLineWidth` constant (0.5) and apply it to auxiliary lines (crosshair, grid, high/low and latest-price mark lines), replacing scattered `0.5` literals and distinguishing them from data lines (`defaultIndicatorLineWidth`).

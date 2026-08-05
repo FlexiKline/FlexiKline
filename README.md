@@ -26,7 +26,7 @@ FlexiKline 是一个高度灵活且可定制的 Flutter 金融 K 线图表框架
 
 ```yaml
 dependencies:
-  flexi_kline: ^2.3.1
+  flexi_kline: ^2.3.2
 ```
 
 然后运行：
@@ -109,8 +109,9 @@ controller.switchKlineData(spec);
 /// 更新指定规格的数据
 controller.updateKlineData(spec, list);
 
-/// 跳转到指定日期（动画滚动到最近一根已加载蜡烛）
-controller.moveToDateTime(DateTime(2024, 6, 15));
+/// 跳转到指定日期（动画滚动到最近一根已加载蜡烛）。
+/// Future 在动画完成后返回实际命中的蜡烛下标；无法完成时返回 null。
+final index = await controller.moveToDateTime(DateTime(2024, 6, 15));
 ```
 
 ## 自定义指标
