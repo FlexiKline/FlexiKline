@@ -24,5 +24,6 @@ class FlexiKlineController extends KlineBindingBase
     super.subIndicatorMaxCount,
     super.logger,
     super.klineDataCacheCapacity,
+    super.calculationInterval,
   });
 }

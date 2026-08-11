@@ -33,12 +33,8 @@ mixin CandleListData on BaseData {
   }
 
   /// 返回不晚于[ts]的最近一根真实蜡烛下标.
-  ///
-  /// 数据按时间降序排列. 空数据或[ts]超出已加载时间范围时返回null.
   int? indexAtOrBefore(int ts) {
-    if (list.isEmpty || ts > list.first.ts || ts < list.last.ts) {
-      return null;
-    }
+    if (list.isEmpty || ts > list.first.ts || ts < list.last.ts) return null;
 
     var low = 0;
     var high = list.length - 1;
@@ -59,17 +55,14 @@ mixin CandleListData on BaseData {
     initBasicData(allRange);
   }
 
-  /// 初始化基础数据
-  ///
-  /// 重置 [range] 范围内每条蜡烛的 OHLCV 数值，
-  /// 保留原有 slots 长度（不依赖外部 slotCount）。
+  /// 初始化基础数据.
   void initBasicData(Range range) {
     for (int i = range.start; i < range.end; i++) {
       _list[i] = _list[i].reset(computeMode, _list[i].slotCount);
     }
   }
 
-  /// 根据[start, end]下标计算最大最小值
+  /// 根据[start, end]下标计算最大最小值.
   MinMax? calculateMinmax(int start, int end) {
     if (!checkStartAndEnd(start, end)) return null;
 
@@ -84,90 +77,79 @@ mixin CandleListData on BaseData {
     return MinMax(max: maxHigh, min: minLow);
   }
 
-  /// 合并多批蜡烛数据到当前列表中。
-  ///
-  /// [slotCount] 指定新蜡烛模型的 slots 数量，传递给 [mergeCandleList]。
-  Range? mergeCandleData(
-    List<List<ICandleModel>> data, {
-    required int slotCount,
-  }) {
-    if (data.isEmpty) return null;
-    Range? result;
-    for (final newList in data) {
-      /// 合并[newList]到[data]中
-      final range = mergeCandleList(newList, slotCount: slotCount);
-      if (range != null) {
-        result ??= range;
-        result = result.merge(range);
-      }
-    }
+  /// 完整替换蜡烛列表并要求全量计算.
+  Range replace(List<ICandleModel> batch, {required int slotCount}) {
+    _list = batch.map((item) => item.toFlexiCandleModel(slotCount, computeMode)).toList(growable: true);
     updateState();
-    return result;
+    return Range.fullRecompute;
   }
 
-  /// 合并 [candleList] 到当前 [list] 中。
-  ///
-  /// 约定: [candleList] 与 [list] 都按时间倒序排列，即最新的蜡烛位于 0 号位。
-  /// 去重: 如两数组在时间维度上有重叠，重叠位置以 [candleList] 为准。
-  /// [slotCount] 指定新蜡烛模型的 slots 数量，由调用方（StateBinding）提供。
-  /// 返回: 新列表中被更新的范围 [start] ~ [end]，没有更新返回 null。
-  Range? mergeCandleList(
-    List<ICandleModel> candleList, {
-    required int slotCount,
-  }) {
-    if (candleList.isEmpty) {
-      logw('mergeCandleList candleList is empty!');
-      return null;
+  /// 合并最新方向数据，方向错误时返回 null.
+  Range? updateLatest(List<ICandleModel> batch, {required int slotCount}) {
+    if (batch.isEmpty || list.isEmpty) return null;
+    if (batch.first.timestamp < list.first.ts || batch.last.timestamp < list.last.ts) return null;
+
+    int start = 0;
+    while (start < list.length && list[start].ts >= batch.last.ts) {
+      start++;
     }
 
-    final newList = candleList.map((e) => e.toFlexiCandleModel(slotCount, computeMode)).toList(growable: false);
-
-    if (list.isEmpty) {
-      logw('mergeCandleList Use candleList directly!');
-      _list = List.of(newList);
-      return Range(0, newList.length);
+    final incoming = List<FlexiCandleModel?>.filled(batch.length, null, growable: false);
+    int oldIndex = start - 1;
+    for (int i = batch.length - 1; i >= 0; i--) {
+      final candle = batch[i];
+      while (oldIndex >= 0 && list[oldIndex].ts < candle.timestamp) {
+        oldIndex--;
+      }
+      FlexiCandleModel? current;
+      if (oldIndex >= 0 && list[oldIndex].ts == candle.timestamp) {
+        current = list[oldIndex--].rebuildSlots(slotCount);
+      }
+      incoming[i] = current?.copyWith(
+            open: candle.open,
+            high: candle.high,
+            low: candle.low,
+            close: candle.close,
+            volume: candle.volume,
+            turnover: candle.turnover,
+            tradeCount: candle.tradeCount,
+            confirmed: candle.confirmed,
+          ) ??
+          candle.toFlexiCandleModel(slotCount, computeMode);
     }
 
-    final firstNew = newList.first.ts;
-    final lastNew = newList.last.ts;
-
-    if (list.first.ts <= firstNew) {
-      int start = 0;
-      while (start < list.length && list[start].ts >= lastNew) {
-        start++;
+    final merged = incoming.cast<FlexiCandleModel>();
+    if (merged.length == start) {
+      for (int i = 0; i < merged.length; i++) {
+        _list[i] = merged[i];
       }
-
-      if (newList.length == start) {
-        // 快路径: 头部对齐且数量一致, 原地覆盖前 N 根, 不重建 List.
-        for (int i = 0; i < newList.length; i++) {
-          _list[i] = newList[i];
-        }
-      } else {
-        _list = List.of(newList, growable: true)..addAll(list.getRange(start, list.length));
-      }
-      return Range(0, newList.length);
-    } else if (list.last.ts >= lastNew) {
-      int end = list.length - 1;
-      while (end >= 0 && list[end].ts <= firstNew) {
-        end--;
-      }
-      final tailStart = end + 1;
-      final oldTailCount = list.length - tailStart;
-
-      if (newList.length == oldTailCount) {
-        // 快路径: 尾部对齐且数量一致, 原地覆盖末尾 N 根.
-        for (int i = 0; i < newList.length; i++) {
-          _list[tailStart + i] = newList[i];
-        }
-      } else {
-        // 原地截断 + 追加, 避免把 [0, tailStart) 段元素重复拷一次.
-        if (tailStart < _list.length) {
-          _list.length = tailStart;
-        }
-        _list.addAll(newList);
-      }
-      return Range(tailStart, _list.length);
+    } else {
+      _list = List.of(merged, growable: true)..addAll(list.getRange(start, list.length));
     }
-    return null;
+    updateState();
+    return Range(0, merged.length);
+  }
+
+  /// 合并历史方向数据，方向错误时返回 null.
+  Range? appendHistory(List<ICandleModel> batch, {required int slotCount}) {
+    if (batch.isEmpty || list.isEmpty || batch.first.timestamp > list.last.ts) return null;
+
+    final incoming = batch.map((item) => item.toFlexiCandleModel(slotCount, computeMode)).toList(growable: false);
+    int end = list.length - 1;
+    while (end >= 0 && list[end].ts <= incoming.first.ts) {
+      end--;
+    }
+    final tailStart = end + 1;
+    final oldTailCount = list.length - tailStart;
+    if (incoming.length == oldTailCount) {
+      for (int i = 0; i < incoming.length; i++) {
+        _list[tailStart + i] = incoming[i];
+      }
+    } else {
+      _list.length = tailStart;
+      _list.addAll(incoming);
+    }
+    updateState();
+    return Range.fullRecompute;
   }
 }

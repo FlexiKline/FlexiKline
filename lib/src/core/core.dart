@@ -27,6 +27,7 @@ import '../constant.dart';
 import '../data/kline_data.dart';
 import '../extension/export.dart';
 import '../framework/export.dart';
+import '../framework/kline_data_pipeline.dart';
 import '../model/export.dart';
 import '../types.dart';
 import '../utils/platform_util.dart';

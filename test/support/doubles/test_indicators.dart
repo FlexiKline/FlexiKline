@@ -114,6 +114,15 @@ class TestComputedIndicator extends ComputedIndicator {
 
   @override
   ComputedPaintObject<ComputedIndicator> createPaintObject() => _TestComputedPaintObject();
+
+  @override
+  IndicatorCalculator createCalculator(int dataIndex) => _TestComputedCalculator(this, dataIndex);
+}
+
+class _TestComputedCalculator extends IndicatorCalculator<TestComputedIndicator> {
+  _TestComputedCalculator(super.indicator, super.dataIndex);
+  @override
+  void compute(KlineData data, Range range, {bool reset = false}) {}
 }
 
 class _TestComputedPaintObject extends ComputedPaintObject<TestComputedIndicator> {
@@ -123,10 +132,6 @@ class _TestComputedPaintObject extends ComputedPaintObject<TestComputedIndicator
   void paint(Canvas canvas, Size size) {}
   @override
   Size? paintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
-  @override
-  bool shouldRecompute(covariant TestComputedIndicator oldIndicator) => false;
-  @override
-  void compute(Range range, {bool reset = false}) {}
 }
 
 // ---------------------------------------------------------------------------

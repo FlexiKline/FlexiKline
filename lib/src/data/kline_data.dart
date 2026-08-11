@@ -16,8 +16,7 @@ library;
 
 import 'package:flutter/foundation.dart';
 
-import '../extension/export.dart';
-import '../framework/chart/indicator.dart';
+import '../extension/collections_ext.dart';
 import '../framework/logger.dart';
 import '../model/export.dart';
 import '../types.dart';
@@ -26,9 +25,8 @@ part 'base_data.dart';
 part 'kline_spec.dart';
 part 'candle_list.dart';
 part 'paint_draw.dart';
-part 'indicator.dart';
 
-class KlineData extends BaseData with KlineSpecData, CandleListData, PaintDrawData, IndicatorData {
+class KlineData extends BaseData with KlineSpecData, CandleListData, PaintDrawData {
   KlineData(
     super.spec, {
     super.loadingState,
@@ -36,8 +34,6 @@ class KlineData extends BaseData with KlineSpecData, CandleListData, PaintDrawDa
     super.computeMode,
     super.logger,
   });
-
-  final FlexiStopwatch stopwatch = FlexiStopwatch();
 
   /// 重建所有蜡烛的 slots 到新容量
   ///
@@ -54,89 +50,10 @@ class KlineData extends BaseData with KlineSpecData, CandleListData, PaintDrawDa
     const KlineSpec(symbol: '', interval: invalidInterval),
     list: List.empty(growable: false),
   );
-
-  /// 预计算Kline指标数据
-  ///
-  /// [slotCount] 指定新蜡烛模型的 slots 数量，传递给 [mergeCandleData]
-  /// [newList] 新增的蜡烛数据
-  /// [mainPaintObjects] 主区待计算的指标集合
-  /// [subPaintObjects] 副区待计算的指标集合
-  /// [reset] 是否重置; 如果有, 忽略之前的计算结果.
-  Future<void> precomputeKlineData({
-    required int slotCount,
-    required List<ICandleModel> newList,
-    required Iterable<PaintObject> mainPaintObjects,
-    required Iterable<PaintObject> subPaintObjects,
-    bool reset = false,
-  }) async {
-    if (stopwatch.isRunning) {
-      logd('precomputeKlineData is running, waitingData.size:${_waitingData.length}');
-      _waitingData.add(newList);
-      return;
-    }
-
-    try {
-      stopwatch
-        ..reset()
-        ..start();
-
-      /// 1. 合并数据
-      final data = newList.isEmpty ? _waitingData : [newList, ..._waitingData];
-      Range? range = stopwatch.run(
-        () => mergeCandleData(data, slotCount: slotCount),
-        label: '$logTag-mergeCandleData-${data.length}',
-      );
-      _waitingData.clear();
-
-      /// 2. 确认要计算的范围.
-      if (reset) range = allRange;
-      if (range == null || range.isEmpty) {
-        // 没有合并新的数据, 且不是重置, 则不计算
-        logd('precomputeKlineData There is no data($range) to be calculated!');
-        return;
-      } else if (range.start < 0 || range.end >= length || range.length == length) {
-        // 如果不是首根更新, 或者是加载更多(尾部)数据, 指标计算结果需要重置.
-        range = allRange;
-        reset = true;
-      }
-
-      /// 3. 计算指标数据
-      logd('precomputeKlineData Start Main $reset-$range');
-      for (final computable in mainPaintObjects.whereType<IComputedPainter>()) {
-        await stopwatch.exec(
-          () => computable.compute(range!, reset: reset),
-          label: '$logTag-Main-precompute:${computable.key}-$range',
-        );
-      }
-
-      logd('precomputeKlineData Start Sub $reset-$range');
-      for (final computable in subPaintObjects.whereType<IComputedPainter>()) {
-        await stopwatch.exec(
-          () => computable.compute(range!, reset: reset),
-          label: '$logTag-Sub-precompute:${computable.key}-$range',
-        );
-      }
-      logd('precomputeKlineData End $reset-$range');
-    } catch (e, stack) {
-      loge('precomputeKlineData catch an exception!!!', error: e, stackTrace: stack);
-    } finally {
-      stopwatch.stop();
-      if (_waitingData.isNotEmpty) {
-        precomputeKlineData(
-          slotCount: slotCount,
-          newList: [],
-          mainPaintObjects: mainPaintObjects,
-          subPaintObjects: subPaintObjects,
-        );
-      }
-    }
-  }
 }
 
-/// 通过compute方式预计算KlineData.
-/// 实际执行参考[KlineData.precomputeKlineData]
-/// [data]将在MainIsolate和subIsolate之间传递,
-/// [data]的序列化反序列化耗时较大, 暂不使用此方式.
+// 通过 compute(isolate) 方式预计算 KlineData 的历史尝试（已废弃）。
+// data 在 MainIsolate 与 subIsolate 间传递时序列化/反序列化耗时较大, 暂不使用此方式。
 // Future<KlineData> precomputeKlineDataByCompute(
 //   KlineData data, {
 //   required int computedDataCount,

@@ -106,8 +106,14 @@ final spec = KlineSpec(
 /// 切换数据源（如切换交易对或周期）
 controller.switchKlineData(spec);
 
-/// 更新指定规格的数据
-controller.updateKlineData(spec, list);
+/// 首次加载或刷新时完整替换
+controller.replaceKlineData(spec, initialCandles);
+
+/// WebSocket 行情只更新最新端
+controller.updateLatestKlineData(spec, latestCandles);
+
+/// 分页加载时追加更早的历史数据
+controller.appendHistoryKlineData(spec, olderCandles);
 
 /// 跳转到指定日期（动画滚动到最近一根已加载蜡烛）。
 /// Future 在动画完成后返回实际命中的蜡烛下标；无法完成时返回 null。
@@ -139,7 +145,8 @@ v2.2.0 引入了类型化的指标体系，通过 `IIndicatorKey` sealed class �
 
 - **Direct / Computed**：`autoActivate` 默认 `false`；show 时创建、hide 时销毁（`keepAlive` 可保活复用）。
 - **External**：`autoActivate` 默认 `true`，首次激活时创建；`initState` 默认调用 `loadBusinessData()` 加载业务数据。
-- 继承 `ComputedPaintObject` 时，覆写 `didUpdateIndicator` 需调用 `super` 以触发重算。
+- **Computed**：计算逻辑放在独立的 `IndicatorCalculator` 中；参数变化由
+  `ComputedIndicator.shouldRecompute` 判定，`ComputedPaintObject` 只读取 slots 并绘制。
 
 ### 示例：自定义数据指标
 
@@ -166,29 +173,35 @@ class MAIndicator extends ComputedIndicator {
   ComputedPaintObject<MAIndicator> createPaintObject() => MAPaintObject();
 
   @override
+  IndicatorCalculator<MAIndicator> createCalculator(int dataIndex) => MACalculator(this, dataIndex);
+
+  @override
+  bool shouldRecompute(covariant MAIndicator oldIndicator) => oldIndicator.calcParam != calcParam;
+
+  @override
   Map<String, dynamic> toJson() {
     return {"calcParam": calcParam.map((e) => e.toJson()).toList()};
   }
 }
 
+/// 独立于绘制对象的指标计算器
+class MACalculator extends IndicatorCalculator<MAIndicator> {
+  MACalculator(super.indicator, super.dataIndex);
+
+  @override
+  void compute(KlineData data, Range range, {bool reset = false}) {
+    final effectiveRange = reset ? data.computableRange : range;
+    if (reset) {
+      for (int i = effectiveRange.start; i < effectiveRange.end; i++) {
+        data.list[i].clean(dataIndex);
+      }
+    }
+    // 根据 indicator.calcParam 计算 effectiveRange，并把结果写入 data.list[i][dataIndex]。
+  }
+}
+
 /// 指标绘制对象
 class MAPaintObject extends ComputedPaintObject<MAIndicator> {
-
-  @override
-  bool shouldRecompute(MAIndicator oldIndicator) {
-    // 判断新旧指标配置的变化是否需要重新计算
-  }
-
-  @override
-  void didUpdateIndicator(MAIndicator oldIndicator) {
-    super.didUpdateIndicator(oldIndicator); // 必须调用 super 以触发重算
-  }
-
-  @override
-  void compute(Range range, {bool reset = false}) {
-    // 针对 [range] 范围内的数据进行计算（仅在数据更新时回调）
-  }
-
   @override
   MinMax? computeVisibleMinMax(int start, int end) {
     // 返回 [start ~ end) 之间的指标最大最小值

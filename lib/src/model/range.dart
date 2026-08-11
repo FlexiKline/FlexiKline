@@ -22,6 +22,15 @@ final class Range {
 
   static Range get empty => const Range(0, 0);
 
+  /// 哨兵：表示需要整段重算（全量）。
+  ///
+  /// 由完整替换、历史合并或其他需要整段重算的操作返回，
+  /// 计算引擎见到 [requiresFullRecompute] 时以 `computableRange` 全量重算。
+  static const Range fullRecompute = Range(-1, 1 << 30);
+
+  /// 是否为 [fullRecompute] 哨兵。
+  bool get requiresFullRecompute => start == -1 && end == (1 << 30);
+
   int get length => end - start;
 
   bool get isEmpty => length <= 0;

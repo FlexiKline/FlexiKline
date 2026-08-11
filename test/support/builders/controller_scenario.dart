@@ -37,7 +37,7 @@ class ControllerScenario {
     List<Indicator> subIndicators = const [],
   }) async {
     controller.switchKlineData(spec);
-    await controller.updateKlineData(spec, candles);
+    controller.replaceKlineData(spec, candles);
     controller.mountIndicators(
       candle: TestCandleIndicator(),
       time: TestTimeIndicator(),

@@ -507,7 +507,7 @@ mixin SettingBinding on KlineBindingBase {
     required List<Indicator> newSubIndicators,
   }) {
     final oldComputedDataCapacity = computedDataCapacity;
-    final pending = _paintObjectManager.updateIndicators(
+    final indicatorChanges = _paintObjectManager.updateIndicators(
       oldCandle: oldCandle,
       newCandle: newCandle,
       oldTime: oldTime,
@@ -518,15 +518,27 @@ mixin SettingBinding on KlineBindingBase {
       newSubIndicators: newSubIndicators,
       context: this,
     );
-    // slot 容量增长（新增 computed 指标突破高水位）时，先对齐当前数据 slots
-    // 并使其余缓存失效，再激活指标（show* 会触发 compute 写入 slot）。
-    if (computedDataCapacity > oldComputedDataCapacity) {
+    final capacityGrew = computedDataCapacity > oldComputedDataCapacity;
+    var invalidatedAll = false;
+    if (capacityGrew) {
       syncComputedSlotCapacity();
+      invalidatedAll = true;
+    } else if (indicatorChanges.slotLayoutChanged) {
+      evictInactiveKlineDataCache();
+      _pipeline.invalidateAll();
+      invalidatedAll = true;
     }
-    for (final key in pending.main) {
+    if (!invalidatedAll && indicatorChanges.recompute.isNotEmpty) {
+      for (final key in indicatorChanges.recompute) {
+        final calculator = _paintObjectManager.getCalculator(key);
+        if (calculator != null) _pipeline.recompute(calculator);
+      }
+      evictInactiveKlineDataCache();
+    }
+    for (final key in indicatorChanges.main) {
       showMainIndicator(key);
     }
-    for (final key in pending.sub) {
+    for (final key in indicatorChanges.sub) {
       showSubIndicator(key);
     }
   }
@@ -549,8 +561,9 @@ mixin SettingBinding on KlineBindingBase {
   bool showMainIndicator(IIndicatorKey key) {
     final newObj = _paintObjectManager.addMainPaintObject(key, this);
     if (newObj == null) return false;
-    if (newObj is IComputedPainter) {
-      (newObj as IComputedPainter).compute(klineData.computableRange, reset: true);
+    if (key is ComputedIndicatorKey) {
+      final calculator = _paintObjectManager.getCalculator(key);
+      if (calculator != null) _pipeline.recompute(calculator);
     }
     markRepaintChart(reset: true);
     markRepaintCross();
@@ -579,8 +592,9 @@ mixin SettingBinding on KlineBindingBase {
       logw('showSubIndicator failed: fixed canvas size is too small for $key.');
       return false;
     }
-    if (newObj is IComputedPainter) {
-      (newObj as IComputedPainter).compute(klineData.computableRange, reset: true);
+    if (key is ComputedIndicatorKey) {
+      final calculator = _paintObjectManager.getCalculator(key);
+      if (calculator != null) _pipeline.recompute(calculator);
     }
     _onSubIndicatorsChanged();
     return true;

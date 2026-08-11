@@ -90,20 +90,4 @@ abstract class BaseData with FlexiLog {
   }
 
   void updateState({KlineLoadingState state = KlineLoadingState.none});
-
-  /// 未合并的数据
-  final List<List<ICandleModel>> _waitingData = List.empty(growable: true);
-
-  /// 是否有待合并的暂存数据
-  bool get hasWaitingData => _waitingData.isNotEmpty;
-
-  /// 待合并数据的数量
-  int get waitingDataLength => _waitingData.length;
-
-  /// 追加待合并数据，等待后续统一 precompute。
-  void enqueueWaitingData(List<ICandleModel> data) {
-    if (data.isNotEmpty) {
-      _waitingData.add(data);
-    }
-  }
 }

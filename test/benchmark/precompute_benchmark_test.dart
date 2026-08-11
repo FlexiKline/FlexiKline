@@ -53,17 +53,14 @@ void main() {
     final kd = KlineData(
       const KlineSpec(symbol: 'BENCH', interval: invalidInterval),
     );
-    kd.mergeCandleList(candles, slotCount: m.computedDataCapacity);
+    kd.replace(candles, slotCount: m.computedDataCapacity);
 
+    final range = kd.computableRange;
     final sw = Stopwatch()..start();
     for (int i = 0; i < 50; i++) {
-      await kd.precomputeKlineData(
-        slotCount: m.computedDataCapacity,
-        newList: candles,
-        mainPaintObjects: m.mainPaintObject.children,
-        subPaintObjects: const [],
-        reset: true,
-      );
+      for (final calculator in m.visibleCalculators) {
+        calculator.compute(kd, range, reset: true);
+      }
     }
     sw.stop();
     debugPrint('precompute: 50x(1000 candles x $indicatorCount indicators) in ${sw.elapsedMilliseconds}ms');

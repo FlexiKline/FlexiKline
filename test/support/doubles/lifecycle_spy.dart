@@ -104,6 +104,8 @@ class SpyComputedIndicator extends ComputedIndicator {
     required this.log,
     this.keepAlive = false,
     this.recompute = false,
+    this.throwOnCompute = false,
+    this.onCompute,
     super.height = 100,
     super.autoActivate = false,
   }) : super(padding: EdgeInsets.zero);
@@ -111,16 +113,28 @@ class SpyComputedIndicator extends ComputedIndicator {
   final LifecycleLog log;
   final bool keepAlive;
 
-  /// 控制 [SpyComputedPaintObject.shouldRecompute] 返回值
+  /// 控制 [shouldRecompute] 返回值
   final bool recompute;
+
+  /// 测试计算异常路径时是否抛出 [StateError]。
+  bool throwOnCompute;
+
+  /// 计算时执行的测试回调.
+  void Function()? onCompute;
 
   @override
   ComputedPaintObject<ComputedIndicator> createPaintObject() => SpyComputedPaintObject();
+
+  @override
+  IndicatorCalculator createCalculator(int dataIndex) => SpyComputedCalculator(this, dataIndex);
+
+  @override
+  bool shouldRecompute(covariant ComputedIndicator oldIndicator) => recompute;
 }
 
-class SpyComputedPaintObject extends ComputedPaintObject<SpyComputedIndicator> {
-  String get _id => indicator.key.id;
-  LifecycleLog get _log => indicator.log;
+/// Spy 计算器：记录 compute 事件到共享 [LifecycleLog]。
+class SpyComputedCalculator extends IndicatorCalculator<SpyComputedIndicator> {
+  SpyComputedCalculator(super.indicator, super.dataIndex);
 
   /// compute 被调用次数
   int computeCount = 0;
@@ -129,17 +143,21 @@ class SpyComputedPaintObject extends ComputedPaintObject<SpyComputedIndicator> {
   bool? lastReset;
 
   @override
-  bool get keepAlive => indicator.keepAlive;
-
-  @override
-  bool shouldRecompute(covariant SpyComputedIndicator oldIndicator) => indicator.recompute;
-
-  @override
-  void compute(Range range, {bool reset = false}) {
+  void compute(KlineData data, Range range, {bool reset = false}) {
     computeCount++;
     lastReset = reset;
-    _log.events.add('compute:$_id(reset:$reset)');
+    indicator.onCompute?.call();
+    if (indicator.throwOnCompute) throw StateError('compute failed');
+    indicator.log.events.add('compute:${indicator.key.id}(reset:$reset)');
   }
+}
+
+class SpyComputedPaintObject extends ComputedPaintObject<SpyComputedIndicator> {
+  String get _id => indicator.key.id;
+  LifecycleLog get _log => indicator.log;
+
+  @override
+  bool get keepAlive => indicator.keepAlive;
 
   @override
   void initState() {

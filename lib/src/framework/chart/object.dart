@@ -207,15 +207,15 @@ abstract class PaintObject<T extends Indicator<IIndicatorKey>> extends Indicator
 /// 普通指标绘制对象，不占 slot，无需预计算。
 ///
 /// 内置的 Candle、Time、Volume 等均基于此，自定义指标也可继承。
-abstract class DirectPaintObject<T extends DirectIndicator> extends PaintObject<T> implements IDirectPainter {}
+abstract class DirectPaintObject<T extends DirectIndicator> extends PaintObject<T> {}
 
 /// 数据指标绘制对象
 ///
 /// 用于 KDJ、MACD、MA 等需要 precompute 并写入 FlexiCandleModel.slots 的指标。
 /// 持有 [dataIndex]，用于在 slots 中存取计算数据。
-abstract class ComputedPaintObject<T extends ComputedIndicator> extends PaintObject<T>
-    with PaintObjectComputedMixin<T>
-    implements IComputedPainter {
+/// 参数变更由 manager 检测 [ComputedIndicator.shouldRecompute] 并重建 calculator，
+/// 再由 controller 驱动 [KlineDataPipeline.recompute]；绘制对象不负责触发重算。
+abstract class ComputedPaintObject<T extends ComputedIndicator> extends PaintObject<T> {
   int? _dataIndex;
 
   /// 当前绘制对象的指标计算数据存储下标，用于在 FlexiCandleModel.slots 中存取计算数据。
@@ -233,17 +233,6 @@ abstract class ComputedPaintObject<T extends ComputedIndicator> extends PaintObj
   void mount(T indicator, PaintContext context) {
     super.mount(indicator, context);
     _dataIndex = context.getComputedDataIndex(indicator.key);
-  }
-
-  /// 指标配置发生变改
-  @mustCallSuper
-  @override
-  @protected
-  void didUpdateIndicator(covariant T oldIndicator) {
-    super.didUpdateIndicator(oldIndicator);
-    if (shouldRecompute(oldIndicator)) {
-      this.compute(klineData.computableRange, reset: true);
-    }
   }
 }
 
@@ -295,7 +284,7 @@ abstract class TimeBasePaintObject<T extends TimeBaseIndicator> extends DirectPa
 ///
 /// 使用 [DirectIndicatorKey]，属于基础/系统指标，不占 slot。
 /// [children] 存储主区内的所有子绘制对象。
-final class MainPaintObject<T extends MainPaintObjectIndicator> extends PaintObject<T> implements IComputedPainter {
+final class MainPaintObject<T extends MainPaintObjectIndicator> extends PaintObject<T> {
   // 需要显式构造函数，因为需要在构造函数体中初始化 children
   MainPaintObject() : super() {
     children = SortableHashSet<PaintObject>.from(
@@ -342,24 +331,6 @@ final class MainPaintObject<T extends MainPaintObjectIndicator> extends PaintObj
       if (object.handleTap(position)) return true;
     }
     return false;
-  }
-
-  @override
-  bool shouldRecompute(MainPaintObjectIndicator oldIndicator) {
-    if (oldIndicator.children != indicator.children) {
-      return true;
-    }
-    return false;
-  }
-
-  /// 委托子对象的 precompute 方法
-  ///
-  /// MainPaintObject 本身不需要 precompute，但需要将调用委托给子对象。
-  @override
-  void compute(Range range, {bool reset = false}) {
-    for (final computable in children.whereType<IComputedPainter>()) {
-      computable.compute(range, reset: reset);
-    }
   }
 
   @override

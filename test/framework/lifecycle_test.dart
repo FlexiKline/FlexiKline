@@ -302,7 +302,7 @@ void main() {
       const key = ExternalIndicatorKey('ext_a');
       final ext = SpyExternalIndicator(key: key, log: log); // 默认 autoActivate=true
 
-      final pending = m.updateIndicators(
+      final indicatorChanges = m.updateIndicators(
         context: ctx,
         oldCandle: TestCandleIndicator(),
         newCandle: TestCandleIndicator(),
@@ -314,7 +314,7 @@ void main() {
         newSubIndicators: const [],
       );
 
-      expect(pending.main, contains(key)); // 待激活
+      expect(indicatorChanges.main, contains(key)); // 待激活
       expect(log.countOf('initState:ext_a'), 0); // manager 未创建
 
       // 模拟上层 show：激活后才创建。

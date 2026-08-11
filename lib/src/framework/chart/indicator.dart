@@ -36,6 +36,7 @@ import '../configuration.dart';
 import '../logger.dart';
 import '../serializers.dart';
 
+part 'calculator.dart';
 part 'delegate.dart';
 part 'indicator.g.dart';
 part 'interfaces.dart';

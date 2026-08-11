@@ -42,6 +42,35 @@ final class IndicatorPaintObjectManager with FlexiLog {
   /// 仅对 [ComputedIndicatorKey]（数据指标）分配 slot。
   final Map<ComputedIndicatorKey, int> _computedDataIndexes = {};
 
+  /// ComputedIndicator 的计算器缓存，与 [_computedDataIndexes] 平行。
+  ///
+  /// 在 `dataIndex` 确认后即时创建（见 [_bindCalculator]），slot 回收时同步移除。
+  /// 同一批计算器可复用于多份 [KlineData]（dataIndex 布局稳定），是后台预加载的基础。
+  final Map<ComputedIndicatorKey, IndicatorCalculator> _calculators = {};
+
+  /// 获取 [key] 对应的计算器。
+  IndicatorCalculator? getCalculator(ComputedIndicatorKey key) => _calculators[key];
+
+  /// 当前绘制树里（显示中的）computed 指标的计算器，供计算引擎遍历。
+  ///
+  /// 顺序与原 precompute 遍历面一致：主区（children 已按 zIndex 有序）后副区。
+  Iterable<IndicatorCalculator> get visibleCalculators sync* {
+    for (final obj in _mainPaintObject.children.whereType<ComputedPaintObject>()) {
+      final c = _calculators[obj.key as ComputedIndicatorKey];
+      if (c != null) yield c;
+    }
+    for (final obj in subPaintObjects.whereType<ComputedPaintObject>()) {
+      final c = _calculators[obj.key as ComputedIndicatorKey];
+      if (c != null) yield c;
+    }
+  }
+
+  /// slot 已分配且声明 indicator 就绪后调用，创建/重建计算器。
+  void _bindCalculator(ComputedIndicatorKey key, ComputedIndicator indicator) {
+    final slot = _computedDataIndexes[key];
+    if (slot != null) _calculators[key] = indicator.createCalculator(slot);
+  }
+
   /// 已回收的 slot，按 FIFO 复用。
   final Queue<int> _recycledSlots = Queue<int>();
 
@@ -144,6 +173,7 @@ final class IndicatorPaintObjectManager with FlexiLog {
   /// 不清理蜡烛数据中对应位置的值（惰性清理，下次复用时自然覆盖）。
   void releaseComputedDataIndex(ComputedIndicatorKey key) {
     final index = _computedDataIndexes.remove(key);
+    _calculators.remove(key);
     if (index != null) {
       _recycledSlots.addLast(index);
       logi('releaseComputedDataIndex $key:$index');
@@ -171,12 +201,18 @@ final class IndicatorPaintObjectManager with FlexiLog {
     ];
     allocateComputedDataIndexes(dataKeys);
 
-    // 缓存声明层指标。
+    // 缓存声明层指标，并为 computed 指标即时创建计算器。
     for (final indicator in mainIndicators) {
       _mainIndicatorRegistry[indicator.key] = indicator;
+      if (indicator is ComputedIndicator) {
+        _bindCalculator(indicator.key, indicator);
+      }
     }
     for (final indicator in subIndicators) {
       _subIndicatorRegistry[indicator.key] = indicator;
+      if (indicator is ComputedIndicator) {
+        _bindCalculator(indicator.key, indicator);
+      }
     }
 
     // 创建系统级 PaintObject。
@@ -207,7 +243,12 @@ final class IndicatorPaintObjectManager with FlexiLog {
   }
 
   /// 按 Widget 新旧声明增量同步指标。
-  ({List<IIndicatorKey> main, List<IIndicatorKey> sub}) updateIndicators({
+  ({
+    List<IIndicatorKey> main,
+    List<IIndicatorKey> sub,
+    List<ComputedIndicatorKey> recompute,
+    bool slotLayoutChanged,
+  }) updateIndicators({
     required PaintContext context,
     required CandleBaseIndicator oldCandle,
     required CandleBaseIndicator newCandle,
@@ -218,16 +259,22 @@ final class IndicatorPaintObjectManager with FlexiLog {
     required List<Indicator> oldSubIndicators,
     required List<Indicator> newSubIndicators,
   }) {
+    final oldComputedDataIndexes = Map<ComputedIndicatorKey, int>.of(_computedDataIndexes);
+
     // candle/time 无条件更新。
     _candlePaintObject.doDidUpdateIndicator(newCandle);
 
     _timePaintObject.doDidUpdateIndicator(newTime);
+
+    // 参数变化需重算的 computed key（由 controller 驱动 KlineDataPipeline.recompute）。
+    final recompute = <ComputedIndicatorKey>[];
 
     // 同步主区声明集合。
     final mainKeys = _mainDiffAndSync(
       context: context,
       oldIndicators: oldMainIndicators,
       newIndicators: newMainIndicators,
+      recompute: recompute,
     );
 
     // 同步副区声明集合。
@@ -235,10 +282,18 @@ final class IndicatorPaintObjectManager with FlexiLog {
       context: context,
       oldIndicators: oldSubIndicators,
       newIndicators: newSubIndicators,
+      recompute: recompute,
     );
 
+    final slotLayoutChanged = oldComputedDataIndexes.length != _computedDataIndexes.length ||
+        oldComputedDataIndexes.entries.any((entry) => _computedDataIndexes[entry.key] != entry.value);
     logi('updateIndicators 完成: computedDataCapacity=$computedDataCapacity');
-    return (main: mainKeys, sub: subKeys);
+    return (
+      main: mainKeys,
+      sub: subKeys,
+      recompute: recompute,
+      slotLayoutChanged: slotLayoutChanged,
+    );
   }
 
   /// 同步主区声明集合；新增只缓存，不自动激活。
@@ -248,6 +303,7 @@ final class IndicatorPaintObjectManager with FlexiLog {
     required PaintContext context,
     required List<Indicator> oldIndicators,
     required List<Indicator> newIndicators,
+    required List<ComputedIndicatorKey> recompute,
   }) {
     final toActivate = <IIndicatorKey>[];
     final oldMap = {for (final ind in oldIndicators) ind.key: ind};
@@ -274,8 +330,9 @@ final class IndicatorPaintObjectManager with FlexiLog {
       final newIndicator = entry.value;
 
       if (!oldMap.containsKey(key)) {
-        if (key is ComputedIndicatorKey) {
+        if (key is ComputedIndicatorKey && newIndicator is ComputedIndicator) {
           allocateComputedDataIndexes([key]);
+          _bindCalculator(key, newIndicator);
         }
         _mainIndicatorRegistry[key] = newIndicator;
         if (newIndicator.autoActivate) toActivate.add(key);
@@ -283,6 +340,13 @@ final class IndicatorPaintObjectManager with FlexiLog {
       } else {
         final oldIndicator = oldMap[key]!;
         _mainIndicatorRegistry[key] = newIndicator;
+        if (key is ComputedIndicatorKey &&
+            newIndicator is ComputedIndicator &&
+            oldIndicator is ComputedIndicator &&
+            newIndicator.shouldRecompute(oldIndicator)) {
+          _bindCalculator(key, newIndicator);
+          recompute.add(key);
+        }
         final paintObject = getMainPaintObject(key, includeKeepAlive: true);
         if (paintObject != null) {
           paintObject.doDidUpdateIndicator(newIndicator);
@@ -306,6 +370,7 @@ final class IndicatorPaintObjectManager with FlexiLog {
     required List<Indicator> oldIndicators,
     required List<Indicator> newIndicators,
     required PaintContext context,
+    required List<ComputedIndicatorKey> recompute,
   }) {
     final toActivate = <IIndicatorKey>[];
     final oldMap = {for (final ind in oldIndicators) ind.key: ind};
@@ -332,8 +397,9 @@ final class IndicatorPaintObjectManager with FlexiLog {
       final newIndicator = entry.value;
 
       if (!oldMap.containsKey(key)) {
-        if (key is ComputedIndicatorKey) {
+        if (key is ComputedIndicatorKey && newIndicator is ComputedIndicator) {
           allocateComputedDataIndexes([key]);
+          _bindCalculator(key, newIndicator);
         }
         _subIndicatorRegistry[key] = newIndicator;
         if (newIndicator.autoActivate) toActivate.add(key);
@@ -341,6 +407,13 @@ final class IndicatorPaintObjectManager with FlexiLog {
       } else {
         final oldIndicator = oldMap[key]!;
         _subIndicatorRegistry[key] = newIndicator;
+        if (key is ComputedIndicatorKey &&
+            newIndicator is ComputedIndicator &&
+            oldIndicator is ComputedIndicator &&
+            newIndicator.shouldRecompute(oldIndicator)) {
+          _bindCalculator(key, newIndicator);
+          recompute.add(key);
+        }
         final paintObject = getSubPaintObject(key, includeKeepAlive: true);
         if (paintObject != null) {
           paintObject.doDidUpdateIndicator(newIndicator);

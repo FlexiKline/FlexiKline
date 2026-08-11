@@ -23,6 +23,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../support/support.dart';
 
 const _spec = KlineSpec(symbol: 'TEST', interval: FlexiTimeInterval(1, TimeUnit.day));
+const _nextSpec = KlineSpec(symbol: 'NEXT', interval: FlexiTimeInterval(1, TimeUnit.day));
 
 List<CandleModel> _candles(int n) => List.generate(
       n,
@@ -38,15 +39,14 @@ List<CandleModel> _candles(int n) => List.generate(
 
 void main() {
   group('v2.2.0/FlexiKlineController/kline_data', () {
-    testWidgets('mount 前 update 暂存 waiting，initState 后数据可用', (tester) async {
+    testWidgets('mount 前 replace 暂存，initState 后数据可用', (tester) async {
       final scene = ControllerScenario();
       addTearDown(scene.dispose);
 
       scene.controller.switchKlineData(_spec);
-      await scene.controller.updateKlineData(_spec, _candles(3));
+      scene.controller.replaceKlineData(_spec, _candles(3));
 
-      // mount 前: waiting 有数据，klineData 空
-      expect(scene.controller.klineData.hasWaitingData, isTrue);
+      // mount 前数据尚未合并。
       expect(scene.controller.klineData.isEmpty, isTrue);
 
       scene.controller.mountIndicators(
@@ -62,9 +62,40 @@ void main() {
       // 内部 scheduleTask 是异步的，需要 pumpAndSettle 让调度执行完成
       await tester.pumpAndSettle();
 
-      // flush 后: waiting 清空，klineData 非空
-      expect(scene.controller.klineData.hasWaitingData, isFalse);
+      // flush 后数据可用。
       expect(scene.controller.klineData.isEmpty, isFalse);
+    });
+
+    testWidgets('切换到新建空数据后旧 current 的 latest 不再参与 tick', (tester) async {
+      const key = ComputedIndicatorKey('owner');
+      final log = LifecycleLog();
+      final indicator = SpyComputedIndicator(key: key, log: log);
+      final scene = ControllerScenario(
+        config: FakeFlexiKlineConfiguration(mainChildren: {key}),
+      );
+      addTearDown(scene.dispose);
+      await scene.initWithData(_spec, _candles(3).reversed.toList(), mainIndicators: [indicator]);
+      scene.controller.flushPendingKlineData();
+      await tester.pumpAndSettle();
+      log.clear();
+
+      scene.controller.updateLatestKlineData(
+        _spec,
+        [
+          CandleModel(
+            timestamp: 172801000,
+            open: Decimal.one,
+            high: Decimal.fromInt(2),
+            low: Decimal.zero,
+            close: Decimal.one,
+            volume: Decimal.one,
+          ),
+        ],
+      );
+      scene.controller.switchKlineData(_nextSpec);
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(log.events.where((event) => event.startsWith('compute:')), isEmpty);
     });
   });
 }

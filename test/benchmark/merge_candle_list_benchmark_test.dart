@@ -32,7 +32,7 @@ void main() {
       final kd = KlineData(
         const KlineSpec(symbol: 'BENCH', interval: invalidInterval),
       );
-      kd.mergeCandleList(spec, slotCount: 0);
+      kd.replace(spec, slotCount: 0);
     }
     sw.stop();
     debugPrint('merge_candle_list: 100x2000 candles in ${sw.elapsedMilliseconds}ms');

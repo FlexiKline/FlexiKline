@@ -113,33 +113,6 @@ abstract interface class IPaintLifecycle {
   bool get keepAlive;
 }
 
-/// 基础指标绘制接口
-///
-/// 用于框架内置的基础/系统指标（Candle、Time、Main 等），不占 slot。
-/// 这些指标直接基于原始数据绘制，无需预计算。
-abstract interface class IDirectPainter extends IPaintObject {
-  // 当前无需额外方法，保留接口用于类型区分和未来扩展
-}
-
-/// 计算型指标绘制接口
-///
-/// 用于需要预计算的数据指标（KDJ、MACD、MA 等），占 slot。
-/// 这些指标需要 precompute 并将结果存储在 slots 中。
-abstract interface class IComputedPainter extends IPaintObject {
-  /// 数据预计算
-  ///
-  /// 在数据源 [KlineData] 发生变化时回调。
-  /// [range] 需要计算的数据范围
-  /// [reset] 是否重置之前的计算结果
-  void compute(Range range, {bool reset = false});
-
-  /// 判断是否需要重新预计算
-  ///
-  /// 当指标配置参数发生变化时，判断是否需要重新计算。
-  /// [oldIndicator] 旧的指标配置
-  bool shouldRecompute(covariant Indicator oldIndicator);
-}
-
 /// 业务指标绘制接口
 ///
 /// 用于由业务数据或用户操作驱动的指标（Trade 等），不占 slot。

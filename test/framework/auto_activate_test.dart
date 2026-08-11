@@ -95,7 +95,7 @@ void main() {
       expect(mainActivated(m), isNot(contains(key)));
 
       final newExt = TestExternalIndicator(key: key, autoActivate: true);
-      final pending = m.updateIndicators(
+      final indicatorChanges = m.updateIndicators(
         context: ctx,
         oldCandle: TestCandleIndicator(),
         newCandle: TestCandleIndicator(),
@@ -107,10 +107,10 @@ void main() {
         newSubIndicators: const [],
       );
 
-      expect(pending.main, contains(key)); // false→true → 待激活
+      expect(indicatorChanges.main, contains(key)); // false→true → 待激活
     });
 
-    test('true→false：pending 不含该 key，且对象仍在树（不自动 hide）', () {
+    test('true→false：indicatorChanges 不含该 key，且对象仍在树（不自动 hide）', () {
       final ctx = FakePaintContext();
       final m = build();
       const key = ExternalIndicatorKey('e_stay');
@@ -128,7 +128,7 @@ void main() {
       expect(mainActivated(m), contains(key));
 
       final newExt = TestExternalIndicator(key: key, autoActivate: false);
-      final pending = m.updateIndicators(
+      final indicatorChanges = m.updateIndicators(
         context: ctx,
         oldCandle: TestCandleIndicator(),
         newCandle: TestCandleIndicator(),
@@ -140,11 +140,11 @@ void main() {
         newSubIndicators: const [],
       );
 
-      expect(pending.main, isNot(contains(key))); // 不重激活
+      expect(indicatorChanges.main, isNot(contains(key))); // 不重激活
       expect(mainActivated(m), contains(key)); // 仍在树（true→false 不 hide）
     });
 
-    test('hide 后同值 rebuild：pending 不含该 key，且不在树', () {
+    test('hide 后同值 rebuild：indicatorChanges 不含该 key，且不在树', () {
       final ctx = FakePaintContext();
       final m = build();
       const key = ExternalIndicatorKey('e_hide');
@@ -164,7 +164,7 @@ void main() {
       expect(mainActivated(m), isNot(contains(key)));
 
       // old(true)→new(true) 同值 rebuild：条件 !old.autoActivate 为 false → 不重激活。
-      final pending = m.updateIndicators(
+      final indicatorChanges = m.updateIndicators(
         context: ctx,
         oldCandle: TestCandleIndicator(),
         newCandle: TestCandleIndicator(),
@@ -176,7 +176,7 @@ void main() {
         newSubIndicators: const [],
       );
 
-      expect(pending.main, isNot(contains(key)));
+      expect(indicatorChanges.main, isNot(contains(key)));
       expect(mainActivated(m), isNot(contains(key))); // 保持隐藏
     });
   });

@@ -30,7 +30,7 @@ void main() {
       );
     });
 
-    testWidgets('updateKlineData before initState should queue waiting data', (tester) async {
+    testWidgets('replaceKlineData before initState should queue data', (tester) async {
       final controller = FlexiKlineController(
         configuration: FakeFlexiKlineConfiguration(),
       );
@@ -40,7 +40,7 @@ void main() {
       );
 
       controller.switchKlineData(spec);
-      await controller.updateKlineData(
+      controller.replaceKlineData(
         spec,
         [
           CandleModel(
@@ -54,7 +54,6 @@ void main() {
         ],
       );
 
-      expect(controller.klineData.hasWaitingData, isTrue);
       expect(controller.klineData.isEmpty, isTrue);
 
       controller.mountIndicators(

@@ -58,7 +58,7 @@ Future<FlexiKlineController> _pumpChart(
   );
   if (withData) {
     controller.switchKlineData(_spec);
-    await controller.updateKlineData(_spec, _candles());
+    controller.replaceKlineData(_spec, _candles());
   }
 
   await tester.pumpWidget(
@@ -371,8 +371,8 @@ void main() {
       await tester.pump(const Duration(milliseconds: 16));
       final updated = _candles();
       updated[index] = _candle(target.add(const Duration(minutes: 1)));
-      final update = controller.updateKlineData(_spec, updated, reset: true);
-      await _pumpUntilFutureComplete(tester, update, 'timestamp update');
+      controller.replaceKlineData(_spec, updated);
+      await tester.pump();
 
       expect(await _pumpUntilFutureComplete(tester, future, 'changed timestamp result'), isNull);
     });

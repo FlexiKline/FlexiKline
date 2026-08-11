@@ -35,13 +35,20 @@ abstract class KlineBindingBase with FlexiLog implements PaintContext, DrawConte
   /// KlineData 缓存容量。
   final int? klineDataCacheCapacity;
 
+  /// latest 指标计算的固定节拍。
+  final Duration calculationInterval;
+
   /// 副区指标最大数量。
   final int subIndicatorMaxCount;
 
   /// 指标绘制对象管理器。
   final IndicatorPaintObjectManager _paintObjectManager;
 
+  /// 绘制工具对象管理器。
   final OverlayDrawObjectManager _drawObjectManager;
+
+  /// 蜡烛合并与指标计算流水线，由 [StateBinding.init] 初始化。
+  late final KlineDataPipeline _pipeline;
 
   KlineBindingBase({
     required this.configuration,
@@ -51,6 +58,7 @@ abstract class KlineBindingBase with FlexiLog implements PaintContext, DrawConte
     this.subIndicatorMaxCount = defaultSubIndicatorMaxCount,
     IFlexiLogger? logger,
     this.klineDataCacheCapacity,
+    this.calculationInterval = const Duration(milliseconds: 500),
   })  : _initialLayoutMode = initialLayoutMode,
         _initialFixedSize = initialFixedSize,
         _paintObjectManager = IndicatorPaintObjectManager(
@@ -158,6 +166,10 @@ abstract class KlineBindingBase with FlexiLog implements PaintContext, DrawConte
   /// 下次切换时重新加载。由 StateBinding 实现。
   @protected
   void syncComputedSlotCapacity();
+
+  /// 丢弃非当前的缓存 KlineData（指标声明/参数变更后其 slot 值已陈旧），
+  /// 下次切换时重新加载。由 StateBinding 实现。
+  void evictInactiveKlineDataCache();
 }
 
 /// KlineController 内部访问扩展。

@@ -92,10 +92,26 @@ abstract class ComputedIndicator extends Indicator<ComputedIndicatorKey> {
   @override
   ComputedPaintObject<ComputedIndicator> createPaintObject();
 
+  /// 创建该指标的计算器（平行于 [createPaintObject]）。
+  ///
+  /// [dataIndex] 由 [IndicatorPaintObjectManager] 在分配 slot 后注入。
+  /// 每个 [ComputedIndicator] 都必须提供计算器：计算已从 PaintObject 下沉到
+  /// [IndicatorCalculator]，由 [KlineDataPipeline] 驱动。
+  @factory
+  IndicatorCalculator createCalculator(int dataIndex);
+
   /// 指标计算参数。
   ///
   /// 用于判断配置变化后是否需要重新预计算。
   dynamic get calcParam => null;
+
+  /// 指标配置参数发生变化时，判断是否需要整段重新计算。
+  ///
+  /// 默认比较 [calcParam]。由 [IndicatorPaintObjectManager] 在声明更新时调用，
+  /// 决定是否重建计算器并上报重算。
+  bool shouldRecompute(covariant ComputedIndicator oldIndicator) {
+    return oldIndicator.calcParam != calcParam && calcParam != null;
+  }
 }
 
 /// 业务指标配置基类

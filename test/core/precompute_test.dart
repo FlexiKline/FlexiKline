@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// 集成测试：shouldRecompute 触发 compute
+/// 集成测试：参数变化时 manager 上报 recompute（实际重算由计算引擎驱动）。
 library;
 
 import 'package:flexi_kline/flexi_kline.dart';
@@ -22,12 +22,11 @@ import '../support/support.dart';
 
 void main() {
   group('v2.2.0/precompute', () {
-    test('配置变化且 shouldRecompute=true 时触发 compute', () {
+    test('配置变化且 shouldRecompute=true 时上报 recompute', () {
       final log = LifecycleLog();
       final ctx = FakePaintContext();
       const key = ComputedIndicatorKey('spy_1');
 
-      // mount 并激活（mainChildren 包含 key）
       final config = FakeFlexiKlineConfiguration(mainChildren: {key});
       final m = IndicatorPaintObjectManager(configuration: config);
       final oldInd = SpyComputedIndicator(key: key, log: log, recompute: true);
@@ -39,12 +38,8 @@ void main() {
         context: ctx,
       );
 
-      // 清除 mount 阶段可能产生的 compute 记录
-      log.clear();
-
-      // 更新指标配置，shouldRecompute=true 应触发 compute
       final newInd = SpyComputedIndicator(key: key, log: log, recompute: true);
-      m.updateIndicators(
+      final result = m.updateIndicators(
         context: ctx,
         oldCandle: TestCandleIndicator(),
         newCandle: TestCandleIndicator(),
@@ -56,15 +51,15 @@ void main() {
         newSubIndicators: const [],
       );
 
-      // compute 会被调用（即使 klineData 为空，Range(0,0)）
       expect(
-        log.events.where((e) => e.startsWith('compute:')).isNotEmpty,
-        isTrue,
-        reason: 'shouldRecompute=true 时应触发 compute',
+        result.recompute,
+        contains(key),
+        reason: 'shouldRecompute=true 时应上报该 key 需重算',
       );
+      expect(result.slotLayoutChanged, isFalse);
     });
 
-    test('shouldRecompute=false 时不触发 compute', () {
+    test('shouldRecompute=false 时不上报 recompute', () {
       final log = LifecycleLog();
       final ctx = FakePaintContext();
       const key = ComputedIndicatorKey('spy_2');
@@ -80,10 +75,8 @@ void main() {
         context: ctx,
       );
 
-      log.clear();
-
       final newInd = SpyComputedIndicator(key: key, log: log, recompute: false);
-      m.updateIndicators(
+      final result = m.updateIndicators(
         context: ctx,
         oldCandle: TestCandleIndicator(),
         newCandle: TestCandleIndicator(),
@@ -96,10 +89,46 @@ void main() {
       );
 
       expect(
-        log.events.where((e) => e.startsWith('compute:')).isEmpty,
-        isTrue,
-        reason: 'shouldRecompute=false 时不应触发 compute',
+        result.recompute,
+        isEmpty,
+        reason: 'shouldRecompute=false 时不应上报重算',
       );
+      expect(result.slotLayoutChanged, isFalse);
+    });
+
+    test('删除 A 并新增 B 复用 slot 时上报 slot layout 变化', () {
+      final log = LifecycleLog();
+      final ctx = FakePaintContext();
+      const oldKey = ComputedIndicatorKey('old');
+      const newKey = ComputedIndicatorKey('new');
+      final manager = IndicatorPaintObjectManager(
+        configuration: FakeFlexiKlineConfiguration(mainChildren: {oldKey}),
+      );
+      final oldIndicator = SpyComputedIndicator(key: oldKey, log: log);
+      manager.mountIndicators(
+        candle: TestCandleIndicator(),
+        time: TestTimeIndicator(),
+        mainIndicators: [oldIndicator],
+        subIndicators: const [],
+        context: ctx,
+      );
+      final oldSlot = manager.getComputedDataIndex(oldKey);
+      final newIndicator = SpyComputedIndicator(key: newKey, log: log);
+
+      final result = manager.updateIndicators(
+        context: ctx,
+        oldCandle: TestCandleIndicator(),
+        newCandle: TestCandleIndicator(),
+        oldTime: TestTimeIndicator(),
+        newTime: TestTimeIndicator(),
+        oldMainIndicators: [oldIndicator],
+        newMainIndicators: [newIndicator],
+        oldSubIndicators: const [],
+        newSubIndicators: const [],
+      );
+
+      expect(manager.getComputedDataIndex(newKey), oldSlot);
+      expect(result.slotLayoutChanged, isTrue);
     });
   });
 }

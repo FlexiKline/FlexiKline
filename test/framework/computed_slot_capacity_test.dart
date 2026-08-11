@@ -27,7 +27,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../support/support.dart';
 
 /// 构造一根按 [slotCount] 定长 slots 的新蜡烛，
-/// 模拟 `mergeCandleList` 中的 `e.toFlexiCandleModel(slotCount, mode)`。
+/// 模拟定向合并中的 `e.toFlexiCandleModel(slotCount, mode)`。
 FlexiCandleModel mergedCandle(int slotCount) => FlexiCandleModel.init(
       candle: CandleModel(
         timestamp: 1715769600000,

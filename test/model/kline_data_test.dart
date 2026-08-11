@@ -48,7 +48,7 @@ bool _listEq(List a, List b) {
   return true;
 }
 
-/// 镜像 CandleListData.mergeCandleList 逻辑的本地实现，用于测试合并算法。
+/// 镜像定向头尾合并逻辑的本地实现，用于测试合并算法。
 ({List<_Item> list, Range? range}) _merge(
   List<_Item> curList,
   List<_Item> newList,
@@ -160,9 +160,9 @@ void main() {
   });
 
   // ---------------------------------------------------------------------------
-  // mergeCandleList 算法逻辑 — 用轻量 _Item 覆盖各合并分支
+  // 定向头尾合并算法 — 用轻量 _Item 覆盖各合并分支
   // ---------------------------------------------------------------------------
-  group('mergeCandleList（算法逻辑）', () {
+  group('定向头尾合并（算法逻辑）', () {
     test('空列表', () {
       final r = _merge([], []);
       expect(r.list, isEmpty);
@@ -270,7 +270,7 @@ void main() {
       final data = KlineData(
         const KlineSpec(symbol: 'TEST', interval: invalidInterval),
       );
-      data.mergeCandleList(
+      data.replace(
         timestamps.map(_makeCandle).toList(),
         slotCount: 0,
       );
