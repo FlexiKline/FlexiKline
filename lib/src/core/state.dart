@@ -32,13 +32,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     super.init();
     logd('init state');
     _klineDataCache = FIFOHashMap(capacity: klineDataCacheCapacity);
-    _pipeline = KlineDataPipeline(
-      _paintObjectManager,
-      interval: calculationInterval,
-      logger: logger,
-      onCandlesMerged: _onCandlesMerged,
-      onComputed: _onComputed,
-    );
+    _pipeline = _createPipeline(_klineData);
   }
 
   @override
@@ -136,6 +130,25 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   /// 当前 K 线数据缓存 key。
   String get klineDataKey => klineData.key;
 
+  KlineDataPipeline _createPipeline(KlineData data) {
+    return KlineDataPipeline(
+      data,
+      _paintObjectManager,
+      interval: calculationInterval,
+      logger: logger,
+      onCandlesMerged: _onCandlesMerged,
+      onComputed: _onComputed,
+    );
+  }
+
+  void _replaceCurrentKlineData(KlineData data) {
+    if (identical(_klineData, data)) return;
+    _pipeline.dispose();
+    _klineData = data;
+    _pipeline = _createPipeline(data);
+    if (isMounted) _pipeline.start();
+  }
+
   @override
   void evictInactiveKlineDataCache() {
     final retainedKey = klineDataKey;
@@ -164,8 +177,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   /// 3. 重绘图表
   /// 4. 取消Cross绘制(如果有)
   void _setKlineData(KlineData data, {bool resetPaintDxOffset = true}) {
-    _klineData = data;
-    _pipeline.activate(data);
+    _replaceCurrentKlineData(data);
     _notifySpecChange(data.spec);
     _notifyLoadingState(data.loadingState, data.key);
     if (resetPaintDxOffset && isMounted) {
@@ -429,8 +441,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     );
     final old = _klineDataCache.append(spec.key, data);
     if (old != null) Future(() => old.dispose());
-    _klineData = data;
-    _pipeline.activate(data);
+    _replaceCurrentKlineData(data);
     _notifySpecChange(data.spec);
     _notifyLoadingState(KlineLoadingState.initLoading, data.key);
     return false;
@@ -454,52 +465,47 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
 
   /// 完整替换[spec]对应的蜡烛数据.
   void replaceKlineData(KlineSpec spec, List<ICandleModel> list) {
-    _submitKlineData(spec, list, _pipeline.replace);
+    if (!_acceptKlineDataUpdate(spec, list)) return;
+    _pipeline.replace(list);
   }
 
   /// 更新[spec]对应的最新方向蜡烛数据.
   void updateLatestKlineData(KlineSpec spec, List<ICandleModel> list) {
-    _submitKlineData(spec, list, _pipeline.updateLatest);
+    if (!_acceptKlineDataUpdate(spec, list)) return;
+    _pipeline.updateLatest(list);
   }
 
   /// 追加[spec]对应的历史方向蜡烛数据.
   void appendHistoryKlineData(KlineSpec spec, List<ICandleModel> list) {
-    _submitKlineData(spec, list, _pipeline.appendHistory);
+    if (!_acceptKlineDataUpdate(spec, list)) return;
+    _pipeline.appendHistory(list);
   }
 
-  void _submitKlineData(
-    KlineSpec spec,
-    List<ICandleModel> list,
-    void Function(KlineData, List<ICandleModel>) submit,
-  ) {
+  bool _acceptKlineDataUpdate(KlineSpec spec, List<ICandleModel> list) {
+    if (spec.key != klineDataKey) {
+      logd('ignore inactive KlineData update: ${spec.key}');
+      return false;
+    }
     if (list.isEmpty) {
       stopLoading(spec: spec);
-      return;
+      return false;
     }
-
-    final data = _klineDataCache[spec.key];
-    if (data == null) {
-      logw('_submitKlineData: cannot find klineData by $spec');
-      return;
-    }
-    stopLoading(spec: data.spec);
-    submit(data, list);
+    stopLoading(spec: klineData.spec);
+    return true;
   }
 
-  void _onCandlesMerged(KlineData data, {required bool replace}) {
-    if (!identical(data, klineData)) return;
+  void _onCandlesMerged({required bool replace}) {
     if (replace) {
-      _setKlineData(data);
+      _setKlineData(klineData);
       return;
     }
-    _notifySpecChange(data.spec);
+    _notifySpecChange(klineData.spec);
     markRepaintChart();
     markRepaintCross();
     markRepaintDraw();
   }
 
-  void _onComputed(KlineData data) {
-    if (!identical(data, klineData)) return;
+  void _onComputed() {
     markRepaintChart();
     markRepaintCross();
     markRepaintDraw();
@@ -508,7 +514,6 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   /// 启动流水线并处理挂载前暂存的数据.
   @override
   void flushPendingKlineData() {
-    _pipeline.activate(klineData);
     _pipeline.start();
   }
 }

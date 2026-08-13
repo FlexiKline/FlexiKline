@@ -48,7 +48,7 @@ abstract class KlineBindingBase with FlexiLog implements PaintContext, DrawConte
   final OverlayDrawObjectManager _drawObjectManager;
 
   /// 蜡烛合并与指标计算流水线，由 [StateBinding.init] 初始化。
-  late final KlineDataPipeline _pipeline;
+  late KlineDataPipeline _pipeline;
 
   KlineBindingBase({
     required this.configuration,

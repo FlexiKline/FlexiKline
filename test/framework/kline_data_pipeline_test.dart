@@ -51,6 +51,25 @@ CandleModel _candle(int timestamp) => CandleModel(
 }
 
 void main() {
+  testWidgets('绑定非空数据后 start 不自动计算', (tester) async {
+    final scene = _scene();
+    scene.data.replace([_candle(2), _candle(1)], slotCount: scene.manager.computedDataCapacity);
+    addTearDown(scene.data.dispose);
+    addTearDown(scene.manager.dispose);
+    final pipeline = KlineDataPipeline(
+      scene.data,
+      scene.manager,
+      onCandlesMerged: ({required replace}) {},
+      onComputed: () {},
+    );
+    addTearDown(pipeline.dispose);
+
+    pipeline.start();
+    await tester.pump();
+
+    expect(scene.calculator.computeCount, 0);
+  });
+
   test('interval 为零时抛出 ArgumentError', () {
     final scene = _scene();
     addTearDown(scene.data.dispose);
@@ -58,10 +77,11 @@ void main() {
 
     expect(
       () => KlineDataPipeline(
+        scene.data,
         scene.manager,
         interval: Duration.zero,
-        onCandlesMerged: (_, {required replace}) {},
-        onComputed: (_) {},
+        onCandlesMerged: ({required replace}) {},
+        onComputed: () {},
       ),
       throwsArgumentError,
     );
@@ -74,10 +94,11 @@ void main() {
 
     expect(
       () => KlineDataPipeline(
+        scene.data,
         scene.manager,
         interval: const Duration(milliseconds: -1),
-        onCandlesMerged: (_, {required replace}) {},
-        onComputed: (_) {},
+        onCandlesMerged: ({required replace}) {},
+        onComputed: () {},
       ),
       throwsArgumentError,
     );
@@ -88,55 +109,21 @@ void main() {
     addTearDown(scene.data.dispose);
     addTearDown(scene.manager.dispose);
     final pipeline = KlineDataPipeline(
+      scene.data,
       scene.manager,
-      onCandlesMerged: (_, {required replace}) {},
-      onComputed: (_) {},
+      onCandlesMerged: ({required replace}) {},
+      onComputed: () {},
     );
     addTearDown(pipeline.dispose);
-    pipeline.activate(scene.data);
     final batch = [_candle(2), _candle(1)];
 
-    pipeline.replace(scene.data, batch);
+    pipeline.replace(batch);
     batch
       ..clear()
       ..add(_candle(99));
     pipeline.start();
 
     expect(scene.data.list.map((item) => item.ts), [2, 1]);
-  });
-
-  testWidgets('激活空数据会清除旧失效并等待 replace', (tester) async {
-    final scene = _scene();
-    final next = KlineData(
-      const KlineSpec(symbol: 'NEXT', interval: FlexiTimeInterval(1, TimeUnit.day)),
-    );
-    var elapsed = Duration.zero;
-    addTearDown(scene.data.dispose);
-    addTearDown(next.dispose);
-    addTearDown(scene.manager.dispose);
-    final pipeline = KlineDataPipeline(
-      scene.manager,
-      elapsed: () => elapsed,
-      onCandlesMerged: (_, {required replace}) {},
-      onComputed: (_) {},
-    );
-    addTearDown(pipeline.dispose);
-    pipeline.start();
-    pipeline.activate(scene.data);
-    pipeline.replace(scene.data, [_candle(2), _candle(1)]);
-    scene.calculator.computeCount = 0;
-
-    pipeline.updateLatest(scene.data, [_candle(2)]);
-    pipeline.activate(next);
-
-    expect(scene.calculator.computeCount, 0);
-    elapsed = const Duration(milliseconds: 500);
-    await tester.pump(elapsed);
-    expect(scene.calculator.computeCount, 0);
-
-    pipeline.replace(next, [_candle(2), _candle(1)]);
-    expect(scene.calculator.computeCount, 1);
-    expect(scene.calculator.lastReset, isTrue);
   });
 
   testWidgets('dispose 后不能重新启动或接收任务', (tester) async {
@@ -146,18 +133,17 @@ void main() {
     addTearDown(scene.data.dispose);
     addTearDown(scene.manager.dispose);
     final pipeline = KlineDataPipeline(
+      scene.data,
       scene.manager,
-      onCandlesMerged: (_, {required replace}) => mergedCount++,
-      onComputed: (_) => computedCount++,
+      onCandlesMerged: ({required replace}) => mergedCount++,
+      onComputed: () => computedCount++,
     );
     addTearDown(pipeline.dispose);
     pipeline.start();
     pipeline.dispose();
-
-    pipeline.activate(scene.data);
     pipeline.invalidateAll();
     pipeline.recompute(scene.calculator);
-    pipeline.replace(scene.data, [_candle(2), _candle(1)]);
+    pipeline.replace([_candle(2), _candle(1)]);
     pipeline.start();
     await tester.pump(const Duration(seconds: 1));
 
@@ -173,17 +159,17 @@ void main() {
     addTearDown(scene.data.dispose);
     addTearDown(scene.manager.dispose);
     final pipeline = KlineDataPipeline(
+      scene.data,
       scene.manager,
       logger: logger,
-      onCandlesMerged: (_, {required replace}) {},
-      onComputed: (_) {},
+      onCandlesMerged: ({required replace}) {},
+      onComputed: () {},
     );
     addTearDown(pipeline.dispose);
     pipeline.start();
-    pipeline.activate(scene.data);
     logger.entries.clear();
 
-    pipeline.replace(scene.data, [_candle(2), _candle(1)]);
+    pipeline.replace([_candle(2), _candle(1)]);
 
     var merge = logger.entries.singleWhere((entry) => entry.msg.startsWith('Merge:::'));
     expect(merge.level, FlexiLogLevel.debug);
@@ -192,10 +178,10 @@ void main() {
     expect(merge.msg, matches(RegExp(r'spent:\d+μs$')));
 
     logger.entries.clear();
-    pipeline.updateLatest(scene.data, [_candle(3), _candle(2)]);
+    pipeline.updateLatest([_candle(3), _candle(2)]);
     expect(logger.entries.where((entry) => entry.msg.startsWith('Merge:::')), isEmpty);
 
-    pipeline.appendHistory(scene.data, [_candle(1), _candle(0)]);
+    pipeline.appendHistory([_candle(1), _candle(0)]);
     merge = logger.entries.singleWhere((entry) => entry.msg.startsWith('Merge:::'));
     expect(merge.msg, contains('kind:appendHistory'));
   });
@@ -206,16 +192,15 @@ void main() {
     addTearDown(scene.data.dispose);
     addTearDown(scene.manager.dispose);
     final pipeline = KlineDataPipeline(
+      scene.data,
       scene.manager,
       logger: logger,
-      onCandlesMerged: (_, {required replace}) {},
-      onComputed: (_) {},
+      onCandlesMerged: ({required replace}) {},
+      onComputed: () {},
     );
     addTearDown(pipeline.dispose);
     pipeline.start();
-
-    pipeline.activate(scene.data);
-    pipeline.replace(scene.data, [_candle(2), _candle(1)]);
+    pipeline.replace([_candle(2), _candle(1)]);
 
     final compute = logger.entries.singleWhere((entry) => entry.msg.startsWith('Compute:::'));
     expect(compute.level, FlexiLogLevel.debug);
@@ -241,15 +226,14 @@ void main() {
     addTearDown(data.dispose);
     addTearDown(manager.dispose);
     final pipeline = KlineDataPipeline(
+      data,
       manager,
       logger: logger,
-      onCandlesMerged: (_, {required replace}) {},
-      onComputed: (_) {},
+      onCandlesMerged: ({required replace}) {},
+      onComputed: () {},
     );
     addTearDown(pipeline.dispose);
     pipeline.start();
-
-    pipeline.activate(data);
 
     expect(logger.entries.where((entry) => entry.msg.startsWith('Compute:::')), isEmpty);
   });
@@ -260,18 +244,18 @@ void main() {
     addTearDown(scene.data.dispose);
     addTearDown(scene.manager.dispose);
     final pipeline = KlineDataPipeline(
+      scene.data,
       scene.manager,
-      onCandlesMerged: (_, {required replace}) {},
-      onComputed: (_) {},
+      onCandlesMerged: ({required replace}) {},
+      onComputed: () {},
       elapsed: () => elapsed,
     );
     addTearDown(pipeline.dispose);
     pipeline.start();
-    pipeline.activate(scene.data);
-    pipeline.replace(scene.data, [_candle(2), _candle(1)]);
+    pipeline.replace([_candle(2), _candle(1)]);
     scene.calculator.computeCount = 0;
 
-    pipeline.updateLatest(scene.data, [_candle(2)]);
+    pipeline.updateLatest([_candle(2)]);
 
     expect(scene.data.list.map((item) => item.ts), [2, 1]);
     expect(scene.calculator.computeCount, 0);
@@ -288,17 +272,17 @@ void main() {
     addTearDown(scene.data.dispose);
     addTearDown(scene.manager.dispose);
     final pipeline = KlineDataPipeline(
+      scene.data,
       scene.manager,
-      onCandlesMerged: (_, {required replace}) {},
-      onComputed: (_) {},
+      onCandlesMerged: ({required replace}) {},
+      onComputed: () {},
     );
     addTearDown(pipeline.dispose);
     pipeline.start();
-    pipeline.activate(scene.data);
-    pipeline.replace(scene.data, [_candle(2), _candle(1)]);
+    pipeline.replace([_candle(2), _candle(1)]);
     scene.calculator.computeCount = 0;
 
-    pipeline.updateLatest(scene.data, [_candle(3), _candle(2)]);
+    pipeline.updateLatest([_candle(3), _candle(2)]);
 
     expect(scene.data.list.map((item) => item.ts), [3, 2, 1]);
     expect(scene.calculator.computeCount, 1);
@@ -310,51 +294,22 @@ void main() {
     addTearDown(scene.data.dispose);
     addTearDown(scene.manager.dispose);
     final pipeline = KlineDataPipeline(
+      scene.data,
       scene.manager,
-      onCandlesMerged: (_, {required replace}) {},
-      onComputed: (_) {},
+      onCandlesMerged: ({required replace}) {},
+      onComputed: () {},
     );
     addTearDown(pipeline.dispose);
     pipeline.start();
-    pipeline.activate(scene.data);
-    pipeline.replace(scene.data, [_candle(2), _candle(1)]);
+    pipeline.replace([_candle(2), _candle(1)]);
     await tester.pump();
     scene.calculator.computeCount = 0;
 
-    pipeline.appendHistory(scene.data, [_candle(1), _candle(0)]);
+    pipeline.appendHistory([_candle(1), _candle(0)]);
     await tester.pump();
 
     expect(scene.data.list.map((item) => item.ts), [2, 1, 0]);
     expect(scene.calculator.computeCount, 1);
-  });
-
-  testWidgets('后台数据只合并，切换为当前数据后全量计算', (tester) async {
-    final scene = _scene();
-    addTearDown(scene.data.dispose);
-    addTearDown(scene.manager.dispose);
-    final background = KlineData(
-      const KlineSpec(symbol: 'BG', interval: FlexiTimeInterval(1, TimeUnit.day)),
-    );
-    addTearDown(background.dispose);
-    final pipeline = KlineDataPipeline(
-      scene.manager,
-      onCandlesMerged: (_, {required replace}) {},
-      onComputed: (_) {},
-    );
-    addTearDown(pipeline.dispose);
-    pipeline.start();
-    pipeline.activate(scene.data);
-    scene.calculator.computeCount = 0;
-
-    pipeline.replace(background, [_candle(2), _candle(1)]);
-    await tester.pump();
-    expect(background.isNotEmpty, isTrue);
-    expect(scene.calculator.computeCount, 0);
-
-    pipeline.activate(background);
-    await tester.pump();
-    expect(scene.calculator.computeCount, 1);
-    expect(scene.calculator.lastReset, isTrue);
   });
 
   testWidgets('合并跨过节拍时，合并完成后立即计算', (tester) async {
@@ -364,21 +319,21 @@ void main() {
     addTearDown(scene.data.dispose);
     addTearDown(scene.manager.dispose);
     final pipeline = KlineDataPipeline(
+      scene.data,
       scene.manager,
       elapsed: () => elapsed,
-      onCandlesMerged: (_, {required replace}) {
+      onCandlesMerged: ({required replace}) {
         if (crossTick) elapsed = const Duration(milliseconds: 600);
       },
-      onComputed: (_) {},
+      onComputed: () {},
     );
     addTearDown(pipeline.dispose);
     pipeline.start();
-    pipeline.activate(scene.data);
-    pipeline.replace(scene.data, [_candle(2), _candle(1)]);
+    pipeline.replace([_candle(2), _candle(1)]);
     scene.calculator.computeCount = 0;
 
     crossTick = true;
-    pipeline.updateLatest(scene.data, [_candle(3), _candle(2)]);
+    pipeline.updateLatest([_candle(3), _candle(2)]);
 
     expect(scene.data.list.map((item) => item.ts), [3, 2, 1]);
     expect(scene.calculator.computeCount, 1);
@@ -391,23 +346,23 @@ void main() {
     addTearDown(scene.manager.dispose);
     late final KlineDataPipeline pipeline;
     pipeline = KlineDataPipeline(
+      scene.data,
       scene.manager,
       elapsed: () => elapsed,
-      onCandlesMerged: (_, {required replace}) {},
-      onComputed: (_) {},
+      onCandlesMerged: ({required replace}) {},
+      onComputed: () {},
     );
     addTearDown(pipeline.dispose);
     pipeline.start();
-    pipeline.activate(scene.data);
-    pipeline.replace(scene.data, [_candle(2), _candle(1)]);
+    pipeline.replace([_candle(2), _candle(1)]);
     scene.calculator.computeCount = 0;
     scene.calculator.indicator.onCompute = () {
       scene.calculator.indicator.onCompute = null;
       elapsed = const Duration(milliseconds: 1200);
-      pipeline.updateLatest(scene.data, [_candle(4), _candle(3)]);
+      pipeline.updateLatest([_candle(4), _candle(3)]);
     };
 
-    pipeline.updateLatest(scene.data, [_candle(2)]);
+    pipeline.updateLatest([_candle(2)]);
     elapsed = const Duration(milliseconds: 500);
     await tester.pump(elapsed);
 
@@ -427,15 +382,15 @@ void main() {
     addTearDown(scene.data.dispose);
     addTearDown(scene.manager.dispose);
     final pipeline = KlineDataPipeline(
+      scene.data,
       scene.manager,
       elapsed: () => elapsed,
-      onCandlesMerged: (_, {required replace}) {},
-      onComputed: (_) {},
+      onCandlesMerged: ({required replace}) {},
+      onComputed: () {},
     );
     addTearDown(pipeline.dispose);
     pipeline.start();
-    pipeline.activate(scene.data);
-    pipeline.replace(scene.data, [_candle(2), _candle(1)]);
+    pipeline.replace([_candle(2), _candle(1)]);
     scene.calculator.indicator.throwOnCompute = true;
     scene.calculator.computeCount = 0;
 
@@ -460,21 +415,21 @@ void main() {
     addTearDown(scene.data.dispose);
     addTearDown(scene.manager.dispose);
     final pipeline = KlineDataPipeline(
+      scene.data,
       scene.manager,
       elapsed: () => elapsed,
-      onCandlesMerged: (_, {required replace}) {},
-      onComputed: (_) {},
+      onCandlesMerged: ({required replace}) {},
+      onComputed: () {},
     );
     addTearDown(pipeline.dispose);
     pipeline.start();
-    pipeline.activate(scene.data);
-    pipeline.replace(scene.data, [_candle(2), _candle(1)]);
+    pipeline.replace([_candle(2), _candle(1)]);
     scene.calculator.indicator.throwOnCompute = true;
     scene.calculator.computeCount = 0;
     expect(pipeline.invalidateAll, throwsStateError);
     scene.calculator.indicator.throwOnCompute = false;
 
-    pipeline.updateLatest(scene.data, [_candle(3), _candle(2)]);
+    pipeline.updateLatest([_candle(3), _candle(2)]);
 
     expect(scene.data.list.map((item) => item.ts), [3, 2, 1]);
     expect(scene.calculator.computeCount, 1);
@@ -490,25 +445,25 @@ void main() {
     addTearDown(scene.data.dispose);
     addTearDown(scene.manager.dispose);
     final pipeline = KlineDataPipeline(
+      scene.data,
       scene.manager,
       elapsed: () => elapsed,
-      onCandlesMerged: (_, {required replace}) {},
-      onComputed: (_) {},
+      onCandlesMerged: ({required replace}) {},
+      onComputed: () {},
     );
     addTearDown(pipeline.dispose);
     pipeline.start();
-    pipeline.activate(scene.data);
-    pipeline.replace(scene.data, [_candle(2), _candle(1)]);
+    pipeline.replace([_candle(2), _candle(1)]);
     scene.calculator.computeCount = 0;
     scene.calculator.indicator.throwOnCompute = true;
 
     expect(
-      () => pipeline.updateLatest(scene.data, [_candle(3), _candle(2)]),
+      () => pipeline.updateLatest([_candle(3), _candle(2)]),
       throwsStateError,
     );
     scene.calculator.indicator.throwOnCompute = false;
 
-    pipeline.updateLatest(scene.data, [_candle(4), _candle(3)]);
+    pipeline.updateLatest([_candle(4), _candle(3)]);
 
     expect(scene.data.list.map((item) => item.ts), [4, 3, 2, 1]);
     expect(scene.calculator.computeCount, 1);
@@ -536,14 +491,14 @@ void main() {
     addTearDown(data.dispose);
     addTearDown(manager.dispose);
     final pipeline = KlineDataPipeline(
+      data,
       manager,
-      onCandlesMerged: (_, {required replace}) {},
-      onComputed: (_) {},
+      onCandlesMerged: ({required replace}) {},
+      onComputed: () {},
     );
     addTearDown(pipeline.dispose);
     pipeline.start();
-    pipeline.activate(data);
-    pipeline.replace(data, [_candle(2), _candle(1)]);
+    pipeline.replace([_candle(2), _candle(1)]);
     final oldCalculator = manager.getCalculator(oldKey)! as SpyComputedCalculator;
     oldIndicator.throwOnCompute = true;
     oldCalculator.computeCount = 0;
@@ -585,24 +540,24 @@ void main() {
     addTearDown(scene.manager.dispose);
     late final KlineDataPipeline pipeline;
     pipeline = KlineDataPipeline(
+      scene.data,
       scene.manager,
       elapsed: () => elapsed,
-      onCandlesMerged: (_, {required replace}) {},
-      onComputed: (_) {},
+      onCandlesMerged: ({required replace}) {},
+      onComputed: () {},
     );
     addTearDown(pipeline.dispose);
     pipeline.start();
-    pipeline.activate(scene.data);
-    pipeline.replace(scene.data, [_candle(3), _candle(2)]);
+    pipeline.replace([_candle(3), _candle(2)]);
     scene.calculator.computeCount = 0;
 
-    pipeline.updateLatest(scene.data, [_candle(3)]);
+    pipeline.updateLatest([_candle(3)]);
     scene.calculator.indicator.onCompute = () {
       scene.calculator.indicator.onCompute = null;
       elapsed = const Duration(milliseconds: 1200);
-      pipeline.updateLatest(scene.data, [_candle(5), _candle(4)]);
+      pipeline.updateLatest([_candle(5), _candle(4)]);
     };
-    pipeline.appendHistory(scene.data, [_candle(2), _candle(1)]);
+    pipeline.appendHistory([_candle(2), _candle(1)]);
 
     expect(scene.data.list.map((item) => item.ts), [5, 4, 3, 2, 1]);
     expect(scene.calculator.computeCount, 1);
