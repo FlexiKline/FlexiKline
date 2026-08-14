@@ -156,6 +156,16 @@ abstract class KlineBindingBase with FlexiLog implements PaintContext, DrawConte
   @protected
   void markRepaintDraw();
 
+  /// 请求重绘 Chart / Cross / Draw 三个绘制层（不含 Grid）。
+  ///
+  /// 用于数据合并、指标计算完成等需要整体刷新绘制层的场景。
+  @protected
+  void markRepaintAll() {
+    markRepaintChart();
+    markRepaintCross();
+    markRepaintDraw();
+  }
+
   /// 处理 Widget 挂载前暂存的数据。由 StateBinding 实现，view 层在 initState 后调用。
   void flushPendingKlineData();
 

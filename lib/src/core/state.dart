@@ -105,20 +105,23 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     return _paintRangeNotifier;
   }
 
-  void _notifySpecChange(KlineSpec spec) {
-    logd('_notifySpecChange $klineDataKey, spec:$spec');
-    if (spec.key == klineDataKey) {
-      onKlineSpecChanged(_klineSpecNotifier.value);
-      _klineSpecNotifier.value = spec;
-      _intervalNotifier.value = spec.interval;
-    }
+  /// 广播当前 [klineData] 的 spec 变更。
+  ///
+  /// 调用前 [klineData] 已切换为新数据，其 spec 即新值；此处捕获旧 spec 供下游 diff，
+  /// 先对齐 notifier 与 interval（使两者与 [klineData] 一致），再触发 [onKlineSpecChanged]。
+  void _notifySpecChange() {
+    final oldSpec = _klineSpecNotifier.value;
+    final newSpec = klineData.spec;
+    logd('_notifySpecChange $newSpec');
+    _klineSpecNotifier.value = newSpec;
+    _intervalNotifier.value = newSpec.interval;
+    onKlineSpecChanged(oldSpec);
   }
 
-  void _notifyLoadingState(KlineLoadingState state, String key) {
-    logd('_notifyLoadingState key:$key, state:$state');
-    if (key == klineDataKey) {
-      _loadingStateNotifier.value = state;
-    }
+  /// 广播当前 [klineData] 的加载状态。
+  void _notifyLoadingState() {
+    logd('_notifyLoadingState ${klineData.loadingState}');
+    _loadingStateNotifier.value = klineData.loadingState;
   }
 
   late final FIFOHashMap<String, KlineData> _klineDataCache;
@@ -178,8 +181,8 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   /// 4. 取消Cross绘制(如果有)
   void _setKlineData(KlineData data, {bool resetPaintDxOffset = true}) {
     _replaceCurrentKlineData(data);
-    _notifySpecChange(data.spec);
-    _notifyLoadingState(data.loadingState, data.key);
+    _notifySpecChange();
+    _notifyLoadingState();
     if (resetPaintDxOffset && isMounted) {
       paintDxOffset = getInitPaintDxOffset();
     }
@@ -441,9 +444,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     );
     final old = _klineDataCache.append(spec.key, data);
     if (old != null) Future(() => old.dispose());
-    _replaceCurrentKlineData(data);
-    _notifySpecChange(data.spec);
-    _notifyLoadingState(KlineLoadingState.initLoading, data.key);
+    _setKlineData(data);
     return false;
   }
 
@@ -456,7 +457,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     if (specKey == klineDataKey) {
       if (klineData.loadingState != KlineLoadingState.none) {
         klineData.updateState(state: KlineLoadingState.none);
-        _notifyLoadingState(KlineLoadingState.none, specKey);
+        _notifyLoadingState();
       }
     } else {
       _klineDataCache.getItem(specKey)?.updateState(state: KlineLoadingState.none);
@@ -499,16 +500,12 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
       _setKlineData(klineData);
       return;
     }
-    _notifySpecChange(klineData.spec);
-    markRepaintChart();
-    markRepaintCross();
-    markRepaintDraw();
+    _notifySpecChange();
+    markRepaintAll();
   }
 
   void _onComputed() {
-    markRepaintChart();
-    markRepaintCross();
-    markRepaintDraw();
+    markRepaintAll();
   }
 
   /// 启动流水线并处理挂载前暂存的数据.

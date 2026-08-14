@@ -232,10 +232,10 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
       Future.delayed(
         // Duration(milliseconds: panDuration),
         Duration.zero,
-        () => _notifyLoadingState(newState, klineDataKey),
+        _notifyLoadingState,
       );
     } else {
-      _notifyLoadingState(newState, klineDataKey);
+      _notifyLoadingState();
     }
 
     if (!oldState.isLoadMore && newState.isLoadMore) {

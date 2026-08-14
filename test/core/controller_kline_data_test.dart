@@ -18,6 +18,7 @@ library;
 import 'package:decimal/decimal.dart';
 import 'package:flexi_formatter/date_time.dart' show TimeUnit;
 import 'package:flexi_kline/flexi_kline.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/support.dart';
@@ -197,6 +198,28 @@ void main() {
       scene.controller.replaceKlineData(_spec, _candles(3).reversed.toList());
 
       expect(log.events.where((event) => event.startsWith('compute:')), ['compute:cache(reset:true)']);
+    });
+
+    testWidgets('无缓存切换：立即取消 cross 并触发清屏重绘', (tester) async {
+      final scene = ControllerScenario();
+      addTearDown(scene.dispose);
+      await scene.initWithData(_spec, _candles(3).reversed.toList());
+      scene.controller.flushPendingKlineData();
+      await tester.pumpAndSettle();
+
+      // 进入 crossing 状态。
+      scene.controller.onCrossStart(GestureData.tap(const Offset(10, 10)));
+      expect(scene.controller.isCrossing, isTrue);
+
+      final repaintChart = scene.controller.repaintChart as ValueNotifier<int>;
+      final repaintBefore = repaintChart.value;
+
+      // 切换到无缓存的新 spec：走 _setKlineData 收尾。
+      expect(scene.controller.switchKlineData(_nextSpec), isFalse);
+
+      // 立即取消旧 cross，并触发 Chart 图层重绘（清屏）。
+      expect(scene.controller.isCrossing, isFalse);
+      expect(repaintChart.value, greaterThan(repaintBefore));
     });
   });
 }
