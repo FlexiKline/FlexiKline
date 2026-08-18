@@ -564,6 +564,64 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     expect(scene.calculator.computeCount, 2);
   });
+
+  testWidgets('新 latest 插入后累积脏区随索引后移，被弄脏的蜡烛仍参与计算', (tester) async {
+    const key = ComputedIndicatorKey('shift');
+    final ranges = <Range>[];
+    final manager = IndicatorPaintObjectManager(
+      configuration: FakeFlexiKlineConfiguration(mainChildren: {key}),
+    );
+    manager.mountIndicators(
+      candle: TestCandleIndicator(),
+      time: TestTimeIndicator(),
+      mainIndicators: [_RangeRecordingIndicator(key: key, log: LifecycleLog(), ranges: ranges)],
+      subIndicators: const [],
+      context: FakePaintContext(),
+    );
+    final data = KlineData(_spec);
+    addTearDown(data.dispose);
+    addTearDown(manager.dispose);
+    // 冻结时钟，使 500ms 节拍不触发，隔离出「脏区挂起未算」的窗口。
+    final pipeline = KlineDataPipeline(
+      data,
+      manager,
+      elapsed: () => Duration.zero,
+      onCandlesMerged: ({required replace}) {},
+      onComputed: () {},
+    );
+    addTearDown(pipeline.dispose);
+    pipeline.start();
+    pipeline.replace([_candle(3), _candle(2), _candle(1)]);
+    ranges.clear();
+
+    // 同 ts 更新头部：不触发 urgent，脏区 Range(0,1) 挂起，尚未计算。
+    pipeline.updateLatest([_candle(3)]);
+    expect(ranges, isEmpty);
+
+    // 新 ts 插入：ts=3 蜡烛从 index 0 移到 index 1，urgent 立即计算。
+    pipeline.updateLatest([_candle(4)]);
+
+    expect(ranges.any((r) => r.start <= 1 && 1 < r.end), isTrue, reason: '被弄脏并后移到 index 1 的蜡烛必须被重算，ranges=$ranges');
+  });
+}
+
+/// 记录每次 compute 实际覆盖区间的指标，用于验证脏区索引平移。
+class _RangeRecordingIndicator extends SpyComputedIndicator {
+  _RangeRecordingIndicator({required super.key, required super.log, required this.ranges});
+
+  final List<Range> ranges;
+
+  @override
+  IndicatorCalculator createCalculator(int dataIndex) => _RangeRecordingCalculator(this, dataIndex);
+}
+
+class _RangeRecordingCalculator extends IndicatorCalculator<_RangeRecordingIndicator> {
+  _RangeRecordingCalculator(super.indicator, super.dataIndex);
+
+  @override
+  void compute(KlineData data, Range range, {bool reset = false}) {
+    indicator.ranges.add(reset ? data.computableRange : range);
+  }
 }
 
 final class _RecordingLogger implements IFlexiLogger {

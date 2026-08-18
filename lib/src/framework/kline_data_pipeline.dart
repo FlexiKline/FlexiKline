@@ -133,6 +133,7 @@ final class KlineDataPipeline with FlexiLog {
       while (_pending.isNotEmpty) {
         final update = _pending.removeFirst();
         final previousLatestTs = data.latest?.ts;
+        final previousLength = data.length;
         final stopwatch = Stopwatch()..start();
         Range? range;
         try {
@@ -166,6 +167,14 @@ final class KlineDataPipeline with FlexiLog {
           );
         }
         final recoveryPending = _retryPending || _dirty?.requiresFullRecompute == true || _requested.isNotEmpty;
+        // updateLatest 在头部插入新蜡烛时，存量索引整体后移；已累积的 _dirty 仍是旧坐标，
+        // 需按插入数量平移后再合并，否则被弄脏但已移位的蜡烛会落在新 range 之外而漏算。
+        if (update.kind == _UpdateKind.updateLatest && _dirty != null && !_dirty!.requiresFullRecompute) {
+          final delta = data.length - previousLength;
+          if (delta > 0) {
+            _dirty = Range(_dirty!.start + delta, _dirty!.end + delta);
+          }
+        }
         _dirty = _mergeRange(_dirty, range);
         final insertedLatest =
             update.kind == _UpdateKind.updateLatest && previousLatestTs != null && data.latest!.ts > previousLatestTs;
