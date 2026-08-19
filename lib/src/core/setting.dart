@@ -563,7 +563,10 @@ mixin SettingBinding on KlineBindingBase {
     if (newObj == null) return false;
     if (key is ComputedIndicatorKey) {
       final calculator = _paintObjectManager.getCalculator(key);
-      if (calculator != null) _pipeline.recompute(calculator);
+      if (calculator != null) {
+        evictInactiveKlineDataCache();
+        _pipeline.recompute(calculator);
+      }
     }
     markRepaintChart(reset: true);
     markRepaintCross();
@@ -594,7 +597,10 @@ mixin SettingBinding on KlineBindingBase {
     }
     if (key is ComputedIndicatorKey) {
       final calculator = _paintObjectManager.getCalculator(key);
-      if (calculator != null) _pipeline.recompute(calculator);
+      if (calculator != null) {
+        evictInactiveKlineDataCache();
+        _pipeline.recompute(calculator);
+      }
     }
     _onSubIndicatorsChanged();
     return true;

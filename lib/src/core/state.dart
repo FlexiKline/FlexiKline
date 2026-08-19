@@ -144,14 +144,6 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     );
   }
 
-  void _replaceCurrentKlineData(KlineData data) {
-    if (identical(_klineData, data)) return;
-    _pipeline.dispose();
-    _klineData = data;
-    _pipeline = _createPipeline(data);
-    if (isMounted) _pipeline.start();
-  }
-
   @override
   void evictInactiveKlineDataCache() {
     final retainedKey = klineDataKey;
@@ -180,7 +172,12 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   /// 3. 重绘图表
   /// 4. 取消Cross绘制(如果有)
   void _setKlineData(KlineData data, {bool resetPaintDxOffset = true}) {
-    _replaceCurrentKlineData(data);
+    if (!identical(_klineData, data)) {
+      _pipeline.dispose();
+      _klineData = data;
+      _pipeline = _createPipeline(data);
+      if (isMounted) _pipeline.start();
+    }
     _notifySpecChange();
     _notifyLoadingState();
     if (resetPaintDxOffset && isMounted) {

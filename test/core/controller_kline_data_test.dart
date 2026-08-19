@@ -200,6 +200,31 @@ void main() {
       expect(log.events.where((event) => event.startsWith('compute:')), ['compute:cache(reset:true)']);
     });
 
+    testWidgets('显示 computed 指标后丢弃 inactive cache', (tester) async {
+      const key = ComputedIndicatorKey('activation');
+      final scene = ControllerScenario();
+      addTearDown(scene.dispose);
+      await scene.initWithData(
+        _spec,
+        _candles(3).reversed.toList(),
+        mainIndicators: [SpyComputedIndicator(key: key, log: LifecycleLog())],
+      );
+      scene.controller.flushPendingKlineData();
+      await tester.pumpAndSettle();
+
+      scene.controller.switchKlineData(_nextSpec);
+      scene.controller.replaceKlineData(_nextSpec, _candles(2).reversed.toList());
+      await tester.pumpAndSettle();
+
+      expect(scene.controller.hasAddedMainIndicator(key), isFalse);
+      expect(scene.controller.showMainIndicator(key), isTrue);
+      expect(
+        scene.controller.switchKlineData(_spec, useCacheFirst: true),
+        isFalse,
+        reason: '激活 computed 指标后，inactive cache 中的 slots 可能缺失，应重新加载',
+      );
+    });
+
     testWidgets('无缓存切换：立即取消 cross 并触发清屏重绘', (tester) async {
       final scene = ControllerScenario();
       addTearDown(scene.dispose);
