@@ -65,15 +65,36 @@ abstract interface class IStorage {
 }
 
 /// FlexiKline配置接口
+///
+/// 框架只依赖"取当前配置"与"落盘当前配置"两个动作；配置如何生成、如何持久化、
+/// 是否跨 Controller 共享实例，全部由实现决定。
 abstract interface class IConfiguration implements IStorage {
   /// 当前配置主题
   IFlexiKlineTheme get theme;
 
-  /// 生成FlexiKline配置
-  /// 调用场景:
-  /// 1. 首次加载(无缓存)情况下, 生成默认的FlexiKlineConfig
-  /// 2. 从缓存中反序列化实现时调用, [origin]即是原始缓存配置, 这可能出现在后续追加/删除/修改配置时, 原有配置无法反序列化.
-  FlexiKlineConfig generateFlexiKlineConfig([FlexiKlineConfig? origin]);
+  /// 提供当前 [FlexiKlineConfig]。
+  ///
+  /// 框架只在 Controller 构造与 `reloadFlexiKlineConfig()` 时调用，不缓存跨实例状态。
+  ///
+  /// 返回新实例还是同一缓存实例由实现决定，直接影响多 Controller 的同步方式：
+  /// - 返回**共享实例**：激活集合与样式配置的变更对彼此实时可见，对侧只需
+  ///   `reloadFlexiKlineConfig()` 即可追平绘制树，不依赖落盘；
+  /// - 返回**新实例**：所有变更必须先 `storeFlexiKlineConfig()` 落盘，对侧
+  ///   `reloadFlexiKlineConfig()` 才能读到；注意 [setConfig] 返回 Future 且默认实现
+  ///   不 await，紧跟的 reload 是否读到新值取决于实现的读写可见性。
+  ///
+  /// 主区尺寸与蜡烛宽度是窗口局部状态：`reloadFlexiKlineConfig()` 不回灌它们，
+  /// 但多个同时挂载的 Controller 共享实例时，二者在配置层是后写胜。
+  ///
+  /// 建议 `with FlexiKlineConfigurationMixin` 而非从零实现：默认实现已包含反序列化
+  /// 失败的兜底，避免一次序列化不兼容就拿不到可用配置。
+  FlexiKlineConfig getFlexiKlineConfig();
+
+  /// 持久化 [config]。
+  ///
+  /// 仅由 `Controller.storeFlexiKlineConfig()` 触发，框架不决定时机。
+  /// 实现可自行决定存储形态，也可同步到自身持有的缓存实例——框架不做任何假设。
+  void saveFlexiKlineConfig(FlexiKlineConfig config);
 
   /// 绘制工具定制
   Map<IDrawType, DrawObjectBuilder> get drawObjectBuilders;
@@ -100,24 +121,6 @@ T? jsonToInstance<T>(Map<String, dynamic>? json, FromJson<T> fromJson) {
 }
 
 extension IConfigurationExt on IConfiguration {
-  FlexiKlineConfig getFlexiKlineConfig() {
-    FlexiKlineConfig? config;
-    try {
-      final json = getConfig(flexiKlineConfigKey);
-      if (json is Map<String, dynamic>) {
-        config = FlexiKlineConfig.fromJson(json);
-      }
-    } catch (error, stack) {
-      debugPrintStack(stackTrace: stack, label: 'getFlexiKlineConfig$error');
-    }
-
-    return generateFlexiKlineConfig(config);
-  }
-
-  void saveFlexiKlineConfig(FlexiKlineConfig config) {
-    setConfig(flexiKlineConfigKey, config.toJson());
-  }
-
   /// 从本地获取[symbol]对应的绘制实例数据列表.
   Iterable<Overlay> getDrawOverlayList(String symbol) {
     final json = getConfig('$symbol-$drawOverlayListConfigKey');

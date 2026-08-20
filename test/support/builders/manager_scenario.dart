@@ -28,10 +28,14 @@ import '../generators/indicator_desc.dart';
 
 /// Manager 级场景构建器
 class ManagerScenario {
-  ManagerScenario(this.rng, {FakeFlexiKlineConfiguration? config})
-      : context = FakePaintContext() {
+  ManagerScenario(
+    this.rng, {
+    FakeFlexiKlineConfiguration? config,
+    int subMax = defaultSubIndicatorMaxCount,
+  }) : context = FakePaintContext() {
     manager = IndicatorPaintObjectManager(
       configuration: config ?? FakeFlexiKlineConfiguration(),
+      subIndicatorMaxCount: subMax,
     );
   }
 
@@ -67,10 +71,8 @@ class ManagerScenario {
   }
 
   /// 激活主区指标
-  void activateMain(IIndicatorKey key) =>
-      manager.addMainPaintObject(key, context);
+  void activateMain(IIndicatorKey key) => manager.addMainPaintObject(key, context);
 
   /// 激活副区指标
-  void activateSub(IIndicatorKey key) =>
-      manager.addSubPaintObject(key, context);
+  void activateSub(IIndicatorKey key) => manager.addSubPaintObject(key, context);
 }

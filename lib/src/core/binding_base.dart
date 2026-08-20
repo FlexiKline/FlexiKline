@@ -20,9 +20,6 @@ abstract class KlineBindingBase with FlexiLog implements PaintContext, DrawConte
 
   final IConfiguration configuration;
 
-  /// 是否自动保存 Kline 配置。
-  final bool autoSave;
-
   /// 初始布局模式。默认 [FlexiLayoutMode.adapt]（覆盖大多数场景）。
   final FlexiLayoutMode _initialLayoutMode;
 
@@ -52,7 +49,6 @@ abstract class KlineBindingBase with FlexiLog implements PaintContext, DrawConte
 
   KlineBindingBase({
     required this.configuration,
-    this.autoSave = true,
     FlexiLayoutMode initialLayoutMode = FlexiLayoutMode.adapt,
     Size? initialFixedSize,
     this.subIndicatorMaxCount = defaultSubIndicatorMaxCount,
@@ -91,7 +87,8 @@ abstract class KlineBindingBase with FlexiLog implements PaintContext, DrawConte
   @mustCallSuper
   void dispose() {
     logd('dispose base');
-    if (autoSave) storeFlexiKlineConfig();
+    // 不在此落盘：时机由业务侧决定（见 storeFlexiKlineConfig）。
+    // 多个 Controller 共享同一份配置时，自动落盘会让从属侧用自己的运行时状态覆盖对侧。
     _paintObjectManager.dispose();
     _drawObjectManager.dispose();
   }
@@ -100,7 +97,8 @@ abstract class KlineBindingBase with FlexiLog implements PaintContext, DrawConte
   @mustCallSuper
   void onThemeChanged([covariant IFlexiKlineTheme? oldTheme]) {
     logd('onThemeChanged base');
-    storeFlexiKlineConfig();
+    // 不在此落盘：主题变化只让各 PaintObject / DrawObject 重建主题派生资源，
+    // 不修改 [FlexiKlineConfig] 的任何字段。
   }
 
   @protected
@@ -135,7 +133,11 @@ abstract class KlineBindingBase with FlexiLog implements PaintContext, DrawConte
     return configuration.setConfig(key, value);
   }
 
-  /// 保存当前 FlexiKline 配置。
+  /// 落盘当前 FlexiKline 配置。
+  ///
+  /// 框架不代为决定时机：既不在 [dispose] 也不在 [onThemeChanged] 自动调用，
+  /// 由业务侧在合适的时机（如页面销毁前、用户显式保存）调用。
+  /// 多个 Controller 共享同一份配置时，应只由配置拥有者一侧落盘。
   void storeFlexiKlineConfig({
     bool storeDrawOverlays = true,
   });
@@ -180,6 +182,18 @@ abstract class KlineBindingBase with FlexiLog implements PaintContext, DrawConte
   /// 丢弃非当前的缓存 KlineData（指标声明/参数变更后其 slot 值已陈旧），
   /// 下次切换时重新加载。由 StateBinding 实现。
   void evictInactiveKlineDataCache();
+
+  /// 把当前绘制偏移约束回合法区间。由 StateBinding 实现。
+  ///
+  /// `paintDxOffset` 的取值区间由 `maxPaintWidth`（数据量 × 单根蜡烛实际宽度）、
+  /// 主图宽度与最小留白共同决定，因此下列任一变化都可能让当前偏移越界：
+  /// 蜡烛宽度改变、数据量减少、主图变宽、`minPaintBlankRate` 改变。
+  ///
+  /// 手势路径在赋值 `paintDxOffset` 时已顺带夹取；非赋值路径（如
+  /// `reloadFlexiKlineConfig` 直接换掉蜡烛宽度）改变了区间却没有新偏移可赋，
+  /// 需要主动调用本方法，否则越界的旧偏移会让用户只能向一个方向平移才能恢复。
+  @protected
+  void constrainPaintDxOffset();
 }
 
 /// KlineController 内部访问扩展。

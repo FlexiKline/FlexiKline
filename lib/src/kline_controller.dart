@@ -18,7 +18,6 @@ class FlexiKlineController extends KlineBindingBase
     with SettingBinding, StateBinding, GridBinding, ChartBinding, CrossBinding, DrawBinding {
   FlexiKlineController({
     required super.configuration,
-    super.autoSave,
     super.initialLayoutMode,
     super.initialFixedSize,
     super.subIndicatorMaxCount,

@@ -46,8 +46,14 @@ abstract interface class IConfiguration implements IStorage {
   /// 当前配置主题
   IFlexiKlineTheme get theme;
 
-  /// 生成FlexiKline配置
-  FlexiKlineConfig generateFlexiKlineConfig([FlexiKlineConfig? origin]);
+  /// 提供当前 FlexiKlineConfig
+  /// 框架只在 Controller 构造与 reloadFlexiKlineConfig() 时调用。
+  /// 覆写为返回同一缓存实例，即可让多个 Controller（横竖屏、多图同页）共享同一份运行时配置。
+  FlexiKlineConfig getFlexiKlineConfig();
+
+  /// 持久化配置
+  /// 仅由 Controller.storeFlexiKlineConfig() 触发，框架不决定落盘时机。
+  void saveFlexiKlineConfig(FlexiKlineConfig config);
 
   /// 绘制工具定制
   Map<IDrawType, DrawObjectBuilder> get drawObjectBuilders;

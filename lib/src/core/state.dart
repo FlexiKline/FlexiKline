@@ -157,6 +157,12 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   }
 
   @override
+  void constrainPaintDxOffset() {
+    // 经 setter 走一遍 clampPaintDxOffset，把越界的旧偏移收回合法区间。
+    paintDxOffset = _paintDxOffset;
+  }
+
+  @override
   @protected
   void syncComputedSlotCapacity() {
     // 当前数据：按最新容量扩容已有蜡烛的 slots。
