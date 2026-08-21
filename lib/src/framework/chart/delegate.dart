@@ -149,8 +149,10 @@ extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
   void onEnterTree() => doAttach();
 
   /// 框架内部：被移出绘制树时调用。
-  /// 先触发 didDetach，再按 [keepAlive] 决定是否真销毁。
+  /// 先释放选中态与拖动, 再触发 didDetach，最后按 [keepAlive] 决定是否真销毁。
   void onExitTree() {
+    // 出树对象不应继续持有选中态: 否则拖动仍会被路由给它, 且拖动中的未提交状态无人回滚。
+    if (_mounted) deselect();
     doDetach();
     if (!keepAlive) dispose();
   }

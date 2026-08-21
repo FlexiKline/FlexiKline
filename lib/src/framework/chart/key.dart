@@ -110,3 +110,27 @@ enum ScalePosition {
   middle,
   right,
 }
+
+/// [PaintObject.handleTap] 的处理结果, 决定框架的后续动作.
+///
+/// 三值而非 bool: bool 表达不了「消费了点击但不需要选中态」这一态, 而它是
+/// 真实存在的(如 crossing 中的下单按钮、蜡烛图的越界价格标记).
+enum PaintTapResult {
+  /// 未命中本对象: 框架继续询问后续绘制对象.
+  ignored,
+
+  /// 已消费本次点击, 但不需要选中态.
+  ///
+  /// 框架停止询问后续对象, 并清除当前选中态(若有):
+  /// 用户点了另一个可交互元素, 说明注意力已从原选中目标转移.
+  handled,
+
+  /// 已消费本次点击, 并请求成为选中对象.
+  ///
+  /// 框架停止询问后续对象, 授予选中态并取消 cross.
+  /// 这是获得选中态的唯一途径.
+  selected;
+
+  /// 是否消费了本次点击(不再询问后续对象, 也不启动 cross).
+  bool get isConsumed => this != PaintTapResult.ignored;
+}

@@ -118,6 +118,15 @@ abstract interface class PaintRuntimeScope {
   /// 请求移动到初始位置。
   void requestMoveToInitialPosition();
 
+  /// [object] 是否为当前选中的绘制对象。
+  bool isSelectedPaintObject(PaintObject object);
+
+  /// 请求放弃选中态；[object] 非当前选中对象时忽略。
+  ///
+  /// 只能放弃自己的选中态。授予选中态没有对应的 request 接口: 只能由框架在
+  /// tap 分发时依据 [PaintObject.handleTap] 的返回值决定。
+  void requestDeselectPaintObject(PaintObject object);
+
   /// 上报指标图缩放滑竿区域。
   void reportChartZoomSlideBarRect(Rect rect);
 }

@@ -62,6 +62,10 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
   /// zoom slider 拖拽是否已正式开始（通过了最小距离检查且 onChartZoomStart 返回 true）
   bool _isZoomStarted = false;
 
+  /// 当前选中的 PaintObject 是否已认领本次单指拖动.
+  /// 认领期间蜡烛图不平移、松手不做惯性平移、也不触发 loadMore 检查.
+  bool _isObjectDragging = false;
+
   @override
   String get logTag => 'TouchGesture';
 
@@ -101,6 +105,8 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
   void onPointerDown(PointerDownEvent event) {
     if (++_activePointerCount == 2) {
       controller.setMultiTouch(true);
+      // 第二指落下即转为缩放语义, 放弃 PaintObject 拖动并回滚其未提交状态.
+      _cancelObjectDragging();
     }
     final position = event.localPosition;
     if (controller.isDrawVisible && drawState.isOngoing) {
@@ -210,7 +216,20 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
       _zoomData = null;
       _isZoomStarted = false;
     }
+    if (event is PointerCancelEvent) {
+      // 正常抬手时 [onScaleEnd] 已经收尾, 这里只兜底指针被取消的路径.
+      _cancelObjectDragging();
+    }
     _moveData = null;
+  }
+
+  /// 放弃当前 PaintObject 拖动并清理其手势数据. 未在拖动时为空操作.
+  void _cancelObjectDragging() {
+    if (!_isObjectDragging) return;
+    _isObjectDragging = false;
+    controller.onPaintObjectDragCancel();
+    _panScaleData?.end();
+    _panScaleData = null;
   }
 
   /// 点击
@@ -308,6 +327,15 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
       return;
     }
 
+    // 已选中的 PaintObject 优先认领单指拖动; 多指仍归缩放.
+    if (details.pointerCount <= 1 && controller.onPaintObjectDragStart(details.localFocalPoint)) {
+      logd('onScaleStart paintObject drag focal:${details.localFocalPoint}');
+      cancelPositionAnimation();
+      _panScaleData = GestureData.pan(details.localFocalPoint);
+      _isObjectDragging = true;
+      return;
+    }
+
     cancelPositionAnimation();
     if (gestureConfig.enableScale && details.pointerCount > 1) {
       ScalePosition position = _panScaleData?.initPosition ?? gestureConfig.scalePosition;
@@ -341,6 +369,13 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
     }
 
     // logd('onScaleUpdate move> ${DateTime.now().millisecond} details:${details.localFocalPoint}');
+    if (_isObjectDragging) {
+      // 不做区域钳制: 是否限制在图表内由绘制对象自行决定.
+      _panScaleData!.update(details.localFocalPoint);
+      controller.onPaintObjectDragUpdate(_panScaleData!);
+      return;
+    }
+
     if (controller.isDrawVisible && drawState.isOngoing) {
       if (_panScaleData!.isPan) {
         _panScaleData!.update(
@@ -379,6 +414,16 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
   void onScaleEnd(ScaleEndDetails details) {
     if (_panScaleData == null) {
       logd('onScaleEnd panScaledata and ticker is empty! > details:$details');
+      return;
+    }
+
+    if (_isObjectDragging) {
+      logd('onScaleEnd paintObject drag end.');
+      _isObjectDragging = false;
+      controller.onPaintObjectDragEnd();
+      _panScaleData?.end();
+      _panScaleData = null;
+      // 拖动的是绘制对象而非蜡烛图: 不做惯性平移, 也不检查 loadMore.
       return;
     }
 

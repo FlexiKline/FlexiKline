@@ -754,13 +754,14 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
   }
 
   @override
-  bool handleTap(Offset position) {
+  PaintTapResult handleTap(Offset position) {
     final lastTxtRect = offViewPriceLabelRect?.inflate(indicator.offViewPriceMark.hitTestMargin);
     if (lastTxtRect != null && lastTxtRect.include(position)) {
-      // 命中最后价区域, 此时应该移动到蜡烛图初始位置
+      // 命中最后价区域, 此时应该移动到蜡烛图初始位置.
+      // 纯动作型交互, 不需要选中态.
       context.requestMoveToInitialPosition();
-      return true;
+      return PaintTapResult.handled;
     }
-    return false;
+    return PaintTapResult.ignored;
   }
 }

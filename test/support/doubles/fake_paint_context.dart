@@ -126,6 +126,22 @@ class FakePaintContext implements PaintContext {
   @override
   void requestMoveToInitialPosition() {}
 
+  /// 当前选中对象。真实实现在 ChartBinding；此处直接暴露供用例 arrange 与断言。
+  ///
+  /// 授予选中态没有 request 接口（框架只在 tap 分发时授予），
+  /// 对象侧语义测试直接给本字段赋值即可。
+  PaintObject? selectedPaintObject;
+
+  @override
+  bool isSelectedPaintObject(PaintObject object) {
+    return identical(selectedPaintObject, object);
+  }
+
+  @override
+  void requestDeselectPaintObject(PaintObject object) {
+    if (identical(selectedPaintObject, object)) selectedPaintObject = null;
+  }
+
   @override
   void reportChartZoomSlideBarRect(Rect rect) {}
 

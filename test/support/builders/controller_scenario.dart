@@ -29,22 +29,34 @@ class ControllerScenario {
 
   final FlexiKlineController controller;
 
+  /// 本次挂载使用的蜡烛指标，供用例切换图表类型等。
+  late final TestCandleIndicator candle;
+
   /// switch → update → mount → initState 完整链。
+  ///
+  /// [canvasWidth] 模拟 widget 层的 `LayoutBuilder` 上报宽度。不传时 `mainRect`
+  /// 宽度为 0，任何依赖画布几何的断言（如按位置分派 tap）都会落空。
   Future<void> initWithData(
     KlineSpec spec,
     List<CandleModel> candles, {
     List<Indicator> mainIndicators = const [],
     List<Indicator> subIndicators = const [],
+    double? canvasWidth,
+    TestCandleIndicator? candle,
   }) async {
     controller.switchKlineData(spec);
     controller.replaceKlineData(spec, candles);
+    this.candle = candle ?? TestCandleIndicator();
     controller.mountIndicators(
-      candle: TestCandleIndicator(),
+      candle: this.candle,
       time: TestTimeIndicator(),
       mainIndicators: mainIndicators,
       subIndicators: subIndicators,
     );
     controller.initState();
+    if (canvasWidth != null) {
+      controller.setAdaptLayoutMode(width: canvasWidth);
+    }
   }
 
   void dispose() => controller.dispose();

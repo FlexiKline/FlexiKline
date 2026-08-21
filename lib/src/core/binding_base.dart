@@ -158,6 +158,15 @@ abstract class KlineBindingBase with FlexiLog implements PaintContext, DrawConte
   @protected
   void markRepaintDraw();
 
+  /// 是否存在选中的 [PaintObject]。由 ChartBinding 实现。
+  ///
+  /// 选中态由框架持有（对象粒度），是 PaintObject 拖动与桌面端
+  /// hover cross 抑制的前置条件。
+  bool get hasSelectedPaintObject;
+
+  /// 清除 [PaintObject] 选中态；若正在拖动，先取消拖动。由 ChartBinding 实现。
+  void deselectPaintObject();
+
   /// 请求重绘 Chart / Cross / Draw 三个绘制层（不含 Grid）。
   ///
   /// 用于数据合并、指标计算完成等需要整体刷新绘制层的场景。
@@ -258,8 +267,18 @@ class FlexiStateNotifier<T> extends ValueNotifier<T> {
     _silent = false;
   }
 
+  /// 赋值并保证恰好通知一次。
+  ///
+  /// 与直接赋值 [value] 的区别: 当新值与旧值 `==` 时（典型场景是同一实例被
+  /// 就地修改, 如 draw 的 [Point] 被 `onUpdateDrawPoint` 改写）,
+  /// [ValueNotifier] 的 setter 会静默早退, 本方法仍会通知一次。
+  ///
+  /// 若新值必然与旧值不同, 直接赋值 [value] 即可, 无需本方法。
   void updateValue(T val) {
-    value = val;
-    super.notifyListeners();
+    if (value == val) {
+      notifyListeners();
+    } else {
+      value = val;
+    }
   }
 }

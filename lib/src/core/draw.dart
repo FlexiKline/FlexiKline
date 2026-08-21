@@ -161,6 +161,8 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
         _drawState = const Prepared();
       }
     }
+    // 手绘与 PaintObject 选中态互斥.
+    deselectPaintObject();
     requestCancelCross();
     _markRepaintDraw();
   }
@@ -319,6 +321,8 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
       updateDrawObjectPointsData(drawState.object!);
     }
     _drawState = DrawState.edit(object);
+    // 手绘与 PaintObject 选中态互斥.
+    deselectPaintObject();
     requestCancelCross();
     _markRepaintDraw();
   }

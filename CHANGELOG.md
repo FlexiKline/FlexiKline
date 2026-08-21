@@ -1,3 +1,25 @@
+## 2.4.0
+* Separate candle merging from indicator calculation: add `KlineDataPipeline` with `idle`/`merging`/`computing` phases and a fixed calculation tick (`FlexiKlineController.calculationInterval`, default 500ms), so the two never modify one `KlineData` concurrently (Breaking Changes).
+* Replace `updateKlineData(spec, list, reset:)` with three intent-specific APIs: `replaceKlineData`, `updateLatestKlineData`, `appendHistoryKlineData`; the pipeline no longer infers direction from timestamps (Breaking Changes).
+* Move indicator calculation out of PaintObject into `IndicatorCalculator`: add `ComputedIndicator.createCalculator(dataIndex)` and `calcParam`; remove `compute` and `shouldRecompute` from the paint layer (Breaking Changes).
+* Bind one `KlineDataPipeline` to one current `KlineData`; switching spec destroys the old pipeline and its pending queue, and data APIs no longer take a `data` argument (Breaking Changes).
+* Remove `KlineData.enqueueWaitingData`, `hasWaitingData` and `waitingDataLength`; pre-mount input is now held by the pipeline, not by `KlineData` (Breaking Changes).
+* Add `evictInactiveKlineDataCache()` and drop non-current cached `KlineData` when computed slot layout or indicator params change, so cached snapshots cannot carry stale indicator values.
+* Fix accumulated dirty range not translating when `updateLatestKlineData` inserts a new head candle, which silently skipped recompute for incremental indicators (MA/EMA/VolMA/BOLL/KDJ/WR/CCI/OBV).
+* Route cache-miss `switchKlineData` through the same path as cache-hit: it now clears the chart, resets the viewport and cancels the active cross; add `markRepaintAll` for the chart+cross+draw triple.
+* Replace `IConfiguration.generateFlexiKlineConfig` with `getFlexiKlineConfig` and `saveFlexiKlineConfig`; implementations mixing in `FlexiKlineConfigurationMixin` need no change (Breaking Changes).
+* Remove the `autoSave` constructor parameter and all implicit persistence (no longer written on `dispose` or `onThemeChanged`); callers must invoke `storeFlexiKlineConfig()` explicitly (Breaking Changes).
+* Add `reloadFlexiKlineConfig([config])` so one controller can catch up with another, fixing landscape config changes not taking effect after returning to portrait; override `getFlexiKlineConfig` to return a cached instance for controllers sharing one runtime config.
+* Fix evicting the head of a full sub-indicator queue leaving its key in the config, which made the reload diff rotate the sub queue on every call.
+* Change `PaintObject.handleTap` to return `PaintTapResult` (`ignored`/`handled`/`selected`) instead of `bool`; `handled` consumes the tap without requesting selection, which a `bool` cannot express (Breaking Changes).
+* Add framework-held PaintObject selection: `PaintObject.isSelected`/`deselect()`, `PaintContext.isSelectedPaintObject`/`requestDeselectPaintObject`, controller-level `hasSelectedPaintObject`/`deselectPaintObject()`/`selectedPaintObjectListenable`; selection is granted only during `onTap` dispatch.
+* Add PaintObject drag gestures `handleDragStart`/`handleDragUpdate`/`handleDragEnd`/`handleDragCancel`, routed only to the selected object; a claimed drag suppresses chart pan, inertial pan, loadMore and Cross updates.
+* Dispatch taps by position instead of forwarding through `MainPaintObject`: `mainRect` hits iterate `mainPaintObject.paintableChildren`, otherwise `subPaintObjects`; a hit region must lie within its owning pane (Breaking Changes).
+* Fix main-area indicators hidden by line chart mode staying tappable through their last painted hit regions; tap dispatch now uses `paintableChildren` like the paint path.
+* Add `MainPaintObject.isPaintable` and gate gestures on it: a selected but unpaintable object counts as unselected for `hasSelectedPaintObject` and drag routing, while `selectedPaintObjectListenable` keeps the raw selection.
+* Fix `FlexiStateNotifier.updateValue` notifying twice when the value actually changes; it now notifies exactly once and still notifies on in-place mutation.
+* Enable `onPointerCancel` on the non-touch gesture detector to roll back an in-progress PaintObject drag, which `onPanEnd` would otherwise commit.
+
 ## 2.3.2
 * Add `crossOffsetListenable` so external consumers can subscribe to Cross focus changes.
 * Constrain multiline `drawText` and `drawImageText` layouts to their `drawableRect`, while retaining existing single-line width behavior.

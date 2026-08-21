@@ -55,6 +55,10 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
   /// 长按监听数据
   GestureData? _longData;
 
+  /// 当前选中的 PaintObject 是否已认领本次拖动.
+  /// 认领期间蜡烛图不平移、不更新 cross, 松手也不做惯性平移.
+  bool _isObjectDragging = false;
+
   final _mouseCursor = ValueNotifier(SystemMouseCursors.precise);
 
   void setCursorToPrecise() {
@@ -156,7 +160,11 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
 
       // onPointerMove: onPointerMove,
       // onPointerDown: onPointerDown,
-      // onPointerCancel: onPointerCancel,
+
+      /// 指针取消: 仅用于回滚 PaintObject 拖动.
+      /// [onPanEnd] 在指针被取消时同样会派发(见 monodrag.dart 的 accepted 分支),
+      /// 无法从 [DragEndDetails] 区分, 故在此先行回滚, 避免把中断当成提交.
+      onPointerCancel: onPointerCancel,
       child: ValueListenableBuilder(
         valueListenable: _mouseCursor,
         builder: (context, cursor, child) => MouseRegion(
@@ -313,6 +321,8 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
   /// 鼠标Hover进入事件.
   void onEnter(PointerEnterEvent event) {
     if (controller.isStartDragGrid) return;
+    // 选中的 PaintObject 独占指针焦点, 此时不拉起 cross.
+    if (controller.hasSelectedPaintObject) return;
     final offset = event.localPosition;
     // if (!controller.canvasRect.include(offset)) return;
 
@@ -355,6 +365,14 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
     } else if (gestureConfig.enableZoom && controller.chartZoomSlideBarRect.include(offset)) {
       controller.requestCancelCross();
       setCursorToZoom();
+      return;
+    }
+
+    if (controller.hasSelectedPaintObject) {
+      // 选中的 PaintObject 独占指针焦点. hover 是持续事件流, 必须在此持续早退,
+      // 否则下一个 hover 事件会用 force 把 cross 重新拉起来.
+      if (controller.isCrossing) controller.requestCancelCross();
+      setCursorToPrecise();
       return;
     }
 
@@ -440,6 +458,16 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
     }
   }
 
+  /// 放弃当前 PaintObject 拖动并清理其手势数据. 未在拖动时为空操作.
+  void _cancelObjectDragging() {
+    if (!_isObjectDragging) return;
+    _isObjectDragging = false;
+    controller.onPaintObjectDragCancel();
+    _panData?.end();
+    _panData = null;
+    setCursorToPrecise();
+  }
+
   /// 平移开始.
   void onPanStart(DragStartDetails details) {
     if (_panData != null && !_panData!.isEnd) {
@@ -461,6 +489,13 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
         _panData?.end();
         _panData = null;
       }
+    } else if (controller.onPaintObjectDragStart(position)) {
+      // 已选中的 PaintObject 优先认领拖动.
+      logd('onPanStart paintObject drag local:$position');
+      cancelPositionAnimation();
+      setCursorToGrabbing();
+      _panData = GestureData.pan(position);
+      _isObjectDragging = true;
     } else {
       logd('onPanStart pan local:$position');
       cancelPositionAnimation();
@@ -484,7 +519,11 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
     //   logd('onPanUpdate move> ${DateTime.now().millisecond} > $details');
     //   return true;
     // }());
-    if (controller.isDrawVisible && drawState.isOngoing) {
+    if (_isObjectDragging) {
+      // 不做区域钳制: 是否限制在图表内由绘制对象自行决定.
+      _panData!.update(details.localPosition);
+      controller.onPaintObjectDragUpdate(_panData!);
+    } else if (controller.isDrawVisible && drawState.isOngoing) {
       _panData!.update(details.localPosition.clamp(controller.mainRect));
       controller.onDrawMoveUpdate(_panData!);
     } else {
@@ -501,6 +540,17 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
   void onPanEnd(DragEndDetails details) {
     if (_panData == null) {
       logd('onPanEnd panData is empty! details:$details');
+      return;
+    }
+
+    if (_isObjectDragging) {
+      logd('onPanEnd paintObject drag end.');
+      _isObjectDragging = false;
+      controller.onPaintObjectDragEnd();
+      _panData?.end();
+      _panData = null;
+      setCursorToPrecise();
+      // 拖动的是绘制对象而非蜡烛图: 不做惯性平移, 也不检查 loadMore.
       return;
     }
 
@@ -776,6 +826,8 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
 
   void onPointerCancel(PointerCancelEvent event) {
     logd('onPointerCancel $event');
+    // 回滚正在进行的 PaintObject 拖动, 避免 [onPanEnd] 把中断当成提交.
+    _cancelObjectDragging();
   }
 
   void onKeyEvent(KeyEvent event) {

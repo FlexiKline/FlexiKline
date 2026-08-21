@@ -28,15 +28,36 @@ import 'package:flutter/painting.dart';
 
 /// 测试用 [CandleBaseIndicator] 子类，支持自定义 height
 class TestCandleIndicator extends CandleBaseIndicator {
-  TestCandleIndicator({super.height = 300}) : super(padding: EdgeInsets.zero);
+  TestCandleIndicator({
+    super.height = 300,
+    this.chartType = FlexiChartType.barSolid,
+    this.hideMainIndicatorsInLineChartMode = false,
+  }) : super(padding: EdgeInsets.zero);
+
+  /// [CandleBasePaintObject.resolveChartType] 的返回值
+  final FlexiChartType chartType;
+
+  /// 线图模式下是否隐藏其余主区指标（内置 CandleIndicator 默认为 true）
+  final bool hideMainIndicatorsInLineChartMode;
+
+  /// 最近一次创建的绘制对象
+  TestCandlePaintObject? object;
 
   @override
-  CandleBasePaintObject<CandleBaseIndicator> createPaintObject() => _TestCandlePaintObject();
+  CandleBasePaintObject<CandleBaseIndicator> createPaintObject() {
+    return object = TestCandlePaintObject();
+  }
 }
 
-class _TestCandlePaintObject extends CandleBasePaintObject<TestCandleIndicator> {
+/// 可切换图表类型的蜡烛绘制对象，用于验证线图模式下的隐藏行为。
+class TestCandlePaintObject extends CandleBasePaintObject<TestCandleIndicator> {
+  /// 覆盖 indicator 的配置；为 null 时取 `indicator.chartType`。
+  FlexiChartType? chartTypeOverride;
+
   @override
-  FlexiChartType resolveChartType() => FlexiChartType.barSolid;
+  FlexiChartType resolveChartType() => chartTypeOverride ?? indicator.chartType;
+  @override
+  bool get hideMainIndicatorsInLineChartMode => indicator.hideMainIndicatorsInLineChartMode;
   @override
   MinMax? computeVisibleMinMax(int start, int end) => null;
   @override
@@ -151,6 +172,89 @@ class TestExternalIndicator extends ExternalIndicator {
 }
 
 class _TestExternalPaintObject extends ExternalPaintObject<TestExternalIndicator> {
+  @override
+  MinMax? computeVisibleMinMax(int start, int end) => null;
+  @override
+  void paint(Canvas canvas, Size size) {}
+  @override
+  Size? paintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
+}
+
+// ---------------------------------------------------------------------------
+// Interactive（选中 / 拖动）
+// ---------------------------------------------------------------------------
+
+/// 测试用可交互 [ExternalIndicator]：驱动 selection 与 drag 的分发测试。
+///
+/// [createPaintObject] 会把创建出的对象记在 [object] 上，测试据此取到实例，
+/// 无需为此在生产代码上开放访问器。
+class TestInteractiveIndicator extends ExternalIndicator {
+  TestInteractiveIndicator({
+    required super.key,
+    super.height = 80,
+    super.autoActivate = true,
+    this.hitRect = const Rect.fromLTRB(0, 0, 100, 100),
+  }) : super(padding: EdgeInsets.zero);
+
+  /// [handleTap] / [handleDragStart] 的命中区域
+  final Rect hitRect;
+
+  /// 最近一次创建的绘制对象
+  TestInteractivePaintObject? object;
+
+  @override
+  TestInteractivePaintObject createPaintObject() {
+    return object = TestInteractivePaintObject();
+  }
+}
+
+/// [TestInteractiveIndicator] 的绘制对象：记录回调序列供断言。
+class TestInteractivePaintObject extends ExternalPaintObject<TestInteractiveIndicator> {
+  /// 是否认领拖动；置 false 可模拟「按在选中对象上但不接受拖动」
+  bool acceptDrag = true;
+
+  /// 首次命中时返回的结果。
+  ///
+  /// 默认请求选中；置为 [PaintTapResult.handled] 可模拟「仅处理点击、
+  /// 不需要选中态」的指标（如 crossing 中的下单按钮）。
+  PaintTapResult tapResult = PaintTapResult.selected;
+
+  /// 按调用顺序记录的回调名
+  final List<String> calls = [];
+
+  /// 最近一次 [handleDragUpdate] 的参数
+  Offset? lastDragPosition;
+  Offset? lastDragDelta;
+
+  @override
+  PaintTapResult handleTap(Offset position) {
+    if (!indicator.hitRect.contains(position)) return PaintTapResult.ignored;
+    calls.add('tap');
+    // 二次点击同一对象 => 消费点击但放弃选中态, 由框架清除。
+    if (isSelected) return PaintTapResult.handled;
+    return tapResult;
+  }
+
+  @override
+  bool handleDragStart(Offset position) {
+    if (!acceptDrag || !indicator.hitRect.contains(position)) return false;
+    calls.add('dragStart');
+    return true;
+  }
+
+  @override
+  void handleDragUpdate(Offset position, Offset delta) {
+    calls.add('dragUpdate');
+    lastDragPosition = position;
+    lastDragDelta = delta;
+  }
+
+  @override
+  void handleDragEnd() => calls.add('dragEnd');
+
+  @override
+  void handleDragCancel() => calls.add('dragCancel');
+
   @override
   MinMax? computeVisibleMinMax(int start, int end) => null;
   @override

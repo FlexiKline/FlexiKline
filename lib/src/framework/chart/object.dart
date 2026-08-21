@@ -173,7 +173,52 @@ abstract class PaintObject<T extends Indicator<IIndicatorKey>> extends Indicator
   /// 处理 Tap 事件
   ///
   /// 注：自行处理 [position] 位置的点击事件。
-  bool handleTap(Offset position) => false;
+  ///
+  /// 返回值决定框架的后续动作, 见 [PaintTapResult]。只有返回
+  /// [PaintTapResult.selected] 才会被授予选中态; 绘制对象无法在其他时机
+  /// 自行获得选中态。
+  ///
+  /// [position] 已由框架按位置分派: 主区指标只会收到 `mainRect` 内的点击,
+  /// 副区指标只会收到 `subRect` 内的点击, 但具体命中区仍需自行判断。命中区
+  /// 必须落在本对象所在大区内, 否则收不到对应位置的点击。
+  ///
+  /// 主区内按 zIndex 升序询问, 即视觉最底层的子指标先被询问。
+  /// [handleDragStart] 不遍历绘制树, 不受此顺序影响。
+  PaintTapResult handleTap(Offset position) => PaintTapResult.ignored;
+
+  /// 是否为框架当前选中的绘制对象。
+  ///
+  /// 选中态由框架持有（对象粒度）。绘制对象应把所有选中相关的渲染判断门控在
+  /// 本 getter 上：框架在任意路径清除选中态后本值即为 false, 对象内部残留的
+  /// 选中标识不会被读到, 因此框架不额外提供失选回调。
+  bool get isSelected => context.isSelectedPaintObject(this);
+
+  /// 请求放弃选中态；非当前选中对象时无效果。
+  ///
+  /// 用于 tap 之外的时机（如选中目标已从业务数据中消失）。tap 内部想放弃
+  /// 选中态应直接返回 [PaintTapResult.handled], 由框架统一处理。
+  void deselect() => context.requestDeselectPaintObject(this);
+
+  /// 处理拖动开始, 仅当前选中且可绘制的对象会被询问。
+  ///
+  /// 返回 true 认领本次拖动：框架随后抑制蜡烛图平移、惯性平移、loadMore 检查
+  /// 与 cross 更新, 并把后续的 [handleDragUpdate] / [handleDragEnd] /
+  /// [handleDragCancel] 只发给本对象。
+  ///
+  /// 注：本回调不遍历绘制树, 因此不存在命中优先级问题。
+  bool handleDragStart(Offset position) => false;
+
+  /// 处理拖动中。
+  ///
+  /// [position] 为当前指针的 canvas 坐标, [delta] 为相对上一次的增量。
+  /// 框架不对 [position] 做区域钳制, 需要时自行使用 `clampDyInChart` 等。
+  void handleDragUpdate(Offset position, Offset delta) {}
+
+  /// 处理拖动正常结束, 应在此提交结果。
+  void handleDragEnd() {}
+
+  /// 处理拖动被打断（指针取消、多指介入、被强制失选）, 应在此回滚未提交状态。
+  void handleDragCancel() {}
 
   /// 触发重新绘制
   void setState([VoidCallback? fn]) {
@@ -325,12 +370,16 @@ final class MainPaintObject<T extends MainPaintObjectIndicator> extends PaintObj
     return _drawableRect ??= Offset.zero & size;
   }
 
-  @override
-  bool handleTap(Offset position) {
-    for (final object in children) {
-      if (object.handleTap(position)) return true;
-    }
-    return false;
+  /// [object] 当前是否会被绘制。
+  ///
+  /// 线图模式（[onlyMainChart]）下主区仅绘制蜡烛, 其余主区子对象不可绘制;
+  /// 非主区子对象（副区）恒可绘制。与 [paintableChildren] 同源, 但为 O(1) 查询。
+  ///
+  /// 注: 隐藏并不使对象出树, 因此其选中态仍保留(放大回蜡烛图即恢复),
+  /// 但不可绘制期间不应参与任何手势。
+  bool isPaintable(PaintObject object) {
+    if (!children.contains(object)) return true;
+    return !onlyMainChart || object.key == candleIndicatorKey;
   }
 
   @override

@@ -33,9 +33,13 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
 
   @override
   void dispose() {
+    // 先静默放弃选中态, 使 super.dispose() 中的 PaintObject 释放不再触发通知与重绘.
+    _isDragging = false;
+    _selectedObjectNotifier.setSilently(null);
     super.dispose();
     logd('dispose chart');
     _repaintChart.dispose();
+    _selectedObjectNotifier.dispose();
     _isChartStartZoom.dispose();
     _chartZoomSlideBarRect.dispose();
     _lastPriceCountDownTimer?.cancel();
@@ -56,6 +60,8 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
     super.onKlineSpecChanged(oldSpec);
     // 仅 symbol/interval（spec.key）变化才通知 external 重载业务数据。
     if (klineData.spec.key != oldSpec.key) {
+      // 业务数据即将重载, 选中的绘制目标不再有效。
+      deselectPaintObject();
       _paintObjectManager.notifySpecChanged(oldSpec);
     }
   }
@@ -428,9 +434,127 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
   @override
   bool onTap(Offset position) {
     if (super.onTap(position)) return true;
-    for (final paintObject in [mainPaintObject, ...subPaintObjects]) {
-      if (paintObject.handleTap(position)) return true;
+
+    // 主区与副区在几何上互斥(mainRect 即 mainPaintObject.drawableRect, subRect 在其下方),
+    // 按位置直接定位目标集合, 无需经 MainPaintObject 转发。
+    // 用 paintableChildren 而非 children: 线图模式下被隐藏的主区指标不参与命中。
+    final objects = mainRect.include(position) ? mainPaintObject.paintableChildren : subPaintObjects;
+
+    for (final paintObject in objects) {
+      switch (paintObject.handleTap(position)) {
+        case PaintTapResult.ignored:
+          continue;
+        case PaintTapResult.handled:
+          // 消费点击但不需要选中态 => 顺带放弃当前选中的目标。
+          deselectPaintObject();
+          return true;
+        case PaintTapResult.selected:
+          _selectPaintObject(paintObject);
+          return true;
+      }
     }
+
+    // 本次点击无人认领 => 放弃选中态, 让后续 cross 接手。
+    deselectPaintObject();
     return false;
+  }
+
+  /// PaintObject 选中态 ///
+
+  /// 当前选中的绘制对象。选中态由框架持有, 同一时刻最多一个。
+  ///
+  /// 对象内部选中了哪个元素（如订单指标的哪条止盈线）由绘制对象自行维护,
+  /// 并应将相关渲染判断门控在 [PaintObject.isSelected] 上。
+  final _selectedObjectNotifier = FlexiStateNotifier<PaintObject?>(null);
+
+  /// 选中对象变化, 供宿主 Widget 联动（如工具条显隐）。
+  ValueListenable<PaintObject?> get selectedPaintObjectListenable {
+    return _selectedObjectNotifier;
+  }
+
+  /// 有效选中对象: 当前不可绘制时(线图模式下被隐藏的主区指标)视为未选中。
+  ///
+  /// 与 [selectedPaintObjectListenable] 的区别: 后者是原始选中, 不因可见性
+  /// 变化而改变; 本 getter 参与手势判定。隐藏不使对象出树, 因此选中态刻意
+  /// 保留, 放大回蜡烛图即恢复。
+  PaintObject? get _activeSelectedObject {
+    final object = _selectedObjectNotifier.value;
+    if (object == null) return null;
+    return mainPaintObject.isPaintable(object) ? object : null;
+  }
+
+  @override
+  bool get hasSelectedPaintObject => _activeSelectedObject != null;
+
+  @override
+  bool isSelectedPaintObject(PaintObject object) {
+    return identical(_selectedObjectNotifier.value, object);
+  }
+
+  /// 授予选中态。private: 唯一调用点是 [onTap] 的三值分发。
+  void _selectPaintObject(PaintObject object) {
+    if (isSelectedPaintObject(object)) return;
+    _cancelDragIfNeeded();
+    // 直接赋值而非 updateValue: 上面已保证值必然变化, 不需要「值未变也通知」的语义。
+    _selectedObjectNotifier.value = object;
+    // 选中即一次性取消 cross; 非触摸设备再由 hover 事件的持续早退保证其不被重新拉起。
+    requestCancelCross();
+    markRepaintChart();
+  }
+
+  @override
+  void requestDeselectPaintObject(PaintObject object) {
+    if (!isSelectedPaintObject(object)) return;
+    deselectPaintObject();
+  }
+
+  @override
+  void deselectPaintObject() {
+    if (_selectedObjectNotifier.value == null) return;
+    _cancelDragIfNeeded();
+    _selectedObjectNotifier.value = null;
+    markRepaintChart();
+  }
+
+  /// PaintObject 拖动 ///
+
+  /// 不变量: 为 true 时 [_selectedObjectNotifier] 必然非空。
+  bool _isDragging = false;
+
+  /// 是否有绘制对象正在被拖动。手势层据此短路蜡烛图平移与 cross 更新。
+  bool get isPaintObjectDragging => _isDragging;
+
+  /// 询问当前选中对象是否认领 [position] 位置发起的拖动。
+  ///
+  /// 未选中任何对象或已在拖动中时直接返回 false, 由蜡烛图平移接手。
+  bool onPaintObjectDragStart(Offset position) {
+    if (_isDragging) return false;
+    // 有效选中而非原始选中: 不可绘制的对象不参与手势。
+    final object = _activeSelectedObject;
+    if (object == null) return false;
+    if (!object.handleDragStart(position)) return false;
+    logd('onPaintObjectDragStart ${object.key} > $position');
+    _isDragging = true;
+    return true;
+  }
+
+  void onPaintObjectDragUpdate(GestureData data) {
+    if (!_isDragging) return;
+    _activeSelectedObject?.handleDragUpdate(data.offset, data.delta);
+  }
+
+  void onPaintObjectDragEnd() {
+    if (!_isDragging) return;
+    _isDragging = false;
+    _activeSelectedObject?.handleDragEnd();
+  }
+
+  void onPaintObjectDragCancel() => _cancelDragIfNeeded();
+
+  void _cancelDragIfNeeded() {
+    if (!_isDragging) return;
+    _isDragging = false;
+    // 用原始选中: 对象若在拖动途中变为不可绘制, 仍必须收到回滚回调。
+    _selectedObjectNotifier.value?.handleDragCancel();
   }
 }
