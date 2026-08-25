@@ -21,26 +21,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../support/support.dart';
 
-FlexiKlineController _createController({
-  FlexiLayoutMode initialLayoutMode = FlexiLayoutMode.adapt,
-  Size? initialFixedSize,
-}) {
-  return FlexiKlineController(
-    configuration: FakeFlexiKlineConfiguration(
-      mainIndicatorDefaultSize: const Size(400, 300),
-    ),
-    initialLayoutMode: initialLayoutMode,
-    initialFixedSize: initialFixedSize,
-  );
-}
-
-Future<void> _pumpAwayTimers(WidgetTester tester) async {
-  await tester.pump(const Duration(milliseconds: 200));
-}
-
 void main() {
   testWidgets('adapt: LayoutBuilder applies parent width', (tester) async {
-    final controller = _createController();
+    final controller = createChartController();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -61,13 +44,11 @@ void main() {
     expect(controller.layoutMode, FlexiLayoutMode.adapt);
     expect(controller.mainSize.width, closeTo(333, 1.0));
 
-    await tester.pumpWidget(const SizedBox.shrink());
-    await _pumpAwayTimers(tester);
-    controller.dispose();
+    await disposeChart(tester, controller);
   });
 
   testWidgets('fixed: LayoutBuilder applies bounded constraints', (tester) async {
-    final controller = _createController(
+    final controller = createChartController(
       initialLayoutMode: FlexiLayoutMode.fixed,
     );
 
@@ -91,13 +72,11 @@ void main() {
     expect(controller.canvasRect.width, closeTo(360, 1.0));
     expect(controller.canvasRect.height, closeTo(520, 1.0));
 
-    await tester.pumpWidget(const SizedBox.shrink());
-    await _pumpAwayTimers(tester);
-    controller.dispose();
+    await disposeChart(tester, controller);
   });
 
   testWidgets('fixed: scrollable parent uses initialFixedSize height', (tester) async {
-    final controller = _createController(
+    final controller = createChartController(
       initialLayoutMode: FlexiLayoutMode.fixed,
       initialFixedSize: const Size(320, 420),
     );
@@ -125,8 +104,6 @@ void main() {
     expect(controller.fixedSize, equals(const Size(360, 420)));
     expect(controller.canvasRect.size, equals(const Size(360, 420)));
 
-    await tester.pumpWidget(const SizedBox.shrink());
-    await _pumpAwayTimers(tester);
-    controller.dispose();
+    await disposeChart(tester, controller);
   });
 }

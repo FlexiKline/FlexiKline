@@ -15,6 +15,7 @@
 /// 测试支撑 barrel：领域测试统一 `import '../support/support.dart';`
 library;
 
+export 'builders/chart_widget_scenario.dart';
 export 'builders/controller_scenario.dart';
 export 'builders/manager_scenario.dart';
 export 'doubles/fake_kline_config.dart';

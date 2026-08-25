@@ -55,11 +55,7 @@ Future<FlexiKlineController> _pumpChart(
   required TestInteractiveIndicator indicator,
   required bool isTouchDevice,
 }) async {
-  final controller = FlexiKlineController(
-    configuration: FakeFlexiKlineConfiguration(
-      mainIndicatorDefaultSize: const Size(400, 300),
-    ),
-  );
+  final controller = createChartController();
   controller.switchKlineData(_spec);
   controller.replaceKlineData(_spec, _candles());
 
@@ -78,33 +74,12 @@ Future<FlexiKlineController> _pumpChart(
       ),
     ),
   );
-  await _pumpUntil(
+  await pumpUntilChart(
     tester,
     () => controller.isMounted && controller.mainChartWidth > 0 && controller.klineData.isNotEmpty,
     'chart data and layout',
   );
   return controller;
-}
-
-Future<void> _pumpUntil(
-  WidgetTester tester,
-  bool Function() condition,
-  String description,
-) async {
-  for (var i = 0; i < 200; i++) {
-    if (condition()) return;
-    await tester.pump(const Duration(milliseconds: 16));
-  }
-  fail('Timed out waiting for $description');
-}
-
-Future<void> _disposeChart(
-  WidgetTester tester,
-  FlexiKlineController controller,
-) async {
-  await tester.pumpWidget(const SizedBox.shrink());
-  await tester.pump(const Duration(milliseconds: 200));
-  controller.dispose();
 }
 
 /// 从按下位置发起一次超过手势容差的拖动, 并断言 PaintObject 收到的是按下位置。
@@ -155,7 +130,7 @@ void main() {
       hitRect: _hitRect,
     );
     final controller = await _pumpChart(tester, indicator: indicator, isTouchDevice: true);
-    addTearDown(() => _disposeChart(tester, controller));
+    addTearDown(() => disposeChart(tester, controller));
 
     await _expectDragClaimedAtDownPosition(
       tester,
@@ -172,7 +147,7 @@ void main() {
       hitRect: _hitRect,
     );
     final controller = await _pumpChart(tester, indicator: indicator, isTouchDevice: false);
-    addTearDown(() => _disposeChart(tester, controller));
+    addTearDown(() => disposeChart(tester, controller));
 
     await _expectDragClaimedAtDownPosition(
       tester,

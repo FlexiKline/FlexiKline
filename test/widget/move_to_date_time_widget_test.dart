@@ -51,11 +51,7 @@ Future<FlexiKlineController> _pumpChart(
   bool withData = true,
   bool? isTouchDevice,
 }) async {
-  final controller = FlexiKlineController(
-    configuration: FakeFlexiKlineConfiguration(
-      mainIndicatorDefaultSize: const Size(400, 300),
-    ),
-  );
+  final controller = createChartController();
   if (withData) {
     controller.switchKlineData(_spec);
     controller.replaceKlineData(_spec, _candles());
@@ -77,24 +73,12 @@ Future<FlexiKlineController> _pumpChart(
       ),
     ),
   );
-  await _pumpUntil(
+  await pumpUntilChart(
     tester,
     () => controller.isMounted && controller.mainChartWidth > 0 && (!withData || controller.klineData.isNotEmpty),
     withData ? 'chart data and layout' : 'empty chart layout',
   );
   return controller;
-}
-
-Future<void> _pumpUntil(
-  WidgetTester tester,
-  bool Function() condition,
-  String description,
-) async {
-  for (var i = 0; i < 200; i++) {
-    if (condition()) return;
-    await tester.pump(const Duration(milliseconds: 16));
-  }
-  fail('Timed out waiting for $description');
 }
 
 Future<T> _pumpUntilFutureComplete<T>(
@@ -106,17 +90,8 @@ Future<T> _pumpUntilFutureComplete<T>(
   future.then((_) {
     completed = true;
   });
-  await _pumpUntil(tester, () => completed, description);
+  await pumpUntilChart(tester, () => completed, description);
   return future;
-}
-
-Future<void> _disposeChart(
-  WidgetTester tester,
-  FlexiKlineController controller,
-) async {
-  await tester.pumpWidget(const SizedBox.shrink());
-  await tester.pump(const Duration(milliseconds: 200));
-  controller.dispose();
 }
 
 void _expectCandleCentered(
@@ -143,7 +118,7 @@ void main() {
   group('FlexiKlineController.moveToDateTime', () {
     testWidgets('indexToCandleDx returns the candle center without changing indexToDx', (tester) async {
       final controller = await _pumpChart(tester);
-      addTearDown(() => _disposeChart(tester, controller));
+      addTearDown(() => disposeChart(tester, controller));
       const index = 40;
       final originalDx = controller.indexToDx(index)!;
 
@@ -158,7 +133,7 @@ void main() {
 
     testWidgets('exact timestamp animates the candle to chart center', (tester) async {
       final controller = await _pumpChart(tester);
-      addTearDown(() => _disposeChart(tester, controller));
+      addTearDown(() => disposeChart(tester, controller));
       final target = _latest.subtract(_day * 40);
       final index = controller.klineData.tsToIndex(
         target.millisecondsSinceEpoch,
@@ -175,7 +150,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 16));
       expect(completed, isFalse);
 
-      await _pumpUntil(
+      await pumpUntilChart(
         tester,
         () => controller.paintDxOffset != begin,
         'exact date animation start',
@@ -183,7 +158,7 @@ void main() {
       expect(controller.paintDxOffset, isNot(begin));
 
       final expectedOffset = _targetOffset(controller, index);
-      await _pumpUntil(
+      await pumpUntilChart(
         tester,
         () => (controller.paintDxOffset - expectedOffset).abs() < 0.01,
         'exact date animation',
@@ -194,7 +169,7 @@ void main() {
 
     testWidgets('UTC calendar date keeps the selected day for daily candles', (tester) async {
       final controller = await _pumpChart(tester);
-      addTearDown(() => _disposeChart(tester, controller));
+      addTearDown(() => disposeChart(tester, controller));
       final selectedDay = DateTime.utc(2026, 6, 4);
       final expectedTimestamp = DateTime.utc(2026, 6, 4).millisecondsSinceEpoch;
       final expectedIndex = controller.klineData.tsToIndex(expectedTimestamp)!;
@@ -210,7 +185,7 @@ void main() {
 
     testWidgets('animation moves in both directions and initial reset reuses it', (tester) async {
       final controller = await _pumpChart(tester);
-      addTearDown(() => _disposeChart(tester, controller));
+      addTearDown(() => disposeChart(tester, controller));
       final historicalTarget = _latest.subtract(_day * 50);
       final initialOffset = controller.paintDxOffset;
       final historicalIndex = controller.klineData.tsToIndex(
@@ -218,7 +193,7 @@ void main() {
       )!;
 
       final historicalFuture = controller.moveToDateTime(historicalTarget);
-      await _pumpUntil(
+      await pumpUntilChart(
         tester,
         () => controller.paintDxOffset != initialOffset,
         'historical date animation start',
@@ -228,7 +203,7 @@ void main() {
         controller,
         historicalIndex,
       );
-      await _pumpUntil(
+      await pumpUntilChart(
         tester,
         () => (controller.paintDxOffset - expectedHistoricalOffset).abs() < 0.01,
         'historical date animation',
@@ -245,13 +220,13 @@ void main() {
       controller.requestMoveToInitialPosition();
       expect(controller.paintDxOffset, historicalOffset);
 
-      await _pumpUntil(
+      await pumpUntilChart(
         tester,
         () => controller.paintDxOffset != historicalOffset,
         'initial position animation start',
       );
       expect(controller.paintDxOffset, lessThan(historicalOffset));
-      await _pumpUntil(
+      await pumpUntilChart(
         tester,
         () => (controller.paintDxOffset - expectedInitialOffset).abs() < 0.01,
         'initial position animation',
@@ -264,13 +239,13 @@ void main() {
 
     testWidgets('same-position request cancels a pending animation', (tester) async {
       final controller = await _pumpChart(tester);
-      addTearDown(() => _disposeChart(tester, controller));
+      addTearDown(() => disposeChart(tester, controller));
       final historicalTarget = _latest.subtract(_day * 50);
       final initialOffset = controller.clampPaintDxOffset(
         controller.getInitPaintDxOffset(),
       );
       controller.requestMoveToInitialPosition();
-      await _pumpUntil(
+      await pumpUntilChart(
         tester,
         () => (controller.paintDxOffset - initialOffset).abs() < 0.01,
         'initial position setup',
@@ -291,12 +266,12 @@ void main() {
 
     testWidgets('same-position date move succeeds without changing the viewport', (tester) async {
       final controller = await _pumpChart(tester);
-      addTearDown(() => _disposeChart(tester, controller));
+      addTearDown(() => disposeChart(tester, controller));
       final target = _latest.subtract(_day * 40);
       final index = controller.klineData.tsToIndex(target.millisecondsSinceEpoch)!;
 
       final first = controller.moveToDateTime(target);
-      await _pumpUntil(
+      await pumpUntilChart(
         tester,
         () => (controller.paintDxOffset - _targetOffset(controller, index)).abs() < 0.01,
         'initial date animation',
@@ -313,7 +288,7 @@ void main() {
 
     testWidgets('later date move interrupts the earlier request', (tester) async {
       final controller = await _pumpChart(tester);
-      addTearDown(() => _disposeChart(tester, controller));
+      addTearDown(() => disposeChart(tester, controller));
       final firstTarget = _latest.subtract(_day * 60);
       final secondTarget = _latest.subtract(_day * 40);
       final secondIndex = controller.klineData.tsToIndex(secondTarget.millisecondsSinceEpoch)!;
@@ -323,7 +298,7 @@ void main() {
       final second = controller.moveToDateTime(secondTarget);
 
       expect(await _pumpUntilFutureComplete(tester, first, 'first interrupted date result'), isNull);
-      await _pumpUntil(
+      await pumpUntilChart(
         tester,
         () => (controller.paintDxOffset - _targetOffset(controller, secondIndex)).abs() < 0.01,
         'second date animation',
@@ -346,7 +321,7 @@ void main() {
 
     testWidgets('data switch during animation invalidates the target index', (tester) async {
       final controller = await _pumpChart(tester);
-      addTearDown(() => _disposeChart(tester, controller));
+      addTearDown(() => disposeChart(tester, controller));
       final target = _latest.subtract(_day * 60);
       final future = controller.moveToDateTime(target);
 
@@ -363,7 +338,7 @@ void main() {
 
     testWidgets('timestamp change at target index invalidates the result', (tester) async {
       final controller = await _pumpChart(tester);
-      addTearDown(() => _disposeChart(tester, controller));
+      addTearDown(() => disposeChart(tester, controller));
       final target = _latest.subtract(_day * 40);
       final index = controller.klineData.tsToIndex(target.millisecondsSinceEpoch)!;
       final future = controller.moveToDateTime(target);
@@ -406,7 +381,7 @@ void main() {
 
     testWidgets('position animation resolves true after it completes', (tester) async {
       final controller = await _pumpChart(tester);
-      addTearDown(() => _disposeChart(tester, controller));
+      addTearDown(() => disposeChart(tester, controller));
       final callback = controller.moveToPositionCallback!;
       final begin = controller.paintDxOffset;
       final end = controller.clampPaintDxOffset(begin + 100);
@@ -419,13 +394,13 @@ void main() {
 
       await tester.pump(const Duration(milliseconds: 16));
       expect(completed, isFalse);
-      await _pumpUntil(tester, () => completed, 'position animation completion');
+      await pumpUntilChart(tester, () => completed, 'position animation completion');
       expect(await future, isTrue);
     });
 
     testWidgets('replacement position animation cancels the earlier request', (tester) async {
       final controller = await _pumpChart(tester);
-      addTearDown(() => _disposeChart(tester, controller));
+      addTearDown(() => disposeChart(tester, controller));
       final callback = controller.moveToPositionCallback!;
       final begin = controller.paintDxOffset;
       final firstEnd = controller.clampPaintDxOffset(begin + 100);
@@ -436,7 +411,7 @@ void main() {
       final second = callback(controller.paintDxOffset, secondEnd);
 
       expect(await first, isFalse);
-      await _pumpUntil(
+      await pumpUntilChart(
         tester,
         () => (controller.paintDxOffset - secondEnd).abs() < 0.01,
         'replacement animation',
@@ -446,7 +421,7 @@ void main() {
 
     testWidgets('direct chart pan cancels a pending position animation', (tester) async {
       final controller = await _pumpChart(tester);
-      addTearDown(() => _disposeChart(tester, controller));
+      addTearDown(() => disposeChart(tester, controller));
       final begin = controller.paintDxOffset;
       final end = controller.clampPaintDxOffset(begin + 100);
       final future = controller.moveToPositionCallback!(begin, end);
@@ -464,7 +439,7 @@ void main() {
 
     testWidgets('touch zoom slider cancels a pending position animation when dragging starts', (tester) async {
       final controller = await _pumpChart(tester, isTouchDevice: true);
-      addTearDown(() => _disposeChart(tester, controller));
+      addTearDown(() => disposeChart(tester, controller));
       controller.updateGestureConfig(
         (config) => config.copyWith(
           enableZoom: true,
@@ -479,7 +454,7 @@ void main() {
           80,
         ),
       );
-      await _pumpUntil(
+      await pumpUntilChart(
         tester,
         () => !controller.chartZoomSlideBarRect.isEmpty,
         'chart zoom slide bar layout',
@@ -504,7 +479,7 @@ void main() {
 
     testWidgets('touch zooming move cancels a pending position animation', (tester) async {
       final controller = await _pumpChart(tester, isTouchDevice: true);
-      addTearDown(() => _disposeChart(tester, controller));
+      addTearDown(() => disposeChart(tester, controller));
       controller.updateGestureConfig(
         (config) => config.copyWith(
           enableZoom: true,
@@ -519,7 +494,7 @@ void main() {
           80,
         ),
       );
-      await _pumpUntil(
+      await pumpUntilChart(
         tester,
         () => !controller.chartZoomSlideBarRect.isEmpty,
         'chart zoom slide bar layout',
@@ -549,7 +524,7 @@ void main() {
 
     testWidgets('gap selects the nearest real candle at or before target', (tester) async {
       final controller = await _pumpChart(tester);
-      addTearDown(() => _disposeChart(tester, controller));
+      addTearDown(() => disposeChart(tester, controller));
       final missingDay = _latest.subtract(_day * 20);
       final target = missingDay.add(const Duration(hours: 12));
       final expected = _latest.subtract(_day * 21);
@@ -559,7 +534,7 @@ void main() {
 
       final future = controller.moveToDateTime(target);
       final expectedOffset = _targetOffset(controller, expectedIndex);
-      await _pumpUntil(
+      await pumpUntilChart(
         tester,
         () => (controller.paintDxOffset - expectedOffset).abs() < 0.01,
         'gap date animation',
@@ -571,7 +546,7 @@ void main() {
 
     testWidgets('latest and oldest candles use existing paint boundaries', (tester) async {
       final controller = await _pumpChart(tester);
-      addTearDown(() => _disposeChart(tester, controller));
+      addTearDown(() => disposeChart(tester, controller));
 
       final latestIndex = controller.klineData.tsToIndex(
         _latest.millisecondsSinceEpoch,
@@ -581,7 +556,7 @@ void main() {
         latestIndex,
       );
       final latestFuture = controller.moveToDateTime(_latest);
-      await _pumpUntil(
+      await pumpUntilChart(
         tester,
         () => (controller.paintDxOffset - expectedLatestOffset).abs() < 0.01,
         'latest candle animation',
@@ -601,7 +576,7 @@ void main() {
         oldestIndex,
       );
       final oldestFuture = controller.moveToDateTime(oldest);
-      await _pumpUntil(
+      await pumpUntilChart(
         tester,
         () => (controller.paintDxOffset - expectedOldestOffset).abs() < 0.01,
         'oldest candle animation',
@@ -615,7 +590,7 @@ void main() {
 
     testWidgets('out-of-range dates fail without moving viewport', (tester) async {
       final controller = await _pumpChart(tester);
-      addTearDown(() => _disposeChart(tester, controller));
+      addTearDown(() => disposeChart(tester, controller));
       final before = controller.paintDxOffset;
 
       expect(await controller.moveToDateTime(_latest.add(_day)), isNull);
@@ -625,7 +600,7 @@ void main() {
 
     testWidgets('mounted empty chart rejects date movement', (tester) async {
       final controller = await _pumpChart(tester, withData: false);
-      addTearDown(() => _disposeChart(tester, controller));
+      addTearDown(() => disposeChart(tester, controller));
 
       expect(await controller.moveToDateTime(_latest), isNull);
       expect(controller.paintDxOffset, 0);

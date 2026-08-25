@@ -42,18 +42,10 @@ class _FakeIndicatorConfig implements IIndicatorConfig {
   Future<bool> setConfig(String key, Map<String, dynamic> value) async => true;
 }
 
-Future<void> _pumpAwayTimers(WidgetTester tester) async {
-  await tester.pump(const Duration(milliseconds: 200));
-}
-
 void main() {
   group('v2.2.0/FlexiKlineWidget/indicator', () {
     testWidgets('FlexiKlineWidget.indicator 从 IIndicatorConfig 挂载', (tester) async {
-      final controller = FlexiKlineController(
-        configuration: FakeFlexiKlineConfiguration(
-          mainIndicatorDefaultSize: const Size(400, 300),
-        ),
-      );
+      final controller = createChartController();
       final cfg = _FakeIndicatorConfig();
 
       await tester.pumpWidget(
@@ -75,10 +67,7 @@ void main() {
       expect(find.byType(FlexiKlineWidget), findsOneWidget);
       expect(controller.isMounted, isTrue);
 
-      // cleanup
-      await tester.pumpWidget(const SizedBox.shrink());
-      await _pumpAwayTimers(tester);
-      controller.dispose();
+      await disposeChart(tester, controller);
     });
   });
 }
