@@ -59,12 +59,19 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
   /// 当前活跃的指针数量，用于检测多指触摸状态.
   int _activePointerCount = 0;
 
+  /// 当前 pointer 会话中第一指的按下位置。
+  ///
+  /// Scale 手势会在移动超过触摸容差后才触发 onStart，PaintObject 需要用原始按下位置命中。
+  ({int pointer, Offset position})? _primaryDown;
+
   /// zoom slider 拖拽是否已正式开始（通过了最小距离检查且 onChartZoomStart 返回 true）
   bool _isZoomStarted = false;
 
-  /// 当前选中的 PaintObject 是否已认领本次单指拖动.
-  /// 认领期间蜡烛图不平移、松手不做惯性平移、也不触发 loadMore 检查.
-  bool _isObjectDragging = false;
+  /// 当前 Scale 手势是否已由 PaintObject 路径认领。
+  ///
+  /// 即使 Controller 因失选等原因提前取消业务拖动，本次手势结束前仍保持认领，
+  /// 避免中途转为蜡烛图平移、惯性平移或 loadMore。
+  bool _isObjectDragGesture = false;
 
   @override
   String get logTag => 'TouchGesture';
@@ -103,10 +110,14 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
   }
 
   void onPointerDown(PointerDownEvent event) {
-    if (++_activePointerCount == 2) {
+    final pointerCount = ++_activePointerCount;
+    if (pointerCount == 1) {
+      _primaryDown = (pointer: event.pointer, position: event.localPosition);
+    }
+    if (pointerCount == 2) {
       controller.setMultiTouch(true);
       // 第二指落下即转为缩放语义, 放弃 PaintObject 拖动并回滚其未提交状态.
-      _cancelObjectDragging();
+      _cancelObjectDragGesture();
     }
     final position = event.localPosition;
     if (controller.isDrawVisible && drawState.isOngoing) {
@@ -200,6 +211,9 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
   void onPointerCancel(PointerCancelEvent event) => _pointerEnd(event);
 
   void _pointerEnd(PointerEvent event) {
+    if (_primaryDown?.pointer == event.pointer) {
+      _primaryDown = null;
+    }
     if (_activePointerCount > 0) _activePointerCount--;
     if (_activePointerCount < 2) {
       controller.setMultiTouch(false);
@@ -218,15 +232,15 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
     }
     if (event is PointerCancelEvent) {
       // 正常抬手时 [onScaleEnd] 已经收尾, 这里只兜底指针被取消的路径.
-      _cancelObjectDragging();
+      _cancelObjectDragGesture();
     }
     _moveData = null;
   }
 
   /// 放弃当前 PaintObject 拖动并清理其手势数据. 未在拖动时为空操作.
-  void _cancelObjectDragging() {
-    if (!_isObjectDragging) return;
-    _isObjectDragging = false;
+  void _cancelObjectDragGesture() {
+    if (!_isObjectDragGesture) return;
+    _isObjectDragGesture = false;
     controller.onPaintObjectDragCancel();
     _panScaleData?.end();
     _panScaleData = null;
@@ -328,11 +342,13 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
     }
 
     // 已选中的 PaintObject 优先认领单指拖动; 多指仍归缩放.
-    if (details.pointerCount <= 1 && controller.onPaintObjectDragStart(details.localFocalPoint)) {
-      logd('onScaleStart paintObject drag focal:${details.localFocalPoint}');
+    final currentPosition = details.localFocalPoint;
+    final downPosition = details.pointerCount <= 1 ? _primaryDown?.position : null;
+    if (downPosition != null && controller.onPaintObjectDragStart(downPosition)) {
+      logd('onScaleStart paintObject drag down:$downPosition current:$currentPosition');
       cancelPositionAnimation();
-      _panScaleData = GestureData.pan(details.localFocalPoint);
-      _isObjectDragging = true;
+      _isObjectDragGesture = true;
+      _panScaleData = GestureData.pan(downPosition);
       return;
     }
 
@@ -369,7 +385,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
     }
 
     // logd('onScaleUpdate move> ${DateTime.now().millisecond} details:${details.localFocalPoint}');
-    if (_isObjectDragging) {
+    if (_isObjectDragGesture) {
       // 不做区域钳制: 是否限制在图表内由绘制对象自行决定.
       _panScaleData!.update(details.localFocalPoint);
       controller.onPaintObjectDragUpdate(_panScaleData!);
@@ -417,9 +433,9 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
       return;
     }
 
-    if (_isObjectDragging) {
+    if (_isObjectDragGesture) {
       logd('onScaleEnd paintObject drag end.');
-      _isObjectDragging = false;
+      _isObjectDragGesture = false;
       controller.onPaintObjectDragEnd();
       _panScaleData?.end();
       _panScaleData = null;

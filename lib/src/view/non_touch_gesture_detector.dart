@@ -178,6 +178,11 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
           child: GestureDetector(
             behavior: HitTestBehavior.translucent,
 
+            /// 按下即作为平移起点: [onPanStart] 收到 PointerDown 位置而非手势识别时刻位置,
+            /// PaintObject 才能按用户实际按下的点命中小尺寸把手.
+            /// Flutter 随后会补发一次携带识别前位移的 [onPanUpdate], 累积位移不丢.
+            dragStartBehavior: DragStartBehavior.down,
+
             /// 点击
             onTapUp: onTapUp,
 
@@ -475,6 +480,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
       logd('onPanStart Currently still panning, ignore!!!');
       return;
     }
+    // 由 [DragStartBehavior.down] 保证: 这是 PointerDown 位置, 不含手势识别前的位移.
     final position = details.localPosition;
     if (controller.isDrawVisible && drawState.isOngoing) {
       if (drawState.isDrawing) {

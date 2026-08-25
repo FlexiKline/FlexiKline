@@ -19,6 +19,8 @@
 * Add `MainPaintObject.isPaintable` and gate gestures on it: a selected but unpaintable object counts as unselected for `hasSelectedPaintObject` and drag routing, while `selectedPaintObjectListenable` keeps the raw selection.
 * Fix `FlexiStateNotifier.updateValue` notifying twice when the value actually changes; it now notifies exactly once and still notifies on in-place mutation.
 * Enable `onPointerCancel` on the non-touch gesture detector to roll back an in-progress PaintObject drag, which `onPanEnd` would otherwise commit.
+* Fix touch PaintObject drags missing small handles: hit-test at the recorded `PointerDown` position instead of the gesture recognition position, and carry the pre-recognition displacement into the first drag update.
+* Fix the same miss on the non-touch detector for non-mouse pointers, whose pan slop is 36px: set `DragStartBehavior.down` so `onPanStart` reports the `PointerDown` position and Flutter replays the pre-recognition displacement.
 
 ## 2.3.2
 * Add `crossOffsetListenable` so external consumers can subscribe to Cross focus changes.

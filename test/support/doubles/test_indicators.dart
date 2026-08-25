@@ -222,9 +222,17 @@ class TestInteractivePaintObject extends ExternalPaintObject<TestInteractiveIndi
   /// 按调用顺序记录的回调名
   final List<String> calls = [];
 
+  /// 最近一次 [handleDragStart] 的命中位置
+  Offset? lastDragStartPosition;
+
   /// 最近一次 [handleDragUpdate] 的参数
   Offset? lastDragPosition;
   Offset? lastDragDelta;
+
+  /// 本轮拖动累计的 delta, 每次 [handleDragStart] 归零。
+  ///
+  /// 与 PointerMove 分几段派发无关, 用于校验手势识别前的位移没有丢。
+  Offset totalDragDelta = Offset.zero;
 
   @override
   PaintTapResult handleTap(Offset position) {
@@ -239,6 +247,8 @@ class TestInteractivePaintObject extends ExternalPaintObject<TestInteractiveIndi
   bool handleDragStart(Offset position) {
     if (!acceptDrag || !indicator.hitRect.contains(position)) return false;
     calls.add('dragStart');
+    lastDragStartPosition = position;
+    totalDragDelta = Offset.zero;
     return true;
   }
 
@@ -247,6 +257,7 @@ class TestInteractivePaintObject extends ExternalPaintObject<TestInteractiveIndi
     calls.add('dragUpdate');
     lastDragPosition = position;
     lastDragDelta = delta;
+    totalDragDelta += delta;
   }
 
   @override
