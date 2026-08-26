@@ -451,10 +451,17 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
   /// 是否有绘制对象正在被拖动。手势层据此短路蜡烛图平移与 cross 更新。
   bool get isPaintObjectDragging => _draggingObject != null;
 
+  /// 应答主/副区的可拖动 PaintObject。
+  @override
+  bool hitTestDragStart(Offset position) {
+    if (hitTestPaintObjectDrag(position)) return true;
+    return super.hitTestDragStart(position);
+  }
+
   /// 询问 [position] 是否存在可拖动的绘制对象，不产生任何状态变更。
   ///
-  /// 供手势层在 `PointerDown` 阶段决定是否提前抢占手势竞技场（图表嵌在可滚动容器内时
-  /// 的必要条件）。命中规则与 [onPaintObjectDragStart] 严格同源，只是不认领。
+  /// 命中规则与 [onPaintObjectDragStart] 严格同源，只是不认领。手势层不直接调用它，
+  /// 而是走 [hitTestDragStart] 让各 Binding 沿 mixin 链应答。
   bool hitTestPaintObjectDrag(Offset position) {
     if (_draggingObject != null) return false;
     return mainRect.include(position)

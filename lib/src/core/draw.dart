@@ -236,6 +236,26 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
     _markRepaintDraw();
   }
 
+  /// 应答编辑中的绘制对象。
+  ///
+  /// 本 Binding 在 mixin 链最后，因此优先级最高，与 `onScaleStart` 里 draw 分支排在
+  /// PaintObject 之前一致。
+  @override
+  bool hitTestDragStart(Offset position) {
+    if (hitTestDrawObjectDrag(position)) return true;
+    return super.hitTestDragStart(position);
+  }
+
+  /// 判据与 [onDrawMoveStart] 严格同源，只是不认领。
+  ///
+  /// 只覆盖 `Editing`：`Drawing` 的移动由 `onPointerMove` 直接驱动，不经竞技场。
+  bool hitTestDrawObjectDrag(Offset position) {
+    if (!isDrawVisible || !drawState.isEditing) return false;
+    final object = drawState.object;
+    if (object == null || object.lock) return false;
+    return object.hitTestPoint(this, position) != null || object.hitTest(this, position, isMove: true);
+  }
+
   bool onDrawMoveStart(GestureData data) {
     if (!drawState.isEditing) return false; // 未完成的暂不允许移动
     final object = drawState.object!;

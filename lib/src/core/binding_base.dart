@@ -120,6 +120,20 @@ abstract class KlineBindingBase with FlexiLog implements PaintContext, DrawConte
     return false;
   }
 
+  /// 询问 [position] 是否存在可发起拖动的目标，不产生任何状态变更。
+  ///
+  /// 手势层据此决定是否在 `PointerDown` 阶段提前抢占竞技场：单指拖动的接受阈值恒为外层
+  /// Scrollable 的两倍（`panSlop` 派生自 `touchSlop * 2`），不抢占在可滚动容器内就拿不到手势。
+  ///
+  /// 覆写统一写成「先判自己、再调 `super`」，于是优先级等于 mixin 声明顺序的逆序：越晚
+  /// `with` 的越优先。判据必须与该 Binding 真正认领拖动时的判据同源，不同源会白抢一次
+  /// 手势——该次拖动既不滚外层也不平移图表。
+  ///
+  /// **必须无副作用**：每次 `PointerDown` 都会调用，包括最终只是点击或长按的手势。
+  @protected
+  @mustCallSuper
+  bool hitTestDragStart(Offset position) => false;
+
   @override
   IFlexiKlineTheme get theme => configuration.theme;
 

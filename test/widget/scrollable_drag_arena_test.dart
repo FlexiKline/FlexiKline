@@ -81,10 +81,15 @@ Future<({FlexiKlineController chart, ScrollController scroll})> _pumpChartInList
   WidgetTester tester, {
   required TestInteractiveIndicator indicator,
   double? touchSlop,
+  bool enableDraw = false,
 }) async {
   final chart = createChartController();
   chart.switchKlineData(_spec);
   chart.replaceKlineData(_spec, _candles());
+  if (enableDraw) {
+    registerTestDrawObject(chart);
+    chart.setDrawVisible(true);
+  }
   final scroll = ScrollController();
   addTearDown(scroll.dispose);
 
@@ -278,5 +283,149 @@ void main() {
       await gesture.up();
       await tester.pump(_settle);
     });
+  });
+
+  _drawArenaTests();
+  _scaleStartBaselineTests();
+}
+
+/// 绘制工具（DrawObject）在可滚动容器内的拖动归属。
+///
+/// 与 PaintObject 共用同一个抢占机制，但走 `onScaleStart` 的 draw 分支——该分支
+/// 优先级高于 PaintObject，且历史上用识别时刻位置命中（偏差 kPanSlop=36px，
+/// 而 `drawConfig.hitTestMinDistance` 只有 10px，必然脱靶）。
+void _drawArenaTests() {
+  group('可滚动容器内的绘制工具拖动', () {
+    /// 线画在图表右侧: 越靠右越确定落在已加载蜡烛的时间范围内,
+    /// 否则 ts 算不出来、point.offset 变 infinite, hitTest 直接跳过。
+    const lineFrom = Offset(280, 150);
+    const lineTo = Offset(360, 150);
+    const dragFrom = Offset(320, 150);
+
+    Future<({FlexiKlineController chart, ScrollController scroll})> arrange(
+      WidgetTester tester,
+    ) async {
+      final indicator = TestInteractiveIndicator(
+        key: const ExternalIndicatorKey('draw_arena'),
+        // 命中区移出线所在位置, 避免 PaintObject 抢走本该归 draw 的手势。
+        hitRect: const Rect.fromLTWH(0, 260, 20, 20),
+      );
+      final scene = await _pumpChartInListView(
+        tester,
+        indicator: indicator,
+        enableDraw: true,
+      );
+      drawTestLine(scene.chart, from: lineFrom, to: lineTo);
+      await tester.pump(_frame);
+      // 前置条件: 线已完成且处于 Editing, 两点 offset 有效。
+      expect(scene.chart.drawState.isEditing, isTrue, reason: '两点直线应已绘制完成');
+      final points = scene.chart.drawState.object!.points;
+      expect(points.every((p) => p?.offset.isFinite == true), isTrue, reason: '绘制点 offset 必须有效');
+      return scene;
+    }
+
+    testWidgets('从线上垂直拖动 => 绘制对象被拖动, 外层不滚动', (tester) async {
+      final scene = await arrange(tester);
+      addTearDown(() => disposeChart(tester, scene.chart));
+      final object = scene.chart.drawState.object!;
+      final beforeDy = object.points.first!.offset.dy;
+
+      final gesture = await tester.startGesture(
+        _toGlobal(tester, dragFrom),
+        kind: PointerDeviceKind.touch,
+      );
+      for (var i = 0; i < _stepCount; i++) {
+        await gesture.moveBy(const Offset(0, _stepDy));
+        await tester.pump(_frame);
+      }
+
+      expect(object.moving, isTrue, reason: 'onDrawMoveStart 应已认领本次拖动');
+      expect(scene.scroll.offset, 0, reason: '拖动绘制对象不应带动外层滚动');
+
+      await gesture.up();
+      await tester.pump(_settle);
+      expect(object.points.first!.offset.dy, lessThan(beforeDy), reason: '整条线应随手指上移');
+    });
+
+    testWidgets('从空白区垂直拖动 => 外层滚动, 绘制对象不动', (tester) async {
+      final scene = await arrange(tester);
+      addTearDown(() => disposeChart(tester, scene.chart));
+      final object = scene.chart.drawState.object!;
+
+      // 与线有足够垂直距离, 超出 hitTestMinDistance(10)。
+      final gesture = await tester.startGesture(
+        _toGlobal(tester, const Offset(320, 60)),
+        kind: PointerDeviceKind.touch,
+      );
+      for (var i = 0; i < _stepCount; i++) {
+        await gesture.moveBy(const Offset(0, _stepDy));
+        await tester.pump(_frame);
+      }
+      await gesture.up();
+      await tester.pump(_settle);
+
+      expect(scene.scroll.offset, greaterThan(0), reason: '空白区拖动仍归外层滚动');
+      expect(object.moving, isFalse);
+    });
+  });
+}
+
+/// 双指缩放的起始基准。
+///
+/// `GestureDetector` 会给 Scale 识别器设 `dragStartBehavior`（默认 `start`），
+/// `ScaleGestureRecognizer` 构造默认却是 `down`。取 `down` 时 `acceptGesture`
+/// 不重置 `_initialSpan`，于是 accept 那一刻 `details.scale` 已经偏离 1.0，
+/// `onScaleUpdate` 里首帧 `change` 就越过 0.01 阈值 → 缩放一上手跳一下。
+void _scaleStartBaselineTests() {
+  testWidgets('双指缩放首帧不跳变: 蜡烛宽度按 accept 时刻为基准', (tester) async {
+    final indicator = TestInteractiveIndicator(
+      key: const ExternalIndicatorKey('scale_baseline'),
+      hitRect: const Rect.fromLTWH(0, 260, 20, 20),
+    );
+    final scene = await _pumpChartInListView(tester, indicator: indicator);
+    addTearDown(() => disposeChart(tester, scene.chart));
+    final beforeWidth = scene.chart.candleWidth;
+
+    // 双指水平相背张开: 走 spanDelta 触发 accept, 而非 focalPointDelta。
+    const center = Offset(200, 150);
+    final left = await tester.startGesture(
+      _toGlobal(tester, center - const Offset(40, 0)),
+      pointer: 1,
+      kind: PointerDeviceKind.touch,
+    );
+    final right = await tester.startGesture(
+      _toGlobal(tester, center + const Offset(40, 0)),
+      pointer: 2,
+      kind: PointerDeviceKind.touch,
+    );
+    await tester.pump(_frame);
+
+    // 每指外移 2px, 走到刚越过 kScaleSlop(18) 的那一步就停下: 初始双指相距 80(span 40),
+    // 每步 span +2, 第 10 步 spanDelta=20 首次越过阈值, accept 与首帧 update 同时发生。
+    for (var i = 0; i < 10; i++) {
+      await left.moveBy(const Offset(-2, 0));
+      await right.moveBy(const Offset(2, 0));
+      await tester.pump(_frame);
+    }
+
+    // accept 时刻的 scale 必须以当时的 span 为基准(1.0), 否则首帧就吞掉一段缩放。
+    // 允许 1 像素级的误差: 越过阈值那一步本身会带来极小的真实缩放。
+    expect(
+      scene.chart.candleWidth,
+      closeTo(beforeWidth, 1.0),
+      reason: 'dragStartBehavior 为 down 时 _initialSpan 不重置, 首帧 scale 已偏离 1.0',
+    );
+
+    // 继续张开: 缩放本身必须生效, 否则「首帧不跳变」会被「根本不缩放」假阳性满足。
+    for (var i = 0; i < 20; i++) {
+      await left.moveBy(const Offset(-4, 0));
+      await right.moveBy(const Offset(4, 0));
+      await tester.pump(_frame);
+    }
+    expect(scene.chart.candleWidth, greaterThan(beforeWidth), reason: '张开手指应放大蜡烛');
+
+    await left.up();
+    await right.up();
+    await tester.pump(_settle);
   });
 }

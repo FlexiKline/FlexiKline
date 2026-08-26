@@ -22,6 +22,7 @@ export 'doubles/fake_kline_config.dart';
 export 'doubles/fake_paint_context.dart';
 export 'doubles/lifecycle_spy.dart';
 export 'doubles/log_print_impl.dart';
+export 'doubles/test_draw_object.dart';
 export 'doubles/test_indicators.dart';
 export 'fixtures/candle_factory.dart';
 export 'fixtures/mock_candle_data.dart';

@@ -129,12 +129,17 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
             () => ChartScaleGestureRecognizer(
               debugOwner: this,
               claimSlopFactor: gestureConfig.dragClaimSlopFactor,
-              hitTestDragStart: controller.hitTestPaintObjectDrag,
+              // 各 Binding 沿 mixin 链自行应答, 顺序与 [onScaleStart] 的分支顺序一致。
+              hitTestDragStart: controller.hitTestDragStart,
             ),
             (instance) => instance
               ..onStart = onScaleStart
               ..onUpdate = onScaleUpdate.throttleOnFps
               ..onEnd = onScaleEnd
+              // [GestureDetector] 会显式设为 start, 而 [ScaleGestureRecognizer] 构造默认是
+              // down: down 不在 accept 时重置 _initialSpan, 双指缩放首帧的 scale 已偏离 1.0,
+              // 表现为缩放一上手跳一下。
+              ..dragStartBehavior = DragStartBehavior.start
               ..gestureSettings = gestureSettings,
           ),
         },
@@ -365,10 +370,16 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
         return;
       }
       if (drawState.object?.lock == true) return;
-      logd('onScaleStart draw > details:$details');
-      final currentPosition = details.localFocalPoint;
+      // 命中与位移基准都取按下位置, 两个理由缺一不可:
+      // 1. 命中准: 识别时刻位置距按下点相差一个 slop(未抢占时是 kPanSlop=36px), 远超
+      //    [DrawConfig.hitTestMinDistance] 的 10px, 沿线方向之外必然脱靶。
+      // 2. 跟手: [DrawBinding.onDrawMoveUpdate] 整体平移吃的是 `data.delta`, 以按下位置为
+      //    基准时首帧 delta 恰好补上按下到识别之间的真实位移; 换成识别位置则首帧为 0,
+      //    线永久滞后一个 slop。
+      // 多指退回质心是既有行为(draw 不限指数, 下方 PaintObject 要求单指), 待归属统一时对齐。
       final downPosition = details.pointerCount <= 1 ? _primaryDown?.position : null;
-      _panScaleData = GestureData.pan(downPosition ?? currentPosition);
+      logd('onScaleStart draw > down:$downPosition focal:${details.localFocalPoint}');
+      _panScaleData = GestureData.pan(downPosition ?? details.localFocalPoint);
       final result = controller.onDrawMoveStart(_panScaleData!);
       if (!result) {
         _panScaleData?.end();
