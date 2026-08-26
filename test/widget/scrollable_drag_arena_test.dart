@@ -213,7 +213,47 @@ void main() {
       expect(scene.scroll.offset, 0);
     });
 
-    testWidgets('抢占后第二指落下 => 转缩放语义并回滚拖动', (tester) async {
+    testWidgets('zoom slider 落点即抢占 => 点击不穿透为 cross', (tester) async {
+      final indicator = TestInteractiveIndicator(
+        key: const ExternalIndicatorKey('arena_zoom_slider'),
+        hitRect: _handleRect,
+      );
+      final scene = await _pumpChartInListView(tester, indicator: indicator);
+      addTearDown(() => disposeChart(tester, scene.chart));
+      scene.chart.updateGestureConfig((config) => config.copyWith(enableZoom: true));
+      final sliderPosition = scene.chart.mainRect.center;
+      scene.chart.setChartZoomSlideBarRect(
+        Rect.fromCenter(center: sliderPosition, width: 80, height: 20),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      await tester.tapAt(_toGlobal(tester, sliderPosition));
+      await tester.pump(_settle);
+
+      expect(scene.chart.isCrossing, isFalse);
+      expect(scene.scroll.offset, 0);
+    });
+
+    testWidgets('cross 上的纯点击未被 Scale 抢占 => 仍按 Tap 语义关闭', (tester) async {
+      final indicator = TestInteractiveIndicator(
+        key: const ExternalIndicatorKey('arena_cross_tap'),
+        hitRect: _handleRect,
+      );
+      final scene = await _pumpChartInListView(tester, indicator: indicator);
+      addTearDown(() => disposeChart(tester, scene.chart));
+      final position = _toGlobal(tester, _blankPosition);
+
+      await tester.tapAt(position);
+      await tester.pump(_settle);
+      expect(scene.chart.isCrossing, isTrue);
+
+      await tester.tapAt(position);
+      await tester.pump(_settle);
+      expect(scene.chart.isCrossing, isFalse);
+    });
+
+    testWidgets('抢占后第二指落下 => 保持原归属并继续拖动', (tester) async {
       final indicator = TestInteractiveIndicator(
         key: const ExternalIndicatorKey('arena_multi'),
         hitRect: _handleRect,
@@ -240,8 +280,61 @@ void main() {
       );
       await tester.pump();
 
-      expect(object.calls.last, 'dragCancel');
-      expect(scene.chart.isPaintObjectDragging, isFalse);
+      expect(object.calls, isNot(contains('dragCancel')));
+      expect(scene.chart.isPaintObjectDragging, isTrue);
+
+      final updateCount = object.calls.where((call) => call == 'dragUpdate').length;
+      await first.moveBy(const Offset(0, _stepDy));
+      await tester.pump(_frame);
+      expect(object.calls.where((call) => call == 'dragUpdate').length, greaterThan(updateCount));
+
+      await first.up();
+      await second.up();
+      await tester.pump(_settle);
+      expect(object.calls.last, 'dragEnd');
+    });
+
+    testWidgets('第二指落下后拖动位置仍跟第一指, 不跳到两指质心', (tester) async {
+      final indicator = TestInteractiveIndicator(
+        key: const ExternalIndicatorKey('arena_primary_finger'),
+        hitRect: _handleRect,
+      );
+      final scene = await _pumpChartInListView(tester, indicator: indicator);
+      addTearDown(() => disposeChart(tester, scene.chart));
+      final object = indicator.object!;
+
+      final first = await tester.startGesture(
+        _toGlobal(tester, _handleRect.center),
+        pointer: 1,
+        kind: PointerDeviceKind.touch,
+      );
+      for (var i = 0; i < _stepCount; i++) {
+        await first.moveBy(const Offset(0, _stepDy));
+        await tester.pump(_frame);
+      }
+      expect(object.calls.first, 'dragStart');
+
+      // 第二指落在远处: 质心会被拉到两指中点, 与第一指相差一百多像素, 断言不会误判。
+      final second = await tester.startGesture(
+        _toGlobal(tester, _blankPosition),
+        pointer: 2,
+        kind: PointerDeviceKind.touch,
+      );
+      await tester.pump(_frame);
+
+      await first.moveBy(const Offset(0, _stepDy));
+      await tester.pump(_frame);
+
+      final firstFinger = _handleRect.center + const Offset(0, _stepDy * (_stepCount + 1));
+      final centroid = Offset(
+        (firstFinger.dx + _blankPosition.dx) / 2,
+        (firstFinger.dy + _blankPosition.dy) / 2,
+      );
+      expect(
+        object.lastDragPosition,
+        within(distance: 1.0, from: firstFinger),
+        reason: '位置来源必须是第一指, 用 ScaleUpdateDetails.localFocalPoint 会跳到 $centroid',
+      );
 
       await first.up();
       await second.up();
@@ -286,7 +379,119 @@ void main() {
   });
 
   _drawArenaTests();
+  _pointerMoveOwnerArenaTests();
   _scaleStartBaselineTests();
+}
+
+/// cross 与 zooming move 在可滚动容器内的归属。
+///
+/// 这两条的移动由 `Listener.onPointerMove` 直接驱动，Scale 只负责抢占竞技场——
+/// 归属漏判时它们不是「变卡」而是被外层滚动整体吃掉，所以成对用例必须同时钉住
+/// 「条件满足时图表拿到手势」与「条件不满足时手势归外层」。
+void _pointerMoveOwnerArenaTests() {
+  group('可滚动容器内的 cross 与缩放态平移', () {
+    testWidgets('crossing 是模式: 拖动只移动十字线, 抬手不退出, 再次点击才退出', (tester) async {
+      final indicator = TestInteractiveIndicator(
+        key: const ExternalIndicatorKey('arena_cross_drag'),
+        hitRect: _handleRect,
+      );
+      final scene = await _pumpChartInListView(tester, indicator: indicator);
+      addTearDown(() => disposeChart(tester, scene.chart));
+      final tapPosition = _toGlobal(tester, _blankPosition);
+
+      // crossing 必须先由一次 tap 建立: cross 的拖动锚点仍复用 onTapUp 留下的手势数据。
+      await tester.tapAt(tapPosition);
+      await tester.pump(_settle);
+      expect(scene.chart.isCrossing, isTrue);
+
+      // dy 从不按蜡烛量化, 永远自由跟随, 是这里唯一可靠的观测量。
+      Future<double> dragUp() async {
+        final beforeDy = scene.chart.crossOffset!.dy;
+        final gesture = await tester.startGesture(tapPosition, kind: PointerDeviceKind.touch);
+        for (var i = 0; i < _stepCount; i++) {
+          await gesture.moveBy(const Offset(0, _stepDy));
+          await tester.pump(_frame);
+        }
+        await gesture.up();
+        await tester.pump(_settle);
+        return beforeDy;
+      }
+
+      final beforeFirst = await dragUp();
+      expect(scene.chart.crossOffset!.dy, lessThan(beforeFirst), reason: '十字线应随手指上移');
+      expect(scene.scroll.offset, 0, reason: '拖动十字线不应带动外层滚动');
+      expect(scene.chart.isCrossing, isTrue, reason: '抬手不退出十字线模式');
+
+      // 第二次拖动必须照样生效: 锚点被清空时这里会静默零响应(竞技场已抢占, 外层也不滚)。
+      final beforeSecond = await dragUp();
+      expect(scene.chart.crossOffset!.dy, lessThan(beforeSecond), reason: '同一 crossing 内可连续拖动');
+      expect(scene.scroll.offset, 0);
+
+      await tester.tapAt(tapPosition);
+      await tester.pump(_settle);
+      expect(scene.chart.isCrossing, isFalse, reason: '退出只由再次点击负责');
+    });
+
+    testWidgets('非 crossing 时同一手势 => 外层滚动, 十字线不出现', (tester) async {
+      final indicator = TestInteractiveIndicator(
+        key: const ExternalIndicatorKey('arena_cross_absent'),
+        hitRect: _handleRect,
+      );
+      final scene = await _pumpChartInListView(tester, indicator: indicator);
+      addTearDown(() => disposeChart(tester, scene.chart));
+      expect(scene.chart.isCrossing, isFalse);
+
+      final gesture = await tester.startGesture(
+        _toGlobal(tester, _blankPosition),
+        kind: PointerDeviceKind.touch,
+      );
+      for (var i = 0; i < _stepCount; i++) {
+        await gesture.moveBy(const Offset(0, _stepDy));
+        await tester.pump(_frame);
+      }
+      await gesture.up();
+      await tester.pump(_settle);
+
+      expect(scene.chart.isCrossing, isFalse, reason: 'cross 归属只在 isCrossing 时成立');
+      expect(scene.scroll.offset, greaterThan(0), reason: '不满足归属条件的拖动仍归外层滚动');
+    });
+
+    testWidgets('缩放态下垂直拖动 => 图表纵向移动, 外层不滚动', (tester) async {
+      final indicator = TestInteractiveIndicator(
+        key: const ExternalIndicatorKey('arena_zooming_move'),
+        hitRect: _handleRect,
+      );
+      final scene = await _pumpChartInListView(tester, indicator: indicator);
+      addTearDown(() => disposeChart(tester, scene.chart));
+      scene.chart.updateGestureConfig((config) => config.copyWith(enableZoom: true));
+      final sliderPosition = scene.chart.mainRect.center;
+      scene.chart.setChartZoomSlideBarRect(
+        Rect.fromCenter(center: sliderPosition, width: 80, height: 20),
+      );
+      await tester.pump(_frame);
+      expect(scene.chart.onChartZoomStart(sliderPosition, false), isTrue);
+      expect(scene.chart.isChartZooming, isTrue);
+      final beforeTop = scene.chart.mainPadding.top;
+
+      // 落点在主区内且避开 slider 矩形, 否则归优先级更高的 zoomSlider。
+      final dragFrom = Offset(_blankPosition.dx, scene.chart.mainRect.top + 30);
+      final gesture = await tester.startGesture(
+        _toGlobal(tester, dragFrom),
+        kind: PointerDeviceKind.touch,
+      );
+      for (var i = 0; i < _stepCount; i++) {
+        await gesture.moveBy(const Offset(0, _stepDy));
+        await tester.pump(_frame);
+      }
+
+      // zooming move 用 GestureData.move, 是唯一消费 dy 的图表平移归属。
+      expect(scene.chart.mainPadding.top, lessThan(beforeTop), reason: '主区应随手指纵向移动');
+      expect(scene.scroll.offset, 0, reason: '缩放态下的平移不应带动外层滚动');
+
+      await gesture.up();
+      await tester.pump(_settle);
+    });
+  });
 }
 
 /// 绘制工具（DrawObject）在可滚动容器内的拖动归属。
@@ -366,6 +571,36 @@ void _drawArenaTests() {
 
       expect(scene.scroll.offset, greaterThan(0), reason: '空白区拖动仍归外层滚动');
       expect(object.moving, isFalse);
+    });
+
+    testWidgets('未完成绘制拖动后抬手 => 由落点归属确认当前绘制点', (tester) async {
+      final indicator = TestInteractiveIndicator(
+        key: const ExternalIndicatorKey('draw_drawing_owner'),
+        hitRect: const Rect.fromLTWH(0, 260, 20, 20),
+      );
+      final scene = await _pumpChartInListView(
+        tester,
+        indicator: indicator,
+        enableDraw: true,
+      );
+      addTearDown(() => disposeChart(tester, scene.chart));
+      scene.chart.startDraw(testDrawLineType, isInitPointer: false);
+      scene.chart.onDrawConfirm(GestureData.tap(lineFrom));
+      expect(scene.chart.drawState.isDrawing, isTrue);
+
+      final gesture = await tester.startGesture(
+        _toGlobal(tester, lineFrom),
+        kind: PointerDeviceKind.touch,
+      );
+      for (var i = 0; i < _stepCount; i++) {
+        await gesture.moveBy(const Offset(0, _stepDy));
+        await tester.pump(_frame);
+      }
+      await gesture.up();
+      await tester.pump(_settle);
+
+      expect(scene.chart.drawState.isEditing, isTrue, reason: '第二个绘制点应在归属手势结束时确认');
+      expect(scene.scroll.offset, 0);
     });
   });
 }

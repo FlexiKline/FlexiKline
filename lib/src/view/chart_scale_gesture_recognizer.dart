@@ -14,19 +14,20 @@
 
 import 'package:flutter/gestures.dart';
 
-/// 图表专用 Scale 识别器：落点命中可拖动 PaintObject 时提前抢占手势竞技场。
+/// 图表专用 Scale 识别器：由上层判定落点归属，本类只负责抢占手势竞技场。
 ///
 /// 单指 pan 的 [ScaleGestureRecognizer] 接受阈值是 `panSlop`，而
 /// [DeviceGestureSettings.panSlop] 是 `touchSlop * 2` 的派生 getter，外层 Scrollable 的
 /// [VerticalDragGestureRecognizer] 读的正是同一个 `touchSlop`。也就是说图表的阈值恒为
 /// 外层的两倍，同一 [MediaQuery] 作用域下单指拖动必输——这是恒等关系而非数值巧合，
-/// 无法通过调参解决。本类在确认落点存在可拖动对象后，把阈值降到 [_claimSlop] 并显式
+/// 无法通过调参解决。本类在上层确认存在落点归属后，把阈值降到 [_claimSlop] 并显式
 /// [resolve]，抢在外层之前胜出。
 ///
-/// 落点没有可拖动对象时不做任何干预：空白区拖动仍归外层滚动。
+/// 没有落点归属时不做任何干预：空白区拖动仍归外层滚动。
 class ChartScaleGestureRecognizer extends ScaleGestureRecognizer {
   ChartScaleGestureRecognizer({
-    required this.hitTestDragStart,
+    required this.shouldClaimImmediately,
+    required this.shouldClaimOnSlop,
     required this.claimSlopFactor,
     super.debugOwner,
   }) : assert(
@@ -35,8 +36,11 @@ class ChartScaleGestureRecognizer extends ScaleGestureRecognizer {
           '取 >= 1 会晚于外层 Scrollable 的裁决',
         );
 
-  /// 落点是否存在可拖动的 PaintObject。必须无副作用。
-  final bool Function(Offset localPosition) hitTestDragStart;
+  /// 是否在 PointerDown 阶段立即抢占。只用于 zoom slider 专属区域。
+  final bool Function(Offset localPosition) shouldClaimImmediately;
+
+  /// 第一指位移超过 [_claimSlop] 后是否抢占。
+  final bool Function() shouldClaimOnSlop;
 
   /// 抢占阈值相对外层 hitSlop 的比例，取值 (0, 1)。
   final double claimSlopFactor;
@@ -51,28 +55,32 @@ class ChartScaleGestureRecognizer extends ScaleGestureRecognizer {
   /// 前提是它被正确注入——[RawGestureDetector] 不会像 [GestureDetector] 那样自动注入。
   double get _claimSlop => (gestureSettings?.touchSlop ?? kTouchSlop) * claimSlopFactor;
 
-  /// 命中可拖动对象的第一指，null 表示本次手势不参与抢占。
-  int? _candidatePointer;
+  /// 本轮手势的第一指。
+  int? _primaryPointer;
 
-  /// [_candidatePointer] 按下时的全局位置，用于算抢占位移。
-  Offset? _candidateDownGlobal;
+  /// [_primaryPointer] 按下时的全局位置，用于算抢占位移。
+  Offset? _primaryDownGlobal;
+
+  bool _hasClaimed = false;
 
   @override
   void addAllowedPointer(PointerDownEvent event) {
     super.addAllowedPointer(event);
-    // 只跟第一指: 多指是缩放语义, 不参与 PaintObject 拖动。
-    if (_candidatePointer != null) return;
-    if (!hitTestDragStart(event.localPosition)) return;
-    _candidatePointer = event.pointer;
-    _candidateDownGlobal = event.position;
+    if (_primaryPointer != null) return;
+    _primaryPointer = event.pointer;
+    _primaryDownGlobal = event.position;
+    if (shouldClaimImmediately(event.localPosition)) {
+      _hasClaimed = true;
+      resolve(GestureDisposition.accepted);
+    }
   }
 
   @override
   void handleEvent(PointerEvent event) {
-    if (event is PointerMoveEvent && event.pointer == _candidatePointer) {
-      final downGlobal = _candidateDownGlobal!;
-      if ((event.position - downGlobal).distance > _claimSlop) {
-        _clearCandidate();
+    if (!_hasClaimed && event is PointerMoveEvent && event.pointer == _primaryPointer) {
+      final downGlobal = _primaryDownGlobal!;
+      if ((event.position - downGlobal).distance > _claimSlop && shouldClaimOnSlop()) {
+        _hasClaimed = true;
         // 显式 accept 由发起者胜出, 与竞技场成员顺序无关; 父类 acceptGesture 会在
         // _state == possible 时派发 onScaleStart, 现有手势流程原样接上。
         resolve(GestureDisposition.accepted);
@@ -83,19 +91,20 @@ class ChartScaleGestureRecognizer extends ScaleGestureRecognizer {
 
   @override
   void rejectGesture(int pointer) {
-    if (pointer == _candidatePointer) _clearCandidate();
+    if (pointer == _primaryPointer) _clearPrimary();
     super.rejectGesture(pointer);
   }
 
   @override
   void didStopTrackingLastPointer(int pointer) {
-    _clearCandidate();
+    _clearPrimary();
     super.didStopTrackingLastPointer(pointer);
   }
 
-  void _clearCandidate() {
-    _candidatePointer = null;
-    _candidateDownGlobal = null;
+  void _clearPrimary() {
+    _primaryPointer = null;
+    _primaryDownGlobal = null;
+    _hasClaimed = false;
   }
 
   @override

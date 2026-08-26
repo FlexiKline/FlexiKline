@@ -24,15 +24,20 @@
 * Enable `onPointerCancel` on the non-touch gesture detector to roll back an in-progress PaintObject drag, which `onPanEnd` would otherwise commit.
 * Fix touch PaintObject drags missing small handles: hit-test at the recorded `PointerDown` position instead of the gesture recognition position, and carry the pre-recognition displacement into the first drag update.
 * Fix the same miss on the non-touch detector for non-mouse pointers, whose pan slop is 36px: set `DragStartBehavior.down` so `onPanStart` reports the `PointerDown` position and Flutter replays the pre-recognition displacement.
-* Fix touch PaintObject drags always losing to an enclosing scroll view: the chart's scale recognizer now claims the gesture arena when a `PointerDown` lands on a draggable object, instead of waiting for its own pan slop which is by definition twice the outer `Scrollable`'s hit slop (`DeviceGestureSettings.panSlop` is derived as `touchSlop * 2`); charts inside a `ListView` or `NestedScrollView` can finally win vertical drags, and blank-area drags still scroll the outer view.
+* Fix touch landed gestures losing to an enclosing scroll view: resolve zoom slider, zooming move, draw drawing/editing, Cross and PaintObject ownership from the first `PointerDown`, then let the chart's scale recognizer claim before the outer `Scrollable`; blank-area drags still scroll the outer view.
 * Add `PaintObject.hitTestDragStart`, a side-effect-free companion to `handleDragStart` that indicators must implement to be draggable inside a scrollable container; it runs on every `PointerDown`, including taps and long presses, so it must not mutate state, repaint or fire business callbacks.
-* Add `hitTestDragStart` as one `@mustCallSuper` channel on `KlineBindingBase` for asking whether a position has a draggable target; each binding tests itself before calling `super`, so priority is the reverse of the mixin declaration order and an editing draw object outranks a PaintObject.
 * Add `FlexiKlineController.hitTestPaintObjectDrag` and `hitTestDrawObjectDrag`, mirroring the hit rules of `onPaintObjectDragStart` and `onDrawMoveStart` without claiming the drag.
 * Fix draw objects in edit mode never winning a drag inside a scrollable container: the arena claim only asked about PaintObjects.
 * Fix draw object drags missing their hit targets: hit-test at the recorded `PointerDown` position, whose offset from the recognition position (`kPanSlop`, 36px when unclaimed) far exceeds `DrawConfig.hitTestMinDistance` (10px).
 * Fix pinch zoom jumping on the first frame: set `DragStartBehavior.start` on the chart's scale recognizer so `_initialSpan` is rebased on accept and `ScaleUpdateDetails.scale` starts from 1.0.
 * Add `GestureConfig.dragClaimSlopFactor` (default 0.5, clamped to 0.1~0.9) expressed as a ratio of the outer hit slop rather than a pixel value, because `touchSlop` is platform-supplied and often below `kTouchSlop` on Android, where any hardcoded pixel threshold fails on some devices.
 * Change a small move-then-release on a draggable object from a tap into a drag once the displacement passes the claim slop, which on touch is now half the outer hit slop instead of `kPanSlop` (Breaking Changes).
+* Make the zoom slider claim on `PointerDown`, preventing taps in its dedicated region from starting Cross.
+* Keep a landed gesture's owner when a second finger is added, so an in-progress draw or PaintObject drag is no longer canceled or converted to chart scale (Breaking Changes).
+* Take landed-gesture positions from the tracked first pointer instead of `ScaleUpdateDetails.localFocalPoint`, so adding a second finger no longer snaps a drag to the two-pointer centroid; chart scale still uses the centroid.
+* Replace touch-path `gestureArena.sweep` calls with owner-driven Scale claims, so a moved-then-released gesture is no longer reported as a tap; Tap still handles displacements below the claim slop.
+* Commit a claimed drawing gesture's point when its pointer session ends, taking over the confirmation that `onTapUp` performed before the claim.
+* Stop a Cross drag from dismissing the Cross on release: Cross is a mode entered and left by tapping, and panning in between only moves it (Breaking Changes).
 
 ## 2.3.2
 * Add `crossOffsetListenable` so external consumers can subscribe to Cross focus changes.
