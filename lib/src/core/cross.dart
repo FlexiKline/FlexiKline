@@ -131,8 +131,7 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
       /// 如果其他手势与Cross手势事件允许共存 或者当前不在Crossing中时, 开启Cross.
       if (force || !isCrossing) {
         logd('handleTap cross > $force > ${data.offset}');
-        // Cross 与 PaintObject 选中态互斥: 进入 crossing 即放弃选中的绘制目标.
-        deselectPaintObject();
+        onPaintObjectDragCancel();
         // 更新并校正起始焦点.
         _updateOffset(data.offset);
         _markRepaintCross();

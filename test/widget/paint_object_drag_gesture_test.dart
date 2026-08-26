@@ -28,15 +28,19 @@ const _spec = KlineSpec(
   interval: FlexiTimeInterval(1, TimeUnit.minute),
 );
 
-/// 命中区高 20px, 小于两条路径的手势识别容差(触摸 36px / 非鼠标 pan 36px),
-/// 因此用识别时刻位置命中必然脱靶。
+/// 命中区高 20px, 小于两条路径的手势识别容差, 因此用识别时刻位置命中必然脱靶。
+///
+/// 两条路径的容差不再相同: 触摸路径由 `ChartScaleGestureRecognizer` 按
+/// `dragClaimSlopFactor` 抢占, 默认是 hitSlop 的一半(测试环境下 9px); 非触摸路径仍走
+/// `kPanSlop`(36px)。20px 高的命中区对两者都足够小。
 const _hitRect = Rect.fromLTWH(100, 100, 30, 20);
 
-/// 一轮拖动的总位移: 必须大于识别容差, 否则手势不会被识别。
+/// 一轮拖动的总位移: 必须大于两条路径的识别容差, 否则手势不会被识别。
 const _dragDelta = Offset(0, -40);
 
-/// 总位移中的首段: 小于识别容差, 此时手势尚不应被识别。
-const _firstStep = Offset(0, -12);
+/// 总位移中的首段: 必须小于两条路径容差的较小者(触摸端的 9px 抢占阈值),
+/// 此时手势尚不应被识别。
+const _firstStep = Offset(0, -6);
 
 List<CandleModel> _candles() => List.generate(
       20,
@@ -93,8 +97,6 @@ Future<void> _expectDragClaimedAtDownPosition(
   required PointerDeviceKind kind,
 }) async {
   final downPosition = _hitRect.center;
-  expect(controller.onTap(downPosition), isTrue);
-  expect(controller.hasSelectedPaintObject, isTrue);
 
   final listenerBox = tester.renderObject<RenderBox>(find.byKey(listenerKey));
   final gesture = await tester.startGesture(

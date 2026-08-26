@@ -55,7 +55,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
   /// 长按监听数据
   GestureData? _longData;
 
-  /// 当前选中的 PaintObject 是否已认领本次拖动.
+  /// PaintObject 是否已认领本次拖动.
   /// 认领期间蜡烛图不平移、不更新 cross, 松手也不做惯性平移.
   bool _isObjectDragging = false;
 
@@ -326,8 +326,6 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
   /// 鼠标Hover进入事件.
   void onEnter(PointerEnterEvent event) {
     if (controller.isStartDragGrid) return;
-    // 选中的 PaintObject 独占指针焦点, 此时不拉起 cross.
-    if (controller.hasSelectedPaintObject) return;
     final offset = event.localPosition;
     // if (!controller.canvasRect.include(offset)) return;
 
@@ -370,14 +368,6 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
     } else if (gestureConfig.enableZoom && controller.chartZoomSlideBarRect.include(offset)) {
       controller.requestCancelCross();
       setCursorToZoom();
-      return;
-    }
-
-    if (controller.hasSelectedPaintObject) {
-      // 选中的 PaintObject 独占指针焦点. hover 是持续事件流, 必须在此持续早退,
-      // 否则下一个 hover 事件会用 force 把 cross 重新拉起来.
-      if (controller.isCrossing) controller.requestCancelCross();
-      setCursorToPrecise();
       return;
     }
 
@@ -496,7 +486,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
         _panData = null;
       }
     } else if (controller.onPaintObjectDragStart(position)) {
-      // 已选中的 PaintObject 优先认领拖动.
+      // PaintObject 优先按落点认领拖动.
       logd('onPanStart paintObject drag local:$position');
       cancelPositionAnimation();
       setCursorToGrabbing();

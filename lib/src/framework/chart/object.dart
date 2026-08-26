@@ -174,38 +174,40 @@ abstract class PaintObject<T extends Indicator<IIndicatorKey>> extends Indicator
   ///
   /// 注：自行处理 [position] 位置的点击事件。
   ///
-  /// 返回值决定框架的后续动作, 见 [PaintTapResult]。只有返回
-  /// [PaintTapResult.selected] 才会被授予选中态; 绘制对象无法在其他时机
-  /// 自行获得选中态。
+  /// 返回 true 表示消费本次点击，框架停止询问后续对象；返回 false 表示未命中，
+  /// 框架继续按 zIndex 从高到低询问。选中等业务状态由绘制对象自行维护。
   ///
   /// [position] 已由框架按位置分派: 主区指标只会收到 `mainRect` 内的点击,
   /// 副区指标只会收到 `subRect` 内的点击, 但具体命中区仍需自行判断。命中区
   /// 必须落在本对象所在大区内, 否则收不到对应位置的点击。
   ///
-  /// 主区内按 zIndex 升序询问, 即视觉最底层的子指标先被询问。
-  /// [handleDragStart] 不遍历绘制树, 不受此顺序影响。
-  PaintTapResult handleTap(Offset position) => PaintTapResult.ignored;
+  /// [handleTap]、[hitTestDragStart] 与 [handleDragStart] 均按 zIndex 倒序询问，
+  /// 即视觉最上层优先。
+  bool handleTap(Offset position) => false;
 
-  /// 是否为框架当前选中的绘制对象。
+  /// 询问 [position] 是否落在本对象的可拖动区域内，必须无副作用。
   ///
-  /// 选中态由框架持有（对象粒度）。绘制对象应把所有选中相关的渲染判断门控在
-  /// 本 getter 上：框架在任意路径清除选中态后本值即为 false, 对象内部残留的
-  /// 选中标识不会被读到, 因此框架不额外提供失选回调。
-  bool get isSelected => context.isSelectedPaintObject(this);
-
-  /// 请求放弃选中态；非当前选中对象时无效果。
+  /// 仅用于框架在 `PointerDown` 阶段判断是否需要提前抢占手势竞技场——图表嵌在可滚动
+  /// 容器内时，单指拖动的接受阈值恒为外层 Scrollable 的两倍，不抢占就永远拿不到手势。
   ///
-  /// 用于 tap 之外的时机（如选中目标已从业务数据中消失）。tap 内部想放弃
-  /// 选中态应直接返回 [PaintTapResult.handled], 由框架统一处理。
-  void deselect() => context.requestDeselectPaintObject(this);
+  /// 每次 `PointerDown` 都会调用，包括最终只是点击或长按的情形，因此不得修改状态、
+  /// 触发重绘或产生任何业务回调；[handleDragStart] 才是允许提交副作用的入口。
+  ///
+  /// 返回 true 不代表拖动已开始，真正的认领仍由 [handleDragStart] 决定，两者判据应当
+  /// 一致（建议抽成共用的私有方法）；不一致时框架会白抢一次手势，表现为该次拖动既不
+  /// 滚动外层也不平移图表，下一次手势恢复正常。
+  ///
+  /// 默认返回 false：只重写 [handleDragStart] 的指标在非滚动容器内行为不变，但在可
+  /// 滚动容器内拿不到手势。
+  bool hitTestDragStart(Offset position) => false;
 
-  /// 处理拖动开始, 仅当前选中且可绘制的对象会被询问。
+  /// 处理拖动开始。框架按 zIndex 从高到低询问当前位置所属大区内的可绘制对象。
   ///
   /// 返回 true 认领本次拖动：框架随后抑制蜡烛图平移、惯性平移、loadMore 检查
   /// 与 cross 更新, 并把后续的 [handleDragUpdate] / [handleDragEnd] /
   /// [handleDragCancel] 只发给本对象。
   ///
-  /// 注：本回调不遍历绘制树, 因此不存在命中优先级问题。
+  /// 返回 false 必须不保留拖动副作用，框架会继续询问后续对象。
   bool handleDragStart(Offset position) => false;
 
   /// 处理拖动中。
@@ -217,7 +219,8 @@ abstract class PaintObject<T extends Indicator<IIndicatorKey>> extends Indicator
   /// 处理拖动正常结束, 应在此提交结果。
   void handleDragEnd() {}
 
-  /// 处理拖动被打断（指针取消、多指介入、被强制失选）, 应在此回滚未提交状态。
+  /// 处理拖动被打断（指针取消、多指介入、进入 cross/手绘、本对象退出绘制树）,
+  /// 应在此回滚未提交状态。
   void handleDragCancel() {}
 
   /// 触发重新绘制
@@ -340,11 +343,23 @@ final class MainPaintObject<T extends MainPaintObjectIndicator> extends PaintObj
 
   late final SortableHashSet<PaintObject> children;
 
-  Set<PaintObject> get paintableChildren {
+  /// 参与绘制的子对象，按 zIndex 升序（视觉自下而上）。
+  ///
+  /// 返回惰性视图而非集合快照：调用方只需顺序遍历，[isPaintable] 才是成员查询入口。
+  /// [children] 的增删是「重建缓存列表」而非原地改，因此遍历期间的增删不会打断迭代。
+  Iterable<PaintObject> get paintableChildren {
     if (onlyMainChart) {
-      return children.where((object) => object.key == candleIndicatorKey).toSet();
+      return children.where((object) => object.key == candleIndicatorKey);
     }
     return children;
+  }
+
+  /// [paintableChildren] 的反向绘制顺序（视觉自上而下），命中分发按此顺序询问。
+  Iterable<PaintObject> get reversedPaintableChildren {
+    if (onlyMainChart) {
+      return children.reversed.where((object) => object.key == candleIndicatorKey);
+    }
+    return children.reversed;
   }
 
   /// 获取蜡烛图绘制对象
@@ -375,8 +390,7 @@ final class MainPaintObject<T extends MainPaintObjectIndicator> extends PaintObj
   /// 线图模式（[onlyMainChart]）下主区仅绘制蜡烛, 其余主区子对象不可绘制;
   /// 非主区子对象（副区）恒可绘制。与 [paintableChildren] 同源, 但为 O(1) 查询。
   ///
-  /// 注: 隐藏并不使对象出树, 因此其选中态仍保留(放大回蜡烛图即恢复),
-  /// 但不可绘制期间不应参与任何手势。
+  /// 注: 隐藏并不使对象出树，但不可绘制期间不应参与任何手势。
   bool isPaintable(PaintObject object) {
     if (!children.contains(object)) return true;
     return !onlyMainChart || object.key == candleIndicatorKey;

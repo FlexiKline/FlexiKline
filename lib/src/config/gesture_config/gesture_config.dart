@@ -44,8 +44,10 @@ class GestureConfig {
     this.zoomStartMinDistance = 5,
     this.zoomSpeed = 1,
     this.isManualSetZoomRect = false,
+    double dragClaimSlopFactor = 0.5,
   })  : tolerance = tolerance ?? ToleranceConfig(),
-        scaleSpeed = scaleSpeed.clamp(1, 30);
+        scaleSpeed = scaleSpeed.clamp(1, 30),
+        dragClaimSlopFactor = dragClaimSlopFactor.clamp(0.1, 0.9);
 
   /// 是否启用长按操作
   final bool enableLongPress;
@@ -85,6 +87,19 @@ class GestureConfig {
 
   /// 是否手动设置缩放区域
   final bool isManualSetZoomRect;
+
+  /// PaintObject 拖动抢占手势竞技场的位移阈值，相对外层 Scrollable 实际 hitSlop 的比例。
+  ///
+  /// 图表嵌在可滚动容器内时，单指拖动的接受阈值恒为外层 Scrollable 的两倍，必须在到达
+  /// 外层阈值之前显式抢占才拿得到手势。落点未命中可拖动对象时不抢占，空白区拖动仍归
+  /// 外层滚动。
+  ///
+  /// 取值 (0, 1)，构造时 clamp 到 [0.1, 0.9]：取 0 会把手柄上的点击也当成拖动抢走，
+  /// 取 1 及以上则晚于外层的裁决，抢不到手势。默认 0.5。
+  ///
+  /// 存比例而非像素值，是因为外层 hitSlop 取自 `DeviceGestureSettings.touchSlop`，
+  /// Android 平台值常小于 `kTouchSlop`(18)，写死的像素阈值会在部分设备上失效。
+  final double dragClaimSlopFactor;
 
   factory GestureConfig.fromJson(Map<String, dynamic> json) => _$GestureConfigFromJson(json);
 

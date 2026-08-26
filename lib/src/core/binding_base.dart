@@ -158,14 +158,19 @@ abstract class KlineBindingBase with FlexiLog implements PaintContext, DrawConte
   @protected
   void markRepaintDraw();
 
-  /// 是否存在选中的 [PaintObject]。由 ChartBinding 实现。
-  ///
-  /// 选中态由框架持有（对象粒度），是 PaintObject 拖动与桌面端
-  /// hover cross 抑制的前置条件。
-  bool get hasSelectedPaintObject;
+  /// 取消当前 PaintObject 拖动并通知认领对象回滚临时状态。
+  void onPaintObjectDragCancel();
 
-  /// 清除 [PaintObject] 选中态；若正在拖动，先取消拖动。由 ChartBinding 实现。
-  void deselectPaintObject();
+  /// 释放框架对 [object] 的持有：退树与对象主动中止交互共用本通道。
+  ///
+  /// 框架侧任何按对象粒度持有的引用（当前是 ChartBinding 的拖动归属）都应在本方法的
+  /// 覆写中释放。覆写方必须先调 `super`，由 mixin 链保证每个 Binding 只清理自己持有
+  /// 的部分；每个覆写都必须带对象身份守卫，不能误释放他人的持有。
+  @mustCallSuper
+  @override
+  void requestReleasePaintObject(PaintObject object) {
+    logd('requestReleasePaintObject base ${object.key}');
+  }
 
   /// 请求重绘 Chart / Cross / Draw 三个绘制层（不含 Grid）。
   ///

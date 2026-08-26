@@ -149,10 +149,11 @@ extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
   void onEnterTree() => doAttach();
 
   /// 框架内部：被移出绘制树时调用。
-  /// 先释放选中态与拖动, 再触发 didDetach，最后按 [keepAlive] 决定是否真销毁。
+  /// 先让各 Binding 释放对本对象的持有，再触发 didDetach，最后按 [keepAlive] 决定是否真销毁。
   void onExitTree() {
-    // 出树对象不应继续持有选中态: 否则拖动仍会被路由给它, 且拖动中的未提交状态无人回滚。
-    if (_mounted) deselect();
+    // 框架侧持有本对象的引用(当前是拖动归属, 后续可能是 hover / 焦点等)由各 Binding
+    // 自行释放, 本处不逐项枚举。
+    if (_mounted) context.requestReleasePaintObject(this);
     doDetach();
     if (!keepAlive) dispose();
   }
@@ -278,6 +279,23 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
   /// 2. 当前不处在Zooming中时
   bool get isFirstDrawTipsArea {
     return indicator.drawBelowTipsArea && !context.isChartZooming;
+  }
+
+  /// 按视觉层级从上到下分发点击，首个返回 true 的对象消费事件并终止分发。
+  bool doHandleTap(Offset position) {
+    return reversedPaintableChildren.any((object) => object.handleTap(position));
+  }
+
+  /// 按视觉层级从上到下询问是否存在可拖动对象，与 [doHandleDragStart] 同序且无副作用。
+  bool doHitTestDragStart(Offset position) {
+    return reversedPaintableChildren.any((object) => object.hitTestDragStart(position));
+  }
+
+  /// 按视觉层级从上到下寻找认领拖动的对象，首个返回 true 的对象终止分发。
+  PaintObject? doHandleDragStart(Offset position) {
+    return reversedPaintableChildren.firstWhereOrNull(
+      (object) => object.handleDragStart(position),
+    );
   }
 
   void doPaintChart(Canvas canvas, Size size) {

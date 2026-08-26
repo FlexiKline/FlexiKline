@@ -34,6 +34,8 @@ abstract class _$GestureConfigCWProxy {
 
   GestureConfig isManualSetZoomRect(bool isManualSetZoomRect);
 
+  GestureConfig dragClaimSlopFactor(double dragClaimSlopFactor);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GestureConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -54,6 +56,7 @@ abstract class _$GestureConfigCWProxy {
     int zoomStartMinDistance,
     int zoomSpeed,
     bool isManualSetZoomRect,
+    double dragClaimSlopFactor,
   });
 }
 
@@ -113,6 +116,10 @@ class _$GestureConfigCWProxyImpl implements _$GestureConfigCWProxy {
       this(isManualSetZoomRect: isManualSetZoomRect);
 
   @override
+  GestureConfig dragClaimSlopFactor(double dragClaimSlopFactor) =>
+      this(dragClaimSlopFactor: dragClaimSlopFactor);
+
+  @override
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GestureConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -134,6 +141,7 @@ class _$GestureConfigCWProxyImpl implements _$GestureConfigCWProxy {
     Object? zoomStartMinDistance = const $CopyWithPlaceholder(),
     Object? zoomSpeed = const $CopyWithPlaceholder(),
     Object? isManualSetZoomRect = const $CopyWithPlaceholder(),
+    Object? dragClaimSlopFactor = const $CopyWithPlaceholder(),
   }) {
     return GestureConfig(
       enableLongPress: enableLongPress == const $CopyWithPlaceholder()
@@ -191,6 +199,10 @@ class _$GestureConfigCWProxyImpl implements _$GestureConfigCWProxy {
           ? _value.isManualSetZoomRect
           // ignore: cast_nullable_to_non_nullable
           : isManualSetZoomRect as bool,
+      dragClaimSlopFactor: dragClaimSlopFactor == const $CopyWithPlaceholder()
+          ? _value.dragClaimSlopFactor
+          // ignore: cast_nullable_to_non_nullable
+          : dragClaimSlopFactor as double,
     );
   }
 }
@@ -229,6 +241,8 @@ GestureConfig _$GestureConfigFromJson(Map<String, dynamic> json) =>
           (json['zoomStartMinDistance'] as num?)?.toInt() ?? 5,
       zoomSpeed: (json['zoomSpeed'] as num?)?.toInt() ?? 1,
       isManualSetZoomRect: json['isManualSetZoomRect'] as bool? ?? false,
+      dragClaimSlopFactor:
+          (json['dragClaimSlopFactor'] as num?)?.toDouble() ?? 0.5,
     );
 
 Map<String, dynamic> _$GestureConfigToJson(GestureConfig instance) =>
@@ -248,4 +262,5 @@ Map<String, dynamic> _$GestureConfigToJson(GestureConfig instance) =>
       'zoomStartMinDistance': instance.zoomStartMinDistance,
       'zoomSpeed': instance.zoomSpeed,
       'isManualSetZoomRect': instance.isManualSetZoomRect,
+      'dragClaimSlopFactor': instance.dragClaimSlopFactor,
     };

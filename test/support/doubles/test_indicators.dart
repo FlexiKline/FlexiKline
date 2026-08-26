@@ -192,6 +192,7 @@ class TestInteractiveIndicator extends ExternalIndicator {
   TestInteractiveIndicator({
     required super.key,
     super.height = 80,
+    super.zIndex,
     super.autoActivate = true,
     this.hitRect = const Rect.fromLTRB(0, 0, 100, 100),
   }) : super(padding: EdgeInsets.zero);
@@ -213,11 +214,8 @@ class TestInteractivePaintObject extends ExternalPaintObject<TestInteractiveIndi
   /// 是否认领拖动；置 false 可模拟「按在选中对象上但不接受拖动」
   bool acceptDrag = true;
 
-  /// 首次命中时返回的结果。
-  ///
-  /// 默认请求选中；置为 [PaintTapResult.handled] 可模拟「仅处理点击、
-  /// 不需要选中态」的指标（如 crossing 中的下单按钮）。
-  PaintTapResult tapResult = PaintTapResult.selected;
+  /// 命中时是否消费点击。
+  bool acceptTap = true;
 
   /// 按调用顺序记录的回调名
   final List<String> calls = [];
@@ -234,13 +232,24 @@ class TestInteractivePaintObject extends ExternalPaintObject<TestInteractiveIndi
   /// 与 PointerMove 分几段派发无关, 用于校验手势识别前的位移没有丢。
   Offset totalDragDelta = Offset.zero;
 
+  /// [hitTestDragStart] 被询问的次数。
+  ///
+  /// 刻意不进 [calls]: 该方法必须无副作用, 用独立计数器才能同时断言
+  /// "被询问过"与"没有产生任何拖动回调"。
+  int hitTestDragStartCount = 0;
+
   @override
-  PaintTapResult handleTap(Offset position) {
-    if (!indicator.hitRect.contains(position)) return PaintTapResult.ignored;
+  bool handleTap(Offset position) {
+    if (!indicator.hitRect.contains(position)) return false;
     calls.add('tap');
-    // 二次点击同一对象 => 消费点击但放弃选中态, 由框架清除。
-    if (isSelected) return PaintTapResult.handled;
-    return tapResult;
+    return acceptTap;
+  }
+
+  @override
+  bool hitTestDragStart(Offset position) {
+    hitTestDragStartCount++;
+    // 判据与 [handleDragStart] 同源, 但不改任何状态。
+    return acceptDrag && indicator.hitRect.contains(position);
   }
 
   @override

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// PaintObject 拖动：只路由给选中对象，且 dragging 蕴含 selected。
+/// PaintObject 拖动：按落点认领并固定路由给同一对象。
 library;
 
 import 'package:decimal/decimal.dart';
@@ -56,41 +56,29 @@ void main() {
       object = indicator.object!;
     }
 
-    /// 走完 tap 选中 => 认领拖动
-    bool selectThenStartDrag({Offset at = const Offset(10, 10)}) {
-      ctrl.onTap(at);
+    bool startDrag({Offset at = const Offset(10, 10)}) {
       return ctrl.onPaintObjectDragStart(at);
     }
 
-    testWidgets('未选中任何对象 => 不认领拖动', (tester) async {
+    testWidgets('未经过 tap 也能直接命中并认领拖动', (tester) async {
       await arrange();
+
+      expect(startDrag(), isTrue);
+      expect(ctrl.isPaintObjectDragging, isTrue);
+      expect(object.calls, ['dragStart']);
+    });
+
+    testWidgets('对象拒绝 => 不认领, 不进入拖动态', (tester) async {
+      await arrange();
+      object.acceptDrag = false;
 
       expect(ctrl.onPaintObjectDragStart(const Offset(10, 10)), isFalse);
       expect(ctrl.isPaintObjectDragging, isFalse);
       expect(object.calls, isEmpty);
     });
 
-    testWidgets('已选中且命中 => 认领拖动', (tester) async {
+    testWidgets('按在命中区之外 => 不认领', (tester) async {
       await arrange();
-
-      expect(selectThenStartDrag(), isTrue);
-      expect(ctrl.isPaintObjectDragging, isTrue);
-      expect(object.calls, ['tap', 'dragStart']);
-    });
-
-    testWidgets('已选中但对象拒绝 => 不认领, 不进入拖动态', (tester) async {
-      await arrange();
-      ctrl.onTap(const Offset(10, 10));
-      object.acceptDrag = false;
-
-      expect(ctrl.onPaintObjectDragStart(const Offset(10, 10)), isFalse);
-      expect(ctrl.isPaintObjectDragging, isFalse);
-      expect(object.calls, ['tap']);
-    });
-
-    testWidgets('已选中但按在命中区之外 => 不认领', (tester) async {
-      await arrange();
-      ctrl.onTap(const Offset(10, 10));
 
       expect(ctrl.onPaintObjectDragStart(const Offset(500, 500)), isFalse);
       expect(ctrl.isPaintObjectDragging, isFalse);
@@ -98,7 +86,7 @@ void main() {
 
     testWidgets('update 透传 position 与 delta', (tester) async {
       await arrange();
-      selectThenStartDrag();
+      startDrag();
 
       final data = GestureData.pan(const Offset(10, 10))..update(const Offset(10, 40));
       ctrl.onPaintObjectDragUpdate(data);
@@ -109,76 +97,59 @@ void main() {
 
     testWidgets('拖动结束 => handleDragEnd 且退出拖动态', (tester) async {
       await arrange();
-      selectThenStartDrag();
+      startDrag();
 
       ctrl.onPaintObjectDragEnd();
 
       expect(ctrl.isPaintObjectDragging, isFalse);
       expect(object.calls.last, 'dragEnd');
-      expect(object.isSelected, isTrue, reason: '结束拖动不应连带取消选中');
     });
 
     testWidgets('拖动取消 => handleDragCancel 且退出拖动态', (tester) async {
       await arrange();
-      selectThenStartDrag();
+      startDrag();
 
       ctrl.onPaintObjectDragCancel();
 
       expect(ctrl.isPaintObjectDragging, isFalse);
       expect(object.calls.last, 'dragCancel');
-      expect(object.isSelected, isTrue);
     });
 
     testWidgets('未在拖动时 update / end / cancel 均为空操作', (tester) async {
       await arrange();
-      ctrl.onTap(const Offset(10, 10));
 
       ctrl.onPaintObjectDragUpdate(GestureData.pan(const Offset(10, 10)));
       ctrl.onPaintObjectDragEnd();
       ctrl.onPaintObjectDragCancel();
 
-      expect(object.calls, ['tap']);
+      expect(object.calls, isEmpty);
     });
 
     testWidgets('拖动中不允许重复认领', (tester) async {
       await arrange();
-      selectThenStartDrag();
+      startDrag();
 
       expect(ctrl.onPaintObjectDragStart(const Offset(10, 10)), isFalse);
-      expect(object.calls, ['tap', 'dragStart']);
+      expect(object.calls, ['dragStart']);
     });
 
-    testWidgets('拖动中被强制失选 => 先 handleDragCancel 再清选中态', (tester) async {
+    testWidgets('拖动中启动 cross => 取消拖动', (tester) async {
       await arrange();
-      selectThenStartDrag();
-
-      ctrl.deselectPaintObject();
-
-      expect(object.calls.last, 'dragCancel');
-      expect(ctrl.isPaintObjectDragging, isFalse);
-      expect(ctrl.hasSelectedPaintObject, isFalse);
-    });
-
-    testWidgets('拖动中启动 cross => 取消拖动并清选中态', (tester) async {
-      await arrange();
-      selectThenStartDrag();
+      startDrag();
 
       ctrl.onCrossStart(GestureData.tap(const Offset(200, 200)));
 
       expect(object.calls.last, 'dragCancel');
       expect(ctrl.isPaintObjectDragging, isFalse);
-      expect(ctrl.hasSelectedPaintObject, isFalse);
     });
 
-    testWidgets('不变量: isPaintObjectDragging 蕴含 hasSelectedPaintObject', (tester) async {
+    testWidgets('拖动对象退出绘制树 => 收到取消且清除拖动归属', (tester) async {
       await arrange();
-      selectThenStartDrag();
+      startDrag();
 
-      expect(ctrl.isPaintObjectDragging, isTrue);
-      expect(ctrl.hasSelectedPaintObject, isTrue);
+      expect(ctrl.hideMainIndicator(object.key), isTrue);
 
-      ctrl.deselectPaintObject();
-
+      expect(object.calls.last, 'dragCancel');
       expect(ctrl.isPaintObjectDragging, isFalse);
     });
   });

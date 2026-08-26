@@ -22,6 +22,7 @@ import '../framework/chart/indicator.dart';
 import '../framework/draw/overlay.dart';
 import '../model/gesture_data.dart';
 import '../utils/algorithm_util.dart';
+import 'chart_scale_gesture_recognizer.dart';
 import 'gesture_detector_widget.dart';
 
 class TouchGestureDetector extends GestureDetectorWidget {
@@ -78,6 +79,10 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
 
   @override
   Widget build(BuildContext context) {
+    // [RawGestureDetector] 不像 [GestureDetector] 那样自动注入 gestureSettings, 必须
+    // 逐个识别器手动注入: 漏了会让所有识别器退回框架常量, 丢掉平台适配, 并让
+    // [ChartScaleGestureRecognizer] 的抢占阈值按 kTouchSlop 而非设备值计算。
+    final gestureSettings = MediaQuery.maybeGestureSettingsOf(context);
     return Listener(
       key: const ValueKey('TouchListener'),
       behavior: HitTestBehavior.translucent,
@@ -85,25 +90,54 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
       onPointerMove: onPointerMove,
       onPointerUp: onPointerUp,
       onPointerCancel: onPointerCancel,
-      child: GestureDetector(
+      child: RawGestureDetector(
         behavior: HitTestBehavior.translucent,
 
-        /// 点击
-        onTapUp: onTapUp,
+        /// map 的插入顺序即竞技场加入顺序, 必须保持 Tap 在最前(与 [GestureDetector]
+        /// 一致): [onPointerMove] 里 crossing / drawing / zoom slider / chart zooming
+        /// 四条路径调的 `gestureArena.sweep` 是"第一个成员胜出", 改顺序会静默改变
+        /// 这四条既有路径的胜者。
+        gestures: <Type, GestureRecognizerFactory>{
+          /// 点击
+          TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+            () => TapGestureRecognizer(debugOwner: this),
+            (instance) => instance
+              ..onTapUp = onTapUp
+              ..gestureSettings = gestureSettings,
+          ),
 
-        /// 双击
-        onDoubleTap: widget.onDoubleTap,
+          /// 双击
+          DoubleTapGestureRecognizer: GestureRecognizerFactoryWithHandlers<DoubleTapGestureRecognizer>(
+            () => DoubleTapGestureRecognizer(debugOwner: this),
+            (instance) => instance
+              ..onDoubleTap = widget.onDoubleTap
+              ..gestureSettings = gestureSettings,
+          ),
 
-        /// 移动 缩放
-        onScaleStart: onScaleStart,
-        onScaleUpdate: onScaleUpdate.throttleOnFps,
-        onScaleEnd: onScaleEnd,
+          /// 长按
+          LongPressGestureRecognizer: GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
+            () => LongPressGestureRecognizer(debugOwner: this),
+            (instance) => instance
+              ..onLongPressStart = onLongPressStart
+              ..onLongPressMoveUpdate = onLongPressMoveUpdate.throttleOnFps
+              ..onLongPressEnd = onLongPressEnd
+              ..gestureSettings = gestureSettings,
+          ),
 
-        /// 长按
-        onLongPressStart: onLongPressStart,
-        onLongPressMoveUpdate: onLongPressMoveUpdate.throttleOnFps,
-        onLongPressEnd: onLongPressEnd,
-
+          /// 移动 缩放
+          ChartScaleGestureRecognizer: GestureRecognizerFactoryWithHandlers<ChartScaleGestureRecognizer>(
+            () => ChartScaleGestureRecognizer(
+              debugOwner: this,
+              claimSlopFactor: gestureConfig.dragClaimSlopFactor,
+              hitTestDragStart: controller.hitTestPaintObjectDrag,
+            ),
+            (instance) => instance
+              ..onStart = onScaleStart
+              ..onUpdate = onScaleUpdate.throttleOnFps
+              ..onEnd = onScaleEnd
+              ..gestureSettings = gestureSettings,
+          ),
+        },
         child: const SizedBox.expand(),
       ),
     );
@@ -332,7 +366,9 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
       }
       if (drawState.object?.lock == true) return;
       logd('onScaleStart draw > details:$details');
-      _panScaleData = GestureData.pan(details.localFocalPoint);
+      final currentPosition = details.localFocalPoint;
+      final downPosition = details.pointerCount <= 1 ? _primaryDown?.position : null;
+      _panScaleData = GestureData.pan(downPosition ?? currentPosition);
       final result = controller.onDrawMoveStart(_panScaleData!);
       if (!result) {
         _panScaleData?.end();
@@ -341,7 +377,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
       return;
     }
 
-    // 已选中的 PaintObject 优先认领单指拖动; 多指仍归缩放.
+    // PaintObject 优先按落点认领单指拖动; 多指仍归缩放.
     final currentPosition = details.localFocalPoint;
     final downPosition = details.pointerCount <= 1 ? _primaryDown?.position : null;
     if (downPosition != null && controller.onPaintObjectDragStart(downPosition)) {
