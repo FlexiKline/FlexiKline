@@ -38,6 +38,10 @@
 * Replace touch-path `gestureArena.sweep` calls with owner-driven Scale claims, so a moved-then-released gesture is no longer reported as a tap; Tap still handles displacements below the claim slop.
 * Commit a claimed drawing gesture's point when its pointer session ends, taking over the confirmation that `onTapUp` performed before the claim.
 * Stop a Cross drag from dismissing the Cross on release: Cross is a mode entered and left by tapping, and panning in between only moves it (Breaking Changes).
+* Drive every landed gesture through `onScaleUpdate` instead of `Listener.onPointerMove`, so Cross, zoom slider, zooming move and in-progress drawing update at most once per display frame like the other gesture paths.
+* Derive landed-gesture coordinates from a fixed anchor plus the first pointer's total displacement, so frames dropped by the per-frame throttle no longer drop movement.
+* Anchor a Cross drag on the authoritative `crossOffset` instead of the gesture data left by the last `onTapUp`, so the crosshair continues from where it is instead of jumping back to the last tap position.
+* Yield the gesture arena on long press for Cross and in-progress drawing, the two owners long press itself does nothing for, so pausing before a drag no longer swallows the whole gesture.
 
 ## 2.3.2
 * Add `crossOffsetListenable` so external consumers can subscribe to Cross focus changes.

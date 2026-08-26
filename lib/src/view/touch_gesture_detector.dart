@@ -23,6 +23,7 @@ import '../framework/draw/overlay.dart';
 import '../model/gesture_data.dart';
 import '../utils/algorithm_util.dart';
 import 'chart_gesture_owner.dart';
+import 'chart_long_press_gesture_recognizer.dart';
 import 'chart_scale_gesture_recognizer.dart';
 import 'gesture_detector_widget.dart';
 
@@ -41,16 +42,22 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
   @override
   String get logTag => 'TouchGesture';
 
-  /// 平移/缩放监听数据
+  /// 图表兜底（pan / scale）的手势数据。
+  ///
+  /// 落点归属走 [_ownerData]，两者互斥：归属存在时这里恒为空。
   GestureData? _panScaleData;
 
-  /// 缩放主区图表事件监听数据
-  GestureData? _zoomData;
+  /// 当前落点归属的手势数据。
+  ///
+  /// 与 [_ownerAnchor] 同生共死：都在 [onScaleStart] 建立、[_pointerEnd] 清空。
+  GestureData? _ownerData;
 
-  /// 移动图表监听数据
-  GestureData? _moveData;
+  /// [_ownerData] 的位移锚点，见 [resolveGestureOwnerAnchor]。
+  Offset? _ownerAnchor;
 
-  /// Cross平移/触发/监听数据
+  /// 点击监听数据，只服务 [onTapUp] 的 cross 启动与绘制点确认。
+  ///
+  /// 不再作为 cross 拖动的跨手势锚点：那份职责已交给权威状态 `controller.crossOffset`。
   GestureData? _tapData;
 
   /// 长按监听数据
@@ -118,8 +125,12 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
           ),
 
           /// 长按
-          LongPressGestureRecognizer: GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
-            () => LongPressGestureRecognizer(debugOwner: this),
+          ChartLongPressGestureRecognizer: GestureRecognizerFactoryWithHandlers<ChartLongPressGestureRecognizer>(
+            () => ChartLongPressGestureRecognizer(
+              debugOwner: this,
+              // 无副作用: deadline 到点时只读已判定的归属。
+              shouldYieldToOwner: () => _owner?.suppressesLongPress == true,
+            ),
             (instance) => instance
               ..onLongPressStart = onLongPressStart
               ..onLongPressMoveUpdate = onLongPressMoveUpdate.throttleOnFps
@@ -168,67 +179,19 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
     _primary = (pointer: event.pointer, down: position, latest: position);
     _ownerClaimed = false;
     _owner = resolveLandedGestureOwner(controller, position);
-    switch (_owner) {
-      case ChartGestureOwner.zoomSlider:
-        logd('onPointerDown zoom > position:$position');
-        _zoomData = GestureData.zoom(position);
-      case ChartGestureOwner.zoomingMove:
-        logd('onPointerDown move > position:$position');
-        _moveData = GestureData.move(position);
-      default:
-    }
+    if (_owner != null) logd('onPointerDown owner:${_owner!.name} position:$position');
   }
 
-  /// 原始移动：记录第一指最新位置，并驱动由 PointerMove 直接驱动的那几种归属。
+  /// 原始移动：只记录第一指最新位置，不驱动任何业务。
+  ///
+  /// 驱动全部收敛到 [onScaleUpdate]，于是「多久处理一次」由节流决定、「处理时用哪个
+  /// 位置」由第一指跟踪决定，两件事解耦。位置不取
+  /// [ScaleUpdateDetails.localFocalPoint]：多指时它是质心，第二指落下瞬间会把位置拽到
+  /// 两指中点，而落点归属独占整个 pointer session、本就不该受第二指影响。
   void onPointerMove(PointerMoveEvent event) {
     final primary = _primary;
     if (primary == null || primary.pointer != event.pointer) return;
     _primary = (pointer: primary.pointer, down: primary.down, latest: event.localPosition);
-
-    switch (_owner) {
-      case ChartGestureOwner.drawDrawing:
-        final pointerOffset = drawState.pointerOffset;
-        if (pointerOffset != null) {
-          if (_tapData == null && pointerOffset.isFinite) {
-            _tapData = GestureData.pan(pointerOffset);
-          }
-
-          if (_tapData == null) return;
-          final newOffset = _tapData!.offset + event.delta;
-          // final mainRect = controller.mainRect;
-          // if (!mainRect.include(newOffset)) {
-          //   newOffset = newOffset.clamp(mainRect);
-          // }
-          controller.onDrawUpdate(_tapData!..update(newOffset));
-        }
-      case ChartGestureOwner.cross:
-        if (_tapData == null) {
-          logd('onPointerMove crossing but _tapData is null, skip');
-          return;
-        }
-        Offset newOffset = _tapData!.offset + event.delta;
-        final canvasRect = controller.canvasRect;
-        if (!canvasRect.include(newOffset)) {
-          newOffset = newOffset.clamp(canvasRect);
-        }
-        controller.onCrossUpdate(_tapData!..update(newOffset));
-      case ChartGestureOwner.zoomSlider when _zoomData != null:
-        _zoomData!.update(event.localPosition);
-        if (!_isZoomStarted) {
-          if (_zoomData!.dyDelta.abs() >= gestureConfig.zoomStartMinDistance &&
-              controller.onChartZoomStart(event.localPosition, false)) {
-            cancelPositionAnimation();
-            _isZoomStarted = true;
-          }
-        } else {
-          controller.onChartZoomUpdate(_zoomData!);
-        }
-      case ChartGestureOwner.zoomingMove when _moveData != null:
-        final newOffset = _moveData!.offset + event.delta;
-        cancelPositionAnimation();
-        controller.onChartMove(_moveData!..update(newOffset));
-      default:
-    }
   }
 
   void onPointerUp(PointerUpEvent event) => _pointerEnd(event);
@@ -246,11 +209,11 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
       _endLandedGesture(canceled: event is PointerCancelEvent);
     }
     // pointer session 归零即无条件清空: 归属已定却没能抢赢竞技场时(落点被双击吃掉、
-    // down 后立即 cancel)不会走 [_endLandedGesture], 残留的 _zoomData 会让下一轮把
-    // 缩放锚在上一轮的按下位置上。
-    _zoomData = null;
+    // down 后立即 cancel)不会走 [_endLandedGesture], 残留的锚点会让下一轮把位移
+    // 算在上一轮的基准上。
+    _ownerData = null;
+    _ownerAnchor = null;
     _isZoomStarted = false;
-    _moveData = null;
     _primary = null;
     _owner = null;
     _ownerClaimed = false;
@@ -268,31 +231,20 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
       case ChartGestureOwner.zoomSlider:
         logd('zoom end');
         if (_isZoomStarted) controller.onChartZoomEnd();
-        _zoomData?.end();
       case ChartGestureOwner.drawDrawing:
         if (!canceled) {
           final pointerOffset = drawState.pointerOffset;
           if (pointerOffset != null && pointerOffset.isFinite) {
             controller.onDrawConfirm(GestureData.tap(pointerOffset));
-            if (drawState.isEditing) {
-              _tapData?.end();
-              _tapData = null;
-            }
           }
         }
       case ChartGestureOwner.drawEditing:
-        if (_panScaleData != null) controller.onDrawMoveEnd();
-        _panScaleData?.end();
-        _panScaleData = null;
+        if (_ownerData != null) controller.onDrawMoveEnd();
       case ChartGestureOwner.cross:
         // 不关闭十字线: cross 是「点击进入、再次点击退出」的模式, 中间的平移只移动十字线。
         // 抢占前抬手会关闭, 是 Tap 赢下竞技场后 onTapUp 的取消分支泄漏到拖动路径上,
         // 属既有缺陷; 退出仍只由 [onTapUp] 负责。
-        //
-        // 只收尾状态、不清空 _tapData: 它是下一次拖动的锚点(仍跨手势复用), 清掉会让
-        // 第二次拖动在 [onPointerMove] 里直接 skip —— 而竞技场已被抢占, 外层也不滚,
-        // 表现为整个手势零响应。
-        _tapData?.end();
+        break;
       case ChartGestureOwner.paintObject:
         if (_isObjectDragGesture) {
           _isObjectDragGesture = false;
@@ -302,10 +254,9 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
             controller.onPaintObjectDragEnd();
           }
         }
-        _panScaleData?.end();
-        _panScaleData = null;
       case ChartGestureOwner.zoomingMove || null:
     }
+    _ownerData?.end();
   }
 
   /// 点击
@@ -378,45 +329,23 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
   /// 平移/缩放开始.
   void onScaleStart(ScaleStartDetails details) {
     final owner = _owner;
-    if (owner != null) _ownerClaimed = true;
-    // 抢占已经拿到手势, 这几种归属的移动仍由 [onPointerMove] 驱动, Scale 三段回调整体让开。
-    if (owner != null && owner.isPointerMoveDriven) return;
+    if (owner != null) {
+      _ownerClaimed = true;
+      // [ScaleGestureRecognizer] 在指针增减时会先派发一次 onEnd、再于下一次 move 重新
+      // onStart, 一轮手势因此被拆成多段。归属独占整个序列, 锚点与业务认领只做第一次。
+      if (_ownerData != null) return;
+      if (_startLandedGesture(owner)) return;
+      // 目标在 down 与 start 之间消失(数据刷新令 overlay 或 PaintObject 不复存在)。
+      // 竞技场已抢到、外层已被 reject, 废掉手势等于白拿, 降级为图表兜底。
+      logd('onScaleStart owner:${owner.name} claim failed, fallback to chart.');
+      _owner = null;
+      _ownerClaimed = false;
+    }
 
     if (_panScaleData != null && !_panScaleData!.isEnd) {
       // 如果上次平移或缩放, 还没有结束, 不允许开始.
       logd('onScaleStart Currently still ongoing, ignore!!!');
       return;
-    }
-
-    if (_owner == ChartGestureOwner.drawEditing) {
-      // 命中与位移基准都取按下位置, 两个理由缺一不可:
-      // 1. 命中准: 识别时刻位置距按下点相差一个 slop(未抢占时是 kPanSlop=36px), 远超
-      //    [DrawConfig.hitTestMinDistance] 的 10px, 沿线方向之外必然脱靶。
-      // 2. 跟手: [DrawBinding.onDrawMoveUpdate] 整体平移吃的是 `data.delta`, 以按下位置为
-      //    基准时首帧 delta 恰好补上按下到识别之间的真实位移; 换成识别位置则首帧为 0,
-      //    线永久滞后一个 slop。
-      final downPosition = _primary?.down;
-      logd('onScaleStart draw > down:$downPosition focal:${details.localFocalPoint}');
-      _panScaleData = GestureData.pan(downPosition ?? details.localFocalPoint);
-      final result = controller.onDrawMoveStart(_panScaleData!);
-      if (result) return;
-      _panScaleData?.end();
-      _panScaleData = null;
-      _owner = null;
-      _ownerClaimed = false;
-    }
-
-    if (_owner == ChartGestureOwner.paintObject) {
-      final downPosition = _primary?.down;
-      if (downPosition != null && controller.onPaintObjectDragStart(downPosition)) {
-        logd('onScaleStart paintObject drag down:$downPosition current:${details.localFocalPoint}');
-        cancelPositionAnimation();
-        _isObjectDragGesture = true;
-        _panScaleData = GestureData.pan(downPosition);
-        return;
-      }
-      _owner = null;
-      _ownerClaimed = false;
     }
 
     // 落点无归属，或原目标在 down 与 start 之间消失时，沿用既有图表兜底。
@@ -445,40 +374,72 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
     }
   }
 
-  /// 平移/缩放中...
-  void onScaleUpdate(ScaleUpdateDetails details) {
-    final owner = _owner;
-    if (owner != null && owner.isPointerMoveDriven) return;
-    _throttledScaleUpdate(details);
+  /// 建立落点归属的锚点与手势数据，并向业务侧认领目标。
+  ///
+  /// 返回 false 表示锚点或目标已失效，调用方应降级为图表兜底。
+  bool _startLandedGesture(ChartGestureOwner owner) {
+    final down = _primary?.down;
+    if (down == null) return false;
+    final anchor = resolveGestureOwnerAnchor(controller, owner, down);
+    if (anchor == null) return false;
+
+    // 类型不只是标签: `isPan` / `isMove` / `isScale` 会改变下游行为, 最典型的是
+    // [ChartBinding.onChartMove] 只在 `isMove` 时消费 dy。
+    final data = switch (owner) {
+      ChartGestureOwner.zoomSlider => GestureData.zoom(anchor),
+      ChartGestureOwner.zoomingMove => GestureData.move(anchor),
+      ChartGestureOwner.cross => GestureData.tap(anchor),
+      ChartGestureOwner.drawDrawing ||
+      ChartGestureOwner.drawEditing ||
+      ChartGestureOwner.paintObject =>
+        GestureData.pan(anchor),
+    };
+
+    switch (owner) {
+      case ChartGestureOwner.drawEditing:
+        // 命中与位移基准都取按下位置, 两个理由缺一不可:
+        // 1. 命中准: 识别时刻位置距按下点相差一个 slop, 远超
+        //    [DrawConfig.hitTestMinDistance] 的 10px, 沿线方向之外必然脱靶。
+        // 2. 跟手: [DrawBinding.onDrawMoveUpdate] 整体平移吃的是 `data.delta`, 以按下
+        //    位置为基准时首帧 delta 恰好补上按下到识别之间的真实位移; 换成识别位置则
+        //    首帧为 0, 线永久滞后一个 slop。
+        logd('onScaleStart draw > down:$down');
+        if (!controller.onDrawMoveStart(data)) return false;
+      case ChartGestureOwner.paintObject:
+        if (!controller.onPaintObjectDragStart(down)) return false;
+        logd('onScaleStart paintObject drag down:$down');
+        cancelPositionAnimation();
+        _isObjectDragGesture = true;
+      case ChartGestureOwner.zoomSlider:
+      case ChartGestureOwner.zoomingMove:
+      case ChartGestureOwner.drawDrawing:
+      case ChartGestureOwner.cross:
+        // 无需认领: 目标由已有业务状态确定, 移动直接生效。
+        break;
+    }
+
+    _ownerData = data;
+    _ownerAnchor = anchor;
+    return true;
   }
 
+  /// 平移/缩放中...
+  void onScaleUpdate(ScaleUpdateDetails details) => _throttledScaleUpdate(details);
+
   void _handleScaleUpdate(ScaleUpdateDetails details) {
+    final owner = _owner;
+    if (owner != null) {
+      _driveLandedGesture(owner);
+      return;
+    }
+
     if (_panScaleData == null) {
       logd('onScaleUpdate panScaleData is empty! details:$details');
       return;
     }
 
-    // 落点归属的位置只跟第一指: [ScaleUpdateDetails.localFocalPoint] 在多指时是所有指
-    // 的质心, 第二指落下瞬间会把位置拽到两指中点。归属独占整个 pointer session、不因
-    // 第二指改变, 位置来源必须同样不受第二指影响。
-    // 兜底(归属为空)仍用质心: 双指缩放的焦点本就该是质心。
-    final Offset position;
-    if (_owner != null) {
-      final latest = _primary?.latest;
-      if (latest == null) return;
-      position = latest;
-    } else {
-      position = details.localFocalPoint;
-    }
-
+    final position = details.localFocalPoint;
     // logd('onScaleUpdate move> ${DateTime.now().millisecond} position:$position');
-    if (_isObjectDragGesture) {
-      // 不做区域钳制: 是否限制在图表内由绘制对象自行决定.
-      _panScaleData!.update(position);
-      controller.onPaintObjectDragUpdate(_panScaleData!);
-      return;
-    }
-
     if (controller.isDrawVisible && drawState.isOngoing) {
       if (_panScaleData!.isPan) {
         _panScaleData!.update(
@@ -510,6 +471,48 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
         _panScaleData!,
         gestureConfig.tolerance.effectivePanSmoothFactor,
       );
+    }
+  }
+
+  /// 按落点归属驱动业务，坐标恒为「锚点 + 第一指总位移」。
+  ///
+  /// 不逐帧累加增量：`onScaleUpdate` 的节流会丢弃窗口内的中间调用，累加会随之丢位移。
+  void _driveLandedGesture(ChartGestureOwner owner) {
+    final data = _ownerData;
+    final anchor = _ownerAnchor;
+    final primary = _primary;
+    if (data == null || anchor == null || primary == null) return;
+
+    final newOffset = anchor + (primary.latest - primary.down);
+    switch (owner) {
+      case ChartGestureOwner.zoomSlider:
+        data.update(newOffset);
+        if (_isZoomStarted) {
+          controller.onChartZoomUpdate(data);
+        } else if (data.dyDelta.abs() >= gestureConfig.zoomStartMinDistance &&
+            controller.onChartZoomStart(newOffset, false)) {
+          // 抢占决定「手势归 zoom」, zoomStartMinDistance 决定「缩放何时真正开始」,
+          // 两个阈值语义不同, 不合并。
+          cancelPositionAnimation();
+          _isZoomStarted = true;
+        }
+      case ChartGestureOwner.zoomingMove:
+        cancelPositionAnimation();
+        data.update(newOffset);
+        controller.onChartMove(data);
+      case ChartGestureOwner.drawDrawing:
+        data.update(newOffset);
+        controller.onDrawUpdate(data);
+      case ChartGestureOwner.drawEditing:
+        data.update(newOffset);
+        controller.onDrawMoveUpdate(data);
+      case ChartGestureOwner.cross:
+        data.update(newOffset.clamp(controller.canvasRect));
+        controller.onCrossUpdate(data);
+      case ChartGestureOwner.paintObject:
+        // 不做区域钳制: 是否限制在图表内由绘制对象自行决定.
+        data.update(newOffset);
+        controller.onPaintObjectDragUpdate(data);
     }
   }
 

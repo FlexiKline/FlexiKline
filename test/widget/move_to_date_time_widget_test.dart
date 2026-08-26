@@ -22,6 +22,9 @@ import 'package:flutter_test/flutter_test.dart';
 import '../support/support.dart';
 
 const _day = Duration(days: 1);
+
+/// 手势结束后留给 `throttleOnFps` 收尾的时长（尾调用会再起一轮 timer，需两个周期）。
+const _throttleSettle = Duration(milliseconds: 60);
 final _latest = DateTime.utc(2026, 7, 10);
 const _spec = KlineSpec(
   symbol: 'DATE-JUMP',
@@ -475,6 +478,9 @@ void main() {
 
       expect(await _pumpUntilFutureComplete(tester, future, 'zoom slider interruption'), isFalse);
       await gesture.up();
+      // zoom 的驱动走 onScaleUpdate 的 throttleOnFps, 尾调用会再起一轮 timer,
+      // 不留够两个周期会以「仍有未完成的 Timer」失败。
+      await tester.pump(_throttleSettle);
     });
 
     testWidgets('touch zooming move cancels a pending position animation', (tester) async {
@@ -520,6 +526,7 @@ void main() {
 
       expect(await _pumpUntilFutureComplete(tester, future, 'zooming move interruption'), isFalse);
       await gesture.up();
+      await tester.pump(_throttleSettle);
     });
 
     testWidgets('gap selects the nearest real candle at or before target', (tester) async {
