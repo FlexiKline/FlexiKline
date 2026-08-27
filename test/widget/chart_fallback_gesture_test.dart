@@ -52,21 +52,8 @@ const _frame = Duration(milliseconds: 16);
 /// 手势收尾时长：`throttleOnFps` 的尾调用会再起一轮 timer，需留两个周期。
 const _settle = Duration(milliseconds: 60);
 
-/// 蜡烛数量给足，保证 `paintDxOffset` 双向都有可平移的余量。
-List<CandleModel> _candles() => List.generate(
-      200,
-      (index) => CandleModel(
-        timestamp: 12000000 - index * 60000,
-        open: 100,
-        high: 110,
-        low: 90,
-        close: 105,
-        volume: 1000,
-      ),
-    );
-
 Future<({FlexiKlineController chart, ScrollController scroll})> _arrange(WidgetTester tester) {
-  return pumpChartInListView(tester, spec: _spec, candles: _candles());
+  return pumpChartInListView(tester, spec: _spec, candles: genFlatCandleList());
 }
 
 /// 从 [_blankPosition] 起按 [_step] 逐帧拖动 [steps] 步，方向由 [unit] 给出。

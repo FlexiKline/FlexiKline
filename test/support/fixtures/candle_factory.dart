@@ -96,3 +96,30 @@ void printMap<K, V>(Map<K, V> map, {String? tag}) {
 void logMsg(dynamic msg) {
   debugPrint(msg.toString());
 }
+
+// ---------------------------------------------------------------------------
+// 确定性 K 线生成（手势与视口用例专用）
+// ---------------------------------------------------------------------------
+
+/// 生成 [count] 根价量恒定的蜡烛，时间戳自 [latestTimestamp] 按 [intervalMs] 向历史递减。
+///
+/// 手势与视口用例只需要「蜡烛够多，`paintDxOffset` 双向都有可平移的余量」，不关心行情形态。
+/// 价量恒定让断言只受手势影响，不受随机数据影响；[genRandomCandleList] 那种随机序列会让
+/// 缩放锚点、Y 轴 minMax 一类断言变得不可复现。
+List<CandleModel> genFlatCandleList({
+  int count = 200,
+  int latestTimestamp = 12000000,
+  int intervalMs = 60000,
+}) {
+  return List.generate(
+    count,
+    (index) => CandleModel(
+      timestamp: latestTimestamp - index * intervalMs,
+      open: 100,
+      high: 110,
+      low: 90,
+      close: 105,
+      volume: 1000,
+    ),
+  );
+}

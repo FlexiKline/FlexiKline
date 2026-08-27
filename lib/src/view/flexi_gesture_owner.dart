@@ -23,13 +23,17 @@ import '../kline_controller.dart';
 /// 前六项是**落点归属**：由第一指落点与既有业务状态决定，`PointerDown` 一次判定。
 /// 后两项是**兜底归属**：图表整体操作没有落点特征，判据是方向与指间距变化，必须等位移
 /// 积累出可信样本才能判。
+///
+/// **声明顺序即优先级**，按「判据越精确越优先，同精度时有跟手焦点的排他模式优先」排：
+/// 排他模式（drawDrawing、cross）→ 命中具体对象（drawEditing、paintObject）→ 区域性辅助
+/// 操作（zoomSlider、zoomingMove，判据只有「落点在不在某个 Rect 里」）→ 全局兜底。
 enum FlexiGestureOwner {
-  zoomSlider,
-  zoomingMove,
   drawDrawing,
   drawEditing,
   cross,
   paintObject,
+  zoomSlider,
+  zoomingMove,
   chartScale,
   chartPan;
 
@@ -38,28 +42,24 @@ enum FlexiGestureOwner {
   /// 必须无副作用：每次 `PointerDown` 都会走一遍，包括最终只是点击或长按的手势。判据也
   /// 必须与真正的认领入口同源（`hitTestDrawObjectDrag` ↔ `onDrawMoveStart`，
   /// `hitTestPaintObjectDrag` ↔ `onPaintObjectDragStart`），否则会白抢一次手势。
+  ///
+  /// zoom 族排在末位而非首位：`chartZoomSlideBarRect` 是价格轴那一整条全高隐形热区，
+  /// `isChartZooming` 又是粘性状态且 `zoomingMove` 的领地是整个 `mainRect`——排在前面就会
+  /// 截走已进入模式或已命中对象的手势（表现为「十字线已显示，拖动却把整个图表拖走」）。
+  ///
+  /// [FlexiScaleGestureRecognizer] 的落点即抢占也问这个函数（`== zoomSlider`），不走单独的
+  /// 旁路入口：抢占与归属同源，才不会出现「为 zoom 抢下竞技场、却由别人驱动」。
   static FlexiGestureOwner? resolveLanded(FlexiKlineController controller, Offset position) {
-    final immediate = resolveImmediate(controller, position);
-    if (immediate != null) return immediate;
-    if (controller.isChartZooming && controller.mainRect.include(position)) {
-      return zoomingMove;
-    }
     if (controller.isDrawVisible && controller.drawState.isDrawing && controller.drawState.pointerOffset != null) {
       return drawDrawing;
     }
     if (controller.hitTestDrawObjectDrag(position)) return drawEditing;
     if (controller.isCrossing) return cross;
     if (controller.hitTestPaintObjectDrag(position)) return paintObject;
-    return null;
-  }
-
-  /// 落点即抢占的专属控件归属。
-  ///
-  /// 由 recognizer 在 `PointerDown` 阶段直接求值，那时 detector 还没判定归属。
-  static FlexiGestureOwner? resolveImmediate(FlexiKlineController controller, Offset position) {
     if (controller.gestureConfig.enableZoom && controller.chartZoomSlideBarRect.include(position)) {
       return zoomSlider;
     }
+    if (controller.isChartZooming && controller.mainRect.include(position)) return zoomingMove;
     return null;
   }
 
@@ -96,13 +96,14 @@ enum FlexiGestureOwner {
         final pointerOffset = controller.drawState.pointerOffset;
         if (pointerOffset == null || !pointerOffset.isFinite) return null;
         return pointerOffset;
+      case drawEditing:
+        return downPosition;
       case cross:
         // crossOffset 是 cross 的权威状态, tap 与长按两种进入方式共用同一个锚点来源。
         return controller.crossOffset;
+      case paintObject:
       case zoomSlider:
       case zoomingMove:
-      case drawEditing:
-      case paintObject:
         return downPosition;
       case chartScale:
       case chartPan:
@@ -116,7 +117,7 @@ enum FlexiGestureOwner {
   /// 路径（锚点、认领、驱动、收尾）。
   bool get isChartFallback => switch (this) {
         chartScale || chartPan => true,
-        zoomSlider || zoomingMove || drawDrawing || drawEditing || cross || paintObject => false,
+        drawDrawing || drawEditing || cross || paintObject || zoomSlider || zoomingMove => false,
       };
 
   /// 是否要求长按让开竞技场。
@@ -125,7 +126,7 @@ enum FlexiGestureOwner {
   /// 不允许长按移动），而长按赢下竞技场会把 Scale 一起 reject，于是整段手势零响应。其余
   /// 归属各有自己的长按路径，不能让开。
   bool get suppressesLongPress => switch (this) {
-        cross || drawDrawing => true,
-        zoomSlider || zoomingMove || drawEditing || paintObject || chartScale || chartPan => false,
+        drawDrawing || cross => true,
+        drawEditing || paintObject || zoomSlider || zoomingMove || chartScale || chartPan => false,
       };
 }

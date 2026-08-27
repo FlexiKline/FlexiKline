@@ -19,7 +19,7 @@
 library;
 
 import 'package:flexi_kline/flexi_kline.dart';
-import 'package:flutter/gestures.dart' show DeviceGestureSettings, kTouchSlop;
+import 'package:flutter/gestures.dart' show DeviceGestureSettings, PointerDeviceKind, kTouchSlop;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -154,4 +154,64 @@ Future<({FlexiKlineController chart, ScrollController scroll})> pumpChartInListV
 Offset toChartGlobal(WidgetTester tester, Offset local) {
   final box = tester.renderObject<RenderBox>(find.byKey(const ValueKey('TouchListener')));
   return box.localToGlobal(local);
+}
+
+/// 一帧的时长。循环移动必须按帧推进时钟，零时长 `pump()` 会把 `throttleOnFps` 的 timer
+/// 全部积压到手势结束之后，测试以「A Timer is still pending」失败。
+const chartGestureFrame = Duration(milliseconds: 16);
+
+/// 手势收尾时长：`unaryThrottle` 的尾调用会再起一轮 timer，需要留两个周期。
+const chartGestureSettle = Duration(milliseconds: 60);
+
+/// 在图表局部坐标 [center] 两侧各落一指，水平间距 `2 × spreadHalf`，返回 (左指, 右指)。
+///
+/// pointer id 显式给出而不交给自动分配：多指用例常要在中途单独抬起或取消某一指，
+/// 断言依赖「哪一指是第一指」。
+Future<(TestGesture, TestGesture)> startTwoFingers(
+  WidgetTester tester, {
+  required Offset center,
+  double spreadHalf = 40,
+  int firstPointer = 1,
+  int secondPointer = 2,
+}) async {
+  final left = await tester.startGesture(
+    toChartGlobal(tester, center - Offset(spreadHalf, 0)),
+    pointer: firstPointer,
+    kind: PointerDeviceKind.touch,
+  );
+  final right = await tester.startGesture(
+    toChartGlobal(tester, center + Offset(spreadHalf, 0)),
+    pointer: secondPointer,
+    kind: PointerDeviceKind.touch,
+  );
+  await tester.pump(chartGestureFrame);
+  return (left, right);
+}
+
+/// 让 [gestures] 同向移动 [steps] 步，每步位移 [unit]，逐帧推进，返回最后一个事件的时间戳。
+///
+/// [since] 是本段起始时间戳，同一手势分多段移动时必须把上一段的返回值传进来。
+///
+/// **必须显式给时间戳**：[TestGesture.moveBy] 的 `timeStamp` 默认恒为 `Duration.zero`，
+/// 而 [VelocityTracker] 按事件时间戳算速度——不传就永远算不出抬手速度，惯性平移不会启动，
+/// 于是任何断言「不惯性」的用例都会假通过。
+///
+/// 反向张开一类「各指位移不同」的场景不走这里：多一个 per-gesture 位移参数只为一两个用例
+/// 服务，用例自己写循环更直白。
+Future<Duration> movePointers(
+  WidgetTester tester,
+  List<TestGesture> gestures, {
+  required Offset unit,
+  required int steps,
+  Duration since = Duration.zero,
+}) async {
+  var at = since;
+  for (var i = 0; i < steps; i++) {
+    at += chartGestureFrame;
+    for (final gesture in gestures) {
+      await gesture.moveBy(unit, timeStamp: at);
+    }
+    await tester.pump(chartGestureFrame);
+  }
+  return at;
 }

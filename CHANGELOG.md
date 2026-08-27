@@ -24,7 +24,7 @@
 * Enable `onPointerCancel` on the non-touch gesture detector to roll back an in-progress PaintObject drag, which `onPanEnd` would otherwise commit.
 * Fix touch PaintObject drags missing small handles: hit-test at the recorded `PointerDown` position instead of the gesture recognition position, and carry the pre-recognition displacement into the first drag update.
 * Fix the same miss on the non-touch detector for non-mouse pointers, whose pan slop is 36px: set `DragStartBehavior.down` so `onPanStart` reports the `PointerDown` position and Flutter replays the pre-recognition displacement.
-* Fix touch landed gestures losing to an enclosing scroll view: resolve zoom slider, zooming move, draw drawing/editing, Cross and PaintObject ownership from the first `PointerDown`, then let the chart's scale recognizer claim before the outer `Scrollable`; blank-area drags still scroll the outer view.
+* Fix touch landed gestures losing to an enclosing scroll view: resolve draw drawing/editing, Cross, PaintObject, zoom slider and zooming move ownership from the first `PointerDown`, then let the chart's scale recognizer claim before the outer `Scrollable`; blank-area drags still scroll the outer view.
 * Add `PaintObject.hitTestDragStart`, a side-effect-free companion to `handleDragStart` that indicators must implement to be draggable inside a scrollable container; it runs on every `PointerDown`, including taps and long presses, so it must not mutate state, repaint or fire business callbacks.
 * Add `FlexiKlineController.hitTestPaintObjectDrag` and `hitTestDrawObjectDrag`, mirroring the hit rules of `onPaintObjectDragStart` and `onDrawMoveStart` without claiming the drag.
 * Fix draw objects in edit mode never winning a drag inside a scrollable container: the arena claim only asked about PaintObjects.
@@ -32,7 +32,7 @@
 * Fix pinch zoom jumping on the first frame: set `DragStartBehavior.start` on the chart's scale recognizer so `_initialSpan` is rebased on accept and `ScaleUpdateDetails.scale` starts from 1.0.
 * Add `GestureConfig.dragClaimSlopFactor` (default 0.5, clamped to 0.1~0.9) expressed as a ratio of the outer hit slop rather than a pixel value, because `touchSlop` is platform-supplied and often below `kTouchSlop` on Android, where any hardcoded pixel threshold fails on some devices.
 * Change a small move-then-release on a draggable object from a tap into a drag once the displacement passes the claim slop, which on touch is now half the outer hit slop instead of `kPanSlop` (Breaking Changes).
-* Make the zoom slider claim on `PointerDown`, preventing taps in its dedicated region from starting Cross.
+* Make the zoom slider claim on `PointerDown` when it owns the landing, so taps in its region no longer start Cross.
 * Keep a landed gesture's owner when a second finger is added, so an in-progress draw or PaintObject drag is no longer canceled or converted to chart scale (Breaking Changes).
 * Take landed-gesture positions from the tracked first pointer instead of `ScaleUpdateDetails.localFocalPoint`, so adding a second finger no longer snaps a drag to the two-pointer centroid; chart scale still uses the centroid.
 * Replace touch-path `gestureArena.sweep` calls with owner-driven Scale claims, so a moved-then-released gesture is no longer reported as a tap; Tap still handles displacements below the claim slop.
@@ -48,6 +48,14 @@
 * Switch chart pan to chart scale mid-gesture once the finger span changes by more than `kScaleSlop`; the reverse switch is not allowed.
 * Reset the pan smooth factor when a pan turns into a scale, which the scale end path never did.
 * Remove `setMultiTouch` and `isMultiTouchListenable`: arena claiming replaced the need for hosts to swap in `NeverScrollableScrollPhysics`, and disabling the outer scroll view also swallowed the two-finger vertical drag it should receive (Breaking Changes).
+* Commit a chart scale segment's `candleWidth` on every scale end, but keep inertial pan and `loadMore` for the end of the whole pointer session (lifting one finger no longer starts inertia mid-gesture) (Breaking Changes).
+* Accumulate `PointerCancel` across the whole pointer session instead of inspecting only the last pointer to leave, so a cancelled non-final pointer followed by a normal lift is no longer committed as a normal gesture; a cancelled chart pan skips inertial pan and a cancelled PaintObject drag rolls back (Breaking Changes).
+* Take over an in-flight inertial pan on the next touch instead of swallowing that gesture (the previous "last gesture not finished" guard dropped the first drag after a fling) (Breaking Changes).
+* Restore the pan smooth factor when a position animation is interrupted, which `animateToPosition`'s completion callback never did; the leftover value kept the Y-axis min/max interpolating and clipped overlays to `canvasRect` instead of `mainRect`.
+* Stop a chart fallback gesture from calling draw callbacks after a failed draw claim degraded it to chart pan, so dragging blank space with an overlay selected pans the chart instead of moving every point of that overlay (Breaking Changes).
+* Resolve `ScalePosition.auto` once per pointer session, so lifting one finger of a pinch and spreading again no longer moves the scale anchor from `middle` to `left`.
+* Reorder landed gesture ownership so the zoom slider and zooming move yield to draw, Cross and PaintObject instead of preceding them: leading the order let them steal gestures from an already-entered mode, so dragging with the crosshair shown moved the chart and left the crosshair stuck (Breaking Changes).
+* Gate the zoom slider's `PointerDown` claim on the same ownership chain, so taps in its region only lose their Cross semantics when no other owner claims the landing; starting a zoom now requires leaving Cross first (Breaking Changes).
 
 ## 2.3.2
 * Add `crossOffsetListenable` so external consumers can subscribe to Cross focus changes.

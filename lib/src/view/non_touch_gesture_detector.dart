@@ -351,7 +351,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
 
     if (controller.isDrawVisible && drawState.isOngoing) {
       if (drawState.isEditing) {
-        /// 已完成的DrawObject通过平移[_panScaleData]或长按[_longData]事件进行修正.
+        // 已完成的 DrawObject 由平移([_panData])或长按([_longData])事件修正, hover 不参与.
         return;
       }
       final pointer = drawState.pointer;

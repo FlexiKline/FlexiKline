@@ -71,52 +71,88 @@ void main() {
     expect(indicator.object!.hitTestDragStartCount, 0);
   });
 
-  testWidgets('zoom slider 先于其他落点归属', (tester) async {
-    final (:scene, :indicator) = await arrange(hitRect: const Rect.fromLTWH(0, 0, 400, 480));
-    scene.controller.updateGestureConfig((config) => config.copyWith(enableZoom: true));
-    final position = scene.controller.mainRect.center;
-    final slideRect = Rect.fromCenter(center: position, width: 80, height: 20);
-    scene.controller.setChartZoomSlideBarRect(slideRect);
+  /// zoom 族排在落点族末位：判据只有「落点在不在某个 Rect 里」，是六种落点归属里意图最弱
+  /// 的一档，不能截走已进入模式或已命中对象的手势。见 design.md 决策 8。
+  ///
+  /// 启用 zoom 并把滑竿区设在 [_onLine] 上：该点同时命中 PaintObject。
+  Future<({ControllerScenario scene, TestInteractiveIndicator indicator})> arrangeZoomOn(
+    WidgetTester tester, {
+    Rect? slideRect,
+  }) async {
+    final arranged = await arrange();
+    arranged.scene.controller.updateGestureConfig((config) => config.copyWith(enableZoom: true));
+    arranged.scene.controller.setChartZoomSlideBarRect(
+      slideRect ?? Rect.fromCenter(center: _onLine, width: 80, height: 20),
+    );
+    // setChartZoomSlideBarRect 走 addPostFrameCallback, 必须泵一帧才生效。
     await tester.pumpWidget(const SizedBox());
     await tester.pump();
+    return arranged;
+  }
+
+  testWidgets('zoom slider 让位于编辑中的绘制对象', (tester) async {
+    final (:scene, :indicator) = await arrangeZoomOn(tester);
     registerTestDrawObject(scene.controller);
     scene.controller.setDrawVisible(true);
-    drawTestLine(
-      scene.controller,
-      from: position - const Offset(40, 0),
-      to: position + const Offset(40, 0),
-    );
+    drawTestLine(scene.controller, from: _lineFrom, to: _lineTo);
 
     expect(
-      FlexiGestureOwner.resolveLanded(scene.controller, position),
-      FlexiGestureOwner.zoomSlider,
+      FlexiGestureOwner.resolveLanded(scene.controller, _onLine),
+      FlexiGestureOwner.drawEditing,
     );
     expect(indicator.object!.hitTestDragStartCount, 0);
   });
 
-  testWidgets('zooming move 先于绘制、cross 与 PaintObject', (tester) async {
-    final (:scene, :indicator) = await arrange(hitRect: const Rect.fromLTWH(0, 0, 400, 480));
-    scene.controller.updateGestureConfig((config) => config.copyWith(enableZoom: true));
-    final sliderPosition = scene.controller.mainRect.center;
-    final slideRect = Rect.fromCenter(center: sliderPosition, width: 80, height: 20);
-    scene.controller.setChartZoomSlideBarRect(slideRect);
-    await tester.pumpWidget(const SizedBox());
-    await tester.pump();
-    expect(scene.controller.onChartZoomStart(sliderPosition, false), isTrue);
-    final position = Offset(scene.controller.mainRect.center.dx, scene.controller.mainRect.top + 30);
-    registerTestDrawObject(scene.controller);
-    scene.controller.setDrawVisible(true);
-    drawTestLine(
-      scene.controller,
-      from: position - const Offset(40, 0),
-      to: position + const Offset(40, 0),
-    );
+  testWidgets('zoom slider 让位于 cross', (tester) async {
+    final (:scene, :indicator) = await arrangeZoomOn(tester);
+    expect(scene.controller.onCrossStart(GestureData.tap(_onLine)), isTrue);
 
+    // 真机反馈的那类困惑: 已进入十字线, 落在价格轴上却被当成调主区留白。
     expect(
-      FlexiGestureOwner.resolveLanded(scene.controller, position),
-      FlexiGestureOwner.zoomingMove,
+      FlexiGestureOwner.resolveLanded(scene.controller, _onLine),
+      FlexiGestureOwner.cross,
     );
     expect(indicator.object!.hitTestDragStartCount, 0);
+  });
+
+  testWidgets('zoom slider 让位于同位置 PaintObject', (tester) async {
+    final (:scene, indicator: _) = await arrangeZoomOn(tester);
+
+    // 滑竿是价格轴那一整条(全高隐形热区), 与 TP/SL 一类手柄必然重叠; 手柄优先只让滑竿在
+    // 少数小区域失效, 反过来则让手柄永久拖不动。
+    expect(
+      FlexiGestureOwner.resolveLanded(scene.controller, _onLine),
+      FlexiGestureOwner.paintObject,
+    );
+  });
+
+  testWidgets('zooming move 让位于同位置 PaintObject', (tester) async {
+    // 滑竿挪到命中区之外, 用它启动 zoom, 再查命中区内的落点。
+    const sliderRect = Rect.fromLTWH(300, 0, 40, 200);
+    final (:scene, indicator: _) = await arrangeZoomOn(tester, slideRect: sliderRect);
+    expect(scene.controller.onChartZoomStart(sliderRect.center, false), isTrue);
+
+    // isChartZooming 是粘性状态、领地是整个 mainRect, 排在前面等于长期接管主区所有拖动。
+    expect(
+      FlexiGestureOwner.resolveLanded(scene.controller, _onLine),
+      FlexiGestureOwner.paintObject,
+    );
+  });
+
+  testWidgets('其余落点归属都不认领时才归 zoom slider 与 zooming move', (tester) async {
+    // 两个查询点都落在 PaintObject 命中区(_sharedHit)之外, 于是只剩 zoom 族可认领。
+    const sliderRect = Rect.fromLTWH(300, 0, 40, 200);
+    final (:scene, indicator: _) = await arrangeZoomOn(tester, slideRect: sliderRect);
+
+    expect(
+      FlexiGestureOwner.resolveLanded(scene.controller, sliderRect.center),
+      FlexiGestureOwner.zoomSlider,
+    );
+    expect(scene.controller.onChartZoomStart(sliderRect.center, false), isTrue);
+    expect(
+      FlexiGestureOwner.resolveLanded(scene.controller, const Offset(200, 150)),
+      FlexiGestureOwner.zoomingMove,
+    );
   });
 
   testWidgets('未完成绘制先于 cross 与 PaintObject', (tester) async {
