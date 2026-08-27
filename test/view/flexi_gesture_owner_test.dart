@@ -12,13 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// 六种落点归属的唯一判定入口与优先级。
+/// 归属判定的唯一入口与优先级：落点归属六种，兜底归属两种。
 library;
 
 import 'package:decimal/decimal.dart';
 import 'package:flexi_formatter/date_time.dart' show TimeUnit;
 import 'package:flexi_kline/flexi_kline.dart';
-import 'package:flexi_kline/src/view/chart_gesture_owner.dart';
+import 'package:flexi_kline/src/view/flexi_gesture_owner.dart';
+import 'package:flutter/gestures.dart' show kScaleSlop, kTouchSlop;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -64,8 +65,8 @@ void main() {
     drawTestLine(scene.controller, from: _lineFrom, to: _lineTo);
 
     expect(
-      resolveLandedGestureOwner(scene.controller, _onLine),
-      ChartGestureOwner.drawEditing,
+      FlexiGestureOwner.resolveLanded(scene.controller, _onLine),
+      FlexiGestureOwner.drawEditing,
     );
     expect(indicator.object!.hitTestDragStartCount, 0);
   });
@@ -87,8 +88,8 @@ void main() {
     );
 
     expect(
-      resolveLandedGestureOwner(scene.controller, position),
-      ChartGestureOwner.zoomSlider,
+      FlexiGestureOwner.resolveLanded(scene.controller, position),
+      FlexiGestureOwner.zoomSlider,
     );
     expect(indicator.object!.hitTestDragStartCount, 0);
   });
@@ -112,8 +113,8 @@ void main() {
     );
 
     expect(
-      resolveLandedGestureOwner(scene.controller, position),
-      ChartGestureOwner.zoomingMove,
+      FlexiGestureOwner.resolveLanded(scene.controller, position),
+      FlexiGestureOwner.zoomingMove,
     );
     expect(indicator.object!.hitTestDragStartCount, 0);
   });
@@ -127,8 +128,8 @@ void main() {
     expect(scene.controller.drawState.isDrawing, isTrue);
 
     expect(
-      resolveLandedGestureOwner(scene.controller, _onLine),
-      ChartGestureOwner.drawDrawing,
+      FlexiGestureOwner.resolveLanded(scene.controller, _onLine),
+      FlexiGestureOwner.drawDrawing,
     );
     expect(indicator.object!.hitTestDragStartCount, 0);
   });
@@ -138,8 +139,8 @@ void main() {
     expect(scene.controller.onCrossStart(GestureData.tap(_onLine)), isTrue);
 
     expect(
-      resolveLandedGestureOwner(scene.controller, _onLine),
-      ChartGestureOwner.cross,
+      FlexiGestureOwner.resolveLanded(scene.controller, _onLine),
+      FlexiGestureOwner.cross,
     );
     expect(indicator.object!.hitTestDragStartCount, 0);
   });
@@ -148,8 +149,8 @@ void main() {
     final (:scene, :indicator) = await arrange();
 
     expect(
-      resolveLandedGestureOwner(scene.controller, _onLine),
-      ChartGestureOwner.paintObject,
+      FlexiGestureOwner.resolveLanded(scene.controller, _onLine),
+      FlexiGestureOwner.paintObject,
     );
     expect(indicator.object!.hitTestDragStartCount, 1);
   });
@@ -163,8 +164,8 @@ void main() {
 
     // 锁定即不可拖, 判据与 onDrawMoveStart 的 lock 检查同源。
     expect(
-      resolveLandedGestureOwner(scene.controller, _onLine),
-      ChartGestureOwner.paintObject,
+      FlexiGestureOwner.resolveLanded(scene.controller, _onLine),
+      FlexiGestureOwner.paintObject,
     );
     expect(indicator.object!.hitTestDragStartCount, 1);
   });
@@ -177,8 +178,8 @@ void main() {
     scene.controller.setDrawVisible(false);
 
     expect(
-      resolveLandedGestureOwner(scene.controller, _onLine),
-      ChartGestureOwner.paintObject,
+      FlexiGestureOwner.resolveLanded(scene.controller, _onLine),
+      FlexiGestureOwner.paintObject,
     );
     expect(indicator.object!.hitTestDragStartCount, 1);
   });
@@ -187,7 +188,99 @@ void main() {
     final (:scene, :indicator) = await arrange();
     indicator.object!.acceptDrag = false;
 
-    expect(resolveLandedGestureOwner(scene.controller, _onLine), isNull);
+    expect(FlexiGestureOwner.resolveLanded(scene.controller, _onLine), isNull);
+  });
+
+  group('兜底归属的判定顺序与边界', () {
+    testWidgets('指间距变化优先于方向: 双指横向张开是缩放而非平移', (tester) async {
+      final (:scene, indicator: _) = await arrange();
+
+      // 双指横向张开时第一指同样是横向位移, 先判方向就会把缩放误判成平移。
+      expect(
+        FlexiGestureOwner.resolveChartFallback(
+          scene.controller,
+          delta: const Offset(40, 0),
+          spanDelta: kScaleSlop + 1,
+          hitSlop: kTouchSlop,
+        ),
+        FlexiGestureOwner.chartScale,
+      );
+    });
+
+    testWidgets('样本不足: 位移未越过 hitSlop 且指间距未变时放弃', (tester) async {
+      final (:scene, indicator: _) = await arrange();
+
+      // 阈值取外层 hitSlop 而非更小的 claimSlop: TapGestureRecognizer 的
+      // preAcceptSlopTolerance 就是同一个 touchSlop, 提前抢占会吃掉点击语义。
+      expect(
+        FlexiGestureOwner.resolveChartFallback(
+          scene.controller,
+          delta: const Offset(kTouchSlop, 0),
+          spanDelta: 0,
+          hitSlop: kTouchSlop,
+        ),
+        isNull,
+      );
+      expect(
+        FlexiGestureOwner.resolveChartFallback(
+          scene.controller,
+          delta: const Offset(kTouchSlop + 1, 0),
+          spanDelta: 0,
+          hitSlop: kTouchSlop,
+        ),
+        FlexiGestureOwner.chartPan,
+      );
+    });
+
+    testWidgets('横向占优按 panClaimRatio 取锥: 恰好等于比例不算占优', (tester) async {
+      final (:scene, indicator: _) = await arrange();
+      final ratio = scene.controller.gestureConfig.panClaimRatio;
+      expect(ratio, 2);
+
+      // 等于比例落在锥边界上: 判据是严格大于, 边界归外层。
+      expect(
+        FlexiGestureOwner.resolveChartFallback(
+          scene.controller,
+          delta: Offset(20 * ratio, -20),
+          spanDelta: 0,
+          hitSlop: kTouchSlop,
+        ),
+        isNull,
+      );
+      expect(
+        FlexiGestureOwner.resolveChartFallback(
+          scene.controller,
+          delta: Offset(20 * ratio + 1, -20),
+          spanDelta: 0,
+          hitSlop: kTouchSlop,
+        ),
+        FlexiGestureOwner.chartPan,
+      );
+    });
+
+    testWidgets('禁用缩放时张开手指不取得缩放归属, 退回方向判定', (tester) async {
+      final (:scene, indicator: _) = await arrange();
+      scene.controller.updateGestureConfig((config) => config.copyWith(enableScale: false));
+
+      expect(
+        FlexiGestureOwner.resolveChartFallback(
+          scene.controller,
+          delta: const Offset(40, 0),
+          spanDelta: kScaleSlop + 1,
+          hitSlop: kTouchSlop,
+        ),
+        FlexiGestureOwner.chartPan,
+      );
+      expect(
+        FlexiGestureOwner.resolveChartFallback(
+          scene.controller,
+          delta: const Offset(0, -40),
+          spanDelta: kScaleSlop + 1,
+          hitSlop: kTouchSlop,
+        ),
+        isNull,
+      );
+    });
   });
 
   testWidgets('判定不产生任何状态变更', (tester) async {
@@ -197,7 +290,7 @@ void main() {
     drawTestLine(scene.controller, from: _lineFrom, to: _lineTo);
 
     // 每次 PointerDown 都会走一遍判定, 包括最终只是点击或长按的手势。
-    resolveLandedGestureOwner(scene.controller, _onLine);
+    FlexiGestureOwner.resolveLanded(scene.controller, _onLine);
 
     expect(scene.controller.drawState.object!.moving, isFalse);
     expect(scene.controller.isPaintObjectDragging, isFalse);

@@ -433,11 +433,14 @@ void main() {
       final gesture = await tester.startGesture(
         tester.getCenter(find.byType(FlexiKlineWidget)),
       );
+      // 30px 横向占优, 兜底归属在越过 hitSlop 时就抢占并驱动图表平移, 于是 onScaleUpdate
+      // 会挂上 throttle timer —— 手势收尾必须留够两个节流周期, 否则测试报未完成的 Timer。
       await gesture.moveBy(const Offset(30, 0));
-      await tester.pump();
+      await tester.pump(_throttleSettle);
 
       expect(await future, isFalse);
       await gesture.up();
+      await tester.pump(_throttleSettle);
     });
 
     testWidgets('touch zoom slider cancels a pending position animation when dragging starts', (tester) async {

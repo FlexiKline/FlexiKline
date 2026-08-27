@@ -45,9 +45,11 @@ class GestureConfig {
     this.zoomSpeed = 1,
     this.isManualSetZoomRect = false,
     double dragClaimSlopFactor = 0.5,
+    double panClaimRatio = 2,
   })  : tolerance = tolerance ?? ToleranceConfig(),
         scaleSpeed = scaleSpeed.clamp(1, 30),
-        dragClaimSlopFactor = dragClaimSlopFactor.clamp(0.1, 0.9);
+        dragClaimSlopFactor = dragClaimSlopFactor.clamp(0.1, 0.9),
+        panClaimRatio = panClaimRatio.clamp(1, 10);
 
   /// 是否启用长按操作
   final bool enableLongPress;
@@ -100,6 +102,16 @@ class GestureConfig {
   /// 存比例而非像素值，是因为外层 hitSlop 取自 `DeviceGestureSettings.touchSlop`，
   /// Android 平台值常小于 `kTouchSlop`(18)，写死的像素阈值会在部分设备上失效。
   final double dragClaimSlopFactor;
+
+  /// 图表整体平移抢占手势竞技场所需的横向占优比例，判据为 `|dx| > |dy| × panClaimRatio`。
+  ///
+  /// 落点没有业务归属时，手势按意图在「平移图表」与「让外层滚动」之间二选一：位移方向落在
+  /// 与水平轴夹角小于 `atan(1 / panClaimRatio)` 的锥内才判为平移。普通平移只消费 dx，纵向
+  /// 位移对它毫无意义，所以让给外层是语义正确而非妥协。
+  ///
+  /// 取值 [1, 10]：1 相当于 45° 锥，任何横向占优都算平移；越大锥越窄，越不容易把斜拖误判
+  /// 成平移。默认 2，即约 26.57°。
+  final double panClaimRatio;
 
   factory GestureConfig.fromJson(Map<String, dynamic> json) => _$GestureConfigFromJson(json);
 

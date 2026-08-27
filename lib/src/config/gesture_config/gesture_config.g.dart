@@ -36,6 +36,8 @@ abstract class _$GestureConfigCWProxy {
 
   GestureConfig dragClaimSlopFactor(double dragClaimSlopFactor);
 
+  GestureConfig panClaimRatio(double panClaimRatio);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GestureConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -57,6 +59,7 @@ abstract class _$GestureConfigCWProxy {
     int zoomSpeed,
     bool isManualSetZoomRect,
     double dragClaimSlopFactor,
+    double panClaimRatio,
   });
 }
 
@@ -120,6 +123,10 @@ class _$GestureConfigCWProxyImpl implements _$GestureConfigCWProxy {
       this(dragClaimSlopFactor: dragClaimSlopFactor);
 
   @override
+  GestureConfig panClaimRatio(double panClaimRatio) =>
+      this(panClaimRatio: panClaimRatio);
+
+  @override
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GestureConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -142,6 +149,7 @@ class _$GestureConfigCWProxyImpl implements _$GestureConfigCWProxy {
     Object? zoomSpeed = const $CopyWithPlaceholder(),
     Object? isManualSetZoomRect = const $CopyWithPlaceholder(),
     Object? dragClaimSlopFactor = const $CopyWithPlaceholder(),
+    Object? panClaimRatio = const $CopyWithPlaceholder(),
   }) {
     return GestureConfig(
       enableLongPress: enableLongPress == const $CopyWithPlaceholder()
@@ -203,6 +211,10 @@ class _$GestureConfigCWProxyImpl implements _$GestureConfigCWProxy {
           ? _value.dragClaimSlopFactor
           // ignore: cast_nullable_to_non_nullable
           : dragClaimSlopFactor as double,
+      panClaimRatio: panClaimRatio == const $CopyWithPlaceholder()
+          ? _value.panClaimRatio
+          // ignore: cast_nullable_to_non_nullable
+          : panClaimRatio as double,
     );
   }
 }
@@ -243,6 +255,7 @@ GestureConfig _$GestureConfigFromJson(Map<String, dynamic> json) =>
       isManualSetZoomRect: json['isManualSetZoomRect'] as bool? ?? false,
       dragClaimSlopFactor:
           (json['dragClaimSlopFactor'] as num?)?.toDouble() ?? 0.5,
+      panClaimRatio: (json['panClaimRatio'] as num?)?.toDouble() ?? 2,
     );
 
 Map<String, dynamic> _$GestureConfigToJson(GestureConfig instance) =>
@@ -263,4 +276,5 @@ Map<String, dynamic> _$GestureConfigToJson(GestureConfig instance) =>
       'zoomSpeed': instance.zoomSpeed,
       'isManualSetZoomRect': instance.isManualSetZoomRect,
       'dragClaimSlopFactor': instance.dragClaimSlopFactor,
+      'panClaimRatio': instance.panClaimRatio,
     };

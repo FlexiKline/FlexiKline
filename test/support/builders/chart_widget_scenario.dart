@@ -19,10 +19,13 @@
 library;
 
 import 'package:flexi_kline/flexi_kline.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/gestures.dart' show DeviceGestureSettings, kTouchSlop;
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../doubles/fake_kline_config.dart';
+import '../doubles/test_draw_object.dart';
+import '../doubles/test_indicators.dart';
 
 /// Widget 测试默认的主图尺寸。
 const defaultChartMainSize = Size(400, 300);
@@ -71,4 +74,84 @@ Future<void> disposeChart(
   await tester.pumpWidget(const SizedBox.shrink());
   await tester.pump(const Duration(milliseconds: 200));
   controller.dispose();
+}
+
+/// 把图表嵌进可垂直滚动的 [ListView], 返回图表与观测外层滚动的 [ScrollController]。
+///
+/// 手势竞技场的用例必须跑在真实可滚动容器里: 单指拖动的接受阈值恒为外层 Scrollable
+/// hitSlop 的两倍([DeviceGestureSettings.panSlop] 是 `touchSlop * 2` 的派生 getter),
+/// 只有外层在场才测得出"谁先赢"。
+///
+/// [touchSlop] 非空时在图表子树外覆盖 `gestureSettings`, 用于模拟 Android 真机上小于
+/// [kTouchSlop] 的平台值 —— 外层 Scrollable 与图表读同一份设置。
+Future<({FlexiKlineController chart, ScrollController scroll})> pumpChartInListView(
+  WidgetTester tester, {
+  required KlineSpec spec,
+  required List<CandleModel> candles,
+  List<Indicator> mainIndicators = const [],
+  double? touchSlop,
+  bool enableDraw = false,
+  Size chartSize = const Size(400, 480),
+  double fillerHeight = 800,
+}) async {
+  final chart = createChartController();
+  chart.switchKlineData(spec);
+  chart.replaceKlineData(spec, candles);
+  if (enableDraw) {
+    registerTestDrawObject(chart);
+    chart.setDrawVisible(true);
+  }
+  final scroll = ScrollController();
+  addTearDown(scroll.dispose);
+
+  Widget wrapGestureSettings(BuildContext context, Widget child) {
+    if (touchSlop == null) return child;
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(
+        gestureSettings: DeviceGestureSettings(touchSlop: touchSlop),
+      ),
+      child: child,
+    );
+  }
+
+  await tester.pumpWidget(
+    MaterialApp(
+      home: Builder(
+        builder: (context) => wrapGestureSettings(
+          context,
+          ListView(
+            controller: scroll,
+            children: [
+              SizedBox(
+                width: chartSize.width,
+                height: chartSize.height,
+                child: FlexiKlineWidget(
+                  controller: chart,
+                  candle: TestCandleIndicator(),
+                  time: TestTimeIndicator(),
+                  mainIndicators: mainIndicators,
+                  isTouchDevice: true,
+                ),
+              ),
+              SizedBox(height: fillerHeight),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+  await pumpUntilChart(
+    tester,
+    () => chart.isMounted && chart.mainChartWidth > 0 && chart.klineData.isNotEmpty,
+    'chart data and layout',
+  );
+  return (chart: chart, scroll: scroll);
+}
+
+/// 把图表局部坐标换算为全局坐标。
+///
+/// 手势 API 只接受全局坐标, 而命中区、绘制点、canvasRect 全部是图表局部坐标。
+Offset toChartGlobal(WidgetTester tester, Offset local) {
+  final box = tester.renderObject<RenderBox>(find.byKey(const ValueKey('TouchListener')));
+  return box.localToGlobal(local);
 }

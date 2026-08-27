@@ -14,18 +14,16 @@
 
 import 'package:flutter/gestures.dart';
 
-/// 图表专用 Scale 识别器：由上层判定落点归属，本类只负责抢占手势竞技场。
+/// 图表专用 Scale 识别器：由上层判定归属，本类只负责抢占手势竞技场。
 ///
-/// 单指 pan 的 [ScaleGestureRecognizer] 接受阈值是 `panSlop`，而
-/// [DeviceGestureSettings.panSlop] 是 `touchSlop * 2` 的派生 getter，外层 Scrollable 的
-/// [VerticalDragGestureRecognizer] 读的正是同一个 `touchSlop`。也就是说图表的阈值恒为
-/// 外层的两倍，同一 [MediaQuery] 作用域下单指拖动必输——这是恒等关系而非数值巧合，
-/// 无法通过调参解决。本类在上层确认存在落点归属后，把阈值降到 [_claimSlop] 并显式
-/// [resolve]，抢在外层之前胜出。
+/// [DeviceGestureSettings.panSlop] 是 `touchSlop * 2` 的派生 getter，而外层 Scrollable 的
+/// [VerticalDragGestureRecognizer] 读的正是同一个 `touchSlop`。也就是说图表的单指阈值恒为
+/// 外层的两倍，同一 [MediaQuery] 作用域下必输——这是恒等关系而非数值巧合，调参无法解决。
+/// 本类在上层确认存在归属后把阈值降到 [_claimSlop] 并显式 [resolve]，抢在外层之前胜出。
 ///
-/// 没有落点归属时不做任何干预：空白区拖动仍归外层滚动。
-class ChartScaleGestureRecognizer extends ScaleGestureRecognizer {
-  ChartScaleGestureRecognizer({
+/// 上层没有归属时不做任何干预：空白区拖动仍归外层滚动。
+class FlexiScaleGestureRecognizer extends ScaleGestureRecognizer {
+  FlexiScaleGestureRecognizer({
     required this.shouldClaimImmediately,
     required this.shouldClaimOnSlop,
     required this.claimSlopFactor,
@@ -48,19 +46,14 @@ class ChartScaleGestureRecognizer extends ScaleGestureRecognizer {
   /// 抢占阈值。
   ///
   /// 必须相对外层 Scrollable 的实际 hitSlop 派生，不能写死像素值：Android 平台提供的
-  /// `touchSlop` 常小于 [kTouchSlop]，写死的值会在部分设备上大于外层阈值而抢占失败，
-  /// 且快速滑动能抢到、慢速拖动抢不到，表现为时灵时不灵。
-  ///
-  /// 这里读的 [gestureSettings] 与外层 Scrollable 同源（同一 [MediaQuery] 作用域），
-  /// 前提是它被正确注入——[RawGestureDetector] 不会像 [GestureDetector] 那样自动注入。
+  /// `touchSlop` 常小于 [kTouchSlop]，写死的值会在部分设备上大于外层阈值，表现为快速滑动
+  /// 抢得到、慢速拖动抢不到。这里读的 [gestureSettings] 与外层同源，前提是它被正确注入
+  /// ——[RawGestureDetector] 不会像 [GestureDetector] 那样自动注入。
   double get _claimSlop => (gestureSettings?.touchSlop ?? kTouchSlop) * claimSlopFactor;
 
-  /// 本轮手势的第一指。
+  /// 本轮手势的第一指及其按下时的全局位置，用于算抢占位移。
   int? _primaryPointer;
-
-  /// [_primaryPointer] 按下时的全局位置，用于算抢占位移。
   Offset? _primaryDownGlobal;
-
   bool _hasClaimed = false;
 
   @override
@@ -71,6 +64,7 @@ class ChartScaleGestureRecognizer extends ScaleGestureRecognizer {
     _primaryDownGlobal = event.position;
     if (shouldClaimImmediately(event.localPosition)) {
       _hasClaimed = true;
+      // 竞技场此刻还没关闭, accept 会先记为 eagerWinner, 在 close 的第一时刻兑现。
       resolve(GestureDisposition.accepted);
     }
   }
@@ -78,8 +72,7 @@ class ChartScaleGestureRecognizer extends ScaleGestureRecognizer {
   @override
   void handleEvent(PointerEvent event) {
     if (!_hasClaimed && event is PointerMoveEvent && event.pointer == _primaryPointer) {
-      final downGlobal = _primaryDownGlobal!;
-      if ((event.position - downGlobal).distance > _claimSlop && shouldClaimOnSlop()) {
+      if ((event.position - _primaryDownGlobal!).distance > _claimSlop && shouldClaimOnSlop()) {
         _hasClaimed = true;
         // 显式 accept 由发起者胜出, 与竞技场成员顺序无关; 父类 acceptGesture 会在
         // _state == possible 时派发 onScaleStart, 现有手势流程原样接上。
@@ -108,5 +101,5 @@ class ChartScaleGestureRecognizer extends ScaleGestureRecognizer {
   }
 
   @override
-  String get debugDescription => 'chart scale';
+  String get debugDescription => 'flexi scale';
 }

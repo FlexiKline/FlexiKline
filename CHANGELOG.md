@@ -36,12 +36,18 @@
 * Keep a landed gesture's owner when a second finger is added, so an in-progress draw or PaintObject drag is no longer canceled or converted to chart scale (Breaking Changes).
 * Take landed-gesture positions from the tracked first pointer instead of `ScaleUpdateDetails.localFocalPoint`, so adding a second finger no longer snaps a drag to the two-pointer centroid; chart scale still uses the centroid.
 * Replace touch-path `gestureArena.sweep` calls with owner-driven Scale claims, so a moved-then-released gesture is no longer reported as a tap; Tap still handles displacements below the claim slop.
-* Commit a claimed drawing gesture's point when its pointer session ends, taking over the confirmation that `onTapUp` performed before the claim.
+* Keep dragging an in-progress drawing point from confirming it on release: confirmation stays a separate tap, matching the pre-claim behavior where `TapGestureRecognizer` stopped tracking once the drag passed its post-accept slop.
 * Stop a Cross drag from dismissing the Cross on release: Cross is a mode entered and left by tapping, and panning in between only moves it (Breaking Changes).
 * Drive every landed gesture through `onScaleUpdate` instead of `Listener.onPointerMove`, so Cross, zoom slider, zooming move and in-progress drawing update at most once per display frame like the other gesture paths.
 * Derive landed-gesture coordinates from a fixed anchor plus the first pointer's total displacement, so frames dropped by the per-frame throttle no longer drop movement.
 * Anchor a Cross drag on the authoritative `crossOffset` instead of the gesture data left by the last `onTapUp`, so the crosshair continues from where it is instead of jumping back to the last tap position.
 * Yield the gesture arena on long press for Cross and in-progress drawing, the two owners long press itself does nothing for, so pausing before a drag no longer swallows the whole gesture.
+* Claim the gesture arena for chart pan when a touch drag is horizontally dominant, halving its start threshold from `kPanSlop` (36px) to the outer hit slop (18px); vertical and shallow diagonal drags still yield to an enclosing scroll view, and displacements below the hit slop stay taps.
+* Add `GestureConfig.panClaimRatio` (default 2, clamped to 1~10): the `|dx| > |dy| x ratio` cone deciding whether a fallback touch drag pans the chart or scrolls the outer view.
+* Dispatch touch chart gestures by intent instead of pointer count: two fingers moving together horizontally now pan instead of winning the arena and doing nothing, since their span never changes and `ScaleUpdateDetails.scale` stays at 1.0 (Breaking Changes).
+* Switch chart pan to chart scale mid-gesture once the finger span changes by more than `kScaleSlop`; the reverse switch is not allowed.
+* Reset the pan smooth factor when a pan turns into a scale, which the scale end path never did.
+* Remove `setMultiTouch` and `isMultiTouchListenable`: arena claiming replaced the need for hosts to swap in `NeverScrollableScrollPhysics`, and disabling the outer scroll view also swallowed the two-finger vertical drag it should receive (Breaking Changes).
 
 ## 2.3.2
 * Add `crossOffsetListenable` so external consumers can subscribe to Cross focus changes.

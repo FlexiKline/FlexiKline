@@ -49,7 +49,6 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     _klineSpecNotifier.dispose();
     _loadingStateNotifier.dispose();
     _isFirstCandleMovedOffScreenNotifier.dispose();
-    _isMultiTouchNotifier.dispose();
     _intervalNotifier.dispose();
     _paintRangeNotifier.dispose();
     _klineDataCache.forEach((key, data) {
@@ -71,15 +70,6 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   final _isFirstCandleMovedOffScreenNotifier = ValueNotifier(false);
   ValueListenable<bool> get isFirstCandleMovedOffScreenListenable {
     return _isFirstCandleMovedOffScreenNotifier;
-  }
-
-  /// 当前是否处于多指触摸（双指缩放）状态.
-  final _isMultiTouchNotifier = ValueNotifier<bool>(false);
-  ValueListenable<bool> get isMultiTouchListenable => _isMultiTouchNotifier;
-  void setMultiTouch(bool value) {
-    if (_isMultiTouchNotifier.value != value) {
-      _isMultiTouchNotifier.value = value;
-    }
   }
 
   /// 当前 KlineData 的 TimeInterval listenable。

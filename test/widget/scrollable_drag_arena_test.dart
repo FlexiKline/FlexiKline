@@ -58,9 +58,6 @@ const _frame = Duration(milliseconds: 16);
 /// throttle 的尾调用会再起一轮 timer(见 [unaryThrottle]), 需要留够两个周期。
 const _settle = Duration(milliseconds: 60);
 
-/// ListView 里图表下方的填充高度, 保证外层确实可滚动。
-const _filler = 800.0;
-
 List<CandleModel> _candles() => List.generate(
       20,
       (index) => CandleModel(
@@ -73,75 +70,23 @@ List<CandleModel> _candles() => List.generate(
       ),
     );
 
-/// 把图表嵌进可垂直滚动的 [ListView], 返回观测外层滚动的 controller。
-///
-/// [touchSlop] 非空时在图表子树外覆盖 `gestureSettings`, 用于模拟 Android 真机上
-/// 小于 [kTouchSlop] 的平台值 —— 外层 Scrollable 与图表读同一份设置。
 Future<({FlexiKlineController chart, ScrollController scroll})> _pumpChartInListView(
   WidgetTester tester, {
   required TestInteractiveIndicator indicator,
   double? touchSlop,
   bool enableDraw = false,
-}) async {
-  final chart = createChartController();
-  chart.switchKlineData(_spec);
-  chart.replaceKlineData(_spec, _candles());
-  if (enableDraw) {
-    registerTestDrawObject(chart);
-    chart.setDrawVisible(true);
-  }
-  final scroll = ScrollController();
-  addTearDown(scroll.dispose);
-
-  Widget wrapGestureSettings(BuildContext context, Widget child) {
-    if (touchSlop == null) return child;
-    return MediaQuery(
-      data: MediaQuery.of(context).copyWith(
-        gestureSettings: DeviceGestureSettings(touchSlop: touchSlop),
-      ),
-      child: child,
-    );
-  }
-
-  await tester.pumpWidget(
-    MaterialApp(
-      home: Builder(
-        builder: (context) => wrapGestureSettings(
-          context,
-          ListView(
-            controller: scroll,
-            children: [
-              SizedBox(
-                width: 400,
-                height: 480,
-                child: FlexiKlineWidget(
-                  controller: chart,
-                  candle: TestCandleIndicator(),
-                  time: TestTimeIndicator(),
-                  mainIndicators: [indicator],
-                  isTouchDevice: true,
-                ),
-              ),
-              const SizedBox(height: _filler),
-            ],
-          ),
-        ),
-      ),
-    ),
-  );
-  await pumpUntilChart(
+}) {
+  return pumpChartInListView(
     tester,
-    () => chart.isMounted && chart.mainChartWidth > 0 && chart.klineData.isNotEmpty,
-    'chart data and layout',
+    spec: _spec,
+    candles: _candles(),
+    mainIndicators: [indicator],
+    touchSlop: touchSlop,
+    enableDraw: enableDraw,
   );
-  return (chart: chart, scroll: scroll);
 }
 
-/// 把图表局部坐标换算为全局坐标。
-Offset _toGlobal(WidgetTester tester, Offset local) {
-  final box = tester.renderObject<RenderBox>(find.byKey(const ValueKey('TouchListener')));
-  return box.localToGlobal(local);
-}
+Offset _toGlobal(WidgetTester tester, Offset local) => toChartGlobal(tester, local);
 
 void main() {
   group('可滚动容器内的拖动归属', () {
@@ -573,7 +518,7 @@ void _drawArenaTests() {
       expect(object.moving, isFalse);
     });
 
-    testWidgets('未完成绘制拖动后抬手 => 由落点归属确认当前绘制点', (tester) async {
+    testWidgets('未完成绘制: 拖动只移动绘制点, 抬手不确认, 再点一次才确认', (tester) async {
       final indicator = TestInteractiveIndicator(
         key: const ExternalIndicatorKey('draw_drawing_owner'),
         hitRect: const Rect.fromLTWH(0, 260, 20, 20),
@@ -587,6 +532,7 @@ void _drawArenaTests() {
       scene.chart.startDraw(testDrawLineType, isInitPointer: false);
       scene.chart.onDrawConfirm(GestureData.tap(lineFrom));
       expect(scene.chart.drawState.isDrawing, isTrue);
+      final beforeDy = scene.chart.drawState.pointerOffset!.dy;
 
       final gesture = await tester.startGesture(
         _toGlobal(tester, lineFrom),
@@ -599,8 +545,16 @@ void _drawArenaTests() {
       await gesture.up();
       await tester.pump(_settle);
 
-      expect(scene.chart.drawState.isEditing, isTrue, reason: '第二个绘制点应在归属手势结束时确认');
+      // 拖动是调整位置, 不是落点: 抢占前 Tap 会在位移越过 postAcceptSlopTolerance
+      // (= touchSlop) 时自我 reject 并停止跟踪, onTapUp 根本不会来, 所以从来不确认。
+      expect(scene.chart.drawState.pointerOffset!.dy, lessThan(beforeDy), reason: '绘制点应随手指上移');
+      expect(scene.chart.drawState.isDrawing, isTrue, reason: '拖动不得确认绘制点');
       expect(scene.scroll.offset, 0);
+
+      // 确认是独立的一次点击。
+      await tester.tapAt(_toGlobal(tester, lineTo));
+      await tester.pump(_settle);
+      expect(scene.chart.drawState.isEditing, isTrue, reason: '再点一次才确认第二个绘制点');
     });
   });
 }
