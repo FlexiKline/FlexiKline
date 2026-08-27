@@ -99,7 +99,13 @@ class TestDirectIndicator extends DirectIndicator {
     required super.key,
     super.height = 100,
     super.autoActivate = false,
+    this.tipsHeight = 0,
   }) : super(padding: EdgeInsets.zero);
+
+  /// [PaintObject.paintTips] 返回的 tips 行高；0 表示不绘制 tips（返回 null）。
+  ///
+  /// 取固定值，便于对主区 tips 撑高后的 padding 断言精确值。
+  final double tipsHeight;
 
   @override
   DirectPaintObject<DirectIndicator> createPaintObject() => _TestDirectPaintObject();
@@ -111,7 +117,10 @@ class _TestDirectPaintObject extends DirectPaintObject<TestDirectIndicator> {
   @override
   void paint(Canvas canvas, Size size) {}
   @override
-  Size? paintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
+  Size? paintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) {
+    final height = indicator.tipsHeight;
+    return height > 0 ? Size(tipsRect?.width ?? 0, height) : null;
+  }
 }
 
 // ---------------------------------------------------------------------------

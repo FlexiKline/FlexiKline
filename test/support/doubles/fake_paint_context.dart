@@ -47,8 +47,9 @@ class FakePaintContext implements PaintContext {
   @override
   bool get canUpdateLayoutHeight => false;
 
+  /// 由测试驱动的缩放态；缩放中 `isFirstDrawTipsArea` 为 false，绘制期不参与 padding 计算。
   @override
-  bool get isChartZooming => false;
+  bool isChartZooming = false;
 
   @override
   double get startCandleDx => 0;
@@ -56,8 +57,9 @@ class FakePaintContext implements PaintContext {
   @override
   double get paintDxOffset => 0;
 
+  /// 由测试驱动的 cross 态；决定 tips 走 `doPaintChart` 还是 `doPaintCross` 分支。
   @override
-  bool get isCrossing => false;
+  bool isCrossing = false;
 
   @override
   KlineData get klineData => KlineData.empty;

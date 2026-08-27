@@ -179,6 +179,24 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
   void restoreSize() {
     _tmpSize = null;
     _tmpHeight = null;
+    // _tmpPadding 同属窗口局部布局状态: 缩放期的比例 padding 与 tips 撑高都写在这里。
+    restorePadding();
+  }
+
+  /// 丢弃绘制期撑高的临时 padding, 回到 [Indicator.padding] 声明值。
+  ///
+  /// [doPaintChart] / [doPaintCross] 对 `padding.top` 只增不减: tips 高度取决于当前蜡烛
+  /// 数值文本的尺寸, 逐帧双向回写会让布局在绘制期反复变化(见 commit 1ed90ce)。收缩因此只能
+  /// 发生在激活集合或声明变化这类离散时机——复位后下一帧的绘制会重新增长到实际需要的高度。
+  ///
+  /// combine 子对象用的是主区下发的 padding 副本, 必须一并追平: 主区复位后若 tipsHeight
+  /// 为 0(例如只剩不绘制 tips 的蜡烛), 增长分支不会触发, 就再没有下发时机。
+  ///
+  /// 须在子对象增删**完成后**调用: 追平走 [paintableChildren], 尚未入树的新对象取不到值。
+  void restorePadding() {
+    _tmpPadding = null;
+    // reset 强制刷新依赖 padding 的边界缓存(topRect / chartRect / bottomRect)。
+    doUpdateLayout(padding: indicator.padding, reset: true);
   }
 
   /// 清除自身及所有子指标的 _dyFactor 缓存, 强制下次绘制重算
@@ -409,13 +427,15 @@ extension MainPaintManagerExt<T extends MainPaintObjectIndicator> on MainPaintOb
         indicator.children.remove(object.key);
         hasRemove = true;
         _tmpHeight = null;
-        _tmpPadding = null;
         _minMax = null;
         _smoothMinMax = null;
         return true;
       }
       return false;
     });
+    // 放在 removeWhere 之外: [restorePadding] 要遍历 children 下发 padding, 不能嵌在
+    // children 自身的遍历里。
+    if (hasRemove) restorePadding();
     return hasRemove;
   }
 
