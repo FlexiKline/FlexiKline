@@ -589,9 +589,10 @@ void _scaleStartBaselineTests() {
     );
     await tester.pump(_frame);
 
-    // 每指外移 2px, 走到刚越过 kScaleSlop(18) 的那一步就停下: 初始双指相距 80(span 40),
-    // 每步 span +2, 第 10 步 spanDelta=20 首次越过阈值, accept 与首帧 update 同时发生。
-    for (var i = 0; i < 10; i++) {
+    // 每指外移 2px, 走到刚越过抢占阈值的那一步就停下: 初始双指相距 80(span 40), 每步
+    // span +2; 判据是「指间距变化 > hitSlop(18)」即 spanDelta > 9, 第 5 步 spanDelta=10
+    // 首次越过, accept 与首帧 update 同时发生。多走一步这里就掺进真实缩放, 断言失去意义。
+    for (var i = 0; i < 5; i++) {
       await left.moveBy(const Offset(-2, 0));
       await right.moveBy(const Offset(2, 0));
       await tester.pump(_frame);

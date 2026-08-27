@@ -163,29 +163,36 @@ const chartGestureFrame = Duration(milliseconds: 16);
 /// 手势收尾时长：`unaryThrottle` 的尾调用会再起一轮 timer，需要留两个周期。
 const chartGestureSettle = Duration(milliseconds: 60);
 
-/// 在图表局部坐标 [center] 两侧各落一指，水平间距 `2 × spreadHalf`，返回 (左指, 右指)。
+/// 在图表局部坐标 [center] 两侧各落一指，沿 [axis] 排列、间距 `2 × spreadHalf`。
+///
+/// 返回 (第一指, 第二指)，前者在 [axis] 负方向（左 / 上），后者在正方向（右 / 下）。
+///
+/// [axis] 必须可选：纵向捏合与横向捏合走的抢占路径不同（外层可滚动容器只累加纵向分量），
+/// 只支持横向排列就测不出「纵向捏合被外层抢走」。
 ///
 /// pointer id 显式给出而不交给自动分配：多指用例常要在中途单独抬起或取消某一指，
 /// 断言依赖「哪一指是第一指」。
 Future<(TestGesture, TestGesture)> startTwoFingers(
   WidgetTester tester, {
   required Offset center,
+  Axis axis = Axis.horizontal,
   double spreadHalf = 40,
   int firstPointer = 1,
   int secondPointer = 2,
 }) async {
-  final left = await tester.startGesture(
-    toChartGlobal(tester, center - Offset(spreadHalf, 0)),
+  final spread = axis == Axis.horizontal ? Offset(spreadHalf, 0) : Offset(0, spreadHalf);
+  final first = await tester.startGesture(
+    toChartGlobal(tester, center - spread),
     pointer: firstPointer,
     kind: PointerDeviceKind.touch,
   );
-  final right = await tester.startGesture(
-    toChartGlobal(tester, center + Offset(spreadHalf, 0)),
+  final second = await tester.startGesture(
+    toChartGlobal(tester, center + spread),
     pointer: secondPointer,
     kind: PointerDeviceKind.touch,
   );
   await tester.pump(chartGestureFrame);
-  return (left, right);
+  return (first, second);
 }
 
 /// 让 [gestures] 同向移动 [steps] 步，每步位移 [unit]，逐帧推进，返回最后一个事件的时间戳。

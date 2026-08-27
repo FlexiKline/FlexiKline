@@ -115,12 +115,12 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
               debugOwner: this,
               claimSlopFactor: gestureConfig.dragClaimSlopFactor,
               // 两个回调都必须无副作用: 归属只由 [onPointerDown] / [onPointerMove] 按第一指
-              // 写入。若在此处顺手记归属, 外层已赢下本轮之后落下的第二指会被 recognizer
-              // 当成新的第一指再问一次, 于是非第一指也能改写归属。
-              // 问同一条优先级链, 不走旁路: 只查「落点在滑竿区内」表达不出「已进入 cross /
-              // draw / 命中手柄时不抢」, 于是会为 zoom 抢下竞技场却由别人驱动, 而 Tap 已被
-              // reject —— 点一下既退不出十字线也不做任何事。
-              shouldClaimImmediately: (position) {
+              // 写入, 在此顺手记会让非第一指也能改写它(外层赢下本轮后 recognizer 放掉全部
+              // 指针, 之后落下的指针会被当成新的第一指再问一次)。
+              // 落点即抢占问同一条优先级链而非旁路: 只查「落点在滑竿区内」表达不出「已进入
+              // cross / draw / 命中手柄时不抢」, 会为 zoom 抢下竞技场却由别人驱动, 而 Tap 已
+              // 被 reject —— 点一下既退不出十字线也不做任何事。
+              shouldClaimOnDown: (position) {
                 return FlexiGestureOwner.resolveLanded(controller, position) == FlexiGestureOwner.zoomSlider;
               },
               shouldClaimOnSlop: () => _session?.owner != null,
@@ -214,7 +214,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
     } else if (session.drive != null) {
       // 落点族就地收尾。drive 为空即归属已定却没抢赢竞技场(落点被双击吃掉、down 后立即
       // cancel), 无需收尾, session 随下面一行整体丢弃。
-      _finish(session, velocity: Offset.zero);
+      _finishSession(session, velocity: Offset.zero);
     }
     _session = null;
   }
@@ -357,7 +357,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
   /// 的是 [ChartBinding.onChartMove] 只在 `isMove` 时消费 dy。
   ///
   /// case 顺序与 [FlexiGestureOwner] 的声明顺序一致，而声明顺序就是归属优先级；
-  /// [onScaleUpdate] 与 [_finish] 的 switch 同序，任一归属的三段生命周期落在同一位置。
+  /// [onScaleUpdate] 与 [_finishSession] 的 switch 同序，任一归属的三段生命周期落在同一位置。
   ///
   /// [owner] 恒为 `session.owner` 的非空形式；[fallbackOrigin] 只有兜底族会用到。
   ({GestureData data, Offset origin})? _startDrive(
@@ -467,6 +467,10 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
     // 而指针数量没变就不会重新派发 start, 不在这里切换的话用户随后张开手指想缩放就永久
     // 失效。反向不切: 缩放一旦开始, 中途转平移会让 initialSpan 基准失去意义; 抬起一指
     // 是另一回事, 指针数量变化会重新派发 start 由 [onScaleStart] 重判。
+    //
+    // 阈值用 [kScaleSlop] 而非 [FlexiGestureOwner.resolveChartFallback] 的抢占判据: 两者
+    // 语义不同, 不要合并。抢占要跟外层可滚动容器赛跑、必须灵敏; 族内切换要稳, 过敏会让
+    // 平移中途乱缩放 —— 此刻竞技场早已赢下, 没有赛跑对手。
     if (owner == FlexiGestureOwner.chartPan && gestureConfig.enableScale && session.spanDelta.abs() > kScaleSlop) {
       final scalePosition = _resolveScalePosition(session, position.dx);
       logd('onScaleUpdate pan > scale $scalePosition focal:$position');
@@ -511,7 +515,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
   /// 属于整个 session，只在最后一段做。混用两者的后果是双指同向平移抬起一指就启动惯性，
   /// 而剩余手指还在屏幕上继续拖，两个源同时改 `paintDxOffset`。
   ///
-  /// 落点归属不走这里，收尾在活跃指针归零处（原因见 [_finish]）。
+  /// 落点归属不走这里，收尾在活跃指针归零处（原因见 [_finishSession]）。
   void onScaleEnd(ScaleEndDetails details) {
     final session = _session;
     if (session == null) return;
@@ -534,7 +538,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
     }
 
     // <0: 从右向左滑动; >0: 从左向右滑动。
-    _finish(session, velocity: details.velocity.pixelsPerSecond);
+    _finishSession(session, velocity: details.velocity.pixelsPerSecond);
     _session = null;
   }
 
@@ -548,7 +552,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
   /// 收尾又不需要抬手速度，所以指针归零是更可靠的落点。
   ///
   /// case 顺序与 [_startDrive]、[onScaleUpdate] 一致，即 [FlexiGestureOwner] 的声明顺序。
-  void _finish(_TouchSession session, {required Offset velocity}) {
+  void _finishSession(_TouchSession session, {required Offset velocity}) {
     final drive = session.drive;
     final owner = session.owner;
     if (drive == null || owner == null) return;
@@ -772,8 +776,8 @@ class _TouchSession {
 
   /// 各指到质心的平均距离，口径与 [ScaleGestureRecognizer] 一致（两指时等于间距的一半）。
   ///
-  /// 同口径才能让 [kScaleSlop] 在两处表达同一件事：判定说「张开够了」时，原生识别器也
-  /// 正好认为够了。
+  /// 同口径才能让 [kScaleSlop] 在 chartPan → chartScale 的切换判据里与原生识别器表达同一
+  /// 件事。抢占判据是另一个量纲（指间距变化，见 [FlexiGestureOwner.resolveChartFallback]）。
   double get span {
     final count = pointers.length;
     if (count < 2) return 0;

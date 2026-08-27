@@ -238,8 +238,9 @@ void main() {
       await second.up(timeStamp: at);
       await tester.pump(chartGestureFrame);
 
-      // 第二段的质心故意移到左三分之一。若 auto 在新 segment 重新解析，会从
-      // middle 跳成 left；保持 middle 则缩放前后该质心下的蜡烛 index 不变。
+      // 第二段的质心故意移到左三分之一: 若 auto 在新 segment 重新解析, 会从 middle 跳成
+      // left。断言点取 middle 真正固定的那一点 —— paintDxOffset 为正时 middle 锚定主图中心
+      // (见 ChartBinding.onChartScale), 而 left 锚定左边界, 中心下的蜡烛随之滑走。
       final secondFocalX = canvas.left + canvas.width * 0.30;
       final thirdX = secondFocalX * 2 - firstX;
       final third = await tester.startGesture(
@@ -248,11 +249,15 @@ void main() {
         kind: PointerDeviceKind.touch,
       );
       await tester.pump(chartGestureFrame);
-      final anchoredIndex = scene.chart.dxToIndex(secondFocalX);
-      expect(anchoredIndex, isNotNull, reason: '前置条件: 质心必须对应可见蜡烛');
+      expect(scene.chart.paintDxOffset, greaterThan(0), reason: '前置条件: middle 走锚定中心的分支');
+      final anchorDx = scene.chart.mainChartLeft + scene.chart.mainChartWidthHalf;
+      final anchoredIndex = scene.chart.dxToIndex(anchorDx);
+      expect(anchoredIndex, isNotNull, reason: '前置条件: 锚点必须对应可见蜡烛');
       final beforeSecondScale = scene.chart.candleWidth;
 
-      for (var i = 0; i < 6; i++) {
+      // 张开得够多才拉得开两种锚定的差距: 缩放倍率越接近 1, middle 与 left 固定的两点
+      // 越难分辨, 断言就会退化成「在容差内碰巧一致」。
+      for (var i = 0; i < 12; i++) {
         at += chartGestureFrame;
         await first.moveBy(_step, timeStamp: at);
         await third.moveBy(-_step, timeStamp: at);
@@ -261,14 +266,9 @@ void main() {
 
       expect(scene.chart.candleWidth, greaterThan(beforeSecondScale), reason: '前置条件: 第二 segment 必须已缩放');
       expect(
-        scene.chart.dxToIndex(secondFocalX),
+        scene.chart.dxToIndex(anchorDx),
         closeTo(anchoredIndex!, 1),
-        reason: '重新按新质心解析为 left 会导致该位置下的蜡烛跳变',
-      );
-      expect(
-        scene.chart.paintDxOffset,
-        lessThan(0),
-        reason: '本场景保持 middle 锚定时偏移为负，重新解析为 left 会跳到正值',
+        reason: '重新按新质心解析为 left 会改成锚定左边界, 主图中心下的蜡烛随之跳变',
       );
 
       await first.up(timeStamp: at);

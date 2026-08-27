@@ -243,6 +243,60 @@ void main() {
       );
     });
 
+    testWidgets('缩放抢占按指间距变化判定, 与外层 hitSlop 同量纲', (tester) async {
+      final (:scene, indicator: _) = await arrange();
+      expect(scene.controller.gestureConfig.scaleClaimSlopFactor, 1);
+
+      // spanDelta 是「各指到质心的平均距离」之差, 两指时为指间距变化的一半, 判据 × 2 还原。
+      // 直接拿 kScaleSlop 与它比会要求 36px 指间距变化, 而外层 VerticalDrag 只要 18px ——
+      // 一指锚定的捏合(最常见姿势)因此稳定地输掉竞技场。
+      expect(
+        FlexiGestureOwner.resolveChartFallback(
+          scene.controller,
+          delta: Offset.zero,
+          spanDelta: kTouchSlop / 2,
+          hitSlop: kTouchSlop,
+        ),
+        isNull,
+        reason: '指间距变化恰好等于外层阈值时落在边界上, 判据是严格大于',
+      );
+      expect(
+        FlexiGestureOwner.resolveChartFallback(
+          scene.controller,
+          delta: Offset.zero,
+          spanDelta: kTouchSlop / 2 + 0.5,
+          hitSlop: kTouchSlop,
+        ),
+        FlexiGestureOwner.chartScale,
+        reason: '越过外层阈值即抢占, 不等原生 kScaleSlop 的两倍量纲',
+      );
+    });
+
+    testWidgets('scaleClaimSlopFactor 调大即按比例抬高抢占门槛', (tester) async {
+      final (:scene, indicator: _) = await arrange();
+      scene.controller.updateGestureConfig((config) => config.copyWith(scaleClaimSlopFactor: 2));
+
+      expect(
+        FlexiGestureOwner.resolveChartFallback(
+          scene.controller,
+          delta: Offset.zero,
+          spanDelta: kTouchSlop / 2 + 0.5,
+          hitSlop: kTouchSlop,
+        ),
+        isNull,
+        reason: '宿主调保守时同一指间距变化不再够用',
+      );
+      expect(
+        FlexiGestureOwner.resolveChartFallback(
+          scene.controller,
+          delta: Offset.zero,
+          spanDelta: kTouchSlop + 0.5,
+          hitSlop: kTouchSlop,
+        ),
+        FlexiGestureOwner.chartScale,
+      );
+    });
+
     testWidgets('样本不足: 位移未越过 hitSlop 且指间距未变时放弃', (tester) async {
       final (:scene, indicator: _) = await arrange();
 

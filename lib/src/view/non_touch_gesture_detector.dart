@@ -262,22 +262,10 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
         /// 横向缩放图表(scale)，与触摸缩放手势一致受 [GestureConfig.enableScale] 约束.
         if (gestureConfig.enableScale) {
           if (_scaleData == null) {
-            ScalePosition position = gestureConfig.scalePosition;
-            if (position == ScalePosition.auto) {
-              final third = controller.canvasRect.width / 3;
-              if (offset.dx < third) {
-                position = ScalePosition.left;
-              } else if (offset.dx > (third + third)) {
-                position = ScalePosition.right;
-              } else {
-                position = ScalePosition.middle;
-              }
-            }
-
             /// 转换滚轮为touch设备的缩放速度[0 ~ 1 ~ n]
             _scaleData = GestureData.signal(
               offset,
-              position: position,
+              position: _resolveScalePosition(offset),
             );
 
             /// 由于没有开始结束事件回调, 此处1秒后将[_scaleData]置空, 重新开始测量位置.
@@ -321,6 +309,19 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
         }());
       }
     }
+  }
+
+  /// 解析缩放的锚定位置：[ScalePosition.auto] 按 [offset] 所在的三分之一区域就近锚定。
+  ///
+  /// 不缓存：非触摸端每次滚轮或触控板手势都是独立的一段，没有触摸端那种「一轮 pointer
+  /// session 内锚点不得改变」的约束。
+  ScalePosition _resolveScalePosition(Offset offset) {
+    final configured = gestureConfig.scalePosition;
+    if (configured != ScalePosition.auto) return configured;
+    final third = controller.canvasRect.width / 3;
+    if (offset.dx < third) return ScalePosition.left;
+    if (offset.dx > third + third) return ScalePosition.right;
+    return ScalePosition.middle;
   }
 
   /// 鼠标Hover进入事件.
@@ -562,59 +563,31 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
       return;
     }
 
-    // <0: 负数代表从右向左滑动.
-    // >0: 正数代表从左向右滑动.
+    // <0: 从右向左滑动; >0: 从左向右滑动.
     final velocity = details.velocity.pixelsPerSecond.dx;
-
-    if (!gestureConfig.enableInertialPan ||
-        controller.klineData.isEmpty ||
-        (velocity < 0 && !controller.canPanRTL) ||
-        (velocity > 0 && !controller.canPanLTR)) {
-      logd('onPanEnd currently can not pan!');
-      _panData?.end();
-      _panData = null;
-      controller.onPanEnd();
-
-      setCursorToPrecise();
-
-      /// 检查并加载更多蜡烛数据
-      controller.checkAndLoadMoreCandlesWhenPanEnd();
-      return;
-    }
-
-    final tolerance = controller.gestureConfig.tolerance;
-
-    /// 惯性平移的最大距离.
+    final tolerance = gestureConfig.tolerance;
     final panDistance = velocity * tolerance.distanceFactor;
+    final panDuration = calcuInertialPanDuration(panDistance, maxDuration: tolerance.maxDuration);
+    final canInertialPan = gestureConfig.enableInertialPan &&
+        controller.klineData.isNotEmpty &&
+        !(velocity < 0 && !controller.canPanRTL) &&
+        !(velocity > 0 && !controller.canPanLTR) &&
+        // 平移距离为 0 或不足 1ms, 无需继续平移.
+        panDistance.abs() >= precisionError &&
+        panDuration > 1;
 
-    final panDuration = calcuInertialPanDuration(
-      panDistance,
-      maxDuration: tolerance.maxDuration,
-    );
-
-    // 平移距离为0 或者 不足1ms, 无需继续平移
-    if (panDistance.abs() < precisionError || panDuration <= 1) {
-      logd('onPanEnd currently not need for inertial movement!');
+    if (!canInertialPan) {
+      logd('onPanEnd no inertial movement, velocity:$velocity distance:$panDistance');
       _panData?.end();
       _panData = null;
       controller.onPanEnd();
-
       setCursorToPrecise();
-
-      /// 检查并加载更多蜡烛数据
       controller.checkAndLoadMoreCandlesWhenPanEnd();
       return;
     }
 
-    /// 检查并加载更多蜡烛数据
-    controller.checkAndLoadMoreCandlesWhenPanEnd(
-      panDistance: panDistance,
-      panDuration: panDuration,
-    );
-
-    logi(
-      'onPanEnd inertial movement, velocity:$velocity, panDistance:$panDistance, panDuration:$panDuration',
-    );
+    controller.checkAndLoadMoreCandlesWhenPanEnd(panDistance: panDistance, panDuration: panDuration);
+    logi('onPanEnd inertial movement, velocity:$velocity distance:$panDistance duration:$panDuration');
 
     animateToPosition(
       _panData!.offset.dx,
@@ -643,20 +616,9 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
     if (gestureConfig.enableScale) {
       cancelPositionAnimation();
       logd('onPointerPanZoomStart $event > ${event.localPosition}');
-      ScalePosition position = gestureConfig.scalePosition;
-      if (position == ScalePosition.auto) {
-        final third = controller.canvasRect.width / 3;
-        if (offset.dx < third) {
-          position = ScalePosition.left;
-        } else if (offset.dx > (third + third)) {
-          position = ScalePosition.right;
-        } else {
-          position = ScalePosition.middle;
-        }
-      }
       _scaleData = GestureData.scale(
         offset,
-        position: position,
+        position: _resolveScalePosition(offset),
       );
     }
   }
@@ -714,11 +676,9 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
   }
 
   /// 长按
-  ///
-  /// 如果当前正在crossing中时, 不触发后续的长按逻辑.
   void onLongPressStart(LongPressStartDetails details) {
     if (!gestureConfig.enableLongPress) {
-      logd('onLongPressStart ignore! > crossing:${controller.isCrossing}');
+      logd('onLongPressStart ignore! > longPress disabled');
       return;
     }
 
@@ -756,22 +716,16 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
   }
 
   void onLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
-    if (!gestureConfig.enableLongPress || _longData == null) {
-      return;
-    }
-    // assert(() {
-    //   logd("onLongPressMoveUpdate ${DateTime.now().millisecond} > details:$details");
-    //   return true;
-    // }());
+    final data = _longData;
+    if (!gestureConfig.enableLongPress || data == null) return;
+    // 三条分支共用同一份长按数据, 位置更新与分派无关, 提到分支之前.
+    data.update(details.localPosition);
     if (controller.isDrawVisible && drawState.isOngoing) {
-      _longData!.update(details.localPosition);
-      controller.onDrawMoveUpdate(_longData!);
+      controller.onDrawMoveUpdate(data);
     } else if (controller.isStartDragGrid) {
-      _longData!.update(details.localPosition);
-      controller.onGridResizeUpdate(_longData!);
+      controller.onGridResizeUpdate(data);
     } else {
-      _longData!.update(details.localPosition);
-      controller.onCrossUpdate(_longData!);
+      controller.onCrossUpdate(data);
     }
   }
 

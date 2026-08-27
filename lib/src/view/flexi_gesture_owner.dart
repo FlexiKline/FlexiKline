@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:flutter/gestures.dart' show kScaleSlop;
 import 'package:flutter/painting.dart';
 
 import '../extension/geometry_ext.dart';
@@ -77,7 +76,13 @@ enum FlexiGestureOwner {
     required double hitSlop,
   }) {
     final config = controller.gestureConfig;
-    if (config.enableScale && spanDelta.abs() > kScaleSlop) return chartScale;
+    // 缩放判据与外层同量纲: 外层看「一指移动了多远」, 这里看「两指相对移动了多远」。
+    // [spanDelta] 是各指到质心的平均距离之差, 两指时为指间距变化的一半, 故 × 2 还原
+    // (三指以上不严格成立, 当前只有两指捏合是真实场景)。不能拿 `kScaleSlop` 比 [hitSlop]:
+    // 两者同为 18 但量纲差一倍, 实际要求 36px 而外层只要 18px, 一指锚定的捏合必输。
+    if (config.enableScale && spanDelta.abs() * 2 > hitSlop * config.scaleClaimSlopFactor) {
+      return chartScale;
+    }
     if (delta.distance <= hitSlop) return null;
     if (delta.dx.abs() > delta.dy.abs() * config.panClaimRatio) return chartPan;
     return null;

@@ -56,6 +56,10 @@
 * Resolve `ScalePosition.auto` once per pointer session, so lifting one finger of a pinch and spreading again no longer moves the scale anchor from `middle` to `left`.
 * Reorder landed gesture ownership so the zoom slider and zooming move yield to draw, Cross and PaintObject instead of preceding them: leading the order let them steal gestures from an already-entered mode, so dragging with the crosshair shown moved the chart and left the crosshair stuck (Breaking Changes).
 * Gate the zoom slider's `PointerDown` claim on the same ownership chain, so taps in its region only lose their Cross semantics when no other owner claims the landing; starting a zoom now requires leaving Cross first (Breaking Changes).
+* Claim the gesture arena on any pointer's displacement instead of only the first pointer's, so a pinch with one finger anchored can win inside a scrollable container; the claim slop guards against stealing taps, and a tap can only ever be single-finger.
+* Compare the scale claim against the same quantity the outer `Scrollable` uses: the threshold is now `spanDelta × 2 > hitSlop × scaleClaimSlopFactor` (inter-finger distance change) instead of `spanDelta > kScaleSlop`, which asked for 36px where the outer only asked for 18px and lost every single-finger-dominant pinch (Breaking Changes).
+* Add `GestureConfig.scaleClaimSlopFactor` (default 1, clamped to [0.5, 4]) for hosts that need a more conservative scale claim; the in-family chartPan to chartScale switch keeps `kScaleSlop` and is deliberately not shared with it.
+* Fix vertical pinch losing to an enclosing scroll view, which made two-finger zoom appear to require a horizontal grip (horizontal pinch only won by claiming through `chartPan` on the way).
 
 ## 2.3.2
 * Add `crossOffsetListenable` so external consumers can subscribe to Cross focus changes.

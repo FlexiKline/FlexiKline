@@ -44,12 +44,14 @@ class GestureConfig {
     this.zoomStartMinDistance = 5,
     this.zoomSpeed = 1,
     this.isManualSetZoomRect = false,
-    double dragClaimSlopFactor = 0.5,
     double panClaimRatio = 2,
+    double dragClaimSlopFactor = 0.5,
+    double scaleClaimSlopFactor = 1,
   })  : tolerance = tolerance ?? ToleranceConfig(),
         scaleSpeed = scaleSpeed.clamp(1, 30),
+        panClaimRatio = panClaimRatio.clamp(1, 10),
         dragClaimSlopFactor = dragClaimSlopFactor.clamp(0.1, 0.9),
-        panClaimRatio = panClaimRatio.clamp(1, 10);
+        scaleClaimSlopFactor = scaleClaimSlopFactor.clamp(0.5, 4);
 
   /// 是否启用长按操作
   final bool enableLongPress;
@@ -90,6 +92,16 @@ class GestureConfig {
   /// 是否手动设置缩放区域
   final bool isManualSetZoomRect;
 
+  /// 图表整体平移抢占手势竞技场所需的横向占优比例，判据为 `|dx| > |dy| × panClaimRatio`。
+  ///
+  /// 落点没有业务归属时，手势按意图在「平移图表」与「让外层滚动」之间二选一：位移方向落在
+  /// 与水平轴夹角小于 `atan(1 / panClaimRatio)` 的锥内才判为平移。普通平移只消费 dx，纵向
+  /// 位移对它毫无意义，所以让给外层是语义正确而非妥协。
+  ///
+  /// 取值 [1, 10]：1 相当于 45° 锥，任何横向占优都算平移；越大锥越窄，越不容易把斜拖误判
+  /// 成平移。默认 2，即约 26.57°。
+  final double panClaimRatio;
+
   /// 落点归属抢占手势竞技场的位移阈值，相对外层 Scrollable 实际 hitSlop 的比例。
   ///
   /// 图表嵌在可滚动容器内时，单指拖动的接受阈值恒为外层 Scrollable 的两倍，必须在到达
@@ -103,15 +115,20 @@ class GestureConfig {
   /// Android 平台值常小于 `kTouchSlop`(18)，写死的像素阈值会在部分设备上失效。
   final double dragClaimSlopFactor;
 
-  /// 图表整体平移抢占手势竞技场所需的横向占优比例，判据为 `|dx| > |dy| × panClaimRatio`。
+  /// 图表缩放抢占手势竞技场所需的指间距变化，相对外层 hitSlop 的比例，判据为
+  /// `指间距变化 > hitSlop × scaleClaimSlopFactor`。
   ///
-  /// 落点没有业务归属时，手势按意图在「平移图表」与「让外层滚动」之间二选一：位移方向落在
-  /// 与水平轴夹角小于 `atan(1 / panClaimRatio)` 的锥内才判为平移。普通平移只消费 dx，纵向
-  /// 位移对它毫无意义，所以让给外层是语义正确而非妥协。
+  /// 与外层同量纲比较：外层 `VerticalDragGestureRecognizer` 看「一指移动了多远」，这里看
+  /// 「两指相对移动了多远」。默认 1，即取外层的同一个阈值——对称捏合每指走 hitSlop 的四分之
+  /// 一即抢到，一指锚定另一指移动时与外层同点，同点由图表胜出（`Listener` 在命中路径中深于
+  /// `Scrollable`，同一 move 事件里先判定、先抢占）。
   ///
-  /// 取值 [1, 10]：1 相当于 45° 锥，任何横向占优都算平移；越大锥越窄，越不容易把斜拖误判
-  /// 成平移。默认 2，即约 26.57°。
-  final double panClaimRatio;
+  /// 取值 [0.5, 4]：调大更保守，代价是外层更容易先接管；调小会把自然滚动时手指的轻微开合
+  /// 误判成缩放。
+  ///
+  /// 与族内 chartPan → chartScale 的切换阈值语义不同，不要合并：抢占要跟外层赛跑、必须
+  /// 灵敏，族内切换要稳，过敏会让平移中途乱缩放。
+  final double scaleClaimSlopFactor;
 
   factory GestureConfig.fromJson(Map<String, dynamic> json) => _$GestureConfigFromJson(json);
 

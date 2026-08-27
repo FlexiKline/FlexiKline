@@ -148,6 +148,111 @@ void main() {
   });
 
   group('兜底归属的意图分派与族内切换', _fallbackDispatchTests);
+
+  group('纵向捏合的抢占', _verticalPinchTests);
+}
+
+/// 纵向捏合在可滚动容器内的抢占时机。
+///
+/// 缩放判据与轴无关（span 是各指到质心的欧氏平均距离），所以纵向捏合本就能缩放；真机上
+/// 「必须横着捏」是抢占失败后的适应性行为——横向捏合靠 `chartPan` 顺路抢到，纵向没有这条
+/// 通道，只能等指间距判据，而它一度按 `kScaleSlop` 算、实际要求 36px 指间距变化，外层只
+/// 要 18px。
+///
+/// 断言主体是 `candleWidth`：外层赢下竞技场即意味着图表的 Scale 被 reject，`onScaleUpdate`
+/// 再也不来，缩放一动不动。`scroll.offset` 在张开方向上会被 `ClampingScrollPhysics` 钳在
+/// 0，断言它反而测不出胜负。
+///
+/// 用例都取「一指不动或少动」的姿势：裁决前外层累加的是各指 dy 的**带符号和**
+/// （`_shouldTrackMoveEvent` 在未 accept 时对所有指针放行，多指策略只影响 accept 之后的
+/// 滚动增量），所以严格对称的捏合两指相消、外层永远不 accept，图表本就赢得轻松，测不出
+/// 量纲错配。真机上输掉的正是一指主导的姿势。
+void _verticalPinchTests() {
+  /// 两指上下排列落在 [_blankPosition]，返回 (上指, 下指)。
+  Future<(TestGesture, TestGesture)> verticalFingers(WidgetTester tester) {
+    return startTwoFingers(
+      tester,
+      center: _blankPosition,
+      axis: Axis.vertical,
+      spreadHalf: _spreadHalf,
+    );
+  }
+
+  testWidgets('纵向捏合: 图表赢下竞技场并缩放', (tester) async {
+    final scene = await _arrange(tester);
+    addTearDown(() => disposeChart(tester, scene.chart));
+    final beforeWidth = scene.chart.candleWidth;
+
+    final (top, bottom) = await verticalFingers(tester);
+    // 下指主导、上指几乎不动: 每步指间距 +7 而外层只累加 +5, 图表在第 3 步抢到, 外层要到
+    // 第 4 步才够 —— 判据按 kScaleSlop 时图表要等到第 6 步, 手势早被外层拿走。
+    for (var i = 0; i < 6; i++) {
+      await top.moveBy(const Offset(0, -1));
+      await bottom.moveBy(const Offset(0, 6));
+      await tester.pump(_frame);
+    }
+
+    expect(
+      scene.chart.candleWidth,
+      greaterThan(beforeWidth),
+      reason: '判据按 kScaleSlop 时要等 36px 指间距变化, 外层 18px 就先接管并 reject 掉 Scale',
+    );
+
+    await top.up();
+    await bottom.up();
+    await tester.pump(_settle);
+  });
+
+  testWidgets('纵向捏合一指锚定: 移动的不是第一指也能抢到', (tester) async {
+    final scene = await _arrange(tester);
+    addTearDown(() => disposeChart(tester, scene.chart));
+    final beforeWidth = scene.chart.candleWidth;
+
+    final (top, bottom) = await verticalFingers(tester);
+    // 拇指按住不动、食指移动是最常见的捏合姿势。抢占只看第一指位移时这条快速通道一次都不
+    // 触发; 换成「任一指位移」才成立 —— claimSlop 防的是点击, 而点击只可能是单指。
+    //
+    // 这一姿势下图表的判据与外层严格同点(指间距变化 = 该指位移 = 外层的带符号累加), 胜负
+    // 全靠事件内先后: Listener 在命中路径中深于 Scrollable, 同一 move 事件里先判定归属;
+    // 图表的 recognizer 也先于外层注册进 pointerRouter, 显式 accept 立即兑现。
+    for (var i = 0; i < 8; i++) {
+      await bottom.moveBy(const Offset(0, 5));
+      await tester.pump(_frame);
+    }
+
+    expect(
+      scene.chart.candleWidth,
+      greaterThan(beforeWidth),
+      reason: '第一指位移恒为 0, 只看它就永远抢不到, 手势整段归外层滚动',
+    );
+
+    await top.up();
+    await bottom.up();
+    await tester.pump(_settle);
+  });
+
+  testWidgets('双指同向纵向: 仍归外层滚动, 不误判成缩放', (tester) async {
+    final scene = await _arrange(tester);
+    addTearDown(() => disposeChart(tester, scene.chart));
+    final beforeWidth = scene.chart.candleWidth;
+    final beforeOffset = scene.chart.paintDxOffset;
+
+    final (top, bottom) = await verticalFingers(tester);
+    // 同向移动不改变指间距, spanDelta 恒为 0: 抢占阈值降低不得把它拽进缩放, 否则
+    //「双指同向纵向应由外层滚动」这条设计整条失效。
+    for (var i = 0; i < 8; i++) {
+      await top.moveBy(const Offset(0, -_step));
+      await bottom.moveBy(const Offset(0, -_step));
+      await tester.pump(_frame);
+    }
+    await top.up();
+    await bottom.up();
+    await tester.pump(_settle);
+
+    expect(scene.scroll.offset, greaterThan(0), reason: '双指同向纵向应归外层滚动');
+    expect(scene.chart.candleWidth, beforeWidth);
+    expect(scene.chart.paintDxOffset, beforeOffset);
+  });
 }
 
 /// 双指手势按意图而非指数分派。
