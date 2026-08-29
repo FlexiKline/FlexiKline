@@ -140,7 +140,7 @@ mixin PaintObjectBoundingMixin<T extends Indicator<IIndicatorKey>> on IndicatorO
       drawableRect.left + padding.left,
       drawableRect.top,
       drawableRect.right - padding.right,
-      drawableRect.top + padding.top,
+      drawableRect.top + padding.top + _tipsAreaHeight,
     );
   }
 

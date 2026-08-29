@@ -179,24 +179,6 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
   void restoreSize() {
     _tmpSize = null;
     _tmpHeight = null;
-    // _tmpPadding 同属窗口局部布局状态: 缩放期的比例 padding 与 tips 撑高都写在这里。
-    restorePadding();
-  }
-
-  /// 丢弃绘制期撑高的临时 padding, 回到 [Indicator.padding] 声明值。
-  ///
-  /// [doPaintChart] / [doPaintCross] 对 `padding.top` 只增不减: tips 高度取决于当前蜡烛
-  /// 数值文本的尺寸, 逐帧双向回写会让布局在绘制期反复变化(见 commit 1ed90ce)。收缩因此只能
-  /// 发生在激活集合或声明变化这类离散时机——复位后下一帧的绘制会重新增长到实际需要的高度。
-  ///
-  /// combine 子对象用的是主区下发的 padding 副本, 必须一并追平: 主区复位后若 tipsHeight
-  /// 为 0(例如只剩不绘制 tips 的蜡烛), 增长分支不会触发, 就再没有下发时机。
-  ///
-  /// 须在子对象增删**完成后**调用: 追平走 [paintableChildren], 尚未入树的新对象取不到值。
-  void restorePadding() {
-    _tmpPadding = null;
-    // reset 强制刷新依赖 padding 的边界缓存(topRect / chartRect / bottomRect)。
-    doUpdateLayout(padding: indicator.padding, reset: true);
   }
 
   /// 清除自身及所有子指标的 _dyFactor 缓存, 强制下次绘制重算
@@ -319,16 +301,9 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
   void doPaintChart(Canvas canvas, Size size) {
     if (isFirstDrawTipsArea) {
       // 如果设置总是要在Tips区域下绘制指标图, 则要首先绘制完所有Tips.
+      // doPaintTips 内部同步 _tipsAreaHeight, 子对象随后取到的 chartRect 已让出 tips 区域。
       if (!context.isCrossing) {
-        final tipsHeight = doPaintTips(canvas, model: klineData.latest);
-
-        if (indicator.padding.top + tipsHeight > padding.top) {
-          doUpdateLayout(
-            padding: indicator.padding.copyWith(
-              top: indicator.padding.top + tipsHeight,
-            ),
-          );
-        }
+        doPaintTips(canvas, model: klineData.latest);
       }
       for (final object in paintableChildren) {
         object.paint(canvas, size);
@@ -352,15 +327,7 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
   void doPaintCross(Canvas canvas, Offset offset, {FlexiCandleModel? model}) {
     if (isFirstDrawTipsArea) {
       if (context.isCrossing) {
-        final tipsHeight = doPaintTips(canvas, offset: offset, model: model);
-
-        if (indicator.padding.top + tipsHeight > padding.top) {
-          doUpdateLayout(
-            padding: indicator.padding.copyWith(
-              top: indicator.padding.top + tipsHeight,
-            ),
-          );
-        }
+        doPaintTips(canvas, offset: offset, model: model);
       }
       for (final object in paintableChildren) {
         object.paintCross(canvas, offset, model: model);
@@ -375,8 +342,14 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
     }
   }
 
-  double doPaintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset}) {
-    // 每次绘制前, 重置Tips区域大小为0
+  /// 逐个绘制子指标的 Tips, 并把总高同步进 [_tipsAreaHeight]。
+  ///
+  /// 累计高度即汇总结果, 无需先存进各子对象再求和。量化只在汇总结果上做一次: 逐子项取整会
+  /// 累积每项不足 1px 的浪费(N 个指标最多 N px), 汇总后取整的误差恒小于 1px 且与子项个数无关。
+  ///
+  /// 量化是双向同步的前提: 它让同一视觉状态每帧得到同一离散值, 稳定态因此提前 return、不触发
+  /// 边界缓存失效。没有量化, 每帧按实测值回写就是 commit 1ed90ce 修掉的那种绘制期抖动。
+  void doPaintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset}) {
     double height = 0;
     for (final object in paintableChildren) {
       final size = object.paintTips(
@@ -387,7 +360,17 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
       );
       if (size != null) height += size.height;
     }
-    return height;
+
+    // drawBelowTipsArea 为 false 时 Tips 叠加绘制在图表之上, 不让出区域。
+    final double next = indicator.drawBelowTipsArea ? height.ceilToDouble() : 0;
+    if (next == _tipsAreaHeight) return;
+    _tipsAreaHeight = next;
+    resetPaintBounding();
+    // combine 子对象与主区共享 chartRect, 同步让出同样的高度。
+    for (final object in children) {
+      object._tipsAreaHeight = next;
+      object.resetPaintBounding();
+    }
   }
 }
 
@@ -427,15 +410,13 @@ extension MainPaintManagerExt<T extends MainPaintObjectIndicator> on MainPaintOb
         indicator.children.remove(object.key);
         hasRemove = true;
         _tmpHeight = null;
+        _tmpPadding = null;
         _minMax = null;
         _smoothMinMax = null;
         return true;
       }
       return false;
     });
-    // 放在 removeWhere 之外: [restorePadding] 要遍历 children 下发 padding, 不能嵌在
-    // children 自身的遍历里。
-    if (hasRemove) restorePadding();
     return hasRemove;
   }
 

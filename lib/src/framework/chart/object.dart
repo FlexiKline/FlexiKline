@@ -65,6 +65,16 @@ abstract class IndicatorObject<T extends Indicator>
   EdgeInsets? _tmpPadding;
   EdgeInsets get padding => _tmpPadding ?? indicator.padding;
 
+  /// 本对象几何计算要让出的 tips 区域高度; 0 表示不让出。
+  ///
+  /// 绘制期产物, 不参与序列化。主区在 [MainPaintDelegateExt.doPaintTips] 汇总子指标实测
+  /// 高度、量化后写入, 并同步下发给所有子对象——combine 子对象与主区共享 chartRect,
+  /// 必须让出同样的高度。副区指标无人写入, 恒为 0, 其 tips 叠加绘制在图表之上。
+  ///
+  /// 与 tips 高度写入 [padding] 的旧实现不同: 绘制期不再回写布局, 收缩也不需要在激活集合
+  /// 变化等离散时机记得复位——汇总每帧无条件同步, 量化保证稳定态不触发边界缓存失效。
+  double _tipsAreaHeight = 0;
+
   PaintMode get paintMode => indicator.paintMode;
   int get zIndex => indicator.zIndex;
 
@@ -410,16 +420,6 @@ final class MainPaintObject<T extends MainPaintObjectIndicator> extends PaintObj
 
   @override
   void paint(Canvas canvas, Size size) {}
-
-  @override
-  Size? paintTips(
-    Canvas canvas, {
-    FlexiCandleModel? model,
-    Offset? offset,
-    Rect? tipsRect,
-  }) {
-    return topRect.size;
-  }
 
   @override
   void dispose() {

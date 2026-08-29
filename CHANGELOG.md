@@ -1,3 +1,8 @@
+## 2.4.1
+* Fix the blank band above the candles left after hiding main-area indicators, which survived config reload and data refresh and could only be cleared by rebuilding the controller.
+* Move the main-area tips height out of `padding` into a dedicated geometry input consumed by `topRect`: the tips area follows activation and declaration changes on the next paint with no explicit reset, and `padding` keeps its declared value throughout (Breaking Changes).
+* Remove the `MainPaintObject.paintTips` override that returned `topRect.size`: it had no caller and closed a feedback loop between the tips height and the padding it derived from (Breaking Changes).
+
 ## 2.4.0
 * Fix a permanent blank band above the candles after main-area indicators are hidden: tips-driven `padding.top` now resets whenever the activation set or indicator declarations change, then regrows on the next frame.
 * Serialize candle merging and indicator calculation through one data pipeline bound to the current `KlineData`, driven by a fixed calculation tick (`FlexiKlineController.calculationInterval`, default 500ms): the two phases never modify one `KlineData` concurrently, and switching spec destroys the old pipeline together with its pending queue (Breaking Changes).

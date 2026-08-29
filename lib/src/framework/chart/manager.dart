@@ -512,8 +512,6 @@ final class IndicatorPaintObjectManager with FlexiLog {
     final newObj = _resolvePaintObject(indicator, context);
     if (newObj == null) return null;
     _mainPaintObject.appendPaintObject(newObj);
-    // 激活集合变了, 复位 tips 撑高的 padding; 放在入树后, 新对象随同一次下发追平。
-    _mainPaintObject.restorePadding();
     return newObj;
   }
 
@@ -672,10 +670,6 @@ final class IndicatorPaintObjectManager with FlexiLog {
     _mainPaintObject.doDidUpdateIndicator(
       _flexiKlineConfig.mainIndicator.copyWith(size: _mainPaintObject.indicator.size),
     );
-
-    // 换了 indicator 就换了 padding 基准, 旧基准上撑高的值已失效。激活集合恰好一致时
-    // 下面的差异为空、不走 show/hide, 这里是唯一的复位时机。
-    _mainPaintObject.restorePadding();
 
     return (
       // candle 由 mountIndicators 直接挂载，来自旧版持久化的配置可能不含它，
