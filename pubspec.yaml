@@ -1,6 +1,6 @@
 name: flexi_kline
 description: "A flexible Kline framework package project."
-version: 2.4.0
+version: 2.4.1
 homepage: https://flexikline.github.io
 repository: https://github.com/FlexiKline/FlexiKline
 issue_tracker: https://github.com/FlexiKline/FlexiKline/issues
@@ -22,7 +22,7 @@ dependencies:
   flexi_formatter: ^2.0.1
   equatable: ^2.0.8
   json_annotation: ^4.9.0
-  copy_with_extension: ">=6.0.0 <16.0.0"
+  copy_with_extension: ">=6.0.0 <18.0.0"
 
 dev_dependencies:
   flutter_test:
@@ -31,4 +31,4 @@ dev_dependencies:
 
   build_runner: ^2.4.15
   json_serializable: ^6.9.5
-  copy_with_extension_gen: ">=6.0.0 <16.0.0"
+  copy_with_extension_gen: ">=6.0.0 <18.0.0"
