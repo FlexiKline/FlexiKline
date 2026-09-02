@@ -238,6 +238,17 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
       _dyFactor = null;
     }
 
+    final zoomMinMax = _zoomMinMax;
+    if (zoomMinMax != null) {
+      return _updateVisibleMinMaxInZoom(
+        zoomMinMax,
+        newPaneIndex,
+        start: start,
+        end: end,
+        reset: reset,
+      );
+    }
+
     // 数据范围未变、已有minMax、且平滑已完成时, 跳过重算
     if (!reset && _start == start && _end == end && _minMax != null && _smoothMinMax == null) {
       invalidateDyFactor();
@@ -248,6 +259,11 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
     _end = end;
     _minMax = null;
     for (final object in paintableChildren) {
+      // 主区已回自动模式: 清掉上一轮下发的缩放区间副本, 否则子对象会一直用它渲染。
+      if (object._zoomMinMax != null) {
+        object._zoomMinMax = null;
+        object._dyFactor = null;
+      }
       // 平滑活跃时, 子对象的 _minMax 已被 setMinMax(smoothed) 污染为平滑值,
       // 必须清除以强制重新计算可见区间 MinMax, 否则 smoothMinMax 的收敛目标是错的
       if (_smoothMinMax != null) object._minMax = null;
@@ -272,6 +288,50 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
 
     _dyFactor = null;
     return _minMax;
+  }
+
+  /// 缩放态下更新可见区间: 子对象照常重算, 但主区不采纳合并结果。
+  ///
+  /// 子对象那一遍不能省, 两个理由:
+  /// 1. [PaintMode.alone] 子对象(如 Volume)拥有独立坐标体系, 其区间既不合并进主区也不被
+  ///    主区覆盖, 必须每帧跟随可见数据自动重算, 否则缩放态平移会让它按过期区间缩放。
+  /// 2. 蜡烛的 [computeVisibleMinMax] 顺带刷新最高/最低价标签所依赖的缓存, 早退会让标签
+  ///    在平移后匹配不到任何蜡烛而消失。
+  ///
+  /// 合并与平滑都跳过: 合并结果本就要丢弃, 平滑见 [smoothMinMax] 的适用边界。
+  MinMax _updateVisibleMinMaxInZoom(
+    MinMax zoomMinMax,
+    int newPaneIndex, {
+    required int start,
+    required int end,
+    required bool reset,
+  }) {
+    _start = start;
+    _end = end;
+    // 缩放态下 _minMax 无意义: 恒为 null, 退出时才由自动路径重建。
+    _minMax = null;
+
+    for (final object in paintableChildren) {
+      object.doUpdateVisibleMinMax(
+        newPaneIndex,
+        start: start,
+        end: end,
+        reset: reset,
+      );
+    }
+
+    for (final object in paintableChildren) {
+      if (object.paintMode == PaintMode.combine) {
+        // 下发到子对象的 _zoomMinMax 而不是 _minMax: 后者是自动路径的缓存, 写进去会让子对象
+        // 在退出缩放态后凭 start/end 未变而早退, 把缩放区间当成自动结果返回给主区。
+        //
+        // 逐个下发副本: [MinMax] 是可变对象, 共享实例会让任意一方的就地修改扩散到其余对象。
+        object.setZoomMinMax(zoomMinMax.clone());
+      }
+    }
+
+    _dyFactor = null;
+    return zoomMinMax;
   }
 
   /// 是否首先绘制Tips区域

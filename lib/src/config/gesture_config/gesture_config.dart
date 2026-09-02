@@ -42,13 +42,14 @@ class GestureConfig {
     this.supportKeyboardShortcuts = true,
     this.enableZoom = false,
     this.zoomStartMinDistance = 5,
-    this.zoomSpeed = 1,
-    this.isManualSetZoomRect = false,
+    double maxZoomPerGesture = 6,
+    this.useCustomZoomRect = false,
     double panClaimRatio = 2,
     double dragClaimSlopFactor = 0.5,
     double scaleClaimSlopFactor = 1,
   })  : tolerance = tolerance ?? ToleranceConfig(),
         scaleSpeed = scaleSpeed.clamp(1, 30),
+        maxZoomPerGesture = maxZoomPerGesture.clamp(1.2, 20),
         panClaimRatio = panClaimRatio.clamp(1, 10),
         dragClaimSlopFactor = dragClaimSlopFactor.clamp(0.1, 0.9),
         scaleClaimSlopFactor = scaleClaimSlopFactor.clamp(0.5, 4);
@@ -86,11 +87,37 @@ class GestureConfig {
   /// Zoom缩放操作启动最小距离. 默认5. 注: 仅支持触摸设备.
   final int zoomStartMinDistance;
 
-  /// Zoom缩放速度主区图表速度. 默认1.
-  final int zoomSpeed;
+  /// 单次价格轴拖动最多能把可见价格区间放大或压缩的倍数。
+  ///
+  /// 是上界而非实际生效值：一轮手势的缩放系数随手指位置在 `[1 / maxZoomPerGesture,
+  /// maxZoomPerGesture]` 内连续变化，两端互为倒数，且与主图区高度无关。**每轮手势独立**，
+  /// 抬手重抓即重新计量（每次按下都取新的区间快照），所以多次手势可以叠加到任意总倍数。
+  ///
+  /// 取值 [1.2, 20]：越大越灵敏，同样位移产生更大的跨度变化，代价是手指贴近主图区边界时
+  /// 最后一段行程更陡；取 1.2 已相当迟钝（单次最多 1.2 倍）。默认 6 对齐 TradingView
+  /// price scale 的软化项（主图区高度的 0.2 倍，等价 `1 + 1 / 0.2 = 6`）。
+  ///
+  /// 内部换算成软化项 `s = 主图区高度 / (maxZoomPerGesture - 1)`，加在缩放系数的分子与分母
+  /// 两侧。手指永远到不了「虚拟底边」，比值因此不会在贴边时爆炸；而两侧同加保住了「手指
+  /// 回到起点即系数为 1」这个不动点——只加分母会让「拖回起点即还原」失效。
+  ///
+  /// 这一个参数就是缩放灵敏度的全部自由度：行程固定为主图区高度，所以中性点灵敏度
+  /// `1 / (按下距底距离 + s)` 与全局倍数上界由同一个 `s` 决定，不存在第二个可独立调节的量。
+  final double maxZoomPerGesture;
 
-  /// 是否手动设置缩放区域
-  final bool isManualSetZoomRect;
+  /// 缩放滑竿区域是否由宿主自行指定。
+  ///
+  /// false（默认）：由蜡烛指标在绘制 Y 轴刻度时按最宽刻度文本自动上报——贴主区右缘、宽度
+  /// 等于最宽刻度文本、高度取主区全高。true：框架不再自动上报，区域完全来自宿主调用
+  /// [FlexiKlineController.setChartZoomSlideBarRect]。
+  ///
+  /// 只决定这个矩形从哪来，不改变任何命中判定：落点归属、滚轮缩放、光标提示与
+  /// `onChartZoomStart` 四处都无条件读 `chartZoomSlideBarRect`。是否启用缩放由
+  /// [enableZoom] 决定，与本项无关。
+  ///
+  /// 置 true 时宿主必须传 canvas 坐标（与手势位置同一坐标系，主区 topLeft 恒为原点）。
+  /// 框架不做坐标转换——四个判定点必须读同一个坐标系，任何单点补偿都救不回来。
+  final bool useCustomZoomRect;
 
   /// 图表整体平移抢占手势竞技场所需的横向占优比例，判据为 `|dx| > |dy| × panClaimRatio`。
   ///

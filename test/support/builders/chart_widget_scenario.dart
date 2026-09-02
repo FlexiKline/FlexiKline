@@ -93,6 +93,7 @@ Future<({FlexiKlineController chart, ScrollController scroll})> pumpChartInListV
   bool enableDraw = false,
   Size chartSize = const Size(400, 480),
   double fillerHeight = 800,
+  TestCandleIndicator? candle,
 }) async {
   final chart = createChartController();
   chart.switchKlineData(spec);
@@ -127,7 +128,7 @@ Future<({FlexiKlineController chart, ScrollController scroll})> pumpChartInListV
                 height: chartSize.height,
                 child: FlexiKlineWidget(
                   controller: chart,
-                  candle: TestCandleIndicator(),
+                  candle: candle ?? TestCandleIndicator(),
                   time: TestTimeIndicator(),
                   mainIndicators: mainIndicators,
                   isTouchDevice: true,

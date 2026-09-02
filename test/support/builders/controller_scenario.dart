@@ -15,10 +15,26 @@
 /// Controller 级薄 arrange 脚手架。
 library;
 
+import 'dart:ui' show PictureRecorder;
+
 import 'package:flexi_kline/flexi_kline.dart';
+import 'package:flutter/widgets.dart' show Canvas;
+import 'package:flutter_test/flutter_test.dart';
 
 import '../doubles/fake_kline_config.dart';
 import '../doubles/test_indicators.dart';
+
+/// 驱动一帧图表绘制，让 `doUpdateVisibleMinMax` 走完一轮并泵掉这一帧。
+///
+/// [ControllerScenario.initWithData] 不绘制，所以任何依赖 `minMax` 已算出的断言
+/// （Y 轴映射、缩放、能否开始缩放）都要先调一次本方法。
+///
+/// 必须泵帧：`calculatePaintChartRange` 会排一个 post-frame 回调去写 notifier，不泵掉它
+/// 会活到本用例 dispose 之后，在下一个用例的首帧里炸「used after disposed」。
+Future<void> paintChartFrame(WidgetTester tester, FlexiKlineController chart) async {
+  chart.paintChart(Canvas(PictureRecorder()), chart.canvasRect.size);
+  await tester.pump();
+}
 
 /// Controller 级场景构建器
 class ControllerScenario {

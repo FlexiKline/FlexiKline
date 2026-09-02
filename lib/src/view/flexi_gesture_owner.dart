@@ -25,14 +25,13 @@ import '../kline_controller.dart';
 ///
 /// **声明顺序即优先级**，按「判据越精确越优先，同精度时有跟手焦点的排他模式优先」排：
 /// 排他模式（drawDrawing、cross）→ 命中具体对象（drawEditing、paintObject）→ 区域性辅助
-/// 操作（zoomSlider、zoomingMove，判据只有「落点在不在某个 Rect 里」）→ 全局兜底。
+/// 操作（zoomSlider，判据只有「落点在不在某个 Rect 里」）→ 全局兜底。
 enum FlexiGestureOwner {
   drawDrawing,
   drawEditing,
   cross,
   paintObject,
   zoomSlider,
-  zoomingMove,
   chartScale,
   chartPan;
 
@@ -42,9 +41,13 @@ enum FlexiGestureOwner {
   /// 必须与真正的认领入口同源（`hitTestDrawObjectDrag` ↔ `onDrawMoveStart`，
   /// `hitTestPaintObjectDrag` ↔ `onPaintObjectDragStart`），否则会白抢一次手势。
   ///
-  /// zoom 族排在末位而非首位：`chartZoomSlideBarRect` 是价格轴那一整条全高隐形热区，
-  /// `isChartZooming` 又是粘性状态且 `zoomingMove` 的领地是整个 `mainRect`——排在前面就会
-  /// 截走已进入模式或已命中对象的手势（表现为「十字线已显示，拖动却把整个图表拖走」）。
+  /// [zoomSlider] 排在落点族末位而非首位：`chartZoomSlideBarRect` 是价格轴那一整条全高
+  /// 隐形热区，排在前面就会截走已进入模式或已命中对象的手势（表现为「十字线已显示，拖动
+  /// 却把整个图表拖走」）。
+  ///
+  /// 没有「zoom 态平移」这一档：Y 轴是否由用户接管属于模型状态，不该在归属层表达。zoom
+  /// 态下的纵向拖动与普通平移走同一条 [chartPan]，由 [ChartBinding.onChartMove] 按
+  /// `isChartZooming` 决定是否消费 dy。
   ///
   /// [FlexiScaleGestureRecognizer] 的落点即抢占也问这个函数（`== zoomSlider`），不走单独的
   /// 旁路入口：抢占与归属同源，才不会出现「为 zoom 抢下竞技场、却由别人驱动」。
@@ -58,7 +61,6 @@ enum FlexiGestureOwner {
     if (controller.gestureConfig.enableZoom && controller.chartZoomSlideBarRect.include(position)) {
       return zoomSlider;
     }
-    if (controller.isChartZooming && controller.mainRect.include(position)) return zoomingMove;
     return null;
   }
 
@@ -84,6 +86,9 @@ enum FlexiGestureOwner {
       return chartScale;
     }
     if (delta.distance <= hitSlop) return null;
+    // Y 轴已由用户接管时纵向位移是有意义的操作(平移价格区间), 方向锥判据不适用。
+    // 自动模式下平移只消费 dx, 纵向位移对它没有意义, 让给外层是语义正确而非妥协。
+    if (controller.isChartZooming) return chartPan;
     if (delta.dx.abs() > delta.dy.abs() * config.panClaimRatio) return chartPan;
     return null;
   }
@@ -108,7 +113,6 @@ enum FlexiGestureOwner {
         return controller.crossOffset;
       case paintObject:
       case zoomSlider:
-      case zoomingMove:
         return downPosition;
       case chartScale:
       case chartPan:
@@ -122,7 +126,7 @@ enum FlexiGestureOwner {
   /// 路径（锚点、认领、驱动、收尾）。
   bool get isChartFallback => switch (this) {
         chartScale || chartPan => true,
-        drawDrawing || drawEditing || cross || paintObject || zoomSlider || zoomingMove => false,
+        drawDrawing || drawEditing || cross || paintObject || zoomSlider => false,
       };
 
   /// 是否要求长按让开竞技场。
@@ -132,6 +136,6 @@ enum FlexiGestureOwner {
   /// 归属各有自己的长按路径，不能让开。
   bool get suppressesLongPress => switch (this) {
         drawDrawing || cross => true,
-        drawEditing || paintObject || zoomSlider || zoomingMove || chartScale || chartPan => false,
+        drawEditing || paintObject || zoomSlider || chartScale || chartPan => false,
       };
 }

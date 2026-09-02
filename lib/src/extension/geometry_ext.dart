@@ -59,6 +59,21 @@ extension FlexiKlineRectExt on Rect {
   bool hitTestTop(double dy, {double minDistance = 0}) {
     return (dy - top).abs() <= minDistance;
   }
+
+  /// [dy] 到本矩形底边的距离, 夹取到 `[0, height]`。
+  ///
+  /// 画布 dy 向下增长, 从底边量起相当于把 Y 轴翻转: 底边为 0, 顶边为 [height]。夹取让
+  /// [dy] 落在矩形之外时距离停在边界而不继续增长。
+  ///
+  /// [height] 非正时返回 null。这不只是「没有可度量的内部」这类语义洁癖: 矩形上下翻转
+  /// (`bottom < top`)时 [height] 为负, `clamp(0.0, height)` 的上界小于下界会直接抛
+  /// `ArgumentError`。翻转是可达状态 —— `chartRect` 的高度是
+  /// `size.height - padding.vertical - tipsAreaHeight`, 主区很矮而主区指标很多时会变负,
+  /// 这也是 `clampDyInChart` 一族要套 `math.max` 的同一个理由。
+  double? distanceFromBottom(double dy) {
+    if (height <= 0) return null;
+    return (bottom - dy).clamp(0.0, height);
+  }
 }
 
 extension FlexiOffsetExt on Offset {

@@ -201,8 +201,17 @@ mixin PaintObjectGeometryStateMixin<T extends Indicator<IIndicatorKey>> on Indic
   /// 用于平移过程中 Y 轴边界平滑过渡的缓存
   MinMax? _smoothMinMax;
 
+  /// 缩放态(Y 轴由用户接管)下的价格区间; null 表示由可见数据自动适配。
+  ///
+  /// 一经设定, 可见区间变化(平移、蜡烛宽度缩放)不重算它, 只有显式复位才交还自动模式。
+  /// 权威状态是 [PaintContext.isChartZooming], 本字段是它的数据载体, 两者同置同清。
+  ///
+  /// 只作用于主区坐标系及其 combine 子对象。[PaintMode.alone] 的子对象拥有独立坐标体系,
+  /// 其区间必须恒随可见数据自动重算, 不接受下发。
+  MinMax? _zoomMinMax;
+
   @override
-  MinMax get minMax => _minMax ?? MinMax.zero;
+  MinMax get minMax => _zoomMinMax ?? _minMax ?? MinMax.zero;
 
   @override
   void setMinMax(MinMax val) {
@@ -211,9 +220,34 @@ mixin PaintObjectGeometryStateMixin<T extends Indicator<IIndicatorKey>> on Indic
     _dyFactor = null;
   }
 
+  /// 是否已有缩放区间, 即用户是否已接管 Y 轴。
+  bool get hasZoomMinMax => _zoomMinMax != null;
+
+  /// 设置缩放区间, 进入用户接管 Y 轴的状态。
+  void setZoomMinMax(MinMax val) {
+    _zoomMinMax = val;
+    _smoothMinMax = null;
+    _dyFactor = null;
+  }
+
+  /// 清除缩放区间, 交还给可见数据自动适配。
+  ///
+  /// 同时清 [_minMax]: 缩放态下它未被维护, 留着会让下一帧的早退分支拿到过期区间。
+  void clearZoomMinMax() {
+    if (_zoomMinMax == null) return;
+    _zoomMinMax = null;
+    _minMax = null;
+    _smoothMinMax = null;
+    _dyFactor = null;
+  }
+
   /// 对 minMax 做平滑插值, 减少平移过程中 Y 轴坐标系的跳变
   /// [smoothFactor] 控制平滑程度: 值越小越平滑(但响应越慢), 建议 0.1~0.25
   /// 当 factor=1.0 时, lerp 直接返回精确值, 无需特殊处理
+  ///
+  /// 只服务自动路径: 缩放区间由用户精确控制, 插值只会让跟手性变差。这条边界由
+  /// [_zoomMinMax] 存在时的三重事实共同保证 —— [minMax] 优先返回它、[setZoomMinMax] 清掉
+  /// 平滑缓存、且缩放态的重算路径根本不调本方法。
   void smoothMinMax({double smoothFactor = 1.0}) {
     if (_minMax == null) return;
     if (smoothFactor >= 1.0) {
@@ -434,11 +468,11 @@ mixin PaintCandleChartMixin<T extends Indicator> on PaintObject<T> {
   }) {
     barWidthHalf ??= candleWidthHalf - candleSpacing;
     final isLong = m.close >= m.open;
-    high ??= valueToDy(m.high);
-    low ??= valueToDy(m.low);
+    high ??= valueToDy(m.high, correct: false);
+    low ??= valueToDy(m.low, correct: false);
     (open, close) = ensureMinDistance(
-      open ?? valueToDy(m.open),
-      close ?? valueToDy(m.close),
+      open ?? valueToDy(m.open, correct: false),
+      close ?? valueToDy(m.close, correct: false),
     );
 
     final path = Path()..moveTo(dx, high);

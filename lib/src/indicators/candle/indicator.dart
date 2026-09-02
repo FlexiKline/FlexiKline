@@ -361,8 +361,8 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
     for (var i = start; i < end; i++) {
       m = klineData[i];
       final dx = offset - (i - start) * candleActualWidth;
-      final highY = valueToDy(m.high);
-      final lowY = valueToDy(m.low);
+      final highY = valueToDy(m.high, correct: false);
+      final lowY = valueToDy(m.low, correct: false);
       paintCandleBar(
         canvas,
         m,
@@ -489,7 +489,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
       if (size.width > maxTickWidth) maxTickWidth = size.width;
     }
 
-    if (!context.gestureConfig.isManualSetZoomRect &&
+    if (!context.gestureConfig.useCustomZoomRect &&
         (_zoomSlideBarSize == null || _zoomSlideBarSize!.width != maxTickWidth)) {
       final barSize = Size(maxTickWidth, drawableRect.height);
       _zoomSlideBarSize = barSize;

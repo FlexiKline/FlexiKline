@@ -104,8 +104,10 @@ class FakePaintContext implements PaintContext {
   @override
   Rect get canvasRect => Rect.zero;
 
+  /// 由测试驱动的主区区域；默认 [Rect.zero]，需要非零 `chartRect.height`（例如断言
+  /// `dyFactor`）的测试自行赋值。
   @override
-  Rect get mainRect => Rect.zero;
+  Rect mainRect = Rect.zero;
 
   @override
   Rect get subRect => Rect.zero;

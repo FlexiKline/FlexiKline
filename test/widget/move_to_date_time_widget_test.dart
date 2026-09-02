@@ -53,6 +53,7 @@ Future<FlexiKlineController> _pumpChart(
   WidgetTester tester, {
   bool withData = true,
   bool? isTouchDevice,
+  bool visibleMinMaxFromData = false,
 }) async {
   final controller = createChartController();
   if (withData) {
@@ -68,7 +69,7 @@ Future<FlexiKlineController> _pumpChart(
           height: 480,
           child: FlexiKlineWidget(
             controller: controller,
-            candle: TestCandleIndicator(),
+            candle: TestCandleIndicator(visibleMinMaxFromData: visibleMinMaxFromData),
             time: TestTimeIndicator(),
             isTouchDevice: isTouchDevice,
           ),
@@ -444,12 +445,13 @@ void main() {
     });
 
     testWidgets('touch zoom slider cancels a pending position animation when dragging starts', (tester) async {
-      final controller = await _pumpChart(tester, isTouchDevice: true);
+      // onChartZoomStart 要求已有可见价格区间: 没有区间可缩放时不进入缩放态。
+      final controller = await _pumpChart(tester, isTouchDevice: true, visibleMinMaxFromData: true);
       addTearDown(() => disposeChart(tester, controller));
       controller.updateGestureConfig(
         (config) => config.copyWith(
           enableZoom: true,
-          isManualSetZoomRect: true,
+          useCustomZoomRect: true,
         ),
       );
       controller.setChartZoomSlideBarRect(
@@ -487,12 +489,12 @@ void main() {
     });
 
     testWidgets('touch zooming move cancels a pending position animation', (tester) async {
-      final controller = await _pumpChart(tester, isTouchDevice: true);
+      final controller = await _pumpChart(tester, isTouchDevice: true, visibleMinMaxFromData: true);
       addTearDown(() => disposeChart(tester, controller));
       controller.updateGestureConfig(
         (config) => config.copyWith(
           enableZoom: true,
-          isManualSetZoomRect: true,
+          useCustomZoomRect: true,
         ),
       );
       controller.setChartZoomSlideBarRect(
@@ -509,7 +511,7 @@ void main() {
         'chart zoom slide bar layout',
       );
       expect(
-        controller.onChartZoomStart(controller.chartZoomSlideBarRect.center, false),
+        controller.onChartZoomStart(controller.chartZoomSlideBarRect.center),
         isTrue,
       );
       await tester.pump();

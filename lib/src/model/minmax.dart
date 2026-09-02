@@ -74,6 +74,31 @@ class MinMax {
     }
   }
 
+  /// 围绕区间中点按 [coeff] 缩放跨度, 中点保持不变。
+  ///
+  /// [coeff] 大于 1 时跨度变大, 同样的像素高度装进更大的价格跨度, 视觉上内容被压缩;
+  /// 小于 1 时相反。
+  ///
+  /// 乘法本身不会产生 0 跨度, 所以不需要额外的跨度下限; 但极端缩小后 [max] 与 [min] 的
+  /// 差可能小于其自身的浮点精度而相等, 此时 [diffDivisor] 回落到 1, 不会除零。
+  ///
+  /// [coeff] 非有限值或当前跨度为 0 时不做任何改动。
+  void scaleAroundCenter(double coeff) {
+    if (!coeff.isFinite || isSame) return;
+    final center = (max + min).divNum(2);
+    max = center + (max - center).mulNum(coeff);
+    min = center + (min - center).mulNum(coeff);
+  }
+
+  /// 整体平移区间, 跨度保持不变。
+  ///
+  /// [delta] 非有限值或为 0 时不做任何改动。
+  void shift(num delta) {
+    if (!delta.isFinite || delta == 0) return;
+    max = max.addNum(delta);
+    min = min.addNum(delta);
+  }
+
   void minToZero() {
     min = min > FlexiNum.zero ? FlexiNum.zero : min;
   }

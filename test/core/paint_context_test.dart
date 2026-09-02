@@ -65,13 +65,13 @@ void main() {
       controller.moveToPositionCallback = null;
     });
 
-    test('reportChartZoomSlideBarRect respects manual zoom rect config', () {
+    test('reportChartZoomSlideBarRect respects useCustomZoomRect', () {
       final controller = FlexiKlineController(
         configuration: FakeFlexiKlineConfiguration(),
       );
 
       controller.gestureConfig = controller.gestureConfig.copyWith(
-        isManualSetZoomRect: true,
+        useCustomZoomRect: true,
       );
 
       (controller as PaintContext).reportChartZoomSlideBarRect(

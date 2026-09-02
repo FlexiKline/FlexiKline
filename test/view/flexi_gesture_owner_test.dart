@@ -46,6 +46,7 @@ List<CandleModel> _candles() => List.generate(
 void main() {
   Future<({ControllerScenario scene, TestInteractiveIndicator indicator})> arrange({
     Rect hitRect = _sharedHit,
+    TestCandleIndicator? candle,
   }) async {
     final scene = ControllerScenario();
     addTearDown(scene.dispose);
@@ -53,7 +54,13 @@ void main() {
       key: const ExternalIndicatorKey('gesture_owner'),
       hitRect: hitRect,
     );
-    await scene.initWithData(_spec, _candles(), mainIndicators: [indicator], canvasWidth: 400);
+    await scene.initWithData(
+      _spec,
+      _candles(),
+      mainIndicators: [indicator],
+      canvasWidth: 400,
+      candle: candle,
+    );
     scene.controller.flushPendingKlineData();
     return (scene: scene, indicator: indicator);
   }
@@ -79,7 +86,7 @@ void main() {
     WidgetTester tester, {
     Rect? slideRect,
   }) async {
-    final arranged = await arrange();
+    final arranged = await arrange(candle: TestCandleIndicator(visibleMinMaxFromData: true));
     arranged.scene.controller.updateGestureConfig((config) => config.copyWith(enableZoom: true));
     arranged.scene.controller.setChartZoomSlideBarRect(
       slideRect ?? Rect.fromCenter(center: _onLine, width: 80, height: 20),
@@ -87,6 +94,8 @@ void main() {
     // setChartZoomSlideBarRect 走 addPostFrameCallback, 必须泵一帧才生效。
     await tester.pumpWidget(const SizedBox());
     await tester.pump();
+    // onChartZoomStart 要求已有可见价格区间: 没有区间可缩放时不进入缩放态。
+    await paintChartFrame(tester, arranged.scene.controller);
     return arranged;
   }
 
@@ -126,21 +135,24 @@ void main() {
     );
   });
 
-  testWidgets('zooming move 让位于同位置 PaintObject', (tester) async {
+  /// zoom 态不再是一档落点归属：Y 轴由谁控制属于模型状态，不在归属层表达。
+  ///
+  /// 曾有一档 `zoomingMove`，领地是整个 `mainRect`，于是「调过一次留白」之后主区内任何拖动
+  /// 都归它 —— 既截走同位置的 PaintObject，又让用户无从感知自己身处何种模式。
+  testWidgets('zoom 态下主区落点仍归同位置 PaintObject', (tester) async {
     // 滑竿挪到命中区之外, 用它启动 zoom, 再查命中区内的落点。
     const sliderRect = Rect.fromLTWH(300, 0, 40, 200);
     final (:scene, indicator: _) = await arrangeZoomOn(tester, slideRect: sliderRect);
-    expect(scene.controller.onChartZoomStart(sliderRect.center, false), isTrue);
+    expect(scene.controller.onChartZoomStart(sliderRect.center), isTrue);
+    expect(scene.controller.isChartZooming, isTrue);
 
-    // isChartZooming 是粘性状态、领地是整个 mainRect, 排在前面等于长期接管主区所有拖动。
     expect(
       FlexiGestureOwner.resolveLanded(scene.controller, _onLine),
       FlexiGestureOwner.paintObject,
     );
   });
 
-  testWidgets('其余落点归属都不认领时才归 zoom slider 与 zooming move', (tester) async {
-    // 两个查询点都落在 PaintObject 命中区(_sharedHit)之外, 于是只剩 zoom 族可认领。
+  testWidgets('zoom 态下无落点归属的主区拖动落到兜底，不再有专属归属', (tester) async {
     const sliderRect = Rect.fromLTWH(300, 0, 40, 200);
     final (:scene, indicator: _) = await arrangeZoomOn(tester, slideRect: sliderRect);
 
@@ -148,10 +160,60 @@ void main() {
       FlexiGestureOwner.resolveLanded(scene.controller, sliderRect.center),
       FlexiGestureOwner.zoomSlider,
     );
-    expect(scene.controller.onChartZoomStart(sliderRect.center, false), isTrue);
+    expect(scene.controller.onChartZoomStart(sliderRect.center), isTrue);
+    // 命中区之外、滑竿之外的落点: 落点族全部不认领, 交给兜底族按位移判定。
     expect(
       FlexiGestureOwner.resolveLanded(scene.controller, const Offset(200, 150)),
-      FlexiGestureOwner.zoomingMove,
+      isNull,
+    );
+  });
+
+  /// 兜底判据按模型状态分流：自动模式下纯纵向拖动让给外层，缩放态下它是平移价格区间。
+  testWidgets('自动模式：纯纵向拖动不认领，让给外层滚动', (tester) async {
+    final (:scene, indicator: _) = await arrangeZoomOn(tester);
+    expect(scene.controller.isChartZooming, isFalse);
+
+    expect(
+      FlexiGestureOwner.resolveChartFallback(
+        scene.controller,
+        delta: const Offset(0, 40),
+        spanDelta: 0,
+        hitSlop: kTouchSlop,
+      ),
+      isNull,
+    );
+  });
+
+  testWidgets('缩放态：纯纵向拖动归 chartPan，方向锥判据不适用', (tester) async {
+    const sliderRect = Rect.fromLTWH(300, 0, 40, 200);
+    final (:scene, indicator: _) = await arrangeZoomOn(tester, slideRect: sliderRect);
+    expect(scene.controller.onChartZoomStart(sliderRect.center), isTrue);
+
+    expect(
+      FlexiGestureOwner.resolveChartFallback(
+        scene.controller,
+        delta: const Offset(0, 40),
+        spanDelta: 0,
+        hitSlop: kTouchSlop,
+      ),
+      FlexiGestureOwner.chartPan,
+    );
+  });
+
+  testWidgets('缩放态：位移不足 hitSlop 仍不认领', (tester) async {
+    const sliderRect = Rect.fromLTWH(300, 0, 40, 200);
+    final (:scene, indicator: _) = await arrangeZoomOn(tester, slideRect: sliderRect);
+    expect(scene.controller.onChartZoomStart(sliderRect.center), isTrue);
+
+    // 放宽的只有方向判据, 阈值判据照旧 —— 且比旧 zoomingMove 的 claimSlop 更晚抢占。
+    expect(
+      FlexiGestureOwner.resolveChartFallback(
+        scene.controller,
+        delta: const Offset(0, kTouchSlop - 1),
+        spanDelta: 0,
+        hitSlop: kTouchSlop,
+      ),
+      isNull,
     );
   });
 

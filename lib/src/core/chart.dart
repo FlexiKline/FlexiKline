@@ -60,6 +60,12 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
       onPaintObjectDragCancel();
       _paintObjectManager.notifySpecChanged(oldSpec);
     }
+    // 换标的才交还 Y 轴: 另一个标的的价格区间没有意义。换周期不退出——同一标的的同一段
+    // 价格, 用户调过的视野应当保留。判据必须是 symbol 而非 spec.key, 后者把 interval
+    // 一起编码, 用它会把换周期误判成换标的。
+    if (isMounted && klineData.spec.symbol != oldSpec.symbol) {
+      exitChartZoom();
+    }
   }
 
   final ValueNotifier<int> _repaintChart = ValueNotifier(0);
@@ -144,7 +150,17 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
     try {
       /// 保存画布状态
       canvas.save();
-      canvas.clipRect(_panSmoothFactor >= 1.0 ? mainRect : canvasRect);
+      // 平滑期放宽裁剪: 插值中的区间滞后于可见数据, 新进入的蜡烛会落在区间外, 而折线图一族
+      // 本就以 `correct: false` 绘制, 裁在主区边缘会看起来被削掉一刀。
+      //
+      // 缩放态不放宽: 区间由用户接管、不做插值(见 [PaintObjectGeometryStateMixin.smoothMinMax]),
+      // 而 `onChartMove` 无条件写 `_panSmoothFactor`, 于是缩放态平移必然满足 `< 1.0` —— 为一个
+      // 不可能发生的平滑放宽裁剪, 只会让缩放放大后溢出的蜡烛画进副区。
+      //
+      // 判据取 `hasZoomMinMax` 而非 `isChartZooming`: 前者与 `doUpdateVisibleMinMax` 的分支同源,
+      // 后者在命中滑竿时即置位、早于区间写入, 那之间主区仍走自动路径。
+      final smoothing = _panSmoothFactor < 1.0 && !mainPaintObject.hasZoomMinMax;
+      canvas.clipRect(smoothing ? canvasRect : mainRect);
       mainPaintObject.doUpdateVisibleMinMax(
         paneIndex++,
         start: klineData.start,
@@ -260,17 +276,12 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
       changed = true;
     }
 
+    // 消费 dy 的条件是「Y 轴已由用户接管」这个模型状态, 而不是手势类型: 自动模式下纵向
+    // 位移对图表没有意义, 缩放态下它平移价格区间。守卫放在这里而非手势层, 于是同一条平移
+    // 路径在两种模式下都成立。
     double dyDelta;
-    if (data.isMove && (dyDelta = data.dyDelta) != 0) {
-      final newPadding = mainPadding.copyWith(
-        top: mainPadding.top + dyDelta,
-        bottom: mainPadding.bottom - dyDelta,
-      );
-      if (newPadding.top > mainSize.height || newPadding.bottom > mainSize.height) {
-        return;
-      }
-
-      changed = mainPaintObject.doUpdateLayout(padding: newPadding) || changed;
+    if (isChartZooming && (dyDelta = data.dyDelta) != 0) {
+      changed = _shiftZoomMinMaxByDy(dyDelta) || changed;
     }
 
     if (changed) {
@@ -280,6 +291,27 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
       // offset 被 clamp 未变化时, 仍需触发重绘以继续 smoothMinMax 收敛
       markRepaintChart();
     }
+  }
+
+  /// 按像素位移平移主区可见价格区间; 跨度不变。
+  ///
+  /// 平移不需要快照: 加法可精确累加, 且 [MinMax.shift] 保持跨度不变, 因此 `dyFactor`
+  /// 全程恒定, 逐帧累加与按总位移一次算是同一个结果。
+  ///
+  /// 向下拖动([dyDelta] > 0)时区间上移, 内容随手指下移 —— `valueToDy` 里固定价格的 dy
+  /// 要增大, 就需要 min 增大。
+  bool _shiftZoomMinMaxByDy(double dyDelta) {
+    final object = mainPaintObject;
+    final factor = object.dyFactor;
+    if (factor <= 0 || !factor.isFinite) return false;
+
+    final priceDelta = dyDelta / factor;
+    if (priceDelta == 0 || !priceDelta.isFinite) return false;
+
+    final next = object.minMax.clone();
+    next.shift(priceDelta);
+    object.setZoomMinMax(next);
+    return true;
   }
 
   /// 平移结束(包括惯性平移完成后), 重置平滑因子并触发一次精确重绘
@@ -359,72 +391,126 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
     _setCandleWidth(candleWidth, sync: true);
   }
 
-  /// 退出指标图的缩放
+  /// 退出指标图的缩放, Y 轴交还给可见数据自动适配。
+  ///
+  /// [isChartZooming] 置 false 的唯一入口 —— 它与清除缩放区间是同一件事, 不能分开发生,
+  /// 否则会留下「按钮已消失、Y 轴仍锁着」的失同步状态。
   void exitChartZoom() {
     _isChartStartZoom.value = false;
-    final changed = mainPaintObject.doUpdateLayout(
-      padding: mainOriginPadding,
-    );
-    markRepaintChart(reset: changed);
+    _endChartZoomSession();
+    // 没有缩放区间可清就没有画面变化, 直接返回省掉一次空重绘。
+    if (!mainPaintObject.hasZoomMinMax) return;
+    mainPaintObject.clearZoomMinMax();
+    markRepaintChart(reset: true);
     markRepaintDraw();
   }
 
-  /// 设置指标图中用于缩放操作的滑竿区域
-  /// 注: 此区域是相对于mainRect
+  /// 本轮 zoom 手势的锚点: 按下时的区间快照与手指距主图区底部的距离。
+  ///
+  /// 两者同生同灭, 打包成一个 record 而非两个可空字段: 非空即代表「本轮可以缩放」,
+  /// 使用处不必各判一次空。
+  ///
+  /// 每帧基于快照重算而不逐帧累乘: 累乘会随节流丢帧漂移, 且无法表达「拖回起点即还原」。
+  ({MinMax minMax, double distanceFromBottom})? _chartZoomAnchor;
+
+  /// 本轮已应用的缩放系数, 用于跳过重复的同系数更新。
+  ///
+  /// 不能改成「系数接近 1 就跳过」: 快照口径下 `coeff == 1` 恰恰表示「手指回到起点、
+  /// 区间应还原为快照」, 跳过会把上一帧的区间留下。
+  double? _chartZoomAppliedCoeff;
+
+  void _endChartZoomSession() {
+    _chartZoomAnchor = null;
+    _chartZoomAppliedCoeff = null;
+  }
+
+  /// 设置指标图中用于缩放操作的滑竿区域。
+  ///
+  /// [rect] 必须是 canvas 坐标, 与手势位置同一坐标系(主区 topLeft 恒为原点), 会被夹取到
+  /// [canvasRect] 内。传入其他坐标系的矩形不会被转换、只会被夹坏 —— 判定滑竿命中的地方有
+  /// 四处(落点归属、滚轮缩放、光标提示、[onChartZoomStart]), 坐标系必须在这里就对齐, 任何
+  /// 单点补偿都救不回来: 落点归属在最前面, 它判不中就走不到后面。
   void setChartZoomSlideBarRect(Rect rect) {
-    if (!rect.isEmpty && !rect.isInfinite) {
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        _chartZoomSlideBarRect.value = rect.clampRect(canvasRect);
-      });
-    }
+    if (rect.isEmpty || rect.isInfinite) return;
+    assert(
+      rect.overlaps(mainRect),
+      'chartZoomSlideBarRect must be in canvas coordinates and overlap mainRect. '
+      'Got $rect, mainRect=$mainRect.',
+    );
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _chartZoomSlideBarRect.value = rect.clampRect(canvasRect);
+    });
   }
 
   @override
   void reportChartZoomSlideBarRect(Rect rect) {
-    if (!gestureConfig.isManualSetZoomRect) {
+    if (!gestureConfig.useCustomZoomRect) {
       setChartZoomSlideBarRect(rect);
     }
   }
 
-  /// 检测是否开始指标图缩放
-  /// [isConvert] 是否转换为canvas区域坐标
-  bool onChartZoomStart(Offset position, [bool isConvert = true]) {
+  /// 检测是否开始指标图缩放, 命中滑竿则同时取本轮的区间快照与起点。
+  ///
+  /// 返回 false 时**不改** [isChartZooming]: 置 false 会在「已处于缩放态、本轮又没抓到滑竿」
+  /// 时留下 `isChartZooming == false` 而缩放区间还在的失同步状态 —— 退出按钮消失、Y 轴却
+  /// 锁着, 用户看不到复位入口。交还 Y 轴只有 [exitChartZoom] 一条路径。
+  bool onChartZoomStart(Offset position) {
     if (!gestureConfig.enableZoom || chartZoomSlideBarRect.isEmpty) return false;
-    if (isConvert) position += chartZoomSlideBarRect.topLeft;
-    return _isChartStartZoom.value = chartZoomSlideBarRect.include(position);
+    if (!chartZoomSlideBarRect.include(position)) return false;
+
+    final distanceFromBottom = mainChartRect.distanceFromBottom(position.dy);
+    final current = mainPaintObject.minMax;
+    // 取不到锚点就不算开始: 本轮缩放注定是空操作, 不该让退出按钮亮起来。
+    if (distanceFromBottom == null || current.isZero) return false;
+
+    _chartZoomAnchor = (minMax: current.clone(), distanceFromBottom: distanceFromBottom);
+    return _isChartStartZoom.value = true;
   }
 
-  /// 指标图缩放更新
+  /// 指标图缩放更新: 按手指相对起点的位移缩放可见价格区间的跨度。
+  ///
+  /// 改的是价格→像素映射的分母(可见区间), 分子(主图区像素高度)全程不动。系数口径取自
+  /// TradingView 的 price scale: 取「距底部距离」的比值, 用比值而非线性差值是为了尺度无关
+  /// —— 系数只取决于相对按下位置移动了多大比例, 与主图区高度无关。
+  ///
+  /// 软化项 `s` 相当于给主图区在底边之外虚拟延长一段, 手指永远到不了那个虚拟底边, 于是:
+  /// 1. 比值不会在手指贴近底边时爆炸(不加软化时 `distance == 0` 直接除零、边界变成死区);
+  /// 2. 系数恒落在 `[1 / maxZoomPerGesture, maxZoomPerGesture]` 且**恒为正**, 因此不需要
+  ///    额外的系数下限 —— 负系数会让 `MinMax` 的 max/min 互换、`dyFactor` 变负, Y 轴镜像
+  ///    翻转, 且 `valueToDy` 的 clamp 会直接抛 `ArgumentError`;
+  /// 3. 两侧同加保住了「手指回到起点即系数为 1」这个不动点, 只加分母会让它偏移。
+  ///
+  /// 缩放的不动点是区间中点([MinMax.scaleAroundCenter])而非手指: 手指位置只决定缩放**幅度**,
+  /// 中点决定**锚点**。所以这是「旋钮」不是「捏合」, 手指下方的价格不保持在手指下方。
   void onChartZoomUpdate(GestureData data) {
-    double delta = data.dyDelta / 2;
-    if (delta == 0) return;
-    if (delta > 0 && (!canSetMainSize(mainSize) || mainMinSize.height > (mainChartHeight + mainOriginPadding.height))) {
-      logw(
-        'onChartZoomUpdate > cannot zoom($delta), mainSize:$mainSize is smaller than the minSize:$mainMinSize',
-      );
-      return;
-    }
+    final anchor = _chartZoomAnchor;
+    if (anchor == null) return;
 
-    delta = delta * gestureConfig.zoomSpeed;
-    final newPadding = mainPadding.copyWith(
-      top: mainPadding.top + delta,
-      bottom: mainPadding.bottom + delta,
-    );
-    if (newPadding.top > mainSize.height || newPadding.bottom > mainSize.height) {
-      return;
-    }
+    final distanceFromBottom = mainChartRect.distanceFromBottom(data.offset.dy);
+    if (distanceFromBottom == null) return;
 
-    final changed = mainPaintObject.doUpdateLayout(padding: newPadding);
-    if (changed) {
-      markRepaintChart();
-      markRepaintDraw();
-    }
+    final soften = mainChartHeight / (gestureConfig.maxZoomPerGesture - 1);
+    final coeff = (anchor.distanceFromBottom + soften) / (distanceFromBottom + soften);
+    if (_chartZoomAppliedCoeff == coeff) return;
+    _chartZoomAppliedCoeff = coeff;
+
+    final next = anchor.minMax.clone();
+    next.scaleAroundCenter(coeff);
+    mainPaintObject.setZoomMinMax(next);
+    markRepaintChart();
+    markRepaintDraw();
   }
 
+  /// 结束本轮 zoom 手势。
+  ///
+  /// 只清会话, 不退出缩放态 —— 用户接管 Y 轴之后只有显式复位(退出按钮)才交还自动模式。
+  /// 例外是本轮没有产生任何缩放(点一下滑竿就抬手): 那种情况不该留下一个需要复位的状态。
   void onChartZoomEnd() {
-    if (mainOriginPadding == mainPadding) {
-      exitChartZoom();
+    if (mainPaintObject.hasZoomMinMax) {
+      _endChartZoomSession();
+      return;
     }
+    exitChartZoom();
   }
 
   /// 按位置把点击分派给主区或副区，首个消费者终止分发。

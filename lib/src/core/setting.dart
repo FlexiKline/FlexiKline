@@ -148,15 +148,6 @@ mixin SettingBinding on KlineBindingBase {
     return timePaintObject.drawableRect;
   }
 
-  /// 缩放过程中按主区高度比例调整 padding。
-  EdgeInsets? _zoomMainPaddingByScale(double scale) {
-    if (!isChartZooming || scale == 1) return null;
-    return mainPadding.copyWith(
-      top: mainPadding.top * scale,
-      bottom: mainPadding.bottom * scale,
-    );
-  }
-
   /// 当前 fixed 画布的最小合法尺寸。
   Size get _minFixedCanvasSize {
     double subMinHeight = 0;
@@ -184,10 +175,7 @@ mixin SettingBinding on KlineBindingBase {
 
     final size = mainRect.size;
     if (size.equals(mainSize)) return false;
-    return mainPaintObject.doUpdateLayout(
-      size: size,
-      padding: _zoomMainPaddingByScale(size.height / mainSize.height),
-    );
+    return mainPaintObject.doUpdateLayout(size: size);
   }
 
   /// fixed 画布是否能容纳当前已激活指标。
@@ -241,10 +229,7 @@ mixin SettingBinding on KlineBindingBase {
       return true;
     }
     if (size.equals(mainSize)) return false;
-    final changed = mainPaintObject.doUpdateLayout(
-      size: size,
-      padding: _zoomMainPaddingByScale(size.height / mainSize.height),
-    );
+    final changed = mainPaintObject.doUpdateLayout(size: size);
     if (restore && !isFixedLayoutMode) {
       _paintObjectManager.restoreHeight();
     }
@@ -353,11 +338,8 @@ mixin SettingBinding on KlineBindingBase {
     );
   }
 
-  /// 主区当前 padding。
+  /// 主区 padding（声明值）。
   EdgeInsets get mainPadding => mainPaintObject.padding;
-
-  /// 主区原始 padding。
-  EdgeInsets get mainOriginPadding => mainPaintObject.indicator.padding;
 
   /// 主图区域。
   Rect get mainChartRect => mainPaintObject.chartRect;

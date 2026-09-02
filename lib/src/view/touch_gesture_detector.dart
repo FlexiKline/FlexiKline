@@ -353,8 +353,8 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
   ///
   /// 返回 null 表示锚点或目标已失效（只发生在落点族），调用方应降级为图表兜底。
   ///
-  /// [GestureData] 的类型不只是标签：`isPan` / `isMove` / `isScale` 会改变下游行为，最典型
-  /// 的是 [ChartBinding.onChartMove] 只在 `isMove` 时消费 dy。
+  /// [GestureData] 的类型不只是标签：`isScale` / `isSignal` 会改变下游行为。dy 是否被消费
+  /// 不在其中——那由 [ChartBinding.onChartMove] 按 `isChartZooming` 判断。
   ///
   /// case 顺序与 [FlexiGestureOwner] 的声明顺序一致，而声明顺序就是归属优先级；
   /// [onScaleUpdate] 与 [_finishSession] 的 switch 同序，任一归属的三段生命周期落在同一位置。
@@ -394,8 +394,6 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
         return (data: GestureData.pan(origin), origin: origin);
       case FlexiGestureOwner.zoomSlider:
         return (data: GestureData.zoom(origin), origin: origin);
-      case FlexiGestureOwner.zoomingMove:
-        return (data: GestureData.move(origin), origin: origin);
       case FlexiGestureOwner.chartScale:
         final position = _resolveScalePosition(session, origin.dx);
         logd('onScaleStart scale $position focal:$origin');
@@ -442,16 +440,12 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
           if (session.zoomStarted) {
             controller.onChartZoomUpdate(data);
           } else if (data.dyDelta.abs() >= gestureConfig.zoomStartMinDistance &&
-              controller.onChartZoomStart(newOffset, false)) {
+              controller.onChartZoomStart(newOffset)) {
             // 抢占决定「手势归 zoom」, zoomStartMinDistance 决定「缩放何时真正开始」,
             // 两个阈值语义不同, 不合并。
             _stopPositionAnimation();
             session.zoomStarted = true;
           }
-        case FlexiGestureOwner.zoomingMove:
-          _stopPositionAnimation();
-          data.update(newOffset);
-          controller.onChartMove(data);
         // 到不了这里: 兜底归属的位置来源是多指质心, 由下面的分支驱动。
         case FlexiGestureOwner.chartScale || FlexiGestureOwner.chartPan:
           break;
@@ -578,9 +572,6 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
         }
       case FlexiGestureOwner.zoomSlider:
         if (session.zoomStarted) controller.onChartZoomEnd();
-      case FlexiGestureOwner.zoomingMove:
-        // 无需收尾。
-        break;
       case FlexiGestureOwner.chartScale:
         controller.checkAndLoadMoreCandlesWhenPanEnd();
       case FlexiGestureOwner.chartPan:

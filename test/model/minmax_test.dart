@@ -232,6 +232,136 @@ void main() {
   });
 
   // ---------------------------------------------------------------------------
+  // scaleAroundCenter
+  // ---------------------------------------------------------------------------
+  group('MinMax.scaleAroundCenter', () {
+    test('coeff > 1：跨度变大，中点不变', () {
+      final mm = _mm(100, 20); // 中点 60, 跨度 80
+      mm.scaleAroundCenter(1.5);
+      expect(mm.size.toDouble(), closeTo(120.0, 1e-9));
+      expect((mm.max + mm.min).divNum(2).toDouble(), closeTo(60.0, 1e-9));
+      expect(mm.max.toDouble(), closeTo(120.0, 1e-9));
+      expect(mm.min.toDouble(), closeTo(0.0, 1e-9));
+    });
+
+    test('coeff < 1：跨度变小，中点不变', () {
+      final mm = _mm(100, 20);
+      mm.scaleAroundCenter(0.5);
+      expect(mm.size.toDouble(), closeTo(40.0, 1e-9));
+      expect((mm.max + mm.min).divNum(2).toDouble(), closeTo(60.0, 1e-9));
+      expect(mm.max.toDouble(), closeTo(80.0, 1e-9));
+      expect(mm.min.toDouble(), closeTo(40.0, 1e-9));
+    });
+
+    test('coeff == 1：不改变', () {
+      final mm = _mm(100, 20);
+      mm.scaleAroundCenter(1.0);
+      expect(mm.max.toDouble(), closeTo(100.0, 1e-9));
+      expect(mm.min.toDouble(), closeTo(20.0, 1e-9));
+    });
+
+    test('跨度为 0：不改变（避免退化区间被缩放放大误差）', () {
+      final mm = _mm(50, 50);
+      mm.scaleAroundCenter(2.0);
+      expect(mm.max.toDouble(), 50.0);
+      expect(mm.min.toDouble(), 50.0);
+    });
+
+    test('coeff 非有限：不改变', () {
+      final mm = _mm(100, 20);
+      mm.scaleAroundCenter(double.infinity);
+      mm.scaleAroundCenter(double.nan);
+      expect(mm.max.toDouble(), 100.0);
+      expect(mm.min.toDouble(), 20.0);
+    });
+
+    test('负数区间同样围绕中点缩放', () {
+      final mm = _mm(-10, -30); // 中点 -20, 跨度 20
+      mm.scaleAroundCenter(2.0);
+      expect(mm.size.toDouble(), closeTo(40.0, 1e-9));
+      expect(mm.max.toDouble(), closeTo(0.0, 1e-9));
+      expect(mm.min.toDouble(), closeTo(-40.0, 1e-9));
+    });
+
+    test('可达次数内反复缩小仍保持有效跨度（无需跨度下限）', () {
+      // 单次手势的系数下限是 0.1, 这里等价连续 10 次「拉满」的缩小手势。
+      final mm = _mm(100, 0);
+      for (int i = 0; i < 10; i++) {
+        mm.scaleAroundCenter(0.1);
+      }
+      expect(mm.isSame, isFalse);
+      expect(mm.size.toDouble(), greaterThan(0.0));
+      expect(mm.diffDivisor.toDouble(), closeTo(mm.size.toDouble(), 1e-30));
+    });
+
+    test('极端缩小退化为 max == min 时优雅降级，不除零', () {
+      // 浮点精度下跨度终会小于自身 ulp 而相等; 这不是崩溃路径:
+      // diffDivisor 回落到 1, dyFactor 因此仍是有限值。
+      final mm = _mm(100, 0);
+      for (int i = 0; i < 50; i++) {
+        mm.scaleAroundCenter(0.1);
+      }
+      expect(mm.isSame, isTrue);
+      expect(mm.diffDivisor.toDouble(), 1.0);
+      expect(mm.max.toDouble().isFinite, isTrue);
+      expect(mm.min.toDouble().isFinite, isTrue);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // shift
+  // ---------------------------------------------------------------------------
+  group('MinMax.shift', () {
+    test('正 delta：区间整体上移，跨度不变', () {
+      final mm = _mm(100, 20);
+      mm.shift(15);
+      expect(mm.max.toDouble(), closeTo(115.0, 1e-9));
+      expect(mm.min.toDouble(), closeTo(35.0, 1e-9));
+      expect(mm.size.toDouble(), closeTo(80.0, 1e-9));
+    });
+
+    test('负 delta：区间整体下移，跨度不变', () {
+      final mm = _mm(100, 20);
+      mm.shift(-15);
+      expect(mm.max.toDouble(), closeTo(85.0, 1e-9));
+      expect(mm.min.toDouble(), closeTo(5.0, 1e-9));
+      expect(mm.size.toDouble(), closeTo(80.0, 1e-9));
+    });
+
+    test('delta == 0：不改变', () {
+      final mm = _mm(100, 20);
+      mm.shift(0);
+      expect(mm.max.toDouble(), 100.0);
+      expect(mm.min.toDouble(), 20.0);
+    });
+
+    test('delta 非有限：不改变', () {
+      final mm = _mm(100, 20);
+      mm.shift(double.infinity);
+      mm.shift(double.nan);
+      expect(mm.max.toDouble(), 100.0);
+      expect(mm.min.toDouble(), 20.0);
+    });
+
+    test('小数 delta：精度正确', () {
+      final mm = _mm(100, 20);
+      mm.shift(0.25);
+      expect(mm.max.toDouble(), closeTo(100.25, 1e-9));
+      expect(mm.min.toDouble(), closeTo(20.25, 1e-9));
+    });
+
+    test('连续平移可累加且不损失跨度', () {
+      final mm = _mm(100, 20);
+      for (int i = 0; i < 10; i++) {
+        mm.shift(1);
+      }
+      expect(mm.max.toDouble(), closeTo(110.0, 1e-9));
+      expect(mm.min.toDouble(), closeTo(30.0, 1e-9));
+      expect(mm.size.toDouble(), closeTo(80.0, 1e-9));
+    });
+  });
+
+  // ---------------------------------------------------------------------------
   // minToZero
   // ---------------------------------------------------------------------------
   group('MinMax.minToZero', () {

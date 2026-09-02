@@ -75,6 +75,7 @@ Future<({FlexiKlineController chart, ScrollController scroll})> _pumpChartInList
   required TestInteractiveIndicator indicator,
   double? touchSlop,
   bool enableDraw = false,
+  bool visibleMinMaxFromData = false,
 }) {
   return pumpChartInListView(
     tester,
@@ -83,7 +84,13 @@ Future<({FlexiKlineController chart, ScrollController scroll})> _pumpChartInList
     mainIndicators: [indicator],
     touchSlop: touchSlop,
     enableDraw: enableDraw,
+    candle: visibleMinMaxFromData ? TestCandleIndicator(visibleMinMaxFromData: true) : null,
   );
+}
+
+/// 当前生效价格区间的上端：主图区顶边对应的价格。
+double _rangeMax(FlexiKlineController chart) {
+  return chart.dyToCandleValue(chart.mainChartRect.top, check: false)!.toDouble();
 }
 
 Offset _toGlobal(WidgetTester tester, Offset local) => toChartGlobal(tester, local);
@@ -328,7 +335,7 @@ void main() {
   _scaleStartBaselineTests();
 }
 
-/// cross 与 zooming move 在可滚动容器内的归属。
+/// cross 与 zoom 态纵向拖动在可滚动容器内的归属。
 ///
 /// 这两条的移动由 `Listener.onPointerMove` 直接驱动，Scale 只负责抢占竞技场——
 /// 归属漏判时它们不是「变卡」而是被外层滚动整体吃掉，所以成对用例必须同时钉住
@@ -406,7 +413,11 @@ void _pointerMoveOwnerArenaTests() {
         key: const ExternalIndicatorKey('arena_zooming_move'),
         hitRect: _handleRect,
       );
-      final scene = await _pumpChartInListView(tester, indicator: indicator);
+      final scene = await _pumpChartInListView(
+        tester,
+        indicator: indicator,
+        visibleMinMaxFromData: true,
+      );
       addTearDown(() => disposeChart(tester, scene.chart));
       scene.chart.updateGestureConfig((config) => config.copyWith(enableZoom: true));
       final sliderPosition = scene.chart.mainRect.center;
@@ -414,9 +425,10 @@ void _pointerMoveOwnerArenaTests() {
         Rect.fromCenter(center: sliderPosition, width: 80, height: 20),
       );
       await tester.pump(_frame);
-      expect(scene.chart.onChartZoomStart(sliderPosition, false), isTrue);
+      expect(scene.chart.onChartZoomStart(sliderPosition), isTrue);
       expect(scene.chart.isChartZooming, isTrue);
-      final beforeTop = scene.chart.mainPadding.top;
+      final beforeMax = _rangeMax(scene.chart);
+      final beforePadding = scene.chart.mainPadding;
 
       // 落点在主区内且避开 slider 矩形, 否则归优先级更高的 zoomSlider。
       final dragFrom = Offset(_blankPosition.dx, scene.chart.mainRect.top + 30);
@@ -429,8 +441,10 @@ void _pointerMoveOwnerArenaTests() {
         await tester.pump(_frame);
       }
 
-      // zooming move 用 GestureData.move, 是唯一消费 dy 的图表平移归属。
-      expect(scene.chart.mainPadding.top, lessThan(beforeTop), reason: '主区应随手指纵向移动');
+      // 观察点是可见价格区间: 缩放态下纵向拖动平移区间, padding 不参与。
+      // 向上拖动(_stepDy < 0)让区间下移, 内容随手指上移。
+      expect(_rangeMax(scene.chart), lessThan(beforeMax), reason: 'Y 轴区间应随手指纵向平移');
+      expect(scene.chart.mainPadding, beforePadding, reason: 'padding 不参与 Y 轴缩放');
       expect(scene.scroll.offset, 0, reason: '缩放态下的平移不应带动外层滚动');
 
       await gesture.up();

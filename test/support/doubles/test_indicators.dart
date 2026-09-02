@@ -32,6 +32,7 @@ class TestCandleIndicator extends CandleBaseIndicator {
     super.height = 300,
     this.chartType = FlexiChartType.barSolid,
     this.hideMainIndicatorsInLineChartMode = false,
+    this.visibleMinMaxFromData = false,
   }) : super(padding: EdgeInsets.zero);
 
   /// [CandleBasePaintObject.resolveChartType] 的返回值
@@ -39,6 +40,12 @@ class TestCandleIndicator extends CandleBaseIndicator {
 
   /// 线图模式下是否隐藏其余主区指标（内置 CandleIndicator 默认为 true）
   final bool hideMainIndicatorsInLineChartMode;
+
+  /// [computeVisibleMinMax] 是否按内置蜡烛的口径从数据算可见区间。
+  ///
+  /// 默认 false（返回 null）：多数用例不关心 Y 轴映射，让区间保持 [MinMax.zero] 更省事。
+  /// 需要断言价格→像素映射（如 Y 轴缩放）的用例置 true。
+  final bool visibleMinMaxFromData;
 
   /// 最近一次创建的绘制对象
   TestCandlePaintObject? object;
@@ -59,7 +66,12 @@ class TestCandlePaintObject extends CandleBasePaintObject<TestCandleIndicator> {
   @override
   bool get hideMainIndicatorsInLineChartMode => indicator.hideMainIndicatorsInLineChartMode;
   @override
-  MinMax? computeVisibleMinMax(int start, int end) => null;
+  MinMax? computeVisibleMinMax(int start, int end) {
+    if (!indicator.visibleMinMaxFromData) return null;
+    if (!klineData.canPaintChart) return null;
+    return klineData.calculateMinmax(start, end);
+  }
+
   @override
   void paint(Canvas canvas, Size size) {}
   @override
@@ -121,6 +133,58 @@ class _TestDirectPaintObject extends DirectPaintObject<TestDirectIndicator> {
     final height = indicator.tipsHeight;
     return height > 0 ? Size(tipsRect?.width ?? 0, height) : null;
   }
+}
+
+// ---------------------------------------------------------------------------
+// Range（可观察 minMax）
+// ---------------------------------------------------------------------------
+
+/// 测试用主区子指标：返回随可见区间变化的 [MinMax]，并记录 [computeVisibleMinMax] 的调用。
+///
+/// 返回值由 `start` / `end` 派生，所以「自动跟随可见数据」与「被下发覆盖」在断言上可区分：
+/// 前者随可见区间变化，后者恒等于下发值。用 [paintMode] 区分 combine 与 alone 两类子对象。
+class TestRangeIndicator extends DirectIndicator {
+  TestRangeIndicator({
+    required super.key,
+    super.height = 100,
+    super.autoActivate = false,
+    super.paintMode,
+  }) : super(padding: EdgeInsets.zero);
+
+  /// 最近一次创建的绘制对象
+  TestRangePaintObject? object;
+
+  @override
+  DirectPaintObject<DirectIndicator> createPaintObject() => object = TestRangePaintObject();
+}
+
+/// [TestRangeIndicator] 的绘制对象：可见区间与调用次数都可断言。
+class TestRangePaintObject extends DirectPaintObject<TestRangeIndicator> {
+  /// [computeVisibleMinMax] 的调用次数。
+  int computeCount = 0;
+
+  /// 最近一次 [computeVisibleMinMax] 收到的可见区间。
+  int? lastStart;
+  int? lastEnd;
+
+  /// 由 `start` / `end` 派生的区间：min 取 start，max 取 end * 10。
+  static MinMax rangeOf(int start, int end) => MinMax(
+        max: FlexiNum.fromNum(end * 10),
+        min: FlexiNum.fromNum(start),
+      );
+
+  @override
+  MinMax? computeVisibleMinMax(int start, int end) {
+    computeCount++;
+    lastStart = start;
+    lastEnd = end;
+    return rangeOf(start, end);
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {}
+  @override
+  Size? paintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
 }
 
 // ---------------------------------------------------------------------------

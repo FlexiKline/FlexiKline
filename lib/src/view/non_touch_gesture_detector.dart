@@ -234,7 +234,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
         if (gestureConfig.enableZoom && controller.chartZoomSlideBarRect.include(offset)) {
           // 如果命中ZommSlideBar区域, 即代表要进行缩放图表
           cancelPositionAnimation();
-          if (!controller.isChartZooming && controller.onChartZoomStart(offset, false)) {
+          if (!controller.isChartZooming && controller.onChartZoomStart(offset)) {
             Future.delayed(const Duration(milliseconds: 1000), () {
               assert(() {
                 logd('onPointerSignal V>Zoom onChartZoomEnd()');
@@ -496,13 +496,14 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
     } else {
       logd('onPanStart pan local:$position');
       cancelPositionAnimation();
+      // 缩放态下同一条平移路径会额外消费 dy, 但那由 [ChartBinding.onChartMove] 按
+      // `isChartZooming` 判断, 与手势数据的类型无关; 这里只换光标提示可拖动的方向。
       if (controller.isChartZooming) {
         setCursorToMove();
-        _panData = GestureData.move(position);
       } else {
         setCursorToGrabbing();
-        _panData = GestureData.pan(position);
       }
+      _panData = GestureData.pan(position);
     }
   }
 

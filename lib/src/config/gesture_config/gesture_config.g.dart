@@ -30,9 +30,9 @@ abstract class _$GestureConfigCWProxy {
 
   GestureConfig zoomStartMinDistance(int zoomStartMinDistance);
 
-  GestureConfig zoomSpeed(int zoomSpeed);
+  GestureConfig maxZoomPerGesture(double maxZoomPerGesture);
 
-  GestureConfig isManualSetZoomRect(bool isManualSetZoomRect);
+  GestureConfig useCustomZoomRect(bool useCustomZoomRect);
 
   GestureConfig panClaimRatio(double panClaimRatio);
 
@@ -58,8 +58,8 @@ abstract class _$GestureConfigCWProxy {
     bool supportKeyboardShortcuts,
     bool enableZoom,
     int zoomStartMinDistance,
-    int zoomSpeed,
-    bool isManualSetZoomRect,
+    double maxZoomPerGesture,
+    bool useCustomZoomRect,
     double panClaimRatio,
     double dragClaimSlopFactor,
     double scaleClaimSlopFactor,
@@ -115,11 +115,12 @@ class _$GestureConfigCWProxyImpl implements _$GestureConfigCWProxy {
       this(zoomStartMinDistance: zoomStartMinDistance);
 
   @override
-  GestureConfig zoomSpeed(int zoomSpeed) => this(zoomSpeed: zoomSpeed);
+  GestureConfig maxZoomPerGesture(double maxZoomPerGesture) =>
+      this(maxZoomPerGesture: maxZoomPerGesture);
 
   @override
-  GestureConfig isManualSetZoomRect(bool isManualSetZoomRect) =>
-      this(isManualSetZoomRect: isManualSetZoomRect);
+  GestureConfig useCustomZoomRect(bool useCustomZoomRect) =>
+      this(useCustomZoomRect: useCustomZoomRect);
 
   @override
   GestureConfig panClaimRatio(double panClaimRatio) =>
@@ -153,8 +154,8 @@ class _$GestureConfigCWProxyImpl implements _$GestureConfigCWProxy {
     Object? supportKeyboardShortcuts = const $CopyWithPlaceholder(),
     Object? enableZoom = const $CopyWithPlaceholder(),
     Object? zoomStartMinDistance = const $CopyWithPlaceholder(),
-    Object? zoomSpeed = const $CopyWithPlaceholder(),
-    Object? isManualSetZoomRect = const $CopyWithPlaceholder(),
+    Object? maxZoomPerGesture = const $CopyWithPlaceholder(),
+    Object? useCustomZoomRect = const $CopyWithPlaceholder(),
     Object? panClaimRatio = const $CopyWithPlaceholder(),
     Object? dragClaimSlopFactor = const $CopyWithPlaceholder(),
     Object? scaleClaimSlopFactor = const $CopyWithPlaceholder(),
@@ -207,14 +208,14 @@ class _$GestureConfigCWProxyImpl implements _$GestureConfigCWProxy {
           ? _value.zoomStartMinDistance
           // ignore: cast_nullable_to_non_nullable
           : zoomStartMinDistance as int,
-      zoomSpeed: zoomSpeed == const $CopyWithPlaceholder()
-          ? _value.zoomSpeed
+      maxZoomPerGesture: maxZoomPerGesture == const $CopyWithPlaceholder()
+          ? _value.maxZoomPerGesture
           // ignore: cast_nullable_to_non_nullable
-          : zoomSpeed as int,
-      isManualSetZoomRect: isManualSetZoomRect == const $CopyWithPlaceholder()
-          ? _value.isManualSetZoomRect
+          : maxZoomPerGesture as double,
+      useCustomZoomRect: useCustomZoomRect == const $CopyWithPlaceholder()
+          ? _value.useCustomZoomRect
           // ignore: cast_nullable_to_non_nullable
-          : isManualSetZoomRect as bool,
+          : useCustomZoomRect as bool,
       panClaimRatio: panClaimRatio == const $CopyWithPlaceholder()
           ? _value.panClaimRatio
           // ignore: cast_nullable_to_non_nullable
@@ -263,8 +264,8 @@ GestureConfig _$GestureConfigFromJson(Map<String, dynamic> json) =>
       enableZoom: json['enableZoom'] as bool? ?? false,
       zoomStartMinDistance:
           (json['zoomStartMinDistance'] as num?)?.toInt() ?? 5,
-      zoomSpeed: (json['zoomSpeed'] as num?)?.toInt() ?? 1,
-      isManualSetZoomRect: json['isManualSetZoomRect'] as bool? ?? false,
+      maxZoomPerGesture: (json['maxZoomPerGesture'] as num?)?.toDouble() ?? 6,
+      useCustomZoomRect: json['useCustomZoomRect'] as bool? ?? false,
       panClaimRatio: (json['panClaimRatio'] as num?)?.toDouble() ?? 2,
       dragClaimSlopFactor:
           (json['dragClaimSlopFactor'] as num?)?.toDouble() ?? 0.5,
@@ -287,8 +288,8 @@ Map<String, dynamic> _$GestureConfigToJson(GestureConfig instance) =>
       'supportKeyboardShortcuts': instance.supportKeyboardShortcuts,
       'enableZoom': instance.enableZoom,
       'zoomStartMinDistance': instance.zoomStartMinDistance,
-      'zoomSpeed': instance.zoomSpeed,
-      'isManualSetZoomRect': instance.isManualSetZoomRect,
+      'maxZoomPerGesture': instance.maxZoomPerGesture,
+      'useCustomZoomRect': instance.useCustomZoomRect,
       'panClaimRatio': instance.panClaimRatio,
       'dragClaimSlopFactor': instance.dragClaimSlopFactor,
       'scaleClaimSlopFactor': instance.scaleClaimSlopFactor,

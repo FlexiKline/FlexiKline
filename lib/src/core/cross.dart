@@ -266,12 +266,7 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
     final list = tooltipInfoList;
 
     /// 开始绘制
-    double top = tooltipConfig.margin.top;
-    if (isChartZooming) {
-      top += mainOriginPadding.top;
-    } else {
-      top += mainPadding.top;
-    }
+    final double top = tooltipConfig.margin.top + mainPadding.top;
 
     final drawOnLeft = offset.dx > mainChartWidthHalf;
     final drawDirection = drawOnLeft ? DrawDirection.ltr : DrawDirection.rtl;
