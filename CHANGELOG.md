@@ -1,4 +1,7 @@
 ## 2.5.0
+* Move `_zoomMinMax`, `setZoomMinMax`, `clearZoomMinMax` and `hasZoomMinMax` from `PaintObjectGeometryStateMixin` to `MainPaintObject`; zoom state is now owned solely by the main paint object (Breaking Changes).
+* Combine children proxy the parent `minMax` via `PaintObject.minMax` override instead of receiving explicit `setMinMax` / `setZoomMinMax` dispatches; the two dispatch loops and the `_smoothMinMax`-pollution cleanup in `delegate.dart` are removed (Breaking Changes).
+* Separate smooth display value from the auto-computed target: `smoothMinMax()` writes only `_smoothMinMax` and never calls `setMinMax`, so `_minMax` always holds the pure convergence target from `computeVisibleMinMax`.
 * Add `MinMax.scaleAroundCenter` and `MinMax.shift` to scale a price range around its centre and to shift it as a whole.
 * Add `setZoomMinMax`, `clearZoomMinMax` and `hasZoomMinMax` on paint objects, carrying a user-controlled Y-axis range that takes precedence over the automatic one; it applies to the main coordinate system and its combine children, while `PaintMode.alone` children keep fitting the visible data.
 * Scale the visible price range on Y-axis zoom instead of shrinking the chart area through `padding`: `padding` keeps its declared value and `mainChartRect` stays put, so panning while zoomed no longer re-fits the Y axis and candles keep their relative positions (Breaking Changes).

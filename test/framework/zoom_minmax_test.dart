@@ -195,21 +195,21 @@ void main() {
       expect(scene.main.minMax.min.toDouble(), 100.0);
     });
 
-    test('下发给 combine 子对象的是独立副本，不与主区共享可变实例', () {
+    test('combine 子对象代理主区 minMax，与主区是同一引用', () {
       final scene = _Scene();
       scene.updateRange(0, 5);
       scene.main.setZoomMinMax(_mm(200, 100));
 
       scene.updateRange(2, 8);
 
+      // 改后 combine 子对象直接代理 _parent!.minMax, 是同一个实例。
       expect(
         identical(scene.combineChild.minMax, scene.main.minMax),
-        isFalse,
-        reason: 'MinMax 可变, 共享实例会让任意一方的就地修改扩散',
+        isTrue,
+        reason: 'combine 子对象代理主区 minMax, 应为同一引用',
       );
-      // 改子对象那份不影响主区。
-      scene.combineChild.minMax.max = FlexiNum.fromNum(999);
-      expect(scene.main.minMax.max.toDouble(), 200.0);
+      expect(scene.combineChild.minMax.max.toDouble(), 200.0);
+      expect(scene.combineChild.minMax.min.toDouble(), 100.0);
     });
 
     test('缩放期间 combine 子对象的自动缓存保持新鲜，退出即刻可用', () {
@@ -227,6 +227,112 @@ void main() {
       expect(scene.main.minMax.min.toDouble(), 4.0);
       expect(scene.main.minMax.max.toDouble(), 60.0);
       expect(scene.combineChild.minMax.max.toDouble(), 60.0);
+    });
+  });
+
+  group('v2.5.0/minMax 显示值分离与 combine 代理', () {
+    test('smoothMinMax 不污染 _minMax：连续平滑期收敛目标不被覆盖', () {
+      final scene = _Scene();
+      // 第一帧：建立初始区间 [0, 50]
+      scene.updateRange(0, 5);
+      expect(scene.main.minMax.max.toDouble(), 50.0);
+
+      // 第二帧带 smooth：可见区间变到 [2, 80]，首帧 smooth 从 _minMax 开始
+      scene.updateRange(2, 8, panSmoothFactor: 0.15);
+      expect(scene.main.minMax.max.toDouble(), closeTo(80.0, 0.01));
+
+      // 第三帧带 smooth：可见区间变到 [4, 120]，此时 _smoothMinMax 已存在
+      scene.updateRange(4, 12, panSmoothFactor: 0.15);
+      final smoothedMax = scene.main.minMax.max.toDouble();
+      expect(smoothedMax, greaterThan(80.0), reason: '插值应向新目标值收敛');
+      expect(smoothedMax, lessThan(120.0), reason: '平滑活跃时 minMax 应返回插值，不是目标值');
+
+      // 第四帧 factor=1.0：平滑结束，minMax 应为最新目标值
+      scene.updateRange(4, 12, panSmoothFactor: 1.0);
+      expect(scene.main.minMax.max.toDouble(), 120.0, reason: '平滑结束后 minMax 应回到纯净目标值');
+    });
+
+    test('combine 子对象正常态代理主区 minMax（非 zoom）', () {
+      final scene = _Scene();
+      scene.updateRange(0, 5);
+
+      // combine 子对象的 minMax 应该等于主区合并后的值
+      expect(scene.combineChild.minMax.max.toDouble(), scene.main.minMax.max.toDouble());
+      expect(scene.combineChild.minMax.min.toDouble(), scene.main.minMax.min.toDouble());
+
+      // 可见区间变化后，combine 跟着变
+      scene.updateRange(3, 9);
+      expect(scene.combineChild.minMax.max.toDouble(), scene.main.minMax.max.toDouble());
+      expect(scene.combineChild.minMax.min.toDouble(), scene.main.minMax.min.toDouble());
+    });
+
+    test('combine 子对象在 smooth 期也代理主区的平滑值', () {
+      final scene = _Scene();
+      scene.updateRange(0, 5);
+      scene.updateRange(2, 8, panSmoothFactor: 0.15);
+
+      // combine 子对象和主区拿到同一个平滑后的值
+      expect(
+        identical(scene.combineChild.minMax, scene.main.minMax),
+        isTrue,
+        reason: 'combine 子对象代理主区 minMax（含 smooth）',
+      );
+    });
+
+    test('alone 子对象不代理主区，始终用自己的区间', () {
+      final scene = _Scene();
+      scene.updateRange(0, 5);
+
+      // alone 子对象的 minMax 是自己 computeVisibleMinMax 的结果
+      // TestRangePaintObject.rangeOf(0, 5) = MinMax(min: 0, max: 50)
+      expect(scene.aloneChild.minMax.min.toDouble(), 0.0);
+      expect(scene.aloneChild.minMax.max.toDouble(), 50.0);
+
+      // 但不应是主区的同一引用
+      expect(
+        identical(scene.aloneChild.minMax, scene.main.minMax),
+        isFalse,
+        reason: 'alone 子对象有独立的 minMax 实例',
+      );
+    });
+
+    test('zoom 状态只存在于 MainPaintObject，子对象无 zoom 状态', () {
+      final scene = _Scene();
+      scene.updateRange(0, 5);
+      scene.main.setZoomMinMax(_mm(200, 100));
+      scene.updateRange(2, 8);
+
+      // 主区有 zoom
+      expect(scene.main.hasZoomMinMax, isTrue);
+
+      // combine 子对象无 zoom 字段（通过代理 parent 获取 zoom 区间）
+      expect(scene.combineChild.minMax.max.toDouble(), 200.0);
+      expect(scene.combineChild.minMax.min.toDouble(), 100.0);
+
+      // alone 子对象完全不受 zoom 影响
+      expect(scene.aloneChild.minMax.min.toDouble(), 2.0);
+      expect(scene.aloneChild.minMax.max.toDouble(), 80.0);
+    });
+
+    test('clearZoomMinMax 后 combine 子对象立即回到自动合并值', () {
+      final scene = _Scene();
+      scene.updateRange(2, 8);
+      scene.main.setZoomMinMax(_mm(200, 100));
+      scene.updateRange(4, 6);
+
+      // zoom 态下 combine 代理的是 zoom 区间
+      expect(scene.combineChild.minMax.max.toDouble(), 200.0);
+
+      scene.main.clearZoomMinMax();
+      scene.updateRange(4, 6);
+
+      // 退出 zoom 后 combine 代理的是主区自动合并值
+      expect(scene.combineChild.minMax.max.toDouble(), 60.0);
+      expect(scene.combineChild.minMax.min.toDouble(), 4.0);
+      expect(
+        identical(scene.combineChild.minMax, scene.main.minMax),
+        isTrue,
+      );
     });
   });
 }

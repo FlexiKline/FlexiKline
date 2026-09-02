@@ -259,14 +259,6 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
     _end = end;
     _minMax = null;
     for (final object in paintableChildren) {
-      // 主区已回自动模式: 清掉上一轮下发的缩放区间副本, 否则子对象会一直用它渲染。
-      if (object._zoomMinMax != null) {
-        object._zoomMinMax = null;
-        object._dyFactor = null;
-      }
-      // 平滑活跃时, 子对象的 _minMax 已被 setMinMax(smoothed) 污染为平滑值,
-      // 必须清除以强制重新计算可见区间 MinMax, 否则 smoothMinMax 的收敛目标是错的
-      if (_smoothMinMax != null) object._minMax = null;
       final ret = object.doUpdateVisibleMinMax(
         newPaneIndex,
         start: start,
@@ -280,13 +272,7 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
 
     smoothMinMax(smoothFactor: panSmoothFactor);
 
-    for (final object in paintableChildren) {
-      if (object.paintMode == PaintMode.combine) {
-        object.setMinMax(minMax);
-      }
-    }
-
-    _dyFactor = null;
+    invalidateDyFactor();
     return _minMax;
   }
 
@@ -318,16 +304,6 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
         end: end,
         reset: reset,
       );
-    }
-
-    for (final object in paintableChildren) {
-      if (object.paintMode == PaintMode.combine) {
-        // 下发到子对象的 _zoomMinMax 而不是 _minMax: 后者是自动路径的缓存, 写进去会让子对象
-        // 在退出缩放态后凭 start/end 未变而早退, 把缩放区间当成自动结果返回给主区。
-        //
-        // 逐个下发副本: [MinMax] 是可变对象, 共享实例会让任意一方的就地修改扩散到其余对象。
-        object.setZoomMinMax(zoomMinMax.clone());
-      }
     }
 
     _dyFactor = null;

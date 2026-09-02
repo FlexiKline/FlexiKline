@@ -105,6 +105,16 @@ abstract class PaintObject<T extends Indicator<IIndicatorKey>> extends Indicator
 
   bool get hasParentObject => _parent != null;
 
+  /// combine 子对象代理主区的区间: 绘制用的 minMax（含 smooth / zoom）来自 parent,
+  /// 自身的 [_minMax] 仅供主区合并使用。alone / 副区走 mixin 默认链。
+  @override
+  MinMax get minMax {
+    if (paintMode.isCombine && _parent != null) {
+      return _parent!.minMax;
+    }
+    return super.minMax;
+  }
+
   /// 将 PaintObject 挂载到绘制系统。
   /// 子类可 override 此方法在挂载时做额外初始化，但必须先调用 `super.mount()`。
   @mustCallSuper
@@ -352,6 +362,44 @@ final class MainPaintObject<T extends MainPaintObjectIndicator> extends PaintObj
   }
 
   late final SortableHashSet<PaintObject> children;
+
+  // ---- Zoom 价格区间（Y 轴由用户接管）----
+
+  /// 缩放态下的价格区间; null 表示由可见数据自动适配。
+  ///
+  /// 一经设定, 可见区间变化(平移、蜡烛宽度缩放)不重算它, 只有显式复位才交还自动模式。
+  /// 权威状态是 [PaintContext.isChartZooming], 本字段是它的数据载体, 两者同置同清。
+  ///
+  /// combine 子对象通过 [minMax] getter 代理主区, 天然读到本字段;
+  /// [PaintMode.alone] 的子对象拥有独立坐标体系, 不受影响。
+  MinMax? _zoomMinMax;
+
+  /// 是否已有缩放区间, 即用户是否已接管 Y 轴。
+  bool get hasZoomMinMax => _zoomMinMax != null;
+
+  /// 设置缩放区间, 进入用户接管 Y 轴的状态。
+  void setZoomMinMax(MinMax val) {
+    _zoomMinMax = val;
+    _smoothMinMax = null;
+    _dyFactor = null;
+  }
+
+  /// 清除缩放区间, 交还给可见数据自动适配。
+  ///
+  /// 同时清 [_minMax]: 缩放态下它未被维护, 留着会让下一帧的早退分支拿到过期区间。
+  void clearZoomMinMax() {
+    if (_zoomMinMax == null) return;
+    _zoomMinMax = null;
+    _minMax = null;
+    _smoothMinMax = null;
+    _dyFactor = null;
+  }
+
+  @override
+  MinMax get minMax {
+    if (_zoomMinMax != null) return _zoomMinMax!;
+    return super.minMax;
+  }
 
   /// 参与绘制的子对象，按 zIndex 升序（视觉自下而上）。
   ///
