@@ -63,9 +63,6 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
   /// 取代原 _panData + _isObjectDragging: 「谁在拖」由 owner 表达。
   ({NonTouchGestureOwner owner, GestureData data})? _drag;
 
-  /// 长按监听数据
-  GestureData? _longData;
-
   final ValueNotifier<MouseCursor> _mouseCursor = ValueNotifier(SystemMouseCursors.precise);
 
   @override
@@ -166,11 +163,6 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
             onPanStart: onPanStart,
             onPanUpdate: onPanUpdate.throttleOnFps,
             onPanEnd: onPanEnd,
-
-            /// 长按
-            onLongPressStart: onLongPressStart,
-            onLongPressMoveUpdate: onLongPressMoveUpdate.throttleOnFps,
-            onLongPressEnd: onLongPressEnd,
           ),
         ),
       ),
@@ -295,7 +287,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
         }
 
       case NonTouchGestureOwner.drawEditing:
-        // 已完成的 DrawObject 由平移([_drag])或长按([_longData])事件修正, hover 不参与.
+        // 已完成的 DrawObject 由平移([_drag])修正, hover 不参与.
         return;
 
       case NonTouchGestureOwner.zoomSlider:
@@ -438,9 +430,15 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
         _mouseCursor.value = owner.dragCursor(controller);
 
       case NonTouchGestureOwner.gridResize:
+        logd('onPanStart gridResize local:$position');
+        if (!controller.onGridResizeStart(position)) return;
+        stopPositionAnimation();
+        controller.requestCancelCross();
+        _drag = (owner: owner, data: GestureData.pan(position));
+        _mouseCursor.value = owner.dragCursor(controller);
+
       case NonTouchGestureOwner.zoomSlider:
-        // gridResize 和 zoomSlider 在本次不走 _drag（仍由长按处理）。
-        // 第 6 次才改 gridResize 为 hover+拖动。
+        // zoomSlider 的拖动暂不接入 _drag。
         return;
 
       case NonTouchGestureOwner.chart:
@@ -493,8 +491,11 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
         );
         controller.onCrossUpdate(data);
 
-      case NonTouchGestureOwner.drawDrawing:
       case NonTouchGestureOwner.gridResize:
+        data.update(details.localPosition);
+        controller.onGridResizeUpdate(data);
+
+      case NonTouchGestureOwner.drawDrawing:
       case NonTouchGestureOwner.zoomSlider:
         // 这些归属在 onPanStart 里已返回，不可能到这里。
         break;
@@ -574,8 +575,15 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
           },
         );
 
-      case NonTouchGestureOwner.drawDrawing:
       case NonTouchGestureOwner.gridResize:
+        logd('onPanEnd gridResize end.');
+        controller.onGridResizeEnd();
+        data.end();
+        _drag = null;
+        _mouseCursor.value = SystemMouseCursors.precise;
+        return;
+
+      case NonTouchGestureOwner.drawDrawing:
       case NonTouchGestureOwner.zoomSlider:
         // 这些归属在 onPanStart 里已返回，不可能到这里。
         break;
@@ -639,85 +647,6 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
       controller.onChartScaleEnd();
     }
     _trackpad = null;
-  }
-
-  /// 长按
-  void onLongPressStart(LongPressStartDetails details) {
-    if (!gestureConfig.enableLongPress) {
-      logd('onLongPressStart ignore! > longPress disabled');
-      return;
-    }
-
-    if (controller.isDrawVisible && drawState.isOngoing) {
-      if (drawState.isDrawing) {
-        // 未完成的暂不允许移动
-        return;
-      }
-      if (drawState.object?.lock == true) return;
-      logd('onLongPressStart draw > details:$details');
-      _longData = GestureData.long(details.localPosition);
-      final result = controller.onDrawMoveStart(_longData!);
-      if (!result) {
-        _longData?.end();
-        _longData = null;
-      } else {
-        _mouseCursor.value = SystemMouseCursors.none;
-      }
-    } else if (controller.onGridResizeStart(details.localPosition)) {
-      _longData = GestureData.long(details.localPosition);
-      controller.requestCancelCross();
-      _mouseCursor.value = SystemMouseCursors.none;
-    } else {
-      logd('onLongPressStart cross > details:$details');
-      controller.requestCancelCross();
-      _longData = GestureData.long(details.localPosition);
-      final result = controller.onCrossStart(_longData!);
-      if (!result) {
-        _longData?.end();
-        _longData = null;
-      } else {
-        _mouseCursor.value = SystemMouseCursors.none;
-      }
-    }
-  }
-
-  void onLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
-    final data = _longData;
-    if (!gestureConfig.enableLongPress || data == null) return;
-    // 三条分支共用同一份长按数据, 位置更新与分派无关, 提到分支之前.
-    data.update(details.localPosition);
-    if (controller.isDrawVisible && drawState.isOngoing) {
-      controller.onDrawMoveUpdate(data);
-    } else if (controller.isStartDragGrid) {
-      controller.onGridResizeUpdate(data);
-    } else {
-      controller.onCrossUpdate(data);
-    }
-  }
-
-  void onLongPressEnd(LongPressEndDetails details) {
-    if (!gestureConfig.enableLongPress || _longData == null) {
-      logd('onLongPressEnd ignore! > details:$details');
-      return;
-    }
-    // assert(() {
-    //   logd("onLongPressEnd details:$details");
-    //   return true;
-    // }());
-    if (controller.isDrawVisible && drawState.isOngoing) {
-      controller.onDrawMoveEnd();
-      if (drawState.isEditing) _mouseCursor.value = SystemMouseCursors.click;
-    } else if (controller.isStartDragGrid) {
-      controller.onGridResizeEnd();
-      _mouseCursor.value = SystemMouseCursors.precise;
-    } else {
-      // 长按结束, 尝试取消Cross事件.
-      controller.requestCancelCross();
-      _mouseCursor.value = SystemMouseCursors.precise;
-    }
-
-    _longData?.end();
-    _longData = null;
   }
 
   void onPointerCancel(PointerCancelEvent event) {

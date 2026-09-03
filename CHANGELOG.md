@@ -1,4 +1,6 @@
 ## 2.5.0
+* Resize sub panes by hovering the divider line (`resizeRow` cursor) and dragging directly on non-touch devices, replacing the long-press interaction inherited from touch devices.
+* Remove long-press gesture handling from non-touch devices; `gestureConfig.enableLongPress` no longer has effect on mouse/trackpad input (Breaking Changes).
 * Fix trackpad pinch simultaneously panning the chart on native platforms; `DragGestureRecognizer` consumed `PointerPanZoomUpdateEvent.panDelta` as drag input in parallel with the `Listener` scale path. A per-session `pinching` flag now suppresses pan in `onPanStart` and `onPanUpdate` once the scale change exceeds the threshold.
 * Add `onChartZoomStep(double coeff)` for incremental Y-axis zoom; each signal event multiplies the current visible range by a ratio factor, with no session or anchor required.
 * Add `GestureConfig.signalScaleFactor` (default 200, matching Flutter's `kDefaultMouseScrollToScaleFactor`) to control mouse scroll-to-zoom sensitivity, and `GestureConfig.scaleSessionTimeout` (default 800ms) for the X-axis scale session idle window.
