@@ -51,6 +51,11 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
   /// `onChartScaleEnd()` 要做 `_setCandleWidth(sync: true)` 与 loadMore 检查。
   _ScaleSession? _scaleSession;
 
+  /// 通道 P 的触控板 session: 持有捏合 scale 数据和 [pinching] 标志。
+  /// 与 [_scaleSession] 独立——通道 S 无 pointer session，通道 P 有 start/end 生命周期，
+  /// 混用是旧实现双重消费的来源之一。
+  _TrackpadSession? _trackpad;
+
   /// Cross平移监听数据
   GestureData? _hoverData;
 
@@ -94,6 +99,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
   void dispose() {
     _scaleSession?.dispose();
     _scaleSession = null;
+    _trackpad = null;
     _keyboardFocusNode.dispose();
     super.dispose();
   }
@@ -393,6 +399,11 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
 
   /// 平移开始.
   void onPanStart(DragStartDetails details) {
+    // 触控板捏合期间抑制 pan: 这是通道 P 与通道 D 唯一的耦合点。
+    // DragGestureRecognizer 会自动把 PointerPanZoomUpdateEvent.panDelta 当拖动增量,
+    // 不抑制会导致捏合时图表同时平移。
+    if (_trackpad?.pinching == true) return;
+
     if (_drag != null) {
       // 如果上次平移或缩放, 还没有结束, 不允许开始.
       logd('onPanStart Currently still panning, ignore!!!');
@@ -444,6 +455,20 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
 
   /// 平移中...
   void onPanUpdate(DragUpdateDetails details) {
+    // 触控板捏合期间抑制 pan: 捏合可能在拖动已开始之后才被检测到(scale 变化需要
+    // 越过阈值), 此时必须放弃本轮已建立的 _drag session 并回滚位移。
+    if (_trackpad?.pinching == true) {
+      if (_drag != null && _drag!.owner == NonTouchGestureOwner.chart) {
+        stopPositionAnimation();
+        _drag!.data.end();
+        _drag = null;
+        // 重置 smoothFactor 但不触发惯性——这不是正常结束, 是中途让出。
+        controller.onPanEnd();
+        _mouseCursor.value = SystemMouseCursors.precise;
+      }
+      return;
+    }
+
     if (_drag == null) {
       logd('onPanUpdate panData is empty! details:$details');
       return;
@@ -557,70 +582,63 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
     }
   }
 
+  /// 通道 P: 原生触控板手势开始。
+  ///
+  /// 只取捏合分量, pan 分量由 [GestureDetector] 的通道 D 兜住(免费拿 velocity tracker
+  /// 惯性)。[_trackpad] 与 [_scaleSession] 独立, 不共用字段。
   void onPointerPanZoomStart(PointerPanZoomStartEvent event) {
     final offset = event.localPosition;
     if (!controller.canvasRect.include(offset)) {
       logw('onPointerPanZoomStart $offset is not in the canvas.');
-      _scaleSession?.dispose();
-      _scaleSession = null;
       return;
     }
 
     if (gestureConfig.enableScale) {
       stopPositionAnimation();
       logd('onPointerPanZoomStart $event > ${event.localPosition}');
-      _scaleSession = _ScaleSession(GestureData.scale(
+      _trackpad = _TrackpadSession(GestureData.scale(
         offset,
         position: _resolveScalePosition(offset),
       ));
     }
   }
 
-  /// 触控板事件更新
-  /// [Flutter Trackpad Gestures](https://docs.google.com/document/d/1oRvebwjpsC3KlxN1gOYnEdxtNpQDYpPtUFAkmTUe-K8/edit?resourcekey=0-pt4_T7uggSTrsq2gWeGsYQ)
-  /// 支持平台: iPadOs, MacOs, ChromeOs, Windows, Linux,
-  /// 注: Web不支持.
-  /// [PointerPanZoomUpdateEvent] 将包含一些额外字段，用于表示平移、缩放和旋转手势的组合。
-  ///   手势的总平移偏移量
-  ///   final Offset pan;
-  ///   自上一个事件以来平移偏移量的变化量
-  ///   final Offset panDelta;
-  ///   手势的缩放比例
-  ///   final double scale;
-  ///   到目前为止手势旋转的弧度量
-  ///   final double rotation;
+  /// 通道 P: 原生触控板手势更新。
+  ///
+  /// `event.scale` 变化越过阈值 → [_TrackpadSession.pinching] 置 true, 本轮不再放行
+  /// 通道 D 的 pan。阈值 0.01 与旧实现一致, 足够滤掉滑动时的手指微张。
   void onPointerPanZoomUpdate(PointerPanZoomUpdateEvent event) {
-    if (_scaleSession == null) {
-      logd('onPointerPanZoomUpdate scaleData is empty! $event ${event.scale}');
+    final session = _trackpad;
+    if (session == null) {
+      logd('onPointerPanZoomUpdate trackpad is empty! $event ${event.scale}');
       return;
     }
 
-    final data = _scaleSession!.data;
-    if (gestureConfig.enableScale && data.isScale) {
+    if (!gestureConfig.enableScale || !session.data.isScale) return;
+
+    final change = event.scale - session.lastRawScale;
+    if (change.abs() > 0.01) {
+      session.pinching = true;
+      session.lastRawScale = event.scale;
       final newScale = scaledDecelerate(event.scale);
-      final change = event.scale - data.scale;
-      if (change.abs() > 0.01) {
-        data.update(
-          event.localPosition,
-          newScale: newScale,
-        );
-        controller.onChartScale(data);
-      }
+      session.data.update(event.localPosition, newScale: newScale);
+      controller.onChartScale(session.data);
     }
   }
 
+  /// 通道 P: 原生触控板手势结束。[pinching] 随 session 销毁自动清零。
   void onPointerPanZoomEnd(PointerPanZoomEndEvent event) {
-    if (_scaleSession == null) {
-      logd('onPointerPanZoomEnd scaledata is empty! > event:$event');
+    final session = _trackpad;
+    if (session == null) {
+      logd('onPointerPanZoomEnd trackpad is empty! > event:$event');
       return;
     }
 
-    if (_scaleSession!.data.isScale) {
-      logd('onPointerPanZoomEnd scale. ${event.localPosition}');
-      _scaleSession?.dispose();
-      _scaleSession = null;
+    logd('onPointerPanZoomEnd pinching:${session.pinching} ${event.localPosition}');
+    if (session.pinching) {
       controller.onChartScaleEnd();
     }
+    _trackpad = null;
   }
 
   /// 长按
@@ -742,4 +760,22 @@ class _ScaleSession {
     _idleTimer = null;
     data.end();
   }
+}
+
+/// 通道 P 的触控板 session。
+///
+/// [pinching] 是通道 P 与通道 D 唯一的耦合点: 一旦 `event.scale` 变化越过阈值即置位,
+/// 本轮通道 D 的 [onPanStart] / [onPanUpdate] 看到它就直接返回, 避免捏合时图表同时平移。
+/// session 结束时 [_trackpad] 被置 null, [pinching] 随之失效。
+class _TrackpadSession {
+  _TrackpadSession(this.data);
+
+  final GestureData data;
+
+  /// 一旦检测到捏合即置 true, 本轮不再放行通道 D 的 pan。
+  bool pinching = false;
+
+  /// 上一次的原始 `event.scale`, 用于计算变化量。
+  /// 初始 1.0: PanZoomStart 时 scale 恒为 1。
+  double lastRawScale = 1.0;
 }

@@ -1,4 +1,5 @@
 ## 2.5.0
+* Fix trackpad pinch simultaneously panning the chart on native platforms; `DragGestureRecognizer` consumed `PointerPanZoomUpdateEvent.panDelta` as drag input in parallel with the `Listener` scale path. A per-session `pinching` flag now suppresses pan in `onPanStart` and `onPanUpdate` once the scale change exceeds the threshold.
 * Add `onChartZoomStep(double coeff)` for incremental Y-axis zoom; each signal event multiplies the current visible range by a ratio factor, with no session or anchor required.
 * Add `GestureConfig.signalScaleFactor` (default 200, matching Flutter's `kDefaultMouseScrollToScaleFactor`) to control mouse scroll-to-zoom sensitivity, and `GestureConfig.scaleSessionTimeout` (default 800ms) for the X-axis scale session idle window.
 * Rewrite `onPointerSignal` to register with `GestureBinding.pointerSignalResolver` instead of consuming events directly, so the chart placed inside a `Scrollable` no longer simultaneously triggers page scroll; unify scroll and `PointerScaleEvent` (Web trackpad pinch) to a single ratio-based factor via `exp(-dy / signalScaleFactor)`.
