@@ -62,8 +62,7 @@ abstract class IndicatorObject<T extends Indicator>
   double? _tmpHeight;
   double get height => _tmpHeight ?? indicator.height;
 
-  EdgeInsets? _tmpPadding;
-  EdgeInsets get padding => _tmpPadding ?? indicator.padding;
+  EdgeInsets get padding => indicator.padding;
 
   /// 本对象几何计算要让出的 tips 区域高度; 0 表示不让出。
   ///
@@ -121,6 +120,17 @@ abstract class PaintObject<T extends Indicator<IIndicatorKey>> extends Indicator
       return _parent!.minMax;
     }
     return super.minMax;
+  }
+
+  /// combine 子对象与主区共享绘制区域, padding 代理 parent 的值,
+  /// 保证 [chartRect] / [topRect] / [bottomRect] 与主区一致。
+  /// alone / 副区使用自己 [indicator.padding] 的声明值。
+  @override
+  EdgeInsets get padding {
+    if (paintMode.isCombine && _parent != null) {
+      return _parent!.padding;
+    }
+    return super.padding;
   }
 
   /// 将 PaintObject 挂载到绘制系统。

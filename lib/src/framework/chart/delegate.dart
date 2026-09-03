@@ -29,24 +29,14 @@ extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
     _tmpHeight = null;
   }
 
-  void setPadding(EdgeInsets padding) {
-    _tmpPadding = padding;
-  }
-
-  /// 更新布布局参数
+  /// 更新布局参数
   bool doUpdateLayout({
     double? height,
-    EdgeInsets? padding,
     bool reset = false,
   }) {
     bool hasChange = reset;
     if (height != null && height > 0 && height != this.height) {
       setHeight(height);
-      hasChange = true;
-    }
-
-    if (padding != null && padding != this.padding) {
-      setPadding(padding);
       hasChange = true;
     }
 
@@ -199,14 +189,9 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
 
   bool doUpdateLayout({
     Size? size,
-    EdgeInsets? padding,
     bool reset = false,
   }) {
     bool hasChange = reset;
-    if (padding != null && padding != this.padding) {
-      setPadding(padding);
-      hasChange = true;
-    }
     if (size != null && size != this.size) {
       setSize(size);
       hasChange = true;
@@ -216,7 +201,6 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
     for (final object in paintableChildren) {
       final childChange = object.doUpdateLayout(
         height: object.paintMode.isCombine ? height : null,
-        padding: object.paintMode.isCombine ? padding : null,
         reset: reset,
       );
       hasChange = hasChange || childChange;
@@ -423,7 +407,6 @@ extension MainPaintManagerExt<T extends MainPaintObjectIndicator> on MainPaintOb
     // 重置object布局参数为MainPaintObject的
     object.doUpdateLayout(
       height: object.paintMode.isCombine ? height : null,
-      padding: object.paintMode.isCombine ? padding : null,
     );
     final old = children.append(object);
     indicator.children.add(object.key);
@@ -446,7 +429,6 @@ extension MainPaintManagerExt<T extends MainPaintObjectIndicator> on MainPaintOb
         indicator.children.remove(object.key);
         hasRemove = true;
         _tmpHeight = null;
-        _tmpPadding = null;
         _minMax = null;
         _smoothMinMax = null;
         return true;
