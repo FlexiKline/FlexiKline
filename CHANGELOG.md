@@ -1,4 +1,6 @@
 ## 2.5.0
+* Add `hitTestGridResize(Offset)` on the controller: a side-effect-free query that shares the same hit-test loop as `onGridResizeStart`, enabling hover-time cursor feedback without triggering a repaint.
+* Change the hover cursor over a hittable `PaintObject` from `precise` to `grab` on non-touch devices, signalling that the element can be dragged.
 * Move `_zoomMinMax`, `setZoomMinMax`, `clearZoomMinMax` and `hasZoomMinMax` from `PaintObjectGeometryStateMixin` to `MainPaintObject`; zoom state is now owned solely by the main paint object (Breaking Changes).
 * Combine children proxy the parent `minMax` via `PaintObject.minMax` override instead of receiving explicit `setMinMax` / `setZoomMinMax` dispatches; the two dispatch loops and the `_smoothMinMax`-pollution cleanup in `delegate.dart` are removed (Breaking Changes).
 * Separate smooth display value from the auto-computed target: `smoothMinMax()` writes only `_smoothMinMax` and never calls `setMinMax`, so `_minMax` always holds the pure convergence target from `computeVisibleMinMax`.

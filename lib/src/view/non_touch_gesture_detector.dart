@@ -24,6 +24,7 @@ import '../framework/draw/overlay.dart';
 import '../model/gesture_data.dart';
 import '../utils/algorithm_util.dart';
 import 'gesture_detector_widget.dart';
+import 'non_touch_gesture_owner.dart';
 
 class NonTouchGestureDetector extends GestureDetectorWidget {
   const NonTouchGestureDetector({
@@ -49,57 +50,20 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
   /// Cross平移监听数据
   GestureData? _hoverData;
 
-  /// 平移监听数据
-  GestureData? _panData;
+  /// 一次拖动 session: 归属在 onPanStart 判定一次, 全程不变。
+  /// 取代原 _panData + _isObjectDragging: 「谁在拖」由 owner 表达。
+  ({NonTouchGestureOwner owner, GestureData data})? _drag;
 
   /// 长按监听数据
   GestureData? _longData;
 
-  /// PaintObject 是否已认领本次拖动.
-  /// 认领期间蜡烛图不平移、不更新 cross, 松手也不做惯性平移.
-  bool _isObjectDragging = false;
-
-  final _mouseCursor = ValueNotifier(SystemMouseCursors.precise);
-
-  void setCursorToPrecise() {
-    _mouseCursor.value = SystemMouseCursors.precise;
-  }
-
-  void setCursorToZoom() {
-    _mouseCursor.value = SystemMouseCursors.resizeUpDown;
-  }
-
-  void setCursorToClick() {
-    _mouseCursor.value = SystemMouseCursors.click;
-  }
-
-  void setCursorToGrabbing() {
-    _mouseCursor.value = SystemMouseCursors.grabbing;
-  }
-
-  void setCursorToMove() {
-    _mouseCursor.value = SystemMouseCursors.move;
-  }
-
-  void setCursorToNone() {
-    _mouseCursor.value = SystemMouseCursors.none;
-  }
+  final ValueNotifier<MouseCursor> _mouseCursor = ValueNotifier(SystemMouseCursors.precise);
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       controller.drawStateListenable.addListener(() {
-        /// 控制指针形状
-        switch (drawState) {
-          case Editing():
-            setCursorToClick();
-          case Drawing():
-          case Prepared():
-          case Exited():
-            setCursorToPrecise();
-        }
-
         if (gestureConfig.supportKeyboardShortcuts) {
           /// 控制KeyboardListener的焦点获取与释放
           switch (drawState) {
@@ -337,38 +301,39 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
   /// 鼠标Hover事件.
   /// onMouseHover _TransformedPointerHoverEvent#1614b(position: Offset(86.5, 343.6))
   void onHover(PointerHoverEvent event) {
-    // if (_hoverData == null) return;
     final offset = event.localPosition;
     _hoverData ??= GestureData.hover(offset);
 
-    if (controller.isDrawVisible && drawState.isOngoing) {
-      if (drawState.isEditing) {
-        // 已完成的 DrawObject 由平移([_panData])或长按([_longData])事件修正, hover 不参与.
-        return;
-      }
-      final pointer = drawState.pointer;
-      if (pointer != null && pointer.offset.isFinite) {
-        if (controller.isCrossing) controller.requestCancelCross();
-        // final mainRect = controller.mainRect;
-        // if (!mainRect.include(offset)) {
-        //   offset = offset.clamp(mainRect);
-        // }
-        _hoverData!.update(offset);
-        controller.onDrawUpdate(_hoverData!);
-        return;
-      }
-    } else if (gestureConfig.enableZoom && controller.chartZoomSlideBarRect.include(offset)) {
-      controller.requestCancelCross();
-      setCursorToZoom();
-      return;
-    }
+    final owner = NonTouchGestureOwner.resolveAt(controller, offset);
+    _mouseCursor.value = owner.hoverCursor;
 
-    if (!controller.isCrossing) {
-      setCursorToPrecise();
-      controller.onCrossStart(_hoverData!, force: true);
-    } else {
-      _hoverData!.update(offset);
-      controller.onCrossUpdate(_hoverData!);
+    switch (owner) {
+      case NonTouchGestureOwner.drawDrawing:
+        final pointer = drawState.pointer;
+        if (pointer != null && pointer.offset.isFinite) {
+          if (controller.isCrossing) controller.requestCancelCross();
+          _hoverData!.update(offset);
+          controller.onDrawUpdate(_hoverData!);
+        }
+
+      case NonTouchGestureOwner.drawEditing:
+        // 已完成的 DrawObject 由平移([_drag])或长按([_longData])事件修正, hover 不参与.
+        return;
+
+      case NonTouchGestureOwner.zoomSlider:
+        controller.requestCancelCross();
+
+      case NonTouchGestureOwner.gridResize:
+        controller.requestCancelCross();
+
+      case NonTouchGestureOwner.paintObject:
+      case NonTouchGestureOwner.chart:
+        if (!controller.isCrossing) {
+          controller.onCrossStart(_hoverData!, force: true);
+        } else {
+          _hoverData!.update(offset);
+          controller.onCrossUpdate(_hoverData!);
+        }
     }
   }
 
@@ -447,154 +412,177 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
 
   /// 放弃当前 PaintObject 拖动并清理其手势数据. 未在拖动时为空操作.
   void _cancelObjectDragging() {
-    if (!_isObjectDragging) return;
-    _isObjectDragging = false;
+    if (_drag == null || _drag!.owner != NonTouchGestureOwner.paintObject) return;
     controller.onPaintObjectDragCancel();
-    _panData?.end();
-    _panData = null;
-    setCursorToPrecise();
+    _drag!.data.end();
+    _drag = null;
+    _mouseCursor.value = SystemMouseCursors.precise;
   }
 
   /// 平移开始.
   void onPanStart(DragStartDetails details) {
-    if (_panData != null && !_panData!.isEnd) {
+    if (_drag != null) {
       // 如果上次平移或缩放, 还没有结束, 不允许开始.
       logd('onPanStart Currently still panning, ignore!!!');
       return;
     }
     // 由 [DragStartBehavior.down] 保证: 这是 PointerDown 位置, 不含手势识别前的位移.
     final position = details.localPosition;
-    if (controller.isDrawVisible && drawState.isOngoing) {
-      if (drawState.isDrawing) {
+    final owner = NonTouchGestureOwner.resolveAt(controller, position);
+
+    switch (owner) {
+      case NonTouchGestureOwner.drawDrawing:
         // 未完成的暂不允许移动
         return;
-      }
-      if (drawState.object?.lock == true) return;
-      logd('onPanStart draw > details:$details');
-      _panData = GestureData.pan(position);
-      final result = controller.onDrawMoveStart(_panData!);
-      if (!result) {
-        _panData?.end();
-        _panData = null;
-      }
-    } else if (controller.onPaintObjectDragStart(position)) {
-      // PaintObject 优先按落点认领拖动.
-      logd('onPanStart paintObject drag local:$position');
-      stopPositionAnimation();
-      setCursorToGrabbing();
-      _panData = GestureData.pan(position);
-      _isObjectDragging = true;
-    } else {
-      logd('onPanStart pan local:$position');
-      stopPositionAnimation();
-      // 缩放态下同一条平移路径会额外消费 dy, 但那由 [ChartBinding.onChartMove] 按
-      // `isChartZooming` 判断, 与手势数据的类型无关; 这里只换光标提示可拖动的方向。
-      if (controller.isChartZooming) {
-        setCursorToMove();
-      } else {
-        setCursorToGrabbing();
-      }
-      _panData = GestureData.pan(position);
+
+      case NonTouchGestureOwner.drawEditing:
+        if (drawState.object?.lock == true) return;
+        logd('onPanStart draw > details:$details');
+        final data = GestureData.pan(position);
+        final result = controller.onDrawMoveStart(data);
+        if (!result) {
+          data.end();
+          return;
+        }
+        _drag = (owner: owner, data: data);
+
+      case NonTouchGestureOwner.paintObject:
+        // PaintObject 优先按落点认领拖动.
+        logd('onPanStart paintObject drag local:$position');
+        if (!controller.onPaintObjectDragStart(position)) return;
+        stopPositionAnimation();
+        _drag = (owner: owner, data: GestureData.pan(position));
+        _mouseCursor.value = owner.dragCursor(controller);
+
+      case NonTouchGestureOwner.gridResize:
+      case NonTouchGestureOwner.zoomSlider:
+        // gridResize 和 zoomSlider 在本次不走 _drag（仍由长按处理）。
+        // 第 6 次才改 gridResize 为 hover+拖动。
+        return;
+
+      case NonTouchGestureOwner.chart:
+        logd('onPanStart pan local:$position');
+        stopPositionAnimation();
+        _drag = (owner: owner, data: GestureData.pan(position));
+        // 缩放态下同一条平移路径会额外消费 dy, 但那由 [ChartBinding.onChartMove] 按
+        // `isChartZooming` 判断, 与手势数据的类型无关; 这里只换光标提示可拖动的方向。
+        _mouseCursor.value = owner.dragCursor(controller);
     }
   }
 
   /// 平移中...
   void onPanUpdate(DragUpdateDetails details) {
-    if (_panData == null) {
+    if (_drag == null) {
       logd('onPanUpdate panData is empty! details:$details');
       return;
     }
-    // assert(() {
-    //   logd('onPanUpdate move> ${DateTime.now().millisecond} > $details');
-    //   return true;
-    // }());
-    if (_isObjectDragging) {
-      // 不做区域钳制: 是否限制在图表内由绘制对象自行决定.
-      _panData!.update(details.localPosition);
-      controller.onPaintObjectDragUpdate(_panData!);
-    } else if (controller.isDrawVisible && drawState.isOngoing) {
-      _panData!.update(details.localPosition.clamp(controller.mainRect));
-      controller.onDrawMoveUpdate(_panData!);
-    } else {
-      _panData!.update(details.localPosition.clamp(controller.canvasRect));
-      controller.onChartMove(
-        _panData!,
-        gestureConfig.tolerance.effectivePanSmoothFactor,
-      );
-      controller.onCrossUpdate(_panData!);
+    final (:owner, :data) = _drag!;
+
+    switch (owner) {
+      case NonTouchGestureOwner.paintObject:
+        // 不做区域钳制: 是否限制在图表内由绘制对象自行决定.
+        data.update(details.localPosition);
+        controller.onPaintObjectDragUpdate(data);
+
+      case NonTouchGestureOwner.drawEditing:
+        data.update(details.localPosition.clamp(controller.mainRect));
+        controller.onDrawMoveUpdate(data);
+
+      case NonTouchGestureOwner.chart:
+        data.update(details.localPosition.clamp(controller.canvasRect));
+        controller.onChartMove(
+          data,
+          gestureConfig.tolerance.effectivePanSmoothFactor,
+        );
+        controller.onCrossUpdate(data);
+
+      case NonTouchGestureOwner.drawDrawing:
+      case NonTouchGestureOwner.gridResize:
+      case NonTouchGestureOwner.zoomSlider:
+        // 这些归属在 onPanStart 里已返回，不可能到这里。
+        break;
     }
   }
 
   /// 平移结束.
   void onPanEnd(DragEndDetails details) {
-    if (_panData == null) {
+    if (_drag == null) {
       logd('onPanEnd panData is empty! details:$details');
       return;
     }
+    final (:owner, :data) = _drag!;
 
-    if (_isObjectDragging) {
-      logd('onPanEnd paintObject drag end.');
-      _isObjectDragging = false;
-      controller.onPaintObjectDragEnd();
-      _panData?.end();
-      _panData = null;
-      setCursorToPrecise();
-      // 拖动的是绘制对象而非蜡烛图: 不做惯性平移, 也不检查 loadMore.
-      return;
+    switch (owner) {
+      case NonTouchGestureOwner.paintObject:
+        logd('onPanEnd paintObject drag end.');
+        controller.onPaintObjectDragEnd();
+        data.end();
+        _drag = null;
+        _mouseCursor.value = SystemMouseCursors.precise;
+        // 拖动的是绘制对象而非蜡烛图: 不做惯性平移, 也不检查 loadMore.
+        return;
+
+      case NonTouchGestureOwner.drawEditing:
+        controller.onDrawMoveEnd();
+        data.end();
+        _drag = null;
+        return;
+
+      case NonTouchGestureOwner.chart:
+        if (data.isMove) {
+          data.end();
+          _drag = null;
+          controller.onPanEnd();
+          _mouseCursor.value = SystemMouseCursors.precise;
+          return;
+        }
+
+        // <0: 从右向左滑动; >0: 从左向右滑动.
+        final velocity = details.velocity.pixelsPerSecond.dx;
+        final tolerance = gestureConfig.tolerance;
+        final panDistance = velocity * tolerance.distanceFactor;
+        final panDuration = calcuInertialPanDuration(panDistance, maxDuration: tolerance.maxDuration);
+        final canInertialPan = gestureConfig.enableInertialPan &&
+            controller.klineData.isNotEmpty &&
+            !(velocity < 0 && !controller.canPanRTL) &&
+            !(velocity > 0 && !controller.canPanLTR) &&
+            // 平移距离为 0 或不足 1ms, 无需继续平移.
+            panDistance.abs() >= precisionError &&
+            panDuration > 1;
+
+        if (!canInertialPan) {
+          logd('onPanEnd no inertial movement, velocity:$velocity distance:$panDistance');
+          data.end();
+          _drag = null;
+          controller.onPanEnd();
+          _mouseCursor.value = SystemMouseCursors.precise;
+          controller.checkAndLoadMoreCandlesWhenPanEnd();
+          return;
+        }
+
+        controller.checkAndLoadMoreCandlesWhenPanEnd(panDistance: panDistance, panDuration: panDuration);
+        logi('onPanEnd inertial movement, velocity:$velocity distance:$panDistance duration:$panDuration');
+
+        animateToPosition(
+          data.offset.dx,
+          data.offset.dx + panDistance,
+          panDuration: Duration(milliseconds: panDuration),
+          tolerance: tolerance,
+          onCompleted: () {
+            _drag?.data.end();
+            _drag = null;
+            controller.onPanEnd();
+
+            _mouseCursor.value = SystemMouseCursors.precise;
+          },
+        );
+
+      case NonTouchGestureOwner.drawDrawing:
+      case NonTouchGestureOwner.gridResize:
+      case NonTouchGestureOwner.zoomSlider:
+        // 这些归属在 onPanStart 里已返回，不可能到这里。
+        break;
     }
-
-    if (controller.isDrawVisible && drawState.isOngoing) {
-      controller.onDrawMoveEnd();
-      _panData?.end();
-      _panData = null;
-      return;
-    } else if (_panData!.isMove) {
-      _panData?.end();
-      _panData = null;
-      controller.onPanEnd();
-      setCursorToPrecise();
-      return;
-    }
-
-    // <0: 从右向左滑动; >0: 从左向右滑动.
-    final velocity = details.velocity.pixelsPerSecond.dx;
-    final tolerance = gestureConfig.tolerance;
-    final panDistance = velocity * tolerance.distanceFactor;
-    final panDuration = calcuInertialPanDuration(panDistance, maxDuration: tolerance.maxDuration);
-    final canInertialPan = gestureConfig.enableInertialPan &&
-        controller.klineData.isNotEmpty &&
-        !(velocity < 0 && !controller.canPanRTL) &&
-        !(velocity > 0 && !controller.canPanLTR) &&
-        // 平移距离为 0 或不足 1ms, 无需继续平移.
-        panDistance.abs() >= precisionError &&
-        panDuration > 1;
-
-    if (!canInertialPan) {
-      logd('onPanEnd no inertial movement, velocity:$velocity distance:$panDistance');
-      _panData?.end();
-      _panData = null;
-      controller.onPanEnd();
-      setCursorToPrecise();
-      controller.checkAndLoadMoreCandlesWhenPanEnd();
-      return;
-    }
-
-    controller.checkAndLoadMoreCandlesWhenPanEnd(panDistance: panDistance, panDuration: panDuration);
-    logi('onPanEnd inertial movement, velocity:$velocity distance:$panDistance duration:$panDuration');
-
-    animateToPosition(
-      _panData!.offset.dx,
-      _panData!.offset.dx + panDistance,
-      panDuration: Duration(milliseconds: panDuration),
-      tolerance: tolerance,
-      onCompleted: () {
-        _panData?.end();
-        _panData = null;
-        controller.onPanEnd();
-
-        setCursorToPrecise();
-      },
-    );
   }
 
   void onPointerPanZoomStart(PointerPanZoomStartEvent event) {
@@ -688,12 +676,12 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
         _longData?.end();
         _longData = null;
       } else {
-        setCursorToNone();
+        _mouseCursor.value = SystemMouseCursors.none;
       }
     } else if (controller.onGridResizeStart(details.localPosition)) {
       _longData = GestureData.long(details.localPosition);
       controller.requestCancelCross();
-      setCursorToNone();
+      _mouseCursor.value = SystemMouseCursors.none;
     } else {
       logd('onLongPressStart cross > details:$details');
       controller.requestCancelCross();
@@ -703,7 +691,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
         _longData?.end();
         _longData = null;
       } else {
-        setCursorToNone();
+        _mouseCursor.value = SystemMouseCursors.none;
       }
     }
   }
@@ -733,14 +721,14 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
     // }());
     if (controller.isDrawVisible && drawState.isOngoing) {
       controller.onDrawMoveEnd();
-      if (drawState.isEditing) setCursorToClick();
+      if (drawState.isEditing) _mouseCursor.value = SystemMouseCursors.click;
     } else if (controller.isStartDragGrid) {
       controller.onGridResizeEnd();
-      setCursorToPrecise();
+      _mouseCursor.value = SystemMouseCursors.precise;
     } else {
       // 长按结束, 尝试取消Cross事件.
       controller.requestCancelCross();
-      setCursorToPrecise();
+      _mouseCursor.value = SystemMouseCursors.precise;
     }
 
     _longData?.end();

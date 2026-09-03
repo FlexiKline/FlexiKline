@@ -240,37 +240,58 @@ mixin GridBinding on KlineBindingBase, SettingBinding {
     );
   }
 
-  /// 测试 [position] 是否命中指标分隔线。
+  /// 询问 [position] 是否命中某条指标分隔线，不产生任何状态变更。
+  ///
+  /// 命中规则与 [onGridResizeStart] 严格同源（两者共用 [_findResizeCandidates]），
+  /// 只是不认领。配合 [NonTouchGestureOwner] 的归属判定，在 hover 时安全调用。
+  bool hitTestGridResize(Offset position) {
+    final (up, down) = _findResizeCandidates(position.dy);
+    if (up == null) return false;
+    // fixed 下只能在两个区域之间分配高度，不能改变画布总高度。
+    return !isFixedLayoutMode || down != null;
+  }
+
+  /// 测试 [position] 是否命中指标分隔线，命中则认领并触发重绘。
   bool onGridResizeStart(Offset position) {
     _upObject = _downObject = null;
-    if (!gridConfig.isAllowDragIndicatorHeight) return false;
+    final (up, down) = _findResizeCandidates(position.dy);
+    if (up == null) return false;
 
-    final dy = position.dy;
+    // fixed 下只能在两个区域之间分配高度，不能改变画布总高度。
+    if (!isFixedLayoutMode || down != null) {
+      _upObject = up;
+      _downObject = down;
+      markRepaintGrid();
+      return true;
+    }
+    return false;
+  }
+
+  /// 按 [dy] 在分隔线带中查找上下候选 PaintObject。
+  ///
+  /// 两个公开入口 [hitTestGridResize] 与 [onGridResizeStart] 共用此方法，
+  /// 同源是结构保证而非纪律。
+  (PaintObject? up, PaintObject? down) _findResizeCandidates(double dy) {
+    if (!gridConfig.isAllowDragIndicatorHeight) return (null, null);
+
     final minDistance = gridConfig.dragHitTestMinDistance;
     final minDistanceHalf = minDistance / 2;
     final list = subPaintObjects.where((obj) => obj.key != timeIndicatorKey);
     final lastObj = list.lastOrNull;
+    PaintObject? up;
     for (final object in [mainPaintObject, ...list]) {
       if (object.drawableRect.hitTestBottom(
         dy - (object == lastObj ? minDistanceHalf : 0),
         minDistance: minDistance,
       )) {
-        _upObject = object;
+        up = object;
         continue;
       }
-      if (_upObject != null) {
-        _downObject = object;
-        break;
+      if (up != null) {
+        return (up, object);
       }
     }
-
-    // fixed 下只能在两个区域之间分配高度，不能改变画布总高度。
-    if (_upObject != null && (!isFixedLayoutMode || _downObject != null)) {
-      markRepaintGrid();
-      return true;
-    }
-    _upObject = _downObject = null;
-    return false;
+    return (up, null);
   }
 
   /// 拖拽更新指标高度。
