@@ -302,7 +302,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
     }
 
     // 落点无归属，或原目标在 down 与 start 之间消失时，沿用既有图表兜底。
-    _stopPositionAnimation();
+    stopPositionAnimation();
     // 按意图分派而非按指数(`pointerCount > 1`): 双指同向横向移动时 span 未变, 判成缩放会让
     // `details.scale` 恒等于 1.0, 图表赢了竞技场却原地不动。
     //
@@ -320,17 +320,6 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
         TouchGestureOwner.chartPan;
     session.owner = owner;
     session.drive = _startDrive(session, owner, focalPoint);
-  }
-
-  /// 打断进行中的位置动画（惯性平移或指定日期定位），并归位它写下的平移平滑因子。
-  ///
-  /// [animateToPosition] 的 `onCompleted` 只在动画自然跑完时执行，被打断时不会。而动画每帧
-  /// 都经 [ChartBinding.onChartMove] 写入 `_panSmoothFactor`，不归位会让 Y 轴的 minMax 一直
-  /// 走插值、且 `clipRect` 停在 `canvasRect` 而非 `mainRect`。
-  void _stopPositionAnimation() {
-    if (animationController == null) return;
-    cancelPositionAnimation();
-    controller.onPanEnd();
   }
 
   /// 解析缩放的锚定位置：[ScalePosition.auto] 按落点所在的三分之一区域就近锚定。
@@ -390,7 +379,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
       case TouchGestureOwner.paintObject:
         if (!controller.onPaintObjectDragStart(down)) return null;
         logd('onScaleStart paintObject drag down:$down');
-        _stopPositionAnimation();
+        stopPositionAnimation();
         return (data: GestureData.pan(origin), origin: origin);
       case TouchGestureOwner.zoomSlider:
         return (data: GestureData.zoom(origin), origin: origin);
@@ -443,7 +432,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
               controller.onChartZoomStart(newOffset)) {
             // 抢占决定「手势归 zoom」, zoomStartMinDistance 决定「缩放何时真正开始」,
             // 两个阈值语义不同, 不合并。
-            _stopPositionAnimation();
+            stopPositionAnimation();
             session.zoomStarted = true;
           }
         // 到不了这里: 兜底归属的位置来源是多指质心, 由下面的分支驱动。

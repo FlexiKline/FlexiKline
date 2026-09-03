@@ -158,9 +158,6 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
       onPointerPanZoomUpdate: onPointerPanZoomUpdate,
       onPointerPanZoomEnd: onPointerPanZoomEnd,
 
-      // onPointerMove: onPointerMove,
-      // onPointerDown: onPointerDown,
-
       /// 指针取消: 仅用于回滚 PaintObject 拖动.
       /// [onPanEnd] 在指针被取消时同样会派发(见 monodrag.dart 的 accepted 分支),
       /// 无法从 [DragEndDetails] 区分, 故在此先行回滚, 避免把中断当成提交.
@@ -193,12 +190,6 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
             onPanStart: onPanStart,
             onPanUpdate: onPanUpdate.throttleOnFps,
             onPanEnd: onPanEnd,
-
-            /// 移动 缩放
-            // onScaleStart: onScaleStart,
-            // onScaleUpdate: onScaleUpdate,
-            // onScaleEnd: onScaleEnd,
-            // trackpadScrollCausesScale: true,
 
             /// 长按
             onLongPressStart: onLongPressStart,
@@ -233,7 +224,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
         /// 纵向缩放图表(zoom)
         if (gestureConfig.enableZoom && controller.chartZoomSlideBarRect.include(offset)) {
           // 如果命中ZommSlideBar区域, 即代表要进行缩放图表
-          cancelPositionAnimation();
+          stopPositionAnimation();
           if (!controller.isChartZooming && controller.onChartZoomStart(offset)) {
             Future.delayed(const Duration(milliseconds: 1000), () {
               assert(() {
@@ -296,7 +287,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
           }());
 
           if (newScale != null) {
-            cancelPositionAnimation();
+            stopPositionAnimation();
             _scaleData!.update(offset, newScale: newScale);
             controller.onChartScale(_scaleData!);
           }
@@ -489,13 +480,13 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
     } else if (controller.onPaintObjectDragStart(position)) {
       // PaintObject 优先按落点认领拖动.
       logd('onPanStart paintObject drag local:$position');
-      cancelPositionAnimation();
+      stopPositionAnimation();
       setCursorToGrabbing();
       _panData = GestureData.pan(position);
       _isObjectDragging = true;
     } else {
       logd('onPanStart pan local:$position');
-      cancelPositionAnimation();
+      stopPositionAnimation();
       // 缩放态下同一条平移路径会额外消费 dy, 但那由 [ChartBinding.onChartMove] 按
       // `isChartZooming` 判断, 与手势数据的类型无关; 这里只换光标提示可拖动的方向。
       if (controller.isChartZooming) {
@@ -560,6 +551,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
     } else if (_panData!.isMove) {
       _panData?.end();
       _panData = null;
+      controller.onPanEnd();
       setCursorToPrecise();
       return;
     }
@@ -615,7 +607,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
     }
 
     if (gestureConfig.enableScale) {
-      cancelPositionAnimation();
+      stopPositionAnimation();
       logd('onPointerPanZoomStart $event > ${event.localPosition}');
       _scaleData = GestureData.scale(
         offset,
@@ -753,26 +745,6 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
 
     _longData?.end();
     _longData = null;
-  }
-
-  void onScaleStart(ScaleStartDetails details) {
-    logd('onScaleStart $details');
-  }
-
-  void onScaleUpdate(ScaleUpdateDetails details) {
-    logd('onScaleUpdate $details');
-  }
-
-  void onScaleEnd(ScaleEndDetails details) {
-    logd('onScaleEnd $details');
-  }
-
-  void onPointerMove(PointerMoveEvent event) {
-    logd('onPointerMove $event');
-  }
-
-  void onPointerDown(PointerDownEvent event) {
-    logd('onPointerDown $event');
   }
 
   void onPointerCancel(PointerCancelEvent event) {

@@ -58,6 +58,18 @@ abstract class GestureDetectorState<T extends GestureDetectorWidget> extends Sta
     current?.dispose();
   }
 
+  /// 打断进行中的位置动画（惯性平移或指定日期定位），并归位它写下的平移平滑因子。
+  ///
+  /// [animateToPosition] 的 `onCompleted` 只在动画自然跑完时执行，被打断时不会。而动画每帧
+  /// 都经 [ChartBinding.onChartMove] 写入 `_panSmoothFactor`，不归位会让 Y 轴的 minMax 一直
+  /// 走插值、且 `clipRect` 停在 `canvasRect` 而非 `mainRect`。
+  @protected
+  void stopPositionAnimation() {
+    if (animationController == null) return;
+    cancelPositionAnimation();
+    controller.onPanEnd();
+  }
+
   /// 以动画的形式从[begin]移动到[end].
   Future<bool> moveToPosition(double begin, double end) {
     if (!mounted || !controller.isMounted) return Future.value(false);
