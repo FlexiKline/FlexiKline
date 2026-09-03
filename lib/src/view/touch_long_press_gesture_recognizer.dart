@@ -22,8 +22,8 @@ import 'package:flutter/gestures.dart';
 ///
 /// 让开时自我 reject 而非继续等待：既然本次序列归某个落点归属，长按对它就没有语义；退出
 /// 后 Tap 与 Scale 照常竞争，轻点仍是点击、越过抢占阈值即拖动。
-class FlexiLongPressGestureRecognizer extends LongPressGestureRecognizer {
-  FlexiLongPressGestureRecognizer({
+class TouchLongPressGestureRecognizer extends LongPressGestureRecognizer {
+  TouchLongPressGestureRecognizer({
     required this.shouldYieldToOwner,
     super.debugOwner,
   });
@@ -41,5 +41,5 @@ class FlexiLongPressGestureRecognizer extends LongPressGestureRecognizer {
   }
 
   @override
-  String get debugDescription => 'flexi long press';
+  String get debugDescription => 'touch long press';
 }

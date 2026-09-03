@@ -21,8 +21,8 @@ import 'package:flutter/gestures.dart';
 /// `touchSlop`；这是恒等关系而非数值巧合，调参无解。所以在上层确认存在归属后把阈值降到
 /// [_claimSlop] 并显式 [resolve]，抢在外层裁决之前胜出；上层没有归属时完全不干预，空白区
 /// 拖动仍归外层滚动。
-class FlexiScaleGestureRecognizer extends ScaleGestureRecognizer {
-  FlexiScaleGestureRecognizer({
+class TouchScaleGestureRecognizer extends ScaleGestureRecognizer {
+  TouchScaleGestureRecognizer({
     required this.shouldClaimOnDown,
     required this.shouldClaimOnSlop,
     required this.claimSlopFactor,
@@ -99,5 +99,5 @@ class FlexiScaleGestureRecognizer extends ScaleGestureRecognizer {
   }
 
   @override
-  String get debugDescription => 'flexi scale';
+  String get debugDescription => 'touch scale';
 }

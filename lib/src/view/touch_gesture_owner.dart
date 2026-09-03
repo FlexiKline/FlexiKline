@@ -26,7 +26,7 @@ import '../kline_controller.dart';
 /// **声明顺序即优先级**，按「判据越精确越优先，同精度时有跟手焦点的排他模式优先」排：
 /// 排他模式（drawDrawing、cross）→ 命中具体对象（drawEditing、paintObject）→ 区域性辅助
 /// 操作（zoomSlider，判据只有「落点在不在某个 Rect 里」）→ 全局兜底。
-enum FlexiGestureOwner {
+enum TouchGestureOwner {
   drawDrawing,
   drawEditing,
   cross,
@@ -49,9 +49,9 @@ enum FlexiGestureOwner {
   /// 态下的纵向拖动与普通平移走同一条 [chartPan]，由 [ChartBinding.onChartMove] 按
   /// `isChartZooming` 决定是否消费 dy。
   ///
-  /// [FlexiScaleGestureRecognizer] 的落点即抢占也问这个函数（`== zoomSlider`），不走单独的
+  /// [TouchScaleGestureRecognizer] 的落点即抢占也问这个函数（`== zoomSlider`），不走单独的
   /// 旁路入口：抢占与归属同源，才不会出现「为 zoom 抢下竞技场、却由别人驱动」。
-  static FlexiGestureOwner? resolveLanded(FlexiKlineController controller, Offset position) {
+  static TouchGestureOwner? resolveLanded(FlexiKlineController controller, Offset position) {
     if (controller.isDrawVisible && controller.drawState.isDrawing && controller.drawState.pointerOffset != null) {
       return drawDrawing;
     }
@@ -71,7 +71,7 @@ enum FlexiGestureOwner {
   ///
   /// [hitSlop] 是外层可滚动容器的裁决阈值，两条判据的样本都不足时返回 null 让给外层。
   /// 放弃不等于不响应：`ScaleGestureRecognizer` 仍会在原生 `panSlop` 自我 accept。
-  static FlexiGestureOwner? resolveChartFallback(
+  static TouchGestureOwner? resolveChartFallback(
     FlexiKlineController controller, {
     required Offset delta,
     required double spanDelta,

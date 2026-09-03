@@ -22,10 +22,10 @@ import '../framework/chart/indicator.dart';
 import '../framework/draw/overlay.dart';
 import '../model/gesture_data.dart';
 import '../utils/algorithm_util.dart';
-import 'flexi_gesture_owner.dart';
-import 'flexi_long_press_gesture_recognizer.dart';
-import 'flexi_scale_gesture_recognizer.dart';
 import 'gesture_detector_widget.dart';
+import 'touch_gesture_owner.dart';
+import 'touch_long_press_gesture_recognizer.dart';
+import 'touch_scale_gesture_recognizer.dart';
 
 class TouchGestureDetector extends GestureDetectorWidget {
   const TouchGestureDetector({
@@ -65,7 +65,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
   Widget build(BuildContext context) {
     // [RawGestureDetector] 不像 [GestureDetector] 那样自动注入 gestureSettings, 必须
     // 逐个识别器手动注入: 漏了会让所有识别器退回框架常量, 丢掉平台适配, 并让
-    // [FlexiScaleGestureRecognizer] 的抢占阈值按 kTouchSlop 而非设备值计算。
+    // [TouchScaleGestureRecognizer] 的抢占阈值按 kTouchSlop 而非设备值计算。
     final gestureSettings = MediaQuery.maybeGestureSettingsOf(context);
     return Listener(
       key: const ValueKey('TouchListener'),
@@ -96,8 +96,8 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
           ),
 
           /// 长按
-          FlexiLongPressGestureRecognizer: GestureRecognizerFactoryWithHandlers<FlexiLongPressGestureRecognizer>(
-            () => FlexiLongPressGestureRecognizer(
+          TouchLongPressGestureRecognizer: GestureRecognizerFactoryWithHandlers<TouchLongPressGestureRecognizer>(
+            () => TouchLongPressGestureRecognizer(
               debugOwner: this,
               // 无副作用: deadline 到点时只读已判定的归属。
               shouldYieldToOwner: () => _session?.owner?.suppressesLongPress == true,
@@ -110,8 +110,8 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
           ),
 
           /// 移动 缩放
-          FlexiScaleGestureRecognizer: GestureRecognizerFactoryWithHandlers<FlexiScaleGestureRecognizer>(
-            () => FlexiScaleGestureRecognizer(
+          TouchScaleGestureRecognizer: GestureRecognizerFactoryWithHandlers<TouchScaleGestureRecognizer>(
+            () => TouchScaleGestureRecognizer(
               debugOwner: this,
               claimSlopFactor: gestureConfig.dragClaimSlopFactor,
               // 两个回调都必须无副作用: 归属只由 [onPointerDown] / [onPointerMove] 按第一指
@@ -121,7 +121,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
               // cross / draw / 命中手柄时不抢」, 会为 zoom 抢下竞技场却由别人驱动, 而 Tap 已
               // 被 reject —— 点一下既退不出十字线也不做任何事。
               shouldClaimOnDown: (position) {
-                return FlexiGestureOwner.resolveLanded(controller, position) == FlexiGestureOwner.zoomSlider;
+                return TouchGestureOwner.resolveLanded(controller, position) == TouchGestureOwner.zoomSlider;
               },
               shouldClaimOnSlop: () => _session?.owner != null,
             ),
@@ -160,7 +160,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
     final session = _session = _TouchSession(event);
     // initialSpan 保持 0: 单指的 span 恒为 0。
     session.pointers[event.pointer] = position;
-    final owner = session.owner = FlexiGestureOwner.resolveLanded(controller, position);
+    final owner = session.owner = TouchGestureOwner.resolveLanded(controller, position);
     if (owner != null) logd('onPointerDown owner:${owner.name} position:$position');
   }
 
@@ -172,7 +172,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
   /// 兜底判定放在这里而非 recognizer：外层 [Listener] 在命中路径中先于 `GestureBinding`
   /// 收到同一个 move 事件，「本事件判定、本事件抢占」因此成立；而外层 Scrollable 的识别器
   /// 在 `pointerRouter` 里排在图表之后，同一事件内图表先赢。判定出归属即满足
-  /// [FlexiScaleGestureRecognizer] 的抢占条件（[_hitSlop] 恒大于它的 claimSlop）。竞技场
+  /// [TouchScaleGestureRecognizer] 的抢占条件（[_hitSlop] 恒大于它的 claimSlop）。竞技场
   /// 已被外层赢下时判定照样执行，此时抢占是空操作、`onScaleStart` 也不会来。
   void onPointerMove(PointerMoveEvent event) {
     final session = _session;
@@ -181,7 +181,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
     if (event.pointer == session.pointer) session.latestPosition = event.localPosition;
     if (session.owner != null) return;
 
-    final owner = FlexiGestureOwner.resolveChartFallback(
+    final owner = TouchGestureOwner.resolveChartFallback(
       controller,
       delta: session.delta,
       spanDelta: session.spanDelta,
@@ -311,13 +311,13 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
     // (单指 span 恒为 0, 缩放再不响应, 也不肯退回平移)。
     //
     // 判定不出来时仍归平移: 竞技场已由原生阈值赢下, 平移好过原地不动。
-    final owner = FlexiGestureOwner.resolveChartFallback(
+    final owner = TouchGestureOwner.resolveChartFallback(
           controller,
           delta: session.delta,
           spanDelta: session.spanDelta,
           hitSlop: _hitSlop,
         ) ??
-        FlexiGestureOwner.chartPan;
+        TouchGestureOwner.chartPan;
     session.owner = owner;
     session.drive = _startDrive(session, owner, focalPoint);
   }
@@ -356,13 +356,13 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
   /// [GestureData] 的类型不只是标签：`isScale` / `isSignal` 会改变下游行为。dy 是否被消费
   /// 不在其中——那由 [ChartBinding.onChartMove] 按 `isChartZooming` 判断。
   ///
-  /// case 顺序与 [FlexiGestureOwner] 的声明顺序一致，而声明顺序就是归属优先级；
+  /// case 顺序与 [TouchGestureOwner] 的声明顺序一致，而声明顺序就是归属优先级；
   /// [onScaleUpdate] 与 [_finishSession] 的 switch 同序，任一归属的三段生命周期落在同一位置。
   ///
   /// [owner] 恒为 `session.owner` 的非空形式；[fallbackOrigin] 只有兜底族会用到。
   ({GestureData data, Offset origin})? _startDrive(
     _TouchSession session,
-    FlexiGestureOwner owner,
+    TouchGestureOwner owner,
     Offset fallbackOrigin,
   ) {
     final down = session.downPosition;
@@ -372,9 +372,9 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
     if (origin == null) return null;
 
     switch (owner) {
-      case FlexiGestureOwner.drawDrawing:
+      case TouchGestureOwner.drawDrawing:
         return (data: GestureData.pan(origin), origin: origin);
-      case FlexiGestureOwner.drawEditing:
+      case TouchGestureOwner.drawEditing:
         // 命中与位移基准都取按下位置, 两个理由缺一不可:
         // 1. 命中准: 识别时刻位置距按下点相差一个 slop, 远超
         //    [DrawConfig.hitTestMinDistance] 的 10px, 沿线方向之外必然脱靶。
@@ -385,20 +385,20 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
         final data = GestureData.pan(origin);
         if (!controller.onDrawMoveStart(data)) return null;
         return (data: data, origin: origin);
-      case FlexiGestureOwner.cross:
+      case TouchGestureOwner.cross:
         return (data: GestureData.tap(origin), origin: origin);
-      case FlexiGestureOwner.paintObject:
+      case TouchGestureOwner.paintObject:
         if (!controller.onPaintObjectDragStart(down)) return null;
         logd('onScaleStart paintObject drag down:$down');
         _stopPositionAnimation();
         return (data: GestureData.pan(origin), origin: origin);
-      case FlexiGestureOwner.zoomSlider:
+      case TouchGestureOwner.zoomSlider:
         return (data: GestureData.zoom(origin), origin: origin);
-      case FlexiGestureOwner.chartScale:
+      case TouchGestureOwner.chartScale:
         final position = _resolveScalePosition(session, origin.dx);
         logd('onScaleStart scale $position focal:$origin');
         return (data: GestureData.scale(origin, position: position), origin: origin);
-      case FlexiGestureOwner.chartPan:
+      case TouchGestureOwner.chartPan:
         logd('onScaleStart pan focal:$origin');
         return (data: GestureData.pan(origin), origin: origin);
     }
@@ -422,20 +422,20 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
       final data = drive.data;
       final newOffset = drive.origin + session.delta;
       switch (owner) {
-        case FlexiGestureOwner.drawDrawing:
+        case TouchGestureOwner.drawDrawing:
           data.update(newOffset);
           controller.onDrawUpdate(data);
-        case FlexiGestureOwner.drawEditing:
+        case TouchGestureOwner.drawEditing:
           data.update(newOffset);
           controller.onDrawMoveUpdate(data);
-        case FlexiGestureOwner.cross:
+        case TouchGestureOwner.cross:
           data.update(newOffset.clamp(controller.canvasRect));
           controller.onCrossUpdate(data);
-        case FlexiGestureOwner.paintObject:
+        case TouchGestureOwner.paintObject:
           // 不做区域钳制: 是否限制在图表内由绘制对象自行决定.
           data.update(newOffset);
           controller.onPaintObjectDragUpdate(data);
-        case FlexiGestureOwner.zoomSlider:
+        case TouchGestureOwner.zoomSlider:
           data.update(newOffset);
           if (session.zoomStarted) {
             controller.onChartZoomUpdate(data);
@@ -447,7 +447,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
             session.zoomStarted = true;
           }
         // 到不了这里: 兜底归属的位置来源是多指质心, 由下面的分支驱动。
-        case FlexiGestureOwner.chartScale || FlexiGestureOwner.chartPan:
+        case TouchGestureOwner.chartScale || TouchGestureOwner.chartPan:
           break;
       }
       return;
@@ -462,13 +462,13 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
     // 失效。反向不切: 缩放一旦开始, 中途转平移会让 initialSpan 基准失去意义; 抬起一指
     // 是另一回事, 指针数量变化会重新派发 start 由 [onScaleStart] 重判。
     //
-    // 阈值用 [kScaleSlop] 而非 [FlexiGestureOwner.resolveChartFallback] 的抢占判据: 两者
+    // 阈值用 [kScaleSlop] 而非 [TouchGestureOwner.resolveChartFallback] 的抢占判据: 两者
     // 语义不同, 不要合并。抢占要跟外层可滚动容器赛跑、必须灵敏; 族内切换要稳, 过敏会让
     // 平移中途乱缩放 —— 此刻竞技场早已赢下, 没有赛跑对手。
-    if (owner == FlexiGestureOwner.chartPan && gestureConfig.enableScale && session.spanDelta.abs() > kScaleSlop) {
+    if (owner == TouchGestureOwner.chartPan && gestureConfig.enableScale && session.spanDelta.abs() > kScaleSlop) {
       final scalePosition = _resolveScalePosition(session, position.dx);
       logd('onScaleUpdate pan > scale $scalePosition focal:$position');
-      session.owner = FlexiGestureOwner.chartScale;
+      session.owner = TouchGestureOwner.chartScale;
       data.end();
       // 平移阶段留下的平滑因子必须归位: 缩放的收尾不调 onPanEnd, 否则它会一直残留。
       controller.onPanEnd();
@@ -488,7 +488,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
 
     // 按归属分派, 不看 [GestureData] 的类型: 类型由归属在 [onScaleStart] 决定, 再照类型分派
     // 一次只会多出一套要保持同步的判据。
-    if (owner == FlexiGestureOwner.chartScale) {
+    if (owner == TouchGestureOwner.chartScale) {
       final newScale = scaledDecelerate(details.scale);
       final change = details.scale - data.scale;
       if (change.abs() > 0.01) {
@@ -518,7 +518,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
     if (owner == null || !owner.isChartFallback || drive == null) return;
 
     // candleWidth 按段落库: 双指缩放后抬起一指, 本段缩放的结果就该定下来。
-    final isScale = owner == FlexiGestureOwner.chartScale;
+    final isScale = owner == TouchGestureOwner.chartScale;
     if (isScale) controller.onChartScaleEnd();
 
     if (details.pointerCount > 0) {
@@ -545,36 +545,36 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
   /// 就提前提交；而最终一次 onEnd 还可能缺席（上一段结束后剩余指针没再移动就抬起）。它的
   /// 收尾又不需要抬手速度，所以指针归零是更可靠的落点。
   ///
-  /// case 顺序与 [_startDrive]、[onScaleUpdate] 一致，即 [FlexiGestureOwner] 的声明顺序。
+  /// case 顺序与 [_startDrive]、[onScaleUpdate] 一致，即 [TouchGestureOwner] 的声明顺序。
   void _finishSession(_TouchSession session, {required Offset velocity}) {
     final drive = session.drive;
     final owner = session.owner;
     if (drive == null || owner == null) return;
 
     switch (owner) {
-      case FlexiGestureOwner.drawDrawing:
+      case TouchGestureOwner.drawDrawing:
         // 拖动只移动当前绘制点, 不确认它: 确认是独立的一次点击, 由 Tap 赢下竞技场后经
         // [onTapUp] 完成。抢占前也是这个语义 —— [TapGestureRecognizer] 的
         // `postAcceptSlopTolerance` 就是 `touchSlop`, 位移越过它之后 Tap 会自我 reject 并
         // 停止跟踪, `onTapUp` 根本不会来, 所以拖完从来不确认。
         break;
-      case FlexiGestureOwner.drawEditing:
+      case TouchGestureOwner.drawEditing:
         controller.onDrawMoveEnd();
-      case FlexiGestureOwner.cross:
+      case TouchGestureOwner.cross:
         // 不关闭十字线: cross 是「点击进入、再次点击退出」的模式, 中间的平移只移动十字线。
         break;
-      case FlexiGestureOwner.paintObject:
+      case TouchGestureOwner.paintObject:
         // 本轮出现过 Cancel 即回滚: 系统接管了手势, 用户并未确认这次拖动。
         if (session.canceled) {
           controller.onPaintObjectDragCancel();
         } else {
           controller.onPaintObjectDragEnd();
         }
-      case FlexiGestureOwner.zoomSlider:
+      case TouchGestureOwner.zoomSlider:
         if (session.zoomStarted) controller.onChartZoomEnd();
-      case FlexiGestureOwner.chartScale:
+      case TouchGestureOwner.chartScale:
         controller.checkAndLoadMoreCandlesWhenPanEnd();
-      case FlexiGestureOwner.chartPan:
+      case TouchGestureOwner.chartPan:
         // 惯性分支要等动画跑完才结束手势数据, 所以自行收尾。
         _finishChartPan(session, drive.data, velocity.dx);
         return;
@@ -731,7 +731,7 @@ class _TouchSession {
   ///
   /// 本轮内不因业务状态或指针数变化而改变，两处例外都在图表兜底族内：`onScaleStart` 认领
   /// 失败时降级，`onScaleUpdate` 允许 chartPan 单向切到 chartScale。
-  FlexiGestureOwner? owner;
+  TouchGestureOwner? owner;
 
   // ── 业务 ──
 
@@ -768,7 +768,7 @@ class _TouchSession {
   /// 各指到质心的平均距离，口径与 [ScaleGestureRecognizer] 一致（两指时等于间距的一半）。
   ///
   /// 同口径才能让 [kScaleSlop] 在 chartPan → chartScale 的切换判据里与原生识别器表达同一
-  /// 件事。抢占判据是另一个量纲（指间距变化，见 [FlexiGestureOwner.resolveChartFallback]）。
+  /// 件事。抢占判据是另一个量纲（指间距变化，见 [TouchGestureOwner.resolveChartFallback]）。
   double get span {
     final count = pointers.length;
     if (count < 2) return 0;
