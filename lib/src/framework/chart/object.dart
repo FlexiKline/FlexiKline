@@ -90,6 +90,14 @@ abstract class IndicatorObject<T extends Indicator>
 
   @override
   int get hashCode => runtimeType.hashCode ^ key.hashCode;
+
+  /// 主题变化时回调。
+  ///
+  /// 子类和 mixin 可 override 此方法清理主题派生的缓存资源（如画笔、颜色），
+  /// 但必须调用 `super.didChangeTheme()`。
+  @protected
+  @mustCallSuper
+  void didChangeTheme() {}
 }
 
 /// PaintObject
@@ -148,9 +156,6 @@ abstract class PaintObject<T extends Indicator<IIndicatorKey>> extends Indicator
   void didUpdateIndicator(covariant T oldIndicator) {
     // 基类不处理 precompute，由 ComputedPaintObject 处理
   }
-
-  @protected
-  void didChangeTheme() {}
 
   /// 进入绘制树（几何首次有效）时回调。默认无操作。
   @protected
@@ -456,6 +461,7 @@ final class MainPaintObject<T extends MainPaintObjectIndicator> extends PaintObj
 
   @override
   void didChangeTheme() {
+    super.didChangeTheme();
     for (final object in children) {
       object.didChangeTheme();
     }

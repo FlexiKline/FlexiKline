@@ -36,59 +36,86 @@ mixin PaintStyleMixin<T extends Indicator<IIndicatorKey>> on IndicatorObject<T> 
   /// 下跌浅色。
   Color get shortTintColor => shortColor.withAlpha(settingConfig.opacity.alpha);
 
+  // ---- 缓存画笔 ----
+  // Paint 对象只在首次访问时创建，主题变化时由 [didChangeTheme] 清除。
+  // 依赖 [candleWidth] 的 bar 类画笔每次访问更新 strokeWidth（一个 double 赋值），
+  // 避免缩放手势期间每帧重建整个 Paint。
+
+  Paint? _defLongBarPaint;
+  Paint? _defShortBarPaint;
+  Paint? _defLongTintBarPaint;
+  Paint? _defShortTintBarPaint;
+  Paint? _defLongHollowBarPaint;
+  Paint? _defShortHollowBarPaint;
+  Paint? _defLongLinePaint;
+  Paint? _defShortLinePaint;
+
   /// 上涨实心柱画笔。
-  Paint get defLongBarPaint => Paint()
+  Paint get defLongBarPaint => (_defLongBarPaint ??= Paint()
     ..color = longColor
-    ..style = PaintingStyle.stroke
+    ..style = PaintingStyle.stroke)
     ..strokeWidth = candleWidth;
 
   /// 下跌实心柱画笔。
-  Paint get defShortBarPaint => Paint()
+  Paint get defShortBarPaint => (_defShortBarPaint ??= Paint()
     ..color = shortColor
-    ..style = PaintingStyle.stroke
+    ..style = PaintingStyle.stroke)
     ..strokeWidth = candleWidth;
 
   /// 上涨浅色实心柱画笔。
-  Paint get defLongTintBarPaint => Paint()
+  Paint get defLongTintBarPaint => (_defLongTintBarPaint ??= Paint()
     ..color = longTintColor
-    ..style = PaintingStyle.stroke
+    ..style = PaintingStyle.stroke)
     ..strokeWidth = candleWidth;
 
   /// 下跌浅色实心柱画笔。
-  Paint get defShortTintBarPaint => Paint()
+  Paint get defShortTintBarPaint => (_defShortTintBarPaint ??= Paint()
     ..color = shortTintColor
-    ..style = PaintingStyle.stroke
+    ..style = PaintingStyle.stroke)
     ..strokeWidth = candleWidth;
 
   /// 上涨空心柱画笔。
-  Paint get defLongHollowBarPaint => Paint()
+  Paint get defLongHollowBarPaint => _defLongHollowBarPaint ??= Paint()
     ..color = longColor
     ..style = PaintingStyle.stroke
     ..strokeWidth = settingConfig.candleHollowBarBorderWidth;
 
   /// 下跌空心柱画笔。
-  Paint get defShortHollowBarPaint => Paint()
+  Paint get defShortHollowBarPaint => _defShortHollowBarPaint ??= Paint()
     ..color = shortColor
     ..style = PaintingStyle.stroke
     ..strokeWidth = settingConfig.candleHollowBarBorderWidth;
 
   /// 上涨线条画笔。
-  Paint get defLongLinePaint => Paint()
+  Paint get defLongLinePaint => _defLongLinePaint ??= Paint()
     ..color = longColor
     ..style = PaintingStyle.stroke
     ..strokeWidth = candleLineWidth;
 
   /// 下跌线条画笔。
-  Paint get defShortLinePaint => Paint()
+  Paint get defShortLinePaint => _defShortLinePaint ??= Paint()
     ..color = shortColor
     ..style = PaintingStyle.stroke
     ..strokeWidth = candleLineWidth;
 
-  /// 创建自定义线条画笔。
+  /// 创建自定义线条画笔（不缓存：参数由调用方传入）。
   Paint getLinePaint({Color? color, double? strokeWidth}) => Paint()
     ..color = color ?? theme.lineChartColor
     ..style = PaintingStyle.stroke
     ..strokeWidth = strokeWidth ?? candleLineWidth;
+
+  @override
+  void didChangeTheme() {
+    super.didChangeTheme();
+    _defLongBarPaint = null;
+    _defShortBarPaint = null;
+    _defLongTintBarPaint = null;
+    _defShortTintBarPaint = null;
+    _defLongHollowBarPaint = null;
+    _defShortHollowBarPaint = null;
+    _defLongLinePaint = null;
+    _defShortLinePaint = null;
+  }
 }
 
 /// 绘制对象边界计算能力。
@@ -241,7 +268,7 @@ mixin PaintObjectGeometryStateMixin<T extends Indicator<IIndicatorKey>> on Indic
   @override
   double get dyFactor {
     if (_dyFactor != null) return _dyFactor!;
-    if (chartRect.height == 0) return _dyFactor = 1;
+    if (chartRect.height <= 0) return _dyFactor = 0;
     return _dyFactor = chartRect.height / minMax.diffDivisor.toDouble();
   }
 
@@ -252,6 +279,7 @@ mixin PaintObjectGeometryStateMixin<T extends Indicator<IIndicatorKey>> on Indic
 
   FlexiNum? dyToValue(double dy, {bool check = true}) {
     if (check && !drawableRect.includeDy(dy)) return null;
+    if (dyFactor <= 0) return null;
     return minMax.max - ((dy - chartRect.top) / dyFactor).toFlexiNum();
   }
 
