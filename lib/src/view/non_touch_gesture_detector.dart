@@ -68,28 +68,27 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      controller.drawStateListenable.addListener(() {
-        if (gestureConfig.supportKeyboardShortcuts) {
-          /// 控制KeyboardListener的焦点获取与释放
-          switch (drawState) {
-            case Drawing():
-            case Editing():
-              if (!_keyboardFocusNode.hasFocus) {
-                _keyboardFocusNode.requestFocus();
-              }
-              break;
-            case Prepared():
-            case Exited():
-              if (_keyboardFocusNode.hasFocus) {
-                _keyboardFocusNode.unfocus();
-              }
-              // FocusManager.instance.primaryFocus?.unfocus();
-              break;
-          }
-        }
-      });
-    });
+    if (gestureConfig.supportKeyboardShortcuts) {
+      // controller 在 widget 树 build 时已经 mounted, 直接注册即可。
+      // 同时监听 lifecycle 以应对 hot-reload 等重建场景。
+      controller.drawStateListenable.addListener(_updateKeyboardFocus);
+      controller.isChartZoomingListenable.addListener(_updateKeyboardFocus);
+    }
+  }
+
+  /// Draw 或 zoom 激活时请求键盘焦点，两者都退出时释放。
+  void _updateKeyboardFocus() {
+    final needFocus = switch (drawState) {
+          Drawing() || Editing() => true,
+          _ => false,
+        } ||
+        controller.isChartZooming;
+
+    if (needFocus && !_keyboardFocusNode.hasFocus) {
+      _keyboardFocusNode.requestFocus();
+    } else if (!needFocus && _keyboardFocusNode.hasFocus) {
+      _keyboardFocusNode.unfocus();
+    }
   }
 
   @override
@@ -135,6 +134,9 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
       /// [onPanEnd] 在指针被取消时同样会派发(见 monodrag.dart 的 accepted 分支),
       /// 无法从 [DragEndDetails] 区分, 故在此先行回滚, 避免把中断当成提交.
       onPointerCancel: onPointerCancel,
+
+      /// 右键按下: 退出 Y 轴缩放。
+      onPointerDown: onPointerDown,
       child: ValueListenableBuilder(
         valueListenable: _mouseCursor,
         builder: (context, cursor, child) => MouseRegion(
@@ -380,15 +382,6 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
     }
   }
 
-  /// 放弃当前 PaintObject 拖动并清理其手势数据. 未在拖动时为空操作.
-  void _cancelObjectDragging() {
-    if (_drag == null || _drag!.owner != NonTouchGestureOwner.paintObject) return;
-    controller.onPaintObjectDragCancel();
-    _drag!.data.end();
-    _drag = null;
-    _mouseCursor.value = SystemMouseCursors.precise;
-  }
-
   /// 平移开始.
   void onPanStart(DragStartDetails details) {
     // 触控板捏合期间抑制 pan: 这是通道 P 与通道 D 唯一的耦合点。
@@ -419,6 +412,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
           data.end();
           return;
         }
+        controller.requestCancelCross();
         _drag = (owner: owner, data: data);
 
       case NonTouchGestureOwner.paintObject:
@@ -613,8 +607,9 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
 
   /// 通道 P: 原生触控板手势更新。
   ///
-  /// `event.scale` 变化越过阈值 → [_TrackpadSession.pinching] 置 true, 本轮不再放行
-  /// 通道 D 的 pan。阈值 0.01 与旧实现一致, 足够滤掉滑动时的手指微张。
+  /// pinching 判定用**累积偏离阈值**而非帧间变化量: `(event.scale - 1.0).abs()` 超过
+  /// [_kPinchThreshold] 才置位。双指横滑时 scale 围绕 1.0 微波动(通常 < 0.02), 不会越过
+  /// 0.05 的阈值; 真正的捏合会使 scale 快速偏离 1.0(放大到 1.1、缩小到 0.9)。
   void onPointerPanZoomUpdate(PointerPanZoomUpdateEvent event) {
     final session = _trackpad;
     if (session == null) {
@@ -624,13 +619,19 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
 
     if (!gestureConfig.enableScale || !session.data.isScale) return;
 
-    final change = event.scale - session.lastRawScale;
-    if (change.abs() > 0.01) {
+    // 累积偏离判定: PanZoomStart 时 scale 恒为 1.0, 真正的捏合会持续偏离。
+    if (!session.pinching && (event.scale - 1.0).abs() > _kPinchThreshold) {
       session.pinching = true;
-      session.lastRawScale = event.scale;
-      final newScale = scaledDecelerate(event.scale);
-      session.data.update(event.localPosition, newScale: newScale);
-      controller.onChartScale(session.data);
+    }
+
+    if (session.pinching) {
+      final change = event.scale - session.lastRawScale;
+      if (change.abs() > 0.001) {
+        session.lastRawScale = event.scale;
+        final newScale = scaledDecelerate(event.scale);
+        session.data.update(event.localPosition, newScale: newScale);
+        controller.onChartScale(session.data);
+      }
     }
   }
 
@@ -649,24 +650,48 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
     _trackpad = null;
   }
 
+  /// 右键按下: 退出 Y 轴缩放。
+  ///
+  /// 用 [Listener.onPointerDown] 而非 [GestureDetector.onSecondaryTap] 以避免与
+  /// pan recognizer 的竞技场冲突。只处理 secondary button, primary 留给 GestureDetector。
+  void onPointerDown(PointerDownEvent event) {
+    if (event.buttons == kSecondaryMouseButton && controller.isChartZooming) {
+      logd('onPointerDown secondary > exit zoom');
+      controller.exitChartZoom();
+    }
+  }
+
   void onPointerCancel(PointerCancelEvent event) {
     logd('onPointerCancel $event');
     // 回滚正在进行的 PaintObject 拖动, 避免 [onPanEnd] 把中断当成提交.
-    _cancelObjectDragging();
+    if (_drag != null && _drag!.owner == NonTouchGestureOwner.paintObject) {
+      controller.onPaintObjectDragCancel();
+      _drag!.data.end();
+      _drag = null;
+      _mouseCursor.value = SystemMouseCursors.precise;
+    }
   }
 
   void onKeyEvent(KeyEvent event) {
     if (event is KeyUpEvent) {
       if (event.logicalKey == LogicalKeyboardKey.escape) {
-        // ESC按键
         logd('onKeyEvent > ESC');
-        if (drawState.isOngoing) {
+        // 优先退出 zoom; 其次退出 draw。
+        if (controller.isChartZooming) {
+          controller.exitChartZoom();
+        } else if (drawState.isOngoing) {
           controller.prepareDraw(force: true);
         }
       }
     }
   }
 }
+
+/// 捏合判定的累积偏离阈值: `(event.scale - 1.0).abs()` 超过此值才视为捏合。
+///
+/// 双指横滑时 scale 围绕 1.0 微波动(通常 < 0.02), 0.05 留 2.5 倍余量;
+/// 真正捏合时 scale 快速偏离 1.0(放大到 1.1+、缩小到 0.9-), 识别延迟可忽略。
+const _kPinchThreshold = 0.05;
 
 /// 通道 S 的 X 轴 scale session。
 ///
@@ -693,9 +718,10 @@ class _ScaleSession {
 
 /// 通道 P 的触控板 session。
 ///
-/// [pinching] 是通道 P 与通道 D 唯一的耦合点: 一旦 `event.scale` 变化越过阈值即置位,
-/// 本轮通道 D 的 [onPanStart] / [onPanUpdate] 看到它就直接返回, 避免捏合时图表同时平移。
-/// session 结束时 [_trackpad] 被置 null, [pinching] 随之失效。
+/// [pinching] 是通道 P 与通道 D 唯一的耦合点: 一旦 `event.scale` 累积偏离 1.0 超过
+/// [_kPinchThreshold] 即置位, 本轮通道 D 的 [onPanStart] / [onPanUpdate] 看到它就
+/// 直接返回, 避免捏合时图表同时平移。session 结束时 [_trackpad] 被置 null,
+/// [pinching] 随之失效。
 class _TrackpadSession {
   _TrackpadSession(this.data);
 

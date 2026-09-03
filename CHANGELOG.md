@@ -1,4 +1,8 @@
 ## 2.5.0
+* Allow trackpad two-finger horizontal slide to pan the chart without being misidentified as a pinch zoom; the pinching threshold is now based on cumulative deviation from 1.0 (`> 0.05`) instead of per-frame change (`> 0.01`).
+* Exit Y-axis zoom with ESC key or right-click on non-touch devices; ESC prioritises exiting zoom over exiting draw mode when both are active. Keyboard focus is now automatically requested when entering zoom or draw state.
+* Cancel the cross cursor when starting to drag a draw object in editing mode; cross resumes naturally when the user moves the mouse after the drag ends.
+* Guard `onChartZoomStep` against unbounded span compression: reject the zoom if the resulting price range span would fall below `originalSpan / maxZoomPerGesture²`, preventing the chart from collapsing to a single line on continuous scroll-wheel zoom-in.
 * Resize sub panes by hovering the divider line (`resizeRow` cursor) and dragging directly on non-touch devices, replacing the long-press interaction inherited from touch devices.
 * Remove long-press gesture handling from non-touch devices; `gestureConfig.enableLongPress` no longer has effect on mouse/trackpad input (Breaking Changes).
 * Fix trackpad pinch simultaneously panning the chart on native platforms; `DragGestureRecognizer` consumed `PointerPanZoomUpdateEvent.panDelta` as drag input in parallel with the `Listener` scale path. A per-session `pinching` flag now suppresses pan in `onPanStart` and `onPanUpdate` once the scale change exceeds the threshold.

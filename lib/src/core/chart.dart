@@ -398,6 +398,7 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
   /// 否则会留下「按钮已消失、Y 轴仍锁着」的失同步状态。
   void exitChartZoom() {
     _isChartStartZoom.value = false;
+    _zoomStepBaseSpan = 0;
     _endChartZoomSession();
     // 没有缩放区间可清就没有画面变化, 直接返回省掉一次空重绘。
     if (!mainPaintObject.hasZoomMinMax) return;
@@ -413,6 +414,13 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
   ///
   /// 每帧基于快照重算而不逐帧累乘: 累乘会随节流丢帧漂移, 且无法表达「拖回起点即还原」。
   ({MinMax minMax, double distanceFromBottom})? _chartZoomAnchor;
+
+  /// [onChartZoomStep] 首次进入 zoom 时记录的原始价格区间跨度。
+  ///
+  /// 增量口径的 [onChartZoomStep] 每次读到的 `mainPaintObject.minMax` 都是上一帧的
+  /// 缩放结果, 不能拿它做下限基准(会随缩放一起缩小, 守卫失效)。这个字段在首次调用时
+  /// 记录自动区间的跨度, 后续以它为固定基准; [exitChartZoom] 清零。
+  double _zoomStepBaseSpan = 0;
 
   /// 本轮已应用的缩放系数, 用于跳过重复的同系数更新。
   ///
@@ -483,9 +491,24 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
     final current = mainPaintObject.minMax;
     if (current.isZero) return false;
 
-    _isChartStartZoom.value = true;
     final next = current.clone();
     next.scaleAroundCenter(coeff);
+
+    // 首次进入 zoom 时记录原始跨度作为固定基准。
+    if (_zoomStepBaseSpan == 0) {
+      _zoomStepBaseSpan = (current.max - current.min).toDouble().abs();
+    }
+
+    // 跨度下限守卫: 增量口径会累乘, 不限制的话 max-min 趋零, dyFactor 爆炸,
+    // 蜡烛被压成一条线。下限取 baseSpan / maxZoomPerGesture², 约等于触摸端
+    // 两轮最大放大后的跨度, 足够小不限制正常操作。
+    final span = (next.max - next.min).toDouble().abs();
+    final limit = gestureConfig.maxZoomPerGesture;
+    if (_zoomStepBaseSpan > 0 && span < _zoomStepBaseSpan / (limit * limit)) {
+      return false;
+    }
+
+    _isChartStartZoom.value = true;
     mainPaintObject.setZoomMinMax(next);
     markRepaintChart();
     markRepaintDraw();
