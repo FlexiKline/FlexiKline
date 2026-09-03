@@ -19,9 +19,9 @@
 /// 且不缓存——两次落在不同三分区的滚轮事件应各自独立解析锚点。
 ///
 /// 覆盖边界：通过 PointerScrollEvent → onPointerSignal → onChartScale 验证锚定行为。
-/// **不覆盖**：真机滚轮的 scrollDelta 量级、scaledSingal 的非线性映射精度、
-/// 光标外观。由于 onPointerSignal 内的 Future.delayed(1000ms) 需要消耗，
-/// 每次 scroll 事件后须 pump 足够时间。
+/// **不覆盖**：真机滚轮的 scrollDelta 量级、scaledSignal 的非线性映射精度、
+/// 光标外观。signal 通道的 scale session 用 scaleSessionTimeout（默认 800ms）的
+/// 可重置 Timer 管理, 每次 scroll 事件后须 pump 足够时间让 session 结束。
 library;
 
 import 'package:flexi_formatter/date_time.dart' show TimeUnit;
@@ -85,7 +85,7 @@ Future<void> _disposeChart(
   controller.dispose();
 }
 
-/// 发送滚轮事件并消耗 1s delayed timer，使下一轮独立。
+/// 发送滚轮事件并等待 scale session 超时结束, 使下一轮独立。
 Future<void> _scrollAndDrain(
   WidgetTester tester,
   Offset localPosition, {
@@ -98,8 +98,8 @@ Future<void> _scrollAndDrain(
   );
   await tester.sendEventToBinding(event);
   await tester.pump();
-  // 消耗 1000ms delayed，使 _scaleData 被清空、onChartScaleEnd 被调用。
-  await tester.pump(const Duration(milliseconds: 1100));
+  // 等待 scaleSessionTimeout (默认 800ms) 触发 session 结束。
+  await tester.pump(const Duration(milliseconds: 900));
 }
 
 // ---------------------------------------------------------------------------
@@ -126,7 +126,7 @@ void main() {
       // ---- 在左三分区滚轮放大一次 ----
       final beforeLeftDx = controller.paintDxOffset;
       final beforeLeftWidth = controller.candleWidth;
-      await _scrollAndDrain(tester, leftPos, scrollDy: 30);
+      await _scrollAndDrain(tester, leftPos, scrollDy: -30);
       final afterLeftDx = controller.paintDxOffset;
       final afterLeftWidth = controller.candleWidth;
       expect(afterLeftWidth, greaterThan(beforeLeftWidth), reason: '放大后 candleWidth 应增大');
@@ -134,7 +134,7 @@ void main() {
 
       // ---- 在右三分区滚轮放大一次（基线已变，但锚定行为不同） ----
       final beforeRightDx = controller.paintDxOffset;
-      await _scrollAndDrain(tester, rightPos, scrollDy: 30);
+      await _scrollAndDrain(tester, rightPos, scrollDy: -30);
       final afterRightDx = controller.paintDxOffset;
       final rightDxDelta = afterRightDx - beforeRightDx;
 
@@ -162,12 +162,12 @@ void main() {
 
       // ---- 在左三分区放大 ----
       final before1Dx = controller.paintDxOffset;
-      await _scrollAndDrain(tester, leftPos, scrollDy: 30);
+      await _scrollAndDrain(tester, leftPos, scrollDy: -30);
       final delta1 = controller.paintDxOffset - before1Dx;
 
       // ---- 在右三分区放大 ----
       final before2Dx = controller.paintDxOffset;
-      await _scrollAndDrain(tester, rightPos, scrollDy: 30);
+      await _scrollAndDrain(tester, rightPos, scrollDy: -30);
       final delta2 = controller.paintDxOffset - before2Dx;
 
       // scalePosition=right 时两处位置都固定用右锚定，offset 变化行为应相近。
@@ -190,11 +190,11 @@ void main() {
 
       // 第一次滚轮在左（drain 后 session 结束）。
       final dx0 = controller.paintDxOffset;
-      await _scrollAndDrain(tester, leftPos, scrollDy: 30);
+      await _scrollAndDrain(tester, leftPos, scrollDy: -30);
       final dxAfterLeft = controller.paintDxOffset;
 
       // 第二次滚轮在右。
-      await _scrollAndDrain(tester, rightPos, scrollDy: 30);
+      await _scrollAndDrain(tester, rightPos, scrollDy: -30);
       final dxAfterRight = controller.paintDxOffset;
 
       // 两次事件的 offset 增量应不同（锚点跳变了）。

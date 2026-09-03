@@ -40,6 +40,10 @@ abstract class _$GestureConfigCWProxy {
 
   GestureConfig scaleClaimSlopFactor(double scaleClaimSlopFactor);
 
+  GestureConfig signalScaleFactor(double signalScaleFactor);
+
+  GestureConfig scaleSessionTimeout(Duration scaleSessionTimeout);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GestureConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -63,6 +67,8 @@ abstract class _$GestureConfigCWProxy {
     double panClaimRatio,
     double dragClaimSlopFactor,
     double scaleClaimSlopFactor,
+    double signalScaleFactor,
+    Duration scaleSessionTimeout,
   });
 }
 
@@ -135,6 +141,14 @@ class _$GestureConfigCWProxyImpl implements _$GestureConfigCWProxy {
       this(scaleClaimSlopFactor: scaleClaimSlopFactor);
 
   @override
+  GestureConfig signalScaleFactor(double signalScaleFactor) =>
+      this(signalScaleFactor: signalScaleFactor);
+
+  @override
+  GestureConfig scaleSessionTimeout(Duration scaleSessionTimeout) =>
+      this(scaleSessionTimeout: scaleSessionTimeout);
+
+  @override
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GestureConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -159,6 +173,8 @@ class _$GestureConfigCWProxyImpl implements _$GestureConfigCWProxy {
     Object? panClaimRatio = const $CopyWithPlaceholder(),
     Object? dragClaimSlopFactor = const $CopyWithPlaceholder(),
     Object? scaleClaimSlopFactor = const $CopyWithPlaceholder(),
+    Object? signalScaleFactor = const $CopyWithPlaceholder(),
+    Object? scaleSessionTimeout = const $CopyWithPlaceholder(),
   }) {
     return GestureConfig(
       enableLongPress: enableLongPress == const $CopyWithPlaceholder()
@@ -228,6 +244,14 @@ class _$GestureConfigCWProxyImpl implements _$GestureConfigCWProxy {
           ? _value.scaleClaimSlopFactor
           // ignore: cast_nullable_to_non_nullable
           : scaleClaimSlopFactor as double,
+      signalScaleFactor: signalScaleFactor == const $CopyWithPlaceholder()
+          ? _value.signalScaleFactor
+          // ignore: cast_nullable_to_non_nullable
+          : signalScaleFactor as double,
+      scaleSessionTimeout: scaleSessionTimeout == const $CopyWithPlaceholder()
+          ? _value.scaleSessionTimeout
+          // ignore: cast_nullable_to_non_nullable
+          : scaleSessionTimeout as Duration,
     );
   }
 }
@@ -271,6 +295,11 @@ GestureConfig _$GestureConfigFromJson(Map<String, dynamic> json) =>
           (json['dragClaimSlopFactor'] as num?)?.toDouble() ?? 0.5,
       scaleClaimSlopFactor:
           (json['scaleClaimSlopFactor'] as num?)?.toDouble() ?? 1,
+      signalScaleFactor: (json['signalScaleFactor'] as num?)?.toDouble() ?? 200,
+      scaleSessionTimeout: json['scaleSessionTimeout'] == null
+          ? const Duration(milliseconds: 800)
+          : Duration(
+              microseconds: (json['scaleSessionTimeout'] as num).toInt()),
     );
 
 Map<String, dynamic> _$GestureConfigToJson(GestureConfig instance) =>
@@ -293,4 +322,6 @@ Map<String, dynamic> _$GestureConfigToJson(GestureConfig instance) =>
       'panClaimRatio': instance.panClaimRatio,
       'dragClaimSlopFactor': instance.dragClaimSlopFactor,
       'scaleClaimSlopFactor': instance.scaleClaimSlopFactor,
+      'signalScaleFactor': instance.signalScaleFactor,
+      'scaleSessionTimeout': instance.scaleSessionTimeout.inMicroseconds,
     };

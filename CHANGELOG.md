@@ -1,4 +1,11 @@
 ## 2.5.0
+* Add `onChartZoomStep(double coeff)` for incremental Y-axis zoom; each signal event multiplies the current visible range by a ratio factor, with no session or anchor required.
+* Add `GestureConfig.signalScaleFactor` (default 200, matching Flutter's `kDefaultMouseScrollToScaleFactor`) to control mouse scroll-to-zoom sensitivity, and `GestureConfig.scaleSessionTimeout` (default 800ms) for the X-axis scale session idle window.
+* Rewrite `onPointerSignal` to register with `GestureBinding.pointerSignalResolver` instead of consuming events directly, so the chart placed inside a `Scrollable` no longer simultaneously triggers page scroll; unify scroll and `PointerScaleEvent` (Web trackpad pinch) to a single ratio-based factor via `exp(-dy / signalScaleFactor)`.
+* Replace the two `Future.delayed(1000ms)` timers in the signal path with a single resettable `Timer` per scale session; rapid consecutive scrolls no longer get their session cut short mid-stream.
+* Change `onChartScale` signal branch from additive (`candleWidth + data.scale`) to multiplicative (`candleWidth * data.scale`) for ratio-based consistency with `_resolveSignalFactor`.
+* Remove the `delta` named parameter from `GestureData.zoom`; its only caller was the now-removed scroll-zoom dead code, and touch-side callers already use the positional-only form (Breaking Changes).
+* Rename `scaledSingal` to `scaledSignal` in `algorithm_util.dart` to fix the typo; the function is in the public export surface via `lib/flexi_kline.dart` (Breaking Changes).
 * Add `hitTestGridResize(Offset)` on the controller: a side-effect-free query that shares the same hit-test loop as `onGridResizeStart`, enabling hover-time cursor feedback without triggering a repaint.
 * Change the hover cursor over a hittable `PaintObject` from `precise` to `grab` on non-touch devices, signalling that the element can be dragged.
 * Move `_zoomMinMax`, `setZoomMinMax`, `clearZoomMinMax` and `hasZoomMinMax` from `PaintObjectGeometryStateMixin` to `MainPaintObject`; zoom state is now owned solely by the main paint object (Breaking Changes).

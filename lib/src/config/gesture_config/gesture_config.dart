@@ -47,6 +47,8 @@ class GestureConfig {
     double panClaimRatio = 2,
     double dragClaimSlopFactor = 0.5,
     double scaleClaimSlopFactor = 1,
+    this.signalScaleFactor = 200,
+    this.scaleSessionTimeout = const Duration(milliseconds: 800),
   })  : tolerance = tolerance ?? ToleranceConfig(),
         scaleSpeed = scaleSpeed.clamp(1, 30),
         maxZoomPerGesture = maxZoomPerGesture.clamp(1.2, 20),
@@ -156,6 +158,18 @@ class GestureConfig {
   /// 与族内 chartPan → chartScale 的切换阈值语义不同，不要合并：抢占要跟外层赛跑、必须
   /// 灵敏，族内切换要稳，过敏会让平移中途乱缩放。
   final double scaleClaimSlopFactor;
+
+  /// 滚轮 scrollDelta.dy 到缩放比值的灵敏度因子。
+  ///
+  /// 映射公式 `exp(-dy / signalScaleFactor)`: 值越大，同样滚动量产生的缩放越小。
+  /// 默认 200，取自 Flutter 官方约定 `kDefaultMouseScrollToScaleFactor`。
+  final double signalScaleFactor;
+
+  /// X 轴 scale session 的空闲超时: 最后一个滚轮事件后多久结束当前 session。
+  ///
+  /// session 结束时执行 `onChartScaleEnd`（同步蜡烛宽度到配置）和 loadMore 检查。
+  /// 每个滚轮事件到来时重置此计时器，快速连续滚动不会被提前切断。
+  final Duration scaleSessionTimeout;
 
   factory GestureConfig.fromJson(Map<String, dynamic> json) => _$GestureConfigFromJson(json);
 

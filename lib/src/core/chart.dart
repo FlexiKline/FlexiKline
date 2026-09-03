@@ -338,7 +338,8 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
       );
     } else if (data.isSignal) {
       // 处理鼠标滚轴滚动/触控板向上向下的缩放逻辑.
-      newWidth = (candleWidth + data.scale).clamp(
+      // data.scale 是比值口径(由 exp(-dy/signalScaleFactor) 产出), 直接乘以当前宽度。
+      newWidth = (candleWidth * data.scale).clamp(
         candleMinWidth,
         candleMaxWidth,
       );
@@ -464,7 +465,31 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
     if (distanceFromBottom == null || current.isZero) return false;
 
     _chartZoomAnchor = (minMax: current.clone(), distanceFromBottom: distanceFromBottom);
-    return _isChartStartZoom.value = true;
+    _isChartStartZoom.value = true;
+    return true;
+  }
+
+  /// 增量口径缩放: 直接对**当前** minMax 乘系数, 不取快照, 不需要 anchor 或 session。
+  ///
+  /// 供无 pointer session 的设备使用(滚轮、Web 触控板捏合)。每个 signal 事件自成一次
+  /// 完整手势, 累乘天然成立: signal 通道不节流, 每事件完整送达, 不存在逐帧丢帧漂移。
+  ///
+  /// 读 [mainPaintObject.minMax]: 当 [hasZoomMinMax] 时返回缩放区间, 否则返回自动
+  /// 区间——所以首次调用会基于自动区间开始, 后续调用累乘缩放区间。
+  bool onChartZoomStep(double coeff) {
+    if (!gestureConfig.enableZoom) return false;
+    if (!coeff.isFinite || coeff <= 0) return false;
+
+    final current = mainPaintObject.minMax;
+    if (current.isZero) return false;
+
+    _isChartStartZoom.value = true;
+    final next = current.clone();
+    next.scaleAroundCenter(coeff);
+    mainPaintObject.setZoomMinMax(next);
+    markRepaintChart();
+    markRepaintDraw();
+    return true;
   }
 
   /// 指标图缩放更新: 按手指相对起点的位移缩放可见价格区间的跨度。

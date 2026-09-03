@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:async';
+import 'dart:math' as math;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -44,8 +47,9 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
   // focus node to capture keyboard events
   final FocusNode _keyboardFocusNode = FocusNode();
 
-  /// 缩放监听数据
-  GestureData? _scaleData;
+  /// 通道 S 的 X 轴 scale session: [initPosition] 必须一轮内稳定,
+  /// `onChartScaleEnd()` 要做 `_setCandleWidth(sync: true)` 与 loadMore 检查。
+  _ScaleSession? _scaleSession;
 
   /// Cross平移监听数据
   GestureData? _hoverData;
@@ -88,6 +92,8 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
 
   @override
   void dispose() {
+    _scaleSession?.dispose();
+    _scaleSession = null;
     _keyboardFocusNode.dispose();
     super.dispose();
   }
@@ -165,105 +171,71 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
     );
   }
 
-  /// 鼠标设备滚轴滚动进行缩放,
-  /// 在Web中:
-  ///   1. 触控板双指同时向上/下进行缩放;
-  ///   2. 触控板双指同时向左/右进行平移(惯性?)
-  ///zp::: web onPointerSignal _TransformedPointerScaleEvent#e6ea9(position: Offset(462.0, 177.0))
+  /// 通道 S: 滚轮与 Web 触控板。
+  ///
+  /// 按 [InteractiveViewer._receivedPointerSignal] 的模式: 每个 signal 事件自成一次
+  /// 完整手势, 无定时器、无 session。注册 [PointerSignalResolver] 消歧——不消费就不注册,
+  /// 这是放行外层 [Scrollable] 滚动的唯一机制。
   void onPointerSignal(PointerSignalEvent event) {
-    if (event is PointerScrollEvent) {
-      final offset = event.localPosition;
-      if (!controller.canvasRect.include(offset)) {
-        logw('onPointerSignal $offset is not in the canvas.');
-        _scaleData?.end();
-        _scaleData = null;
+    final position = event.localPosition;
+    if (!controller.canvasRect.include(position)) return;
+
+    final factor = _resolveSignalFactor(event);
+    if (factor == null) return;
+
+    final owner = NonTouchGestureOwner.resolveAt(controller, position);
+    final intent = owner.signalIntent(controller);
+    // 不注册 = 放行给外层 Scrollable。这是本设计放行滚动的唯一机制。
+    if (intent == null) return;
+
+    GestureBinding.instance.pointerSignalResolver.register(event, (_) {
+      stopPositionAnimation();
+      switch (intent) {
+        case SignalIntent.zoomY:
+          controller.onChartZoomStep(factor);
+        case SignalIntent.scaleX:
+          _applyScaleStep(position, factor);
       }
+    });
+  }
 
-      final scrollDelta = event.scrollDelta;
-      final dx = scrollDelta.dx.abs();
-      final dy = scrollDelta.dy.abs();
-      if (dy > 1 && dy > dx) {
-        // 说明可能是(鼠标滚轴或触控板双指)向上向下进行缩放
+  /// 三种输入归一到同一个比值口径。
+  ///
+  /// 指数形式的实质理由是加法性: `exp(a/K) × exp(b/K) == exp((a+b)/K)`, 碎事件
+  /// 与整格事件累乘到同一总倍数, 两种设备手感自动一致。
+  double? _resolveSignalFactor(PointerSignalEvent event) {
+    // Web 触控板捏合: event.scale 本身即比值。
+    if (event is PointerScaleEvent) return event.scale;
+    if (event is! PointerScrollEvent) return null;
+    final dy = event.scrollDelta.dy;
+    if (dy == 0) return null; // 忽略横向滚轮
+    return math.exp(-dy / gestureConfig.signalScaleFactor);
+  }
 
-        /// 纵向缩放图表(zoom)
-        if (gestureConfig.enableZoom && controller.chartZoomSlideBarRect.include(offset)) {
-          // 如果命中ZommSlideBar区域, 即代表要进行缩放图表
-          stopPositionAnimation();
-          if (!controller.isChartZooming && controller.onChartZoomStart(offset)) {
-            Future.delayed(const Duration(milliseconds: 1000), () {
-              assert(() {
-                logd('onPointerSignal V>Zoom onChartZoomEnd()');
-                return true;
-              }());
-              // 由于没有开始结束事件回调, 此处1秒后执行缩放结束动作-检查.
-              controller.onChartZoomEnd();
-            });
-          }
-
-          assert(() {
-            logd('onPointerSignal V>Zoom $offset, $scrollDelta');
-            return true;
-          }());
-          controller.onChartZoomUpdate(GestureData.zoom(
-            offset,
-            delta: Offset(
-              scrollDelta.dx,
-              scrollDelta.dy.sign * scaledDecelerate(dy),
-            ),
-          ));
-          return;
-        }
-
-        /// 横向缩放图表(scale)，与触摸缩放手势一致受 [GestureConfig.enableScale] 约束.
-        if (gestureConfig.enableScale) {
-          if (_scaleData == null) {
-            /// 转换滚轮为touch设备的缩放速度[0 ~ 1 ~ n]
-            _scaleData = GestureData.signal(
-              offset,
-              position: _resolveScalePosition(offset),
-            );
-
-            /// 由于没有开始结束事件回调, 此处1秒后将[_scaleData]置空, 重新开始测量位置.
-            Future.delayed(const Duration(milliseconds: 1000), () {
-              assert(() {
-                logd(
-                  'onPointerSignal V>Scale clean _scaleData${_scaleData?.initPosition}',
-                );
-                return true;
-              }());
-              _scaleData?.end();
-              _scaleData = null;
-              controller.onChartScaleEnd();
-
-              /// 检查并加载更多蜡烛数据
-              controller.checkAndLoadMoreCandlesWhenPanEnd();
-            });
-          }
-
-          final newScale = scaledSingal(
-            scrollDelta.dy,
-            gestureConfig.scaleSpeed,
-          );
-
-          assert(() {
-            logd('onPointerSignal V>Scale $offset, $scrollDelta, $newScale');
-            return true;
-          }());
-
-          if (newScale != null) {
-            stopPositionAnimation();
-            _scaleData!.update(offset, newScale: newScale);
-            controller.onChartScale(_scaleData!);
-          }
-        }
-      } else if (dx > 1 && dx > dy) {
-        // 说明可能是触控板的双指横向移动操作
-        assert(() {
-          logd('onPointerSignal H> $offset, $scrollDelta,');
-          return true;
-        }());
-      }
+  /// 通道 S 的 X 轴缩放: 用可重置 [Timer] 管理 session, 每个事件重置倒计时。
+  void _applyScaleStep(Offset position, double factor) {
+    var session = _scaleSession;
+    if (session == null) {
+      session = _ScaleSession(GestureData.signal(
+        position,
+        position: _resolveScalePosition(position),
+      ));
+      _scaleSession = session;
     }
+    // 每个事件重置倒计时: 快速连续滚动不会在中途被提前清理(旧实现的缺陷)。
+    session.resetIdleTimer(gestureConfig.scaleSessionTimeout, _endScaleSession);
+
+    session.data.update(position, newScale: factor);
+    controller.onChartScale(session.data);
+  }
+
+  void _endScaleSession() {
+    _scaleSession?.dispose();
+    _scaleSession = null;
+    controller.onChartScaleEnd();
+
+    /// 检查并加载更多蜡烛数据
+    controller.checkAndLoadMoreCandlesWhenPanEnd();
   }
 
   /// 解析缩放的锚定位置：[ScalePosition.auto] 按 [offset] 所在的三分之一区域就近锚定。
@@ -589,18 +561,18 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
     final offset = event.localPosition;
     if (!controller.canvasRect.include(offset)) {
       logw('onPointerPanZoomStart $offset is not in the canvas.');
-      _scaleData?.end();
-      _scaleData = null;
+      _scaleSession?.dispose();
+      _scaleSession = null;
       return;
     }
 
     if (gestureConfig.enableScale) {
       stopPositionAnimation();
       logd('onPointerPanZoomStart $event > ${event.localPosition}');
-      _scaleData = GestureData.scale(
+      _scaleSession = _ScaleSession(GestureData.scale(
         offset,
         position: _resolveScalePosition(offset),
-      );
+      ));
     }
   }
 
@@ -618,40 +590,35 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
   ///   到目前为止手势旋转的弧度量
   ///   final double rotation;
   void onPointerPanZoomUpdate(PointerPanZoomUpdateEvent event) {
-    if (_scaleData == null) {
+    if (_scaleSession == null) {
       logd('onPointerPanZoomUpdate scaleData is empty! $event ${event.scale}');
       return;
     }
 
-    if (gestureConfig.enableScale && _scaleData!.isScale) {
+    final data = _scaleSession!.data;
+    if (gestureConfig.enableScale && data.isScale) {
       final newScale = scaledDecelerate(event.scale);
-      final change = event.scale - _scaleData!.scale;
-      // assert(() {
-      //   logd(
-      //     "onPointerPanZoomUpdate scale ${event.scale}>$newScale change:$change",
-      //   );
-      //   return true;
-      // }());
+      final change = event.scale - data.scale;
       if (change.abs() > 0.01) {
-        _scaleData!.update(
+        data.update(
           event.localPosition,
           newScale: newScale,
         );
-        controller.onChartScale(_scaleData!);
+        controller.onChartScale(data);
       }
     }
   }
 
   void onPointerPanZoomEnd(PointerPanZoomEndEvent event) {
-    if (_scaleData == null) {
+    if (_scaleSession == null) {
       logd('onPointerPanZoomEnd scaledata is empty! > event:$event');
       return;
     }
 
-    if (_scaleData!.isScale) {
+    if (_scaleSession!.data.isScale) {
       logd('onPointerPanZoomEnd scale. ${event.localPosition}');
-      _scaleData?.end();
-      _scaleData = null;
+      _scaleSession?.dispose();
+      _scaleSession = null;
       controller.onChartScaleEnd();
     }
   }
@@ -751,5 +718,28 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
         }
       }
     }
+  }
+}
+
+/// 通道 S 的 X 轴 scale session。
+///
+/// [data] 的 [GestureData.initPosition] 必须一轮内稳定（锚定三分区），
+/// 且 [onChartScaleEnd] 要做 `_setCandleWidth(sync: true)` 与 loadMore 检查。
+/// 所以 session 不能取消——改的只是用**可重置 [Timer]** 替代 `Future.delayed`。
+class _ScaleSession {
+  _ScaleSession(this.data);
+
+  final GestureData data;
+  Timer? _idleTimer;
+
+  void resetIdleTimer(Duration timeout, VoidCallback onTimeout) {
+    _idleTimer?.cancel();
+    _idleTimer = Timer(timeout, onTimeout);
+  }
+
+  void dispose() {
+    _idleTimer?.cancel();
+    _idleTimer = null;
+    data.end();
   }
 }

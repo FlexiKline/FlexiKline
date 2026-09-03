@@ -76,10 +76,9 @@ class GestureData {
 
   GestureData.move(Offset offset) : this._internal(offset: offset, type: GestureType.move);
 
-  GestureData.zoom(Offset offset, {Offset? delta})
+  GestureData.zoom(Offset offset)
       : this._internal(
           offset: offset,
-          prevOffset: delta != null ? offset - delta : null,
           type: GestureType.zoom,
         );
 

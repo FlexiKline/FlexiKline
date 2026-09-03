@@ -22,37 +22,37 @@ import '../support/support.dart';
 
 void main() {
   // ---------------------------------------------------------------------------
-  // scaledSingal
+  // scaledSignal
   // ---------------------------------------------------------------------------
-  group('scaledSingal', () {
+  group('scaledSignal', () {
     test('x < 1 返回 null', () {
-      expect(scaledSingal(0.0, 15), isNull);
-      expect(scaledSingal(0.9, 15), isNull);
-      expect(scaledSingal(0.5, 15), isNull);
+      expect(scaledSignal(0.0, 15), isNull);
+      expect(scaledSignal(0.9, 15), isNull);
+      expect(scaledSignal(0.5, 15), isNull);
     });
 
     test('x 为负且绝对值 < 1 返回 null', () {
-      expect(scaledSingal(-0.5, 15), isNull);
-      expect(scaledSingal(-0.9, 15), isNull);
+      expect(scaledSignal(-0.5, 15), isNull);
+      expect(scaledSignal(-0.9, 15), isNull);
     });
 
     test('x = 1（边界）k=1 时返回 0.5', () {
       // kNorm = (1-1)/(30-1) = 0；sigmoid(0) = 0.5；sign=+1
-      final y = scaledSingal(1.0, 1);
+      final y = scaledSignal(1.0, 1);
       expect(y, isNotNull);
       expect(y!, closeTo(0.5, 1e-9));
     });
 
     test('k = 1 时对任意 x >= 1 结果均为 ±0.5（kNorm=0 → sigmoid 固定）', () {
       for (final x in [1.0, 2.0, 10.0, 100.0]) {
-        final y = scaledSingal(x, 1)!;
+        final y = scaledSignal(x, 1)!;
         expect(y, closeTo(0.5, 1e-9), reason: 'x=$x');
       }
     });
 
     test('正 x 返回正值，负 x 返回负值（符号保留）', () {
-      final pos = scaledSingal(5.0, 15)!;
-      final neg = scaledSingal(-5.0, 15)!;
+      final pos = scaledSignal(5.0, 15)!;
+      final neg = scaledSignal(-5.0, 15)!;
       expect(pos, greaterThan(0));
       expect(neg, lessThan(0));
       expect(pos, closeTo(-neg, 1e-9)); // 绝对值相等
@@ -60,32 +60,32 @@ void main() {
 
     test('输出值在 (0, 1) 范围内（绝对值）', () {
       for (final x in [1.0, 2.0, 5.0, 10.0, 100.0, 1000.0]) {
-        final y = scaledSingal(x, 15)!;
+        final y = scaledSignal(x, 15)!;
         expect(y.abs(), greaterThan(0.0));
         expect(y.abs(), lessThan(1.0));
       }
     });
 
     test('k 越大，相同 x 时输出越接近 1（更强压缩）', () {
-      final y5 = scaledSingal(10.0, 5)!;
-      final y15 = scaledSingal(10.0, 15)!;
-      final y25 = scaledSingal(10.0, 25)!;
+      final y5 = scaledSignal(10.0, 5)!;
+      final y15 = scaledSignal(10.0, 15)!;
+      final y25 = scaledSignal(10.0, 25)!;
       expect(y5, lessThan(y15));
       expect(y15, lessThan(y25));
     });
 
     test('x 越大，相同 k 时输出单调增（压缩越多）', () {
-      final y1 = scaledSingal(1.0, 15)!;
-      final y10 = scaledSingal(10.0, 15)!;
-      final y100 = scaledSingal(100.0, 15)!;
+      final y1 = scaledSignal(1.0, 15)!;
+      final y10 = scaledSignal(10.0, 15)!;
+      final y100 = scaledSignal(100.0, 15)!;
       expect(y1, lessThan(y10));
       expect(y10, lessThan(y100));
     });
 
     test('自定义 kMax 影响归一化系数', () {
       // kMax=10, k=10 → kNorm=1；kMax=30, k=10 → kNorm=9/29 ≈ 0.31
-      final yBig = scaledSingal(5.0, 10, kMax: 10)!;
-      final ySmall = scaledSingal(5.0, 10, kMax: 30)!;
+      final yBig = scaledSignal(5.0, 10, kMax: 10)!;
+      final ySmall = scaledSignal(5.0, 10, kMax: 30)!;
       expect(yBig, greaterThan(ySmall));
     });
   });

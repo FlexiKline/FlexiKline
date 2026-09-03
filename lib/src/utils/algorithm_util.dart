@@ -16,15 +16,15 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 
-/// 按比例压缩singal手势数据
+/// 按比例压缩signal手势数据
 ///
 /// 参考[gesture_test.dart]测试数据.
 /// y = Fn(x, k);
-double? scaledSingal(double x, double k, {double kMax = 30}) {
+double? scaledSignal(double x, double k, {double kMax = 30}) {
   final sign = x.sign;
   x = x.abs();
   if (x < 1) {
-    debugPrint('zp::: scaledSingal x must be >= 1');
+    debugPrint('zp::: scaledSignal x must be >= 1');
     return null;
   }
 
