@@ -321,6 +321,34 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
     markRepaintChart(reset: true);
   }
 
+  /// signal 通道(横向滚轮、Web 触控板双指横滑)的一次性横向平移: 每个事件自成一段。
+  ///
+  /// 与 [onChartMove] 的分工在于有没有结束事件。后者服务连续拖动, 结束时机只有手势层知道,
+  /// loadMore 检查因此留给手势层在 [onPanEnd] 之后调; signal 没有结束事件, 检查只能每个事件
+  /// 做一次, 所以收进这里 —— 留给调用方就是每个调用点都要记得补一遍。
+  ///
+  /// 同理不写 `_panSmoothFactor`: 离散事件之间没有可插值的连续位移。它由上一次拖动或动画
+  /// 结束时的 [onPanEnd] 归位, 到这里恒为 1.0。
+  ///
+  /// 返回 [paintDxOffset] 是否变化, 贴在边界上继续同向滑即为 false。调用方据此跳过 Cross
+  /// 重吸附 —— `startCandleDx` 没变就不必重算。
+  bool onChartPanStep(double dxDelta) {
+    if (!dxDelta.isFinite || dxDelta == 0) return false;
+
+    final newDxOffset = clampPaintDxOffset(paintDxOffset + dxDelta);
+    final changed = newDxOffset != paintDxOffset;
+    if (changed) {
+      paintDxOffset = newDxOffset;
+      markRepaintChart();
+      markRepaintDraw();
+    }
+
+    // 不按 [changed] 收窄: 贴在历史边界上继续左滑恰恰是最该加载的时刻, 那时 offset 已被夹住
+    // 不变; 反向滑离阈值区也要走一遍, 否则 loading 状态退不回 none。
+    checkAndLoadMoreCandlesWhenPanEnd();
+    return changed;
+  }
+
   /// 蜡烛图缩放中...
   void onChartScale(GestureData data) {
     if (!gestureConfig.enableScale) return;

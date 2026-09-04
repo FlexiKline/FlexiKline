@@ -84,6 +84,9 @@ Future<void> disposeChart(
 ///
 /// [touchSlop] 非空时在图表子树外覆盖 `gestureSettings`, 用于模拟 Android 真机上小于
 /// [kTouchSlop] 的平台值 —— 外层 Scrollable 与图表读同一份设置。
+///
+/// [isTouchDevice] 置 false 挂非触摸 detector, 用于验证 signal 通道与外层滚动的竞争。
+/// 注意 Listener 的 key 随之变成 `NonTouchListener`, 取全局坐标要用 [toNonTouchChartGlobal]。
 Future<({FlexiKlineController chart, ScrollController scroll})> pumpChartInListView(
   WidgetTester tester, {
   required KlineSpec spec,
@@ -94,6 +97,7 @@ Future<({FlexiKlineController chart, ScrollController scroll})> pumpChartInListV
   Size chartSize = const Size(400, 480),
   double fillerHeight = 800,
   TestCandleIndicator? candle,
+  bool isTouchDevice = true,
 }) async {
   final chart = createChartController();
   chart.switchKlineData(spec);
@@ -131,7 +135,7 @@ Future<({FlexiKlineController chart, ScrollController scroll})> pumpChartInListV
                   candle: candle ?? TestCandleIndicator(),
                   time: TestTimeIndicator(),
                   mainIndicators: mainIndicators,
-                  isTouchDevice: true,
+                  isTouchDevice: isTouchDevice,
                 ),
               ),
               SizedBox(height: fillerHeight),
@@ -154,6 +158,12 @@ Future<({FlexiKlineController chart, ScrollController scroll})> pumpChartInListV
 /// 手势 API 只接受全局坐标, 而命中区、绘制点、canvasRect 全部是图表局部坐标。
 Offset toChartGlobal(WidgetTester tester, Offset local) {
   final box = tester.renderObject<RenderBox>(find.byKey(const ValueKey('TouchListener')));
+  return box.localToGlobal(local);
+}
+
+/// [toChartGlobal] 的非触摸端版本: 两端 detector 的 [Listener] key 不同。
+Offset toNonTouchChartGlobal(WidgetTester tester, Offset local) {
+  final box = tester.renderObject<RenderBox>(find.byKey(const ValueKey('NonTouchListener')));
   return box.localToGlobal(local);
 }
 

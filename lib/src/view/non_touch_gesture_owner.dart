@@ -97,14 +97,26 @@ enum NonTouchGestureOwner {
 
   /// 本归属对滚轮/捏合的意图; null 表示不消费 —— 调用方据此**不注册**
   /// [PointerSignalResolver], 事件因而放行给外层可滚动容器。
-  SignalIntent? signalIntent(FlexiKlineController controller) {
+  ///
+  /// [horizontal] 是「横向位移占优」, 由调用方从事件读出后传入: 方向是事件属性、不是位置
+  /// 属性, 归属层不认识 [PointerSignalEvent]。两者在这里合成动作, 「归属 → 动作」因此仍只
+  /// 有这一处映射, 放行也仍只有 `null` 这一个信号。
+  ///
+  /// [SignalIntent.panX] 不受 [GestureConfig.enableScale] 约束: 平移图表是基本操作, 直接
+  /// 拖动同样没有开关, 横滑只是多一种触发方式。
+  SignalIntent? signalIntent(
+    FlexiKlineController controller, {
+    required bool horizontal,
+  }) {
     final config = controller.gestureConfig;
     if (this == zoomSlider) {
+      if (horizontal) return null; // 价格轴上横滑没有图表语义
       return config.enableZoom ? SignalIntent.zoomY : null;
     }
+    if (horizontal) return SignalIntent.panX;
     return config.enableScale ? SignalIntent.scaleX : null;
   }
 }
 
-/// 滚轮与捏合的缩放意图。只有两种取值, 不建类。
-enum SignalIntent { zoomY, scaleX }
+/// 滚轮与捏合的意图。[zoomY] 与 [scaleX] 的量是比值, [panX] 的量是像素位移。
+enum SignalIntent { zoomY, scaleX, panX }

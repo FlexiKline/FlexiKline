@@ -1,4 +1,7 @@
 ## 2.5.0
+* Pan the chart with horizontally dominant scroll signals (Web trackpad two-finger slide, `Shift` + wheel) on non-touch devices; `PointerScrollEvent.scrollDelta.dx` was previously discarded entirely, so a horizontal slide either did nothing or triggered a slight zoom from its small `dy`.
+* Add `onChartPanStep(double dxDelta)` for one-shot horizontal panning; unlike `onChartMove` it runs the loadMore check itself, since signal events have no end event to hang it on.
+* Dispatch each scroll signal to exactly one action: horizontally dominant events (`|dx| >= |dy| × 2`) pan, everything else zooms, so a diagonal slide no longer both pans and zooms. Horizontal scroll over the price axis is not consumed and passes through to an enclosing `Scrollable`.
 * Allow trackpad two-finger horizontal slide to pan the chart without being misidentified as a pinch zoom; the pinching threshold is now based on cumulative deviation from 1.0 (`> 0.05`) instead of per-frame change (`> 0.01`).
 * Exit Y-axis zoom with ESC key or right-click on non-touch devices; ESC prioritises exiting zoom over exiting draw mode when both are active. Keyboard focus is now automatically requested when entering zoom or draw state.
 * Cancel the cross cursor when starting to drag a draw object in editing mode; cross resumes naturally when the user moves the mouse after the drag ends.

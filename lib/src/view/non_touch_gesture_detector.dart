@@ -119,10 +119,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
       key: const ValueKey('NonTouchListener'),
       behavior: HitTestBehavior.translucent,
 
-      /// 鼠标设备滚轴滚动进行缩放,
-      /// 在Web中:
-      ///   1. 触控板双指同时向上/下进行缩放;
-      ///   2. 触控板双指同时向左/右进行平移(惯性?)
+      /// 鼠标滚轮与 Web 触控板: 纵向占优缩放, 横向占优平移。见 [onPointerSignal]。
       onPointerSignal: onPointerSignal,
 
       /// 触控板的平移、缩放和旋转手势
@@ -176,50 +173,64 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
   /// 按 [InteractiveViewer._receivedPointerSignal] 的模式: 每个 signal 事件自成一次
   /// 完整手势, 无定时器、无 session。注册 [PointerSignalResolver] 消歧——不消费就不注册,
   /// 这是放行外层 [Scrollable] 滚动的唯一机制。
+  ///
+  /// 一个事件只做一件事: 先按方向分出平移与缩放, 再由归属把缩放分给 Y 轴或 X 轴。
   void onPointerSignal(PointerSignalEvent event) {
     final position = event.localPosition;
     if (!controller.canvasRect.include(position)) return;
 
-    final owner = NonTouchGestureOwner.resolveAt(controller, position);
-    final intent = owner.signalIntent(controller);
-    // 不注册 = 放行给外层 Scrollable。这是本设计放行滚动的唯一机制。
-    if (intent == null) return;
+    // 只认这两种 signal, 且排在归属之前: [NonTouchGestureOwner.resolveAt] 含 hitTest,
+    // 为注定不消费的事件跑它是白费。
+    final scroll = event is PointerScrollEvent ? event.scrollDelta : null;
+    final pinch = event is PointerScaleEvent ? event.scale : null;
+    if (scroll == null && pinch == null) return;
 
-    // 意图必须先解析: 两个意图各有自己的灵敏度标定, 不知道意图就算不出正确的比值。
-    final factor = _resolveSignalFactor(event, intent);
-    if (factor == null) return;
+    // 方向要在意图之前判: 横滑是平移, 不属于任何缩放意图, 也就没有灵敏度标定可言。
+    // 捏合只有比值、没有方向, 恒走纵向路径。
+    final horizontal = scroll != null && scroll.dx.abs() >= scroll.dy.abs() * _kPanDominanceRatio;
+
+    final owner = NonTouchGestureOwner.resolveAt(controller, position);
+    final intent = owner.signalIntent(controller, horizontal: horizontal);
+    if (intent == null) return; // 不注册 = 放行外层 Scrollable
+
+    // [amount] 的量纲随意图变: 缩放是比值, 平移是像素。[GestureData.scale] 在两条链上也是
+    // 一个字段两种读法。`scroll!` 安全: `panX` 蕴含 `horizontal`, 缩放只在 `pinch == null`
+    // 时才求值 dy, 两者都蕴含 scroll 非空。
+    final double amount;
+    switch (intent) {
+      case SignalIntent.panX:
+        // 1:1 与外层 [Scrollable] 同口径(它也直接用 scrollDelta), 横滑与页面滚动手感一致。
+        // 取负: dx > 0 是视口朝新数据走, 对应 paintDxOffset 减小。方向由测试固定。
+        amount = -scroll!.dx;
+      // 滚动取指数是为了加法性: `exp(a·k) × exp(b·k) == exp((a+b)·k)`, 碎事件与整格事件累乘到
+      // 同一总倍数, 两种设备手感自动一致。捏合的 `scale` 本身就是比值, 再过一遍曲线是恒等变换,
+      // 白做; 真要调只能加阻尼指数, 而指数取多少得看真机数据。
+      case SignalIntent.zoomY:
+        amount = pinch ?? math.exp(-scroll!.dy * controller.signalZoomCoeffPerPixel);
+      case SignalIntent.scaleX:
+        amount = pinch ?? math.exp(-scroll!.dy / gestureConfig.signalScaleFactor);
+    }
+    // 只可能是 dx 与 dy 同为 0 的空事件——它满足横向占优判据却没有位移。缩放的比值恒为正。
+    if (amount == 0) return;
 
     GestureBinding.instance.pointerSignalResolver.register(event, (_) {
       stopPositionAnimation();
       switch (intent) {
         case SignalIntent.zoomY:
-          controller.onChartZoomStep(factor);
+          controller.onChartZoomStep(amount);
         case SignalIntent.scaleX:
-          _applyScaleStep(position, factor);
+          _applyScaleStep(position, amount);
+        case SignalIntent.panX:
+          final panned = controller.onChartPanStep(amount);
+          // 指针没动、底下的蜡烛换了, 同一个屏幕位置得按新的 startCandleDx 重新吸附, 否则读数
+          // 停在旧蜡烛上。放在手势层是因为 [ChartBinding.onChartPanStep] 拿不到指针位置, 与
+          // [onPanUpdate] 的 chart 分支同一分工。
+          if (panned && _hoverData != null && controller.isCrossing) {
+            _hoverData!.update(position);
+            controller.onCrossUpdate(_hoverData!);
+          }
       }
     });
-  }
-
-  /// 三种输入归一到同一个比值口径。
-  ///
-  /// 指数形式的实质理由是加法性: `exp(a·k) × exp(b·k) == exp((a+b)·k)`, 碎事件与整格事件
-  /// 累乘到同一总倍数, 两种设备手感自动一致。
-  ///
-  /// 每像素灵敏度 `k` 按 [intent] 取: Y 轴用 `signalZoomCoeffPerPixel`(由触摸端口径派生,
-  /// 使同样位移在两端得到同样倍率); X 轴仍用 [GestureConfig.signalScaleFactor], 它另有自己
-  /// 的界和触摸端对手(`scaleSpeed`)。
-  double? _resolveSignalFactor(PointerSignalEvent event, SignalIntent intent) {
-    // Web 触控板捏合: event.scale 本身即比值, 不经过位移标定。做「比值 → 等效位移 → 再过
-    // 同一条曲线」的换算是恒等变换, 白做; 真要调只能加阻尼指数, 而指数取多少需要真机数据。
-    if (event is PointerScaleEvent) return event.scale;
-    if (event is! PointerScrollEvent) return null;
-    final dy = event.scrollDelta.dy;
-    if (dy == 0) return null; // 忽略横向滚轮
-    final coeffPerPixel = switch (intent) {
-      SignalIntent.zoomY => controller.signalZoomCoeffPerPixel,
-      SignalIntent.scaleX => 1 / gestureConfig.signalScaleFactor,
-    };
-    return math.exp(-dy * coeffPerPixel);
   }
 
   /// 通道 S 的 X 轴缩放: 用可重置 [Timer] 管理 session, 每个事件重置倒计时。
@@ -702,6 +713,13 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
 /// 双指横滑时 scale 围绕 1.0 微波动(通常 < 0.02), 0.05 留 2.5 倍余量;
 /// 真正捏合时 scale 快速偏离 1.0(放大到 1.1+、缩小到 0.9-), 识别延迟可忽略。
 const _kPinchThreshold = 0.05;
+
+/// 滚轮事件判为横向平移所需的横向占优比例: `|dx| >= |dy| × _kPanDominanceRatio`。
+/// 取 2 即约 26.57° 的横向锥。
+///
+/// 不复用 [GestureConfig.panClaimRatio]: 那里的二分是「平移 vs 放弃给外层」, 这里是
+/// 「平移 vs 缩放」, 两边都消费事件。暂用常量不开配置, 等真机反馈说 2:1 不合适再提升。
+const _kPanDominanceRatio = 2;
 
 /// 通道 S 的 X 轴 scale session。
 ///

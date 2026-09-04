@@ -19,12 +19,12 @@
 /// - 连乘等价性：两次 exp(a) 与一次 exp(2a) 结果相同
 /// - 滚轮在图表区 → X 轴缩放；idle 窗口内连续滚动不提前结束 session
 /// - PointerScaleEvent → 按 event.scale 缩放
-/// - dy == 0 的横向滚轮不产生任何变化
+/// - 横向占优的滚轮 → 图表平移（onChartPanStep），一个事件只做一件事
 /// - enableZoom / enableScale 关闭时不消费事件（放行外层）
 ///
 /// 覆盖边界：经 PointerSignalEvent → Listener → onPointerSignal → controller API。
-/// **不覆盖**：真机滚轮 scrollDelta.dy 的量级、光标外观、在 Scrollable 内的竞争。
-/// **未经真机验证**。
+/// **不覆盖**：真机滚轮 scrollDelta 的量级与 dx/dy 比例、光标外观。
+/// **未经真机验证**：浏览器给出的真实 delta 手感、`-scrollDelta.dx` 的符号方向。
 library;
 
 import 'dart:math' as math;
@@ -165,6 +165,21 @@ Future<void> _sendScale(
   await tester.sendEventToBinding(event);
   await tester.pump();
 }
+
+/// 把鼠标移入图表，建立 hover 态的 cross（非触摸端 cross 只由 hover 开启）。
+Future<void> _enterMouse(WidgetTester tester, Offset localPosition) async {
+  final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+  await mouse.addPointer(location: _toGlobal(tester, localPosition));
+  addTearDown(() => mouse.removePointer());
+  await tester.pump();
+}
+
+/// 稳定落在蜡烛区的 cross 焦点：往左第 5 根。空白区（`dx > startCandleDx`）另有
+/// `crossConfig.moveByCandleInBlank` 决定吸不吸附，本组不测那条分支。
+Offset _candleAreaFocus(FlexiKlineController chart) => Offset(
+      chart.startCandleDx - chart.candleActualWidth * 5,
+      chart.mainRect.center.dy,
+    );
 
 // ---------------------------------------------------------------------------
 // 用例
@@ -400,10 +415,155 @@ void main() {
   });
 
   // =========================================================================
-  // 横向滚轮与边界
+  // 横向平移（横向占优的滚轮 / Web 触控板双指横滑）
+  // =========================================================================
+  //
+  // 判据 `|dx| >= |dy| × 2`，在意图解析之前判。位移 1:1，与外层 Scrollable 同一口径。
+  group('signal pan (horizontal scroll)', () {
+    testWidgets('横滑平移视口，不缩放也不进入 Y 轴缩放', (tester) async {
+      final controller = await _pumpNonTouchChart(tester);
+      addTearDown(() => _disposeChart(tester, controller));
+
+      final chartCenter = controller.mainRect.center;
+      final initDx = controller.paintDxOffset;
+      final initWidth = controller.candleWidth;
+      final initSpan = _rangeSpan(controller);
+
+      await _sendScroll(tester, chartCenter, scrollDy: 0, scrollDx: 50);
+      await _paintFrame(tester, controller);
+
+      expect(controller.paintDxOffset, isNot(closeTo(initDx, precisionError)), reason: '横滑应平移视口');
+      expect(controller.candleWidth, equals(initWidth), reason: '横滑不改蜡烛宽度');
+      expect(_rangeSpan(controller), closeTo(initSpan, 0.01), reason: '横滑不改价格区间');
+      expect(controller.isChartZooming, isFalse, reason: '横滑不该让 Y 轴进入用户接管态');
+    });
+
+    testWidgets('dx > 0 视口向新数据方向移动，位移 1:1', (tester) async {
+      final controller = await _pumpNonTouchChart(tester);
+      addTearDown(() => _disposeChart(tester, controller));
+
+      final chartCenter = controller.mainRect.center;
+      final initDx = controller.paintDxOffset;
+
+      await _sendScroll(tester, chartCenter, scrollDy: 0, scrollDx: 50);
+      expect(
+        controller.paintDxOffset,
+        closeTo(initDx - 50, precisionError),
+        reason: 'dx > 0 → paintDxOffset 减小, 且量为 1:1',
+      );
+
+      await _sendScroll(tester, chartCenter, scrollDy: 0, scrollDx: -50);
+      expect(controller.paintDxOffset, closeTo(initDx, precisionError), reason: '反向等量应回到原位');
+    });
+
+    testWidgets('一个事件只做一件事：按 2:1 分派平移或缩放', (tester) async {
+      final controller = await _pumpNonTouchChart(tester);
+      addTearDown(() => _disposeChart(tester, controller));
+
+      final chartCenter = controller.mainRect.center;
+
+      // 横向主导 100 : 40 → 平移。
+      var dxBefore = controller.paintDxOffset;
+      var widthBefore = controller.candleWidth;
+      await _sendScroll(tester, chartCenter, scrollDy: 40, scrollDx: 100);
+      expect(controller.paintDxOffset, closeTo(dxBefore - 100, precisionError), reason: '横向主导应平移');
+      expect(controller.candleWidth, equals(widthBefore), reason: '横向主导不该同时缩放');
+
+      // 纵向主导 40 : 100 → 缩放。
+      dxBefore = controller.paintDxOffset;
+      widthBefore = controller.candleWidth;
+      await _sendScroll(tester, chartCenter, scrollDy: 100, scrollDx: 40);
+      expect(controller.candleWidth, lessThan(widthBefore), reason: '纵向主导应缩放');
+      // X 轴缩放本身会按锚点改写 paintDxOffset, 所以只断言没有额外平移 40。
+      expect(
+        controller.paintDxOffset,
+        isNot(closeTo(dxBefore - 40, precisionError)),
+        reason: '纵向主导不该同时按 dx 平移',
+      );
+
+      // 恰好 2:1 → 归横滑，固定判据取 `>=` 而非 `>`。
+      await tester.pump(const Duration(milliseconds: 900)); // 结束上一段 scale session
+      dxBefore = controller.paintDxOffset;
+      widthBefore = controller.candleWidth;
+      await _sendScroll(tester, chartCenter, scrollDy: 50, scrollDx: 100);
+      expect(controller.paintDxOffset, closeTo(dxBefore - 100, precisionError), reason: '恰好 2:1 应判为横滑');
+      expect(controller.candleWidth, equals(widthBefore), reason: '恰好 2:1 不该缩放');
+    });
+
+    testWidgets('价格轴上的横滑不消费', (tester) async {
+      final controller = await _pumpNonTouchChart(tester);
+      addTearDown(() => _disposeChart(tester, controller));
+
+      final initDx = controller.paintDxOffset;
+      final initSpan = _rangeSpan(controller);
+
+      await _sendScroll(tester, _sliderRect(controller).center, scrollDy: 0, scrollDx: 50);
+      await _paintFrame(tester, controller);
+
+      expect(controller.paintDxOffset, equals(initDx), reason: '价格轴横滑没有图表语义, 不该平移');
+      expect(_rangeSpan(controller), closeTo(initSpan, 0.01));
+      expect(controller.isChartZooming, isFalse);
+    });
+
+    testWidgets('横滑后 cross 按新视口重新吸附', (tester) async {
+      final controller = await _pumpNonTouchChart(tester);
+      addTearDown(() => _disposeChart(tester, controller));
+
+      final focus = _candleAreaFocus(controller);
+      expect(controller.canvasRect.include(focus), isTrue, reason: '前置：焦点必须落在画布内');
+
+      await _enterMouse(tester, focus);
+      expect(controller.isCrossing, isTrue, reason: '前置：hover 应开启 cross');
+      final crossBefore = controller.crossOffset;
+      expect(crossBefore, isNotNull);
+
+      // 错开半根：整根位移下吸附结果不变, 测不出有没有重算。
+      final scrollDx = controller.candleActualWidth * 1.5;
+      await _sendScroll(tester, focus, scrollDy: 0, scrollDx: scrollDx);
+
+      expect(controller.isCrossing, isTrue, reason: '横滑不该关闭 cross');
+      expect(
+        controller.crossOffset!.dx,
+        isNot(closeTo(crossBefore!.dx, precisionError)),
+        reason: '指针没动但 startCandleDx 变了, 焦点该吸附到另一根蜡烛',
+      );
+    });
+
+    testWidgets('连续横滑跨过 loadMore 阈值只请求一次', (tester) async {
+      final controller = await _pumpNonTouchChart(tester);
+      addTearDown(() => _disposeChart(tester, controller));
+
+      expect(
+        controller.klineData.loadingState.isLoadMore,
+        isFalse,
+        reason: '前置：初始不应已在 loadMore',
+      );
+
+      var loadMoreCount = 0;
+      controller.onLoadMoreCandles = (spec) async => loadMoreCount++;
+      // FakeFlexiKlineConfiguration 默认关掉自动加载(免得别的用例意外发请求), 这条要测它。
+      controller.updateSettingConfig((c) => c.copyWith(autoLoadMoreData: true));
+      // 阈值放到远大于数据总宽, 一次横滑就跨过。
+      controller.updateGestureConfig(
+        (c) => c.copyWith(loadMoreWhenNoEnoughCandles: 100000),
+      );
+
+      final chartCenter = controller.mainRect.center;
+      // dx < 0 → paintDxOffset 增大 → 趋向历史边界。
+      await _sendScroll(tester, chartCenter, scrollDy: 0, scrollDx: -100);
+      expect(loadMoreCount, 1, reason: '首次跨过阈值应请求一次');
+
+      await _sendScroll(tester, chartCenter, scrollDy: 0, scrollDx: -100);
+      await _sendScroll(tester, chartCenter, scrollDy: 0, scrollDx: -100);
+      expect(loadMoreCount, 1, reason: '已在 loadMore 态, 后续横滑不得重复请求');
+    });
+  });
+
+  // =========================================================================
+  // 边界
   // =========================================================================
   group('edge cases', () {
-    testWidgets('dy == 0 的横向滚轮不产生任何变化', (tester) async {
+    testWidgets('dx 与 dy 同为 0 的空事件不产生任何变化', (tester) async {
       final controller = await _pumpNonTouchChart(tester);
       addTearDown(() => _disposeChart(tester, controller));
 
@@ -411,7 +571,7 @@ void main() {
       final initWidth = controller.candleWidth;
       final initDx = controller.paintDxOffset;
 
-      await _sendScroll(tester, chartCenter, scrollDy: 0, scrollDx: 50);
+      await _sendScroll(tester, chartCenter, scrollDy: 0, scrollDx: 0);
       expect(controller.candleWidth, equals(initWidth));
       expect(controller.paintDxOffset, equals(initDx));
     });
@@ -457,6 +617,83 @@ void main() {
 
       await _sendScroll(tester, chartCenter, scrollDy: 30);
       expect(controller.candleWidth, equals(initWidth));
+    });
+  });
+
+  // =========================================================================
+  // 与外层 Scrollable 的竞争
+  // =========================================================================
+  //
+  // 「不注册 resolver = 放行」只有真实可滚动容器在场才测得出。另外纵向 Scrollable 对纯横滑
+  // 本来就不注册（它按 axisDirection 取 delta，横滑在纵向轴上为 0），所以图表消费横滑与外层
+  // 无冲突——第一条固定这个事实。
+  group('nested Scrollable', () {
+    Future<({FlexiKlineController chart, ScrollController scroll})> arrange(
+      WidgetTester tester,
+    ) async {
+      final scene = await pumpChartInListView(
+        tester,
+        spec: _spec,
+        candles: genFlatCandleList(),
+        candle: TestCandleIndicator(visibleMinMaxFromData: true),
+        isTouchDevice: false,
+      );
+      addTearDown(() => disposeChart(tester, scene.chart));
+      return scene;
+    }
+
+    Future<void> sendScroll(
+      WidgetTester tester,
+      FlexiKlineController chart,
+      Offset localPosition, {
+      double scrollDy = 0,
+      double scrollDx = 0,
+    }) async {
+      await tester.sendEventToBinding(PointerScrollEvent(
+        position: toNonTouchChartGlobal(tester, localPosition),
+        scrollDelta: Offset(scrollDx, scrollDy),
+      ));
+      await tester.pump();
+    }
+
+    testWidgets('图表消费横滑时外层不滚动', (tester) async {
+      final (:chart, :scroll) = await arrange(tester);
+
+      final initDx = chart.paintDxOffset;
+      final scrollBefore = scroll.offset;
+
+      await sendScroll(tester, chart, chart.mainRect.center, scrollDx: 50);
+
+      expect(chart.paintDxOffset, closeTo(initDx - 50, precisionError), reason: '图表应消费横滑');
+      expect(scroll.offset, scrollBefore, reason: '外层不该跟着滚');
+    });
+
+    testWidgets('图表消费纵滑缩放时外层不滚动', (tester) async {
+      final (:chart, :scroll) = await arrange(tester);
+
+      final initWidth = chart.candleWidth;
+      final scrollBefore = scroll.offset;
+
+      await sendScroll(tester, chart, chart.mainRect.center, scrollDy: 60);
+
+      expect(chart.candleWidth, lessThan(initWidth), reason: '图表应消费纵滑');
+      expect(scroll.offset, scrollBefore, reason: '外层不该跟着滚');
+
+      await tester.pump(const Duration(milliseconds: 900)); // 结束 scale session
+    });
+
+    testWidgets('两种缩放都关闭时纵滑放行给外层', (tester) async {
+      final (:chart, :scroll) = await arrange(tester);
+
+      chart.updateGestureConfig(
+        (c) => c.copyWith(enableZoom: false, enableScale: false),
+      );
+      final initWidth = chart.candleWidth;
+
+      await sendScroll(tester, chart, chart.mainRect.center, scrollDy: 60);
+
+      expect(chart.candleWidth, equals(initWidth), reason: '图表不该消费');
+      expect(scroll.offset, greaterThan(0), reason: '事件应放行给外层滚动');
     });
   });
 }

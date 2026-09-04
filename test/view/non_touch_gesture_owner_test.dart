@@ -293,14 +293,14 @@ void main() {
     });
   });
 
-  group('signalIntent', () {
+  group('signalIntent (纵向占优)', () {
     testWidgets('zoomSlider → zoomY（enableZoom=true）', (tester) async {
       final (:scene, indicator: _) = await _arrange();
       scene.controller.updateGestureConfig(
         (config) => config.copyWith(enableZoom: true),
       );
       expect(
-        NonTouchGestureOwner.zoomSlider.signalIntent(scene.controller),
+        NonTouchGestureOwner.zoomSlider.signalIntent(scene.controller, horizontal: false),
         SignalIntent.zoomY,
       );
     });
@@ -311,7 +311,7 @@ void main() {
         (config) => config.copyWith(enableZoom: false),
       );
       expect(
-        NonTouchGestureOwner.zoomSlider.signalIntent(scene.controller),
+        NonTouchGestureOwner.zoomSlider.signalIntent(scene.controller, horizontal: false),
         isNull,
       );
     });
@@ -319,7 +319,7 @@ void main() {
     testWidgets('chart → scaleX（enableScale=true）', (tester) async {
       final (:scene, indicator: _) = await _arrange();
       expect(
-        NonTouchGestureOwner.chart.signalIntent(scene.controller),
+        NonTouchGestureOwner.chart.signalIntent(scene.controller, horizontal: false),
         SignalIntent.scaleX,
       );
     });
@@ -330,7 +330,7 @@ void main() {
         (config) => config.copyWith(enableScale: false),
       );
       expect(
-        NonTouchGestureOwner.chart.signalIntent(scene.controller),
+        NonTouchGestureOwner.chart.signalIntent(scene.controller, horizontal: false),
         isNull,
       );
     });
@@ -338,8 +338,58 @@ void main() {
     testWidgets('drawEditing → scaleX（绘制中滚轮仍缩放）', (tester) async {
       final (:scene, indicator: _) = await _arrange();
       expect(
-        NonTouchGestureOwner.drawEditing.signalIntent(scene.controller),
+        NonTouchGestureOwner.drawEditing.signalIntent(scene.controller, horizontal: false),
         SignalIntent.scaleX,
+      );
+    });
+  });
+
+  // 横滑是平移: 除价格轴外一律消费, 也不看 enableScale —— 平移图表是基本操作, 直接拖动同样
+  // 没有开关。
+  group('signalIntent (横向占优)', () {
+    testWidgets('chart → panX', (tester) async {
+      final (:scene, indicator: _) = await _arrange();
+      expect(
+        NonTouchGestureOwner.chart.signalIntent(scene.controller, horizontal: true),
+        SignalIntent.panX,
+      );
+    });
+
+    testWidgets('chart → panX（enableScale=false 也平移）', (tester) async {
+      final (:scene, indicator: _) = await _arrange();
+      scene.controller.updateGestureConfig(
+        (config) => config.copyWith(enableScale: false),
+      );
+      expect(
+        NonTouchGestureOwner.chart.signalIntent(scene.controller, horizontal: true),
+        SignalIntent.panX,
+      );
+    });
+
+    testWidgets('drawEditing / gridResize / paintObject → panX', (tester) async {
+      final (:scene, indicator: _) = await _arrange();
+      for (final owner in [
+        NonTouchGestureOwner.drawEditing,
+        NonTouchGestureOwner.gridResize,
+        NonTouchGestureOwner.paintObject,
+        NonTouchGestureOwner.drawDrawing,
+      ]) {
+        expect(
+          owner.signalIntent(scene.controller, horizontal: true),
+          SignalIntent.panX,
+          reason: '$owner 的横滑应平移图表',
+        );
+      }
+    });
+
+    testWidgets('zoomSlider → null（价格轴无横向语义, 放行外层）', (tester) async {
+      final (:scene, indicator: _) = await _arrange();
+      scene.controller.updateGestureConfig(
+        (config) => config.copyWith(enableZoom: true),
+      );
+      expect(
+        NonTouchGestureOwner.zoomSlider.signalIntent(scene.controller, horizontal: true),
+        isNull,
       );
     });
   });
