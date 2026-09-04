@@ -57,7 +57,7 @@ void drawTestLine(
   required Offset to,
 }) {
   controller.startDraw(testDrawLineType, isInitPointer: false);
-  controller.onDrawConfirm(GestureData.tap(from));
-  controller.onDrawUpdate(GestureData.pan(to));
-  controller.onDrawConfirm(GestureData.tap(to));
+  controller.onDrawConfirm(from);
+  controller.onDrawUpdate(to);
+  controller.onDrawConfirm(to);
 }

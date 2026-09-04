@@ -188,6 +188,46 @@ void main() {
       );
       expect(controller.isPaintObjectDragging, isFalse);
     });
+
+    testWidgets('指针取消后不做惯性平移', (tester) async {
+      final controller = await _pumpNonTouchChart(tester);
+      addTearDown(() => disposeChart(tester, controller));
+
+      // `DragGestureRecognizer` 在指针被取消时同样派发 onPanEnd，且无法从 DragEndDetails
+      // 区分，所以 cancel 这个事实必须由外层 Listener 记下来。cancel 意味着系统接管了手势
+      // （应用切后台、父级抢占），指针并非被主动甩出，继续滚动是错的。
+      final (gesture: gesture, at: at) = await _dragMouse(tester);
+      final dxAtCancel = controller.paintDxOffset;
+
+      // 时间戳必须接着拖动往后走: 用默认的 `Duration.zero` 会让速度估计退化成零,
+      // 惯性本来就不会发生, 这条测试就变成空的(它曾经因此假绿)。
+      await gesture.cancel(timeStamp: at + chartGestureFrame);
+      await _pumpInertia(tester);
+
+      expect(
+        controller.paintDxOffset,
+        dxAtCancel,
+        reason: '取消后不应继续惯性滚动',
+      );
+    });
+
+    testWidgets('正常抬手仍做惯性平移', (tester) async {
+      final controller = await _pumpNonTouchChart(tester);
+      addTearDown(() => disposeChart(tester, controller));
+
+      // 上一条的对照组：证明 cancel 守卫没有顺手掐掉正常的惯性。
+      final (gesture: gesture, at: at) = await _dragMouse(tester);
+      final dxAtRelease = controller.paintDxOffset;
+
+      await gesture.up(timeStamp: at + chartGestureFrame);
+      await _pumpInertia(tester);
+
+      expect(
+        controller.paintDxOffset,
+        isNot(dxAtRelease),
+        reason: '正常抬手应按抬手速度继续平移',
+      );
+    });
   });
 
   // ---- #4: 三种坐标钳制 ----

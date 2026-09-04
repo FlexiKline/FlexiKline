@@ -263,25 +263,29 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
     }
   }
 
-  void onChartMove(GestureData data, [double smoothFactor = 1.0]) {
-    if (!data.moved) return;
-    // logd('onChartMove ${DateTime.now().format(HHmmssSSS)} data:$data smoothFactor:$smoothFactor');
+  /// 有结束事件的连续平移: 按帧间位移增量移动图表。
+  ///
+  /// [delta] 是本帧相对上一帧的位移, 由手势层的 session 差分得出 —— 帧间增量的基准属于
+  /// 一轮手势, 只有手势层知道它何时开始与结束。无结束事件的离散平移走 [onChartPanStep],
+  /// 两者的分工判据是有没有结束事件, 不是量纲(见该方法注释)。
+  void onChartMove(Offset delta, {double smoothFactor = 1.0}) {
+    if (delta == Offset.zero) return;
+    // logd('onChartMove ${DateTime.now().format(HHmmssSSS)} delta:$delta smoothFactor:$smoothFactor');
 
     _panSmoothFactor = smoothFactor;
 
     bool changed = false;
-    final newDxOffset = clampPaintDxOffset(paintDxOffset + data.dxDelta);
+    final newDxOffset = clampPaintDxOffset(paintDxOffset + delta.dx);
     if (newDxOffset != paintDxOffset) {
       paintDxOffset = newDxOffset;
       changed = true;
     }
 
-    // 消费 dy 的条件是「Y 轴已由用户接管」这个模型状态, 而不是手势类型: 自动模式下纵向
-    // 位移对图表没有意义, 缩放态下它平移价格区间。守卫放在这里而非手势层, 于是同一条平移
-    // 路径在两种模式下都成立。
-    double dyDelta;
-    if (isChartZooming && (dyDelta = data.dyDelta) != 0) {
-      changed = _shiftZoomMinMaxByDy(dyDelta) || changed;
+    // 消费 dy 的条件是「Y 轴已由用户接管」这个模型状态, 而不是手势类型或输入设备: 自动模式
+    // 下纵向位移对图表没有意义, 缩放态下它平移价格区间。守卫放在这里而非手势层, 于是同一条
+    // 平移路径在两种模式、所有输入设备下都成立。
+    if (isChartZooming && delta.dy != 0) {
+      changed = _shiftZoomMinMaxByDy(delta.dy) || changed;
     }
 
     if (changed) {
@@ -349,40 +353,63 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
     return changed;
   }
 
-  /// 蜡烛图缩放中...
-  void onChartScale(GestureData data) {
+  /// X 轴缩放: 按**累积比例的帧间增量**调整蜡烛宽度。
+  ///
+  /// 输入是「相对手势起点的累积比例」的连续流, 调用方差分后传入本帧增量。双指捏合与桌面
+  /// 触控板 `PointerPanZoom` 走这条 —— 判据是口径而非设备: 同一块触控板在 Web 上给出的是
+  /// 单次比值, 那边走 [onChartScaleTo]。
+  ///
+  /// 增量口径下不需要方向短路: 已在界上还继续同向时 clamp 使宽度不变, 由下面的等值检查
+  /// 拦住; 而按累积比例判方向会在「累积放大后开始收拢」的第一帧误挡反向缩放。
+  void onChartScaleBy(
+    double scaleDelta, {
+    required ScalePosition position,
+    required double focalDx,
+  }) {
     if (!gestureConfig.enableScale) return;
+    _applyCandleWidth(
+      candleWidth + scaleDelta * gestureConfig.scaleSpeed,
+      position: position,
+      focalDx: focalDx,
+    );
+  }
 
-    double? newWidth;
-    if (data.scaled) {
-      // 处理触摸设备的缩放逻辑.
-      if (data.scale > 1 && candleWidth >= candleMaxWidth) return;
-      if (data.scale < 1 && candleWidth <= candleMinWidth) return;
+  /// X 轴缩放: 按**单次比值倍率**调整蜡烛宽度。
+  ///
+  /// 输入是「本次事件的独立比值」, 每个事件自成一次完整缩放。滚轮(`exp(-dy/signalScaleFactor)`
+  /// 产出)与 Web 触控板 `PointerScaleEvent` 走这条。
+  void onChartScaleTo(
+    double factor, {
+    required ScalePosition position,
+    required double focalDx,
+  }) {
+    if (!gestureConfig.enableScale) return;
+    _applyCandleWidth(
+      candleWidth * factor,
+      position: position,
+      focalDx: focalDx,
+    );
+  }
 
-      final dxGrowth = data.scaleDelta * gestureConfig.scaleSpeed;
-      newWidth = (candleWidth + dxGrowth).clamp(
-        candleMinWidth,
-        candleMaxWidth,
-      );
-    } else if (data.isSignal) {
-      // 处理鼠标滚轴滚动/触控板向上向下的缩放逻辑.
-      // data.scale 是比值口径(由 exp(-dy/signalScaleFactor) 产出), 直接乘以当前宽度。
-      newWidth = (candleWidth * data.scale).clamp(
-        candleMinWidth,
-        candleMaxWidth,
-      );
-    }
-
-    if (newWidth == null || newWidth == candleWidth) return;
+  /// 两条缩放链共用的应用点: 夹取目标宽度, 并按锚定位置修正 [paintDxOffset]。
+  ///
+  /// 收敛成一个方法而不是让两条链各写一遍, 是为了让「界与锚定行为一致」成为结构保证。
+  void _applyCandleWidth(
+    double target, {
+    required ScalePosition position,
+    required double focalDx,
+  }) {
+    final newWidth = target.clamp(candleMinWidth, candleMaxWidth);
+    if (newWidth == candleWidth) return;
 
     final scaleFactor = (newWidth + candleSpacing) / candleActualWidth;
-    // logd('onChartScale candleWidth:$candleWidth>$newWidth; factor:$scaleFactor');
+    // logd('_applyCandleWidth candleWidth:$candleWidth>$newWidth; factor:$scaleFactor');
 
     /// 更新蜡烛宽度
     _setCandleWidth(newWidth);
 
     double newDxOffset;
-    switch (data.initPosition) {
+    switch (position) {
       case ScalePosition.right:
         if (paintDxOffset <= 0) {
           newDxOffset = paintDxOffset; // 固定右侧空白
@@ -397,7 +424,7 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
       case ScalePosition.auto:
       case ScalePosition.middle:
         if (paintDxOffset <= 0) {
-          final dxRight = mainChartWidth - data.offset.dx;
+          final dxRight = mainChartWidth - focalDx;
           newDxOffset = (dxRight + paintDxOffset) * scaleFactor - dxRight;
         } else {
           final widthHalf = mainChartWidthHalf;
@@ -407,7 +434,7 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
     }
 
     if (newDxOffset != paintDxOffset) {
-      // logd('handleScale paintDxOffset:$paintDxOffset > $newDxOffset');
+      // logd('_applyCandleWidth paintDxOffset:$paintDxOffset > $newDxOffset');
       paintDxOffset = newDxOffset;
     }
 
@@ -586,11 +613,11 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
   /// 两侧同加保住「手指回到起点即系数为 1」这个不动点, 只加分母会让它偏移。
   ///
   /// 缩放的不动点是区间中点而非手指 —— 手指位置只决定幅度。所以这是「旋钮」不是「捏合」。
-  void onChartZoomUpdate(GestureData data) {
+  void onChartZoomUpdate(double dy) {
     final anchor = _chartZoomAnchor;
     if (anchor == null) return;
 
-    final distanceFromBottom = mainChartRect.distanceFromBottom(data.offset.dy);
+    final distanceFromBottom = mainChartRect.distanceFromBottom(dy);
     if (distanceFromBottom == null) return;
 
     final soften = mainChartHeight / (gestureConfig.maxZoomPerGesture - 1);
@@ -662,8 +689,8 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
     return true;
   }
 
-  void onPaintObjectDragUpdate(GestureData data) {
-    _draggingObject?.handleDragUpdate(data.offset, data.delta);
+  void onPaintObjectDragUpdate(Offset position, Offset delta) {
+    _draggingObject?.handleDragUpdate(position, delta);
   }
 
   void onPaintObjectDragEnd() {

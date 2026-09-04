@@ -80,7 +80,7 @@ Future<FlexiKlineController> _arrangeZooming(WidgetTester tester) async {
 void main() {
   testWidgets('zoom 模式下 crossing 拖动 => 移动十字线, 不移动图表', (tester) async {
     final chart = await _arrangeZooming(tester);
-    expect(chart.onCrossStart(GestureData.tap(_modePosition)), isTrue);
+    expect(chart.onCrossToggle(_modePosition), isTrue);
     final crossBefore = chart.crossOffset;
     final panBefore = chart.paintDxOffset;
     expect(crossBefore, isNotNull, reason: '前置条件: 必须已显示十字线');

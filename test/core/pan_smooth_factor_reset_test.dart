@@ -82,15 +82,11 @@ void main() {
     /// 返回第二帧的 rangeMax（插值态）。
     Future<double> enterSmoothState(WidgetTester tester) async {
       // 帧 1：大幅平移, factor=0.15 → 首帧无旧缓存，值等于精确值，但建立了 _smoothMinMax
-      final pan1 = GestureData.pan(const Offset(200, 150));
-      pan1.update(const Offset(300, 150));
-      chart.onChartMove(pan1, 0.15);
+      chart.onChartMove(const Offset(100, 0), smoothFactor: 0.15);
       await paintChartFrame(tester, chart);
 
       // 帧 2：继续大幅平移, factor=0.15 → _smoothMinMax 从帧 1 的旧值向新目标插值，产生滞后
-      final pan2 = GestureData.pan(const Offset(300, 150));
-      pan2.update(const Offset(400, 150));
-      chart.onChartMove(pan2, 0.15);
+      chart.onChartMove(const Offset(100, 0), smoothFactor: 0.15);
       await paintChartFrame(tester, chart);
 
       return _rangeMax(chart);
@@ -119,9 +115,7 @@ void main() {
       final smoothedMax1 = await enterSmoothState(tester);
 
       // 不调 onPanEnd，第三帧继续平移 factor=0.15
-      final pan3 = GestureData.pan(const Offset(400, 150));
-      pan3.update(const Offset(430, 150));
-      chart.onChartMove(pan3, 0.15);
+      chart.onChartMove(const Offset(30, 0), smoothFactor: 0.15);
       await paintChartFrame(tester, chart);
       final smoothedMax2 = _rangeMax(chart);
 
@@ -139,9 +133,7 @@ void main() {
 
       // 连续 8 帧 factor=0.15 平移（模拟惯性动画）
       for (var i = 0; i < 8; i++) {
-        final data = GestureData.pan(Offset(200.0 + i * 25, 150));
-        data.update(Offset(225.0 + i * 25, 150));
-        chart.onChartMove(data, 0.15);
+        chart.onChartMove(const Offset(25, 0), smoothFactor: 0.15);
         await paintChartFrame(tester, chart);
       }
 

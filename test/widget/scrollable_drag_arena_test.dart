@@ -544,7 +544,7 @@ void _drawArenaTests() {
       );
       addTearDown(() => disposeChart(tester, scene.chart));
       scene.chart.startDraw(testDrawLineType, isInitPointer: false);
-      scene.chart.onDrawConfirm(GestureData.tap(lineFrom));
+      scene.chart.onDrawConfirm(lineFrom);
       expect(scene.chart.drawState.isDrawing, isTrue);
       final beforeDy = scene.chart.drawState.pointerOffset!.dy;
 

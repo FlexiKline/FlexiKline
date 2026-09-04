@@ -407,14 +407,74 @@ void main() {
       controller.updateSettingConfig((c) => c.copyWith(candleMinWidth: 0, candleFixedSpacing: null));
 
       // 一路缩到下界，逐步逼近而不是一次跳过去，确保真的踩在 clamp 上。
-      final data = GestureData.scale(Offset.zero, position: ScalePosition.middle);
+      // 累积比例每步 -0.03，故帧间增量恒为 -0.03。
       for (var i = 1; i <= 30; i++) {
-        data.update(Offset.zero, newScale: 1.0 - i * 0.03);
-        controller.onChartScale(data);
+        controller.onChartScaleBy(-0.03, position: ScalePosition.middle, focalDx: 0);
       }
 
       expect(controller.candleWidth, greaterThan(0));
       expect(controller.candleActualWidth, greaterThan(0));
+    });
+  });
+
+  /// X 轴缩放的两条链（`onChartScaleBy` 累积比例增量 / `onChartScaleTo` 单次比值）在同一个
+  /// 私有应用点夹取，界与锚定行为因此由结构保证一致。
+  ///
+  /// 前两条是回归测试：删除 GestureData 之前，控制器读的是手势对象持有的**累积比例**，
+  /// 由此产生两个手感缺陷。改成只接受增量后这两种状态在控制器侧不再可观测。
+  /// 反向验证做过：把累积比例账本与两条方向短路恢复回去，这两条精确变红。
+  group('v2.5.0/FlexiKlineController/scale', () {
+    test('累积比例回到起点时仍按增量缩放', () {
+      final controller = mountController(FakeFlexiKlineConfiguration());
+      addTearDown(controller.dispose);
+      final before = controller.candleWidth;
+
+      // 张开再收回同样的量：累积比例走 1.0 → 1.3 → 1.0。
+      // 旧实现第二步撞上 `scale != 1.0` 守卫被整帧跳过，宽度停在放大后的值。
+      controller.onChartScaleBy(0.3, position: ScalePosition.middle, focalDx: 0);
+      expect(controller.candleWidth, isNot(before), reason: '前置：第一步已放大');
+      controller.onChartScaleBy(-0.3, position: ScalePosition.middle, focalDx: 0);
+
+      expect(controller.candleWidth, closeTo(before, 1e-9), reason: '手指回到起点应缩回原始宽度');
+    });
+
+    test('贴上界后反向收拢立即生效，不延迟一帧', () {
+      final controller = mountController(FakeFlexiKlineConfiguration());
+      addTearDown(controller.dispose);
+      for (var i = 0; i < 60; i++) {
+        controller.onChartScaleBy(1.0, position: ScalePosition.middle, focalDx: 0);
+      }
+      expect(controller.candleWidth, controller.candleMaxWidth, reason: '前置：已贴上界');
+
+      // 旧实现此刻累积比例仍 > 1，`scale > 1 && candleWidth >= candleMaxWidth` 直接 return，
+      // 第一帧收拢被吞掉，要等累积比例跌回 1 以下才响应。
+      controller.onChartScaleBy(-0.5, position: ScalePosition.middle, focalDx: 0);
+
+      expect(controller.candleWidth, lessThan(controller.candleMaxWidth));
+    });
+
+    test('贴界后同向继续为空操作', () {
+      final controller = mountController(FakeFlexiKlineConfiguration());
+      addTearDown(controller.dispose);
+      for (var i = 0; i < 60; i++) {
+        controller.onChartScaleBy(1.0, position: ScalePosition.middle, focalDx: 0);
+      }
+      final atMax = controller.candleWidth;
+
+      controller.onChartScaleBy(1.0, position: ScalePosition.middle, focalDx: 0);
+
+      expect(controller.candleWidth, atMax);
+    });
+
+    test('比值链与增量链受同一组界约束', () {
+      final controller = mountController(FakeFlexiKlineConfiguration());
+      addTearDown(controller.dispose);
+
+      controller.onChartScaleTo(100, position: ScalePosition.middle, focalDx: 0);
+      expect(controller.candleWidth, controller.candleMaxWidth);
+
+      controller.onChartScaleTo(0.0001, position: ScalePosition.middle, focalDx: 0);
+      expect(controller.candleWidth, controller.candleMinWidth);
     });
   });
 }

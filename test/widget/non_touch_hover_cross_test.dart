@@ -147,9 +147,9 @@ void main() {
       // 启动绘制但只确认第一个点，进入 Drawing 状态。
       final mainRect = controller.mainRect;
       controller.startDraw(testDrawLineType, isInitPointer: false);
-      controller.onDrawConfirm(GestureData.tap(
+      controller.onDrawConfirm(
         Offset(mainRect.left + 20, mainRect.center.dy),
-      ));
+      );
       await tester.pump();
       expect(controller.drawState.isDrawing, isTrue, reason: '前置：必须在 Drawing 状态');
 
@@ -187,9 +187,9 @@ void main() {
 
       // 启动绘制进入 Drawing 态。
       controller.startDraw(testDrawLineType, isInitPointer: false);
-      controller.onDrawConfirm(GestureData.tap(
+      controller.onDrawConfirm(
         Offset(mainRect.left + 20, mainRect.center.dy),
-      ));
+      );
       await tester.pump();
       expect(controller.drawState.isDrawing, isTrue, reason: '前置：Drawing 状态');
 
@@ -217,9 +217,9 @@ void main() {
 
       // 启动绘制，确认第一个点。
       controller.startDraw(testDrawLineType, isInitPointer: false);
-      controller.onDrawConfirm(GestureData.tap(
+      controller.onDrawConfirm(
         Offset(mainRect.left + 20, mainRect.center.dy),
-      ));
+      );
       await tester.pump();
 
       // hover 以建立绘制追踪。

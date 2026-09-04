@@ -167,7 +167,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
   }
 
   /// 更新当前指针坐标
-  void onDrawUpdate(GestureData data) {
+  void onDrawUpdate(Offset position) {
     if (!drawState.isDrawing) return;
     final object = drawState.object!;
     final pointer = object.pointer;
@@ -178,7 +178,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
       }());
       return;
     }
-    final newOffset = magneticSnap(data.offset);
+    final newOffset = magneticSnap(position);
     if (newOffset != pointer.offset) {
       object.onUpdateDrawPoint(pointer, newOffset);
       _markRepaintDraw();
@@ -186,15 +186,15 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
   }
 
   /// 确认动作.
-  void onDrawConfirm(GestureData data) {
+  void onDrawConfirm(Offset position) {
     final object = drawState.object;
     if (object == null) return;
 
     if (object.isDrawing) {
       Point? pointer = object.pointer;
       if (pointer == null) {
-        // 非触摸设备启动时, 不会设置初始指针, 只有在第一次Tap时, pointer才确认第一个指针
-        final newOffset = magneticSnap(data.offset);
+        // 指针未预置时(不预置初始指针的输入路径), 第一次确认才落下第一个指针
+        final newOffset = magneticSnap(position);
         pointer = Point.pointer(object.nextIndex, newOffset);
       }
 
@@ -211,7 +211,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
             drawConfig,
           );
           if (nextObj != null) {
-            final initOffset = object.lastPoint?.offset ?? data.offset;
+            final initOffset = object.lastPoint?.offset ?? position;
             nextObj.setPointer(Point.pointer(0, magneticSnap(initOffset)));
             _drawState = DrawState.draw(nextObj);
           } else {
@@ -246,12 +246,11 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
     return object.hitTestPoint(this, position) != null || object.hitTest(this, position, isMove: true);
   }
 
-  bool onDrawMoveStart(GestureData data) {
+  bool onDrawMoveStart(Offset position) {
     if (!drawState.isEditing) return false; // 未完成的暂不允许移动
     final object = drawState.object!;
     if (object.lock) return false; // 锁定状态不允许移动
 
-    final position = data.offset;
     // 检查是否在某个绘制点上
     final point = object.hitTestPoint(this, position);
     if (point != null) {
@@ -275,16 +274,17 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
   }
 
   /// 移动Overlay
-  void onDrawMoveUpdate(GestureData data) {
+  ///
+  /// [position] 移动单个绘制点时作为新落点(经磁吸校正), [delta] 整体平移时施加到每个点。
+  void onDrawMoveUpdate(Offset position, Offset delta) {
     if (!drawState.isEditing) return; // 未完成的暂不允许移动
     final object = drawState.object!;
 
-    final delta = data.delta;
     final pointer = object.pointer;
     if (pointer != null) {
       // 当前移动一个编辑状态的Overlay的某个绘制点指针时,
       // 需要通过[DrawObject]的`onUpdatePoint`接口来校正offset.
-      final newOffset = magneticSnap(data.offset);
+      final newOffset = magneticSnap(position);
       if (newOffset != pointer.offset) {
         object.onUpdateDrawPoint(pointer, newOffset);
         _drawPointerNotifier.updateValue(pointer);

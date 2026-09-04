@@ -295,10 +295,11 @@ mixin GridBinding on KlineBindingBase, SettingBinding {
   }
 
   /// 拖拽更新指标高度。
-  void onGridResizeUpdate(GestureData data) {
+  ///
+  /// [deltaDy] 为本帧纵向位移增量, 由手势层差分得出。>0 向下、<0 向上。
+  void onGridResizeUpdate(double deltaDy) {
     if (!isStartDragGrid) return;
 
-    final deltaDy = data.delta.dy;
     if (deltaDy != 0) {
       // >0 向下，<0 向上。
       final bool isMainIndicator = _upObject is MainPaintObject;

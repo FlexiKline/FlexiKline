@@ -16,7 +16,6 @@ export 'candle_model/candle_model.dart';
 export 'flexi_candle_model.dart';
 // 内置数据类型
 export 'flexi_num.dart';
-export 'gesture_data.dart';
 export 'kline_spec/kline_spec.dart';
 export 'layout_mode.dart';
 export 'minmax.dart';

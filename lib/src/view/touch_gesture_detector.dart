@@ -15,12 +15,10 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 
-import '../constant.dart';
 import '../extension/functions_ext.dart';
 import '../extension/geometry_ext.dart';
 import '../framework/chart/indicator.dart';
 import '../framework/draw/overlay.dart';
-import '../model/gesture_data.dart';
 import '../utils/algorithm_util.dart';
 import 'gesture_detector_widget.dart';
 import 'touch_gesture_owner.dart';
@@ -48,11 +46,11 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
   /// 不必逐个核对标志位是否都复位了。「有手势在进行」的判据见 [_TouchSession.isActive]。
   _TouchSession? _session;
 
-  /// 长按监听数据。
+  /// 长按的上一帧位置，帧间增量的基准；非空即代表长按已向业务侧认领。
   ///
   /// 不进 [_session] 有两个理由：长按赢下竞技场即意味着 Scale 被 reject，与归属驱动互斥；
   /// 它的收尾在 [onLongPressEnd]，晚于活跃指针归零。
-  GestureData? _longData;
+  Offset? _longPressLast;
 
   /// 外层可滚动容器的裁决阈值，也是兜底归属的抢占阈值。
   ///
@@ -206,13 +204,13 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
 
     final owner = session.owner;
     if (owner != null && owner.isChartFallback) {
-      // 兜底族的收尾要用 recognizer 维护的抬手速度, 交给紧随其后的 [onScaleEnd]。drive 为空
+      // 兜底族的收尾要用 recognizer 维护的抬手速度, 交给紧随其后的 [onScaleEnd]。锚点为空
       // 说明上一段已提交、剩余指针又没再移动, 不会再有 onScaleEnd。惯性不可能
       // 发生, 但 session 级的 loadMore 仍要在这里补上。
-      if (session.drive != null) return;
+      if (session.anchor != null) return;
       controller.checkAndLoadMoreCandlesWhenPanEnd();
-    } else if (session.drive != null) {
-      // 落点族就地收尾。drive 为空即归属已定却没抢赢竞技场(落点被双击吃掉、down 后立即
+    } else if (session.anchor != null) {
+      // 落点族就地收尾。锚点为空即归属已定却没抢赢竞技场(落点被双击吃掉、down 后立即
       // cancel), 无需收尾, session 随下面一行整体丢弃。
       _finishSession(session, velocity: Offset.zero);
     }
@@ -227,10 +225,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
           final pointerOffset = drawState.pointerOffset;
           if (pointerOffset != null && pointerOffset.isFinite) {
             logd('onTapUp draw(drawing) confirm pointer:$pointerOffset');
-            final data = GestureData.tap(pointerOffset);
-            controller.onDrawConfirm(data);
-            // 绘制点凑齐后状态转为 Editing, 本次点击的手势序列到此结束。
-            if (drawState.isEditing) data.end();
+            controller.onDrawConfirm(pointerOffset);
           }
           return;
         case Editing():
@@ -241,9 +236,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
             controller.onDrawSelect(object);
           } else {
             logd('onTapUp draw(editing) confirm offset:$offset');
-            final data = GestureData.tap(offset);
-            controller.onDrawConfirm(data);
-            data.end();
+            controller.onDrawConfirm(offset);
           }
           return;
         case Exited():
@@ -274,10 +267,9 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
     }
     // }
 
-    logd('onTapUp cross start details:$details');
-    final data = GestureData.tap(details.localPosition);
-    // 未能启动 crossing（点击被当作退出、或数据不可用）即就地结束这次手势数据。
-    if (!controller.onCrossStart(data)) data.end();
+    logd('onTapUp cross toggle details:$details');
+    // 点击语义: 未开则开、已开则关。跟随类输入走 onCrossFollow, 不是这里。
+    controller.onCrossToggle(details.localPosition);
   }
 
   /// 平移/缩放开始：为当前归属建立驱动状态。
@@ -290,12 +282,8 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
     if (landed != null && !landed.isChartFallback) {
       // [ScaleGestureRecognizer] 在指针增减时会先派发一次 onEnd、再于下一次 move 重新
       // onStart, 一轮手势因此被拆成多段。归属独占整个序列, 锚点与业务认领只做第一次。
-      if (session.drive != null) return;
-      final drive = _startDrive(session, landed, focalPoint);
-      if (drive != null) {
-        session.drive = drive;
-        return;
-      }
+      if (session.anchor != null) return;
+      if (_claim(session, landed, focalPoint)) return;
       // 目标在 down 与 start 之间消失(数据刷新令 overlay 或 PaintObject 不复存在)。
       // 竞技场已抢到、外层已被 reject, 废掉手势等于白拿, 降级为图表兜底。
       logd('onScaleStart owner:${landed.name} claim failed, fallback to chart.');
@@ -319,37 +307,24 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
         ) ??
         TouchGestureOwner.chartPan;
     session.owner = owner;
-    session.drive = _startDrive(session, owner, focalPoint);
+    _claim(session, owner, focalPoint);
   }
 
-  /// 解析缩放的锚定位置：[ScalePosition.auto] 按落点所在的三分之一区域就近锚定。
+  /// 缓存在 session 上的锚定位置，一轮 pointer session 只解析一次。
   ///
-  /// 结果缓存在 session 上，一轮 pointer session 只解析一次。每段按新落点重解析会让「双指
-  /// 缩放抬起一指再张开」时锚点从 middle 跳到 left。
-  ScalePosition _resolveScalePosition(_TouchSession session, double focalDx) {
-    final resolved = session.resolvedScalePosition;
-    if (resolved != null) return resolved;
+  /// 每段按新落点重解析会让「双指缩放抬起一指再张开」时锚点从 middle 跳到 left。
+  ScalePosition _resolveScalePosition(_TouchSession session, double focalDx) =>
+      session.resolvedScalePosition ??= resolveScalePosition(focalDx);
 
-    final configured = gestureConfig.scalePosition;
-    if (configured != ScalePosition.auto) return session.resolvedScalePosition = configured;
-    final third = controller.canvasRect.width / 3;
-    if (focalDx < third) return session.resolvedScalePosition = ScalePosition.left;
-    if (focalDx > third + third) return session.resolvedScalePosition = ScalePosition.right;
-    return session.resolvedScalePosition = ScalePosition.middle;
-  }
-
-  /// 为 [owner] 建立驱动状态：手势数据与位移锚点，并向业务侧认领目标。
+  /// 为 [owner] 解析锚点并向业务侧认领目标，成功则写入 [_TouchSession.anchor]。
   ///
-  /// 返回 null 表示锚点或目标已失效（只发生在落点族），调用方应降级为图表兜底。
-  ///
-  /// [GestureData] 的类型不只是标签：`isScale` / `isSignal` 会改变下游行为。dy 是否被消费
-  /// 不在其中——那由 [ChartBinding.onChartMove] 按 `isChartZooming` 判断。
+  /// 返回 false 表示锚点或目标已失效（只发生在落点族），调用方应降级为图表兜底。
   ///
   /// case 顺序与 [TouchGestureOwner] 的声明顺序一致，而声明顺序就是归属优先级；
   /// [onScaleUpdate] 与 [_finishSession] 的 switch 同序，任一归属的三段生命周期落在同一位置。
   ///
   /// [owner] 恒为 `session.owner` 的非空形式；[fallbackOrigin] 只有兜底族会用到。
-  ({GestureData data, Offset origin})? _startDrive(
+  bool _claim(
     _TouchSession session,
     TouchGestureOwner owner,
     Offset fallbackOrigin,
@@ -358,39 +333,36 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
     // 兜底族的锚点是多指质心(缩放必须如此, 平移用质心也更抗抖); 落点族的锚点由归属自己给出,
     // 为 null 即目标已消失。
     final origin = owner.isChartFallback ? fallbackOrigin : owner.resolveAnchor(controller, down);
-    if (origin == null) return null;
+    if (origin == null) return false;
 
     switch (owner) {
       case TouchGestureOwner.drawDrawing:
-        return (data: GestureData.pan(origin), origin: origin);
+      case TouchGestureOwner.cross:
+      case TouchGestureOwner.zoomSlider:
+        break;
       case TouchGestureOwner.drawEditing:
         // 命中与位移基准都取按下位置, 两个理由缺一不可:
         // 1. 命中准: 识别时刻位置距按下点相差一个 slop, 远超
         //    [DrawConfig.hitTestMinDistance] 的 10px, 沿线方向之外必然脱靶。
-        // 2. 跟手: [DrawBinding.onDrawMoveUpdate] 整体平移吃的是 `data.delta`, 以按下
-        //    位置为基准时首帧 delta 恰好补上按下到识别之间的真实位移; 换成识别位置则
-        //    首帧为 0, 线永久滞后一个 slop。
+        // 2. 跟手: [DrawBinding.onDrawMoveUpdate] 整体平移吃的是帧间增量, 以按下位置为
+        //    基准时首帧增量恰好补上按下到识别之间的真实位移; 换成识别位置则首帧为 0,
+        //    线永久滞后一个 slop。
         logd('onScaleStart draw > down:$down');
-        final data = GestureData.pan(origin);
-        if (!controller.onDrawMoveStart(data)) return null;
-        return (data: data, origin: origin);
-      case TouchGestureOwner.cross:
-        return (data: GestureData.tap(origin), origin: origin);
+        if (!controller.onDrawMoveStart(origin)) return false;
       case TouchGestureOwner.paintObject:
-        if (!controller.onPaintObjectDragStart(down)) return null;
+        if (!controller.onPaintObjectDragStart(down)) return false;
         logd('onScaleStart paintObject drag down:$down');
         stopPositionAnimation();
-        return (data: GestureData.pan(origin), origin: origin);
-      case TouchGestureOwner.zoomSlider:
-        return (data: GestureData.zoom(origin), origin: origin);
       case TouchGestureOwner.chartScale:
-        final position = _resolveScalePosition(session, origin.dx);
-        logd('onScaleStart scale $position focal:$origin');
-        return (data: GestureData.scale(origin, position: position), origin: origin);
+        logd('onScaleStart scale ${_resolveScalePosition(session, origin.dx)} focal:$origin');
       case TouchGestureOwner.chartPan:
         logd('onScaleStart pan focal:$origin');
-        return (data: GestureData.pan(origin), origin: origin);
     }
+
+    session.anchor = origin;
+    session.lastDrive = origin;
+    session.lastScale = 1.0;
+    return true;
   }
 
   /// 平移/缩放中...
@@ -398,38 +370,38 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
   /// 注册时挂了 `throttleOnFps`，所以这里每帧最多执行一次。
   void onScaleUpdate(ScaleUpdateDetails details) {
     final session = _session;
-    final drive = session?.drive;
+    final anchor = session?.anchor;
     final owner = session?.owner;
-    if (session == null || drive == null || owner == null) {
-      logd('onScaleUpdate no drive! details:$details');
+    if (session == null || anchor == null || owner == null) {
+      logd('onScaleUpdate not claimed! details:$details');
       return;
     }
 
     if (!owner.isChartFallback) {
       // 落点族的坐标恒为「锚点 + 第一指总位移」。不逐帧累加增量: 本方法挂了节流, 累加会随
       // 被丢弃的中间调用一起丢位移。
-      final data = drive.data;
-      final newOffset = drive.origin + session.delta;
+      final newOffset = anchor + session.delta;
       switch (owner) {
         case TouchGestureOwner.drawDrawing:
-          data.update(newOffset);
-          controller.onDrawUpdate(data);
+          controller.onDrawUpdate(newOffset);
+          session.lastDrive = newOffset;
         case TouchGestureOwner.drawEditing:
-          data.update(newOffset);
-          controller.onDrawMoveUpdate(data);
+          controller.onDrawMoveUpdate(newOffset, newOffset - session.lastDrive);
+          session.lastDrive = newOffset;
         case TouchGestureOwner.cross:
-          data.update(newOffset.clamp(controller.canvasRect));
-          controller.onCrossUpdate(data);
+          final clamped = newOffset.clamp(controller.canvasRect);
+          controller.onCrossUpdate(clamped);
+          session.lastDrive = clamped;
         case TouchGestureOwner.paintObject:
           // 不做区域钳制: 是否限制在图表内由绘制对象自行决定.
-          data.update(newOffset);
-          controller.onPaintObjectDragUpdate(data);
+          controller.onPaintObjectDragUpdate(newOffset, newOffset - session.lastDrive);
+          session.lastDrive = newOffset;
         case TouchGestureOwner.zoomSlider:
-          data.update(newOffset);
+          final dyDelta = newOffset.dy - session.lastDrive.dy;
+          session.lastDrive = newOffset;
           if (session.zoomStarted) {
-            controller.onChartZoomUpdate(data);
-          } else if (data.dyDelta.abs() >= gestureConfig.zoomStartMinDistance &&
-              controller.onChartZoomStart(newOffset)) {
+            controller.onChartZoomUpdate(newOffset.dy);
+          } else if (dyDelta.abs() >= gestureConfig.zoomStartMinDistance && controller.onChartZoomStart(newOffset)) {
             // 抢占决定「手势归 zoom」, zoomStartMinDistance 决定「缩放何时真正开始」,
             // 两个阈值语义不同, 不合并。
             stopPositionAnimation();
@@ -443,7 +415,6 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
     }
 
     // 兜底族的位置来源是多指质心, 不是第一指。
-    final data = drive.data;
     final position = details.localFocalPoint;
 
     // chartPan 单向切到 chartScale: 双指刚落下、还没张开就横向移了一点会被判为 chartPan,
@@ -455,38 +426,39 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
     // 语义不同, 不要合并。抢占要跟外层可滚动容器赛跑、必须灵敏; 族内切换要稳, 过敏会让
     // 平移中途乱缩放 —— 此刻竞技场早已赢下, 没有赛跑对手。
     if (owner == TouchGestureOwner.chartPan && gestureConfig.enableScale && session.spanDelta.abs() > kScaleSlop) {
-      final scalePosition = _resolveScalePosition(session, position.dx);
-      logd('onScaleUpdate pan > scale $scalePosition focal:$position');
+      logd('onScaleUpdate pan > scale ${_resolveScalePosition(session, position.dx)} focal:$position');
       session.owner = TouchGestureOwner.chartScale;
-      data.end();
       // 平移阶段留下的平滑因子必须归位: 缩放的收尾不调 onPanEnd, 否则它会一直残留。
       controller.onPanEnd();
-      session.drive = (
-        data: GestureData.scale(
-          position,
-          // 以切换时刻的实际缩放为基准: 从 1.0 起算会把按下到切换之间的间距变化一次性吃掉。
-          scale: scaledDecelerate(details.scale),
-          position: scalePosition,
-        ),
-        origin: position,
-      );
-      // 本帧只切换: 新建的 data 其 scaleDelta 恒为 0, [ChartBinding.onChartScale] 拿它算不出
-      // 任何宽度变化, 驱动要等下一帧。
+      session.anchor = position;
+      session.lastDrive = position;
+      // 以切换时刻的实际缩放为基准: 从 1.0 起算会把按下到切换之间的间距变化一次性吃掉。
+      session.lastScale = scaledDecelerate(details.scale);
+      // 本帧只切换: 增量基准刚重设, 本帧增量恒为 0, 算不出任何宽度变化, 驱动要等下一帧。
       return;
     }
 
-    // 按归属分派, 不看 [GestureData] 的类型: 类型由归属在 [onScaleStart] 决定, 再照类型分派
+    // 按归属分派, 不按输入设备或指针数: 归属已在 [onScaleStart] 判定, 再照别的判据分派
     // 一次只会多出一套要保持同步的判据。
     if (owner == TouchGestureOwner.chartScale) {
       final newScale = scaledDecelerate(details.scale);
-      final change = details.scale - data.scale;
-      if (change.abs() > 0.01) {
-        data.update(position, newScale: newScale);
-        controller.onChartScale(data);
+      // 判据混口径是有意的: 原始 `details.scale` 与上一帧减速后的比例作差, 与既有手感一致。
+      if ((details.scale - session.lastScale).abs() > 0.01) {
+        controller.onChartScaleBy(
+          newScale - session.lastScale,
+          position: _resolveScalePosition(session, position.dx),
+          focalDx: position.dx,
+        );
+        session.lastScale = newScale;
+        session.lastDrive = position;
       }
     } else {
-      data.update(position.clamp(controller.canvasRect), newScale: details.scale);
-      controller.onChartMove(data, gestureConfig.tolerance.effectivePanSmoothFactor);
+      final clamped = position.clamp(controller.canvasRect);
+      controller.onChartMove(
+        clamped - session.lastDrive,
+        smoothFactor: gestureConfig.tolerance.effectivePanSmoothFactor,
+      );
+      session.lastDrive = clamped;
     }
   }
 
@@ -503,8 +475,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
     final session = _session;
     if (session == null) return;
     final owner = session.owner;
-    final drive = session.drive;
-    if (owner == null || !owner.isChartFallback || drive == null) return;
+    if (owner == null || !owner.isChartFallback || session.anchor == null) return;
 
     // candleWidth 按段落库: 双指缩放后抬起一指, 本段缩放的结果就该定下来。
     final isScale = owner == TouchGestureOwner.chartScale;
@@ -512,11 +483,10 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
 
     if (details.pointerCount > 0) {
       logd('onScaleEnd segment end, ${details.pointerCount} pointer(s) left.');
-      // 平移写进的平滑因子同样按段归位; 下一段由 [onScaleStart] 重判归属并重建 drive。
+      // 平移写进的平滑因子同样按段归位; 下一段由 [onScaleStart] 重判归属并重新认领。
       if (!isScale) controller.onPanEnd();
-      drive.data.end();
       // 置空即宣告「本段已提交」: 指针随后归零时 [_pointerEnd] 据此知道不会再有最终 onEnd。
-      session.drive = null;
+      session.anchor = null;
       return;
     }
 
@@ -536,9 +506,8 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
   ///
   /// case 顺序与 [_startDrive]、[onScaleUpdate] 一致，即 [TouchGestureOwner] 的声明顺序。
   void _finishSession(_TouchSession session, {required Offset velocity}) {
-    final drive = session.drive;
     final owner = session.owner;
-    if (drive == null || owner == null) return;
+    if (session.anchor == null || owner == null) return;
 
     switch (owner) {
       case TouchGestureOwner.drawDrawing:
@@ -564,50 +533,33 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
       case TouchGestureOwner.chartScale:
         controller.checkAndLoadMoreCandlesWhenPanEnd();
       case TouchGestureOwner.chartPan:
-        // 惯性分支要等动画跑完才结束手势数据, 所以自行收尾。
-        _finishChartPan(session, drive.data, velocity.dx);
-        return;
+        _finishChartPan(session, velocity.dx);
     }
-    drive.data.end();
   }
 
   /// chartPan 的 session 收尾：够条件就按抬手速度做惯性平移，否则就地结束。
   ///
   /// 两条路径都要检查 loadMore，惯性路径额外把预测的终点传进去，让预加载提前发生。
-  void _finishChartPan(_TouchSession session, GestureData data, double velocity) {
-    final tolerance = gestureConfig.tolerance;
-    final panDistance = velocity * tolerance.distanceFactor;
-    final panDuration = calcuInertialPanDuration(panDistance, maxDuration: tolerance.maxDuration);
-    // 本轮出现过 PointerCancel 即不惯性: cancel 意味着系统接管了手势(来电、系统返回、父级
-    // 抢占), 手指并非主动甩出去, 继续滚动是错的。
-    final canInertialPan = !session.canceled &&
-        gestureConfig.enableInertialPan &&
-        controller.klineData.isNotEmpty &&
-        !(velocity < 0 && !controller.canPanRTL) &&
-        !(velocity > 0 && !controller.canPanLTR) &&
-        // 平移距离为 0 或不足 1ms, 无需继续平移。
-        panDistance.abs() >= precisionError &&
-        panDuration > 1;
+  void _finishChartPan(_TouchSession session, double velocity) {
+    final inertial = resolveInertialPan(velocity, canceled: session.canceled);
 
-    if (!canInertialPan) {
+    if (inertial == null) {
       logd('_finishChartPan no inertial movement, velocity:$velocity canceled:${session.canceled}');
-      data.end();
       controller.onPanEnd();
       controller.checkAndLoadMoreCandlesWhenPanEnd();
       return;
     }
 
-    controller.checkAndLoadMoreCandlesWhenPanEnd(panDistance: panDistance, panDuration: panDuration);
-    logi('_finishChartPan inertial movement, velocity:$velocity distance:$panDistance duration:$panDuration');
-    final from = data.offset.dx;
-    // 手势数据在动画启动前就结束: 动画自带一份 GestureData 驱动 onChartMove, 不消费这一份。
-    // 放进 onCompleted 则动画被打断时(走 TickerCanceled)永远不执行。
-    data.end();
+    final (:distance, :duration) = inertial;
+    controller.checkAndLoadMoreCandlesWhenPanEnd(panDistance: distance, panDuration: duration);
+    logi('_finishChartPan inertial movement, velocity:$velocity distance:$distance duration:$duration');
+    // 动画自带差分游标驱动 onChartMove, 不消费 session 的状态。
+    final from = session.lastDrive.dx;
     animateToPosition(
       from,
-      from + panDistance,
-      panDuration: Duration(milliseconds: panDuration),
-      tolerance: tolerance,
+      from + distance,
+      panDuration: Duration(milliseconds: duration),
+      tolerance: gestureConfig.tolerance,
       onCompleted: controller.onPanEnd,
     );
   }
@@ -621,6 +573,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
       return;
     }
 
+    final position = details.localPosition;
     if (controller.isDrawVisible && drawState.isOngoing) {
       if (drawState.isDrawing) {
         // 未完成的暂不允许移动
@@ -628,44 +581,36 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
       }
       if (drawState.object?.lock == true) return;
       logd('onLongPressStart draw > details:$details');
-      _longData = GestureData.long(details.localPosition);
-      final result = controller.onDrawMoveStart(_longData!);
-      if (!result) {
-        _longData?.end();
-        _longData = null;
-      }
-    } else if (!controller.isCrossing && controller.onGridResizeStart(details.localPosition)) {
+      if (controller.onDrawMoveStart(position)) _longPressLast = position;
+    } else if (!controller.isCrossing && controller.onGridResizeStart(position)) {
       logd('onLongPressStart move > details:$details');
-      _longData = GestureData.long(details.localPosition);
+      _longPressLast = position;
     } else {
       logd('onLongPressStart cross > details:$details');
-      _longData = GestureData.long(details.localPosition);
-      final result = controller.onCrossStart(_longData!);
-      if (!result) {
-        _longData?.end();
-        _longData = null;
-      }
+      // 长按到此处必然未在 crossing(方法开头已守卫), 所以 toggle 恒为「开启」。
+      if (controller.onCrossToggle(position)) _longPressLast = position;
     }
   }
 
   void onLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
-    final data = _longData;
-    if (!gestureConfig.enableLongPress || data == null) {
+    final last = _longPressLast;
+    if (!gestureConfig.enableLongPress || last == null) {
       return;
     }
-    // 三条分支共用同一份长按数据, 位置更新与分派无关, 提到分支之前。
-    data.update(details.localPosition);
+    // 三条分支共用同一个差分基准, 位置更新与分派无关, 提到分支之前。
+    final position = details.localPosition;
+    _longPressLast = position;
     if (controller.isDrawVisible && drawState.isOngoing) {
-      controller.onDrawMoveUpdate(data);
+      controller.onDrawMoveUpdate(position, position - last);
     } else if (controller.isStartDragGrid) {
-      controller.onGridResizeUpdate(data);
+      controller.onGridResizeUpdate(position.dy - last.dy);
     } else {
-      controller.onCrossUpdate(data);
+      controller.onCrossUpdate(position);
     }
   }
 
   void onLongPressEnd(LongPressEndDetails details) {
-    if (!gestureConfig.enableLongPress || _longData == null) {
+    if (!gestureConfig.enableLongPress || _longPressLast == null) {
       logd('onLongPressEnd ignore! > details:$details');
       return;
     }
@@ -681,8 +626,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
       // 长按结束, 尝试取消Cross事件.
       controller.requestCancelCross();
     }
-    _longData?.end();
-    _longData = null;
+    _longPressLast = null;
   }
 }
 
@@ -724,13 +668,22 @@ class _TouchSession {
 
   // ── 业务 ──
 
-  /// 驱动状态：手势数据与位移锚点，在 Scale 赢下竞技场（`onScaleStart`）后建立。
+  /// 位移锚点，在 Scale 赢下竞技场（`onScaleStart`）后建立。
   ///
   /// 非空即代表「已抢赢且已向业务侧认领」，所以不需要额外的 claimed 标志。
   ///
-  /// 落点族的 drive 跨 segment 保持；兜底族的 drive 在 `onScaleEnd(pointerCount > 0)` 置空，
-  /// 因此「兜底族 drive 非空」正是「当前 segment 仍活着、最终 onEnd 必来」的等价物。
-  ({GestureData data, Offset origin})? drive;
+  /// 落点族的锚点跨 segment 保持；兜底族在 `onScaleEnd(pointerCount > 0)` 置空，
+  /// 因此「兜底族锚点非空」正是「当前 segment 仍活着、最终 onEnd 必来」的等价物。
+  Offset? anchor;
+
+  /// 上一帧派给业务的驱动位置，帧间增量的基准。
+  ///
+  /// Controller API 只接受已算好的增量，差分基准因此归手势层持有：一轮手势的起止只有
+  /// 这里知道。与 [anchor] 同时赋值（`onScaleStart`），随 session 整体丢弃。
+  Offset lastDrive = Offset.zero;
+
+  /// 上一帧的缩放比例（decelerated 口径），`onChartScaleBy` 的增量基准。
+  double lastScale = 1.0;
 
   /// 本轮是否出现过 [PointerCancelEvent]。
   ///

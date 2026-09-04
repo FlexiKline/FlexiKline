@@ -110,7 +110,7 @@ void main() {
   void dragSlider(FlexiKlineController chart, double dy) {
     final from = Offset(_sliderRect(chart).center.dx, chart.mainRect.center.dy);
     expect(chart.onChartZoomStart(from), isTrue);
-    chart.onChartZoomUpdate(GestureData.zoom(from)..update(from + Offset(0, dy)));
+    chart.onChartZoomUpdate(from.dy + dy);
   }
 
   /// 一轮完整的触摸缩小手势：抓主图区底边拖到顶边，取到本轮最大压缩（系数 `1 / M`）。
@@ -122,7 +122,7 @@ void main() {
     final rect = chart.mainChartRect;
     final from = Offset(dx, rect.bottom);
     expect(chart.onChartZoomStart(from), isTrue);
-    chart.onChartZoomUpdate(GestureData.zoom(from)..update(Offset(dx, rect.top)));
+    chart.onChartZoomUpdate(rect.top);
     chart.onChartZoomEnd();
   }
 
@@ -132,7 +132,7 @@ void main() {
     final rect = chart.mainChartRect;
     final from = Offset(dx, rect.top);
     expect(chart.onChartZoomStart(from), isTrue);
-    chart.onChartZoomUpdate(GestureData.zoom(from)..update(Offset(dx, rect.bottom)));
+    chart.onChartZoomUpdate(rect.bottom);
     chart.onChartZoomEnd();
   }
 
@@ -212,11 +212,9 @@ void main() {
       final from = Offset(_sliderRect(chart).center.dx, chart.mainRect.center.dy);
       expect(chart.onChartZoomStart(from), isTrue);
 
-      final data = GestureData.zoom(from);
       // 中途来回若干帧, 最后停回起点。
       for (final dy in [20.0, 45.0, -30.0, 10.0, 0.0]) {
-        data.update(from + Offset(0, dy));
-        chart.onChartZoomUpdate(data);
+        chart.onChartZoomUpdate(from.dy + dy);
       }
       await paintFrame(tester, chart);
 
@@ -238,7 +236,7 @@ void main() {
       final zoomedMin = _rangeMin(chart);
 
       // 横向平移改变可见蜡烛范围, 自动模式下会重算区间。
-      chart.onChartMove(GestureData.pan(Offset.zero)..update(const Offset(-120, 0)));
+      chart.onChartMove(const Offset(-120, 0));
       await paintFrame(tester, chart);
 
       expect(_rangeMax(chart), closeTo(zoomedMax, 1e-9));
@@ -257,7 +255,7 @@ void main() {
       final factor = chart.mainChartRect.height / spanBefore;
 
       const dy = 24.0;
-      chart.onChartMove(GestureData.pan(Offset.zero)..update(const Offset(0, dy)));
+      chart.onChartMove(const Offset(0, dy));
       await paintFrame(tester, chart);
 
       expect(_rangeSpan(chart), closeTo(spanBefore, 1e-6), reason: '平移不改变跨度');
@@ -273,7 +271,7 @@ void main() {
       final chart = scene.controller;
       await paintFrame(tester, chart);
 
-      chart.onChartMove(GestureData.pan(Offset.zero)..update(const Offset(0, 24)));
+      chart.onChartMove(const Offset(0, 24));
       await paintFrame(tester, chart);
 
       expect(_rangeMax(chart), closeTo(_autoMax, 1e-9));
@@ -337,7 +335,7 @@ void main() {
       expect(chart.isChartZooming, isFalse);
 
       // 没有快照, update 必须是 no-op。
-      chart.onChartZoomUpdate(GestureData.zoom(Offset.zero)..update(const Offset(0, _dragDy)));
+      chart.onChartZoomUpdate(_dragDy);
       await paintFrame(tester, chart);
 
       expect(_rangeSpan(chart), closeTo(_autoSpan, 1e-9));
@@ -384,7 +382,7 @@ void main() {
       final dx = _sliderRect(chart).center.dx;
       final from = Offset(dx, fromDy);
       expect(chart.onChartZoomStart(from), isTrue);
-      chart.onChartZoomUpdate(GestureData.zoom(from)..update(Offset(dx, toDy)));
+      chart.onChartZoomUpdate(toDy);
       await paintFrame(tester, chart);
 
       return _rangeSpan(chart) / baseSpan;
@@ -517,8 +515,7 @@ void main() {
   group('v2.4.1/zoom/主区裁剪范围', () {
     /// 带平滑因子横向平移一步：只给 dx，避免顺带平移价格区间。
     void panWithSmoothing(FlexiKlineController chart) {
-      final from = chart.mainChartRect.center;
-      chart.onChartMove(GestureData.pan(from)..update(from - const Offset(12, 0)), 0.15);
+      chart.onChartMove(const Offset(-12, 0), smoothFactor: 0.15);
     }
 
     /// 驱动一帧绘制并捕获主区的裁剪矩形。

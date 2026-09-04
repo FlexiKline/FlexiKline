@@ -99,7 +99,7 @@ void main() {
       registerTestDrawObject(scene.controller);
       scene.controller.setDrawVisible(true);
       scene.controller.startDraw(testDrawLineType, isInitPointer: false);
-      scene.controller.onDrawConfirm(GestureData.tap(_lineFrom));
+      scene.controller.onDrawConfirm(_lineFrom);
       expect(scene.controller.drawState.isDrawing, isTrue);
 
       expect(
@@ -397,7 +397,7 @@ void main() {
   group('与触摸端的差异', () {
     testWidgets('非触摸端没有 cross 归属: isCrossing 不影响归属判定', (tester) async {
       final (:scene, :indicator) = await _arrange();
-      expect(scene.controller.onCrossStart(GestureData.tap(_onLine)), isTrue);
+      expect(scene.controller.onCrossToggle(_onLine), isTrue);
       expect(scene.controller.isCrossing, isTrue);
 
       // 触摸端会返回 cross，非触摸端 cross 不参与拖动竞争，仍返回 paintObject。

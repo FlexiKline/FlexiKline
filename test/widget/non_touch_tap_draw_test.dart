@@ -92,13 +92,13 @@ void main() {
 
       // 启动绘制，确认第一个点 → Drawing 态。
       controller.startDraw(testDrawLineType, isInitPointer: false);
-      controller.onDrawConfirm(GestureData.tap(point1));
+      controller.onDrawConfirm(point1);
       await tester.pump();
       expect(controller.drawState.isDrawing, isTrue);
 
       // 更新绘制位置（模拟 hover 跟手）后点击确认第二个点。
       final point2 = Offset(mainRect.left + 120, mainRect.center.dy - 20);
-      controller.onDrawUpdate(GestureData.pan(point2));
+      controller.onDrawUpdate(point2);
       await tester.pump();
 
       // 点击 → onTapUp Drawing 分支 → onDrawConfirm。

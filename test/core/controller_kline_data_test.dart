@@ -233,7 +233,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // 进入 crossing 状态。
-      scene.controller.onCrossStart(GestureData.tap(const Offset(10, 10)));
+      scene.controller.onCrossToggle(const Offset(10, 10));
       expect(scene.controller.isCrossing, isTrue);
 
       final repaintChart = scene.controller.repaintChart as ValueNotifier<int>;

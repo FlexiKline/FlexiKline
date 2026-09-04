@@ -253,9 +253,9 @@ void main() {
       // Enter draw and zoom simultaneously.
       final mainRect = controller.mainRect;
       controller.startDraw(testDrawLineType, isInitPointer: false);
-      controller.onDrawConfirm(GestureData.tap(
+      controller.onDrawConfirm(
         Offset(mainRect.left + 20, mainRect.center.dy),
-      ));
+      );
       await tester.pump();
       expect(controller.drawState.isDrawing, isTrue);
 
@@ -356,7 +356,7 @@ void main() {
 
       // Manually ensure crossing is active for the test.
       if (!controller.isCrossing) {
-        controller.onCrossStart(GestureData.hover(from), force: true);
+        controller.onCrossFollow(from);
         await tester.pump();
       }
       expect(controller.isCrossing, isTrue, reason: 'precondition: cross active');

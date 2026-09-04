@@ -195,7 +195,7 @@ void main() {
       // 「上一次点击留下的手势数据」与「cross 的权威状态」不再相等,
       // 两种锚点来源才可区分。dy 从不按蜡烛量化, 是唯一可靠的观测量。
       final relocated = Offset(_blankPosition.dx, _blankPosition.dy - 120);
-      chart.onCrossStart(GestureData.tap(relocated), force: true);
+      chart.onCrossFollow(relocated);
       await tester.pump(_frame);
       final anchorDy = chart.crossOffset!.dy;
       expect(anchorDy, within(distance: 0.01, from: relocated.dy));
@@ -267,7 +267,7 @@ void _longPressCollisionTests() {
     // 画在右侧: 越靠右越确定落在已加载蜡烛的时间范围内, 否则 point.offset 会变 infinite。
     const drawFrom = Offset(320, 150);
     chart.startDraw(testDrawLineType, isInitPointer: false);
-    chart.onDrawConfirm(GestureData.tap(drawFrom));
+    chart.onDrawConfirm(drawFrom);
     await tester.pump(_frame);
     expect(chart.drawState.isDrawing, isTrue);
     final beforeDy = chart.drawState.pointerOffset!.dy;

@@ -125,32 +125,56 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
     // }
   }
 
-  /// 启动Cross事件
-  bool onCrossStart(GestureData data, {bool force = false}) {
-    if (crossConfig.enable && klineData.canPaintChart) {
-      /// 如果其他手势与Cross手势事件允许共存 或者当前不在Crossing中时, 开启Cross.
-      if (force || !isCrossing) {
-        logd('handleTap cross > $force > ${data.offset}');
-        onPaintObjectDragCancel();
-        // 更新并校正起始焦点.
-        _updateOffset(data.offset);
-        _markRepaintCross();
-        // 当Cross事件启动后, 调用markRepaintChart清理Chart图层的tips信息.
-        markRepaintChart();
-        return true;
-      }
-
+  /// 点击语义: 未开则开、已开则关。返回开启后是否处于 crossing。
+  ///
+  /// 服务「点一下进入十字线、再点一下退出」这一族输入(手指 tap、鼠标左键)。跟随类输入
+  /// (hover)绝不能走这里 —— 指针每移动一步都会把十字线关掉, 那是 [onCrossFollow]。
+  /// 两者在已开状态下做相反的事, 所以是两个方法而不是一个布尔参数。
+  bool onCrossToggle(Offset position) {
+    if (!crossConfig.enable || !klineData.canPaintChart) return false;
+    if (isCrossing) {
       requestCancelCross();
       onCrossCustomTooltip?.call(null);
       return false;
     }
-    return false;
+    logd('onCrossToggle > $position');
+    _openCross(position);
+    return true;
   }
 
-  /// 更新Cross事件数据.
-  void onCrossUpdate(GestureData data) {
+  /// 跟随语义: 未开则开, 已开则只移动十字线。
+  ///
+  /// 服务持续跟随的输入(鼠标 hover、手写笔悬停)。已开时刻意走轻量路径:
+  /// [onPaintObjectDragCancel] 与 [markRepaintChart](全图重绘)只在「从无到有地开启」时
+  /// 才有意义, 指针每移动一步都做一遍太贵。
+  void onCrossFollow(Offset position) {
+    if (!crossConfig.enable || !klineData.canPaintChart) return;
+    if (isCrossing) {
+      _updateOffset(position);
+      _markRepaintCross();
+      return;
+    }
+    logd('onCrossFollow open > $position');
+    _openCross(position);
+  }
+
+  /// 从无到有地开启 cross: 取消可能正在进行的对象拖动, 并清理 Chart 图层的 tips。
+  void _openCross(Offset position) {
+    onPaintObjectDragCancel();
+    // 更新并校正起始焦点.
+    _updateOffset(position);
+    _markRepaintCross();
+    // 当Cross事件启动后, 调用markRepaintChart清理Chart图层的tips信息.
+    markRepaintChart();
+  }
+
+  /// 已开则移动十字线, 未开不做事。
+  ///
+  /// 服务「十字线跟着别的手势走」的场景: 图表平移中的跟随、signal 平移后的重吸附、
+  /// 落点归属为 cross 的拖动。它不负责开启, 所以未开时是空操作。
+  void onCrossUpdate(Offset position) {
     if (crossConfig.enable && isCrossing) {
-      _updateOffset(data.offset);
+      _updateOffset(position);
       _markRepaintCross();
     }
   }

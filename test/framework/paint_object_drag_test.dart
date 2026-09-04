@@ -88,8 +88,7 @@ void main() {
       await arrange();
       startDrag();
 
-      final data = GestureData.pan(const Offset(10, 10))..update(const Offset(10, 40));
-      ctrl.onPaintObjectDragUpdate(data);
+      ctrl.onPaintObjectDragUpdate(const Offset(10, 40), const Offset(0, 30));
 
       expect(object.lastDragPosition, const Offset(10, 40));
       expect(object.lastDragDelta, const Offset(0, 30));
@@ -118,7 +117,7 @@ void main() {
     testWidgets('未在拖动时 update / end / cancel 均为空操作', (tester) async {
       await arrange();
 
-      ctrl.onPaintObjectDragUpdate(GestureData.pan(const Offset(10, 10)));
+      ctrl.onPaintObjectDragUpdate(const Offset(10, 10), Offset.zero);
       ctrl.onPaintObjectDragEnd();
       ctrl.onPaintObjectDragCancel();
 
@@ -137,7 +136,7 @@ void main() {
       await arrange();
       startDrag();
 
-      ctrl.onCrossStart(GestureData.tap(const Offset(200, 200)));
+      ctrl.onCrossToggle(const Offset(200, 200));
 
       expect(object.calls.last, 'dragCancel');
       expect(ctrl.isPaintObjectDragging, isFalse);

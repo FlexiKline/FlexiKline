@@ -19,12 +19,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import '../constant.dart';
 import '../extension/functions_ext.dart';
 import '../extension/geometry_ext.dart';
 import '../framework/chart/indicator.dart';
 import '../framework/draw/overlay.dart';
-import '../model/gesture_data.dart';
 import '../utils/algorithm_util.dart';
 import 'gesture_detector_widget.dart';
 import 'non_touch_gesture_owner.dart';
@@ -56,12 +54,12 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
   /// 混用是旧实现双重消费的来源之一。
   _TrackpadSession? _trackpad;
 
-  /// Cross平移监听数据
-  GestureData? _hoverData;
+  /// 指针最新位置，非空即代表指针在图表内（hover 跟随中）。
+  Offset? _hoverPosition;
 
   /// 一次拖动 session: 归属在 onPanStart 判定一次, 全程不变。
   /// 取代原 _panData + _isObjectDragging: 「谁在拖」由 owner 表达。
-  ({NonTouchGestureOwner owner, GestureData data})? _drag;
+  _DragSession? _drag;
 
   final ValueNotifier<MouseCursor> _mouseCursor = ValueNotifier(SystemMouseCursors.precise);
 
@@ -193,9 +191,8 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
     final intent = owner.signalIntent(controller, horizontal: horizontal);
     if (intent == null) return; // 不注册 = 放行外层 Scrollable
 
-    // [amount] 的量纲随意图变: 缩放是比值, 平移是像素。[GestureData.scale] 在两条链上也是
-    // 一个字段两种读法。`scroll!` 安全: `panX` 蕴含 `horizontal`, 缩放只在 `pinch == null`
-    // 时才求值 dy, 两者都蕴含 scroll 非空。
+    // [amount] 的口径随意图变: 缩放是比值, 平移是像素。`scroll!` 安全: `panX` 蕴含
+    // `horizontal`, 缩放只在 `pinch == null` 时才求值 dy, 两者都蕴含 scroll 非空。
     final double amount;
     switch (intent) {
       case SignalIntent.panX:
@@ -225,9 +222,9 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
           // 指针没动、底下的蜡烛换了, 同一个屏幕位置得按新的 startCandleDx 重新吸附, 否则读数
           // 停在旧蜡烛上。放在手势层是因为 [ChartBinding.onChartPanStep] 拿不到指针位置, 与
           // [onPanUpdate] 的 chart 分支同一分工。
-          if (panned && _hoverData != null && controller.isCrossing) {
-            _hoverData!.update(position);
-            controller.onCrossUpdate(_hoverData!);
+          if (panned) {
+            _hoverPosition = position;
+            controller.onCrossUpdate(position);
           }
       }
     });
@@ -237,17 +234,14 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
   void _applyScaleStep(Offset position, double factor) {
     var session = _scaleSession;
     if (session == null) {
-      session = _ScaleSession(GestureData.signal(
-        position,
-        position: _resolveScalePosition(position),
-      ));
+      session = _ScaleSession(resolveScalePosition(position.dx));
       _scaleSession = session;
     }
     // 每个事件重置倒计时: 快速连续滚动不会在中途被提前清理(旧实现的缺陷)。
     session.resetIdleTimer(gestureConfig.scaleSessionTimeout, _endScaleSession);
 
-    session.data.update(position, newScale: factor);
-    controller.onChartScale(session.data);
+    // 单次比值口径: 每个 signal 事件自成一次完整缩放, 直接乘。
+    controller.onChartScaleTo(factor, position: session.position, focalDx: position.dx);
   }
 
   void _endScaleSession() {
@@ -259,35 +253,22 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
     controller.checkAndLoadMoreCandlesWhenPanEnd();
   }
 
-  /// 解析缩放的锚定位置：[ScalePosition.auto] 按 [offset] 所在的三分之一区域就近锚定。
-  ///
-  /// 不缓存：非触摸端每次滚轮或触控板手势都是独立的一段，没有触摸端那种「一轮 pointer
-  /// session 内锚点不得改变」的约束。
-  ScalePosition _resolveScalePosition(Offset offset) {
-    final configured = gestureConfig.scalePosition;
-    if (configured != ScalePosition.auto) return configured;
-    final third = controller.canvasRect.width / 3;
-    if (offset.dx < third) return ScalePosition.left;
-    if (offset.dx > third + third) return ScalePosition.right;
-    return ScalePosition.middle;
-  }
-
   /// 鼠标Hover进入事件.
   void onEnter(PointerEnterEvent event) {
     if (controller.isStartDragGrid) return;
     final offset = event.localPosition;
     // if (!controller.canvasRect.include(offset)) return;
 
-    if (_hoverData != null && controller.isDrawVisible && drawState.isOngoing) {
+    if (_hoverPosition != null && controller.isDrawVisible && drawState.isOngoing) {
       logd('onEnter draw: $event');
       if (drawState.object?.pointer != null) {
         drawState.object!.onUpdateDrawPoint(drawState.object!.pointer!, offset);
       }
-      _hoverData!.update(offset);
+      _hoverPosition = offset;
     } else {
       logd('onEnter cross: $event');
-      _hoverData = GestureData.hover(offset);
-      controller.onCrossStart(_hoverData!, force: true);
+      _hoverPosition = offset;
+      controller.onCrossFollow(offset);
     }
   }
 
@@ -295,7 +276,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
   /// onMouseHover _TransformedPointerHoverEvent#1614b(position: Offset(86.5, 343.6))
   void onHover(PointerHoverEvent event) {
     final offset = event.localPosition;
-    _hoverData ??= GestureData.hover(offset);
+    _hoverPosition = offset;
 
     final owner = NonTouchGestureOwner.resolveAt(controller, offset);
     _mouseCursor.value = owner.hoverCursor;
@@ -305,8 +286,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
         final pointer = drawState.pointer;
         if (pointer != null && pointer.offset.isFinite) {
           if (controller.isCrossing) controller.requestCancelCross();
-          _hoverData!.update(offset);
-          controller.onDrawUpdate(_hoverData!);
+          controller.onDrawUpdate(offset);
         }
 
       case NonTouchGestureOwner.drawEditing:
@@ -321,12 +301,9 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
 
       case NonTouchGestureOwner.paintObject:
       case NonTouchGestureOwner.chart:
-        if (!controller.isCrossing) {
-          controller.onCrossStart(_hoverData!, force: true);
-        } else {
-          _hoverData!.update(offset);
-          controller.onCrossUpdate(_hoverData!);
-        }
+        // 跟随语义: 未开则开、已开则只移动十字线。开启与更新的分工连同「已开时走轻量路径」
+        // 的理由都收在 [CrossBinding.onCrossFollow] 内部, 手势层不重复判 isCrossing。
+        controller.onCrossFollow(offset);
     }
   }
 
@@ -335,13 +312,12 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
     controller.requestCancelCross();
     logd('onExit $event');
 
-    if (_hoverData == null) return;
+    if (_hoverPosition == null) return;
     if (controller.isDrawVisible && drawState.isOngoing) {
       // 当处在绘制中状态时, 不清理hover指针数据.
       return;
     }
-    _hoverData?.end();
-    _hoverData = null;
+    _hoverPosition = null;
   }
 
   /// 点击
@@ -352,8 +328,8 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
           final offset = drawState.pointerOffset ?? details.localPosition;
           if (offset.isFinite) {
             logd('onTapUp draw(drawing) confirm pointer:$offset');
-            _hoverData = GestureData.tap(offset);
-            controller.onDrawConfirm(_hoverData!);
+            _hoverPosition = offset;
+            controller.onDrawConfirm(offset);
             if (controller.isCrossing) {
               controller.requestCancelCross();
             }
@@ -367,11 +343,10 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
             controller.onDrawSelect(object);
           } else {
             logd('onTapUp draw(editing) confirm offset:$offset');
-            _hoverData = GestureData.tap(offset);
-            controller.onDrawConfirm(_hoverData!);
-            if (!controller.isCrossing) {
-              controller.onCrossStart(_hoverData!);
-            }
+            _hoverPosition = offset;
+            controller.onDrawConfirm(offset);
+            // 指针仍在图表内, 确认后让十字线跟上来。
+            controller.onCrossFollow(offset);
           }
           return;
         case Exited():
@@ -427,21 +402,16 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
       case NonTouchGestureOwner.drawEditing:
         if (drawState.object?.lock == true) return;
         logd('onPanStart draw > details:$details');
-        final data = GestureData.pan(position);
-        final result = controller.onDrawMoveStart(data);
-        if (!result) {
-          data.end();
-          return;
-        }
+        if (!controller.onDrawMoveStart(position)) return;
         controller.requestCancelCross();
-        _drag = (owner: owner, data: data);
+        _drag = _DragSession(owner, position);
 
       case NonTouchGestureOwner.paintObject:
         // PaintObject 优先按落点认领拖动.
         logd('onPanStart paintObject drag local:$position');
         if (!controller.onPaintObjectDragStart(position)) return;
         stopPositionAnimation();
-        _drag = (owner: owner, data: GestureData.pan(position));
+        _drag = _DragSession(owner, position);
         _mouseCursor.value = owner.dragCursor(controller);
 
       case NonTouchGestureOwner.gridResize:
@@ -449,7 +419,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
         if (!controller.onGridResizeStart(position)) return;
         stopPositionAnimation();
         controller.requestCancelCross();
-        _drag = (owner: owner, data: GestureData.pan(position));
+        _drag = _DragSession(owner, position);
         _mouseCursor.value = owner.dragCursor(controller);
 
       case NonTouchGestureOwner.zoomSlider:
@@ -459,7 +429,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
       case NonTouchGestureOwner.chart:
         logd('onPanStart pan local:$position');
         stopPositionAnimation();
-        _drag = (owner: owner, data: GestureData.pan(position));
+        _drag = _DragSession(owner, position);
         // 缩放态下同一条平移路径会额外消费 dy, 但那由 [ChartBinding.onChartMove] 按
         // `isChartZooming` 判断, 与手势数据的类型无关; 这里只换光标提示可拖动的方向。
         _mouseCursor.value = owner.dragCursor(controller);
@@ -473,7 +443,6 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
     if (_trackpad?.pinching == true) {
       if (_drag != null && _drag!.owner == NonTouchGestureOwner.chart) {
         stopPositionAnimation();
-        _drag!.data.end();
         _drag = null;
         // 重置 smoothFactor 但不触发惯性——这不是正常结束, 是中途让出。
         controller.onPanEnd();
@@ -482,33 +451,37 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
       return;
     }
 
-    if (_drag == null) {
-      logd('onPanUpdate panData is empty! details:$details');
+    final drag = _drag;
+    if (drag == null) {
+      logd('onPanUpdate no drag session! details:$details');
       return;
     }
-    final (:owner, :data) = _drag!;
 
-    switch (owner) {
+    switch (drag.owner) {
       case NonTouchGestureOwner.paintObject:
         // 不做区域钳制: 是否限制在图表内由绘制对象自行决定.
-        data.update(details.localPosition);
-        controller.onPaintObjectDragUpdate(data);
+        final position = details.localPosition;
+        controller.onPaintObjectDragUpdate(position, position - drag.last);
+        drag.last = position;
 
       case NonTouchGestureOwner.drawEditing:
-        data.update(details.localPosition.clamp(controller.mainRect));
-        controller.onDrawMoveUpdate(data);
+        final position = details.localPosition.clamp(controller.mainRect);
+        controller.onDrawMoveUpdate(position, position - drag.last);
+        drag.last = position;
 
       case NonTouchGestureOwner.chart:
-        data.update(details.localPosition.clamp(controller.canvasRect));
+        final position = details.localPosition.clamp(controller.canvasRect);
         controller.onChartMove(
-          data,
-          gestureConfig.tolerance.effectivePanSmoothFactor,
+          position - drag.last,
+          smoothFactor: gestureConfig.tolerance.effectivePanSmoothFactor,
         );
-        controller.onCrossUpdate(data);
+        drag.last = position;
+        controller.onCrossUpdate(position);
 
       case NonTouchGestureOwner.gridResize:
-        data.update(details.localPosition);
-        controller.onGridResizeUpdate(data);
+        final position = details.localPosition;
+        controller.onGridResizeUpdate(position.dy - drag.last.dy);
+        drag.last = position;
 
       case NonTouchGestureOwner.drawDrawing:
       case NonTouchGestureOwner.zoomSlider:
@@ -519,17 +492,16 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
 
   /// 平移结束.
   void onPanEnd(DragEndDetails details) {
-    if (_drag == null) {
-      logd('onPanEnd panData is empty! details:$details');
+    final drag = _drag;
+    if (drag == null) {
+      logd('onPanEnd no drag session! details:$details');
       return;
     }
-    final (:owner, :data) = _drag!;
 
-    switch (owner) {
+    switch (drag.owner) {
       case NonTouchGestureOwner.paintObject:
         logd('onPanEnd paintObject drag end.');
         controller.onPaintObjectDragEnd();
-        data.end();
         _drag = null;
         _mouseCursor.value = SystemMouseCursors.precise;
         // 拖动的是绘制对象而非蜡烛图: 不做惯性平移, 也不检查 loadMore.
@@ -537,35 +509,16 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
 
       case NonTouchGestureOwner.drawEditing:
         controller.onDrawMoveEnd();
-        data.end();
         _drag = null;
         return;
 
       case NonTouchGestureOwner.chart:
-        if (data.isMove) {
-          data.end();
-          _drag = null;
-          controller.onPanEnd();
-          _mouseCursor.value = SystemMouseCursors.precise;
-          return;
-        }
-
         // <0: 从右向左滑动; >0: 从左向右滑动.
         final velocity = details.velocity.pixelsPerSecond.dx;
-        final tolerance = gestureConfig.tolerance;
-        final panDistance = velocity * tolerance.distanceFactor;
-        final panDuration = calcuInertialPanDuration(panDistance, maxDuration: tolerance.maxDuration);
-        final canInertialPan = gestureConfig.enableInertialPan &&
-            controller.klineData.isNotEmpty &&
-            !(velocity < 0 && !controller.canPanRTL) &&
-            !(velocity > 0 && !controller.canPanLTR) &&
-            // 平移距离为 0 或不足 1ms, 无需继续平移.
-            panDistance.abs() >= precisionError &&
-            panDuration > 1;
+        final inertial = resolveInertialPan(velocity, canceled: drag.canceled);
 
-        if (!canInertialPan) {
-          logd('onPanEnd no inertial movement, velocity:$velocity distance:$panDistance');
-          data.end();
+        if (inertial == null) {
+          logd('onPanEnd no inertial movement, velocity:$velocity canceled:${drag.canceled}');
           _drag = null;
           controller.onPanEnd();
           _mouseCursor.value = SystemMouseCursors.precise;
@@ -573,16 +526,17 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
           return;
         }
 
-        controller.checkAndLoadMoreCandlesWhenPanEnd(panDistance: panDistance, panDuration: panDuration);
-        logi('onPanEnd inertial movement, velocity:$velocity distance:$panDistance duration:$panDuration');
+        final (:distance, :duration) = inertial;
+        controller.checkAndLoadMoreCandlesWhenPanEnd(panDistance: distance, panDuration: duration);
+        logi('onPanEnd inertial movement, velocity:$velocity distance:$distance duration:$duration');
 
+        final from = drag.last.dx;
         animateToPosition(
-          data.offset.dx,
-          data.offset.dx + panDistance,
-          panDuration: Duration(milliseconds: panDuration),
-          tolerance: tolerance,
+          from,
+          from + distance,
+          panDuration: Duration(milliseconds: duration),
+          tolerance: gestureConfig.tolerance,
           onCompleted: () {
-            _drag?.data.end();
             _drag = null;
             controller.onPanEnd();
 
@@ -593,7 +547,6 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
       case NonTouchGestureOwner.gridResize:
         logd('onPanEnd gridResize end.');
         controller.onGridResizeEnd();
-        data.end();
         _drag = null;
         _mouseCursor.value = SystemMouseCursors.precise;
         return;
@@ -619,10 +572,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
     if (gestureConfig.enableScale) {
       stopPositionAnimation();
       logd('onPointerPanZoomStart $event > ${event.localPosition}');
-      _trackpad = _TrackpadSession(GestureData.scale(
-        offset,
-        position: _resolveScalePosition(offset),
-      ));
+      _trackpad = _TrackpadSession(resolveScalePosition(offset.dx));
     }
   }
 
@@ -638,7 +588,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
       return;
     }
 
-    if (!gestureConfig.enableScale || !session.data.isScale) return;
+    if (!gestureConfig.enableScale) return;
 
     // 累积偏离判定: PanZoomStart 时 scale 恒为 1.0, 真正的捏合会持续偏离。
     if (!session.pinching && (event.scale - 1.0).abs() > _kPinchThreshold) {
@@ -646,12 +596,17 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
     }
 
     if (session.pinching) {
-      final change = event.scale - session.lastRawScale;
-      if (change.abs() > 0.001) {
+      // 阈值判在 raw 口径, 增量传 decelerated 口径: 两个口径各有用途, 不能合并成一个字段。
+      if ((event.scale - session.lastRawScale).abs() > 0.001) {
         session.lastRawScale = event.scale;
         final newScale = scaledDecelerate(event.scale);
-        session.data.update(event.localPosition, newScale: newScale);
-        controller.onChartScale(session.data);
+        // 累积比例口径: 传帧间增量, 由 onChartScaleBy 加到蜡烛宽度上。
+        controller.onChartScaleBy(
+          newScale - session.lastScale,
+          position: session.position,
+          focalDx: event.localPosition.dx,
+        );
+        session.lastScale = newScale;
       }
     }
   }
@@ -684,13 +639,19 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
 
   void onPointerCancel(PointerCancelEvent event) {
     logd('onPointerCancel $event');
-    // 回滚正在进行的 PaintObject 拖动, 避免 [onPanEnd] 把中断当成提交.
-    if (_drag != null && _drag!.owner == NonTouchGestureOwner.paintObject) {
+    final drag = _drag;
+    if (drag == null) return;
+
+    if (drag.owner == NonTouchGestureOwner.paintObject) {
+      // 立刻回滚, 不能等 [onPanEnd]: 那里会把中断当成一次提交。
       controller.onPaintObjectDragCancel();
-      _drag!.data.end();
       _drag = null;
       _mouseCursor.value = SystemMouseCursors.precise;
+      return;
     }
+
+    // 其余归属留给各自的 [onPanEnd] 收尾, 这里只记下事实。
+    drag.canceled = true;
   }
 
   void onKeyEvent(KeyEvent event) {
@@ -721,15 +682,36 @@ const _kPinchThreshold = 0.05;
 /// 「平移 vs 缩放」, 两边都消费事件。暂用常量不开配置, 等真机反馈说 2:1 不合适再提升。
 const _kPanDominanceRatio = 2;
 
+/// 通道 D 的一次拖动 session：归属在 `onPanStart` 判定一次，全程不变。
+class _DragSession {
+  _DragSession(this.owner, this.last);
+
+  final NonTouchGestureOwner owner;
+
+  /// 上一帧位置：既是帧间增量的基准，也是惯性平移的起点。
+  ///
+  /// Controller API 只接受已算好的增量，差分基准因此归手势层持有。
+  Offset last;
+
+  /// 本轮是否出现过 [PointerCancelEvent]。
+  ///
+  /// `DragGestureRecognizer` 在指针被取消时同样派发 `onPanEnd`，且无法从 [DragEndDetails]
+  /// 区分，所以必须由外层 [Listener] 记下这个事实——它在命中路径中先于 `GestureBinding`
+  /// 收到同一个事件，写入一定早于 `onPanEnd`。当前只有 chart 平移消费它（不做惯性平移）。
+  bool canceled = false;
+}
+
 /// 通道 S 的 X 轴 scale session。
 ///
-/// [data] 的 [GestureData.initPosition] 必须一轮内稳定（锚定三分区），
-/// 且 [onChartScaleEnd] 要做 `_setCandleWidth(sync: true)` 与 loadMore 检查。
-/// 所以 session 不能取消——改的只是用**可重置 [Timer]** 替代 `Future.delayed`。
+/// [position] 必须一轮内稳定（锚定三分区），且 [onChartScaleEnd] 要做
+/// `_setCandleWidth(sync: true)` 与 loadMore 检查。所以 session 不能取消——改的只是用
+/// **可重置 [Timer]** 替代 `Future.delayed`。
+///
+/// 不存缩放基准：signal 是单次比值口径，每个事件自成一次完整缩放。
 class _ScaleSession {
-  _ScaleSession(this.data);
+  _ScaleSession(this.position);
 
-  final GestureData data;
+  final ScalePosition position;
   Timer? _idleTimer;
 
   void resetIdleTimer(Duration timeout, VoidCallback onTimeout) {
@@ -740,7 +722,6 @@ class _ScaleSession {
   void dispose() {
     _idleTimer?.cancel();
     _idleTimer = null;
-    data.end();
   }
 }
 
@@ -751,14 +732,19 @@ class _ScaleSession {
 /// 直接返回, 避免捏合时图表同时平移。session 结束时 [_trackpad] 被置 null,
 /// [pinching] 随之失效。
 class _TrackpadSession {
-  _TrackpadSession(this.data);
+  _TrackpadSession(this.position);
 
-  final GestureData data;
+  final ScalePosition position;
 
   /// 一旦检测到捏合即置 true, 本轮不再放行通道 D 的 pan。
   bool pinching = false;
 
-  /// 上一次的原始 `event.scale`, 用于计算变化量。
+  /// 上一次的原始 `event.scale`，用于帧间变化量的阈值判定（raw 口径）。
   /// 初始 1.0: PanZoomStart 时 scale 恒为 1。
   double lastRawScale = 1.0;
+
+  /// 上一次减速后的比例，`onChartScaleBy` 的增量基准（decelerated 口径）。
+  ///
+  /// 与 [lastRawScale] 是两个口径、两个用途：前者判「动没动」，后者算「动了多少」。
+  double lastScale = 1.0;
 }

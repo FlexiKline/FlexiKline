@@ -96,7 +96,7 @@ void main() {
     testWidgets('PaintObject 消费点击后关闭 crossing', (tester) async {
       final object = _interactive('main');
       await arrange([object]);
-      expect(ctrl.onCrossStart(GestureData.tap(const Offset(200, 200))), isTrue);
+      expect(ctrl.onCrossToggle(const Offset(200, 200)), isTrue);
       expect(ctrl.isCrossing, isTrue);
 
       expect(ctrl.onTap(const Offset(10, 10)), isTrue);
@@ -111,8 +111,7 @@ void main() {
       await arrange([lower, upper]);
 
       expect(ctrl.onPaintObjectDragStart(const Offset(10, 10)), isTrue);
-      final data = GestureData.pan(const Offset(10, 10))..update(const Offset(10, 20));
-      ctrl.onPaintObjectDragUpdate(data);
+      ctrl.onPaintObjectDragUpdate(const Offset(10, 20), const Offset(0, 10));
       ctrl.onPaintObjectDragEnd();
 
       expect(upper.object!.calls, ['dragStart', 'dragUpdate', 'dragEnd']);

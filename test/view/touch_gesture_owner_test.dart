@@ -114,7 +114,7 @@ void main() {
 
   testWidgets('zoom slider 让位于 cross', (tester) async {
     final (:scene, :indicator) = await arrangeZoomOn(tester);
-    expect(scene.controller.onCrossStart(GestureData.tap(_onLine)), isTrue);
+    expect(scene.controller.onCrossToggle(_onLine), isTrue);
 
     // 真机反馈的那类困惑: 已进入十字线, 落在价格轴上却被当成调主区留白。
     expect(
@@ -222,7 +222,7 @@ void main() {
     registerTestDrawObject(scene.controller);
     scene.controller.setDrawVisible(true);
     scene.controller.startDraw(testDrawLineType, isInitPointer: false);
-    scene.controller.onDrawConfirm(GestureData.tap(_lineFrom));
+    scene.controller.onDrawConfirm(_lineFrom);
     expect(scene.controller.drawState.isDrawing, isTrue);
 
     expect(
@@ -234,7 +234,7 @@ void main() {
 
   testWidgets('cross 先于 PaintObject', (tester) async {
     final (:scene, :indicator) = await arrange();
-    expect(scene.controller.onCrossStart(GestureData.tap(_onLine)), isTrue);
+    expect(scene.controller.onCrossToggle(_onLine), isTrue);
 
     expect(
       TouchGestureOwner.resolveLanded(scene.controller, _onLine),
