@@ -89,5 +89,11 @@ abstract class BaseData with FlexiLog {
     return isNotEmpty && start < end && start >= 0 && end <= length;
   }
 
+  /// 当前绘制区间 `[start, end)` 是否可用。
+  ///
+  /// 为真时保证 `0 <= start < end <= length`, 即 [start] 与 `end - 1` 均为合法下标。
+  /// 绘制期各入口以此担保下游, 见 [IPaintState.computeVisibleMinMax]。
+  bool get canPaintChart => checkStartAndEnd(start, end);
+
   void updateState({KlineLoadingState state = KlineLoadingState.none});
 }

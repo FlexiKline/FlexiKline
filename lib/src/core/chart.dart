@@ -137,12 +137,15 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
 
   void paintChart(Canvas canvas, Size size) {
     // logd('$diffTime paintChart >>>>');
-    if (!isMounted || !klineData.canPaintChart) {
+    if (!isMounted) return;
+
+    // 先算区间再校验: 校验放在前面只能验到上一帧的旧值。
+    calculatePaintChartRange();
+    if (!klineData.canPaintChart) {
       logd('chartBinding paintChart data is being prepared!');
       return;
     }
 
-    calculatePaintChartRange();
     int paneIndex = mainPaneIndex;
 
     /// overlay 是否允许绘制在主图 rect 之外

@@ -49,6 +49,10 @@ abstract interface class IPaintState {
   ///
   /// 此方法在绘制前调用，用于计算当前绘制范围的数据范围。
   /// 返回 null 表示使用当前 minMax。
+  ///
+  /// 入口保证 `0 <= start < end <= klineData.length`(见 [BaseData.canPaintChart]),
+  /// 实现无需再校验区间或数据是否为空; 但派生下标(如 `end - period`)可能为负, 在遍历
+  /// 之外索引蜡烛时须自行确认。
   MinMax? computeVisibleMinMax(int start, int end);
 }
 

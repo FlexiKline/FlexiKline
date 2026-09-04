@@ -131,7 +131,8 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
   /// (hover)绝不能走这里 —— 指针每移动一步都会把十字线关掉, 那是 [onCrossFollow]。
   /// 两者在已开状态下做相反的事, 所以是两个方法而不是一个布尔参数。
   bool onCrossToggle(Offset position) {
-    if (!crossConfig.enable || !klineData.canPaintChart) return false;
+    // 输入入口的前提是有数据可指, 而非绘制区间已算好, 故不用 canPaintChart。
+    if (!crossConfig.enable || klineData.isEmpty) return false;
     if (isCrossing) {
       requestCancelCross();
       onCrossCustomTooltip?.call(null);
@@ -148,7 +149,7 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
   /// [onPaintObjectDragCancel] 与 [markRepaintChart](全图重绘)只在「从无到有地开启」时
   /// 才有意义, 指针每移动一步都做一遍太贵。
   void onCrossFollow(Offset position) {
-    if (!crossConfig.enable || !klineData.canPaintChart) return;
+    if (!crossConfig.enable || klineData.isEmpty) return;
     if (isCrossing) {
       _updateOffset(position);
       _markRepaintCross();

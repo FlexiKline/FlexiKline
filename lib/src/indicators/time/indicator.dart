@@ -75,7 +75,6 @@ class TimePaintObject<T extends TimeIndicator> extends TimeBasePaintObject<T> {
 
   void paintTimeChart(Canvas canvas, Size size) {
     final data = klineData;
-    if (data.list.isEmpty) return;
     final start = data.start;
     final end = data.end;
 

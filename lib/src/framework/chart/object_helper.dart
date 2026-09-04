@@ -442,9 +442,10 @@ mixin PaintCandleChartMixin<T extends Indicator> on PaintObject<T> {
     int? end,
     double? startOffset, // 起始偏移量.
   }) {
-    if (!klineData.canPaintChart) return;
     start ??= klineData.start;
-    end ??= (klineData.end + 1).clamp(start, klineData.length); // 多绘制一根蜡烛;
+    end ??= math.min(klineData.end + 1, klineData.length); // 多绘制一根蜡烛;
+    // start/end 可由调用方传入, 不受绘制入口担保, 故校验实际生效的区间。
+    if (!klineData.checkStartAndEnd(start, end)) return;
     startOffset ??= startCandleDx - candleWidthHalf;
     final barWidthHalf = candleWidthHalf;
     for (var i = start; i < end; i++) {
@@ -545,9 +546,10 @@ mixin PaintCandleChartMixin<T extends Indicator> on PaintObject<T> {
     required Paint linePaint, // 蜡烛线图画笔.
     LinearGradient? gradient, // 线图渐变.
   }) {
-    if (!klineData.canPaintChart) return;
     start ??= klineData.start;
-    end ??= (klineData.end + 1).clamp(start, klineData.length); // 多绘制一根蜡烛;
+    end ??= math.min(klineData.end + 1, klineData.length); // 多绘制一根蜡烛;
+    // start/end 可由调用方传入, 不受绘制入口担保, 故校验实际生效的区间。
+    if (!klineData.checkStartAndEnd(start, end)) return;
     startOffset ??= startCandleDx - candleWidthHalf;
 
     final points = <Offset>[];
@@ -606,9 +608,10 @@ mixin PaintCandleChartMixin<T extends Indicator> on PaintObject<T> {
     LinearGradient? longGradient, // 上涨渐变.
     LinearGradient? shortGradient, // 下跌渐变.
   }) {
-    if (!klineData.canPaintChart) return;
     start ??= klineData.start;
-    end ??= (klineData.end + 1).clamp(start, klineData.length); // 多绘制一根蜡烛;
+    end ??= math.min(klineData.end + 1, klineData.length); // 多绘制一根蜡烛;
+    // start/end 可由调用方传入, 不受绘制入口担保, 故校验实际生效的区间。
+    if (!klineData.checkStartAndEnd(start, end)) return;
     startOffset ??= startCandleDx - candleWidthHalf;
 
     final latestDy = valueToDy(klineData.latest!.close, correct: false);

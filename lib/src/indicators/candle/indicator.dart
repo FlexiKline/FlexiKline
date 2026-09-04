@@ -258,8 +258,6 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
 
   @override
   MinMax? computeVisibleMinMax(int start, int end) {
-    if (!klineData.canPaintChart) return null;
-
     final minmax = klineData.calculateMinmax(start, end);
     _maxHigh = minmax?.max;
     _minLow = minmax?.min;
@@ -342,11 +340,6 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
 
   /// 绘制蜡烛柱状图
   void paintCandleBars(Canvas canvas, Size size, ChartBarStyle style) {
-    if (!klineData.canPaintChart) {
-      logw('paintCandleBars Data.list is empty or Index is out of bounds');
-      return;
-    }
-
     final start = klineData.start;
     final end = klineData.end;
 

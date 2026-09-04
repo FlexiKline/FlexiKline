@@ -15,10 +15,6 @@
 part of 'kline_data.dart';
 
 mixin PaintDrawData on BaseData {
-  bool get canPaintChart {
-    return isNotEmpty && list.checkIndex(start); // && list.checkIndex(end);
-  }
-
   void ensureStartAndEndIndex(
     int startIndex,
     int maxCandleCount,
