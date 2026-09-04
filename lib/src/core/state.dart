@@ -148,8 +148,8 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
 
   @override
   void constrainPaintDxOffset() {
-    // 经 setter 走一遍 clampPaintDxOffset，把越界的旧偏移收回合法区间。
-    paintDxOffset = _paintDxOffset;
+    // 用当前区间重新约束当前偏移，把越界的旧值收回合法区间。
+    _setPaintDxOffset(_paintDxOffset);
   }
 
   @override
@@ -177,7 +177,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     _notifySpecChange();
     _notifyLoadingState();
     if (resetPaintDxOffset && isMounted) {
-      paintDxOffset = getInitPaintDxOffset();
+      _setPaintDxOffset(getInitPaintDxOffset());
     }
     markRepaintChart(reset: true);
     markRepaintDraw();
@@ -283,9 +283,15 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   ///     绘制起始蜡烛的向右边界外的偏移 = paintDxOffset % candleActualWidth;
   @override
   double get paintDxOffset => _paintDxOffset;
-  set paintDxOffset(double val) {
-    _paintDxOffset = clampPaintDxOffset(val);
-    _isFirstCandleMovedOffScreenNotifier.value = _paintDxOffset > 0;
+
+  /// 绘制偏移的唯一写入点: 夹取到合法区间, 并同步「首根蜡烛已移出屏幕」通知。
+  /// 返回偏移是否真的变化: 贴在边界上继续同向平移即为 false, 调用方据此跳过重绘。
+  bool _setPaintDxOffset(double value) {
+    final newOffset = clampPaintDxOffset(value);
+    if (newOffset == _paintDxOffset) return false;
+    _paintDxOffset = newOffset;
+    _isFirstCandleMovedOffScreenNotifier.value = newOffset > 0;
+    return true;
   }
 
   /// PaintDxOffset的最小值
@@ -329,7 +335,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     }
 
     if ((begin - end).abs() >= precisionError) {
-      paintDxOffset = end;
+      _setPaintDxOffset(end);
       markRepaintChart(reset: true);
       markRepaintDraw();
     }

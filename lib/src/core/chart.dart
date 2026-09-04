@@ -274,12 +274,7 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
 
     _panSmoothFactor = smoothFactor;
 
-    bool changed = false;
-    final newDxOffset = clampPaintDxOffset(paintDxOffset + delta.dx);
-    if (newDxOffset != paintDxOffset) {
-      paintDxOffset = newDxOffset;
-      changed = true;
-    }
+    bool changed = _setPaintDxOffset(paintDxOffset + delta.dx);
 
     // 消费 dy 的条件是「Y 轴已由用户接管」这个模型状态, 而不是手势类型或输入设备: 自动模式
     // 下纵向位移对图表没有意义, 缩放态下它平移价格区间。守卫放在这里而非手势层, 于是同一条
@@ -339,10 +334,8 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
   bool onChartPanStep(double dxDelta) {
     if (!dxDelta.isFinite || dxDelta == 0) return false;
 
-    final newDxOffset = clampPaintDxOffset(paintDxOffset + dxDelta);
-    final changed = newDxOffset != paintDxOffset;
+    final changed = _setPaintDxOffset(paintDxOffset + dxDelta);
     if (changed) {
-      paintDxOffset = newDxOffset;
       markRepaintChart();
       markRepaintDraw();
     }
@@ -433,10 +426,8 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
         break;
     }
 
-    if (newDxOffset != paintDxOffset) {
-      // logd('_applyCandleWidth paintDxOffset:$paintDxOffset > $newDxOffset');
-      paintDxOffset = newDxOffset;
-    }
+    // logd('_applyCandleWidth paintDxOffset:$paintDxOffset > $newDxOffset');
+    _setPaintDxOffset(newDxOffset);
 
     markRepaintChart();
     markRepaintDraw();
