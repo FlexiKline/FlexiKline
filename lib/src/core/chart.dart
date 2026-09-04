@@ -398,7 +398,7 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
   /// 否则会留下「按钮已消失、Y 轴仍锁着」的失同步状态。
   void exitChartZoom() {
     _isChartStartZoom.value = false;
-    _zoomStepBaseSpan = 0;
+    _zoomFactor = 1.0;
     _endChartZoomSession();
     // 没有缩放区间可清就没有画面变化, 直接返回省掉一次空重绘。
     if (!mainPaintObject.hasZoomMinMax) return;
@@ -407,20 +407,17 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
     markRepaintDraw();
   }
 
-  /// 本轮 zoom 手势的锚点: 按下时的区间快照与手指距主图区底部的距离。
+  /// 触摸端本轮 zoom 手势的锚点: 按下时的区间快照、手指距主图区底部的距离、按下时的累计倍率。
   ///
-  /// 两者同生同灭, 打包成一个 record 而非两个可空字段: 非空即代表「本轮可以缩放」,
-  /// 使用处不必各判一次空。
-  ///
-  /// 每帧基于快照重算而不逐帧累乘: 累乘会随节流丢帧漂移, 且无法表达「拖回起点即还原」。
-  ({MinMax minMax, double distanceFromBottom})? _chartZoomAnchor;
+  /// 三者同生同灭, 打包成 record: 非空即代表「本轮可以缩放」。
+  /// 每帧基于快照重算而不逐帧累乘 —— 累乘会随节流丢帧漂移, 也表达不了「拖回起点即还原」。
+  ({MinMax minMax, double distanceFromBottom, double factor})? _chartZoomAnchor;
 
-  /// [onChartZoomStep] 首次进入 zoom 时记录的原始价格区间跨度。
+  /// 可见价格跨度相对「用户接管 Y 轴那一刻的自动跨度」的倍率, [exitChartZoom] 归 1。
   ///
-  /// 增量口径的 [onChartZoomStep] 每次读到的 `mainPaintObject.minMax` 都是上一帧的
-  /// 缩放结果, 不能拿它做下限基准(会随缩放一起缩小, 守卫失效)。这个字段在首次调用时
-  /// 记录自动区间的跨度, 后续以它为固定基准; [exitChartZoom] 清零。
-  double _zoomStepBaseSpan = 0;
+  /// 界只读这个账本, 不读实时区间: 后者无论在哪个时刻读都可能已被缩过(触摸先缩、滚轮后缩
+  /// 就会), 那正是基准污染的来源。缩放态下平移不改跨度, 所以倍率与跨度互为常数倍。
+  double _zoomFactor = 1.0;
 
   /// 本轮已应用的缩放系数, 用于跳过重复的同系数更新。
   ///
@@ -431,6 +428,41 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
   void _endChartZoomSession() {
     _chartZoomAnchor = null;
     _chartZoomAppliedCoeff = null;
+  }
+
+  double _clampZoomFactor(double factor) {
+    return factor.clamp(minZoomSpanRatio, maxZoomSpanRatio);
+  }
+
+  /// 缩放区间的唯一写入点, 触摸与非触摸共用: 把目标倍率夹进界内, 换算成相对 [from] 的系数
+  /// 写入。返回是否写入。
+  ///
+  /// [from] 与 [fromFactor] 必须同源 —— 非触摸传当前区间与当前倍率(增量口径), 触摸传本轮
+  /// 快照与快照倍率(快照口径)。两种口径的差异全在这两个入参上, 界因此对两端一致。
+  ///
+  /// 越界**钳制**而非拒绝: 拒绝会让区间不变, 于是同一个事件反复被拒形成不动点, 连反向输入
+  /// 也被封死。与 [onChartScale] 夹取蜡烛宽度同源。
+  bool _applyZoomFactor(
+    double target, {
+    required MinMax from,
+    required double fromFactor,
+  }) {
+    if (!target.isFinite || target <= 0) return false;
+    if (from.isZero || from.isSame) return false;
+
+    final clamped = _clampZoomFactor(target);
+    final next = from.clone();
+    next.scaleAroundCenter(clamped / fromFactor);
+
+    // 有界倍率已经保证候选有限, 这里只是让唯一写入点的契约不依赖界配得是否合理:
+    // 非有限区间会让 dyFactor 变 NaN, 连纵向平移一起死, 且无法从手势恢复。
+    if (!next.max.toDouble().isFinite || !next.min.toDouble().isFinite) return false;
+
+    _zoomFactor = clamped;
+    mainPaintObject.setZoomMinMax(next);
+    markRepaintChart();
+    markRepaintDraw();
+    return true;
   }
 
   /// 设置指标图中用于缩放操作的滑竿区域。
@@ -472,64 +504,60 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
     // 取不到锚点就不算开始: 本轮缩放注定是空操作, 不该让退出按钮亮起来。
     if (distanceFromBottom == null || current.isZero) return false;
 
-    _chartZoomAnchor = (minMax: current.clone(), distanceFromBottom: distanceFromBottom);
+    _chartZoomAnchor = (
+      minMax: current.clone(),
+      distanceFromBottom: distanceFromBottom,
+      factor: _zoomFactor,
+    );
     _isChartStartZoom.value = true;
     return true;
   }
 
-  /// 增量口径缩放: 直接对**当前** minMax 乘系数, 不取快照, 不需要 anchor 或 session。
+  /// 非触摸端(滚轮、Web 触控板捏合)的增量口径缩放: 直接对当前区间乘系数, 不需要 anchor。
   ///
-  /// 供无 pointer session 的设备使用(滚轮、Web 触控板捏合)。每个 signal 事件自成一次
-  /// 完整手势, 累乘天然成立: signal 通道不节流, 每事件完整送达, 不存在逐帧丢帧漂移。
-  ///
-  /// 读 [mainPaintObject.minMax]: 当 [hasZoomMinMax] 时返回缩放区间, 否则返回自动
-  /// 区间——所以首次调用会基于自动区间开始, 后续调用累乘缩放区间。
+  /// 无 pointer session 的设备每个事件自成一次完整手势, 累乘天然成立 —— signal 通道不节流,
+  /// 每事件完整送达, 不存在丢帧漂移。
   bool onChartZoomStep(double coeff) {
     if (!gestureConfig.enableZoom) return false;
     if (!coeff.isFinite || coeff <= 0) return false;
 
-    final current = mainPaintObject.minMax;
-    if (current.isZero) return false;
-
-    final next = current.clone();
-    next.scaleAroundCenter(coeff);
-
-    // 首次进入 zoom 时记录原始跨度作为固定基准。
-    if (_zoomStepBaseSpan == 0) {
-      _zoomStepBaseSpan = (current.max - current.min).toDouble().abs();
-    }
-
-    // 跨度下限守卫: 增量口径会累乘, 不限制的话 max-min 趋零, dyFactor 爆炸,
-    // 蜡烛被压成一条线。下限取 baseSpan / maxZoomPerGesture², 约等于触摸端
-    // 两轮最大放大后的跨度, 足够小不限制正常操作。
-    final span = (next.max - next.min).toDouble().abs();
-    final limit = gestureConfig.maxZoomPerGesture;
-    if (_zoomStepBaseSpan > 0 && span < _zoomStepBaseSpan / (limit * limit)) {
+    final target = _zoomFactor * coeff;
+    // 已贴在界上还继续同向滚: 目标被夹回当前倍率, 区间不会变, 省掉一次空重绘。反向输入的
+    // 目标一定落回界内, 走不到这里。快照口径不能照抄这个早退: 那里系数为 1 表示要还原为快照。
+    if (_clampZoomFactor(target) == _zoomFactor && mainPaintObject.hasZoomMinMax) {
       return false;
     }
 
+    if (!_applyZoomFactor(target, from: mainPaintObject.minMax, fromFactor: _zoomFactor)) return false;
     _isChartStartZoom.value = true;
-    mainPaintObject.setZoomMinMax(next);
-    markRepaintChart();
-    markRepaintDraw();
     return true;
   }
 
-  /// 指标图缩放更新: 按手指相对起点的位移缩放可见价格区间的跨度。
+  /// 非触摸端 Y 轴滚轮的每像素灵敏度(对数空间), 由触摸端口径派生。
   ///
-  /// 改的是价格→像素映射的分母(可见区间), 分子(主图区像素高度)全程不动。系数口径取自
-  /// TradingView 的 price scale: 取「距底部距离」的比值, 用比值而非线性差值是为了尺度无关
-  /// —— 系数只取决于相对按下位置移动了多大比例, 与主图区高度无关。
+  /// 触摸端的标定是「手指走完主图区高度得到倍率 [GestureConfig.maxZoomPerGesture]」, 折成
+  /// 每像素即 `ln(M) / H`; 让滚轮用同一个值, 同样的位移在两端才得到同样的倍率。
   ///
-  /// 软化项 `s` 相当于给主图区在底边之外虚拟延长一段, 手指永远到不了那个虚拟底边, 于是:
-  /// 1. 比值不会在手指贴近底边时爆炸(不加软化时 `distance == 0` 直接除零、边界变成死区);
-  /// 2. 系数恒落在 `[1 / maxZoomPerGesture, maxZoomPerGesture]` 且**恒为正**, 因此不需要
-  ///    额外的系数下限 —— 负系数会让 `MinMax` 的 max/min 互换、`dyFactor` 变负, Y 轴镜像
-  ///    翻转, 且 `valueToDy` 的 clamp 会直接抛 `ArgumentError`;
-  /// 3. 两侧同加保住了「手指回到起点即系数为 1」这个不动点, 只加分母会让它偏移。
+  /// 派生而非独立配置: 它与 `maxZoomPerGesture` 表达同一个感知量, 再给一个旋钮会让两端手感
+  /// 随配置漂移。`GestureConfig.signalScaleFactor` 因此只服务 X 轴。
   ///
-  /// 缩放的不动点是区间中点([MinMax.scaleAroundCenter])而非手指: 手指位置只决定缩放**幅度**,
-  /// 中点决定**锚点**。所以这是「旋钮」不是「捏合」, 手指下方的价格不保持在手指下方。
+  /// `maxZoomPerGesture` 夹在 `[1.2, 20]` 故 `ln(M) > 0`; 布局未就绪时回退到 X 轴那套口径。
+  double get signalZoomCoeffPerPixel {
+    final height = mainChartHeight;
+    if (height <= 0) return 1 / gestureConfig.signalScaleFactor;
+    return math.log(gestureConfig.maxZoomPerGesture) / height;
+  }
+
+  /// 触摸端滑竿拖拽: 按手指相对起点的位移缩放可见价格区间的跨度。
+  ///
+  /// 改的是价格→像素映射的分母(可见区间), 分子(主图区像素高度)全程不动。系数取自 TradingView
+  /// price scale 的口径: 「距底部距离」的比值, 用比值而非差值是为了与主图区高度无关。
+  ///
+  /// 软化项 `s` 等于把主图区在底边外虚拟延长一段, 手指到不了那个虚拟底边, 于是: 比值不会在
+  /// 贴近底边时除零; 系数恒落在 `[1 / M, M]` 且恒为正(负系数会让 max/min 互换、Y 轴翻转);
+  /// 两侧同加保住「手指回到起点即系数为 1」这个不动点, 只加分母会让它偏移。
+  ///
+  /// 缩放的不动点是区间中点而非手指 —— 手指位置只决定幅度。所以这是「旋钮」不是「捏合」。
   void onChartZoomUpdate(GestureData data) {
     final anchor = _chartZoomAnchor;
     if (anchor == null) return;
@@ -540,13 +568,11 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
     final soften = mainChartHeight / (gestureConfig.maxZoomPerGesture - 1);
     final coeff = (anchor.distanceFromBottom + soften) / (distanceFromBottom + soften);
     if (_chartZoomAppliedCoeff == coeff) return;
-    _chartZoomAppliedCoeff = coeff;
 
-    final next = anchor.minMax.clone();
-    next.scaleAroundCenter(coeff);
-    mainPaintObject.setZoomMinMax(next);
-    markRepaintChart();
-    markRepaintDraw();
+    // 记账在写入成功之后: 候选被挡掉时若已记下系数, 用户略微回拖会因「这个系数见过」被跳过。
+    if (_applyZoomFactor(anchor.factor * coeff, from: anchor.minMax, fromFactor: anchor.factor)) {
+      _chartZoomAppliedCoeff = coeff;
+    }
   }
 
   /// 结束本轮 zoom 手势。

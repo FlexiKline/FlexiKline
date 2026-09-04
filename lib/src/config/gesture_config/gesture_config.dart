@@ -159,10 +159,13 @@ class GestureConfig {
   /// 灵敏，族内切换要稳，过敏会让平移中途乱缩放。
   final double scaleClaimSlopFactor;
 
-  /// 滚轮 scrollDelta.dy 到缩放比值的灵敏度因子。
+  /// 滚轮 scrollDelta.dy 到 **X 轴** 缩放比值的灵敏度因子。
   ///
   /// 映射公式 `exp(-dy / signalScaleFactor)`: 值越大，同样滚动量产生的缩放越小。
   /// 默认 200，取自 Flutter 官方约定 `kDefaultMouseScrollToScaleFactor`。
+  ///
+  /// **不作用于 Y 轴。** 价格轴上滚轮的灵敏度由 [maxZoomPerGesture] 与主图区高度派生
+  /// （见 `signalZoomCoeffPerPixel`），与触摸端拖价格轴共用一个旋钮，否则两端手感会随配置漂移。
   final double signalScaleFactor;
 
   /// X 轴 scale session 的空闲超时: 最后一个滚轮事件后多久结束当前 session。

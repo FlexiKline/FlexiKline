@@ -249,6 +249,68 @@ void main() {
   });
 
   // =========================================================================
+  // 灵敏度标定：Y 轴由触摸端口径派生，X 轴保持自己的旋钮
+  // =========================================================================
+  //
+  // 触摸端的标定是「手指走完主图区高度 H 得到倍率 M」，折成每像素即 `ln(M) / H`。Y 轴 signal
+  // 用同一个值，同样的位移量在两条链上才得到同样的倍率。X 轴另有自己的界（candleMinWidth /
+  // candleMaxWidth）和触摸端对手（scaleSpeed），与 Y 轴无关，仍用 signalScaleFactor。
+  group('signal 灵敏度标定', () {
+    testWidgets('Y 轴滚轮灵敏度随 maxZoomPerGesture 变化', (tester) async {
+      final controller = await _pumpNonTouchChart(tester);
+      addTearDown(() => _disposeChart(tester, controller));
+
+      final scrollPos = _sliderRect(controller).center;
+
+      /// 在 [m] 下量一次固定滚动量产生的跨度比值。每次先复位，避免上一次的缩放叠进来。
+      Future<double> measure(double m) async {
+        controller.exitChartZoom();
+        await _paintFrame(tester, controller);
+        controller.updateGestureConfig((c) => c.copyWith(maxZoomPerGesture: m));
+        final before = _rangeSpan(controller);
+        await _sendScroll(tester, scrollPos, scrollDy: 60);
+        await _paintFrame(tester, controller);
+        return _rangeSpan(controller) / before;
+      }
+
+      final ratio6 = await measure(6);
+      final ratio12 = await measure(12);
+
+      // 比值 = exp(-dy · ln(M) / H)，所以两次取对数后的比就是 ln(M) 的比，H 和 dy 都约掉。
+      expect(
+        math.log(ratio12) / math.log(ratio6),
+        closeTo(math.log(12) / math.log(6), 1e-6),
+        reason: 'Y 轴 signal 灵敏度必须由 maxZoomPerGesture 派生, 不是独立常量',
+      );
+    });
+
+    testWidgets('maxZoomPerGesture 不影响 X 轴滚轮缩放幅度', (tester) async {
+      final controller = await _pumpNonTouchChart(tester);
+      addTearDown(() => _disposeChart(tester, controller));
+
+      final chartCenter = controller.mainRect.center;
+
+      Future<double> measure(double m) async {
+        controller.updateGestureConfig((c) => c.copyWith(maxZoomPerGesture: m));
+        final before = controller.candleWidth;
+        await _sendScroll(tester, chartCenter, scrollDy: 60);
+        // 等 session 空闲超时结束，下一次测量才是独立的一段。
+        await tester.pump(const Duration(milliseconds: 900));
+        return controller.candleWidth / before;
+      }
+
+      final ratio6 = await measure(6);
+      final ratio12 = await measure(12);
+
+      expect(
+        ratio12,
+        closeTo(ratio6, 1e-9),
+        reason: '两个意图的标定已解耦: X 轴仍用 signalScaleFactor',
+      );
+    });
+  });
+
+  // =========================================================================
   // X 轴 scale（滚轮在图表区）
   // =========================================================================
   group('signal scale (chart area scroll)', () {

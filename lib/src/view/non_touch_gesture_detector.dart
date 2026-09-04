@@ -180,13 +180,14 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
     final position = event.localPosition;
     if (!controller.canvasRect.include(position)) return;
 
-    final factor = _resolveSignalFactor(event);
-    if (factor == null) return;
-
     final owner = NonTouchGestureOwner.resolveAt(controller, position);
     final intent = owner.signalIntent(controller);
     // 不注册 = 放行给外层 Scrollable。这是本设计放行滚动的唯一机制。
     if (intent == null) return;
+
+    // 意图必须先解析: 两个意图各有自己的灵敏度标定, 不知道意图就算不出正确的比值。
+    final factor = _resolveSignalFactor(event, intent);
+    if (factor == null) return;
 
     GestureBinding.instance.pointerSignalResolver.register(event, (_) {
       stopPositionAnimation();
@@ -201,15 +202,24 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
 
   /// 三种输入归一到同一个比值口径。
   ///
-  /// 指数形式的实质理由是加法性: `exp(a/K) × exp(b/K) == exp((a+b)/K)`, 碎事件
-  /// 与整格事件累乘到同一总倍数, 两种设备手感自动一致。
-  double? _resolveSignalFactor(PointerSignalEvent event) {
-    // Web 触控板捏合: event.scale 本身即比值。
+  /// 指数形式的实质理由是加法性: `exp(a·k) × exp(b·k) == exp((a+b)·k)`, 碎事件与整格事件
+  /// 累乘到同一总倍数, 两种设备手感自动一致。
+  ///
+  /// 每像素灵敏度 `k` 按 [intent] 取: Y 轴用 `signalZoomCoeffPerPixel`(由触摸端口径派生,
+  /// 使同样位移在两端得到同样倍率); X 轴仍用 [GestureConfig.signalScaleFactor], 它另有自己
+  /// 的界和触摸端对手(`scaleSpeed`)。
+  double? _resolveSignalFactor(PointerSignalEvent event, SignalIntent intent) {
+    // Web 触控板捏合: event.scale 本身即比值, 不经过位移标定。做「比值 → 等效位移 → 再过
+    // 同一条曲线」的换算是恒等变换, 白做; 真要调只能加阻尼指数, 而指数取多少需要真机数据。
     if (event is PointerScaleEvent) return event.scale;
     if (event is! PointerScrollEvent) return null;
     final dy = event.scrollDelta.dy;
     if (dy == 0) return null; // 忽略横向滚轮
-    return math.exp(-dy / gestureConfig.signalScaleFactor);
+    final coeffPerPixel = switch (intent) {
+      SignalIntent.zoomY => controller.signalZoomCoeffPerPixel,
+      SignalIntent.scaleX => 1 / gestureConfig.signalScaleFactor,
+    };
+    return math.exp(-dy * coeffPerPixel);
   }
 
   /// 通道 S 的 X 轴缩放: 用可重置 [Timer] 管理 session, 每个事件重置倒计时。

@@ -382,4 +382,39 @@ void main() {
       );
     });
   });
+
+  /// [SettingConfig] 是 const 构造、原样存值，越界修正都在 `SettingBinding` 的 getter 里。
+  group('v2.5.0/FlexiKlineController/config-clamp', () {
+    test('candleMinWidth 不小于 1', () {
+      final controller = mountController(FakeFlexiKlineConfiguration());
+      addTearDown(controller.dispose);
+
+      controller.updateSettingConfig((c) => c.copyWith(candleMinWidth: 0, candleFixedSpacing: null));
+
+      expect(controller.candleMinWidth, 1);
+      expect(controller.candleMaxWidth, greaterThanOrEqualTo(controller.candleMinWidth));
+    });
+
+    /// 触摸端缩放是加法（`candleWidth + dxGrowth` 再 clamp 到 `candleMinWidth`），所以下界
+    /// 归零时蜡烛宽度会精确落到 0；未配 `candleFixedSpacing` 时间距按宽度派生也一起归零，
+    /// `candleActualWidth` 于是为 0。滚轮那条路是乘法，只会趋零、够不到 0。
+    ///
+    /// 断言取根因（宽度与实际宽度非零）而不是崩溃：`candleActualWidth == 0` 会让按宽度推算
+    /// 蜡烛数量的循环不收敛，驱动绘制时实测抛 StackOverflowError，但本用例不跑绘制。
+    test('candleMinWidth 归零不会让 candleActualWidth 归零', () {
+      final controller = mountController(FakeFlexiKlineConfiguration());
+      addTearDown(controller.dispose);
+      controller.updateSettingConfig((c) => c.copyWith(candleMinWidth: 0, candleFixedSpacing: null));
+
+      // 一路缩到下界，逐步逼近而不是一次跳过去，确保真的踩在 clamp 上。
+      final data = GestureData.scale(Offset.zero, position: ScalePosition.middle);
+      for (var i = 1; i <= 30; i++) {
+        data.update(Offset.zero, newScale: 1.0 - i * 0.03);
+        controller.onChartScale(data);
+      }
+
+      expect(controller.candleWidth, greaterThan(0));
+      expect(controller.candleActualWidth, greaterThan(0));
+    });
+  });
 }

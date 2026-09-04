@@ -47,6 +47,10 @@ abstract class _$SettingConfigCWProxy {
 
   SettingConfig expandRatiosOfSameMinmax(List<double> expandRatiosOfSameMinmax);
 
+  SettingConfig minZoomSpanRatio(double minZoomSpanRatio);
+
+  SettingConfig maxZoomSpanRatio(double maxZoomSpanRatio);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `SettingConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -73,6 +77,8 @@ abstract class _$SettingConfigCWProxy {
     bool autoStartLastPriceCountDownTimer,
     bool autoLoadMoreData,
     List<double> expandRatiosOfSameMinmax,
+    double minZoomSpanRatio,
+    double maxZoomSpanRatio,
   });
 }
 
@@ -161,6 +167,14 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
       this(expandRatiosOfSameMinmax: expandRatiosOfSameMinmax);
 
   @override
+  SettingConfig minZoomSpanRatio(double minZoomSpanRatio) =>
+      this(minZoomSpanRatio: minZoomSpanRatio);
+
+  @override
+  SettingConfig maxZoomSpanRatio(double maxZoomSpanRatio) =>
+      this(maxZoomSpanRatio: maxZoomSpanRatio);
+
+  @override
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `SettingConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -189,6 +203,8 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
     Object? autoStartLastPriceCountDownTimer = const $CopyWithPlaceholder(),
     Object? autoLoadMoreData = const $CopyWithPlaceholder(),
     Object? expandRatiosOfSameMinmax = const $CopyWithPlaceholder(),
+    Object? minZoomSpanRatio = const $CopyWithPlaceholder(),
+    Object? maxZoomSpanRatio = const $CopyWithPlaceholder(),
   }) {
     return SettingConfig(
       opacity: opacity == const $CopyWithPlaceholder()
@@ -273,6 +289,14 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
               ? _value.expandRatiosOfSameMinmax
               // ignore: cast_nullable_to_non_nullable
               : expandRatiosOfSameMinmax as List<double>,
+      minZoomSpanRatio: minZoomSpanRatio == const $CopyWithPlaceholder()
+          ? _value.minZoomSpanRatio
+          // ignore: cast_nullable_to_non_nullable
+          : minZoomSpanRatio as double,
+      maxZoomSpanRatio: maxZoomSpanRatio == const $CopyWithPlaceholder()
+          ? _value.maxZoomSpanRatio
+          // ignore: cast_nullable_to_non_nullable
+          : maxZoomSpanRatio as double,
     );
   }
 }
@@ -322,6 +346,8 @@ SettingConfig _$SettingConfigFromJson(Map<String, dynamic> json) =>
                   ?.map((e) => (e as num).toDouble())
                   .toList() ??
               const [0.1, 0.05],
+      minZoomSpanRatio: (json['minZoomSpanRatio'] as num?)?.toDouble() ?? 0.05,
+      maxZoomSpanRatio: (json['maxZoomSpanRatio'] as num?)?.toDouble() ?? 20,
     );
 
 Map<String, dynamic> _$SettingConfigToJson(SettingConfig instance) =>
@@ -348,4 +374,6 @@ Map<String, dynamic> _$SettingConfigToJson(SettingConfig instance) =>
           instance.autoStartLastPriceCountDownTimer,
       'autoLoadMoreData': instance.autoLoadMoreData,
       'expandRatiosOfSameMinmax': instance.expandRatiosOfSameMinmax,
+      'minZoomSpanRatio': instance.minZoomSpanRatio,
+      'maxZoomSpanRatio': instance.maxZoomSpanRatio,
     };

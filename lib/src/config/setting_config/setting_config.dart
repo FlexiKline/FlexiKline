@@ -63,6 +63,10 @@ class SettingConfig {
     /// 是否自动加载更多数据
     this.autoLoadMoreData = true,
     this.expandRatiosOfSameMinmax = const [0.1, 0.05],
+
+    /// Y 轴缩放可达跨度倍率
+    this.minZoomSpanRatio = 0.05,
+    this.maxZoomSpanRatio = 20,
   });
 
   /// Long/Short 浅色不透明度 [longTintColor] 和 [shortTintColor]
@@ -85,9 +89,9 @@ class SettingConfig {
   final bool alwaysCalculateScreenOfCandlesIfEnough;
 
   /// 蜡烛配置
-  /// 最小蜡烛宽度[1, 50]
+  /// 最小蜡烛宽度, 小于 1 会被夹到 1(否则蜡烛宽度可精确归零, 蜡烛数量的推算不再收敛)
   final double candleMinWidth;
-  // 最大蜡烛宽度[1, 50]
+  // 最大蜡烛宽度, 小于 [candleMinWidth] 时取后者; 不设上界
   final double candleMaxWidth;
   // 单根蜡烛柱的宽度
   final double candleWidth;
@@ -120,6 +124,20 @@ class SettingConfig {
   /// second: 最低价减少(1-second)倍.
   /// 如果为0或null, 则不增加最高价或最低价
   final List<double> expandRatiosOfSameMinmax;
+
+  /// Y 轴缩放能把可见价格跨度压到的下限, 单位是「用户接管 Y 轴那一刻的自动跨度」的倍数。
+  /// 取值 (0, 1], 默认 0.05 即最多把内容放大 20 倍。触摸与非触摸共用同一个界。
+  ///
+  /// 与 `GestureConfig.maxZoomPerGesture` 是两件事: 后者是单轮手势的上界, 抬手重抓即重新
+  /// 计量; 本字段是全局可达范围, 分几轮都不会越过。
+  ///
+  /// 与 [maxZoomSpanRatio] 不取倒数对: 放大方向有纵向平移做补偿, 用户能移到想看的价格切片,
+  /// 压到很小仍是有效视图; 缩小方向没有补偿, 跨度一大数据就成一条发丝。
+  final double minZoomSpanRatio;
+
+  /// Y 轴缩放能把可见价格跨度放到的上限, 单位同 [minZoomSpanRatio]。
+  /// 取值 [1, ∞), 默认 20 即最多把内容缩小 20 倍。
+  final double maxZoomSpanRatio;
 
   bool get isFixedCandleSpacing {
     return candleFixedSpacing != null && candleFixedSpacing! > candleMinWidth;

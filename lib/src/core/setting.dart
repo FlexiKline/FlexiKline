@@ -370,11 +370,27 @@ mixin SettingBinding on KlineBindingBase {
     return mainChartWidth * settingConfig.minPaintBlankRate.clamp(0, 0.9);
   }
 
-  /// 最小蜡烛宽度[1, 50]
-  double get candleMinWidth => settingConfig.candleMinWidth;
+  /// 最小蜡烛宽度, 不小于 1。
+  ///
+  /// 下界不是风格约束: 触摸端缩放是加法, 归零会让 [candleWidth] 精确落到 0, 而未配
+  /// [SettingConfig.candleFixedSpacing] 时间距按宽度派生也一起归零, [candleActualWidth]
+  /// 于是为 0, 按宽度推算蜡烛数量的循环不再收敛(实测 StackOverflowError)。
+  double get candleMinWidth => math.max(1, settingConfig.candleMinWidth);
 
-  /// 最大蜡烛宽度[1, 50]
+  /// 最大蜡烛宽度, 不小于 [candleMinWidth]。
+  ///
+  /// 不设上界: 过宽只是不好看, 不会算错, 而硬性上界会悄悄改掉宿主已经在用的取值。
   double get candleMaxWidth => math.max(candleMinWidth, settingConfig.candleMaxWidth);
+
+  /// Y 轴缩放可达跨度倍率的下界, 夹在 (0, 1]。
+  ///
+  /// 与 [candleMinWidth] / [candleMaxWidth] 同源: [SettingConfig] 是 const 构造、原样存值,
+  /// 越界修正统一放在这里。少了这层, `minZoomSpanRatio > 1` 会让下界高于起点, 「缩小」手势
+  /// 反而放大视野。
+  double get minZoomSpanRatio => settingConfig.minZoomSpanRatio.clamp(1e-6, 1);
+
+  /// Y 轴缩放可达跨度倍率的上界, 夹在 [1, 1e6]。两端各自单侧夹取即保证 `min <= 1 <= max`。
+  double get maxZoomSpanRatio => settingConfig.maxZoomSpanRatio.clamp(1, 1e6);
 
   /// 单根蜡烛宽度，限制在 [candleMinWidth] ~ [candleMaxWidth]。
   @override
