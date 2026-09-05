@@ -347,12 +347,105 @@ abstract class ExternalPaintObject<T extends ExternalIndicator> extends PaintObj
 /// 蜡烛图绘制对象
 ///
 /// 使用 [DirectIndicatorKey]，属于基础/系统指标，不占 slot。
-abstract class CandleBasePaintObject<T extends CandleBaseIndicator> extends DirectPaintObject<T> {
+abstract class CandleBasePaintObject<T extends CandleBaseIndicator> extends DirectPaintObject<T>
+    with PaintYAxisTicksMixin {
   /// 获取当前蜡烛图的绘制类型
   FlexiChartType resolveChartType();
 
   /// 是否在蜡烛图类型为线图时隐藏指标
   bool get hideMainIndicatorsInLineChartMode => false;
+
+  /// 本帧 Y 轴刻度缓存: 位置与值, **不含文本**。
+  ///
+  /// [paintYAxisTickLines] 写入, [paintYAxisTickLabels] 读取并格式化后置空。
+  /// 两次调用同属一次 [MainPaintObject.doPaintChart], 生命周期即一帧。
+  /// 存值而非文本, 是为了让格式化只发生在真正要画文本的地方 —— 画线阶段不需要它。
+  List<({double dy, FlexiNum value})>? _frameTicks;
+
+  /// 缓存价钱刻度文本区域大小, 用于定位缩放拖拽条区域
+  Size? _zoomSlideBarSize;
+
+  /// 绘制 Y 轴刻度横线, 并产出本帧刻度。
+  ///
+  /// 由 [MainPaintObject.doPaintChart] 在遍历子对象**之前**调用, 因此横线一定在所有
+  /// 主区指标之下, 与各指标的 zIndex 无关。
+  ///
+  /// 横线宽度取 [drawableRect] 而非 chartRect: 后者已让出 padding, 会让线短一截。
+  void paintYAxisTickLines(Canvas canvas, Size size) {
+    final axis = gridConfig.horizontal;
+    final ticks = _frameTicks = _averageTicks(axis.count);
+
+    if (!axis.show) return;
+    for (final tick in ticks) {
+      canvas.drawLineByConfig(
+        Path()
+          ..moveTo(drawableRect.left, tick.dy)
+          ..lineTo(drawableRect.right, tick.dy),
+        axis.line,
+        themeColor: theme.gridLineColor,
+      );
+    }
+  }
+
+  /// 按像素等分 [drawableRect] 产出刻度: 先定位置, 再由 [dyToValue] 反算价格。
+  ///
+  /// [count] 是间隔数, 末条刻度落在 [drawableRect] 底边。
+  List<({double dy, FlexiNum value})> _averageTicks(int count) {
+    final ticks = <({double dy, FlexiNum value})>[];
+    if (count <= 0) return ticks;
+    final dyStep = drawableRect.height / count;
+    for (int i = 1; i <= count; i++) {
+      final dy = i * dyStep;
+      final value = dyToValue(dy);
+      if (value == null) continue;
+      ticks.add((dy: dy, value: value));
+    }
+    return ticks;
+  }
+
+  /// 绘制 Y 轴刻度文本。
+  ///
+  /// 由 [MainPaintObject.doPaintChart] 在遍历子对象**之后**调用, 因此文本一定在所有
+  /// 主区指标之上, 不会被 MA / BOLL 一类 zIndex 更大的指标覆盖。
+  void paintYAxisTickLabels(Canvas canvas, Size size) {
+    final ticks = _frameTicks;
+    _frameTicks = null; // 用完即弃, 不跨帧存活
+    if (ticks == null || !settingConfig.showYAxisTick) return;
+
+    final dx = chartRect.right;
+    double maxTickWidth = 0.0;
+    for (final tick in ticks) {
+      final text = formatTicksValue(tick.value, precision: klineData.precision);
+
+      final ticksText = defTicksTextConfig;
+
+      final size = canvas.drawTextArea(
+        offset: Offset(
+          dx,
+          tick.dy - ticksText.areaHeight, // 绘制在刻度线之上
+        ),
+        drawDirection: DrawDirection.rtl,
+        drawableRect: drawableRect,
+        text: text,
+        textConfig: ticksText,
+        themeTextColor: theme.ticksTextColor,
+      );
+
+      if (size.width > maxTickWidth) maxTickWidth = size.width;
+    }
+
+    if (!context.gestureConfig.useCustomZoomRect &&
+        (_zoomSlideBarSize == null || _zoomSlideBarSize!.width != maxTickWidth)) {
+      final barSize = Size(maxTickWidth, drawableRect.height);
+      _zoomSlideBarSize = barSize;
+      context.reportChartZoomSlideBarRect(Rect.fromLTWH(
+        drawableRect.right - barSize.width,
+        drawableRect.top,
+        barSize.width,
+        barSize.height,
+      ));
+    }
+  }
 }
 
 /// 时间轴指标绘制对象

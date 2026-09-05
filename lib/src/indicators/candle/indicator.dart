@@ -305,11 +305,6 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
             paintLatestPoint(canvas, size);
         }
     }
-
-    /// 绘制价钱刻度数据
-    if (settingConfig.showYAxisTick) {
-      paintYAxisPriceLabels(canvas, size);
-    }
   }
 
   @override
@@ -325,6 +320,17 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
       canvas,
       offset,
       precision: klineData.precision,
+    );
+  }
+
+  // 格式化Y轴价钱刻度值.
+  @override
+  String formatTicksValue(FlexiNum value, {required int precision}) {
+    return formatPrice(
+      value.toDecimal(),
+      precision: precision,
+      cutInvalidZero: false,
+      enableGrouping: true,
     );
   }
 
@@ -441,58 +447,6 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
       textConfig: markConfig.text,
       themeTextColor: theme.textColor,
     );
-  }
-
-  /// 缓存价钱刻度文本区域大小, 用于定位缩放拖拽条区域
-  Size? _zoomSlideBarSize;
-
-  /// 绘制蜡烛图右侧价钱刻度
-  /// 根据Grid horizontal配置来绘制, 保证在grid.horizontal线之上.
-  void paintYAxisPriceLabels(Canvas canvas, Size size) {
-    final dyStep = drawableRect.height / gridConfig.horizontal.count;
-    final dx = chartRect.right;
-    double dy = 0;
-    double maxTickWidth = 0.0;
-    for (int i = 1; i <= gridConfig.horizontal.count; i++) {
-      dy = i * dyStep;
-      final price = dyToValue(dy);
-      if (price == null) continue;
-
-      final text = formatPrice(
-        price.toDecimal(),
-        precision: klineData.precision,
-        cutInvalidZero: false,
-        enableGrouping: true,
-      );
-
-      final ticksText = defTicksTextConfig;
-
-      final size = canvas.drawTextArea(
-        offset: Offset(
-          dx,
-          dy - ticksText.areaHeight, // 绘制在刻度线之上
-        ),
-        drawDirection: DrawDirection.rtl,
-        drawableRect: drawableRect,
-        text: text,
-        textConfig: ticksText,
-        themeTextColor: theme.ticksTextColor,
-      );
-
-      if (size.width > maxTickWidth) maxTickWidth = size.width;
-    }
-
-    if (!context.gestureConfig.useCustomZoomRect &&
-        (_zoomSlideBarSize == null || _zoomSlideBarSize!.width != maxTickWidth)) {
-      final barSize = Size(maxTickWidth, drawableRect.height);
-      _zoomSlideBarSize = barSize;
-      context.reportChartZoomSlideBarRect(Rect.fromLTWH(
-        drawableRect.right - barSize.width,
-        drawableRect.top,
-        barSize.width,
-        barSize.height,
-      ));
-    }
   }
 
   /// 缓存latest文本相对于屏幕右侧的负偏移量

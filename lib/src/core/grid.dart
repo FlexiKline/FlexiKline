@@ -143,18 +143,9 @@ mixin GridBinding on KlineBindingBase, SettingBinding {
       themeColor: theme.gridLineColor,
     );
 
-    // 主区网格线
-    final step = main.bottom / gridConfig.horizontal.count;
-    for (int i = 1; i < gridConfig.horizontal.count; i++) {
-      dy = i * step;
-      canvas.drawLineByConfig(
-        Path()
-          ..moveTo(main.left, dy)
-          ..lineTo(main.right, dy),
-        gridConfig.horizontal.line,
-        themeColor: theme.gridLineColor,
-      );
-    }
+    // 主区内部的价格横线不在此绘制: 它与 Y 轴刻度文本同源, 由 chart 层的
+    // [CandleBasePaintObject.paintYAxisTickLines] 产出, 才能保证线与文本用同一帧的
+    // minMax。grid 层因此只余布局线, 与价格无关, 保持静态。
 
     // 主区底部分隔线
     canvas.drawLineByConfig(

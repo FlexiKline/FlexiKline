@@ -65,6 +65,7 @@
 * Rename `GestureConfig.isManualSetZoomRect` to `useCustomZoomRect`, keeping its meaning and polarity: true means the host owns the zoom slider rect and the candle indicator stops reporting one. The serialized key changes with it, so a stored config that set the old key falls back to the default and reverts to the auto-reported rect until it is saved again (Breaking Changes).
 * Keep the chart in its zoomed state when a zoom gesture starts outside the slider or before a price range exists, instead of clearing `isChartZooming` while the zoom range stayed applied — that combination hid the reset button while the Y axis remained locked. Handing the Y axis back is now only possible through `exitChartZoom`.
 * Add `Rect.distanceFromBottom`, replacing the private helper that measured a dy against the main chart area (renamed from the unused `invertedToDistane`); it returns null for a non-positive height, since an inverted rect makes the underlying `clamp` throw (Breaking Changes).
+* Move main-pane horizontal price lines from the grid layer into the chart layer so lines and tick labels share one source; tick labels now paint above all main-pane indicators instead of being covered by them.
 
 ## 2.4.1
 * Fix the blank band above the candles left after hiding main-area indicators, which survived config reload and data refresh and could only be cleared by rebuilding the controller.

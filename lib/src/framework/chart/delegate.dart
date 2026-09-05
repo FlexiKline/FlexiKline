@@ -319,6 +319,14 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
   }
 
   void doPaintChart(Canvas canvas, Size size) {
+    // Y 轴刻度的横线与文本夹住整个子对象遍历: 线在所有主区指标之下、文本在其之上。
+    //
+    // 不能把这两步收进 CandlePaintObject.paint —— candle 不是最底层。CandleIndicator
+    // 的 zIndex 是 -1, 而 VolumeIndicator 用 -2, 且 zIndex 是可覆盖的构造参数, 宿主
+    // 能传任意值。只有在此处编排才与 zIndex 无关。
+    final candle = _candlePaintObject;
+    candle?.paintYAxisTickLines(canvas, size);
+
     if (isFirstDrawTipsArea) {
       // 如果设置总是要在Tips区域下绘制指标图, 则要首先绘制完所有Tips.
       // doPaintTips 内部同步 _tipsAreaHeight, 子对象随后取到的 chartRect 已让出 tips 区域。
@@ -336,6 +344,8 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
         doPaintTips(canvas, model: klineData.latest);
       }
     }
+
+    candle?.paintYAxisTickLabels(canvas, size);
   }
 
   void doPaintOverlay(Canvas canvas, Size size) {
