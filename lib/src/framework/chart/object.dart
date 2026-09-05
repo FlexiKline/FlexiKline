@@ -362,8 +362,19 @@ abstract class CandleBasePaintObject<T extends CandleBaseIndicator> extends Dire
   /// 存值而非文本, 是为了让格式化只发生在真正要画文本的地方 —— 画线阶段不需要它。
   List<({double dy, FlexiNum value})>? _frameTicks;
 
-  /// 缓存价钱刻度文本区域大小, 用于定位缩放拖拽条区域
-  Size? _zoomSlideBarSize;
+  /// 上次上报的 zoom 滑竿区域, 同时承载宽度的单调增长态。
+  ///
+  /// 宽度只增不减: 刻度文本的长度随缩放、平移变化, 热区若跟着回缩, 用户会遇到「刚才能拖、
+  /// 现在拖不到」。热区只参与四处命中判定(见 `setChartZoomSlideBarRect` 的注释), 不参与
+  /// 展示, 偏宽无副作用; 上界是该 precision 下最长刻度文本的宽度, 所以一定收敛。
+  Rect? _reportedZoomBarRect;
+
+  /// 上次度量刻度文本时的前提: precision 决定小数位数, ticksText 决定字体与内边距。
+  ///
+  /// 变化时清掉已收敛的宽度 —— 否则换到短文本的标的后, 热区会一直沿用上一个标的的宽度。
+  /// [TextAreaConfig] 没有 `==`, 比较退化为实例比较: 稳定态是同一个实例, 配置变更时由
+  /// copyWith 换新, 两种情形都判对; 内容相同的重建只多上报一次。
+  ({int precision, TextAreaConfig ticksText})? _tickTextMetrics;
 
   /// 绘制 Y 轴刻度横线, 并产出本帧刻度。
   ///
@@ -470,17 +481,45 @@ abstract class CandleBasePaintObject<T extends CandleBaseIndicator> extends Dire
       if (size.width > maxTickWidth) maxTickWidth = size.width;
     }
 
-    if (!context.gestureConfig.useCustomZoomRect &&
-        (_zoomSlideBarSize == null || _zoomSlideBarSize!.width != maxTickWidth)) {
-      final barSize = Size(maxTickWidth, drawableRect.height);
-      _zoomSlideBarSize = barSize;
-      context.reportChartZoomSlideBarRect(Rect.fromLTWH(
-        drawableRect.right - barSize.width,
-        drawableRect.top,
-        barSize.width,
-        barSize.height,
-      ));
+    _reportZoomSlideBarRect(maxTickWidth);
+  }
+
+  /// 按本帧刻度文本的最大宽度上报 zoom 滑竿区域。
+  ///
+  /// 比较整个 [Rect] 而不只比宽度: 主区高度变化(grid resize、指标增删)时宽度可能没变, 但
+  /// top / height 要更新。稳定态因此零上报, 不再每帧提交一次 post-frame 回调。
+  ///
+  /// 经 `context.reportChartZoomSlideBarRect` 而不直连 controller: 宿主接管热区
+  /// (`useCustomZoomRect`)时上报必须彻底静默。
+  void _reportZoomSlideBarRect(double maxTickWidth) {
+    if (context.gestureConfig.useCustomZoomRect) return;
+
+    final metrics = (precision: klineData.precision, ticksText: defTicksTextConfig);
+    if (metrics != _tickTextMetrics) {
+      _tickTextMetrics = metrics;
+      _invalidateZoomBarWidth();
     }
+
+    final width = math.max(_reportedZoomBarRect?.width ?? 0, maxTickWidth);
+    final rect = Rect.fromLTWH(
+      drawableRect.right - width,
+      drawableRect.top,
+      width,
+      drawableRect.height,
+    );
+    if (rect == _reportedZoomBarRect) return;
+    _reportedZoomBarRect = rect;
+    context.reportChartZoomSlideBarRect(rect);
+  }
+
+  /// 清空滑竿宽度的收敛态, 让它按新的文本度量前提重新长起来。
+  void _invalidateZoomBarWidth() => _reportedZoomBarRect = null;
+
+  @override
+  void didChangeTheme() {
+    super.didChangeTheme();
+    // 主题可换字体与字号, 已收敛的宽度不再可信。
+    _invalidateZoomBarWidth();
   }
 }
 

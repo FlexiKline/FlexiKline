@@ -68,6 +68,7 @@
 * Move main-pane horizontal price lines from the grid layer into the chart layer so lines and tick labels share one source; tick labels now paint above all main-pane indicators instead of being covered by them.
 * Add `GridAxis.tickMode` to choose between evenly divided ticks and nice-number ticks on the main price axis; defaults to `average` so existing behaviour is unchanged.
 * Change `GridAxis.count` to mean a target interval count when `tickMode` is `nice`: the actual tick count varies around it because step values are rounded to readable numbers.
+* Keep the price-axis width reported for the zoom slide bar monotonic so the zoom hit area no longer shifts while tick labels change length; the cached width resets when precision, theme, or tick text style changes.
 
 ## 2.4.1
 * Fix the blank band above the candles left after hiding main-area indicators, which survived config reload and data refresh and could only be cleared by rebuilding the controller.
