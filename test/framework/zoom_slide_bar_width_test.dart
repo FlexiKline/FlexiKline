@@ -85,18 +85,35 @@ void main() {
       expect(scene.reports, hasLength(1), reason: '每帧上报会每帧提交一次 post-frame 回调');
     });
 
-    test('换标的(precision 变化): 宽度重新收敛, 不沿用上一个标的', () {
+    test('换标的: 宽度重新收敛, 不沿用上一个标的', () {
       final scene = _ZoomBarScene(precision: 8);
       setShortRange(scene);
       scene.paintFrame();
       final wide = scene.lastReport.width;
 
-      // 只换 precision, 价格区间不动: 小数位由 8 位降到 2 位, 文本随之变短。
-      scene.setPrecision(2);
+      // 价格区间不动, 只换标的与精度: 小数位由 8 位降到 2 位, 文本随之变短。
+      scene.switchSymbol(symbol: 'OTHER', precision: 2);
       scene.paintFrame();
 
       expect(scene.reports, hasLength(2), reason: '清空后首帧必须重新上报, 否则热区一直是空的');
       expect(scene.lastReport.width, lessThan(wide), reason: '沿用上一个标的的宽度会让热区盖住图表');
+    });
+
+    /// 判据是 symbol 而不是 `spec.key`：后者含 interval，用它会把每次换周期也当成换标的，
+    /// 让宽度在同一个标的上反复重新收敛。
+    test('切周期: 宽度不清空', () {
+      final scene = _ZoomBarScene(precision: 8);
+      setShortRange(scene);
+      scene.paintFrame();
+      final wide = scene.lastReport.width;
+
+      scene.switchInterval();
+      // 同标的换周期后让文本变短: 清空过就会跟着缩回去。
+      scene.setRange(min: 1, max: 1.8);
+      scene.paintFrame();
+
+      expect(scene.reports, hasLength(1));
+      expect(scene.lastReport.width, wide, reason: '价格量级不随周期变, 没有重新收敛的理由');
     });
 
     test('主题变化: 宽度重新收敛', () {
@@ -158,6 +175,9 @@ class _ZoomBarScene {
     object.bind(indicator, context);
   }
 
+  static const _day = FlexiTimeInterval(1, TimeUnit.day);
+  static const _hour = FlexiTimeInterval(1, TimeUnit.hour);
+
   /// `padding` 为零，`height` 与主区等高：`chartRect` 因此等于 `drawableRect`。
   final indicator = TestCandleIndicator(height: _mainHeight);
   final context = _ReportSpyContext();
@@ -171,8 +191,23 @@ class _ZoomBarScene {
     object.setMinMax(MinMax(min: FlexiNum.fromNum(min), max: FlexiNum.fromNum(max)));
   }
 
-  /// 换标的：只改价格精度，即刻度文本的小数位数。
-  void setPrecision(int precision) => context.data = _dataWith(precision: precision);
+  /// 换标的：替换数据并派发依赖变化，与 `IndicatorPaintObjectManager.notifySpecChanged`
+  /// 在 `spec.key` 变化时做的事一致。
+  void switchSymbol({required String symbol, required int precision}) {
+    _switchTo(_dataWith(symbol: symbol, precision: precision));
+  }
+
+  /// 切周期：同标的，只换 interval，`spec.key` 同样变化。
+  void switchInterval() {
+    final spec = context.data.spec;
+    _switchTo(KlineData(spec.copyWith(interval: _hour)));
+  }
+
+  void _switchTo(KlineData data) {
+    final oldSpec = context.data.spec;
+    context.data = data;
+    object.notifyDependenciesChanged(oldSpec);
+  }
 
   void resizeMain(double height) {
     context.mainRect = Rect.fromLTWH(0, 0, _mainWidth, height);
@@ -190,10 +225,10 @@ class _ZoomBarScene {
   }
 }
 
-KlineData _dataWith({required int precision}) => KlineData(
+KlineData _dataWith({String symbol = 'ZOOM-BAR-WIDTH', required int precision}) => KlineData(
       KlineSpec(
-        symbol: 'ZOOM-BAR-WIDTH',
-        interval: const FlexiTimeInterval(1, TimeUnit.day),
+        symbol: symbol,
+        interval: _ZoomBarScene._day,
         precision: precision,
       ),
     );
@@ -222,6 +257,9 @@ class _SpyCandlePaintObject extends CandleBasePaintObject<TestCandleIndicator> {
 
   /// 主题变化钩子入口，同上。
   void notifyThemeChanged() => didChangeTheme();
+
+  /// 依赖变化钩子入口，同上。
+  void notifyDependenciesChanged(KlineSpec oldSpec) => didChangeDependencies(oldSpec);
 
   @override
   FlexiChartType resolveChartType() => FlexiChartType.barSolid;

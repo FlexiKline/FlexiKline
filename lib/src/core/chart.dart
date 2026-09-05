@@ -143,6 +143,12 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
     calculatePaintChartRange();
     if (!klineData.canPaintChart) {
       logd('chartBinding paintChart data is being prepared!');
+      // 数据未就绪时仍补一趟主区横线: 整趟跳过会让加载中的主区只剩 grid 的竖线。骨架的位置
+      // 只依赖几何, 无需区间; 刻度文本没有值可取, 由 [paintYAxisTickLines] 自行跳过。
+      //
+      // 放在 chart 层而非 grid 层: grid 只在布局与配置变更时重绘, 数据到达时不会, 那样画
+      // 出的骨架线会一直叠在真实刻度线上。
+      mainPaintObject.doPaintYAxisTickLines(canvas, size);
       return;
     }
 

@@ -66,9 +66,12 @@
 * Keep the chart in its zoomed state when a zoom gesture starts outside the slider or before a price range exists, instead of clearing `isChartZooming` while the zoom range stayed applied — that combination hid the reset button while the Y axis remained locked. Handing the Y axis back is now only possible through `exitChartZoom`.
 * Add `Rect.distanceFromBottom`, replacing the private helper that measured a dy against the main chart area (renamed from the unused `invertedToDistane`); it returns null for a non-positive height, since an inverted rect makes the underlying `clamp` throw (Breaking Changes).
 * Move main-pane horizontal price lines from the grid layer into the chart layer so lines and tick labels share one source; tick labels now paint above all main-pane indicators instead of being covered by them.
-* Add `GridAxis.tickMode` to choose between evenly divided ticks and nice-number ticks on the main price axis; defaults to `average` so existing behaviour is unchanged.
+* Add `GridAxis.tickMode` to choose between evenly divided ticks and nice-number ticks on the main price axis; it defaults to `nice`, and the default lives on `GridAxis` so a stored config without the field switches over too (Breaking Changes).
 * Change `GridAxis.count` to mean a target interval count when `tickMode` is `nice`: the actual tick count varies around it because step values are rounded to readable numbers.
-* Keep the price-axis width reported for the zoom slide bar monotonic so the zoom hit area no longer shifts while tick labels change length; the cached width resets when precision, theme, or tick text style changes.
+* Paint the main-pane price lines evenly divided while no price range exists, so a chart waiting for data keeps its horizontal skeleton instead of showing the grid's vertical lines alone; tick labels stay hidden until a range exists, since there is no value to format.
+* Keep the price-axis width reported for the zoom slide bar monotonic so the zoom hit area no longer shifts while tick labels change length; the cached width resets on a symbol change or a theme change.
+* Expose `CandleBasePaintObject.reportZoomSlideBarRect` as protected, so a subclass that overrides `paintYAxisTickLabels` to draw its own tick labels can still report the zoom hit area.
+* Mark `CandleBasePaintObject.didChangeDependencies` as `@mustCallSuper`: it resets the cached zoom slide bar width when the symbol changes, so an override that skips `super` keeps the previous symbol's width (Breaking Changes).
 
 ## 2.4.1
 * Fix the blank band above the candles left after hiding main-area indicators, which survived config reload and data refresh and could only be cleared by rebuilding the controller.

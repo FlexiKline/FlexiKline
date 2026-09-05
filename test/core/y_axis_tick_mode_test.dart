@@ -52,7 +52,7 @@ void main() {
   /// 建 controller、灌数据并按 [tickMode] 配置主区横向轴。
   Future<ControllerScenario> arrange(
     WidgetTester tester, {
-    GridTickMode tickMode = GridTickMode.average,
+    required GridTickMode tickMode,
     List<CandleModel>? candles,
     EdgeInsets padding = _mainPadding,
     bool gridShow = true,
@@ -147,7 +147,7 @@ void main() {
   }
 
   group('v2.5.0/主区Y轴/刻度模式', () {
-    testWidgets('默认是 average: 刻度按像素等分, 位置与值都不变', (tester) async {
+    testWidgets('默认是 nice: 不动配置也取整数化刻度', (tester) async {
       final scene = ControllerScenario(
         config: FakeFlexiKlineConfiguration(mainIndicatorDefaultPadding: _mainPadding),
       );
@@ -161,8 +161,18 @@ void main() {
       scene.controller.flushPendingKlineData();
       final chart = scene.controller;
 
-      // 不动任何配置: 默认值本身就是本条用例要守的东西。
-      expect(chart.gridConfig.horizontal.tickMode, GridTickMode.average);
+      // 不动任何配置: 默认值本身就是本条用例要守的东西。它同时管着旧持久化配置的反序列化,
+      // 那条路径读的是 GridAxis 的构造默认值。
+      expect(chart.gridConfig.horizontal.tickMode, GridTickMode.nice);
+
+      final spy = await paintFrame(tester, chart);
+
+      expectNiceMultiples(tickValues(spy, chart));
+    });
+
+    testWidgets('average: 刻度按像素等分, 位置与值都不变', (tester) async {
+      final scene = await arrange(tester, tickMode: GridTickMode.average);
+      final chart = scene.controller;
 
       final spy = await paintFrame(tester, chart);
       final count = chart.gridConfig.horizontal.count;
@@ -178,6 +188,38 @@ void main() {
         closeTo(chart.dyToCandleValue(count * dyStep, check: false)!.toDouble(), 1e-9),
         reason: '值由位置反算, 不经过任何取整',
       );
+    });
+
+    /// 横线从 grid 层搬到 chart 层后落在了 `paintChart` 的 `canPaintChart` 门禁之后，加载中
+    /// 的主区于是只剩 grid 的竖线。骨架路径补的就是这一段：位置只依赖几何，与 tickMode 无关。
+    ///
+    /// 不放回 grid 层：grid 只在布局与配置变更时重绘，数据到达时不会，骨架线会一直叠在真实
+    /// 刻度线上。
+    testWidgets('数据未就绪: 按 count 等分画骨架横线, 不画刻度文本', (tester) async {
+      final scene = ControllerScenario(
+        config: FakeFlexiKlineConfiguration(mainIndicatorDefaultPadding: _mainPadding),
+      );
+      addTearDown(scene.dispose);
+      await scene.initWithData(
+        _spec,
+        const [],
+        canvasWidth: 400,
+        candle: TestCandleIndicator(visibleMinMaxFromData: true),
+      );
+      scene.controller.flushPendingKlineData();
+      final chart = scene.controller;
+      expect(chart.klineData.canPaintChart, isFalse, reason: '前置条件: 本条要的就是无数据态');
+
+      final spy = await paintFrame(tester, chart);
+      final count = chart.gridConfig.horizontal.count;
+      final dyStep = chart.mainRect.height / count;
+
+      expect(
+        tickDys(spy, chart),
+        [for (var i = 1; i <= count; i++) i * dyStep],
+        reason: '骨架位置与 average 模式同口径',
+      );
+      expect(spy.paragraphs, 0, reason: '没有区间就取不到值, 不该画文本');
     });
 
     testWidgets('nice + 自动区间: 刻度值是同一 step 的整数倍', (tester) async {

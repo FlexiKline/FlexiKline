@@ -112,7 +112,7 @@ class GridAxis {
   const GridAxis({
     this.show = true,
     this.count = 5,
-    this.tickMode = GridTickMode.average,
+    this.tickMode = GridTickMode.nice,
     this.line = const LineConfig(
       type: LineType.solid,
       dashes: [2, 2],
@@ -128,7 +128,11 @@ class GridAxis {
   /// [GridTickMode.nice] 下是目标间隔数: 步长要取整到好读的数, 实际刻度数在它附近浮动。
   final int count;
 
-  /// 刻度取值方式。本期只有主区价格轴(即 [GridConfig.horizontal])读取它。
+  /// 刻度取值方式, 默认 [GridTickMode.nice]。
+  ///
+  /// 本期只有主区价格轴(即 [GridConfig.horizontal])读取它, [GridConfig.vertical] 上的取值
+  /// 当前无人使用。默认值定在这里而不是 [GridConfig] 的构造参数上, 是为了让缺少该字段的旧
+  /// 持久化配置反序列化后也走 nice。
   final GridTickMode tickMode;
 
   final LineConfig line;

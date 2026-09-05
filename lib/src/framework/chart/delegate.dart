@@ -348,6 +348,11 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
     candle?.paintYAxisTickLabels(canvas, size);
   }
 
+  /// 只画 Y 轴横线, 供数据未就绪时的骨架路径使用(见 `paintChart` 的 `canPaintChart` 门禁)。
+  void doPaintYAxisTickLines(Canvas canvas, Size size) {
+    _candlePaintObject?.paintYAxisTickLines(canvas, size);
+  }
+
   void doPaintOverlay(Canvas canvas, Size size) {
     for (final object in paintableChildren) {
       object.paintOverlay(canvas, size);

@@ -367,14 +367,11 @@ abstract class CandleBasePaintObject<T extends CandleBaseIndicator> extends Dire
   /// 宽度只增不减: 刻度文本的长度随缩放、平移变化, 热区若跟着回缩, 用户会遇到「刚才能拖、
   /// 现在拖不到」。热区只参与四处命中判定(见 `setChartZoomSlideBarRect` 的注释), 不参与
   /// 展示, 偏宽无副作用; 上界是该 precision 下最长刻度文本的宽度, 所以一定收敛。
-  Rect? _reportedZoomBarRect;
-
-  /// 上次度量刻度文本时的前提: precision 决定小数位数, ticksText 决定字体与内边距。
   ///
-  /// 变化时清掉已收敛的宽度 —— 否则换到短文本的标的后, 热区会一直沿用上一个标的的宽度。
-  /// [TextAreaConfig] 没有 `==`, 比较退化为实例比较: 稳定态是同一个实例, 配置变更时由
-  /// copyWith 换新, 两种情形都判对; 内容相同的重建只多上报一次。
-  ({int precision, TextAreaConfig ticksText})? _tickTextMetrics;
+  /// 清空点只有换标的([didChangeDependencies])与换主题([didChangeTheme])两处。刻度文本
+  /// 样式([GridConfig.ticksText])调小字号后热区会一直偏宽, 但那与单调增长本身的代价同量级,
+  /// 不值得为它引入配置级的变更通知。
+  Rect? _reportedZoomBarRect;
 
   /// 绘制 Y 轴刻度横线, 并产出本帧刻度。
   ///
@@ -385,19 +382,25 @@ abstract class CandleBasePaintObject<T extends CandleBaseIndicator> extends Dire
   void paintYAxisTickLines(Canvas canvas, Size size) {
     final axis = gridConfig.horizontal;
 
-    // 唯一的模式分叉点。两个分支只负责产出 (dy, value) 对, 线的绘制、值的格式化与滑竿宽度
-    // 上报都在分叉之外, 各写一遍就够。
-    final ticks = _frameTicks = switch (axis.tickMode) {
-      GridTickMode.average => _averageTicks(axis.count),
-      GridTickMode.nice => _niceTicks(axis.count),
-    };
+    // 没有区间可用时只画骨架: 位置按 count 等分, 不产出刻度值, 文本那一趟因此自动跳过。
+    // 数据未就绪(加载中、切标的)是它的主要场景 —— 横线是布局骨架, 位置只依赖几何, 缺了
+    // 这一路主区就只剩竖线。价格全为零的坏数据也走这里, 画骨架比画一列 0 更诚实。
+    //
+    // 其余情况是唯一的模式分叉点。两个分支只负责产出 (dy, value) 对, 线的绘制、值的格式化
+    // 与滑竿宽度上报都在分叉之外, 各写一遍就够。
+    final ticks = _frameTicks = minMax.isZero
+        ? null
+        : switch (axis.tickMode) {
+            GridTickMode.average => _averageTicks(axis.count),
+            GridTickMode.nice => _niceTicks(axis.count),
+          };
 
     if (!axis.show) return;
-    for (final tick in ticks) {
+    for (final dy in ticks?.map((tick) => tick.dy) ?? _averageTickDys(axis.count)) {
       canvas.drawLineByConfig(
         Path()
-          ..moveTo(drawableRect.left, tick.dy)
-          ..lineTo(drawableRect.right, tick.dy),
+          ..moveTo(drawableRect.left, dy)
+          ..lineTo(drawableRect.right, dy),
         axis.line,
         themeColor: theme.gridLineColor,
       );
@@ -409,15 +412,21 @@ abstract class CandleBasePaintObject<T extends CandleBaseIndicator> extends Dire
   /// [count] 是间隔数, 末条刻度落在 [drawableRect] 底边。
   List<({double dy, FlexiNum value})> _averageTicks(int count) {
     final ticks = <({double dy, FlexiNum value})>[];
-    if (count <= 0) return ticks;
-    final dyStep = drawableRect.height / count;
-    for (int i = 1; i <= count; i++) {
-      final dy = i * dyStep;
+    for (final dy in _averageTickDys(count)) {
       final value = dyToValue(dy);
       if (value == null) continue;
       ticks.add((dy: dy, value: value));
     }
     return ticks;
+  }
+
+  /// 按像素等分 [drawableRect] 的刻度位置, [count] 是间隔数, 末条落在底边。
+  ///
+  /// 与取值分开: 骨架路径只要位置, 没有区间可反算。
+  List<double> _averageTickDys(int count) {
+    if (count <= 0) return const [];
+    final dyStep = drawableRect.height / count;
+    return [for (int i = 1; i <= count; i++) i * dyStep];
   }
 
   /// 按 nice-number 取整刻度值产出刻度: 先定值, 再由 [valueToDy] 换算位置。
@@ -481,24 +490,22 @@ abstract class CandleBasePaintObject<T extends CandleBaseIndicator> extends Dire
       if (size.width > maxTickWidth) maxTickWidth = size.width;
     }
 
-    _reportZoomSlideBarRect(maxTickWidth);
+    reportZoomSlideBarRect(maxTickWidth);
   }
 
   /// 按本帧刻度文本的最大宽度上报 zoom 滑竿区域。
+  ///
+  /// 覆写 [paintYAxisTickLabels] 自行绘制刻度文本的子类, 度量完成后要调用它, 否则 zoom
+  /// 手势拿不到热区。
   ///
   /// 比较整个 [Rect] 而不只比宽度: 主区高度变化(grid resize、指标增删)时宽度可能没变, 但
   /// top / height 要更新。稳定态因此零上报, 不再每帧提交一次 post-frame 回调。
   ///
   /// 经 `context.reportChartZoomSlideBarRect` 而不直连 controller: 宿主接管热区
   /// (`useCustomZoomRect`)时上报必须彻底静默。
-  void _reportZoomSlideBarRect(double maxTickWidth) {
+  @protected
+  void reportZoomSlideBarRect(double maxTickWidth) {
     if (context.gestureConfig.useCustomZoomRect) return;
-
-    final metrics = (precision: klineData.precision, ticksText: defTicksTextConfig);
-    if (metrics != _tickTextMetrics) {
-      _tickTextMetrics = metrics;
-      _invalidateZoomBarWidth();
-    }
 
     final width = math.max(_reportedZoomBarRect?.width ?? 0, maxTickWidth);
     final rect = Rect.fromLTWH(
@@ -512,14 +519,23 @@ abstract class CandleBasePaintObject<T extends CandleBaseIndicator> extends Dire
     context.reportChartZoomSlideBarRect(rect);
   }
 
-  /// 清空滑竿宽度的收敛态, 让它按新的文本度量前提重新长起来。
-  void _invalidateZoomBarWidth() => _reportedZoomBarRect = null;
+  /// 换标的时让滑竿宽度重新收敛: 价格量级与精度都可能变, 沿用上一个标的的宽度会让热区宽出
+  /// 一截、盖住图表。
+  ///
+  /// 判据取 symbol 而不是 [KlineSpec.key]: 后者含 interval, 而周期切换不改价格量级。
+  @protected
+  @mustCallSuper
+  @override
+  void didChangeDependencies(KlineSpec oldSpec) {
+    super.didChangeDependencies(oldSpec);
+    if (oldSpec.symbol != klineData.symbol) _reportedZoomBarRect = null;
+  }
 
   @override
   void didChangeTheme() {
     super.didChangeTheme();
     // 主题可换字体与字号, 已收敛的宽度不再可信。
-    _invalidateZoomBarWidth();
+    _reportedZoomBarRect = null;
   }
 }
 
