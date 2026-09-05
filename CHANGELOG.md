@@ -66,6 +66,8 @@
 * Keep the chart in its zoomed state when a zoom gesture starts outside the slider or before a price range exists, instead of clearing `isChartZooming` while the zoom range stayed applied — that combination hid the reset button while the Y axis remained locked. Handing the Y axis back is now only possible through `exitChartZoom`.
 * Add `Rect.distanceFromBottom`, replacing the private helper that measured a dy against the main chart area (renamed from the unused `invertedToDistane`); it returns null for a non-positive height, since an inverted rect makes the underlying `clamp` throw (Breaking Changes).
 * Move main-pane horizontal price lines from the grid layer into the chart layer so lines and tick labels share one source; tick labels now paint above all main-pane indicators instead of being covered by them.
+* Add `GridAxis.tickMode` to choose between evenly divided ticks and nice-number ticks on the main price axis; defaults to `average` so existing behaviour is unchanged.
+* Change `GridAxis.count` to mean a target interval count when `tickMode` is `nice`: the actual tick count varies around it because step values are rounded to readable numbers.
 
 ## 2.4.1
 * Fix the blank band above the candles left after hiding main-area indicators, which survived config reload and data refresh and could only be cleared by rebuilding the controller.

@@ -166,6 +166,8 @@ abstract class _$GridAxisCWProxy {
 
   GridAxis count(int count);
 
+  GridAxis tickMode(GridTickMode tickMode);
+
   GridAxis line(LineConfig line);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GridAxis(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
@@ -177,6 +179,7 @@ abstract class _$GridAxisCWProxy {
   GridAxis call({
     bool show,
     int count,
+    GridTickMode tickMode,
     LineConfig line,
   });
 }
@@ -194,6 +197,9 @@ class _$GridAxisCWProxyImpl implements _$GridAxisCWProxy {
   GridAxis count(int count) => this(count: count);
 
   @override
+  GridAxis tickMode(GridTickMode tickMode) => this(tickMode: tickMode);
+
+  @override
   GridAxis line(LineConfig line) => this(line: line);
 
   @override
@@ -207,6 +213,7 @@ class _$GridAxisCWProxyImpl implements _$GridAxisCWProxy {
   GridAxis call({
     Object? show = const $CopyWithPlaceholder(),
     Object? count = const $CopyWithPlaceholder(),
+    Object? tickMode = const $CopyWithPlaceholder(),
     Object? line = const $CopyWithPlaceholder(),
   }) {
     return GridAxis(
@@ -218,6 +225,10 @@ class _$GridAxisCWProxyImpl implements _$GridAxisCWProxy {
           ? _value.count
           // ignore: cast_nullable_to_non_nullable
           : count as int,
+      tickMode: tickMode == const $CopyWithPlaceholder()
+          ? _value.tickMode
+          // ignore: cast_nullable_to_non_nullable
+          : tickMode as GridTickMode,
       line: line == const $CopyWithPlaceholder()
           ? _value.line
           // ignore: cast_nullable_to_non_nullable
@@ -286,6 +297,9 @@ Map<String, dynamic> _$GridConfigToJson(GridConfig instance) =>
 GridAxis _$GridAxisFromJson(Map<String, dynamic> json) => GridAxis(
       show: json['show'] as bool? ?? true,
       count: (json['count'] as num?)?.toInt() ?? 5,
+      tickMode: json['tickMode'] == null
+          ? GridTickMode.average
+          : const GridTickModeConverter().fromJson(json['tickMode'] as String),
       line: json['line'] == null
           ? const LineConfig(
               type: LineType.solid,
@@ -297,5 +311,6 @@ GridAxis _$GridAxisFromJson(Map<String, dynamic> json) => GridAxis(
 Map<String, dynamic> _$GridAxisToJson(GridAxis instance) => <String, dynamic>{
       'show': instance.show,
       'count': instance.count,
+      'tickMode': const GridTickModeConverter().toJson(instance.tickMode),
       'line': instance.line.toJson(),
     };

@@ -110,16 +110,45 @@ List<CandleModel> genFlatCandleList({
   int count = 200,
   int latestTimestamp = 12000000,
   int intervalMs = 60000,
+  num high = 110,
+  num low = 90,
 }) {
   return List.generate(
     count,
     (index) => CandleModel(
       timestamp: latestTimestamp - index * intervalMs,
       open: 100,
-      high: 110,
-      low: 90,
+      high: high,
+      low: low,
       close: 105,
       volume: 1000,
     ),
   );
+}
+
+/// 生成 [count] 根价格线性上行的蜡烛：第 i 根（自最新往历史数）的 high 为
+/// `high - i * slope`，low 恒低 [spread]。
+///
+/// [genFlatCandleList] 的价量恒定让平移不改变 `minMax`，任何「区间随可见数据变化」的断言在它
+/// 上面都是空转。线性斜坡下每平移一根蜡烛，`minMax` 端点就移动一个 [slope]：位移有下界（不空转）
+/// 又有上界（可断言「没有台阶」），而 [genRandomCandleList] 的随机形态两头都给不了。
+List<CandleModel> genRampCandleList({
+  int count = 200,
+  int latestTimestamp = 12000000,
+  int intervalMs = 60000,
+  num high = 110,
+  num spread = 14,
+  num slope = 0.5,
+}) {
+  return List.generate(count, (index) {
+    final h = high - index * slope;
+    return CandleModel(
+      timestamp: latestTimestamp - index * intervalMs,
+      open: h - spread / 2,
+      high: h,
+      low: h - spread,
+      close: h - spread / 2,
+      volume: 1000,
+    );
+  });
 }

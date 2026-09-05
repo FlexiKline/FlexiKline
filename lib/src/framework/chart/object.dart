@@ -373,7 +373,13 @@ abstract class CandleBasePaintObject<T extends CandleBaseIndicator> extends Dire
   /// 横线宽度取 [drawableRect] 而非 chartRect: 后者已让出 padding, 会让线短一截。
   void paintYAxisTickLines(Canvas canvas, Size size) {
     final axis = gridConfig.horizontal;
-    final ticks = _frameTicks = _averageTicks(axis.count);
+
+    // 唯一的模式分叉点。两个分支只负责产出 (dy, value) 对, 线的绘制、值的格式化与滑竿宽度
+    // 上报都在分叉之外, 各写一遍就够。
+    final ticks = _frameTicks = switch (axis.tickMode) {
+      GridTickMode.average => _averageTicks(axis.count),
+      GridTickMode.nice => _niceTicks(axis.count),
+    };
 
     if (!axis.show) return;
     for (final tick in ticks) {
@@ -401,6 +407,36 @@ abstract class CandleBasePaintObject<T extends CandleBaseIndicator> extends Dire
       ticks.add((dy: dy, value: value));
     }
     return ticks;
+  }
+
+  /// 按 nice-number 取整刻度值产出刻度: 先定值, 再由 [valueToDy] 换算位置。
+  ///
+  /// 取值范围是 [drawableRect] 反算出的价格区间, **不外扩 minMax** —— 后者是 Y 轴 zoom 的
+  /// 数据载体, 外扩会让用户精确控制的跨度被算法撑回去, 也会让 step 换档时整幅画面跳一下。
+  /// 代价是最顶/最底刻度到边缘的距离随平移连续变化, 与 TradingView 一致。
+  ///
+  /// [count] 是目标间隔数, 直接就是算法的 targetCount: 等分模式的 `height / count` 同样把
+  /// 高度切成 count 段, 两者语义本就一致, 不做 ±1 换算。
+  List<({double dy, FlexiNum value})> _niceTicks(int count) {
+    // 显式 check: false —— 此处的 dy 恰在 drawableRect 边界上, 带检查的默认值会返回 null,
+    // 刻度会整体消失且不抛异常。
+    final top = dyToValue(drawableRect.top, check: false);
+    final bottom = dyToValue(drawableRect.bottom, check: false);
+    if (top == null || bottom == null) return const [];
+
+    final ticks = computePriceTicks(
+      bottom: bottom.toDouble(),
+      top: top.toDouble(),
+      targetCount: count,
+      precision: klineData.precision,
+    );
+
+    return ticks.values.map((tick) {
+      final value = tick.toFlexiNum();
+      // correct: false —— 默认会把值 clamp 进 [minMax.min, max], 留白区(padding 与 tips)的
+      // 刻度会被压到边缘叠在一起。
+      return (dy: valueToDy(value, correct: false), value: value);
+    }).toList();
   }
 
   /// 绘制 Y 轴刻度文本。

@@ -17,6 +17,7 @@ import 'package:flexi_formatter/date_time.dart';
 import 'package:flutter/painting.dart';
 import 'package:json_annotation/json_annotation.dart';
 
+import '../config/grid_config/grid_config.dart';
 import '../extension/export.dart';
 import '../model/flexi_num.dart';
 import '../model/time_interval.dart';
@@ -399,6 +400,23 @@ class LineTypeConverter implements JsonConverter<LineType, String> {
 
   @override
   String toJson(LineType object) {
+    return object.name;
+  }
+}
+
+class GridTickModeConverter implements JsonConverter<GridTickMode, String> {
+  const GridTickModeConverter();
+
+  @override
+  GridTickMode fromJson(String json) {
+    return GridTickMode.values.firstWhere(
+      (e) => e.name == json,
+      orElse: () => GridTickMode.average,
+    );
+  }
+
+  @override
+  String toJson(GridTickMode object) {
     return object.name;
   }
 }
@@ -965,6 +983,7 @@ const _basicConverterList = <JsonConverter>[
   PaintingStyleConverter(),
   BlendModeConverter(),
   LineTypeConverter(),
+  GridTickModeConverter(),
   EdgeInsetsConverter(),
   SizeConverter(),
   RectConverter(),

@@ -97,12 +97,22 @@ class GridConfig {
   Map<String, dynamic> toJson() => _$GridConfigToJson(this);
 }
 
+/// 轴刻度的取值方式。
+enum GridTickMode {
+  /// 按像素等分轴长, 刻度值由位置反算。位置固定, 数量精确等于 count。
+  average,
+
+  /// 按 nice-number 取整刻度值, 位置由值换算。值好读, 数量在 count 附近浮动。
+  nice,
+}
+
 @CopyWith()
 @FlexiConfigSerializable
 class GridAxis {
   const GridAxis({
     this.show = true,
     this.count = 5,
+    this.tickMode = GridTickMode.average,
     this.line = const LineConfig(
       type: LineType.solid,
       dashes: [2, 2],
@@ -111,7 +121,16 @@ class GridAxis {
   });
 
   final bool show;
+
+  /// 刻度的间隔数。
+  ///
+  /// [GridTickMode.average] 下是精确间隔数: 轴长恰好被切成 count 段。
+  /// [GridTickMode.nice] 下是目标间隔数: 步长要取整到好读的数, 实际刻度数在它附近浮动。
   final int count;
+
+  /// 刻度取值方式。本期只有主区价格轴(即 [GridConfig.horizontal])读取它。
+  final GridTickMode tickMode;
+
   final LineConfig line;
 
   factory GridAxis.fromJson(Map<String, dynamic> json) => _$GridAxisFromJson(json);
