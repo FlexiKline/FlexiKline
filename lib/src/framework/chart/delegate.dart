@@ -333,39 +333,28 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
     );
   }
 
-  /// 委托蜡烛绘制主区网格线: 存下竖线 dx 供副区对齐, 返回横线 dy 供刻度文本那一趟。
+  /// 委托蜡烛绘制主区网格线: 存下竖线 dx 供副区对齐, 交出横线 dy 给刻度文本那一趟。
   ///
   /// 两个调用点: [doPaintChart] 的第一步, 以及编排层的加载态路径 —— 那一趟不走 [doPaintChart],
   /// 但网格线与副区要对齐的 dx 都不该跟着缺席。
   ///
-  /// 只问 candle、不遍历主区子指标: 与 [doPaintChart] 里刻度文本的口径一致, MA / BOLL
-  /// 一类不参与网格线。
-  ///
-  /// 也不自己编排(调 candle 的 resolve 与 paint): 那要求 candle 把四个方法分别暴露出去, 还
-  /// 要让主区容器知道 `indicator.horizontalGrid` / `verticalGrid` 长什么样 —— 网格配置的知识
-  /// 就从蜡烛泄漏到了容器里。委托单一入口即可。
+  /// 只问 candle: MA / BOLL 一类不参与网格线。也不自己编排 candle 的 resolve 与 paint —— 那会
+  /// 把 `horizontalGrid` / `verticalGrid` 的知识泄漏到容器里, 委托单一入口即可。
   List<double> doPaintGridLines(Canvas canvas, Size size) {
-    final candle = _candlePaintObject;
-    if (candle == null) {
-      _gridVerticalDxs = const [];
-      return const [];
-    }
-    final (dxs: dxs, dys: dys) = candle.paintGridLines(canvas, size);
-    _gridVerticalDxs = dxs;
-    return dys;
+    final grid = _candlePaintObject?.paintGridLines(canvas, size);
+    _gridVerticalDxs = grid?.dxs ?? const [];
+    return grid?.dys ?? const [];
   }
 
-  void doPaintChart(Canvas canvas, Size size) {
-    // 网格线与 Y 轴刻度文本夹住整个子对象遍历: 线在所有主区指标之下、文本在其之上。
-    //
-    // 不能把这两步收进 CandlePaintObject.paint —— candle 不是最底层。CandleIndicator
-    // 的 zIndex 是 -1, 而 VolumeIndicator 用 -2, 且 zIndex 是可覆盖的构造参数, 宿主
-    // 能传任意值。只有在此处编排才与 zIndex 无关。
-    //
-    // 本帧刻度位置用局部变量跨过整个遍历, 不落成字段: 它的生命周期本来就是「一次编排」,
-    // 作用域天然保证不脏读。也不在文本那一趟重算 —— 两者之间隔着 doPaintTips, 它改
-    // _tipsAreaHeight 从而改 chartRect, 重算会让 nice 文本落在自己那条线之外。
-    //
+  /// 返回本帧 Y 轴刻度文本的最大宽度, 供编排层定 zoom 滑竿热区的宽度; null 表示这一帧没画。
+  ///
+  /// 网格线与刻度文本夹住整个子对象遍历: 线在所有主区指标之下、文本在其之上。这两步不能收进
+  /// `CandlePaintObject.paint` —— candle 不是最底层(`CandleIndicator` 的 zIndex 是 -1, 而
+  /// `VolumeIndicator` 用 -2, 且宿主能传任意值), 只有在此处编排才与 zIndex 无关。
+  ///
+  /// 本帧刻度位置用局部变量跨过遍历, 不落成帧内字段: 后者要靠「用完置空」的纪律维持, 某帧未走
+  /// 到文本那一趟就会留下上一帧的值。
+  double? doPaintChart(Canvas canvas, Size size) {
     // 网格线坐标落在 drawableRect 内, 编排层此刻的 clipRect(mainRect, 平滑期是更宽的
     // canvasRect)裁不到它。
     final dys = doPaintGridLines(canvas, size);
@@ -388,7 +377,11 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
       }
     }
 
-    _candlePaintObject?.paintYAxisTickLabels(canvas, size, dys: dys);
+    // 直接调 paintYAxisTicks、不在 candle 上另设一层入口: 那一层只会重复这三个判断再转发。
+    // 自行绘制刻度文本的子类覆写 `PaintGridTicksMixin.paintYAxisTicks` 并返回实测最大宽度即可。
+    final candle = _candlePaintObject;
+    if (candle == null || dys.isEmpty || !settingConfig.showYAxisTick) return null;
+    return candle.paintYAxisTicks(canvas, dys: dys, precision: klineData.precision);
   }
 
   void doPaintOverlay(Canvas canvas, Size size) {

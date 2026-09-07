@@ -470,7 +470,9 @@ mixin PaintGridTicksMixin<T extends Indicator> on PaintObject<T> {
   /// [formatTicksValue] 格式化。**必须 check: false**: `includeDy` 是闭区间, 而 nice 刻度
   /// 可以落在留白区端点上, 浮点误差足以让它差之毫厘被判出界, 整条刻度静默消失。
   ///
-  /// 返回宽度是给主区蜡烛用的: zoom 滑竿热区的宽度由本帧刻度文本实测而来。
+  /// 返回宽度供主区那一趟上行给编排层: zoom 滑竿热区的宽度由本帧刻度文本实测而来
+  /// (见 `MainPaintDelegateExt.doPaintChart`)。自行绘制刻度文本的子类覆写它, 返回实测最大宽度
+  /// 即可, 否则 zoom 手势拿不到热区。
   @protected
   double paintYAxisTicks(
     Canvas canvas, {

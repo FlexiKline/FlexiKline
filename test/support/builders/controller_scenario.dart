@@ -38,10 +38,13 @@ Future<void> paintChartFrame(WidgetTester tester, FlexiKlineController chart) as
 
 /// Controller 级场景构建器
 class ControllerScenario {
-  ControllerScenario({FakeFlexiKlineConfiguration? config})
-      : controller = FlexiKlineController(
-          configuration: config ?? FakeFlexiKlineConfiguration(),
-        );
+  /// [controller] 供需要观察 controller 自身调用的用例传入 spy 子类；传了它 [config] 就无效，
+  /// configuration 由调用方在构造 controller 时给。
+  ControllerScenario({FakeFlexiKlineConfiguration? config, FlexiKlineController? controller})
+      : controller = controller ??
+            FlexiKlineController(
+              configuration: config ?? FakeFlexiKlineConfiguration(),
+            );
 
   final FlexiKlineController controller;
 

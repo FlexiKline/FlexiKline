@@ -183,6 +183,20 @@ void main() {
       expect(log.paragraphs, 0, reason: '没有区间就取不到值, 不该画文本');
     });
 
+    /// 加载态走的是编排层直接调 `doPaintGridLines` 的那条路，不经 `doPaintChart`。dx 的写入必须
+    /// 在那个方法里，否则副区读到的是上一帧的值——冷启动时是空列表，整个加载期间主区有竖线、副区
+    /// 没有。
+    testWidgets('加载态: 副区仍收到本帧主区的 dx', (tester) async {
+      final scene = await arrange(tester, candles: const []);
+      final chart = scene.controller;
+
+      final log = await paintFrame(tester, chart);
+
+      final main = log.mainVerticalDxs(chart);
+      expect(main, isNotEmpty, reason: '前置条件: 加载态也该有主区竖线');
+      expect(_AlignedGridIndicator.lastObject!.receivedDxs, main, reason: '加载态副区拿不到 dx 就只能自己算, 对齐失去结构保证');
+    });
+
     /// 退化判据取 `canPaintChart` 而非 `minMax.isZero` 的唯一理由：这一帧里两者的取值相反。
     testWidgets('切标的瞬间(canPaintChart 转 false, minMax 仍是旧值): 横线不闪断', (tester) async {
       final scene = await arrange(tester);

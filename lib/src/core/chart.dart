@@ -50,6 +50,8 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
     for (final paintObject in [mainPaintObject, ...subPaintObjects]) {
       paintObject.doDidChangeTheme();
     }
+    // 主题可换字体与字号, 已收敛的滑竿宽度不再可信, 清零让它下一帧重新收敛。
+    _chartZoomSlideBarRect.value = Rect.zero;
   }
 
   @override
@@ -64,6 +66,8 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
     // 价格, 用户调过的视野应当保留。判据必须是 symbol 而非 spec.key, 后者把 interval
     // 一起编码, 用它会把换周期误判成换标的。
     if (isMounted && klineData.spec.symbol != oldSpec.symbol) {
+      // 滑竿宽度同理: 价格量级与精度都可能变, 沿用上一个标的的宽度会让热区宽出一截、盖住图表。
+      _chartZoomSlideBarRect.value = Rect.zero;
       exitChartZoom();
     }
   }
@@ -192,7 +196,9 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
         reset: _reset,
         panSmoothFactor: _panSmoothFactor,
       );
-      mainPaintObject.doPaintChart(canvas, size);
+      // 热区宽度来自本帧刻度文本的实测宽度, 所以紧跟主区那一趟。
+      final maxTickWidth = mainPaintObject.doPaintChart(canvas, size);
+      _syncChartZoomSlideBarRect(maxTickWidth);
 
       if (!allowOverlayOutsideMainRect) {
         mainPaintObject.doPaintOverlay(canvas, size);
@@ -201,9 +207,6 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
       /// 恢复画布状态
       canvas.restore();
     }
-
-    // 主区画完才有刻度文本宽度: 热区从绘制树上拉取, 不由蜡烛反向上报。
-    _syncChartZoomSlideBarRect();
 
     for (final paintObject in subPaintObjects) {
       /// 更新副区指标可见区间状态.
@@ -554,27 +557,30 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
     });
   }
 
-  /// 上一次由绘制编排提交的热区, 只用于跳过重复提交。
+  /// 按本帧刻度文本的最大宽度同步 zoom 滑竿热区; [maxTickWidth] 为 null 表示这一帧没画文本。
   ///
-  /// 不拿 [_chartZoomSlideBarRect] 当判据: 提交经 post-frame 落地, 同帧内比会读到上一帧的
-  /// 值; 且它存的是夹取后的结果, 与拉取到的原值不可直接比。
-  Rect? _committedZoomSlideBarRect;
-
-  /// 从绘制树上拉取本帧的 zoom 滑竿热区并提交。
+  /// 宽度只增不减: 文本长度随缩放、平移变化(整数位跨量级、step 换档), 热区跟着回缩会让用户遇到
+  /// 「刚才能拖、现在拖不到」。它只参与命中判定、不参与展示, 偏宽无副作用; 上界是该 precision 下
+  /// 最长文本的宽度, 所以一定收敛。下界的清零点只有换标的与换主题两处, 见 [onKlineSpecChanged]
+  /// 与 [onThemeChanged]。
   ///
-  /// 由 [paintChart] 在主区绘制完成之后调用: 热区宽度来自主区 Y 轴刻度文本的实测宽度, 那一趟
-  /// 画完才有值。
+  /// 比整个 [Rect] 而不只比宽度: 主区高度变化(grid resize、指标增删)时宽度可能没变, 但 top /
+  /// height 要跟上。相等则不提交 —— 提交走 post-frame, 每帧提一次等于每帧挂一个空转回调。
+  /// 直接拿 [chartZoomSlideBarRect] 当判据成立的前提是矩形按 [mainRect] 构造: 它落在 [canvasRect]
+  /// 内, [setChartZoomSlideBarRect] 的夹取因此是空操作, 存进去的就是这里算出的值。
   ///
-  /// 值未变就不提交: 提交走 `addPostFrameCallback`, 每帧提一次等于每帧挂一个回调, 而
-  /// [_chartZoomSlideBarRect] 同值写入本就不通知, 挂了也是空转。
+  /// [GestureConfig.useCustomZoomRect] 的短路在这里而不在蜡烛侧: 它只决定这个矩形从哪来, 是
+  /// controller 的配置。
   ///
-  /// [GestureConfig.useCustomZoomRect] 的短路在这里而不在蜡烛侧: 它是 controller 的配置, 只
-  /// 决定这个矩形从哪来。宿主接管时蜡烛照常收敛宽度, 只是不提交。
-  void _syncChartZoomSlideBarRect() {
-    if (gestureConfig.useCustomZoomRect) return;
-    final rect = mainPaintObject.zoomSlideBarRect;
-    if (rect == null || rect == _committedZoomSlideBarRect) return;
-    _committedZoomSlideBarRect = rect;
+  /// 已知取舍: 单调下界读的是 [chartZoomSlideBarRect], 而它宿主也能写。宿主在自动模式下手动写
+  /// 一次宽矩形、或从 `useCustomZoomRect: true` 切回 false 时留下的宿主矩形, 都会成为自动路径的
+  /// 下界, 直到换标的或换主题清零。不为它另存一份下界: 前者是配置文档已排除的用法, 后者是运行时
+  /// 罕见的来源切换, 都不值得再养一份并行状态。
+  void _syncChartZoomSlideBarRect(double? maxTickWidth) {
+    if (maxTickWidth == null || gestureConfig.useCustomZoomRect) return;
+    final width = math.max(chartZoomSlideBarRect.width, maxTickWidth);
+    final rect = Rect.fromLTWH(mainRect.right - width, mainRect.top, width, mainRect.height);
+    if (rect == chartZoomSlideBarRect) return;
     setChartZoomSlideBarRect(rect);
   }
 
