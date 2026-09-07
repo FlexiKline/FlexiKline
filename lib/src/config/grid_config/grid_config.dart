@@ -28,7 +28,8 @@ part 'grid_config.g.dart';
 ///
 /// grid 层只负责**边框、pane 分隔线与拖拽**。网格线本身归各指标 —— 主区横线是价格刻度线、
 /// 竖线是几何参考线, 都由 `CandleBaseIndicator.horizontalGrid` / `verticalGrid` 配置。
-/// [horizontal] 与 [vertical] 因此只剩边框语义, 类型是 [GridBorder]。
+/// [horizontal] 与 [vertical] 因此只剩边框语义, 类型是 [GridBorder]。显隐由这两者各自的
+/// `show` 表达, 没有总开关 —— 那与「两个方向都关」完全等价, 且它管不到拖拽热区。
 ///
 /// 如果指定[dragLine]时:
 /// 1. 当拖拽中时, 使用[dragLine]绘制预拖拽的指标图的底部边线.
@@ -43,7 +44,6 @@ part 'grid_config.g.dart';
 @FlexiConfigSerializable
 class GridConfig {
   const GridConfig({
-    this.show = true,
     this.horizontal = const GridBorder(),
     this.vertical = const GridBorder(),
     this.isAllowDragIndicatorHeight = false,
@@ -70,9 +70,6 @@ class GridConfig {
       padding: EdgeInsets.symmetric(horizontal: 2),
     ),
   });
-
-  /// 是否绘制边框与 pane 分隔线。
-  final bool show;
 
   /// 主区顶边框与各 pane 底部分隔线。
   ///

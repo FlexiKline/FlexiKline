@@ -216,13 +216,13 @@ class _ZoomBarScene {
 
   void notifyThemeChanged() => object.notifyThemeChanged();
 
-  /// 驱动 Y 轴刻度的两趟绘制：画线一趟产出本帧刻度，画文本一趟度量宽度并上报。
+  /// 驱动 Y 轴刻度的两趟绘制：网格线一趟产出本帧刻度，画文本一趟度量宽度并上报。
   ///
-  /// 位置经返回值在两趟之间传递，与 `MainPaintObject.doPaintChart` 里的局部变量同一形状。
+  /// 位置经返回值在两趟之间传递，与 `ChartBinding.paintChart` 里的局部变量同一形状。
   void paintFrame() {
     final canvas = Canvas(PictureRecorder());
     final size = context.mainRect.size;
-    final dys = object.paintYAxisTickLines(canvas, size);
+    final dys = object.paintLinesAndTakeDys(canvas, size);
     object.paintYAxisTickLabels(canvas, size, dys: dys);
   }
 }
@@ -262,6 +262,12 @@ class _SpyCandlePaintObject extends CandleBasePaintObject<TestCandleIndicator> {
 
   /// 依赖变化钩子入口，同上。
   void notifyDependenciesChanged(KlineSpec oldSpec) => didChangeDependencies(oldSpec);
+
+  /// 网格线那一趟的入口：`paintGridLines` 是 `@protected`，它服务实现者而不是公开 API，
+  /// 用例只能经子类转发。
+  List<double> paintLinesAndTakeDys(Canvas canvas, Size size) {
+    return paintGridLines(canvas, size).dys;
+  }
 
   @override
   FlexiChartType resolveChartType() => FlexiChartType.barSolid;

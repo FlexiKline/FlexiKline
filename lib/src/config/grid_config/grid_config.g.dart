@@ -7,8 +7,6 @@ part of 'grid_config.dart';
 // **************************************************************************
 
 abstract class _$GridConfigCWProxy {
-  GridConfig show(bool show);
-
   GridConfig horizontal(GridBorder horizontal);
 
   GridConfig vertical(GridBorder vertical);
@@ -34,7 +32,6 @@ abstract class _$GridConfigCWProxy {
   /// GridConfig(...).copyWith(id: 12, name: "My name")
   /// ````
   GridConfig call({
-    bool show,
     GridBorder horizontal,
     GridBorder vertical,
     bool isAllowDragIndicatorHeight,
@@ -52,9 +49,6 @@ class _$GridConfigCWProxyImpl implements _$GridConfigCWProxy {
   const _$GridConfigCWProxyImpl(this._value);
 
   final GridConfig _value;
-
-  @override
-  GridConfig show(bool show) => this(show: show);
 
   @override
   GridConfig horizontal(GridBorder horizontal) => this(horizontal: horizontal);
@@ -94,7 +88,6 @@ class _$GridConfigCWProxyImpl implements _$GridConfigCWProxy {
   /// GridConfig(...).copyWith(id: 12, name: "My name")
   /// ````
   GridConfig call({
-    Object? show = const $CopyWithPlaceholder(),
     Object? horizontal = const $CopyWithPlaceholder(),
     Object? vertical = const $CopyWithPlaceholder(),
     Object? isAllowDragIndicatorHeight = const $CopyWithPlaceholder(),
@@ -106,10 +99,6 @@ class _$GridConfigCWProxyImpl implements _$GridConfigCWProxy {
     Object? ticksText = const $CopyWithPlaceholder(),
   }) {
     return GridConfig(
-      show: show == const $CopyWithPlaceholder()
-          ? _value.show
-          // ignore: cast_nullable_to_non_nullable
-          : show as bool,
       horizontal: horizontal == const $CopyWithPlaceholder()
           ? _value.horizontal
           // ignore: cast_nullable_to_non_nullable
@@ -221,7 +210,6 @@ extension $GridBorderCopyWith on GridBorder {
 // **************************************************************************
 
 GridConfig _$GridConfigFromJson(Map<String, dynamic> json) => GridConfig(
-      show: json['show'] as bool? ?? true,
       horizontal: json['horizontal'] == null
           ? const GridBorder()
           : GridBorder.fromJson(json['horizontal'] as Map<String, dynamic>),
@@ -244,7 +232,6 @@ GridConfig _$GridConfigFromJson(Map<String, dynamic> json) => GridConfig(
     );
 
 Map<String, dynamic> _$GridConfigToJson(GridConfig instance) => <String, dynamic>{
-      'show': instance.show,
       'horizontal': instance.horizontal.toJson(),
       'vertical': instance.vertical.toJson(),
       'isAllowDragIndicatorHeight': instance.isAllowDragIndicatorHeight,

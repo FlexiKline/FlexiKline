@@ -12,23 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// 网格线归主区蜡烛之后的编排：`paintGridLines` 在 `canPaintChart` 门禁**之前**跑，
-/// `paintYAxisTickLines` 在门禁之后。
+/// 网格线归主区蜡烛之后的编排：`paintGridLines` 一趟画完横竖两向，由各 pane 的 `doPaintChart`
+/// 在自己的可见区间就绪之后、指标图之前调；数据未就绪那一帧走编排层的独立路径，只调这一趟。
 ///
-/// 观察点是**一帧的绘制记录**：既取形状（横线、竖线、蜡烛记号、文本段），也取顺序。顺序是
-/// 本组的关键工具——副区指标的竖线由框架在门禁前、主区之后调，于是它天然是「门禁前 / 门禁后」
-/// 的分界标记：主区横线落在它之前即门禁前画的，落在它之后即门禁后画的。
+/// 观察点是**一帧的绘制记录**：既取形状（横线、竖线、蜡烛记号、文本段），也取顺序。顺序是本组
+/// 的关键工具——蜡烛落下的记号把「网格线」与「主区指标图」分开，副区落下的记号把「主区那一趟」
+/// 与「副区那一趟」分开。
 ///
-/// 三条只会「行为错、不报错」的实现细节由此有了回归网：
+/// 四条只会「行为错、不报错」的实现细节由此有了回归网：
 ///
-/// 一是**横线的两个绘制时机必须严格互补**。`paintGridLines` 与 `paintYAxisTickLines` 取同一
-/// 判据的正反两面，写歪一边就会画两遍（同色同宽，肉眼分不出）或一遍都不画。
+/// 一是**网格线必须早于本 pane 的指标图**。它收在 `doPaintChart` 的第一步，靠的是方法内部的顺序
+/// 而不是 zIndex——`CandleIndicator` 的 zIndex 是 -1、`VolumeIndicator` 用 -2，且宿主能传任意值。
 ///
-/// 二是**退化判据必须与门禁同源**（`klineData.canPaintChart`）。门禁前读到的 `minMax` 是上
-/// 一帧的值，切标的时它仍非零；用 `minMax.isZero` 判断会让 nice 既不在门禁前画（以为区间可用）、
-/// 也不在门禁后画（门禁挡住），横线闪断一帧。
+/// 二是**横线只画一遍**。两个绘制时机合并之后横线只剩一个入口，但位置重复（同色同宽，肉眼分不出）
+/// 仍是这条链路最容易悄悄发生的错。
 ///
-/// 三是**竖线必须在门禁之前**，否则加载中的图表只剩 grid 层的边框。
+/// 三是**退化判据必须与门禁同源**（`klineData.canPaintChart`）。切标的那一帧 `minMax` 仍是上一帧
+/// 的旧值；用 `minMax.isZero` 判退化会让 nice 以为区间可用、按旧标的的价格算位置。
+///
+/// 四是**数据未就绪时网格线仍要画**，否则加载中的图表只剩 grid 层的边框。
 library;
 
 import 'dart:ui' show Paragraph;
@@ -59,12 +61,12 @@ const _divisions = 5;
 const _canvasWidth = 400.0;
 const _subHeight = 80.0;
 
-/// 副区指标在门禁前落下的分界记号。
+/// 副区那一趟落下的记号，用来把主区画的东西与副区画的东西分开。
 ///
-/// 用有面积的形状而不是竖线：副区在这一刻的 `paneIndex` 还没分配（见
+/// 用有面积的形状而不是竖线：加载态那一帧副区的 `paneIndex` 还没分配（见
 /// `IPaintObject.paintGridLines` 的告警），它的 `drawableRect` 读到的是主区区域，画出来的
 /// 竖线与主区竖线形状一模一样，分不开。
-const _gateMarkRect = Rect.fromLTWH(3, 5, 7, 11);
+const _subMarkRect = Rect.fromLTWH(3, 5, 7, 11);
 
 /// 显式给实线：虚线会被 `drawLineByConfig` 拆成多段 path，形状分类随之失效。
 const _solidLine = LineConfig(type: LineType.solid);
@@ -75,7 +77,7 @@ void main() {
   /// 建 controller、灌数据并按参数配置主区网格线。
   ///
   /// 默认挂一个覆写了 `paintGridLines` 的副区指标：它既收下主区产出的 dx（「副区能借主区 dx
-  /// 对齐」这条能力的被测对象），也在同一时刻落下 [_gateMarkRect]，作为门禁前后的分界标记。
+  /// 对齐」这条能力的被测对象），也在同一时刻落下 [_subMarkRect] 与自己那一刻的 `drawableRect`。
   Future<ControllerScenario> arrange(
     WidgetTester tester, {
     GridTickMode horizontalMode = const GridTickMode.nice(targetDivisions: _divisions),
@@ -135,9 +137,9 @@ void main() {
       );
     });
 
-    /// 竖线画在门禁之前，那时主区的 `save() + clipRect(mainRect)` 还没进行；坐标本来就落在
-    /// `mainRect` 内，不会溢出。
-    testWidgets('z 序: 竖线早于蜡烛与主区指标', (tester) async {
+    /// 网格线是 `doPaintChart` 的第一步，此刻主区的 `save() + clipRect(mainRect)` 已经生效；
+    /// 坐标本来就落在 `mainRect` 内，裁不到它。
+    testWidgets('z 序: 横竖网格都早于蜡烛与主区指标', (tester) async {
       final scene = await arrange(
         tester,
         paintMarker: true,
@@ -147,11 +149,19 @@ void main() {
 
       final log = await paintFrame(tester, chart);
 
-      final lastVertical = log.lastIndexOf(log.mainVerticalOps(chart));
+      final lastLine = log.lastIndexOf([...log.mainVerticalOps(chart), ...log.mainHorizontalOps(chart)]..sort());
       final marker = log.indexOfMarker();
-      expect(lastVertical, isNonNegative, reason: '前置条件: 本帧必须有主区竖线');
+      expect(log.mainVerticalOps(chart), isNotEmpty, reason: '前置条件: 本帧必须有主区竖线');
+      expect(log.mainHorizontalOps(chart), isNotEmpty, reason: '前置条件: 本帧必须有主区横线');
       expect(marker, isNonNegative, reason: '前置条件: 蜡烛必须落下记号');
-      expect(lastVertical, lessThan(marker), reason: '竖线压在蜡烛上就成了前景, 不再是网格');
+      expect(lastLine, lessThan(marker), reason: '网格压在蜡烛上就成了前景, 不再是网格');
+
+      // 横线的 x 跨度恒等于 mainRect 宽度, 只有 dy 可能越界。容差放到 1e-9: nice 刻度可以越过
+      // 端点一个浮点误差(见「刻度顶在 drawableRect 边界外」那条), 那点越界肉眼与像素都看不出。
+      for (final dy in log.mainHorizontalDys(chart)) {
+        expect(dy, greaterThanOrEqualTo(chart.mainRect.top - 1e-9), reason: '横线越出 mainRect 会被 clipRect 裁掉');
+        expect(dy, lessThanOrEqualTo(chart.mainRect.bottom + 1e-9), reason: '横线越出 mainRect 会被 clipRect 裁掉');
+      }
     });
 
     /// 门禁前那一趟不是「数据没来时的兜底」，而是所有位置此刻已确定的网格线的正常路径：
@@ -200,23 +210,40 @@ void main() {
       );
     });
 
-    testWidgets('有数据 + nice: 横线只在门禁后画一遍', (tester) async {
+    /// 横线只有一个入口之后，「画一遍」不再靠两处判据互补维持；这条改为直接盯位置：nice 用的是
+    /// 本帧区间取整的结果，逐值等于 `computePriceTicks` 的产出，而不是退化后的等分。
+    ///
+    /// 区间取自绘制后的 `candle`：本组的 `TestCandleIndicator` 不画 tips，`_tipsAreaHeight` 全程
+    /// 为 0，所以帧内帧后的 `chartRect` 相同，反算得到的位置与绘制时用的是同一批。
+    testWidgets('有数据 + nice: 横线按本帧区间取整, 只画一遍', (tester) async {
       final scene = await arrange(tester);
       final chart = scene.controller;
+      final candle = scene.candle.object!;
 
       final log = await paintFrame(tester, chart);
       final dys = log.mainHorizontalDys(chart);
 
-      expect(dys, isNotEmpty);
+      final bounds = candle.drawableRect;
+      final ticks = computePriceTicks(
+        bottom: candle.dyToValue(bounds.bottom, check: false)!.toDouble(),
+        top: candle.dyToValue(bounds.top, check: false)!.toDouble(),
+        targetCount: _divisions,
+        precision: candle.klineData.precision,
+      ).values;
+
+      expect(ticks, hasLength(greaterThanOrEqualTo(3)), reason: '前置条件: 刻度太少断言会空转');
+      expect(dys, hasLength(ticks.length), reason: '条数对不上即 nice 没用本帧区间; 条数翻倍即同一批横线画了两遍');
       expect(dys, hasLength(dys.toSet().length), reason: '位置重复即同一批横线画了两遍');
-      expect(
-        log.firstIndexOf(log.mainHorizontalOps(chart)),
-        greaterThan(log.gateMarkIndex()),
-        reason: 'nice 的位置由值换算, 只能等本帧区间, 不该出现在门禁前',
-      );
+
+      // 逐值给容差: [_PaintLog] 的位置取自 `Path.getBounds()`, 经 Skia 存成 float32, 相对误差
+      // 约 1e-7。等分位置恰好都能精确表示, nice 的不能, 所以只有这里要 closeTo。
+      final expected = [for (final value in ticks) candle.valueToDy(value.toFlexiNum(), correct: false)];
+      for (var i = 0; i < expected.length; i++) {
+        expect(dys[i], closeTo(expected[i], 1e-3), reason: '第 $i 条横线不在 nice 取整的位置上');
+      }
     });
 
-    testWidgets('有数据 + count: 横线只在门禁前画一遍, 门禁后只出文本', (tester) async {
+    testWidgets('有数据 + count: 横线按等分画一遍, 文本随后补上', (tester) async {
       final scene = await arrange(tester, horizontalMode: const GridTickMode.count(_divisions));
       final chart = scene.controller;
 
@@ -227,10 +254,10 @@ void main() {
       expect(dys, [for (var i = 1; i < _divisions; i++) i * dyStep]);
       expect(
         log.lastIndexOf(log.mainHorizontalOps(chart)),
-        lessThan(log.gateMarkIndex()),
-        reason: 'count 的位置只依赖高度, 门禁前就该画完',
+        lessThan(log.subMarkIndex()),
+        reason: '主区网格线必须在主区那一趟内画完',
       );
-      expect(log.paragraphs, greaterThan(0), reason: '门禁后那一趟仍要补刻度文本');
+      expect(log.paragraphs, greaterThan(0), reason: '线画完之后仍要补刻度文本');
     });
 
     testWidgets('verticalGrid.line = null: 不画竖线, gridVerticalDxs 仍非空', (tester) async {
@@ -267,9 +294,9 @@ void main() {
     /// 位置各算一遍也能对上（同宽 + 同 mode 必然相同），但那把对齐建立在「宿主两处配一样」的
     /// 约定上。经 `context.gridVerticalDxs` 拿主区的产出，对齐才是结构保证。
     ///
-    /// 断言的是副区**收到**的 dx，不是它画出的线：门禁前副区的 pane 几何还没分配，线的位置
-    /// 此刻不可信（见 `IPaintObject.paintGridLines` 的告警）。这条只守值的传递与编排顺序——
-    /// 主区那一趟必须先跑完，否则副区读到的是空列表或上一帧的值。
+    /// 断言的是副区**收到**的 dx，不是它画出的线：线的位置还要看该副区自己怎么摆，那是下一条
+    /// 用例的事。这条只守值的传递与编排顺序——主区那一趟必须先跑完，否则副区读到的是空列表或
+    /// 上一帧的值。
     testWidgets('副区对齐: 收到的 dx 与主区逐值相同', (tester) async {
       final scene = await arrange(tester);
       final chart = scene.controller;
@@ -280,10 +307,29 @@ void main() {
       expect(main, isNotEmpty, reason: '前置条件: 主区必须有竖线');
       expect(_AlignedGridIndicator.lastObject!.receivedDxs, main, reason: '副区与主区错位就是两套网格');
       expect(
-        log.gateMarkIndex(),
+        log.subMarkIndex(),
         greaterThan(log.lastIndexOf(log.mainVerticalOps(chart))),
         reason: '副区必须在主区之后被调, 否则读到的 dx 是上一帧的',
       );
+    });
+
+    /// 网格线挪到区间就绪之后，附带解掉了副区的 pane 几何约束：`paintGridLines` 现在是副区
+    /// `doPaintChart` 的第一步，排在给它分配 `paneIndex` 的 `doUpdateVisibleMinMax` 之后，于是
+    /// 副区终于能按自己的 `drawableRect` 画网格线。
+    ///
+    /// 加载态那一帧仍不可信（编排层直接调这一趟，`paneIndex` 还没分配），所以这条只断言正常路径。
+    testWidgets('副区几何: 正常路径下 drawableRect 已是本 pane 的区域', (tester) async {
+      final scene = await arrange(tester);
+      final chart = scene.controller;
+
+      await paintFrame(tester, chart);
+
+      final bounds = _AlignedGridIndicator.lastObject!.paintedBounds;
+      expect(bounds, isNotNull, reason: '前置条件: 副区那一趟必须已跑过');
+      expect(bounds, isNot(chart.mainRect), reason: 'pane 几何未就绪时读到的就是 mainRect, 副区网格线会画到主区上');
+      expect(bounds!.height, _subHeight, reason: '高度必须是本指标的高度, 不是主区高度');
+      expect(bounds.top, greaterThanOrEqualTo(chart.subRect.top));
+      expect(bounds.bottom, lessThanOrEqualTo(chart.subRect.bottom));
     });
 
     /// nice 的值不再由算法一路传下来，改由画文本时 `dyToValue(check: false)` 现算。观察点取
@@ -343,7 +389,8 @@ void main() {
       object.bind(TestCandleIndicator(height: 100), context);
       object.setMinMax(MinMax(min: FlexiNum.zero, max: FlexiNum.fromNum(11)));
 
-      // 与 `_niceDys` 内部同一步换算: 算法定值, `valueToDy(correct: false)` 换位置。
+      // 与 `resolveHorizontalDys` 的 nice 分支同一步换算: 算法定值, `valueToDy(correct: false)`
+      // 换位置。
       final topDy = object.valueToDy(FlexiNum.fromNum(11), correct: false);
       expect(topDy, lessThan(object.drawableRect.top), reason: '前置条件: 刻度必须真的越过边界');
       expect(topDy, closeTo(object.drawableRect.top, 1e-9), reason: '前置条件: 越界量必须只是浮点误差');
@@ -406,13 +453,13 @@ class _PaintLog implements Canvas {
     return paths.indexWhere((r) => r == bounds);
   }
 
-  /// 门禁前后的分界：副区指标落下的 [_gateMarkRect]。
+  /// 主区与副区的分界：副区指标落下的 [_subMarkRect]。
   ///
-  /// 框架在门禁**之前**、主区那一趟**之后**调各副区的 `doPaintGridLines`，所以索引小于它的
-  /// 主区横线是门禁前画的，大于它的是门禁后画的。
-  int gateMarkIndex() {
-    final index = paths.indexWhere((r) => r == _gateMarkRect);
-    expect(index, isNonNegative, reason: '前置条件: 分界记号必须已落下');
+  /// 两条路径上副区都排在主区之后（正常路径是副区遍历，加载态是紧随主区的那一趟），所以索引
+  /// 小于它的都是主区画的。
+  int subMarkIndex() {
+    final index = paths.indexWhere((r) => r == _subMarkRect);
+    expect(index, isNonNegative, reason: '前置条件: 副区记号必须已落下');
     return index;
   }
 
@@ -486,14 +533,18 @@ class _AlignedGridPaintObject extends DirectPaintObject<_AlignedGridIndicator> {
   /// 本帧从 context 读到的主区 dx 序列。
   List<double> receivedDxs = const [];
 
+  /// 本帧落笔那一刻读到的 `drawableRect`，用来验证 pane 几何是否已就绪。
+  Rect? paintedBounds;
+
   @override
-  List<double> paintGridLines(Canvas canvas, Size size) {
+  ({List<double> dxs, List<double> dys}) paintGridLines(Canvas canvas, Size size) {
     receivedDxs = context.gridVerticalDxs;
-    // 落一笔分界记号而不是竖线: 此刻副区的 pane 几何还没分配, 画出来的线落在主区上, 与主区
-    // 竖线分不开。真正要画竖线的副区指标须显式传 bounds。
-    canvas.drawPath(Path()..addRect(_gateMarkRect), Paint());
-    // 副区不产出自己的 dx: 它借的是主区的。
-    return const [];
+    paintedBounds = drawableRect;
+    // 落一笔记号而不是竖线: 加载态那一帧副区的 pane 几何还没分配, 画出来的线落在主区上, 与主区
+    // 竖线分不开。
+    canvas.drawPath(Path()..addRect(_subMarkRect), Paint());
+    // 副区不产出自己的位置: 竖线借的是主区的 dx, 也没有横线。
+    return (dxs: const [], dys: const []);
   }
 
   @override

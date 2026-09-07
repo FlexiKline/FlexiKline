@@ -148,20 +148,21 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
     // 先算区间再校验: 校验放在前面只能验到上一帧的旧值。
     calculatePaintChartRange();
 
-    // 网格线在门禁之前: 位置不依赖本帧区间的那些线(所有竖线, 以及 count / size 与区间不可用
-    // 时退化的 nice 横线)此刻已经确定, 加载中的图表因此照常有完整网格 —— 这是正常路径, 不是
-    // 数据没来时的兜底。位置由值换算的横线留到 doPaintChart 那一趟。
-    //
-    // 此时还没有 clipRect(主区的 save + clipRect 在门禁之后), 但网格线坐标本来就落在 mainRect
-    // 与 subRect 内, 不会溢出画布。
-    //
-    // 主区在副区之前: 副区要对齐的 dx 由主区这一趟产出, 随后经 [gridVerticalDxs] 只读。
-    mainPaintObject.doPaintGridLines(canvas, size);
-    for (final paintObject in subPaintObjects) {
-      paintObject.doPaintGridLines(canvas, size);
-    }
-
     if (!klineData.canPaintChart) {
+      // 数据未就绪也照常画网格: 位置只依赖几何的线此刻已经确定(nice 在 resolveHorizontalDys
+      // 内退化为 count), 加载中的图表因此不会只剩 grid 层的边框。刻度文本没有区间可反算,
+      // 自然不画, 所以这里丢掉主区交出的 dys。
+      //
+      // 与正常路径共用同一个 paintGridLines, 只是调用点不同: 正常路径由各 pane 的 doPaintChart
+      // 在自己的可见区间与 pane 几何就绪之后调它, 这里走不到那一步, 只能在门禁上调 —— 于是副区
+      // 的 paneIndex 尚未分配, 它读到的 drawableRect 是主区区域(见 IPaintObject.paintGridLines
+      // 的告警)。
+      //
+      // 主区在副区之前: 副区要对齐的 dx 由主区这一趟产出, 随后经 [gridVerticalDxs] 只读。
+      mainPaintObject.doPaintGridLines(canvas, size);
+      for (final paintObject in subPaintObjects) {
+        paintObject.doPaintGridLines(canvas, size);
+      }
       logd('chartBinding paintChart data is being prepared!');
       return;
     }
@@ -191,10 +192,7 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
         reset: _reset,
         panSmoothFactor: _panSmoothFactor,
       );
-      mainPaintObject.doPaintChart(
-        canvas,
-        size,
-      );
+      mainPaintObject.doPaintChart(canvas, size);
 
       if (!allowOverlayOutsideMainRect) {
         mainPaintObject.doPaintOverlay(canvas, size);
@@ -214,7 +212,8 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
         panSmoothFactor: _panSmoothFactor,
       );
 
-      /// 绘制副区的指标图
+      /// 绘制副区的指标图。网格线是它的第一步, 此刻 paneIndex 已分配, 副区读到的
+      /// drawableRect 才是本 pane 的区域。
       paintObject.doPaintChart(canvas, size);
 
       paintObject.doPaintOverlay(canvas, size);

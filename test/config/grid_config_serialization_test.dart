@@ -18,7 +18,8 @@
 ///
 /// 一是**旧持久化配置仍要还原**。`GridAxis` 更名为 `GridBorder` 只动类型名，JSON 键
 /// (`grid.horizontal.show` / `.line`) 一个没变，所以旧配置照常读回来，只有随网格线下沉的
-/// `count` 被忽略。类型名换了却顺手改了键，就会让所有存过配置的宿主静默回落默认值。
+/// `count` 与已删除的总开关 `grid.show` 被忽略。类型名换了却顺手改了键，就会让所有存过配置
+/// 的宿主静默回落默认值。
 ///
 /// 二是**指标侧「不画线」必须能往返**。`GridAxisConfig.line` 的默认值必须是 null：可空字段
 /// 一旦带非空默认值，json_serializable 生成的 `?? 默认值` 就会把宿主关掉的线复活，不报错、
@@ -33,10 +34,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 /// 前一期（2.5.0 未发布段）的 grid 配置形状：刻度参数还挂在 grid 层。
 ///
-/// `count` 从 2.4.x 起就在，`tickMode` 是未发布段新加的；两者都随网格线下沉到指标，读到时
-/// 应当被忽略而不是抛。
+/// `count` 从 2.4.x 起就在，`tickMode` 是未发布段新加的；两者都随网格线下沉到指标。顶层的
+/// `show` 是已删除的边框总开关。三者读到时都应当被忽略而不是抛。
 const _legacyGridJson = <String, dynamic>{
-  'show': true,
+  'show': false,
   'horizontal': {
     'show': true,
     'count': 8,
@@ -57,11 +58,11 @@ void main() {
     test('默认值往返: 键与旧版一致', () {
       final json = const GridConfig().toJson();
 
-      expect(json.keys, containsAll(['show', 'horizontal', 'vertical']));
+      expect(json.keys, containsAll(['horizontal', 'vertical']));
+      expect(json.containsKey('show'), isFalse, reason: '边框总开关与两个方向的 show 完全等价, 已删除');
 
       final restored = GridConfig.fromJson(json);
 
-      expect(restored.show, true);
       expect(restored.horizontal.show, true);
       expect(restored.horizontal.line.toJson(), (json['horizontal'] as Map)['line']);
       expect(restored.vertical.show, true);
@@ -83,23 +84,21 @@ void main() {
 
     test('show 与 line 逐字往返', () {
       final json = const GridConfig(
-        show: false,
         horizontal: GridBorder(show: false),
         vertical: GridBorder(line: LineConfig(type: LineType.dotted, dashes: [1, 4])),
       ).toJson();
 
       final restored = GridConfig.fromJson(json);
 
-      expect(restored.show, false);
       expect(restored.horizontal.show, false);
       expect(restored.vertical.line.type, LineType.dotted);
       expect(restored.vertical.line.dashes, [1.0, 4.0]);
     });
 
-    test('旧 JSON: 不抛, count / tickMode 忽略, show 与 line 照常还原', () {
+    test('旧 JSON: 不抛, 顶层 show / count / tickMode 忽略, 边框照常还原', () {
       final restored = GridConfig.fromJson(_legacyGridJson);
 
-      // 键未变, 所以宿主定制过的边框样式一个不丢。
+      // 键未变, 所以宿主定制过的边框样式一个不丢。顶层 show 已无对应字段, 读到即忽略。
       expect(restored.horizontal.show, true);
       expect(restored.horizontal.line.type, LineType.dashed);
       expect(restored.horizontal.line.dashes, [4.0, 4.0]);

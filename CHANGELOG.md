@@ -80,10 +80,12 @@
 * Rename `PaintYAxisTicksMixin` to `PaintGridTicksMixin` and split it into `resolveX` methods that compute positions and `paintX` methods that draw them; tick labels now have a single drawing entry point (Breaking Changes).
 * Rename `nice_tick_util.dart` to `grid_tick_util.dart` and add `evenPositions`, `positionsByCount` and `spacedPositions`; the three tick-position algorithms are now pure functions grouped one section each (Breaking Changes).
 * Move grid line painting out of the grid layer into the main candle object: it now paints both the horizontal price lines and the vertical reference lines, while the grid layer keeps only borders, pane separators and the drag affordances (Breaking Changes).
-* Add `IPaintObject.paintGridLines`, called before the `canPaintChart` gate so that a chart waiting for data still shows its grid; it returns the vertical dx positions it produced (Breaking Changes).
+* Add `IPaintObject.paintGridLines`, an indicator-level entry that paints both axes in one pass and returns the positions it resolved as `({List<double> dxs, List<double> dys})`; positions are returned whether or not a line was stroked, since `line: null` only means this object does not draw them itself (Breaking Changes).
+* Paint each pane's grid lines as the first step of painting that pane, right after its visible range is computed, so lines sit below every indicator in the pane regardless of their `zIndex` and `nice` horizontal positions are rounded against the current frame's range. The frame that is still waiting for data has no such step and calls `paintGridLines` directly from the paint orchestration instead.
 * Expose the main pane's vertical grid positions as `PaintContext.gridVerticalDxs` so a sub indicator can align its own vertical lines with the main pane.
 * Drop the horizontal skeleton fallback that ran when `canPaintChart` was false: positions that do not depend on the visible range are now painted on the normal path instead.
-* Change `CandleBasePaintObject.paintYAxisTickLines` to return the tick positions it produced and `paintYAxisTickLabels` to take them as a `dys` argument, replacing the frame-scoped field that carried them between the two passes (Breaking Changes).
+* Remove `CandleBasePaintObject.paintYAxisTickLines`: horizontal grid lines are painted by `paintGridLines` alongside the vertical ones, and `paintYAxisTickLabels` takes the resulting positions as its `dys` argument, replacing the frame-scoped field that carried them between the two passes (Breaking Changes).
+* Assign a sub indicator's pane geometry before its grid lines are painted, so a sub indicator overriding `paintGridLines` can draw into its own `drawableRect`; only the frame waiting for data still reads the main-pane rect there.
 
 ## 2.4.1
 * Fix the blank band above the candles left after hiding main-area indicators, which survived config reload and data refresh and could only be cleared by rebuilding the controller.

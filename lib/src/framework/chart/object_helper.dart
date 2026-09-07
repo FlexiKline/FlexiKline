@@ -345,20 +345,49 @@ mixin PaintGridTicksMixin<T extends Indicator> on PaintObject<T> {
   ///
   /// `count` / `size` 是纯几何, 与任何值无关; `nice` 由算法定值再经
   /// `valueToDy(correct: false)` 换算位置, 区间不可用时退化为 `count`。
+  ///
+  /// 前两种只是把参数转交给 [evenPositions] / [spacedPositions] 这两个纯函数; `nice` 的
+  /// **值到像素**那一步留在这里, 因为它要经 [dyToValue] / [valueToDy] 在值与像素之间来回,
+  /// 而那是本对象的坐标体系 —— 搬进纯函数就得把两个映射当闭包传进去, 接口复杂度会超过它
+  /// 自己的实现复杂度。取整算法本身在 [computePriceTicks]。
   @protected
   List<double> resolveHorizontalDys(GridTickMode mode, {Rect? bounds}) {
     final rect = bounds ?? drawableRect;
-    return switch (mode) {
-      GridCountTickMode(:final divisions) => evenPositions(divisions, start: rect.top, length: rect.height),
-      GridSizeTickMode(:final spacing) => spacedPositions(spacing, start: rect.top, length: rect.height),
-      // 区间不可用时退化为 count。两个判据各管一头: canPaintChart 与 paintChart 的门禁同源
-      // (切标的时 minMax 还是上一帧的旧值, 只看它会让 nice 拿旧价格算位置); minMax.isZero
-      // 则覆盖数据已就绪但区间为零的坏数据 —— computePriceTicks 对非正跨度返回空, 不退化
-      // 会让主区一条横线都没有。
-      GridNiceTickMode(:final targetDivisions) => klineData.canPaintChart && !minMax.isZero
-          ? _niceDys(targetDivisions, rect)
-          : evenPositions(targetDivisions, start: rect.top, length: rect.height),
-    };
+    switch (mode) {
+      case GridCountTickMode(:final divisions):
+        return evenPositions(divisions, start: rect.top, length: rect.height);
+      case GridSizeTickMode(:final spacing):
+        return spacedPositions(spacing, start: rect.top, length: rect.height);
+      case GridNiceTickMode(:final targetDivisions):
+        // 区间不可用时退化为 count。两个判据各管一头: canPaintChart 与 paintChart 的门禁同源
+        // (切标的时 minMax 还是上一帧的旧值, 只看它会让 nice 拿旧价格算位置); minMax.isZero
+        // 则覆盖数据已就绪但区间为零的坏数据 —— computePriceTicks 对非正跨度返回空, 不退化
+        // 会让主区一条横线都没有。
+        if (!klineData.canPaintChart || minMax.isZero) {
+          return evenPositions(targetDivisions, start: rect.top, length: rect.height);
+        }
+
+        // 取值范围是 [rect] 反算出的价格区间, **不外扩 minMax** —— 后者是 Y 轴 zoom 的数据
+        // 载体, 外扩会让用户精确控制的跨度被算法撑回去, 也会让 step 换档时整幅画面跳一下。
+        // 代价是最顶/最底刻度到边缘的距离随平移连续变化, 与 TradingView 一致。
+        //
+        // 显式 check: false —— 这两个 dy 恰在 [rect] 边界上, 带检查的默认值会返回 null, 刻度
+        // 会整体消失且不抛异常。
+        final top = dyToValue(rect.top, check: false);
+        final bottom = dyToValue(rect.bottom, check: false);
+        if (top == null || bottom == null) return const [];
+
+        final ticks = computePriceTicks(
+          bottom: bottom.toDouble(),
+          top: top.toDouble(),
+          targetCount: targetDivisions,
+          precision: klineData.precision,
+        );
+
+        // correct: false —— 默认会把值 clamp 进 [minMax.min, max], 留白区(padding 与 tips)的
+        // 刻度会被压到边缘叠在一起。
+        return [for (final value in ticks.values) valueToDy(value.toFlexiNum(), correct: false)];
+    }
   }
 
   /// 按**刻度数**等分产出横向 dy 序列, **含两端**。副区历来的口径(3 表示高 / 中 / 低)。
@@ -387,34 +416,6 @@ mixin PaintGridTicksMixin<T extends Indicator> on PaintObject<T> {
         assert(false, '竖线不支持 nice: 已退化为 count($targetDivisions)。');
         return evenPositions(targetDivisions, start: rect.left, length: rect.width);
     }
-  }
-
-  /// 按 nice-number 取整刻度值产出位置: 先定值, 再由 `valueToDy` 换算。
-  ///
-  /// 只有这一条取位方式留在 mixin 内: 它要经 `dyToValue` / `valueToDy` 在值与像素之间来回,
-  /// 而那是本对象的坐标体系, 搬进纯函数就得把两个映射当闭包传进去 —— 接口复杂度会超过它
-  /// 自己的实现复杂度。取整算法本身在 [computePriceTicks]。
-  ///
-  /// 取值范围是 [bounds] 反算出的价格区间, **不外扩 minMax** —— 后者是 Y 轴 zoom 的数据
-  /// 载体, 外扩会让用户精确控制的跨度被算法撑回去, 也会让 step 换档时整幅画面跳一下。
-  /// 代价是最顶/最底刻度到边缘的距离随平移连续变化, 与 TradingView 一致。
-  List<double> _niceDys(int targetDivisions, Rect bounds) {
-    // 显式 check: false —— 此处的 dy 恰在 bounds 边界上, 带检查的默认值会返回 null, 刻度会
-    // 整体消失且不抛异常。
-    final top = dyToValue(bounds.top, check: false);
-    final bottom = dyToValue(bounds.bottom, check: false);
-    if (top == null || bottom == null) return const [];
-
-    final ticks = computePriceTicks(
-      bottom: bottom.toDouble(),
-      top: top.toDouble(),
-      targetCount: targetDivisions,
-      precision: klineData.precision,
-    );
-
-    // correct: false —— 默认会把值 clamp 进 [minMax.min, max], 留白区(padding 与 tips)的
-    // 刻度会被压到边缘叠在一起。
-    return [for (final value in ticks.values) valueToDy(value.toFlexiNum(), correct: false)];
   }
 
   // ---- 画: 只消费已算好的位置 ----

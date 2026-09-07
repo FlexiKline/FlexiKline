@@ -45,13 +45,11 @@ mixin GridBinding on KlineBindingBase, SettingBinding {
   }
 
   void paintGrid(Canvas canvas, Size size) {
-    if (gridConfig.show) {
-      // 横向边框与 pane 分隔线
-      _paintHorizontalBorder(canvas, size);
+    // 横向边框与 pane 分隔线
+    _paintHorizontalBorder(canvas, size);
 
-      // 左右边框
-      _paintVerticalBorder(canvas, size);
-    }
+    // 左右边框
+    _paintVerticalBorder(canvas, size);
 
     // 拖拽分隔线
     if (gridConfig.isAllowDragIndicatorHeight) {
@@ -129,7 +127,7 @@ mixin GridBinding on KlineBindingBase, SettingBinding {
   /// 绘制主区顶边框与各 pane 底部分隔线。
   ///
   /// 网格横线不在此绘制: 它与 Y 轴刻度文本同源, 由 chart 层的
-  /// [CandleBasePaintObject.paintYAxisTickLines] 产出, 才能保证线与文本用同一帧的
+  /// [CandleBasePaintObject.paintGridLines] 产出, 才能保证线与文本用同一帧的
   /// minMax。grid 层因此只余布局线, 与价格无关。
   void _paintHorizontalBorder(Canvas canvas, Size size) {
     if (!gridConfig.horizontal.show) return;

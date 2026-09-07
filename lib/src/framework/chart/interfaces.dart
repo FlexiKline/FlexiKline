@@ -68,22 +68,26 @@ abstract interface class IPaintObject {
   /// 它是**指标层的编排入口**, 不是单条线的绘制方法: 实现者内部各方向自己取位置
   /// (`PaintGridTicksMixin.resolveXxx`)再落笔(`paintXxx`), 框架只负责在正确的时机调它一次。
   ///
-  /// 框架在 `canPaintChart` 门禁**之前**调用, 因此数据未就绪时也会执行, 此时 [IPaintState.minMax]
-  /// 不可用(读到的是上一帧的值)。位置由值换算的横线因此要推迟到本帧区间可用之后再画。
+  /// 框架在**本 pane 的可见区间就绪之后、本 pane 的指标图之前**调用, 所以 [IPaintState.minMax]
+  /// 与 [IPaintBounding] 的几何都已生效: 位置由值换算的横线可以直接按本帧区间取整, 而网格线
+  /// 一定落在本 pane 所有指标之下 —— 后者与各指标的 zIndex 无关, 只由这个调用时机保证。
   ///
   /// > [!warning]
-  /// > **副区对象在此刻的 pane 几何未必有效。** `paneIndex` 由门禁之后的
-  /// > `doUpdateVisibleMinMax` 分配, 所以首帧(以及指标增删导致 pane 重排后的那一帧)副区的
-  /// > [IPaintBounding.drawableRect] 读到的是主区区域。主区不受影响 —— 它的 `paneIndex`
-  /// > 恒为 `mainPaneIndex`。副区实现者要么显式传 `bounds`, 要么等 pane 几何前移到门禁之前
-  /// > 再接线; 当前内置的副区指标一律不覆写本方法。
+  /// > **数据未就绪(`canPaintChart` 为 false)那一帧是唯一的例外。** 那时框架只走这一趟就返回,
+  /// > [IPaintState.minMax] 读到的是上一帧的值, 副区的 `paneIndex` 也还没分配 —— 副区的
+  /// > [IPaintBounding.drawableRect] 因此读到的是主区区域。所以那一帧的位置只能依赖几何:
+  /// > 内置实现在那里让 `nice` 退化为 `count`(见 `PaintGridTicksMixin.resolveHorizontalDys`),
+  /// > 副区实现者要么显式传 `bounds`, 要么接受那一帧不画。
   ///
-  /// 返回本次产出的**竖线 dx 序列**, 供其它 pane 对齐; 不产出时返回空列表。与 [paintTips]
-  /// 返回 `Size?` 供布局使用同一形状。
+  /// 返回本帧**解析出**的两个方向的位置, 与画不画无关 —— `line` 为 null 只表示本对象自己不画,
+  /// 位置照样要返回。它是这些位置离开本对象的唯一通道, 宿主覆写本方法后框架拿到的因此仍是宿主
+  /// 实际用的位置: dx 经 [PaintContext.gridVerticalDxs] 供其它 pane 对齐, dy 交给本对象的刻度
+  /// 文本那一趟(隔着整个子对象遍历)。不产出时给空列表。
   ///
-  /// 不返回横线的 dy: 返回值的存在理由是「给本对象之外的人用」, 而 dy 只有同一对象的刻度
-  /// 文本那一趟消费(主区是价格轴、副区是各自的值轴, 横线不跨 pane 通用)。
-  List<double> paintGridLines(Canvas canvas, Size size);
+  /// 两个方向都返回, 而不按消费方裁剪: 框架当前只读主区那一趟的返回值(副区无处对齐、值轴各自
+  /// 独立), 但「交出你解析的位置」是一条与实现者身份无关的契约; 按消费方裁剪会让主区的需要长进
+  /// 公共接口, 且横线一旦不经返回值上行, 就只能靠帧内字段或重算一遍跨过子对象遍历。
+  ({List<double> dxs, List<double> dys}) paintGridLines(Canvas canvas, Size size);
 
   /// 绘制指标图
   ///
