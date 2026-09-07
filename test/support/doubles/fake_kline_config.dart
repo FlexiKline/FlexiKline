@@ -69,6 +69,8 @@ class FakeFlexiKlineConfiguration with FlexiKlineConfigurationMixin {
     this.mainIndicatorDefaultPadding,
     this.drawBelowTipsArea = false,
     this.shareConfigInstance = false,
+    this.enableStorage = false,
+    this.enableDraw = false,
   })  : _mainChildren = mainChildren,
         _subKeys = subKeys;
 
@@ -85,6 +87,22 @@ class FakeFlexiKlineConfiguration with FlexiKlineConfigurationMixin {
   /// 是否让 [getFlexiKlineConfig] 返回同一缓存实例，用于模拟多 Controller 共享配置。
   final bool shareConfigInstance;
   FlexiKlineConfig? _sharedConfig;
+
+  /// 是否启用内存存储。默认 false：[getConfig] 恒返回 null、[setConfig] 丢弃写入，
+  /// 让绝大多数用例的配置来源只有 [genFlexiKlineConfig] 一条，不受落盘副作用干扰。
+  ///
+  /// 置 true 后读写走 [_store]，用于需要观察持久化往返的用例（如绘制 overlay 的
+  /// 落盘与跨 Controller 加载）。
+  final bool enableStorage;
+
+  /// 是否让 [genDrawConfig] 产出 `enable: true`。
+  ///
+  /// 绘制功能默认关闭（[DrawConfig.enable] 为 false），而 overlay 落盘与 `paintDraw`
+  /// 都以它为门禁，涉及绘制的用例必须显式打开。
+  final bool enableDraw;
+
+  /// [enableStorage] 为 true 时的内存存储。
+  final Map<String, Map<String, dynamic>> _store = {};
 
   /// [saveFlexiKlineConfig] 收到的配置，按调用顺序记录，供落盘时机断言。
   final List<FlexiKlineConfig> savedConfigs = [];
@@ -134,8 +152,19 @@ class FakeFlexiKlineConfiguration with FlexiKlineConfigurationMixin {
   }
 
   @override
-  Map<String, dynamic>? getConfig(String key) => null;
+  DrawConfig genDrawConfig([DrawConfig? draw]) {
+    final base = super.genDrawConfig(draw);
+    return enableDraw ? base.copyWith(enable: true) : base;
+  }
 
   @override
-  Future<bool> setConfig(String key, Map<String, dynamic> value) async => true;
+  Map<String, dynamic>? getConfig(String key) {
+    return enableStorage ? _store[key] : null;
+  }
+
+  @override
+  Future<bool> setConfig(String key, Map<String, dynamic> value) async {
+    if (enableStorage) _store[key] = value;
+    return true;
+  }
 }

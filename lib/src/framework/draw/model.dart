@@ -105,6 +105,12 @@ class Overlay implements Comparable<Overlay> {
         points: List.filled(type.steps, null),
       );
 
+  /// Overlay 标识, 与 [key]、[type] 一起构成 `==` 与 [hashCode]。
+  ///
+  /// [Overlay.fromType] 取创建时刻的毫秒时间戳。交互绘制不会撞号 —— 它在取绘制工具时
+  /// 赋值, 两次取工具之间隔着人的操作时间。但**程序化地在同一毫秒内为同一 key + type
+  /// 创建两个** overlay 会得到相同身份, 后者在 `SortableHashSet` 里顶掉前者;
+  /// 这类批量创建应自行给出 [id]。
   final int id;
   final String key;
   final IDrawType type;

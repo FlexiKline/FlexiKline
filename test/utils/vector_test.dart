@@ -182,6 +182,86 @@ void main() {
   });
 
   // ---------------------------------------------------------------------------
+  // clipLineToRect
+  // ---------------------------------------------------------------------------
+  group('clipLineToRect', () {
+    /// 端点必须落在矩形边界上、恰好两个、且两端不同。
+    void expectSegmentOnBoundary(List<Offset> points) {
+      expect(points, hasLength(2));
+      expect(points.first, isNot(points.last));
+      for (final p in points) {
+        final onBoundary = (p.dx - rect.left).abs() < 1e-6 ||
+            (p.dx - rect.right).abs() < 1e-6 ||
+            (p.dy - rect.top).abs() < 1e-6 ||
+            (p.dy - rect.bottom).abs() < 1e-6;
+        expect(onBoundary, isTrue, reason: '$p 应落在矩形边界上');
+      }
+    }
+
+    /// 按坐标逐分量比对，不用 `Set` 相等 —— 边界交点由除法算出，
+    /// `6.8` 实际是 `6.800000000000001`，`Offset` 的 `==` 是精确比较。
+    void expectPoints(List<Offset> actual, List<Offset> expected) {
+      int byXY(Offset a, Offset b) => a.dx != b.dx ? a.dx.compareTo(b.dx) : a.dy.compareTo(b.dy);
+      final got = [...actual]..sort(byXY);
+      final want = [...expected]..sort(byXY);
+      expect(got, hasLength(want.length));
+      for (var i = 0; i < want.length; i++) {
+        expect(got[i].dx, closeTo(want[i].dx, 1e-6));
+        expect(got[i].dy, closeTo(want[i].dy, 1e-6));
+      }
+    }
+
+    test('斜线两端都裁到边界', () {
+      // rect=(0,0,14,10); 过 (5,5)、(10,6) 的直线 k=0.2, b=4
+      // 左端 x=0 → y=4; 右端 x=14 → y=6.8
+      final points = clipLineToRect(const Offset(5, 5), const Offset(10, 6), rect);
+      expectSegmentOnBoundary(points);
+      expectPoints(points, const [Offset(0, 4), Offset(14, 6.8)]);
+    });
+
+    test('反向传参得到同一条线段', () {
+      const A = Offset(5, 5);
+      const B = Offset(10, 6);
+      expectPoints(clipLineToRect(B, A, rect), clipLineToRect(A, B, rect));
+    });
+
+    test('垂直线按 dy 取两端', () {
+      // dx 恒等, 按 dx 取极值会取到同一点。
+      final points = clipLineToRect(const Offset(5, 5), const Offset(5, 8), rect);
+      expectSegmentOnBoundary(points);
+      expectPoints(points, const [Offset(5, 0), Offset(5, 10)]);
+    });
+
+    test('水平线按 dx 取两端', () {
+      final points = clipLineToRect(const Offset(5, 5), const Offset(9, 5), rect);
+      expectSegmentOnBoundary(points);
+      expectPoints(points, const [Offset(0, 5), Offset(14, 5)]);
+    });
+
+    test('两点都在矩形外仍能裁出穿过矩形的线段', () {
+      // 过 (-5,5)、(20,5) 的水平线穿过整个矩形。
+      final points = clipLineToRect(const Offset(-5, 5), const Offset(20, 5), rect);
+      expectSegmentOnBoundary(points);
+      expectPoints(points, const [Offset(0, 5), Offset(14, 5)]);
+    });
+
+    test('直线与矩形无交集时返回空列表', () {
+      // 完全在矩形上方的水平线。
+      expect(clipLineToRect(const Offset(-5, -5), const Offset(20, -5), rect), isEmpty);
+    });
+
+    test('两点重合时返回空列表', () {
+      expect(clipLineToRect(const Offset(5, 5), const Offset(5, 5), rect), isEmpty);
+    });
+
+    test('结果恒为两点, 从结构上排除折返', () {
+      // 折返来自「把两次 reflect 结果直接拼起来」的多点路径; 只返回两端点即无从折返。
+      final points = clipLineToRect(const Offset(3, 8), const Offset(11, 2), rect);
+      expect(points, hasLength(2));
+    });
+  });
+
+  // ---------------------------------------------------------------------------
   // reflectRectSide (Offset.reflectRectSide)
   // ---------------------------------------------------------------------------
   group('pointReflectInRect', () {
@@ -252,6 +332,27 @@ void main() {
       final ret = offset.reflectRectSide(offset, testRect);
       expect(ret.dx, closeTo(offset.dx, 1e-6));
       expect(ret.dy, closeTo(offset.dy, 1e-6));
+    });
+
+    /// 上面 8 条覆盖了「右 / 下 / 上」三侧与两条轴向短路，唯独漏了**左侧斜线**分支
+    /// （`|k| <= 1` 且 `O.dx < P.dx`）——本组用的 [testRect] 原点非零，正好能测出该分支
+    /// 把 `rect.top` 当成了 `rect.left`。
+    test('向左下斜线延伸落在左边界', () {
+      // P=(5,5), O=(2,6): k=-1/3, |k|<=1, 向左 → 落在左边界 x=0.5
+      // b = 6 - 2×(-1/3) = 20/3; y = 0.5×(-1/3) + 20/3 = 6.5
+      const other = Offset(2, 6);
+      final ret = offset.reflectRectSide(other, testRect);
+      expect(ret.dx, closeTo(testRect.left, 1e-6));
+      expect(ret.dy, closeTo(6.5, 1e-6));
+    });
+
+    test('向左上斜线延伸落在左边界', () {
+      // P=(5,5), O=(2,4): k=1/3, 向左 → x=0.5
+      // b = 4 - 2×(1/3) = 10/3; y = 0.5×(1/3) + 10/3 = 3.5
+      const other = Offset(2, 4);
+      final ret = offset.reflectRectSide(other, testRect);
+      expect(ret.dx, closeTo(testRect.left, 1e-6));
+      expect(ret.dy, closeTo(3.5, 1e-6));
     });
   });
 
@@ -880,6 +981,41 @@ void main() {
     test('Offset.isInsideOf 与 isInsideOfPolygon 结果一致', () {
       const p = Offset(5, 5);
       expect(p.isInsideOf(square), equals(isInsideOfPolygon(p, square)));
+    });
+
+    /// 上面各条都传「重复起点」的闭合点列。而顶点列表的自然形态是不闭合的
+    /// （[Parallelogram.points] 就返回 4 个点），此时最后一条边 `last → first`
+    /// 从未被检验，那条边外侧的点会被误判为在内部。
+    group('顶点列表未显式闭合', () {
+      final openSquare = [
+        const Offset(0, 0),
+        const Offset(10, 0),
+        const Offset(10, 10),
+        const Offset(0, 10),
+      ];
+
+      test('内部点仍返回 true', () {
+        expect(isInsideOfPolygon(const Offset(5, 5), openSquare), isTrue);
+      });
+
+      test('末边（D→A，即 x=0 那条）外侧的点返回 false', () {
+        expect(
+          isInsideOfPolygon(const Offset(-5, 5), openSquare),
+          isFalse,
+          reason: '只遍历 vertexes[1..last] 会漏掉 last→first 这条边, '
+              '正方形只判了 3 条边, 左侧外部点因此被误判为在内。',
+        );
+      });
+
+      test('已闭合与未闭合的点列结论一致', () {
+        for (final p in const [Offset(5, 5), Offset(-5, 5), Offset(15, 5), Offset(5, -5)]) {
+          expect(
+            isInsideOfPolygon(p, openSquare),
+            isInsideOfPolygon(p, square),
+            reason: '$p 在两种点列形态下的结论必须相同',
+          );
+        }
+      });
     });
   });
 

@@ -63,6 +63,23 @@
 * Validate the effective range in candle painting methods after applying defaults.
 * Guard `dyFactor` against non-positive `chartRect.height`; clamp `candleMinWidth` to at least 1.
 
+### Draw overlays and config API (Breaking Changes)
+
+* Persist draw overlays on every change instead of only on `storeFlexiKlineConfig()`, so a finished drawing survives a controller rebuild or app restart.
+* Refresh the draw overlay tree in `syncFlexiKlineConfig()`: overlays use their own storage key, which a shared `FlexiKlineConfig` instance could not carry between controllers.
+* Apply the current `DrawConfig` to existing overlays on sync; they kept the snapshot taken at construction, so `updateDrawConfig` never reached them.
+* Exit the draw state on sync, since rebuilding disposes the object `drawState` may point at.
+* Write back a point's `ts` / `value` when a tap confirms it during editing; only the screen offset was updated, so the point jumped back on sync.
+* Rename `reloadFlexiKlineConfig` to `syncFlexiKlineConfig`: it is not the inverse of `storeFlexiKlineConfig` and reads no storage when `getFlexiKlineConfig()` returns a shared instance (Breaking Changes).
+* Remove the `storeDrawOverlays` parameter of `storeFlexiKlineConfig`: overlays persist on change, so it was a redundant re-write (Breaking Changes).
+* Move the `storeFlexiKlineConfig` declaration off `KlineBindingBase` into `SettingBinding`: the framework never calls it (Breaking Changes).
+
+### Geometry utilities
+
+* Add `clipLineToRect(A, B, rect)`, which clips the full line through two points to a rect and returns its two boundary points.
+* Fix `reflectToRectSide` returning `rect.top` where `rect.left` was meant, which put the left-side intersection at the wrong x for any rect whose origin is not `(0, 0)`.
+* Fix `isInsideOfPolygon` never testing the closing edge, so an n-gon was judged by n-1 edges and points outside the last edge read as inside; callers no longer need to repeat the first vertex.
+
 ### Other
 
 * Add `MinMax.scaleAroundCenter` and `MinMax.shift`.

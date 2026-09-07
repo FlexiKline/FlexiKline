@@ -212,17 +212,17 @@ void main() {
       );
     });
 
-    test('reload 不影响 tips 区域', () {
+    test('sync 不影响 tips 区域', () {
       final scene = _Scene(declared: 1, activated: {0});
       scene.paintFrame();
       expect(scene.tipsAreaBottom, scene.expected(1));
 
-      final diff = scene.manager.reloadFlexiKlineConfig();
+      final diff = scene.manager.syncFlexiKlineConfig();
 
       expect(
         [...diff.mainToShow, ...diff.mainToHide, ...diff.subToShow, ...diff.subToHide],
         isEmpty,
-        reason: '激活集合一致时 reload 不走 show/hide',
+        reason: '激活集合一致时 sync 不走 show/hide',
       );
       expect(
         scene.tipsAreaBottom,

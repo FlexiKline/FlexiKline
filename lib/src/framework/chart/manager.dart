@@ -16,7 +16,7 @@ part of 'indicator.dart';
 
 /// 配置重载引起的指标激活集合差异。
 ///
-/// 由 [IndicatorPaintObjectManager.reloadFlexiKlineConfig] 产出，交由 Controller 走
+/// 由 [IndicatorPaintObjectManager.syncFlexiKlineConfig] 产出，交由 Controller 走
 /// `show*/hide*` 收敛——激活需要指标重算与布局校验能力，只有 Controller 层具备。
 typedef IndicatorActivationDiff = ({
   Set<IIndicatorKey> mainToShow,
@@ -642,14 +642,14 @@ final class IndicatorPaintObjectManager with FlexiLog {
         subToHide: <IIndicatorKey>{},
       );
 
-  /// 重新载入配置，并让主区运行时 indicator 跟随新配置。
+  /// 追平配置，并让主区运行时 indicator 跟随新配置。
   ///
   /// [config] 为空时由 [configuration] 提供；实现返回共享实例时为自赋值，返回新实例时
   /// 为换指针，两种情况下后续处理相同。
   ///
   /// 返回激活集合差异，由 Controller 走 `show*/hide*` 收敛，以复用其中的指标重算与
   /// 布局校验。未挂载时只替换配置，不触碰绘制树。
-  IndicatorActivationDiff reloadFlexiKlineConfig([FlexiKlineConfig? config]) {
+  IndicatorActivationDiff syncFlexiKlineConfig([FlexiKlineConfig? config]) {
     _flexiKlineConfig = config ?? configuration.getFlexiKlineConfig();
 
     if (!_isInitialized) return _emptyActivationDiff;

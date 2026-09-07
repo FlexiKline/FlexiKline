@@ -17,7 +17,7 @@ FlexiKline 是一个 Flutter 金融 K 线图表框架，指标、绘制工具、
 - 计算与绘制解耦：指标计算在独立的 `IndicatorCalculator` 里，不碰渲染，可以单独测试
 - 自定义绘制工具：实现 `DrawObject` 定义自己的画法与命中判定
 - 主副区布局：全屏 / 横屏切换，图表宽高可动态调整
-- 配置可控：样式、参数、指标、绘制都能定制，整体序列化落盘，写入时机由业务侧决定
+- 配置可控：样式、参数、指标、绘制都能定制，整体序列化落盘，`FlexiKlineConfig` 的写入时机由业务侧决定
 - 手势操作：惯性平移、缩放锚点、平移平滑均可调；嵌在可滚动容器里也能正常拿到手势
 - 多平台：Android、iOS、Web、macOS、Windows、Linux
 
@@ -68,7 +68,7 @@ class MyIndicatorConfig with ChangeNotifier implements IIndicatorConfig {
 }
 ```
 
-同一份缓存配置可供横竖屏或同页多图共享；框架只在 Controller 构造和 `reloadFlexiKlineConfig()` 时读取它，落盘由业务侧调用 `storeFlexiKlineConfig()` 决定。
+同一份缓存配置可供横竖屏或同页多图共享；框架只在 Controller 构造和 `syncFlexiKlineConfig()` 时读取它，落盘由业务侧调用 `storeFlexiKlineConfig()` 决定。
 
 ### 2. 创建 FlexiKlineController
 
@@ -154,17 +154,23 @@ final index = await controller.moveToDateTime(DateTime(2024, 6, 15));
 
 颜色不写死在配置对象里，由 `IFlexiKlineTheme` 在绘制时注入，同一份配置就能跟随亮 / 暗色主题切换。主题变化后调用 `controller.onThemeChanged()`，各绘制对象会重建自己的主题派生资源。
 
-### 读取与落盘
+### 耐久性与一致性
+
+两个 Controller 方法各管一件事，它们**不是**一对逆操作：
 
 | 入口 | 说明 |
 | ---- | ---- |
-| `IConfiguration.getFlexiKlineConfig()` | 框架取当前配置，只在 Controller 构造与 `reloadFlexiKlineConfig()` 时调用 |
+| `controller.storeFlexiKlineConfig()` | **耐久性**：把当前 `FlexiKlineConfig` 交给 `IConfiguration` 写入存储，只为扛住进程退出 |
+| `controller.syncFlexiKlineConfig([config])` | **一致性**：把本 Controller 的运行时追平到当前配置，用于横竖屏 / 同页多图之间同步 |
+| `IConfiguration.getFlexiKlineConfig()` | 框架取当前配置，只在 Controller 构造与 `syncFlexiKlineConfig()` 时调用 |
 | `IConfiguration.saveFlexiKlineConfig(config)` | 实际写入存储，仅由 `storeFlexiKlineConfig()` 触发 |
-| `controller.storeFlexiKlineConfig()` | 业务侧主动落盘当前配置，可选是否同时落盘绘制图形 |
-| `controller.reloadFlexiKlineConfig([config])` | 重新载入配置并收敛绘制树，用于多 Controller 之间同步 |
+
+`syncFlexiKlineConfig()` 取的是 `getFlexiKlineConfig()` 返回的配置而非存储快照——返回共享实例时全程不碰存储，返回新实例时对侧须先落盘本侧才读得到。它不发通知（与 `showMainIndicator()` 一致），调用方需自行刷新依赖激活集合的状态。
 
 > [!warning]
-> 框架不会自动决定落盘时机：`dispose()` 与 `onThemeChanged()` 都不会写入，需业务侧在页面销毁前或用户显式保存时调用 `storeFlexiKlineConfig()`。
+> 框架不会自动决定 `FlexiKlineConfig` 的落盘时机：`dispose()` 与 `onThemeChanged()` 都不会写入，需业务侧在页面销毁前或用户显式保存时调用 `storeFlexiKlineConfig()`。多个 Controller 共享一份配置时，应只由配置拥有者一侧落盘。
+
+绘制 overlay 不在以上任何一环，它由框架自动落盘，见「绘制工具」一节。
 
 ## 指标系统
 
@@ -335,7 +341,7 @@ class TradePaintObject extends ExternalPaintObject<TradeIndicator> {
 
 ## 绘制工具
 
-绘制工具（趋势线、射线、斐波那契等）通过 `IDrawType` 与 `DrawObject` 扩展，在 `IConfiguration.drawObjectBuilders` 中注册。绘制实例按 symbol 持久化。
+绘制工具（趋势线、射线、斐波那契等）通过 `IDrawType` 与 `DrawObject` 扩展，在 `IConfiguration.drawObjectBuilders` 中注册，也可运行期 `controller.registerDrawObjectBuilder(type, builder)` 追加。
 
 内置绘制工具集由 [flexi_kline_draw_tools](https://pub.dev/packages/flexi_kline_draw_tools) 提供。
 
@@ -350,10 +356,26 @@ class RayLineDrawObject extends DrawObject {
 
   @override
   void draw(DrawContext context, Canvas canvas, Size size) {
-    // 绘制图形
+    // 绘制已完成的图形
   }
 }
 ```
+
+### 可覆写的钩子
+
+| 钩子 | 时机 | 说明 |
+| ---- | ---- | ---- |
+| `draw(context, canvas, size)` | 绘制完成 | 必须实现 |
+| `drawing(context, canvas, size)` | 绘制中 | 默认画连接虚线与绘制点；需要提前预览成品形态时覆写 |
+| `hitTest(context, position, {isMove})` | 命中测试 | 默认按点到线段距离判定；矩形、通道一类要覆写 |
+| `onUpdateDrawPoint(point, offset)` | 每次点位变化 | 校正落点，如把两点吸附到同一价位 |
+
+> [!warning]
+> `onUpdateDrawPoint` 是**拖动单个点**与**整体平移**的唯一入口。做点间联动修正时要按 `point.index` 区分这两种情形，否则容易写出「基准点对齐自己」——该坐标恒等于旧值，图形在那个方向上锁死。
+
+### 持久化
+
+绘制实例按 symbol 存在独立存储键下，**由框架自动落盘**：绘制完成、点位确认、移动结束、改样式、锁定、改层级都会立即写入，业务侧无需调用 `storeFlexiKlineConfig()`。跨 Controller 同步由 `syncFlexiKlineConfig()` 顺带完成。
 
 ## License
 

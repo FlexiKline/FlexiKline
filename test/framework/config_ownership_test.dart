@@ -15,7 +15,7 @@
 /// 配置所有权契约：FlexiKlineConfig 是运行时状态的实时镜像。
 ///
 /// 锁定 manager 与配置之间的隐式约定，这些约定是多 Controller 共享配置
-/// （横竖屏、多 K 线同页）时 `reloadFlexiKlineConfig` 能追平的前提。
+/// （横竖屏、多 K 线同页）时 `syncFlexiKlineConfig` 能追平的前提。
 library;
 
 import 'dart:math';
@@ -41,7 +41,7 @@ void main() {
         isTrue,
         reason: 'MainPaintObjectIndicator.copyWith 对 children 传引用、构造函数不复制，'
             '主区激活集合因此实时写入配置。若改为复制，共享配置的其他 Controller '
-            '将读不到本侧的激活变更，reloadFlexiKlineConfig 会失效。',
+            '将读不到本侧的激活变更，syncFlexiKlineConfig 会失效。',
       );
     });
 
@@ -52,7 +52,7 @@ void main() {
         scene.manager.flexiKlineConfig.mainIndicator.children,
         contains(candleIndicatorKey),
         reason: 'candle 经 appendPaintObject 挂载，会写入共享的 children。'
-            'reloadFlexiKlineConfig 因此必须显式排除 candleIndicatorKey，'
+            'syncFlexiKlineConfig 因此必须显式排除 candleIndicatorKey，'
             '否则来自旧版持久化（不含 candle）的配置会把它判为待隐藏。',
       );
     });
@@ -91,7 +91,7 @@ void main() {
         manager.flexiKlineConfig.sub,
         manager.subIndicatorKeys.toSet(),
         reason: '配置是激活集合的实时镜像。被驱逐的 key 留在配置里会让 sub 超出队列容量，'
-            'reload 的差异永不收敛（每次补一个又驱逐一个），并把超容集合写进持久化。',
+            'sync 的差异永不收敛（每次补一个又驱逐一个），并把超容集合写进持久化。',
       );
     });
 

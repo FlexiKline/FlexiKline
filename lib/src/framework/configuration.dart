@@ -74,16 +74,19 @@ abstract interface class IConfiguration implements IStorage {
 
   /// 提供当前 [FlexiKlineConfig]。
   ///
-  /// 框架只在 Controller 构造与 `reloadFlexiKlineConfig()` 时调用，不缓存跨实例状态。
+  /// 框架只在 Controller 构造与 `syncFlexiKlineConfig()` 时调用，不缓存跨实例状态。
   ///
   /// 返回新实例还是同一缓存实例由实现决定，直接影响多 Controller 的同步方式：
   /// - 返回**共享实例**：激活集合与样式配置的变更对彼此实时可见，对侧只需
-  ///   `reloadFlexiKlineConfig()` 即可追平绘制树，不依赖落盘；
+  ///   `syncFlexiKlineConfig()` 即可追平绘制树，全程不碰存储；
   /// - 返回**新实例**：所有变更必须先 `storeFlexiKlineConfig()` 落盘，对侧
-  ///   `reloadFlexiKlineConfig()` 才能读到；注意 [setConfig] 返回 Future 且默认实现
-  ///   不 await，紧跟的 reload 是否读到新值取决于实现的读写可见性。
+  ///   `syncFlexiKlineConfig()` 才能读到；注意 [setConfig] 返回 Future 且默认实现
+  ///   不 await，紧跟的 sync 是否读到新值取决于实现的读写可见性。
   ///
-  /// 主区尺寸与蜡烛宽度是窗口局部状态：`reloadFlexiKlineConfig()` 不回灌它们，
+  /// 绘制 overlay 不在 [FlexiKlineConfig] 里，走独立存储键并由框架自动落盘，因此无论
+  /// 本方法返回什么，它的跨 Controller 同步都经存储往返。
+  ///
+  /// 主区尺寸与蜡烛宽度是窗口局部状态：`syncFlexiKlineConfig()` 不回灌它们，
   /// 但多个同时挂载的 Controller 共享实例时，二者在配置层是后写胜。
   ///
   /// 建议 `with FlexiKlineConfigurationMixin` 而非从零实现：默认实现已包含反序列化
@@ -94,6 +97,7 @@ abstract interface class IConfiguration implements IStorage {
   ///
   /// 仅由 `Controller.storeFlexiKlineConfig()` 触发，框架不决定时机。
   /// 实现可自行决定存储形态，也可同步到自身持有的缓存实例——框架不做任何假设。
+  /// 绘制 overlay 不经本方法，它走 [setConfig] 与自己的存储键。
   void saveFlexiKlineConfig(FlexiKlineConfig config);
 
   /// 绘制工具定制

@@ -110,14 +110,14 @@ void main() {
     });
   });
 
-  group('v2.4.0/FlexiKlineController/config-reload', () {
+  group('v2.4.0/FlexiKlineController/config-sync', () {
     final mainKey = directKey(1);
     final subKey = computedKey(1);
 
     List<Indicator> declaredMain() => [TestDirectIndicator(key: mainKey)];
     List<Indicator> declaredSub() => [TestComputedIndicator(key: subKey)];
 
-    test('配置里已激活而树上没有的指标，reload 后进入绘制树', () {
+    test('配置里已激活而树上没有的指标，sync 后进入绘制树', () {
       final config = FakeFlexiKlineConfiguration(shareConfigInstance: true);
       final controller = mountController(
         config,
@@ -130,13 +130,13 @@ void main() {
       shared.mainIndicator.children.add(mainKey);
       shared.sub.add(subKey);
 
-      controller.reloadFlexiKlineConfig();
+      controller.syncFlexiKlineConfig();
 
       expect(controller.mainIndicatorKeys, contains(mainKey));
       expect(controller.subIndicatorKeys, contains(subKey));
     });
 
-    test('树上已激活而配置里没有的指标，reload 后退出绘制树', () {
+    test('树上已激活而配置里没有的指标，sync 后退出绘制树', () {
       final config = FakeFlexiKlineConfiguration(shareConfigInstance: true);
       final controller = mountController(
         config,
@@ -151,13 +151,13 @@ void main() {
       shared.mainIndicator.children.remove(mainKey);
       shared.sub.remove(subKey);
 
-      controller.reloadFlexiKlineConfig();
+      controller.syncFlexiKlineConfig();
 
       expect(controller.mainIndicatorKeys, isNot(contains(mainKey)));
       expect(controller.subIndicatorKeys, isNot(contains(subKey)));
     });
 
-    test('配置 children 不含 candle 时 reload 不误隐藏蜡烛图', () {
+    test('配置 children 不含 candle 时 sync 不误隐藏蜡烛图', () {
       final config = FakeFlexiKlineConfiguration(shareConfigInstance: true);
       final controller = mountController(config);
       addTearDown(controller.dispose);
@@ -165,7 +165,7 @@ void main() {
       // 模拟来自旧版持久化的配置：children 里没有 candle。
       shared.mainIndicator.children.clear();
 
-      controller.reloadFlexiKlineConfig();
+      controller.syncFlexiKlineConfig();
 
       expect(
         controller.mainIndicatorKeys,
@@ -174,20 +174,20 @@ void main() {
       );
     });
 
-    test('reload 后运行时 indicator 与配置仍共享同一 children Set', () {
+    test('sync 后运行时 indicator 与配置仍共享同一 children Set', () {
       final config = FakeFlexiKlineConfiguration();
       final controller = mountController(config, mainIndicators: declaredMain());
       addTearDown(controller.dispose);
       // 传入新实例，模拟 getFlexiKlineConfig 返回新对象的实现。
       final fresh = config.getFlexiKlineConfig();
 
-      controller.reloadFlexiKlineConfig(fresh);
+      controller.syncFlexiKlineConfig(fresh);
       controller.showMainIndicator(mainKey);
 
       expect(
         fresh.mainIndicator.children,
         contains(mainKey),
-        reason: 'reload 必须把运行时 indicator 接到新配置的 children Set 上，'
+        reason: 'sync 必须把运行时 indicator 接到新配置的 children Set 上，'
             '否则激活变更写进旧 Set，落盘内容会陈旧。',
       );
     });
@@ -201,16 +201,16 @@ void main() {
       // 模拟对侧缩放结束后写回共享配置。
       shared.setting = shared.setting.copyWith(candleWidth: target);
 
-      controller.reloadFlexiKlineConfig();
+      controller.syncFlexiKlineConfig();
 
       expect(
         controller.candleWidth,
         target,
-        reason: '_candleWidth 是 init 时对 settingConfig 的字段快照，须由 reload 重设。',
+        reason: '_candleWidth 是 init 时对 settingConfig 的字段快照，须由 sync 重设。',
       );
     });
 
-    test('reload 不回灌主区尺寸', () {
+    test('sync 不回灌主区尺寸', () {
       final config = FakeFlexiKlineConfiguration(shareConfigInstance: true);
       final controller = mountController(config);
       addTearDown(controller.dispose);
@@ -219,7 +219,7 @@ void main() {
       // 模拟对侧窗口写入了不同的主区尺寸。
       shared.mainIndicator.size = Size(sizeBefore.width + 50, sizeBefore.height + 50);
 
-      controller.reloadFlexiKlineConfig();
+      controller.syncFlexiKlineConfig();
 
       expect(
         controller.mainSize,
@@ -228,25 +228,25 @@ void main() {
       );
     });
 
-    test('reload 不改变 computed slot 布局', () {
+    test('sync 不改变 computed slot 布局', () {
       final config = FakeFlexiKlineConfiguration(shareConfigInstance: true);
       final controller = mountController(config, subIndicators: declaredSub());
       addTearDown(controller.dispose);
       final capacityBefore = controller.computedDataCapacity;
       final slotBefore = controller.getComputedDataIndex(subKey);
 
-      controller.reloadFlexiKlineConfig();
+      controller.syncFlexiKlineConfig();
 
       expect(controller.computedDataCapacity, capacityBefore);
       expect(controller.getComputedDataIndex(subKey), slotBefore);
     });
 
-    test('未挂载时 reload 只替换配置，不触碰绘制树', () {
+    test('未挂载时 sync 只替换配置，不触碰绘制树', () {
       final config = FakeFlexiKlineConfiguration(mainChildren: {mainKey});
       final controller = FlexiKlineController(configuration: config);
       addTearDown(controller.dispose);
 
-      expect(controller.reloadFlexiKlineConfig, returnsNormally);
+      expect(controller.syncFlexiKlineConfig, returnsNormally);
 
       // mount 后仍按配置恢复激活集合。
       controller.mountIndicators(
@@ -268,14 +268,14 @@ void main() {
 
       a.showMainIndicator(mainKey);
       a.showSubIndicator(subKey);
-      b.reloadFlexiKlineConfig();
+      b.syncFlexiKlineConfig();
 
       expect(config.savedConfigs, isEmpty, reason: '同步不应依赖落盘。');
       expect(b.mainIndicatorKeys, contains(mainKey));
       expect(b.subIndicatorKeys, contains(subKey));
     });
 
-    test('多个 Controller 依次 reload 幂等，配置不被中间态污染', () {
+    test('多个 Controller 依次 sync 幂等，配置不被中间态污染', () {
       final config = FakeFlexiKlineConfiguration(shareConfigInstance: true);
       final a = mountController(config, mainIndicators: declaredMain(), subIndicators: declaredSub());
       final b = mountController(config, mainIndicators: declaredMain(), subIndicators: declaredSub());
@@ -286,8 +286,8 @@ void main() {
 
       a.showMainIndicator(mainKey);
       a.showSubIndicator(subKey);
-      b.reloadFlexiKlineConfig();
-      c.reloadFlexiKlineConfig();
+      b.syncFlexiKlineConfig();
+      c.syncFlexiKlineConfig();
 
       expect(b.mainIndicatorKeys, contains(mainKey));
       expect(c.mainIndicatorKeys, contains(mainKey));
@@ -295,7 +295,7 @@ void main() {
       expect(c.subIndicatorKeys, contains(subKey));
     });
 
-    test('副区超容时 reload 收敛，不逐次轮转', () {
+    test('副区超容时 sync 收敛，不逐次轮转', () {
       const capacity = 2;
       final subKeys = [computedKey(1), computedKey(2), computedKey(3)];
       final config = FakeFlexiKlineConfiguration(shareConfigInstance: true);
@@ -317,9 +317,9 @@ void main() {
       }
       final settled = controller.subIndicatorKeys.toSet();
 
-      controller.reloadFlexiKlineConfig();
+      controller.syncFlexiKlineConfig();
       final afterFirst = controller.subIndicatorKeys.toSet();
-      controller.reloadFlexiKlineConfig();
+      controller.syncFlexiKlineConfig();
       final afterSecond = controller.subIndicatorKeys.toSet();
 
       expect(settled, hasLength(capacity));
@@ -327,12 +327,12 @@ void main() {
         afterFirst,
         settled,
         reason: '驱逐后配置若仍留着被驱逐的 key，subToShow 会恒非空，'
-            '每次 reload 补一个又驱逐一个，副区可见指标逐次轮转。',
+            '每次 sync 补一个又驱逐一个，副区可见指标逐次轮转。',
       );
       expect(afterSecond, settled);
     });
 
-    test('fixed 布局下 reload 不把临时尺寸写成持久尺寸', () {
+    test('fixed 布局下 sync 不把临时尺寸写成持久尺寸', () {
       const persisted = Size(400, 300);
       final config = FakeFlexiKlineConfiguration(
         shareConfigInstance: true,
@@ -355,12 +355,12 @@ void main() {
       // fixed 下画布尺寸只进 _tmpSize，不写 indicator.size。
       controller.setFixedLayoutMode(Size(persisted.width, persisted.height + 100));
 
-      controller.reloadFlexiKlineConfig();
+      controller.syncFlexiKlineConfig();
 
       expect(
         shared.mainIndicator.size,
         persistedBefore,
-        reason: 'reload 取 indicator.size 而非 MainPaintObject.size（后者是 '
+        reason: 'sync 取 indicator.size 而非 MainPaintObject.size（后者是 '
             '`_tmpSize ?? indicator.size`），否则 fixed 的临时尺寸会被写成持久尺寸。',
       );
     });

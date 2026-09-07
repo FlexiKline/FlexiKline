@@ -617,20 +617,29 @@ mixin SettingBinding on KlineBindingBase {
   }
 
   // Config
+  //
+  // 两个入口不是一对逆操作: [storeFlexiKlineConfig] 管耐久性(写存储, 扛进程退出),
+  // [syncFlexiKlineConfig] 管一致性(追平运行时, 未必读存储)。绘制 overlay 的耐久性
+  // 不属于任何一个 —— 它由 `DrawBinding` 在每次改动结束时写穿。
 
-  /// 重新载入配置并追平运行时, 用于横竖屏/多 K 线同页等多入口场景。
+  /// 追平本 Controller 的运行时到当前配置, 用于横竖屏/多 K 线同页等多入口场景。
   ///
-  /// 只处理配置无法自动生效的状态: setting 字段快照与激活集合差异。
-  /// 依赖 [IConfiguration.getFlexiKlineConfig] 返回新实例; 对侧须先 [storeFlexiKlineConfig]。
-  /// 本方法不发通知, 调用方应在调用后自行刷新依赖激活集合的状态。
-  void reloadFlexiKlineConfig([FlexiKlineConfig? config]) {
-    final diff = _paintObjectManager.reloadFlexiKlineConfig(config);
+  /// 只处理配置无法自动生效的状态: setting 字段快照与激活集合差异。不传 [config] 时
+  /// 向 [IConfiguration.getFlexiKlineConfig] 取; 该实现返回新实例的话, 对侧须先
+  /// [storeFlexiKlineConfig] 本侧才读得到 —— 返回共享实例时全程不读存储, 这也是本方法
+  /// 不叫 `reload` 的原因。
+  ///
+  /// 不发通知(与 [showMainIndicator] 等一致), 调用方应自行刷新依赖激活集合的状态。
+  /// 绘制 overlay 走独立存储键, 由 `DrawBinding` 的覆写追平。
+  @mustCallSuper
+  void syncFlexiKlineConfig([FlexiKlineConfig? config]) {
+    final diff = _paintObjectManager.syncFlexiKlineConfig(config);
 
     // _candleWidth / _candleSpacing 是 init() 对 settingConfig 的字段快照，须重设。
     // sync: false —— 只读入配置，不反向写回。
     _setCandleWidth(settingConfig.candleWidth.clamp(candleMinWidth, candleMaxWidth));
     // 蜡烛宽度与 minPaintBlankRate 都可能随新配置变化，两者都会收缩绘制偏移的
-    // 取值区间。这里不做 onChartScale 那样的视口补偿（reload 的语义是追平配置，
+    // 取值区间。这里不做 onChartScale 那样的视口补偿（本方法的语义是追平配置，
     // 不是保持视口），但必须把当前偏移约束回合法区间。
     if (isMounted) constrainPaintDxOffset();
 
@@ -653,15 +662,14 @@ mixin SettingBinding on KlineBindingBase {
     markRepaintDraw();
   }
 
-  /// 保存当前 FlexiKline 配置。
-  @override
-  void storeFlexiKlineConfig({
-    bool storeDrawOverlays = true,
-  }) {
+  /// 把当前 [FlexiKlineConfig] 交给 [IConfiguration] 落盘。
+  ///
+  /// 框架不代为决定时机: 既不在 `dispose` 也不在 `onThemeChanged` 自动调用。
+  /// 多个 Controller 共享一份配置时, 应只由配置拥有者一侧落盘。
+  ///
+  /// 不含绘制 overlay —— 它已写穿落盘, 不依赖本方法被调用。
+  void storeFlexiKlineConfig() {
     _paintObjectManager.storeFlexiKlineConfig();
-    if (storeDrawOverlays && drawConfig.enable) {
-      _drawObjectManager.storeDrawOverlaysConfig();
-    }
   }
 
   /// SettingConfig

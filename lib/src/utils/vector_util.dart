@@ -154,6 +154,28 @@ Path? reflectPathOnRect(Offset A, Offset B, Rect rect) {
   return Path()..addPolygon(points, false);
 }
 
+/// 把过[A]、[B]的**完整直线**裁到[rect]，返回两个边界端点；无交集时返回空列表。
+/// 不要求[A]、[B]落在[rect]内。
+///
+/// [reflectPointsOnRect]只给「从 A 朝 B」这一侧，正反各取一次才是完整直线；但两次结果
+/// 混着[A]、[B]本身且顺序不定，直接拼成 polygon 会来回折返，虚线相位错乱、半透明叠深。
+List<Offset> clipLineToRect(Offset A, Offset B, Rect rect) {
+  final points = [
+    ...reflectPointsOnRect(A, B, rect),
+    ...reflectPointsOnRect(B, A, rect),
+  ];
+  if (points.length < 2) return const [];
+
+  // 点共线, 沿优势轴取两端即可; 垂直线的 dx 恒等, 必须按 dy 取。
+  final vAB = B - A;
+  final byDy = vAB.dy.abs() > vAB.dx.abs();
+  double axis(Offset p) => byDy ? p.dy : p.dx;
+
+  final lo = points.reduce((a, b) => axis(a) <= axis(b) ? a : b);
+  final hi = points.reduce((a, b) => axis(a) >= axis(b) ? a : b);
+  return lo == hi ? const [] : [lo, hi]; // A 与 B 同点
+}
+
 /// 以[base]为基点, 以[sign]为方向, 判断[p]是否在此方向上
 bool _isExtendPoint(double base, double sign, double p) {
   if (sign > 0) return p > base;
@@ -263,8 +285,8 @@ Offset reflectToRectSide(Offset P, Offset O, Rect rect) {
     }
   } else {
     if (O.dx < P.dx) {
-      final y = rect.top * k + b;
-      return Offset(rect.top, y); // left
+      final y = rect.left * k + b;
+      return Offset(rect.left, y); // left
     } else {
       final y = rect.right * k + b;
       return Offset(rect.right, y);
@@ -306,14 +328,16 @@ Offset rotateVector(Offset v, double radians) {
 /// res < 0, AP在AB的顺时针方向
 bool isInsideOfPolygon(Offset P, List<Offset> vertexes) {
   if (vertexes.length <= 2) return false;
-  double cross1, cross2;
   bool res1 = true, res2 = true;
   Offset end, start = vertexes.first;
-  for (int i = 1; i < vertexes.length; i++) {
-    end = vertexes[i];
-    cross1 = cross2 = (end - start).cross(P - start);
-    res1 = res1 && cross1 >= 0;
-    res2 = res2 && cross2 <= 0;
+  // i 取到 length: 末边 `last → first` 也要检验, 否则 n 边形只判了 n-1 条边,
+  // 漏掉那条边外侧的点会被误判为在内。调用方已显式闭合(末点等于首点)时,
+  // 多出的这条边长度为 0、叉积为 0, 同时满足两个方向, 不改变结论。
+  for (int i = 1; i <= vertexes.length; i++) {
+    end = vertexes[i % vertexes.length];
+    final cross = (end - start).cross(P - start);
+    res1 = res1 && cross >= 0;
+    res2 = res2 && cross <= 0;
     if (!res1 && !res2) return false;
     start = end;
   }

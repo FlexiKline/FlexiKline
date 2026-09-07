@@ -26,6 +26,13 @@ import 'package:flutter/painting.dart';
 /// 两点直线类型，[FlexiDrawType.steps] 为 2。
 const testDrawLineType = FlexiDrawType('test_draw_line', 2, groupId: 'test');
 
+/// 与 [testDrawLineType] 同形状的第二个类型。
+///
+/// 需要**两个身份不同**的 overlay 时用它：`Overlay.id` 取创建时刻的毫秒时间戳，
+/// 而 `==` 由 `id` + `key` + `type` 三者构成，所以同类型连着建两个在同一毫秒内会撞号。
+/// 换类型让身份差异不依赖真实时钟走过多久。
+const testDrawLineType2 = FlexiDrawType('test_draw_line_2', 2, groupId: 'test');
+
 /// 只实现绘制契约的最小 [DrawObject]。
 class TestDrawObject extends DrawObject<Overlay> {
   TestDrawObject(super.overlay, super.config);
@@ -38,12 +45,14 @@ class TestDrawObject extends DrawObject<Overlay> {
   void draw(DrawContext context, Canvas canvas, Size size) {}
 }
 
-/// 注册 [testDrawLineType] 的构造器。挂载 controller 后调用一次即可。
+/// 注册两个测试类型的构造器。挂载 controller 后调用一次即可。
 void registerTestDrawObject(FlexiKlineController controller) {
-  controller.registerDrawObjectBuilder(
-    testDrawLineType,
-    (overlay, config) => TestDrawObject(overlay, config),
-  );
+  for (final type in const [testDrawLineType, testDrawLineType2]) {
+    controller.registerDrawObjectBuilder(
+      type,
+      (overlay, config) => TestDrawObject(overlay, config),
+    );
+  }
 }
 
 /// 走完整绘制流程画出一条两点直线，并停在 `Editing` 状态。
@@ -51,12 +60,14 @@ void registerTestDrawObject(FlexiKlineController controller) {
 /// 必须传 `isInitPointer: false`：否则 `startDraw` 会把第一个点预置到 `mainRect`
 /// 中心，测试就控制不了它的位置。两次确认之间必须插一次 [onDrawUpdate]——
 /// [DrawObject.addPointer] 让下一个 pointer 继承上一个点的 offset，不更新的话两点重合。
+/// 连着画多条时须换 [type]（见 [testDrawLineType2]），或在两次之间让真实时钟走过一毫秒。
 void drawTestLine(
   FlexiKlineController controller, {
   required Offset from,
   required Offset to,
+  IDrawType type = testDrawLineType,
 }) {
-  controller.startDraw(testDrawLineType, isInitPointer: false);
+  controller.startDraw(type, isInitPointer: false);
   controller.onDrawConfirm(from);
   controller.onDrawUpdate(to);
   controller.onDrawConfirm(to);

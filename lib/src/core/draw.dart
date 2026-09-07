@@ -118,6 +118,26 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
     }
   }
 
+  /// 追平绘制 overlay: 按存储重建对象树。
+  ///
+  /// overlay 不在 [FlexiKlineConfig] 里，共享配置实例带不动它。重建顺带让每个
+  /// [DrawObject] 换到新的 [DrawConfig]（它持有的是构造期快照），并 dispose 旧对象，
+  /// 因此必须 [exitDraw] —— 否则 [drawState] 指向已弃对象。
+  @override
+  void syncFlexiKlineConfig([FlexiKlineConfig? config]) {
+    super.syncFlexiKlineConfig(config);
+    _drawObjectManager.updateDrawOverlaysConfig(drawConfig);
+    exitDraw();
+  }
+
+  /// 把当前 overlay 列表落盘。
+  ///
+  /// 任何改动 [Overlay] 持久化字段的动作**结束时**都要调: points、line、lock、zIndex。
+  /// 内存与存储一旦分叉，[syncFlexiKlineConfig] 按存储重建就会回退未落盘的改动。
+  void _storeDrawOverlays() {
+    _drawObjectManager.storeDrawOverlaysConfig();
+  }
+
   void prepareDraw({bool force = false}) {
     // 如果是非退出状态, 则无需变更状态.
     if (!force && !drawState.isExited) return;
@@ -205,6 +225,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
         // 绘制完成, 使用line配置绘制实线.
         object.setDrawLineConfig(object.line);
         _drawObjectManager.addDrawObject(object, addToTop: true);
+        _storeDrawOverlays();
         if (drawContinuousListenable.value) {
           final nextObj = _drawObjectManager.generateDrawObject(
             object.clone(),
@@ -227,9 +248,14 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
         // 当前处于编辑状态, 但是pointer又没有被赋值, 此时点击事件为确认完成绘制.
         updateDrawObjectPointsData(object);
         _drawObjectManager.addDrawObject(object, replaceIfPresent: false);
+        _storeDrawOverlays();
         _drawState = const Prepared();
       } else {
         object.confirmPointer();
+        // 与其他提交路径同源: onUpdateDrawPoint 只改 offset, ts/value 要在落盘前回填,
+        // 否则存下去的是与视觉位置不符的旧蜡烛坐标。
+        updateDrawObjectPointsData(object);
+        _storeDrawOverlays();
       }
     }
 
@@ -319,6 +345,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
       }
     }
     updateDrawObjectPointsData(object);
+    _storeDrawOverlays();
     object.setMoveing(false);
     _drawPointerNotifier.updateValue(null);
     _notifyDrawStateChange();
@@ -374,6 +401,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
       strokeWidth: strokeWidth,
       lineType: lineType,
     )) {
+      _storeDrawOverlays();
       _markRepaintDraw();
       _notifyDrawStateChange();
       return true;
@@ -385,6 +413,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
     final object = drawState.object;
     if (object == null) return false;
     object.setDrawLockState(isLock);
+    _storeDrawOverlays();
     _markRepaintDraw();
     _notifyDrawStateChange();
     return true;
@@ -425,6 +454,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
     final object = drawState.object;
     if (object == null) return false;
     _drawObjectManager.moveToTop(object);
+    _storeDrawOverlays();
     _markRepaintDraw();
     return true;
   }
@@ -440,6 +470,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
     final object = drawState.object;
     if (object == null) return false;
     _drawObjectManager.moveToBottom(object);
+    _storeDrawOverlays();
     _markRepaintDraw();
     return true;
   }
