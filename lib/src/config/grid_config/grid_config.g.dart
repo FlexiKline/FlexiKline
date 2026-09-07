@@ -9,9 +9,9 @@ part of 'grid_config.dart';
 abstract class _$GridConfigCWProxy {
   GridConfig show(bool show);
 
-  GridConfig horizontal(GridAxis horizontal);
+  GridConfig horizontal(GridBorder horizontal);
 
-  GridConfig vertical(GridAxis vertical);
+  GridConfig vertical(GridBorder vertical);
 
   GridConfig isAllowDragIndicatorHeight(bool isAllowDragIndicatorHeight);
 
@@ -35,8 +35,8 @@ abstract class _$GridConfigCWProxy {
   /// ````
   GridConfig call({
     bool show,
-    GridAxis horizontal,
-    GridAxis vertical,
+    GridBorder horizontal,
+    GridBorder vertical,
     bool isAllowDragIndicatorHeight,
     double dragHitTestMinDistance,
     double draggingBgOpacity,
@@ -57,10 +57,10 @@ class _$GridConfigCWProxyImpl implements _$GridConfigCWProxy {
   GridConfig show(bool show) => this(show: show);
 
   @override
-  GridConfig horizontal(GridAxis horizontal) => this(horizontal: horizontal);
+  GridConfig horizontal(GridBorder horizontal) => this(horizontal: horizontal);
 
   @override
-  GridConfig vertical(GridAxis vertical) => this(vertical: vertical);
+  GridConfig vertical(GridBorder vertical) => this(vertical: vertical);
 
   @override
   GridConfig isAllowDragIndicatorHeight(bool isAllowDragIndicatorHeight) =>
@@ -71,19 +71,16 @@ class _$GridConfigCWProxyImpl implements _$GridConfigCWProxy {
       this(dragHitTestMinDistance: dragHitTestMinDistance);
 
   @override
-  GridConfig draggingBgOpacity(double draggingBgOpacity) =>
-      this(draggingBgOpacity: draggingBgOpacity);
+  GridConfig draggingBgOpacity(double draggingBgOpacity) => this(draggingBgOpacity: draggingBgOpacity);
 
   @override
-  GridConfig dragBgOpacity(double dragBgOpacity) =>
-      this(dragBgOpacity: dragBgOpacity);
+  GridConfig dragBgOpacity(double dragBgOpacity) => this(dragBgOpacity: dragBgOpacity);
 
   @override
   GridConfig dragLine(LineConfig? dragLine) => this(dragLine: dragLine);
 
   @override
-  GridConfig dragLineOpacity(double dragLineOpacity) =>
-      this(dragLineOpacity: dragLineOpacity);
+  GridConfig dragLineOpacity(double dragLineOpacity) => this(dragLineOpacity: dragLineOpacity);
 
   @override
   GridConfig ticksText(TextAreaConfig ticksText) => this(ticksText: ticksText);
@@ -116,21 +113,19 @@ class _$GridConfigCWProxyImpl implements _$GridConfigCWProxy {
       horizontal: horizontal == const $CopyWithPlaceholder()
           ? _value.horizontal
           // ignore: cast_nullable_to_non_nullable
-          : horizontal as GridAxis,
+          : horizontal as GridBorder,
       vertical: vertical == const $CopyWithPlaceholder()
           ? _value.vertical
           // ignore: cast_nullable_to_non_nullable
-          : vertical as GridAxis,
-      isAllowDragIndicatorHeight:
-          isAllowDragIndicatorHeight == const $CopyWithPlaceholder()
-              ? _value.isAllowDragIndicatorHeight
-              // ignore: cast_nullable_to_non_nullable
-              : isAllowDragIndicatorHeight as bool,
-      dragHitTestMinDistance:
-          dragHitTestMinDistance == const $CopyWithPlaceholder()
-              ? _value.dragHitTestMinDistance
-              // ignore: cast_nullable_to_non_nullable
-              : dragHitTestMinDistance as double,
+          : vertical as GridBorder,
+      isAllowDragIndicatorHeight: isAllowDragIndicatorHeight == const $CopyWithPlaceholder()
+          ? _value.isAllowDragIndicatorHeight
+          // ignore: cast_nullable_to_non_nullable
+          : isAllowDragIndicatorHeight as bool,
+      dragHitTestMinDistance: dragHitTestMinDistance == const $CopyWithPlaceholder()
+          ? _value.dragHitTestMinDistance
+          // ignore: cast_nullable_to_non_nullable
+          : dragHitTestMinDistance as double,
       draggingBgOpacity: draggingBgOpacity == const $CopyWithPlaceholder()
           ? _value.draggingBgOpacity
           // ignore: cast_nullable_to_non_nullable
@@ -161,74 +156,52 @@ extension $GridConfigCopyWith on GridConfig {
   _$GridConfigCWProxy get copyWith => _$GridConfigCWProxyImpl(this);
 }
 
-abstract class _$GridAxisCWProxy {
-  GridAxis show(bool show);
+abstract class _$GridBorderCWProxy {
+  GridBorder show(bool show);
 
-  GridAxis count(int count);
+  GridBorder line(LineConfig line);
 
-  GridAxis tickMode(GridTickMode tickMode);
-
-  GridAxis line(LineConfig line);
-
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GridAxis(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GridBorder(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
   /// ```dart
-  /// GridAxis(...).copyWith(id: 12, name: "My name")
+  /// GridBorder(...).copyWith(id: 12, name: "My name")
   /// ````
-  GridAxis call({
+  GridBorder call({
     bool show,
-    int count,
-    GridTickMode tickMode,
     LineConfig line,
   });
 }
 
-/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfGridAxis.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfGridAxis.copyWith.fieldName(...)`
-class _$GridAxisCWProxyImpl implements _$GridAxisCWProxy {
-  const _$GridAxisCWProxyImpl(this._value);
+/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfGridBorder.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfGridBorder.copyWith.fieldName(...)`
+class _$GridBorderCWProxyImpl implements _$GridBorderCWProxy {
+  const _$GridBorderCWProxyImpl(this._value);
 
-  final GridAxis _value;
-
-  @override
-  GridAxis show(bool show) => this(show: show);
+  final GridBorder _value;
 
   @override
-  GridAxis count(int count) => this(count: count);
+  GridBorder show(bool show) => this(show: show);
 
   @override
-  GridAxis tickMode(GridTickMode tickMode) => this(tickMode: tickMode);
-
-  @override
-  GridAxis line(LineConfig line) => this(line: line);
+  GridBorder line(LineConfig line) => this(line: line);
 
   @override
 
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GridAxis(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GridBorder(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
   /// ```dart
-  /// GridAxis(...).copyWith(id: 12, name: "My name")
+  /// GridBorder(...).copyWith(id: 12, name: "My name")
   /// ````
-  GridAxis call({
+  GridBorder call({
     Object? show = const $CopyWithPlaceholder(),
-    Object? count = const $CopyWithPlaceholder(),
-    Object? tickMode = const $CopyWithPlaceholder(),
     Object? line = const $CopyWithPlaceholder(),
   }) {
-    return GridAxis(
+    return GridBorder(
       show: show == const $CopyWithPlaceholder()
           ? _value.show
           // ignore: cast_nullable_to_non_nullable
           : show as bool,
-      count: count == const $CopyWithPlaceholder()
-          ? _value.count
-          // ignore: cast_nullable_to_non_nullable
-          : count as int,
-      tickMode: tickMode == const $CopyWithPlaceholder()
-          ? _value.tickMode
-          // ignore: cast_nullable_to_non_nullable
-          : tickMode as GridTickMode,
       line: line == const $CopyWithPlaceholder()
           ? _value.line
           // ignore: cast_nullable_to_non_nullable
@@ -237,10 +210,10 @@ class _$GridAxisCWProxyImpl implements _$GridAxisCWProxy {
   }
 }
 
-extension $GridAxisCopyWith on GridAxis {
-  /// Returns a callable class that can be used as follows: `instanceOfGridAxis.copyWith(...)` or like so:`instanceOfGridAxis.copyWith.fieldName(...)`.
+extension $GridBorderCopyWith on GridBorder {
+  /// Returns a callable class that can be used as follows: `instanceOfGridBorder.copyWith(...)` or like so:`instanceOfGridBorder.copyWith.fieldName(...)`.
   // ignore: library_private_types_in_public_api
-  _$GridAxisCWProxy get copyWith => _$GridAxisCWProxyImpl(this);
+  _$GridBorderCWProxy get copyWith => _$GridBorderCWProxyImpl(this);
 }
 
 // **************************************************************************
@@ -250,38 +223,27 @@ extension $GridAxisCopyWith on GridAxis {
 GridConfig _$GridConfigFromJson(Map<String, dynamic> json) => GridConfig(
       show: json['show'] as bool? ?? true,
       horizontal: json['horizontal'] == null
-          ? const GridAxis()
-          : GridAxis.fromJson(json['horizontal'] as Map<String, dynamic>),
-      vertical: json['vertical'] == null
-          ? const GridAxis()
-          : GridAxis.fromJson(json['vertical'] as Map<String, dynamic>),
-      isAllowDragIndicatorHeight:
-          json['isAllowDragIndicatorHeight'] as bool? ?? false,
-      dragHitTestMinDistance:
-          (json['dragHitTestMinDistance'] as num?)?.toDouble() ?? 10,
+          ? const GridBorder()
+          : GridBorder.fromJson(json['horizontal'] as Map<String, dynamic>),
+      vertical:
+          json['vertical'] == null ? const GridBorder() : GridBorder.fromJson(json['vertical'] as Map<String, dynamic>),
+      isAllowDragIndicatorHeight: json['isAllowDragIndicatorHeight'] as bool? ?? false,
+      dragHitTestMinDistance: (json['dragHitTestMinDistance'] as num?)?.toDouble() ?? 10,
       draggingBgOpacity: (json['draggingBgOpacity'] as num?)?.toDouble() ?? 0.1,
       dragBgOpacity: (json['dragBgOpacity'] as num?)?.toDouble() ?? 0,
       dragLine: json['dragLine'] == null
-          ? const LineConfig(
-              type: LineType.dashed,
-              dashes: [3, 5],
-              length: 20,
-              paint: PaintConfig(strokeWidth: 2))
+          ? const LineConfig(type: LineType.dashed, dashes: [3, 5], length: 20, paint: PaintConfig(strokeWidth: 2))
           : LineConfig.fromJson(json['dragLine'] as Map<String, dynamic>),
       dragLineOpacity: (json['dragLineOpacity'] as num?)?.toDouble() ?? 0.1,
       ticksText: json['ticksText'] == null
           ? const TextAreaConfig(
-              style: TextStyle(
-                  fontSize: defaultTextSize,
-                  overflow: TextOverflow.ellipsis,
-                  height: defaultTextHeight),
+              style: TextStyle(fontSize: defaultTextSize, overflow: TextOverflow.ellipsis, height: defaultTextHeight),
               textAlign: TextAlign.end,
               padding: EdgeInsets.symmetric(horizontal: 2))
           : TextAreaConfig.fromJson(json['ticksText'] as Map<String, dynamic>),
     );
 
-Map<String, dynamic> _$GridConfigToJson(GridConfig instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$GridConfigToJson(GridConfig instance) => <String, dynamic>{
       'show': instance.show,
       'horizontal': instance.horizontal.toJson(),
       'vertical': instance.vertical.toJson(),
@@ -294,23 +256,15 @@ Map<String, dynamic> _$GridConfigToJson(GridConfig instance) =>
       'ticksText': instance.ticksText.toJson(),
     };
 
-GridAxis _$GridAxisFromJson(Map<String, dynamic> json) => GridAxis(
+GridBorder _$GridBorderFromJson(Map<String, dynamic> json) => GridBorder(
       show: json['show'] as bool? ?? true,
-      count: (json['count'] as num?)?.toInt() ?? 5,
-      tickMode: json['tickMode'] == null
-          ? GridTickMode.average
-          : const GridTickModeConverter().fromJson(json['tickMode'] as String),
       line: json['line'] == null
           ? const LineConfig(
-              type: LineType.solid,
-              dashes: [2, 2],
-              paint: PaintConfig(strokeWidth: defaultAuxiliaryLineWidth))
+              type: LineType.solid, dashes: [2, 2], paint: PaintConfig(strokeWidth: defaultAuxiliaryLineWidth))
           : LineConfig.fromJson(json['line'] as Map<String, dynamic>),
     );
 
-Map<String, dynamic> _$GridAxisToJson(GridAxis instance) => <String, dynamic>{
+Map<String, dynamic> _$GridBorderToJson(GridBorder instance) => <String, dynamic>{
       'show': instance.show,
-      'count': instance.count,
-      'tickMode': const GridTickModeConverter().toJson(instance.tickMode),
       'line': instance.line.toJson(),
     };

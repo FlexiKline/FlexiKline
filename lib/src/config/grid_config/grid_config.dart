@@ -26,9 +26,13 @@ part 'grid_config.g.dart';
 
 /// GridConfig 配置说明:
 ///
+/// grid 层只负责**边框、pane 分隔线与拖拽**。网格线本身归各指标 —— 主区横线是价格刻度线、
+/// 竖线是几何参考线, 都由 `CandleBaseIndicator.horizontalGrid` / `verticalGrid` 配置。
+/// [horizontal] 与 [vertical] 因此只剩边框语义, 类型是 [GridBorder]。
+///
 /// 如果指定[dragLine]时:
 /// 1. 当拖拽中时, 使用[dragLine]绘制预拖拽的指标图的底部边线.
-/// 2. 当未拖拽时, 使用[drawLine]绘制其length指定长度的线. 其中线类型为实线, 颜色不透明度为[draggingBgOpacity], 且位于指标图底部线居中位置.
+/// 2. 当未拖拽时, 使用[dragLine]绘制其length指定长度的线. 其中线类型为实线, 颜色不透明度为[draggingBgOpacity], 且位于指标图底部线居中位置.
 ///
 /// 如果未指定:
 /// 1. 默认会根据[dragHitTestMinDistance]计算可拖拽区域, 并使用[theme.dragBg]进行填充.
@@ -40,8 +44,8 @@ part 'grid_config.g.dart';
 class GridConfig {
   const GridConfig({
     this.show = true,
-    this.horizontal = const GridAxis(),
-    this.vertical = const GridAxis(),
+    this.horizontal = const GridBorder(),
+    this.vertical = const GridBorder(),
     this.isAllowDragIndicatorHeight = false,
     this.dragHitTestMinDistance = 10,
     this.draggingBgOpacity = 0.1,
@@ -67,9 +71,16 @@ class GridConfig {
     ),
   });
 
+  /// 是否绘制边框与 pane 分隔线。
   final bool show;
-  final GridAxis horizontal;
-  final GridAxis vertical;
+
+  /// 主区顶边框与各 pane 底部分隔线。
+  ///
+  /// 分隔线也算相邻两个 pane 的边框, 因此与顶边框共用同一配置。
+  final GridBorder horizontal;
+
+  /// 左右边框, 贯穿主区到副区底。
+  final GridBorder vertical;
 
   /// 是否允许通过拖拽Grid线移动指标图表
   final bool isAllowDragIndicatorHeight;
@@ -97,22 +108,16 @@ class GridConfig {
   Map<String, dynamic> toJson() => _$GridConfigToJson(this);
 }
 
-/// 轴刻度的取值方式。
-enum GridTickMode {
-  /// 按像素等分轴长, 刻度值由位置反算。位置固定, 数量精确等于 count。
-  average,
-
-  /// 按 nice-number 取整刻度值, 位置由值换算。值好读, 数量在 count 附近浮动。
-  nice,
-}
-
+/// 单个方向的 grid 边框配置。
+///
+/// 由 `GridAxis` 更名而来: grid 层不再拥有任何轴, 只剩边框与 pane 分隔线, 原先的 `count`
+/// 与 `tickMode` 随网格线一起下沉到指标(见 `GridAxisConfig`)。**JSON 键未变**, 因此旧的
+/// 持久化配置照常还原, 只是多余的 `count` 被忽略。
 @CopyWith()
 @FlexiConfigSerializable
-class GridAxis {
-  const GridAxis({
+class GridBorder {
+  const GridBorder({
     this.show = true,
-    this.count = 5,
-    this.tickMode = GridTickMode.nice,
     this.line = const LineConfig(
       type: LineType.solid,
       dashes: [2, 2],
@@ -122,22 +127,9 @@ class GridAxis {
 
   final bool show;
 
-  /// 刻度的间隔数。
-  ///
-  /// [GridTickMode.average] 下是精确间隔数: 轴长恰好被切成 count 段。
-  /// [GridTickMode.nice] 下是目标间隔数: 步长要取整到好读的数, 实际刻度数在它附近浮动。
-  final int count;
-
-  /// 刻度取值方式, 默认 [GridTickMode.nice]。
-  ///
-  /// 本期只有主区价格轴(即 [GridConfig.horizontal])读取它, [GridConfig.vertical] 上的取值
-  /// 当前无人使用。默认值定在这里而不是 [GridConfig] 的构造参数上, 是为了让缺少该字段的旧
-  /// 持久化配置反序列化后也走 nice。
-  final GridTickMode tickMode;
-
   final LineConfig line;
 
-  factory GridAxis.fromJson(Map<String, dynamic> json) => _$GridAxisFromJson(json);
+  factory GridBorder.fromJson(Map<String, dynamic> json) => _$GridBorderFromJson(json);
 
-  Map<String, dynamic> toJson() => _$GridAxisToJson(this);
+  Map<String, dynamic> toJson() => _$GridBorderToJson(this);
 }

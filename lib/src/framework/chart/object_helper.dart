@@ -327,51 +327,178 @@ mixin PaintObjectGeometryStateMixin<T extends Indicator<IIndicatorKey>> on Indic
   }
 }
 
-/// 绘制当前图表在Y轴上的刻度值
-mixin PaintYAxisTicksMixin<T extends Indicator> on PaintObject<T> {
-  /// 为副区的指标图绘制Y轴上的刻度信息
+/// 网格线与 Y 轴刻度的绘制能力。
+///
+/// 算与画分成两组: `resolveXxx` 只产出位置、不碰 canvas; `paintXxx` 只消费已算好的位置。
+/// 分开是因为「算了但不画」是常态 —— 线关掉了仍要产出位置供刻度文本使用, 竖线的位置还要
+/// 跨 pane 供副区对齐。
+///
+/// 全部方法只在 `List<double>` 这一种货币上交易: 刻度值不随位置一起传递, 由
+/// [paintYAxisTicks] 内部经 `dyToValue` 现算。
+mixin PaintGridTicksMixin<T extends Indicator> on PaintObject<T> {
+  // ---- 算: 只产出位置 ----
+
+  /// 按 [mode] 产出横向网格线的 dy 序列, **不含落在 [bounds] 两端的位置**。
+  ///
+  /// 两端不产出: 那里有 grid 层的顶边框与 pane 分隔线, 再画一条只是重合。[bounds] 默认
+  /// [drawableRect] —— 横线要横穿整个可绘制区, chartRect 已让出 padding 会让线短一截。
+  ///
+  /// `count` / `size` 是纯几何, 与任何值无关; `nice` 由算法定值再经
+  /// `valueToDy(correct: false)` 换算位置, 区间不可用时退化为 `count`。
   @protected
-  void paintYAxisTicks(
-    Canvas canvas,
-    Size size, {
-    required int tickCount, // 刻度数量.
+  List<double> resolveHorizontalDys(GridTickMode mode, {Rect? bounds}) {
+    final rect = bounds ?? drawableRect;
+    return switch (mode) {
+      GridCountTickMode(:final divisions) => evenPositions(divisions, start: rect.top, length: rect.height),
+      GridSizeTickMode(:final spacing) => spacedPositions(spacing, start: rect.top, length: rect.height),
+      // 区间不可用时退化为 count。两个判据各管一头: canPaintChart 与 paintChart 的门禁同源
+      // (切标的时 minMax 还是上一帧的旧值, 只看它会让 nice 拿旧价格算位置); minMax.isZero
+      // 则覆盖数据已就绪但区间为零的坏数据 —— computePriceTicks 对非正跨度返回空, 不退化
+      // 会让主区一条横线都没有。
+      GridNiceTickMode(:final targetDivisions) => klineData.canPaintChart && !minMax.isZero
+          ? _niceDys(targetDivisions, rect)
+          : evenPositions(targetDivisions, start: rect.top, length: rect.height),
+    };
+  }
+
+  /// 按**刻度数**等分产出横向 dy 序列, **含两端**。副区历来的口径(3 表示高 / 中 / 低)。
+  ///
+  /// 与 [resolveHorizontalDys] 的 `count` 分支刻意不同: 那里的参数是间隔数且避开两端,
+  /// 因为主区两端有边框; 副区没有边框, 贴顶贴底的两条正是该指标在可视区的极值, 是信息而非
+  /// 冗余。[bounds] 因此也默认 [chartRect] 而非 [drawableRect] —— 刻度文本落在图表区内。
+  @protected
+  List<double> resolveDysByCount(int tickCount, {Rect? bounds}) {
+    final rect = bounds ?? chartRect;
+    return positionsByCount(tickCount, start: rect.top, length: rect.height);
+  }
+
+  /// 按 [mode] 产出纵向网格线的 dx 序列, **不含落在 [bounds] 两端的位置**(那里是左右边框)。
+  ///
+  /// `nice` 在此不成立, 退化为 `count`: 竖线是几何参考线, 按值取整会让网格随数据漂移。
+  @protected
+  List<double> resolveVerticalDxs(GridTickMode mode, {Rect? bounds}) {
+    final rect = bounds ?? drawableRect;
+    switch (mode) {
+      case GridCountTickMode(:final divisions):
+        return evenPositions(divisions, start: rect.left, length: rect.width);
+      case GridSizeTickMode(:final spacing):
+        return spacedPositions(spacing, start: rect.left, length: rect.width);
+      case GridNiceTickMode(:final targetDivisions):
+        assert(false, '竖线不支持 nice: 已退化为 count($targetDivisions)。');
+        return evenPositions(targetDivisions, start: rect.left, length: rect.width);
+    }
+  }
+
+  /// 按 nice-number 取整刻度值产出位置: 先定值, 再由 `valueToDy` 换算。
+  ///
+  /// 只有这一条取位方式留在 mixin 内: 它要经 `dyToValue` / `valueToDy` 在值与像素之间来回,
+  /// 而那是本对象的坐标体系, 搬进纯函数就得把两个映射当闭包传进去 —— 接口复杂度会超过它
+  /// 自己的实现复杂度。取整算法本身在 [computePriceTicks]。
+  ///
+  /// 取值范围是 [bounds] 反算出的价格区间, **不外扩 minMax** —— 后者是 Y 轴 zoom 的数据
+  /// 载体, 外扩会让用户精确控制的跨度被算法撑回去, 也会让 step 换档时整幅画面跳一下。
+  /// 代价是最顶/最底刻度到边缘的距离随平移连续变化, 与 TradingView 一致。
+  List<double> _niceDys(int targetDivisions, Rect bounds) {
+    // 显式 check: false —— 此处的 dy 恰在 bounds 边界上, 带检查的默认值会返回 null, 刻度会
+    // 整体消失且不抛异常。
+    final top = dyToValue(bounds.top, check: false);
+    final bottom = dyToValue(bounds.bottom, check: false);
+    if (top == null || bottom == null) return const [];
+
+    final ticks = computePriceTicks(
+      bottom: bottom.toDouble(),
+      top: top.toDouble(),
+      targetCount: targetDivisions,
+      precision: klineData.precision,
+    );
+
+    // correct: false —— 默认会把值 clamp 进 [minMax.min, max], 留白区(padding 与 tips)的
+    // 刻度会被压到边缘叠在一起。
+    return [for (final value in ticks.values) valueToDy(value.toFlexiNum(), correct: false)];
+  }
+
+  // ---- 画: 只消费已算好的位置 ----
+
+  /// 画横向网格线。[line] 为 null 则不画。
+  @protected
+  void paintHorizontalGridLines(
+    Canvas canvas, {
+    required Iterable<double> dys,
+    LineConfig? line,
+    Rect? bounds,
+  }) {
+    if (line == null) return;
+    final rect = bounds ?? drawableRect;
+    for (final dy in dys) {
+      canvas.drawLineByConfig(
+        Path()
+          ..moveTo(rect.left, dy)
+          ..lineTo(rect.right, dy),
+        line,
+        themeColor: theme.gridLineColor,
+      );
+    }
+  }
+
+  /// 画纵向网格线。[line] 为 null 则不画。
+  ///
+  /// 副区指标传主区产出的 dx 序列即与主区对齐。
+  @protected
+  void paintVerticalGridLines(
+    Canvas canvas, {
+    required Iterable<double> dxs,
+    LineConfig? line,
+    Rect? bounds,
+  }) {
+    if (line == null) return;
+    final rect = bounds ?? drawableRect;
+    for (final dx in dxs) {
+      canvas.drawLineByConfig(
+        Path()
+          ..moveTo(dx, rect.top)
+          ..lineTo(dx, rect.bottom),
+        line,
+        themeColor: theme.gridLineColor,
+      );
+    }
+  }
+
+  /// 画 Y 轴刻度文本, 返回本次文本的最大宽度(未画任何文本时为 0)。
+  ///
+  /// 逐个 `dyToValue(dy, check: false)` 取值, null 的跳过(无区间时取不到), 再经
+  /// [formatTicksValue] 格式化。**必须 check: false**: `includeDy` 是闭区间, 而 nice 刻度
+  /// 可以落在留白区端点上, 浮点误差足以让它差之毫厘被判出界, 整条刻度静默消失。
+  ///
+  /// 返回宽度是给主区蜡烛用的: zoom 滑竿热区的宽度由本帧刻度文本实测而来。
+  @protected
+  double paintYAxisTicks(
+    Canvas canvas, {
+    required Iterable<double> dys,
     required int precision,
   }) {
-    if (minMax.isZero) return;
-    if (tickCount <= 0) return;
-
-    double dyStep = 0;
-    double drawTop;
-    if (tickCount == 1) {
-      drawTop = chartRect.top + chartRect.height / 2;
-    } else {
-      drawTop = chartRect.top;
-      dyStep = chartRect.height / (tickCount - 1);
-    }
+    if (minMax.isZero) return 0;
 
     final dx = chartRect.right;
-    double dy = 0.0;
-    for (int i = 0; i < tickCount; i++) {
-      dy = drawTop + i * dyStep;
-      final value = dyToValue(dy);
+    final ticksText = defTicksTextConfig;
+    double maxWidth = 0;
+    for (final dy in dys) {
+      final value = dyToValue(dy, check: false);
       if (value == null) continue;
 
-      final text = formatTicksValue(value, precision: precision);
-
-      final ticksText = defTicksTextConfig;
-
-      canvas.drawTextArea(
+      final size = canvas.drawTextArea(
         offset: Offset(
           dx,
           dy - ticksText.areaHeight, // 绘制在刻度线之上
         ),
         drawDirection: DrawDirection.rtl,
         drawableRect: drawableRect,
-        text: text,
+        text: formatTicksValue(value, precision: precision),
         textConfig: ticksText,
         themeTextColor: theme.ticksTextColor,
       );
+      if (size.width > maxWidth) maxWidth = size.width;
     }
+    return maxWidth;
   }
 
   /// 如果要定制格式化刻度值. 在PaintObject中覆写此方法.

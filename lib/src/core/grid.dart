@@ -46,11 +46,11 @@ mixin GridBinding on KlineBindingBase, SettingBinding {
 
   void paintGrid(Canvas canvas, Size size) {
     if (gridConfig.show) {
-      // 横向网格线
-      _paintHorizontalGrid(canvas, size);
+      // 横向边框与 pane 分隔线
+      _paintHorizontalBorder(canvas, size);
 
-      // 纵向网格线
-      _paintVerticalGrid(canvas, size);
+      // 左右边框
+      _paintVerticalBorder(canvas, size);
     }
 
     // 拖拽分隔线
@@ -126,9 +126,14 @@ mixin GridBinding on KlineBindingBase, SettingBinding {
     }
   }
 
-  /// 绘制横向网格线。
-  void _paintHorizontalGrid(Canvas canvas, Size size) {
+  /// 绘制主区顶边框与各 pane 底部分隔线。
+  ///
+  /// 网格横线不在此绘制: 它与 Y 轴刻度文本同源, 由 chart 层的
+  /// [CandleBasePaintObject.paintYAxisTickLines] 产出, 才能保证线与文本用同一帧的
+  /// minMax。grid 层因此只余布局线, 与价格无关。
+  void _paintHorizontalBorder(Canvas canvas, Size size) {
     if (!gridConfig.horizontal.show) return;
+    final border = gridConfig.horizontal.line;
     final main = mainRect;
     final sub = subRect;
 
@@ -139,20 +144,16 @@ mixin GridBinding on KlineBindingBase, SettingBinding {
       Path()
         ..moveTo(main.left, dy)
         ..lineTo(main.right, dy),
-      gridConfig.horizontal.line,
+      border,
       themeColor: theme.gridLineColor,
     );
-
-    // 主区内部的价格横线不在此绘制: 它与 Y 轴刻度文本同源, 由 chart 层的
-    // [CandleBasePaintObject.paintYAxisTickLines] 产出, 才能保证线与文本用同一帧的
-    // minMax。grid 层因此只余布局线, 与价格无关, 保持静态。
 
     // 主区底部分隔线
     canvas.drawLineByConfig(
       Path()
         ..moveTo(main.left, main.bottom)
         ..lineTo(main.right, main.bottom),
-      gridConfig.horizontal.line,
+      border,
       themeColor: theme.gridLineColor,
     );
 
@@ -165,68 +166,37 @@ mixin GridBinding on KlineBindingBase, SettingBinding {
         Path()
           ..moveTo(main.left, dy)
           ..lineTo(main.right, dy),
-        gridConfig.horizontal.line,
+        border,
         themeColor: theme.gridLineColor,
       );
     }
   }
 
-  /// 绘制纵向网格线。
-  void _paintVerticalGrid(Canvas canvas, Size size) {
+  /// 绘制左右边框, 贯穿主区到副区底。
+  ///
+  /// 网格竖线不在此绘制: 它归主区蜡烛(`CandleBaseIndicator.verticalGrid`), 宿主自定义
+  /// Candle 指标时才拿得到竖线的定制权。
+  void _paintVerticalBorder(Canvas canvas, Size size) {
     if (!gridConfig.vertical.show) return;
+    final border = gridConfig.vertical.line;
     final main = mainRect;
     final sub = subRect;
-    double dx = main.left;
-    final step = main.right / gridConfig.vertical.count;
 
     // 左边框线
     canvas.drawLineByConfig(
       Path()
-        ..moveTo(dx, main.top)
-        ..lineTo(dx, sub.bottom),
-      gridConfig.vertical.line,
+        ..moveTo(main.left, main.top)
+        ..lineTo(main.left, sub.bottom),
+      border,
       themeColor: theme.gridLineColor,
     );
-
-    // 时间轴不绘制纵向副区网格线。
-    double top = sub.top;
-    double bottom = sub.bottom;
-    switch (timePaintObject.position) {
-      case DrawPosition.middle:
-        top += timePaintObject.height;
-      case DrawPosition.bottom:
-        bottom -= timePaintObject.height;
-    }
-
-    // 主区与副区纵向网格线
-    for (int i = 1; i < gridConfig.vertical.count; i++) {
-      dx = i * step;
-
-      // 主区竖线
-      canvas.drawLineByConfig(
-        Path()
-          ..moveTo(dx, main.top)
-          ..lineTo(dx, main.bottom),
-        gridConfig.vertical.line,
-        themeColor: theme.gridLineColor,
-      );
-
-      // 副区竖线
-      canvas.drawLineByConfig(
-        Path()
-          ..moveTo(dx, top)
-          ..lineTo(dx, bottom),
-        gridConfig.vertical.line,
-        themeColor: theme.gridLineColor,
-      );
-    }
 
     // 右边框线
     canvas.drawLineByConfig(
       Path()
         ..moveTo(main.right, main.top)
         ..lineTo(main.right, sub.bottom),
-      gridConfig.vertical.line,
+      border,
       themeColor: theme.gridLineColor,
     );
   }

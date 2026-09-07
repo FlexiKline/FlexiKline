@@ -348,19 +348,21 @@ abstract class ExternalPaintObject<T extends ExternalIndicator> extends PaintObj
 ///
 /// 使用 [DirectIndicatorKey]，属于基础/系统指标，不占 slot。
 abstract class CandleBasePaintObject<T extends CandleBaseIndicator> extends DirectPaintObject<T>
-    with PaintYAxisTicksMixin {
+    with PaintGridTicksMixin {
   /// 获取当前蜡烛图的绘制类型
   FlexiChartType resolveChartType();
 
   /// 是否在蜡烛图类型为线图时隐藏指标
   bool get hideMainIndicatorsInLineChartMode => false;
 
-  /// 本帧 Y 轴刻度缓存: 位置与值, **不含文本**。
+  /// 本帧 Y 轴刻度位置, **不含值**。
   ///
-  /// [paintYAxisTickLines] 写入, [paintYAxisTickLabels] 读取并格式化后置空。
-  /// 两次调用同属一次 [MainPaintObject.doPaintChart], 生命周期即一帧。
-  /// 存值而非文本, 是为了让格式化只发生在真正要画文本的地方 —— 画线阶段不需要它。
-  List<({double dy, FlexiNum value})>? _frameTicks;
+  /// [paintYAxisTickLines] 写入, [paintYAxisTickLabels] 读取后置空。两次调用同属一次
+  /// [MainPaintObject.doPaintChart], 生命周期即一帧。null 表示本帧没有可用区间, 文本那一趟
+  /// 因此自动跳过。
+  ///
+  /// 只存位置: 刻度值在画文本时由 `dyToValue(check: false)` 现算回来, 两个方向严格互逆。
+  List<double>? _frameTicks;
 
   /// 上次上报的 zoom 滑竿区域, 同时承载宽度的单调增长态。
   ///
@@ -373,90 +375,22 @@ abstract class CandleBasePaintObject<T extends CandleBaseIndicator> extends Dire
   /// 不值得为它引入配置级的变更通知。
   Rect? _reportedZoomBarRect;
 
-  /// 绘制 Y 轴刻度横线, 并产出本帧刻度。
+  /// 绘制 Y 轴刻度横线, 并产出本帧刻度位置。
   ///
   /// 由 [MainPaintObject.doPaintChart] 在遍历子对象**之前**调用, 因此横线一定在所有
   /// 主区指标之下, 与各指标的 zIndex 无关。
   ///
-  /// 横线宽度取 [drawableRect] 而非 chartRect: 后者已让出 padding, 会让线短一截。
+  /// 位置一律交给 mixin 的 [resolveHorizontalDys]: 三种模式的分叉、以及区间不可用时 nice
+  /// 退化为 count, 都在那里一次写完。本方法只负责决定「值取不到时不产出刻度」。
   void paintYAxisTickLines(Canvas canvas, Size size) {
-    final axis = gridConfig.horizontal;
+    final grid = indicator.horizontalGrid;
+    final dys = resolveHorizontalDys(grid.mode);
 
-    // 没有区间可用时只画骨架: 位置按 count 等分, 不产出刻度值, 文本那一趟因此自动跳过。
-    // 数据未就绪(加载中、切标的)是它的主要场景 —— 横线是布局骨架, 位置只依赖几何, 缺了
-    // 这一路主区就只剩竖线。价格全为零的坏数据也走这里, 画骨架比画一列 0 更诚实。
-    //
-    // 其余情况是唯一的模式分叉点。两个分支只负责产出 (dy, value) 对, 线的绘制、值的格式化
-    // 与滑竿宽度上报都在分叉之外, 各写一遍就够。
-    final ticks = _frameTicks = minMax.isZero
-        ? null
-        : switch (axis.tickMode) {
-            GridTickMode.average => _averageTicks(axis.count),
-            GridTickMode.nice => _niceTicks(axis.count),
-          };
+    // 区间为零时只画线不产出刻度: 位置只依赖几何, 缺了这一路主区一条横线都没有; 但值反算
+    // 出来会是一列贴着 0 的噪声, 画骨架比画一列 0 更诚实。
+    _frameTicks = minMax.isZero ? null : dys;
 
-    if (!axis.show) return;
-    for (final dy in ticks?.map((tick) => tick.dy) ?? _averageTickDys(axis.count)) {
-      canvas.drawLineByConfig(
-        Path()
-          ..moveTo(drawableRect.left, dy)
-          ..lineTo(drawableRect.right, dy),
-        axis.line,
-        themeColor: theme.gridLineColor,
-      );
-    }
-  }
-
-  /// 按像素等分 [drawableRect] 产出刻度: 先定位置, 再由 [dyToValue] 反算价格。
-  ///
-  /// [count] 是间隔数, 末条刻度落在 [drawableRect] 底边。
-  List<({double dy, FlexiNum value})> _averageTicks(int count) {
-    final ticks = <({double dy, FlexiNum value})>[];
-    for (final dy in _averageTickDys(count)) {
-      final value = dyToValue(dy);
-      if (value == null) continue;
-      ticks.add((dy: dy, value: value));
-    }
-    return ticks;
-  }
-
-  /// 按像素等分 [drawableRect] 的刻度位置, [count] 是间隔数, 末条落在底边。
-  ///
-  /// 与取值分开: 骨架路径只要位置, 没有区间可反算。
-  List<double> _averageTickDys(int count) {
-    if (count <= 0) return const [];
-    final dyStep = drawableRect.height / count;
-    return [for (int i = 1; i <= count; i++) i * dyStep];
-  }
-
-  /// 按 nice-number 取整刻度值产出刻度: 先定值, 再由 [valueToDy] 换算位置。
-  ///
-  /// 取值范围是 [drawableRect] 反算出的价格区间, **不外扩 minMax** —— 后者是 Y 轴 zoom 的
-  /// 数据载体, 外扩会让用户精确控制的跨度被算法撑回去, 也会让 step 换档时整幅画面跳一下。
-  /// 代价是最顶/最底刻度到边缘的距离随平移连续变化, 与 TradingView 一致。
-  ///
-  /// [count] 是目标间隔数, 直接就是算法的 targetCount: 等分模式的 `height / count` 同样把
-  /// 高度切成 count 段, 两者语义本就一致, 不做 ±1 换算。
-  List<({double dy, FlexiNum value})> _niceTicks(int count) {
-    // 显式 check: false —— 此处的 dy 恰在 drawableRect 边界上, 带检查的默认值会返回 null,
-    // 刻度会整体消失且不抛异常。
-    final top = dyToValue(drawableRect.top, check: false);
-    final bottom = dyToValue(drawableRect.bottom, check: false);
-    if (top == null || bottom == null) return const [];
-
-    final ticks = computePriceTicks(
-      bottom: bottom.toDouble(),
-      top: top.toDouble(),
-      targetCount: count,
-      precision: klineData.precision,
-    );
-
-    return ticks.values.map((tick) {
-      final value = tick.toFlexiNum();
-      // correct: false —— 默认会把值 clamp 进 [minMax.min, max], 留白区(padding 与 tips)的
-      // 刻度会被压到边缘叠在一起。
-      return (dy: valueToDy(value, correct: false), value: value);
-    }).toList();
+    paintHorizontalGridLines(canvas, dys: dys, line: grid.line);
   }
 
   /// 绘制 Y 轴刻度文本。
@@ -464,33 +398,11 @@ abstract class CandleBasePaintObject<T extends CandleBaseIndicator> extends Dire
   /// 由 [MainPaintObject.doPaintChart] 在遍历子对象**之后**调用, 因此文本一定在所有
   /// 主区指标之上, 不会被 MA / BOLL 一类 zIndex 更大的指标覆盖。
   void paintYAxisTickLabels(Canvas canvas, Size size) {
-    final ticks = _frameTicks;
+    final dys = _frameTicks;
     _frameTicks = null; // 用完即弃, 不跨帧存活
-    if (ticks == null || !settingConfig.showYAxisTick) return;
+    if (dys == null || !settingConfig.showYAxisTick) return;
 
-    final dx = chartRect.right;
-    double maxTickWidth = 0.0;
-    for (final tick in ticks) {
-      final text = formatTicksValue(tick.value, precision: klineData.precision);
-
-      final ticksText = defTicksTextConfig;
-
-      final size = canvas.drawTextArea(
-        offset: Offset(
-          dx,
-          tick.dy - ticksText.areaHeight, // 绘制在刻度线之上
-        ),
-        drawDirection: DrawDirection.rtl,
-        drawableRect: drawableRect,
-        text: text,
-        textConfig: ticksText,
-        themeTextColor: theme.ticksTextColor,
-      );
-
-      if (size.width > maxTickWidth) maxTickWidth = size.width;
-    }
-
-    reportZoomSlideBarRect(maxTickWidth);
+    reportZoomSlideBarRect(paintYAxisTicks(canvas, dys: dys, precision: klineData.precision));
   }
 
   /// 按本帧刻度文本的最大宽度上报 zoom 滑竿区域。

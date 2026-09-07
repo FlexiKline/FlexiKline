@@ -22,6 +22,10 @@ class CandleIndicator extends CandleBaseIndicator {
     super.height = defaultMainIndicatorHeight,
     super.padding = defaultMainIndicatorPadding,
 
+    // 主区网格线: 横线即价格刻度线, 竖线是几何参考线.
+    super.horizontalGrid = CandleBaseIndicator.defaultHorizontalGrid,
+    super.verticalGrid = CandleBaseIndicator.defaultVerticalGrid,
+
     // 最高价
     this.high = const MarkConfig(
       spacing: 2,

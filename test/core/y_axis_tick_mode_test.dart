@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// 主区 Y 轴价格刻度的两种取值方式：[GridTickMode.average] 与 [GridTickMode.nice]。
+/// 主区 Y 轴价格刻度的两种取值方式：[GridCountTickMode] 与 [GridNiceTickMode]。
 ///
 /// 观察点取**绘制产物**而非内部字段：横线经 `drawPath` 落在 Canvas 上，刻度值再由
 /// `dyToCandleValue` 从横线位置反算。这样两条只会「行为错、不报错」的实现细节才有回归网——
@@ -48,14 +48,23 @@ const _mainPadding = EdgeInsets.symmetric(vertical: 20);
 const _flatHigh = 107.0;
 const _flatLow = 93.0;
 
+/// 本组统一用的间隔数，与 [CandleBaseIndicator.defaultHorizontalGrid] 的默认值一致。
+///
+/// count 模式产出 `divisions - 1` 条内部横线：两端落在 grid 层的顶边框与主区底部分隔线上，
+/// 再画一条只是重合。
+const _divisions = 5;
+
 void main() {
-  /// 建 controller、灌数据并按 [tickMode] 配置主区横向轴。
+  /// 建 controller、灌数据并按 [mode] 配置主区横线。
+  ///
+  /// 刻度参数挂在**蜡烛 indicator** 上而不是 `GridConfig`：grid 层只剩边框与拖拽，网格线归
+  /// 指标。这条路径同时管着「宿主自定义 Candle 指标时能否定制刻度」。
   Future<ControllerScenario> arrange(
     WidgetTester tester, {
-    required GridTickMode tickMode,
+    required GridTickMode mode,
     List<CandleModel>? candles,
     EdgeInsets padding = _mainPadding,
-    bool gridShow = true,
+    bool paintGridLine = true,
     bool showYAxisTick = true,
   }) async {
     final scene = ControllerScenario(
@@ -66,14 +75,15 @@ void main() {
       _spec,
       candles ?? genFlatCandleList(high: _flatHigh, low: _flatLow),
       canvasWidth: 400,
-      candle: TestCandleIndicator(visibleMinMaxFromData: true),
-    );
-    scene.controller.flushPendingKlineData();
-    scene.controller.updateGridConfig(
-      (config) => config.copyWith(
-        horizontal: config.horizontal.copyWith(tickMode: tickMode, show: gridShow),
+      candle: TestCandleIndicator(
+        visibleMinMaxFromData: true,
+        horizontalGrid: GridAxisConfig(
+          mode: mode,
+          line: paintGridLine ? const LineConfig() : null,
+        ),
       ),
     );
+    scene.controller.flushPendingKlineData();
     scene.controller.updateSettingConfig((config) => config.copyWith(showYAxisTick: showYAxisTick));
     scene.controller.updateGestureConfig((config) => config.copyWith(enableZoom: true));
     return scene;
@@ -162,40 +172,40 @@ void main() {
       final chart = scene.controller;
 
       // 不动任何配置: 默认值本身就是本条用例要守的东西。它同时管着旧持久化配置的反序列化,
-      // 那条路径读的是 GridAxis 的构造默认值。
-      expect(chart.gridConfig.horizontal.tickMode, GridTickMode.nice);
+      // 那条路径读的是 CandleBaseIndicator 的构造默认值。
+      expect(scene.candle.horizontalGrid.mode, const GridTickMode.nice(targetDivisions: _divisions));
 
       final spy = await paintFrame(tester, chart);
 
       expectNiceMultiples(tickValues(spy, chart));
     });
 
-    testWidgets('average: 刻度按像素等分, 位置与值都不变', (tester) async {
-      final scene = await arrange(tester, tickMode: GridTickMode.average);
+    testWidgets('count: 刻度按像素等分且避开两端, 位置与值都不变', (tester) async {
+      final scene = await arrange(tester, mode: const GridTickMode.count(_divisions));
       final chart = scene.controller;
 
       final spy = await paintFrame(tester, chart);
-      final count = chart.gridConfig.horizontal.count;
-      final dyStep = chart.mainRect.height / count;
+      final dyStep = chart.mainRect.height / _divisions;
 
       expect(
         tickDys(spy, chart),
-        [for (var i = 1; i <= count; i++) i * dyStep],
-        reason: '等分模式的位置由 count 精确决定, 末条落在 drawableRect 底边',
+        [for (var i = 1; i < _divisions; i++) i * dyStep],
+        reason: '等分模式的位置由 divisions 精确决定, 两端交给 grid 层的边框与分隔线',
       );
       expect(
         tickValues(spy, chart).first,
-        closeTo(chart.dyToCandleValue(count * dyStep, check: false)!.toDouble(), 1e-9),
+        closeTo(chart.dyToCandleValue((_divisions - 1) * dyStep, check: false)!.toDouble(), 1e-9),
         reason: '值由位置反算, 不经过任何取整',
       );
     });
 
     /// 横线从 grid 层搬到 chart 层后落在了 `paintChart` 的 `canPaintChart` 门禁之后，加载中
-    /// 的主区于是只剩 grid 的竖线。骨架路径补的就是这一段：位置只依赖几何，与 tickMode 无关。
+    /// 的主区于是只剩 grid 的边框。骨架路径补的就是这一段：位置只依赖几何，与 mode 无关——
+    /// nice 在区间不可用时退化为同 divisions 的 count。
     ///
     /// 不放回 grid 层：grid 只在布局与配置变更时重绘，数据到达时不会，骨架线会一直叠在真实
     /// 刻度线上。
-    testWidgets('数据未就绪: 按 count 等分画骨架横线, 不画刻度文本', (tester) async {
+    testWidgets('数据未就绪: nice 退化为 count 画骨架横线, 不画刻度文本', (tester) async {
       final scene = ControllerScenario(
         config: FakeFlexiKlineConfiguration(mainIndicatorDefaultPadding: _mainPadding),
       );
@@ -211,19 +221,18 @@ void main() {
       expect(chart.klineData.canPaintChart, isFalse, reason: '前置条件: 本条要的就是无数据态');
 
       final spy = await paintFrame(tester, chart);
-      final count = chart.gridConfig.horizontal.count;
-      final dyStep = chart.mainRect.height / count;
+      final dyStep = chart.mainRect.height / _divisions;
 
       expect(
         tickDys(spy, chart),
-        [for (var i = 1; i <= count; i++) i * dyStep],
-        reason: '骨架位置与 average 模式同口径',
+        [for (var i = 1; i < _divisions; i++) i * dyStep],
+        reason: '骨架位置与 count 模式同口径',
       );
       expect(spy.paragraphs, 0, reason: '没有区间就取不到值, 不该画文本');
     });
 
     testWidgets('nice + 自动区间: 刻度值是同一 step 的整数倍', (tester) async {
-      final scene = await arrange(tester, tickMode: GridTickMode.nice);
+      final scene = await arrange(tester, mode: const GridTickMode.nice(targetDivisions: _divisions));
       final chart = scene.controller;
 
       final spy = await paintFrame(tester, chart);
@@ -236,7 +245,7 @@ void main() {
     /// 本组最重要的一条回归网。参考实现里的 nice-number 都会把 min/max 外扩到 step 整数倍上；
     /// 照搬到这里就等于让算法改写 `minMax`，而缩放态下 `minMax` 就是用户拖出来的那个区间。
     testWidgets('nice + Y 轴放大: 刻度仍整数化, 且 minMax 恒等于 zoom 写入值', (tester) async {
-      final scene = await arrange(tester, tickMode: GridTickMode.nice);
+      final scene = await arrange(tester, mode: const GridTickMode.nice(targetDivisions: _divisions));
       final chart = scene.controller;
       await paintFrame(tester, chart);
       final autoSpan = rangeMax(chart) - rangeMin(chart);
@@ -263,10 +272,10 @@ void main() {
 
     /// 外扩口径的另一面：`minMax` 会被吸附到 step 整数倍上，于是平移时它不再连续跟随数据，而是
     /// 一段不动、换档时整幅跳一格。两种模式逐帧比对能同时排除吸附与任何其它写入。
-    testWidgets('nice + 平移: minMax 逐帧与 average 模式一致, 无按 step 量化的台阶', (tester) async {
+    testWidgets('nice + 平移: minMax 逐帧与 count 模式一致, 无按 step 量化的台阶', (tester) async {
       /// 沿历史方向平移 12 步，返回每帧的 `minMax.max` 以及末帧的刻度值。
-      Future<({List<double> series, List<double> lastTicks})> panSeries(GridTickMode tickMode) async {
-        final scene = await arrange(tester, tickMode: tickMode, candles: genRampCandleList());
+      Future<({List<double> series, List<double> lastTicks})> panSeries(GridTickMode mode) async {
+        final scene = await arrange(tester, mode: mode, candles: genRampCandleList());
         final chart = scene.controller;
         var spy = await paintFrame(tester, chart);
 
@@ -281,11 +290,11 @@ void main() {
         return (series: series, lastTicks: tickValues(spy, chart));
       }
 
-      final nice = await panSeries(GridTickMode.nice);
-      final average = await panSeries(GridTickMode.average);
+      final nice = await panSeries(const GridTickMode.nice(targetDivisions: _divisions));
+      final count = await panSeries(const GridTickMode.count(_divisions));
 
       expect(nice.series.toSet().length, greaterThan(1), reason: '前置条件: minMax 必须真的随平移变化');
-      expect(nice.series, average.series, reason: '换刻度模式不得改变任何一帧的 minMax');
+      expect(nice.series, count.series, reason: '换刻度模式不得改变任何一帧的 minMax');
 
       // 斜坡数据每平移一根蜡烛只挪一个 slope, 远小于一个 step; 被吸附到整数倍上则相邻差会是
       // 0 或整整一个 step。
@@ -300,7 +309,7 @@ void main() {
     });
 
     testWidgets('nice: 刻度可越过 minMax 落进留白区, 但不出 drawableRect', (tester) async {
-      final scene = await arrange(tester, tickMode: GridTickMode.nice);
+      final scene = await arrange(tester, mode: const GridTickMode.nice(targetDivisions: _divisions));
       final chart = scene.controller;
 
       final spy = await paintFrame(tester, chart);
@@ -323,7 +332,7 @@ void main() {
     });
 
     testWidgets('nice: zoom 滑竿热区照常上报', (tester) async {
-      final scene = await arrange(tester, tickMode: GridTickMode.nice);
+      final scene = await arrange(tester, mode: const GridTickMode.nice(targetDivisions: _divisions));
       final chart = scene.controller;
       expect(chart.chartZoomSlideBarRect, Rect.zero, reason: '绘制前热区应为空');
 
@@ -336,18 +345,23 @@ void main() {
       );
     });
 
-    testWidgets('horizontal.show = false: 不画横线, 刻度文本照旧', (tester) async {
-      final scene = await arrange(tester, tickMode: GridTickMode.nice, gridShow: false);
+    testWidgets('horizontalGrid.line = null: 不画横线, 刻度文本照旧', (tester) async {
+      final scene = await arrange(
+        tester,
+        mode: const GridTickMode.nice(targetDivisions: _divisions),
+        paintGridLine: false,
+      );
       final chart = scene.controller;
 
       final spy = await paintFrame(tester, chart);
 
-      expect(tickDys(spy, chart), isEmpty, reason: 'show 关掉即不画横线');
+      expect(tickDys(spy, chart), isEmpty, reason: 'line 置 null 即不画横线');
       expect(spy.paragraphs, greaterThan(0), reason: '文本只受 showYAxisTick 约束, 与横线开关无关');
     });
 
     testWidgets('showYAxisTick = false: 只剩横线, 无刻度文本', (tester) async {
-      final scene = await arrange(tester, tickMode: GridTickMode.nice, showYAxisTick: false);
+      final scene =
+          await arrange(tester, mode: const GridTickMode.nice(targetDivisions: _divisions), showYAxisTick: false);
       final chart = scene.controller;
 
       final spy = await paintFrame(tester, chart);

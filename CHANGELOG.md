@@ -66,12 +66,20 @@
 * Keep the chart in its zoomed state when a zoom gesture starts outside the slider or before a price range exists, instead of clearing `isChartZooming` while the zoom range stayed applied — that combination hid the reset button while the Y axis remained locked. Handing the Y axis back is now only possible through `exitChartZoom`.
 * Add `Rect.distanceFromBottom`, replacing the private helper that measured a dy against the main chart area (renamed from the unused `invertedToDistane`); it returns null for a non-positive height, since an inverted rect makes the underlying `clamp` throw (Breaking Changes).
 * Move main-pane horizontal price lines from the grid layer into the chart layer so lines and tick labels share one source; tick labels now paint above all main-pane indicators instead of being covered by them.
-* Add `GridAxis.tickMode` to choose between evenly divided ticks and nice-number ticks on the main price axis; it defaults to `nice`, and the default lives on `GridAxis` so a stored config without the field switches over too (Breaking Changes).
-* Change `GridAxis.count` to mean a target interval count when `tickMode` is `nice`: the actual tick count varies around it because step values are rounded to readable numbers.
-* Paint the main-pane price lines evenly divided while no price range exists, so a chart waiting for data keeps its horizontal skeleton instead of showing the grid's vertical lines alone; tick labels stay hidden until a range exists, since there is no value to format.
+* Round the main price axis ticks to readable numbers and make that the default: values are chosen first and their positions derived from them, instead of dividing the axis evenly and reading the value back off the pixel position.
+* Interpret the nice tick parameter as a target interval count: the actual tick count varies around it because step values are rounded to readable numbers.
+* Paint the main-pane price lines evenly divided while no price range exists, so a chart waiting for data keeps its horizontal skeleton instead of showing the grid's borders alone; tick labels stay hidden until a range exists, since there is no value to format.
 * Keep the price-axis width reported for the zoom slide bar monotonic so the zoom hit area no longer shifts while tick labels change length; the cached width resets on a symbol change or a theme change.
 * Expose `CandleBasePaintObject.reportZoomSlideBarRect` as protected, so a subclass that overrides `paintYAxisTickLabels` to draw its own tick labels can still report the zoom hit area.
 * Mark `CandleBasePaintObject.didChangeDependencies` as `@mustCallSuper`: it resets the cached zoom slide bar width when the symbol changes, so an override that skips `super` keeps the previous symbol's width (Breaking Changes).
+* Rename `GridAxis` to `GridBorder` and remove its `count`: the grid layer no longer owns an axis, only the main-pane top border, the pane dividers and the left/right borders. `GridConfig.horizontal` and `vertical` keep their names, types aside, so a stored config still restores — the dropped `count` is simply ignored (Breaking Changes).
+* Sink grid tick configuration into the indicators as `CandleBaseIndicator.horizontalGrid` and `verticalGrid`, both `GridAxisConfig`; `GridAxisConfig.line` is nullable and defaults to null, meaning positions are still produced but no line is painted.
+* Add a sealed `GridTickMode` carrying its own parameter per mode — `count(divisions)`, `size(spacing)` and `nice(targetDivisions)` — replacing a single numeric field whose unit changed with the mode.
+* Add `GridTickMode.size`, which divides the axis by a fixed pixel spacing and splits the remainder evenly between both ends.
+* Stop painting the vertical grid lines from the grid layer: they are geometric reference lines owned by the candle indicator, so a host that supplies its own candle indicator can configure them.
+* Change the main-pane `count` ticks to exclude both ends: the last line used to land on `drawableRect.bottom`, coinciding with the pane divider the grid layer draws there.
+* Rename `PaintYAxisTicksMixin` to `PaintGridTicksMixin` and split it into `resolveX` methods that compute positions and `paintX` methods that draw them; tick labels now have a single drawing entry point (Breaking Changes).
+* Rename `nice_tick_util.dart` to `grid_tick_util.dart` and add `evenPositions`, `positionsByCount` and `spacedPositions`; the three tick-position algorithms are now pure functions grouped one section each (Breaking Changes).
 
 ## 2.4.1
 * Fix the blank band above the candles left after hiding main-area indicators, which survived config reload and data refresh and could only be cleared by rebuilding the controller.

@@ -18,6 +18,7 @@ export 'draw_config/draw_config.dart';
 export 'flexi_kline_config/flexi_kline_config.dart';
 export 'gesture_config/gesture_config.dart';
 export 'gradient_config/gradient_config.dart';
+export 'grid_axis_config/grid_axis_config.dart';
 export 'grid_config/grid_config.dart';
 export 'line_config/line_config.dart';
 export 'loading_config/loading_config.dart';

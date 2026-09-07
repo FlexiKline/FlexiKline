@@ -17,7 +17,6 @@ import 'package:flexi_formatter/date_time.dart';
 import 'package:flutter/painting.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-import '../config/grid_config/grid_config.dart';
 import '../extension/export.dart';
 import '../model/flexi_num.dart';
 import '../model/time_interval.dart';
@@ -25,6 +24,7 @@ import '../utils/convert_util.dart';
 import 'chart/indicator.dart';
 import 'chart_type.dart';
 import 'draw/overlay.dart';
+import 'grid_tick_mode.dart';
 
 /// IndicatorKey 序列化转换器
 ///
@@ -404,20 +404,31 @@ class LineTypeConverter implements JsonConverter<LineType, String> {
   }
 }
 
-class GridTickModeConverter implements JsonConverter<GridTickMode, String> {
+class GridTickModeConverter implements JsonConverter<GridTickMode, Map<String, dynamic>> {
   const GridTickModeConverter();
 
   @override
-  GridTickMode fromJson(String json) {
-    return GridTickMode.values.firstWhere(
-      (e) => e.name == json,
-      orElse: () => GridTickMode.average,
-    );
+  GridTickMode fromJson(Map<String, dynamic> json) {
+    final type = json['type'] as String?;
+    switch (type) {
+      case 'count':
+        return GridCountTickMode(parseInt(json['divisions']) ?? 5);
+      case 'size':
+        return GridSizeTickMode(parseDouble(json['spacing']) ?? 0);
+      case 'nice':
+        return GridNiceTickMode(targetDivisions: parseInt(json['targetDivisions']) ?? 5);
+      default:
+        return GridTickMode.fallback;
+    }
   }
 
   @override
-  String toJson(GridTickMode object) {
-    return object.name;
+  Map<String, dynamic> toJson(GridTickMode mode) {
+    return switch (mode) {
+      GridCountTickMode(:final divisions) => {'type': mode.type, 'divisions': divisions},
+      GridSizeTickMode(:final spacing) => {'type': mode.type, 'spacing': spacing},
+      GridNiceTickMode(:final targetDivisions) => {'type': mode.type, 'targetDivisions': targetDivisions},
+    };
   }
 }
 

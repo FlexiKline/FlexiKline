@@ -136,12 +136,42 @@ abstract class ExternalIndicator extends Indicator<ExternalIndicatorKey> {
 ///
 /// 使用 [DirectIndicatorKey]，属于基础/系统指标，不占 slot。
 abstract class CandleBaseIndicator extends DirectIndicator {
+  /// 网格线的默认线样式, 沿用 grid 层边框的口径。
+  static const defaultGridLine = LineConfig(
+    type: LineType.solid,
+    dashes: [2, 2],
+    paint: PaintConfig(strokeWidth: defaultAuxiliaryLineWidth),
+  );
+
+  /// 主区横线默认按 nice 取整: 横线即价格刻度线, 值要好读。
+  static const defaultHorizontalGrid = GridAxisConfig(
+    mode: GridTickMode.nice(targetDivisions: 5),
+    line: defaultGridLine,
+  );
+
+  /// 主区竖线默认按数量等分: 竖线是几何参考线, 位置与任何值都无关。
+  static const defaultVerticalGrid = GridAxisConfig(
+    mode: GridTickMode.count(5),
+    line: defaultGridLine,
+  );
+
   CandleBaseIndicator({
     required super.height,
     required super.padding,
     super.paintMode,
     super.zIndex,
+    this.horizontalGrid = defaultHorizontalGrid,
+    this.verticalGrid = defaultVerticalGrid,
   }) : super(key: candleIndicatorKey, autoActivate: true);
+
+  /// 主区横向网格线(即 Y 轴价格刻度线)的配置。
+  final GridAxisConfig horizontalGrid;
+
+  /// 主区纵向网格线(几何参考线)的配置。
+  ///
+  /// [GridTickMode.nice] 在此不成立, 会退化为 [GridTickMode.count]: 竖线永不按时间取整,
+  /// 否则网格会随平移缩放持续漂移。
+  final GridAxisConfig verticalGrid;
 
   @override
   CandleBasePaintObject<CandleBaseIndicator> createPaintObject();

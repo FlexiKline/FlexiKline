@@ -19,5 +19,6 @@ export 'collection/fixed_hash_queue.dart';
 export 'collection/sortable_hash_set.dart';
 export 'configuration.dart';
 export 'draw/overlay.dart';
+export 'grid_tick_mode.dart';
 export 'logger.dart';
 export 'serializers.dart';

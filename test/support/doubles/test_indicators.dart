@@ -30,6 +30,8 @@ import 'package:flutter/painting.dart';
 class TestCandleIndicator extends CandleBaseIndicator {
   TestCandleIndicator({
     super.height = 300,
+    super.horizontalGrid,
+    super.verticalGrid,
     this.chartType = FlexiChartType.barSolid,
     this.hideMainIndicatorsInLineChartMode = false,
     this.visibleMinMaxFromData = false,
@@ -76,6 +78,24 @@ class TestCandlePaintObject extends CandleBasePaintObject<TestCandleIndicator> {
   void paint(Canvas canvas, Size size) {}
   @override
   Size? paintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
+
+  // ---- PaintGridTicksMixin 的算位置能力对用例开放 ----
+  //
+  // mixin 里三个 resolve 都是 @protected: 它们服务实现者, 不是公开 API。用例要直接断言位置,
+  // 只能经子类转发 —— 从 canvas 记录读回来的坐标是 float32, 带 1e-6 相对噪声, 做不了
+  // 「反算值与算法原值逐位相同」这类断言。
+
+  List<double> horizontalDysOf(GridTickMode mode, {Rect? bounds}) {
+    return resolveHorizontalDys(mode, bounds: bounds);
+  }
+
+  List<double> dysByCountOf(int tickCount, {Rect? bounds}) {
+    return resolveDysByCount(tickCount, bounds: bounds);
+  }
+
+  List<double> verticalDxsOf(GridTickMode mode, {Rect? bounds}) {
+    return resolveVerticalDxs(mode, bounds: bounds);
+  }
 }
 
 // ---------------------------------------------------------------------------

@@ -13,6 +13,10 @@ abstract class _$CandleIndicatorCWProxy {
 
   CandleIndicator padding(EdgeInsets padding);
 
+  CandleIndicator horizontalGrid(GridAxisConfig horizontalGrid);
+
+  CandleIndicator verticalGrid(GridAxisConfig verticalGrid);
+
   CandleIndicator high(MarkConfig high);
 
   CandleIndicator low(MarkConfig low);
@@ -64,6 +68,8 @@ abstract class _$CandleIndicatorCWProxy {
     int zIndex,
     double height,
     EdgeInsets padding,
+    GridAxisConfig horizontalGrid,
+    GridAxisConfig verticalGrid,
     MarkConfig high,
     MarkConfig low,
     MarkConfig offViewPriceMark,
@@ -100,6 +106,14 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
 
   @override
   CandleIndicator padding(EdgeInsets padding) => this(padding: padding);
+
+  @override
+  CandleIndicator horizontalGrid(GridAxisConfig horizontalGrid) =>
+      this(horizontalGrid: horizontalGrid);
+
+  @override
+  CandleIndicator verticalGrid(GridAxisConfig verticalGrid) =>
+      this(verticalGrid: verticalGrid);
 
   @override
   CandleIndicator high(MarkConfig high) => this(high: high);
@@ -190,6 +204,8 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
     Object? zIndex = const $CopyWithPlaceholder(),
     Object? height = const $CopyWithPlaceholder(),
     Object? padding = const $CopyWithPlaceholder(),
+    Object? horizontalGrid = const $CopyWithPlaceholder(),
+    Object? verticalGrid = const $CopyWithPlaceholder(),
     Object? high = const $CopyWithPlaceholder(),
     Object? low = const $CopyWithPlaceholder(),
     Object? offViewPriceMark = const $CopyWithPlaceholder(),
@@ -224,6 +240,14 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
           ? _value.padding
           // ignore: cast_nullable_to_non_nullable
           : padding as EdgeInsets,
+      horizontalGrid: horizontalGrid == const $CopyWithPlaceholder()
+          ? _value.horizontalGrid
+          // ignore: cast_nullable_to_non_nullable
+          : horizontalGrid as GridAxisConfig,
+      verticalGrid: verticalGrid == const $CopyWithPlaceholder()
+          ? _value.verticalGrid
+          // ignore: cast_nullable_to_non_nullable
+          : verticalGrid as GridAxisConfig,
       high: high == const $CopyWithPlaceholder()
           ? _value.high
           // ignore: cast_nullable_to_non_nullable
@@ -325,6 +349,14 @@ CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
           ? defaultMainIndicatorPadding
           : const EdgeInsetsConverter()
               .fromJson(json['padding'] as Map<String, dynamic>),
+      horizontalGrid: json['horizontalGrid'] == null
+          ? CandleBaseIndicator.defaultHorizontalGrid
+          : GridAxisConfig.fromJson(
+              json['horizontalGrid'] as Map<String, dynamic>),
+      verticalGrid: json['verticalGrid'] == null
+          ? CandleBaseIndicator.defaultVerticalGrid
+          : GridAxisConfig.fromJson(
+              json['verticalGrid'] as Map<String, dynamic>),
       high: json['high'] == null
           ? const MarkConfig(
               spacing: 2,
@@ -446,6 +478,8 @@ Map<String, dynamic> _$CandleIndicatorToJson(CandleIndicator instance) =>
       'height': instance.height,
       'padding': const EdgeInsetsConverter().toJson(instance.padding),
       'zIndex': instance.zIndex,
+      'horizontalGrid': instance.horizontalGrid.toJson(),
+      'verticalGrid': instance.verticalGrid.toJson(),
       'high': instance.high.toJson(),
       'low': instance.low.toJson(),
       'offViewPriceMark': instance.offViewPriceMark.toJson(),

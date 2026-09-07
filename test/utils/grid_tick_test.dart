@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:flexi_kline/src/utils/nice_tick_util.dart';
+import 'package:flexi_kline/src/utils/grid_tick_util.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/support.dart';
@@ -55,6 +55,95 @@ void expectTickInvariants(({double step, List<double> values}) result, double bo
 }
 
 void main() {
+  // ---------------------------------------------------------------------------
+  // 等分
+  // ---------------------------------------------------------------------------
+  group('evenPositions 等分取位', () {
+    test('产出 divisions - 1 个内部位置, 两端一个不占', () {
+      expect(evenPositions(5, start: 0, length: 300), [60.0, 120.0, 180.0, 240.0]);
+      expect(evenPositions(2, start: 100, length: 300), [250.0]);
+    });
+
+    test('divisions <= 1 时没有内部位置', () {
+      for (final divisions in [1, 0, -3]) {
+        expect(evenPositions(divisions, start: 0, length: 300), isEmpty, reason: 'divisions=$divisions');
+      }
+    });
+
+    test('长度非正或非有限时返回空, 不产出 NaN', () {
+      for (final length in [0.0, -300.0, double.nan, double.infinity]) {
+        expect(evenPositions(5, start: 0, length: length), isEmpty, reason: 'length=$length');
+      }
+    });
+  });
+
+  group('positionsByCount 按刻度数等分', () {
+    test('含两端: 首末恰为 start 与 start + length', () {
+      final positions = positionsByCount(3, start: 0, length: 300);
+
+      expect(positions, [0.0, 150.0, 300.0]);
+    });
+
+    test('1 条时居中, 非正时为空', () {
+      expect(positionsByCount(1, start: 20, length: 300), [170.0]);
+      expect(positionsByCount(0, start: 0, length: 300), isEmpty);
+      expect(positionsByCount(-1, start: 0, length: 300), isEmpty);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // 固定间距
+  // ---------------------------------------------------------------------------
+  group('spacedPositions 固定间距取位', () {
+    test('整除时余量为零, 位置数为完整间隔数减一', () {
+      expect(spacedPositions(60, start: 0, length: 300), [60.0, 120.0, 180.0, 240.0]);
+    });
+
+    test('余量平分两端, 间距仍严格等于 spacing', () {
+      // 320 装得下 5 格 60, 余 20 → 两端各 10。
+      final positions = spacedPositions(60, start: 0, length: 320);
+
+      expect(positions, [70.0, 130.0, 190.0, 250.0]);
+      for (int i = 1; i < positions.length; i++) {
+        expect(positions[i] - positions[i - 1], 60.0, reason: '不得为了整除而调整间距');
+      }
+    });
+
+    test('start 参与偏移, 不假定从 0 起', () {
+      expect(spacedPositions(60, start: 100, length: 320), [170.0, 230.0, 290.0, 350.0]);
+    });
+
+    test('首位置到起点距离 == 末位置到终点距离', () {
+      for (final (length, spacing) in [(320.0, 60.0), (300.0, 60.0), (317.0, 47.0), (500.0, 133.0)]) {
+        final positions = spacedPositions(spacing, start: 0, length: length);
+        if (positions.isEmpty) continue;
+        expect(
+          positions.first,
+          closeTo(length - positions.last, 1e-9),
+          reason: 'length=$length spacing=$spacing 不居中',
+        );
+      }
+    });
+
+    test('装不下、参数非法都返回空且不抛', () {
+      final cases = <(String, double, double)>[
+        ('恰好一格, 内部无位置', 300, 300),
+        ('容不下一格', 60, 50),
+        ('spacing 为零', 0, 300),
+        ('spacing 为负', -60, 300),
+        ('spacing 无穷', double.infinity, 300),
+        ('spacing 非数', double.nan, 300),
+        ('长度为零', 60, 0),
+        ('长度为负', 60, -300),
+        ('长度非数', 60, double.nan),
+        ('长度无穷', 60, double.infinity),
+      ];
+      for (final (reason, spacing, length) in cases) {
+        expect(spacedPositions(spacing, start: 0, length: length), isEmpty, reason: reason);
+      }
+    });
+  });
+
   // ---------------------------------------------------------------------------
   // niceStep 档位归整
   // ---------------------------------------------------------------------------
