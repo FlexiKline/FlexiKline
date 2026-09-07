@@ -1,92 +1,73 @@
 ## 2.5.0
-* Fix `paintChart` validating the previous frame's visible range: the guard ran before `calculatePaintChartRange` rewrote `start`/`end`, so a degenerate range computed in the current frame was still handed to every `computeVisibleMinMax` (Breaking Changes).
-* Change `KlineData.canPaintChart` to `checkStartAndEnd(start, end)`, which additionally requires `start < end`; it now guarantees `start` and `end - 1` are both valid indices, so `computeVisibleMinMax` implementations no longer need to validate the range or emptiness themselves (Breaking Changes).
-* Move `canPaintChart` from `PaintDrawData` to `BaseData`, alongside the `start`/`end` accessors and `checkStartAndEnd` it is defined in terms of; `PaintDrawData` serves the draw overlay, while this predicate governs all chart painting.
-* Change `onCrossToggle` and `onCrossFollow` to gate on `klineData.isEmpty` instead of `canPaintChart`: an input handler's precondition is that data exists, not that the paint range has been recomputed this frame (Breaking Changes).
-* Validate the effective range in `paintOHLCStyleCandleChart`, `paintCandleLineChart` and `paintCandleUpDownLineChart` after applying defaults; their `start`/`end` are caller-supplied and were previously checked against `klineData.start`/`end` instead, leaving explicit arguments unverified ahead of an unguarded `klineData[start]`.
-* Remove the now-redundant `canPaintChart` checks from `CandlePaintObject.computeVisibleMinMax`/`paintCandleBars` and the empty-list check from `TimePaintObject.paintTimeChart`.
-* Make `paintDxOffset` read-only on the controller: the setter silently clamped the assigned value, so every write now goes through a single library-private write point that clamps, syncs the first-candle-off-screen notifier and reports whether the offset actually moved (Breaking Changes).
-* Fix a cancelled mouse drag still starting an inertial fling on non-touch devices: `DragGestureRecognizer` dispatches `onPanEnd` for cancelled pointers too and `DragEndDetails` cannot distinguish them, so the cancel is now recorded by the outer `Listener` and consumed at pan end, matching the touch side.
-* Hoist `resolveScalePosition(double dx)` and `resolveInertialPan(double velocity, {required bool canceled})` into `GestureDetectorState`; both sides shared these decisions verbatim while keeping their own caching and cleanup policies.
-* Remove `GestureData`, `GestureType` and `GestureState`; gesture APIs on the controller now take the values they actually use (`Offset`, delta, ratio) instead of a gesture envelope. `PaintObject.handleDragUpdate` already took `(position, delta)`, so the envelope only existed to be packed and unpacked across a single hop (Breaking Changes).
-* Change `onChartMove` to take a frame delta and a named `smoothFactor`: `onChartMove(Offset delta, {double smoothFactor = 1.0})` (Breaking Changes).
-* Split `onChartScale` into `onChartScaleBy(double scaleDelta, {position, focalDx})` for cumulative-ratio input (touch pinch, native trackpad pinch) and `onChartScaleTo(double factor, {position, focalDx})` for one-shot ratio input (wheel, Web `PointerScaleEvent`); the split follows the arithmetic, not the input device, since the same trackpad reports cumulative ratios on desktop and one-shot ratios on Web (Breaking Changes).
-* Fix X-axis scaling being skipped for a whole frame whenever the cumulative pinch ratio passed back through exactly 1.0, leaving the candle width stuck at the zoomed value instead of returning to its starting width.
-* Fix reverse pinching being swallowed for one frame after the candle width reached its bound: the direction short-circuits read the cumulative ratio, so pinching back in while still above 1.0 was rejected until the ratio itself crossed the bound.
-* Split `onCrossStart(GestureData, {bool force})` into `onCrossToggle(Offset)` (tap semantics, closes an open cross) and `onCrossFollow(Offset)` (follow semantics, moves an open cross); the flag selected between opposite behaviours in the already-open state. `onCrossFollow` also absorbs the `isCrossing` branch previously duplicated in both detectors (Breaking Changes).
-* Change `onCrossUpdate`, `onDrawUpdate`, `onDrawConfirm` and `onDrawMoveStart` to take an `Offset`; `onDrawMoveUpdate` and `onPaintObjectDragUpdate` to take `(Offset position, Offset delta)`; `onGridResizeUpdate` to take a `double` delta; `onChartZoomUpdate` to take a `double` dy (Breaking Changes).
-* Remove the unreachable `GestureType.move` branch in the non-touch `onPanEnd` and the always-false `isScale` guard in `onPointerPanZoomUpdate`; both were type-tag checks whose constructors could only produce the opposite value.
-* Pan the chart with horizontally dominant scroll signals (Web trackpad two-finger slide, `Shift` + wheel) on non-touch devices; `PointerScrollEvent.scrollDelta.dx` was previously discarded entirely, so a horizontal slide either did nothing or triggered a slight zoom from its small `dy`.
-* Add `onChartPanStep(double dxDelta)` for one-shot horizontal panning; unlike `onChartMove` it runs the loadMore check itself, since signal events have no end event to hang it on.
-* Dispatch each scroll signal to exactly one action: horizontally dominant events (`|dx| >= |dy| × 2`) pan, everything else zooms, so a diagonal slide no longer both pans and zooms. Horizontal scroll over the price axis is not consumed and passes through to an enclosing `Scrollable`.
-* Allow trackpad two-finger horizontal slide to pan the chart without being misidentified as a pinch zoom; the pinching threshold is now based on cumulative deviation from 1.0 (`> 0.05`) instead of per-frame change (`> 0.01`).
-* Exit Y-axis zoom with ESC key or right-click on non-touch devices; ESC prioritises exiting zoom over exiting draw mode when both are active. Keyboard focus is now automatically requested when entering zoom or draw state.
-* Cancel the cross cursor when starting to drag a draw object in editing mode; cross resumes naturally when the user moves the mouse after the drag ends.
-* Bound the reachable Y-axis zoom span in both directions, and clamp out-of-range candidates instead of rejecting them; rejection left the range unchanged, so a wheel event that could not clear the bound in one step deadlocked the wheel permanently, reverse direction included.
-* Add `SettingConfig.minZoomSpanRatio` (default 0.05) and `SettingConfig.maxZoomSpanRatio` (default 20), expressing how far the Y axis can be zoomed as multiples of the visible price span captured when the user took over the axis.
-* Fix repeated touch drags on the price-axis slider compressing the visible price range without limit: the bound now applies to both input chains through a single write point.
-* Fix the visible price range becoming non-finite after repeated zoom-out, which also disabled vertical panning and left exiting zoom as the only way back.
-* Fix the Y-axis zoom bound depending on whether touch or the scroll wheel zoomed first; zoom is now tracked as a cumulative factor instead of a span snapshot read from the live range.
-* Derive Y-axis scroll sensitivity from `GestureConfig.maxZoomPerGesture` and the main chart height so the same travel produces the same zoom factor on both input chains; `GestureConfig.signalScaleFactor` now affects X-axis scaling only (Breaking Changes).
-* Clamp `candleMinWidth` to at least 1: a zero lower bound let touch scaling land `candleWidth` exactly on 0, and with no `candleFixedSpacing` the derived spacing collapsed too, leaving `candleActualWidth` at 0 and the candle-count estimation non-convergent.
-* Resize sub panes by hovering the divider line (`resizeRow` cursor) and dragging directly on non-touch devices, replacing the long-press interaction inherited from touch devices.
-* Remove long-press gesture handling from non-touch devices; `gestureConfig.enableLongPress` no longer has effect on mouse/trackpad input (Breaking Changes).
-* Fix trackpad pinch simultaneously panning the chart on native platforms; `DragGestureRecognizer` consumed `PointerPanZoomUpdateEvent.panDelta` as drag input in parallel with the `Listener` scale path. A per-session `pinching` flag now suppresses pan in `onPanStart` and `onPanUpdate` once the scale change exceeds the threshold.
-* Add `onChartZoomStep(double coeff)` for incremental Y-axis zoom; each signal event multiplies the current visible range by a ratio factor, with no session or anchor required.
-* Add `GestureConfig.signalScaleFactor` (default 200, matching Flutter's `kDefaultMouseScrollToScaleFactor`) to control mouse scroll-to-zoom sensitivity, and `GestureConfig.scaleSessionTimeout` (default 800ms) for the X-axis scale session idle window.
-* Rewrite `onPointerSignal` to register with `GestureBinding.pointerSignalResolver` instead of consuming events directly, so the chart placed inside a `Scrollable` no longer simultaneously triggers page scroll; unify scroll and `PointerScaleEvent` (Web trackpad pinch) to a single ratio-based factor via `exp(-dy / signalScaleFactor)`.
-* Replace the two `Future.delayed(1000ms)` timers in the signal path with a single resettable `Timer` per scale session; rapid consecutive scrolls no longer get their session cut short mid-stream.
-* Change `onChartScale` signal branch from additive (`candleWidth + data.scale`) to multiplicative (`candleWidth * data.scale`) for ratio-based consistency with `_resolveSignalFactor`.
-* Remove the `delta` named parameter from `GestureData.zoom`; its only caller was the now-removed scroll-zoom dead code, and touch-side callers already use the positional-only form (Breaking Changes).
-* Rename `scaledSingal` to `scaledSignal` in `algorithm_util.dart` to fix the typo; the function is in the public export surface via `lib/flexi_kline.dart` (Breaking Changes).
-* Add `hitTestGridResize(Offset)` on the controller: a side-effect-free query that shares the same hit-test loop as `onGridResizeStart`, enabling hover-time cursor feedback without triggering a repaint.
-* Change the hover cursor over a hittable `PaintObject` from `precise` to `grab` on non-touch devices, signalling that the element can be dragged.
-* Move `_zoomMinMax`, `setZoomMinMax`, `clearZoomMinMax` and `hasZoomMinMax` from `PaintObjectGeometryStateMixin` to `MainPaintObject`; zoom state is now owned solely by the main paint object (Breaking Changes).
-* Combine children proxy the parent `minMax` via `PaintObject.minMax` override instead of receiving explicit `setMinMax` / `setZoomMinMax` dispatches; the two dispatch loops and the `_smoothMinMax`-pollution cleanup in `delegate.dart` are removed (Breaking Changes).
-* Separate smooth display value from the auto-computed target: `smoothMinMax()` writes only `_smoothMinMax` and never calls `setMinMax`, so `_minMax` always holds the pure convergence target from `computeVisibleMinMax`.
-* Guard `dyFactor` against non-positive `chartRect.height`: return 0 instead of computing a negative factor that mirrors the Y axis; `dyToValue` returns null when `dyFactor` is zero to avoid division by zero.
-* Cache the eight default `Paint` objects in `PaintStyleMixin` so they are created once and reused across frames; bar paints update only `strokeWidth` each access to track `candleWidth` changes. `didChangeTheme` clears the cache so colours rebuild on the next frame.
-* Move `didChangeTheme` declaration from `PaintObject` to `IndicatorObject` with `@mustCallSuper`, allowing mixins on `IndicatorObject` (like `PaintStyleMixin`) to override it for cache cleanup.
-* Remove `_tmpPadding`, `setPadding` and the `padding` parameter from `doUpdateLayout`; `padding` now returns `indicator.padding` directly, and combine children proxy `_parent!.padding` to stay aligned with the main area (Breaking Changes).
-* Add `MinMax.scaleAroundCenter` and `MinMax.shift` to scale a price range around its centre and to shift it as a whole.
-* Add `setZoomMinMax`, `clearZoomMinMax` and `hasZoomMinMax` on paint objects, carrying a user-controlled Y-axis range that takes precedence over the automatic one; it applies to the main coordinate system and its combine children, while `PaintMode.alone` children keep fitting the visible data.
-* Scale the visible price range on Y-axis zoom instead of shrinking the chart area through `padding`: `padding` keeps its declared value and `mainChartRect` stays put, so panning while zoomed no longer re-fits the Y axis and candles keep their relative positions (Breaking Changes).
-* Derive the zoom factor from the range snapshot taken when the slider is pressed, so dragging back to the start restores the original range instead of drifting.
-* Exit zoom on gesture end only when the gesture produced no scale at all, replacing the padding-equality check that used to stand in for it.
-* Remove the `mainMinSize` guards from `onChartZoomUpdate` and the proportional padding compensation applied on main-area resize: zoom no longer touches pixel geometry, so a manual range survives a resize unchanged.
-* Shift the visible price range on vertical drag while the Y axis is user-controlled, instead of moving the chart area through `padding`; the span is preserved and the guard now reads the model state rather than the gesture type, so `onChartMove` consumes `dy` whenever `isChartZooming` holds (Breaking Changes).
-* Remove `FlexiGestureOwner.zoomingMove`: a drag in the main area while zoomed is now owned by `chartPan`, which serves both axes, so it also gains the horizontal inertial pan it previously lacked (Breaking Changes).
-* Claim a purely vertical drag for the chart while the Y axis is user-controlled, where the direction test in `resolveChartFallback` no longer applies; the claim now waits for the outer `hitSlop` instead of the earlier `claimSlop` the removed owner used.
-* Remove `mainOriginPadding` and stop switching the Cross tooltip offset between it and `mainPadding`: the two are identical now that zoom leaves `padding` alone, and the main area no longer has a runtime padding distinct from its declared one (Breaking Changes).
-* Hand the Y axis back to automatic fitting when the symbol changes, while a change of interval keeps the range the user set; the test is `KlineSpec.symbol`, since `spec.key` also encodes the interval.
-* Keep the main-area clip at `mainRect` while the Y axis is user-controlled: the clip was only widened to let interpolated ranges overflow during a smoothed pan, which cannot happen while zoomed, so zoomed-in candles no longer bleed into the sub panes.
-* Replace `GestureConfig.zoomSpeed` with `maxZoomPerGesture`, the maximum factor one price-axis drag may magnify or compress the visible range; the coefficient now stays within `[1 / maxZoomPerGesture, maxZoomPerGesture]` regardless of main-area height. The old field amplified the coefficient after the softening term, which put its only safe value at the default 1: anything higher could drive the coefficient to zero or below, inverting the range and throwing from the `valueToDy` clamp (Breaking Changes).
-* Remove the `isConvert` parameter of `onChartZoomStart`: every caller passed false, and the conversion it applied matched neither documented coordinate space. `setChartZoomSlideBarRect` now states that the rect must be in canvas coordinates and asserts that it overlaps `mainRect` (Breaking Changes).
-* Rename `GestureConfig.isManualSetZoomRect` to `useCustomZoomRect`, keeping its meaning and polarity: true means the host owns the zoom slider rect and the candle indicator stops reporting one. The serialized key changes with it, so a stored config that set the old key falls back to the default and reverts to the auto-reported rect until it is saved again (Breaking Changes).
-* Keep the chart in its zoomed state when a zoom gesture starts outside the slider or before a price range exists, instead of clearing `isChartZooming` while the zoom range stayed applied — that combination hid the reset button while the Y axis remained locked. Handing the Y axis back is now only possible through `exitChartZoom`.
-* Add `Rect.distanceFromBottom`, replacing the private helper that measured a dy against the main chart area (renamed from the unused `invertedToDistane`); it returns null for a non-positive height, since an inverted rect makes the underlying `clamp` throw (Breaking Changes).
-* Move main-pane horizontal price lines from the grid layer into the chart layer so lines and tick labels share one source; tick labels now paint above all main-pane indicators instead of being covered by them.
-* Round the main price axis ticks to readable numbers and make that the default: values are chosen first and their positions derived from them, instead of dividing the axis evenly and reading the value back off the pixel position.
-* Interpret the nice tick parameter as a target interval count: the actual tick count varies around it because step values are rounded to readable numbers.
-* Paint the main-pane price lines evenly divided while no price range exists; tick labels stay hidden until a range exists, since there is no value to format.
-* Keep the zoom slide bar width monotonic so the hit area no longer shifts while tick labels change length; the width lives in `chartZoomSlideBarRect` itself and resets on a symbol change or a theme change.
-* Rename `GridAxis` to `GridBorder` and remove its `count`: the grid layer no longer owns an axis, only the main-pane top border, the pane dividers and the left/right borders. `GridConfig.horizontal` and `vertical` keep their names, types aside, so a stored config still restores — the dropped `count` is simply ignored (Breaking Changes).
-* Sink grid tick configuration into the indicators as `CandleBaseIndicator.horizontalGrid` and `verticalGrid`, both `GridAxisConfig`; `GridAxisConfig.line` is nullable and defaults to null, meaning positions are still produced but no line is painted.
-* Add a sealed `GridTickMode` carrying its own parameter per mode — `count(divisions)`, `size(spacing)` and `nice(targetDivisions)` — replacing a single numeric field whose unit changed with the mode.
-* Add `GridTickMode.size`, which divides the axis by a fixed pixel spacing and splits the remainder evenly between both ends.
-* Change the main-pane `count` ticks to exclude both ends: the last line used to land on `drawableRect.bottom`, coinciding with the pane divider the grid layer draws there.
-* Rename `PaintYAxisTicksMixin` to `PaintGridTicksMixin` and split it into `resolveX` methods that compute positions and `paintX` methods that draw them; tick labels now have a single drawing entry point (Breaking Changes).
-* Rename `nice_tick_util.dart` to `grid_tick_util.dart` and add `evenPositions`, `positionsByCount` and `spacedPositions`; the three tick-position algorithms are now pure functions grouped one section each (Breaking Changes).
-* Move grid line painting out of the grid layer into the main candle object: it now paints both the horizontal price lines and the vertical reference lines, while the grid layer keeps only borders, pane separators and the drag affordances (Breaking Changes).
-* Add `IPaintObject.paintGridLines`, an indicator-level entry that paints both axes in one pass and returns the positions it resolved as `({List<double> dxs, List<double> dys})`; positions are returned whether or not a line was stroked, since `line: null` only means this object does not draw them itself (Breaking Changes).
-* Paint each pane's grid lines as the first step of painting that pane, right after its visible range is computed, so lines sit below every indicator in the pane regardless of their `zIndex` and `nice` horizontal positions are rounded against the current frame's range. The frame that is still waiting for data has no such step and calls `paintGridLines` directly from the paint orchestration instead.
-* Expose the main pane's vertical grid positions as `PaintContext.gridVerticalDxs` so a sub indicator can align its own vertical lines with the main pane.
-* Drop the horizontal skeleton fallback that ran when `canPaintChart` was false: positions that do not depend on the visible range are now painted on the normal path instead.
-* Remove `CandleBasePaintObject.paintYAxisTickLines`: horizontal grid lines are painted by `paintGridLines` alongside the vertical ones, and the resulting positions are handed to the tick-label pass as its `dys` argument, replacing the frame-scoped field that carried them between the two passes (Breaking Changes).
-* Assign a sub indicator's pane geometry before its grid lines are painted, so a sub indicator overriding `paintGridLines` can draw into its own `drawableRect`; only the frame waiting for data still reads the main-pane rect there.
-* Remove `PaintContext.reportChartZoomSlideBarRect`: the zoom hit area is now derived by the paint orchestration from the tick-label width the main pane returns, so no indicator can overwrite it mid-frame (Breaking Changes).
-* Remove `CandleBasePaintObject.paintYAxisTickLabels` and return the measured maximum tick-label width from `MainPaintObject.doPaintChart` instead (null when nothing was painted): the removed method only repeated the paint orchestration's own guards before forwarding to `PaintGridTicksMixin.paintYAxisTicks`, which a subclass can override directly (Breaking Changes).
-* Move the `GestureConfig.useCustomZoomRect` short-circuit to the controller: it decides where the rect comes from, which is not something the candle needs to know.
+
+### Gesture system rewrite (Breaking Changes)
+
+* Remove `GestureData`, `GestureType` and `GestureState`; controller gesture APIs now take plain values (`Offset`, delta, ratio) instead of a gesture envelope.
+* Split `onChartScale` into `onChartScaleBy` (cumulative-ratio, touch pinch) and `onChartScaleTo` (one-shot ratio, wheel/Web trackpad). Add `onChartPanStep` for discrete horizontal panning and `onChartZoomStep` for incremental Y-axis zoom.
+* Change `onChartMove` signature to `onChartMove(Offset delta, {double smoothFactor})`.
+* Split `onCrossStart` into `onCrossToggle` (tap: open/close) and `onCrossFollow` (hover: open/move). Change `onCrossUpdate`, `onDrawUpdate`, `onDrawConfirm`, `onDrawMoveStart`, `onGridResizeUpdate`, `onChartZoomUpdate` to take plain `Offset`/`double` values.
+* Replace `GestureConfig.zoomSpeed` with `maxZoomPerGesture`; rename `isManualSetZoomRect` to `useCustomZoomRect`; remove the `isConvert` parameter of `onChartZoomStart`; `signalScaleFactor` now affects X-axis scaling only.
+* Add `GestureConfig.panClaimRatio`, `dragClaimSlopFactor`, `scaleClaimSlopFactor`, `signalScaleFactor` and `scaleSessionTimeout` for fine-grained gesture tuning.
+* Remove `setMultiTouch`, `isMultiTouchListenable`, `FlexiGestureOwner.zoomingMove` and `mainOriginPadding`.
+
+### Touch gesture overhaul (Breaking Changes)
+
+* Resolve gesture ownership once from `PointerDown` and claim the arena before an enclosing `Scrollable`; hit tests use the down position instead of a slop-displaced recognition position, making small targets reachable again.
+* Dispatch chart pan and scale by intent (finger span then direction cone) instead of pointer count; two fingers moving horizontally now pan, vertical/diagonal drags yield to outer scroll views.
+* Separate the pointer session from the recognizer segment so lifting one finger no longer starts inertia mid-gesture; cancelled drags roll back correctly.
+* Remove long-press gesture handling from non-touch devices; `enableLongPress` no longer affects mouse/trackpad input.
+
+### Non-touch (mouse / trackpad) improvements
+
+* Rewrite `onPointerSignal` via `GestureBinding.pointerSignalResolver` so the chart inside a `Scrollable` no longer triggers page scroll simultaneously.
+* Pan the chart with horizontally dominant scroll signals (Web trackpad slide, `Shift` + wheel); dispatch each signal to exactly one action (pan or zoom).
+* Allow trackpad two-finger horizontal slide without misidentifying it as pinch zoom.
+* Resize sub panes by hover + drag on the divider line (`resizeRow` cursor) instead of long-press.
+* Exit Y-axis zoom with ESC or right-click; cancel cross when starting a draw-object drag.
+* Fix trackpad pinch simultaneously panning the chart; fix cancelled mouse drag starting inertial fling.
+* Add `hitTestGridResize` for hover cursor feedback; change hover cursor over hittable `PaintObject` to `grab`.
+
+### Y-axis zoom redesign (Breaking Changes)
+
+* Scale the visible price range instead of shrinking the chart area through `padding`; `padding` keeps its declared value and `mainChartRect` stays put, so panning while zoomed no longer re-fits the Y axis.
+* Bound the reachable Y-axis zoom span with `SettingConfig.minZoomSpanRatio` (default 0.05) and `maxZoomSpanRatio` (default 20); clamp instead of reject so the wheel no longer deadlocks at the bound.
+* Track zoom as a cumulative factor derived from the range snapshot on press, unifying touch and scroll-wheel behaviour; dragging back to the start restores the original range.
+* Move zoom state (`setZoomMinMax`, `clearZoomMinMax`, `hasZoomMinMax`) from geometry mixin to `MainPaintObject`; combine children proxy parent `minMax` via override.
+* Shift the visible price range on vertical drag while zoomed, with horizontal inertial pan available in the same gesture.
+* Hand the Y axis back to auto-fit on symbol change; keep the user-set range on interval change.
+* Fix price range becoming non-finite after repeated zoom-out; fix repeated touch drags compressing range without limit.
+
+### Grid line and tick system redesign (Breaking Changes)
+
+* Move grid lines from the grid layer into the main candle object; the grid layer now only draws borders, pane separators and drag affordances.
+* Add `IPaintObject.paintGridLines` as the indicator-level grid entry, painting both axes in one pass and returning resolved positions.
+* Add sealed `GridTickMode` with three modes: `count(divisions)`, `size(spacing)` and `nice(targetDivisions)`.
+* Round main price axis ticks to readable numbers (`nice` mode, now the default); tick labels paint above indicators instead of being covered by them.
+* Rename `GridAxis` to `GridBorder`; sink tick config into indicators as `CandleBaseIndicator.horizontalGrid` / `verticalGrid` (`GridAxisConfig`).
+* Rename `PaintYAxisTicksMixin` to `PaintGridTicksMixin`; rename `nice_tick_util.dart` to `grid_tick_util.dart`.
+* Expose `PaintContext.gridVerticalDxs` so sub indicators can align vertical lines with the main pane.
+
+### Framework and layout (Breaking Changes)
+
+* Remove `_tmpPadding`, `setPadding` and `padding` parameter from `doUpdateLayout`; `padding` returns `indicator.padding` directly; combine children proxy parent padding.
+* Separate smooth display value from auto-computed target; `smoothMinMax()` no longer writes `_minMax`.
+* Move `didChangeTheme` declaration to `IndicatorObject` with `@mustCallSuper`.
+* Cache default `Paint` objects in `PaintStyleMixin`; clear on theme change.
+* Make `paintDxOffset` read-only on the controller; writes go through one clamped, notifying write point.
+* Remove `PaintContext.reportChartZoomSlideBarRect`; the zoom hit area is now derived from tick-label width.
+* Remove `CandleBasePaintObject.paintYAxisTickLines` and `paintYAxisTickLabels`.
+
+### Data validation
+
+* Replace `KlineData.canPaintChart` with `checkStartAndEnd(start, end)` on `BaseData`; move to `BaseData` alongside `start`/`end` accessors.
+* Validate the effective range in candle painting methods after applying defaults.
+* Guard `dyFactor` against non-positive `chartRect.height`; clamp `candleMinWidth` to at least 1.
+
+### Other
+
+* Add `MinMax.scaleAroundCenter` and `MinMax.shift`.
+* Add `Rect.distanceFromBottom`.
+* Rename `scaledSingal` to `scaledSignal` (public API typo fix).
 
 ## 2.4.1
 * Fix the blank band above the candles left after hiding main-area indicators, which survived config reload and data refresh and could only be cleared by rebuilding the controller.

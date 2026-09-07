@@ -618,25 +618,11 @@ mixin SettingBinding on KlineBindingBase {
 
   // Config
 
-  /// 重新载入配置并追平运行时。
+  /// 重新载入配置并追平运行时, 用于横竖屏/多 K 线同页等多入口场景。
   ///
-  /// 用于横竖屏、多 K 线同页等多入口场景：对侧改完后，本侧调用一次即可追平。
-  ///
-  /// 只处理配置无法自动生效的两类状态：对 [settingConfig] 的字段快照，以及配置激活
-  /// 集合与绘制树的差异。setting/gesture/grid/cross/draw 五个 getter 直取配置，无需
-  /// 搬运；主区尺寸是窗口局部状态，不在此回灌。
-  ///
-  /// 依赖 [IConfiguration.getFlexiKlineConfig] 的语义：返回新实例时，对侧必须先
-  /// [storeFlexiKlineConfig] 落盘，本次 reload 才能读到其变更。
-  ///
-  /// 本方法不发出配置变更通知：调用方即变更的发起方，若持有依赖激活集合的状态镜像
-  /// （如指标栏选中态），应在调用后自行刷新。
-  ///
-  /// K 线数据与 spec 切换由 `switchKlineData` 负责；绘制图形列表不在此范围。
-  ///
-  /// 注意：本方法不是纯读——副区差异非空时会经 `_onSubIndicatorsChanged` 把本窗口
-  /// 当前主区尺寸同步进配置（adapt 下的既有行为）。共享配置时这等于把本侧尺寸推给对侧，
-  /// 但对侧运行时不受影响（各持自己的 indicator 副本）。
+  /// 只处理配置无法自动生效的状态: setting 字段快照与激活集合差异。
+  /// 依赖 [IConfiguration.getFlexiKlineConfig] 返回新实例; 对侧须先 [storeFlexiKlineConfig]。
+  /// 本方法不发通知, 调用方应在调用后自行刷新依赖激活集合的状态。
   void reloadFlexiKlineConfig([FlexiKlineConfig? config]) {
     final diff = _paintObjectManager.reloadFlexiKlineConfig(config);
 

@@ -219,7 +219,6 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   @override
   int? dxToTimestamp(double dx) {
     final indexValue = mainPaintObject.dxToIndex(dx);
-    // if (indexValue == null) return null;
     final ts = klineData.indexToTimestamp(indexValue);
     return ts;
   }

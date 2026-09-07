@@ -101,12 +101,6 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
 
   /// Latest Price ///
   Timer? _lastPriceCountDownTimer;
-  @protected
-  void markRepaintLastPrice({bool latestPriceUpdated = false}) {
-    // 最新价已更新, 且首根蜡烛在可视区域内.
-    // _reset = latestPriceUpdated && paintDxOffset <= 0;
-    _markRepaintChart();
-  }
 
   /// 控制 doUpdateVisibleMinMax 操作是否重置计算结果
   bool _reset = false;
@@ -130,39 +124,25 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
   @protected
   void startLastPriceCountDownTimer() {
     _lastPriceCountDownTimer?.cancel();
-    markRepaintLastPrice();
+    _markRepaintChart();
     _lastPriceCountDownTimer = Timer.periodic(
       const Duration(seconds: 1),
       (timer) {
-        markRepaintLastPrice();
+        _markRepaintChart();
       },
     );
   }
 
-  DateTime _lastPaintTime = DateTime.now();
-  int get diffTime {
-    // 计算两次绘制时间差
-    return _lastPaintTime.difference(_lastPaintTime = DateTime.now()).inMilliseconds.abs();
-  }
-
   void paintChart(Canvas canvas, Size size) {
-    // logd('$diffTime paintChart >>>>');
     if (!isMounted) return;
 
     // 先算区间再校验: 校验放在前面只能验到上一帧的旧值。
     calculatePaintChartRange();
 
     if (!klineData.canPaintChart) {
-      // 数据未就绪也照常画网格: 位置只依赖几何的线此刻已经确定(nice 在 resolveHorizontalDys
-      // 内退化为 count), 加载中的图表因此不会只剩 grid 层的边框。刻度文本没有区间可反算,
-      // 自然不画, 所以这里丢掉主区交出的 dys。
-      //
-      // 与正常路径共用同一个 paintGridLines, 只是调用点不同: 正常路径由各 pane 的 doPaintChart
-      // 在自己的可见区间与 pane 几何就绪之后调它, 这里走不到那一步, 只能在门禁上调 —— 于是副区
-      // 的 paneIndex 尚未分配, 它读到的 drawableRect 是主区区域(见 IPaintObject.paintGridLines
-      // 的告警)。
-      //
-      // 主区在副区之前: 副区要对齐的 dx 由主区这一趟产出, 随后经 [gridVerticalDxs] 只读。
+      // 数据未就绪时只画网格(nice 退化为 count, 刻度文本不画)。
+      // 副区 paneIndex 尚未分配, 其 drawableRect 是主区区域(见 paintGridLines 契约的 warning)。
+      // 主区先于副区: 副区要对齐的 dx 由主区产出, 经 [gridVerticalDxs] 只读。
       mainPaintObject.doPaintGridLines(canvas, size);
       for (final paintObject in subPaintObjects) {
         paintObject.doPaintGridLines(canvas, size);
@@ -178,15 +158,10 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
     try {
       /// 保存画布状态
       canvas.save();
-      // 平滑期放宽裁剪: 插值中的区间滞后于可见数据, 新进入的蜡烛会落在区间外, 而折线图一族
-      // 本就以 `correct: false` 绘制, 裁在主区边缘会看起来被削掉一刀。
-      //
-      // 缩放态不放宽: 区间由用户接管、不做插值(见 [PaintObjectGeometryStateMixin.smoothMinMax]),
-      // 而 `onChartMove` 无条件写 `_panSmoothFactor`, 于是缩放态平移必然满足 `< 1.0` —— 为一个
-      // 不可能发生的平滑放宽裁剪, 只会让缩放放大后溢出的蜡烛画进副区。
-      //
-      // 判据取 `hasZoomMinMax` 而非 `isChartZooming`: 前者与 `doUpdateVisibleMinMax` 的分支同源,
-      // 后者在命中滑竿时即置位、早于区间写入, 那之间主区仍走自动路径。
+      // 平滑期放宽裁剪到 canvasRect: 插值中区间滞后, 新蜡烛会落在区间外, 折线图被裁会有
+      // 削刀感。缩放态不放宽: 区间由用户接管、不做插值, `_panSmoothFactor < 1.0` 不应生效。
+      // 判据取 `hasZoomMinMax`(与 doUpdateVisibleMinMax 分支同源), 而非 `isChartZooming`
+      // (命中滑竿即置位, 早于区间写入)。
       final smoothing = _panSmoothFactor < 1.0 && !mainPaintObject.hasZoomMinMax;
       canvas.clipRect(smoothing ? canvasRect : mainRect);
       mainPaintObject.doUpdateVisibleMinMax(
@@ -298,8 +273,6 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
   /// 两者的分工判据是有没有结束事件, 不是量纲(见该方法注释)。
   void onChartMove(Offset delta, {double smoothFactor = 1.0}) {
     if (delta == Offset.zero) return;
-    // logd('onChartMove ${DateTime.now().format(HHmmssSSS)} delta:$delta smoothFactor:$smoothFactor');
-
     _panSmoothFactor = smoothFactor;
 
     bool changed = _setPaintDxOffset(paintDxOffset + delta.dx);
@@ -320,13 +293,9 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
     }
   }
 
-  /// 按像素位移平移主区可见价格区间; 跨度不变。
+  /// 按像素位移平移主区可见价格区间; 跨度不变, 加法可精确累加。
   ///
-  /// 平移不需要快照: 加法可精确累加, 且 [MinMax.shift] 保持跨度不变, 因此 `dyFactor`
-  /// 全程恒定, 逐帧累加与按总位移一次算是同一个结果。
-  ///
-  /// 向下拖动([dyDelta] > 0)时区间上移, 内容随手指下移 —— `valueToDy` 里固定价格的 dy
-  /// 要增大, 就需要 min 增大。
+  /// 向下拖动(dyDelta > 0)时区间上移——`valueToDy` 里固定价格的 dy 要增大, 需 min 增大。
   bool _shiftZoomMinMaxByDy(double dyDelta) {
     final object = mainPaintObject;
     final factor = object.dyFactor;
@@ -350,15 +319,10 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
 
   /// signal 通道(横向滚轮、Web 触控板双指横滑)的一次性横向平移: 每个事件自成一段。
   ///
-  /// 与 [onChartMove] 的分工在于有没有结束事件。后者服务连续拖动, 结束时机只有手势层知道,
-  /// loadMore 检查因此留给手势层在 [onPanEnd] 之后调; signal 没有结束事件, 检查只能每个事件
-  /// 做一次, 所以收进这里 —— 留给调用方就是每个调用点都要记得补一遍。
+  /// 与 [onChartMove] 的分工在于有没有结束事件: 后者留 loadMore 给手势层在 [onPanEnd] 后调,
+  /// signal 无结束事件, 检查收在这里。同理不写 `_panSmoothFactor`(离散事件无连续位移可插值)。
   ///
-  /// 同理不写 `_panSmoothFactor`: 离散事件之间没有可插值的连续位移。它由上一次拖动或动画
-  /// 结束时的 [onPanEnd] 归位, 到这里恒为 1.0。
-  ///
-  /// 返回 [paintDxOffset] 是否变化, 贴在边界上继续同向滑即为 false。调用方据此跳过 Cross
-  /// 重吸附 —— `startCandleDx` 没变就不必重算。
+  /// 返回 [paintDxOffset] 是否变化; 调用方据此跳过 Cross 重吸附。
   bool onChartPanStep(double dxDelta) {
     if (!dxDelta.isFinite || dxDelta == 0) return false;
 
@@ -424,7 +388,6 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
     if (newWidth == candleWidth) return;
 
     final scaleFactor = (newWidth + candleSpacing) / candleActualWidth;
-    // logd('_applyCandleWidth candleWidth:$candleWidth>$newWidth; factor:$scaleFactor');
 
     /// 更新蜡烛宽度
     _setCandleWidth(newWidth);
@@ -454,7 +417,6 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
         break;
     }
 
-    // logd('_applyCandleWidth paintDxOffset:$paintDxOffset > $newDxOffset');
     _setPaintDxOffset(newDxOffset);
 
     markRepaintChart();
@@ -508,14 +470,10 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
     return factor.clamp(minZoomSpanRatio, maxZoomSpanRatio);
   }
 
-  /// 缩放区间的唯一写入点, 触摸与非触摸共用: 把目标倍率夹进界内, 换算成相对 [from] 的系数
-  /// 写入。返回是否写入。
+  /// 缩放区间的唯一写入点, 触摸与非触摸共用。
   ///
-  /// [from] 与 [fromFactor] 必须同源 —— 非触摸传当前区间与当前倍率(增量口径), 触摸传本轮
-  /// 快照与快照倍率(快照口径)。两种口径的差异全在这两个入参上, 界因此对两端一致。
-  ///
-  /// 越界**钳制**而非拒绝: 拒绝会让区间不变, 于是同一个事件反复被拒形成不动点, 连反向输入
-  /// 也被封死。与 [onChartScale] 夹取蜡烛宽度同源。
+  /// [from] 与 [fromFactor] 必须同源(非触摸传当前, 触摸传快照)。
+  /// 越界钳制而非拒绝, 避免不动点阻塞反向输入。
   bool _applyZoomFactor(
     double target, {
     required MinMax from,
@@ -557,25 +515,12 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
     });
   }
 
-  /// 按本帧刻度文本的最大宽度同步 zoom 滑竿热区; [maxTickWidth] 为 null 表示这一帧没画文本。
+  /// 按本帧刻度文本宽度同步 zoom 滑竿热区; null 表示这帧没画文本。
   ///
-  /// 宽度只增不减: 文本长度随缩放、平移变化(整数位跨量级、step 换档), 热区跟着回缩会让用户遇到
-  /// 「刚才能拖、现在拖不到」。它只参与命中判定、不参与展示, 偏宽无副作用; 上界是该 precision 下
-  /// 最长文本的宽度, 所以一定收敛。下界的清零点只有换标的与换主题两处, 见 [onKlineSpecChanged]
-  /// 与 [onThemeChanged]。
+  /// 宽度只增不减(热区回缩会导致「刚能拖, 现在拖不到」), 上界收敛于该 precision 最长文本;
+  /// 清零点只有换标的与换主题两处。比整个 Rect: 主区高度变化时 top/height 要跟上。
   ///
-  /// 比整个 [Rect] 而不只比宽度: 主区高度变化(grid resize、指标增删)时宽度可能没变, 但 top /
-  /// height 要跟上。相等则不提交 —— 提交走 post-frame, 每帧提一次等于每帧挂一个空转回调。
-  /// 直接拿 [chartZoomSlideBarRect] 当判据成立的前提是矩形按 [mainRect] 构造: 它落在 [canvasRect]
-  /// 内, [setChartZoomSlideBarRect] 的夹取因此是空操作, 存进去的就是这里算出的值。
-  ///
-  /// [GestureConfig.useCustomZoomRect] 的短路在这里而不在蜡烛侧: 它只决定这个矩形从哪来, 是
-  /// controller 的配置。
-  ///
-  /// 已知取舍: 单调下界读的是 [chartZoomSlideBarRect], 而它宿主也能写。宿主在自动模式下手动写
-  /// 一次宽矩形、或从 `useCustomZoomRect: true` 切回 false 时留下的宿主矩形, 都会成为自动路径的
-  /// 下界, 直到换标的或换主题清零。不为它另存一份下界: 前者是配置文档已排除的用法, 后者是运行时
-  /// 罕见的来源切换, 都不值得再养一份并行状态。
+  /// [GestureConfig.useCustomZoomRect] 的短路在这里而非蜡烛侧: 该矩形从哪来是 controller 配置。
   void _syncChartZoomSlideBarRect(double? maxTickWidth) {
     if (maxTickWidth == null || gestureConfig.useCustomZoomRect) return;
     final width = math.max(chartZoomSlideBarRect.width, maxTickWidth);
@@ -627,31 +572,21 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
     return true;
   }
 
-  /// 非触摸端 Y 轴滚轮的每像素灵敏度(对数空间), 由触摸端口径派生。
+  /// 非触摸端 Y 轴滚轮的每像素灵敏度(对数空间)。
   ///
-  /// 触摸端的标定是「手指走完主图区高度得到倍率 [GestureConfig.maxZoomPerGesture]」, 折成
-  /// 每像素即 `ln(M) / H`; 让滚轮用同一个值, 同样的位移在两端才得到同样的倍率。
-  ///
-  /// 派生而非独立配置: 它与 `maxZoomPerGesture` 表达同一个感知量, 再给一个旋钮会让两端手感
-  /// 随配置漂移。`GestureConfig.signalScaleFactor` 因此只服务 X 轴。
-  ///
-  /// `maxZoomPerGesture` 夹在 `[1.2, 20]` 故 `ln(M) > 0`; 布局未就绪时回退到 X 轴那套口径。
+  /// 由触摸端口径派生: 手指走完主图区高度得到 [GestureConfig.maxZoomPerGesture] 倍率,
+  /// 每像素 = `ln(M) / H`。与触摸端共用一个旋钮, 避免两端手感漂移。
   double get signalZoomCoeffPerPixel {
     final height = mainChartHeight;
     if (height <= 0) return 1 / gestureConfig.signalScaleFactor;
     return math.log(gestureConfig.maxZoomPerGesture) / height;
   }
 
-  /// 触摸端滑竿拖拽: 按手指相对起点的位移缩放可见价格区间的跨度。
+  /// 触摸端滑竿拖拽: 按手指相对起点的位移缩放可见价格区间。
   ///
-  /// 改的是价格→像素映射的分母(可见区间), 分子(主图区像素高度)全程不动。系数取自 TradingView
-  /// price scale 的口径: 「距底部距离」的比值, 用比值而非差值是为了与主图区高度无关。
-  ///
-  /// 软化项 `s` 等于把主图区在底边外虚拟延长一段, 手指到不了那个虚拟底边, 于是: 比值不会在
-  /// 贴近底边时除零; 系数恒落在 `[1 / M, M]` 且恒为正(负系数会让 max/min 互换、Y 轴翻转);
-  /// 两侧同加保住「手指回到起点即系数为 1」这个不动点, 只加分母会让它偏移。
-  ///
-  /// 缩放的不动点是区间中点而非手指 —— 手指位置只决定幅度。所以这是「旋钮」不是「捏合」。
+  /// 系数取 TradingView price scale 口径: 「距底部距离」的比值(与主图区高度无关)。
+  /// 软化项 `s = H / (M - 1)` 使比值不在贴边时除零、保住「回到起点即系数为 1」的不动点。
+  /// 缩放不动点是区间中点而非手指位置。
   void onChartZoomUpdate(double dy) {
     final anchor = _chartZoomAnchor;
     if (anchor == null) return;

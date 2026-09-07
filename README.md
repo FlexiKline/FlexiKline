@@ -27,7 +27,7 @@ FlexiKline 是一个 Flutter 金融 K 线图表框架，指标、绘制工具、
 
 ```yaml
 dependencies:
-  flexi_kline: ^2.4.0
+  flexi_kline: ^2.5.0
 ```
 
 然后运行：
@@ -138,11 +138,11 @@ final index = await controller.moveToDateTime(DateTime(2024, 6, 15));
 
 | 字段 | 类型 | 覆盖范围 |
 | ---- | ---- | -------- |
-| `setting` | `SettingConfig` | 画布透明度、主副区最小尺寸、蜡烛宽度区间与间距、留白比例、Y 轴刻度、最新价倒计时、自动加载更多、Loading 样式 |
-| `grid` | `GridConfig` | 网格开关、横纵轴线与分格数、刻度文本、指标高度拖拽（开关、命中距离、拖拽线与背景） |
+| `setting` | `SettingConfig` | 画布透明度、主副区最小尺寸、蜡烛宽度区间与间距、留白比例、Y 轴刻度、Y 轴缩放跨度倍率、最新价倒计时、自动加载更多、Loading 样式 |
+| `grid` | `GridConfig` | 网格边框（横向/纵向边框开关与线型）、指标高度拖拽（开关、命中距离、拖拽线与背景） |
 | `cross` | `CrossConfig` | 十字线开关、准星线与交点、刻度文本、Tooltip 样式与间距、空白区行为 |
 | `draw` | `DrawConfig` | 绘制功能开关、绘制线与点、准星、刻度文本、命中距离、磁吸距离、放大镜 |
-| `gesture` | `GestureConfig` | 长按、惯性平移与容差、缩放开关与速度、缩放锚点、键盘快捷键、缩放滑竿、手势抢占阈值 |
+| `gesture` | `GestureConfig` | 长按、惯性平移与容差、缩放开关与锚点、Y 轴缩放倍率上界、键盘快捷键、缩放滑竿、手势抢占阈值（平移方向锥、拖动/缩放 slop 因子） |
 | `mainIndicator` | `MainPaintObjectIndicator` | 主区尺寸、padding 与当前已选中的主区指标集合 |
 | `sub` | `Set<IIndicatorKey>` | 当前已选中的副区指标集合 |
 
@@ -210,6 +210,7 @@ Direct 与 Computed 的 `autoActivate` 默认 `false`；show 时创建、hide �
 
 | 方法 | 说明 |
 | ---- | ---- |
+| `paintGridLines(canvas, size)` | 绘制本 pane 的网格线（先竖后横），返回解析出的位置 `({List<double> dxs, List<double> dys})` |
 | `computeVisibleMinMax(start, end)` | 返回 `[start, end)` 区间的最大最小值，参与 Y 轴换算 |
 | `paint(canvas, size)` | 主体绘制 |
 | `paintOverlay(canvas, size)` | 主图完成后的叠加绘制，如最新价标记 |

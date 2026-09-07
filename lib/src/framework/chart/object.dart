@@ -14,9 +14,7 @@
 
 part of 'indicator.dart';
 
-/// IndicatorObject: 保存 Indicator 配置
-///
-/// 提供 [Indicator] 的所有属性。
+/// PaintObject / Indicator 配置的运行时宿主, 提供排序、相等性和主题回调。
 abstract class IndicatorObject<T extends Indicator>
     implements Comparable<IndicatorObject<T>>, IPaintBounding, IPaintState {
   IndicatorObject();
@@ -99,11 +97,7 @@ abstract class IndicatorObject<T extends Indicator>
   void didChangeTheme() {}
 }
 
-/// PaintObject
-///
-/// 通过混入边界计算与数据初始化计算，简化 PaintObject 接口。
-/// 1. 定义 PaintObject 行为：通过实现对应的接口，实现 Chart 的配置、计算、绘制、Cross。
-/// 2. [_parent] 保存当前绘制对象的父级。
+/// 所有指标绘制对象的基类, 混入边界计算、几何状态与画笔缓存。
 abstract class PaintObject<T extends Indicator<IIndicatorKey>> extends IndicatorObject<T>
     with FlexiLog, PaintStyleMixin<T>, PaintObjectBoundingMixin<T>, PaintObjectGeometryStateMixin<T>
     implements IPaintObject, IPaintLifecycle {

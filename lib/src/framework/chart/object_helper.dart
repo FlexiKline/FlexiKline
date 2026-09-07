@@ -242,18 +242,10 @@ mixin PaintObjectGeometryStateMixin<T extends Indicator<IIndicatorKey>> on Indic
     _dyFactor = null;
   }
 
-  /// 对 minMax 做平滑插值, 减少平移过程中 Y 轴坐标系的跳变。
+  /// 对 minMax 做平滑插值, 减少平移中 Y 轴坐标跳变。
   ///
-  /// [smoothFactor] 控制平滑程度: 值越小越平滑(但响应越慢), 建议 0.1~0.25。
-  /// 当 factor=1.0 时, lerp 直接返回精确值, 无需特殊处理。
-  ///
-  /// 插值结果只写入 [_smoothMinMax], 不碰 [_minMax] —— 后者恒为
-  /// [computeVisibleMinMax] 写入的纯净目标值, 用作下一帧 smooth 的收敛目标。
-  /// [minMax] getter 按 `_smoothMinMax ?? _minMax` 的优先级读取, 确保渲染使用平滑值。
-  ///
-  /// 只服务自动路径: 缩放区间由用户精确控制, 插值只会让跟手性变差。这条边界由
-  /// [MainPaintObject._zoomMinMax] 存在时的事实保证 —— [MainPaintObject.minMax]
-  /// 优先返回它、设置时清掉平滑缓存、且缩放态的重算路径根本不调本方法。
+  /// 只写 [_smoothMinMax], 不碰 [_minMax](保持纯净收敛目标)。factor=1.0 时清除平滑。
+  /// 只服务自动路径: 缩放态由用户精确控制, 不走此方法。
   void smoothMinMax({double smoothFactor = 1.0}) {
     if (_minMax == null) return;
     if (smoothFactor >= 1.0) {

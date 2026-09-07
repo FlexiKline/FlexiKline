@@ -485,7 +485,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
     if (!indicator.inViewPriceMark.show && !indicator.offViewPriceMark.show) return;
     final model = klineData.latest;
     if (model == null) {
-      logd('paintLatestPriceMarkers > on data!');
+      logd('paintLatestPriceMarkers > no data!');
       return;
     }
 
@@ -658,7 +658,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
         ),
         drawDirection: DrawDirection.rtl,
         drawableRect: drawableRect,
-        text: '$text ▸', // ➤➤▹►▸▶︎≻
+        text: '$text ▸',
         textConfig: offViewPriceMark.text,
         themeTextColor: theme.lastPriceColor,
         themeBackgroundColor: theme.lastPriceBg,
@@ -672,7 +672,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
     if (indicator.latestPoint == null) return;
     final model = klineData.latest;
     if (model == null) {
-      logd('paintLatestPoint > on data!');
+      logd('paintLatestPoint > no data!');
       return;
     }
     if (paintDxOffset > latestPriceLabelOffsetX) {

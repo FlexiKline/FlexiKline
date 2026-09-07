@@ -114,15 +114,6 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
       val.dx + diff % candleActualWidth - candleWidthHalf,
       val.dy,
     );
-
-    // 当超出边界时, 校正到边界.
-    // if (canvasRect.contains(val)) {
-    //   final diff = (startCandleDx - val.dx) % candleActualWidth;
-    //   final dx = val.dx + diff - candleWidthHalf;
-    //   return Offset(dx, val.dy);
-    // } else {
-    //   return val.clamp(canvasRect);
-    // }
   }
 
   /// 点击语义: 未开则开、已开则关。返回开启后是否处于 crossing。
@@ -214,10 +205,7 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
         }
       }
 
-      /// 绘制Cross Line
       paintCrossLine(canvas, offset);
-
-      /// 绘制 Tooltip
       paintTooltip(canvas, offset, model: model);
 
       for (final paintObject in subPaintObjects) {
@@ -227,7 +215,6 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
     }
   }
 
-  /// 绘制Cross Line
   @protected
   void paintCrossLine(Canvas canvas, Offset offset) {
     final path = Path()
@@ -250,7 +237,6 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
     );
   }
 
-  /// 绘制 Tooltip
   void paintTooltip(Canvas canvas, Offset offset, {FlexiCandleModel? model}) {
     _clearTooltipHitTestData();
 

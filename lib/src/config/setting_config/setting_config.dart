@@ -80,8 +80,7 @@ class SettingConfig {
   // 副区指标图的最小高度
   final double subMinHeight;
 
-  /// 绘制区域最少留白比例
-  /// 例如: 当蜡烛数量不足以绘制一屏, 向右移动到末尾时, 绘制区域左边最少留白区域占可绘制区域(canvasWidth)的比例
+  /// 蜡烛数量不足一屏时, 向右移到末尾后左侧最少留白占可绘制宽度的比例。
   final double minPaintBlankRate;
 
   /// 如果足够总是计算一屏的蜡烛.
@@ -91,19 +90,26 @@ class SettingConfig {
   /// 蜡烛配置
   /// 最小蜡烛宽度, 小于 1 会被夹到 1(否则蜡烛宽度可精确归零, 蜡烛数量的推算不再收敛)
   final double candleMinWidth;
-  // 最大蜡烛宽度, 小于 [candleMinWidth] 时取后者; 不设上界
+
+  /// 最大蜡烛宽度, 小于 [candleMinWidth] 时取后者
   final double candleMaxWidth;
-  // 单根蜡烛柱的宽度
+
+  /// 单根蜡烛柱的宽度
   final double candleWidth;
-  // 蜡烛间的固定间距
+
+  /// 蜡烛间的固定间距
   final double? candleFixedSpacing;
-  // 蜡烛间的间距按蜡烛宽度平分[candleSpacingParts]份
+
+  /// 蜡烛间的间距按蜡烛宽度平分 [candleSpacingParts] 份
   final int candleSpacingParts;
-  // 蜡烛空心柱的边框宽度
+
+  /// 蜡烛空心柱的边框宽度
   final double candleHollowBarBorderWidth;
-  // 蜡烛空心线宽; 高低线宽(high, low)
+
+  /// 蜡烛线宽(high/low)
   final double candleLineWidth;
-  // Candle 第一根Candle相对于mainRect右边的偏移
+
+  /// 第一根蜡烛相对于 mainRect 右边的偏移
   final double firstCandleInitOffset;
 
   /// overlay 是否允许绘制在主图 rect 之外
