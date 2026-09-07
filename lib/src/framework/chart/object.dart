@@ -195,6 +195,14 @@ abstract class PaintObject<T extends Indicator<IIndicatorKey>> extends Indicator
     _parent = null;
   }
 
+  /// 默认不产出任何网格线。
+  ///
+  /// 要与主区竖线对齐的副区指标覆写它, 把 [PaintContext.gridVerticalDxs] 交给
+  /// `PaintGridTicksMixin.paintVerticalGridLines` 即可 —— 编排保证主区那一趟已经跑完。
+  @protected
+  @override
+  List<double> paintGridLines(Canvas canvas, Size size) => const [];
+
   @protected
   @override
   void paintOverlay(Canvas canvas, Size size) {}
@@ -355,15 +363,6 @@ abstract class CandleBasePaintObject<T extends CandleBaseIndicator> extends Dire
   /// 是否在蜡烛图类型为线图时隐藏指标
   bool get hideMainIndicatorsInLineChartMode => false;
 
-  /// 本帧 Y 轴刻度位置, **不含值**。
-  ///
-  /// [paintYAxisTickLines] 写入, [paintYAxisTickLabels] 读取后置空。两次调用同属一次
-  /// [MainPaintObject.doPaintChart], 生命周期即一帧。null 表示本帧没有可用区间, 文本那一趟
-  /// 因此自动跳过。
-  ///
-  /// 只存位置: 刻度值在画文本时由 `dyToValue(check: false)` 现算回来, 两个方向严格互逆。
-  List<double>? _frameTicks;
-
   /// 上次上报的 zoom 滑竿区域, 同时承载宽度的单调增长态。
   ///
   /// 宽度只增不减: 刻度文本的长度随缩放、平移变化, 热区若跟着回缩, 用户会遇到「刚才能拖、
@@ -375,32 +374,73 @@ abstract class CandleBasePaintObject<T extends CandleBaseIndicator> extends Dire
   /// 不值得为它引入配置级的变更通知。
   Rect? _reportedZoomBarRect;
 
-  /// 绘制 Y 轴刻度横线, 并产出本帧刻度位置。
+  /// 横线的位置是否要等本帧区间。
+  ///
+  /// 只有 `nice` 的位置由值换算; 而区间不可用时它退化为 `count`, 位置又变回纯几何。
+  /// [paintGridLines] 与 [paintYAxisTickLines] 分别取这个判据的**反面与正面**, 于是「横线
+  /// 恰好画一遍」是结构保证而非纪律 —— 两处各写一遍判据, 写歪一边就会画两遍(同色同宽,
+  /// 肉眼难辨)或一遍都不画。
+  ///
+  /// 判据取 [KlineData.canPaintChart] 而不是 `minMax.isZero`: 门禁前读到的 minMax 是**上一帧**
+  /// 的值, 切标的时它仍非零, 用它会让 nice 既不在门禁前画(以为区间可用)、也不在门禁后画
+  /// (门禁挡住), 横线闪断一帧。
+  bool get _horizontalGridNeedsRange {
+    return indicator.horizontalGrid.mode is GridNiceTickMode && klineData.canPaintChart;
+  }
+
+  /// 绘制主区网格线: 先竖线, 后横线。
+  ///
+  /// 由框架在 `canPaintChart` 门禁**之前**调用, 所以这里只画位置此刻已确定的线 —— 所有竖线
+  /// (竖线是几何参考线, 永不按值取整)与非 `nice` 的横线。加载态因此走的是正常路径, 不是兜底。
+  @protected
+  @override
+  List<double> paintGridLines(Canvas canvas, Size size) {
+    final vertical = indicator.verticalGrid;
+    // 产出与绘制分开: `line == null` 只表示主区自己不画, 位置照样要返回 —— 副区可能仍想按
+    // 同一位置画, 那时对齐才不必依赖「两处配一样」的约定。
+    final dxs = resolveVerticalDxs(vertical.mode);
+    paintVerticalGridLines(canvas, dxs: dxs, line: vertical.line);
+
+    if (!_horizontalGridNeedsRange) {
+      final horizontal = indicator.horizontalGrid;
+      paintHorizontalGridLines(
+        canvas,
+        dys: resolveHorizontalDys(horizontal.mode),
+        line: horizontal.line,
+      );
+    }
+    return dxs;
+  }
+
+  /// 绘制位置依赖本帧区间的 Y 轴刻度横线, 并产出本帧刻度位置。
   ///
   /// 由 [MainPaintObject.doPaintChart] 在遍历子对象**之前**调用, 因此横线一定在所有
   /// 主区指标之下, 与各指标的 zIndex 无关。
   ///
-  /// 位置一律交给 mixin 的 [resolveHorizontalDys]: 三种模式的分叉、以及区间不可用时 nice
-  /// 退化为 count, 都在那里一次写完。本方法只负责决定「值取不到时不产出刻度」。
-  void paintYAxisTickLines(Canvas canvas, Size size) {
+  /// 位置一律交给 mixin 的 [resolveHorizontalDys], 三种模式的分叉在那里一次写完; 本方法只
+  /// 决定画不画 —— 不依赖区间的那几路已在 [paintGridLines] 画完, 判据见 [_horizontalGridNeedsRange]。
+  ///
+  /// 返回值交给 [paintYAxisTickLabels]: 两趟之间隔着整个子对象遍历, 由
+  /// [MainPaintDelegateExt.doPaintChart] 的局部变量接驳。不留帧内字段 —— 那要靠「用完置空」
+  /// 的纪律维持, 某帧未走到文本那一趟就会留下上一帧的值。
+  List<double> paintYAxisTickLines(Canvas canvas, Size size) {
     final grid = indicator.horizontalGrid;
     final dys = resolveHorizontalDys(grid.mode);
-
-    // 区间为零时只画线不产出刻度: 位置只依赖几何, 缺了这一路主区一条横线都没有; 但值反算
-    // 出来会是一列贴着 0 的噪声, 画骨架比画一列 0 更诚实。
-    _frameTicks = minMax.isZero ? null : dys;
-
-    paintHorizontalGridLines(canvas, dys: dys, line: grid.line);
+    if (_horizontalGridNeedsRange) {
+      paintHorizontalGridLines(canvas, dys: dys, line: grid.line);
+    }
+    return dys;
   }
 
-  /// 绘制 Y 轴刻度文本。
+  /// 绘制 Y 轴刻度文本, [dys] 取自本帧的 [paintYAxisTickLines]。
   ///
   /// 由 [MainPaintObject.doPaintChart] 在遍历子对象**之后**调用, 因此文本一定在所有
   /// 主区指标之上, 不会被 MA / BOLL 一类 zIndex 更大的指标覆盖。
-  void paintYAxisTickLabels(Canvas canvas, Size size) {
-    final dys = _frameTicks;
-    _frameTicks = null; // 用完即弃, 不跨帧存活
-    if (dys == null || !settingConfig.showYAxisTick) return;
+  ///
+  /// 值不随位置一起传进来, 由 [paintYAxisTicks] 逐个 `dyToValue(check: false)` 现算: 两个
+  /// 方向严格互逆, 往返只经一次乘、一次除。区间为零时那里取不到值、自然不画文本。
+  void paintYAxisTickLabels(Canvas canvas, Size size, {required List<double> dys}) {
+    if (dys.isEmpty || !settingConfig.showYAxisTick) return;
 
     reportZoomSlideBarRect(paintYAxisTicks(canvas, dys: dys, precision: klineData.precision));
   }
@@ -473,6 +513,16 @@ final class MainPaintObject<T extends MainPaintObjectIndicator> extends PaintObj
   }
 
   late final SortableHashSet<PaintObject> children;
+
+  /// 本帧主区竖线的 dx 序列, canvas 坐标; 空表示主区未产出竖线。
+  ///
+  /// 由 [MainPaintDelegateExt.doPaintGridLines] 写入, 经 [PaintContext.gridVerticalDxs]
+  /// 只读暴露给副区指标对齐。写入口只有本类 —— 它是框架内部的 `final class`, 宿主绕不过
+  /// 蜡烛去改主区的竖线位置。
+  List<double> _gridVerticalDxs = const [];
+
+  /// 本帧主区竖线的 dx 序列, 供副区指标对齐; 空表示主区未产出竖线。
+  List<double> get gridVerticalDxs => _gridVerticalDxs;
 
   // ---- Zoom 价格区间（Y 轴由用户接管）----
 

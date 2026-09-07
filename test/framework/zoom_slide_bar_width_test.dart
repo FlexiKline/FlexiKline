@@ -217,11 +217,13 @@ class _ZoomBarScene {
   void notifyThemeChanged() => object.notifyThemeChanged();
 
   /// 驱动 Y 轴刻度的两趟绘制：画线一趟产出本帧刻度，画文本一趟度量宽度并上报。
+  ///
+  /// 位置经返回值在两趟之间传递，与 `MainPaintObject.doPaintChart` 里的局部变量同一形状。
   void paintFrame() {
     final canvas = Canvas(PictureRecorder());
     final size = context.mainRect.size;
-    object.paintYAxisTickLines(canvas, size);
-    object.paintYAxisTickLabels(canvas, size);
+    final dys = object.paintYAxisTickLines(canvas, size);
+    object.paintYAxisTickLabels(canvas, size, dys: dys);
   }
 }
 

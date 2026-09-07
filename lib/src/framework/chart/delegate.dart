@@ -77,6 +77,13 @@ extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
     return _minMax;
   }
 
+  /// 框架内部：在 `canPaintChart` 门禁之前绘制本对象负责的网格线。
+  ///
+  /// 返回本对象产出的竖线 dx 序列，编排层据此让其它 pane 对齐（见 `ChartBinding.paintChart`）。
+  List<double> doPaintGridLines(Canvas canvas, Size size) {
+    return paintGridLines(canvas, size);
+  }
+
   void doPaintChart(Canvas canvas, Size size) {
     paint(canvas, size);
 
@@ -318,14 +325,29 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
     );
   }
 
+  /// 委托蜡烛绘制主区网格线, 并存下它产出的竖线 dx 供副区对齐。
+  ///
+  /// 只问 candle、不遍历主区子指标: 与 [doPaintChart] 里横线 / 文本的口径一致, MA / BOLL
+  /// 一类不参与网格线。
+  ///
+  /// 也不自己编排(调 candle 的 resolve 与 paint): 那要求 candle 把四个方法分别暴露出去, 还
+  /// 要让主区容器知道 `indicator.horizontalGrid` / `verticalGrid` 长什么样 —— 网格配置的知识
+  /// 就从蜡烛泄漏到了容器里。委托单一入口即可。
+  List<double> doPaintGridLines(Canvas canvas, Size size) {
+    return _gridVerticalDxs = _candlePaintObject?.paintGridLines(canvas, size) ?? const [];
+  }
+
   void doPaintChart(Canvas canvas, Size size) {
     // Y 轴刻度的横线与文本夹住整个子对象遍历: 线在所有主区指标之下、文本在其之上。
     //
     // 不能把这两步收进 CandlePaintObject.paint —— candle 不是最底层。CandleIndicator
     // 的 zIndex 是 -1, 而 VolumeIndicator 用 -2, 且 zIndex 是可覆盖的构造参数, 宿主
     // 能传任意值。只有在此处编排才与 zIndex 无关。
+    //
+    // 本帧刻度位置用局部变量跨过整个遍历, 不落成字段: 它的生命周期本来就是「一次编排」,
+    // 作用域天然保证不脏读。
     final candle = _candlePaintObject;
-    candle?.paintYAxisTickLines(canvas, size);
+    final dys = candle?.paintYAxisTickLines(canvas, size) ?? const <double>[];
 
     if (isFirstDrawTipsArea) {
       // 如果设置总是要在Tips区域下绘制指标图, 则要首先绘制完所有Tips.
@@ -345,12 +367,7 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
       }
     }
 
-    candle?.paintYAxisTickLabels(canvas, size);
-  }
-
-  /// 只画 Y 轴横线, 供数据未就绪时的骨架路径使用(见 `paintChart` 的 `canPaintChart` 门禁)。
-  void doPaintYAxisTickLines(Canvas canvas, Size size) {
-    _candlePaintObject?.paintYAxisTickLines(canvas, size);
+    candle?.paintYAxisTickLabels(canvas, size, dys: dys);
   }
 
   void doPaintOverlay(Canvas canvas, Size size) {

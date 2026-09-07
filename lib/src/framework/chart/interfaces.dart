@@ -63,6 +63,28 @@ abstract interface class IPaintObject {
   /// 指标 Key
   IIndicatorKey get key;
 
+  /// 绘制本对象负责的网格线: 先竖线、后横线, 位置由各方向自己的 mode 决定。
+  ///
+  /// 它是**指标层的编排入口**, 不是单条线的绘制方法: 实现者内部各方向自己取位置
+  /// (`PaintGridTicksMixin.resolveXxx`)再落笔(`paintXxx`), 框架只负责在正确的时机调它一次。
+  ///
+  /// 框架在 `canPaintChart` 门禁**之前**调用, 因此数据未就绪时也会执行, 此时 [IPaintState.minMax]
+  /// 不可用(读到的是上一帧的值)。位置由值换算的横线因此要推迟到本帧区间可用之后再画。
+  ///
+  /// > [!warning]
+  /// > **副区对象在此刻的 pane 几何未必有效。** `paneIndex` 由门禁之后的
+  /// > `doUpdateVisibleMinMax` 分配, 所以首帧(以及指标增删导致 pane 重排后的那一帧)副区的
+  /// > [IPaintBounding.drawableRect] 读到的是主区区域。主区不受影响 —— 它的 `paneIndex`
+  /// > 恒为 `mainPaneIndex`。副区实现者要么显式传 `bounds`, 要么等 pane 几何前移到门禁之前
+  /// > 再接线; 当前内置的副区指标一律不覆写本方法。
+  ///
+  /// 返回本次产出的**竖线 dx 序列**, 供其它 pane 对齐; 不产出时返回空列表。与 [paintTips]
+  /// 返回 `Size?` 供布局使用同一形状。
+  ///
+  /// 不返回横线的 dy: 返回值的存在理由是「给本对象之外的人用」, 而 dy 只有同一对象的刻度
+  /// 文本那一趟消费(主区是价格轴、副区是各自的值轴, 横线不跨 pane 通用)。
+  List<double> paintGridLines(Canvas canvas, Size size);
+
   /// 绘制指标图
   ///
   /// [canvas] 画布

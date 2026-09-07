@@ -109,6 +109,19 @@ abstract interface class PaintRuntimeScope {
   /// 指标图缩放滑竿区域。
   Rect get chartZoomSlideBarRect;
 
+  /// 本帧主区竖线的 dx 序列, canvas 坐标; 空表示主区未产出竖线。
+  ///
+  /// 副区指标画竖线时把它交给 `PaintGridTicksMixin.paintVerticalGridLines` 即与主区对齐,
+  /// 不必依赖「两处配一样」的约定。读取时机由编排保证: 主区的网格线那一趟在所有副区之前
+  /// 跑完(见 `ChartBinding.paintChart`)。
+  ///
+  /// **只读。** [PaintContext] 是所有 PaintObject 共享的同一个实例, 挂上写方法就等于允许
+  /// 任何副区指标改主区的竖线位置; dx 只经 `IPaintObject.paintGridLines` 的返回值上行, 由
+  /// 框架内部的 `MainPaintObject` 持有。
+  ///
+  /// 横线没有对应物: 主区是价格轴, 副区是各自的值轴, 两者不可通用。
+  List<double> get gridVerticalDxs;
+
   /// 请求重绘 chart 图层。
   void requestRepaint();
 

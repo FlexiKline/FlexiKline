@@ -118,6 +118,10 @@ class FakePaintContext implements PaintContext {
   @override
   Rect get chartZoomSlideBarRect => Rect.zero;
 
+  /// 由测试驱动的主区竖线位置；默认空，验证副区对齐的测试自行赋值。
+  @override
+  List<double> gridVerticalDxs = const [];
+
   @override
   double calculatePaneTop(int slot) => 0;
 

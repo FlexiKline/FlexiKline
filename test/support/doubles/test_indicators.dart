@@ -35,6 +35,7 @@ class TestCandleIndicator extends CandleBaseIndicator {
     this.chartType = FlexiChartType.barSolid,
     this.hideMainIndicatorsInLineChartMode = false,
     this.visibleMinMaxFromData = false,
+    this.paintMarker = false,
   }) : super(padding: EdgeInsets.zero);
 
   /// [CandleBasePaintObject.resolveChartType] 的返回值
@@ -49,6 +50,12 @@ class TestCandleIndicator extends CandleBaseIndicator {
   /// 需要断言价格→像素映射（如 Y 轴缩放）的用例置 true。
   final bool visibleMinMaxFromData;
 
+  /// [PaintObject.paint] 是否落一笔可识别的记号（[TestCandlePaintObject.markerPath]）。
+  ///
+  /// 默认 false：蜡烛不画任何东西，按绘制产物断言的用例不必过滤它。断言 z 序的用例置 true，
+  /// 「网格线在蜡烛之下」才有可观测的先后。
+  final bool paintMarker;
+
   /// 最近一次创建的绘制对象
   TestCandlePaintObject? object;
 
@@ -60,8 +67,19 @@ class TestCandleIndicator extends CandleBaseIndicator {
 
 /// 可切换图表类型的蜡烛绘制对象，用于验证线图模式下的隐藏行为。
 class TestCandlePaintObject extends CandleBasePaintObject<TestCandleIndicator> {
+  /// [TestCandleIndicator.paintMarker] 开启时 [paint] 落下的记号。
+  ///
+  /// 取正方形而不是线段：网格线的包围盒一维为 0，用有面积的形状才能在绘制记录里一眼分开。
+  static final Path markerPath = Path()..addRect(const Rect.fromLTWH(10, 10, 20, 20));
+
   /// 覆盖 indicator 的配置；为 null 时取 `indicator.chartType`。
   FlexiChartType? chartTypeOverride;
+
+  /// [formatTicksValue] 每次收到的刻度值，按绘制顺序。
+  ///
+  /// 这是观测 `paintYAxisTicks` 内部 `dyToValue(check: false)` 产物的唯一途径：文本一旦交给
+  /// `Paragraph` 就读不回来了，而钩子拿到的正是即将被格式化的那个值。
+  final List<FlexiNum> formattedTickValues = [];
 
   @override
   FlexiChartType resolveChartType() => chartTypeOverride ?? indicator.chartType;
@@ -75,9 +93,18 @@ class TestCandlePaintObject extends CandleBasePaintObject<TestCandleIndicator> {
   }
 
   @override
-  void paint(Canvas canvas, Size size) {}
+  void paint(Canvas canvas, Size size) {
+    if (indicator.paintMarker) canvas.drawPath(markerPath, Paint());
+  }
+
   @override
   Size? paintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
+
+  @override
+  String formatTicksValue(FlexiNum value, {required int precision}) {
+    formattedTickValues.add(value);
+    return super.formatTicksValue(value, precision: precision);
+  }
 
   // ---- PaintGridTicksMixin 的算位置能力对用例开放 ----
   //

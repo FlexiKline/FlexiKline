@@ -68,7 +68,7 @@
 * Move main-pane horizontal price lines from the grid layer into the chart layer so lines and tick labels share one source; tick labels now paint above all main-pane indicators instead of being covered by them.
 * Round the main price axis ticks to readable numbers and make that the default: values are chosen first and their positions derived from them, instead of dividing the axis evenly and reading the value back off the pixel position.
 * Interpret the nice tick parameter as a target interval count: the actual tick count varies around it because step values are rounded to readable numbers.
-* Paint the main-pane price lines evenly divided while no price range exists, so a chart waiting for data keeps its horizontal skeleton instead of showing the grid's borders alone; tick labels stay hidden until a range exists, since there is no value to format.
+* Paint the main-pane price lines evenly divided while no price range exists; tick labels stay hidden until a range exists, since there is no value to format.
 * Keep the price-axis width reported for the zoom slide bar monotonic so the zoom hit area no longer shifts while tick labels change length; the cached width resets on a symbol change or a theme change.
 * Expose `CandleBasePaintObject.reportZoomSlideBarRect` as protected, so a subclass that overrides `paintYAxisTickLabels` to draw its own tick labels can still report the zoom hit area.
 * Mark `CandleBasePaintObject.didChangeDependencies` as `@mustCallSuper`: it resets the cached zoom slide bar width when the symbol changes, so an override that skips `super` keeps the previous symbol's width (Breaking Changes).
@@ -76,10 +76,14 @@
 * Sink grid tick configuration into the indicators as `CandleBaseIndicator.horizontalGrid` and `verticalGrid`, both `GridAxisConfig`; `GridAxisConfig.line` is nullable and defaults to null, meaning positions are still produced but no line is painted.
 * Add a sealed `GridTickMode` carrying its own parameter per mode — `count(divisions)`, `size(spacing)` and `nice(targetDivisions)` — replacing a single numeric field whose unit changed with the mode.
 * Add `GridTickMode.size`, which divides the axis by a fixed pixel spacing and splits the remainder evenly between both ends.
-* Stop painting the vertical grid lines from the grid layer: they are geometric reference lines owned by the candle indicator, so a host that supplies its own candle indicator can configure them.
 * Change the main-pane `count` ticks to exclude both ends: the last line used to land on `drawableRect.bottom`, coinciding with the pane divider the grid layer draws there.
 * Rename `PaintYAxisTicksMixin` to `PaintGridTicksMixin` and split it into `resolveX` methods that compute positions and `paintX` methods that draw them; tick labels now have a single drawing entry point (Breaking Changes).
 * Rename `nice_tick_util.dart` to `grid_tick_util.dart` and add `evenPositions`, `positionsByCount` and `spacedPositions`; the three tick-position algorithms are now pure functions grouped one section each (Breaking Changes).
+* Move grid line painting out of the grid layer into the main candle object: it now paints both the horizontal price lines and the vertical reference lines, while the grid layer keeps only borders, pane separators and the drag affordances (Breaking Changes).
+* Add `IPaintObject.paintGridLines`, called before the `canPaintChart` gate so that a chart waiting for data still shows its grid; it returns the vertical dx positions it produced (Breaking Changes).
+* Expose the main pane's vertical grid positions as `PaintContext.gridVerticalDxs` so a sub indicator can align its own vertical lines with the main pane.
+* Drop the horizontal skeleton fallback that ran when `canPaintChart` was false: positions that do not depend on the visible range are now painted on the normal path instead.
+* Change `CandleBasePaintObject.paintYAxisTickLines` to return the tick positions it produced and `paintYAxisTickLabels` to take them as a `dys` argument, replacing the frame-scoped field that carried them between the two passes (Breaking Changes).
 
 ## 2.4.1
 * Fix the blank band above the candles left after hiding main-area indicators, which survived config reload and data refresh and could only be cleared by rebuilding the controller.

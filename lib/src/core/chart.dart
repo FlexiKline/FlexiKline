@@ -89,6 +89,12 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
   @override
   Rect get chartZoomSlideBarRect => _chartZoomSlideBarRect.value;
 
+  /// 本帧主区竖线的 dx 序列, 由 [MainPaintObject.gridVerticalDxs] 持有。
+  ///
+  /// 只转发, 不缓存: 编排每帧重写它, 缓存一份只会多一个可能过期的副本。
+  @override
+  List<double> get gridVerticalDxs => mainPaintObject.gridVerticalDxs;
+
   /// Latest Price ///
   Timer? _lastPriceCountDownTimer;
   @protected
@@ -141,14 +147,22 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
 
     // 先算区间再校验: 校验放在前面只能验到上一帧的旧值。
     calculatePaintChartRange();
+
+    // 网格线在门禁之前: 位置不依赖本帧区间的那些线(所有竖线, 以及 count / size 与区间不可用
+    // 时退化的 nice 横线)此刻已经确定, 加载中的图表因此照常有完整网格 —— 这是正常路径, 不是
+    // 数据没来时的兜底。位置由值换算的横线留到 doPaintChart 那一趟。
+    //
+    // 此时还没有 clipRect(主区的 save + clipRect 在门禁之后), 但网格线坐标本来就落在 mainRect
+    // 与 subRect 内, 不会溢出画布。
+    //
+    // 主区在副区之前: 副区要对齐的 dx 由主区这一趟产出, 随后经 [gridVerticalDxs] 只读。
+    mainPaintObject.doPaintGridLines(canvas, size);
+    for (final paintObject in subPaintObjects) {
+      paintObject.doPaintGridLines(canvas, size);
+    }
+
     if (!klineData.canPaintChart) {
       logd('chartBinding paintChart data is being prepared!');
-      // 数据未就绪时仍补一趟主区横线: 整趟跳过会让加载中的主区只剩 grid 的竖线。骨架的位置
-      // 只依赖几何, 无需区间; 刻度文本没有值可取, 由 [paintYAxisTickLines] 自行跳过。
-      //
-      // 放在 chart 层而非 grid 层: grid 只在布局与配置变更时重绘, 数据到达时不会, 那样画
-      // 出的骨架线会一直叠在真实刻度线上。
-      mainPaintObject.doPaintYAxisTickLines(canvas, size);
       return;
     }
 
