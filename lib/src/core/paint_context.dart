@@ -107,6 +107,10 @@ abstract interface class PaintRuntimeScope {
   Offset? get crossOffset;
 
   /// 指标图缩放滑竿区域。
+  ///
+  /// **只读。** 热区由编排层在主区绘制完成后从绘制树上拉取(见
+  /// `CandleBasePaintObject.zoomSlideBarRect`); [PaintContext] 是所有 PaintObject 共享的
+  /// 同一个实例, 挂上写方法就等于允许任何副区指标改这块只该由主区蜡烛决定的热区。
   Rect get chartZoomSlideBarRect;
 
   /// 本帧主区竖线的 dx 序列, canvas 坐标; 空表示主区未产出竖线。
@@ -141,9 +145,6 @@ abstract interface class PaintRuntimeScope {
   /// 各 Binding 的实现带对象身份守卫，传入非当前持有对象时为空操作，因此对象在
   /// 任意时机调用都是安全的。
   void requestReleasePaintObject(PaintObject object);
-
-  /// 上报指标图缩放滑竿区域。
-  void reportChartZoomSlideBarRect(Rect rect);
 }
 
 /// PaintObject 对外可见的绘制上下文。

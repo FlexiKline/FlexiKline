@@ -138,9 +138,6 @@ class FakePaintContext implements PaintContext {
   void requestReleasePaintObject(PaintObject object) {}
 
   @override
-  void reportChartZoomSlideBarRect(Rect rect) {}
-
-  @override
   int? getComputedDataIndex(ComputedIndicatorKey key) => null;
 
   @override

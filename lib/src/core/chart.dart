@@ -202,6 +202,9 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
       canvas.restore();
     }
 
+    // 主区画完才有刻度文本宽度: 热区从绘制树上拉取, 不由蜡烛反向上报。
+    _syncChartZoomSlideBarRect();
+
     for (final paintObject in subPaintObjects) {
       /// 更新副区指标可见区间状态.
       paintObject.doUpdateVisibleMinMax(
@@ -551,11 +554,28 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
     });
   }
 
-  @override
-  void reportChartZoomSlideBarRect(Rect rect) {
-    if (!gestureConfig.useCustomZoomRect) {
-      setChartZoomSlideBarRect(rect);
-    }
+  /// 上一次由绘制编排提交的热区, 只用于跳过重复提交。
+  ///
+  /// 不拿 [_chartZoomSlideBarRect] 当判据: 提交经 post-frame 落地, 同帧内比会读到上一帧的
+  /// 值; 且它存的是夹取后的结果, 与拉取到的原值不可直接比。
+  Rect? _committedZoomSlideBarRect;
+
+  /// 从绘制树上拉取本帧的 zoom 滑竿热区并提交。
+  ///
+  /// 由 [paintChart] 在主区绘制完成之后调用: 热区宽度来自主区 Y 轴刻度文本的实测宽度, 那一趟
+  /// 画完才有值。
+  ///
+  /// 值未变就不提交: 提交走 `addPostFrameCallback`, 每帧提一次等于每帧挂一个回调, 而
+  /// [_chartZoomSlideBarRect] 同值写入本就不通知, 挂了也是空转。
+  ///
+  /// [GestureConfig.useCustomZoomRect] 的短路在这里而不在蜡烛侧: 它是 controller 的配置, 只
+  /// 决定这个矩形从哪来。宿主接管时蜡烛照常收敛宽度, 只是不提交。
+  void _syncChartZoomSlideBarRect() {
+    if (gestureConfig.useCustomZoomRect) return;
+    final rect = mainPaintObject.zoomSlideBarRect;
+    if (rect == null || rect == _committedZoomSlideBarRect) return;
+    _committedZoomSlideBarRect = rect;
+    setChartZoomSlideBarRect(rect);
   }
 
   /// 检测是否开始指标图缩放, 命中滑竿则同时取本轮的区间快照与起点。

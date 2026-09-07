@@ -365,7 +365,7 @@ abstract class CandleBasePaintObject<T extends CandleBaseIndicator> extends Dire
   /// 是否在蜡烛图类型为线图时隐藏指标
   bool get hideMainIndicatorsInLineChartMode => false;
 
-  /// 上次上报的 zoom 滑竿区域, 同时承载宽度的单调增长态。
+  /// zoom 滑竿热区, 同时承载宽度的单调增长态。
   ///
   /// 宽度只增不减: 刻度文本的长度随缩放、平移变化, 热区若跟着回缩, 用户会遇到「刚才能拖、
   /// 现在拖不到」。热区只参与四处命中判定(见 `setChartZoomSlideBarRect` 的注释), 不参与
@@ -374,7 +374,17 @@ abstract class CandleBasePaintObject<T extends CandleBaseIndicator> extends Dire
   /// 清空点只有换标的([didChangeDependencies])与换主题([didChangeTheme])两处。刻度文本
   /// 样式([GridConfig.ticksText])调小字号后热区会一直偏宽, 但那与单调增长本身的代价同量级,
   /// 不值得为它引入配置级的变更通知。
-  Rect? _reportedZoomBarRect;
+  Rect? _zoomSlideBarRect;
+
+  /// 本帧应生效的 zoom 滑竿热区, canvas 坐标; null 表示还没度量出刻度文本宽度。
+  ///
+  /// 由编排层在主区绘制完成后拉取(见 `ChartBinding.paintChart`), 本对象不反向上报:
+  /// [PaintContext] 是所有 PaintObject 共享的同一个实例, 上报方法一旦挂上去, 任何副区指标
+  /// 都能改这块只该由主区蜡烛的刻度文本宽度决定的热区。与 [MainPaintObject.gridVerticalDxs]
+  /// 同一形状。
+  ///
+  /// 值稳定时照常返回同一个 [Rect] —— 是否重复提交由拉取端判断, 只有那里知道上次提交了什么。
+  Rect? get zoomSlideBarRect => _zoomSlideBarRect;
 
   /// 绘制主区网格线: 先竖线, 后横线, 一趟画完并交出两个方向的位置。
   ///
@@ -415,33 +425,28 @@ abstract class CandleBasePaintObject<T extends CandleBaseIndicator> extends Dire
   void paintYAxisTickLabels(Canvas canvas, Size size, {required List<double> dys}) {
     if (dys.isEmpty || !settingConfig.showYAxisTick) return;
 
-    reportZoomSlideBarRect(paintYAxisTicks(canvas, dys: dys, precision: klineData.precision));
+    updateZoomSlideBarRect(paintYAxisTicks(canvas, dys: dys, precision: klineData.precision));
   }
 
-  /// 按本帧刻度文本的最大宽度上报 zoom 滑竿区域。
+  /// 按本帧刻度文本的最大宽度更新 [zoomSlideBarRect]。
   ///
   /// 覆写 [paintYAxisTickLabels] 自行绘制刻度文本的子类, 度量完成后要调用它, 否则 zoom
   /// 手势拿不到热区。
   ///
-  /// 比较整个 [Rect] 而不只比宽度: 主区高度变化(grid resize、指标增删)时宽度可能没变, 但
-  /// top / height 要更新。稳定态因此零上报, 不再每帧提交一次 post-frame 回调。
+  /// 整个 [Rect] 都重算而不只取宽度: 主区高度变化(grid resize、指标增删)时宽度可能没变, 但
+  /// top / height 要跟上。
   ///
-  /// 经 `context.reportChartZoomSlideBarRect` 而不直连 controller: 宿主接管热区
-  /// (`useCustomZoomRect`)时上报必须彻底静默。
+  /// 不看 `useCustomZoomRect`: 宿主接管热区时该静默的是提交那一步, 而那是 controller 的配置,
+  /// 判断留在拉取端。本对象只管把宽度收敛出来。
   @protected
-  void reportZoomSlideBarRect(double maxTickWidth) {
-    if (context.gestureConfig.useCustomZoomRect) return;
-
-    final width = math.max(_reportedZoomBarRect?.width ?? 0, maxTickWidth);
-    final rect = Rect.fromLTWH(
+  void updateZoomSlideBarRect(double maxTickWidth) {
+    final width = math.max(_zoomSlideBarRect?.width ?? 0, maxTickWidth);
+    _zoomSlideBarRect = Rect.fromLTWH(
       drawableRect.right - width,
       drawableRect.top,
       width,
       drawableRect.height,
     );
-    if (rect == _reportedZoomBarRect) return;
-    _reportedZoomBarRect = rect;
-    context.reportChartZoomSlideBarRect(rect);
   }
 
   /// 换标的时让滑竿宽度重新收敛: 价格量级与精度都可能变, 沿用上一个标的的宽度会让热区宽出
@@ -453,14 +458,14 @@ abstract class CandleBasePaintObject<T extends CandleBaseIndicator> extends Dire
   @override
   void didChangeDependencies(KlineSpec oldSpec) {
     super.didChangeDependencies(oldSpec);
-    if (oldSpec.symbol != klineData.symbol) _reportedZoomBarRect = null;
+    if (oldSpec.symbol != klineData.symbol) _zoomSlideBarRect = null;
   }
 
   @override
   void didChangeTheme() {
     super.didChangeTheme();
     // 主题可换字体与字号, 已收敛的宽度不再可信。
-    _reportedZoomBarRect = null;
+    _zoomSlideBarRect = null;
   }
 }
 
@@ -496,6 +501,12 @@ final class MainPaintObject<T extends MainPaintObjectIndicator> extends PaintObj
 
   /// 本帧主区竖线的 dx 序列, 供副区指标对齐; 空表示主区未产出竖线。
   List<double> get gridVerticalDxs => _gridVerticalDxs;
+
+  /// 本帧应生效的 zoom 滑竿热区; null 表示主区蜡烛还没度量出刻度文本宽度。
+  ///
+  /// 只转发蜡烛的值、不自持: 热区宽度由主区 Y 轴刻度文本决定, 那是蜡烛的知识
+  /// (见 [CandleBasePaintObject.zoomSlideBarRect])。
+  Rect? get zoomSlideBarRect => _candlePaintObject?.zoomSlideBarRect;
 
   // ---- Zoom 价格区间（Y 轴由用户接管）----
 

@@ -69,8 +69,8 @@
 * Round the main price axis ticks to readable numbers and make that the default: values are chosen first and their positions derived from them, instead of dividing the axis evenly and reading the value back off the pixel position.
 * Interpret the nice tick parameter as a target interval count: the actual tick count varies around it because step values are rounded to readable numbers.
 * Paint the main-pane price lines evenly divided while no price range exists; tick labels stay hidden until a range exists, since there is no value to format.
-* Keep the price-axis width reported for the zoom slide bar monotonic so the zoom hit area no longer shifts while tick labels change length; the cached width resets on a symbol change or a theme change.
-* Expose `CandleBasePaintObject.reportZoomSlideBarRect` as protected, so a subclass that overrides `paintYAxisTickLabels` to draw its own tick labels can still report the zoom hit area.
+* Keep the price-axis width behind the zoom slide bar monotonic so the zoom hit area no longer shifts while tick labels change length; the cached width resets on a symbol change or a theme change.
+* Expose `CandleBasePaintObject.updateZoomSlideBarRect` as protected, so a subclass that overrides `paintYAxisTickLabels` to draw its own tick labels can still keep the zoom hit area up to date.
 * Mark `CandleBasePaintObject.didChangeDependencies` as `@mustCallSuper`: it resets the cached zoom slide bar width when the symbol changes, so an override that skips `super` keeps the previous symbol's width (Breaking Changes).
 * Rename `GridAxis` to `GridBorder` and remove its `count`: the grid layer no longer owns an axis, only the main-pane top border, the pane dividers and the left/right borders. `GridConfig.horizontal` and `vertical` keep their names, types aside, so a stored config still restores — the dropped `count` is simply ignored (Breaking Changes).
 * Sink grid tick configuration into the indicators as `CandleBaseIndicator.horizontalGrid` and `verticalGrid`, both `GridAxisConfig`; `GridAxisConfig.line` is nullable and defaults to null, meaning positions are still produced but no line is painted.
@@ -86,6 +86,8 @@
 * Drop the horizontal skeleton fallback that ran when `canPaintChart` was false: positions that do not depend on the visible range are now painted on the normal path instead.
 * Remove `CandleBasePaintObject.paintYAxisTickLines`: horizontal grid lines are painted by `paintGridLines` alongside the vertical ones, and `paintYAxisTickLabels` takes the resulting positions as its `dys` argument, replacing the frame-scoped field that carried them between the two passes (Breaking Changes).
 * Assign a sub indicator's pane geometry before its grid lines are painted, so a sub indicator overriding `paintGridLines` can draw into its own `drawableRect`; only the frame waiting for data still reads the main-pane rect there.
+* Remove `PaintContext.reportChartZoomSlideBarRect`: the zoom hit area is now pulled from the main candle object by the paint orchestration, so no indicator can overwrite it mid-frame (Breaking Changes).
+* Expose the resolved zoom hit area as `CandleBasePaintObject.zoomSlideBarRect`, forwarded by `MainPaintObject`; `GestureConfig.useCustomZoomRect` now only suppresses the commit on the controller side, so the candle keeps converging its width while the host owns the rect.
 
 ## 2.4.1
 * Fix the blank band above the candles left after hiding main-area indicators, which survived config reload and data refresh and could only be cleared by rebuilding the controller.

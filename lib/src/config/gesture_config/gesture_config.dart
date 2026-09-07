@@ -109,9 +109,9 @@ class GestureConfig {
 
   /// 缩放滑竿区域是否由宿主自行指定。
   ///
-  /// false（默认）：由蜡烛指标在绘制 Y 轴刻度时按最宽刻度文本自动上报——贴主区右缘、宽度
-  /// 等于最宽刻度文本、高度取主区全高。true：框架不再自动上报，区域完全来自宿主调用
-  /// [FlexiKlineController.setChartZoomSlideBarRect]。
+  /// false（默认）：绘制编排每帧从主区蜡烛拉取它按最宽刻度文本收敛出的热区——贴主区右缘、
+  /// 宽度等于最宽刻度文本、高度取主区全高。true：框架不再提交拉取到的值，区域完全来自宿主
+  /// 调用 [FlexiKlineController.setChartZoomSlideBarRect]。
   ///
   /// 只决定这个矩形从哪来，不改变任何命中判定：落点归属、滚轮缩放、光标提示与
   /// `onChartZoomStart` 四处都无条件读 `chartZoomSlideBarRect`。是否启用缩放由

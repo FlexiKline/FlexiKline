@@ -64,21 +64,5 @@ void main() {
       expect(actualEnd, expectedEnd);
       controller.moveToPositionCallback = null;
     });
-
-    test('reportChartZoomSlideBarRect respects useCustomZoomRect', () {
-      final controller = FlexiKlineController(
-        configuration: FakeFlexiKlineConfiguration(),
-      );
-
-      controller.gestureConfig = controller.gestureConfig.copyWith(
-        useCustomZoomRect: true,
-      );
-
-      (controller as PaintContext).reportChartZoomSlideBarRect(
-        const Rect.fromLTWH(1, 2, 3, 4),
-      );
-
-      expect(controller.chartZoomSlideBarRect, Rect.zero);
-    });
   });
 }
