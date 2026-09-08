@@ -7,7 +7,7 @@
 * Remove `drawToolbarInitHeight` and `keepDrawToolbarFullyVisible`; the draw toolbar now always clamps within the canvas and resets to a fixed bottom-left offset (Breaking Changes).
 * Remove `exitZoomButtonAlignment` and `exitZoomButtonPadding`; the exit-zoom button layout is now internal or fully controlled via `exitZoomButtonBuilder` (Breaking Changes).
 * Change `exitZoomButtonBuilder` type from `WidgetBuilder` to `FlexiKlineWidgetBuilder`, replacing the whole button instead of only its icon (Breaking Changes).
-* Add `hasDrawContent`; `DrawPainter` now skips the whole layer when it is false, so Cross movement no longer re-runs the draw overlays (both painters share one `CustomPaint`).
+* Add `hasDrawOverlay`; `DrawPainter` now skips the whole layer when it is false, so Cross movement no longer re-runs the draw overlays (both painters share one `CustomPaint`).
 
 ## 2.5.1
 

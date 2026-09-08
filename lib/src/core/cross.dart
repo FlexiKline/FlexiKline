@@ -186,33 +186,30 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
   void paintCross(Canvas canvas, Size size) {
     if (!crossConfig.enable) return;
 
-    if (isCrossing) {
-      final offset = crossOffset;
-      if (offset == null || offset.isInfinite) {
-        return;
-      }
+    // 与 [isCrossing] 同一判据: 它就是 `crossOffset?.isFinite == true`。
+    final offset = crossOffset;
+    if (offset == null || !offset.isFinite) return;
 
-      FlexiCandleModel? model;
-      if (crossConfig.showLatestTipsInBlank) {
-        model = dxToCandle(offset.dx);
-        // 如果当前model为空, 则根据offset.dx计算当前model是最新的, 还是最后的.
-        if (model == null && klineData.isNotEmpty) {
-          if (offset.dx > startCandleDx) {
-            model = klineData.latest;
-          } else {
-            model = klineData.list.last;
-          }
+    FlexiCandleModel? model;
+    if (crossConfig.showLatestTipsInBlank) {
+      model = dxToCandle(offset.dx);
+      // 如果当前model为空, 则根据offset.dx计算当前model是最新的, 还是最后的.
+      if (model == null && klineData.isNotEmpty) {
+        if (offset.dx > startCandleDx) {
+          model = klineData.latest;
+        } else {
+          model = klineData.list.last;
         }
       }
-
-      paintCrossLine(canvas, offset);
-      paintTooltip(canvas, offset, model: model);
-
-      for (final paintObject in subPaintObjects) {
-        paintObject.doPaintCross(canvas, offset, model: model);
-      }
-      mainPaintObject.doPaintCross(canvas, offset, model: model);
     }
+
+    paintCrossLine(canvas, offset);
+    paintTooltip(canvas, offset, model: model);
+
+    for (final paintObject in subPaintObjects) {
+      paintObject.doPaintCross(canvas, offset, model: model);
+    }
+    mainPaintObject.doPaintCross(canvas, offset, model: model);
   }
 
   @protected

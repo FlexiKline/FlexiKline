@@ -53,7 +53,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
 
   @override
   void markRepaintDraw() {
-    if (drawState.isOngoing || _drawObjectManager.hasObject) {
+    if (hasDrawOverlay) {
       _markRepaintDraw();
     }
   }
@@ -93,6 +93,10 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
   ValueListenable<bool> get drawContinuousListenable => _drawContinuousNotifier;
 
   bool get isDrawVisible => drawVisibilityListenable.value;
+
+  bool get hasDrawOverlay {
+    return drawState.isOngoing || _drawObjectManager.hasObject;
+  }
 
   @override
   MagnetMode get drawMagnet => drawMagnetModeListenable.value;

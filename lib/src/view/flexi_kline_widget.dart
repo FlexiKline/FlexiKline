@@ -419,6 +419,7 @@ class DrawPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     if (!controller.isDrawVisible) return;
+    if (!controller.hasDrawOverlay) return;
 
     try {
       canvas.save();

@@ -37,12 +37,24 @@ const testDrawLineType2 = FlexiDrawType('test_draw_line_2', 2, groupId: 'test');
 class TestDrawObject extends DrawObject<Overlay> {
   TestDrawObject(super.overlay, super.config);
 
+  /// [drawing] 与 [draw] 各自被调用的次数。
+  ///
+  /// 供「图层这一帧到底画没画」的断言观察：绘制本身不产生像素，调用计数是唯一可观察的
+  /// 信号。两者分开计数是因为进行中与已完成的 overlay 走 [DrawBinding.paintDraw] 里
+  /// 两条不同的路径，只数一个会漏掉另一条。
+  int drawingCallCount = 0;
+  int drawCallCount = 0;
+
   /// 绘制过程与结果都不产生像素：测试只关心手势与命中，不做像素断言。
   @override
-  void drawing(DrawContext context, Canvas canvas, Size size) {}
+  void drawing(DrawContext context, Canvas canvas, Size size) {
+    drawingCallCount++;
+  }
 
   @override
-  void draw(DrawContext context, Canvas canvas, Size size) {}
+  void draw(DrawContext context, Canvas canvas, Size size) {
+    drawCallCount++;
+  }
 }
 
 /// 注册两个测试类型的构造器。挂载 controller 后调用一次即可。
