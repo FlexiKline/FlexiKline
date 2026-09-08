@@ -27,7 +27,7 @@ FlexiKline 是一个 Flutter 金融 K 线图表框架，指标、绘制工具、
 
 ```yaml
 dependencies:
-  flexi_kline: ^2.5.0
+  flexi_kline: ^2.5.1
 ```
 
 然后运行：

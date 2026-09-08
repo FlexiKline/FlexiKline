@@ -1,3 +1,11 @@
+## 2.5.1
+
+* Add bottom tick label for count-mode horizontal grid: `dividedPositions` now includes endpoints; `paintHorizontalGridLines` and `paintVerticalGridLines` skip lines on frame boundaries automatically.
+* Add `showTopTick` / `showBottomTick` parameters to `paintYAxisTicks` for controlling edge tick label visibility.
+* Rename `evenPositions` to `dividedPositions`, `positionsByCount` to `tickPositions`, `computePriceTicks` to `computeNiceTicks` (Breaking Changes).
+* Remove `resolveDysByCount`; sub-pane indicators now use `tickPositions` directly (Breaking Changes).
+* Hide `niceStep` and `NiceStep` from the public export surface (Breaking Changes).
+
 ## 2.5.0
 
 ### Gesture system rewrite (Breaking Changes)

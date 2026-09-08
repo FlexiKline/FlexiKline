@@ -116,10 +116,6 @@ class TestCandlePaintObject extends CandleBasePaintObject<TestCandleIndicator> {
     return resolveHorizontalDys(mode, bounds: bounds);
   }
 
-  List<double> dysByCountOf(int tickCount, {Rect? bounds}) {
-    return resolveDysByCount(tickCount, bounds: bounds);
-  }
-
   List<double> verticalDxsOf(GridTickMode mode, {Rect? bounds}) {
     return resolveVerticalDxs(mode, bounds: bounds);
   }

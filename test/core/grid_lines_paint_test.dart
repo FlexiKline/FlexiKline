@@ -38,7 +38,6 @@ import 'dart:ui' show Paragraph;
 import 'package:flexi_formatter/date_time.dart' show TimeUnit;
 import 'package:flexi_formatter/flexi_formatter.dart' show formatPrice;
 import 'package:flexi_kline/flexi_kline.dart';
-import 'package:flexi_kline/src/utils/grid_tick_util.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -128,7 +127,7 @@ void main() {
       final log = await paintFrame(tester, chart);
 
       // 旧 grid 层的口径: `step = mainRect.right / count`, `dx = i * step, i ∈ [1, count)`。
-      // 主区 left 恒为 0, 所以它与 `evenPositions(count, start: left, length: width)` 同值。
+      // 主区 left 恒为 0, 所以它与 `dividedPositions(count, start: left, length: width)` 同值。
       final step = chart.mainRect.width / _divisions;
       expect(
         log.mainVerticalDxs(chart),
@@ -194,7 +193,12 @@ void main() {
 
       final main = log.mainVerticalDxs(chart);
       expect(main, isNotEmpty, reason: '前置条件: 加载态也该有主区竖线');
-      expect(_AlignedGridIndicator.lastObject!.receivedDxs, main, reason: '加载态副区拿不到 dx 就只能自己算, 对齐失去结构保证');
+      // 加载态副区同样经 gridVerticalDxs 收到含两端的完整序列。
+      expect(
+        _AlignedGridIndicator.lastObject!.receivedDxs,
+        (chart as PaintContext).gridVerticalDxs,
+        reason: '加载态副区拿不到 dx 就只能自己算, 对齐失去结构保证',
+      );
     });
 
     /// 退化判据取 `canPaintChart` 而非 `minMax.isZero` 的唯一理由：这一帧里两者的取值相反。
@@ -225,7 +229,7 @@ void main() {
     });
 
     /// 横线只有一个入口之后，「画一遍」不再靠两处判据互补维持；这条改为直接盯位置：nice 用的是
-    /// 本帧区间取整的结果，逐值等于 `computePriceTicks` 的产出，而不是退化后的等分。
+    /// 本帧区间取整的结果，逐值等于 `computeNiceTicks` 的产出，而不是退化后的等分。
     ///
     /// 区间取自绘制后的 `candle`：本组的 `TestCandleIndicator` 不画 tips，`_tipsAreaHeight` 全程
     /// 为 0，所以帧内帧后的 `chartRect` 相同，反算得到的位置与绘制时用的是同一批。
@@ -238,7 +242,7 @@ void main() {
       final dys = log.mainHorizontalDys(chart);
 
       final bounds = candle.drawableRect;
-      final ticks = computePriceTicks(
+      final ticks = computeNiceTicks(
         bottom: candle.dyToValue(bounds.bottom, check: false)!.toDouble(),
         top: candle.dyToValue(bounds.top, check: false)!.toDouble(),
         targetCount: _divisions,
@@ -283,7 +287,7 @@ void main() {
       expect(log.mainVerticalDxs(chart), isEmpty, reason: 'line 置 null 即主区不画竖线');
       expect(
         (chart as PaintContext).gridVerticalDxs,
-        hasLength(_divisions - 1),
+        hasLength(_divisions + 1),
         reason: '产出与绘制分开: 主区不画, 副区仍可能想按同一位置画',
       );
     });
@@ -319,7 +323,12 @@ void main() {
 
       final main = log.mainVerticalDxs(chart);
       expect(main, isNotEmpty, reason: '前置条件: 主区必须有竖线');
-      expect(_AlignedGridIndicator.lastObject!.receivedDxs, main, reason: '副区与主区错位就是两套网格');
+      // 副区收到的是含两端的完整产出序列(经 gridVerticalDxs), paintVerticalGridLines 会自行跳过边框。
+      expect(
+        _AlignedGridIndicator.lastObject!.receivedDxs,
+        (chart as PaintContext).gridVerticalDxs,
+        reason: '副区与主区错位就是两套网格',
+      );
       expect(
         log.subMarkIndex(),
         greaterThan(log.lastIndexOf(log.mainVerticalOps(chart))),
@@ -360,7 +369,7 @@ void main() {
       await paintFrame(tester, chart);
 
       final bounds = candle.drawableRect;
-      final expected = computePriceTicks(
+      final expected = computeNiceTicks(
         bottom: candle.dyToValue(bounds.bottom, check: false)!.toDouble(),
         top: candle.dyToValue(bounds.top, check: false)!.toDouble(),
         targetCount: _divisions,
@@ -416,6 +425,33 @@ void main() {
         hasLength(1),
         reason: 'dyToValue 漏了 check: false, 落在边界上的刻度会静默消失',
       );
+    });
+
+    testWidgets('showTopTick / showBottomTick 控制边框刻度文本', (tester) async {
+      const height = 300.0;
+      final object = _EdgeTickPaintObject();
+      final context = FakePaintContext()..mainRect = const Rect.fromLTWH(0, 0, _canvasWidth, height);
+      object.bind(TestCandleIndicator(height: height), context);
+      object.setMinMax(MinMax(min: FlexiNum.zero, max: FlexiNum.fromNum(100)));
+
+      final rect = object.drawableRect;
+      // 3 个 dy：顶边、中间、底边
+      final dys = [rect.top, rect.center.dy, rect.bottom];
+
+      // 默认: showTopTick=false, showBottomTick=true → 跳过顶边, 保留中间和底边
+      object.formattedTickValues.clear();
+      object.paintTicks(_PaintLog(), dys);
+      expect(object.formattedTickValues, hasLength(2), reason: '默认跳过顶边');
+
+      // 两端都显示
+      object.formattedTickValues.clear();
+      object.paintTicks(_PaintLog(), dys, showTopTick: true, showBottomTick: true);
+      expect(object.formattedTickValues, hasLength(3), reason: '两端都显示');
+
+      // 两端都不显示
+      object.formattedTickValues.clear();
+      object.paintTicks(_PaintLog(), dys, showTopTick: false, showBottomTick: false);
+      expect(object.formattedTickValues, hasLength(1), reason: '只有中间那条');
     });
   });
 }
@@ -523,8 +559,19 @@ class _EdgeTickPaintObject extends CandleBasePaintObject<TestCandleIndicator> {
   /// [formatTicksValue] 每次收到的刻度值。
   final List<FlexiNum> formattedTickValues = [];
 
-  void paintTicks(Canvas canvas, List<double> dys) {
-    paintYAxisTicks(canvas, dys: dys, precision: 2);
+  void paintTicks(
+    Canvas canvas,
+    List<double> dys, {
+    bool showTopTick = false,
+    bool showBottomTick = true,
+  }) {
+    paintYAxisTicks(
+      canvas,
+      dys: dys,
+      precision: 2,
+      showTopTick: showTopTick,
+      showBottomTick: showBottomTick,
+    );
   }
 
   @override

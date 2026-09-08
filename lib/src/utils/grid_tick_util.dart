@@ -14,9 +14,8 @@
 
 /// 网格线与刻度的取位算法, 全部是纯函数。
 ///
-/// 三种取位方式各占一节: 等分([evenPositions])、固定间距([spacedPositions])、nice-number
-/// 取整([computePriceTicks])。前两种只吃长度, 后一种只吃价格区间 —— 都不认识 Rect、canvas
-/// 或任何绘制对象, 值到像素的换算留给调用方(`PaintGridTicksMixin`)。
+/// 三种取位方式: 等分([dividedPositions])、固定间距([spacedPositions])、nice-number
+/// 取整([computeNiceTicks])。都不认识 Rect 或 canvas, 值到像素的换算留给调用方。
 library;
 
 import 'dart:math' as math;
@@ -25,27 +24,22 @@ import 'dart:math' as math;
 // 等分
 // ---------------------------------------------------------------------------
 
-/// 把 [length] 等分成 [divisions] 段, 产出 `divisions - 1` 个**内部**位置。
+/// 把 [length] 等分成 [divisions] 段, 产出 `divisions + 1` 个位置, **含两端**。
 ///
-/// 不含两端: 调用方的两端通常已有边框或分隔线, 再产出一条只是重合。[divisions] 是间隔数,
-/// 因此 `1` 与非正值都没有内部位置。长度非正或非有限时返回空。
-List<double> evenPositions(int divisions, {required double start, required double length}) {
-  if (divisions <= 1) return const [];
+/// [divisions] 非正时返回空; 长度非正或非有限时返回空。
+List<double> dividedPositions(int divisions, {required double start, required double length}) {
+  if (divisions <= 0) return const [];
   if (!length.isFinite || length <= 0) return const [];
   final step = length / divisions;
-  return [for (int i = 1; i < divisions; i++) start + i * step];
+  return [for (int i = 0; i <= divisions; i++) start + i * step];
 }
 
-/// 把 [length] 按**刻度数** [count] 等分, 产出 [count] 个位置, **含两端**。
+/// 按**刻度数** [count] 等分产出位置, **含两端**。
 ///
-/// 与 [evenPositions] 的端点语义刻意相反: 那里的参数是间隔数且避开两端, 这里的参数是刻度数
-/// 且贴住两端 —— 贴顶贴底的两条承载的是区间极值, 是信息而非冗余。[count] 为 1 时取正中,
-/// 非正时返回空。
-List<double> positionsByCount(int count, {required double start, required double length}) {
-  if (count <= 0) return const [];
-  if (count == 1) return [start + length / 2];
-  final step = length / (count - 1);
-  return [for (int i = 0; i < count; i++) start + i * step];
+/// `tickPositions(N)` 等价于 `dividedPositions(N - 1)`: 副区用刻度数描述(3 = 高/中/低),
+/// 本函数做一次减法让调用方不必关心。
+List<double> tickPositions(int count, {required double start, required double length}) {
+  return dividedPositions(count - 1, start: start, length: length);
 }
 
 // ---------------------------------------------------------------------------
@@ -54,9 +48,7 @@ List<double> positionsByCount(int count, {required double start, required double
 
 /// 按固定间距 [spacing] 切分 [length], 余量平分两端, 产出**内部**位置。
 ///
-/// 间距严格等于 [spacing], 不为了整除而调整它 —— 那会让不同高度的 pane 呈现不同间距, 本
-/// 模式随之失去意义。余量平分两端即整体居中; 两端本身通常是边框, 不重复产出, 所以位置数是
-/// 完整间隔数减一。装不下一格、[spacing] 非正或非有限、长度非正或非有限时返回空。
+/// 间距严格等于 [spacing], 不为整除而调整。装不下一格或参数无效时返回空。
 List<double> spacedPositions(double spacing, {required double start, required double length}) {
   if (spacing <= 0 || !spacing.isFinite) return const [];
   if (!length.isFinite || length <= 0) return const [];
@@ -71,8 +63,6 @@ List<double> spacedPositions(double spacing, {required double start, required do
 // ---------------------------------------------------------------------------
 
 /// 归一化的 nice 步长: step == fraction * 10^exponent。
-///
-/// [fraction] 与 [exponent] 是为了让换档不必重新解析 [step], 不出本文件的边界。
 typedef NiceStep = ({double step, double fraction, int exponent});
 
 /// nice 步长候选: 1 / 2 / 2.5 / 5, 乘以 10 的整数次幂。
@@ -83,12 +73,9 @@ const _niceFractions = <double>[1, 2, 2.5, 5, 10];
 
 /// 在 [bottom], [top] 之间生成 nice 价格刻度。
 ///
-/// [targetCount] 是目标**间隔数**, 实测实际刻度数落在 3~7。[precision] 是显示侧的最小可辨
-/// 精度, 只作为 step 的选档约束进来 —— 本函数不产出任何格式化参数, 刻度文本由调用方的
-/// `formatPrice` 决定。
-///
-/// 跨度非正、非有限或 [targetCount] 非正时返回空列表。
-({double step, List<double> values}) computePriceTicks({
+/// [targetCount] 是目标间隔数, 实测刻度数落在 3~7。[precision] 是显示精度, 作为 step
+/// 的选档约束。跨度非正或 [targetCount] 非正时返回空。
+({double step, List<double> values}) computeNiceTicks({
   required double bottom,
   required double top,
   required int targetCount,
@@ -127,9 +114,7 @@ List<double> _buildTicks(double bottom, double top, double step, int targetCount
   return values;
 }
 
-/// 把理想步长 [rough] 归整到最接近的 nice 档位。[rough] 须为正的有限值。
-///
-/// 取「最接近」而非「不小于」: 后者实测在 21 个价格 × 缩放组合中有 8 次给出不足 3 条刻度。
+/// 把理想步长 [rough] 归整到最接近的 nice 档位。
 NiceStep niceStep(double rough) {
   final exponent = (math.log(rough) / math.ln10).floor();
   final base = math.pow(10, exponent).toDouble();
@@ -169,7 +154,7 @@ NiceStep _fitPrecision(NiceStep ns, int precision) {
   return ns;
 }
 
-/// 降一档。1 档的下一档是上一量级的 5, 其余档在同量级内下移。
+/// 降一档。
 NiceStep _previousStep(NiceStep ns) {
   final index = _niceFractions.lastIndexWhere((f) => f < ns.fraction);
   final exponent = index < 0 ? ns.exponent - 1 : ns.exponent;

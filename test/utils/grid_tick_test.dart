@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:flexi_kline/src/utils/grid_tick_util.dart';
+import 'package:flexi_kline/flexi_kline.dart';
+import 'package:flexi_kline/src/utils/grid_tick_util.dart' show niceStep;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/support.dart';
@@ -58,36 +59,26 @@ void main() {
   // ---------------------------------------------------------------------------
   // 等分
   // ---------------------------------------------------------------------------
-  group('evenPositions 等分取位', () {
-    test('产出 divisions - 1 个内部位置, 两端一个不占', () {
-      expect(evenPositions(5, start: 0, length: 300), [60.0, 120.0, 180.0, 240.0]);
-      expect(evenPositions(2, start: 100, length: 300), [250.0]);
+  group('dividedPositions 等分取位 (含两端)', () {
+    test('产出 divisions + 1 个位置, 含首末', () {
+      expect(dividedPositions(5, start: 0, length: 300), [0.0, 60.0, 120.0, 180.0, 240.0, 300.0]);
+      expect(dividedPositions(2, start: 100, length: 300), [100.0, 250.0, 400.0]);
     });
 
-    test('divisions <= 1 时没有内部位置', () {
-      for (final divisions in [1, 0, -3]) {
-        expect(evenPositions(divisions, start: 0, length: 300), isEmpty, reason: 'divisions=$divisions');
+    test('divisions == 1 时只有两端', () {
+      expect(dividedPositions(1, start: 0, length: 300), [0.0, 300.0]);
+    });
+
+    test('divisions <= 0 时返回空', () {
+      for (final divisions in [0, -3]) {
+        expect(dividedPositions(divisions, start: 0, length: 300), isEmpty, reason: 'divisions=$divisions');
       }
     });
 
     test('长度非正或非有限时返回空, 不产出 NaN', () {
       for (final length in [0.0, -300.0, double.nan, double.infinity]) {
-        expect(evenPositions(5, start: 0, length: length), isEmpty, reason: 'length=$length');
+        expect(dividedPositions(5, start: 0, length: length), isEmpty, reason: 'length=$length');
       }
-    });
-  });
-
-  group('positionsByCount 按刻度数等分', () {
-    test('含两端: 首末恰为 start 与 start + length', () {
-      final positions = positionsByCount(3, start: 0, length: 300);
-
-      expect(positions, [0.0, 150.0, 300.0]);
-    });
-
-    test('1 条时居中, 非正时为空', () {
-      expect(positionsByCount(1, start: 20, length: 300), [170.0]);
-      expect(positionsByCount(0, start: 0, length: 300), isEmpty);
-      expect(positionsByCount(-1, start: 0, length: 300), isEmpty);
     });
   });
 
@@ -180,12 +171,12 @@ void main() {
   // ---------------------------------------------------------------------------
   // precision 约束: step 必须是最小可辨单位 u = 10^-precision 的整数倍
   // ---------------------------------------------------------------------------
-  group('computePriceTicks precision 下限', () {
+  group('computeNiceTicks precision 下限', () {
     test('跨度小到理想 step 低于最小可辨单位时, step 被夹到 u 且刻度文本不重复', () {
       // 不夹的话 step 会是 5e-9, 实测得到 0.00002452 连续出现三次。
       const bottom = 2.451e-5;
       const top = bottom + 3e-8;
-      final result = computePriceTicks(bottom: bottom, top: top, targetCount: 5, precision: 8);
+      final result = computeNiceTicks(bottom: bottom, top: top, targetCount: 5, precision: 8);
 
       expect(result.step, stepIs(1e-8));
       final texts = result.values.map((v) => v.toStringAsFixed(8)).toList();
@@ -197,7 +188,7 @@ void main() {
         (10, 1.2345e-6, 3e-10, 1e-10),
         (12, 1.2345e-9, 3e-12, 1e-12),
       ]) {
-        final result = computePriceTicks(
+        final result = computeNiceTicks(
           bottom: price,
           top: price + span,
           targetCount: 5,
@@ -210,13 +201,13 @@ void main() {
     });
   });
 
-  group('computePriceTicks precision 整数倍', () {
+  group('computeNiceTicks precision 整数倍', () {
     test('2.5 档不是 u 的整数倍时提升到同量级的 5 档, 格式化后相邻差相等', () {
       // 价格 5.50、跨度 0.15、precision=2: 不修正会选到 step=0.025, 刻度线等距但文本显示成
       // 5.43 | 5.45 | 5.48 | 5.50 | 5.53, 相邻差在 0.02 与 0.03 之间跳。
       const bottom = 5.5 - 0.075;
       const top = 5.5 + 0.075;
-      final result = computePriceTicks(bottom: bottom, top: top, targetCount: 5, precision: 2);
+      final result = computeNiceTicks(bottom: bottom, top: top, targetCount: 5, precision: 2);
 
       expect(result.step, isNot(stepIs(0.025)));
       expect(result.step, stepIs(0.05));
@@ -230,7 +221,7 @@ void main() {
         (4, 0.1523, 0.0013, 0.00025, 0.0005),
         (8, 2.4e-5, 1.3e-7, 2.5e-8, 5e-8),
       ]) {
-        final result = computePriceTicks(
+        final result = computeNiceTicks(
           bottom: price - span / 2,
           top: price + span / 2,
           targetCount: 5,
@@ -246,7 +237,7 @@ void main() {
 
     test('商为合法整数时保留 2.5 档, 不被误伤', () {
       // step 2.5e-7 / u 1e-8 = 25, 是整数倍, 应原样保留而不是提升到 5e-7。
-      final result = computePriceTicks(bottom: 2.4e-5, top: 2.55e-5, targetCount: 5, precision: 8);
+      final result = computeNiceTicks(bottom: 2.4e-5, top: 2.55e-5, targetCount: 5, precision: 8);
       expect(result.step, stepIs(2.5e-7));
     });
 
@@ -254,7 +245,7 @@ void main() {
       // step 2.5e-8 / u 1e-9 在 double 下得 24.999999999999996。相等比较会把它误判成非整数
       // 倍而提升到 5e-8, 只有相对容差才正确。
       const bottom = 2.4e-5;
-      final result = computePriceTicks(bottom: bottom, top: bottom + 1.25e-7, targetCount: 5, precision: 9);
+      final result = computeNiceTicks(bottom: bottom, top: bottom + 1.25e-7, targetCount: 5, precision: 9);
       expect(result.step, stepIs(2.5e-8));
     });
   });
@@ -262,7 +253,7 @@ void main() {
   // ---------------------------------------------------------------------------
   // 刻度序列
   // ---------------------------------------------------------------------------
-  group('computePriceTicks 刻度序列', () {
+  group('computeNiceTicks 刻度序列', () {
     test('刻度都是 step 整数倍、单调递增、落在区间内', () {
       for (final (bottom, top, precision) in [
         (63375.0, 66625.0, 2),
@@ -271,7 +262,7 @@ void main() {
         (2.3775e-5, 2.5245e-5, 8),
         (1.179e-6, 1.29e-6, 10),
       ]) {
-        final result = computePriceTicks(bottom: bottom, top: top, targetCount: 5, precision: precision);
+        final result = computeNiceTicks(bottom: bottom, top: top, targetCount: 5, precision: precision);
         expectTickInvariants(result, bottom, top);
       }
     });
@@ -281,7 +272,7 @@ void main() {
       // 不减容差会 ceil 到 4, 首条刻度变成 0.4, 白丢 0.3 这一条。
       const step = 0.1;
       const bottom = 3 * step;
-      final result = computePriceTicks(bottom: bottom, top: bottom + 0.5, targetCount: 5, precision: 2);
+      final result = computeNiceTicks(bottom: bottom, top: bottom + 0.5, targetCount: 5, precision: 2);
 
       expect(result.step, stepIs(step));
       expect(result.values.first, bottom);
@@ -292,7 +283,7 @@ void main() {
   // ---------------------------------------------------------------------------
   // 退化输入
   // ---------------------------------------------------------------------------
-  group('computePriceTicks 退化输入', () {
+  group('computeNiceTicks 退化输入', () {
     test('跨度为 0 / 负 / NaN / Infinity 时返回空列表且不抛异常', () {
       for (final (label, bottom, top) in [
         ('跨度为 0', 100.0, 100.0),
@@ -302,7 +293,7 @@ void main() {
         ('top 为 +Infinity', 100.0, double.infinity),
         ('bottom 为 -Infinity', double.negativeInfinity, 100.0),
       ]) {
-        final result = computePriceTicks(bottom: bottom, top: top, targetCount: 5, precision: 2);
+        final result = computeNiceTicks(bottom: bottom, top: top, targetCount: 5, precision: 2);
         expect(result.values, isEmpty, reason: label);
         expect(result.step, 0, reason: label);
       }
@@ -310,7 +301,7 @@ void main() {
 
     test('targetCount <= 0 时返回空列表', () {
       for (final count in [0, -1, -5]) {
-        final result = computePriceTicks(bottom: 100, top: 150, targetCount: count, precision: 2);
+        final result = computeNiceTicks(bottom: 100, top: 150, targetCount: count, precision: 2);
         expect(result.values, isEmpty, reason: 'targetCount=$count');
         expect(result.step, 0, reason: 'targetCount=$count');
       }
@@ -320,7 +311,7 @@ void main() {
       // targetCount=1 时最接近取档给出 step=50, [101, 149] 内没有任何 50 的整数倍。
       // 空刻度会让滑竿宽度归零、zoom 手势失效, 所以要降到 25 重算。
       for (final count in [1, 2]) {
-        final result = computePriceTicks(bottom: 101, top: 149, targetCount: count, precision: 2);
+        final result = computeNiceTicks(bottom: 101, top: 149, targetCount: count, precision: 2);
         expect(result.values, isNotEmpty, reason: 'targetCount=$count');
         expectTickInvariants(result, 101, 149);
       }
@@ -329,7 +320,7 @@ void main() {
     test('跨度远小于最小可辨单位且区间内无整数倍时, 重试后仍返回空列表', () {
       // step 被 precision 夹到 0.01, [101.0000005, 101.0000006] 内没有 0.01 的整数倍;
       // 降一档得 0.005 又被 precision 夹回 0.01, 于是放弃。
-      final result = computePriceTicks(bottom: 101.0000005, top: 101.0000006, targetCount: 5, precision: 2);
+      final result = computeNiceTicks(bottom: 101.0000005, top: 101.0000006, targetCount: 5, precision: 2);
       expect(result.values, isEmpty);
     });
   });
@@ -337,7 +328,7 @@ void main() {
   // ---------------------------------------------------------------------------
   // 场景回归: 固定住各精度档位在自动区间与放大 20x 下的 step 与刻度数
   // ---------------------------------------------------------------------------
-  group('computePriceTicks 场景回归', () {
+  group('computeNiceTicks 场景回归', () {
     // price 与 autoRange 取自设计文档 4.2 的探针数据; step 与 count 是当前实现的实测输出,
     // 与该表的 B 方案一列一致。
     const scenarios = [
@@ -401,7 +392,7 @@ void main() {
         ]) {
           final bottom = s.price - range / 2;
           final top = s.price + range / 2;
-          final result = computePriceTicks(
+          final result = computeNiceTicks(
             bottom: bottom,
             top: top,
             targetCount: 5,
