@@ -25,4 +25,5 @@ export 'src/kline_controller.dart';
 export 'src/model/export.dart';
 export 'src/types.dart';
 export 'src/utils/export.dart';
+export 'src/view/flexi_kline_prefabs.dart';
 export 'src/view/flexi_kline_widget.dart';

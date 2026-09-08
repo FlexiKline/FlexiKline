@@ -86,14 +86,58 @@ controller = FlexiKlineController(
 
 ### 3. 使用 FlexiKlineWidget
 
+`candle` / `time` 为必填的基础指标，`mainIndicators` / `subIndicators` 为主区 / 副区叠加的可选指标。可以像组件树一样内联构造各指标并按需定制：
+
 ```dart
-FlexiKlineWidget.indicator(
+FlexiKlineWidget(
   controller: controller,
-  indicatorConfig: indicatorConfig,
+  // 蜡烛图: 倒计时样式定制 + 按时间周期指定图表类型
+  candle: CandleIndicator(
+    showCountdown: true,
+    countdown: const TextAreaConfig(
+      style: TextStyle(fontSize: 10, height: 1.2),
+      textAlign: TextAlign.center,
+      padding: EdgeInsets.all(2),
+      borderRadius: BorderRadius.all(Radius.circular(2)),
+    ),
+    // 主区横向网格线(即 Y 轴价格刻度线): 4 等分 nice 取整 + 虚线样式.
+    horizontalGrid: const GridAxisConfig(
+      mode: GridTickMode.nice(targetDivisions: 4),
+      line: LineConfig(type: LineType.dashed, dashes: [4, 2]),
+    ),
+  ),
+  // 时间轴: 自定义高度与刻度格式(不传 tickFormatter 时按 interval 粒度默认格式化)
+  time: TimeIndicator(
+    height: 16,
+    position: DrawPosition.bottom,
+    tickFormatter: (dateTime, interval) {
+      return '${dateTime.month}/${dateTime.day}';
+    },
+  ),
+  // 主区叠加: 均线
+  mainIndicators: [
+    MAIndicator(
+      lineWidth: 1,
+      calcParam: [
+        MaParam(count: 5, color: Color(0xFFFFB74D), label: 'MA5'),
+        MaParam(count: 10, color: Color(0xFF03A9F4), label: 'MA10'),
+        MaParam(count: 30, color: Color(0xFF9C27B0), label: 'MA30'),
+      ],
+    ),
+    ...
+  ],
+  // 副区叠加: MACD
+  subIndicators: [
+    MACDIndicator(
+      calcParam: const MACDParam(s: 12, l: 26, m: 9),
+      lineWidth: 1,
+    ),
+    ...
+  ],
 )
 ```
 
-也可直接传入指标实例，将配置之外的指标（如业务侧的 External 指标）一起混入：
+也可从一个 `IIndicatorConfig` 解构，并混入配置之外的指标（如业务侧的 External 指标）：
 
 ```dart
 ListenableBuilder(

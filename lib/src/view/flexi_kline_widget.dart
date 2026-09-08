@@ -13,20 +13,14 @@
 // limitations under the License.
 
 import 'dart:developer';
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 
-import '../constant.dart';
-import '../extension/basic_type_ext.dart';
-import '../extension/functions_ext.dart';
-import '../extension/geometry_ext.dart';
 import '../framework/chart/indicator.dart';
-import '../framework/configuration.dart';
 import '../framework/logger.dart';
 import '../kline_controller.dart';
 import '../model/layout_mode.dart';
 import '../utils/platform_util.dart';
+import 'flexi_kline_prefabs.dart';
 import 'non_touch_gesture_detector.dart';
 import 'touch_gesture_detector.dart';
 
@@ -34,12 +28,6 @@ import 'touch_gesture_detector.dart';
 typedef FlexiKlineWidgetBuilder = Widget Function(
   BuildContext context,
   FlexiKlineController controller,
-);
-
-/// 放大镜 decoration shape 定制签名.
-typedef MagnifierDecorationShapeBuilder = ShapeBorder Function(
-  BuildContext context,
-  BorderSide side,
 );
 
 class FlexiKlineWidget extends StatefulWidget {
@@ -130,14 +118,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
 
   bool get isTouchDevice => widget.isTouchDevice ?? PlatformUtil.isTouch;
 
-  /// 绘制工具条位置
-  late final ValueNotifier<Offset> _drawToolbarPosition;
-
   FlexiKlineController get controller => widget.controller;
-
-  IConfiguration get configuration => controller.configuration;
-
-  IFlexiKlineTheme get theme => configuration.theme;
 
   @override
   void initState() {
@@ -158,10 +139,6 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
 
     // 处理挂载前暂存的数据。
     controller.flushPendingKlineData();
-
-    _drawToolbarPosition = ValueNotifier(
-      configuration.getDrawToolbarPosition(),
-    );
   }
 
   @override
@@ -195,7 +172,6 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
 
   @override
   void dispose() {
-    configuration.saveDrawToolbarPosition(drawToolbarPosition);
     super.dispose();
   }
 
@@ -245,13 +221,6 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
     return ValueListenableBuilder(
       valueListenable: controller.canvasRectListenable,
       builder: (context, canvasRect, child) {
-        if (controller.drawState.isEditing) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            configuration.saveDrawToolbarPosition(
-              _updateDrawToolbarPosition(drawToolbarPosition, canvasRect),
-            );
-          });
-        }
         return _buildKlineContent(context, canvasRect);
       },
     );
@@ -311,14 +280,14 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
                   onDoubleTap: widget.onDoubleTap,
                 ),
           // 第4层: 放大镜
-          _buildMagnifier(context, canvasRect),
+          _buildMagnifier(context),
           // 第5层: 退出缩放按钮
           Positioned.fromRect(
             rect: mainRect,
             child: _buildExitZoomButton(context),
           ),
           // 第6层: 绘制工具条
-          _buildDrawToolbar(context, canvasRect),
+          _buildDrawToolbar(context),
           // 第7层: Loading
           Positioned.fromRect(
             rect: mainRect,
@@ -357,29 +326,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
     if (widget.loadingBuilder != null) {
       return widget.loadingBuilder!(context, controller);
     }
-    // 内置默认
-    return ValueListenableBuilder(
-      valueListenable: controller.loadingStateListenable,
-      builder: (context, loadingState, child) {
-        final loadingConfig = controller.settingConfig.loading;
-        return Offstage(
-          offstage: !(loadingState.showLoading && controller.settingConfig.autoLoadMoreData),
-          child: Center(
-            key: const ValueKey('loadingView'),
-            child: SizedBox.square(
-              dimension: loadingConfig.size,
-              child: CircularProgressIndicator(
-                strokeWidth: loadingConfig.strokeWidth,
-                backgroundColor: loadingConfig.backgroundColor ?? controller.theme.tooltipBg,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  loadingConfig.valueColor ?? controller.theme.textColor,
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
+    return FlexiLoading(controller: controller);
   }
 
   /// 退出缩放按钮
@@ -387,220 +334,29 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
     if (widget.exitZoomButtonBuilder != null) {
       return widget.exitZoomButtonBuilder!(context, controller);
     }
-    // 内置默认: 仅在 isChartZooming 时展示
-    return ValueListenableBuilder(
-      valueListenable: controller.isChartZoomingListenable,
-      builder: (context, isStartZooming, child) => Visibility(
-        visible: isStartZooming,
-        child: Container(
-          alignment: AlignmentDirectional.bottomEnd,
-          padding: const EdgeInsetsDirectional.all(12),
-          child: IconButton(
-            onPressed: controller.exitChartZoom.debounce(),
-            constraints: const BoxConstraints(),
-            style: IconButton.styleFrom(
-              padding: EdgeInsets.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              fixedSize: const Size(20, 20),
-              foregroundColor: theme.tooltipTextColor,
-              backgroundColor: theme.tooltipBg.withAlpha(0.8.alpha),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(4),
-              ),
-              side: BorderSide(color: theme.gridLineColor, width: 1),
-            ),
-            icon: const Text('A', style: TextStyle(fontSize: 12)),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Offset _updateDrawToolbarPosition(Offset newPosition, [Rect? canvasRect]) {
-    canvasRect ??= controller.canvasRect;
-    final size = _drawToolbarKey.currentContext?.size;
-    if (size != null && size.isFinite) {
-      newPosition = Offset(
-        newPosition.dx.clamp(
-          canvasRect.left,
-          math.max(canvasRect.left, canvasRect.right - size.width),
-        ),
-        newPosition.dy.clamp(
-          canvasRect.top,
-          math.max(canvasRect.top, canvasRect.bottom - size.height),
-        ),
-      );
-    } else {
-      newPosition = newPosition.clamp(canvasRect);
-    }
-    return _drawToolbarPosition.value = newPosition;
+    return FlexiExitZoomButton(controller: controller);
   }
 
   /// 绘制工具条. drawToolbarBuilder优先, drawToolbar其次.
-  Widget _buildDrawToolbar(BuildContext flexiKlineContext, Rect canvasRect) {
+  Widget _buildDrawToolbar(BuildContext flexiKlineContext) {
     if (widget.drawToolbarBuilder != null) {
       return widget.drawToolbarBuilder!(flexiKlineContext, controller);
     }
     if (widget.drawToolbar == null) return const SizedBox.shrink();
-
-    final drawToolbarWrapper = SizedBox(
-      key: _drawToolbarKey,
+    return FlexiDraggableDrawToolbar(
+      controller: controller,
       child: widget.drawToolbar!,
-    );
-
-    // 内置拖拽: Draggable(跟手) + onDragEnd clamp回画布内.
-    // return ValueListenableBuilder(
-    //   valueListenable: controller.drawStateListenable,
-    //   builder: (context, state, child) => Visibility(
-    //     visible: state.isEditing,
-    //     child: ValueListenableBuilder(
-    //       valueListenable: _drawToolbarPosition,
-    //       builder: (context, position, child) {
-    //         if (position == Offset.infinite || !canvasRect.contains(position)) {
-    //           position = Offset(0, canvasRect.height - 50);
-    //         }
-    //         return Positioned(
-    //           left: position.dx,
-    //           top: position.dy,
-    //           child: MouseRegion(
-    //             cursor: SystemMouseCursors.move,
-    //             child: Draggable(
-    //               key: const ValueKey('DrawToolbarDraggable'),
-    //               feedback: drawToolbarWrapper,
-    //               childWhenDragging: const SizedBox.shrink(),
-    //               child: drawToolbarWrapper,
-    //               onDragEnd: (details) {
-    //                 final box = flexiKlineContext.findRenderObject() as RenderBox;
-    //                 final newPosition = box.globalToLocal(details.offset);
-    //                 configuration.saveDrawToolbarPosition(
-    //                   _updateDrawToolbarPosition(newPosition, canvasRect),
-    //                 );
-    //               },
-    //             ),
-    //           ),
-    //         );
-    //       },
-    //     ),
-    //   ),
-    // );
-
-    // ── 备选方案: GestureDetector + onPan ──
-    // 优点: onPanUpdate 中实时 clamp, 拖拽过程不会移出画布.
-    // 缺点: ValueListenableBuilder rebuild 有一帧延迟, 跟手性不如 Draggable.
-    return ValueListenableBuilder(
-      valueListenable: controller.drawStateListenable,
-      builder: (context, state, child) => Visibility(
-        visible: state.isEditing,
-        child: ValueListenableBuilder(
-          valueListenable: _drawToolbarPosition,
-          builder: (context, position, child) {
-            if (position == Offset.infinite || !canvasRect.contains(position)) {
-              position = Offset(0, canvasRect.height - 50);
-            }
-            return Positioned(
-              left: position.dx,
-              top: position.dy,
-              child: GestureDetector(
-                onPanUpdate: (details) {
-                  _updateDrawToolbarPosition(
-                    position + details.delta * 2,
-                    canvasRect,
-                  );
-                },
-                onPanEnd: (_) {
-                  configuration.saveDrawToolbarPosition(drawToolbarPosition);
-                },
-                child: MouseRegion(
-                  cursor: SystemMouseCursors.move,
-                  child: drawToolbarWrapper,
-                ),
-              ),
-            );
-          },
-        ),
-      ),
     );
   }
 
   /// 放大镜. magnifierBuilder优先, magnifierDecorationShapeBuilder其次.
-  Widget _buildMagnifier(BuildContext context, Rect drawRect) {
+  Widget _buildMagnifier(BuildContext context) {
     if (widget.magnifierBuilder != null) {
       return widget.magnifierBuilder!(context, controller);
     }
-
-    final config = controller.drawConfig.magnifier;
-    if (!config.enable || config.size.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return ValueListenableBuilder(
-      valueListenable: controller.drawPointerListenable,
-      builder: (context, pointer, child) {
-        bool visible = false;
-        final pointerOffset = pointer?.offset;
-        Offset focalPosition = Offset.zero;
-        AlignmentGeometry alignment = AlignmentDirectional.topStart;
-        EdgeInsets margin = config.margin;
-        if (pointerOffset != null && pointerOffset.isFinite) {
-          visible = true;
-          Offset position;
-          if (pointerOffset.dx > drawRect.width * 0.5) {
-            alignment = AlignmentDirectional.topStart;
-            position = config.size.center(margin.topLeft);
-            position = Offset(
-              drawRect.left + position.dx,
-              drawRect.top + position.dy,
-            );
-          } else {
-            alignment = AlignmentDirectional.topEnd;
-            final valueTxtWidth = controller.drawState.object?.valueTicksSize?.width ?? 0;
-            margin = margin.copyWith(right: margin.right + valueTxtWidth);
-            position = Offset(
-              drawRect.right - margin.right - config.size.width / 2,
-              drawRect.top + margin.top + config.size.height / 2,
-            );
-          }
-          focalPosition = pointerOffset - position;
-        }
-        return Visibility(
-          key: const ValueKey('MagnifierVisibility'),
-          visible: visible,
-          child: Container(
-            key: const ValueKey('MagnifierContainer'),
-            alignment: alignment,
-            margin: margin,
-            child: RawMagnifier(
-              key: const ValueKey('KlineRawMagnifier'),
-              decoration: MagnifierDecoration(
-                opacity: config.decorationOpacity,
-                shadows: config.decorationShadows ??
-                    [
-                      BoxShadow(
-                        offset: const Offset(0.1, 0.1),
-                        blurRadius: 2,
-                        spreadRadius: 3,
-                        color: controller.theme.gridLineColor.withAlpha(0.1.alpha),
-                      ),
-                    ],
-                shape: widget.magnifierDecorationShapeBuilder?.call(
-                      context,
-                      config.shapeSide,
-                    ) ??
-                    CircleBorder(
-                      side: config.shapeSide.copyWith(
-                        color: config.shapeSide.color == transparent
-                            ? controller.theme.gridLineColor
-                            : config.shapeSide.color,
-                      ),
-                    ),
-              ),
-              size: config.size,
-              focalPointOffset: focalPosition,
-              magnificationScale: config.magnificationScale,
-            ),
-          ),
-        );
-      },
+    return FlexiMagnifier(
+      controller: controller,
+      shapeBuilder: widget.magnifierDecorationShapeBuilder,
     );
   }
 }
