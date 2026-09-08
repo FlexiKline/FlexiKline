@@ -1,8 +1,8 @@
 ## 2.5.2
 
-* Redesign `FlexiKlineWidget` customization: replace ad-hoc view parameters with a unified `FlexiKlineWidgetBuilder` typedef `(BuildContext, FlexiKlineController) → Widget?`; add `mainBackgroundBuilder`, `mainForegroundBuilder`, `loadingBuilder`, `exitZoomButtonBuilder`, `drawToolbarBuilder` and `magnifierBuilder` (Breaking Changes).
+* Redesign `FlexiKlineWidget` customization: replace ad-hoc view parameters with a unified `FlexiKlineWidgetBuilder` typedef `(BuildContext, FlexiKlineController) → Widget?`; add `mainBackgroundBuilder`, `mainForegroundBuilder`, `loadingBuilder`, `exitZoomButtonBuilder`, `drawToolbarBuilder` and `magnifierBuilder`; extract `FlexiDraggableDrawToolbar`, `FlexiPannableDrawToolbar`, `FlexiLoading`, `FlexiExitZoomButton` and `FlexiMagnifier` into `flexi_kline_prefabs.dart` as standalone prefab widgets (Breaking Changes).
 * Remove `FlexiKlineWidget.indicator` named constructor; pass `candle` / `time` / `mainIndicators` / `subIndicators` to the default constructor directly (Breaking Changes).
-* Remove `mainForegroundViewBuilder`, `mainBackgroundView`, `drawToolbarInitHeight`, `keepDrawToolbarFullyVisible`, `exitZoomButtonAlignment` and `exitZoomButtonPadding` (Breaking Changes).
+* Remove `mainForegroundViewBuilder`, `mainBackgroundView`, `drawToolbarInitHeight`, `keepDrawToolbarFullyVisible`, `exitZoomButtonAlignment` and `exitZoomButtonPadding`; replace `defaultBottomOffset` with `toolbarSize` in draw toolbar prefabs; add `klineContext` to `FlexiDraggableDrawToolbar`; both toolbars listen to `canvasRectListenable` and re-clamp position on canvas resize (Breaking Changes).
 * Add `hasDrawOverlay`; `DrawPainter` skips the whole layer when no overlay exists, so Cross movement no longer re-runs draw overlays.
 * Make internal painting helpers private: `paintCrossLine`, `paintTooltip` on `CrossBinding`; `drawOverlayObjectList`, `drawStateOverlayObject` on `DrawBinding`.
 * Remove `@protected` from `dispose`, `onThemeChanged`, `onLanguageChanged` and `startLastPriceCountDownTimer` to clarify they are part of the user-facing API.

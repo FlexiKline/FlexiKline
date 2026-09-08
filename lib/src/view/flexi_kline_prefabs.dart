@@ -34,18 +34,26 @@ class FlexiDraggableDrawToolbar extends StatefulWidget {
     super.key,
     required this.controller,
     required this.child,
+    required this.klineContext,
     this.cursor = SystemMouseCursors.move,
-    this.defaultBottomOffset = 50,
+    this.toolbarSize = const Size(100, 50),
   });
 
   final FlexiKlineController controller;
   final Widget child;
 
+  /// [FlexiKlineWidget] 的 [BuildContext], 用于 [Draggable.onDragEnd] 时
+  /// 将全局坐标转换为相对于 Kline 画布的局部坐标.
+  final BuildContext klineContext;
+
   /// 拖拽时的鼠标光标样式.
   final MouseCursor cursor;
 
-  /// 无有效缓存位置时, 工具条距画布底部的默认偏移.
-  final double defaultBottomOffset;
+  /// 工具条的预估尺寸.
+  ///
+  /// 用于首次定位(无缓存时贴左下角)和缓存位置超出画布时的粗略 clamp.
+  /// 不要求精确, 交互结束后会用真实尺寸校准.
+  final Size toolbarSize;
 
   @override
   State<FlexiDraggableDrawToolbar> createState() => _FlexiDraggableDrawToolbarState();
@@ -53,45 +61,59 @@ class FlexiDraggableDrawToolbar extends StatefulWidget {
 
 class _FlexiDraggableDrawToolbarState extends State<FlexiDraggableDrawToolbar> {
   late final GlobalKey _toolbarKey = GlobalKey();
-  late final ValueNotifier<Offset> _position = ValueNotifier(
-    widget.controller.configuration.getDrawToolbarPosition(),
-  );
+  late final ValueNotifier<Offset> _position;
+  late Rect _canvasRect;
 
-  Offset _clampPosition(Offset pos) {
-    final canvasRect = widget.controller.canvasRect;
-    final size = _toolbarKey.currentContext?.size;
+  @override
+  void initState() {
+    super.initState();
+    _canvasRect = widget.controller.canvasRect;
+    final cached = widget.controller.configuration.getDrawToolbarPosition();
+    _position = ValueNotifier(
+      _clampPosition(
+        cached.isFinite ? cached : _canvasRect.bottomLeft,
+        size: widget.toolbarSize,
+      ),
+    );
+    widget.controller.canvasRectListenable.addListener(_onCanvasRectChanged);
+  }
+
+  void _onCanvasRectChanged() {
+    _canvasRect = widget.controller.canvasRect;
+    _position.value = _clampPosition(
+      _position.value,
+      size: _toolbarKey.currentContext?.size ?? widget.toolbarSize,
+    );
+    widget.controller.configuration.saveDrawToolbarPosition(_position.value);
+  }
+
+  Offset _clampPosition(
+    Offset pos, {
+    Size? size,
+  }) {
     if (size != null && size.isFinite) {
       return Offset(
         pos.dx.clamp(
-          canvasRect.left,
-          math.max(canvasRect.left, canvasRect.right - size.width),
+          _canvasRect.left,
+          math.max(_canvasRect.left, _canvasRect.right - size.width),
         ),
         pos.dy.clamp(
-          canvasRect.top,
-          math.max(canvasRect.top, canvasRect.bottom - size.height),
+          _canvasRect.top,
+          math.max(_canvasRect.top, _canvasRect.bottom - size.height),
         ),
       );
     }
-    return pos.clamp(canvasRect);
-  }
-
-  void _savePosition(Offset pos) {
-    _position.value = _clampPosition(pos);
-    widget.controller.configuration.saveDrawToolbarPosition(_position.value);
+    return pos.clamp(_canvasRect);
   }
 
   @override
   void dispose() {
-    widget.controller.configuration.saveDrawToolbarPosition(_position.value);
+    widget.controller.canvasRectListenable.removeListener(_onCanvasRectChanged);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final wrappedChild = SizedBox(
-      key: _toolbarKey,
-      child: widget.child,
-    );
     return ValueListenableBuilder(
       valueListenable: widget.controller.drawStateListenable,
       builder: (context, state, child) => Visibility(
@@ -101,30 +123,32 @@ class _FlexiDraggableDrawToolbarState extends State<FlexiDraggableDrawToolbar> {
       child: ValueListenableBuilder(
         valueListenable: _position,
         builder: (context, position, child) {
-          final canvasRect = widget.controller.canvasRect;
-          if (position == Offset.infinite || !canvasRect.contains(position)) {
-            position = Offset(
-              0,
-              canvasRect.height - widget.defaultBottomOffset,
-            );
-          }
           return Positioned(
             left: position.dx,
             top: position.dy,
             child: MouseRegion(
               cursor: widget.cursor,
               child: Draggable(
-                feedback: wrappedChild,
+                feedback: child!,
                 childWhenDragging: const SizedBox.shrink(),
-                child: wrappedChild,
+                child: child,
                 onDragEnd: (details) {
-                  final box = context.findRenderObject() as RenderBox;
-                  _savePosition(box.globalToLocal(details.offset));
+                  final box = widget.klineContext.findRenderObject() as RenderBox;
+                  final pos = box.globalToLocal(details.offset);
+                  _position.value = _clampPosition(
+                    pos,
+                    size: _toolbarKey.currentContext?.size,
+                  );
+                  widget.controller.configuration.saveDrawToolbarPosition(_position.value);
                 },
               ),
             ),
           );
         },
+        child: SizedBox(
+          key: _toolbarKey,
+          child: widget.child,
+        ),
       ),
     );
   }
@@ -142,7 +166,7 @@ class FlexiPannableDrawToolbar extends StatefulWidget {
     required this.controller,
     required this.child,
     this.cursor = SystemMouseCursors.move,
-    this.defaultBottomOffset = 50,
+    this.toolbarSize = const Size(100, 50),
     this.panSpeedMultiplier = 2.0,
   });
 
@@ -152,8 +176,11 @@ class FlexiPannableDrawToolbar extends StatefulWidget {
   /// 拖拽时的鼠标光标样式.
   final MouseCursor cursor;
 
-  /// 无有效缓存位置时, 工具条距画布底部的默认偏移.
-  final double defaultBottomOffset;
+  /// 工具条的预估尺寸.
+  ///
+  /// 用于首次定位(无缓存时贴左下角)和缓存位置超出画布时的粗略 clamp.
+  /// 不要求精确, 交互结束后会用真实尺寸校准.
+  final Size toolbarSize;
 
   /// onPanUpdate delta 乘数, 补偿重建延迟. 1.0=原速, 2.0=两倍速.
   final double panSpeedMultiplier;
@@ -164,36 +191,54 @@ class FlexiPannableDrawToolbar extends StatefulWidget {
 
 class _FlexiPannableDrawToolbarState extends State<FlexiPannableDrawToolbar> {
   late final GlobalKey _toolbarKey = GlobalKey();
-  late final ValueNotifier<Offset> _position = ValueNotifier(
-    widget.controller.configuration.getDrawToolbarPosition(),
-  );
+  late final ValueNotifier<Offset> _position;
+  late Rect _canvasRect;
 
-  Offset _clampPosition(Offset pos) {
-    final canvasRect = widget.controller.canvasRect;
-    final size = _toolbarKey.currentContext?.size;
+  @override
+  void initState() {
+    super.initState();
+    _canvasRect = widget.controller.canvasRect;
+    final cached = widget.controller.configuration.getDrawToolbarPosition();
+    _position = ValueNotifier(
+      _clampPosition(
+        cached.isFinite ? cached : _canvasRect.bottomLeft,
+        size: widget.toolbarSize,
+      ),
+    );
+    widget.controller.canvasRectListenable.addListener(_onCanvasRectChanged);
+  }
+
+  void _onCanvasRectChanged() {
+    _canvasRect = widget.controller.canvasRect;
+    _position.value = _clampPosition(
+      _position.value,
+      size: _toolbarKey.currentContext?.size ?? widget.toolbarSize,
+    );
+    widget.controller.configuration.saveDrawToolbarPosition(_position.value);
+  }
+
+  Offset _clampPosition(
+    Offset pos, {
+    Size? size,
+  }) {
     if (size != null && size.isFinite) {
       return Offset(
         pos.dx.clamp(
-          canvasRect.left,
-          math.max(canvasRect.left, canvasRect.right - size.width),
+          _canvasRect.left,
+          math.max(_canvasRect.left, _canvasRect.right - size.width),
         ),
         pos.dy.clamp(
-          canvasRect.top,
-          math.max(canvasRect.top, canvasRect.bottom - size.height),
+          _canvasRect.top,
+          math.max(_canvasRect.top, _canvasRect.bottom - size.height),
         ),
       );
     }
-    return pos.clamp(canvasRect);
-  }
-
-  void _savePosition(Offset pos) {
-    _position.value = _clampPosition(pos);
-    widget.controller.configuration.saveDrawToolbarPosition(_position.value);
+    return pos.clamp(_canvasRect);
   }
 
   @override
   void dispose() {
-    widget.controller.configuration.saveDrawToolbarPosition(_position.value);
+    widget.controller.canvasRectListenable.removeListener(_onCanvasRectChanged);
     super.dispose();
   }
 
@@ -208,14 +253,6 @@ class _FlexiPannableDrawToolbarState extends State<FlexiPannableDrawToolbar> {
       child: ValueListenableBuilder(
         valueListenable: _position,
         builder: (context, position, child) {
-          final canvasRect = widget.controller.canvasRect;
-          if (position == Offset.infinite || !canvasRect.contains(position)) {
-            position = Offset(
-              0,
-              canvasRect.height - widget.defaultBottomOffset,
-            );
-          }
-          // onPanUpdate 闭包捕获 position, 每次值不同, 内层无法用 child.
           return Positioned(
             left: position.dx,
             top: position.dy,
@@ -223,19 +260,27 @@ class _FlexiPannableDrawToolbarState extends State<FlexiPannableDrawToolbar> {
               onPanUpdate: (details) {
                 _position.value = _clampPosition(
                   position + details.delta * widget.panSpeedMultiplier,
+                  size: _toolbarKey.currentContext?.size,
                 );
               },
-              onPanEnd: (_) => _savePosition(_position.value),
-              child: MouseRegion(
-                cursor: widget.cursor,
-                child: SizedBox(
-                  key: _toolbarKey,
-                  child: widget.child,
-                ),
-              ),
+              onPanEnd: (_) {
+                _position.value = _clampPosition(
+                  _position.value,
+                  size: _toolbarKey.currentContext?.size,
+                );
+                widget.controller.configuration.saveDrawToolbarPosition(_position.value);
+              },
+              child: child!,
             ),
           );
         },
+        child: MouseRegion(
+          cursor: widget.cursor,
+          child: SizedBox(
+            key: _toolbarKey,
+            child: widget.child,
+          ),
+        ),
       ),
     );
   }

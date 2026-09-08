@@ -345,6 +345,7 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
     if (widget.drawToolbar == null) return const SizedBox.shrink();
     return FlexiDraggableDrawToolbar(
       controller: controller,
+      klineContext: flexiKlineContext,
       child: widget.drawToolbar!,
     );
   }
