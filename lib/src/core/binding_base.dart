@@ -83,7 +83,6 @@ abstract class KlineBindingBase with FlexiLog implements PaintContext, DrawConte
     logd('initState base');
   }
 
-  @protected
   @mustCallSuper
   void dispose() {
     logd('dispose base');
@@ -93,7 +92,6 @@ abstract class KlineBindingBase with FlexiLog implements PaintContext, DrawConte
     _drawObjectManager.dispose();
   }
 
-  @protected
   @mustCallSuper
   void onThemeChanged([covariant IFlexiKlineTheme? oldTheme]) {
     logd('onThemeChanged base');
@@ -101,7 +99,6 @@ abstract class KlineBindingBase with FlexiLog implements PaintContext, DrawConte
     // 不修改 [FlexiKlineConfig] 的任何字段。
   }
 
-  @protected
   @mustCallSuper
   void onLanguageChanged() {
     logd('onLanguageChanged base');

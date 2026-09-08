@@ -203,8 +203,8 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
       }
     }
 
-    paintCrossLine(canvas, offset);
-    paintTooltip(canvas, offset, model: model);
+    _paintCrossLine(canvas, offset);
+    _paintTooltip(canvas, offset, model: model);
 
     for (final paintObject in subPaintObjects) {
       paintObject.doPaintCross(canvas, offset, model: model);
@@ -212,8 +212,7 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
     mainPaintObject.doPaintCross(canvas, offset, model: model);
   }
 
-  @protected
-  void paintCrossLine(Canvas canvas, Offset offset) {
+  void _paintCrossLine(Canvas canvas, Offset offset) {
     final path = Path()
       ..moveTo(mainChartLeft, offset.dy)
       ..lineTo(mainChartRight, offset.dy)
@@ -234,7 +233,7 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
     );
   }
 
-  void paintTooltip(Canvas canvas, Offset offset, {FlexiCandleModel? model}) {
+  void _paintTooltip(Canvas canvas, Offset offset, {FlexiCandleModel? model}) {
     _clearTooltipHitTestData();
 
     final tooltipConfig = crossConfig.tooltipConfig;

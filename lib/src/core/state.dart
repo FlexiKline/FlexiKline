@@ -153,7 +153,6 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   }
 
   @override
-  @protected
   void syncComputedSlotCapacity() {
     // 当前数据：按最新容量扩容已有蜡烛的 slots。
     klineData.rebuildSlots(computedDataCapacity);

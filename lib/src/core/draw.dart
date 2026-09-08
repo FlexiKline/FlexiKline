@@ -506,14 +506,14 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
     if (!drawConfig.enable) return;
 
     /// 首先绘制已完成的overlayObjectList
-    drawOverlayObjectList(canvas, size);
+    _drawOverlayObjectList(canvas, size);
 
     /// 最后绘制当前处于Drawing或Editing状态的Overlay.
-    drawStateOverlayObject(canvas, size);
+    _drawStateOverlayObject(canvas, size);
   }
 
   /// 绘制已完成的OverlayList
-  void drawOverlayObjectList(Canvas canvas, Size size) {
+  void _drawOverlayObjectList(Canvas canvas, Size size) {
     final stateObject = drawState.object;
     for (final object in _drawObjectManager.overlayObjectList) {
       if (object.moving) continue;
@@ -532,7 +532,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
     }
   }
 
-  void drawStateOverlayObject(Canvas canvas, Size size) {
+  void _drawStateOverlayObject(Canvas canvas, Size size) {
     final object = drawState.object;
     if (object == null) return;
 

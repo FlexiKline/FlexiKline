@@ -111,17 +111,14 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
 
   /// 触发重绘蜡烛线.
   @override
-  @protected
   void markRepaintChart({bool reset = false}) {
     _reset = _reset || reset;
     _markRepaintChart();
   }
 
   @override
-  @protected
   void requestRepaint() => markRepaintChart();
 
-  @protected
   void startLastPriceCountDownTimer() {
     _lastPriceCountDownTimer?.cancel();
     _markRepaintChart();
