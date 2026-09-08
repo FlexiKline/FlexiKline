@@ -27,7 +27,7 @@ FlexiKline 是一个 Flutter 金融 K 线图表框架，指标、绘制工具、
 
 ```yaml
 dependencies:
-  flexi_kline: ^2.5.1
+  flexi_kline: ^2.5.2
 ```
 
 然后运行：
@@ -91,7 +91,7 @@ controller = FlexiKlineController(
 ```dart
 FlexiKlineWidget(
   controller: controller,
-  // 蜡烛图: 倒计时样式定制 + 按时间周期指定图表类型
+  // 蜡烛图: 倒计时样式 + 主区网格线定制
   candle: CandleIndicator(
     showCountdown: true,
     countdown: const TextAreaConfig(
@@ -100,13 +100,13 @@ FlexiKlineWidget(
       padding: EdgeInsets.all(2),
       borderRadius: BorderRadius.all(Radius.circular(2)),
     ),
-    // 主区横向网格线(即 Y 轴价格刻度线): 4 等分 nice 取整 + 虚线样式.
+    // 主区横向网格线(Y 轴价格刻度线): 4 等分 nice 取整 + 虚线样式
     horizontalGrid: const GridAxisConfig(
       mode: GridTickMode.nice(targetDivisions: 4),
       line: LineConfig(type: LineType.dashed, dashes: [4, 2]),
     ),
   ),
-  // 时间轴: 自定义高度与刻度格式(不传 tickFormatter 时按 interval 粒度默认格式化)
+  // 时间轴: 自定义高度、位置与刻度格式(不传 tickFormatter 时按 interval 粒度默认格式化)
   time: TimeIndicator(
     height: 16,
     position: DrawPosition.bottom,
@@ -114,7 +114,7 @@ FlexiKlineWidget(
       return '${dateTime.month}/${dateTime.day}';
     },
   ),
-  // 主区叠加: 均线
+  // 主区叠加: MA 或其他主区指标
   mainIndicators: [
     MAIndicator(
       lineWidth: 1,
@@ -126,7 +126,7 @@ FlexiKlineWidget(
     ),
     ...
   ],
-  // 副区叠加: MACD
+  // 副区叠加: MACD 或其他副区指标
   subIndicators: [
     MACDIndicator(
       calcParam: const MACDParam(s: 12, l: 26, m: 9),

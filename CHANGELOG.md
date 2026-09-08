@@ -1,13 +1,11 @@
 ## 2.5.2
 
-* Add `FlexiKlineWidgetBuilder` typedef and a unified builder family on `FlexiKlineWidget`: `mainBackgroundBuilder`, `mainForegroundBuilder`, `loadingBuilder`, `exitZoomButtonBuilder`, `drawToolbarBuilder` and `magnifierBuilder`, each receiving `(context, controller)` and fully owning its display logic.
-* Change `loadingBuilder` to layer independently from `mainForegroundBuilder` (loading is decoupled from the foreground extension layer).
-* Remove the `FlexiKlineWidget.indicator` named constructor; build from an `IIndicatorConfig` by passing its `candle` / `time` / `mainIndicators` / `subIndicators` to the default constructor (Breaking Changes).
-* Remove `mainForegroundViewBuilder` (use `mainForegroundBuilder` / `loadingBuilder`) and `mainBackgroundView` (use `mainBackgroundBuilder`) (Breaking Changes).
-* Remove `drawToolbarInitHeight` and `keepDrawToolbarFullyVisible`; the draw toolbar now always clamps within the canvas and resets to a fixed bottom-left offset (Breaking Changes).
-* Remove `exitZoomButtonAlignment` and `exitZoomButtonPadding`; the exit-zoom button layout is now internal or fully controlled via `exitZoomButtonBuilder` (Breaking Changes).
-* Change `exitZoomButtonBuilder` type from `WidgetBuilder` to `FlexiKlineWidgetBuilder`, replacing the whole button instead of only its icon (Breaking Changes).
-* Add `hasDrawOverlay`; `DrawPainter` now skips the whole layer when it is false, so Cross movement no longer re-runs the draw overlays (both painters share one `CustomPaint`).
+* Redesign `FlexiKlineWidget` customization: replace ad-hoc view parameters with a unified `FlexiKlineWidgetBuilder` typedef `(BuildContext, FlexiKlineController) → Widget?`; add `mainBackgroundBuilder`, `mainForegroundBuilder`, `loadingBuilder`, `exitZoomButtonBuilder`, `drawToolbarBuilder` and `magnifierBuilder` (Breaking Changes).
+* Remove `FlexiKlineWidget.indicator` named constructor; pass `candle` / `time` / `mainIndicators` / `subIndicators` to the default constructor directly (Breaking Changes).
+* Remove `mainForegroundViewBuilder`, `mainBackgroundView`, `drawToolbarInitHeight`, `keepDrawToolbarFullyVisible`, `exitZoomButtonAlignment` and `exitZoomButtonPadding` (Breaking Changes).
+* Add `hasDrawOverlay`; `DrawPainter` skips the whole layer when no overlay exists, so Cross movement no longer re-runs draw overlays.
+* Make internal painting helpers private: `paintCrossLine`, `paintTooltip` on `CrossBinding`; `drawOverlayObjectList`, `drawStateOverlayObject` on `DrawBinding`.
+* Remove `@protected` from `dispose`, `onThemeChanged`, `onLanguageChanged` and `startLastPriceCountDownTimer` to clarify they are part of the user-facing API.
 
 ## 2.5.1
 
