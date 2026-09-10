@@ -424,7 +424,8 @@ CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
               json['inViewPriceMark'] as Map<String, dynamic>),
       showLatestPoint: json['showLatestPoint'] as bool? ?? true,
       latestPoint: json['latestPoint'] == null
-          ? const PointConfig(radius: 2, width: 0, borderWidth: 2)
+          ? const PointConfig(
+              radius: 2, width: 0, borderWidth: 2, borderOpacity: 0.5)
           : PointConfig.fromJson(json['latestPoint'] as Map<String, dynamic>),
       useCandleColorForLatestPriceBackground:
           json['useCandleColorForLatestPriceBackground'] as bool? ?? true,

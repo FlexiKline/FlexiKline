@@ -150,7 +150,8 @@ CrossConfig _$CrossConfigFromJson(Map<String, dynamic> json) => CrossConfig(
               dashes: [3, 3])
           : LineConfig.fromJson(json['crosshair'] as Map<String, dynamic>),
       crosspoint: json['crosspoint'] == null
-          ? const PointConfig(radius: 2, width: 0, borderWidth: 3)
+          ? const PointConfig(
+              radius: 2, width: 0, borderWidth: 3, borderOpacity: 0.2)
           : PointConfig.fromJson(json['crosspoint'] as Map<String, dynamic>),
       ticksText: json['ticksText'] == null
           ? const TextAreaConfig(

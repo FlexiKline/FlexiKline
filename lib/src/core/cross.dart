@@ -229,7 +229,7 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
       offset,
       crossConfig.crosspoint,
       themeColor: theme.crosshairColor,
-      themeBorderColor: theme.crosshairColor.withAlpha(0.2.alpha),
+      themeBorderColor: theme.crosshairColor,
     );
   }
 

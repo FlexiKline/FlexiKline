@@ -16,6 +16,7 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flutter/painting.dart';
 
 import '../../constant.dart';
+import '../../extension/basic_type_ext.dart';
 import '../../extension/style_ext.dart';
 import '../../framework/serializers.dart';
 
@@ -28,25 +29,33 @@ class PointConfig {
     this.radius = 2,
     this.width = 2,
     this.color,
+    this.useThemeColor = true,
     this.borderWidth,
     this.borderColor,
+    this.borderOpacity = 1,
   });
 
   final double radius;
   final double width;
   final Color? color;
 
+  /// 当 color 为空时, 是否使用所在 themeColor 代替
+  final bool useThemeColor;
+
   /// 点的边框配置
   final double? borderWidth;
   final Color? borderColor;
 
+  /// border颜色的透明度
+  final double borderOpacity;
+
   /// 确保画笔颜色不为空
   PointConfig ensure({Color? themeColor, Color? themeBorderColor}) {
-    if ((color.isValid || themeColor.isInvalid) && (borderColor.isValid || themeBorderColor.isInvalid)) {
-      return this;
-    }
+    final colorReady = color.isValid || !useThemeColor || themeColor.isInvalid;
+    final borderReady = borderColor.isValid || themeBorderColor.isInvalid;
+    if (colorReady && borderReady) return this;
     return copyWith(
-      color: color.or(themeColor),
+      color: useThemeColor ? color.or(themeColor) : color,
       borderColor: borderColor.or(themeBorderColor),
     );
   }
@@ -66,7 +75,7 @@ class PointConfig {
   Paint? get borderPaint {
     if (borderWidth != null && borderWidth! > 0 && borderColor != null && borderColor!.a != 0) {
       return Paint()
-        ..color = borderColor!
+        ..color = borderColor!.withAlpha(borderOpacity.alpha)
         ..strokeWidth = borderWidth!
         ..style = PaintingStyle.stroke;
     }

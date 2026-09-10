@@ -15,6 +15,7 @@
 import 'package:flutter/painting.dart';
 
 import '../../config/point_config/point_config.dart';
+import '../basic_type_ext.dart';
 
 extension FlexiDrawCircle on Canvas {
   /// 绘制一个带边框的圆点.
@@ -27,6 +28,7 @@ extension FlexiDrawCircle on Canvas {
     Color? color,
     Color? borderColor,
     Paint? borderPaint,
+    double borderOpacity = 1,
   }) {
     if (offset.isInfinite) return;
     borderWidth ??= borderPaint?.strokeWidth;
@@ -36,7 +38,7 @@ extension FlexiDrawCircle on Canvas {
         offset,
         radius + borderWidth / 2,
         Paint()
-          ..color = borderColor
+          ..color = borderColor.withAlpha(borderOpacity.alpha)
           ..strokeWidth = borderWidth
           ..style = PaintingStyle.stroke,
       );
@@ -63,9 +65,10 @@ extension FlexiDrawCircle on Canvas {
       offset: offset,
       radius: point.radius,
       strokeWidth: point.width,
-      color: point.color ?? themeColor,
+      color: point.color ?? (point.useThemeColor ? themeColor : null),
       borderWidth: point.borderWidth,
       borderColor: point.borderColor ?? themeBorderColor,
+      borderOpacity: point.borderOpacity,
     );
   }
 }

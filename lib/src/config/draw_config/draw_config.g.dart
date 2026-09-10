@@ -188,7 +188,7 @@ DrawConfig _$DrawConfigFromJson(Map<String, dynamic> json) => DrawConfig(
       enable: json['enable'] as bool? ?? false,
       allowSelectWhenExit: json['allowSelectWhenExit'] as bool? ?? true,
       crosspoint: json['crosspoint'] == null
-          ? const PointConfig(radius: 2, width: 0, borderWidth: 2)
+          ? const PointConfig(radius: 2, width: 0)
           : PointConfig.fromJson(json['crosspoint'] as Map<String, dynamic>),
       crosshair: json['crosshair'] == null
           ? const LineConfig(
@@ -203,11 +203,12 @@ DrawConfig _$DrawConfigFromJson(Map<String, dynamic> json) => DrawConfig(
               dashes: [5, 3])
           : LineConfig.fromJson(json['drawLine'] as Map<String, dynamic>),
       drawPoint: json['drawPoint'] == null
-          ? const PointConfig(radius: 9, width: 0, borderWidth: 1)
+          ? const PointConfig(radius: 9, color: white, width: 0, borderWidth: 1)
           : PointConfig.fromJson(json['drawPoint'] as Map<String, dynamic>),
       ticksText: json['ticksText'] == null
           ? const TextAreaConfig(
               style: TextStyle(
+                  color: white,
                   fontSize: defaultTextSize,
                   fontWeight: FontWeight.normal,
                   height: defaultTextHeight),

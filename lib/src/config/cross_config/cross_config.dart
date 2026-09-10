@@ -42,6 +42,7 @@ class CrossConfig {
       radius: 2,
       width: 0,
       borderWidth: 3,
+      borderOpacity: 0.2,
     ),
     this.ticksText = const TextAreaConfig(
       style: TextStyle(

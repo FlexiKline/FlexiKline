@@ -35,7 +35,6 @@ class DrawConfig {
     this.crosspoint = const PointConfig(
       radius: 2,
       width: 0,
-      borderWidth: 2,
     ),
     this.crosshair = const LineConfig(
       paint: PaintConfig(
@@ -53,11 +52,13 @@ class DrawConfig {
     ),
     this.drawPoint = const PointConfig(
       radius: 9,
+      color: white,
       width: 0,
       borderWidth: 1,
     ),
     this.ticksText = const TextAreaConfig(
       style: TextStyle(
+        color: white,
         fontSize: defaultTextSize,
         fontWeight: FontWeight.normal,
         height: defaultTextHeight,

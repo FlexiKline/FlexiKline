@@ -126,6 +126,7 @@ class CandleIndicator extends CandleBaseIndicator {
       radius: 2,
       width: 0,
       borderWidth: 2,
+      borderOpacity: 0.5,
     ),
 
     /// 使用蜡烛颜色做为Latest的背景
@@ -690,7 +691,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
       offset,
       point,
       themeColor: theme.lineChartColor,
-      themeBorderColor: theme.lineChartColor.withAlpha(0x7F),
+      themeBorderColor: theme.lineChartColor,
     );
   }
 

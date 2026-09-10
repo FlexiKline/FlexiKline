@@ -34,9 +34,7 @@ mixin DrawConfigMixin on OverlayObject {
     if (_crosspoint != null) return _crosspoint!;
     _crosspoint = config.crosspoint.ensure(
       themeColor: lineColor,
-      themeBorderColor: lineColor.withValues(
-        alpha: config.crosspoint.borderColor?.a ?? 0,
-      ),
+      themeBorderColor: lineColor,
     );
     return _crosspoint!;
   }
@@ -63,7 +61,7 @@ mixin DrawConfigMixin on OverlayObject {
   PointConfig get drawPointConfig {
     if (_drawPoint != null) return _drawPoint!;
     _drawPoint = config.drawPoint.ensure(
-      themeColor: white,
+      themeColor: lineColor,
       themeBorderColor: lineColor,
     );
     return _drawPoint!;

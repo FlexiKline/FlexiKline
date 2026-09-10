@@ -65,16 +65,19 @@ class _$GridConfigCWProxyImpl implements _$GridConfigCWProxy {
       this(dragHitTestMinDistance: dragHitTestMinDistance);
 
   @override
-  GridConfig draggingBgOpacity(double draggingBgOpacity) => this(draggingBgOpacity: draggingBgOpacity);
+  GridConfig draggingBgOpacity(double draggingBgOpacity) =>
+      this(draggingBgOpacity: draggingBgOpacity);
 
   @override
-  GridConfig dragBgOpacity(double dragBgOpacity) => this(dragBgOpacity: dragBgOpacity);
+  GridConfig dragBgOpacity(double dragBgOpacity) =>
+      this(dragBgOpacity: dragBgOpacity);
 
   @override
   GridConfig dragLine(LineConfig? dragLine) => this(dragLine: dragLine);
 
   @override
-  GridConfig dragLineOpacity(double dragLineOpacity) => this(dragLineOpacity: dragLineOpacity);
+  GridConfig dragLineOpacity(double dragLineOpacity) =>
+      this(dragLineOpacity: dragLineOpacity);
 
   @override
   GridConfig ticksText(TextAreaConfig ticksText) => this(ticksText: ticksText);
@@ -107,14 +110,16 @@ class _$GridConfigCWProxyImpl implements _$GridConfigCWProxy {
           ? _value.vertical
           // ignore: cast_nullable_to_non_nullable
           : vertical as GridBorder,
-      isAllowDragIndicatorHeight: isAllowDragIndicatorHeight == const $CopyWithPlaceholder()
-          ? _value.isAllowDragIndicatorHeight
-          // ignore: cast_nullable_to_non_nullable
-          : isAllowDragIndicatorHeight as bool,
-      dragHitTestMinDistance: dragHitTestMinDistance == const $CopyWithPlaceholder()
-          ? _value.dragHitTestMinDistance
-          // ignore: cast_nullable_to_non_nullable
-          : dragHitTestMinDistance as double,
+      isAllowDragIndicatorHeight:
+          isAllowDragIndicatorHeight == const $CopyWithPlaceholder()
+              ? _value.isAllowDragIndicatorHeight
+              // ignore: cast_nullable_to_non_nullable
+              : isAllowDragIndicatorHeight as bool,
+      dragHitTestMinDistance:
+          dragHitTestMinDistance == const $CopyWithPlaceholder()
+              ? _value.dragHitTestMinDistance
+              // ignore: cast_nullable_to_non_nullable
+              : dragHitTestMinDistance as double,
       draggingBgOpacity: draggingBgOpacity == const $CopyWithPlaceholder()
           ? _value.draggingBgOpacity
           // ignore: cast_nullable_to_non_nullable
@@ -213,25 +218,36 @@ GridConfig _$GridConfigFromJson(Map<String, dynamic> json) => GridConfig(
       horizontal: json['horizontal'] == null
           ? const GridBorder()
           : GridBorder.fromJson(json['horizontal'] as Map<String, dynamic>),
-      vertical:
-          json['vertical'] == null ? const GridBorder() : GridBorder.fromJson(json['vertical'] as Map<String, dynamic>),
-      isAllowDragIndicatorHeight: json['isAllowDragIndicatorHeight'] as bool? ?? false,
-      dragHitTestMinDistance: (json['dragHitTestMinDistance'] as num?)?.toDouble() ?? 10,
+      vertical: json['vertical'] == null
+          ? const GridBorder()
+          : GridBorder.fromJson(json['vertical'] as Map<String, dynamic>),
+      isAllowDragIndicatorHeight:
+          json['isAllowDragIndicatorHeight'] as bool? ?? false,
+      dragHitTestMinDistance:
+          (json['dragHitTestMinDistance'] as num?)?.toDouble() ?? 10,
       draggingBgOpacity: (json['draggingBgOpacity'] as num?)?.toDouble() ?? 0.1,
       dragBgOpacity: (json['dragBgOpacity'] as num?)?.toDouble() ?? 0,
       dragLine: json['dragLine'] == null
-          ? const LineConfig(type: LineType.dashed, dashes: [3, 5], length: 20, paint: PaintConfig(strokeWidth: 2))
+          ? const LineConfig(
+              type: LineType.dashed,
+              dashes: [3, 5],
+              length: 20,
+              paint: PaintConfig(strokeWidth: 2))
           : LineConfig.fromJson(json['dragLine'] as Map<String, dynamic>),
       dragLineOpacity: (json['dragLineOpacity'] as num?)?.toDouble() ?? 0.1,
       ticksText: json['ticksText'] == null
           ? const TextAreaConfig(
-              style: TextStyle(fontSize: defaultTextSize, overflow: TextOverflow.ellipsis, height: defaultTextHeight),
+              style: TextStyle(
+                  fontSize: defaultTextSize,
+                  overflow: TextOverflow.ellipsis,
+                  height: defaultTextHeight),
               textAlign: TextAlign.end,
               padding: EdgeInsets.symmetric(horizontal: 2))
           : TextAreaConfig.fromJson(json['ticksText'] as Map<String, dynamic>),
     );
 
-Map<String, dynamic> _$GridConfigToJson(GridConfig instance) => <String, dynamic>{
+Map<String, dynamic> _$GridConfigToJson(GridConfig instance) =>
+    <String, dynamic>{
       'horizontal': instance.horizontal.toJson(),
       'vertical': instance.vertical.toJson(),
       'isAllowDragIndicatorHeight': instance.isAllowDragIndicatorHeight,
@@ -247,11 +263,14 @@ GridBorder _$GridBorderFromJson(Map<String, dynamic> json) => GridBorder(
       show: json['show'] as bool? ?? true,
       line: json['line'] == null
           ? const LineConfig(
-              type: LineType.solid, dashes: [2, 2], paint: PaintConfig(strokeWidth: defaultAuxiliaryLineWidth))
+              type: LineType.solid,
+              dashes: [2, 2],
+              paint: PaintConfig(strokeWidth: defaultAuxiliaryLineWidth))
           : LineConfig.fromJson(json['line'] as Map<String, dynamic>),
     );
 
-Map<String, dynamic> _$GridBorderToJson(GridBorder instance) => <String, dynamic>{
+Map<String, dynamic> _$GridBorderToJson(GridBorder instance) =>
+    <String, dynamic>{
       'show': instance.show,
       'line': instance.line.toJson(),
     };

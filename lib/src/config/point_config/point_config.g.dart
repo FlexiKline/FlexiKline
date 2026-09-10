@@ -13,9 +13,13 @@ abstract class _$PointConfigCWProxy {
 
   PointConfig color(Color? color);
 
+  PointConfig useThemeColor(bool useThemeColor);
+
   PointConfig borderWidth(double? borderWidth);
 
   PointConfig borderColor(Color? borderColor);
+
+  PointConfig borderOpacity(double borderOpacity);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `PointConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -27,8 +31,10 @@ abstract class _$PointConfigCWProxy {
     double radius,
     double width,
     Color? color,
+    bool useThemeColor,
     double? borderWidth,
     Color? borderColor,
+    double borderOpacity,
   });
 }
 
@@ -48,11 +54,19 @@ class _$PointConfigCWProxyImpl implements _$PointConfigCWProxy {
   PointConfig color(Color? color) => this(color: color);
 
   @override
+  PointConfig useThemeColor(bool useThemeColor) =>
+      this(useThemeColor: useThemeColor);
+
+  @override
   PointConfig borderWidth(double? borderWidth) =>
       this(borderWidth: borderWidth);
 
   @override
   PointConfig borderColor(Color? borderColor) => this(borderColor: borderColor);
+
+  @override
+  PointConfig borderOpacity(double borderOpacity) =>
+      this(borderOpacity: borderOpacity);
 
   @override
 
@@ -66,8 +80,10 @@ class _$PointConfigCWProxyImpl implements _$PointConfigCWProxy {
     Object? radius = const $CopyWithPlaceholder(),
     Object? width = const $CopyWithPlaceholder(),
     Object? color = const $CopyWithPlaceholder(),
+    Object? useThemeColor = const $CopyWithPlaceholder(),
     Object? borderWidth = const $CopyWithPlaceholder(),
     Object? borderColor = const $CopyWithPlaceholder(),
+    Object? borderOpacity = const $CopyWithPlaceholder(),
   }) {
     return PointConfig(
       radius: radius == const $CopyWithPlaceholder()
@@ -82,6 +98,10 @@ class _$PointConfigCWProxyImpl implements _$PointConfigCWProxy {
           ? _value.color
           // ignore: cast_nullable_to_non_nullable
           : color as Color?,
+      useThemeColor: useThemeColor == const $CopyWithPlaceholder()
+          ? _value.useThemeColor
+          // ignore: cast_nullable_to_non_nullable
+          : useThemeColor as bool,
       borderWidth: borderWidth == const $CopyWithPlaceholder()
           ? _value.borderWidth
           // ignore: cast_nullable_to_non_nullable
@@ -90,6 +110,10 @@ class _$PointConfigCWProxyImpl implements _$PointConfigCWProxy {
           ? _value.borderColor
           // ignore: cast_nullable_to_non_nullable
           : borderColor as Color?,
+      borderOpacity: borderOpacity == const $CopyWithPlaceholder()
+          ? _value.borderOpacity
+          // ignore: cast_nullable_to_non_nullable
+          : borderOpacity as double,
     );
   }
 }
@@ -109,9 +133,11 @@ PointConfig _$PointConfigFromJson(Map<String, dynamic> json) => PointConfig(
       width: (json['width'] as num?)?.toDouble() ?? 2,
       color: _$JsonConverterFromJson<String, Color>(
           json['color'], const ColorConverter().fromJson),
+      useThemeColor: json['useThemeColor'] as bool? ?? true,
       borderWidth: (json['borderWidth'] as num?)?.toDouble(),
       borderColor: _$JsonConverterFromJson<String, Color>(
           json['borderColor'], const ColorConverter().fromJson),
+      borderOpacity: (json['borderOpacity'] as num?)?.toDouble() ?? 1,
     );
 
 Map<String, dynamic> _$PointConfigToJson(PointConfig instance) =>
@@ -122,11 +148,13 @@ Map<String, dynamic> _$PointConfigToJson(PointConfig instance) =>
               instance.color, const ColorConverter().toJson)
           case final value?)
         'color': value,
+      'useThemeColor': instance.useThemeColor,
       if (instance.borderWidth case final value?) 'borderWidth': value,
       if (_$JsonConverterToJson<String, Color>(
               instance.borderColor, const ColorConverter().toJson)
           case final value?)
         'borderColor': value,
+      'borderOpacity': instance.borderOpacity,
     };
 
 Value? _$JsonConverterFromJson<Json, Value>(

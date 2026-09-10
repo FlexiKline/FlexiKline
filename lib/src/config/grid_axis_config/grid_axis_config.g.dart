@@ -70,14 +70,19 @@ extension $GridAxisConfigCopyWith on GridAxisConfig {
 // JsonSerializableGenerator
 // **************************************************************************
 
-GridAxisConfig _$GridAxisConfigFromJson(Map<String, dynamic> json) => GridAxisConfig(
+GridAxisConfig _$GridAxisConfigFromJson(Map<String, dynamic> json) =>
+    GridAxisConfig(
       mode: json['mode'] == null
           ? GridTickMode.fallback
-          : const GridTickModeConverter().fromJson(json['mode'] as Map<String, dynamic>),
-      line: json['line'] == null ? null : LineConfig.fromJson(json['line'] as Map<String, dynamic>),
+          : const GridTickModeConverter()
+              .fromJson(json['mode'] as Map<String, dynamic>),
+      line: json['line'] == null
+          ? null
+          : LineConfig.fromJson(json['line'] as Map<String, dynamic>),
     );
 
-Map<String, dynamic> _$GridAxisConfigToJson(GridAxisConfig instance) => <String, dynamic>{
+Map<String, dynamic> _$GridAxisConfigToJson(GridAxisConfig instance) =>
+    <String, dynamic>{
       'mode': const GridTickModeConverter().toJson(instance.mode),
       if (instance.line?.toJson() case final value?) 'line': value,
     };
