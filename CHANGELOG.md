@@ -2,6 +2,7 @@
 * Fix draw toolbar re-clamping during canvas resize by using the last known toolbar size instead of reading a widget size during build.
 * Add `useThemeColor` and `borderOpacity` to `PointConfig` to support multiple circle point styles (plain dot, filled + translucent ring, filled + solid border); move hardcoded opacity from call sites into config defaults (Breaking Changes).
 * Bake `white` into `DrawConfig.drawPoint.color` and `DrawConfig.ticksText` style color; `DrawConfig.crosspoint` no longer carries a `borderWidth` by default.
+* Replace `DrawObjectMixin.valueTicksSize` (`Size?`) with `valueTicksRect` (`Rect?`); draw value tick texts before their gap background so the background width matches the current frame (Breaking Changes).
 
 ## 2.5.2
 

@@ -518,7 +518,7 @@ class FlexiMagnifier extends StatelessWidget {
             );
           } else {
             alignment = AlignmentDirectional.topEnd;
-            final valueTxtWidth = controller.drawState.object?.valueTicksSize?.width ?? 0;
+            final valueTxtWidth = controller.drawState.object?.valueTicksRect?.width ?? 0;
             effectiveMargin = effectiveMargin.copyWith(
               right: effectiveMargin.right + valueTxtWidth,
             );

@@ -183,17 +183,8 @@ mixin DrawObjectMixin on DrawStateObject {
     canvas.drawCirclePoint(pointer, crosspointConfig);
   }
 
-  Size? __valueTicksSize;
-  Size? get valueTicksSize => __valueTicksSize;
-  set _valueTicksSize(Size size) {
-    if (__valueTicksSize != null && __valueTicksSize! > Size.zero) {
-      if (size.width < __valueTicksSize!.width) {
-        __valueTicksSize = size;
-      }
-    } else {
-      __valueTicksSize = size;
-    }
-  }
+  Rect? _valueTicksRect;
+  Rect? get valueTicksRect => _valueTicksRect;
 
   /// 绘制刻度(时间/价值)
   void drawAxisTicksText(DrawContext context, Canvas canvas, Rect bounds) {
@@ -246,20 +237,6 @@ mixin DrawObjectMixin on DrawStateObject {
 
     /// 绘制价值刻度
     if (bounds.height > 0) {
-      // 绘制top到bottom刻度之间的背景
-      final txtWidth = valueTicksSize?.width ?? 0;
-      if (txtWidth > 0 && ticksGapBgPaint != null) {
-        canvas.drawRect(
-          Rect.fromLTRB(
-            mainRect.right - config.spacing - txtWidth,
-            bounds.top.clamp(mainRect.top, mainRect.bottom),
-            mainRect.right - config.spacing,
-            bounds.bottom.clamp(mainRect.top, mainRect.bottom),
-          ),
-          ticksGapBgPaint!,
-        );
-      }
-
       double topDy = bounds.top;
       double bottomDy = bounds.bottom;
 
@@ -270,25 +247,54 @@ mixin DrawObjectMixin on DrawStateObject {
         bottomDy = bounds.top;
       }
 
-      _valueTicksSize = drawValueTicks(
+      // 先绘制文本, 拿到当前帧的实际宽度
+      final topSize = drawValueTicks(
         context,
         canvas,
         topDy,
         drawableRect: mainRect,
       );
-      _valueTicksSize = drawValueTicks(
+      final bottomSize = drawValueTicks(
         context,
         canvas,
         bottomDy,
         drawableRect: mainRect,
       );
+      final maxWidth = math.max(topSize.width, bottomSize.width);
+
+      // 用当前帧文本宽度绘制背景(opacity极低, 叠在文本上方无视觉影响)
+      if (maxWidth > 0) {
+        final top = topDy + topSize.height / 2 - (ticksTextConfig.borderRadius?.topLeft.y ?? 0);
+        final bottom = bottomDy - bottomSize.height / 2 + (ticksTextConfig.borderRadius?.bottomLeft.y ?? 0);
+        _valueTicksRect = Rect.fromLTRB(
+          mainRect.right - config.spacing - maxWidth,
+          top.clamp(mainRect.top, mainRect.bottom),
+          mainRect.right - config.spacing,
+          bottom.clamp(mainRect.top, mainRect.bottom),
+        );
+        if (ticksGapBgPaint != null) {
+          canvas.drawRect(_valueTicksRect!, ticksGapBgPaint!);
+        }
+      } else {
+        _valueTicksRect = null;
+      }
     } else {
-      _valueTicksSize = drawValueTicks(
+      final size = drawValueTicks(
         context,
         canvas,
         bounds.top,
         drawableRect: mainRect,
       );
+      if (size.width > 0) {
+        _valueTicksRect = Rect.fromLTWH(
+          mainRect.right - config.spacing - size.width,
+          bounds.top,
+          size.width,
+          size.height,
+        );
+      } else {
+        _valueTicksRect = null;
+      }
     }
   }
 
