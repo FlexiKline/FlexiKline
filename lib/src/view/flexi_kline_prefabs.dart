@@ -63,16 +63,18 @@ class _FlexiDraggableDrawToolbarState extends State<FlexiDraggableDrawToolbar> {
   late final GlobalKey _toolbarKey = GlobalKey();
   late final ValueNotifier<Offset> _position;
   late Rect _canvasRect;
+  late Size _lastToolbarSize;
 
   @override
   void initState() {
     super.initState();
     _canvasRect = widget.controller.canvasRect;
+    _lastToolbarSize = widget.toolbarSize;
     final cached = widget.controller.configuration.getDrawToolbarPosition();
     _position = ValueNotifier(
       _clampPosition(
         cached.isFinite ? cached : _canvasRect.bottomLeft,
-        size: widget.toolbarSize,
+        size: _lastToolbarSize,
       ),
     );
     widget.controller.canvasRectListenable.addListener(_onCanvasRectChanged);
@@ -82,7 +84,7 @@ class _FlexiDraggableDrawToolbarState extends State<FlexiDraggableDrawToolbar> {
     _canvasRect = widget.controller.canvasRect;
     _position.value = _clampPosition(
       _position.value,
-      size: _toolbarKey.currentContext?.size ?? widget.toolbarSize,
+      size: _lastToolbarSize,
     );
     widget.controller.configuration.saveDrawToolbarPosition(_position.value);
   }
@@ -92,6 +94,7 @@ class _FlexiDraggableDrawToolbarState extends State<FlexiDraggableDrawToolbar> {
     Size? size,
   }) {
     if (size != null && size.isFinite) {
+      _lastToolbarSize = size;
       return Offset(
         pos.dx.clamp(
           _canvasRect.left,
@@ -193,16 +196,18 @@ class _FlexiPannableDrawToolbarState extends State<FlexiPannableDrawToolbar> {
   late final GlobalKey _toolbarKey = GlobalKey();
   late final ValueNotifier<Offset> _position;
   late Rect _canvasRect;
+  late Size _lastToolbarSize;
 
   @override
   void initState() {
     super.initState();
     _canvasRect = widget.controller.canvasRect;
+    _lastToolbarSize = widget.toolbarSize;
     final cached = widget.controller.configuration.getDrawToolbarPosition();
     _position = ValueNotifier(
       _clampPosition(
         cached.isFinite ? cached : _canvasRect.bottomLeft,
-        size: widget.toolbarSize,
+        size: _lastToolbarSize,
       ),
     );
     widget.controller.canvasRectListenable.addListener(_onCanvasRectChanged);
@@ -212,7 +217,7 @@ class _FlexiPannableDrawToolbarState extends State<FlexiPannableDrawToolbar> {
     _canvasRect = widget.controller.canvasRect;
     _position.value = _clampPosition(
       _position.value,
-      size: _toolbarKey.currentContext?.size ?? widget.toolbarSize,
+      size: _lastToolbarSize,
     );
     widget.controller.configuration.saveDrawToolbarPosition(_position.value);
   }
@@ -222,6 +227,7 @@ class _FlexiPannableDrawToolbarState extends State<FlexiPannableDrawToolbar> {
     Size? size,
   }) {
     if (size != null && size.isFinite) {
+      _lastToolbarSize = size;
       return Offset(
         pos.dx.clamp(
           _canvasRect.left,

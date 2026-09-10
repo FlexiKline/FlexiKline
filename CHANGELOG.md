@@ -1,3 +1,6 @@
+## 2.5.3
+* Fix draw toolbar re-clamping during canvas resize by using the last known toolbar size instead of reading a widget size during build.
+
 ## 2.5.2
 
 * Redesign `FlexiKlineWidget` customization: replace ad-hoc view parameters with a unified `FlexiKlineWidgetBuilder` typedef `(BuildContext, FlexiKlineController) → Widget?`; add `mainBackgroundBuilder`, `mainForegroundBuilder`, `loadingBuilder`, `exitZoomButtonBuilder`, `drawToolbarBuilder` and `magnifierBuilder`; extract `FlexiDraggableDrawToolbar`, `FlexiPannableDrawToolbar`, `FlexiLoading`, `FlexiExitZoomButton` and `FlexiMagnifier` into `flexi_kline_prefabs.dart` as standalone prefab widgets (Breaking Changes).
