@@ -419,8 +419,8 @@ class DrawPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (!controller.isDrawVisible) return;
-    if (!controller.hasDrawOverlay) return;
+    // 早退在此是为了省掉 save/clipRect; paintDraw 内部同样查这个判据(它是 public, 可能被直接调)。
+    if (!controller.shouldPaintDraw) return;
 
     try {
       canvas.save();

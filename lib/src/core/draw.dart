@@ -34,7 +34,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
     logd('dispose draw');
     _repaintDraw.dispose();
     _drawStateNotifier.dispose();
-    _drawPointerNotifier.dispose();
+    _drawingPointerNotifier.dispose();
     _drawVisibilityNotifier.dispose();
     _drawMagnetModeNotifier.dispose();
     _drawContinuousNotifier.dispose();
@@ -42,7 +42,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
 
   final _repaintDraw = ValueNotifier(0);
   final _drawStateNotifier = FlexiStateNotifier(DrawState.exited());
-  final _drawPointerNotifier = FlexiStateNotifier<Point?>(null);
+  final _drawingPointerNotifier = FlexiStateNotifier<Point?>(null);
   final _drawVisibilityNotifier = ValueNotifier<bool>(true);
   final _drawMagnetModeNotifier = ValueNotifier<MagnetMode>(MagnetMode.normal);
   final _drawContinuousNotifier = ValueNotifier<bool>(false);
@@ -84,7 +84,8 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
 
   ValueListenable<DrawState> get drawStateListenable => _drawStateNotifier;
 
-  ValueListenable<Point?> get drawPointerListenable => _drawPointerNotifier;
+  /// 绘制中的指针; 无交互时为 null。
+  ValueListenable<Point?> get drawingPointerListenable => _drawingPointerNotifier;
 
   ValueListenable<bool> get drawVisibilityListenable => _drawVisibilityNotifier;
 
@@ -97,6 +98,9 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
   bool get hasDrawOverlay {
     return drawState.isOngoing || _drawObjectManager.hasObject;
   }
+
+  /// Draw 图层这一帧是否需要绘制。
+  bool get shouldPaintDraw => drawConfig.enable && isDrawVisible && hasDrawOverlay;
 
   @override
   MagnetMode get drawMagnet => drawMagnetModeListenable.value;
@@ -145,16 +149,27 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
     _drawObjectManager.storeDrawOverlaysConfig();
   }
 
+  /// 离开 [drawState] 当前持有的 object。
+  void _leaveDrawStateObject() {
+    final object = drawState.object;
+    if (object == null) return;
+    if (object.isCompleted) {
+      object.resetInteraction();
+    } else {
+      object.dispose();
+    }
+  }
+
   void prepareDraw({bool force = false}) {
     // 如果是非退出状态, 则无需变更状态.
     if (!force && !drawState.isExited) return;
-    drawState.object?.dispose();
+    _leaveDrawStateObject();
     _drawState = const Prepared();
     _markRepaintDraw();
   }
 
   void exitDraw() {
-    drawState.object?.dispose();
+    _leaveDrawStateObject();
     _drawState = const Exited();
     _markRepaintDraw();
   }
@@ -166,6 +181,8 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
     if (!isDrawVisible) return;
 
     if (drawState.object?.type == type) {
+      // 再点同一个工具 = 收起。不收尾的话半成品会带着旧指针被丢弃。
+      _leaveDrawStateObject();
       _drawState = const Prepared();
     } else {
       final object = _drawObjectManager.createDrawObject(
@@ -226,7 +243,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
       }
 
       object.addPointer(pointer);
-      if (object.isEditing) {
+      if (object.isCompleted) {
         logi('onDrawConfirm ${object.type} draw completed!');
         updateDrawObjectPointsData(object);
         // 绘制完成, 使用line配置绘制实线.
@@ -249,7 +266,8 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
           _drawState = Editing(object);
         }
       }
-    } else if (object.isEditing) {
+    } else {
+      assert(object.isCompleted, 'object must be completed here');
       final pointer = object.pointer;
       if (pointer == null) {
         // 当前处于编辑状态, 但是pointer又没有被赋值, 此时点击事件为确认完成绘制.
@@ -289,16 +307,16 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
     if (point != null) {
       logd('onDrawMoveStart index:${point.index} point:$point');
       object.setPointer(point);
-      object.setMoveing(true);
-      _drawPointerNotifier.updateValue(object.pointer);
+      object.setMoving(true);
+      _drawingPointerNotifier.updateValue(object.pointer);
       _notifyDrawStateChange();
       _markRepaintDraw();
       return true;
     } else if (object.hitTest(this, position, isMove: true) == true) {
       // 检查当前焦点是否命中Overlay
       object.setPointer(null);
-      object.setMoveing(true);
-      _drawPointerNotifier.updateValue(null);
+      object.setMoving(true);
+      _drawingPointerNotifier.updateValue(null);
       _notifyDrawStateChange();
       _markRepaintDraw();
       return true;
@@ -320,7 +338,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
       final newOffset = magneticSnap(position);
       if (newOffset != pointer.offset) {
         object.onUpdateDrawPoint(pointer, newOffset);
-        _drawPointerNotifier.updateValue(pointer);
+        _drawingPointerNotifier.updateValue(pointer);
         _markRepaintDraw();
       }
     } else {
@@ -353,8 +371,8 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
     }
     updateDrawObjectPointsData(object);
     _storeDrawOverlays();
-    object.setMoveing(false);
-    _drawPointerNotifier.updateValue(null);
+    object.setMoving(false);
+    _drawingPointerNotifier.updateValue(null);
     _notifyDrawStateChange();
     _markRepaintDraw();
   }
@@ -372,25 +390,20 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
   ////// 操作 //////
   /// 删除[object]; 如果不指定, 删除当前绘制[drawState]的object.
   void removeDrawObject({DrawObject? object}) {
-    if (object != null) {
-      if (_drawObjectManager.removeDrawObject(object)) {
-        _markRepaintDraw();
-      }
-    } else {
-      object = drawState.object;
-      if (object != null) {
-        _drawObjectManager.removeDrawObject(object);
-        _drawState = const Prepared();
-        _markRepaintDraw();
-      }
-    }
+    object ??= drawState.object;
+    if (object == null) return;
+
+    final isStateObject = drawState.object == object;
+    _drawObjectManager.removeDrawObject(object);
+    if (isStateObject) _drawState = const Prepared();
+    _markRepaintDraw();
   }
 
   void removeAllDrawObjects() {
     _drawObjectManager.removeAllDrawObjects();
     final object = drawState.object;
     if (object != null) {
-      _drawObjectManager.removeDrawObject(object);
+      object.dispose();
       _drawState = const Prepared();
     }
     _markRepaintDraw();
@@ -450,7 +463,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
   void setDrawContinuous(bool isOn) {
     _drawContinuousNotifier.value = isOn;
     if (!isOn) {
-      drawState.object?.dispose();
+      _leaveDrawStateObject();
       _drawState = const Prepared();
       _markRepaintDraw();
     }
@@ -506,7 +519,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
 
   /// 绘制Draw图层
   void paintDraw(Canvas canvas, Size size) {
-    if (!drawConfig.enable) return;
+    if (!shouldPaintDraw) return;
 
     /// 首先绘制已完成的overlayObjectList
     _drawOverlayObjectList(canvas, size);
@@ -521,9 +534,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
     for (final object in _drawObjectManager.overlayObjectList) {
       if (object.moving) continue;
 
-      // 待优化,
-      // 1. 检测points中每个value是否有效.
-      // 2. 当发生图表移动/缩放/数据源发生变化时, 需要initPoint
+      // 每帧重算: 蜡烛坐标(ts/value) → 屏幕坐标。
       final succeed = object.initPoints(this);
       if (!succeed) continue;
       object.draw(this, canvas, size);

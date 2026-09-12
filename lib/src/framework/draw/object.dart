@@ -33,17 +33,14 @@ class OverlayObject implements Comparable<OverlayObject> {
 
   int get nextIndex => _overlay.nextIndex;
 
-  /// 已开始绘制
-  bool get isStarted => points.first == null;
+  /// 最开始的状态, 即所有point均未确认。
+  bool get isInitial => points.every((point) => point == null);
 
-  /// 最开始的状态, 即所有points均为空
-  bool get isInitial => points.fold(true, (ret, item) => ret && item == null);
+  /// 当前绘制中, 即还有point未确认。
+  bool get isDrawing => points.any((point) => point == null);
 
-  /// 当前绘制中
-  bool get isDrawing => points.fold(false, (ret, item) => ret || item == null);
-
-  /// 当前绘制已完成, 修正中.
-  bool get isEditing => points.fold(true, (ret, item) => ret && item != null);
+  /// 当前绘制已完成, 即所有point都已确认。
+  bool get isCompleted => !isDrawing;
 
   Overlay clone() {
     return Overlay.fromType(key: key, type: type, line: line);
@@ -107,7 +104,7 @@ abstract class DrawStateObject extends OverlayObject with DrawConfigMixin {
   /// 当前overlay是否在移动中
   bool _moving = false;
   bool get moving => _moving;
-  void setMoveing(bool isMoving) {
+  void setMoving(bool isMoving) {
     _moving = isMoving;
   }
 
@@ -300,10 +297,21 @@ abstract class DrawObject<T extends Overlay> extends DrawStateObject with DrawOb
   @override
   void draw(DrawContext context, Canvas canvas, Size size);
 
+  /// 清掉交互残留: 指针、移动标记, 以及跟随主题/线样式的懒缓存。
+  /// 子类若有自己的**瞬时**状态(悬停高亮、拖拽临时量), 覆写它。
   @mustCallSuper
-  void dispose() {
+  void resetInteraction() {
     _cleanTmpConfig();
     _pointer = null;
     _moving = false;
+  }
+
+  /// 废弃该对象: 调用后不应再被绘制或命中。
+  ///
+  /// 只有对象的所有者该调它 —— 列表里的对象归 [OverlayDrawObjectManager], 尚未入列表的
+  /// 半成品归 `DrawState`。想"退出交互但保留对象"用 [resetInteraction]。
+  @mustCallSuper
+  void dispose() {
+    resetInteraction();
   }
 }

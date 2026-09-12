@@ -41,7 +41,7 @@ sealed class DrawState {
 
   factory DrawState.edit(DrawObject object) {
     assert(
-      object.isEditing,
+      object.isCompleted,
       'DrawObject${object.toString()} is not finished drawing',
     );
     return Editing(object);

@@ -1,3 +1,16 @@
+## 2.5.4
+* Add `DrawContext.isSelectedDrawObject` so a `DrawObject` can branch on selection state, which lives in `DrawState` rather than on the object itself (Breaking Changes).
+* Rename `OverlayObject.isEditing` to `isCompleted`: it only means all points are placed, so an overlay loaded from storage and never selected also returns true (Breaking Changes).
+* Remove `OverlayObject.isStarted`: it had no callers and its condition was inverted (Breaking Changes).
+* Rename `DrawStateObject.setMoveing` to `setMoving` (Breaking Changes).
+* Rename `drawPointerListenable` to `drawingPointerListenable`; document that it only pushes while dragging a point of a completed overlay, so it is not a mirror of `drawState.pointer` (Breaking Changes).
+* Add `DrawObject.resetInteraction` to leave an interaction without discarding the object; `dispose` delegates to it and stays the hook for subclasses that release resources.
+* Add `shouldPaintDraw` combining the draw layer's three gates: `DrawConfig.enable`, visibility and content; `DrawPainter` and `paintDraw` now read the same predicate.
+* Fix `isDrawOnTop` and `isDrawOnBottom` throwing instead of returning false when no object is selected.
+* Fix `removeDrawObject(object:)` leaving `drawState` pointing at an object that was already removed and disposed.
+* Fix `removeAllDrawObjects` writing an empty list back to storage right after deleting the key.
+* Fix `startDraw` dropping an unfinished object without clearing its pointer when the same tool is tapped again.
+
 ## 2.5.3
 * Fix draw toolbar re-clamping during canvas resize by using the last known toolbar size instead of reading a widget size during build.
 * Add `useThemeColor` and `borderOpacity` to `PointConfig` to support multiple circle point styles (plain dot, filled + translucent ring, filled + solid border); move hardcoded opacity from call sites into config defaults (Breaking Changes).

@@ -456,7 +456,8 @@ typedef MagnifierDecorationShapeBuilder = ShapeBorder Function(
 
 /// 绘制放大镜预制件.
 ///
-/// 监听 [controller.drawPointerListenable], 在绘制指针可见时展示.
+/// 监听 [controller.drawingPointerListenable], 在绘制指针可见时展示.
+/// 该监听只在移动已完成 overlay 的绘制点时推送, 所以放大镜不会在绘制落点过程中出现.
 /// 样式参数优先使用传入值, 未传时从 [controller.drawConfig.magnifier] 读取.
 class FlexiMagnifier extends StatelessWidget {
   const FlexiMagnifier({
@@ -498,7 +499,7 @@ class FlexiMagnifier extends StatelessWidget {
     final effectiveOpacity = decorationOpacity ?? config.decorationOpacity;
 
     return ValueListenableBuilder(
-      valueListenable: controller.drawPointerListenable,
+      valueListenable: controller.drawingPointerListenable,
       builder: (context, pointer, child) {
         bool visible = false;
         final pointerOffset = pointer?.offset;
