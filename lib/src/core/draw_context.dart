@@ -69,14 +69,11 @@ abstract interface class DrawGeometryScope {
 abstract interface class DrawRuntimeScope {
   /// 当前磁吸模式。
   MagnetMode get drawMagnet;
+
+  /// [object] 是否是当前被选中(编辑态)的绘制对象。
+  bool isSelectedDrawObject(DrawObject object);
 }
 
 /// Overlay 对外可见的绘制上下文。
 abstract interface class DrawContext
-    implements
-        DrawEnvironment,
-        DrawDataScope,
-        DrawGeometryScope,
-        DrawRuntimeScope,
-        IStorage,
-        ILogger {}
+    implements DrawEnvironment, DrawDataScope, DrawGeometryScope, DrawRuntimeScope, IStorage, ILogger {}

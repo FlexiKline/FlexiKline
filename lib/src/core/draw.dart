@@ -102,6 +102,9 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
   MagnetMode get drawMagnet => drawMagnetModeListenable.value;
 
   @override
+  bool isSelectedDrawObject(DrawObject object) => drawState.object == object;
+
+  @override
   void onThemeChanged([covariant IFlexiKlineTheme? oldTheme]) {
     super.onThemeChanged(oldTheme);
     if (drawState is Drawing) {
@@ -465,8 +468,8 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
 
   bool isDrawOnTop({DrawObject? object}) {
     object ??= drawState.object;
-    if (object == null) false;
-    return _drawObjectManager.isOnTop(object!);
+    if (object == null) return false;
+    return _drawObjectManager.isOnTop(object);
   }
 
   bool moveDrawStateObjectToBottom() {
@@ -481,8 +484,8 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
 
   bool isDrawOnBottom({DrawObject? object}) {
     object ??= drawState.object;
-    if (object == null) false;
-    return _drawObjectManager.isOnBottom(object!);
+    if (object == null) return false;
+    return _drawObjectManager.isOnBottom(object);
   }
 
   /// 测试[position]位置上是否有命中的Overly.
