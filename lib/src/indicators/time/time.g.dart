@@ -19,15 +19,15 @@ abstract class _$TimeIndicatorCWProxy {
 
   TimeIndicator clipToDrawableRect(bool clipToDrawableRect);
 
-  TimeIndicator tickFormatter(
-      String Function(DateTime, [ITimeInterval?])? tickFormatter);
+  TimeIndicator tickFormatter(DateTimeFormatter? tickFormatter);
 
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `TimeIndicator(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `TimeIndicator(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// TimeIndicator(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   TimeIndicator call({
     int zIndex,
     double height,
@@ -35,49 +35,49 @@ abstract class _$TimeIndicatorCWProxy {
     DrawPosition position,
     TextAreaConfig timeLabel,
     bool clipToDrawableRect,
-    String Function(DateTime, [ITimeInterval?])? tickFormatter,
+    DateTimeFormatter? tickFormatter,
   });
 }
 
-/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfTimeIndicator.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfTimeIndicator.copyWith.fieldName(...)`
+/// Callable proxy for `copyWith` functionality.
+/// Use as `instanceOfTimeIndicator.copyWith(...)` or call `instanceOfTimeIndicator.copyWith.fieldName(value)` for a single field.
 class _$TimeIndicatorCWProxyImpl implements _$TimeIndicatorCWProxy {
   const _$TimeIndicatorCWProxyImpl(this._value);
 
   final TimeIndicator _value;
 
   @override
-  TimeIndicator zIndex(int zIndex) => this(zIndex: zIndex);
+  TimeIndicator zIndex(int zIndex) => call(zIndex: zIndex);
 
   @override
-  TimeIndicator height(double height) => this(height: height);
+  TimeIndicator height(double height) => call(height: height);
 
   @override
-  TimeIndicator padding(EdgeInsets padding) => this(padding: padding);
+  TimeIndicator padding(EdgeInsets padding) => call(padding: padding);
 
   @override
-  TimeIndicator position(DrawPosition position) => this(position: position);
+  TimeIndicator position(DrawPosition position) => call(position: position);
 
   @override
   TimeIndicator timeLabel(TextAreaConfig timeLabel) =>
-      this(timeLabel: timeLabel);
+      call(timeLabel: timeLabel);
 
   @override
   TimeIndicator clipToDrawableRect(bool clipToDrawableRect) =>
-      this(clipToDrawableRect: clipToDrawableRect);
+      call(clipToDrawableRect: clipToDrawableRect);
 
   @override
-  TimeIndicator tickFormatter(
-          String Function(DateTime, [ITimeInterval?])? tickFormatter) =>
-      this(tickFormatter: tickFormatter);
+  TimeIndicator tickFormatter(DateTimeFormatter? tickFormatter) =>
+      call(tickFormatter: tickFormatter);
 
-  @override
-
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `TimeIndicator(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `TimeIndicator(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// TimeIndicator(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
+  @override
   TimeIndicator call({
     Object? zIndex = const $CopyWithPlaceholder(),
     Object? height = const $CopyWithPlaceholder(),
@@ -88,40 +88,43 @@ class _$TimeIndicatorCWProxyImpl implements _$TimeIndicatorCWProxy {
     Object? tickFormatter = const $CopyWithPlaceholder(),
   }) {
     return TimeIndicator(
-      zIndex: zIndex == const $CopyWithPlaceholder()
+      zIndex: zIndex == const $CopyWithPlaceholder() || zIndex == null
           ? _value.zIndex
           // ignore: cast_nullable_to_non_nullable
           : zIndex as int,
-      height: height == const $CopyWithPlaceholder()
+      height: height == const $CopyWithPlaceholder() || height == null
           ? _value.height
           // ignore: cast_nullable_to_non_nullable
           : height as double,
-      padding: padding == const $CopyWithPlaceholder()
+      padding: padding == const $CopyWithPlaceholder() || padding == null
           ? _value.padding
           // ignore: cast_nullable_to_non_nullable
           : padding as EdgeInsets,
-      position: position == const $CopyWithPlaceholder()
+      position: position == const $CopyWithPlaceholder() || position == null
           ? _value.position
           // ignore: cast_nullable_to_non_nullable
           : position as DrawPosition,
-      timeLabel: timeLabel == const $CopyWithPlaceholder()
+      timeLabel: timeLabel == const $CopyWithPlaceholder() || timeLabel == null
           ? _value.timeLabel
           // ignore: cast_nullable_to_non_nullable
           : timeLabel as TextAreaConfig,
-      clipToDrawableRect: clipToDrawableRect == const $CopyWithPlaceholder()
+      clipToDrawableRect:
+          clipToDrawableRect == const $CopyWithPlaceholder() ||
+              clipToDrawableRect == null
           ? _value.clipToDrawableRect
           // ignore: cast_nullable_to_non_nullable
           : clipToDrawableRect as bool,
       tickFormatter: tickFormatter == const $CopyWithPlaceholder()
           ? _value.tickFormatter
           // ignore: cast_nullable_to_non_nullable
-          : tickFormatter as String Function(DateTime, [ITimeInterval?])?,
+          : tickFormatter as DateTimeFormatter?,
     );
   }
 }
 
 extension $TimeIndicatorCopyWith on TimeIndicator {
-  /// Returns a callable class that can be used as follows: `instanceOfTimeIndicator.copyWith(...)` or like so:`instanceOfTimeIndicator.copyWith.fieldName(...)`.
+  /// Returns a callable class used to build a new instance with modified fields.
+  /// Example: `instanceOfTimeIndicator.copyWith(...)` or `instanceOfTimeIndicator.copyWith.fieldName(...)`.
   // ignore: library_private_types_in_public_api
   _$TimeIndicatorCWProxy get copyWith => _$TimeIndicatorCWProxyImpl(this);
 }
@@ -137,19 +140,22 @@ TimeIndicator _$TimeIndicatorFromJson(Map<String, dynamic> json) =>
           (json['height'] as num?)?.toDouble() ?? defaultTimeIndicatorHeight,
       padding: json['padding'] == null
           ? EdgeInsets.zero
-          : const EdgeInsetsConverter()
-              .fromJson(json['padding'] as Map<String, dynamic>),
+          : const EdgeInsetsConverter().fromJson(
+              json['padding'] as Map<String, dynamic>,
+            ),
       position: json['position'] == null
           ? DrawPosition.middle
           : const DrawPositionConverter().fromJson(json['position'] as String),
       timeLabel: json['timeLabel'] == null
           ? const TextAreaConfig(
               style: TextStyle(
-                  fontSize: defaultTextSize,
-                  overflow: TextOverflow.ellipsis,
-                  height: defaultTextHeight),
+                fontSize: defaultTextSize,
+                overflow: TextOverflow.ellipsis,
+                height: defaultTextHeight,
+              ),
               textWidth: 80,
-              textAlign: TextAlign.center)
+              textAlign: TextAlign.center,
+            )
           : TextAreaConfig.fromJson(json['timeLabel'] as Map<String, dynamic>),
       clipToDrawableRect: json['clipToDrawableRect'] as bool? ?? false,
     );

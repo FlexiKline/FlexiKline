@@ -107,7 +107,8 @@ void main() {
       expect(
         controller.hasDrawOverlay,
         isFalse,
-        reason: '没画过任何东西时 draw 层无事可做；判据为 true 会让十字线的每一步'
+        reason:
+            '没画过任何东西时 draw 层无事可做；判据为 true 会让十字线的每一步'
             '都白跑一趟 clip 与遍历。',
       );
     });
@@ -127,7 +128,8 @@ void main() {
       expect(
         (object! as TestDrawObject).drawCallCount,
         greaterThan(0),
-        reason: '守卫只该跳过「无事可做」的那一帧。它把有 overlay 的帧也拦掉，'
+        reason:
+            '守卫只该跳过「无事可做」的那一帧。它把有 overlay 的帧也拦掉，'
             '用户已经画好的线就会从屏幕上消失。',
       );
     });
@@ -144,7 +146,8 @@ void main() {
       expect(
         controller.hitTestDrawObject(ends.from),
         isNull,
-        reason: '前置：进行中的 overlay 要到 onDrawConfirm 判定 isEditing 后才进入'
+        reason:
+            '前置：进行中的 overlay 要到 onDrawConfirm 判定 isEditing 后才进入'
             'overlayObjectList，此刻列表仍是空的——这正是判据不能只看列表的原因。',
       );
 
@@ -154,7 +157,8 @@ void main() {
       expect(
         (object! as TestDrawObject).drawingCallCount,
         greaterThan(0),
-        reason: '判据若只看 overlayObjectList，正在画的图形全程不可见——用户落下第一点'
+        reason:
+            '判据若只看 overlayObjectList，正在画的图形全程不可见——用户落下第一点'
             '后屏幕上什么都没有，直到最后一点确认才突然出现。',
       );
     });

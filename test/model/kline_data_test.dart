@@ -34,10 +34,7 @@ class _Item {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is _Item &&
-          runtimeType == other.runtimeType &&
-          ts == other.ts &&
-          val == other.val;
+      other is _Item && runtimeType == other.runtimeType && ts == other.ts && val == other.val;
 }
 
 bool _listEq(List a, List b) {
@@ -78,13 +75,13 @@ bool _listEq(List a, List b) {
 }
 
 CandleModel _makeCandle(int ts) => CandleModel(
-      timestamp: ts,
-      open: Decimal.fromInt(1),
-      high: Decimal.fromInt(1),
-      low: Decimal.fromInt(1),
-      close: Decimal.fromInt(1),
-      volume: Decimal.fromInt(1),
-    );
+  timestamp: ts,
+  open: Decimal.fromInt(1),
+  high: Decimal.fromInt(1),
+  low: Decimal.fromInt(1),
+  close: Decimal.fromInt(1),
+  volume: Decimal.fromInt(1),
+);
 
 void main() {
   // ---------------------------------------------------------------------------

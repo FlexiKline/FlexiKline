@@ -89,13 +89,15 @@ mixin DrawConfigMixin on OverlayObject {
     color ??= line.paint.color;
     strokeWidth ??= line.paint.strokeWidth;
     lineType ??= line.type;
-    setDrawLineConfig(line.copyWith(
-      type: lineType,
-      paint: line.paint.copyWith(
-        color: color,
-        strokeWidth: strokeWidth,
+    setDrawLineConfig(
+      line.copyWith(
+        type: lineType,
+        paint: line.paint.copyWith(
+          color: color,
+          strokeWidth: strokeWidth,
+        ),
       ),
-    ));
+    );
     return true;
   }
 

@@ -68,9 +68,7 @@ final class ExternalIndicatorKey extends IIndicatorKey {
 
 const unknownIndicatorKey = DirectIndicatorKey('unknown');
 
-typedef IndicatorBuilder<T extends Indicator<IIndicatorKey>> = T Function(
-  Map<String, dynamic>,
-);
+typedef IndicatorBuilder<T extends Indicator<IIndicatorKey>> = T Function(Map<String, dynamic>);
 
 const mainIndicatorKey = DirectIndicatorKey('main', label: 'Main');
 const candleIndicatorKey = DirectIndicatorKey('candle', label: 'Candle');

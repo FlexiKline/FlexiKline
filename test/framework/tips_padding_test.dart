@@ -44,10 +44,10 @@ const mainSize = Size(300, 300);
 
 class _Scene {
   _Scene({required int declared, required Set<int> activated, bool drawBelowTipsArea = true})
-      : context = FakePaintContext(),
-        declarations = [
-          for (var i = 0; i < declared; i++) TestDirectIndicator(key: directKey(i), tipsHeight: tipsRow),
-        ] {
+    : context = FakePaintContext(),
+      declarations = [
+        for (var i = 0; i < declared; i++) TestDirectIndicator(key: directKey(i), tipsHeight: tipsRow),
+      ] {
     config = FakeFlexiKlineConfiguration(
       mainChildren: activated.map<IIndicatorKey>(directKey).toSet(),
       mainIndicatorDefaultSize: mainSize,
@@ -193,7 +193,8 @@ void main() {
       expect(
         scene.tipsAreaBottom,
         basePadding.top + tipsRow / 4,
-        reason: '声明更新不经过 add/remove，旧实现需要额外补一次失效；'
+        reason:
+            '声明更新不经过 add/remove，旧实现需要额外补一次失效；'
             '汇总方案下同一次绘制即跟随',
       );
     });
@@ -284,7 +285,8 @@ void main() {
       expect(
         scene.main.topRect,
         same(rect),
-        reason: '量化后稳定态汇总值不变，doPaintTips 应提前 return；'
+        reason:
+            '量化后稳定态汇总值不变，doPaintTips 应提前 return；'
             '否则边界缓存每帧重建，绘制期布局反复变化即抖动',
       );
     });

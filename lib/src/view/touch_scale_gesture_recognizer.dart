@@ -28,10 +28,10 @@ class TouchScaleGestureRecognizer extends ScaleGestureRecognizer {
     required this.claimSlopFactor,
     super.debugOwner,
   }) : assert(
-          claimSlopFactor > 0 && claimSlopFactor < 1,
-          'claimSlopFactor 必须落在 (0, 1) 内: 取 0 会抢掉手柄上的点击, '
-          '取 >= 1 会晚于外层 Scrollable 的裁决',
-        );
+         claimSlopFactor > 0 && claimSlopFactor < 1,
+         'claimSlopFactor 必须落在 (0, 1) 内: 取 0 会抢掉手柄上的点击, '
+         '取 >= 1 会晚于外层 Scrollable 的裁决',
+       );
 
   /// 第一指按下即抢占。只用于 zoom slider 专属区域。
   final bool Function(Offset localPosition) shouldClaimOnDown;

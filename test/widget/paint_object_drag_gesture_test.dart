@@ -43,16 +43,16 @@ const _dragDelta = Offset(0, -40);
 const _firstStep = Offset(0, -6);
 
 List<CandleModel> _candles() => List.generate(
-      20,
-      (index) => CandleModel(
-        timestamp: 20000 - index * 60000,
-        open: 100,
-        high: 110,
-        low: 90,
-        close: 105,
-        volume: 1000,
-      ),
-    );
+  20,
+  (index) => CandleModel(
+    timestamp: 20000 - index * 60000,
+    open: 100,
+    high: 110,
+    low: 90,
+    close: 105,
+    volume: 1000,
+  ),
+);
 
 Future<FlexiKlineController> _pumpChart(
   WidgetTester tester, {

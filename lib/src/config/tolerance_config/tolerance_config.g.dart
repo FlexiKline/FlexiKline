@@ -17,12 +17,13 @@ abstract class _$ToleranceConfigCWProxy {
 
   ToleranceConfig convergenceRatio(double convergenceRatio);
 
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `ToleranceConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ToleranceConfig(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// ToleranceConfig(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   ToleranceConfig call({
     int maxDuration,
     double distanceFactor,
@@ -32,7 +33,8 @@ abstract class _$ToleranceConfigCWProxy {
   });
 }
 
-/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfToleranceConfig.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfToleranceConfig.copyWith.fieldName(...)`
+/// Callable proxy for `copyWith` functionality.
+/// Use as `instanceOfToleranceConfig.copyWith(...)` or call `instanceOfToleranceConfig.copyWith.fieldName(value)` for a single field.
 class _$ToleranceConfigCWProxyImpl implements _$ToleranceConfigCWProxy {
   const _$ToleranceConfigCWProxyImpl(this._value);
 
@@ -40,31 +42,31 @@ class _$ToleranceConfigCWProxyImpl implements _$ToleranceConfigCWProxy {
 
   @override
   ToleranceConfig maxDuration(int maxDuration) =>
-      this(maxDuration: maxDuration);
+      call(maxDuration: maxDuration);
 
   @override
   ToleranceConfig distanceFactor(double distanceFactor) =>
-      this(distanceFactor: distanceFactor);
+      call(distanceFactor: distanceFactor);
 
   @override
-  ToleranceConfig curvestr(String curvestr) => this(curvestr: curvestr);
+  ToleranceConfig curvestr(String curvestr) => call(curvestr: curvestr);
 
   @override
   ToleranceConfig panSmoothFactor(double panSmoothFactor) =>
-      this(panSmoothFactor: panSmoothFactor);
+      call(panSmoothFactor: panSmoothFactor);
 
   @override
   ToleranceConfig convergenceRatio(double convergenceRatio) =>
-      this(convergenceRatio: convergenceRatio);
+      call(convergenceRatio: convergenceRatio);
 
-  @override
-
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `ToleranceConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ToleranceConfig(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// ToleranceConfig(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
+  @override
   ToleranceConfig call({
     Object? maxDuration = const $CopyWithPlaceholder(),
     Object? distanceFactor = const $CopyWithPlaceholder(),
@@ -73,23 +75,30 @@ class _$ToleranceConfigCWProxyImpl implements _$ToleranceConfigCWProxy {
     Object? convergenceRatio = const $CopyWithPlaceholder(),
   }) {
     return ToleranceConfig(
-      maxDuration: maxDuration == const $CopyWithPlaceholder()
+      maxDuration:
+          maxDuration == const $CopyWithPlaceholder() || maxDuration == null
           ? _value.maxDuration
           // ignore: cast_nullable_to_non_nullable
           : maxDuration as int,
-      distanceFactor: distanceFactor == const $CopyWithPlaceholder()
+      distanceFactor:
+          distanceFactor == const $CopyWithPlaceholder() ||
+              distanceFactor == null
           ? _value.distanceFactor
           // ignore: cast_nullable_to_non_nullable
           : distanceFactor as double,
-      curvestr: curvestr == const $CopyWithPlaceholder()
+      curvestr: curvestr == const $CopyWithPlaceholder() || curvestr == null
           ? _value.curvestr
           // ignore: cast_nullable_to_non_nullable
           : curvestr as String,
-      panSmoothFactor: panSmoothFactor == const $CopyWithPlaceholder()
+      panSmoothFactor:
+          panSmoothFactor == const $CopyWithPlaceholder() ||
+              panSmoothFactor == null
           ? _value.panSmoothFactor
           // ignore: cast_nullable_to_non_nullable
           : panSmoothFactor as double,
-      convergenceRatio: convergenceRatio == const $CopyWithPlaceholder()
+      convergenceRatio:
+          convergenceRatio == const $CopyWithPlaceholder() ||
+              convergenceRatio == null
           ? _value.convergenceRatio
           // ignore: cast_nullable_to_non_nullable
           : convergenceRatio as double,
@@ -98,7 +107,8 @@ class _$ToleranceConfigCWProxyImpl implements _$ToleranceConfigCWProxy {
 }
 
 extension $ToleranceConfigCopyWith on ToleranceConfig {
-  /// Returns a callable class that can be used as follows: `instanceOfToleranceConfig.copyWith(...)` or like so:`instanceOfToleranceConfig.copyWith.fieldName(...)`.
+  /// Returns a callable class used to build a new instance with modified fields.
+  /// Example: `instanceOfToleranceConfig.copyWith(...)` or `instanceOfToleranceConfig.copyWith.fieldName(...)`.
   // ignore: library_private_types_in_public_api
   _$ToleranceConfigCWProxy get copyWith => _$ToleranceConfigCWProxyImpl(this);
 }

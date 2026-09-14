@@ -21,20 +21,16 @@ import 'package:flutter_test/flutter_test.dart';
 import '../doubles/lifecycle_spy.dart';
 
 /// 断言 key 已在主区激活
-Matcher isActivatedInMain(IndicatorPaintObjectManager m) =>
-    _ActivatedMatcher(m, main: true);
+Matcher isActivatedInMain(IndicatorPaintObjectManager m) => _ActivatedMatcher(m, main: true);
 
 /// 断言 key 已在副区激活
-Matcher isActivatedInSub(IndicatorPaintObjectManager m) =>
-    _ActivatedMatcher(m, main: false);
+Matcher isActivatedInSub(IndicatorPaintObjectManager m) => _ActivatedMatcher(m, main: false);
 
 /// 断言 ComputedIndicatorKey 已分配 slot
-Matcher hasComputedSlot(IndicatorPaintObjectManager m) =>
-    _HasSlotMatcher(m, expectSlot: true);
+Matcher hasComputedSlot(IndicatorPaintObjectManager m) => _HasSlotMatcher(m, expectSlot: true);
 
 /// 断言 key 未分配 slot
-Matcher hasNoComputedSlot(IndicatorPaintObjectManager m) =>
-    _HasSlotMatcher(m, expectSlot: false);
+Matcher hasNoComputedSlot(IndicatorPaintObjectManager m) => _HasSlotMatcher(m, expectSlot: false);
 
 /// 断言生命周期事件按给定顺序出现（允许其间插入其它事件）
 Matcher emitsLifecycle(List<String> ordered) => _EmitsLifecycleMatcher(ordered);
@@ -55,12 +51,10 @@ class _ActivatedMatcher extends Matcher {
   }
 
   @override
-  Description describe(Description d) =>
-      d.add('activated in ${main ? "main" : "sub"}');
+  Description describe(Description d) => d.add('activated in ${main ? "main" : "sub"}');
 
   @override
-  Description describeMismatch(
-      Object? item, Description d, Map matchState, bool verbose) {
+  Description describeMismatch(Object? item, Description d, Map matchState, bool verbose) {
     final keys = main ? _m.mainIndicatorKeys : _m.subIndicatorKeys;
     return d.add('$item not found in ${keys.toList()}');
   }
@@ -79,8 +73,7 @@ class _HasSlotMatcher extends Matcher {
   }
 
   @override
-  Description describe(Description d) =>
-      d.add('${expectSlot ? "has" : "has no"} computed slot');
+  Description describe(Description d) => d.add('${expectSlot ? "has" : "has no"} computed slot');
 }
 
 class _EmitsLifecycleMatcher extends Matcher {
@@ -105,12 +98,10 @@ class _EmitsLifecycleMatcher extends Matcher {
   }
 
   @override
-  Description describe(Description d) =>
-      d.add('emits lifecycle in order $_ordered');
+  Description describe(Description d) => d.add('emits lifecycle in order $_ordered');
 
   @override
-  Description describeMismatch(
-      Object? item, Description d, Map matchState, bool verbose) {
+  Description describeMismatch(Object? item, Description d, Map matchState, bool verbose) {
     final events = item is LifecycleLog ? item.events : item;
     return d.add('actual events: $events');
   }

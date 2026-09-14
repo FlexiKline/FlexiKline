@@ -59,16 +59,16 @@ const _frame = Duration(milliseconds: 16);
 const _settle = Duration(milliseconds: 60);
 
 List<CandleModel> _candles() => List.generate(
-      20,
-      (index) => CandleModel(
-        timestamp: 20000 - index * 60000,
-        open: 100,
-        high: 110,
-        low: 90,
-        close: 105,
-        volume: 1000,
-      ),
-    );
+  20,
+  (index) => CandleModel(
+    timestamp: 20000 - index * 60000,
+    open: 100,
+    high: 110,
+    low: 90,
+    close: 105,
+    volume: 1000,
+  ),
+);
 
 Future<({FlexiKlineController chart, ScrollController scroll})> _pumpChartInListView(
   WidgetTester tester, {

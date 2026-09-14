@@ -198,7 +198,7 @@ void main() {
         const [],
         [
           SpyExternalIndicator(key: a, log: log, autoActivate: false),
-          SpyExternalIndicator(key: b, log: log, autoActivate: false)
+          SpyExternalIndicator(key: b, log: log, autoActivate: false),
         ],
         ctx,
       );

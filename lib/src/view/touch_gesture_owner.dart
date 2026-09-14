@@ -125,9 +125,9 @@ enum TouchGestureOwner {
   /// 兜底族没有落点目标可认领，位置来源又是多指质心，两条都与落点族相反，因此不走落点
   /// 路径（锚点、认领、驱动、收尾）。
   bool get isChartFallback => switch (this) {
-        chartScale || chartPan => true,
-        drawDrawing || drawEditing || cross || paintObject || zoomSlider => false,
-      };
+    chartScale || chartPan => true,
+    drawDrawing || drawEditing || cross || paintObject || zoomSlider => false,
+  };
 
   /// 是否要求长按让开竞技场。
   ///
@@ -135,7 +135,7 @@ enum TouchGestureOwner {
   /// 不允许长按移动），而长按赢下竞技场会把 Scale 一起 reject，于是整段手势零响应。其余
   /// 归属各有自己的长按路径，不能让开。
   bool get suppressesLongPress => switch (this) {
-        drawDrawing || cross => true,
-        drawEditing || paintObject || zoomSlider || chartScale || chartPan => false,
-      };
+    drawDrawing || cross => true,
+    drawEditing || paintObject || zoomSlider || chartScale || chartPan => false,
+  };
 }

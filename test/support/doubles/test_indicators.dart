@@ -212,9 +212,9 @@ class TestRangePaintObject extends DirectPaintObject<TestRangeIndicator> {
 
   /// 由 `start` / `end` 派生的区间：min 取 start，max 取 end * 10。
   static MinMax rangeOf(int start, int end) => MinMax(
-        max: FlexiNum.fromNum(end * 10),
-        min: FlexiNum.fromNum(start),
-      );
+    max: FlexiNum.fromNum(end * 10),
+    min: FlexiNum.fromNum(start),
+  );
 
   @override
   MinMax? computeVisibleMinMax(int start, int end) {

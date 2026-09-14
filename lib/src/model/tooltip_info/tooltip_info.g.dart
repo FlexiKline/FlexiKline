@@ -15,52 +15,54 @@ abstract class _$TooltipInfoCWProxy {
 
   TooltipInfo valueStyle(TextStyle? valueStyle);
 
-  TooltipInfo onTap(void Function()? onTap);
+  TooltipInfo onTap(VoidCallback? onTap);
 
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `TooltipInfo(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `TooltipInfo(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// TooltipInfo(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   TooltipInfo call({
     String label,
     TextStyle? labelStyle,
     String value,
     TextStyle? valueStyle,
-    void Function()? onTap,
+    VoidCallback? onTap,
   });
 }
 
-/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfTooltipInfo.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfTooltipInfo.copyWith.fieldName(...)`
+/// Callable proxy for `copyWith` functionality.
+/// Use as `instanceOfTooltipInfo.copyWith(...)` or call `instanceOfTooltipInfo.copyWith.fieldName(value)` for a single field.
 class _$TooltipInfoCWProxyImpl implements _$TooltipInfoCWProxy {
   const _$TooltipInfoCWProxyImpl(this._value);
 
   final TooltipInfo _value;
 
   @override
-  TooltipInfo label(String label) => this(label: label);
+  TooltipInfo label(String label) => call(label: label);
 
   @override
-  TooltipInfo labelStyle(TextStyle? labelStyle) => this(labelStyle: labelStyle);
+  TooltipInfo labelStyle(TextStyle? labelStyle) => call(labelStyle: labelStyle);
 
   @override
-  TooltipInfo value(String value) => this(value: value);
+  TooltipInfo value(String value) => call(value: value);
 
   @override
-  TooltipInfo valueStyle(TextStyle? valueStyle) => this(valueStyle: valueStyle);
+  TooltipInfo valueStyle(TextStyle? valueStyle) => call(valueStyle: valueStyle);
 
   @override
-  TooltipInfo onTap(void Function()? onTap) => this(onTap: onTap);
+  TooltipInfo onTap(VoidCallback? onTap) => call(onTap: onTap);
 
-  @override
-
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `TooltipInfo(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `TooltipInfo(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// TooltipInfo(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
+  @override
   TooltipInfo call({
     Object? label = const $CopyWithPlaceholder(),
     Object? labelStyle = const $CopyWithPlaceholder(),
@@ -69,7 +71,7 @@ class _$TooltipInfoCWProxyImpl implements _$TooltipInfoCWProxy {
     Object? onTap = const $CopyWithPlaceholder(),
   }) {
     return TooltipInfo(
-      label: label == const $CopyWithPlaceholder()
+      label: label == const $CopyWithPlaceholder() || label == null
           ? _value.label
           // ignore: cast_nullable_to_non_nullable
           : label as String,
@@ -77,7 +79,7 @@ class _$TooltipInfoCWProxyImpl implements _$TooltipInfoCWProxy {
           ? _value.labelStyle
           // ignore: cast_nullable_to_non_nullable
           : labelStyle as TextStyle?,
-      value: value == const $CopyWithPlaceholder()
+      value: value == const $CopyWithPlaceholder() || value == null
           ? _value.value
           // ignore: cast_nullable_to_non_nullable
           : value as String,
@@ -88,13 +90,14 @@ class _$TooltipInfoCWProxyImpl implements _$TooltipInfoCWProxy {
       onTap: onTap == const $CopyWithPlaceholder()
           ? _value.onTap
           // ignore: cast_nullable_to_non_nullable
-          : onTap as void Function()?,
+          : onTap as VoidCallback?,
     );
   }
 }
 
 extension $TooltipInfoCopyWith on TooltipInfo {
-  /// Returns a callable class that can be used as follows: `instanceOfTooltipInfo.copyWith(...)` or like so:`instanceOfTooltipInfo.copyWith.fieldName(...)`.
+  /// Returns a callable class used to build a new instance with modified fields.
+  /// Example: `instanceOfTooltipInfo.copyWith(...)` or `instanceOfTooltipInfo.copyWith.fieldName(...)`.
   // ignore: library_private_types_in_public_api
   _$TooltipInfoCWProxy get copyWith => _$TooltipInfoCWProxyImpl(this);
 }

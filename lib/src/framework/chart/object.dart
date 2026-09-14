@@ -477,8 +477,8 @@ final class MainPaintObject<T extends MainPaintObjectIndicator> extends PaintObj
   /// 获取蜡烛图绘制对象
   CandleBasePaintObject? get _candlePaintObject {
     return children.whereType<CandleBasePaintObject>().firstWhereOrNull(
-          (obj) => obj.key == candleIndicatorKey,
-        );
+      (obj) => obj.key == candleIndicatorKey,
+    );
   }
 
   /// 是否只绘制蜡烛图（隐藏技术指标）

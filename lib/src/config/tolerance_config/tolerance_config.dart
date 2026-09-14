@@ -14,6 +14,7 @@
 
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flutter/animation.dart';
+import 'package:json_annotation/json_annotation.dart';
 
 import '../../framework/serializers.dart';
 import '../../utils/convert_util.dart';
@@ -27,13 +28,31 @@ part 'tolerance_config.g.dart';
 @CopyWith()
 @FlexiConfigSerializable
 class ToleranceConfig {
-  ToleranceConfig({
+  factory ToleranceConfig({
+    int maxDuration = 3000,
+    double distanceFactor = 0.8,
+    String curvestr = 'easeOutCubic',
+    double panSmoothFactor = 0.15,
+    double convergenceRatio = 0.85,
+  }) {
+    return ToleranceConfig._(
+      maxDuration: maxDuration,
+      distanceFactor: distanceFactor,
+      curvestr: curvestr,
+      curve: parseCurve(curvestr),
+      panSmoothFactor: panSmoothFactor.clamp(0.1, 1.0),
+      convergenceRatio: convergenceRatio.clamp(0.0, 1.0),
+    );
+  }
+
+  const ToleranceConfig._({
     this.maxDuration = 3000,
     this.distanceFactor = 0.8,
-    this.curvestr = 'easeOutCubic',
+    required this.curve,
+    required this.curvestr,
     this.panSmoothFactor = 0.15,
     this.convergenceRatio = 0.85,
-  }) : _curve = parseCurve(curvestr);
+  });
 
   final int maxDuration;
   final double distanceFactor;
@@ -45,14 +64,8 @@ class ToleranceConfig {
   /// 惯性动画尾部开始将 smoothFactor 收敛到 1.0 的动画进度比 (0~1)
   final double convergenceRatio;
 
-  late final Curve _curve;
-  Curve get curve => _curve;
-
-  /// 经过 clamp 验证的平滑因子
-  double get effectivePanSmoothFactor => panSmoothFactor.clamp(0.1, 1.0);
-
-  /// 经过 clamp 验证的收敛起始进度
-  double get effectiveConvergenceRatio => convergenceRatio.clamp(0.0, 1.0);
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  final Curve curve;
 
   @override
   String toString() {

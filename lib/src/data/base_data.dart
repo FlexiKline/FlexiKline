@@ -32,9 +32,9 @@ abstract class BaseData with FlexiLog {
     List<FlexiCandleModel> list = const [],
     this.computeMode = ComputeMode.fast,
     IFlexiLogger? logger,
-  })  : _spec = spec,
-        _loadingState = loadingState,
-        _list = List.of(list) {
+  }) : _spec = spec,
+       _loadingState = loadingState,
+       _list = List.of(list) {
     this.logger = logger;
     initData();
   }

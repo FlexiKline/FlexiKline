@@ -54,11 +54,11 @@ final _wheelExpand = math.exp(100 / 200);
 
 /// 滑竿区宽 24、贴主区右缘、高度取整个主区，与生产实现（价格轴全高热区）同形。
 Rect _sliderRect(FlexiKlineController chart) => Rect.fromLTWH(
-      chart.mainRect.right - 24,
-      chart.mainRect.top,
-      24,
-      chart.mainRect.height,
-    );
+  chart.mainRect.right - 24,
+  chart.mainRect.top,
+  24,
+  chart.mainRect.height,
+);
 
 /// 当前生效区间的上端：主图区顶边对应的价格。
 double _rangeMax(FlexiKlineController chart) {

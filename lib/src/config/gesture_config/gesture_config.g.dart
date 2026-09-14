@@ -14,7 +14,8 @@ abstract class _$GestureConfigCWProxy {
   GestureConfig tolerance(ToleranceConfig? tolerance);
 
   GestureConfig loadMoreWhenNoEnoughDistance(
-      double? loadMoreWhenNoEnoughDistance);
+    double? loadMoreWhenNoEnoughDistance,
+  );
 
   GestureConfig loadMoreWhenNoEnoughCandles(int loadMoreWhenNoEnoughCandles);
 
@@ -44,12 +45,13 @@ abstract class _$GestureConfigCWProxy {
 
   GestureConfig scaleSessionTimeout(Duration scaleSessionTimeout);
 
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GestureConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GestureConfig(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// GestureConfig(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   GestureConfig call({
     bool enableLongPress,
     bool enableInertialPan,
@@ -72,7 +74,8 @@ abstract class _$GestureConfigCWProxy {
   });
 }
 
-/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfGestureConfig.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfGestureConfig.copyWith.fieldName(...)`
+/// Callable proxy for `copyWith` functionality.
+/// Use as `instanceOfGestureConfig.copyWith(...)` or call `instanceOfGestureConfig.copyWith.fieldName(value)` for a single field.
 class _$GestureConfigCWProxyImpl implements _$GestureConfigCWProxy {
   const _$GestureConfigCWProxyImpl(this._value);
 
@@ -80,82 +83,82 @@ class _$GestureConfigCWProxyImpl implements _$GestureConfigCWProxy {
 
   @override
   GestureConfig enableLongPress(bool enableLongPress) =>
-      this(enableLongPress: enableLongPress);
+      call(enableLongPress: enableLongPress);
 
   @override
   GestureConfig enableInertialPan(bool enableInertialPan) =>
-      this(enableInertialPan: enableInertialPan);
+      call(enableInertialPan: enableInertialPan);
 
   @override
   GestureConfig tolerance(ToleranceConfig? tolerance) =>
-      this(tolerance: tolerance);
+      call(tolerance: tolerance);
 
   @override
   GestureConfig loadMoreWhenNoEnoughDistance(
-          double? loadMoreWhenNoEnoughDistance) =>
-      this(loadMoreWhenNoEnoughDistance: loadMoreWhenNoEnoughDistance);
+    double? loadMoreWhenNoEnoughDistance,
+  ) => call(loadMoreWhenNoEnoughDistance: loadMoreWhenNoEnoughDistance);
 
   @override
   GestureConfig loadMoreWhenNoEnoughCandles(int loadMoreWhenNoEnoughCandles) =>
-      this(loadMoreWhenNoEnoughCandles: loadMoreWhenNoEnoughCandles);
+      call(loadMoreWhenNoEnoughCandles: loadMoreWhenNoEnoughCandles);
 
   @override
-  GestureConfig enableScale(bool enableScale) => this(enableScale: enableScale);
+  GestureConfig enableScale(bool enableScale) => call(enableScale: enableScale);
 
   @override
   GestureConfig scalePosition(ScalePosition scalePosition) =>
-      this(scalePosition: scalePosition);
+      call(scalePosition: scalePosition);
 
   @override
-  GestureConfig scaleSpeed(double scaleSpeed) => this(scaleSpeed: scaleSpeed);
+  GestureConfig scaleSpeed(double scaleSpeed) => call(scaleSpeed: scaleSpeed);
 
   @override
   GestureConfig supportKeyboardShortcuts(bool supportKeyboardShortcuts) =>
-      this(supportKeyboardShortcuts: supportKeyboardShortcuts);
+      call(supportKeyboardShortcuts: supportKeyboardShortcuts);
 
   @override
-  GestureConfig enableZoom(bool enableZoom) => this(enableZoom: enableZoom);
+  GestureConfig enableZoom(bool enableZoom) => call(enableZoom: enableZoom);
 
   @override
   GestureConfig zoomStartMinDistance(int zoomStartMinDistance) =>
-      this(zoomStartMinDistance: zoomStartMinDistance);
+      call(zoomStartMinDistance: zoomStartMinDistance);
 
   @override
   GestureConfig maxZoomPerGesture(double maxZoomPerGesture) =>
-      this(maxZoomPerGesture: maxZoomPerGesture);
+      call(maxZoomPerGesture: maxZoomPerGesture);
 
   @override
   GestureConfig useCustomZoomRect(bool useCustomZoomRect) =>
-      this(useCustomZoomRect: useCustomZoomRect);
+      call(useCustomZoomRect: useCustomZoomRect);
 
   @override
   GestureConfig panClaimRatio(double panClaimRatio) =>
-      this(panClaimRatio: panClaimRatio);
+      call(panClaimRatio: panClaimRatio);
 
   @override
   GestureConfig dragClaimSlopFactor(double dragClaimSlopFactor) =>
-      this(dragClaimSlopFactor: dragClaimSlopFactor);
+      call(dragClaimSlopFactor: dragClaimSlopFactor);
 
   @override
   GestureConfig scaleClaimSlopFactor(double scaleClaimSlopFactor) =>
-      this(scaleClaimSlopFactor: scaleClaimSlopFactor);
+      call(scaleClaimSlopFactor: scaleClaimSlopFactor);
 
   @override
   GestureConfig signalScaleFactor(double signalScaleFactor) =>
-      this(signalScaleFactor: signalScaleFactor);
+      call(signalScaleFactor: signalScaleFactor);
 
   @override
   GestureConfig scaleSessionTimeout(Duration scaleSessionTimeout) =>
-      this(scaleSessionTimeout: scaleSessionTimeout);
+      call(scaleSessionTimeout: scaleSessionTimeout);
 
-  @override
-
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GestureConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GestureConfig(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// GestureConfig(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
+  @override
   GestureConfig call({
     Object? enableLongPress = const $CopyWithPlaceholder(),
     Object? enableInertialPan = const $CopyWithPlaceholder(),
@@ -177,11 +180,15 @@ class _$GestureConfigCWProxyImpl implements _$GestureConfigCWProxy {
     Object? scaleSessionTimeout = const $CopyWithPlaceholder(),
   }) {
     return GestureConfig(
-      enableLongPress: enableLongPress == const $CopyWithPlaceholder()
+      enableLongPress:
+          enableLongPress == const $CopyWithPlaceholder() ||
+              enableLongPress == null
           ? _value.enableLongPress
           // ignore: cast_nullable_to_non_nullable
           : enableLongPress as bool,
-      enableInertialPan: enableInertialPan == const $CopyWithPlaceholder()
+      enableInertialPan:
+          enableInertialPan == const $CopyWithPlaceholder() ||
+              enableInertialPan == null
           ? _value.enableInertialPan
           // ignore: cast_nullable_to_non_nullable
           : enableInertialPan as bool,
@@ -191,64 +198,85 @@ class _$GestureConfigCWProxyImpl implements _$GestureConfigCWProxy {
           : tolerance as ToleranceConfig?,
       loadMoreWhenNoEnoughDistance:
           loadMoreWhenNoEnoughDistance == const $CopyWithPlaceholder()
-              ? _value.loadMoreWhenNoEnoughDistance
-              // ignore: cast_nullable_to_non_nullable
-              : loadMoreWhenNoEnoughDistance as double?,
+          ? _value.loadMoreWhenNoEnoughDistance
+          // ignore: cast_nullable_to_non_nullable
+          : loadMoreWhenNoEnoughDistance as double?,
       loadMoreWhenNoEnoughCandles:
-          loadMoreWhenNoEnoughCandles == const $CopyWithPlaceholder()
-              ? _value.loadMoreWhenNoEnoughCandles
-              // ignore: cast_nullable_to_non_nullable
-              : loadMoreWhenNoEnoughCandles as int,
-      enableScale: enableScale == const $CopyWithPlaceholder()
+          loadMoreWhenNoEnoughCandles == const $CopyWithPlaceholder() ||
+              loadMoreWhenNoEnoughCandles == null
+          ? _value.loadMoreWhenNoEnoughCandles
+          // ignore: cast_nullable_to_non_nullable
+          : loadMoreWhenNoEnoughCandles as int,
+      enableScale:
+          enableScale == const $CopyWithPlaceholder() || enableScale == null
           ? _value.enableScale
           // ignore: cast_nullable_to_non_nullable
           : enableScale as bool,
-      scalePosition: scalePosition == const $CopyWithPlaceholder()
+      scalePosition:
+          scalePosition == const $CopyWithPlaceholder() || scalePosition == null
           ? _value.scalePosition
           // ignore: cast_nullable_to_non_nullable
           : scalePosition as ScalePosition,
-      scaleSpeed: scaleSpeed == const $CopyWithPlaceholder()
+      scaleSpeed:
+          scaleSpeed == const $CopyWithPlaceholder() || scaleSpeed == null
           ? _value.scaleSpeed
           // ignore: cast_nullable_to_non_nullable
           : scaleSpeed as double,
       supportKeyboardShortcuts:
-          supportKeyboardShortcuts == const $CopyWithPlaceholder()
-              ? _value.supportKeyboardShortcuts
-              // ignore: cast_nullable_to_non_nullable
-              : supportKeyboardShortcuts as bool,
-      enableZoom: enableZoom == const $CopyWithPlaceholder()
+          supportKeyboardShortcuts == const $CopyWithPlaceholder() ||
+              supportKeyboardShortcuts == null
+          ? _value.supportKeyboardShortcuts
+          // ignore: cast_nullable_to_non_nullable
+          : supportKeyboardShortcuts as bool,
+      enableZoom:
+          enableZoom == const $CopyWithPlaceholder() || enableZoom == null
           ? _value.enableZoom
           // ignore: cast_nullable_to_non_nullable
           : enableZoom as bool,
-      zoomStartMinDistance: zoomStartMinDistance == const $CopyWithPlaceholder()
+      zoomStartMinDistance:
+          zoomStartMinDistance == const $CopyWithPlaceholder() ||
+              zoomStartMinDistance == null
           ? _value.zoomStartMinDistance
           // ignore: cast_nullable_to_non_nullable
           : zoomStartMinDistance as int,
-      maxZoomPerGesture: maxZoomPerGesture == const $CopyWithPlaceholder()
+      maxZoomPerGesture:
+          maxZoomPerGesture == const $CopyWithPlaceholder() ||
+              maxZoomPerGesture == null
           ? _value.maxZoomPerGesture
           // ignore: cast_nullable_to_non_nullable
           : maxZoomPerGesture as double,
-      useCustomZoomRect: useCustomZoomRect == const $CopyWithPlaceholder()
+      useCustomZoomRect:
+          useCustomZoomRect == const $CopyWithPlaceholder() ||
+              useCustomZoomRect == null
           ? _value.useCustomZoomRect
           // ignore: cast_nullable_to_non_nullable
           : useCustomZoomRect as bool,
-      panClaimRatio: panClaimRatio == const $CopyWithPlaceholder()
+      panClaimRatio:
+          panClaimRatio == const $CopyWithPlaceholder() || panClaimRatio == null
           ? _value.panClaimRatio
           // ignore: cast_nullable_to_non_nullable
           : panClaimRatio as double,
-      dragClaimSlopFactor: dragClaimSlopFactor == const $CopyWithPlaceholder()
+      dragClaimSlopFactor:
+          dragClaimSlopFactor == const $CopyWithPlaceholder() ||
+              dragClaimSlopFactor == null
           ? _value.dragClaimSlopFactor
           // ignore: cast_nullable_to_non_nullable
           : dragClaimSlopFactor as double,
-      scaleClaimSlopFactor: scaleClaimSlopFactor == const $CopyWithPlaceholder()
+      scaleClaimSlopFactor:
+          scaleClaimSlopFactor == const $CopyWithPlaceholder() ||
+              scaleClaimSlopFactor == null
           ? _value.scaleClaimSlopFactor
           // ignore: cast_nullable_to_non_nullable
           : scaleClaimSlopFactor as double,
-      signalScaleFactor: signalScaleFactor == const $CopyWithPlaceholder()
+      signalScaleFactor:
+          signalScaleFactor == const $CopyWithPlaceholder() ||
+              signalScaleFactor == null
           ? _value.signalScaleFactor
           // ignore: cast_nullable_to_non_nullable
           : signalScaleFactor as double,
-      scaleSessionTimeout: scaleSessionTimeout == const $CopyWithPlaceholder()
+      scaleSessionTimeout:
+          scaleSessionTimeout == const $CopyWithPlaceholder() ||
+              scaleSessionTimeout == null
           ? _value.scaleSessionTimeout
           // ignore: cast_nullable_to_non_nullable
           : scaleSessionTimeout as Duration,
@@ -257,7 +285,8 @@ class _$GestureConfigCWProxyImpl implements _$GestureConfigCWProxy {
 }
 
 extension $GestureConfigCopyWith on GestureConfig {
-  /// Returns a callable class that can be used as follows: `instanceOfGestureConfig.copyWith(...)` or like so:`instanceOfGestureConfig.copyWith.fieldName(...)`.
+  /// Returns a callable class used to build a new instance with modified fields.
+  /// Example: `instanceOfGestureConfig.copyWith(...)` or `instanceOfGestureConfig.copyWith.fieldName(...)`.
   // ignore: library_private_types_in_public_api
   _$GestureConfigCWProxy get copyWith => _$GestureConfigCWProxyImpl(this);
 }
@@ -266,53 +295,50 @@ extension $GestureConfigCopyWith on GestureConfig {
 // JsonSerializableGenerator
 // **************************************************************************
 
-GestureConfig _$GestureConfigFromJson(Map<String, dynamic> json) =>
-    GestureConfig(
-      enableLongPress: json['enableLongPress'] as bool? ?? true,
-      enableInertialPan: json['enableInertialPan'] as bool? ?? true,
-      tolerance: json['tolerance'] == null
-          ? null
-          : ToleranceConfig.fromJson(json['tolerance'] as Map<String, dynamic>),
-      loadMoreWhenNoEnoughDistance:
-          (json['loadMoreWhenNoEnoughDistance'] as num?)?.toDouble(),
-      loadMoreWhenNoEnoughCandles:
-          (json['loadMoreWhenNoEnoughCandles'] as num?)?.toInt() ?? 60,
-      enableScale: json['enableScale'] as bool? ?? true,
-      scalePosition: json['scalePosition'] == null
-          ? ScalePosition.auto
-          : const ScalePositionConverter()
-              .fromJson(json['scalePosition'] as String),
-      scaleSpeed: (json['scaleSpeed'] as num?)?.toDouble() ?? 10,
-      supportKeyboardShortcuts:
-          json['supportKeyboardShortcuts'] as bool? ?? true,
-      enableZoom: json['enableZoom'] as bool? ?? false,
-      zoomStartMinDistance:
-          (json['zoomStartMinDistance'] as num?)?.toInt() ?? 5,
-      maxZoomPerGesture: (json['maxZoomPerGesture'] as num?)?.toDouble() ?? 6,
-      useCustomZoomRect: json['useCustomZoomRect'] as bool? ?? false,
-      panClaimRatio: (json['panClaimRatio'] as num?)?.toDouble() ?? 2,
-      dragClaimSlopFactor:
-          (json['dragClaimSlopFactor'] as num?)?.toDouble() ?? 0.5,
-      scaleClaimSlopFactor:
-          (json['scaleClaimSlopFactor'] as num?)?.toDouble() ?? 1,
-      signalScaleFactor: (json['signalScaleFactor'] as num?)?.toDouble() ?? 200,
-      scaleSessionTimeout: json['scaleSessionTimeout'] == null
-          ? const Duration(milliseconds: 800)
-          : Duration(
-              microseconds: (json['scaleSessionTimeout'] as num).toInt()),
-    );
+GestureConfig _$GestureConfigFromJson(
+  Map<String, dynamic> json,
+) => GestureConfig(
+  enableLongPress: json['enableLongPress'] as bool? ?? true,
+  enableInertialPan: json['enableInertialPan'] as bool? ?? true,
+  tolerance: json['tolerance'] == null
+      ? null
+      : ToleranceConfig.fromJson(json['tolerance'] as Map<String, dynamic>),
+  loadMoreWhenNoEnoughDistance: (json['loadMoreWhenNoEnoughDistance'] as num?)
+      ?.toDouble(),
+  loadMoreWhenNoEnoughCandles:
+      (json['loadMoreWhenNoEnoughCandles'] as num?)?.toInt() ?? 60,
+  enableScale: json['enableScale'] as bool? ?? true,
+  scalePosition: json['scalePosition'] == null
+      ? ScalePosition.auto
+      : const ScalePositionConverter().fromJson(
+          json['scalePosition'] as String,
+        ),
+  scaleSpeed: (json['scaleSpeed'] as num?)?.toDouble() ?? 10,
+  supportKeyboardShortcuts: json['supportKeyboardShortcuts'] as bool? ?? true,
+  enableZoom: json['enableZoom'] as bool? ?? false,
+  zoomStartMinDistance: (json['zoomStartMinDistance'] as num?)?.toInt() ?? 5,
+  maxZoomPerGesture: (json['maxZoomPerGesture'] as num?)?.toDouble() ?? 6,
+  useCustomZoomRect: json['useCustomZoomRect'] as bool? ?? false,
+  panClaimRatio: (json['panClaimRatio'] as num?)?.toDouble() ?? 2,
+  dragClaimSlopFactor: (json['dragClaimSlopFactor'] as num?)?.toDouble() ?? 0.5,
+  scaleClaimSlopFactor: (json['scaleClaimSlopFactor'] as num?)?.toDouble() ?? 1,
+  signalScaleFactor: (json['signalScaleFactor'] as num?)?.toDouble() ?? 200,
+  scaleSessionTimeout: json['scaleSessionTimeout'] == null
+      ? const Duration(milliseconds: 800)
+      : Duration(microseconds: (json['scaleSessionTimeout'] as num).toInt()),
+);
 
 Map<String, dynamic> _$GestureConfigToJson(GestureConfig instance) =>
     <String, dynamic>{
       'enableLongPress': instance.enableLongPress,
       'enableInertialPan': instance.enableInertialPan,
       'tolerance': instance.tolerance.toJson(),
-      if (instance.loadMoreWhenNoEnoughDistance case final value?)
-        'loadMoreWhenNoEnoughDistance': value,
+      'loadMoreWhenNoEnoughDistance': ?instance.loadMoreWhenNoEnoughDistance,
       'loadMoreWhenNoEnoughCandles': instance.loadMoreWhenNoEnoughCandles,
       'enableScale': instance.enableScale,
-      'scalePosition':
-          const ScalePositionConverter().toJson(instance.scalePosition),
+      'scalePosition': const ScalePositionConverter().toJson(
+        instance.scalePosition,
+      ),
       'scaleSpeed': instance.scaleSpeed,
       'supportKeyboardShortcuts': instance.supportKeyboardShortcuts,
       'enableZoom': instance.enableZoom,

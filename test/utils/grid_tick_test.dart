@@ -340,7 +340,7 @@ void main() {
         autoStep: 5e2,
         autoCount: 7,
         zoomStep: 2.5e1,
-        zoomCount: 7
+        zoomCount: 7,
       ),
       (
         name: 'SOL',
@@ -350,7 +350,7 @@ void main() {
         autoStep: 2.5,
         autoCount: 5,
         zoomStep: 1e-1,
-        zoomCount: 5
+        zoomCount: 5,
       ),
       (
         name: 'DOGE',
@@ -360,7 +360,7 @@ void main() {
         autoStep: 2e-3,
         autoCount: 5,
         zoomStep: 1e-4,
-        zoomCount: 5
+        zoomCount: 5,
       ),
       (
         name: 'SHIB',
@@ -370,7 +370,7 @@ void main() {
         autoStep: 2.5e-7,
         autoCount: 5,
         zoomStep: 1e-8,
-        zoomCount: 7
+        zoomCount: 7,
       ),
       (
         name: 'PEPE',
@@ -380,7 +380,7 @@ void main() {
         autoStep: 2e-8,
         autoCount: 6,
         zoomStep: 1e-9,
-        zoomCount: 6
+        zoomCount: 6,
       ),
     ];
 

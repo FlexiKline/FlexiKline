@@ -360,8 +360,11 @@ void main() {
     });
 
     testWidgets('showYAxisTick = false: 只剩横线, 无刻度文本', (tester) async {
-      final scene =
-          await arrange(tester, mode: const GridTickMode.nice(targetDivisions: _divisions), showYAxisTick: false);
+      final scene = await arrange(
+        tester,
+        mode: const GridTickMode.nice(targetDivisions: _divisions),
+        showYAxisTick: false,
+      );
       final chart = scene.controller;
 
       final spy = await paintFrame(tester, chart);

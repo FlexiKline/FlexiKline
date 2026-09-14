@@ -16,4 +16,5 @@ export './algorithm_util.dart';
 export './convert_util.dart';
 export './grid_tick_util.dart' hide niceStep, NiceStep;
 export 'vector_util.dart';
+
 // export './platform_util.dart';

@@ -70,10 +70,10 @@ void main() {
   }
 
   FakeFlexiKlineConfiguration newConfig() => FakeFlexiKlineConfiguration(
-        enableStorage: true,
-        enableDraw: true,
-        shareConfigInstance: true,
-      );
+    enableStorage: true,
+    enableDraw: true,
+    shareConfigInstance: true,
+  );
 
   /// 取主区内一条水平线段的两端，线段落在可见蜡烛范围内。
   ({Offset from, Offset to}) lineEnds(FlexiKlineController controller, {double dyShift = 0}) {
@@ -102,7 +102,8 @@ void main() {
       expect(
         controller.drawState.object,
         isNull,
-        reason: '对象已被移出对象树并 dispose，drawState 再指着它就是悬空引用：'
+        reason:
+            '对象已被移出对象树并 dispose，drawState 再指着它就是悬空引用：'
             '后续确认/移动/改样式都会作用在一个不再被绘制的对象上。',
       );
       expect(controller.hitTestDrawObject(ends.from.translate(20, 0)), isNull);

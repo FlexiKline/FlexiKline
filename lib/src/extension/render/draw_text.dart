@@ -63,7 +63,8 @@ extension FlexiDrawTextExt on Canvas {
     }
 
     final textPainter = TextPainter(
-      text: textSpan ??
+      text:
+          textSpan ??
           TextSpan(
             text: text,
             style: style,
@@ -142,24 +143,28 @@ extension FlexiDrawTextExt on Canvas {
     if (hasPadding || isDrawBg || isDrawBorder) {
       final Path path = Path();
       if (borderRadius != null) {
-        path.addRRect(RRect.fromLTRBAndCorners(
-          offset.dx,
-          offset.dy,
-          offset.dx + containerSize.width,
-          offset.dy + containerSize.height,
-          topLeft: borderRadius.topLeft,
-          topRight: borderRadius.topRight,
-          bottomLeft: borderRadius.bottomLeft,
-          bottomRight: borderRadius.bottomRight,
-        ));
+        path.addRRect(
+          RRect.fromLTRBAndCorners(
+            offset.dx,
+            offset.dy,
+            offset.dx + containerSize.width,
+            offset.dy + containerSize.height,
+            topLeft: borderRadius.topLeft,
+            topRight: borderRadius.topRight,
+            bottomLeft: borderRadius.bottomLeft,
+            bottomRight: borderRadius.bottomRight,
+          ),
+        );
       } else {
-        path.addRRect(RRect.fromLTRBR(
-          offset.dx,
-          offset.dy,
-          offset.dx + containerSize.width,
-          offset.dy + containerSize.height,
-          const Radius.circular(0),
-        ));
+        path.addRRect(
+          RRect.fromLTRBR(
+            offset.dx,
+            offset.dy,
+            offset.dx + containerSize.width,
+            offset.dy + containerSize.height,
+            const Radius.circular(0),
+          ),
+        );
       }
 
       if (isDrawBg) {

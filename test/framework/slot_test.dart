@@ -67,7 +67,8 @@ void main() {
                 expect(
                   manager.computedDataCapacity,
                   greaterThan(slot),
-                  reason: 'run#$run: 执行 $op 后 computedDataCapacity '
+                  reason:
+                      'run#$run: 执行 $op 后 computedDataCapacity '
                       '(${manager.computedDataCapacity}) 必须 > 存活 $key 的 slot $slot',
                 );
               }
@@ -122,7 +123,8 @@ void main() {
               expect(
                 manager.getComputedDataIndex(newKey),
                 equals(recycledSlots[i]),
-                reason: 'run#$run: 第 ${i + 1} 个新 key 应复用回收队列中的 slot '
+                reason:
+                    'run#$run: 第 ${i + 1} 个新 key 应复用回收队列中的 slot '
                     '${recycledSlots[i]}',
               );
             }

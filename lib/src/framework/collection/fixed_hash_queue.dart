@@ -27,8 +27,8 @@ import 'dart:collection';
 /// 实现在[append]中.
 class FixedHashQueue<E> implements Queue<E> {
   FixedHashQueue(this.fixedCapacity)
-      : assert(fixedCapacity >= 0, 'fixedCapacity must be greater than or equal to 0'),
-        _queue = ListQueue<E>(fixedCapacity);
+    : assert(fixedCapacity >= 0, 'fixedCapacity must be greater than or equal to 0'),
+      _queue = ListQueue<E>(fixedCapacity);
 
   final int fixedCapacity;
   ListQueue<E> _queue;

@@ -190,8 +190,11 @@ void main() {
             };
             for (final key in keptKeys) {
               if (key is ComputedIndicatorKey) {
-                expect(manager.getComputedDataIndex(key), equals(oldDataSlots[key]),
-                    reason: 'run#$run: 保留的 $key 的 slot 应不变');
+                expect(
+                  manager.getComputedDataIndex(key),
+                  equals(oldDataSlots[key]),
+                  reason: 'run#$run: 保留的 $key 的 slot 应不变',
+                );
               }
             }
 
@@ -200,9 +203,13 @@ void main() {
             for (final key in newAllKeys) {
               if (key is ComputedIndicatorKey) {
                 final slot = manager.getComputedDataIndex(key)!;
-                expect(manager.computedDataCapacity, greaterThan(slot),
-                    reason: 'run#$run: computedDataCapacity '
-                        '(${manager.computedDataCapacity}) 必须 > 存活 $key 的 slot $slot');
+                expect(
+                  manager.computedDataCapacity,
+                  greaterThan(slot),
+                  reason:
+                      'run#$run: computedDataCapacity '
+                      '(${manager.computedDataCapacity}) 必须 > 存活 $key 的 slot $slot',
+                );
               }
             }
 
@@ -230,11 +237,14 @@ void main() {
             final context = FakePaintContext();
 
             final count = 1 + rng.nextInt(5);
-            final indicatorPairs = <({
-              ComputedIndicatorKey key,
-              TestComputedIndicator oldInd,
-              TestComputedIndicator newInd,
-            })>[];
+            final indicatorPairs =
+                <
+                  ({
+                    ComputedIndicatorKey key,
+                    TestComputedIndicator oldInd,
+                    TestComputedIndicator newInd,
+                  })
+                >[];
 
             for (int i = 0; i < count; i++) {
               final key = ComputedIndicatorKey('cfg_$i');
@@ -264,8 +274,11 @@ void main() {
 
             // 验证指标已激活
             for (final pair in indicatorPairs) {
-              expect(manager.mainIndicatorKeys.toSet().contains(pair.key), isTrue,
-                  reason: 'run#$run: ${pair.key} 应已激活');
+              expect(
+                manager.mainIndicatorKeys.toSet().contains(pair.key),
+                isTrue,
+                reason: 'run#$run: ${pair.key} 应已激活',
+              );
             }
 
             manager.updateIndicators(

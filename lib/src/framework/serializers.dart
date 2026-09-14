@@ -216,13 +216,13 @@ class FlexiChartTypeConverter implements JsonConverter<FlexiChartType, Map<Strin
   Map<String, dynamic> toJson(FlexiChartType chartType) {
     return switch (chartType) {
       FlexiBarChartType(:final style) => {
-          'type': 'bar',
-          'style': style.name,
-        },
+        'type': 'bar',
+        'style': style.name,
+      },
       FlexiLineChartType(:final style) => {
-          'type': 'line',
-          'style': style.name,
-        },
+        'type': 'line',
+        'style': style.name,
+      },
     };
   }
 }
@@ -298,23 +298,27 @@ class IntervalChartTypesConverter implements JsonConverter<Map<ITimeInterval, Fl
   @override
   Map<ITimeInterval, FlexiChartType>? fromJson(List<dynamic>? json) {
     if (json == null) return null;
-    return Map.fromEntries(json.map((e) {
-      final map = e as Map<String, dynamic>;
-      return MapEntry(
-        const ITimeIntervalConvert().fromJson(map['interval'] as Map<String, dynamic>),
-        const FlexiChartTypeConverter().fromJson(map['chartType'] as Map<String, dynamic>),
-      );
-    }));
+    return Map.fromEntries(
+      json.map((e) {
+        final map = e as Map<String, dynamic>;
+        return MapEntry(
+          const ITimeIntervalConvert().fromJson(map['interval'] as Map<String, dynamic>),
+          const FlexiChartTypeConverter().fromJson(map['chartType'] as Map<String, dynamic>),
+        );
+      }),
+    );
   }
 
   @override
   List<dynamic>? toJson(Map<ITimeInterval, FlexiChartType>? map) {
     if (map == null) return null;
     return map.entries
-        .map((e) => {
-              'interval': const ITimeIntervalConvert().toJson(e.key),
-              'chartType': const FlexiChartTypeConverter().toJson(e.value),
-            })
+        .map(
+          (e) => {
+            'interval': const ITimeIntervalConvert().toJson(e.key),
+            'chartType': const FlexiChartTypeConverter().toJson(e.value),
+          },
+        )
         .toList();
   }
 }
@@ -822,7 +826,8 @@ class LinearGradientConverter implements JsonConverter<LinearGradient, Map<Strin
 
     // 解析颜色列表
     final colorsList = json['colors'] as List<dynamic>?;
-    final colors = colorsList?.map((c) {
+    final colors =
+        colorsList?.map((c) {
           if (c is String) {
             return parseHexColor(c) ?? const Color(0x00000000);
           } else if (c is int) {

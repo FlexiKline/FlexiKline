@@ -21,8 +21,6 @@ export 'gradient_config/gradient_config.dart';
 export 'grid_axis_config/grid_axis_config.dart';
 export 'grid_config/grid_config.dart';
 export 'line_config/line_config.dart';
-export 'loading_config/loading_config.dart';
-export 'magnifier_config/magnifier_config.dart';
 export 'mark_config/mark_config.dart';
 export 'paint_config/paint_config.dart';
 export 'point_config/point_config.dart';

@@ -10,6 +10,8 @@
 * Fix `removeDrawObject(object:)` leaving `drawState` pointing at an object that was already removed and disposed.
 * Fix `removeAllDrawObjects` writing an empty list back to storage right after deleting the key.
 * Fix `startDraw` dropping an unfinished object without clearing its pointer when the same tool is tapped again.
+* Remove `LoadingConfig` from `SettingConfig` and `MagnifierConfig` from `DrawConfig`; loading and magnifier styling is now fully controlled via `FlexiLoading` and `FlexiMagnifier` prefab constructor parameters instead of the configuration center (Breaking Changes).
+* Raise minimum SDK to Dart 3.9 / Flutter 3.35; bump `json_annotation` to `^4.12.0` (Breaking Changes).
 
 ## 2.5.3
 * Fix draw toolbar re-clamping during canvas resize by using the last known toolbar size instead of reading a widget size during build.

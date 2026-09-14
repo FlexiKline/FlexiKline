@@ -23,13 +23,13 @@ import '../support/support.dart';
 const _spec = KlineSpec(symbol: 'TEST', interval: FlexiTimeInterval(1, TimeUnit.day));
 
 CandleModel _candle(int timestamp) => CandleModel(
-      timestamp: timestamp,
-      open: Decimal.one,
-      high: Decimal.fromInt(2),
-      low: Decimal.zero,
-      close: Decimal.one,
-      volume: Decimal.one,
-    );
+  timestamp: timestamp,
+  open: Decimal.one,
+  high: Decimal.fromInt(2),
+  low: Decimal.zero,
+  close: Decimal.one,
+  volume: Decimal.one,
+);
 
 ({KlineData data, IndicatorPaintObjectManager manager, SpyComputedCalculator calculator}) _scene() {
   const key = ComputedIndicatorKey('pipeline');

@@ -49,11 +49,11 @@ const _spec = KlineSpec(
 
 /// 滑竿区宽 24、贴主区右缘、高度取整个主区。
 Rect _sliderRect(FlexiKlineController chart) => Rect.fromLTWH(
-      chart.mainRect.right - 24,
-      chart.mainRect.top,
-      24,
-      chart.mainRect.height,
-    );
+  chart.mainRect.right - 24,
+  chart.mainRect.top,
+  24,
+  chart.mainRect.height,
+);
 
 /// 当前可见价格区间的跨度（经公开面 dyToCandleValue 反算）。
 double _rangeSpan(FlexiKlineController chart) => _rangeMax(chart) - _rangeMin(chart);
@@ -177,9 +177,9 @@ Future<void> _enterMouse(WidgetTester tester, Offset localPosition) async {
 /// 稳定落在蜡烛区的 cross 焦点：往左第 5 根。空白区（`dx > startCandleDx`）另有
 /// `crossConfig.moveByCandleInBlank` 决定吸不吸附，本组不测那条分支。
 Offset _candleAreaFocus(FlexiKlineController chart) => Offset(
-      chart.startCandleDx - chart.candleActualWidth * 5,
-      chart.mainRect.center.dy,
-    );
+  chart.startCandleDx - chart.candleActualWidth * 5,
+  chart.mainRect.center.dy,
+);
 
 // ---------------------------------------------------------------------------
 // 用例
@@ -649,10 +649,12 @@ void main() {
       double scrollDy = 0,
       double scrollDx = 0,
     }) async {
-      await tester.sendEventToBinding(PointerScrollEvent(
-        position: toNonTouchChartGlobal(tester, localPosition),
-        scrollDelta: Offset(scrollDx, scrollDy),
-      ));
+      await tester.sendEventToBinding(
+        PointerScrollEvent(
+          position: toNonTouchChartGlobal(tester, localPosition),
+          scrollDelta: Offset(scrollDx, scrollDy),
+        ),
+      );
       await tester.pump();
     }
 

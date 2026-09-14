@@ -28,7 +28,7 @@ void main() {
     final size = canvas.drawTooltipInfos(
       offset: Offset.zero,
       tooltipInfos: const [],
-      onLayout: (_, __) => layoutCalled = true,
+      onLayout: (_, _) => layoutCalled = true,
     );
 
     expect(size, Size.zero);

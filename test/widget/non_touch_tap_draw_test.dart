@@ -220,10 +220,12 @@ void main() {
       expect(controller.drawState.isExited, isTrue);
 
       // 点击线条位置 → allowSelectWhenExit=false → break 到后续逻辑。
-      await tester.tapAt(_toGlobal(
-        tester,
-        Offset(mainRect.left + 60, mainRect.center.dy),
-      ));
+      await tester.tapAt(
+        _toGlobal(
+          tester,
+          Offset(mainRect.left + 60, mainRect.center.dy),
+        ),
+      );
       await tester.pump();
 
       expect(

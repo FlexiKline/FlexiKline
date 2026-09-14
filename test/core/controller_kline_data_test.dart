@@ -27,16 +27,16 @@ const _spec = KlineSpec(symbol: 'TEST', interval: FlexiTimeInterval(1, TimeUnit.
 const _nextSpec = KlineSpec(symbol: 'NEXT', interval: FlexiTimeInterval(1, TimeUnit.day));
 
 List<CandleModel> _candles(int n) => List.generate(
-      n,
-      (i) => CandleModel(
-        timestamp: 1000 + i * 86400000,
-        open: Decimal.fromInt(100 + i),
-        high: Decimal.fromInt(110 + i),
-        low: Decimal.fromInt(90 + i),
-        close: Decimal.fromInt(105 + i),
-        volume: Decimal.fromInt(1000 + i),
-      ),
-    );
+  n,
+  (i) => CandleModel(
+    timestamp: 1000 + i * 86400000,
+    open: Decimal.fromInt(100 + i),
+    high: Decimal.fromInt(110 + i),
+    low: Decimal.fromInt(90 + i),
+    close: Decimal.fromInt(105 + i),
+    volume: Decimal.fromInt(1000 + i),
+  ),
+);
 
 void main() {
   group('v2.2.0/FlexiKlineController/kline_data', () {
@@ -172,7 +172,9 @@ void main() {
       expect(scene.controller.klineData.length, 3);
       expect(scene.controller.klineData.loadingState, KlineLoadingState.loadingMore);
       expect(
-          scene.controller.klineData.list.map((item) => item.ts), _candles(3).reversed.map((item) => item.timestamp));
+        scene.controller.klineData.list.map((item) => item.ts),
+        _candles(3).reversed.map((item) => item.timestamp),
+      );
     });
 
     testWidgets('命中缓存不计算，fresh replace 只全量计算一次', (tester) async {

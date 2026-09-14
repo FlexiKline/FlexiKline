@@ -30,31 +30,68 @@ part 'gesture_config.g.dart';
 @CopyWith()
 @FlexiConfigSerializable
 class GestureConfig {
-  GestureConfig({
+  factory GestureConfig({
+    bool enableLongPress = true,
+    bool enableInertialPan = true,
+    ToleranceConfig? tolerance,
+    double? loadMoreWhenNoEnoughDistance,
+    int loadMoreWhenNoEnoughCandles = 60,
+    bool enableScale = true,
+    ScalePosition scalePosition = ScalePosition.auto,
+    double scaleSpeed = 10,
+    bool supportKeyboardShortcuts = true,
+    bool enableZoom = false,
+    int zoomStartMinDistance = 5,
+    double maxZoomPerGesture = 6,
+    bool useCustomZoomRect = false,
+    double panClaimRatio = 2,
+    double dragClaimSlopFactor = 0.5,
+    double scaleClaimSlopFactor = 1,
+    double signalScaleFactor = 200,
+    Duration scaleSessionTimeout = const Duration(milliseconds: 800),
+  }) {
+    return GestureConfig._(
+      enableLongPress: enableLongPress,
+      enableInertialPan: enableInertialPan,
+      tolerance: tolerance ?? ToleranceConfig(),
+      loadMoreWhenNoEnoughDistance: loadMoreWhenNoEnoughDistance,
+      loadMoreWhenNoEnoughCandles: loadMoreWhenNoEnoughCandles,
+      enableScale: enableScale,
+      scalePosition: scalePosition,
+      scaleSpeed: scaleSpeed.clamp(1, 30),
+      supportKeyboardShortcuts: supportKeyboardShortcuts,
+      enableZoom: enableZoom,
+      zoomStartMinDistance: zoomStartMinDistance,
+      maxZoomPerGesture: maxZoomPerGesture.clamp(1.2, 20),
+      useCustomZoomRect: useCustomZoomRect,
+      panClaimRatio: panClaimRatio.clamp(1, 10),
+      dragClaimSlopFactor: dragClaimSlopFactor.clamp(0.1, 0.9),
+      scaleClaimSlopFactor: scaleClaimSlopFactor.clamp(0.5, 4),
+      signalScaleFactor: signalScaleFactor,
+      scaleSessionTimeout: scaleSessionTimeout,
+    );
+  }
+
+  const GestureConfig._({
     this.enableLongPress = true,
     this.enableInertialPan = true,
-    ToleranceConfig? tolerance,
+    required this.tolerance,
     this.loadMoreWhenNoEnoughDistance,
     this.loadMoreWhenNoEnoughCandles = 60,
     this.enableScale = true,
     this.scalePosition = ScalePosition.auto,
-    double scaleSpeed = 10,
+    this.scaleSpeed = 10,
     this.supportKeyboardShortcuts = true,
     this.enableZoom = false,
     this.zoomStartMinDistance = 5,
-    double maxZoomPerGesture = 6,
+    this.maxZoomPerGesture = 6,
     this.useCustomZoomRect = false,
-    double panClaimRatio = 2,
-    double dragClaimSlopFactor = 0.5,
-    double scaleClaimSlopFactor = 1,
+    this.panClaimRatio = 2,
+    this.dragClaimSlopFactor = 0.5,
+    this.scaleClaimSlopFactor = 1,
     this.signalScaleFactor = 200,
     this.scaleSessionTimeout = const Duration(milliseconds: 800),
-  })  : tolerance = tolerance ?? ToleranceConfig(),
-        scaleSpeed = scaleSpeed.clamp(1, 30),
-        maxZoomPerGesture = maxZoomPerGesture.clamp(1.2, 20),
-        panClaimRatio = panClaimRatio.clamp(1, 10),
-        dragClaimSlopFactor = dragClaimSlopFactor.clamp(0.1, 0.9),
-        scaleClaimSlopFactor = scaleClaimSlopFactor.clamp(0.5, 4);
+  });
 
   /// 是否启用长按操作
   final bool enableLongPress;

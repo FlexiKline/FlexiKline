@@ -299,7 +299,8 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
     // (单指 span 恒为 0, 缩放再不响应, 也不肯退回平移)。
     //
     // 判定不出来时仍归平移: 竞技场已由原生阈值赢下, 平移好过原地不动。
-    final owner = TouchGestureOwner.resolveChartFallback(
+    final owner =
+        TouchGestureOwner.resolveChartFallback(
           controller,
           delta: session.delta,
           spanDelta: session.spanDelta,
@@ -456,7 +457,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
       final clamped = position.clamp(controller.canvasRect);
       controller.onChartMove(
         clamped - session.lastDrive,
-        smoothFactor: gestureConfig.tolerance.effectivePanSmoothFactor,
+        smoothFactor: gestureConfig.tolerance.panSmoothFactor,
       );
       session.lastDrive = clamped;
     }
@@ -633,9 +634,9 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
 /// 一次触摸序列（第一指按下 → 全部指针离开）的状态，字段按「输入 → 归属 → 业务」三组排列。
 class _TouchSession {
   _TouchSession(PointerDownEvent event)
-      : pointer = event.pointer,
-        downPosition = event.localPosition,
-        latestPosition = event.localPosition;
+    : pointer = event.pointer,
+      downPosition = event.localPosition,
+      latestPosition = event.localPosition;
 
   // ── 输入 ──
 

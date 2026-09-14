@@ -20,10 +20,7 @@ part of 'core.dart';
 typedef OnLoadMoreCandles = Future<void> Function(KlineSpec spec);
 
 /// 将蜡烛图从[begin]动画移动到[end].
-typedef MoveToPositionCallback = Future<bool> Function(
-  double begin,
-  double end,
-);
+typedef MoveToPositionCallback = Future<bool> Function(double begin, double end);
 
 /// 状态管理: 负责数据的管理, 缓存, 切换, 计算.
 mixin StateBinding on KlineBindingBase, SettingBinding {

@@ -196,17 +196,26 @@ void main() {
             }
 
             // 验证：computedDataCapacity 不变
-            expect(manager.computedDataCapacity, equals(computedDataCapacityBefore),
-                reason: 'run#$run: remove 后 computedDataCapacity 应保持不变');
+            expect(
+              manager.computedDataCapacity,
+              equals(computedDataCapacityBefore),
+              reason: 'run#$run: remove 后 computedDataCapacity 应保持不变',
+            );
 
             // 验证：缓存不变（重新 add 应成功）
             for (final key in removeMainKeys) {
-              expect(manager.addMainPaintObject(key, context), isNotNull,
-                  reason: 'run#$run: remove 后重新 addMainPaintObject($key) 应成功');
+              expect(
+                manager.addMainPaintObject(key, context),
+                isNotNull,
+                reason: 'run#$run: remove 后重新 addMainPaintObject($key) 应成功',
+              );
             }
             for (final key in removeSubKeys) {
-              expect(manager.addSubPaintObject(key, context), isNotNull,
-                  reason: 'run#$run: remove 后重新 addSubPaintObject($key) 应成功');
+              expect(
+                manager.addSubPaintObject(key, context),
+                isNotNull,
+                reason: 'run#$run: remove 后重新 addSubPaintObject($key) 应成功',
+              );
             }
           }
         },
@@ -267,13 +276,19 @@ void main() {
 
             // 验证主区激活 key 集合（排除 candle）
             final actualMainKeys = manager.mainIndicatorKeys.where((k) => k != candleIndicatorKey).toSet();
-            expect(actualMainKeys, equals(expectedMainActivated),
-                reason: 'run#$run: 主区激活 key 应等于 persistMainKeys ∩ declaredMainKeys');
+            expect(
+              actualMainKeys,
+              equals(expectedMainActivated),
+              reason: 'run#$run: 主区激活 key 应等于 persistMainKeys ∩ declaredMainKeys',
+            );
 
             // 验证副区激活 key 集合（排除 time）
             final actualSubKeys = manager.subIndicatorKeys.where((k) => k != timeIndicatorKey).toSet();
-            expect(actualSubKeys, equals(expectedSubActivated),
-                reason: 'run#$run: 副区激活 key 应等于 persistSubKeys ∩ declaredSubKeys');
+            expect(
+              actualSubKeys,
+              equals(expectedSubActivated),
+              reason: 'run#$run: 副区激活 key 应等于 persistSubKeys ∩ declaredSubKeys',
+            );
           }
         },
       );

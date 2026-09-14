@@ -29,17 +29,17 @@ import '../support/support.dart';
 /// 构造一根按 [slotCount] 定长 slots 的新蜡烛，
 /// 模拟定向合并中的 `e.toFlexiCandleModel(slotCount, mode)`。
 FlexiCandleModel mergedCandle(int slotCount) => FlexiCandleModel.init(
-      candle: CandleModel(
-        timestamp: 1715769600000,
-        open: '100',
-        high: '110',
-        low: '95',
-        close: '105',
-        volume: '1000',
-      ),
-      count: slotCount,
-      mode: ComputeMode.fast,
-    );
+  candle: CandleModel(
+    timestamp: 1715769600000,
+    open: '100',
+    high: '110',
+    low: '95',
+    close: '105',
+    volume: '1000',
+  ),
+  count: slotCount,
+  mode: ComputeMode.fast,
+);
 
 void main() {
   test('v2.2.0/ComputedSlot/删中间指标后新蜡烛仍能容纳高位存活指标', () {

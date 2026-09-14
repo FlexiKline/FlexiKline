@@ -76,7 +76,8 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
 
   /// Draw 或 zoom 激活时请求键盘焦点，两者都退出时释放。
   void _updateKeyboardFocus() {
-    final needFocus = switch (drawState) {
+    final needFocus =
+        switch (drawState) {
           Drawing() || Editing() => true,
           _ => false,
         } ||
@@ -473,7 +474,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
         final position = details.localPosition.clamp(controller.canvasRect);
         controller.onChartMove(
           position - drag.last,
-          smoothFactor: gestureConfig.tolerance.effectivePanSmoothFactor,
+          smoothFactor: gestureConfig.tolerance.panSmoothFactor,
         );
         drag.last = position;
         controller.onCrossUpdate(position);

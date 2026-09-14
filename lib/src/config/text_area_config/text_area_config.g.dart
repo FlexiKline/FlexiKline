@@ -29,12 +29,13 @@ abstract class _$TextAreaConfigCWProxy {
 
   TextAreaConfig borderRadius(BorderRadius? borderRadius);
 
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `TextAreaConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `TextAreaConfig(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// TextAreaConfig(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   TextAreaConfig call({
     TextStyle style,
     TextAlign textAlign,
@@ -50,56 +51,57 @@ abstract class _$TextAreaConfigCWProxy {
   });
 }
 
-/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfTextAreaConfig.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfTextAreaConfig.copyWith.fieldName(...)`
+/// Callable proxy for `copyWith` functionality.
+/// Use as `instanceOfTextAreaConfig.copyWith(...)` or call `instanceOfTextAreaConfig.copyWith.fieldName(value)` for a single field.
 class _$TextAreaConfigCWProxyImpl implements _$TextAreaConfigCWProxy {
   const _$TextAreaConfigCWProxyImpl(this._value);
 
   final TextAreaConfig _value;
 
   @override
-  TextAreaConfig style(TextStyle style) => this(style: style);
+  TextAreaConfig style(TextStyle style) => call(style: style);
 
   @override
-  TextAreaConfig textAlign(TextAlign textAlign) => this(textAlign: textAlign);
+  TextAreaConfig textAlign(TextAlign textAlign) => call(textAlign: textAlign);
 
   @override
   TextAreaConfig strutStyle(StrutStyle? strutStyle) =>
-      this(strutStyle: strutStyle);
+      call(strutStyle: strutStyle);
 
   @override
-  TextAreaConfig textWidth(double? textWidth) => this(textWidth: textWidth);
+  TextAreaConfig textWidth(double? textWidth) => call(textWidth: textWidth);
 
   @override
-  TextAreaConfig minWidth(double? minWidth) => this(minWidth: minWidth);
+  TextAreaConfig minWidth(double? minWidth) => call(minWidth: minWidth);
 
   @override
-  TextAreaConfig maxWidth(double? maxWidth) => this(maxWidth: maxWidth);
+  TextAreaConfig maxWidth(double? maxWidth) => call(maxWidth: maxWidth);
 
   @override
-  TextAreaConfig maxLines(int? maxLines) => this(maxLines: maxLines);
+  TextAreaConfig maxLines(int? maxLines) => call(maxLines: maxLines);
 
   @override
   TextAreaConfig backgroundColor(Color? backgroundColor) =>
-      this(backgroundColor: backgroundColor);
+      call(backgroundColor: backgroundColor);
 
   @override
-  TextAreaConfig padding(EdgeInsets? padding) => this(padding: padding);
+  TextAreaConfig padding(EdgeInsets? padding) => call(padding: padding);
 
   @override
-  TextAreaConfig border(BorderSide? border) => this(border: border);
+  TextAreaConfig border(BorderSide? border) => call(border: border);
 
   @override
   TextAreaConfig borderRadius(BorderRadius? borderRadius) =>
-      this(borderRadius: borderRadius);
+      call(borderRadius: borderRadius);
 
-  @override
-
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `TextAreaConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `TextAreaConfig(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// TextAreaConfig(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
+  @override
   TextAreaConfig call({
     Object? style = const $CopyWithPlaceholder(),
     Object? textAlign = const $CopyWithPlaceholder(),
@@ -114,11 +116,11 @@ class _$TextAreaConfigCWProxyImpl implements _$TextAreaConfigCWProxy {
     Object? borderRadius = const $CopyWithPlaceholder(),
   }) {
     return TextAreaConfig(
-      style: style == const $CopyWithPlaceholder()
+      style: style == const $CopyWithPlaceholder() || style == null
           ? _value.style
           // ignore: cast_nullable_to_non_nullable
           : style as TextStyle,
-      textAlign: textAlign == const $CopyWithPlaceholder()
+      textAlign: textAlign == const $CopyWithPlaceholder() || textAlign == null
           ? _value.textAlign
           // ignore: cast_nullable_to_non_nullable
           : textAlign as TextAlign,
@@ -163,7 +165,8 @@ class _$TextAreaConfigCWProxyImpl implements _$TextAreaConfigCWProxy {
 }
 
 extension $TextAreaConfigCopyWith on TextAreaConfig {
-  /// Returns a callable class that can be used as follows: `instanceOfTextAreaConfig.copyWith(...)` or like so:`instanceOfTextAreaConfig.copyWith.fieldName(...)`.
+  /// Returns a callable class used to build a new instance with modified fields.
+  /// Example: `instanceOfTextAreaConfig.copyWith(...)` or `instanceOfTextAreaConfig.copyWith.fieldName(...)`.
   // ignore: library_private_types_in_public_api
   _$TextAreaConfigCWProxy get copyWith => _$TextAreaConfigCWProxyImpl(this);
 }
@@ -178,66 +181,77 @@ TextAreaConfig _$TextAreaConfigFromJson(Map<String, dynamic> json) =>
           ? const TextStyle(
               fontSize: defaultTextSize,
               overflow: TextOverflow.ellipsis,
-              height: defaultTextHeight)
-          : const TextStyleConverter()
-              .fromJson(json['style'] as Map<String, dynamic>),
+              height: defaultTextHeight,
+            )
+          : const TextStyleConverter().fromJson(
+              json['style'] as Map<String, dynamic>,
+            ),
       textAlign: json['textAlign'] == null
           ? TextAlign.start
           : const TextAlignConvert().fromJson(json['textAlign'] as String),
       strutStyle: _$JsonConverterFromJson<Map<String, dynamic>, StrutStyle>(
-          json['strutStyle'], const StrutStyleConverter().fromJson),
+        json['strutStyle'],
+        const StrutStyleConverter().fromJson,
+      ),
       textWidth: (json['textWidth'] as num?)?.toDouble(),
       minWidth: (json['minWidth'] as num?)?.toDouble(),
       maxWidth: (json['maxWidth'] as num?)?.toDouble(),
       maxLines: (json['maxLines'] as num?)?.toInt(),
       backgroundColor: _$JsonConverterFromJson<String, Color>(
-          json['backgroundColor'], const ColorConverter().fromJson),
+        json['backgroundColor'],
+        const ColorConverter().fromJson,
+      ),
       padding: _$JsonConverterFromJson<Map<String, dynamic>, EdgeInsets>(
-          json['padding'], const EdgeInsetsConverter().fromJson),
+        json['padding'],
+        const EdgeInsetsConverter().fromJson,
+      ),
       border: _$JsonConverterFromJson<Map<String, dynamic>, BorderSide>(
-          json['border'], const BorderSideConvert().fromJson),
+        json['border'],
+        const BorderSideConvert().fromJson,
+      ),
       borderRadius: _$JsonConverterFromJson<Map<String, dynamic>, BorderRadius>(
-          json['borderRadius'], const BorderRadiusConverter().fromJson),
+        json['borderRadius'],
+        const BorderRadiusConverter().fromJson,
+      ),
     );
 
-Map<String, dynamic> _$TextAreaConfigToJson(TextAreaConfig instance) =>
-    <String, dynamic>{
-      'style': const TextStyleConverter().toJson(instance.style),
-      'textAlign': const TextAlignConvert().toJson(instance.textAlign),
-      if (_$JsonConverterToJson<Map<String, dynamic>, StrutStyle>(
-              instance.strutStyle, const StrutStyleConverter().toJson)
-          case final value?)
-        'strutStyle': value,
-      if (instance.textWidth case final value?) 'textWidth': value,
-      if (instance.minWidth case final value?) 'minWidth': value,
-      if (instance.maxWidth case final value?) 'maxWidth': value,
-      if (instance.maxLines case final value?) 'maxLines': value,
-      if (_$JsonConverterToJson<String, Color>(
-              instance.backgroundColor, const ColorConverter().toJson)
-          case final value?)
-        'backgroundColor': value,
-      if (_$JsonConverterToJson<Map<String, dynamic>, EdgeInsets>(
-              instance.padding, const EdgeInsetsConverter().toJson)
-          case final value?)
-        'padding': value,
-      if (_$JsonConverterToJson<Map<String, dynamic>, BorderSide>(
-              instance.border, const BorderSideConvert().toJson)
-          case final value?)
-        'border': value,
-      if (_$JsonConverterToJson<Map<String, dynamic>, BorderRadius>(
-              instance.borderRadius, const BorderRadiusConverter().toJson)
-          case final value?)
-        'borderRadius': value,
-    };
+Map<String, dynamic> _$TextAreaConfigToJson(
+  TextAreaConfig instance,
+) => <String, dynamic>{
+  'style': const TextStyleConverter().toJson(instance.style),
+  'textAlign': const TextAlignConvert().toJson(instance.textAlign),
+  'strutStyle': ?_$JsonConverterToJson<Map<String, dynamic>, StrutStyle>(
+    instance.strutStyle,
+    const StrutStyleConverter().toJson,
+  ),
+  'textWidth': ?instance.textWidth,
+  'minWidth': ?instance.minWidth,
+  'maxWidth': ?instance.maxWidth,
+  'maxLines': ?instance.maxLines,
+  'backgroundColor': ?_$JsonConverterToJson<String, Color>(
+    instance.backgroundColor,
+    const ColorConverter().toJson,
+  ),
+  'padding': ?_$JsonConverterToJson<Map<String, dynamic>, EdgeInsets>(
+    instance.padding,
+    const EdgeInsetsConverter().toJson,
+  ),
+  'border': ?_$JsonConverterToJson<Map<String, dynamic>, BorderSide>(
+    instance.border,
+    const BorderSideConvert().toJson,
+  ),
+  'borderRadius': ?_$JsonConverterToJson<Map<String, dynamic>, BorderRadius>(
+    instance.borderRadius,
+    const BorderRadiusConverter().toJson,
+  ),
+};
 
 Value? _$JsonConverterFromJson<Json, Value>(
   Object? json,
   Value? Function(Json json) fromJson,
-) =>
-    json == null ? null : fromJson(json as Json);
+) => json == null ? null : fromJson(json as Json);
 
 Json? _$JsonConverterToJson<Json, Value>(
   Value? value,
   Json? Function(Value value) toJson,
-) =>
-    value == null ? null : toJson(value);
+) => value == null ? null : toJson(value);

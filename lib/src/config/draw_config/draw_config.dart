@@ -19,7 +19,6 @@ import '../../constant.dart';
 import '../../extension/render/types.dart';
 import '../../framework/serializers.dart';
 import '../line_config/line_config.dart';
-import '../magnifier_config/magnifier_config.dart';
 import '../paint_config/paint_config.dart';
 import '../point_config/point_config.dart';
 import '../text_area_config/text_area_config.dart';
@@ -73,7 +72,6 @@ class DrawConfig {
     this.ticksGapBgOpacity = 0.1,
     this.hitTestMinDistance = 10,
     this.magnetMinDistance = 10,
-    this.magnifier = const MagnifierConfig(),
   });
 
   /// 是否启用Draw Overlay功能开关
@@ -109,9 +107,6 @@ class DrawConfig {
 
   /// 磁吸模式(weak)下，最小吸附距离
   final double magnetMinDistance;
-
-  /// 放大镜配置
-  final MagnifierConfig magnifier;
 
   factory DrawConfig.fromJson(Map<String, dynamic> json) => _$DrawConfigFromJson(json);
 

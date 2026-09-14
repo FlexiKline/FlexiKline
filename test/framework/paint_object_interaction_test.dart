@@ -26,16 +26,16 @@ import '../support/support.dart';
 const _spec = KlineSpec(symbol: 'INTERACTION', interval: FlexiTimeInterval(1, TimeUnit.day));
 
 List<CandleModel> _candles() => List.generate(
-      3,
-      (i) => CandleModel(
-        timestamp: 1000 + i * 86400000,
-        open: Decimal.fromInt(100 + i),
-        high: Decimal.fromInt(110 + i),
-        low: Decimal.fromInt(90 + i),
-        close: Decimal.fromInt(105 + i),
-        volume: Decimal.fromInt(1000 + i),
-      ),
-    );
+  3,
+  (i) => CandleModel(
+    timestamp: 1000 + i * 86400000,
+    open: Decimal.fromInt(100 + i),
+    high: Decimal.fromInt(110 + i),
+    low: Decimal.fromInt(90 + i),
+    close: Decimal.fromInt(105 + i),
+    volume: Decimal.fromInt(1000 + i),
+  ),
+);
 
 TestInteractiveIndicator _interactive(String id, {int zIndex = 0, Rect? hitRect}) {
   return TestInteractiveIndicator(

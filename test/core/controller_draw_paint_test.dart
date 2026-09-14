@@ -68,10 +68,10 @@ void main() {
   }
 
   FakeFlexiKlineConfiguration newConfig() => FakeFlexiKlineConfiguration(
-        enableStorage: true,
-        enableDraw: true,
-        shareConfigInstance: true,
-      );
+    enableStorage: true,
+    enableDraw: true,
+    shareConfigInstance: true,
+  );
 
   ({Offset from, Offset to}) lineEnds(
     FlexiKlineController controller, {
@@ -102,9 +102,7 @@ void main() {
 
       drawTestLine(controller, from: ends.from, to: ends.to);
       paintDrawFrame(controller);
-      final object =
-          controller.hitTestDrawObject(ends.from.translate(20, 0))!
-              as TestDrawObject;
+      final object = controller.hitTestDrawObject(ends.from.translate(20, 0))! as TestDrawObject;
       // 选中态，开始移动：命中线段整体拖拽。
       expect(controller.onDrawMoveStart(ends.from.translate(20, 0)), isTrue);
       expect(object.moving, isTrue, reason: '前置：对象进入 moving 态');
@@ -117,7 +115,8 @@ void main() {
       expect(
         object.drawCallCount,
         greaterThan(0),
-        reason: 'moving 对象由 _drawStateOverlayObject 的 Editing+moving 分支绘制，'
+        reason:
+            'moving 对象由 _drawStateOverlayObject 的 Editing+moving 分支绘制，'
             '走 draw 路径（不是 drawing）。如果为零说明 moving 帧对象不可见。',
       );
       expect(
@@ -137,9 +136,7 @@ void main() {
       // 退出编辑，让对象只靠列表路径绘制。
       controller.exitDraw();
       paintDrawFrame(controller);
-      final object =
-          controller.hitTestDrawObject(ends.from.translate(20, 0))!
-              as TestDrawObject;
+      final object = controller.hitTestDrawObject(ends.from.translate(20, 0))! as TestDrawObject;
 
       object.drawCallCount = 0;
       paintDrawFrame(controller);

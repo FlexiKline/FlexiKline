@@ -17,12 +17,13 @@ abstract class _$PaintConfigCWProxy {
 
   PaintConfig isAntiAlias(bool isAntiAlias);
 
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `PaintConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `PaintConfig(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// PaintConfig(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   PaintConfig call({
     Color? color,
     double strokeWidth,
@@ -32,35 +33,36 @@ abstract class _$PaintConfigCWProxy {
   });
 }
 
-/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfPaintConfig.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfPaintConfig.copyWith.fieldName(...)`
+/// Callable proxy for `copyWith` functionality.
+/// Use as `instanceOfPaintConfig.copyWith(...)` or call `instanceOfPaintConfig.copyWith.fieldName(value)` for a single field.
 class _$PaintConfigCWProxyImpl implements _$PaintConfigCWProxy {
   const _$PaintConfigCWProxyImpl(this._value);
 
   final PaintConfig _value;
 
   @override
-  PaintConfig color(Color? color) => this(color: color);
+  PaintConfig color(Color? color) => call(color: color);
 
   @override
-  PaintConfig strokeWidth(double strokeWidth) => this(strokeWidth: strokeWidth);
+  PaintConfig strokeWidth(double strokeWidth) => call(strokeWidth: strokeWidth);
 
   @override
-  PaintConfig style(PaintingStyle style) => this(style: style);
+  PaintConfig style(PaintingStyle style) => call(style: style);
 
   @override
-  PaintConfig blendMode(BlendMode blendMode) => this(blendMode: blendMode);
+  PaintConfig blendMode(BlendMode blendMode) => call(blendMode: blendMode);
 
   @override
-  PaintConfig isAntiAlias(bool isAntiAlias) => this(isAntiAlias: isAntiAlias);
+  PaintConfig isAntiAlias(bool isAntiAlias) => call(isAntiAlias: isAntiAlias);
 
-  @override
-
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `PaintConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `PaintConfig(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// PaintConfig(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
+  @override
   PaintConfig call({
     Object? color = const $CopyWithPlaceholder(),
     Object? strokeWidth = const $CopyWithPlaceholder(),
@@ -73,19 +75,21 @@ class _$PaintConfigCWProxyImpl implements _$PaintConfigCWProxy {
           ? _value.color
           // ignore: cast_nullable_to_non_nullable
           : color as Color?,
-      strokeWidth: strokeWidth == const $CopyWithPlaceholder()
+      strokeWidth:
+          strokeWidth == const $CopyWithPlaceholder() || strokeWidth == null
           ? _value.strokeWidth
           // ignore: cast_nullable_to_non_nullable
           : strokeWidth as double,
-      style: style == const $CopyWithPlaceholder()
+      style: style == const $CopyWithPlaceholder() || style == null
           ? _value.style
           // ignore: cast_nullable_to_non_nullable
           : style as PaintingStyle,
-      blendMode: blendMode == const $CopyWithPlaceholder()
+      blendMode: blendMode == const $CopyWithPlaceholder() || blendMode == null
           ? _value.blendMode
           // ignore: cast_nullable_to_non_nullable
           : blendMode as BlendMode,
-      isAntiAlias: isAntiAlias == const $CopyWithPlaceholder()
+      isAntiAlias:
+          isAntiAlias == const $CopyWithPlaceholder() || isAntiAlias == null
           ? _value.isAntiAlias
           // ignore: cast_nullable_to_non_nullable
           : isAntiAlias as bool,
@@ -94,7 +98,8 @@ class _$PaintConfigCWProxyImpl implements _$PaintConfigCWProxy {
 }
 
 extension $PaintConfigCopyWith on PaintConfig {
-  /// Returns a callable class that can be used as follows: `instanceOfPaintConfig.copyWith(...)` or like so:`instanceOfPaintConfig.copyWith.fieldName(...)`.
+  /// Returns a callable class used to build a new instance with modified fields.
+  /// Example: `instanceOfPaintConfig.copyWith(...)` or `instanceOfPaintConfig.copyWith.fieldName(...)`.
   // ignore: library_private_types_in_public_api
   _$PaintConfigCWProxy get copyWith => _$PaintConfigCWProxyImpl(this);
 }
@@ -104,24 +109,26 @@ extension $PaintConfigCopyWith on PaintConfig {
 // **************************************************************************
 
 PaintConfig _$PaintConfigFromJson(Map<String, dynamic> json) => PaintConfig(
-      color: _$JsonConverterFromJson<String, Color>(
-          json['color'], const ColorConverter().fromJson),
-      strokeWidth: (json['strokeWidth'] as num?)?.toDouble() ?? 0,
-      style: json['style'] == null
-          ? PaintingStyle.stroke
-          : const PaintingStyleConverter().fromJson(json['style'] as String),
-      blendMode: json['blendMode'] == null
-          ? BlendMode.srcOver
-          : const BlendModeConverter().fromJson(json['blendMode'] as String),
-      isAntiAlias: json['isAntiAlias'] as bool? ?? true,
-    );
+  color: _$JsonConverterFromJson<String, Color>(
+    json['color'],
+    const ColorConverter().fromJson,
+  ),
+  strokeWidth: (json['strokeWidth'] as num?)?.toDouble() ?? 0,
+  style: json['style'] == null
+      ? PaintingStyle.stroke
+      : const PaintingStyleConverter().fromJson(json['style'] as String),
+  blendMode: json['blendMode'] == null
+      ? BlendMode.srcOver
+      : const BlendModeConverter().fromJson(json['blendMode'] as String),
+  isAntiAlias: json['isAntiAlias'] as bool? ?? true,
+);
 
 Map<String, dynamic> _$PaintConfigToJson(PaintConfig instance) =>
     <String, dynamic>{
-      if (_$JsonConverterToJson<String, Color>(
-              instance.color, const ColorConverter().toJson)
-          case final value?)
-        'color': value,
+      'color': ?_$JsonConverterToJson<String, Color>(
+        instance.color,
+        const ColorConverter().toJson,
+      ),
       'strokeWidth': instance.strokeWidth,
       'style': const PaintingStyleConverter().toJson(instance.style),
       'blendMode': const BlendModeConverter().toJson(instance.blendMode),
@@ -131,11 +138,9 @@ Map<String, dynamic> _$PaintConfigToJson(PaintConfig instance) =>
 Value? _$JsonConverterFromJson<Json, Value>(
   Object? json,
   Value? Function(Json json) fromJson,
-) =>
-    json == null ? null : fromJson(json as Json);
+) => json == null ? null : fromJson(json as Json);
 
 Json? _$JsonConverterToJson<Json, Value>(
   Value? value,
   Json? Function(Value value) toJson,
-) =>
-    value == null ? null : toJson(value);
+) => value == null ? null : toJson(value);

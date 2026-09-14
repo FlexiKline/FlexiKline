@@ -30,7 +30,8 @@ abstract class _$CandleIndicatorCWProxy {
   CandleIndicator latestPoint(PointConfig? latestPoint);
 
   CandleIndicator useCandleColorForLatestPriceBackground(
-      bool useCandleColorForLatestPriceBackground);
+    bool useCandleColorForLatestPriceBackground,
+  );
 
   CandleIndicator showCountdown(bool showCountdown);
 
@@ -41,10 +42,12 @@ abstract class _$CandleIndicatorCWProxy {
   CandleIndicator minWidthLineType(FlexiLineChartType? minWidthLineType);
 
   CandleIndicator intervalChartTypes(
-      Map<ITimeInterval, FlexiChartType>? intervalChartTypes);
+    Map<ITimeInterval, FlexiChartType>? intervalChartTypes,
+  );
 
   CandleIndicator hideMainIndicatorsInLineChartMode(
-      bool hideMainIndicatorsInLineChartMode);
+    bool hideMainIndicatorsInLineChartMode,
+  );
 
   CandleIndicator longColor(Color? longColor);
 
@@ -58,12 +61,13 @@ abstract class _$CandleIndicatorCWProxy {
 
   CandleIndicator shortGradientConfig(GradientConfig? shortGradientConfig);
 
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `CandleIndicator(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `CandleIndicator(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// CandleIndicator(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   CandleIndicator call({
     int zIndex,
     double height,
@@ -92,114 +96,117 @@ abstract class _$CandleIndicatorCWProxy {
   });
 }
 
-/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfCandleIndicator.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfCandleIndicator.copyWith.fieldName(...)`
+/// Callable proxy for `copyWith` functionality.
+/// Use as `instanceOfCandleIndicator.copyWith(...)` or call `instanceOfCandleIndicator.copyWith.fieldName(value)` for a single field.
 class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
   const _$CandleIndicatorCWProxyImpl(this._value);
 
   final CandleIndicator _value;
 
   @override
-  CandleIndicator zIndex(int zIndex) => this(zIndex: zIndex);
+  CandleIndicator zIndex(int zIndex) => call(zIndex: zIndex);
 
   @override
-  CandleIndicator height(double height) => this(height: height);
+  CandleIndicator height(double height) => call(height: height);
 
   @override
-  CandleIndicator padding(EdgeInsets padding) => this(padding: padding);
+  CandleIndicator padding(EdgeInsets padding) => call(padding: padding);
 
   @override
   CandleIndicator horizontalGrid(GridAxisConfig horizontalGrid) =>
-      this(horizontalGrid: horizontalGrid);
+      call(horizontalGrid: horizontalGrid);
 
   @override
   CandleIndicator verticalGrid(GridAxisConfig verticalGrid) =>
-      this(verticalGrid: verticalGrid);
+      call(verticalGrid: verticalGrid);
 
   @override
-  CandleIndicator high(MarkConfig high) => this(high: high);
+  CandleIndicator high(MarkConfig high) => call(high: high);
 
   @override
-  CandleIndicator low(MarkConfig low) => this(low: low);
+  CandleIndicator low(MarkConfig low) => call(low: low);
 
   @override
   CandleIndicator offViewPriceMark(MarkConfig offViewPriceMark) =>
-      this(offViewPriceMark: offViewPriceMark);
+      call(offViewPriceMark: offViewPriceMark);
 
   @override
   CandleIndicator inViewPriceMark(MarkConfig inViewPriceMark) =>
-      this(inViewPriceMark: inViewPriceMark);
+      call(inViewPriceMark: inViewPriceMark);
 
   @override
   CandleIndicator showLatestPoint(bool showLatestPoint) =>
-      this(showLatestPoint: showLatestPoint);
+      call(showLatestPoint: showLatestPoint);
 
   @override
   CandleIndicator latestPoint(PointConfig? latestPoint) =>
-      this(latestPoint: latestPoint);
+      call(latestPoint: latestPoint);
 
   @override
   CandleIndicator useCandleColorForLatestPriceBackground(
-          bool useCandleColorForLatestPriceBackground) =>
-      this(
-          useCandleColorForLatestPriceBackground:
-              useCandleColorForLatestPriceBackground);
+    bool useCandleColorForLatestPriceBackground,
+  ) => call(
+    useCandleColorForLatestPriceBackground:
+        useCandleColorForLatestPriceBackground,
+  );
 
   @override
   CandleIndicator showCountdown(bool showCountdown) =>
-      this(showCountdown: showCountdown);
+      call(showCountdown: showCountdown);
 
   @override
   CandleIndicator countdown(TextAreaConfig countdown) =>
-      this(countdown: countdown);
+      call(countdown: countdown);
 
   @override
   CandleIndicator chartType(FlexiChartType chartType) =>
-      this(chartType: chartType);
+      call(chartType: chartType);
 
   @override
   CandleIndicator minWidthLineType(FlexiLineChartType? minWidthLineType) =>
-      this(minWidthLineType: minWidthLineType);
+      call(minWidthLineType: minWidthLineType);
 
   @override
   CandleIndicator intervalChartTypes(
-          Map<ITimeInterval, FlexiChartType>? intervalChartTypes) =>
-      this(intervalChartTypes: intervalChartTypes);
+    Map<ITimeInterval, FlexiChartType>? intervalChartTypes,
+  ) => call(intervalChartTypes: intervalChartTypes);
 
   @override
   CandleIndicator hideMainIndicatorsInLineChartMode(
-          bool hideMainIndicatorsInLineChartMode) =>
-      this(
-          hideMainIndicatorsInLineChartMode: hideMainIndicatorsInLineChartMode);
+    bool hideMainIndicatorsInLineChartMode,
+  ) => call(
+    hideMainIndicatorsInLineChartMode: hideMainIndicatorsInLineChartMode,
+  );
 
   @override
-  CandleIndicator longColor(Color? longColor) => this(longColor: longColor);
+  CandleIndicator longColor(Color? longColor) => call(longColor: longColor);
 
   @override
-  CandleIndicator shortColor(Color? shortColor) => this(shortColor: shortColor);
+  CandleIndicator shortColor(Color? shortColor) => call(shortColor: shortColor);
 
   @override
-  CandleIndicator lineColor(Color? lineColor) => this(lineColor: lineColor);
+  CandleIndicator lineColor(Color? lineColor) => call(lineColor: lineColor);
 
   @override
   CandleIndicator lineGradientConfig(GradientConfig? lineGradientConfig) =>
-      this(lineGradientConfig: lineGradientConfig);
+      call(lineGradientConfig: lineGradientConfig);
 
   @override
   CandleIndicator longGradientConfig(GradientConfig? longGradientConfig) =>
-      this(longGradientConfig: longGradientConfig);
+      call(longGradientConfig: longGradientConfig);
 
   @override
   CandleIndicator shortGradientConfig(GradientConfig? shortGradientConfig) =>
-      this(shortGradientConfig: shortGradientConfig);
+      call(shortGradientConfig: shortGradientConfig);
 
-  @override
-
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `CandleIndicator(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `CandleIndicator(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// CandleIndicator(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
+  @override
   CandleIndicator call({
     Object? zIndex = const $CopyWithPlaceholder(),
     Object? height = const $CopyWithPlaceholder(),
@@ -228,43 +235,52 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
     Object? shortGradientConfig = const $CopyWithPlaceholder(),
   }) {
     return CandleIndicator(
-      zIndex: zIndex == const $CopyWithPlaceholder()
+      zIndex: zIndex == const $CopyWithPlaceholder() || zIndex == null
           ? _value.zIndex
           // ignore: cast_nullable_to_non_nullable
           : zIndex as int,
-      height: height == const $CopyWithPlaceholder()
+      height: height == const $CopyWithPlaceholder() || height == null
           ? _value.height
           // ignore: cast_nullable_to_non_nullable
           : height as double,
-      padding: padding == const $CopyWithPlaceholder()
+      padding: padding == const $CopyWithPlaceholder() || padding == null
           ? _value.padding
           // ignore: cast_nullable_to_non_nullable
           : padding as EdgeInsets,
-      horizontalGrid: horizontalGrid == const $CopyWithPlaceholder()
+      horizontalGrid:
+          horizontalGrid == const $CopyWithPlaceholder() ||
+              horizontalGrid == null
           ? _value.horizontalGrid
           // ignore: cast_nullable_to_non_nullable
           : horizontalGrid as GridAxisConfig,
-      verticalGrid: verticalGrid == const $CopyWithPlaceholder()
+      verticalGrid:
+          verticalGrid == const $CopyWithPlaceholder() || verticalGrid == null
           ? _value.verticalGrid
           // ignore: cast_nullable_to_non_nullable
           : verticalGrid as GridAxisConfig,
-      high: high == const $CopyWithPlaceholder()
+      high: high == const $CopyWithPlaceholder() || high == null
           ? _value.high
           // ignore: cast_nullable_to_non_nullable
           : high as MarkConfig,
-      low: low == const $CopyWithPlaceholder()
+      low: low == const $CopyWithPlaceholder() || low == null
           ? _value.low
           // ignore: cast_nullable_to_non_nullable
           : low as MarkConfig,
-      offViewPriceMark: offViewPriceMark == const $CopyWithPlaceholder()
+      offViewPriceMark:
+          offViewPriceMark == const $CopyWithPlaceholder() ||
+              offViewPriceMark == null
           ? _value.offViewPriceMark
           // ignore: cast_nullable_to_non_nullable
           : offViewPriceMark as MarkConfig,
-      inViewPriceMark: inViewPriceMark == const $CopyWithPlaceholder()
+      inViewPriceMark:
+          inViewPriceMark == const $CopyWithPlaceholder() ||
+              inViewPriceMark == null
           ? _value.inViewPriceMark
           // ignore: cast_nullable_to_non_nullable
           : inViewPriceMark as MarkConfig,
-      showLatestPoint: showLatestPoint == const $CopyWithPlaceholder()
+      showLatestPoint:
+          showLatestPoint == const $CopyWithPlaceholder() ||
+              showLatestPoint == null
           ? _value.showLatestPoint
           // ignore: cast_nullable_to_non_nullable
           : showLatestPoint as bool,
@@ -273,19 +289,22 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
           // ignore: cast_nullable_to_non_nullable
           : latestPoint as PointConfig?,
       useCandleColorForLatestPriceBackground:
-          useCandleColorForLatestPriceBackground == const $CopyWithPlaceholder()
-              ? _value.useCandleColorForLatestPriceBackground
-              // ignore: cast_nullable_to_non_nullable
-              : useCandleColorForLatestPriceBackground as bool,
-      showCountdown: showCountdown == const $CopyWithPlaceholder()
+          useCandleColorForLatestPriceBackground ==
+                  const $CopyWithPlaceholder() ||
+              useCandleColorForLatestPriceBackground == null
+          ? _value.useCandleColorForLatestPriceBackground
+          // ignore: cast_nullable_to_non_nullable
+          : useCandleColorForLatestPriceBackground as bool,
+      showCountdown:
+          showCountdown == const $CopyWithPlaceholder() || showCountdown == null
           ? _value.showCountdown
           // ignore: cast_nullable_to_non_nullable
           : showCountdown as bool,
-      countdown: countdown == const $CopyWithPlaceholder()
+      countdown: countdown == const $CopyWithPlaceholder() || countdown == null
           ? _value.countdown
           // ignore: cast_nullable_to_non_nullable
           : countdown as TextAreaConfig,
-      chartType: chartType == const $CopyWithPlaceholder()
+      chartType: chartType == const $CopyWithPlaceholder() || chartType == null
           ? _value.chartType
           // ignore: cast_nullable_to_non_nullable
           : chartType as FlexiChartType,
@@ -298,10 +317,11 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
           // ignore: cast_nullable_to_non_nullable
           : intervalChartTypes as Map<ITimeInterval, FlexiChartType>?,
       hideMainIndicatorsInLineChartMode:
-          hideMainIndicatorsInLineChartMode == const $CopyWithPlaceholder()
-              ? _value.hideMainIndicatorsInLineChartMode
-              // ignore: cast_nullable_to_non_nullable
-              : hideMainIndicatorsInLineChartMode as bool,
+          hideMainIndicatorsInLineChartMode == const $CopyWithPlaceholder() ||
+              hideMainIndicatorsInLineChartMode == null
+          ? _value.hideMainIndicatorsInLineChartMode
+          // ignore: cast_nullable_to_non_nullable
+          : hideMainIndicatorsInLineChartMode as bool,
       longColor: longColor == const $CopyWithPlaceholder()
           ? _value.longColor
           // ignore: cast_nullable_to_non_nullable
@@ -331,7 +351,8 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
 }
 
 extension $CandleIndicatorCopyWith on CandleIndicator {
-  /// Returns a callable class that can be used as follows: `instanceOfCandleIndicator.copyWith(...)` or like so:`instanceOfCandleIndicator.copyWith.fieldName(...)`.
+  /// Returns a callable class used to build a new instance with modified fields.
+  /// Example: `instanceOfCandleIndicator.copyWith(...)` or `instanceOfCandleIndicator.copyWith.fieldName(...)`.
   // ignore: library_private_types_in_public_api
   _$CandleIndicatorCWProxy get copyWith => _$CandleIndicatorCWProxyImpl(this);
 }
@@ -340,139 +361,170 @@ extension $CandleIndicatorCopyWith on CandleIndicator {
 // JsonSerializableGenerator
 // **************************************************************************
 
-CandleIndicator _$CandleIndicatorFromJson(Map<String, dynamic> json) =>
-    CandleIndicator(
-      zIndex: (json['zIndex'] as num?)?.toInt() ?? -1,
-      height:
-          (json['height'] as num?)?.toDouble() ?? defaultMainIndicatorHeight,
-      padding: json['padding'] == null
-          ? defaultMainIndicatorPadding
-          : const EdgeInsetsConverter()
-              .fromJson(json['padding'] as Map<String, dynamic>),
-      horizontalGrid: json['horizontalGrid'] == null
-          ? CandleBaseIndicator.defaultHorizontalGrid
-          : GridAxisConfig.fromJson(
-              json['horizontalGrid'] as Map<String, dynamic>),
-      verticalGrid: json['verticalGrid'] == null
-          ? CandleBaseIndicator.defaultVerticalGrid
-          : GridAxisConfig.fromJson(
-              json['verticalGrid'] as Map<String, dynamic>),
-      high: json['high'] == null
-          ? const MarkConfig(
-              spacing: 2,
-              line: LineConfig(
-                  type: LineType.solid,
-                  length: 20,
-                  paint: PaintConfig(strokeWidth: defaultAuxiliaryLineWidth)),
-              text: TextAreaConfig(
-                  style: TextStyle(
-                      fontSize: defaultTextSize,
-                      overflow: TextOverflow.ellipsis,
-                      height: defaultTextHeight)))
-          : MarkConfig.fromJson(json['high'] as Map<String, dynamic>),
-      low: json['low'] == null
-          ? const MarkConfig(
-              spacing: 2,
-              line: LineConfig(
-                  type: LineType.solid,
-                  length: 20,
-                  paint: PaintConfig(strokeWidth: defaultAuxiliaryLineWidth)),
-              text: TextAreaConfig(
-                  style: TextStyle(
-                      fontSize: defaultTextSize,
-                      overflow: TextOverflow.ellipsis,
-                      height: defaultTextHeight)))
-          : MarkConfig.fromJson(json['low'] as Map<String, dynamic>),
-      offViewPriceMark: json['offViewPriceMark'] == null
-          ? const MarkConfig(
-              show: true,
-              spacing: 1,
-              line: LineConfig(
-                  type: LineType.dashed,
-                  dashes: [3, 3],
-                  paint: PaintConfig(strokeWidth: defaultAuxiliaryLineWidth)),
-              hitTestMargin: 4,
-              text: TextAreaConfig(
-                  style: TextStyle(
-                      fontSize: defaultTextSize,
-                      overflow: TextOverflow.ellipsis,
-                      height: defaultTextHeight,
-                      textBaseline: TextBaseline.alphabetic),
-                  padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                  border: defaultBorderSide,
-                  borderRadius: BorderRadius.all(Radius.circular(10))))
-          : MarkConfig.fromJson(
-              json['offViewPriceMark'] as Map<String, dynamic>),
-      inViewPriceMark: json['inViewPriceMark'] == null
-          ? const MarkConfig(
-              show: true,
-              spacing: 1,
-              line: LineConfig(
-                  type: LineType.dashed,
-                  dashes: [3, 3],
-                  paint: PaintConfig(strokeWidth: defaultAuxiliaryLineWidth)),
-              text: TextAreaConfig(
-                  style: TextStyle(
-                      fontSize: defaultTextSize,
-                      overflow: TextOverflow.ellipsis,
-                      height: defaultTextHeight),
-                  textAlign: TextAlign.center,
-                  padding: EdgeInsets.all(2),
-                  border: BorderSide(color: transparent, width: 0.5),
-                  borderRadius: BorderRadius.all(Radius.circular(2))))
-          : MarkConfig.fromJson(
-              json['inViewPriceMark'] as Map<String, dynamic>),
-      showLatestPoint: json['showLatestPoint'] as bool? ?? true,
-      latestPoint: json['latestPoint'] == null
-          ? const PointConfig(
-              radius: 2, width: 0, borderWidth: 2, borderOpacity: 0.5)
-          : PointConfig.fromJson(json['latestPoint'] as Map<String, dynamic>),
-      useCandleColorForLatestPriceBackground:
-          json['useCandleColorForLatestPriceBackground'] as bool? ?? true,
-      showCountdown: json['showCountdown'] as bool? ?? true,
-      countdown: json['countdown'] == null
-          ? const TextAreaConfig(
-              style: TextStyle(
-                  fontSize: defaultTextSize,
-                  overflow: TextOverflow.ellipsis,
-                  height: defaultTextHeight),
-              textAlign: TextAlign.center,
-              padding: EdgeInsets.all(2),
-              borderRadius: BorderRadius.all(Radius.circular(2)))
-          : TextAreaConfig.fromJson(json['countdown'] as Map<String, dynamic>),
-      chartType: json['chartType'] == null
-          ? FlexiChartType.barSolid
-          : const FlexiChartTypeConverter()
-              .fromJson(json['chartType'] as Map<String, dynamic>),
-      minWidthLineType:
-          _$JsonConverterFromJson<Map<String, dynamic>, FlexiLineChartType>(
-              json['minWidthLineType'],
-              const LineChartTypeConverter().fromJson),
-      intervalChartTypes: json['intervalChartTypes'] == null
-          ? const {}
-          : const IntervalChartTypesConverter()
-              .fromJson(json['intervalChartTypes'] as List?),
-      hideMainIndicatorsInLineChartMode:
-          json['hideMainIndicatorsInLineChartMode'] as bool? ?? true,
-      longColor: _$JsonConverterFromJson<String, Color>(
-          json['longColor'], const ColorConverter().fromJson),
-      shortColor: _$JsonConverterFromJson<String, Color>(
-          json['shortColor'], const ColorConverter().fromJson),
-      lineColor: _$JsonConverterFromJson<String, Color>(
-          json['lineColor'], const ColorConverter().fromJson),
-      lineGradientConfig: json['lineGradientConfig'] == null
-          ? GradientPresets.lineChart
-          : GradientConfig.fromJson(
-              json['lineGradientConfig'] as Map<String, dynamic>),
-      longGradientConfig: json['longGradientConfig'] == null
-          ? GradientPresets.long
-          : GradientConfig.fromJson(
-              json['longGradientConfig'] as Map<String, dynamic>),
-      shortGradientConfig: json['shortGradientConfig'] == null
-          ? GradientPresets.short
-          : GradientConfig.fromJson(
-              json['shortGradientConfig'] as Map<String, dynamic>),
-    );
+CandleIndicator _$CandleIndicatorFromJson(
+  Map<String, dynamic> json,
+) => CandleIndicator(
+  zIndex: (json['zIndex'] as num?)?.toInt() ?? -1,
+  height: (json['height'] as num?)?.toDouble() ?? defaultMainIndicatorHeight,
+  padding: json['padding'] == null
+      ? defaultMainIndicatorPadding
+      : const EdgeInsetsConverter().fromJson(
+          json['padding'] as Map<String, dynamic>,
+        ),
+  horizontalGrid: json['horizontalGrid'] == null
+      ? CandleBaseIndicator.defaultHorizontalGrid
+      : GridAxisConfig.fromJson(json['horizontalGrid'] as Map<String, dynamic>),
+  verticalGrid: json['verticalGrid'] == null
+      ? CandleBaseIndicator.defaultVerticalGrid
+      : GridAxisConfig.fromJson(json['verticalGrid'] as Map<String, dynamic>),
+  high: json['high'] == null
+      ? const MarkConfig(
+          spacing: 2,
+          line: LineConfig(
+            type: LineType.solid,
+            length: 20,
+            paint: PaintConfig(strokeWidth: defaultAuxiliaryLineWidth),
+          ),
+          text: TextAreaConfig(
+            style: TextStyle(
+              fontSize: defaultTextSize,
+              overflow: TextOverflow.ellipsis,
+              height: defaultTextHeight,
+            ),
+          ),
+        )
+      : MarkConfig.fromJson(json['high'] as Map<String, dynamic>),
+  low: json['low'] == null
+      ? const MarkConfig(
+          spacing: 2,
+          line: LineConfig(
+            type: LineType.solid,
+            length: 20,
+            paint: PaintConfig(strokeWidth: defaultAuxiliaryLineWidth),
+          ),
+          text: TextAreaConfig(
+            style: TextStyle(
+              fontSize: defaultTextSize,
+              overflow: TextOverflow.ellipsis,
+              height: defaultTextHeight,
+            ),
+          ),
+        )
+      : MarkConfig.fromJson(json['low'] as Map<String, dynamic>),
+  offViewPriceMark: json['offViewPriceMark'] == null
+      ? const MarkConfig(
+          show: true,
+          spacing: 1,
+          line: LineConfig(
+            type: LineType.dashed,
+            dashes: [3, 3],
+            paint: PaintConfig(strokeWidth: defaultAuxiliaryLineWidth),
+          ),
+          hitTestMargin: 4,
+          text: TextAreaConfig(
+            style: TextStyle(
+              fontSize: defaultTextSize,
+              overflow: TextOverflow.ellipsis,
+              height: defaultTextHeight,
+              textBaseline: TextBaseline.alphabetic,
+            ),
+            padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+            border: defaultBorderSide,
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+          ),
+        )
+      : MarkConfig.fromJson(json['offViewPriceMark'] as Map<String, dynamic>),
+  inViewPriceMark: json['inViewPriceMark'] == null
+      ? const MarkConfig(
+          show: true,
+          spacing: 1,
+          line: LineConfig(
+            type: LineType.dashed,
+            dashes: [3, 3],
+            paint: PaintConfig(strokeWidth: defaultAuxiliaryLineWidth),
+          ),
+          text: TextAreaConfig(
+            style: TextStyle(
+              fontSize: defaultTextSize,
+              overflow: TextOverflow.ellipsis,
+              height: defaultTextHeight,
+            ),
+            textAlign: TextAlign.center,
+            padding: EdgeInsets.all(2),
+            border: BorderSide(color: transparent, width: 0.5),
+            borderRadius: BorderRadius.all(Radius.circular(2)),
+          ),
+        )
+      : MarkConfig.fromJson(json['inViewPriceMark'] as Map<String, dynamic>),
+  showLatestPoint: json['showLatestPoint'] as bool? ?? true,
+  latestPoint: json['latestPoint'] == null
+      ? const PointConfig(
+          radius: 2,
+          width: 0,
+          borderWidth: 2,
+          borderOpacity: 0.5,
+        )
+      : PointConfig.fromJson(json['latestPoint'] as Map<String, dynamic>),
+  useCandleColorForLatestPriceBackground:
+      json['useCandleColorForLatestPriceBackground'] as bool? ?? true,
+  showCountdown: json['showCountdown'] as bool? ?? true,
+  countdown: json['countdown'] == null
+      ? const TextAreaConfig(
+          style: TextStyle(
+            fontSize: defaultTextSize,
+            overflow: TextOverflow.ellipsis,
+            height: defaultTextHeight,
+          ),
+          textAlign: TextAlign.center,
+          padding: EdgeInsets.all(2),
+          borderRadius: BorderRadius.all(Radius.circular(2)),
+        )
+      : TextAreaConfig.fromJson(json['countdown'] as Map<String, dynamic>),
+  chartType: json['chartType'] == null
+      ? FlexiChartType.barSolid
+      : const FlexiChartTypeConverter().fromJson(
+          json['chartType'] as Map<String, dynamic>,
+        ),
+  minWidthLineType:
+      _$JsonConverterFromJson<Map<String, dynamic>, FlexiLineChartType>(
+        json['minWidthLineType'],
+        const LineChartTypeConverter().fromJson,
+      ),
+  intervalChartTypes: json['intervalChartTypes'] == null
+      ? const {}
+      : const IntervalChartTypesConverter().fromJson(
+          json['intervalChartTypes'] as List?,
+        ),
+  hideMainIndicatorsInLineChartMode:
+      json['hideMainIndicatorsInLineChartMode'] as bool? ?? true,
+  longColor: _$JsonConverterFromJson<String, Color>(
+    json['longColor'],
+    const ColorConverter().fromJson,
+  ),
+  shortColor: _$JsonConverterFromJson<String, Color>(
+    json['shortColor'],
+    const ColorConverter().fromJson,
+  ),
+  lineColor: _$JsonConverterFromJson<String, Color>(
+    json['lineColor'],
+    const ColorConverter().fromJson,
+  ),
+  lineGradientConfig: json['lineGradientConfig'] == null
+      ? GradientPresets.lineChart
+      : GradientConfig.fromJson(
+          json['lineGradientConfig'] as Map<String, dynamic>,
+        ),
+  longGradientConfig: json['longGradientConfig'] == null
+      ? GradientPresets.long
+      : GradientConfig.fromJson(
+          json['longGradientConfig'] as Map<String, dynamic>,
+        ),
+  shortGradientConfig: json['shortGradientConfig'] == null
+      ? GradientPresets.short
+      : GradientConfig.fromJson(
+          json['shortGradientConfig'] as Map<String, dynamic>,
+        ),
+);
 
 Map<String, dynamic> _$CandleIndicatorToJson(CandleIndicator instance) =>
     <String, dynamic>{
@@ -494,17 +546,26 @@ Map<String, dynamic> _$CandleIndicatorToJson(CandleIndicator instance) =>
       'chartType': const FlexiChartTypeConverter().toJson(instance.chartType),
       'minWidthLineType':
           _$JsonConverterToJson<Map<String, dynamic>, FlexiLineChartType>(
-              instance.minWidthLineType, const LineChartTypeConverter().toJson),
-      'intervalChartTypes': const IntervalChartTypesConverter()
-          .toJson(instance.intervalChartTypes),
+            instance.minWidthLineType,
+            const LineChartTypeConverter().toJson,
+          ),
+      'intervalChartTypes': const IntervalChartTypesConverter().toJson(
+        instance.intervalChartTypes,
+      ),
       'hideMainIndicatorsInLineChartMode':
           instance.hideMainIndicatorsInLineChartMode,
       'longColor': _$JsonConverterToJson<String, Color>(
-          instance.longColor, const ColorConverter().toJson),
+        instance.longColor,
+        const ColorConverter().toJson,
+      ),
       'shortColor': _$JsonConverterToJson<String, Color>(
-          instance.shortColor, const ColorConverter().toJson),
+        instance.shortColor,
+        const ColorConverter().toJson,
+      ),
       'lineColor': _$JsonConverterToJson<String, Color>(
-          instance.lineColor, const ColorConverter().toJson),
+        instance.lineColor,
+        const ColorConverter().toJson,
+      ),
       'lineGradientConfig': instance.lineGradientConfig?.toJson(),
       'longGradientConfig': instance.longGradientConfig?.toJson(),
       'shortGradientConfig': instance.shortGradientConfig?.toJson(),
@@ -513,11 +574,9 @@ Map<String, dynamic> _$CandleIndicatorToJson(CandleIndicator instance) =>
 Value? _$JsonConverterFromJson<Json, Value>(
   Object? json,
   Value? Function(Json json) fromJson,
-) =>
-    json == null ? null : fromJson(json as Json);
+) => json == null ? null : fromJson(json as Json);
 
 Json? _$JsonConverterToJson<Json, Value>(
   Value? value,
   Json? Function(Value value) toJson,
-) =>
-    value == null ? null : toJson(value);
+) => value == null ? null : toJson(value);

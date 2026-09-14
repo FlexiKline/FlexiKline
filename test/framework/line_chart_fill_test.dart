@@ -7,11 +7,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 class _LineTestIndicator extends DirectIndicator {
   _LineTestIndicator()
-      : super(
-          key: const DirectIndicatorKey('line-test'),
-          height: 100,
-          padding: EdgeInsets.zero,
-        );
+    : super(
+        key: const DirectIndicatorKey('line-test'),
+        height: 100,
+        padding: EdgeInsets.zero,
+      );
 
   @override
   _LineTestPaintObject createPaintObject() => _LineTestPaintObject();
@@ -24,9 +24,9 @@ class _LineTestPaintObject extends DirectPaintObject<_LineTestIndicator>
 
   /// 复刻 [paintCandleLineChart] 内联的动态底边计算, 作为调用方契约。
   double boundDy(List<Offset> points) => points.fold<double>(
-        chartRect.bottom,
-        (bottom, point) => math.max(bottom, point.dy),
-      );
+    chartRect.bottom,
+    (bottom, point) => math.max(bottom, point.dy),
+  );
 
   void drawFill(
     Canvas canvas,
@@ -58,8 +58,7 @@ class _LineTestPaintObject extends DirectPaintObject<_LineTestIndicator>
     FlexiCandleModel? model,
     Offset? offset,
     Rect? tipsRect,
-  }) =>
-      null;
+  }) => null;
 }
 
 void main() {

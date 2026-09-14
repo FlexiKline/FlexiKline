@@ -31,9 +31,9 @@ const _tinyMainRect = Rect.fromLTWH(0, 0, 300, 40);
 final _combineKey = directKey(0);
 
 MinMax _mm(num max, num min) => MinMax(
-      max: FlexiNum.fromNum(max),
-      min: FlexiNum.fromNum(min),
-    );
+  max: FlexiNum.fromNum(max),
+  min: FlexiNum.fromNum(min),
+);
 
 class _Scene {
   _Scene({required Rect mainRect, required EdgeInsets padding}) : context = (FakePaintContext()..mainRect = mainRect) {

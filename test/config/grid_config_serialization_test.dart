@@ -85,7 +85,9 @@ void main() {
     test('show 与 line 逐字往返', () {
       final json = const GridConfig(
         horizontal: GridBorder(show: false),
-        vertical: GridBorder(line: LineConfig(type: LineType.dotted, dashes: [1, 4])),
+        vertical: GridBorder(
+          line: LineConfig(type: LineType.dotted, dashes: [1, 4]),
+        ),
       ).toJson();
 
       final restored = GridConfig.fromJson(json);

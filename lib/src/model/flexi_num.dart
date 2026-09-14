@@ -179,13 +179,17 @@ extension type FlexiNum._(Object _value) {
       }
     } else if (_value is Decimal) {
       if (other._value is Decimal) {
-        return FlexiNum._((_value / other._value).toDecimal(
-          scaleOnInfinitePrecision: FlexiFormatter.scaleOnInfinitePrecision,
-        ));
+        return FlexiNum._(
+          (_value / other._value).toDecimal(
+            scaleOnInfinitePrecision: FlexiFormatter.scaleOnInfinitePrecision,
+          ),
+        );
       } else if (other._value is num) {
-        return FlexiNum._((_value / other._value.toDecimal()).toDecimal(
-          scaleOnInfinitePrecision: FlexiFormatter.scaleOnInfinitePrecision,
-        ));
+        return FlexiNum._(
+          (_value / other._value.toDecimal()).toDecimal(
+            scaleOnInfinitePrecision: FlexiFormatter.scaleOnInfinitePrecision,
+          ),
+        );
       }
     }
     throw const FlexiNumException('FlexiNum operator / Type not match!');
@@ -366,9 +370,11 @@ extension type FlexiNum._(Object _value) {
     if (_value is num) {
       return FlexiNum._(_value / value);
     } else if (_value is Decimal) {
-      return FlexiNum._((_value / value.toDecimal()).toDecimal(
-        scaleOnInfinitePrecision: FlexiFormatter.scaleOnInfinitePrecision,
-      ));
+      return FlexiNum._(
+        (_value / value.toDecimal()).toDecimal(
+          scaleOnInfinitePrecision: FlexiFormatter.scaleOnInfinitePrecision,
+        ),
+      );
     }
     throw const FlexiNumException('FlexiNum divNum Type not match!');
   }
@@ -378,9 +384,11 @@ extension type FlexiNum._(Object _value) {
     if (_value is num) {
       return FlexiNum._(_value / value.toDouble());
     } else if (_value is Decimal) {
-      return FlexiNum._((_value / value).toDecimal(
-        scaleOnInfinitePrecision: FlexiFormatter.scaleOnInfinitePrecision,
-      ));
+      return FlexiNum._(
+        (_value / value).toDecimal(
+          scaleOnInfinitePrecision: FlexiFormatter.scaleOnInfinitePrecision,
+        ),
+      );
     }
     throw const FlexiNumException('FlexiNum divDecimal Type not match!');
   }

@@ -84,7 +84,8 @@ void main() {
       // 所有延伸交点应落在矩形边界上
       for (int i = 2; i < points.length; i++) {
         final p = points[i];
-        final onBoundary = (p.dx - rect.left).abs() < 1e-6 ||
+        final onBoundary =
+            (p.dx - rect.left).abs() < 1e-6 ||
             (p.dx - rect.right).abs() < 1e-6 ||
             (p.dy - rect.top).abs() < 1e-6 ||
             (p.dy - rect.bottom).abs() < 1e-6;
@@ -190,7 +191,8 @@ void main() {
       expect(points, hasLength(2));
       expect(points.first, isNot(points.last));
       for (final p in points) {
-        final onBoundary = (p.dx - rect.left).abs() < 1e-6 ||
+        final onBoundary =
+            (p.dx - rect.left).abs() < 1e-6 ||
             (p.dx - rect.right).abs() < 1e-6 ||
             (p.dy - rect.top).abs() < 1e-6 ||
             (p.dy - rect.bottom).abs() < 1e-6;
@@ -488,25 +490,33 @@ void main() {
   group('distancePointToExtendedLine', () {
     test('点在直线延长线上，距离为 0', () {
       // P=(-2,-2) 在 y=x 延长线（A 之前）上；sqrt 运算精度约 1e-7
-      expect(distancePointToExtendedLine(const Offset(-2, -2), const Offset(0, 0), const Offset(8, 8)),
-          closeTo(0.0, 1e-6));
+      expect(
+        distancePointToExtendedLine(const Offset(-2, -2), const Offset(0, 0), const Offset(8, 8)),
+        closeTo(0.0, 1e-6),
+      );
     });
 
     test('点在线段内部，距离为 0', () {
       expect(
-          distancePointToExtendedLine(const Offset(5, 5), const Offset(0, 0), const Offset(8, 8)), closeTo(0.0, 1e-6));
+        distancePointToExtendedLine(const Offset(5, 5), const Offset(0, 0), const Offset(8, 8)),
+        closeTo(0.0, 1e-6),
+      );
     });
 
     test('点垂直偏离水平线，距离等于垂直分量', () {
       // P=(3,5) 到 y=0 → 距离=5
       expect(
-          distancePointToExtendedLine(const Offset(3, 5), const Offset(0, 0), const Offset(10, 0)), closeTo(5.0, 1e-9));
+        distancePointToExtendedLine(const Offset(3, 5), const Offset(0, 0), const Offset(10, 0)),
+        closeTo(5.0, 1e-9),
+      );
     });
 
     test('点垂直偏离竖直线，距离等于水平分量', () {
       // P=(3,5) 到 x=0 → 距离=3
       expect(
-          distancePointToExtendedLine(const Offset(3, 5), const Offset(0, 0), const Offset(0, 10)), closeTo(3.0, 1e-9));
+        distancePointToExtendedLine(const Offset(3, 5), const Offset(0, 0), const Offset(0, 10)),
+        closeTo(3.0, 1e-9),
+      );
     });
 
     test('扩展方法 distanceToExtendedLine 与全局函数结果一致', () {
@@ -1002,7 +1012,8 @@ void main() {
         expect(
           isInsideOfPolygon(const Offset(-5, 5), openSquare),
           isFalse,
-          reason: '只遍历 vertexes[1..last] 会漏掉 last→first 这条边, '
+          reason:
+              '只遍历 vertexes[1..last] 会漏掉 last→first 这条边, '
               '正方形只判了 3 条边, 左侧外部点因此被误判为在内。',
         );
       });

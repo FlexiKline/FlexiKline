@@ -124,7 +124,8 @@ void main() {
       expect(
         config.getDrawOverlayList(_spec.symbol),
         hasLength(1),
-        reason: '绘制完成即 overlay 的终态，此刻不落盘，进程内其他 Controller 与'
+        reason:
+            '绘制完成即 overlay 的终态，此刻不落盘，进程内其他 Controller 与'
             '下次冷启动都读不到它——用户的线会凭空消失。',
       );
     });
@@ -262,7 +263,8 @@ void main() {
       expect(
         storedOverlays(config),
         before,
-        reason: 'overlay 已写穿落盘, store 只管 FlexiKlineConfig; 若它还顺手重写一遍'
+        reason:
+            'overlay 已写穿落盘, store 只管 FlexiKlineConfig; 若它还顺手重写一遍'
             'overlay, 从属侧一次 store 就会用自己的树覆盖拥有者一侧。',
       );
     });
@@ -284,7 +286,8 @@ void main() {
       expect(
         landscape.hitTestDrawObject(ends.from),
         isNotNull,
-        reason: '新 Controller 在 switchKlineData 时按 symbol 加载 overlay；'
+        reason:
+            '新 Controller 在 switchKlineData 时按 symbol 加载 overlay；'
             '竖屏那条线必须出现在横屏的对象树上。',
       );
     });
@@ -309,7 +312,8 @@ void main() {
       expect(
         portrait.hitTestDrawObject(ends.from),
         isNotNull,
-        reason: 'overlay 不在 FlexiKlineConfig 里，共享配置实例带不动它；'
+        reason:
+            'overlay 不在 FlexiKlineConfig 里，共享配置实例带不动它；'
             'sync 必须重新从存储加载 overlay 列表，否则横屏画的线退回竖屏就不见了。',
       );
     });
@@ -330,7 +334,8 @@ void main() {
       expect(
         controller.hitTestDrawObject(ends.from),
         isNotNull,
-        reason: 'sync 从存储重建对象树，本侧刚画的 overlay 必须已在存储里；'
+        reason:
+            'sync 从存储重建对象树，本侧刚画的 overlay 必须已在存储里；'
             '否则「追平对侧」会以「清空本侧」为代价。',
       );
     });
@@ -360,7 +365,8 @@ void main() {
       expect(
         controller.hitTestDrawObject(nearLine),
         isNull,
-        reason: 'DrawObject 持有的是构造期传入的 DrawConfig 快照；sync 换掉配置后'
+        reason:
+            'DrawObject 持有的是构造期传入的 DrawConfig 快照；sync 换掉配置后'
             '必须重建对象，否则新配置对已存在的 overlay 永远不生效。',
       );
       // 线段上的点仍要命中：否则「新配置生效」与「对象树被清空」不可区分，

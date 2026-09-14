@@ -44,10 +44,7 @@ extension FlexiDrawTooltipInfosExt on Canvas {
     BorderRadius? borderRadius,
     BorderSide? borderSide,
     EdgeInsets padding = EdgeInsets.zero,
-    void Function(
-      Rect bounds,
-      List<Rect> itemBounds,
-    )? onLayout,
+    void Function(Rect bounds, List<Rect> itemBounds)? onLayout,
   }) {
     assert(spacing >= 0);
     assert(minContentWidth == null || minContentWidth >= 0);
@@ -154,7 +151,8 @@ extension FlexiDrawTooltipInfosExt on Canvas {
       }
 
       final bounds = Offset(dx, dy) & size;
-      final rrect = borderRadius?.toRRect(bounds) ??
+      final rrect =
+          borderRadius?.toRRect(bounds) ??
           RRect.fromRectAndRadius(
             bounds,
             Radius.zero,

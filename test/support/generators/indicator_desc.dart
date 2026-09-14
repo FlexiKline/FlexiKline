@@ -37,10 +37,10 @@ enum IndicatorKind {
 
   /// key 前缀
   String get prefix => switch (this) {
-        direct => 'direct',
-        computed => 'computed',
-        external_ => 'external',
-      };
+    direct => 'direct',
+    computed => 'computed',
+    external_ => 'external',
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -90,27 +90,27 @@ ExternalIndicatorKey externalKey(int id) => ExternalIndicatorKey('external_$id')
 
 /// 从描述获取 [IIndicatorKey]
 IIndicatorKey descToKey(IndicatorDesc d) => switch (d.kind) {
-      IndicatorKind.direct => directKey(d.id),
-      IndicatorKind.computed => computedKey(d.id),
-      IndicatorKind.external_ => externalKey(d.id),
-    };
+  IndicatorKind.direct => directKey(d.id),
+  IndicatorKind.computed => computedKey(d.id),
+  IndicatorKind.external_ => externalKey(d.id),
+};
 
 /// 根据描述创建具体的 [Indicator] 实例
 Indicator createIndicator(IndicatorDesc d) => switch (d.kind) {
-      IndicatorKind.direct => TestDirectIndicator(
-          key: directKey(d.id),
-          height: d.height,
-        ),
-      IndicatorKind.computed => TestComputedIndicator(
-          key: computedKey(d.id),
-          height: d.height,
-        ),
-      IndicatorKind.external_ => TestExternalIndicator(
-          key: externalKey(d.id),
-          height: d.height,
-          autoActivate: false,
-        ),
-    };
+  IndicatorKind.direct => TestDirectIndicator(
+    key: directKey(d.id),
+    height: d.height,
+  ),
+  IndicatorKind.computed => TestComputedIndicator(
+    key: computedKey(d.id),
+    height: d.height,
+  ),
+  IndicatorKind.external_ => TestExternalIndicator(
+    key: externalKey(d.id),
+    height: d.height,
+    autoActivate: false,
+  ),
+};
 
 // ---------------------------------------------------------------------------
 // 随机工具

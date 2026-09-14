@@ -38,8 +38,8 @@ final class SortableHashSet<E> with SetMixin<E> {
   SortableHashSet([
     Set<E>? set,
     Comparator<E>? compare,
-  ])  : _compare = compare ?? _defaultCompare<E>(),
-        _set = set ?? <E>{};
+  ]) : _compare = compare ?? _defaultCompare<E>(),
+       _set = set ?? <E>{};
 
   factory SortableHashSet.from(
     Iterable<E> elements, [

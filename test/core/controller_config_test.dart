@@ -55,7 +55,8 @@ void main() {
       expect(
         identical(shared.mainIndicator, mainIndicatorBefore),
         isTrue,
-        reason: '配置已是运行时的实时镜像，store 不应替换 mainIndicator；'
+        reason:
+            '配置已是运行时的实时镜像，store 不应替换 mainIndicator；'
             '替换会断开与运行时 indicator 的 children 共享。',
       );
       expect(
@@ -80,7 +81,8 @@ void main() {
       expect(
         config.savedConfigs,
         isEmpty,
-        reason: '落盘时机由业务侧决定，框架不代为保存；'
+        reason:
+            '落盘时机由业务侧决定，框架不代为保存；'
             '否则从属侧 dispose 会用自己的运行时状态覆盖共享配置。',
       );
     });
@@ -187,7 +189,8 @@ void main() {
       expect(
         fresh.mainIndicator.children,
         contains(mainKey),
-        reason: 'sync 必须把运行时 indicator 接到新配置的 children Set 上，'
+        reason:
+            'sync 必须把运行时 indicator 接到新配置的 children Set 上，'
             '否则激活变更写进旧 Set，落盘内容会陈旧。',
       );
     });
@@ -326,7 +329,8 @@ void main() {
       expect(
         afterFirst,
         settled,
-        reason: '驱逐后配置若仍留着被驱逐的 key，subToShow 会恒非空，'
+        reason:
+            '驱逐后配置若仍留着被驱逐的 key，subToShow 会恒非空，'
             '每次 sync 补一个又驱逐一个，副区可见指标逐次轮转。',
       );
       expect(afterSecond, settled);
@@ -360,7 +364,8 @@ void main() {
       expect(
         shared.mainIndicator.size,
         persistedBefore,
-        reason: 'sync 取 indicator.size 而非 MainPaintObject.size（后者是 '
+        reason:
+            'sync 取 indicator.size 而非 MainPaintObject.size（后者是 '
             '`_tmpSize ?? indicator.size`），否则 fixed 的临时尺寸会被写成持久尺寸。',
       );
     });

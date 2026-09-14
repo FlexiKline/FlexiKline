@@ -104,7 +104,8 @@ extension FlexiDrawImageText on Canvas {
     spacing = math.max(0, spacing);
 
     final textPainter = TextPainter(
-      text: textSpan ??
+      text:
+          textSpan ??
           TextSpan(
             text: text,
             style: style,
@@ -189,24 +190,28 @@ extension FlexiDrawImageText on Canvas {
     if (hasPadding || isDrawBg || isDrawBorder) {
       final Path path = Path();
       if (borderRadius != null) {
-        path.addRRect(RRect.fromLTRBAndCorners(
-          offset.dx,
-          offset.dy,
-          offset.dx + containerSize.width,
-          offset.dy + containerSize.height,
-          topLeft: borderRadius.topLeft,
-          topRight: borderRadius.topRight,
-          bottomLeft: borderRadius.bottomLeft,
-          bottomRight: borderRadius.bottomRight,
-        ));
+        path.addRRect(
+          RRect.fromLTRBAndCorners(
+            offset.dx,
+            offset.dy,
+            offset.dx + containerSize.width,
+            offset.dy + containerSize.height,
+            topLeft: borderRadius.topLeft,
+            topRight: borderRadius.topRight,
+            bottomLeft: borderRadius.bottomLeft,
+            bottomRight: borderRadius.bottomRight,
+          ),
+        );
       } else {
-        path.addRRect(RRect.fromLTRBR(
-          offset.dx,
-          offset.dy,
-          offset.dx + containerSize.width,
-          offset.dy + containerSize.height,
-          const Radius.circular(0),
-        ));
+        path.addRRect(
+          RRect.fromLTRBR(
+            offset.dx,
+            offset.dy,
+            offset.dx + containerSize.width,
+            offset.dy + containerSize.height,
+            const Radius.circular(0),
+          ),
+        );
       }
 
       if (isDrawBg) {
@@ -236,13 +241,15 @@ extension FlexiDrawImageText on Canvas {
 
     if (isClip) {
       save();
-      clipRRect(RRect.fromRectAndCorners(
-        result,
-        topLeft: borderRadius.topLeft,
-        topRight: borderRadius.topRight,
-        bottomRight: borderRadius.bottomRight,
-        bottomLeft: borderRadius.bottomLeft,
-      ));
+      clipRRect(
+        RRect.fromRectAndCorners(
+          result,
+          topLeft: borderRadius.topLeft,
+          topRight: borderRadius.topRight,
+          bottomRight: borderRadius.bottomRight,
+          bottomLeft: borderRadius.bottomLeft,
+        ),
+      );
     }
 
     final imageSrc = srcRect ?? (Offset.zero & originImgSize);

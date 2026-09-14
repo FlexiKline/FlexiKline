@@ -207,8 +207,12 @@ class MainPaintObjectIndicator<T extends Indicator<IIndicatorKey>> extends Indic
     required super.padding,
     this.drawBelowTipsArea = false,
     Set<IIndicatorKey>? children,
-  })  : children = children ?? <IIndicatorKey>{},
-        super(key: mainIndicatorKey, height: size.height, autoActivate: true);
+  }) : children = children ?? <IIndicatorKey>{},
+       super(
+         key: mainIndicatorKey,
+         height: size.height,
+         autoActivate: true,
+       );
 
   late Size size;
 

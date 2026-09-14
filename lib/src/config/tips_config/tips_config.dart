@@ -22,7 +22,6 @@ import '../../framework/serializers.dart';
 part 'tips_config.g.dart';
 
 @CopyWith()
-
 /// 指标图顶部提示文本配置
 @FlexiConfigSerializable
 class TipsConfig {
@@ -54,17 +53,17 @@ class TipsConfig {
     Color? decorationColor,
     TextDecorationStyle? decorationStyle,
   }) : style = TextStyle(
-          color: color,
-          fontSize: fontSize,
-          overflow: overflow,
-          height: height,
-          fontFamily: fontFamily,
-          fontWeight: fontWeight,
-          textBaseline: textBaseline,
-          decoration: decoration,
-          decorationColor: decorationColor,
-          decorationStyle: decorationStyle,
-        );
+         color: color,
+         fontSize: fontSize,
+         overflow: overflow,
+         height: height,
+         fontFamily: fontFamily,
+         fontWeight: fontWeight,
+         textBaseline: textBaseline,
+         decoration: decoration,
+         decorationColor: decorationColor,
+         decorationStyle: decorationStyle,
+       );
 
   final String label;
   final int? precision;

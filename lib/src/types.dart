@@ -20,30 +20,13 @@ import 'model/time_interval.dart';
 /// 计算模式
 /// [fast] 使用(IEEE 754 二进制浮点数算术标准)计算指标数据. (用double类型计算)
 /// [accurate] 使用Decimal基于十进制算术的精确计算指标数据. (用Decimal类型计算)
-enum ComputeMode {
-  fast,
-  accurate,
-}
+enum ComputeMode { fast, accurate }
 
 /// 内置TooltipLabel
-enum TooltipLabel {
-  time,
-  open,
-  high,
-  low,
-  close,
-  chg,
-  chgRate,
-  range,
-  amount,
-  turnover;
-}
+enum TooltipLabel { time, open, high, low, close, chg, chgRate, range, amount, turnover }
 
 /// 按[interval]格式化时间[dateTime]
-typedef DateTimeFormatter = String Function(
-  DateTime dateTime, [
-  ITimeInterval? interval,
-]);
+typedef DateTimeFormatter = String Function(DateTime dateTime, [ITimeInterval? interval]);
 
 /// 更新器函数类型
 /// [current] 当前值, 返回更新后的值

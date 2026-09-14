@@ -76,24 +76,24 @@ enum NonTouchGestureOwner {
 
   /// hover 时的光标 —— 「如果在这里按下, 会发生什么」的视觉表达。
   MouseCursor get hoverCursor => switch (this) {
-        drawDrawing => SystemMouseCursors.precise,
-        drawEditing => SystemMouseCursors.click,
-        paintObject => SystemMouseCursors.grab,
-        gridResize => SystemMouseCursors.resizeRow,
-        zoomSlider => SystemMouseCursors.resizeUpDown,
-        chart => SystemMouseCursors.precise,
-      };
+    drawDrawing => SystemMouseCursors.precise,
+    drawEditing => SystemMouseCursors.click,
+    paintObject => SystemMouseCursors.grab,
+    gridResize => SystemMouseCursors.resizeRow,
+    zoomSlider => SystemMouseCursors.resizeUpDown,
+    chart => SystemMouseCursors.precise,
+  };
 
   /// 拖动期间的光标。
   ///
   /// [chart] 需要 controller: 缩放态下纵向拖动是有意义的操作, 用 [move] 提示双向可拖。
   MouseCursor dragCursor(FlexiKlineController controller) => switch (this) {
-        drawDrawing => SystemMouseCursors.precise,
-        drawEditing || paintObject => SystemMouseCursors.grabbing,
-        gridResize => SystemMouseCursors.resizeRow,
-        zoomSlider => SystemMouseCursors.move,
-        chart => controller.isChartZooming ? SystemMouseCursors.move : SystemMouseCursors.grabbing,
-      };
+    drawDrawing => SystemMouseCursors.precise,
+    drawEditing || paintObject => SystemMouseCursors.grabbing,
+    gridResize => SystemMouseCursors.resizeRow,
+    zoomSlider => SystemMouseCursors.move,
+    chart => controller.isChartZooming ? SystemMouseCursors.move : SystemMouseCursors.grabbing,
+  };
 
   /// 本归属对滚轮/捏合的意图; null 表示不消费 —— 调用方据此**不注册**
   /// [PointerSignalResolver], 事件因而放行给外层可滚动容器。

@@ -20,28 +20,18 @@ void main() {
   group('v2.2.0/support/forAll', () {
     test('运行 runs 次且确定性（同 description 同序列）', () {
       final a = <int>[];
-      forAll('seq',
-          generate: (rng) => rng.nextInt(1000), check: a.add, runs: 50);
+      forAll('seq', generate: (rng) => rng.nextInt(1000), check: a.add, runs: 50);
       final b = <int>[];
-      forAll('seq',
-          generate: (rng) => rng.nextInt(1000), check: b.add, runs: 50);
+      forAll('seq', generate: (rng) => rng.nextInt(1000), check: b.add, runs: 50);
       expect(a.length, 50);
       expect(a, equals(b));
     });
 
     test('自定义 seed 覆盖 description hash', () {
       final a = <int>[];
-      forAll('x',
-          generate: (rng) => rng.nextInt(100),
-          check: a.add,
-          runs: 10,
-          seed: 999);
+      forAll('x', generate: (rng) => rng.nextInt(100), check: a.add, runs: 10, seed: 999);
       final b = <int>[];
-      forAll('y',
-          generate: (rng) => rng.nextInt(100),
-          check: b.add,
-          runs: 10,
-          seed: 999);
+      forAll('y', generate: (rng) => rng.nextInt(100), check: b.add, runs: 10, seed: 999);
       expect(a, equals(b));
     });
   });

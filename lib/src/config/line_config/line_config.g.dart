@@ -15,12 +15,13 @@ abstract class _$LineConfigCWProxy {
 
   LineConfig paint(PaintConfig paint);
 
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `LineConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `LineConfig(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// LineConfig(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   LineConfig call({
     LineType type,
     double? length,
@@ -29,32 +30,33 @@ abstract class _$LineConfigCWProxy {
   });
 }
 
-/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfLineConfig.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfLineConfig.copyWith.fieldName(...)`
+/// Callable proxy for `copyWith` functionality.
+/// Use as `instanceOfLineConfig.copyWith(...)` or call `instanceOfLineConfig.copyWith.fieldName(value)` for a single field.
 class _$LineConfigCWProxyImpl implements _$LineConfigCWProxy {
   const _$LineConfigCWProxyImpl(this._value);
 
   final LineConfig _value;
 
   @override
-  LineConfig type(LineType type) => this(type: type);
+  LineConfig type(LineType type) => call(type: type);
 
   @override
-  LineConfig length(double? length) => this(length: length);
+  LineConfig length(double? length) => call(length: length);
 
   @override
-  LineConfig dashes(List<double> dashes) => this(dashes: dashes);
+  LineConfig dashes(List<double> dashes) => call(dashes: dashes);
 
   @override
-  LineConfig paint(PaintConfig paint) => this(paint: paint);
+  LineConfig paint(PaintConfig paint) => call(paint: paint);
 
-  @override
-
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `LineConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `LineConfig(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// LineConfig(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
+  @override
   LineConfig call({
     Object? type = const $CopyWithPlaceholder(),
     Object? length = const $CopyWithPlaceholder(),
@@ -62,7 +64,7 @@ class _$LineConfigCWProxyImpl implements _$LineConfigCWProxy {
     Object? paint = const $CopyWithPlaceholder(),
   }) {
     return LineConfig(
-      type: type == const $CopyWithPlaceholder()
+      type: type == const $CopyWithPlaceholder() || type == null
           ? _value.type
           // ignore: cast_nullable_to_non_nullable
           : type as LineType,
@@ -70,11 +72,11 @@ class _$LineConfigCWProxyImpl implements _$LineConfigCWProxy {
           ? _value.length
           // ignore: cast_nullable_to_non_nullable
           : length as double?,
-      dashes: dashes == const $CopyWithPlaceholder()
+      dashes: dashes == const $CopyWithPlaceholder() || dashes == null
           ? _value.dashes
           // ignore: cast_nullable_to_non_nullable
           : dashes as List<double>,
-      paint: paint == const $CopyWithPlaceholder()
+      paint: paint == const $CopyWithPlaceholder() || paint == null
           ? _value.paint
           // ignore: cast_nullable_to_non_nullable
           : paint as PaintConfig,
@@ -83,7 +85,8 @@ class _$LineConfigCWProxyImpl implements _$LineConfigCWProxy {
 }
 
 extension $LineConfigCopyWith on LineConfig {
-  /// Returns a callable class that can be used as follows: `instanceOfLineConfig.copyWith(...)` or like so:`instanceOfLineConfig.copyWith.fieldName(...)`.
+  /// Returns a callable class used to build a new instance with modified fields.
+  /// Example: `instanceOfLineConfig.copyWith(...)` or `instanceOfLineConfig.copyWith.fieldName(...)`.
   // ignore: library_private_types_in_public_api
   _$LineConfigCWProxy get copyWith => _$LineConfigCWProxyImpl(this);
 }
@@ -93,23 +96,24 @@ extension $LineConfigCopyWith on LineConfig {
 // **************************************************************************
 
 LineConfig _$LineConfigFromJson(Map<String, dynamic> json) => LineConfig(
-      type: json['type'] == null
-          ? LineType.solid
-          : const LineTypeConverter().fromJson(json['type'] as String),
-      length: (json['length'] as num?)?.toDouble(),
-      dashes: (json['dashes'] as List<dynamic>?)
-              ?.map((e) => (e as num).toDouble())
-              .toList() ??
-          const [3, 3],
-      paint: json['paint'] == null
-          ? const PaintConfig(strokeWidth: defaultAuxiliaryLineWidth)
-          : PaintConfig.fromJson(json['paint'] as Map<String, dynamic>),
-    );
+  type: json['type'] == null
+      ? LineType.solid
+      : const LineTypeConverter().fromJson(json['type'] as String),
+  length: (json['length'] as num?)?.toDouble(),
+  dashes:
+      (json['dashes'] as List<dynamic>?)
+          ?.map((e) => (e as num).toDouble())
+          .toList() ??
+      const [3, 3],
+  paint: json['paint'] == null
+      ? const PaintConfig(strokeWidth: defaultAuxiliaryLineWidth)
+      : PaintConfig.fromJson(json['paint'] as Map<String, dynamic>),
+);
 
 Map<String, dynamic> _$LineConfigToJson(LineConfig instance) =>
     <String, dynamic>{
       'type': const LineTypeConverter().toJson(instance.type),
-      if (instance.length case final value?) 'length': value,
+      'length': ?instance.length,
       'dashes': instance.dashes,
       'paint': instance.paint.toJson(),
     };

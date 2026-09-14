@@ -25,10 +25,7 @@ import 'non_touch_gesture_detector.dart';
 import 'touch_gesture_detector.dart';
 
 /// 通用定制 builder 签名.
-typedef FlexiKlineWidgetBuilder = Widget Function(
-  BuildContext context,
-  FlexiKlineController controller,
-);
+typedef FlexiKlineWidgetBuilder = Widget Function(BuildContext context, FlexiKlineController controller);
 
 class FlexiKlineWidget extends StatefulWidget {
   const FlexiKlineWidget({

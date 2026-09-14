@@ -18,7 +18,6 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flutter/painting.dart';
 
 import '../../framework/serializers.dart';
-import '../loading_config/loading_config.dart';
 
 part 'setting_config.g.dart';
 
@@ -28,12 +27,6 @@ class SettingConfig {
   const SettingConfig({
     /// Long/Short 浅色不透明度 [longTintColor] 和 [shortTintColor]
     this.opacity = 0.5,
-
-    /// 内置LoadingView样式配置
-    this.loading = const LoadingConfig(
-      size: 26,
-      strokeWidth: 4,
-    ),
 
     ///  如果不指定默认为设置为20*20的逻辑像素区域.
     this.mainMinSize = const Size(120, 80),
@@ -71,9 +64,6 @@ class SettingConfig {
 
   /// Long/Short 浅色不透明度 [longTintColor] 和 [shortTintColor]
   final double opacity;
-
-  /// 内置LoadingView样式配置
-  final LoadingConfig loading;
 
   // 主区指标图的最小大小限制
   final Size mainMinSize;

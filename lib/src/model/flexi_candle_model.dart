@@ -144,18 +144,20 @@ int flexiCandleModelCompare(FlexiCandleModel a, FlexiCandleModel b) => b.ts - a.
 /// 是否已完结(cfm): K 线是否已完结
 /// 数据槽位(slots): 数据槽位
 extension type FlexiCandleModel._(
-    ({
-      int ts,
-      FlexiNum o,
-      FlexiNum h,
-      FlexiNum l,
-      FlexiNum c,
-      FlexiNum v,
-      FlexiNum? tn,
-      int? tc,
-      bool cfm,
-      List<Object?> slots,
-    }) _m) {
+  ({
+    int ts,
+    FlexiNum o,
+    FlexiNum h,
+    FlexiNum l,
+    FlexiNum c,
+    FlexiNum v,
+    FlexiNum? tn,
+    int? tc,
+    bool cfm,
+    List<Object?> slots,
+  })
+  _m
+) {
   /// 从 ICandleModel 初始化 FlexiCandleModel
   ///
   /// [candle] 原始蜡烛数据（实现 ICandleModel 接口）

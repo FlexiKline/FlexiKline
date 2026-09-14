@@ -22,8 +22,8 @@ class Point {
     this.ts = -1,
     FlexiNum? value,
     Offset? offset,
-  })  : _offset = offset ?? Offset.infinite,
-        value = value ?? FlexiNum.zero;
+  }) : _offset = offset ?? Offset.infinite,
+       value = value ?? FlexiNum.zero;
 
   factory Point.pointer(int index, Offset offset) {
     assert(index >= 0, 'invalid index($index)');
@@ -96,14 +96,13 @@ class Overlay implements Comparable<Overlay> {
     required String key,
     required IDrawType type,
     required LineConfig line,
-  }) =>
-      Overlay(
-        id: DateTime.now().millisecondsSinceEpoch,
-        key: key,
-        type: type,
-        line: line,
-        points: List.filled(type.steps, null),
-      );
+  }) => Overlay(
+    id: DateTime.now().millisecondsSinceEpoch,
+    key: key,
+    type: type,
+    line: line,
+    points: List.filled(type.steps, null),
+  );
 
   /// Overlay 标识, 与 [key]、[type] 一起构成 `==` 与 [hashCode]。
   ///

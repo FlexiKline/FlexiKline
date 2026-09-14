@@ -40,9 +40,9 @@ final _combineKey = directKey(0);
 final _aloneKey = directKey(1);
 
 MinMax _mm(num max, num min) => MinMax(
-      max: FlexiNum.fromNum(max),
-      min: FlexiNum.fromNum(min),
-    );
+  max: FlexiNum.fromNum(max),
+  min: FlexiNum.fromNum(min),
+);
 
 class _Scene {
   _Scene() : context = (FakePaintContext()..mainRect = _mainRect) {

@@ -232,10 +232,12 @@ void main() {
 
       // 点击确认第二个点（完成绘制进入 Editing）。
       // onTapUp 的 Drawing 分支会在 onDrawConfirm 后检查 isCrossing 并 requestCancelCross。
-      await tester.tapAt(_toGlobal(
-        tester,
-        Offset(mainRect.left + 80, mainRect.center.dy),
-      ));
+      await tester.tapAt(
+        _toGlobal(
+          tester,
+          Offset(mainRect.left + 80, mainRect.center.dy),
+        ),
+      );
       await tester.pump();
 
       expect(
@@ -266,10 +268,12 @@ void main() {
       );
 
       // 移动 hover 位置，cross 应持续更新。
-      await gesture.moveTo(_toGlobal(
-        tester,
-        Offset(mainRect.center.dx + 30, mainRect.center.dy + 10),
-      ));
+      await gesture.moveTo(
+        _toGlobal(
+          tester,
+          Offset(mainRect.center.dx + 30, mainRect.center.dy + 10),
+        ),
+      );
       await tester.pump();
 
       expect(controller.isCrossing, isTrue, reason: '持续 hover 时 cross 应维持');

@@ -105,7 +105,8 @@ mixin CandleListData on BaseData {
       if (oldIndex >= 0 && list[oldIndex].ts == candle.timestamp) {
         current = list[oldIndex--].rebuildSlots(slotCount);
       }
-      incoming[i] = current?.copyWith(
+      incoming[i] =
+          current?.copyWith(
             open: candle.open,
             high: candle.high,
             low: candle.low,

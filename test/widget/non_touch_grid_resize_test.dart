@@ -71,11 +71,13 @@ Future<FlexiKlineController> _pumpGridResizeChart(
   final subIndicators = <Indicator>[];
   for (var i = 0; i < subCount; i++) {
     final key = DirectIndicatorKey('grid_resize_sub_$i');
-    subIndicators.add(TestDirectIndicator(
-      key: key,
-      height: _subHeight,
-      autoActivate: true,
-    ));
+    subIndicators.add(
+      TestDirectIndicator(
+        key: key,
+        height: _subHeight,
+        autoActivate: true,
+      ),
+    );
   }
 
   await tester.pumpWidget(

@@ -297,14 +297,13 @@ class _FlexiPannableDrawToolbarState extends State<FlexiPannableDrawToolbar> {
 /// Loading指示器预制件.
 ///
 /// 监听 [controller.loadingStateListenable], 在 showLoading 时展示.
-/// 样式参数优先使用传入值, 未传时从 [controller.settingConfig.loading] 读取.
 class FlexiLoading extends StatelessWidget {
   const FlexiLoading({
     super.key,
     required this.controller,
     this.alignment = Alignment.center,
-    this.size,
-    this.strokeWidth,
+    this.size = 26,
+    this.strokeWidth = 4,
     this.backgroundColor,
     this.valueColor,
   });
@@ -314,21 +313,20 @@ class FlexiLoading extends StatelessWidget {
   /// 指示器在主区内的对齐方式.
   final AlignmentGeometry alignment;
 
-  /// 指示器尺寸. 为null时使用 LoadingConfig.size.
-  final double? size;
+  /// 指示器尺寸.
+  final double size;
 
-  /// 线宽. 为null时使用 LoadingConfig.strokeWidth.
-  final double? strokeWidth;
+  /// 线宽.
+  final double strokeWidth;
 
-  /// 背景色. 为null时使用 LoadingConfig.backgroundColor ?? theme.tooltipBg.
+  /// 背景色. 为null时使用 theme.tooltipBg.
   final Color? backgroundColor;
 
-  /// 值颜色. 为null时使用 LoadingConfig.valueColor ?? theme.textColor.
+  /// 值颜色. 为null时使用 theme.textColor.
   final Color? valueColor;
 
   @override
   Widget build(BuildContext context) {
-    final config = controller.settingConfig.loading;
     final theme = controller.theme;
     return ValueListenableBuilder(
       valueListenable: controller.loadingStateListenable,
@@ -341,12 +339,12 @@ class FlexiLoading extends StatelessWidget {
       child: Align(
         alignment: alignment,
         child: SizedBox.square(
-          dimension: size ?? config.size,
+          dimension: size,
           child: CircularProgressIndicator(
-            strokeWidth: strokeWidth ?? config.strokeWidth,
-            backgroundColor: backgroundColor ?? config.backgroundColor ?? theme.tooltipBg,
+            strokeWidth: strokeWidth,
+            backgroundColor: backgroundColor ?? theme.tooltipBg,
             valueColor: AlwaysStoppedAnimation<Color>(
-              valueColor ?? config.valueColor ?? theme.textColor,
+              valueColor ?? theme.textColor,
             ),
           ),
         ),
@@ -449,25 +447,27 @@ class FlexiExitZoomButton extends StatelessWidget {
 // ── Magnifier ──
 
 /// 放大镜 decoration shape 定制签名.
-typedef MagnifierDecorationShapeBuilder = ShapeBorder Function(
-  BuildContext context,
-  BorderSide side,
-);
+typedef MagnifierDecorationShapeBuilder =
+    ShapeBorder Function(
+      BuildContext context,
+      BorderSide side,
+    );
 
 /// 绘制放大镜预制件.
 ///
 /// 监听 [controller.drawingPointerListenable], 在绘制指针可见时展示.
 /// 该监听只在移动已完成 overlay 的绘制点时推送, 所以放大镜不会在绘制落点过程中出现.
-/// 样式参数优先使用传入值, 未传时从 [controller.drawConfig.magnifier] 读取.
 class FlexiMagnifier extends StatelessWidget {
   const FlexiMagnifier({
     super.key,
     required this.controller,
     this.shapeBuilder,
-    this.size,
-    this.magnificationScale,
-    this.decorationOpacity,
-    this.margin,
+    this.size = const Size(80, 80),
+    this.magnificationScale = 2,
+    this.decorationOpacity = 1.0,
+    this.decorationShadows,
+    this.shapeSide = const BorderSide(width: 0.5, color: Color(0x00000000)),
+    this.margin = const EdgeInsets.all(1),
   });
 
   final FlexiKlineController controller;
@@ -475,28 +475,31 @@ class FlexiMagnifier extends StatelessWidget {
   /// 定制 decoration shape. 为null时使用 CircleBorder.
   final MagnifierDecorationShapeBuilder? shapeBuilder;
 
-  /// 放大镜尺寸. 为null时使用 MagnifierConfig.size.
-  final Size? size;
+  /// 放大镜尺寸.
+  final Size size;
 
-  /// 放大倍数. 为null时使用 MagnifierConfig.magnificationScale.
-  final double? magnificationScale;
+  /// 放大倍数.
+  final double magnificationScale;
 
-  /// decoration 透明度. 为null时使用 MagnifierConfig.decorationOpacity.
-  final double? decorationOpacity;
+  /// decoration 透明度.
+  final double decorationOpacity;
 
-  /// 放大镜外边距. 为null时使用 MagnifierConfig.margin.
-  final EdgeInsets? margin;
+  /// decoration 阴影列表. 为null时使用默认阴影.
+  final List<BoxShadow>? decorationShadows;
+
+  /// 放大镜圆形边框样式.
+  ///
+  /// 默认 width 为 0.5; [color] 为透明时渲染端回退到主题网格线色.
+  final BorderSide shapeSide;
+
+  /// 放大镜外边距.
+  final EdgeInsets margin;
 
   @override
   Widget build(BuildContext context) {
-    final config = controller.drawConfig.magnifier;
-    if (!config.enable || config.size.isEmpty) {
+    if (size.isEmpty) {
       return const SizedBox.shrink();
     }
-
-    final effectiveSize = size ?? config.size;
-    final effectiveScale = magnificationScale ?? config.magnificationScale;
-    final effectiveOpacity = decorationOpacity ?? config.decorationOpacity;
 
     return ValueListenableBuilder(
       valueListenable: controller.drawingPointerListenable,
@@ -505,14 +508,14 @@ class FlexiMagnifier extends StatelessWidget {
         final pointerOffset = pointer?.offset;
         Offset focalPosition = Offset.zero;
         AlignmentGeometry alignment = AlignmentDirectional.topStart;
-        EdgeInsets effectiveMargin = margin ?? config.margin;
+        EdgeInsets effectiveMargin = margin;
         if (pointerOffset != null && pointerOffset.isFinite) {
           visible = true;
           final drawRect = controller.canvasRect;
           Offset position;
           if (pointerOffset.dx > drawRect.width * 0.5) {
             alignment = AlignmentDirectional.topStart;
-            position = effectiveSize.center(effectiveMargin.topLeft);
+            position = size.center(effectiveMargin.topLeft);
             position = Offset(
               drawRect.left + position.dx,
               drawRect.top + position.dy,
@@ -524,8 +527,8 @@ class FlexiMagnifier extends StatelessWidget {
               right: effectiveMargin.right + valueTxtWidth,
             );
             position = Offset(
-              drawRect.right - effectiveMargin.right - effectiveSize.width / 2,
-              drawRect.top + effectiveMargin.top + effectiveSize.height / 2,
+              drawRect.right - effectiveMargin.right - size.width / 2,
+              drawRect.top + effectiveMargin.top + size.height / 2,
             );
           }
           focalPosition = pointerOffset - position;
@@ -538,8 +541,9 @@ class FlexiMagnifier extends StatelessWidget {
             margin: effectiveMargin,
             child: RawMagnifier(
               decoration: MagnifierDecoration(
-                opacity: effectiveOpacity,
-                shadows: config.decorationShadows ??
+                opacity: decorationOpacity,
+                shadows:
+                    decorationShadows ??
                     [
                       BoxShadow(
                         offset: const Offset(0.1, 0.1),
@@ -548,18 +552,17 @@ class FlexiMagnifier extends StatelessWidget {
                         color: theme.gridLineColor.withAlpha(0x1A),
                       ),
                     ],
-                shape: shapeBuilder?.call(context, config.shapeSide) ??
+                shape:
+                    shapeBuilder?.call(context, shapeSide) ??
                     CircleBorder(
-                      side: config.shapeSide.copyWith(
-                        color: config.shapeSide.color == const Color(0x00000000)
-                            ? theme.gridLineColor
-                            : config.shapeSide.color,
+                      side: shapeSide.copyWith(
+                        color: shapeSide.color == const Color(0x00000000) ? theme.gridLineColor : shapeSide.color,
                       ),
                     ),
               ),
-              size: effectiveSize,
+              size: size,
               focalPointOffset: focalPosition,
-              magnificationScale: effectiveScale,
+              magnificationScale: magnificationScale,
             ),
           ),
         );

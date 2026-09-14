@@ -261,7 +261,8 @@ final class IndicatorPaintObjectManager with FlexiLog {
     List<IIndicatorKey> sub,
     List<ComputedIndicatorKey> recompute,
     bool slotLayoutChanged,
-  }) updateIndicators({
+  })
+  updateIndicators({
     required PaintContext context,
     required CandleBaseIndicator oldCandle,
     required CandleBaseIndicator newCandle,
@@ -298,7 +299,8 @@ final class IndicatorPaintObjectManager with FlexiLog {
       recompute: recompute,
     );
 
-    final slotLayoutChanged = oldComputedDataIndexes.length != _computedDataIndexes.length ||
+    final slotLayoutChanged =
+        oldComputedDataIndexes.length != _computedDataIndexes.length ||
         oldComputedDataIndexes.entries.any((entry) => _computedDataIndexes[entry.key] != entry.value);
     logi('updateIndicators 完成: computedDataCapacity=$computedDataCapacity');
     return (
@@ -636,11 +638,11 @@ final class IndicatorPaintObjectManager with FlexiLog {
 
   /// 未挂载时的空差异。
   IndicatorActivationDiff get _emptyActivationDiff => (
-        mainToShow: <IIndicatorKey>{},
-        mainToHide: <IIndicatorKey>{},
-        subToShow: <IIndicatorKey>{},
-        subToHide: <IIndicatorKey>{},
-      );
+    mainToShow: <IIndicatorKey>{},
+    mainToHide: <IIndicatorKey>{},
+    subToShow: <IIndicatorKey>{},
+    subToHide: <IIndicatorKey>{},
+  );
 
   /// 追平配置，并让主区运行时 indicator 跟随新配置。
   ///

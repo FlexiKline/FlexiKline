@@ -534,12 +534,12 @@ class _PaintLog implements Canvas {
 /// 只在本组用，所以留在测试文件内而不进 `support/`。
 class _AlignedGridIndicator extends DirectIndicator {
   _AlignedGridIndicator()
-      : super(
-          key: _alignedSubKey,
-          height: _subHeight,
-          padding: EdgeInsets.zero,
-          autoActivate: true,
-        );
+    : super(
+        key: _alignedSubKey,
+        height: _subHeight,
+        padding: EdgeInsets.zero,
+        autoActivate: true,
+      );
 
   /// 最近一次创建的绘制对象。
   static _AlignedGridPaintObject? lastObject;

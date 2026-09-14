@@ -17,9 +17,9 @@ import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 MinMax _mm(num max, num min) => MinMax(
-      max: FlexiNum.fromNum(max),
-      min: FlexiNum.fromNum(min),
-    );
+  max: FlexiNum.fromNum(max),
+  min: FlexiNum.fromNum(min),
+);
 
 FlexiNum _fn(num v) => FlexiNum.fromNum(v);
 

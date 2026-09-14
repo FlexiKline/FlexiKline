@@ -145,7 +145,8 @@ abstract class GestureDetectorState<T extends GestureDetectorWidget> extends Sta
     }
 
     final effectiveTolerance = tolerance ?? gestureConfig.tolerance;
-    final effectivePanDuration = panDuration ??
+    final effectivePanDuration =
+        panDuration ??
         Duration(
           milliseconds: calcuInertialPanDuration(
             (begin - end).abs(),
@@ -172,8 +173,8 @@ abstract class GestureDetectorState<T extends GestureDetectorWidget> extends Sta
       final delta = value - last;
       last = value;
       final progress = current.value;
-      final sf = effectiveTolerance.effectivePanSmoothFactor;
-      final tp = effectiveTolerance.effectiveConvergenceRatio;
+      final sf = effectiveTolerance.panSmoothFactor;
+      final tp = effectiveTolerance.convergenceRatio;
       final smoothFactor = progress < tp ? sf : lerpDouble(sf, 1.0, (progress - tp) / (1.0 - tp))!;
       controller.onChartMove(Offset(delta, 0), smoothFactor: smoothFactor);
     });

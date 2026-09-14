@@ -95,7 +95,8 @@ class GradientConfig {
   LinearGradient createGradient({
     required Color baseColor,
   }) {
-    final gradientColors = colors ??
+    final gradientColors =
+        colors ??
         [
           baseColor.withAlpha(startAlpha.alpha),
           baseColor.withAlpha(endAlpha.alpha),

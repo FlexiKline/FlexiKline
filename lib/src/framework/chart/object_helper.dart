@@ -51,28 +51,36 @@ mixin PaintStyleMixin<T extends Indicator<IIndicatorKey>> on IndicatorObject<T> 
   Paint? _defShortLinePaint;
 
   /// 上涨实心柱画笔。
-  Paint get defLongBarPaint => (_defLongBarPaint ??= Paint()
-    ..color = longColor
-    ..style = PaintingStyle.stroke)
-    ..strokeWidth = candleWidth;
+  Paint get defLongBarPaint {
+    return (_defLongBarPaint ??= Paint()
+        ..color = longColor
+        ..style = PaintingStyle.stroke)
+      ..strokeWidth = candleWidth;
+  }
 
   /// 下跌实心柱画笔。
-  Paint get defShortBarPaint => (_defShortBarPaint ??= Paint()
-    ..color = shortColor
-    ..style = PaintingStyle.stroke)
-    ..strokeWidth = candleWidth;
+  Paint get defShortBarPaint {
+    return (_defShortBarPaint ??= Paint()
+        ..color = shortColor
+        ..style = PaintingStyle.stroke)
+      ..strokeWidth = candleWidth;
+  }
 
   /// 上涨浅色实心柱画笔。
-  Paint get defLongTintBarPaint => (_defLongTintBarPaint ??= Paint()
-    ..color = longTintColor
-    ..style = PaintingStyle.stroke)
-    ..strokeWidth = candleWidth;
+  Paint get defLongTintBarPaint {
+    return (_defLongTintBarPaint ??= Paint()
+        ..color = longTintColor
+        ..style = PaintingStyle.stroke)
+      ..strokeWidth = candleWidth;
+  }
 
   /// 下跌浅色实心柱画笔。
-  Paint get defShortTintBarPaint => (_defShortTintBarPaint ??= Paint()
-    ..color = shortTintColor
-    ..style = PaintingStyle.stroke)
-    ..strokeWidth = candleWidth;
+  Paint get defShortTintBarPaint {
+    return (_defShortTintBarPaint ??= Paint()
+        ..color = shortTintColor
+        ..style = PaintingStyle.stroke)
+      ..strokeWidth = candleWidth;
+  }
 
   /// 上涨空心柱画笔。
   Paint get defLongHollowBarPaint => _defLongHollowBarPaint ??= Paint()
@@ -202,13 +210,13 @@ mixin PaintObjectBoundingMixin<T extends Indicator<IIndicatorKey>> on IndicatorO
   double get chartRectWidthHalf => chartRect.width / 2;
 
   double clampDxInChart(double dx) => dx.clamp(
-        chartRect.left,
-        math.max(chartRect.left, chartRect.right),
-      );
+    chartRect.left,
+    math.max(chartRect.left, chartRect.right),
+  );
   double clampDyInChart(double dy) => dy.clamp(
-        chartRect.top,
-        math.max(chartRect.top, chartRect.bottom),
-      );
+    chartRect.top,
+    math.max(chartRect.top, chartRect.bottom),
+  );
 
   // Tips区域向下移动height.
   Rect shiftNextTipsRect(double height) {
@@ -583,10 +591,12 @@ mixin PaintCandleChartMixin<T extends Indicator> on PaintObject<T> {
     } else if (isLong) {
       if (chartStyle.isHollowUp) {
         path.lineTo(dx, close);
-        path.addRect(Rect.fromPoints(
-          Offset(dx - barWidthHalf, close),
-          Offset(dx + barWidthHalf, open),
-        ));
+        path.addRect(
+          Rect.fromPoints(
+            Offset(dx - barWidthHalf, close),
+            Offset(dx + barWidthHalf, open),
+          ),
+        );
         if (low > open) {
           path.moveTo(dx, low);
           path.lineTo(dx, open);
@@ -604,10 +614,12 @@ mixin PaintCandleChartMixin<T extends Indicator> on PaintObject<T> {
     } else {
       if (chartStyle.isHollowDown) {
         path.lineTo(dx, open);
-        path.addRect(Rect.fromPoints(
-          Offset(dx - barWidthHalf, open),
-          Offset(dx + barWidthHalf, close),
-        ));
+        path.addRect(
+          Rect.fromPoints(
+            Offset(dx - barWidthHalf, open),
+            Offset(dx + barWidthHalf, close),
+          ),
+        );
         if (low > close) {
           path.moveTo(dx, low);
           path.lineTo(dx, close);
@@ -646,10 +658,12 @@ mixin PaintCandleChartMixin<T extends Indicator> on PaintObject<T> {
     for (var i = start; i < end; i++) {
       m = klineData[i];
       final dy = valueToDy(m.close, correct: false);
-      points.add(Offset(
-        startOffset - (i - start) * candleActualWidth,
-        dy,
-      ));
+      points.add(
+        Offset(
+          startOffset - (i - start) * candleActualWidth,
+          dy,
+        ),
+      );
       boundDy = math.max(boundDy, dy);
     }
 

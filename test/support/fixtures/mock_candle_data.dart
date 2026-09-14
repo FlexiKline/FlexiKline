@@ -40,17 +40,19 @@ List<ICandleModel> getEthUsdtCandles() {
     for (var i = 0; i < data.length; i++) {
       final item = data[i];
       if (item is List) {
-        list.add(CandleModel(
-          timestamp: int.parse(item[0]),
-          open: Decimal.parse(item[1].toString()),
-          high: Decimal.parse(item[2].toString()),
-          low: Decimal.parse(item[3].toString()),
-          close: Decimal.parse(item[4].toString()),
-          volume: Decimal.parse(item[5].toString()),
-          turnover: Decimal.parse(item[6].toString()),
-          tradeCount: parseInt(item[7]),
-          confirmed: parseBool(item[8]) ?? item[8] == '1',
-        ));
+        list.add(
+          CandleModel(
+            timestamp: int.parse(item[0]),
+            open: Decimal.parse(item[1].toString()),
+            high: Decimal.parse(item[2].toString()),
+            low: Decimal.parse(item[3].toString()),
+            close: Decimal.parse(item[4].toString()),
+            volume: Decimal.parse(item[5].toString()),
+            turnover: Decimal.parse(item[6].toString()),
+            tradeCount: parseInt(item[7]),
+            confirmed: parseBool(item[8]) ?? item[8] == '1',
+          ),
+        );
       }
     }
     return list;
@@ -66,15 +68,17 @@ List<ICandleModel> getBtcCandles() {
     for (var i = data.length - 1; i >= 0; i--) {
       final item = data[i];
       if (item is List) {
-        list.add(CandleModel(
-          timestamp: item[0] * 1000,
-          open: Decimal.parse(item[1].toString()),
-          high: Decimal.parse(item[2].toString()),
-          low: Decimal.parse(item[3].toString()),
-          close: Decimal.parse(item[4].toString()),
-          volume: Decimal.parse(item[5].toString()),
-          turnover: Decimal.parse(item[6].toString()),
-        ));
+        list.add(
+          CandleModel(
+            timestamp: item[0] * 1000,
+            open: Decimal.parse(item[1].toString()),
+            high: Decimal.parse(item[2].toString()),
+            low: Decimal.parse(item[3].toString()),
+            close: Decimal.parse(item[4].toString()),
+            volume: Decimal.parse(item[5].toString()),
+            turnover: Decimal.parse(item[6].toString()),
+          ),
+        );
       }
     }
     return list;

@@ -17,12 +17,13 @@ abstract class _$TipsConfigCWProxy {
 
   TipsConfig style(TextStyle style);
 
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `TipsConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `TipsConfig(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// TipsConfig(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   TipsConfig call({
     String label,
     int? precision,
@@ -32,35 +33,36 @@ abstract class _$TipsConfigCWProxy {
   });
 }
 
-/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfTipsConfig.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfTipsConfig.copyWith.fieldName(...)`
+/// Callable proxy for `copyWith` functionality.
+/// Use as `instanceOfTipsConfig.copyWith(...)` or call `instanceOfTipsConfig.copyWith.fieldName(value)` for a single field.
 class _$TipsConfigCWProxyImpl implements _$TipsConfigCWProxy {
   const _$TipsConfigCWProxyImpl(this._value);
 
   final TipsConfig _value;
 
   @override
-  TipsConfig label(String label) => this(label: label);
+  TipsConfig label(String label) => call(label: label);
 
   @override
-  TipsConfig precision(int? precision) => this(precision: precision);
+  TipsConfig precision(int? precision) => call(precision: precision);
 
   @override
-  TipsConfig isShow(bool isShow) => this(isShow: isShow);
+  TipsConfig isShow(bool isShow) => call(isShow: isShow);
 
   @override
-  TipsConfig lineWidth(double? lineWidth) => this(lineWidth: lineWidth);
+  TipsConfig lineWidth(double? lineWidth) => call(lineWidth: lineWidth);
 
   @override
-  TipsConfig style(TextStyle style) => this(style: style);
+  TipsConfig style(TextStyle style) => call(style: style);
 
-  @override
-
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `TipsConfig(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `TipsConfig(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// TipsConfig(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
+  @override
   TipsConfig call({
     Object? label = const $CopyWithPlaceholder(),
     Object? precision = const $CopyWithPlaceholder(),
@@ -69,7 +71,7 @@ class _$TipsConfigCWProxyImpl implements _$TipsConfigCWProxy {
     Object? style = const $CopyWithPlaceholder(),
   }) {
     return TipsConfig(
-      label: label == const $CopyWithPlaceholder()
+      label: label == const $CopyWithPlaceholder() || label == null
           ? _value.label
           // ignore: cast_nullable_to_non_nullable
           : label as String,
@@ -77,7 +79,7 @@ class _$TipsConfigCWProxyImpl implements _$TipsConfigCWProxy {
           ? _value.precision
           // ignore: cast_nullable_to_non_nullable
           : precision as int?,
-      isShow: isShow == const $CopyWithPlaceholder()
+      isShow: isShow == const $CopyWithPlaceholder() || isShow == null
           ? _value.isShow
           // ignore: cast_nullable_to_non_nullable
           : isShow as bool,
@@ -85,7 +87,7 @@ class _$TipsConfigCWProxyImpl implements _$TipsConfigCWProxy {
           ? _value.lineWidth
           // ignore: cast_nullable_to_non_nullable
           : lineWidth as double?,
-      style: style == const $CopyWithPlaceholder()
+      style: style == const $CopyWithPlaceholder() || style == null
           ? _value.style
           // ignore: cast_nullable_to_non_nullable
           : style as TextStyle,
@@ -94,7 +96,8 @@ class _$TipsConfigCWProxyImpl implements _$TipsConfigCWProxy {
 }
 
 extension $TipsConfigCopyWith on TipsConfig {
-  /// Returns a callable class that can be used as follows: `instanceOfTipsConfig.copyWith(...)` or like so:`instanceOfTipsConfig.copyWith.fieldName(...)`.
+  /// Returns a callable class used to build a new instance with modified fields.
+  /// Example: `instanceOfTipsConfig.copyWith(...)` or `instanceOfTipsConfig.copyWith.fieldName(...)`.
   // ignore: library_private_types_in_public_api
   _$TipsConfigCWProxy get copyWith => _$TipsConfigCWProxyImpl(this);
 }
@@ -104,24 +107,26 @@ extension $TipsConfigCopyWith on TipsConfig {
 // **************************************************************************
 
 TipsConfig _$TipsConfigFromJson(Map<String, dynamic> json) => TipsConfig(
-      label: json['label'] as String? ?? '',
-      precision: (json['precision'] as num?)?.toInt(),
-      isShow: json['isShow'] as bool? ?? true,
-      lineWidth: (json['lineWidth'] as num?)?.toDouble(),
-      style: json['style'] == null
-          ? const TextStyle(
-              fontSize: defaultTextSize,
-              overflow: TextOverflow.ellipsis,
-              height: defaultTipsTextHeight)
-          : const TextStyleConverter()
-              .fromJson(json['style'] as Map<String, dynamic>),
-    );
+  label: json['label'] as String? ?? '',
+  precision: (json['precision'] as num?)?.toInt(),
+  isShow: json['isShow'] as bool? ?? true,
+  lineWidth: (json['lineWidth'] as num?)?.toDouble(),
+  style: json['style'] == null
+      ? const TextStyle(
+          fontSize: defaultTextSize,
+          overflow: TextOverflow.ellipsis,
+          height: defaultTipsTextHeight,
+        )
+      : const TextStyleConverter().fromJson(
+          json['style'] as Map<String, dynamic>,
+        ),
+);
 
 Map<String, dynamic> _$TipsConfigToJson(TipsConfig instance) =>
     <String, dynamic>{
       'label': instance.label,
-      if (instance.precision case final value?) 'precision': value,
+      'precision': ?instance.precision,
       'isShow': instance.isShow,
-      if (instance.lineWidth case final value?) 'lineWidth': value,
+      'lineWidth': ?instance.lineWidth,
       'style': const TextStyleConverter().toJson(instance.style),
     };

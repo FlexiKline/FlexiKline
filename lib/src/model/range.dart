@@ -38,9 +38,9 @@ final class Range {
   bool get isNotEmpty => length > 0;
 
   Range merge(Range range) => Range(
-        math.min(start, range.start),
-        math.max(end, range.end),
-      );
+    math.min(start, range.start),
+    math.max(end, range.end),
+  );
 
   @override
   int get hashCode => start.hashCode ^ end.hashCode;

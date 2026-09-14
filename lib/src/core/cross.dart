@@ -21,10 +21,11 @@ part of 'core.dart';
 /// [prev] 前一个CandleMode数据
 /// 1. 如果返回null, 则尝试用 [OnCrossI18nTooltipLabels] 继续定制.
 /// 2. 如果返回const [], 则不会再展示Tooltip信息.
-typedef OnCrossCustomTooltipCallback = List<TooltipInfo>? Function(
-  FlexiCandleModel? current, {
-  FlexiCandleModel? prev,
-});
+typedef OnCrossCustomTooltipCallback =
+    List<TooltipInfo>? Function(
+      FlexiCandleModel? current, {
+      FlexiCandleModel? prev,
+    });
 
 /// 定制TooltipLabels国际化
 ///
@@ -399,11 +400,9 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
           break;
       }
       if (value != null) {
-        list.add(TooltipInfo(
-          label: label,
-          value: value,
-          valueStyle: valueStyle,
-        ));
+        list.add(
+          TooltipInfo(label: label, value: value, valueStyle: valueStyle),
+        );
       }
     });
     return list;

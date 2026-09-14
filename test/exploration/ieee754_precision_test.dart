@@ -50,8 +50,8 @@ void main() {
     double number = a + b;
     Decimal decimal = Decimal.parse('123456789.123456789') + Decimal.parse('0.000000001');
 
-    logMsg('Double : $number');   // 123456789.12345679
-    logMsg('Decimal: $decimal');  // 123456789.123456790
+    logMsg('Double : $number'); // 123456789.12345679
+    logMsg('Decimal: $decimal'); // 123456789.123456790
 
     // 在当前 Dart/decimal 版本下两者 toDouble() 相等（精度丢失在同一位）
     expect(number, equals(decimal.toDouble()));
@@ -87,8 +87,8 @@ void main() {
     double number = a - b;
     Decimal decimal = Decimal.parse('1.0000000000000001') - Decimal.parse('0.0000000000000001');
 
-    logMsg('Double: $number');    // 0.9999999999999999
-    logMsg('Decimal: $decimal');  // 1.0000000000000000
+    logMsg('Double: $number'); // 0.9999999999999999
+    logMsg('Decimal: $decimal'); // 1.0000000000000000
 
     // a - b 在 double 层面产生了细微差异，与 Decimal 结果不同
     expect(number, isNot(equals(decimal.toDouble())));
@@ -100,15 +100,15 @@ void main() {
     double resultDouble = a * b;
     Decimal resultDecimal = Decimal.parse('1.234567890123456789') * Decimal.parse('2.123');
 
-    logMsg('Double: $resultDouble');    // 1.5241578753238822
-    logMsg('Decimal: $resultDecimal');  // 更高精度
+    logMsg('Double: $resultDouble'); // 1.5241578753238822
+    logMsg('Decimal: $resultDecimal'); // 更高精度
 
     // 乘法结果不相等
     expect(resultDouble, isNot(equals(resultDecimal.toDouble())));
   });
 
   test('有效数字范围 15~17 位演示', () {
-    double a = 1.234567890123456;  // 16位
+    double a = 1.234567890123456; // 16位
     logMsg(a);
     double b = 1.2345678901234567; // 17位
     logMsg(b);

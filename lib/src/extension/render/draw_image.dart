@@ -119,24 +119,28 @@ extension FlexiDrawImage on Canvas {
     if (hasPadding || isDrawBg || isDrawBorder) {
       final Path path = Path();
       if (borderRadius != null) {
-        path.addRRect(RRect.fromLTRBAndCorners(
-          offset.dx,
-          offset.dy,
-          offset.dx + viewSize.width,
-          offset.dy + viewSize.height,
-          topLeft: borderRadius.topLeft,
-          topRight: borderRadius.topRight,
-          bottomLeft: borderRadius.bottomLeft,
-          bottomRight: borderRadius.bottomRight,
-        ));
+        path.addRRect(
+          RRect.fromLTRBAndCorners(
+            offset.dx,
+            offset.dy,
+            offset.dx + viewSize.width,
+            offset.dy + viewSize.height,
+            topLeft: borderRadius.topLeft,
+            topRight: borderRadius.topRight,
+            bottomLeft: borderRadius.bottomLeft,
+            bottomRight: borderRadius.bottomRight,
+          ),
+        );
       } else {
-        path.addRRect(RRect.fromLTRBR(
-          offset.dx,
-          offset.dy,
-          offset.dx + viewSize.width,
-          offset.dy + viewSize.height,
-          const Radius.circular(0),
-        ));
+        path.addRRect(
+          RRect.fromLTRBR(
+            offset.dx,
+            offset.dy,
+            offset.dx + viewSize.width,
+            offset.dy + viewSize.height,
+            const Radius.circular(0),
+          ),
+        );
       }
 
       if (isDrawBg) {
@@ -170,13 +174,15 @@ extension FlexiDrawImage on Canvas {
 
     if (isClip && borderRadius != null && borderRadius.isValid) {
       save();
-      clipRRect(RRect.fromRectAndCorners(
-        result,
-        topLeft: borderRadius.topLeft,
-        topRight: borderRadius.topRight,
-        bottomRight: borderRadius.bottomRight,
-        bottomLeft: borderRadius.bottomLeft,
-      ));
+      clipRRect(
+        RRect.fromRectAndCorners(
+          result,
+          topLeft: borderRadius.topLeft,
+          topRight: borderRadius.topRight,
+          bottomRight: borderRadius.bottomRight,
+          bottomLeft: borderRadius.bottomLeft,
+        ),
+      );
       drawImageRect(image, src, dst, imagePaint);
       restore();
     } else {

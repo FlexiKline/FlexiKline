@@ -361,7 +361,7 @@ void main() {
       model.set(2, 123);
 
       expect(model.isEmpty(0), isFalse); // 有数据
-      expect(model.isEmpty(1), isTrue);  // 未赋值
+      expect(model.isEmpty(1), isTrue); // 未赋值
       expect(model.isEmpty(2), isFalse); // 有数据
     });
 
@@ -379,7 +379,7 @@ void main() {
       model.clean(1);
 
       expect(model.isEmpty(0), isFalse); // 未清除
-      expect(model.isEmpty(1), isTrue);  // 已清除
+      expect(model.isEmpty(1), isTrue); // 已清除
       expect(model.isEmpty(2), isFalse); // 未清除
       expect(model.get<String>(1), isNull);
     });
@@ -387,9 +387,9 @@ void main() {
     test('clean 返回值：越界返回 false，有效返回 true', () {
       model.set(0, 'value');
 
-      expect(model.clean(0), isTrue);    // 有效索引
-      expect(model.clean(-1), isFalse);  // 越界
-      expect(model.clean(10), isFalse);  // 越界
+      expect(model.clean(0), isTrue); // 有效索引
+      expect(model.clean(-1), isFalse); // 越界
+      expect(model.clean(10), isFalse); // 越界
     });
 
     test('clean 越界不抛异常', () {

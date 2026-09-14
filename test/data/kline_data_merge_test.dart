@@ -17,13 +17,13 @@ import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 CandleModel _candle(int timestamp) => CandleModel(
-      timestamp: timestamp,
-      open: Decimal.one,
-      high: Decimal.fromInt(2),
-      low: Decimal.zero,
-      close: Decimal.one,
-      volume: Decimal.one,
-    );
+  timestamp: timestamp,
+  open: Decimal.one,
+  high: Decimal.fromInt(2),
+  low: Decimal.zero,
+  close: Decimal.one,
+  volume: Decimal.one,
+);
 
 KlineData _data() => KlineData(const KlineSpec(symbol: 'T', interval: invalidInterval));
 

@@ -121,7 +121,7 @@ void main() {
       final chunks = [1, 2, 3, 4].chunk(2).toList();
       expect(chunks, [
         [1, 2],
-        [3, 4]
+        [3, 4],
       ]);
     });
 

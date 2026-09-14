@@ -31,7 +31,7 @@ enum DrawDirection {
 enum LineType {
   solid, // 实线
   dashed, // 虚线
-  dotted; // 点线
+  dotted, // 点线
 }
 
 /// Y轴对齐方式

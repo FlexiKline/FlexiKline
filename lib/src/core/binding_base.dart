@@ -55,17 +55,17 @@ abstract class KlineBindingBase with FlexiLog implements PaintContext, DrawConte
     IFlexiLogger? logger,
     this.klineDataCacheCapacity,
     this.calculationInterval = const Duration(milliseconds: 500),
-  })  : _initialLayoutMode = initialLayoutMode,
-        _initialFixedSize = initialFixedSize,
-        _paintObjectManager = IndicatorPaintObjectManager(
-          configuration: configuration,
-          subIndicatorMaxCount: subIndicatorMaxCount,
-          logger: logger,
-        ),
-        _drawObjectManager = OverlayDrawObjectManager(
-          configuration: configuration,
-          logger: logger,
-        ) {
+  }) : _initialLayoutMode = initialLayoutMode,
+       _initialFixedSize = initialFixedSize,
+       _paintObjectManager = IndicatorPaintObjectManager(
+         configuration: configuration,
+         subIndicatorMaxCount: subIndicatorMaxCount,
+         logger: logger,
+       ),
+       _drawObjectManager = OverlayDrawObjectManager(
+         configuration: configuration,
+         logger: logger,
+       ) {
     logd('construct');
     this.logger = logger;
     init();

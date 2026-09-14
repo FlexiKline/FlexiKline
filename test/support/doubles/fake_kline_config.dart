@@ -71,8 +71,8 @@ class FakeFlexiKlineConfiguration with FlexiKlineConfigurationMixin {
     this.shareConfigInstance = false,
     this.enableStorage = false,
     this.enableDraw = false,
-  })  : _mainChildren = mainChildren,
-        _subKeys = subKeys;
+  }) : _mainChildren = mainChildren,
+       _subKeys = subKeys;
 
   final Set<IIndicatorKey>? _mainChildren;
   final Set<IIndicatorKey>? _subKeys;

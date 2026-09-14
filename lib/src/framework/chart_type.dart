@@ -150,5 +150,5 @@ enum ChartBarStyle {
 /// K线线图的绘制样式
 enum ChartLineStyle {
   normal, // 普通折线
-  updown; // 涨跌线
+  updown, // 涨跌线
 }
