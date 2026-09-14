@@ -168,12 +168,13 @@ final class OverlayDrawObjectManager with FlexiLog {
     bool replaceIfPresent = true,
     bool addToTop = false,
   }) {
-    if (addToTop) moveToTop(object);
+    // 先入集合，再调整层级——对尚未在集合中的对象调 moveToTop 只会空转 resetSort。
     final old = _overlayObjectList.append(
       object,
       replaceIfPresent: replaceIfPresent,
     );
     old?.dispose();
+    if (addToTop) moveToTop(object);
   }
 
   void removeAllDrawObjects() {
@@ -182,10 +183,14 @@ final class OverlayDrawObjectManager with FlexiLog {
   }
 
   bool removeDrawObject(DrawObject object) {
-    object.dispose();
     final removed = _overlayObjectList.remove(object);
-    // configuration.delDrawOverlay(_instId, object._overlay);
-    configuration.saveDrawOverlayList(_instId, _overlayObjectList.map((e) => e._overlay));
+    if (removed) {
+      object.dispose();
+      configuration.saveDrawOverlayList(
+        _instId,
+        _overlayObjectList.map((e) => e._overlay),
+      );
+    }
     return removed;
   }
 
