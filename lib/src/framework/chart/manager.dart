@@ -477,6 +477,7 @@ final class IndicatorPaintObjectManager with FlexiLog {
   ///
   /// 用于声明移除等需要彻底销毁的场景；与 [removeMainPaintObject] 的隐藏保活相区别。
   bool disposeMainPaintObject(IIndicatorKey key) {
+    if (key == candleIndicatorKey) return false;
     final obj = getMainPaintObject(key, includeKeepAlive: true);
     final removed = _mainPaintObject.removePaintObject(key);
     _keepAlivePaintObjects.remove(key);
@@ -519,6 +520,7 @@ final class IndicatorPaintObjectManager with FlexiLog {
 
   /// 删除已激活的主区指标。
   bool removeMainPaintObject(IIndicatorKey key) {
+    if (key == candleIndicatorKey) return false;
     final obj = _mainPaintObject.getChildPaintObject(key);
     if (obj != null && obj.keepAlive) _keepAlivePaintObjects[key] = obj;
     return _mainPaintObject.removePaintObject(key);
@@ -538,6 +540,7 @@ final class IndicatorPaintObjectManager with FlexiLog {
   ///
   /// 用于声明移除等需要彻底销毁的场景；与 [removeSubPaintObject] 的隐藏保活相区别。
   bool disposeSubPaintObject(IIndicatorKey key) {
+    if (key == timeIndicatorKey) return false;
     final obj = getSubPaintObject(key, includeKeepAlive: true);
     final removed = removeSubPaintObject(key);
     _keepAlivePaintObjects.remove(key);
@@ -604,6 +607,7 @@ final class IndicatorPaintObjectManager with FlexiLog {
   /// 返回值只表示"是否从绘制队列摘除"；配置侧无条件清理，使历史持久化数据里
   /// 因驱逐而残留的 key 也能被显式隐藏清除。
   bool removeSubPaintObject(IIndicatorKey key) {
+    if (key == timeIndicatorKey) return false;
     bool hasRemove = false;
     _subPaintObjectQueue.removeWhere((obj) {
       if (obj.indicator.key == key) {

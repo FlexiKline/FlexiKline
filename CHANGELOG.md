@@ -1,3 +1,6 @@
+## 2.5.5
+* Fix candle and time indicators being removable via external `hide*Indicator` or `dispose*PaintObject` calls, which could crash the chart.
+
 ## 2.5.4
 * Add `DrawContext.isSelectedDrawObject` so a `DrawObject` can branch on selection state, which lives in `DrawState` rather than on the object itself (Breaking Changes).
 * Rename `OverlayObject.isEditing` to `isCompleted`: it only means all points are placed, so an overlay loaded from storage and never selected also returns true (Breaking Changes).
