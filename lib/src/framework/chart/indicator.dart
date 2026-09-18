@@ -21,6 +21,8 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flexi_formatter/flexi_formatter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter/widgets.dart' show TickerModeData;
 
 import '../../config/export.dart';
 import '../../constant.dart';
@@ -38,6 +40,7 @@ import '../grid_tick_mode.dart';
 import '../logger.dart';
 import '../serializers.dart';
 
+part 'animation.dart';
 part 'calculator.dart';
 part 'delegate.dart';
 part 'indicator.g.dart';

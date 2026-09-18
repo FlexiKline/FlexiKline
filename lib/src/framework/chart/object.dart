@@ -199,6 +199,11 @@ abstract class PaintObject<T extends Indicator<IIndicatorKey>> extends Indicator
     return (dxs: const [], dys: const []);
   }
 
+  /// 数据未就绪那一帧默认不画; 几何约束与覆写须知见 [IPaintObject.paintPlaceholder]。
+  @protected
+  @override
+  void paintPlaceholder(Canvas canvas, Size size) {}
+
   @protected
   @override
   void paintOverlay(Canvas canvas, Size size) {}

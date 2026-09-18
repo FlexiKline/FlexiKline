@@ -398,3 +398,86 @@ class TestInteractivePaintObject extends ExternalPaintObject<TestInteractiveIndi
   @override
   Size? paintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
 }
+
+// ---------------------------------------------------------------------------
+// Animated（vsync / placeholder）
+// ---------------------------------------------------------------------------
+
+/// 测试用带 vsync 的 [ExternalIndicator]：驱动 [TickerProviderPaintObjectMixin] 与
+/// 加载态 `paintPlaceholder` 的测试。
+///
+/// 取 External 而非 Direct：它默认 `autoActivate` 且 `keepAlive`，数据未就绪时也已入树，
+/// 正是 placeholder 与「出树冻结」两个场景需要的前提。
+class TestAnimatedIndicator extends ExternalIndicator {
+  TestAnimatedIndicator({
+    required super.key,
+    super.height = 80,
+    super.zIndex,
+    super.autoActivate = true,
+    this.name = 'animated',
+    this.sink,
+  }) : super(padding: EdgeInsets.zero);
+
+  /// 记入 [sink] 的前缀，用于在多实例场景下区分绘制顺序。
+  final String name;
+
+  /// 绘制入口调用序列的收集器；多个指标可共享同一个，用于断言跨 pane 的先后。
+  final List<String>? sink;
+
+  /// 最近一次创建的绘制对象
+  TestAnimatedPaintObject? object;
+
+  @override
+  TestAnimatedPaintObject createPaintObject() => object = TestAnimatedPaintObject();
+}
+
+/// [TestAnimatedIndicator] 的绘制对象：自带 vsync，并记录各绘制入口的调用序列。
+///
+/// 不在此持有 `AnimationController`：测试直接用 `AnimationController(vsync: object)` 或
+/// `object.createTicker(...)` 即可，Ticker 引用留在用例手上才能断言 `muted`，
+/// 生产代码因此不需要为测试开放 ticker 集合。
+class TestAnimatedPaintObject extends ExternalPaintObject<TestAnimatedIndicator> with TickerProviderPaintObjectMixin {
+  /// 按调用顺序记录的绘制入口名（不含前缀），[TestAnimatedIndicator.sink] 里带前缀。
+  final List<String> paintCalls = [];
+
+  /// 生命周期回调序列，用于断言 mixin 覆写没有吞掉 super。
+  final List<String> lifecycleCalls = [];
+
+  void _record(String call) {
+    paintCalls.add(call);
+    indicator.sink?.add('${indicator.name}.$call');
+  }
+
+  @override
+  void didAttach() {
+    super.didAttach();
+    lifecycleCalls.add('didAttach');
+  }
+
+  @override
+  void didDetach() {
+    super.didDetach();
+    lifecycleCalls.add('didDetach');
+  }
+
+  @override
+  void paintPlaceholder(Canvas canvas, Size size) {
+    super.paintPlaceholder(canvas, size);
+    _record('placeholder');
+  }
+
+  @override
+  ({List<double> dxs, List<double> dys}) paintGridLines(Canvas canvas, Size size) {
+    _record('gridLines');
+    return super.paintGridLines(canvas, size);
+  }
+
+  @override
+  MinMax? computeVisibleMinMax(int start, int end) => null;
+
+  @override
+  void paint(Canvas canvas, Size size) => _record('paint');
+
+  @override
+  Size? paintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
+}

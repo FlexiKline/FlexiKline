@@ -15,6 +15,7 @@
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/widgets.dart' show TickerModeData;
 
 /// 测试用 [PaintContext] 假实现。
 ///
@@ -60,6 +61,11 @@ class FakePaintContext implements PaintContext {
   /// 由测试驱动的 cross 态；决定 tips 走 `doPaintChart` 还是 `doPaintCross` 分支。
   @override
   bool isCrossing = false;
+
+  /// 由测试驱动的 TickerMode 策略；默认 [TickerModeData.fallback]（enabled 且不强制出帧），
+  /// 验证动画冻结或 forceFrames 透传的测试自行改写 `value`。
+  @override
+  final ValueNotifier<TickerModeData> tickerModeListenable = ValueNotifier(TickerModeData.fallback);
 
   @override
   KlineData get klineData => KlineData.empty;

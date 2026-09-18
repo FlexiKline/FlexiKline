@@ -88,6 +88,13 @@ extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
     paintGridLines(canvas, size);
   }
 
+  /// 框架内部：数据未就绪那一帧的绘制，紧跟该 pane 的 [doPaintGridLines]，与 [doPaintChart] 互斥。
+  ///
+  /// 主区容器另有覆写（[MainPaintDelegateExt.doPaintPlaceholder]）转发给子对象；副区走本实现。
+  void doPaintPlaceholder(Canvas canvas, Size size) {
+    paintPlaceholder(canvas, size);
+  }
+
   void doPaintChart(Canvas canvas, Size size) {
     // 网格线是本 pane 的第一笔: 它必须压在指标图与 tips 之下。收在这里而不是让编排层单独调,
     // 于是「网格在最下面」由本方法的内部顺序保证, 编排层不必知道网格线的存在。
@@ -344,6 +351,18 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
     final grid = _candlePaintObject?.paintGridLines(canvas, size);
     _gridVerticalDxs = grid?.dxs ?? const [];
     return grid?.dys ?? const [];
+  }
+
+  /// 委托子对象绘制加载态占位内容，与 [doPaintOverlay] 同形。
+  ///
+  /// 主区容器自己不画东西（[MainPaintObject.paint] 为空），所以只遍历、不调自身的
+  /// `paintPlaceholder`。少了这个覆写，通用实现只会问到容器，主区子指标在加载态永远没有落笔
+  /// 机会——而这不报错，只是画面上什么都没有。遍历 [paintableChildren] 而非 [children]：线图
+  /// 模式下被隐藏的主区指标不该在加载态复活。
+  void doPaintPlaceholder(Canvas canvas, Size size) {
+    for (final object in paintableChildren) {
+      object.paintPlaceholder(canvas, size);
+    }
   }
 
   /// 返回本帧 Y 轴刻度文本的最大宽度, 供编排层定 zoom 滑竿热区的宽度; null 表示这一帧没画。

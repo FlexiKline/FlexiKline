@@ -13,6 +13,8 @@
 // limitations under the License.
 
 import 'dart:developer';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../framework/chart/indicator.dart';
@@ -136,6 +138,15 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
 
     // 处理挂载前暂存的数据。
     controller.flushPendingKlineData();
+
+    _updateTickerModeNotifier();
+  }
+
+  @override
+  void activate() {
+    super.activate();
+    // 本 Widget 可能已被搬到新的 TickerMode 祖先下（宿主用 GlobalKey 在 tab 间搬移图表即是）。
+    _updateTickerModeNotifier();
   }
 
   @override
@@ -162,6 +173,31 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
     logd('didChangeDependencies');
   }
 
+  /// Widget 层 [TickerMode] 的 notifier; 供 PaintObject 动画按可见性冻结。
+  ValueListenable<TickerModeData>? _tickerModeNotifier;
+
+  /// 把 [TickerMode] 策略原样接到 controller 上。
+  ///
+  /// 调用时机是 [initState] 与 [activate], **不是** [didChangeDependencies]:
+  /// [TickerMode.getValuesNotifier] 用 `getInheritedWidgetOfExactType` 取祖先、不建立依赖,
+  /// 祖先更换不会触发 [didChangeDependencies], 挂在那里会一直读旧祖先的 notifier。与 Flutter
+  /// 自身 `TickerProviderStateMixin.activate` 同一做法。同一个 [TickerMode] 内 `enabled` 的
+  /// 变化无需重新解析 —— 那写的是同一个 notifier 的 value。
+  void _updateTickerModeNotifier() {
+    final notifier = TickerMode.getValuesNotifier(context);
+    // 实例未变即整体早退, 不像 Flutter 的 `activate` 那样再无条件同步一次: 本 State 在
+    // `deactivate` 期间不移除 listener, 同一祖先下的策略变化照常收到, 值一直是同步的。
+    if (notifier == _tickerModeNotifier) return;
+    _tickerModeNotifier?.removeListener(_handleTickerModeChanged);
+    notifier.addListener(_handleTickerModeChanged);
+    _tickerModeNotifier = notifier;
+    _handleTickerModeChanged();
+  }
+
+  void _handleTickerModeChanged() {
+    controller.setTickerMode(_tickerModeNotifier!.value);
+  }
+
   @override
   void didHaveMemoryPressure() {
     controller.evictInactiveKlineDataCache();
@@ -169,6 +205,8 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
 
   @override
   void dispose() {
+    _tickerModeNotifier?.removeListener(_handleTickerModeChanged);
+    _tickerModeNotifier = null;
     super.dispose();
   }
 

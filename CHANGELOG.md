@@ -1,4 +1,7 @@
 ## 2.5.5
+* Add `TickerProviderPaintObjectMixin` so a `PaintObject` can drive `AnimationController` without a Widget-provided vsync; each tick requests a chart repaint, and animations freeze while the object is out of the paint tree or the chart is offscreen.
+* Add `PaintObject.paintPlaceholder`, drawn right after grid lines on frames where kline data is not ready; the main pane forwards it to its children. `PaintObject` provides an empty default, so existing indicators need no change.
+* Add `PaintContext.tickerModeListenable` and `FlexiKlineController.setTickerMode`, relaying the widget-level `TickerModeData` (both `enabled` and `forceFrames`) into the controller so PaintObject animations follow the ambient `TickerMode`.
 * Fix candle and time indicators being removable via external `hide*Indicator` or `dispose*PaintObject` calls, which could crash the chart.
 
 ## 2.5.4

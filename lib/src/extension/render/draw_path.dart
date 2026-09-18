@@ -91,6 +91,25 @@ class CircularIntervalList<T> {
   }
 }
 
+extension FlexiPathFraction on Path {
+  /// 按**路径长度**截取前 [fraction] 比例的子路径, 用于线性生长动画。
+  ///
+  /// 按长度而非点数截取: 采样点疏密不均时(蜡烛缩放后尤其明显)按点数会让线段忽快忽慢, 按长度
+  /// 则匀速生长, 且能画出「半条线段」。
+  ///
+  /// [fraction] 大于等于 1 时返回自身, 不做无谓的 metrics 遍历; 小于等于 0 时返回空路径。
+  /// 截取方向即路径方向 —— 想让折线从左向右生长, 采样时就按 dx 递增的顺序收集点。
+  Path takeFraction(double fraction) {
+    if (fraction >= 1.0) return this;
+    final result = Path();
+    if (fraction <= 0) return result;
+    for (final metric in computeMetrics()) {
+      result.addPath(metric.extractPath(0, metric.length * fraction), Offset.zero);
+    }
+    return result;
+  }
+}
+
 extension FlexiPathDraw on Canvas {
   /// 绘制虚线
   void drawDashPath(

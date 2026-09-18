@@ -137,12 +137,15 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
     calculatePaintChartRange();
 
     if (!klineData.canPaintChart) {
-      // 数据未就绪时只画网格(nice 退化为 count, 刻度文本不画)。
+      // 数据未就绪时只画网格(nice 退化为 count, 刻度文本不画)与各指标的占位内容。
       // 副区 paneIndex 尚未分配, 其 drawableRect 是主区区域(见 paintGridLines 契约的 warning)。
       // 主区先于副区: 副区要对齐的 dx 由主区产出, 经 [gridVerticalDxs] 只读。
+      // 占位跟在本 pane 网格线之后, 与正常态 doPaintChart 的内部顺序一致。
       mainPaintObject.doPaintGridLines(canvas, size);
+      mainPaintObject.doPaintPlaceholder(canvas, size);
       for (final paintObject in subPaintObjects) {
         paintObject.doPaintGridLines(canvas, size);
+        paintObject.doPaintPlaceholder(canvas, size);
       }
       logd('chartBinding paintChart data is being prepared!');
       return;

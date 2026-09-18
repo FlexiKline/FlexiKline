@@ -89,6 +89,20 @@ abstract interface class IPaintObject {
   /// 公共接口, 且横线一旦不经返回值上行, 就只能靠帧内字段或重算一遍跨过子对象遍历。
   ({List<double> dxs, List<double> dys}) paintGridLines(Canvas canvas, Size size);
 
+  /// 数据未就绪那一帧的绘制入口, 默认不画。
+  ///
+  /// 判据是 `BaseData.canPaintChart` 为 false, 即当前没有可绘制的蜡烛区间 —— 空数据同样命中,
+  /// 它表达「无区间」而不是某个 loading 状态。框架在那一帧走完各 pane 的 [paintGridLines] 之后
+  /// 调它, 主区先于副区; 数据就绪时改走 [paint], 两者不会同帧发生。要让它动起来见
+  /// [TickerProviderPaintObjectMixin]。
+  ///
+  /// > [!warning]
+  /// > 几何比 [paint] 窄一档, 与 [paintGridLines] 的告警同源: 副区 `paneIndex` 尚未分配,
+  /// > [IPaintBounding.drawableRect] 读到的是**主区**区域(只能用 `PaintContext.mainRect` /
+  /// > `canvasRect`); [IPaintState.minMax] 是**上一帧**的值, 换标的时仍是旧标的的价格区间,
+  /// > 不可用于值到像素的换算。于是这一趟只适合与数据无关的图形。
+  void paintPlaceholder(Canvas canvas, Size size);
+
   /// 绘制指标图
   ///
   /// [canvas] 画布

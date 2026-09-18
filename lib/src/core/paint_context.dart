@@ -103,6 +103,16 @@ abstract interface class PaintRuntimeScope {
   /// 是否正在绘制 cross。
   bool get isCrossing;
 
+  /// Widget 层 `TickerMode` 的当前策略; `enabled` 为 false 表示图表此刻不可见。
+  ///
+  /// **只读。** 由 view 层从 `TickerMode.getValuesNotifier(context)` 原样中继而来 —— 图表
+  /// 可见性是 Widget 树的事实, 不该由任一绘制对象改写。[TickerProviderPaintObjectMixin]
+  /// 订阅它冻结动画, 不用动画的对象无需关心。
+  ///
+  /// 整个 [TickerModeData] 原样转发, 不裁成 `enabled`; 中继也不做成「交给 PaintObject 自取的
+  /// 解析闭包」。两处取舍见 `CONTEXT.md` 的 `Paint Object Animation Ownership`。
+  ValueListenable<TickerModeData> get tickerModeListenable;
+
   /// 当前 cross 坐标。
   Offset? get crossOffset;
 

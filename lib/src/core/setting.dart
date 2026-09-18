@@ -31,6 +31,7 @@ mixin SettingBinding on KlineBindingBase {
       _fixedSize = _initialFixedSize;
     }
     _lifecycleNotifier = FlexiStateNotifier(FlexiKlineLifecycle.initial);
+    _tickerModeNotifier = FlexiStateNotifier(TickerModeData.fallback);
     _canvasRectNotifier = FlexiStateNotifier(Rect.zero);
     _subIndicatorHeightsNotifier = FlexiStateNotifier<List<double>>(const []);
   }
@@ -52,6 +53,7 @@ mixin SettingBinding on KlineBindingBase {
     logd('dispose setting');
     _lifecycleNotifier.value = FlexiKlineLifecycle.disposed;
     _lifecycleNotifier.dispose();
+    _tickerModeNotifier.dispose();
     _layoutModeNotifier.dispose();
     _canvasRectNotifier.dispose();
     _subIndicatorHeightsNotifier.dispose();
@@ -64,6 +66,21 @@ mixin SettingBinding on KlineBindingBase {
   /// Controller 生命周期状态 listenable。
   late final FlexiStateNotifier<FlexiKlineLifecycle> _lifecycleNotifier;
   ValueListenable<FlexiKlineLifecycle> get lifecycleListenable => _lifecycleNotifier;
+
+  /// Widget 层 `TickerMode` 策略的中继, 供 PaintObject 订阅一个与 Controller 同寿的目标。
+  ///
+  /// 与 [lifecycleListenable] 互不派生: 后者是 Controller 自身的 mount / dispose 阶段, 这里
+  /// 是「Widget 树此刻要不要让动画走」—— 图表被路由覆盖时 Controller 仍是 mounted。默认
+  /// [TickerModeData.fallback], 使不接 view 层的用法(如纯 Controller 测试)行为不变。
+  late final FlexiStateNotifier<TickerModeData> _tickerModeNotifier;
+
+  @override
+  ValueListenable<TickerModeData> get tickerModeListenable => _tickerModeNotifier;
+
+  /// 同步 Widget 层的 `TickerMode` 策略; 由 view 层在 `initState` 与 `activate` 调用。
+  void setTickerMode(TickerModeData values) {
+    _tickerModeNotifier.value = values;
+  }
 
   /// 副区指标高度变化 listenable（不含时间轴）。
   late final FlexiStateNotifier<List<double>> _subIndicatorHeightsNotifier;

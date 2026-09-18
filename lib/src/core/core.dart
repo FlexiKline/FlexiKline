@@ -21,6 +21,7 @@ import 'package:flexi_formatter/flexi_formatter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/widgets.dart' show TickerModeData;
 
 import '../config/export.dart';
 import '../constant.dart';
