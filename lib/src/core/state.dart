@@ -361,6 +361,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     if (!await _moveToPaintDxOffset(target)) return null;
     if (!isMounted || !identical(klineData, data)) return null;
     if (klineData.get(index)?.ts != targetTimestamp) return null;
+    dispatchInteractionEvent(FlexiKlineEventType.moveToDate, {'ts': targetTimestamp});
     return index;
   }
 
@@ -369,6 +370,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   void requestMoveToInitialPosition() {
     if (!isMounted) return;
     unawaited(_moveToPaintDxOffset(getInitPaintDxOffset()));
+    dispatchInteractionEvent(FlexiKlineEventType.moveToLatest);
   }
 
   /// 计算绘制蜡烛图的范围
@@ -415,6 +417,10 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     bool useCacheFirst = true,
     bool useCachePaintDxOffset = false,
   }) {
+    dispatchInteractionEvent(FlexiKlineEventType.switchKlineData, {
+      'symbol': spec.symbol,
+      'interval': spec.interval.toString(),
+    });
     KlineData? data = _klineDataCache[spec.key];
 
     if (useCacheFirst && data != null && data.isNotEmpty) {

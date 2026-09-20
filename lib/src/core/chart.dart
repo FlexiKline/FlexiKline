@@ -260,6 +260,7 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
     }
 
     if (!oldState.isLoadMore && newState.isLoadMore) {
+      dispatchInteractionEvent(FlexiKlineEventType.loadMoreHistory, {'length': klineData.length});
       if (settingConfig.autoLoadMoreData) {
         onLoadMoreCandles?.call(klineData.getLoadMoreSpec());
       }
@@ -315,6 +316,7 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
     logd('onPanEnd');
     _panSmoothFactor = 1.0;
     markRepaintChart(reset: true);
+    dispatchInteractionEvent(FlexiKlineEventType.pan);
   }
 
   /// signal 通道(横向滚轮、Web 触控板双指横滑)的一次性横向平移: 每个事件自成一段。
@@ -426,6 +428,7 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
   // 蜡烛图缩放结束
   void onChartScaleEnd() {
     _setCandleWidth(candleWidth, sync: true);
+    dispatchInteractionEvent(FlexiKlineEventType.scale, {'candleWidth': candleWidth});
   }
 
   /// 退出指标图的缩放, Y 轴交还给可见数据自动适配。
@@ -609,6 +612,7 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
   /// 只清会话, 不退出缩放态 —— 用户接管 Y 轴之后只有显式复位(退出按钮)才交还自动模式。
   /// 例外是本轮没有产生任何缩放(点一下滑竿就抬手): 那种情况不该留下一个需要复位的状态。
   void onChartZoomEnd() {
+    dispatchInteractionEvent(FlexiKlineEventType.zoomY);
     if (mainPaintObject.hasZoomMinMax) {
       _endChartZoomSession();
       return;
@@ -671,6 +675,9 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
     final object = _draggingObject;
     _draggingObject = null;
     object?.handleDragEnd();
+    if (object != null) {
+      dispatchInteractionEvent(FlexiKlineEventType.paintObjectDrag, {'key': object.key.toString()});
+    }
   }
 
   @override

@@ -585,6 +585,11 @@ mixin SettingBinding on KlineBindingBase {
     }
     markRepaintChart(reset: true);
     markRepaintCross();
+    dispatchInteractionEvent(FlexiKlineEventType.indicatorToggle, {
+      'key': key.toString(),
+      'visible': true,
+      'inMain': true,
+    });
     return true;
   }
 
@@ -593,6 +598,11 @@ mixin SettingBinding on KlineBindingBase {
     if (!_paintObjectManager.removeMainPaintObject(key)) return false;
     markRepaintChart(reset: true);
     markRepaintCross();
+    dispatchInteractionEvent(FlexiKlineEventType.indicatorToggle, {
+      'key': key.toString(),
+      'visible': false,
+      'inMain': true,
+    });
     return true;
   }
 
@@ -618,6 +628,11 @@ mixin SettingBinding on KlineBindingBase {
       }
     }
     _onSubIndicatorsChanged();
+    dispatchInteractionEvent(FlexiKlineEventType.indicatorToggle, {
+      'key': key.toString(),
+      'visible': true,
+      'inMain': false,
+    });
     return true;
   }
 
@@ -625,6 +640,11 @@ mixin SettingBinding on KlineBindingBase {
   bool hideSubIndicator(IIndicatorKey key) {
     if (!_paintObjectManager.removeSubPaintObject(key)) return false;
     _onSubIndicatorsChanged();
+    dispatchInteractionEvent(FlexiKlineEventType.indicatorToggle, {
+      'key': key.toString(),
+      'visible': false,
+      'inMain': false,
+    });
     return true;
   }
 

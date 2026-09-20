@@ -128,10 +128,12 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
     if (isCrossing) {
       requestCancelCross();
       onCrossCustomTooltip?.call(null);
+      dispatchInteractionEvent(FlexiKlineEventType.cross, const {'active': false});
       return false;
     }
     logd('onCrossToggle > $position');
     _openCross(position);
+    dispatchInteractionEvent(FlexiKlineEventType.cross, const {'active': true});
     return true;
   }
 

@@ -90,6 +90,35 @@ abstract class KlineBindingBase with FlexiLog implements PaintContext, DrawConte
     // 多个 Controller 共享同一份配置时，自动落盘会让从属侧用自己的运行时状态覆盖对侧。
     _paintObjectManager.dispose();
     _drawObjectManager.dispose();
+    _observers.clear();
+  }
+
+  /// 用户交互观测者：供业务侧做埋点上报的旁路只读通道，不参与任何功能路径。
+  final ObserverList<FlexiKlineObserver> _observers = ObserverList<FlexiKlineObserver>();
+
+  /// 注册观测者。业务侧须在自身 `dispose` 里 [removeObserver]，避免持有泄漏。
+  void addObserver(FlexiKlineObserver observer) => _observers.add(observer);
+
+  void removeObserver(FlexiKlineObserver observer) => _observers.remove(observer);
+
+  /// 上报一次用户交互事件，[data] 为发射点就近可得的附加信息。
+  ///
+  /// 无观测者时不构造事件对象；观测者异常就地隔离，不冒泡回框架的手势与绘制路径
+  /// —— 这是「观测不影响功能」的保证所在。遍历前取快照，允许观测者在回调内注销自己。
+  @protected
+  void dispatchInteractionEvent(
+    FlexiKlineEventType type, [
+    Map<String, Object?> data = const {},
+  ]) {
+    if (_observers.isEmpty) return;
+    final event = FlexiKlineEvent(type, DateTime.now().millisecondsSinceEpoch, data);
+    for (final observer in List.of(_observers)) {
+      try {
+        observer.onEvent(event);
+      } catch (e, s) {
+        logw('interaction observer threw, isolated', error: e, stackTrace: s);
+      }
+    }
   }
 
   @mustCallSuper

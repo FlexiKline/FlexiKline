@@ -300,5 +300,6 @@ mixin GridBinding on KlineBindingBase, SettingBinding {
     _upObject = _downObject = null;
     markRepaintGrid();
     markRepaintChart();
+    dispatchInteractionEvent(FlexiKlineEventType.gridResize);
   }
 }

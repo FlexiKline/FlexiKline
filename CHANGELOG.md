@@ -3,6 +3,7 @@
 * Add `PaintObject.paintPlaceholder`, drawn right after grid lines on frames where kline data is not ready; the main pane forwards it to its children. `PaintObject` provides an empty default, so existing indicators need no change.
 * Add `PaintContext.tickerModeListenable` and `FlexiKlineController.setTickerMode`, relaying the widget-level `TickerModeData` (both `enabled` and `forceFrames`) into the controller so PaintObject animations follow the ambient `TickerMode`.
 * Fix candle and time indicators being removable via external `hide*Indicator` or `dispose*PaintObject` calls, which could crash the chart.
+* Add `FlexiKlineObserver` and `FlexiKlineEvent` as a side channel for user-interaction telemetry: register with `addObserver` / `removeObserver`, then receive an event carrying `type`, `timestamp` and a flat `data` map. Events are reported from existing operation entry points: pan, X/Y zoom, cross toggle, grid resize, paint-object drag, load-more, kline data switch, date / latest jump, indicator toggle, and draw start / complete / select / move / delete. Observer exceptions are isolated and never reach the gesture or paint path.
 
 ## 2.5.4
 * Add `DrawContext.isSelectedDrawObject` so a `DrawObject` can branch on selection state, which lives in `DrawState` rather than on the object itself (Breaking Changes).

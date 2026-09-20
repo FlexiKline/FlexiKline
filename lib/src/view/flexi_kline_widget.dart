@@ -178,15 +178,12 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
 
   /// 把 [TickerMode] 策略原样接到 controller 上。
   ///
-  /// 调用时机是 [initState] 与 [activate], **不是** [didChangeDependencies]:
-  /// [TickerMode.getValuesNotifier] 用 `getInheritedWidgetOfExactType` 取祖先、不建立依赖,
-  /// 祖先更换不会触发 [didChangeDependencies], 挂在那里会一直读旧祖先的 notifier。与 Flutter
-  /// 自身 `TickerProviderStateMixin.activate` 同一做法。同一个 [TickerMode] 内 `enabled` 的
-  /// 变化无需重新解析 —— 那写的是同一个 notifier 的 value。
+  /// 时机是 [initState] 与 [activate] 而非 [didChangeDependencies]:
+  /// [TickerMode.getValuesNotifier] 取祖先却不建立依赖, 祖先更换不触发后者, 挂在那里会一直
+  /// 读旧 notifier(与 Flutter `TickerProviderStateMixin.activate` 同源)。
   void _updateTickerModeNotifier() {
     final notifier = TickerMode.getValuesNotifier(context);
-    // 实例未变即整体早退, 不像 Flutter 的 `activate` 那样再无条件同步一次: 本 State 在
-    // `deactivate` 期间不移除 listener, 同一祖先下的策略变化照常收到, 值一直是同步的。
+    // 实例未变即早退: `deactivate` 期间不移除 listener, 同一祖先下的策略变化照常收到。
     if (notifier == _tickerModeNotifier) return;
     _tickerModeNotifier?.removeListener(_handleTickerModeChanged);
     notifier.addListener(_handleTickerModeChanged);

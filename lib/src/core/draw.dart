@@ -201,6 +201,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
           object.setPointer(Point.pointer(0, magneticSnap(initOffset)));
         }
         _drawState = DrawState.draw(object);
+        dispatchInteractionEvent(FlexiKlineEventType.drawStart, {'type': type.toString()});
       } else {
         _drawState = const Prepared();
       }
@@ -245,6 +246,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
       object.addPointer(pointer);
       if (object.isCompleted) {
         logi('onDrawConfirm ${object.type} draw completed!');
+        dispatchInteractionEvent(FlexiKlineEventType.drawComplete, {'type': object.type.toString()});
         updateDrawObjectPointsData(object);
         // 绘制完成, 使用line配置绘制实线.
         object.setDrawLineConfig(object.line);
@@ -375,6 +377,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
     _drawingPointerNotifier.updateValue(null);
     _notifyDrawStateChange();
     _markRepaintDraw();
+    dispatchInteractionEvent(FlexiKlineEventType.drawMove, {'type': object.type.toString()});
   }
 
   void onDrawSelect(DrawObject object) {
@@ -385,6 +388,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
     onPaintObjectDragCancel();
     requestCancelCross();
     _markRepaintDraw();
+    dispatchInteractionEvent(FlexiKlineEventType.drawSelect, {'type': object.type.toString()});
   }
 
   ////// 操作 //////
@@ -397,6 +401,10 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
     _drawObjectManager.removeDrawObject(object);
     if (isStateObject) _drawState = const Prepared();
     _markRepaintDraw();
+    dispatchInteractionEvent(FlexiKlineEventType.drawDelete, {
+      'type': object.type.toString(),
+      'all': false,
+    });
   }
 
   void removeAllDrawObjects() {
@@ -407,6 +415,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
       _drawState = const Prepared();
     }
     _markRepaintDraw();
+    dispatchInteractionEvent(FlexiKlineEventType.drawDelete, {'all': true});
   }
 
   bool changeDrawLineStyle({
