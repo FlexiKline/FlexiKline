@@ -167,4 +167,30 @@ void main() {
 
     recorder.endRecording().dispose();
   });
+
+  test('drawTooltipInfos 卡片底边不超出 drawableRect 且高度不被压缩', () {
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+    const style = TextStyle(fontSize: 10, height: 1);
+    const drawableRect = Rect.fromLTWH(0, 0, 400, 60);
+
+    Rect? bounds;
+
+    final size = canvas.drawTooltipInfos(
+      offset: const Offset(0, 50),
+      tooltipInfos: [
+        TooltipInfo(label: 'A', value: '1'),
+        TooltipInfo(label: 'B', value: '2'),
+        TooltipInfo(label: 'C', value: '3'),
+      ],
+      drawableRect: drawableRect,
+      defaultStyle: style,
+      onLayout: (cardBounds, _) => bounds = cardBounds,
+    );
+
+    expect(bounds!.bottom, lessThanOrEqualTo(drawableRect.bottom + 0.01));
+    expect(bounds!.height, closeTo(size.height, 0.01));
+
+    recorder.endRecording().dispose();
+  });
 }

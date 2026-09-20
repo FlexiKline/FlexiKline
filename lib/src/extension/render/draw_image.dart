@@ -69,49 +69,29 @@ extension FlexiDrawImage on Canvas {
       );
     }
 
+    // 方向摆放与边界夹取分两步, 保证结果与是否传[drawableRect]无关.
+    offset = Offset(
+      switch (drawDirection) {
+        DrawDirection.ltr => offset.dx,
+        DrawDirection.center => offset.dx - viewSize.width / 2,
+        DrawDirection.rtl => offset.dx - viewSize.width,
+      },
+      offset.dy,
+    );
+
     // 矫正边界.
     if (drawableRect != null) {
-      final dy = math.max(
-        drawableRect.top,
-        math.min(offset.dy, drawableRect.bottom),
+      // 外层max不可省: 区域装不下容器时上下界会反, 换成clamp会抛异常.
+      offset = Offset(
+        math.max(
+          drawableRect.left,
+          math.min(offset.dx, drawableRect.right - viewSize.width),
+        ),
+        math.max(
+          drawableRect.top,
+          math.min(offset.dy, drawableRect.bottom - viewSize.height),
+        ),
       );
-      double dx;
-      switch (drawDirection) {
-        case DrawDirection.ltr:
-          dx = math.max(
-            drawableRect.left,
-            math.min(offset.dx, drawableRect.right - viewSize.width),
-          );
-          break;
-        case DrawDirection.center:
-          dx = math.max(
-            drawableRect.left,
-            math.min(offset.dx, drawableRect.right - viewSize.width / 2),
-          );
-          break;
-        case DrawDirection.rtl:
-          dx = math.max(
-            drawableRect.left,
-            math.min(
-              drawableRect.right - viewSize.width,
-              offset.dx - viewSize.width,
-            ),
-          );
-          break;
-      }
-      offset = Offset(dx, dy);
-    } else {
-      if (drawDirection.isrtl) {
-        offset = Offset(
-          offset.dx - viewSize.width,
-          offset.dy,
-        );
-      } else if (drawDirection.isCenter) {
-        offset = Offset(
-          offset.dx - viewSize.width / 2,
-          offset.dy,
-        );
-      }
     }
 
     final isDrawBg = backgroundColor != null && backgroundColor.a != 0;

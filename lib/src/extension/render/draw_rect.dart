@@ -54,31 +54,28 @@ extension FlexiDrawRect on Canvas {
       size += Offset(margin.horizontal, margin.vertical);
     }
 
+    // 方向摆放与边界夹取分两步, 保证结果与是否传[drawableSize]无关.
+    offset = Offset(
+      switch (drawDirection) {
+        DrawDirection.ltr => offset.dx,
+        DrawDirection.center => offset.dx - size.width / 2,
+        DrawDirection.rtl => offset.dx - size.width,
+      },
+      offset.dy,
+    );
+
     // 矫正边界.
     if (drawableSize != null) {
-      final dy = math.max(
-        0.0,
-        math.min(offset.dy, drawableSize.height - size.height),
-      );
-
-      double dx;
-      if (drawDirection.isltr) {
-        dx = math.max(
-          0,
+      offset = Offset(
+        math.max(
+          0.0,
           math.min(offset.dx, drawableSize.width - size.width),
-        );
-      } else {
-        // 从右向左
-        dx = math.max(
-          0,
-          math.min(
-            drawableSize.width - size.width,
-            offset.dx - size.width,
-          ),
-        );
-      }
-
-      offset = Offset(dx, dy);
+        ),
+        math.max(
+          0.0,
+          math.min(offset.dy, drawableSize.height - size.height),
+        ),
+      );
     }
 
     if (margin != null && margin.isNonNegative) {

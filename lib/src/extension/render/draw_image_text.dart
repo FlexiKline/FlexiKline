@@ -100,8 +100,10 @@ extension FlexiDrawImageText on Canvas {
 
     final originImgSize = Size(image.width.toDouble(), image.height.toDouble());
     final isDrawImage = !(originImgSize.isEmpty || imgSize.isEmpty);
-    Size containerSize = isDrawImage ? imgSize : Size.zero;
-    spacing = math.max(0, spacing);
+    // 图片实际占位: 布局一律用它, 空[imgSize]直接参与会推开文本, 并让垂直分布越界触发断言.
+    final drawImgSize = isDrawImage ? imgSize : Size.zero;
+    Size containerSize = drawImgSize;
+    spacing = isDrawImage ? math.max(0, spacing) : 0;
 
     final textPainter = TextPainter(
       text:
@@ -140,49 +142,28 @@ extension FlexiDrawImageText on Canvas {
       containerSize += Offset(padding.horizontal, padding.vertical);
     }
 
-    if (drawableRect != null) {
-      final dy = math.max(
-        drawableRect.top,
-        math.min(offset.dy, drawableRect.bottom),
-      );
-      double dx;
+    // 方向摆放与边界夹取分两步, 保证结果与是否传[drawableRect]无关.
+    offset = Offset(
       switch (drawDirection) {
-        case DrawDirection.ltr:
-          dx = math.max(
-            drawableRect.left,
-            math.min(offset.dx, drawableRect.right - containerSize.width),
-          );
-          break;
-        case DrawDirection.center:
-          dx = math.max(
-            drawableRect.left,
-            math.min(offset.dx, drawableRect.right - containerSize.width / 2),
-          );
-          break;
-        case DrawDirection.rtl:
-          dx = math.max(
-            drawableRect.left,
-            math.min(
-              drawableRect.right - containerSize.width,
-              offset.dx - containerSize.width,
-            ),
-          );
-          break;
-      }
+        DrawDirection.ltr => offset.dx,
+        DrawDirection.center => offset.dx - containerSize.width / 2,
+        DrawDirection.rtl => offset.dx - containerSize.width,
+      },
+      offset.dy,
+    );
 
-      offset = Offset(dx, dy);
-    } else {
-      if (drawDirection.isrtl) {
-        offset = Offset(
-          offset.dx - containerSize.width,
-          offset.dy,
-        );
-      } else if (drawDirection.isCenter) {
-        offset = Offset(
-          offset.dx - containerSize.width / 2,
-          offset.dy,
-        );
-      }
+    if (drawableRect != null) {
+      // 外层max不可省: 区域装不下容器时上下界会反, 换成clamp会抛异常.
+      offset = Offset(
+        math.max(
+          drawableRect.left,
+          math.min(offset.dx, drawableRect.right - containerSize.width),
+        ),
+        math.max(
+          drawableRect.top,
+          math.min(offset.dy, drawableRect.bottom - containerSize.height),
+        ),
+      );
     }
 
     final isDrawBg = backgroundColor != null && backgroundColor.a != 0;
@@ -262,24 +243,26 @@ extension FlexiDrawImageText on Canvas {
     final imgDy = yAxisAlign.distributeOffset(
       result.top + padding.top,
       result.bottom - padding.bottom,
-      imgSize.height,
+      drawImgSize.height,
     );
 
     if (drawImageFirst) {
-      final dst = Offset(offset.dx, imgDy) & imgSize;
+      final dst = Offset(offset.dx, imgDy) & drawImgSize;
       drawImageRect(image, imageSrc, dst, imagePaint);
       final textOffset = Offset(offset.dx + dst.width + spacing, txtDy);
       textPainter.paint(this, textOffset);
     } else {
       textPainter.paint(this, Offset(offset.dx, txtDy));
       final imgOffset = Offset(offset.dx + textSize.width + spacing, imgDy);
-      final dst = imgOffset & imgSize;
+      final dst = imgOffset & drawImgSize;
       drawImageRect(image, imageSrc, dst, imagePaint);
     }
 
     if (isClip) {
       restore();
     }
+
+    textPainter.dispose();
 
     return result;
   }

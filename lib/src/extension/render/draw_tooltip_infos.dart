@@ -144,9 +144,10 @@ extension FlexiDrawTooltipInfosExt on Canvas {
           drawableRect.left,
           math.min(dx, drawableRect.right - size.width),
         );
+        // 只上推不压缩卡片; 外层max不可省, 区域装不下卡片时上下界会反.
         dy = math.max(
           drawableRect.top,
-          math.min(dy, drawableRect.bottom),
+          math.min(dy, drawableRect.bottom - size.height),
         );
       }
 
