@@ -15,6 +15,7 @@
 import 'package:decimal/decimal.dart';
 
 import '../extension/collections_ext.dart';
+import '../types.dart';
 import 'flexi_num.dart';
 
 class MinMax {
@@ -31,28 +32,34 @@ class MinMax {
 
   MinMax clone() => MinMax(max: max, min: min);
 
+  /// 两端点转成 [mode] 的**新**区间; 恒复制, 于是调用方不必额外 [clone]。
+  MinMax reset(ComputeMode mode) => MinMax(max: max.reset(mode), min: min.reset(mode));
+
   FlexiNum max;
   FlexiNum min;
 
+  // 外来值一律 reset 到端点自身的模式: [FlexiNum] 的运算恒以左操作数模式为准, 只有赋值绕过
+  // 这条规则(`ByNum` / `ByDecimal` 按入参类型硬造 FlexiNum, 同属此列)。
+
   void updateMinMaxBy(FlexiNum val) {
-    if (max < val) max = val;
-    if (min > val) min = val;
+    if (max < val) max = val.reset(max.mode);
+    if (min > val) min = val.reset(min.mode);
   }
 
   void updateMinMaxByNum(num val) {
-    if (max.ltNum(val)) max = FlexiNum.fromNum(val);
-    if (min.gtNum(val)) min = FlexiNum.fromNum(val);
+    if (max.ltNum(val)) max = FlexiNum.fromNum(val).reset(max.mode);
+    if (min.gtNum(val)) min = FlexiNum.fromNum(val).reset(min.mode);
   }
 
   void updateMinMaxByDecimal(Decimal val) {
-    if (max.ltDecimal(val)) max = FlexiNum.fromDecimal(val);
-    if (min.gtDecimal(val)) min = FlexiNum.fromDecimal(val);
+    if (max.ltDecimal(val)) max = FlexiNum.fromDecimal(val).reset(max.mode);
+    if (min.gtDecimal(val)) min = FlexiNum.fromDecimal(val).reset(min.mode);
   }
 
   void updateMinMax(MinMax? minmax) {
     if (minmax == null) return;
-    if (max < minmax.max) max = minmax.max;
-    if (min > minmax.min) min = minmax.min;
+    if (max < minmax.max) max = minmax.max.reset(max.mode);
+    if (min > minmax.min) min = minmax.min.reset(min.mode);
   }
 
   void expand(num margin) {
@@ -86,8 +93,9 @@ class MinMax {
   void scaleAroundCenter(double coeff) {
     if (!coeff.isFinite || isSame) return;
     final center = (max + min).divNum(2);
-    max = center + (max - center).mulNum(coeff);
-    min = center + (min - center).mulNum(coeff);
+    // clampScale: 缩放以当前区间为基准, 逐次自乘会让 Decimal 的 scale 无界增长。
+    max = (center + (max - center).mulNum(coeff)).clampScale();
+    min = (center + (min - center).mulNum(coeff)).clampScale();
   }
 
   /// 整体平移区间, 跨度保持不变。
@@ -114,6 +122,9 @@ class MinMax {
 
   bool get isSame => max == min;
 
+  /// 两端点都能换算为有限 double; 否则既映射不出坐标, 也过不了 accurate 模式的 `Decimal.parse`。
+  bool get isFinite => max.toDouble().isFinite && min.toDouble().isFinite;
+
   /// 计算给定集合[list]中的所有[FlexiNum]的最大最小值
   static MinMax? getMinMaxByList(List<FlexiNum?>? list) {
     if (list == null || list.isEmpty) return null;
@@ -128,14 +139,16 @@ class MinMax {
   }
 
   /// 线性插值: 从 [a] 到 [b], 按 [t] 比例过渡 (t=0 返回 a, t=1 返回 b)
+  ///
+  /// 结果经 [FlexiNum.clampScale] 收口: 逐帧自插值会让 Decimal 的 scale 无界增长。
   static MinMax lerp(MinMax a, MinMax b, double t) {
     if (t >= 1 || a == b) return b.clone();
     if (t <= 0) return a.clone();
     final tNum = FlexiNum.fromNum(t);
     final oneMinusT = FlexiNum.fromNum(1 - t);
     return MinMax(
-      max: a.max * oneMinusT + b.max * tNum,
-      min: a.min * oneMinusT + b.min * tNum,
+      max: (a.max * oneMinusT + b.max * tNum).clampScale(),
+      min: (a.min * oneMinusT + b.min * tNum).clampScale(),
     );
   }
 

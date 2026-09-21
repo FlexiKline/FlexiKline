@@ -243,8 +243,17 @@ mixin PaintObjectGeometryStateMixin<T extends Indicator<IIndicatorKey>> on Indic
     return _smoothMinMax ?? _minMax ?? MinMax.zero;
   }
 
+  /// `_minMax` 的唯一写入入口, 也是计算模式继承链的起点: 下游(平滑、zoom、合并)都以自身端点为
+  /// 左操作数, 归一后自动跟随。[MinMax.reset] 恒复制, 调用方不必先 clone。
+  ///
+  /// 非有限区间拒绝写入、保留上一帧, 口径同 `_applyZoomFactor`。
   @override
   void setMinMax(MinMax val) {
+    if (!val.isFinite) {
+      assert(false, 'computeVisibleMinMax 返回了非有限区间: $val ($key)');
+      return;
+    }
+    val = val.reset(klineData.computeMode);
     if (val.isSame) val.expandByRatios(settingConfig.expandRatiosOfSameMinmax);
     _minMax = val;
     _dyFactor = null;

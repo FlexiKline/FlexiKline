@@ -604,6 +604,15 @@ extension type FlexiNum._(Object _value) {
     throw const FlexiNumException('FlexiNum round Type not match!');
   }
 
+  /// 把精度收口到 [FlexiFormatter.scaleOnInfinitePrecision]; fast 模式原样返回。
+  ///
+  /// `Decimal` 乘法取两操作数 scale 之和, 所以自乘迭代会让 scale 线性增长, 最终 `toDouble()`
+  /// (一个 BigInt 除法)溢出为 `Infinity / Infinity` = NaN。除法自带同档收口, 乘法需显式调用。
+  FlexiNum clampScale() {
+    if (_value is! Decimal) return this;
+    return round(scale: FlexiFormatter.scaleOnInfinitePrecision);
+  }
+
   FlexiNum shift(int value) {
     if (_value is num) {
       return FlexiNum.fromNum(_value * math.pow(10, value));

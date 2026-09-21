@@ -489,9 +489,8 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
     final next = from.clone();
     next.scaleAroundCenter(clamped / fromFactor);
 
-    // 有界倍率已经保证候选有限, 这里只是让唯一写入点的契约不依赖界配得是否合理:
-    // 非有限区间会让 dyFactor 变 NaN, 连纵向平移一起死, 且无法从手势恢复。
-    if (!next.max.toDouble().isFinite || !next.min.toDouble().isFinite) return false;
+    // 有界倍率已经保证候选有限, 这里只是让唯一写入点的契约不依赖界配得是否合理。
+    if (!next.isFinite) return false;
 
     _zoomFactor = clamped;
     mainPaintObject.setZoomMinMax(next);

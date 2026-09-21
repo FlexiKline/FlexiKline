@@ -1,3 +1,10 @@
+## 2.5.6
+* Fix `FormatException: NaN is not a valid format` thrown from `paintGridLines` after a few seconds of continuous panning: a `Decimal`-backed range from a combine child left `ComputeMode.fast` holding a `Decimal` endpoint, whose scale then grew every frame until `toDouble()` returned NaN.
+* Add `MinMax.reset` and normalize the range to `klineData.computeMode` in `setMinMax` and `setZoomMinMax`, the write entries feeding `dyFactor`; `MainPaintObject.updateMinMax` seeds through `setMinMax` instead of assigning `_minMax` directly.
+* Keep a `MinMax` endpoint's compute mode owned by the range itself: `updateMinMax`, `updateMinMaxBy`, `updateMinMaxByNum` and `updateMinMaxByDecimal` now `reset` the incoming value to the endpoint's mode, since assignment is the only way around `FlexiNum`'s left-operand rule.
+* Add `FlexiNum.clampScale` and apply it in `MinMax.lerp` and `MinMax.scaleAroundCenter`: `Decimal` multiplication adds up operand scales, so feeding either result back in grows the scale until `toDouble()` overflows.
+* Add `MinMax.isFinite` and reject a non-finite range in `setMinMax`, keeping the previous one: such a range maps to no coordinate and cannot be converted to `Decimal`; same stance as `_applyZoomFactor`, which now shares the getter.
+
 ## 2.5.5
 * Add `TickerProviderPaintObjectMixin` so a `PaintObject` can drive `AnimationController` without a Widget-provided vsync; animations freeze while the object is out of the paint tree or the chart is offscreen.
 * Add `PaintObject.paintPlaceholder`, drawn right after grid lines on frames where kline data is not ready; the default is empty, so existing indicators need no change.

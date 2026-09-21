@@ -67,8 +67,10 @@ class FakePaintContext implements PaintContext {
   @override
   final ValueNotifier<TickerModeData> tickerModeListenable = ValueNotifier(TickerModeData.fallback);
 
+  /// 由测试驱动的数据源；默认 [KlineData.empty]（`ComputeMode.fast`），需要其他计算模式的
+  /// 测试自行赋值。
   @override
-  KlineData get klineData => KlineData.empty;
+  KlineData klineData = KlineData.empty;
 
   @override
   ValueListenable<KlineSpec> get klineSpecListenable =>

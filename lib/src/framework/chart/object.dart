@@ -437,8 +437,10 @@ final class MainPaintObject<T extends MainPaintObjectIndicator> extends PaintObj
   bool get hasZoomMinMax => _zoomMinMax != null;
 
   /// 设置缩放区间, 进入用户接管 Y 轴的状态。
+  ///
+  /// 同 [setMinMax] 归一计算模式(两者都喂给 [dyFactor])。有限性由调用点保证, 此处不重复查。
   void setZoomMinMax(MinMax val) {
-    _zoomMinMax = val;
+    _zoomMinMax = val.reset(klineData.computeMode);
     _smoothMinMax = null;
     _dyFactor = null;
   }

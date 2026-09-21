@@ -201,9 +201,12 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
     }
   }
 
+  /// 合并一个 combine 子对象的区间; [val] 无需调用方 clone, [setMinMax] 经 reset 接管副本。
+  ///
+  /// 首个子对象**播种**主区的计算模式(播种者由 zIndex 升序决定), 故走 [setMinMax] 而非直接赋值。
   void updateMinMax(MinMax val) {
     if (_minMax == null) {
-      _minMax = val;
+      setMinMax(val);
     } else {
       _minMax!.updateMinMax(val);
     }
@@ -272,7 +275,7 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
         reset: reset,
       );
       if (ret != null && object.paintMode == PaintMode.combine) {
-        updateMinMax(ret.clone());
+        updateMinMax(ret);
       }
     }
 

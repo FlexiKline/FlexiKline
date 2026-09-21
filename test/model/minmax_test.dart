@@ -493,4 +493,124 @@ void main() {
       expect(current.min.toDouble(), closeTo(50.0, 1.0));
     });
   });
+
+  // ---------------------------------------------------------------------------
+  // 重复乘法下的精度收口
+  //
+  // 上面的 lerp / scaleAroundCenter 用例全走 fast 模式(double 定长, 无累积)。精度累积只在
+  // accurate 模式暴露：FlexiNum 背后是有理数，每乘一个由 double 转来的 Decimal 就让分母乘上
+  // 该 Decimal 的分母。分子分母双双越过 double 上限后 `toDouble()` 算的是 Infinity /
+  // Infinity，得到 NaN；NaN 比较恒为 false，会穿过 dyFactor 的 `<= 0` 哨兵一路传到
+  // `Decimal.parse('NaN')` 抛 FormatException。
+  // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  // 边界更新的模式保持
+  //
+  // FlexiNum 的运算以左操作数的模式为准，所以端点模式对了，外来值自然被收编；但赋值绕过运算
+  // 符。主区靠 updateMinMax 合并 combine 子对象的区间，一个返回 Decimal 区间的业务指标就能
+  // 把 fast 模式的主区顶成 Decimal，随后 lerp 的精度增长无人可挡。
+  // ---------------------------------------------------------------------------
+  group('边界更新保持自身的计算模式', () {
+    MinMax fastRange() => MinMax(max: FlexiNum.fromNum(100.0), min: FlexiNum.fromNum(10.0));
+    MinMax accurateRange() => MinMax(
+      max: FlexiNum.fromDecimal(Decimal.parse('100')),
+      min: FlexiNum.fromDecimal(Decimal.parse('10')),
+    );
+
+    test('updateMinMax：fast 区间并入 Decimal 区间后仍是 fast', () {
+      final mm = fastRange();
+      mm.updateMinMax(
+        MinMax(
+          max: FlexiNum.fromDecimal(Decimal.parse('200.5')),
+          min: FlexiNum.fromDecimal(Decimal.parse('5.25')),
+        ),
+      );
+
+      expect(mm.max.mode, ComputeMode.fast);
+      expect(mm.min.mode, ComputeMode.fast);
+      expect(mm.max.toDouble(), 200.5);
+      expect(mm.min.toDouble(), 5.25);
+    });
+
+    test('updateMinMax：accurate 区间并入 fast 区间后仍是 accurate', () {
+      final mm = accurateRange();
+      mm.updateMinMax(_mm(200.5, 5.25));
+
+      expect(mm.max.mode, ComputeMode.accurate);
+      expect(mm.min.mode, ComputeMode.accurate);
+      expect(mm.max.toDouble(), 200.5);
+    });
+
+    test('updateMinMaxBy：外来 FlexiNum 被转成自身模式', () {
+      final mm = fastRange();
+      mm.updateMinMaxBy(FlexiNum.fromDecimal(Decimal.parse('300')));
+      expect(mm.max.mode, ComputeMode.fast);
+      expect(mm.max.toDouble(), 300.0);
+    });
+
+    test('updateMinMaxByDecimal：不把 fast 区间升级成 Decimal', () {
+      final mm = fastRange();
+      mm.updateMinMaxByDecimal(Decimal.parse('300'));
+      expect(mm.max.mode, ComputeMode.fast);
+      expect(mm.max.toDouble(), 300.0);
+    });
+
+    test('updateMinMaxByNum：不把 accurate 区间降级成 double', () {
+      final mm = accurateRange();
+      mm.updateMinMaxByNum(300.0);
+      expect(mm.max.mode, ComputeMode.accurate);
+      expect(mm.max.toDouble(), 300.0);
+    });
+
+    test('未越界时不改写端点，也不动模式', () {
+      final mm = fastRange();
+      mm.updateMinMax(accurateRange()); // 50 落在 [10, 100] 内, 两端都不更新
+      expect(mm.max.mode, ComputeMode.fast);
+      expect(mm.max.toDouble(), 100.0);
+      expect(mm.min.toDouble(), 10.0);
+    });
+  });
+
+  group('accurate 模式重复乘法：精度必须有界', () {
+    MinMax accurate(String max, String min) => MinMax(
+      max: FlexiNum.fromDecimal(Decimal.parse(max)),
+      min: FlexiNum.fromDecimal(Decimal.parse(min)),
+    );
+
+    test('lerp 自插值 400 帧：diffDivisor 始终可换算为有限 double', () {
+      // 修复前第 152 帧 toDouble() 变 Infinity、第 154 帧变 NaN——按 60fps 算不到 3 秒的连续
+      // 平移。Decimal 的 scale 在乘法下累加, toDouble() 的 BigInt 除法两边先后越界。
+      final target = accurate('60000.12', '59500.34');
+      var smooth = target.clone();
+
+      for (int frame = 1; frame <= 400; frame++) {
+        smooth = MinMax.lerp(smooth, target, 0.15);
+        expect(
+          smooth.diffDivisor.toDouble().isFinite,
+          isTrue,
+          reason: '第 $frame 帧的 diffDivisor 已无法换算为有限 double',
+        );
+      }
+      // 收口只舍掉低于可显示精度的位数，收敛目标不受影响。
+      expect(smooth.max.toDouble(), closeTo(60000.12, 1e-6));
+      expect(smooth.min.toDouble(), closeTo(59500.34, 1e-6));
+    });
+
+    test('scaleAroundCenter 反复缩放 400 次：diffDivisor 始终可换算为有限 double', () {
+      // 滚轮缩放以当前区间为基准(`from: mainPaintObject.minMax`)，与 lerp 同样是自乘累积。
+      // 一放一收让跨度量级保持不变，暴露出来的就只有精度增长。
+      final mm = accurate('60000', '59000');
+      final span = mm.size.toDouble();
+
+      for (int i = 0; i < 400; i++) {
+        mm.scaleAroundCenter(i.isEven ? 1.1 : 1 / 1.1);
+        expect(
+          mm.diffDivisor.toDouble().isFinite,
+          isTrue,
+          reason: '第 $i 次缩放后的 diffDivisor 已无法换算为有限 double',
+        );
+      }
+      expect(mm.size.toDouble(), closeTo(span, span * 1e-6));
+    });
+  });
 }
