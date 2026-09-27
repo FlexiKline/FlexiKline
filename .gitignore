@@ -25,16 +25,20 @@ migrate_working_dir/
 
 example/
 flexi_kline_indicators/
-flexi_kline_draw_tools/
-flexi_network/
 .vscode/
 
 # Flutter/Dart/Pub related
 # Libraries should not include pubspec.lock, per https://dart.dev/guides/libraries/private-files#pubspeclock.
-/pubspec.lock
+# 根目录 pubspec.lock 提交进 git（monorepo 根非库，锁依赖以固定 CI 解析）；成员包的 lockfile 仍忽略。
+packages/*/pubspec.lock
+apps/*/pubspec.lock
 **/doc/api/
 .dart_tool/
 build/
+
+# workspace 临时脱离用的 pubspec_overrides.yaml 不得入库（§3.3 逃生口）
+packages/*/pubspec_overrides.yaml
+apps/*/pubspec_overrides.yaml
 
 # FVM Version Cache
 .fvm/

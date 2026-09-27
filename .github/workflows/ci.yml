@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["**.md"]
+  pull_request:
+    branches: [main]
+    paths-ignore: ["**.md"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: Analyze (workspace)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: subosito/flutter-action@v2
+        with: { channel: stable, cache: true }
+      - run: flutter pub get          # 一次解析整个 workspace
+      - run: flutter analyze          # 根目录递归覆盖全部成员
+      - name: Verify formatting of changed files
+        run: |
+          git fetch origin ${{ github.base_ref || 'main' }} --depth=1
+          files=$(git diff --name-only origin/${{ github.base_ref || 'main' }}...HEAD -- '*.dart' | tr '\n' ' ')
+          [ -z "$files" ] || dart format --output=none --set-exit-if-changed $files
+
+  test:
+    name: Test ${{ matrix.package }} @ ${{ matrix.flutter-version || 'stable' }}
+    needs: analyze
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [flexi_kline, flexi_kline_draw_tools]
+        flutter-version: ["3.35.0", ""]     # 最低支持版 + latest stable
+    steps:
+      - uses: actions/checkout@v6
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ matrix.flutter-version }}
+          channel: stable
+          cache: true
+      - run: flutter pub get                # 根目录，全 workspace
+      - working-directory: packages/${{ matrix.package }}
+        run: flutter test --exclude-tags "exploration,benchmark"
+
+  dry-run:
+    name: Publish dry-run ${{ matrix.package }}
+    needs: analyze
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [flexi_kline, flexi_kline_draw_tools]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: subosito/flutter-action@v2
+        with: { channel: stable, cache: true }
+      - run: flutter pub get
+      - run: flutter pub publish --dry-run -C packages/${{ matrix.package }}
+
+  constraints:
+    name: Constraints resolve on pub.dev (informational)
+    needs: analyze
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [flexi_kline_draw_tools]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: subosito/flutter-action@v2
+        with: { channel: stable, cache: true }
+      - working-directory: packages/${{ matrix.package }}
+        run: |
+          printf 'resolution:\n' > pubspec_overrides.yaml
+          flutter pub get

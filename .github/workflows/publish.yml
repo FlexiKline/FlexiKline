@@ -3,10 +3,56 @@ name: Publish to pub.dev
 on:
   push:
     tags:
-      - "v[0-9]+.[0-9]+.[0-9]+*"
+      # <包名>-v<semver>，覆盖 packages/ 下所有包；历史的 vX.Y.Z 不匹配
+      - "*-v[0-9]+.[0-9]+.[0-9]+*"
 
 jobs:
+  resolve:
+    name: Resolve package from tag
+    runs-on: ubuntu-latest
+    outputs:
+      package: ${{ steps.parse.outputs.package }}
+    steps:
+      - uses: actions/checkout@v6
+      - id: parse
+        run: |
+          set -euo pipefail
+          tag="$GITHUB_REF_NAME"
+          package="${tag%-v*}"
+          version="${tag##*-v}"
+          dir="packages/$package"
+
+          # 不变量：只有 packages/ 下的包可发布
+          if [ ! -f "$dir/pubspec.yaml" ]; then
+            echo "::error::$dir/pubspec.yaml not found (tag=$tag)"; exit 1
+          fi
+
+          # 版本必须与 tag 一致，否则会在最后一步才被 pub.dev 拒绝
+          actual=$(grep -m1 '^version:' "$dir/pubspec.yaml" | sed 's/^version:[[:space:]]*//')
+          if [ "$actual" != "$version" ]; then
+            echo "::error::tag version $version != pubspec version $actual"; exit 1
+          fi
+
+          echo "package=$package" >> "$GITHUB_OUTPUT"
+
+  constraints:
+    name: Verify constraints resolve against pub.dev
+    needs: resolve
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: subosito/flutter-action@v2
+        with: { channel: stable, cache: true }
+      - name: Resolve outside the workspace
+        working-directory: packages/${{ needs.resolve.outputs.package }}
+        run: |
+          printf 'resolution:\n' > pubspec_overrides.yaml
+          flutter pub get     # 依赖的兄弟包必须已在 pub.dev 上，否则失败
+
   publish:
+    needs: [resolve, constraints]
     permissions:
-      id-token: write
+      id-token: write         # OIDC，必须在调用方声明
     uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
+    with:
+      working-directory: packages/${{ needs.resolve.outputs.package }}
