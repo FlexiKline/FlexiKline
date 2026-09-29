@@ -7,4 +7,4 @@ environment:
 workspace:
   - packages/flexi_kline
   - packages/flexi_kline_draw_tools
-  # - apps/demo  （demo 全平台项目脚手架就绪后，取消注释纳入 workspace）
+  - apps/demo

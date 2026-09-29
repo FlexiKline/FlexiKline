@@ -29,7 +29,8 @@ flexi_kline_indicators/
 
 # Flutter/Dart/Pub related
 # Libraries should not include pubspec.lock, per https://dart.dev/guides/libraries/private-files#pubspeclock.
-# 根目录 pubspec.lock 提交进 git（monorepo 根非库，锁依赖以固定 CI 解析）；成员包的 lockfile 仍忽略。
+# 根目录 workspace lockfile 与成员包的 lockfile 均不入库。
+/pubspec.lock
 packages/*/pubspec.lock
 apps/*/pubspec.lock
 **/doc/api/
