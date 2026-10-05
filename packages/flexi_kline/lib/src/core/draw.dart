@@ -43,7 +43,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
   final _repaintDraw = ValueNotifier(0);
   final _drawStateNotifier = FlexiStateNotifier(DrawState.exited());
   final _drawingPointerNotifier = FlexiStateNotifier<Point?>(null);
-  final _drawVisibilityNotifier = ValueNotifier<bool>(true);
+  final _drawVisibilityNotifier = ValueNotifier<bool>(false);
   final _drawMagnetModeNotifier = ValueNotifier<MagnetMode>(MagnetMode.normal);
   final _drawContinuousNotifier = ValueNotifier<bool>(false);
 

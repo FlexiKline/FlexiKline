@@ -589,7 +589,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
         canvas.drawText(
           offset: Offset(
             offset.dx,
-            offset.dy + size.height - 0.5,
+            offset.dy + size.height,
           ),
           drawDirection: DrawDirection.rtl,
           drawableRect: drawableRect,
@@ -603,7 +603,8 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
           ),
           textAlign: countdown.textAlign,
           textWidth: size.width,
-          // padding: countdown.padding,
+          // textWidth仅作为layout的maxWidth, 需同时指定minWidth才能强制固定宽度与最新价同宽.
+          minWidth: size.width,
           backgroundColor: theme.countdownBg,
           borderRadius: borderRadius,
           borderSide: BorderSide(
