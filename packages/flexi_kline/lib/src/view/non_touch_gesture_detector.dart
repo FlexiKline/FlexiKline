@@ -446,7 +446,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
         stopPositionAnimation();
         _drag = null;
         // 重置 smoothFactor 但不触发惯性——这不是正常结束, 是中途让出。
-        controller.onPanEnd();
+        controller.onChartPanEnd();
         _mouseCursor.value = SystemMouseCursors.precise;
       }
       return;
@@ -521,7 +521,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
         if (inertial == null) {
           logd('onPanEnd no inertial movement, velocity:$velocity canceled:${drag.canceled}');
           _drag = null;
-          controller.onPanEnd();
+          controller.onChartPanEnd();
           _mouseCursor.value = SystemMouseCursors.precise;
           controller.checkAndLoadMoreCandlesWhenPanEnd();
           return;
@@ -539,7 +539,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
           tolerance: gestureConfig.tolerance,
           onCompleted: () {
             _drag = null;
-            controller.onPanEnd();
+            controller.onChartPanEnd();
 
             _mouseCursor.value = SystemMouseCursors.precise;
           },
@@ -645,7 +645,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
 
     if (drag.owner == NonTouchGestureOwner.paintObject) {
       // 立刻回滚, 不能等 [onPanEnd]: 那里会把中断当成一次提交。
-      controller.onPaintObjectDragCancel();
+      controller.cancelPaintObjectDrag();
       _drag = null;
       _mouseCursor.value = SystemMouseCursors.precise;
       return;

@@ -140,7 +140,7 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
   /// 跟随语义: 未开则开, 已开则只移动十字线。
   ///
   /// 服务持续跟随的输入(鼠标 hover、手写笔悬停)。已开时刻意走轻量路径:
-  /// [onPaintObjectDragCancel] 与 [markRepaintChart](全图重绘)只在「从无到有地开启」时
+  /// [cancelPaintObjectDrag] 与 [markRepaintChart](全图重绘)只在「从无到有地开启」时
   /// 才有意义, 指针每移动一步都做一遍太贵。
   void onCrossFollow(Offset position) {
     if (!crossConfig.enable || klineData.isEmpty) return;
@@ -155,7 +155,7 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
 
   /// 从无到有地开启 cross: 取消可能正在进行的对象拖动, 并清理 Chart 图层的 tips。
   void _openCross(Offset position) {
-    onPaintObjectDragCancel();
+    cancelPaintObjectDrag();
     // 更新并校正起始焦点.
     _updateOffset(position);
     _markRepaintCross();

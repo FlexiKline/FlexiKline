@@ -400,6 +400,9 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     }
 
     SchedulerBinding.instance.addPostFrameCallback((_) {
+      // dispose 后仍可能有 pending 帧触发本回调（widget 卸载与下一帧之间的窗口）：
+      // 生命周期守卫短路对已销毁 notifier 的写入。
+      if (!isMounted) return;
       _paintRangeNotifier.value = klineData.paintIndexRange;
     });
   }

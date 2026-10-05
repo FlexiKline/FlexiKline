@@ -108,7 +108,7 @@ abstract class GestureDetectorState<T extends GestureDetectorWidget> extends Sta
   void stopPositionAnimation() {
     if (animationController == null) return;
     cancelPositionAnimation();
-    controller.onPanEnd();
+    controller.onChartPanEnd();
   }
 
   /// 以动画的形式从[begin]移动到[end].
@@ -118,7 +118,7 @@ abstract class GestureDetectorState<T extends GestureDetectorWidget> extends Sta
     return animateToPosition(
       begin,
       end,
-      onCompleted: controller.onPanEnd,
+      onCompleted: controller.onChartPanEnd,
     );
   }
 

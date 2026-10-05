@@ -107,7 +107,7 @@ void main() {
     testWidgets('平移结束上报 pan', (tester) async {
       await arrange(tester);
 
-      chart.onPanEnd();
+      chart.onChartPanEnd();
 
       expect(observer.ofType(FlexiKlineEventType.pan), hasLength(1));
     });
@@ -165,7 +165,7 @@ void main() {
       final throwing = _ThrowingObserver();
       chart.addObserver(throwing);
 
-      expect(() => chart.onPanEnd(), returnsNormally);
+      expect(() => chart.onChartPanEnd(), returnsNormally);
       expect(throwing.calls, 1, reason: 'observer 确实被调用了');
     });
 
@@ -174,8 +174,8 @@ void main() {
       final selfRemoving = _SelfRemovingObserver(chart);
       chart.addObserver(selfRemoving);
 
-      expect(() => chart.onPanEnd(), returnsNormally, reason: '遍历快照避免并发修改');
-      chart.onPanEnd();
+      expect(() => chart.onChartPanEnd(), returnsNormally, reason: '遍历快照避免并发修改');
+      chart.onChartPanEnd();
       expect(selfRemoving.calls, 1, reason: '注销后不再收到');
     });
 
@@ -183,14 +183,14 @@ void main() {
       await arrange(tester);
       chart.removeObserver(observer);
 
-      chart.onPanEnd();
+      chart.onChartPanEnd();
 
       expect(observer.events, isEmpty);
     });
 
     testWidgets('后注册的 observer 收不到历史事件', (tester) async {
       await arrange(tester, register: false);
-      chart.onPanEnd();
+      chart.onChartPanEnd();
 
       final later = _RecordingObserver();
       chart.addObserver(later);

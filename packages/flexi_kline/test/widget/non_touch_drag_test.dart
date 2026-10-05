@@ -477,7 +477,7 @@ void main() {
       await second.gesture.up(timeStamp: second.at);
       await tester.pump(chartGestureSettle);
 
-      // stopPositionAnimation 调用 onPanEnd() 归位 smoothFactor。
+      // stopPositionAnimation 调用 onChartPanEnd() 归位 smoothFactor。
       // 间接验证：下一帧 paintChart 正常执行不抛异常，且 mainRect 可用。
       expect(controller.mainRect.height, greaterThan(0));
     });

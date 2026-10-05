@@ -43,7 +43,9 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
   final _repaintDraw = ValueNotifier(0);
   final _drawStateNotifier = FlexiStateNotifier(DrawState.exited());
   final _drawingPointerNotifier = FlexiStateNotifier<Point?>(null);
-  final _drawVisibilityNotifier = ValueNotifier<bool>(false);
+
+  /// 绘制图层是否可见，默认可见：落盘恢复的历史 overlay 在加载后即应直接绘制。
+  final _drawVisibilityNotifier = ValueNotifier<bool>(true);
   final _drawMagnetModeNotifier = ValueNotifier<MagnetMode>(MagnetMode.normal);
   final _drawContinuousNotifier = ValueNotifier<bool>(false);
 
@@ -206,7 +208,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
         _drawState = const Prepared();
       }
     }
-    onPaintObjectDragCancel();
+    cancelPaintObjectDrag();
     requestCancelCross();
     _markRepaintDraw();
   }
@@ -385,7 +387,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
       updateDrawObjectPointsData(drawState.object!);
     }
     _drawState = DrawState.edit(object);
-    onPaintObjectDragCancel();
+    cancelPaintObjectDrag();
     requestCancelCross();
     _markRepaintDraw();
     dispatchInteractionEvent(FlexiKlineEventType.drawSelect, {'type': object.type.toString()});

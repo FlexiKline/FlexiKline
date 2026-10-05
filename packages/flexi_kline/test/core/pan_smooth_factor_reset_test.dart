@@ -14,10 +14,10 @@
 
 /// 回归测试：`_panSmoothFactor` 在所有中断路径上归位到 1.0。
 ///
-/// 覆盖层级：controller 的 `onChartMove` / `onPanEnd` / `paintChart`。
+/// 覆盖层级：controller 的 `onChartMove` / `onChartPanEnd` / `paintChart`。
 /// 不覆盖：手势识别、GestureDetector 派发——那些只能靠 widget 测试或真机验证。
 ///
-/// 核心不变量：`onPanEnd()` 归位 `_panSmoothFactor` 到 1.0 后，下一帧 minMax 回到精确值。
+/// 核心不变量：`onChartPanEnd()` 归位 `_panSmoothFactor` 到 1.0 后，下一帧 minMax 回到精确值。
 ///
 /// smooth 的可观测差异需要至少两帧连续 smoothFactor < 1.0 且可见范围在帧间变化：
 /// 首帧 smooth 无旧缓存，`_smoothMinMax` 从 `_minMax` 起插值结果等于精确值；
@@ -92,12 +92,12 @@ void main() {
       return _rangeMax(chart);
     }
 
-    testWidgets('onPanEnd 后 Y 轴区间跳到精确值，不再走插值', (tester) async {
+    testWidgets('onChartPanEnd 后 Y 轴区间跳到精确值，不再走插值', (tester) async {
       await arrange(tester);
       final smoothedMax = await enterSmoothState(tester);
 
       // 归位
-      chart.onPanEnd();
+      chart.onChartPanEnd();
       await paintChartFrame(tester, chart);
 
       final preciseMax = _rangeMax(chart);
@@ -110,17 +110,17 @@ void main() {
       expect(smoothedMax, isNot(closeTo(preciseMax, 0.01)), reason: 'smooth 态与精确态的 rangeMax 应有可观测差异');
     });
 
-    testWidgets('不调 onPanEnd 则继续平移仍走插值', (tester) async {
+    testWidgets('不调 onChartPanEnd 则继续平移仍走插值', (tester) async {
       await arrange(tester);
       final smoothedMax1 = await enterSmoothState(tester);
 
-      // 不调 onPanEnd，第三帧继续平移 factor=0.15
+      // 不调 onChartPanEnd，第三帧继续平移 factor=0.15
       chart.onChartMove(const Offset(30, 0), smoothFactor: 0.15);
       await paintChartFrame(tester, chart);
       final smoothedMax2 = _rangeMax(chart);
 
       // 归位
-      chart.onPanEnd();
+      chart.onChartPanEnd();
       await paintChartFrame(tester, chart);
       final preciseMax = _rangeMax(chart);
 
@@ -140,7 +140,7 @@ void main() {
       final beforeReset = _rangeMax(chart);
 
       // 中断归位
-      chart.onPanEnd();
+      chart.onChartPanEnd();
       await paintChartFrame(tester, chart);
 
       final afterReset = _rangeMax(chart);

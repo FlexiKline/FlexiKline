@@ -139,7 +139,9 @@ abstract class KlineBindingBase with FlexiLog implements PaintContext, DrawConte
     logd('onKlineSpecChanged base');
   }
 
-  @protected
+  /// 手势认领链终结者（与上方「外部变化通知」钩子不同族）：view 层上报点击，
+  /// 各 Binding 按 mixin 顺序短路认领——命中即返回 true 早退，无人认领时落到
+  /// 本实现返回 false，view 据此决定是否继续派发该事件。
   @mustCallSuper
   bool onTap(Offset position) {
     logd('onTap base');
@@ -176,7 +178,7 @@ abstract class KlineBindingBase with FlexiLog implements PaintContext, DrawConte
   void markRepaintDraw();
 
   /// 取消当前 PaintObject 拖动并通知认领对象回滚临时状态。
-  void onPaintObjectDragCancel();
+  void cancelPaintObjectDrag();
 
   /// 释放框架对 [object] 的持有：退树与对象主动中止交互共用本通道。
   ///

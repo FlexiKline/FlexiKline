@@ -52,6 +52,12 @@ class _DemoKlinePageState extends MyKlineStateBase<DemoKlinePage>
   /// 当前周期 UI 状态（初始值来自页面入口参数），由 intervalBar 回写。
   late final ValueNotifier<MyKlineInterval> _currentIntervalNotifier;
 
+  /// 绘制工具条显隐（页面本地状态，默认隐藏），与 example 同款模式。
+  ///
+  /// 与框架的 [FlexiKlineController.isDrawVisible]（绘制图层是否绘制）正交：
+  /// 开关工具条只联动绘制状态机（prepareDraw/exitDraw），不影响已画内容是否显示。
+  final ValueNotifier<bool> showDrawMenubar = ValueNotifier(false);
+
   @override
   void initState() {
     _currentIntervalNotifier = ValueNotifier(MyKlineInterval.parse(widget.interval));
@@ -61,6 +67,7 @@ class _DemoKlinePageState extends MyKlineStateBase<DemoKlinePage>
 
   @override
   void dispose() {
+    showDrawMenubar.dispose();
     _currentIntervalNotifier.dispose();
     super.dispose();
   }
@@ -90,7 +97,12 @@ class _DemoKlinePageState extends MyKlineStateBase<DemoKlinePage>
   }
 
   void _toggleDraw() {
-    klineController.setDrawVisible(!klineController.isDrawVisible);
+    showDrawMenubar.value = !showDrawMenubar.value;
+    if (showDrawMenubar.value) {
+      klineController.prepareDraw();
+    } else {
+      klineController.exitDraw();
+    }
   }
 
   /// 以路由方式打开横屏页（横竖屏切换发生在 [DemoLandscapePage] 内）。
@@ -134,9 +146,9 @@ class _DemoKlinePageState extends MyKlineStateBase<DemoKlinePage>
               ),
             ),
             ValueListenableBuilder(
-              valueListenable: klineController.drawVisibilityListenable,
-              builder: (context, isDrawVisible, child) => Visibility(
-                visible: isDrawVisible,
+              valueListenable: showDrawMenubar,
+              builder: (context, isShow, child) => Visibility(
+                visible: isShow,
                 child: child!,
               ),
               child: Container(

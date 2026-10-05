@@ -108,7 +108,7 @@ void main() {
       await arrange();
       startDrag();
 
-      ctrl.onPaintObjectDragCancel();
+      ctrl.cancelPaintObjectDrag();
 
       expect(ctrl.isPaintObjectDragging, isFalse);
       expect(object.calls.last, 'dragCancel');
@@ -119,7 +119,7 @@ void main() {
 
       ctrl.onPaintObjectDragUpdate(const Offset(10, 10), Offset.zero);
       ctrl.onPaintObjectDragEnd();
-      ctrl.onPaintObjectDragCancel();
+      ctrl.cancelPaintObjectDrag();
 
       expect(object.calls, isEmpty);
     });

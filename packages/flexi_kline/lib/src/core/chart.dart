@@ -33,7 +33,7 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
 
   @override
   void dispose() {
-    onPaintObjectDragCancel();
+    cancelPaintObjectDrag();
     super.dispose();
     logd('dispose chart');
     _repaintChart.dispose();
@@ -59,7 +59,7 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
     super.onKlineSpecChanged(oldSpec);
     // 仅 symbol/interval（spec.key）变化才通知 external 重载业务数据。
     if (klineData.spec.key != oldSpec.key) {
-      onPaintObjectDragCancel();
+      cancelPaintObjectDrag();
       _paintObjectManager.notifySpecChanged(oldSpec);
     }
     // 换标的才交还 Y 轴: 另一个标的的价格区间没有意义。换周期不退出——同一标的的同一段
@@ -312,8 +312,8 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
   }
 
   /// 平移结束(包括惯性平移完成后), 重置平滑因子并触发一次精确重绘
-  void onPanEnd() {
-    logd('onPanEnd');
+  void onChartPanEnd() {
+    logd('onChartPanEnd');
     _panSmoothFactor = 1.0;
     markRepaintChart(reset: true);
     dispatchInteractionEvent(FlexiKlineEventType.pan);
@@ -321,7 +321,7 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
 
   /// signal 通道(横向滚轮、Web 触控板双指横滑)的一次性横向平移: 每个事件自成一段。
   ///
-  /// 与 [onChartMove] 的分工在于有没有结束事件: 后者留 loadMore 给手势层在 [onPanEnd] 后调,
+  /// 与 [onChartMove] 的分工在于有没有结束事件: 后者留 loadMore 给手势层在 [onChartPanEnd] 后调,
   /// signal 无结束事件, 检查收在这里。同理不写 `_panSmoothFactor`(离散事件无连续位移可插值)。
   ///
   /// 返回 [paintDxOffset] 是否变化; 调用方据此跳过 Cross 重吸附。
@@ -513,6 +513,7 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
       'Got $rect, mainRect=$mainRect.',
     );
     SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (!isMounted) return;
       _chartZoomSlideBarRect.value = rect.clampRect(canvasRect);
     });
   }
@@ -680,7 +681,7 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
   }
 
   @override
-  void onPaintObjectDragCancel() {
+  void cancelPaintObjectDrag() {
     final object = _draggingObject;
     if (object == null) return;
     _draggingObject = null;
@@ -692,6 +693,6 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
   void requestReleasePaintObject(PaintObject object) {
     super.requestReleasePaintObject(object);
     // 带对象守卫: 传入对象不是当前拖动所有者时不能误取消他人的拖动。
-    if (identical(_draggingObject, object)) onPaintObjectDragCancel();
+    if (identical(_draggingObject, object)) cancelPaintObjectDrag();
   }
 }

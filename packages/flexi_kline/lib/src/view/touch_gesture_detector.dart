@@ -429,8 +429,8 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
     if (owner == TouchGestureOwner.chartPan && gestureConfig.enableScale && session.spanDelta.abs() > kScaleSlop) {
       logd('onScaleUpdate pan > scale ${_resolveScalePosition(session, position.dx)} focal:$position');
       session.owner = TouchGestureOwner.chartScale;
-      // 平移阶段留下的平滑因子必须归位: 缩放的收尾不调 onPanEnd, 否则它会一直残留。
-      controller.onPanEnd();
+      // 平移阶段留下的平滑因子必须归位: 缩放的收尾不调 onChartPanEnd, 否则它会一直残留。
+      controller.onChartPanEnd();
       session.anchor = position;
       session.lastDrive = position;
       // 以切换时刻的实际缩放为基准: 从 1.0 起算会把按下到切换之间的间距变化一次性吃掉。
@@ -485,7 +485,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
     if (details.pointerCount > 0) {
       logd('onScaleEnd segment end, ${details.pointerCount} pointer(s) left.');
       // 平移写进的平滑因子同样按段归位; 下一段由 [onScaleStart] 重判归属并重新认领。
-      if (!isScale) controller.onPanEnd();
+      if (!isScale) controller.onChartPanEnd();
       // 置空即宣告「本段已提交」: 指针随后归零时 [_pointerEnd] 据此知道不会再有最终 onEnd。
       session.anchor = null;
       return;
@@ -525,7 +525,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
       case TouchGestureOwner.paintObject:
         // 本轮出现过 Cancel 即回滚: 系统接管了手势, 用户并未确认这次拖动。
         if (session.canceled) {
-          controller.onPaintObjectDragCancel();
+          controller.cancelPaintObjectDrag();
         } else {
           controller.onPaintObjectDragEnd();
         }
@@ -546,7 +546,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
 
     if (inertial == null) {
       logd('_finishChartPan no inertial movement, velocity:$velocity canceled:${session.canceled}');
-      controller.onPanEnd();
+      controller.onChartPanEnd();
       controller.checkAndLoadMoreCandlesWhenPanEnd();
       return;
     }
@@ -561,7 +561,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
       from + distance,
       panDuration: Duration(milliseconds: duration),
       tolerance: gestureConfig.tolerance,
-      onCompleted: controller.onPanEnd,
+      onCompleted: controller.onChartPanEnd,
     );
   }
 
