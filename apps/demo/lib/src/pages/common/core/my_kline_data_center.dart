@@ -5,10 +5,10 @@ import 'package:flutter/widgets.dart';
 
 import '../../../config/my_kline_interval.dart';
 import '../../../data/repositories/kline_repository.dart';
-import 'my_kline_state_base.dart';
+import 'kline_state_base.dart';
 
 /// 公共 K 线数据接线 Mixin，负责 [KlineSpec]/数据源/HTTP 加载/WS 订阅接线。
-mixin MyKlineDataCenterMixin<T extends StatefulWidget> on MyKlineStateBase<T> {
+mixin MyKlineDataCenterMixin<T extends StatefulWidget> on KlineStateBase<T> {
   /// 数据源，构造注入（由 `DemoKlinePage` 传入）。
   KlineRepository get repository;
 
@@ -18,9 +18,6 @@ mixin MyKlineDataCenterMixin<T extends StatefulWidget> on MyKlineStateBase<T> {
 
   /// 当前生效周期（只读数据事实，供页面或调试读取）。
   ITimeInterval get timeInterval => _spec.interval;
-
-  /// 新建 KlineSpec（接口，由页面基于入口参数构建）。
-  KlineSpec createKlineSpec([KlineSpec? last]);
 
   @override
   void initState() {
@@ -33,9 +30,22 @@ mixin MyKlineDataCenterMixin<T extends StatefulWidget> on MyKlineStateBase<T> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    klineController.onLoadMoreCandles = loadMoreCandles;
+  }
+
+  @override
   void dispose() {
     _cancelTicks();
     super.dispose();
+  }
+
+  /// 下拉刷新：蜡烛是关键路径，全程 await（[RefreshIndicator.onRefresh] 等它完成）。
+  @override
+  Future<void> refresh() async {
+    await super.refresh();
+    await refreshKlineData(reset: true);
   }
 
   /// 周期切换。
@@ -47,6 +57,7 @@ mixin MyKlineDataCenterMixin<T extends StatefulWidget> on MyKlineStateBase<T> {
   }
 
   /// 加载 K 线数据（模拟 HTTP）并订阅推送。
+  @override
   Future<void> refreshKlineData({bool reset = false}) async {
     final spec = _spec.initial();
 

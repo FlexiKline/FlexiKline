@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'framework/configuration.dart';
 import 'kline_controller.dart';
 import 'model/kline_spec/kline_spec.dart';
 import 'model/time_interval.dart';
@@ -36,9 +35,6 @@ typedef FlexiUpdater<T> = T Function(T current);
 abstract interface class IFlexiKlineDataCenter {
   /// 创建 KlineSpec, 在品种或周期变更时调用
   KlineSpec createKlineSpec([KlineSpec? last]);
-
-  /// 创建FlexiKline配置
-  IConfiguration createFlexiKlineConfig();
 
   /// 创建FlexiKline控制器
   FlexiKlineController createFlexiKlineController();

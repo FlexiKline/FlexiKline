@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'my_kline_storage.dart';
 import 'my_kline_theme.dart';
 
-/// FlexiKline 框架配置，组合框架 mixin 与绘制工具 builder。
-class MyKlineConfig extends MyKlineStorage with FlexiKlineConfigurationMixin, DrawObjectBuildersConfigMixin {
+/// FlexiKline 框架配置：组合框架 mixin、绘制工具 builder 与内存存储。
+class MyKlineConfig with MyKlineStorageMixin, FlexiKlineConfigurationMixin, DrawObjectBuildersConfigMixin {
   MyKlineConfig();
 
   @override

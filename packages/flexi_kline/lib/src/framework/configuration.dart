@@ -190,6 +190,13 @@ abstract interface class IIndicatorConfig implements IStorage {
   List<Indicator> get subIndicators;
 }
 
+/// 指标配置骨架：混入 [ChangeNotifier] 实现 [IIndicatorConfig]，
+/// 补齐可监听（驱动 UI 增量重建）与可释放（[dispose]）能力。
+///
+/// 仅提供「可监听 + 可释放」的机制，不预设任何策略：
+/// 指标实例（candle/time/main/sub）与存储实现（[IStorage]）一律由子类决定。
+abstract class BaseIndicatorConfig with ChangeNotifier implements IIndicatorConfig {}
+
 extension IIndicatorConfigExt on IIndicatorConfig {
   /// 读取 [key] 对应的本地指标配置，并通过 [builder] 转为指标实例。
   T? getIndicator<T extends Indicator>(IIndicatorKey key, IndicatorBuilder builder) {

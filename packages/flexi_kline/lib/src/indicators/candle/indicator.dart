@@ -592,7 +592,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
             offset.dy + size.height,
           ),
           drawDirection: DrawDirection.rtl,
-          drawableRect: drawableRect,
+          // drawableRect: drawableRect,
           text: countdownText,
           style: countdown.style.copyWith(
             color: theme.textColor,

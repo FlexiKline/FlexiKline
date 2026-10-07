@@ -1,9 +1,11 @@
 import 'package:flexi_kline/flexi_kline.dart';
+import 'package:flexi_kline_demo/src/config/my_kline_config.dart';
+import 'package:flexi_kline_demo/src/config/my_kline_indicator_config.dart';
 import 'package:flexi_kline_demo/src/config/my_kline_interval.dart';
 import 'package:flexi_kline_demo/src/config/my_kline_logger.dart';
 import 'package:flexi_kline_demo/src/data/repositories/kline_repository.dart';
+import 'package:flexi_kline_demo/src/pages/common/core/kline_state_base.dart';
 import 'package:flexi_kline_demo/src/pages/common/core/my_kline_data_center.dart';
-import 'package:flexi_kline_demo/src/pages/common/core/my_kline_state_base.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -42,9 +44,32 @@ class _TestPage extends StatefulWidget {
   State<_TestPage> createState() => _TestPageState();
 }
 
-class _TestPageState extends MyKlineStateBase<_TestPage> with MyKlineDataCenterMixin<_TestPage>, MyKlineLoggerMixin {
+class _TestPageState extends KlineStateBase<_TestPage> with MyKlineDataCenterMixin<_TestPage>, MyKlineLoggerMixin {
+  late final MyKlineIndicatorConfig _indicatorConfig;
+  late final MyKlineConfig _klineConfig;
+
+  @override
+  BaseIndicatorConfig get indicatorConfig => _indicatorConfig;
+
+  @override
+  IConfiguration get klineConfig => _klineConfig;
+
   @override
   KlineRepository get repository => widget.repository;
+
+  @override
+  void initState() {
+    _indicatorConfig = MyKlineIndicatorConfig();
+    _klineConfig = MyKlineConfig();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    klineController.storeFlexiKlineConfig();
+    _indicatorConfig.dispose();
+    super.dispose();
+  }
 
   @override
   KlineSpec createKlineSpec([KlineSpec? last]) {

@@ -54,7 +54,7 @@ class _IndexPageState extends State<IndexPage> {
           ),
           const SizedBox(height: 8),
           Text(
-            '基于 flexi_kline 框架，离线 mock 数据，仅使用 Flutter 官方组件。',
+            '基于 flexi_kline 框架，离线 mock 数据。',
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),

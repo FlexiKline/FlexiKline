@@ -1,80 +1,67 @@
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../../config/my_kline_config.dart';
-import '../../../config/my_kline_indicator_config.dart';
-
-/// K 线页面 State 的公共基类，负责控制器/配置/指标的创建销毁与 K 线视图构建。
-abstract class MyKlineStateBase<T extends StatefulWidget> extends State<T> implements IFlexiLogger {
+/// K 线页面 State 公共基类：负责控制器创建销毁与 K 线视图构建。
+///
+/// [klineController] 由本基类拥有；[indicatorConfig] / [klineConfig]
+/// 由各 Page 持有与销毁，DataCenter mixin 不触碰配置生命周期。
+abstract class KlineStateBase<T extends StatefulWidget> extends State<T>
+    implements IFlexiKlineDataCenter, IFlexiLogger {
   late final FlexiKlineController _klineController;
-  late final MyKlineIndicatorConfig _indicatorConfig;
 
-  /// K 线控制器（[initState] 后可用）。
   FlexiKlineController get klineController => _klineController;
 
-  /// 指标配置（[initState] 后可用）。
-  MyKlineIndicatorConfig get indicatorConfig => _indicatorConfig;
+  /// 指标配置（协变覆写为 Page 自身的具体类型）。
+  BaseIndicatorConfig get indicatorConfig;
 
-  /// 框架配置工厂（默认 [MyKlineConfig]）。
-  IConfiguration createFlexiKlineConfig() => MyKlineConfig();
+  /// 框架配置（协变覆写为 Page 自身的具体类型）。
+  /// 须在 [super.initState] 前赋值，基类创建 controller 时读取。
+  IConfiguration get klineConfig;
 
-  /// 指标配置工厂（默认 [MyKlineIndicatorConfig]）。
-  MyKlineIndicatorConfig createIndicatorConfig() => MyKlineIndicatorConfig();
-
-  /// 新建控制器，日志走本 State（[IFlexiLogger]）。
+  /// 新建控制器。横屏页可覆写以注入 [FlexiLayoutMode.fixed] 等。
+  @override
   FlexiKlineController createFlexiKlineController() {
     return FlexiKlineController(
-      configuration: createFlexiKlineConfig(),
+      configuration: klineConfig,
       logger: this,
     );
   }
 
-  // ─── 生命周期 ───
-
   @override
   void initState() {
     super.initState();
-    _indicatorConfig = createIndicatorConfig();
     _klineController = createFlexiKlineController();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _klineController.onLoadMoreCandles = loadMoreCandles;
+    _klineController.onCrossCustomTooltip = customTooltips;
   }
 
   @override
   void dispose() {
-    _indicatorConfig.dispose();
-    storeAndDisposeKlineController();
+    _klineController.dispose();
     super.dispose();
   }
 
-  /// 向前翻页加载历史 K 线数据，由 [MyKlineDataCenterMixin] 实现。
-  Future<void> loadMoreCandles(KlineSpec spec);
+  /// 下拉刷新统一入口。
+  ///
+  /// 关键路径 mixin：`await super.refresh(); await 自己的刷新();`（阻塞指示器）。
+  /// 非关键 mixin：`自己的刷新(); await super.refresh();`（fire-and-forget）。
+  @mustCallSuper
+  Future<void> refresh() async {}
 
-  /// 落盘并释放 [klineController]（顺序不可换：落盘必须早于 dispose）。
-  void storeAndDisposeKlineController() {
-    klineController.storeFlexiKlineConfig();
-    klineController.dispose();
-  }
+  /// 自定义十字线 Tooltip。子 mixin 用 `...?super.customTooltips(...)` 编排。
+  @mustCallSuper
+  List<TooltipInfo>? customTooltips(FlexiCandleModel? model, {FlexiCandleModel? prev}) => null;
 
-  // ─── 扩展点 ───
+  // ─── 指标扩展点（mixin 覆写时须先调 super）───
 
-  /// 蜡烛指标扩展点。mixin 覆写时须 `return super.buildCandleIndicator().copyWith(...)`。
   @mustCallSuper
   CandleBaseIndicator buildCandleIndicator() => indicatorConfig.candle;
 
-  /// 时间轴指标扩展点。mixin 覆写时须 `return super.buildTimeIndicator().copyWith(...)`。
   @mustCallSuper
   TimeBaseIndicator buildTimeIndicator() => indicatorConfig.time;
 
-  /// 主区可选指标扩展点。mixin 覆写时须 `[...super.buildExtraMainIndicators(), ...]`。
   @mustCallSuper
   List<Indicator> buildExtraMainIndicators() => const [];
 
-  /// 副区可选指标扩展点。mixin 覆写时须 `[...super.buildExtraSubIndicators(), ...]`。
   @mustCallSuper
   List<Indicator> buildExtraSubIndicators() => const [];
 

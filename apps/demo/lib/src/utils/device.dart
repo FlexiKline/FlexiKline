@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-/// 平台判断工具（精简自 example 的 DeviceUtil，去掉 `package_info_plus` 依赖）。
+/// 平台判断工具（不依赖 `package_info_plus`）。
 final class DeviceUtil {
   DeviceUtil._();
 
