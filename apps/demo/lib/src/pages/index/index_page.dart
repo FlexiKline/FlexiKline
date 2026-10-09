@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../demo_kline/demo_kline_page.dart';
+import '../painting/painting_page.dart';
 
 /// 本地 demo 清单项：标题 + 简介 + 页面构建器。
 class _DemoEntry {
@@ -29,6 +30,11 @@ class _IndexPageState extends State<IndexPage> {
       title: 'K 线（BTC-USDT）',
       description: '分时 / 15分 / 1时 / 1天 / 1周 + 模拟实时推送',
       pageBuilder: () => const DemoKlinePage(),
+    ),
+    _DemoEntry(
+      title: 'Painting 示例',
+      description: '标签摆放 / 缓存 / 富文本 / 形状 / 图片 / 批量 / Tooltip',
+      pageBuilder: () => const PaintingPage(),
     ),
   ];
 
