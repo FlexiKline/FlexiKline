@@ -221,7 +221,7 @@ abstract interface class IDrawObject {
 
 /// [PaintResourceOwner] 资源只在 [dispose] 时释放: 没有声明更新入口, 输入变化由资源按值比较自行失效。
 abstract class DrawObject<T extends Overlay> extends DrawStateObject
-    with DrawObjectMixin, PaintResourceOwner
+    with PaintResourceOwner, DrawObjectMixin
     implements IDrawObject {
   DrawObject(super.overlay, super.config);
 

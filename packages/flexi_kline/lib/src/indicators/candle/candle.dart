@@ -24,6 +24,7 @@ import '../../constant.dart';
 import '../../extension/export.dart';
 import '../../framework/export.dart';
 import '../../model/export.dart';
+import '../../painting/export.dart';
 
 part 'candle.g.dart';
 part 'indicator.dart';

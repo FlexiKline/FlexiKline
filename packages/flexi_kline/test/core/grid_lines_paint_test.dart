@@ -438,20 +438,19 @@ void main() {
       // 3 个 dy：顶边、中间、底边
       final dys = [rect.top, rect.center.dy, rect.bottom];
 
+      // 数绘制的段落而非格式化次数: 刻度标签跨帧缓存, 已见过的值不再格式化。
+      int paragraphsOf({bool showTopTick = false, bool showBottomTick = true}) {
+        final log = _PaintLog();
+        object.paintTicks(log, dys, showTopTick: showTopTick, showBottomTick: showBottomTick);
+        return log.paragraphs;
+      }
+
       // 默认: showTopTick=false, showBottomTick=true → 跳过顶边, 保留中间和底边
-      object.formattedTickValues.clear();
-      object.paintTicks(_PaintLog(), dys);
-      expect(object.formattedTickValues, hasLength(2), reason: '默认跳过顶边');
-
+      expect(paragraphsOf(), 2, reason: '默认跳过顶边');
       // 两端都显示
-      object.formattedTickValues.clear();
-      object.paintTicks(_PaintLog(), dys, showTopTick: true, showBottomTick: true);
-      expect(object.formattedTickValues, hasLength(3), reason: '两端都显示');
-
+      expect(paragraphsOf(showTopTick: true), 3, reason: '两端都显示');
       // 两端都不显示
-      object.formattedTickValues.clear();
-      object.paintTicks(_PaintLog(), dys, showTopTick: false, showBottomTick: false);
-      expect(object.formattedTickValues, hasLength(1), reason: '只有中间那条');
+      expect(paragraphsOf(showBottomTick: false), 1, reason: '只有中间那条');
     });
   });
 }

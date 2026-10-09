@@ -16,6 +16,7 @@ library;
 
 import 'dart:collection';
 import 'dart:math' as math;
+import 'dart:ui' as ui show PointMode;
 
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flexi_formatter/flexi_formatter.dart';
@@ -30,6 +31,7 @@ import '../../core/core.dart';
 import '../../data/kline_data.dart';
 import '../../extension/export.dart';
 import '../../model/export.dart' show FlexiCandleModel, FlexiNum, KlineSpec, MinMax, NumFlexiNumExt, Range;
+import '../../painting/export.dart';
 import '../../utils/algorithm_util.dart';
 import '../../utils/grid_tick_util.dart';
 import '../chart_type.dart';

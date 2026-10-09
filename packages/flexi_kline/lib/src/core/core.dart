@@ -30,6 +30,7 @@ import '../extension/export.dart';
 import '../framework/export.dart';
 import '../framework/kline_data_pipeline.dart';
 import '../model/export.dart';
+import '../painting/tooltip_painter.dart';
 import '../types.dart';
 import '../utils/platform_util.dart';
 

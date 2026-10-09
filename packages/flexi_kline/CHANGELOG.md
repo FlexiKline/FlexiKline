@@ -12,6 +12,14 @@
 * Fix the `calculatePaintChartRange` and `setChartZoomSlideBarRect` post-frame callbacks writing to disposed notifiers when a frame lands after `dispose`.
 * Fix the latest price countdown label being narrower than the latest price label and overlapping it by 0.5px; it is no longer clamped into `drawableRect`.
 * Point the pubspec `repository` to `packages/flexi_kline` in the FlexiKline monorepo.
+* Paint the core labels (Y-axis and cross ticks, time axis, candle high/low, latest price, countdown, last price, draw tool ticks and the cross tooltip) with `LabelPainter`, reusing text layout across frames; the `extension/render/` API stays unchanged for other callers.
+* Draw core label borders inside the label bounds, as `RoundedRectangleBorder` does, instead of centered on the edge.
+* Apply `TextOverflow.ellipsis` to core labels limited by their drawable bounds; the width used to be limited only when `maxLines` was unset or above 1.
+* Position core labels by their measured height (centered on the anchor, or bottom-aligned for Y-axis ticks) instead of `TextAreaConfig.areaHeight`.
+* Resolve countdown text and background colors from `CandleIndicator.countdown` first, falling back to the theme, as other labels do; the theme colors used to override the config.
+* Batch candle bars: wicks and solid bodies go through one `drawRawPoints` call per trend, hollow bodies through one path per trend; hollow bodies now always use `candleHollowBarBorderWidth` and every wick `candleLineWidth`.
+* Add `PaintCandleChartMixin.addCandleBar` and `flushCandleBars` for batched candle drawing; `paintCandleBar` stays available.
+* Require `PaintResourceOwner` on `DrawObjectMixin` (`on DrawStateObject, PaintResourceOwner`) so the draw tool ticks can own their painters (Breaking Changes).
 
 ## 2.5.6
 * Fix `FormatException: NaN is not a valid format` thrown from `paintGridLines` after a few seconds of continuous panning: a `Decimal`-backed range from a combine child left `ComputeMode.fast` holding a `Decimal` endpoint, whose scale then grew every frame until `toDouble()` returned NaN.

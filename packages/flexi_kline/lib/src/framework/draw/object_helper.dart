@@ -110,7 +110,11 @@ mixin DrawConfigMixin on OverlayObject {
   }
 }
 
-mixin DrawObjectMixin on DrawStateObject {
+mixin DrawObjectMixin on DrawStateObject, PaintResourceOwner {
+  /// 同一时刻最多画两个刻度, 多留一个给拖动中的来回切换。
+  late final _timeTicks = own(LabelPainter(capacity: 3));
+  late final _valueTicks = own(LabelPainter(capacity: 3));
+
   void doDidChangeTheme(IFlexiKlineTheme theme) {
     didChangeTheme(theme);
   }
@@ -311,20 +315,18 @@ mixin DrawObjectMixin on DrawStateObject {
     final ts = context.dxToTimestamp(dx);
     if (ts == null) return Size.zero;
 
-    final klineData = context.klineData;
-    final timeTxt = formatTimeTicksText(ts, klineData.interval.unit);
-
+    final unit = context.klineData.interval.unit;
     drawableRect ??= context.timeRect;
-    return canvas.drawTextArea(
-      offset: Offset(
-        dx,
-        drawableRect.top,
-      ),
-      text: timeTxt,
-      textConfig: ticksTextConfig,
-      drawDirection: DrawDirection.center,
-      // drawableRect: drawableRect,
-    );
+    return _timeTicks
+        .paint(
+          canvas,
+          (ts, unit),
+          build: () => formatTimeTicksText(ts, unit),
+          style: ticksTextConfig.toLabelStyle(),
+          anchor: Offset(dx, drawableRect.top),
+          align: Alignment.topCenter,
+        )
+        .size;
   }
 
   /// 在[drawableRect]区域的右侧, 绘制由[dy]指定的价值刻度
@@ -338,27 +340,19 @@ mixin DrawObjectMixin on DrawStateObject {
     final value = context.dyToValue(dy);
     if (value == null) return Size.zero;
 
-    final valTxt = formatValueTicksText(
-      value,
-      precision: context.klineData.precision,
-    );
-
-    final txtSpacing = config.spacing;
-    final centerOffset = ticksTextConfig.areaHeight / 2;
+    final precision = context.klineData.precision;
     drawableRect ??= context.mainRect;
-    return canvas.drawTextArea(
-      offset: Offset(
-        drawableRect.right - txtSpacing,
-        (dy - centerOffset).clamp(
-          drawableRect.top,
-          drawableRect.bottom - centerOffset,
-        ),
-      ),
-      text: valTxt,
-      textConfig: ticksTextConfig,
-      drawDirection: DrawDirection.rtl,
-      drawableRect: drawableRect,
-    );
+    return _valueTicks
+        .paint(
+          canvas,
+          (value, precision),
+          build: () => formatValueTicksText(value, precision: precision),
+          style: ticksTextConfig.toLabelStyle(),
+          anchor: Offset(drawableRect.right - config.spacing, dy),
+          align: Alignment.centerRight,
+          bounds: drawableRect,
+        )
+        .size;
   }
 
   /// 格式化时间刻度文本

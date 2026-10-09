@@ -22,9 +22,9 @@ import 'package:json_annotation/json_annotation.dart';
 
 import '../../config/export.dart';
 import '../../constant.dart';
-import '../../extension/export.dart';
 import '../../framework/export.dart';
 import '../../model/export.dart';
+import '../../painting/export.dart';
 import '../../types.dart';
 
 part 'indicator.dart';

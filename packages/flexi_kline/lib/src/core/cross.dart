@@ -96,6 +96,8 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
 
   final List<_TooltipTapTarget> _tooltipTapTargets = [];
 
+  late final _tooltip = own(TooltipPainter());
+
   /// 当前 crossing 会话内观测到的最大 Tooltip 内容区宽度（不含 padding）。
   double? _tooltipStableContentWidth;
 
@@ -279,7 +281,6 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
     final double top = tooltipConfig.margin.top + mainPadding.top;
 
     final drawOnLeft = offset.dx > mainChartWidthHalf;
-    final drawDirection = drawOnLeft ? DrawDirection.ltr : DrawDirection.rtl;
     final tooltipOffset = Offset(
       drawOnLeft ? mainRect.left + tooltipConfig.margin.left : mainRect.right - tooltipConfig.margin.right,
       top,
@@ -291,35 +292,30 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
       availableWidth - tooltipConfig.padding.horizontal,
     );
 
-    final size = canvas.drawTooltipInfos(
-      offset: tooltipOffset,
-      tooltipInfos: list,
-      drawDirection: drawDirection,
-      drawableRect: mainChartRect,
-      defaultStyle: tooltipTextStyle,
+    final card = _tooltip.paint(
+      canvas,
+      [
+        for (final info in list)
+          (label: info.label, labelStyle: info.labelStyle, value: info.value, valueStyle: info.valueStyle),
+      ],
+      style: tooltipTextStyle,
+      anchor: tooltipOffset,
+      align: drawOnLeft ? Alignment.topLeft : Alignment.topRight,
+      bounds: mainChartRect,
+      spacing: tooltipConfig.spacing,
       minContentWidth: _tooltipStableContentWidth,
       maxContentWidth: maxContentWidth,
-      yAxisAlign: YAxisAlign.center,
       backgroundColor: theme.tooltipBg,
-      borderRadius: tooltipConfig.radius,
+      radius: tooltipConfig.radius,
       padding: tooltipConfig.padding,
-      spacing: tooltipConfig.spacing,
-      onLayout: (_, itemBounds) {
-        for (int index = 0; index < list.length; index++) {
-          final onTap = list[index].onTap;
-          if (onTap == null) continue;
-
-          _tooltipTapTargets.add(
-            _TooltipTapTarget(
-              bounds: itemBounds[index],
-              onTap: onTap,
-            ),
-          );
-        }
-      },
     );
+    for (int index = 0; index < list.length; index++) {
+      final onTap = list[index].onTap;
+      if (onTap == null) continue;
+      _tooltipTapTargets.add(_TooltipTapTarget(bounds: card.rows[index], onTap: onTap));
+    }
 
-    final contentWidth = size.width - tooltipConfig.padding.horizontal;
+    final contentWidth = card.bounds.width - tooltipConfig.padding.horizontal;
     _tooltipStableContentWidth = math.max(
       _tooltipStableContentWidth ?? 0,
       contentWidth,

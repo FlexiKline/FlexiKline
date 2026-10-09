@@ -56,6 +56,10 @@ class TimeIndicator extends TimeBaseIndicator {
 }
 
 class TimePaintObject<T extends TimeIndicator> extends TimeBasePaintObject<T> {
+  /// key 为 (ts, interval, tickFormatter): 宿主换了格式器, 函数身份不同, 文本随之重建。
+  late final _timeLabels = own(LabelPainter(capacity: 16));
+  late final _crossTimeLabel = own(LabelPainter());
+
   /// 两个时间刻度间隔的蜡烛数
   int get timeLabelIntervalCount {
     return ((math.max(60, indicator.timeLabel.textWidth ?? 0)) / candleActualWidth).round();
@@ -80,25 +84,22 @@ class TimePaintObject<T extends TimeIndicator> extends TimeBasePaintObject<T> {
 
     final offset = startCandleDx - candleWidthHalf;
     final interval = data.interval;
+    if (!interval.isValid) return;
+    final style = indicator.timeLabel.toLabelStyle(textColor: theme.ticksTextColor);
+    final formatter = indicator.tickFormatter;
+    final dy = chartRect.top + height / 2;
+    final step = timeLabelIntervalCount;
     for (var i = start; i < end; i++) {
+      if (i % step != 0) continue;
       final model = data.list[i];
-      final dx = offset - (i - start) * candleActualWidth;
-      if (interval.isValid && i % timeLabelIntervalCount == 0) {
-        final offset = Offset(dx, chartRect.top);
-
-        // 绘制时间刻度.
-        final dyCenterOffset = (height - indicator.timeLabel.areaHeight) / 2;
-        canvas.drawTextArea(
-          offset: Offset(
-            offset.dx,
-            offset.dy + dyCenterOffset,
-          ),
-          drawDirection: DrawDirection.center,
-          text: formatTimeLabel(model, interval),
-          textConfig: indicator.timeLabel,
-          themeTextColor: theme.ticksTextColor,
-        );
-      }
+      _timeLabels.paint(
+        canvas,
+        (model.ts, interval, formatter),
+        build: () => formatTimeLabel(model, interval),
+        style: style,
+        anchor: Offset(offset - (i - start) * candleActualWidth, dy),
+        align: Alignment.center,
+      );
     }
   }
 
@@ -115,20 +116,16 @@ class TimePaintObject<T extends TimeIndicator> extends TimeBasePaintObject<T> {
     final interval = klineData.interval;
     if (selectedModel == null || !interval.isValid) return;
 
-    final time = formatTimeLabel(selectedModel, interval);
-    // final time = formatyyMMddHHMMss(model.dateTime);
-
-    final dyCenterOffset = (height - crossConfig.ticksText.areaHeight) / 2;
-    canvas.drawTextArea(
-      offset: Offset(
-        offset.dx,
-        chartRect.top + dyCenterOffset,
+    _crossTimeLabel.paint(
+      canvas,
+      (selectedModel.ts, interval, indicator.tickFormatter),
+      build: () => formatTimeLabel(selectedModel, interval),
+      style: crossConfig.ticksText.toLabelStyle(
+        textColor: theme.crossTextColor,
+        backgroundColor: theme.crossTextBg,
       ),
-      drawDirection: DrawDirection.center,
-      text: time,
-      textConfig: crossConfig.ticksText,
-      themeTextColor: theme.crossTextColor,
-      themeBackgroundColor: theme.crossTextBg,
+      anchor: Offset(offset.dx, chartRect.top + height / 2),
+      align: Alignment.center,
     );
   }
 }

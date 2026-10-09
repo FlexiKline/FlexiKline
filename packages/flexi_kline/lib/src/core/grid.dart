@@ -40,6 +40,9 @@ mixin GridBinding on KlineBindingBase, SettingBinding {
 
   PaintObject? _upObject, _downObject;
 
+  /// 拖拽热区的填充画笔; 每次绘制只改颜色。
+  final Paint _dragBgPaint = Paint();
+
   bool get isStartDragGrid {
     return gridConfig.isAllowDragIndicatorHeight && _upObject != null;
   }
@@ -87,13 +90,9 @@ mixin GridBinding on KlineBindingBase, SettingBinding {
           );
         } else if (gridConfig.draggingBgOpacity > 0) {
           // 正在拖拽的底部热区。
-          canvas.drawRectBackground(
-            offset: Offset(
-              objRect.left,
-              objRect.bottom - minDistanceHalf,
-            ),
-            size: Size(objRect.width, minDistance),
-            backgroundColor: dragBg.withAlpha(gridConfig.draggingBgOpacity.alpha),
+          canvas.drawRect(
+            Rect.fromLTWH(objRect.left, objRect.bottom - minDistanceHalf, objRect.width, minDistance),
+            _dragBgPaint..color = dragBg.withAlpha(gridConfig.draggingBgOpacity.alpha),
           );
         }
       } else {
@@ -111,13 +110,9 @@ mixin GridBinding on KlineBindingBase, SettingBinding {
           }
         } else if (gridConfig.dragBgOpacity > 0) {
           // 可拖拽的底部热区。
-          canvas.drawRectBackground(
-            offset: Offset(
-              objRect.left,
-              objRect.bottom - minDistanceHalf,
-            ),
-            size: Size(objRect.width, minDistance),
-            backgroundColor: dragBg.withAlpha(gridConfig.dragBgOpacity.alpha),
+          canvas.drawRect(
+            Rect.fromLTWH(objRect.left, objRect.bottom - minDistanceHalf, objRect.width, minDistance),
+            _dragBgPaint..color = dragBg.withAlpha(gridConfig.dragBgOpacity.alpha),
           );
         }
       }

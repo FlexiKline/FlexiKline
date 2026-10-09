@@ -26,6 +26,7 @@ import '../../core/core.dart';
 import '../../data/kline_data.dart';
 import '../../extension/export.dart';
 import '../../model/export.dart';
+import '../../painting/export.dart';
 import '../collection/sortable_hash_set.dart';
 import '../configuration.dart';
 import '../logger.dart';

@@ -14,6 +14,9 @@
 
 part of 'candle.dart';
 
+/// 最新价与倒计时的派生样式, 见 [CandlePaintObject._resolveLatestStyles]。
+typedef _LatestStyles = ({LabelStyle latest, LabelStyle countdown});
+
 @CopyWith()
 @FlexiIndicatorSerializable
 class CandleIndicator extends CandleBaseIndicator {
@@ -365,29 +368,19 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
     for (var i = start; i < end; i++) {
       m = klineData[i];
       final dx = offset - (i - start) * candleActualWidth;
-      final highY = valueToDy(m.high, correct: false);
-      final lowY = valueToDy(m.low, correct: false);
-      paintCandleBar(
-        canvas,
-        m,
-        dx: dx,
-        high: highY,
-        low: lowY,
-        barWidthHalf: barWidthHalf,
-        chartStyle: style,
-      );
+      addCandleBar(m, dx: dx, barWidthHalf: barWidthHalf, chartStyle: style);
 
       if (indicator.high.show) {
         if (hasEnough) {
           // 满足一屏, 根据initData中的最大最小值来记录最大最小偏移量.
           if (m.high == _maxHigh) {
-            maxHighOffset = Offset(dx, highY);
+            maxHighOffset = Offset(dx, valueToDy(m.high, correct: false));
             maxHigh = _maxHigh!;
           }
         } else {
           // 如果当前绘制不足一屏, 最大最小绘制仅限可见区域.
           if (m.high >= maxHigh) {
-            maxHighOffset = Offset(dx, highY);
+            maxHighOffset = Offset(dx, valueToDy(m.high, correct: false));
             maxHigh = m.high;
           }
         }
@@ -397,18 +390,19 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
         if (hasEnough) {
           // 满足一屏, 根据initData中的最大最小值来记录最大最小偏移量.
           if (m.low == _minLow) {
-            minLowOffset = Offset(dx, lowY);
+            minLowOffset = Offset(dx, valueToDy(m.low, correct: false));
             minLow = _minLow!;
           }
         } else {
           // 如果当前绘制不足一屏, 最大最小绘制仅限可见区域.
           if (m.low <= minLow) {
-            minLowOffset = Offset(dx, lowY);
+            minLowOffset = Offset(dx, valueToDy(m.low, correct: false));
             minLow = m.low;
           }
         }
       }
     }
+    flushCandleBars(canvas);
 
     // 最后绘制在蜡烛图中的最大价钱标记
     if (maxHighOffset != null && maxHigh > FlexiNum.zero) {
@@ -420,6 +414,9 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
     }
   }
 
+  /// 最高价与最低价共用: 默认配置下两者是同一个 const 实例, 样式一致, 两个 key 都留在池里。
+  late final _extremePriceLabels = own(LabelPainter(capacity: 2));
+
   /// 绘制蜡烛图上最大最小值价钱标记.
   void paintPriceMark(
     Canvas canvas,
@@ -428,30 +425,102 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
     MarkConfig markConfig,
   ) {
     final flag = offset.dx > chartRectWidthHalf ? -1 : 1;
-    Offset endOffset = Offset(
+    final lineEnd = Offset(
       offset.dx + markConfig.lineLength * flag,
       offset.dy,
     );
     canvas.drawLine(
       offset,
-      endOffset,
+      lineEnd,
       markConfig.line.getLinePaint(theme.markLineColor),
     );
 
-    endOffset = Offset(
-      endOffset.dx + flag * markConfig.spacing,
-      endOffset.dy - markConfig.text.areaHeight / 2,
+    final precision = klineData.precision;
+    _extremePriceLabels.paint(
+      canvas,
+      (val, precision),
+      build: () => formatPrice(val.toDecimal(), precision: precision),
+      style: markConfig.text.toLabelStyle(textColor: theme.textColor),
+      anchor: Offset(lineEnd.dx + flag * markConfig.spacing, lineEnd.dy),
+      align: flag < 0 ? Alignment.centerRight : Alignment.centerLeft,
+    );
+  }
+
+  late final _inViewPriceLabel = own(LabelPainter());
+  late final _countdownLabel = own(LabelPainter());
+  late final _offViewPriceLabel = own(LabelPainter());
+
+  /// [_resolveLatestStyles] 的单项记忆: 输入与上次相同(样式按 identical)时直接返回上次的结果。
+  ({LabelStyle latestBase, LabelStyle countdownBase, bool withCountdown, bool candleColor, _LatestStyles styles})?
+  _latestStyles;
+
+  /// 最新价与倒计时的派生样式(随状态变的形状): 有倒计时时最新价只留上圆角, 倒计时取最新价的上圆角
+  /// 作下圆角; 用涨跌色作背景时边框透明。倒计时不用 padding, 改由行高撑到 areaHeight - 1。
+  _LatestStyles _resolveLatestStyles(
+    LabelStyle latestBase,
+    LabelStyle countdownBase, {
+    required bool withCountdown,
+    required bool candleColor,
+  }) {
+    final memo = _latestStyles;
+    if (memo != null &&
+        identical(memo.latestBase, latestBase) &&
+        identical(memo.countdownBase, countdownBase) &&
+        memo.withCountdown == withCountdown &&
+        memo.candleColor == candleColor) {
+      return memo.styles;
+    }
+
+    final radius = indicator.inViewPriceMark.text.borderRadius;
+    var latest = latestBase;
+    final decoration = latestBase.decoration;
+    final shape = decoration?.shape;
+    if (decoration != null && shape is RoundedRectangleBorder && (withCountdown || candleColor)) {
+      latest = latestBase.copyWith(
+        decoration: ShapeDecoration(
+          color: decoration.color,
+          gradient: decoration.gradient,
+          shadows: decoration.shadows,
+          shape: shape.copyWith(
+            side: candleColor ? shape.side.copyWith(color: transparent) : null,
+            borderRadius: withCountdown && radius != null
+                ? radius.copyWith(bottomLeft: Radius.zero, bottomRight: Radius.zero)
+                : null,
+          ),
+        ),
+      );
+    }
+
+    final config = indicator.countdown;
+    final countdown = countdownBase.copyWith(
+      text: countdownBase.text.copyWith(height: (config.areaHeight - 1) / config.textHeight),
+      maxLines: config.maxLines ?? 1,
+      padding: EdgeInsets.zero,
+      decoration: ShapeDecoration(
+        color: countdownBase.decoration?.color,
+        gradient: countdownBase.decoration?.gradient,
+        shadows: countdownBase.decoration?.shadows,
+        shape: RoundedRectangleBorder(
+          side: BorderSide(
+            color: candleColor ? transparent : theme.markLineColor,
+            width: config.border?.width ?? 0.5,
+          ),
+          borderRadius: radius == null
+              ? BorderRadius.zero
+              : BorderRadius.only(bottomLeft: radius.topLeft, bottomRight: radius.topRight),
+        ),
+      ),
     );
 
-    final text = formatPrice(val.toDecimal(), precision: klineData.precision);
-
-    canvas.drawTextArea(
-      offset: endOffset,
-      drawDirection: flag < 0 ? DrawDirection.rtl : DrawDirection.ltr,
-      text: text,
-      textConfig: markConfig.text,
-      themeTextColor: theme.textColor,
+    final styles = (latest: latest, countdown: countdown);
+    _latestStyles = (
+      latestBase: latestBase,
+      countdownBase: countdownBase,
+      withCountdown: withCountdown,
+      candleColor: candleColor,
+      styles: styles,
     );
+    return styles;
   }
 
   /// 缓存latest文本相对于屏幕右侧的负偏移量
@@ -509,7 +578,6 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
       final updownColor = model.close >= model.open ? longColor : shortColor;
 
       final textConfig = indicator.inViewPriceMark.text;
-      BorderRadius? borderRadius = textConfig.borderRadius;
 
       final halfHeight = textConfig.areaHeight / 2;
       // 修正dy位置
@@ -528,90 +596,49 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
         themeColor: useCandleColor ? updownColor : theme.markLineColor,
       );
 
-      /// 最新价文本和样式配置
-      final text = formatPrice(
-        model.close.toDecimal(),
-        precision: klineData.precision,
-        cutInvalidZero: false,
-      );
-
-      /// 倒计时Text
-      String? countdownText;
-      // 时间周期 > 1秒时才显示倒计时
+      // 倒计时: 时间周期 > 1 秒且下次更新在未来时显示; 文本由剩余整秒数唯一决定, 以它作 key。
+      DateTime? next;
+      final now = DateTime.now();
       if (indicator.showCountdown && klineData.interval.milliseconds > Duration.millisecondsPerSecond) {
-        final nextUpdateDateTime = model.nextUpdateDateTime(klineData.interval);
-        if (nextUpdateDateTime != null &&
-            nextUpdateDateTime.millisecondsSinceEpoch > DateTime.now().millisecondsSinceEpoch) {
-          countdownText = nextUpdateDateTime.diffAsCountdown();
-        }
-      }
-      if (countdownText != null) {
-        // 如果展示倒计时, 最新价仅保留顶部radius
-        borderRadius = borderRadius?.copyWith(
-          topLeft: borderRadius.topLeft,
-          topRight: borderRadius.topRight,
-          bottomLeft: const Radius.circular(0),
-          bottomRight: const Radius.circular(0),
-        );
+        next = model.nextUpdateDateTime(klineData.interval);
+        if (next != null && next.millisecondsSinceEpoch <= now.millisecondsSinceEpoch) next = null;
       }
 
-      final offset = Offset(
-        rdx - inViewPriceMark.spacing,
-        dy - halfHeight, // 垂直居中
+      final styles = _resolveLatestStyles(
+        textConfig.toLabelStyle(
+          textColor: useCandleColor ? white : theme.textColor,
+          backgroundColor: useCandleColor ? updownColor : theme.latestPriceBg,
+          borderColor: useCandleColor ? null : theme.markLineColor,
+        ),
+        indicator.countdown.toLabelStyle(textColor: theme.textColor, backgroundColor: theme.countdownBg),
+        withCountdown: next != null,
+        candleColor: useCandleColor,
       );
 
-      /// 绘制最新价标记
-      final size = canvas.drawTextArea(
-        offset: offset,
-        drawDirection: DrawDirection.rtl,
-        drawableRect: drawableRect,
-        text: text,
-        textConfig: textConfig,
-        themeTextColor: useCandleColor ? white : theme.textColor,
-        themeBackgroundColor: useCandleColor ? updownColor : theme.latestPriceBg,
-        themeBorderColor: useCandleColor ? null : theme.markLineColor,
-        borderRadius: borderRadius,
-        borderSide: useCandleColor ? textConfig.border?.copyWith(color: transparent) : null,
+      final precision = klineData.precision;
+      final latest = _inViewPriceLabel.paint(
+        canvas,
+        (model.close, precision),
+        build: () => formatPrice(model.close.toDecimal(), precision: precision, cutInvalidZero: false),
+        style: styles.latest,
+        anchor: Offset(rdx - inViewPriceMark.spacing, dy),
+        align: Alignment.centerRight,
+        bounds: drawableRect,
       );
-      latestPriceLabelOffsetX = -(size.width + inViewPriceMark.spacing);
+      latestPriceLabelOffsetX = -(latest.width + inViewPriceMark.spacing);
 
-      if (countdownText != null) {
-        final countdown = indicator.countdown;
-        // 展示倒计时, 倒计时radius始终使用最新价的, 且保留底部radius
-        borderRadius = borderRadius?.copyWith(
-          topLeft: const Radius.circular(0),
-          topRight: const Radius.circular(0),
-          bottomLeft: borderRadius.topLeft,
-          bottomRight: borderRadius.topRight,
-        );
-
-        /// 绘制倒计时标记
-        canvas.drawText(
-          offset: Offset(
-            offset.dx,
-            offset.dy + size.height,
-          ),
-          drawDirection: DrawDirection.rtl,
-          // drawableRect: drawableRect,
-          text: countdownText,
-          style: countdown.style.copyWith(
-            color: theme.textColor,
-            // 修正倒计时文本区域高度:
-            // 由于倒计时使用了固定宽度(最新价的size.width), 保持与最新价同宽.
-            // 此处无法再为countdown设置padding, 固在此处修正
-            height: (countdown.areaHeight - 1) / countdown.textHeight,
-          ),
-          textAlign: countdown.textAlign,
-          textWidth: size.width,
-          // textWidth仅作为layout的maxWidth, 需同时指定minWidth才能强制固定宽度与最新价同宽.
-          minWidth: size.width,
-          backgroundColor: theme.countdownBg,
-          borderRadius: borderRadius,
-          borderSide: BorderSide(
-            color: useCandleColor ? transparent : theme.markLineColor,
-            width: countdown.border?.width ?? 0.5,
-          ),
-          maxLines: countdown.maxLines ?? 1,
+      if (next != null) {
+        final countdownEnd = next;
+        // 与最新价同宽: minWidth 撑开, bounds 的宽度封顶。纵向不夹取: 最新价贴底时倒计时溢出到时间轴上。
+        _countdownLabel.paint(
+          canvas,
+          countdownEnd.difference(now).inSeconds,
+          build: () => countdownEnd.diffAsCountdown(now),
+          style: styles.countdown,
+          anchor: latest.bottomRight,
+          align: Alignment.topRight,
+          bounds: Rect.fromLTRB(latest.left, latest.bottom, latest.right, double.infinity),
+          minWidth: latest.width,
         );
       }
     } else {
@@ -646,25 +673,22 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
         themeColor: theme.markLineColor,
       );
 
-      final text = formatPrice(
-        model.close.toDecimal(),
-        precision: klineData.precision,
-        cutInvalidZero: false,
-      );
-
       /// 绘制最后价标记
-      offViewPriceLabelSize = canvas.drawTextArea(
-        offset: Offset(
-          rdx + latestPriceLabelOffsetX - offViewPriceMark.spacing,
-          dy - halfHeight, // 居中
-        ),
-        drawDirection: DrawDirection.rtl,
-        drawableRect: drawableRect,
-        text: '$text ▸',
-        textConfig: offViewPriceMark.text,
-        themeTextColor: theme.lastPriceColor,
-        themeBackgroundColor: theme.lastPriceBg,
-      );
+      final precision = klineData.precision;
+      offViewPriceLabelSize = _offViewPriceLabel
+          .paint(
+            canvas,
+            (model.close, precision),
+            build: () => '${formatPrice(model.close.toDecimal(), precision: precision, cutInvalidZero: false)} ▸',
+            style: offViewPriceMark.text.toLabelStyle(
+              textColor: theme.lastPriceColor,
+              backgroundColor: theme.lastPriceBg,
+            ),
+            anchor: Offset(rdx + latestPriceLabelOffsetX - offViewPriceMark.spacing, dy),
+            align: Alignment.centerRight,
+            bounds: drawableRect,
+          )
+          .size;
     }
   }
 

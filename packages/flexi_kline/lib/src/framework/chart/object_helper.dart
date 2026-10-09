@@ -442,10 +442,13 @@ mixin PaintGridTicksMixin<T extends Indicator> on PaintObject<T> {
     }
   }
 
+  /// 同屏刻度不超过 16 个; [formatTicksValue] 是本对象固定的格式器, key 取 (value, precision) 即可。
+  late final _yAxisTicks = own(LabelPainter(capacity: 16));
+
   /// 画 Y 轴刻度文本, 返回本次文本的最大宽度(未画任何文本时为 0)。
   ///
   /// [showTopTick] / [showBottomTick] 控制是否绘制落在 [drawableRect] 顶/底边的刻度文本。
-  /// 边框上的文本由 `drawTextArea` 校准逻辑自动推入可见区。
+  /// 边框上的文本由 [drawableRect] 夹取推入可见区。
   ///
   /// 返回宽度供编排层设定 zoom 滑竿热区。
   @protected
@@ -459,7 +462,7 @@ mixin PaintGridTicksMixin<T extends Indicator> on PaintObject<T> {
     if (minMax.isZero) return 0;
 
     final dx = chartRect.right;
-    final ticksText = defTicksTextConfig;
+    final style = defTicksTextConfig.toLabelStyle(textColor: theme.ticksTextColor);
     final rect = drawableRect;
     double maxWidth = 0;
     for (final dy in dys) {
@@ -469,18 +472,17 @@ mixin PaintGridTicksMixin<T extends Indicator> on PaintObject<T> {
       final value = dyToValue(dy, check: false);
       if (value == null) continue;
 
-      final size = canvas.drawTextArea(
-        offset: Offset(
-          dx,
-          dy - ticksText.areaHeight, // 绘制在刻度线之上
-        ),
-        drawDirection: DrawDirection.rtl,
-        drawableRect: rect,
-        text: formatTicksValue(value, precision: precision),
-        textConfig: ticksText,
-        themeTextColor: theme.ticksTextColor,
+      // 画在刻度线之上。
+      final label = _yAxisTicks.paint(
+        canvas,
+        (value, precision),
+        build: () => formatTicksValue(value, precision: precision),
+        style: style,
+        anchor: Offset(dx, dy),
+        align: Alignment.bottomRight,
+        bounds: rect,
       );
-      if (size.width > maxWidth) maxWidth = size.width;
+      if (label.width > maxWidth) maxWidth = label.width;
     }
     return maxWidth;
   }
@@ -499,6 +501,8 @@ mixin PaintGridTicksMixin<T extends Indicator> on PaintObject<T> {
 
 /// 当Cross事件发生时, 在Y轴上的绘制crossing相应的刻度值
 mixin PaintYAxisTicksOnCrossMixin<T extends Indicator> on PaintObject<T> {
+  late final _crossTick = own(LabelPainter());
+
   /// onCross时, 绘制Y轴上的刻度值
   @protected
   Size? paintYAxisTicksOnCross(
@@ -512,23 +516,20 @@ mixin PaintYAxisTicksOnCrossMixin<T extends Indicator> on PaintObject<T> {
     final value = dyToValue(offset.dy);
     if (value == null) return null;
 
-    final text = formatTicksValueOnCross(value, precision: precision);
-
-    final ticksText = crossConfig.ticksText;
-
-    return canvas.drawTextArea(
-      offset: Offset(
-        chartRect.right - crossConfig.spacing,
-        offset.dy - ticksText.areaHeight / 2,
+    final label = _crossTick.paint(
+      canvas,
+      (value, precision),
+      build: () => formatTicksValueOnCross(value, precision: precision),
+      style: crossConfig.ticksText.toLabelStyle(
+        textColor: textColor ?? theme.crossTextColor,
+        backgroundColor: bgColor ?? theme.crossTextBg,
+        borderColor: borderColor,
       ),
-      drawDirection: DrawDirection.rtl,
-      drawableRect: drawableRect,
-      text: text,
-      textConfig: ticksText,
-      themeTextColor: textColor ?? theme.crossTextColor,
-      themeBackgroundColor: bgColor ?? theme.crossTextBg,
-      themeBorderColor: borderColor,
+      anchor: Offset(chartRect.right - crossConfig.spacing, offset.dy),
+      align: Alignment.centerRight,
+      bounds: drawableRect,
     );
+    return label.size;
   }
 
   @protected
@@ -544,6 +545,16 @@ mixin PaintYAxisTicksOnCrossMixin<T extends Indicator> on PaintObject<T> {
 
 /// 绘制基于蜡烛数据的图表能力。
 mixin PaintCandleChartMixin<T extends Indicator> on PaintObject<T> {
+  // 按画笔分批: 影线(含 OHLC 的开收短线)、实心实体各按涨跌一个缓冲, 空心实体各一条复用 Path。
+  late final _longWicks = own(PointBuffer());
+  late final _shortWicks = own(PointBuffer());
+  late final _longBodies = own(PointBuffer());
+  late final _shortBodies = own(PointBuffer());
+  final _longHollowBodies = Path();
+  final _shortHollowBodies = Path();
+  bool _hasLongHollow = false;
+  bool _hasShortHollow = false;
+
   /// 绘制 Open-high-low-close 样式的蜡烛图（美国线图）
   /// 主区: 蜡烛图
   /// 副区: 用于SubBoll图和SubSar图中
@@ -560,13 +571,84 @@ mixin PaintCandleChartMixin<T extends Indicator> on PaintObject<T> {
     startOffset ??= startCandleDx - candleWidthHalf;
     final barWidthHalf = candleWidthHalf;
     for (var i = start; i < end; i++) {
-      paintCandleBar(
-        canvas,
+      addCandleBar(
         klineData[i],
         dx: startOffset - (i - start) * candleActualWidth,
         barWidthHalf: barWidthHalf,
         chartStyle: ChartBarStyle.ohlc,
       );
+    }
+    flushCandleBars(canvas);
+  }
+
+  /// 把蜡烛 [m] 加入本帧批次, 由 [flushCandleBars] 一次画完; 几何同 [paintCandleBar]。
+  ///
+  /// [barWidthHalf] 只用于空心实体与 OHLC 的开收短线, 实心实体的宽度是画笔的 strokeWidth(candleWidth)。
+  @protected
+  void addCandleBar(
+    FlexiCandleModel m, {
+    required double dx,
+    required double barWidthHalf,
+    required ChartBarStyle chartStyle,
+  }) {
+    final isLong = m.close >= m.open;
+    final high = valueToDy(m.high, correct: false);
+    final low = valueToDy(m.low, correct: false);
+    final (open, close) = ensureMinDistance(
+      valueToDy(m.open, correct: false),
+      valueToDy(m.close, correct: false),
+    );
+    final wicks = isLong ? _longWicks : _shortWicks;
+    if (chartStyle == ChartBarStyle.ohlc) {
+      wicks
+        ..addSegment(dx, high, dx, low)
+        ..addSegment(dx - barWidthHalf, open, dx, open)
+        ..addSegment(dx + barWidthHalf, close, dx, close);
+      return;
+    }
+
+    if (!(isLong ? chartStyle.isHollowUp : chartStyle.isHollowDown)) {
+      wicks.addSegment(dx, high, dx, low);
+      (isLong ? _longBodies : _shortBodies).addSegment(dx, open, dx, close);
+      return;
+    }
+
+    // 空心: 影线只画到实体边缘, 不穿过描边框。
+    final top = math.min(open, close);
+    final bottom = math.max(open, close);
+    wicks.addSegment(dx, high, dx, top);
+    if (low > bottom) wicks.addSegment(dx, low, dx, bottom);
+    final body = Rect.fromLTRB(dx - barWidthHalf, top, dx + barWidthHalf, bottom);
+    if (isLong) {
+      _longHollowBodies.addRect(body);
+      _hasLongHollow = true;
+    } else {
+      _shortHollowBodies.addRect(body);
+      _hasShortHollow = true;
+    }
+  }
+
+  /// 画完 [addCandleBar] 攒下的批次并清空; 先影线后实体, 实体盖住穿过它的影线。
+  @protected
+  void flushCandleBars(Canvas canvas) {
+    // 实体是线宽为 candleWidth 的线段, 非 butt 端帽会让两端各外延半个 candleWidth。
+    assert(
+      defLongBarPaint.strokeCap == StrokeCap.butt && defShortBarPaint.strokeCap == StrokeCap.butt,
+      'candle body paints must use StrokeCap.butt',
+    );
+    _longWicks.flush(canvas, ui.PointMode.lines, defLongLinePaint);
+    _shortWicks.flush(canvas, ui.PointMode.lines, defShortLinePaint);
+    _longBodies.flush(canvas, ui.PointMode.lines, defLongBarPaint);
+    _shortBodies.flush(canvas, ui.PointMode.lines, defShortBarPaint);
+    if (_hasLongHollow) {
+      canvas.drawPath(_longHollowBodies, defLongHollowBarPaint);
+      _longHollowBodies.reset();
+      _hasLongHollow = false;
+    }
+    if (_hasShortHollow) {
+      canvas.drawPath(_shortHollowBodies, defShortHollowBarPaint);
+      _shortHollowBodies.reset();
+      _hasShortHollow = false;
     }
   }
 
