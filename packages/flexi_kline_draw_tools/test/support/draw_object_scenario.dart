@@ -15,6 +15,8 @@
 /// 绘制工具单测的公共 arrange / act。
 library;
 
+import 'dart:ui' show Paragraph;
+
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -91,6 +93,14 @@ class RecordingCanvas implements Canvas {
       if (start == null || end == null) continue;
       drawn.add((start: start, end: end, length: metric.length, color: paint.color));
     }
+  }
+
+  /// 文本绘制: 段落实例用来判断缓存是否命中, 矩形用来断言对齐。
+  final List<({Paragraph paragraph, Rect rect})> paragraphs = [];
+
+  @override
+  void drawParagraph(Paragraph paragraph, Offset offset) {
+    paragraphs.add((paragraph: paragraph, rect: offset & Size(paragraph.longestLine, paragraph.height)));
   }
 
   @override

@@ -1,3 +1,9 @@
+## 2.6.0
+* Align the version with `flexi_kline` 2.6.0: during v2 the major.minor tracks the minimum required `flexi_kline` major.minor, and own changes bump the patch.
+* Raise the `flexi_kline` constraint to `^2.6.0` for the painting layer.
+* Paint fibonacci, fib fans, price line and trend angle labels with cached `LabelPainter`s: labels are re-laid out only when their value changes, and are now placed by measured height instead of `TextAreaConfig.areaHeight` (may shift by up to 1px).
+* Reuse one fill `Paint` for fibonacci level backgrounds instead of allocating one per level per frame.
+
 ## 2.0.1
 * Raise minimum SDK to Dart 3.9 / Flutter 3.35; bump `json_annotation` to `^4.12.0`.
 * Align `analysis_options.yaml` with the core `flexi_kline` package.

@@ -24,6 +24,10 @@ class FibFansDrawObject extends DrawObject {
   /// 斐波那契扇形绘制参数。通过 [DrawToolsConfig.configure] 定制。
   static FibFansDrawParam get drawParam => DrawToolsConfig.instance.fibFans;
 
+  /// 横、纵两排各一个: 默认 7 个比率, 留余量给自定义比率。
+  late final _horiLabels = own(LabelPainter(capacity: 8));
+  late final _vertLabels = own(LabelPainter(capacity: 8));
+
   Rect? getRectangleRect() {
     final points = allPoints;
     final first = points.firstOrNull?.offset;
@@ -93,10 +97,10 @@ class FibFansDrawObject extends DrawObject {
     Offset fans1, fans2, hori, vert;
     double dx, dy;
 
-    final areaHeight = fibText.areaHeight;
-    final txtHalft = areaHeight / 2;
-    final txtHeight = dyLen >= 0 ? areaHeight : 0;
-    final vertTxtDirection = dxLen >= 0 ? DrawDirection.rtl : DrawDirection.ltr;
+    // 各比率颜色不同: 颜色进 key 与 span, 样式共用一份。
+    final style = fibText.toLabelStyle();
+    final horiAlign = dyLen >= 0 ? Alignment.bottomCenter : Alignment.topCenter;
+    final vertAlign = dxLen >= 0 ? Alignment.centerRight : Alignment.centerLeft;
 
     for (final rate in fibFansParams) {
       dx = A.dx + dxLen * rate;
@@ -141,22 +145,13 @@ class FibFansDrawObject extends DrawObject {
       );
 
       /// 画扇形参数值
-      canvas.drawTextArea(
+      final textColor = fibTextColor ?? color;
+      TextSpan build() => TextSpan(
         text: rate.toString(),
-        drawDirection: DrawDirection.center,
-        offset: Offset(dx, A.dy - txtHeight),
-        textConfig: fibText.copyWith(
-          style: fibText.style.copyWith(color: fibTextColor ?? color),
-        ),
+        style: TextStyle(color: textColor),
       );
-      canvas.drawTextArea(
-        text: rate.toString(),
-        drawDirection: vertTxtDirection,
-        offset: Offset(A.dx, dy - txtHalft),
-        textConfig: fibText.copyWith(
-          style: fibText.style.copyWith(color: fibTextColor ?? color),
-        ),
-      );
+      _horiLabels.paint(canvas, (rate, textColor), build: build, style: style, anchor: hori, align: horiAlign);
+      _vertLabels.paint(canvas, (rate, textColor), build: build, style: style, anchor: vert, align: vertAlign);
     }
   }
 }

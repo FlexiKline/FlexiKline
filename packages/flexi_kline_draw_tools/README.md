@@ -6,16 +6,17 @@
 
 | flexi_kline_draw_tools | flexi_kline | Flutter |
 | ---------------------- | ----------- | ------- |
+| 2.6.0                  | ^2.6.0      | >=3.35.0 |
 | 2.0.1                  | ^2.5.4      | >=3.35.0 |
 | 2.0.0                  | ^2.5.1      | >=3.27.0 |
 
-> 版本号 major 与 `flexi_kline` 对齐，之后独立演进。
+> v2 期间版本号 major.minor 等于所需 `flexi_kline` 的最低 major.minor（如 2.6.x 需要 `^2.6.0`），自身的修复与功能只升 patch；`flexi_kline` 升级而本包无需新能力时不跟随发版。v2 稳定后只对齐 major。
 
 ## 安装
 
 ```yaml
 dependencies:
-  flexi_kline_draw_tools: ^2.0.0
+  flexi_kline_draw_tools: ^2.6.0
 ```
 
 ## 快速上手

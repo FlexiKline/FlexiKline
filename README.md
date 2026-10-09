@@ -19,10 +19,11 @@ FlexiKline 是一个 Flutter 金融 K 线图表框架，指标、绘制工具、
 
 ### flexi_kline_draw_tools
 
-[flexi_kline](https://pub.dev/packages/flexi_kline) 的绘图工具扩展包，提供趋势线、斐波那契、平行通道等 19 种绘图工具。版本号 major 与 `flexi_kline` 对齐，之后独立演进：
+[flexi_kline](https://pub.dev/packages/flexi_kline) 的绘图工具扩展包，提供趋势线、斐波那契、平行通道等 19 种绘图工具。v2 期间版本号 major.minor 等于所需 `flexi_kline` 的最低 major.minor，自身迭代只升 patch：
 
 | flexi_kline_draw_tools | flexi_kline | Flutter |
 | ---------------------- | ----------- | ------- |
+| 2.6.0                  | ^2.6.0      | >=3.35.0 |
 | 2.0.1                  | ^2.5.4      | >=3.35.0 |
 | 2.0.0                  | ^2.5.1      | >=3.27.0 |
 

@@ -23,6 +23,8 @@ class PriceLineDrawObject extends DrawObject {
 
   static PriceLineDrawParam get drawParam => DrawToolsConfig.instance.priceLine;
 
+  late final _label = own(LabelPainter());
+
   @override
   bool hitTest(DrawContext context, Offset position, {bool isMove = false}) {
     assertCheck();
@@ -64,21 +66,15 @@ class PriceLineDrawObject extends DrawObject {
     // 画价值文本区域
     final value = context.dyToValue(first.dy);
     if (value != null) {
-      final valTxt = formatValueTicksText(
-        value,
-        precision: context.klineData.precision,
-      );
-      final ticksText = drawParam.priceText ?? ticksTextConfig;
+      final precision = context.klineData.precision;
       final margin = drawParam.priceTextMargin;
-      canvas.drawTextArea(
-        offset: Offset(
-          first.dx + margin.left,
-          first.dy - ticksText.areaHeight - margin.bottom,
-        ),
-        text: valTxt,
-        textConfig: ticksText,
-        drawDirection: DrawDirection.ltr,
-        // drawableRect: drawableRect,
+      _label.paint(
+        canvas,
+        (value, precision),
+        build: () => formatValueTicksText(value, precision: precision),
+        style: (drawParam.priceText ?? ticksTextConfig).toLabelStyle(),
+        anchor: Offset(first.dx + margin.left, first.dy - margin.bottom),
+        align: Alignment.bottomLeft,
       );
     }
   }

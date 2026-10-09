@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:ui';
-
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/painting.dart';
 
@@ -26,6 +24,10 @@ class FibRetracementDrawObject extends DrawObject {
 
   /// 斐波那契扩展绘制参数。通过 [DrawToolsConfig.configure] 定制。
   static FibonacciDrawParam get drawParam => DrawToolsConfig.instance.fibRetracement;
+
+  /// 默认 11 个比率, 留余量给自定义比率。
+  late final _labels = own(LabelPainter(capacity: 16));
+  final _fill = Paint()..style = PaintingStyle.fill;
 
   @override
   bool hitTest(DrawContext context, Offset position, {bool isMove = false}) {
@@ -91,7 +93,8 @@ class FibRetracementDrawObject extends DrawObject {
     final dyLen = A.dy - B.dy;
     Offset start, end;
 
-    final txtHeightOffset = fibText.areaHeight / 2;
+    // 各比率颜色不同: 颜色进 key 与 span, 样式共用一份, 否则每画一个比率就清一次缓存。
+    final style = fibText.toLabelStyle();
     final txtOffsetDx = dxLen >= 0 ? A.dx : B.dx;
 
     for (final rate in fibRates) {
@@ -104,9 +107,7 @@ class FibRetracementDrawObject extends DrawObject {
         /// 填充背景
         canvas.drawPath(
           Path()..addPolygon([...linePoints, end, start], true),
-          Paint()
-            ..color = color.withAlpha(fibBgOpacity.alpha)
-            ..style = PaintingStyle.fill,
+          _fill..color = color.withAlpha(fibBgOpacity.alpha),
         );
       }
       linePoints = [start, end];
@@ -122,14 +123,17 @@ class FibRetracementDrawObject extends DrawObject {
       /// 画比率值
       final value = context.dyToValue(start.dy);
       if (value != null) {
-        final text = formatValueTicksText(value, precision: precision);
-        canvas.drawTextArea(
-          text: '$rate($text)',
-          drawDirection: DrawDirection.rtl,
-          offset: Offset(txtOffsetDx, dy - txtHeightOffset),
-          textConfig: fibText.copyWith(
-            style: fibText.style.copyWith(color: fibTextColor ?? color),
+        final textColor = fibTextColor ?? color;
+        _labels.paint(
+          canvas,
+          (rate, value, precision, textColor),
+          build: () => TextSpan(
+            text: '$rate(${formatValueTicksText(value, precision: precision)})',
+            style: TextStyle(color: textColor),
           ),
+          style: style,
+          anchor: Offset(txtOffsetDx, dy),
+          align: Alignment.centerRight,
         );
       }
     }

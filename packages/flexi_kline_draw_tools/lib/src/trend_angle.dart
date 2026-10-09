@@ -26,6 +26,8 @@ class TrendAngleDrawObject extends DrawObject {
   /// 趋势角度绘制参数。通过 [DrawToolsConfig.configure] 定制。
   static TrendAngleDrawParam get drawParam => DrawToolsConfig.instance.trendAngle;
 
+  late final _label = own(LabelPainter());
+
   @override
   bool hitTest(DrawContext context, Offset position, {bool isMove = false}) {
     assertCheck();
@@ -124,15 +126,12 @@ class TrendAngleDrawObject extends DrawObject {
     );
 
     // 画弧度值
-    final radText = drawParam.angleText ?? ticksTextConfig;
-    final radVal = (radians * -180 / math.pi).toStringAsFixed(2);
-    canvas.drawTextArea(
-      offset: Offset(
-        A.dx + drawParam.angleBaseLineMinLen,
-        A.dy - radText.areaHeight / 2,
-      ),
-      text: '$radVal°',
-      textConfig: radText,
+    _label.paint(
+      canvas,
+      '${(radians * -180 / math.pi).toStringAsFixed(2)}°',
+      style: (drawParam.angleText ?? ticksTextConfig).toLabelStyle(),
+      anchor: Offset(A.dx + drawParam.angleBaseLineMinLen, A.dy),
+      align: Alignment.centerLeft,
     );
   }
 }
