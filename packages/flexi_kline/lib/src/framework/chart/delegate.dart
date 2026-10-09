@@ -129,6 +129,10 @@ extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
   void doDidUpdateIndicator(T newIndicator) {
     final T oldIndicator = indicator;
     _indicator = newIndicator;
+    // 先 reset 再回调: 回调里读到的资源不会命中旧声明的缓存。
+    // 扩展不算子类成员, 跨 library 调 @protected 需豁免。
+    // ignore: invalid_use_of_protected_member
+    resetResources();
     didUpdateIndicator(oldIndicator);
   }
 

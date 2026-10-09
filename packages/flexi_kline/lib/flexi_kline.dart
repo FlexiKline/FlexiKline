@@ -23,6 +23,7 @@ export 'src/framework/export.dart' hide PaintDelegateExt, MainPaintDelegateExt, 
 export 'src/indicators/export.dart';
 export 'src/kline_controller.dart';
 export 'src/model/export.dart';
+export 'src/painting/export.dart';
 export 'src/types.dart';
 export 'src/utils/export.dart';
 export 'src/view/flexi_kline_prefabs.dart';

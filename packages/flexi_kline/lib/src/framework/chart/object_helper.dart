@@ -281,9 +281,15 @@ mixin PaintObjectGeometryStateMixin<T extends Indicator<IIndicatorKey>> on Indic
     return _dyFactor = chartRect.height / minMax.diffDivisor.toDouble();
   }
 
+  /// [correct] 为 true 时夹到 [chartRect] 内; 换算线性单调, 在像素空间 clamp 与先夹值等价, 省掉 FlexiNum 比较。
   double valueToDy(FlexiNum value, {bool correct = true}) {
-    if (correct) value = value.clamp(minMax.min, minMax.max);
-    return chartRect.bottom - (value - minMax.min).toDouble() * dyFactor;
+    final bottom = chartRect.bottom;
+    final dy = bottom - (value - minMax.min).toDouble() * dyFactor;
+    if (!correct) return dy;
+    // isSame 时 diffDivisor 回落到 1, [min, max] 只对应 bottom; 上界不收到 bottom, (min, min + 1) 会落进区间中段。
+    // chartRect 高度非正时 top >= bottom, 取 min 免得 clamp 上下界颠倒(此时 dyFactor 为 0, 结果仍是 bottom)。
+    final top = minMax.isSame ? bottom : math.min(chartRect.top, bottom);
+    return dy.clamp(top, bottom);
   }
 
   FlexiNum? dyToValue(double dy, {bool check = true}) {

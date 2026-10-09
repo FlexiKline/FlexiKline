@@ -22,4 +22,5 @@ export 'draw/overlay.dart';
 export 'grid_tick_mode.dart';
 export 'interaction_event.dart';
 export 'logger.dart';
+export 'paint_resource_owner.dart';
 export 'serializers.dart';

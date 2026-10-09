@@ -29,6 +29,10 @@ abstract class _$TextAreaConfigCWProxy {
 
   TextAreaConfig borderRadius(BorderRadius? borderRadius);
 
+  TextAreaConfig gradient(GradientConfig? gradient);
+
+  TextAreaConfig shadows(List<BoxShadow>? shadows);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `TextAreaConfig(...).copyWith.fieldName(value)`.
   ///
@@ -48,6 +52,8 @@ abstract class _$TextAreaConfigCWProxy {
     EdgeInsets? padding,
     BorderSide? border,
     BorderRadius? borderRadius,
+    GradientConfig? gradient,
+    List<BoxShadow>? shadows,
   });
 }
 
@@ -94,6 +100,12 @@ class _$TextAreaConfigCWProxyImpl implements _$TextAreaConfigCWProxy {
   TextAreaConfig borderRadius(BorderRadius? borderRadius) =>
       call(borderRadius: borderRadius);
 
+  @override
+  TextAreaConfig gradient(GradientConfig? gradient) => call(gradient: gradient);
+
+  @override
+  TextAreaConfig shadows(List<BoxShadow>? shadows) => call(shadows: shadows);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `TextAreaConfig(...).copyWith.fieldName(value)`.
   ///
@@ -114,6 +126,8 @@ class _$TextAreaConfigCWProxyImpl implements _$TextAreaConfigCWProxy {
     Object? padding = const $CopyWithPlaceholder(),
     Object? border = const $CopyWithPlaceholder(),
     Object? borderRadius = const $CopyWithPlaceholder(),
+    Object? gradient = const $CopyWithPlaceholder(),
+    Object? shadows = const $CopyWithPlaceholder(),
   }) {
     return TextAreaConfig(
       style: style == const $CopyWithPlaceholder() || style == null
@@ -160,6 +174,14 @@ class _$TextAreaConfigCWProxyImpl implements _$TextAreaConfigCWProxy {
           ? _value.borderRadius
           // ignore: cast_nullable_to_non_nullable
           : borderRadius as BorderRadius?,
+      gradient: gradient == const $CopyWithPlaceholder()
+          ? _value.gradient
+          // ignore: cast_nullable_to_non_nullable
+          : gradient as GradientConfig?,
+      shadows: shadows == const $CopyWithPlaceholder()
+          ? _value.shadows
+          // ignore: cast_nullable_to_non_nullable
+          : shadows as List<BoxShadow>?,
     );
   }
 }
@@ -213,6 +235,15 @@ TextAreaConfig _$TextAreaConfigFromJson(Map<String, dynamic> json) =>
         json['borderRadius'],
         const BorderRadiusConverter().fromJson,
       ),
+      gradient: json['gradient'] == null
+          ? null
+          : GradientConfig.fromJson(json['gradient'] as Map<String, dynamic>),
+      shadows: (json['shadows'] as List<dynamic>?)
+          ?.map(
+            (e) =>
+                const BoxShadowConverter().fromJson(e as Map<String, dynamic>),
+          )
+          .toList(),
     );
 
 Map<String, dynamic> _$TextAreaConfigToJson(
@@ -244,6 +275,8 @@ Map<String, dynamic> _$TextAreaConfigToJson(
     instance.borderRadius,
     const BorderRadiusConverter().toJson,
   ),
+  'gradient': ?instance.gradient?.toJson(),
+  'shadows': ?instance.shadows?.map(const BoxShadowConverter().toJson).toList(),
 };
 
 Value? _$JsonConverterFromJson<Json, Value>(

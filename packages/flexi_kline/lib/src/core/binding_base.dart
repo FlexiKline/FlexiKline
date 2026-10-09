@@ -14,7 +14,8 @@
 
 part of 'core.dart';
 
-abstract class KlineBindingBase with FlexiLog implements PaintContext, DrawContext {
+/// [PaintResourceOwner] 资源(如 tooltip)只在 [dispose] 时释放: 没有声明更新入口, 配置与主题变化由资源自行失效。
+abstract class KlineBindingBase with FlexiLog, PaintResourceOwner implements PaintContext, DrawContext {
   @override
   String get logTag => 'Controller';
 
@@ -90,6 +91,7 @@ abstract class KlineBindingBase with FlexiLog implements PaintContext, DrawConte
     // 多个 Controller 共享同一份配置时，自动落盘会让从属侧用自己的运行时状态覆盖对侧。
     _paintObjectManager.dispose();
     _drawObjectManager.dispose();
+    disposeResources();
     _observers.clear();
   }
 

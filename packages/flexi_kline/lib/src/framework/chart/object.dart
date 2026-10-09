@@ -98,8 +98,10 @@ abstract class IndicatorObject<T extends Indicator>
 }
 
 /// 所有指标绘制对象的基类, 混入边界计算、几何状态与画笔缓存。
+///
+/// [PaintResourceOwner] 资源在指标声明更新时 reset、[dispose] 时释放; keepAlive 对象出树不释放。
 abstract class PaintObject<T extends Indicator<IIndicatorKey>> extends IndicatorObject<T>
-    with FlexiLog, PaintStyleMixin<T>, PaintObjectBoundingMixin<T>, PaintObjectGeometryStateMixin<T>
+    with FlexiLog, PaintResourceOwner, PaintStyleMixin<T>, PaintObjectBoundingMixin<T>, PaintObjectGeometryStateMixin<T>
     implements IPaintObject, IPaintLifecycle {
   // 父级 PaintObject，主要用于给其子级 PaintObject 限定范围。
   PaintObject? _parent;
@@ -187,6 +189,7 @@ abstract class PaintObject<T extends Indicator<IIndicatorKey>> extends Indicator
     if (_disposed) return;
     _disposed = true;
     _parent = null;
+    disposeResources();
   }
 
   /// 默认不产出任何网格线。

@@ -1,3 +1,18 @@
+## 2.6.0
+* Export the painting layer: `LabelPainter`, `LabelStyle`, `TextLayoutCache`, `ImagePainter`, `ImageStyle`, `ImageSpan`, `AnchoredBorder`, `BubbleBorder`, `PointBuffer`, `PaintResource` and `AlignmentPlace` (`Alignment.place`); the `extension/render/` drawing API stays available alongside it.
+* Add `PaintResourceOwner` to `PaintObject`, `DrawObject` and `KlineBindingBase`: all three dispose resources registered with `own()` on `dispose`, and only `PaintObject` also resets them on an indicator update, before `didUpdateIndicator` (keepAlive objects leaving the paint tree keep them).
+* Assert in `PaintResourceOwner.own` once the owner is disposed: a resource registered then would never be released.
+* Add `TextAreaConfig.toLabelStyle` (`TextAreaConfigLabel`) to resolve a config into a `LabelStyle` with theme fallback colors, memoized per config instance; `textWidth` folds into `maxWidth`.
+* Add `TextAreaConfig.gradient` and `TextAreaConfig.shadows` with JSON support: a gradient replaces the background color; both apply only through `toLabelStyle`, not `drawTextArea`.
+* Add `BaseIndicatorConfig`, a `ChangeNotifier` skeleton implementing `IIndicatorConfig`.
+* Remove `IFlexiKlineDataCenter.createFlexiKlineConfig`: the framework never called it (Breaking Changes).
+* Rename `onPanEnd` to `onChartPanEnd` (Breaking Changes).
+* Rename `onPaintObjectDragCancel` to `cancelPaintObjectDrag`: it is a command issued across bindings, not a gesture event (Breaking Changes).
+* Drop `@protected` from `KlineBindingBase.onTap`: it ends the tap-claim chain and returns whether a binding consumed the tap.
+* Fix the `calculatePaintChartRange` and `setChartZoomSlideBarRect` post-frame callbacks writing to disposed notifiers when a frame lands after `dispose`.
+* Fix the latest price countdown label being narrower than the latest price label and overlapping it by 0.5px; it is no longer clamped into `drawableRect`.
+* Point the pubspec `repository` to `packages/flexi_kline` in the FlexiKline monorepo.
+
 ## 2.5.6
 * Fix `FormatException: NaN is not a valid format` thrown from `paintGridLines` after a few seconds of continuous panning: a `Decimal`-backed range from a combine child left `ComputeMode.fast` holding a `Decimal` endpoint, whose scale then grew every frame until `toDouble()` returned NaN.
 * Add `MinMax.reset` and normalize the range to `klineData.computeMode` in `setMinMax` and `setZoomMinMax`, the write entries feeding `dyFactor`; `MainPaintObject.updateMinMax` seeds through `setMinMax` instead of assigning `_minMax` directly.
