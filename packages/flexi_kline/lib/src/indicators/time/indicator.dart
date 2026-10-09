@@ -57,7 +57,9 @@ class TimeIndicator extends TimeBaseIndicator {
 
 class TimePaintObject<T extends TimeIndicator> extends TimeBasePaintObject<T> {
   /// key 为 (ts, interval, tickFormatter): 宿主换了格式器, 函数身份不同, 文本随之重建。
-  late final _timeLabels = own(LabelPainter(capacity: 16));
+  ///
+  /// 约每 60px 一个刻度, 1200px 宽同屏已有 15 个; 64 覆盖桌面宽度, 并给缩放时来回切换的刻度组留余量。
+  late final _timeLabels = own(LabelPainter(capacity: 64));
   late final _crossTimeLabel = own(LabelPainter());
 
   /// 两个时间刻度间隔的蜡烛数

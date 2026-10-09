@@ -82,7 +82,7 @@ void main() {
   }
 
   group('最后价(最新蜡烛在视区外)', () {
-    testWidgets('offViewPriceLabelSize 取自绘出的标签矩形, 命中区与标签横向对齐', (tester) async {
+    testWidgets('offViewPriceLabelRect 即绘出的标签矩形, 命中区与标签重合', (tester) async {
       final candle = await mount(tester, _Candle());
       // 首帧以初值判定为视区内, 量出最新价宽度后切到最后价(见 paint_label_cache_test)。
       await paint(tester);
@@ -94,12 +94,8 @@ void main() {
       final body = canvas.rrectBounds.singleWhere((r) => r.size == size);
       final mark = candle.indicator.offViewPriceMark;
       expect(body.right, candle.chartRect.right + candle.latestPriceLabelOffsetX - mark.spacing);
-
-      final hit = candle.offViewPriceLabelRect!;
-      expect(hit.left, body.left);
-      expect(hit.width, body.width);
-      // 命中区纵向沿用旧口径: 顶边在最新价 dy, 不随标签居中上移。
-      expect(hit.top, candle.clampDyInChart(candle.valueToDy(chart.klineData.latest!.close)));
+      // 旧实现命中区顶边在最新价 dy, 比标签低半个标签高度。
+      expect(candle.offViewPriceLabelRect, body);
     });
 
     testWidgets('handleTap: 命中标签回到初始位置, 标签外不消费', (tester) async {

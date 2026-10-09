@@ -527,24 +527,12 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
   @protected
   double latestPriceLabelOffsetX = 0.0;
 
-  /// 缓存last文本所占大小
+  /// 最后价标签本帧绘出的矩形, 用于后续点击事件命中测试; 未画最后价时为 null.
   @protected
-  Size? offViewPriceLabelSize;
+  Rect? offViewPriceLabelRect;
 
-  /// 最后价文本区域位置, 用于后续点击事件命中测试.
-  Rect? get offViewPriceLabelRect {
-    if (offViewPriceLabelSize == null) return null;
-    final model = klineData.latest;
-    if (model == null) return null;
-    // 计算最新价YAxis位置.
-    final dy = clampDyInChart(valueToDy(model.close));
-    return Rect.fromLTWH(
-      chartRect.right + latestPriceLabelOffsetX - indicator.offViewPriceMark.spacing - offViewPriceLabelSize!.width,
-      dy,
-      offViewPriceLabelSize!.width,
-      offViewPriceLabelSize!.height,
-    );
-  }
+  /// 缓存last文本所占大小
+  Size? get offViewPriceLabelSize => offViewPriceLabelRect?.size;
 
   /// 绘制最新价刻度线与价钱标记
   /// 1. 价钱标记始终展示在画板最右边.
@@ -567,7 +555,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
     double ldx = 0; // 计算最新价刻度线lineTo参数X轴的dx值. 默认0: 代表橫穿整个Canvas.
 
     if (paintDxOffset < latestPriceLabelOffsetX) {
-      offViewPriceLabelSize = null;
+      offViewPriceLabelRect = null;
       // 绘制最新价和倒计时
       final MarkConfig inViewPriceMark = indicator.inViewPriceMark;
       if (!inViewPriceMark.show) return;
@@ -657,11 +645,12 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
 
       /// 绘制横穿画板的最后价刻度线.
       final lastPath = Path();
-      if (offViewPriceLabelSize != null) {
+      final lastSize = offViewPriceLabelSize;
+      if (lastSize != null) {
         final lastTextAreaRight = rdx + latestPriceLabelOffsetX - offViewPriceMark.spacing;
         lastPath.moveTo(rdx, dy);
         lastPath.lineTo(lastTextAreaRight, dy);
-        lastPath.moveTo(lastTextAreaRight - offViewPriceLabelSize!.width, dy);
+        lastPath.moveTo(lastTextAreaRight - lastSize.width, dy);
         lastPath.lineTo(ldx, dy);
       } else {
         lastPath.moveTo(rdx, dy);
@@ -675,20 +664,18 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
 
       /// 绘制最后价标记
       final precision = klineData.precision;
-      offViewPriceLabelSize = _offViewPriceLabel
-          .paint(
-            canvas,
-            (model.close, precision),
-            build: () => '${formatPrice(model.close.toDecimal(), precision: precision, cutInvalidZero: false)} ▸',
-            style: offViewPriceMark.text.toLabelStyle(
-              textColor: theme.lastPriceColor,
-              backgroundColor: theme.lastPriceBg,
-            ),
-            anchor: Offset(rdx + latestPriceLabelOffsetX - offViewPriceMark.spacing, dy),
-            align: Alignment.centerRight,
-            bounds: drawableRect,
-          )
-          .size;
+      offViewPriceLabelRect = _offViewPriceLabel.paint(
+        canvas,
+        (model.close, precision),
+        build: () => '${formatPrice(model.close.toDecimal(), precision: precision, cutInvalidZero: false)} ▸',
+        style: offViewPriceMark.text.toLabelStyle(
+          textColor: theme.lastPriceColor,
+          backgroundColor: theme.lastPriceBg,
+        ),
+        anchor: Offset(rdx + latestPriceLabelOffsetX - offViewPriceMark.spacing, dy),
+        align: Alignment.centerRight,
+        bounds: drawableRect,
+      );
     }
   }
 

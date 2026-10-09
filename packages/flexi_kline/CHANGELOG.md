@@ -20,6 +20,7 @@
 * Batch candle bars: wicks and solid bodies go through one `drawRawPoints` call per trend, hollow bodies through one path per trend; hollow bodies now always use `candleHollowBarBorderWidth` and every wick `candleLineWidth`.
 * Add `PaintCandleChartMixin.addCandleBar` and `flushCandleBars` for batched candle drawing; `paintCandleBar` stays available.
 * Require `PaintResourceOwner` on `DrawObjectMixin` (`on DrawStateObject, PaintResourceOwner`) so the draw tool ticks can own their painters (Breaking Changes).
+* Fix the last price tap area sitting half a label lower than the painted label: `CandlePaintObject.offViewPriceLabelRect` is now the painted rect and `offViewPriceLabelSize` a read-only getter (Breaking Changes).
 
 ## 2.5.6
 * Fix `FormatException: NaN is not a valid format` thrown from `paintGridLines` after a few seconds of continuous panning: a `Decimal`-backed range from a combine child left `ComputeMode.fast` holding a `Decimal` endpoint, whose scale then grew every frame until `toDouble()` returned NaN.

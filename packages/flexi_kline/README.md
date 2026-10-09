@@ -267,6 +267,38 @@ Direct 与 Computed 的 `autoActivate` 默认 `false`；show 时创建、hide �
 | `paintCross(canvas, offset, {model})` | Cross 状态下的附加绘制 |
 | `paintTips(canvas, {model, offset, tipsRect})` | 绘制顶部 Tips 信息条并返回占用尺寸 |
 
+### 绘制构件（painting）
+
+需要跨帧复用的绘制资源用 `own()` 登记，PaintObject 更新声明时自动 `reset`、销毁时自动 `dispose`。文本标签用 `LabelPainter`：每帧照常传 key 与 `build`，内容与样式不变时不格式化、不排版；同批画笔的点或线段用 `PointBuffer` 攒齐后一次绘制。旧的 `extension/render/` 文本扩展仍可用，二者并存。
+
+```dart
+class VolumePaintObject extends DirectPaintObject<VolumeIndicator> {
+  late final _label = own(LabelPainter());
+  late final _bars = own(PointBuffer());
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // 柱子: 线宽为柱宽的竖线段, 一次 drawRawPoints 画完。
+    for (final (dx, top, bottom) in visibleBars) {
+      _bars.addSegment(dx, top, dx, bottom);
+    }
+    _bars.flush(canvas, PointMode.lines, barPaint);
+
+    // 标签: key 必须唯一决定文本, 命中时 build 不会被调用。
+    final value = latestVolume;
+    _label.paint(
+      canvas,
+      value,
+      build: () => formatNumber(value),
+      style: indicator.text.toLabelStyle(textColor: theme.textColor),
+      anchor: chartRect.topRight,
+      align: Alignment.topRight,
+      bounds: drawableRect,
+    );
+  }
+}
+```
+
 ### 交互入口
 
 默认全部为空操作，按需覆写。点击与拖动按 `zIndex` 倒序询问，视觉最上层的对象优先作答。
