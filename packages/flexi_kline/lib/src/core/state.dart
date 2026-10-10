@@ -505,11 +505,17 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
       return;
     }
     _notifySpecChange();
-    markRepaintAll();
+    // start/end 未变但数据内容变了: 用 reset 跳过区间早退, 否则新 high/low 会画出主区。
+    markRepaintChart(reset: true);
+    markRepaintCross();
+    markRepaintDraw();
   }
 
   void _onComputed() {
-    markRepaintAll();
+    // 同 [_onCandlesMerged]。
+    markRepaintChart(reset: true);
+    markRepaintCross();
+    markRepaintDraw();
   }
 
   /// 启动流水线并处理挂载前暂存的数据.

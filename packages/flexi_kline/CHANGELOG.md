@@ -1,4 +1,5 @@
 ## 2.6.0
+* Fix the latest candle painting outside the main chart when a pushed update exceeds the visible price range: the visible min/max is now recomputed after each data merge.
 * Fix `syncFlexiKlineConfig` hiding `autoActivate` indicators that are not in the config `children`/`sub`; sync now matches `mountIndicators`.
 * Ignore `startDraw` and `onDrawConfirm` when the kline data is empty, so no draw tool can be entered or confirmed with no data to anchor to.
 * Export the painting layer: `LabelPainter`, `LabelStyle`, `TextLayoutCache`, `ImagePainter`, `ImageStyle`, `ImageSpan`, `AnchoredBorder`, `BubbleBorder`, `PointBuffer`, `PaintResource` and `AlignmentPlace` (`Alignment.place`); the `extension/render/` drawing API stays available alongside it.

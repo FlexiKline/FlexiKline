@@ -249,4 +249,88 @@ void main() {
       expect(repaintChart.value, greaterThan(repaintBefore));
     });
   });
+
+  /// WS 推送最新价后蜡烛超出可视区: 数据内容变化(非 replace)必须重算可见区间, 即使
+  /// 可见 start/end 不变。修复经数据回调 `markRepaintChart(reset: true)` 跳过早退强制重算。
+  /// 参见 bug 文档 `projects/flexi_kline/bugs/2026-10-10-WS推送最新价蜡烛超出可视区根因与修复`。
+  group('v2.6.0/FlexiKlineController/visible_minmax_on_data_change', () {
+    /// 当前生效区间的上端: 主图区顶边对应的价格。
+    double rangeMax(FlexiKlineController chart) {
+      return chart.dyToCandleValue(chart.mainChartRect.top)!.toDouble();
+    }
+
+    /// 当前生效区间的下端: 主图区底边对应的价格。
+    double rangeMin(FlexiKlineController chart) {
+      return chart.dyToCandleValue(chart.mainChartRect.bottom)!.toDouble();
+    }
+
+    CandleModel candleAt(int timestamp, {required num high, required num low}) => CandleModel(
+      timestamp: timestamp,
+      open: Decimal.fromInt(100),
+      high: Decimal.fromInt(high.toInt()),
+      low: Decimal.fromInt(low.toInt()),
+      close: Decimal.fromInt(100),
+      volume: Decimal.fromInt(1000),
+    );
+
+    Future<ControllerScenario> arrange(WidgetTester tester) async {
+      final scene = ControllerScenario();
+      addTearDown(scene.dispose);
+      await scene.initWithData(
+        _spec,
+        genFlatCandleList(),
+        canvasWidth: 400,
+        candle: TestCandleIndicator(visibleMinMaxFromData: true),
+      );
+      scene.controller.flushPendingKlineData();
+      await tester.pumpAndSettle();
+      await paintChartFrame(tester, scene.controller);
+      return scene;
+    }
+
+    testWidgets('原地更新最新一根 high 超出当前区间: 可见上端随之扩展', (tester) async {
+      final scene = await arrange(tester);
+      final chart = scene.controller;
+
+      // genFlatCandleList: high 110 / low 90, 最新一根 timestamp 为 12000000。
+      expect(rangeMax(chart), closeTo(110, 1e-6), reason: '前置条件: 自动区间上端为蜡烛最高价');
+
+      // 原地更新最新一根(同 timestamp), 推一个远高于当前区间的 high。
+      chart.updateLatestKlineData(_spec, [candleAt(12000000, high: 200, low: 90)]);
+      await tester.pump(const Duration(milliseconds: 500));
+      await paintChartFrame(tester, chart);
+
+      expect(
+        rangeMax(chart),
+        greaterThanOrEqualTo(200 - 1e-6),
+        reason: '数据变了却命中早退 => 新 high 落在区间外, 蜡烛被裁到主区外',
+      );
+    });
+
+    testWidgets('原地更新最新一根 low 跌破当前区间: 可见下端随之扩展', (tester) async {
+      final scene = await arrange(tester);
+      final chart = scene.controller;
+
+      expect(rangeMin(chart), closeTo(90, 1e-6), reason: '前置条件: 自动区间下端为蜡烛最低价');
+
+      chart.updateLatestKlineData(_spec, [candleAt(12000000, high: 110, low: 10)]);
+      await tester.pump(const Duration(milliseconds: 500));
+      await paintChartFrame(tester, chart);
+
+      expect(rangeMin(chart), lessThanOrEqualTo(10 + 1e-6));
+    });
+
+    testWidgets('推入时间更新的新蜡烛: 可见区间覆盖新蜡烛的高低点', (tester) async {
+      final scene = await arrange(tester);
+      final chart = scene.controller;
+
+      // 新 timestamp(晚于 12000000), 走头部插入新蜡烛的路径。
+      chart.updateLatestKlineData(_spec, [candleAt(12060000, high: 180, low: 20)]);
+      await tester.pump(const Duration(milliseconds: 500));
+      await paintChartFrame(tester, chart);
+
+      expect(rangeMax(chart), greaterThanOrEqualTo(180 - 1e-6));
+      expect(rangeMin(chart), lessThanOrEqualTo(20 + 1e-6));
+    });
+  });
 }
