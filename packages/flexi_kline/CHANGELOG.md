@@ -1,4 +1,5 @@
 ## 2.6.0
+* Ignore `startDraw` and `onDrawConfirm` when the kline data is empty, so no draw tool can be entered or confirmed with no data to anchor to.
 * Export the painting layer: `LabelPainter`, `LabelStyle`, `TextLayoutCache`, `ImagePainter`, `ImageStyle`, `ImageSpan`, `AnchoredBorder`, `BubbleBorder`, `PointBuffer`, `PaintResource` and `AlignmentPlace` (`Alignment.place`); the `extension/render/` drawing API stays available alongside it.
 * Add `PaintResourceOwner` to `PaintObject`, `DrawObject` and `KlineBindingBase`: all three dispose resources registered with `own()` on `dispose`, and only `PaintObject` also resets them on an indicator update, before `didUpdateIndicator` (keepAlive objects leaving the paint tree keep them).
 * Assert in `PaintResourceOwner.own` once the owner is disposed: a resource registered then would never be released.

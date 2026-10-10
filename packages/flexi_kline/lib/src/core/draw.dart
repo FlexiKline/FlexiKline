@@ -180,7 +180,8 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
   /// 1. 重置状态为Drawing
   /// 2. 初始化第一个Point的位置为[mainRect]中心
   void startDraw(IDrawType type, {bool? isInitPointer}) {
-    if (!isDrawVisible) return;
+    // 与 cross 入口同口径用 isEmpty: canPaintChart 依赖 start/end, 布局前可能短暂为 false。
+    if (!isDrawVisible || klineData.isEmpty) return;
 
     if (drawState.object?.type == type) {
       // 再点同一个工具 = 收起。不收尾的话半成品会带着旧指针被丢弃。
@@ -234,6 +235,9 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
 
   /// 确认动作.
   void onDrawConfirm(Offset position) {
+    // 同 symbol 切换不会 exitDraw, 数据清空后再确认会换算出错位坐标。
+    if (klineData.isEmpty) return;
+
     final object = drawState.object;
     if (object == null) return;
 
