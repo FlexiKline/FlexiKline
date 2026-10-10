@@ -679,12 +679,20 @@ final class IndicatorPaintObjectManager with FlexiLog {
 
     return (
       // candle 由 mountIndicators 直接挂载，来自旧版持久化的配置可能不含它，
-      // 不排除会把它判为待隐藏。
-      mainToHide: currentMain.difference(targetMain)..remove(candleIndicatorKey),
+      // 不排除会把它判为待隐藏。autoActivate 指标同理：mount 时激活，但不在 children 里。
+      mainToHide: currentMain.difference(targetMain)
+        ..remove(candleIndicatorKey)
+        ..removeWhere(_isAutoActivated),
       mainToShow: targetMain.difference(currentMain),
-      subToHide: currentSub.difference(targetSub),
+      subToHide: currentSub.difference(targetSub)..removeWhere(_isAutoActivated),
       subToShow: targetSub.difference(currentSub),
     );
+  }
+
+  /// 读声明注册表（与 [mountIndicators] 同源），未注册的 key 视为非 autoActivate。
+  bool _isAutoActivated(IIndicatorKey key) {
+    final indicator = _mainIndicatorRegistry[key] ?? _subIndicatorRegistry[key];
+    return indicator?.autoActivate ?? false;
   }
 
   /// K 线 spec.key 变化时，通知 attached 树对象与 detached keepAlive 常驻对象（去重）。

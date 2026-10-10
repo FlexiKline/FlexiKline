@@ -221,4 +221,138 @@ void main() {
       expect(subActivated(m), equals(<IIndicatorKey>{keyA}));
     });
   });
+
+  group('autoActivate/sync 与 mount 同口径', () {
+    // 回归：sync 只看 children/sub，而 mount 激活 children ∪ autoActivate，
+    // 导致仅靠 autoActivate 入树的指标被 sync 误判为待隐藏。
+    test('主区 autoActivate 指标不在 children → sync 不把它判为待隐藏', () {
+      final ctx = FakePaintContext();
+      const key = DirectIndicatorKey('auto_main');
+      // children 为空：该 key 仅靠 autoActivate 入树。
+      final m = build();
+
+      m.mountIndicators(
+        candle: TestCandleIndicator(),
+        time: TestTimeIndicator(),
+        mainIndicators: [TestDirectIndicator(key: key, autoActivate: true)],
+        subIndicators: const [],
+        context: ctx,
+      );
+      expect(mainActivated(m), contains(key));
+
+      final diff = m.syncFlexiKlineConfig();
+
+      expect(diff.mainToHide, isNot(contains(key)));
+      expect(mainActivated(m), contains(key));
+    });
+
+    test('副区 autoActivate 指标不在 sub → sync 不把它判为待隐藏', () {
+      final ctx = FakePaintContext();
+      const key = ExternalIndicatorKey('auto_sub');
+      final m = build();
+
+      m.mountIndicators(
+        candle: TestCandleIndicator(),
+        time: TestTimeIndicator(),
+        mainIndicators: const [],
+        subIndicators: [TestExternalIndicator(key: key, autoActivate: true)],
+        context: ctx,
+      );
+      expect(subActivated(m), contains(key));
+
+      final diff = m.syncFlexiKlineConfig();
+
+      expect(diff.subToHide, isNot(contains(key)));
+      expect(subActivated(m), contains(key));
+    });
+
+    test('非 autoActivate 的持久化指标从 children 移除 → sync 仍判为待隐藏', () {
+      final ctx = FakePaintContext();
+      const key = DirectIndicatorKey('persist_only');
+      // 初始 children 含该 key，但 autoActivate:false。
+      final m = build(mainChildren: {key});
+
+      m.mountIndicators(
+        candle: TestCandleIndicator(),
+        time: TestTimeIndicator(),
+        mainIndicators: [TestDirectIndicator(key: key, autoActivate: false)],
+        subIndicators: const [],
+        context: ctx,
+      );
+      expect(mainActivated(m), contains(key));
+
+      // 构造一份 children 不含该 key 的新配置来 sync（模拟用户隐藏后另一侧追平）。
+      final current = m.flexiKlineConfig;
+      final next = FlexiKlineConfig(
+        grid: current.grid,
+        setting: current.setting,
+        gesture: current.gesture,
+        cross: current.cross,
+        draw: current.draw,
+        mainIndicator: current.mainIndicator.copyWith(children: <IIndicatorKey>{}),
+        sub: current.sub,
+      );
+      final diff = m.syncFlexiKlineConfig(next);
+
+      // 非 autoActivate 不被豁免，照常待隐藏。
+      expect(diff.mainToHide, contains(key));
+    });
+
+    test('非 autoActivate 指标经 add 激活后 → sync 同一份配置不隐藏（主/副区）', () {
+      final ctx = FakePaintContext();
+      const mainKey = DirectIndicatorKey('manual_main');
+      const subKey = ExternalIndicatorKey('manual_sub');
+      final m = build();
+
+      m.mountIndicators(
+        candle: TestCandleIndicator(),
+        time: TestTimeIndicator(),
+        mainIndicators: [TestDirectIndicator(key: mainKey, autoActivate: false)],
+        subIndicators: [TestExternalIndicator(key: subKey, autoActivate: false)],
+        context: ctx,
+      );
+      // 仅声明、未激活。
+      expect(mainActivated(m), isNot(contains(mainKey)));
+      expect(subActivated(m), isNot(contains(subKey)));
+
+      // 手动激活会把 key 写进与配置共享的 children / sub。
+      m.addMainPaintObject(mainKey, ctx);
+      m.addSubPaintObject(subKey, ctx);
+      expect(mainActivated(m), contains(mainKey));
+      expect(subActivated(m), contains(subKey));
+
+      final diff = m.syncFlexiKlineConfig(m.flexiKlineConfig);
+
+      expect(diff.mainToHide, isNot(contains(mainKey)));
+      expect(diff.subToHide, isNot(contains(subKey)));
+      expect(mainActivated(m), contains(mainKey));
+      expect(subActivated(m), contains(subKey));
+    });
+
+    test('配置 children 含未注册 key（如横屏独有指标回到竖屏）→ 忽略，不 show 也不 hide，key 保留', () {
+      final ctx = FakePaintContext();
+      const unregistered = DirectIndicatorKey('landscape_only');
+      final m = build(mainChildren: {unregistered}, subKeys: {const ExternalIndicatorKey('landscape_sub')});
+
+      // 竖屏侧未注册该 key：mount 跳过并告警，不入树。
+      m.mountIndicators(
+        candle: TestCandleIndicator(),
+        time: TestTimeIndicator(),
+        mainIndicators: const [],
+        subIndicators: const [],
+        context: ctx,
+      );
+      expect(mainActivated(m), isEmpty);
+      expect(subActivated(m), isEmpty);
+
+      final diff = m.syncFlexiKlineConfig(m.flexiKlineConfig);
+
+      expect(diff.mainToShow, isEmpty);
+      expect(diff.mainToHide, isEmpty);
+      expect(diff.subToShow, isEmpty);
+      expect(diff.subToHide, isEmpty);
+      // 未注册 key 不被清理：共享配置回到横屏侧时仍能恢复。
+      expect(m.flexiKlineConfig.mainIndicator.children, contains(unregistered));
+    });
+  });
 }

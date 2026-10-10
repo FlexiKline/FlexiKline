@@ -45,6 +45,8 @@ abstract class Indicator<K extends IIndicatorKey> {
   /// 是否在首次声明或从 false 变为 true 时自动激活。
   ///
   /// 该属性只触发自动 show；变为 false 不会自动 hide。
+  ///
+  /// 不受持久化集合（`children` / `sub`）管理：`syncFlexiKlineConfig` 不会隐藏它。
   final bool autoActivate;
 
   final PaintMode paintMode;
