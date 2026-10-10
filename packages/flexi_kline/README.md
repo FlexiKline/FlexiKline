@@ -299,6 +299,33 @@ class VolumePaintObject extends DirectPaintObject<VolumeIndicator> {
 }
 ```
 
+文字旁的小图标（如最后价箭头）用 `ShapeImage`：子类只实现 `draw`，按颜色缓存位图与释放由父类负责，`span(color)` 排进标签。内置 `TriangleImage`、`ChevronImage`、`DiamondImage`、`SquareImage`、`CircleImage`、`PlusImage`、`MinusImage`、`CrossImage`、`StarImage`、`BellImage`；其他图形自行继承（子类须为 `final` 或 `base`），可复用父类的 `roundedPolygon`（凸多边形倒圆角）与 `strokePaint`（圆头描边画笔）。尺寸跟随内容或要对准锚点的外形（气泡、订单标记的尖角）用 `ShapeBorder`（如 `BubbleBorder`），不用图片。
+
+```dart
+final class HexagonImage extends ShapeImage {
+  HexagonImage(super.size);
+
+  @override
+  void draw(Canvas canvas, Size size, Color color) {
+    final (w, h) = (size.width, size.height);
+    // 顶点须顺时针。
+    final vertices = [
+      Offset(w / 4, 0),
+      Offset(w * 3 / 4, 0),
+      Offset(w, h / 2),
+      Offset(w * 3 / 4, h),
+      Offset(w / 4, h),
+      Offset(0, h / 2),
+    ];
+    canvas.drawPath(roundedPolygon(vertices, 0.5), Paint()..color = color);
+  }
+}
+
+// 替换最后价箭头: 覆写 CandlePaintObject.createOffViewPriceArrow。
+@override
+ShapeImage createOffViewPriceArrow() => ChevronImage(const Size(5, 6));
+```
+
 ### 交互入口
 
 默认全部为空操作，按需覆写。点击与拖动按 `zIndex` 倒序询问，视觉最上层的对象优先作答。

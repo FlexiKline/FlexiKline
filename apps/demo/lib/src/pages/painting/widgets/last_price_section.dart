@@ -1,16 +1,13 @@
-import 'dart:ui' as ui;
-
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart';
 
 import '../../../config/my_kline_config.dart';
 import '../../../config/my_kline_indicator_config.dart';
-import 'demo_image.dart';
 import 'section.dart';
 
 /// 最后价标签(最新蜡烛滚出视区时): 断开的虚线 + 价格 + 箭头。
 ///
-/// 样式取自 [CandleIndicator.offViewPriceMark] 的配置(demo K 线页同一份), 箭头用 [ImageSpan] 代替字符 '▸'。
+/// 样式取自 [CandleIndicator.offViewPriceMark] 的配置(demo K 线页同一份), 箭头同 CandlePaintObject 默认的 [TriangleImage]。
 class LastPriceSection extends StatelessWidget {
   const LastPriceSection(this.configuration, this.indicatorConfig, {super.key});
 
@@ -39,8 +36,8 @@ class _LastPricePainter extends SectionPainter {
   late final _labels = [for (final _ in _styles) own(LabelPainter())];
   late final _names = own(LabelPainter(capacity: 3));
 
-  /// 箭头与文字同色, 按颜色各生成一张。
-  final Map<Color, ui.Image> _arrows = {};
+  /// 箭头与文字同色; 各样式颜色不同, 各持一份(ShapeImage 只缓存一种颜色)。
+  late final _arrows = [for (final _ in _styles) own(TriangleImage(const Size(5, 6)))];
 
   static const _price = '1234.56';
   static const _nameConfig = TextAreaConfig(style: TextStyle(fontSize: 10));
@@ -77,27 +74,18 @@ class _LastPricePainter extends SectionPainter {
   ];
 
   @override
-  void dispose() {
-    for (final image in _arrows.values) {
-      image.dispose();
-    }
-    super.dispose();
-  }
-
-  @override
   void paint(Canvas canvas, Size size) {
     final rowHeight = size.height / _styles.length;
     for (final (i, style) in _styles.indexed) {
       final y = rowHeight * (i + 0.5);
       final labelStyle = style.resolve(theme, theme.longColor);
-      final arrow = _arrows.putIfAbsent(labelStyle.text.color!, () => arrowImage(labelStyle.text.color!));
       final label = _labels[i].paint(
         canvas,
         _price,
         build: () => TextSpan(
           children: [
             const TextSpan(text: '$_price '),
-            ImageSpan(arrow, const Size(7, 7)),
+            _arrows[i].span(labelStyle.text.color!),
           ],
         ),
         style: labelStyle,

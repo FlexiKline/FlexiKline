@@ -20,7 +20,7 @@
 library;
 
 import 'dart:typed_data';
-import 'dart:ui' show Paragraph, PointMode;
+import 'dart:ui' show Image, Paragraph, PointMode;
 
 import 'package:flexi_formatter/date_time.dart' show TimeUnit;
 import 'package:flexi_kline/flexi_kline.dart';
@@ -30,6 +30,9 @@ import 'package:flutter_test/flutter_test.dart';
 import '../support/support.dart';
 
 const _spec = KlineSpec(symbol: 'CANDLE-LABEL', interval: FlexiTimeInterval(1, TimeUnit.minute));
+
+Image _arrowOf(RecordingCanvas canvas) =>
+    canvas.invocations.singleWhere((i) => i.memberName == #drawImageRect).positionalArguments[0] as Image;
 
 List<Paragraph> _paragraphs(RecordingCanvas canvas) => [
   for (final i in canvas.invocations)
@@ -59,11 +62,67 @@ class _Candle extends CandleIndicator {
   CandlePaintObject createPaintObject() => object = CandlePaintObject();
 }
 
+/// 覆写最后价内容, 记下收到的价格与颜色。
+class _CustomSpanCandle extends _Candle {
+  final calls = <(String, Color)>[];
+
+  @override
+  CandlePaintObject createPaintObject() => object = _CustomSpanObject(calls);
+}
+
+class _CustomSpanObject extends CandlePaintObject {
+  _CustomSpanObject(this.calls);
+
+  final List<(String, Color)> calls;
+
+  @override
+  InlineSpan buildOffViewPriceSpan(String price, Color color) {
+    calls.add((price, color));
+    return TextSpan(text: 'custom $price');
+  }
+}
+
+/// 只换箭头图形, 内容仍走默认的 buildOffViewPriceSpan。
+class _CustomArrowCandle extends _Candle {
+  @override
+  CandlePaintObject createPaintObject() => object = _CustomArrowObject();
+}
+
+final class _SquareImage extends ShapeImage {
+  _SquareImage() : super(const Size(4, 4));
+
+  @override
+  void draw(Canvas canvas, Size size, Color color) => canvas.drawRect(Offset.zero & size, Paint()..color = color);
+}
+
+class _CustomArrowObject extends CandlePaintObject {
+  @override
+  ShapeImage createOffViewPriceArrow() => _SquareImage();
+}
+
+/// 最后价文字色可在测试中途改变的主题, 模拟主题切换。
+class _SwitchableTheme extends FakeFlexiKlineTheme {
+  Color lastColor = const Color(0xFF5F5F5F);
+
+  @override
+  Color get lastPriceColor => lastColor;
+}
+
+class _SwitchableConfiguration extends FakeFlexiKlineConfiguration {
+  @override
+  final _SwitchableTheme theme = _SwitchableTheme();
+}
+
 void main() {
   late FlexiKlineController chart;
 
-  Future<CandlePaintObject> mount(WidgetTester tester, _Candle candle, {List<CandleModel>? candles}) async {
-    chart = FlexiKlineController(configuration: FakeFlexiKlineConfiguration());
+  Future<CandlePaintObject> mount(
+    WidgetTester tester,
+    _Candle candle, {
+    List<CandleModel>? candles,
+    FakeFlexiKlineConfiguration? configuration,
+  }) async {
+    chart = FlexiKlineController(configuration: configuration ?? FakeFlexiKlineConfiguration());
     addTearDown(chart.dispose);
     chart.switchKlineData(_spec);
     chart.replaceKlineData(_spec, candles ?? _alternating());
@@ -109,6 +168,69 @@ void main() {
       expect(candle.handleTap(hit.topLeft.translate(-margin + 1, -margin + 1)), isTrue, reason: 'hitTestMargin 内');
       expect(candle.handleTap(hit.topLeft.translate(-margin - 1, 0)), isFalse);
       expect(candle.handleTap(Offset(hit.left, hit.bottom + margin + 1)), isFalse);
+    });
+
+    testWidgets('箭头画成默认三角图片, 落在价格文字右侧、标签内', (tester) async {
+      final candle = await mount(tester, _Candle());
+      await paint(tester);
+      final canvas = await paint(tester);
+
+      final arrow = canvas.imageDstRects.single;
+      expect(arrow.size, const Size(5, 6));
+      final label = candle.offViewPriceLabelRect!;
+      expect(label.contains(arrow.topLeft) && label.contains(arrow.bottomRight), isTrue);
+      expect(arrow.left, greaterThan(label.left + label.width / 2), reason: '箭头在文字之后');
+    });
+
+    testWidgets('同色时跨帧复用同一张图, 主题换色后重建并释放旧图', (tester) async {
+      final configuration = _SwitchableConfiguration();
+      await mount(tester, _Candle(), configuration: configuration);
+      await paint(tester);
+
+      final first = _arrowOf(await paint(tester));
+      expect(_arrowOf(await paint(tester)), same(first));
+
+      // close 与 precision 不变, 只有文字色变: 箭头须随之重建。
+      configuration.theme.lastColor = const Color(0xFFFF0000);
+      final second = _arrowOf(await paint(tester));
+      expect(second, isNot(same(first)));
+      expect(first.debugDisposed, isTrue);
+      expect(second.debugDisposed, isFalse);
+    });
+
+    testWidgets('PaintObject 销毁时释放箭头图', (tester) async {
+      final candle = await mount(tester, _Candle());
+      await paint(tester);
+      final image = _arrowOf(await paint(tester));
+      expect(image.debugDisposed, isFalse);
+
+      candle.dispose();
+      expect(image.debugDisposed, isTrue);
+    });
+
+    testWidgets('子类覆写 createOffViewPriceArrow 换箭头图形, 并随 PaintObject 释放', (tester) async {
+      final candle = await mount(tester, _CustomArrowCandle());
+      await paint(tester);
+      final canvas = await paint(tester);
+
+      expect(canvas.imageDstRects.single.size, const Size(4, 4));
+      final image = _arrowOf(canvas);
+      candle.dispose();
+      expect(image.debugDisposed, isTrue, reason: '覆写的资源也经 own() 登记');
+    });
+
+    testWidgets('子类覆写 buildOffViewPriceSpan 替换最后价内容', (tester) async {
+      final indicator = _CustomSpanCandle();
+      final candle = await mount(tester, indicator);
+      await paint(tester);
+      final canvas = await paint(tester);
+
+      expect(indicator.calls, hasLength(1), reason: '第二帧 (close, precision) 未变, 命中缓存不重建');
+      final (price, color) = indicator.calls.single;
+      expect(price, isNotEmpty);
+      expect(color, FakeFlexiKlineTheme().lastPriceColor);
+      expect(canvas.imageDstRects, isEmpty, reason: '覆写后不再画默认箭头');
+      expect(candle.offViewPriceLabelRect, isNotNull);
     });
 
     testWidgets('第二帧价格不变时复用 Paragraph', (tester) async {

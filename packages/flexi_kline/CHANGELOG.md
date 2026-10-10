@@ -21,6 +21,8 @@
 * Add `PaintCandleChartMixin.addCandleBar` and `flushCandleBars` for batched candle drawing; `paintCandleBar` stays available.
 * Require `PaintResourceOwner` on `DrawObjectMixin` (`on DrawStateObject, PaintResourceOwner`) so the draw tool ticks can own their painters (Breaking Changes).
 * Fix the last price tap area sitting half a label lower than the painted label: `CandlePaintObject.offViewPriceLabelRect` is now the painted rect and `offViewPriceLabelSize` a read-only getter (Breaking Changes).
+* Add `ShapeImage`, a color-cached drawn icon for inline `ImageSpan`s: subclasses implement only `draw` and may reuse `roundedPolygon` / `strokePaint`; built-in `TriangleImage` and `ChevronImage` (any `direction`), `DiamondImage`, `SquareImage`, `CircleImage`, `PlusImage`, `MinusImage`, `CrossImage`, `StarImage` and `BellImage`.
+* Replace the off-view latest price arrow glyph `▸` with a `TriangleImage`, independent of the platform font; add `CandlePaintObject.createOffViewPriceArrow` to swap the arrow and `buildOffViewPriceSpan` to replace the label content.
 
 ## 2.5.6
 * Fix `FormatException: NaN is not a valid format` thrown from `paintGridLines` after a few seconds of continuous panning: a `Decimal`-backed range from a combine child left `ComputeMode.fast` holding a `Decimal` endpoint, whose scale then grew every frame until `toDouble()` returned NaN.

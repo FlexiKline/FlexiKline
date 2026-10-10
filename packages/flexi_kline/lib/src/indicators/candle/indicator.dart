@@ -231,13 +231,37 @@ class CandleIndicator extends CandleBaseIndicator {
 
 class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject<T>
     with PaintYAxisTicksOnCrossMixin, PaintCandleChartMixin {
+  FlexiNum? _maxHigh, _minLow;
+
+  /// 最高价与最低价共用: 默认配置下两者是同一个 const 实例, 样式一致, 两个 key 都留在池里。
+  late final _extremePriceLabels = own(LabelPainter(capacity: 2));
+
+  late final _inViewPriceLabel = own(LabelPainter());
+  late final _countdownLabel = own(LabelPainter());
+  late final _offViewPriceLabel = own(LabelPainter());
+
+  late final _offViewArrow = own(createOffViewPriceArrow());
+
+  /// [_resolveLatestStyles] 的单项记忆: 输入与上次相同(样式按 identical)时直接返回上次的结果。
+  ({LabelStyle latestBase, LabelStyle countdownBase, bool withCountdown, bool candleColor, _LatestStyles styles})?
+  _latestStyles;
+
+  /// 最新价标签相对屏幕右侧的负偏移量。
+  @protected
+  double latestPriceLabelOffsetX = 0.0;
+
+  /// 最后价标签本帧绘出的矩形, 用于点击命中; 未画最后价时为 null。
+  @protected
+  Rect? offViewPriceLabelRect;
+
+  /// 最后价标签本帧的大小。
+  Size? get offViewPriceLabelSize => offViewPriceLabelRect?.size;
+
   @override
   Color get longColor => indicator.longColor ?? theme.longColor;
 
   @override
   Color get shortColor => indicator.shortColor ?? theme.shortColor;
-
-  FlexiNum? _maxHigh, _minLow;
 
   @override
   bool get hideMainIndicatorsInLineChartMode => indicator.hideMainIndicatorsInLineChartMode;
@@ -317,13 +341,13 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
 
   @override
   void paintOverlay(Canvas canvas, Size size) {
-    /// 绘制最新价刻度线与价钱标记
+    // 绘制最新价刻度线与价钱标记
     paintLatestPriceMarkers(canvas, size);
   }
 
   @override
   void paintCross(Canvas canvas, Offset offset, {FlexiCandleModel? model}) {
-    /// 绘制Cross Y轴价钱刻度
+    // 绘制Cross Y轴价钱刻度
     paintYAxisTicksOnCross(
       canvas,
       offset,
@@ -331,7 +355,17 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
     );
   }
 
-  // 格式化Y轴价钱刻度值.
+  @override
+  Size? paintTips(
+    Canvas canvas, {
+    FlexiCandleModel? model,
+    Offset? offset,
+    Rect? tipsRect,
+  }) {
+    return null;
+  }
+
+  /// 格式化 Y 轴价格刻度值。
   @override
   String formatTicksValue(FlexiNum value, {required int precision}) {
     return formatPrice(
@@ -342,7 +376,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
     );
   }
 
-  // onCross时, 格式化Y轴上的标记值.
+  /// Cross 时格式化 Y 轴上的标记值。
   @override
   String formatTicksValueOnCross(FlexiNum value, {required int precision}) {
     return formatPrice(
@@ -351,6 +385,32 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
       cutInvalidZero: false,
     );
   }
+
+  @override
+  bool handleTap(Offset position) {
+    final lastTxtRect = offViewPriceLabelRect?.inflate(indicator.offViewPriceMark.hitTestMargin);
+    if (lastTxtRect != null && lastTxtRect.include(position)) {
+      // 命中最后价, 回到蜡烛图初始位置。
+      context.requestMoveToInitialPosition();
+      return true;
+    }
+    return false;
+  }
+
+  /// 最后价标签末尾的箭头, 首次使用时创建一次并随本对象释放; 子类覆写可换成其他 [ShapeImage]。
+  @protected
+  ShapeImage createOffViewPriceArrow() => TriangleImage(const Size(5, 6));
+
+  /// 最后价标签内容: 价格文本加 [createOffViewPriceArrow] 的箭头。
+  ///
+  /// 仅在缓存未命中时调用, 结果须只由 (close, precision) 与 [color] 决定; 子类覆写可替换整个内容。
+  @protected
+  InlineSpan buildOffViewPriceSpan(String price, Color color) => TextSpan(
+    children: [
+      TextSpan(text: '$price '),
+      _offViewArrow.span(color),
+    ],
+  );
 
   /// 绘制蜡烛柱状图
   void paintCandleBars(Canvas canvas, Size size, ChartBarStyle style) {
@@ -414,9 +474,6 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
     }
   }
 
-  /// 最高价与最低价共用: 默认配置下两者是同一个 const 实例, 样式一致, 两个 key 都留在池里。
-  late final _extremePriceLabels = own(LabelPainter(capacity: 2));
-
   /// 绘制蜡烛图上最大最小值价钱标记.
   void paintPriceMark(
     Canvas canvas,
@@ -446,16 +503,158 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
     );
   }
 
-  late final _inViewPriceLabel = own(LabelPainter());
-  late final _countdownLabel = own(LabelPainter());
-  late final _offViewPriceLabel = own(LabelPainter());
+  /// 绘制最新价刻度线与价钱标记
+  /// 1. 价钱标记始终展示在画板最右边.
+  /// 2. 最新价向右移出屏幕后, 刻度线横穿整屏.
+  ///    且展示在指定价钱区间内, 如超出边界, 则停靠在最高最低线上.
+  /// 3. 最新价向左移动后, 刻度线根据最新价蜡烛线平行移动.
+  void paintLatestPriceMarkers(Canvas canvas, Size size) {
+    if (!indicator.inViewPriceMark.show && !indicator.offViewPriceMark.show) return;
+    final model = klineData.latest;
+    if (model == null) {
+      logd('paintLatestPriceMarkers > no data!');
+      return;
+    }
 
-  /// [_resolveLatestStyles] 的单项记忆: 输入与上次相同(样式按 identical)时直接返回上次的结果。
-  ({LabelStyle latestBase, LabelStyle countdownBase, bool withCountdown, bool candleColor, _LatestStyles styles})?
-  _latestStyles;
+    // 计算最新价YAxis位置.
+    double dy = clampDyInChart(valueToDy(model.close));
 
-  /// 最新价与倒计时的派生样式(随状态变的形状): 有倒计时时最新价只留上圆角, 倒计时取最新价的上圆角
-  /// 作下圆角; 用涨跌色作背景时边框透明。倒计时不用 padding, 改由行高撑到 areaHeight - 1。
+    // 计算最新价XAxis位置.
+    final rdx = chartRect.right;
+    double ldx = 0; // 计算最新价刻度线lineTo参数X轴的dx值. 默认0: 代表橫穿整个Canvas.
+
+    if (paintDxOffset < latestPriceLabelOffsetX) {
+      offViewPriceLabelRect = null;
+      // 绘制最新价和倒计时
+      final MarkConfig inViewPriceMark = indicator.inViewPriceMark;
+      if (!inViewPriceMark.show) return;
+
+      ldx = startCandleDx;
+
+      final useCandleColor = indicator.useCandleColorForLatestPriceBackground;
+      final updownColor = model.close >= model.open ? longColor : shortColor;
+
+      final textConfig = indicator.inViewPriceMark.text;
+
+      final halfHeight = textConfig.areaHeight / 2;
+      // 修正dy位置
+      dy = dy.clamp(
+        drawableRect.top + halfHeight,
+        drawableRect.bottom - halfHeight,
+      );
+
+      // 绘制首根蜡烛到rdx的刻度线.
+      final latestPath = Path();
+      latestPath.moveTo(rdx, dy);
+      latestPath.lineTo(ldx, dy);
+      canvas.drawLineByConfig(
+        latestPath,
+        indicator.inViewPriceMark.line,
+        themeColor: useCandleColor ? updownColor : theme.markLineColor,
+      );
+
+      // 倒计时: 时间周期 > 1 秒且下次更新在未来时显示; 文本由剩余整秒数唯一决定, 以它作 key。
+      DateTime? next;
+      final now = DateTime.now();
+      if (indicator.showCountdown && klineData.interval.milliseconds > Duration.millisecondsPerSecond) {
+        next = model.nextUpdateDateTime(klineData.interval);
+        if (next != null && next.millisecondsSinceEpoch <= now.millisecondsSinceEpoch) next = null;
+      }
+
+      final styles = _resolveLatestStyles(
+        textConfig.toLabelStyle(
+          textColor: useCandleColor ? white : theme.textColor,
+          backgroundColor: useCandleColor ? updownColor : theme.latestPriceBg,
+          borderColor: useCandleColor ? null : theme.markLineColor,
+        ),
+        indicator.countdown.toLabelStyle(textColor: theme.textColor, backgroundColor: theme.countdownBg),
+        withCountdown: next != null,
+        candleColor: useCandleColor,
+      );
+
+      final precision = klineData.precision;
+      final latest = _inViewPriceLabel.paint(
+        canvas,
+        (model.close, precision),
+        build: () => formatPrice(model.close.toDecimal(), precision: precision, cutInvalidZero: false),
+        style: styles.latest,
+        anchor: Offset(rdx - inViewPriceMark.spacing, dy),
+        align: Alignment.centerRight,
+        bounds: drawableRect,
+      );
+      latestPriceLabelOffsetX = -(latest.width + inViewPriceMark.spacing);
+
+      if (next != null) {
+        final countdownEnd = next;
+        // 与最新价同宽: minWidth 撑开, bounds 的宽度封顶。纵向不夹取: 最新价贴底时倒计时溢出到时间轴上。
+        _countdownLabel.paint(
+          canvas,
+          countdownEnd.difference(now).inSeconds,
+          build: () => countdownEnd.diffAsCountdown(now),
+          style: styles.countdown,
+          anchor: latest.bottomRight,
+          align: Alignment.topRight,
+          bounds: Rect.fromLTRB(latest.left, latest.bottom, latest.right, double.infinity),
+          minWidth: latest.width,
+        );
+      }
+    } else {
+      // 绘制最后价
+      final offViewPriceMark = indicator.offViewPriceMark;
+      if (!offViewPriceMark.show) return;
+
+      ldx = 0;
+
+      final halfHeight = offViewPriceMark.text.areaHeight / 2;
+      // 修正dy位置
+      dy = dy.clamp(
+        drawableRect.top + halfHeight,
+        drawableRect.bottom - halfHeight,
+      );
+
+      // 绘制横穿画板的最后价刻度线.
+      final lastPath = Path();
+      final lastSize = offViewPriceLabelSize;
+      if (lastSize != null) {
+        final lastTextAreaRight = rdx + latestPriceLabelOffsetX - offViewPriceMark.spacing;
+        lastPath.moveTo(rdx, dy);
+        lastPath.lineTo(lastTextAreaRight, dy);
+        lastPath.moveTo(lastTextAreaRight - lastSize.width, dy);
+        lastPath.lineTo(ldx, dy);
+      } else {
+        lastPath.moveTo(rdx, dy);
+        lastPath.lineTo(ldx, dy);
+      }
+      canvas.drawLineByConfig(
+        lastPath,
+        offViewPriceMark.line,
+        themeColor: theme.markLineColor,
+      );
+
+      // 绘制最后价标记
+      final precision = klineData.precision;
+      final style = offViewPriceMark.text.toLabelStyle(
+        textColor: theme.lastPriceColor,
+        backgroundColor: theme.lastPriceBg,
+      );
+      offViewPriceLabelRect = _offViewPriceLabel.paint(
+        canvas,
+        (model.close, precision),
+        // 箭头颜色取自 style: 颜色一变 style.text 随之变, 排版缓存被丢弃后 build 会重跑。
+        build: () => buildOffViewPriceSpan(
+          formatPrice(model.close.toDecimal(), precision: precision, cutInvalidZero: false),
+          style.text.color ?? theme.lastPriceColor,
+        ),
+        style: style,
+        anchor: Offset(rdx + latestPriceLabelOffsetX - offViewPriceMark.spacing, dy),
+        align: Alignment.centerRight,
+        bounds: drawableRect,
+      );
+    }
+  }
+
+  /// 最新价与倒计时的派生样式: 有倒计时时最新价只留上圆角, 倒计时以其上圆角作下圆角;
+  /// 涨跌色背景时边框透明。倒计时不用 padding, 改由行高撑到 areaHeight - 1。
   _LatestStyles _resolveLatestStyles(
     LabelStyle latestBase,
     LabelStyle countdownBase, {
@@ -523,162 +722,6 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
     return styles;
   }
 
-  /// 缓存latest文本相对于屏幕右侧的负偏移量
-  @protected
-  double latestPriceLabelOffsetX = 0.0;
-
-  /// 最后价标签本帧绘出的矩形, 用于后续点击事件命中测试; 未画最后价时为 null.
-  @protected
-  Rect? offViewPriceLabelRect;
-
-  /// 缓存last文本所占大小
-  Size? get offViewPriceLabelSize => offViewPriceLabelRect?.size;
-
-  /// 绘制最新价刻度线与价钱标记
-  /// 1. 价钱标记始终展示在画板最右边.
-  /// 2. 最新价向右移出屏幕后, 刻度线横穿整屏.
-  ///    且展示在指定价钱区间内, 如超出边界, 则停靠在最高最低线上.
-  /// 3. 最新价向左移动后, 刻度线根据最新价蜡烛线平行移动.
-  void paintLatestPriceMarkers(Canvas canvas, Size size) {
-    if (!indicator.inViewPriceMark.show && !indicator.offViewPriceMark.show) return;
-    final model = klineData.latest;
-    if (model == null) {
-      logd('paintLatestPriceMarkers > no data!');
-      return;
-    }
-
-    // 计算最新价YAxis位置.
-    double dy = clampDyInChart(valueToDy(model.close));
-
-    // 计算最新价XAxis位置.
-    final rdx = chartRect.right;
-    double ldx = 0; // 计算最新价刻度线lineTo参数X轴的dx值. 默认0: 代表橫穿整个Canvas.
-
-    if (paintDxOffset < latestPriceLabelOffsetX) {
-      offViewPriceLabelRect = null;
-      // 绘制最新价和倒计时
-      final MarkConfig inViewPriceMark = indicator.inViewPriceMark;
-      if (!inViewPriceMark.show) return;
-
-      ldx = startCandleDx;
-
-      final useCandleColor = indicator.useCandleColorForLatestPriceBackground;
-      final updownColor = model.close >= model.open ? longColor : shortColor;
-
-      final textConfig = indicator.inViewPriceMark.text;
-
-      final halfHeight = textConfig.areaHeight / 2;
-      // 修正dy位置
-      dy = dy.clamp(
-        drawableRect.top + halfHeight,
-        drawableRect.bottom - halfHeight,
-      );
-
-      /// 绘制首根蜡烛到rdx的刻度线.
-      final latestPath = Path();
-      latestPath.moveTo(rdx, dy);
-      latestPath.lineTo(ldx, dy);
-      canvas.drawLineByConfig(
-        latestPath,
-        indicator.inViewPriceMark.line,
-        themeColor: useCandleColor ? updownColor : theme.markLineColor,
-      );
-
-      // 倒计时: 时间周期 > 1 秒且下次更新在未来时显示; 文本由剩余整秒数唯一决定, 以它作 key。
-      DateTime? next;
-      final now = DateTime.now();
-      if (indicator.showCountdown && klineData.interval.milliseconds > Duration.millisecondsPerSecond) {
-        next = model.nextUpdateDateTime(klineData.interval);
-        if (next != null && next.millisecondsSinceEpoch <= now.millisecondsSinceEpoch) next = null;
-      }
-
-      final styles = _resolveLatestStyles(
-        textConfig.toLabelStyle(
-          textColor: useCandleColor ? white : theme.textColor,
-          backgroundColor: useCandleColor ? updownColor : theme.latestPriceBg,
-          borderColor: useCandleColor ? null : theme.markLineColor,
-        ),
-        indicator.countdown.toLabelStyle(textColor: theme.textColor, backgroundColor: theme.countdownBg),
-        withCountdown: next != null,
-        candleColor: useCandleColor,
-      );
-
-      final precision = klineData.precision;
-      final latest = _inViewPriceLabel.paint(
-        canvas,
-        (model.close, precision),
-        build: () => formatPrice(model.close.toDecimal(), precision: precision, cutInvalidZero: false),
-        style: styles.latest,
-        anchor: Offset(rdx - inViewPriceMark.spacing, dy),
-        align: Alignment.centerRight,
-        bounds: drawableRect,
-      );
-      latestPriceLabelOffsetX = -(latest.width + inViewPriceMark.spacing);
-
-      if (next != null) {
-        final countdownEnd = next;
-        // 与最新价同宽: minWidth 撑开, bounds 的宽度封顶。纵向不夹取: 最新价贴底时倒计时溢出到时间轴上。
-        _countdownLabel.paint(
-          canvas,
-          countdownEnd.difference(now).inSeconds,
-          build: () => countdownEnd.diffAsCountdown(now),
-          style: styles.countdown,
-          anchor: latest.bottomRight,
-          align: Alignment.topRight,
-          bounds: Rect.fromLTRB(latest.left, latest.bottom, latest.right, double.infinity),
-          minWidth: latest.width,
-        );
-      }
-    } else {
-      /// 绘制最后价
-      final offViewPriceMark = indicator.offViewPriceMark;
-      if (!offViewPriceMark.show) return;
-
-      ldx = 0;
-
-      final halfHeight = offViewPriceMark.text.areaHeight / 2;
-      // 修正dy位置
-      dy = dy.clamp(
-        drawableRect.top + halfHeight,
-        drawableRect.bottom - halfHeight,
-      );
-
-      /// 绘制横穿画板的最后价刻度线.
-      final lastPath = Path();
-      final lastSize = offViewPriceLabelSize;
-      if (lastSize != null) {
-        final lastTextAreaRight = rdx + latestPriceLabelOffsetX - offViewPriceMark.spacing;
-        lastPath.moveTo(rdx, dy);
-        lastPath.lineTo(lastTextAreaRight, dy);
-        lastPath.moveTo(lastTextAreaRight - lastSize.width, dy);
-        lastPath.lineTo(ldx, dy);
-      } else {
-        lastPath.moveTo(rdx, dy);
-        lastPath.lineTo(ldx, dy);
-      }
-      canvas.drawLineByConfig(
-        lastPath,
-        offViewPriceMark.line,
-        themeColor: theme.markLineColor,
-      );
-
-      /// 绘制最后价标记
-      final precision = klineData.precision;
-      offViewPriceLabelRect = _offViewPriceLabel.paint(
-        canvas,
-        (model.close, precision),
-        build: () => '${formatPrice(model.close.toDecimal(), precision: precision, cutInvalidZero: false)} ▸',
-        style: offViewPriceMark.text.toLabelStyle(
-          textColor: theme.lastPriceColor,
-          backgroundColor: theme.lastPriceBg,
-        ),
-        anchor: Offset(rdx + latestPriceLabelOffsetX - offViewPriceMark.spacing, dy),
-        align: Alignment.centerRight,
-        bounds: drawableRect,
-      );
-    }
-  }
-
   /// 绘制最新蜡烛点
   void paintLatestPoint(Canvas canvas, Size size) {
     if (!indicator.showLatestPoint) return;
@@ -705,26 +748,5 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
       themeColor: theme.lineChartColor,
       themeBorderColor: theme.lineChartColor,
     );
-  }
-
-  @override
-  Size? paintTips(
-    Canvas canvas, {
-    FlexiCandleModel? model,
-    Offset? offset,
-    Rect? tipsRect,
-  }) {
-    return null;
-  }
-
-  @override
-  bool handleTap(Offset position) {
-    final lastTxtRect = offViewPriceLabelRect?.inflate(indicator.offViewPriceMark.hitTestMargin);
-    if (lastTxtRect != null && lastTxtRect.include(position)) {
-      // 命中最后价区域, 此时应该移动到蜡烛图初始位置.
-      context.requestMoveToInitialPosition();
-      return true;
-    }
-    return false;
   }
 }

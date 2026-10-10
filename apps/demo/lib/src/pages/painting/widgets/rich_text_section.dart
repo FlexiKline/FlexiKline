@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 import '../../../config/my_kline_config.dart';
 import '../../../config/my_kline_indicator_config.dart';
-import 'demo_image.dart';
 import 'section.dart';
 
 /// 富文本标签: build 返回 InlineSpan; 指标 tips 每段的颜色取自各自的 [TipsConfig]。
@@ -27,7 +26,7 @@ class _RichTextPainter extends SectionPainter {
 
   late final _tips = own(LabelPainter());
   late final _order = own(LabelPainter());
-  final _dot = dotImage(Colors.white);
+  late final _dot = own(CircleImage(const Size(8, 8)));
 
   static const _tipsConfig = [
     TipsConfig(
@@ -50,12 +49,6 @@ class _RichTextPainter extends SectionPainter {
   );
 
   @override
-  void dispose() {
-    _dot.dispose();
-    super.dispose();
-  }
-
-  @override
   void paint(Canvas canvas, Size size) {
     const values = [101.25, 98.6, 95.12];
     _tips.paint(
@@ -76,7 +69,7 @@ class _RichTextPainter extends SectionPainter {
       ('buy', 0.5),
       build: () => TextSpan(
         children: [
-          ImageSpan(_dot, const Size(8, 8)),
+          _dot.span(Colors.white),
           const TextSpan(text: ' Buy 0.5 BTC'),
         ],
       ),

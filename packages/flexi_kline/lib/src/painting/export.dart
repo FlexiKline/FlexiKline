@@ -24,5 +24,6 @@ export 'label_painter.dart';
 export 'label_style.dart';
 export 'paint_resource.dart';
 export 'point_buffer.dart';
+export 'shape_image.dart';
 export 'text_layout_cache.dart';
 export 'tooltip_painter.dart';

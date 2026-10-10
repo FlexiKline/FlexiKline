@@ -7,9 +7,11 @@ import 'widgets/cache_section.dart';
 import 'widgets/image_section.dart';
 import 'widgets/last_price_section.dart';
 import 'widgets/latest_price_section.dart';
+import 'widgets/order_mark_section.dart';
 import 'widgets/placement_section.dart';
 import 'widgets/rich_text_section.dart';
 import 'widgets/section.dart';
+import 'widgets/shape_image_section.dart';
 import 'widgets/shape_section.dart';
 import 'widgets/tooltip_section.dart';
 
@@ -47,10 +49,12 @@ class _PaintingPageState extends State<PaintingPage> {
           RichTextSection(c, i),
           ShapeSection(c, i),
           ImageSection(c, i),
+          ShapeImageSection(c, i),
           BatchSection(c, i),
           TooltipSection(c, i),
           LastPriceSection(c, i),
           LatestPriceSection(c, i),
+          OrderMarkSection(c, i),
         ],
       ),
     );
