@@ -37,6 +37,8 @@ abstract class _$CandleIndicatorCWProxy {
 
   CandleIndicator countdown(TextAreaConfig countdown);
 
+  CandleIndicator dateMark(DateMarkConfig dateMark);
+
   CandleIndicator chartType(FlexiChartType chartType);
 
   CandleIndicator minWidthLineType(FlexiLineChartType? minWidthLineType);
@@ -83,6 +85,7 @@ abstract class _$CandleIndicatorCWProxy {
     bool useCandleColorForLatestPriceBackground,
     bool showCountdown,
     TextAreaConfig countdown,
+    DateMarkConfig dateMark,
     FlexiChartType chartType,
     FlexiLineChartType? minWidthLineType,
     Map<ITimeInterval, FlexiChartType>? intervalChartTypes,
@@ -159,6 +162,9 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
       call(countdown: countdown);
 
   @override
+  CandleIndicator dateMark(DateMarkConfig dateMark) => call(dateMark: dateMark);
+
+  @override
   CandleIndicator chartType(FlexiChartType chartType) =>
       call(chartType: chartType);
 
@@ -223,6 +229,7 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
         const $CopyWithPlaceholder(),
     Object? showCountdown = const $CopyWithPlaceholder(),
     Object? countdown = const $CopyWithPlaceholder(),
+    Object? dateMark = const $CopyWithPlaceholder(),
     Object? chartType = const $CopyWithPlaceholder(),
     Object? minWidthLineType = const $CopyWithPlaceholder(),
     Object? intervalChartTypes = const $CopyWithPlaceholder(),
@@ -304,6 +311,10 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
           ? _value.countdown
           // ignore: cast_nullable_to_non_nullable
           : countdown as TextAreaConfig,
+      dateMark: dateMark == const $CopyWithPlaceholder() || dateMark == null
+          ? _value.dateMark
+          // ignore: cast_nullable_to_non_nullable
+          : dateMark as DateMarkConfig,
       chartType: chartType == const $CopyWithPlaceholder() || chartType == null
           ? _value.chartType
           // ignore: cast_nullable_to_non_nullable
@@ -480,6 +491,9 @@ CandleIndicator _$CandleIndicatorFromJson(
           borderRadius: BorderRadius.all(Radius.circular(2)),
         )
       : TextAreaConfig.fromJson(json['countdown'] as Map<String, dynamic>),
+  dateMark: json['dateMark'] == null
+      ? const DateMarkConfig()
+      : DateMarkConfig.fromJson(json['dateMark'] as Map<String, dynamic>),
   chartType: json['chartType'] == null
       ? FlexiChartType.barSolid
       : const FlexiChartTypeConverter().fromJson(
@@ -543,6 +557,7 @@ Map<String, dynamic> _$CandleIndicatorToJson(CandleIndicator instance) =>
           instance.useCandleColorForLatestPriceBackground,
       'showCountdown': instance.showCountdown,
       'countdown': instance.countdown.toJson(),
+      'dateMark': instance.dateMark.toJson(),
       'chartType': const FlexiChartTypeConverter().toJson(instance.chartType),
       'minWidthLineType':
           _$JsonConverterToJson<Map<String, dynamic>, FlexiLineChartType>(

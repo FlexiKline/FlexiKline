@@ -362,6 +362,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     if (!isMounted || !identical(klineData, data)) return null;
     if (klineData.get(index)?.ts != targetTimestamp) return null;
     dispatchInteractionEvent(FlexiKlineEventType.moveToDate, {'ts': targetTimestamp});
+    candlePaintObject.didMoveToDate(targetTimestamp);
     return index;
   }
 

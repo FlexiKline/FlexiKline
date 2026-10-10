@@ -14,6 +14,8 @@
 
 library;
 
+import 'dart:async';
+
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flexi_formatter/flexi_formatter.dart';
 import 'package:flutter/foundation.dart';

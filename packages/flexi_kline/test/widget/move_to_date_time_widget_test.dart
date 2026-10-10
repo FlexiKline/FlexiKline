@@ -54,6 +54,7 @@ Future<FlexiKlineController> _pumpChart(
   bool withData = true,
   bool? isTouchDevice,
   bool visibleMinMaxFromData = false,
+  TestCandleIndicator? candle,
 }) async {
   final controller = createChartController();
   if (withData) {
@@ -69,7 +70,7 @@ Future<FlexiKlineController> _pumpChart(
           height: 480,
           child: FlexiKlineWidget(
             controller: controller,
-            candle: TestCandleIndicator(visibleMinMaxFromData: visibleMinMaxFromData),
+            candle: candle ?? TestCandleIndicator(visibleMinMaxFromData: visibleMinMaxFromData),
             time: TestTimeIndicator(),
             isTouchDevice: isTouchDevice,
           ),
@@ -608,6 +609,32 @@ void main() {
       expect(await controller.moveToDateTime(_latest.add(_day)), isNull);
       expect(await controller.moveToDateTime(_latest.subtract(_day * 81)), isNull);
       expect(controller.paintDxOffset, before);
+    });
+
+    testWidgets('success notifies the candle with the resolved candle ts', (tester) async {
+      final candle = TestCandleIndicator();
+      final controller = await _pumpChart(tester, candle: candle);
+      addTearDown(() => disposeChart(tester, controller));
+      // 落在缺口里: 通知的是实际移到的蜡烛, 不是输入日期。
+      final target = _latest.subtract(_day * 20).add(const Duration(hours: 12));
+      final expected = _latest.subtract(_day * 21).millisecondsSinceEpoch;
+
+      final index = await _pumpUntilFutureComplete(tester, controller.moveToDateTime(target), 'date mark result');
+      expect(controller.klineData[index!].ts, expected);
+      expect(candle.object!.movedToDates, [expected]);
+    });
+
+    testWidgets('interrupted move does not notify the candle', (tester) async {
+      final candle = TestCandleIndicator();
+      final controller = await _pumpChart(tester, candle: candle);
+      addTearDown(() => disposeChart(tester, controller));
+
+      final dateMove = controller.moveToDateTime(_latest.subtract(_day * 50));
+      await tester.pump(const Duration(milliseconds: 16));
+      controller.requestMoveToInitialPosition();
+
+      expect(await _pumpUntilFutureComplete(tester, dateMove, 'interrupted date mark result'), isNull);
+      expect(candle.object!.movedToDates, isEmpty);
     });
 
     testWidgets('mounted empty chart rejects date movement', (tester) async {

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 export 'cross_config/cross_config.dart';
+export 'date_mark_config/date_mark_config.dart';
 export 'default_config.dart';
 export 'draw_config/draw_config.dart';
 export 'flexi_kline_config/flexi_kline_config.dart';

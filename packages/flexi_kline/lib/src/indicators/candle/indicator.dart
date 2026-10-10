@@ -147,6 +147,9 @@ class CandleIndicator extends CandleBaseIndicator {
       padding: EdgeInsets.all(2),
       borderRadius: BorderRadius.all(Radius.circular(2)),
     ),
+
+    /// 日期气泡, moveToDateTime 完成后指向目标蜡烛
+    this.dateMark = const DateMarkConfig(),
     this.chartType = FlexiChartType.barSolid,
     this.minWidthLineType,
     this.intervalChartTypes = const {},
@@ -183,6 +186,9 @@ class CandleIndicator extends CandleBaseIndicator {
   /// 倒计时, 在latest最新价之下展示
   final bool showCountdown;
   final TextAreaConfig countdown;
+
+  /// 日期气泡, `moveToDateTime` 完成后指向目标蜡烛, 见 [CandlePaintObject.didMoveToDate]。
+  final DateMarkConfig dateMark;
 
   /// 主区蜡烛图表默认类型（包含样式）
   final FlexiChartType chartType;
@@ -246,6 +252,17 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
   ({LabelStyle latestBase, LabelStyle countdownBase, bool withCountdown, bool candleColor, _LatestStyles styles})?
   _latestStyles;
 
+  /// 日期气泡指向的蜡烛 ts, null 不显示; 存 ts 不存 index: 新蜡烛插入 index 0 时下标整体后移。
+  int? _dateMarkTs;
+  Timer? _dateMarkTimer;
+  late final _dateMarkLabel = own(LabelPainter());
+
+  /// [_resolveDateMarkStyle] 的单项记忆: source 按 identical、arrowSize 按值比较, 上下两个方向一并派生。
+  ({LabelStyle source, Size arrowSize, LabelStyle above, LabelStyle below})? _dateMarkStyles;
+
+  /// 日期气泡指向的蜡烛 ts; null 不显示。
+  int? get dateMarkTs => _dateMarkTs;
+
   /// 最新价标签相对屏幕右侧的负偏移量。
   @protected
   double latestPriceLabelOffsetX = 0.0;
@@ -286,6 +303,26 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
 
     // 3. 返回默认图表类型
     return indicator.chartType;
+  }
+
+  @mustCallSuper
+  @override
+  void didChangeDependencies(KlineSpec oldSpec) {
+    super.didChangeDependencies(oldSpec);
+    _hideDateMark();
+  }
+
+  @mustCallSuper
+  @override
+  void didUpdateIndicator(covariant T oldIndicator) {
+    super.didUpdateIndicator(oldIndicator);
+    if (!indicator.dateMark.show) _hideDateMark();
+  }
+
+  @override
+  void dispose() {
+    _dateMarkTimer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -343,6 +380,20 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
   void paintOverlay(Canvas canvas, Size size) {
     // 绘制最新价刻度线与价钱标记
     paintLatestPriceMarkers(canvas, size);
+    // 日期气泡压在最新价线之上
+    paintDateMark(canvas);
+  }
+
+  /// 显示指向 [ts] 的日期气泡, 替换已有的并重新计时; [DateMarkConfig.show] 关闭时忽略。
+  @override
+  void didMoveToDate(int ts) {
+    final config = indicator.dateMark;
+    if (!config.show) return;
+    _dateMarkTimer?.cancel();
+    _dateMarkTs = ts;
+    _dateMarkTimer = config.holdDuration > 0 ? Timer(Duration(milliseconds: config.holdDuration), _hideDateMark) : null;
+    // moveToDateTime 返回前已等过 endOfFrame, 那一帧还没有 ts。
+    context.requestRepaint();
   }
 
   @override
@@ -748,5 +799,94 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
       themeColor: theme.lineChartColor,
       themeBorderColor: theme.lineChartColor,
     );
+  }
+
+  /// 计时到期、换 spec 或关闭开关时清空日期气泡。
+  void _hideDateMark() {
+    _dateMarkTimer?.cancel();
+    _dateMarkTimer = null;
+    if (_dateMarkTs == null) return;
+    _dateMarkTs = null;
+    context.requestRepaint();
+  }
+
+  /// 日期气泡内容, 默认是日期文本; 子类覆写可换格式(时区、星期)或加图标。
+  ///
+  /// 仅在缓存未命中时调用, 结果须只由 (ts, interval) 与 [color] 决定; 外观由 [DateMarkConfig] 决定。
+  @protected
+  InlineSpan buildDateMarkSpan(FlexiCandleModel model, Color color) => TextSpan(
+    text: model.formatDateTime(klineData.interval),
+  );
+
+  /// 绘制日期气泡: 每帧按 ts 重新锚定, 随平移、缩放与 Y 轴调整联动; 目标蜡烛不在可视区或已不在数据中时不画。
+  @protected
+  void paintDateMark(Canvas canvas) {
+    final ts = _dateMarkTs;
+    if (ts == null) return;
+    final i = klineData.indexAtOrBefore(ts);
+    if (i == null || i < klineData.start || i >= klineData.end || klineData[i].ts != ts) return;
+
+    final model = klineData[i];
+    final config = indicator.dateMark;
+    final (top, bottom) = resolveChartType() is FlexiLineChartType
+        ? (model.close, model.close)
+        : (model.high, model.low);
+    final topDy = valueToDy(top);
+    // auto 按配置估算上方是否放得下; 强制方位放不下时由 bounds 夹回主区。
+    final above = switch (config.position) {
+      DateMarkPosition.above => true,
+      DateMarkPosition.below => false,
+      DateMarkPosition.auto =>
+        topDy - config.spacing - config.arrowSize.height - config.text.areaHeight >= drawableRect.top,
+    };
+    final style = _resolveDateMarkStyle(config, above);
+
+    _dateMarkLabel.paint(
+      canvas,
+      (ts, klineData.interval),
+      build: () => buildDateMarkSpan(model, style.text.color ?? theme.crossTextColor),
+      style: style,
+      anchor: Offset(
+        // 同 paintCandleBars: 蜡烛中心。
+        startCandleDx - candleWidthHalf - (i - klineData.start) * candleActualWidth,
+        above ? topDy - config.spacing : valueToDy(bottom) + config.spacing,
+      ),
+      align: above ? Alignment.bottomCenter : Alignment.topCenter,
+      bounds: drawableRect,
+    );
+  }
+
+  /// 把 [DateMarkConfig.text] 解析出的圆角矩形换成指向蜡烛的气泡; [above] 时箭头朝下。
+  LabelStyle _resolveDateMarkStyle(DateMarkConfig config, bool above) {
+    // 背景色有主题兜底, toLabelStyle 必然产出 RoundedRectangleBorder 的 decoration。
+    final source = config.text.toLabelStyle(
+      textColor: theme.crossTextColor,
+      backgroundColor: theme.crossTextBg,
+    );
+    var styles = _dateMarkStyles;
+    if (styles == null || !identical(styles.source, source) || styles.arrowSize != config.arrowSize) {
+      final decoration = source.decoration!;
+      final shape = decoration.shape as RoundedRectangleBorder;
+      LabelStyle derive(AxisDirection direction) => source.copyWith(
+        decoration: ShapeDecoration(
+          color: decoration.color,
+          gradient: decoration.gradient,
+          shadows: decoration.shadows,
+          shape: BubbleBorder(
+            side: shape.side,
+            borderRadius: shape.borderRadius.resolve(null),
+            direction: direction,
+            arrowSize: config.arrowSize,
+          ),
+        ),
+      );
+      styles = _dateMarkStyles = (
+        source: source,
+        arrowSize: config.arrowSize,
+        above: derive(AxisDirection.down),
+        below: derive(AxisDirection.up),
+      );
+    }
+    return above ? styles.above : styles.below;
   }
 }

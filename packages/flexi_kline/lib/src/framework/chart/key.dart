@@ -99,6 +99,18 @@ enum DrawPosition {
   bottom,
 }
 
+/// 日期气泡相对目标蜡烛的方位, 见 `DateMarkConfig.position`。
+enum DateMarkPosition {
+  /// 优先放在上方(high 之上), 上方放不下时放到下方(low 之下)。
+  auto,
+
+  /// 只放在上方。
+  above,
+
+  /// 只放在下方。
+  below,
+}
+
 /// 缩放位置
 ///
 /// 将绘制区域宽度三等分, [auto] 会根据当前缩放开始时的焦点位置, 自行决定缩放位置.

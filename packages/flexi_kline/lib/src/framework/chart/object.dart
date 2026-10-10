@@ -390,6 +390,11 @@ abstract class CandleBasePaintObject<T extends CandleBaseIndicator> extends Dire
 
     return (dxs: dxs, dys: dys);
   }
+
+  /// `moveToDateTime` 动画完整结束、目标蜡烛确认未变后由框架调用, [ts] 是实际移到的蜡烛时间戳; 默认不处理。
+  ///
+  /// 内置 [CandlePaintObject] 据此显示日期气泡(见 `CandleIndicator.dateMark`); 直接继承本类的实现按需覆写。
+  void didMoveToDate(int ts) {}
 }
 
 /// 时间轴指标绘制对象
