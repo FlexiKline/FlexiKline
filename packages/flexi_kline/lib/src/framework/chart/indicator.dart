@@ -16,7 +16,7 @@ library;
 
 import 'dart:collection';
 import 'dart:math' as math;
-import 'dart:ui' as ui show PointMode;
+import 'dart:ui' as ui;
 
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flexi_formatter/flexi_formatter.dart';

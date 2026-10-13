@@ -1,32 +1,22 @@
 ## 2.6.0
+* Raise minimum SDK to Dart 3.11 / Flutter 3.41: `TickerModeData`, `Ticker.forceFrames` and `TickerMode.getValuesNotifier`, used since 2.5.5, first appear in Flutter 3.41, so the previously declared 3.35 floor could not compile (Breaking Changes).
+* Add `CandleIndicator.dateMark` (`DateMarkConfig`, `DateMarkPosition`): after `moveToDateTime` completes, a date bubble is painted at the target candle and follows pan and zoom until `holdDuration` expires; it is on by default, so turn `dateMark.show` off to opt out; customize it with `CandlePaintObject.buildDateMarkSpan` or `paintDateMark`; custom `CandleBasePaintObject` implementations receive `didMoveToDate(ts)`.
 * Fix the latest candle painting outside the main chart when a pushed update exceeds the visible price range: the visible min/max is now recomputed after each data merge.
 * Fix `syncFlexiKlineConfig` hiding `autoActivate` indicators that are not in the config `children`/`sub`; sync now matches `mountIndicators`.
+* Fix the last price tap area sitting half a label lower than the painted label: `CandlePaintObject.offViewPriceLabelRect` is now the painted rect and `offViewPriceLabelSize` a read-only getter (Breaking Changes).
+* Fix the `calculatePaintChartRange` and `setChartZoomSlideBarRect` post-frame callbacks writing to disposed notifiers when a frame lands after `dispose`.
 * Ignore `startDraw` and `onDrawConfirm` when the kline data is empty, so no draw tool can be entered or confirmed with no data to anchor to.
 * Export the painting layer: `LabelPainter`, `LabelStyle`, `TextLayoutCache`, `ImagePainter`, `ImageStyle`, `ImageSpan`, `AnchoredBorder`, `BubbleBorder`, `PointBuffer`, `PaintResource` and `AlignmentPlace` (`Alignment.place`); the `extension/render/` drawing API stays available alongside it.
-* Add `PaintResourceOwner` to `PaintObject`, `DrawObject` and `KlineBindingBase`: all three dispose resources registered with `own()` on `dispose`, and only `PaintObject` also resets them on an indicator update, before `didUpdateIndicator` (keepAlive objects leaving the paint tree keep them).
-* Assert in `PaintResourceOwner.own` once the owner is disposed: a resource registered then would never be released.
-* Add `TextAreaConfig.toLabelStyle` (`TextAreaConfigLabel`) to resolve a config into a `LabelStyle` with theme fallback colors, memoized per config instance; `textWidth` folds into `maxWidth`.
-* Add `TextAreaConfig.gradient` and `TextAreaConfig.shadows` with JSON support: a gradient replaces the background color; both apply only through `toLabelStyle`, not `drawTextArea`.
+* Add `PaintResourceOwner` to `PaintObject`, `DrawObject` and `KlineBindingBase`: resources registered with `own()` are disposed with the owner, and `PaintObject` also resets them on an indicator update before `didUpdateIndicator`; `DrawObjectMixin` now requires it (`on DrawStateObject, PaintResourceOwner`) (Breaking Changes).
+* Add `ShapeImage`, a color-cached drawn icon for inline `ImageSpan`s, with built-in `TriangleImage`, `ChevronImage`, `DiamondImage`, `SquareImage`, `CircleImage`, `PlusImage`, `MinusImage`, `CrossImage`, `StarImage` and `BellImage`.
+* Replace the off-view latest price arrow glyph `▸` with a `TriangleImage`, independent of the platform font; add `CandlePaintObject.createOffViewPriceArrow` to swap the arrow and `buildOffViewPriceSpan` to replace the label content.
+* Add `TextAreaConfig.toLabelStyle` to resolve a config into a `LabelStyle` with theme fallback colors; add `TextAreaConfig.gradient` and `TextAreaConfig.shadows` with JSON support, applied only through `toLabelStyle`.
+* Paint the core labels (axis and cross ticks, time axis, candle high/low, latest and last price, countdown, draw tool ticks and the cross tooltip) with cached `LabelPainter`s: borders are drawn inside the bounds, text limited by its drawable bounds ellipsizes, and labels are positioned by measured height instead of `TextAreaConfig.areaHeight` (may shift by up to 1px).
+* Fix the countdown label: its colors resolve from `CandleIndicator.countdown` before the theme, and it is no longer narrower than the latest price label nor clamped into `drawableRect`.
+* Batch candle bars into one `drawRawPoints` call or path per trend and add `PaintCandleChartMixin.addCandleBar` and `flushCandleBars`; hollow bodies now always use `candleHollowBarBorderWidth` and every wick `candleLineWidth`.
 * Add `BaseIndicatorConfig`, a `ChangeNotifier` skeleton implementing `IIndicatorConfig`.
 * Remove `IFlexiKlineDataCenter.createFlexiKlineConfig`: the framework never called it (Breaking Changes).
-* Rename `onPanEnd` to `onChartPanEnd` (Breaking Changes).
-* Rename `onPaintObjectDragCancel` to `cancelPaintObjectDrag`: it is a command issued across bindings, not a gesture event (Breaking Changes).
-* Drop `@protected` from `KlineBindingBase.onTap`: it ends the tap-claim chain and returns whether a binding consumed the tap.
-* Fix the `calculatePaintChartRange` and `setChartZoomSlideBarRect` post-frame callbacks writing to disposed notifiers when a frame lands after `dispose`.
-* Fix the latest price countdown label being narrower than the latest price label and overlapping it by 0.5px; it is no longer clamped into `drawableRect`.
-* Point the pubspec `repository` to `packages/flexi_kline` in the FlexiKline monorepo.
-* Paint the core labels (Y-axis and cross ticks, time axis, candle high/low, latest price, countdown, last price, draw tool ticks and the cross tooltip) with `LabelPainter`, reusing text layout across frames; the `extension/render/` API stays unchanged for other callers.
-* Draw core label borders inside the label bounds, as `RoundedRectangleBorder` does, instead of centered on the edge.
-* Apply `TextOverflow.ellipsis` to core labels limited by their drawable bounds; the width used to be limited only when `maxLines` was unset or above 1.
-* Position core labels by their measured height (centered on the anchor, or bottom-aligned for Y-axis ticks) instead of `TextAreaConfig.areaHeight`.
-* Resolve countdown text and background colors from `CandleIndicator.countdown` first, falling back to the theme, as other labels do; the theme colors used to override the config.
-* Batch candle bars: wicks and solid bodies go through one `drawRawPoints` call per trend, hollow bodies through one path per trend; hollow bodies now always use `candleHollowBarBorderWidth` and every wick `candleLineWidth`.
-* Add `PaintCandleChartMixin.addCandleBar` and `flushCandleBars` for batched candle drawing; `paintCandleBar` stays available.
-* Require `PaintResourceOwner` on `DrawObjectMixin` (`on DrawStateObject, PaintResourceOwner`) so the draw tool ticks can own their painters (Breaking Changes).
-* Fix the last price tap area sitting half a label lower than the painted label: `CandlePaintObject.offViewPriceLabelRect` is now the painted rect and `offViewPriceLabelSize` a read-only getter (Breaking Changes).
-* Add `ShapeImage`, a color-cached drawn icon for inline `ImageSpan`s: subclasses implement only `draw` and may reuse `roundedPolygon` / `strokePaint`; built-in `TriangleImage` and `ChevronImage` (any `direction`), `DiamondImage`, `SquareImage`, `CircleImage`, `PlusImage`, `MinusImage`, `CrossImage`, `StarImage` and `BellImage`.
-* Replace the off-view latest price arrow glyph `▸` with a `TriangleImage`, independent of the platform font; add `CandlePaintObject.createOffViewPriceArrow` to swap the arrow and `buildOffViewPriceSpan` to replace the label content.
-* Add `CandleIndicator.dateMark` (`DateMarkConfig`, `DateMarkPosition`): after `moveToDateTime` completes, an arrowed date bubble is painted above the target candle (below its low when there is no room, or as configured) and follows pan and zoom until `holdDuration` expires; it is on by default, so turn `dateMark.show` off if you draw your own; customize the content with `CandlePaintObject.buildDateMarkSpan` or the whole drawing with `paintDateMark`; custom `CandleBasePaintObject` implementations receive `didMoveToDate(ts)`.
+* Rename `onPanEnd` to `onChartPanEnd`, and `onPaintObjectDragCancel` to `cancelPaintObjectDrag` since it is a command issued across bindings, not a gesture event (Breaking Changes).
 
 ## 2.5.6
 * Fix `FormatException: NaN is not a valid format` thrown from `paintGridLines` after a few seconds of continuous panning: a `Decimal`-backed range from a combine child left `ComputeMode.fast` holding a `Decimal` endpoint, whose scale then grew every frame until `toDouble()` returned NaN.

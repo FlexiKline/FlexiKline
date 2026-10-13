@@ -1,6 +1,6 @@
 resolution: workspace
 name: flexi_kline
-description: "A flexible Kline framework package project."
+description: "A flexible Flutter candlestick (K-line) chart framework with pluggable indicators, drawing tools, styles and gestures for stock and crypto markets."
 version: 2.6.0
 homepage: https://flexikline.github.io
 repository: https://github.com/FlexiKline/FlexiKline/tree/main/packages/flexi_kline
@@ -13,8 +13,8 @@ topics:
   - stock
 
 environment:
-  sdk: ">=3.9.0 <4.0.0"
-  flutter: ">=3.35.0"
+  sdk: ">=3.11.0 <4.0.0"
+  flutter: ">=3.41.0"
 
 dependencies:
   flutter:

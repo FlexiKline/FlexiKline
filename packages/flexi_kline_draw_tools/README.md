@@ -1,43 +1,47 @@
 # flexi_kline_draw_tools
 
-[flexi_kline](https://pub.dev/packages/flexi_kline) 的绘图工具扩展包，提供趋势线、斐波那契、平行通道等 19 种绘图工具。
+English | [简体中文](https://github.com/FlexiKline/FlexiKline/blob/main/packages/flexi_kline_draw_tools/README_zh.md)
 
-## 版本兼容
+Drawing tools for [flexi_kline](https://pub.dev/packages/flexi_kline): trend lines, Fibonacci, parallel channels and more.
+
+## Compatibility
 
 | flexi_kline_draw_tools | flexi_kline | Flutter |
 | ---------------------- | ----------- | ------- |
-| 2.6.0                  | ^2.6.0      | >=3.35.0 |
+| 2.6.0                  | ^2.6.0      | >=3.41.0 |
 | 2.0.1                  | ^2.5.4      | >=3.35.0 |
 | 2.0.0                  | ^2.5.1      | >=3.27.0 |
 
-> v2 期间版本号 major.minor 等于所需 `flexi_kline` 的最低 major.minor（如 2.6.x 需要 `^2.6.0`），自身的修复与功能只升 patch；`flexi_kline` 升级而本包无需新能力时不跟随发版。v2 稳定后只对齐 major。
+> During v2, major.minor matches the minimum required `flexi_kline` major.minor (2.6.x needs `^2.6.0`); fixes and features of this package only bump patch, and it is not re-released when `flexi_kline` upgrades without needing new capabilities. After v2 stabilizes only major is aligned.
 
-## 安装
+## Installation
 
 ```yaml
 dependencies:
   flexi_kline_draw_tools: ^2.6.0
 ```
 
-## 快速上手
+## Quick start
 
-两种方式注册绘图工具（二选一）：
+Register the tools in one of two ways. A runnable minimal app is in [example/main.dart](example/main.dart).
 
 ```dart
-// 方式一：函数调用
+// Option 1: function call
 registerAllDrawObjectBuilder(controller);
 
-// 方式二：混入配置类
+// Option 2: mix into your configuration
 class MyConfig extends FlexiKlineStorage
     with FlexiKlineConfigurationMixin, DrawObjectBuildersConfigMixin {
-  // drawObjectBuilders 已自动提供
+  // drawObjectBuilders is provided
 }
 ```
 
-## 支持的绘图工具
+Drawing also requires `DrawConfig.enable`; start a tool with `controller.startDraw(trendLine)`.
 
-| 分组 | 工具 | 点数 |
-| ---- | ---- | ---- |
+## Tools
+
+| Group | Tools | Points |
+| ----- | ----- | ------ |
 | Lines | trendLine, arrowLine, extendedTrendLine, trendAngle, rayLine, horizontalTrendLine, horizontalRayLine | 2 |
 | Lines | horizontalLine, verticalLine, crossLine, priceLine | 1 |
 | Projection | rectangle | 2 |
@@ -47,11 +51,11 @@ class MyConfig extends FlexiKlineStorage
 | Patterns | tripleWaves | 4 |
 | Patterns | pentaWaves | 6 |
 
-> `tripleWaves` 和 `pentaWaves` 都由 `ElliottImpulseWaveDrawObject` 实现，区别仅在点数。
+> `tripleWaves` and `pentaWaves` are both implemented by `ElliottImpulseWaveDrawObject`; they differ only in point count.
 
-## 参数定制
+## Customization
 
-通过 `DrawToolsConfig.configure()` 统一配置，只传入需要修改的参数：
+Configure everything through `DrawToolsConfig.configure()`, passing only what you change:
 
 ```dart
 DrawToolsConfig.configure(
@@ -65,10 +69,10 @@ DrawToolsConfig.configure(
 );
 ```
 
-各工具的参数类：
+Param classes per tool:
 
-| 工具 | 参数类 | 主要字段 |
-| ---- | ------ | -------- |
+| Tool | Param class | Main fields |
+| ---- | ----------- | ----------- |
 | ArrowLine | `ArrowLineDrawParam` | arrowsRadians, arrowsLen |
 | PriceLine | `PriceLineDrawParam` | priceText, priceTextMargin |
 | TrendAngle | `TrendAngleDrawParam` | angleBaseLineMinLen, angleRadSize, angleText |
@@ -76,11 +80,11 @@ DrawToolsConfig.configure(
 | Rectangle | `RectangleDrawParam` | rectangleBgOpacity |
 | Parallelogram | `ParallelogramDrawParam` | bgOpacity |
 | FibExpansion | `FibonacciDrawParam` | fibRates, fibColors, fibBgOpacity, fibText |
-| FibRetracement | `FibonacciDrawParam` | 同上（独立实例） |
+| FibRetracement | `FibonacciDrawParam` | Same as above (separate instance) |
 | FibFans | `FibFansDrawParam` | fibFansParams, fibFansColors, fibFansGridColor, fibText |
 
-> 线色、线宽、虚线样式由核心包的 `Overlay.line` 控制，不在此配置。
-> `priceText` 和 `angleText` 默认为 `null`，回退到核心包 `DrawConfig.ticksText` 的主题色。
+> Line color, width and dash style come from the core package's `Overlay.line`, not from here.
+> `priceText` and `angleText` default to `null` and fall back to the theme color of the core package's `DrawConfig.ticksText`.
 
 ## License
 

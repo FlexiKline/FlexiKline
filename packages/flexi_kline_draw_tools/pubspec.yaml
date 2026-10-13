@@ -1,6 +1,6 @@
 resolution: workspace
 name: flexi_kline_draw_tools
-description: "draw tools library for FlexiKline"
+description: "Drawing tools for flexi_kline charts, including trend lines, Fibonacci retracements, parallel channels and more."
 version: 2.6.0
 homepage: "https://flexikline.github.io"
 repository: "https://github.com/FlexiKline/FlexiKline/tree/main/packages/flexi_kline_draw_tools"
@@ -12,8 +12,8 @@ topics:
   - flexi-kline
 
 environment:
-  sdk: ">=3.9.0 <4.0.0"
-  flutter: ">=3.35.0"
+  sdk: ">=3.11.0 <4.0.0"
+  flutter: ">=3.41.0"
 
 dependencies:
   flutter:
@@ -28,6 +28,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ">=5.0.0 <7.0.0"
+  flexi_formatter: ^2.0.1 # example/ only: TimeUnit for KlineSpec.interval
 
   build_runner: ^2.4.15
   json_serializable: ^6.9.5

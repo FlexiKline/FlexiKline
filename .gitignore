@@ -23,7 +23,7 @@ migrate_working_dir/
 # is commented out by default.
 #.vscode/
 
-example/
+/example/
 flexi_kline_indicators/
 .vscode/
 

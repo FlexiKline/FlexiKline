@@ -1,68 +1,57 @@
-# FlexiKline [![pub package](https://img.shields.io/pub/v/flexi_kline.svg)](https://pub.dev/packages/flexi_kline)
+# FlexiKline
 
-FlexiKline 是一个 Flutter 金融 K 线图表框架，指标、绘制工具、样式与手势都可以替换或扩展，适用于股票、数字货币等行情展示场景。
+[![flexi_kline](https://img.shields.io/pub/v/flexi_kline.svg?label=flexi_kline)](https://pub.dev/packages/flexi_kline)
+[![flexi_kline_draw_tools](https://img.shields.io/pub/v/flexi_kline_draw_tools.svg?label=flexi_kline_draw_tools)](https://pub.dev/packages/flexi_kline_draw_tools)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
-本仓库用 Dart 原生 `pub workspaces` 组织的 monorepo，核心包 `flexi_kline` 与绘图工具包 `flexi_kline_draw_tools` 同仓维护。
+English | [简体中文](README_zh.md)
 
-## Demo
+A flexible Flutter candlestick (K-line) chart framework for stock and crypto markets. Indicators, drawing tools, styles and gestures can all be replaced or extended. Runs on Android, iOS, Web, macOS, Windows and Linux.
 
-[在线体验](https://flexikline.github.io)
+**[Try the online demo](https://flexikline.github.io)**
 
-## 包
+## Packages
 
-| 包 | 版本 | 说明 |
-| --- | --- | --- |
-| [flexi_kline](packages/flexi_kline) | [![pub package](https://img.shields.io/pub/v/flexi_kline.svg)](https://pub.dev/packages/flexi_kline) | 核心 K 线图框架 |
-| [flexi_kline_draw_tools](packages/flexi_kline_draw_tools) | [![pub package](https://img.shields.io/pub/v/flexi_kline_draw_tools.svg)](https://pub.dev/packages/flexi_kline_draw_tools) | 绘图工具扩展包 |
+| Package | Version | Description |
+| ------- | ------- | ----------- |
+| [flexi_kline](packages/flexi_kline) | [![pub](https://img.shields.io/pub/v/flexi_kline.svg)](https://pub.dev/packages/flexi_kline) | Core chart framework: layout, gestures, indicators, configuration |
+| [flexi_kline_draw_tools](packages/flexi_kline_draw_tools) | [![pub](https://img.shields.io/pub/v/flexi_kline_draw_tools.svg)](https://pub.dev/packages/flexi_kline_draw_tools) | Built-in drawing tools: trend lines, Fibonacci, channels and more |
 
-`apps/` 放不发布的应用（`apps/demo` 为全平台 demo，当前占位，后续实现）。
-
-### flexi_kline_draw_tools
-
-[flexi_kline](https://pub.dev/packages/flexi_kline) 的绘图工具扩展包，提供趋势线、斐波那契、平行通道等 19 种绘图工具。v2 期间版本号 major.minor 等于所需 `flexi_kline` 的最低 major.minor，自身迭代只升 patch：
-
-| flexi_kline_draw_tools | flexi_kline | Flutter |
-| ---------------------- | ----------- | ------- |
-| 2.6.0                  | ^2.6.0      | >=3.35.0 |
-| 2.0.1                  | ^2.5.4      | >=3.35.0 |
-| 2.0.0                  | ^2.5.1      | >=3.27.0 |
-
-完整说明见 [packages/flexi_kline_draw_tools/README.md](packages/flexi_kline_draw_tools/README.md)。
-
-## 快速上手
-
-在 `pubspec.yaml` 中添加依赖：
+## Quick start
 
 ```yaml
 dependencies:
-  flexi_kline: ^2.5.6
+  flexi_kline: ^2.6.0
+  flexi_kline_draw_tools: ^2.6.0 # optional
 ```
 
-完整用法（配置、指标系统、绘制工具、参数定制）见 [packages/flexi_kline/README.md](packages/flexi_kline/README.md)。
+Usage, configuration and the indicator system are documented in the [flexi_kline README](packages/flexi_kline/README.md); a minimal app is in [example/main.dart](packages/flexi_kline/example/main.dart).
 
-## 开发
+## Repository layout
 
-环境要求：Dart SDK ≥ 3.9.0，Flutter ≥ 3.35.0（版本见根目录 `.fvmrc`）。
+A Dart `pub workspaces` monorepo:
+
+```
+packages/
+├── flexi_kline/              core package
+└── flexi_kline_draw_tools/   drawing tools package
+apps/
+└── demo/                     multi-platform demo (not published)
+```
+
+## Development
+
+Requires Dart >= 3.11.0 and Flutter >= 3.41.0 (pinned in `.fvmrc`).
 
 ```bash
-fvm flutter pub get          # 根目录，一次解析整个 workspace
-fvm flutter analyze          # 根目录，递归覆盖全部成员
+fvm flutter pub get          # resolves the whole workspace
+fvm flutter analyze          # analyzes all members
 fvm flutter test packages/flexi_kline/test packages/flexi_kline_draw_tools/test \
   --exclude-tags "exploration,benchmark"
 ```
 
-## 发布
+Packages are versioned independently and released by tag `<package>-v<version>` (e.g. `flexi_kline-v2.6.0`), core first. See [publish.yml](.github/workflows/publish.yml).
 
-各包版本独立维护，tag 规则 `<包名>-v<版本>`（如 `flexi_kline-v2.6.0`）。发布顺序恒为 core → dependents。见 `.github/workflows/publish.yml`。
+## License
 
-## 目录结构
-
-```
-FlexiKline/
-├── pubspec.yaml              ← workspace 根（name: flexi_kline_workspace，不发布）
-├── packages/                 ← 可发布的包
-│   ├── flexi_kline/
-│   └── flexi_kline_draw_tools/
-└── apps/                     ← 不发布的应用
-    └── demo/                 ← 全平台 demo（占位中）
-```
+[Apache License 2.0](LICENSE)

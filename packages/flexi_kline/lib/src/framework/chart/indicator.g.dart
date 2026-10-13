@@ -9,7 +9,7 @@ part of 'indicator.dart';
 abstract class _$MainPaintObjectIndicatorCWProxy<
   T extends Indicator<IIndicatorKey>
 > {
-  MainPaintObjectIndicator<T> size(Size size);
+  MainPaintObjectIndicator<T> size(ui.Size size);
 
   MainPaintObjectIndicator<T> padding(EdgeInsets padding);
 
@@ -25,7 +25,7 @@ abstract class _$MainPaintObjectIndicatorCWProxy<
   /// MainPaintObjectIndicator<T>(...).copyWith(id: 12, name: "My name")
   /// ```
   MainPaintObjectIndicator<T> call({
-    Size size,
+    ui.Size size,
     EdgeInsets padding,
     bool drawBelowTipsArea,
     Set<IIndicatorKey>? children,
@@ -41,7 +41,7 @@ class _$MainPaintObjectIndicatorCWProxyImpl<T extends Indicator<IIndicatorKey>>
   final MainPaintObjectIndicator<T> _value;
 
   @override
-  MainPaintObjectIndicator<T> size(Size size) => call(size: size);
+  MainPaintObjectIndicator<T> size(ui.Size size) => call(size: size);
 
   @override
   MainPaintObjectIndicator<T> padding(EdgeInsets padding) =>
@@ -73,7 +73,7 @@ class _$MainPaintObjectIndicatorCWProxyImpl<T extends Indicator<IIndicatorKey>>
       size: size == const $CopyWithPlaceholder() || size == null
           ? _value.size
           // ignore: cast_nullable_to_non_nullable
-          : size as Size,
+          : size as ui.Size,
       padding: padding == const $CopyWithPlaceholder() || padding == null
           ? _value.padding
           // ignore: cast_nullable_to_non_nullable
