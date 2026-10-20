@@ -19,6 +19,8 @@ Flutter/App.framework
 Flutter/Flutter.framework
 Flutter/Flutter.podspec
 Flutter/Generated.xcconfig
+# 本机签名（DEVELOPMENT_TEAM），由 Debug/Release.xcconfig 以 #include? 引入
+Flutter/Local.xcconfig
 Flutter/ephemeral/
 Flutter/app.flx
 Flutter/app.zip
