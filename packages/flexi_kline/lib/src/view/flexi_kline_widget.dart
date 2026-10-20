@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:developer';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -403,7 +401,9 @@ class GridPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    if (kProfileMode) FlutterTimeline.startSync('Flexi-PaintGrid');
     controller.paintGrid(canvas, size);
+    if (kProfileMode) FlutterTimeline.finishSync();
   }
 
   @override
@@ -421,7 +421,7 @@ class ChartPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    Timeline.startSync('Flexi-PaintChart');
+    if (kProfileMode) FlutterTimeline.startSync('Flexi-PaintChart');
 
     // try {
     //   /// 保存画布状态
@@ -433,7 +433,7 @@ class ChartPainter extends CustomPainter {
     //   canvas.restore();
     // }
 
-    Timeline.finishSync();
+    if (kProfileMode) FlutterTimeline.finishSync();
   }
 
   @override
@@ -458,7 +458,9 @@ class DrawPainter extends CustomPainter {
       canvas.save();
       canvas.clipRect(controller.mainRect);
 
+      if (kProfileMode) FlutterTimeline.startSync('Flexi-PaintDraw');
       controller.paintDraw(canvas, size);
+      if (kProfileMode) FlutterTimeline.finishSync();
     } finally {
       canvas.restore();
     }
@@ -485,7 +487,9 @@ class CrossPainter extends CustomPainter {
       canvas.save();
       canvas.clipRect(controller.canvasRect);
 
+      if (kProfileMode) FlutterTimeline.startSync('Flexi-PaintCross');
       controller.paintCross(canvas, size);
+      if (kProfileMode) FlutterTimeline.finishSync();
     } finally {
       canvas.restore();
     }

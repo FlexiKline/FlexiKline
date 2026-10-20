@@ -228,5 +228,18 @@ void main() {
       local.dispose();
       expect(painter.debugDisposed, isTrue);
     });
+
+    test('debugMissCount: 命中不增, 未命中加一, 换排版样式后下一次加一', () {
+      TextLayoutCache.debugMissCount = 0;
+      cache.layout('a');
+      expect(TextLayoutCache.debugMissCount, 1);
+      cache.layout('a');
+      cache.layout('a', maxWidth: 10);
+      expect(TextLayoutCache.debugMissCount, 1, reason: '命中, 只改约束也不算未命中');
+
+      cache.configure(_style(fontSize: 12));
+      cache.layout('a');
+      expect(TextLayoutCache.debugMissCount, 2);
+    });
   });
 }

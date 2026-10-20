@@ -31,6 +31,10 @@ final class TextLayoutCache implements PaintResource {
 
   final int capacity;
 
+  /// 全部实例累计的未命中次数, 即真正重设文本并排版的次数; 只在 debug 下累加, 供计数测试断言。
+  @visibleForTesting
+  static int debugMissCount = 0;
+
   /// 插入序即使用序: 命中时挪到末尾, 满了淘汰首个。
   ///
   /// 值里带上入池时的 key: 命中后用它重新插入, 而不是调用方本次传入的实例, List key 才能一直保持冻结。
@@ -56,6 +60,10 @@ final class TextLayoutCache implements PaintResource {
     final style = _style!;
     var entry = _entries.remove(key);
     if (entry == null) {
+      assert(() {
+        debugMissCount++;
+        return true;
+      }());
       final content = build?.call() ?? key;
       final painter = _entries.length < capacity ? _create(style) : _entries.remove(_entries.keys.first)!.painter;
       // InlineSpan 统一挂在以 style.text 为样式的根 span 下: 子 span 只写差异(如颜色),
