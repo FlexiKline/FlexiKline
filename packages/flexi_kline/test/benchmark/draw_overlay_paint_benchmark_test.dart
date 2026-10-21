@@ -134,6 +134,9 @@ class _BenchFibLinesOnlyDrawObject extends DrawObject<Overlay> {
 }
 
 void main() {
+  final report = BenchReport('draw_overlay', config: {'frames': _frames, 'rounds': _rounds});
+  tearDownAll(report.write);
+
   /// 造 [count] 个身份不同的绘制类型。
   ///
   /// 必须各不相同：`Overlay.id` 取创建时刻的毫秒时间戳，`==` 由 id + key + type 构成，
@@ -187,19 +190,6 @@ void main() {
       controller.prepareDraw(force: true);
     }
     return objects;
-  }
-
-  /// 跑 [_rounds] 轮 [body]，返回最快一轮的微秒数。
-  int bestMicros(void Function() body) {
-    var best = -1;
-    for (int r = 0; r < _rounds; r++) {
-      final sw = Stopwatch()..start();
-      body();
-      sw.stop();
-      final micros = sw.elapsedMicroseconds;
-      if (best < 0 || micros < best) best = micros;
-    }
-    return best;
   }
 
   /// 量一档：[count] 个由 [builder] 造出的 overlay，打印 paintDraw / initPoints 及换算两半。
@@ -266,20 +256,15 @@ void main() {
       controller.paintDraw(Canvas(PictureRecorder()), canvasSize);
       final drawnPerFrame = drawCountOf();
 
-      final paintMicros = bestMicros(paintBody);
-      final initMicros = bestMicros(initBody);
-      final valueMicros = bestMicros(valueBody);
-      final tsMicros = bestMicros(tsBody);
-
-      final share = initMicros / paintMicros * 100;
+      final name = '$label-$count';
+      final meta = {'overlays': count, 'points': points.length, 'drawnPerFrame': drawnPerFrame};
+      final paintMicros = report.measure('draw/$name/paint', paintBody, rounds: _rounds, perRound: _frames, meta: meta);
+      final initMicros = report.measure('draw/$name/init-points', initBody, rounds: _rounds, perRound: _frames);
+      // 拆开换算的两半, 判断「同帧共享换算参数」一类优化值不值得做。
+      report.measure('draw/$name/value-to-dy', valueBody, rounds: _rounds, perRound: _frames);
+      report.measure('draw/$name/ts-to-dx', tsBody, rounds: _rounds, perRound: _frames);
       debugPrint(
-        'draw_paint_bench[$label / $count overlays / ${points.length} points]: '
-        'drawn/frame $drawnPerFrame, '
-        'paintDraw ${(paintMicros / _frames).toStringAsFixed(2)}us/frame, '
-        'initPoints ${(initMicros / _frames).toStringAsFixed(2)}us/frame '
-        '(${share.toStringAsFixed(1)}% of paintDraw), '
-        'valueToDy ${(valueMicros / _frames).toStringAsFixed(2)}us/frame, '
-        'timestampToDx ${(tsMicros / _frames).toStringAsFixed(2)}us/frame',
+        'draw_paint_bench[$name]: initPoints ${(initMicros / paintMicros * 100).toStringAsFixed(1)}% of paintDraw',
       );
 
       expect(drawnPerFrame, count, reason: '每帧应画出全部 $count 个 overlay');

@@ -16,12 +16,14 @@
 library;
 
 import 'package:flexi_kline/flexi_kline.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/support.dart';
 
 void main() {
+  final report = BenchReport('precompute', config: {'candles': 1000, 'indicators': 10, 'rounds': 15});
+  tearDownAll(report.write);
+
   test('precompute N candles x M indicators', () async {
     final candles = await genRandomCandleList(count: 1000);
     const indicatorCount = 10;
@@ -56,14 +58,18 @@ void main() {
     kd.replace(candles, slotCount: m.computedDataCapacity);
 
     final range = kd.computableRange;
-    final sw = Stopwatch()..start();
-    for (int i = 0; i < 50; i++) {
-      for (final calculator in m.visibleCalculators) {
-        calculator.compute(kd, range, reset: true);
-      }
-    }
-    sw.stop();
-    debugPrint('precompute: 50x(1000 candles x $indicatorCount indicators) in ${sw.elapsedMilliseconds}ms');
-    expect(sw.elapsedMilliseconds, greaterThanOrEqualTo(0));
+    report.measure(
+      'precompute/full/1000x$indicatorCount',
+      () {
+        for (int i = 0; i < 20; i++) {
+          for (final calculator in m.visibleCalculators) {
+            calculator.compute(kd, range, reset: true);
+          }
+        }
+      },
+      rounds: 15,
+      perRound: 20,
+      unit: 'us/op',
+    );
   });
 }

@@ -16,26 +16,27 @@
 library;
 
 import 'package:flexi_kline/flexi_kline.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/support.dart';
 
 void main() {
-  test('merge candle list 性能基线', () async {
-    final candles = await genRandomCandleList(count: 2000);
-    // genRandomCandleList with isHistory=true returns descending timestamps
-    final spec = candles;
+  final report = BenchReport('merge_candle_list', config: {'candles': 2000, 'rounds': 7});
+  tearDownAll(report.write);
 
-    final sw = Stopwatch()..start();
-    for (int i = 0; i < 100; i++) {
-      final kd = KlineData(
-        const KlineSpec(symbol: 'BENCH', interval: invalidInterval),
-      );
-      kd.replace(spec, slotCount: 0);
-    }
-    sw.stop();
-    debugPrint('merge_candle_list: 100x2000 candles in ${sw.elapsedMilliseconds}ms');
-    expect(sw.elapsedMilliseconds, greaterThanOrEqualTo(0));
+  test('merge candle list 性能基线', () async {
+    // genRandomCandleList with isHistory=true returns descending timestamps
+    final candles = await genRandomCandleList(count: 2000);
+    report.measure(
+      'merge/replace/2000',
+      () {
+        for (int i = 0; i < 10; i++) {
+          KlineData(const KlineSpec(symbol: 'BENCH', interval: invalidInterval)).replace(candles, slotCount: 0);
+        }
+      },
+      rounds: 7,
+      perRound: 10,
+      unit: 'us/op',
+    );
   });
 }

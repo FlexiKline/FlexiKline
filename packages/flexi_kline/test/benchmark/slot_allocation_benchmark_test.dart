@@ -18,28 +18,33 @@ library;
 import 'dart:math';
 
 import 'package:flexi_kline/flexi_kline.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/support.dart';
 
 void main() {
-  test('slot register/recycle 100k ops', () {
+  final report = BenchReport('slot_allocation', config: {'opsPerRound': 10000, 'rounds': 7});
+  tearDownAll(report.write);
+
+  test('slot register/recycle 10k ops', () {
     final m = IndicatorPaintObjectManager(
       configuration: FakeFlexiKlineConfiguration(),
     );
     final rng = Random(0);
-    final sw = Stopwatch()..start();
-    for (int i = 0; i < 100000; i++) {
-      final key = ComputedIndicatorKey('k_${rng.nextInt(50)}');
-      if (rng.nextBool()) {
-        m.allocateComputedDataIndexes([key]);
-      } else {
-        m.releaseComputedDataIndex(key);
-      }
-    }
-    sw.stop();
-    debugPrint('slot_allocation: 100k ops in ${sw.elapsedMilliseconds}ms');
-    expect(sw.elapsedMilliseconds, greaterThanOrEqualTo(0));
+    report.measure(
+      'slot/register-recycle/10k',
+      () {
+        for (int i = 0; i < 10000; i++) {
+          final key = ComputedIndicatorKey('k_${rng.nextInt(50)}');
+          if (rng.nextBool()) {
+            m.allocateComputedDataIndexes([key]);
+          } else {
+            m.releaseComputedDataIndex(key);
+          }
+        }
+      },
+      rounds: 7,
+      unit: 'us',
+    );
   });
 }

@@ -8,3 +8,4 @@ workspace:
   - packages/flexi_kline
   - packages/flexi_kline_draw_tools
   - apps/demo
+  - apps/benchmark
