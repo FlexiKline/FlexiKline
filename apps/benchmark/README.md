@@ -14,7 +14,7 @@ fvm flutter devices
 tool/benchmark/device.sh --device <id> --hz 60 --scenario pan/base --windows 1 --window-seconds 3 --allow-dirty
 ```
 
-`--scenario` picks what to run: names are `<action>/<preset>` (`pan/base` = drag back and forth on a candles-only chart). The smoke run above uses `pan/base` just to confirm the device builds, signs, connects and reports its refresh rate. Drop `--scenario` to run **all 20 scenarios** (adds a few minutes, checks every scenario's precondition on this device); use `'pan/*'` for a prefix match. A run ends with `wrote build/benchmark/device/... (refresh rate 60.0Hz)`. For the full multi-device capture use `tool/benchmark/matrix.sh` (see `tool/README.md`).
+`--scenario` picks what to run: names are `<action>/<preset>` (`pan/base` = drag back and forth on a candles-only chart). The smoke run above uses `pan/base` just to confirm the device builds, signs, connects and reports its refresh rate. Drop `--scenario` to run **all 14 scenarios** (adds a few minutes, checks every scenario's precondition on this device); use `'pan/*'` for a prefix match. A run ends with `wrote build/benchmark/device/... (refresh rate 60.0Hz)`. For the full multi-device capture use `tool/benchmark/matrix.sh` (see `tool/README.md`).
 
 Try the chart by hand: `fvm flutter run --profile -d <id> --dart-define=PRESET=full`, then watch frames in DevTools.
 
@@ -34,17 +34,18 @@ Try the chart by hand: `fvm flutter run --profile -d <id> --dart-define=PRESET=f
 
 ## Scenarios
 
-Names are `<action>/<preset>`; existing names never change so results stay comparable across versions. Presets: `base` (candles and time axis), `full` (main VOL + MA, sub MACD + VOLMA). Input is emitted at the measured refresh rate, so high-refresh devices get an event every vsync.
+Names are `<action>/<preset>`; existing names never change so results stay comparable across versions. Only `pan` keeps a `base` variant as the candles-only reference: every other action's `full` does all of its `base` work. Each scenario drives a 3 s warmup (not recorded), then 3 windows of 6 s (`WINDOWS` / `WINDOW_SECONDS`). Presets: `base` (candles and time axis), `full` (main VOL + MA, sub MACD + VOLMA). Input is emitted at the measured refresh rate, so high-refresh devices get an event every vsync.
 
 | action | what it does | presets |
 | --- | --- | --- |
-| `pan` / `fling` | drag back and forth / fling and wait for inertia | `base`, `full` |
-| `scale` | two-finger pinch (candle width) | `base`, `full` |
-| `zoom` | vertical drag on the price axis (Y range), feature `zoom` | `base`, `full` |
-| `cross` | crosshair sweep | `base`, `full` |
-| `resize` | drag the main / sub divider through the controller API (touch has no divider gesture), feature `resize` | `full` |
-| `realtime` | a tick every 100 ms, view still | `base`, `full` |
-| `startup` | unmount and mount a fresh chart; op = mount to first painted frame | `base`, `full` |
+| `pan` | drag back and forth | `base`, `full` |
+| `fling` | fling and wait for inertia | `full` |
+| `scale` | two-finger pinch (candle width) | `full` |
+| `zoom` | vertical drag on the price axis (Y range), feature `zoom` | `full` |
+| `cross` | crosshair sweep | `full` |
+| `resize` | long-press the main / sub divider, then drag it up and down, feature `resize` | `full` |
+| `realtime` | a tick every 100 ms, view still | `full` |
+| `startup` | unmount and mount a fresh chart; op = mount to first painted frame | `full` |
 | `switch` | switch between two symbols (2000 / 5000 candles); op = call until the data pipeline is idle | `full` |
 | `history` | append 500 older candles mid-drag; op = the append call until the pipeline is idle and the next frame is painted | `full` |
 | `indicators` | show / hide the sub indicators; op = toggle until the pipeline is idle | `full` |

@@ -3,7 +3,7 @@
 #
 #   tool/benchmark/device.sh --device <id> --hz <刷新率> [--side target|baseline] [--ref <ref>]
 #       [--backend impeller|skia] [--label ios-phone] [--session adhoc]
-#       [--binary <build.sh 打印的包> | --mode frames|trace --scenario 'pan/*' --windows 5 --window-seconds 10]
+#       [--binary <build.sh 打印的包> | --mode frames|trace --scenario 'pan/*' --windows 3 --window-seconds 6]
 #       [--allow-dirty]
 #
 # - --side 只决定结果目录; --ref 决定代码, 默认 target 为 HEAD、baseline 为 v2.5.6-monorepo;
@@ -29,8 +29,8 @@ SESSION="adhoc"
 BINARY=""
 MODE="frames"
 SCENARIO=""
-WINDOWS=5
-WINDOW_SECONDS=10
+WINDOWS=3
+WINDOW_SECONDS=6
 ALLOW_DIRTY=false
 while [[ $# -gt 0 ]]; do
   case "$1" in

@@ -16,19 +16,20 @@
 library;
 
 import 'package:flexi_kline_benchmark/src/preset.dart';
+import 'package:flutter/gestures.dart' show kLongPressTimeout;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../gestures.dart';
 import '../scenario.dart';
 
 final interactionScenarios = <String, Scenario>{
-  for (final preset in BenchPreset.values) ...{
-    'pan/${preset.name}': Scenario(preset, pan),
-    'fling/${preset.name}': Scenario(preset, _fling),
-    'scale/${preset.name}': Scenario(preset, _scale),
-    'zoom/${preset.name}': Scenario(preset, _zoom, features: const {BenchFeature.zoom}, prepare: _exitZoom),
-    'cross/${preset.name}': Scenario(preset, _cross),
-  },
+  // base 只留 pan 作「只有蜡烛」的参考: 其他动作的 full 包含 base 的全部工作, base 里的回退在 full 里同样出现。
+  'pan/base': const Scenario(BenchPreset.base, pan),
+  'pan/full': const Scenario(BenchPreset.full, pan),
+  'fling/full': const Scenario(BenchPreset.full, _fling),
+  'scale/full': const Scenario(BenchPreset.full, _scale),
+  'zoom/full': const Scenario(BenchPreset.full, _zoom, features: {BenchFeature.zoom}, prepare: _exitZoom),
+  'cross/full': const Scenario(BenchPreset.full, _cross),
   'resize/full': const Scenario(BenchPreset.full, _resize, features: {BenchFeature.resize}),
 };
 
@@ -112,25 +113,23 @@ Future<void> _cross(ScenarioContext ctx) async {
   await gesture.up();
 }
 
-/// 逐帧拖动主区与第一个副区的分隔线, 主区高度在 ±60px 内往返, 每程 0.5s。
+/// 长按主区与第一个副区的分隔线再上下拖动(手机上调整副区高度的操作), 主区高度在 ±60px 内往返, 每程 0.5s。
 ///
-/// 触摸端没有分隔线拖动手势(只有鼠标端有), 所以直接调交互 API: 测的是重新布局与重绘, 不含手势识别。
+/// 走完整的触摸链路: 长按判定 → `onGridResizeStart`, 之后的移动 → `onGridResizeUpdate`。
+/// 等长按判定([kLongPressTimeout])时手指静止, 几乎不出帧。
 Future<void> _resize(ScenarioContext ctx) async {
   final controller = ctx.controller;
-  final frames = (0.5 * ctx.refreshRate).round();
-  final step = 60 / frames;
   while (ctx.running) {
-    final line = Offset(controller.mainRect.center.dx, controller.mainRect.bottom);
-    expect(controller.onGridResizeStart(line), isTrue, reason: '前置：要命中主区下方的分隔线');
-    final heights = <double>{};
+    final main = controller.mainRect;
+    final gesture = await ctx.tester.startGesture(ctx.toGlobal(Offset(main.center.dx, main.bottom)));
+    await Future<void>.delayed(kLongPressTimeout + const Duration(milliseconds: 100));
+    expect(controller.isStartDragGrid, isTrue, reason: '前置：长按要命中主区下方的分隔线');
+    final heights = {controller.mainRect.height};
     for (final sign in const [1.0, -1.0, -1.0, 1.0]) {
-      for (var i = 0; i < frames; i++) {
-        controller.onGridResizeUpdate(sign * step);
-        await ctx.nextFrame();
-        heights.add(controller.mainRect.height);
-      }
+      await ctx.moveFor(gesture, Offset(0, sign * 120), const Duration(milliseconds: 500));
+      heights.add(controller.mainRect.height);
     }
-    controller.onGridResizeEnd();
+    await gesture.up();
     await ctx.nextFrame();
     expect(heights.length, greaterThan(1), reason: '前置：拖动分隔线要改变主区高度');
   }

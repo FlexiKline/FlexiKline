@@ -23,7 +23,7 @@ usage: bench.dart <command> [args]
 
   summarize micro  --target <runs-dir> [--baseline <runs-dir>] --out <dir>
   summarize device --target <runs-dir> [--baseline <runs-dir>] --out <dir>
-  plan <devices.conf>            print `<phase> <label> <id> <hz> <backend> <platform>` per connected combo
+  plan <devices.conf>            print `<label> <id> <hz> <backend> <platform>` per connected combo
   device-info <device-id>        print `<platform> <model> <os>`
   flutter-version                print the Flutter framework version
   env <out.json> <key=value | key:=number>...  write a flat JSON object

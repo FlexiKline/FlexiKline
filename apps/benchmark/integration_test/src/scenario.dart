@@ -30,7 +30,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'compat.dart';
 
 /// 每个计时窗口的时长。
-const windowDuration = Duration(seconds: int.fromEnvironment('WINDOW_SECONDS', defaultValue: 10));
+const windowDuration = Duration(seconds: int.fromEnvironment('WINDOW_SECONDS', defaultValue: 6));
 
 /// 一个场景: [drive] 在窗口时长内反复执行操作; [prepare] 在每个窗口开始前执行, 它产生的帧不计入。
 final class Scenario {
@@ -62,16 +62,19 @@ final class ScenarioContext {
   final ops = <int>[];
 
   final _window = Stopwatch();
+  var _limit = windowDuration;
 
-  void startWindow() {
+  /// 开始一段驱动: 清空操作耗时并计时; 预热用更短的 [duration]。
+  void startWindow([Duration duration = windowDuration]) {
     ops.clear();
+    _limit = duration;
     _window
       ..reset()
       ..start();
   }
 
-  /// 窗口时长未到; 驱动每完成一次完整操作检查一次, 窗口可能略超时长。
-  bool get running => _window.elapsed < windowDuration;
+  /// 时长未到; 驱动每完成一次完整操作检查一次, 所以可能略超时长。
+  bool get running => _window.elapsed < _limit;
 
   /// startup 会换掉图表, 每次都重新取。
   ///
@@ -92,17 +95,22 @@ final class ScenarioContext {
   /// 等下一帧画完; 没有待画的帧时会排一帧, 所以逐帧驱动的循环与 vsync 同步。
   Future<void> nextFrame() => SchedulerBinding.instance.endOfFrame;
 
-  /// 记一次操作耗时: [op] 开始到数据变更完全生效(合并与计算都完成)后的那一帧画完。
+  /// 等数据变更完全生效(合并与计算都完成)后的那一帧画完, 最多 120 帧。
   ///
   /// 可在手势进行中调用(history 边拖边加载), 所以只用不受 test guard 约束的 API(`expectSync`)。
-  Future<void> timeFrameOp(void Function() op) async {
-    final watch = Stopwatch()..start();
-    op();
+  Future<void> settle() async {
     await nextFrame();
     for (var i = 0; i < 120 && !isDataSettled(controller); i++) {
       await nextFrame();
     }
-    expectSync(isDataSettled(controller), isTrue, reason: '前置：操作后数据流水线要在 120 帧内完成');
+    expectSync(isDataSettled(controller), isTrue, reason: '前置：数据流水线要在 120 帧内完成');
+  }
+
+  /// 记一次操作耗时: [op] 开始到 [settle] 完成。
+  Future<void> timeOp(void Function() op) async {
+    final watch = Stopwatch()..start();
+    op();
+    await settle();
     ops.add(watch.elapsedMicroseconds);
   }
 }

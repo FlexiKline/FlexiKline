@@ -20,7 +20,7 @@
 /// dart-define:
 /// - `MODE`: `frames`(默认)或 `trace`(只跑选中的一个场景的一个窗口, 包在 traceAction 里取时间线);
 /// - `SCENARIO`: 逗号分隔的场景名, 可用 `pan/*` 这样的前缀; 为空跑全部;
-/// - `WINDOWS` / `WINDOW_SECONDS`: 每场景计时窗口数与窗口时长, 默认 5 × 10s, 冒烟时调小。
+/// - `WINDOWS` / `WINDOW_SECONDS`: 每场景计时窗口数与窗口时长, 默认 3 × 6s(之前先驱动 3s 预热, 不计入), 冒烟时调小。
 library;
 
 import 'package:flexi_kline_benchmark/src/app.dart';
@@ -36,7 +36,10 @@ import 'src/scenarios/interaction.dart';
 
 const _mode = String.fromEnvironment('MODE', defaultValue: 'frames');
 const _filter = String.fromEnvironment('SCENARIO');
-const _windows = int.fromEnvironment('WINDOWS', defaultValue: 5);
+const _windows = int.fromEnvironment('WINDOWS', defaultValue: 3);
+
+/// 预热时长: 驱动一个循环最长约 3s, 预热至少跑完一个循环。
+const _warmup = Duration(seconds: 3);
 
 Map<String, Scenario> _allScenarios() {
   final all = <String, Scenario>{};
@@ -92,10 +95,12 @@ void main() {
       Future<void> prepare() async => scenario.prepare?.call(ctx);
       Future<void> drive() => scenario.drive(ctx);
 
+      // 预热: 只驱动, 不收集帧; trace 与 frames 共用。
+      await prepare();
+      ctx.startWindow(_warmup);
+      await drive();
+
       if (_mode == 'trace') {
-        await prepare();
-        ctx.startWindow();
-        await drive(); // 预热
         await prepare();
         ctx.startWindow();
         await binding.traceAction(drive, reportKey: 'timeline');
@@ -103,13 +108,7 @@ void main() {
         continue;
       }
 
-      await prepare();
-      await recordWindow(ctx, drive); // 预热窗口, 丢弃
-      final windows = <Map<String, Object>>[];
-      for (var w = 0; w < _windows; w++) {
-        await prepare();
-        windows.add(await recordWindow(ctx, drive));
-      }
+      final windows = await recordWindows(ctx, _windows, prepare, drive);
       results[name] = {'windows': windows};
       debugPrint('bench[$name]: ${[for (final w in windows) w['frames']]} frames per window');
     }

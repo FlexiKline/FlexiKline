@@ -16,6 +16,8 @@ WT="$(cd "$WT" && pwd)"
 
 SRC="$BENCH_ROOT/packages/flexi_kline/test"
 DST="$WT/packages/flexi_kline/test"
+# 两个版本必须用同一个 Flutter SDK 构建, 否则 SDK 的差异会混进版本差异。
+cp "$BENCH_ROOT/.fvmrc" "$WT/.fvmrc"
 mkdir -p "$DST/support/benchmark" "$DST/benchmark"
 cp "$SRC/support/benchmark/bench_harness.dart" "$DST/support/benchmark/"
 rm -rf "$DST/benchmark/versioned"

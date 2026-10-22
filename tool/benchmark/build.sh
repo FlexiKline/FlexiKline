@@ -2,7 +2,7 @@
 # 构建真机基准包(profile), 供 device.sh --binary 反复安装; 打印包路径。
 #
 #   tool/benchmark/build.sh --platform ios|android [--ref HEAD] [--mode frames|trace] [--scenario 'pan/*']
-#       [--windows 5] [--window-seconds 10] [--allow-dirty]
+#       [--windows 3] [--window-seconds 6] [--allow-dirty]
 #
 # dart-define 是编译期常量, 所以包按 sha + 平台 + 参数存放在 build/benchmark/bin/<key>/,
 # 旁边的 build.env 记下这些参数, device.sh 据此写 env.json, 不再重复传。
@@ -15,8 +15,8 @@ PLATFORM=""
 REF="HEAD"
 MODE="frames"
 SCENARIO=""
-WINDOWS=5
-WINDOW_SECONDS=10
+WINDOWS=3
+WINDOW_SECONDS=6
 ALLOW_DIRTY=false
 while [[ $# -gt 0 ]]; do
   case "$1" in

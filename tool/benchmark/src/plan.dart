@@ -19,9 +19,8 @@ import 'dart:io';
 
 import 'common.dart';
 
-/// 读 devices.conf, 与已连接设备求交, 每个组合输出一行 `<phase> <label> <id> <hz> <backend> <platform>`。
+/// 读 devices.conf, 与已连接设备求交, 每个组合输出一行 `<label> <id> <hz> <backend> <platform>`。
 ///
-/// phase 是该 hz 在本设备各档里从低到高的序号: 同一设备的不同刷新率分阶段跑, 阶段之间手动切换。
 /// 有未连接的设备时退出, 不跑半套。
 void plan(String conf) {
   final devices = connectedDevices();
@@ -53,11 +52,7 @@ void plan(String conf) {
     exit(1);
   }
   for (final r in rows) {
-    final rates = {
-      for (final o in rows)
-        if (o.label == r.label) o.hz,
-    }.toList()..sort();
-    stdout.writeln('${rates.indexOf(r.hz) + 1} ${r.label} ${r.id} ${r.hz} ${r.backend} ${r.kind}');
+    stdout.writeln('${r.label} ${r.id} ${r.hz} ${r.backend} ${r.kind}');
   }
 }
 

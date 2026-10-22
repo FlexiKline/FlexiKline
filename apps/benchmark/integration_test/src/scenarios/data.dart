@@ -28,10 +28,9 @@ import '../scenario.dart';
 import 'interaction.dart' show pan;
 
 final dataScenarios = <String, Scenario>{
-  for (final preset in BenchPreset.values) ...{
-    'realtime/${preset.name}': Scenario(preset, _realtime),
-    'startup/${preset.name}': Scenario(preset, _startup),
-  },
+  // 只跑 full: full 的推送与冷启动包含 base 的全部工作。
+  'realtime/full': const Scenario(BenchPreset.full, _realtime),
+  'startup/full': const Scenario(BenchPreset.full, _startup),
   'switch/full': const Scenario(BenchPreset.full, _switch),
   'history/full': const Scenario(BenchPreset.full, _history, prepare: _resetData),
   'indicators/full': const Scenario(BenchPreset.full, _indicators),
@@ -82,7 +81,7 @@ Future<void> _startup(ScenarioContext ctx) async {
 
 /// 在两个品种之间来回切换, 每次整段替换数据并重算全部指标, 之后静置 1s。
 ///
-/// 操作耗时 = 切换调用到数据完全生效后的那一帧结束(见 [ScenarioContext.timeFrameOp])。
+/// 操作耗时 = 切换调用到数据完全生效后的那一帧结束(见 [ScenarioContext.timeOp])。
 Future<void> _switch(ScenarioContext ctx) async {
   final controller = ctx.controller;
   final lists = {
@@ -91,7 +90,7 @@ Future<void> _switch(ScenarioContext ctx) async {
   };
   var next = controller.klineDataKey == benchSpec.key ? benchAltSpec : benchSpec;
   while (ctx.running) {
-    await ctx.timeFrameOp(() {
+    await ctx.timeOp(() {
       controller.switchKlineData(next);
       controller.replaceKlineData(next, lists[next]!);
     });
@@ -107,7 +106,7 @@ Future<void> _resetData(ScenarioContext ctx) async => ctx.controller.replaceKlin
 
 /// 左右往返拖动; 朝历史方向的那一笔拖到 300ms 时追加 500 根更早的蜡烛, 模拟边拖边加载更多。
 ///
-/// 操作耗时与 switch 同口径: 追加调用到数据完全生效后的那一帧结束(见 [ScenarioContext.timeFrameOp]);
+/// 操作耗时与 switch 同口径: 追加调用到数据完全生效后的那一帧结束(见 [ScenarioContext.timeOp]);
 /// 纯合并与计算的开销由 L1 的 `merge/append-history` 与 `precompute` 覆盖。
 Future<void> _history(ScenarioContext ctx) async {
   final controller = ctx.controller;
@@ -118,7 +117,7 @@ Future<void> _history(ScenarioContext ctx) async {
       final length = controller.klineData.length;
       final batch = benchCandles(count: 500, offset: length);
       await Future<void>.delayed(const Duration(milliseconds: 300));
-      await ctx.timeFrameOp(() => controller.appendHistoryKlineData(benchSpec, batch));
+      await ctx.timeOp(() => controller.appendHistoryKlineData(benchSpec, batch));
       await stroke;
       expect(controller.klineData.length, length + batch.length, reason: '前置：加载历史要合并出新蜡烛');
     } else {
@@ -130,13 +129,13 @@ Future<void> _history(ScenarioContext ctx) async {
 
 /// 来回显示 / 隐藏全部副区指标(与用户从指标菜单开关一致), 每次之后静置 1s。
 ///
-/// 操作耗时 = 开关调用到数据完全生效后的那一帧结束, 显示时含新增指标的整段计算(见 [ScenarioContext.timeFrameOp])。
+/// 操作耗时 = 开关调用到数据完全生效后的那一帧结束, 显示时含新增指标的整段计算(见 [ScenarioContext.timeOp])。
 Future<void> _indicators(ScenarioContext ctx) async {
   final controller = ctx.controller;
   final keys = ctx.chart.subKeys;
   while (ctx.running) {
     final shown = controller.getSubIndicatorHeights().isNotEmpty;
-    await ctx.timeFrameOp(() {
+    await ctx.timeOp(() {
       for (final key in keys) {
         shown ? controller.hideSubIndicator(key) : controller.showSubIndicator(key);
       }

@@ -198,6 +198,15 @@ void summarizeDevice(Map<String, String> opts) {
   if (baseline != null && (baseline.refreshRate - target.refreshRate).abs() > target.refreshRate * 0.05) {
     b.writeln('- **warning**: baseline ran at ${baseline.refreshRate.toStringAsFixed(0)}Hz, not comparable');
   }
+  if (baseline != null && baseline.env['flutter'] != env['flutter']) {
+    b.writeln('- **warning**: baseline built with Flutter ${baseline.env['flutter']}, not comparable');
+  }
+  String windowsOf(Map<String, Object?> e) => '${e['windows']}x${e['windowSeconds']}s';
+  if (baseline != null && windowsOf(baseline.env) != windowsOf(env)) {
+    b.writeln(
+      '- **warning**: baseline used ${windowsOf(baseline.env)} windows, target ${windowsOf(env)}; not comparable',
+    );
+  }
   b.writeln();
   String ms(double? us) => us == null ? '-' : (us / 1000).toStringAsFixed(2);
   String pct(double? v) => v == null ? '-' : '${(v * 100).toStringAsFixed(1)}%';

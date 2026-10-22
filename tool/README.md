@@ -13,7 +13,7 @@ Repository-level scripts. Everything here runs from the repository root with `fv
 | --- | --- |
 | `compare.sh` | compare L1 frame benchmarks of two versions on this machine |
 | `device.sh` | run one on-device capture on one device |
-| `matrix.sh` | run a full capture on every device in `devices.conf`, both versions |
+| `matrix.sh` | run an unattended capture on the devices in `devices.conf`, both versions, one refresh rate per call (`--hz`); writes `retry-<time>.sh` for failed runs |
 | `build.sh` | build a profile benchmark app once for `device.sh --binary` (matrix calls it) |
 | `overlay.sh` | copy the current benchmark code into another version's worktree (called by the others) |
 | `lib.sh` | shared shell functions (sourced, not run) |
@@ -24,12 +24,13 @@ Repository-level scripts. Everything here runs from the repository root with `fv
 # L1: this machine, v2.5.6-monorepo vs HEAD (needs a clean working tree; add --allow-dirty to try it out)
 tool/benchmark/compare.sh --baseline v2.5.6-monorepo
 
-# L3: one device, smoke run — pan/base just checks the device link (drop --scenario to run all 20, or use 'pan/*')
+# L3: one device, smoke run — pan/base just checks the device link (drop --scenario to run all 14, or use 'pan/*')
 tool/benchmark/device.sh --device <id> --hz 60 --scenario pan/base --windows 1 --window-seconds 3 --allow-dirty
 
-# L3: all devices, both versions
+# L3: all devices, both versions, one refresh rate per call (set the phones first; same --session merges)
 cp tool/benchmark/devices.example.conf tool/benchmark/devices.conf   # then fill in device ids
-tool/benchmark/matrix.sh
+tool/benchmark/matrix.sh --session <name> --hz 60
+tool/benchmark/matrix.sh --session <name> --hz 120                   # after switching the high-refresh devices
 
 # merge existing runs again
 fvm dart tool/benchmark/bench.dart summarize device --target <dir>/target --baseline <dir>/baseline --out <dir>
