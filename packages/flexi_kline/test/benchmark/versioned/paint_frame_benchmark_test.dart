@@ -24,7 +24,7 @@ import 'dart:ui' show Canvas, PictureRecorder;
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../support/support.dart';
+import '../../support/benchmark/bench_harness.dart';
 import 'bench_chart.dart';
 
 const _rounds = 7;

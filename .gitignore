@@ -43,3 +43,6 @@ apps/*/pubspec_overrides.yaml
 
 # FVM Version Cache
 .fvm/
+
+# Local device list for tool/benchmark/matrix.sh
+/tool/benchmark/devices.conf

@@ -21,11 +21,11 @@ import 'dart:ui' show Canvas, PictureRecorder;
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../support/support.dart';
+import '../../support/benchmark/bench_harness.dart';
 import 'bench_chart.dart';
 
 const _rounds = 7;
-const _firstFrameRounds = 15;
+const _startupRounds = 15;
 
 /// 规模曲线用的宽画布: 400 根需要的蜡烛宽仍在最小宽 1 之上。
 const _wideCanvas = 1200.0;
@@ -33,7 +33,7 @@ const _wideCanvas = 1200.0;
 void main() {
   final report = BenchReport(
     'frame_scenarios',
-    config: {'frames': benchFrames, 'rounds': _rounds, 'firstFrameRounds': _firstFrameRounds},
+    config: {'frames': benchFrames, 'rounds': _rounds, 'startupRounds': _startupRounds},
   );
   tearDownAll(report.write);
 
@@ -63,10 +63,10 @@ void main() {
     final main = multi ? 3 : 0;
     final sub = multi ? 4 : 0;
 
-    testWidgets('zoom / $setup', (tester) async {
+    testWidgets('scale / $setup', (tester) async {
       final controller = await mountBenchChart(tester, main: main, sub: sub);
       // 蜡烛宽每 60 帧在 2 与 10 之间往返一次。
-      await measure(tester, controller, 'zoom/$setup', (i, canvas) {
+      await measure(tester, controller, 'scale/$setup', (i, canvas) {
         final phase = (i % 60) / 30;
         final target = 2 + 8 * (phase <= 1 ? phase : 2 - phase);
         controller.onChartScaleTo(target / controller.candleWidth, position: ScalePosition.right, focalDx: 0);
@@ -88,13 +88,13 @@ void main() {
       });
     });
 
-    testWidgets('first-frame / $setup', (tester) async {
+    testWidgets('startup / $setup', (tester) async {
       final candles = benchCandles();
       final controllers = <FlexiKlineController>[];
       report.measure(
-        'first-frame/$setup',
+        'startup/$setup',
         () => controllers.add(createBenchChart(main: main, sub: sub, candles: candles)),
-        rounds: _firstFrameRounds,
+        rounds: _startupRounds,
         unit: 'us',
       );
       await tester.pump();
@@ -105,7 +105,7 @@ void main() {
   }
 
   for (final target in const [40, 140, 400]) {
-    testWidgets('scale / candles $target', (tester) async {
+    testWidgets('load / candles $target', (tester) async {
       final controller = await mountBenchChart(tester, width: _wideCanvas);
       final width = controller.mainChartWidth / target / (1 + 1 / controller.settingConfig.spacingCandleParts);
       controller.onChartScaleTo(width / controller.candleWidth, position: ScalePosition.right, focalDx: 0);
@@ -114,7 +114,7 @@ void main() {
       await measure(
         tester,
         controller,
-        'scale/candles-$target',
+        'load/candles-$target',
         (i, c) => panFrame(controller, i, c),
         meta: {'candleWidth': controller.candleWidth},
       );
@@ -122,14 +122,14 @@ void main() {
   }
 
   for (final count in const [0, 3, 7, 14]) {
-    testWidgets('scale / indicators $count', (tester) async {
+    testWidgets('load / indicators $count', (tester) async {
       // 副区最多 4 个(defaultSubIndicatorMaxCount): 先放满主区 3 个、再放副区, 超出部分回到主区。
       final sub = (count - 3).clamp(0, 4);
       final controller = await mountBenchChart(tester, main: count - sub, sub: sub);
       BenchLineIndicator.paintCount = 0;
       paintChart(controller, Canvas(PictureRecorder()));
       expect(BenchLineIndicator.paintCount, count, reason: '前置：$count 个测试指标都要参与绘制');
-      await measure(tester, controller, 'scale/indicators-$count', (i, c) => panFrame(controller, i, c));
+      await measure(tester, controller, 'load/indicators-$count', (i, c) => panFrame(controller, i, c));
     });
   }
 }

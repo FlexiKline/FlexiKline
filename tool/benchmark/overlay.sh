@@ -1,48 +1,32 @@
 #!/usr/bin/env bash
-# 把当前树的 benchmark harness 与整帧场景覆盖进另一个版本的 worktree, 只改该 worktree、不提交。
+# 把当前树的基准代码覆盖进另一个版本的 worktree, 只改该 worktree、不提交; 重复执行结果相同。
 #
 #   tool/benchmark/overlay.sh <worktree> [--app]
 #
-# --app 额外复制 apps/benchmark 并登记到根 pubspec.yaml 的 workspace(S3 起可用)。
+# - 总是复制: L1 harness 与 packages/flexi_kline/test/benchmark/versioned/ 整个目录(目录即版本对照的清单);
+# - --app 另复制 apps/benchmark(integration_test/src/compat.dart 换成同目录的 compat_baseline.dart)
+#   并登记到根 pubspec.yaml 的 workspace。
 # 被覆盖的 worktree 就是当前树时什么都不做。
 set -euo pipefail
+source "$(dirname "$0")/lib.sh"
 
-ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 WT="${1:?usage: overlay.sh <worktree> [--app]}"
 WT="$(cd "$WT" && pwd)"
-APP=false
-[[ "${2:-}" == "--app" ]] && APP=true
+[[ "$WT" == "$BENCH_ROOT" ]] && exit 0
 
-[[ "$WT" == "$ROOT" ]] && exit 0
-
-# 参与版本对照的文件; 增删时同步 compare.sh 的 FILES。
-SRC="$ROOT/packages/flexi_kline/test"
+SRC="$BENCH_ROOT/packages/flexi_kline/test"
 DST="$WT/packages/flexi_kline/test"
-FILES=(
-  benchmark/bench_chart.dart
-  benchmark/paint_frame_benchmark_test.dart
-  benchmark/frame_scenarios_benchmark_test.dart
-)
-
 mkdir -p "$DST/support/benchmark" "$DST/benchmark"
 cp "$SRC/support/benchmark/bench_harness.dart" "$DST/support/benchmark/"
-for f in "${FILES[@]}"; do
-  cp "$SRC/$f" "$DST/$f"
-done
+rm -rf "$DST/benchmark/versioned"
+cp -R "$SRC/benchmark/versioned" "$DST/benchmark/versioned"
 
-SUPPORT="$DST/support/support.dart"
-if ! grep -q "export 'benchmark/bench_harness.dart';" "$SUPPORT"; then
-  # 插在 builders/ 之前, 保持 directives_ordering(根目录 analyze 也会扫到 build/benchmark/wt/)。
-  sed -i.bak "s#^export 'builders/chart_widget_scenario.dart';#export 'benchmark/bench_harness.dart';\\
-export 'builders/chart_widget_scenario.dart';#" "$SUPPORT"
-  rm -f "$SUPPORT.bak"
-  grep -q "export 'benchmark/bench_harness.dart';" "$SUPPORT" || { echo "failed to export bench_harness in $SUPPORT" >&2; exit 1; }
-fi
-
-if $APP; then
+if [[ "${2:-}" == "--app" ]]; then
   rm -rf "$WT/apps/benchmark"
-  cp -R "$ROOT/apps/benchmark" "$WT/apps/benchmark"
+  cp -R "$BENCH_ROOT/apps/benchmark" "$WT/apps/benchmark"
   rm -rf "$WT/apps/benchmark/build" "$WT/apps/benchmark/.dart_tool"
+  # 版本差异的唯一适配点, 见 integration_test/src/compat.dart。
+  cp "$WT/apps/benchmark/integration_test/src/compat_baseline.dart" "$WT/apps/benchmark/integration_test/src/compat.dart"
   if ! grep -q '^  - apps/benchmark$' "$WT/pubspec.yaml"; then
     # 追加在 workspace 列表最后一项之后。
     awk '
@@ -52,6 +36,7 @@ if $APP; then
       END { if (in_ws) print "  - apps/benchmark" }
     ' "$WT/pubspec.yaml" >"$WT/pubspec.yaml.tmp"
     mv "$WT/pubspec.yaml.tmp" "$WT/pubspec.yaml"
+    grep -q '^  - apps/benchmark$' "$WT/pubspec.yaml" || { echo "failed to add apps/benchmark to $WT/pubspec.yaml" >&2; exit 1; }
   fi
 fi
 

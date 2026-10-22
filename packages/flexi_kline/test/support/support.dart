@@ -15,7 +15,6 @@
 /// 测试支撑 barrel：领域测试统一 `import '../support/support.dart';`
 library;
 
-export 'benchmark/bench_harness.dart';
 export 'builders/chart_widget_scenario.dart';
 export 'builders/controller_scenario.dart';
 export 'builders/manager_scenario.dart';

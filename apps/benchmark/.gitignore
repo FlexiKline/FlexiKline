@@ -46,6 +46,3 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
-
-# Local device list for tool/matrix.sh
-/tool/devices.conf

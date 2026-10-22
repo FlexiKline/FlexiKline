@@ -31,7 +31,7 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart' show SizedBox;
 import 'package:flutter_test/flutter_test.dart';
 
-import '../support/support.dart';
+import '../../support/support.dart';
 
 const benchSpec = KlineSpec(symbol: 'PAINT-FRAME-BENCH', interval: FlexiTimeInterval(1, TimeUnit.minute));
 
@@ -116,21 +116,48 @@ class _BenchLinePaintObject extends DirectPaintObject<BenchLineIndicator> {
 /// 500 根斜坡蜡烛, 价格逐根下降, 平移时区间与刻度文本随之变化。
 List<CandleModel> benchCandles() => genRampCandleList(count: 500, high: 1000, spread: 14, slope: 0.5);
 
+/// 按场景打开默认关闭的交互: 打开 [resize] 后网格会多画可拖拽分隔线, 所以不全局打开。
+class _BenchConfiguration extends FakeFlexiKlineConfiguration {
+  _BenchConfiguration({required this.zoom, required this.resize});
+
+  final bool zoom;
+  final bool resize;
+
+  @override
+  GestureConfig genGestureConfig([GestureConfig? gesture]) {
+    final base = super.genGestureConfig(gesture);
+    return zoom ? base.copyWith(enableZoom: true) : base;
+  }
+
+  @override
+  GridConfig genGridConfig([GridConfig? grid]) {
+    final base = super.genGridConfig(grid);
+    return resize ? base.copyWith(isAllowDragIndicatorHeight: true) : base;
+  }
+}
+
 /// 不经 Widget 装配一个可直接调绘制入口的 controller。
 ///
-/// [main] / [sub] 是叠加的 [BenchLineIndicator] 个数(base = 0/0, multi = 3/4)。
+/// [main] / [sub] 是叠加的 [BenchLineIndicator] 个数(base = 0/0, multi = 3/4);
+/// [zoom] / [resize] 打开价格轴缩放与分隔线拖动。
 FlexiKlineController createBenchChart({
   int main = 0,
   int sub = 0,
   double? candleWidth,
   double width = benchCanvasWidth,
   List<CandleModel>? candles,
+  FlexiChartType chartType = FlexiChartType.barSolid,
+  ComputeMode computeMode = ComputeMode.fast,
+  bool zoom = false,
+  bool resize = false,
 }) {
-  final controller = FlexiKlineController(configuration: FakeFlexiKlineConfiguration());
-  controller.switchKlineData(benchSpec);
+  final controller = FlexiKlineController(
+    configuration: _BenchConfiguration(zoom: zoom, resize: resize),
+  );
+  controller.switchKlineData(benchSpec, computeMode: computeMode);
   controller.replaceKlineData(benchSpec, candles ?? benchCandles());
   controller.mountIndicators(
-    candle: CandleIndicator(),
+    candle: CandleIndicator(chartType: chartType),
     time: TimeIndicator(),
     mainIndicators: [for (int i = 0; i < main; i++) BenchLineIndicator('m$i', paintMode: PaintMode.combine)],
     subIndicators: [for (int i = 0; i < sub; i++) BenchLineIndicator('s$i', paintMode: PaintMode.alone)],
@@ -152,8 +179,21 @@ Future<FlexiKlineController> mountBenchChart(
   int sub = 0,
   double? candleWidth,
   double width = benchCanvasWidth,
+  FlexiChartType chartType = FlexiChartType.barSolid,
+  ComputeMode computeMode = ComputeMode.fast,
+  bool zoom = false,
+  bool resize = false,
 }) async {
-  final controller = createBenchChart(main: main, sub: sub, candleWidth: candleWidth, width: width);
+  final controller = createBenchChart(
+    main: main,
+    sub: sub,
+    candleWidth: candleWidth,
+    width: width,
+    chartType: chartType,
+    computeMode: computeMode,
+    zoom: zoom,
+    resize: resize,
+  );
   await tester.pumpWidget(const SizedBox());
   await tester.pump();
   return controller;

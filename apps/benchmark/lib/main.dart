@@ -14,17 +14,16 @@
 
 import 'package:flutter/material.dart';
 
-import 'src/bench_chart.dart';
+import 'src/app.dart';
+import 'src/preset.dart';
 
-/// 手动冒烟入口: `flutter run --profile --dart-define=SETUP=multi`, 用手指操作并在 DevTools 里看帧。
+/// 手动冒烟入口: `flutter run --profile --dart-define=PRESET=full`, 用手指操作并在 DevTools 里看帧。
 ///
-/// 正式采集走 `integration_test/frames_test.dart`(见 `tool/device.sh`)。
+/// 正式采集走 `integration_test/bench_test.dart`(见 `tool/benchmark/device.sh`)。
 void main() {
   runApp(
     BenchApp(
-      setup: BenchSetup.parse(
-        const String.fromEnvironment('SETUP', defaultValue: 'base'),
-      ),
+      preset: BenchPreset.parse(const String.fromEnvironment('PRESET', defaultValue: 'full')),
     ),
   );
 }

@@ -20,6 +20,7 @@ import 'dart:math';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../support/benchmark/bench_harness.dart';
 import '../support/support.dart';
 
 void main() {

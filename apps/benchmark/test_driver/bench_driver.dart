@@ -33,17 +33,18 @@ Future<void> main() {
       final out = Directory(Platform.environment['FLEXI_BENCH_DEVICE_OUT'] ?? 'build/benchmark/device/latest');
       out.createSync(recursive: true);
 
+      // 先核对刷新率再写文件: 不合格的运行不能留下 frames.json, 否则汇总时会被合并进去。
+      final hz = double.tryParse(Platform.environment['FLEXI_BENCH_HZ'] ?? '');
+      final measured = (data['refreshRate'] as num).toDouble();
+      if (hz != null && (measured - hz).abs() > hz * 0.05) {
+        throw StateError('refresh rate is ${measured.toStringAsFixed(1)}Hz, expected ${hz}Hz; switch the display mode');
+      }
+
       final timeline = data.remove('timeline');
       File('${out.path}/frames.json').writeAsStringSync('${const JsonEncoder.withIndent('  ').convert(data)}\n');
       if (timeline != null) {
         final summary = TimelineSummary.summarize(Timeline.fromJson(timeline as Map<String, dynamic>));
         await summary.writeTimelineToFile('trace', destinationDirectory: out.path, pretty: true);
-      }
-
-      final hz = double.tryParse(Platform.environment['FLEXI_BENCH_HZ'] ?? '');
-      final measured = (data['refreshRate'] as num).toDouble();
-      if (hz != null && (measured - hz).abs() > hz * 0.05) {
-        throw StateError('refresh rate is ${measured.toStringAsFixed(1)}Hz, expected ${hz}Hz; switch the display mode');
       }
       stdout.writeln('wrote ${out.path} (refresh rate ${measured.toStringAsFixed(1)}Hz)');
     },

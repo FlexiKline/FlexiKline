@@ -14,13 +14,9 @@
 
 import 'dart:math' as math;
 
-import 'package:flexi_formatter/date_time.dart' show TimeUnit;
 import 'package:flexi_kline/flexi_kline.dart';
 
-const benchSpec = KlineSpec(symbol: 'DEVICE-BENCH', interval: FlexiTimeInterval(1, TimeUnit.minute));
-
-/// 切换场景的另一个品种: 与 [benchSpec] 来回切换, 模拟切币对。
-const benchAltSpec = KlineSpec(symbol: 'DEVICE-BENCH-ALT', interval: FlexiTimeInterval(1, TimeUnit.minute));
+import '../constants.dart';
 
 const _intervalMs = 60000;
 const _latestTs = 1760000000000;
@@ -28,7 +24,7 @@ const _latestTs = 1760000000000;
 /// 固定种子的随机游走蜡烛, 按时间倒序(最新在前), 与 `replaceKlineData` / `appendHistoryKlineData` 的约定一致。
 ///
 /// [offset] 为距最新一根的根数: 加载历史时取紧接已有数据的更早一段; 种子随 [offset] 变, 每段可复现。
-List<CandleModel> benchCandles({int count = 2000, int offset = 0}) {
+List<CandleModel> benchCandles({int count = benchCandleCount, int offset = 0}) {
   final random = math.Random(20261020 + offset);
   var close = 1000.0;
   final candles = <CandleModel>[];

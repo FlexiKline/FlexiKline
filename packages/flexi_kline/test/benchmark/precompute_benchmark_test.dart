@@ -18,6 +18,7 @@ library;
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../support/benchmark/bench_harness.dart';
 import '../support/support.dart';
 
 void main() {
@@ -69,6 +70,21 @@ void main() {
       },
       rounds: 15,
       perRound: 20,
+      unit: 'us/op',
+    );
+
+    // 实时行情只重算最新一根: 增量区间 [0, 1)。
+    report.measure(
+      'precompute/latest/1000x$indicatorCount',
+      () {
+        for (int i = 0; i < 200; i++) {
+          for (final calculator in m.visibleCalculators) {
+            calculator.compute(kd, const Range(0, 1));
+          }
+        }
+      },
+      rounds: 15,
+      perRound: 200,
       unit: 'us/op',
     );
   });

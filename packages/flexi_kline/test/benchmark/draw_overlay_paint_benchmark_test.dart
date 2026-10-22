@@ -36,6 +36,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart' show Canvas, Offset, Size, SizedBox;
 import 'package:flutter_test/flutter_test.dart';
 
+import '../support/benchmark/bench_harness.dart';
 import '../support/support.dart';
 
 const _spec = KlineSpec(
