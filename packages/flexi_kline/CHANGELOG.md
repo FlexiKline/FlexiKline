@@ -1,6 +1,7 @@
 ## 2.6.1
 * Add `TextLayoutCache.debugMissCount` (debug-only, `@visibleForTesting`) so tests can assert that cached label frames do not re-lay out text.
 * Add profile-mode timeline events for the grid, chart, draw and cross layers and for chart range, min/max and pane painting, collectable via `FlutterTimeline.debugCollect()`; the existing `Flexi-PaintChart` event is now emitted in profile mode only instead of in every build mode.
+* Add profile-mode `Flexi-Merge` / `Flexi-Compute` timeline events for each data pipeline merge and compute batch, and `isDataPipelineIdle` (`@visibleForTesting`) on the controller to tell when a data change has been fully merged and computed.
 
 ## 2.6.0
 * Raise minimum SDK to Dart 3.11 / Flutter 3.41: `TickerModeData`, `Ticker.forceFrames` and `TickerMode.getValuesNotifier`, used since 2.5.5, first appear in Flutter 3.41, so the previously declared 3.35 floor could not compile (Breaking Changes).

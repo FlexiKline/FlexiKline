@@ -266,6 +266,32 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1));
     expect(scene.calculator.computeCount, 1);
   });
+  testWidgets('isIdle 在 latest 已合并、节拍计算前为 false, 算完后恢复 true', (tester) async {
+    final scene = _scene();
+    var elapsed = Duration.zero;
+    addTearDown(scene.data.dispose);
+    addTearDown(scene.manager.dispose);
+    final pipeline = KlineDataPipeline(
+      scene.data,
+      scene.manager,
+      onCandlesMerged: ({required replace}) {},
+      onComputed: () {},
+      elapsed: () => elapsed,
+    );
+    addTearDown(pipeline.dispose);
+    pipeline.start();
+    pipeline.replace([_candle(2), _candle(1)]);
+    expect(pipeline.isIdle, isTrue, reason: 'replace 同步合并并立即计算');
+
+    pipeline.updateLatest([_candle(2)]);
+    expect(scene.data.list.map((item) => item.ts), [2, 1]);
+    expect(pipeline.isIdle, isFalse, reason: '已合并但待节拍计算');
+
+    elapsed = const Duration(milliseconds: 500);
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(pipeline.isIdle, isTrue);
+  });
+
 
   testWidgets('新时间戳 latest 合并后立即计算一次', (tester) async {
     final scene = _scene();

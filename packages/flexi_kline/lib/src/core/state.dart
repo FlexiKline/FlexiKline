@@ -57,6 +57,10 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     moveToPositionCallback = null;
   }
 
+  /// 当前数据的流水线没有待合并的批次与待计算的区间; 测试与基准用它判断一次数据变更何时完全生效。
+  @visibleForTesting
+  bool get isDataPipelineIdle => _pipeline.isIdle;
+
   /// 加载更多回调
   OnLoadMoreCandles? onLoadMoreCandles;
 

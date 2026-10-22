@@ -17,6 +17,8 @@ library;
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:flutter/foundation.dart' show FlutterTimeline, kProfileMode;
+
 import '../data/kline_data.dart';
 import '../model/export.dart';
 import 'chart/indicator.dart' show IndicatorCalculator, IndicatorPaintObjectManager;
@@ -66,6 +68,9 @@ final class KlineDataPipeline with FlexiLog {
   bool _deferredTick = false;
   bool _started = false;
   bool _disposed = false;
+
+  /// 没有待合并的批次、待计算的区间或指标; 一次数据变更此后才算完全生效。
+  bool get isIdle => _phase == _PipelinePhase.idle && _pending.isEmpty && _dirty == null && _requested.isEmpty;
 
   void start() {
     if (_started || _disposed) return;
@@ -129,6 +134,7 @@ final class KlineDataPipeline with FlexiLog {
   void _drainPending() {
     if (!_started || _disposed || _phase != _PipelinePhase.idle || _pending.isEmpty) return;
     _phase = _PipelinePhase.merging;
+    if (kProfileMode) FlutterTimeline.startSync('Flexi-Merge');
     try {
       while (_pending.isNotEmpty) {
         final update = _pending.removeFirst();
@@ -184,6 +190,7 @@ final class KlineDataPipeline with FlexiLog {
         onCandlesMerged(replace: update.kind == _UpdateKind.replace);
       }
     } finally {
+      if (kProfileMode) FlutterTimeline.finishSync();
       _phase = _PipelinePhase.idle;
     }
 
@@ -243,6 +250,7 @@ final class KlineDataPipeline with FlexiLog {
     final requested = Set<IndicatorCalculator>.of(_requested);
     final stopwatch = Stopwatch()..start();
     var calculatorCount = 0;
+    if (kProfileMode) FlutterTimeline.startSync('Flexi-Compute');
     try {
       try {
         if (dirty != null) {
@@ -282,6 +290,7 @@ final class KlineDataPipeline with FlexiLog {
       _requested.removeAll(requested);
       onComputed();
     } finally {
+      if (kProfileMode) FlutterTimeline.finishSync();
       _phase = _PipelinePhase.idle;
       _advanceTick();
       _drainPending();
