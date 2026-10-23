@@ -402,8 +402,11 @@ class GridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     if (kProfileMode) FlutterTimeline.startSync('Flexi-PaintGrid');
-    controller.paintGrid(canvas, size);
-    if (kProfileMode) FlutterTimeline.finishSync();
+    try {
+      controller.paintGrid(canvas, size);
+    } finally {
+      if (kProfileMode) FlutterTimeline.finishSync();
+    }
   }
 
   @override
@@ -422,18 +425,11 @@ class ChartPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     if (kProfileMode) FlutterTimeline.startSync('Flexi-PaintChart');
-
-    // try {
-    //   /// 保存画布状态
-    //   canvas.save();
-    //   canvas.clipRect(controller.canvasRect);
-    controller.paintChart(canvas, size);
-    // } finally {
-    //   /// 恢复画布状态
-    //   canvas.restore();
-    // }
-
-    if (kProfileMode) FlutterTimeline.finishSync();
+    try {
+      controller.paintChart(canvas, size);
+    } finally {
+      if (kProfileMode) FlutterTimeline.finishSync();
+    }
   }
 
   @override
@@ -459,8 +455,11 @@ class DrawPainter extends CustomPainter {
       canvas.clipRect(controller.mainRect);
 
       if (kProfileMode) FlutterTimeline.startSync('Flexi-PaintDraw');
-      controller.paintDraw(canvas, size);
-      if (kProfileMode) FlutterTimeline.finishSync();
+      try {
+        controller.paintDraw(canvas, size);
+      } finally {
+        if (kProfileMode) FlutterTimeline.finishSync();
+      }
     } finally {
       canvas.restore();
     }
@@ -488,8 +487,11 @@ class CrossPainter extends CustomPainter {
       canvas.clipRect(controller.canvasRect);
 
       if (kProfileMode) FlutterTimeline.startSync('Flexi-PaintCross');
-      controller.paintCross(canvas, size);
-      if (kProfileMode) FlutterTimeline.finishSync();
+      try {
+        controller.paintCross(canvas, size);
+      } finally {
+        if (kProfileMode) FlutterTimeline.finishSync();
+      }
     } finally {
       canvas.restore();
     }

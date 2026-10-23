@@ -134,9 +134,13 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
     if (!isMounted) return;
 
     // 先算区间再校验: 校验放在前面只能验到上一帧的旧值。
+    // 时间线事件的 finishSync 都放在 finally 里: 被包住的调用抛异常时, 事件仍然配对。
     if (kProfileMode) FlutterTimeline.startSync('Flexi-ChartRange');
-    calculatePaintChartRange();
-    if (kProfileMode) FlutterTimeline.finishSync();
+    try {
+      calculatePaintChartRange();
+    } finally {
+      if (kProfileMode) FlutterTimeline.finishSync();
+    }
 
     if (!klineData.canPaintChart) {
       // 数据未就绪时只画网格(nice 退化为 count, 刻度文本不画)与各指标的占位内容。
@@ -167,24 +171,30 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
       final smoothing = _panSmoothFactor < 1.0 && !mainPaintObject.hasZoomMinMax;
       canvas.clipRect(smoothing ? canvasRect : mainRect);
       if (kProfileMode) FlutterTimeline.startSync('Flexi-UpdateMinMax');
-      mainPaintObject.doUpdateVisibleMinMax(
-        paneIndex++,
-        start: klineData.start,
-        end: klineData.end,
-        reset: _reset,
-        panSmoothFactor: _panSmoothFactor,
-      );
-      if (kProfileMode) FlutterTimeline.finishSync();
+      try {
+        mainPaintObject.doUpdateVisibleMinMax(
+          paneIndex++,
+          start: klineData.start,
+          end: klineData.end,
+          reset: _reset,
+          panSmoothFactor: _panSmoothFactor,
+        );
+      } finally {
+        if (kProfileMode) FlutterTimeline.finishSync();
+      }
 
       if (kProfileMode) FlutterTimeline.startSync('Flexi-PaintMain');
-      // 热区宽度来自本帧刻度文本的实测宽度, 所以紧跟主区那一趟。
-      final maxTickWidth = mainPaintObject.doPaintChart(canvas, size);
-      _syncChartZoomSlideBarRect(maxTickWidth);
+      try {
+        // 热区宽度来自本帧刻度文本的实测宽度, 所以紧跟主区那一趟。
+        final maxTickWidth = mainPaintObject.doPaintChart(canvas, size);
+        _syncChartZoomSlideBarRect(maxTickWidth);
 
-      if (!allowOverlayOutsideMainRect) {
-        mainPaintObject.doPaintOverlay(canvas, size);
+        if (!allowOverlayOutsideMainRect) {
+          mainPaintObject.doPaintOverlay(canvas, size);
+        }
+      } finally {
+        if (kProfileMode) FlutterTimeline.finishSync();
       }
-      if (kProfileMode) FlutterTimeline.finishSync();
     } finally {
       /// 恢复画布状态
       canvas.restore();
@@ -193,28 +203,37 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
     for (final paintObject in subPaintObjects) {
       /// 更新副区指标可见区间状态.
       if (kProfileMode) FlutterTimeline.startSync('Flexi-UpdateMinMax');
-      paintObject.doUpdateVisibleMinMax(
-        paneIndex++,
-        start: klineData.start,
-        end: klineData.end,
-        reset: _reset,
-        panSmoothFactor: _panSmoothFactor,
-      );
-      if (kProfileMode) FlutterTimeline.finishSync();
+      try {
+        paintObject.doUpdateVisibleMinMax(
+          paneIndex++,
+          start: klineData.start,
+          end: klineData.end,
+          reset: _reset,
+          panSmoothFactor: _panSmoothFactor,
+        );
+      } finally {
+        if (kProfileMode) FlutterTimeline.finishSync();
+      }
 
       /// 绘制副区的指标图。网格线是它的第一步, 此刻 paneIndex 已分配, 副区读到的
       /// drawableRect 才是本 pane 的区域。
       if (kProfileMode) FlutterTimeline.startSync('Flexi-PaintSub');
-      paintObject.doPaintChart(canvas, size);
+      try {
+        paintObject.doPaintChart(canvas, size);
 
-      paintObject.doPaintOverlay(canvas, size);
-      if (kProfileMode) FlutterTimeline.finishSync();
+        paintObject.doPaintOverlay(canvas, size);
+      } finally {
+        if (kProfileMode) FlutterTimeline.finishSync();
+      }
     }
 
     if (allowOverlayOutsideMainRect) {
       if (kProfileMode) FlutterTimeline.startSync('Flexi-PaintMain');
-      mainPaintObject.doPaintOverlay(canvas, size);
-      if (kProfileMode) FlutterTimeline.finishSync();
+      try {
+        mainPaintObject.doPaintOverlay(canvas, size);
+      } finally {
+        if (kProfileMode) FlutterTimeline.finishSync();
+      }
     }
 
     if (_reset) _reset = false;
