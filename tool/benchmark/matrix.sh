@@ -9,10 +9,10 @@
 #   --rounds (2)  --windows (3)  --window-seconds (6)  --cooldown (120)  --session (当前时间)  --publish  --allow-dirty
 #
 # - 启动前核对: 选中设备在线、每台只剩一个刷新率、Android 屏幕刷新率与配置相差不超过 5%; 不满足就退出, 不开始运行。
-# - 构建: 两个版本并行, 日志在 build-<side>.log; 包按 sha 缓存, 同一提交再跑不重建。
+# - 构建: 两个版本并行, 日志在 build-<side>.log; 包按 sha + 基准代码指纹缓存, 同一提交再跑不重建。
 # - 两次运行之间按温度冷却: Android 等电池温度回到开跑时 +1°C 以内(最多 --cooldown 秒), iOS 固定 60s。
 # - 每次运行前: 设备最多等 120s 上线, Android 再核对一次刷新率; 不满足时这台设备剩下的运行记为失败并跳过, 其他设备继续。
-# - 产出 build/benchmark/device/<session>/<combo>/ 与 summary.md; --publish 再把摘要复制到 docs/benchmark/results/<session>/。
+# - 产出 build/benchmark/device/<session>/<combo>/ 与 summary.md(组合按 devices.conf 的行序); --publish 再调 publish.sh 发布到 docs/benchmark/results/<session>/。
 # - 有失败时写 retry-<UTC>.sh(每次调用一份), 执行它补采; summarize 会合并补采结果。
 set -euo pipefail
 source "$(dirname "$0")/lib.sh"
@@ -65,10 +65,12 @@ wait_online() {
   return 1
 }
 
-# Android 屏幕刷新率(整数 Hz); 读不到时为空。
+# Android 屏幕刷新率(整数 Hz); 读不到时为空。DisplayMode 里的字段名随系统版本而异, 两种都认:
+# peakRefreshRate= 或 refreshRate=; 后者要求前一个字符是空格、逗号或 {, 不会误匹配 peakRefreshRate= / vsyncRate=。
 display_hz() {
-  adb -s "$1" shell dumpsys display </dev/null 2>/dev/null \
-    | sed -n 's/.*mActiveSfDisplayMode.*peakRefreshRate=\([0-9][0-9]*\).*/\1/p' | head -1
+  adb -s "$1" shell dumpsys display </dev/null 2>/dev/null | sed -n \
+    -e 's/.*mActiveSfDisplayMode.*peakRefreshRate=\([0-9][0-9]*\).*/\1/p' \
+    -e 's/.*mActiveSfDisplayMode.*[ ,{]refreshRate=\([0-9][0-9]*\).*/\1/p' | head -1
 }
 
 # 实测 $1 与期望 $2 相差不超过 5%, 与 bench_driver 的核对口径一致。
@@ -220,22 +222,25 @@ for combo in "$OUT"/*/; do
   [[ -d "$combo/target" ]] || continue
   args=(summarize device --target "$combo/target" --out "$combo")
   [[ -d "$combo/baseline" ]] && args+=(--baseline "$combo/baseline")
-  bench_dart "${args[@]}" >/dev/null
+  # 某个组合一次成功的运行都没有时只警告: 不能因此跳过后面的发布和补采脚本。
+  bench_dart "${args[@]}" >/dev/null || echo "warning: no usable runs in $combo, left out of the summary" >&2
 done
 if ls "$OUT"/*/device-summary.md >/dev/null 2>&1; then
-  cat "$OUT"/*/device-summary.md >"$OUT/summary.md"
+  # 按完整 $CONF 的行序(补采时 $OUT/devices.conf 只剩被过滤的行); 清单里已删掉的组合排在最后。
+  combos="$({
+    awk '{ sub(/#.*/, "") } NF == 4 { print $1 "-" $4 "-" $3 "hz" }' "$CONF"
+    for combo in "$OUT"/*/; do basename "$combo"; done
+  } | awk '!seen[$0]++')"
+  for combo in $combos; do
+    [[ -f "$OUT/$combo/device-summary.md" ]] || continue
+    cat "$OUT/$combo/device-summary.md"
+  done >"$OUT/summary.md"
   echo "summary: $OUT/summary.md" >&2
 fi
 
+# 发布失败只警告: 后面还要写补采脚本。
 if $PUBLISH; then
-  DOCS="docs/benchmark/results/$SESSION"
-  for combo in "$OUT"/*/; do
-    [[ -f "$combo/device.json" ]] || continue
-    mkdir -p "$DOCS/$(basename "$combo")"
-    cp "$combo/device.json" "$combo/device-summary.md" "$DOCS/$(basename "$combo")/"
-  done
-  [[ -f "$OUT/summary.md" ]] && cp "$OUT/summary.md" "$DOCS/"
-  echo "published to $DOCS" >&2
+  "$BENCH_DIR/publish.sh" "$SESSION" || echo "warning: publish failed; run tool/benchmark/publish.sh $SESSION" >&2
 fi
 
 [[ -f "$FAILURES" ]] || exit 0

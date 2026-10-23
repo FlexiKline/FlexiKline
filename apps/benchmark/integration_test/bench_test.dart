@@ -23,8 +23,11 @@
 /// - `WINDOWS` / `WINDOW_SECONDS`: 每场景计时窗口数与窗口时长, 默认 3 × 6s(之前先驱动 3s 预热, 不计入), 冒烟时调小。
 library;
 
+import 'dart:io' show ProcessInfo;
+
 import 'package:flexi_kline_benchmark/src/app.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart' show SizedBox;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
@@ -80,6 +83,9 @@ void main() {
     double refreshRate = 0;
     for (final name in selected) {
       final scenario = scenarios[name]!;
+      // 先卸掉上一个场景再读 RSS: 窗口末的 RSS 减去它, 是本场景挂载与驱动带来的增量(不强制 GC, 只是近似)。
+      await tester.pumpWidget(const SizedBox());
+      final rssBefore = ProcessInfo.currentRss;
       await tester.pumpWidget(
         BenchApp(
           key: UniqueKey(),
@@ -109,7 +115,7 @@ void main() {
       }
 
       final windows = await recordWindows(ctx, _windows, prepare, drive);
-      results[name] = {'windows': windows};
+      results[name] = {'windows': windows, 'rssBefore': rssBefore};
       debugPrint('bench[$name]: ${[for (final w in windows) w['frames']]} frames per window');
     }
     binding.reportData = {

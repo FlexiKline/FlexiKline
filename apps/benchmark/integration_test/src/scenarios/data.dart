@@ -72,8 +72,8 @@ Future<void> _startup(ScenarioContext ctx) async {
       await ctx.nextFrame();
     }
     expect(painted(), isTrue, reason: '前置：启动后要挂载并合并出蜡烛');
-    // 数据在挂载后才合并, 再等一帧确保蜡烛已画出。
-    await ctx.nextFrame();
+    // 等合并与计算全部生效(isDataSettled), 再多一帧确保蜡烛已画出。
+    await ctx.settle();
     ctx.ops.add(watch.elapsedMicroseconds);
     await Future<void>.delayed(const Duration(milliseconds: 300));
   }

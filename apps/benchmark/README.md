@@ -58,4 +58,4 @@ Names are `<action>/<preset>`; existing names never change so results stay compa
 
 - Only use API that also exists in the baseline (`v2.5.6-monorepo`); put a version difference in `integration_test/src/compat.dart` and its baseline twin `compat_baseline.dart`, same signatures.
 - New scenarios are appended; never rename an existing one.
-- After a change: `fvm flutter analyze`, `fvm flutter test`, then `fvm flutter test -d flutter-tester integration_test/bench_test.dart --dart-define=WINDOWS=1 --dart-define=WINDOW_SECONDS=2` here and in the baseline tree (`tool/benchmark/overlay.sh build/benchmark/wt/<sha> --app`).
+- After a change: `fvm flutter analyze`, `fvm flutter test`, then `fvm flutter test -d flutter-tester integration_test/bench_test.dart --dart-define=WINDOWS=1 --dart-define=WINDOW_SECONDS=2` here and in the baseline tree (`tool/benchmark/overlay.sh .worktrees/benchmark/baseline --app`).

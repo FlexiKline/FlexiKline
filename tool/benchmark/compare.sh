@@ -65,11 +65,11 @@ run_side() {
 }
 
 echo "preparing target $TARGET" >&2
-bench_tree "$TARGET"
+bench_tree "$TARGET" target
 TARGET_TREE="$TREE"
 if [[ -n "$BASELINE" ]]; then
   echo "preparing baseline $BASELINE" >&2
-  bench_tree "$BASELINE"
+  bench_tree "$BASELINE" baseline
   BASELINE_TREE="$TREE"
 fi
 

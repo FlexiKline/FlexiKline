@@ -7,11 +7,11 @@
 #       [--allow-dirty]
 #
 # - --side 只决定结果目录; --ref 决定代码, 默认 target 为 HEAD、baseline 为 v2.5.6-monorepo;
-#   baseline 在 build/benchmark/wt/<sha> 运行, 由 overlay.sh --app 覆盖本 app;
+#   baseline 在 .worktrees/benchmark/baseline 运行(固定名字, 版本不对时重建), 由 overlay.sh --app 覆盖本 app;
 # - --binary 直接安装 build.sh 的包, 采集参数取自包旁的 build.env, 不再构建; 否则 flutter drive 自己构建;
 # - skia 只用于 Android(--no-enable-impeller); iOS 只有 Impeller;
 # - --hz 用于核对: 设备实测刷新率与它相差超过 5% 时 bench_driver 报错, 不出数;
-# - --label 覆盖目录名里的设备名(iOS 只能取到用户自定义的设备名)。
+# - --label 覆盖目录名里的设备名(默认取设备型号, 不用用户给手机起的名字)。
 #
 # 输出: build/benchmark/device/<session>/<label>-<backend>-<hz>hz/<side>/<UTC 时间>/{env.json,frames.json,drive.log}
 # 同一组合的多次运行落在同一个 <side> 目录下, 供 `bench.dart summarize device` 合并。
@@ -64,16 +64,17 @@ if [[ -n "$BINARY" ]]; then
   [[ -e "$BINARY" ]] || bench_die "no binary at $BINARY; run tool/benchmark/build.sh first"
   # shellcheck source=/dev/null
   source "$(dirname "$BINARY")/build.env"
-  REF="$BUILD_REF" SHA="$BUILD_SHA" MODE="$BUILD_MODE" SCENARIO="$BUILD_SCENARIO"
+  REF="$BUILD_REF" SHA="$BUILD_SHA" CODE="$BUILD_CODE" MODE="$BUILD_MODE" SCENARIO="$BUILD_SCENARIO"
   WINDOWS="$BUILD_WINDOWS" WINDOW_SECONDS="$BUILD_WINDOW_SECONDS"
   # driver 两版逐字相同, 从当前树跑, 不碰基线树: 多台设备并行时就不会同时改写它。
   APP_DIR="$BENCH_ROOT/apps/benchmark"
   ARGS+=(--use-application-binary="$BINARY")
 else
   [[ -n "$REF" ]] || { [[ "$SIDE" == baseline ]] && REF="v2.5.6-monorepo" || REF="HEAD"; }
-  [[ "$(git rev-parse "$REF^{commit}")" == "$(git rev-parse HEAD)" ]] && bench_require_clean "$ALLOW_DIRTY"
+  bench_require_clean "$ALLOW_DIRTY"
   SHA="$(bench_sha "$REF")"
-  bench_tree "$REF" --app
+  CODE="$(bench_code_id)${DIRTY:-}"
+  bench_tree "$REF" "$SIDE" --app
   APP_DIR="$TREE/apps/benchmark"
   ARGS+=(--dart-define=MODE="$MODE" --dart-define=WINDOWS="$WINDOWS" --dart-define=WINDOW_SECONDS="$WINDOW_SECONDS")
   [[ -n "$SCENARIO" ]] && ARGS+=(--dart-define=SCENARIO="$SCENARIO")
@@ -86,8 +87,9 @@ OUT="$BENCH_ROOT/build/benchmark/device/$SESSION/$SLUG-$BACKEND-${HZ}hz/$SIDE/$S
 [[ "$MODE" == trace ]] && OUT="$OUT-trace"
 mkdir -p "$OUT"
 
-VERSION="$(git show "$REF:packages/flexi_kline/pubspec.yaml" | sed -n 's/^version: *//p')"
-bench_dart env "$OUT/env.json" "version=$VERSION" "sha=$SHA" "flutter=$(bench_dart flutter-version)" \
+# 版本号取自构建时的提交: --binary 时 $REF 可能是 HEAD, 之后 HEAD 会移动。
+VERSION="$(git show "${SHA%-dirty}:packages/flexi_kline/pubspec.yaml" | sed -n 's/^version: *//p')"
+bench_dart env "$OUT/env.json" "version=$VERSION" "sha=$SHA" "code=$CODE" "flutter=$(bench_dart flutter-version)" \
   "device=$MODEL" "os=$OS" "platform=$KIND" "backend=$BACKEND" hz:="$HZ" "mode=$MODE" \
   "scenario=${SCENARIO:-all}" windows:="$WINDOWS" windowSeconds:="$WINDOW_SECONDS" "date=$STAMP"
 

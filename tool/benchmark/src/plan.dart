@@ -15,6 +15,7 @@
 /// `plan` 与 `device-info`: 设备清单解析与设备探测。
 library;
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'common.dart';
@@ -33,7 +34,12 @@ void plan(String conf) {
       stderr.writeln('$conf:${n + 1}: expected `<label> <device-id> <hz> <backend>`');
       exit(64);
     }
-    final [label, id, hz, backend] = fields;
+    final [label, id, hzText, backend] = fields;
+    final hz = int.tryParse(hzText);
+    if (hz == null) {
+      stderr.writeln('$conf:${n + 1}: hz must be an integer, got `$hzText`');
+      exit(64);
+    }
     final device = devices[id];
     if (device == null) {
       missing.add('$label ($id)');
@@ -42,7 +48,7 @@ void plan(String conf) {
     rows.add((
       label: label,
       id: id,
-      hz: int.parse(hz),
+      hz: hz,
       backend: backend,
       kind: platformKind(device),
     ));
@@ -56,7 +62,8 @@ void plan(String conf) {
   }
 }
 
-/// 输出 `<platform> <model> <os>`, 空格换成下划线; Android 型号用 getprop, 不用用户自定义的设备名。
+/// 输出 `<platform> <model> <os>`, 空格换成下划线; 型号不用用户自定义的设备名:
+/// Android 用 getprop, iOS 用 devicectl 的 marketingName(读不到时记 iOS_device, 不回退到设备名)。
 void deviceInfo(String id) {
   final device = connectedDevices()[id];
   if (device == null) {
@@ -66,10 +73,29 @@ void deviceInfo(String id) {
   final kind = platformKind(device);
   String clean(String v) => v.trim().replaceAll(RegExp(r'\s+'), '_');
   final (model, os) = kind == 'ios'
-      ? (device['name']! as String, device['sdk']! as String)
+      ? (_iosModel(id), device['sdk']! as String)
       : (
           run('adb', ['-s', id, 'shell', 'getprop', 'ro.product.model']),
           'Android ${run('adb', ['-s', id, 'shell', 'getprop', 'ro.build.version.release']).trim()}',
         );
   stdout.writeln('$kind ${clean(model)} ${clean(os)}');
+}
+
+String _iosModel(String udid) {
+  final dir = Directory.systemTemp.createTempSync('bench-devicectl');
+  try {
+    final file = '${dir.path}/devices.json';
+    final result = Process.runSync('xcrun', ['devicectl', 'list', 'devices', '--json-output', file]);
+    if (result.exitCode != 0) return 'iOS device';
+    final devices = (jsonDecode(File(file).readAsStringSync()) as Map)['result']['devices'] as List;
+    for (final d in devices.cast<Map<String, Object?>>()) {
+      final hardware = d['hardwareProperties'] as Map<String, Object?>? ?? const {};
+      if (hardware['udid'] == udid) return hardware['marketingName'] as String? ?? 'iOS device';
+    }
+    return 'iOS device';
+  } on Object {
+    return 'iOS device';
+  } finally {
+    dir.deleteSync(recursive: true);
+  }
 }

@@ -4,8 +4,10 @@
 #   tool/benchmark/build.sh --platform ios|android [--ref HEAD] [--mode frames|trace] [--scenario 'pan/*']
 #       [--windows 3] [--window-seconds 6] [--allow-dirty]
 #
-# dart-define 是编译期常量, 所以包按 sha + 平台 + 参数存放在 build/benchmark/bin/<key>/,
+# dart-define 是编译期常量, 所以包按 sha + 基准代码指纹 + 平台 + 参数存放在 build/benchmark/bin/<key>/,
 # 旁边的 build.env 记下这些参数, device.sh 据此写 env.json, 不再重复传。
+# 指纹覆盖 apps/benchmark、L1 场景与 harness、.fvmrc 的 HEAD 内容(见 lib.sh bench_code_id): 基线包里真正决定
+# 场景行为的是覆盖进去的这些代码, 它们变了基线包就要重建。
 # 同一干净 sha 的包已存在时直接复用; 带未提交改动(--allow-dirty)时每次重建。
 set -euo pipefail
 source "$(dirname "$0")/lib.sh"
@@ -33,9 +35,13 @@ done
 [[ "$PLATFORM" == ios || "$PLATFORM" == android ]] || bench_die "--platform must be ios or android"
 [[ "$MODE" == frames || "$MODE" == trace ]] || bench_die "--mode must be frames or trace"
 
-[[ "$(git rev-parse "$REF^{commit}")" == "$(git rev-parse HEAD)" ]] && bench_require_clean "$ALLOW_DIRTY"
+# 基线也要查: 覆盖进基线树的基准代码若有未提交改动, 按指纹缓存的包就不可信。
+bench_require_clean "$ALLOW_DIRTY"
 SHA="$(bench_sha "$REF")"
-KEY="$SHA-$PLATFORM-$MODE-${WINDOWS}x$WINDOW_SECONDS${SCENARIO:+-$(printf '%s' "$SCENARIO" | tr -c 'a-zA-Z0-9-' '_')}"
+# 基线包里决定场景行为的是覆盖进去的当前基准代码, 所以缓存键除 sha 外还要带它的指纹;
+# 带未提交改动时指纹加 -dirty: 基线 sha 不带 -dirty, 否则这次的包会覆盖同键的干净包, 之后被正式采集复用。
+CODE="$(bench_code_id)${DIRTY:-}"
+KEY="$SHA-$CODE-$PLATFORM-$MODE-${WINDOWS}x$WINDOW_SECONDS${SCENARIO:+-$(printf '%s' "$SCENARIO" | tr -c 'a-zA-Z0-9-' '_')}"
 DIR="$BENCH_ROOT/build/benchmark/bin/$KEY"
 case "$PLATFORM" in
   ios) BIN="$DIR/Runner.app" OUT_BIN=build/ios/iphoneos/Runner.app ;;
@@ -47,7 +53,7 @@ if [[ -e "$BIN" && -z "${DIRTY:-}" ]]; then
   exit 0
 fi
 
-bench_tree "$REF" --app
+bench_tree "$REF" baseline --app
 DEFINES=(--dart-define=MODE="$MODE" --dart-define=WINDOWS="$WINDOWS" --dart-define=WINDOW_SECONDS="$WINDOW_SECONDS")
 [[ -n "$SCENARIO" ]] && DEFINES+=(--dart-define=SCENARIO="$SCENARIO")
 echo "building $PLATFORM $REF ($SHA) -> $BIN" >&2
@@ -61,6 +67,7 @@ cp -R "$TREE/apps/benchmark/$OUT_BIN" "$BIN"
 cat >"$DIR/build.env" <<EOF
 BUILD_REF='$REF'
 BUILD_SHA='$SHA'
+BUILD_CODE='$CODE'
 BUILD_MODE='$MODE'
 BUILD_SCENARIO='$SCENARIO'
 BUILD_WINDOWS='$WINDOWS'

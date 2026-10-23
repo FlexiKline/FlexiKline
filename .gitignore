@@ -47,3 +47,6 @@ apps/*/pubspec_overrides.yaml
 # Local device lists for tool/benchmark/matrix.sh (devices.conf and variants; the example stays tracked)
 /tool/benchmark/devices*.conf
 !/tool/benchmark/devices.example.conf
+
+# Worktrees (benchmark baseline in .worktrees/benchmark/, development trees)
+/.worktrees/

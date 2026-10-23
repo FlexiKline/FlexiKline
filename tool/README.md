@@ -16,6 +16,8 @@ Repository-level scripts. Everything here runs from the repository root with `fv
 | `matrix.sh` | run an unattended capture on the devices in `devices.conf`, both versions, one refresh rate per call (`--hz`); writes `retry-<time>.sh` for failed runs |
 | `build.sh` | build a profile benchmark app once for `device.sh --binary` (matrix calls it) |
 | `overlay.sh` | copy the current benchmark code into another version's worktree (called by the others) |
+| `publish.sh` | copy a session's `device.json` files and merged `summary.md` to `docs/benchmark/results/<session>/` (`matrix.sh --publish` calls it) |
+| `clean.sh` | remove the baseline / target worktrees under `.worktrees/benchmark/` |
 | `lib.sh` | shared shell functions (sourced, not run) |
 | `bench.dart` | data processing: `summarize micro|device`, `plan`, `device-info`, `flutter-version`, `env` |
 | `devices.example.conf` | template for the git-ignored `devices.conf` |
@@ -36,6 +38,6 @@ tool/benchmark/matrix.sh --session <name> --hz 120                   # after swi
 fvm dart tool/benchmark/bench.dart summarize device --target <dir>/target --baseline <dir>/baseline --out <dir>
 ```
 
-Results go to `build/benchmark/` (ignored). Baseline worktrees are cached under `build/benchmark/wt/<sha>`; remove one with `git worktree remove --force build/benchmark/wt/<sha>`.
+Results go to `build/benchmark/` (ignored). The baseline worktree lives in `.worktrees/benchmark/baseline` (plus `target` when `compare.sh --target` is not HEAD): fixed names, reused while their HEAD matches the requested ref and recreated otherwise, and outside `build/` so `flutter clean` does not remove them. `tool/benchmark/clean.sh` removes them.
 
 The device app and its scenarios live in `apps/benchmark/` (see its README).
