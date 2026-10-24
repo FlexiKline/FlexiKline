@@ -1,0 +1,123 @@
+name: Benchmark
+
+# 发版时在同一台 runner 上对照本版本与上一版本的 L1 整帧 benchmark, 推送到 FlexiKline/benchmark-data:
+# 绝对帧耗时受 runner 硬件影响, 只看大趋势; 加速比是同机比值, 才是「每个版本的提升」。
+
+on:
+  push:
+    tags: ["flexi_kline-v*"]
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "被测 ref（tag 或 sha）"
+        required: true
+      baseline:
+        description: "对照 ref，留空取 target 之前最近的 flexi_kline-v* tag，没有则 v2.5.6-monorepo"
+        required: false
+      push-data:
+        description: "写入 benchmark-data（回填须按版本从旧到新）"
+        type: boolean
+        default: false
+
+concurrency:
+  group: benchmark
+  cancel-in-progress: false # 不取消运行中的 run; 但同组只保留一个排队中的 run, 回填须等上一次跑完再触发
+
+permissions:
+  contents: read
+
+jobs:
+  l1:
+    name: L1 benchmark
+    if: github.repository == 'FlexiKline/FlexiKline' # secret 只配在公开仓库
+    runs-on: ubuntu-24.04 # 钉死镜像, 减少与代码无关的跳变
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v6
+        with: { fetch-depth: 0 } # 解析 tag 与建 worktree 需要完整历史
+
+      - name: Resolve refs and Flutter version
+        id: refs
+        env:
+          INPUT_TARGET: ${{ inputs.target }}
+          INPUT_BASELINE: ${{ inputs.baseline }}
+        run: |
+          set -euo pipefail
+          target="${INPUT_TARGET:-$GITHUB_REF_NAME}"
+          baseline="$INPUT_BASELINE"
+          if [ -z "$baseline" ]; then
+            # target 之前最近的发布 tag; tag 与 sha 都适用, 没有更早的发布时退回 monorepo 基线。
+            baseline=$(git describe --tags --abbrev=0 --match 'flexi_kline-v*' "$target^" 2>/dev/null || echo v2.5.6-monorepo)
+          fi
+          {
+            echo "target=$target"
+            echo "baseline=$baseline"
+            echo "target_sha=$(git rev-parse "$target^{commit}")"
+            echo "flutter=$(jq -r .flutter .fvmrc)"
+          } >> "$GITHUB_OUTPUT"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ steps.refs.outputs.flutter }}
+          channel: stable
+          cache: true
+
+      # 脚本统一调用 fvm; runner 上直接转发给 PATH 里的 flutter / dart。
+      - name: fvm shim
+        run: |
+          mkdir -p "$RUNNER_TEMP/bin"
+          printf '#!/bin/sh\nexec "$@"\n' > "$RUNNER_TEMP/bin/fvm"
+          chmod +x "$RUNNER_TEMP/bin/fvm"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+
+      - name: Compare
+        env:
+          TARGET: ${{ steps.refs.outputs.target }}
+          BASELINE: ${{ steps.refs.outputs.baseline }}
+        run: tool/benchmark/compare.sh --target "$TARGET" --baseline "$BASELINE" --rounds 2 --out build/benchmark/l1
+
+      - run: cat build/benchmark/l1/summary.md >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-l1-${{ steps.refs.outputs.target }}
+          path: build/benchmark/l1/*.json
+
+      - name: Trend (absolute)
+        if: github.event_name == 'push' || inputs.push-data
+        uses: benchmark-action/github-action-benchmark@4322e5726e6334590d251fc4f92bec0efafc45dc # v1.22.2
+        with:
+          name: L1 frame time (us/frame)
+          tool: customSmallerIsBetter
+          output-file-path: build/benchmark/l1/gha.json
+          gh-repository: github.com/FlexiKline/benchmark-data
+          gh-pages-branch: main
+          benchmark-data-dir-path: flexi_kline/l1
+          github-token: ${{ secrets.BENCHMARK_DATA_TOKEN }}
+          ref: ${{ steps.refs.outputs.target_sha }} # 回填时数据点记在被测提交上, 而不是触发时的 main
+          auto-push: true
+          alert-threshold: "150%" # 托管 runner 同一提交两次读数常差 10%~30%
+          fail-on-alert: false
+          comment-on-alert: false
+
+      # action 把 gh-repository 克隆到 ./benchmark-data-repository, 推送成功后不删除; 不清掉的话下一步 clone 会因目录非空失败。
+      - name: Reset benchmark-data clone
+        if: github.event_name == 'push' || inputs.push-data
+        run: rm -rf benchmark-data-repository
+
+      - name: Trend (speedup vs previous release)
+        if: github.event_name == 'push' || inputs.push-data
+        uses: benchmark-action/github-action-benchmark@4322e5726e6334590d251fc4f92bec0efafc45dc # v1.22.2
+        with:
+          name: L1 speedup vs previous release (x)
+          tool: customBiggerIsBetter
+          output-file-path: build/benchmark/l1/gha-speedup.json
+          gh-repository: github.com/FlexiKline/benchmark-data
+          gh-pages-branch: main
+          benchmark-data-dir-path: flexi_kline/l1
+          github-token: ${{ secrets.BENCHMARK_DATA_TOKEN }}
+          ref: ${{ steps.refs.outputs.target_sha }}
+          auto-push: true
+          alert-threshold: "150%"
+          fail-on-alert: false
+          comment-on-alert: false
