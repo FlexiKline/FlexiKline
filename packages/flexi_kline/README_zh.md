@@ -2,11 +2,15 @@
 
 [English](README.md) | 简体中文
 
-FlexiKline 是一个 Flutter 金融 K 线图表框架，指标、绘制工具、样式与手势都可以替换或扩展，适用于股票、数字货币等行情展示场景。
+FlexiKline 是面向股票、数字货币行情的 Flutter K 线图表框架。指标、绘制工具、样式和手势都是可替换的扩展点，业务侧按需组合。
 
 ## Demo
 
 [在线体验](https://flexikline.github.io)
+
+## 性能
+
+真机 benchmark 结果：[docs/benchmark](https://github.com/FlexiKline/FlexiKline/blob/main/docs/benchmark/README.md)。
 
 ## 版本要求
 
@@ -15,13 +19,12 @@ FlexiKline 是一个 Flutter 金融 K 线图表框架，指标、绘制工具、
 
 ## 特性
 
-- 自定义指标：实现指标配置与绘制对象两个接口就能接入
-- 计算与绘制解耦：指标计算在独立的 `IndicatorCalculator` 里，不碰渲染，可以单独测试
-- 自定义绘制工具：实现 `DrawObject` 定义自己的画法与命中判定
-- 主副区布局：全屏 / 横屏切换，图表宽高可动态调整
-- 配置可控：样式、参数、指标、绘制都能定制，整体序列化落盘，`FlexiKlineConfig` 的写入时机由业务侧决定
-- 手势操作：惯性平移、缩放锚点、平移平滑均可调；嵌在可滚动容器里也能正常拿到手势
-- 多平台：Android、iOS、Web、macOS、Windows、Linux
+- **指标框架**：直绘、预计算、外部数据三类指标；计算与绘制解耦，可单独测试；指标支持动画。
+- **绘制工具框架**：实现 `DrawObject` 定义图形与命中判定；[flexi_kline_draw_tools](https://pub.dev/packages/flexi_kline_draw_tools) 内置 19 种工具。
+- **一切可配置**：样式、参数、指标、绘制整体序列化，写入时机由业务侧决定。
+- **主副区布局**：全屏 / 横屏切换，图表宽高可动态调整。
+- **手势**：支持触摸、鼠标、触控板与键盘；惯性平移、双指或滚轮缩放、十字线、价格轴缩放、副区高度调整；参数可调，可嵌入滚动容器。
+- **多平台**：Android、iOS、Web、macOS、Windows、Linux。
 
 ## 安装
 
@@ -29,7 +32,7 @@ FlexiKline 是一个 Flutter 金融 K 线图表框架，指标、绘制工具、
 
 ```yaml
 dependencies:
-  flexi_kline: ^2.6.0
+  flexi_kline: ^2.6.1
 ```
 
 然后运行：

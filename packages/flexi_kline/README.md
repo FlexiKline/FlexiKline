@@ -2,11 +2,15 @@
 
 English | [简体中文](https://github.com/FlexiKline/FlexiKline/blob/main/packages/flexi_kline/README_zh.md)
 
-FlexiKline is a Flutter candlestick (K-line) chart framework for stock and crypto markets. Indicators, drawing tools, styles and gestures can all be replaced or extended.
+FlexiKline is a Flutter candlestick (K-line) chart framework for stock and crypto markets. Indicators, drawing tools, styles and gestures are all replaceable extension points, composed by your app as needed.
 
 ## Demo
 
 [Try it online](https://flexikline.github.io)
+
+## Performance
+
+Real-device benchmark results: [docs/benchmark](https://github.com/FlexiKline/FlexiKline/blob/main/docs/benchmark/README.md).
 
 ## Requirements
 
@@ -15,13 +19,12 @@ FlexiKline is a Flutter candlestick (K-line) chart framework for stock and crypt
 
 ## Features
 
-- Custom indicators: implement an indicator config and a paint object to plug one in.
-- Calculation decoupled from rendering: indicator math lives in an `IndicatorCalculator`, testable on its own.
-- Custom drawing tools: implement `DrawObject` to define the shape and its hit test.
-- Main/sub pane layout: fullscreen and landscape switching, chart size adjustable at runtime.
-- Controllable configuration: styles, params, indicators and drawings are all customizable and serialize as a whole; when `FlexiKlineConfig` is persisted is up to your app.
-- Gestures: tunable fling, zoom anchor and pan smoothing; works inside scrollable containers.
-- Platforms: Android, iOS, Web, macOS, Windows, Linux.
+- **Indicator framework**: direct, computed and external indicators; calculation is decoupled from painting and testable on its own; indicators can animate.
+- **Drawing tool framework**: implement `DrawObject` for your own shape and hit test; [flexi_kline_draw_tools](https://pub.dev/packages/flexi_kline_draw_tools) ships 19 tools.
+- **Everything configurable**: styles, params, indicators and drawings serialize as a whole; when to persist is up to your app.
+- **Main/sub panes**: fullscreen and landscape switching, chart size adjustable at runtime.
+- **Gestures**: touch, mouse, trackpad and keyboard; pan with inertia, pinch or wheel zoom, crosshair, price-axis scaling, pane resizing; tunable, and works inside scrollable containers.
+- **Platforms**: Android, iOS, Web, macOS, Windows, Linux.
 
 ## Installation
 
@@ -29,7 +32,7 @@ Add the dependency to `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  flexi_kline: ^2.6.0
+  flexi_kline: ^2.6.1
 ```
 
 Then run:
