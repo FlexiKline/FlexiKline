@@ -122,7 +122,7 @@ void main() {
       scene.main.setMinMax(_mm(100, 0));
 
       // dyFactor == 0 → 除零会产生 Infinity → 应返回 null
-      final value = scene.main.dyToValue(20.0, check: false);
+      final value = scene.main.dyToValue(20.0);
       expect(value, isNull, reason: 'dyFactor <= 0 时 dyToValue 应返回 null');
     });
   });

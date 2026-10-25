@@ -36,44 +36,48 @@ void main() {
   test('MA and VOLMA equal the window mean of close / volume', () {
     final data = load();
     BenchMaIndicator().createCalculator(0).compute(data, data.computableRange, reset: true);
+    // 第 i 根的 MA 是 data[i-count+1..i] 的均值; 取距最新第 3 根。
+    final i = data.length - 1 - 3;
     for (final (j, param) in BenchMaIndicator().calcParam.indexed) {
       final count = param.count;
-      final ma = data[3].getList<FlexiNum>(0)![j]!.toDouble();
-      expect(ma, closeTo(mean(data, 3, count, (m) => m.close.toDouble()), 1e-6), reason: 'MA$count');
+      final ma = data[i].getList<FlexiNum>(0)![j]!.toDouble();
+      expect(ma, closeTo(mean(data, i - count + 1, count, (m) => m.close.toDouble()), 1e-6), reason: 'MA$count');
     }
 
     final volData = load();
     BenchVolMaIndicator().createCalculator(0).compute(volData, volData.computableRange, reset: true);
-    final ma5 = volData[0].getList<FlexiNum>(0)![0]!.toDouble();
-    expect(ma5, closeTo(mean(volData, 0, 5, (m) => m.vol.toDouble()), 1e-6));
+    final latest = volData.length - 1;
+    final ma5 = volData[latest].getList<FlexiNum>(0)![0]!.toDouble();
+    expect(ma5, closeTo(mean(volData, latest - 4, 5, (m) => m.vol.toDouble()), 1e-6));
   });
 
   test('non-positive MA / VOLMA periods are skipped instead of dividing by zero', () {
     const black = Color(0xFF000000);
     final ma = load();
+    final i = ma.length - 1 - 3;
     BenchMaIndicator(
       calcParam: const [(count: 0, color: black), (count: 5, color: black)],
     ).createCalculator(0).compute(ma, ma.computableRange, reset: true);
-    expect(ma[3].getList<FlexiNum>(0)![0], isNull);
-    expect(ma[3].getList<FlexiNum>(0)![1], isNotNull);
+    expect(ma[i].getList<FlexiNum>(0)![0], isNull);
+    expect(ma[i].getList<FlexiNum>(0)![1], isNotNull);
 
     final vol = load();
     BenchVolMaIndicator(
       calcParam: const [(count: 0, color: black), (count: 5, color: black)],
     ).createCalculator(0).compute(vol, vol.computableRange, reset: true);
-    expect(vol[3].getList<FlexiNum>(0)![0], isNull);
-    expect(vol[3].getList<FlexiNum>(0)![1], isNotNull);
+    expect(vol[i].getList<FlexiNum>(0)![0], isNull);
+    expect(vol[i].getList<FlexiNum>(0)![1], isNotNull);
   });
 
   test('MACD matches an independent EMA(12, 26, 9) reference', () {
     final data = load();
     BenchMacdIndicator().createCalculator(0).compute(data, data.computableRange, reset: true);
-    // 独立参考: 从最旧一根起顺序递推, 以首根 close 为种子。
+    // 独立参考: 从最旧一根(下标 0)起顺序递推, 以首根 close 为种子。
     double ema(double prev, double v, int n) => prev + (v - prev) * 2 / (n + 1);
     var short = 0.0, long = 0.0, dea = 0.0, dif = 0.0;
-    for (var i = data.length - 1; i >= 0; i--) {
+    for (var i = 0; i < data.length; i++) {
       final close = data[i].close.toDouble();
-      if (i == data.length - 1) {
+      if (i == 0) {
         short = long = close;
         dea = 0;
       } else {
@@ -83,11 +87,11 @@ void main() {
       }
       dif = short - long;
     }
-    final newest = data[0].get<BenchMacdResult>(0)!;
+    final newest = data[data.length - 1].get<BenchMacdResult>(0)!;
     expect(newest.dif.toDouble(), closeTo(dif, 1e-6), reason: 'DIF');
     expect(newest.dea.toDouble(), closeTo(dea, 1e-6), reason: 'DEA');
     expect(newest.macd.toDouble(), closeTo(2 * (dif - dea), 1e-6), reason: 'MACD bar');
-    expect(data[data.length - 1].get<BenchMacdResult>(0)!.macd.toDouble(), 0, reason: '首值种子: DIF = DEA = 0');
+    expect(data[0].get<BenchMacdResult>(0)!.macd.toDouble(), 0, reason: '首值种子: DIF = DEA = 0');
   });
 
   test('MACD compute is a full recompute: the range argument is ignored', () {

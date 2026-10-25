@@ -16,8 +16,8 @@
 ///
 /// 观察点取**绘制产物**而非内部字段：横线经 `drawPath` 落在 Canvas 上，刻度值再由
 /// `dyToCandleValue` 从横线位置反算。这样两条只会「行为错、不报错」的实现细节才有回归网——
-/// `dyToValue` 漏传 `check: false` 会让刻度整体消失（横线数归零），`valueToDy` 漏传
-/// `correct: false` 会把留白区的刻度钳到边缘（反算出的值不再是 step 整数倍）。
+/// `dyToValue` 若检查 dy 是否落在窗格内，会让刻度整体消失（横线数归零）；`valueToDy` 若钳制到
+/// 窗格内，会把留白区的刻度钳到边缘（反算出的值不再是 step 整数倍）。
 ///
 /// 最关键的一条是「算法不碰 `minMax`」：它是 Y 轴 zoom 的数据载体，一旦被 nice 算法外扩，
 /// 用户精确控制的跨度就会被撑回去，平滑插值也会在换档时整幅跳一下。缩放与平移两组各守一端。
@@ -109,12 +109,12 @@ void main() {
 
   /// 由横线位置反算刻度值，升序返回。
   ///
-  /// 反算而不是读内部缓存：它同时校验了 dy 是由 `valueToDy(correct: false)` 换算来的——若走
-  /// 默认的钳制版本，留白区刻度的 dy 会挤到边缘，反算值随之不再是 step 整数倍。
+  /// 反算而不是读内部缓存：它同时校验了 dy 是由不钳制的 `valueToDy` 换算来的——若钳制到窗格内，
+  /// 留白区刻度的 dy 会挤到边缘，反算值随之不再是 step 整数倍。
   ///
   /// 代价是 `Path` 的坐标按 float32 存储，反算值带 1e-6 量级的相对噪声，见 [expectNiceMultiples]。
   List<double> tickValues(_TickSpyCanvas spy, FlexiKlineController chart) {
-    final values = tickDys(spy, chart).map((dy) => chart.dyToCandleValue(dy, check: false)!.toDouble()).toList();
+    final values = tickDys(spy, chart).map((dy) => chart.dyToCandleValue(dy)!.toDouble()).toList();
     return values..sort();
   }
 
@@ -123,12 +123,12 @@ void main() {
   /// `mainPaintObject` 只在 package 内可见，所以经映射读端点（与 `chart_zoom_test` 同一口径）：
   /// `dyToValue(chartRect.top)` 按定义恰好等于 `minMax.max`，不引入任何误差。
   double rangeMax(FlexiKlineController chart) {
-    return chart.dyToCandleValue(chart.mainChartRect.top, check: false)!.toDouble();
+    return chart.dyToCandleValue(chart.mainChartRect.top)!.toDouble();
   }
 
   /// 当前生效区间的下端，即 `minMax.min`。
   double rangeMin(FlexiKlineController chart) {
-    return chart.dyToCandleValue(chart.mainChartRect.bottom, check: false)!.toDouble();
+    return chart.dyToCandleValue(chart.mainChartRect.bottom)!.toDouble();
   }
 
   /// 断言 [values] 等距，且每个值都是这个步长的整数倍。返回步长。
@@ -194,7 +194,7 @@ void main() {
       );
       expect(
         tickValues(spy, chart).first,
-        closeTo(chart.dyToCandleValue((_divisions - 1) * dyStep, check: false)!.toDouble(), 1e-9),
+        closeTo(chart.dyToCandleValue((_divisions - 1) * dyStep)!.toDouble(), 1e-9),
         reason: '值由位置反算, 不经过任何取整',
       );
     });
@@ -238,7 +238,7 @@ void main() {
       final spy = await paintFrame(tester, chart);
       final values = tickValues(spy, chart);
 
-      expect(values, isNotEmpty, reason: '刻度为空说明 dyToValue 漏了 check: false');
+      expect(values, isNotEmpty, reason: '刻度为空说明 dyToValue 做了窗格归属检查');
       expectNiceMultiples(values);
     });
 

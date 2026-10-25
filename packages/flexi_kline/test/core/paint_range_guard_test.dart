@@ -37,11 +37,11 @@ void main() {
       scene.controller.flushPendingKlineData();
       final data = scene.controller.klineData;
 
-      data.ensureStartAndEndIndex(0, 10);
+      data.ensurePaintRange(barsBack: 10, count: 10);
       expect(data.canPaintChart, isTrue, reason: '[0, 10) 是合法区间');
 
       // maxCandleCount 为 0 时 calculatePaintChartRange 就会算出这个退化区间。
-      data.ensureStartAndEndIndex(0, 0);
+      data.ensurePaintRange(barsBack: data.length, count: 0);
       expect(data.start, data.end);
       expect(
         data.canPaintChart,

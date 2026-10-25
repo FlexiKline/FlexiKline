@@ -6,7 +6,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('MockKlineApi', () {
-    test('首次取最新一页：默认 500 根、降序、confirmed', () async {
+    test('首次取最新一页：默认 500 根、升序、confirmed', () async {
       final api = MockKlineApi();
       final candles = await api.fetchCandles(
         symbol: 'BTCUSDT',
@@ -14,9 +14,9 @@ void main() {
       );
 
       expect(candles, hasLength(500));
-      expect(candles.first.confirmed, isTrue);
+      expect(candles.last.confirmed, isTrue);
       for (var i = 0; i < candles.length - 1; i++) {
-        expect(candles[i].timestamp, greaterThan(candles[i + 1].timestamp));
+        expect(candles[i].timestamp, lessThan(candles[i + 1].timestamp));
       }
     });
 
@@ -26,7 +26,7 @@ void main() {
         symbol: 'BTCUSDT',
         interval: MyKlineInterval.minute15,
       );
-      final end = first.last.timestamp;
+      final end = first.first.timestamp;
       final second = await api.fetchCandles(
         symbol: 'BTCUSDT',
         interval: MyKlineInterval.minute15,
@@ -38,7 +38,7 @@ void main() {
         expect(c.timestamp, lessThan(end));
       }
       // 第二页最新一根早于第一页最旧一根，无重叠。
-      expect(second.first.timestamp, lessThan(first.last.timestamp));
+      expect(second.last.timestamp, lessThan(first.first.timestamp));
     });
 
     test('周期数据缓存：同一周期多次调用返回一致', () async {
@@ -64,7 +64,7 @@ void main() {
       final api = MockKlineApi();
       final candles = await api.fetchCandles(symbol: 'BTCUSDT', interval: MyKlineInterval.minute15);
 
-      expect(candles.first.timestamp % (15 * 60 * 1000), 0);
+      expect(candles.last.timestamp % (15 * 60 * 1000), 0);
     });
 
     test('isRealtime=false 回放 JSON 历史时间戳', () async {
@@ -72,10 +72,10 @@ void main() {
       final candles = await api.fetchCandles(symbol: 'BTCUSDT', interval: MyKlineInterval.minute15);
 
       expect(candles, hasLength(500));
-      // 最新一根 = 统一锚点 2025-01-01 00:00:00 UTC，相邻间隔 15 分钟。
-      expect(candles.first.timestamp, 1735689600000);
+      // 最新一根 = 统一锚点 2025-01-01 00:00:00 UTC，相邻间隔 15 分钟（升序）。
+      expect(candles.last.timestamp, 1735689600000);
       for (var i = 0; i < candles.length - 1; i++) {
-        expect(candles[i].timestamp - candles[i + 1].timestamp, 15 * 60 * 1000);
+        expect(candles[i + 1].timestamp - candles[i].timestamp, 15 * 60 * 1000);
       }
     });
   });

@@ -375,13 +375,10 @@ mixin DrawObjectMixin on DrawStateObject, PaintResourceOwner {
 extension DrawContextExt on DrawContext {
   /// 以当前蜡烛图绘制参数为基础, 将绘制参数[point]转换Offset坐标.
   Offset? calculateDrawPointOffset(Point point) {
-    final dy = valueToDy(point.value);
-    if (dy == null) return null;
-
     final dx = timestampToDx(point.ts);
     if (dx == null) return null;
 
-    return Offset(dx, dy);
+    return Offset(dx, valueToDy(point.value));
   }
 
   /// 以当前蜡烛图绘制数据为基础, 将[object]的所有point的坐标更新为蜡烛数据坐标
@@ -413,9 +410,7 @@ extension DrawContextExt on DrawContext {
 
     double dx = offset.dx, dy = offset.dy;
     final index = dxToIndex(dx);
-    if (index != null) {
-      dx = indexToDx(index)! - candleWidthHalf;
-    }
+    dx = indexToDx(index);
     final value = dyToValue(dy);
     final candle = klineData.get(index);
     if (value != null && candle != null) {
@@ -424,21 +419,17 @@ extension DrawContextExt on DrawContext {
       final minDistance = drawConfig.magnetMinDistance;
       if (value > high) {
         final highDy = valueToDy(high);
-        if (highDy != null) {
-          if (drawMagnet.isWeak && (highDy - dy) <= minDistance) {
-            dy = highDy;
-          } else if (drawMagnet.isStrong) {
-            dy = highDy;
-          }
+        if (drawMagnet.isWeak && (highDy - dy) <= minDistance) {
+          dy = highDy;
+        } else if (drawMagnet.isStrong) {
+          dy = highDy;
         }
       } else if (value < low) {
         final lowDy = valueToDy(low);
-        if (lowDy != null) {
-          if (drawMagnet.isWeak && (dy - lowDy) <= minDistance) {
-            dy = lowDy;
-          } else if (drawMagnet.isStrong) {
-            dy = lowDy;
-          }
+        if (drawMagnet.isWeak && (dy - lowDy) <= minDistance) {
+          dy = lowDy;
+        } else if (drawMagnet.isStrong) {
+          dy = lowDy;
         }
       } else {
         FlexiNum midLow, midHigh;
@@ -457,7 +448,7 @@ extension DrawContextExt on DrawContext {
         } else if (value < high) {
           result = (high - value) > (value - midHigh) ? midHigh : high;
         }
-        if (result != null) dy = valueToDy(result) ?? dy;
+        if (result != null) dy = valueToDy(result);
       }
     }
     return Offset(dx, dy);
@@ -471,8 +462,7 @@ extension DrawContextExt on DrawContext {
       final pointDx = point?.offset.dx;
       if (pointDx == null) return false;
       final index = dxToIndex(pointDx);
-      if (index == null) return false;
-      final dx = indexToDx(index)! - candleWidthHalf;
+      final dx = indexToDx(index);
       // 计算point实际dx坐标与当前所在蜡烛中心坐标距离.
       final deltaDx = (pointDx - dx).abs();
       first ??= deltaDx;

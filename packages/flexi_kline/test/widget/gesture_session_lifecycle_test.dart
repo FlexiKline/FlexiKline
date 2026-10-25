@@ -252,7 +252,6 @@ void main() {
       expect(scene.chart.paintDxOffset, greaterThan(0), reason: '前置条件: middle 走锚定中心的分支');
       final anchorDx = scene.chart.mainChartLeft + scene.chart.mainChartWidthHalf;
       final anchoredIndex = scene.chart.dxToIndex(anchorDx);
-      expect(anchoredIndex, isNotNull, reason: '前置条件: 锚点必须对应可见蜡烛');
       final beforeSecondScale = scene.chart.candleWidth;
 
       // 张开得够多才拉得开两种锚定的差距: 缩放倍率越接近 1, middle 与 left 固定的两点
@@ -267,7 +266,7 @@ void main() {
       expect(scene.chart.candleWidth, greaterThan(beforeSecondScale), reason: '前置条件: 第二 segment 必须已缩放');
       expect(
         scene.chart.dxToIndex(anchorDx),
-        closeTo(anchoredIndex!, 1),
+        closeTo(anchoredIndex, 1),
         reason: '重新按新质心解析为 left 会改成锚定左边界, 主图中心下的蜡烛随之跳变',
       );
 

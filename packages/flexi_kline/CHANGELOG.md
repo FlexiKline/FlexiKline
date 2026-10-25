@@ -1,4 +1,13 @@
 ## 2.7.0
+* Store candles in ascending time order (`KlineData.list.first` is the oldest, `list.last` the latest) and traverse, compute and paint left-to-right; data passed to `replaceKlineData`, `updateLatestKlineData` and `appendHistoryKlineData` must be in ascending time order (asserted in debug) (Breaking Changes).
+* Change `indexToDx` to return the non-nullable candle center (extrapolated outside the data) and `dxToIndex` to return the non-nullable index of the candle under `dx`; add `latestCandleDx` and `dxToFloatIndex` to `PaintObject` geometry; remove `indexToCandleDx` and `startCandleDx` (Breaking Changes).
+* Remove the `startOffset` parameter from `paintOHLCStyleCandleChart`, `paintCandleLineChart` and `paintCandleUpDownLineChart`; their default range now extends one candle beyond each side of the visible range (Breaking Changes).
+* Change `timestampToIndex` / `indexToTimestamp` to map to candle centers, interpolating by timestamp between adjacent candles and extrapolating by interval outside the data, so saved drawings shift by half a candle (Breaking Changes).
+* Rename `KlineData.ensureStartAndEndIndex(startIndex, maxCount)` to `ensurePaintRange({barsBack, count})` (Breaking Changes).
+* Change the default of `PaintObject.valueToDy`'s `correct` to `false`, matching the controller and `DrawContext`; pass `correct: true` to clamp into the chart rect (Breaking Changes).
+* Change the default of `PaintObject.dyToValue`'s `check` to `false`, matching the controller and `DrawContext`; pass `check: true` to return null for a `dy` outside the pane (Breaking Changes).
+* Change `DrawContext.valueToDy` to return a non-nullable `double` (Breaking Changes).
+* Add `KlineData.labelOriginIndex` so time-axis labels stay on the same candles after loading more history.
 * Remove the unused public helpers `combineCandleList`, `removeDuplicate` and `KlineData.paintTimeRange` (Breaking Changes).
 
 ## 2.6.1

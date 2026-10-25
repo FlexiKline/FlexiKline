@@ -67,7 +67,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   /// 蜡烛图位置动画回调，由手势Widget在挂载后注入.
   MoveToPositionCallback? moveToPositionCallback;
 
-  /// 首根蜡烛是否移出屏幕 listenable。
+  /// 最新一根蜡烛是否移出屏幕 listenable。
   final _isFirstCandleMovedOffScreenNotifier = ValueNotifier(false);
   ValueListenable<bool> get isFirstCandleMovedOffScreenListenable {
     return _isFirstCandleMovedOffScreenNotifier;
@@ -164,7 +164,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
 
   /// 设置当前KlineData:
   /// 1. 通知timeInterval变更
-  /// 2. 初始化首根蜡烛绘制位置于屏幕右侧[getInitPaintDxOffset]指定处.
+  /// 2. 初始化最新一根蜡烛绘制位置于屏幕右侧[getInitPaintDxOffset]指定处.
   /// 3. 重绘图表
   /// 4. 取消Cross绘制(如果有)
   void _setKlineData(KlineData data, {bool resetPaintDxOffset = true}) {
@@ -195,32 +195,21 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
 
   /// 将[dx]转换为当前绘制区域对应的蜡烛的下标.
   @override
-  int? dxToIndex(double dx) {
-    return mainPaintObject.dxToIndex(dx).toInt();
+  int dxToIndex(double dx) {
+    return mainPaintObject.dxToIndex(dx);
   }
 
-  /// 将[index]转换为当前绘制区域对应的X轴坐标.
+  /// 将[index]转换为蜡烛中心的 X 轴坐标.
   @override
-  double? indexToDx(int index, {bool check = false}) {
-    return mainPaintObject.indexToDx(index, check: check);
-  }
-
-  /// 将 [index] 转换为蜡烛中心的 X 坐标。
-  double? indexToCandleDx(int index, {bool check = false}) {
-    final dx = indexToDx(index, check: false);
-    if (dx == null) return null;
-
-    final candleDx = dx - candleWidthHalf;
-    if (check && !mainChartRect.includeDx(candleDx)) return null;
-    return candleDx;
+  double indexToDx(num index) {
+    return mainPaintObject.indexToDx(index);
   }
 
   /// 将[dx]精确转换为蜡烛的时间戳ts, 差异部分补充到ts中.
   @override
   int? dxToTimestamp(double dx) {
-    final indexValue = mainPaintObject.dxToIndex(dx);
-    final ts = klineData.indexToTimestamp(indexValue);
-    return ts;
+    final indexValue = mainPaintObject.dxToFloatIndex(dx);
+    return klineData.indexToTimestamp(indexValue);
   }
 
   /// 将时间戳[ts]精确转换为dx坐标, 并将差异部分汇总到dx中.
@@ -228,8 +217,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   double? timestampToDx(int ts) {
     final indexValue = klineData.timestampToIndex(ts);
     if (indexValue == null) return null;
-    final dx = mainPaintObject.indexToDx(indexValue, check: false);
-    return dx;
+    return mainPaintObject.indexToDx(indexValue);
   }
 
   @override
@@ -252,18 +240,6 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     return candlePaintObject.dyToValue(dy, check: check);
   }
 
-  /// 当前canvas绘制区域起始蜡烛右部dx值.
-  @override
-  double get startCandleDx {
-    if (paintDxOffset == 0) {
-      return mainChartRight;
-    } else if (paintDxOffset > 0) {
-      return mainChartRight + paintDxOffset % candleActualWidth;
-    } else {
-      return mainChartRight + paintDxOffset;
-    }
-  }
-
   /// 画布是否可以从右向左进行平移.
   bool get canPanRTL => paintDxOffset > minPaintDxOffset;
 
@@ -274,16 +250,16 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
 
   double _paintDxOffset = 0;
 
-  /// 代表当前绘制区域相对于startIndex右侧的偏移量.
-  /// 1. 当为零时(默认) : 说明首根蜡烛在Canvas右边界展示.
-  /// 2. 当为负数时     : 代表首根蜡烛到Canvas右边界的距离.
-  /// 3. 当为正数时     : 说明首根蜡烛已向右移出Canvas.
+  /// 最新一根蜡烛相对绘制区右缘的偏移量.
+  /// 1. 当为零时(默认) : 最新一根贴在 Canvas 右边界展示.
+  /// 2. 当为负数时     : 最新一根到 Canvas 右边界的空白距离.
+  /// 3. 当为正数时     : 最新一根已向右移出 Canvas.
   ///     移出右边界的蜡烛数量 = (paintDxOffset / candleActualWidth).floor()
-  ///     绘制起始蜡烛的向右边界外的偏移 = paintDxOffset % candleActualWidth;
+  ///     最右可见蜡烛超出右边界的偏移 = paintDxOffset % candleActualWidth;
   @override
   double get paintDxOffset => _paintDxOffset;
 
-  /// 绘制偏移的唯一写入点: 夹取到合法区间, 并同步「首根蜡烛已移出屏幕」通知。
+  /// 绘制偏移的唯一写入点: 夹取到合法区间, 并同步「最新一根蜡烛已移出屏幕」通知。
   /// 返回偏移是否真的变化: 贴在边界上继续同向平移即为 false, 调用方据此跳过重绘。
   bool _setPaintDxOffset(double value) {
     final newOffset = clampPaintDxOffset(value);
@@ -313,8 +289,8 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
 
   double getInitPaintDxOffset() {
     return math.min(
-      maxPaintWidth - mainChartWidth, // 不足一屏, 首根蜡烛偏移量等于首根蜡烛右边长度.
-      -settingConfig.firstCandleInitOffset, // 满足一屏时, 首根蜡烛相对于主绘制区域最小的偏移量
+      maxPaintWidth - mainChartWidth, // 不足一屏时取此值, 最旧一根贴绘制区左缘.
+      -settingConfig.firstCandleInitOffset, // 满足一屏时, 最新一根到绘制区右缘的留白.
     );
   }
 
@@ -360,7 +336,8 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     final targetTimestamp = data.get(index)?.ts;
     if (targetTimestamp == null) return null;
 
-    final target = index * candleActualWidth + candleWidthHalf - mainChartWidthHalf;
+    final barsBack = klineData.length - 1 - index;
+    final target = barsBack * candleActualWidth + candleWidthHalf - mainChartWidthHalf;
     requestCancelCross();
     if (!await _moveToPaintDxOffset(target)) return null;
     if (!isMounted || !identical(klineData, data)) return null;
@@ -381,13 +358,10 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   /// 计算绘制蜡烛图的范围
   void calculatePaintChartRange() {
     if (paintDxOffset > 0) {
-      final startIndex = (paintDxOffset / candleActualWidth).floor();
+      final barsBack = (paintDxOffset / candleActualWidth).floor();
       final diff = paintDxOffset % candleActualWidth;
       final maxCount = ((mainChartWidth + diff) / candleActualWidth).round();
-      klineData.ensureStartAndEndIndex(
-        startIndex,
-        maxCount,
-      );
+      klineData.ensurePaintRange(barsBack: barsBack, count: maxCount);
     } else {
       int maxCount;
       if (settingConfig.alwaysCalculateScreenOfCandlesIfEnough) {
@@ -398,10 +372,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
         final offsetIndex = (paintDxOffset.abs() / candleActualWidth).round();
         maxCount = maxCandleCount - offsetIndex;
       }
-      klineData.ensureStartAndEndIndex(
-        0,
-        maxCount,
-      );
+      klineData.ensurePaintRange(barsBack: 0, count: maxCount);
     }
 
     SchedulerBinding.instance.addPostFrameCallback((_) {

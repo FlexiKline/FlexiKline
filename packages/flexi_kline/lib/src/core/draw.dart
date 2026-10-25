@@ -371,8 +371,7 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
         for (final point in object.points) {
           if (point == null) continue;
           final index = dxToIndex(point.offset.dx);
-          if (index == null) continue;
-          final dx = indexToDx(index)! - candleWidthHalf;
+          final dx = indexToDx(index);
           object.onUpdateDrawPoint(point, Offset(dx, point.offset.dy));
         }
       }

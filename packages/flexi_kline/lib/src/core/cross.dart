@@ -109,14 +109,11 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
   Offset? _correctCrossOffset(Offset val) {
     if (val.isInfinite) return null;
 
-    // Horizontal轴按蜡烛线移动.
+    // 横轴吸附到蜡烛中心; 最新根右侧空白区未开 moveByCandleInBlank 时不吸附。
     val = val.clamp(canvasRect);
-    final diff = startCandleDx - val.dx;
-    if (!crossConfig.moveByCandleInBlank && diff < 0) return val;
-    return Offset(
-      val.dx + diff % candleActualWidth - candleWidthHalf,
-      val.dy,
-    );
+    final index = dxToIndex(val.dx);
+    if (!crossConfig.moveByCandleInBlank && index >= klineData.length) return val;
+    return Offset(indexToDx(index), val.dy);
   }
 
   /// 点击语义: 未开则开、已开则关。返回开启后是否处于 crossing。
@@ -181,7 +178,7 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
   void requestCancelCross() {
     if (isCrossing || crossOffset != null) {
       _updateOffset(null);
-      // 当Cross事件结束后, 调用markRepaintChart触发绘制Chart图层首根蜡烛的tips信息.
+      // 当Cross事件结束后, 调用markRepaintChart触发绘制Chart图层最新一根蜡烛的tips信息.
       markRepaintChart();
       _markRepaintCross();
     }
@@ -198,13 +195,9 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
     FlexiCandleModel? model;
     if (crossConfig.showLatestTipsInBlank) {
       model = dxToCandle(offset.dx);
-      // 如果当前model为空, 则根据offset.dx计算当前model是最新的, 还是最后的.
+      // 落在数据外时: 最新根右侧取最新一根, 最旧根左侧取最旧一根。
       if (model == null && klineData.isNotEmpty) {
-        if (offset.dx > startCandleDx) {
-          model = klineData.latest;
-        } else {
-          model = klineData.list.last;
-        }
+        model = dxToIndex(offset.dx) >= klineData.length ? klineData.latest : klineData.list.first;
       }
     }
 
@@ -246,9 +239,8 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
     final tooltipTextStyle = tooltipConfig.style.ensure(theme.tooltipTextColor);
 
     final index = dxToIndex(offset.dx);
-    if (index == null) return;
     model ??= klineData.get(index);
-    final prev = klineData.get(index + 1);
+    final prev = klineData.get(index - 1);
     if (model == null) return;
 
     /// 准备数据

@@ -58,11 +58,9 @@ Rect _sliderRect(FlexiKlineController chart) => Rect.fromLTWH(
 /// 当前可见价格区间的跨度（经公开面 dyToCandleValue 反算）。
 double _rangeSpan(FlexiKlineController chart) => _rangeMax(chart) - _rangeMin(chart);
 
-double _rangeMax(FlexiKlineController chart) =>
-    chart.dyToCandleValue(chart.mainChartRect.top, check: false)!.toDouble();
+double _rangeMax(FlexiKlineController chart) => chart.dyToCandleValue(chart.mainChartRect.top)!.toDouble();
 
-double _rangeMin(FlexiKlineController chart) =>
-    chart.dyToCandleValue(chart.mainChartRect.bottom, check: false)!.toDouble();
+double _rangeMin(FlexiKlineController chart) => chart.dyToCandleValue(chart.mainChartRect.bottom)!.toDouble();
 
 double _rangeCenter(FlexiKlineController chart) => (_rangeMax(chart) + _rangeMin(chart)) / 2;
 
@@ -174,10 +172,10 @@ Future<void> _enterMouse(WidgetTester tester, Offset localPosition) async {
   await tester.pump();
 }
 
-/// 稳定落在蜡烛区的 cross 焦点：往左第 5 根。空白区（`dx > startCandleDx`）另有
+/// 稳定落在蜡烛区的 cross 焦点：最新根往左第 5 根的中心。空白区（最新根右侧）另有
 /// `crossConfig.moveByCandleInBlank` 决定吸不吸附，本组不测那条分支。
 Offset _candleAreaFocus(FlexiKlineController chart) => Offset(
-  chart.startCandleDx - chart.candleActualWidth * 5,
+  chart.indexToDx(chart.klineData.length - 6),
   chart.mainRect.center.dy,
 );
 
@@ -525,7 +523,7 @@ void main() {
       expect(
         controller.crossOffset!.dx,
         isNot(closeTo(crossBefore!.dx, precisionError)),
-        reason: '指针没动但 startCandleDx 变了, 焦点该吸附到另一根蜡烛',
+        reason: '指针没动但蜡烛位置变了, 焦点该吸附到另一根蜡烛',
       );
     });
 

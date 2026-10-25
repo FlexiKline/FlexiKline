@@ -53,9 +53,6 @@ class FakePaintContext implements PaintContext {
   bool isChartZooming = false;
 
   @override
-  double get startCandleDx => 0;
-
-  @override
   double get paintDxOffset => 0;
 
   /// 由测试驱动的 cross 态；决定 tips 走 `doPaintChart` 还是 `doPaintCross` 分支。

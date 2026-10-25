@@ -18,7 +18,7 @@
 ///
 /// 两处最容易做错的地方：
 ///
-/// 一是 **nice 的值不再由算法一路传下来**，改由画文本时 `dyToValue(check: false)` 现算。
+/// 一是 **nice 的值不再由算法一路传下来**，改由画文本时 `dyToValue` 现算。
 /// 只要 `valueToDy` / `dyToValue` 不是严格互逆，刻度文本就会显示成不等差的数字，而线的位置
 /// 看起来完全正常。
 ///
@@ -113,8 +113,8 @@ void main() {
       expect(dys.length, greaterThanOrEqualTo(3), reason: '前置条件: 刻度太少断言会空转');
 
       // 算法的原值: 与 mixin 内部同一组入参。
-      final top = object.dyToValue(bounds.top, check: false)!.toDouble();
-      final bottom = object.dyToValue(bounds.bottom, check: false)!.toDouble();
+      final top = object.dyToValue(bounds.top)!.toDouble();
+      final bottom = object.dyToValue(bounds.bottom)!.toDouble();
       final expected = computeNiceTicks(
         bottom: bottom,
         top: top,
@@ -127,8 +127,8 @@ void main() {
       // 价格上是 1e-14 绝对误差, formatPrice 的四舍五入会吸收掉。
       for (final precision in [2, 8]) {
         for (var i = 0; i < dys.length; i++) {
-          final restored = object.dyToValue(dys[i], check: false);
-          expect(restored, isNotNull, reason: 'check: false 漏了会让整条刻度静默消失');
+          final restored = object.dyToValue(dys[i]);
+          expect(restored, isNotNull, reason: '做了窗格归属检查会让整条刻度静默消失');
           expect(
             formatPrice(restored!.toDecimal(), precision: precision, cutInvalidZero: false),
             formatPrice(expected[i].toFlexiNum().toDecimal(), precision: precision, cutInvalidZero: false),

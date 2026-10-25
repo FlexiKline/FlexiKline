@@ -78,13 +78,15 @@ class _BenchVolMaCalculator extends IndicatorCalculator<BenchVolMaIndicator> {
         params[i].count,
         paramIndex: i,
         paramLen: params.length,
-        start: math.max(0, range.start - params[i].count), // 补起上一次未算数据
+        start: range.start,
         end: range.end,
       );
     }
   }
 
   /// 计算 [count] 周期均量, 写入 [start, end) 区间。
+  ///
+  /// 第 i 根的值是 vol[i-count+1..i] 的均值, 首个有值下标为 count-1。
   void _calculateVolMa(
     KlineData data,
     int count, {
@@ -96,18 +98,19 @@ class _BenchVolMaCalculator extends IndicatorCalculator<BenchVolMaIndicator> {
     final len = data.list.length;
     if (count > len || !data.checkStartAndEnd(start, end)) return;
 
-    end = math.min(len - count, end - 1);
+    final from = math.max(start, count - 1);
+    if (from >= end) return;
 
-    FlexiCandleModel m = data.list[end];
+    FlexiCandleModel m = data.list[from];
     FlexiNum sum = m.vol;
-    for (int i = end + 1; i < end + count; i++) {
+    for (int i = from - count + 1; i < from; i++) {
       sum += data.list[i].vol;
     }
     m.getOrInitList(dataIndex, paramLen)[paramIndex] = sum.divNum(count);
 
-    for (int i = end - 1; i >= start; i--) {
+    for (int i = from + 1; i < end; i++) {
       m = data.list[i];
-      sum = sum - data.list[i + count].vol + m.vol;
+      sum = sum - data.list[i - count].vol + m.vol;
       m.getOrInitList(dataIndex, paramLen)[paramIndex] = sum.divNum(count);
     }
   }
@@ -133,8 +136,9 @@ class _BenchVolMaPaintObject extends ComputedPaintObject<BenchVolMaIndicator>
     // 任一周期长于数据时均线整体不出值(与计算器一致)。
     if (params.isNotEmpty && params.every((p) => p.count <= len)) {
       final minCount = params.map((p) => p.count).reduce(math.min);
-      final maEnd = math.min(len - minCount, end - 1);
-      for (int i = maEnd; i >= start; i--) {
+      // 跳过首个有值下标之前的暖机段。
+      final maStart = math.max(start, minCount - 1);
+      for (int i = maStart; i < end; i++) {
         final itemMinmax = klineData.list[i].getList<FlexiNum>(dataIndex)?.minmax;
         maMinmax ??= itemMinmax;
         maMinmax?.updateMinMax(itemMinmax);
@@ -182,7 +186,6 @@ class _BenchVolMaPaintObject extends ComputedPaintObject<BenchVolMaIndicator>
     final int start = klineData.start;
     final int end = klineData.end;
 
-    final offset = startCandleDx - candleWidthHalf;
     final dyBottom = chartRect.bottom;
 
     final longPaint = defLongBarPaint..color = longColor.withAlpha(indicator.volOpacity.alpha);
@@ -190,8 +193,8 @@ class _BenchVolMaPaintObject extends ComputedPaintObject<BenchVolMaIndicator>
 
     for (var i = start; i < end; i++) {
       final model = list[i];
-      final dx = offset - (i - start) * candleActualWidth;
-      var dy = valueToDy(model.vol);
+      final dx = indexToDx(i);
+      var dy = valueToDy(model.vol, correct: true);
       // Y 轴以可见区最小值为底, 最小那根量柱高度为 0; 不足 0.5 时画 1px, 避免看不见。
       if (dyBottom - dy < 0.5) dy = dyBottom - 1;
       final isLong = model.close >= model.open;
@@ -202,17 +205,16 @@ class _BenchVolMaPaintObject extends ComputedPaintObject<BenchVolMaIndicator>
 
   void _paintVolMaLines(Canvas canvas) {
     final list = klineData.list;
-    final int start = klineData.start;
-    final int end = (klineData.end + 1).clamp(start, list.length); // 多绘制一根蜡烛
+    final int start = math.max(klineData.start - 1, 0); // 左缘多绘制一根蜡烛
+    final int end = klineData.end;
 
-    final offset = startCandleDx - candleWidthHalf;
     for (int j = 0; j < indicator.calcParam.length; j++) {
       FlexiNum? val;
       final List<Offset> points = [];
       for (int i = start; i < end; i++) {
         val = list[i].getList<FlexiNum>(dataIndex)?.getItem(j);
         if (val == null) continue;
-        points.add(Offset(offset - (i - start) * candleActualWidth, valueToDy(val, correct: false)));
+        points.add(Offset(indexToDx(i), valueToDy(val)));
       }
 
       canvas.drawPath(

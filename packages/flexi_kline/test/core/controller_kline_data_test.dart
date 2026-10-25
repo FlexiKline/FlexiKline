@@ -99,7 +99,7 @@ void main() {
         config: FakeFlexiKlineConfiguration(mainChildren: {key}),
       );
       addTearDown(scene.dispose);
-      await scene.initWithData(_spec, _candles(3).reversed.toList(), mainIndicators: [indicator]);
+      await scene.initWithData(_spec, _candles(3), mainIndicators: [indicator]);
       scene.controller.flushPendingKlineData();
       await tester.pumpAndSettle();
       log.clear();
@@ -126,12 +126,12 @@ void main() {
     testWidgets('非 Current spec 的三类更新不会修改冻结缓存', (tester) async {
       final scene = ControllerScenario();
       addTearDown(scene.dispose);
-      await scene.initWithData(_spec, _candles(3).reversed.toList());
+      await scene.initWithData(_spec, _candles(3));
       scene.controller.flushPendingKlineData();
       await tester.pumpAndSettle();
 
       scene.controller.switchKlineData(_nextSpec);
-      scene.controller.replaceKlineData(_nextSpec, _candles(2).reversed.toList());
+      scene.controller.replaceKlineData(_nextSpec, _candles(2));
       await tester.pumpAndSettle();
 
       final inactiveData = scene.controller.switchKlineData(_spec, useCacheFirst: true)
@@ -173,7 +173,7 @@ void main() {
       expect(scene.controller.klineData.loadingState, KlineLoadingState.loadingMore);
       expect(
         scene.controller.klineData.list.map((item) => item.ts),
-        _candles(3).reversed.map((item) => item.timestamp),
+        _candles(3).map((item) => item.timestamp),
       );
     });
 
@@ -185,19 +185,19 @@ void main() {
         config: FakeFlexiKlineConfiguration(mainChildren: {key}),
       );
       addTearDown(scene.dispose);
-      await scene.initWithData(_spec, _candles(3).reversed.toList(), mainIndicators: [indicator]);
+      await scene.initWithData(_spec, _candles(3), mainIndicators: [indicator]);
       scene.controller.flushPendingKlineData();
       await tester.pumpAndSettle();
 
       scene.controller.switchKlineData(_nextSpec);
-      scene.controller.replaceKlineData(_nextSpec, _candles(2).reversed.toList());
+      scene.controller.replaceKlineData(_nextSpec, _candles(2));
       await tester.pumpAndSettle();
       log.clear();
 
       expect(scene.controller.switchKlineData(_spec, useCacheFirst: true), isTrue);
       expect(log.events.where((event) => event.startsWith('compute:')), isEmpty);
 
-      scene.controller.replaceKlineData(_spec, _candles(3).reversed.toList());
+      scene.controller.replaceKlineData(_spec, _candles(3));
 
       expect(log.events.where((event) => event.startsWith('compute:')), ['compute:cache(reset:true)']);
     });
@@ -208,14 +208,14 @@ void main() {
       addTearDown(scene.dispose);
       await scene.initWithData(
         _spec,
-        _candles(3).reversed.toList(),
+        _candles(3),
         mainIndicators: [SpyComputedIndicator(key: key, log: LifecycleLog())],
       );
       scene.controller.flushPendingKlineData();
       await tester.pumpAndSettle();
 
       scene.controller.switchKlineData(_nextSpec);
-      scene.controller.replaceKlineData(_nextSpec, _candles(2).reversed.toList());
+      scene.controller.replaceKlineData(_nextSpec, _candles(2));
       await tester.pumpAndSettle();
 
       expect(scene.controller.hasAddedMainIndicator(key), isFalse);
@@ -230,7 +230,7 @@ void main() {
     testWidgets('无缓存切换：立即取消 cross 并触发清屏重绘', (tester) async {
       final scene = ControllerScenario();
       addTearDown(scene.dispose);
-      await scene.initWithData(_spec, _candles(3).reversed.toList());
+      await scene.initWithData(_spec, _candles(3));
       scene.controller.flushPendingKlineData();
       await tester.pumpAndSettle();
 

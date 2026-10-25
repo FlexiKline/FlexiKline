@@ -55,7 +55,7 @@ const _settle = Duration(milliseconds: 60);
 List<CandleModel> _candles() => List.generate(
   20,
   (index) => CandleModel(
-    timestamp: 20000 - index * 60000,
+    timestamp: 20000 - (19 - index) * 60000,
     open: 100,
     high: 110,
     low: 90,

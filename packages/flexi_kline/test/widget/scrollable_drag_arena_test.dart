@@ -61,7 +61,7 @@ const _settle = Duration(milliseconds: 60);
 List<CandleModel> _candles() => List.generate(
   20,
   (index) => CandleModel(
-    timestamp: 20000 - index * 60000,
+    timestamp: 20000 - (19 - index) * 60000,
     open: 100,
     high: 110,
     low: 90,
@@ -90,7 +90,7 @@ Future<({FlexiKlineController chart, ScrollController scroll})> _pumpChartInList
 
 /// 当前生效价格区间的上端：主图区顶边对应的价格。
 double _rangeMax(FlexiKlineController chart) {
-  return chart.dyToCandleValue(chart.mainChartRect.top, check: false)!.toDouble();
+  return chart.dyToCandleValue(chart.mainChartRect.top)!.toDouble();
 }
 
 Offset _toGlobal(WidgetTester tester, Offset local) => toChartGlobal(tester, local);

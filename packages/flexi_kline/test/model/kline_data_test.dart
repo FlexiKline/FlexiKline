@@ -32,7 +32,7 @@ void main() {
         const KlineSpec(symbol: 'TEST', interval: invalidInterval),
       );
       data.replace(
-        timestamps.map(_makeCandle).toList(),
+        (timestamps.toList()..sort()).map(_makeCandle).toList(),
         slotCount: 0,
       );
       return data;
@@ -42,9 +42,9 @@ void main() {
       final data = createData([100, 80, 50]);
       addTearDown(data.dispose);
 
-      expect(data.indexAtOrBefore(100), 0);
+      expect(data.indexAtOrBefore(50), 0);
       expect(data.indexAtOrBefore(80), 1);
-      expect(data.indexAtOrBefore(50), 2);
+      expect(data.indexAtOrBefore(100), 2);
     });
 
     test('时间缺口返回不晚于目标的最近真实蜡烛', () {
@@ -52,7 +52,7 @@ void main() {
       addTearDown(data.dispose);
 
       expect(data.indexAtOrBefore(90), 1);
-      expect(data.indexAtOrBefore(79), 2);
+      expect(data.indexAtOrBefore(79), 0);
     });
 
     test('空数据或目标超出已加载范围返回null', () {

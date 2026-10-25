@@ -139,25 +139,28 @@ class ExampleTheme implements IFlexiKlineTheme {
   Color get tooltipTextColor => const Color(0xFF111111);
 }
 
-/// Random-walk candles, newest first (the order flexi_kline expects).
+/// Random-walk candles in ascending time order (oldest first, newest last — the order flexi_kline expects).
 List<CandleModel> generateCandles(int count) {
   final random = math.Random(7);
   final hour = const Duration(hours: 1).inMilliseconds;
   final now = DateTime.now().millisecondsSinceEpoch ~/ hour * hour;
+  final candles = <CandleModel>[];
   var close = 60000.0;
-  return List.generate(count, (i) {
+  for (var i = 0; i < count; i++) {
     final open = close + (random.nextDouble() - 0.5) * 400;
     final high = math.max(open, close) + random.nextDouble() * 200;
     final low = math.min(open, close) - random.nextDouble() * 200;
-    final candle = CandleModel(
-      timestamp: now - i * hour,
-      open: open,
-      high: high,
-      low: low,
-      close: close,
-      volume: random.nextDouble() * 100,
+    candles.add(
+      CandleModel(
+        timestamp: now - (count - 1 - i) * hour,
+        open: open,
+        high: high,
+        low: low,
+        close: close,
+        volume: random.nextDouble() * 100,
+      ),
     );
     close = open;
-    return candle;
-  });
+  }
+  return candles;
 }

@@ -63,6 +63,8 @@ abstract class BaseData with FlexiLog {
   bool get invalid => spec.symbol.isEmpty;
 
   List<FlexiCandleModel> _list;
+
+  /// 蜡烛列表, 按时间严格升序: `list.first` 最旧, `list.last` 最新。
   List<FlexiCandleModel> get list => _list;
   int get length => _list.length;
   bool get isEmpty => _list.isEmpty;
@@ -70,7 +72,7 @@ abstract class BaseData with FlexiLog {
 
   int _start = 0;
 
-  /// 当前绘制区域起始下标 右
+  /// 当前绘制区间起始下标(含)。
   int get start => _start;
   set start(int val) {
     _start = val.clamp(0, length);
@@ -78,15 +80,35 @@ abstract class BaseData with FlexiLog {
 
   int _end = 0;
 
-  /// 当前绘制区域结束下标 左
+  /// 当前绘制区间结束下标(不含), `end - 1` 为最右侧可见根。
   /// 注: 遍历时, 应 < end;
   int get end => _end;
   set end(int val) {
     _end = val.clamp(0, length);
   }
 
+  int _labelOriginIndex = 0;
+
+  /// 时间轴标签的锚点下标: 标签取 `(i - labelOriginIndex) % step == 0` 的蜡烛,
+  /// 头部插入历史时随之平移, 使标签不随 loadMore 或新蜡烛跳动。
+  int get labelOriginIndex => _labelOriginIndex;
+
   bool checkStartAndEnd(int start, int end) {
     return isNotEmpty && start < end && start >= 0 && end <= length;
+  }
+
+  /// 首个 `ts >= [ts]` 的下标; 全部早于 [ts] 时返回 [length]。
+  int _lowerBound(int ts) {
+    var low = 0, high = length;
+    while (low < high) {
+      final mid = low + ((high - low) >> 1);
+      if (_list[mid].ts < ts) {
+        low = mid + 1;
+      } else {
+        high = mid;
+      }
+    }
+    return low;
   }
 
   /// 当前绘制区间 `[start, end)` 是否可用。

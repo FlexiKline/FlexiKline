@@ -347,7 +347,6 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
             // 绘制普通折线图
             paintCandleLineChart(
               canvas,
-              startOffset: startCandleDx - candleWidthHalf,
               linePaint: getLinePaint(
                 color: indicator.lineColor,
                 strokeWidth: candleLineWidth,
@@ -361,7 +360,6 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
             // 绘制涨跌线图
             paintCandleUpDownLineChart(
               canvas,
-              startOffset: startCandleDx - candleWidthHalf,
               longLinePaint: getLinePaint(color: longColor),
               shortLinePaint: getLinePaint(color: shortColor),
               longGradient: indicator.longGradientConfig?.createGradient(
@@ -468,7 +466,6 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
     final start = klineData.start;
     final end = klineData.end;
 
-    final offset = startCandleDx - candleWidthHalf;
     final barWidthHalf = candleWidthHalf - candleSpacing;
 
     Offset? maxHighOffset, minLowOffset;
@@ -478,20 +475,20 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
     FlexiCandleModel m;
     for (var i = start; i < end; i++) {
       m = klineData[i];
-      final dx = offset - (i - start) * candleActualWidth;
+      final dx = indexToDx(i);
       addCandleBar(m, dx: dx, barWidthHalf: barWidthHalf, chartStyle: style);
 
       if (indicator.high.show) {
         if (hasEnough) {
-          // 满足一屏, 根据initData中的最大最小值来记录最大最小偏移量.
+          // 满足一屏: 用 initData 的全局极值, 并列时只记首次命中(最左/最旧).
           if (m.high == _maxHigh) {
-            maxHighOffset = Offset(dx, valueToDy(m.high, correct: false));
+            maxHighOffset ??= Offset(dx, valueToDy(m.high));
             maxHigh = _maxHigh!;
           }
         } else {
-          // 如果当前绘制不足一屏, 最大最小绘制仅限可见区域.
-          if (m.high >= maxHigh) {
-            maxHighOffset = Offset(dx, valueToDy(m.high, correct: false));
+          // 不足一屏: 极值限可见区域, 严格大于使并列标最左(最旧).
+          if (m.high > maxHigh) {
+            maxHighOffset = Offset(dx, valueToDy(m.high));
             maxHigh = m.high;
           }
         }
@@ -499,15 +496,15 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
 
       if (indicator.low.show) {
         if (hasEnough) {
-          // 满足一屏, 根据initData中的最大最小值来记录最大最小偏移量.
+          // 满足一屏: 用 initData 的全局极值, 并列时只记首次命中(最左/最旧).
           if (m.low == _minLow) {
-            minLowOffset = Offset(dx, valueToDy(m.low, correct: false));
+            minLowOffset ??= Offset(dx, valueToDy(m.low));
             minLow = _minLow!;
           }
         } else {
-          // 如果当前绘制不足一屏, 最大最小绘制仅限可见区域.
-          if (m.low <= minLow) {
-            minLowOffset = Offset(dx, valueToDy(m.low, correct: false));
+          // 不足一屏: 极值限可见区域, 严格小于使并列标最左(最旧).
+          if (m.low < minLow) {
+            minLowOffset = Offset(dx, valueToDy(m.low));
             minLow = m.low;
           }
         }
@@ -568,7 +565,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
     }
 
     // 计算最新价YAxis位置.
-    double dy = clampDyInChart(valueToDy(model.close));
+    double dy = clampDyInChart(valueToDy(model.close, correct: true));
 
     // 计算最新价XAxis位置.
     final rdx = chartRect.right;
@@ -580,7 +577,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
       final MarkConfig inViewPriceMark = indicator.inViewPriceMark;
       if (!inViewPriceMark.show) return;
 
-      ldx = startCandleDx;
+      ldx = latestCandleDx + candleWidthHalf;
 
       final useCandleColor = indicator.useCandleColorForLatestPriceBackground;
       final updownColor = model.close >= model.open ? longColor : shortColor;
@@ -594,7 +591,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
         drawableRect.bottom - halfHeight,
       );
 
-      // 绘制首根蜡烛到rdx的刻度线.
+      // 绘制最新一根蜡烛到rdx的刻度线.
       final latestPath = Path();
       latestPath.moveTo(rdx, dy);
       latestPath.lineTo(ldx, dy);
@@ -790,8 +787,8 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
 
     final point = indicator.latestPoint!;
     final offset = Offset(
-      startCandleDx - candleWidthHalf,
-      clampDyInChart(valueToDy(model.close)),
+      latestCandleDx,
+      clampDyInChart(valueToDy(model.close, correct: true)),
     );
     canvas.drawCirclePoint(
       offset,
@@ -831,7 +828,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
     final (top, bottom) = resolveChartType() is FlexiLineChartType
         ? (model.close, model.close)
         : (model.high, model.low);
-    final topDy = valueToDy(top);
+    final topDy = valueToDy(top, correct: true);
     // auto 按配置估算上方是否放得下; 强制方位放不下时由 bounds 夹回主区。
     final above = switch (config.position) {
       DateMarkPosition.above => true,
@@ -848,8 +845,8 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
       style: style,
       anchor: Offset(
         // 同 paintCandleBars: 蜡烛中心。
-        startCandleDx - candleWidthHalf - (i - klineData.start) * candleActualWidth,
-        above ? topDy - config.spacing : valueToDy(bottom) + config.spacing,
+        indexToDx(i),
+        above ? topDy - config.spacing : valueToDy(bottom, correct: true) + config.spacing,
       ),
       align: above ? Alignment.bottomCenter : Alignment.topCenter,
       bounds: drawableRect,

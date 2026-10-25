@@ -53,7 +53,7 @@ CandleModel _candle(int timestamp) => CandleModel(
 void main() {
   testWidgets('绑定非空数据后 start 不自动计算', (tester) async {
     final scene = _scene();
-    scene.data.replace([_candle(2), _candle(1)], slotCount: scene.manager.computedDataCapacity);
+    scene.data.replace([_candle(1), _candle(2)], slotCount: scene.manager.computedDataCapacity);
     addTearDown(scene.data.dispose);
     addTearDown(scene.manager.dispose);
     final pipeline = KlineDataPipeline(
@@ -115,7 +115,7 @@ void main() {
       onComputed: () {},
     );
     addTearDown(pipeline.dispose);
-    final batch = [_candle(2), _candle(1)];
+    final batch = [_candle(1), _candle(2)];
 
     pipeline.replace(batch);
     batch
@@ -123,7 +123,7 @@ void main() {
       ..add(_candle(99));
     pipeline.start();
 
-    expect(scene.data.list.map((item) => item.ts), [2, 1]);
+    expect(scene.data.list.map((item) => item.ts), [1, 2]);
   });
 
   testWidgets('dispose 后不能重新启动或接收任务', (tester) async {
@@ -143,7 +143,7 @@ void main() {
     pipeline.dispose();
     pipeline.invalidateAll();
     pipeline.recompute(scene.calculator);
-    pipeline.replace([_candle(2), _candle(1)]);
+    pipeline.replace([_candle(1), _candle(2)]);
     pipeline.start();
     await tester.pump(const Duration(seconds: 1));
 
@@ -169,7 +169,7 @@ void main() {
     pipeline.start();
     logger.entries.clear();
 
-    pipeline.replace([_candle(2), _candle(1)]);
+    pipeline.replace([_candle(1), _candle(2)]);
 
     var merge = logger.entries.singleWhere((entry) => entry.msg.startsWith('Merge:::'));
     expect(merge.level, FlexiLogLevel.debug);
@@ -178,10 +178,10 @@ void main() {
     expect(merge.msg, matches(RegExp(r'spent:\d+μs$')));
 
     logger.entries.clear();
-    pipeline.updateLatest([_candle(3), _candle(2)]);
+    pipeline.updateLatest([_candle(2), _candle(3)]);
     expect(logger.entries.where((entry) => entry.msg.startsWith('Merge:::')), isEmpty);
 
-    pipeline.appendHistory([_candle(1), _candle(0)]);
+    pipeline.appendHistory([_candle(0), _candle(1)]);
     merge = logger.entries.singleWhere((entry) => entry.msg.startsWith('Merge:::'));
     expect(merge.msg, contains('kind:appendHistory'));
   });
@@ -200,7 +200,7 @@ void main() {
     );
     addTearDown(pipeline.dispose);
     pipeline.start();
-    pipeline.replace([_candle(2), _candle(1)]);
+    pipeline.replace([_candle(1), _candle(2)]);
 
     final compute = logger.entries.singleWhere((entry) => entry.msg.startsWith('Compute:::'));
     expect(compute.level, FlexiLogLevel.debug);
@@ -252,12 +252,12 @@ void main() {
     );
     addTearDown(pipeline.dispose);
     pipeline.start();
-    pipeline.replace([_candle(2), _candle(1)]);
+    pipeline.replace([_candle(1), _candle(2)]);
     scene.calculator.computeCount = 0;
 
     pipeline.updateLatest([_candle(2)]);
 
-    expect(scene.data.list.map((item) => item.ts), [2, 1]);
+    expect(scene.data.list.map((item) => item.ts), [1, 2]);
     expect(scene.calculator.computeCount, 0);
     elapsed = const Duration(milliseconds: 499);
     await tester.pump(elapsed);
@@ -280,18 +280,17 @@ void main() {
     );
     addTearDown(pipeline.dispose);
     pipeline.start();
-    pipeline.replace([_candle(2), _candle(1)]);
+    pipeline.replace([_candle(1), _candle(2)]);
     expect(pipeline.isIdle, isTrue, reason: 'replace 同步合并并立即计算');
 
     pipeline.updateLatest([_candle(2)]);
-    expect(scene.data.list.map((item) => item.ts), [2, 1]);
+    expect(scene.data.list.map((item) => item.ts), [1, 2]);
     expect(pipeline.isIdle, isFalse, reason: '已合并但待节拍计算');
 
     elapsed = const Duration(milliseconds: 500);
     await tester.pump(const Duration(milliseconds: 500));
     expect(pipeline.isIdle, isTrue);
   });
-
 
   testWidgets('新时间戳 latest 合并后立即计算一次', (tester) async {
     final scene = _scene();
@@ -305,12 +304,12 @@ void main() {
     );
     addTearDown(pipeline.dispose);
     pipeline.start();
-    pipeline.replace([_candle(2), _candle(1)]);
+    pipeline.replace([_candle(1), _candle(2)]);
     scene.calculator.computeCount = 0;
 
-    pipeline.updateLatest([_candle(3), _candle(2)]);
+    pipeline.updateLatest([_candle(2), _candle(3)]);
 
-    expect(scene.data.list.map((item) => item.ts), [3, 2, 1]);
+    expect(scene.data.list.map((item) => item.ts), [1, 2, 3]);
     expect(scene.calculator.computeCount, 1);
     expect(scene.calculator.lastReset, isFalse);
   });
@@ -327,14 +326,14 @@ void main() {
     );
     addTearDown(pipeline.dispose);
     pipeline.start();
-    pipeline.replace([_candle(2), _candle(1)]);
+    pipeline.replace([_candle(1), _candle(2)]);
     await tester.pump();
     scene.calculator.computeCount = 0;
 
-    pipeline.appendHistory([_candle(1), _candle(0)]);
+    pipeline.appendHistory([_candle(0), _candle(1)]);
     await tester.pump();
 
-    expect(scene.data.list.map((item) => item.ts), [2, 1, 0]);
+    expect(scene.data.list.map((item) => item.ts), [0, 1, 2]);
     expect(scene.calculator.computeCount, 1);
   });
 
@@ -355,13 +354,13 @@ void main() {
     );
     addTearDown(pipeline.dispose);
     pipeline.start();
-    pipeline.replace([_candle(2), _candle(1)]);
+    pipeline.replace([_candle(1), _candle(2)]);
     scene.calculator.computeCount = 0;
 
     crossTick = true;
-    pipeline.updateLatest([_candle(3), _candle(2)]);
+    pipeline.updateLatest([_candle(2), _candle(3)]);
 
-    expect(scene.data.list.map((item) => item.ts), [3, 2, 1]);
+    expect(scene.data.list.map((item) => item.ts), [1, 2, 3]);
     expect(scene.calculator.computeCount, 1);
   });
 
@@ -380,19 +379,19 @@ void main() {
     );
     addTearDown(pipeline.dispose);
     pipeline.start();
-    pipeline.replace([_candle(2), _candle(1)]);
+    pipeline.replace([_candle(1), _candle(2)]);
     scene.calculator.computeCount = 0;
     scene.calculator.indicator.onCompute = () {
       scene.calculator.indicator.onCompute = null;
       elapsed = const Duration(milliseconds: 1200);
-      pipeline.updateLatest([_candle(4), _candle(3)]);
+      pipeline.updateLatest([_candle(3), _candle(4)]);
     };
 
     pipeline.updateLatest([_candle(2)]);
     elapsed = const Duration(milliseconds: 500);
     await tester.pump(elapsed);
 
-    expect(scene.data.list.map((item) => item.ts), [4, 3, 2, 1]);
+    expect(scene.data.list.map((item) => item.ts), [1, 2, 3, 4]);
     expect(scene.calculator.computeCount, 1);
     elapsed = const Duration(milliseconds: 1499);
     await tester.pump(const Duration(milliseconds: 299));
@@ -416,7 +415,7 @@ void main() {
     );
     addTearDown(pipeline.dispose);
     pipeline.start();
-    pipeline.replace([_candle(2), _candle(1)]);
+    pipeline.replace([_candle(1), _candle(2)]);
     scene.calculator.indicator.throwOnCompute = true;
     scene.calculator.computeCount = 0;
 
@@ -449,15 +448,15 @@ void main() {
     );
     addTearDown(pipeline.dispose);
     pipeline.start();
-    pipeline.replace([_candle(2), _candle(1)]);
+    pipeline.replace([_candle(1), _candle(2)]);
     scene.calculator.indicator.throwOnCompute = true;
     scene.calculator.computeCount = 0;
     expect(pipeline.invalidateAll, throwsStateError);
     scene.calculator.indicator.throwOnCompute = false;
 
-    pipeline.updateLatest([_candle(3), _candle(2)]);
+    pipeline.updateLatest([_candle(2), _candle(3)]);
 
-    expect(scene.data.list.map((item) => item.ts), [3, 2, 1]);
+    expect(scene.data.list.map((item) => item.ts), [1, 2, 3]);
     expect(scene.calculator.computeCount, 1);
     elapsed = const Duration(milliseconds: 500);
     await tester.pump(elapsed);
@@ -479,19 +478,19 @@ void main() {
     );
     addTearDown(pipeline.dispose);
     pipeline.start();
-    pipeline.replace([_candle(2), _candle(1)]);
+    pipeline.replace([_candle(1), _candle(2)]);
     scene.calculator.computeCount = 0;
     scene.calculator.indicator.throwOnCompute = true;
 
     expect(
-      () => pipeline.updateLatest([_candle(3), _candle(2)]),
+      () => pipeline.updateLatest([_candle(2), _candle(3)]),
       throwsStateError,
     );
     scene.calculator.indicator.throwOnCompute = false;
 
-    pipeline.updateLatest([_candle(4), _candle(3)]);
+    pipeline.updateLatest([_candle(3), _candle(4)]);
 
-    expect(scene.data.list.map((item) => item.ts), [4, 3, 2, 1]);
+    expect(scene.data.list.map((item) => item.ts), [1, 2, 3, 4]);
     expect(scene.calculator.computeCount, 1);
     elapsed = const Duration(milliseconds: 500);
     await tester.pump(const Duration(milliseconds: 500));
@@ -524,7 +523,7 @@ void main() {
     );
     addTearDown(pipeline.dispose);
     pipeline.start();
-    pipeline.replace([_candle(2), _candle(1)]);
+    pipeline.replace([_candle(1), _candle(2)]);
     final oldCalculator = manager.getCalculator(oldKey)! as SpyComputedCalculator;
     oldIndicator.throwOnCompute = true;
     oldCalculator.computeCount = 0;
@@ -574,24 +573,24 @@ void main() {
     );
     addTearDown(pipeline.dispose);
     pipeline.start();
-    pipeline.replace([_candle(3), _candle(2)]);
+    pipeline.replace([_candle(2), _candle(3)]);
     scene.calculator.computeCount = 0;
 
     pipeline.updateLatest([_candle(3)]);
     scene.calculator.indicator.onCompute = () {
       scene.calculator.indicator.onCompute = null;
       elapsed = const Duration(milliseconds: 1200);
-      pipeline.updateLatest([_candle(5), _candle(4)]);
+      pipeline.updateLatest([_candle(4), _candle(5)]);
     };
-    pipeline.appendHistory([_candle(2), _candle(1)]);
+    pipeline.appendHistory([_candle(1), _candle(2)]);
 
-    expect(scene.data.list.map((item) => item.ts), [5, 4, 3, 2, 1]);
+    expect(scene.data.list.map((item) => item.ts), [1, 2, 3, 4, 5]);
     expect(scene.calculator.computeCount, 1);
     await tester.pump(const Duration(milliseconds: 500));
     expect(scene.calculator.computeCount, 2);
   });
 
-  testWidgets('新 latest 插入后累积脏区随索引后移，被弄脏的蜡烛仍参与计算', (tester) async {
+  testWidgets('新 latest 追加到尾部后，先前被弄脏的蜡烛仍参与计算', (tester) async {
     const key = ComputedIndicatorKey('shift');
     final ranges = <Range>[];
     final manager = IndicatorPaintObjectManager(
@@ -617,21 +616,21 @@ void main() {
     );
     addTearDown(pipeline.dispose);
     pipeline.start();
-    pipeline.replace([_candle(3), _candle(2), _candle(1)]);
+    pipeline.replace([_candle(1), _candle(2), _candle(3)]);
     ranges.clear();
 
-    // 同 ts 更新头部：不触发 urgent，脏区 Range(0,1) 挂起，尚未计算。
+    // 同 ts 更新尾部：不触发 urgent，脏区 Range(2,3) 挂起，尚未计算。
     pipeline.updateLatest([_candle(3)]);
     expect(ranges, isEmpty);
 
-    // 新 ts 插入：ts=3 蜡烛从 index 0 移到 index 1，urgent 立即计算。
+    // 新 ts 追加：ts=4 追加到 index 3，ts=3 仍在 index 2（尾部追加不移动已有下标），urgent 立即计算。
     pipeline.updateLatest([_candle(4)]);
 
-    expect(ranges.any((r) => r.start <= 1 && 1 < r.end), isTrue, reason: '被弄脏并后移到 index 1 的蜡烛必须被重算，ranges=$ranges');
+    expect(ranges.any((r) => r.start <= 2 && 2 < r.end), isTrue, reason: '被弄脏的尾部蜡烛(index 2)必须被重算，ranges=$ranges');
   });
 }
 
-/// 记录每次 compute 实际覆盖区间的指标，用于验证脏区索引平移。
+/// 记录每次 compute 实际覆盖区间的指标，用于验证脏区索引映射。
 class _RangeRecordingIndicator extends SpyComputedIndicator {
   _RangeRecordingIndicator({required super.key, required super.log, required this.ranges});
 

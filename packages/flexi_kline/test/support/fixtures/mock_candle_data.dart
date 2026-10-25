@@ -32,12 +32,12 @@ bool? parseBool(dynamic value) {
   return null;
 }
 
-/// 返回 ETHUSDT 1D 50根K线示例数据.
+/// 返回 ETHUSDT 1D 50根K线示例数据(按时间升序: 最旧在前).
 List<ICandleModel> getEthUsdtCandles() {
   final data = jsonDecode(_ethUsdtJsonString);
   if (data is List) {
     final List<ICandleModel> list = List.empty(growable: true);
-    for (var i = 0; i < data.length; i++) {
+    for (var i = data.length - 1; i >= 0; i--) {
       final item = data[i];
       if (item is List) {
         list.add(
@@ -60,12 +60,12 @@ List<ICandleModel> getEthUsdtCandles() {
   return [];
 }
 
-/// 返回 BTCUSDT 15m K线示例数据（按时间正序排列，函数内倒序存放）.
+/// 返回 BTCUSDT 15m K线示例数据（按时间升序: 最旧在前）.
 List<ICandleModel> getBtcCandles() {
   final data = jsonDecode(_btcJsonString);
   if (data is List) {
     final List<ICandleModel> list = List.empty(growable: true);
-    for (var i = data.length - 1; i >= 0; i--) {
+    for (var i = 0; i < data.length; i++) {
       final item = data[i];
       if (item is List) {
         list.add(

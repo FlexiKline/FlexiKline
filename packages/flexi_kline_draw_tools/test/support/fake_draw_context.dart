@@ -75,7 +75,7 @@ class FakeDrawContext implements DrawContext {
   double get candleWidthHalf => 4;
 
   @override
-  double? valueToDy(FlexiNum value, {bool correct = false}) {
+  double valueToDy(FlexiNum value, {bool correct = false}) {
     return maxValue - value.toDouble();
   }
 
@@ -91,10 +91,10 @@ class FakeDrawContext implements DrawContext {
   double? timestampToDx(int ts) => ts / msPerPx;
 
   @override
-  int? dxToIndex(double dx) => dx.floor();
+  int dxToIndex(double dx) => dx.floor();
 
   @override
-  double? indexToDx(int index, {bool check = false}) => index.toDouble();
+  double indexToDx(num index) => index.toDouble();
 
   @override
   FlexiCandleModel? dxToCandle(double dx) => null;

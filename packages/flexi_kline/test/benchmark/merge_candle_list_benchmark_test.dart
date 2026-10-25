@@ -26,7 +26,7 @@ void main() {
   tearDownAll(report.write);
 
   test('merge candle list 性能基线', () async {
-    // genRandomCandleList with isHistory=true returns descending timestamps
+    // genRandomCandleList returns ascending timestamps (oldest first)
     final candles = await genRandomCandleList(count: 2000);
     report.measure(
       'merge/replace/2000',
@@ -44,13 +44,13 @@ void main() {
   test('merge candle list 增量路径: 更新最新一根与追加历史', () async {
     const spec = KlineSpec(symbol: 'BENCH', interval: invalidInterval);
     final candles = await genRandomCandleList(count: 2000);
-    // 默认日线、按时间倒序: 历史从最早一根的前一天开始。
-    final earliest = DateTime.fromMillisecondsSinceEpoch(candles.last.timestamp);
+    // 默认日线、按时间升序: 历史从最早一根(首根)的前一天开始。
+    final earliest = DateTime.fromMillisecondsSinceEpoch(candles.first.timestamp);
     final history = await genRandomCandleList(count: 500, dateTime: earliest.subtract(const Duration(days: 1)));
 
     final data = KlineData(spec)..replace(candles, slotCount: 0);
-    // 同一时间戳的两个报价交替推送。
-    final ticks = [candles.first, candles.first.copyWith(close: candles.first.high)];
+    // 同一时间戳的两个报价交替推送(最新一根在末尾)。
+    final ticks = [candles.last, candles.last.copyWith(close: candles.last.high)];
     report.measure(
       'merge/update-latest/1',
       () {

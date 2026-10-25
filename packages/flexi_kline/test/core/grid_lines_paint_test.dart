@@ -213,7 +213,7 @@ void main() {
       chart.flushPendingKlineData();
       expect(chart.klineData.canPaintChart, isFalse, reason: '前置条件: 新标的的数据还没到');
       expect(
-        chart.dyToCandleValue(chart.mainChartRect.top, check: false)!.toDouble(),
+        chart.dyToCandleValue(chart.mainChartRect.top)!.toDouble(),
         closeTo(_flatHigh, 1e-9),
         reason: '前置条件: minMax 仍是上一帧的旧值, 否则本用例分辨不出两个判据',
       );
@@ -243,8 +243,8 @@ void main() {
 
       final bounds = candle.drawableRect;
       final ticks = computeNiceTicks(
-        bottom: candle.dyToValue(bounds.bottom, check: false)!.toDouble(),
-        top: candle.dyToValue(bounds.top, check: false)!.toDouble(),
+        bottom: candle.dyToValue(bounds.bottom)!.toDouble(),
+        top: candle.dyToValue(bounds.top)!.toDouble(),
         targetCount: _divisions,
         precision: candle.klineData.precision,
       ).values;
@@ -255,7 +255,7 @@ void main() {
 
       // 逐值给容差: [_PaintLog] 的位置取自 `Path.getBounds()`, 经 Skia 存成 float32, 相对误差
       // 约 1e-7。等分位置恰好都能精确表示, nice 的不能, 所以只有这里要 closeTo。
-      final expected = [for (final value in ticks) candle.valueToDy(value.toFlexiNum(), correct: false)];
+      final expected = [for (final value in ticks) candle.valueToDy(value.toFlexiNum())];
       for (var i = 0; i < expected.length; i++) {
         expect(dys[i], closeTo(expected[i], 1e-3), reason: '第 $i 条横线不在 nice 取整的位置上');
       }
@@ -355,10 +355,10 @@ void main() {
       expect(bounds.bottom, lessThanOrEqualTo(chart.subRect.bottom));
     });
 
-    /// nice 的值不再由算法一路传下来，改由画文本时 `dyToValue(check: false)` 现算。观察点取
+    /// nice 的值不再由算法一路传下来，改由画文本时 `dyToValue` 现算。观察点取
     /// `formatTicksValue` 钩子的入参——文本一旦交给 `Paragraph` 就读不回来了。
     ///
-    /// `check: false` 守的是「刻度落在 `drawableRect` 边界上」这一路：`includeDy` 是闭区间，
+    /// 不做窗格归属检查守的是「刻度落在 `drawableRect` 边界上」这一路：`includeDy` 是闭区间，
     /// 理论上边界能过，但浮点误差足以让它差之毫厘被判出界，整条刻度静默消失。本用例断言
     /// **每条刻度都有值**，那条路径一旦发生就会少一个。
     testWidgets('刻度文本: 值与算法原值格式化后逐个相同', (tester) async {
@@ -370,8 +370,8 @@ void main() {
 
       final bounds = candle.drawableRect;
       final expected = computeNiceTicks(
-        bottom: candle.dyToValue(bounds.bottom, check: false)!.toDouble(),
-        top: candle.dyToValue(bounds.top, check: false)!.toDouble(),
+        bottom: candle.dyToValue(bounds.bottom)!.toDouble(),
+        top: candle.dyToValue(bounds.top)!.toDouble(),
         targetCount: _divisions,
         precision: candle.klineData.precision,
       ).values;
@@ -396,7 +396,7 @@ void main() {
       }
     });
 
-    /// 上一条断言「每条刻度都有值」，但它守不住 `check: false`——那组数据的刻度全落在
+    /// 上一条断言「每条刻度都有值」，但它守不住「不做窗格归属检查」——那组数据的刻度全落在
     /// `drawableRect` 内部，闭区间的边界判定对它们没有区别。这条把刻度**顶到边界上**：
     ///
     /// 区间 `[0, 11]`、可绘制高度 100，于是 `dyFactor = 100/11 = 9.090909090909092`，最顶刻度
@@ -412,9 +412,9 @@ void main() {
       object.bind(TestCandleIndicator(height: 100), context);
       object.setMinMax(MinMax(min: FlexiNum.zero, max: FlexiNum.fromNum(11)));
 
-      // 与 `resolveHorizontalDys` 的 nice 分支同一步换算: 算法定值, `valueToDy(correct: false)`
+      // 与 `resolveHorizontalDys` 的 nice 分支同一步换算: 算法定值, 不钳制的 `valueToDy`
       // 换位置。
-      final topDy = object.valueToDy(FlexiNum.fromNum(11), correct: false);
+      final topDy = object.valueToDy(FlexiNum.fromNum(11));
       expect(topDy, lessThan(object.drawableRect.top), reason: '前置条件: 刻度必须真的越过边界');
       expect(topDy, closeTo(object.drawableRect.top, 1e-9), reason: '前置条件: 越界量必须只是浮点误差');
 
@@ -423,7 +423,7 @@ void main() {
       expect(
         object.formattedTickValues,
         hasLength(1),
-        reason: 'dyToValue 漏了 check: false, 落在边界上的刻度会静默消失',
+        reason: 'dyToValue 做了窗格归属检查, 落在边界上的刻度会静默消失',
       );
     });
 

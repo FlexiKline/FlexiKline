@@ -84,22 +84,22 @@ class TimePaintObject<T extends TimeIndicator> extends TimeBasePaintObject<T> {
     final start = data.start;
     final end = data.end;
 
-    final offset = startCandleDx - candleWidthHalf;
     final interval = data.interval;
     if (!interval.isValid) return;
     final style = indicator.timeLabel.toLabelStyle(textColor: theme.ticksTextColor);
     final formatter = indicator.tickFormatter;
     final dy = chartRect.top + height / 2;
     final step = timeLabelIntervalCount;
+    final origin = data.labelOriginIndex;
     for (var i = start; i < end; i++) {
-      if (i % step != 0) continue;
+      if ((i - origin) % step != 0) continue;
       final model = data.list[i];
       _timeLabels.paint(
         canvas,
         (model.ts, interval, formatter),
         build: () => formatTimeLabel(model, interval),
         style: style,
-        anchor: Offset(offset - (i - start) * candleActualWidth, dy),
+        anchor: Offset(indexToDx(i), dy),
         align: Alignment.center,
       );
     }

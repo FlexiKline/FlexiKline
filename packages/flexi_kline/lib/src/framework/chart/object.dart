@@ -46,7 +46,6 @@ abstract class IndicatorObject<T extends Indicator>
 
   /// 当前绘制偏移。
   double get paintDxOffset => context.paintDxOffset;
-  double get startCandleDx => context.startCandleDx;
 
   /// 蜡烛绘制尺寸。
   double get candleWidth => context.candleWidth;

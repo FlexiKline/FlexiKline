@@ -40,17 +40,17 @@ List<Paragraph> _paragraphs(RecordingCanvas canvas) => [
 ];
 
 /// 涨跌交替: 偶数根(自最新起)上涨, 奇数根下跌。
-List<CandleModel> _alternating({int count = 200, int latestTimestamp = 12000000}) => List.generate(
-  count,
-  (i) => CandleModel(
-    timestamp: latestTimestamp - i * 60000,
-    open: i.isEven ? 100 : 105,
-    high: 110,
-    low: 90,
-    close: i.isEven ? 105 : 100,
-    volume: 1000,
-  ),
-);
+List<CandleModel> _alternating({int count = 200, int latestTimestamp = 12000000}) => [
+  for (var i = count - 1; i >= 0; i--)
+    CandleModel(
+      timestamp: latestTimestamp - i * 60000,
+      open: i.isEven ? 100 : 105,
+      high: 110,
+      low: 90,
+      close: i.isEven ? 105 : 100,
+      volume: 1000,
+    ),
+];
 
 /// 记下创建的 [CandlePaintObject], 供用例读它的几何与标签状态。
 class _Candle extends CandleIndicator {
@@ -315,13 +315,23 @@ void main() {
         expect(paint.strokeWidth, chart.candleWidth);
       }
 
-      // 最新一根(上涨)的实体: 从 open 到 close, x 在蜡烛中心。
+      // 最新一根(上涨)的实体: 从 open 到 close, x 在蜡烛中心。在批量点集里按 x 定位最新根那一段。
       final latest = chart.klineData.latest!;
-      final long = bodies.first.positionalArguments[1] as Float32List;
-      final dx = chart.startCandleDx - chart.candleWidthHalf;
-      expect(long[0], closeTo(dx, 1e-3));
-      expect(long[1], closeTo(candle.valueToDy(latest.open, correct: false), 1e-3));
-      expect(long[3], closeTo(candle.valueToDy(latest.close, correct: false), 1e-3));
+      final dx = chart.indexToDx(chart.klineData.length - 1);
+      Float32List? latestSeg;
+      int? latestBase;
+      for (final body in bodies) {
+        final pts = body.positionalArguments[1] as Float32List;
+        for (var b = 0; b < pts.length; b += 4) {
+          if ((pts[b] - dx).abs() < 1e-3) {
+            latestSeg = pts;
+            latestBase = b;
+          }
+        }
+      }
+      expect(latestSeg, isNotNull, reason: '最新根实体必须被画出');
+      expect(latestSeg![latestBase! + 1], closeTo(candle.valueToDy(latest.open), 1e-3));
+      expect(latestSeg[latestBase + 3], closeTo(candle.valueToDy(latest.close), 1e-3));
     });
 
     testWidgets('空心: 影线批量, 实体按涨跌各一条 Path 用空心画笔描边', (tester) async {

@@ -77,7 +77,7 @@ class TestCandlePaintObject extends CandleBasePaintObject<TestCandleIndicator> {
 
   /// [formatTicksValue] 每次收到的刻度值，按绘制顺序。
   ///
-  /// 这是观测 `paintYAxisTicks` 内部 `dyToValue(check: false)` 产物的唯一途径：文本一旦交给
+  /// 这是观测 `paintYAxisTicks` 内部 `dyToValue` 产物的唯一途径：文本一旦交给
   /// `Paragraph` 就读不回来了，而钩子拿到的正是即将被格式化的那个值。
   final List<FlexiNum> formattedTickValues = [];
 

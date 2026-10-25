@@ -25,8 +25,8 @@ mixin KlineSpecData on BaseData {
   void updateState({KlineLoadingState state = KlineLoadingState.none}) {
     _loadingState = state;
     _spec = spec.copyWith(
-      from: list.lastOrNull?.ts,
-      to: list.firstOrNull?.ts,
+      from: list.firstOrNull?.ts,
+      to: list.lastOrNull?.ts,
     );
     // from/to 仅更新 spec，是否通知由 StateBinding 按 key 决定
   }
@@ -34,7 +34,7 @@ mixin KlineSpecData on BaseData {
   /// 返回用于加载更多历史数据的规格（to 置空，向旧方向无限翻页）
   KlineSpec getLoadMoreSpec() {
     return spec.copyWith(
-      from: list.lastOrNull?.ts,
+      from: list.firstOrNull?.ts,
       to: null,
     );
   }
@@ -44,7 +44,7 @@ mixin KlineSpecData on BaseData {
     if (isEmpty || reset) {
       return spec.copyWith(from: null, to: null);
     }
-    final model = list.secondWhereOrNull((m) => m.hasValidData);
+    final model = list.reversed.secondWhereOrNull((m) => m.hasValidData);
     return spec.copyWith(
       from: null,
       to: model?.ts,

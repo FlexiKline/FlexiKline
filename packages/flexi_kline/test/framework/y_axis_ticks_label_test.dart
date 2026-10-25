@@ -118,4 +118,10 @@ void main() {
     expect(object.crossFormatted, 1);
     expect(identical(_paragraphs(second).single, paragraph), isTrue);
   });
+
+  test('cross 指针 dy 不在本窗格时不画刻度', () {
+    final canvas = RecordingCanvas();
+    expect(object.crossTick(canvas, object.drawableRect.bottom + 50), isNull);
+    expect(_paragraphs(canvas), isEmpty);
+  });
 }

@@ -76,10 +76,7 @@ abstract interface class PaintGeometryScope {
   /// 蜡烛宽度的一半。
   double get candleWidthHalf;
 
-  /// 当前画布内第一根蜡烛的绘制偏移。
-  double get startCandleDx;
-
-  /// 当前绘制区域相对 startIndex 右侧的偏移。
+  /// 最新一根蜡烛相对绘制区右缘的偏移, 正值表示已向右移出。
   double get paintDxOffset;
 
   /// 计算 [paneIndex] 对应副区的 top。

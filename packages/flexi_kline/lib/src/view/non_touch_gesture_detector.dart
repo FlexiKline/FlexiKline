@@ -220,7 +220,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
           _applyScaleStep(position, amount);
         case SignalIntent.panX:
           final panned = controller.onChartPanStep(amount);
-          // 指针没动、底下的蜡烛换了, 同一个屏幕位置得按新的 startCandleDx 重新吸附, 否则读数
+          // 指针没动、底下的蜡烛换了, 同一个屏幕位置得按新的蜡烛中心重新吸附, 否则读数
           // 停在旧蜡烛上。放在手势层是因为 [ChartBinding.onChartPanStep] 拿不到指针位置, 与
           // [onPanUpdate] 的 chart 分支同一分工。
           if (panned) {

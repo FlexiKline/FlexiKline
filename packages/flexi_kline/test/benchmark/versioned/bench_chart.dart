@@ -69,13 +69,12 @@ class _BenchLinePaintObject extends DirectPaintObject<BenchLineIndicator> {
   @override
   void paint(Canvas canvas, Size size) {
     BenchLineIndicator.paintCount++;
-    final start = klineData.start;
-    final end = math.min(klineData.end + 1, klineData.length);
-    final startOffset = startCandleDx - candleWidthHalf;
+    final start = math.max(klineData.start - 1, 0);
+    final end = klineData.end;
     for (int j = 0; j < BenchLineIndicator.colors.length; j++) {
       final points = <Offset>[];
       for (int i = start; i < end; i++) {
-        points.add(Offset(startOffset - (i - start) * candleActualWidth, valueToDy(_valueOf(klineData[i], j))));
+        points.add(Offset(indexToDx(i), valueToDy(_valueOf(klineData[i], j))));
       }
       canvas.drawPath(
         Path()..addPolygon(points, false),

@@ -21,7 +21,7 @@ import '../constants.dart';
 const _intervalMs = 60000;
 const _latestTs = 1760000000000;
 
-/// 固定种子的随机游走蜡烛, 按时间倒序(最新在前), 与 `replaceKlineData` / `appendHistoryKlineData` 的约定一致。
+/// 固定种子的随机游走蜡烛, 按时间升序(最新在后), 与 `replaceKlineData` / `appendHistoryKlineData` 的约定一致。
 ///
 /// [offset] 为距最新一根的根数: 加载历史时取紧接已有数据的更早一段; 种子随 [offset] 变, 每段可复现。
 List<CandleModel> benchCandles({int count = benchCandleCount, int offset = 0}) {
@@ -42,10 +42,10 @@ List<CandleModel> benchCandles({int count = benchCandleCount, int offset = 0}) {
         volume: _round(500 + random.nextDouble() * 1500),
       ),
     );
-    // 倒序生成: 下一根(更早)的收盘价围绕本根开盘价游走。
+    // 从最新往更早生成: 下一根(更早)的收盘价围绕本根开盘价游走; 返回时按时间升序排列。
     close = open + (random.nextDouble() - 0.5) * 4;
   }
-  return candles;
+  return candles.reversed.toList();
 }
 
 /// 实时场景的第 [tick] 次推送: 每 10 次收盘并开一根新蜡烛, 价格小幅摆动。

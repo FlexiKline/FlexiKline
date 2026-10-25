@@ -12,15 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// Step 1 翻转前基准（2.6.1 倒序）：几何命中表。
+/// 几何命中表: 冻结 `dxToIndex(dx)` 的取整下标契约。
 ///
-/// 用真实 controller 冻结当前几何契约：`dxToIndex(dx)` 的取整下标。采样覆盖画布右缘
-/// （最新根）、中部、左缘与最新根右侧的空白区。
-///
-/// 倒序约定下：index 0 = 最新根，贴在画布右缘；dx 越往左下标越大（越旧）。
-/// 数据正向化（v2.7.0）后，升序实现须产出本表的镜像：同一 dx 命中的下标变为
-/// `length - 1 - index`，可见区间 `[start, end)` 变为 `[length - end, length - start)`。
-/// 届时逐行改写期望，差异即几何契约翻转点。
+/// 用真实 controller 采样画布右缘（最新根一侧）、中部、左缘与最新根右侧的空白区。
+/// 最新根下标为 `length - 1`，锚定在画布右缘；dx 越往左下标越小，超出最新根右缘进入空白区则大于 `length - 1`。
 ///
 /// 捕获方式：`_dump=true` 跑一次，从日志抄出 golden 填入 [frozen]，再改回 false 冻结。
 @Tags(['baseline'])
@@ -47,7 +42,7 @@ void main() {
   List<CandleModel> candles(int n) => [
     for (int i = 0; i < n; i++)
       CandleModel(
-        timestamp: 1700000000000 - i * 86400000,
+        timestamp: 1700000000000 - (n - 1 - i) * 86400000,
         open: '100',
         high: '101',
         low: '99',
@@ -64,8 +59,8 @@ void main() {
 
   // 冻结的 golden：首次用 _dump=true 捕获后填入，与 [pans] 一一对应。
   const frozen = <_Frozen>[
-    (panDx: 0.0, offset: 0.0, hits: [0, 0, 12, 25, 37, 50, 51, -1]),
-    (panDx: -300.0, offset: -300.0, hits: [-37, -37, -25, -12, 0, 12, 13, -38]),
+    (panDx: 0.0, offset: -80.0, hits: [210, 209, 197, 185, 172, 160, 158, 211]),
+    (panDx: -300.0, offset: -200.0, hits: [225, 224, 212, 200, 187, 175, 173, 226]),
   ];
 
   testWidgets('geometry_hit_table_matches_frozen_golden', (tester) async {
@@ -75,12 +70,13 @@ void main() {
       addTearDown(scenario.dispose);
       await scenario.initWithData(_spec, candles(length), canvasWidth: canvasWidth);
       final chart = scenario.controller;
+      chart.flushPendingKlineData();
       await paintChartFrame(tester, chart);
       if (pan != 0) {
         chart.onChartMove(Offset(pan, 0));
         await paintChartFrame(tester, chart);
       }
-      final hits = [for (final dx in sampleDx) chart.dxToIndex(dx) ?? -999];
+      final hits = [for (final dx in sampleDx) chart.dxToIndex(dx)];
       results.add((panDx: pan, offset: chart.paintDxOffset, hits: hits));
     }
 

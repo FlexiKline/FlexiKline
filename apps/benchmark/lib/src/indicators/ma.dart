@@ -74,16 +74,17 @@ class _BenchMaCalculator extends IndicatorCalculator<BenchMaIndicator> {
       final count = param.count;
       // 周期非正的线不写值, tips 显示 `--`; 否则 sum.divNum(count) 会除以 0。
       if (count <= 0) continue;
-      final end = math.min(data.length - count, range.end - 1);
-      final start = math.max(0, range.start - count);
-      if (end < start) continue;
-      var sum = data[end].close;
-      for (int i = end + 1; i < end + count; i++) {
+      // 第 i 根的值是 data[i-count+1..i] 的均值, 首个有值下标为 count-1; 只重算 range.start 及之后。
+      final from = math.max(range.start, count - 1);
+      final end = math.min(range.end, data.length);
+      if (from >= end) continue;
+      var sum = data[from].close;
+      for (int i = from - count + 1; i < from; i++) {
         sum += data[i].close;
       }
-      data[end].getOrInitList<FlexiNum>(dataIndex, params.length)[j] = sum.divNum(count);
-      for (int i = end - 1; i >= start; i--) {
-        sum = sum - data[i + count].close + data[i].close;
+      data[from].getOrInitList<FlexiNum>(dataIndex, params.length)[j] = sum.divNum(count);
+      for (int i = from + 1; i < end; i++) {
+        sum = sum - data[i - count].close + data[i].close;
         data[i].getOrInitList<FlexiNum>(dataIndex, params.length)[j] = sum.divNum(count);
       }
     }
@@ -101,11 +102,12 @@ class _BenchMaPaintObject extends ComputedPaintObject<BenchMaIndicator> {
     if (params.isEmpty || params.any((p) => p.count > len)) return null;
 
     final int minCount = params.map((p) => p.count).reduce(math.min);
-    end = math.min(len - minCount, end - 1);
+    // 跳过首个有值下标之前的暖机段。
+    start = math.max(start, minCount - 1);
 
     MinMax? minmax;
     FlexiCandleModel m;
-    for (int i = end; i >= start; i--) {
+    for (int i = start; i < end; i++) {
       m = klineData[i];
       minmax ??= m.getList<FlexiNum>(dataIndex)?.minmax;
       minmax?.updateMinMax(m.getList<FlexiNum>(dataIndex)?.minmax);
@@ -115,20 +117,15 @@ class _BenchMaPaintObject extends ComputedPaintObject<BenchMaIndicator> {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final start = klineData.start;
-    final end = math.min(klineData.end + 1, klineData.length);
-    final startOffset = startCandleDx - candleWidthHalf;
+    // 左缘多画一根, 让折线从视区外接入。
+    final start = math.max(klineData.start - 1, 0);
+    final end = klineData.end;
     for (int j = 0; j < indicator.calcParam.length; j++) {
       final points = <Offset>[];
       for (int i = start; i < end; i++) {
         final value = _value(klineData[i], j);
         if (value == null) continue;
-        points.add(
-          Offset(
-            startOffset - (i - start) * candleActualWidth,
-            valueToDy(value, correct: false),
-          ),
-        );
+        points.add(Offset(indexToDx(i), valueToDy(value)));
       }
       canvas.drawPath(
         Path()..addPolygon(points, false),

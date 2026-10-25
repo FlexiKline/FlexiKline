@@ -62,12 +62,12 @@ Rect _sliderRect(FlexiKlineController chart) => Rect.fromLTWH(
 
 /// 当前生效区间的上端：主图区顶边对应的价格。
 double _rangeMax(FlexiKlineController chart) {
-  return chart.dyToCandleValue(chart.mainChartRect.top, check: false)!.toDouble();
+  return chart.dyToCandleValue(chart.mainChartRect.top)!.toDouble();
 }
 
 /// 当前生效区间的下端：主图区底边对应的价格。
 double _rangeMin(FlexiKlineController chart) {
-  return chart.dyToCandleValue(chart.mainChartRect.bottom, check: false)!.toDouble();
+  return chart.dyToCandleValue(chart.mainChartRect.bottom)!.toDouble();
 }
 
 double _rangeSpan(FlexiKlineController chart) => _rangeMax(chart) - _rangeMin(chart);

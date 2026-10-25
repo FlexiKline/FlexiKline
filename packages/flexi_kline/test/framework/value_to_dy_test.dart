@@ -36,7 +36,7 @@ double _legacyValueToDy(PaintObject object, FlexiNum value) {
 void _expectMatchesLegacy(PaintObject object, Iterable<num> values) {
   for (final v in values) {
     final value = FlexiNum.fromNum(v);
-    expect(object.valueToDy(value), closeTo(_legacyValueToDy(object, value), 1e-9), reason: 'value=$v');
+    expect(object.valueToDy(value, correct: true), closeTo(_legacyValueToDy(object, value), 1e-9), reason: 'value=$v');
   }
 }
 
@@ -87,8 +87,8 @@ void main() {
   test('区间端点映射到 chartRect 上下边', () {
     final main = _mountMain()..setMinMax(_mm(200, 100));
 
-    expect(main.valueToDy(FlexiNum.fromNum(200)), closeTo(main.chartRect.top, 1e-9));
-    expect(main.valueToDy(FlexiNum.fromNum(100)), closeTo(main.chartRect.bottom, 1e-9));
+    expect(main.valueToDy(FlexiNum.fromNum(200), correct: true), closeTo(main.chartRect.top, 1e-9));
+    expect(main.valueToDy(FlexiNum.fromNum(100), correct: true), closeTo(main.chartRect.bottom, 1e-9));
   });
 
   test('isSame 区间：结果恒为 bottom，与旧实现一致', () {
@@ -98,7 +98,7 @@ void main() {
 
     final values = [..._values, 100.5, 100.999];
     for (final v in values) {
-      expect(main.valueToDy(FlexiNum.fromNum(v)), main.chartRect.bottom, reason: 'value=$v');
+      expect(main.valueToDy(FlexiNum.fromNum(v), correct: true), main.chartRect.bottom, reason: 'value=$v');
     }
     _expectMatchesLegacy(main, values);
   });

@@ -197,7 +197,7 @@ void main() {
         scene.frame(panSmoothFactor: 0.15);
         expect(scene.main.dyFactor.isFinite, isTrue, reason: '第 $i 帧 dyFactor 非有限');
         expect(
-          () => scene.main.dyToValue(scene.main.chartRect.top, check: false),
+          () => scene.main.dyToValue(scene.main.chartRect.top),
           returnsNormally,
           reason: '第 $i 帧 dyToValue 抛异常',
         );
@@ -227,7 +227,7 @@ void main() {
           reason: '第 $i 帧 diffDivisor 换算为非有限值',
         );
         expect(
-          () => scene.main.dyToValue(scene.main.chartRect.top, check: false),
+          () => scene.main.dyToValue(scene.main.chartRect.top),
           returnsNormally,
           reason: '第 $i 帧 dyToValue 抛异常',
         );

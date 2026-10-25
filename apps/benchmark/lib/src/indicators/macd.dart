@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:math' as math;
+
 import 'package:flexi_formatter/flexi_formatter.dart' show formatPrice;
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/painting.dart';
@@ -81,11 +83,10 @@ class _BenchMacdCalculator extends IndicatorCalculator<BenchMacdIndicator> {
     if (len <= 0) return;
 
     final s = indicator.calcParam.short, l = indicator.calcParam.long, m = indicator.calcParam.signal;
-    final oldest = len - 1;
-    FlexiNum emaS = data[oldest].close, emaL = emaS;
+    FlexiNum emaS = data[0].close, emaL = emaS;
     // 首值由数据算出, 不用 FlexiNum.zero: 常量作左操作数会让 accurate 模式退化为 double。
     FlexiNum dif = emaS - emaL, dea = dif;
-    data[oldest].set(
+    data[0].set(
       dataIndex,
       BenchMacdResult(
         dif: dif,
@@ -96,7 +97,7 @@ class _BenchMacdCalculator extends IndicatorCalculator<BenchMacdIndicator> {
       ),
     );
 
-    for (int i = oldest - 1; i >= 0; i--) {
+    for (int i = 1; i < len; i++) {
       final model = data[i];
       final close2 = model.close.mulNum(2);
       // 递推状态每步 clampScale: 除数只含因子 2、5 时 divNum 的商是精确的, scale 会逐根增长直到溢出为 NaN。
@@ -126,7 +127,7 @@ class _BenchMacdPaintObject extends ComputedPaintObject<BenchMacdIndicator>
   MinMax? computeVisibleMinMax(int start, int end) {
     if (klineData.length <= 0) return null;
     MinMax? minmax;
-    for (int i = end - 1; i >= start; i--) {
+    for (int i = start; i < end; i++) {
       final ret = klineData[i].get<BenchMacdResult>(dataIndex);
       if (ret == null) continue;
       final itemMinmax = ret.minmax;
@@ -159,33 +160,33 @@ class _BenchMacdPaintObject extends ComputedPaintObject<BenchMacdIndicator>
   }
 
   void _paintMacdChart(Canvas canvas) {
-    final int start = klineData.start;
-    final int end = (klineData.end + 1).clamp(start, klineData.length); // 多绘制一根蜡烛
+    final int start = math.max(klineData.start - 1, 0); // 左缘多绘制一根蜡烛
+    final int end = klineData.end;
 
     final List<Offset> difPoints = [];
     final List<Offset> deaPoints = [];
-    final double zeroDy = valueToDy(FlexiNum.zero);
-    final offset = startCandleDx - candleWidthHalf;
+    final double zeroDy = valueToDy(FlexiNum.zero, correct: true);
     final hollowHalf = candleWidthHalf - candleSpacing;
 
     BenchMacdResult? ret;
-    BenchMacdResult? next;
+    BenchMacdResult? prev;
     for (int i = start; i < end; i++) {
       ret = klineData[i].get(dataIndex);
       if (ret == null) continue;
-      final dx = offset - (i - start) * candleActualWidth;
-      difPoints.add(Offset(dx, valueToDy(ret.dif, correct: false)));
-      deaPoints.add(Offset(dx, valueToDy(ret.dea, correct: false)));
+      final dx = indexToDx(i);
+      difPoints.add(Offset(dx, valueToDy(ret.dif)));
+      deaPoints.add(Offset(dx, valueToDy(ret.dea)));
 
-      next = klineData.get(i + 1)?.get(dataIndex);
+      // 与前一根(更旧)比较。
+      prev = klineData.get(i - 1)?.get(dataIndex);
       final isLong = ret.macd.signum >= 0; // 0 归涨色
-      if (next != null && ret.macd > next.macd) {
+      if (prev != null && ret.macd > prev.macd) {
         // 空心
         canvas.drawPath(
           Path()..addRect(
             Rect.fromPoints(
               Offset(dx - hollowHalf, zeroDy),
-              Offset(dx + hollowHalf, valueToDy(ret.macd, correct: false)),
+              Offset(dx + hollowHalf, valueToDy(ret.macd)),
             ),
           ),
           isLong ? defLongHollowBarPaint : defShortHollowBarPaint,
@@ -194,7 +195,7 @@ class _BenchMacdPaintObject extends ComputedPaintObject<BenchMacdIndicator>
         // 实心
         canvas.drawLine(
           Offset(dx, zeroDy),
-          Offset(dx, valueToDy(ret.macd)),
+          Offset(dx, valueToDy(ret.macd, correct: true)),
           _barPaint
             ..color = isLong ? longColor : shortColor
             ..strokeWidth = candleWidth,

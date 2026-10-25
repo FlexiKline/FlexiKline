@@ -52,14 +52,14 @@ abstract interface class DrawGeometryScope {
   /// 将时间戳 [ts] 精确转换为 dx 坐标。
   double? timestampToDx(int ts);
 
-  /// 将 [dx] 转换为当前绘制区域对应的蜡烛下标。
-  int? dxToIndex(double dx);
+  /// 将 [dx] 转换为当前绘制区域对应的蜡烛下标(可越界)。
+  int dxToIndex(double dx);
 
-  /// 将 index 转换为当前绘制区域对应的 X 轴坐标；如果超出范围，则返回 null。
-  double? indexToDx(int index, {bool check = false});
+  /// 将 index 转换为蜡烛中心的 X 轴坐标(可越界外推)。
+  double indexToDx(num index);
 
   /// 将 value 转换为 dy 坐标值。
-  double? valueToDy(FlexiNum value, {bool correct = false});
+  double valueToDy(FlexiNum value, {bool correct = false});
 
   /// 将 dy 坐标值转换为 value。
   FlexiNum? dyToValue(double dy, {bool check = false});

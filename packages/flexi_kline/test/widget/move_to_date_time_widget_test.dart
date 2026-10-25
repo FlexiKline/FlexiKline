@@ -44,7 +44,7 @@ CandleModel _candle(DateTime dateTime) {
 
 List<CandleModel> _candles() {
   return [
-    for (var i = 0; i <= 80; i++)
+    for (var i = 80; i >= 0; i--)
       if (i != 20) _candle(_latest.subtract(_day * i)),
   ];
 }
@@ -103,7 +103,7 @@ void _expectCandleCentered(
   FlexiKlineController controller,
   int index,
 ) {
-  final candleCenter = controller.indexToDx(index)! - controller.candleWidthHalf;
+  final candleCenter = controller.indexToDx(index);
   expect(
     candleCenter,
     closeTo(controller.mainChartRect.center.dx, 0.01),
@@ -114,26 +114,21 @@ double _targetOffset(
   FlexiKlineController controller,
   int index,
 ) {
+  final barsBack = controller.klineData.length - 1 - index;
   return controller.clampPaintDxOffset(
-    index * controller.candleActualWidth + controller.candleWidthHalf - controller.mainChartWidthHalf,
+    barsBack * controller.candleActualWidth + controller.candleWidthHalf - controller.mainChartWidthHalf,
   );
 }
 
 void main() {
   group('FlexiKlineController.moveToDateTime', () {
-    testWidgets('indexToCandleDx returns the candle center without changing indexToDx', (tester) async {
+    testWidgets('indexToDx returns the candle center, spaced one candle apart', (tester) async {
       final controller = await _pumpChart(tester);
       addTearDown(() => disposeChart(tester, controller));
       const index = 40;
-      final originalDx = controller.indexToDx(index)!;
-
-      expect(
-        controller.indexToCandleDx(index),
-        closeTo(originalDx - controller.candleWidthHalf, 0.001),
-      );
-      expect(controller.indexToDx(index), originalDx);
-      expect(controller.indexToCandleDx(80, check: true), isNull);
-      expect(controller.indexToCandleDx(80, check: false), isNotNull);
+      final dx = controller.indexToDx(index);
+      // 相邻下标相距一个蜡烛宽度, 整数下标即中心。
+      expect(controller.indexToDx(index + 1) - dx, closeTo(controller.candleActualWidth, 0.001));
     });
 
     testWidgets('exact timestamp animates the candle to chart center', (tester) async {

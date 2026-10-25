@@ -30,17 +30,18 @@ const _spec = KlineSpec(symbol: 'DATE-MARK', interval: FlexiTimeInterval(1, Time
 const _otherSpec = KlineSpec(symbol: 'DATE-MARK-OTHER', interval: FlexiTimeInterval(1, TimeUnit.minute));
 
 /// 唯一的最高点下标: 其余蜡烛 high 都是 100, 上方有足够空间; 它贴近主区顶部, 上方放不下。
-const _peak = 5;
+/// 取靠近最新端(高下标)以落在默认可视窗口内。
+const _peak = 195;
 
 /// 唯一的最低点下标: 其余蜡烛 low 都是 90, 下方有足够空间。
-const _trough = 7;
+const _trough = 193;
 
 const _timed = DateMarkConfig();
 
 List<CandleModel> _candles({int count = 200}) => List.generate(
   count,
   (i) => CandleModel(
-    timestamp: 12000000 - i * 60000,
+    timestamp: 12000000 - (count - 1 - i) * 60000,
     open: 95,
     high: i == _peak ? 110 : 100,
     low: i == _trough ? 80 : 90,
@@ -114,23 +115,26 @@ void main() {
   ];
 
   int tsOf(int index) => chart.klineData[index].ts;
-  double dxOf(int index) => chart.indexToCandleDx(index)!;
+  double dxOf(int index) => chart.indexToDx(index);
 
   group('绘制位置', () {
     testWidgets('默认放在 high 上方: 箭头尖端在蜡烛中心、high 上方 spacing 处', (tester) async {
       final candle = await mount(tester, _Candle());
-      const index = 20;
+      const index = 180;
       candle.didMoveToDate(tsOf(index));
 
       final bounds = bubbles(paint()).single.getBounds();
       final config = candle.indicator.dateMark;
-      expect(bounds.bottom, closeTo(candle.valueToDy(chart.klineData[index].high) - config.spacing, 0.01));
+      expect(
+        bounds.bottom,
+        closeTo(candle.valueToDy(chart.klineData[index].high, correct: true) - config.spacing, 0.01),
+      );
       expect(bounds.center.dx, closeTo(dxOf(index), 0.01));
     });
 
     testWidgets('平移后气泡随蜡烛移动', (tester) async {
       final candle = await mount(tester, _Candle());
-      const index = 20;
+      const index = 180;
       candle.didMoveToDate(tsOf(index));
       final before = bubbles(paint()).single.getBounds();
 
@@ -162,7 +166,7 @@ void main() {
 
       final bounds = bubbles(paint()).single.getBounds();
       final config = candle.indicator.dateMark;
-      expect(bounds.top, closeTo(candle.valueToDy(chart.klineData[_peak].low) + config.spacing, 0.01));
+      expect(bounds.top, closeTo(candle.valueToDy(chart.klineData[_peak].low, correct: true) + config.spacing, 0.01));
     });
 
     testWidgets('above: 上方放不下时整体夹回 drawableRect, 不翻到下方', (tester) async {
@@ -174,7 +178,7 @@ void main() {
 
       final bounds = bubbles(paint()).single.getBounds();
       expect(bounds.top, closeTo(candle.drawableRect.top, 0.01));
-      expect(bounds.bottom, lessThan(candle.valueToDy(chart.klineData[_peak].low)), reason: '没有翻到下方');
+      expect(bounds.bottom, lessThan(candle.valueToDy(chart.klineData[_peak].low, correct: true)), reason: '没有翻到下方');
     });
 
     testWidgets('below: 上方有空间也放在 low 下方', (tester) async {
@@ -182,27 +186,31 @@ void main() {
         tester,
         _Candle(dateMark: const DateMarkConfig(holdDuration: 0, position: DateMarkPosition.below)),
       );
-      const index = 20;
+      const index = 180;
       candle.didMoveToDate(tsOf(index));
 
       final bounds = bubbles(paint()).single.getBounds();
       final config = candle.indicator.dateMark;
-      expect(bounds.top, closeTo(candle.valueToDy(chart.klineData[index].low) + config.spacing, 0.01));
+      expect(bounds.top, closeTo(candle.valueToDy(chart.klineData[index].low, correct: true) + config.spacing, 0.01));
     });
 
     testWidgets('线图: 锚点取 close', (tester) async {
       final candle = await mount(tester, _Candle(chartType: FlexiChartType.lineNormal));
-      const index = 20;
+      const index = 180;
       candle.didMoveToDate(tsOf(index));
 
       final bounds = bubbles(paint()).single.getBounds();
       final config = candle.indicator.dateMark;
-      expect(bounds.bottom, closeTo(candle.valueToDy(chart.klineData[index].close) - config.spacing, 0.01));
+      expect(
+        bounds.bottom,
+        closeTo(candle.valueToDy(chart.klineData[index].close, correct: true) - config.spacing, 0.01),
+      );
     });
 
     testWidgets('目标蜡烛不在可视区时不画', (tester) async {
       final candle = await mount(tester, _Candle());
-      candle.didMoveToDate(tsOf(chart.klineData.end + 10));
+      // 可视窗口锚定最新端, 窗口左侧(更旧)的蜡烛不在可视区。
+      candle.didMoveToDate(tsOf(chart.klineData.start - 10));
 
       expect(bubbles(paint()), isEmpty);
       expect(candle.dateMarkTs, isNotNull, reason: '状态保留, 移回可视区仍在计时内则再次出现');
@@ -210,25 +218,32 @@ void main() {
 
     testWidgets('最新蜡烛插入后仍指向同一根蜡烛(按 ts 锚定)', (tester) async {
       final candle = await mount(tester, _Candle());
-      const index = 20;
+      const index = 180;
       final ts = tsOf(index);
       candle.didMoveToDate(ts);
 
       chart.updateLatestKlineData(_spec, [
-        CandleModel(timestamp: tsOf(0) + 60000, open: 95, high: 100, low: 90, close: 98, volume: 1000),
+        CandleModel(
+          timestamp: tsOf(chart.klineData.length - 1) + 60000,
+          open: 95,
+          high: 100,
+          low: 90,
+          close: 98,
+          volume: 1000,
+        ),
       ]);
       chart.flushPendingKlineData();
       await tester.pump();
 
-      expect(tsOf(index + 1), ts, reason: '前置条件: 下标整体后移一位');
+      expect(tsOf(index), ts, reason: '前置条件: 尾部追加不移动已有下标');
       final bounds = bubbles(paint()).single.getBounds();
-      expect(bounds.center.dx, closeTo(dxOf(index + 1), 0.01));
+      expect(bounds.center.dx, closeTo(dxOf(index), 0.01));
     });
 
     testWidgets('子类覆写 buildDateMarkSpan 替换内容, 缓存命中时不重建', (tester) async {
       final candle = _CustomSpanCandle();
       final object = await mount(tester, candle);
-      const index = 20;
+      const index = 180;
       object.didMoveToDate(tsOf(index));
       paint();
       paint();

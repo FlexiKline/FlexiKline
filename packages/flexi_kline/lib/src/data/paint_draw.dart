@@ -15,65 +15,39 @@
 part of 'kline_data.dart';
 
 mixin PaintDrawData on BaseData {
-  void ensureStartAndEndIndex(
-    int startIndex,
-    int maxCandleCount,
-  ) {
-    start = startIndex;
-    end = startIndex + maxCandleCount;
+  /// 以最新根右侧移出视区的根数 [barsBack] 与可见根数 [count] 设置绘制区间 `[start, end)`。
+  void ensurePaintRange({required int barsBack, required int count}) {
+    end = length - barsBack;
+    start = end - count;
   }
 
   Range get computableRange => Range(0, length);
 
   Range get paintIndexRange => Range(start, end);
 
-  /// 将[ts]转换为当前KlineData数据列表的下标和剩余偏移率
-  /// 如果ts > 最新价, 将为负
+  /// [ts]对应的连续下标: 整数位是蜡烛中心, 相邻蜡烛间按 ts 线性插值, 两端外按周期外推.
   double? timestampToIndex(int ts) {
-    if (list.isEmpty || !spec.interval.isValid) return null;
-    const latestIndex = 0; // 后续性能优化考虑数据方向
-    final timespans = spec.interval.milliseconds;
-    final first = list.first;
-    final last = list.last;
-    if (ts > first.ts) {
-      // 超出蜡烛数据时间范围, 不予考虑交易时间问题
-      final distance = first.ts - ts;
-      final value = distance / timespans;
-      return latestIndex + value;
-    } else if (ts <= last.ts) {
-      // 超出蜡烛数据时间范围, 不予考虑交易时间问题
-      final distance = last.ts - ts;
-      final value = distance / timespans;
-      return list.length - 1 + value;
-    } else {
-      int i = latestIndex;
-      final distance = first.ts - ts;
-      final indexValue = distance / timespans;
-      final index = indexValue.truncate();
-      final patch = indexValue - index;
-      for (; i < list.length; i++) {
-        if (ts == list[i].ts) break;
-        if (ts > list[i].ts) {
-          i--;
-          break;
-        }
-      }
-      return i + patch;
-    }
+    if (isEmpty || !spec.interval.isValid) return null;
+    final span = spec.interval.milliseconds;
+    final first = _list.first.ts, last = _list.last.ts;
+    if (ts <= first) return (ts - first) / span;
+    if (ts >= last) return length - 1 + (ts - last) / span;
+    final i = _lowerBound(ts); // _list[i-1].ts < ts <= _list[i].ts
+    final hi = _list[i].ts;
+    if (hi == ts) return i.toDouble();
+    final lo = _list[i - 1].ts;
+    return i - 1 + (ts - lo) / (hi - lo);
   }
 
-  /// 将[indexValue]转换为以当前KlineData数据范围为基础的timestamp
-  int? indexToTimestamp(double indexValue) {
-    if (list.isEmpty || !spec.interval.isValid) return null;
-    final timespans = spec.interval.milliseconds;
-    final index = indexValue.toInt();
-    final patchTs = ((indexValue - index) * timespans).truncate();
-    if (index < 0) {
-      return list.first.ts - index * timespans - patchTs;
-    } else if (index >= list.length - 1) {
-      return list.last.ts - (index + 1 - list.length) * timespans - patchTs;
-    } else {
-      return list[index].ts - patchTs;
-    }
+  /// [timestampToIndex]的逆; [index] 非有限值时返回 null。
+  int? indexToTimestamp(double index) {
+    if (isEmpty || !spec.interval.isValid || !index.isFinite) return null;
+    final span = spec.interval.milliseconds;
+    final last = length - 1;
+    if (index <= 0) return _list.first.ts + (index * span).round();
+    if (index >= last) return _list.last.ts + ((index - last) * span).round();
+    final i = index.floor();
+    final lo = _list[i].ts;
+    return lo + ((index - i) * (_list[i + 1].ts - lo)).round();
   }
 }

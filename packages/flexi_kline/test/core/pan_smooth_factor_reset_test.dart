@@ -42,22 +42,22 @@ List<CandleModel> _stairCandles({
   int latestTimestamp = 12000000,
   int intervalMs = 60000,
 }) {
-  return List.generate(count, (index) {
-    final center = base + index * step;
-    return CandleModel(
-      timestamp: latestTimestamp - index * intervalMs,
-      open: center - spread / 2,
-      high: center + spread,
-      low: center - spread,
-      close: center + spread / 2,
-      volume: 1000,
-    );
-  });
+  return [
+    for (var index = count - 1; index >= 0; index--)
+      CandleModel(
+        timestamp: latestTimestamp - index * intervalMs,
+        open: base + index * step - spread / 2,
+        high: base + index * step + spread,
+        low: base + index * step - spread,
+        close: base + index * step + spread / 2,
+        volume: 1000,
+      ),
+  ];
 }
 
 /// 当前生效区间的上端：主图区顶边对应的价格。
 double _rangeMax(FlexiKlineController chart) {
-  return chart.dyToCandleValue(chart.mainChartRect.top, check: false)!.toDouble();
+  return chart.dyToCandleValue(chart.mainChartRect.top)!.toDouble();
 }
 
 void main() {

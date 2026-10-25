@@ -60,7 +60,6 @@ class _BenchVolumePaintObject extends DirectPaintObject<BenchVolumeIndicator> {
     final int start = klineData.start;
     final int end = klineData.end;
 
-    final offset = startCandleDx - candleWidthHalf;
     final dyBottom = chartRect.bottom;
 
     final longPaint = defLongBarPaint..color = longColor.withAlpha(indicator.opacity.alpha);
@@ -68,8 +67,8 @@ class _BenchVolumePaintObject extends DirectPaintObject<BenchVolumeIndicator> {
 
     for (var i = start; i < end; i++) {
       final model = list[i];
-      final dx = offset - (i - start) * candleActualWidth;
-      final dy = valueToDy(model.vol);
+      final dx = indexToDx(i);
+      final dy = valueToDy(model.vol, correct: true);
       final isLong = model.close >= model.open;
 
       canvas.drawLine(Offset(dx, dy), Offset(dx, dyBottom), isLong ? longPaint : shortPaint);

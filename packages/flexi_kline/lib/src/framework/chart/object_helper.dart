@@ -282,7 +282,7 @@ mixin PaintObjectGeometryStateMixin<T extends Indicator<IIndicatorKey>> on Indic
   }
 
   /// [correct] 为 true 时夹到 [chartRect] 内; 换算线性单调, 在像素空间 clamp 与先夹值等价, 省掉 FlexiNum 比较。
-  double valueToDy(FlexiNum value, {bool correct = true}) {
+  double valueToDy(FlexiNum value, {bool correct = false}) {
     final bottom = chartRect.bottom;
     final dy = bottom - (value - minMax.min).toDouble() * dyFactor;
     if (!correct) return dy;
@@ -292,32 +292,38 @@ mixin PaintObjectGeometryStateMixin<T extends Indicator<IIndicatorKey>> on Indic
     return dy.clamp(top, bottom);
   }
 
-  FlexiNum? dyToValue(double dy, {bool check = true}) {
+  FlexiNum? dyToValue(double dy, {bool check = false}) {
     if (check && !drawableRect.includeDy(dy)) return null;
     if (dyFactor <= 0) return null;
     return minMax.max - ((dy - chartRect.top) / dyFactor).toFlexiNum();
   }
 
-  double? indexToDx(num index, {bool check = true}) {
-    final indexDx = index * candleActualWidth;
-    final dx = chartRect.right + paintDxOffset - indexDx;
-    if (!check) return dx;
-    return chartRect.includeDx(dx) ? dx : null;
+  /// 最新根中心 dx; 由[paintDxOffset]锚定在绘制区右缘。
+  double get latestCandleDx => chartRect.right + paintDxOffset - candleWidthHalf;
+
+  /// 第[index]根蜡烛中心 dx; 越界时按蜡烛宽度外推(负数在最旧根左侧, `>= length` 在最新根右侧)。
+  double indexToDx(num index) {
+    return latestCandleDx - (klineData.length - 1 - index) * candleActualWidth;
   }
 
-  double? timestampToDx(int ts, {bool check = true}) {
-    final index = klineData.tsToIndex(ts);
-    if (index == null) return null;
-    return indexToDx(index, check: check);
+  /// 时间戳[ts]处的 dx; 落在两根蜡烛之间时按 ts 插值。
+  double? timestampToDx(int ts) {
+    final index = klineData.timestampToIndex(ts);
+    return index == null ? null : indexToDx(index);
   }
 
-  double dxToIndex(double dx) {
-    final dxPaintOffset = chartRect.right + paintDxOffset - dx;
-    return dxPaintOffset / candleActualWidth;
+  /// [dx]处的连续下标, 整数位是蜡烛中心。
+  double dxToFloatIndex(double dx) {
+    return klineData.length - 1 - (latestCandleDx - dx) / candleActualWidth;
+  }
+
+  /// [dx]所在蜡烛的下标; 蜡烛区间为 `[中心 - w/2, 中心 + w/2)`, 可越界。
+  int dxToIndex(double dx) {
+    return (dxToFloatIndex(dx) + 0.5).floor();
   }
 
   FlexiCandleModel? dxToCandle(double dx) {
-    final index = dxToIndex(dx).toInt();
+    final index = dxToIndex(dx);
     return klineData.get(index);
   }
 
@@ -365,8 +371,8 @@ mixin PaintGridTicksMixin<T extends Indicator> on PaintObject<T> {
         if (!klineData.canPaintChart || minMax.isZero) {
           return dividedPositions(targetDivisions, start: rect.top, length: rect.height);
         }
-        final top = dyToValue(rect.top, check: false);
-        final bottom = dyToValue(rect.bottom, check: false);
+        final top = dyToValue(rect.top);
+        final bottom = dyToValue(rect.bottom);
         if (top == null || bottom == null) return const [];
 
         final ticks = computeNiceTicks(
@@ -375,7 +381,7 @@ mixin PaintGridTicksMixin<T extends Indicator> on PaintObject<T> {
           targetCount: targetDivisions,
           precision: klineData.precision,
         );
-        return [for (final value in ticks.values) valueToDy(value.toFlexiNum(), correct: false)];
+        return [for (final value in ticks.values) valueToDy(value.toFlexiNum())];
     }
   }
 
@@ -469,7 +475,7 @@ mixin PaintGridTicksMixin<T extends Indicator> on PaintObject<T> {
       if (!showTopTick && dy == rect.top) continue;
       if (!showBottomTick && dy == rect.bottom) continue;
 
-      final value = dyToValue(dy, check: false);
+      final value = dyToValue(dy);
       if (value == null) continue;
 
       // 画在刻度线之上。
@@ -513,7 +519,8 @@ mixin PaintYAxisTicksOnCrossMixin<T extends Indicator> on PaintObject<T> {
     Color? bgColor,
     Color? borderColor,
   }) {
-    final value = dyToValue(offset.dy);
+    // 只在 dy 落在本窗格时画刻度。
+    final value = dyToValue(offset.dy, check: true);
     if (value == null) return null;
 
     final label = _crossTick.paint(
@@ -562,18 +569,17 @@ mixin PaintCandleChartMixin<T extends Indicator> on PaintObject<T> {
     Canvas canvas, {
     int? start,
     int? end,
-    double? startOffset, // 起始偏移量.
   }) {
-    start ??= klineData.start;
-    end ??= math.min(klineData.end + 1, klineData.length); // 多绘制一根蜡烛;
+    // 默认在可见区两侧各多画一根, 让图形从视区外接入。
+    start ??= math.max(klineData.start - 1, 0);
+    end ??= math.min(klineData.end + 1, klineData.length);
     // start/end 可由调用方传入, 不受绘制入口担保, 故校验实际生效的区间。
     if (!klineData.checkStartAndEnd(start, end)) return;
-    startOffset ??= startCandleDx - candleWidthHalf;
     final barWidthHalf = candleWidthHalf;
     for (var i = start; i < end; i++) {
       addCandleBar(
         klineData[i],
-        dx: startOffset - (i - start) * candleActualWidth,
+        dx: indexToDx(i),
         barWidthHalf: barWidthHalf,
         chartStyle: ChartBarStyle.ohlc,
       );
@@ -592,11 +598,11 @@ mixin PaintCandleChartMixin<T extends Indicator> on PaintObject<T> {
     required ChartBarStyle chartStyle,
   }) {
     final isLong = m.close >= m.open;
-    final high = valueToDy(m.high, correct: false);
-    final low = valueToDy(m.low, correct: false);
+    final high = valueToDy(m.high);
+    final low = valueToDy(m.low);
     final (open, close) = ensureMinDistance(
-      valueToDy(m.open, correct: false),
-      valueToDy(m.close, correct: false),
+      valueToDy(m.open),
+      valueToDy(m.close),
     );
     final wicks = isLong ? _longWicks : _shortWicks;
     if (chartStyle == ChartBarStyle.ohlc) {
@@ -669,11 +675,11 @@ mixin PaintCandleChartMixin<T extends Indicator> on PaintObject<T> {
   }) {
     barWidthHalf ??= candleWidthHalf - candleSpacing;
     final isLong = m.close >= m.open;
-    high ??= valueToDy(m.high, correct: false);
-    low ??= valueToDy(m.low, correct: false);
+    high ??= valueToDy(m.high);
+    low ??= valueToDy(m.low);
     (open, close) = ensureMinDistance(
-      open ?? valueToDy(m.open, correct: false),
-      close ?? valueToDy(m.close, correct: false),
+      open ?? valueToDy(m.open),
+      close ?? valueToDy(m.close),
     );
 
     final path = Path()..moveTo(dx, high);
@@ -739,28 +745,20 @@ mixin PaintCandleChartMixin<T extends Indicator> on PaintObject<T> {
     Canvas canvas, {
     int? start,
     int? end,
-    double? startOffset, // 起始偏移量.
     required Paint linePaint, // 蜡烛线图画笔.
     LinearGradient? gradient, // 线图渐变.
   }) {
-    start ??= klineData.start;
-    end ??= math.min(klineData.end + 1, klineData.length); // 多绘制一根蜡烛;
+    // 默认在可见区两侧各多画一根, 让图形从视区外接入。
+    start ??= math.max(klineData.start - 1, 0);
+    end ??= math.min(klineData.end + 1, klineData.length);
     // start/end 可由调用方传入, 不受绘制入口担保, 故校验实际生效的区间。
     if (!klineData.checkStartAndEnd(start, end)) return;
-    startOffset ??= startCandleDx - candleWidthHalf;
 
     final points = <Offset>[];
-    FlexiCandleModel m;
     double boundDy = chartRect.bottom;
     for (var i = start; i < end; i++) {
-      m = klineData[i];
-      final dy = valueToDy(m.close, correct: false);
-      points.add(
-        Offset(
-          startOffset - (i - start) * candleActualWidth,
-          dy,
-        ),
-      );
+      final dy = valueToDy(klineData[i].close);
+      points.add(Offset(indexToDx(i), dy));
       boundDy = math.max(boundDy, dy);
     }
 
@@ -801,31 +799,30 @@ mixin PaintCandleChartMixin<T extends Indicator> on PaintObject<T> {
     Canvas canvas, {
     int? start,
     int? end,
-    double? startOffset, // 起始偏移量.
     required Paint longLinePaint, // 上涨线图画笔.
     required Paint shortLinePaint, // 下跌线图画笔.
     LinearGradient? longGradient, // 上涨渐变.
     LinearGradient? shortGradient, // 下跌渐变.
   }) {
-    start ??= klineData.start;
-    end ??= math.min(klineData.end + 1, klineData.length); // 多绘制一根蜡烛;
+    // 默认在可见区两侧各多画一根, 让图形从视区外接入。
+    start ??= math.max(klineData.start - 1, 0);
+    end ??= math.min(klineData.end + 1, klineData.length);
     // start/end 可由调用方传入, 不受绘制入口担保, 故校验实际生效的区间。
     if (!klineData.checkStartAndEnd(start, end)) return;
-    startOffset ??= startCandleDx - candleWidthHalf;
 
-    final latestDy = valueToDy(klineData.latest!.close, correct: false);
+    final latestDy = valueToDy(klineData.latest!.close);
 
     // 默认策略：使用最新价作为基准线
     Offset boundStart, boundEnd, prev, point;
-    boundStart = Offset(startOffset.clamp(chartRect.left, chartRect.right), latestDy);
-    prev = point = Offset(startOffset, valueToDy(klineData[start].close, correct: false));
+    boundStart = Offset(indexToDx(start).clamp(chartRect.left, chartRect.right), latestDy);
+    prev = point = Offset(indexToDx(start), valueToDy(klineData[start].close));
     final points = [point];
     bool isLong = point.dy <= latestDy;
     for (var i = start + 1; i <= end; i++) {
       if (i < end) {
         point = Offset(
-          startOffset - (i - start) * candleActualWidth,
-          valueToDy(klineData[i].close, correct: false),
+          indexToDx(i),
+          valueToDy(klineData[i].close),
         );
       }
       if (point.dy <= latestDy != isLong || i == end) {

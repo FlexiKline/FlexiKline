@@ -15,7 +15,8 @@
 part of 'kline_data.dart';
 
 mixin CandleListData on BaseData {
-  FlexiCandleModel? get latest => list.firstOrNull;
+  /// 最新一根蜡烛(列表末尾)。
+  FlexiCandleModel? get latest => list.lastOrNull;
 
   Range get allRange => Range(0, list.length);
 
@@ -28,25 +29,15 @@ mixin CandleListData on BaseData {
   FlexiCandleModel? get(int? index) => index != null && checkIndex(index) ? _list[index] : null;
 
   int? tsToIndex(int ts) {
-    final index = list.indexWhere((m) => m.ts == ts);
-    return checkIndex(index) ? index : null;
+    final i = _lowerBound(ts);
+    return i < length && _list[i].ts == ts ? i : null;
   }
 
   /// 返回不晚于[ts]的最近一根真实蜡烛下标.
   int? indexAtOrBefore(int ts) {
-    if (list.isEmpty || ts > list.first.ts || ts < list.last.ts) return null;
-
-    var low = 0;
-    var high = list.length - 1;
-    while (low < high) {
-      final mid = low + ((high - low) >> 1);
-      if (list[mid].ts <= ts) {
-        high = mid;
-      } else {
-        low = mid + 1;
-      }
-    }
-    return low;
+    if (isEmpty || ts < _list.first.ts || ts > _list.last.ts) return null;
+    final i = _lowerBound(ts);
+    return _list[i].ts == ts ? i : i - 1;
   }
 
   @override
@@ -66,10 +57,10 @@ mixin CandleListData on BaseData {
   MinMax? calculateMinmax(int start, int end) {
     if (!checkStartAndEnd(start, end)) return null;
 
-    FlexiCandleModel m = list[end - 1];
+    FlexiCandleModel m = list[start];
     FlexiNum maxHigh = m.high;
     FlexiNum minLow = m.low;
-    for (int i = end - 2; i >= start; i--) {
+    for (int i = start + 1; i < end; i++) {
       m = list[i];
       maxHigh = m.high > maxHigh ? m.high : maxHigh;
       minLow = m.low < minLow ? m.low : minLow;
@@ -77,79 +68,75 @@ mixin CandleListData on BaseData {
     return MinMax(max: maxHigh, min: minLow);
   }
 
-  /// 完整替换蜡烛列表并要求全量计算.
+  /// 仅供 assert 使用: 批次按时间严格升序。
+  bool _isAscending(List<ICandleModel> batch) {
+    for (var i = 1; i < batch.length; i++) {
+      if (batch[i].timestamp <= batch[i - 1].timestamp) return false;
+    }
+    return true;
+  }
+
+  /// 完整替换蜡烛列表并要求全量计算; [batch] 须按时间升序。
   Range replace(List<ICandleModel> batch, {required int slotCount}) {
+    assert(_isAscending(batch), 'replace batch must be in ascending time order');
     _list = batch.map((item) => item.toFlexiCandleModel(slotCount, computeMode)).toList(growable: true);
+    _labelOriginIndex = 0;
     updateState();
     return Range.fullRecompute;
   }
 
-  /// 合并最新方向数据，方向错误时返回 null.
+  /// 把最新方向的 [batch](升序)合并进尾部, 返回被改写的尾段; 方向不符时返回 null。
+  ///
+  /// [batch] 覆盖的时间段以 [batch] 为准: 同 ts 蜡烛保留计算槽后更新行情, 其余替换或追加。
   Range? updateLatest(List<ICandleModel> batch, {required int slotCount}) {
     if (batch.isEmpty || list.isEmpty) return null;
-    if (batch.first.timestamp < list.first.ts || batch.last.timestamp < list.last.ts) return null;
+    if (batch.last.timestamp < _list.last.ts || batch.first.timestamp < _list.first.ts) return null;
+    assert(_isAscending(batch), 'updateLatest batch must be in ascending time order');
 
-    int start = 0;
-    while (start < list.length && list[start].ts >= batch.last.ts) {
-      start++;
+    var tailStart = length;
+    while (tailStart > 0 && _list[tailStart - 1].ts >= batch.first.timestamp) {
+      tailStart--;
     }
 
-    final incoming = List<FlexiCandleModel?>.filled(batch.length, null, growable: false);
-    int oldIndex = start - 1;
-    for (int i = batch.length - 1; i >= 0; i--) {
-      final candle = batch[i];
-      while (oldIndex >= 0 && list[oldIndex].ts < candle.timestamp) {
-        oldIndex--;
+    final merged = <FlexiCandleModel>[];
+    var old = tailStart;
+    for (final candle in batch) {
+      while (old < length && _list[old].ts < candle.timestamp) {
+        old++;
       }
-      FlexiCandleModel? current;
-      if (oldIndex >= 0 && list[oldIndex].ts == candle.timestamp) {
-        current = list[oldIndex--].rebuildSlots(slotCount);
-      }
-      incoming[i] =
-          current?.copyWith(
-            open: candle.open,
-            high: candle.high,
-            low: candle.low,
-            close: candle.close,
-            volume: candle.volume,
-            turnover: candle.turnover,
-            tradeCount: candle.tradeCount,
-            confirmed: candle.confirmed,
-          ) ??
-          candle.toFlexiCandleModel(slotCount, computeMode);
+      final current = old < length && _list[old].ts == candle.timestamp ? _list[old++].rebuildSlots(slotCount) : null;
+      merged.add(
+        current?.copyWith(
+              open: candle.open,
+              high: candle.high,
+              low: candle.low,
+              close: candle.close,
+              volume: candle.volume,
+              turnover: candle.turnover,
+              tradeCount: candle.tradeCount,
+              confirmed: candle.confirmed,
+            ) ??
+            candle.toFlexiCandleModel(slotCount, computeMode),
+      );
     }
 
-    final merged = incoming.cast<FlexiCandleModel>();
-    if (merged.length == start) {
-      for (int i = 0; i < merged.length; i++) {
-        _list[i] = merged[i];
-      }
-    } else {
-      _list = List.of(merged, growable: true)..addAll(list.getRange(start, list.length));
-    }
+    _list.replaceRange(tailStart, length, merged);
     updateState();
-    return Range(0, merged.length);
+    return Range(tailStart, length);
   }
 
-  /// 合并历史方向数据，方向错误时返回 null.
+  /// 把历史方向的 [batch](升序)合并进头部并要求全量计算; 方向不符时返回 null。
   Range? appendHistory(List<ICandleModel> batch, {required int slotCount}) {
-    if (batch.isEmpty || list.isEmpty || batch.first.timestamp > list.last.ts) return null;
+    if (batch.isEmpty || list.isEmpty || batch.last.timestamp > _list.first.ts) return null;
+    assert(_isAscending(batch), 'appendHistory batch must be in ascending time order');
 
     final incoming = batch.map((item) => item.toFlexiCandleModel(slotCount, computeMode)).toList(growable: false);
-    int end = list.length - 1;
-    while (end >= 0 && list[end].ts <= incoming.first.ts) {
-      end--;
+    var headEnd = 0;
+    while (headEnd < length && _list[headEnd].ts <= incoming.last.ts) {
+      headEnd++;
     }
-    final tailStart = end + 1;
-    final oldTailCount = list.length - tailStart;
-    if (incoming.length == oldTailCount) {
-      for (int i = 0; i < incoming.length; i++) {
-        _list[tailStart + i] = incoming[i];
-      }
-    } else {
-      _list.length = tailStart;
-      _list.addAll(incoming);
-    }
+    _list.replaceRange(0, headEnd, incoming);
+    _labelOriginIndex += incoming.length - headEnd;
     updateState();
     return Range.fullRecompute;
   }

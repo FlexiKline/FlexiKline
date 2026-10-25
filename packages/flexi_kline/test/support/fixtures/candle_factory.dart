@@ -71,7 +71,7 @@ Future<List<CandleModel>> genRandomCandleList({
       list.insert(0, m);
     }
   }
-  return list;
+  return list.reversed.toList(); // 升序存储: 最旧在前.
 }
 
 // ---------------------------------------------------------------------------
@@ -123,7 +123,7 @@ List<CandleModel> genFlatCandleList({
       close: 105,
       volume: 1000,
     ),
-  );
+  ).reversed.toList(); // 升序存储: 最旧在前.
 }
 
 /// 生成 [count] 根价格线性上行的蜡烛：第 i 根（自最新往历史数）的 high 为
@@ -150,5 +150,5 @@ List<CandleModel> genRampCandleList({
       close: h - spread / 2,
       volume: 1000,
     );
-  });
+  }).reversed.toList(); // 升序存储: 最旧在前.
 }

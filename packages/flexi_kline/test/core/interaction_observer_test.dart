@@ -68,17 +68,17 @@ class _SelfRemovingObserver extends FlexiKlineObserver {
 
 List<CandleModel> _candles({int count = 200, int intervalMs = 60000}) {
   const latest = 12000000;
-  return List.generate(count, (index) {
-    final center = 100 + index * 10.0;
-    return CandleModel(
-      timestamp: latest - index * intervalMs,
-      open: center,
-      high: center + 5,
-      low: center - 5,
-      close: center,
-      volume: 1000,
-    );
-  });
+  return [
+    for (var index = count - 1; index >= 0; index--)
+      CandleModel(
+        timestamp: latest - index * intervalMs,
+        open: 100 + index * 10.0,
+        high: 100 + index * 10.0 + 5,
+        low: 100 + index * 10.0 - 5,
+        close: 100 + index * 10.0,
+        volume: 1000,
+      ),
+  ];
 }
 
 void main() {

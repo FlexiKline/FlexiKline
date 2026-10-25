@@ -21,7 +21,7 @@ class MockKlineApi implements KlineApi {
   final Map<MyKlineInterval, List<CandleModel>> _cache = {};
   final Map<MyKlineInterval, Future<List<CandleModel>>> _pending = {};
 
-  /// 该周期全量蜡烛（降序，最新在前），懒加载并缓存。
+  /// 该周期全量蜡烛（升序，最新在后），懒加载并缓存。
   Future<List<CandleModel>> _ensureAll(MyKlineInterval interval) {
     final cached = _cache[interval];
     if (cached != null) return Future.value(cached);
@@ -43,7 +43,7 @@ class MockKlineApi implements KlineApi {
     return (json['candles'] as List<dynamic>).map((e) => RawCandle.fromJson(e as Map<String, dynamic>)).toList();
   }
 
-  /// 把 [RawCandle] 序列构建为按时间降序（最新在前）的 [CandleModel]。
+  /// 把 [RawCandle] 序列构建为按时间升序（最新在后）的 [CandleModel]。
   List<CandleModel> _buildCandles(MyKlineInterval interval, List<RawCandle> raw) {
     final n = raw.length;
     if (n == 0) return const [];
@@ -63,7 +63,7 @@ class MockKlineApi implements KlineApi {
         candles.add(_toCandle(r, r.timestamp));
       }
     }
-    return candles.reversed.toList();
+    return candles;
   }
 
   CandleModel _toCandle(RawCandle r, int ts) => CandleModel(
@@ -86,10 +86,10 @@ class MockKlineApi implements KlineApi {
   }) async {
     await Future<void>.delayed(const Duration(milliseconds: 300));
     final all = await _ensureAll(interval);
-    if (end == null) {
-      return all.take(limit).toList();
-    }
-    return all.where((c) => c.timestamp < end).take(limit).toList();
+    // all 升序（最新在后）。取满足条件的一段里最新的 limit 根, 仍按升序返回。
+    final window = end == null ? all : all.where((c) => c.timestamp < end).toList();
+    final from = window.length <= limit ? 0 : window.length - limit;
+    return window.sublist(from);
   }
 
   @override
@@ -98,7 +98,7 @@ class MockKlineApi implements KlineApi {
     required MyKlineInterval interval,
   }) async* {
     final all = await _ensureAll(interval);
-    final latest = all.isEmpty ? null : all.first;
+    final latest = all.isEmpty ? null : all.last;
     final startTs = latest?.timestamp ?? DateTime.now().millisecondsSinceEpoch;
     final startOpen = (latest?.open as num?)?.toDouble() ?? 0.0;
     final startClose = (latest?.close as num?)?.toDouble() ?? 0.0;
