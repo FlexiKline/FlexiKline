@@ -21,11 +21,15 @@
 /// - `MODE`: `frames`(默认)或 `trace`(只跑选中的一个场景的一个窗口, 包在 traceAction 里取时间线);
 /// - `SCENARIO`: 逗号分隔的场景名, 可用 `pan/*` 这样的前缀; 为空跑全部;
 /// - `WINDOWS` / `WINDOW_SECONDS`: 每场景计时窗口数与窗口时长, 默认 3 × 6s(之前先驱动 3s 预热, 不计入), 冒烟时调小。
+///
+/// 回传的 `scenarioVersion` 与每个场景的 `dataDigest` 用来核对两侧负载相同, 见 `src/data/digest.dart`。
 library;
 
 import 'dart:io' show ProcessInfo;
 
 import 'package:flexi_kline_benchmark/src/app.dart';
+import 'package:flexi_kline_benchmark/src/data/candles.dart';
+import 'package:flexi_kline_benchmark/src/data/digest.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart' show SizedBox;
 import 'package:flutter_test/flutter_test.dart';
@@ -115,12 +119,17 @@ void main() {
       }
 
       final windows = await recordWindows(ctx, _windows, prepare, drive);
-      results[name] = {'windows': windows, 'rssBefore': rssBefore};
+      results[name] = {
+        'windows': windows,
+        'rssBefore': rssBefore,
+        'dataDigest': dataDigest(benchCandles(count: scenario.candles)),
+      };
       debugPrint('bench[$name]: ${[for (final w in windows) w['frames']]} frames per window');
     }
     binding.reportData = {
       ...?binding.reportData,
-      'schema': 1,
+      'schema': 2,
+      'scenarioVersion': scenarioVersion,
       'mode': _mode,
       'refreshRate': refreshRate,
       'windowSeconds': windowDuration.inSeconds,
