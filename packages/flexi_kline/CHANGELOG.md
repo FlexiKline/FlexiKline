@@ -1,3 +1,6 @@
+## 2.7.0
+* Remove the unused public helpers `combineCandleList`, `removeDuplicate` and `KlineData.paintTimeRange` (Breaking Changes).
+
 ## 2.6.1
 * Add `TextLayoutCache.debugMissCount` (debug-only, `@visibleForTesting`) so tests can assert that cached label frames do not re-lay out text.
 * Add profile-mode timeline events for the grid, chart, draw and cross layers and for chart range, min/max and pane painting, collectable via `FlutterTimeline.debugCollect()`; the existing `Flexi-PaintChart` event is now emitted in profile mode only instead of in every build mode.

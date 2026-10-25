@@ -27,13 +27,6 @@ mixin PaintDrawData on BaseData {
 
   Range get paintIndexRange => Range(start, end);
 
-  Range? get paintTimeRange {
-    if (checkStartAndEnd(start, end)) {
-      return Range(list[start].ts, list[end].ts);
-    }
-    return null;
-  }
-
   /// 将[ts]转换为当前KlineData数据列表的下标和剩余偏移率
   /// 如果ts > 最新价, 将为负
   double? timestampToIndex(int ts) {
