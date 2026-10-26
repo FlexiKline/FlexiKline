@@ -404,71 +404,39 @@ extension DrawContextExt on DrawContext {
     return true;
   }
 
-  /// 将[offset]吸附到蜡烛坐标上
+  /// 将[offset]吸附到蜡烛坐标: 横轴吸到所在蜡烛中心(空白区按蜡烛宽度外推);
+  /// 纵轴吸到该蜡烛 OHLC 中最近的价位, 弱磁吸只在 [DrawConfig.magnetMinDistance] 像素内生效。
   Offset magneticSnap(Offset offset) {
     if (drawMagnet.isNormal) return offset;
 
-    double dx = offset.dx, dy = offset.dy;
-    final index = dxToIndex(dx);
-    dx = indexToDx(index);
-    final value = dyToValue(dy);
+    final index = dxToIndex(offset.dx);
+    final dx = indexToDx(index);
     final candle = klineData.get(index);
-    if (value != null && candle != null) {
-      final high = candle.high;
-      final low = candle.low;
-      final minDistance = drawConfig.magnetMinDistance;
-      if (value > high) {
-        final highDy = valueToDy(high);
-        if (drawMagnet.isWeak && (highDy - dy) <= minDistance) {
-          dy = highDy;
-        } else if (drawMagnet.isStrong) {
-          dy = highDy;
-        }
-      } else if (value < low) {
-        final lowDy = valueToDy(low);
-        if (drawMagnet.isWeak && (dy - lowDy) <= minDistance) {
-          dy = lowDy;
-        } else if (drawMagnet.isStrong) {
-          dy = lowDy;
-        }
-      } else {
-        FlexiNum midLow, midHigh;
-        if (candle.isLong) {
-          midLow = candle.open;
-          midHigh = candle.close;
-        } else {
-          midLow = candle.close;
-          midHigh = candle.open;
-        }
-        FlexiNum? result;
-        if (value < midLow) {
-          result = (midLow - value) > (value - low) ? low : midLow;
-        } else if (value < midHigh) {
-          result = (midHigh - value) > (value - midLow) ? midLow : midHigh;
-        } else if (value < high) {
-          result = (high - value) > (value - midHigh) ? midHigh : high;
-        }
-        if (result != null) dy = valueToDy(result);
-      }
+    if (candle == null) return Offset(dx, offset.dy);
+
+    var dy = offset.dy, distance = double.infinity;
+    for (final value in [candle.high, candle.open, candle.close, candle.low]) {
+      final valueDy = valueToDy(value);
+      final d = (valueDy - offset.dy).abs();
+      if (d < distance) (dy, distance) = (valueDy, d);
     }
+    if (drawMagnet.isWeak && distance > drawConfig.magnetMinDistance) dy = offset.dy;
     return Offset(dx, dy);
   }
 
-  /// 检测[object]中所有point到所在蜡烛中心的距离是否相等.
-  /// 如果相等, 则可以进行磁吸操作
-  bool isMagneticDrawObject(DrawObject object) {
-    double? first;
+  /// 整体平移[object]后把它拉回蜡烛中心所需的横向位移。
+  ///
+  /// 只有所有点相对各自蜡烛中心的偏移相同(即平移前已对齐蜡烛网格)才返回位移, 否则返回 null,
+  /// 免得把自由绘制的对象拉变形。
+  double? magneticShift(DrawObject object) {
+    double? shift;
     for (final point in object.points) {
-      final pointDx = point?.offset.dx;
-      if (pointDx == null) return false;
-      final index = dxToIndex(pointDx);
-      final dx = indexToDx(index);
-      // 计算point实际dx坐标与当前所在蜡烛中心坐标距离.
-      final deltaDx = (pointDx - dx).abs();
-      first ??= deltaDx;
-      // 如果当前point的deltaDx与第一个point的deltaDx不相同, 则不可进行磁吸操作
-      if ((deltaDx - first).abs() > precisionError) return false;
+      if (point == null) return null;
+      final dx = point.offset.dx;
+      final d = indexToDx(dxToIndex(dx)) - dx;
+      shift ??= d;
+      if ((d - shift).abs() > precisionError) return null;
     }
-    return true;
+    return shift;
   }
 }

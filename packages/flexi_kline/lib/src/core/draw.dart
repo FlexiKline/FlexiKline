@@ -366,13 +366,11 @@ mixin DrawBinding on KlineBindingBase, SettingBinding {
     if (object.pointer != null) {
       logd('onDrawMoveEnd pointer:${object.pointer}');
       object.confirmPointer();
-    } else {
-      if (!drawMagnet.isNormal && isMagneticDrawObject(object)) {
+    } else if (!drawMagnet.isNormal) {
+      final shift = magneticShift(object);
+      if (shift != null && shift != 0) {
         for (final point in object.points) {
-          if (point == null) continue;
-          final index = dxToIndex(point.offset.dx);
-          final dx = indexToDx(index);
-          object.onUpdateDrawPoint(point, Offset(dx, point.offset.dy));
+          object.onUpdateDrawPoint(point!, point.offset.translate(shift, 0));
         }
       }
     }

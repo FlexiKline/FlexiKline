@@ -4,10 +4,12 @@
 * Remove the `startOffset` parameter from `paintOHLCStyleCandleChart`, `paintCandleLineChart` and `paintCandleUpDownLineChart`; their default range now extends one candle beyond each side of the visible range (Breaking Changes).
 * Change `timestampToIndex` / `indexToTimestamp` to map to candle centers, interpolating by timestamp between adjacent candles and extrapolating by interval outside the data, so saved drawings shift by half a candle (Breaking Changes).
 * Rename `KlineData.ensureStartAndEndIndex(startIndex, maxCount)` to `ensurePaintRange({barsBack, count})` (Breaking Changes).
+* Fix the cross snapping to candle centers in the blank area left of the oldest candle when `moveByCandleInBlank` is off; both blank sides now behave the same.
 * Change the default of `PaintObject.valueToDy`'s `correct` to `false`, matching the controller and `DrawContext`; pass `correct: true` to clamp into the chart rect (Breaking Changes).
 * Change the default of `PaintObject.dyToValue`'s `check` to `false`, matching the controller and `DrawContext`; pass `check: true` to return null for a `dy` outside the pane (Breaking Changes).
 * Change `DrawContext.valueToDy` to return a non-nullable `double` (Breaking Changes).
-* Fix the cross snapping to candle centers in the blank area left of the oldest candle when `moveByCandleInBlank` is off; both blank sides now behave the same.
+* Change the weak magnet to snap to the nearest OHLC price only within `magnetMinDistance`, also inside the candle body and wicks (it used to always snap there, like the strong magnet).
+* Replace `DrawContextExt.isMagneticDrawObject` with `magneticShift`, which returns the dx shift that realigns a moved drawing to candle centers; points mirrored around their candle centers no longer count as aligned (Breaking Changes).
 * Add `KlineData.labelOriginIndex` so time-axis labels stay on the same candles after loading more history.
 * Remove the unused public helpers `combineCandleList`, `removeDuplicate` and `KlineData.paintTimeRange` (Breaking Changes).
 
