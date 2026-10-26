@@ -7,6 +7,7 @@
 * Change the default of `PaintObject.valueToDy`'s `correct` to `false`, matching the controller and `DrawContext`; pass `correct: true` to clamp into the chart rect (Breaking Changes).
 * Change the default of `PaintObject.dyToValue`'s `check` to `false`, matching the controller and `DrawContext`; pass `check: true` to return null for a `dy` outside the pane (Breaking Changes).
 * Change `DrawContext.valueToDy` to return a non-nullable `double` (Breaking Changes).
+* Fix the cross snapping to candle centers in the blank area left of the oldest candle when `moveByCandleInBlank` is off; both blank sides now behave the same.
 * Add `KlineData.labelOriginIndex` so time-axis labels stay on the same candles after loading more history.
 * Remove the unused public helpers `combineCandleList`, `removeDuplicate` and `KlineData.paintTimeRange` (Breaking Changes).
 

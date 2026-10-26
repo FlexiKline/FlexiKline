@@ -109,10 +109,10 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
   Offset? _correctCrossOffset(Offset val) {
     if (val.isInfinite) return null;
 
-    // 横轴吸附到蜡烛中心; 最新根右侧空白区未开 moveByCandleInBlank 时不吸附。
+    // 横轴吸附到蜡烛中心; 最旧根左侧与最新根右侧的空白区未开 moveByCandleInBlank 时不吸附。
     val = val.clamp(canvasRect);
     final index = dxToIndex(val.dx);
-    if (!crossConfig.moveByCandleInBlank && index >= klineData.length) return val;
+    if (!crossConfig.moveByCandleInBlank && !klineData.checkIndex(index)) return val;
     return Offset(indexToDx(index), val.dy);
   }
 
