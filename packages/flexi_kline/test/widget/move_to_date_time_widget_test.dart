@@ -352,6 +352,23 @@ void main() {
       expect(await _pumpUntilFutureComplete(tester, future, 'changed timestamp result'), isNull);
     });
 
+    testWidgets('new latest candle during animation keeps the target index', (tester) async {
+      final controller = await _pumpChart(tester);
+      addTearDown(() => disposeChart(tester, controller));
+      final target = _latest.subtract(_day * 40);
+      final index = controller.klineData.tsToIndex(target.millisecondsSinceEpoch)!;
+      final future = controller.moveToDateTime(target);
+
+      await tester.pump(const Duration(milliseconds: 16));
+      // 新蜡烛追加在尾部, 已有下标不动.
+      controller.updateLatestKlineData(_spec, [_candle(_latest.add(_day))]);
+      controller.flushPendingKlineData();
+      await tester.pump();
+
+      expect(controller.klineData.tsToIndex(target.millisecondsSinceEpoch), index);
+      expect(await _pumpUntilFutureComplete(tester, future, 'new candle result'), index);
+    });
+
     testWidgets('retained move callback is inert after widget disposal', (tester) async {
       final controller = await _pumpChart(tester);
       addTearDown(controller.dispose);

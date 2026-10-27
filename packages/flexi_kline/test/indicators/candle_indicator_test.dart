@@ -362,4 +362,73 @@ void main() {
       expect(segments, visible * 3);
     });
   });
+
+  group('最高/最低价标记', () {
+    /// 高低价按 [highs] / [lows] 给出的 [highs.length] 根蜡烛, 时间升序。
+    List<CandleModel> bars(List<num> highs, List<num> lows) => [
+      for (var i = 0; i < highs.length; i++)
+        CandleModel(
+          timestamp: 12000000 + i * 60000,
+          open: 100,
+          high: highs[i],
+          low: lows[i],
+          close: 100,
+          volume: 1000,
+        ),
+    ];
+
+    testWidgets('不足一屏: 并列的最高/最低价标在最左那根', (tester) async {
+      final candle = _MarkCandle();
+      await mount(tester, candle, candles: bars([110, 120, 115, 120, 110], [90, 80, 85, 80, 90]));
+      expect(chart.paintDxOffset, lessThanOrEqualTo(0), reason: '前置: 不足一屏');
+      await paint(tester);
+
+      expect(candle.marks, [
+        (dx: chart.indexToDx(1), value: 120.0),
+        (dx: chart.indexToDx(1), value: 80.0),
+      ]);
+    });
+
+    testWidgets('不足一屏: 极值落在最左一根时也画标记', (tester) async {
+      final candle = _MarkCandle();
+      await mount(tester, candle, candles: bars([130, 120, 110], [70, 80, 90]));
+      await paint(tester);
+
+      expect(candle.marks, [
+        (dx: chart.indexToDx(0), value: 130.0),
+        (dx: chart.indexToDx(0), value: 70.0),
+      ]);
+    });
+
+    testWidgets('满一屏: 全局极值并列时标在可视区最左那根', (tester) async {
+      final candle = _MarkCandle();
+      await mount(tester, candle);
+      chart.onChartMove(const Offset(200, 0));
+      chart.onChartPanEnd();
+      expect(chart.paintDxOffset, greaterThan(0), reason: '前置: 满一屏');
+      await paint(tester);
+
+      final left = chart.indexToDx(chart.klineData.start);
+      expect(candle.marks, [(dx: left, value: 110.0), (dx: left, value: 90.0)]);
+    });
+  });
+}
+
+/// 记下 [CandlePaintObject.paintPriceMark] 收到的位置与价格。
+class _MarkCandle extends _Candle {
+  final marks = <({double dx, double value})>[];
+
+  @override
+  CandlePaintObject createPaintObject() => object = _MarkObject(marks);
+}
+
+class _MarkObject extends CandlePaintObject {
+  _MarkObject(this.marks);
+
+  final List<({double dx, double value})> marks;
+
+  @override
+  void paintPriceMark(Canvas canvas, Offset offset, FlexiNum val, MarkConfig markConfig) {
+    marks.add((dx: offset.dx, value: val.toDouble()));
+  }
 }

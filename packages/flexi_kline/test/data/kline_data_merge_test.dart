@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'package:decimal/decimal.dart';
+import 'package:flexi_formatter/date_time.dart' show TimeUnit;
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -146,6 +147,100 @@ void main() {
       expect(data.prependHistory([], slotCount: 0), isNull);
       expect(data.prependHistory([_candle(4)], slotCount: 0), isNull);
       expect(data.list, before);
+    });
+
+    test('三个合并入口在 debug 下断言批次按时间升序', () {
+      final data = _data();
+      addTearDown(data.dispose);
+      final descending = [_candle(3), _candle(2), _candle(1)];
+
+      expect(() => data.replace(descending, slotCount: 0), throwsAssertionError);
+      data.replace([_candle(4), _candle(5)], slotCount: 0);
+      expect(() => data.updateLatest([_candle(7), _candle(6)], slotCount: 0), throwsAssertionError);
+      expect(() => data.prependHistory([_candle(2), _candle(1)], slotCount: 0), throwsAssertionError);
+      expect(() => data.replace([_candle(1), _candle(1)], slotCount: 0), throwsAssertionError, reason: '要求严格升序');
+      expect(data.list.map((item) => item.ts), [4, 5]);
+    });
+  });
+
+  group('KlineData labelOriginIndex', () {
+    test('replace 归零, 头部插入加上净头插根数, 最新端更新不变', () {
+      final data = _data();
+      addTearDown(data.dispose);
+      data.replace([_candle(5), _candle(6), _candle(7)], slotCount: 0);
+      expect(data.labelOriginIndex, 0);
+
+      // ts=5 与已有蜡烛重叠, 净头插 2 根.
+      data.prependHistory([_candle(3), _candle(4), _candle(5)], slotCount: 0);
+      expect(data.labelOriginIndex, 2);
+
+      data.updateLatest([_candle(7), _candle(8)], slotCount: 0);
+      expect(data.labelOriginIndex, 2);
+
+      data.replace([_candle(1)], slotCount: 0);
+      expect(data.labelOriginIndex, 0);
+    });
+
+    test('加载历史前后, 原有蜡烛里被选作标签的时间戳不变', () {
+      final data = _data();
+      addTearDown(data.dispose);
+      data.replace([for (var ts = 10; ts < 20; ts++) _candle(ts)], slotCount: 0);
+      const step = 3;
+      Set<int> labelTs({int fromTs = 10}) => {
+        for (var i = 0; i < data.length; i++)
+          if ((i - data.labelOriginIndex) % step == 0 && data[i].ts >= fromTs) data[i].ts,
+      };
+      final before = labelTs();
+
+      // 净头插 2 根, 不是 step 的倍数: 只按下标取模时标签会整体错位.
+      data.prependHistory([_candle(8), _candle(9)], slotCount: 0);
+
+      expect(labelTs(), before);
+    });
+  });
+
+  group('KlineData timestamp <-> float index', () {
+    const minute = 60000;
+    KlineData minuteData(List<int> minutes) {
+      final data = KlineData(const KlineSpec(symbol: 'T', interval: FlexiTimeInterval(1, TimeUnit.minute)));
+      data.replace([for (final m in minutes) _candle(m * minute)], slotCount: 0);
+      return data;
+    }
+
+    test('整根命中整数下标, 缺口内按时间戳插值, 两端按周期外推', () {
+      // 第 1、2 根之间缺 1 根: ts=2 落在两根的正中.
+      final data = minuteData([0, 1, 3]);
+      addTearDown(data.dispose);
+
+      expect(data.timestampToFloatIndex(0), 0);
+      expect(data.timestampToFloatIndex(1 * minute), 1);
+      expect(data.timestampToFloatIndex(2 * minute), 1.5);
+      expect(data.timestampToFloatIndex(3 * minute), 2);
+      expect(data.timestampToFloatIndex(-1 * minute), -1);
+      expect(data.timestampToFloatIndex(5 * minute), 4);
+    });
+
+    test('floatIndexToTimestamp 是逆映射; 非有限值返回 null', () {
+      final data = minuteData([0, 1, 3]);
+      addTearDown(data.dispose);
+
+      for (final ts in [-2 * minute, 0, 30000, 2 * minute, 3 * minute, 6 * minute]) {
+        expect(data.floatIndexToTimestamp(data.timestampToFloatIndex(ts)!), ts, reason: 'ts=$ts');
+      }
+      expect(data.floatIndexToTimestamp(double.nan), isNull);
+      expect(data.floatIndexToTimestamp(double.infinity), isNull);
+    });
+
+    test('空数据或无效周期返回 null', () {
+      final empty = minuteData([]);
+      addTearDown(empty.dispose);
+      expect(empty.timestampToFloatIndex(0), isNull);
+      expect(empty.floatIndexToTimestamp(0), isNull);
+
+      final invalid = _data();
+      addTearDown(invalid.dispose);
+      invalid.replace([_candle(1), _candle(2)], slotCount: 0);
+      expect(invalid.timestampToFloatIndex(1), isNull);
     });
   });
 }

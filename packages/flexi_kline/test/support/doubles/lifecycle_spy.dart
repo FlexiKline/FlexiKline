@@ -142,10 +142,14 @@ class SpyComputedCalculator extends IndicatorCalculator<SpyComputedIndicator> {
   /// 最近一次 compute 的 reset 参数
   bool? lastReset;
 
+  /// 最近一次 compute 收到的脏区, 以及当时的数据长度.
+  ({Range range, int length})? lastRange;
+
   @override
   void compute(KlineData data, Range range, {bool reset = false}) {
     computeCount++;
     lastReset = reset;
+    lastRange = (range: range, length: data.length);
     indicator.onCompute?.call();
     if (indicator.throwOnCompute) throw StateError('compute failed');
     indicator.log.events.add('compute:${indicator.key.id}(reset:$reset)');

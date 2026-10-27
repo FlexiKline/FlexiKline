@@ -312,6 +312,8 @@ void main() {
     expect(scene.data.list.map((item) => item.ts), [1, 2, 3]);
     expect(scene.calculator.computeCount, 1);
     expect(scene.calculator.lastReset, isFalse);
+    // 最新端更新只弄脏尾段: [1, 3) 覆盖 ts=2 并追加 ts=3, 终点等于数据长度.
+    expect(scene.calculator.lastRange, (range: const Range(1, 3), length: 3));
   });
 
   testWidgets('history 合并后立即计算，不等待下一节拍', (tester) async {

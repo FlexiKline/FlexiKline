@@ -487,7 +487,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
           }
         } else {
           // 不足一屏: 极值限可见区域, 严格大于使并列标最左(最旧).
-          if (m.high > maxHigh) {
+          if (maxHighOffset == null || m.high > maxHigh) {
             maxHighOffset = Offset(dx, valueToDy(m.high));
             maxHigh = m.high;
           }
@@ -503,7 +503,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
           }
         } else {
           // 不足一屏: 极值限可见区域, 严格小于使并列标最左(最旧).
-          if (m.low < minLow) {
+          if (minLowOffset == null || m.low < minLow) {
             minLowOffset = Offset(dx, valueToDy(m.low));
             minLow = m.low;
           }
