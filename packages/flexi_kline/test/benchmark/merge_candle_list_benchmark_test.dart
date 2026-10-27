@@ -71,7 +71,7 @@ void main() {
       () {
         for (int i = 0; i < 10; i++) {
           pool.moveNext();
-          pool.current.appendHistory(history, slotCount: 0);
+          pool.current.prependHistory(history, slotCount: 0);
         }
       },
       rounds: 7,

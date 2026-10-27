@@ -117,7 +117,7 @@ Future<void> _history(ScenarioContext ctx) async {
       final length = controller.klineData.length;
       final batch = benchCandles(count: 500, offset: length);
       await Future<void>.delayed(const Duration(milliseconds: 300));
-      await ctx.timeOp(() => controller.appendHistoryKlineData(benchSpec, batch));
+      await ctx.timeOp(() => controller.prependHistoryKlineData(benchSpec, batch));
       await stroke;
       expect(controller.klineData.length, length + batch.length, reason: '前置：加载历史要合并出新蜡烛');
     } else {

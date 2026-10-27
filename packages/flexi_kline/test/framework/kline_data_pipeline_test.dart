@@ -181,9 +181,9 @@ void main() {
     pipeline.updateLatest([_candle(2), _candle(3)]);
     expect(logger.entries.where((entry) => entry.msg.startsWith('Merge:::')), isEmpty);
 
-    pipeline.appendHistory([_candle(0), _candle(1)]);
+    pipeline.prependHistory([_candle(0), _candle(1)]);
     merge = logger.entries.singleWhere((entry) => entry.msg.startsWith('Merge:::'));
-    expect(merge.msg, contains('kind:appendHistory'));
+    expect(merge.msg, contains('kind:prependHistory'));
   });
 
   testWidgets('输出指标计算耗时日志', (tester) async {
@@ -330,7 +330,7 @@ void main() {
     await tester.pump();
     scene.calculator.computeCount = 0;
 
-    pipeline.appendHistory([_candle(0), _candle(1)]);
+    pipeline.prependHistory([_candle(0), _candle(1)]);
     await tester.pump();
 
     expect(scene.data.list.map((item) => item.ts), [0, 1, 2]);
@@ -582,7 +582,7 @@ void main() {
       elapsed = const Duration(milliseconds: 1200);
       pipeline.updateLatest([_candle(4), _candle(5)]);
     };
-    pipeline.appendHistory([_candle(1), _candle(2)]);
+    pipeline.prependHistory([_candle(1), _candle(2)]);
 
     expect(scene.data.list.map((item) => item.ts), [1, 2, 3, 4, 5]);
     expect(scene.calculator.computeCount, 1);

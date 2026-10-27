@@ -26,7 +26,7 @@ import 'logger.dart';
 
 enum _PipelinePhase { idle, merging, computing }
 
-enum _UpdateKind { replace, updateLatest, appendHistory }
+enum _UpdateKind { replace, updateLatest, prependHistory }
 
 /// 串行编排蜡烛合并与指标计算，并按固定节拍计算 latest 更新.
 final class KlineDataPipeline with FlexiLog {
@@ -100,7 +100,7 @@ final class KlineDataPipeline with FlexiLog {
 
   void updateLatest(List<ICandleModel> batch) => _enqueue(batch, _UpdateKind.updateLatest);
 
-  void appendHistory(List<ICandleModel> batch) => _enqueue(batch, _UpdateKind.appendHistory);
+  void prependHistory(List<ICandleModel> batch) => _enqueue(batch, _UpdateKind.prependHistory);
 
   /// 请求当前数据全部指标立即重算.
   void invalidateAll() {
@@ -145,7 +145,7 @@ final class KlineDataPipeline with FlexiLog {
           range = switch (update.kind) {
             _UpdateKind.replace => data.replace(update.batch, slotCount: manager.computedDataCapacity),
             _UpdateKind.updateLatest => data.updateLatest(update.batch, slotCount: manager.computedDataCapacity),
-            _UpdateKind.appendHistory => data.appendHistory(update.batch, slotCount: manager.computedDataCapacity),
+            _UpdateKind.prependHistory => data.prependHistory(update.batch, slotCount: manager.computedDataCapacity),
           };
           stopwatch.stop();
         } catch (error, stackTrace) {

@@ -42,7 +42,7 @@ class SettingConfig {
     this.candleSpacingParts = 7,
     this.candleHollowBarBorderWidth = 1,
     this.candleLineWidth = 1,
-    this.firstCandleInitOffset = 80,
+    this.latestCandleInitOffset = 80,
 
     /// overlay 是否允许绘制在主图 rect 之外
     this.allowOverlayOutsideMainRect = true,
@@ -99,8 +99,8 @@ class SettingConfig {
   /// 蜡烛线宽(high/low)
   final double candleLineWidth;
 
-  /// 第一根蜡烛相对于 mainRect 右边的偏移
-  final double firstCandleInitOffset;
+  /// 最新一根蜡烛初始时距 mainRect 右缘的留白
+  final double latestCandleInitOffset;
 
   /// overlay 是否允许绘制在主图 rect 之外
   final bool allowOverlayOutsideMainRect;

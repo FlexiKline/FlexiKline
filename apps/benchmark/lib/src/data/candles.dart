@@ -21,7 +21,7 @@ import '../constants.dart';
 const _intervalMs = 60000;
 const _latestTs = 1760000000000;
 
-/// 固定种子的随机游走蜡烛, 按时间升序(最新在后), 与 `replaceKlineData` / `appendHistoryKlineData` 的约定一致。
+/// 固定种子的随机游走蜡烛, 按时间升序(最新在后), 与 `replaceKlineData` / `prependHistoryKlineData` 的约定一致。
 ///
 /// [offset] 为距最新一根的根数: 加载历史时取紧接已有数据的更早一段; 种子随 [offset] 变, 每段可复现。
 List<CandleModel> benchCandles({int count = benchCandleCount, int offset = 0}) {

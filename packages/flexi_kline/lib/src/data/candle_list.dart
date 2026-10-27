@@ -126,9 +126,9 @@ mixin CandleListData on BaseData {
   }
 
   /// 把历史方向的 [batch](升序)合并进头部并要求全量计算; 方向不符时返回 null。
-  Range? appendHistory(List<ICandleModel> batch, {required int slotCount}) {
+  Range? prependHistory(List<ICandleModel> batch, {required int slotCount}) {
     if (batch.isEmpty || list.isEmpty || batch.last.timestamp > _list.first.ts) return null;
-    assert(_isAscending(batch), 'appendHistory batch must be in ascending time order');
+    assert(_isAscending(batch), 'prependHistory batch must be in ascending time order');
 
     final incoming = batch.map((item) => item.toFlexiCandleModel(slotCount, computeMode)).toList(growable: false);
     var headEnd = 0;

@@ -308,7 +308,7 @@ mixin PaintObjectGeometryStateMixin<T extends Indicator<IIndicatorKey>> on Indic
 
   /// 时间戳[ts]处的 dx; 落在两根蜡烛之间时按 ts 插值。
   double? timestampToDx(int ts) {
-    final index = klineData.timestampToIndex(ts);
+    final index = klineData.timestampToFloatIndex(ts);
     return index == null ? null : indexToDx(index);
   }
 

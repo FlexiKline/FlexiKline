@@ -26,7 +26,7 @@ mixin PaintDrawData on BaseData {
   Range get paintIndexRange => Range(start, end);
 
   /// [ts]对应的连续下标: 整数位是蜡烛中心, 相邻蜡烛间按 ts 线性插值, 两端外按周期外推.
-  double? timestampToIndex(int ts) {
+  double? timestampToFloatIndex(int ts) {
     if (isEmpty || !spec.interval.isValid) return null;
     final span = spec.interval.milliseconds;
     final first = _list.first.ts, last = _list.last.ts;
@@ -39,8 +39,8 @@ mixin PaintDrawData on BaseData {
     return i - 1 + (ts - lo) / (hi - lo);
   }
 
-  /// [timestampToIndex]的逆; [index] 非有限值时返回 null。
-  int? indexToTimestamp(double index) {
+  /// [timestampToFloatIndex]的逆; [index] 非有限值时返回 null。
+  int? floatIndexToTimestamp(double index) {
     if (isEmpty || !spec.interval.isValid || !index.isFinite) return null;
     final span = spec.interval.milliseconds;
     final last = length - 1;

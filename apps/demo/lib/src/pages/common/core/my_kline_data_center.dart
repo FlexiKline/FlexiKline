@@ -92,7 +92,7 @@ mixin MyKlineDataCenterMixin<T extends StatefulWidget> on KlineStateBase<T> {
       limit: spec.limit,
     );
     if (!mounted) return;
-    klineController.appendHistoryKlineData(spec, candles);
+    klineController.prependHistoryKlineData(spec, candles);
   }
 
   void _subscribeTicks(KlineSpec spec) {

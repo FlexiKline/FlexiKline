@@ -172,12 +172,14 @@ final spec = KlineSpec(
 controller.switchKlineData(spec);
 controller.replaceKlineData(spec, initialCandles); // first load / refresh
 controller.updateLatestKlineData(spec, latestCandles); // WebSocket updates at the latest end
-controller.appendHistoryKlineData(spec, olderCandles); // older history
+controller.prependHistoryKlineData(spec, olderCandles); // older history
 
 final index = await controller.moveToDateTime(DateTime(2024, 6, 15));
 ```
 
-Each update entry states its intent: `replaceKlineData` replaces everything and recomputes, `updateLatestKlineData` handles only the latest end, `appendHistoryKlineData` only appends history. `switchKlineData` returns `true` on a cache hit; updates whose `spec` doesn't match the current data are ignored.
+Each update entry states its intent: `replaceKlineData` replaces everything and recomputes, `updateLatestKlineData` handles only the latest end, `prependHistoryKlineData` inserts older history at the head. `switchKlineData` returns `true` on a cache hit; updates whose `spec` doesn't match the current data are ignored.
+
+Every batch must be in strictly ascending time order (oldest first); the library does not sort, and debug builds assert the order. `klineData.list` keeps the same order: `list.first` is the oldest candle and `list.last` the latest. The visible range `[start, end)` and all painting run left to right, and an integer index maps to the candle center (`indexToDx` / `dxToIndex`, extrapolated outside the data).
 
 After `moveToDateTime` succeeds, the candle indicator shows a date bubble above the target candle by default. It follows pan and zoom and disappears after `holdDuration` (default 2000ms, `0` keeps it). Configure visibility, position (`DateMarkPosition.auto` / `above` / `below`) and look via `CandleIndicator.dateMark` (`DateMarkConfig`); set `show: false` to draw your own. Override `CandlePaintObject.buildDateMarkSpan` to change only the text, or `paintDateMark` to change the drawing.
 
@@ -382,6 +384,8 @@ Computed adds a precompute step to Direct: `createCalculator(dataIndex)` creates
 | `calcParam` | Calculation params; decides whether a config change needs recomputing |
 | `shouldRecompute(old)` | Whether to recompute everything on a param change; compares `calcParam` by default |
 | `compute(data, range, {reset})` | Computes `range` into `slots[dataIndex]`; clears the slot first when `reset` is true |
+
+Updates at the latest end only dirty the tail, so `range.end` always equals `data.length`: compute from `range.start` to the end, and recursive indicators continue from the stored value at `range.start - 1`. Loading history triggers a full recompute.
 
 Constructor params, serialization and the algorithm are omitted below; the wiring between calculator and PaintObject is kept:
 

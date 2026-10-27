@@ -154,7 +154,7 @@ void main() {
           ),
         ],
       );
-      scene.controller.appendHistoryKlineData(
+      scene.controller.prependHistoryKlineData(
         _spec,
         [
           CandleModel(

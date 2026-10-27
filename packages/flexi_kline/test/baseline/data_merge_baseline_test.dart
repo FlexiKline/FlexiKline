@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// 数据合并契约: `replace` / `updateLatest` / `appendHistory` 的存储顺序与返回 Range。
+/// 数据合并契约: `replace` / `updateLatest` / `prependHistory` 的存储顺序与返回 Range。
 ///
 /// - `replace` 按升序原样存入，`list.first` 最旧、`list.last` 最新。
 /// - `updateLatest` 合并到尾部，返回被改写的尾段 `Range(tailStart, length)`。
-/// - `appendHistory` 合并到头部，返回 `Range.fullRecompute`。
+/// - `prependHistory` 合并到头部，返回 `Range.fullRecompute`。
 @Tags(['baseline'])
 library;
 
@@ -75,11 +75,11 @@ void main() {
     });
   });
 
-  group('appendHistory baseline (ascending store)', () {
+  group('prependHistory baseline (ascending store)', () {
     test('merge_append_history_prepends_to_head', () {
       // 历史方向（更旧）：插到数组头部，返回全量重算。
       final data = freshWith([30, 40, 50]);
-      final range = data.appendHistory(bars([10, 20]), slotCount: 1);
+      final range = data.prependHistory(bars([10, 20]), slotCount: 1);
       expect(tssOf(data), [10, 20, 30, 40, 50]);
       expect(range, Range.fullRecompute);
     });
@@ -87,7 +87,7 @@ void main() {
     test('merge_append_history_overlap_replaces_head', () {
       // 与头端重叠：覆盖重叠的历史根。
       final data = freshWith([30, 40, 50]);
-      final range = data.appendHistory(bars([10, 20, 30]), slotCount: 1);
+      final range = data.prependHistory(bars([10, 20, 30]), slotCount: 1);
       expect(tssOf(data), [10, 20, 30, 40, 50]);
       expect(range, Range.fullRecompute);
     });
@@ -95,7 +95,7 @@ void main() {
     test('merge_append_history_wrong_direction_returns_null', () {
       // 批次比最旧根更新：方向错误，返回 null。
       final data = freshWith([30, 40, 50]);
-      final range = data.appendHistory(bars([60, 70]), slotCount: 1);
+      final range = data.prependHistory(bars([60, 70]), slotCount: 1);
       expect(range, isNull);
       expect(tssOf(data), [30, 40, 50]);
     });

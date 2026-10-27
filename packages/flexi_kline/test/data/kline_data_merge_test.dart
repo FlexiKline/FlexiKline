@@ -115,12 +115,12 @@ void main() {
       expect(data.list.map((item) => item.get<int>(0)), [10, 20, 30, null]);
     });
 
-    test('appendHistory 覆盖头部并要求全量计算', () {
+    test('prependHistory 覆盖头部并要求全量计算', () {
       final data = _data();
       addTearDown(data.dispose);
       data.replace([_candle(1), _candle(2), _candle(3)], slotCount: 0);
 
-      final range = data.appendHistory([_candle(0), _candle(1)], slotCount: 0);
+      final range = data.prependHistory([_candle(0), _candle(1)], slotCount: 0);
 
       expect(range, Range.fullRecompute);
       expect(data.list.map((item) => item.ts), [0, 1, 2, 3]);
@@ -137,14 +137,14 @@ void main() {
       expect(data.list, before);
     });
 
-    test('appendHistory 拒绝空批次和最新方向数据', () {
+    test('prependHistory 拒绝空批次和最新方向数据', () {
       final data = _data();
       addTearDown(data.dispose);
       data.replace([_candle(1), _candle(2), _candle(3)], slotCount: 0);
       final before = List.of(data.list);
 
-      expect(data.appendHistory([], slotCount: 0), isNull);
-      expect(data.appendHistory([_candle(4)], slotCount: 0), isNull);
+      expect(data.prependHistory([], slotCount: 0), isNull);
+      expect(data.prependHistory([_candle(4)], slotCount: 0), isNull);
       expect(data.list, before);
     });
   });

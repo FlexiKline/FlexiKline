@@ -33,7 +33,7 @@ abstract class _$SettingConfigCWProxy {
 
   SettingConfig candleLineWidth(double candleLineWidth);
 
-  SettingConfig firstCandleInitOffset(double firstCandleInitOffset);
+  SettingConfig latestCandleInitOffset(double latestCandleInitOffset);
 
   SettingConfig allowOverlayOutsideMainRect(bool allowOverlayOutsideMainRect);
 
@@ -71,7 +71,7 @@ abstract class _$SettingConfigCWProxy {
     int candleSpacingParts,
     double candleHollowBarBorderWidth,
     double candleLineWidth,
-    double firstCandleInitOffset,
+    double latestCandleInitOffset,
     bool allowOverlayOutsideMainRect,
     bool showYAxisTick,
     bool autoStartLastPriceCountDownTimer,
@@ -140,8 +140,8 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
       call(candleLineWidth: candleLineWidth);
 
   @override
-  SettingConfig firstCandleInitOffset(double firstCandleInitOffset) =>
-      call(firstCandleInitOffset: firstCandleInitOffset);
+  SettingConfig latestCandleInitOffset(double latestCandleInitOffset) =>
+      call(latestCandleInitOffset: latestCandleInitOffset);
 
   @override
   SettingConfig allowOverlayOutsideMainRect(bool allowOverlayOutsideMainRect) =>
@@ -195,7 +195,7 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
     Object? candleSpacingParts = const $CopyWithPlaceholder(),
     Object? candleHollowBarBorderWidth = const $CopyWithPlaceholder(),
     Object? candleLineWidth = const $CopyWithPlaceholder(),
-    Object? firstCandleInitOffset = const $CopyWithPlaceholder(),
+    Object? latestCandleInitOffset = const $CopyWithPlaceholder(),
     Object? allowOverlayOutsideMainRect = const $CopyWithPlaceholder(),
     Object? showYAxisTick = const $CopyWithPlaceholder(),
     Object? autoStartLastPriceCountDownTimer = const $CopyWithPlaceholder(),
@@ -271,12 +271,12 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
           ? _value.candleLineWidth
           // ignore: cast_nullable_to_non_nullable
           : candleLineWidth as double,
-      firstCandleInitOffset:
-          firstCandleInitOffset == const $CopyWithPlaceholder() ||
-              firstCandleInitOffset == null
-          ? _value.firstCandleInitOffset
+      latestCandleInitOffset:
+          latestCandleInitOffset == const $CopyWithPlaceholder() ||
+              latestCandleInitOffset == null
+          ? _value.latestCandleInitOffset
           // ignore: cast_nullable_to_non_nullable
-          : firstCandleInitOffset as double,
+          : latestCandleInitOffset as double,
       allowOverlayOutsideMainRect:
           allowOverlayOutsideMainRect == const $CopyWithPlaceholder() ||
               allowOverlayOutsideMainRect == null
@@ -353,8 +353,8 @@ SettingConfig _$SettingConfigFromJson(Map<String, dynamic> json) =>
       candleHollowBarBorderWidth:
           (json['candleHollowBarBorderWidth'] as num?)?.toDouble() ?? 1,
       candleLineWidth: (json['candleLineWidth'] as num?)?.toDouble() ?? 1,
-      firstCandleInitOffset:
-          (json['firstCandleInitOffset'] as num?)?.toDouble() ?? 80,
+      latestCandleInitOffset:
+          (json['latestCandleInitOffset'] as num?)?.toDouble() ?? 80,
       allowOverlayOutsideMainRect:
           json['allowOverlayOutsideMainRect'] as bool? ?? true,
       showYAxisTick: json['showYAxisTick'] as bool? ?? true,
@@ -386,7 +386,7 @@ Map<String, dynamic> _$SettingConfigToJson(
   'candleSpacingParts': instance.candleSpacingParts,
   'candleHollowBarBorderWidth': instance.candleHollowBarBorderWidth,
   'candleLineWidth': instance.candleLineWidth,
-  'firstCandleInitOffset': instance.firstCandleInitOffset,
+  'latestCandleInitOffset': instance.latestCandleInitOffset,
   'allowOverlayOutsideMainRect': instance.allowOverlayOutsideMainRect,
   'showYAxisTick': instance.showYAxisTick,
   'autoStartLastPriceCountDownTimer': instance.autoStartLastPriceCountDownTimer,

@@ -45,7 +45,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     logd('dispose state');
     _klineSpecNotifier.dispose();
     _loadingStateNotifier.dispose();
-    _isFirstCandleMovedOffScreenNotifier.dispose();
+    _isLatestCandleOffScreenNotifier.dispose();
     _intervalNotifier.dispose();
     _paintRangeNotifier.dispose();
     _klineDataCache.forEach((key, data) {
@@ -68,9 +68,9 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   MoveToPositionCallback? moveToPositionCallback;
 
   /// 最新一根蜡烛是否移出屏幕 listenable。
-  final _isFirstCandleMovedOffScreenNotifier = ValueNotifier(false);
-  ValueListenable<bool> get isFirstCandleMovedOffScreenListenable {
-    return _isFirstCandleMovedOffScreenNotifier;
+  final _isLatestCandleOffScreenNotifier = ValueNotifier(false);
+  ValueListenable<bool> get isLatestCandleOffScreenListenable {
+    return _isLatestCandleOffScreenNotifier;
   }
 
   /// 当前 KlineData 的 TimeInterval listenable。
@@ -209,13 +209,13 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   @override
   int? dxToTimestamp(double dx) {
     final indexValue = mainPaintObject.dxToFloatIndex(dx);
-    return klineData.indexToTimestamp(indexValue);
+    return klineData.floatIndexToTimestamp(indexValue);
   }
 
   /// 将时间戳[ts]精确转换为dx坐标, 并将差异部分汇总到dx中.
   @override
   double? timestampToDx(int ts) {
-    final indexValue = klineData.timestampToIndex(ts);
+    final indexValue = klineData.timestampToFloatIndex(ts);
     if (indexValue == null) return null;
     return mainPaintObject.indexToDx(indexValue);
   }
@@ -265,7 +265,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     final newOffset = clampPaintDxOffset(value);
     if (newOffset == _paintDxOffset) return false;
     _paintDxOffset = newOffset;
-    _isFirstCandleMovedOffScreenNotifier.value = newOffset > 0;
+    _isLatestCandleOffScreenNotifier.value = newOffset > 0;
     return true;
   }
 
@@ -290,7 +290,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   double getInitPaintDxOffset() {
     return math.min(
       maxPaintWidth - mainChartWidth, // 不足一屏时取此值, 最旧一根贴绘制区左缘.
-      -settingConfig.firstCandleInitOffset, // 满足一屏时, 最新一根到绘制区右缘的留白.
+      -settingConfig.latestCandleInitOffset, // 满足一屏时, 最新一根到绘制区右缘的留白.
     );
   }
 
@@ -455,10 +455,10 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     _pipeline.updateLatest(list);
   }
 
-  /// 追加[spec]对应的历史方向蜡烛数据.
-  void appendHistoryKlineData(KlineSpec spec, List<ICandleModel> list) {
+  /// 把[spec]对应的历史蜡烛数据插入头部.
+  void prependHistoryKlineData(KlineSpec spec, List<ICandleModel> list) {
     if (!_acceptKlineDataUpdate(spec, list)) return;
-    _pipeline.appendHistory(list);
+    _pipeline.prependHistory(list);
   }
 
   bool _acceptKlineDataUpdate(KlineSpec spec, List<ICandleModel> list) {

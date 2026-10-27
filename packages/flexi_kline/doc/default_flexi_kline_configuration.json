@@ -94,7 +94,7 @@
     "candleSpacingParts": 7,
     "candleHollowBarBorderWidth": 1.0,
     "candleLineWidth": 1.0,
-    "firstCandleInitOffset": 80.0,
+    "latestCandleInitOffset": 80.0,
     "allowOverlayOutsideMainRect": true,
     "showYAxisTick": true,
     "autoStartLastPriceCountDownTimer": true,

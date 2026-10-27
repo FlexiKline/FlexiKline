@@ -172,12 +172,14 @@ final spec = KlineSpec(
 controller.switchKlineData(spec);
 controller.replaceKlineData(spec, initialCandles); // 首次加载 / 刷新
 controller.updateLatestKlineData(spec, latestCandles); // WebSocket 最新端更新
-controller.appendHistoryKlineData(spec, olderCandles); // 更早的历史数据
+controller.prependHistoryKlineData(spec, olderCandles); // 更早的历史数据
 
 final index = await controller.moveToDateTime(DateTime(2024, 6, 15));
 ```
 
-三个更新入口各自声明意图：`replaceKlineData` 整体替换并全量重算，`updateLatestKlineData` 只处理最新端，`appendHistoryKlineData` 只追加历史端。`switchKlineData` 命中缓存时返回 `true`；传入 `spec` 与当前数据不一致的更新会被忽略。
+三个更新入口各自声明意图：`replaceKlineData` 整体替换并全量重算，`updateLatestKlineData` 只处理最新端，`prependHistoryKlineData` 把更早的历史插入头部。`switchKlineData` 命中缓存时返回 `true`；传入 `spec` 与当前数据不一致的更新会被忽略。
+
+每批数据必须按时间严格升序（最旧在前）；框架不负责排序，debug 下会断言顺序。`klineData.list` 也按这个顺序存放：`list.first` 是最旧一根，`list.last` 是最新一根。可视区间 `[start, end)` 与所有绘制都从左到右，整数下标对应蜡烛中心（`indexToDx` / `dxToIndex`，数据之外按蜡烛宽度外推）。
 
 `moveToDateTime` 定位成功后，蜡烛指标默认在目标蜡烛上方画一个日期气泡，随平移缩放联动，`holdDuration`（默认 2000ms，`0` 表示一直显示）后消失。通过 `CandleIndicator.dateMark`（`DateMarkConfig`）配置开关、位置（`DateMarkPosition.auto` / `above` / `below`）与外观；业务侧自己画提示时设 `show: false`。只换文案覆写 `CandlePaintObject.buildDateMarkSpan`，整体换画法覆写 `paintDateMark`。
 
@@ -382,6 +384,8 @@ Computed 比 Direct 多一层预计算：`createCalculator(dataIndex)` 创建 `I
 | `calcParam` | 计算参数，用于判断配置变化后是否需要重算 |
 | `shouldRecompute(old)` | 参数变化时是否整段重算，默认比较 `calcParam` |
 | `compute(data, range, {reset})` | 计算 `range` 并写入 `slots[dataIndex]`；`reset` 为真时先清空槽位 |
+
+最新端的更新只弄脏尾段，所以 `range.end` 恒等于 `data.length`：从 `range.start` 算到末尾即可，递推型指标接续 `range.start - 1` 处已存的值。加载历史会触发全量重算。
 
 下面省略构造参数、序列化和具体算法，但保留计算器与 PaintObject 的接线关系：
 
