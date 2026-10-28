@@ -251,7 +251,7 @@ void main() {
   });
 
   /// WS 推送最新价后蜡烛超出可视区: 数据内容变化(非 replace)必须重算可见区间, 即使
-  /// 可见 start/end 不变。修复经数据回调 `markRepaintChart(reset: true)` 跳过早退强制重算。
+  /// 可见 start/end 不变。修复经数据回调 `markRepaintChart(range: true)` 跳过早退强制重算。
   /// 参见 bug 文档 `projects/flexi_kline/bugs/2026-10-10-WS推送最新价蜡烛超出可视区根因与修复`。
   group('v2.6.0/FlexiKlineController/visible_minmax_on_data_change', () {
     /// 当前生效区间的上端: 主图区顶边对应的价格。

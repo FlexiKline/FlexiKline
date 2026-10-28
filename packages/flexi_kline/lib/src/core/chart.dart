@@ -102,8 +102,11 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
   /// Latest Price ///
   Timer? _lastPriceCountDownTimer;
 
-  /// 控制 doUpdateVisibleMinMax 操作是否重置计算结果
-  bool _reset = false;
+  /// 下一帧待失效的绘制几何(各 pane 的 Rect); 几何失效蕴含区间失效.
+  bool _geometryDirty = false;
+
+  /// 下一帧待重算的可见区间: 可见 start/end 没变而数据或偏移变了时由调用方置位.
+  bool _rangeDirty = false;
 
   /// 平移过程中Y轴平滑插值因子
   /// 1.0 = 精确值(无平滑), 0.15 = 平滑过渡
@@ -111,8 +114,9 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
 
   /// 触发重绘蜡烛线.
   @override
-  void markRepaintChart({bool reset = false}) {
-    _reset = _reset || reset;
+  void markRepaintChart({bool geometry = false, bool range = false}) {
+    _geometryDirty = _geometryDirty || geometry;
+    _rangeDirty = _rangeDirty || range || geometry;
     _markRepaintChart();
   }
 
@@ -176,7 +180,8 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
           paneIndex++,
           start: klineData.start,
           end: klineData.end,
-          reset: _reset,
+          geometry: _geometryDirty,
+          range: _rangeDirty,
           panSmoothFactor: _panSmoothFactor,
         );
       } finally {
@@ -208,7 +213,8 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
           paneIndex++,
           start: klineData.start,
           end: klineData.end,
-          reset: _reset,
+          geometry: _geometryDirty,
+          range: _rangeDirty,
           panSmoothFactor: _panSmoothFactor,
         );
       } finally {
@@ -236,7 +242,8 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
       }
     }
 
-    if (_reset) _reset = false;
+    _geometryDirty = false;
+    _rangeDirty = false;
   }
 
   /// 惯性平移前检查是否需要加载更多
@@ -347,7 +354,7 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
   void onChartPanEnd() {
     logd('onChartPanEnd');
     _panSmoothFactor = 1.0;
-    markRepaintChart(reset: true);
+    markRepaintChart(range: true);
     dispatchInteractionEvent(FlexiKlineEventType.pan);
   }
 
@@ -474,7 +481,7 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
     // 没有缩放区间可清就没有画面变化, 直接返回省掉一次空重绘。
     if (!mainPaintObject.hasZoomMinMax) return;
     mainPaintObject.clearZoomMinMax();
-    markRepaintChart(reset: true);
+    markRepaintChart(range: true);
     markRepaintDraw();
   }
 

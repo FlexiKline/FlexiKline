@@ -179,7 +179,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     if (resetPaintDxOffset && isMounted) {
       _setPaintDxOffset(getInitPaintDxOffset());
     }
-    markRepaintChart(reset: true);
+    markRepaintChart(geometry: true);
     markRepaintDraw();
     requestCancelCross();
   }
@@ -311,13 +311,16 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
 
     if ((begin - end).abs() >= precisionError) {
       _setPaintDxOffset(end);
-      markRepaintChart(reset: true);
+      markRepaintChart(range: true);
       markRepaintDraw();
     }
     return true;
   }
 
   /// 移动到不晚于[dateTime]的最近一根已加载蜡烛.
+  ///
+  /// 按[dateTime]表示的时刻(`millisecondsSinceEpoch`)与蜡烛时间戳比较, 不做时区换算;
+  /// 按日历日期跳转时, 由调用方换算成该交易所当日蜡烛的开盘时刻.
   ///
   /// 数据充足时目标蜡烛居中; 靠近数据两端时沿用当前绘制边界.
   /// 未挂载、无数据、动画中断或目标蜡烛发生变化时返回null.
@@ -480,15 +483,15 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
       return;
     }
     _notifySpecChange();
-    // start/end 未变但数据内容变了: 用 reset 跳过区间早退, 否则新 high/low 会画出主区。
-    markRepaintChart(reset: true);
+    // start/end 未变但数据内容变了: 区间失效跳过早退, 否则新 high/low 会画出主区。
+    markRepaintChart(range: true);
     markRepaintCross();
     markRepaintDraw();
   }
 
   void _onComputed() {
     // 同 [_onCandlesMerged]。
-    markRepaintChart(reset: true);
+    markRepaintChart(range: true);
     markRepaintCross();
     markRepaintDraw();
   }

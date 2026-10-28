@@ -48,17 +48,18 @@ extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
     int newPaneIndex, {
     required int start,
     required int end,
-    bool reset = false,
+    bool geometry = false,
+    bool range = false,
     double panSmoothFactor = 1.0,
   }) {
-    if (reset || newPaneIndex != paneIndex) {
+    if (geometry || newPaneIndex != paneIndex) {
       resetPaintBounding(paneIndex: newPaneIndex);
       _minMax = null;
       _dyFactor = null;
     }
 
     // 数据范围未变、已有minMax、且平滑已完成时, 跳过重算
-    if (!reset && _start == start && _end == end && _minMax != null && _smoothMinMax == null) {
+    if (!geometry && !range && _start == start && _end == end && _minMax != null && _smoothMinMax == null) {
       _dyFactor = null;
       return _minMax;
     }
@@ -242,10 +243,11 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
     int newPaneIndex, {
     required int start,
     required int end,
-    bool reset = false,
+    bool geometry = false,
+    bool range = false,
     double panSmoothFactor = 1.0,
   }) {
-    if (reset || newPaneIndex != paneIndex) {
+    if (geometry || newPaneIndex != paneIndex) {
       resetPaintBounding(paneIndex: newPaneIndex);
       _minMax = null;
       _dyFactor = null;
@@ -258,12 +260,13 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
         newPaneIndex,
         start: start,
         end: end,
-        reset: reset,
+        geometry: geometry,
+        range: range,
       );
     }
 
     // 数据范围未变、已有minMax、且平滑已完成时, 跳过重算
-    if (!reset && _start == start && _end == end && _minMax != null && _smoothMinMax == null) {
+    if (!geometry && !range && _start == start && _end == end && _minMax != null && _smoothMinMax == null) {
       invalidateDyFactor();
       return _minMax;
     }
@@ -276,7 +279,8 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
         newPaneIndex,
         start: start,
         end: end,
-        reset: reset,
+        geometry: geometry,
+        range: range,
       );
       if (ret != null && object.paintMode == PaintMode.combine) {
         updateMinMax(ret);
@@ -303,7 +307,8 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
     int newPaneIndex, {
     required int start,
     required int end,
-    required bool reset,
+    required bool geometry,
+    required bool range,
   }) {
     _start = start;
     _end = end;
@@ -315,7 +320,8 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
         newPaneIndex,
         start: start,
         end: end,
-        reset: reset,
+        geometry: geometry,
+        range: range,
       );
     }
 
@@ -480,6 +486,8 @@ extension MainPaintManagerExt<T extends MainPaintObjectIndicator> on MainPaintOb
     object.doUpdateLayout(
       height: object.paintMode.isCombine ? height : null,
     );
+    // 保活后重新进树的 external 对象可能带着离树期间已过时的矩形缓存。
+    object.resetPaintBounding();
     final old = children.append(object);
     indicator.children.add(object.key);
     // 被替换对象走多态退树：普通指标 dispose，external 仅 detach 保活。

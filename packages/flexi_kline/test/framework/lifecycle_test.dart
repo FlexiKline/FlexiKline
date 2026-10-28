@@ -19,6 +19,7 @@ library;
 import 'package:flexi_kline/flexi_kline.dart';
 // 直接引入内部库，使框架内部的 do* 调度扩展（PaintDelegateExt）对包内测试可见。
 import 'package:flexi_kline/src/framework/chart/indicator.dart';
+import 'package:flutter/painting.dart' show Rect;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/support.dart';
@@ -185,6 +186,24 @@ void main() {
       expect(log.countOf('didDetach:ext_a'), 1);
       expect(log.countOf('didAttach:ext_a'), 2);
       expect(log.countOf('dispose:ext_a'), 0);
+    });
+
+    test('保活对象重新进主区时丢弃离树期间过时的矩形缓存', () {
+      final log = LifecycleLog();
+      final ctx = FakePaintContext()..mainRect = const Rect.fromLTWH(0, 0, 300, 200);
+      final m = build(log);
+      const key = ExternalIndicatorKey('ext_a');
+      mount(m, [SpyExternalIndicator(key: key, log: log)], const [], ctx);
+      m.addMainPaintObject(key, ctx);
+      final object = m.mainPaintObject.getChildPaintObject(key)!;
+      expect(object.drawableRect, ctx.mainRect, reason: '前置: 已缓存旧矩形');
+
+      m.removeMainPaintObject(key);
+      ctx.mainRect = const Rect.fromLTWH(0, 0, 300, 400);
+      m.addMainPaintObject(key, ctx);
+
+      expect(identical(m.mainPaintObject.getChildPaintObject(key), object), isTrue, reason: '前置: 复用同一对象');
+      expect(object.drawableRect, ctx.mainRect);
     });
 
     test('副区容量驱逐：被挤出的 external 走保活 detach，不 dispose', () {

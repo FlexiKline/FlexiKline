@@ -168,8 +168,12 @@ abstract class KlineBindingBase with FlexiLog, PaintResourceOwner implements Pai
   void markRepaintGrid();
 
   /// 请求重绘 Chart 图层。
+  ///
+  /// [range] 让下一帧重算可见区间, 用于可见 start/end 未变而数据或偏移变了的场景(数据更新、跳转、
+  /// 平移结束、退出缩放); [geometry] 让各 pane 的绘制矩形失效, 用于数据集、画布尺寸或指标布局变化,
+  /// 并蕴含 [range]。两者都不传时, 只有 start/end 变化才会重算区间。
   @protected
-  void markRepaintChart({bool reset = false});
+  void markRepaintChart({bool geometry = false, bool range = false});
 
   /// 请求重绘 Cross 图层。
   @protected

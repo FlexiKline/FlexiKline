@@ -6,6 +6,7 @@
 * Rename `KlineData.ensureStartAndEndIndex(startIndex, maxCount)` to `ensurePaintRange({barsBack, count})` (Breaking Changes).
 * Rename `appendHistoryKlineData` to `prependHistoryKlineData` and `KlineData.appendHistory` to `prependHistory`: older history is inserted at the head (Breaking Changes).
 * Rename `isFirstCandleMovedOffScreenListenable` to `isLatestCandleOffScreenListenable` and `SettingConfig.firstCandleInitOffset` to `latestCandleInitOffset`, including the JSON field; stored configs fall back to the default `80` (Breaking Changes).
+* Replace `markRepaintChart({reset})` and `doUpdateVisibleMinMax({reset})` with the orthogonal `range` (recompute the visible range) and `geometry` (invalidate pane rects, implies `range`) flags; data updates, jumps, pan end, zoom exit and showing or hiding main indicators no longer invalidate pane geometry (Breaking Changes).
 * Fix the cross snapping to candle centers in the blank area left of the oldest candle when `moveByCandleInBlank` is off; both blank sides now behave the same.
 * Change the default of `PaintObject.valueToDy`'s `correct` to `false`, matching the controller and `DrawContext`; pass `correct: true` to clamp into the chart rect (Breaking Changes).
 * Change the default of `PaintObject.dyToValue`'s `check` to `false`, matching the controller and `DrawContext`; pass `check: true` to return null for a `dy` outside the pane (Breaking Changes).

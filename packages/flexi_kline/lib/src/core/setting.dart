@@ -224,7 +224,7 @@ mixin SettingBinding on KlineBindingBase {
     _syncMainSizeToConfig();
     _canvasRectNotifier.value = canvasRect;
     if (force) _canvasRectNotifier.notifyListeners();
-    markRepaintChart(reset: force);
+    markRepaintChart(geometry: force);
     markRepaintCross();
     markRepaintGrid();
   }
@@ -583,7 +583,8 @@ mixin SettingBinding on KlineBindingBase {
         _pipeline.recompute(calculator);
       }
     }
-    markRepaintChart(reset: true);
+    // 主区矩形不随子指标变化, 只需重算区间; 子对象的布局在进出主区时各自处理.
+    markRepaintChart(range: true);
     markRepaintCross();
     dispatchInteractionEvent(FlexiKlineEventType.indicatorToggle, {
       'key': key.toString(),
@@ -596,7 +597,7 @@ mixin SettingBinding on KlineBindingBase {
   /// 在主图中隐藏指标。
   bool hideMainIndicator(IIndicatorKey key) {
     if (!_paintObjectManager.removeMainPaintObject(key)) return false;
-    markRepaintChart(reset: true);
+    markRepaintChart(range: true);
     markRepaintCross();
     dispatchInteractionEvent(FlexiKlineEventType.indicatorToggle, {
       'key': key.toString(),
@@ -694,7 +695,7 @@ mixin SettingBinding on KlineBindingBase {
     }
 
     markRepaintGrid();
-    markRepaintChart(reset: true);
+    markRepaintChart(geometry: true);
     markRepaintCross();
     markRepaintDraw();
   }
