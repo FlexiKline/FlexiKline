@@ -25,6 +25,8 @@ import 'types.dart';
 extension FlexiDrawImageText on Canvas {
   /// 绘制图片区域.
   /// 返回[image]在canvas中的实际绘制区域.
+  ///
+  /// 有文本时每次调用都重新排版, 只适合低频的一次性绘制; 跨帧重复绘制用 `LabelPainter`(图片经 `ImageSpan` 行内排入)。
   Rect drawImageText({
     ///绘制启始坐标位置
     required Offset offset,

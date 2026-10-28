@@ -23,6 +23,8 @@ import 'types.dart';
 extension FlexiDrawImage on Canvas {
   /// 绘制图片区域.
   /// 返回[image]在canvas中的实际绘制区域.
+  ///
+  /// 每次调用都重新组装背景与边框, 只适合低频的一次性绘制; 跨帧重复绘制用 `ImagePainter`。
   Rect drawImageView({
     /// 绘制启始坐标位置
     required Offset offset,

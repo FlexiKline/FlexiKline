@@ -23,6 +23,8 @@ import 'types.dart';
 
 extension FlexiDrawTextExt on Canvas {
   /// 绘制文本
+  ///
+  /// 每次调用都新建 [TextPainter] 并重新排版, 只适合低频的一次性绘制; 跨帧重复绘制用 `LabelPainter`。
   Size drawText({
     ///绘制启始坐标位置
     required Offset offset,
@@ -175,6 +177,7 @@ extension FlexiDrawTextExt on Canvas {
     return containerSize;
   }
 
+  /// 按 [TextAreaConfig] 绘制文本, 排版成本同 [drawText]; 跨帧重复绘制用 `LabelPainter`(经 `toLabelStyle` 转换配置)。
   Size drawTextArea({
     ///绘制启始坐标位置
     required Offset offset,

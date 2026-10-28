@@ -25,6 +25,8 @@ extension FlexiDrawTooltipInfosExt on Canvas {
   /// label 在内容区左对齐，value 在内容区右对齐。
   /// [minContentWidth] 与 [maxContentWidth] 均指内容区宽度，不包含 [padding]。
   /// 返回包含 padding 的卡片实际尺寸。
+  ///
+  /// 每次调用都逐行重新排版, 只适合低频的一次性绘制; 跨帧重复绘制用 `TooltipPainter`。
   Size drawTooltipInfos({
     required Offset offset,
     required List<TooltipInfo> tooltipInfos,

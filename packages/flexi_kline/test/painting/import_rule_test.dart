@@ -43,4 +43,31 @@ void main() {
     }
     expect(violations, isEmpty, reason: violations.join('\n'));
   });
+
+  test('lib/ 在 extension/render 之外不调用 render 的文本与图片函数', () {
+    final dir = Directory('lib');
+    expect(dir.existsSync(), isTrue, reason: 'flutter test 的 cwd 应为包根');
+
+    final render = Directory('lib/src/extension/render').absolute.path;
+    final files = dir
+        .listSync(recursive: true)
+        .whereType<File>()
+        .where((f) => f.path.endsWith('.dart') && !f.absolute.path.startsWith(render))
+        .toList();
+    expect(files, isNotEmpty, reason: '空扫描会让规则假通过');
+
+    final call = RegExp(r'\.(drawText|drawTextArea|drawImageText|drawImageView|drawTooltipInfos)\(');
+    final violations = <String>[];
+    for (final file in files) {
+      final lines = file.readAsLinesSync();
+      for (var i = 0; i < lines.length; i++) {
+        if (call.hasMatch(lines[i])) violations.add('${file.path}:${i + 1}: ${lines[i].trim()}');
+      }
+    }
+    expect(
+      violations,
+      isEmpty,
+      reason: '每次调用都重新排版, 改用 LabelPainter / TooltipPainter / ImagePainter:\n${violations.join('\n')}',
+    );
+  });
 }
