@@ -319,6 +319,22 @@ void main() {
       expect(n.divSafeDecimal(Decimal.zero).isZero, isTrue);
     });
 
+    test('除数为 0 时默认值与自定义值都取被除数的模式', () {
+      final accurate = FlexiNum.fromDecimal(Decimal.fromInt(5));
+      final fast = FlexiNum.fromNum(5.0);
+
+      for (final (n, mode) in [(accurate, ComputeMode.accurate), (fast, ComputeMode.fast)]) {
+        expect(n.divSafe(FlexiNum.zero).mode, mode);
+        expect(n.divSafe(FlexiNum.zero, FlexiNum.fromNum(-1)).mode, mode);
+        expect(n.divSafe(FlexiNum.zero, FlexiNum.fromDecimal(Decimal.one)).mode, mode);
+        expect(n.divSafeNum(0).mode, mode);
+        expect(n.divSafeNum(0, 7).mode, mode);
+        expect(n.divSafeDecimal(Decimal.zero).mode, mode);
+        expect(n.divSafeDecimal(Decimal.zero, Decimal.one).mode, mode);
+      }
+      expect(accurate.divSafeNum(0, 7).toDecimal(), Decimal.fromInt(7));
+    });
+
     test('divSafeDecimal：除数非 0 正常计算', () {
       final n = FlexiNum.fromDecimal(Decimal.fromInt(10));
       final result = n.divSafeDecimal(Decimal.fromInt(4));

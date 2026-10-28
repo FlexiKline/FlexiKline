@@ -393,24 +393,23 @@ extension type FlexiNum._(Object _value) {
     throw const FlexiNumException('FlexiNum divDecimal Type not match!');
   }
 
-  /// 除以FlexiNum, 如果value为0, 则返回def, 否则返回this / value
-  /// [def] 默认值
+  /// 除以FlexiNum; [value] 为 0 时返回 [def](默认 0)。
+  ///
+  /// 与运算符一样以 this 的模式为准: 默认值也转成 this 的模式, accurate 下不会漏出 double。
   FlexiNum divSafe(FlexiNum value, [FlexiNum? def]) {
-    if (value.isZero) return def ?? FlexiNum.zero;
+    if (value.isZero) return (def ?? FlexiNum.zero).reset(mode);
     return div(value);
   }
 
-  /// 除以Num, 如果value为0, 则返回def, 否则返回this / value
-  /// [def] 默认值
+  /// 除以Num; [value] 为 0 时返回 [def](默认 0), 模式同 [divSafe]。
   FlexiNum divSafeNum(num value, [num? def]) {
-    if (value == 0) return def != null ? FlexiNum.fromNum(def) : FlexiNum.zero;
+    if (value == 0) return FlexiNum.fromNum(def ?? 0).reset(mode);
     return divNum(value);
   }
 
-  /// 除以Decimal, 如果value为0, 则返回def, 否则返回this / value
-  /// [def] 默认值
+  /// 除以Decimal; [value] 为 0 时返回 [def](默认 0), 模式同 [divSafe]。
   FlexiNum divSafeDecimal(Decimal value, [Decimal? def]) {
-    if (value == Decimal.zero) return def != null ? FlexiNum.fromDecimal(def) : FlexiNum.zero;
+    if (value == Decimal.zero) return FlexiNum.fromDecimal(def ?? Decimal.zero).reset(mode);
     return divDecimal(value);
   }
 
