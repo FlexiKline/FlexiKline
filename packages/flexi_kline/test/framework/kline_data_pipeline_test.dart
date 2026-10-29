@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:math' as math;
+import 'dart:math' show Random;
+
 import 'package:decimal/decimal.dart';
 import 'package:flexi_formatter/date_time.dart' show TimeUnit;
 import 'package:flexi_kline/flexi_kline.dart';
@@ -630,6 +633,127 @@ void main() {
 
     expect(ranges.any((r) => r.start <= 2 && 2 < r.end), isTrue, reason: '被弄脏的尾部蜡烛(index 2)必须被重算，ranges=$ranges');
   });
+
+  /// 增量区间契约：非全量时 `range.end == data.length`，起点是累计脏区的最小起点；
+  /// 期间有过 prependHistory / replace 则必须全量。
+  /// updateLatest 弄脏的是首个 `ts >= batch.first` 的下标到末尾，期望按合并前的数据推出。
+  group('incremental dirty range', () {
+    testWidgets('随机合并序列下，每次计算的区间都等于累计脏区', tags: 'property', (tester) async {
+      const runs = 30;
+      const opsPerRun = 40;
+      for (var run = 0; run < runs; run++) {
+        final rng = Random(500 + run);
+        const key = ComputedIndicatorKey('dirty');
+        final calls = <({Range range, bool reset, int length})>[];
+        final manager = IndicatorPaintObjectManager(
+          configuration: FakeFlexiKlineConfiguration(mainChildren: {key}),
+        );
+        manager.mountIndicators(
+          candle: TestCandleIndicator(),
+          time: TestTimeIndicator(),
+          mainIndicators: [_CallRecordingIndicator(key: key, log: LifecycleLog(), calls: calls)],
+          subIndicators: const [],
+          context: FakePaintContext(),
+        );
+        final data = KlineData(_spec);
+        var elapsed = Duration.zero;
+        final pipeline = KlineDataPipeline(
+          data,
+          manager,
+          elapsed: () => elapsed,
+          onCandlesMerged: ({required replace}) {},
+          onComputed: () {},
+        );
+        pipeline.start();
+        pipeline.replace([for (var ts = 100; ts < 120; ts++) _candle(ts)]);
+        calls.clear();
+
+        var expectFull = false;
+        int? expectStart;
+        final log = <String>[];
+        void verifyNewCalls(int before) {
+          for (final call in calls.skip(before)) {
+            final context = 'run#$run ops=$log call=$call';
+            if (expectFull) {
+              expect(call.reset, isTrue, reason: '合并过 prependHistory/replace 后必须全量. $context');
+            } else {
+              expect(call.reset, isFalse, reason: context);
+              expect(call.range.end, call.length, reason: '增量区间必须以 data.length 收尾. $context');
+              expect(call.range.start, expectStart, reason: '起点必须是累计脏区的最小起点. $context');
+            }
+            expectFull = false;
+            expectStart = null;
+          }
+        }
+
+        for (var op = 0; op < opsPerRun; op++) {
+          final before = calls.length;
+          final first = data.list.first.ts;
+          final latest = data.list.last.ts;
+          switch (rng.nextInt(5)) {
+            case 0:
+              log.add('same');
+              expectStart = math.min(expectStart ?? data.length, data.length - 1);
+              pipeline.updateLatest([_candle(latest)]);
+            case 1:
+              final count = 1 + rng.nextInt(3);
+              log.add('new$count');
+              expectStart = math.min(expectStart ?? data.length, data.length);
+              pipeline.updateLatest([for (var i = 1; i <= count; i++) _candle(latest + i)]);
+            case 2:
+              final overlap = 1 + rng.nextInt(math.min(3, data.length));
+              final count = rng.nextInt(3);
+              log.add('overlap$overlap+$count');
+              final batch = [for (var ts = latest - overlap + 1; ts <= latest + count; ts++) _candle(ts)];
+              final tailStart = data.list.indexWhere((m) => m.ts >= batch.first.timestamp);
+              expectStart = math.min(expectStart ?? data.length, tailStart);
+              pipeline.updateLatest(batch);
+            case 3:
+              final count = 1 + rng.nextInt(5);
+              log.add('prepend$count');
+              expectFull = true;
+              pipeline.prependHistory([for (var ts = first - count; ts < first; ts++) _candle(ts)]);
+            default:
+              final start = rng.nextInt(1000);
+              log.add('replace');
+              expectFull = true;
+              pipeline.replace([for (var ts = start; ts < start + 5 + rng.nextInt(20); ts++) _candle(ts)]);
+          }
+          verifyNewCalls(before);
+          if (rng.nextBool()) {
+            final beforeTick = calls.length;
+            elapsed += const Duration(milliseconds: 600);
+            await tester.pump(const Duration(milliseconds: 600));
+            log.add('tick');
+            verifyNewCalls(beforeTick);
+          }
+        }
+        expect(calls, isNotEmpty, reason: 'run#$run 至少要发生一次计算, 否则用例空转');
+        pipeline.dispose();
+        manager.dispose();
+        data.dispose();
+      }
+    });
+  });
+}
+
+/// 记录每次 compute 的区间、是否全量与当时的数据长度。
+class _CallRecordingIndicator extends SpyComputedIndicator {
+  _CallRecordingIndicator({required super.key, required super.log, required this.calls});
+
+  final List<({Range range, bool reset, int length})> calls;
+
+  @override
+  IndicatorCalculator createCalculator(int dataIndex) => _CallRecordingCalculator(this, dataIndex);
+}
+
+class _CallRecordingCalculator extends IndicatorCalculator<_CallRecordingIndicator> {
+  _CallRecordingCalculator(super.indicator, super.dataIndex);
+
+  @override
+  void compute(KlineData data, Range range, {bool reset = false}) {
+    indicator.calls.add((range: range, reset: reset, length: data.length));
+  }
 }
 
 /// 记录每次 compute 实际覆盖区间的指标，用于验证脏区索引映射。

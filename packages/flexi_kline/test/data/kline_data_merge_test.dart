@@ -116,15 +116,17 @@ void main() {
       expect(data.list.map((item) => item.get<int>(0)), [10, 20, 30, null]);
     });
 
-    test('prependHistory 覆盖头部并要求全量计算', () {
+    test('prependHistory 插入头部并要求全量计算; 与头端重叠的蜡烛被覆盖', () {
       final data = _data();
       addTearDown(data.dispose);
-      data.replace([_candle(1), _candle(2), _candle(3)], slotCount: 0);
+      data.replace([_candle(2), _candle(3), _candle(4)], slotCount: 0);
 
-      final range = data.prependHistory([_candle(0), _candle(1)], slotCount: 0);
+      expect(data.prependHistory([_candle(0), _candle(1)], slotCount: 0), Range.fullRecompute);
+      expect(data.list.map((item) => item.ts), [0, 1, 2, 3, 4]);
 
-      expect(range, Range.fullRecompute);
-      expect(data.list.map((item) => item.ts), [0, 1, 2, 3]);
+      // 批次最新一根与当前最旧一根同 ts: 覆盖那一根。
+      expect(data.prependHistory([_candle(-1), _candle(0)], slotCount: 0), Range.fullRecompute);
+      expect(data.list.map((item) => item.ts), [-1, 0, 1, 2, 3, 4]);
     });
 
     test('updateLatest 拒绝空批次和历史方向数据', () {

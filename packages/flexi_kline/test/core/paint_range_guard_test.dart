@@ -126,4 +126,77 @@ void main() {
       }
     });
   });
+
+  /// 可见窗口 `[start, end)` 就是屏幕上的蜡烛：最新侧截到最后一根仍有部分在屏内的蜡烛，
+  /// 最旧侧取覆盖左边界的那一根（四舍五入，误差不超过半根）。平移量取非整数倍蜡烛宽。
+  group('可见窗口与屏幕蜡烛一致', () {
+    Future<FlexiKlineController> arrange(WidgetTester tester, {bool alwaysOneScreen = false}) async {
+      final scene = ControllerScenario();
+      addTearDown(scene.dispose);
+      await scene.initWithData(_spec, genFlatCandleList(count: 200), canvasWidth: 400);
+      final ctrl = scene.controller;
+      ctrl.flushPendingKlineData();
+      if (alwaysOneScreen) {
+        ctrl.updateSettingConfig((c) => c.copyWith(alwaysCalculateScreenOfCandlesIfEnough: true));
+      }
+      await paintChartFrame(tester, ctrl);
+      return ctrl;
+    }
+
+    double leftEdge(FlexiKlineController ctrl, int index) => ctrl.indexToDx(index) - ctrl.candleActualWidth / 2;
+
+    testWidgets('最新侧移出屏幕时：end 是最后一根仍有部分在屏内的蜡烛之后', (tester) async {
+      final ctrl = await arrange(tester);
+      final rect = ctrl.mainChartRect;
+      final w = ctrl.candleActualWidth;
+      ctrl.onChartMove(Offset(-ctrl.paintDxOffset, 0));
+      var checked = 0;
+      for (var step = 0; step < 40; step++) {
+        ctrl.onChartMove(Offset(w * 0.37, 0));
+        if (ctrl.paintDxOffset <= 0) continue;
+        ctrl.calculatePaintChartRange();
+        final data = ctrl.klineData;
+        final context = 'step=$step offset=${ctrl.paintDxOffset} range=[${data.start}, ${data.end})';
+        checked++;
+
+        expect(leftEdge(ctrl, data.end), greaterThanOrEqualTo(rect.right - 1e-9), reason: 'end 及之后整根在屏外. $context');
+        expect(leftEdge(ctrl, data.end - 1), lessThan(rect.right), reason: 'end - 1 仍有一部分在屏内. $context');
+        expect((leftEdge(ctrl, data.start) - rect.left).abs(), lessThanOrEqualTo(w / 2 + 1e-9), reason: context);
+      }
+      expect(checked, greaterThan(20), reason: '平移量不足, 用例空转');
+    });
+
+    testWidgets('最新根右侧留白时：end 恒为 length，start 覆盖左边界', (tester) async {
+      final ctrl = await arrange(tester);
+      final rect = ctrl.mainChartRect;
+      final w = ctrl.candleActualWidth;
+      var checked = 0;
+      for (var step = 0; step < 40; step++) {
+        ctrl.onChartMove(Offset(-w * 0.37, 0));
+        if (ctrl.paintDxOffset > 0) continue;
+        ctrl.calculatePaintChartRange();
+        final data = ctrl.klineData;
+        final context = 'step=$step offset=${ctrl.paintDxOffset} range=[${data.start}, ${data.end})';
+        checked++;
+
+        expect(data.end, data.length, reason: context);
+        // maxCandleCount 向上取整、留白根数四舍五入: 起点最多再往左多出一根。
+        final edge = leftEdge(ctrl, data.start);
+        expect(edge, lessThanOrEqualTo(rect.left + w / 2 + 1e-9), reason: context);
+        expect(edge, greaterThanOrEqualTo(rect.left - w * 1.5 - 1e-9), reason: context);
+      }
+      expect(checked, greaterThan(5), reason: '平移量不足, 用例空转');
+    });
+
+    testWidgets('alwaysCalculateScreenOfCandlesIfEnough 时留白也按一屏根数取窗口', (tester) async {
+      final ctrl = await arrange(tester, alwaysOneScreen: true);
+      ctrl.onChartMove(Offset(-ctrl.mainChartWidth / 3, 0));
+      expect(ctrl.paintDxOffset, lessThan(0), reason: '前置条件: 最新根右侧有留白');
+      ctrl.calculatePaintChartRange();
+
+      final data = ctrl.klineData;
+      expect(data.end, data.length);
+      expect(data.end - data.start, ctrl.maxCandleCount);
+    });
+  });
 }
