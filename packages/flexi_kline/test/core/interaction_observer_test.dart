@@ -66,20 +66,14 @@ class _SelfRemovingObserver extends FlexiKlineObserver {
   }
 }
 
-List<CandleModel> _candles({int count = 200, int intervalMs = 60000}) {
-  const latest = 12000000;
-  return [
-    for (var index = count - 1; index >= 0; index--)
-      CandleModel(
-        timestamp: latest - index * intervalMs,
-        open: 100 + index * 10.0,
-        high: 100 + index * 10.0 + 5,
-        low: 100 + index * 10.0 - 5,
-        close: 100 + index * 10.0,
-        volume: 1000,
-      ),
-  ];
-}
+List<CandleModel> _candles({int count = 200, int intervalMs = 60000}) => genCandleList(
+  count: count,
+  intervalMs: intervalMs,
+  ohlc: (index) {
+    final price = 100 + index * 10.0;
+    return (open: price, high: price + 5, low: price - 5, close: price);
+  },
+);
 
 void main() {
   group('interaction-observer', () {

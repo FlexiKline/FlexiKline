@@ -12,39 +12,83 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// 集成测试：FlexiKlineLifecycle 三态切换
+/// Controller 的生命周期：initial → mounted → disposed，以及挂载前的调用。
 library;
 
+import 'package:flexi_formatter/date_time.dart' show TimeUnit;
 import 'package:flexi_kline/flexi_kline.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/support.dart';
 
+const _spec = KlineSpec(symbol: 'LIFECYCLE', interval: FlexiTimeInterval(1, TimeUnit.minute));
+
+FlexiKlineController _controller() => FlexiKlineController(
+  configuration: FakeFlexiKlineConfiguration(mainIndicatorDefaultSize: const Size(400, 300)),
+);
+
+void _mount(FlexiKlineController c) => c.mountIndicators(
+  candle: TestCandleIndicator(),
+  time: TestTimeIndicator(),
+  mainIndicators: const [],
+  subIndicators: const [],
+);
+
 void main() {
-  group('v2.2.0/FlexiKlineController/lifecycle', () {
-    test('initial → mounted → disposed 三态切换', () {
-      final c = FlexiKlineController(
-        configuration: FakeFlexiKlineConfiguration(),
-      );
+  test('initial → mounted → disposed', () {
+    final c = _controller();
+    expect(c.lifecycleListenable.value, FlexiKlineLifecycle.initial);
+    expect(c.isMounted, isFalse);
 
-      // 1. 构造后处于 initial 状态
-      expect(c.lifecycleListenable.value, FlexiKlineLifecycle.initial);
-      expect(c.isMounted, isFalse);
+    _mount(c);
+    expect(c.lifecycleListenable.value, FlexiKlineLifecycle.mounted);
+    expect(c.isMounted, isTrue);
 
-      // 2. mountIndicators 后进入 mounted 状态
-      c.mountIndicators(
-        candle: TestCandleIndicator(),
-        time: TestTimeIndicator(),
-        mainIndicators: const [],
-        subIndicators: const [],
-      );
+    c.dispose();
+    expect(c.lifecycleListenable.value, FlexiKlineLifecycle.disposed);
+  });
 
-      expect(c.lifecycleListenable.value, FlexiKlineLifecycle.mounted);
-      expect(c.isMounted, isTrue);
+  group('挂载前', () {
+    test('受守卫的 API 不抛异常, moveToDateTime 返回 null', () async {
+      final c = _controller();
+      addTearDown(c.dispose);
 
-      // 3. dispose 后进入 disposed 状态
-      c.dispose();
-      expect(c.lifecycleListenable.value, FlexiKlineLifecycle.disposed);
+      expect(c.onThemeChanged, returnsNormally);
+      expect(c.requestMoveToInitialPosition, returnsNormally);
+      expect(await c.moveToDateTime(DateTime.utc(2026, 7, 10)), isNull);
     });
+
+    testWidgets('replaceKlineData 先排队, initState 之后生效', (tester) async {
+      final c = _controller();
+      addTearDown(c.dispose);
+      c.switchKlineData(_spec);
+      c.replaceKlineData(_spec, genFlatCandleList(count: 3));
+      expect(c.klineData.isEmpty, isTrue);
+
+      _mount(c);
+      c.initState();
+      c.flushPendingKlineData();
+
+      expect(c.klineData.length, 3);
+    });
+  });
+
+  test('requestMoveToInitialPosition 经 moveToPositionCallback 从当前位置移到初始位置', () {
+    final c = _controller();
+    addTearDown(c.dispose);
+    _mount(c);
+    c.initState();
+    double? begin, end;
+    c.moveToPositionCallback = (b, e) async {
+      begin = b;
+      end = e;
+      return true;
+    };
+
+    c.requestMoveToInitialPosition();
+
+    expect(begin, c.paintDxOffset);
+    expect(end, c.clampPaintDxOffset(c.getInitPaintDxOffset()));
   });
 }

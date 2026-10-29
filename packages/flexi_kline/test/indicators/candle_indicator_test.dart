@@ -39,18 +39,15 @@ List<Paragraph> _paragraphs(RecordingCanvas canvas) => [
     if (i.memberName == #drawParagraph) i.positionalArguments[0] as Paragraph,
 ];
 
-/// 涨跌交替: 偶数根(自最新起)上涨, 奇数根下跌。
-List<CandleModel> _alternating({int count = 200, int latestTimestamp = 12000000}) => [
-  for (var i = count - 1; i >= 0; i--)
-    CandleModel(
-      timestamp: latestTimestamp - i * 60000,
-      open: i.isEven ? 100 : 105,
-      high: 110,
-      low: 90,
-      close: i.isEven ? 105 : 100,
-      volume: 1000,
-    ),
-];
+/// 涨跌交替: 最新一根上涨, 往历史方向依次跌、涨。
+List<CandleModel> _alternating({int count = 200, int latestTimestamp = 12000000}) => genCandleList(
+  count: count,
+  latestTimestamp: latestTimestamp,
+  ohlc: (index) {
+    final up = (count - 1 - index).isEven;
+    return (open: up ? 100 : 105, high: 110, low: 90, close: up ? 105 : 100);
+  },
+);
 
 /// 记下创建的 [CandlePaintObject], 供用例读它的几何与标签状态。
 class _Candle extends CandleIndicator {

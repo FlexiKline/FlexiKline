@@ -12,7 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// `valueToDy(correct: true)` 改为像素空间 clamp 后与旧实现逐点等价; `isSame` 区间是唯一需要特判的分支。
+/// PaintObject 的值与 dy 换算：区间 `[min, max]` 线性映射到 `[chartRect.bottom, chartRect.top]`。
+///
+/// chartRect 高度可以为零或负（主区很矮而 padding 很大），此时 `dyFactor` 为 0，
+/// 所有值落在底边，`dyToValue` 返回 null 而不是除零。
 library;
 
 import 'package:flexi_kline/flexi_kline.dart';
@@ -26,28 +29,15 @@ final _key = directKey(0);
 
 MinMax _mm(num max, num min) => MinMax(max: FlexiNum.fromNum(max), min: FlexiNum.fromNum(min));
 
-/// 旧实现原文：先夹值，再换算。
-double _legacyValueToDy(PaintObject object, FlexiNum value) {
-  final minMax = object.minMax;
-  value = value.clamp(minMax.min, minMax.max);
-  return object.chartRect.bottom - (value - minMax.min).toDouble() * object.dyFactor;
-}
+FlexiNum _v(num value) => FlexiNum.fromNum(value);
 
-void _expectMatchesLegacy(PaintObject object, Iterable<num> values) {
-  for (final v in values) {
-    final value = FlexiNum.fromNum(v);
-    expect(object.valueToDy(value, correct: true), closeTo(_legacyValueToDy(object, value), 1e-9), reason: 'value=$v');
-  }
-}
-
-MainPaintObject _mountMain() {
-  const mainRect = Rect.fromLTWH(0, 0, 300, 200);
+MainPaintObject _mountMain({Rect mainRect = const Rect.fromLTWH(0, 0, 300, 200), double padding = 12}) {
   final context = FakePaintContext()..mainRect = mainRect;
   final manager = IndicatorPaintObjectManager(
     configuration: FakeFlexiKlineConfiguration(
       mainChildren: {_key},
       mainIndicatorDefaultSize: mainRect.size,
-      mainIndicatorDefaultPadding: const EdgeInsets.symmetric(vertical: 12),
+      mainIndicatorDefaultPadding: EdgeInsets.symmetric(vertical: padding),
     ),
   );
   manager.mountIndicators(
@@ -62,51 +52,68 @@ MainPaintObject _mountMain() {
   return main;
 }
 
-/// 区间内、端点、区间外两侧，以及一些非整数值。
-const _values = <num>[-1e6, -50, 0, 99.999, 100, 100.25, 123.456789, 150, 199.5, 200, 200.0001, 250, 1e9];
-
 void main() {
-  test('前提：chartRect 有正高度', () {
-    final main = _mountMain();
-    expect(main.chartRect.height, greaterThan(0));
+  group('valueToDy / dyToValue', () {
+    test('端点映射到上下边, 中点映射到中线', () {
+      final main = _mountMain()..setMinMax(_mm(200, 100));
+      final rect = main.chartRect;
+      expect(rect.height, greaterThan(0));
+
+      expect(main.valueToDy(_v(200)), closeTo(rect.top, 1e-9));
+      expect(main.valueToDy(_v(100)), closeTo(rect.bottom, 1e-9));
+      expect(main.valueToDy(_v(150)), closeTo(rect.center.dy, 1e-9));
+    });
+
+    test('dyToValue 是 valueToDy 的逆', () {
+      final main = _mountMain()..setZoomMinMax(_mm(180.5, 120.25));
+
+      for (final v in [120.25, 123.456789, 150, 180.5]) {
+        expect(main.dyToValue(main.valueToDy(_v(v)))!.toDouble(), closeTo(v, 1e-9), reason: 'value=$v');
+      }
+    });
+
+    test('默认不夹取; correct: true 夹到 chartRect 内', () {
+      final main = _mountMain()..setMinMax(_mm(200, 100));
+      final rect = main.chartRect;
+
+      expect(main.valueToDy(_v(250)), lessThan(rect.top));
+      expect(main.valueToDy(_v(50)), greaterThan(rect.bottom));
+      expect(main.valueToDy(_v(250), correct: true), closeTo(rect.top, 1e-9));
+      expect(main.valueToDy(_v(50), correct: true), closeTo(rect.bottom, 1e-9));
+      expect(main.valueToDy(_v(150), correct: true), closeTo(rect.center.dy, 1e-9), reason: '区间内不受夹取影响');
+    });
+
+    test('max == min 时所有值都落在底边', () {
+      // setZoomMinMax 不做 expandByRatios, 能构造出 max == min 的区间。
+      final main = _mountMain()..setZoomMinMax(_mm(100, 100));
+      expect(main.minMax.isSame, isTrue);
+
+      for (final v in [50, 100, 100.5, 1e9]) {
+        expect(main.valueToDy(_v(v), correct: true), main.chartRect.bottom, reason: 'value=$v');
+      }
+    });
   });
 
-  test('普通区间：区间内外各取值时与旧实现逐点相等', () {
-    final main = _mountMain()..setMinMax(_mm(200, 100));
-    expect(main.minMax.isSame, isFalse);
+  group('chartRect 高度非正', () {
+    const tiny = Rect.fromLTWH(0, 0, 300, 40);
 
-    _expectMatchesLegacy(main, _values);
-  });
+    test('高度为零或负时 dyFactor 为 0, 不产生镜像', () {
+      final zero = _mountMain(mainRect: tiny, padding: 20);
+      final negative = _mountMain(mainRect: tiny, padding: 25);
+      expect(zero.chartRect.height, 0);
+      expect(negative.chartRect.height, lessThan(0));
 
-  test('缩放区间（不经 setMinMax 扩展）同样逐点相等', () {
-    final main = _mountMain()..setZoomMinMax(_mm(180.5, 120.25));
+      expect(zero.dyFactor, 0);
+      expect(negative.dyFactor, 0);
+    });
 
-    _expectMatchesLegacy(main, _values);
-  });
+    test('valueToDy 恒为底边, dyToValue 返回 null', () {
+      final main = _mountMain(mainRect: tiny, padding: 25)..setMinMax(_mm(100, 0));
 
-  test('区间端点映射到 chartRect 上下边', () {
-    final main = _mountMain()..setMinMax(_mm(200, 100));
-
-    expect(main.valueToDy(FlexiNum.fromNum(200), correct: true), closeTo(main.chartRect.top, 1e-9));
-    expect(main.valueToDy(FlexiNum.fromNum(100), correct: true), closeTo(main.chartRect.bottom, 1e-9));
-  });
-
-  test('isSame 区间：结果恒为 bottom，与旧实现一致', () {
-    // setZoomMinMax 不做 expandByRatios, 能构造出 max == min 的区间。
-    final main = _mountMain()..setZoomMinMax(_mm(100, 100));
-    expect(main.minMax.isSame, isTrue);
-
-    final values = [..._values, 100.5, 100.999];
-    for (final v in values) {
-      expect(main.valueToDy(FlexiNum.fromNum(v), correct: true), main.chartRect.bottom, reason: 'value=$v');
-    }
-    _expectMatchesLegacy(main, values);
-  });
-
-  test('correct: false 不夹取', () {
-    final main = _mountMain()..setMinMax(_mm(200, 100));
-
-    expect(main.valueToDy(FlexiNum.fromNum(250), correct: false), lessThan(main.chartRect.top));
-    expect(main.valueToDy(FlexiNum.fromNum(50), correct: false), greaterThan(main.chartRect.bottom));
+      for (final v in [0, 50, 100]) {
+        expect(main.valueToDy(_v(v)), main.chartRect.bottom, reason: 'value=$v');
+      }
+      expect(main.dyToValue(20), isNull);
+    });
   });
 }

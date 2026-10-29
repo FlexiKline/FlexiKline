@@ -33,7 +33,7 @@ import '../support/support.dart';
 
 const _spec = KlineSpec(symbol: 'SMOOTH-TEST', interval: FlexiTimeInterval(1, TimeUnit.day));
 
-/// 阶梯蜡烛：第 i 根的中心价格 = base + i * step。
+/// 阶梯蜡烛：第 i 根（0 为最旧）的中心价格 = base + i * step。
 List<CandleModel> _stairCandles({
   int count = 200,
   double base = 100,
@@ -41,19 +41,15 @@ List<CandleModel> _stairCandles({
   double spread = 5,
   int latestTimestamp = 12000000,
   int intervalMs = 60000,
-}) {
-  return [
-    for (var index = count - 1; index >= 0; index--)
-      CandleModel(
-        timestamp: latestTimestamp - index * intervalMs,
-        open: base + index * step - spread / 2,
-        high: base + index * step + spread,
-        low: base + index * step - spread,
-        close: base + index * step + spread / 2,
-        volume: 1000,
-      ),
-  ];
-}
+}) => genCandleList(
+  count: count,
+  latestTimestamp: latestTimestamp,
+  intervalMs: intervalMs,
+  ohlc: (index) {
+    final center = base + index * step;
+    return (open: center - spread / 2, high: center + spread, low: center - spread, close: center + spread / 2);
+  },
+);
 
 /// 当前生效区间的上端：主图区顶边对应的价格。
 double _rangeMax(FlexiKlineController chart) {

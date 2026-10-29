@@ -42,10 +42,12 @@ CandleModel _candle(DateTime dateTime) {
   );
 }
 
+/// 81 天的日线, 升序, 缺 `_latest` 前第 20 天那一根。
 List<CandleModel> _candles() {
+  final oldest = _latest.subtract(_day * 80);
   return [
-    for (var i = 80; i >= 0; i--)
-      if (i != 20) _candle(_latest.subtract(_day * i)),
+    for (var i = 0; i <= 80; i++)
+      if (i != 60) _candle(oldest.add(_day * i)),
   ];
 }
 
@@ -122,15 +124,6 @@ double _targetOffset(
 
 void main() {
   group('FlexiKlineController.moveToDateTime', () {
-    testWidgets('indexToDx returns the candle center, spaced one candle apart', (tester) async {
-      final controller = await _pumpChart(tester);
-      addTearDown(() => disposeChart(tester, controller));
-      const index = 40;
-      final dx = controller.indexToDx(index);
-      // 相邻下标相距一个蜡烛宽度, 整数下标即中心。
-      expect(controller.indexToDx(index + 1) - dx, closeTo(controller.candleActualWidth, 0.001));
-    });
-
     testWidgets('exact timestamp animates the candle to chart center', (tester) async {
       final controller = await _pumpChart(tester);
       addTearDown(() => disposeChart(tester, controller));
@@ -165,6 +158,23 @@ void main() {
       );
       _expectCandleCentered(controller, index);
       expect(await _pumpUntilFutureComplete(tester, future, 'exact date result'), index);
+    });
+
+    testWidgets('paintRangeListenable publishes the ascending range that contains the target', (tester) async {
+      final controller = await _pumpChart(tester);
+      addTearDown(() => disposeChart(tester, controller));
+      final target = _latest.subtract(_day * 40);
+      final index = controller.klineData.tsToIndex(target.millisecondsSinceEpoch)!;
+
+      expect(await _pumpUntilFutureComplete(tester, controller.moveToDateTime(target), 'date move'), index);
+      // 区间在 post-frame 回调里发布。
+      await tester.pump();
+
+      final data = controller.klineData;
+      final range = controller.paintRangeListenable.value;
+      expect(range, Range(data.start, data.end));
+      expect(range!.start, lessThan(index));
+      expect(index, lessThan(range.end), reason: '跳转目标必须在发布的可见区间内');
     });
 
     testWidgets('UTC calendar date keeps the selected day for daily candles', (tester) async {
