@@ -27,6 +27,16 @@ void main() {
       expect(a, equals(b));
     });
 
+    test('check 失败时消息带上 seed、轮次与输入', () {
+      expect(
+        () =>
+            forAll('fail', generate: (rng) => rng.nextInt(10), check: (v) => expect(v, lessThan(0)), runs: 3, seed: 7),
+        throwsA(
+          isA<TestFailure>().having((f) => f.message, 'message', allOf(contains('seed=7'), contains('run=0'))),
+        ),
+      );
+    });
+
     test('自定义 seed 覆盖 description hash', () {
       final a = <int>[];
       forAll('x', generate: (rng) => rng.nextInt(100), check: a.add, runs: 10, seed: 999);

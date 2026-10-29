@@ -17,7 +17,11 @@ library;
 
 import 'dart:math';
 
+import 'package:flutter_test/flutter_test.dart';
+
 /// seed 默认由 [description] 派生，免去手工 seed 簿记。
+///
+/// [check] 失败时附上 seed、轮次与输入，传回 `seed:` 即可复现。
 void forAll<T>(
   String description, {
   required T Function(Random rng) generate,
@@ -29,6 +33,13 @@ void forAll<T>(
   final rng = Random(s);
   for (int run = 0; run < runs; run++) {
     final value = generate(rng);
-    check(value);
+    try {
+      check(value);
+    } on TestFailure catch (failure, stackTrace) {
+      Error.throwWithStackTrace(
+        TestFailure('forAll($description) seed=$s run=$run value=$value\n${failure.message}'),
+        stackTrace,
+      );
+    }
   }
 }

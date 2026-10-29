@@ -152,19 +152,6 @@ class FakePaintContext implements PaintContext {
   void requestRepaint() {}
 }
 
-/// 将 slot 查询代理到真实 manager，供 precompute 等需要读 slot 的集成测试。
-class ManagerBackedPaintContext extends FakePaintContext {
-  ManagerBackedPaintContext(this.manager);
-
-  final IndicatorPaintObjectManager manager;
-
-  @override
-  int? getComputedDataIndex(ComputedIndicatorKey key) => manager.getComputedDataIndex(key);
-
-  @override
-  int get computedDataCapacity => manager.computedDataCapacity;
-}
-
 /// 内联的最小 [IFlexiKlineTheme] 实现，避免外部依赖。
 class _FakeTheme implements IFlexiKlineTheme {
   const _FakeTheme();

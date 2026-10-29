@@ -53,7 +53,7 @@ void main() {
     });
 
     test('降序列表（target.compareTo(element)）', () {
-      // K 线时间戳倒序排列时，compare = target.compareTo(element)
+      // 比较函数取反即可搜索降序列表。
       final desc = [9, 7, 5, 3, 1];
       expect(desc.binarySearch((e) => 5.compareTo(e)), 2);
       expect(desc.binarySearch((e) => 4.compareTo(e)), -1);

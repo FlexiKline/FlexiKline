@@ -44,7 +44,7 @@ void main() {
     });
 
     test('反向采样则从右侧长出', () {
-      // 同一组点倒序采样, 截取结果落在右端——这正是 AVL 指标里「索引倒序收集」要保证的事。
+      // 路径从右往左时, 截取结果落在右端。
       final reversed = Path()..addPolygon(const [Offset(300, 0), Offset(200, 0), Offset(100, 0), Offset(0, 0)], false);
       final bounds = reversed.takeFraction(0.25).getBounds();
 

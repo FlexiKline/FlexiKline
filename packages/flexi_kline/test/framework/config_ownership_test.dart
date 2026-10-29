@@ -88,7 +88,7 @@ void main() {
         // 队列已满，激活第三个会驱逐队首 computed_1。
         ..activateSub(computedKey(3));
 
-      expect(manager.subIndicatorKeys, hasLength(capacity));
+      expect(manager.subIndicatorKeys, [computedKey(2), computedKey(3)], reason: '按 FIFO 驱逐最早激活的');
       expect(
         manager.flexiKlineConfig.sub,
         manager.subIndicatorKeys.toSet(),

@@ -18,6 +18,7 @@
 /// - **Property 5: candle/time 无条件更新**
 /// - **Property 6: diff 增删的 slot 与缓存一致性**
 /// - **Property 7: diff 配置变化更新已激活 PaintObject**
+@Tags(['property'])
 library;
 
 import 'dart:math';

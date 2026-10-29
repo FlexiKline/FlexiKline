@@ -19,6 +19,7 @@
 /// 2. 回收的 slot 按 FIFO 顺序被下一次注册复用
 /// 3. 每个已注册的 ComputedIndicatorKey 拥有唯一的 slot index
 /// 4. 所有已分配的 slot index >= 0 且互不重复
+@Tags(['property'])
 library;
 
 import 'dart:math';

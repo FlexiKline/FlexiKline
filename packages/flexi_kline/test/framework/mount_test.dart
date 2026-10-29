@@ -13,6 +13,7 @@
 // limitations under the License.
 
 /// 属性测试：mountIndicators 声明层完整性 (M1)
+@Tags(['property'])
 library;
 
 import 'dart:math';

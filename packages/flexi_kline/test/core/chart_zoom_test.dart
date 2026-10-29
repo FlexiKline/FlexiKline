@@ -558,13 +558,7 @@ void main() {
 
   /// 跨度的可用区间：两端都要有界，且越界处理必须是钳制而不是拒绝写入。
   ///
-  /// 参照同文件 `onChartScale` 的 X 轴缩放——它把界做成配置（`candleMinWidth` /
-  /// `candleMaxWidth`）、越界走 `clamp`、两条输入链共用一段代码，且提前 return 带方向判据
-  /// （`data.scale > 1 && candleWidth >= candleMaxWidth`）所以永不挡反向。Y 轴缺的正是后两条。
-  ///
-  /// 本组放在文件末尾：这两条当前必红，而失败用例会把 `calculatePaintChartRange` 排的
-  /// post-frame 回调留到下一个用例的首帧，炸出「used after disposed」。放最后可以避免它
-  /// 连带打挂无关的组，让实施者拿到干净的失败清单。修好之后位置就无所谓了。
+  /// 与 X 轴缩放一致：界由配置给出、越界钳制、触摸与滚轮共用一段代码，到界后反向输入立即生效。
   group('v2.4.1/zoom/跨度界限', () {
     /// `onChartZoomStep` 的判据是「候选**结果**越界就整体拒绝」。被拒时区间一点不变，于是
     /// 下一个同样的事件同样被拒——只要 `span < 下限 / coeff` 就构成不动点，滚轮永久失效。

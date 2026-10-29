@@ -25,7 +25,7 @@ import 'package:flutter/foundation.dart';
 // 随机 K 线生成
 // ---------------------------------------------------------------------------
 
-/// 随机生成 [CandleModel] 列表
+/// 随机生成 [count] 根升序蜡烛，最新一根的时间为 [dateTime]（默认当前时间）。
 Future<List<CandleModel>> genRandomCandleList({
   int count = 5,
   double inital = 1000,
@@ -34,10 +34,8 @@ Future<List<CandleModel>> genRandomCandleList({
   double rangeVol = 50,
   ITimeInterval interval = const FlexiTimeInterval(1, TimeUnit.day),
   DateTime? dateTime,
-  bool isHistory = true,
 }) async {
-  final List<CandleModel> list = [];
-  dateTime ??= DateTime.now();
+  final latest = (dateTime ?? DateTime.now()).millisecondsSinceEpoch;
   final random = math.Random();
   double h, l, o, c = inital, v = initalVol;
 
@@ -48,8 +46,7 @@ Future<List<CandleModel>> genRandomCandleList({
     return isUp ? m + r * k : m - r * k;
   }
 
-  final int flag = isHistory ? -1 : 1;
-
+  final list = <CandleModel>[];
   for (int i = 0; i < count; i++) {
     o = c;
     c = genVal(o, range);
@@ -57,40 +54,23 @@ Future<List<CandleModel>> genRandomCandleList({
     l = genVal(math.min(o, c), range, isUp: false);
     if (h < l) [h, l] = [l, h];
     v = genVal(v, rangeVol);
-    final m = CandleModel(
-      timestamp: dateTime.add(Duration(milliseconds: flag * i * interval.milliseconds)).millisecondsSinceEpoch,
-      high: h.d,
-      open: o.d,
-      close: c.d,
-      low: l.d,
-      volume: v.d,
+    list.add(
+      CandleModel(
+        timestamp: latest - (count - 1 - i) * interval.milliseconds,
+        high: h.d,
+        open: o.d,
+        close: c.d,
+        low: l.d,
+        volume: v.d,
+      ),
     );
-    if (isHistory) {
-      list.add(m);
-    } else {
-      list.insert(0, m);
-    }
   }
-  return list.reversed.toList(); // 升序存储: 最旧在前.
+  return list;
 }
 
 // ---------------------------------------------------------------------------
 // 调试打印工具
 // ---------------------------------------------------------------------------
-
-/// 逐行打印可迭代集合
-void printIterable<T>(Iterable<T> list, {String? tag}) {
-  for (final val in list) {
-    debugPrint('${tag ?? ''}>${val.toString()}');
-  }
-}
-
-/// 逐行打印 Map
-void printMap<K, V>(Map<K, V> map, {String? tag}) {
-  map.forEach((key, val) {
-    debugPrint('${tag ?? ''}> key:$key \t val:${val.toString()}');
-  });
-}
 
 /// 简易日志打印
 void logMsg(dynamic msg) {
@@ -101,7 +81,30 @@ void logMsg(dynamic msg) {
 // 确定性 K 线生成（手势与视口用例专用）
 // ---------------------------------------------------------------------------
 
-/// 生成 [count] 根价量恒定的蜡烛，时间戳自 [latestTimestamp] 按 [intervalMs] 向历史递减。
+/// 生成 [count] 根升序蜡烛：下标 0 最旧，最新一根的时间戳为 [latestTimestamp]，相邻间隔 [intervalMs]。
+///
+/// [ohlc] 按下标给出价格，成交量恒为 [volume]。
+List<CandleModel> genCandleList({
+  int count = 200,
+  int latestTimestamp = 12000000,
+  int intervalMs = 60000,
+  num volume = 1000,
+  required ({num open, num high, num low, num close}) Function(int index) ohlc,
+}) {
+  return List.generate(count, (index) {
+    final price = ohlc(index);
+    return CandleModel(
+      timestamp: latestTimestamp - (count - 1 - index) * intervalMs,
+      open: price.open,
+      high: price.high,
+      low: price.low,
+      close: price.close,
+      volume: volume,
+    );
+  });
+}
+
+/// 生成 [count] 根价量恒定的升序蜡烛，最新一根的时间戳为 [latestTimestamp]。
 ///
 /// 手势与视口用例只需要「蜡烛够多，`paintDxOffset` 双向都有可平移的余量」，不关心行情形态。
 /// 价量恒定让断言只受手势影响，不受随机数据影响；[genRandomCandleList] 那种随机序列会让
@@ -113,21 +116,16 @@ List<CandleModel> genFlatCandleList({
   num high = 110,
   num low = 90,
 }) {
-  return List.generate(
-    count,
-    (index) => CandleModel(
-      timestamp: latestTimestamp - index * intervalMs,
-      open: 100,
-      high: high,
-      low: low,
-      close: 105,
-      volume: 1000,
-    ),
-  ).reversed.toList(); // 升序存储: 最旧在前.
+  return genCandleList(
+    count: count,
+    latestTimestamp: latestTimestamp,
+    intervalMs: intervalMs,
+    ohlc: (_) => (open: 100, high: high, low: low, close: 105),
+  );
 }
 
-/// 生成 [count] 根价格线性上行的蜡烛：第 i 根（自最新往历史数）的 high 为
-/// `high - i * slope`，low 恒低 [spread]。
+/// 生成 [count] 根价格线性上行的升序蜡烛：最新一根的 high 为 [high]，往历史每根降 [slope]，
+/// low 恒低 [spread]。
 ///
 /// [genFlatCandleList] 的价量恒定让平移不改变 `minMax`，任何「区间随可见数据变化」的断言在它
 /// 上面都是空转。线性斜坡下每平移一根蜡烛，`minMax` 端点就移动一个 [slope]：位移有下界（不空转）
@@ -140,15 +138,13 @@ List<CandleModel> genRampCandleList({
   num spread = 14,
   num slope = 0.5,
 }) {
-  return List.generate(count, (index) {
-    final h = high - index * slope;
-    return CandleModel(
-      timestamp: latestTimestamp - index * intervalMs,
-      open: h - spread / 2,
-      high: h,
-      low: h - spread,
-      close: h - spread / 2,
-      volume: 1000,
-    );
-  }).reversed.toList(); // 升序存储: 最旧在前.
+  return genCandleList(
+    count: count,
+    latestTimestamp: latestTimestamp,
+    intervalMs: intervalMs,
+    ohlc: (index) {
+      final h = high - (count - 1 - index) * slope;
+      return (open: h - spread / 2, high: h, low: h - spread, close: h - spread / 2);
+    },
+  );
 }

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 /// 属性测试：激活层指标管理
+@Tags(['property'])
 library;
 
 import 'dart:math';
