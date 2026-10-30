@@ -1,6 +1,8 @@
 ## 2.7.0
 * Store candles in ascending time order (`KlineData.list.first` is the oldest, `list.last` the latest) and traverse, compute and paint left-to-right; data passed to `replaceKlineData`, `updateLatestKlineData` and `prependHistoryKlineData` must be in ascending time order (asserted in debug) (Breaking Changes).
 * Change `indexToDx` to return the non-nullable candle center (extrapolated outside the data) and `dxToIndex` to return the non-nullable index of the candle under `dx`; add `latestCandleDx` and `dxToFloatIndex` to `PaintObject` geometry; remove `indexToCandleDx` and `startCandleDx` (Breaking Changes).
+* Remove the `check` parameter from `indexToDx` and `timestampToDx`; use `chartRect.includeDx` to test visibility (Breaking Changes).
+* Change `PaintObject.dxToIndex` to return `int` instead of `double` (Breaking Changes).
 * Remove the `startOffset` parameter from `paintOHLCStyleCandleChart`, `paintCandleLineChart` and `paintCandleUpDownLineChart`; their default range now extends one candle beyond each side of the visible range (Breaking Changes).
 * Rename `KlineData.timestampToIndex` / `indexToTimestamp` to `timestampToFloatIndex` / `floatIndexToTimestamp` and map them to candle centers, interpolating by timestamp between adjacent candles and extrapolating by interval outside the data, so saved drawings shift by half a candle (Breaking Changes).
 * Rename `KlineData.ensureStartAndEndIndex(startIndex, maxCount)` to `ensurePaintRange({barsBack, count})` (Breaking Changes).
@@ -15,6 +17,8 @@
 * Replace `DrawContextExt.isMagneticDrawObject` with `magneticShift`, which returns the dx shift that realigns a moved drawing to candle centers; points mirrored around their candle centers no longer count as aligned (Breaking Changes).
 * Add `KlineData.labelOriginIndex` so time-axis labels stay on the same candles after loading more history.
 * Remove the unused public helpers `combineCandleList`, `removeDuplicate` and `KlineData.paintTimeRange` (Breaking Changes).
+* Deprecate `ComputeMode`; it will be removed in 2.8.0 together with `FlexiNum`, and all values will use `double`.
+* Fix `FlexiNum.divSafe`, `divSafeNum` and `divSafeDecimal` returning a `double` fallback for a `Decimal` dividend when the divisor is zero; the fallback now takes the dividend's mode.
 
 ## 2.6.1
 * Add `TextLayoutCache.debugMissCount` (debug-only, `@visibleForTesting`) so tests can assert that cached label frames do not re-lay out text.

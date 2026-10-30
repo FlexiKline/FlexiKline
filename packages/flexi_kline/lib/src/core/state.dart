@@ -388,6 +388,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
 
   /// 切换[spec]规格指定的蜡烛数据
   /// [spec] 待切换的[KlineSpec]
+  /// [computeMode] 计算模式, 选择依据见 [ComputeMode]
   /// [useCacheFirst] 是否优先使用缓存. 注: 如果有缓存数据(说明之前加载过), loading不会展示.
   /// [useCachePaintDxOffset] 是否仍使用缓存的绘制位置(如果当前没有切换请求);
   /// return

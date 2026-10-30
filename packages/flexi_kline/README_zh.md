@@ -181,6 +181,8 @@ final index = await controller.moveToDateTime(DateTime(2024, 6, 15));
 
 每批数据必须按时间严格升序（最旧在前）；框架不负责排序，debug 下会断言顺序。`klineData.list` 也按这个顺序存放：`list.first` 是最旧一根，`list.last` 是最新一根。可视区间 `[start, end)` 与所有绘制都从左到右，整数下标对应蜡烛中心（`indexToDx` / `dxToIndex`，数据之外按蜡烛宽度外推）。
 
+`switchKlineData(spec, computeMode: ...)` 选择蜡烛与指标的数值类型。`ComputeMode.fast`（默认，`double`）无论价格量级都保有约 15～16 位有效数字，1e-17 的价格同样适用，且快得多。只有结果要与交易所或后端逐位一致、整数成交量可能超过 2^53、或取整边界不能有 `0.30000000000000004` 这类尾数时，才用 `ComputeMode.accurate`（`Decimal`）。它的无限小数除法按 `FlexiFormatter.scaleOnInfinitePrecision` 位小数截断（默认 17），价格低于 1e-15 时要先通过 `FlexiFormatter.setGlobalConfig` 调小 `exponentMinDecimal`；开方等 `Decimal` 不支持的运算（如 BOLL 标准差）仍是 `double`。
+
 `moveToDateTime` 定位成功后，蜡烛指标默认在目标蜡烛上方画一个日期气泡，随平移缩放联动，`holdDuration`（默认 2000ms，`0` 表示一直显示）后消失。通过 `CandleIndicator.dateMark`（`DateMarkConfig`）配置开关、位置（`DateMarkPosition.auto` / `above` / `below`）与外观；业务侧自己画提示时设 `show: false`。只换文案覆写 `CandlePaintObject.buildDateMarkSpan`，整体换画法覆写 `paintDateMark`。
 
 蜡烛合并与指标计算由同一条内部流水线串行编排。后续计划开放外置流水线接口，让业务侧完成清洗、复权、聚合或换算后，再交回框架绘制。
