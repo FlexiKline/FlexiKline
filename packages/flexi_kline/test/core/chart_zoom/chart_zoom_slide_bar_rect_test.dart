@@ -34,7 +34,7 @@ import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../support/support.dart';
+import '../../support/support.dart';
 
 const _day = FlexiTimeInterval(1, TimeUnit.day);
 const _hour = FlexiTimeInterval(1, TimeUnit.hour);
