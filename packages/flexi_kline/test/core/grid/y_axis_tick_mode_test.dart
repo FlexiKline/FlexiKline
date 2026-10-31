@@ -120,7 +120,7 @@ void main() {
 
   /// 当前生效区间的上端，即 `minMax.max`。
   ///
-  /// `mainPaintObject` 只在 package 内可见，所以经映射读端点（与 `chart_zoom_test` 同一口径）：
+  /// `mainPaintObject` 只在 package 内可见，所以经映射读端点（与 `core/chart_zoom/` 同一口径）：
   /// `dyToValue(chartRect.top)` 按定义恰好等于 `minMax.max`，不引入任何误差。
   double rangeMax(FlexiKlineController chart) {
     return chart.dyToCandleValue(chart.mainChartRect.top)!.toDouble();

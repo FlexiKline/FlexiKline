@@ -119,7 +119,7 @@ void main() {
     return log;
   }
 
-  group('v2.5.0/网格线/编排', () {
+  group('网格线编排', () {
     testWidgets('count 竖线: dx 与旧 grid 层的等分口径逐值一致', (tester) async {
       final scene = await arrange(tester);
       final chart = scene.controller;
@@ -156,7 +156,7 @@ void main() {
       expect(lastLine, lessThan(marker), reason: '网格压在蜡烛上就成了前景, 不再是网格');
 
       // 横线的 x 跨度恒等于 mainRect 宽度, 只有 dy 可能越界。容差放到 1e-9: nice 刻度可以越过
-      // 端点一个浮点误差(见「刻度顶在 drawableRect 边界外」那条), 那点越界肉眼与像素都看不出。
+      // 端点一个浮点误差(见 y_axis_ticks_label_test), 那点越界肉眼与像素都看不出。
       for (final dy in log.mainHorizontalDys(chart)) {
         expect(dy, greaterThanOrEqualTo(chart.mainRect.top - 1e-9), reason: '横线越出 mainRect 会被 clipRect 裁掉');
         expect(dy, lessThanOrEqualTo(chart.mainRect.bottom + 1e-9), reason: '横线越出 mainRect 会被 clipRect 裁掉');
@@ -395,63 +395,6 @@ void main() {
         }
       }
     });
-
-    /// 上一条断言「每条刻度都有值」，但它守不住「不做窗格归属检查」——那组数据的刻度全落在
-    /// `drawableRect` 内部，闭区间的边界判定对它们没有区别。这条把刻度**顶到边界上**：
-    ///
-    /// 区间 `[0, 11]`、可绘制高度 100，于是 `dyFactor = 100/11 = 9.090909090909092`，最顶刻度
-    /// 11 换算回去是 `100 - 11 × dyFactor = -1.42e-14`——差之毫厘落在 `drawableRect.top` 之外。
-    /// 带检查的 `dyToValue` 会把它判成 null，那条刻度静默消失且不抛异常。
-    ///
-    /// 不经 controller：既要区间端点精确落在 step 整数倍上（最顶刻度才等于端点），又要
-    /// `跨度 × dyFactor` 的舍入方向朝上（差值才为负），controller 那条路上 `minMax` 由蜡烛
-    /// 数据算出，凑不出这个巧合。
-    testWidgets('刻度顶在 drawableRect 边界外的浮点误差内: 仍取得到值', (tester) async {
-      final object = _EdgeTickPaintObject();
-      final context = FakePaintContext()..mainRect = const Rect.fromLTWH(0, 0, _canvasWidth, 100);
-      object.bind(TestCandleIndicator(height: 100), context);
-      object.setMinMax(MinMax(min: FlexiNum.zero, max: FlexiNum.fromNum(11)));
-
-      // 与 `resolveHorizontalDys` 的 nice 分支同一步换算: 算法定值, 不钳制的 `valueToDy`
-      // 换位置。
-      final topDy = object.valueToDy(FlexiNum.fromNum(11));
-      expect(topDy, lessThan(object.drawableRect.top), reason: '前置条件: 刻度必须真的越过边界');
-      expect(topDy, closeTo(object.drawableRect.top, 1e-9), reason: '前置条件: 越界量必须只是浮点误差');
-
-      object.paintTicks(_PaintLog(), [topDy]);
-
-      expect(
-        object.formattedTickValues,
-        hasLength(1),
-        reason: 'dyToValue 做了窗格归属检查, 落在边界上的刻度会静默消失',
-      );
-    });
-
-    testWidgets('showTopTick / showBottomTick 控制边框刻度文本', (tester) async {
-      const height = 300.0;
-      final object = _EdgeTickPaintObject();
-      final context = FakePaintContext()..mainRect = const Rect.fromLTWH(0, 0, _canvasWidth, height);
-      object.bind(TestCandleIndicator(height: height), context);
-      object.setMinMax(MinMax(min: FlexiNum.zero, max: FlexiNum.fromNum(100)));
-
-      final rect = object.drawableRect;
-      // 3 个 dy：顶边、中间、底边
-      final dys = [rect.top, rect.center.dy, rect.bottom];
-
-      // 数绘制的段落而非格式化次数: 刻度标签跨帧缓存, 已见过的值不再格式化。
-      int paragraphsOf({bool showTopTick = false, bool showBottomTick = true}) {
-        final log = _PaintLog();
-        object.paintTicks(log, dys, showTopTick: showTopTick, showBottomTick: showBottomTick);
-        return log.paragraphs;
-      }
-
-      // 默认: showTopTick=false, showBottomTick=true → 跳过顶边, 保留中间和底边
-      expect(paragraphsOf(), 2, reason: '默认跳过顶边');
-      // 两端都显示
-      expect(paragraphsOf(showTopTick: true), 3, reason: '两端都显示');
-      // 两端都不显示
-      expect(paragraphsOf(showBottomTick: false), 1, reason: '只有中间那条');
-    });
   });
 }
 
@@ -545,48 +488,6 @@ class _AlignedGridIndicator extends DirectIndicator {
 
   @override
   DirectPaintObject<DirectIndicator> createPaintObject() => lastObject = _AlignedGridPaintObject();
-}
-
-/// 直接驱动刻度文本那一趟的蜡烛对象：区间与几何都由用例精确给定。
-///
-/// 不用 [TestCandlePaintObject]：`paintYAxisTicks` 是 `@protected`，它服务实现者而不是公开
-/// API，用例只能经子类转发。
-class _EdgeTickPaintObject extends CandleBasePaintObject<TestCandleIndicator> {
-  /// 挂载入口：`mount` 对外受保护，子类内调用是它的正常用法。
-  void bind(TestCandleIndicator indicator, PaintContext context) => mount(indicator, context);
-
-  /// [formatTicksValue] 每次收到的刻度值。
-  final List<FlexiNum> formattedTickValues = [];
-
-  void paintTicks(
-    Canvas canvas,
-    List<double> dys, {
-    bool showTopTick = false,
-    bool showBottomTick = true,
-  }) {
-    paintYAxisTicks(
-      canvas,
-      dys: dys,
-      precision: 2,
-      showTopTick: showTopTick,
-      showBottomTick: showBottomTick,
-    );
-  }
-
-  @override
-  String formatTicksValue(FlexiNum value, {required int precision}) {
-    formattedTickValues.add(value);
-    return super.formatTicksValue(value, precision: precision);
-  }
-
-  @override
-  FlexiChartType resolveChartType() => FlexiChartType.barSolid;
-
-  @override
-  void paint(Canvas canvas, Size size) {}
-
-  @override
-  Size? paintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
 }
 
 class _AlignedGridPaintObject extends DirectPaintObject<_AlignedGridIndicator> {

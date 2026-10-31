@@ -28,17 +28,18 @@ import '../../support/support.dart';
 class _TicksPaintObject extends CandleBasePaintObject<TestCandleIndicator> with PaintYAxisTicksOnCrossMixin {
   void bind(TestCandleIndicator indicator, PaintContext context) => mount(indicator, context);
 
-  int formatted = 0;
+  /// [formatTicksValue] 每次收到的刻度值。
+  final List<FlexiNum> formatted = [];
   int crossFormatted = 0;
 
-  double ticks(Canvas canvas, List<double> dys) =>
-      paintYAxisTicks(canvas, dys: dys, precision: 2, showTopTick: true, showBottomTick: true);
+  double ticks(Canvas canvas, List<double> dys, {bool showTopTick = true, bool showBottomTick = true}) =>
+      paintYAxisTicks(canvas, dys: dys, precision: 2, showTopTick: showTopTick, showBottomTick: showBottomTick);
 
   Size? crossTick(Canvas canvas, double dy) => paintYAxisTicksOnCross(canvas, Offset(10, dy), precision: 2);
 
   @override
   String formatTicksValue(FlexiNum value, {required int precision}) {
-    formatted++;
+    formatted.add(value);
     return super.formatTicksValue(value, precision: precision);
   }
 
@@ -66,15 +67,19 @@ List<Paragraph> _paragraphs(RecordingCanvas canvas) => [
     if (i.memberName == #drawParagraph) i.positionalArguments[0] as Paragraph,
 ];
 
+/// 高 [height]、区间 `[0, max]` 的主区蜡烛对象。
+_TicksPaintObject _bound({double height = 200, num max = 100}) {
+  final object = _TicksPaintObject();
+  final context = FakePaintContext()..mainRect = Rect.fromLTWH(0, 0, 300, height);
+  object.bind(TestCandleIndicator(height: height), context);
+  object.setMinMax(MinMax(min: FlexiNum.zero, max: FlexiNum.fromNum(max)));
+  return object;
+}
+
 void main() {
   late _TicksPaintObject object;
 
-  setUp(() {
-    object = _TicksPaintObject();
-    final context = FakePaintContext()..mainRect = const Rect.fromLTWH(0, 0, 300, 200);
-    object.bind(TestCandleIndicator(height: 200), context);
-    object.setMinMax(MinMax(min: FlexiNum.zero, max: FlexiNum.fromNum(100)));
-  });
+  setUp(() => object = _bound());
 
   test('刻度标签底边落在刻度线上、右边贴 chartRect, 顶边的刻度被推回可见区', () {
     final canvas = RecordingCanvas();
@@ -97,11 +102,39 @@ void main() {
     final dys = [50.0, 100.0, 150.0];
     final first = RecordingCanvas();
     object.ticks(first, dys);
-    expect(object.formatted, 3);
+    expect(object.formatted, hasLength(3));
     final second = RecordingCanvas();
     object.ticks(second, dys);
-    expect(object.formatted, 3);
+    expect(object.formatted, hasLength(3));
     expect(_paragraphs(second), orderedEquals(_paragraphs(first)));
+  });
+
+  test('showTopTick / showBottomTick 控制边框刻度文本', () {
+    final rect = object.drawableRect;
+    final dys = [rect.top, rect.center.dy, rect.bottom];
+
+    int paragraphsOf({required bool showTopTick, required bool showBottomTick}) {
+      final canvas = RecordingCanvas();
+      object.ticks(canvas, dys, showTopTick: showTopTick, showBottomTick: showBottomTick);
+      return _paragraphs(canvas).length;
+    }
+
+    expect(paragraphsOf(showTopTick: false, showBottomTick: true), 2);
+    expect(paragraphsOf(showTopTick: true, showBottomTick: true), 3);
+    expect(paragraphsOf(showTopTick: false, showBottomTick: false), 1);
+  });
+
+  /// 区间 `[0, 11]`、高 100 时最顶刻度换算为 `100 - 11 × (100/11) = -1.42e-14`，浮点误差内越出
+  /// `drawableRect.top`；带窗格归属检查的 `dyToValue` 会把它判成 null，刻度静默消失。
+  test('刻度顶在 drawableRect 边界外的浮点误差内: 仍取得到值', () {
+    final edge = _bound(height: 100, max: 11);
+    final topDy = edge.valueToDy(FlexiNum.fromNum(11));
+    expect(topDy, lessThan(edge.drawableRect.top), reason: '前置条件: 刻度必须真的越过边界');
+    expect(topDy, closeTo(edge.drawableRect.top, 1e-9), reason: '前置条件: 越界量必须只是浮点误差');
+
+    edge.ticks(RecordingCanvas(), [topDy]);
+
+    expect(edge.formatted, hasLength(1));
   });
 
   test('cross 刻度垂直居中于指针 dy, 同一 dy 的第二帧不再格式化', () {

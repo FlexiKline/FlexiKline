@@ -245,4 +245,32 @@ void main() {
       expect(invalid.timestampToFloatIndex(1), isNull);
     });
   });
+
+  group('KlineData timestamp lookup', () {
+    KlineData data(List<int> timestamps) {
+      final d = _data()..replace(timestamps.map(_candle).toList(), slotCount: 0);
+      addTearDown(d.dispose);
+      return d;
+    }
+
+    test('tsToIndex 只命中精确时间戳', () {
+      final d = data([50, 80, 100]);
+
+      expect([d.tsToIndex(50), d.tsToIndex(80), d.tsToIndex(100)], [0, 1, 2]);
+      expect(d.tsToIndex(90), isNull, reason: '缺口内');
+      expect(d.tsToIndex(49), isNull);
+      expect(d.tsToIndex(101), isNull);
+    });
+
+    test('indexAtOrBefore 返回不晚于目标的最近一根; 超出已加载范围返回 null', () {
+      final d = data([50, 80, 100]);
+
+      expect([d.indexAtOrBefore(50), d.indexAtOrBefore(80), d.indexAtOrBefore(100)], [0, 1, 2]);
+      expect(d.indexAtOrBefore(90), 1);
+      expect(d.indexAtOrBefore(79), 0);
+      expect(d.indexAtOrBefore(49), isNull);
+      expect(d.indexAtOrBefore(101), isNull);
+      expect(data([]).indexAtOrBefore(80), isNull);
+    });
+  });
 }

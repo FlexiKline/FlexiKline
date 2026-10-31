@@ -22,7 +22,7 @@
 /// 不通知，「稳定态不重复提交」在那里根本观测不到。提交走 `addPostFrameCallback`，每帧提一次
 /// 就是每帧挂一个空转回调。
 ///
-/// 现有 zoom 用例（`chart_zoom_test`、`gesture_owner_priority_test`、
+/// 现有 zoom 用例（`core/chart_zoom/` 其余用例、`gesture_owner_priority_test`、
 /// `move_to_date_time_widget_test`）一律走 `useCustomZoomRect: true` 并显式注入热区，不覆盖
 /// 这条自动路径。
 library;
