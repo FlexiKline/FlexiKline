@@ -14,8 +14,7 @@
 
 /// 非触摸端 hover 与 cross 行为的特征测试。
 ///
-/// 覆盖目标设计第六节 #3（onHover 里 drawState.isEditing 早退）、
-/// #12（draw 绘制中 requestCancelCross 的时机）。
+/// 覆盖：Editing 态 hover 早退；绘制中与 Editing 拖动时取消 cross。
 ///
 /// 覆盖边界：覆盖手势层对 controller.isCrossing / drawState 的分派决策。
 /// **不覆盖**：光标外观在各平台的真实渲染、MouseRegion 的 enter/exit 平台差异。
@@ -106,8 +105,7 @@ Future<TestGesture> _hoverAt(
 // ---------------------------------------------------------------------------
 
 void main() {
-  // ---- #3: onHover 里 drawState.isEditing 早退 ----
-  group('#3 hover isEditing early return', () {
+  group('hover isEditing early return', () {
     testWidgets('drawState.isEditing 时 hover 不更新绘制对象', (tester) async {
       final controller = await _pumpNonTouchChart(tester, enableDraw: true);
       addTearDown(() => disposeChart(tester, controller));
@@ -168,8 +166,7 @@ void main() {
     });
   });
 
-  // ---- #12: draw 绘制中 requestCancelCross 的时机 ----
-  group('#12 requestCancelCross timing in draw', () {
+  group('requestCancelCross timing in draw', () {
     testWidgets('Drawing 态 hover 时取消 cross（cross 与 draw 不同时跟手）', (tester) async {
       final controller = await _pumpNonTouchChart(tester, enableDraw: true);
       addTearDown(() => disposeChart(tester, controller));
@@ -280,6 +277,31 @@ void main() {
 
       await gesture.removePointer();
       await tester.pump(const Duration(milliseconds: 100));
+    });
+
+    testWidgets('Editing 态拖动绘制对象时取消 cross', (tester) async {
+      final controller = await _pumpNonTouchChart(tester, enableDraw: true);
+      addTearDown(() => disposeChart(tester, controller));
+
+      final mainRect = controller.mainRect;
+      final from = Offset(mainRect.left + 20, mainRect.center.dy);
+      drawTestLine(controller, from: from, to: Offset(mainRect.left + 100, mainRect.center.dy));
+      await tester.pump();
+      expect(controller.drawState.isEditing, isTrue, reason: '前置条件: 已进入 Editing');
+
+      // Editing 态 hover 早退，cross 只能直接开启。
+      controller.onCrossFollow(from);
+      await tester.pump();
+      expect(controller.isCrossing, isTrue, reason: '前置条件: cross 已开启');
+
+      final drag = await tester.startGesture(_toGlobal(tester, from), kind: PointerDeviceKind.mouse, pointer: 2);
+      await drag.moveBy(const Offset(0, -10));
+      await tester.pump();
+
+      expect(controller.isCrossing, isFalse, reason: '拖动开始即取消 cross');
+
+      await drag.up();
+      await tester.pump(const Duration(milliseconds: 60));
     });
   });
 }

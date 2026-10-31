@@ -14,7 +14,7 @@
 
 /// 非触摸端 onTapUp 的 draw 四态分支特征测试。
 ///
-/// 覆盖目标设计第六节 #11：
+/// 覆盖：
 /// - Drawing 态点击 → 确认当前指针
 /// - Editing 态点击已有对象 → 切换选中
 /// - Editing 态点击空白 → 确认（提交编辑）
@@ -82,7 +82,7 @@ Offset _toGlobal(WidgetTester tester, Offset local) {
 // ---------------------------------------------------------------------------
 
 void main() {
-  group('#11 onTapUp draw four-state dispatch', () {
+  group('onTapUp draw four-state dispatch', () {
     testWidgets('Drawing 态点击 → 确认当前指针', (tester) async {
       final controller = await _pumpNonTouchChart(tester);
       addTearDown(() => disposeChart(tester, controller));

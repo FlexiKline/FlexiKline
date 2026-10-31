@@ -14,7 +14,6 @@
 
 /// 非触摸端拖动类手势的特征测试。
 ///
-/// 覆盖目标设计第六节 #1, #2, #4, #6, #7, #8, #9, #10。
 /// 所有用例直接驱动 widget 层的 GestureDetector / Listener，经由
 /// [NonTouchGestureDetector] 分派到 controller API。
 ///
@@ -129,8 +128,7 @@ Future<void> _pumpInertia(WidgetTester tester) async {
 // ---------------------------------------------------------------------------
 
 void main() {
-  // ---- #1: dragStartBehavior: DragStartBehavior.down ----
-  group('#1 dragStartBehavior.down', () {
+  group('dragStartBehavior.down', () {
     testWidgets('非触摸端 onPanStart 收到 PointerDown 位置而非识别时刻位置', (tester) async {
       final indicator = TestInteractiveIndicator(
         key: const ExternalIndicatorKey('nt_drag_down'),
@@ -159,8 +157,7 @@ void main() {
     });
   });
 
-  // ---- #2: onPointerCancel → 回滚 PaintObject 拖动 ----
-  group('#2 onPointerCancel rollback', () {
+  group('onPointerCancel rollback', () {
     testWidgets('指针取消时回滚 PaintObject 拖动而非提交', (tester) async {
       final indicator = TestInteractiveIndicator(
         key: const ExternalIndicatorKey('nt_cancel'),
@@ -230,8 +227,7 @@ void main() {
     });
   });
 
-  // ---- #4: 三种坐标钳制 ----
-  group('#4 coordinate clamping', () {
+  group('coordinate clamping', () {
     testWidgets('PaintObject 拖动不做区域钳制', (tester) async {
       final indicator = TestInteractiveIndicator(
         key: const ExternalIndicatorKey('nt_clamp_obj'),
@@ -276,8 +272,7 @@ void main() {
     });
   });
 
-  // ---- #6: onPanUpdate 的 throttleOnFps ----
-  group('#6 throttleOnFps', () {
+  group('throttleOnFps', () {
     testWidgets('onPanUpdate 接线了 throttleOnFps 节流', (tester) async {
       final controller = await _pumpNonTouchChart(tester);
       addTearDown(() => disposeChart(tester, controller));
@@ -294,8 +289,7 @@ void main() {
     });
   });
 
-  // ---- #7: onPanEnd 的 isMove 早退 ----
-  group('#7 isMove early return', () {
+  group('isMove early return', () {
     testWidgets('PaintObject 拖动结束后不做惯性平移', (tester) async {
       final indicator = TestInteractiveIndicator(
         key: const ExternalIndicatorKey('nt_no_inertia'),
@@ -328,8 +322,7 @@ void main() {
     });
   });
 
-  // ---- #8: 惯性可行性的五项与条件 ----
-  group('#8 inertial pan conditions', () {
+  group('inertial pan conditions', () {
     testWidgets('enableInertialPan 关闭时不惯性', (tester) async {
       final controller = await _pumpNonTouchChart(tester);
       addTearDown(() => disposeChart(tester, controller));
@@ -412,8 +405,7 @@ void main() {
     });
   });
 
-  // ---- #9: checkAndLoadMoreCandlesWhenPanEnd 两种调用形态 ----
-  group('#9 loadMore on panEnd', () {
+  group('loadMore on panEnd', () {
     testWidgets('无惯性时 panEnd 仍检查 loadMore', (tester) async {
       final controller = await _pumpNonTouchChart(tester);
       addTearDown(() => disposeChart(tester, controller));
@@ -458,8 +450,7 @@ void main() {
     });
   });
 
-  // ---- #10: smoothFactor 归位 ----
-  group('#10 smoothFactor reset', () {
+  group('smoothFactor reset', () {
     testWidgets('惯性被新手势打断后 smoothFactor 归位，主区 clipRect 恢复', (tester) async {
       final controller = await _pumpNonTouchChart(tester);
       addTearDown(() => disposeChart(tester, controller));

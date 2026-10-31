@@ -20,7 +20,7 @@
 /// - [_hitTestGridResize] 的 dx 约束（C3）
 /// - [hoverCursor] / [dragCursor] / [signalIntent] 的返回值
 ///
-/// 仿 `touch_gesture_owner_test.dart` 的形式，用 [ControllerScenario] 搭建。
+/// 仿 `view/touch/gesture_owner_test.dart` 的形式，用 [ControllerScenario] 搭建。
 library;
 
 import 'package:decimal/decimal.dart';

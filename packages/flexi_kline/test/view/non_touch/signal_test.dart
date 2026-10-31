@@ -371,6 +371,44 @@ void main() {
       // 等待 session 超时结束。
       await tester.pump(const Duration(milliseconds: 900));
     });
+
+    /// 先右、后左三分区各放大一次，返回两次的 paintDxOffset 增量；每次等 session 超时，下一次独立解析锚点。
+    ///
+    /// `paintDxOffset <= 0` 时 right 锚点固定右侧空白、增量为 0，left 锚点增量非 0。
+    Future<(double, double)> zoomRightThenLeft(WidgetTester tester, FlexiKlineController controller) async {
+      expect(controller.paintDxOffset, lessThanOrEqualTo(0), reason: '前置条件: right 锚点才不改 offset');
+      final canvas = controller.canvasRect;
+      final third = canvas.width / 3;
+      final deltas = <double>[];
+      for (final dx in [canvas.right - third * 0.5, canvas.left + third * 0.5]) {
+        final before = controller.paintDxOffset;
+        await _sendScroll(tester, Offset(dx, canvas.center.dy), scrollDy: -30);
+        await tester.pump(const Duration(milliseconds: 900));
+        deltas.add(controller.paintDxOffset - before);
+      }
+      return (deltas[0], deltas[1]);
+    }
+
+    testWidgets('scalePosition=auto: 锚点按每次滚轮所在三分区解析, 不缓存', (tester) async {
+      final controller = await _pumpNonTouchChart(tester);
+      addTearDown(() => _disposeChart(tester, controller));
+      expect(controller.gestureConfig.scalePosition, ScalePosition.auto, reason: '前置条件');
+
+      final (right, left) = await zoomRightThenLeft(tester, controller);
+
+      expect(right, 0, reason: '右三分区应取 right 锚点');
+      expect(left, isNot(0), reason: '左三分区应取 left 锚点; 缓存了第一次的锚点则仍为 0');
+    });
+
+    testWidgets('scalePosition 非 auto: 忽略滚轮位置', (tester) async {
+      final controller = await _pumpNonTouchChart(tester);
+      addTearDown(() => _disposeChart(tester, controller));
+      controller.updateGestureConfig((c) => c.copyWith(scalePosition: ScalePosition.right));
+
+      final (right, left) = await zoomRightThenLeft(tester, controller);
+
+      expect((right, left), (0, 0), reason: '两处都应取配置的 right 锚点');
+    });
   });
 
   // =========================================================================
