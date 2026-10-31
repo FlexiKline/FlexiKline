@@ -219,9 +219,13 @@ void main() {
       await tester.pump(chartGestureSettle);
     });
 
-    testWidgets('auto 缩放锚点跨 segment 保持同一解析结果', (tester) async {
+    /// 两段捏合: 首段质心在画布中央, 第二段质心移到左三分之一; 返回第二段前后的视口。
+    Future<({double before, double after, double width})> pinchTwoSegments(
+      WidgetTester tester, {
+      ScalePosition? position,
+    }) async {
       final scene = await _arrange(tester);
-      addTearDown(() => disposeChart(tester, scene.chart));
+      if (position != null) scene.chart.updateGestureConfig((c) => c.copyWith(scalePosition: position));
       final canvas = scene.chart.canvasRect;
       final initialCenter = Offset(canvas.center.dx, _blankPosition.dy);
 
@@ -238,9 +242,6 @@ void main() {
       await second.up(timeStamp: at);
       await tester.pump(chartGestureFrame);
 
-      // 第二段的质心故意移到左三分之一: 若 auto 在新 segment 重新解析, 会从 middle 跳成
-      // left。断言点取 middle 真正固定的那一点 —— paintDxOffset 为正时 middle 锚定主图中心
-      // (见 ChartBinding.onChartScale), 而 left 锚定左边界, 中心下的蜡烛随之滑走。
       final secondFocalX = canvas.left + canvas.width * 0.30;
       final thirdX = secondFocalX * 2 - firstX;
       final third = await tester.startGesture(
@@ -249,30 +250,38 @@ void main() {
         kind: PointerDeviceKind.touch,
       );
       await tester.pump(chartGestureFrame);
-      expect(scene.chart.paintDxOffset, greaterThan(0), reason: '前置条件: middle 走锚定中心的分支');
-      final anchorDx = scene.chart.mainChartLeft + scene.chart.mainChartWidthHalf;
-      final anchoredIndex = scene.chart.dxToIndex(anchorDx);
-      final beforeSecondScale = scene.chart.candleWidth;
+      final before = scene.chart.paintDxOffset;
+      final beforeWidth = scene.chart.candleWidth;
 
-      // 张开得够多才拉得开两种锚定的差距: 缩放倍率越接近 1, middle 与 left 固定的两点
-      // 越难分辨, 断言就会退化成「在容差内碰巧一致」。
+      // 张开得够多才拉得开两种锚定的差距。
       for (var i = 0; i < 12; i++) {
         at += chartGestureFrame;
         await first.moveBy(_step, timeStamp: at);
         await third.moveBy(-_step, timeStamp: at);
         await tester.pump(chartGestureFrame);
       }
-
-      expect(scene.chart.candleWidth, greaterThan(beforeSecondScale), reason: '前置条件: 第二 segment 必须已缩放');
-      expect(
-        scene.chart.dxToIndex(anchorDx),
-        closeTo(anchoredIndex, 1),
-        reason: '重新按新质心解析为 left 会改成锚定左边界, 主图中心下的蜡烛随之跳变',
-      );
+      expect(scene.chart.candleWidth, greaterThan(beforeWidth), reason: '前置条件: 第二 segment 必须已缩放');
+      final result = (before: before, after: scene.chart.paintDxOffset, width: scene.chart.candleWidth);
 
       await first.up(timeStamp: at);
       await third.up(timeStamp: at + chartGestureFrame);
       await tester.pump(chartGestureSettle);
+      // 同一用例里要连跑几次, 每次收尾时卸载。
+      await disposeChart(tester, scene.chart);
+      return result;
+    }
+
+    /// 首段在中央解析为 middle; 第二段若按新质心重新解析会变成 left。用显式 middle 跑同一序列作对照:
+    /// 两者的视口必须逐值相同。
+    testWidgets('auto 缩放锚点跨 segment 保持同一解析结果', (tester) async {
+      final auto = await pinchTwoSegments(tester);
+      final middle = await pinchTwoSegments(tester, position: ScalePosition.middle);
+      final left = await pinchTwoSegments(tester, position: ScalePosition.left);
+
+      expect(auto.before, greaterThan(0), reason: '前置条件: middle 走锚定中心的分支');
+      expect((auto.before, auto.width), (middle.before, middle.width), reason: '前置条件: 两次输入序列相同');
+      expect(left.after, isNot(closeTo(middle.after, 1)), reason: '前置条件: 这组输入分得开 middle 与 left');
+      expect(auto.after, closeTo(middle.after, 1e-9), reason: '重新按新质心解析为 left 会改成锚定左边界');
     });
 
     testWidgets('惯性平移中拖动 => 立即接管, 原动画不再推进', (tester) async {

@@ -563,6 +563,11 @@ void main() {
         isNot(closeTo(crossBefore!.dx, precisionError)),
         reason: '指针没动但蜡烛位置变了, 焦点该吸附到另一根蜡烛',
       );
+      expect(
+        controller.crossOffset!.dx,
+        closeTo(controller.indexToDx(controller.dxToIndex(focus.dx)), precisionError),
+        reason: '吸附到指针下那根蜡烛的中心',
+      );
     });
 
     testWidgets('连续横滑跨过 loadMore 阈值只请求一次', (tester) async {
