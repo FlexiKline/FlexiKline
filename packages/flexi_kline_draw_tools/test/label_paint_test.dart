@@ -54,7 +54,7 @@ void main() {
 
   tearDown(DrawToolsConfig.resetAll);
 
-  group('v2.6.0/labels/cache', () {
+  group('labels/cache', () {
     test('斐波那契回撤: 各比率颜色不同仍全部命中', () {
       final object = buildEditingObject(
         FibRetracementDrawObject.new,
@@ -103,7 +103,7 @@ void main() {
     });
   });
 
-  group('v2.6.0/labels/align', () {
+  group('labels/align', () {
     test('斐波那契回撤: 文字贴在起点左侧, 垂直居中于比率线', () {
       DrawToolsConfig.configure(fibRetracement: const FibonacciDrawParam(fibRates: [0, 1]));
       final padding = FibRetracementDrawObject.drawParam.fibText.padding!;

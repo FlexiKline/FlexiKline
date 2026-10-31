@@ -40,7 +40,7 @@ void main() {
     object.draw(context, canvas, mainRect.size);
   }
 
-  group('v2.5.0/trendLine/draw', () {
+  group('trendLine/draw', () {
     test('止于两个绘制点', () {
       final object = buildEditingObject(
         TrendLineDrawObject.new,
@@ -68,7 +68,7 @@ void main() {
     });
   });
 
-  group('v2.5.0/rayLine/draw', () {
+  group('rayLine/draw', () {
     test('只向 b 的方向延伸到边界', () {
       final object = buildEditingObject(
         RayLineDrawObject.new,
@@ -99,7 +99,7 @@ void main() {
     });
   });
 
-  group('v2.5.0/extendedTrendLine/draw', () {
+  group('extendedTrendLine/draw', () {
     test('两头都延伸到边界, 且是一条不折返的线段', () {
       final object = buildEditingObject(
         ExtendedTrendLineDrawObject.new,

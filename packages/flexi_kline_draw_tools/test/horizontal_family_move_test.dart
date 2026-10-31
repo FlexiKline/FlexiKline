@@ -42,7 +42,7 @@ void main() {
   };
 
   for (final MapEntry(key: name, value: spec) in cases.entries) {
-    group('v2.5.0/$name/move', () {
+    group('$name/move', () {
       DrawObject arrange() => buildEditingObject(
         spec.builder,
         type: spec.type,
@@ -73,7 +73,7 @@ void main() {
           const [Offset(20, 175), Offset(140, 175)],
           reason:
               '对齐基准取「本次平移后的第一点」而不是「平移前的第一点」，'
-              '否则 dy 恒等于旧值，整条线永远无法上下移动。',
+              '否则 dy 恒等于平移前的值，整条线永远无法上下移动。',
         );
       });
 

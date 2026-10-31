@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// 之前零覆盖的 DrawObject 的绘制产物与命中判据。
+/// 各类 DrawObject 的绘制产物细节。
 ///
-/// 覆盖：draw 基本产物（画了几条、起止在哪）+ hitTest 几何边界。
-/// 不覆盖：手势、颜色视觉呈现。
+/// 覆盖：`draw` 画了几条、起止在哪、选中态额外产物。命中与不命中见
+/// `draw_object_contract_test.dart`。
+/// **不覆盖**：手势、颜色视觉呈现。
 library;
 
 import 'package:flexi_kline/flexi_kline.dart';
@@ -45,17 +46,6 @@ void main() {
 
       // 1 条主线 + 2 条箭头 = 3 条 path
       expect(canvas.drawn, hasLength(3));
-    });
-
-    test('hitTest 在线段上命中, 线段外不命中', () {
-      final object = buildEditingObject(
-        ArrowLineDrawObject.new,
-        type: arrowLine,
-        offsets: const [Offset(100, 200), Offset(200, 100)],
-      );
-      expect(object.hitTest(context, const Offset(150, 150)), isTrue);
-      // 延长线方向上不命中（和 trendLine 一样是线段判据）
-      expect(object.hitTest(context, const Offset(250, 50)), isFalse);
     });
 
     test('箭头端点在可视区外时不画箭头', () {
@@ -93,16 +83,6 @@ void main() {
       expect(path.start.dx, mainRect.left);
       expect(path.end.dx, mainRect.right);
     });
-
-    test('hitTest 在水平线上命中, 远离不命中', () {
-      final object = buildEditingObject(
-        HorizontalLineDrawObject.new,
-        type: horizontalLine,
-        offsets: const [Offset(150, 100)],
-      );
-      expect(object.hitTest(context, const Offset(200, 100)), isTrue);
-      expect(object.hitTest(context, const Offset(200, 200)), isFalse);
-    });
   });
 
   // -----------------------------------------------------------------------
@@ -125,16 +105,6 @@ void main() {
       expect(path.start.dy, mainRect.top);
       expect(path.end.dy, mainRect.bottom);
     });
-
-    test('hitTest 在垂直线上命中, 远离不命中', () {
-      final object = buildEditingObject(
-        VerticalLineDrawObject.new,
-        type: verticalLine,
-        offsets: const [Offset(200, 150)],
-      );
-      expect(object.hitTest(context, const Offset(200, 50)), isTrue);
-      expect(object.hitTest(context, const Offset(100, 150)), isFalse);
-    });
   });
 
   // -----------------------------------------------------------------------
@@ -153,20 +123,6 @@ void main() {
       // drawLineByConfig 收到的 path 含两个 sub-path（moveTo+lineTo × 2）
       // RecordingCanvas 按 metric 拆分，应有 2 条
       expect(canvas.drawn, hasLength(2));
-    });
-
-    test('hitTest 在横线或纵线上均命中', () {
-      final object = buildEditingObject(
-        CrossLineDrawObject.new,
-        type: crossLine,
-        offsets: const [Offset(150, 100)],
-      );
-      // 水平线上
-      expect(object.hitTest(context, const Offset(300, 100)), isTrue);
-      // 垂直线上
-      expect(object.hitTest(context, const Offset(150, 250)), isTrue);
-      // 远离两条线
-      expect(object.hitTest(context, const Offset(300, 250)), isFalse);
     });
   });
 
@@ -190,46 +146,6 @@ void main() {
       expect(linePath.end.dx, mainRect.right);
       expect(linePath.end.dy, 150);
     });
-
-    test('hitTest 在射线上命中, 锚点左边不命中', () {
-      final object = buildEditingObject(
-        PriceLineDrawObject.new,
-        type: priceLine,
-        offsets: const [Offset(100, 150)],
-      );
-      // 射线右侧
-      expect(object.hitTest(context, const Offset(300, 150)), isTrue);
-      // 锚点左侧（不在射线上）
-      expect(object.hitTest(context, const Offset(50, 150)), isFalse);
-    });
-  });
-
-  // -----------------------------------------------------------------------
-  // Rectangle
-  // -----------------------------------------------------------------------
-  group('rectangle', () {
-    test('draw 产出填充 + 边框', () {
-      final object = buildEditingObject(
-        RectangleDrawObject.new,
-        type: rectangle,
-        offsets: const [Offset(50, 50), Offset(200, 200)],
-      );
-      final canvas = RecordingCanvas();
-      object.draw(context, canvas, mainRect.size);
-
-      // 至少有填充和边框两组 drawPath
-      expect(canvas.drawn, isNotEmpty);
-    });
-
-    test('hitTest 矩形内命中, 外不命中', () {
-      final object = buildEditingObject(
-        RectangleDrawObject.new,
-        type: rectangle,
-        offsets: const [Offset(50, 50), Offset(200, 200)],
-      );
-      expect(object.hitTest(context, const Offset(100, 100)), isTrue);
-      expect(object.hitTest(context, const Offset(250, 250)), isFalse);
-    });
   });
 
   // -----------------------------------------------------------------------
@@ -247,18 +163,6 @@ void main() {
 
       // 填充 polygon + 中线 + 基线 AB + 平行线 CD
       expect(canvas.drawn.length, greaterThanOrEqualTo(4));
-    });
-
-    test('hitTest 通道内命中, 外不命中', () {
-      final object = buildEditingObject(
-        ParallelChannelDrawObject.new,
-        type: parallelChannel,
-        offsets: const [Offset(50, 100), Offset(250, 100), Offset(150, 200)],
-      );
-      // 通道中间
-      expect(object.hitTest(context, const Offset(150, 150)), isTrue);
-      // 通道外
-      expect(object.hitTest(context, const Offset(150, 50)), isFalse);
     });
 
     test('选中时第三点在CD横向范围外, 连接线连到就近端点', () {
@@ -298,32 +202,6 @@ void main() {
   // Parallelogram
   // -----------------------------------------------------------------------
   group('parallelogram', () {
-    test('draw 产出填充 + 四条边', () {
-      // A=(50,100), B=(200,100), C=(250,200) → D=A+C-B=(100,200)
-      final object = buildEditingObject(
-        ParallelogramDrawObject.new,
-        type: parallelogram,
-        offsets: const [Offset(50, 100), Offset(200, 100), Offset(250, 200)],
-      );
-      final canvas = RecordingCanvas();
-      object.draw(context, canvas, mainRect.size);
-
-      // 填充 polygon + 边框 polygon
-      expect(canvas.drawn, isNotEmpty);
-    });
-
-    test('hitTest 四边形内命中, 外不命中', () {
-      final object = buildEditingObject(
-        ParallelogramDrawObject.new,
-        type: parallelogram,
-        offsets: const [Offset(50, 100), Offset(200, 100), Offset(250, 200)],
-      );
-      // 内部中心大约在 (162, 150)
-      expect(object.hitTest(context, const Offset(162, 150)), isTrue);
-      // 明确在外部
-      expect(object.hitTest(context, const Offset(10, 10)), isFalse);
-    });
-
     test('第四点 D = A + C - B 构成平行四边形', () {
       final object = buildEditingObject(
         ParallelogramDrawObject.new,
@@ -340,35 +218,6 @@ void main() {
       final dc = verts[2] - verts[3];
       expect(ab.dx, dc.dx);
       expect(ab.dy, dc.dy);
-    });
-  });
-
-  // -----------------------------------------------------------------------
-  // TrendAngle
-  // -----------------------------------------------------------------------
-  group('trendAngle', () {
-    test('draw 不抛异常且产出路径', () {
-      final object = buildEditingObject(
-        TrendAngleDrawObject.new,
-        type: trendAngle,
-        offsets: const [Offset(100, 200), Offset(300, 100)],
-      );
-      final canvas = RecordingCanvas();
-      expect(
-        () => object.draw(context, canvas, mainRect.size),
-        returnsNormally,
-      );
-      expect(canvas.drawn, isNotEmpty);
-    });
-
-    test('hitTest 在线段上命中', () {
-      final object = buildEditingObject(
-        TrendAngleDrawObject.new,
-        type: trendAngle,
-        offsets: const [Offset(100, 200), Offset(300, 100)],
-      );
-      expect(object.hitTest(context, const Offset(200, 150)), isTrue);
-      expect(object.hitTest(context, const Offset(50, 50)), isFalse);
     });
   });
 
@@ -410,23 +259,6 @@ void main() {
       object.draw(context, canvas, mainRect.size);
 
       expect(canvas.drawn, hasLength(5));
-    });
-
-    test('hitTest 在线段上命中', () {
-      final object = buildEditingObject(
-        ElliottImpulseWaveDrawObject.new,
-        type: tripleWaves,
-        offsets: const [
-          Offset(50, 200),
-          Offset(100, 100),
-          Offset(150, 180),
-          Offset(200, 80),
-        ],
-      );
-      // 第一段中点附近
-      expect(object.hitTest(context, const Offset(75, 150)), isTrue);
-      // 远离所有线段
-      expect(object.hitTest(context, const Offset(300, 250)), isFalse);
     });
   });
 }

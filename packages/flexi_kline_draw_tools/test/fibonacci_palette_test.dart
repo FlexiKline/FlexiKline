@@ -16,7 +16,7 @@
 ///
 /// `fibColors` / `fibFansColors` 置空是文档明说支持的配置（「如果为空使用指针画笔颜色」），
 /// 而取色写成 `colors[i % colors.length]` —— 调色板与线色同时缺失时会除零。线色缺失不是
-/// 假想: `Overlay` 可由业务直接构造，也可来自旧版本的持久化数据。
+/// 假想: `Overlay` 可由业务直接构造，也可来自持久化数据。
 ///
 /// 覆盖边界：取色回退与循环取模。
 /// **不覆盖**：比率线的位置计算、文本排版。
@@ -59,7 +59,7 @@ void main() {
     DrawToolsConfig.resetAll();
   });
 
-  group('v2.5.0/fibonacci/palette', () {
+  group('fibonacci/palette', () {
     test('调色板与线色同时为空时不抛异常', () {
       DrawToolsConfig.configure(fibRetracement: const FibonacciDrawParam(fibColors: []));
       final object = buildColorless(
