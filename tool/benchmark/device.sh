@@ -4,10 +4,11 @@
 #   tool/benchmark/device.sh --device <id> --hz <刷新率> [--side target|baseline] [--ref <ref>]
 #       [--backend impeller|skia] [--label ios-phone] [--session adhoc]
 #       [--binary <build.sh 打印的包> | --mode frames|trace --scenario 'pan/*' --windows 3 --window-seconds 6]
-#       [--allow-dirty]
+#       [--allow-dirty] [--own-code]
 #
-# - --side 只决定结果目录; --ref 决定代码, 默认 target 为 HEAD、baseline 为 v2.5.6-monorepo;
+# - --side 只决定结果目录; --ref 决定代码, 默认 target 为 HEAD、baseline 为 bench/bridge-v2.6.1;
 #   baseline 在 .worktrees/benchmark/baseline 运行(固定名字, 版本不对时重建), 由 overlay.sh --app 覆盖本 app;
+#   默认基线是桥接分支 bench/bridge-v2.6.1, 此时自动 --own-code: 基线跑自己的基准代码, 不被覆盖;
 # - --binary 直接安装 build.sh 的包, 采集参数取自包旁的 build.env, 不再构建; 否则 flutter drive 自己构建;
 # - skia 只用于 Android(--no-enable-impeller); iOS 只有 Impeller;
 # - --hz 用于核对: 设备实测刷新率与它相差超过 5% 时 bench_driver 报错, 不出数;
@@ -32,6 +33,7 @@ SCENARIO=""
 WINDOWS=3
 WINDOW_SECONDS=6
 ALLOW_DIRTY=false
+OWN_CODE=()
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --device) DEVICE="$2"; shift 2 ;;
@@ -47,6 +49,7 @@ while [[ $# -gt 0 ]]; do
     --windows) WINDOWS="$2"; shift 2 ;;
     --window-seconds) WINDOW_SECONDS="$2"; shift 2 ;;
     --allow-dirty) ALLOW_DIRTY=true; shift ;;
+    --own-code) OWN_CODE=(--own-code); shift ;;
     *) bench_die "unknown option: $1" ;;
   esac
 done
@@ -70,11 +73,13 @@ if [[ -n "$BINARY" ]]; then
   APP_DIR="$BENCH_ROOT/apps/benchmark"
   ARGS+=(--use-application-binary="$BINARY")
 else
-  [[ -n "$REF" ]] || { [[ "$SIDE" == baseline ]] && REF="v2.5.6-monorepo" || REF="HEAD"; }
+  [[ -n "$REF" ]] || { [[ "$SIDE" == baseline ]] && REF="$BENCH_DEFAULT_BASELINE" || REF="HEAD"; }
+  bench_require_ref "$REF"
+  bench_is_bridge "$REF" && OWN_CODE=(--own-code)
   bench_require_clean "$ALLOW_DIRTY"
   SHA="$(bench_sha "$REF")"
-  CODE="$(bench_code_id)${DIRTY:-}"
-  bench_tree "$REF" "$SIDE" --app
+  CODE="$(bench_code_id "$([[ ${#OWN_CODE[@]} -gt 0 ]] && echo "$REF" || echo HEAD)")${DIRTY:-}"
+  bench_tree "$REF" "$SIDE" --app "${OWN_CODE[@]+"${OWN_CODE[@]}"}"
   APP_DIR="$TREE/apps/benchmark"
   ARGS+=(--dart-define=MODE="$MODE" --dart-define=WINDOWS="$WINDOWS" --dart-define=WINDOW_SECONDS="$WINDOW_SECONDS")
   [[ -n "$SCENARIO" ]] && ARGS+=(--dart-define=SCENARIO="$SCENARIO")

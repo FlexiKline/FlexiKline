@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 # 把当前树的基准代码覆盖进另一个版本的 worktree, 只改该 worktree、不提交; 重复执行结果相同。
 #
-#   tool/benchmark/overlay.sh <worktree> [--app]
+#   tool/benchmark/overlay.sh <worktree> [--app] [--own-code]
+#
+# - --own-code: 只复制 .fvmrc, 两侧各用自己版本的基准代码(跨数据方向对比时用, 见 apps/benchmark/README.md);
+#   两侧负载是否相同由 frames.json 的 scenarioVersion 与 dataDigest 核对。
 #
 # - 总是复制: .fvmrc(两个版本用同一个 Flutter SDK)、L1 harness 与 packages/flexi_kline/test/benchmark/versioned/ 整个目录
 #   (目录即版本对照的清单);
@@ -19,11 +22,25 @@ WT="${1:?usage: overlay.sh <worktree> [--app]}"
 WT="$(cd "$WT" && pwd)"
 [[ "$WT" == "$BENCH_ROOT" ]] && exit 0
 APP=false
-[[ "${2:-}" == "--app" ]] && APP=true
+OWN_CODE=false
+for arg in "${@:2}"; do
+  case "$arg" in
+    --app) APP=true ;;
+    --own-code) OWN_CODE=true ;;
+    *) bench_die "unknown option: $arg" ;;
+  esac
+done
 
 HARNESS=packages/flexi_kline/test/support/benchmark/bench_harness.dart
 VERSIONED=packages/flexi_kline/test/benchmark/versioned
 cd "$BENCH_ROOT"
+
+if $OWN_CODE; then
+  git show HEAD:.fvmrc >"$WT/.fvmrc"
+  rm -f "$WT/.bench-overlay-id" "$WT/.bench-overlay-files"
+  (cd "$WT" && fvm flutter pub get >/dev/null)
+  exit 0
+fi
 
 CLEAN=false
 if [[ -z "$(git status --porcelain --untracked-files=normal -- apps/benchmark "$HARNESS" "$VERSIONED" .fvmrc)" ]]; then

@@ -26,6 +26,7 @@ Try the chart by hand: `fvm flutter run --profile -d <id> --dart-define=PRESET=f
 | `lib/src/preset.dart` | `BenchPreset { base, full }` (which indicators) and `BenchFeature { draw, resize, zoom }` (opt-in interactions) |
 | `lib/src/config/` | non-persisting `BenchConfiguration` (activates the preset's indicators, turns features on) and a fixed theme |
 | `lib/src/data/candles.dart` | fixed-seed candles and realtime ticks |
+| `lib/src/data/digest.dart` | `scenarioVersion` and `dataDigest`: proof that two runs fed the same workload, independent of data direction |
 | `lib/src/indicators/` | VOL, MA, MACD, VOLMA: minimal configuration, calculation and painting ported from `flexi_kline_indicators` |
 | `integration_test/bench_test.dart` | device-side entry: mounts each scenario, warms up, records windows, reports raw data |
 | `integration_test/src/` | `ScenarioContext`, recorder, gesture primitives, scenario tables, `compat.dart` / `compat_baseline.dart` |
@@ -56,6 +57,8 @@ Names are `<action>/<preset>`; existing names never change so results stay compa
 
 ## Rules for changes
 
-- Only use API that also exists in the baseline (`v2.5.6-monorepo`); put a version difference in `integration_test/src/compat.dart` and its baseline twin `compat_baseline.dart`, same signatures.
+- Bump `scenarioVersion` in `lib/src/data/digest.dart` whenever a scenario constant changes (candle count, seed, gesture parameters, windows). Two runs are comparable only when `scenarioVersion` and every scenario's `dataDigest` match; `bench.dart summarize device` warns otherwise.
 - New scenarios are appended; never rename an existing one.
-- After a change: `fvm flutter analyze`, `fvm flutter test`, then `fvm flutter test -d flutter-tester integration_test/bench_test.dart --dart-define=WINDOWS=1 --dart-define=WINDOW_SECONDS=2` here and in the baseline tree (`tool/benchmark/overlay.sh .worktrees/benchmark/baseline --app`).
+- Default comparison (2.7.0 against 2.6.1): the baseline is the bridge branch `bench/bridge-v2.6.1`, and each side runs its own benchmark code (`--own-code`, added automatically for `bench/bridge-*`). A bridge branch is the release tag plus one commit that adds `digest.dart` and the two `bench_test.dart` fields; its library code must stay identical to the tag. See `tool/README.md`.
+- Comparing two versions with the same data direction (2.7.0 and later) overlays the current benchmark code onto the baseline: `--baseline <ref>`, with version differences in `integration_test/src/compat.dart` and its baseline twin `compat_baseline.dart`, same signatures.
+- After a change: `fvm flutter analyze`, `fvm flutter test`, then `fvm flutter test -d flutter-tester integration_test/bench_test.dart --dart-define=WINDOWS=1 --dart-define=WINDOW_SECONDS=2` here and in the baseline tree.

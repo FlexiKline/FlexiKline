@@ -38,11 +38,30 @@ bench_sha() {
   echo "$sha"
 }
 
-# 覆盖进别的版本的基准代码(app、L1 场景与 harness、.fvmrc)的指纹, 取当前 HEAD 提交的内容。
+# 基准代码(app、L1 场景与 harness、.fvmrc)的指纹, 默认取当前 HEAD 提交的内容, 即覆盖进别的版本的那份代码。
 # 它和 sha 一起决定基线包能否复用: 基线包里真正决定场景行为的是覆盖进去的当前代码, 不是基线自己的 sha。
+# --own-code 时两侧各跑自己的基准代码, 传 ref 取该版本自己的指纹。
 bench_code_id() {
-  git -C "$BENCH_ROOT" rev-parse HEAD:apps/benchmark HEAD:packages/flexi_kline/test/benchmark/versioned \
-    HEAD:packages/flexi_kline/test/support/benchmark/bench_harness.dart HEAD:.fvmrc | git hash-object --stdin | cut -c1-10
+  local ref="${1:-HEAD}"
+  git -C "$BENCH_ROOT" rev-parse "$ref:apps/benchmark" "$ref:packages/flexi_kline/test/benchmark/versioned" \
+    "$ref:packages/flexi_kline/test/support/benchmark/bench_harness.dart" HEAD:.fvmrc | git hash-object --stdin | cut -c1-10
+}
+
+# 默认基线: 2.7.0 起数据方向与 2.6.x 相反, 当前基准代码覆盖不进旧版本, 所以对照桥接分支并让两侧各跑自己的基准代码。
+BENCH_DEFAULT_BASELINE="bench/bridge-v2.6.1"
+
+# ref 是桥接分支(tag + 上报 scenarioVersion / dataDigest 的一个提交)时返回 0: 它必须用自己的基准代码, 即 --own-code。
+bench_is_bridge() {
+  [[ "$1" == bench/bridge-* || "$1" == */bench/bridge-* ]]
+}
+
+# 基线 ref 必须存在; 默认的桥接分支是本地分支, 新克隆里没有, 此时给出重建方法而不是报一串 git 错误。
+bench_require_ref() {
+  git -C "$BENCH_ROOT" rev-parse --verify -q "$1^{commit}" >/dev/null && return
+  if bench_is_bridge "$1"; then
+    bench_die "baseline $1 not found; create it: git branch ${1#origin/} <release tag> && cherry-pick the dataDigest commit (see apps/benchmark/README.md), or pass --baseline <ref>"
+  fi
+  bench_die "baseline $1 not found"
 }
 
 # bench_tree <ref> <role> [overlay.sh 参数]: 把 ref 解析成可运行的树并写入 TREE。
@@ -50,6 +69,7 @@ bench_code_id() {
 # - 否则用 $BENCH_WT/<role>(role 为 baseline 或 target, 最多两个固定名字, 不随版本累积):
 #   已有且 HEAD 就是 ref 时复用, 否则(不存在、损坏、版本不对)移除后重建;
 #   再把当前的基准代码覆盖进去(overlay.sh 幂等, 内容没变就跳过)。
+# - 参数含 --own-code 时不覆盖基准代码, 树里有未提交改动(上次覆盖留下的)就重建, 保证跑的是 ref 自己的代码。
 # 不用 $(...) 返回: 调用方要在同一个 shell 里拿到 TREE。清理用 tool/benchmark/clean.sh。
 bench_tree() {
   local ref="$1" role="$2" sha
@@ -61,7 +81,10 @@ bench_tree() {
     return
   fi
   TREE="$BENCH_WT/$role"
-  if [[ ! -e "$TREE/.git" || "$(git -C "$TREE" rev-parse HEAD 2>/dev/null)" != "$sha" ]]; then
+  local own=false
+  [[ " $* " == *" --own-code "* ]] && own=true
+  if [[ ! -e "$TREE/.git" || "$(git -C "$TREE" rev-parse HEAD 2>/dev/null)" != "$sha" ]] ||
+    { $own && [[ -n "$(git -C "$TREE" status --porcelain --untracked-files=normal -- apps/benchmark packages)" ]]; }; then
     bench_drop_tree "$TREE"
     git -C "$BENCH_ROOT" worktree add --detach "$TREE" "$sha" >/dev/null
   fi

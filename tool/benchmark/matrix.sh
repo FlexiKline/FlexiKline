@@ -5,8 +5,10 @@
 #   tool/benchmark/matrix.sh --session <名字> --hz 60 [--publish]
 #
 # 选项(括号内为默认): --devices (tool/benchmark/devices.conf)  --hz <只跑该刷新率的行>  --only <label[,label]>
-#   --backend impeller|skia|all (impeller)  --side baseline|target  --baseline (v2.5.6-monorepo)  --no-baseline
+#   --backend impeller|skia|all (impeller)  --side baseline|target  --baseline (bench/bridge-v2.6.1)  --no-baseline
 #   --rounds (2)  --windows (3)  --window-seconds (6)  --cooldown (120)  --session (当前时间)  --publish  --allow-dirty
+#   --own-code(两侧各用自己版本的基准代码; 基线是桥接分支 bench/bridge-* 时自动带上, 默认基线就是桥接分支;
+#   负载是否相同看 summary 里的 dataDigest 核对。数据方向相同的基线(2.7.0 及之后的 tag)用 --baseline <ref>, 走覆盖)
 #
 # - 启动前核对: 选中设备在线、每台只剩一个刷新率、Android 屏幕刷新率与配置相差不超过 5%; 不满足就退出, 不开始运行。
 # - 构建: 两个版本并行, 日志在 build-<side>.log; 包按 sha + 基准代码指纹缓存, 同一提交再跑不重建。
@@ -22,7 +24,7 @@ CONF="tool/benchmark/devices.conf"
 HZ=""
 ONLY=""
 BACKEND="impeller"
-BASELINE="v2.5.6-monorepo"
+BASELINE="$BENCH_DEFAULT_BASELINE"
 SIDES=(baseline target)
 ROUNDS=2
 WINDOWS=3
@@ -31,6 +33,7 @@ COOLDOWN=120
 SESSION="$(date +%Y%m%d-%H%M)"
 PUBLISH=false
 DIRTY_ARG=()
+OWN_CODE=()
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --devices) CONF="$2"; shift 2 ;;
@@ -47,6 +50,7 @@ while [[ $# -gt 0 ]]; do
     --session) SESSION="$2"; shift 2 ;;
     --publish) PUBLISH=true; shift ;;
     --allow-dirty) DIRTY_ARG=(--allow-dirty); shift ;;
+    --own-code) OWN_CODE=(--own-code); shift ;;
     *) bench_die "unknown option: $1" ;;
   esac
 done
@@ -54,6 +58,10 @@ done
 [[ "$BACKEND" =~ ^(impeller|skia|all)$ ]] || bench_die "--backend must be impeller, skia or all"
 [[ "${SIDES[0]}" =~ ^(baseline|target)$ ]] || bench_die "--side must be baseline or target"
 bench_require_clean "$([[ ${#DIRTY_ARG[@]} -gt 0 ]] && echo true || echo false)"
+if [[ " ${SIDES[*]} " == *" baseline "* ]]; then
+  bench_require_ref "$BASELINE"
+  bench_is_bridge "$BASELINE" && OWN_CODE=(--own-code)
+fi
 
 # 下面的 adb / dart 调用都接 </dev/null: 它们在 `while read` 循环里执行, 会吃掉循环剩下的输入行。
 wait_online() {
@@ -123,7 +131,7 @@ build_side() {
   [[ "$side" == baseline ]] && ref="$BASELINE" order=-ur
   for platform in $(awk '{ print $5 }' <<<"$PLAN" | sort "$order"); do
     bin="$(tool/benchmark/build.sh --platform "$platform" --ref "$ref" --windows "$WINDOWS" \
-      --window-seconds "$WINDOW_SECONDS" "${DIRTY_ARG[@]+"${DIRTY_ARG[@]}"}")" || return
+      --window-seconds "$WINDOW_SECONDS" "${DIRTY_ARG[@]+"${DIRTY_ARG[@]}"}" "${OWN_CODE[@]+"${OWN_CODE[@]}"}")" || return
     echo "$platform $bin"
   done >"$OUT/bins-$side"
 }
@@ -252,6 +260,7 @@ common="--session $SESSION --devices $CONF --baseline $BASELINE --windows $WINDO
 common+=" --window-seconds $WINDOW_SECONDS --cooldown $COOLDOWN"
 $PUBLISH && common+=" --publish"
 [[ ${#DIRTY_ARG[@]} -eq 0 ]] || common+=" --allow-dirty"
+[[ ${#OWN_CODE[@]} -eq 0 ]] || common+=" --own-code"
 {
   printf '#!/usr/bin/env bash\n# 补采 session %s 调用 %s 的失败项; 先确认设备在线、刷新率已设好。\n' "$SESSION" "$STAMP"
   printf 'set -euo pipefail\ncd "$(dirname "$0")/../../../.."\n'

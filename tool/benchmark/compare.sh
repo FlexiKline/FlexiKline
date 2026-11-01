@@ -2,8 +2,11 @@
 # 同机同口径对照两个版本的 L1 整帧 benchmark(packages/flexi_kline/test/benchmark/versioned/)。
 #
 #   tool/benchmark/compare.sh [--target HEAD] [--baseline <ref>] [--rounds 3] [--out build/benchmark/l1] [--allow-dirty]
+#       [--own-code]
 #
 # - 两个版本都跑当前树的 versioned/ 与 harness(overlay.sh), 场景逐字相同;
+# - --own-code: 两侧各跑自己版本的 versioned/(跨数据方向对比时用, 基线取桥接分支, 见 apps/benchmark/README.md);
+#   基线是桥接分支 bench/bridge-* 时自动带上;
 # - 按 B T B T ... 交替跑 --rounds 组, 降低机器状态漂移对单侧的影响;
 # - 产出 micro-target.json、micro-baseline.json、gha.json、gha-speedup.json、summary.md、env.json。
 #
@@ -18,6 +21,7 @@ BASELINE=""
 ROUNDS=3
 OUT="build/benchmark/l1"
 ALLOW_DIRTY=false
+OWN_CODE=()
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --target) TARGET="$2"; shift 2 ;;
@@ -25,6 +29,7 @@ while [[ $# -gt 0 ]]; do
     --rounds) ROUNDS="$2"; shift 2 ;;
     --out) OUT="$2"; shift 2 ;;
     --allow-dirty) ALLOW_DIRTY=true; shift ;;
+    --own-code) OWN_CODE=(--own-code); shift ;;
     *) bench_die "unknown option: $1" ;;
   esac
 done
@@ -64,12 +69,16 @@ run_side() {
   done
 }
 
+if [[ -n "$BASELINE" ]]; then
+  bench_require_ref "$BASELINE"
+  bench_is_bridge "$BASELINE" && OWN_CODE=(--own-code)
+fi
 echo "preparing target $TARGET" >&2
-bench_tree "$TARGET" target
+bench_tree "$TARGET" target "${OWN_CODE[@]+"${OWN_CODE[@]}"}"
 TARGET_TREE="$TREE"
 if [[ -n "$BASELINE" ]]; then
   echo "preparing baseline $BASELINE" >&2
-  bench_tree "$BASELINE" baseline
+  bench_tree "$BASELINE" baseline "${OWN_CODE[@]+"${OWN_CODE[@]}"}"
   BASELINE_TREE="$TREE"
 fi
 

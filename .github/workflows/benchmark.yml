@@ -18,6 +18,10 @@ on:
         description: "写入 benchmark-data（回填须按版本从旧到新）"
         type: boolean
         default: false
+      own-code:
+        description: "两侧各跑自己版本的基准代码（跨数据方向对比，baseline 填 origin/bench/bridge-v2.6.1, CI 里没有同名本地分支; 桥接分支会自动带上）"
+        type: boolean
+        default: false
 
 concurrency:
   group: benchmark
@@ -41,6 +45,7 @@ jobs:
         env:
           INPUT_TARGET: ${{ inputs.target }}
           INPUT_BASELINE: ${{ inputs.baseline }}
+          INPUT_OWN_CODE: ${{ inputs.own-code }}
         run: |
           set -euo pipefail
           target="${INPUT_TARGET:-$GITHUB_REF_NAME}"
@@ -48,10 +53,18 @@ jobs:
           if [ -z "$baseline" ]; then
             # target 之前最近的发布 tag; tag 与 sha 都适用, 没有更早的发布时退回 monorepo 基线。
             baseline=$(git describe --tags --abbrev=0 --match 'flexi_kline-v*' "$target^" 2>/dev/null || echo v2.5.6-monorepo)
+            # 跨数据方向的上一版本有桥接分支(tag + 上报负载指纹的一个提交)时改用它, 两侧各跑自己的基准代码:
+            # 当前基准代码覆盖进旧版本会编译失败。
+            bridge="origin/bench/bridge-${baseline#flexi_kline-}"
+            if git rev-parse --verify -q "$bridge^{commit}" >/dev/null; then
+              baseline="$bridge"
+              INPUT_OWN_CODE=true
+            fi
           fi
           {
             echo "target=$target"
             echo "baseline=$baseline"
+            echo "own_code=$([ "$INPUT_OWN_CODE" = true ] && echo --own-code)"
             echo "target_sha=$(git rev-parse "$target^{commit}")"
             echo "flutter=$(jq -r .flutter .fvmrc)"
           } >> "$GITHUB_OUTPUT"
@@ -74,7 +87,9 @@ jobs:
         env:
           TARGET: ${{ steps.refs.outputs.target }}
           BASELINE: ${{ steps.refs.outputs.baseline }}
-        run: tool/benchmark/compare.sh --target "$TARGET" --baseline "$BASELINE" --rounds 2 --out build/benchmark/l1
+          OWN_CODE: ${{ steps.refs.outputs.own_code }}
+        # OWN_CODE 不加引号: 为空时不传参数。
+        run: tool/benchmark/compare.sh --target "$TARGET" --baseline "$BASELINE" --rounds 2 --out build/benchmark/l1 $OWN_CODE
 
       - run: cat build/benchmark/l1/summary.md >> "$GITHUB_STEP_SUMMARY"
 

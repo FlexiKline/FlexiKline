@@ -50,8 +50,11 @@ const _noiseMetrics = ['build_p90', 'raster_p90'];
 /// 运行之间这些环境字段不一致时, 汇总里给出警告。
 const _consistentEnvKeys = ['sha', 'code', 'flutter', 'windows', 'windowSeconds'];
 
+/// 采集时喂给场景的负载: `frames.json` 的 `scenarioVersion` 与各场景的 `dataDigest`(schema 2 起才有)。
+typedef _Workload = ({int? version, Map<String, String> digests});
+
 final class _DeviceSide {
-  _DeviceSide(this.env, this.runs, this.refreshRate, this.stats, this.gc, this.perRun, this.notes);
+  _DeviceSide(this.env, this.runs, this.refreshRate, this.stats, this.gc, this.perRun, this.notes, this.workload);
 
   final Map<String, Object?> env;
   final int runs;
@@ -64,6 +67,8 @@ final class _DeviceSide {
 
   /// 这一侧的运行之间环境不一致的提示。
   final List<String> notes;
+
+  final _Workload workload;
 
   double get budgetUs => 1e6 / refreshRate;
 
@@ -97,6 +102,7 @@ final class _DeviceSide {
     ],
     if (notes.isNotEmpty) 'notes': notes,
     if (gc.isNotEmpty) 'gc': gc,
+    if (workload.version != null) 'workload': {'scenarioVersion': workload.version, 'dataDigest': workload.digests},
   };
 }
 
@@ -172,6 +178,8 @@ _DeviceSide? _mergeDevice(String path) {
   final rates = <double>[];
   final perRun = <_Run>[];
   final gc = <String, Map<String, List<double>>>{};
+  final versions = <int?>{};
+  final digests = <String, Set<String>>{};
   for (final dir in runDirs) {
     Map<String, Object?> runEnv = const {};
     final envFile = File('${dir.path}/env.json');
@@ -185,6 +193,7 @@ _DeviceSide? _mergeDevice(String path) {
     }
     final json = jsonDecode(File('${dir.path}/frames.json').readAsStringSync()) as Map<String, Object?>;
     final rate = (json['refreshRate']! as num).toDouble();
+    versions.add((json['scenarioVersion'] as num?)?.toInt());
     final budget = 1e6 / rate;
     final runWindows = <String, Map<String, List<double>>>{};
     for (final MapEntry(:key, :value) in (json['scenarios']! as Map<String, Object?>).entries) {
@@ -192,6 +201,7 @@ _DeviceSide? _mergeDevice(String path) {
       final scenario = value! as Map<String, Object?>;
       final raw = scenario['windows'];
       final rssBefore = scenario['rssBefore'];
+      if (scenario['dataDigest'] case final String digest) digests.putIfAbsent(key, () => {}).add(digest);
       for (final w in raw is List ? raw.cast<Map<String, Object?>>() : const <Map<String, Object?>>[]) {
         final stats = _windowStats(w, budget);
         if (stats == null) continue;
@@ -226,6 +236,10 @@ _DeviceSide? _mergeDevice(String path) {
     final values = {for (final e in framedEnvs) '${e[key]}'};
     if (values.length > 1) notes.add('runs differ in $key: ${(values.toList()..sort()).join(', ')}');
   }
+  if (versions.length > 1) notes.add('runs differ in scenarioVersion: ${versions.join(', ')}');
+  for (final MapEntry(:key, :value) in digests.entries) {
+    if (value.length > 1) notes.add('runs differ in dataDigest of $key');
+  }
   return _DeviceSide(
     env,
     perRun.length,
@@ -242,6 +256,10 @@ _DeviceSide? _mergeDevice(String path) {
     },
     perRun,
     notes,
+    (
+      version: versions.length == 1 ? versions.single : null,
+      digests: {for (final MapEntry(:key, :value) in digests.entries) key: value.first},
+    ),
   );
 }
 
@@ -296,7 +314,22 @@ void summarizeDevice(Map<String, String> opts) {
   if (baseline != null && baseline.env['flutter'] != env['flutter']) {
     b.writeln('- **warning**: baseline built with Flutter ${baseline.env['flutter']}, not comparable');
   }
-  if (baseline != null && baseline.env['code'] != env['code']) {
+  // 两侧都报了负载时按负载核对: --own-code 下两侧基准代码本来就不同, 代码指纹不再说明可比性。
+  final (baseWork, targetWork) = (baseline?.workload, target.workload);
+  if (baseWork?.version != null && targetWork.version != null) {
+    if (baseWork!.version != targetWork.version) {
+      b.writeln(
+        '- **warning**: baseline ran scenarioVersion ${baseWork.version}, target ${targetWork.version}; not comparable',
+      );
+    }
+    final differing = [
+      for (final MapEntry(:key, :value) in targetWork.digests.entries)
+        if (baseWork.digests[key] case final other? when other != value) key,
+    ];
+    if (differing.isNotEmpty) {
+      b.writeln('- **warning**: dataDigest differs in ${differing.join(', ')}; not comparable');
+    }
+  } else if (baseline != null && baseline.env['code'] != env['code']) {
     b.writeln(
       '- **warning**: baseline ran benchmark code ${baseline.env['code']}, target ${env['code']}; not comparable',
     );

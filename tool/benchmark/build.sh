@@ -2,7 +2,10 @@
 # 构建真机基准包(profile), 供 device.sh --binary 反复安装; 打印包路径。
 #
 #   tool/benchmark/build.sh --platform ios|android [--ref HEAD] [--mode frames|trace] [--scenario 'pan/*']
-#       [--windows 3] [--window-seconds 6] [--allow-dirty]
+#       [--windows 3] [--window-seconds 6] [--allow-dirty] [--own-code]
+#
+# --own-code: ref 用自己版本的基准代码构建, 不覆盖当前树的(跨数据方向对比, 见 overlay.sh);
+# ref 是桥接分支 bench/bridge-* 时自动带上。
 #
 # dart-define 是编译期常量, 所以包按 sha + 基准代码指纹 + 平台 + 参数存放在 build/benchmark/bin/<key>/,
 # 旁边的 build.env 记下这些参数, device.sh 据此写 env.json, 不再重复传。
@@ -20,6 +23,7 @@ SCENARIO=""
 WINDOWS=3
 WINDOW_SECONDS=6
 ALLOW_DIRTY=false
+OWN_CODE=()
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --platform) PLATFORM="$2"; shift 2 ;;
@@ -29,18 +33,21 @@ while [[ $# -gt 0 ]]; do
     --windows) WINDOWS="$2"; shift 2 ;;
     --window-seconds) WINDOW_SECONDS="$2"; shift 2 ;;
     --allow-dirty) ALLOW_DIRTY=true; shift ;;
+    --own-code) OWN_CODE=(--own-code); shift ;;
     *) bench_die "unknown option: $1" ;;
   esac
 done
 [[ "$PLATFORM" == ios || "$PLATFORM" == android ]] || bench_die "--platform must be ios or android"
 [[ "$MODE" == frames || "$MODE" == trace ]] || bench_die "--mode must be frames or trace"
 
+bench_require_ref "$REF"
+bench_is_bridge "$REF" && OWN_CODE=(--own-code)
 # 基线也要查: 覆盖进基线树的基准代码若有未提交改动, 按指纹缓存的包就不可信。
 bench_require_clean "$ALLOW_DIRTY"
 SHA="$(bench_sha "$REF")"
 # 基线包里决定场景行为的是覆盖进去的当前基准代码, 所以缓存键除 sha 外还要带它的指纹;
 # 带未提交改动时指纹加 -dirty: 基线 sha 不带 -dirty, 否则这次的包会覆盖同键的干净包, 之后被正式采集复用。
-CODE="$(bench_code_id)${DIRTY:-}"
+CODE="$(bench_code_id "$([[ ${#OWN_CODE[@]} -gt 0 ]] && echo "$REF" || echo HEAD)")${DIRTY:-}"
 KEY="$SHA-$CODE-$PLATFORM-$MODE-${WINDOWS}x$WINDOW_SECONDS${SCENARIO:+-$(printf '%s' "$SCENARIO" | tr -c 'a-zA-Z0-9-' '_')}"
 DIR="$BENCH_ROOT/build/benchmark/bin/$KEY"
 case "$PLATFORM" in
@@ -53,7 +60,7 @@ if [[ -e "$BIN" && -z "${DIRTY:-}" ]]; then
   exit 0
 fi
 
-bench_tree "$REF" baseline --app
+bench_tree "$REF" baseline --app "${OWN_CODE[@]+"${OWN_CODE[@]}"}"
 DEFINES=(--dart-define=MODE="$MODE" --dart-define=WINDOWS="$WINDOWS" --dart-define=WINDOW_SECONDS="$WINDOW_SECONDS")
 [[ -n "$SCENARIO" ]] && DEFINES+=(--dart-define=SCENARIO="$SCENARIO")
 echo "building $PLATFORM $REF ($SHA) -> $BIN" >&2
