@@ -38,7 +38,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: [flexi_kline, flexi_kline_draw_tools]
+        package: [packages/flexi_kline, packages/flexi_kline_draw_tools, apps/benchmark]
         flutter-version: ["3.41.0", ""]     # 最低支持版 + latest stable
     steps:
       - uses: actions/checkout@v6
@@ -48,7 +48,7 @@ jobs:
           channel: stable
           cache: true
       - run: flutter pub get                # 根目录，全 workspace
-      - working-directory: packages/${{ matrix.package }}
+      - working-directory: ${{ matrix.package }}
         run: flutter test --exclude-tags "exploration,benchmark"
 
   dry-run:
