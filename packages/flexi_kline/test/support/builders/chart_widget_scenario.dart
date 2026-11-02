@@ -98,6 +98,8 @@ Future<({FlexiKlineController chart, ScrollController scroll})> pumpChartInListV
   double fillerHeight = 800,
   TestCandleIndicator? candle,
   bool isTouchDevice = true,
+  GestureTapCallback? onDoubleTap,
+  FlexiKlineWidgetBuilder? mainForegroundBuilder,
 }) async {
   final chart = createChartController();
   chart.switchKlineData(spec);
@@ -136,6 +138,8 @@ Future<({FlexiKlineController chart, ScrollController scroll})> pumpChartInListV
                   time: TestTimeIndicator(),
                   mainIndicators: mainIndicators,
                   isTouchDevice: isTouchDevice,
+                  onDoubleTap: onDoubleTap,
+                  mainForegroundBuilder: mainForegroundBuilder,
                 ),
               ),
               SizedBox(height: fillerHeight),

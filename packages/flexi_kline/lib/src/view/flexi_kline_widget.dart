@@ -311,20 +311,20 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
                 ),
           // 第4层: 放大镜
           _buildMagnifier(context),
-          // 第5层: 退出缩放按钮
-          Positioned.fromRect(
-            rect: mainRect,
-            child: _buildExitZoomButton(context),
-          ),
-          // 第6层: 绘制工具条
+          // 第5层: 绘制工具条
           _buildDrawToolbar(context),
-          // 第7层: Loading
+          // 第6层: Loading
           Positioned.fromRect(
             rect: mainRect,
             child: _buildLoading(context),
           ),
-          // 第8层: 主区前景
+          // 第7层: 主区前景
           _buildMainForeground(context, mainRect),
+          // 第8层: 退出缩放按钮. 置顶, 宿主前景或工具条盖住它就退不出缩放.
+          Positioned.fromRect(
+            rect: mainRect,
+            child: _buildExitZoomButton(context),
+          ),
         ],
       ),
     );

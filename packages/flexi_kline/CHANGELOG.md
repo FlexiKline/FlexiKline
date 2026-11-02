@@ -18,6 +18,7 @@
 * Add `KlineData.labelOriginIndex` so time-axis labels stay on the same candles after loading more history.
 * Remove the unused public helpers `combineCandleList`, `removeDuplicate` and `KlineData.paintTimeRange` (Breaking Changes).
 * Deprecate `ComputeMode`; it will be removed in 2.8.0 together with `FlexiNum`, and all values will use `double`.
+* Move the exit-zoom button to the top of the `FlexiKlineWidget` stack so foreground content and the draw toolbar cannot cover it; a custom `exitZoomButtonBuilder` that fills the main area now blocks the gestures beneath it.
 * Fix `FlexiNum.divSafe`, `divSafeNum` and `divSafeDecimal` returning a `double` fallback for a `Decimal` dividend when the divisor is zero; the fallback now takes the dividend's mode.
 
 ## 2.6.1
