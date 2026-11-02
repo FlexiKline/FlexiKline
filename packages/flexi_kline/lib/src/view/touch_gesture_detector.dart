@@ -112,15 +112,9 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
             () => TouchScaleGestureRecognizer(
               debugOwner: this,
               claimSlopFactor: gestureConfig.dragClaimSlopFactor,
-              // 两个回调都必须无副作用: 归属只由 [onPointerDown] / [onPointerMove] 按第一指
-              // 写入, 在此顺手记会让非第一指也能改写它(外层赢下本轮后 recognizer 放掉全部
-              // 指针, 之后落下的指针会被当成新的第一指再问一次)。
-              // 落点即抢占问同一条优先级链而非旁路: 只查「落点在滑竿区内」表达不出「已进入
-              // cross / draw / 命中手柄时不抢」, 会为 zoom 抢下竞技场却由别人驱动, 而 Tap 已
-              // 被 reject —— 点一下既退不出十字线也不做任何事。
-              shouldClaimOnDown: (position) {
-                return TouchGestureOwner.resolveLanded(controller, position) == TouchGestureOwner.zoomSlider;
-              },
+              // 回调必须无副作用: 归属只由 [onPointerDown] / [onPointerMove] 按第一指写入, 在此
+              // 顺手记会让非第一指也能改写它(外层赢下本轮后 recognizer 放掉全部指针, 之后落下
+              // 的指针会被当成新的第一指再问一次)。
               shouldClaimOnSlop: () => _session?.owner != null,
             ),
             (instance) => instance

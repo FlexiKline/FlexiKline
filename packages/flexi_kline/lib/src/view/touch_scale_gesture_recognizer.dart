@@ -23,7 +23,6 @@ import 'package:flutter/gestures.dart';
 /// 拖动仍归外层滚动。
 class TouchScaleGestureRecognizer extends ScaleGestureRecognizer {
   TouchScaleGestureRecognizer({
-    required this.shouldClaimOnDown,
     required this.shouldClaimOnSlop,
     required this.claimSlopFactor,
     super.debugOwner,
@@ -32,9 +31,6 @@ class TouchScaleGestureRecognizer extends ScaleGestureRecognizer {
          'claimSlopFactor 必须落在 (0, 1) 内: 取 0 会抢掉手柄上的点击, '
          '取 >= 1 会晚于外层 Scrollable 的裁决',
        );
-
-  /// 第一指按下即抢占。只用于 zoom slider 专属区域。
-  final bool Function(Offset localPosition) shouldClaimOnDown;
 
   /// 任一指位移超过 [_claimSlop] 后是否抢占。
   final bool Function() shouldClaimOnSlop;
@@ -59,14 +55,7 @@ class TouchScaleGestureRecognizer extends ScaleGestureRecognizer {
   @override
   void addAllowedPointer(PointerDownEvent event) {
     super.addAllowedPointer(event);
-    // 落点即抢占只问第一指: 落点归属独占整个 pointer session, 后续指针不重判。
-    final isFirst = _downPositions.isEmpty;
     _downPositions[event.pointer] = event.position;
-    if (isFirst && shouldClaimOnDown(event.localPosition)) {
-      _hasClaimed = true;
-      // 竞技场此刻还没关闭, accept 会先记为 eagerWinner, 在 close 的第一时刻兑现。
-      resolve(GestureDisposition.accepted);
-    }
   }
 
   @override

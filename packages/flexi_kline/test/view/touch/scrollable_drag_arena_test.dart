@@ -21,7 +21,7 @@ library;
 
 import 'package:flexi_formatter/date_time.dart' show TimeUnit;
 import 'package:flexi_kline/flexi_kline.dart';
-import 'package:flutter/gestures.dart' show DeviceGestureSettings, PointerDeviceKind, kTouchSlop;
+import 'package:flutter/gestures.dart' show DeviceGestureSettings, PointerDeviceKind, kLongPressTimeout, kTouchSlop;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -95,6 +95,31 @@ double _rangeMax(FlexiKlineController chart) {
 
 Offset _toGlobal(WidgetTester tester, Offset local) => toChartGlobal(tester, local);
 
+/// 开启 zoom、滑竿区为主区右侧全高一条的场景, [slider] 为滑竿区中心的本地坐标。
+///
+/// 全高是为了拖动全程留在滑竿区内: [FlexiKlineController.onChartZoomStart] 拒绝区外的起点。
+Future<({FlexiKlineController chart, ScrollController scroll, Offset slider})> _pumpChartWithZoomSlider(
+  WidgetTester tester, {
+  required String key,
+  double? touchSlop,
+}) async {
+  final indicator = TestInteractiveIndicator(key: ExternalIndicatorKey(key), hitRect: _handleRect);
+  final scene = await _pumpChartInListView(
+    tester,
+    indicator: indicator,
+    touchSlop: touchSlop,
+    visibleMinMaxFromData: true,
+  );
+  addTearDown(() => disposeChart(tester, scene.chart));
+  scene.chart.updateGestureConfig((config) => config.copyWith(enableZoom: true, useCustomZoomRect: true));
+  final main = scene.chart.mainRect;
+  scene.chart.setChartZoomSlideBarRect(Rect.fromLTWH(main.right - 24, main.top, 24, main.height));
+  await tester.pump();
+  await tester.pump();
+  final slider = Offset(scene.chart.chartZoomSlideBarRect.center.dx, main.center.dy);
+  return (chart: scene.chart, scroll: scene.scroll, slider: slider);
+}
+
 void main() {
   group('可滚动容器内的拖动归属', () {
     testWidgets('从手柄垂直拖动 => PaintObject 收到拖动, 外层不滚动', (tester) async {
@@ -165,26 +190,45 @@ void main() {
       expect(scene.scroll.offset, 0);
     });
 
-    testWidgets('zoom slider 落点即抢占 => 点击不穿透为 cross', (tester) async {
-      final indicator = TestInteractiveIndicator(
-        key: const ExternalIndicatorKey('arena_zoom_slider'),
-        hitRect: _handleRect,
-      );
-      final scene = await _pumpChartInListView(tester, indicator: indicator);
-      addTearDown(() => disposeChart(tester, scene.chart));
-      scene.chart.updateGestureConfig((config) => config.copyWith(enableZoom: true));
-      final sliderPosition = scene.chart.mainRect.center;
-      scene.chart.setChartZoomSlideBarRect(
-        Rect.fromCenter(center: sliderPosition, width: 80, height: 20),
-      );
-      await tester.pump();
-      await tester.pump();
+    testWidgets('zoom slider 上点击 => 与图表其他位置一样启动 cross', (tester) async {
+      final scene = await _pumpChartWithZoomSlider(tester, key: 'arena_zoom_slider_tap');
 
-      await tester.tapAt(_toGlobal(tester, sliderPosition));
+      await tester.tapAt(_toGlobal(tester, scene.slider));
       await tester.pump(_settle);
 
-      expect(scene.chart.isCrossing, isFalse);
+      expect(scene.chart.isCrossing, isTrue);
       expect(scene.scroll.offset, 0);
+    });
+
+    testWidgets('zoom slider 上长按 => 启动 cross', (tester) async {
+      final scene = await _pumpChartWithZoomSlider(tester, key: 'arena_zoom_slider_long_press');
+
+      final gesture = await tester.startGesture(_toGlobal(tester, scene.slider), kind: PointerDeviceKind.touch);
+      await tester.pump(kLongPressTimeout + _frame);
+
+      expect(scene.chart.isCrossing, isTrue);
+
+      await gesture.up();
+      await tester.pump(_settle);
+    });
+
+    testWidgets('外层 touchSlop 小于 kTouchSlop 时 zoom slider 拖动仍先于外层抢占', (tester) async {
+      final scene = await _pumpChartWithZoomSlider(tester, key: 'arena_zoom_slider_small_slop', touchSlop: 8);
+
+      final gesture = await tester.startGesture(_toGlobal(tester, scene.slider), kind: PointerDeviceKind.touch);
+      // 逐像素移动: claimSlop(=8*0.5) 必须先于外层的 8 抢占; 最后一步 10px 越过 zoomStartMinDistance。
+      for (var i = 0; i < 6; i++) {
+        await gesture.moveBy(const Offset(0, -1));
+        await tester.pump(_frame);
+      }
+      await gesture.moveBy(const Offset(0, -10));
+      await tester.pump(_frame);
+
+      expect(scene.chart.isChartZooming, isTrue);
+      expect(scene.scroll.offset, 0, reason: '滑竿拖动不应带动外层滚动');
+
+      await gesture.up();
+      await tester.pump(_settle);
     });
 
     testWidgets('cross 上的纯点击未被 Scale 抢占 => 仍按 Tap 语义关闭', (tester) async {

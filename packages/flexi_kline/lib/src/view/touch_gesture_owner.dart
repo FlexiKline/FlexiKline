@@ -48,9 +48,6 @@ enum TouchGestureOwner {
   /// 没有「zoom 态平移」这一档：Y 轴是否由用户接管属于模型状态，不该在归属层表达。zoom
   /// 态下的纵向拖动与普通平移走同一条 [chartPan]，由 [ChartBinding.onChartMove] 按
   /// `isChartZooming` 决定是否消费 dy。
-  ///
-  /// [TouchScaleGestureRecognizer] 的落点即抢占也问这个函数（`== zoomSlider`），不走单独的
-  /// 旁路入口：抢占与归属同源，才不会出现「为 zoom 抢下竞技场、却由别人驱动」。
   static TouchGestureOwner? resolveLanded(FlexiKlineController controller, Offset position) {
     if (controller.isDrawVisible && controller.drawState.isDrawing && controller.drawState.pointerOffset != null) {
       return drawDrawing;
