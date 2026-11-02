@@ -155,7 +155,8 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
             onTapUp: onTapUp,
 
             /// 双击
-            onDoubleTap: widget.onDoubleTap,
+            onDoubleTapDown: widget.onDoubleTap == null ? null : onDoubleTapDown,
+            onDoubleTap: widget.onDoubleTap == null ? null : onDoubleTap,
 
             /// 按下平移
             onPanStart: onPanStart,

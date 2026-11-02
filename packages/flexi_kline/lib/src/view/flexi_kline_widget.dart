@@ -21,6 +21,7 @@ import '../kline_controller.dart';
 import '../model/layout_mode.dart';
 import '../utils/platform_util.dart';
 import 'flexi_kline_prefabs.dart';
+import 'gesture_detector_widget.dart';
 import 'non_touch_gesture_detector.dart';
 import 'touch_gesture_detector.dart';
 
@@ -72,8 +73,8 @@ class FlexiKlineWidget extends StatefulWidget {
   /// 是否是触摸设备.
   final bool? isTouchDevice;
 
-  /// 整个图表双击事件
-  final GestureTapCallback? onDoubleTap;
+  /// 整个图表（含价格轴滑竿区）的双击。框架不提供默认行为，如双击滑竿退出缩放需宿主按落点自行处理。
+  final FlexiDoubleTapCallback? onDoubleTap;
 
   /// 主区背景(logo/watermark等静态View, IgnorePointer).
   final FlexiKlineWidgetBuilder? mainBackgroundBuilder;

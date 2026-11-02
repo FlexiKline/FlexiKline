@@ -12,6 +12,9 @@ import '../framework/logger.dart';
 import '../kline_controller.dart';
 import '../utils/algorithm_util.dart';
 
+/// 双击回调，[position] 为第二下按下的落点（画布坐标）。
+typedef FlexiDoubleTapCallback = void Function(Offset position);
+
 abstract class GestureDetectorWidget extends StatefulWidget {
   const GestureDetectorWidget({
     super.key,
@@ -20,7 +23,7 @@ abstract class GestureDetectorWidget extends StatefulWidget {
   });
 
   final FlexiKlineController controller;
-  final GestureTapCallback? onDoubleTap;
+  final FlexiDoubleTapCallback? onDoubleTap;
 
   @override
   GestureDetectorState<GestureDetectorWidget> createState();
@@ -48,6 +51,20 @@ abstract class GestureDetectorState<T extends GestureDetectorWidget> extends Sta
     cancelPositionAnimation();
     controller.moveToPositionCallback = null;
     super.dispose();
+  }
+
+  Offset? _doubleTapPosition;
+
+  /// 双击识别器的回调。宿主未设 [GestureDetectorWidget.onDoubleTap] 时不挂，识别器不进竞技场，
+  /// 单击不必等双击超时。
+  @protected
+  void onDoubleTapDown(TapDownDetails details) => _doubleTapPosition = details.localPosition;
+
+  @protected
+  void onDoubleTap() {
+    final position = _doubleTapPosition;
+    _doubleTapPosition = null;
+    if (position != null) widget.onDoubleTap?.call(position);
   }
 
   /// 解析缩放的锚定位置：[ScalePosition.auto] 时按 [dx] 所在的横向三分区就近锚定，

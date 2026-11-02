@@ -19,6 +19,7 @@
 * Remove the unused public helpers `combineCandleList`, `removeDuplicate` and `KlineData.paintTimeRange` (Breaking Changes).
 * Deprecate `ComputeMode`; it will be removed in 2.8.0 together with `FlexiNum`, and all values will use `double`.
 * Move the exit-zoom button to the top of the `FlexiKlineWidget` stack so foreground content and the draw toolbar cannot cover it; a custom `exitZoomButtonBuilder` that fills the main area now blocks the gestures beneath it.
+* Change `onDoubleTap` to `FlexiDoubleTapCallback`, which receives the double-tap position (Breaking Changes).
 * Remove the zoom slider's claim-on-down on touch devices: taps, long presses and double-taps on it now behave as elsewhere on the chart (Breaking Changes).
 * Fix `FlexiNum.divSafe`, `divSafeNum` and `divSafeDecimal` returning a `double` fallback for a `Decimal` dividend when the divisor is zero; the fallback now takes the dividend's mode.
 

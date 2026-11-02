@@ -28,3 +28,4 @@ export 'src/types.dart';
 export 'src/utils/export.dart';
 export 'src/view/flexi_kline_prefabs.dart';
 export 'src/view/flexi_kline_widget.dart';
+export 'src/view/gesture_detector_widget.dart' show FlexiDoubleTapCallback;

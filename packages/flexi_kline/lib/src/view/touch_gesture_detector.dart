@@ -89,7 +89,8 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
           DoubleTapGestureRecognizer: GestureRecognizerFactoryWithHandlers<DoubleTapGestureRecognizer>(
             () => DoubleTapGestureRecognizer(debugOwner: this),
             (instance) => instance
-              ..onDoubleTap = widget.onDoubleTap
+              ..onDoubleTapDown = widget.onDoubleTap == null ? null : onDoubleTapDown
+              ..onDoubleTap = widget.onDoubleTap == null ? null : onDoubleTap
               ..gestureSettings = gestureSettings,
           ),
 

@@ -75,7 +75,6 @@ abstract class KlineStateBase<T extends StatefulWidget> extends State<T>
     FlexiKlineWidgetBuilder? loadingBuilder,
     FlexiKlineWidgetBuilder? exitZoomButtonBuilder,
     Widget? drawToolbar,
-    VoidCallback? onDoubleTap,
     bool includeSubIndicators = true,
   }) {
     return ListenableBuilder(
@@ -105,5 +104,12 @@ abstract class KlineStateBase<T extends StatefulWidget> extends State<T>
         );
       },
     );
+  }
+
+  /// 双击价格轴滑竿区退出缩放。
+  void onDoubleTap(Offset position) {
+    if (klineController.chartZoomSlideBarRect.include(position)) {
+      klineController.exitChartZoom();
+    }
   }
 }

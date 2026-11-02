@@ -98,7 +98,7 @@ Future<({FlexiKlineController chart, ScrollController scroll})> pumpChartInListV
   double fillerHeight = 800,
   TestCandleIndicator? candle,
   bool isTouchDevice = true,
-  GestureTapCallback? onDoubleTap,
+  FlexiDoubleTapCallback? onDoubleTap,
   FlexiKlineWidgetBuilder? mainForegroundBuilder,
 }) async {
   final chart = createChartController();

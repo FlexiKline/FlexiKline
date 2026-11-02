@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// 触摸端价格轴滑竿区的双击：滑竿区与图表其他位置一样由 DoubleTap 识别器派发。
+/// 触摸端双击：滑竿区与图表其他位置一样由 DoubleTap 识别器派发，回调带上落点。
 library;
 
 import 'package:flexi_formatter/date_time.dart' show TimeUnit;
@@ -45,7 +45,7 @@ List<CandleModel> _candles() => List.generate(
   ),
 );
 
-Future<FlexiKlineController> _arrange(WidgetTester tester, {GestureTapCallback? onDoubleTap}) async {
+Future<FlexiKlineController> _arrange(WidgetTester tester, {FlexiDoubleTapCallback? onDoubleTap}) async {
   final result = await pumpChartInListView(
     tester,
     spec: _spec,
@@ -74,13 +74,57 @@ Future<void> _doubleTap(WidgetTester tester, Offset local) async {
   await tester.pump(_settle);
 }
 
+void _enterZoom(FlexiKlineController chart) {
+  final from = _slider(chart);
+  expect(chart.onChartZoomStart(from), isTrue);
+  chart.onChartZoomUpdate(from.dy - 60);
+  chart.onChartZoomEnd();
+  expect(chart.isChartZooming, isTrue, reason: '前置条件: 已进入缩放态');
+}
+
 void main() {
-  testWidgets('双击滑竿 => onDoubleTap 调用一次', (tester) async {
-    var doubleTaps = 0;
-    final chart = await _arrange(tester, onDoubleTap: () => doubleTaps++);
+  testWidgets('双击滑竿 => 回调收到滑竿内落点, 框架不改缩放态', (tester) async {
+    final positions = <Offset>[];
+    final chart = await _arrange(tester, onDoubleTap: positions.add);
+    _enterZoom(chart);
 
     await _doubleTap(tester, _slider(chart));
 
-    expect(doubleTaps, 1);
+    expect(positions, [_slider(chart)]);
+    expect(chart.isChartZooming, isTrue);
+  });
+
+  testWidgets('宿主在回调里按落点退出缩放 => Y 轴复位', (tester) async {
+    late final FlexiKlineController chart;
+    chart = await _arrange(
+      tester,
+      onDoubleTap: (position) {
+        if (chart.chartZoomSlideBarRect.include(position)) chart.exitChartZoom();
+      },
+    );
+    _enterZoom(chart);
+
+    await _doubleTap(tester, _slider(chart));
+
+    expect(chart.isChartZooming, isFalse);
+  });
+
+  testWidgets('双击主区 => 回调收到主区落点', (tester) async {
+    final positions = <Offset>[];
+    final chart = await _arrange(tester, onDoubleTap: positions.add);
+    final target = chart.mainRect.center;
+
+    await _doubleTap(tester, target);
+
+    expect(positions, [target]);
+  });
+
+  testWidgets('未设回调 => 单击滑竿不等双击超时, 立即启动 cross', (tester) async {
+    final chart = await _arrange(tester);
+
+    await tester.tapAt(toChartGlobal(tester, _slider(chart)));
+    await tester.pump();
+
+    expect(chart.isCrossing, isTrue);
   });
 }
