@@ -16,6 +16,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/painting.dart';
 
+import 'alignment.dart';
 import 'decoration_painter.dart';
 import 'image_span.dart';
 import 'label_style.dart';
@@ -47,17 +48,9 @@ final class LabelPainter implements PaintResource {
     Rect? bounds,
     double minWidth = 0,
   }) {
-    _text.configure(style);
     final decoration = style.decoration;
     final outsets = outsetsOf(decoration?.shape);
-    final painter = _text.layout(
-      key,
-      build: build,
-      minWidth: math.max(0.0, minWidth - style.padding.horizontal),
-      maxWidth: bounds == null
-          ? double.infinity
-          : math.max(0.0, bounds.width - style.padding.horizontal - outsets.horizontal),
-    );
+    final painter = _layout(key, build, style, outsets, bounds, minWidth);
 
     final body = placeBody(style.padding.inflateSize(painter.size), outsets, anchor, align, bounds);
     // 无条件调用: decoration 变成 null 时由它释放旧 BoxPainter。
@@ -67,6 +60,61 @@ final class LabelPainter implements PaintResource {
     painter.paint(canvas, origin);
     _paintImages(canvas, painter, origin);
     return body;
+  }
+
+  /// 围绕 [target] 画标签, 返回容器矩形: 按 [side] 一侧的样式测量, 经 [placeAround] 决定实际所在侧, 再以该侧样式绘制。
+  ///
+  /// [styleOf] 给出标签位于某侧时的样式(如箭头指向 [target] 的气泡)。各侧外延尺寸相同, 换到对侧后排版仍命中缓存。
+  Rect paintAround(
+    Canvas canvas,
+    Object key, {
+    Object Function()? build,
+    required LabelStyle Function(AxisDirection side) styleOf,
+    required Rect target,
+    required AxisDirection side,
+    double spacing = 0,
+    bool flip = true,
+    Rect? bounds,
+  }) {
+    final size = measure(key, build: build, style: styleOf(side), bounds: bounds);
+    final placed = placeAround(target, size, side: side, spacing: spacing, flip: flip, bounds: bounds);
+    return paint(
+      canvas,
+      key,
+      build: build,
+      style: styleOf(placed.side),
+      anchor: placed.anchor,
+      align: placed.align,
+      bounds: bounds,
+    );
+  }
+
+  /// 标签外框尺寸(含 padding 与 AnchoredBorder 的外延), 用于绘制前决定摆放。
+  ///
+  /// 与 [paint] 同一套排版约束与缓存: 随后以相同 key、style、bounds 与 minWidth 调用 [paint] 时直接命中。
+  Size measure(Object key, {Object Function()? build, required LabelStyle style, Rect? bounds, double minWidth = 0}) {
+    final outsets = outsetsOf(style.decoration?.shape);
+    final painter = _layout(key, build, style, outsets, bounds, minWidth);
+    return outsets.inflateSize(style.padding.inflateSize(painter.size));
+  }
+
+  TextPainter _layout(
+    Object key,
+    Object Function()? build,
+    LabelStyle style,
+    EdgeInsets outsets,
+    Rect? bounds,
+    double minWidth,
+  ) {
+    _text.configure(style);
+    return _text.layout(
+      key,
+      build: build,
+      minWidth: math.max(0.0, minWidth - style.padding.horizontal),
+      maxWidth: bounds == null
+          ? double.infinity
+          : math.max(0.0, bounds.width - style.padding.horizontal - outsets.horizontal),
+    );
   }
 
   /// 按先序把 [ImageSpan] 与占位框一一对应补画; ellipsis 截断时框可能少于 span, 取完即停。

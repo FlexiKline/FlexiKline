@@ -68,4 +68,65 @@ void main() {
       expect(rect.size, size);
     });
   });
+
+  group('placeAround', () {
+    // 目标是一根蜡烛: x ∈ [96, 104], y ∈ [40, 60]。
+    const target = Rect.fromLTRB(96, 40, 104, 60);
+    const spacing = 4.0;
+
+    test('四个方向: 锚点为对应边中点外移 spacing, align 指向锚点', () {
+      final cases = {
+        AxisDirection.up: (const Offset(100, 36), Alignment.bottomCenter),
+        AxisDirection.down: (const Offset(100, 64), Alignment.topCenter),
+        AxisDirection.left: (const Offset(92, 50), Alignment.centerRight),
+        AxisDirection.right: (const Offset(108, 50), Alignment.centerLeft),
+      };
+      for (final MapEntry(key: side, value: (anchor, align)) in cases.entries) {
+        final placed = placeAround(target, size, side: side, spacing: spacing);
+        expect(placed.side, side);
+        expect(placed.anchor, anchor);
+        expect(placed.align, align);
+      }
+    });
+
+    test('首选侧放不下而对侧放得下时翻转', () {
+      // 上方锚点 dy = 36, 气泡高 20, 顶边到 16; bounds.top = 20 时放不下, 下方到 84 放得下。
+      const bounds = Rect.fromLTRB(0, 20, 200, 200);
+      expect(
+        placeAround(target, size, side: AxisDirection.up, spacing: spacing, bounds: bounds).side,
+        AxisDirection.down,
+      );
+      // 横向: 左侧 92 - 40 = 52 < bounds.left 60。
+      const narrow = Rect.fromLTRB(60, 0, 300, 100);
+      expect(
+        placeAround(target, size, side: AxisDirection.left, spacing: spacing, bounds: narrow).side,
+        AxisDirection.right,
+      );
+    });
+
+    test('首选侧放得下时不翻转; 恰好贴边也算放得下', () {
+      const bounds = Rect.fromLTRB(0, 16, 200, 200);
+      expect(
+        placeAround(target, size, side: AxisDirection.up, spacing: spacing, bounds: bounds).side,
+        AxisDirection.up,
+      );
+    });
+
+    test('两侧都放不下时留在首选侧', () {
+      const bounds = Rect.fromLTRB(0, 30, 200, 70);
+      final placed = placeAround(target, size, side: AxisDirection.up, spacing: spacing, bounds: bounds);
+      expect(placed.side, AxisDirection.up);
+      expect(placed.anchor, const Offset(100, 36));
+    });
+
+    test('flip 为 false 时不翻转', () {
+      const bounds = Rect.fromLTRB(0, 20, 200, 200);
+      final placed = placeAround(target, size, side: AxisDirection.up, spacing: spacing, flip: false, bounds: bounds);
+      expect(placed.side, AxisDirection.up);
+    });
+
+    test('无 bounds 时不翻转', () {
+      expect(placeAround(target, size, side: AxisDirection.down).side, AxisDirection.down);
+    });
+  });
 }

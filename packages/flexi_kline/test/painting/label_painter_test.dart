@@ -131,6 +131,80 @@ void main() {
     });
   });
 
+  group('measure', () {
+    test('外框 = 文本 + padding + 箭头外延, 与 paint 的 body 一致', () {
+      expect(label.measure('abc', style: style), const Size(38, 18));
+      final size = label.measure('abc', style: bubbleStyle);
+      expect(size, const Size(38, 18 + 6));
+      final body = label.paint(canvas, 'abc', style: bubbleStyle, anchor: Offset.zero);
+      expect(body.size, const Size(38, 18));
+    });
+
+    test('bounds 与 minWidth 和 paint 同样参与排版约束', () {
+      const bounds = Rect.fromLTWH(0, 0, 40, 100);
+      expect(label.measure('abcdefghij', style: style, bounds: bounds).width, lessThanOrEqualTo(40));
+      expect(label.measure('a', style: style, minWidth: 100).width, 100);
+    });
+
+    test('随后同参 paint 命中排版缓存, 不再 build', () {
+      label.measure('k', build: counted('abc'), style: bubbleStyle, bounds: const Rect.fromLTWH(0, 0, 200, 100));
+      label.paint(
+        canvas,
+        'k',
+        build: counted('abc'),
+        style: bubbleStyle,
+        anchor: Offset.zero,
+        bounds: const Rect.fromLTWH(0, 0, 200, 100),
+      );
+      expect(builds, 1);
+    });
+  });
+
+  group('paintAround', () {
+    // 气泡位于某侧时箭头指向反方向。
+    final styles = {
+      for (final side in AxisDirection.values)
+        side: bubbleStyle.copyWith(
+          decoration: ShapeDecoration(
+            color: red,
+            shape: BubbleBorder(arrowSize: arrowSize, direction: flipAxisDirection(side)),
+          ),
+        ),
+    };
+    const target = Rect.fromLTWH(96, 10, 8, 20);
+    const bounds = Rect.fromLTWH(0, 0, 200, 100);
+
+    test('首选侧放得下时贴在该侧, 箭头尖端在锚点', () {
+      final body = label.paintAround(
+        canvas,
+        'k',
+        build: counted('abc'),
+        styleOf: (side) => styles[side]!,
+        target: const Rect.fromLTWH(96, 50, 8, 20),
+        side: AxisDirection.up,
+        spacing: 4,
+        bounds: bounds,
+      );
+      expect(body.bottom + arrowSize.height, 50 - 4);
+      expect(body.center.dx, 100);
+    });
+
+    test('首选侧放不下时换到对侧并用该侧样式, 只 build 一次', () {
+      final body = label.paintAround(
+        canvas,
+        'k',
+        build: counted('abc'),
+        styleOf: (side) => styles[side]!,
+        target: target,
+        side: AxisDirection.up,
+        spacing: 4,
+        bounds: bounds,
+      );
+      expect(body.top - arrowSize.height, target.bottom + 4);
+      expect(builds, 1);
+    });
+  });
+
   group('缓存', () {
     test('同一 style 实例连续 paint 走快路径, 不重复 build', () {
       label.paint(canvas, 'k', build: counted('abc'), style: style, anchor: Offset.zero);

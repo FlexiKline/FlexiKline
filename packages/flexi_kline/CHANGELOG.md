@@ -26,6 +26,7 @@
 * Fix `BubbleBorder` drawing stubs at the ends when adjacent corner radii exceed a side (such as a capsule); radii now scale down like `RRect`.
 * Add `BubbleBorder.gradient` and `GradientRoundedRectangleBorder` to stroke borders with a gradient; the bubble's gradient covers the arrow.
 * Add `TextAreaConfig.borderGradient` to stroke label borders with a gradient; without `colors` it derives from the border color.
+* Add `placeAround` to place an anchored label on any side of a target rect, flipping to the opposite side when it does not fit; add `LabelPainter.measure` and `LabelPainter.paintAround`, which measures, places and paints in one call.
 
 ## 2.6.1
 * Add `TextLayoutCache.debugMissCount` (debug-only, `@visibleForTesting`) so tests can assert that cached label frames do not re-lay out text.

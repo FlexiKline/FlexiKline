@@ -32,3 +32,40 @@ extension AlignmentPlace on Alignment {
         size;
   }
 }
+
+/// [placeAround] 的结果: 实际所在侧、锚点与绘制用的对齐方式。
+typedef AnchorPlacement = ({AxisDirection side, Offset anchor, Alignment align});
+
+/// 在 [target] 的 [side] 一侧摆放尺寸为 [size](含箭头外延)的标签: 锚点是该边中点向外 [spacing]。
+///
+/// [flip] 时首选侧在 [bounds] 内放不下而对侧放得下则换到对侧; 两侧都放不下时留在首选侧, 由绘制时的 bounds 夹回。
+/// 只判断主轴, 交叉轴由夹取处理。
+AnchorPlacement placeAround(
+  Rect target,
+  Size size, {
+  required AxisDirection side,
+  double spacing = 0,
+  bool flip = true,
+  Rect? bounds,
+}) {
+  AnchorPlacement at(AxisDirection side) => switch (side) {
+    AxisDirection.up => (side: side, anchor: target.topCenter.translate(0, -spacing), align: Alignment.bottomCenter),
+    AxisDirection.down => (side: side, anchor: target.bottomCenter.translate(0, spacing), align: Alignment.topCenter),
+    AxisDirection.left => (side: side, anchor: target.centerLeft.translate(-spacing, 0), align: Alignment.centerRight),
+    AxisDirection.right => (side: side, anchor: target.centerRight.translate(spacing, 0), align: Alignment.centerLeft),
+  };
+
+  bool fits(AnchorPlacement p) =>
+      bounds == null ||
+      switch (p.side) {
+        AxisDirection.up => p.anchor.dy - size.height >= bounds.top,
+        AxisDirection.down => p.anchor.dy + size.height <= bounds.bottom,
+        AxisDirection.left => p.anchor.dx - size.width >= bounds.left,
+        AxisDirection.right => p.anchor.dx + size.width <= bounds.right,
+      };
+
+  final preferred = at(side);
+  if (!flip || fits(preferred)) return preferred;
+  final opposite = at(flipAxisDirection(side));
+  return fits(opposite) ? opposite : preferred;
+}
