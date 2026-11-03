@@ -14,7 +14,7 @@
 
 import 'package:flutter/foundation.dart';
 
-import '../painting/paint_resource.dart';
+import 'paint_resource.dart';
 
 /// 持有 [PaintResource]; 何时 reset / dispose 由混入者决定。
 ///

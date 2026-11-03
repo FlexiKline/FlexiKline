@@ -30,7 +30,6 @@ import '../../painting/export.dart';
 import '../collection/sortable_hash_set.dart';
 import '../configuration.dart';
 import '../logger.dart';
-import '../paint_resource_owner.dart';
 import '../serializers.dart';
 
 part 'types.dart';

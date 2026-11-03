@@ -10,7 +10,7 @@ void main() {
     addTearDown(tester.view.reset);
 
     await tester.pumpWidget(const MaterialApp(home: PaintingPage()));
-    expect(find.byType(Card), findsNWidgets(11));
+    expect(find.byType(Card), findsNWidgets(12));
 
     await tester.tap(find.text('换值'));
     await tester.pump();

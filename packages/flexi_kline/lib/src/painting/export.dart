@@ -23,6 +23,7 @@ export 'image_style.dart';
 export 'label_painter.dart';
 export 'label_style.dart';
 export 'paint_resource.dart';
+export 'paint_resource_owner.dart';
 export 'point_buffer.dart';
 export 'shape_image.dart';
 export 'text_layout_cache.dart';

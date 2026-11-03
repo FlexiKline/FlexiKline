@@ -9,6 +9,7 @@
 * Make the weak magnet snap only within `magnetMinDistance`, and replace `isMagneticDrawObject` with `magneticShift` (Breaking Changes).
 * Change `onDoubleTap` to `FlexiDoubleTapCallback`, which receives the position, and stop the zoom slider claiming touches on pointer down (Breaking Changes).
 * Move the exit-zoom button to the top of the `FlexiKlineWidget` stack so foreground content cannot cover it.
+* Add the `package:flexi_kline/painting.dart` entry for using the painting primitives without the K-line API; `PaintResourceOwner` is now exported from it.
 * Replace `DateMarkConfig` and `DateMarkPosition` with the style-only `BubbleConfig` (`placement`, `flip`, `spacing`, arrow and text style); move the switch and duration to `CandleIndicator.showDateMark` and `dateMarkDuration` (Breaking Changes).
 * Add `TextAreaConfig.borderGradient`, `BubbleBorder.gradient` / `arrowRadius` and `GradientRoundedRectangleBorder` for gradient borders and rounded arrows; `BubbleBorder` scales oversized corner radii like `RRect` instead of drawing stubs.
 * Add `placeAround` and `LabelPainter.measure` / `paintAround` to place a label on any side of a target, flipping when it does not fit.
