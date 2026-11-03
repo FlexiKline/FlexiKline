@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:math' as math;
+
 import 'package:flexi_kline/src/painting/export.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -191,6 +193,93 @@ void main() {
         expect(border.outsets, isNot(EdgeInsets.zero));
       });
     }
+  });
+
+  group('圆角超过半边', () {
+    test('像 RRect 一样等比缩小: 胶囊形左右两端只有圆弧, 没有竖直线段', () {
+      // body 高 40, 圆角 30: 上下相邻圆角之和 60 > 40, 缩到 20, 即胶囊形。
+      const border = BubbleBorder(borderRadius: BorderRadius.all(Radius.circular(30)), arrowSize: arrowSize);
+      const r = 20.0;
+      final left = Offset(body.left + r, body.center.dy);
+      final right = Offset(body.right - r, body.center.dy);
+      for (final p in _samples(border.getOuterPath(body))) {
+        // 两端各是半径 20 的半圆: 采样点到圆心的距离等于半径。
+        if (p.dx < left.dx) expect((p - left).distance, closeTo(r, 0.1), reason: '$p');
+        if (p.dx > right.dx) expect((p - right).distance, closeTo(r, 0.1), reason: '$p');
+      }
+      // 箭头仍在下边的直边上。
+      expect(border.getOuterPath(body).contains(Offset(body.center.dx, body.bottom + h - 0.5)), isTrue);
+    });
+  });
+
+  group('arrowRadius', () {
+    const r = 2.0;
+    BubbleBorder rounded(AxisDirection direction, [Offset? arrow]) => BubbleBorder(
+      borderRadius: const BorderRadius.all(Radius.circular(radius)),
+      direction: direction,
+      arrowSize: arrowSize,
+      arrowRadius: r,
+      arrow: arrow,
+    );
+    // 根部切线长 r * tan(atan2(h, half) / 2)。
+    final root = r * math.tan(math.atan2(h, half) / 2);
+
+    test('尖端倒圆: 几何尖端附近不在路径内, 尖端内缩不超过 r', () {
+      const arrow = Offset(50, 40 + h);
+      final tip = body.topLeft + arrow;
+      final sharp = bubble(AxisDirection.down).anchorTo(arrow).getOuterPath(body);
+      final path = rounded(AxisDirection.down).anchorTo(arrow).getOuterPath(body);
+      expect(sharp.contains(tip - const Offset(0, 0.5)), isTrue);
+      expect(path.contains(tip - const Offset(0, 0.5)), isFalse);
+      // getBounds 含圆弧控制点(即几何尖端), 取轮廓采样的最低点。
+      final lowest = _samples(path).map((p) => p.dy).reduce(math.max);
+      expect(lowest, inExclusiveRange(tip.dy - r, tip.dy - 0.5));
+      expect(path.contains(tip - const Offset(0, 2)), isTrue);
+    });
+
+    test('根部倒圆: 腰与底边的凹角被圆弧填平', () {
+      const arrow = Offset(50, 40 + h);
+      final rootPoint = Offset(body.left + arrow.dx + half, body.bottom);
+      final sharp = bubble(AxisDirection.down).anchorTo(arrow).getOuterPath(body);
+      final path = rounded(AxisDirection.down).anchorTo(arrow).getOuterPath(body);
+      const probe = Offset(0.2, 0.05);
+      expect(sharp.contains(rootPoint + probe), isFalse);
+      expect(path.contains(rootPoint + probe), isTrue);
+    });
+
+    test('四个方向的尖端都倒圆', () {
+      for (final direction in AxisDirection.values) {
+        final path = rounded(direction).getOuterPath(body);
+        final tip = switch (direction) {
+          AxisDirection.up => Offset(body.center.dx, body.top - h + 0.5),
+          AxisDirection.down => Offset(body.center.dx, body.bottom + h - 0.5),
+          AxisDirection.left => Offset(body.left - h + 0.5, body.center.dy),
+          AxisDirection.right => Offset(body.right + h - 0.5, body.center.dy),
+        };
+        expect(path.contains(tip), isFalse, reason: '$direction');
+        expect(path.contains(body.center), isTrue, reason: '$direction');
+      }
+    });
+
+    test('arrow 远在左侧时中心多让出根部切线长, 箭头不越过左圆角端点', () {
+      final path = rounded(AxisDirection.down, const Offset(-50, 40 + h)).getOuterPath(body);
+      final below = [
+        for (final p in _samples(path))
+          if (p.dy > body.bottom + 1e-3) p,
+      ];
+      final lowest = below.reduce((a, b) => a.dy >= b.dy ? a : b);
+      expect(lowest.dx, closeTo(body.left + radius + half + root, 0.3));
+      for (final p in below) {
+        expect(p.dx, greaterThanOrEqualTo(body.left + radius - 1e-3));
+      }
+    });
+
+    test('anchorTo、scale 与 == 带上 arrowRadius', () {
+      final border = rounded(AxisDirection.down);
+      expect(border.anchorTo(const Offset(1, 1)).arrowRadius, r);
+      expect(border.scale(2).arrowRadius, 2 * r);
+      expect(border == bubble(AxisDirection.down), isFalse);
+    });
   });
 
   group('描边', () {

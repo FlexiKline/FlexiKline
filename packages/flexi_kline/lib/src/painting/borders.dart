@@ -16,6 +16,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/painting.dart';
 
+import 'corner.dart';
+
 /// 外延在 body 之外、且依赖锚点的形状(带箭头的气泡、单侧收口的价格标签等)。
 ///
 /// 宿主实现它即可接入 LabelPainter 的摆放与夹取, 不需要改框架。
@@ -43,8 +45,9 @@ final class BubbleBorder extends AnchoredBorder {
     this.borderRadius = BorderRadius.zero,
     this.direction = AxisDirection.down,
     this.arrowSize = const Size(10, 6),
+    this.arrowRadius = 0,
     this.arrow,
-  });
+  }) : assert(arrowRadius >= 0);
 
   final BorderSide side;
   final BorderRadius borderRadius;
@@ -54,6 +57,9 @@ final class BubbleBorder extends AnchoredBorder {
 
   /// 箭头根宽与伸出高度。
   final Size arrowSize;
+
+  /// 箭头尖端与两个根部的圆角半径, 0 为尖角; 尖端倒圆后可见尖端略低于 [arrowSize] 的高度。
+  final double arrowRadius;
 
   /// 箭头尖端要对准的点, 相对 rect 左上角; null 对准所在边的中点。
   ///
@@ -70,8 +76,14 @@ final class BubbleBorder extends AnchoredBorder {
   };
 
   @override
-  BubbleBorder anchorTo(Offset anchor) =>
-      BubbleBorder(side: side, borderRadius: borderRadius, direction: direction, arrowSize: arrowSize, arrow: anchor);
+  BubbleBorder anchorTo(Offset anchor) => BubbleBorder(
+    side: side,
+    borderRadius: borderRadius,
+    direction: direction,
+    arrowSize: arrowSize,
+    arrowRadius: arrowRadius,
+    arrow: anchor,
+  );
 
   @override
   EdgeInsetsGeometry get dimensions => EdgeInsets.all(math.max(side.strokeInset, 0));
@@ -95,6 +107,7 @@ final class BubbleBorder extends AnchoredBorder {
     borderRadius: borderRadius * t,
     direction: direction,
     arrowSize: arrowSize * t,
+    arrowRadius: arrowRadius * t,
     // 相对 rect 的长度, 与 rect 一同缩放。
     arrow: arrow == null ? null : arrow! * t,
   );
@@ -106,32 +119,54 @@ final class BubbleBorder extends AnchoredBorder {
   Path _path(Rect rect, double delta) {
     final b = rect.inflate(delta);
     Radius grow(Radius r) => Radius.elliptical(math.max(0, r.x + delta), math.max(0, r.y + delta));
-    final tl = grow(borderRadius.topLeft);
-    final tr = grow(borderRadius.topRight);
-    final br = grow(borderRadius.bottomRight);
-    final bl = grow(borderRadius.bottomLeft);
+    var tl = grow(borderRadius.topLeft);
+    var tr = grow(borderRadius.topRight);
+    var br = grow(borderRadius.bottomRight);
+    var bl = grow(borderRadius.bottomLeft);
+    // 同 RRect: 相邻圆角之和超过边长时等比缩小全部圆角(如胶囊形), 否则路径折返, 描边画出毛刺。
+    double fit(double length, double sum) => sum > length ? length / sum : 1;
+    final scale = math.min(
+      math.min(fit(b.width, tl.x + tr.x), fit(b.width, bl.x + br.x)),
+      math.min(fit(b.height, tl.y + bl.y), fit(b.height, tr.y + br.y)),
+    );
+    if (scale < 1) {
+      (tl, tr, br, bl) = (tl * scale, tr * scale, br * scale, bl * scale);
+    }
     final h = arrowSize.height;
     final target = arrow == null ? null : rect.topLeft + arrow!;
 
-    // 箭头在直边 [start, end](两侧圆角之间)上的中心与半个根宽。中心夹到「圆角之外 + 半个根宽」的安全区;
-    // 直边放不下根宽时根宽收缩到直边长度、中心取直边中点, 路径不越过圆角端点(否则描边会画出折返毛刺);
+    // 箭头在直边 [start, end](两侧圆角之间)上的中心与半个根宽。中心夹到「圆角之外 + 半个根宽 + 根部倒圆切线长」
+    // 的安全区; 直边放不下根宽时根宽收缩到直边长度、中心取直边中点, 路径不越过圆角端点(否则描边会画出折返毛刺);
     // 直边长度 ≤ 0 时不画箭头, outsets 照旧保留。
     ({double center, double half})? place(double? value, double start, double end, double mid) {
       final length = end - start;
       if (length <= 0) return null;
       if (length < arrowSize.width) return (center: (start + end) / 2, half: length / 2);
       final half = arrowSize.width / 2;
-      return (center: (value ?? mid).clamp(start + half, end - half).toDouble(), half: half);
+      // 根部顶角 = π - atan2(h, half), 切线长 r / tan(半顶角) 化简为 r * tan(atan2(h, half) / 2)。
+      final root = math.min(arrowRadius * math.tan(math.atan2(h, half) / 2), math.sqrt(h * h + half * half) / 2);
+      final margin = math.min(half + root, length / 2);
+      return (center: (value ?? mid).clamp(start + margin, end - margin).toDouble(), half: half);
     }
 
-    final path = Path()..moveTo(b.left + tl.x, b.top);
+    // 从直边上的 [from] 经根、尖、根三个顶点折到 [to], 各顶点按 arrowRadius 倒圆。
+    final path = Path();
+    void arrowTo(Offset from, Offset root, Offset tip, Offset otherRoot, Offset to) => path
+      ..cornerTo(from, root, tip, arrowRadius)
+      ..cornerTo(root, tip, otherRoot, arrowRadius)
+      ..cornerTo(tip, otherRoot, to, arrowRadius);
+
+    path.moveTo(b.left + tl.x, b.top);
 
     if (direction == AxisDirection.up) {
       if (place(target?.dx, b.left + tl.x, b.right - tr.x, b.center.dx) case (:final center, :final half)) {
-        path
-          ..lineTo(center - half, b.top)
-          ..lineTo(center, b.top - h)
-          ..lineTo(center + half, b.top);
+        arrowTo(
+          Offset(b.left + tl.x, b.top),
+          Offset(center - half, b.top),
+          Offset(center, b.top - h),
+          Offset(center + half, b.top),
+          Offset(b.right - tr.x, b.top),
+        );
       }
     }
     path
@@ -140,10 +175,13 @@ final class BubbleBorder extends AnchoredBorder {
 
     if (direction == AxisDirection.right) {
       if (place(target?.dy, b.top + tr.y, b.bottom - br.y, b.center.dy) case (:final center, :final half)) {
-        path
-          ..lineTo(b.right, center - half)
-          ..lineTo(b.right + h, center)
-          ..lineTo(b.right, center + half);
+        arrowTo(
+          Offset(b.right, b.top + tr.y),
+          Offset(b.right, center - half),
+          Offset(b.right + h, center),
+          Offset(b.right, center + half),
+          Offset(b.right, b.bottom - br.y),
+        );
       }
     }
     path
@@ -152,10 +190,13 @@ final class BubbleBorder extends AnchoredBorder {
 
     if (direction == AxisDirection.down) {
       if (place(target?.dx, b.left + bl.x, b.right - br.x, b.center.dx) case (:final center, :final half)) {
-        path
-          ..lineTo(center + half, b.bottom)
-          ..lineTo(center, b.bottom + h)
-          ..lineTo(center - half, b.bottom);
+        arrowTo(
+          Offset(b.right - br.x, b.bottom),
+          Offset(center + half, b.bottom),
+          Offset(center, b.bottom + h),
+          Offset(center - half, b.bottom),
+          Offset(b.left + bl.x, b.bottom),
+        );
       }
     }
     path
@@ -164,10 +205,13 @@ final class BubbleBorder extends AnchoredBorder {
 
     if (direction == AxisDirection.left) {
       if (place(target?.dy, b.top + tl.y, b.bottom - bl.y, b.center.dy) case (:final center, :final half)) {
-        path
-          ..lineTo(b.left, center + half)
-          ..lineTo(b.left - h, center)
-          ..lineTo(b.left, center - half);
+        arrowTo(
+          Offset(b.left, b.bottom - bl.y),
+          Offset(b.left, center + half),
+          Offset(b.left - h, center),
+          Offset(b.left, center - half),
+          Offset(b.left, b.top + tl.y),
+        );
       }
     }
     path
@@ -185,8 +229,9 @@ final class BubbleBorder extends AnchoredBorder {
           borderRadius == other.borderRadius &&
           direction == other.direction &&
           arrowSize == other.arrowSize &&
+          arrowRadius == other.arrowRadius &&
           arrow == other.arrow;
 
   @override
-  int get hashCode => Object.hash(side, borderRadius, direction, arrowSize, arrow);
+  int get hashCode => Object.hash(side, borderRadius, direction, arrowSize, arrowRadius, arrow);
 }

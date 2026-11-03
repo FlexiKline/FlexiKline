@@ -18,6 +18,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
+import 'corner.dart';
 import 'image_span.dart';
 import 'paint_resource.dart';
 
@@ -96,9 +97,7 @@ abstract base class ShapeImage implements PaintResource {
     ..strokeCap = StrokeCap.round
     ..strokeJoin = StrokeJoin.round;
 
-  /// 凸多边形逐角倒圆, [radius] 为 0 时即原多边形。
-  ///
-  /// [vertices] 须按屏幕坐标(y 向下)顺时针给出, 圆弧方向依此而定; 半径过大时切点夹到较短邻边的中点, 圆弧随之缩小。
+  /// 多边形逐角倒圆, [radius] 为 0 时即原多边形; 半径过大时切点夹到较短邻边的中点, 圆弧随之缩小。
   @protected
   @nonVirtual
   Path roundedPolygon(List<Offset> vertices, double radius) {
@@ -106,23 +105,11 @@ abstract base class ShapeImage implements PaintResource {
     if (radius <= 0) return path..addPolygon(vertices, true);
 
     final count = vertices.length;
+    // 从末边中点起笔: 每个顶点都位于两段边之间, 可统一用 cornerTo 倒圆。
+    final start = (vertices[count - 1] + vertices[0]) / 2;
+    path.moveTo(start.dx, start.dy);
     for (var i = 0; i < count; i++) {
-      final vertex = vertices[i];
-      final toPrev = vertices[(i - 1 + count) % count] - vertex;
-      final toNext = vertices[(i + 1) % count] - vertex;
-      final unitPrev = toPrev / toPrev.distance;
-      final unitNext = toNext / toNext.distance;
-      // 切点到顶点的距离 = r / tan(半个顶角)。
-      final halfAngle = math.acos(unitPrev.dx * unitNext.dx + unitPrev.dy * unitNext.dy) / 2;
-      final distance = math.min(radius / math.tan(halfAngle), math.min(toPrev.distance, toNext.distance) / 2);
-
-      final start = vertex + unitPrev * distance;
-      if (i == 0) {
-        path.moveTo(start.dx, start.dy);
-      } else {
-        path.lineTo(start.dx, start.dy);
-      }
-      path.arcToPoint(vertex + unitNext * distance, radius: Radius.circular(distance * math.tan(halfAngle)));
+      path.cornerTo(vertices[(i - 1 + count) % count], vertices[i], vertices[(i + 1) % count], radius);
     }
     return path..close();
   }
@@ -145,7 +132,6 @@ final class TriangleImage extends ShapeImage {
   @override
   void draw(Canvas canvas, Size size, Color color) {
     final (w, h) = (size.width, size.height);
-    // roundedPolygon 要求顶点顺时针。
     final vertices = switch (direction) {
       AxisDirection.right => [Offset.zero, Offset(w, h / 2), Offset(0, h)],
       AxisDirection.down => [Offset.zero, Offset(w, 0), Offset(w / 2, h)],

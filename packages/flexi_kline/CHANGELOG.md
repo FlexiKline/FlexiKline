@@ -22,6 +22,8 @@
 * Change `onDoubleTap` to `FlexiDoubleTapCallback`, which receives the double-tap position (Breaking Changes).
 * Remove the zoom slider's claim-on-down on touch devices: taps, long presses and double-taps on it now behave as elsewhere on the chart (Breaking Changes).
 * Fix `FlexiNum.divSafe`, `divSafeNum` and `divSafeDecimal` returning a `double` fallback for a `Decimal` dividend when the divisor is zero; the fallback now takes the dividend's mode.
+* Add `BubbleBorder.arrowRadius` to round the arrow tip and base joints.
+* Fix `BubbleBorder` drawing stubs at the ends when adjacent corner radii exceed a side (such as a capsule); radii now scale down like `RRect`.
 
 ## 2.6.1
 * Add `TextLayoutCache.debugMissCount` (debug-only, `@visibleForTesting`) so tests can assert that cached label frames do not re-lay out text.
