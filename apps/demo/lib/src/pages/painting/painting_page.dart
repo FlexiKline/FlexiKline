@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../config/my_kline_config.dart';
 import '../../config/my_kline_indicator_config.dart';
+import '../../widgets/my_theme_toggle_button.dart';
 import 'widgets/batch_section.dart';
+import 'widgets/bubble_section.dart';
 import 'widgets/cache_section.dart';
 import 'widgets/image_section.dart';
 import 'widgets/last_price_section.dart';
@@ -40,7 +42,7 @@ class _PaintingPageState extends State<PaintingPage> {
   Widget build(BuildContext context) {
     final (c, i) = (_configuration, _indicatorConfig);
     return Scaffold(
-      appBar: AppBar(title: const Text('Painting 示例')),
+      appBar: AppBar(title: const Text('Painting 示例'), actions: const [MyThemeToggleButton()]),
       body: ListView(
         padding: const EdgeInsets.all(12),
         children: [
@@ -48,6 +50,7 @@ class _PaintingPageState extends State<PaintingPage> {
           CacheSection(c, i),
           RichTextSection(c, i),
           ShapeSection(c, i),
+          BubbleSection(c, i),
           ImageSection(c, i),
           ShapeImageSection(c, i),
           BatchSection(c, i),

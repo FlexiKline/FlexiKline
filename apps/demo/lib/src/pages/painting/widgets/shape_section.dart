@@ -74,12 +74,8 @@ class _ShapePainter extends SectionPainter {
     style: _text,
     padding: _padding,
     borderRadius: BorderRadius.all(Radius.circular(4)),
-    gradient: GradientConfig(
-      begin: Alignment.centerLeft,
-      end: Alignment.centerRight,
-      colors: [Colors.indigo, Colors.pink],
-    ),
-    shadows: [BoxShadow(color: Colors.black38, blurRadius: 6, spreadRadius: 1, offset: Offset(0, 2))],
+    gradient: demoGradient,
+    shadows: demoShadows,
   );
 
   @override

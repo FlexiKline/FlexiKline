@@ -111,6 +111,17 @@ class _PaintingSectionState<P extends SectionPainter> extends State<PaintingSect
   }
 }
 
+/// 形状与气泡两节共用的渐变背景; clamp 让 body 之外的箭头取两端色, 默认的 decal 会让它透明。
+const demoGradient = GradientConfig(
+  begin: Alignment.centerLeft,
+  end: Alignment.centerRight,
+  tileMode: TileMode.clamp,
+  colors: [Colors.indigo, Colors.pink],
+);
+
+/// 与 [demoGradient] 配套的阴影。
+const demoShadows = [BoxShadow(color: Colors.black38, blurRadius: 6, spreadRadius: 1, offset: Offset(0, 2))];
+
 /// 在 [anchor] 画一个红色十字, 标出标签对准的点。
 void paintAnchor(Canvas canvas, Offset anchor) {
   final paint = Paint()
