@@ -1,33 +1,21 @@
 ## 2.7.0
-* Store candles in ascending time order (`KlineData.list.first` is the oldest, `list.last` the latest) and traverse, compute and paint left-to-right; data passed to `replaceKlineData`, `updateLatestKlineData` and `prependHistoryKlineData` must be in ascending time order (asserted in debug) (Breaking Changes).
-* Change `indexToDx` to return the non-nullable candle center (extrapolated outside the data) and `dxToIndex` to return the non-nullable index of the candle under `dx`; add `latestCandleDx` and `dxToFloatIndex` to `PaintObject` geometry; remove `indexToCandleDx` and `startCandleDx` (Breaking Changes).
-* Remove the `check` parameter from `indexToDx` and `timestampToDx`; use `chartRect.includeDx` to test visibility (Breaking Changes).
-* Change `PaintObject.dxToIndex` to return `int` instead of `double` (Breaking Changes).
-* Remove the `startOffset` parameter from `paintOHLCStyleCandleChart`, `paintCandleLineChart` and `paintCandleUpDownLineChart`; their default range now extends one candle beyond each side of the visible range (Breaking Changes).
-* Rename `KlineData.timestampToIndex` / `indexToTimestamp` to `timestampToFloatIndex` / `floatIndexToTimestamp` and map them to candle centers, interpolating by timestamp between adjacent candles and extrapolating by interval outside the data, so saved drawings shift by half a candle (Breaking Changes).
-* Rename `KlineData.ensureStartAndEndIndex(startIndex, maxCount)` to `ensurePaintRange({barsBack, count})` (Breaking Changes).
-* Rename `appendHistoryKlineData` to `prependHistoryKlineData` and `KlineData.appendHistory` to `prependHistory`: older history is inserted at the head (Breaking Changes).
-* Rename `isFirstCandleMovedOffScreenListenable` to `isLatestCandleOffScreenListenable` and `SettingConfig.firstCandleInitOffset` to `latestCandleInitOffset`, including the JSON field; stored configs fall back to the default `80` (Breaking Changes).
-* Replace `markRepaintChart({reset})` and `doUpdateVisibleMinMax({reset})` with the orthogonal `range` (recompute the visible range) and `geometry` (invalidate pane rects, implies `range`) flags; data updates, jumps, pan end, zoom exit and showing or hiding main indicators no longer invalidate pane geometry (Breaking Changes).
-* Fix the cross snapping to candle centers in the blank area left of the oldest candle when `moveByCandleInBlank` is off; both blank sides now behave the same.
-* Fix `TimePaintObject` throwing `IntegerDivisionByZeroException` when the candle width exceeds the time label spacing; every candle now gets a label.
-* Change the default of `PaintObject.valueToDy`'s `correct` to `false`, matching the controller and `DrawContext`; pass `correct: true` to clamp into the chart rect (Breaking Changes).
-* Change the default of `PaintObject.dyToValue`'s `check` to `false`, matching the controller and `DrawContext`; pass `check: true` to return null for a `dy` outside the pane (Breaking Changes).
-* Change `DrawContext.valueToDy` to return a non-nullable `double` (Breaking Changes).
-* Change the weak magnet to snap to the nearest OHLC price only within `magnetMinDistance`, also inside the candle body and wicks (it used to always snap there, like the strong magnet).
-* Replace `DrawContextExt.isMagneticDrawObject` with `magneticShift`, which returns the dx shift that realigns a moved drawing to candle centers; points mirrored around their candle centers no longer count as aligned (Breaking Changes).
-* Remove the unused public helpers `combineCandleList`, `removeDuplicate` and `KlineData.paintTimeRange` (Breaking Changes).
-* Deprecate `ComputeMode`; it will be removed in 2.8.0 together with `FlexiNum`, and all values will use `double`.
-* Move the exit-zoom button to the top of the `FlexiKlineWidget` stack so foreground content and the draw toolbar cannot cover it; a custom `exitZoomButtonBuilder` that fills the main area now blocks the gestures beneath it.
-* Change `onDoubleTap` to `FlexiDoubleTapCallback`, which receives the double-tap position (Breaking Changes).
-* Remove the zoom slider's claim-on-down on touch devices: taps, long presses and double-taps on it now behave as elsewhere on the chart (Breaking Changes).
-* Fix `FlexiNum.divSafe`, `divSafeNum` and `divSafeDecimal` returning a `double` fallback for a `Decimal` dividend when the divisor is zero; the fallback now takes the dividend's mode.
-* Add `BubbleBorder.arrowRadius` to round the arrow tip and base joints.
-* Fix `BubbleBorder` drawing stubs at the ends when adjacent corner radii exceed a side (such as a capsule); radii now scale down like `RRect`.
-* Add `BubbleBorder.gradient` and `GradientRoundedRectangleBorder` to stroke borders with a gradient; the bubble's gradient covers the arrow.
-* Add `TextAreaConfig.borderGradient` to stroke label borders with a gradient; without `colors` it derives from the border color.
-* Replace `DateMarkConfig` and `DateMarkPosition` with the style-only `BubbleConfig` (text style, arrow, `spacing`, `placement` as `AxisDirection` and `flip`); move `show` and `holdDuration` to `CandleIndicator.showDateMark` and `dateMarkDuration`, including JSON fields (Breaking Changes).
-* Add `placeAround` to place an anchored label on any side of a target rect, flipping to the opposite side when it does not fit; add `LabelPainter.measure` and `LabelPainter.paintAround`, which measures, places and paints in one call.
+* Store candles in ascending time order and traverse, compute and paint left-to-right; data passed to `replaceKlineData`, `updateLatestKlineData` and `prependHistoryKlineData` must be ascending (asserted in debug) (Breaking Changes).
+* Rename `appendHistoryKlineData` / `KlineData.appendHistory` to `prependHistoryKlineData` / `prependHistory`, `KlineData.ensureStartAndEndIndex` to `ensurePaintRange({barsBack, count})`, `isFirstCandleMovedOffScreenListenable` to `isLatestCandleOffScreenListenable` and `SettingConfig.firstCandleInitOffset` to `latestCandleInitOffset`, including the JSON field (Breaking Changes).
+* Change `indexToDx` to return the non-nullable candle center and `dxToIndex` to return a non-nullable `int`; remove their `check` parameter (use `chartRect.includeDx`) and `indexToCandleDx` / `startCandleDx`; add `latestCandleDx` and `dxToFloatIndex` (Breaking Changes).
+* Rename `KlineData.timestampToIndex` / `indexToTimestamp` to `timestampToFloatIndex` / `floatIndexToTimestamp`, mapped to candle centers, so saved drawings shift by half a candle (Breaking Changes).
+* Change the defaults of `PaintObject.valueToDy`'s `correct` and `dyToValue`'s `check` to `false`, matching the controller and `DrawContext`, and make `DrawContext.valueToDy` non-nullable (Breaking Changes).
+* Replace the `reset` flag of `markRepaintChart` and `doUpdateVisibleMinMax` with `range` and `geometry`; data updates, jumps, pan end and zoom exit no longer invalidate pane geometry (Breaking Changes).
+* Remove the `startOffset` parameter from the candle and line chart paint helpers; they now paint one candle beyond each side of the visible range (Breaking Changes).
+* Make the weak magnet snap only within `magnetMinDistance`, and replace `isMagneticDrawObject` with `magneticShift` (Breaking Changes).
+* Change `onDoubleTap` to `FlexiDoubleTapCallback`, which receives the position, and stop the zoom slider claiming touches on pointer down (Breaking Changes).
+* Move the exit-zoom button to the top of the `FlexiKlineWidget` stack so foreground content cannot cover it.
+* Replace `DateMarkConfig` and `DateMarkPosition` with the style-only `BubbleConfig` (`placement`, `flip`, `spacing`, arrow and text style); move the switch and duration to `CandleIndicator.showDateMark` and `dateMarkDuration` (Breaking Changes).
+* Add `TextAreaConfig.borderGradient`, `BubbleBorder.gradient` / `arrowRadius` and `GradientRoundedRectangleBorder` for gradient borders and rounded arrows; `BubbleBorder` scales oversized corner radii like `RRect` instead of drawing stubs.
+* Add `placeAround` and `LabelPainter.measure` / `paintAround` to place a label on any side of a target, flipping when it does not fit.
+* Fix time labels skipping the latest candle and throwing `IntegerDivisionByZeroException` when a candle is wider than the label spacing.
+* Fix the cross snapping to candle centers in the blank area left of the oldest candle when `moveByCandleInBlank` is off.
+* Remove the unused helpers `combineCandleList`, `removeDuplicate` and `KlineData.paintTimeRange` (Breaking Changes).
+* Deprecate `ComputeMode`; 2.8.0 removes it together with `FlexiNum`, and all values become `double`.
 
 ## 2.6.1
 * Add `TextLayoutCache.debugMissCount` (debug-only, `@visibleForTesting`) so tests can assert that cached label frames do not re-lay out text.
