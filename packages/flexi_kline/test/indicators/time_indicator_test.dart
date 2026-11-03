@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// 时间轴标签的选根: 锚定 replace 时的第一根, 加载历史与新蜡烛都不让标签跳动。
+/// 时间轴标签的选根: 锚定最新一根, 最新蜡烛下方恒有标签, 加载历史不让标签跳动。
 ///
 /// 经 controller 的绘制入口驱动, 断言录制下来的标签位置; 不覆盖手势与 Widget 布局。
 library;
 
-import 'dart:math' as math;
+import 'dart:ui' show Paragraph;
 
 import 'package:flexi_formatter/date_time.dart' show TimeUnit;
 import 'package:flexi_kline/flexi_kline.dart';
@@ -49,14 +49,18 @@ void main() {
     chart.flushPendingKlineData();
   }
 
-  /// 本帧时间轴标签(画在主区下方)的左上角位置。
-  Future<List<Offset>> labels(WidgetTester tester) async {
+  /// 本帧时间轴标签(画在主区下方)的左上角位置与宽度。
+  Future<List<({Offset offset, double width})>> labels(WidgetTester tester) async {
     final canvas = RecordingCanvas();
     chart.paintChart(canvas, chart.canvasRect.size);
     await tester.pump();
+    final paragraphs = [
+      for (final i in canvas.invocations)
+        if (i.memberName == #drawParagraph) i.positionalArguments[0] as Paragraph,
+    ];
     return [
-      for (final o in canvas.paragraphOffsets)
-        if (o.dy >= chart.mainRect.bottom) o,
+      for (final (i, o) in canvas.paragraphOffsets.indexed)
+        if (o.dy >= chart.mainRect.bottom) (offset: o, width: paragraphs[i].width),
     ];
   }
 
@@ -75,21 +79,33 @@ void main() {
     expect(await labels(tester), before);
   });
 
-  testWidgets('新蜡烛追加在尾部时已有标签不跳', (tester) async {
+  testWidgets('蜡烛宽过标签间距时每根都有标签, 不因 step 为 0 抛异常', (tester) async {
     await mount(tester);
-    final before = await labels(tester);
-    final w = chart.candleActualWidth;
+    chart.settingConfig = chart.settingConfig.copyWith(candleMaxWidth: 300);
+    chart.onChartScaleTo(150 / chart.candleWidth, position: ScalePosition.right, focalDx: 0);
+    expect(chart.candleActualWidth, greaterThan(120), reason: '前置: 标签间距不足一根蜡烛');
 
-    chart.updateLatestKlineData(_spec, [_candle(1200)]);
-    chart.flushPendingKlineData();
-    final after = await labels(tester);
+    final shown = await labels(tester);
 
-    // 视口锚定最新根, 新蜡烛让已有蜡烛整体左移一根; 标签跟着蜡烛走, 相位与左移一根后一致.
-    final period = before[1].dx - before[0].dx;
-    expect(period, greaterThan(w), reason: '前置: 标签隔根选取');
-    for (final o in after) {
-      final phase = (o.dx + w - before.first.dx) % period;
-      expect(math.min(phase, period - phase), lessThan(1e-6), reason: '标签 $o 不在左移一根后的原相位上');
+    expect(shown, isNotEmpty);
+    expect(shown.length, chart.klineData.end - chart.klineData.start);
+  });
+
+  testWidgets('最新一根下方恒有标签, 新蜡烛追加后仍然如此', (tester) async {
+    await mount(tester);
+    final first = await labels(tester);
+    expect(first.length, greaterThan(1), reason: '前置: 标签隔根选取');
+    final step = ((first[1].offset.dx - first[0].offset.dx) / chart.candleActualWidth).round();
+
+    // 追加 step + 1 根, 让最新一根走遍 step 的全部余数。
+    for (var i = 0; i <= step; i++) {
+      final latestDx = chart.indexToDx(chart.klineData.length - 1);
+      final centers = [for (final l in await labels(tester)) l.offset.dx + l.width / 2];
+      expect(centers.any((c) => (c - latestDx).abs() < 0.01), isTrue, reason: '追加 $i 根后最新一根下方没有标签');
+
+      chart.updateLatestKlineData(_spec, [_candle(1200 + i)]);
+      chart.flushPendingKlineData();
     }
+    expect(chart.klineData.length, 200 + step + 1, reason: '前置: 蜡烛确实追加');
   });
 }

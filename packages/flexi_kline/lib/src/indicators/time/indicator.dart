@@ -64,7 +64,7 @@ class TimePaintObject<T extends TimeIndicator> extends TimeBasePaintObject<T> {
 
   /// 两个时间刻度间隔的蜡烛数
   int get timeLabelIntervalCount {
-    return ((math.max(60, indicator.timeLabel.textWidth ?? 0)) / candleActualWidth).round();
+    return math.max(1, (math.max(60, indicator.timeLabel.textWidth ?? 0) / candleActualWidth).round());
   }
 
   @override
@@ -90,9 +90,10 @@ class TimePaintObject<T extends TimeIndicator> extends TimeBasePaintObject<T> {
     final formatter = indicator.tickFormatter;
     final dy = chartRect.top + height / 2;
     final step = timeLabelIntervalCount;
-    final origin = data.labelOriginIndex;
+    // 标签以最新一根为锚点, 最新蜡烛下方恒有刻度; 加载历史不改变距最新根的根数, 标签不跳。
+    final latestIndex = data.length - 1;
     for (var i = start; i < end; i++) {
-      if ((i - origin) % step != 0) continue;
+      if ((latestIndex - i) % step != 0) continue;
       final model = data.list[i];
       _timeLabels.paint(
         canvas,

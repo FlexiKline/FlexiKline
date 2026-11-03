@@ -10,12 +10,12 @@
 * Rename `isFirstCandleMovedOffScreenListenable` to `isLatestCandleOffScreenListenable` and `SettingConfig.firstCandleInitOffset` to `latestCandleInitOffset`, including the JSON field; stored configs fall back to the default `80` (Breaking Changes).
 * Replace `markRepaintChart({reset})` and `doUpdateVisibleMinMax({reset})` with the orthogonal `range` (recompute the visible range) and `geometry` (invalidate pane rects, implies `range`) flags; data updates, jumps, pan end, zoom exit and showing or hiding main indicators no longer invalidate pane geometry (Breaking Changes).
 * Fix the cross snapping to candle centers in the blank area left of the oldest candle when `moveByCandleInBlank` is off; both blank sides now behave the same.
+* Fix `TimePaintObject` throwing `IntegerDivisionByZeroException` when the candle width exceeds the time label spacing; every candle now gets a label.
 * Change the default of `PaintObject.valueToDy`'s `correct` to `false`, matching the controller and `DrawContext`; pass `correct: true` to clamp into the chart rect (Breaking Changes).
 * Change the default of `PaintObject.dyToValue`'s `check` to `false`, matching the controller and `DrawContext`; pass `check: true` to return null for a `dy` outside the pane (Breaking Changes).
 * Change `DrawContext.valueToDy` to return a non-nullable `double` (Breaking Changes).
 * Change the weak magnet to snap to the nearest OHLC price only within `magnetMinDistance`, also inside the candle body and wicks (it used to always snap there, like the strong magnet).
 * Replace `DrawContextExt.isMagneticDrawObject` with `magneticShift`, which returns the dx shift that realigns a moved drawing to candle centers; points mirrored around their candle centers no longer count as aligned (Breaking Changes).
-* Add `KlineData.labelOriginIndex` so time-axis labels stay on the same candles after loading more history.
 * Remove the unused public helpers `combineCandleList`, `removeDuplicate` and `KlineData.paintTimeRange` (Breaking Changes).
 * Deprecate `ComputeMode`; it will be removed in 2.8.0 together with `FlexiNum`, and all values will use `double`.
 * Move the exit-zoom button to the top of the `FlexiKlineWidget` stack so foreground content and the draw toolbar cannot cover it; a custom `exitZoomButtonBuilder` that fills the main area now blocks the gestures beneath it.

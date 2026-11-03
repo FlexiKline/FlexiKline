@@ -165,42 +165,6 @@ void main() {
     });
   });
 
-  group('KlineData labelOriginIndex', () {
-    test('replace 归零, 头部插入加上净头插根数, 最新端更新不变', () {
-      final data = _data();
-      addTearDown(data.dispose);
-      data.replace([_candle(5), _candle(6), _candle(7)], slotCount: 0);
-      expect(data.labelOriginIndex, 0);
-
-      // ts=5 与已有蜡烛重叠, 净头插 2 根.
-      data.prependHistory([_candle(3), _candle(4), _candle(5)], slotCount: 0);
-      expect(data.labelOriginIndex, 2);
-
-      data.updateLatest([_candle(7), _candle(8)], slotCount: 0);
-      expect(data.labelOriginIndex, 2);
-
-      data.replace([_candle(1)], slotCount: 0);
-      expect(data.labelOriginIndex, 0);
-    });
-
-    test('加载历史前后, 原有蜡烛里被选作标签的时间戳不变', () {
-      final data = _data();
-      addTearDown(data.dispose);
-      data.replace([for (var ts = 10; ts < 20; ts++) _candle(ts)], slotCount: 0);
-      const step = 3;
-      Set<int> labelTs({int fromTs = 10}) => {
-        for (var i = 0; i < data.length; i++)
-          if ((i - data.labelOriginIndex) % step == 0 && data[i].ts >= fromTs) data[i].ts,
-      };
-      final before = labelTs();
-
-      // 净头插 2 根, 不是 step 的倍数: 只按下标取模时标签会整体错位.
-      data.prependHistory([_candle(8), _candle(9)], slotCount: 0);
-
-      expect(labelTs(), before);
-    });
-  });
-
   group('KlineData timestamp <-> float index', () {
     const minute = 60000;
     KlineData minuteData(List<int> minutes) {

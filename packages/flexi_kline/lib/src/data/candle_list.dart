@@ -80,7 +80,6 @@ mixin CandleListData on BaseData {
   Range replace(List<ICandleModel> batch, {required int slotCount}) {
     assert(_isAscending(batch), 'replace batch must be in ascending time order');
     _list = batch.map((item) => item.toFlexiCandleModel(slotCount, computeMode)).toList(growable: true);
-    _labelOriginIndex = 0;
     updateState();
     return Range.fullRecompute;
   }
@@ -136,7 +135,6 @@ mixin CandleListData on BaseData {
       headEnd++;
     }
     _list.replaceRange(0, headEnd, incoming);
-    _labelOriginIndex += incoming.length - headEnd;
     updateState();
     return Range.fullRecompute;
   }

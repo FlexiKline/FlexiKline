@@ -87,12 +87,6 @@ abstract class BaseData with FlexiLog {
     _end = val.clamp(0, length);
   }
 
-  int _labelOriginIndex = 0;
-
-  /// 时间轴标签的锚点下标: 标签取 `(i - labelOriginIndex) % step == 0` 的蜡烛,
-  /// 头部插入历史时随之平移, 使标签不随 loadMore 或新蜡烛跳动。
-  int get labelOriginIndex => _labelOriginIndex;
-
   bool checkStartAndEnd(int start, int end) {
     return isNotEmpty && start < end && start >= 0 && end <= length;
   }
