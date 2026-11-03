@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// `TextAreaConfig.toLabelStyle` 的解析与记忆，以及 `gradient` / `shadows` 的序列化。
+/// `TextAreaConfig.toLabelStyle` 的解析与记忆，以及 `gradient` / `borderGradient` / `shadows` 的序列化。
 library;
 
 import 'package:flexi_kline/flexi_kline.dart';
@@ -165,6 +165,40 @@ void main() {
       expect(decoration.gradient!.colors, const [_red, _blue]);
     });
 
+    test('有 border 与 borderGradient 时形状为 GradientRoundedRectangleBorder，边框色作 baseColor', () {
+      const config = TextAreaConfig(
+        border: BorderSide(color: _red, width: 2),
+        borderRadius: BorderRadius.all(Radius.circular(4)),
+        borderGradient: GradientConfig(),
+      );
+
+      final shape = config.toLabelStyle().decoration!.shape as GradientRoundedRectangleBorder;
+
+      expect(shape.gradient, const GradientConfig().createGradient(baseColor: _red));
+      expect(shape.side, const BorderSide(color: _red, width: 2));
+      expect(shape.borderRadius, const BorderRadius.all(Radius.circular(4)));
+    });
+
+    test('borderGradient 的边框色可来自主题兜底', () {
+      const config = TextAreaConfig(
+        border: BorderSide(color: Color(0x00000000)),
+        borderGradient: GradientConfig(),
+      );
+
+      final shape = config.toLabelStyle(borderColor: _blue).decoration!.shape as GradientRoundedRectangleBorder;
+
+      expect(shape.gradient, const GradientConfig().createGradient(baseColor: _blue));
+    });
+
+    test('没有 border 时 borderGradient 不生效', () {
+      const config = TextAreaConfig(backgroundColor: _red, borderGradient: GradientConfig());
+
+      final shape = config.toLabelStyle().decoration!.shape;
+
+      expect(shape.runtimeType, RoundedRectangleBorder);
+      expect(const TextAreaConfig(borderGradient: GradientConfig()).toLabelStyle().decoration, isNull);
+    });
+
     test('shadows 原样转入 decoration', () {
       const shadows = [BoxShadow(color: _red, blurRadius: 4, offset: Offset(1, 2))];
 
@@ -203,6 +237,28 @@ void main() {
       expect(gradient.stops, const [0.0, 1.0]);
       expect(gradient.colors, const [_red, _blue]);
       expect(restored.shadows, config.shadows);
+    });
+
+    test('borderGradient JSON 往返, 未设置时不写键', () {
+      const config = TextAreaConfig(
+        border: BorderSide(color: _red),
+        borderGradient: GradientConfig(
+          begin: Alignment.centerLeft,
+          end: Alignment.center,
+          tileMode: TileMode.mirror,
+          startAlpha: 1,
+          endAlpha: 0.2,
+        ),
+      );
+
+      final restored = TextAreaConfig.fromJson(config.toJson()).borderGradient!;
+
+      expect(restored.begin, Alignment.centerLeft);
+      expect(restored.end, Alignment.center);
+      expect(restored.tileMode, TileMode.mirror);
+      expect(restored.startAlpha, 1);
+      expect(restored.endAlpha, 0.2);
+      expect(const TextAreaConfig().toJson().containsKey('borderGradient'), isFalse);
     });
 
     test('未设置时 toJson 不写这两个键', () {

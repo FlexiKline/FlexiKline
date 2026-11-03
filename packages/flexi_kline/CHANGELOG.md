@@ -24,6 +24,8 @@
 * Fix `FlexiNum.divSafe`, `divSafeNum` and `divSafeDecimal` returning a `double` fallback for a `Decimal` dividend when the divisor is zero; the fallback now takes the dividend's mode.
 * Add `BubbleBorder.arrowRadius` to round the arrow tip and base joints.
 * Fix `BubbleBorder` drawing stubs at the ends when adjacent corner radii exceed a side (such as a capsule); radii now scale down like `RRect`.
+* Add `BubbleBorder.gradient` and `GradientRoundedRectangleBorder` to stroke borders with a gradient; the bubble's gradient covers the arrow.
+* Add `TextAreaConfig.borderGradient` to stroke label borders with a gradient; without `colors` it derives from the border color.
 
 ## 2.6.1
 * Add `TextLayoutCache.debugMissCount` (debug-only, `@visibleForTesting`) so tests can assert that cached label frames do not re-lay out text.

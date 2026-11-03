@@ -20,6 +20,7 @@ import 'package:flutter/painting.dart';
 import '../../constant.dart';
 import '../../extension/export.dart';
 import '../../framework/serializers.dart';
+import '../../painting/borders.dart';
 import '../../painting/label_style.dart';
 import '../gradient_config/gradient_config.dart';
 
@@ -48,6 +49,7 @@ class TextAreaConfig {
     this.border,
     this.borderRadius,
     this.gradient,
+    this.borderGradient,
     this.shadows,
   });
 
@@ -68,6 +70,9 @@ class TextAreaConfig {
 
   /// 背景渐变, 与背景色互斥: 有渐变时背景色(含主题兜底)只作 baseColor; 未给 colors 又无背景色时不生效。
   final GradientConfig? gradient;
+
+  /// 边框渐变, 只在有 [border] 时生效; 未给 colors 时以边框颜色(含主题兜底)为 baseColor。
+  final GradientConfig? borderGradient;
 
   /// 背景阴影; 模糊在 raster 线程逐帧执行, 只建议同屏个位数的标签(如最新价、气泡)使用, 不要挂在刻度上。
   final List<BoxShadow>? shadows;
@@ -134,6 +139,15 @@ extension TextAreaConfigLabel on TextAreaConfig {
     final resolvedGradient = gradient == null || (bg == null && gradient.isDynamic)
         ? null
         : gradient.createGradient(baseColor: bg ?? transparent);
+    final radius = borderRadius ?? BorderRadius.zero;
+    final borderGradient = this.borderGradient;
+    final shape = side != null && borderGradient != null
+        ? GradientRoundedRectangleBorder(
+            side: side,
+            borderRadius: radius,
+            gradient: borderGradient.createGradient(baseColor: side.color),
+          )
+        : RoundedRectangleBorder(side: side ?? BorderSide.none, borderRadius: radius);
     final hasDecoration = bg != null || side != null || borderRadius != null || gradient != null || shadows != null;
     return LabelStyle(
       text: style.ensure(textColor),
@@ -151,10 +165,7 @@ extension TextAreaConfigLabel on TextAreaConfig {
               color: gradient == null ? bg : null,
               gradient: resolvedGradient,
               shadows: shadows,
-              shape: RoundedRectangleBorder(
-                side: side ?? BorderSide.none,
-                borderRadius: borderRadius ?? BorderRadius.zero,
-              ),
+              shape: shape,
             ),
     );
   }

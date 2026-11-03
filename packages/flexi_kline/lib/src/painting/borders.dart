@@ -46,6 +46,7 @@ final class BubbleBorder extends AnchoredBorder {
     this.direction = AxisDirection.down,
     this.arrowSize = const Size(10, 6),
     this.arrowRadius = 0,
+    this.gradient,
     this.arrow,
   }) : assert(arrowRadius >= 0);
 
@@ -60,6 +61,9 @@ final class BubbleBorder extends AnchoredBorder {
 
   /// 箭头尖端与两个根部的圆角半径, 0 为尖角; 尖端倒圆后可见尖端略低于 [arrowSize] 的高度。
   final double arrowRadius;
+
+  /// 描边渐变, null 用 [side] 的颜色; 着色区域是含箭头的整条描边路径。
+  final Gradient? gradient;
 
   /// 箭头尖端要对准的点, 相对 rect 左上角; null 对准所在边的中点。
   ///
@@ -82,6 +86,7 @@ final class BubbleBorder extends AnchoredBorder {
     direction: direction,
     arrowSize: arrowSize,
     arrowRadius: arrowRadius,
+    gradient: gradient,
     arrow: anchor,
   );
 
@@ -98,7 +103,15 @@ final class BubbleBorder extends AnchoredBorder {
   void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
     if (side.style == BorderStyle.none) return;
     // 描边中心线落在 strokeAlign 对应的位置(默认 inside: 内缩半个线宽)。
-    canvas.drawPath(_path(rect, side.strokeOffset / 2), side.toPaint());
+    final path = _path(rect, side.strokeOffset / 2);
+    final paint = side.toPaint();
+    if (gradient case final gradient?) {
+      // 画笔色的 alpha 会与 shader 叠乘, 置为不透明。
+      paint
+        ..color = const Color(0xFF000000)
+        ..shader = gradient.createShader(path.getBounds(), textDirection: textDirection);
+    }
+    canvas.drawPath(path, paint);
   }
 
   @override
@@ -108,6 +121,7 @@ final class BubbleBorder extends AnchoredBorder {
     direction: direction,
     arrowSize: arrowSize * t,
     arrowRadius: arrowRadius * t,
+    gradient: gradient,
     // 相对 rect 的长度, 与 rect 一同缩放。
     arrow: arrow == null ? null : arrow! * t,
   );
@@ -230,8 +244,55 @@ final class BubbleBorder extends AnchoredBorder {
           direction == other.direction &&
           arrowSize == other.arrowSize &&
           arrowRadius == other.arrowRadius &&
+          gradient == other.gradient &&
           arrow == other.arrow;
 
   @override
-  int get hashCode => Object.hash(side, borderRadius, direction, arrowSize, arrowRadius, arrow);
+  int get hashCode => Object.hash(side, borderRadius, direction, arrowSize, arrowRadius, gradient, arrow);
+}
+
+/// 描边用 [gradient] 着色的圆角矩形; 形状、填充与描边位置同 [RoundedRectangleBorder]。
+///
+/// 不参与形状插值: lerp 得到的是不带渐变的 RoundedRectangleBorder。
+final class GradientRoundedRectangleBorder extends RoundedRectangleBorder {
+  const GradientRoundedRectangleBorder({super.side, super.borderRadius, required this.gradient});
+
+  /// 着色区域是传给 [paint] 的 rect。
+  final Gradient gradient;
+
+  @override
+  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
+    if (side.style == BorderStyle.none) return;
+    final rrect = borderRadius.resolve(textDirection).toRRect(rect);
+    final paint = Paint()..shader = gradient.createShader(rect, textDirection: textDirection);
+    // 与 RoundedRectangleBorder 相同: 线宽 0 画细线, 否则按 strokeAlign 填充内外两条轮廓之间。
+    if (side.width == 0) {
+      canvas.drawRRect(rrect, paint..style = PaintingStyle.stroke);
+    } else {
+      canvas.drawDRRect(rrect.inflate(side.strokeOutset), rrect.deflate(side.strokeInset), paint);
+    }
+  }
+
+  @override
+  GradientRoundedRectangleBorder copyWith({BorderSide? side, BorderRadiusGeometry? borderRadius, Gradient? gradient}) =>
+      GradientRoundedRectangleBorder(
+        side: side ?? this.side,
+        borderRadius: borderRadius ?? this.borderRadius,
+        gradient: gradient ?? this.gradient,
+      );
+
+  @override
+  GradientRoundedRectangleBorder scale(double t) =>
+      GradientRoundedRectangleBorder(side: side.scale(t), borderRadius: borderRadius * t, gradient: gradient);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is GradientRoundedRectangleBorder &&
+          side == other.side &&
+          borderRadius == other.borderRadius &&
+          gradient == other.gradient;
+
+  @override
+  int get hashCode => Object.hash(side, borderRadius, gradient);
 }

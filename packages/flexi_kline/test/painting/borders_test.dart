@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'dart:math' as math;
+import 'dart:ui' show PictureRecorder;
 
 import 'package:flexi_kline/src/painting/export.dart';
 import 'package:flutter/painting.dart';
@@ -315,6 +316,116 @@ void main() {
       final canvas = RecordingCanvas();
       bubble(AxisDirection.down).paint(canvas, body);
       expect(canvas.invocations, isEmpty);
+    });
+  });
+
+  group('BubbleBorder.gradient', () {
+    const side = BorderSide(width: 2, color: Color(0x80FF0000));
+    // decal: shader 区域之外透明, 区域若只取 body 则箭头画不出来。
+    const gradient = LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [Color(0xFF00FF00), Color(0xFF00FF00)],
+      tileMode: TileMode.decal,
+    );
+    const border = BubbleBorder(
+      side: side,
+      borderRadius: BorderRadius.all(Radius.circular(radius)),
+      arrowSize: arrowSize,
+      gradient: gradient,
+    );
+
+    test('描边画笔挂 shader, 画笔色不透明以免 alpha 叠乘', () {
+      final canvas = RecordingCanvas();
+      border.paint(canvas, body);
+      expect(canvas.countOf(#drawPath), 1);
+      final paint = canvas.invocations.single.positionalArguments[1] as Paint;
+      expect(paint.shader, isNotNull);
+      expect(paint.color.a, 1);
+      expect(paint.strokeWidth, 2);
+    });
+
+    test('着色区域含箭头: 栅格化后箭头处有像素', () async {
+      final recorder = PictureRecorder();
+      border.paint(Canvas(recorder), body);
+      final image = recorder.endRecording().toImageSync(140, 70);
+      addTearDown(image.dispose);
+      final bytes = (await image.toByteData())!;
+      var painted = 0;
+      for (var y = (body.bottom + 1).ceil(); y < 70; y++) {
+        for (var x = 0; x < 140; x++) {
+          if (bytes.getUint8((y * 140 + x) * 4 + 3) > 0) painted++;
+        }
+      }
+      expect(painted, greaterThan(0));
+    });
+
+    test('anchorTo、scale 与 == 带上 gradient', () {
+      expect(border.anchorTo(const Offset(1, 1)).gradient, gradient);
+      expect(border.scale(2).gradient, gradient);
+      expect(
+        border == const BubbleBorder(side: side, borderRadius: BorderRadius.all(Radius.circular(radius))),
+        isFalse,
+      );
+    });
+  });
+
+  group('GradientRoundedRectangleBorder', () {
+    const gradient = LinearGradient(colors: [Color(0xFF00FF00), Color(0xFF0000FF)]);
+    const side = BorderSide(width: 2, color: Color(0xFFFF0000));
+    const border = GradientRoundedRectangleBorder(
+      side: side,
+      borderRadius: BorderRadius.all(Radius.circular(radius)),
+      gradient: gradient,
+    );
+
+    test('按 strokeAlign 填充内外轮廓之间, 画笔挂 shader', () {
+      final canvas = RecordingCanvas();
+      border.paint(canvas, body);
+      final args = canvas.invocations.single.positionalArguments;
+      expect(canvas.invocations.single.memberName, #drawDRRect);
+      expect((args[0] as RRect).outerRect, body);
+      expect((args[1] as RRect).outerRect, body.deflate(2));
+      expect((args[2] as Paint).shader, isNotNull);
+    });
+
+    test('线宽 0 画细线; 无边框时不画', () {
+      final hairline = RecordingCanvas();
+      border.copyWith(side: const BorderSide(width: 0)).paint(hairline, body);
+      expect(hairline.rrectBounds, [body]);
+      expect((hairline.invocations.single.positionalArguments[1] as Paint).shader, isNotNull);
+
+      final none = RecordingCanvas();
+      border.copyWith(side: BorderSide.none).paint(none, body);
+      expect(none.invocations, isEmpty);
+    });
+
+    test('copyWith 与 scale 保留 gradient, 仍是 RoundedRectangleBorder', () {
+      final copied = border.copyWith(borderRadius: BorderRadius.zero);
+      expect(copied.gradient, gradient);
+      expect(copied.side, side);
+      expect(
+        border.scale(2),
+        const GradientRoundedRectangleBorder(
+          side: BorderSide(width: 4, color: Color(0xFFFF0000)),
+          borderRadius: BorderRadius.all(Radius.circular(radius * 2)),
+          gradient: gradient,
+        ),
+      );
+      expect(border, isA<RoundedRectangleBorder>());
+    });
+
+    test('== 区分渐变, 与同参的 RoundedRectangleBorder 不等', () {
+      expect(border, border.copyWith());
+      expect(border.hashCode, border.copyWith().hashCode);
+      expect(
+        border == border.copyWith(gradient: const LinearGradient(colors: [Color(0xFF000000), Color(0xFFFFFFFF)])),
+        isFalse,
+      );
+      expect(
+        border == const RoundedRectangleBorder(side: side, borderRadius: BorderRadius.all(Radius.circular(radius))),
+        isFalse,
+      );
     });
   });
 

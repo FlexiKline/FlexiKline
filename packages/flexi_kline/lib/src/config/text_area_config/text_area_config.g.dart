@@ -31,6 +31,8 @@ abstract class _$TextAreaConfigCWProxy {
 
   TextAreaConfig gradient(GradientConfig? gradient);
 
+  TextAreaConfig borderGradient(GradientConfig? borderGradient);
+
   TextAreaConfig shadows(List<BoxShadow>? shadows);
 
   /// Creates a new instance with the provided field values.
@@ -53,6 +55,7 @@ abstract class _$TextAreaConfigCWProxy {
     BorderSide? border,
     BorderRadius? borderRadius,
     GradientConfig? gradient,
+    GradientConfig? borderGradient,
     List<BoxShadow>? shadows,
   });
 }
@@ -104,6 +107,10 @@ class _$TextAreaConfigCWProxyImpl implements _$TextAreaConfigCWProxy {
   TextAreaConfig gradient(GradientConfig? gradient) => call(gradient: gradient);
 
   @override
+  TextAreaConfig borderGradient(GradientConfig? borderGradient) =>
+      call(borderGradient: borderGradient);
+
+  @override
   TextAreaConfig shadows(List<BoxShadow>? shadows) => call(shadows: shadows);
 
   /// Creates a new instance with the provided field values.
@@ -127,6 +134,7 @@ class _$TextAreaConfigCWProxyImpl implements _$TextAreaConfigCWProxy {
     Object? border = const $CopyWithPlaceholder(),
     Object? borderRadius = const $CopyWithPlaceholder(),
     Object? gradient = const $CopyWithPlaceholder(),
+    Object? borderGradient = const $CopyWithPlaceholder(),
     Object? shadows = const $CopyWithPlaceholder(),
   }) {
     return TextAreaConfig(
@@ -178,6 +186,10 @@ class _$TextAreaConfigCWProxyImpl implements _$TextAreaConfigCWProxy {
           ? _value.gradient
           // ignore: cast_nullable_to_non_nullable
           : gradient as GradientConfig?,
+      borderGradient: borderGradient == const $CopyWithPlaceholder()
+          ? _value.borderGradient
+          // ignore: cast_nullable_to_non_nullable
+          : borderGradient as GradientConfig?,
       shadows: shadows == const $CopyWithPlaceholder()
           ? _value.shadows
           // ignore: cast_nullable_to_non_nullable
@@ -238,6 +250,11 @@ TextAreaConfig _$TextAreaConfigFromJson(Map<String, dynamic> json) =>
       gradient: json['gradient'] == null
           ? null
           : GradientConfig.fromJson(json['gradient'] as Map<String, dynamic>),
+      borderGradient: json['borderGradient'] == null
+          ? null
+          : GradientConfig.fromJson(
+              json['borderGradient'] as Map<String, dynamic>,
+            ),
       shadows: (json['shadows'] as List<dynamic>?)
           ?.map(
             (e) =>
@@ -276,6 +293,7 @@ Map<String, dynamic> _$TextAreaConfigToJson(
     const BorderRadiusConverter().toJson,
   ),
   'gradient': ?instance.gradient?.toJson(),
+  'borderGradient': ?instance.borderGradient?.toJson(),
   'shadows': ?instance.shadows?.map(const BoxShadowConverter().toJson).toList(),
 };
 
