@@ -359,19 +359,19 @@ class ScalePositionConverter implements JsonConverter<ScalePosition, String> {
   }
 }
 
-class DateMarkPositionConverter implements JsonConverter<DateMarkPosition, String> {
-  const DateMarkPositionConverter();
+class AxisDirectionConverter implements JsonConverter<AxisDirection, String> {
+  const AxisDirectionConverter();
 
   @override
-  DateMarkPosition fromJson(String json) {
-    return DateMarkPosition.values.firstWhere(
+  AxisDirection fromJson(String json) {
+    return AxisDirection.values.firstWhere(
       (e) => e.name == json,
-      orElse: () => DateMarkPosition.auto,
+      orElse: () => AxisDirection.up,
     );
   }
 
   @override
-  String toJson(DateMarkPosition object) {
+  String toJson(AxisDirection object) {
     return object.name;
   }
 }
@@ -1013,7 +1013,7 @@ class IDrawTypeConverter implements JsonConverter<IDrawType, Map<String, dynamic
 const _basicConverterList = <JsonConverter>[
   DrawPositionConverter(),
   ScalePositionConverter(),
-  DateMarkPositionConverter(),
+  AxisDirectionConverter(),
   PaintingStyleConverter(),
   BlendModeConverter(),
   LineTypeConverter(),

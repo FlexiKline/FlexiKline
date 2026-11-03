@@ -26,6 +26,7 @@
 * Fix `BubbleBorder` drawing stubs at the ends when adjacent corner radii exceed a side (such as a capsule); radii now scale down like `RRect`.
 * Add `BubbleBorder.gradient` and `GradientRoundedRectangleBorder` to stroke borders with a gradient; the bubble's gradient covers the arrow.
 * Add `TextAreaConfig.borderGradient` to stroke label borders with a gradient; without `colors` it derives from the border color.
+* Replace `DateMarkConfig` and `DateMarkPosition` with the style-only `BubbleConfig` (text style, arrow, `spacing`, `placement` as `AxisDirection` and `flip`); move `show` and `holdDuration` to `CandleIndicator.showDateMark` and `dateMarkDuration`, including JSON fields (Breaking Changes).
 * Add `placeAround` to place an anchored label on any side of a target rect, flipping to the opposite side when it does not fit; add `LabelPainter.measure` and `LabelPainter.paintAround`, which measures, places and paints in one call.
 
 ## 2.6.1

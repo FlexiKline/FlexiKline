@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+export 'bubble_config/bubble_config.dart';
 export 'cross_config/cross_config.dart';
-export 'date_mark_config/date_mark_config.dart';
 export 'default_config.dart';
 export 'draw_config/draw_config.dart';
 export 'flexi_kline_config/flexi_kline_config.dart';

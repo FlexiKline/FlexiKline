@@ -36,8 +36,6 @@ const _peak = 195;
 /// 唯一的最低点下标: 其余蜡烛 low 都是 90, 下方有足够空间。
 const _trough = 193;
 
-const _timed = DateMarkConfig();
-
 List<CandleModel> _candles({int count = 200}) => List.generate(
   count,
   (i) => CandleModel(
@@ -50,9 +48,10 @@ List<CandleModel> _candles({int count = 200}) => List.generate(
   ),
 );
 
-/// 默认 holdDuration 为 0: 不留 Timer, 只断言位置的用例不必等它到期; 计时类用例显式传入时长。
+/// 默认 dateMarkDuration 为 0: 不留 Timer, 只断言位置的用例不必等它到期; 计时类用例显式传入时长。
 class _Candle extends CandleIndicator {
-  _Candle({super.chartType, super.dateMark = const DateMarkConfig(holdDuration: 0)}) : super(showCountdown: false);
+  _Candle({super.chartType, super.showDateMark, super.dateMark, super.dateMarkDuration = 0})
+    : super(showCountdown: false);
 
   late CandlePaintObject object;
 
@@ -160,7 +159,7 @@ void main() {
       expect(path.contains(Offset(dxOf(index), bounds.bottom - 0.5)), isTrue, reason: '箭头尖端在蜡烛中心');
     });
 
-    testWidgets('auto: 上方放不下时放到 low 下方', (tester) async {
+    testWidgets('flip: 上方放不下时放到 low 下方', (tester) async {
       final candle = await mount(tester, _Candle());
       candle.didMoveToDate(tsOf(_peak));
 
@@ -169,11 +168,8 @@ void main() {
       expect(bounds.top, closeTo(candle.valueToDy(chart.klineData[_peak].low, correct: true) + config.spacing, 0.01));
     });
 
-    testWidgets('above: 上方放不下时整体夹回 drawableRect, 不翻到下方', (tester) async {
-      final candle = await mount(
-        tester,
-        _Candle(dateMark: const DateMarkConfig(holdDuration: 0, position: DateMarkPosition.above)),
-      );
+    testWidgets('不翻转: 上方放不下时整体夹回 drawableRect, 不翻到下方', (tester) async {
+      final candle = await mount(tester, _Candle(dateMark: const BubbleConfig(flip: false)));
       candle.didMoveToDate(tsOf(_peak));
 
       final bounds = bubbles(paint()).single.getBounds();
@@ -181,17 +177,37 @@ void main() {
       expect(bounds.bottom, lessThan(candle.valueToDy(chart.klineData[_peak].low, correct: true)), reason: '没有翻到下方');
     });
 
-    testWidgets('below: 上方有空间也放在 low 下方', (tester) async {
-      final candle = await mount(
-        tester,
-        _Candle(dateMark: const DateMarkConfig(holdDuration: 0, position: DateMarkPosition.below)),
-      );
+    testWidgets('placement 为 down: 上方有空间也放在 low 下方', (tester) async {
+      final candle = await mount(tester, _Candle(dateMark: const BubbleConfig(placement: AxisDirection.down)));
       const index = 180;
       candle.didMoveToDate(tsOf(index));
 
       final bounds = bubbles(paint()).single.getBounds();
       final config = candle.indicator.dateMark;
       expect(bounds.top, closeTo(candle.valueToDy(chart.klineData[index].low, correct: true) + config.spacing, 0.01));
+    });
+
+    testWidgets('placement 为 left: 箭头尖端在蜡烛左缘外 spacing 处, 纵向居中于 high 与 low', (tester) async {
+      final candle = await mount(tester, _Candle(dateMark: const BubbleConfig(placement: AxisDirection.left)));
+      const index = 180;
+      candle.didMoveToDate(tsOf(index));
+
+      final bounds = bubbles(paint()).single.getBounds();
+      final model = chart.klineData[index];
+      final spacing = candle.indicator.dateMark.spacing;
+      expect(bounds.right, closeTo(dxOf(index) - candle.candleWidth / 2 - spacing, 0.01));
+      final middle = (candle.valueToDy(model.high, correct: true) + candle.valueToDy(model.low, correct: true)) / 2;
+      expect(bounds.center.dy, closeTo(middle, 0.01));
+    });
+
+    testWidgets('placement 为 right: 右侧放不下时翻到左侧', (tester) async {
+      final candle = await mount(tester, _Candle(dateMark: const BubbleConfig(placement: AxisDirection.right)));
+      final index = chart.klineData.end - 1;
+      candle.didMoveToDate(tsOf(index));
+
+      final bounds = bubbles(paint()).single.getBounds();
+      final spacing = candle.indicator.dateMark.spacing;
+      expect(bounds.right, closeTo(dxOf(index) - candle.candleWidth / 2 - spacing, 0.01));
     });
 
     testWidgets('线图: 锚点取 close', (tester) async {
@@ -253,16 +269,16 @@ void main() {
   });
 
   group('状态与计时', () {
-    testWidgets('show 关闭时忽略', (tester) async {
-      final candle = await mount(tester, _Candle(dateMark: const DateMarkConfig(show: false)));
+    testWidgets('showDateMark 关闭时忽略', (tester) async {
+      final candle = await mount(tester, _Candle(showDateMark: false));
       candle.didMoveToDate(tsOf(20));
 
       expect(candle.dateMarkTs, isNull);
       expect(bubbles(paint()), isEmpty);
     });
 
-    testWidgets('显示时请求重绘; holdDuration 到期清空并再请求一次', (tester) async {
-      final candle = await mount(tester, _Candle(dateMark: _timed));
+    testWidgets('显示时请求重绘; dateMarkDuration 到期清空并再请求一次', (tester) async {
+      final candle = await mount(tester, _Candle(dateMarkDuration: 2000));
       var repaints = 0;
       chart.repaintChart.addListener(() => repaints++);
 
@@ -277,7 +293,7 @@ void main() {
     });
 
     testWidgets('再次显示替换目标并重新计时', (tester) async {
-      final candle = await mount(tester, _Candle(dateMark: _timed));
+      final candle = await mount(tester, _Candle(dateMarkDuration: 2000));
       candle.didMoveToDate(tsOf(20));
       await tester.pump(const Duration(milliseconds: 1500));
 
@@ -289,8 +305,8 @@ void main() {
       expect(candle.dateMarkTs, isNull);
     });
 
-    testWidgets('holdDuration 为 0 时一直显示', (tester) async {
-      final candle = await mount(tester, _Candle(dateMark: const DateMarkConfig(holdDuration: 0)));
+    testWidgets('dateMarkDuration 为 0 时一直显示', (tester) async {
+      final candle = await mount(tester, _Candle());
       candle.didMoveToDate(tsOf(20));
 
       await tester.pump(const Duration(seconds: 10));
@@ -298,7 +314,7 @@ void main() {
     });
 
     testWidgets('切换标的时清空', (tester) async {
-      final candle = await mount(tester, _Candle(dateMark: _timed));
+      final candle = await mount(tester, _Candle(dateMarkDuration: 2000));
       candle.didMoveToDate(tsOf(20));
 
       chart.switchKlineData(_otherSpec);
@@ -306,14 +322,14 @@ void main() {
       // 清空同时取消计时, 否则用例结束时报「Timer 仍未完成」。
     });
 
-    testWidgets('运行时关闭 show 时清空', (tester) async {
-      final candle = await mount(tester, _Candle(dateMark: _timed));
+    testWidgets('运行时关闭 showDateMark 时清空', (tester) async {
+      final candle = await mount(tester, _Candle(dateMarkDuration: 2000));
       candle.didMoveToDate(tsOf(20));
 
       final time = TimeIndicator();
       chart.updateIndicators(
         oldCandle: indicator,
-        newCandle: _Candle(dateMark: const DateMarkConfig(show: false)),
+        newCandle: _Candle(showDateMark: false),
         oldTime: time,
         newTime: time,
         oldMainIndicators: const [],
@@ -325,7 +341,7 @@ void main() {
     });
 
     testWidgets('dispose 取消计时', (tester) async {
-      final candle = await mount(tester, _Candle(dateMark: _timed));
+      final candle = await mount(tester, _Candle(dateMarkDuration: 2000));
       candle.didMoveToDate(tsOf(20));
 
       candle.dispose();

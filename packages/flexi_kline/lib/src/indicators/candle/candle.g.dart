@@ -37,7 +37,11 @@ abstract class _$CandleIndicatorCWProxy {
 
   CandleIndicator countdown(TextAreaConfig countdown);
 
-  CandleIndicator dateMark(DateMarkConfig dateMark);
+  CandleIndicator showDateMark(bool showDateMark);
+
+  CandleIndicator dateMark(BubbleConfig dateMark);
+
+  CandleIndicator dateMarkDuration(int dateMarkDuration);
 
   CandleIndicator chartType(FlexiChartType chartType);
 
@@ -85,7 +89,9 @@ abstract class _$CandleIndicatorCWProxy {
     bool useCandleColorForLatestPriceBackground,
     bool showCountdown,
     TextAreaConfig countdown,
-    DateMarkConfig dateMark,
+    bool showDateMark,
+    BubbleConfig dateMark,
+    int dateMarkDuration,
     FlexiChartType chartType,
     FlexiLineChartType? minWidthLineType,
     Map<ITimeInterval, FlexiChartType>? intervalChartTypes,
@@ -162,7 +168,15 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
       call(countdown: countdown);
 
   @override
-  CandleIndicator dateMark(DateMarkConfig dateMark) => call(dateMark: dateMark);
+  CandleIndicator showDateMark(bool showDateMark) =>
+      call(showDateMark: showDateMark);
+
+  @override
+  CandleIndicator dateMark(BubbleConfig dateMark) => call(dateMark: dateMark);
+
+  @override
+  CandleIndicator dateMarkDuration(int dateMarkDuration) =>
+      call(dateMarkDuration: dateMarkDuration);
 
   @override
   CandleIndicator chartType(FlexiChartType chartType) =>
@@ -229,7 +243,9 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
         const $CopyWithPlaceholder(),
     Object? showCountdown = const $CopyWithPlaceholder(),
     Object? countdown = const $CopyWithPlaceholder(),
+    Object? showDateMark = const $CopyWithPlaceholder(),
     Object? dateMark = const $CopyWithPlaceholder(),
+    Object? dateMarkDuration = const $CopyWithPlaceholder(),
     Object? chartType = const $CopyWithPlaceholder(),
     Object? minWidthLineType = const $CopyWithPlaceholder(),
     Object? intervalChartTypes = const $CopyWithPlaceholder(),
@@ -311,10 +327,21 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
           ? _value.countdown
           // ignore: cast_nullable_to_non_nullable
           : countdown as TextAreaConfig,
+      showDateMark:
+          showDateMark == const $CopyWithPlaceholder() || showDateMark == null
+          ? _value.showDateMark
+          // ignore: cast_nullable_to_non_nullable
+          : showDateMark as bool,
       dateMark: dateMark == const $CopyWithPlaceholder() || dateMark == null
           ? _value.dateMark
           // ignore: cast_nullable_to_non_nullable
-          : dateMark as DateMarkConfig,
+          : dateMark as BubbleConfig,
+      dateMarkDuration:
+          dateMarkDuration == const $CopyWithPlaceholder() ||
+              dateMarkDuration == null
+          ? _value.dateMarkDuration
+          // ignore: cast_nullable_to_non_nullable
+          : dateMarkDuration as int,
       chartType: chartType == const $CopyWithPlaceholder() || chartType == null
           ? _value.chartType
           // ignore: cast_nullable_to_non_nullable
@@ -491,9 +518,11 @@ CandleIndicator _$CandleIndicatorFromJson(
           borderRadius: BorderRadius.all(Radius.circular(2)),
         )
       : TextAreaConfig.fromJson(json['countdown'] as Map<String, dynamic>),
+  showDateMark: json['showDateMark'] as bool? ?? true,
   dateMark: json['dateMark'] == null
-      ? const DateMarkConfig()
-      : DateMarkConfig.fromJson(json['dateMark'] as Map<String, dynamic>),
+      ? const BubbleConfig()
+      : BubbleConfig.fromJson(json['dateMark'] as Map<String, dynamic>),
+  dateMarkDuration: (json['dateMarkDuration'] as num?)?.toInt() ?? 2000,
   chartType: json['chartType'] == null
       ? FlexiChartType.barSolid
       : const FlexiChartTypeConverter().fromJson(
@@ -557,7 +586,9 @@ Map<String, dynamic> _$CandleIndicatorToJson(CandleIndicator instance) =>
           instance.useCandleColorForLatestPriceBackground,
       'showCountdown': instance.showCountdown,
       'countdown': instance.countdown.toJson(),
+      'showDateMark': instance.showDateMark,
       'dateMark': instance.dateMark.toJson(),
+      'dateMarkDuration': instance.dateMarkDuration,
       'chartType': const FlexiChartTypeConverter().toJson(instance.chartType),
       'minWidthLineType':
           _$JsonConverterToJson<Map<String, dynamic>, FlexiLineChartType>(

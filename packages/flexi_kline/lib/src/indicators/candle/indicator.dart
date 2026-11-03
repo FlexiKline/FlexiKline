@@ -149,7 +149,9 @@ class CandleIndicator extends CandleBaseIndicator {
     ),
 
     /// 日期气泡, moveToDateTime 完成后指向目标蜡烛
-    this.dateMark = const DateMarkConfig(),
+    this.showDateMark = true,
+    this.dateMark = const BubbleConfig(),
+    this.dateMarkDuration = 2000,
     this.chartType = FlexiChartType.barSolid,
     this.minWidthLineType,
     this.intervalChartTypes = const {},
@@ -187,8 +189,13 @@ class CandleIndicator extends CandleBaseIndicator {
   final bool showCountdown;
   final TextAreaConfig countdown;
 
-  /// 日期气泡, `moveToDateTime` 完成后指向目标蜡烛, 见 [CandlePaintObject.didMoveToDate]。
-  final DateMarkConfig dateMark;
+  /// 日期气泡, `moveToDateTime` 完成后指向目标蜡烛, 见 [CandlePaintObject.didMoveToDate];
+  /// 关闭后框架不画, 接入方可依据 `moveToDateTime` 的返回值自行实现(不随滚动联动)。
+  final bool showDateMark;
+  final BubbleConfig dateMark;
+
+  /// 日期气泡显示时长(ms); 0 表示一直显示, 直到下一次定位成功或切换数据。
+  final int dateMarkDuration;
 
   /// 主区蜡烛图表默认类型（包含样式）
   final FlexiChartType chartType;
@@ -257,9 +264,6 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
   Timer? _dateMarkTimer;
   late final _dateMarkLabel = own(LabelPainter());
 
-  /// [_resolveDateMarkStyle] 的单项记忆: source 按 identical、arrowSize 按值比较, 上下两个方向一并派生。
-  ({LabelStyle source, Size arrowSize, LabelStyle above, LabelStyle below})? _dateMarkStyles;
-
   /// 日期气泡指向的蜡烛 ts; null 不显示。
   int? get dateMarkTs => _dateMarkTs;
 
@@ -316,7 +320,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
   @override
   void didUpdateIndicator(covariant T oldIndicator) {
     super.didUpdateIndicator(oldIndicator);
-    if (!indicator.dateMark.show) _hideDateMark();
+    if (!indicator.showDateMark) _hideDateMark();
   }
 
   @override
@@ -382,14 +386,14 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
     paintDateMark(canvas);
   }
 
-  /// 显示指向 [ts] 的日期气泡, 替换已有的并重新计时; [DateMarkConfig.show] 关闭时忽略。
+  /// 显示指向 [ts] 的日期气泡, 替换已有的并重新计时; [CandleIndicator.showDateMark] 关闭时忽略。
   @override
   void didMoveToDate(int ts) {
-    final config = indicator.dateMark;
-    if (!config.show) return;
+    if (!indicator.showDateMark) return;
+    final duration = indicator.dateMarkDuration;
     _dateMarkTimer?.cancel();
     _dateMarkTs = ts;
-    _dateMarkTimer = config.holdDuration > 0 ? Timer(Duration(milliseconds: config.holdDuration), _hideDateMark) : null;
+    _dateMarkTimer = duration > 0 ? Timer(Duration(milliseconds: duration), _hideDateMark) : null;
     // moveToDateTime 返回前已等过 endOfFrame, 那一帧还没有 ts。
     context.requestRepaint();
   }
@@ -747,7 +751,8 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
         color: countdownBase.decoration?.color,
         gradient: countdownBase.decoration?.gradient,
         shadows: countdownBase.decoration?.shadows,
-        shape: RoundedRectangleBorder(
+        // copyWith 保留 toLabelStyle 产出的边框渐变。
+        shape: (countdownBase.decoration?.shape as RoundedRectangleBorder? ?? const RoundedRectangleBorder()).copyWith(
           side: BorderSide(
             color: candleColor ? transparent : theme.markLineColor,
             width: config.border?.width ?? 0.5,
@@ -809,7 +814,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
 
   /// 日期气泡内容, 默认是日期文本; 子类覆写可换格式(时区、星期)或加图标。
   ///
-  /// 仅在缓存未命中时调用, 结果须只由 (ts, interval) 与 [color] 决定; 外观由 [DateMarkConfig] 决定。
+  /// 仅在缓存未命中时调用, 结果须只由 (ts, interval) 与 [color] 决定; 外观由 [CandleIndicator.dateMark] 决定。
   @protected
   InlineSpan buildDateMarkSpan(FlexiCandleModel model, Color color) => TextSpan(
     text: model.formatDateTime(klineData.interval),
@@ -824,66 +829,32 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
     if (i == null || i < klineData.start || i >= klineData.end || klineData[i].ts != ts) return;
 
     final model = klineData[i];
-    final config = indicator.dateMark;
+    final bubble = indicator.dateMark;
     final (top, bottom) = resolveChartType() is FlexiLineChartType
         ? (model.close, model.close)
         : (model.high, model.low);
-    final topDy = valueToDy(top, correct: true);
-    // auto 按配置估算上方是否放得下; 强制方位放不下时由 bounds 夹回主区。
-    final above = switch (config.position) {
-      DateMarkPosition.above => true,
-      DateMarkPosition.below => false,
-      DateMarkPosition.auto =>
-        topDy - config.spacing - config.arrowSize.height - config.text.areaHeight >= drawableRect.top,
-    };
-    final style = _resolveDateMarkStyle(config, above);
+    // 同 paintCandleBars: 蜡烛中心; 线图退化为 close 处高度为 0 的矩形。
+    final dx = indexToDx(i);
+    final half = candleWidth / 2;
+    final target = Rect.fromLTRB(dx - half, valueToDy(top, correct: true), dx + half, valueToDy(bottom, correct: true));
 
-    _dateMarkLabel.paint(
-      canvas,
-      (ts, klineData.interval),
-      build: () => buildDateMarkSpan(model, style.text.color ?? theme.crossTextColor),
-      style: style,
-      anchor: Offset(
-        // 同 paintCandleBars: 蜡烛中心。
-        indexToDx(i),
-        above ? topDy - config.spacing : valueToDy(bottom, correct: true) + config.spacing,
-      ),
-      align: above ? Alignment.bottomCenter : Alignment.topCenter,
-      bounds: drawableRect,
-    );
-  }
-
-  /// 把 [DateMarkConfig.text] 解析出的圆角矩形换成指向蜡烛的气泡; [above] 时箭头朝下。
-  LabelStyle _resolveDateMarkStyle(DateMarkConfig config, bool above) {
-    // 背景色有主题兜底, toLabelStyle 必然产出 RoundedRectangleBorder 的 decoration。
-    final source = config.text.toLabelStyle(
+    // 边框兜底取文本色: 与 crossTextBg 底色对比清楚, 动态边框渐变以它为基色。
+    LabelStyle styleOf(AxisDirection side) => bubble.toLabelStyle(
+      side,
       textColor: theme.crossTextColor,
       backgroundColor: theme.crossTextBg,
+      borderColor: theme.crossTextColor,
     );
-    var styles = _dateMarkStyles;
-    if (styles == null || !identical(styles.source, source) || styles.arrowSize != config.arrowSize) {
-      final decoration = source.decoration!;
-      final shape = decoration.shape as RoundedRectangleBorder;
-      LabelStyle derive(AxisDirection direction) => source.copyWith(
-        decoration: ShapeDecoration(
-          color: decoration.color,
-          gradient: decoration.gradient,
-          shadows: decoration.shadows,
-          shape: BubbleBorder(
-            side: shape.side,
-            borderRadius: shape.borderRadius.resolve(null),
-            direction: direction,
-            arrowSize: config.arrowSize,
-          ),
-        ),
-      );
-      styles = _dateMarkStyles = (
-        source: source,
-        arrowSize: config.arrowSize,
-        above: derive(AxisDirection.down),
-        below: derive(AxisDirection.up),
-      );
-    }
-    return above ? styles.above : styles.below;
+    _dateMarkLabel.paintAround(
+      canvas,
+      (ts, klineData.interval),
+      build: () => buildDateMarkSpan(model, bubble.text.style.color ?? theme.crossTextColor),
+      styleOf: styleOf,
+      target: target,
+      side: bubble.placement,
+      spacing: bubble.spacing,
+      flip: bubble.flip,
+      bounds: drawableRect,
+    );
   }
 }

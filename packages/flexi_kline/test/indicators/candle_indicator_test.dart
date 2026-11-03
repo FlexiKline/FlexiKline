@@ -51,7 +51,7 @@ List<CandleModel> _alternating({int count = 200, int latestTimestamp = 12000000}
 
 /// 记下创建的 [CandlePaintObject], 供用例读它的几何与标签状态。
 class _Candle extends CandleIndicator {
-  _Candle({super.chartType, super.inViewPriceMark, super.showCountdown = false});
+  _Candle({super.chartType, super.inViewPriceMark, super.showCountdown = false, super.countdown});
 
   late CandlePaintObject object;
 
@@ -268,6 +268,25 @@ void main() {
       final [latest, countdown] = labels.toList();
       expect(countdown.top, latest.bottom);
       expect(countdown.left, latest.left);
+    });
+
+    testWidgets('倒计时派生下圆角与边框色时保留边框渐变', (tester) async {
+      final base = smallLatest();
+      final candle = _Candle(
+        showCountdown: true,
+        inViewPriceMark: base.inViewPriceMark,
+        countdown: base.countdown.copyWith(
+          border: const BorderSide(width: 1),
+          borderGradient: const GradientConfig(colors: [Color(0xFF00FF00), Color(0xFF0000FF)]),
+        ),
+      );
+      await mount(tester, candle, candles: live());
+      final canvas = await paint(tester);
+
+      final strokes = canvas.invocations.where(
+        (i) => i.memberName == #drawDRRect && (i.positionalArguments[2] as Paint).shader != null,
+      );
+      expect(strokes, hasLength(1), reason: '只有倒计时配了边框渐变');
     });
 
     testWidgets('同一秒内的第二帧, 最新价与倒计时都复用 Paragraph', (tester) async {
