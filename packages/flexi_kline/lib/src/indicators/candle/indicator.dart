@@ -450,9 +450,9 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
     return false;
   }
 
-  /// 最后价标签末尾的箭头, 首次使用时创建一次并随本对象释放; 子类覆写可换成其他 [ShapeImage]。
+  /// 最后价标签末尾的箭头, 首次使用时创建一次并随本对象释放; 子类覆写可换成其他 [IconShape] 或尺寸。
   @protected
-  ShapeImage createOffViewPriceArrow() => TriangleImage(const Size(5, 6));
+  ShapeImage createOffViewPriceArrow() => ShapeImage(const TriangleShape(), const Size(5, 6));
 
   /// 最后价标签内容: 价格文本加 [createOffViewPriceArrow] 的箭头。
   ///

@@ -312,14 +312,14 @@ class VolumePaintObject extends DirectPaintObject<VolumeIndicator> {
 }
 ```
 
-文字旁的小图标（如最后价箭头）用 `ShapeImage`：子类只实现 `draw`，按颜色缓存位图与释放由父类负责，`span(color)` 排进标签。内置 `TriangleImage`、`ChevronImage`、`DiamondImage`、`SquareImage`、`CircleImage`、`PlusImage`、`MinusImage`、`CrossImage`、`StarImage`、`BellImage`；其他图形自行继承（子类须为 `final` 或 `base`），可复用父类的 `roundedPolygon`（凸多边形倒圆角）与 `strokePaint`（圆头描边画笔）。尺寸跟随内容或要对准锚点的外形（气泡、订单标记的尖角）用 `ShapeBorder`（如 `BubbleBorder`），不用图片。
+文字旁的小图标（如最后价箭头）用只负责绘制的 `IconShape` 描述，由 `ShapeImage(shape, size)` 缓存成位图，`span(color)` 排进标签；一个 `ShapeImage` 只缓存一种颜色。内置 `TriangleShape`、`ChevronShape`、`DiamondShape`、`SquareShape`、`CircleShape`、`PlusShape`、`MinusShape`、`CrossShape`、`StarShape`、`BellShape`；其他图形继承 `IconShape`（子类须为 `final` 或 `base`，带参数时覆写 `==` 与 `hashCode`），可复用 `Path.addRoundedPolygon`（凸多边形倒圆角）与父类的 `strokePaint`（圆头描边画笔）。尺寸跟随内容或要对准锚点的外形（气泡、订单标记的尖角）用 `ShapeBorder`（如 `BubbleBorder`），不用图片。
 
 ```dart
-final class HexagonImage extends ShapeImage {
-  HexagonImage(super.size);
+final class HexagonShape extends IconShape {
+  const HexagonShape();
 
   @override
-  void draw(Canvas canvas, Size size, Color color) {
+  void paint(Canvas canvas, Size size, Color color) {
     final (w, h) = (size.width, size.height);
     // 顶点须顺时针。
     final vertices = [
@@ -330,13 +330,13 @@ final class HexagonImage extends ShapeImage {
       Offset(w / 4, h),
       Offset(0, h / 2),
     ];
-    canvas.drawPath(roundedPolygon(vertices, 0.5), Paint()..color = color);
+    canvas.drawPath(Path()..addRoundedPolygon(vertices, 0.5), Paint()..color = color);
   }
 }
 
 // 替换最后价箭头: 覆写 CandlePaintObject.createOffViewPriceArrow。
 @override
-ShapeImage createOffViewPriceArrow() => ChevronImage(const Size(5, 6));
+ShapeImage createOffViewPriceArrow() => ShapeImage(const ChevronShape(), const Size(5, 6));
 ```
 
 ### 交互入口

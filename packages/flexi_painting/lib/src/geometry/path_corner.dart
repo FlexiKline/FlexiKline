@@ -58,4 +58,18 @@ extension PathCorner on Path {
     lineTo(corner.start.dx, corner.start.dy);
     arcToPoint(corner.end, radius: corner.radius, clockwise: corner.clockwise);
   }
+
+  /// 添加逐角倒圆的闭合多边形, [radius] 为 0 时即原多边形; 半径过大时切点夹到较短邻边的中点, 圆弧随之缩小。
+  void addRoundedPolygon(List<Offset> vertices, double radius) {
+    if (radius <= 0) return addPolygon(vertices, true);
+
+    final count = vertices.length;
+    // 从末边中点起笔: 每个顶点都位于两段边之间, 可统一用 cornerTo 倒圆。
+    final start = (vertices[count - 1] + vertices[0]) / 2;
+    moveTo(start.dx, start.dy);
+    for (var i = 0; i < count; i++) {
+      cornerTo(vertices[(i - 1 + count) % count], vertices[i], vertices[(i + 1) % count], radius);
+    }
+    close();
+  }
 }

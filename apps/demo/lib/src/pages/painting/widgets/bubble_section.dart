@@ -28,7 +28,7 @@ class _BubblePainter extends SectionPainter {
 
   /// 每个方向一个 painter: 各自持有排版与装饰缓存。
   late final _labels = {for (final side in AxisDirection.values) side: own(LabelPainter())};
-  late final _icon = own(StarImage(const Size(12, 12)));
+  late final _icon = own(ShapeImage(const StarShape(), const Size(12, 12)));
 
   /// 上下: 胶囊形, 箭头在上下直边上; 边框从两端到中点渐变, mirror 镜像出右半段: 两端浅、中间亮。
   static const _vertical = BubbleConfig(

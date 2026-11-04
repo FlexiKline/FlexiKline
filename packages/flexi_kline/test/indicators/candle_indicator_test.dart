@@ -85,16 +85,16 @@ class _CustomArrowCandle extends _Candle {
   CandlePaintObject createPaintObject() => object = _CustomArrowObject();
 }
 
-final class _SquareImage extends ShapeImage {
-  _SquareImage() : super(const Size(4, 4));
+final class _SquareShape extends IconShape {
+  const _SquareShape();
 
   @override
-  void draw(Canvas canvas, Size size, Color color) => canvas.drawRect(Offset.zero & size, Paint()..color = color);
+  void paint(Canvas canvas, Size size, Color color) => canvas.drawRect(Offset.zero & size, Paint()..color = color);
 }
 
 class _CustomArrowObject extends CandlePaintObject {
   @override
-  ShapeImage createOffViewPriceArrow() => _SquareImage();
+  ShapeImage createOffViewPriceArrow() => ShapeImage(const _SquareShape(), const Size(4, 4));
 }
 
 /// 最后价文字色可在测试中途改变的主题, 模拟主题切换。

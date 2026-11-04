@@ -63,4 +63,13 @@ void main() {
     // 尖角保留: 顶点附近仍在路径内。
     expect(path.contains(const Offset(9.9, 0.1)), isTrue);
   });
+
+  test('addRoundedPolygon: radius 为 0 是原多边形, 否则切掉每个顶点', () {
+    const square = [Offset.zero, Offset(10, 0), Offset(10, 10), Offset(0, 10)];
+
+    expect((Path()..addRoundedPolygon(square, 0)).getBounds(), const Rect.fromLTRB(0, 0, 10, 10));
+    final rounded = Path()..addRoundedPolygon(square, 2);
+    expect(rounded.contains(const Offset(0.3, 0.3)), isFalse, reason: '直角被半径 2 的圆弧切掉');
+    expect(rounded.contains(const Offset(1, 5)), isTrue);
+  });
 }

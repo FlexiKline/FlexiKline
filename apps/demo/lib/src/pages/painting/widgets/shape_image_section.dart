@@ -5,7 +5,7 @@ import '../../../config/my_kline_config.dart';
 import '../../../config/my_kline_indicator_config.dart';
 import 'section.dart';
 
-/// 程序绘制的小图标: [TriangleImage] 的圆角对比、内置图形一览, 以及业务侧继承 [ShapeImage] 的自定义图形。
+/// 程序绘制的小图标: [TriangleShape] 的圆角对比、内置图形一览, 以及业务侧继承 [IconShape] 的自定义图形。
 class ShapeImageSection extends StatelessWidget {
   const ShapeImageSection(this.configuration, this.indicatorConfig, {super.key});
 
@@ -17,7 +17,7 @@ class ShapeImageSection extends StatelessWidget {
     title: 'ShapeImage',
     caption:
         '按颜色缓存一张位图, 换色释放旧图。上排放大 6 倍看三角圆角; 其次是行内实际尺寸(5x6, 最后价箭头用默认 radius 0.5)与四个方向;'
-        '最下面两排是其余内置图形, 以及业务侧继承 ShapeImage 只实现 draw 的自定义图形。',
+        '最下面两排是其余内置图形, 以及业务侧继承 IconShape 只实现 paint 的自定义图形。',
     height: 270,
     create: () => _ShapeImagePainter(configuration, indicatorConfig),
   );
@@ -29,28 +29,33 @@ class _ShapeImagePainter extends SectionPainter {
   /// 行内尺寸下的圆角半径; 上排放大 6 倍, 半径同比放大。
   static const _radii = [0.0, 0.5, 1.0];
 
-  late final _large = [for (final r in _radii) own(TriangleImage(const Size(30, 36), radius: r * 6))];
-  late final _inline = [for (final r in _radii) own(TriangleImage(const Size(5, 6), radius: r))];
+  late final _large = [for (final r in _radii) own(ShapeImage(TriangleShape(radius: r * 6), const Size(30, 36)))];
+  late final _inline = [for (final r in _radii) own(ShapeImage(TriangleShape(radius: r), const Size(5, 6)))];
 
   static const _directions = [AxisDirection.up, AxisDirection.down, AxisDirection.left, AxisDirection.right];
   late final _arrows = [
     for (final d in _directions)
-      own(TriangleImage(axisDirectionToAxis(d) == Axis.vertical ? const Size(6, 5) : const Size(5, 6), direction: d)),
+      own(
+        ShapeImage(
+          TriangleShape(direction: d),
+          axisDirectionToAxis(d) == Axis.vertical ? const Size(6, 5) : const Size(5, 6),
+        ),
+      ),
   ];
   late final _arrowLabels = [for (final _ in _directions) own(LabelPainter())];
 
   static const _iconSize = Size(8, 8);
   late final _icons = [
-    ('CircleImage', own(CircleImage(_iconSize))),
-    ('DiamondImage', own(DiamondImage(_iconSize))),
-    ('PlusImage', own(PlusImage(_iconSize))),
-    ('MinusImage', own(MinusImage(_iconSize))),
-    ('ChevronImage', own(ChevronImage(_iconSize))),
-    ('CrossImage', own(CrossImage(_iconSize))),
-    ('StarImage', own(StarImage(_iconSize))),
-    ('BellImage', own(BellImage(_iconSize))),
-    ('SquareImage', own(SquareImage(_iconSize, radius: 1.5))),
-    ('_HexagonImage', own(_HexagonImage(_iconSize))),
+    ('CircleShape', own(ShapeImage(const CircleShape(), _iconSize))),
+    ('DiamondShape', own(ShapeImage(const DiamondShape(), _iconSize))),
+    ('PlusShape', own(ShapeImage(const PlusShape(), _iconSize))),
+    ('MinusShape', own(ShapeImage(const MinusShape(), _iconSize))),
+    ('ChevronShape', own(ShapeImage(const ChevronShape(), _iconSize))),
+    ('CrossShape', own(ShapeImage(const CrossShape(), _iconSize))),
+    ('StarShape', own(ShapeImage(const StarShape(), _iconSize))),
+    ('BellShape', own(ShapeImage(const BellShape(), _iconSize))),
+    ('SquareShape', own(ShapeImage(const SquareShape(radius: 1.5), _iconSize))),
+    ('_HexagonShape', own(ShapeImage(const _HexagonShape(), _iconSize))),
   ];
 
   late final _labels = [for (final _ in _radii) own(LabelPainter())];
@@ -151,13 +156,13 @@ class _ShapeImagePainter extends SectionPainter {
   }
 }
 
-/// 业务侧自定义图形的写法: 继承 [ShapeImage] 只实现 draw, 可复用父类的 roundedPolygon / strokePaint;
-/// 子类须为 final 或 base。
-final class _HexagonImage extends ShapeImage {
-  _HexagonImage(super.size);
+/// 业务侧自定义图形的写法: 继承 [IconShape] 只实现 paint, 可复用 `Path.addRoundedPolygon` 与父类的 strokePaint;
+/// 子类须为 final 或 base, 带参数时按参数覆写相等运算符与 hashCode。
+final class _HexagonShape extends IconShape {
+  const _HexagonShape();
 
   @override
-  void draw(Canvas canvas, Size size, Color color) {
+  void paint(Canvas canvas, Size size, Color color) {
     final (w, h) = (size.width, size.height);
     final vertices = [
       Offset(w / 4, 0),
@@ -167,6 +172,6 @@ final class _HexagonImage extends ShapeImage {
       Offset(w / 4, h),
       Offset(0, h / 2),
     ];
-    canvas.drawPath(roundedPolygon(vertices, 0.5), Paint()..color = color);
+    canvas.drawPath(Path()..addRoundedPolygon(vertices, 0.5), Paint()..color = color);
   }
 }

@@ -7,7 +7,7 @@ import 'section.dart';
 
 /// 最后价标签(最新蜡烛滚出视区时): 断开的虚线 + 价格 + 箭头。
 ///
-/// 样式取自 [CandleIndicator.offViewPriceMark] 的配置(demo K 线页同一份), 箭头同 CandlePaintObject 默认的 [TriangleImage]。
+/// 样式取自 [CandleIndicator.offViewPriceMark] 的配置(demo K 线页同一份), 箭头同 CandlePaintObject 默认的 [TriangleShape]。
 class LastPriceSection extends StatelessWidget {
   const LastPriceSection(this.configuration, this.indicatorConfig, {super.key});
 
@@ -37,7 +37,7 @@ class _LastPricePainter extends SectionPainter {
   late final _names = own(LabelPainter(capacity: 3));
 
   /// 箭头与文字同色; 各样式颜色不同, 各持一份(ShapeImage 只缓存一种颜色)。
-  late final _arrows = [for (final _ in _styles) own(TriangleImage(const Size(5, 6)))];
+  late final _arrows = [for (final _ in _styles) own(ShapeImage(const TriangleShape(), const Size(5, 6)))];
 
   static const _price = '1234.56';
   static const _nameConfig = TextAreaConfig(style: TextStyle(fontSize: 10));

@@ -26,7 +26,7 @@ class _RichTextPainter extends SectionPainter {
 
   late final _tips = own(LabelPainter());
   late final _order = own(LabelPainter());
-  late final _dot = own(CircleImage(const Size(8, 8)));
+  late final _dot = own(ShapeImage(const CircleShape(), const Size(8, 8)));
 
   static const _tipsConfig = [
     TipsConfig(

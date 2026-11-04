@@ -312,14 +312,14 @@ class VolumePaintObject extends DirectPaintObject<VolumeIndicator> {
 }
 ```
 
-Use `ShapeImage` for small icons next to text (e.g. the last-price arrow): subclasses only implement `draw`; the base class caches bitmaps per color and releases them, and `span(color)` puts the icon into a label. Built-ins: `TriangleImage`, `ChevronImage`, `DiamondImage`, `SquareImage`, `CircleImage`, `PlusImage`, `MinusImage`, `CrossImage`, `StarImage`, `BellImage`. Subclass for other shapes (subclasses must be `final` or `base`) and reuse `roundedPolygon` (rounded convex polygon) and `strokePaint` (round-cap stroke). Shapes that size to content or must point at an anchor (bubbles, order-mark tails) use a `ShapeBorder` (e.g. `BubbleBorder`), not an image.
+Small icons next to text (e.g. the last-price arrow) are an `IconShape` that only paints, cached as a bitmap by `ShapeImage(shape, size)`; `span(color)` puts the icon into a label, and one `ShapeImage` caches one color. Built-ins: `TriangleShape`, `ChevronShape`, `DiamondShape`, `SquareShape`, `CircleShape`, `PlusShape`, `MinusShape`, `CrossShape`, `StarShape`, `BellShape`. Subclass `IconShape` for other shapes (subclasses must be `final` or `base`; override `==` and `hashCode` when they take parameters) and reuse `Path.addRoundedPolygon` (rounded convex polygon) and `strokePaint` (round-cap stroke). Shapes that size to content or must point at an anchor (bubbles, order-mark tails) use a `ShapeBorder` (e.g. `BubbleBorder`), not an image.
 
 ```dart
-final class HexagonImage extends ShapeImage {
-  HexagonImage(super.size);
+final class HexagonShape extends IconShape {
+  const HexagonShape();
 
   @override
-  void draw(Canvas canvas, Size size, Color color) {
+  void paint(Canvas canvas, Size size, Color color) {
     final (w, h) = (size.width, size.height);
     // Vertices must be clockwise.
     final vertices = [
@@ -330,13 +330,13 @@ final class HexagonImage extends ShapeImage {
       Offset(w / 4, h),
       Offset(0, h / 2),
     ];
-    canvas.drawPath(roundedPolygon(vertices, 0.5), Paint()..color = color);
+    canvas.drawPath(Path()..addRoundedPolygon(vertices, 0.5), Paint()..color = color);
   }
 }
 
 // Replace the last-price arrow: override CandlePaintObject.createOffViewPriceArrow.
 @override
-ShapeImage createOffViewPriceArrow() => ChevronImage(const Size(5, 6));
+ShapeImage createOffViewPriceArrow() => ShapeImage(const ChevronShape(), const Size(5, 6));
 ```
 
 ### Interaction entry points
