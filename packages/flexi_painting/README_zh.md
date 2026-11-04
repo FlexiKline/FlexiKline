@@ -11,7 +11,7 @@ Flutter 自绘图表与组件的底层绘制工具，只依赖 Flutter：给 `Cu
 - **异形边框**：`BubbleBorder`（箭头可在任意一边的气泡，可选渐变边框）、`GradientRoundedRectangleBorder`。二者都是 `ShapeBorder`，可用于 `ShapeDecoration`、`ClipPath`、`Material`。
 - **带缓存的标签**：`LabelPainter` 只在 key 或样式变化时重新排版，按锚点与对齐方式摆放，可限定在区域内；`paintAround` 放不下时翻到目标另一侧。`RawImageSpan` 把已解码的 `ui.Image` 排进文字行内。
 - **图片与提示框**：`ImagePainter`、`TooltipPainter`，缓存与摆放方式同上。
-- **代码绘制的图标**：`ShapeImage` 把小矢量图形栅格化并缓存，供行内使用。
+- **代码绘制的图标**：图形用 `IconShape` 描述一次；在 Widget 中用 `ShapeIcon` 矢量显示（与 `Icon` 一样取 `IconTheme` 默认值），在画布标签里用 `ShapeImage` 行内显示，只接受 `ImageProvider` 的地方用 `ShapeImageProvider`。
 - **批量绘制**：`PointBuffer` 攒齐同一画笔的点或线段，一次画完。
 - **资源管理**：`PaintResource`、`PaintResourceOwner` 负责跨帧绘制资源的重置与释放。
 
