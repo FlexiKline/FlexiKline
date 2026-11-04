@@ -4,7 +4,7 @@
 
 English | [简体中文](https://github.com/FlexiKline/FlexiKline/blob/main/packages/flexi_painting/README_zh.md)
 
-Canvas painting primitives for Flutter, with no dependency beyond Flutter. They fill the gaps when you paint charts, order books or custom controls in a `CustomPainter`, and the borders also work as ordinary widget decorations. [flexi_kline](https://pub.dev/packages/flexi_kline) paints with them and re-exports them.
+The low-level painting toolkit for custom-painted Flutter charts and widgets, with no dependency beyond Flutter: cached labels, tooltips, batched drawing and paint resource management for `CustomPainter`, geometry helpers, and shaped borders and code-drawn icons that work both in widgets and on a canvas. [flexi_kline](https://pub.dev/packages/flexi_kline) paints with it and re-exports it.
 
 ## Features
 
@@ -14,6 +14,10 @@ Canvas painting primitives for Flutter, with no dependency beyond Flutter. They 
 - **Code-drawn icons**: `ShapeImage` rasterizes a small vector shape and caches the image for inline use.
 - **Batching**: `PointBuffer` collects points or segments sharing a paint and draws them in one call.
 - **Resource management**: `PaintResource` and `PaintResourceOwner` reset and dispose paint resources that live across frames.
+
+## Scope
+
+It has no chart semantics: coordinate mapping, ticks, axes, crosshair gestures and animation belong to the chart libraries built on it. It does not parse SVG, and app-specific icons are written as shapes in the app or library that uses them.
 
 ## Usage
 

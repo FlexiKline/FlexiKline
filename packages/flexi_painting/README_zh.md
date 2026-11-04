@@ -4,7 +4,7 @@
 
 [English](https://github.com/FlexiKline/FlexiKline/blob/main/packages/flexi_painting/README.md) | 简体中文
 
-Flutter 画布绘制原语，只依赖 Flutter。用 `CustomPainter` 自绘图表、订单簿或自定义控件时补上 Flutter 缺的那部分；其中的边框也能直接当普通 Widget 的装饰用。[flexi_kline](https://pub.dev/packages/flexi_kline) 基于它绘制，并重新导出它。
+Flutter 自绘图表与组件的底层绘制工具，只依赖 Flutter：给 `CustomPainter` 用的跨帧缓存标签、提示框、批量绘制与资源管理，几何工具，以及 Widget 与画布通用的异形边框和代码绘制图标。[flexi_kline](https://pub.dev/packages/flexi_kline) 基于它绘制，并重新导出它。
 
 ## 功能
 
@@ -14,6 +14,10 @@ Flutter 画布绘制原语，只依赖 Flutter。用 `CustomPainter` 自绘图�
 - **代码绘制的图标**：`ShapeImage` 把小矢量图形栅格化并缓存，供行内使用。
 - **批量绘制**：`PointBuffer` 攒齐同一画笔的点或线段，一次画完。
 - **资源管理**：`PaintResource`、`PaintResourceOwner` 负责跨帧绘制资源的重置与释放。
+
+## 范围
+
+不包含图表语义：坐标映射、刻度、坐标轴、十字线手势与动画由基于它的图表库负责。不解析 SVG；业务图标以图形描述的形式写在使用它的 App 或库里。
 
 ## 用法
 
