@@ -13,4 +13,5 @@ On-device results of `flexi_kline`, captured with [apps/benchmark](../../apps/be
 
 | Date | Baseline → target | Devices | Summary |
 | --- | --- | --- | --- |
+| 2026-11-04 | 2.6.1 (`bench/bridge-v2.6.1`) → 2.7.0 | iPhone 16 60Hz, OnePlus 15T 60Hz, Honor 80 Pro 60/120Hz | [summary.md](results/20261104-v2.7.0/summary.md) |
 | 2026-10-24 | `v2.5.6-monorepo` → 2.6.1 | iPhone 16 60Hz, OnePlus 15T 60Hz, Honor 80 Pro 60/120Hz | [summary.md](results/20261024-v2.5.6/summary.md) |

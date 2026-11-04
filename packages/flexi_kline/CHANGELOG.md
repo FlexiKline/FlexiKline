@@ -16,6 +16,7 @@
 * Fix time labels skipping the latest candle and throwing `IntegerDivisionByZeroException` when a candle is wider than the label spacing.
 * Fix the cross snapping to candle centers in the blank area left of the oldest candle when `moveByCandleInBlank` is off.
 * Remove the unused helpers `combineCandleList`, `removeDuplicate` and `KlineData.paintTimeRange` (Breaking Changes).
+* Fix `FlexiNum.divSafe`, `divSafeNum` and `divSafeDecimal` returning the zero-divisor fallback in its own mode: it now takes the dividend's mode, so `ComputeMode.accurate` no longer leaks a `double`.
 * Deprecate `ComputeMode`; 2.8.0 removes it together with `FlexiNum`, and all values become `double`.
 
 ## 2.6.1

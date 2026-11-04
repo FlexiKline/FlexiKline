@@ -33,7 +33,7 @@ The core package ships the candle and time-axis indicators; others such as MA an
 
 ```yaml
 dependencies:
-  flexi_kline: ^2.6.1
+  flexi_kline: ^2.7.0
   flexi_kline_draw_tools: ^2.6.0 # optional
 ```
 
@@ -41,18 +41,18 @@ Usage, configuration and the indicator system are documented in the [flexi_kline
 
 ## Performance
 
-Real devices, profile mode, `flexi_kline` 2.6.1: p90 of UI-thread frame time (share of frame budget in brackets).
+Real devices, profile mode, `flexi_kline` 2.7.0: p90 of UI-thread frame time (share of frame budget in brackets).
 
 | Device | Frame budget | Basic | Full |
 | --- | ---: | ---: | ---: |
-| iPhone 16 · 60Hz | 16.67 ms | 1.6 ms (10%) | 4.5 ms (27%) |
-| OnePlus 15T · 60Hz | 16.67 ms | 2.0 ms (12%) | 6.1 ms (37%) |
-| Honor 80 Pro · 60Hz | 16.67 ms | 4.3 ms (26%) | 9.7 ms (58%) |
-| Honor 80 Pro · 120Hz | 8.33 ms | 2.6 ms (32%) | 6.5 ms (78%) |
+| iPhone 16 · 60Hz | 16.67 ms | 1.5 ms (9%) | 4.6 ms (27%) |
+| OnePlus 15T · 60Hz | 16.67 ms | 1.9 ms (12%) | 5.9 ms (35%) |
+| Honor 80 Pro · 60Hz | 16.67 ms | 3.8 ms (22%) | 9.5 ms (57%) |
+| Honor 80 Pro · 120Hz | 8.33 ms | 2.6 ms (31%) | 6.7 ms (81%) |
 
 Scenario: dragging the chart back and forth continuously. Basic: candles and time axis. Full: plus main-pane VOL and MA, and sub-pane MACD and VOLMA.
 
-Compared with 2.5.6, the same drag takes 13%–44% less UI-thread time; raster changes little. Method and every scenario: [docs/benchmark](docs/benchmark/README.md).
+Against 2.6.1 the same drag differs by less than 5% on every device; 2.6.1 had cut it by 13%–44% from 2.5.6, with raster changing little. Method and every scenario: [docs/benchmark](docs/benchmark/README.md).
 
 ## Repository layout
 

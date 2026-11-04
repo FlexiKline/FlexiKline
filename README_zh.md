@@ -30,7 +30,7 @@ FlexiKline 是面向股票、数字货币行情的 Flutter K 线图表框架。�
 
 ```yaml
 dependencies:
-  flexi_kline: ^2.6.1
+  flexi_kline: ^2.7.0
   flexi_kline_draw_tools: ^2.6.0 # 可选
 ```
 
@@ -38,18 +38,18 @@ dependencies:
 
 ## 性能
 
-真机 profile 模式，`flexi_kline` 2.6.1，UI 线程帧耗时 p90（括号内为占帧预算的比例）。
+真机 profile 模式，`flexi_kline` 2.7.0，UI 线程帧耗时 p90（括号内为占帧预算的比例）。
 
 | 设备 | 帧预算 | 基础 | 完整 |
 | --- | ---: | ---: | ---: |
-| iPhone 16 · 60Hz | 16.67 ms | 1.6 ms（10%） | 4.5 ms（27%） |
-| 一加 15T · 60Hz | 16.67 ms | 2.0 ms（12%） | 6.1 ms（37%） |
-| 荣耀 80 Pro · 60Hz | 16.67 ms | 4.3 ms（26%） | 9.7 ms（58%） |
-| 荣耀 80 Pro · 120Hz | 8.33 ms | 2.6 ms（32%） | 6.5 ms（78%） |
+| iPhone 16 · 60Hz | 16.67 ms | 1.5 ms（9%） | 4.6 ms（27%） |
+| 一加 15T · 60Hz | 16.67 ms | 1.9 ms（12%） | 5.9 ms（35%） |
+| 荣耀 80 Pro · 60Hz | 16.67 ms | 3.8 ms（22%） | 9.5 ms（57%） |
+| 荣耀 80 Pro · 120Hz | 8.33 ms | 2.6 ms（31%） | 6.7 ms（81%） |
 
 场景：在图表上持续来回拖动。基础：蜡烛与时间轴；完整：另含主图 VOL、MA 与副图 MACD、VOLMA。
 
-相比 2.5.6，同样的拖动 UI 线程耗时降低 13%～44%，raster 变化不大。方法和全部场景见 [docs/benchmark](docs/benchmark/README.md)。
+与 2.6.1 相比，同样的拖动在各设备上相差不到 5%；2.6.1 相比 2.5.6 降低了 13%～44%，raster 变化不大。方法和全部场景见 [docs/benchmark](docs/benchmark/README.md)。
 
 ## 目录结构
 
