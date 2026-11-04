@@ -15,7 +15,7 @@
 // ignore_for_file: invalid_use_of_protected_member
 import 'dart:math' as math;
 
-import 'package:flexi_kline/src/painting/export.dart';
+import 'package:flexi_painting/flexi_painting.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 

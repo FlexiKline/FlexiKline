@@ -1,0 +1,25 @@
+resolution: workspace
+name: flexi_painting
+description: "Canvas painting primitives for Flutter: shaped borders such as speech bubbles, cached text and image labels, code-drawn icons and paint resource management."
+version: 0.1.0
+homepage: https://flexikline.github.io
+repository: https://github.com/FlexiKline/FlexiKline/tree/main/packages/flexi_painting
+issue_tracker: https://github.com/FlexiKline/FlexiKline/issues
+topics:
+  - canvas
+  - painting
+  - shape
+  - border
+
+environment:
+  sdk: ">=3.11.0 <4.0.0"
+  flutter: ">=3.41.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ">=5.0.0 <7.0.0"

@@ -17,7 +17,7 @@ library;
 
 import 'dart:ui' show Paragraph;
 
-import 'package:flexi_kline/src/painting/painters/tooltip_painter.dart';
+import 'package:flexi_painting/src/painters/tooltip_painter.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 

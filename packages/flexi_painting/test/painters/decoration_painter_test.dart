@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:flexi_kline/src/painting/export.dart';
-import 'package:flexi_kline/src/painting/painters/decoration_painter.dart';
+import 'package:flexi_painting/flexi_painting.dart';
+import 'package:flexi_painting/src/painters/decoration_painter.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 

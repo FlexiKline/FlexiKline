@@ -20,6 +20,7 @@ import 'dart:ui' as ui;
 
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flexi_formatter/flexi_formatter.dart';
+import 'package:flexi_painting/flexi_painting.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
@@ -31,7 +32,6 @@ import '../../core/core.dart';
 import '../../data/kline_data.dart';
 import '../../extension/export.dart';
 import '../../model/export.dart' show FlexiCandleModel, FlexiNum, KlineSpec, MinMax, NumFlexiNumExt, Range;
-import '../../painting/export.dart';
 import '../../utils/algorithm_util.dart';
 import '../../utils/grid_tick_util.dart';
 import '../chart_type.dart';

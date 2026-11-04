@@ -38,7 +38,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: [packages/flexi_kline, packages/flexi_kline_draw_tools, apps/benchmark]
+        package: [packages/flexi_painting, packages/flexi_kline, packages/flexi_kline_draw_tools, apps/benchmark]
         flutter-version: ["3.41.0", ""]     # 最低支持版 + latest stable
     steps:
       - uses: actions/checkout@v6
@@ -58,7 +58,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: [flexi_kline, flexi_kline_draw_tools]
+        package: [flexi_painting, flexi_kline, flexi_kline_draw_tools]
     steps:
       - uses: actions/checkout@v6
       - uses: subosito/flutter-action@v2
@@ -74,7 +74,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: [flexi_kline_draw_tools]
+        package: [flexi_kline, flexi_kline_draw_tools]
     steps:
       - uses: actions/checkout@v6
       - uses: subosito/flutter-action@v2

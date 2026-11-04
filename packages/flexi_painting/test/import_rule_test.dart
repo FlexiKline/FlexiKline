@@ -37,7 +37,7 @@ String? _layerOf(Uri root, Uri path) {
   return segments.length > 1 ? segments.first : null;
 }
 
-/// painting 每层可依赖的下层; 同层引用不受限, 根目录的 export.dart 不受限。
+/// `lib/src` 每层可依赖的下层; 同层引用不受限。
 const _layers = {
   'foundation': <String>{},
   'geometry': <String>{},
@@ -47,17 +47,17 @@ const _layers = {
 };
 
 void main() {
-  test('lib/src/painting 只依赖 dart 与 flutter, 且各层只依赖下层', () {
-    final root = Directory('lib/src/painting').absolute.uri;
+  test('lib/src 只依赖 dart 与 flutter, 且各层只依赖下层', () {
+    final root = Directory('lib/src').absolute.uri;
     final dirs = Directory.fromUri(root).listSync().whereType<Directory>().map((d) => _layerOf(root, d.uri)).toSet();
     expect(dirs, _layers.keys.toSet(), reason: '新增目录须在 _layers 中声明可依赖的层');
 
     final violations = <String>[];
-    for (final (file, uri) in _directives('lib/src/painting')) {
+    for (final (file, uri) in _directives('lib/src')) {
       if (uri.startsWith('dart:') || uri.startsWith('package:flutter/')) continue;
       final target = file.absolute.uri.resolve(uri);
       if (uri.contains(':') || !target.path.startsWith(root.path)) {
-        violations.add('${file.path}: $uri 越出 painting');
+        violations.add('${file.path}: $uri 越出 lib/src');
         continue;
       }
       final from = _layerOf(root, file.absolute.uri);
@@ -68,42 +68,23 @@ void main() {
     expect(violations, isEmpty, reason: violations.join('\n'));
   });
 
-  test('test/painting 只依赖 painting 与自身的测试替身', () {
-    final root = Directory('test/painting').absolute.uri;
-    const allowed = ['dart:', 'package:flutter/', 'package:flutter_test/', 'package:flexi_kline/painting.dart'];
+  test('入口只导出 lib/src', () {
+    final uris = File(
+      'lib/flexi_painting.dart',
+    ).readAsLinesSync().map((line) => _directive.firstMatch(line)?.group(1)).whereType<String>().toList();
+    expect(uris, isNotEmpty, reason: '空扫描会让规则假通过');
+    expect(uris.where((uri) => !uri.startsWith('src/')), isEmpty);
+  });
+
+  test('test/ 只依赖本包与自身的测试替身', () {
+    final root = Directory('test').absolute.uri;
+    const allowed = ['dart:', 'package:flutter/', 'package:flutter_test/', 'package:flexi_painting/'];
     final violations = <String>[];
-    for (final (file, uri) in _directives('test/painting')) {
-      if (allowed.any(uri.startsWith) || uri.startsWith('package:flexi_kline/src/painting/')) continue;
+    for (final (file, uri) in _directives('test')) {
+      if (allowed.any(uri.startsWith)) continue;
       if (!uri.contains(':') && file.absolute.uri.resolve(uri).path.startsWith(root.path)) continue;
       violations.add('${file.path}: $uri');
     }
     expect(violations, isEmpty, reason: violations.join('\n'));
-  });
-
-  test('lib/ 在 extension/render 之外不调用 render 的文本与图片函数', () {
-    final dir = Directory('lib');
-    expect(dir.existsSync(), isTrue, reason: 'flutter test 的 cwd 应为包根');
-
-    final render = Directory('lib/src/extension/render').absolute.path;
-    final files = dir
-        .listSync(recursive: true)
-        .whereType<File>()
-        .where((f) => f.path.endsWith('.dart') && !f.absolute.path.startsWith(render))
-        .toList();
-    expect(files, isNotEmpty, reason: '空扫描会让规则假通过');
-
-    final call = RegExp(r'\.(drawText|drawTextArea|drawImageText|drawImageView|drawTooltipInfos)\(');
-    final violations = <String>[];
-    for (final file in files) {
-      final lines = file.readAsLinesSync();
-      for (var i = 0; i < lines.length; i++) {
-        if (call.hasMatch(lines[i])) violations.add('${file.path}:${i + 1}: ${lines[i].trim()}');
-      }
-    }
-    expect(
-      violations,
-      isEmpty,
-      reason: '每次调用都重新排版, 改用 LabelPainter / TooltipPainter / ImagePainter:\n${violations.join('\n')}',
-    );
   });
 }

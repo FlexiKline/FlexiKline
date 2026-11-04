@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// painting 测试共用的替身; 阶段 1 不改 test/support, 暂放本目录。
+/// 本包测试共用的替身。
 library;
 
 import 'dart:ui' as ui;
 
-import 'package:flexi_kline/src/painting/export.dart';
+import 'package:flexi_painting/flexi_painting.dart';
 import 'package:flutter/painting.dart';
 
 /// 同步现画一张 [width] x [height] 的图片; 调用方负责 dispose。

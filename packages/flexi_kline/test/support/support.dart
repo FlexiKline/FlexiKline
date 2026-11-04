@@ -15,13 +15,13 @@
 /// 测试支撑 barrel：领域测试统一 `import '../support/support.dart';`
 library;
 
-export '../painting/recording_canvas.dart';
 export 'builders/chart_widget_scenario.dart';
 export 'builders/controller_scenario.dart';
 export 'builders/manager_scenario.dart';
 export 'doubles/fake_kline_config.dart';
 export 'doubles/fake_paint_context.dart';
 export 'doubles/lifecycle_spy.dart';
+export 'doubles/recording_canvas.dart';
 export 'doubles/test_draw_object.dart';
 export 'doubles/test_indicators.dart';
 export 'fixtures/candle_factory.dart';

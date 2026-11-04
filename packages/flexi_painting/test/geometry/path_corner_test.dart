@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:flexi_kline/src/painting/geometry/path_corner.dart';
+import 'package:flexi_painting/src/geometry/path_corner.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 

@@ -14,7 +14,7 @@
 
 import 'dart:ui' as ui;
 
-import 'package:flexi_kline/src/painting/export.dart';
+import 'package:flexi_painting/flexi_painting.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 

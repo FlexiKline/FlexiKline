@@ -21,6 +21,7 @@ dependencies:
     sdk: flutter
   decimal: ^3.2.4
   flexi_formatter: ^2.0.1
+  flexi_painting: ^0.1.0
   equatable: ^2.0.8
   json_annotation: ^4.12.0
   copy_with_extension: ">=6.0.0 <18.0.0"

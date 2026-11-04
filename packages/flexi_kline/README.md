@@ -282,7 +282,7 @@ Direct and Computed default to `autoActivate: false`: created on show, destroyed
 
 ### Painting building blocks
 
-Register paint resources reused across frames with `own()`: they reset when the PaintObject's declaration updates and dispose with it. Use `LabelPainter` for text labels: pass the key and `build` every frame; nothing is formatted or laid out while content and style are unchanged. Batch points or segments sharing a paint in a `PointBuffer` and draw them at once. The old text extensions in `extension/render/` still work alongside.
+Register paint resources reused across frames with `own()`: they reset when the PaintObject's declaration updates and dispose with it. Use `LabelPainter` for text labels: pass the key and `build` every frame; nothing is formatted or laid out while content and style are unchanged. Batch points or segments sharing a paint in a `PointBuffer` and draw them at once. The old text extensions in `extension/render/` still work alongside. These building blocks come from [flexi_painting](https://pub.dev/packages/flexi_painting) and are re-exported by `flexi_kline.dart`.
 
 ```dart
 class VolumePaintObject extends DirectPaintObject<VolumeIndicator> {

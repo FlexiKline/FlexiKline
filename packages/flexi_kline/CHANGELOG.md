@@ -1,4 +1,5 @@
 ## 2.8.0
+* Move the painting primitives to the new `flexi_painting` package; `flexi_kline.dart` still exports them, and `package:flexi_kline/painting.dart` is removed in favor of `package:flexi_painting/flexi_painting.dart` (Breaking Changes).
 * Rename `ImageSpan` to `RawImageSpan`, which avoids the name clash with `extended_text` (Breaking Changes).
 
 ## 2.7.2

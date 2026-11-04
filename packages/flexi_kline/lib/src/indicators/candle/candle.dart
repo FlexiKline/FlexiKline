@@ -18,6 +18,7 @@ import 'dart:async';
 
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flexi_formatter/flexi_formatter.dart';
+import 'package:flexi_painting/flexi_painting.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
@@ -26,7 +27,6 @@ import '../../constant.dart';
 import '../../extension/export.dart';
 import '../../framework/export.dart';
 import '../../model/export.dart';
-import '../../painting/export.dart';
 
 part 'candle.g.dart';
 part 'indicator.dart';

@@ -18,6 +18,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flexi_formatter/flexi_formatter.dart';
+import 'package:flexi_painting/flexi_painting.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
@@ -30,7 +31,6 @@ import '../extension/export.dart';
 import '../framework/export.dart';
 import '../framework/kline_data_pipeline.dart';
 import '../model/export.dart';
-import '../painting/export.dart';
 import '../types.dart';
 import '../utils/platform_util.dart';
 

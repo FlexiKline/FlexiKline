@@ -13,11 +13,11 @@
 // limitations under the License.
 
 import 'package:copy_with_extension/copy_with_extension.dart';
+import 'package:flexi_painting/flexi_painting.dart';
 import 'package:flutter/painting.dart';
 
 import '../../constant.dart';
 import '../../framework/serializers.dart';
-import '../../painting/export.dart';
 import '../text_area_config/text_area_config.dart';
 
 part 'bubble_config.g.dart';

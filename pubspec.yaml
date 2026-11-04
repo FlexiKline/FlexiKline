@@ -5,6 +5,7 @@ environment:
   sdk: ">=3.11.0 <4.0.0"
 
 workspace:
+  - packages/flexi_painting
   - packages/flexi_kline
   - packages/flexi_kline_draw_tools
   - apps/demo

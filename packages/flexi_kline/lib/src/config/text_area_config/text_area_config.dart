@@ -15,12 +15,12 @@
 import 'dart:math' as math;
 
 import 'package:copy_with_extension/copy_with_extension.dart';
+import 'package:flexi_painting/flexi_painting.dart';
 import 'package:flutter/painting.dart';
 
 import '../../constant.dart';
 import '../../extension/export.dart';
 import '../../framework/serializers.dart';
-import '../../painting/export.dart';
 import '../gradient_config/gradient_config.dart';
 
 part 'text_area_config.g.dart';

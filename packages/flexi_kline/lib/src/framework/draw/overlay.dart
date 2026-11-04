@@ -17,6 +17,7 @@ library;
 import 'dart:collection';
 import 'dart:math' as math;
 import 'package:flexi_formatter/flexi_formatter.dart';
+import 'package:flexi_painting/flexi_painting.dart';
 import 'package:flutter/widgets.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -26,7 +27,6 @@ import '../../core/core.dart';
 import '../../data/kline_data.dart';
 import '../../extension/export.dart';
 import '../../model/export.dart';
-import '../../painting/export.dart';
 import '../collection/sortable_hash_set.dart';
 import '../configuration.dart';
 import '../logger.dart';
