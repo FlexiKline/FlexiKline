@@ -16,23 +16,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/painting.dart';
 
-import 'corner.dart';
-
-/// 外延在 body 之外、且依赖锚点的形状(带箭头的气泡、单侧收口的价格标签等)。
-///
-/// 宿主实现它即可接入 LabelPainter 的摆放与夹取, 不需要改框架。
-abstract class AnchoredBorder extends ShapeBorder {
-  const AnchoredBorder();
-
-  /// 形状在 body 之外占的空间, 参与摆放与边界夹取。
-  EdgeInsets get outsets;
-
-  /// 返回对准 [anchor] 的形状; [anchor] 相对 body(即 getOuterPath 收到的 rect)的左上角。
-  ///
-  /// body 被夹取平移后锚点可能落在可放置区间外, 实现须自己把箭头夹进去。
-  /// 路径必须按 rect 相对计算, 这样阴影平移 rect 时箭头跟着平移。
-  ShapeBorder anchorTo(Offset anchor);
-}
+import '../geometry/path_corner.dart';
+import 'anchored_border.dart';
 
 /// 带箭头的圆角矩形。路径一次成型, 不用 Path.combine(union): union 的接缝会被描边画出来。
 ///
@@ -249,50 +234,4 @@ final class BubbleBorder extends AnchoredBorder {
 
   @override
   int get hashCode => Object.hash(side, borderRadius, direction, arrowSize, arrowRadius, gradient, arrow);
-}
-
-/// 描边用 [gradient] 着色的圆角矩形; 形状、填充与描边位置同 [RoundedRectangleBorder]。
-///
-/// 不参与形状插值: lerp 得到的是不带渐变的 RoundedRectangleBorder。
-final class GradientRoundedRectangleBorder extends RoundedRectangleBorder {
-  const GradientRoundedRectangleBorder({super.side, super.borderRadius, required this.gradient});
-
-  /// 着色区域是传给 [paint] 的 rect。
-  final Gradient gradient;
-
-  @override
-  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
-    if (side.style == BorderStyle.none) return;
-    final rrect = borderRadius.resolve(textDirection).toRRect(rect);
-    final paint = Paint()..shader = gradient.createShader(rect, textDirection: textDirection);
-    // 与 RoundedRectangleBorder 相同: 线宽 0 画细线, 否则按 strokeAlign 填充内外两条轮廓之间。
-    if (side.width == 0) {
-      canvas.drawRRect(rrect, paint..style = PaintingStyle.stroke);
-    } else {
-      canvas.drawDRRect(rrect.inflate(side.strokeOutset), rrect.deflate(side.strokeInset), paint);
-    }
-  }
-
-  @override
-  GradientRoundedRectangleBorder copyWith({BorderSide? side, BorderRadiusGeometry? borderRadius, Gradient? gradient}) =>
-      GradientRoundedRectangleBorder(
-        side: side ?? this.side,
-        borderRadius: borderRadius ?? this.borderRadius,
-        gradient: gradient ?? this.gradient,
-      );
-
-  @override
-  GradientRoundedRectangleBorder scale(double t) =>
-      GradientRoundedRectangleBorder(side: side.scale(t), borderRadius: borderRadius * t, gradient: gradient);
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is GradientRoundedRectangleBorder &&
-          side == other.side &&
-          borderRadius == other.borderRadius &&
-          gradient == other.gradient;
-
-  @override
-  int get hashCode => Object.hash(side, borderRadius, gradient);
 }

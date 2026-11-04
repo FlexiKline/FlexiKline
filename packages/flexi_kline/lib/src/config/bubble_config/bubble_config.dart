@@ -17,8 +17,7 @@ import 'package:flutter/painting.dart';
 
 import '../../constant.dart';
 import '../../framework/serializers.dart';
-import '../../painting/borders.dart';
-import '../../painting/label_style.dart';
+import '../../painting/export.dart';
 import '../text_area_config/text_area_config.dart';
 
 part 'bubble_config.g.dart';

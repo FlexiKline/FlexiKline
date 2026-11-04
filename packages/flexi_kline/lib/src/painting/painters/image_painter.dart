@@ -16,9 +16,9 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
 
+import '../foundation/paint_resource.dart';
 import 'decoration_painter.dart';
 import 'image_style.dart';
-import 'paint_resource.dart';
 
 /// 带背景与边框的图片绘制器。
 ///

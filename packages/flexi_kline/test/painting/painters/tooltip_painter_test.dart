@@ -17,11 +17,11 @@ library;
 
 import 'dart:ui' show Paragraph;
 
-import 'package:flexi_kline/src/painting/tooltip_painter.dart';
+import 'package:flexi_kline/src/painting/painters/tooltip_painter.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../support/support.dart';
+import '../recording_canvas.dart';
 
 const _style = TextStyle(fontSize: 10, height: 1.2);
 const _padding = EdgeInsets.all(4);

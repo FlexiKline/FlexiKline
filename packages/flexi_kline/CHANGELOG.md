@@ -1,3 +1,6 @@
+## 2.8.0
+* Rename `ImageSpan` to `RawImageSpan`, which avoids the name clash with `extended_text` (Breaking Changes).
+
 ## 2.7.2
 * Change `ScalePosition.auto` to always anchor X-axis zoom at the focal point (pinch centroid, wheel or trackpad pointer) and `middle` at the main chart center: `auto` used to pick an anchor by screen third, and `middle` followed the focal point until the latest candle left the screen.
 * Fix X-axis zoom drifting off its anchor when candle spacing is derived from the candle width.

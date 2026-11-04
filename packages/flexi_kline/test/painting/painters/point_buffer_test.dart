@@ -19,7 +19,7 @@ import 'package:flexi_kline/src/painting/export.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../support/support.dart';
+import '../recording_canvas.dart';
 
 void main() {
   late PointBuffer buffer;

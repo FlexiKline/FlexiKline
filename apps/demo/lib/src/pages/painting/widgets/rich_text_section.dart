@@ -15,7 +15,7 @@ class RichTextSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) => PaintingSection(
     title: '富文本',
-    caption: '一行多色(指标 tips): key 用 List, 逐元素比较; ImageSpan 把图片排进文字行内。',
+    caption: '一行多色(指标 tips): key 用 List, 逐元素比较; RawImageSpan 把图片排进文字行内。',
     height: 60,
     create: () => _RichTextPainter(configuration, indicatorConfig),
   );

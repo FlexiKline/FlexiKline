@@ -18,8 +18,8 @@ import 'package:flexi_kline/src/painting/export.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../support/support.dart';
-import 'painting_doubles.dart';
+import '../painting_doubles.dart';
+import '../recording_canvas.dart';
 
 const _red = Color(0xFFFF0000);
 const _rounded = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4)));
@@ -379,7 +379,7 @@ void main() {
       expect(calls(), [#drawParagraph]);
     });
 
-    test('带图片: drawRRect + drawParagraph + drawImageRect, 目标框尺寸等于 ImageSpan.size', () {
+    test('带图片: drawRRect + drawParagraph + drawImageRect, 目标框尺寸等于 RawImageSpan.size', () {
       final image = solidImage(4, 4);
       const size = Size(12, 12);
       final body = label.paint(
@@ -387,7 +387,7 @@ void main() {
         'img',
         build: () => TextSpan(
           children: [
-            ImageSpan(image, size),
+            RawImageSpan(image, size),
             const TextSpan(text: 'ab'),
           ],
         ),
@@ -402,7 +402,7 @@ void main() {
       image.dispose();
     });
 
-    test('截断掉 ImageSpan 后占位框少于 span: 不越界, 只画剩下的', () {
+    test('截断掉 RawImageSpan 后占位框少于 span: 不越界, 只画剩下的', () {
       final image = solidImage(4, 4);
       const size = Size(10, 10);
       const truncated = LabelStyle(text: TextStyle(fontSize: 10, overflow: TextOverflow.ellipsis), maxLines: 1);
@@ -411,9 +411,9 @@ void main() {
         'img',
         build: () => TextSpan(
           children: [
-            ImageSpan(image, size),
+            RawImageSpan(image, size),
             const TextSpan(text: 'abcdefghij'),
-            ImageSpan(image, size),
+            RawImageSpan(image, size),
           ],
         ),
         style: truncated,

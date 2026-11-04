@@ -32,7 +32,7 @@ final class ImageStyle {
   /// 图片显示尺寸(不含 padding)。
   final Size size;
 
-  /// 图片在 [size] 内的适配方式; 默认 fill, 与旧 drawImageView(src → dst 拉伸)一致。对齐固定居中。
+  /// 图片在 [size] 内的适配方式; 默认 fill(拉伸填满)。对齐固定居中。
   final BoxFit fit;
 
   final EdgeInsets padding;

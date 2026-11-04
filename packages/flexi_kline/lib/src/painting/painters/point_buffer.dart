@@ -18,7 +18,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
 
-import 'paint_resource.dart';
+import '../foundation/paint_resource.dart';
 
 /// 同一画笔的点 / 线段批次, 每帧攒坐标、一次 drawRawPoints 画完。
 ///

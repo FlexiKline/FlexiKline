@@ -36,7 +36,7 @@ final class LabelStyle {
 
   /// 排版宽度区间, 与 TextPainter.layout 同义; 固定宽度写成 minWidth == maxWidth。
   ///
-  /// 不设单独的 width 字段: 它与 maxWidth 语义重叠, 且旧 textWidth 会绕开 bounds 导致溢出。
+  /// 不设单独的 width 字段: 它与 maxWidth 语义重叠, 且会绕开 bounds 导致溢出。
   /// 实际排版时与本次调用的约束(如 bounds 推出的可用宽度)取交集, minWidth 夹到上限以内。
   final double minWidth;
   final double maxWidth;

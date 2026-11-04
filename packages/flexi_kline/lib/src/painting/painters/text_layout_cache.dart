@@ -18,12 +18,12 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
+import '../foundation/paint_resource.dart';
 import 'label_style.dart';
-import 'paint_resource.dart';
 
 /// 一份排版参数下的 TextPainter 池, 按 key 复用排版结果。
 ///
-/// key 契约: 值相等语义, 且在当前 [LabelStyle] 下完全决定文本。可用 String、num、FlexiNum、record;
+/// key 契约: 值相等语义, 且在当前 [LabelStyle] 下完全决定文本。可用 String、num、record;
 /// 变长序列直接用 List: 本池按元素比较, 未命中入池时冻结一份副本, 调用方可以复用自己的 List。
 /// 可用宽度不进 key, 由 TextPainter.layout 自己判断约束是否变化。
 final class TextLayoutCache implements PaintResource {
@@ -67,7 +67,7 @@ final class TextLayoutCache implements PaintResource {
       final content = build?.call() ?? key;
       final painter = _entries.length < capacity ? _create(style) : _entries.remove(_entries.keys.first)!.painter;
       // InlineSpan 统一挂在以 style.text 为样式的根 span 下: 子 span 只写差异(如颜色),
-      // ImageSpan 旁边的文字也能继承字号与颜色。
+      // RawImageSpan 旁边的文字也能继承字号与颜色。
       painter.text = switch (content) {
         final InlineSpan span => TextSpan(style: style.text, children: [span]),
         _ => TextSpan(text: '$content', style: style.text),

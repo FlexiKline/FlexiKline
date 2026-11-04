@@ -19,8 +19,7 @@ import 'package:flutter/painting.dart';
 extension AlignmentPlace on Alignment {
   /// 让 [size] 的本对齐点落在 [anchor] 上; 给了 [bounds] 就整体平移回其内。
   ///
-  /// topLeft / topRight / topCenter 对应旧 DrawDirection 的 ltr / rtl / center;
-  /// 调用点手算的 `dy - areaHeight / 2` 也由它表达, 且用实测高度而非估算。
+  /// 如 centerLeft 让 size 左边中点对准 anchor, 垂直居中按实测高度计算。
   Rect place(Size size, Offset anchor, [Rect? bounds]) {
     final rect = (anchor - alongSize(size)) & size;
     if (bounds == null) return rect;

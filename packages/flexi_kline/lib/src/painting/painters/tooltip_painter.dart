@@ -16,10 +16,10 @@ import 'dart:math' as math;
 
 import 'package:flutter/painting.dart';
 
-import 'alignment.dart';
+import '../foundation/paint_resource.dart';
+import '../geometry/placement.dart';
 import 'decoration_painter.dart';
 import 'label_style.dart';
-import 'paint_resource.dart';
 import 'text_layout_cache.dart';
 
 /// tooltip 的一行; 行样式为 null 时沿用列样式。
@@ -28,7 +28,7 @@ typedef TooltipRow = ({String label, TextStyle? labelStyle, String value, TextSt
 /// 两列 tooltip 卡片: label 左对齐、value 右对齐, 返回卡片与逐行命中区。
 ///
 /// 两列各一个 [TextLayoutCache], 列样式只取基础文本样式; 每行自带的样式进 key 与子 span, 切行不清缓存。
-/// value 列容量是 label 列的两倍: 十字线在相邻蜡烛间来回时两组值都留在池里。
+/// value 列容量是 label 列的两倍: 在相邻两条数据间来回切换时, 两组值都留在池里。
 final class TooltipPainter implements PaintResource {
   TextLayoutCache _labels = TextLayoutCache(capacity: 16);
   TextLayoutCache _values = TextLayoutCache(capacity: 32);

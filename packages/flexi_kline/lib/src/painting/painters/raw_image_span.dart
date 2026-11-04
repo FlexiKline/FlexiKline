@@ -19,8 +19,8 @@ import 'package:flutter/painting.dart';
 /// 行内图片。排版时占一个 [size] 的框, 由 LabelPainter 在框内补画。
 ///
 /// 与 WidgetSpan 不同, 尺寸由自身给出, 不需要先 `TextPainter.setPlaceholderDimensions`。
-final class ImageSpan extends PlaceholderSpan {
-  const ImageSpan(this.image, this.size, {super.alignment = ui.PlaceholderAlignment.middle, super.baseline});
+final class RawImageSpan extends PlaceholderSpan {
+  const RawImageSpan(this.image, this.size, {super.alignment = ui.PlaceholderAlignment.middle, super.baseline});
 
   final ui.Image image;
   final Size size;
@@ -59,7 +59,7 @@ final class ImageSpan extends PlaceholderSpan {
   @override
   RenderComparison compareTo(InlineSpan other) {
     if (identical(this, other)) return RenderComparison.identical;
-    if (other is! ImageSpan ||
+    if (other is! RawImageSpan ||
         !identical(image, other.image) ||
         size != other.size ||
         alignment != other.alignment ||
@@ -70,14 +70,14 @@ final class ImageSpan extends PlaceholderSpan {
   }
 
   /// PlaceholderSpan 的默认实现是 `assert(false, ...)`, 而 `TextPainter.text` setter 会递归校验,
-  /// 不覆写则一赋值就断言失败; ImageSpan 自带尺寸、不依赖 WidgetSpan 的布局协议, 恒为有效。
+  /// 不覆写则一赋值就断言失败; RawImageSpan 自带尺寸、不依赖 WidgetSpan 的布局协议, 恒为有效。
   @override
   bool debugAssertIsValid() => true;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is ImageSpan &&
+      other is RawImageSpan &&
           identical(image, other.image) &&
           size == other.size &&
           alignment == other.alignment &&

@@ -14,9 +14,9 @@
 
 import 'package:flutter/painting.dart';
 
-import 'alignment.dart';
-import 'borders.dart';
-import 'paint_resource.dart';
+import '../borders/anchored_border.dart';
+import '../foundation/paint_resource.dart';
+import '../geometry/placement.dart';
 
 /// [shape] 在 body 之外占的空间; 只有 [AnchoredBorder] 有外延。
 EdgeInsets outsetsOf(ShapeBorder? shape) => shape is AnchoredBorder ? shape.outsets : EdgeInsets.zero;

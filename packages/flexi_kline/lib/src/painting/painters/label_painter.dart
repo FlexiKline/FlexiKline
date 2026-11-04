@@ -16,11 +16,11 @@ import 'dart:math' as math;
 
 import 'package:flutter/painting.dart';
 
-import 'alignment.dart';
+import '../foundation/paint_resource.dart';
+import '../geometry/placement.dart';
 import 'decoration_painter.dart';
-import 'image_span.dart';
 import 'label_style.dart';
-import 'paint_resource.dart';
+import 'raw_image_span.dart';
 import 'text_layout_cache.dart';
 
 /// 带背景与边框的标签绘制器, 跨帧持有排版结果。
@@ -36,7 +36,7 @@ final class LabelPainter implements PaintResource {
 
   /// 画标签, 返回容器矩形(含 padding, 不含 AnchoredBorder 的外延)。
   ///
-  /// [minWidth] 是容器(含 padding)的最小宽度, 用于与相邻标签对齐(如倒计时与最新价同宽);
+  /// [minWidth] 是容器(含 padding)的最小宽度, 用于与相邻标签对齐(如上下两个标签同宽);
   /// 与 bounds 推出的可用宽度一样, 属于本次调用的约束, 不进 style、不进 key。
   Rect paint(
     Canvas canvas,
@@ -117,7 +117,7 @@ final class LabelPainter implements PaintResource {
     );
   }
 
-  /// 按先序把 [ImageSpan] 与占位框一一对应补画; ellipsis 截断时框可能少于 span, 取完即停。
+  /// 按先序把 [RawImageSpan] 与占位框一一对应补画; ellipsis 截断时框可能少于 span, 取完即停。
   void _paintImages(Canvas canvas, TextPainter painter, Offset origin) {
     final boxes = painter.inlinePlaceholderBoxes;
     if (boxes == null || boxes.isEmpty) return;
@@ -126,7 +126,7 @@ final class LabelPainter implements PaintResource {
       if (span is! PlaceholderSpan) return true;
       if (index >= boxes.length) return false;
       final box = boxes[index++];
-      if (span is ImageSpan) {
+      if (span is RawImageSpan) {
         final image = span.image;
         canvas.drawImageRect(
           image,

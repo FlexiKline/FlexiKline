@@ -20,8 +20,7 @@ import 'package:flutter/painting.dart';
 import '../../constant.dart';
 import '../../extension/export.dart';
 import '../../framework/serializers.dart';
-import '../../painting/borders.dart';
-import '../../painting/label_style.dart';
+import '../../painting/export.dart';
 import '../gradient_config/gradient_config.dart';
 
 part 'text_area_config.g.dart';

@@ -18,14 +18,14 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
-import 'corner.dart';
-import 'image_span.dart';
-import 'paint_resource.dart';
+import '../foundation/paint_resource.dart';
+import '../geometry/path_corner.dart';
+import '../painters/raw_image_span.dart';
 
-/// 程序绘制的单色小图标, 用作行内 [ImageSpan]; 子类只实现 [draw], 缓存与释放由本类负责。
+/// 程序绘制的单色小图标, 用作行内 [RawImageSpan]; 子类只实现 [draw], 缓存与释放由本类负责。
 ///
 /// 只缓存当前颜色的一张位图, 换色时释放旧图。缓存不看图形参数, 所以参数应为 final; 确需可变时修改后调用 [reset]。
-/// 尺寸跟随内容或需对准锚点的外形(气泡、价格标签)用 ShapeBorder, 不用它。
+/// 尺寸跟随内容或需对准锚点的外形(气泡、带尖角的标签)用 ShapeBorder, 不用它。
 abstract base class ShapeImage implements PaintResource {
   ShapeImage(
     this.size, {
@@ -70,10 +70,10 @@ abstract base class ShapeImage implements PaintResource {
 
   /// 以 [size] 占位的行内图片。
   @nonVirtual
-  ImageSpan span(
+  RawImageSpan span(
     Color color, {
     ui.PlaceholderAlignment alignment = ui.PlaceholderAlignment.middle,
-  }) => ImageSpan(of(color), size, alignment: alignment);
+  }) => RawImageSpan(of(color), size, alignment: alignment);
 
   @override
   @nonVirtual
@@ -176,7 +176,7 @@ final class CircleImage extends ShapeImage {
   );
 }
 
-/// 实心矩形色块, 填满 [size]; [radius] 为圆角半径, 默认 0。常用于指标图例。
+/// 实心矩形色块, 填满 [size]; [radius] 为圆角半径, 默认 0。常用于图例。
 final class SquareImage extends ShapeImage {
   SquareImage(
     super.size, {

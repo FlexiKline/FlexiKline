@@ -18,9 +18,9 @@ import 'package:flexi_kline/src/painting/export.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'painting_doubles.dart';
+import '../painting_doubles.dart';
 
-/// ImageSpan 原型: 不经 setPlaceholderDimensions 也能排版, 占位框与 span 先序一一对应。
+/// RawImageSpan 原型: 不经 setPlaceholderDimensions 也能排版, 占位框与 span 先序一一对应。
 void main() {
   late ui.Image img1;
   late ui.Image img2;
@@ -35,15 +35,15 @@ void main() {
     img2.dispose();
   });
 
-  group('ImageSpan 排版', () {
-    test('含 ImageSpan 的 TextPainter 能 layout, 占位框数量/顺序/尺寸与 span 先序一致', () {
+  group('RawImageSpan 排版', () {
+    test('含 RawImageSpan 的 TextPainter 能 layout, 占位框数量/顺序/尺寸与 span 先序一致', () {
       final painter = TextPainter(
         text: TextSpan(
           children: [
             const TextSpan(text: 'a'),
-            ImageSpan(img1, const Size(10, 12)),
+            RawImageSpan(img1, const Size(10, 12)),
             const TextSpan(text: 'b'),
-            ImageSpan(img2, const Size(16, 16)),
+            RawImageSpan(img2, const Size(16, 16)),
           ],
         ),
         textDirection: TextDirection.ltr,
@@ -64,7 +64,7 @@ void main() {
         'img',
         build: () => TextSpan(
           children: [
-            ImageSpan(img1, const Size(10, 12)),
+            RawImageSpan(img1, const Size(10, 12)),
             const TextSpan(text: 'x'),
           ],
         ),
@@ -79,63 +79,63 @@ void main() {
 
   group('compareTo', () {
     test('同实例 identical', () {
-      final span = ImageSpan(img1, const Size(10, 10));
+      final span = RawImageSpan(img1, const Size(10, 10));
       expect(span.compareTo(span), RenderComparison.identical);
     });
 
     test('等字段新实例 identical', () {
       expect(
-        ImageSpan(img1, const Size(10, 10)).compareTo(ImageSpan(img1, const Size(10, 10))),
+        RawImageSpan(img1, const Size(10, 10)).compareTo(RawImageSpan(img1, const Size(10, 10))),
         RenderComparison.identical,
       );
     });
 
     test('换 size → layout', () {
       expect(
-        ImageSpan(img1, const Size(10, 10)).compareTo(ImageSpan(img1, const Size(12, 10))),
+        RawImageSpan(img1, const Size(10, 10)).compareTo(RawImageSpan(img1, const Size(12, 10))),
         RenderComparison.layout,
       );
     });
 
     test('换 image → layout', () {
       expect(
-        ImageSpan(img1, const Size(10, 10)).compareTo(ImageSpan(img2, const Size(10, 10))),
+        RawImageSpan(img1, const Size(10, 10)).compareTo(RawImageSpan(img2, const Size(10, 10))),
         RenderComparison.layout,
       );
     });
 
     test('换 alignment → layout', () {
       expect(
-        ImageSpan(
+        RawImageSpan(
           img1,
           const Size(10, 10),
-        ).compareTo(ImageSpan(img1, const Size(10, 10), alignment: ui.PlaceholderAlignment.top)),
+        ).compareTo(RawImageSpan(img1, const Size(10, 10), alignment: ui.PlaceholderAlignment.top)),
         RenderComparison.layout,
       );
     });
 
     test('与其他类型 span 比较 → layout', () {
-      expect(ImageSpan(img1, const Size(10, 10)).compareTo(const TextSpan(text: 'x')), RenderComparison.layout);
+      expect(RawImageSpan(img1, const Size(10, 10)).compareTo(const TextSpan(text: 'x')), RenderComparison.layout);
     });
   });
 
   group('== / hashCode', () {
     test('同一图片同字段相等且哈希一致', () {
-      final a = ImageSpan(img1, const Size(10, 10));
-      final b = ImageSpan(img1, const Size(10, 10));
+      final a = RawImageSpan(img1, const Size(10, 10));
+      final b = RawImageSpan(img1, const Size(10, 10));
       expect(a, b);
       expect(a.hashCode, b.hashCode);
     });
 
     test('按图片身份与尺寸区分', () {
-      final a = ImageSpan(img1, const Size(10, 10));
-      expect(a == ImageSpan(img2, const Size(10, 10)), isFalse);
-      expect(a == ImageSpan(img1, const Size(11, 10)), isFalse);
+      final a = RawImageSpan(img1, const Size(10, 10));
+      expect(a == RawImageSpan(img2, const Size(10, 10)), isFalse);
+      expect(a == RawImageSpan(img1, const Size(11, 10)), isFalse);
     });
 
     test('同像素的不同图片实例不相等', () {
       final other = solidImage(4, 4);
-      expect(ImageSpan(img1, const Size(10, 10)) == ImageSpan(other, const Size(10, 10)), isFalse);
+      expect(RawImageSpan(img1, const Size(10, 10)) == RawImageSpan(other, const Size(10, 10)), isFalse);
       other.dispose();
     });
   });
