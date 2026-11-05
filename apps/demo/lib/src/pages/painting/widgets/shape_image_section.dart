@@ -5,7 +5,22 @@ import '../../../config/my_kline_config.dart';
 import '../../../config/my_kline_indicator_config.dart';
 import 'section.dart';
 
-/// 程序绘制的小图标: [TriangleShape] 的圆角对比、内置图形一览, 以及业务侧继承 [IconShape] 的自定义图形。
+/// 画布与 Widget 共用的图形一览。
+const _shapes = <(String, IconShape)>[
+  ('CircleShape', CircleShape()),
+  ('DiamondShape', DiamondShape()),
+  ('PlusShape', PlusShape()),
+  ('MinusShape', MinusShape()),
+  ('ChevronShape', ChevronShape()),
+  ('CrossShape', CrossShape()),
+  ('StarShape', StarShape()),
+  ('BellShape', BellShape()),
+  ('SquareShape', SquareShape(radius: 1.5)),
+  ('_HexagonShape', _HexagonShape()),
+];
+
+/// 程序绘制的小图标: [TriangleShape] 的圆角对比、内置图形一览, 以及业务侧继承 [IconShape] 的自定义图形;
+/// 底部用 [ShapeIcon] 与 [ShapeImageProvider] 在 Widget 中显示同一批图形。
 class ShapeImageSection extends StatelessWidget {
   const ShapeImageSection(this.configuration, this.indicatorConfig, {super.key});
 
@@ -14,13 +29,50 @@ class ShapeImageSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => PaintingSection(
-    title: 'ShapeImage',
+    title: 'ShapeImage / ShapeIcon',
     caption:
         '按颜色缓存一张位图, 换色释放旧图。上排放大 6 倍看三角圆角; 其次是行内实际尺寸(5x6, 最后价箭头用默认 radius 0.5)与四个方向;'
-        '最下面两排是其余内置图形, 以及业务侧继承 IconShape 只实现 paint 的自定义图形。',
+        '其后两排是其余内置图形, 以及业务侧继承 IconShape 只实现 paint 的自定义图形。'
+        '底部同一批图形在 Widget 中显示: 第一行 ShapeIcon 矢量绘制, 颜色取自 IconTheme; 第二行 ShapeImageProvider 供 Image 使用。',
     height: 270,
     create: () => _ShapeImagePainter(configuration, indicatorConfig),
+    footer: (_) => const _WidgetIcons(),
   );
+}
+
+class _WidgetIcons extends StatelessWidget {
+  const _WidgetIcons();
+
+  static const _size = 24.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme.primary;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 8),
+        IconTheme(
+          data: IconThemeData(size: _size, color: color),
+          child: Wrap(
+            spacing: 12,
+            runSpacing: 8,
+            children: [
+              for (final (name, shape) in _shapes) ShapeIcon(shape, semanticLabel: name),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 12,
+          runSpacing: 8,
+          children: [
+            for (final (_, shape) in _shapes) Image(image: ShapeImageProvider(shape, const Size.square(_size), color)),
+          ],
+        ),
+      ],
+    );
+  }
 }
 
 class _ShapeImagePainter extends SectionPainter {
@@ -45,18 +97,7 @@ class _ShapeImagePainter extends SectionPainter {
   late final _arrowLabels = [for (final _ in _directions) own(LabelPainter())];
 
   static const _iconSize = Size(8, 8);
-  late final _icons = [
-    ('CircleShape', own(ShapeImage(const CircleShape(), _iconSize))),
-    ('DiamondShape', own(ShapeImage(const DiamondShape(), _iconSize))),
-    ('PlusShape', own(ShapeImage(const PlusShape(), _iconSize))),
-    ('MinusShape', own(ShapeImage(const MinusShape(), _iconSize))),
-    ('ChevronShape', own(ShapeImage(const ChevronShape(), _iconSize))),
-    ('CrossShape', own(ShapeImage(const CrossShape(), _iconSize))),
-    ('StarShape', own(ShapeImage(const StarShape(), _iconSize))),
-    ('BellShape', own(ShapeImage(const BellShape(), _iconSize))),
-    ('SquareShape', own(ShapeImage(const SquareShape(radius: 1.5), _iconSize))),
-    ('_HexagonShape', own(ShapeImage(const _HexagonShape(), _iconSize))),
-  ];
+  late final _icons = [for (final (name, shape) in _shapes) (name, own(ShapeImage(shape, _iconSize)))];
 
   late final _labels = [for (final _ in _radii) own(LabelPainter())];
   late final _iconLabels = [for (final _ in _icons) own(LabelPainter())];

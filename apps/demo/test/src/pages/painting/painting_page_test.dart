@@ -1,3 +1,4 @@
+import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flexi_kline_demo/src/pages/painting/painting_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,6 +12,8 @@ void main() {
 
     await tester.pumpWidget(const MaterialApp(home: PaintingPage()));
     expect(find.byType(Card), findsNWidgets(12));
+    expect(find.byType(ShapeIcon), findsNWidgets(10));
+    expect(find.byWidgetPredicate((w) => w is Image && w.image is ShapeImageProvider), findsNWidgets(10));
 
     await tester.tap(find.text('换值'));
     await tester.pump();
