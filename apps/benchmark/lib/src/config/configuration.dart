@@ -63,7 +63,7 @@ class BenchConfiguration with FlexiKlineConfigurationMixin {
   }
 
   @override
-  MainPaintObjectIndicator<Indicator> genMainIndicator(MainPaintObjectIndicator<Indicator>? mainIndicator) {
+  MainPaintObjectIndicator<Indicator> genMainIndicator([MainPaintObjectIndicator<Indicator>? mainIndicator]) {
     return MainPaintObjectIndicator(
       size: mainIndicator?.size ?? const Size(0, 360),
       padding: mainIndicator?.padding ?? const EdgeInsets.only(top: 16, bottom: 4),

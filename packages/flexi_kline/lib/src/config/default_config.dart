@@ -67,7 +67,7 @@ mixin FlexiKlineConfigurationMixin implements IConfiguration {
     );
   }
 
-  MainPaintObjectIndicator genMainIndicator(MainPaintObjectIndicator<Indicator>? mainIndicator) {
+  MainPaintObjectIndicator genMainIndicator([MainPaintObjectIndicator<Indicator>? mainIndicator]) {
     return mainIndicator ??
         MainPaintObjectIndicator(
           size: const Size(0, defaultMainIndicatorHeight),

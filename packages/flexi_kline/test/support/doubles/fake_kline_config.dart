@@ -126,9 +126,7 @@ class FakeFlexiKlineConfiguration with FlexiKlineConfigurationMixin {
   Map<IDrawType, DrawObjectBuilder<Overlay, DrawObject<Overlay>>> get drawObjectBuilders => {};
 
   @override
-  MainPaintObjectIndicator<Indicator> genMainIndicator(
-    MainPaintObjectIndicator<Indicator>? mainIndicator,
-  ) {
+  MainPaintObjectIndicator<Indicator> genMainIndicator([MainPaintObjectIndicator<Indicator>? mainIndicator]) {
     return MainPaintObjectIndicator(
       size: mainIndicator?.size ?? mainIndicatorDefaultSize ?? const Size(0, 300),
       padding: mainIndicator?.padding ?? mainIndicatorDefaultPadding ?? EdgeInsets.zero,

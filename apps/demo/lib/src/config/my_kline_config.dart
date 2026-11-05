@@ -58,9 +58,7 @@ class MyKlineConfig with MyKlineStorageMixin, FlexiKlineConfigurationMixin, Draw
   }
 
   @override
-  MainPaintObjectIndicator genMainIndicator(
-    MainPaintObjectIndicator<Indicator>? mainIndicator,
-  ) {
+  MainPaintObjectIndicator genMainIndicator([MainPaintObjectIndicator<Indicator>? mainIndicator]) {
     return MainPaintObjectIndicator(
       size: mainIndicator?.size ?? const Size(375, 300),
       padding: mainIndicator?.padding ?? defaultMainIndicatorPadding,
