@@ -32,7 +32,7 @@ Add the dependency to `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  flexi_kline: ^2.7.0
+  flexi_kline: ^2.7.1
 ```
 
 Then run:
