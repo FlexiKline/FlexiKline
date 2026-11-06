@@ -1,4 +1,5 @@
 ## 2.7.1
+* Add the `showDateMark` parameter to `moveToDateTime` so a single move can skip the date bubble; when `false` the candle indicator does not receive `didMoveToDate`.
 * Fix the `markNeedsBuild() called during build` assertion when candles arrive before `FlexiKlineWidget` mounts and an already built sibling listens to `klineSpecListenable`: such candles now merge right after the mount frame.
 
 ## 2.7.0

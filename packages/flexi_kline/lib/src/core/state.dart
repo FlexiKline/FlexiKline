@@ -326,7 +326,10 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   /// 未挂载、无数据、动画中断或目标蜡烛发生变化时返回null.
   ///
   /// 成功时返回目标蜡烛在当前[KlineData]中的下标.
-  Future<int?> moveToDateTime(DateTime dateTime) async {
+  ///
+  /// [showDateMark]为false时本次不调用`didMoveToDate`, 蜡烛指标不显示日期气泡;
+  /// 用于程序化定位等不需要提示目标日期的场景, `moveToDate`交互事件照常派发.
+  Future<int?> moveToDateTime(DateTime dateTime, {bool showDateMark = true}) async {
     if (!isMounted || klineData.isEmpty || mainChartWidth <= 0) {
       return null;
     }
@@ -346,7 +349,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     if (!isMounted || !identical(klineData, data)) return null;
     if (klineData.get(index)?.ts != targetTimestamp) return null;
     dispatchInteractionEvent(FlexiKlineEventType.moveToDate, {'ts': targetTimestamp});
-    candlePaintObject.didMoveToDate(targetTimestamp);
+    if (showDateMark) candlePaintObject.didMoveToDate(targetTimestamp);
     return index;
   }
 

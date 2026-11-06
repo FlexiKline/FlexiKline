@@ -646,6 +646,23 @@ void main() {
       expect(candle.object!.movedToDates, [expected]);
     });
 
+    testWidgets('showDateMark false moves without notifying the candle', (tester) async {
+      final candle = TestCandleIndicator();
+      final controller = await _pumpChart(tester, candle: candle);
+      addTearDown(() => disposeChart(tester, controller));
+      final target = _latest.subtract(_day * 40);
+      final expected = controller.klineData.tsToIndex(target.millisecondsSinceEpoch)!;
+
+      final index = await _pumpUntilFutureComplete(
+        tester,
+        controller.moveToDateTime(target, showDateMark: false),
+        'date move without mark',
+      );
+      expect(index, expected);
+      _expectCandleCentered(controller, expected);
+      expect(candle.object!.movedToDates, isEmpty);
+    });
+
     testWidgets('interrupted move does not notify the candle', (tester) async {
       final candle = TestCandleIndicator();
       final controller = await _pumpChart(tester, candle: candle);
