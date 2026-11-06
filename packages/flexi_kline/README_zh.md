@@ -312,7 +312,7 @@ class VolumePaintObject extends DirectPaintObject<VolumeIndicator> {
 }
 ```
 
-文字旁的小图标（如最后价箭头）用只负责绘制的 `IconShape` 描述，由 `ShapeImage(shape, size)` 缓存成位图，`span(color)` 排进标签；一个 `ShapeImage` 只缓存一种颜色。内置 `TriangleShape`、`ChevronShape`、`DiamondShape`、`SquareShape`、`CircleShape`、`PlusShape`、`MinusShape`、`CrossShape`、`StarShape`、`BellShape`；其他图形继承 `IconShape`（子类须为 `final` 或 `base`，带参数时覆写 `==` 与 `hashCode`），可复用 `Path.addRoundedPolygon`（凸多边形倒圆角）与父类的 `strokePaint`（圆头描边画笔）。尺寸跟随内容或要对准锚点的外形（气泡、订单标记的尖角）用 `ShapeBorder`（如 `BubbleBorder`），不用图片。
+文字旁的小图标（如最后价箭头）用只负责绘制的 `IconShape` 描述，由 `ShapeImage(shape, size)` 缓存成位图，`span(color)` 排进标签；一个 `ShapeImage` 只缓存一种颜色。内置 `TriangleShape`、`ChevronShape`、`DiamondShape`、`SquareShape`、`CircleShape`、`PlusShape`、`CirclePlusShape`、`MinusShape`、`CrossShape`、`StarShape`、`BellShape`；其他图形继承 `IconShape`（子类须为 `final` 或 `base`，带参数时覆写 `==` 与 `hashCode`），可复用 `Path.addRoundedPolygon`（凸多边形倒圆角）与父类的 `strokePaint`（圆头描边画笔）。尺寸跟随内容或要对准锚点的外形（气泡、订单标记的尖角）用 `ShapeBorder`（如 `BubbleBorder`），不用图片。
 
 ```dart
 final class HexagonShape extends IconShape {

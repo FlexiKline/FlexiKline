@@ -10,6 +10,7 @@ const _shapes = <(String, IconShape)>[
   ('CircleShape', CircleShape()),
   ('DiamondShape', DiamondShape()),
   ('PlusShape', PlusShape()),
+  ('CirclePlusShape', CirclePlusShape()),
   ('MinusShape', MinusShape()),
   ('ChevronShape', ChevronShape()),
   ('CrossShape', CrossShape()),
@@ -34,7 +35,7 @@ class ShapeImageSection extends StatelessWidget {
         '按颜色缓存一张位图, 换色释放旧图。上排放大 6 倍看三角圆角; 其次是行内实际尺寸(5x6, 最后价箭头用默认 radius 0.5)与四个方向;'
         '其后两排是其余内置图形, 以及业务侧继承 IconShape 只实现 paint 的自定义图形。'
         '底部同一批图形在 Widget 中显示: 第一行 ShapeIcon 矢量绘制, 颜色取自 IconTheme; 第二行 ShapeImageProvider 供 Image 使用。',
-    height: 270,
+    height: 320,
     create: () => _ShapeImagePainter(configuration, indicatorConfig),
     footer: (_) => const _WidgetIcons(),
   );

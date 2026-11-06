@@ -312,7 +312,7 @@ class VolumePaintObject extends DirectPaintObject<VolumeIndicator> {
 }
 ```
 
-Small icons next to text (e.g. the last-price arrow) are an `IconShape` that only paints, cached as a bitmap by `ShapeImage(shape, size)`; `span(color)` puts the icon into a label, and one `ShapeImage` caches one color. Built-ins: `TriangleShape`, `ChevronShape`, `DiamondShape`, `SquareShape`, `CircleShape`, `PlusShape`, `MinusShape`, `CrossShape`, `StarShape`, `BellShape`. Subclass `IconShape` for other shapes (subclasses must be `final` or `base`; override `==` and `hashCode` when they take parameters) and reuse `Path.addRoundedPolygon` (rounded convex polygon) and `strokePaint` (round-cap stroke). Shapes that size to content or must point at an anchor (bubbles, order-mark tails) use a `ShapeBorder` (e.g. `BubbleBorder`), not an image.
+Small icons next to text (e.g. the last-price arrow) are an `IconShape` that only paints, cached as a bitmap by `ShapeImage(shape, size)`; `span(color)` puts the icon into a label, and one `ShapeImage` caches one color. Built-ins: `TriangleShape`, `ChevronShape`, `DiamondShape`, `SquareShape`, `CircleShape`, `PlusShape`, `CirclePlusShape`, `MinusShape`, `CrossShape`, `StarShape`, `BellShape`. Subclass `IconShape` for other shapes (subclasses must be `final` or `base`; override `==` and `hashCode` when they take parameters) and reuse `Path.addRoundedPolygon` (rounded convex polygon) and `strokePaint` (round-cap stroke). Shapes that size to content or must point at an anchor (bubbles, order-mark tails) use a `ShapeBorder` (e.g. `BubbleBorder`), not an image.
 
 ```dart
 final class HexagonShape extends IconShape {

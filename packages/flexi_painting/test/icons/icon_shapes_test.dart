@@ -41,9 +41,13 @@ Path _pathOf(IconShape shape, Size size) => _argsOf(shape, size)[0] as Path;
 }
 
 void main() {
-  test('CircleShape 以短边为直径居中', () {
+  test('CircleShape 以短边为直径居中; strokeWidth 时画成不出界的圆环', () {
     final args = _argsOf(const CircleShape(), const Size(10, 6));
-    expect((args[0], args[1]), (const Offset(5, 3), 3.0));
+    expect((args[0], args[1], (args[2] as Paint).style), (const Offset(5, 3), 3.0, PaintingStyle.fill));
+
+    final ring = _argsOf(const CircleShape(strokeWidth: 2), const Size(10, 6));
+    final paint = ring[2] as Paint;
+    expect((ring[0], ring[1], paint.style, paint.strokeWidth), (const Offset(5, 3), 2.0, PaintingStyle.stroke, 2.0));
   });
 
   group('TriangleShape', () {
@@ -126,6 +130,12 @@ void main() {
     );
   });
 
+  test('SquareShape 的 strokeWidth 画成描边方框: 内收半个线宽, 外轮廓保持 radius', () {
+    final args = _argsOf(const SquareShape(radius: 3, strokeWidth: 2), const Size(10, 6));
+    expect(args[0], RRect.fromLTRBR(1, 1, 9, 5, const Radius.circular(2)));
+    expect(((args[1] as Paint).style, (args[1] as Paint).strokeWidth), (PaintingStyle.stroke, 2.0));
+  });
+
   group('DiamondShape', () {
     const size = Size(40, 20);
 
@@ -175,11 +185,21 @@ void main() {
     });
 
     test('MinusShape 是贯穿宽度的横杠, 竖向居中', () {
-      expect(_argsOf(const MinusShape(), size)[0], const Rect.fromLTRB(0, 10, 30, 20));
+      expect(_argsOf(const MinusShape(), size)[0], RRect.fromLTRBR(0, 10, 30, 20, Radius.zero));
     });
 
-    test('MinusShape 的 thickness 指定杠高', () {
-      expect(_argsOf(const MinusShape(thickness: 4), size)[0], const Rect.fromLTRB(0, 13, 30, 17));
+    test('MinusShape 的 thickness 指定杠高, radius 为两端圆角且不超过半个杠高', () {
+      expect(_argsOf(const MinusShape(thickness: 4), size)[0], RRect.fromLTRBR(0, 13, 30, 17, Radius.zero));
+      expect(
+        _argsOf(const MinusShape(thickness: 4, radius: 9), size)[0],
+        RRect.fromLTRBR(0, 13, 30, 17, const Radius.circular(2)),
+      );
+    });
+
+    test('PlusShape 的 radius 让臂端变圆: 臂端角落在外, 臂端中点在内', () {
+      final path = _pathOf(const PlusShape(thickness: 10, radius: 5), size);
+      expect(path.contains(const Offset(0.5, 10.5)), isFalse, reason: '横臂左端的角已被圆角切掉');
+      expect(path.contains(const Offset(0.5, 15)), isTrue);
     });
   });
 
@@ -221,6 +241,51 @@ void main() {
         const Offset(15, 10),
       ]);
     });
+  });
+
+  group('CirclePlusShape', () {
+    test('圆环居中, 横竖两臂穿过圆心、贯穿到环上', () {
+      final (path, paint) = _strokeOf(const CirclePlusShape(), const Size(40, 30));
+      expect((paint.style, paint.strokeWidth), (PaintingStyle.stroke, 3.0), reason: '默认线宽为短边 1/10');
+      expect(path.getBounds(), rectMoreOrLessEquals(Rect.fromCircle(center: const Offset(20, 15), radius: 13.5)));
+
+      // 前两条轮廓是横臂与竖臂, 各长一个直径; 最后一条是圆环。
+      final arms = path.computeMetrics().take(2).toList();
+      expect(arms.map((m) => m.length), [27.0, 27.0]);
+      expect(arms.map((m) => m.getTangentForOffset(m.length / 2)!.position), [
+        const Offset(20, 15),
+        const Offset(20, 15),
+      ]);
+    });
+
+    test('thickness 指定线宽, 环随之内缩', () {
+      final (path, paint) = _strokeOf(const CirclePlusShape(thickness: 6), const Size(30, 30));
+      expect(paint.strokeWidth, 6);
+      expect(path.getBounds(), rectMoreOrLessEquals(Rect.fromCircle(center: const Offset(15, 15), radius: 12)));
+    });
+
+    test('plusRatio 控制臂长占直径的比例', () {
+      final (path, _) = _strokeOf(const CirclePlusShape(plusRatio: 0.5), const Size(40, 30));
+      expect(path.computeMetrics().take(2).map((m) => m.length), [13.5, 13.5]);
+    });
+
+    test('plusThickness 与环宽不同时, 环与加号分两笔各用各的线宽', () {
+      final canvas = RecordingCanvas();
+      const CirclePlusShape(thickness: 2, plusThickness: 4).paint(canvas, const Size(30, 30), _black);
+      expect(canvas.invocations.map((i) => i.memberName), [#drawCircle, #drawPath]);
+      expect((canvas.invocations[0].positionalArguments[2] as Paint).strokeWidth, 2);
+      expect((canvas.invocations[1].positionalArguments[1] as Paint).strokeWidth, 4);
+    });
+  });
+
+  test('StarShape 的 points 与 innerRatio: 六角星有 12 个顶点, 内凹顶点按比例收进', () {
+    final path = _pathOf(const StarShape(points: 6, innerRatio: 0.5), const Size(40, 40));
+    const center = Offset(20, 20);
+    // 偶数角上下对称, 不做竖直偏移; 内凹顶点在外半径一半处。
+    expect(path.contains(center + Offset.fromDirection(-math.pi / 2 + math.pi / 6, 9.5)), isTrue);
+    expect(path.contains(center + Offset.fromDirection(-math.pi / 2 + math.pi / 6, 10.5)), isFalse);
+    expect(path.getBounds().top, closeTo(0, 0.01));
+    expect(path.getBounds().bottom, closeTo(40, 0.01));
   });
 
   group('StarShape', () {
@@ -278,14 +343,24 @@ void main() {
         const [TriangleShape(direction: AxisDirection.up), TriangleShape(radius: 1)],
       ),
       ('DiamondShape', const DiamondShape(), DiamondShape(radius: 0.5), const [DiamondShape(radius: 1)]),
-      ('SquareShape', const SquareShape(), SquareShape(radius: 0), const [SquareShape(radius: 1)]),
+      (
+        'SquareShape',
+        const SquareShape(),
+        SquareShape(radius: 0),
+        const [SquareShape(radius: 1), SquareShape(strokeWidth: 1)],
+      ),
       (
         'PlusShape',
         const PlusShape(thickness: 2),
         PlusShape(thickness: 2),
-        const [PlusShape(), MinusShape(thickness: 2)],
+        const [PlusShape(), PlusShape(thickness: 2, radius: 1), MinusShape(thickness: 2)],
       ),
-      ('MinusShape', const MinusShape(thickness: 2), MinusShape(thickness: 2), const [MinusShape()]),
+      (
+        'MinusShape',
+        const MinusShape(thickness: 2),
+        MinusShape(thickness: 2),
+        const [MinusShape(), MinusShape(thickness: 2, radius: 1)],
+      ),
       (
         'ChevronShape',
         const ChevronShape(thickness: 2),
@@ -293,8 +368,24 @@ void main() {
         const [ChevronShape(direction: AxisDirection.left, thickness: 2), ChevronShape()],
       ),
       ('CrossShape', const CrossShape(thickness: 2), CrossShape(thickness: 2), const [CrossShape()]),
-      ('CircleShape', const CircleShape(), CircleShape(), const [StarShape()]),
-      ('StarShape', const StarShape(), StarShape(), const [BellShape()]),
+      (
+        'CirclePlusShape',
+        const CirclePlusShape(thickness: 2),
+        CirclePlusShape(thickness: 2),
+        const [
+          CirclePlusShape(),
+          CirclePlusShape(thickness: 2, plusThickness: 3),
+          CirclePlusShape(thickness: 2, plusRatio: 0.5),
+          PlusShape(thickness: 2),
+        ],
+      ),
+      ('CircleShape', const CircleShape(), CircleShape(), const [CircleShape(strokeWidth: 1), StarShape()]),
+      (
+        'StarShape',
+        const StarShape(),
+        StarShape(points: 5, innerRatio: 0.4),
+        const [StarShape(points: 6), StarShape(innerRatio: 0.5), BellShape()],
+      ),
       ('BellShape', const BellShape(), BellShape(), const [CircleShape()]),
     ];
 

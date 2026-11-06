@@ -12,8 +12,8 @@ void main() {
 
     await tester.pumpWidget(const MaterialApp(home: PaintingPage()));
     expect(find.byType(Card), findsNWidgets(12));
-    expect(find.byType(ShapeIcon), findsNWidgets(10));
-    expect(find.byWidgetPredicate((w) => w is Image && w.image is ShapeImageProvider), findsNWidgets(10));
+    expect(find.byType(ShapeIcon), findsNWidgets(11));
+    expect(find.byWidgetPredicate((w) => w is Image && w.image is ShapeImageProvider), findsNWidgets(11));
 
     await tester.tap(find.text('换值'));
     await tester.pump();
