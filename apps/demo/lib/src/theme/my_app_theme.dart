@@ -23,11 +23,18 @@ abstract final class MyAppTheme {
 
   static ThemeData get dark => _base(Brightness.dark);
 
+  /// 品牌蓝, 也是配色的种子色。
+  static const brandBlue = Color(0xFF1565C0);
+
+  /// 选中态用的品牌蓝: 种子派生的 primary 偏灰, 与未选中的灰色难以区分; 深色模式提亮, 保证在深色底上可辨。
+  static Color selectedOf(Brightness brightness) =>
+      brightness == Brightness.light ? brandBlue : const Color(0xFF5C9DFF);
+
   static ThemeData _base(Brightness brightness) {
     return ThemeData(
       useMaterial3: true,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: const Color(0xFF1565C0),
+        seedColor: brandBlue,
         brightness: brightness,
       ),
     );

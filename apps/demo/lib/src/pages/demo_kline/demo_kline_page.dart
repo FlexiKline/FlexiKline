@@ -8,6 +8,8 @@ import '../../config/my_kline_logger.dart';
 import '../../data/repositories/kline_repository.dart';
 import '../../utils/device.dart';
 import '../../widgets/my_theme_toggle_button.dart';
+import '../common/components/draw_menubar.dart';
+import '../common/components/draw_toolbar.dart';
 import '../common/components/my_kline_interval_bar.dart';
 import '../common/core/kline_state_base.dart';
 import '../common/core/my_kline_data_center.dart';
@@ -162,13 +164,11 @@ class _DemoKlinePageState extends KlineStateBase<DemoKlinePage>
                   visible: isShow,
                   child: child!,
                 ),
-                child: Container(
-                  height: 20,
-                  color: Colors.red,
-                ),
+                child: DrawMenubar(controller: klineController, onExit: _toggleDraw),
               ),
               buildFlexiKlineWidget(
                 key: const ValueKey('DemoKline'),
+                drawToolbar: DrawToolbar(controller: klineController),
               ),
             ],
           ),
