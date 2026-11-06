@@ -154,6 +154,8 @@ Future<({FlexiKlineController chart, ScrollController scroll})> pumpChartInListV
     () => chart.isMounted && chart.mainChartWidth > 0 && chart.klineData.isNotEmpty,
     'chart data and layout',
   );
+  // 挂载前送入的数据在首帧结束后才合并，再泵一帧让几何按数据完成首次绘制。
+  await tester.pump();
   return (chart: chart, scroll: scroll);
 }
 

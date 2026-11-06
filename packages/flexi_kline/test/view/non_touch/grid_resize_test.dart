@@ -104,6 +104,8 @@ Future<FlexiKlineController> _pumpGridResizeChart(
         controller.getSubIndicatorHeights().isNotEmpty,
     'non-touch chart with sub indicator ready',
   );
+  // 挂载前送入的数据在首帧结束后才合并，再泵一帧让几何按数据完成首次绘制。
+  await tester.pump();
   return controller;
 }
 

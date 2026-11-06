@@ -1,3 +1,6 @@
+## 2.7.1
+* Fix the `markNeedsBuild() called during build` assertion when candles arrive before `FlexiKlineWidget` mounts and an already built sibling listens to `klineSpecListenable`: such candles now merge right after the mount frame.
+
 ## 2.7.0
 * Store candles in ascending time order and traverse, compute and paint left-to-right; data passed to `replaceKlineData`, `updateLatestKlineData` and `prependHistoryKlineData` must be ascending (asserted in debug) (Breaking Changes).
 * Rename `appendHistoryKlineData` / `KlineData.appendHistory` to `prependHistoryKlineData` / `prependHistory`, `KlineData.ensureStartAndEndIndex` to `ensurePaintRange({barsBack, count})`, `isFirstCandleMovedOffScreenListenable` to `isLatestCandleOffScreenListenable` and `SettingConfig.firstCandleInitOffset` to `latestCandleInitOffset`, including the JSON field (Breaking Changes).

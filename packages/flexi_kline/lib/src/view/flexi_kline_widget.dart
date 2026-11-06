@@ -135,8 +135,11 @@ class _FlexiKlineWidgetState extends State<FlexiKlineWidget> with WidgetsBinding
     // 同步 controller 生命周期。
     controller.initState();
 
-    // 处理挂载前暂存的数据。
-    controller.flushPendingKlineData();
+    // 挂载前暂存的数据在本帧结束后处理：此刻处于 build 阶段，处理时发出的 spec、加载状态通知
+    // 会让已构建过的兄弟监听者在 build 中被标脏而断言失败。
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) controller.flushPendingKlineData();
+    });
 
     _updateTickerModeNotifier();
   }
