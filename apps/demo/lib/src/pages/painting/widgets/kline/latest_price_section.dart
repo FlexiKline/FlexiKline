@@ -5,9 +5,10 @@ import 'package:flexi_formatter/flexi_formatter.dart';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart';
 
-import '../../../config/my_kline_config.dart';
-import '../../../config/my_kline_indicator_config.dart';
-import 'section.dart';
+import '../../../../config/my_kline_config.dart';
+import '../../../../config/my_kline_indicator_config.dart';
+import '../section.dart';
+import 'kline_section.dart';
 
 /// 最新价标签 + 倒计时(最新蜡烛在视区内): 价格每秒跳动、涨跌换色, 倒计时到整分钟。
 ///
@@ -34,7 +35,7 @@ typedef _Resolved = ({Color line, LabelStyle latest, LabelStyle countdown, Shape
 
 typedef _LatestStyle = ({String name, _Resolved Function(IFlexiKlineTheme theme, Color candle) resolve});
 
-class _LatestPricePainter extends SectionPainter {
+class _LatestPricePainter extends KlineSectionPainter {
   _LatestPricePainter(super.configuration, super.indicatorConfig) {
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       _change = (_random.nextDouble() - 0.5) * 2;

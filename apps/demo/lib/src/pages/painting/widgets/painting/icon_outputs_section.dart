@@ -1,42 +1,28 @@
-import 'package:flexi_kline/flexi_kline.dart';
+import 'package:flexi_painting/flexi_painting.dart';
 import 'package:flutter/material.dart';
 
-import '../../../config/my_kline_config.dart';
-import '../../../config/my_kline_indicator_config.dart';
-import 'section.dart';
+import '../section.dart';
 
-/// 画布与 Widget 共用的图形一览。
+/// 底部 Widget 两行共用的图形。
 const _shapes = <(String, IconShape)>[
-  ('CircleShape', CircleShape()),
-  ('DiamondShape', DiamondShape()),
-  ('PlusShape', PlusShape()),
-  ('CirclePlusShape', CirclePlusShape()),
-  ('MinusShape', MinusShape()),
-  ('ChevronShape', ChevronShape()),
-  ('CrossShape', CrossShape()),
+  ('TriangleShape', TriangleShape()),
   ('StarShape', StarShape()),
-  ('BellShape', BellShape()),
-  ('SquareShape', SquareShape(radius: 1.5)),
   ('_HexagonShape', _HexagonShape()),
 ];
 
-/// 程序绘制的小图标: [TriangleShape] 的圆角对比、内置图形一览, 以及业务侧继承 [IconShape] 的自定义图形;
-/// 底部用 [ShapeIcon] 与 [ShapeImageProvider] 在 Widget 中显示同一批图形。
-class ShapeImageSection extends StatelessWidget {
-  const ShapeImageSection(this.configuration, this.indicatorConfig, {super.key});
-
-  final MyKlineConfig configuration;
-  final MyKlineIndicatorConfig indicatorConfig;
+/// 同一个 [IconShape] 的三种用法: 画布标签里的 [ShapeImage]、Widget 中的 [ShapeIcon]、只接受图片的 API 用 [ShapeImageProvider]。
+class IconOutputsSection extends StatelessWidget {
+  const IconOutputsSection({super.key});
 
   @override
   Widget build(BuildContext context) => PaintingSection(
-    title: 'ShapeImage / ShapeIcon',
+    title: '图标: 一个图形三处用',
     caption:
-        '按颜色缓存一张位图, 换色释放旧图。上排放大 6 倍看三角圆角; 其次是行内实际尺寸(5x6, 最后价箭头用默认 radius 0.5)与四个方向;'
-        '其后两排是其余内置图形, 以及业务侧继承 IconShape 只实现 paint 的自定义图形。'
-        '底部同一批图形在 Widget 中显示: 第一行 ShapeIcon 矢量绘制, 颜色取自 IconTheme; 第二行 ShapeImageProvider 供 Image 使用。',
-    height: 320,
-    create: () => _ShapeImagePainter(configuration, indicatorConfig),
+        '画布: ShapeImage 按颜色缓存一张位图, 换色释放旧图; 上排放大 6 倍看三角圆角, 其次是行内实际尺寸(5x6)与四个方向, '
+        '末行是业务侧继承 IconShape 只实现 paint 的六边形。'
+        '底部同一批图形: 第一行 ShapeIcon 矢量绘制, 颜色取自 IconTheme; 第二行 ShapeImageProvider 供 Image 使用。',
+    height: 210,
+    create: _IconOutputsPainter.new,
     footer: (_) => const _WidgetIcons(),
   );
 }
@@ -57,16 +43,12 @@ class _WidgetIcons extends StatelessWidget {
           data: IconThemeData(size: _size, color: color),
           child: Wrap(
             spacing: 12,
-            runSpacing: 8,
-            children: [
-              for (final (name, shape) in _shapes) ShapeIcon(shape, semanticLabel: name),
-            ],
+            children: [for (final (name, shape) in _shapes) ShapeIcon(shape, semanticLabel: name)],
           ),
         ),
         const SizedBox(height: 8),
         Wrap(
           spacing: 12,
-          runSpacing: 8,
           children: [
             for (final (_, shape) in _shapes) Image(image: ShapeImageProvider(shape, const Size.square(_size), color)),
           ],
@@ -76,9 +58,7 @@ class _WidgetIcons extends StatelessWidget {
   }
 }
 
-class _ShapeImagePainter extends SectionPainter {
-  _ShapeImagePainter(super.configuration, super.indicatorConfig);
-
+class _IconOutputsPainter extends SectionPainter {
   /// 行内尺寸下的圆角半径; 上排放大 6 倍, 半径同比放大。
   static const _radii = [0.0, 0.5, 1.0];
 
@@ -95,34 +75,40 @@ class _ShapeImagePainter extends SectionPainter {
         ),
       ),
   ];
-  late final _arrowLabels = [for (final _ in _directions) own(LabelPainter())];
-
-  static const _iconSize = Size(8, 8);
-  late final _icons = [for (final (name, shape) in _shapes) (name, own(ShapeImage(shape, _iconSize)))];
+  late final _hexagon = own(ShapeImage(const _HexagonShape(), const Size(8, 8)));
 
   late final _labels = [for (final _ in _radii) own(LabelPainter())];
-  late final _iconLabels = [for (final _ in _icons) own(LabelPainter())];
-  late final _names = own(LabelPainter(capacity: _radii.length + _icons.length));
-
-  static const _labelConfig = TextAreaConfig(
-    style: TextStyle(fontSize: 10),
-    padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-    borderRadius: BorderRadius.all(Radius.circular(2)),
-  );
-  static const _nameConfig = TextAreaConfig(style: TextStyle(fontSize: 10));
+  late final _arrowLabels = [for (final _ in _directions) own(LabelPainter())];
+  late final _hexagonLabel = own(LabelPainter());
+  late final _names = own(LabelPainter(capacity: _radii.length));
 
   final _imagePaint = Paint()..filterQuality = FilterQuality.medium;
 
+  LabelStyle get _nameStyle =>
+      byColors(#name, (c) => LabelStyle(text: TextStyle(fontSize: 10, color: c.onSurfaceVariant)));
+
+  LabelStyle get _labelStyle => byColors(
+    #label,
+    (c) => LabelStyle(
+      text: TextStyle(fontSize: 10, color: c.onPrimary),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      decoration: ShapeDecoration(
+        color: c.primary,
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2))),
+      ),
+    ),
+  );
+
   @override
   void paint(Canvas canvas, Size size) {
-    final nameStyle = _nameConfig.toLabelStyle(textColor: theme.ticksTextColor);
-    final labelStyle = _labelConfig.toLabelStyle(textColor: theme.lastPriceColor, backgroundColor: theme.lastPriceBg);
+    final labelStyle = _labelStyle;
+    final ink = labelStyle.text.color!;
 
     final step = size.width / _radii.length;
     for (final (i, radius) in _radii.indexed) {
       final center = Offset(step * (i + 0.5), 30);
       final large = _large[i];
-      final image = large.of(theme.textColor);
+      final image = large.of(colors.onSurface);
       canvas.drawImageRect(
         image,
         Offset.zero & Size(image.width.toDouble(), image.height.toDouble()),
@@ -132,18 +118,17 @@ class _ShapeImagePainter extends SectionPainter {
       _names.paint(
         canvas,
         'radius $radius',
-        style: nameStyle,
+        style: _nameStyle,
         anchor: center.translate(0, 22),
         align: Alignment.topCenter,
       );
-
       _labels[i].paint(
         canvas,
         radius,
         build: () => TextSpan(
           children: [
             const TextSpan(text: '1234.56 '),
-            _inline[i].span(labelStyle.text.color!),
+            _inline[i].span(ink),
           ],
         ),
         style: labelStyle,
@@ -160,7 +145,7 @@ class _ShapeImagePainter extends SectionPainter {
         build: () => TextSpan(
           children: [
             TextSpan(text: '${direction.name} '),
-            _arrows[i].span(labelStyle.text.color!),
+            _arrows[i].span(ink),
           ],
         ),
         style: labelStyle,
@@ -169,32 +154,19 @@ class _ShapeImagePainter extends SectionPainter {
       );
     }
 
-    // 每行 5 个, 名字在图标下方。
-    const columns = 5;
-    final iconStep = size.width / columns;
-    for (final (i, (name, image)) in _icons.indexed) {
-      final anchor = Offset(iconStep * (i % columns + 0.5), 185.0 + i ~/ columns * 48);
-      _iconLabels[i].paint(
-        canvas,
-        name,
-        build: () => TextSpan(
-          children: [
-            image.span(theme.longColor),
-            const TextSpan(text: ' Buy'),
-          ],
-        ),
-        style: labelStyle,
-        anchor: anchor,
-        align: Alignment.center,
-      );
-      _names.paint(
-        canvas,
-        name,
-        style: nameStyle,
-        anchor: anchor.translate(0, 14),
-        align: Alignment.topCenter,
-      );
-    }
+    _hexagonLabel.paint(
+      canvas,
+      'hexagon',
+      build: () => TextSpan(
+        children: [
+          _hexagon.span(ink),
+          const TextSpan(text: ' custom IconShape'),
+        ],
+      ),
+      style: labelStyle,
+      anchor: Offset(size.width / 2, 185),
+      align: Alignment.center,
+    );
   }
 }
 

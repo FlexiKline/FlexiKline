@@ -1,30 +1,23 @@
-import 'package:flexi_kline/flexi_kline.dart';
+import 'package:flexi_painting/flexi_painting.dart';
 import 'package:flutter/material.dart';
 
-import '../../../config/my_kline_config.dart';
-import '../../../config/my_kline_indicator_config.dart';
-import 'demo_image.dart';
-import 'section.dart';
+import '../demo_image.dart';
+import '../section.dart';
 
 /// [ImagePainter]: 摆放同 LabelPainter; 有 decoration 时按形状内轮廓裁切图片。
 class ImageSection extends StatelessWidget {
-  const ImageSection(this.configuration, this.indicatorConfig, {super.key});
-
-  final MyKlineConfig configuration;
-  final MyKlineIndicatorConfig indicatorConfig;
+  const ImageSection({super.key});
 
   @override
-  Widget build(BuildContext context) => PaintingSection(
+  Widget build(BuildContext context) => const PaintingSection(
     title: '图片',
     caption: '依次为: 无装饰不裁切、圆角裁切、气泡裁切(箭头区域不画图片)。',
     height: 90,
-    create: () => _ImagePainter(configuration, indicatorConfig),
+    create: _ImagePainter.new,
   );
 }
 
 class _ImagePainter extends SectionPainter {
-  _ImagePainter(super.configuration, super.indicatorConfig);
-
   /// 每个 ImagePainter 只缓存一个装饰, 三种形状各用一个。
   late final _painters = [for (final _ in _styles) own(ImagePainter())];
   final _image = checkerImage();

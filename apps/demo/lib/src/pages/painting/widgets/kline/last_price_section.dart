@@ -1,9 +1,10 @@
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart';
 
-import '../../../config/my_kline_config.dart';
-import '../../../config/my_kline_indicator_config.dart';
-import 'section.dart';
+import '../../../../config/my_kline_config.dart';
+import '../../../../config/my_kline_indicator_config.dart';
+import '../section.dart';
+import 'kline_section.dart';
 
 /// 最后价标签(最新蜡烛滚出视区时): 断开的虚线 + 价格 + 箭头。
 ///
@@ -30,7 +31,7 @@ typedef _LastStyle = ({
   LabelStyle Function(IFlexiKlineTheme theme, Color candle) resolve,
 });
 
-class _LastPricePainter extends SectionPainter {
+class _LastPricePainter extends KlineSectionPainter {
   _LastPricePainter(super.configuration, super.indicatorConfig);
 
   late final _labels = [for (final _ in _styles) own(LabelPainter())];

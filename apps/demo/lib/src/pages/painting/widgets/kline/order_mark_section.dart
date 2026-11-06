@@ -3,9 +3,10 @@ import 'dart:math' as math;
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart';
 
-import '../../../config/my_kline_config.dart';
-import '../../../config/my_kline_indicator_config.dart';
-import 'section.dart';
+import '../../../../config/my_kline_config.dart';
+import '../../../../config/my_kline_indicator_config.dart';
+import '../section.dart';
+import 'kline_section.dart';
 
 /// 历史订单标记: 用 [LabelPainter] + ShapeBorder 画成标签而非图片, 字母保持矢量、跟随主题字体。
 ///
@@ -25,7 +26,7 @@ class OrderMarkSection extends StatelessWidget {
   );
 }
 
-class _OrderMarkPainter extends SectionPainter {
+class _OrderMarkPainter extends KlineSectionPainter {
   _OrderMarkPainter(super.configuration, super.indicatorConfig);
 
   static const _letters = ['B', 'S', 'W', 'L'];
