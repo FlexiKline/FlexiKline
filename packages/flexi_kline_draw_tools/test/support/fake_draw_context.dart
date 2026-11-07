@@ -75,13 +75,13 @@ class FakeDrawContext implements DrawContext {
   double get candleWidthHalf => 4;
 
   @override
-  double valueToDy(FlexiNum value, {bool correct = false}) {
-    return maxValue - value.toDouble();
+  double valueToDy(double value, {bool correct = false}) {
+    return maxValue - value;
   }
 
   @override
-  FlexiNum? dyToValue(double dy, {bool check = false}) {
-    return FlexiNum.fromNum(maxValue - dy);
+  double? dyToValue(double dy, {bool check = false}) {
+    return maxValue - dy;
   }
 
   @override
