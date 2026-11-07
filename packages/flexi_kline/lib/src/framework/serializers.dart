@@ -18,7 +18,6 @@ import 'package:flutter/painting.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import '../extension/export.dart';
-import '../model/flexi_num.dart';
 import '../model/time_interval.dart';
 import '../utils/convert_util.dart';
 import 'chart/indicator.dart';
@@ -959,21 +958,6 @@ class DecimalConverter implements JsonConverter<Decimal, dynamic> {
   }
 }
 
-class FlexiNumConverter implements JsonConverter<FlexiNum, dynamic> {
-  const FlexiNumConverter();
-
-  @override
-  FlexiNum fromJson(dynamic json) {
-    final value = parseDecimal(json);
-    return value != null ? FlexiNum.fromDecimal(value) : FlexiNum.zero;
-  }
-
-  @override
-  String toJson(FlexiNum object) {
-    return convertDecimal(object.toDecimal());
-  }
-}
-
 class MagnetModeConverter implements JsonConverter<MagnetMode, String> {
   const MagnetModeConverter();
   @override
@@ -1035,7 +1019,6 @@ const _basicConverterList = <JsonConverter>[
   StrutStyleConverter(),
   ColorConverter(),
   DecimalConverter(),
-  FlexiNumConverter(),
   FlexiChartTypeConverter(),
   FlexiChartBarStyleConverter(),
   FlexiChartLineStyleConverter(),

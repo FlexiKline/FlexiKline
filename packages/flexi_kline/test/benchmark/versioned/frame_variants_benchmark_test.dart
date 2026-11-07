@@ -12,10 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// 整帧变体: 价格轴缩放、分隔线拖动、蜡烛样式与 accurate 计算模式; 装配与口径同 `paint_frame`。
+/// 整帧变体: 价格轴缩放、分隔线拖动与蜡烛样式; 装配与口径同 `paint_frame`。
 ///
-/// 这些路径与默认平移不同: 缩放态有独立的区间与裁剪, 空心 / OHLC / 折线各走一条绘制路径,
-/// accurate 下坐标换算走 Decimal。
+/// 这些路径与默认平移不同: 缩放态有独立的区间与裁剪, 空心 / OHLC / 折线各走一条绘制路径。
 @Tags(['benchmark'])
 library;
 
@@ -65,12 +64,6 @@ void main() {
         controller.onChartZoomUpdate(bar.center.dy - 60 + 120 * (phase <= 1 ? phase : 2 - phase));
         controller.paintChart(canvas, controller.canvasRect.size);
       });
-    });
-
-    testWidgets('accurate / $setup', (tester) async {
-      final controller = await mountBenchChart(tester, main: main, sub: sub, computeMode: ComputeMode.accurate);
-      expect(controller.klineData.computeMode, ComputeMode.accurate, reason: '前置：数据要是 accurate 模式');
-      await measure(tester, controller, 'accurate/$setup', (i, c) => panFrame(controller, i, c));
     });
   }
 

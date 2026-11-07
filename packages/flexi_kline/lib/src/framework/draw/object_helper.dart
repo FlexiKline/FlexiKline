@@ -363,9 +363,9 @@ mixin DrawObjectMixin on DrawStateObject, PaintResourceOwner {
 
   /// 格式化价值刻度文本
   @protected
-  String formatValueTicksText(FlexiNum value, {int precision = 0}) {
+  String formatValueTicksText(double value, {int precision = 0}) {
     return formatPrice(
-      value.toDecimal(),
+      value.d,
       precision: precision,
       cutInvalidZero: false,
     );

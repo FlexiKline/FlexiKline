@@ -49,7 +49,7 @@ mixin CandleListData on BaseData {
   /// 初始化基础数据.
   void initBasicData(Range range) {
     for (int i = range.start; i < range.end; i++) {
-      _list[i] = _list[i].reset(computeMode, _list[i].slotCount);
+      _list[i] = _list[i].reset(_list[i].slotCount);
     }
   }
 
@@ -58,8 +58,8 @@ mixin CandleListData on BaseData {
     if (!checkStartAndEnd(start, end)) return null;
 
     FlexiCandleModel m = list[start];
-    FlexiNum maxHigh = m.high;
-    FlexiNum minLow = m.low;
+    double maxHigh = m.high;
+    double minLow = m.low;
     for (int i = start + 1; i < end; i++) {
       m = list[i];
       maxHigh = m.high > maxHigh ? m.high : maxHigh;
@@ -79,7 +79,7 @@ mixin CandleListData on BaseData {
   /// 完整替换蜡烛列表并要求全量计算; [batch] 须按时间升序。
   Range replace(List<ICandleModel> batch, {required int slotCount}) {
     assert(_isAscending(batch), 'replace batch must be in ascending time order');
-    _list = batch.map((item) => item.toFlexiCandleModel(slotCount, computeMode)).toList(growable: true);
+    _list = batch.map((item) => item.toFlexiCandleModel(slotCount)).toList(growable: true);
     updateState();
     return Range.fullRecompute;
   }
@@ -115,7 +115,7 @@ mixin CandleListData on BaseData {
               tradeCount: candle.tradeCount,
               confirmed: candle.confirmed,
             ) ??
-            candle.toFlexiCandleModel(slotCount, computeMode),
+            candle.toFlexiCandleModel(slotCount),
       );
     }
 
@@ -129,7 +129,7 @@ mixin CandleListData on BaseData {
     if (batch.isEmpty || list.isEmpty || batch.last.timestamp > _list.first.ts) return null;
     assert(_isAscending(batch), 'prependHistory batch must be in ascending time order');
 
-    final incoming = batch.map((item) => item.toFlexiCandleModel(slotCount, computeMode)).toList(growable: false);
+    final incoming = batch.map((item) => item.toFlexiCandleModel(slotCount)).toList(growable: false);
     var headEnd = 0;
     while (headEnd < length && _list[headEnd].ts <= incoming.last.ts) {
       headEnd++;

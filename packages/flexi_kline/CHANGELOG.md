@@ -2,6 +2,9 @@
 * Move the painting primitives to the new `flexi_painting` package; `flexi_kline.dart` still exports them, and `package:flexi_kline/painting.dart` is removed in favor of `package:flexi_painting/flexi_painting.dart` (Breaking Changes).
 * Rename `ImageSpan` to `RawImageSpan`, which avoids the name clash with `extended_text` (Breaking Changes).
 * Split `ShapeImage` into the immutable `IconShape`, which only paints, and a `final` bitmap cache `ShapeImage(shape, size)`; rename the built-in `XxxImage` to `XxxShape` and replace `roundedPolygon` with `Path.addRoundedPolygon` (Breaking Changes).
+* Remove `ComputeMode` and `FlexiNum`: candle fields, `MinMax`, `valueToDy` / `dyToValue`, the tick formatting hooks and `Point.value` all use `double`, and `switchKlineData` drops `computeMode` (Breaking Changes).
+* Remove `MinMax.reset`, `updateMinMaxByNum` and `updateMinMaxByDecimal`; `updateMinMaxBy` takes a `double` (Breaking Changes).
+* Write `Point.value` to JSON as a number; reading still accepts the numeric strings saved by 2.7.x.
 
 ## 2.7.2
 * Change `ScalePosition.auto` to always anchor X-axis zoom at the focal point (pinch centroid, wheel or trackpad pointer) and `middle` at the main chart center: `auto` used to pick an anchor by screen third, and `middle` followed the focal point until the latest candle left the screen.

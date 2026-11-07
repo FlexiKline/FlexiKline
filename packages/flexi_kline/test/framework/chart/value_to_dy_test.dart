@@ -27,9 +27,9 @@ import '../../support/support.dart';
 
 final _key = directKey(0);
 
-MinMax _mm(num max, num min) => MinMax(max: FlexiNum.fromNum(max), min: FlexiNum.fromNum(min));
+MinMax _mm(num max, num min) => MinMax(max: max.toDouble(), min: min.toDouble());
 
-FlexiNum _v(num value) => FlexiNum.fromNum(value);
+double _v(num value) => value.toDouble();
 
 MainPaintObject _mountMain({Rect mainRect = const Rect.fromLTWH(0, 0, 300, 200), double padding = 12}) {
   final context = FakePaintContext()..mainRect = mainRect;

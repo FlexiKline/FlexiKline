@@ -31,7 +31,7 @@ import '../../constant.dart';
 import '../../core/core.dart';
 import '../../data/kline_data.dart';
 import '../../extension/export.dart';
-import '../../model/export.dart' show FlexiCandleModel, FlexiNum, KlineSpec, MinMax, NumFlexiNumExt, Range;
+import '../../model/export.dart' show FlexiCandleModel, KlineSpec, MinMax, Range;
 import '../../utils/algorithm_util.dart';
 import '../../utils/grid_tick_util.dart';
 import '../chart_type.dart';

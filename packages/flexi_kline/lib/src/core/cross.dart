@@ -352,40 +352,40 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
           value = model.formatDateTime(interval);
           break;
         case TooltipLabel.open:
-          value = formatPrice(model.open.toDecimal(), precision: p, cutInvalidZero: false);
+          value = formatPrice(model.open.d, precision: p, cutInvalidZero: false);
           break;
         case TooltipLabel.high:
-          value = formatPrice(model.high.toDecimal(), precision: p, cutInvalidZero: false);
+          value = formatPrice(model.high.d, precision: p, cutInvalidZero: false);
           break;
         case TooltipLabel.low:
-          value = formatPrice(model.low.toDecimal(), precision: p, cutInvalidZero: false);
+          value = formatPrice(model.low.d, precision: p, cutInvalidZero: false);
           break;
         case TooltipLabel.close:
-          value = formatPrice(model.close.toDecimal(), precision: p, cutInvalidZero: false);
+          value = formatPrice(model.close.d, precision: p, cutInvalidZero: false);
           break;
         case TooltipLabel.chg:
-          value = formatPrice(model.change.toDecimal(), precision: p, cutInvalidZero: false);
-          valueStyle = getValueStyle(model.change.signum);
+          value = formatPrice(model.change.d, precision: p, cutInvalidZero: false);
+          valueStyle = getValueStyle(model.change.sign);
           break;
         case TooltipLabel.chgRate:
-          value = formatPercentage(model.changeRate.toDecimal(), precision: 2);
-          valueStyle = getValueStyle(model.change.signum);
+          value = formatPercentage(model.changeRate.d, precision: 2);
+          valueStyle = getValueStyle(model.change.sign);
           break;
         case TooltipLabel.range:
           if (pre != null) {
-            value = formatPercentage(model.rangeRate(pre).toDecimal(), precision: 2);
+            value = formatPercentage(model.rangeRate(pre).d, precision: 2);
             valueStyle = getValueStyle(model.rangeRate(pre));
           } else {
-            value = formatPrice(model.range.toDecimal(), precision: p, cutInvalidZero: false);
-            valueStyle = getValueStyle(model.range.signum);
+            value = formatPrice(model.range.d, precision: p, cutInvalidZero: false);
+            valueStyle = getValueStyle(model.range.sign);
           }
           break;
         case TooltipLabel.amount:
-          value = formatAmount(model.vol.toDecimal(), precision: 2);
+          value = formatAmount(model.vol.d, precision: 2);
           break;
         case TooltipLabel.turnover:
           if (model.turnover != null) {
-            value = formatAmount(model.turnover!.toDecimal(), precision: 2);
+            value = formatAmount(model.turnover!.d, precision: 2);
           }
           break;
       }

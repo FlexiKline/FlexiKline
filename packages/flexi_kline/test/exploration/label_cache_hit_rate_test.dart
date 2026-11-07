@@ -62,7 +62,7 @@ class _Candle extends CandleIndicator {
 
 class _CandleObject extends CandlePaintObject<_Candle> {
   @override
-  String formatTicksValue(FlexiNum value, {required int precision}) {
+  String formatTicksValue(double value, {required int precision}) {
     _yTicks.hit((value, precision));
     return super.formatTicksValue(value, precision: precision);
   }

@@ -59,10 +59,10 @@ abstract interface class DrawGeometryScope {
   double indexToDx(num index);
 
   /// 将 value 转换为 dy 坐标值。
-  double valueToDy(FlexiNum value, {bool correct = false});
+  double valueToDy(double value, {bool correct = false});
 
   /// 将 dy 坐标值转换为 value。
-  FlexiNum? dyToValue(double dy, {bool check = false});
+  double? dyToValue(double dy, {bool check = false});
 }
 
 /// Draw 绘制运行态：当前绘制交互状态。

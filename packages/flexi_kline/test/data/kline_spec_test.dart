@@ -31,7 +31,7 @@ KlineData _data(int count, {Iterable<int> valid = const []}) {
     for (var i = 0; i < count; i++) CandleModel(timestamp: (i + 1) * 10, open: 1, high: 2, low: 0, close: 1, volume: 1),
   ], slotCount: 1);
   for (final i in valid) {
-    data.list[i].set(0, FlexiNum.one);
+    data.list[i].set(0, 1.0);
   }
   return data;
 }

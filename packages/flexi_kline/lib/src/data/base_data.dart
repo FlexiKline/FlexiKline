@@ -30,7 +30,6 @@ abstract class BaseData with FlexiLog {
     KlineSpec spec, {
     KlineLoadingState loadingState = KlineLoadingState.none,
     List<FlexiCandleModel> list = const [],
-    this.computeMode = ComputeMode.fast,
     IFlexiLogger? logger,
   }) : _spec = spec,
        _loadingState = loadingState,
@@ -51,8 +50,6 @@ abstract class BaseData with FlexiLog {
     start = 0;
     end = 0;
   }
-
-  final ComputeMode computeMode;
 
   KlineSpec _spec;
   KlineSpec get spec => _spec;

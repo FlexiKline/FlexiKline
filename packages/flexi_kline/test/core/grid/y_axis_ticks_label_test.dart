@@ -29,7 +29,7 @@ class _TicksPaintObject extends CandleBasePaintObject<TestCandleIndicator> with 
   void bind(TestCandleIndicator indicator, PaintContext context) => mount(indicator, context);
 
   /// [formatTicksValue] 每次收到的刻度值。
-  final List<FlexiNum> formatted = [];
+  final List<double> formatted = [];
   int crossFormatted = 0;
 
   double ticks(Canvas canvas, List<double> dys, {bool showTopTick = true, bool showBottomTick = true}) =>
@@ -38,13 +38,13 @@ class _TicksPaintObject extends CandleBasePaintObject<TestCandleIndicator> with 
   Size? crossTick(Canvas canvas, double dy) => paintYAxisTicksOnCross(canvas, Offset(10, dy), precision: 2);
 
   @override
-  String formatTicksValue(FlexiNum value, {required int precision}) {
+  String formatTicksValue(double value, {required int precision}) {
     formatted.add(value);
     return super.formatTicksValue(value, precision: precision);
   }
 
   @override
-  String formatTicksValueOnCross(FlexiNum value, {required int precision}) {
+  String formatTicksValueOnCross(double value, {required int precision}) {
     crossFormatted++;
     return super.formatTicksValueOnCross(value, precision: precision);
   }
@@ -72,7 +72,7 @@ _TicksPaintObject _bound({double height = 200, num max = 100}) {
   final object = _TicksPaintObject();
   final context = FakePaintContext()..mainRect = Rect.fromLTWH(0, 0, 300, height);
   object.bind(TestCandleIndicator(height: height), context);
-  object.setMinMax(MinMax(min: FlexiNum.zero, max: FlexiNum.fromNum(max)));
+  object.setMinMax(MinMax(min: 0.0, max: max.toDouble()));
   return object;
 }
 
@@ -128,7 +128,7 @@ void main() {
   /// `drawableRect.top`；带窗格归属检查的 `dyToValue` 会把它判成 null，刻度静默消失。
   test('刻度顶在 drawableRect 边界外的浮点误差内: 仍取得到值', () {
     final edge = _bound(height: 100, max: 11);
-    final topDy = edge.valueToDy(FlexiNum.fromNum(11));
+    final topDy = edge.valueToDy(11.0);
     expect(topDy, lessThan(edge.drawableRect.top), reason: '前置条件: 刻度必须真的越过边界');
     expect(topDy, closeTo(edge.drawableRect.top, 1e-9), reason: '前置条件: 越界量必须只是浮点误差');
 
@@ -156,5 +156,15 @@ void main() {
     final canvas = RecordingCanvas();
     expect(object.crossTick(canvas, object.drawableRect.bottom + 50), isNull);
     expect(_paragraphs(canvas), isEmpty);
+  });
+
+  /// 刻度值以 `double` 传入, 显示前转 `Decimal`: 按 `double` 的最短表示转换, 才不会把二进制误差
+  /// （如 0.1 实为 0.1000000000000000055…）带进高精度文本。
+  test('formatTicksValue：double 按最短表示转成文本', () {
+    expect(object.formatTicksValue(0.1, precision: 18), '0.100000000000000000');
+    expect(object.formatTicksValue(0.1 + 0.2, precision: 2), '0.30');
+    expect(object.formatTicksValue(0.123456789012345678, precision: 18), '0.123456789012345680');
+    expect(object.formatTicksValue(1.2e-17, precision: 18), '1.200000000000000000e-17');
+    expect(object.formatTicksValue(1e21, precision: 0), '1,000,000,000,000,000,000,000');
   });
 }

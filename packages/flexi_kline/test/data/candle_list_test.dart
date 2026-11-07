@@ -69,8 +69,8 @@ void main() {
 
       data.updateLatest([updated], slotCount: 1);
 
-      expect(data.latest!.close.toDecimal(), Decimal.fromInt(2));
-      expect(data.latest!.vol.toDecimal(), Decimal.fromInt(4));
+      expect(data.latest!.close, 2);
+      expect(data.latest!.vol, 4);
       expect(data.latest!.get<int>(0), 42);
     });
 

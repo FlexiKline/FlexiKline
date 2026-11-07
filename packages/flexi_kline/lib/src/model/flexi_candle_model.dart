@@ -15,16 +15,13 @@
 import 'package:decimal/decimal.dart';
 import 'package:flexi_formatter/flexi_formatter.dart';
 
-import '../types.dart';
 import '../utils/convert_util.dart' show parseDecimal, parseDouble;
-import 'flexi_num.dart';
 import 'time_interval.dart';
 
 /// K 线蜡烛图数据接口
 ///
 /// 定义 K 线数据的标准字段，兼容股票、加密货币、外汇等市场。
-/// 价格和成交量字段支持 [String]、[num]、[Decimal] 类型，
-/// 框架会根据计算模式自动转换为 [FlexiNum]。
+/// 价格和成交量字段支持 [String]、[num]、[Decimal]、[BigInt] 类型，入库时统一转换为 [double]。
 abstract interface class ICandleModel {
   /// 时间戳（毫秒）
   ///
@@ -113,9 +110,22 @@ extension FlexiICandleModelExt on ICandleModel {
 
   double get rangeDouble => highDouble - lowDouble;
 
-  FlexiCandleModel toFlexiCandleModel(int count, ComputeMode mode) {
-    return FlexiCandleModel.init(candle: this, count: count, mode: mode);
+  FlexiCandleModel toFlexiCandleModel(int count) {
+    return FlexiCandleModel.init(candle: this, count: count);
   }
+}
+
+/// 把 [ICandleModel] 的数值字段转换为 [double]。
+///
+/// 支持 [num]、[Decimal]、[String]、[BigInt]；其他类型抛 [ArgumentError]。
+double _toDouble(Object value) {
+  return switch (value) {
+    final num v => v.toDouble(),
+    final Decimal v => v.toDouble(),
+    final String v => double.parse(v),
+    final BigInt v => v.toDouble(),
+    _ => throw ArgumentError.value(value, 'value', 'Unsupported candle value type ${value.runtimeType}'),
+  };
 }
 
 /// 比较两个蜡烛数据模型，用于按时间戳降序排序。
@@ -131,7 +141,7 @@ int candleModelCompare(ICandleModel a, ICandleModel b) {
 int flexiCandleModelCompare(FlexiCandleModel a, FlexiCandleModel b) => b.ts - a.ts;
 
 /// FlexiCandleModel 框架层蜡烛模型
-/// 框架层蜡烛模型是框架层用于指标数据计算的蜡烛模型, 主要用于指标数据计算, 适配精确模式(Decimal)和快速模式(fast mode)
+/// 框架层蜡烛模型是框架层用于指标数据计算的蜡烛模型, 数值字段均为 [double]
 /// 支持时间戳(ts), 开盘价(o), 最高价(h), 最低价(l), 收盘价(c), 成交量(v), 成交额(tn), 成交笔数(tc), 是否已完结(cfm), 数据槽位(slots)
 /// 时间戳(ts): 时间戳（毫秒）
 /// 开盘价(o): 开盘价格
@@ -146,12 +156,12 @@ int flexiCandleModelCompare(FlexiCandleModel a, FlexiCandleModel b) => b.ts - a.
 extension type FlexiCandleModel._(
   ({
     int ts,
-    FlexiNum o,
-    FlexiNum h,
-    FlexiNum l,
-    FlexiNum c,
-    FlexiNum v,
-    FlexiNum? tn,
+    double o,
+    double h,
+    double l,
+    double c,
+    double v,
+    double? tn,
     int? tc,
     bool cfm,
     List<Object?> slots,
@@ -162,49 +172,42 @@ extension type FlexiCandleModel._(
   ///
   /// [candle] 原始蜡烛数据（实现 ICandleModel 接口）
   /// [count] 指标数据槽位数量
-  /// [mode] 计算模式：fast (double) 或 accurate (Decimal)
-  factory FlexiCandleModel.init({
-    required ICandleModel candle,
-    required int count,
-    ComputeMode mode = ComputeMode.fast,
-  }) {
+  factory FlexiCandleModel.init({required ICandleModel candle, required int count}) {
+    final turnover = candle.turnover;
     return FlexiCandleModel._((
       ts: candle.timestamp,
-      o: FlexiNum.fromAny(candle.open, mode),
-      h: FlexiNum.fromAny(candle.high, mode),
-      l: FlexiNum.fromAny(candle.low, mode),
-      c: FlexiNum.fromAny(candle.close, mode),
-      v: FlexiNum.fromAny(candle.volume, mode),
-      tn: candle.turnover != null ? FlexiNum.fromAny(candle.turnover!, mode) : null,
+      o: _toDouble(candle.open),
+      h: _toDouble(candle.high),
+      l: _toDouble(candle.low),
+      c: _toDouble(candle.close),
+      v: _toDouble(candle.volume),
+      tn: turnover != null ? _toDouble(turnover) : null,
       tc: candle.tradeCount,
       cfm: candle.confirmed,
       slots: List<Object?>.filled(count, null, growable: false),
     ));
   }
 
-  /// 计算模式
-  ComputeMode get mode => _m.o.mode;
-
   /// 时间戳（毫秒）
   int get ts => _m.ts;
 
   /// 开盘价格
-  FlexiNum get open => _m.o;
+  double get open => _m.o;
 
   /// 最高价格
-  FlexiNum get high => _m.h;
+  double get high => _m.h;
 
   /// 最低价格
-  FlexiNum get low => _m.l;
+  double get low => _m.l;
 
   /// 收盘价格
-  FlexiNum get close => _m.c;
+  double get close => _m.c;
 
   /// 成交量
-  FlexiNum get vol => _m.v;
+  double get vol => _m.v;
 
   /// 成交额（计价货币）
-  FlexiNum? get turnover => _m.tn;
+  double? get turnover => _m.tn;
 
   /// 成交笔数
   int? get tradeCount => _m.tc;
@@ -219,23 +222,23 @@ extension type FlexiCandleModel._(
   bool get isShort => close < open;
 
   /// 涨跌幅
-  FlexiNum get change => close - open;
+  double get change => close - open;
 
   /// 涨跌幅(百分比)
   double get changeRate {
     final chg = close - open;
-    if (chg.isZero) return 0;
-    return (chg / open).toDouble();
+    if (chg == 0) return 0;
+    return chg / open;
   }
 
   /// 振幅
-  FlexiNum get range => high - low;
+  double get range => high - low;
 
   /// 振幅率(百分比)
   double rangeRate(FlexiCandleModel pre) {
     final rng = high - low;
-    if (rng.isZero) return 0;
-    return (rng / pre.close).toDouble();
+    if (rng == 0) return 0;
+    return rng / pre.close;
   }
 
   /// 检查指定槽位索引是否在有效范围内
@@ -424,16 +427,16 @@ extension type FlexiCandleModel._(
     return converter(this);
   }
 
-  /// 重置当前模型，根据[mode]和[count]重置指标数据槽位
-  FlexiCandleModel reset(ComputeMode mode, int count) {
+  /// 重置当前模型，按[count]重建空的指标数据槽位
+  FlexiCandleModel reset(int count) {
     return FlexiCandleModel._((
       ts: ts,
-      o: open.reset(mode),
-      h: high.reset(mode),
-      l: low.reset(mode),
-      c: close.reset(mode),
-      v: vol.reset(mode),
-      tn: turnover?.reset(mode),
+      o: _m.o,
+      h: _m.h,
+      l: _m.l,
+      c: _m.c,
+      v: _m.v,
+      tn: _m.tn,
       tc: tradeCount,
       cfm: confirmed,
       slots: List<Object?>.filled(count, null, growable: false),
@@ -469,15 +472,14 @@ extension type FlexiCandleModel._(
     bool? confirmed,
     List<Object?>? slots,
   }) {
-    final originalMode = mode;
     return FlexiCandleModel._((
       ts: ts ?? _m.ts,
-      o: FlexiNum.fromAnyOrNull(open, originalMode) ?? _m.o,
-      h: FlexiNum.fromAnyOrNull(high, originalMode) ?? _m.h,
-      l: FlexiNum.fromAnyOrNull(low, originalMode) ?? _m.l,
-      c: FlexiNum.fromAnyOrNull(close, originalMode) ?? _m.c,
-      v: FlexiNum.fromAnyOrNull(volume, originalMode) ?? _m.v,
-      tn: FlexiNum.fromAnyOrNull(turnover, originalMode),
+      o: open != null ? _toDouble(open) : _m.o,
+      h: high != null ? _toDouble(high) : _m.h,
+      l: low != null ? _toDouble(low) : _m.l,
+      c: close != null ? _toDouble(close) : _m.c,
+      v: volume != null ? _toDouble(volume) : _m.v,
+      tn: turnover != null ? _toDouble(turnover) : null,
       tc: tradeCount ?? _m.tc,
       cfm: confirmed ?? _m.cfm,
       slots: slots ?? _m.slots,
@@ -487,12 +489,12 @@ extension type FlexiCandleModel._(
   String valueString() {
     return '''{
       'ts': $ts   ,
-      'o': ${open.valueString()},
-      'h': ${high.valueString()},
-      'l': ${low.valueString()},
-      'c': ${close.valueString()},
-      'v': ${vol.valueString()},
-      'tn': ${turnover?.valueString()},
+      'o': $open,
+      'h': $high,
+      'l': $low,
+      'c': $close,
+      'v': $vol,
+      'tn': $turnover,
       'tc': $tradeCount,
       'cfm': $confirmed,
       'slots': ${_m.slots.map((e) => e?.toString()).join(',')},

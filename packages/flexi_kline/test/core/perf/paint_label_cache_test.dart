@@ -59,7 +59,7 @@ class _CountingDrawObject extends TestDrawObject {
   }
 
   @override
-  String formatValueTicksText(FlexiNum value, {int precision = 0}) {
+  String formatValueTicksText(double value, {int precision = 0}) {
     valueFormatted++;
     return super.formatValueTicksText(value, precision: precision);
   }

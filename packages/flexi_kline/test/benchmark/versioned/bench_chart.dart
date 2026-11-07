@@ -25,7 +25,7 @@ import 'dart:math' as math;
 import 'dart:ui' show PictureRecorder;
 
 import 'package:flexi_formatter/date_time.dart' show TimeUnit;
-import 'package:flexi_formatter/flexi_formatter.dart' show formatPrice;
+import 'package:flexi_formatter/flexi_formatter.dart' show FlexiNumberFormatterDoubleExt, formatPrice;
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart' show SizedBox;
@@ -64,7 +64,7 @@ class _BenchLinePaintObject extends DirectPaintObject<BenchLineIndicator> {
   MinMax? computeVisibleMinMax(int start, int end) => klineData.calculateMinmax(start, end);
 
   /// 第 [j] 条线取 close 上下错开的值, 让三条线分开。
-  FlexiNum _valueOf(FlexiCandleModel m, int j) => m.close + FlexiNum.fromNum((j - 1) * 2);
+  double _valueOf(FlexiCandleModel m, int j) => m.close + (j - 1) * 2;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -94,7 +94,7 @@ class _BenchLinePaintObject extends DirectPaintObject<BenchLineIndicator> {
       for (int j = 0; j < BenchLineIndicator.colors.length; j++)
         TextSpan(
           text: formatPrice(
-            _valueOf(model, j).toDecimal(),
+            _valueOf(model, j).d,
             precision: klineData.precision,
             prefix: 'L$j: ',
             suffix: '  ',
@@ -146,14 +146,13 @@ FlexiKlineController createBenchChart({
   double width = benchCanvasWidth,
   List<CandleModel>? candles,
   FlexiChartType chartType = FlexiChartType.barSolid,
-  ComputeMode computeMode = ComputeMode.fast,
   bool zoom = false,
   bool resize = false,
 }) {
   final controller = FlexiKlineController(
     configuration: _BenchConfiguration(zoom: zoom, resize: resize),
   );
-  controller.switchKlineData(benchSpec, computeMode: computeMode);
+  controller.switchKlineData(benchSpec);
   controller.replaceKlineData(benchSpec, candles ?? benchCandles());
   controller.mountIndicators(
     candle: CandleIndicator(chartType: chartType),
@@ -180,7 +179,6 @@ Future<FlexiKlineController> mountBenchChart(
   double? candleWidth,
   double width = benchCanvasWidth,
   FlexiChartType chartType = FlexiChartType.barSolid,
-  ComputeMode computeMode = ComputeMode.fast,
   bool zoom = false,
   bool resize = false,
 }) async {
@@ -190,7 +188,6 @@ Future<FlexiKlineController> mountBenchChart(
     candleWidth: candleWidth,
     width: width,
     chartType: chartType,
-    computeMode: computeMode,
     zoom: zoom,
     resize: resize,
   );

@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import 'package:decimal/decimal.dart';
-import 'package:flexi_kline/flexi_kline.dart' show ComputeMode;
 import 'package:flexi_kline/src/model/export.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -26,7 +25,7 @@ void main() {
   // FlexiCandleModel.init
   // ---------------------------------------------------------------------------
   group('FlexiCandleModel.init', () {
-    test('fast mode: 从 CandleModel 正确初始化', () {
+    test('从字符串字段正确初始化', () {
       final candle = CandleModel(
         timestamp: 1715769600000,
         open: '100.5',
@@ -38,11 +37,7 @@ void main() {
         tradeCount: 100,
         confirmed: true,
       );
-      final model = FlexiCandleModel.init(
-        candle: candle,
-        count: 10,
-        mode: ComputeMode.fast,
-      );
+      final model = FlexiCandleModel.init(candle: candle, count: 10);
 
       expect(model.ts, 1715769600000);
       expect(model.open.toDouble(), 100.5);
@@ -54,30 +49,30 @@ void main() {
       expect(model.confirmed, isTrue);
     });
 
-    test('accurate mode: 从 CandleModel 正确初始化', () {
+    test('num / Decimal / BigInt 字段统一转为 double', () {
       final candle = CandleModel(
         timestamp: 1715769600000,
-        open: '100.123456789',
-        high: '110.987654321',
-        low: '95.111111111',
-        close: '105.555555555',
-        volume: '1000.12345',
+        open: 100,
+        high: Decimal.parse('110.25'),
+        low: BigInt.from(95),
+        close: '1.2e-17',
+        volume: 1000.5,
       );
-      final model = FlexiCandleModel.init(
-        candle: candle,
-        count: 5,
-        mode: ComputeMode.accurate,
-      );
+      final model = FlexiCandleModel.init(candle: candle, count: 5);
 
-      expect(model.ts, 1715769600000);
-      expect(model.open.toDecimal(), Decimal.parse('100.123456789'));
-      expect(model.high.toDecimal(), Decimal.parse('110.987654321'));
-      expect(model.low.toDecimal(), Decimal.parse('95.111111111'));
-      expect(model.close.toDecimal(), Decimal.parse('105.555555555'));
-      expect(model.vol.toDecimal(), Decimal.parse('1000.12345'));
+      expect(model.open, 100.0);
+      expect(model.high, 110.25);
+      expect(model.low, 95.0);
+      expect(model.close, 1.2e-17);
+      expect(model.vol, 1000.5);
       expect(model.turnover, isNull);
-      // 默认 confirmed 为 true
       expect(model.confirmed, isTrue);
+    });
+
+    test('不支持的字段类型抛 ArgumentError', () {
+      final candle = CandleModel(timestamp: 0, open: true, high: 1, low: 1, close: 1, volume: 1);
+
+      expect(() => FlexiCandleModel.init(candle: candle, count: 1), throwsArgumentError);
     });
 
     test('初始化后所有槽位为 null', () {
@@ -314,15 +309,15 @@ void main() {
     test('operator[] 支持复杂类型', () {
       final list = ['a', 'b', 'c'];
       final map = {'key': 'value'};
-      final flexiNum = FlexiNum.fromNum(100.5);
+      const price = 100.5;
 
       model[0] = list;
       model[1] = map;
-      model[2] = flexiNum;
+      model[2] = price;
 
       expect(model[0], list);
       expect(model[1], map);
-      expect(model[2], flexiNum);
+      expect(model[2], price);
     });
 
     test('operator[]= 赋 null 后槽位变为空', () {
@@ -456,49 +451,6 @@ void main() {
   });
 
   // ---------------------------------------------------------------------------
-  // ComputeMode
-  // ---------------------------------------------------------------------------
-  group('FlexiCandleModel ComputeMode', () {
-    test('fast mode 内部使用 double，存在精度损失', () {
-      final candle = CandleModel(
-        timestamp: 1715769600000,
-        open: '100.123456789123456789',
-        high: '100',
-        low: '100',
-        close: '100',
-        volume: '100',
-      );
-      final model = FlexiCandleModel.init(
-        candle: candle,
-        count: 5,
-        mode: ComputeMode.fast,
-      );
-
-      final openDouble = model.open.toDouble();
-      expect(openDouble, closeTo(100.12345678912346, 0.0000001));
-    });
-
-    test('accurate mode 内部使用 Decimal，保持精度', () {
-      final candle = CandleModel(
-        timestamp: 1715769600000,
-        open: '100.123456789123456789',
-        high: '100',
-        low: '100',
-        close: '100',
-        volume: '100',
-      );
-      final model = FlexiCandleModel.init(
-        candle: candle,
-        count: 5,
-        mode: ComputeMode.accurate,
-      );
-
-      final openDecimal = model.open.toDecimal();
-      expect(openDecimal, Decimal.parse('100.123456789123456789'));
-    });
-  });
-
-  // ---------------------------------------------------------------------------
   // 边界情况
   // ---------------------------------------------------------------------------
   group('FlexiCandleModel 边界情况', () {
@@ -563,7 +515,7 @@ void main() {
     ///   且前 slots.length 个元素与原实例相同，其余为 null
     test('returns self when slots.length >= newCount', () {
       final candle = _candle(1000);
-      final model = FlexiCandleModel.init(candle: candle, count: 5, mode: ComputeMode.fast);
+      final model = FlexiCandleModel.init(candle: candle, count: 5);
 
       // 当 newCount <= 当前 slots.length 时，应返回自身
       final result1 = model.rebuildSlots(5);
@@ -575,7 +527,7 @@ void main() {
 
     test('creates new instance with expanded slots when slots.length < newCount', () {
       final candle = _candle(1000);
-      final model = FlexiCandleModel.init(candle: candle, count: 3, mode: ComputeMode.fast);
+      final model = FlexiCandleModel.init(candle: candle, count: 3);
 
       // 设置一些数据到 slots
       model[0] = 'data0';
@@ -606,7 +558,7 @@ void main() {
 
     test('preserves all slot data types during rebuild', () {
       final candle = _candle(1000);
-      final model = FlexiCandleModel.init(candle: candle, count: 2, mode: ComputeMode.fast);
+      final model = FlexiCandleModel.init(candle: candle, count: 2);
 
       // 设置不同类型的数据
       model[0] = 42;
@@ -623,7 +575,7 @@ void main() {
 
     test('handles empty slots correctly', () {
       final candle = _candle(1000);
-      final model = FlexiCandleModel.init(candle: candle, count: 0, mode: ComputeMode.fast);
+      final model = FlexiCandleModel.init(candle: candle, count: 0);
 
       // 从 0 个 slots 扩容到 3
       final result = model.rebuildSlots(3);
@@ -644,7 +596,7 @@ void main() {
         close: 105.5,
         volume: 5000.0,
       );
-      final model = FlexiCandleModel.init(candle: candle, count: 2, mode: ComputeMode.fast);
+      final model = FlexiCandleModel.init(candle: candle, count: 2);
 
       final result = model.rebuildSlots(5);
 
@@ -659,7 +611,7 @@ void main() {
 
     test('multiple sequential rebuilds work correctly', () {
       final candle = _candle(1000);
-      var model = FlexiCandleModel.init(candle: candle, count: 2, mode: ComputeMode.fast);
+      var model = FlexiCandleModel.init(candle: candle, count: 2);
 
       model[0] = 'initial';
       model[1] = 'data';

@@ -19,7 +19,6 @@ import 'package:flutter/foundation.dart';
 import '../extension/collections_ext.dart';
 import '../framework/logger.dart';
 import '../model/export.dart';
-import '../types.dart';
 
 part 'base_data.dart';
 part 'kline_spec.dart';
@@ -31,7 +30,6 @@ class KlineData extends BaseData with KlineSpecData, CandleListData, PaintDrawDa
     super.spec, {
     super.loadingState,
     super.list,
-    super.computeMode,
     super.logger,
   });
 

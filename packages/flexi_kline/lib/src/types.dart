@@ -16,17 +16,6 @@ import 'kline_controller.dart';
 import 'model/kline_spec/kline_spec.dart';
 import 'model/time_interval.dart';
 
-/// 计算模式: 蜡烛与指标的数值类型.
-///
-/// [fast] 用 double, 默认. 精度是相对的(约 15~16 位有效数字), 1e-17 量级的价格同样适用, 速度远快于 [accurate].
-///
-/// [accurate] 用 Decimal, 用于结果要与交易所或后端逐位一致、整数累计量可能超过 2^53、
-/// 或取整边界不能有 `0.30000000000000004` 这类尾数.
-/// 限制: 无限小数的除法按 `FlexiFormatter.scaleOnInfinitePrecision` 位**小数**截断(默认 17), 价格低于 1e-15 时
-/// 需先调小 `FlexiFormatter.setGlobalConfig(exponentMinDecimal: ...)`; 开方等运算(如 BOLL 标准差)仍是 double 精度.
-@Deprecated('Will be removed in 2.8.0 together with FlexiNum; all values will use double.')
-enum ComputeMode { fast, accurate }
-
 /// 内置TooltipLabel
 enum TooltipLabel { time, open, high, low, close, chg, chgRate, range, amount, turnover }
 

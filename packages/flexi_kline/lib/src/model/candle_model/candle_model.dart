@@ -124,12 +124,12 @@ class CandleModel implements ICandleModel, Comparable<ICandleModel> {
   factory CandleModel.fromFlexiCandleModel(FlexiCandleModel model) {
     return CandleModel(
       timestamp: model.ts,
-      open: model.open.toDecimal(),
-      high: model.high.toDecimal(),
-      low: model.low.toDecimal(),
-      close: model.close.toDecimal(),
-      volume: model.vol.toDecimal(),
-      turnover: model.turnover?.toDecimal(),
+      open: model.open,
+      high: model.high,
+      low: model.low,
+      close: model.close,
+      volume: model.vol,
+      turnover: model.turnover,
       tradeCount: model.tradeCount,
       confirmed: model.confirmed,
     );

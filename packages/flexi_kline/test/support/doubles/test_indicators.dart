@@ -79,7 +79,7 @@ class TestCandlePaintObject extends CandleBasePaintObject<TestCandleIndicator> {
   ///
   /// 这是观测 `paintYAxisTicks` 内部 `dyToValue` 产物的唯一途径：文本一旦交给
   /// `Paragraph` 就读不回来了，而钩子拿到的正是即将被格式化的那个值。
-  final List<FlexiNum> formattedTickValues = [];
+  final List<double> formattedTickValues = [];
 
   /// [didMoveToDate] 每次收到的蜡烛 ts, 按调用顺序。
   final List<int> movedToDates = [];
@@ -107,7 +107,7 @@ class TestCandlePaintObject extends CandleBasePaintObject<TestCandleIndicator> {
   Size? paintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
 
   @override
-  String formatTicksValue(FlexiNum value, {required int precision}) {
+  String formatTicksValue(double value, {required int precision}) {
     formattedTickValues.add(value);
     return super.formatTicksValue(value, precision: precision);
   }
@@ -218,8 +218,8 @@ class TestRangePaintObject extends DirectPaintObject<TestRangeIndicator> {
 
   /// 由 `start` / `end` 派生的区间：min 取 start，max 取 end * 10。
   static MinMax rangeOf(int start, int end) => MinMax(
-    max: FlexiNum.fromNum(end * 10),
-    min: FlexiNum.fromNum(start),
+    max: (end * 10).toDouble(),
+    min: start.toDouble(),
   );
 
   @override

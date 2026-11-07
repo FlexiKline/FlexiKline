@@ -52,7 +52,7 @@ void main() {
     await tester.pump();
   }
 
-  double dyOf(num value) => chart.valueToDy(FlexiNum.fromNum(value));
+  double dyOf(num value) => chart.valueToDy(value.toDouble());
 
   /// 可视区内靠近最新端的一根。
   const index = 197;

@@ -64,8 +64,7 @@ class FakePaintContext implements PaintContext {
   @override
   final ValueNotifier<TickerModeData> tickerModeListenable = ValueNotifier(TickerModeData.fallback);
 
-  /// 由测试驱动的数据源；默认 [KlineData.empty]（`ComputeMode.fast`），需要其他计算模式的
-  /// 测试自行赋值。
+  /// 由测试驱动的数据源；默认 [KlineData.empty]，需要真实数据的测试自行赋值。
   @override
   KlineData klineData = KlineData.empty;
 
@@ -101,10 +100,10 @@ class FakePaintContext implements PaintContext {
   double get candleWidthHalf => 4;
 
   @override
-  FlexiNum? dyToCandleValue(double dy, {bool check = false}) => null;
+  double? dyToCandleValue(double dy, {bool check = false}) => null;
 
   @override
-  double candleValueToDy(FlexiNum value, {bool correct = false}) => 0;
+  double candleValueToDy(double value, {bool correct = false}) => 0;
 
   @override
   Rect get canvasRect => Rect.zero;

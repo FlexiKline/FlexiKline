@@ -26,7 +26,7 @@
 library;
 
 import 'package:flexi_formatter/date_time.dart' show TimeUnit;
-import 'package:flexi_formatter/flexi_formatter.dart' show formatPrice;
+import 'package:flexi_formatter/flexi_formatter.dart' show FlexiNumberFormatterDoubleExt, formatPrice;
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -130,8 +130,8 @@ void main() {
           final restored = object.dyToValue(dys[i]);
           expect(restored, isNotNull, reason: '做了窗格归属检查会让整条刻度静默消失');
           expect(
-            formatPrice(restored!.toDecimal(), precision: precision, cutInvalidZero: false),
-            formatPrice(expected[i].toFlexiNum().toDecimal(), precision: precision, cutInvalidZero: false),
+            formatPrice(restored!.d, precision: precision, cutInvalidZero: false),
+            formatPrice(expected[i].d, precision: precision, cutInvalidZero: false),
             reason: 'precision $precision 下第 $i 条刻度的反算值与算法原值不一致',
           );
         }

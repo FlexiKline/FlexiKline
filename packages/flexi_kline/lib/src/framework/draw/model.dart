@@ -20,10 +20,9 @@ class Point {
   Point({
     this.index = -1,
     this.ts = -1,
-    FlexiNum? value,
+    this.value = 0,
     Offset? offset,
-  }) : _offset = offset ?? Offset.infinite,
-       value = value ?? FlexiNum.zero;
+  }) : _offset = offset ?? Offset.infinite;
 
   factory Point.pointer(int index, Offset offset) {
     assert(index >= 0, 'invalid index($index)');
@@ -39,8 +38,9 @@ class Point {
   /// 蜡烛图时间
   int ts;
 
-  /// 蜡烛图价值
-  FlexiNum value;
+  /// 蜡烛图价值; JSON 接受 [num] 与数字字符串。
+  @JsonKey(fromJson: _pointValueFromJson)
+  double value;
 
   /// 当前canvas中的临时坐标(实时更新)
   Offset _offset;
@@ -70,6 +70,8 @@ class Point {
   factory Point.fromJson(Map<String, dynamic> json) => _$PointFromJson(json);
   Map<String, dynamic> toJson() => _$PointToJson(this);
 }
+
+double _pointValueFromJson(Object? json) => parseDouble(json) ?? 0;
 
 /// Overlay基础配置
 /// [key] 指定当前Overlay属于哪个[KlineData], 取KlineData.req.key

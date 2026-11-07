@@ -243,8 +243,7 @@ mixin PaintObjectGeometryStateMixin<T extends Indicator<IIndicatorKey>> on Indic
     return _smoothMinMax ?? _minMax ?? MinMax.zero;
   }
 
-  /// `_minMax` 的唯一写入入口, 也是计算模式继承链的起点: 下游(平滑、zoom、合并)都以自身端点为
-  /// 左操作数, 归一后自动跟随。[MinMax.reset] 恒复制, 调用方不必先 clone。
+  /// `_minMax` 的唯一写入入口。写入的是 [val] 的副本: 主区会就地合并子对象区间, 不能改到调用方的对象。
   ///
   /// 非有限区间拒绝写入、保留上一帧, 口径同 `_applyZoomFactor`。
   @override
@@ -253,7 +252,7 @@ mixin PaintObjectGeometryStateMixin<T extends Indicator<IIndicatorKey>> on Indic
       assert(false, 'computeVisibleMinMax 返回了非有限区间: $val ($key)');
       return;
     }
-    val = val.reset(klineData.computeMode);
+    val = val.clone();
     if (val.isSame) val.expandByRatios(settingConfig.expandRatiosOfSameMinmax);
     _minMax = val;
     _dyFactor = null;
@@ -278,13 +277,13 @@ mixin PaintObjectGeometryStateMixin<T extends Indicator<IIndicatorKey>> on Indic
   double get dyFactor {
     if (_dyFactor != null) return _dyFactor!;
     if (chartRect.height <= 0) return _dyFactor = 0;
-    return _dyFactor = chartRect.height / minMax.diffDivisor.toDouble();
+    return _dyFactor = chartRect.height / minMax.diffDivisor;
   }
 
-  /// [correct] 为 true 时夹到 [chartRect] 内; 换算线性单调, 在像素空间 clamp 与先夹值等价, 省掉 FlexiNum 比较。
-  double valueToDy(FlexiNum value, {bool correct = false}) {
+  /// [correct] 为 true 时夹到 [chartRect] 内; 换算线性单调, 在像素空间 clamp 与先夹值等价。
+  double valueToDy(double value, {bool correct = false}) {
     final bottom = chartRect.bottom;
-    final dy = bottom - (value - minMax.min).toDouble() * dyFactor;
+    final dy = bottom - (value - minMax.min) * dyFactor;
     if (!correct) return dy;
     // isSame 时 diffDivisor 回落到 1, [min, max] 只对应 bottom; 上界不收到 bottom, (min, min + 1) 会落进区间中段。
     // chartRect 高度非正时 top >= bottom, 取 min 免得 clamp 上下界颠倒(此时 dyFactor 为 0, 结果仍是 bottom)。
@@ -292,10 +291,10 @@ mixin PaintObjectGeometryStateMixin<T extends Indicator<IIndicatorKey>> on Indic
     return dy.clamp(top, bottom);
   }
 
-  FlexiNum? dyToValue(double dy, {bool check = false}) {
+  double? dyToValue(double dy, {bool check = false}) {
     if (check && !drawableRect.includeDy(dy)) return null;
     if (dyFactor <= 0) return null;
-    return minMax.max - ((dy - chartRect.top) / dyFactor).toFlexiNum();
+    return minMax.max - (dy - chartRect.top) / dyFactor;
   }
 
   /// 最新根中心 dx; 由[paintDxOffset]锚定在绘制区右缘。
@@ -332,11 +331,11 @@ mixin PaintObjectGeometryStateMixin<T extends Indicator<IIndicatorKey>> on Indic
     return null;
   }
 
-  double candleValueToDy(FlexiNum value, {bool correct = false}) {
+  double candleValueToDy(double value, {bool correct = false}) {
     return context.candleValueToDy(value, correct: correct);
   }
 
-  FlexiNum? dyToCandleValue(double dy, {bool check = false}) {
+  double? dyToCandleValue(double dy, {bool check = false}) {
     return context.dyToCandleValue(dy, check: check);
   }
 
@@ -376,12 +375,12 @@ mixin PaintGridTicksMixin<T extends Indicator> on PaintObject<T> {
         if (top == null || bottom == null) return const [];
 
         final ticks = computeNiceTicks(
-          bottom: bottom.toDouble(),
-          top: top.toDouble(),
+          bottom: bottom,
+          top: top,
           targetCount: targetDivisions,
           precision: klineData.precision,
         );
-        return [for (final value in ticks.values) valueToDy(value.toFlexiNum())];
+        return [for (final value in ticks.values) valueToDy(value)];
     }
   }
 
@@ -495,9 +494,9 @@ mixin PaintGridTicksMixin<T extends Indicator> on PaintObject<T> {
 
   /// 如果要定制格式化刻度值. 在PaintObject中覆写此方法.
   @protected
-  String formatTicksValue(FlexiNum value, {required int precision}) {
+  String formatTicksValue(double value, {required int precision}) {
     return formatPrice(
-      value.toDecimal(),
+      value.d,
       precision: precision,
       cutInvalidZero: false,
       defIfZero: '0.00',
@@ -540,9 +539,9 @@ mixin PaintYAxisTicksOnCrossMixin<T extends Indicator> on PaintObject<T> {
   }
 
   @protected
-  String formatTicksValueOnCross(FlexiNum value, {required int precision}) {
+  String formatTicksValueOnCross(double value, {required int precision}) {
     return formatPrice(
-      value.toDecimal(),
+      value.d,
       precision: precision,
       cutInvalidZero: false,
       defIfZero: '0.00',

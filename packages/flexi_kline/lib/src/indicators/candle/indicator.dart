@@ -244,7 +244,7 @@ class CandleIndicator extends CandleBaseIndicator {
 
 class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject<T>
     with PaintYAxisTicksOnCrossMixin, PaintCandleChartMixin {
-  FlexiNum? _maxHigh, _minLow;
+  double? _maxHigh, _minLow;
 
   /// 最高价与最低价共用: 默认配置下两者是同一个 const 实例, 样式一致, 两个 key 都留在池里。
   late final _extremePriceLabels = own(LabelPainter(capacity: 2));
@@ -420,9 +420,9 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
 
   /// 格式化 Y 轴价格刻度值。
   @override
-  String formatTicksValue(FlexiNum value, {required int precision}) {
+  String formatTicksValue(double value, {required int precision}) {
     return formatPrice(
-      value.toDecimal(),
+      value.d,
       precision: precision,
       cutInvalidZero: false,
       enableGrouping: true,
@@ -431,9 +431,9 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
 
   /// Cross 时格式化 Y 轴上的标记值。
   @override
-  String formatTicksValueOnCross(FlexiNum value, {required int precision}) {
+  String formatTicksValueOnCross(double value, {required int precision}) {
     return formatPrice(
-      value.toDecimal(),
+      value.d,
       precision: klineData.precision,
       cutInvalidZero: false,
     );
@@ -474,8 +474,8 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
 
     Offset? maxHighOffset, minLowOffset;
     final hasEnough = paintDxOffset > 0;
-    FlexiNum maxHigh = klineData[start].high;
-    FlexiNum minLow = klineData[start].low;
+    double maxHigh = klineData[start].high;
+    double minLow = klineData[start].low;
     FlexiCandleModel m;
     for (var i = start; i < end; i++) {
       m = klineData[i];
@@ -517,11 +517,11 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
     flushCandleBars(canvas);
 
     // 最后绘制在蜡烛图中的最大价钱标记
-    if (maxHighOffset != null && maxHigh > FlexiNum.zero) {
+    if (maxHighOffset != null && maxHigh > 0) {
       paintPriceMark(canvas, maxHighOffset, maxHigh, indicator.high);
     }
     // 最后绘制在蜡烛图中的最小价钱标记
-    if (minLowOffset != null && minLow > FlexiNum.zero) {
+    if (minLowOffset != null && minLow > 0) {
       paintPriceMark(canvas, minLowOffset, minLow, indicator.low);
     }
   }
@@ -530,7 +530,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
   void paintPriceMark(
     Canvas canvas,
     Offset offset,
-    FlexiNum val,
+    double val,
     MarkConfig markConfig,
   ) {
     final flag = offset.dx > chartRectWidthHalf ? -1 : 1;
@@ -548,7 +548,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
     _extremePriceLabels.paint(
       canvas,
       (val, precision),
-      build: () => formatPrice(val.toDecimal(), precision: precision),
+      build: () => formatPrice(val.d, precision: precision),
       style: markConfig.text.toLabelStyle(textColor: theme.textColor),
       anchor: Offset(lineEnd.dx + flag * markConfig.spacing, lineEnd.dy),
       align: flag < 0 ? Alignment.centerRight : Alignment.centerLeft,
@@ -628,7 +628,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
       final latest = _inViewPriceLabel.paint(
         canvas,
         (model.close, precision),
-        build: () => formatPrice(model.close.toDecimal(), precision: precision, cutInvalidZero: false),
+        build: () => formatPrice(model.close.d, precision: precision, cutInvalidZero: false),
         style: styles.latest,
         anchor: Offset(rdx - inViewPriceMark.spacing, dy),
         align: Alignment.centerRight,
@@ -694,7 +694,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
         (model.close, precision),
         // 箭头颜色取自 style: 颜色一变 style.text 随之变, 排版缓存被丢弃后 build 会重跑。
         build: () => buildOffViewPriceSpan(
-          formatPrice(model.close.toDecimal(), precision: precision, cutInvalidZero: false),
+          formatPrice(model.close.d, precision: precision, cutInvalidZero: false),
           style.text.color ?? theme.lastPriceColor,
         ),
         style: style,

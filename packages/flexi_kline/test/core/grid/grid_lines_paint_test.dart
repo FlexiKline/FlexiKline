@@ -36,7 +36,7 @@ library;
 import 'dart:ui' show Paragraph;
 
 import 'package:flexi_formatter/date_time.dart' show TimeUnit;
-import 'package:flexi_formatter/flexi_formatter.dart' show formatPrice;
+import 'package:flexi_formatter/flexi_formatter.dart' show FlexiNumberFormatterDoubleExt, formatPrice;
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -255,7 +255,7 @@ void main() {
 
       // 逐值给容差: [_PaintLog] 的位置取自 `Path.getBounds()`, 经 Skia 存成 float32, 相对误差
       // 约 1e-7。等分位置恰好都能精确表示, nice 的不能, 所以只有这里要 closeTo。
-      final expected = [for (final value in ticks) candle.valueToDy(value.toFlexiNum())];
+      final expected = [for (final value in ticks) candle.valueToDy(value)];
       for (var i = 0; i < expected.length; i++) {
         expect(dys[i], closeTo(expected[i], 1e-3), reason: '第 $i 条横线不在 nice 取整的位置上');
       }
@@ -388,8 +388,8 @@ void main() {
       for (final precision in [2, 8]) {
         for (var i = 0; i < expected.length; i++) {
           expect(
-            formatPrice(candle.formattedTickValues[i].toDecimal(), precision: precision, cutInvalidZero: false),
-            formatPrice(expected[i].toFlexiNum().toDecimal(), precision: precision, cutInvalidZero: false),
+            formatPrice(candle.formattedTickValues[i].d, precision: precision, cutInvalidZero: false),
+            formatPrice(expected[i].d, precision: precision, cutInvalidZero: false),
             reason: 'precision $precision 下第 $i 条刻度的反算值与算法原值不一致',
           );
         }

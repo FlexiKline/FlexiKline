@@ -444,7 +444,7 @@ class _MarkObject extends CandlePaintObject {
   final List<({double dx, double value})> marks;
 
   @override
-  void paintPriceMark(Canvas canvas, Offset offset, FlexiNum val, MarkConfig markConfig) {
+  void paintPriceMark(Canvas canvas, Offset offset, double val, MarkConfig markConfig) {
     marks.add((dx: offset.dx, value: val.toDouble()));
   }
 }

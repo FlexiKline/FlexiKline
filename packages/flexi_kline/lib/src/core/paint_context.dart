@@ -83,10 +83,10 @@ abstract interface class PaintGeometryScope {
   double calculatePaneTop(int paneIndex);
 
   /// 将蜡烛值转换为主图 Y 坐标。
-  double candleValueToDy(FlexiNum value, {bool correct = false});
+  double candleValueToDy(double value, {bool correct = false});
 
   /// 将主图 Y 坐标转换为蜡烛值。
-  FlexiNum? dyToCandleValue(double dy, {bool check = false});
+  double? dyToCandleValue(double dy, {bool check = false});
 }
 
 /// 绘制运行态：布局写回、cross、chart zoom 与调度。

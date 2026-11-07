@@ -221,22 +221,22 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   }
 
   @override
-  double valueToDy(FlexiNum value, {bool correct = false}) {
+  double valueToDy(double value, {bool correct = false}) {
     return mainPaintObject.valueToDy(value, correct: correct);
   }
 
   @override
-  FlexiNum? dyToValue(double dy, {bool check = false}) {
+  double? dyToValue(double dy, {bool check = false}) {
     return mainPaintObject.dyToValue(dy, check: check);
   }
 
   @override
-  double candleValueToDy(FlexiNum value, {bool correct = false}) {
+  double candleValueToDy(double value, {bool correct = false}) {
     return candlePaintObject.valueToDy(value, correct: correct);
   }
 
   @override
-  FlexiNum? dyToCandleValue(double dy, {bool check = false}) {
+  double? dyToCandleValue(double dy, {bool check = false}) {
     return candlePaintObject.dyToValue(dy, check: check);
   }
 
@@ -391,7 +391,6 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
 
   /// 切换[spec]规格指定的蜡烛数据
   /// [spec] 待切换的[KlineSpec]
-  /// [computeMode] 计算模式, 选择依据见 [ComputeMode]
   /// [useCacheFirst] 是否优先使用缓存. 注: 如果有缓存数据(说明之前加载过), loading不会展示.
   /// [useCachePaintDxOffset] 是否仍使用缓存的绘制位置(如果当前没有切换请求);
   /// return
@@ -399,7 +398,6 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   ///   2. false: 代表未使用缓存; 且 [klineData] 数据会被清空(如果有).
   bool switchKlineData(
     KlineSpec spec, {
-    ComputeMode computeMode = ComputeMode.fast,
     bool useCacheFirst = true,
     bool useCachePaintDxOffset = false,
   }) {
@@ -425,7 +423,6 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     data = KlineData(
       spec,
       loadingState: KlineLoadingState.initLoading,
-      computeMode: computeMode,
       logger: logger,
     );
     final old = _klineDataCache.append(spec.key, data);
