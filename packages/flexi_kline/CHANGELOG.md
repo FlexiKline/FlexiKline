@@ -4,6 +4,7 @@
 * Split `ShapeImage` into the immutable `IconShape`, which only paints, and a `final` bitmap cache `ShapeImage(shape, size)`; rename the built-in `XxxImage` to `XxxShape` and replace `roundedPolygon` with `Path.addRoundedPolygon` (Breaking Changes).
 * Remove `ComputeMode` and `FlexiNum`: candle fields, `MinMax`, `valueToDy` / `dyToValue`, the tick formatting hooks and `Point.value` all use `double`, and `switchKlineData` drops `computeMode` (Breaking Changes).
 * Remove `MinMax.reset`, `updateMinMaxByNum` and `updateMinMaxByDecimal`; `updateMinMaxBy` takes a `double` (Breaking Changes).
+* Replace `FlexiNum` calls with `double` operators when migrating: `mulNum` / `divNum` / `addNum` become `*` / `/` / `+`, `a.divSafe(b)` becomes `b == 0 ? 0 : a / b`, `gt` / `calcuMax` become `>` / `math.max`, and `toDecimal()` becomes `flexi_formatter`'s `.d` at display time.
 * Write `Point.value` to JSON as a number; reading still accepts the numeric strings saved by 2.7.x.
 
 ## 2.7.2
