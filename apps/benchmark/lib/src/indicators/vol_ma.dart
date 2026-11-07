@@ -14,7 +14,7 @@
 
 import 'dart:math' as math;
 
-import 'package:flexi_formatter/flexi_formatter.dart' show RoundMode, formatAmount;
+import 'package:flexi_formatter/flexi_formatter.dart' show FlexiNumberFormatterDoubleExt, RoundMode, formatAmount;
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/painting.dart';
 
@@ -71,7 +71,7 @@ class _BenchVolMaCalculator extends IndicatorCalculator<BenchVolMaIndicator> {
       }
     }
     for (int i = 0; i < params.length; i++) {
-      // 周期非正的线不写值, tips 显示 `--`; 否则 sum.divNum(count) 会除以 0。
+      // 周期非正的线不写值, tips 显示 `--`; 否则 sum / count 会除以 0。
       if (params[i].count <= 0) continue;
       _calculateVolMa(
         data,
@@ -102,16 +102,16 @@ class _BenchVolMaCalculator extends IndicatorCalculator<BenchVolMaIndicator> {
     if (from >= end) return;
 
     FlexiCandleModel m = data.list[from];
-    FlexiNum sum = m.vol;
+    double sum = m.vol;
     for (int i = from - count + 1; i < from; i++) {
       sum += data.list[i].vol;
     }
-    m.getOrInitList(dataIndex, paramLen)[paramIndex] = sum.divNum(count);
+    m.getOrInitList<double>(dataIndex, paramLen)[paramIndex] = sum / count;
 
     for (int i = from + 1; i < end; i++) {
       m = data.list[i];
       sum = sum - data.list[i - count].vol + m.vol;
-      m.getOrInitList(dataIndex, paramLen)[paramIndex] = sum.divNum(count);
+      m.getOrInitList<double>(dataIndex, paramLen)[paramIndex] = sum / count;
     }
   }
 }
@@ -121,8 +121,8 @@ class _BenchVolMaPaintObject extends ComputedPaintObject<BenchVolMaIndicator>
   @override
   MinMax? computeVisibleMinMax(int start, int end) {
     FlexiCandleModel model = klineData.list[end - 1];
-    FlexiNum minVol = model.vol;
-    FlexiNum maxVol = model.vol;
+    double minVol = model.vol;
+    double maxVol = model.vol;
     for (int i = end - 2; i >= start; i--) {
       model = klineData.list[i];
       maxVol = model.vol > maxVol ? model.vol : maxVol;
@@ -139,7 +139,7 @@ class _BenchVolMaPaintObject extends ComputedPaintObject<BenchVolMaIndicator>
       // 跳过首个有值下标之前的暖机段。
       final maStart = math.max(start, minCount - 1);
       for (int i = maStart; i < end; i++) {
-        final itemMinmax = klineData.list[i].getList<FlexiNum>(dataIndex)?.minmax;
+        final itemMinmax = MinMax.getMinMaxByList(klineData.list[i].getList<double>(dataIndex));
         maMinmax ??= itemMinmax;
         maMinmax?.updateMinMax(itemMinmax);
       }
@@ -163,18 +163,18 @@ class _BenchVolMaPaintObject extends ComputedPaintObject<BenchVolMaIndicator>
   }
 
   // 刻度值是核心库按像素反推的, 与数据值差浮点误差; 截断时误差落在边界下方会少显示末位, 所以先收到比显示位数多 3 位。
-  String _formatTicks(FlexiNum value, int precision) => formatAmount(
-    value.toDecimal().round(scale: precision + 3),
+  String _formatTicks(double value, int precision) => formatAmount(
+    value.d.round(scale: precision + 3),
     precision: precision,
     roundMode: RoundMode.truncate,
     defIfZero: '0.00',
   );
 
   @override
-  String formatTicksValue(FlexiNum value, {required int precision}) => _formatTicks(value, precision);
+  String formatTicksValue(double value, {required int precision}) => _formatTicks(value, precision);
 
   @override
-  String formatTicksValueOnCross(FlexiNum value, {required int precision}) => _formatTicks(value, precision);
+  String formatTicksValueOnCross(double value, {required int precision}) => _formatTicks(value, precision);
 
   @override
   void paintCross(Canvas canvas, Offset offset, {FlexiCandleModel? model}) {
@@ -209,10 +209,10 @@ class _BenchVolMaPaintObject extends ComputedPaintObject<BenchVolMaIndicator>
     final int end = klineData.end;
 
     for (int j = 0; j < indicator.calcParam.length; j++) {
-      FlexiNum? val;
+      double? val;
       final List<Offset> points = [];
       for (int i = start; i < end; i++) {
-        val = list[i].getList<FlexiNum>(dataIndex)?.getItem(j);
+        val = list[i].getList<double>(dataIndex)?.getItem(j);
         if (val == null) continue;
         points.add(Offset(indexToDx(i), valueToDy(val)));
       }
@@ -234,7 +234,7 @@ class _BenchVolMaPaintObject extends ComputedPaintObject<BenchVolMaIndicator>
     final children = <TextSpan>[];
 
     final text = formatAmount(
-      model.vol.toDecimal(),
+      model.vol.d,
       precision: indicator.precision,
       roundMode: RoundMode.truncate,
       prefix: 'Vol:$nbsp',
@@ -246,11 +246,11 @@ class _BenchVolMaPaintObject extends ComputedPaintObject<BenchVolMaIndicator>
       ),
     );
 
-    final volMaList = model.getList<FlexiNum>(dataIndex);
+    final volMaList = model.getList<double>(dataIndex);
     final params = indicator.calcParam;
     for (int i = 0; i < params.length; i++) {
       final text = formatAmount(
-        volMaList?.getItem(i)?.toDecimal(),
+        volMaList?.getItem(i)?.d,
         precision: indicator.precision,
         roundMode: RoundMode.truncate,
         prefix: 'MA${params[i].count}:$nbsp',

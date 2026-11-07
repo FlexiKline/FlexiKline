@@ -40,14 +40,14 @@ void main() {
     final i = data.length - 1 - 3;
     for (final (j, param) in BenchMaIndicator().calcParam.indexed) {
       final count = param.count;
-      final ma = data[i].getList<FlexiNum>(0)![j]!.toDouble();
+      final ma = data[i].getList<double>(0)![j]!.toDouble();
       expect(ma, closeTo(mean(data, i - count + 1, count, (m) => m.close.toDouble()), 1e-6), reason: 'MA$count');
     }
 
     final volData = load();
     BenchVolMaIndicator().createCalculator(0).compute(volData, volData.computableRange, reset: true);
     final latest = volData.length - 1;
-    final ma5 = volData[latest].getList<FlexiNum>(0)![0]!.toDouble();
+    final ma5 = volData[latest].getList<double>(0)![0]!.toDouble();
     expect(ma5, closeTo(mean(volData, latest - 4, 5, (m) => m.vol.toDouble()), 1e-6));
   });
 
@@ -58,15 +58,15 @@ void main() {
     BenchMaIndicator(
       calcParam: const [(count: 0, color: black), (count: 5, color: black)],
     ).createCalculator(0).compute(ma, ma.computableRange, reset: true);
-    expect(ma[i].getList<FlexiNum>(0)![0], isNull);
-    expect(ma[i].getList<FlexiNum>(0)![1], isNotNull);
+    expect(ma[i].getList<double>(0)![0], isNull);
+    expect(ma[i].getList<double>(0)![1], isNotNull);
 
     final vol = load();
     BenchVolMaIndicator(
       calcParam: const [(count: 0, color: black), (count: 5, color: black)],
     ).createCalculator(0).compute(vol, vol.computableRange, reset: true);
-    expect(vol[i].getList<FlexiNum>(0)![0], isNull);
-    expect(vol[i].getList<FlexiNum>(0)![1], isNotNull);
+    expect(vol[i].getList<double>(0)![0], isNull);
+    expect(vol[i].getList<double>(0)![1], isNotNull);
   });
 
   test('MACD matches an independent EMA(12, 26, 9) reference', () {

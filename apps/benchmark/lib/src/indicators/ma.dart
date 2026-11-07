@@ -14,7 +14,7 @@
 
 import 'dart:math' as math;
 
-import 'package:flexi_formatter/flexi_formatter.dart' show formatPrice;
+import 'package:flexi_formatter/flexi_formatter.dart' show FlexiNumberFormatterDoubleExt, formatPrice;
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/painting.dart';
 
@@ -72,7 +72,7 @@ class _BenchMaCalculator extends IndicatorCalculator<BenchMaIndicator> {
     final params = indicator.calcParam;
     for (final (j, param) in params.indexed) {
       final count = param.count;
-      // 周期非正的线不写值, tips 显示 `--`; 否则 sum.divNum(count) 会除以 0。
+      // 周期非正的线不写值, tips 显示 `--`; 否则 sum / count 会除以 0。
       if (count <= 0) continue;
       // 第 i 根的值是 data[i-count+1..i] 的均值, 首个有值下标为 count-1; 只重算 range.start 及之后。
       final from = math.max(range.start, count - 1);
@@ -82,17 +82,17 @@ class _BenchMaCalculator extends IndicatorCalculator<BenchMaIndicator> {
       for (int i = from - count + 1; i < from; i++) {
         sum += data[i].close;
       }
-      data[from].getOrInitList<FlexiNum>(dataIndex, params.length)[j] = sum.divNum(count);
+      data[from].getOrInitList<double>(dataIndex, params.length)[j] = sum / count;
       for (int i = from + 1; i < end; i++) {
         sum = sum - data[i - count].close + data[i].close;
-        data[i].getOrInitList<FlexiNum>(dataIndex, params.length)[j] = sum.divNum(count);
+        data[i].getOrInitList<double>(dataIndex, params.length)[j] = sum / count;
       }
     }
   }
 }
 
 class _BenchMaPaintObject extends ComputedPaintObject<BenchMaIndicator> {
-  FlexiNum? _value(FlexiCandleModel m, int j) => m.getList<FlexiNum>(dataIndex)?[j];
+  double? _value(FlexiCandleModel m, int j) => m.getList<double>(dataIndex)?[j];
 
   @override
   MinMax? computeVisibleMinMax(int start, int end) {
@@ -109,8 +109,8 @@ class _BenchMaPaintObject extends ComputedPaintObject<BenchMaIndicator> {
     FlexiCandleModel m;
     for (int i = start; i < end; i++) {
       m = klineData[i];
-      minmax ??= m.getList<FlexiNum>(dataIndex)?.minmax;
-      minmax?.updateMinMax(m.getList<FlexiNum>(dataIndex)?.minmax);
+      minmax ??= MinMax.getMinMaxByList(m.getList<double>(dataIndex));
+      minmax?.updateMinMax(MinMax.getMinMaxByList(m.getList<double>(dataIndex)));
     }
     return minmax;
   }
@@ -145,7 +145,7 @@ class _BenchMaPaintObject extends ComputedPaintObject<BenchMaIndicator> {
       for (int j = 0; j < indicator.calcParam.length; j++)
         TextSpan(
           text: formatPrice(
-            _value(model, j)?.toDecimal(),
+            _value(model, j)?.d,
             precision: indicator.precision ?? klineData.precision,
             prefix: 'MA${indicator.calcParam[j].count}:$nbsp',
             suffix: '  ',

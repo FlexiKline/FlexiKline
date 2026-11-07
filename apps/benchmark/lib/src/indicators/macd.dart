@@ -14,7 +14,7 @@
 
 import 'dart:math' as math;
 
-import 'package:flexi_formatter/flexi_formatter.dart' show formatPrice;
+import 'package:flexi_formatter/flexi_formatter.dart' show FlexiNumberFormatterDoubleExt, formatPrice;
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/painting.dart';
 
@@ -58,11 +58,11 @@ class BenchMacdResult {
     required this.emaLong,
   });
 
-  final FlexiNum emaShort;
-  final FlexiNum emaLong;
-  final FlexiNum dif;
-  final FlexiNum dea;
-  final FlexiNum macd;
+  final double emaShort;
+  final double emaLong;
+  final double dif;
+  final double dea;
+  final double macd;
 
   MinMax get minmax => MinMax.getMinMaxByList([dif, dea, macd])!;
 }
@@ -83,15 +83,15 @@ class _BenchMacdCalculator extends IndicatorCalculator<BenchMacdIndicator> {
     if (len <= 0) return;
 
     final s = indicator.calcParam.short, l = indicator.calcParam.long, m = indicator.calcParam.signal;
-    FlexiNum emaS = data[0].close, emaL = emaS;
-    // 首值由数据算出, 不用 FlexiNum.zero: 常量作左操作数会让 accurate 模式退化为 double。
-    FlexiNum dif = emaS - emaL, dea = dif;
+    double emaS = data[0].close, emaL = emaS;
+    // DIF₀ = DEA₀ = 0。
+    double dif = emaS - emaL, dea = dif;
     data[0].set(
       dataIndex,
       BenchMacdResult(
         dif: dif,
         dea: dea,
-        macd: (dif - dea).mulNum(2),
+        macd: (dif - dea) * 2,
         emaShort: emaS,
         emaLong: emaL,
       ),
@@ -99,18 +99,17 @@ class _BenchMacdCalculator extends IndicatorCalculator<BenchMacdIndicator> {
 
     for (int i = 1; i < len; i++) {
       final model = data[i];
-      final close2 = model.close.mulNum(2);
-      // 递推状态每步 clampScale: 除数只含因子 2、5 时 divNum 的商是精确的, scale 会逐根增长直到溢出为 NaN。
-      emaS = (close2 + emaS.mulNum(s - 1)).divNum(s + 1).clampScale();
-      emaL = (close2 + emaL.mulNum(l - 1)).divNum(l + 1).clampScale();
+      final close2 = model.close * 2;
+      emaS = (close2 + emaS * (s - 1)) / (s + 1);
+      emaL = (close2 + emaL * (l - 1)) / (l + 1);
       dif = emaS - emaL;
-      dea = (dif.mulNum(2) + dea.mulNum(m - 1)).divNum(m + 1).clampScale();
+      dea = (dif * 2 + dea * (m - 1)) / (m + 1);
       model.set(
         dataIndex,
         BenchMacdResult(
           dif: dif,
           dea: dea,
-          macd: (dif - dea).mulNum(2),
+          macd: (dif - dea) * 2,
           emaShort: emaS,
           emaLong: emaL,
         ),
@@ -165,7 +164,7 @@ class _BenchMacdPaintObject extends ComputedPaintObject<BenchMacdIndicator>
 
     final List<Offset> difPoints = [];
     final List<Offset> deaPoints = [];
-    final double zeroDy = valueToDy(FlexiNum.zero, correct: true);
+    final double zeroDy = valueToDy(0.0, correct: true);
     final hollowHalf = candleWidthHalf - candleSpacing;
 
     BenchMacdResult? ret;
@@ -179,7 +178,7 @@ class _BenchMacdPaintObject extends ComputedPaintObject<BenchMacdIndicator>
 
       // 与前一根(更旧)比较。
       prev = klineData.get(i - 1)?.get(dataIndex);
-      final isLong = ret.macd.signum >= 0; // 0 归涨色
+      final isLong = ret.macd.sign >= 0; // 0 归涨色
       if (prev != null && ret.macd > prev.macd) {
         // 空心
         canvas.drawPath(
@@ -226,9 +225,9 @@ class _BenchMacdPaintObject extends ComputedPaintObject<BenchMacdIndicator>
     final macd = model.get<BenchMacdResult>(dataIndex);
     final precision = klineData.precision;
 
-    TextSpan item(String label, FlexiNum? value, Color color) => TextSpan(
+    TextSpan item(String label, double? value, Color color) => TextSpan(
       text: formatPrice(
-        value?.toDecimal(),
+        value?.d,
         precision: precision,
         prefix: '$label:$nbsp',
         suffix: ' ',

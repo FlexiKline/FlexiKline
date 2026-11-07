@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:flexi_formatter/flexi_formatter.dart' show RoundMode, formatAmount;
+import 'package:flexi_formatter/flexi_formatter.dart' show FlexiNumberFormatterDoubleExt, RoundMode, formatAmount;
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/painting.dart';
 
@@ -44,8 +44,8 @@ class _BenchVolumePaintObject extends DirectPaintObject<BenchVolumeIndicator> {
     if (!klineData.checkStartAndEnd(start, end)) return null;
 
     FlexiCandleModel m = klineData.list[end - 1];
-    FlexiNum minVol = m.vol;
-    FlexiNum maxVol = m.vol;
+    double minVol = m.vol;
+    double maxVol = m.vol;
     for (int i = end - 2; i >= start; i--) {
       m = klineData.list[i];
       maxVol = m.vol > maxVol ? m.vol : maxVol;
@@ -84,7 +84,7 @@ class _BenchVolumePaintObject extends DirectPaintObject<BenchVolumeIndicator> {
     if (model == null) return null;
 
     final text = formatAmount(
-      model.vol.toDecimal(),
+      model.vol.d,
       precision: indicator.precision,
       roundMode: RoundMode.truncate,
       prefix: 'Vol:$nbsp',
