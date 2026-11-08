@@ -1,6 +1,8 @@
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flexi_kline_demo/src/data/models/kline_interval.dart';
 import 'package:flexi_kline_demo/src/data/repositories/kline_repository.dart';
+import 'package:flexi_kline_demo/src/data/service_locator.dart';
+import 'package:flexi_kline_demo/src/presentation/kline/kline_landscape_page.dart';
 import 'package:flexi_kline_demo/src/presentation/kline/kline_page.dart';
 import 'package:flexi_kline_demo/src/presentation/kline/widgets/draw_menubar.dart';
 import 'package:flutter/material.dart';
@@ -20,16 +22,12 @@ class _EmptyRepository implements KlineRepository {
       const Stream.empty();
 }
 
-class _TestPage extends KlinePage {
-  const _TestPage();
-
-  @override
-  KlineRepository createRepository() => _EmptyRepository();
-}
-
 void main() {
+  setUp(() => getIt.registerSingleton<KlineRepository>(_EmptyRepository()));
+  tearDown(getIt.reset);
+
   testWidgets('点击「绘图工具」显示绘图菜单栏, 点退出后收起', (tester) async {
-    await tester.pumpWidget(const MaterialApp(home: _TestPage()));
+    await tester.pumpWidget(const MaterialApp(home: KlinePage()));
     expect(find.byType(DrawMenubar), findsNothing);
 
     await tester.tap(find.byTooltip('绘图工具'));
@@ -44,5 +42,69 @@ void main() {
     await tester.pump(const Duration(seconds: 2));
     await tester.pumpWidget(const SizedBox());
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('竖屏切到 1时 后打开横屏页，横屏页也在 1时', (tester) async {
+    await tester.pumpWidget(const MaterialApp(home: KlinePage()));
+    await tester.pump();
+
+    await tester.tap(find.text('1时'));
+    await tester.pump(const Duration(milliseconds: 500));
+
+    await tester.tap(find.byTooltip('横屏'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    final landscapeBar = find.descendant(of: find.byType(KlineLandscapePage), matching: find.byType(TabBar));
+    expect(
+      tester.widget<TabBar>(landscapeBar).controller?.index,
+      KlineInterval.values.indexOf(KlineInterval.hour1),
+    );
+
+    // 让头部按钮的节流定时器走完。
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump(const Duration(seconds: 1));
+    expect(tester.takeException(), isNull);
+  });
+
+  /// 竖屏切到 1时 → 打开横屏 → 横屏切到 1天，返回由 [exit] 完成。
+  Future<void> openLandscapeAndPickDay(WidgetTester tester, Future<void> Function() exit) async {
+    await tester.pumpWidget(const MaterialApp(home: KlinePage()));
+    await tester.pump();
+    await tester.tap(find.text('1时'));
+    await tester.pump(const Duration(milliseconds: 500));
+
+    await tester.tap(find.byTooltip('横屏'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    final landscape = find.byType(KlineLandscapePage);
+    await tester.tap(find.descendant(of: landscape, matching: find.text('1天')));
+    await tester.pump(const Duration(milliseconds: 500));
+
+    await exit();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(landscape, findsNothing);
+  }
+
+  Future<void> expectPortraitInterval(WidgetTester tester, KlineInterval interval) async {
+    expect(tester.widget<TabBar>(find.byType(TabBar)).controller?.index, KlineInterval.values.indexOf(interval));
+
+    // 让头部按钮的节流定时器走完。
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump(const Duration(seconds: 1));
+    expect(tester.takeException(), isNull);
+  }
+
+  testWidgets('点 AppBar 返回退出横屏后，竖屏周期变为横屏所选', (tester) async {
+    await openLandscapeAndPickDay(tester, () => tester.tap(find.byType(BackButton)));
+    await expectPortraitInterval(tester, KlineInterval.day1);
+  });
+
+  testWidgets('系统返回键退出横屏后，竖屏周期变为横屏所选', (tester) async {
+    await openLandscapeAndPickDay(tester, () => tester.binding.handlePopRoute());
+    await expectPortraitInterval(tester, KlineInterval.day1);
   });
 }

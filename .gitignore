@@ -36,6 +36,8 @@ apps/*/pubspec.lock
 **/doc/api/
 .dart_tool/
 build/
+# DevTools 扩展启用状态（依赖带 DevTools 扩展时，运行即生成，如 get_it）
+devtools_options.yaml
 
 # workspace 临时脱离用的 pubspec_overrides.yaml 不得入库（§3.3 逃生口）
 packages/*/pubspec_overrides.yaml

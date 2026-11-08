@@ -1,28 +1,41 @@
 import 'dart:async';
 
 import 'package:flexi_kline/flexi_kline.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../data/models/kline_interval.dart';
 import '../../../data/repositories/kline_repository.dart';
+import '../../../data/service_locator.dart';
 import 'kline_state_base.dart';
 
-/// 公共 K 线数据接线 Mixin，负责 [KlineSpec]/数据源/HTTP 加载/WS 订阅接线。
+/// K 线数据能力：拥有当前周期，负责加载、翻页与推送订阅。
+///
+/// 当前周期只由本 mixin 写：页面提供 [initialInterval]，周期栏读 [interval]、点击调 [selectInterval]。
 mixin KlineDataCenterMixin<T extends StatefulWidget> on KlineStateBase<T> {
-  /// 数据源，构造注入（由 `KlinePage` 传入）。
-  KlineRepository get repository;
+  /// 数据仓库，默认从依赖容器取；测试或需要特定实现的页面可覆写。
+  KlineRepository get klineRepository => getIt<KlineRepository>();
+
+  /// 进入页面时的周期；之后由 [selectInterval] 改变。
+  KlineInterval get initialInterval;
+
+  late final ValueNotifier<KlineInterval> _interval = ValueNotifier(initialInterval);
 
   late KlineSpec _spec;
 
   StreamSubscription<List<CandleModel>>? _ticksSub;
 
-  /// 当前生效周期（只读数据事实，供页面或调试读取）。
-  ITimeInterval get timeInterval => _spec.interval;
+  /// 当前周期，周期栏据此显示选中态。
+  ValueListenable<KlineInterval> get interval => _interval;
+
+  /// 页面实现 [createKlineSpec] 时用它取周期，保证 spec 与 [interval] 一致。
+  KlineInterval get currentInterval => _interval.value;
 
   @override
   void initState() {
     super.initState();
     _spec = createKlineSpec();
+    klineController.onLoadMoreCandles = loadMoreCandles;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       refreshKlineData(reset: true);
@@ -30,14 +43,9 @@ mixin KlineDataCenterMixin<T extends StatefulWidget> on KlineStateBase<T> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    klineController.onLoadMoreCandles = loadMoreCandles;
-  }
-
-  @override
   void dispose() {
     _cancelTicks();
+    _interval.dispose();
     super.dispose();
   }
 
@@ -48,11 +56,12 @@ mixin KlineDataCenterMixin<T extends StatefulWidget> on KlineStateBase<T> {
     await refreshKlineData(reset: true);
   }
 
-  /// 周期切换。
-  void didIntervalChanged(KlineInterval interval) {
-    if (interval == _spec.interval) return;
+  /// 切换周期；与当前周期相同时不做事。
+  void selectInterval(KlineInterval value) {
+    if (value == _interval.value) return;
+    _interval.value = value;
     _cancelTicks();
-    _spec = _spec.copyWith(interval: interval);
+    _spec = _spec.copyWith(interval: value);
     refreshKlineData();
   }
 
@@ -70,9 +79,9 @@ mixin KlineDataCenterMixin<T extends StatefulWidget> on KlineStateBase<T> {
       useCachePaintDxOffset: true,
     );
 
-    final candles = await repository.fetchCandles(
+    final candles = await klineRepository.fetchCandles(
       symbol: spec.symbol,
-      interval: spec.interval as KlineInterval,
+      interval: _intervalOf(spec),
       end: spec.to,
       limit: spec.limit,
     );
@@ -85,9 +94,9 @@ mixin KlineDataCenterMixin<T extends StatefulWidget> on KlineStateBase<T> {
   /// 向前翻页加载历史 K 线数据。
   @override
   Future<void> loadMoreCandles(KlineSpec spec) async {
-    final candles = await repository.fetchCandles(
+    final candles = await klineRepository.fetchCandles(
       symbol: spec.symbol,
-      interval: spec.interval as KlineInterval,
+      interval: _intervalOf(spec),
       end: spec.from,
       limit: spec.limit,
     );
@@ -95,12 +104,15 @@ mixin KlineDataCenterMixin<T extends StatefulWidget> on KlineStateBase<T> {
     klineController.prependHistoryKlineData(spec, candles);
   }
 
+  /// spec 由本 mixin 用 [KlineInterval] 创建，这里是唯一的类型还原点。
+  KlineInterval _intervalOf(KlineSpec spec) => spec.interval as KlineInterval;
+
   void _subscribeTicks(KlineSpec spec) {
     _cancelTicks();
-    _ticksSub = repository
+    _ticksSub = klineRepository
         .subscribeTicks(
           symbol: spec.symbol,
-          interval: spec.interval as KlineInterval,
+          interval: _intervalOf(spec),
         )
         .listen((batch) {
           if (!mounted) return;

@@ -11,8 +11,8 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: KlineIntervalBar(
-              intervalNotifier: notifier,
-              onChanged: (_) {},
+              selected: notifier,
+              onSelected: (_) {},
             ),
           ),
         ),
@@ -23,15 +23,15 @@ void main() {
       }
     });
 
-    testWidgets('点击周期回写 notifier 并回调 onChanged', (tester) async {
+    testWidgets('点击周期只回调 onSelected，不改 selected', (tester) async {
       final notifier = ValueNotifier(KlineInterval.minute15);
       KlineInterval? changedTo;
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: KlineIntervalBar(
-              intervalNotifier: notifier,
-              onChanged: (v) => changedTo = v,
+              selected: notifier,
+              onSelected: (v) => changedTo = v,
             ),
           ),
         ),
@@ -40,8 +40,8 @@ void main() {
       await tester.tap(find.text('1时'));
       await tester.pumpAndSettle();
 
-      expect(notifier.value, KlineInterval.hour1);
       expect(changedTo, KlineInterval.hour1);
+      expect(notifier.value, KlineInterval.minute15);
     });
 
     testWidgets('外部改动 notifier 时 TabBar 同步选中态', (tester) async {
@@ -50,8 +50,8 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: KlineIntervalBar(
-              intervalNotifier: notifier,
-              onChanged: (_) {},
+              selected: notifier,
+              onSelected: (_) {},
             ),
           ),
         ),
@@ -73,15 +73,15 @@ void main() {
       );
     });
 
-    testWidgets('supportedIntervals 自定义子集', (tester) async {
+    testWidgets('intervals 自定义子集', (tester) async {
       final notifier = ValueNotifier(KlineInterval.minute15);
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: KlineIntervalBar(
-              intervalNotifier: notifier,
-              onChanged: (_) {},
-              supportedIntervals: const [KlineInterval.minute15, KlineInterval.hour1],
+              selected: notifier,
+              onSelected: (_) {},
+              intervals: const [KlineInterval.minute15, KlineInterval.hour1],
             ),
           ),
         ),

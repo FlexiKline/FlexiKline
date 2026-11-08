@@ -16,6 +16,7 @@ dependencies:
   flexi_painting: ^0.1.0
   flexi_kline_draw_tools: ^2.0.1
   flexi_formatter: ^2.0.1
+  get_it: ^9.3.0
 
 dev_dependencies:
   flutter_test:

@@ -5,13 +5,7 @@ import '../theme/app_theme.dart';
 
 /// 主题切换按钮：图标反映当前实际主题亮度（含跟随系统），点击切换到相反主题。
 class ThemeToggleButton extends StatelessWidget {
-  const ThemeToggleButton({
-    super.key,
-    this.onChanged,
-  });
-
-  /// 主题切换后的额外回调（如刷新 K 线配色）。
-  final VoidCallback? onChanged;
+  const ThemeToggleButton({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,10 +15,7 @@ class ThemeToggleButton extends StatelessWidget {
       icon: Icon(
         isDark ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
       ),
-      onPressed: () {
-        toggleThemeMode();
-        onChanged?.call();
-      }.throttle(),
+      onPressed: toggleThemeMode.throttle(),
     );
   }
 }

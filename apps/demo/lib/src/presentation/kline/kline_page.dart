@@ -4,10 +4,7 @@ import 'package:flutter/material.dart';
 import '../../config/app_kline_config.dart';
 import '../../config/app_kline_indicator_config.dart';
 import '../../config/app_kline_logger.dart';
-import '../../data/data_sources/mock/mock_kline_data_source.dart';
 import '../../data/models/kline_interval.dart';
-import '../../data/repositories/kline_repository.dart';
-import '../../data/repositories/kline_repository_impl.dart';
 import '../../utils/device_util.dart';
 import '../../widgets/theme_toggle_button.dart';
 import 'core/kline_data_center_mixin.dart';
@@ -44,9 +41,6 @@ class KlinePage extends StatefulWidget {
   /// 初始周期名（[KlineInterval] 枚举名，如 `minute15`）；为空或未命中时用默认周期。
   final String? interval;
 
-  /// 仓库工厂（默认 [KlineRepositoryImpl] 加 [MockKlineDataSource]；测试可覆写注入假实现）。
-  KlineRepository createRepository() => KlineRepositoryImpl(MockKlineDataSource());
-
   @override
   State<KlinePage> createState() => _KlinePageState();
 }
@@ -54,10 +48,6 @@ class KlinePage extends StatefulWidget {
 class _KlinePageState extends KlineStateBase<KlinePage> with KlineDataCenterMixin<KlinePage>, AppKlineLoggerMixin {
   late final AppKlineIndicatorConfig _indicatorConfig;
   late final AppKlineConfig _klineConfig;
-  late final KlineRepository _repository;
-
-  /// 当前周期 UI 状态，由 intervalBar 回写。
-  late final ValueNotifier<KlineInterval> _currentIntervalNotifier;
 
   /// 绘制工具条显隐。与 [FlexiKlineController.isDrawVisible] 正交：只联动状态机，不影响已画内容。
   final ValueNotifier<bool> _drawMenubarVisible = ValueNotifier(false);
@@ -66,7 +56,7 @@ class _KlinePageState extends KlineStateBase<KlinePage> with KlineDataCenterMixi
   String get logTag => 'KlinePage';
 
   @override
-  KlineRepository get repository => _repository;
+  KlineInterval get initialInterval => KlineInterval.parse(widget.interval);
 
   @override
   BaseIndicatorConfig get indicatorConfig => _indicatorConfig;
@@ -78,7 +68,7 @@ class _KlinePageState extends KlineStateBase<KlinePage> with KlineDataCenterMixi
   KlineSpec createKlineSpec([KlineSpec? last]) {
     return KlineSpec(
       symbol: widget.symbol,
-      interval: last?.interval ?? _currentIntervalNotifier.value,
+      interval: last?.interval ?? currentInterval,
       precision: widget.precision,
       limit: widget.limit,
       label: widget.label,
@@ -90,9 +80,7 @@ class _KlinePageState extends KlineStateBase<KlinePage> with KlineDataCenterMixi
     // 先于 super.initState：基类创建 controller 时读取这些字段。
     _indicatorConfig = AppKlineIndicatorConfig();
     _klineConfig = AppKlineConfig();
-    _currentIntervalNotifier = ValueNotifier(KlineInterval.parse(widget.interval));
     super.initState();
-    _repository = widget.createRepository();
   }
 
   @override
@@ -101,13 +89,7 @@ class _KlinePageState extends KlineStateBase<KlinePage> with KlineDataCenterMixi
     klineController.storeFlexiKlineConfig();
     _indicatorConfig.dispose();
     _drawMenubarVisible.dispose();
-    _currentIntervalNotifier.dispose();
     super.dispose();
-  }
-
-  void _onThemeChanged() {
-    klineController.onThemeChanged();
-    setState(() {});
   }
 
   void _toggleDraw() {
@@ -115,17 +97,17 @@ class _KlinePageState extends KlineStateBase<KlinePage> with KlineDataCenterMixi
     _drawMenubarVisible.value ? klineController.prepareDraw() : klineController.exitDraw();
   }
 
-  /// 打开横屏页（复用本页配置，避免独立落盘覆盖）。
+  /// 打开横屏页（复用本页配置，避免独立落盘覆盖）；返回后改用横屏页最后的周期。
   Future<void> _openLandscapePage() async {
     if (!DeviceUtil.isMobile) return;
-    await Navigator.of(context).push(
-      MaterialPageRoute<void>(
+    final result = await Navigator.of(context).push(
+      MaterialPageRoute<KlineLandscapeResult>(
         builder: (_) => KlineLandscapePage(
           symbol: widget.symbol,
           label: widget.label,
           precision: widget.precision,
           limit: widget.limit,
-          interval: _currentIntervalNotifier.value.name,
+          interval: currentInterval.name,
           indicatorConfig: _indicatorConfig,
           klineConfig: _klineConfig,
         ),
@@ -133,6 +115,7 @@ class _KlinePageState extends KlineStateBase<KlinePage> with KlineDataCenterMixi
     );
     if (!mounted) return;
     klineController.syncFlexiKlineConfig();
+    if (result != null) selectInterval(result.interval);
   }
 
   @override
@@ -142,7 +125,7 @@ class _KlinePageState extends KlineStateBase<KlinePage> with KlineDataCenterMixi
         title: Text(widget.label),
         centerTitle: true,
         actions: [
-          ThemeToggleButton(onChanged: _onThemeChanged),
+          const ThemeToggleButton(),
         ],
       ),
       body: RefreshIndicator(
@@ -154,10 +137,7 @@ class _KlinePageState extends KlineStateBase<KlinePage> with KlineDataCenterMixi
               KlineHeaderBar(
                 onToggleDraw: _toggleDraw.throttle(),
                 onOpenLandscape: _openLandscapePage.throttle(),
-                klineIntervalBar: KlineIntervalBar(
-                  intervalNotifier: _currentIntervalNotifier,
-                  onChanged: didIntervalChanged,
-                ),
+                klineIntervalBar: KlineIntervalBar(selected: interval, onSelected: selectInterval),
               ),
               ValueListenableBuilder(
                 valueListenable: _drawMenubarVisible,

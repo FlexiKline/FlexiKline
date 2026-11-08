@@ -1,7 +1,9 @@
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/widgets.dart';
 
-/// K 线页面 State 公共基类：负责控制器创建销毁与 K 线视图构建。
+import '../../../theme/app_theme.dart';
+
+/// K 线页面 State 公共基类：负责控制器创建销毁、应用主题切换时刷新配色与 K 线视图构建。
 ///
 /// [klineController] 由本基类拥有；[indicatorConfig] / [klineConfig]
 /// 由各 Page 持有与销毁，DataCenter mixin 不触碰配置生命周期。
@@ -18,11 +20,14 @@ abstract class KlineStateBase<T extends StatefulWidget> extends State<T>
   /// 须在 [super.initState] 前赋值，基类创建 controller 时读取。
   IConfiguration get klineConfig;
 
-  /// 新建控制器。横屏页可覆写以注入 [FlexiLayoutMode.fixed] 等。
+  /// 初始布局模式；横屏页覆写为 [FlexiLayoutMode.fixed]，避免横滑时主副图自适应抖动。
+  FlexiLayoutMode get initialLayoutMode => FlexiLayoutMode.adapt;
+
   @override
   FlexiKlineController createFlexiKlineController() {
     return FlexiKlineController(
       configuration: klineConfig,
+      initialLayoutMode: initialLayoutMode,
       logger: this,
     );
   }
@@ -32,12 +37,20 @@ abstract class KlineStateBase<T extends StatefulWidget> extends State<T>
     super.initState();
     _klineController = createFlexiKlineController();
     _klineController.onCrossCustomTooltip = customTooltips;
+    appThemeMode.addListener(_onThemeChanged);
   }
 
   @override
   void dispose() {
+    appThemeMode.removeListener(_onThemeChanged);
     _klineController.dispose();
     super.dispose();
+  }
+
+  /// 监听全局 [appThemeMode]：页面被盖住时也刷新，返回后配色已是新主题。
+  void _onThemeChanged() {
+    _klineController.onThemeChanged();
+    setState(() {});
   }
 
   /// 下拉刷新统一入口。
