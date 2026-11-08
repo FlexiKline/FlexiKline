@@ -29,7 +29,7 @@ enum MyKlineInterval implements ITimeInterval {
     MyKlineInterval defaultValue = initial,
   ]) {
     if (name == null) return defaultValue;
-    name = name.trim().toUpperCase();
+    name = name.trim().toLowerCase();
     return values.firstWhere(
       (e) => e.name == name,
       orElse: () => defaultValue,
