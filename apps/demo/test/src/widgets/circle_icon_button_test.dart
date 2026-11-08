@@ -1,5 +1,5 @@
 import 'package:flexi_kline/flexi_kline.dart';
-import 'package:flexi_kline_demo/src/theme/my_app_theme.dart';
+import 'package:flexi_kline_demo/src/theme/app_theme.dart';
 import 'package:flexi_kline_demo/src/widgets/circle_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -16,10 +16,10 @@ void main() {
 
   Color iconColor(WidgetTester tester) => IconTheme.of(tester.element(find.byType(ShapeIcon))).color!;
 
-  for (final (name, theme) in [('浅色', MyAppTheme.light), ('深色', MyAppTheme.dark)]) {
+  for (final (name, theme) in [('浅色', AppTheme.light), ('深色', AppTheme.dark)]) {
     testWidgets('$name: 选中用品牌蓝, 未选中用次要文字色, 都不加背景', (tester) async {
       await pump(tester, theme, selected: true);
-      expect(iconColor(tester), MyAppTheme.selectedOf(theme.brightness));
+      expect(iconColor(tester), AppTheme.selectedOf(theme.brightness));
       final style = tester.widget<IconButton>(find.byType(IconButton)).style!;
       expect(style.backgroundColor, isNull);
 

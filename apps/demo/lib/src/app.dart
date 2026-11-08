@@ -1,24 +1,24 @@
 import 'package:flutter/material.dart';
 
-import 'pages/index/index_page.dart';
-import 'route/route_observer.dart';
-import 'theme/my_app_theme.dart';
+import 'presentation/index/index_page.dart';
+import 'theme/app_theme.dart';
+import 'utils/app_navigator.dart';
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class DemoApp extends StatelessWidget {
+  const DemoApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<ThemeMode>(
-      valueListenable: myAppThemeMode,
+      valueListenable: appThemeMode,
       builder: (context, mode, _) {
         return MaterialApp(
           title: 'FlexiKline Demo',
           debugShowCheckedModeBanner: false,
           navigatorObservers: [globalRouteObserver],
           themeMode: mode,
-          theme: MyAppTheme.light,
-          darkTheme: MyAppTheme.dark,
+          theme: AppTheme.light,
+          darkTheme: AppTheme.dark,
           home: const IndexPage(),
         );
       },

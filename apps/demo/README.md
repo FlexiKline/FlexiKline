@@ -25,17 +25,16 @@ lib/
 ├── main.dart                 # 入口
 └── src/
     ├── app.dart              # MaterialApp 配置（主题、路由观察者）
-    ├── config/               # 框架配置（K线周期、主题、指标、存储）
+    ├── config/               # flexi_kline 扩展层（K线周期、主题色板、指标、存储、日志）
     ├── data/                 # 数据层（接口、mock 实现、模型）
-    ├── pages/
-    │   ├── common/
-    │   │   ├── core/         # 页面架构核心（State 基类、数据接线 mixin）
-    │   │   └── components/   # 业务通用组件（周期切换栏）
-    │   ├── demo_kline/       # K 线 feature（竖屏页 + 横屏页 + 私有子组件）
-    │   └── index/            # Demo 入口页
-    ├── route/                # 路由相关（全局 RouteObserver）
+    ├── presentation/
+    │   ├── index/            # Demo 入口页
+    │   ├── kline/            # K 线 feature（竖屏页 + 横屏页）
+    │   │   ├── core/         # 状态层（State 基类、能力 mixin）
+    │   │   └── widgets/      # 周期栏、头部栏、绘图菜单与工具条
+    │   └── painting/         # Painting 示例页
     ├── theme/                # 应用主题（light/dark ThemeData + 主题模式管理）
-    ├── utils/                # 工具（时间对齐、设备判断、横竖屏切换）
+    ├── utils/                # 工具（全局 RouteObserver、时间对齐、设备判断、横竖屏切换）
     └── widgets/              # 纯通用 UI 组件（与业务无关）
 ```
 
@@ -45,4 +44,4 @@ lib/
 flutter test
 ```
 
-测试按 `lib/src/` 目录结构镜像组织，覆盖 config、data、utils、pages/common。
+测试按 `lib/src/` 目录结构镜像组织，覆盖 config、data、utils、presentation。
