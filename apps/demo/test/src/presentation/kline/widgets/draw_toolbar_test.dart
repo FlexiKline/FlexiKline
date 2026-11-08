@@ -1,7 +1,7 @@
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flexi_kline_demo/src/config/app_kline_config.dart';
 import 'package:flexi_kline_demo/src/config/app_kline_indicator_config.dart';
-import 'package:flexi_kline_demo/src/config/my_kline_interval.dart';
+import 'package:flexi_kline_demo/src/data/models/kline_interval.dart';
 import 'package:flexi_kline_demo/src/presentation/kline/widgets/draw_toolbar.dart';
 import 'package:flexi_kline_draw_tools/flexi_kline_draw_tools.dart' show trendLine;
 import 'package:flutter/material.dart';
@@ -11,8 +11,8 @@ void main() {
   testWidgets('选中图形后打开颜色菜单不报错, 选色后生效并收起菜单', (tester) async {
     final indicators = AppKlineIndicatorConfig();
     final controller = FlexiKlineController(configuration: AppKlineConfig());
-    const spec = KlineSpec(symbol: 'BTCUSDT', interval: MyKlineInterval.minute15, precision: 2);
-    final step = MyKlineInterval.minute15.milliseconds;
+    const spec = KlineSpec(symbol: 'BTCUSDT', interval: KlineInterval.minute15, precision: 2);
+    final step = KlineInterval.minute15.milliseconds;
     controller
       ..switchKlineData(spec)
       ..replaceKlineData(spec, [

@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import '../../config/app_kline_config.dart';
 import '../../config/app_kline_indicator_config.dart';
 import '../../config/app_kline_logger.dart';
-import '../../config/my_kline_interval.dart';
+import '../../data/data_sources/mock/mock_kline_data_source.dart';
+import '../../data/models/kline_interval.dart';
 import '../../data/repositories/kline_repository.dart';
+import '../../data/repositories/kline_repository_impl.dart';
 import '../../utils/screen_orientation.dart';
 import '../../widgets/theme_toggle_button.dart';
 import 'core/kline_data_center_mixin.dart';
@@ -37,7 +39,7 @@ class KlineLandscapePage extends StatefulWidget {
   /// 单次分页条数。
   final int limit;
 
-  /// 初始周期名（[MyKlineInterval] 枚举名，如 `minute15`）；为空或未命中时用默认周期。
+  /// 初始周期名（[KlineInterval] 枚举名，如 `minute15`）；为空或未命中时用默认周期。
   final String? interval;
 
   /// 指标配置注入（通常来自竖屏页复用）；为空时本页自建并在 dispose 时销毁。
@@ -46,8 +48,8 @@ class KlineLandscapePage extends StatefulWidget {
   /// 框架配置注入（通常来自竖屏页复用）；为空时本页自建并在 dispose 时落盘+销毁。
   final IConfiguration? klineConfig;
 
-  /// 仓库工厂（默认懒加载本地 JSON 的 [KlineRepositoryImpl]；测试可覆写注入假实现）。
-  KlineRepository createRepository() => KlineRepositoryImpl();
+  /// 仓库工厂（默认 [KlineRepositoryImpl] 加 [MockKlineDataSource]；测试可覆写注入假实现）。
+  KlineRepository createRepository() => KlineRepositoryImpl(MockKlineDataSource());
 
   @override
   State<KlineLandscapePage> createState() => _KlineLandscapePageState();
@@ -56,7 +58,7 @@ class KlineLandscapePage extends StatefulWidget {
 class _KlineLandscapePageState extends KlineStateBase<KlineLandscapePage>
     with KlineDataCenterMixin<KlineLandscapePage>, ScreenLandscapeModeMixin<KlineLandscapePage>, AppKlineLoggerMixin {
   late final KlineRepository _repository;
-  late final ValueNotifier<MyKlineInterval> _currentIntervalNotifier;
+  late final ValueNotifier<KlineInterval> _currentIntervalNotifier;
 
   /// 注入则复用，否则自建。
   late final BaseIndicatorConfig _indicatorConfig;
@@ -100,7 +102,7 @@ class _KlineLandscapePageState extends KlineStateBase<KlineLandscapePage>
     // 先于 super.initState：基类创建 controller 时读取这些字段。
     _indicatorConfig = widget.indicatorConfig ?? AppKlineIndicatorConfig();
     _klineConfig = widget.klineConfig ?? AppKlineConfig();
-    _currentIntervalNotifier = ValueNotifier(MyKlineInterval.parse(widget.interval));
+    _currentIntervalNotifier = ValueNotifier(KlineInterval.parse(widget.interval));
     super.initState();
     _repository = widget.createRepository();
   }

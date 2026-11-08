@@ -1,7 +1,7 @@
 import 'package:flexi_kline/flexi_kline.dart';
 
+import '../data/models/kline_interval.dart';
 import 'app_kline_storage.dart';
-import 'my_kline_interval.dart';
 
 /// 内置蜡烛 + 时间轴指标配置，不引入 flexi_kline_indicators。
 ///
@@ -12,7 +12,7 @@ class AppKlineIndicatorConfig extends BaseIndicatorConfig with AppKlineStorageMi
   String cacheKey(String key) => key;
 
   final CandleIndicator _candle = CandleIndicator(
-    intervalChartTypes: {MyKlineInterval.line: FlexiChartType.lineNormal},
+    intervalChartTypes: {KlineInterval.line: FlexiChartType.lineNormal},
   );
 
   final TimeIndicator _time = TimeIndicator(position: DrawPosition.bottom);

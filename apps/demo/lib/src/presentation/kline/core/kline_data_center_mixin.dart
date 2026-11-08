@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../../config/my_kline_interval.dart';
+import '../../../data/models/kline_interval.dart';
 import '../../../data/repositories/kline_repository.dart';
 import 'kline_state_base.dart';
 
@@ -49,7 +49,7 @@ mixin KlineDataCenterMixin<T extends StatefulWidget> on KlineStateBase<T> {
   }
 
   /// 周期切换。
-  void didIntervalChanged(MyKlineInterval interval) {
+  void didIntervalChanged(KlineInterval interval) {
     if (interval == _spec.interval) return;
     _cancelTicks();
     _spec = _spec.copyWith(interval: interval);
@@ -72,7 +72,7 @@ mixin KlineDataCenterMixin<T extends StatefulWidget> on KlineStateBase<T> {
 
     final candles = await repository.fetchCandles(
       symbol: spec.symbol,
-      interval: spec.interval as MyKlineInterval,
+      interval: spec.interval as KlineInterval,
       end: spec.to,
       limit: spec.limit,
     );
@@ -87,7 +87,7 @@ mixin KlineDataCenterMixin<T extends StatefulWidget> on KlineStateBase<T> {
   Future<void> loadMoreCandles(KlineSpec spec) async {
     final candles = await repository.fetchCandles(
       symbol: spec.symbol,
-      interval: spec.interval as MyKlineInterval,
+      interval: spec.interval as KlineInterval,
       end: spec.from,
       limit: spec.limit,
     );
@@ -100,7 +100,7 @@ mixin KlineDataCenterMixin<T extends StatefulWidget> on KlineStateBase<T> {
     _ticksSub = repository
         .subscribeTicks(
           symbol: spec.symbol,
-          interval: spec.interval as MyKlineInterval,
+          interval: spec.interval as KlineInterval,
         )
         .listen((batch) {
           if (!mounted) return;

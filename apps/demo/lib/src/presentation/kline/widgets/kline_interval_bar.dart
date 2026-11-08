@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../config/my_kline_interval.dart';
+import '../../../data/models/kline_interval.dart';
 
 /// 周期切换栏：选中态由 [intervalNotifier] 驱动，点击回写 notifier 并回调 [onChanged]。
 class KlineIntervalBar extends StatefulWidget {
@@ -9,19 +9,19 @@ class KlineIntervalBar extends StatefulWidget {
     this.padding = const EdgeInsets.symmetric(horizontal: 0),
     required this.intervalNotifier,
     required this.onChanged,
-    this.supportedIntervals = MyKlineInterval.values,
+    this.supportedIntervals = KlineInterval.values,
   });
 
   final EdgeInsetsGeometry padding;
 
   /// 当前周期 notifier，由页面持有并初始化，本组件负责回写。
-  final ValueNotifier<MyKlineInterval> intervalNotifier;
+  final ValueNotifier<KlineInterval> intervalNotifier;
 
   /// 点击周期切换回调。
-  final ValueChanged<MyKlineInterval> onChanged;
+  final ValueChanged<KlineInterval> onChanged;
 
   /// 支持的周期列表。
-  final List<MyKlineInterval> supportedIntervals;
+  final List<KlineInterval> supportedIntervals;
 
   @override
   State<KlineIntervalBar> createState() => _KlineIntervalBarState();
@@ -30,7 +30,7 @@ class KlineIntervalBar extends StatefulWidget {
 class _KlineIntervalBarState extends State<KlineIntervalBar> with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
-  MyKlineInterval get _selected => widget.intervalNotifier.value;
+  KlineInterval get _selected => widget.intervalNotifier.value;
 
   @override
   void initState() {
@@ -97,4 +97,14 @@ class _KlineIntervalBarState extends State<KlineIntervalBar> with SingleTickerPr
       ),
     );
   }
+}
+
+extension on KlineInterval {
+  String get label => switch (this) {
+    KlineInterval.line => '分时',
+    KlineInterval.minute15 => '15分',
+    KlineInterval.hour1 => '1时',
+    KlineInterval.day1 => '1天',
+    KlineInterval.week1 => '1周',
+  };
 }

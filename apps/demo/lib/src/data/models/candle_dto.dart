@@ -1,6 +1,6 @@
-/// JSON 里一根蜡烛的原始 OHLCV（带历史时间戳）。
-class RawCandle {
-  const RawCandle({
+/// 服务端的一根蜡烛：assets JSON 与推送都产出它，由 Repository 转成 `CandleModel`。
+class CandleDto {
+  const CandleDto({
     required this.timestamp,
     required this.open,
     required this.high,
@@ -8,9 +8,10 @@ class RawCandle {
     required this.close,
     required this.volume,
     required this.turnover,
+    this.confirmed = true,
   });
 
-  /// 历史时间戳（毫秒）。
+  /// 周期起点时间戳（毫秒）。
   final int timestamp;
 
   final double open;
@@ -20,7 +21,10 @@ class RawCandle {
   final double volume;
   final double turnover;
 
-  factory RawCandle.fromJson(Map<String, dynamic> json) => RawCandle(
+  /// 推送中未收盘的蜡烛为 false。
+  final bool confirmed;
+
+  factory CandleDto.fromJson(Map<String, dynamic> json) => CandleDto(
     timestamp: (json['ts'] as num).toInt(),
     open: (json['open'] as num).toDouble(),
     high: (json['high'] as num).toDouble(),

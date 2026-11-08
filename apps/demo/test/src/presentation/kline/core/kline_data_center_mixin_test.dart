@@ -2,7 +2,7 @@ import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flexi_kline_demo/src/config/app_kline_config.dart';
 import 'package:flexi_kline_demo/src/config/app_kline_indicator_config.dart';
 import 'package:flexi_kline_demo/src/config/app_kline_logger.dart';
-import 'package:flexi_kline_demo/src/config/my_kline_interval.dart';
+import 'package:flexi_kline_demo/src/data/models/kline_interval.dart';
 import 'package:flexi_kline_demo/src/data/repositories/kline_repository.dart';
 import 'package:flexi_kline_demo/src/presentation/kline/core/kline_data_center_mixin.dart';
 import 'package:flexi_kline_demo/src/presentation/kline/core/kline_state_base.dart';
@@ -17,7 +17,7 @@ class _FakeRepository implements KlineRepository {
   @override
   Future<List<CandleModel>> fetchCandles({
     required String symbol,
-    required MyKlineInterval interval,
+    required KlineInterval interval,
     int? end,
     int limit = 500,
   }) async {
@@ -28,7 +28,7 @@ class _FakeRepository implements KlineRepository {
   @override
   Stream<List<CandleModel>> subscribeTicks({
     required String symbol,
-    required MyKlineInterval interval,
+    required KlineInterval interval,
   }) {
     subscribeCallCount++;
     return const Stream.empty();
@@ -75,7 +75,7 @@ class _TestPageState extends KlineStateBase<_TestPage> with KlineDataCenterMixin
   KlineSpec createKlineSpec([KlineSpec? last]) {
     return KlineSpec(
       symbol: 'BTCUSDT',
-      interval: last?.interval ?? MyKlineInterval.minute15,
+      interval: last?.interval ?? KlineInterval.minute15,
       precision: 2,
       limit: 500,
       label: 'BTC-USDT',
@@ -94,7 +94,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final state = tester.state<_TestPageState>(find.byType(_TestPage));
-      expect(state.timeInterval, MyKlineInterval.minute15);
+      expect(state.timeInterval, KlineInterval.minute15);
     });
 
     testWidgets('didIntervalChanged 同周期早退，不触发数据请求', (tester) async {
@@ -106,7 +106,7 @@ void main() {
       final initialFetch = repo.fetchCallCount;
       final initialSub = repo.subscribeCallCount;
 
-      state.didIntervalChanged(MyKlineInterval.minute15);
+      state.didIntervalChanged(KlineInterval.minute15);
       expect(repo.fetchCallCount, initialFetch);
       expect(repo.subscribeCallCount, initialSub);
     });
@@ -120,12 +120,12 @@ void main() {
       final initialFetch = repo.fetchCallCount;
       final initialSub = repo.subscribeCallCount;
 
-      state.didIntervalChanged(MyKlineInterval.hour1);
+      state.didIntervalChanged(KlineInterval.hour1);
       await tester.pumpAndSettle();
 
       expect(repo.fetchCallCount, greaterThan(initialFetch));
       expect(repo.subscribeCallCount, greaterThan(initialSub));
-      expect(state.timeInterval, MyKlineInterval.hour1);
+      expect(state.timeInterval, KlineInterval.hour1);
     });
   });
 }

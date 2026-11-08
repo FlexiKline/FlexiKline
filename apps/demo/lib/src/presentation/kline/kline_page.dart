@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import '../../config/app_kline_config.dart';
 import '../../config/app_kline_indicator_config.dart';
 import '../../config/app_kline_logger.dart';
-import '../../config/my_kline_interval.dart';
+import '../../data/data_sources/mock/mock_kline_data_source.dart';
+import '../../data/models/kline_interval.dart';
 import '../../data/repositories/kline_repository.dart';
+import '../../data/repositories/kline_repository_impl.dart';
 import '../../utils/device_util.dart';
 import '../../widgets/theme_toggle_button.dart';
 import 'core/kline_data_center_mixin.dart';
@@ -39,11 +41,11 @@ class KlinePage extends StatefulWidget {
   /// 单次分页条数。
   final int limit;
 
-  /// 初始周期名（[MyKlineInterval] 枚举名，如 `minute15`）；为空或未命中时用默认周期。
+  /// 初始周期名（[KlineInterval] 枚举名，如 `minute15`）；为空或未命中时用默认周期。
   final String? interval;
 
-  /// 仓库工厂（默认懒加载本地 JSON 的 [KlineRepositoryImpl]；测试可覆写注入假实现）。
-  KlineRepository createRepository() => KlineRepositoryImpl();
+  /// 仓库工厂（默认 [KlineRepositoryImpl] 加 [MockKlineDataSource]；测试可覆写注入假实现）。
+  KlineRepository createRepository() => KlineRepositoryImpl(MockKlineDataSource());
 
   @override
   State<KlinePage> createState() => _KlinePageState();
@@ -55,7 +57,7 @@ class _KlinePageState extends KlineStateBase<KlinePage> with KlineDataCenterMixi
   late final KlineRepository _repository;
 
   /// 当前周期 UI 状态，由 intervalBar 回写。
-  late final ValueNotifier<MyKlineInterval> _currentIntervalNotifier;
+  late final ValueNotifier<KlineInterval> _currentIntervalNotifier;
 
   /// 绘制工具条显隐。与 [FlexiKlineController.isDrawVisible] 正交：只联动状态机，不影响已画内容。
   final ValueNotifier<bool> _drawMenubarVisible = ValueNotifier(false);
@@ -88,7 +90,7 @@ class _KlinePageState extends KlineStateBase<KlinePage> with KlineDataCenterMixi
     // 先于 super.initState：基类创建 controller 时读取这些字段。
     _indicatorConfig = AppKlineIndicatorConfig();
     _klineConfig = AppKlineConfig();
-    _currentIntervalNotifier = ValueNotifier(MyKlineInterval.parse(widget.interval));
+    _currentIntervalNotifier = ValueNotifier(KlineInterval.parse(widget.interval));
     super.initState();
     _repository = widget.createRepository();
   }

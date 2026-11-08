@@ -1,5 +1,5 @@
 import 'package:flexi_kline/flexi_kline.dart';
-import 'package:flexi_kline_demo/src/config/my_kline_interval.dart';
+import 'package:flexi_kline_demo/src/data/models/kline_interval.dart';
 import 'package:flexi_kline_demo/src/data/repositories/kline_repository.dart';
 import 'package:flexi_kline_demo/src/presentation/kline/kline_page.dart';
 import 'package:flexi_kline_demo/src/presentation/kline/widgets/draw_menubar.dart';
@@ -10,13 +10,13 @@ class _EmptyRepository implements KlineRepository {
   @override
   Future<List<CandleModel>> fetchCandles({
     required String symbol,
-    required MyKlineInterval interval,
+    required KlineInterval interval,
     int? end,
     int limit = 500,
   }) async => [];
 
   @override
-  Stream<List<CandleModel>> subscribeTicks({required String symbol, required MyKlineInterval interval}) =>
+  Stream<List<CandleModel>> subscribeTicks({required String symbol, required KlineInterval interval}) =>
       const Stream.empty();
 }
 

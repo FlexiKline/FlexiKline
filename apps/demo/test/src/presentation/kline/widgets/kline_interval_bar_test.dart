@@ -1,4 +1,4 @@
-import 'package:flexi_kline_demo/src/config/my_kline_interval.dart';
+import 'package:flexi_kline_demo/src/data/models/kline_interval.dart';
 import 'package:flexi_kline_demo/src/presentation/kline/widgets/kline_interval_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('KlineIntervalBar', () {
     testWidgets('渲染五档周期标签', (tester) async {
-      final notifier = ValueNotifier(MyKlineInterval.minute15);
+      final notifier = ValueNotifier(KlineInterval.minute15);
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -18,14 +18,14 @@ void main() {
         ),
       );
 
-      for (final interval in MyKlineInterval.values) {
-        expect(find.text(interval.label), findsOneWidget);
+      for (final label in const ['分时', '15分', '1时', '1天', '1周']) {
+        expect(find.text(label), findsOneWidget);
       }
     });
 
     testWidgets('点击周期回写 notifier 并回调 onChanged', (tester) async {
-      final notifier = ValueNotifier(MyKlineInterval.minute15);
-      MyKlineInterval? changedTo;
+      final notifier = ValueNotifier(KlineInterval.minute15);
+      KlineInterval? changedTo;
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -40,12 +40,12 @@ void main() {
       await tester.tap(find.text('1时'));
       await tester.pumpAndSettle();
 
-      expect(notifier.value, MyKlineInterval.hour1);
-      expect(changedTo, MyKlineInterval.hour1);
+      expect(notifier.value, KlineInterval.hour1);
+      expect(changedTo, KlineInterval.hour1);
     });
 
     testWidgets('外部改动 notifier 时 TabBar 同步选中态', (tester) async {
-      final notifier = ValueNotifier(MyKlineInterval.minute15);
+      final notifier = ValueNotifier(KlineInterval.minute15);
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -60,28 +60,28 @@ void main() {
       // 初始选中 15分
       expect(
         tester.widget<TabBar>(find.byType(TabBar)).controller?.index,
-        MyKlineInterval.values.indexOf(MyKlineInterval.minute15),
+        KlineInterval.values.indexOf(KlineInterval.minute15),
       );
 
       // 外部切到 1天
-      notifier.value = MyKlineInterval.day1;
+      notifier.value = KlineInterval.day1;
       await tester.pumpAndSettle();
 
       expect(
         tester.widget<TabBar>(find.byType(TabBar)).controller?.index,
-        MyKlineInterval.values.indexOf(MyKlineInterval.day1),
+        KlineInterval.values.indexOf(KlineInterval.day1),
       );
     });
 
     testWidgets('supportedIntervals 自定义子集', (tester) async {
-      final notifier = ValueNotifier(MyKlineInterval.minute15);
+      final notifier = ValueNotifier(KlineInterval.minute15);
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: KlineIntervalBar(
               intervalNotifier: notifier,
               onChanged: (_) {},
-              supportedIntervals: const [MyKlineInterval.minute15, MyKlineInterval.hour1],
+              supportedIntervals: const [KlineInterval.minute15, KlineInterval.hour1],
             ),
           ),
         ),
