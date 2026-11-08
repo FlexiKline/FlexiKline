@@ -35,5 +35,10 @@ abstract class IndicatorCalculator<T extends ComputedIndicator> {
   /// 在 [range] 上计算并写入 slots。
   ///
   /// [reset] 为 true 时应先清空 [dataIndex] 槽位再整段计算。
+  ///
+  /// [reset] 为 false 时 [range] 是尾段 `[start, data.length)`: `start` 之前的槽位是已提交的结果,
+  /// 可以读取并接续; `start` 及之后的槽位可能残留旧行情算出的值, 必须重写, 不能读取。
+  /// 递推型指标把递推所需的状态存进结果对象, 读不到前一根的状态时退回整段计算。
+  /// 同一实例会计算多份 [KlineData], 所以不要在计算器里保存与某份数据相关的状态。
   void compute(KlineData data, Range range, {bool reset = false});
 }
