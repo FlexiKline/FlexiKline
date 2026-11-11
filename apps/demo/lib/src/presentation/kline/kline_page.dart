@@ -14,6 +14,7 @@ import 'widgets/draw_menubar.dart';
 import 'widgets/draw_toolbar.dart';
 import 'widgets/kline_header_bar.dart';
 import 'widgets/kline_interval_bar.dart';
+import 'widgets/title_with_tag.dart';
 
 /// 第一个形态：BTCUSDT 蜡烛 K 线（分时/15m/1h/1d/1w + 模拟实时推送）。
 class KlinePage extends StatefulWidget {
@@ -122,7 +123,7 @@ class _KlinePageState extends KlineStateBase<KlinePage> with KlineDataCenterMixi
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.label),
+        title: TitleWithTag(widget.label, tag: '模拟'),
         centerTitle: true,
         actions: [
           const ThemeToggleButton(),

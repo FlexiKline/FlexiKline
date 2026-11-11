@@ -1,68 +1,37 @@
-import 'dart:convert';
+import 'dart:math' as math;
 
 import 'package:flexi_kline/flexi_kline.dart';
-import 'package:flutter/services.dart' show rootBundle;
 
 import '../../../utils/candle_time.dart';
 import '../../models/candle_dto.dart';
 import '../../models/kline_interval.dart';
 import '../kline_data_source.dart';
 import 'mock_kline_ticker.dart';
+import 'mock_price_series.dart';
 
-/// [KlineDataSource] 的 mock 实现：assets JSON 模拟 HTTP 分页，[MockKlineTicker] 模拟实时推送，数据按周期懒加载缓存。
+/// [KlineDataSource] 的 mock 实现：按时间戳生成确定性的历史与推送，历史可以无限向前翻页。
+///
+/// 每个 symbol 的价位由 [profiles] 决定；最新一根是当前周期进行中的蜡烛。
 class MockKlineDataSource implements KlineDataSource {
-  MockKlineDataSource({this.isRealtime = true});
+  MockKlineDataSource({this.profiles = defaultProfiles, DateTime Function()? now})
+    : _now = now ?? DateTime.now,
+      _ticker = MockKlineTicker(now: now);
 
-  /// 是否把历史蜡烛时间戳对齐到当前时间（false 则回放 JSON 里的历史时间）。
-  final bool isRealtime;
+  /// 内置标的的价位；新增标的在这里加一行。
+  static const Map<String, MockSymbolProfile> defaultProfiles = {
+    'BTCUSDT': MockSymbolProfile(basePrice: 80000),
+  };
 
-  final MockKlineTicker _ticker = MockKlineTicker();
+  final Map<String, MockSymbolProfile> profiles;
+  final DateTime Function() _now;
+  final MockKlineTicker _ticker;
+  final Map<String, MockPriceSeries> _series = {};
 
-  final Map<KlineInterval, List<CandleDto>> _cache = {};
-  final Map<KlineInterval, Future<List<CandleDto>>> _pending = {};
-
-  /// 该周期全量蜡烛（升序，最新在后），懒加载并缓存。
-  Future<List<CandleDto>> _ensureAll(KlineInterval interval) {
-    final cached = _cache[interval];
-    if (cached != null) return Future.value(cached);
-    return _pending[interval] ??= _build(interval);
+  MockPriceSeries _seriesOf(String symbol) {
+    final profile = profiles[symbol];
+    if (profile == null) throw ArgumentError.value(symbol, 'symbol', '没有 mock 价位参数，在 profiles 里添加');
+    return _series[symbol] ??= MockPriceSeries(symbol, profile);
   }
-
-  Future<List<CandleDto>> _build(KlineInterval interval) async {
-    final raw = await _loadRaw(interval);
-    final all = isRealtime ? _alignToNow(interval, raw) : raw;
-    _cache[interval] = all;
-    return all;
-  }
-
-  static Future<List<CandleDto>> _loadRaw(KlineInterval interval) async {
-    final raw = await rootBundle.loadString(
-      'assets/rawdata/btcusdt_kline_${interval.name}.json',
-    );
-    final json = jsonDecode(raw) as Map<String, dynamic>;
-    return (json['candles'] as List<dynamic>).map((e) => CandleDto.fromJson(e as Map<String, dynamic>)).toList();
-  }
-
-  /// 最新一根对齐当前时间，往前按周期倒推（raw 从旧到新）。
-  static List<CandleDto> _alignToNow(KlineInterval interval, List<CandleDto> raw) {
-    final n = raw.length;
-    final intervalMs = interval.milliseconds;
-    final latestTs = alignToInterval(DateTime.now().millisecondsSinceEpoch, intervalMs);
-    return [
-      for (var i = 0; i < n; i++) _withTimestamp(raw[i], latestTs - (n - 1 - i) * intervalMs),
-    ];
-  }
-
-  static CandleDto _withTimestamp(CandleDto d, int ts) => CandleDto(
-    timestamp: ts,
-    open: d.open,
-    high: d.high,
-    low: d.low,
-    close: d.close,
-    volume: d.volume,
-    turnover: d.turnover,
-    confirmed: d.confirmed,
-  );
 
   @override
   Future<List<CandleDto>> fetchCandles({
@@ -72,30 +41,24 @@ class MockKlineDataSource implements KlineDataSource {
     int limit = 500,
   }) async {
     await Future<void>.delayed(const Duration(milliseconds: 300));
-    final all = await _ensureAll(interval);
-    // all 升序（最新在后）。取满足条件的一段里最新的 limit 根, 仍按升序返回。
-    final window = end == null ? all : all.where((c) => c.timestamp < end).toList();
-    final from = window.length <= limit ? 0 : window.length - limit;
-    return window.sublist(from);
+    final series = _seriesOf(symbol);
+    final intervalMs = interval.milliseconds;
+    final nowMs = _now().millisecondsSinceEpoch;
+    final current = alignToInterval(nowMs, intervalMs);
+    // 最后一根：取最新一页时是当前周期；翻页时是严格早于 end 的那一根，且不晚于当前周期。
+    final last = end == null ? current : math.min(alignToInterval(end - 1, intervalMs), current);
+    final first = last - (limit - 1) * intervalMs;
+    return [
+      for (var ts = first; ts <= last; ts += intervalMs)
+        ts == current ? series.candle(ts, intervalMs, until: nowMs) : series.candle(ts, intervalMs),
+    ];
   }
 
   @override
   Stream<CandleDto> subscribeTicks({
     required String symbol,
     required KlineInterval interval,
-  }) async* {
-    final all = await _ensureAll(interval);
-    final last = all.isNotEmpty
-        ? all.last
-        : CandleDto(
-            timestamp: DateTime.now().millisecondsSinceEpoch,
-            open: 0,
-            high: 0,
-            low: 0,
-            close: 0,
-            volume: 0,
-            turnover: 0,
-          );
-    yield* _ticker.subscribe(interval, last);
+  }) {
+    return _ticker.subscribe(interval, _seriesOf(symbol));
   }
 }

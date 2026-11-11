@@ -5,6 +5,7 @@ import 'package:flexi_kline_demo/src/data/service_locator.dart';
 import 'package:flexi_kline_demo/src/presentation/kline/kline_landscape_page.dart';
 import 'package:flexi_kline_demo/src/presentation/kline/kline_page.dart';
 import 'package:flexi_kline_demo/src/presentation/kline/widgets/draw_menubar.dart';
+import 'package:flexi_kline_demo/src/presentation/kline/widgets/title_with_tag.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -106,5 +107,40 @@ void main() {
   testWidgets('系统返回键退出横屏后，竖屏周期变为横屏所选', (tester) async {
     await openLandscapeAndPickDay(tester, () => tester.binding.handlePopRoute());
     await expectPortraitInterval(tester, KlineInterval.day1);
+  });
+
+  testWidgets('竖屏 AppBar 标题是「标的 + 模拟」标签', (tester) async {
+    await tester.pumpWidget(const MaterialApp(home: KlinePage()));
+    await tester.pump();
+
+    final appBar = find.descendant(of: find.byType(KlinePage), matching: find.byType(AppBar));
+    expect(find.descendant(of: appBar, matching: find.byType(TitleWithTag)), findsOneWidget);
+    expect(find.descendant(of: appBar, matching: find.text('BTC-USDT')), findsOneWidget);
+    expect(find.descendant(of: appBar, matching: find.text('模拟')), findsOneWidget);
+
+    // 让头部按钮的节流定时器走完。
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump(const Duration(seconds: 1));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('横屏 AppBar 标题也是「标的 + 模拟」标签', (tester) async {
+    await tester.pumpWidget(const MaterialApp(home: KlinePage()));
+    await tester.pump();
+    await tester.tap(find.byTooltip('横屏'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    final appBar = find.descendant(of: find.byType(KlineLandscapePage), matching: find.byType(AppBar));
+    expect(find.descendant(of: appBar, matching: find.byType(TitleWithTag)), findsOneWidget);
+    expect(find.descendant(of: appBar, matching: find.text('BTC-USDT')), findsOneWidget);
+    expect(find.descendant(of: appBar, matching: find.text('模拟')), findsOneWidget);
+
+    // 让头部按钮的节流定时器走完。
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump(const Duration(seconds: 1));
+    expect(tester.takeException(), isNull);
   });
 }

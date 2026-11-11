@@ -1,95 +1,83 @@
-import 'dart:math' as math;
-
 import 'package:fake_async/fake_async.dart';
-import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flexi_kline_demo/src/data/data_sources/mock/mock_kline_ticker.dart';
+import 'package:flexi_kline_demo/src/data/data_sources/mock/mock_price_series.dart';
 import 'package:flexi_kline_demo/src/data/models/candle_dto.dart';
 import 'package:flexi_kline_demo/src/data/models/kline_interval.dart';
-import 'package:flexi_kline_demo/src/utils/candle_time.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-CandleDto _last({required int ts, required double open, required double close, double? high, double? low}) =>
-    CandleDto(timestamp: ts, open: open, high: high ?? close, low: low ?? close, close: close, volume: 0, turnover: 0);
+/// 2026-01-01 00:14:57 UTC：离 15 分钟周期结束还有 3 秒。
+final _start = DateTime.utc(2026, 1, 1, 0, 14, 57);
+final _series = MockPriceSeries('BTCUSDT', const MockSymbolProfile(basePrice: 80000));
 
 void main() {
   group('MockKlineTicker', () {
-    test('每秒推一根未确认蜡烛，open 延续上一根（无缝衔接）', () {
-      const interval = KlineInterval.minute15;
-      final startTs = alignToInterval(DateTime.now().millisecondsSinceEpoch, interval.milliseconds);
-      final ticker = MockKlineTicker(tickInterval: const Duration(seconds: 1), random: math.Random(42));
-
+    test('每秒推一根未确认蜡烛，收盘取当前时刻价格，时间戳对齐周期起点', () {
       fakeAsync((async) {
+        final ticker = MockKlineTicker(now: () => _start.add(async.elapsed));
         final events = <CandleDto>[];
-        final sub = ticker.subscribe(interval, _last(ts: startTs, open: 83624.0, close: 84820.49)).listen(events.add);
+        final sub = ticker.subscribe(KlineInterval.minute15, _series).listen(events.add);
 
-        async.elapse(const Duration(seconds: 3));
-        async.flushMicrotasks();
+        async.elapse(const Duration(seconds: 2));
 
-        expect(events, hasLength(3));
-        for (final c in events) {
+        expect(events, hasLength(2));
+        final cycleStart = DateTime.utc(2026, 1, 1).millisecondsSinceEpoch;
+        for (final (i, c) in events.indexed) {
           expect(c.confirmed, isFalse);
-          // open 保持历史开盘价，避免与上一根产生跳空缺口。
-          expect(c.open, 83624.0);
-          expect(c.close, closeTo(84820.49, 84820.49 * 0.001));
-          // 同一周期内时间戳固定（对齐到周期边界）。
-          expect(c.timestamp, startTs);
+          expect(c.timestamp, cycleStart);
+          expect(c.open, _series.priceAt(cycleStart));
+          expect(c.close, _series.priceAt(_start.add(Duration(seconds: i + 1)).millisecondsSinceEpoch));
         }
 
-        // 取消订阅后无残留 timer。
         sub.cancel();
         async.flushMicrotasks();
         expect(async.periodicTimerCount, 0);
       });
     });
 
-    test('周期切换后新蜡烛 open 等于上一根收盘价', () {
-      final ticker = MockKlineTicker(tickInterval: const Duration(seconds: 1), random: math.Random(7));
-
+    test('跨过周期边界后开新蜡烛，开盘取新周期起点价格', () {
       fakeAsync((async) {
-        final candles = <CandleDto>[];
-        // 故意错位：首 tick 即触发周期切换。
-        final last = _last(ts: 0, open: 100.0, close: 200.0, high: 250.0, low: 50.0);
-        final sub = ticker.subscribe(KlineInterval.line, last).listen(candles.add);
+        final ticker = MockKlineTicker(now: () => _start.add(async.elapsed));
+        final events = <CandleDto>[];
+        final sub = ticker.subscribe(KlineInterval.minute15, _series).listen(events.add);
 
-        async.elapse(const Duration(seconds: 1));
-        async.flushMicrotasks();
+        async.elapse(const Duration(seconds: 4));
 
-        expect(candles, hasLength(1));
-        expect(candles.single.open, 200.0);
-        expect(candles.single.confirmed, isFalse);
-        expect(candles.single.close, closeTo(200.0, 200.0 * 0.001));
-
+        final next = DateTime.utc(2026, 1, 1, 0, 15).millisecondsSinceEpoch;
+        expect(events.last.timestamp, next);
+        expect(events.last.open, _series.priceAt(next));
         sub.cancel();
-        async.flushMicrotasks();
       });
     });
 
-    test('同一 ticker 的两次订阅互不影响：后订阅不关闭先订阅，取消一条另一条继续', () {
-      const interval = KlineInterval.minute15;
-      final startTs = alignToInterval(DateTime.now().millisecondsSinceEpoch, interval.milliseconds);
-      final ticker = MockKlineTicker(tickInterval: const Duration(seconds: 1), random: math.Random(1));
-
+    test('同一周期内最高只升、最低只降', () {
       fakeAsync((async) {
+        final ticker = MockKlineTicker(now: () => DateTime.utc(2026, 1, 1, 0, 1).add(async.elapsed));
+        final events = <CandleDto>[];
+        final sub = ticker.subscribe(KlineInterval.minute15, _series).listen(events.add);
+
+        async.elapse(const Duration(seconds: 120));
+
+        for (var i = 1; i < events.length; i++) {
+          expect(events[i].high, greaterThanOrEqualTo(events[i - 1].high));
+          expect(events[i].low, lessThanOrEqualTo(events[i - 1].low));
+        }
+        sub.cancel();
+      });
+    });
+
+    test('两条订阅在同一时刻推出同一价格，取消一条另一条继续', () {
+      fakeAsync((async) {
+        final ticker = MockKlineTicker(now: () => _start.add(async.elapsed));
         final a = <CandleDto>[];
         final b = <CandleDto>[];
-        var aDone = false;
-        final subA = ticker
-            .subscribe(interval, _last(ts: startTs, open: 100, close: 100))
-            .listen(a.add, onDone: () => aDone = true);
-        final subB = ticker.subscribe(interval, _last(ts: startTs, open: 500, close: 500)).listen(b.add);
+        final subA = ticker.subscribe(KlineInterval.minute15, _series).listen(a.add);
+        final subB = ticker.subscribe(KlineInterval.minute15, _series).listen(b.add);
 
         async.elapse(const Duration(seconds: 2));
-        async.flushMicrotasks();
-        expect(aDone, isFalse);
-        expect(a, hasLength(2));
-        expect(b, hasLength(2));
-        // 各自从自己的起点续走，不共享价格状态。
-        expect(a.last.close, closeTo(100, 100 * 0.002));
-        expect(b.last.close, closeTo(500, 500 * 0.002));
+        expect([for (final c in a) c.close], [for (final c in b) c.close]);
 
         subB.cancel();
         async.elapse(const Duration(seconds: 2));
-        async.flushMicrotasks();
         expect(a, hasLength(4));
         expect(b, hasLength(2));
         expect(async.periodicTimerCount, 1);

@@ -10,6 +10,7 @@ import '../../widgets/theme_toggle_button.dart';
 import 'core/kline_data_center_mixin.dart';
 import 'core/kline_state_base.dart';
 import 'widgets/kline_interval_bar.dart';
+import 'widgets/title_with_tag.dart';
 
 /// 横屏页退出时交回竖屏页的结果；需要回传更多数据时在这里加命名字段。
 typedef KlineLandscapeResult = ({KlineInterval interval});
@@ -117,7 +118,7 @@ class _KlineLandscapePageState extends KlineStateBase<KlineLandscapePage>
       onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(widget.label),
+          title: TitleWithTag(widget.label, tag: '模拟'),
           centerTitle: false,
           actions: [
             const ThemeToggleButton(),

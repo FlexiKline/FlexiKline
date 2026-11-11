@@ -6,52 +6,48 @@ import 'package:flexi_kline/flexi_kline.dart';
 import '../../../utils/candle_time.dart';
 import '../../models/candle_dto.dart';
 import '../../models/kline_interval.dart';
+import 'mock_price_series.dart';
 
-/// 模拟 WebSocket 实时推送：按周期节奏随机产价，最新价 confirmed=false 持续游走。
+/// 模拟 WebSocket 实时推送：每 [tickInterval] 推一次当前周期未确认的蜡烛，价格取自 [MockPriceSeries]。
 ///
-/// 每次 [subscribe] 返回一条独立的流，状态只属于这次订阅；取消订阅即停止计时，不影响其他订阅。
+/// 价格只由时间戳决定，同一时刻的多个订阅推出的收盘价相同；每次 [subscribe] 是一条独立的流，取消订阅即停止计时。
 class MockKlineTicker {
-  MockKlineTicker({
-    this.tickInterval = const Duration(seconds: 1),
-    math.Random? random,
-  }) : _random = random ?? math.Random();
+  MockKlineTicker({this.tickInterval = const Duration(seconds: 1), DateTime Function()? now})
+    : _now = now ?? DateTime.now;
 
   final Duration tickInterval;
-  final math.Random _random;
+  final DateTime Function() _now;
 
-  /// 从 [last] 无缝续走：同一周期内 open 保持不变，high/low 在 [last] 的累计值上继续取 max/min。
-  Stream<CandleDto> subscribe(KlineInterval interval, CandleDto last) {
-    var cycleStartTs = last.timestamp;
-    var open = last.open;
-    var price = last.close;
-    var high = math.max(last.high, math.max(open, price));
-    var low = math.min(last.low, math.min(open, price));
+  Stream<CandleDto> subscribe(KlineInterval interval, MockPriceSeries series) {
+    final intervalMs = interval.milliseconds;
+    var cycleStart = -1;
+    var high = 0.0;
+    var low = 0.0;
 
     Timer? timer;
     late final StreamController<CandleDto> controller;
 
     void tick() {
-      final cycleStart = alignToInterval(DateTime.now().millisecondsSinceEpoch, interval.milliseconds);
-      if (cycleStart != cycleStartTs) {
-        // 倒计时结束后的下一秒：上一根蜡烛的收盘价即新蜡烛的开盘价。
-        cycleStartTs = cycleStart;
-        open = price;
-        high = price;
-        low = price;
+      final nowMs = _now().millisecondsSinceEpoch;
+      final candle = series.candle(alignToInterval(nowMs, intervalMs), intervalMs, until: nowMs);
+      // 同一周期内最高、最低只扩不缩：采样点随时间移动，单次估算可能比之前推过的值窄。
+      if (candle.timestamp == cycleStart) {
+        high = math.max(high, candle.high);
+        low = math.min(low, candle.low);
+      } else {
+        cycleStart = candle.timestamp;
+        high = candle.high;
+        low = candle.low;
       }
-      price = _nextPrice(price);
-      high = math.max(high, price);
-      low = math.min(low, price);
-      final volume = _volume();
       controller.add(
         CandleDto(
-          timestamp: cycleStartTs,
-          open: open,
+          timestamp: candle.timestamp,
+          open: candle.open,
           high: high,
           low: low,
-          close: price,
-          volume: volume,
-          turnover: price * volume,
+          close: candle.close,
+          volume: candle.volume,
+          turnover: candle.turnover,
           confirmed: false,
         ),
       );
@@ -63,11 +59,4 @@ class MockKlineTicker {
     );
     return controller.stream;
   }
-
-  double _nextPrice(double p) {
-    final delta = (_random.nextDouble() - 0.5) * 0.001; // ±0.05%
-    return p * (1 + delta);
-  }
-
-  double _volume() => 1 + _random.nextDouble() * 5;
 }

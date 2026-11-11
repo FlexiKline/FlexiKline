@@ -60,7 +60,7 @@ class _IndexPageState extends State<IndexPage> {
           ),
           const SizedBox(height: 8),
           Text(
-            '基于 flexi_kline 框架，离线 mock 数据。',
+            '基于 flexi_kline 框架，行情为本地生成的模拟数据，非真实行情。',
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
