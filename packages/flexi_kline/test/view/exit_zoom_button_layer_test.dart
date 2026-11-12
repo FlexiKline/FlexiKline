@@ -17,7 +17,7 @@ library;
 
 import 'package:flexi_formatter/date_time.dart' show TimeUnit;
 import 'package:flexi_kline/flexi_kline.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/support.dart';
@@ -65,7 +65,7 @@ void main() {
     expect(chart.isChartZooming, isTrue, reason: '前置条件: 已进入缩放态');
 
     await tester.tap(
-      find.descendant(of: find.byType(FlexiExitZoomButton), matching: find.byType(IconButton)),
+      find.descendant(of: find.byType(FlexiExitZoomButton), matching: find.text('A')),
       warnIfMissed: false,
     );
     await tester.pump();

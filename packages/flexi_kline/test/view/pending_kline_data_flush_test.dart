@@ -17,7 +17,7 @@ library;
 
 import 'package:flexi_formatter/date_time.dart' show TimeUnit;
 import 'package:flexi_kline/flexi_kline.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/support.dart';
@@ -26,7 +26,7 @@ void main() {
   // 复现宿主的布局：监听 spec 的兄弟组件先构建，图表在另一个父组件的 build 中才挂载
   // （如横屏页的 AppBar 标题与 OrientationBuilder 里的图表）。
   Widget host(FlexiKlineController controller, {required bool showChart, required List<KlineSpec> seen}) {
-    return MaterialApp(
+    return TestApp(
       home: Column(
         children: [
           ValueListenableBuilder<KlineSpec>(

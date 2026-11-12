@@ -1,4 +1,5 @@
 import 'package:flexi_kline/flexi_kline.dart';
+import 'package:flutter/material.dart' show CircularProgressIndicator;
 import 'package:flutter/widgets.dart';
 
 import '../../../theme/app_theme.dart';
@@ -110,12 +111,28 @@ abstract class KlineStateBase<T extends StatefulWidget> extends State<T>
               : const [],
           mainBackgroundBuilder: mainBackgroundBuilder,
           mainForegroundBuilder: mainForegroundBuilder,
-          loadingBuilder: loadingBuilder,
+          loadingBuilder: loadingBuilder ?? buildLoading,
           exitZoomButtonBuilder: exitZoomButtonBuilder,
           drawToolbar: drawToolbar,
           onDoubleTap: onDoubleTap,
         );
       },
+    );
+  }
+
+  /// 默认加载指示器；页面可通过 `buildFlexiKlineWidget(loadingBuilder:)` 替换。
+  Widget buildLoading(BuildContext context, FlexiKlineController controller) {
+    final theme = controller.theme;
+    return FlexiLoading(
+      controller: controller,
+      child: SizedBox.square(
+        dimension: 26,
+        child: CircularProgressIndicator(
+          strokeWidth: 4,
+          backgroundColor: theme.tooltipBg,
+          valueColor: AlwaysStoppedAnimation<Color>(theme.textColor),
+        ),
+      ),
     );
   }
 

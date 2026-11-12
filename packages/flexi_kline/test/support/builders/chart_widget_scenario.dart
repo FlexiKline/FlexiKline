@@ -20,12 +20,13 @@ library;
 
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/gestures.dart' show DeviceGestureSettings, PointerDeviceKind, kTouchSlop;
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../doubles/fake_kline_config.dart';
 import '../doubles/test_draw_object.dart';
 import '../doubles/test_indicators.dart';
+import 'test_app.dart';
 
 /// Widget 测试默认的主图尺寸。
 const defaultChartMainSize = Size(400, 300);
@@ -122,7 +123,7 @@ Future<({FlexiKlineController chart, ScrollController scroll})> pumpChartInListV
   }
 
   await tester.pumpWidget(
-    MaterialApp(
+    TestApp(
       home: Builder(
         builder: (context) => wrapGestureSettings(
           context,

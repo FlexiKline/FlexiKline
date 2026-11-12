@@ -20,8 +20,8 @@ library;
 import 'package:flexi_formatter/date_time.dart' show TimeUnit;
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show LogicalKeyboardKey;
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/support.dart';
@@ -60,7 +60,7 @@ Future<FlexiKlineController> _pumpNonTouchChart(
   }
 
   await tester.pumpWidget(
-    MaterialApp(
+    TestApp(
       home: SizedBox(
         width: 400,
         height: 480,

@@ -18,6 +18,7 @@ library;
 export 'builders/chart_widget_scenario.dart';
 export 'builders/controller_scenario.dart';
 export 'builders/manager_scenario.dart';
+export 'builders/test_app.dart';
 export 'doubles/fake_kline_config.dart';
 export 'doubles/fake_paint_context.dart';
 export 'doubles/lifecycle_spy.dart';

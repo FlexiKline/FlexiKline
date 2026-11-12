@@ -25,7 +25,7 @@ import 'package:flexi_formatter/date_time.dart' show TimeUnit;
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flexi_kline/src/view/non_touch_gesture_owner.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/support.dart';
@@ -81,7 +81,7 @@ Future<FlexiKlineController> _pumpGridResizeChart(
   }
 
   await tester.pumpWidget(
-    MaterialApp(
+    TestApp(
       home: SizedBox(
         width: _chartWidth,
         height: _chartHeight,

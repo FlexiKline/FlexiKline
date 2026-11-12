@@ -16,7 +16,7 @@
 library;
 
 import 'package:flexi_kline/flexi_kline.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/support.dart';
@@ -26,7 +26,7 @@ void main() {
     final controller = createChartController();
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestApp(
         home: Center(
           child: SizedBox(
             width: 333,
@@ -53,7 +53,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestApp(
         home: Center(
           child: SizedBox(
             width: 360,
@@ -82,7 +82,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestApp(
         home: Center(
           child: SizedBox(
             width: 360,

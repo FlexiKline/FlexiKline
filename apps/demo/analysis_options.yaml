@@ -11,6 +11,8 @@ analyzer:
     - macos/**
     - linux/**
   errors:
+    # 示例应用不发布, 不跟随 Flutter 的 API 废弃迁移(如 material 拆包); 发布包仍报废弃.
+    deprecated_member_use: ignore
     deprecated_member_use_from_same_package: ignore
     unintended_html_in_doc_comment: ignore
 

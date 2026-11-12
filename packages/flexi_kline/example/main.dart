@@ -6,9 +6,21 @@ import 'dart:math' as math;
 
 import 'package:flexi_formatter/date_time.dart' show TimeUnit;
 import 'package:flexi_kline/flexi_kline.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
-void main() => runApp(const MaterialApp(home: KlinePage()));
+void main() {
+  runApp(
+    WidgetsApp(
+      color: const Color(0xFFFFFFFF),
+      textStyle: const TextStyle(color: Color(0xFF111111), fontSize: 14),
+      pageRouteBuilder: <T>(settings, builder) => PageRouteBuilder<T>(
+        settings: settings,
+        pageBuilder: (context, animation, secondaryAnimation) => builder(context),
+      ),
+      home: const ColoredBox(color: Color(0xFFFFFFFF), child: KlinePage()),
+    ),
+  );
+}
 
 class KlinePage extends StatefulWidget {
   const KlinePage({super.key});
@@ -43,9 +55,8 @@ class _KlinePageState extends State<KlinePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('FlexiKline')),
-      body: FlexiKlineWidget(
+    return SafeArea(
+      child: FlexiKlineWidget(
         controller: controller,
         candle: candle,
         time: time,

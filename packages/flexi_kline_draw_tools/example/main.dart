@@ -7,9 +7,21 @@ import 'dart:math' as math;
 import 'package:flexi_formatter/date_time.dart' show TimeUnit;
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flexi_kline_draw_tools/flexi_kline_draw_tools.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
-void main() => runApp(const MaterialApp(home: DrawToolsPage()));
+void main() {
+  runApp(
+    WidgetsApp(
+      color: const Color(0xFFFFFFFF),
+      textStyle: const TextStyle(color: Color(0xFF111111), fontSize: 14),
+      pageRouteBuilder: <T>(settings, builder) => PageRouteBuilder<T>(
+        settings: settings,
+        pageBuilder: (context, animation, secondaryAnimation) => builder(context),
+      ),
+      home: const ColoredBox(color: Color(0xFFFFFFFF), child: DrawToolsPage()),
+    ),
+  );
+}
 
 class DrawToolsPage extends StatefulWidget {
   const DrawToolsPage({super.key});
@@ -41,22 +53,16 @@ class _DrawToolsPageState extends State<DrawToolsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('FlexiKline draw tools')),
-      body: Column(
+    return SafeArea(
+      child: Column(
         children: [
           Wrap(
             spacing: 8,
+            runSpacing: 8,
             children: [
               for (final type in [trendLine, horizontalLine, rectangle, fibRetracement])
-                OutlinedButton(
-                  onPressed: () => controller.startDraw(type),
-                  child: Text(type.id),
-                ),
-              TextButton(
-                onPressed: controller.exitDraw,
-                child: const Text('exit'),
-              ),
+                _ToolButton(label: type.id, onTap: () => controller.startDraw(type)),
+              _ToolButton(label: 'exit', onTap: controller.exitDraw),
             ],
           ),
           Expanded(
@@ -67,6 +73,32 @@ class _DrawToolsPageState extends State<DrawToolsPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// A plain bordered button; the example does not depend on Material.
+class _ToolButton extends StatelessWidget {
+  const _ToolButton({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          border: Border.all(color: const Color(0xFF448AFF)),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          child: Text(label, style: const TextStyle(color: Color(0xFF448AFF))),
+        ),
       ),
     );
   }

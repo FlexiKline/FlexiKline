@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import '../framework/chart/indicator.dart';
 import '../framework/logger.dart';
@@ -83,7 +83,7 @@ class FlexiKlineWidget extends StatefulWidget {
   /// 与 loading 解耦, 两者独立叠加.
   final FlexiKlineWidgetBuilder? mainForegroundBuilder;
 
-  /// Loading指示器. 为null时使用内置默认实现.
+  /// Loading指示器. 为null时使用内置默认实现 [FlexiLoading].
   /// 业务可监听 controller.loadingStateListenable 自行控制.
   final FlexiKlineWidgetBuilder? loadingBuilder;
 

@@ -27,6 +27,26 @@ void main() {
   setUp(() => getIt.registerSingleton<KlineRepository>(_EmptyRepository()));
   tearDown(getIt.reset);
 
+  testWidgets('K 线数据加载中展示加载指示器, 加载结束后隐藏', (tester) async {
+    await tester.pumpWidget(const MaterialApp(home: KlinePage()));
+    await tester.pump();
+    final controller = tester.widget<FlexiKlineWidget>(find.byType(FlexiKlineWidget)).controller;
+
+    // 空仓库立即返回, 先把当前规格切回空数据, 回到加载中。
+    controller.switchKlineData(controller.klineData.spec);
+    await tester.pump();
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+    controller.stopLoading(spec: controller.klineData.spec);
+    await tester.pump();
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+
+    // 让头部按钮的节流定时器走完。
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpWidget(const SizedBox());
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('点击「绘图工具」显示绘图菜单栏, 点退出后收起', (tester) async {
     await tester.pumpWidget(const MaterialApp(home: KlinePage()));
     expect(find.byType(DrawMenubar), findsNothing);

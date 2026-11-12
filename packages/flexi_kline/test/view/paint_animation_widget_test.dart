@@ -21,7 +21,7 @@ library;
 
 import 'package:flexi_formatter/date_time.dart' show TimeUnit;
 import 'package:flexi_kline/flexi_kline.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/support.dart';
@@ -56,7 +56,7 @@ void main() {
       kline = TickerMode(enabled: tickerModeEnabled, child: kline);
     }
 
-    await tester.pumpWidget(MaterialApp(home: kline));
+    await tester.pumpWidget(TestApp(home: kline));
     await pumpUntilChart(
       tester,
       () => chart.isMounted && chart.mainChartWidth > 0,
@@ -89,7 +89,7 @@ void main() {
       addTearDown(() => disposeChart(tester, chart));
 
       await tester.pumpWidget(
-        MaterialApp(
+        TestApp(
           home: TickerMode(
             enabled: true,
             forceFrames: true,
@@ -125,7 +125,7 @@ void main() {
 
       Future<void> pumpWith(bool enabled) async {
         await tester.pumpWidget(
-          MaterialApp(
+          TestApp(
             home: TickerMode(
               enabled: enabled,
               child: SizedBox(
@@ -176,7 +176,7 @@ void main() {
 
       Future<void> pumpWithKlineUnderEnabled({required bool underEnabled}) async {
         await tester.pumpWidget(
-          MaterialApp(
+          TestApp(
             home: Stack(
               children: [
                 TickerMode(enabled: true, child: underEnabled ? kline() : const SizedBox.shrink()),

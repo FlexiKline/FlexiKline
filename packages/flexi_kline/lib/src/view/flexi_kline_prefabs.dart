@@ -15,7 +15,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import '../extension/geometry_ext.dart';
 import '../framework/configuration.dart';
@@ -294,40 +294,28 @@ class _FlexiPannableDrawToolbarState extends State<FlexiPannableDrawToolbar> {
 
 // ── Loading ──
 
-/// Loading指示器预制件.
+/// Loading容器预制件.
 ///
-/// 监听 [controller.loadingStateListenable], 在 showLoading 时展示.
+/// 监听 [controller.loadingStateListenable], 在 showLoading 时展示 [child].
+/// 默认是静态文字提示: 隐藏时 [Offstage] 内的动画仍会持续驱动帧, 需要动效时由业务传入 [child].
 class FlexiLoading extends StatelessWidget {
   const FlexiLoading({
     super.key,
     required this.controller,
+    this.child,
     this.alignment = Alignment.center,
-    this.size = 26,
-    this.strokeWidth = 4,
-    this.backgroundColor,
-    this.valueColor,
   });
 
   final FlexiKlineController controller;
 
+  /// 加载指示器. 为null时展示 `Loading…` 文字提示, 配色取 theme.tooltipBg 与 theme.tooltipTextColor.
+  final Widget? child;
+
   /// 指示器在主区内的对齐方式.
   final AlignmentGeometry alignment;
 
-  /// 指示器尺寸.
-  final double size;
-
-  /// 线宽.
-  final double strokeWidth;
-
-  /// 背景色. 为null时使用 theme.tooltipBg.
-  final Color? backgroundColor;
-
-  /// 值颜色. 为null时使用 theme.textColor.
-  final Color? valueColor;
-
   @override
   Widget build(BuildContext context) {
-    final theme = controller.theme;
     return ValueListenableBuilder(
       valueListenable: controller.loadingStateListenable,
       builder: (context, loadingState, child) {
@@ -336,18 +324,17 @@ class FlexiLoading extends StatelessWidget {
           child: child,
         );
       },
-      child: Align(
-        alignment: alignment,
-        child: SizedBox.square(
-          dimension: size,
-          child: CircularProgressIndicator(
-            strokeWidth: strokeWidth,
-            backgroundColor: backgroundColor ?? theme.tooltipBg,
-            valueColor: AlwaysStoppedAnimation<Color>(
-              valueColor ?? theme.textColor,
-            ),
-          ),
-        ),
+      child: Align(alignment: alignment, child: child ?? _buildHint()),
+    );
+  }
+
+  Widget _buildHint() {
+    final theme = controller.theme;
+    return DecoratedBox(
+      decoration: BoxDecoration(color: theme.tooltipBg, borderRadius: BorderRadius.circular(4)),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        child: Text('Loading…', style: TextStyle(color: theme.tooltipTextColor, fontSize: 12)),
       ),
     );
   }
@@ -408,6 +395,7 @@ class FlexiExitZoomButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = controller.configuration.theme;
+    final foreground = foregroundColor ?? theme.tooltipTextColor;
     return ListenableBuilder(
       listenable: Listenable.merge([
         visibleListenable,
@@ -416,21 +404,36 @@ class FlexiExitZoomButton extends StatelessWidget {
       child: Container(
         alignment: alignment,
         padding: padding,
-        child: IconButton(
-          onPressed: controller.exitChartZoom,
-          constraints: const BoxConstraints(),
-          style: IconButton.styleFrom(
-            padding: EdgeInsets.zero,
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            fixedSize: buttonSize,
-            foregroundColor: foregroundColor ?? theme.tooltipTextColor,
-            backgroundColor: backgroundColor ?? theme.tooltipBg.withAlpha(0xCC),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(borderRadius),
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: Semantics(
+            button: true,
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: controller.exitChartZoom,
+              child: SizedBox.fromSize(
+                size: buttonSize,
+                child: DecoratedBox(
+                  decoration: ShapeDecoration(
+                    color: backgroundColor ?? theme.tooltipBg.withAlpha(0xCC),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(borderRadius),
+                      side: borderSide ?? BorderSide(color: theme.gridLineColor, width: 1),
+                    ),
+                  ),
+                  child: Center(
+                    child: IconTheme.merge(
+                      data: IconThemeData(color: foreground),
+                      child: DefaultTextStyle.merge(
+                        style: TextStyle(color: foreground),
+                        child: icon ?? const Text('A', style: TextStyle(fontSize: 12)),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ),
-            side: borderSide ?? BorderSide(color: theme.gridLineColor, width: 1),
           ),
-          icon: icon ?? const Text('A', style: TextStyle(fontSize: 12)),
         ),
       ),
       builder: (context, child) {

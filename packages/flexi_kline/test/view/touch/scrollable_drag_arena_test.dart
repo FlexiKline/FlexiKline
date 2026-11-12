@@ -22,7 +22,7 @@ library;
 import 'package:flexi_formatter/date_time.dart' show TimeUnit;
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/gestures.dart' show DeviceGestureSettings, PointerDeviceKind, kLongPressTimeout, kTouchSlop;
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/support.dart';

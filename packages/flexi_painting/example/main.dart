@@ -13,11 +13,20 @@
 // limitations under the License.
 
 import 'package:flexi_painting/flexi_painting.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 void main() => runApp(
-  const MaterialApp(
-    home: Scaffold(body: Center(child: PaintingExample())),
+  WidgetsApp(
+    color: const Color(0xFFFFFFFF),
+    textStyle: const TextStyle(color: Color(0xFF000000), fontSize: 14),
+    pageRouteBuilder: <T>(settings, builder) => PageRouteBuilder<T>(
+      settings: settings,
+      pageBuilder: (context, animation, secondaryAnimation) => builder(context),
+    ),
+    home: const ColoredBox(
+      color: Color(0xFFFFFFFF),
+      child: Center(child: PaintingExample()),
+    ),
   ),
 );
 
@@ -49,8 +58,8 @@ class _PaintingExampleState extends State<PaintingExample> {
       children: [
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: const ShapeDecoration(color: Colors.indigo, shape: _bubble),
-          child: const Text('ShapeDecoration', style: TextStyle(color: Colors.white)),
+          decoration: const ShapeDecoration(color: Color(0xFF3F51B5), shape: _bubble),
+          child: const Text('ShapeDecoration', style: TextStyle(color: Color(0xFFFFFFFF))),
         ),
         const SizedBox(height: 32),
         GestureDetector(
@@ -69,7 +78,7 @@ class _LabelChart extends CustomPainter {
   final int taps;
 
   static const _style = LabelStyle(
-    text: TextStyle(color: Colors.black, fontSize: 14),
+    text: TextStyle(color: Color(0xFF000000), fontSize: 14),
     padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
     decoration: ShapeDecoration(color: Color(0xFFFFE082), shape: _bubble),
   );
