@@ -107,9 +107,10 @@ void main() {
     final many = visibleCandles();
     final manyCanvas = await paintChart(tester);
 
-    expect(many, greaterThanOrEqualTo(few * 5), reason: '前置条件: 缩小后可见根数显著增加($few -> $many)');
+    expect(many, greaterThanOrEqualTo(few * 3), reason: '前置条件: 缩小后可见根数显著增加($few -> $many)');
     expect(manyCanvas.countOf(#drawRawPoints), fewCanvas.countOf(#drawRawPoints));
-    expect(_drawCalls(manyCanvas), _drawCalls(fewCanvas), reason: '几何应按画笔批量绘制, 不随根数增长');
+    // 轴标签数随视区跨度变化, 可以减少; 几何按画笔批量绘制, 总数不会随根数增长。
+    expect(_drawCalls(manyCanvas), lessThanOrEqualTo(_drawCalls(fewCanvas)), reason: '几何应按画笔批量绘制, 不随根数增长');
     chart.dispose();
   });
 

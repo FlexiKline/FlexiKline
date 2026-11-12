@@ -1,6 +1,7 @@
 ## 2.7.2
 * Change `ScalePosition.auto` to always anchor X-axis zoom at the focal point (pinch centroid, wheel or trackpad pointer) and `middle` at the main chart center: `auto` used to pick an anchor by screen third, and `middle` followed the focal point until the latest candle left the screen.
 * Fix X-axis zoom drifting off its anchor when candle spacing is derived from the candle width.
+* Fix the zoom anchor jumping when a gesture ends at a small candle width: the derived candle spacing now rounds its parts by the live width instead of the saved one.
 * Make `position` and `focalDx` of `onChartScaleBy`/`onChartScaleTo` optional: `position` defaults to `GestureConfig.scalePosition` and `focalDx`, used only by `ScalePosition.auto`, defaults to the main chart center (Breaking Changes).
 * Make the `genMainIndicator` parameter optional like the other `genXxx` methods, so overrides keep the same signature: an override that relaxed it to optional got a garbage argument under Dart 3.12 arm64 AOT (Breaking Changes).
 

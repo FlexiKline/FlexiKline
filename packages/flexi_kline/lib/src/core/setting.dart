@@ -429,7 +429,10 @@ mixin SettingBinding on KlineBindingBase {
       return settingConfig.candleFixedSpacing!;
     }
     if (_candleSpacing != null && _candleSpacing! > 0) return _candleSpacing!;
-    _candleSpacing = candleWidth / settingConfig.spacingCandleParts;
+    // 份数按实时宽度取整: 手势进行中 [SettingConfig.candleWidth] 还是上一次落库的值, 用它会让
+    // 松手同步配置的瞬间间距突变。
+    final parts = settingConfig.candleSpacingParts.clamp(1, math.max(1, candleWidth.toInt()));
+    _candleSpacing = candleWidth / parts;
     _candleSpacing!.clamp(
       candleMinWidth,
       math.max(candleMinWidth, candleWidthHalf),

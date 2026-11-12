@@ -112,4 +112,45 @@ void main() {
     chart.onChartScaleBy(0.5, position: ScalePosition.auto);
     expect(contentAt(center), closeTo(content, 1e-6));
   });
+
+  /// 间距按宽度派生时, 手势中与松手落库后的间距必须一致: 份数取整要用实时宽度, 而不是配置里
+  /// 上一次落库的宽度, 否则从小宽度放大后松手, 间距突变而 [paintDxOffset] 不跟着调, 焦点下的
+  /// 内容就跳走了。
+  group('松手落库 (间距按宽度派生)', () {
+    /// 把宽度调到 [width] 并落库, 模拟上一轮手势已结束。
+    void settleAt(double width) {
+      chart.onChartScaleBy((width - chart.candleWidth) / chart.gestureConfig.scaleSpeed, focalDx: _focalDx);
+      chart.onChartScaleEnd();
+      expect(chart.candleWidth, closeTo(width, 1e-9), reason: '前置：起始宽度');
+      expect(chart.settingConfig.candleWidth, closeTo(width, 1e-9), reason: '前置：配置已落库');
+    }
+
+    // 缩小的用例步数要停在留白下界之前: 越过 [minPaintDxOffset] 后偏移被夹住, 漂移是边界造成的。
+    for (final (start, delta, steps) in [
+      (1.0, 0.1, 10),
+      (3.0, 0.1, 10),
+      (3.0, -0.03, 4),
+      (7.0, -0.03, 10),
+      (20.0, -0.1, 10),
+    ]) {
+      for (final history in [false, true]) {
+        testWidgets('宽度 $start 起步, 每步 $delta, history=$history: 手势中与松手后焦点下内容都不动', (tester) async {
+          await arrange(tester, history: history, fixedSpacing: false);
+          settleAt(start);
+          final content = contentAt(_focalDx);
+
+          for (var i = 0; i < steps; i++) {
+            chart.onChartScaleBy(delta, position: ScalePosition.auto, focalDx: _focalDx);
+          }
+          expect(chart.candleWidth, isNot(start), reason: '前置：宽度确实变了');
+          expect(contentAt(_focalDx), closeTo(content, 1e-6), reason: '手势进行中漂移');
+
+          final spacing = chart.candleSpacing;
+          chart.onChartScaleEnd();
+          expect(chart.candleSpacing, spacing, reason: '落库不应改变间距');
+          expect(contentAt(_focalDx), closeTo(content, 1e-6), reason: '松手后漂移');
+        });
+      }
+    }
+  });
 }
