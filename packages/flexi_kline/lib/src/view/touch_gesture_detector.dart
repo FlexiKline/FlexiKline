@@ -17,7 +17,6 @@ import 'package:flutter/widgets.dart';
 
 import '../extension/functions_ext.dart';
 import '../extension/geometry_ext.dart';
-import '../framework/chart/indicator.dart';
 import '../framework/draw/overlay.dart';
 import '../utils/algorithm_util.dart';
 import 'gesture_detector_widget.dart';
@@ -306,12 +305,6 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
     _claim(session, owner, focalPoint);
   }
 
-  /// 缓存在 session 上的锚定位置，一轮 pointer session 只解析一次。
-  ///
-  /// 每段按新落点重解析会让「双指缩放抬起一指再张开」时锚点从 middle 跳到 left。
-  ScalePosition _resolveScalePosition(_TouchSession session, double focalDx) =>
-      session.resolvedScalePosition ??= resolveScalePosition(focalDx);
-
   /// 为 [owner] 解析锚点并向业务侧认领目标，成功则写入 [_TouchSession.anchor]。
   ///
   /// 返回 false 表示锚点或目标已失效（只发生在落点族），调用方应降级为图表兜底。
@@ -350,7 +343,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
         logd('onScaleStart paintObject drag down:$down');
         stopPositionAnimation();
       case TouchGestureOwner.chartScale:
-        logd('onScaleStart scale ${_resolveScalePosition(session, origin.dx)} focal:$origin');
+        logd('onScaleStart scale focal:$origin');
       case TouchGestureOwner.chartPan:
         logd('onScaleStart pan focal:$origin');
     }
@@ -422,7 +415,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
     // 语义不同, 不要合并。抢占要跟外层可滚动容器赛跑、必须灵敏; 族内切换要稳, 过敏会让
     // 平移中途乱缩放 —— 此刻竞技场早已赢下, 没有赛跑对手。
     if (owner == TouchGestureOwner.chartPan && gestureConfig.enableScale && session.spanDelta.abs() > kScaleSlop) {
-      logd('onScaleUpdate pan > scale ${_resolveScalePosition(session, position.dx)} focal:$position');
+      logd('onScaleUpdate pan > scale focal:$position');
       session.owner = TouchGestureOwner.chartScale;
       // 平移阶段留下的平滑因子必须归位: 缩放的收尾不调 onChartPanEnd, 否则它会一直残留。
       controller.onChartPanEnd();
@@ -440,11 +433,7 @@ class _TouchGestureDetectorState extends GestureDetectorState<TouchGestureDetect
       final newScale = scaledDecelerate(details.scale);
       // 判据混口径是有意的: 原始 `details.scale` 与上一帧减速后的比例作差, 与既有手感一致。
       if ((details.scale - session.lastScale).abs() > 0.01) {
-        controller.onChartScaleBy(
-          newScale - session.lastScale,
-          position: _resolveScalePosition(session, position.dx),
-          focalDx: position.dx,
-        );
+        controller.onChartScaleBy(newScale - session.lastScale, focalDx: position.dx);
         session.lastScale = newScale;
         session.lastDrive = position;
       }
@@ -689,9 +678,6 @@ class _TouchSession {
 
   /// zoom slider 拖拽是否已正式开始（通过了最小距离检查且 onChartZoomStart 返回 true）。
   bool zoomStarted = false;
-
-  /// [ScalePosition.auto] 的解析结果，一轮 session 只解析一次。
-  ScalePosition? resolvedScalePosition;
 
   /// 是否还有活跃指针。
   ///

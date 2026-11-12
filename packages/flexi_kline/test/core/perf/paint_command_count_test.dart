@@ -102,7 +102,7 @@ void main() {
     final few = visibleCandles();
     final fewCanvas = await paintChart(tester);
 
-    chart.onChartScaleTo(0.1, position: ScalePosition.right, focalDx: 0);
+    chart.onChartScaleTo(0.1, position: ScalePosition.right);
     await paintChart(tester);
     final many = visibleCandles();
     final manyCanvas = await paintChart(tester);

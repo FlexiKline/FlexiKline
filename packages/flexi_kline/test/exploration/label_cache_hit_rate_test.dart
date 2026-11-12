@@ -177,7 +177,7 @@ void main() {
       if (i >= 0) {
         if (chart.candleWidth <= 2.2) zoomIn = true;
         if (chart.candleWidth >= 14) zoomIn = false;
-        chart.onChartScaleTo(zoomIn ? 1.02 : 0.98, position: ScalePosition.right, focalDx: 0);
+        chart.onChartScaleTo(zoomIn ? 1.02 : 0.98, position: ScalePosition.right);
       }
       paintChart(canvas);
     });

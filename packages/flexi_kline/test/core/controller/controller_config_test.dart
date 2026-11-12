@@ -414,7 +414,7 @@ void main() {
       // 一路缩到下界，逐步逼近而不是一次跳过去，确保真的踩在 clamp 上。
       // 累积比例每步 -0.03，故帧间增量恒为 -0.03。
       for (var i = 1; i <= 30; i++) {
-        controller.onChartScaleBy(-0.03, position: ScalePosition.middle, focalDx: 0);
+        controller.onChartScaleBy(-0.03, position: ScalePosition.middle);
       }
 
       expect(controller.candleWidth, greaterThan(0));
@@ -436,9 +436,9 @@ void main() {
 
       // 张开再收回同样的量：累积比例走 1.0 → 1.3 → 1.0。
       // 旧实现第二步撞上 `scale != 1.0` 守卫被整帧跳过，宽度停在放大后的值。
-      controller.onChartScaleBy(0.3, position: ScalePosition.middle, focalDx: 0);
+      controller.onChartScaleBy(0.3, position: ScalePosition.middle);
       expect(controller.candleWidth, isNot(before), reason: '前置：第一步已放大');
-      controller.onChartScaleBy(-0.3, position: ScalePosition.middle, focalDx: 0);
+      controller.onChartScaleBy(-0.3, position: ScalePosition.middle);
 
       expect(controller.candleWidth, closeTo(before, 1e-9), reason: '手指回到起点应缩回原始宽度');
     });
@@ -447,13 +447,13 @@ void main() {
       final controller = mountController(FakeFlexiKlineConfiguration());
       addTearDown(controller.dispose);
       for (var i = 0; i < 60; i++) {
-        controller.onChartScaleBy(1.0, position: ScalePosition.middle, focalDx: 0);
+        controller.onChartScaleBy(1.0, position: ScalePosition.middle);
       }
       expect(controller.candleWidth, controller.candleMaxWidth, reason: '前置：已贴上界');
 
       // 旧实现此刻累积比例仍 > 1，`scale > 1 && candleWidth >= candleMaxWidth` 直接 return，
       // 第一帧收拢被吞掉，要等累积比例跌回 1 以下才响应。
-      controller.onChartScaleBy(-0.5, position: ScalePosition.middle, focalDx: 0);
+      controller.onChartScaleBy(-0.5, position: ScalePosition.middle);
 
       expect(controller.candleWidth, lessThan(controller.candleMaxWidth));
     });
@@ -462,11 +462,11 @@ void main() {
       final controller = mountController(FakeFlexiKlineConfiguration());
       addTearDown(controller.dispose);
       for (var i = 0; i < 60; i++) {
-        controller.onChartScaleBy(1.0, position: ScalePosition.middle, focalDx: 0);
+        controller.onChartScaleBy(1.0, position: ScalePosition.middle);
       }
       final atMax = controller.candleWidth;
 
-      controller.onChartScaleBy(1.0, position: ScalePosition.middle, focalDx: 0);
+      controller.onChartScaleBy(1.0, position: ScalePosition.middle);
 
       expect(controller.candleWidth, atMax);
     });
@@ -475,10 +475,10 @@ void main() {
       final controller = mountController(FakeFlexiKlineConfiguration());
       addTearDown(controller.dispose);
 
-      controller.onChartScaleTo(100, position: ScalePosition.middle, focalDx: 0);
+      controller.onChartScaleTo(100, position: ScalePosition.middle);
       expect(controller.candleWidth, controller.candleMaxWidth);
 
-      controller.onChartScaleTo(0.0001, position: ScalePosition.middle, focalDx: 0);
+      controller.onChartScaleTo(0.0001, position: ScalePosition.middle);
       expect(controller.candleWidth, controller.candleMinWidth);
     });
   });

@@ -387,76 +387,64 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
   ///
   /// 增量口径下不需要方向短路: 已在界上还继续同向时 clamp 使宽度不变, 由下面的等值检查
   /// 拦住; 而按累积比例判方向会在「累积放大后开始收拢」的第一帧误挡反向缩放。
+  ///
+  /// [position] 缺省取 [GestureConfig.scalePosition]; [focalDx] 是缩放焦点的横坐标, 只在
+  /// [ScalePosition.auto] 时作为锚点, 缺省取主图中心。
   void onChartScaleBy(
     double scaleDelta, {
-    required ScalePosition position,
-    required double focalDx,
+    ScalePosition? position,
+    double? focalDx,
   }) {
     if (!gestureConfig.enableScale) return;
     _applyCandleWidth(
       candleWidth + scaleDelta * gestureConfig.scaleSpeed,
-      position: position,
-      focalDx: focalDx,
+      anchorDx: _scaleAnchorDx(position, focalDx),
     );
   }
 
   /// X 轴缩放: 按**单次比值倍率**调整蜡烛宽度。
   ///
   /// 输入是「本次事件的独立比值」, 每个事件自成一次完整缩放。滚轮(`exp(-dy/signalScaleFactor)`
-  /// 产出)与 Web 触控板 `PointerScaleEvent` 走这条。
+  /// 产出)与 Web 触控板 `PointerScaleEvent` 走这条。[position] 与 [focalDx] 同 [onChartScaleBy]。
   void onChartScaleTo(
     double factor, {
-    required ScalePosition position,
-    required double focalDx,
+    ScalePosition? position,
+    double? focalDx,
   }) {
     if (!gestureConfig.enableScale) return;
     _applyCandleWidth(
       candleWidth * factor,
-      position: position,
-      focalDx: focalDx,
+      anchorDx: _scaleAnchorDx(position, focalDx),
     );
   }
 
-  /// 两条缩放链共用的应用点: 夹取目标宽度, 并按锚定位置修正 [paintDxOffset]。
+  /// 缩放锚点的横坐标: 锚点下的内容在缩放前后保持不动。
+  double _scaleAnchorDx(ScalePosition? position, double? focalDx) {
+    return switch (position ?? gestureConfig.scalePosition) {
+      ScalePosition.auto => focalDx ?? mainChartRect.center.dx,
+      ScalePosition.left => mainChartLeft,
+      ScalePosition.middle => mainChartRect.center.dx,
+      // 最新蜡烛在屏内时锚定它的右缘, 右侧空白随之不变。
+      ScalePosition.right => mainChartRight + math.min(paintDxOffset, 0),
+    };
+  }
+
+  /// 两条缩放链共用的应用点: 夹取目标宽度, 并让 [anchorDx] 下的内容保持不动。
   ///
   /// 收敛成一个方法而不是让两条链各写一遍, 是为了让「界与锚定行为一致」成为结构保证。
-  void _applyCandleWidth(
-    double target, {
-    required ScalePosition position,
-    required double focalDx,
-  }) {
+  void _applyCandleWidth(double target, {required double anchorDx}) {
     final newWidth = target.clamp(candleMinWidth, candleMaxWidth);
     if (newWidth == candleWidth) return;
 
-    final scaleFactor = (newWidth + candleSpacing) / candleActualWidth;
-
-    /// 更新蜡烛宽度
+    final oldActualWidth = candleActualWidth;
     _setCandleWidth(newWidth);
+    // 间距可能按宽度派生, 比例要取更新宽度之后的实际宽度。
+    final scaleFactor = candleActualWidth / oldActualWidth;
 
-    double newDxOffset;
-    switch (position) {
-      case ScalePosition.right:
-        if (paintDxOffset <= 0) {
-          newDxOffset = paintDxOffset; // 固定右侧空白
-        } else {
-          newDxOffset = paintDxOffset * scaleFactor;
-        }
-        break;
-      case ScalePosition.left:
-        final chartWidth = mainChartWidth;
-        newDxOffset = (chartWidth + paintDxOffset) * scaleFactor - chartWidth;
-        break;
-      case ScalePosition.auto:
-      case ScalePosition.middle:
-        if (paintDxOffset <= 0) {
-          final dxRight = mainChartWidth - focalDx;
-          newDxOffset = (dxRight + paintDxOffset) * scaleFactor - dxRight;
-        } else {
-          final widthHalf = mainChartWidthHalf;
-          newDxOffset = (widthHalf + paintDxOffset) * scaleFactor - widthHalf;
-        }
-        break;
-    }
+    // [paintDxOffset] 是最新蜡烛右缘越过主图右缘的距离; 锚点到最新蜡烛右缘的距离随蜡烛
+    // 实际宽度等比伸缩, 锚点下的内容即保持不动。
+    final anchorToRight = mainChartRight - anchorDx;
+    final newDxOffset = (anchorToRight + paintDxOffset) * scaleFactor - anchorToRight;
 
     _setPaintDxOffset(newDxOffset);
 

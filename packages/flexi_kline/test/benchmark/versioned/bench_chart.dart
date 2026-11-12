@@ -165,6 +165,7 @@ FlexiKlineController createBenchChart({
   controller.setAdaptLayoutMode(width: width);
   controller.flushPendingKlineData();
   if (candleWidth != null) {
+    // right 不读 focalDx; 显式传入是为了本目录覆盖到 focalDx 必填的基线版本时也能编译。
     controller.onChartScaleTo(candleWidth / controller.candleWidth, position: ScalePosition.right, focalDx: 0);
   }
   controller.paintChart(Canvas(PictureRecorder()), controller.canvasRect.size);

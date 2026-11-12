@@ -219,14 +219,14 @@ void main() {
       await tester.pump(chartGestureSettle);
     });
 
-    /// 两段捏合: 首段质心在画布中央, 第二段质心移到左三分之一; 返回第二段前后的视口。
-    Future<({double before, double after, double width})> pinchTwoSegments(
-      WidgetTester tester, {
-      ScalePosition? position,
-    }) async {
+    /// 首段质心在画布中央, 抬起一指再落下新指后, 第二段质心移到左侧 30% 处且已在历史区。
+    /// auto 每段都锚定当前质心: 第二段缩放前后, 质心下的内容不动。
+    testWidgets('auto 缩放跨 segment 锚定当前质心', (tester) async {
       final scene = await _arrange(tester);
-      if (position != null) scene.chart.updateGestureConfig((c) => c.copyWith(scalePosition: position));
-      final canvas = scene.chart.canvasRect;
+      addTearDown(() => disposeChart(tester, scene.chart));
+      final chart = scene.chart;
+      double contentAt(double dx) => (dx - chart.indexToDx(0)) / chart.candleActualWidth;
+      final canvas = chart.canvasRect;
       final initialCenter = Offset(canvas.center.dx, _blankPosition.dy);
 
       final (first, second) = await startTwoFingers(tester, center: initialCenter);
@@ -243,45 +243,29 @@ void main() {
       await tester.pump(chartGestureFrame);
 
       final secondFocalX = canvas.left + canvas.width * 0.30;
-      final thirdX = secondFocalX * 2 - firstX;
       final third = await tester.startGesture(
-        toChartGlobal(tester, Offset(thirdX, _blankPosition.dy)),
+        toChartGlobal(tester, Offset(secondFocalX * 2 - firstX, _blankPosition.dy)),
         pointer: 3,
         kind: PointerDeviceKind.touch,
       );
       await tester.pump(chartGestureFrame);
-      final before = scene.chart.paintDxOffset;
-      final beforeWidth = scene.chart.candleWidth;
+      expect(chart.paintDxOffset, greaterThan(0), reason: '前置条件: 最新蜡烛已滑出屏幕');
+      final beforeWidth = chart.candleWidth;
+      final content = contentAt(secondFocalX);
 
-      // 张开得够多才拉得开两种锚定的差距。
+      // 两指对称收拢, 质心固定在 secondFocalX。
       for (var i = 0; i < 12; i++) {
         at += chartGestureFrame;
         await first.moveBy(_step, timeStamp: at);
         await third.moveBy(-_step, timeStamp: at);
         await tester.pump(chartGestureFrame);
       }
-      expect(scene.chart.candleWidth, greaterThan(beforeWidth), reason: '前置条件: 第二 segment 必须已缩放');
-      final result = (before: before, after: scene.chart.paintDxOffset, width: scene.chart.candleWidth);
+      expect(chart.candleWidth, isNot(beforeWidth), reason: '前置条件: 第二 segment 必须已缩放');
+      expect(contentAt(secondFocalX), closeTo(content, 1e-6), reason: '质心下的内容应保持不动');
 
       await first.up(timeStamp: at);
       await third.up(timeStamp: at + chartGestureFrame);
       await tester.pump(chartGestureSettle);
-      // 同一用例里要连跑几次, 每次收尾时卸载。
-      await disposeChart(tester, scene.chart);
-      return result;
-    }
-
-    /// 首段在中央解析为 middle; 第二段若按新质心重新解析会变成 left。用显式 middle 跑同一序列作对照:
-    /// 两者的视口必须逐值相同。
-    testWidgets('auto 缩放锚点跨 segment 保持同一解析结果', (tester) async {
-      final auto = await pinchTwoSegments(tester);
-      final middle = await pinchTwoSegments(tester, position: ScalePosition.middle);
-      final left = await pinchTwoSegments(tester, position: ScalePosition.left);
-
-      expect(auto.before, greaterThan(0), reason: '前置条件: middle 走锚定中心的分支');
-      expect((auto.before, auto.width), (middle.before, middle.width), reason: '前置条件: 两次输入序列相同');
-      expect(left.after, isNot(closeTo(middle.after, 1)), reason: '前置条件: 这组输入分得开 middle 与 left');
-      expect(auto.after, closeTo(middle.after, 1e-9), reason: '重新按新质心解析为 left 会改成锚定左边界');
     });
 
     testWidgets('惯性平移中拖动 => 立即接管, 原动画不再推进', (tester) async {

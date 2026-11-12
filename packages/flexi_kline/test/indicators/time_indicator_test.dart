@@ -82,7 +82,7 @@ void main() {
   testWidgets('蜡烛宽过标签间距时每根都有标签, 不因 step 为 0 抛异常', (tester) async {
     await mount(tester);
     chart.settingConfig = chart.settingConfig.copyWith(candleMaxWidth: 300);
-    chart.onChartScaleTo(150 / chart.candleWidth, position: ScalePosition.right, focalDx: 0);
+    chart.onChartScaleTo(150 / chart.candleWidth, position: ScalePosition.right);
     expect(chart.candleActualWidth, greaterThan(120), reason: '前置: 标签间距不足一根蜡烛');
 
     final shown = await labels(tester);

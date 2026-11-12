@@ -69,6 +69,7 @@ void main() {
       await measure(tester, controller, 'scale/$setup', (i, canvas) {
         final phase = (i % 60) / 30;
         final target = 2 + 8 * (phase <= 1 ? phase : 2 - phase);
+        // focalDx 见 bench_chart.dart 中 createBenchChart 的说明。
         controller.onChartScaleTo(target / controller.candleWidth, position: ScalePosition.right, focalDx: 0);
         paintChart(controller, canvas);
       });
@@ -108,6 +109,7 @@ void main() {
     testWidgets('load / candles $target', (tester) async {
       final controller = await mountBenchChart(tester, width: _wideCanvas);
       final width = controller.mainChartWidth / target / (1 + 1 / controller.settingConfig.spacingCandleParts);
+      // focalDx 见 bench_chart.dart 中 createBenchChart 的说明。
       controller.onChartScaleTo(width / controller.candleWidth, position: ScalePosition.right, focalDx: 0);
       paintChart(controller, Canvas(PictureRecorder()));
       expect(visibleCandles(controller), closeTo(target, target * 0.15), reason: '前置：可见根数接近目标档');

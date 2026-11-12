@@ -21,7 +21,6 @@ import 'package:flutter/widgets.dart';
 
 import '../extension/functions_ext.dart';
 import '../extension/geometry_ext.dart';
-import '../framework/chart/indicator.dart';
 import '../framework/draw/overlay.dart';
 import '../utils/algorithm_util.dart';
 import 'gesture_detector_widget.dart';
@@ -236,14 +235,14 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
   void _applyScaleStep(Offset position, double factor) {
     var session = _scaleSession;
     if (session == null) {
-      session = _ScaleSession(resolveScalePosition(position.dx));
+      session = _ScaleSession();
       _scaleSession = session;
     }
     // 每个事件重置倒计时: 快速连续滚动不会在中途被提前清理(旧实现的缺陷)。
     session.resetIdleTimer(gestureConfig.scaleSessionTimeout, _endScaleSession);
 
     // 单次比值口径: 每个 signal 事件自成一次完整缩放, 直接乘。
-    controller.onChartScaleTo(factor, position: session.position, focalDx: position.dx);
+    controller.onChartScaleTo(factor, focalDx: position.dx);
   }
 
   void _endScaleSession() {
@@ -574,7 +573,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
     if (gestureConfig.enableScale) {
       stopPositionAnimation();
       logd('onPointerPanZoomStart $event > ${event.localPosition}');
-      _trackpad = _TrackpadSession(resolveScalePosition(offset.dx));
+      _trackpad = _TrackpadSession();
     }
   }
 
@@ -603,11 +602,7 @@ class _NonTouchGestureDetectorState extends GestureDetectorState<NonTouchGesture
         session.lastRawScale = event.scale;
         final newScale = scaledDecelerate(event.scale);
         // 累积比例口径: 传帧间增量, 由 onChartScaleBy 加到蜡烛宽度上。
-        controller.onChartScaleBy(
-          newScale - session.lastScale,
-          position: session.position,
-          focalDx: event.localPosition.dx,
-        );
+        controller.onChartScaleBy(newScale - session.lastScale, focalDx: event.localPosition.dx);
         session.lastScale = newScale;
       }
     }
@@ -705,15 +700,11 @@ class _DragSession {
 
 /// 通道 S 的 X 轴 scale session。
 ///
-/// [position] 必须一轮内稳定（锚定三分区），且 [onChartScaleEnd] 要做
-/// `_setCandleWidth(sync: true)` 与 loadMore 检查。所以 session 不能取消——改的只是用
-/// **可重置 [Timer]** 替代 `Future.delayed`。
+/// [onChartScaleEnd] 要做 `_setCandleWidth(sync: true)` 与 loadMore 检查, 所以 session
+/// 不能取消, 只用**可重置 [Timer]** 延后结束。
 ///
 /// 不存缩放基准：signal 是单次比值口径，每个事件自成一次完整缩放。
 class _ScaleSession {
-  _ScaleSession(this.position);
-
-  final ScalePosition position;
   Timer? _idleTimer;
 
   void resetIdleTimer(Duration timeout, VoidCallback onTimeout) {
@@ -734,10 +725,6 @@ class _ScaleSession {
 /// 直接返回, 避免捏合时图表同时平移。session 结束时 [_trackpad] 被置 null,
 /// [pinching] 随之失效。
 class _TrackpadSession {
-  _TrackpadSession(this.position);
-
-  final ScalePosition position;
-
   /// 一旦检测到捏合即置 true, 本轮不再放行通道 D 的 pan。
   bool pinching = false;
 

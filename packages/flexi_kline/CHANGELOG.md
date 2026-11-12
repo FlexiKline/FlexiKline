@@ -1,3 +1,8 @@
+## 2.7.2
+* Change `ScalePosition.auto` to always anchor X-axis zoom at the focal point (pinch centroid, wheel or trackpad pointer) and `middle` at the main chart center: `auto` used to pick an anchor by screen third, and `middle` followed the focal point until the latest candle left the screen.
+* Fix X-axis zoom drifting off its anchor when candle spacing is derived from the candle width.
+* Make `position` and `focalDx` of `onChartScaleBy`/`onChartScaleTo` optional: `position` defaults to `GestureConfig.scalePosition` and `focalDx`, used only by `ScalePosition.auto`, defaults to the main chart center (Breaking Changes).
+
 ## 2.7.1
 * Add the `showDateMark` parameter to `moveToDateTime` so a single move can skip the date bubble; when `false` the candle indicator does not receive `didMoveToDate`.
 * Fix the `markNeedsBuild() called during build` assertion when candles arrive before `FlexiKlineWidget` mounts and an already built sibling listens to `klineSpecListenable`: such candles now merge right after the mount frame.

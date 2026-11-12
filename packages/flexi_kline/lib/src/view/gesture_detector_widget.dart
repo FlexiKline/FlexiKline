@@ -6,7 +6,6 @@ import 'package:flutter/widgets.dart';
 import '../config/gesture_config/gesture_config.dart';
 import '../config/tolerance_config/tolerance_config.dart';
 import '../constant.dart';
-import '../framework/chart/indicator.dart';
 import '../framework/draw/overlay.dart';
 import '../framework/logger.dart';
 import '../kline_controller.dart';
@@ -65,22 +64,6 @@ abstract class GestureDetectorState<T extends GestureDetectorWidget> extends Sta
     final position = _doubleTapPosition;
     _doubleTapPosition = null;
     if (position != null) widget.onDoubleTap?.call(position);
-  }
-
-  /// 解析缩放的锚定位置：[ScalePosition.auto] 时按 [dx] 所在的横向三分区就近锚定，
-  /// 已显式配置则原样返回。
-  ///
-  /// 只解析不缓存：一轮手势内能否重新解析是两端各自的策略。触摸端必须锁定，否则「双指
-  /// 缩放抬起一指再张开」时锚点会从 middle 跳到 left（见 `CONTEXT.md` 的
-  /// `Landed Gesture Ownership`）；非触摸端每个 signal 事件自成一段，不存在这个约束。
-  @protected
-  ScalePosition resolveScalePosition(double dx) {
-    final configured = gestureConfig.scalePosition;
-    if (configured != ScalePosition.auto) return configured;
-    final third = controller.canvasRect.width / 3;
-    if (dx < third) return ScalePosition.left;
-    if (dx > third + third) return ScalePosition.right;
-    return ScalePosition.middle;
   }
 
   /// 惯性平移的准入判定：够条件则返回预测的平移距离与时长，否则返回 null。

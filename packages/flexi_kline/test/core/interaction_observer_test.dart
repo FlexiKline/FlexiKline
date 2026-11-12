@@ -109,7 +109,7 @@ void main() {
     testWidgets('X 轴缩放结束上报 scale 带当前蜡烛宽度', (tester) async {
       await arrange(tester);
 
-      chart.onChartScaleBy(2.0, position: ScalePosition.middle, focalDx: 200);
+      chart.onChartScaleBy(2.0, position: ScalePosition.middle);
       chart.onChartScaleEnd();
 
       final scale = observer.ofType(FlexiKlineEventType.scale).single;
