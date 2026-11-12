@@ -100,9 +100,11 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   ///
   /// 调用前 [klineData] 已切换为新数据，其 spec 即新值；此处捕获旧 spec 供下游 diff，
   /// 先对齐 notifier 与 interval（使两者与 [klineData] 一致），再触发 [onKlineSpecChanged]。
+  /// spec 未变时直接返回：只改写最新蜡烛的推送不移动 from/to，无需广播。
   void _notifySpecChange() {
     final oldSpec = _klineSpecNotifier.value;
     final newSpec = klineData.spec;
+    if (oldSpec == newSpec) return;
     logd('_notifySpecChange $newSpec');
     _klineSpecNotifier.value = newSpec;
     _intervalNotifier.value = newSpec.interval;

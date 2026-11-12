@@ -88,7 +88,7 @@ class KlineSpec {
   }
 
   @override
-  int get hashCode => symbol.hashCode ^ interval.hashCode ^ precision.hashCode;
+  int get hashCode => Object.hash(symbol, interval, from, to, precision);
 }
 
 extension KlineSpecExt on KlineSpec {

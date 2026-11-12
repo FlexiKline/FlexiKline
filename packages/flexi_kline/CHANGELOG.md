@@ -8,6 +8,7 @@
 * Write `Point.value` to JSON as a number; reading still accepts the numeric strings saved by 2.7.x.
 * Remove the `package:flutter/material.dart` dependency from `flexi_kline`: `FlexiExitZoomButton` is built from widgets and has no Material ink or hover highlight.
 * Replace the `size`, `strokeWidth`, `backgroundColor` and `valueColor` parameters of `FlexiLoading` with an optional `child` indicator; the default is a static `Loading…` hint instead of a spinner (Breaking Changes).
+* Skip `onKlineSpecChanged` when a data merge leaves the `KlineSpec` unchanged, such as a tick that only rewrites the latest candle; `KlineSpec.hashCode` now includes `from` and `to`.
 
 ## 2.7.2
 * Change `ScalePosition.auto` to always anchor X-axis zoom at the focal point (pinch centroid, wheel or trackpad pointer) and `middle` at the main chart center: `auto` used to pick an anchor by screen third, and `middle` followed the focal point until the latest candle left the screen.

@@ -28,7 +28,7 @@ mixin KlineSpecData on BaseData {
       from: list.firstOrNull?.ts,
       to: list.lastOrNull?.ts,
     );
-    // from/to 仅更新 spec，是否通知由 StateBinding 按 key 决定
+    // from/to 仅更新 spec，是否通知由 StateBinding 比较新旧 spec 决定
   }
 
   /// 返回用于加载更多历史数据的规格（to 置空，向旧方向无限翻页）

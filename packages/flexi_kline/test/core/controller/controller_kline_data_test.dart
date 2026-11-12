@@ -38,6 +38,28 @@ List<CandleModel> _candles(int n) => List.generate(
   ),
 );
 
+CandleModel _candleAt(int timestamp) => CandleModel(
+  timestamp: timestamp,
+  open: Decimal.one,
+  high: Decimal.fromInt(2),
+  low: Decimal.zero,
+  close: Decimal.one,
+  volume: Decimal.one,
+);
+
+/// 记录每次 [onKlineSpecChanged] 收到的旧 spec。
+class _SpecChangeSpyController extends FlexiKlineController {
+  _SpecChangeSpyController() : super(configuration: FakeFlexiKlineConfiguration());
+
+  final oldSpecs = <KlineSpec>[];
+
+  @override
+  void onKlineSpecChanged(KlineSpec oldSpec) {
+    super.onKlineSpecChanged(oldSpec);
+    oldSpecs.add(oldSpec);
+  }
+}
+
 void main() {
   group('v2.2.0/FlexiKlineController/kline_data', () {
     testWidgets('mount 前切换 spec 只保留最终 Current 的 pending', (tester) async {
@@ -247,6 +269,31 @@ void main() {
       // 立即取消旧 cross，并触发 Chart 图层重绘（清屏）。
       expect(scene.controller.isCrossing, isFalse);
       expect(repaintChart.value, greaterThan(repaintBefore));
+    });
+
+    testWidgets('updateLatest 不移动 from/to 时不广播 spec 变更', (tester) async {
+      final controller = _SpecChangeSpyController();
+      final scene = ControllerScenario(controller: controller);
+      addTearDown(scene.dispose);
+      await scene.initWithData(_spec, _candles(3));
+      scene.controller.flushPendingKlineData();
+      await tester.pumpAndSettle();
+      final specBefore = scene.controller.klineSpecListenable.value;
+      controller.oldSpecs.clear();
+
+      // 改写最后一根蜡烛：ts 不变，spec 的 from/to 不变。
+      scene.controller.updateLatestKlineData(_spec, [_candleAt(1000 + 2 * 86400000)]);
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(controller.oldSpecs, isEmpty);
+      expect(scene.controller.klineSpecListenable.value, specBefore);
+
+      // 追加新蜡烛：to 前移，广播一次并带上旧 spec。
+      scene.controller.updateLatestKlineData(_spec, [_candleAt(1000 + 3 * 86400000)]);
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(controller.oldSpecs, [specBefore]);
+      expect(scene.controller.klineSpecListenable.value.to, 1000 + 3 * 86400000);
     });
   });
 
