@@ -17,6 +17,12 @@ Real-device benchmark results: [docs/benchmark](https://github.com/FlexiKline/Fl
 - **Flutter SDK**: >= 3.41.0
 - **Dart SDK**: >= 3.11.0
 
+> Since v2.8.0, the package does not import Flutter's `material.dart` or `cupertino.dart`. You can use it with Material, with `material_ui`, or with neither. It is tested on Flutter 3.41.0 (the minimum version) and 3.50.0, where those framework libraries are deprecated.
+
+## Versioning
+
+2.x is a refactoring phase: any 2.x release, patch releases included, may contain breaking changes, each marked `(Breaking Changes)` in the [CHANGELOG](CHANGELOG.md). Pin the version you have tested, for example `flexi_kline: 2.8.0`, and read the CHANGELOG before upgrading. The API is planned to stabilize in 3.0.0; from then on, releases follow semantic versioning.
+
 ## Features
 
 - **Indicator framework**: direct, computed and external indicators; calculation is decoupled from painting and testable on its own; indicators can animate.

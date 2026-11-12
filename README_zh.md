@@ -37,6 +37,8 @@ dependencies:
 
 用法、配置与指标系统见 [flexi_kline README](packages/flexi_kline/README_zh.md)；最小示例见 [example/main.dart](packages/flexi_kline/example/main.dart)。
 
+> 2.x 是重构阶段，任何 2.x 版本都可能包含破坏性变更，升级前见 [版本说明](packages/flexi_kline/README_zh.md#版本说明)。
+
 ## 性能
 
 真机 profile 模式，`flexi_kline` 2.7.0，UI 线程帧耗时 p90（括号内为占帧预算的比例）。

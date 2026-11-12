@@ -17,6 +17,12 @@ FlexiKline 是面向股票、数字货币行情的 Flutter K 线图表框架。�
 - **Flutter SDK**: >= 3.41.0
 - **Dart SDK**: >= 3.11.0
 
+> 从 v2.8.0 起，本包不再 import Flutter 的 `material.dart` 和 `cupertino.dart`。无论应用使用 Material、`material_ui`，还是都不用，都可以直接接入。已在 Flutter 3.41.0（最低支持版本）和 3.50.0 上测试通过；3.50.0 中这两个框架库已标为废弃。
+
+## 版本说明
+
+2.x 是重构阶段，任何 2.x 版本（包括补丁版本）都可能包含破坏性变更，均在 [CHANGELOG](CHANGELOG.md) 中标为 `(Breaking Changes)`。建议固定使用已验证过的版本（如 `flexi_kline: 2.8.0`），升级前先阅读 CHANGELOG。API 计划在 3.0.0 稳定，之后按语义化版本发布。
+
 ## 特性
 
 - **指标框架**：直绘、预计算、外部数据三类指标；计算与绘制解耦，可单独测试；指标支持动画。

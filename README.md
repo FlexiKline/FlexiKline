@@ -40,6 +40,8 @@ dependencies:
 
 Usage, configuration and the indicator system are documented in the [flexi_kline README](packages/flexi_kline/README.md); a minimal app is in [example/main.dart](packages/flexi_kline/example/main.dart).
 
+> 2.x is a refactoring phase and any 2.x release may contain breaking changes; see [Versioning](packages/flexi_kline/README.md#versioning) before upgrading.
+
 ## Performance
 
 Real devices, profile mode, `flexi_kline` 2.7.0: p90 of UI-thread frame time (share of frame budget in brackets).

@@ -6,6 +6,13 @@ English | [简体中文](https://github.com/FlexiKline/FlexiKline/blob/main/pack
 
 The low-level painting toolkit for custom-painted Flutter charts and widgets, with no dependency beyond Flutter: cached labels, tooltips, batched drawing and paint resource management for `CustomPainter`, geometry helpers, and shaped borders and code-drawn icons that work both in widgets and on a canvas. [flexi_kline](https://pub.dev/packages/flexi_kline) paints with it and re-exports it.
 
+## Requirements
+
+- **Flutter SDK**: >= 3.41.0
+- **Dart SDK**: >= 3.11.0
+
+> The package does not import Flutter's `material.dart` or `cupertino.dart`. You can use it with Material, with `material_ui`, or with neither. It is tested on Flutter 3.41.0 (the minimum version) and 3.50.0, where those framework libraries are deprecated.
+
 ## Features
 
 - **Shaped borders**: `BubbleBorder` (speech bubble with an arrow on any side, optional gradient border) and `GradientRoundedRectangleBorder`. Both are `ShapeBorder`s, so `ShapeDecoration`, `ClipPath` and `Material` accept them.
@@ -34,9 +41,9 @@ label.paint(
   price, // the key must fully determine the text; build is skipped on a hit
   build: () => price.toStringAsFixed(2),
   style: const LabelStyle(
-    text: TextStyle(color: Colors.black, fontSize: 12),
+    text: TextStyle(color: Color(0xFF000000), fontSize: 12),
     padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-    decoration: ShapeDecoration(color: Colors.amber, shape: BubbleBorder()),
+    decoration: ShapeDecoration(color: Color(0xFFFFC107), shape: BubbleBorder()),
   ),
   anchor: Offset(dx, dy),
   align: Alignment.bottomCenter,

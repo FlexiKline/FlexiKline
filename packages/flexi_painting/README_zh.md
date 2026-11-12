@@ -6,6 +6,13 @@
 
 Flutter 自绘图表与组件的底层绘制工具，只依赖 Flutter：给 `CustomPainter` 用的跨帧缓存标签、提示框、批量绘制与资源管理，几何工具，以及 Widget 与画布通用的异形边框和代码绘制图标。[flexi_kline](https://pub.dev/packages/flexi_kline) 基于它绘制，并重新导出它。
 
+## 版本要求
+
+- **Flutter SDK**: >= 3.41.0
+- **Dart SDK**: >= 3.11.0
+
+> 本包不 import Flutter 的 `material.dart` 和 `cupertino.dart`。无论应用使用 Material、`material_ui`，还是都不用，都可以直接接入。已在 Flutter 3.41.0（最低支持版本）和 3.50.0 上测试通过；3.50.0 中这两个框架库已标为废弃。
+
 ## 功能
 
 - **异形边框**：`BubbleBorder`（箭头可在任意一边的气泡，可选渐变边框）、`GradientRoundedRectangleBorder`。二者都是 `ShapeBorder`，可用于 `ShapeDecoration`、`ClipPath`、`Material`。
@@ -34,9 +41,9 @@ label.paint(
   price, // key 必须唯一决定文本，命中缓存时不调用 build
   build: () => price.toStringAsFixed(2),
   style: const LabelStyle(
-    text: TextStyle(color: Colors.black, fontSize: 12),
+    text: TextStyle(color: Color(0xFF000000), fontSize: 12),
     padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-    decoration: ShapeDecoration(color: Colors.amber, shape: BubbleBorder()),
+    decoration: ShapeDecoration(color: Color(0xFFFFC107), shape: BubbleBorder()),
   ),
   anchor: Offset(dx, dy),
   align: Alignment.bottomCenter,
