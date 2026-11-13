@@ -46,8 +46,10 @@ class _TooltipPainter extends SectionPainter {
       anchor: Offset(size.width / 2, 0),
       align: Alignment.topCenter,
       spacing: 12,
-      backgroundColor: c.surfaceContainerHighest,
-      radius: const BorderRadius.all(Radius.circular(4)),
+      decoration: ShapeDecoration(
+        color: c.surfaceContainerHighest,
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
+      ),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
     );
     final selected = _selected;

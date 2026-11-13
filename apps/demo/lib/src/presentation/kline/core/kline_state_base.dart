@@ -2,6 +2,7 @@ import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/material.dart' show CircularProgressIndicator;
 import 'package:flutter/widgets.dart';
 
+import '../../../config/app_kline_config.dart';
 import '../../../theme/app_theme.dart';
 
 /// K 线页面 State 公共基类：负责控制器创建销毁、应用主题切换时刷新配色与 K 线视图构建。
@@ -37,7 +38,7 @@ abstract class KlineStateBase<T extends StatefulWidget> extends State<T>
   void initState() {
     super.initState();
     _klineController = createFlexiKlineController();
-    _klineController.onCrossCustomTooltip = customTooltips;
+    _klineController.tooltipBuilder = customTooltips;
     appThemeMode.addListener(_onThemeChanged);
   }
 
@@ -51,6 +52,10 @@ abstract class KlineStateBase<T extends StatefulWidget> extends State<T>
   /// 监听全局 [appThemeMode]：页面被盖住时也刷新，返回后配色已是新主题。
   void _onThemeChanged() {
     _klineController.onThemeChanged();
+    // onThemeChanged 只重建主题派生资源, 不改配置; Tooltip 卡片的颜色在配置里, 须按新主题重新套用。
+    _klineController.updateCrossConfig(
+      (cross) => cross.copyWith(tooltipConfig: AppKlineConfig.styleTooltip(cross.tooltipConfig)),
+    );
     setState(() {});
   }
 
@@ -63,7 +68,7 @@ abstract class KlineStateBase<T extends StatefulWidget> extends State<T>
 
   /// 自定义十字线 Tooltip。子 mixin 用 `...?super.customTooltips(...)` 编排。
   @mustCallSuper
-  List<TooltipInfo>? customTooltips(FlexiCandleModel? model, {FlexiCandleModel? prev}) => null;
+  List<TooltipInfo>? customTooltips(FlexiCandleModel model, {FlexiCandleModel? prev}) => null;
 
   // ─── 指标扩展点（mixin 覆写时须先调 super）───
 

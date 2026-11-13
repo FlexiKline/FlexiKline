@@ -30,13 +30,11 @@ abstract final class AppTheme {
   static Color selectedOf(Brightness brightness) =>
       brightness == Brightness.light ? brandBlue : const Color(0xFF5C9DFF);
 
+  /// 品牌蓝派生的配色, 画布等拿不到 [BuildContext] 的地方也用它, 与 Material 层一致。
+  static ColorScheme schemeOf(Brightness brightness) =>
+      ColorScheme.fromSeed(seedColor: brandBlue, brightness: brightness);
+
   static ThemeData _base(Brightness brightness) {
-    return ThemeData(
-      useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: brandBlue,
-        brightness: brightness,
-      ),
-    );
+    return ThemeData(useMaterial3: true, colorScheme: schemeOf(brightness));
   }
 }

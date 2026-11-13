@@ -29,6 +29,18 @@ class _CrosshairPainter extends KlineSectionPainter {
   _CrosshairPainter(super.configuration, super.indicatorConfig);
 
   late final _cross = flexiKlineConfig.cross;
+
+  /// 按主题套用的 Tooltip 样式; 主题不变时复用同一实例, 卡片装饰走记忆。
+  TooltipConfig? _tooltipConfig;
+  IFlexiKlineTheme? _tooltipTheme;
+  TooltipConfig get tooltipConfig {
+    if (!identical(theme, _tooltipTheme)) {
+      _tooltipTheme = theme;
+      _tooltipConfig = AppKlineConfig.styleTooltip(_cross.tooltipConfig);
+    }
+    return _tooltipConfig!;
+  }
+
   late final _ticks = own(LabelPainter(capacity: 2));
   late final _tooltip = own(TooltipPainter());
 
@@ -89,7 +101,7 @@ class _CrosshairPainter extends KlineSectionPainter {
       bounds: bounds,
     );
 
-    final config = _cross.tooltipConfig;
+    final config = tooltipConfig;
     final up = config.style.ensure(theme.longColor);
     final onLeft = point.dx > size.width / 2;
     final card = _tooltip.paint(
@@ -104,8 +116,7 @@ class _CrosshairPainter extends KlineSectionPainter {
       anchor: onLeft ? const Offset(4, 4) : Offset(size.width - 4, 4),
       align: onLeft ? Alignment.topLeft : Alignment.topRight,
       spacing: config.spacing,
-      backgroundColor: theme.tooltipBg,
-      radius: config.radius,
+      decoration: config.toDecoration(backgroundColor: theme.tooltipBg),
       padding: config.padding,
     );
     final selected = _selected;

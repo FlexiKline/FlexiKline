@@ -11,6 +11,8 @@ AppKlineTheme get appKlineTheme =>
 abstract class AppKlineTheme implements IFlexiKlineTheme {
   const AppKlineTheme();
 
+  Brightness get brightness;
+
   @override
   Color get longColor => const Color(0xFF21B26D);
 
@@ -26,6 +28,9 @@ abstract class AppKlineTheme implements IFlexiKlineTheme {
 
 class AppKlineLightTheme extends AppKlineTheme {
   const AppKlineLightTheme();
+
+  @override
+  Brightness get brightness => Brightness.light;
 
   @override
   Color get chartBg => const Color(0xFFFBFDFF);
@@ -75,6 +80,9 @@ class AppKlineLightTheme extends AppKlineTheme {
 
 class AppKlineDarkTheme extends AppKlineTheme {
   const AppKlineDarkTheme();
+
+  @override
+  Brightness get brightness => Brightness.dark;
 
   @override
   Color get chartBg => const Color(0xFF111111);
