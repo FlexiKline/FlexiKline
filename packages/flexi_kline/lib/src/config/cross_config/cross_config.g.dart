@@ -187,7 +187,7 @@ CrossConfig _$CrossConfigFromJson(Map<String, dynamic> json) => CrossConfig(
           show: true,
           margin: EdgeInsets.only(left: 15, right: 65, top: 10),
           padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-          radius: BorderRadius.all(Radius.circular(6)),
+          borderRadius: BorderRadius.all(Radius.circular(8)),
           style: TextStyle(
             fontSize: defaultTextSize,
             overflow: TextOverflow.ellipsis,

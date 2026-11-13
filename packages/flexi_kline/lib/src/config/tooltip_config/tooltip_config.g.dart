@@ -13,13 +13,23 @@ abstract class _$TooltipConfigCWProxy {
 
   TooltipConfig padding(EdgeInsets padding);
 
-  TooltipConfig radius(BorderRadius radius);
-
   TooltipConfig spacing(double spacing);
 
   TooltipConfig hitTestMargin(double hitTestMargin);
 
   TooltipConfig style(TextStyle style);
+
+  TooltipConfig backgroundColor(Color? backgroundColor);
+
+  TooltipConfig border(BorderSide? border);
+
+  TooltipConfig borderRadius(BorderRadius? borderRadius);
+
+  TooltipConfig gradient(GradientConfig? gradient);
+
+  TooltipConfig borderGradient(GradientConfig? borderGradient);
+
+  TooltipConfig shadows(List<BoxShadow>? shadows);
 
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `TooltipConfig(...).copyWith.fieldName(value)`.
@@ -32,10 +42,15 @@ abstract class _$TooltipConfigCWProxy {
     bool show,
     EdgeInsets margin,
     EdgeInsets padding,
-    BorderRadius radius,
     double spacing,
     double hitTestMargin,
     TextStyle style,
+    Color? backgroundColor,
+    BorderSide? border,
+    BorderRadius? borderRadius,
+    GradientConfig? gradient,
+    GradientConfig? borderGradient,
+    List<BoxShadow>? shadows,
   });
 }
 
@@ -56,9 +71,6 @@ class _$TooltipConfigCWProxyImpl implements _$TooltipConfigCWProxy {
   TooltipConfig padding(EdgeInsets padding) => call(padding: padding);
 
   @override
-  TooltipConfig radius(BorderRadius radius) => call(radius: radius);
-
-  @override
   TooltipConfig spacing(double spacing) => call(spacing: spacing);
 
   @override
@@ -67,6 +79,27 @@ class _$TooltipConfigCWProxyImpl implements _$TooltipConfigCWProxy {
 
   @override
   TooltipConfig style(TextStyle style) => call(style: style);
+
+  @override
+  TooltipConfig backgroundColor(Color? backgroundColor) =>
+      call(backgroundColor: backgroundColor);
+
+  @override
+  TooltipConfig border(BorderSide? border) => call(border: border);
+
+  @override
+  TooltipConfig borderRadius(BorderRadius? borderRadius) =>
+      call(borderRadius: borderRadius);
+
+  @override
+  TooltipConfig gradient(GradientConfig? gradient) => call(gradient: gradient);
+
+  @override
+  TooltipConfig borderGradient(GradientConfig? borderGradient) =>
+      call(borderGradient: borderGradient);
+
+  @override
+  TooltipConfig shadows(List<BoxShadow>? shadows) => call(shadows: shadows);
 
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `TooltipConfig(...).copyWith.fieldName(value)`.
@@ -80,10 +113,15 @@ class _$TooltipConfigCWProxyImpl implements _$TooltipConfigCWProxy {
     Object? show = const $CopyWithPlaceholder(),
     Object? margin = const $CopyWithPlaceholder(),
     Object? padding = const $CopyWithPlaceholder(),
-    Object? radius = const $CopyWithPlaceholder(),
     Object? spacing = const $CopyWithPlaceholder(),
     Object? hitTestMargin = const $CopyWithPlaceholder(),
     Object? style = const $CopyWithPlaceholder(),
+    Object? backgroundColor = const $CopyWithPlaceholder(),
+    Object? border = const $CopyWithPlaceholder(),
+    Object? borderRadius = const $CopyWithPlaceholder(),
+    Object? gradient = const $CopyWithPlaceholder(),
+    Object? borderGradient = const $CopyWithPlaceholder(),
+    Object? shadows = const $CopyWithPlaceholder(),
   }) {
     return TooltipConfig(
       show: show == const $CopyWithPlaceholder() || show == null
@@ -98,10 +136,6 @@ class _$TooltipConfigCWProxyImpl implements _$TooltipConfigCWProxy {
           ? _value.padding
           // ignore: cast_nullable_to_non_nullable
           : padding as EdgeInsets,
-      radius: radius == const $CopyWithPlaceholder() || radius == null
-          ? _value.radius
-          // ignore: cast_nullable_to_non_nullable
-          : radius as BorderRadius,
       spacing: spacing == const $CopyWithPlaceholder() || spacing == null
           ? _value.spacing
           // ignore: cast_nullable_to_non_nullable
@@ -115,6 +149,30 @@ class _$TooltipConfigCWProxyImpl implements _$TooltipConfigCWProxy {
           ? _value.style
           // ignore: cast_nullable_to_non_nullable
           : style as TextStyle,
+      backgroundColor: backgroundColor == const $CopyWithPlaceholder()
+          ? _value.backgroundColor
+          // ignore: cast_nullable_to_non_nullable
+          : backgroundColor as Color?,
+      border: border == const $CopyWithPlaceholder()
+          ? _value.border
+          // ignore: cast_nullable_to_non_nullable
+          : border as BorderSide?,
+      borderRadius: borderRadius == const $CopyWithPlaceholder()
+          ? _value.borderRadius
+          // ignore: cast_nullable_to_non_nullable
+          : borderRadius as BorderRadius?,
+      gradient: gradient == const $CopyWithPlaceholder()
+          ? _value.gradient
+          // ignore: cast_nullable_to_non_nullable
+          : gradient as GradientConfig?,
+      borderGradient: borderGradient == const $CopyWithPlaceholder()
+          ? _value.borderGradient
+          // ignore: cast_nullable_to_non_nullable
+          : borderGradient as GradientConfig?,
+      shadows: shadows == const $CopyWithPlaceholder()
+          ? _value.shadows
+          // ignore: cast_nullable_to_non_nullable
+          : shadows as List<BoxShadow>?,
     );
   }
 }
@@ -139,23 +197,71 @@ TooltipConfig _$TooltipConfigFromJson(Map<String, dynamic> json) =>
       padding: const EdgeInsetsConverter().fromJson(
         json['padding'] as Map<String, dynamic>,
       ),
-      radius: const BorderRadiusConverter().fromJson(
-        json['radius'] as Map<String, dynamic>,
-      ),
       spacing: (json['spacing'] as num?)?.toDouble() ?? 2,
       hitTestMargin: (json['hitTestMargin'] as num?)?.toDouble() ?? 2,
       style: const TextStyleConverter().fromJson(
         json['style'] as Map<String, dynamic>,
       ),
+      backgroundColor: _$JsonConverterFromJson<String, Color>(
+        json['backgroundColor'],
+        const ColorConverter().fromJson,
+      ),
+      border: _$JsonConverterFromJson<Map<String, dynamic>, BorderSide>(
+        json['border'],
+        const BorderSideConvert().fromJson,
+      ),
+      borderRadius: _$JsonConverterFromJson<Map<String, dynamic>, BorderRadius>(
+        json['borderRadius'],
+        const BorderRadiusConverter().fromJson,
+      ),
+      gradient: json['gradient'] == null
+          ? null
+          : GradientConfig.fromJson(json['gradient'] as Map<String, dynamic>),
+      borderGradient: json['borderGradient'] == null
+          ? null
+          : GradientConfig.fromJson(
+              json['borderGradient'] as Map<String, dynamic>,
+            ),
+      shadows: (json['shadows'] as List<dynamic>?)
+          ?.map(
+            (e) =>
+                const BoxShadowConverter().fromJson(e as Map<String, dynamic>),
+          )
+          .toList(),
     );
 
-Map<String, dynamic> _$TooltipConfigToJson(TooltipConfig instance) =>
-    <String, dynamic>{
-      'show': instance.show,
-      'margin': const EdgeInsetsConverter().toJson(instance.margin),
-      'padding': const EdgeInsetsConverter().toJson(instance.padding),
-      'radius': const BorderRadiusConverter().toJson(instance.radius),
-      'spacing': instance.spacing,
-      'hitTestMargin': instance.hitTestMargin,
-      'style': const TextStyleConverter().toJson(instance.style),
-    };
+Map<String, dynamic> _$TooltipConfigToJson(
+  TooltipConfig instance,
+) => <String, dynamic>{
+  'show': instance.show,
+  'margin': const EdgeInsetsConverter().toJson(instance.margin),
+  'padding': const EdgeInsetsConverter().toJson(instance.padding),
+  'spacing': instance.spacing,
+  'hitTestMargin': instance.hitTestMargin,
+  'style': const TextStyleConverter().toJson(instance.style),
+  'backgroundColor': ?_$JsonConverterToJson<String, Color>(
+    instance.backgroundColor,
+    const ColorConverter().toJson,
+  ),
+  'border': ?_$JsonConverterToJson<Map<String, dynamic>, BorderSide>(
+    instance.border,
+    const BorderSideConvert().toJson,
+  ),
+  'borderRadius': ?_$JsonConverterToJson<Map<String, dynamic>, BorderRadius>(
+    instance.borderRadius,
+    const BorderRadiusConverter().toJson,
+  ),
+  'gradient': ?instance.gradient?.toJson(),
+  'borderGradient': ?instance.borderGradient?.toJson(),
+  'shadows': ?instance.shadows?.map(const BoxShadowConverter().toJson).toList(),
+};
+
+Value? _$JsonConverterFromJson<Json, Value>(
+  Object? json,
+  Value? Function(Json json) fromJson,
+) => json == null ? null : fromJson(json as Json);
+
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) => value == null ? null : toJson(value);

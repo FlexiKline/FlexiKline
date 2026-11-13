@@ -157,7 +157,7 @@ void main() {
     });
 
     test('动态 gradient 缺背景色时不生效；给定 colors 的 gradient 不依赖背景色', () {
-      expect(const TextAreaConfig(gradient: GradientConfig()).toLabelStyle().decoration!.gradient, isNull);
+      expect(const TextAreaConfig(gradient: GradientConfig()).toLabelStyle().decoration?.gradient, isNull);
 
       const fixed = GradientConfig(colors: [_red, _blue]);
       final decoration = const TextAreaConfig(gradient: fixed).toLabelStyle().decoration!;

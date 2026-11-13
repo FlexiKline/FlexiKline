@@ -25,6 +25,10 @@ import '../recording_canvas.dart';
 
 const _style = TextStyle(fontSize: 10, height: 1.2);
 const _padding = EdgeInsets.all(4);
+const _decoration = ShapeDecoration(
+  color: Color(0xFFF2F2F2),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
+);
 
 TooltipRow _row(String label, String value, {TextStyle? valueStyle}) =>
     (label: label, labelStyle: null, value: value, valueStyle: valueStyle);
@@ -47,6 +51,7 @@ void main() {
     Rect? bounds,
     double? minContentWidth,
     double maxContentWidth = double.infinity,
+    ShapeDecoration? decoration = _decoration,
   }) => painter.paint(
     canvas,
     rows,
@@ -57,8 +62,7 @@ void main() {
     spacing: 8,
     minContentWidth: minContentWidth,
     maxContentWidth: maxContentWidth,
-    backgroundColor: const Color(0xFFF2F2F2),
-    radius: const BorderRadius.all(Radius.circular(4)),
+    decoration: decoration,
     padding: _padding,
   );
 
@@ -160,6 +164,33 @@ void main() {
     final second = RecordingCanvas();
     paint(second, rows);
     expect(_paragraphs(second), orderedEquals(paragraphs));
+  });
+
+  test('decoration 为 null 时只画文字, 不画背景', () {
+    final canvas = RecordingCanvas();
+    paint(canvas, [_row('A', '1')], decoration: null);
+    expect(canvas.rrectBounds, isEmpty);
+    expect(_paragraphs(canvas), hasLength(2));
+  });
+
+  test('decoration 带边框与阴影时按卡片矩形绘制', () {
+    final canvas = RecordingCanvas();
+    final card = paint(
+      canvas,
+      [_row('A', '1')],
+      decoration: const ShapeDecoration(
+        color: Color(0xFFF2F2F2),
+        shadows: [BoxShadow(color: Color(0x33000000), blurRadius: 4)],
+        shape: RoundedRectangleBorder(
+          side: BorderSide(color: Color(0xFF888888)),
+          borderRadius: BorderRadius.all(Radius.circular(4)),
+        ),
+      ),
+    );
+    // 阴影与填充各一次 drawRRect, 边框一次 drawDRRect; 填充缩进半个边框宽。
+    expect(canvas.rrectBounds, hasLength(2));
+    expect(canvas.rrectBounds.last, card.bounds.deflate(0.5));
+    expect(canvas.invocations.where((i) => i.memberName == #drawDRRect), hasLength(1));
   });
 
   test('空列表不画任何东西', () {

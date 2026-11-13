@@ -37,16 +37,22 @@ final class GradientRoundedRectangleBorder extends RoundedRectangleBorder {
   }
 
   @override
-  GradientRoundedRectangleBorder copyWith({BorderSide? side, BorderRadiusGeometry? borderRadius, Gradient? gradient}) =>
-      GradientRoundedRectangleBorder(
-        side: side ?? this.side,
-        borderRadius: borderRadius ?? this.borderRadius,
-        gradient: gradient ?? this.gradient,
-      );
+  GradientRoundedRectangleBorder copyWith({
+    BorderSide? side,
+    BorderRadiusGeometry? borderRadius,
+    Gradient? gradient,
+  }) => GradientRoundedRectangleBorder(
+    side: side ?? this.side,
+    borderRadius: borderRadius ?? this.borderRadius,
+    gradient: gradient ?? this.gradient,
+  );
 
   @override
-  GradientRoundedRectangleBorder scale(double t) =>
-      GradientRoundedRectangleBorder(side: side.scale(t), borderRadius: borderRadius * t, gradient: gradient);
+  GradientRoundedRectangleBorder scale(double t) => GradientRoundedRectangleBorder(
+    side: side.scale(t),
+    borderRadius: borderRadius * t,
+    gradient: gradient,
+  );
 
   @override
   bool operator ==(Object other) =>
@@ -58,4 +64,28 @@ final class GradientRoundedRectangleBorder extends RoundedRectangleBorder {
 
   @override
   int get hashCode => Object.hash(side, borderRadius, gradient);
+}
+
+/// 合成圆角矩形的背景、边框与阴影; 全部为空时返回 null。
+///
+/// [gradient] 优先于 [color]。[borderGradient] 只在 [border] 非空时生效, 此时边框用 [GradientRoundedRectangleBorder]。
+ShapeDecoration? roundedShapeDecoration({
+  Color? color,
+  BorderSide? border,
+  BorderRadius? borderRadius,
+  Gradient? gradient,
+  Gradient? borderGradient,
+  List<BoxShadow>? shadows,
+}) {
+  if (color == null && border == null && borderRadius == null && gradient == null && shadows == null) return null;
+  final radius = borderRadius ?? BorderRadius.zero;
+  return ShapeDecoration(
+    // ShapeDecoration 断言 color 与 gradient 不能同时非空。
+    color: gradient == null ? color : null,
+    gradient: gradient,
+    shadows: shadows,
+    shape: border != null && borderGradient != null
+        ? GradientRoundedRectangleBorder(side: border, borderRadius: radius, gradient: borderGradient)
+        : RoundedRectangleBorder(side: border ?? BorderSide.none, borderRadius: radius),
+  );
 }

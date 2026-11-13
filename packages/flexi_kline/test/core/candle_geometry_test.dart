@@ -132,10 +132,10 @@ void main() {
   });
 
   group('cross tooltip', () {
-    testWidgets('onCrossCustomTooltip 的 prev 是更旧的前一根', (tester) async {
+    testWidgets('tooltipBuilder 的 prev 是更旧的前一根', (tester) async {
       await arrange(tester);
       FlexiCandleModel? got, gotPrev;
-      chart.onCrossCustomTooltip = (model, {prev}) {
+      chart.tooltipBuilder = (model, {prev}) {
         got = model;
         gotPrev = prev;
         return null;

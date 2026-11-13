@@ -80,4 +80,32 @@ void main() {
       );
     });
   });
+
+  group('roundedShapeDecoration', () {
+    const red = Color(0xFFFF0000);
+    const gradient = LinearGradient(colors: [Color(0xFF00FF00), Color(0xFF0000FF)]);
+    const side = BorderSide(color: red);
+
+    test('全部为空时返回 null', () {
+      expect(roundedShapeDecoration(), isNull);
+    });
+
+    test('渐变优先于背景色', () {
+      final decoration = roundedShapeDecoration(color: red, gradient: gradient)!;
+      expect(decoration.color, isNull);
+      expect(decoration.gradient, gradient);
+    });
+
+    test('有边框和边框渐变时用 GradientRoundedRectangleBorder, 否则用 RoundedRectangleBorder', () {
+      const radius = BorderRadius.all(Radius.circular(6));
+      final gradientBorder = roundedShapeDecoration(border: side, borderRadius: radius, borderGradient: gradient)!;
+      expect(
+        gradientBorder.shape,
+        const GradientRoundedRectangleBorder(side: side, borderRadius: radius, gradient: gradient),
+      );
+
+      final noBorder = roundedShapeDecoration(color: red, borderGradient: gradient)!;
+      expect(noBorder.shape, const RoundedRectangleBorder());
+    });
+  });
 }

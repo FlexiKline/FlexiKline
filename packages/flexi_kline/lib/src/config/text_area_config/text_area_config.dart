@@ -133,21 +133,6 @@ extension TextAreaConfigLabel on TextAreaConfig {
   LabelStyle _resolveLabelStyle(Color? textColor, Color? backgroundColor, Color? borderColor) {
     final bg = this.backgroundColor.or(backgroundColor);
     final side = border.ensure(borderColor);
-    final gradient = this.gradient;
-    // colors 已给定的渐变不依赖背景色。
-    final resolvedGradient = gradient == null || (bg == null && gradient.isDynamic)
-        ? null
-        : gradient.createGradient(baseColor: bg ?? transparent);
-    final radius = borderRadius ?? BorderRadius.zero;
-    final borderGradient = this.borderGradient;
-    final shape = side != null && borderGradient != null
-        ? GradientRoundedRectangleBorder(
-            side: side,
-            borderRadius: radius,
-            gradient: borderGradient.createGradient(baseColor: side.color),
-          )
-        : RoundedRectangleBorder(side: side ?? BorderSide.none, borderRadius: radius);
-    final hasDecoration = bg != null || side != null || borderRadius != null || gradient != null || shadows != null;
     return LabelStyle(
       text: style.ensure(textColor),
       textAlign: textAlign,
@@ -157,15 +142,17 @@ extension TextAreaConfigLabel on TextAreaConfig {
       // 旧 textWidth 只作排版上限, 并入 maxWidth。
       maxWidth: math.min(textWidth ?? double.infinity, maxWidth ?? double.infinity),
       padding: padding ?? EdgeInsets.zero,
-      decoration: !hasDecoration
-          ? null
-          : ShapeDecoration(
-              // ShapeDecoration 断言 color 与 gradient 不能同时非空。
-              color: gradient == null ? bg : null,
-              gradient: resolvedGradient,
-              shadows: shadows,
-              shape: shape,
-            ),
+      decoration: roundedShapeDecoration(
+        color: bg,
+        border: side,
+        borderRadius: borderRadius,
+        // 动态渐变以背景色为基色, 没有背景色时不画; colors 已给定的渐变不依赖背景色。
+        gradient: bg == null && gradient?.isDynamic == true
+            ? null
+            : gradient?.createGradient(baseColor: bg ?? transparent),
+        borderGradient: side == null ? null : borderGradient?.createGradient(baseColor: side.color),
+        shadows: shadows,
+      ),
     );
   }
 }

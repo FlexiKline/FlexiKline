@@ -42,13 +42,10 @@ final class TooltipPainter implements PaintResource {
   LabelStyle? _labelStyle;
   LabelStyle? _valueStyle;
 
-  Color? _background;
-  BorderRadius? _radius;
-  ShapeDecoration? _shape;
-
   /// 画卡片, 返回卡片矩形(含 padding)与各行矩形(横向撑满卡片)。
   ///
   /// [minContentWidth] / [maxContentWidth] 指内容区宽度, 不含 [padding]; 超出 [maxContentWidth] 时只压缩 value 列。
+  /// [decoration] 是卡片的背景与边框, 跨帧传同一实例时复用其 BoxPainter; 为 null 时不画。
   ({Rect bounds, List<Rect> rows}) paint(
     Canvas canvas,
     List<TooltipRow> infos, {
@@ -59,8 +56,7 @@ final class TooltipPainter implements PaintResource {
     double spacing = 0,
     double? minContentWidth,
     double maxContentWidth = double.infinity,
-    Color? backgroundColor,
-    BorderRadius radius = BorderRadius.zero,
+    ShapeDecoration? decoration,
     EdgeInsets padding = EdgeInsets.zero,
   }) {
     if (infos.isEmpty) return (bounds: Rect.zero, rows: const <Rect>[]);
@@ -97,17 +93,7 @@ final class TooltipPainter implements PaintResource {
     }
     final card = align.place(Size(contentWidth + padding.horizontal, contentHeight + padding.vertical), anchor, bounds);
 
-    if (backgroundColor != _background || radius != _radius) {
-      _background = backgroundColor;
-      _radius = radius;
-      _shape = backgroundColor == null || backgroundColor.a == 0
-          ? null
-          : ShapeDecoration(
-              color: backgroundColor,
-              shape: RoundedRectangleBorder(borderRadius: radius),
-            );
-    }
-    _decoration.paint(canvas, _shape, card, anchor);
+    _decoration.paint(canvas, decoration, card, anchor);
 
     final rows = <Rect>[];
     var top = card.top + padding.top;

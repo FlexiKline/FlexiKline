@@ -14,24 +14,10 @@
 
 part of 'core.dart';
 
-/// 定制TooltipInfoList
+/// 生成十字线所指蜡烛 [current] 的 Tooltip 内容, [prev] 是它的前一根。
 ///
-/// [current] 当前Cross选中的CandleMode数据.
-///   如果为null, 说明当前Cross线已取消.
-/// [prev] 前一个CandleMode数据
-/// 1. 如果返回null, 则尝试用 [OnCrossI18nTooltipLabels] 继续定制.
-/// 2. 如果返回const [], 则不会再展示Tooltip信息.
-typedef OnCrossCustomTooltipCallback =
-    List<TooltipInfo>? Function(
-      FlexiCandleModel? current, {
-      FlexiCandleModel? prev,
-    });
-
-/// 定制TooltipLabels国际化
-///
-/// 1. 如果返回null, 则使用默认[defaultTooltipLabels] 生成TooltipInfoList
-/// 2. 如果返回const {}, 则不会再展示Tooltip信息
-typedef OnCrossI18nTooltipLabels = Map<TooltipLabel, String>? Function();
+/// 返回 null 时用 [defaultTooltipLabels] 生成; 返回空列表时不画 Tooltip。
+typedef TooltipBuilder = List<TooltipInfo>? Function(FlexiCandleModel current, {FlexiCandleModel? prev});
 
 /// 负责Cross图层的绘制
 ///
@@ -126,7 +112,6 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
     if (!crossConfig.enable || klineData.isEmpty) return false;
     if (isCrossing) {
       requestCancelCross();
-      onCrossCustomTooltip?.call(null);
       dispatchInteractionEvent(FlexiKlineEventType.cross, const {'active': false});
       return false;
     }
@@ -243,31 +228,10 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
     final prev = klineData.get(index - 1);
     if (model == null) return;
 
-    /// 准备数据
-    // 1. 使用定制接口生成TooltipInfoList.
-    List<TooltipInfo>? tooltipInfoList;
-    if (onCrossCustomTooltip != null) {
-      tooltipInfoList = onCrossCustomTooltip!(model, prev: prev);
-    }
-
-    if (tooltipInfoList == null) {
-      Map<TooltipLabel, String>? tooltipLabels;
-      // 2. 使用定制多语言TooltipLabels生成TooltipInfoList
-      if (onCrossI18nTooltipLabels != null) {
-        tooltipLabels = onCrossI18nTooltipLabels!.call();
-      }
-      // 3. 使用FlexiKline内置(默认En)的Labels生成TooltipInfoList
-      tooltipLabels ??= defaultTooltipLabels;
-
-      tooltipInfoList = generateTooltipInfoListByLabels(
-        tooltipLabels,
-        model: model,
-        pre: prev,
-      );
-    }
-
-    if (tooltipInfoList.isEmpty) return;
-    final list = tooltipInfoList;
+    final list =
+        tooltipBuilder?.call(model, prev: prev) ??
+        generateTooltipInfoListByLabels(defaultTooltipLabels, model: model, prev: prev);
+    if (list.isEmpty) return;
 
     /// 开始绘制
     final double top = tooltipConfig.margin.top + mainPadding.top;
@@ -297,8 +261,7 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
       spacing: tooltipConfig.spacing,
       minContentWidth: _tooltipStableContentWidth,
       maxContentWidth: maxContentWidth,
-      backgroundColor: theme.tooltipBg,
-      radius: tooltipConfig.radius,
+      decoration: tooltipConfig.toDecoration(backgroundColor: theme.tooltipBg),
       padding: tooltipConfig.padding,
     );
     for (int index = 0; index < list.length; index++) {
@@ -314,20 +277,16 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
     );
   }
 
-  /// Tooltip定制回调
-  /// 当未实现此接口或定制返回null: 后续将触发[onCrossI18nTooltipLabels]接口实现.
-  /// 当定制返回[]空数组时: 说明由用户自行在页面自由定制.
-  OnCrossCustomTooltipCallback? onCrossCustomTooltip;
-
-  /// TooltipLabels多语言回调
-  /// 当未实现此接口或定制返回为null: 将使用[defaultTooltipLabels]默认英文Tooltip.
-  OnCrossI18nTooltipLabels? onCrossI18nTooltipLabels;
+  /// Tooltip 的内容来源; 为 null 时用 [defaultTooltipLabels] 生成。
+  ///
+  /// 多语言文案可在 builder 里调用 [generateTooltipInfoListByLabels]。
+  TooltipBuilder? tooltipBuilder;
 
   /// 根据TooltipLabels生成TooltipInfoList.
   List<TooltipInfo> generateTooltipInfoListByLabels(
     Map<TooltipLabel, String> tooltipLabels, {
     required FlexiCandleModel model,
-    FlexiCandleModel? pre,
+    FlexiCandleModel? prev,
   }) {
     if (tooltipLabels.isEmpty) return const [];
     final p = klineData.precision;
@@ -372,9 +331,9 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
           valueStyle = getValueStyle(model.change.sign);
           break;
         case TooltipLabel.range:
-          if (pre != null) {
-            value = formatPercentage(model.rangeRate(pre).d, precision: 2);
-            valueStyle = getValueStyle(model.rangeRate(pre));
+          if (prev != null) {
+            value = formatPercentage(model.rangeRate(prev).d, precision: 2);
+            valueStyle = getValueStyle(model.rangeRate(prev));
           } else {
             value = formatPrice(model.range.d, precision: p, cutInvalidZero: false);
             valueStyle = getValueStyle(model.range.sign);

@@ -85,20 +85,12 @@ extension BubbleConfigLabel on BubbleConfig {
   LabelStyle _derive(LabelStyle source, AxisDirection side) {
     final decoration = source.decoration;
     if (decoration == null) return source;
-    final shape = decoration.shape as RoundedRectangleBorder;
     return source.copyWith(
-      decoration: ShapeDecoration(
-        color: decoration.color,
-        gradient: decoration.gradient,
-        shadows: decoration.shadows,
-        shape: BubbleBorder(
-          side: shape.side,
-          borderRadius: shape.borderRadius.resolve(TextDirection.ltr),
-          direction: flipAxisDirection(side),
-          arrowSize: arrowSize,
-          arrowRadius: arrowRadius,
-          gradient: shape is GradientRoundedRectangleBorder ? shape.gradient : null,
-        ),
+      decoration: bubbleShapeDecoration(
+        decoration,
+        direction: flipAxisDirection(side),
+        arrowSize: arrowSize,
+        arrowRadius: arrowRadius,
       ),
     );
   }

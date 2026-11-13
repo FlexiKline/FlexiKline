@@ -72,7 +72,7 @@ class CrossConfig {
         horizontal: 8,
         vertical: 8,
       ),
-      radius: BorderRadius.all(Radius.circular(6)),
+      borderRadius: BorderRadius.all(Radius.circular(8)),
       // tooltip 文本设置
       style: TextStyle(
         fontSize: defaultTextSize,
