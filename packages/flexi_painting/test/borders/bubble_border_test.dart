@@ -401,46 +401,4 @@ void main() {
       expect(a == a.scale(2), isFalse);
     });
   });
-
-  group('bubbleShapeDecoration', () {
-    const side = BorderSide(color: Color(0xFFFF0000));
-    const radius = BorderRadius.all(Radius.circular(4));
-    const shadows = [BoxShadow(color: Color(0x33000000), blurRadius: 4)];
-    const gradient = LinearGradient(colors: [Color(0xFF00FF00), Color(0xFF0000FF)]);
-
-    test('保留填充、阴影、描边与圆角, 箭头指向给定方向', () {
-      final bubble = bubbleShapeDecoration(
-        const ShapeDecoration(
-          color: Color(0xFFF2F2F2),
-          shadows: shadows,
-          shape: RoundedRectangleBorder(side: side, borderRadius: radius),
-        ),
-        direction: AxisDirection.left,
-        arrowSize: const Size(8, 4),
-        arrowRadius: 1,
-      );
-      expect(bubble.color, const Color(0xFFF2F2F2));
-      expect(bubble.shadows, shadows);
-      expect(
-        bubble.shape,
-        const BubbleBorder(
-          side: side,
-          borderRadius: radius,
-          direction: AxisDirection.left,
-          arrowSize: Size(8, 4),
-          arrowRadius: 1,
-        ),
-      );
-    });
-
-    test('渐变描边带到气泡描边上', () {
-      final bubble = bubbleShapeDecoration(
-        const ShapeDecoration(
-          shape: GradientRoundedRectangleBorder(side: side, borderRadius: radius, gradient: gradient),
-        ),
-        direction: AxisDirection.down,
-      );
-      expect((bubble.shape as BubbleBorder).gradient, gradient);
-    });
-  });
 }

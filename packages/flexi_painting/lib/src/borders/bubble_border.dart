@@ -18,7 +18,6 @@ import 'package:flutter/painting.dart';
 
 import '../geometry/path_corner.dart';
 import 'anchored_border.dart';
-import 'gradient_rounded_rectangle_border.dart';
 
 /// 带箭头的圆角矩形。路径一次成型, 不用 Path.combine(union): union 的接缝会被描边画出来。
 ///
@@ -235,29 +234,4 @@ final class BubbleBorder extends AnchoredBorder {
 
   @override
   int get hashCode => Object.hash(side, borderRadius, direction, arrowSize, arrowRadius, gradient, arrow);
-}
-
-/// 把圆角矩形装饰换成箭头指向 [direction] 的气泡, 保留填充、渐变、阴影与描边(含 [GradientRoundedRectangleBorder] 的渐变)。
-///
-/// [decoration] 的形状须是 [RoundedRectangleBorder], 如 [roundedShapeDecoration] 的结果。
-ShapeDecoration bubbleShapeDecoration(
-  ShapeDecoration decoration, {
-  required AxisDirection direction,
-  Size arrowSize = const Size(10, 6),
-  double arrowRadius = 0,
-}) {
-  final shape = decoration.shape as RoundedRectangleBorder;
-  return ShapeDecoration(
-    color: decoration.color,
-    gradient: decoration.gradient,
-    shadows: decoration.shadows,
-    shape: BubbleBorder(
-      side: shape.side,
-      borderRadius: shape.borderRadius.resolve(TextDirection.ltr),
-      direction: direction,
-      arrowSize: arrowSize,
-      arrowRadius: arrowRadius,
-      gradient: shape is GradientRoundedRectangleBorder ? shape.gradient : null,
-    ),
-  );
 }

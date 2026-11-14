@@ -85,12 +85,20 @@ extension BubbleConfigLabel on BubbleConfig {
   LabelStyle _derive(LabelStyle source, AxisDirection side) {
     final decoration = source.decoration;
     if (decoration == null) return source;
+    // [text] 的装饰只由 roundedShapeDecoration 生成, 形状必为圆角矩形; 这里仅做类型收窄。
+    final shape = decoration.shape;
+    if (shape is! RoundedRectangleBorder) return source;
     return source.copyWith(
       decoration: bubbleShapeDecoration(
-        decoration,
         direction: flipAxisDirection(side),
         arrowSize: arrowSize,
         arrowRadius: arrowRadius,
+        color: decoration.color,
+        gradient: decoration.gradient,
+        shadows: decoration.shadows,
+        side: shape.side,
+        borderRadius: shape.borderRadius.resolve(TextDirection.ltr),
+        borderGradient: shape is GradientRoundedRectangleBorder ? shape.gradient : null,
       ),
     );
   }

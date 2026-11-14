@@ -20,6 +20,7 @@ library;
 export 'src/borders/anchored_border.dart';
 export 'src/borders/bubble_border.dart';
 export 'src/borders/gradient_rounded_rectangle_border.dart';
+export 'src/borders/shape_decoration.dart';
 export 'src/foundation/paint_resource.dart';
 export 'src/foundation/paint_resource_owner.dart';
 export 'src/geometry/path_corner.dart' show PathCorner;
