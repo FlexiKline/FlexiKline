@@ -32,6 +32,7 @@ class TestCandleIndicator extends CandleBaseIndicator {
     super.height = 300,
     super.horizontalGrid,
     super.verticalGrid,
+    super.yAxisSide = AxisDirection.right,
     this.chartType = FlexiChartType.barSolid,
     this.hideMainIndicatorsInLineChartMode = false,
     this.visibleMinMaxFromData = false,

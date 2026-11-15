@@ -73,4 +73,89 @@ void main() {
     expect(chart.isChartZooming, isFalse);
     expect(foregroundTaps, 0);
   });
+
+  /// 从滑竿中心按下并拖动, 进入缩放态。
+  Future<void> enterZoom(WidgetTester tester, FlexiKlineController chart) async {
+    chart.updateGestureConfig((config) => config.copyWith(enableZoom: true));
+    final from = chart.chartZoomSlideBarRect.center;
+    expect(chart.chartZoomSlideBarRect.isEmpty, isFalse, reason: '前置条件: 滑竿已绘制');
+    expect(chart.onChartZoomStart(from), isTrue);
+    chart.onChartZoomUpdate(from.dy - 60);
+    chart.onChartZoomEnd();
+    await tester.pump();
+  }
+
+  Container buttonContainer(WidgetTester tester) {
+    return tester.widget<Container>(
+      find.descendant(of: find.byType(FlexiExitZoomButton), matching: find.byType(Container)).first,
+    );
+  }
+
+  testWidgets('未指定 alignment 与 padding: 滑竿在左侧时贴左下, 水平居中于滑竿, 底部与水平间距相同', (tester) async {
+    final scene = await pumpChartInListView(
+      tester,
+      spec: _spec,
+      candles: _candles(),
+      candle: TestCandleIndicator(visibleMinMaxFromData: true, yAxisSide: AxisDirection.left),
+    );
+    final chart = scene.chart;
+    addTearDown(() => disposeChart(tester, chart));
+
+    await enterZoom(tester, chart);
+
+    // 按钮默认尺寸为 20x20, 居中留白由滑竿实测宽度换算。
+    final container = buttonContainer(tester);
+    final slideBar = chart.chartZoomSlideBarRect;
+    expect(container.alignment, AlignmentDirectional.bottomStart);
+    expect(container.padding, EdgeInsets.all((slideBar.width - 20) / 2));
+  });
+
+  testWidgets('指定 padding 未指定 alignment: 滑竿在左侧时贴左下, padding 原样使用', (tester) async {
+    final scene = await pumpChartInListView(
+      tester,
+      spec: _spec,
+      candles: _candles(),
+      candle: TestCandleIndicator(visibleMinMaxFromData: true, yAxisSide: AxisDirection.left),
+      // 前景层先于默认按钮挂入 Stack, 所以 first 取到的是这里传入 padding 的按钮。
+      mainForegroundBuilder: (context, controller) => FlexiExitZoomButton(
+        controller: controller,
+        padding: const EdgeInsets.all(12),
+      ),
+    );
+    final chart = scene.chart;
+    addTearDown(() => disposeChart(tester, chart));
+
+    await enterZoom(tester, chart);
+
+    final container = tester.widget<Container>(
+      find.descendant(of: find.byType(FlexiExitZoomButton).first, matching: find.byType(Container)).first,
+    );
+    expect(container.alignment, AlignmentDirectional.bottomStart);
+    expect(container.padding, const EdgeInsets.all(12));
+  });
+
+  testWidgets('指定 alignment 与 padding 时, 不论滑竿在哪一侧都按指定值', (tester) async {
+    final scene = await pumpChartInListView(
+      tester,
+      spec: _spec,
+      candles: _candles(),
+      candle: TestCandleIndicator(visibleMinMaxFromData: true, yAxisSide: AxisDirection.left),
+      // 前景层先于默认按钮挂入 Stack, 所以 first 取到的是这里显式指定的按钮。
+      mainForegroundBuilder: (context, controller) => FlexiExitZoomButton(
+        controller: controller,
+        alignment: Alignment.topLeft,
+        padding: const EdgeInsets.all(3),
+      ),
+    );
+    final chart = scene.chart;
+    addTearDown(() => disposeChart(tester, chart));
+
+    await enterZoom(tester, chart);
+
+    final container = tester.widget<Container>(
+      find.descendant(of: find.byType(FlexiExitZoomButton).first, matching: find.byType(Container)).first,
+    );
+    expect(container.alignment, Alignment.topLeft);
+    expect(container.padding, const EdgeInsets.all(3));
+  });
 }

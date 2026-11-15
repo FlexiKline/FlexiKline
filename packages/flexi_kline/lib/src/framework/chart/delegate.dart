@@ -366,6 +366,9 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
     return grid?.dys ?? const [];
   }
 
+  /// Y 轴刻度所在的一侧, 编排层据此定 zoom 滑竿热区的位置。无蜡烛对象时取右侧。
+  AxisDirection get yAxisSide => _candlePaintObject?.yAxisSide ?? AxisDirection.right;
+
   /// 委托子对象绘制加载态占位内容，与 [doPaintOverlay] 同形。
   ///
   /// 主区容器自己不画东西（[MainPaintObject.paint] 为空），所以只遍历、不调自身的
@@ -413,7 +416,12 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
     // 自行绘制刻度文本的子类覆写 `PaintGridTicksMixin.paintYAxisTicks` 并返回实测最大宽度即可。
     final candle = _candlePaintObject;
     if (candle == null || dys.isEmpty || !settingConfig.showYAxisTick) return null;
-    return candle.paintYAxisTicks(canvas, dys: dys, precision: klineData.precision);
+    return candle.paintYAxisTicks(
+      canvas,
+      dys: dys,
+      precision: klineData.precision,
+      yAxisSide: candle.yAxisSide,
+    );
   }
 
   void doPaintOverlay(Canvas canvas, Size size) {

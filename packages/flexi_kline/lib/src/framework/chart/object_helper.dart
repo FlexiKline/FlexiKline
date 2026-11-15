@@ -455,6 +455,9 @@ mixin PaintGridTicksMixin<T extends Indicator> on PaintObject<T> {
   /// [showTopTick] / [showBottomTick] 控制是否绘制落在 [drawableRect] 顶/底边的刻度文本。
   /// 边框上的文本由 [drawableRect] 夹取推入可见区。
   ///
+  /// [yAxisSide] 只接受 left 与 right: 右侧刻度贴 [chartRect] 右边缘; 左侧刻度贴 [drawableRect]
+  /// 左边缘, 落在 padding.left 留白内。
+  ///
   /// 返回宽度供编排层设定 zoom 滑竿热区。
   @protected
   double paintYAxisTicks(
@@ -463,12 +466,15 @@ mixin PaintGridTicksMixin<T extends Indicator> on PaintObject<T> {
     required int precision,
     bool showTopTick = false,
     bool showBottomTick = true,
+    AxisDirection yAxisSide = AxisDirection.right,
   }) {
     if (minMax.isZero) return 0;
 
-    final dx = chartRect.right;
-    final style = defTicksTextConfig.toLabelStyle(textColor: theme.ticksTextColor);
+    final isLeft = yAxisSide == AxisDirection.left;
     final rect = drawableRect;
+    final dx = isLeft ? rect.left : chartRect.right;
+    final align = isLeft ? Alignment.bottomLeft : Alignment.bottomRight;
+    final style = defTicksTextConfig.toLabelStyle(textColor: theme.ticksTextColor);
     double maxWidth = 0;
     for (final dy in dys) {
       if (!showTopTick && dy == rect.top) continue;
@@ -484,7 +490,7 @@ mixin PaintGridTicksMixin<T extends Indicator> on PaintObject<T> {
         build: () => formatTicksValue(value, precision: precision),
         style: style,
         anchor: Offset(dx, dy),
-        align: Alignment.bottomRight,
+        align: align,
         bounds: rect,
       );
       if (label.width > maxWidth) maxWidth = label.width;
@@ -508,7 +514,7 @@ mixin PaintGridTicksMixin<T extends Indicator> on PaintObject<T> {
 mixin PaintYAxisTicksOnCrossMixin<T extends Indicator> on PaintObject<T> {
   late final _crossTick = own(LabelPainter());
 
-  /// onCross时, 绘制Y轴上的刻度值
+  /// onCross时, 绘制Y轴上的刻度值; [yAxisSide] 为 left 时贴左缘, 否则贴右缘。
   @protected
   Size? paintYAxisTicksOnCross(
     Canvas canvas,
@@ -517,11 +523,13 @@ mixin PaintYAxisTicksOnCrossMixin<T extends Indicator> on PaintObject<T> {
     Color? textColor,
     Color? bgColor,
     Color? borderColor,
+    AxisDirection yAxisSide = AxisDirection.right,
   }) {
     // 只在 dy 落在本窗格时画刻度。
     final value = dyToValue(offset.dy, check: true);
     if (value == null) return null;
 
+    final isLeft = yAxisSide == AxisDirection.left;
     final label = _crossTick.paint(
       canvas,
       (value, precision),
@@ -531,8 +539,10 @@ mixin PaintYAxisTicksOnCrossMixin<T extends Indicator> on PaintObject<T> {
         backgroundColor: bgColor ?? theme.crossTextBg,
         borderColor: borderColor,
       ),
-      anchor: Offset(chartRect.right - crossConfig.spacing, offset.dy),
-      align: Alignment.centerRight,
+      anchor: isLeft
+          ? Offset(drawableRect.left + crossConfig.spacing, offset.dy)
+          : Offset(chartRect.right - crossConfig.spacing, offset.dy),
+      align: isLeft ? Alignment.centerLeft : Alignment.centerRight,
       bounds: drawableRect,
     );
     return label.size;

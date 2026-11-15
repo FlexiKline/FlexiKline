@@ -17,6 +17,8 @@ abstract class _$CandleIndicatorCWProxy {
 
   CandleIndicator verticalGrid(GridAxisConfig verticalGrid);
 
+  CandleIndicator yAxisSide(AxisDirection yAxisSide);
+
   CandleIndicator high(MarkConfig high);
 
   CandleIndicator low(MarkConfig low);
@@ -80,6 +82,7 @@ abstract class _$CandleIndicatorCWProxy {
     EdgeInsets padding,
     GridAxisConfig horizontalGrid,
     GridAxisConfig verticalGrid,
+    AxisDirection yAxisSide,
     MarkConfig high,
     MarkConfig low,
     MarkConfig offViewPriceMark,
@@ -128,6 +131,10 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
   @override
   CandleIndicator verticalGrid(GridAxisConfig verticalGrid) =>
       call(verticalGrid: verticalGrid);
+
+  @override
+  CandleIndicator yAxisSide(AxisDirection yAxisSide) =>
+      call(yAxisSide: yAxisSide);
 
   @override
   CandleIndicator high(MarkConfig high) => call(high: high);
@@ -233,6 +240,7 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
     Object? padding = const $CopyWithPlaceholder(),
     Object? horizontalGrid = const $CopyWithPlaceholder(),
     Object? verticalGrid = const $CopyWithPlaceholder(),
+    Object? yAxisSide = const $CopyWithPlaceholder(),
     Object? high = const $CopyWithPlaceholder(),
     Object? low = const $CopyWithPlaceholder(),
     Object? offViewPriceMark = const $CopyWithPlaceholder(),
@@ -281,6 +289,10 @@ class _$CandleIndicatorCWProxyImpl implements _$CandleIndicatorCWProxy {
           ? _value.verticalGrid
           // ignore: cast_nullable_to_non_nullable
           : verticalGrid as GridAxisConfig,
+      yAxisSide: yAxisSide == const $CopyWithPlaceholder() || yAxisSide == null
+          ? _value.yAxisSide
+          // ignore: cast_nullable_to_non_nullable
+          : yAxisSide as AxisDirection,
       high: high == const $CopyWithPlaceholder() || high == null
           ? _value.high
           // ignore: cast_nullable_to_non_nullable
@@ -415,6 +427,9 @@ CandleIndicator _$CandleIndicatorFromJson(
   verticalGrid: json['verticalGrid'] == null
       ? CandleBaseIndicator.defaultVerticalGrid
       : GridAxisConfig.fromJson(json['verticalGrid'] as Map<String, dynamic>),
+  yAxisSide: json['yAxisSide'] == null
+      ? AxisDirection.right
+      : const AxisDirectionConverter().fromJson(json['yAxisSide'] as String),
   high: json['high'] == null
       ? const MarkConfig(
           spacing: 2,
@@ -576,6 +591,7 @@ Map<String, dynamic> _$CandleIndicatorToJson(CandleIndicator instance) =>
       'zIndex': instance.zIndex,
       'horizontalGrid': instance.horizontalGrid.toJson(),
       'verticalGrid': instance.verticalGrid.toJson(),
+      'yAxisSide': const AxisDirectionConverter().toJson(instance.yAxisSide),
       'high': instance.high.toJson(),
       'low': instance.low.toJson(),
       'offViewPriceMark': instance.offViewPriceMark.toJson(),

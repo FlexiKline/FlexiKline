@@ -33,9 +33,17 @@ class _TicksPaintObject extends CandleBasePaintObject<TestCandleIndicator> with 
   int crossFormatted = 0;
 
   double ticks(Canvas canvas, List<double> dys, {bool showTopTick = true, bool showBottomTick = true}) =>
-      paintYAxisTicks(canvas, dys: dys, precision: 2, showTopTick: showTopTick, showBottomTick: showBottomTick);
+      paintYAxisTicks(
+        canvas,
+        dys: dys,
+        precision: 2,
+        showTopTick: showTopTick,
+        showBottomTick: showBottomTick,
+        yAxisSide: yAxisSide,
+      );
 
-  Size? crossTick(Canvas canvas, double dy) => paintYAxisTicksOnCross(canvas, Offset(10, dy), precision: 2);
+  Size? crossTick(Canvas canvas, double dy) =>
+      paintYAxisTicksOnCross(canvas, Offset(10, dy), precision: 2, yAxisSide: yAxisSide);
 
   @override
   String formatTicksValue(double value, {required int precision}) {
@@ -68,10 +76,10 @@ List<Paragraph> _paragraphs(RecordingCanvas canvas) => [
 ];
 
 /// 高 [height]、区间 `[0, max]` 的主区蜡烛对象。
-_TicksPaintObject _bound({double height = 200, num max = 100}) {
+_TicksPaintObject _bound({double height = 200, num max = 100, AxisDirection side = AxisDirection.right}) {
   final object = _TicksPaintObject();
   final context = FakePaintContext()..mainRect = Rect.fromLTWH(0, 0, 300, height);
-  object.bind(TestCandleIndicator(height: height), context);
+  object.bind(TestCandleIndicator(height: height, yAxisSide: side), context);
   object.setMinMax(MinMax(min: 0.0, max: max.toDouble()));
   return object;
 }
@@ -166,5 +174,53 @@ void main() {
     expect(object.formatTicksValue(0.123456789012345678, precision: 18), '0.123456789012345680');
     expect(object.formatTicksValue(1.2e-17, precision: 18), '1.200000000000000000e-17');
     expect(object.formatTicksValue(1e21, precision: 0), '1,000,000,000,000,000,000,000');
+  });
+
+  group('左侧刻度', () {
+    // 同一文本在两侧的绘制偏移之差等于框的水平位移, 所以只比较两侧之差, 不依赖偏移的绝对值。
+    // 以右侧为基准: 右侧框左缘 = chartRect.right - 宽度, 左侧框左缘 = drawableRect.left。
+    test('文本框贴 drawableRect 左边, 底边仍落在刻度线上', () {
+      final right = _bound();
+      final left = _bound(side: AxisDirection.left);
+      final rightCanvas = RecordingCanvas();
+      final rightWidth = right.ticks(rightCanvas, [100]);
+      final leftCanvas = RecordingCanvas();
+      final leftWidth = left.ticks(leftCanvas, [100]);
+      final padding = left.defTicksTextConfig.padding ?? EdgeInsets.zero;
+
+      final leftOffset = leftCanvas.paragraphOffsets.single;
+      final rightOffset = rightCanvas.paragraphOffsets.single;
+      expect(leftWidth, rightWidth);
+      // 右侧框左缘 = chartRect.right - 宽度; 左侧框左缘 = drawableRect.left。
+      expect(
+        leftOffset.dx - rightOffset.dx,
+        closeTo(left.drawableRect.left - (right.chartRect.right - rightWidth), 0.01),
+      );
+      final paragraph = _paragraphs(leftCanvas).single;
+      expect(leftOffset.dy + paragraph.height + padding.bottom, closeTo(100, 0.01));
+    });
+
+    test('cross 刻度贴左缘, 垂直居中于指针', () {
+      final right = _bound();
+      final left = _bound(side: AxisDirection.left);
+      final rightCanvas = RecordingCanvas();
+      final rightSize = right.crossTick(rightCanvas, 100)!;
+      final leftCanvas = RecordingCanvas();
+      final leftSize = left.crossTick(leftCanvas, 100)!;
+      final padding = left.crossConfig.ticksText.padding ?? EdgeInsets.zero;
+
+      final leftOffset = leftCanvas.paragraphOffsets.single;
+      final rightOffset = rightCanvas.paragraphOffsets.single;
+      expect(leftSize.width, rightSize.width);
+      final spacing = left.crossConfig.spacing;
+      expect(
+        leftOffset.dx - rightOffset.dx,
+        closeTo(
+          (left.drawableRect.left + spacing) - (right.chartRect.right - spacing - rightSize.width),
+          0.01,
+        ),
+      );
+      expect(leftOffset.dy - padding.top + leftSize.height / 2, closeTo(100, 0.01));
+    });
   });
 }

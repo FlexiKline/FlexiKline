@@ -164,7 +164,12 @@ abstract class CandleBaseIndicator extends DirectIndicator {
     super.zIndex,
     this.horizontalGrid = defaultHorizontalGrid,
     this.verticalGrid = defaultVerticalGrid,
-  }) : super(key: candleIndicatorKey, autoActivate: true);
+    this.yAxisSide = AxisDirection.right,
+  }) : assert(
+         yAxisSide == AxisDirection.left || yAxisSide == AxisDirection.right,
+         'yAxisSide only supports AxisDirection.left or AxisDirection.right.',
+       ),
+       super(key: candleIndicatorKey, autoActivate: true);
 
   /// 主区横向网格线(即 Y 轴价格刻度线)的配置。
   final GridAxisConfig horizontalGrid;
@@ -174,6 +179,12 @@ abstract class CandleBaseIndicator extends DirectIndicator {
   /// [GridTickMode.nice] 在此不成立, 会退化为 [GridTickMode.count]: 竖线永不按时间取整,
   /// 否则网格会随平移缩放持续漂移。
   final GridAxisConfig verticalGrid;
+
+  /// Y 轴刻度文本所在的一侧, 只接受 [AxisDirection.left] 与 [AxisDirection.right]。
+  ///
+  /// 左侧时刻度贴主区左边缘绘制, 落在 [padding] 的 left 留白内, 所以留白需不小于最宽刻度文本;
+  /// 留白不足时刻度会压在蜡烛上。缩放滑竿热区随之移到左侧, 与刻度列对齐。
+  final AxisDirection yAxisSide;
 
   @override
   CandleBasePaintObject<CandleBaseIndicator> createPaintObject();

@@ -192,7 +192,7 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
       try {
         // 热区宽度来自本帧刻度文本的实测宽度, 所以紧跟主区那一趟。
         final maxTickWidth = mainPaintObject.doPaintChart(canvas, size);
-        _syncChartZoomSlideBarRect(maxTickWidth);
+        _syncChartZoomSlideBarRect(maxTickWidth, mainPaintObject.yAxisSide);
 
         if (!allowOverlayOutsideMainRect) {
           mainPaintObject.doPaintOverlay(canvas, size);
@@ -551,10 +551,12 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
   /// 清零点只有换标的与换主题两处。比整个 Rect: 主区高度变化时 top/height 要跟上。
   ///
   /// [GestureConfig.useCustomZoomRect] 的短路在这里而非蜡烛侧: 该矩形从哪来是 controller 配置。
-  void _syncChartZoomSlideBarRect(double? maxTickWidth) {
+  void _syncChartZoomSlideBarRect(double? maxTickWidth, AxisDirection yAxisSide) {
     if (maxTickWidth == null || gestureConfig.useCustomZoomRect) return;
     final width = math.max(chartZoomSlideBarRect.width, maxTickWidth);
-    final rect = Rect.fromLTWH(mainRect.right - width, mainRect.top, width, mainRect.height);
+    // 热区贴着刻度列: 刻度在左侧时热区从主区左边缘开始, 否则贴右边缘。
+    final left = yAxisSide == AxisDirection.left ? mainRect.left : mainRect.right - width;
+    final rect = Rect.fromLTWH(left, mainRect.top, width, mainRect.height);
     if (rect == chartZoomSlideBarRect) return;
     setChartZoomSlideBarRect(rect);
   }

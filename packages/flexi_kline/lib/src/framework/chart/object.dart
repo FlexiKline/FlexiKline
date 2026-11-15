@@ -366,6 +366,9 @@ abstract class CandleBasePaintObject<T extends CandleBaseIndicator> extends Dire
   /// 是否在蜡烛图类型为线图时隐藏指标
   bool get hideMainIndicatorsInLineChartMode => false;
 
+  /// Y 轴刻度所在的一侧, 直接取自指标配置。
+  AxisDirection get yAxisSide => indicator.yAxisSide;
+
   /// 绘制主区网格线: 先竖线, 后横线, 一趟画完并交出两个方向的位置。
   ///
   /// 由框架在主区可见区间就绪之后、遍历主区子对象之前调用, 于是这里没有「哪些线现在能画」

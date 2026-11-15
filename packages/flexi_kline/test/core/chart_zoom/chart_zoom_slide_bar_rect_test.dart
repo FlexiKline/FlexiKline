@@ -60,6 +60,7 @@ void main() {
     WidgetTester tester, {
     List<CandleModel>? candles,
     int precision = 2,
+    AxisDirection yAxisSide = AxisDirection.right,
   }) async {
     final controller = _SpyController();
     final scene = ControllerScenario(controller: controller);
@@ -68,7 +69,7 @@ void main() {
       _spec(precision: precision),
       candles ?? _threeDigits(),
       canvasWidth: _canvasWidth,
-      candle: TestCandleIndicator(visibleMinMaxFromData: true),
+      candle: TestCandleIndicator(visibleMinMaxFromData: true, yAxisSide: yAxisSide),
     );
     controller.flushPendingKlineData();
     return controller;
@@ -102,6 +103,18 @@ void main() {
       expect(rect.right, chart.mainRect.right);
       expect(rect.top, chart.mainRect.top);
       expect(rect.height, chart.mainRect.height);
+    });
+
+    testWidgets('刻度在左侧: 热区贴主区左缘, 宽度仍取刻度实测宽度', (tester) async {
+      final chart = await arrange(tester, yAxisSide: AxisDirection.left);
+      await paintFrame(tester, chart);
+
+      final rect = chart.chartZoomSlideBarRect;
+      expect(rect.isEmpty, isFalse);
+      expect(rect.left, chart.mainRect.left);
+      expect(rect.top, chart.mainRect.top);
+      expect(rect.height, chart.mainRect.height);
+      expect(rect.width, greaterThan(0));
     });
 
     testWidgets('刻度文本变长: 宽度扩大', (tester) async {

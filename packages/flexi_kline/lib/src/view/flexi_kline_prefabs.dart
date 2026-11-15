@@ -352,8 +352,8 @@ class FlexiExitZoomButton extends StatelessWidget {
     super.key,
     required this.controller,
     this.visibleListenable,
-    this.alignment = AlignmentDirectional.bottomEnd,
-    this.padding = const EdgeInsetsDirectional.all(12),
+    this.alignment,
+    this.padding,
     this.buttonSize = const Size(20, 20),
     this.icon,
     this.borderRadius = 4,
@@ -368,11 +368,13 @@ class FlexiExitZoomButton extends StatelessWidget {
   /// 为null时仅由 isChartZooming 控制展示.
   final ValueListenable<bool>? visibleListenable;
 
-  /// 按钮在主区内的对齐方式.
-  final AlignmentGeometry alignment;
+  /// 按钮在主区内的对齐方式. 为 null 时按缩放滑竿所在的一侧: 滑竿在左侧用左下角, 否则右下角;
+  /// 滑竿尚未绘制过 (`Rect.zero`) 时按钮不渲染.
+  final AlignmentGeometry? alignment;
 
-  /// 按钮外边距.
-  final EdgeInsetsGeometry padding;
+  /// 按钮外边距. 为 null 时水平居中于滑竿, 底部间距与水平间距相同. 水平留白大于 0 时原样使用;
+  /// 否则仍水平居中于滑竿, 只取 [padding] 的底部留白.
+  final EdgeInsetsGeometry? padding;
 
   /// 按钮尺寸.
   final Size buttonSize;
@@ -401,9 +403,31 @@ class FlexiExitZoomButton extends StatelessWidget {
         visibleListenable,
         controller.isChartZoomingListenable,
       ]),
-      child: Container(
-        alignment: alignment,
-        padding: padding,
+      builder: (context, child) => Visibility(
+        visible: (visibleListenable?.value ?? false) || controller.isChartZooming,
+        child: child!,
+      ),
+      child: ValueListenableBuilder<Rect>(
+        valueListenable: controller.chartZoomSlideBarRectListenable,
+        builder: (context, slideBar, child) {
+          // 滑竿尚未绘制 (或主题切换后待重新测量) 时没有可定位的列, 不渲染按钮。
+          if (slideBar.isEmpty) return const SizedBox.shrink();
+          final resolvedPadding = padding?.resolve(Directionality.of(context));
+          final centeringInset = math.max(0.0, (slideBar.size.width - buttonSize.width) / 2);
+          return Container(
+            alignment:
+                alignment ??
+                ((slideBar.center.dx < controller.mainRect.center.dx)
+                    ? AlignmentDirectional.bottomStart
+                    : AlignmentDirectional.bottomEnd),
+            padding: resolvedPadding == null
+                ? EdgeInsets.all(centeringInset)
+                : (resolvedPadding.horizontal > 0
+                      ? resolvedPadding
+                      : EdgeInsets.fromLTRB(centeringInset, 0, centeringInset, resolvedPadding.bottom)),
+            child: child!,
+          );
+        },
         child: MouseRegion(
           cursor: SystemMouseCursors.click,
           child: Semantics(
@@ -436,13 +460,6 @@ class FlexiExitZoomButton extends StatelessWidget {
           ),
         ),
       ),
-      builder: (context, child) {
-        final forceVisible = visibleListenable?.value ?? false;
-        return Visibility(
-          visible: forceVisible || controller.isChartZooming,
-          child: child!,
-        );
-      },
     );
   }
 }

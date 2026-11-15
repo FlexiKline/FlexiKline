@@ -12,6 +12,8 @@
 * Add `backgroundColor`, `border`, `gradient`, `borderGradient` and `shadows` to `TooltipConfig`, and rename `radius` to `borderRadius` (Breaking Changes).
 * Rename `onCrossCustomTooltip` to `tooltipBuilder` and `OnCrossCustomTooltipCallback` to `TooltipBuilder`; `current` is non-null and the builder is no longer called with `null` when the crosshair closes, use `crossOffsetListenable` instead (Breaking Changes).
 * Remove `onCrossI18nTooltipLabels`: call `generateTooltipInfoListByLabels` from `tooltipBuilder` instead; its `pre` parameter is renamed to `prev` (Breaking Changes).
+* Add `yAxisSide` to `CandleBaseIndicator` (`AxisDirection.left` or `AxisDirection.right`, default `right`) so the Y-axis ticks, the crosshair ticks and the zoom slider can sit on the left; leave room with `padding.left` for the ticks.
+* Change `FlexiExitZoomButton.alignment` and `padding` to nullable: an unset alignment follows the zoom slider side, an unset padding centers the button horizontally, and the button is hidden until the slider is measured (Breaking Changes).
 
 ## 2.7.2
 * Change `ScalePosition.auto` to always anchor X-axis zoom at the focal point (pinch centroid, wheel or trackpad pointer) and `middle` at the main chart center: `auto` used to pick an anchor by screen third, and `middle` followed the focal point until the latest candle left the screen.

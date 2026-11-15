@@ -28,6 +28,7 @@ class CandleIndicator extends CandleBaseIndicator {
     // 主区网格线: 横线即价格刻度线, 竖线是几何参考线.
     super.horizontalGrid = CandleBaseIndicator.defaultHorizontalGrid,
     super.verticalGrid = CandleBaseIndicator.defaultVerticalGrid,
+    super.yAxisSide = AxisDirection.right,
 
     // 最高价
     this.high = const MarkConfig(
@@ -405,6 +406,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
       canvas,
       offset,
       precision: klineData.precision,
+      yAxisSide: indicator.yAxisSide,
     );
   }
 
