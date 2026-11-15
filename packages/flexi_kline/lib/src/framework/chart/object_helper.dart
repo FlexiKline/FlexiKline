@@ -357,7 +357,7 @@ mixin PaintGridTicksMixin<T extends Indicator> on PaintObject<T> {
   /// 按 [mode] 产出横向网格线的 dy 序列, **含两端**。
   ///
   /// [bounds] 默认 [drawableRect]。落在两端的位置由 [paintHorizontalGridLines] 自行跳过,
-  /// 刻度文本按 [paintYAxisTicks] 的 includeTop/includeBottom 决定。
+  /// 刻度文本按 [paintYAxisTickLabels] 的 includeTop/includeBottom 决定。
   @protected
   List<double> resolveHorizontalDys(GridTickMode mode, {Rect? bounds}) {
     final rect = bounds ?? drawableRect;
@@ -460,7 +460,7 @@ mixin PaintGridTicksMixin<T extends Indicator> on PaintObject<T> {
   ///
   /// 返回宽度供编排层设定 zoom 滑竿热区。
   @protected
-  double paintYAxisTicks(
+  double paintYAxisTickLabels(
     Canvas canvas, {
     required Iterable<double> dys,
     required int precision,
@@ -508,10 +508,7 @@ mixin PaintGridTicksMixin<T extends Indicator> on PaintObject<T> {
       defIfZero: '0.00',
     );
   }
-}
 
-/// 当Cross事件发生时, 在Y轴上的绘制crossing相应的刻度值
-mixin PaintYAxisTicksOnCrossMixin<T extends Indicator> on PaintObject<T> {
   late final _crossTick = own(LabelPainter());
 
   /// onCross时, 绘制Y轴上的刻度值; [yAxisSide] 为 left 时贴左缘, 否则贴右缘。
@@ -571,36 +568,26 @@ mixin PaintCandleChartMixin<T extends Indicator> on PaintObject<T> {
   bool _hasLongHollow = false;
   bool _hasShortHollow = false;
 
-  /// 绘制 Open-high-low-close 样式的蜡烛图（美国线图）
-  /// 主区: 蜡烛图
-  /// 副区: 用于SubBoll图和SubSar图中
-  void paintOHLCStyleCandleChart(
+  /// 绘制柱状蜡烛（实心、空心、涨跌空心与 OHLC 美国线）, 只画下标区间 [start, end) 内的蜡烛。
+  void paintBarChart(
     Canvas canvas, {
-    int? start,
-    int? end,
+    required int start,
+    required int end,
+    required ChartBarStyle style,
   }) {
-    // 默认在可见区两侧各多画一根, 让图形从视区外接入。
-    start ??= math.max(klineData.start - 1, 0);
-    end ??= math.min(klineData.end + 1, klineData.length);
-    // start/end 可由调用方传入, 不受绘制入口担保, 故校验实际生效的区间。
     if (!klineData.checkStartAndEnd(start, end)) return;
-    final barWidthHalf = candleWidthHalf;
+    final barWidthHalf = style == ChartBarStyle.ohlc ? candleWidthHalf : candleWidthHalf - candleSpacing;
     for (var i = start; i < end; i++) {
-      addCandleBar(
-        klineData[i],
-        dx: indexToDx(i),
-        barWidthHalf: barWidthHalf,
-        chartStyle: ChartBarStyle.ohlc,
-      );
+      _addBar(klineData[i], dx: indexToDx(i), barWidthHalf: barWidthHalf, chartStyle: style);
     }
-    flushCandleBars(canvas);
+    _flushBars(canvas);
   }
 
-  /// 把蜡烛 [m] 加入本帧批次, 由 [flushCandleBars] 一次画完; 几何同 [paintCandleBar]。
+  /// 把蜡烛 [m] 加入本帧批次, 由 [_flushBars] 一次画完; 几何同 [paintCandleBar]。
   ///
   /// [barWidthHalf] 只用于空心实体与 OHLC 的开收短线, 实心实体的宽度是画笔的 strokeWidth(candleWidth)。
   @protected
-  void addCandleBar(
+  void _addBar(
     FlexiCandleModel m, {
     required double dx,
     required double barWidthHalf,
@@ -643,9 +630,9 @@ mixin PaintCandleChartMixin<T extends Indicator> on PaintObject<T> {
     }
   }
 
-  /// 画完 [addCandleBar] 攒下的批次并清空; 先影线后实体, 实体盖住穿过它的影线。
+  /// 画完 [_addBar] 攒下的批次并清空; 先影线后实体, 实体盖住穿过它的影线。
   @protected
-  void flushCandleBars(Canvas canvas) {
+  void _flushBars(Canvas canvas) {
     // 实体是线宽为 candleWidth 的线段, 非 butt 端帽会让两端各外延半个 candleWidth。
     assert(
       defLongBarPaint.strokeCap == StrokeCap.butt && defShortBarPaint.strokeCap == StrokeCap.butt,
@@ -667,90 +654,8 @@ mixin PaintCandleChartMixin<T extends Indicator> on PaintObject<T> {
     }
   }
 
-  /// 绘制单根蜡烛柱(支持上涨下跌柱为空心或实心)
-  /// [open], [close], [low], [high]为蜡烛[m]在当前图表中转换后的坐标值, 若不传, 则实时计算.
-  /// [barWidthHalf]为蜡烛柱的宽度的一半, 若不传, 则实时计算.
-  /// [chartStyle]为蜡烛柱的样式, 支持: ohlcChart, upHollow, downHollow
-  void paintCandleBar(
-    Canvas canvas,
-    FlexiCandleModel m, {
-    required double dx,
-    double? high,
-    double? low,
-    double? open,
-    double? close,
-    double? barWidthHalf,
-    required ChartBarStyle chartStyle,
-  }) {
-    barWidthHalf ??= candleWidthHalf - candleSpacing;
-    final isLong = m.close >= m.open;
-    high ??= valueToDy(m.high);
-    low ??= valueToDy(m.low);
-    (open, close) = ensureMinDistance(
-      open ?? valueToDy(m.open),
-      close ?? valueToDy(m.close),
-    );
-
-    final path = Path()..moveTo(dx, high);
-    if (chartStyle == ChartBarStyle.ohlc) {
-      path.moveTo(dx, high);
-      path.lineTo(dx, low);
-      path.moveTo(dx - barWidthHalf, open);
-      path.lineTo(dx, open);
-      path.moveTo(dx + barWidthHalf, close);
-      path.lineTo(dx, close);
-      canvas.drawPath(path, isLong ? defLongLinePaint : defShortLinePaint);
-    } else if (isLong) {
-      if (chartStyle.isHollowUp) {
-        path.lineTo(dx, close);
-        path.addRect(
-          Rect.fromPoints(
-            Offset(dx - barWidthHalf, close),
-            Offset(dx + barWidthHalf, open),
-          ),
-        );
-        if (low > open) {
-          path.moveTo(dx, low);
-          path.lineTo(dx, open);
-        }
-        canvas.drawPath(path, defLongLinePaint);
-      } else {
-        path.lineTo(dx, low);
-        canvas.drawPath(path, defLongLinePaint);
-        canvas.drawLine(
-          Offset(dx, open),
-          Offset(dx, close),
-          defLongBarPaint,
-        );
-      }
-    } else {
-      if (chartStyle.isHollowDown) {
-        path.lineTo(dx, open);
-        path.addRect(
-          Rect.fromPoints(
-            Offset(dx - barWidthHalf, open),
-            Offset(dx + barWidthHalf, close),
-          ),
-        );
-        if (low > close) {
-          path.moveTo(dx, low);
-          path.lineTo(dx, close);
-        }
-        canvas.drawPath(path, defShortHollowBarPaint);
-      } else {
-        path.lineTo(dx, low);
-        canvas.drawPath(path, defShortLinePaint);
-        canvas.drawLine(
-          Offset(dx, open),
-          Offset(dx, close),
-          defShortBarPaint,
-        );
-      }
-    }
-  }
-
   /// 绘制基于蜡烛数据的普通折线图
-  void paintCandleLineChart(
+  void paintLineChart(
     Canvas canvas, {
     int? start,
     int? end,
@@ -771,7 +676,7 @@ mixin PaintCandleChartMixin<T extends Indicator> on PaintObject<T> {
       boundDy = math.max(boundDy, dy);
     }
 
-    paintLineChart(
+    paintLinePoints(
       canvas,
       points: points,
       boundEnd: Offset(points.last.dx, boundDy),
@@ -782,7 +687,7 @@ mixin PaintCandleChartMixin<T extends Indicator> on PaintObject<T> {
   }
 
   @protected
-  void paintLineChart(
+  void paintLinePoints(
     Canvas canvas, {
     required List<Offset> points, // 绘制线
     required Paint linePaint, // 蜡烛线图画笔.
@@ -804,7 +709,7 @@ mixin PaintCandleChartMixin<T extends Indicator> on PaintObject<T> {
   }
 
   /// 绘制基于蜡烛数据的涨跌线图
-  void paintCandleUpDownLineChart(
+  void paintUpDownLineChart(
     Canvas canvas, {
     int? start,
     int? end,
@@ -844,7 +749,7 @@ mixin PaintCandleChartMixin<T extends Indicator> on PaintObject<T> {
         }
         if (isLong) {
           // 绘制上涨区间的线图
-          paintLineChart(
+          paintLinePoints(
             canvas,
             points: points,
             boundEnd: boundEnd,
@@ -854,7 +759,7 @@ mixin PaintCandleChartMixin<T extends Indicator> on PaintObject<T> {
           );
         } else {
           // 绘制下跌区间的线图
-          paintLineChart(
+          paintLinePoints(
             canvas,
             points: points,
             boundEnd: boundEnd,

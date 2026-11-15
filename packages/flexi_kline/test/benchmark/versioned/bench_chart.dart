@@ -21,7 +21,6 @@
 /// 只用 `v2.5.6-monorepo` 上也存在的 API, 改动后须在基线 worktree 上编译一次。
 library;
 
-import 'dart:math' as math;
 import 'dart:ui' show PictureRecorder;
 
 import 'package:flexi_formatter/date_time.dart' show TimeUnit;
@@ -67,10 +66,8 @@ class _BenchLinePaintObject extends DirectPaintObject<BenchLineIndicator> {
   double _valueOf(FlexiCandleModel m, int j) => m.close + (j - 1) * 2;
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(Canvas canvas, Size size, {required int start, required int end}) {
     BenchLineIndicator.paintCount++;
-    final start = math.max(klineData.start - 1, 0);
-    final end = klineData.end;
     for (int j = 0; j < BenchLineIndicator.colors.length; j++) {
       final points = <Offset>[];
       for (int i = start; i < end; i++) {

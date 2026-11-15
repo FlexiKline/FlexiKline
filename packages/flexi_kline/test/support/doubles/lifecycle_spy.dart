@@ -88,7 +88,7 @@ class SpyExternalPaintObject extends ExternalPaintObject<SpyExternalIndicator> {
   @override
   MinMax? computeVisibleMinMax(int start, int end) => null;
   @override
-  void paint(Canvas canvas, Size size) {}
+  void paint(Canvas canvas, Size size, {required int start, required int end}) {}
   @override
   Size? paintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
 }
@@ -191,7 +191,7 @@ class SpyComputedPaintObject extends ComputedPaintObject<SpyComputedIndicator> {
   @override
   MinMax? computeVisibleMinMax(int start, int end) => null;
   @override
-  void paint(Canvas canvas, Size size) {}
+  void paint(Canvas canvas, Size size, {required int start, required int end}) {}
   @override
   Size? paintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
 }

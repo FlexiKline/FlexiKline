@@ -157,7 +157,7 @@ TimeIndicator _$TimeIndicatorFromJson(Map<String, dynamic> json) =>
               textAlign: TextAlign.center,
             )
           : TextAreaConfig.fromJson(json['timeLabel'] as Map<String, dynamic>),
-      clipToDrawableRect: json['clipToDrawableRect'] as bool? ?? false,
+      clipToDrawableRect: json['clipToDrawableRect'] as bool? ?? true,
     );
 
 Map<String, dynamic> _$TimeIndicatorToJson(TimeIndicator instance) =>

@@ -243,8 +243,7 @@ class CandleIndicator extends CandleBaseIndicator {
   Map<String, dynamic> toJson() => _$CandleIndicatorToJson(this);
 }
 
-class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject<T>
-    with PaintYAxisTicksOnCrossMixin, PaintCandleChartMixin {
+class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject<T> with PaintCandleChartMixin {
   double? _maxHigh, _minLow;
 
   /// 最高价与最低价共用: 默认配置下两者是同一个 const 实例, 样式一致, 两个 key 都留在池里。
@@ -339,19 +338,18 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
   }
 
   @override
-  void paint(Canvas canvas, Size size) {
-    final chartType = resolveChartType();
-
-    switch (chartType) {
+  void paint(Canvas canvas, Size size, {required int start, required int end}) {
+    switch (resolveChartType()) {
       case FlexiBarChartType(:final style):
-        // 绘制蜡烛柱状图，传入样式
-        paintCandleBars(canvas, size, style);
+        paintBarChart(canvas, start: start, end: end, style: style);
+        _paintExtremeMarks(canvas, start: start, end: end);
       case FlexiLineChartType(:final style):
         switch (style) {
           case ChartLineStyle.normal:
-            // 绘制普通折线图
-            paintCandleLineChart(
+            paintLineChart(
               canvas,
+              start: start,
+              end: end,
               linePaint: getLinePaint(
                 color: indicator.lineColor,
                 strokeWidth: candleLineWidth,
@@ -360,11 +358,11 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
                 baseColor: indicator.lineColor ?? theme.lineChartColor,
               ),
             );
-            paintLatestPoint(canvas, size);
           case ChartLineStyle.updown:
-            // 绘制涨跌线图
-            paintCandleUpDownLineChart(
+            paintUpDownLineChart(
               canvas,
+              start: start,
+              end: end,
               longLinePaint: getLinePaint(color: longColor),
               shortLinePaint: getLinePaint(color: shortColor),
               longGradient: indicator.longGradientConfig?.createGradient(
@@ -374,8 +372,8 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
                 baseColor: shortColor,
               ),
             );
-            paintLatestPoint(canvas, size);
         }
+        _paintLatestPoint(canvas, size, start: start, end: end);
     }
   }
 
@@ -467,64 +465,35 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
     ],
   );
 
-  /// 绘制蜡烛柱状图
-  void paintCandleBars(Canvas canvas, Size size, ChartBarStyle style) {
-    final start = klineData.start;
-    final end = klineData.end;
-
-    final barWidthHalf = candleWidthHalf - candleSpacing;
-
-    Offset? maxHighOffset, minLowOffset;
-    final hasEnough = paintDxOffset > 0;
-    double maxHigh = klineData[start].high;
-    double minLow = klineData[start].low;
-    FlexiCandleModel m;
-    for (var i = start; i < end; i++) {
-      m = klineData[i];
-      final dx = indexToDx(i);
-      addCandleBar(m, dx: dx, barWidthHalf: barWidthHalf, chartStyle: style);
-
-      if (indicator.high.show) {
-        if (hasEnough) {
-          // 满足一屏: 用 initData 的全局极值, 并列时只记首次命中(最左/最旧).
-          if (m.high == _maxHigh) {
-            maxHighOffset ??= Offset(dx, valueToDy(m.high));
-            maxHigh = _maxHigh!;
-          }
-        } else {
-          // 不足一屏: 极值限可见区域, 严格大于使并列标最左(最旧).
-          if (maxHighOffset == null || m.high > maxHigh) {
-            maxHighOffset = Offset(dx, valueToDy(m.high));
-            maxHigh = m.high;
-          }
-        }
-      }
-
-      if (indicator.low.show) {
-        if (hasEnough) {
-          // 满足一屏: 用 initData 的全局极值, 并列时只记首次命中(最左/最旧).
-          if (m.low == _minLow) {
-            minLowOffset ??= Offset(dx, valueToDy(m.low));
-            minLow = _minLow!;
-          }
-        } else {
-          // 不足一屏: 极值限可见区域, 严格小于使并列标最左(最旧).
-          if (minLowOffset == null || m.low < minLow) {
-            minLowOffset = Offset(dx, valueToDy(m.low));
-            minLow = m.low;
-          }
-        }
+  /// 可见区 [klineData.start, klineData.end) 内最高价、最低价的下标。
+  ///
+  /// 满足一屏（paintDxOffset > 0）时取全局极值 `_maxHigh`、`_minLow` 的首个命中（最左、最旧）；
+  /// 不足一屏时取可见区内的极值，并列取最左。范围与绘制区间无关，展开中截断绘制区间也不改变标记位置。
+  ({int? high, int? low}) _extremeIndices() {
+    int? high, low;
+    for (var i = klineData.start; i < klineData.end; i++) {
+      final m = klineData[i];
+      if (paintDxOffset > 0) {
+        high ??= m.high == _maxHigh ? i : null;
+        low ??= m.low == _minLow ? i : null;
+      } else {
+        if (high == null || m.high > klineData[high].high) high = i;
+        if (low == null || m.low < klineData[low].low) low = i;
       }
     }
-    flushCandleBars(canvas);
+    return (high: high, low: low);
+  }
 
-    // 最后绘制在蜡烛图中的最大价钱标记
-    if (maxHighOffset != null && maxHigh > 0) {
-      paintPriceMark(canvas, maxHighOffset, maxHigh, indicator.high);
+  /// 最高、最低价标记; 下标落在 [start, end) 内才绘制, 展开中尚未画到的极值不显示。
+  void _paintExtremeMarks(Canvas canvas, {required int start, required int end}) {
+    final (:high, :low) = _extremeIndices();
+    if (indicator.high.show && high != null && high >= start && high < end) {
+      final value = klineData[high].high;
+      if (value > 0) paintPriceMark(canvas, Offset(indexToDx(high), valueToDy(value)), value, indicator.high);
     }
-    // 最后绘制在蜡烛图中的最小价钱标记
-    if (minLowOffset != null && minLow > 0) {
-      paintPriceMark(canvas, minLowOffset, minLow, indicator.low);
+    if (indicator.low.show && low != null && low >= start && low < end) {
+      final value = klineData[low].low;
+      if (value > 0) paintPriceMark(canvas, Offset(indexToDx(low), valueToDy(value)), value, indicator.low);
     }
   }
 
@@ -777,10 +746,12 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
     return styles;
   }
 
-  /// 绘制最新蜡烛点
-  void paintLatestPoint(Canvas canvas, Size size) {
+  /// 绘制最新蜡烛点; 最新蜡烛的下标落在 [start, end) 内才绘制。
+  void _paintLatestPoint(Canvas canvas, Size size, {required int start, required int end}) {
     if (!indicator.showLatestPoint) return;
     if (indicator.latestPoint == null) return;
+    final latestIndex = klineData.length - 1;
+    if (latestIndex < start || latestIndex >= end) return;
     final model = klineData.latest;
     if (model == null) {
       logd('paintLatestPoint > no data!');

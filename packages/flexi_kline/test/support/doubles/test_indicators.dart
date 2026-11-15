@@ -100,7 +100,7 @@ class TestCandlePaintObject extends CandleBasePaintObject<TestCandleIndicator> {
   }
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(Canvas canvas, Size size, {required int start, required int end}) {
     if (indicator.paintMarker) canvas.drawPath(markerPath, Paint());
   }
 
@@ -146,7 +146,7 @@ class _TestTimePaintObject extends TimeBasePaintObject<TestTimeIndicator> {
   @override
   MinMax? computeVisibleMinMax(int start, int end) => null;
   @override
-  void paint(Canvas canvas, Size size) {}
+  void paint(Canvas canvas, Size size, {required int start, required int end}) {}
   @override
   Size? paintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
 }
@@ -177,7 +177,7 @@ class _TestDirectPaintObject extends DirectPaintObject<TestDirectIndicator> {
   @override
   MinMax? computeVisibleMinMax(int start, int end) => null;
   @override
-  void paint(Canvas canvas, Size size) {}
+  void paint(Canvas canvas, Size size, {required int start, required int end}) {}
   @override
   Size? paintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) {
     final height = indicator.tipsHeight;
@@ -232,7 +232,7 @@ class TestRangePaintObject extends DirectPaintObject<TestRangeIndicator> {
   }
 
   @override
-  void paint(Canvas canvas, Size size) {}
+  void paint(Canvas canvas, Size size, {required int start, required int end}) {}
   @override
   Size? paintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
 }
@@ -273,7 +273,7 @@ class _TestComputedPaintObject extends ComputedPaintObject<TestComputedIndicator
   @override
   MinMax? computeVisibleMinMax(int start, int end) => null;
   @override
-  void paint(Canvas canvas, Size size) {}
+  void paint(Canvas canvas, Size size, {required int start, required int end}) {}
   @override
   Size? paintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
 }
@@ -298,7 +298,7 @@ class _TestExternalPaintObject extends ExternalPaintObject<TestExternalIndicator
   @override
   MinMax? computeVisibleMinMax(int start, int end) => null;
   @override
-  void paint(Canvas canvas, Size size) {}
+  void paint(Canvas canvas, Size size, {required int start, required int end}) {}
   @override
   Size? paintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
 }
@@ -401,7 +401,7 @@ class TestInteractivePaintObject extends ExternalPaintObject<TestInteractiveIndi
   @override
   MinMax? computeVisibleMinMax(int start, int end) => null;
   @override
-  void paint(Canvas canvas, Size size) {}
+  void paint(Canvas canvas, Size size, {required int start, required int end}) {}
   @override
   Size? paintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
 }
@@ -483,7 +483,7 @@ class TestAnimatedPaintObject extends ExternalPaintObject<TestAnimatedIndicator>
   MinMax? computeVisibleMinMax(int start, int end) => null;
 
   @override
-  void paint(Canvas canvas, Size size) => _record('paint');
+  void paint(Canvas canvas, Size size, {required int start, required int end}) => _record('paint');
 
   @override
   Size? paintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;

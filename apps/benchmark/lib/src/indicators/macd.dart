@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:math' as math;
-
 import 'package:flexi_formatter/flexi_formatter.dart' show FlexiNumberFormatterDoubleExt, formatPrice;
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/painting.dart';
@@ -118,8 +116,7 @@ class _BenchMacdCalculator extends IndicatorCalculator<BenchMacdIndicator> {
   }
 }
 
-class _BenchMacdPaintObject extends ComputedPaintObject<BenchMacdIndicator>
-    with PaintGridTicksMixin, PaintYAxisTicksOnCrossMixin {
+class _BenchMacdPaintObject extends ComputedPaintObject<BenchMacdIndicator> with PaintGridTicksMixin {
   final Paint _barPaint = Paint()..style = PaintingStyle.stroke;
 
   @override
@@ -137,20 +134,12 @@ class _BenchMacdPaintObject extends ComputedPaintObject<BenchMacdIndicator>
   }
 
   @override
-  void paint(Canvas canvas, Size size) {
-    _paintMacdChart(canvas);
-
-    if (settingConfig.showYAxisTick) {
-      paintYAxisTicks(
-        canvas,
-        dys: tickPositions(
-          defaultSubTickCount,
-          start: chartRect.top,
-          length: chartRect.height,
-        ),
-        precision: klineData.precision,
-      );
-    }
+  double paintYAxisTicks(Canvas canvas, Size size) {
+    return paintYAxisTickLabels(
+      canvas,
+      dys: tickPositions(defaultSubTickCount, start: chartRect.top, length: chartRect.height),
+      precision: klineData.precision,
+    );
   }
 
   @override
@@ -158,10 +147,8 @@ class _BenchMacdPaintObject extends ComputedPaintObject<BenchMacdIndicator>
     paintYAxisTicksOnCross(canvas, offset, precision: klineData.precision);
   }
 
-  void _paintMacdChart(Canvas canvas) {
-    final int start = math.max(klineData.start - 1, 0); // 左缘多绘制一根蜡烛
-    final int end = klineData.end;
-
+  @override
+  void paint(Canvas canvas, Size size, {required int start, required int end}) {
     final List<Offset> difPoints = [];
     final List<Offset> deaPoints = [];
     final double zeroDy = valueToDy(0.0, correct: true);

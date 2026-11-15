@@ -208,6 +208,16 @@ abstract class PaintObject<T extends Indicator<IIndicatorKey>> extends Indicator
 
   @protected
   @override
+  double paintYAxisTicks(Canvas canvas, Size size) => 0;
+
+  /// 绘制区间的起点, 比可见区多一根, 让折线与柱体从视区外接入。
+  int get paintStart => math.max(klineData.start - 1, 0);
+
+  /// 绘制区间的终点（不含）, 比可见区多一根。
+  int get paintEnd => math.min(klineData.end + 1, klineData.length);
+
+  @protected
+  @override
   void paintOverlay(Canvas canvas, Size size) {}
 
   @override
@@ -368,6 +378,18 @@ abstract class CandleBasePaintObject<T extends CandleBaseIndicator> extends Dire
 
   /// Y 轴刻度所在的一侧, 直接取自指标配置。
   AxisDirection get yAxisSide => indicator.yAxisSide;
+
+  /// 主区 Y 轴刻度: 位置与网格横线一致(同一 horizontalGrid 模式)。
+  @protected
+  @override
+  double paintYAxisTicks(Canvas canvas, Size size) {
+    return paintYAxisTickLabels(
+      canvas,
+      dys: resolveHorizontalDys(indicator.horizontalGrid.mode),
+      precision: klineData.precision,
+      yAxisSide: yAxisSide,
+    );
+  }
 
   /// 绘制主区网格线: 先竖线, 后横线, 一趟画完并交出两个方向的位置。
   ///
@@ -539,7 +561,7 @@ final class MainPaintObject<T extends MainPaintObjectIndicator> extends PaintObj
   }
 
   @override
-  void paint(Canvas canvas, Size size) {}
+  void paint(Canvas canvas, Size size, {required int start, required int end}) {}
 
   @override
   void dispose() {

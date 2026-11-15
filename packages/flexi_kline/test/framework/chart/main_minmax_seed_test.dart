@@ -43,7 +43,7 @@ class _SeedRangePaintObject extends DirectPaintObject<_SeedRangeIndicator> {
   MinMax? computeVisibleMinMax(int start, int end) => MinMax(max: 60000.12, min: 59500.34);
 
   @override
-  void paint(Canvas canvas, Size size) {}
+  void paint(Canvas canvas, Size size, {required int start, required int end}) {}
 
   @override
   Size? paintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;

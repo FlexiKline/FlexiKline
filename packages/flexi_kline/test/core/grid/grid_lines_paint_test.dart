@@ -512,7 +512,7 @@ class _AlignedGridPaintObject extends DirectPaintObject<_AlignedGridIndicator> {
   MinMax? computeVisibleMinMax(int start, int end) => null;
 
   @override
-  void paint(Canvas canvas, Size size) {}
+  void paint(Canvas canvas, Size size, {required int start, required int end}) {}
 
   @override
   Size? paintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;

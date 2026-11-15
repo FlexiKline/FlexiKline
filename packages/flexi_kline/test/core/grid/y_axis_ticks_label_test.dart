@@ -25,7 +25,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/support.dart';
 
-class _TicksPaintObject extends CandleBasePaintObject<TestCandleIndicator> with PaintYAxisTicksOnCrossMixin {
+class _TicksPaintObject extends CandleBasePaintObject<TestCandleIndicator> {
   void bind(TestCandleIndicator indicator, PaintContext context) => mount(indicator, context);
 
   /// [formatTicksValue] 每次收到的刻度值。
@@ -33,7 +33,7 @@ class _TicksPaintObject extends CandleBasePaintObject<TestCandleIndicator> with 
   int crossFormatted = 0;
 
   double ticks(Canvas canvas, List<double> dys, {bool showTopTick = true, bool showBottomTick = true}) =>
-      paintYAxisTicks(
+      paintYAxisTickLabels(
         canvas,
         dys: dys,
         precision: 2,
@@ -64,7 +64,7 @@ class _TicksPaintObject extends CandleBasePaintObject<TestCandleIndicator> with 
   bool get hideMainIndicatorsInLineChartMode => false;
 
   @override
-  void paint(Canvas canvas, Size size) {}
+  void paint(Canvas canvas, Size size, {required int start, required int end}) {}
 
   @override
   Size? paintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;

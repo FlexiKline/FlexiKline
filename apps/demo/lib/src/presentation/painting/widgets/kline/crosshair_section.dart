@@ -75,7 +75,7 @@ class _CrosshairPainter extends KlineSectionPainter {
       themeColor: theme.crosshairColor,
     );
 
-    // 与 cross 刻度同一配置、同一主题兜底, 见 PaintYAxisTicksOnCrossMixin。
+    // 与 cross 刻度同一配置、同一主题兜底, 见 PaintGridTicksMixin.paintYAxisTicksOnCross。
     final tickStyle = _cross.ticksText.toLabelStyle(
       textColor: theme.crossTextColor,
       backgroundColor: theme.crossTextBg,

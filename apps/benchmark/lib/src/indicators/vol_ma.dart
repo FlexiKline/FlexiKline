@@ -116,8 +116,7 @@ class _BenchVolMaCalculator extends IndicatorCalculator<BenchVolMaIndicator> {
   }
 }
 
-class _BenchVolMaPaintObject extends ComputedPaintObject<BenchVolMaIndicator>
-    with PaintGridTicksMixin, PaintYAxisTicksOnCrossMixin {
+class _BenchVolMaPaintObject extends ComputedPaintObject<BenchVolMaIndicator> with PaintGridTicksMixin {
   @override
   MinMax? computeVisibleMinMax(int start, int end) {
     FlexiCandleModel model = klineData.list[end - 1];
@@ -149,17 +148,12 @@ class _BenchVolMaPaintObject extends ComputedPaintObject<BenchVolMaIndicator>
   }
 
   @override
-  void paint(Canvas canvas, Size size) {
-    _paintVolumeChart(canvas);
-    _paintVolMaLines(canvas);
-
-    if (settingConfig.showYAxisTick) {
-      paintYAxisTicks(
-        canvas,
-        dys: tickPositions(defaultSubTickCount, start: chartRect.top, length: chartRect.height),
-        precision: indicator.precision,
-      );
-    }
+  double paintYAxisTicks(Canvas canvas, Size size) {
+    return paintYAxisTickLabels(
+      canvas,
+      dys: tickPositions(defaultSubTickCount, start: chartRect.top, length: chartRect.height),
+      precision: indicator.precision,
+    );
   }
 
   // 刻度值是核心库按像素反推的, 与数据值差浮点误差; 截断时误差落在边界下方会少显示末位, 所以先收到比显示位数多 3 位。
@@ -181,10 +175,14 @@ class _BenchVolMaPaintObject extends ComputedPaintObject<BenchVolMaIndicator>
     paintYAxisTicksOnCross(canvas, offset, precision: indicator.precision);
   }
 
-  void _paintVolumeChart(Canvas canvas) {
+  @override
+  void paint(Canvas canvas, Size size, {required int start, required int end}) {
+    _paintVolumeChart(canvas, start: start, end: end);
+    _paintVolMaLines(canvas, start: start, end: end);
+  }
+
+  void _paintVolumeChart(Canvas canvas, {required int start, required int end}) {
     final list = klineData.list;
-    final int start = klineData.start;
-    final int end = klineData.end;
 
     final dyBottom = chartRect.bottom;
 
@@ -203,10 +201,8 @@ class _BenchVolMaPaintObject extends ComputedPaintObject<BenchVolMaIndicator>
     }
   }
 
-  void _paintVolMaLines(Canvas canvas) {
+  void _paintVolMaLines(Canvas canvas, {required int start, required int end}) {
     final list = klineData.list;
-    final int start = math.max(klineData.start - 1, 0); // 左缘多绘制一根蜡烛
-    final int end = klineData.end;
 
     for (int j = 0; j < indicator.calcParam.length; j++) {
       double? val;

@@ -46,7 +46,7 @@ class _LinePaintObject extends DirectPaintObject<_LineIndicator> with PaintCandl
   MinMax? computeVisibleMinMax(int start, int end) => klineData.calculateMinmax(start, end);
 
   @override
-  void paint(Canvas canvas, Size size) {}
+  void paint(Canvas canvas, Size size, {required int start, required int end}) {}
 
   @override
   Size? paintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
@@ -79,7 +79,7 @@ void main() {
     final data = chart.klineData;
     final canvas = RecordingCanvas();
 
-    object.paintCandleLineChart(canvas, linePaint: Paint());
+    object.paintLineChart(canvas, start: object.paintStart, end: object.paintEnd, linePaint: Paint());
 
     expect(canvas.countOf(#drawPath), 1, reason: '不传渐变时只画折线');
     final line = canvas.pathBounds.single;
@@ -94,7 +94,13 @@ void main() {
     final oldestDy = object.valueToDy(data[data.start - 1].close);
     expect(oldestDy, greaterThan(object.chartRect.bottom), reason: '前置条件: 视区外那根低于可见区间');
 
-    object.paintCandleLineChart(canvas, linePaint: Paint(), gradient: gradient);
+    object.paintLineChart(
+      canvas,
+      start: object.paintStart,
+      end: object.paintEnd,
+      linePaint: Paint(),
+      gradient: gradient,
+    );
 
     expect(canvas.countOf(#drawPath), 2, reason: '折线 + 填充');
     final fill = canvas.pathBounds.last;

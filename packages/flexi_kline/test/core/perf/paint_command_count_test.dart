@@ -60,7 +60,7 @@ class _OwningPaintObject extends DirectPaintObject<_OwningIndicator> {
 
   /// 首次绘制时登记; 替身的 reset 是空操作, 只为触发 late 初始化。
   @override
-  void paint(Canvas canvas, Size size) => _resource.reset();
+  void paint(Canvas canvas, Size size, {required int start, required int end}) => _resource.reset();
 
   @override
   Size? paintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;

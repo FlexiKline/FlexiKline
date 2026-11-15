@@ -33,7 +33,7 @@ class TimeIndicator extends TimeBaseIndicator {
       textWidth: 80,
       textAlign: TextAlign.center,
     ),
-    this.clipToDrawableRect = false,
+    this.clipToDrawableRect = true,
     this.tickFormatter,
   });
 
@@ -68,22 +68,19 @@ class TimePaintObject<T extends TimeIndicator> extends TimeBasePaintObject<T> {
   }
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(Canvas canvas, Size size, {required int start, required int end}) {
     if (indicator.clipToDrawableRect) {
       canvas.save();
       canvas.clipRect(drawableRect);
-      paintTimeChart(canvas, size);
+      paintTimeChart(canvas, size, start: start, end: end);
       canvas.restore();
     } else {
-      paintTimeChart(canvas, size);
+      paintTimeChart(canvas, size, start: start, end: end);
     }
   }
 
-  void paintTimeChart(Canvas canvas, Size size) {
+  void paintTimeChart(Canvas canvas, Size size, {required int start, required int end}) {
     final data = klineData;
-    final start = data.start;
-    final end = data.end;
-
     final interval = data.interval;
     if (!interval.isValid) return;
     final style = indicator.timeLabel.toLabelStyle(textColor: theme.ticksTextColor);

@@ -101,7 +101,11 @@ extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
     // 于是「网格在最下面」由本方法的内部顺序保证, 编排层不必知道网格线的存在。
     doPaintGridLines(canvas, size);
 
-    paint(canvas, size);
+    paint(canvas, size, start: paintStart, end: paintEnd);
+
+    if (settingConfig.showYAxisTick) {
+      paintYAxisTicks(canvas, size);
+    }
 
     if (!context.isCrossing) {
       paintTips(
@@ -392,7 +396,7 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
   double? doPaintChart(Canvas canvas, Size size) {
     // 网格线坐标落在 drawableRect 内, 编排层此刻的 clipRect(mainRect, 平滑期是更宽的
     // canvasRect)裁不到它。
-    final dys = doPaintGridLines(canvas, size);
+    doPaintGridLines(canvas, size);
 
     if (isFirstDrawTipsArea) {
       // 如果设置总是要在Tips区域下绘制指标图, 则要首先绘制完所有Tips.
@@ -401,27 +405,21 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
         doPaintTips(canvas, model: klineData.latest);
       }
       for (final object in paintableChildren) {
-        object.paint(canvas, size);
+        object.paint(canvas, size, start: paintStart, end: paintEnd);
       }
     } else {
       for (final object in paintableChildren) {
-        object.paint(canvas, size);
+        object.paint(canvas, size, start: paintStart, end: paintEnd);
       }
       if (!context.isCrossing) {
         doPaintTips(canvas, model: klineData.latest);
       }
     }
 
-    // 直接调 paintYAxisTicks、不在 candle 上另设一层入口: 那一层只会重复这三个判断再转发。
-    // 自行绘制刻度文本的子类覆写 `PaintGridTicksMixin.paintYAxisTicks` 并返回实测最大宽度即可。
+    // 刻度由 candle 自己准备参数并绘制; 容器只判断开关, 不在此另设一层入口。
     final candle = _candlePaintObject;
-    if (candle == null || dys.isEmpty || !settingConfig.showYAxisTick) return null;
-    return candle.paintYAxisTicks(
-      canvas,
-      dys: dys,
-      precision: klineData.precision,
-      yAxisSide: candle.yAxisSide,
-    );
+    if (candle == null || !settingConfig.showYAxisTick) return null;
+    return candle.paintYAxisTicks(canvas, size);
   }
 
   void doPaintOverlay(Canvas canvas, Size size) {

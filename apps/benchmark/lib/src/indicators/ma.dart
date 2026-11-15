@@ -116,10 +116,7 @@ class _BenchMaPaintObject extends ComputedPaintObject<BenchMaIndicator> {
   }
 
   @override
-  void paint(Canvas canvas, Size size) {
-    // 左缘多画一根, 让折线从视区外接入。
-    final start = math.max(klineData.start - 1, 0);
-    final end = klineData.end;
+  void paint(Canvas canvas, Size size, {required int start, required int end}) {
     for (int j = 0; j < indicator.calcParam.length; j++) {
       final points = <Offset>[];
       for (int i = start; i < end; i++) {

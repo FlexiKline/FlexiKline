@@ -321,10 +321,10 @@ void main() {
       for (final call in calls) {
         expect(call.positionalArguments[0], PointMode.lines);
       }
-      final visible = chart.klineData.end - chart.klineData.start;
+      final drawn = candle.paintEnd - candle.paintStart;
       final bodies = calls.sublist(2);
       final bodySegments = bodies.fold<int>(0, (n, c) => n + (c.positionalArguments[1] as Float32List).length ~/ 4);
-      expect(bodySegments, visible, reason: '每根可见蜡烛一段实体');
+      expect(bodySegments, drawn, reason: '绘制区间内每根蜡烛一段实体');
       for (final body in bodies) {
         final paint = body.positionalArguments[2] as Paint;
         expect(paint.strokeCap, StrokeCap.butt);
@@ -368,14 +368,14 @@ void main() {
     });
 
     testWidgets('OHLC: 每根三段(影线 + 开盘左短线 + 收盘右短线), 按涨跌两批', (tester) async {
-      await mount(tester, _Candle(chartType: FlexiChartType.barOhlc));
+      final candle = await mount(tester, _Candle(chartType: FlexiChartType.barOhlc));
       final canvas = await paint(tester);
 
       final calls = rawPoints(canvas);
       expect(calls, hasLength(2));
-      final visible = chart.klineData.end - chart.klineData.start;
+      final drawn = candle.paintEnd - candle.paintStart;
       final segments = calls.fold<int>(0, (n, c) => n + (c.positionalArguments[1] as Float32List).length ~/ 4);
-      expect(segments, visible * 3);
+      expect(segments, drawn * 3);
     });
   });
 

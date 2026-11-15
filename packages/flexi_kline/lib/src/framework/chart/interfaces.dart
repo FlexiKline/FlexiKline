@@ -103,11 +103,13 @@ abstract interface class IPaintObject {
   /// > 不可用于值到像素的换算。于是这一趟只适合与数据无关的图形。
   void paintPlaceholder(Canvas canvas, Size size);
 
-  /// 绘制指标图
+  /// 绘制指标图, 只绘制下标区间 [start, end) 内的图形。
   ///
-  /// [canvas] 画布
-  /// [size] 绘制区域大小
-  void paint(Canvas canvas, Size size);
+  /// 区间由框架给出, 指标不得读取 klineData.start / klineData.end 决定绘制范围。
+  void paint(Canvas canvas, Size size, {required int start, required int end});
+
+  /// 绘制 Y 轴刻度文本, 返回文本最大宽度(供滑竿热区使用); 不绘制时返回 0。
+  double paintYAxisTicks(Canvas canvas, Size size);
 
   /// 在所有指标图绘制结束后额外的绘制
   ///

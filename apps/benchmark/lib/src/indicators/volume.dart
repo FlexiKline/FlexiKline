@@ -55,10 +55,8 @@ class _BenchVolumePaintObject extends DirectPaintObject<BenchVolumeIndicator> {
   }
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(Canvas canvas, Size size, {required int start, required int end}) {
     final list = klineData.list;
-    final int start = klineData.start;
-    final int end = klineData.end;
 
     final dyBottom = chartRect.bottom;
 

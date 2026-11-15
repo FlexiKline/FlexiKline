@@ -17,6 +17,7 @@
 /// 经 controller 的绘制入口驱动, 断言录制下来的标签位置; 不覆盖手势与 Widget 布局。
 library;
 
+import 'dart:math' as math;
 import 'dart:ui' show Paragraph;
 
 import 'package:flexi_formatter/date_time.dart' show TimeUnit;
@@ -88,7 +89,10 @@ void main() {
     final shown = await labels(tester);
 
     expect(shown, isNotEmpty);
-    expect(shown.length, chart.klineData.end - chart.klineData.start);
+    expect(
+      shown.length,
+      math.min(chart.klineData.end + 1, chart.klineData.length) - math.max(chart.klineData.start - 1, 0),
+    );
   });
 
   testWidgets('最新一根下方恒有标签, 新蜡烛追加后仍然如此', (tester) async {
