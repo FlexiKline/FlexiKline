@@ -163,6 +163,18 @@ void main() {
       expect(() => data.replace([_candle(1), _candle(1)], slotCount: 0), throwsAssertionError, reason: '要求严格升序');
       expect(data.list.map((item) => item.ts), [4, 5]);
     });
+
+    test('降序批次即使落在早退条件内也断言, 不静默返回 null', () {
+      final data = _data();
+      addTearDown(data.dispose);
+      data.replace([_candle(4), _candle(5)], slotCount: 0);
+
+      // 末根 3 < 列表末根 5, 旧实现会先早退返回 null 而不断言。
+      expect(() => data.updateLatest([_candle(7), _candle(3)], slotCount: 0), throwsAssertionError);
+      // 末根 8 > 列表首根 4, 旧实现会先早退返回 null 而不断言。
+      expect(() => data.prependHistory([_candle(9), _candle(8)], slotCount: 0), throwsAssertionError);
+      expect(data.list.map((item) => item.ts), [4, 5]);
+    });
   });
 
   group('KlineData timestamp <-> float index', () {

@@ -20,7 +20,7 @@ part 'draw_param.g.dart';
 
 /// 箭头(ArrowLine)绘制参数
 @CopyWith()
-// @FlexiOverlaySerializable
+// @FlexiSerializable
 class ArrowLineDrawParam {
   const ArrowLineDrawParam({
     this.arrowsRadians = pi30,

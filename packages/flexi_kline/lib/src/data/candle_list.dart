@@ -89,8 +89,8 @@ mixin CandleListData on BaseData {
   /// [batch] 覆盖的时间段以 [batch] 为准: 同 ts 蜡烛保留计算槽后更新行情, 其余替换或追加。
   Range? updateLatest(List<ICandleModel> batch, {required int slotCount}) {
     if (batch.isEmpty || list.isEmpty) return null;
-    if (batch.last.timestamp < _list.last.ts || batch.first.timestamp < _list.first.ts) return null;
     assert(_isAscending(batch), 'updateLatest batch must be in ascending time order');
+    if (batch.last.timestamp < _list.last.ts || batch.first.timestamp < _list.first.ts) return null;
 
     var tailStart = length;
     while (tailStart > 0 && _list[tailStart - 1].ts >= batch.first.timestamp) {
@@ -126,8 +126,9 @@ mixin CandleListData on BaseData {
 
   /// 把历史方向的 [batch](升序)合并进头部并要求全量计算; 方向不符时返回 null。
   Range? prependHistory(List<ICandleModel> batch, {required int slotCount}) {
-    if (batch.isEmpty || list.isEmpty || batch.last.timestamp > _list.first.ts) return null;
+    if (batch.isEmpty || list.isEmpty) return null;
     assert(_isAscending(batch), 'prependHistory batch must be in ascending time order');
+    if (batch.last.timestamp > _list.first.ts) return null;
 
     final incoming = batch.map((item) => item.toFlexiCandleModel(slotCount)).toList(growable: false);
     var headEnd = 0;
