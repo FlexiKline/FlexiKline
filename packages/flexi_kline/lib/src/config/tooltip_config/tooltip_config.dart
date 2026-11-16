@@ -24,7 +24,7 @@ import '../gradient_config/gradient_config.dart';
 part 'tooltip_config.g.dart';
 
 @CopyWith()
-@FlexiConfigSerializable
+@FlexiSerializable
 class TooltipConfig {
   const TooltipConfig({
     this.show = true,

@@ -23,7 +23,7 @@ import '../../framework/serializers.dart';
 part 'point_config.g.dart';
 
 @CopyWith()
-@FlexiConfigSerializable
+@FlexiSerializable
 class PointConfig {
   const PointConfig({
     this.radius = 2,

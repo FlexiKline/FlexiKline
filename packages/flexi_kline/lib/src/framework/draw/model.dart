@@ -15,7 +15,7 @@
 part of 'overlay.dart';
 
 /// Overlay 绘制点坐标
-@FlexiOverlaySerializable
+@FlexiSerializable
 class Point {
   Point({
     this.index = -1,
@@ -80,7 +80,7 @@ double _pointValueFromJson(Object? json) => parseDouble(json) ?? 0;
 /// [lock] 是否锁定
 /// [steps] 指定Overlay需要几个点来完成绘制操作, 决定points的数量
 /// [line] Overlay绘制时线配置
-@FlexiOverlaySerializable
+@FlexiSerializable
 class Overlay implements Comparable<Overlay> {
   Overlay({
     required this.id,

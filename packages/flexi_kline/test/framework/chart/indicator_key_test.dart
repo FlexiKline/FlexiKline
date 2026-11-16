@@ -46,8 +46,8 @@ void main() {
         expect(create('kdj', label: 'KDJ').toString(), allOf(contains(type), contains('kdj'), contains('KDJ')));
       });
 
-      test('IIndicatorKeyConvert 按 类型:id:label 往返, 保留具体类型', () {
-        const converter = IIndicatorKeyConvert();
+      test('IIndicatorKeyConverter 按 类型:id:label 往返, 保留具体类型', () {
+        const converter = IIndicatorKeyConverter();
         for (final (id, label) in [
           ('main', 'Main'),
           ('test', 'A:B:C'),
@@ -72,8 +72,8 @@ void main() {
     expect(const ComputedIndicatorKey('a'), isNot(const ExternalIndicatorKey('a')));
   });
 
-  group('IIndicatorKeyConvert.fromJson 的回落', () {
-    const converter = IIndicatorKeyConvert();
+  group('IIndicatorKeyConverter.fromJson 的回落', () {
+    const converter = IIndicatorKeyConverter();
 
     test('少于三段或 id 为空时返回 unknownIndicatorKey', () {
       for (final json in ['', 'DirectIndicatorKey', 'DirectIndicatorKey:test', 'DirectIndicatorKey::Label']) {
@@ -93,9 +93,9 @@ void main() {
   test('具体类型的转换器读回时统一成自己的类型', () {
     const json = 'ExternalIndicatorKey:test:Test';
     final readers = <(IIndicatorKey Function(String), Type)>[
-      (const DirectIndicatorKeyConvert().fromJson, DirectIndicatorKey),
-      (const ComputedIndicatorKeyConvert().fromJson, ComputedIndicatorKey),
-      (const ExternalIndicatorKeyConvert().fromJson, ExternalIndicatorKey),
+      (const DirectIndicatorKeyConverter().fromJson, DirectIndicatorKey),
+      (const ComputedIndicatorKeyConverter().fromJson, ComputedIndicatorKey),
+      (const ExternalIndicatorKeyConverter().fromJson, ExternalIndicatorKey),
     ];
     for (final (read, type) in readers) {
       final key = read(json);
@@ -104,7 +104,7 @@ void main() {
       expect(key.label, 'Test');
     }
     expect(
-      const ComputedIndicatorKeyConvert().toJson(const ComputedIndicatorKey('kdj', label: 'KDJ')),
+      const ComputedIndicatorKeyConverter().toJson(const ComputedIndicatorKey('kdj', label: 'KDJ')),
       'ComputedIndicatorKey:kdj:KDJ',
     );
   });

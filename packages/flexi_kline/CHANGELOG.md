@@ -23,6 +23,8 @@
 * Replace `paintCandleBars`, `paintCandleBar` and `paintOHLCStyleCandleChart` with `paintBarChart`, and rename `paintCandleLineChart` and `paintCandleUpDownLineChart` to `paintLineChart` and `paintUpDownLineChart`; the chart helpers take the draw range (Breaking Changes).
 * Change the default of `TimeIndicator.clipToDrawableRect` to `true` so time labels are clipped to the drawable rect (Breaking Changes).
 * Draw candle bars over the draw range, which adds one candle beyond each visible edge.
+* Merge `FlexiOverlaySerializable`, `FlexiIndicatorSerializable`, `FlexiParamSerializable`, `FlexiModelSerializable` and `FlexiConfigSerializable` into `FlexiSerializable`, which sets `explicitToJson` and `includeIfNull: false` (Breaking Changes).
+* Omit null fields from the JSON output of overlays, indicators and params instead of writing `null` (Breaking Changes).
 
 ## 2.7.2
 * Change `ScalePosition.auto` to always anchor X-axis zoom at the focal point (pinch centroid, wheel or trackpad pointer) and `middle` at the main chart center: `auto` used to pick an anchor by screen third, and `middle` followed the focal point until the latest candle left the screen.

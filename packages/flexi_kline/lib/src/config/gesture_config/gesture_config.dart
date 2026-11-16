@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'package:copy_with_extension/copy_with_extension.dart';
+import 'package:json_annotation/json_annotation.dart';
 
 import '../../framework/chart/indicator.dart';
 import '../../framework/serializers.dart';
@@ -28,7 +29,7 @@ part 'gesture_config.g.dart';
 ///   默认值60: 按单根蜡烛宽度默认值计算, 在触摸设备上, 代表还剩一屏半时, 触发LoadMore.
 ///   非触摸设备上, 根据窗口宽度自行计算设定, 或直接使用[loadMoreWhenNoEnoughDistance]更好.
 @CopyWith()
-@FlexiConfigSerializable
+@FlexiSerializable
 class GestureConfig {
   factory GestureConfig({
     bool enableLongPress = true,
@@ -111,7 +112,8 @@ class GestureConfig {
   /// 是否启用缩放操作
   final bool enableScale;
 
-  /// 缩放操作位置
+  /// 缩放操作位置; JSON 中的未知值回退为 [ScalePosition.auto], 与构造默认值一致。
+  @JsonKey(unknownEnumValue: ScalePosition.auto)
   final ScalePosition scalePosition;
 
   /// 按比例缩放蜡烛图速度. 取值范围[1~30], 建议10.

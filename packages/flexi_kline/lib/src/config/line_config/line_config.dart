@@ -14,6 +14,7 @@
 
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flutter/painting.dart';
+import 'package:json_annotation/json_annotation.dart';
 
 import '../../constant.dart';
 import '../../extension/render/types.dart';
@@ -24,7 +25,7 @@ import '../paint_config/paint_config.dart';
 part 'line_config.g.dart';
 
 @CopyWith()
-@FlexiConfigSerializable
+@FlexiSerializable
 class LineConfig {
   const LineConfig({
     this.type = LineType.solid,
@@ -35,7 +36,8 @@ class LineConfig {
     ),
   });
 
-  /// 线类型
+  /// 线类型; JSON 中的未知值回退为 [LineType.solid], 与构造默认值一致。
+  @JsonKey(unknownEnumValue: LineType.solid)
   final LineType type;
 
   /// 线长

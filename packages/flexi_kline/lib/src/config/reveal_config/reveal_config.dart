@@ -33,7 +33,7 @@ enum RevealTrigger {
 ///
 /// 框架决定何时展开; 绘制由指标在 `paintReveal` 中完成。默认关闭。
 @CopyWith()
-@FlexiConfigSerializable
+@FlexiSerializable
 class RevealConfig {
   const RevealConfig({
     this.enabled = false,

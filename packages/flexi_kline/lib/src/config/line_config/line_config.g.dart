@@ -96,9 +96,13 @@ extension $LineConfigCopyWith on LineConfig {
 // **************************************************************************
 
 LineConfig _$LineConfigFromJson(Map<String, dynamic> json) => LineConfig(
-  type: json['type'] == null
-      ? LineType.solid
-      : const LineTypeConverter().fromJson(json['type'] as String),
+  type:
+      $enumDecodeNullable(
+        _$LineTypeEnumMap,
+        json['type'],
+        unknownValue: LineType.solid,
+      ) ??
+      LineType.solid,
   length: (json['length'] as num?)?.toDouble(),
   dashes:
       (json['dashes'] as List<dynamic>?)
@@ -112,8 +116,14 @@ LineConfig _$LineConfigFromJson(Map<String, dynamic> json) => LineConfig(
 
 Map<String, dynamic> _$LineConfigToJson(LineConfig instance) =>
     <String, dynamic>{
-      'type': const LineTypeConverter().toJson(instance.type),
+      'type': _$LineTypeEnumMap[instance.type]!,
       'length': ?instance.length,
       'dashes': instance.dashes,
       'paint': instance.paint.toJson(),
     };
+
+const _$LineTypeEnumMap = {
+  LineType.solid: 'solid',
+  LineType.dashed: 'dashed',
+  LineType.dotted: 'dotted',
+};

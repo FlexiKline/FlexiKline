@@ -26,7 +26,7 @@ import '../text_area_config/text_area_config.dart';
 part 'draw_config.g.dart';
 
 @CopyWith()
-@FlexiConfigSerializable
+@FlexiSerializable
 class DrawConfig {
   const DrawConfig({
     this.enable = false,

@@ -143,9 +143,13 @@ TimeIndicator _$TimeIndicatorFromJson(Map<String, dynamic> json) =>
           : const EdgeInsetsConverter().fromJson(
               json['padding'] as Map<String, dynamic>,
             ),
-      position: json['position'] == null
-          ? DrawPosition.middle
-          : const DrawPositionConverter().fromJson(json['position'] as String),
+      position:
+          $enumDecodeNullable(
+            _$DrawPositionEnumMap,
+            json['position'],
+            unknownValue: DrawPosition.middle,
+          ) ??
+          DrawPosition.middle,
       timeLabel: json['timeLabel'] == null
           ? const TextAreaConfig(
               style: TextStyle(
@@ -165,7 +169,12 @@ Map<String, dynamic> _$TimeIndicatorToJson(TimeIndicator instance) =>
       'height': instance.height,
       'padding': const EdgeInsetsConverter().toJson(instance.padding),
       'zIndex': instance.zIndex,
-      'position': const DrawPositionConverter().toJson(instance.position),
+      'position': _$DrawPositionEnumMap[instance.position]!,
       'timeLabel': instance.timeLabel.toJson(),
       'clipToDrawableRect': instance.clipToDrawableRect,
     };
+
+const _$DrawPositionEnumMap = {
+  DrawPosition.middle: 'middle',
+  DrawPosition.bottom: 'bottom',
+};

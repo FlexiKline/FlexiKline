@@ -63,6 +63,7 @@ const unknownDrawType = FlexiDrawType('unknown', 0);
 const String drawGroupUnknown = 'unknown';
 
 /// 磁吸模式
+@JsonEnum()
 enum MagnetMode {
   normal,
   weak,

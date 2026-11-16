@@ -24,7 +24,7 @@ part 'mark_config.g.dart';
 
 @CopyWith()
 // 标记(最高价/最低价/最新价/最后价)
-@FlexiConfigSerializable
+@FlexiSerializable
 class MarkConfig {
   const MarkConfig({
     this.show = true,

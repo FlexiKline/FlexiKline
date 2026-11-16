@@ -22,7 +22,7 @@ import '../../framework/serializers.dart';
 part 'paint_config.g.dart';
 
 @CopyWith()
-@FlexiConfigSerializable
+@FlexiSerializable
 class PaintConfig {
   const PaintConfig({
     this.color,

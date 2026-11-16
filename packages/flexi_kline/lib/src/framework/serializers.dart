@@ -30,8 +30,8 @@ import 'grid_tick_mode.dart';
 /// 格式：`type:id:label`，其中 type 为 `base` | `data` | `business`。
 /// - toJson：根据 Key 类型写入对应前缀。
 /// - fromJson：根据 type 前缀还原为对应 Key 子类型。
-class IIndicatorKeyConvert implements JsonConverter<IIndicatorKey, String> {
-  const IIndicatorKeyConvert();
+class IIndicatorKeyConverter implements JsonConverter<IIndicatorKey, String> {
+  const IIndicatorKeyConverter();
 
   @override
   IIndicatorKey fromJson(String json) {
@@ -47,9 +47,9 @@ class IIndicatorKeyConvert implements JsonConverter<IIndicatorKey, String> {
     final label = parts.sublist(2).join(':');
 
     return switch (type) {
-      final typeName when typeName == (ComputedIndicatorKey).toString() => ComputedIndicatorKey(id, label: label),
-      final typeName when typeName == (ExternalIndicatorKey).toString() => ExternalIndicatorKey(id, label: label),
-      final typeName when typeName == (DirectIndicatorKey).toString() => DirectIndicatorKey(id, label: label),
+      'ComputedIndicatorKey' => ComputedIndicatorKey(id, label: label),
+      'ExternalIndicatorKey' => ExternalIndicatorKey(id, label: label),
+      'DirectIndicatorKey' => DirectIndicatorKey(id, label: label),
       _ => DirectIndicatorKey(id, label: label), // unknownIndicatorKey
     };
   }
@@ -60,80 +60,51 @@ class IIndicatorKeyConvert implements JsonConverter<IIndicatorKey, String> {
   }
 }
 
-/// DirectIndicatorKey 序列化转换器
+/// 具体 IndicatorKey 子类型的序列化转换器公共实现。
 ///
-/// 专门用于处理 DirectIndicatorKey 类型的序列化，
-/// 让 json_serializable 能够识别并生成正确的序列化代码。
-class DirectIndicatorKeyConvert implements JsonConverter<DirectIndicatorKey, String> {
-  const DirectIndicatorKeyConvert();
+/// json_serializable 要求为每个子类型提供具体的转换器类。反序列化结果不是 [K] 时,
+/// 按 id 与 label 重建为 [K], 保证字段类型与生成代码一致。
+abstract class _IndicatorKeyConverter<K extends IIndicatorKey> implements JsonConverter<K, String> {
+  const _IndicatorKeyConverter();
+
+  K create(String id, String label);
 
   @override
-  DirectIndicatorKey fromJson(String json) {
-    final result = const IIndicatorKeyConvert().fromJson(json);
-    if (result is DirectIndicatorKey) {
-      return result;
-    }
-    // 如果解析结果不是 DirectIndicatorKey，返回一个默认值
-    // 这种情况理论上不应该发生，但为了类型安全需要处理
-    return DirectIndicatorKey(result.id, label: result.label);
+  K fromJson(String json) {
+    final result = const IIndicatorKeyConverter().fromJson(json);
+    return result is K ? result : create(result.id, result.label);
   }
 
   @override
-  String toJson(DirectIndicatorKey key) {
-    return const IIndicatorKeyConvert().toJson(key);
-  }
+  String toJson(K key) => const IIndicatorKeyConverter().toJson(key);
+}
+
+/// DirectIndicatorKey 序列化转换器
+class DirectIndicatorKeyConverter extends _IndicatorKeyConverter<DirectIndicatorKey> {
+  const DirectIndicatorKeyConverter();
+
+  @override
+  DirectIndicatorKey create(String id, String label) => DirectIndicatorKey(id, label: label);
 }
 
 /// ComputedIndicatorKey 序列化转换器
-///
-/// 专门用于处理 ComputedIndicatorKey 类型的序列化，
-/// 让 json_serializable 能够识别并生成正确的序列化代码。
-class ComputedIndicatorKeyConvert implements JsonConverter<ComputedIndicatorKey, String> {
-  const ComputedIndicatorKeyConvert();
+class ComputedIndicatorKeyConverter extends _IndicatorKeyConverter<ComputedIndicatorKey> {
+  const ComputedIndicatorKeyConverter();
 
   @override
-  ComputedIndicatorKey fromJson(String json) {
-    final result = const IIndicatorKeyConvert().fromJson(json);
-    if (result is ComputedIndicatorKey) {
-      return result;
-    }
-    // 如果解析结果不是 ComputedIndicatorKey，返回一个默认值
-    // 这种情况理论上不应该发生，但为了类型安全需要处理
-    return ComputedIndicatorKey(result.id, label: result.label);
-  }
-
-  @override
-  String toJson(ComputedIndicatorKey key) {
-    return const IIndicatorKeyConvert().toJson(key);
-  }
+  ComputedIndicatorKey create(String id, String label) => ComputedIndicatorKey(id, label: label);
 }
 
 /// ExternalIndicatorKey 序列化转换器
-///
-/// 专门用于处理 ExternalIndicatorKey 类型的序列化，
-/// 让 json_serializable 能够识别并生成正确的序列化代码。
-class ExternalIndicatorKeyConvert implements JsonConverter<ExternalIndicatorKey, String> {
-  const ExternalIndicatorKeyConvert();
+class ExternalIndicatorKeyConverter extends _IndicatorKeyConverter<ExternalIndicatorKey> {
+  const ExternalIndicatorKeyConverter();
 
   @override
-  ExternalIndicatorKey fromJson(String json) {
-    final result = const IIndicatorKeyConvert().fromJson(json);
-    if (result is ExternalIndicatorKey) {
-      return result;
-    }
-    // 如果解析结果不是 ExternalIndicatorKey，返回一个默认值
-    // 这种情况理论上不应该发生，但为了类型安全需要处理
-    return ExternalIndicatorKey(result.id, label: result.label);
-  }
-
-  @override
-  String toJson(ExternalIndicatorKey key) {
-    return const IIndicatorKeyConvert().toJson(key);
-  }
+  ExternalIndicatorKey create(String id, String label) => ExternalIndicatorKey(id, label: label);
 }
 
-class ITimeIntervalConvert implements JsonConverter<ITimeInterval, Map<String, dynamic>> {
-  const ITimeIntervalConvert();
+class ITimeIntervalConverter implements JsonConverter<ITimeInterval, Map<String, dynamic>> {
+  const ITimeIntervalConverter();
 
   @override
   ITimeInterval fromJson(Map<String, dynamic> json) {
@@ -161,28 +132,13 @@ class SetIndicatorKeyConverter implements JsonConverter<Set<IIndicatorKey>, List
 
   @override
   Set<IIndicatorKey> fromJson(List<dynamic> json) {
-    return json.map((e) => const IIndicatorKeyConvert().fromJson(e)).toSet();
+    return json.map((e) => const IIndicatorKeyConverter().fromJson(e)).toSet();
   }
 
   @override
   List<dynamic> toJson(Set<IIndicatorKey> object) {
-    return object.map((e) => const IIndicatorKeyConvert().toJson(e)).toList();
+    return object.map((e) => const IIndicatorKeyConverter().toJson(e)).toList();
   }
-}
-
-class PaintModeConverter implements JsonConverter<PaintMode, String> {
-  const PaintModeConverter();
-
-  @override
-  PaintMode fromJson(String json) {
-    return PaintMode.values.firstWhere(
-      (e) => e.name == json,
-      orElse: () => PaintMode.combine,
-    );
-  }
-
-  @override
-  String toJson(PaintMode mode) => mode.name;
 }
 
 class FlexiChartTypeConverter implements JsonConverter<FlexiChartType, Map<String, dynamic>> {
@@ -224,36 +180,6 @@ class FlexiChartTypeConverter implements JsonConverter<FlexiChartType, Map<Strin
       },
     };
   }
-}
-
-class FlexiChartBarStyleConverter implements JsonConverter<ChartBarStyle, String> {
-  const FlexiChartBarStyleConverter();
-
-  @override
-  ChartBarStyle fromJson(String json) {
-    return ChartBarStyle.values.firstWhere(
-      (e) => e.name.equalsIgnoreCase(json),
-      orElse: () => ChartBarStyle.allSolid,
-    );
-  }
-
-  @override
-  String toJson(ChartBarStyle style) => style.name;
-}
-
-class FlexiChartLineStyleConverter implements JsonConverter<ChartLineStyle, String> {
-  const FlexiChartLineStyleConverter();
-
-  @override
-  ChartLineStyle fromJson(String json) {
-    return ChartLineStyle.values.firstWhere(
-      (e) => e.name.equalsIgnoreCase(json),
-      orElse: () => ChartLineStyle.normal,
-    );
-  }
-
-  @override
-  String toJson(ChartLineStyle style) => style.name;
 }
 
 /// LineChartType 类型的序列化转换器
@@ -301,7 +227,7 @@ class IntervalChartTypesConverter implements JsonConverter<Map<ITimeInterval, Fl
       json.map((e) {
         final map = e as Map<String, dynamic>;
         return MapEntry(
-          const ITimeIntervalConvert().fromJson(map['interval'] as Map<String, dynamic>),
+          const ITimeIntervalConverter().fromJson(map['interval'] as Map<String, dynamic>),
           const FlexiChartTypeConverter().fromJson(map['chartType'] as Map<String, dynamic>),
         );
       }),
@@ -314,47 +240,11 @@ class IntervalChartTypesConverter implements JsonConverter<Map<ITimeInterval, Fl
     return map.entries
         .map(
           (e) => {
-            'interval': const ITimeIntervalConvert().toJson(e.key),
+            'interval': const ITimeIntervalConverter().toJson(e.key),
             'chartType': const FlexiChartTypeConverter().toJson(e.value),
           },
         )
         .toList();
-  }
-}
-
-/// 基础样式转换
-
-class DrawPositionConverter implements JsonConverter<DrawPosition, String> {
-  const DrawPositionConverter();
-
-  @override
-  DrawPosition fromJson(String json) {
-    return DrawPosition.values.firstWhere(
-      (e) => e.name == json,
-      orElse: () => DrawPosition.middle,
-    );
-  }
-
-  @override
-  String toJson(DrawPosition object) {
-    return object.name;
-  }
-}
-
-class ScalePositionConverter implements JsonConverter<ScalePosition, String> {
-  const ScalePositionConverter();
-
-  @override
-  ScalePosition fromJson(String json) {
-    return ScalePosition.values.firstWhere(
-      (e) => e.name == json,
-      orElse: () => ScalePosition.auto,
-    );
-  }
-
-  @override
-  String toJson(ScalePosition object) {
-    return object.name;
   }
 }
 
@@ -403,23 +293,6 @@ class BlendModeConverter implements JsonConverter<BlendMode, String> {
 
   @override
   String toJson(BlendMode object) {
-    return object.name;
-  }
-}
-
-class LineTypeConverter implements JsonConverter<LineType, String> {
-  const LineTypeConverter();
-
-  @override
-  LineType fromJson(String json) {
-    return LineType.values.firstWhere(
-      (e) => e.name == json,
-      orElse: () => LineType.solid,
-    );
-  }
-
-  @override
-  String toJson(LineType object) {
     return object.name;
   }
 }
@@ -561,8 +434,8 @@ class RectConverter implements JsonConverter<Rect, Map<String, dynamic>> {
   }
 }
 
-class BorderSideConvert implements JsonConverter<BorderSide, Map<String, dynamic>> {
-  const BorderSideConvert();
+class BorderSideConverter implements JsonConverter<BorderSide, Map<String, dynamic>> {
+  const BorderSideConverter();
 
   @override
   BorderSide fromJson(Map<String, dynamic> json) {
@@ -641,8 +514,8 @@ class BorderRadiusConverter implements JsonConverter<BorderRadius, Map<String, d
   }
 }
 
-class TextAlignConvert implements JsonConverter<TextAlign, String> {
-  const TextAlignConvert();
+class TextAlignConverter implements JsonConverter<TextAlign, String> {
+  const TextAlignConverter();
 
   @override
   TextAlign fromJson(String json) {
@@ -958,22 +831,6 @@ class DecimalConverter implements JsonConverter<Decimal, dynamic> {
   }
 }
 
-class MagnetModeConverter implements JsonConverter<MagnetMode, String> {
-  const MagnetModeConverter();
-  @override
-  MagnetMode fromJson(String json) {
-    return MagnetMode.values.firstWhere(
-      (e) => e.name == json,
-      orElse: () => MagnetMode.normal,
-    );
-  }
-
-  @override
-  String toJson(MagnetMode object) {
-    return object.name;
-  }
-}
-
 class IDrawTypeConverter implements JsonConverter<IDrawType, Map<String, dynamic>> {
   const IDrawTypeConverter();
 
@@ -995,17 +852,14 @@ class IDrawTypeConverter implements JsonConverter<IDrawType, Map<String, dynamic
 }
 
 const _basicConverterList = <JsonConverter>[
-  DrawPositionConverter(),
-  ScalePositionConverter(),
   AxisDirectionConverter(),
   PaintingStyleConverter(),
   BlendModeConverter(),
-  LineTypeConverter(),
   GridTickModeConverter(),
   EdgeInsetsConverter(),
   SizeConverter(),
   RectConverter(),
-  BorderSideConvert(),
+  BorderSideConverter(),
   BorderConverter(),
   BorderRadiusConverter(),
   ClipConverter(),
@@ -1014,67 +868,32 @@ const _basicConverterList = <JsonConverter>[
   LinearGradientConverter(),
   BoxShadowConverter(),
   OffsetConverter(),
-  TextAlignConvert(),
+  TextAlignConverter(),
   TextStyleConverter(),
   StrutStyleConverter(),
   ColorConverter(),
   DecimalConverter(),
   FlexiChartTypeConverter(),
-  FlexiChartBarStyleConverter(),
-  FlexiChartLineStyleConverter(),
   LineChartTypeConverter(),
   BarChartTypeConverter(),
-  ITimeIntervalConvert(),
+  ITimeIntervalConverter(),
 ];
 
+/// 框架内可序列化类共用的 json_serializable 配置。
+///
+/// 转换器列表是超集: json_serializable 只对字段类型匹配的转换器生效, 多出的条目不影响其他字段。
+/// 子类型的 IndicatorKey 转换器须排在 [IIndicatorKeyConverter] 之前。
 // ignore: constant_identifier_names
-const FlexiOverlaySerializable = JsonSerializable(
+const FlexiSerializable = JsonSerializable(
   converters: [
     IDrawTypeConverter(),
-    MagnetModeConverter(),
-    ..._basicConverterList,
-  ],
-  explicitToJson: true,
-  // genericArgumentFactories: true,
-);
-
-// ignore: constant_identifier_names
-const FlexiIndicatorSerializable = JsonSerializable(
-  converters: [
-    ExternalIndicatorKeyConvert(),
-    ComputedIndicatorKeyConvert(),
-    DirectIndicatorKeyConvert(),
-    IIndicatorKeyConvert(),
-    PaintModeConverter(),
+    ExternalIndicatorKeyConverter(),
+    ComputedIndicatorKeyConverter(),
+    DirectIndicatorKeyConverter(),
+    IIndicatorKeyConverter(),
+    SetIndicatorKeyConverter(),
     IntervalChartTypesConverter(),
     ..._basicConverterList,
-  ],
-  explicitToJson: true,
-  // genericArgumentFactories: true,
-);
-
-// ignore: constant_identifier_names
-const FlexiParamSerializable = JsonSerializable(
-  converters: [
-    ColorConverter(),
-    EdgeInsetsConverter(),
-  ],
-  explicitToJson: true,
-);
-
-// ignore: constant_identifier_names
-const FlexiModelSerializable = JsonSerializable(
-  converters: _basicConverterList,
-  // ignoreUnannotated: true,
-  explicitToJson: true,
-  includeIfNull: false,
-);
-
-// ignore: constant_identifier_names
-const FlexiConfigSerializable = JsonSerializable(
-  converters: [
-    ..._basicConverterList,
-    SetIndicatorKeyConverter(),
   ],
   explicitToJson: true,
   includeIfNull: false,

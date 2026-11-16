@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:json_annotation/json_annotation.dart';
+
 /// K线图绘制类型
 sealed class FlexiChartType {
   const FlexiChartType();
@@ -135,6 +137,7 @@ final class FlexiLineChartType extends FlexiChartType {
 }
 
 /// K线柱状图的绘制样式
+@JsonEnum()
 enum ChartBarStyle {
   allSolid, // 全实心
   allHollow, // 全空心
@@ -148,6 +151,7 @@ enum ChartBarStyle {
 }
 
 /// K线线图的绘制样式
+@JsonEnum()
 enum ChartLineStyle {
   normal, // 普通折线
   updown, // 涨跌线

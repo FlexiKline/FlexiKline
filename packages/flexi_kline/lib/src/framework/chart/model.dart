@@ -202,6 +202,8 @@ abstract class TimeBaseIndicator extends DirectIndicator {
     required this.position,
   }) : super(key: timeIndicatorKey, autoActivate: true);
 
+  /// 时间指标的绘制位置; JSON 中的未知值回退为 [DrawPosition.middle], 与构造默认值一致。
+  @JsonKey(unknownEnumValue: DrawPosition.middle)
   final DrawPosition position;
 
   @override
@@ -213,7 +215,7 @@ abstract class TimeBaseIndicator extends DirectIndicator {
 /// 使用 [DirectIndicatorKey]，属于基础/系统指标，不占 slot。
 /// [children] 存储当前主区已选中的子指标 Key 集合。
 @CopyWith()
-@FlexiIndicatorSerializable
+@FlexiSerializable
 class MainPaintObjectIndicator<T extends Indicator<IIndicatorKey>> extends Indicator {
   MainPaintObjectIndicator({
     required this.size,

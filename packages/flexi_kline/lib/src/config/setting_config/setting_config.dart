@@ -23,7 +23,7 @@ import '../reveal_config/reveal_config.dart';
 part 'setting_config.g.dart';
 
 @CopyWith()
-@FlexiConfigSerializable
+@FlexiSerializable
 class SettingConfig {
   const SettingConfig({
     /// Long/Short 浅色不透明度 [longTintColor] 和 [shortTintColor]

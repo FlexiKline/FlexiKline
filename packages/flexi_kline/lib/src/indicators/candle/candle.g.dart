@@ -597,7 +597,7 @@ Map<String, dynamic> _$CandleIndicatorToJson(CandleIndicator instance) =>
       'offViewPriceMark': instance.offViewPriceMark.toJson(),
       'inViewPriceMark': instance.inViewPriceMark.toJson(),
       'showLatestPoint': instance.showLatestPoint,
-      'latestPoint': instance.latestPoint?.toJson(),
+      'latestPoint': ?instance.latestPoint?.toJson(),
       'useCandleColorForLatestPriceBackground':
           instance.useCandleColorForLatestPriceBackground,
       'showCountdown': instance.showCountdown,
@@ -607,30 +607,30 @@ Map<String, dynamic> _$CandleIndicatorToJson(CandleIndicator instance) =>
       'dateMarkDuration': instance.dateMarkDuration,
       'chartType': const FlexiChartTypeConverter().toJson(instance.chartType),
       'minWidthLineType':
-          _$JsonConverterToJson<Map<String, dynamic>, FlexiLineChartType>(
+          ?_$JsonConverterToJson<Map<String, dynamic>, FlexiLineChartType>(
             instance.minWidthLineType,
             const LineChartTypeConverter().toJson,
           ),
-      'intervalChartTypes': const IntervalChartTypesConverter().toJson(
+      'intervalChartTypes': ?const IntervalChartTypesConverter().toJson(
         instance.intervalChartTypes,
       ),
       'hideMainIndicatorsInLineChartMode':
           instance.hideMainIndicatorsInLineChartMode,
-      'longColor': _$JsonConverterToJson<String, Color>(
+      'longColor': ?_$JsonConverterToJson<String, Color>(
         instance.longColor,
         const ColorConverter().toJson,
       ),
-      'shortColor': _$JsonConverterToJson<String, Color>(
+      'shortColor': ?_$JsonConverterToJson<String, Color>(
         instance.shortColor,
         const ColorConverter().toJson,
       ),
-      'lineColor': _$JsonConverterToJson<String, Color>(
+      'lineColor': ?_$JsonConverterToJson<String, Color>(
         instance.lineColor,
         const ColorConverter().toJson,
       ),
-      'lineGradientConfig': instance.lineGradientConfig?.toJson(),
-      'longGradientConfig': instance.longGradientConfig?.toJson(),
-      'shortGradientConfig': instance.shortGradientConfig?.toJson(),
+      'lineGradientConfig': ?instance.lineGradientConfig?.toJson(),
+      'longGradientConfig': ?instance.longGradientConfig?.toJson(),
+      'shortGradientConfig': ?instance.shortGradientConfig?.toJson(),
     };
 
 Value? _$JsonConverterFromJson<Json, Value>(

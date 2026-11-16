@@ -308,11 +308,13 @@ GestureConfig _$GestureConfigFromJson(
   loadMoreWhenNoEnoughCandles:
       (json['loadMoreWhenNoEnoughCandles'] as num?)?.toInt() ?? 60,
   enableScale: json['enableScale'] as bool? ?? true,
-  scalePosition: json['scalePosition'] == null
-      ? ScalePosition.auto
-      : const ScalePositionConverter().fromJson(
-          json['scalePosition'] as String,
-        ),
+  scalePosition:
+      $enumDecodeNullable(
+        _$ScalePositionEnumMap,
+        json['scalePosition'],
+        unknownValue: ScalePosition.auto,
+      ) ??
+      ScalePosition.auto,
   scaleSpeed: (json['scaleSpeed'] as num?)?.toDouble() ?? 10,
   supportKeyboardShortcuts: json['supportKeyboardShortcuts'] as bool? ?? true,
   enableZoom: json['enableZoom'] as bool? ?? false,
@@ -336,9 +338,7 @@ Map<String, dynamic> _$GestureConfigToJson(GestureConfig instance) =>
       'loadMoreWhenNoEnoughDistance': ?instance.loadMoreWhenNoEnoughDistance,
       'loadMoreWhenNoEnoughCandles': instance.loadMoreWhenNoEnoughCandles,
       'enableScale': instance.enableScale,
-      'scalePosition': const ScalePositionConverter().toJson(
-        instance.scalePosition,
-      ),
+      'scalePosition': _$ScalePositionEnumMap[instance.scalePosition]!,
       'scaleSpeed': instance.scaleSpeed,
       'supportKeyboardShortcuts': instance.supportKeyboardShortcuts,
       'enableZoom': instance.enableZoom,
@@ -351,3 +351,10 @@ Map<String, dynamic> _$GestureConfigToJson(GestureConfig instance) =>
       'signalScaleFactor': instance.signalScaleFactor,
       'scaleSessionTimeout': instance.scaleSessionTimeout.inMicroseconds,
     };
+
+const _$ScalePositionEnumMap = {
+  ScalePosition.auto: 'auto',
+  ScalePosition.left: 'left',
+  ScalePosition.middle: 'middle',
+  ScalePosition.right: 'right',
+};

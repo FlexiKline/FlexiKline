@@ -23,7 +23,7 @@ part 'tips_config.g.dart';
 
 @CopyWith()
 /// 指标图顶部提示文本配置
-@FlexiConfigSerializable
+@FlexiSerializable
 class TipsConfig {
   const TipsConfig({
     this.label = '',

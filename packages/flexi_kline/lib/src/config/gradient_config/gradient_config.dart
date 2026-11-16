@@ -34,7 +34,7 @@ part 'gradient_config.g.dart';
 /// 2. 主题切换时渐变自动适应
 /// 3. 需要保持渐变与线条颜色一致性的场景
 @CopyWith()
-@FlexiConfigSerializable
+@FlexiSerializable
 class GradientConfig {
   const GradientConfig({
     this.begin = Alignment.topCenter,

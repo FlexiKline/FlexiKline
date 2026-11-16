@@ -18,7 +18,7 @@ part of 'candle.dart';
 typedef _LatestStyles = ({LabelStyle latest, LabelStyle countdown});
 
 @CopyWith()
-@FlexiIndicatorSerializable
+@FlexiSerializable
 class CandleIndicator extends CandleBaseIndicator {
   CandleIndicator({
     super.zIndex = -1,

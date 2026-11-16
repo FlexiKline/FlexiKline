@@ -26,7 +26,7 @@ import '../gradient_config/gradient_config.dart';
 part 'text_area_config.g.dart';
 
 @CopyWith()
-@FlexiConfigSerializable
+@FlexiSerializable
 class TextAreaConfig {
   const TextAreaConfig({
     /// 文本样式

@@ -24,7 +24,7 @@ import '../setting_config/setting_config.dart';
 
 part 'flexi_kline_config.g.dart';
 
-@FlexiConfigSerializable
+@FlexiSerializable
 class FlexiKlineConfig {
   FlexiKlineConfig({
     required this.grid,

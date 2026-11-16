@@ -16,7 +16,7 @@ part of 'time.dart';
 
 /// 时间刻度指标图
 @CopyWith()
-@FlexiIndicatorSerializable
+@FlexiSerializable
 class TimeIndicator extends TimeBaseIndicator {
   TimeIndicator({
     super.zIndex = 0,

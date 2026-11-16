@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:json_annotation/json_annotation.dart';
+
 /// 绘制方向
 enum DrawDirection {
   /// The draw flows from left to right.
@@ -28,6 +30,7 @@ enum DrawDirection {
 }
 
 /// 线条类型
+@JsonEnum()
 enum LineType {
   solid, // 实线
   dashed, // 虚线

@@ -28,7 +28,7 @@ part 'grid_axis_config.g.dart';
 /// 显隐由 [line] 是否为 null 表达, 不另设 `show` —— grid 层的 `GridBorder` 用 `show` 是为了
 /// 保住旧持久化配置的键, 这里是新面, 没有那条约束。
 @CopyWith()
-@FlexiConfigSerializable
+@FlexiSerializable
 class GridAxisConfig {
   const GridAxisConfig({
     this.mode = GridTickMode.fallback,

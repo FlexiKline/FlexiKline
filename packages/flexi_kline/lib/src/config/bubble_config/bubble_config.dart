@@ -24,7 +24,7 @@ part 'bubble_config.g.dart';
 
 /// 指向锚点的带箭头气泡: 外观、所在侧与间距; 内容和何时显示由使用方决定。
 @CopyWith()
-@FlexiConfigSerializable
+@FlexiSerializable
 class BubbleConfig {
   const BubbleConfig({
     this.text = const TextAreaConfig(

@@ -26,7 +26,7 @@ part 'tolerance_config.g.dart';
 /// [distanceFactor] 惯性平移的距离因子 = [velocity] * inertiaFactor; 值越大, 惯性平移距离越长.
 /// [curvestr] 惯性平移动画的响应曲线. 参考: https://api.flutter.dev/flutter/animation/Curves-class.html
 @CopyWith()
-@FlexiConfigSerializable
+@FlexiSerializable
 class ToleranceConfig {
   factory ToleranceConfig({
     int maxDuration = 3000,

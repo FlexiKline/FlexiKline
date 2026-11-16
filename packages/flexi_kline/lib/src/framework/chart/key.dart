@@ -80,6 +80,7 @@ const mainPaneIndex = -1;
 ///
 /// 注: PaintMode仅当Indicator加入MultiPaintObjectIndicator后起作用,
 /// 代表当前Indicator的绘制是否是独立绘制的, 还是依赖于MultiPaintObjectIndicator
+@JsonEnum()
 enum PaintMode {
   /// 组合模式, Indicator会联合其他子Indicator一起绘制, 坐标系共享.
   combine,
@@ -93,6 +94,7 @@ enum PaintMode {
 /// 绘制位置
 ///
 /// 主要是指定TimeIndicator的绘制位置
+@JsonEnum()
 enum DrawPosition {
   // top, // 不支持
   middle,
@@ -103,6 +105,7 @@ enum DrawPosition {
 ///
 /// [auto] 跟随缩放焦点(双指质心、滚轮或触控板的指针位置); 其余固定在主图的左缘、中心、右缘,
 /// 其中 [right] 在最新蜡烛未滑出屏幕时保持右侧空白不变。
+@JsonEnum()
 enum ScalePosition {
   auto,
   left,

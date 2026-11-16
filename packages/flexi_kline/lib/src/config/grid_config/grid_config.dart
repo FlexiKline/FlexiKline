@@ -41,7 +41,7 @@ part 'grid_config.g.dart';
 /// 3. 当未拖拽时, 使用[dragBgOpacity]不透明度填充.
 ///
 @CopyWith()
-@FlexiConfigSerializable
+@FlexiSerializable
 class GridConfig {
   const GridConfig({
     this.horizontal = const GridBorder(),
@@ -111,7 +111,7 @@ class GridConfig {
 /// 与 `tickMode` 随网格线一起下沉到指标(见 `GridAxisConfig`)。**JSON 键未变**, 因此旧的
 /// 持久化配置照常还原, 只是多余的 `count` 被忽略。
 @CopyWith()
-@FlexiConfigSerializable
+@FlexiSerializable
 class GridBorder {
   const GridBorder({
     this.show = true,

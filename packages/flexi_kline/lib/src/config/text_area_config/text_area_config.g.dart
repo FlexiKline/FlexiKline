@@ -222,7 +222,7 @@ TextAreaConfig _$TextAreaConfigFromJson(Map<String, dynamic> json) =>
             ),
       textAlign: json['textAlign'] == null
           ? TextAlign.start
-          : const TextAlignConvert().fromJson(json['textAlign'] as String),
+          : const TextAlignConverter().fromJson(json['textAlign'] as String),
       strutStyle: _$JsonConverterFromJson<Map<String, dynamic>, StrutStyle>(
         json['strutStyle'],
         const StrutStyleConverter().fromJson,
@@ -241,7 +241,7 @@ TextAreaConfig _$TextAreaConfigFromJson(Map<String, dynamic> json) =>
       ),
       border: _$JsonConverterFromJson<Map<String, dynamic>, BorderSide>(
         json['border'],
-        const BorderSideConvert().fromJson,
+        const BorderSideConverter().fromJson,
       ),
       borderRadius: _$JsonConverterFromJson<Map<String, dynamic>, BorderRadius>(
         json['borderRadius'],
@@ -267,7 +267,7 @@ Map<String, dynamic> _$TextAreaConfigToJson(
   TextAreaConfig instance,
 ) => <String, dynamic>{
   'style': const TextStyleConverter().toJson(instance.style),
-  'textAlign': const TextAlignConvert().toJson(instance.textAlign),
+  'textAlign': const TextAlignConverter().toJson(instance.textAlign),
   'strutStyle': ?_$JsonConverterToJson<Map<String, dynamic>, StrutStyle>(
     instance.strutStyle,
     const StrutStyleConverter().toJson,
@@ -286,7 +286,7 @@ Map<String, dynamic> _$TextAreaConfigToJson(
   ),
   'border': ?_$JsonConverterToJson<Map<String, dynamic>, BorderSide>(
     instance.border,
-    const BorderSideConvert().toJson,
+    const BorderSideConverter().toJson,
   ),
   'borderRadius': ?_$JsonConverterToJson<Map<String, dynamic>, BorderRadius>(
     instance.borderRadius,

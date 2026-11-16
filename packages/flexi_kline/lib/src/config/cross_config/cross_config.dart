@@ -27,7 +27,7 @@ import '../tooltip_config/tooltip_config.dart';
 part 'cross_config.g.dart';
 
 @CopyWith()
-@FlexiConfigSerializable
+@FlexiSerializable
 class CrossConfig {
   const CrossConfig({
     this.enable = true,

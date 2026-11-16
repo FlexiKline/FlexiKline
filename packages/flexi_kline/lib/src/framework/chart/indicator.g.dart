@@ -6,7 +6,9 @@ part of 'indicator.dart';
 // CopyWithGenerator
 // **************************************************************************
 
-abstract class _$MainPaintObjectIndicatorCWProxy<T extends Indicator<IIndicatorKey>> {
+abstract class _$MainPaintObjectIndicatorCWProxy<
+  T extends Indicator<IIndicatorKey>
+> {
   MainPaintObjectIndicator<T> size(ui.Size size);
 
   MainPaintObjectIndicator<T> padding(EdgeInsets padding);
@@ -42,13 +44,16 @@ class _$MainPaintObjectIndicatorCWProxyImpl<T extends Indicator<IIndicatorKey>>
   MainPaintObjectIndicator<T> size(ui.Size size) => call(size: size);
 
   @override
-  MainPaintObjectIndicator<T> padding(EdgeInsets padding) => call(padding: padding);
+  MainPaintObjectIndicator<T> padding(EdgeInsets padding) =>
+      call(padding: padding);
 
   @override
-  MainPaintObjectIndicator<T> drawBelowTipsArea(bool drawBelowTipsArea) => call(drawBelowTipsArea: drawBelowTipsArea);
+  MainPaintObjectIndicator<T> drawBelowTipsArea(bool drawBelowTipsArea) =>
+      call(drawBelowTipsArea: drawBelowTipsArea);
 
   @override
-  MainPaintObjectIndicator<T> children(Set<IIndicatorKey>? children) => call(children: children);
+  MainPaintObjectIndicator<T> children(Set<IIndicatorKey>? children) =>
+      call(children: children);
 
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `MainPaintObjectIndicator<T>(...).copyWith.fieldName(value)`.
@@ -73,7 +78,9 @@ class _$MainPaintObjectIndicatorCWProxyImpl<T extends Indicator<IIndicatorKey>>
           ? _value.padding
           // ignore: cast_nullable_to_non_nullable
           : padding as EdgeInsets,
-      drawBelowTipsArea: drawBelowTipsArea == const $CopyWithPlaceholder() || drawBelowTipsArea == null
+      drawBelowTipsArea:
+          drawBelowTipsArea == const $CopyWithPlaceholder() ||
+              drawBelowTipsArea == null
           ? _value.drawBelowTipsArea
           // ignore: cast_nullable_to_non_nullable
           : drawBelowTipsArea as bool,
@@ -85,36 +92,44 @@ class _$MainPaintObjectIndicatorCWProxyImpl<T extends Indicator<IIndicatorKey>>
   }
 }
 
-extension $MainPaintObjectIndicatorCopyWith<T extends Indicator<IIndicatorKey>> on MainPaintObjectIndicator<T> {
+extension $MainPaintObjectIndicatorCopyWith<T extends Indicator<IIndicatorKey>>
+    on MainPaintObjectIndicator<T> {
   /// Returns a callable class used to build a new instance with modified fields.
   /// Example: `instanceOfMainPaintObjectIndicator.copyWith(...)` or `instanceOfMainPaintObjectIndicator.copyWith.fieldName(...)`.
   // ignore: library_private_types_in_public_api
-  _$MainPaintObjectIndicatorCWProxy<T> get copyWith => _$MainPaintObjectIndicatorCWProxyImpl<T>(this);
+  _$MainPaintObjectIndicatorCWProxy<T> get copyWith =>
+      _$MainPaintObjectIndicatorCWProxyImpl<T>(this);
 }
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-MainPaintObjectIndicator<T> _$MainPaintObjectIndicatorFromJson<T extends Indicator<IIndicatorKey>>(
-  Map<String, dynamic> json,
-) => MainPaintObjectIndicator<T>(
+MainPaintObjectIndicator<T> _$MainPaintObjectIndicatorFromJson<
+  T extends Indicator<IIndicatorKey>
+>(Map<String, dynamic> json) => MainPaintObjectIndicator<T>(
   size: const SizeConverter().fromJson(json['size'] as Map<String, dynamic>),
   padding: const EdgeInsetsConverter().fromJson(
     json['padding'] as Map<String, dynamic>,
   ),
   drawBelowTipsArea: json['drawBelowTipsArea'] as bool? ?? false,
-  children: (json['children'] as List<dynamic>?)
-      ?.map((e) => const IIndicatorKeyConvert().fromJson(e as String))
-      .toSet(),
+  children: _$JsonConverterFromJson<List<dynamic>, Set<IIndicatorKey>>(
+    json['children'],
+    const SetIndicatorKeyConverter().fromJson,
+  ),
 )..height = (json['height'] as num).toDouble();
 
-Map<String, dynamic> _$MainPaintObjectIndicatorToJson<T extends Indicator<IIndicatorKey>>(
-  MainPaintObjectIndicator<T> instance,
-) => <String, dynamic>{
+Map<String, dynamic> _$MainPaintObjectIndicatorToJson<
+  T extends Indicator<IIndicatorKey>
+>(MainPaintObjectIndicator<T> instance) => <String, dynamic>{
   'padding': const EdgeInsetsConverter().toJson(instance.padding),
   'size': const SizeConverter().toJson(instance.size),
   'height': instance.height,
   'drawBelowTipsArea': instance.drawBelowTipsArea,
-  'children': instance.children.map(const IIndicatorKeyConvert().toJson).toList(),
+  'children': const SetIndicatorKeyConverter().toJson(instance.children),
 };
+
+Value? _$JsonConverterFromJson<Json, Value>(
+  Object? json,
+  Value? Function(Json json) fromJson,
+) => json == null ? null : fromJson(json as Json);

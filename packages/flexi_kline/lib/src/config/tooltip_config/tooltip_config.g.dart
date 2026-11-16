@@ -208,7 +208,7 @@ TooltipConfig _$TooltipConfigFromJson(Map<String, dynamic> json) =>
       ),
       border: _$JsonConverterFromJson<Map<String, dynamic>, BorderSide>(
         json['border'],
-        const BorderSideConvert().fromJson,
+        const BorderSideConverter().fromJson,
       ),
       borderRadius: _$JsonConverterFromJson<Map<String, dynamic>, BorderRadius>(
         json['borderRadius'],
@@ -245,7 +245,7 @@ Map<String, dynamic> _$TooltipConfigToJson(
   ),
   'border': ?_$JsonConverterToJson<Map<String, dynamic>, BorderSide>(
     instance.border,
-    const BorderSideConvert().toJson,
+    const BorderSideConverter().toJson,
   ),
   'borderRadius': ?_$JsonConverterToJson<Map<String, dynamic>, BorderRadius>(
     instance.borderRadius,

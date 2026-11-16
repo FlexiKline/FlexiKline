@@ -25,6 +25,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart' show TickerModeData;
+import 'package:json_annotation/json_annotation.dart';
 
 import '../../config/export.dart';
 import '../../constant.dart';
