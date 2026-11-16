@@ -87,6 +87,10 @@ class AppKlineConfig with AppKlineStorageMixin, FlexiKlineConfigurationMixin, Dr
       candleFixedSpacing: null,
       candleSpacingParts: 7,
       minPaintBlankRate: 0.9,
+      reveal: config.reveal.copyWith(
+        enabled: true,
+        trigger: RevealTrigger.specFirstLoad,
+      ),
     );
   }
 

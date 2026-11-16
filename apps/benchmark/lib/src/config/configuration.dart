@@ -78,9 +78,11 @@ class BenchConfiguration with FlexiKlineConfigurationMixin {
   @override
   SettingConfig genSettingConfig([SettingConfig? setting]) {
     // 倒计时每秒重绘一次, 会给静止场景混入与被测操作无关的帧。
+    // 首屏展开会改变首帧的绘制量, 对照测试需要显式关闭。
     return (setting ?? const SettingConfig()).copyWith(
       autoStartLastPriceCountDownTimer: false,
       autoLoadMoreData: false,
+      reveal: const RevealConfig(enabled: false),
     );
   }
 

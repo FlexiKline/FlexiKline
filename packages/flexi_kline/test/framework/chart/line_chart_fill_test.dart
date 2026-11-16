@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// `paintCandleLineChart` 的点列与填充区。
+/// `paintLineChart` 的点列与填充区。
 ///
 /// 折线在可见区两侧各多画一根，让线从视区外接入；填充区的底边取 chart 底边与最低点中更低的那个，
 /// 视区外那根比可见区间更低时填充不会在底边处断开。

@@ -132,9 +132,9 @@ FlexiKlineWidget(
     MAIndicator(
       lineWidth: 1,
       calcParam: [
-        MaParam(count: 5, color: Color(0xFFFFB74D), label: 'MA5'),
-        MaParam(count: 10, color: Color(0xFF03A9F4), label: 'MA10'),
-        MaParam(count: 30, color: Color(0xFF9C27B0), label: 'MA30'),
+        PeriodParam(period: 5, color: Color(0xFFFFB74D), label: 'MA5'),
+        PeriodParam(period: 10, color: Color(0xFF03A9F4), label: 'MA10'),
+        PeriodParam(period: 30, color: Color(0xFF9C27B0), label: 'MA30'),
       ],
     ),
     ...
@@ -400,7 +400,7 @@ Computed 比 Direct 多一层预计算：`createCalculator(dataIndex)` 创建 `I
 ```dart
 class MAIndicator extends ComputedIndicator {
   @override
-  final List<MaParam> calcParam;
+  final List<PeriodParam> calcParam;
 
   @override
   ComputedPaintObject<MAIndicator> createPaintObject() => MAPaintObject();

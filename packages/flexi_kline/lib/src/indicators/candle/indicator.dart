@@ -806,7 +806,7 @@ class CandlePaintObject<T extends CandleIndicator> extends CandleBasePaintObject
     final (top, bottom) = resolveChartType() is FlexiLineChartType
         ? (model.close, model.close)
         : (model.high, model.low);
-    // 同 paintCandleBars: 蜡烛中心; 线图退化为 close 处高度为 0 的矩形。
+    // 同 paintBarChart: 蜡烛中心; 线图退化为 close 处高度为 0 的矩形。
     final dx = indexToDx(i);
     final half = candleWidth / 2;
     final target = Rect.fromLTRB(dx - half, valueToDy(top, correct: true), dx + half, valueToDy(bottom, correct: true));

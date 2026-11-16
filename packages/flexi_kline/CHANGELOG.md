@@ -17,6 +17,12 @@
 * Add `SettingConfig.reveal` (`RevealConfig`) to animate the first load of candles from the left: `enabled` (default `false`), `trigger` (`RevealTrigger.controllerFirst` or `RevealTrigger.specFirstLoad`), `duration` in milliseconds (default `600`) and `curve` (default `easeInOut`).
 * Add `paintReveal(canvas, size, {progress = 1})` to `IPaintObject`; the default draws the candles revealed so far, and indicators override it for a custom reveal.
 * Skip the reveal when the system asks to reduce motion (`SemanticsBinding.instance.disableAnimations`), and show the final state at once.
+* Change `IPaintObject.paint` to take the draw range as `{required int start, required int end}`; the framework draws `[start, end)` and indicators must not read `klineData.start` or `klineData.end` to decide their drawing range (Breaking Changes).
+* Add `IPaintObject.paintYAxisTicks(canvas, size)`, which draws the Y-axis tick labels and returns the widest label; the former indicator helper is renamed to `paintYAxisTickLabels` (Breaking Changes).
+* Remove `PaintYAxisTicksOnCrossMixin` and merge its behavior into `PaintGridTicksMixin` (Breaking Changes).
+* Replace `paintCandleBars`, `paintCandleBar` and `paintOHLCStyleCandleChart` with `paintBarChart`, and rename `paintCandleLineChart` and `paintCandleUpDownLineChart` to `paintLineChart` and `paintUpDownLineChart`; the chart helpers take the draw range (Breaking Changes).
+* Change the default of `TimeIndicator.clipToDrawableRect` to `true` so time labels are clipped to the drawable rect (Breaking Changes).
+* Draw candle bars over the draw range, which adds one candle beyond each visible edge.
 
 ## 2.7.2
 * Change `ScalePosition.auto` to always anchor X-axis zoom at the focal point (pinch centroid, wheel or trackpad pointer) and `middle` at the main chart center: `auto` used to pick an anchor by screen third, and `middle` followed the focal point until the latest candle left the screen.
