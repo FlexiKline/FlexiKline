@@ -96,12 +96,22 @@ extension PaintDelegateExt<T extends Indicator> on PaintObject<T> {
     paintPlaceholder(canvas, size);
   }
 
-  void doPaintChart(Canvas canvas, Size size) {
+  /// 框架内部：展开进行中调用 [paintReveal]，否则以绘制区间调用 [paint]。
+  void doPaint(Canvas canvas, Size size, {double progress = 1}) {
+    if (progress < 1) {
+      paintReveal(canvas, size, progress: progress);
+    } else {
+      paint(canvas, size, start: paintStart, end: paintEnd);
+    }
+  }
+
+  /// [progress] 为 1 时即不展开, 进度只在展开期间小于 1。
+  void doPaintChart(Canvas canvas, Size size, {double progress = 1}) {
     // 网格线是本 pane 的第一笔: 它必须压在指标图与 tips 之下。收在这里而不是让编排层单独调,
     // 于是「网格在最下面」由本方法的内部顺序保证, 编排层不必知道网格线的存在。
     doPaintGridLines(canvas, size);
 
-    paint(canvas, size, start: paintStart, end: paintEnd);
+    doPaint(canvas, size, progress: progress);
 
     if (settingConfig.showYAxisTick) {
       paintYAxisTicks(canvas, size);
@@ -393,7 +403,7 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
   ///
   /// 本帧刻度位置用局部变量跨过遍历, 不落成帧内字段: 后者要靠「用完置空」的纪律维持, 某帧未走
   /// 到文本那一趟就会留下上一帧的值。
-  double? doPaintChart(Canvas canvas, Size size) {
+  double? doPaintChart(Canvas canvas, Size size, {double progress = 1}) {
     // 网格线坐标落在 drawableRect 内, 编排层此刻的 clipRect(mainRect, 平滑期是更宽的
     // canvasRect)裁不到它。
     doPaintGridLines(canvas, size);
@@ -405,11 +415,11 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
         doPaintTips(canvas, model: klineData.latest);
       }
       for (final object in paintableChildren) {
-        object.paint(canvas, size, start: paintStart, end: paintEnd);
+        object.doPaint(canvas, size, progress: progress);
       }
     } else {
       for (final object in paintableChildren) {
-        object.paint(canvas, size, start: paintStart, end: paintEnd);
+        object.doPaint(canvas, size, progress: progress);
       }
       if (!context.isCrossing) {
         doPaintTips(canvas, model: klineData.latest);

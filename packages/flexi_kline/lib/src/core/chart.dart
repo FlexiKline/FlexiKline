@@ -161,6 +161,8 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
       return;
     }
 
+    beginRevealIfPending();
+
     int paneIndex = mainPaneIndex;
 
     /// overlay 是否允许绘制在主图 rect 之外
@@ -191,7 +193,7 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
       if (kProfileMode) FlutterTimeline.startSync('Flexi-PaintMain');
       try {
         // 热区宽度来自本帧刻度文本的实测宽度, 所以紧跟主区那一趟。
-        final maxTickWidth = mainPaintObject.doPaintChart(canvas, size);
+        final maxTickWidth = mainPaintObject.doPaintChart(canvas, size, progress: revealProgress);
         _syncChartZoomSlideBarRect(maxTickWidth, mainPaintObject.yAxisSide);
 
         if (!allowOverlayOutsideMainRect) {
@@ -225,7 +227,7 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
       /// drawableRect 才是本 pane 的区域。
       if (kProfileMode) FlutterTimeline.startSync('Flexi-PaintSub');
       try {
-        paintObject.doPaintChart(canvas, size);
+        paintObject.doPaintChart(canvas, size, progress: revealProgress);
 
         paintObject.doPaintOverlay(canvas, size);
       } finally {

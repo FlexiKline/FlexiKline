@@ -41,6 +41,8 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   @override
   void dispose() {
     _pipeline.dispose();
+    _revealTicker?.dispose();
+    _revealTicker = null;
     super.dispose();
     logd('dispose state');
     _klineSpecNotifier.dispose();
@@ -108,6 +110,11 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     logd('_notifySpecChange $newSpec');
     _klineSpecNotifier.value = newSpec;
     _intervalNotifier.value = newSpec.interval;
+    if (oldSpec.key != newSpec.key) {
+      cancelReveal();
+      // controllerFirst 的首次展开跨 spec 保留; 其余策略的请求只属于当前 spec。
+      if (settingConfig.reveal.trigger != RevealTrigger.controllerFirst) _revealRequested = false;
+    }
     onKlineSpecChanged(oldSpec);
   }
 
@@ -115,6 +122,55 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   void _notifyLoadingState() {
     logd('_notifyLoadingState ${klineData.loadingState}');
     _loadingStateNotifier.value = klineData.loadingState;
+  }
+
+  /// 展开请求: 数据可绘制时消费一次。初始为 true, 使控制器首次可绘制时展开。
+  bool _revealRequested = true;
+
+  /// 展开进度, 1 为终态。绘制层读取它并传给 `doPaintChart`。
+  double _revealProgress = 1;
+
+  /// 当前展开进度, 1 为终态。
+  @visibleForTesting
+  double get revealProgress => _revealProgress;
+
+  Ticker? _revealTicker;
+
+  /// 数据可绘制时消费一次待定的展开。消费与可见性无关: 首次到达时不可见则整段不播。
+  /// 由绘制层在 [klineData] 可绘制后调用, 此时才有重绘可请求。
+  void beginRevealIfPending() {
+    if (!_revealRequested || !klineData.canPaintChart) return;
+    _revealRequested = false;
+    final config = settingConfig.reveal;
+    if (!config.enabled || !canAnimateReveal) return;
+    final duration = Duration(milliseconds: config.duration);
+    final curve = parseCurve(config.curve, Curves.easeInOut);
+    _revealProgress = 0;
+    _revealTicker?.dispose();
+    // 以首个 tick 为零点: start() 若发生在一帧之内, Ticker 会把那一帧的时间戳当作零点,
+    // 启动帧的耗时就被计入展开, 首个可见帧的进度会直接跳到 1/4 左右。
+    Duration? origin;
+    final ticker = _revealTicker = Ticker((elapsed) {
+      origin ??= elapsed;
+      final sinceStart = elapsed - origin!;
+      final t = duration == Duration.zero ? 1.0 : sinceStart.inMicroseconds / duration.inMicroseconds;
+      // 到达终态与中途失去播放条件都落在终态, 共用 cancelReveal。
+      if (t >= 1 || !settingConfig.reveal.enabled || !canAnimateReveal) {
+        cancelReveal();
+        return;
+      }
+      _revealProgress = curve.transform(t);
+      markRepaintChart();
+    }, debugLabel: 'flexi-reveal');
+    ticker.start();
+  }
+
+  /// 打断展开, 直接落在终态。拖动、缩放与 spec 切换时调用。
+  void cancelReveal() {
+    if (_revealProgress == 1) return;
+    _revealTicker?.stop();
+    _revealProgress = 1;
+    markRepaintChart();
   }
 
   late final FIFOHashMap<String, KlineData> _klineDataCache;
@@ -430,6 +486,8 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     final old = _klineDataCache.append(spec.key, data);
     if (old != null) Future(() => old.dispose());
     _setKlineData(data);
+    // 未命中缓存的切换是一次新加载。放在 _setKlineData 之后, 使 spec 切换时的清除先于本次置位。
+    if (settingConfig.reveal.trigger == RevealTrigger.specFirstLoad) _revealRequested = true;
     return false;
   }
 

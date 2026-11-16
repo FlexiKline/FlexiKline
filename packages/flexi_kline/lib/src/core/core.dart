@@ -19,9 +19,11 @@ import 'dart:math' as math;
 
 import 'package:flexi_formatter/flexi_formatter.dart';
 import 'package:flexi_painting/flexi_painting.dart';
+import 'package:flutter/animation.dart' show Curves;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/semantics.dart' show SemanticsBinding;
 import 'package:flutter/widgets.dart' show TickerModeData;
 
 import '../config/export.dart';
@@ -32,6 +34,7 @@ import '../framework/export.dart';
 import '../framework/kline_data_pipeline.dart';
 import '../model/export.dart';
 import '../types.dart';
+import '../utils/convert_util.dart' show parseCurve;
 import '../utils/platform_util.dart';
 
 part 'binding_base.dart';

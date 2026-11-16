@@ -14,6 +14,9 @@
 * Remove `onCrossI18nTooltipLabels`: call `generateTooltipInfoListByLabels` from `tooltipBuilder` instead; its `pre` parameter is renamed to `prev` (Breaking Changes).
 * Add `yAxisSide` to `CandleBaseIndicator` (`AxisDirection.left` or `AxisDirection.right`, default `right`) so the Y-axis ticks, the crosshair ticks and the zoom slider can sit on the left; leave room with `padding.left` for the ticks.
 * Change `FlexiExitZoomButton.alignment` and `padding` to nullable: an unset alignment follows the zoom slider side, an unset padding centers the button horizontally, and the button is hidden until the slider is measured (Breaking Changes).
+* Add `SettingConfig.reveal` (`RevealConfig`) to animate the first load of candles from the left: `enabled` (default `false`), `trigger` (`RevealTrigger.controllerFirst` or `RevealTrigger.specFirstLoad`), `duration` in milliseconds (default `600`) and `curve` (default `easeInOut`).
+* Add `paintReveal(canvas, size, {progress = 1})` to `IPaintObject`; the default draws the candles revealed so far, and indicators override it for a custom reveal.
+* Skip the reveal when the system asks to reduce motion (`SemanticsBinding.instance.disableAnimations`), and show the final state at once.
 
 ## 2.7.2
 * Change `ScalePosition.auto` to always anchor X-axis zoom at the focal point (pinch centroid, wheel or trackpad pointer) and `middle` at the main chart center: `auto` used to pick an anchor by screen third, and `middle` followed the focal point until the latest candle left the screen.

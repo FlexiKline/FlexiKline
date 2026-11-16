@@ -51,6 +51,8 @@ abstract class _$SettingConfigCWProxy {
 
   SettingConfig maxZoomSpanRatio(double maxZoomSpanRatio);
 
+  SettingConfig reveal(RevealConfig reveal);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `SettingConfig(...).copyWith.fieldName(value)`.
   ///
@@ -79,6 +81,7 @@ abstract class _$SettingConfigCWProxy {
     List<double> expandRatiosOfSameMinmax,
     double minZoomSpanRatio,
     double maxZoomSpanRatio,
+    RevealConfig reveal,
   });
 }
 
@@ -173,6 +176,9 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
   SettingConfig maxZoomSpanRatio(double maxZoomSpanRatio) =>
       call(maxZoomSpanRatio: maxZoomSpanRatio);
 
+  @override
+  SettingConfig reveal(RevealConfig reveal) => call(reveal: reveal);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `SettingConfig(...).copyWith.fieldName(value)`.
   ///
@@ -203,6 +209,7 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
     Object? expandRatiosOfSameMinmax = const $CopyWithPlaceholder(),
     Object? minZoomSpanRatio = const $CopyWithPlaceholder(),
     Object? maxZoomSpanRatio = const $CopyWithPlaceholder(),
+    Object? reveal = const $CopyWithPlaceholder(),
   }) {
     return SettingConfig(
       opacity: opacity == const $CopyWithPlaceholder() || opacity == null
@@ -318,6 +325,10 @@ class _$SettingConfigCWProxyImpl implements _$SettingConfigCWProxy {
           ? _value.maxZoomSpanRatio
           // ignore: cast_nullable_to_non_nullable
           : maxZoomSpanRatio as double,
+      reveal: reveal == const $CopyWithPlaceholder() || reveal == null
+          ? _value.reveal
+          // ignore: cast_nullable_to_non_nullable
+          : reveal as RevealConfig,
     );
   }
 }
@@ -368,6 +379,9 @@ SettingConfig _$SettingConfigFromJson(Map<String, dynamic> json) =>
           const [0.1, 0.05],
       minZoomSpanRatio: (json['minZoomSpanRatio'] as num?)?.toDouble() ?? 0.05,
       maxZoomSpanRatio: (json['maxZoomSpanRatio'] as num?)?.toDouble() ?? 20,
+      reveal: json['reveal'] == null
+          ? const RevealConfig()
+          : RevealConfig.fromJson(json['reveal'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$SettingConfigToJson(
@@ -394,4 +408,5 @@ Map<String, dynamic> _$SettingConfigToJson(
   'expandRatiosOfSameMinmax': instance.expandRatiosOfSameMinmax,
   'minZoomSpanRatio': instance.minZoomSpanRatio,
   'maxZoomSpanRatio': instance.maxZoomSpanRatio,
+  'reveal': instance.reveal.toJson(),
 };

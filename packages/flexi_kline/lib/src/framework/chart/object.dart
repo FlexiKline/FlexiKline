@@ -206,6 +206,18 @@ abstract class PaintObject<T extends Indicator<IIndicatorKey>> extends Indicator
   @override
   void paintPlaceholder(Canvas canvas, Size size) {}
 
+  /// 默认展开: 把绘制终点截断到进度对应的位置后调用 [paint]。需要不同的展开效果的指标覆写它。
+  @override
+  void paintReveal(Canvas canvas, Size size, {double progress = 1}) {
+    // 进度 0 时终点即起点(区间为空), 进度向上取整到下一根蜡烛, 进度 1 时为完整区间。
+    final end = progress <= 0
+        ? paintStart
+        : progress >= 1
+        ? paintEnd
+        : paintStart + ((paintEnd - paintStart) * progress).ceil();
+    paint(canvas, size, start: paintStart, end: end);
+  }
+
   @protected
   @override
   double paintYAxisTicks(Canvas canvas, Size size) => 0;

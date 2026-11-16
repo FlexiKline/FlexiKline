@@ -25,6 +25,7 @@ export 'line_config/line_config.dart';
 export 'mark_config/mark_config.dart';
 export 'paint_config/paint_config.dart';
 export 'point_config/point_config.dart';
+export 'reveal_config/reveal_config.dart';
 export 'setting_config/setting_config.dart';
 export 'text_area_config/text_area_config.dart';
 export 'tips_config/tips_config.dart';

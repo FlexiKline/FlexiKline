@@ -82,6 +82,11 @@ mixin SettingBinding on KlineBindingBase {
     _tickerModeNotifier.value = values;
   }
 
+  /// 图表此刻是否允许播放展开动画: 系统未开启「减少动画」, 且 Widget 层 TickerMode 为启用。
+  /// 直接读取 [SemanticsBinding], 与 Flutter 的 AnimationController 同源; 宿主在 MediaQuery 中
+  /// 的覆盖不影响它, 这与 Flutter 框架动画的行为一致。
+  bool get canAnimateReveal => !SemanticsBinding.instance.disableAnimations && _tickerModeNotifier.value.enabled;
+
   /// 副区指标高度变化 listenable（不含时间轴）。
   late final FlexiStateNotifier<List<double>> _subIndicatorHeightsNotifier;
   ValueListenable<List<double>> get subIndicatorHeightsListenable => _subIndicatorHeightsNotifier;

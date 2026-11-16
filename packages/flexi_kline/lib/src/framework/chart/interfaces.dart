@@ -108,6 +108,9 @@ abstract interface class IPaintObject {
   /// 区间由框架给出, 指标不得读取 klineData.start / klineData.end 决定绘制范围。
   void paint(Canvas canvas, Size size, {required int start, required int end});
 
+  /// 展开期间的绘制入口, [progress] 取值 [0, 1)。框架只在展开进行中调用它, 展开结束后只调用 [paint]。
+  void paintReveal(Canvas canvas, Size size, {double progress = 1});
+
   /// 绘制 Y 轴刻度文本, 返回文本最大宽度(供滑竿热区使用); 不绘制时返回 0。
   double paintYAxisTicks(Canvas canvas, Size size);
 

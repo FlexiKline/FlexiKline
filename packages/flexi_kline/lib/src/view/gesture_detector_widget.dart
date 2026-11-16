@@ -106,6 +106,7 @@ abstract class GestureDetectorState<T extends GestureDetectorWidget> extends Sta
   /// 走插值、且 `clipRect` 停在 `canvasRect` 而非 `mainRect`。
   @protected
   void stopPositionAnimation() {
+    controller.cancelReveal();
     if (animationController == null) return;
     cancelPositionAnimation();
     controller.onChartPanEnd();

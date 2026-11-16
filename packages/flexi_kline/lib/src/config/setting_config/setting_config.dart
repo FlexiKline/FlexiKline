@@ -18,6 +18,7 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flutter/painting.dart';
 
 import '../../framework/serializers.dart';
+import '../reveal_config/reveal_config.dart';
 
 part 'setting_config.g.dart';
 
@@ -60,6 +61,7 @@ class SettingConfig {
     /// Y 轴缩放可达跨度倍率
     this.minZoomSpanRatio = 0.05,
     this.maxZoomSpanRatio = 20,
+    this.reveal = const RevealConfig(),
   });
 
   /// Long/Short 浅色不透明度 [longTintColor] 和 [shortTintColor]
@@ -134,6 +136,9 @@ class SettingConfig {
   /// Y 轴缩放能把可见价格跨度放到的上限, 单位同 [minZoomSpanRatio]。
   /// 取值 [1, ∞), 默认 20 即最多把内容缩小 20 倍。
   final double maxZoomSpanRatio;
+
+  /// 数据显示时的展开动画, 见 [RevealConfig]。
+  final RevealConfig reveal;
 
   bool get isFixedCandleSpacing {
     return candleFixedSpacing != null && candleFixedSpacing! > candleMinWidth;
