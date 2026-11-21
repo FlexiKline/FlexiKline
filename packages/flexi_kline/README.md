@@ -203,7 +203,7 @@ Everything configurable lives in one `FlexiKlineConfig`, provided by `IConfigura
 | ----- | ---- | ------ |
 | `setting` | `SettingConfig` | Canvas opacity, min pane sizes, candle width range and spacing, blank ratio, Y-axis ticks, Y-axis zoom span, latest-price countdown, auto load-more |
 | `grid` | `GridConfig` | Grid border (horizontal/vertical switches and line style), indicator height dragging (switch, hit distance, drag line and background) |
-| `cross` | `CrossConfig` | Crosshair switch, lines and crosspoint, tick text, tooltip style and spacing, behavior over blank area |
+| `cross` | `CrossConfig` | Crosshair switch, lines and crosspoint, tick text, tooltip style, spacing and row alignment, behavior over blank area |
 | `draw` | `DrawConfig` | Drawing switch, lines and points, crosspoint, tick text, hit distance, magnet distance |
 | `gesture` | `GestureConfig` | Long press, fling and tolerance, zoom switch and anchor, Y-axis zoom upper bound, keyboard shortcuts, zoom slider, gesture arena thresholds (pan cone, drag/zoom slop factors) |
 | `mainIndicator` | `MainPaintObjectIndicator` | Main pane size, padding and the selected main indicators |

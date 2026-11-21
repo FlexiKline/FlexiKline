@@ -15,6 +15,7 @@
 import 'package:decimal/decimal.dart';
 import 'package:flexi_formatter/date_time.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/rendering.dart' show MainAxisAlignment;
 import 'package:json_annotation/json_annotation.dart';
 
 import '../extension/export.dart';
@@ -277,6 +278,25 @@ class PaintingStyleConverter implements JsonConverter<PaintingStyle, String> {
 
   @override
   String toJson(PaintingStyle object) {
+    return object.name;
+  }
+}
+
+/// Tooltip 行内余量分配方式, 借用 Flutter 的 [MainAxisAlignment]。
+/// 注: spaceAround 被借用为两列定宽, spaceEvenly 绘制时降级为 spaceBetween。
+class MainAxisAlignmentConverter implements JsonConverter<MainAxisAlignment, String> {
+  const MainAxisAlignmentConverter();
+
+  @override
+  MainAxisAlignment fromJson(String json) {
+    return MainAxisAlignment.values.firstWhere(
+      (e) => e.name == json,
+      orElse: () => MainAxisAlignment.spaceBetween,
+    );
+  }
+
+  @override
+  String toJson(MainAxisAlignment object) {
     return object.name;
   }
 }
@@ -854,6 +874,7 @@ class IDrawTypeConverter implements JsonConverter<IDrawType, Map<String, dynamic
 const _basicConverterList = <JsonConverter>[
   AxisDirectionConverter(),
   PaintingStyleConverter(),
+  MainAxisAlignmentConverter(),
   BlendModeConverter(),
   GridTickModeConverter(),
   EdgeInsetsConverter(),

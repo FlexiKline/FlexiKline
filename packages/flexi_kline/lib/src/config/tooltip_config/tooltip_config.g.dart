@@ -15,6 +15,8 @@ abstract class _$TooltipConfigCWProxy {
 
   TooltipConfig spacing(double spacing);
 
+  TooltipConfig alignment(MainAxisAlignment alignment);
+
   TooltipConfig hitTestMargin(double hitTestMargin);
 
   TooltipConfig style(TextStyle style);
@@ -43,6 +45,7 @@ abstract class _$TooltipConfigCWProxy {
     EdgeInsets margin,
     EdgeInsets padding,
     double spacing,
+    MainAxisAlignment alignment,
     double hitTestMargin,
     TextStyle style,
     Color? backgroundColor,
@@ -72,6 +75,10 @@ class _$TooltipConfigCWProxyImpl implements _$TooltipConfigCWProxy {
 
   @override
   TooltipConfig spacing(double spacing) => call(spacing: spacing);
+
+  @override
+  TooltipConfig alignment(MainAxisAlignment alignment) =>
+      call(alignment: alignment);
 
   @override
   TooltipConfig hitTestMargin(double hitTestMargin) =>
@@ -114,6 +121,7 @@ class _$TooltipConfigCWProxyImpl implements _$TooltipConfigCWProxy {
     Object? margin = const $CopyWithPlaceholder(),
     Object? padding = const $CopyWithPlaceholder(),
     Object? spacing = const $CopyWithPlaceholder(),
+    Object? alignment = const $CopyWithPlaceholder(),
     Object? hitTestMargin = const $CopyWithPlaceholder(),
     Object? style = const $CopyWithPlaceholder(),
     Object? backgroundColor = const $CopyWithPlaceholder(),
@@ -140,6 +148,10 @@ class _$TooltipConfigCWProxyImpl implements _$TooltipConfigCWProxy {
           ? _value.spacing
           // ignore: cast_nullable_to_non_nullable
           : spacing as double,
+      alignment: alignment == const $CopyWithPlaceholder() || alignment == null
+          ? _value.alignment
+          // ignore: cast_nullable_to_non_nullable
+          : alignment as MainAxisAlignment,
       hitTestMargin:
           hitTestMargin == const $CopyWithPlaceholder() || hitTestMargin == null
           ? _value.hitTestMargin
@@ -197,7 +209,12 @@ TooltipConfig _$TooltipConfigFromJson(Map<String, dynamic> json) =>
       padding: const EdgeInsetsConverter().fromJson(
         json['padding'] as Map<String, dynamic>,
       ),
-      spacing: (json['spacing'] as num?)?.toDouble() ?? 2,
+      spacing: (json['spacing'] as num?)?.toDouble() ?? 8,
+      alignment: json['alignment'] == null
+          ? MainAxisAlignment.spaceBetween
+          : const MainAxisAlignmentConverter().fromJson(
+              json['alignment'] as String,
+            ),
       hitTestMargin: (json['hitTestMargin'] as num?)?.toDouble() ?? 2,
       style: const TextStyleConverter().fromJson(
         json['style'] as Map<String, dynamic>,
@@ -237,6 +254,7 @@ Map<String, dynamic> _$TooltipConfigToJson(
   'margin': const EdgeInsetsConverter().toJson(instance.margin),
   'padding': const EdgeInsetsConverter().toJson(instance.padding),
   'spacing': instance.spacing,
+  'alignment': const MainAxisAlignmentConverter().toJson(instance.alignment),
   'hitTestMargin': instance.hitTestMargin,
   'style': const TextStyleConverter().toJson(instance.style),
   'backgroundColor': ?_$JsonConverterToJson<String, Color>(

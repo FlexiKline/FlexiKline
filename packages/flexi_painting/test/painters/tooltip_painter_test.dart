@@ -19,6 +19,7 @@ import 'dart:ui' show Paragraph;
 
 import 'package:flexi_painting/src/painters/tooltip_painter.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/rendering.dart' show MainAxisAlignment;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../recording_canvas.dart';
@@ -38,6 +39,20 @@ List<Paragraph> _paragraphs(RecordingCanvas canvas) => [
     if (i.memberName == #drawParagraph) i.positionalArguments[0] as Paragraph,
 ];
 
+double _maxWidth(Iterable<Paragraph> paragraphs) =>
+    paragraphs.map((e) => e.longestLine).reduce((a, b) => a > b ? a : b);
+
+/// 最宽一行: label + spacing + value; p 中偶数下标为 label、奇数为 value。
+double _widestRow(List<Paragraph> p) => [
+  for (var i = 0; i < p.length; i += 2) p[i].longestLine + 8 + p[i + 1].longestLine,
+].reduce((a, b) => a > b ? a : b);
+
+/// 两列各取最大宽再相加: 最宽 label + spacing + 最宽 value。
+double _columnSum(List<Paragraph> p) =>
+    _maxWidth([for (var i = 0; i < p.length; i += 2) p[i]]) +
+    8 +
+    _maxWidth([for (var i = 1; i < p.length; i += 2) p[i]]);
+
 void main() {
   late TooltipPainter painter;
   setUp(() => painter = TooltipPainter());
@@ -48,6 +63,7 @@ void main() {
     List<TooltipRow> rows, {
     Offset anchor = const Offset(10, 10),
     Alignment align = Alignment.topLeft,
+    MainAxisAlignment alignment = MainAxisAlignment.spaceBetween,
     Rect? bounds,
     double? minContentWidth,
     double maxContentWidth = double.infinity,
@@ -60,21 +76,20 @@ void main() {
     align: align,
     bounds: bounds,
     spacing: 8,
+    alignment: alignment,
     minContentWidth: minContentWidth,
     maxContentWidth: maxContentWidth,
     decoration: decoration,
     padding: _padding,
   );
 
-  test('卡片宽为 label 列 + spacing + value 列 + padding, 各行横向撑满卡片', () {
+  test('卡片宽为最宽一行 label + spacing + value + padding, 各行横向撑满卡片', () {
     final canvas = RecordingCanvas();
     final card = paint(canvas, [_row('Open', '1.00'), _row('Close', '123.45')]);
 
     final p = _paragraphs(canvas);
     expect(p, hasLength(4));
-    final labelWidth = [p[0].longestLine, p[2].longestLine].reduce((a, b) => a > b ? a : b);
-    final valueWidth = [p[1].longestLine, p[3].longestLine].reduce((a, b) => a > b ? a : b);
-    expect(card.bounds.width, closeTo(labelWidth + 8 + valueWidth + _padding.horizontal, 0.01));
+    expect(card.bounds.width, closeTo(_widestRow(p) + _padding.horizontal, 0.01));
     expect(card.bounds.topLeft, const Offset(10, 10));
     expect(card.rows, hasLength(2));
     for (final row in card.rows) {
@@ -85,6 +100,115 @@ void main() {
     expect(card.rows.last.bottom, card.bounds.bottom - _padding.bottom);
     // 背景走 RoundedRectangleBorder 的 drawRRect 快路径, 大小即卡片。
     expect(canvas.rrectBounds.single, card.bounds);
+  });
+
+  test('卡片宽由最宽一行决定而非两列最大宽相加, 每行两列净距不小于 spacing', () {
+    final canvas = RecordingCanvas();
+    // 最宽 label 行与最宽 value 行分属两行: 两列各取最大再相加会明显过宽。
+    final card = paint(canvas, [_row('LongLabel', '1'), _row('L', '123456')]);
+
+    final p = _paragraphs(canvas);
+    expect(card.bounds.width, closeTo(_widestRow(p) + _padding.horizontal, 0.01));
+    expect(_columnSum(p), greaterThan(_widestRow(p)));
+
+    // 行内间距: label 右缘到 value 左缘不小于 spacing; label 左对齐、value 右对齐不变。
+    for (var i = 0; i < 2; i++) {
+      final labelRight = canvas.paragraphOffsets[i * 2].dx + p[i * 2].longestLine;
+      final valueLeft = canvas.paragraphOffsets[i * 2 + 1].dx;
+      expect(valueLeft - labelRight, greaterThanOrEqualTo(8 - 0.01));
+    }
+  });
+
+  test('spaceAround(借用): 按最宽 label + spacing + 最宽 value 定宽, 两端对齐', () {
+    final canvas = RecordingCanvas();
+    final card = paint(
+      canvas,
+      [_row('LongLabel', '1'), _row('L', '123456')],
+      alignment: MainAxisAlignment.spaceAround,
+    );
+
+    final p = _paragraphs(canvas);
+    expect(card.bounds.width, closeTo(_columnSum(p) + _padding.horizontal, 0.01));
+    // value 仍右对齐到卡片内容区右边。
+    for (var i = 0; i < 2; i++) {
+      final valueRight = canvas.paragraphOffsets[i * 2 + 1].dx + p[i * 2 + 1].longestLine;
+      expect(valueRight, closeTo(card.bounds.right - _padding.right, 0.01));
+    }
+  });
+
+  test('spaceEvenly: 不支持, 降级为 spaceBetween 绘制', () {
+    final canvasEvenly = RecordingCanvas();
+    final cardEvenly = paint(
+      canvasEvenly,
+      [_row('LongLabel', '1'), _row('L', '123456')],
+      alignment: MainAxisAlignment.spaceEvenly,
+    );
+    final canvasBetween = RecordingCanvas();
+    final cardBetween = paint(
+      canvasBetween,
+      [_row('LongLabel', '1'), _row('L', '123456')],
+      alignment: MainAxisAlignment.spaceBetween,
+    );
+    expect(cardEvenly.bounds.width, closeTo(cardBetween.bounds.width, 0.01));
+    for (var i = 0; i < canvasEvenly.paragraphOffsets.length; i++) {
+      expect(canvasEvenly.paragraphOffsets[i], canvasBetween.paragraphOffsets[i]);
+    }
+  });
+
+  test('start: label+spacing+value 整体左对齐, 余量留尾部', () {
+    final canvas = RecordingCanvas();
+    final card = paint(
+      canvas,
+      [_row('LongLabel', '1'), _row('L', '123456')],
+      alignment: MainAxisAlignment.start,
+    );
+
+    final p = _paragraphs(canvas);
+    for (var i = 0; i < 2; i++) {
+      final labelDx = canvas.paragraphOffsets[i * 2].dx;
+      final valueDx = canvas.paragraphOffsets[i * 2 + 1].dx;
+      // label 贴内容区左缘; value 紧跟 label 右缘 + spacing。
+      expect(labelDx, closeTo(card.bounds.left + _padding.left, 0.01));
+      expect(valueDx, closeTo(labelDx + p[i * 2].longestLine + 8, 0.01));
+    }
+  });
+
+  test('end: label+spacing+value 整体右对齐, value 贴内容区右缘', () {
+    final canvas = RecordingCanvas();
+    final card = paint(
+      canvas,
+      [_row('LongLabel', '1'), _row('L', '123456')],
+      alignment: MainAxisAlignment.end,
+    );
+
+    final p = _paragraphs(canvas);
+    for (var i = 0; i < 2; i++) {
+      final labelDx = canvas.paragraphOffsets[i * 2].dx;
+      final valueDx = canvas.paragraphOffsets[i * 2 + 1].dx;
+      // value 贴内容区右缘; label 右缘与 value 左缘净距恰为 spacing。
+      expect(valueDx + p[i * 2 + 1].longestLine, closeTo(card.bounds.right - _padding.right, 0.01));
+      expect(valueDx - (labelDx + p[i * 2].longestLine), closeTo(8, 0.01));
+    }
+  });
+
+  test('center: label+spacing+value 整体居中, 中缝保底 spacing', () {
+    final canvas = RecordingCanvas();
+    final card = paint(
+      canvas,
+      [_row('LongLabel', '1'), _row('L', '123456')],
+      alignment: MainAxisAlignment.center,
+    );
+
+    final p = _paragraphs(canvas);
+    for (var i = 0; i < 2; i++) {
+      final labelDx = canvas.paragraphOffsets[i * 2].dx;
+      final valueDx = canvas.paragraphOffsets[i * 2 + 1].dx;
+      final valueRight = valueDx + p[i * 2 + 1].longestLine;
+      // 中缝保底 spacing; 两侧余量对称: 内容区左缘到 label 左缘 == value 右缘到内容区右缘。
+      expect(valueDx - (labelDx + p[i * 2].longestLine), greaterThanOrEqualTo(8 - 0.01));
+      expect(labelDx - (card.bounds.left + _padding.left),
+          closeTo(card.bounds.right - _padding.right - valueRight, 0.01));
+    }
   });
 
   test('value 列右对齐到卡片内容区右边', () {

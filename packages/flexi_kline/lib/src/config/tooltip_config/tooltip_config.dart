@@ -15,6 +15,7 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flexi_painting/flexi_painting.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/rendering.dart' show MainAxisAlignment;
 
 import '../../constant.dart';
 import '../../extension/style_ext.dart';
@@ -32,7 +33,8 @@ class TooltipConfig {
     /// tooltip 区域设置
     required this.margin,
     required this.padding,
-    this.spacing = 2,
+    this.spacing = 8,
+    this.alignment = MainAxisAlignment.spaceBetween,
     this.hitTestMargin = 2,
 
     /// tooltip 文本设置
@@ -53,8 +55,16 @@ class TooltipConfig {
   final EdgeInsets margin;
   final EdgeInsets padding;
 
-  /// tooltip 两列之间的间距
+  /// tooltip 两列之间的最小间距; 行内实际间距由 [alignment] 分配余量后决定, 只会更大
   final double spacing;
+
+  /// 行内 label 与 value 的排布方式, 借用 Flutter 的 [MainAxisAlignment]:
+  /// - start / end / center: 整体左对齐 / 右对齐 / 居中;
+  /// - spaceBetween(默认): 按最宽一行(label+spacing+value)定宽, 两端对齐;
+  /// - spaceAround(借用, 行为已变): 两列定宽, 卡片宽 = 最宽 label + spacing + 最宽 value;
+  /// - spaceEvenly: 不支持, 绘制时降级为 spaceBetween。
+  /// spacing 始终保底为两列间的最小间距。
+  final MainAxisAlignment alignment;
 
   /// 扩大 Tooltip 行点击命中区域；向四周各扩展 [hitTestMargin] 逻辑像素。
   /// 仅影响点击检测，不影响绘制布局。

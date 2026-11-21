@@ -1,9 +1,7 @@
 {
   "grid": {
-    "show": true,
     "horizontal": {
       "show": true,
-      "count": 5,
       "line": {
         "type": "solid",
         "dashes": [
@@ -20,7 +18,6 @@
     },
     "vertical": {
       "show": true,
-      "count": 5,
       "line": {
         "type": "solid",
         "dashes": [
@@ -45,7 +42,7 @@
         5.0
       ],
       "paint": {
-        "strokeWidth": 3.0,
+        "strokeWidth": 2.0,
         "style": "stroke",
         "blendMode": "srcOver",
         "isAntiAlias": true
@@ -59,11 +56,11 @@
         "color": null,
         "fontSize": 10.0,
         "fontFamily": null,
-        "fontStyle": null,
+        "fontStyle": "normal",
         "height": 1.0,
-        "fontWeight": null,
-        "textBaseline": null,
-        "decoration": null,
+        "fontWeight": "w400",
+        "textBaseline": "ideographic",
+        "decoration": "none",
         "decorationColor": null,
         "decorationStyle": null
       },
@@ -76,10 +73,6 @@
   },
   "setting": {
     "opacity": 0.5,
-    "loading": {
-      "size": 26.0,
-      "strokeWidth": 4.0
-    },
     "mainMinSize": {
       "width": 120.0,
       "height": 80.0
@@ -102,7 +95,15 @@
     "expandRatiosOfSameMinmax": [
       0.1,
       0.05
-    ]
+    ],
+    "minZoomSpanRatio": 0.05,
+    "maxZoomSpanRatio": 20.0,
+    "reveal": {
+      "enabled": false,
+      "trigger": "controllerFirst",
+      "duration": 600,
+      "curve": "easeInOut"
+    }
   },
   "gesture": {
     "enableLongPress": true,
@@ -121,8 +122,13 @@
     "supportKeyboardShortcuts": true,
     "enableZoom": false,
     "zoomStartMinDistance": 5,
-    "zoomSpeed": 1,
-    "isManualSetZoomRect": false
+    "maxZoomPerGesture": 6.0,
+    "useCustomZoomRect": false,
+    "panClaimRatio": 2.0,
+    "dragClaimSlopFactor": 0.5,
+    "scaleClaimSlopFactor": 1.0,
+    "signalScaleFactor": 200.0,
+    "scaleSessionTimeout": 800000
   },
   "cross": {
     "enable": true,
@@ -142,18 +148,20 @@
     "crosspoint": {
       "radius": 2.0,
       "width": 0.0,
-      "borderWidth": 3.0
+      "useThemeColor": true,
+      "borderWidth": 3.0,
+      "borderOpacity": 0.2
     },
     "ticksText": {
       "style": {
         "color": null,
         "fontSize": 10.0,
         "fontFamily": null,
-        "fontStyle": null,
+        "fontStyle": "normal",
         "height": 1.2,
         "fontWeight": "w400",
-        "textBaseline": null,
-        "decoration": null,
+        "textBaseline": "ideographic",
+        "decoration": "none",
         "decorationColor": null,
         "decorationStyle": null
       },
@@ -186,25 +194,26 @@
         "horizontal": 8.0,
         "vertical": 8.0
       },
-      "radius": {
-        "topLeft": 6.0,
-        "topRight": 6.0,
-        "bottomLeft": 6.0,
-        "bottomRight": 6.0
-      },
-      "spacing": 2.0,
+      "spacing": 8.0,
+      "alignment": "spaceBetween",
       "hitTestMargin": 2.0,
       "style": {
         "color": null,
         "fontSize": 10.0,
         "fontFamily": null,
-        "fontStyle": null,
+        "fontStyle": "normal",
         "height": 1.4,
-        "fontWeight": null,
-        "textBaseline": null,
-        "decoration": null,
+        "fontWeight": "w400",
+        "textBaseline": "ideographic",
+        "decoration": "none",
         "decorationColor": null,
         "decorationStyle": null
+      },
+      "borderRadius": {
+        "topLeft": 8.0,
+        "topRight": 8.0,
+        "bottomLeft": 8.0,
+        "bottomRight": 8.0
       }
     },
     "spacing": 1.0,
@@ -217,7 +226,8 @@
     "crosspoint": {
       "radius": 2.0,
       "width": 0.0,
-      "borderWidth": 2.0
+      "useThemeColor": true,
+      "borderOpacity": 1.0
     },
     "crosshair": {
       "type": "dashed",
@@ -248,18 +258,21 @@
     "drawPoint": {
       "radius": 9.0,
       "width": 0.0,
-      "borderWidth": 1.0
+      "color": "0xffffffff",
+      "useThemeColor": true,
+      "borderWidth": 1.0,
+      "borderOpacity": 1.0
     },
     "ticksText": {
       "style": {
-        "color": null,
+        "color": "0xffffffff",
         "fontSize": 10.0,
         "fontFamily": null,
-        "fontStyle": null,
+        "fontStyle": "normal",
         "height": 1.0,
         "fontWeight": "w400",
-        "textBaseline": null,
-        "decoration": null,
+        "textBaseline": "ideographic",
+        "decoration": "none",
         "decorationColor": null,
         "decorationStyle": null
       },
@@ -278,33 +291,12 @@
     "spacing": 1.0,
     "ticksGapBgOpacity": 0.1,
     "hitTestMinDistance": 10.0,
-    "magnetMinDistance": 10.0,
-    "magnifier": {
-      "enable": true,
-      "margin": {
-        "horizontal": 1.0,
-        "vertical": 1.0
-      },
-      "size": {
-        "width": 80.0,
-        "height": 80.0
-      },
-      "magnificationScale": 2.0,
-      "clipBehavior": "none",
-      "decorationOpacity": 1.0,
-      "shapeSide": {
-        "color": "0x00000000",
-        "width": 0.5,
-        "style": "solid"
-      }
-    }
+    "magnetMinDistance": 10.0
   },
   "mainIndicator": {
     "padding": {
-      "left": 0.0,
-      "top": 5.0,
-      "right": 0.0,
-      "bottom": 5.0
+      "horizontal": 0.0,
+      "vertical": 5.0
     },
     "size": {
       "width": 0.0,

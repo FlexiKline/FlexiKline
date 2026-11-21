@@ -259,6 +259,7 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
       align: drawOnLeft ? Alignment.topLeft : Alignment.topRight,
       bounds: mainChartRect,
       spacing: tooltipConfig.spacing,
+      alignment: tooltipConfig.alignment,
       minContentWidth: _tooltipStableContentWidth,
       maxContentWidth: maxContentWidth,
       decoration: tooltipConfig.toDecoration(backgroundColor: theme.tooltipBg),

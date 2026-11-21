@@ -17,6 +17,7 @@ library;
 
 import 'package:flexi_kline/flexi_kline.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/rendering.dart' show MainAxisAlignment;
 import 'package:flutter_test/flutter_test.dart';
 
 const _red = Color(0xFFFF0000);
@@ -104,5 +105,24 @@ void main() {
     expect(restored.gradient?.toJson(), config.gradient?.toJson());
     expect(restored.borderGradient?.toJson(), config.borderGradient?.toJson());
     expect(restored.shadows, config.shadows);
+  });
+
+  test('布局字段 JSON 往返', () {
+    // 默认: 最宽行定宽 + spaceBetween, spacing 8。
+    final defaultJson = TooltipConfig.fromJson({
+      ..._base.toJson(),
+      'spacing': null,
+      'alignment': null,
+    });
+    expect(defaultJson.spacing, 8);
+    expect(defaultJson.alignment, MainAxisAlignment.spaceBetween);
+
+    final custom = _base.copyWith(
+      spacing: 12,
+      alignment: MainAxisAlignment.spaceAround,
+    );
+    final restored = TooltipConfig.fromJson(custom.toJson());
+    expect(restored.spacing, custom.spacing);
+    expect(restored.alignment, MainAxisAlignment.spaceAround);
   });
 }

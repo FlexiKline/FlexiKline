@@ -203,7 +203,7 @@ final index = await controller.moveToDateTime(DateTime(2024, 6, 15));
 | ---- | ---- | -------- |
 | `setting` | `SettingConfig` | 画布透明度、主副区最小尺寸、蜡烛宽度区间与间距、留白比例、Y 轴刻度、Y 轴缩放跨度倍率、最新价倒计时、自动加载更多 |
 | `grid` | `GridConfig` | 网格边框（横向/纵向边框开关与线型）、指标高度拖拽（开关、命中距离、拖拽线与背景） |
-| `cross` | `CrossConfig` | 十字线开关、准星线与交点、刻度文本、Tooltip 样式与间距、空白区行为 |
+| `cross` | `CrossConfig` | 十字线开关、准星线与交点、刻度文本、Tooltip 样式、间距与行内对齐、空白区行为 |
 | `draw` | `DrawConfig` | 绘制功能开关、绘制线与点、准星、刻度文本、命中距离、磁吸距离 |
 | `gesture` | `GestureConfig` | 长按、惯性平移与容差、缩放开关与锚点、Y 轴缩放倍率上界、键盘快捷键、缩放滑竿、手势抢占阈值（平移方向锥、拖动/缩放 slop 因子） |
 | `mainIndicator` | `MainPaintObjectIndicator` | 主区尺寸、padding 与当前已选中的主区指标集合 |
