@@ -8,6 +8,10 @@ FlexiKline is a Flutter candlestick (K-line) chart framework for stock and crypt
 
 [Try it online](https://flexikline.github.io)
 
+![K-line page](https://raw.githubusercontent.com/FlexiKline/FlexiKline.github.io/main/media/kline.png)
+
+![K-line page recording](https://raw.githubusercontent.com/FlexiKline/FlexiKline.github.io/main/media/kline.gif)
+
 ## Performance
 
 Real-device benchmark results: [docs/benchmark](https://github.com/FlexiKline/FlexiKline/blob/main/docs/benchmark/README.md).
@@ -38,7 +42,7 @@ Add the dependency to `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  flexi_kline: ^2.7.2
+  flexi_kline: ^2.8.0
 ```
 
 Then run:

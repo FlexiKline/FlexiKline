@@ -3,7 +3,7 @@ name: Publish to pub.dev
 on:
   push:
     tags:
-      # <包名>-v<semver>，覆盖 packages/ 下所有包；历史的 vX.Y.Z 不匹配
+      # <包名>-v<semver>，覆盖 packages/ 下所有包；apps/ 下的 tag（如 flexi_kline_demo-v*）由 resolve 跳过；历史的 vX.Y.Z 不匹配
       - "*-v[0-9]+.[0-9]+.[0-9]+*"
 
 jobs:
@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       package: ${{ steps.parse.outputs.package }}
+      skip: ${{ steps.parse.outputs.skip }}
     steps:
       - uses: actions/checkout@v6
       - id: parse
@@ -22,7 +23,15 @@ jobs:
           version="${tag##*-v}"
           dir="packages/$package"
 
-          # 不变量：只有 packages/ 下的包可发布
+          # 非 packages/ 下的 tag（如 flexi_kline_demo-v*，由 apps/ 的发布流程处理）直接跳过
+          if [ ! -d "$dir" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::$dir not found, skipped (tag=$tag)"
+            exit 0
+          fi
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+
+          # 不变量：packages/ 下的包必须有 pubspec.yaml
           if [ ! -f "$dir/pubspec.yaml" ]; then
             echo "::error::$dir/pubspec.yaml not found (tag=$tag)"; exit 1
           fi
@@ -38,6 +47,7 @@ jobs:
   constraints:
     name: Verify constraints resolve against pub.dev
     needs: resolve
+    if: needs.resolve.outputs.skip != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -51,6 +61,7 @@ jobs:
 
   publish:
     needs: [resolve, constraints]
+    if: needs.resolve.outputs.skip != 'true'
     permissions:
       id-token: write         # OIDC，必须在调用方声明
     uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1

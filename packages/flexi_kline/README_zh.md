@@ -8,6 +8,10 @@ FlexiKline 是面向股票、数字货币行情的 Flutter K 线图表框架。�
 
 [在线体验](https://flexikline.github.io)
 
+![K 线页面](https://raw.githubusercontent.com/FlexiKline/FlexiKline.github.io/main/media/kline.png)
+
+![K 线页面录屏](https://raw.githubusercontent.com/FlexiKline/FlexiKline.github.io/main/media/kline.gif)
+
 ## 性能
 
 真机 benchmark 结果：[docs/benchmark](https://github.com/FlexiKline/FlexiKline/blob/main/docs/benchmark/README.md)。
@@ -38,7 +42,7 @@ FlexiKline 是面向股票、数字货币行情的 Flutter K 线图表框架。�
 
 ```yaml
 dependencies:
-  flexi_kline: ^2.7.2
+  flexi_kline: ^2.8.0
 ```
 
 然后运行：

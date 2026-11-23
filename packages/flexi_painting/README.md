@@ -2,9 +2,13 @@
 
 [![pub](https://img.shields.io/pub/v/flexi_painting.svg)](https://pub.dev/packages/flexi_painting)
 
+![Painting page](https://raw.githubusercontent.com/FlexiKline/FlexiKline.github.io/main/media/painting.png)
+
+![Painting page recording](https://raw.githubusercontent.com/FlexiKline/FlexiKline.github.io/main/media/painting.gif)
+
 English | [简体中文](https://github.com/FlexiKline/FlexiKline/blob/main/packages/flexi_painting/README_zh.md)
 
-The low-level painting toolkit for custom-painted Flutter charts and widgets, with no dependency beyond Flutter: cached labels, tooltips, batched drawing and paint resource management for `CustomPainter`, geometry helpers, and shaped borders and code-drawn icons that work both in widgets and on a canvas. [flexi_kline](https://pub.dev/packages/flexi_kline) paints with it and re-exports it.
+Painting primitives that extend Flutter's `painting` library for custom-drawn widgets and charts. On top of what Flutter provides, it adds cached text labels and tooltips, shaped borders and code-drawn icons that work in widgets and on a canvas, batched drawing, geometry helpers and paint resource management. It depends only on Flutter and has no chart semantics. [flexi_kline](https://pub.dev/packages/flexi_kline) is built on it and re-exports it.
 
 ## Requirements
 

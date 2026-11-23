@@ -8,6 +8,8 @@ FlexiKline 是面向股票、数字货币行情的 Flutter K 线图表框架。�
 
 **[在线体验](https://flexikline.github.io)**
 
+[Android 体验包](https://github.com/FlexiKline/FlexiKline/releases/download/flexi_kline_demo-v1.0.0/flexi_kline_demo.apk)
+
 ## 特性
 
 - **指标框架**：直绘、预计算、外部数据三类指标；计算与绘制解耦，可单独测试；指标支持动画。
@@ -22,7 +24,7 @@ FlexiKline 是面向股票、数字货币行情的 Flutter K 线图表框架。�
 | 包 | Pub | 说明 |
 | --- | --- | --- |
 | [flexi_kline](packages/flexi_kline) | [![pub](https://img.shields.io/pub/v/flexi_kline.svg)](https://pub.dev/packages/flexi_kline) | 核心框架：图表 Widget 与 Controller、指标框架、十字线与 tooltip、手势、主题与配置 |
-| [flexi_painting](packages/flexi_painting) | [![pub](https://img.shields.io/pub/v/flexi_painting.svg)](https://pub.dev/packages/flexi_painting) | 画布绘制原语，只依赖 Flutter：异形边框、带缓存的标签、代码绘制的图标；flexi_kline 基于它绘制并重新导出 |
+| [flexi_painting](packages/flexi_painting) | [![pub](https://img.shields.io/pub/v/flexi_painting.svg)](https://pub.dev/packages/flexi_painting) | 在 Flutter `painting` 库之上扩展的绘制原语：带缓存的标签、异形边框、代码绘制的图标；只依赖 Flutter，flexi_kline 基于它绘制并重新导出 |
 | [flexi_kline_draw_tools](packages/flexi_kline_draw_tools) | [![pub](https://img.shields.io/pub/v/flexi_kline_draw_tools.svg)](https://pub.dev/packages/flexi_kline_draw_tools) | 19 种绘图工具：线、矩形与通道、斐波那契、艾略特波浪 |
 
 核心包自带蜡烛与时间轴指标；MA、MACD 等其他指标基于指标框架实现，写法见[指标系统](packages/flexi_kline/README_zh.md#指标系统)。
@@ -31,7 +33,7 @@ FlexiKline 是面向股票、数字货币行情的 Flutter K 线图表框架。�
 
 ```yaml
 dependencies:
-  flexi_kline: ^2.7.2
+  flexi_kline: ^2.8.0
   flexi_kline_draw_tools: ^2.6.0 # 可选
 ```
 

@@ -11,6 +11,8 @@ FlexiKline is a Flutter candlestick (K-line) chart framework for stock and crypt
 
 **[Try the online demo](https://flexikline.github.io)**
 
+[Android demo APK](https://github.com/FlexiKline/FlexiKline/releases/download/flexi_kline_demo-v1.0.0/flexi_kline_demo.apk)
+
 ## Features
 
 - **Indicator framework**: direct, computed and external indicators; calculation is decoupled from painting and testable on its own; indicators can animate.
@@ -25,7 +27,7 @@ FlexiKline is a Flutter candlestick (K-line) chart framework for stock and crypt
 | Package | Pub | Description |
 | --- | --- | --- |
 | [flexi_kline](packages/flexi_kline) | [![pub](https://img.shields.io/pub/v/flexi_kline.svg)](https://pub.dev/packages/flexi_kline) | Core framework: chart widget and controller, indicator framework, crosshair and tooltip, gestures, theme and configuration |
-| [flexi_painting](packages/flexi_painting) | [![pub](https://img.shields.io/pub/v/flexi_painting.svg)](https://pub.dev/packages/flexi_painting) | Canvas painting primitives with no dependency beyond Flutter: shaped borders, cached labels, code-drawn icons; used and re-exported by flexi_kline |
+| [flexi_painting](packages/flexi_painting) | [![pub](https://img.shields.io/pub/v/flexi_painting.svg)](https://pub.dev/packages/flexi_painting) | Painting primitives that extend Flutter's `painting` library for custom-drawn widgets and charts: cached labels, shaped borders, code-drawn icons; no dependency beyond Flutter, used and re-exported by flexi_kline |
 | [flexi_kline_draw_tools](packages/flexi_kline_draw_tools) | [![pub](https://img.shields.io/pub/v/flexi_kline_draw_tools.svg)](https://pub.dev/packages/flexi_kline_draw_tools) | 19 drawing tools: lines, rectangle and channels, Fibonacci, Elliott waves |
 
 The core package ships the candle and time-axis indicators; others such as MA and MACD are built on the indicator framework, see [Indicators](packages/flexi_kline/README.md#indicators).
@@ -34,7 +36,7 @@ The core package ships the candle and time-axis indicators; others such as MA an
 
 ```yaml
 dependencies:
-  flexi_kline: ^2.7.2
+  flexi_kline: ^2.8.0
   flexi_kline_draw_tools: ^2.6.0 # optional
 ```
 

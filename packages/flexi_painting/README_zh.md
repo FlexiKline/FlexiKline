@@ -2,9 +2,13 @@
 
 [![pub](https://img.shields.io/pub/v/flexi_painting.svg)](https://pub.dev/packages/flexi_painting)
 
+![绘制页面](https://raw.githubusercontent.com/FlexiKline/FlexiKline.github.io/main/media/painting.png)
+
+![绘制页面录屏](https://raw.githubusercontent.com/FlexiKline/FlexiKline.github.io/main/media/painting.gif)
+
 [English](https://github.com/FlexiKline/FlexiKline/blob/main/packages/flexi_painting/README.md) | 简体中文
 
-Flutter 自绘图表与组件的底层绘制工具，只依赖 Flutter：给 `CustomPainter` 用的跨帧缓存标签、提示框、批量绘制与资源管理，几何工具，以及 Widget 与画布通用的异形边框和代码绘制图标。[flexi_kline](https://pub.dev/packages/flexi_kline) 基于它绘制，并重新导出它。
+在 Flutter `painting` 库之上扩展的绘制原语，用于自绘组件与图表。在 Flutter 已有能力之外，补充带缓存的文字标签与提示框、可用于 Widget 与画布的异形边框和代码绘制图标、批量绘制、几何工具，以及跨帧绘制资源管理。只依赖 Flutter，不含图表语义。[flexi_kline](https://pub.dev/packages/flexi_kline) 基于它绘制，并重新导出它。
 
 ## 版本要求
 

@@ -1,6 +1,6 @@
 resolution: workspace
 name: flexi_painting
-description: "Low-level painting toolkit for custom-painted Flutter charts and widgets: cached labels and tooltips, batched drawing, shaped borders and code-drawn icons."
+description: "Painting primitives that extend Flutter's painting library: cached labels and tooltips, shaped borders, code-drawn icons and batched drawing, with no chart semantics."
 version: 0.1.0
 homepage: https://flexikline.github.io
 repository: https://github.com/FlexiKline/FlexiKline/tree/main/packages/flexi_painting
