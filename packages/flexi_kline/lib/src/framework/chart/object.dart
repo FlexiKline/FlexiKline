@@ -47,6 +47,9 @@ abstract class IndicatorObject<T extends Indicator>
   /// 当前绘制偏移。
   double get paintDxOffset => context.paintDxOffset;
 
+  /// 最新蜡烛是否在最新价标签区左侧可见; 为 false 时蜡烛画的是最后价。
+  bool get isLatestCandleInView => paintDxOffset + context.latestPriceLabelWidth < 0;
+
   /// 蜡烛绘制尺寸。
   double get candleWidth => context.candleWidth;
   double get candleSpacing => context.candleSpacing;
@@ -426,6 +429,11 @@ abstract class CandleBasePaintObject<T extends CandleBaseIndicator> extends Dire
 
     return (dxs: dxs, dys: dys);
   }
+
+  /// 最近一次绘制的最新价标签区宽度, 含与 [chartRect] 右缘的间距; 0 表示没有标签区。
+  ///
+  /// 经 [PaintContext.latestPriceLabelWidth] 交给所有绘制对象, 判断最新蜡烛是否在视区内。
+  double get latestPriceLabelWidth => 0;
 
   /// `moveToDateTime` 动画完整结束、目标蜡烛确认未变后由框架调用, [ts] 是实际移到的蜡烛时间戳; 默认不处理。
   ///

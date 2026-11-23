@@ -51,12 +51,43 @@ List<CandleModel> _alternating({int count = 200, int latestTimestamp = 12000000}
 
 /// 记下创建的 [CandlePaintObject], 供用例读它的几何与标签状态。
 class _Candle extends CandleIndicator {
-  _Candle({super.chartType, super.inViewPriceMark, super.showCountdown = false, super.countdown});
+  _Candle({
+    super.chartType,
+    super.inViewPriceMark,
+    super.offViewPriceMark,
+    super.showCountdown = false,
+    super.countdown,
+  });
 
   late CandlePaintObject object;
 
   @override
   CandlePaintObject createPaintObject() => object = CandlePaintObject();
+}
+
+/// 在 paint 阶段记下 [PaintContext.latestPriceLabelWidth] 与 [PaintObject.isLatestCandleInView]。
+class _Probe extends DirectIndicator {
+  _Probe(DirectIndicatorKey key) : super(key: key, height: 60, padding: EdgeInsets.zero, autoActivate: true);
+
+  late _ProbeObject object;
+
+  @override
+  DirectPaintObject<DirectIndicator> createPaintObject() => object = _ProbeObject();
+}
+
+class _ProbeObject extends DirectPaintObject<_Probe> {
+  final seen = <(double, bool)>[];
+
+  @override
+  MinMax? computeVisibleMinMax(int start, int end) => null;
+
+  @override
+  void paint(Canvas canvas, Size size, {required int start, required int end}) {
+    seen.add((context.latestPriceLabelWidth, isLatestCandleInView));
+  }
+
+  @override
+  Size? paintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) => null;
 }
 
 /// 覆写最后价内容, 记下收到的价格与颜色。
@@ -112,18 +143,22 @@ class _SwitchableConfiguration extends FakeFlexiKlineConfiguration {
 
 void main() {
   late FlexiKlineController chart;
+  late TimeIndicator time;
 
   Future<CandlePaintObject> mount(
     WidgetTester tester,
     _Candle candle, {
     List<CandleModel>? candles,
     FakeFlexiKlineConfiguration? configuration,
+    List<Indicator> mainIndicators = const [],
+    List<Indicator> subIndicators = const [],
   }) async {
     chart = FlexiKlineController(configuration: configuration ?? FakeFlexiKlineConfiguration());
     addTearDown(chart.dispose);
     chart.switchKlineData(_spec);
     chart.replaceKlineData(_spec, candles ?? _alternating());
-    chart.mountIndicators(candle: candle, time: TimeIndicator(), mainIndicators: const [], subIndicators: const []);
+    time = TimeIndicator();
+    chart.mountIndicators(candle: candle, time: time, mainIndicators: mainIndicators, subIndicators: subIndicators);
     chart.initState();
     chart.setAdaptLayoutMode(width: 400);
     chart.flushPendingKlineData();
@@ -138,9 +173,9 @@ void main() {
   }
 
   group('最后价(最新蜡烛在视区外)', () {
-    testWidgets('offViewPriceLabelRect 即绘出的标签矩形, 命中区与标签重合', (tester) async {
+    testWidgets('offViewPriceLabelRect 即绘出的标签矩形, 停在最新价标签区左侧', (tester) async {
       final candle = await mount(tester, _Candle());
-      // 首帧以初值判定为视区内, 量出最新价宽度后切到最后价(见 paint_label_cache_test)。
+      // 首帧标签区宽度为 0, 判定为视区内; 量出最新价宽度后切到最后价。
       await paint(tester);
       final canvas = await paint(tester);
 
@@ -149,9 +184,32 @@ void main() {
       // 最后价有背景色, 装饰的填充走 drawRRect, 其外接矩形即标签 body。
       final body = canvas.rrectBounds.singleWhere((r) => r.size == size);
       final mark = candle.indicator.offViewPriceMark;
-      expect(body.right, candle.chartRect.right + candle.latestPriceLabelOffsetX - mark.spacing);
-      // 旧实现命中区顶边在最新价 dy, 比标签低半个标签高度。
+      expect(body.right, candle.chartRect.right - chart.latestPriceLabelWidth - mark.spacing);
       expect(candle.offViewPriceLabelRect, body);
+    });
+
+    testWidgets('关闭 offViewPriceMark 后不再画最后价, 也不再命中', (tester) async {
+      final shown = _Candle();
+      final candle = await mount(tester, shown);
+      await paint(tester);
+      await paint(tester);
+      final hit = candle.offViewPriceLabelRect!;
+
+      final hidden = _Candle(offViewPriceMark: shown.offViewPriceMark.copyWith(show: false));
+      chart.updateIndicators(
+        oldCandle: shown,
+        newCandle: hidden,
+        oldTime: time,
+        newTime: time,
+        oldMainIndicators: const [],
+        newMainIndicators: const [],
+        oldSubIndicators: const [],
+        newSubIndicators: const [],
+      );
+      await paint(tester);
+
+      expect(candle.offViewPriceLabelRect, isNull);
+      expect(candle.handleTap(hit.center), isFalse);
     });
 
     testWidgets('handleTap: 命中标签回到初始位置, 标签外不消费', (tester) async {
@@ -255,19 +313,34 @@ void main() {
       return _alternating(latestTimestamp: now - now % 60000);
     }
 
-    testWidgets('倒计时贴在最新价正下方, 与最新价同宽', (tester) async {
-      final candle = await mount(tester, smallLatest(), candles: live());
-      await paint(tester);
+    testWidgets('倒计时贴在最新价正下方, 两者同宽且取较宽者, 倒计时不截断', (tester) async {
+      final base = smallLatest();
+      final wideCountdown = _Candle(
+        showCountdown: true,
+        inViewPriceMark: base.inViewPriceMark,
+        countdown: base.countdown.copyWith(style: const TextStyle(fontSize: 12, height: 1)),
+      );
+      final candle = await mount(tester, wideCountdown, candles: live());
       final canvas = await paint(tester);
       expect(candle.offViewPriceLabelSize, isNull, reason: '前置条件: 停在视区内分支');
 
-      final latestWidth = -candle.latestPriceLabelOffsetX - candle.indicator.inViewPriceMark.spacing;
+      final width = chart.latestPriceLabelWidth - candle.indicator.inViewPriceMark.spacing;
       final right = candle.chartRect.right - candle.indicator.inViewPriceMark.spacing;
-      final labels = canvas.rrectBounds.where((r) => (r.right - right).abs() < 0.01 && r.width == latestWidth);
+      final labels = canvas.rrectBounds.where((r) => (r.right - right).abs() < 0.01 && r.width == width);
       expect(labels, hasLength(2), reason: '最新价与倒计时两块填充');
       final [latest, countdown] = labels.toList();
       expect(countdown.top, latest.bottom);
       expect(countdown.left, latest.left);
+
+      // 居中对齐的 Paragraph 落点在标签矩形外, 按绘制顺序取 overlay 最后两段。
+      final [..., latestText, countdownText] = _paragraphs(canvas);
+      final latestPadding = candle.indicator.inViewPriceMark.text.padding?.horizontal ?? 0;
+      expect(
+        countdownText.longestLine,
+        greaterThan(latestText.longestLine + latestPadding),
+        reason: '前置条件: 倒计时(无 padding)比最新价整块更宽',
+      );
+      expect(countdownText.didExceedMaxLines, isFalse);
     });
 
     testWidgets('倒计时派生下圆角与边框色时保留边框渐变', (tester) async {
@@ -301,6 +374,23 @@ void main() {
         expect(second, orderedEquals(first));
         break;
       }
+    });
+  });
+
+  group('最新价标签区宽度(PaintContext.latestPriceLabelWidth)', () {
+    testWidgets('主区与副区指标读到蜡烛最近一次绘制的宽度', (tester) async {
+      final main = _Probe(const DirectIndicatorKey('probe-main'));
+      final sub = _Probe(const DirectIndicatorKey('probe-sub'));
+      await mount(tester, _Candle(), mainIndicators: [main], subIndicators: [sub]);
+      await paint(tester);
+      final width = chart.latestPriceLabelWidth;
+      expect(width, greaterThan(0), reason: '前置条件: 首帧画了最新价');
+
+      main.object.seen.clear();
+      sub.object.seen.clear();
+      await paint(tester);
+      expect(main.object.seen, [(width, false)]);
+      expect(sub.object.seen, [(width, false)]);
     });
   });
 

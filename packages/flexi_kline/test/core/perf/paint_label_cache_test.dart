@@ -101,7 +101,7 @@ void main() {
   }
 
   testWidgets('静止的第二帧: 刻度、时间轴、最高最低价与最新价全部复用上一帧的 Paragraph', (tester) async {
-    // 首帧用初值 latestPriceLabelOffsetX = 0 判断最新价是否在视区内, 第二帧起才用实测宽度; 跳过这次切换。
+    // 首帧用初值 latestPriceLabelWidth = 0 判断最新价是否在视区内, 第二帧起才用实测宽度; 跳过这次切换。
     await paintChart(tester);
     final first = _paragraphs(await paintChart(tester));
     final formatted = time.formatted;

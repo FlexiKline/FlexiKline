@@ -133,6 +133,11 @@ abstract interface class PaintRuntimeScope {
   /// 横线没有对应物: 主区是价格轴, 副区是各自的值轴, 两者不可通用。
   List<double> get gridVerticalDxs;
 
+  /// 最新价标签区宽度, 含与主区右缘的间距; 0 表示没有标签区。
+  ///
+  /// 取自蜡烛最近一次绘制, 可能是上一帧的值。判断蜡烛画最新价还是最后价用 `PaintObject.isLatestCandleInView`。
+  double get latestPriceLabelWidth;
+
   /// 请求重绘 chart 图层。
   void requestRepaint();
 

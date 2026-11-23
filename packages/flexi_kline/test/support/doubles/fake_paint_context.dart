@@ -127,6 +127,9 @@ class FakePaintContext implements PaintContext {
   List<double> gridVerticalDxs = const [];
 
   @override
+  double latestPriceLabelWidth = 0;
+
+  @override
   double calculatePaneTop(int slot) => 0;
 
   @override

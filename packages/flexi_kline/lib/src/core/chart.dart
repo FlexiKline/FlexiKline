@@ -99,6 +99,10 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
   @override
   List<double> get gridVerticalDxs => mainPaintObject.gridVerticalDxs;
 
+  /// 转发 [CandleBasePaintObject.latestPriceLabelWidth]。
+  @override
+  double get latestPriceLabelWidth => candlePaintObject.latestPriceLabelWidth;
+
   /// Latest Price ///
   Timer? _lastPriceCountDownTimer;
 
