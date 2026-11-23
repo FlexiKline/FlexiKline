@@ -26,6 +26,7 @@
 * Draw candle bars over the draw range, which adds one candle beyond each visible edge.
 * Merge `FlexiOverlaySerializable`, `FlexiIndicatorSerializable`, `FlexiParamSerializable`, `FlexiModelSerializable` and `FlexiConfigSerializable` into `FlexiSerializable`, which sets `explicitToJson` and `includeIfNull: false` (Breaking Changes).
 * Omit null fields from the JSON output of overlays, indicators and params instead of writing `null` (Breaking Changes).
+* Add an optional `duration` to `PaintContext.requestMoveToInitialPosition`, `FlexiKlineController.moveToDateTime` and `MoveToPositionCallback`, so these moves can run for a set time instead of the inertial-pan duration capped by `ToleranceConfig.maxDuration`; `Duration.zero` moves synchronously without an animation.
 
 ## 2.7.2
 * Change `ScalePosition.auto` to always anchor X-axis zoom at the focal point (pinch centroid, wheel or trackpad pointer) and `middle` at the main chart center: `auto` used to pick an anchor by screen third, and `middle` followed the focal point until the latest candle left the screen.

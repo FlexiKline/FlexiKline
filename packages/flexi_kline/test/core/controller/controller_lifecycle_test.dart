@@ -80,7 +80,7 @@ void main() {
     _mount(c);
     c.initState();
     double? begin, end;
-    c.moveToPositionCallback = (b, e) async {
+    c.moveToPositionCallback = (b, e, {duration}) async {
       begin = b;
       end = e;
       return true;

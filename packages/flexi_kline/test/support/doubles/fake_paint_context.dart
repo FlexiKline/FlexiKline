@@ -136,7 +136,7 @@ class FakePaintContext implements PaintContext {
   void requestCancelCross() {}
 
   @override
-  void requestMoveToInitialPosition() {}
+  void requestMoveToInitialPosition({Duration? duration}) {}
 
   @override
   void requestReleasePaintObject(PaintObject object) {}

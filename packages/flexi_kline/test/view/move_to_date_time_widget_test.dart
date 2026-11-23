@@ -684,4 +684,105 @@ void main() {
       expect(controller.paintDxOffset, 0);
     });
   });
+
+  group('FlexiKlineController.moveToDateTime duration', () {
+    testWidgets('zero duration moves synchronously and resolves without a frame', (tester) async {
+      final controller = await _pumpChart(tester);
+      addTearDown(() => disposeChart(tester, controller));
+      final target = _latest.subtract(_day * 40);
+      final index = controller.klineData.tsToIndex(target.millisecondsSinceEpoch)!;
+
+      final future = controller.moveToDateTime(target, duration: Duration.zero);
+      expect(controller.paintDxOffset, closeTo(_targetOffset(controller, index), 0.01));
+
+      var done = false;
+      future.then((_) => done = true);
+      for (var i = 0; i < 5; i++) {
+        await null;
+      }
+      expect(done, isTrue, reason: '零时长不经过 endOfFrame');
+      expect(await future, index);
+    });
+
+    testWidgets('zero duration interrupts a running date move', (tester) async {
+      final controller = await _pumpChart(tester);
+      addTearDown(() => disposeChart(tester, controller));
+      final first = controller.moveToDateTime(_latest.subtract(_day * 50));
+      await tester.pump(const Duration(milliseconds: 16));
+
+      final target = _latest.subtract(_day * 25);
+      final index = controller.klineData.tsToIndex(target.millisecondsSinceEpoch)!;
+      final second = controller.moveToDateTime(target, duration: Duration.zero);
+      expect(controller.paintDxOffset, closeTo(_targetOffset(controller, index), 0.01));
+
+      expect(await _pumpUntilFutureComplete(tester, first, 'interrupted first date move'), isNull);
+      expect(await second, index);
+      for (var i = 0; i < 60; i++) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      expect(controller.paintDxOffset, closeTo(_targetOffset(controller, index), 0.01));
+    });
+  });
+
+  group('FlexiKlineController.requestMoveToInitialPosition', () {
+    testWidgets('passes duration to the move callback', (tester) async {
+      final controller = await _pumpChart(tester);
+      addTearDown(() => disposeChart(tester, controller));
+
+      final durations = <Duration?>[];
+      controller.moveToPositionCallback = (begin, end, {duration}) {
+        durations.add(duration);
+        return Future.value(true);
+      };
+
+      controller.requestMoveToInitialPosition(duration: const Duration(milliseconds: 180));
+      controller.requestMoveToInitialPosition();
+
+      expect(durations, [const Duration(milliseconds: 180), null]);
+    });
+
+    testWidgets('zero duration moves at once and interrupts a running animation', (tester) async {
+      final controller = await _pumpChart(tester);
+      addTearDown(() => disposeChart(tester, controller));
+      final initialOffset = controller.clampPaintDxOffset(controller.getInitPaintDxOffset());
+
+      final historical = controller.moveToDateTime(_latest.subtract(_day * 50));
+      await pumpUntilChart(
+        tester,
+        () => (controller.paintDxOffset - initialOffset).abs() > 1,
+        'historical offset setup',
+      );
+      await _pumpUntilFutureComplete(tester, historical, 'historical setup result');
+
+      controller.requestMoveToInitialPosition();
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(controller.paintDxOffset, isNot(closeTo(initialOffset, 0.01)));
+
+      controller.requestMoveToInitialPosition(duration: Duration.zero);
+      expect(controller.paintDxOffset, closeTo(initialOffset, 0.01), reason: '零时长不等帧, 调用返回时即到位');
+
+      for (var i = 0; i < 60; i++) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      expect(controller.paintDxOffset, closeTo(initialOffset, 0.01), reason: '被打断的动画不得再写入偏移');
+    });
+
+    testWidgets('zero duration resolves without waiting for a frame', (tester) async {
+      final controller = await _pumpChart(tester);
+      addTearDown(() => disposeChart(tester, controller));
+      final begin = controller.paintDxOffset;
+      final move = controller.moveToPositionCallback!(
+        begin,
+        begin - 10,
+        duration: Duration.zero,
+      );
+
+      var done = false;
+      move.then((_) => done = true);
+      await null;
+      await null;
+      expect(done, isTrue, reason: '零时长不经过 endOfFrame, 返回的 Future 立即完成');
+      expect(controller.paintDxOffset, closeTo(begin - 10, 0.01));
+    });
+  });
 }

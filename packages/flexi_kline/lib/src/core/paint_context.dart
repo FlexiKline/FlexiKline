@@ -140,7 +140,9 @@ abstract interface class PaintRuntimeScope {
   void requestCancelCross();
 
   /// 请求移动到初始位置。
-  void requestMoveToInitialPosition();
+  ///
+  /// [duration] 为空时按惯性平移的规则计算动画时长, 非空时使用该时长.
+  void requestMoveToInitialPosition({Duration? duration});
 
   /// 请求框架释放对 [object] 的持有（当前是拖动归属，后续可能是 hover、焦点等）。
   ///

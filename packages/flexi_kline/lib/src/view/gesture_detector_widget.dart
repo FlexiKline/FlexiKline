@@ -112,13 +112,23 @@ abstract class GestureDetectorState<T extends GestureDetectorWidget> extends Sta
     controller.onChartPanEnd();
   }
 
-  /// 以动画的形式从[begin]移动到[end].
-  Future<bool> moveToPosition(double begin, double end) {
+  /// 以动画的形式从[begin]移动到[end]指定位置。
+  /// [duration] 为零时同步完成: 打断进行中的动画后一次性平移, 不经过 ticker 与帧等待。
+  /// [duration] 为空时按惯性规则计算时长, 与 [animateToPosition] 的 `panDuration` 一致.
+  Future<bool> moveToPosition(double begin, double end, {Duration? duration}) {
     if (!mounted || !controller.isMounted) return Future.value(false);
+
+    if (duration == Duration.zero) {
+      cancelPositionAnimation();
+      controller.onChartMove(Offset(end - begin, 0));
+      controller.onChartPanEnd();
+      return Future.value(true);
+    }
 
     return animateToPosition(
       begin,
       end,
+      panDuration: duration,
       onCompleted: controller.onChartPanEnd,
     );
   }

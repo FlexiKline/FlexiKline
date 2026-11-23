@@ -20,7 +20,9 @@ part of 'core.dart';
 typedef OnLoadMoreCandles = Future<void> Function(KlineSpec spec);
 
 /// 将蜡烛图从[begin]动画移动到[end].
-typedef MoveToPositionCallback = Future<bool> Function(double begin, double end);
+///
+/// [duration] 为空时按位移距离与惯性参数计算时长; 非空时直接使用该时长.
+typedef MoveToPositionCallback = Future<bool> Function(double begin, double end, {Duration? duration});
 
 /// 状态管理: 负责数据的管理, 缓存, 切换, 计算.
 mixin StateBinding on KlineBindingBase, SettingBinding {
@@ -355,8 +357,9 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   /// 将视口移动到[target]对应的绘制偏移.
   ///
   /// 优先通过[moveToPositionCallback]走动画; 无回调时立即更新[paintDxOffset]并重绘.
+  /// [duration] 透传给回调; 为空时由回调按惯性参数计算时长.
   /// 返回动画是否完整完成.
-  Future<bool> _moveToPaintDxOffset(double target) async {
+  Future<bool> _moveToPaintDxOffset(double target, {Duration? duration}) async {
     if (!isMounted) return false;
 
     final begin = paintDxOffset;
@@ -364,7 +367,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
 
     final callback = moveToPositionCallback;
     if (callback != null) {
-      return callback(begin, end);
+      return callback(begin, end, duration: duration);
     }
 
     if ((begin - end).abs() >= precisionError) {
@@ -387,7 +390,13 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   ///
   /// [showDateMark]为false时本次不调用`didMoveToDate`, 蜡烛指标不显示日期气泡;
   /// 用于程序化定位等不需要提示目标日期的场景, `moveToDate`交互事件照常派发.
-  Future<int?> moveToDateTime(DateTime dateTime, {bool showDateMark = true}) async {
+  ///
+  /// [duration]为空时按惯性规则计算动画时长; 为[Duration.zero]时同步平移, 调用返回时偏移已到位.
+  Future<int?> moveToDateTime(
+    DateTime dateTime, {
+    bool showDateMark = true,
+    Duration? duration,
+  }) async {
     if (!isMounted || klineData.isEmpty || mainChartWidth <= 0) {
       return null;
     }
@@ -403,7 +412,7 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
     final barsBack = klineData.length - 1 - index;
     final target = barsBack * candleActualWidth + candleWidthHalf - mainChartWidthHalf;
     requestCancelCross();
-    if (!await _moveToPaintDxOffset(target)) return null;
+    if (!await _moveToPaintDxOffset(target, duration: duration)) return null;
     if (!isMounted || !identical(klineData, data)) return null;
     if (klineData.get(index)?.ts != targetTimestamp) return null;
     dispatchInteractionEvent(FlexiKlineEventType.moveToDate, {'ts': targetTimestamp});
@@ -412,10 +421,13 @@ mixin StateBinding on KlineBindingBase, SettingBinding {
   }
 
   /// 请求移动蜡烛图回到初始位置。
+  ///
+  /// [duration] 为空时时长沿用惯性平移的计算方式, 与甩动共用 [ToleranceConfig.maxDuration];
+  /// 非空时直接使用该时长, 不受 [ToleranceConfig.maxDuration] 约束.
   @override
-  void requestMoveToInitialPosition() {
+  void requestMoveToInitialPosition({Duration? duration}) {
     if (!isMounted) return;
-    unawaited(_moveToPaintDxOffset(getInitPaintDxOffset()));
+    unawaited(_moveToPaintDxOffset(getInitPaintDxOffset(), duration: duration));
     dispatchInteractionEvent(FlexiKlineEventType.moveToLatest);
   }
 
