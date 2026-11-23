@@ -114,6 +114,14 @@ void main() {
       );
     });
 
+    test('只换 filterQuality → paint, 且实例不等', () {
+      final low = RawImageSpan(img1, const Size(10, 10));
+      final medium = RawImageSpan(img1, const Size(10, 10), filterQuality: FilterQuality.medium);
+      expect(low.filterQuality, FilterQuality.low);
+      expect(low.compareTo(medium), RenderComparison.paint);
+      expect(low == medium, isFalse);
+    });
+
     test('与其他类型 span 比较 → layout', () {
       expect(RawImageSpan(img1, const Size(10, 10)).compareTo(const TextSpan(text: 'x')), RenderComparison.layout);
     });

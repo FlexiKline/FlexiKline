@@ -32,6 +32,8 @@ final class LabelPainter implements PaintResource {
 
   final TextLayoutCache _text;
   final DecorationPainter _decoration = DecorationPainter();
+
+  /// 行内图片共用的画笔, 采样质量按每个 [RawImageSpan.filterQuality] 设置。
   final Paint _imagePaint = Paint();
 
   /// 画标签, 返回容器矩形(含 padding, 不含 AnchoredBorder 的外延)。
@@ -132,7 +134,7 @@ final class LabelPainter implements PaintResource {
           image,
           Offset.zero & Size(image.width.toDouble(), image.height.toDouble()),
           box.toRect().shift(origin),
-          _imagePaint,
+          _imagePaint..filterQuality = span.filterQuality,
         );
       }
       return true;

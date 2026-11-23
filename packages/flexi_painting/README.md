@@ -16,7 +16,7 @@ The low-level painting toolkit for custom-painted Flutter charts and widgets, wi
 ## Features
 
 - **Shaped borders**: `BubbleBorder` (speech bubble with an arrow on any side, optional gradient border) and `GradientRoundedRectangleBorder`. Both are `ShapeBorder`s, so `ShapeDecoration`, `ClipPath` and `Material` accept them.
-- **Cached labels**: `LabelPainter` lays text out only when its key or style changes, places the label by an anchor and alignment inside optional bounds, and can flip to the opposite side of a target with `paintAround`. `RawImageSpan` puts a decoded `ui.Image` inline in the text.
+- **Cached labels**: `LabelPainter` lays text out only when its key or style changes, places the label by an anchor and alignment inside optional bounds, and can flip to the opposite side of a target with `paintAround`. `RawImageSpan` puts a decoded `ui.Image` inline in the text, sampled with its `filterQuality` (default `low`).
 - **Images and tooltips**: `ImagePainter` and `TooltipPainter` with the same cache-and-place model; tooltip rows are laid out by a `MainAxisAlignment`-style alignment, with `spacing` as the minimum label-value gap.
 - **Code-drawn icons**: describe a shape once as an `IconShape`; show it as a widget with `ShapeIcon` (vector, `IconTheme` defaults like `Icon`), inline in a canvas label with `ShapeImage`, or through `ShapeImageProvider` where an `ImageProvider` is required.
 - **Batching**: `PointBuffer` collects points or segments sharing a paint and draws them in one call.

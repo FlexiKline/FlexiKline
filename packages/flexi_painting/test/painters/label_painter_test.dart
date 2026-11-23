@@ -399,6 +399,23 @@ void main() {
       expect(dst.size, size);
       expect(dst.topLeft.dx, body.left + 4);
       expect(body.deflate(4).contains(dst.center), isTrue);
+      final paint = canvas.invocations.last.positionalArguments[3] as Paint;
+      expect(paint.filterQuality, FilterQuality.low);
+      image.dispose();
+    });
+
+    test('drawImageRect 的采样质量取自 RawImageSpan.filterQuality', () {
+      final image = solidImage(4, 4);
+      label.paint(
+        canvas,
+        'img-medium',
+        build: () => RawImageSpan(image, const Size(12, 12), filterQuality: FilterQuality.medium),
+        style: style,
+        anchor: Offset.zero,
+      );
+      expect(calls().last, #drawImageRect);
+      final paint = canvas.invocations.last.positionalArguments[3] as Paint;
+      expect(paint.filterQuality, FilterQuality.medium);
       image.dispose();
     });
 

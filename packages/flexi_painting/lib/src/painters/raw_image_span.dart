@@ -20,10 +20,20 @@ import 'package:flutter/painting.dart';
 ///
 /// 与 WidgetSpan 不同, 尺寸由自身给出, 不需要先 `TextPainter.setPlaceholderDimensions`。
 final class RawImageSpan extends PlaceholderSpan {
-  const RawImageSpan(this.image, this.size, {super.alignment = ui.PlaceholderAlignment.middle, super.baseline});
+  const RawImageSpan(
+    this.image,
+    this.size, {
+    super.alignment = ui.PlaceholderAlignment.middle,
+    super.baseline,
+    this.filterQuality = FilterQuality.low,
+  });
 
   final ui.Image image;
   final Size size;
+
+  /// [image] 缩放到 [size] 时的采样质量。默认 low 适合 ShapeImage 这类按 2～4 倍栅格化的位图;
+  /// 缩小超过约 4 倍(如大图 logo)时用 medium, 否则会有锯齿和闪烁。
+  final FilterQuality filterQuality;
 
   @override
   void build(
@@ -55,7 +65,7 @@ final class RawImageSpan extends PlaceholderSpan {
     return localOffset == 0 ? PlaceholderSpan.placeholderCodeUnit : null;
   }
 
-  /// 图片换了实例或尺寸、对齐变化都要重排: 占位框尺寸与位置由它们决定。
+  /// 图片换了实例或尺寸、对齐变化都要重排: 占位框尺寸与位置由它们决定; 只换采样质量时只需重画。
   @override
   RenderComparison compareTo(InlineSpan other) {
     if (identical(this, other)) return RenderComparison.identical;
@@ -66,7 +76,7 @@ final class RawImageSpan extends PlaceholderSpan {
         baseline != other.baseline) {
       return RenderComparison.layout;
     }
-    return RenderComparison.identical;
+    return filterQuality == other.filterQuality ? RenderComparison.identical : RenderComparison.paint;
   }
 
   /// PlaceholderSpan 的默认实现是 `assert(false, ...)`, 而 `TextPainter.text` setter 会递归校验,
@@ -81,8 +91,9 @@ final class RawImageSpan extends PlaceholderSpan {
           identical(image, other.image) &&
           size == other.size &&
           alignment == other.alignment &&
-          baseline == other.baseline;
+          baseline == other.baseline &&
+          filterQuality == other.filterQuality;
 
   @override
-  int get hashCode => Object.hash(identityHashCode(image), size, alignment, baseline);
+  int get hashCode => Object.hash(identityHashCode(image), size, alignment, baseline, filterQuality);
 }
