@@ -136,23 +136,79 @@ void main() {
     }
   });
 
-  test('spaceEvenly: 不支持, 降级为 spaceBetween 绘制', () {
-    final canvasEvenly = RecordingCanvas();
-    final cardEvenly = paint(
-      canvasEvenly,
+  test('spaceEvenly(借用): 两列定宽, label 列右对齐、value 列左对齐, 中缝恰为 spacing', () {
+    final canvas = RecordingCanvas();
+    final card = paint(
+      canvas,
       [_row('LongLabel', '1'), _row('L', '123456')],
       alignment: MainAxisAlignment.spaceEvenly,
     );
-    final canvasBetween = RecordingCanvas();
-    final cardBetween = paint(
-      canvasBetween,
-      [_row('LongLabel', '1'), _row('L', '123456')],
-      alignment: MainAxisAlignment.spaceBetween,
-    );
-    expect(cardEvenly.bounds.width, closeTo(cardBetween.bounds.width, 0.01));
-    for (var i = 0; i < canvasEvenly.paragraphOffsets.length; i++) {
-      expect(canvasEvenly.paragraphOffsets[i], canvasBetween.paragraphOffsets[i]);
+
+    final p = _paragraphs(canvas);
+    expect(card.bounds.width, closeTo(_columnSum(p) + _padding.horizontal, 0.01));
+    final seam = card.bounds.left + _padding.left + _maxWidth([p[0], p[2]]);
+    for (var i = 0; i < 2; i++) {
+      expect(canvas.paragraphOffsets[i * 2].dx + p[i * 2].longestLine, closeTo(seam, 0.01));
+      expect(canvas.paragraphOffsets[i * 2 + 1].dx, closeTo(seam + 8, 0.01));
     }
+  });
+
+  test('spaceEvenly: minContentWidth 撑宽时余量平分到两侧', () {
+    final canvas = RecordingCanvas();
+    final card = paint(
+      canvas,
+      [_row('LongLabel', '1'), _row('L', '123456')],
+      alignment: MainAxisAlignment.spaceEvenly,
+      minContentWidth: 200,
+    );
+
+    final p = _paragraphs(canvas);
+    final contentLeft = card.bounds.left + _padding.left;
+    final contentRight = card.bounds.right - _padding.right;
+    final labelLeft = canvas.paragraphOffsets[0].dx;
+    final valueRight = canvas.paragraphOffsets[3].dx + p[3].longestLine;
+    expect(labelLeft - contentLeft, greaterThan(0));
+    expect(labelLeft - contentLeft, closeTo(contentRight - valueRight, 0.01));
+  });
+
+  test('spaceEvenly: maxContentWidth 只压缩 value 列, label 列右缘仍对齐', () {
+    final canvas = RecordingCanvas();
+    final card = paint(
+      canvas,
+      [_row('LongLabel', '1'), _row('A', 'a very long value text that overflows')],
+      alignment: MainAxisAlignment.spaceEvenly,
+      maxContentWidth: 120,
+    );
+
+    final p = _paragraphs(canvas);
+    expect(card.bounds.width, closeTo(120 + _padding.horizontal, 0.01));
+    final seam = card.bounds.left + _padding.left + p[0].longestLine;
+    expect(canvas.paragraphOffsets[2].dx + p[2].longestLine, closeTo(seam, 0.01));
+    expect(canvas.paragraphOffsets[3].dx, closeTo(seam + 8, 0.01));
+    expect(p[3].width, lessThanOrEqualTo(120 - 8 - p[0].longestLine + 0.01));
+  });
+
+  test('value 换行后各行的起点: spaceEvenly 左对齐, 其余右对齐', () {
+    double minLineLeft(MainAxisAlignment alignment) {
+      final canvas = RecordingCanvas();
+      final p = TooltipPainter();
+      addTearDown(p.dispose);
+      p.paint(
+        canvas,
+        [_row('A', 'aaaa bb cccccc d')],
+        style: _style,
+        anchor: Offset.zero,
+        spacing: 8,
+        alignment: alignment,
+        maxContentWidth: 60,
+      );
+      final lines = _paragraphs(canvas)[1].computeLineMetrics();
+      expect(lines.length, greaterThan(1));
+      return lines.map((e) => e.left).reduce((a, b) => a < b ? a : b);
+    }
+
+    expect(minLineLeft(MainAxisAlignment.spaceEvenly), 0);
+    expect(minLineLeft(MainAxisAlignment.spaceBetween), greaterThan(0));
   });
 
   test('start: label+spacing+value 整体左对齐, 余量留尾部', () {
@@ -206,8 +262,10 @@ void main() {
       final valueRight = valueDx + p[i * 2 + 1].longestLine;
       // 中缝保底 spacing; 两侧余量对称: 内容区左缘到 label 左缘 == value 右缘到内容区右缘。
       expect(valueDx - (labelDx + p[i * 2].longestLine), greaterThanOrEqualTo(8 - 0.01));
-      expect(labelDx - (card.bounds.left + _padding.left),
-          closeTo(card.bounds.right - _padding.right - valueRight, 0.01));
+      expect(
+        labelDx - (card.bounds.left + _padding.left),
+        closeTo(card.bounds.right - _padding.right - valueRight, 0.01),
+      );
     }
   });
 

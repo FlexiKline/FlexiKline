@@ -62,7 +62,7 @@ class TooltipConfig {
   /// - start / end / center: 整体左对齐 / 右对齐 / 居中;
   /// - spaceBetween(默认): 按最宽一行(label+spacing+value)定宽, 两端对齐;
   /// - spaceAround(借用, 行为已变): 两列定宽, 卡片宽 = 最宽 label + spacing + 最宽 value;
-  /// - spaceEvenly: 不支持, 绘制时降级为 spaceBetween。
+  /// - spaceEvenly(借用): 两列定宽同 spaceAround, label 列右对齐、value 列左对齐, 向中缝靠拢。
   /// spacing 始终保底为两列间的最小间距。
   final MainAxisAlignment alignment;
 

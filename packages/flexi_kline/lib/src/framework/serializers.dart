@@ -283,7 +283,7 @@ class PaintingStyleConverter implements JsonConverter<PaintingStyle, String> {
 }
 
 /// Tooltip 行内余量分配方式, 借用 Flutter 的 [MainAxisAlignment]。
-/// 注: spaceAround 被借用为两列定宽, spaceEvenly 绘制时降级为 spaceBetween。
+/// 注: spaceAround 被借用为两列定宽, spaceEvenly 被借用为两列向中缝靠拢。
 class MainAxisAlignmentConverter implements JsonConverter<MainAxisAlignment, String> {
   const MainAxisAlignmentConverter();
 

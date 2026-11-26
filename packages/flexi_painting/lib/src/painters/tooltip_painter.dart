@@ -34,10 +34,11 @@ typedef TooltipRow = ({String label, TextStyle? labelStyle, String value, TextSt
 ///   value 往往不在同一行, 两端对齐时余量摊进中缝;
 /// - spaceAround(借用, 行为已变): 两列定宽, 卡片宽 = 最宽 label + spacing + 最宽 value,
 ///   两列严格对齐;
-/// - spaceEvenly(不支持): 绘制时降级为 spaceBetween。
+/// - spaceEvenly(借用): 两列定宽同 spaceAround, label 列右对齐、value 列左对齐, 两列向中缝靠拢;
+///   内容区有余量时平分到两侧。
 /// spacing 始终保底为两列间的最小间距。
 ///
-/// 两列各一个 [TextLayoutCache], 列样式只取基础文本样式; 每行自带的样式进 key 与子 span, 切行不清缓存。
+/// 两列各一个 [TextLayoutCache], 列样式只取基础文本样式(value 列右对齐, spaceEvenly 下左对齐); 每行自带的样式进 key 与子 span, 切行不清缓存。
 /// value 列容量是 label 列的两倍: 在相邻两条数据间来回切换时, 两组值都留在池里。
 final class TooltipPainter implements PaintResource {
   TextLayoutCache _labels = TextLayoutCache(capacity: 16);
@@ -51,6 +52,7 @@ final class TooltipPainter implements PaintResource {
   TextStyle? _text;
   LabelStyle? _labelStyle;
   LabelStyle? _valueStyle;
+  LabelStyle? _valueStartStyle;
 
   /// 画卡片, 返回卡片矩形(含 padding)与各行矩形(横向撑满卡片)。
   ///
@@ -72,7 +74,7 @@ final class TooltipPainter implements PaintResource {
     EdgeInsets padding = EdgeInsets.zero,
   }) {
     if (infos.isEmpty) return (bounds: Rect.zero, rows: const <Rect>[]);
-    _configure(style, infos.length);
+    _configure(style, infos.length, alignment == MainAxisAlignment.spaceEvenly);
 
     final labels = _labelRows..clear();
     final values = _valueRows..clear();
@@ -90,14 +92,14 @@ final class TooltipPainter implements PaintResource {
       valueWidth = math.max(valueWidth, value.width);
     }
 
-    // 定宽: spaceAround 借用为两列定宽(最宽 label + gap + 最宽 value); 其余按最宽一行。
-    final byColumns = alignment == MainAxisAlignment.spaceAround;
+    // 两列定宽: 卡片宽 = 最宽 label + gap + 最宽 value; 其余按最宽一行。
+    final byColumns = alignment == MainAxisAlignment.spaceAround || alignment == MainAxisAlignment.spaceEvenly;
     var contentWidth = math.max(byColumns ? labelWidth + gap + valueWidth : widest, minContentWidth ?? 0);
     if (maxContentWidth.isFinite && contentWidth > maxContentWidth && maxContentWidth > labelWidth + gap) {
       contentWidth = maxContentWidth;
       // 压缩 value 列: byColumns 按列最大宽一刀切; 否则逐行扣除各自 label 与 gap 的剩余空间。
       for (var i = 0; i < infos.length; i++) {
-        final valueMaxWidth = byColumns ? maxContentWidth - labelWidth - gap : maxContentWidth - labels[i].width - gap;
+        final valueMaxWidth = maxContentWidth - gap - (byColumns ? labelWidth : labels[i].width);
         if (values[i].width <= valueMaxWidth) continue;
         final info = infos[i];
         values[i] = _values.layout((info.value, info.valueStyle), maxWidth: valueMaxWidth);
@@ -116,12 +118,14 @@ final class TooltipPainter implements PaintResource {
     var top = card.top + padding.top;
     final left = card.left + padding.left;
     final width = card.width - padding.horizontal;
+    // spaceEvenly 的中缝位置(label 列右缘): 余量平分到两侧; 压缩后余量为负, 中缝贴最宽 label。
+    final seam = labelWidth + math.max(0.0, width - labelWidth - valueWidth - gap) / 2;
     for (var i = 0; i < infos.length; i++) {
       final label = labels[i];
       final value = values[i];
       final height = math.max(label.height, value.height);
       // 行内垂直居中; 水平按 alignment 分配余量, gap 始终保底在中缝。
-      final (labelDx, valueDx) = _rowOffsets(alignment, gap, width - label.width - value.width, label.width);
+      final (labelDx, valueDx) = _rowOffsets(alignment, gap, width - label.width - value.width, label.width, seam);
       label.paint(canvas, Offset(left + labelDx, top + (height - label.height) / 2));
       value.paint(canvas, Offset(left + valueDx, top + (height - value.height) / 2));
       rows.add(Rect.fromLTRB(card.left, top, card.right, top + height));
@@ -133,25 +137,34 @@ final class TooltipPainter implements PaintResource {
   /// 行内 label / value 的横轴偏移: [free] 是内容区扣除两列后的余量(不小于 [gap]),
   /// 扣除保底 [gap] 后的剩余余量按 [alignment] 分配。
   ///
-  /// spaceAround 借用为两列定宽、spaceEvenly 不支持, 两者绘制时都按 spaceBetween 两端对齐。
-  static (double, double) _rowOffsets(MainAxisAlignment alignment, double gap, double free, double labelWidth) {
+  /// spaceAround 借用为两列定宽, 行内按 spaceBetween 两端对齐; spaceEvenly 的 label 右缘贴 [seam],
+  /// value 左缘距 [seam] 一个 [gap]。
+  static (double, double) _rowOffsets(
+    MainAxisAlignment alignment,
+    double gap,
+    double free,
+    double labelWidth,
+    double seam,
+  ) {
     final rest = math.max(0.0, free - gap);
     final after = labelWidth + gap; // start 基准: value 紧跟 label。
     return switch (alignment) {
       MainAxisAlignment.start => (0.0, after),
       MainAxisAlignment.end => (rest, rest + after),
       MainAxisAlignment.center => (rest / 2, rest / 2 + after),
-      // spaceBetween 及借用/降级的 spaceAround / spaceEvenly: 两端对齐。
+      MainAxisAlignment.spaceEvenly => (seam - labelWidth, seam + gap),
+      // spaceBetween 及借用的 spaceAround: 两端对齐。
       _ => (0.0, rest + after),
     };
   }
 
   /// 同步列样式, 并保证容量不小于行数: 否则同一帧后面的行会淘汰前面行仍要绘制的 painter。
-  void _configure(TextStyle style, int rows) {
+  void _configure(TextStyle style, int rows, bool valueAtStart) {
     if (style != _text) {
       _text = style;
       _labelStyle = LabelStyle(text: style);
       _valueStyle = LabelStyle(text: style, textAlign: TextAlign.end);
+      _valueStartStyle = LabelStyle(text: style);
     }
     if (rows > _labels.capacity) {
       _labels.dispose();
@@ -162,7 +175,7 @@ final class TooltipPainter implements PaintResource {
       _values = TextLayoutCache(capacity: rows * 2);
     }
     _labels.configure(_labelStyle!);
-    _values.configure(_valueStyle!);
+    _values.configure(valueAtStart ? _valueStartStyle! : _valueStyle!);
   }
 
   /// 行样式为 null 时直接用文本, 由列样式的根 span 决定外观。

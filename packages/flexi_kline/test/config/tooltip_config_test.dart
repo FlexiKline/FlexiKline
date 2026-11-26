@@ -124,5 +124,10 @@ void main() {
     final restored = TooltipConfig.fromJson(custom.toJson());
     expect(restored.spacing, custom.spacing);
     expect(restored.alignment, MainAxisAlignment.spaceAround);
+
+    final evenly = TooltipConfig.fromJson(
+      custom.copyWith(alignment: MainAxisAlignment.spaceEvenly).toJson(),
+    );
+    expect(evenly.alignment, MainAxisAlignment.spaceEvenly);
   });
 }

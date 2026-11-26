@@ -1,3 +1,6 @@
+## 0.2.0
+* Change `TooltipPainter.paint` under `alignment: MainAxisAlignment.spaceEvenly` to size the card like `spaceAround` and align labels right and values left toward the gap, splitting any extra width between both sides; it used to fall back to `spaceBetween` (Breaking Changes).
+
 ## 0.1.0
 * Initial release: the painting primitives of `flexi_kline` as a standalone package with no dependency beyond Flutter.
 * Add `IconShape`, an immutable shape description shared by canvas and widgets, with eleven built-in shapes including the circled plus `CirclePlusShape`; `ShapeImage` caches a shape as a bitmap for inline labels.
