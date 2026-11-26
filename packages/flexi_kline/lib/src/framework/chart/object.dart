@@ -474,6 +474,9 @@ final class MainPaintObject<T extends MainPaintObjectIndicator> extends PaintObj
   /// 本帧主区竖线的 dx 序列, 供副区指标对齐; 空表示主区未产出竖线。
   List<double> get gridVerticalDxs => _gridVerticalDxs;
 
+  /// 主区为 tips 让出的高度, 含其上方的 `padding.top`; 没有 tips 或 `drawBelowTipsArea` 为 false 时为 0。
+  double get tipsAreaHeight => _tipsAreaHeight;
+
   // ---- Zoom 价格区间（Y 轴由用户接管）----
 
   /// 缩放态下的价格区间; null 表示由可见数据自动适配。
@@ -531,6 +534,16 @@ final class MainPaintObject<T extends MainPaintObjectIndicator> extends PaintObj
       return children.reversed.where((object) => object.key == candleIndicatorKey);
     }
     return children.reversed;
+  }
+
+  /// 与 [paintableChildren] 成员相同, 但按指标加入主区的先后排列, 不随 zIndex。
+  ///
+  /// zIndex 决定图形层级, 依赖加入先后的场景(如 tips 行序)用本视图。
+  Iterable<PaintObject> get linkedChildren {
+    if (onlyMainChart) {
+      return children.originList.where((object) => object.key == candleIndicatorKey);
+    }
+    return children.originList;
   }
 
   /// 获取蜡烛图绘制对象

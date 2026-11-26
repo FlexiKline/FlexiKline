@@ -1,3 +1,9 @@
+## 2.8.1
+* Start main pane tips at `MainPaintObjectIndicator.padding.top`; with `drawBelowTipsArea` the padding is kept both above the tips and between the tips and the chart.
+* Fix candles, indicator lines and the cross price label drifting apart after the main pane tips area changes height, which lasted until the next repaint on a static chart or while crossing: the chart repaints once more after such a frame.
+* Lay out main pane tips rows in the order the indicators were added instead of by `zIndex`, so an indicator drawn below the candles, such as the volume, no longer always takes the first row.
+* Add the read-only `MainPaintObject.tipsAreaHeight`, the height the main pane reserves for tips.
+
 ## 2.8.0
 * Move the painting primitives to the new `flexi_painting` package; `flexi_kline.dart` still exports them, and `package:flexi_kline/painting.dart` is removed in favor of `package:flexi_painting/flexi_painting.dart` (Breaking Changes).
 * Rename `ImageSpan` to `RawImageSpan`, which avoids the name clash with `extended_text` (Breaking Changes).

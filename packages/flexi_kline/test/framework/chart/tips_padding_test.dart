@@ -23,6 +23,7 @@ library;
 
 import 'dart:ui';
 
+import 'package:flexi_kline/flexi_kline.dart' show CandleModel, FlexiCandleModel, MinMax;
 // 直接引入内部库，使框架内部的 do* 绘制调度扩展（MainPaintDelegateExt）对包内测试可见。
 import 'package:flexi_kline/src/framework/chart/indicator.dart';
 import 'package:flutter/painting.dart';
@@ -104,8 +105,9 @@ class _Scene {
     );
   }
 
-  /// 期望的 tips 区域下边界：声明 padding.top 加 [rows] 行 tips。
-  double expected(int rows) => basePadding.top + rows * tipsRow;
+  /// 期望的 tips 区域下边界：有 tips 时为 tips 上方与下方各一份 padding.top 加 [rows] 行 tips，
+  /// 没有 tips 时只留 padding.top。
+  double expected(int rows) => rows == 0 ? noTipsArea : basePadding.top * 2 + rows * tipsRow;
 }
 
 void main() {
@@ -192,7 +194,7 @@ void main() {
 
       expect(
         scene.tipsAreaBottom,
-        basePadding.top + tipsRow / 4,
+        basePadding.top * 2 + tipsRow / 4,
         reason:
             '声明更新不经过 add/remove，旧实现需要额外补一次失效；'
             '汇总方案下同一次绘制即跟随',
@@ -319,4 +321,99 @@ void main() {
       );
     });
   });
+
+  group('MainPaintObject/tips 起点', () {
+    test('首行从 padding.top 起绘，后续行依次下移', () {
+      final scene = _RowScene();
+      scene.paintChart(_model(150));
+
+      expect(scene.tipsRects.map((r) => r.top), [basePadding.top, basePadding.top + _RowObject.rowHeight * 2]);
+    });
+
+    test('行序按加入主区的先后，不随 zIndex', () {
+      // 后加入的指标 zIndex 更小(如成交量柱要压在蜡烛之下), 图形层级在下, tips 仍排在后面。
+      final scene = _RowScene(zIndexes: const [0, -2]);
+      scene.paintChart(_model(50));
+
+      expect(scene.tipsRectOf(0).top, basePadding.top, reason: '先加入的指标排第一行');
+      expect(scene.tipsRectOf(1).top, basePadding.top + _RowObject.rowHeight, reason: '后加入的 zIndex 更小也排在其后');
+    });
+
+    test('drawBelowTipsArea 为 false 时首行同样从 padding.top 起绘', () {
+      final scene = _RowScene(drawBelowTipsArea: false);
+      scene.paintChart(_model(150));
+
+      expect(scene.tipsRects.first.top, basePadding.top);
+      expect(scene.main.topRect.bottom, noTipsArea, reason: '不让出区域');
+    });
+  });
+}
+
+FlexiCandleModel _model(num close) => FlexiCandleModel.init(
+  candle: CandleModel(timestamp: 1, open: close, high: close, low: close, close: close, volume: 1),
+  count: 4,
+);
+
+/// 主区挂两个 [_RowIndicator]，tips 行高随蜡烛变化。
+class _RowScene {
+  _RowScene({bool drawBelowTipsArea = true, List<int> zIndexes = const [0, 0]}) : context = FakePaintContext() {
+    final config = FakeFlexiKlineConfiguration(
+      mainChildren: {directKey(0), directKey(1)},
+      mainIndicatorDefaultSize: mainSize,
+      mainIndicatorDefaultPadding: basePadding,
+      drawBelowTipsArea: drawBelowTipsArea,
+    );
+    manager = IndicatorPaintObjectManager(configuration: config);
+    manager.mountIndicators(
+      context: context,
+      candle: TestCandleIndicator(),
+      time: TestTimeIndicator(),
+      mainIndicators: [
+        _RowIndicator(key: directKey(0), zIndex: zIndexes[0]),
+        _RowIndicator(key: directKey(1), zIndex: zIndexes[1]),
+      ],
+      subIndicators: const [],
+    );
+  }
+
+  final FakePaintContext context;
+  late final IndicatorPaintObjectManager manager;
+
+  MainPaintObject get main => manager.mainPaintObject;
+
+  /// 最近一帧 [index] 号指标收到的 tipsRect。
+  Rect tipsRectOf(int index) => (main.getChildPaintObject(directKey(index))! as _RowObject).lastTipsRect!;
+
+  /// 最近一帧各子指标收到的 tipsRect，按 zIndex 排序后的遍历顺序。
+  List<Rect> get tipsRects => [
+    for (final object in main.children)
+      if (object is _RowObject) ?object.lastTipsRect,
+  ];
+
+  void paintChart(FlexiCandleModel model) => main.doPaintTips(Canvas(PictureRecorder()), model: model);
+}
+
+/// close >= 100 时 tips 折成两行，否则一行，模拟数值位数不同导致换行数变化。
+class _RowIndicator extends DirectIndicator {
+  _RowIndicator({required super.key, super.zIndex}) : super(height: 100, autoActivate: false, padding: EdgeInsets.zero);
+
+  @override
+  DirectPaintObject<DirectIndicator> createPaintObject() => _RowObject();
+}
+
+class _RowObject extends DirectPaintObject<_RowIndicator> {
+  static const rowHeight = tipsRow;
+
+  Rect? lastTipsRect;
+
+  @override
+  MinMax? computeVisibleMinMax(int start, int end) => null;
+  @override
+  void paint(Canvas canvas, Size size, {required int start, required int end}) {}
+  @override
+  Size? paintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset, Rect? tipsRect}) {
+    lastTipsRect = tipsRect;
+    if (model == null) return null;
+    return Size(tipsRect?.width ?? 0, model.close >= 100 ? rowHeight * 2 : rowHeight);
+  }
 }

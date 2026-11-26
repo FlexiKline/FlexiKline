@@ -457,6 +457,7 @@ mixin SettingBinding on KlineBindingBase {
   int get maxCandleCount => (mainChartWidth / candleActualWidth).ceil();
 
   /// PaintObject 已创建且 Controller 处于 mounted。
+  @override
   bool get isMounted => _paintObjectManager.isInitialized && _lifecycleNotifier.value.isMounted;
 
   /// 主区已注册指标 key；默认过滤 External 业务指标，[includeExternal]=true 则全返回。

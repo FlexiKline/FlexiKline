@@ -186,13 +186,15 @@ mixin CrossBinding on KlineBindingBase, SettingBinding {
       }
     }
 
-    _paintCrossLine(canvas, offset);
-    _paintTooltip(canvas, offset, model: model);
-
     for (final paintObject in subPaintObjects) {
       paintObject.doPaintCross(canvas, offset, model: model);
     }
+    final tipsAreaHeight = mainPaintObject.tipsAreaHeight;
     mainPaintObject.doPaintCross(canvas, offset, model: model);
+    repaintChartIfTipsAreaChanged(tipsAreaHeight);
+
+    _paintCrossLine(canvas, offset);
+    _paintTooltip(canvas, offset, model: model);
   }
 
   void _paintCrossLine(Canvas canvas, Offset offset) {

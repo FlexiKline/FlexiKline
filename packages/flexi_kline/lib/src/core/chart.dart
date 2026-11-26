@@ -196,9 +196,11 @@ mixin ChartBinding on KlineBindingBase, SettingBinding, StateBinding {
 
       if (kProfileMode) FlutterTimeline.startSync('Flexi-PaintMain');
       try {
+        final tipsAreaHeight = mainPaintObject.tipsAreaHeight;
         // 热区宽度来自本帧刻度文本的实测宽度, 所以紧跟主区那一趟。
         final maxTickWidth = mainPaintObject.doPaintChart(canvas, size, progress: revealProgress);
         _syncChartZoomSlideBarRect(maxTickWidth, mainPaintObject.yAxisSide);
+        repaintChartIfTipsAreaChanged(tipsAreaHeight);
 
         if (!allowOverlayOutsideMainRect) {
           mainPaintObject.doPaintOverlay(canvas, size);

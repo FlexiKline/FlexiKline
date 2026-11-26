@@ -463,20 +463,25 @@ extension MainPaintDelegateExt<T extends MainPaintObjectIndicator> on MainPaintO
   ///
   /// 量化是双向同步的前提: 它让同一视觉状态每帧得到同一离散值, 稳定态因此提前 return、不触发
   /// 边界缓存失效。没有量化, 每帧按实测值回写就是 commit 1ed90ce 修掉的那种绘制期抖动。
+  ///
+  /// Tips 从 `padding.top` 起绘, 让出的高度含这份上边距; 加上 [topRect] 自带的 `padding.top`,
+  /// Tips 上下各留一份。没有 Tips 时不让出。
+  ///
+  /// 行序按指标加入主区的先后, 不随 zIndex: zIndex 只决定图形的层级(如成交量柱要压在蜡烛之下)。
   void doPaintTips(Canvas canvas, {FlexiCandleModel? model, Offset? offset}) {
     double height = 0;
-    for (final object in paintableChildren) {
+    for (final object in linkedChildren) {
       final size = object.paintTips(
         canvas,
         model: model,
         offset: offset,
-        tipsRect: shiftNextTipsRect(height),
+        tipsRect: shiftNextTipsRect(padding.top + height),
       );
       if (size != null) height += size.height;
     }
 
     // drawBelowTipsArea 为 false 时 Tips 叠加绘制在图表之上, 不让出区域。
-    final double next = indicator.drawBelowTipsArea ? height.ceilToDouble() : 0;
+    final double next = indicator.drawBelowTipsArea && height > 0 ? (padding.top + height).ceilToDouble() : 0;
     if (next == _tipsAreaHeight) return;
     _tipsAreaHeight = next;
     resetPaintBounding();

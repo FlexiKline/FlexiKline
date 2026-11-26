@@ -150,6 +150,9 @@ abstract class KlineBindingBase with FlexiLog, PaintResourceOwner implements Pai
     return false;
   }
 
+  /// Controller 是否已挂载; 由 [SettingBinding] 实现。
+  bool get isMounted;
+
   @override
   IFlexiKlineTheme get theme => configuration.theme;
 
@@ -255,6 +258,17 @@ extension on KlineBindingBase {
 
   Iterable<PaintObject> get subPaintObjects {
     return _paintObjectManager.subPaintObjects;
+  }
+
+  /// 主区 tips 区高度较绘制前的 [previous] 变了时, 帧后补绘一次 Chart 图层。
+  ///
+  /// 本帧已按旧几何画出的网格线、先读过 dyFactor 的蜡烛, 以及 cross 时整个 Chart 图层,
+  /// 都与新几何不一致; 绘制阶段不能标记重绘, 只能排到帧后。
+  void repaintChartIfTipsAreaChanged(double previous) {
+    if (mainPaintObject.tipsAreaHeight == previous) return;
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (isMounted) markRepaintChart();
+    });
   }
 }
 
