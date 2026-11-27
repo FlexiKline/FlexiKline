@@ -28,9 +28,9 @@ import 'grid_tick_mode.dart';
 
 /// IndicatorKey 序列化转换器
 ///
-/// 格式：`type:id:label`，其中 type 为 `base` | `data` | `business`。
-/// - toJson：根据 Key 类型写入对应前缀。
-/// - fromJson：根据 type 前缀还原为对应 Key 子类型。
+/// 格式：`type:id:label`，type 为 `DirectIndicatorKey` | `ComputedIndicatorKey` | `ExternalIndicatorKey`。
+/// - toJson：使用 [IIndicatorKey.toString]。
+/// - fromJson：按 type 还原为对应子类型；无法识别的 type 读回为 [DirectIndicatorKey]。
 class IIndicatorKeyConverter implements JsonConverter<IIndicatorKey, String> {
   const IIndicatorKeyConverter();
 

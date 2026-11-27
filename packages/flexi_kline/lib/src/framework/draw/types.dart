@@ -56,6 +56,9 @@ final class FlexiDrawType implements IDrawType {
   int get hashCode {
     return runtimeType.hashCode ^ id.hashCode ^ steps.hashCode ^ groupId.hashCode;
   }
+
+  @override
+  String toString() => 'FlexiDrawType(id:$id, steps:$steps, groupId:$groupId)';
 }
 
 const unknownDrawType = FlexiDrawType('unknown', 0);

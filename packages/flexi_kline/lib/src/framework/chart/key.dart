@@ -37,9 +37,15 @@ sealed class IIndicatorKey {
   @override
   int get hashCode => runtimeType.hashCode ^ id.hashCode;
 
+  /// 格式 `类型:id:label`，同时是持久化格式；类型写字面量，混淆或 Web 压缩后仍保持不变。
   @override
   String toString() {
-    return '$runtimeType:$id:$label';
+    final type = switch (this) {
+      DirectIndicatorKey() => 'DirectIndicatorKey',
+      ComputedIndicatorKey() => 'ComputedIndicatorKey',
+      ExternalIndicatorKey() => 'ExternalIndicatorKey',
+    };
+    return '$type:$id:$label';
   }
 }
 

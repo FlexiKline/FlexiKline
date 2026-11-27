@@ -1,3 +1,7 @@
+## 2.8.2
+* Fix activated indicators being lost on restart in obfuscated or Web release builds: `IIndicatorKey.toString` and its JSON form write a fixed type prefix instead of `runtimeType`.
+* Add `FlexiDrawType.toString`, so the draw type is readable in `Overlay.toString` and logs.
+
 ## 2.8.1
 * Start main pane tips at `MainPaintObjectIndicator.padding.top`; with `drawBelowTipsArea` the padding is kept both above the tips and between the tips and the chart.
 * Fix candles, indicator lines and the cross price label drifting apart after the main pane tips area changes height, which lasted until the next repaint on a static chart or while crossing: the chart repaints once more after such a frame.
